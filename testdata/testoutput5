@@ -4722,21 +4722,6 @@ Callout 0: last capture = 1
     
 # More differences from Perl
 
-/^[\p{Arabic}]/utf
-\= Expect no match
-    \x{650}
-No match
-    \x{651}  
-No match
-    \x{652}  
-No match
-    \x{653}  
-No match
-    \x{654} 
-No match
-    \x{655} 
-No match
-    
 /^\p{Common}/utf
     \x{60c}
  0: \x{60c}

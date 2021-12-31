@@ -316,7 +316,7 @@ j = 0;
 for (i = 0; i < PRIV(utt_size); i++)
   {
   const ucp_type_table *u = PRIV(utt) + i;
-  if (u->type == PT_SCX && u->value == script) 
+  if ((u->type == PT_SCX || u->type == PT_SC) && u->value == script) 
     {
     foundlist[j++] = i;
     if (j >= 2) break;
@@ -479,38 +479,16 @@ if (is_just_one && othercase != c)
     }
   }
 
-if (scriptx != script)
+if (scriptx != 0)
   {
+  const char *sep = ""; 
+  const uint32_t *p = PRIV(ucd_script_sets) + scriptx;
   printf(", [");
-  if (scriptx >= 0)
-    printf("%s", get_scriptname(scriptx));
-  else
-    {
-    const char *sep = "";
-    
-
-/* 
-    const uint8_t *p = PRIV(ucd_script_sets) - scriptx;
-    while (*p != 0)
-      {
-      printf("%s%s", sep, get_scriptname(*p++));
-      sep = ", ";
-      }
-*/
-
-    const uint32_t *p = PRIV(ucd_script_sets) - scriptx;
-    for (int i = 0; i < ucp_Script_Count; i++)
-      {
-      int x = i/32;
-      int y = i%32;
-      
-      if ((p[x] & (1u<<y)) != 0)
-        {
-        printf("%s%s", sep, get_scriptname(i));
-        sep = ", ";
-        }
-      }  
- 
+  for (int i = 0; i < ucp_Unknown; i++)
+  if (MAPBIT(p, i) != 0)
+    { 
+    printf("%s%s", sep, get_scriptname(i));
+    sep = ", ";
     }
   printf("]");
   }

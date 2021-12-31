@@ -117,8 +117,9 @@
 # Conceptually, there is a table of records (of type ucd_record), one for each
 # Unicode character. Each record contains the script number, script extension
 # value, character type, grapheme break type, offset to caseless matching set,
-# offset to the character's other case, and the bidi class/control. However, a
-# real table covering all Unicode characters would be far too big. It can be
+# offset to the character's other case, and the bidi class/control. 
+#
+# A real table covering all Unicode characters would be far too big. It can be
 # efficiently compressed by observing that many characters have the same
 # record, and many blocks of characters (taking 128 characters in a block) have
 # the same set of records as other blocks. This leads to a 2-stage lookup
@@ -135,13 +136,20 @@
 # in script runs all come from the same set. The first element in the vector
 # contains the number of subsequent elements, which are in ascending order.
 #
+# The lists of scripts in script_names and script_abbrevs are partitioned into
+# two groups. Scripts that appear in at least one character's script extension
+# list come first, follwed by "Unknown" and then all the rest. This sorting is
+# done certain automatically in the GenerateCommon.py script. A script's number
+# is its index in these lists.
+#
 # The ucd_script_sets vector contains bitmaps that represent lists of scripts
-# for the Script Extensions properties of certain characters. Each bitmap
-# consists of a fixed number of unsigned 32-bit numbers, enough to allocate
-# a bit for every known script. A character with more than one script listed
-# for its Script Extension property has a negative value in its record. This is
-# the negated offset to the start of the relevant bitmap in the ucd_script_sets
-# vector.
+# for Script Extensions properties. Each bitmap consists of a fixed number of
+# unsigned 32-bit numbers, enough to allocate a bit for every script that is
+# used in any character's extension list, that is, enough for every script
+# whose number is less than ucp_Unknown. A character's script extension value
+# in its ucd record is an offset into the ucd_script_sets vector. The first
+# bitmap has no bits set; characters that have no script extensions have zero
+# as their script extensions value so that they use this map.
 #
 # The ucd_records table contains one instance of every unique record that is
 # required. The ucd_stage1 table is indexed by a character's block number,
@@ -157,15 +165,15 @@
 #
 # Example: lowercase "a" (U+0061) is in block 0
 #          lookup 0 in stage1 table yields 0
-#          lookup 97 (0x61) in the first table in stage2 yields 22
-#          record 22 is { 34, 5, 12, 0, -32, 34, 2, 0 }
-#            34 = ucp_Latin   => Latin script
+#          lookup 97 (0x61) in the first table in stage2 yields 23
+#          record 23 is { 20, 5, 12, 0, -32, 0, 9, 0 }
+#            20 = ucp_Latin   => Latin script
 #             5 = ucp_Ll      => Lower case letter
 #            12 = ucp_gbOther => Grapheme break property "Other"
 #             0               => Not part of a caseless set
 #           -32 (-0x20)       => Other case is U+0041
-#            34 = ucp_Latin   => No special Script Extension property
-#             2 = ucp_bidiL   => Bidi class left-to-right
+#             0               => No special Script Extension property
+#             9 = ucp_bidiL   => Bidi class left-to-right
 #             0               => Dummy value, unused at present
 #
 # Almost all lowercase latin characters resolve to the same record. One or two
@@ -174,35 +182,35 @@
 #
 # Example: hiragana letter A (U+3042) is in block 96 (0x60)
 #          lookup 96 in stage1 table yields 91
-#          lookup 66 (0x42) in table 91 in stage2 yields 613
-#          record 613 is { 27, 7, 12, 0, 0, 27, 2, 0 }
-#            27 = ucp_Hiragana => Hiragana script
+#          lookup 66 (0x42) in table 91 in stage2 yields 614
+#          record 614 is { 17, 7, 12, 0, 0, 0, 9, 0 }
+#            17 = ucp_Hiragana => Hiragana script
 #             7 = ucp_Lo       => Other letter
 #            12 = ucp_gbOther  => Grapheme break property "Other"
 #             0                => Not part of a caseless set
 #             0                => No other case
-#            27 = ucp_Hiragana => No special Script Extension property
-#             2 = ucp_bidiL    => Bidi class left-to-right
+#             0                => No special Script Extension property
+#             9 = ucp_bidiL    => Bidi class left-to-right
 #             0                => Dummy value, unused at present
 #
 # Example: vedic tone karshana (U+1CD0) is in block 57 (0x39)
 #          lookup 57 in stage1 table yields 55
-#          lookup 80 (0x50) in table 55 in stage2 yields 485
-#          record 485 is { 28, 12, 3, 0, 0, -122, 19, 0 }
-#            28 = ucp_Inherited => Script inherited from predecessor
+#          lookup 80 (0x50) in table 55 in stage2 yields 486
+#          record 485 is { 78, 12, 3, 0, 0, 138, 13, 0 }
+#            78 = ucp_Inherited => Script inherited from predecessor
 #            12 = ucp_Mn        => Non-spacing mark
 #             3 = ucp_gbExtend  => Grapheme break property "Extend"
 #             0                 => Not part of a caseless set
 #             0                 => No other case
-#          -228                 => Script Extension list offset = 228
+#           138                 => Script Extension list offset = 138
 #            13 = ucp_bidiNSM   => Bidi class non-spacing mark
 #             0                 => Dummy value, unused at present
 #
-# At offset 228 in the ucd_script_sets vector we find a bitmap with bits 3, 15,
-# 29, and 107 set. This means that this character is expected to be used with
+# At offset 138 in the ucd_script_sets vector we find a bitmap with bits 1, 8,
+# 18, and 47 set. This means that this character is expected to be used with
 # any of those scripts, which are Bengali, Devanagari, Kannada, and Grantha.
 #
-#  Philip Hazel, last updated 19 December 2021.
+#  Philip Hazel, last updated 31 December 2021.
 ##############################################################################
 
 
@@ -775,7 +783,6 @@ f.write("""\
 const uint32_t PRIV(ucd_script_sets)[] = {
 """)
 
-
 for d in script_lists:
   bitwords = [0] * script_list_item_size
 
@@ -797,8 +804,8 @@ f.write("""\
 /* These are the main two-stage UCD tables. The fields in each record are:
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
 offset to multichar other cases or zero (8 bits), offset to other case or zero
-(32 bits, signed), script extension (16 bits, signed), bidi class (8 bits), and
-a dummy 8-bit field to make the whole thing a multiple of 4 bytes. */
+(32 bits, signed), script extension (8 bits), bidi class (8 bits), and a dummy
+16-bit field to make the whole thing a multiple of 4 bytes. */
 \n""")
 
 write_records(records, record_size)

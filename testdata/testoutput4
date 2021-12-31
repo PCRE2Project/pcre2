@@ -1883,13 +1883,6 @@ No match
     \x{2e7f}
 No match
 
-/^\P{Katakana}+/utf
-    \x{3105}
- 0: \x{3105}
-\= Expect no match
-    \x{30ff}
-No match
-
 /^[\p{Arabic}]/utf
     \x{06e9}
  0: \x{6e9}
@@ -1897,6 +1890,15 @@ No match
  0: \x{60b}
 \= Expect no match
     X\x{06e9}
+No match
+
+#subject no_jit
+
+/^\P{Katakana}+/utf
+    \x{3105}
+ 0: \x{3105}
+\= Expect no match
+    \x{30ff}
 No match
 
 /^[\P{Yi}]/utf
@@ -1907,6 +1909,8 @@ No match
 No match
     \x{a4c6}
 No match
+
+#subject -no_jit     
 
 /^\p{Any}X/utf
     AXYZ
@@ -4235,4 +4239,19 @@ No match
     \x{0b82}\x{10380}
  0: \x{b82}\x{10380}
 
+/^[\p{sc:Arabic}]/utf
+\= Expect no match
+    \x{650}
+No match
+    \x{651}  
+No match
+    \x{652}  
+No match
+    \x{653}  
+No match
+    \x{654} 
+No match
+    \x{655} 
+No match
+    
 # End of testinput4

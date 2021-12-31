@@ -1850,10 +1850,11 @@ typedef struct {
 #define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
 
 /* The "scriptx" field gives an offset into a vector of 32-bit words that
-form a bitmap representing a list of scripts. This macro tests for a
-script in the map by number. */
+form a bitmap representing a list of scripts. These macros test or set the bit
+for a script in the map by number. */
 
 #define MAPBIT(map,script) ((map)[(script)/32]&(1u<<((script)%32)))
+#define MAPSET(map,script) ((map)[(script)/32]|=(1u<<((script)%32)))
 
 /* The "bidi" field has the 0x80 bit set if the character has the Bidi_Control
 property. The remaining bits hold the bidi class, but as there are only 23

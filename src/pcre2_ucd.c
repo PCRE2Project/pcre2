@@ -237,8 +237,8 @@ const uint32_t PRIV(ucd_script_sets)[] = {
 /* These are the main two-stage UCD tables. The fields in each record are:
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
 offset to multichar other cases or zero (8 bits), offset to other case or zero
-(32 bits, signed), script extension (16 bits, signed), bidi class (8 bits), and
-a dummy 8-bit field to make the whole thing a multiple of 4 bytes. */
+(32 bits, signed), script extension (8 bits), bidi class (8 bits), and a dummy
+16-bit field to make the whole thing a multiple of 4 bytes. */
 
 const ucd_record PRIV(ucd_records)[] = { /* 12588 bytes, record size 12 */
   {    73,      0,      2,      0,      0,      0,      3,    256, }, /*   0 */

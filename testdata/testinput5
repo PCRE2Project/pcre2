@@ -2073,15 +2073,6 @@
     
 # More differences from Perl
 
-/^[\p{Arabic}]/utf
-\= Expect no match
-    \x{650}
-    \x{651}  
-    \x{652}  
-    \x{653}  
-    \x{654} 
-    \x{655} 
-    
 /^\p{Common}/utf
     \x{60c}
     \x{61f}  
