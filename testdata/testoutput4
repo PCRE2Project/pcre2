@@ -1892,8 +1892,6 @@ No match
     X\x{06e9}
 No match
 
-#subject no_jit
-
 /^\P{Katakana}+/utf
     \x{3105}
  0: \x{3105}
@@ -1909,8 +1907,6 @@ No match
 No match
     \x{a4c6}
 No match
-
-#subject -no_jit     
 
 /^\p{Any}X/utf
     AXYZ
@@ -2312,8 +2308,6 @@ No match
     \x{1D183}
  0: \x{1d183}
 
-#subject no_jit
-
 /^\p{Inherited}/utf
     \x{200c}
  0: \x{200c}
@@ -2391,8 +2385,6 @@ No match
 /\p{sc:katakana}{3,}?/utf
     \x{30a1}\x{30fa}\x{32d0}\x{1b122}\x{ff66}\x{3001}ABC
  0: \x{30a1}\x{30fa}\x{32d0}
-
-#subject -no_jit
 
 /\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/utf
     \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====

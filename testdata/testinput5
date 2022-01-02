@@ -2035,8 +2035,6 @@
 # doesn't recognize all these scripts. In time these three tests can be moved
 # to test 4.
 
-#subject no_jit
-
 /^(\p{Adlam}+)(\p{Bhaiksuki}+)(\p{Marchen}+)(\p{Newa}+)(\p{Osage}+)
   (\p{Tangut}+)(\p{Masaram_Gondi}+)(\p{Nushu}+)(\p{Soyombo}+)
   (\p{Zanabazar_Square}+)/x,utf
@@ -2084,8 +2082,6 @@
     \x{654}
     \x{655}
     \x{1D1AA} 
-
-#subject -no_jit 
 
 /\N{U+}/
 

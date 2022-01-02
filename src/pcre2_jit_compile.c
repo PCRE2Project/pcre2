@@ -7413,14 +7413,18 @@ return cc;
 static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr);
 
 #ifdef SUPPORT_UNICODE
-#define XCLASS_SAVE_CHAR 0x01
-#define XCLASS_CHAR_SAVED 0x02
-#define XCLASS_HAS_TYPE 0x04
-#define XCLASS_HAS_SCRIPT 0x08
-#define XCLASS_HAS_SCRIPT_EXTENSION 0x10
-#define XCLASS_HAS_BIDICO 0x20
-#define XCLASS_HAS_BIDICL 0x40
+#define XCLASS_SAVE_CHAR 0x001
+#define XCLASS_CHAR_SAVED 0x002
+#define XCLASS_HAS_TYPE 0x004
+#define XCLASS_HAS_SCRIPT 0x008
+#define XCLASS_HAS_SCRIPT_EXTENSION 0x010
+#define XCLASS_HAS_BIDICO 0x020
+#define XCLASS_HAS_BIDICL 0x040
 #define XCLASS_NEEDS_UCD (XCLASS_HAS_TYPE | XCLASS_HAS_SCRIPT | XCLASS_HAS_SCRIPT_EXTENSION | XCLASS_HAS_BIDICO | XCLASS_HAS_BIDICL)
+#define XCLASS_SCRIPT_EXTENSION_NOTPROP 0x080
+#define XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR 0x100
+#define XCLASS_SCRIPT_EXTENSION_RESTORE_LOCALS0 0x200
+
 #endif /* SUPPORT_UNICODE */
 
 static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
@@ -7521,6 +7525,11 @@ while (*cc != XCL_END)
 
       case PT_SCX:
       unicode_status |= XCLASS_HAS_SCRIPT_EXTENSION;
+      if (cc[-1] == XCL_NOTPROP)
+        {
+        unicode_status |= XCLASS_SCRIPT_EXTENSION_NOTPROP;
+        break;
+        }
       compares++;
 
       case PT_SC:
@@ -7679,14 +7688,19 @@ if (unicode_status & XCLASS_NEEDS_UCD)
         {
         SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
         cc++;
-        if (*cc == PT_SC || *cc == PT_SCX)
+        switch (*cc)
           {
+          case PT_SCX:
+          if (cc[-1] == XCL_NOTPROP)
+            break;
+
+          case PT_SC:
           compares--;
           invertcmp = (compares == 0 && list != backtracks);
           if (cc[-1] == XCL_NOTPROP)
             invertcmp ^= 0x1;
-          jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]);
-          add_jump(compiler, compares > 0 ? list : backtracks, jump);
+
+          add_jump(compiler, compares > 0 ? list : backtracks, CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]));
           }
         cc += 2;
         }
@@ -7697,6 +7711,27 @@ if (unicode_status & XCLASS_NEEDS_UCD)
 
   if (unicode_status & XCLASS_HAS_SCRIPT_EXTENSION)
     {
+    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx));
+    OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
+
+    if (unicode_status & XCLASS_SCRIPT_EXTENSION_NOTPROP)
+      {
+      if (unicode_status & (XCLASS_HAS_BIDICO | XCLASS_HAS_BIDICL | XCLASS_HAS_TYPE))
+        {
+        if (unicode_status & XCLASS_SAVE_CHAR)
+          {
+          OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, TMP2, 0);
+          unicode_status |= XCLASS_SCRIPT_EXTENSION_RESTORE_LOCALS0;
+          }
+        else
+          {
+          OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP2, 0);
+          unicode_status |= XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR;
+          }
+        }
+      OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
+      }
+
     while (*cc != XCL_END)
       {
       if (*cc == XCL_SINGLE)
@@ -7716,22 +7751,35 @@ if (unicode_status & XCLASS_NEEDS_UCD)
         cc++;
         if (*cc == PT_SCX)
           {
-          OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx));
-          OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
-          OP1(SLJIT_MOV_U32, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)));
-          OP2(SLJIT_AND | SLJIT_SET_Z, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
-
           compares--;
           invertcmp = (compares == 0 && list != backtracks);
+
+          jump = NULL;
           if (cc[-1] == XCL_NOTPROP)
+            {
+            jump = CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, (int)cc[1]);
+            if (invertcmp)
+              {
+              add_jump(compiler, backtracks, jump);
+              jump = NULL;
+              }
             invertcmp ^= 0x1;
-          jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-          add_jump(compiler, compares > 0 ? list : backtracks, jump);
+            }
+
+          OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
+          add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
+
+          if (jump != NULL)
+            JUMPHERE(jump);
           }
         cc += 2;
         }
       }
 
+    if (unicode_status & XCLASS_SCRIPT_EXTENSION_RESTORE_LOCALS0)
+      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+    else if (unicode_status & XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR)
+      OP1(SLJIT_MOV, TMP2, 0, RETURN_ADDR, 0);
     cc = ccbegin;
     }
 
