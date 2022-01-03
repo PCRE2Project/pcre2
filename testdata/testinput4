@@ -1144,8 +1144,6 @@
 \= Expect no match
     X\x{06e9}
 
-#subject no_jit
-
 /^\P{Katakana}+/utf
     \x{3105}
 \= Expect no match
@@ -1156,8 +1154,6 @@
 \= Expect no match
     \x{a014}
     \x{a4c6}
-
-#subject -no_jit     
 
 /^\p{Any}X/utf
     AXYZ
@@ -1410,8 +1406,6 @@
     \x{2116}
     \x{1D183}
 
-#subject no_jit
-
 /^\p{Inherited}/utf
     \x{200c}
 \= Expect no match
@@ -1463,8 +1457,6 @@
 
 /\p{sc:katakana}{3,}?/utf
     \x{30a1}\x{30fa}\x{32d0}\x{1b122}\x{ff66}\x{3001}ABC
-
-#subject -no_jit
 
 /\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/utf
     \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
