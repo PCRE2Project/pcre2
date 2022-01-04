@@ -66,6 +66,16 @@ now three scripts that generate pcre2_ucd.c, pcre2_ucp.h, and pcre2_ucptables.c
 (which is #included by pcre2_tables.c). The data lists that used to be
 duplicated are now held in a single common Python module.
 
+19. On CHERI, and thus Arm's Morello prototype, pointers are represented as
+hardware capabilities, which consist of both an integer address and additional
+metadata, meaning they are twice the size of the platform's size_t type, i.e.
+16 bytes on a 64-bit system. The ovector member of heapframe happens to only be
+8 byte aligned, and so computing frame_size ended up with a multiple of 8 but
+not 16. Whilst the first frame was always suitably aligned, this then
+misaligned the frame that follows, resulting in an alignment fault when storing
+a pointer to Fecode at the start of match. Patch to fix this issue by Jessica
+Clarke PR#72.
+
 
 Version 10.39 29-October-2021
 -----------------------------
