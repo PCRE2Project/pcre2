@@ -838,6 +838,17 @@ multiple of PCRE2_SIZE. See various comments above. */
 typedef char check_heapframe_size[
   ((sizeof(heapframe) % sizeof(PCRE2_SIZE)) == 0)? (+1):(-1)];
 
+/* Structure for computing the alignment of heapframe. */
+
+typedef struct heapframe_align {
+  char unalign;    /* Completely unalign the current offset */
+  heapframe frame; /* Offset is its alignment */
+} heapframe_align;
+
+/* This define is the minimum alignment required for a heapframe, in bytes. */
+
+#define HEAPFRAME_ALIGNMENT offsetof(heapframe_align, frame)
+
 /* Structure for passing "static" information around between the functions
 doing traditional NFA matching (pcre2_match() and friends). */
 
