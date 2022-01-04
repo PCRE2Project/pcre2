@@ -6781,10 +6781,16 @@ the pattern. It is not used at all if there are no capturing parentheses.
 
 The last of these is changed within the match() function if the frame vector
 has to be expanded. We therefore put it into the match block so that it is
-correct when calling match() more than once for non-anchored patterns. */
+correct when calling match() more than once for non-anchored patterns.
 
-frame_size = offsetof(heapframe, ovector) +
-  re->top_bracket * 2 * sizeof(PCRE2_SIZE);
+We must also pad frame_size for alignment to ensure subsequent frames are as
+aligned as heapframe. Whilst ovector is word-aligned due to being a PCRE2_SIZE
+array, that does not guarantee it is suitably aligned for pointers, as some
+architectures have pointers that are larger than a size_t. */
+
+frame_size = (offsetof(heapframe, ovector) +
+  re->top_bracket * 2 * sizeof(PCRE2_SIZE) + HEAPFRAME_ALIGNMENT - 1) &
+  ~(HEAPFRAME_ALIGNMENT - 1);
 
 /* Limits set in the pattern override the match context only if they are
 smaller. */
@@ -6828,7 +6834,7 @@ mb->match_frames_top =
 to avoid uninitialized memory read errors when it is copied to a new frame. */
 
 memset((char *)(mb->match_frames) + offsetof(heapframe, ovector), 0xff,
-  re->top_bracket * 2 * sizeof(PCRE2_SIZE));
+  frame_size - offsetof(heapframe, ovector));
 
 /* Pointers to the individual character tables */
 
