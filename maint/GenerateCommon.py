@@ -58,45 +58,6 @@ script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille
   'Cypro_Minoan', 'Old_Uyghur', 'Tangsa', 'Toto', 'Vithkuqi'
  ]
 
-script_abbrevs = [
-  'Zzzz', 'Arab', 'Armn', 'Beng', 'Bopo', 'Brai', 'Bugi', 'Buhd', 'Cans',
-  'Cher', 'Zyyy', 'Copt', 'Cprt', 'Cyrl', 'Dsrt', 'Deva', 'Ethi', 'Geor',
-  'Glag', 'Goth', 'Grek', 'Gujr', 'Guru', 'Hani', 'Hang', 'Hano', 'Hebr',
-  'Hira', 'Zinh', 'Knda', 'Kana', 'Khar', 'Khmr', 'Laoo', 'Latn', 'Limb',
-  'Linb', 'Mlym', 'Mong', 'Mymr', 'Talu', 'Ogam', 'Ital', 'Xpeo', 'Orya',
-  'Osma', 'Runr', 'Shaw', 'Sinh', 'Sylo', 'Syrc', 'Tglg', 'Tagb', 'Tale',
-  'Taml', 'Telu', 'Thaa', 'Thai', 'Tibt', 'Tfng', 'Ugar', 'Yiii',
-#New for Unicode 5.0
-  'Bali', 'Xsux', 'Nkoo', 'Phag', 'Phnx',
-#New for Unicode 5.1
-  'Cari', 'Cham', 'Kali', 'Lepc', 'Lyci', 'Lydi', 'Olck', 'Rjng', 'Saur',
-  'Sund', 'Vaii',
-#New for Unicode 5.2
-  'Avst', 'Bamu', 'Egyp', 'Armi', 'Phli', 'Prti', 'Java', 'Kthi', 'Lisu',
-  'Mtei', 'Sarb', 'Orkh', 'Samr', 'Lana', 'Tavt',
-#New for Unicode 6.0.0
-  'Batk', 'Brah', 'Mand',
-#New for Unicode 6.1.0
-  'Cakm', 'Merc', 'Mero', 'Plrd', 'Shrd', 'Sora', 'Takr',
-#New for Unicode 7.0.0
-  'Bass', 'Aghb', 'Dupl', 'Elba', 'Gran', 'Khoj', 'Sind', 'Lina', 'Mahj',
-  'Mani', 'Mend', 'Modi', 'Mroo', 'Nbat', 'Narb', 'Perm', 'Hmng', 'Palm',
-  'Phlp', 'Pauc', 'Sidd', 'Tirh', 'Wara',
-#New for Unicode 8.0.0
-  'Ahom', 'Hluw', 'Hatr', 'Mult', 'Hung', 'Sgnw',
-#New for Unicode 10.0.0
-  'Adlm', 'Bhks', 'Marc', 'Newa', 'Osge', 'Tang', 'Gonm', 'Nshu', 'Soyo',
-  'Zanb',
-#New for Unicode 11.0.0
-  'Dogr', 'Gong', 'Rohg', 'Maka', 'Medf', 'Sogo', 'Sogd',
-#New for Unicode 12.0.0
-  'Elym', 'Nand', 'Hmnp', 'Wcho',
-#New for Unicode 13.0.0
-  'Chrs', 'Diak', 'Kits', 'Yezi',
-#New for Unicode 14.0.0
-  'Cpmn', 'Ougr', 'Tngs', 'Toto', 'Vith'
- ]
-
 # BIDI classes in the DerivedBidiClass.txt file, with comments.
 
 bidi_classes = [
@@ -184,15 +145,207 @@ break_properties = [
   'Extended_Pictographic', '14'
   ]
 
+# List of abbreviations for various properties
+
+abbreviations = {
+# Script abbreviations
+  'Unknown': 'Zzzz',
+  'Arabic': 'Arab',
+  'Armenian': 'Armn',
+  'Bengali': 'Beng',
+  'Bopomofo': 'Bopo',
+  'Braille': 'Brai',
+  'Buginese': 'Bugi',
+  'Buhid': 'Buhd',
+  'Canadian_Aboriginal': 'Cans',
+  'Cherokee': 'Cher',
+  'Common': 'Zyyy',
+  'Coptic': ('Copt', 'Qaac'),
+  'Cypriot': 'Cprt',
+  'Cyrillic': 'Cyrl',
+  'Deseret': 'Dsrt',
+  'Devanagari': 'Deva',
+  'Ethiopic': 'Ethi',
+  'Georgian': 'Geor',
+  'Glagolitic': 'Glag',
+  'Gothic': 'Goth',
+  'Greek': 'Grek',
+  'Gujarati': 'Gujr',
+  'Gurmukhi': 'Guru',
+  'Han': 'Hani',
+  'Hangul': 'Hang',
+  'Hanunoo': 'Hano',
+  'Hebrew': 'Hebr',
+  'Hiragana': 'Hira',
+  'Inherited': ('Zinh', 'Qaai'),
+  'Kannada': 'Knda',
+  'Katakana': 'Kana',
+  'Kharoshthi': 'Khar',
+  'Khmer': 'Khmr',
+  'Lao': 'Laoo',
+  'Latin': 'Latn',
+  'Limbu': 'Limb',
+  'Linear_B': 'Linb',
+  'Malayalam': 'Mlym',
+  'Mongolian': 'Mong',
+  'Myanmar': 'Mymr',
+  'New_Tai_Lue': 'Talu',
+  'Ogham': 'Ogam',
+  'Old_Italic': 'Ital',
+  'Old_Persian': 'Xpeo',
+  'Oriya': 'Orya',
+  'Osmanya': 'Osma',
+  'Runic': 'Runr',
+  'Shavian': 'Shaw',
+  'Sinhala': 'Sinh',
+  'Syloti_Nagri': 'Sylo',
+  'Syriac': 'Syrc',
+  'Tagalog': 'Tglg',
+  'Tagbanwa': 'Tagb',
+  'Tai_Le': 'Tale',
+  'Tamil': 'Taml',
+  'Telugu': 'Telu',
+  'Thaana': 'Thaa',
+  'Thai': (),
+  'Tibetan': 'Tibt',
+  'Tifinagh': 'Tfng',
+  'Ugaritic': 'Ugar',
+  'Yi': 'Yiii',
+# New for Unicode 5.0
+  'Balinese': 'Bali',
+  'Cuneiform': 'Xsux',
+  'Nko': 'Nkoo',
+  'Phags_Pa': 'Phag',
+  'Phoenician': 'Phnx',
+# New for Unicode 5.1
+  'Carian': 'Cari',
+  'Cham': (),
+  'Kayah_Li': 'Kali',
+  'Lepcha': 'Lepc',
+  'Lycian': 'Lyci',
+  'Lydian': 'Lydi',
+  'Ol_Chiki': 'Olck',
+  'Rejang': 'Rjng',
+  'Saurashtra': 'Saur',
+  'Sundanese': 'Sund',
+  'Vai': 'Vaii',
+# New for Unicode 5.2
+  'Avestan': 'Avst',
+  'Bamum': 'Bamu',
+  'Egyptian_Hieroglyphs': 'Egyp',
+  'Imperial_Aramaic': 'Armi',
+  'Inscriptional_Pahlavi': 'Phli',
+  'Inscriptional_Parthian': 'Prti',
+  'Javanese': 'Java',
+  'Kaithi': 'Kthi',
+  'Lisu': (),
+  'Meetei_Mayek': 'Mtei',
+  'Old_South_Arabian': 'Sarb',
+  'Old_Turkic': 'Orkh',
+  'Samaritan': 'Samr',
+  'Tai_Tham': 'Lana',
+  'Tai_Viet': 'Tavt',
+# New for Unicode 6.0.0
+  'Batak': 'Batk',
+  'Brahmi': 'Brah',
+  'Mandaic': 'Mand',
+# New for Unicode 6.1.0
+  'Chakma': 'Cakm',
+  'Meroitic_Cursive': 'Merc',
+  'Meroitic_Hieroglyphs': 'Mero',
+  'Miao': 'Plrd',
+  'Sharada': 'Shrd',
+  'Sora_Sompeng': 'Sora',
+  'Takri': 'Takr',
+# New for Unicode 7.0.0
+  'Bassa_Vah': 'Bass',
+  'Caucasian_Albanian': 'Aghb',
+  'Duployan': 'Dupl',
+  'Elbasan': 'Elba',
+  'Grantha': 'Gran',
+  'Khojki': 'Khoj',
+  'Khudawadi': 'Sind',
+  'Linear_A': 'Lina',
+  'Mahajani': 'Mahj',
+  'Manichaean': 'Mani',
+  'Mende_Kikakui': 'Mend',
+  'Modi': (),
+  'Mro': 'Mroo',
+  'Nabataean': 'Nbat',
+  'Old_North_Arabian': 'Narb',
+  'Old_Permic': 'Perm',
+  'Pahawh_Hmong': 'Hmng',
+  'Palmyrene': 'Palm',
+  'Psalter_Pahlavi': 'Phlp',
+  'Pau_Cin_Hau': 'Pauc',
+  'Siddham': 'Sidd',
+  'Tirhuta': 'Tirh',
+  'Warang_Citi': 'Wara',
+# New for Unicode 8.0.0
+  'Ahom': (),
+  'Anatolian_Hieroglyphs': 'Hluw',
+  'Hatran': 'Hatr',
+  'Multani': 'Mult',
+  'Old_Hungarian': 'Hung',
+  'SignWriting': 'Sgnw',
+# New for Unicode 10.0.0
+  'Adlam': 'Adlm',
+  'Bhaiksuki': 'Bhks',
+  'Marchen': 'Marc',
+  'Newa': (),
+  'Osage': 'Osge',
+  'Tangut': 'Tang',
+  'Masaram_Gondi': 'Gonm',
+  'Nushu': 'Nshu',
+  'Soyombo': 'Soyo',
+  'Zanabazar_Square': 'Zanb',
+# New for Unicode 11.0.0
+  'Dogra': 'Dogr',
+  'Gunjala_Gondi': 'Gong',
+  'Hanifi_Rohingya': 'Rohg',
+  'Makasar': 'Maka',
+  'Medefaidrin': 'Medf',
+  'Old_Sogdian': 'Sogo',
+  'Sogdian': 'Sogd',
+# New for Unicode 12.0.0
+  'Elymaic': 'Elym',
+  'Nandinagari': 'Nand',
+  'Nyiakeng_Puachue_Hmong': 'Hmnp',
+  'Wancho': 'Wcho',
+# New for Unicode 13.0.0
+  'Chorasmian': 'Chrs',
+  'Dives_Akuru': 'Diak',
+  'Khitan_Small_Script': 'Kits',
+  'Yezidi': 'Yezi',
+# New for Unicode 14.0.0
+  'Cypro_Minoan': 'Cpmn',
+  'Old_Uyghur': 'Ougr',
+  'Tangsa': 'Tngs',
+  'Toto': (),
+  'Vithkuqi': 'Vith',
+  }
+
+# Convert string abbreviations to tuples
+for key in abbreviations:
+  value = abbreviations[key]
+  if isinstance(value, str):
+    abbreviations[key] = (value,)
+
 # ---------------------------------------------------------------------------
 #                      REORDERING SCRIPT NAMES
 # ---------------------------------------------------------------------------
 
 import re
 
+script_abbrevs = []
+
 def reorder_scripts():
   global script_names
   global script_abbrevs
+
+  for name in script_names:
+    abbrevs = abbreviations[name]
+    script_abbrevs.append(name if len(abbrevs) == 0 else abbrevs[0])
 
   extended_script_abbrevs = set()
   with open("Unicode.tables/ScriptExtensions.txt") as f:

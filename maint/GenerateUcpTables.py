@@ -48,10 +48,10 @@
 # Import common data lists and functions
 
 from GenerateCommon import \
+  abbreviations, \
   bidi_classes, \
   category_names, \
   general_category_names, \
-  script_abbrevs, \
   script_names, \
   open_output
 
@@ -75,14 +75,15 @@ category_names = category_names[::2]
 # Create standardized versions of the names by lowercasing and removing
 # underscores.
 
+def stdname(x):
+  return x.lower().replace('_', '')
+
 def stdnames(x):
   y = [''] * len(x)
   for i in range(len(x)):
-    y[i] = x[i].lower().replace('_', '')
+    y[i] = stdname(x[i])
   return y
 
-std_script_names = stdnames(script_names)
-std_script_abbrevs = stdnames(script_abbrevs)
 std_category_names = stdnames(category_names)
 std_general_category_names = stdnames(general_category_names)
 std_bidi_class_names = stdnames(bidi_class_names)
@@ -92,18 +93,16 @@ std_bidi_class_names = stdnames(bidi_class_names)
 # latter is used for the ucp_xx names. NOTE: for the script abbreviations, we
 # still use the full original names.
 
+utt_table = []
+
 scx_end = script_names.index('Unknown')
 
-utt_table  = list(zip(std_script_names[0:scx_end], script_names[0:scx_end], ['PT_SCX'] * scx_end))
-utt_table += list(zip(std_script_names[scx_end:], script_names[scx_end:], ['PT_SC'] * (len(script_names) - scx_end)))
-utt_table += list(zip(std_script_abbrevs[0:scx_end], script_names[0:scx_end], ['PT_SCX'] * scx_end))
-utt_table += list(zip(std_script_abbrevs[scx_end:], script_names[scx_end:], ['PT_SC'] * (len(script_names) - scx_end)))
+for idx, name in enumerate(script_names):
+  pt_type = 'PT_SCX' if idx < scx_end else 'PT_SC'
 
-# At lease one script abbreviation is the same as the full name of the script,
-# so we must remove duplicates. It doesn't matter if this operation changes the
-# order, because we are going to sort the list later.
-
-utt_table = list(set(utt_table))
+  utt_table.append((stdname(name), name, pt_type))
+  for abbrev in abbreviations[name]:
+    utt_table.append((stdname(abbrev), name, pt_type))
 
 # Add the remaining property lists
 
