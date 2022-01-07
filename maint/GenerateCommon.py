@@ -13,90 +13,6 @@
 #                             DATA LISTS
 # ---------------------------------------------------------------------------
 
-# The lists of script names and script abbreviations must be kept in step. Note
-# that the pcre2pattern and pcre2syntax documentation has lists of scripts.
-
-script_names = ['Unknown', 'Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
- 'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
- 'Glagolitic', 'Gothic', 'Greek', 'Gujarati', 'Gurmukhi', 'Han', 'Hangul', 'Hanunoo', 'Hebrew', 'Hiragana', \
- 'Inherited', 'Kannada', 'Katakana', 'Kharoshthi', 'Khmer', 'Lao', 'Latin', 'Limbu', 'Linear_B', 'Malayalam', \
- 'Mongolian', 'Myanmar', 'New_Tai_Lue', 'Ogham', 'Old_Italic', 'Old_Persian', 'Oriya', 'Osmanya', 'Runic', \
- 'Shavian', 'Sinhala', 'Syloti_Nagri', 'Syriac', 'Tagalog', 'Tagbanwa', 'Tai_Le', 'Tamil', 'Telugu', 'Thaana', \
- 'Thai', 'Tibetan', 'Tifinagh', 'Ugaritic', 'Yi', \
- # New for Unicode 5.0
- 'Balinese', 'Cuneiform', 'Nko', 'Phags_Pa', 'Phoenician', \
- # New for Unicode 5.1
- 'Carian', 'Cham', 'Kayah_Li', 'Lepcha', 'Lycian', 'Lydian', 'Ol_Chiki', 'Rejang', 'Saurashtra', 'Sundanese', 'Vai', \
- # New for Unicode 5.2
- 'Avestan', 'Bamum', 'Egyptian_Hieroglyphs', 'Imperial_Aramaic', \
- 'Inscriptional_Pahlavi', 'Inscriptional_Parthian', \
- 'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
- 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet', \
- # New for Unicode 6.0.0
- 'Batak', 'Brahmi', 'Mandaic', \
-# New for Unicode 6.1.0
- 'Chakma', 'Meroitic_Cursive', 'Meroitic_Hieroglyphs', 'Miao', 'Sharada', 'Sora_Sompeng', 'Takri',
-# New for Unicode 7.0.0
- 'Bassa_Vah', 'Caucasian_Albanian', 'Duployan', 'Elbasan', 'Grantha', 'Khojki', 'Khudawadi',
- 'Linear_A', 'Mahajani', 'Manichaean', 'Mende_Kikakui', 'Modi', 'Mro', 'Nabataean',
- 'Old_North_Arabian', 'Old_Permic', 'Pahawh_Hmong', 'Palmyrene', 'Psalter_Pahlavi',
- 'Pau_Cin_Hau', 'Siddham', 'Tirhuta', 'Warang_Citi',
-# New for Unicode 8.0.0
- 'Ahom', 'Anatolian_Hieroglyphs', 'Hatran', 'Multani', 'Old_Hungarian',
- 'SignWriting',
-# New for Unicode 10.0.0
- 'Adlam', 'Bhaiksuki', 'Marchen', 'Newa', 'Osage', 'Tangut', 'Masaram_Gondi',
- 'Nushu', 'Soyombo', 'Zanabazar_Square',
-# New for Unicode 11.0.0
-  'Dogra', 'Gunjala_Gondi', 'Hanifi_Rohingya', 'Makasar', 'Medefaidrin',
-  'Old_Sogdian', 'Sogdian',
-# New for Unicode 12.0.0
-  'Elymaic', 'Nandinagari', 'Nyiakeng_Puachue_Hmong', 'Wancho',
-# New for Unicode 13.0.0
-  'Chorasmian', 'Dives_Akuru', 'Khitan_Small_Script', 'Yezidi',
-# New for Unicode 14.0.0
-  'Cypro_Minoan', 'Old_Uyghur', 'Tangsa', 'Toto', 'Vithkuqi'
- ]
-
-script_abbrevs = [
-  'Zzzz', 'Arab', 'Armn', 'Beng', 'Bopo', 'Brai', 'Bugi', 'Buhd', 'Cans',
-  'Cher', 'Zyyy', 'Copt', 'Cprt', 'Cyrl', 'Dsrt', 'Deva', 'Ethi', 'Geor',
-  'Glag', 'Goth', 'Grek', 'Gujr', 'Guru', 'Hani', 'Hang', 'Hano', 'Hebr',
-  'Hira', 'Zinh', 'Knda', 'Kana', 'Khar', 'Khmr', 'Laoo', 'Latn', 'Limb',
-  'Linb', 'Mlym', 'Mong', 'Mymr', 'Talu', 'Ogam', 'Ital', 'Xpeo', 'Orya',
-  'Osma', 'Runr', 'Shaw', 'Sinh', 'Sylo', 'Syrc', 'Tglg', 'Tagb', 'Tale',
-  'Taml', 'Telu', 'Thaa', 'Thai', 'Tibt', 'Tfng', 'Ugar', 'Yiii',
-#New for Unicode 5.0
-  'Bali', 'Xsux', 'Nkoo', 'Phag', 'Phnx',
-#New for Unicode 5.1
-  'Cari', 'Cham', 'Kali', 'Lepc', 'Lyci', 'Lydi', 'Olck', 'Rjng', 'Saur',
-  'Sund', 'Vaii',
-#New for Unicode 5.2
-  'Avst', 'Bamu', 'Egyp', 'Armi', 'Phli', 'Prti', 'Java', 'Kthi', 'Lisu',
-  'Mtei', 'Sarb', 'Orkh', 'Samr', 'Lana', 'Tavt',
-#New for Unicode 6.0.0
-  'Batk', 'Brah', 'Mand',
-#New for Unicode 6.1.0
-  'Cakm', 'Merc', 'Mero', 'Plrd', 'Shrd', 'Sora', 'Takr',
-#New for Unicode 7.0.0
-  'Bass', 'Aghb', 'Dupl', 'Elba', 'Gran', 'Khoj', 'Sind', 'Lina', 'Mahj',
-  'Mani', 'Mend', 'Modi', 'Mroo', 'Nbat', 'Narb', 'Perm', 'Hmng', 'Palm',
-  'Phlp', 'Pauc', 'Sidd', 'Tirh', 'Wara',
-#New for Unicode 8.0.0
-  'Ahom', 'Hluw', 'Hatr', 'Mult', 'Hung', 'Sgnw',
-#New for Unicode 10.0.0
-  'Adlm', 'Bhks', 'Marc', 'Newa', 'Osge', 'Tang', 'Gonm', 'Nshu', 'Soyo',
-  'Zanb',
-#New for Unicode 11.0.0
-  'Dogr', 'Gong', 'Rohg', 'Maka', 'Medf', 'Sogo', 'Sogd',
-#New for Unicode 12.0.0
-  'Elym', 'Nand', 'Hmnp', 'Wcho',
-#New for Unicode 13.0.0
-  'Chrs', 'Diak', 'Kits', 'Yezi',
-#New for Unicode 14.0.0
-  'Cpmn', 'Ougr', 'Tngs', 'Toto', 'Vith'
- ]
-
 # BIDI classes in the DerivedBidiClass.txt file, with comments.
 
 bidi_classes = [
@@ -185,14 +101,66 @@ break_properties = [
   ]
 
 # ---------------------------------------------------------------------------
-#                      REORDERING SCRIPT NAMES
+#                     COLLECTING PROPERTY NAMES
 # ---------------------------------------------------------------------------
 
 import re
 
+script_names = ['Unknown']
+abbreviations = {}
+
+def collect_property_names():
+  global script_names
+  global abbreviations
+
+  names_re = re.compile(r'^[0-9A-F]{4,6}(?:\.\.[0-9A-F]{4,6})? +; ([A-Za-z_]+) #')
+
+  last_script_name = ""
+  with open("Unicode.tables/Scripts.txt") as f:
+    for line in f:
+      match_obj = names_re.match(line)
+
+      if match_obj == None or match_obj.group(1) == last_script_name:
+        continue
+
+      last_script_name = match_obj.group(1)
+      script_names.append(last_script_name)
+
+  # Sometimes there is comment in the line
+  # so splitting around semicolon is not enough
+  value_alias_re = re.compile(r' *([A-Za-z_]+) *; *([A-Za-z_]+) *; *([A-Za-z_]+)(?: *; *([A-Za-z_ ]+))?')
+
+  with open("Unicode.tables/PropertyValueAliases.txt") as f:
+    for line in f:
+      match_obj = value_alias_re.match(line)
+
+      if match_obj == None:
+        continue
+
+      if match_obj.group(1) == "sc":
+        if match_obj.group(2) == match_obj.group(3):
+          abbreviations[match_obj.group(3)] = ()
+        elif match_obj.group(4) == None:
+          abbreviations[match_obj.group(3)] = (match_obj.group(2),)
+        else:
+          abbreviations[match_obj.group(3)] = (match_obj.group(2), match_obj.group(4))
+
+collect_property_names()
+
+# ---------------------------------------------------------------------------
+#                      REORDERING SCRIPT NAMES
+# ---------------------------------------------------------------------------
+
+script_abbrevs = []
+
 def reorder_scripts():
   global script_names
   global script_abbrevs
+  global abbreviations
+
+  for name in script_names:
+    abbrevs = abbreviations[name]
+    script_abbrevs.append(name if len(abbrevs) == 0 else abbrevs[0])
 
   extended_script_abbrevs = set()
   with open("Unicode.tables/ScriptExtensions.txt") as f:
