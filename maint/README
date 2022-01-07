@@ -85,6 +85,14 @@ utf8.c
 Updating to a new Unicode release
 =================================
 
+**** WORK IN PROGRESS ****
+
+Work is going on in the area of Unicode property handling. What follows here is 
+now out-of-date. It will be updated once the current project is complete. 
+Updating to any new Unicode release is best left till then also.
+06-January-2022
+
+
 When there is a new release of Unicode, the files in Unicode.tables must be
 refreshed from the web site. If the new version of Unicode adds new character
 scripts, the lists in GenerateCommon.py must be updated. I have been adding

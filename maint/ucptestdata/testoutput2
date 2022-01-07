@@ -26,7 +26,7 @@ U+1FDD..U+1FDF  ON  Symbol: Modifier symbol, greek, Other
 U+1FED..U+1FEF  ON  Symbol: Modifier symbol, greek, Other
 U+1FFD..U+1FFE  ON  Symbol: Modifier symbol, greek, Other
 U+309B..U+309C  ON  Symbol: Modifier symbol, common, Other, [hiragana, katakana]
-U+A700..U+A707  ON  Symbol: Modifier symbol, common, Other, [han, latin]
+U+A700..U+A707  ON  Symbol: Modifier symbol, common, Other, [latin, han]
 U+A708..U+A716  ON  Symbol: Modifier symbol, common, Other
 U+A720..U+A721  ON  Symbol: Modifier symbol, common, Other
 U+A789..U+A78A  L   Symbol: Modifier symbol, common, Other
@@ -49,8 +49,8 @@ U+2010..U+2015  ON  Punctuation: Dash punctuation, common, Other
 U+2E3A..U+2E3B  ON  Punctuation: Dash punctuation, common, Other
         U+2E40  ON  Punctuation: Dash punctuation, common, Other
         U+2E5D  ON  Punctuation: Dash punctuation, common, Other
-        U+301C  ON  Punctuation: Dash punctuation, common, Other, [bopomofo, han, hangul, hiragana, katakana]
-        U+3030  ON  Punctuation: Dash punctuation, common, Extended Pictographic, [bopomofo, han, hangul, hiragana, katakana]
+        U+301C  ON  Punctuation: Dash punctuation, common, Other, [hangul, hiragana, katakana, bopomofo, han]
+        U+3030  ON  Punctuation: Dash punctuation, common, Extended Pictographic, [hangul, hiragana, katakana, bopomofo, han]
         U+30A0  ON  Punctuation: Dash punctuation, common, Other, [hiragana, katakana]
 U+FE31..U+FE32  ON  Punctuation: Dash punctuation, common, Other
         U+FE58  ON  Punctuation: Dash punctuation, common, Other
