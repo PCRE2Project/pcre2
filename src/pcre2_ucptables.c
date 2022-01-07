@@ -409,7 +409,7 @@ the "loose matching" rules that Unicode advises and Perl uses. */
 #define STRING_tifinagh0 STR_t STR_i STR_f STR_i STR_n STR_a STR_g STR_h "\0"
 #define STRING_tirh0 STR_t STR_i STR_r STR_h "\0"
 #define STRING_tirhuta0 STR_t STR_i STR_r STR_h STR_u STR_t STR_a "\0"
-#define STRING_tngs0 STR_t STR_n STR_g STR_s "\0"
+#define STRING_tnsa0 STR_t STR_n STR_s STR_a "\0"
 #define STRING_toto0 STR_t STR_o STR_t STR_o "\0"
 #define STRING_ugar0 STR_u STR_g STR_a STR_r "\0"
 #define STRING_ugaritic0 STR_u STR_g STR_a STR_r STR_i STR_t STR_i STR_c "\0"
@@ -800,7 +800,7 @@ const char PRIV(utt_names)[] =
   STRING_tifinagh0
   STRING_tirh0
   STRING_tirhuta0
-  STRING_tngs0
+  STRING_tnsa0
   STRING_toto0
   STRING_ugar0
   STRING_ugaritic0
