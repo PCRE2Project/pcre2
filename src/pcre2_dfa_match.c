@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1245,12 +1245,13 @@ for (;;)
                c >= 0xe000;
           break;
 
-          case PT_BIDICO:
-          OK = UCD_BIDICONTROL(c) != 0;
-          break;
-
           case PT_BIDICL:
           OK = UCD_BIDICLASS(c) == code[2];
+          break;
+
+          case PT_BOOL:
+          OK = MAPBIT(PRIV(ucd_boolprop_sets) +
+            prop->bprops * ucd_boolprop_sets_item_size, code[2]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1516,12 +1517,13 @@ for (;;)
                c >= 0xe000;
           break;
 
-          case PT_BIDICO:
-          OK = UCD_BIDICONTROL(c) != 0;
-          break;
-
           case PT_BIDICL:
           OK = UCD_BIDICLASS(c) == code[3];
+          break;
+
+          case PT_BOOL:
+          OK = MAPBIT(PRIV(ucd_boolprop_sets) +
+            prop->bprops * ucd_boolprop_sets_item_size, code[3]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1770,12 +1772,13 @@ for (;;)
                c >= 0xe000;
           break;
 
-          case PT_BIDICO:
-          OK = UCD_BIDICONTROL(c) != 0;
-          break;
-
           case PT_BIDICL:
           OK = UCD_BIDICLASS(c) == code[3];
+          break;
+
+          case PT_BOOL:
+          OK = MAPBIT(PRIV(ucd_boolprop_sets) +
+            prop->bprops * ucd_boolprop_sets_item_size, code[3]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -2050,12 +2053,14 @@ for (;;)
                c >= 0xe000;
           break;
 
-          case PT_BIDICO:
-          OK = UCD_BIDICONTROL(c) != 0;
-          break;
-
           case PT_BIDICL:
           OK = UCD_BIDICLASS(c) == code[1 + IMM2_SIZE + 2];
+          break;
+
+          case PT_BOOL:
+          OK = MAPBIT(PRIV(ucd_boolprop_sets) +
+            prop->bprops * ucd_boolprop_sets_item_size,
+              code[1 + IMM2_SIZE + 2]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */

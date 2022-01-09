@@ -4937,7 +4937,7 @@ Subject length lower bound = 3
 /\p{L&}+\p{bidi_control}/B
 ------------------------------------------------------------------
         Bra
-        prop Lc ++
+        prop Lc +
         prop Bidicontrol
         Ket
         End
@@ -4946,7 +4946,7 @@ Subject length lower bound = 3
 /\p{bidi_control}+\p{L&}/B
 ------------------------------------------------------------------
         Bra
-        prop Bidicontrol ++
+        prop Bidicontrol +
         prop Lc
         Ket
         End

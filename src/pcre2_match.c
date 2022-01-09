@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2015-2021 University of Cambridge
+          New API code Copyright (c) 2015-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -2513,14 +2513,17 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           RRETURN(MATCH_NOMATCH);
         break;
 
-        case PT_BIDICO:
-        if (((prop->bidi & UCD_BIDICONTROL_BIT) != 0) == notmatch)
-          RRETURN(MATCH_NOMATCH);
-        break;
-
         case PT_BIDICL:
         if (((prop->bidi & UCD_BIDICLASS_MASK) == Fecode[2]) == notmatch)
           RRETURN(MATCH_NOMATCH);
+        break;
+
+        case PT_BOOL:
+          {
+          BOOL ok = MAPBIT(PRIV(ucd_boolprop_sets) +
+            prop->bprops * ucd_boolprop_sets_item_size, Fecode[2]) != 0;
+          if (ok == notmatch) RRETURN(MATCH_NOMATCH);
+          }
         break;
 
         /* This should never occur */
@@ -2845,20 +2848,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             }
           break;
 
-          case PT_BIDICO:
-          for (i = 1; i <= Lmin; i++)
-            {
-            if (Feptr >= mb->end_subject)
-              {
-              SCHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
-            GETCHARINCTEST(fc, Feptr);
-            if ((UCD_BIDICONTROL(fc) != 0) == notmatch)
-              RRETURN(MATCH_NOMATCH);
-            }
-          break;
-
           case PT_BIDICL:
           for (i = 1; i <= Lmin; i++)
             {
@@ -2869,6 +2858,25 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch)
+              RRETURN(MATCH_NOMATCH);
+            }
+          break;
+
+          case PT_BOOL:
+          for (i = 1; i <= Lmin; i++)
+            {
+            BOOL ok;
+            const ucd_record *prop;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            prop = GET_UCD(fc);
+            ok = MAPBIT(PRIV(ucd_boolprop_sets) +
+              prop->bprops * ucd_boolprop_sets_item_size, Lpropvalue) != 0;
+            if (ok == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3654,23 +3662,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             }
           /* Control never gets here */
 
-          case PT_BIDICO:
-          for (;;)
-            {
-            RMATCH(Fecode, RM223);
-            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
-            if (Feptr >= mb->end_subject)
-              {
-              SCHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
-            GETCHARINCTEST(fc, Feptr);
-            if ((UCD_BIDICONTROL(fc) != 0) == (Lctype == OP_NOTPROP))
-              RRETURN(MATCH_NOMATCH);
-            }
-          /* Control never gets here */
-
           case PT_BIDICL:
           for (;;)
             {
@@ -3684,6 +3675,28 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARINCTEST(fc, Feptr);
             if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
+              RRETURN(MATCH_NOMATCH);
+            }
+          /* Control never gets here */
+
+          case PT_BOOL:
+          for (;;)
+            {
+            BOOL ok;
+            const ucd_record *prop;
+            RMATCH(Fecode, RM223);
+            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(fc, Feptr);
+            prop = GET_UCD(fc);
+            ok = MAPBIT(PRIV(ucd_boolprop_sets) +
+              prop->bprops * ucd_boolprop_sets_item_size, Lpropvalue) != 0;
+            if (ok == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4221,21 +4234,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             }
           break;
 
-          case PT_BIDICO:
-          for (i = Lmin; i < Lmax; i++)
-            {
-            int len = 1;
-            if (Feptr >= mb->end_subject)
-              {
-              SCHECK_PARTIAL();
-              break;
-              }
-            GETCHARLENTEST(fc, Feptr, len);
-            if ((UCD_BIDICONTROL(fc) != 0) == notmatch) break;
-            Feptr+= len;
-            }
-          break;
-
           case PT_BIDICL:
           for (i = Lmin; i < Lmax; i++)
             {
@@ -4247,6 +4245,26 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               }
             GETCHARLENTEST(fc, Feptr, len);
             if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch) break;
+            Feptr+= len;
+            }
+          break;
+
+          case PT_BOOL:
+          for (i = Lmin; i < Lmax; i++)
+            {
+            BOOL ok;
+            const ucd_record *prop;
+            int len = 1;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              break;
+              }
+            GETCHARLENTEST(fc, Feptr, len);
+            prop = GET_UCD(fc);
+            ok = MAPBIT(PRIV(ucd_boolprop_sets) +
+              prop->bprops * ucd_boolprop_sets_item_size, Lpropvalue) != 0;
+            if (ok == notmatch) break;
             Feptr+= len;
             }
           break;

@@ -2,7 +2,7 @@
 * A program for testing the Unicode property table *
 ***************************************************/
 
-/* Copyright (c) University of Cambridge 2008-2021 */
+/* Copyright (c) University of Cambridge 2008-2022 */
 
 /* Compile thus:
 
@@ -14,10 +14,10 @@
 */
 
 /* This is a hacked-up program for testing the Unicode properties tables of
-PCRE2. It can also be used for finding characters with certain properties.
-I wrote it to help with debugging PCRE, and have added things that I found
-useful, in a rather haphazard way. The code has never been seriously tidied or
-checked for robustness, but it shouldn't now give compiler warnings.
+PCRE2. It can also be used for finding characters with certain properties. I
+wrote it to help with debugging, and have added things that I found useful, in
+a rather haphazard way. The code has never been seriously tidied or checked for
+robustness, but it shouldn't now give compiler warnings.
 
 There is only one option: "-s". If given, it applies only to the "findprop"
 command. It causes the UTF-8 sequence of bytes that encode the character to be
@@ -33,31 +33,31 @@ return code is always zero.
 
 There are three commands:
 
-"findprop" must be followed by a space-separated list of Unicode code points as
-hex numbers, either without any prefix or starting with "U+", or as individual
-UTF-8 characters preceded by '+'. For example:
+The command "findprop" must be followed by a space-separated list of Unicode
+code points as hex numbers, either without any prefix or starting with "U+", or
+as individual UTF-8 characters preceded by '+'. For example:
 
   findprop U+1234 5Abc +?
 
-The output is one line per character, giving its Unicode properties followed by
-its other case or cases if one or more exist, followed by its Script Extension
-list if it is not just the same as the base script. This list is in square
-brackets. The properties are:
+The output is one long line per character, listing Unicode properties that have
+values, followed by its other case or cases if one or more exist, followed by
+its Script Extension list if there is one. This list is in square brackets. A
+second list in square brackets gives all the Boolean properties of the
+character. The properties that come first are:
 
-Bidi control        shown as '*' if true
-Bidi class          e.g. NSM (most common is L)
-General type        e.g. Letter
-Specific type       e.g. Upper case letter
-Script              e.g. Medefaidrin
-Grapheme break type e.g. Extend (most common is Other)
+  Bidi class          e.g. NSM (most common is L)
+  General type        e.g. Letter
+  Specific type       e.g. Upper case letter
+  Script              e.g. Medefaidrin
+  Grapheme break type e.g. Extend (most common is Other)
 
-The scripts names are all in lower case, with underscores removed, because
-that's how they are stored for "loose" matching.
+Script names and Boolean property names are all in lower case, with underscores
+and hyphens removed, because that's how they are stored for "loose" matching.
 
-"find" must be followed by a list of property names and their values. The
-values are case-sensitive, except for bidi class. This finds characters that
-have those properties. If multiple properties are listed, they must all be
-matched. Currently supported:
+The command "find" must be followed by a list of property types and their
+values. The values are case-sensitive, except for bidi class. This finds
+characters that have those properties. If multiple properties are listed, they
+must all be matched. Currently supported:
 
   script <name>    The character must have this script property. Only one
                      such script may be given.
@@ -67,18 +67,19 @@ matched. Currently supported:
   type <abbrev>    The character's specific type (e.g. Lu or Nd) must match.
   gbreak <name>    The grapheme break property must match.
   bidi <class>     The character's bidi class must match.
-  bidi_control     The character must be a bidi control character
+  bool <name>      The character's Boolean property list must contain this
+                     property.
 
 If a <name> or <abbrev> is preceded by !, the value must NOT be present. For
-Script Extensions, there may be a mixture of positive and negative
-requirements. All must be satisfied.
+Script Extensions and Boolean properties, there may be a mixture of positive
+and negative requirements. All must be satisfied.
 
 Sequences of two or more characters are shown as ranges, for example
 U+0041..U+004A. No more than 100 lines are are output. If there are more
 characters, the list ends with ...
 
-"list" must be followed by one of property names script, type, gbreak or bidi.
-The defined values for that property are listed. */
+The command "list" must be followed by one of property names script, bool,
+type, gbreak or bidi. The defined values for that property are listed. */
 
 
 #ifdef HAVE_CONFIG_H
@@ -296,34 +297,35 @@ return isatty(fileno(stdin));
 
 
 /*************************************************
-*      Get script name from ucp ident            *
+*            Get  name from ucp ident            *
 *************************************************/
 
-/* The utt table contains both the full script names and the 4-letter 
-abbreviations. So search for both and use the longer if two are found, unless 
-the first one is only 3 characters (some scripts have 3-character names). If
-this were not just a test program it might be worth making some kind of reverse
+/* The utt table contains both full names and abbreviations. So search for both
+and use the longer if two are found, unless the first one is only 3 characters
+and we are looking for a script (some scripts have 3-character names). If this
+were not just a test program it might be worth making some kind of reverse
 index. */
 
 static const char *
-get_scriptname(int script)
+get_propname(int prop, int type)
 {
 size_t i, j, len;
 size_t foundlist[2];
 const char *yield;
+int typex = (type == PT_SC)? PT_SCX : type;
 
 j = 0;
 for (i = 0; i < PRIV(utt_size); i++)
   {
   const ucp_type_table *u = PRIV(utt) + i;
-  if ((u->type == PT_SCX || u->type == PT_SC) && u->value == script) 
+  if ((u->type == type || u->type == typex) && u->value == prop)
     {
     foundlist[j++] = i;
     if (j >= 2) break;
-    } 
+    }
   }
   
-if (j == 0) return "??"; 
+if (j == 0) return "??";
 
 yield = NULL;
 len = 0;
@@ -332,12 +334,13 @@ for (i = 0; i < j; i++)
   {
   const char *s = PRIV(utt_names) + (PRIV(utt) + foundlist[i])->name_offset;
   size_t sl = strlen(s);
+
   if (sl > len)
     {
     yield = s;
-    if (sl == 3) break; 
-    len = sl; 
-    }     
+    if (sl == 3 && type == PT_SC) break;
+    len = sl;
+    }
   }
 
 return yield;
@@ -357,15 +360,15 @@ int script = UCD_SCRIPT(c);
 int scriptx = UCD_SCRIPTX(c);
 int gbprop = UCD_GRAPHBREAK(c);
 int bidi = UCD_BIDICLASS(c);
-int bidicontrol = UCD_BIDICONTROL(c);
 unsigned int othercase = UCD_OTHERCASE(c);
 int caseset = UCD_CASESET(c);
+int bprops = UCD_BPROPS(c);
 
 const unsigned char *fulltypename = US"??";
 const unsigned char *typename = US"??";
 const unsigned char *graphbreak = US"??";
 const unsigned char *bidiclass = US"??";
-const unsigned char *scriptname = CUS get_scriptname(script);
+const unsigned char *scriptname = CUS get_propname(script, PT_SC);
 
 switch (type)
   {
@@ -462,8 +465,8 @@ switch(bidi)
   default:           bidiclass = US"???"; break;
   }
 
-printf("U+%04X %c%s %s: %s, %s, %s", c, bidicontrol? '*':' ', bidiclass,
-  typename, fulltypename, scriptname, graphbreak);
+printf("U+%04X %s %s: %s, %s, %s", c, bidiclass, typename, fulltypename,
+  scriptname, graphbreak);
 
 if (is_just_one && othercase != c)
   {
@@ -481,13 +484,28 @@ if (is_just_one && othercase != c)
 
 if (scriptx != 0)
   {
-  const char *sep = ""; 
+  const char *sep = "";
   const uint32_t *p = PRIV(ucd_script_sets) + scriptx;
   printf(", [");
   for (int i = 0; i < ucp_Unknown; i++)
   if (MAPBIT(p, i) != 0)
-    { 
-    printf("%s%s", sep, get_scriptname(i));
+    {
+    printf("%s%s", sep, get_propname(i, PT_SC));
+    sep = ", ";
+    }
+  printf("]");
+  }
+
+if (bprops != 0)
+  {
+  const char *sep = "";
+  const uint32_t *p = PRIV(ucd_boolprop_sets) + 
+    bprops * ucd_boolprop_sets_item_size;
+  printf(", [");
+  for (int i = 0; i < ucp_Bprop_Count; i++)
+  if (MAPBIT(p, i) != 0)
+    {
+    printf("%s%s", sep, get_propname(i, PT_BOOL));
     sep = ", ";
     }
   printf("]");
@@ -512,12 +530,14 @@ printf("\n");
 static void
 find_chars(unsigned char *s)
 {
-unsigned char name[24];
-unsigned char value[24];
+unsigned char name[128];
+unsigned char value[128];
 unsigned char *t;
 unsigned int count= 0;
-int scriptx_list[24];
+int scriptx_list[128];
 unsigned int scriptx_count = 0;
+int bprop_list[128];
+unsigned int bprop_count = 0;
 uint32_t i, c;
 int script = -1;
 int type = -1;
@@ -543,13 +563,18 @@ while (*s != 0)
   while (isspace(*s)) s++;
   value_start = s;
 
-  for (t = value; *s != 0 && !isspace(*s); s++) *t++ = *s;
+  for (t = value; *s != 0 && !isspace(*s); s++) 
+    {
+    if (*s != '_' && *s != '-') *t++ = *s;
+    } 
   *t = 0;
   while (isspace(*s)) s++;
 
   if (strcmp(CS name, "script") == 0 ||
       strcmp(CS name, "scriptx") == 0)
     {
+    for (t = value; *t != 0; t++) *t = tolower(*t);
+ 
     if (value[0] == '!')
       {
       if (name[6] == 'x') scriptx_not = TRUE;
@@ -560,7 +585,7 @@ while (*s != 0)
     for (i = 0; i < PRIV(utt_size); i++)
       {
       const ucp_type_table *u = PRIV(utt) + i;
-      if (u->type == PT_SCX && strcmp(CS(value + offset),
+      if ((u->type == PT_SCX || u->type == PT_SC) && strcmp(CS(value + offset),
             PRIV(utt_names) + u->name_offset) == 0)
         {
         c = u->value;
@@ -583,6 +608,33 @@ while (*s != 0)
     if (i >= PRIV(utt_size))
       {
       printf("** Unrecognized script name \"%s\"\n", value);
+      return;
+      }
+    }
+
+  else if (strcmp(CS name, "bool") == 0)
+    {
+    int not = 1;
+    if (value[0] == '!')
+      {
+      not = -1;
+      offset = 1;
+      }
+
+    for (i = 0; i < PRIV(utt_size); i++)
+      {
+      const ucp_type_table *u = PRIV(utt) + i;
+      if (u->type == PT_BOOL && strcmp(CS(value + offset),
+            PRIV(utt_names) + u->name_offset) == 0)
+        {
+        bprop_list[bprop_count++] = u->value * not;
+        break;
+        }
+      }
+
+    if (i >= PRIV(utt_size))
+      {
+      printf("** Unrecognized property name \"%s\"\n", value);
       return;
       }
     }
@@ -681,13 +733,6 @@ while (*s != 0)
       }
     }
 
-  else if (strcmp(CS name, "bidi_control") == 0 ||
-           strcmp(CS name, "bidicontrol") == 0)
-    {
-    bidicontrol = TRUE;
-    s = value_start;     /* No data */
-    }
-
   else
     {
     printf("** Unrecognized property name \"%s\"\n", name);
@@ -695,8 +740,8 @@ while (*s != 0)
     }
   }
 
-if (script < 0 && scriptx_count == 0 && type < 0 && gbreak < 0 &&
-    bidiclass < 0 && !bidicontrol)
+if (script < 0 && scriptx_count == 0 && bprop_count == 0 && type < 0 &&
+    gbreak < 0 && bidiclass < 0)
   {
   printf("** No properties specified\n");
   return;
@@ -708,46 +753,53 @@ for (c = 0; c <= 0x10ffff; c++)
 
   if (scriptx_count > 0)
     {
-    const uint32_t *bits_scriptx = NULL;
+    const uint32_t *bits_scriptx = PRIV(ucd_script_sets) + UCD_SCRIPTX(c);
     unsigned int found = 0;
-    int scriptx = UCD_SCRIPTX(c);
-
-    if (scriptx < 0) bits_scriptx = PRIV(ucd_script_sets) - scriptx;
 
     for (i = 0; i < scriptx_count; i++)
       {
+      int x = scriptx_list[i]/32;
+      int y = scriptx_list[i]%32;
+
       /* Positive requirment */
       if (scriptx_list[i] >= 0)
         {
-        if (scriptx >= 0)
-          {
-          if (scriptx == scriptx_list[i]) found++;
-          }
-
-        else
-          {
-          int x = scriptx_list[i]/32;
-          int y = scriptx_list[i]%32; 
-          if ((bits_scriptx[x] & (1u<<y)) != 0) found++;  
-          }
+        if ((bits_scriptx[x] & (1u<<y)) != 0) found++;
         }
       /* Negative requirement */
       else
         {
-        if (scriptx >= 0)
-          {
-          if (scriptx != -scriptx_list[i]) found++;
-          }
-        else
-          {
-          int x = scriptx_list[i]/32;
-          int y = scriptx_list[i]%32; 
-          if ((bits_scriptx[x] & (1u<<y)) == 0) found++;  
-          }
+        if ((bits_scriptx[x] & (1u<<y)) == 0) found++;
         }
       }
 
     if (found != scriptx_count) continue;
+    }
+
+  if (bprop_count > 0)
+    {
+    const uint32_t *bits_bprop = PRIV(ucd_boolprop_sets) + 
+      UCD_BPROPS(c) * ucd_boolprop_sets_item_size;
+    unsigned int found = 0;
+
+    for (i = 0; i < bprop_count; i++)
+      {
+      int x = bprop_list[i]/32;
+      int y = bprop_list[i]%32;
+
+      /* Positive requirement */
+      if (bprop_list[i] >= 0)
+        {
+        if ((bits_bprop[x] & (1u<<y)) != 0) found++;
+        }
+      /* Negative requirement */
+      else
+        {
+        if ((bits_bprop[-x] & (1u<<(-y))) == 0) found++;
+        }
+      }
+
+    if (found != bprop_count) continue;
     }
 
   if (type >= 0)
@@ -785,8 +837,6 @@ for (c = 0; c <= 0x10ffff; c++)
       if (bidiclass != UCD_BIDICLASS(c)) continue;
       }
     }
-
-  if (bidicontrol && UCD_BIDICONTROL(c) == 0) continue;
 
   /* All conditions are met. Look for runs. */
 
@@ -850,10 +900,10 @@ if (strcmp(CS name, "findprop") == 0)
     if (*t == '+')
       {
       c = *(++t);
-      if (c > 0x7fu) 
+      if (c > 0x7fu)
         {
         GETCHARINC(c, t);
-        }    
+        }
       endptr = t+1;
       }
     else
@@ -896,7 +946,14 @@ else if (strcmp(CS name, "list") == 0)
     if (strcmp(CS name, "script") == 0 || strcmp(CS name, "scripts") == 0)
       {
       for (i = 0; i < PRIV(utt_size); i++)
-        if (PRIV(utt)[i].type == PT_SCX)
+        if (PRIV(utt)[i].type == PT_SCX || PRIV(utt)[i].type == PT_SC)
+          printf("%s\n", PRIV(utt_names) + PRIV(utt)[i].name_offset);
+      }
+
+    else if (strcmp(CS name, "bool") == 0)
+      {
+      for (i = 0; i < PRIV(utt_size); i++)
+        if (PRIV(utt)[i].type == PT_BOOL)
           printf("%s\n", PRIV(utt_names) + PRIV(utt)[i].name_offset);
       }
 

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1286,7 +1286,7 @@ match. */
 #define PT_CLIST     10    /* Pseudo-property: match character list */
 #define PT_UCNC      11    /* Universal Character nameable character */
 #define PT_BIDICL    12    /* Specified bidi class */
-#define PT_BIDICO    13    /* Bidi control character */
+#define PT_BOOL      13    /* Boolean property */
 #define PT_TABSIZE   14    /* Size of square table for autopossessify tests */
 
 /* The following special properties are used only in XCLASS items, when POSIX
@@ -1824,7 +1824,8 @@ typedef struct {
   int32_t other_case; /* offset to other case, or zero if none */
   uint8_t scriptx;    /* script extension value */
   uint8_t bidi;       /* bidi class and control flag */
-  uint16_t dummy;     /* spare - to round to multiple of 4 bytes */
+  uint8_t bprops;     /* binary properties offset */ 
+  uint8_t dummy;      /* spare - to round to multiple of 4 bytes */
 } ucd_record;
 
 /* UCD access macros */
@@ -1848,13 +1849,14 @@ typedef struct {
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
 #define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
+#define UCD_BPROPS(ch)      GET_UCD(ch)->bprops
 
-/* The "scriptx" field gives an offset into a vector of 32-bit words that
-form a bitmap representing a list of scripts. These macros test or set the bit
-for a script in the map by number. */
+/* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
+that form a bitmap representing a list of scripts or boolean properties. These
+macros test or set a bit in the map by number. */
 
-#define MAPBIT(map,script) ((map)[(script)/32]&(1u<<((script)%32)))
-#define MAPSET(map,script) ((map)[(script)/32]|=(1u<<((script)%32)))
+#define MAPBIT(map,n) ((map)[(n)/32]&(1u<<((n)%32)))
+#define MAPSET(map,n) ((map)[(n)/32]|=(1u<<((n)%32)))
 
 /* The "bidi" field has the 0x80 bit set if the character has the Bidi_Control
 property. The remaining bits hold the bidi class, but as there are only 23
@@ -1921,6 +1923,7 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #endif
 #define _pcre2_hspace_list             PCRE2_SUFFIX(_pcre2_hspace_list_)
 #define _pcre2_vspace_list             PCRE2_SUFFIX(_pcre2_vspace_list_)
+#define _pcre2_ucd_boolprop_sets       PCRE2_SUFFIX(_pcre2_ucd_boolprop_sets_)
 #define _pcre2_ucd_caseless_sets       PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
 #define _pcre2_ucd_digit_sets          PCRE2_SUFFIX(_pcre2_ucd_digit_sets_)
 #define _pcre2_ucd_script_sets         PCRE2_SUFFIX(_pcre2_ucd_script_sets_)
@@ -1944,6 +1947,7 @@ extern const pcre2_match_context       PRIV(default_match_context);
 extern const uint8_t                   PRIV(default_tables)[];
 extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];
+extern const uint32_t                  PRIV(ucd_boolprop_sets)[];
 extern const uint32_t                  PRIV(ucd_caseless_sets)[];
 extern const uint32_t                  PRIV(ucd_digit_sets)[];
 extern const uint32_t                  PRIV(ucd_script_sets)[];

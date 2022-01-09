@@ -9,6 +9,9 @@
 # December 2021.
 
 
+import re
+
+
 # ---------------------------------------------------------------------------
 #                             DATA LISTS
 # ---------------------------------------------------------------------------
@@ -100,11 +103,58 @@ break_properties = [
   'Extended_Pictographic', '14'
   ]
 
+# List of files from which the names of Boolean properties are obtained, along
+# with a list of regex patterns for properties to be ignored, and a list of
+# extra pattern names to add.
+
+bool_propsfiles = ['PropList.txt', 'DerivedCoreProperties.txt', 'emoji-data.txt']
+bool_propsignore = [r'^Other_', r'^Hyphen$']
+bool_propsextras = ['ASCII', 'Bidi_Mirrored']
+
+
 # ---------------------------------------------------------------------------
-#                     COLLECTING PROPERTY NAMES
+#                   GET BOOLEAN PROPERTY NAMES
 # ---------------------------------------------------------------------------
 
-import re
+# Get a list of Boolean property names from a number of files.
+
+def getbpropslist():
+  bplist = []
+  bplast = ""
+
+  for filename in bool_propsfiles:
+    try:
+      file = open('Unicode.tables/' + filename, 'r')
+    except IOError:
+      print(f"** Couldn't open {'Unicode.tables/' + filename}\n")
+      sys.exit(1)
+
+    for line in file:
+      line = re.sub(r'#.*', '', line)
+      data = list(map(str.strip, line.split(';')))
+      if len(data) <= 1 or data[1] == bplast:
+        continue
+      bplast = data[1]
+      for pat in bool_propsignore:
+        if re.match(pat, bplast) != None:
+          break
+      else:
+        bplist.append(bplast)
+
+    file.close()
+
+  bplist.extend(bool_propsextras)
+  bplist.sort()
+  return bplist
+
+bool_properties = getbpropslist()
+bool_props_list_item_size = (len(bool_properties) + 31) // 32
+
+
+
+# ---------------------------------------------------------------------------
+#                  COLLECTING PROPERTY NAMES AND ALIASES
+# ---------------------------------------------------------------------------
 
 script_names = ['Unknown']
 abbreviations = {}
@@ -145,7 +195,24 @@ def collect_property_names():
         else:
           abbreviations[match_obj.group(3)] = (match_obj.group(2), match_obj.group(4))
 
+  # We can also collect Boolean property abbreviations into the same dictionary
+
+  bin_alias_re = re.compile(r' *([A-Za-z_]+) *; *([A-Za-z_]+)(?: *; *([A-Za-z_]+))?')
+  with open("Unicode.tables/PropertyAliases.txt") as f:
+    for line in f:
+      match_obj = bin_alias_re.match(line)
+      if match_obj == None:
+        continue
+
+      if match_obj.group(2) in bool_properties:
+        if match_obj.group(3) == None:
+          abbreviations[match_obj.group(2)] = (match_obj.group(1),)
+        else:
+          abbreviations[match_obj.group(2)] = (match_obj.group(1), match_obj.group(3))
+
 collect_property_names()
+
+
 
 # ---------------------------------------------------------------------------
 #                      REORDERING SCRIPT NAMES
@@ -192,6 +259,8 @@ def reorder_scripts():
   script_abbrevs = new_script_abbrevs
 
 reorder_scripts()
+script_list_item_size = (script_names.index('Unknown') + 31) // 32
+
 
 # ---------------------------------------------------------------------------
 #                         DERIVED LISTS
@@ -243,7 +312,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 This module is auto-generated from Unicode data files. DO NOT EDIT MANUALLY!
 """)

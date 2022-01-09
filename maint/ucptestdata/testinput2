@@ -14,5 +14,6 @@ find bidi RLI
 find bidi RLO
 find bidi S
 find bidi WS
-find bidi_control
 find script bopo
+find bool prependedconcatenationmark
+find bool pcm

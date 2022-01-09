@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -232,9 +232,9 @@ function should not be called in such configurations, because a pattern that
 tries to use Unicode properties won't compile. Rather than put lots of #ifdefs
 into the main code, however, we just put one into this function. 
 
-Now that the table contains both full script names and their 4-character
-abbreviations, we do some fiddling to try to get the full name, which is either
-the longer of two found names, or a 3-character name. */
+Now that the table contains both full names and their abbreviations, we do some
+fiddling to try to get the full name, which is either the longer of two found
+names, or a 3-character script name. */
 
 static const char *
 get_ucpname(unsigned int ptype, unsigned int pvalue)
@@ -243,19 +243,18 @@ get_ucpname(unsigned int ptype, unsigned int pvalue)
 int count = 0;
 const char *yield = "??";
 size_t len = 0;
-
-if (ptype == PT_SC) ptype = PT_SCX;  /* Table has scx values */
+unsigned int ptypex = (ptype == PT_SC)? PT_SCX : ptype;
 
 for (int i = PRIV(utt_size) - 1; i >= 0; i--)
   {
   const ucp_type_table *u = PRIV(utt) + i;
  
-  if (ptype == u->type && pvalue == u->value) 
+  if ((ptype == u->type || ptypex == u->type) && pvalue == u->value) 
     {
     const char *s = PRIV(utt_names) + u->name_offset;
     size_t sl = strlen(s);
     
-    if (sl == 3)
+    if (sl == 3 && (u->type == PT_SC || u->type == PT_SCX))
       {
       yield = s;
       break;

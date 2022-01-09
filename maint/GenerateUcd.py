@@ -117,7 +117,7 @@
 # Conceptually, there is a table of records (of type ucd_record), one for each
 # Unicode character. Each record contains the script number, script extension
 # value, character type, grapheme break type, offset to caseless matching set,
-# offset to the character's other case, and the bidi class/control. 
+# offset to the character's other case, and the bidi class/control.
 #
 # A real table covering all Unicode characters would be far too big. It can be
 # efficiently compressed by observing that many characters have the same
@@ -224,10 +224,14 @@ import sys
 
 from GenerateCommon import \
   bidi_classes, \
+  bool_properties, \
+  bool_propsfiles, \
+  bool_props_list_item_size, \
   break_properties, \
   category_names, \
   general_category_names, \
   script_abbrevs, \
+  script_list_item_size, \
   script_names, \
   open_output
 
@@ -430,6 +434,22 @@ def write_records(records, record_size):
   f.write('};\n\n')
 
 
+# Write a bit set
+
+def write_bitsets(list, item_size):
+  for d in list:
+    bitwords = [0] * item_size
+    for idx in d:
+      bitwords[idx // 32] |= 1 << (idx & 31)
+    s = " "
+    for x in bitwords:
+      f.write("%s" % s)
+      s = ", "
+      f.write("0x%08xu" % x)
+    f.write(",\n")
+  f.write("};\n\n")
+
+
 # ---------------------------------------------------------------------------
 # This bit of code must have been useful when the original script was being
 # developed. Retain it just in case it is ever needed again.
@@ -475,27 +495,6 @@ break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_na
 other_case = read_table('Unicode.tables/CaseFolding.txt', get_other_case, 0)
 bidi_class = read_table('Unicode.tables/DerivedBidiClass.txt', make_get_names(bidi_classes), bidi_classes.index('L'))
 
-# The Bidi_Control property is a Y/N value, so needs only one bit. We scan the
-# PropList.txt file and set 0x80 bit in the bidi_class table.
-
-file = open('Unicode.tables/PropList.txt', 'r', encoding='utf-8')
-for line in file:
-  line = re.sub(r'#.*', '', line)
-  chardata = list(map(str.strip, line.split(';')))
-  if len(chardata) <= 1:
-    continue
-  if chardata[1] != "Bidi_Control":
-    continue
-  m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
-  char = int(m.group(1), 16)
-  if m.group(3) is None:
-    last = char
-  else:
-    last = int(m.group(3), 16)
-  for i in range(char, last + 1):
-    bidi_class[i] |= 0x80;
-file.close()
-
 # The grapheme breaking rules were changed for Unicode 11.0.0 (June 2018). Now
 # we need to find the Extended_Pictographic property for emoji characters. This
 # can be set as an additional grapheme break property, because the default for
@@ -532,17 +531,103 @@ file.close()
 # element is never used.
 
 script_lists = [[]]
-script_list_item_size = (script_names.index('Unknown') + 31) // 32
+
 last_script_extension = ""
 scriptx = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, 0)
+
+# Find the Boolean properties of each character. This next bit of magic creates
+# a list of empty lists. Just using [[]] * MAX_UNICODE gives a list of
+# references to the *same* list, which is not what we want.
+
+bprops = [[] for _ in range(MAX_UNICODE)]
+
+# Collect the properties from the various files
+
+for filename in bool_propsfiles:
+  try:
+    file = open('Unicode.tables/' + filename, 'r')
+  except IOError:
+    print(f"** Couldn't open {'Unicode.tables/' + filename}\n")
+    sys.exit(1)
+
+  for line in file:
+    line = re.sub(r'#.*', '', line)
+    data = list(map(str.strip, line.split(';')))
+    if len(data) <= 1:
+      continue
+
+    try:
+      ix = bool_properties.index(data[1])
+    except ValueError:
+      continue
+
+    m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', data[0])
+    char = int(m.group(1), 16)
+    if m.group(3) is None:
+      last = char
+    else:
+      last = int(m.group(3), 16)
+
+    for i in range(char, last + 1):
+      bprops[i].append(ix)
+
+  file.close()
+
+# The ASCII property isn't listed in any files, but it is easy enough to add
+# it manually.
+
+ix = bool_properties.index("ASCII")
+for i in range(128):
+  bprops[i].append(ix)
+
+# The Bidi_Mirrored property isn't listed in any property files. We have to
+# deduce it from the file that lists the mirrored characters.
+
+ix = bool_properties.index("Bidi_Mirrored")
+
+try:
+  file = open('Unicode.tables/BidiMirroring.txt', 'r')
+except IOError:
+  print(f"** Couldn't open {'Unicode.tables/BidiMirroring.txt'}\n")
+  sys.exit(1)
+
+for line in file:
+  line = re.sub(r'#.*', '', line)
+  data = list(map(str.strip, line.split(';')))
+  if len(data) <= 1:
+    continue
+  c = int(data[0], 16)
+  bprops[c].append(ix)
+
+file.close()
+
+
+# Scan each character's boolean property list and created a list of unique
+# lists, at the same time, setting the index in that list for each property in
+# the bool_props vector.
+
+bool_props = [0] * MAX_UNICODE
+bool_props_lists = [[]]
+
+for c in range(MAX_UNICODE):
+  s = set(bprops[c])
+  for i in range(len(bool_props_lists)):
+    if s == set(bool_props_lists[i]):
+      break;
+  else:
+    bool_props_lists.append(bprops[c])
+    i += 1
+
+  bool_props[c] = i
+
 
 # With the addition of the Script Extensions field, we needed some padding to
 # get the Unicode records up to 12 bytes (multiple of 4). Originally this was a
 # 16-bit field and padding_dummy[0] was set to 256 to ensure this, but 8 bits
-# are now used for the bidi class, so zero will do.
+# are now used, so zero will do.
 
 padding_dummy = [0] * MAX_UNICODE
-padding_dummy[0] = 256
+padding_dummy[0] = 0
 
 # This block of code was added by PH in September 2012. It scans the other_case
 # table to find sets of more than two characters that must all match each other
@@ -616,7 +701,7 @@ for s in caseless_sets:
 # Combine all the tables
 
 table, records = combine_tables(script, category, break_props,
-  caseless_offsets, other_case, scriptx, bidi_class, padding_dummy)
+  caseless_offsets, other_case, scriptx, bidi_class, bool_props, padding_dummy)
 
 # Find the record size and create a string definition of the structure for
 # outputting as a comment.
@@ -708,6 +793,7 @@ const ucd_record PRIV(dummy_ucd_record)[] = {{
   0,              /* other case */
   ucp_Unknown,    /* script extension */
   ucp_bidiL,      /* bidi class */
+  0,              /* bool properties offset */ 
   0               /* dummy filler */
   }};
 #endif
@@ -782,21 +868,15 @@ f.write("""\
 
 const uint32_t PRIV(ucd_script_sets)[] = {
 """)
+write_bitsets(script_lists, script_list_item_size)
 
-for d in script_lists:
-  bitwords = [0] * script_list_item_size
+f.write("""\
+/* This vector is a list of bitsets for Boolean properties. */
 
-  for idx in d:
-    bitwords[idx // 32] |= 1 << (idx & 31)
+const uint32_t PRIV(ucd_boolprop_sets)[] = {
+""")
+write_bitsets(bool_props_lists, bool_props_list_item_size)
 
-  s = " "
-  for x in bitwords:
-    f.write("%s" % s)
-    s = ", "
-    f.write("0x%08xu" % x)
-  f.write(",\n")
-
-f.write("};\n\n")
 
 # Output the main UCD tables.
 
@@ -804,8 +884,9 @@ f.write("""\
 /* These are the main two-stage UCD tables. The fields in each record are:
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
 offset to multichar other cases or zero (8 bits), offset to other case or zero
-(32 bits, signed), script extension (8 bits), bidi class (8 bits), and a dummy
-16-bit field to make the whole thing a multiple of 4 bytes. */
+(32 bits, signed), script extension (8 bits), bidi class (8 bits), bool
+properties offset (8 bits), and a dummy 8-bit field to make the whole thing a
+multiple of 4 bytes. */
 \n""")
 
 write_records(records, record_size)

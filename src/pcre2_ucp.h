@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 This module is auto-generated from Unicode data files. DO NOT EDIT MANUALLY!
 Instead, modify the maint/GenerateUcpHeader.py script and run it to generate
@@ -99,6 +99,69 @@ enum {
   ucp_Zp,    /* Paragraph separator */
   ucp_Zs,    /* Space separator */
 };
+
+/* These are Boolean properties. */
+
+enum {
+  ucp_ASCII,
+  ucp_ASCII_Hex_Digit,
+  ucp_Alphabetic,
+  ucp_Bidi_Control,
+  ucp_Bidi_Mirrored,
+  ucp_Case_Ignorable,
+  ucp_Cased,
+  ucp_Changes_When_Casefolded,
+  ucp_Changes_When_Casemapped,
+  ucp_Changes_When_Lowercased,
+  ucp_Changes_When_Titlecased,
+  ucp_Changes_When_Uppercased,
+  ucp_Dash,
+  ucp_Default_Ignorable_Code_Point,
+  ucp_Deprecated,
+  ucp_Diacritic,
+  ucp_Emoji,
+  ucp_Emoji_Component,
+  ucp_Emoji_Modifier,
+  ucp_Emoji_Modifier_Base,
+  ucp_Emoji_Presentation,
+  ucp_Extended_Pictographic,
+  ucp_Extender,
+  ucp_Grapheme_Base,
+  ucp_Grapheme_Extend,
+  ucp_Grapheme_Link,
+  ucp_Hex_Digit,
+  ucp_IDS_Binary_Operator,
+  ucp_IDS_Trinary_Operator,
+  ucp_ID_Continue,
+  ucp_ID_Start,
+  ucp_Ideographic,
+  ucp_Join_Control,
+  ucp_Logical_Order_Exception,
+  ucp_Lowercase,
+  ucp_Math,
+  ucp_Noncharacter_Code_Point,
+  ucp_Pattern_Syntax,
+  ucp_Pattern_White_Space,
+  ucp_Prepended_Concatenation_Mark,
+  ucp_Quotation_Mark,
+  ucp_Radical,
+  ucp_Regional_Indicator,
+  ucp_Sentence_Terminal,
+  ucp_Soft_Dotted,
+  ucp_Terminal_Punctuation,
+  ucp_Unified_Ideograph,
+  ucp_Uppercase,
+  ucp_Variation_Selector,
+  ucp_White_Space,
+  ucp_XID_Continue,
+  ucp_XID_Start,
+  /* This must be last */
+  ucp_Bprop_Count
+};
+
+/* Size of entries in ucd_boolprop_sets[] */
+
+#define ucd_boolprop_sets_item_size 2
 
 /* These are the bidi class values. */
 
@@ -321,6 +384,10 @@ enum {
   /* This must be last */
   ucp_Script_Count
 };
+
+/* Size of entries in ucd_script_sets[] */
+
+#define ucd_script_sets_item_size 3
 
 #endif  /* PCRE2_UCP_H_IDEMPOTENT_GUARD */
 

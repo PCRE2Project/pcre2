@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -123,21 +123,21 @@ opcode is used to select the column. The values are as follows:
 */
 
 static const uint8_t propposstab[PT_TABSIZE][PT_TABSIZE] = {
-/* ANY LAMP GC  PC  SC  SCX ALNUM SPACE PXSPACE WORD CLIST UCNC BIDICL BIDICO */
+/* ANY LAMP GC  PC  SC  SCX ALNUM SPACE PXSPACE WORD CLIST UCNC BIDICL BOOL */
   { 0,  0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_ANY */
-  { 0,  3,  0,  0,  0,   0,    3,    1,      1,   0,    0,   0,    0,    1 },  /* PT_LAMP */
+  { 0,  3,  0,  0,  0,   0,    3,    1,      1,   0,    0,   0,    0,    0 },  /* PT_LAMP */
   { 0,  0,  2,  4,  0,   0,    9,   10,     10,  11,    0,   0,    0,    0 },  /* PT_GC */
   { 0,  0,  5,  2,  0,   0,   15,   16,     16,  17,    0,   0,    0,    0 },  /* PT_PC */
   { 0,  0,  0,  0,  2,   2,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_SC */
   { 0,  0,  0,  0,  2,   2,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_SCX */
-  { 0,  3,  6, 12,  0,   0,    3,    1,      1,   0,    0,   0,    0,    1 },  /* PT_ALNUM */
-  { 0,  1,  7, 13,  0,   0,    1,    3,      3,   1,    0,   0,    0,    1 },  /* PT_SPACE */
-  { 0,  1,  7, 13,  0,   0,    1,    3,      3,   1,    0,   0,    0,    1 },  /* PT_PXSPACE */
-  { 0,  0,  8, 14,  0,   0,    0,    1,      1,   3,    0,   0,    0,    1 },  /* PT_WORD */
+  { 0,  3,  6, 12,  0,   0,    3,    1,      1,   0,    0,   0,    0,    0 },  /* PT_ALNUM */
+  { 0,  1,  7, 13,  0,   0,    1,    3,      3,   1,    0,   0,    0,    0 },  /* PT_SPACE */
+  { 0,  1,  7, 13,  0,   0,    1,    3,      3,   1,    0,   0,    0,    0 },  /* PT_PXSPACE */
+  { 0,  0,  8, 14,  0,   0,    0,    1,      1,   3,    0,   0,    0,    0 },  /* PT_WORD */
   { 0,  0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_CLIST */
   { 0,  0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   3,    0,    0 },  /* PT_UCNC */
   { 0,  0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_BIDICL */
-  { 0,  1,  0,  0,  0,   0,    1,    1,      1,   1,    0,   0,    0,    0 }   /* PT_BIDICO */
+  { 0,  0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 }   /* PT_BOOL */
 };
 
 /* This table is used to check whether auto-possessification is possible
@@ -266,7 +266,7 @@ switch(ptype)
   case PT_BIDICL:
   return FALSE;
 
-  case PT_BIDICO:
+  case PT_BOOL:
   return FALSE;
   }
 
