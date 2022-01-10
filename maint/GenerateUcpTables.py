@@ -41,7 +41,8 @@
 #
 # Note subsequent changes here:
 #
-# 27-December_2021: Added support for 4-letter script abbreviations.
+# 27-December-2021: Added support for 4-letter script abbreviations.
+# xx-January-2022:  Further updates for Boolean property support
 # -----------------------------------------------------------------------------
 
 
@@ -119,8 +120,6 @@ for name in bool_properties:
       utt_table.append((stdname(abbrev), name, 'PT_BOOL'))
        
 
-#utt_table += list(zip(std_bool_properties, bool_properties, ['PT_BOOL'] * len(bool_properties)))
-
 # Now add specials and synonyms. Note both the standardized and capitalized
 # forms are needed.
 
@@ -133,8 +132,9 @@ utt_table.append(('xsp', 'Xsp', 'PT_SPACE'))
 utt_table.append(('xuc', 'Xuc', 'PT_UCNC'))
 utt_table.append(('xwd', 'Xwd', 'PT_WORD'))
 
-# Sort the table.
+# Remove duplicates from the table and then sort it.
 
+utt_table = list(set(utt_table)) 
 utt_table.sort()
 
 # Output file-specific heading
