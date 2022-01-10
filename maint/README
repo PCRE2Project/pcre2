@@ -22,13 +22,14 @@ GenerateCommon.py
   
 GenerateTest26.py
   A Python script that generates input and expected output test data for test
-  26, which tests Unicode property support.  
+  26, which tests certain aspects of Unicode property support.  
 
 GenerateUcd.py
   A Python script that generates the file pcre2_ucd.c from GenerateCommon.py
   and Unicode data files, which are themselves downloaded from the Unicode web
   site. The generated file contains the tables for a 2-stage lookup of Unicode
-  properties, along with some auxiliary tables.
+  properties, along with some auxiliary tables. The script starts with a long
+  comment that gives details of the tables it constructs. 
 
 GenerateUcpHeader.py
   A Python script that generates the file pcre2_ucp.h from GenerateCommon.py
@@ -38,7 +39,7 @@ GenerateUcpHeader.py
 GenerateUcpTables.py
   A Python script that generates the file pcre2_ucptables.c from
   GenerateCommon.py and Unicode data files. The generated file contains tables
-  for looking up Unicode properties.
+  for looking up Unicode property names.
 
 ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
@@ -63,11 +64,11 @@ Unicode.tables
   ScriptExtensions.txt are where to look for script information.
 
 ucptest.c
-  A short C program for testing the Unicode property macros that do lookups in
-  the pcre2_ucd.c data, mainly useful after rebuilding the Unicode property
-  table. Compile and run this in the "maint" directory (see comments at its
-  head). This program can also be used to find characters with specific
-  properties.
+  A program for testing the Unicode property macros that do lookups in the
+  pcre2_ucd.c data, mainly useful after rebuilding the Unicode property tables.
+  Compile and run this in the "maint" directory (see comments at its head).
+  This program can also be used to find characters with specific properties and 
+  to list which properties are supported. 
 
 ucptestdata
   A directory containing four files, testinput{1,2} and testoutput{1,2}, for
@@ -85,35 +86,18 @@ utf8.c
 Updating to a new Unicode release
 =================================
 
-**** WORK IN PROGRESS ****
-
-Work is going on in the area of Unicode property handling. What follows here is 
-now out-of-date. It will be updated once the current project is complete. 
-Updating to any new Unicode release is best left till then also.
-06-January-2022
-
-
 When there is a new release of Unicode, the files in Unicode.tables must be
-refreshed from the web site. If the new version of Unicode adds new character
-scripts, the lists in GenerateCommon.py must be updated. I have been adding
-each new group at the end of the relevant list, with a comment.
+refreshed from the web site. Once that is done, the four Python scripts that 
+generate files from the Unicode data can be run from within the "maint" 
+directory.
 
-NOTE: Both the pcre2syntax.3 and pcre2pattern.3 man pages contain lists of
-supported Unicode scripts that also have to be updated. These lists are in
-alphabetical order.
+Note: Previously, it was necessary to update lists of scripts and their 
+abbreviations by hand before running the Python scripts. This is no longer
+necessary because the scripts have been upgraded to extract this information
+themselves. Also, there used to be explicit lists of script in two of the man
+pages. This is no longer the case.
 
-There are two lists in GenerateCommon.py: the full names and the abbreviations
-that are found in the ScriptExtensions.txt file. A list of script names and
-their abbreviations can be found in the PropertyValueAliases.txt file on the
-Unicode web site. There is also a Wikipedia page that lists them, and notes the
-Unicode version in which they were introduced:
-
-https://en.wikipedia.org/wiki/Unicode_scripts#Table_of_Unicode_scripts
-
-Once the script name lists have been updated, the three generator scripts can
-be run from within the maint directory. If you get the error "ValueError:
-list.index(x): x not in list", the cause is usually a missing (or misspelt)
-name in one of the lists. You can give an output file name as an argument, but
+You can give an output file name as an argument to the following scripts, but
 by default:
 
 GenerateUcd.py        creates pcre2_ucd.c        )
@@ -121,17 +105,18 @@ GenerateUcpHeader.py  creates pcre2_ucp.h        ) in the current directory
 GenerateUcpTables.py  creates pcre2_ucptables.c  )
 
 These files can be compared against the existing versions in the src directory
-to check on any changes before replacing the old files, but you can generate
-directly into the final location by running
+to check on any changes before replacing the old files, but you can also
+generate directly into the final location by running:
 
 ./GenerateUcd.py       ../src/pcre2_ucd.c
 ./GenerateUcpHeader.py ../src/pcre2_ucp.h
 ./GenerateUcpTables.py ../src/pcre2_ucptables.c
 
-The ucptest program can be compiled and used to check that the new tables work
-properly, using the data files in ucptestdata to check a number of test
-characters. See the comments at the start of ucptest.c. If there are new
-scripts, adding a few tests to the files in ucptestdata is a good idea.
+Once the .c and .h files are in the ../src directory, the ucptest program can
+be compiled and used to check that the new tables work properly. The data files
+in ucptestdata are set up to check a number of test characters. See the
+comments at the start of ucptest.c. If there are new scripts, adding a few
+tests to the files in ucptestdata is a good idea.
 
 Finally, you should run the GenerateTest26.py script to regenerate new versions 
 of the input and expected output from a series of Unicode property tests that 
@@ -476,4 +461,4 @@ years.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 31 December 2021
+Last updated: 10 January 2022

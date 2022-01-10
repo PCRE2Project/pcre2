@@ -42,7 +42,7 @@
 # Note subsequent changes here:
 #
 # 27-December-2021: Added support for 4-letter script abbreviations.
-# xx-January-2022:  Further updates for Boolean property support
+# 10-January-2022:  Further updates for Boolean property support
 # -----------------------------------------------------------------------------
 
 
@@ -112,20 +112,18 @@ utt_table += list(zip(std_category_names, category_names, ['PT_PC'] * len(catego
 utt_table += list(zip(std_general_category_names, general_category_names, ['PT_GC'] * len(general_category_names)))
 utt_table += list(zip(std_bidi_class_names, bidi_class_names, ['PT_BIDICL'] * len(bidi_class_names)))
 
-
 for name in bool_properties:
   utt_table.append((stdname(name), name, 'PT_BOOL'))
   if name in abbreviations: 
     for abbrev in abbreviations[name]:
       utt_table.append((stdname(abbrev), name, 'PT_BOOL'))
-       
 
 # Now add specials and synonyms. Note both the standardized and capitalized
 # forms are needed.
 
 utt_table.append(('any', 'Any', 'PT_ANY'))
-utt_table.append(('l&',  'L&', 'PT_LAMP'))
-utt_table.append(('lc',  'LC', 'PT_LAMP'))
+utt_table.append(('l&',  'L&',  'PT_LAMP'))
+utt_table.append(('lc',  'LC',  'PT_LAMP'))
 utt_table.append(('xan', 'Xan', 'PT_ALNUM'))
 utt_table.append(('xps', 'Xps', 'PT_PXSPACE'))
 utt_table.append(('xsp', 'Xsp', 'PT_SPACE'))

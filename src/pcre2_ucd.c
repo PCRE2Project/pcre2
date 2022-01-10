@@ -107,7 +107,7 @@ const ucd_record PRIV(dummy_ucd_record)[] = {{
   0,              /* other case */
   ucp_Unknown,    /* script extension */
   ucp_bidiL,      /* bidi class */
-  0,              /* bool properties offset */ 
+  0,              /* bool properties offset */
   0               /* dummy filler */
   }};
 #endif
@@ -168,7 +168,9 @@ const uint32_t PRIV(ucd_digit_sets)[] = {
   0x1e959, 0x1fbf9,
 };
 
-/* This vector is a list of script bitsets for the Script Extension property. */
+/* This vector is a list of script bitsets for the Script Extension property.
+The number of 32-bit words in each bitset is #defined in pcre2_ucp.h as
+ucd_script_sets_item_size. */
 
 const uint32_t PRIV(ucd_script_sets)[] = {
  0x00000000u, 0x00000000u, 0x00000000u,
@@ -236,7 +238,9 @@ const uint32_t PRIV(ucd_script_sets)[] = {
  0x2000ffc0u, 0x3984a010u, 0x00000001u,
 };
 
-/* This vector is a list of bitsets for Boolean properties. */
+/* This vector is a list of bitsets for Boolean properties. The number of
+32_bit words in each bitset is #defined as ucd_boolprop_sets_item_size in
+pcre2_ucp.h. */
 
 const uint32_t PRIV(ucd_boolprop_sets)[] = {
  0x00000000u, 0x00000000u,
