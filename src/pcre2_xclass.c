@@ -215,7 +215,7 @@ while ((t = *data++) != XCL_END)
       break;
       
       case PT_BIDICL:
-      if (((prop->bidi & UCD_BIDICLASS_MASK) == data[1]) == isprop)
+      if ((prop->bidi == data[1]) == isprop)
         return !negated;
       break;    
       

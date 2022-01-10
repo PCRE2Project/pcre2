@@ -2514,7 +2514,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         break;
 
         case PT_BIDICL:
-        if (((prop->bidi & UCD_BIDICLASS_MASK) == Fecode[2]) == notmatch)
+        if ((prop->bidi == Fecode[2]) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 

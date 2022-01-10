@@ -1823,7 +1823,7 @@ typedef struct {
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
   uint8_t scriptx;    /* script extension value */
-  uint8_t bidi;       /* bidi class and control flag */
+  uint8_t bidi;       /* bidi class */
   uint8_t bprops;     /* binary properties offset */ 
   uint8_t dummy;      /* spare - to round to multiple of 4 bytes */
 } ucd_record;
@@ -1850,6 +1850,7 @@ typedef struct {
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
 #define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
 #define UCD_BPROPS(ch)      GET_UCD(ch)->bprops
+#define UCD_BIDICLASS(ch)   GET_UCD(ch)->bidi
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These
@@ -1857,16 +1858,6 @@ macros test or set a bit in the map by number. */
 
 #define MAPBIT(map,n) ((map)[(n)/32]&(1u<<((n)%32)))
 #define MAPSET(map,n) ((map)[(n)/32]|=(1u<<((n)%32)))
-
-/* The "bidi" field has the 0x80 bit set if the character has the Bidi_Control
-property. The remaining bits hold the bidi class, but as there are only 23
-classes, we can mask off 5 bits - leaving two free for the future. */
-
-#define UCD_BIDICLASS_MASK  0x1fu
-#define UCD_BIDICONTROL_BIT 0x80u
-
-#define UCD_BIDICLASS(ch)   (GET_UCD(ch)->bidi & UCD_BIDICLASS_MASK)
-#define UCD_BIDICONTROL(ch) (GET_UCD(ch)->bidi & UCD_BIDICONTROL_BIT)
 
 /* Header for serialized pcre2 codes. */
 
