@@ -4246,4 +4246,223 @@ No match
     \x{655} 
 No match
     
+# -----------------------------------------------------------------------------
+# Tests for newly-added Boolean Properties
+
+/\p{ahex}\p{asciihexdigit}/utf
+    >4F<
+ 0: 4F
+
+/\p{alpha}\p{alphabetic}/g,utf
+    >AB<>\x{148}\x{1234}
+ 0: AB
+ 0: \x{148}\x{1234}
+    
+/\p{ascii}\p{ascii}/g,utf
+    >AB<>\x{148}\x{1234}
+ 0: >A
+ 0: B<
+ 
+/\p{Bidi_C}\p{bidicontrol}/g,utf
+    >\x{202d}\x{2069}<
+ 0: \x{202d}\x{2069}
+
+/\p{Bidi_M}\p{bidimirrored}/g,utf
+    >\x{202d}\x{2069}<>\x{298b}\x{bb}<
+ 0: <>
+ 0: \x{298b}\x{bb}
+    
+/\p{cased}\p{cased}/g,utf
+    >AN<>\x{149}\x{120}<
+ 0: AN
+ 0: \x{149}\x{120}
+ 
+/\p{caseignorable}\p{ci}/g,utf
+    >AN<>\x{60}\x{859}<
+ 0: `\x{859}
+ 
+/\p{changeswhencasefolded}\p{cwcf}/g,utf
+    >AN<>\x{149}\x{120}<
+ 0: AN
+ 0: \x{149}\x{120}
+ 
+/\p{changeswhencasemapped}\p{cwcm}/g,utf
+    >AN<>\x{149}\x{120}<
+ 0: AN
+ 0: \x{149}\x{120}
+ 
+/\p{changeswhenlowercased}\p{cwl}/g,utf
+    >AN<>\x{149}\x{120}<>yz<
+ 0: AN
+
+/\p{changeswhenuppercased}\p{cwu}/g,utf
+    >AN<>\x{149}\x{120}<>yz<
+ 0: yz
+
+/\p{changeswhentitlecased}\p{cwt}/g,utf
+    >AN<>\x{149}\x{120}<>yz<
+ 0: yz
+
+/\p{dash}\p{dash}/g,utf
+    >\x{2d}\x{1400}<>yz<
+ 0: -\x{1400}
+    
+/\p{defaultignorablecodepoint}\p{di}/g,utf
+    >AN<>\x{ad}\x{e0fff}<>yz<
+ 0: \x{ad}\x{e0fff}
+ 
+/\p{deprecated}\p{dep}/g,utf
+    >AN<>\x{149}\x{e0001}<>yz<
+ 0: \x{149}\x{e0001}
+ 
+/\p{diacritic}\p{dia}/g,utf
+    >AN<>\x{f84}\x{5e}<>yz<
+ 0: \x{f84}^
+
+/\p{emojicomponent}\p{ecomp}/g,utf
+    >AN<>\x{200d}\x{e007f}<>yz<
+ 0: \x{200d}\x{e007f}
+
+/\p{emojimodifier}\p{emod}/g,utf
+    >AN<>\x{1f3fb}\x{1f3ff}<>yz<
+ 0: \x{1f3fb}\x{1f3ff}
+    
+/\p{emojipresentation}\p{epres}/g,utf
+    >AN<>\x{2653}\x{1f6d2}<>yz<
+ 0: \x{2653}\x{1f6d2}
+ 
+/\p{extender}\p{ext}/g,utf
+    >AN<>\x{1e944}\x{b7}<>yz<
+ 0: \x{1e944}\x{b7}
+
+/\p{extendedpictographic}\p{extpict}/g,utf
+    >AN<>\x{26cf}\x{ae}<>yz<
+ 0: \x{26cf}\x{ae}
+    
+/\p{graphemebase}\p{grbase}/g,utf
+    >AN<>\x{10f}\x{60}<>yz<
+ 0: >A
+ 0: N<
+ 0: >\x{10f}
+ 0: `<
+ 0: >y
+ 0: z<
+
+/\p{graphemeextend}\p{grext}/g,utf
+    >AN<>\x{300}\x{b44}<>yz<
+ 0: \x{300}\x{b44}
+
+/\p{hexdigit}\p{hex}/g,utf
+    >AF23<>\x{ff46}\x{ff10}<>yz<
+ 0: AF
+ 0: 23
+ 0: \x{ff46}\x{ff10}
+ 
+/\p{idcontinue}\p{idc}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+ 0: AF
+ 0: 23
+ 0: \x{146}z
+ 0: yz
+
+/\p{ideographic}\p{ideo}/g,utf
+    >AF23<>\x{30000}\x{3006}<>yz<
+ 0: \x{30000}\x{3006}
+
+/\p{idstart}\p{ids}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+ 0: AF
+ 0: \x{146}z
+ 0: yz
+
+/\p{idsbinaryoperator}\p{idsb}/g,utf
+    >AF23<>\x{2ff0}\x{2ffb}<>yz<\x{2ff2}\x{2ff1}
+ 0: \x{2ff0}\x{2ffb}
+
+/\p{idstrinaryoperator}\p{idst}/g,utf
+    >AF23<>\x{2ff2}\x{2ff3}<>yz<
+ 0: \x{2ff2}\x{2ff3}
+
+/\p{Join Control}\p{joinc}/g,utf
+    >AF23<>\x{200c}\x{200d}<>yz<
+ 0: \x{200c}\x{200d}
+
+/\p{logical_order_exception}\p{loe}/g,utf
+    >AF23<>\x{e40}\x{aabc}<>yz<
+ 0: \x{e40}\x{aabc}
+
+/\p{Lowercase}\p{lower}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+ 0: \x{146}z
+ 0: yz
+
+/\p{math}\p{math}/g,utf
+    >AF23<>\x{2215}\x{2b}<>yz<
+ 0: <>
+ 0: \x{2215}+
+ 0: <>
+    
+/\p{Non Character Code Point}\p{nchar}/g,utf
+    >AF23<>\x{10ffff}\x{fdd0}<>yz<
+ 0: \x{10ffff}\x{fdd0}
+ 
+/\p{patternsyntax}\p{patsyn}/g,utf
+    >AF23<>\x{21cd}\x{21}<>yz<
+ 0: <>
+ 0: \x{21cd}!
+ 0: <>
+
+/\p{patternwhitespace}\p{patws}/g,utf
+    >AF23<>\x{2029}\x{85}<>yz<
+ 0: \x{2029}\x{85}
+
+/\p{prependedconcatenationmark}\p{pcm}/g,utf
+    >AF23<>\x{600}\x{110cd}<>yz<
+ 0: \x{600}\x{110cd}
+
+/\p{quotationmark}\p{qmark}/g,utf
+    >AF23<>\x{ff63}\x{22}<>yz<
+ 0: \x{ff63}"
+
+/\p{radical}\p{radical}/g,utf
+    >AF23<>\x{2fd5}\x{2e80}<>yz<
+ 0: \x{2fd5}\x{2e80}
+
+/\p{regionalindicator}\p{ri}/g,utf
+    >AF23<>\x{1f1e6}\x{1f1ff}<>yz<
+ 0: \x{1f1e6}\x{1f1ff}
+
+/=\p{whitespace}\p{space}\p{wspace}=/g,utf
+    >AF23<=\x{d}\x{1680}\x{3000}=>yz<
+ 0: =\x{0d}\x{1680}\x{3000}=
+
+/\p{sentenceterminal}\p{sterm}/g,utf
+    >AF23<>\x{1da88}\x{2e}<>yz<
+ 0: \x{1da88}.
+
+/\p{terminalpunctuation}\p{term}/g,utf
+    >AF23<>\x{1da88}\x{2e}<>yz<
+ 0: \x{1da88}.
+
+/\p{unified ideograph}\p{uideo}/g,utf
+    >AF23<>\x{30000}\x{3400}<>yz<
+ 0: \x{30000}\x{3400}
+
+/\p{UPPERcase}\p{upper}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+ 0: AF
+
+/\p{variationselector}\p{vs}/g,utf
+    >AF23<>\x{180b}\x{e01ef}<>yz<
+ 0: \x{180b}\x{e01ef}
+
+/\p{xidcontinue}\p{xidc}/g,utf
+    >AF23<>\x{146}\x{30}<>yz<
+ 0: AF
+ 0: 23
+ 0: \x{146}0
+ 0: yz
+
+# -----------------------------------------------------------------------------
+
 # End of testinput4

@@ -4997,4 +4997,18 @@ Subject length lower bound = 3
 /\p{sc:L}/
 Failed: error 147 at offset 8: unknown property after \P or \p
 
+# Some Boolean property tests that differ from Perl
+
+/\p{emojimodifierbase}\p{ebase}/g,utf
+    >AN<>\x{261d}\x{1faf6}<>yz<
+ 0: \x{261d}\x{1faf6}
+
+/\p{graphemelink}\p{grlink}/g,utf
+    >AN<>\x{11d97}\x{94d}<>yz<
+ 0: \x{11d97}\x{94d}
+ 
+/\p{soft dotted}\p{sd}/g,utf
+    >AF23<>\x{1df1a}\x{69}<>yz<
+ 0: \x{1df1a}i
+
 # End of testinput5

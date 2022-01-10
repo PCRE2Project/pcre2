@@ -2645,4 +2645,150 @@
     \x{654} 
     \x{655} 
     
+# -----------------------------------------------------------------------------
+# Tests for newly-added Boolean Properties
+
+/\p{ahex}\p{asciihexdigit}/utf
+    >4F<
+
+/\p{alpha}\p{alphabetic}/g,utf
+    >AB<>\x{148}\x{1234}
+    
+/\p{ascii}\p{ascii}/g,utf
+    >AB<>\x{148}\x{1234}
+ 
+/\p{Bidi_C}\p{bidicontrol}/g,utf
+    >\x{202d}\x{2069}<
+
+/\p{Bidi_M}\p{bidimirrored}/g,utf
+    >\x{202d}\x{2069}<>\x{298b}\x{bb}<
+    
+/\p{cased}\p{cased}/g,utf
+    >AN<>\x{149}\x{120}<
+ 
+/\p{caseignorable}\p{ci}/g,utf
+    >AN<>\x{60}\x{859}<
+ 
+/\p{changeswhencasefolded}\p{cwcf}/g,utf
+    >AN<>\x{149}\x{120}<
+ 
+/\p{changeswhencasemapped}\p{cwcm}/g,utf
+    >AN<>\x{149}\x{120}<
+ 
+/\p{changeswhenlowercased}\p{cwl}/g,utf
+    >AN<>\x{149}\x{120}<>yz<
+
+/\p{changeswhenuppercased}\p{cwu}/g,utf
+    >AN<>\x{149}\x{120}<>yz<
+
+/\p{changeswhentitlecased}\p{cwt}/g,utf
+    >AN<>\x{149}\x{120}<>yz<
+
+/\p{dash}\p{dash}/g,utf
+    >\x{2d}\x{1400}<>yz<
+    
+/\p{defaultignorablecodepoint}\p{di}/g,utf
+    >AN<>\x{ad}\x{e0fff}<>yz<
+ 
+/\p{deprecated}\p{dep}/g,utf
+    >AN<>\x{149}\x{e0001}<>yz<
+ 
+/\p{diacritic}\p{dia}/g,utf
+    >AN<>\x{f84}\x{5e}<>yz<
+
+/\p{emojicomponent}\p{ecomp}/g,utf
+    >AN<>\x{200d}\x{e007f}<>yz<
+
+/\p{emojimodifier}\p{emod}/g,utf
+    >AN<>\x{1f3fb}\x{1f3ff}<>yz<
+    
+/\p{emojipresentation}\p{epres}/g,utf
+    >AN<>\x{2653}\x{1f6d2}<>yz<
+ 
+/\p{extender}\p{ext}/g,utf
+    >AN<>\x{1e944}\x{b7}<>yz<
+
+/\p{extendedpictographic}\p{extpict}/g,utf
+    >AN<>\x{26cf}\x{ae}<>yz<
+    
+/\p{graphemebase}\p{grbase}/g,utf
+    >AN<>\x{10f}\x{60}<>yz<
+
+/\p{graphemeextend}\p{grext}/g,utf
+    >AN<>\x{300}\x{b44}<>yz<
+
+/\p{hexdigit}\p{hex}/g,utf
+    >AF23<>\x{ff46}\x{ff10}<>yz<
+ 
+/\p{idcontinue}\p{idc}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+
+/\p{ideographic}\p{ideo}/g,utf
+    >AF23<>\x{30000}\x{3006}<>yz<
+
+/\p{idstart}\p{ids}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+
+/\p{idsbinaryoperator}\p{idsb}/g,utf
+    >AF23<>\x{2ff0}\x{2ffb}<>yz<\x{2ff2}\x{2ff1}
+
+/\p{idstrinaryoperator}\p{idst}/g,utf
+    >AF23<>\x{2ff2}\x{2ff3}<>yz<
+
+/\p{Join Control}\p{joinc}/g,utf
+    >AF23<>\x{200c}\x{200d}<>yz<
+
+/\p{logical_order_exception}\p{loe}/g,utf
+    >AF23<>\x{e40}\x{aabc}<>yz<
+
+/\p{Lowercase}\p{lower}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+
+/\p{math}\p{math}/g,utf
+    >AF23<>\x{2215}\x{2b}<>yz<
+    
+/\p{Non Character Code Point}\p{nchar}/g,utf
+    >AF23<>\x{10ffff}\x{fdd0}<>yz<
+ 
+/\p{patternsyntax}\p{patsyn}/g,utf
+    >AF23<>\x{21cd}\x{21}<>yz<
+
+/\p{patternwhitespace}\p{patws}/g,utf
+    >AF23<>\x{2029}\x{85}<>yz<
+
+/\p{prependedconcatenationmark}\p{pcm}/g,utf
+    >AF23<>\x{600}\x{110cd}<>yz<
+
+/\p{quotationmark}\p{qmark}/g,utf
+    >AF23<>\x{ff63}\x{22}<>yz<
+
+/\p{radical}\p{radical}/g,utf
+    >AF23<>\x{2fd5}\x{2e80}<>yz<
+
+/\p{regionalindicator}\p{ri}/g,utf
+    >AF23<>\x{1f1e6}\x{1f1ff}<>yz<
+
+/=\p{whitespace}\p{space}\p{wspace}=/g,utf
+    >AF23<=\x{d}\x{1680}\x{3000}=>yz<
+
+/\p{sentenceterminal}\p{sterm}/g,utf
+    >AF23<>\x{1da88}\x{2e}<>yz<
+
+/\p{terminalpunctuation}\p{term}/g,utf
+    >AF23<>\x{1da88}\x{2e}<>yz<
+
+/\p{unified ideograph}\p{uideo}/g,utf
+    >AF23<>\x{30000}\x{3400}<>yz<
+
+/\p{UPPERcase}\p{upper}/g,utf
+    >AF23<>\x{146}\x{7a}<>yz<
+
+/\p{variationselector}\p{vs}/g,utf
+    >AF23<>\x{180b}\x{e01ef}<>yz<
+
+/\p{xidcontinue}\p{xidc}/g,utf
+    >AF23<>\x{146}\x{30}<>yz<
+
+# -----------------------------------------------------------------------------
+
 # End of testinput4
