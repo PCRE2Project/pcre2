@@ -423,9 +423,9 @@ const uint32_t PRIV(ucd_boolprop_sets)[] = {
 /* These are the main two-stage UCD tables. The fields in each record are:
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
 offset to multichar other cases or zero (8 bits), offset to other case or zero
-(32 bits, signed), script extension (8 bits), bidi class (8 bits), bool
-properties offset (8 bits), and a dummy 8-bit field to make the whole thing a
-multiple of 4 bytes. */
+(32 bits, signed), bidi class (5 bits) and script extension (11 bits) packed
+into a 16-bit field, offset in binary properties table (8 bits), and a dummy
+8-bit field to make the whole thing a multiple of 4 bytes. */
 
 const ucd_record PRIV(ucd_records)[] = { /* 16908 bytes, record size 12 */
   {    69,      0,      2,      0,      0,   6144,      1,      0, }, /*   0 */
