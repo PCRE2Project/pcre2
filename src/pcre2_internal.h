@@ -1822,9 +1822,8 @@ typedef struct {
   uint8_t gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
-  uint8_t scriptx;    /* script extension value */
-  uint8_t bidi;       /* bidi class */
-  uint8_t bprops;     /* binary properties offset */ 
+  uint16_t scriptx_bidiclass; /* script extension (11 bit) and bidi class (5 bit) values */
+  uint8_t bprops;     /* binary properties offset */
   uint8_t dummy;      /* spare - to round to multiple of 4 bytes */
 } ucd_record;
 
@@ -1842,15 +1841,21 @@ typedef struct {
 #define GET_UCD(ch) REAL_GET_UCD(ch)
 #endif
 
+#define UCD_SCRIPTX_MASK 0x3ff
+#define UCD_BIDICLASS_SHIFT 11
+
+#define UCD_SCRIPTX_PROP(prop) ((prop)->scriptx_bidiclass & UCD_SCRIPTX_MASK)
+#define UCD_BIDICLASS_PROP(prop) ((prop)->scriptx_bidiclass >> UCD_BIDICLASS_SHIFT)
+
 #define UCD_CHARTYPE(ch)    GET_UCD(ch)->chartype
 #define UCD_SCRIPT(ch)      GET_UCD(ch)->script
 #define UCD_CATEGORY(ch)    PRIV(ucp_gentype)[UCD_CHARTYPE(ch)]
 #define UCD_GRAPHBREAK(ch)  GET_UCD(ch)->gbprop
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
-#define UCD_SCRIPTX(ch)     GET_UCD(ch)->scriptx
+#define UCD_SCRIPTX(ch)     UCD_SCRIPTX_PROP(GET_UCD(ch))
 #define UCD_BPROPS(ch)      GET_UCD(ch)->bprops
-#define UCD_BIDICLASS(ch)   GET_UCD(ch)->bidi
+#define UCD_BIDICLASS(ch)   UCD_BIDICLASS_PROP(GET_UCD(ch))
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These

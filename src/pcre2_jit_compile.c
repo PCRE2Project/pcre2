@@ -7670,7 +7670,8 @@ if (unicode_status & XCLASS_NEEDS_UCD)
 
   if (unicode_status & XCLASS_HAS_BIDICL)
     {
-    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, bidi));
+    OP1(SLJIT_MOV_U16, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx_bidiclass));
+    OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BIDICLASS_SHIFT);
 
     while (*cc != XCL_END)
       {
@@ -7789,7 +7790,8 @@ if (unicode_status & XCLASS_NEEDS_UCD)
 
   if (unicode_status & XCLASS_HAS_SCRIPT_EXTENSION)
     {
-    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx));
+    OP1(SLJIT_MOV_U16, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx_bidiclass));
+    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_SCRIPTX_MASK);
     OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
 
     if (unicode_status & XCLASS_SCRIPT_EXTENSION_NOTPROP)
