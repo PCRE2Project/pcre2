@@ -538,7 +538,11 @@ file.close()
 
 script_lists = [[]]
 last_script_extension = ""
-scriptx = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, 0)
+scriptx_bidi_class = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, 0)
+
+for idx in range(len(scriptx_bidi_class)):
+  scriptx_bidi_class[idx] = scriptx_bidi_class[idx] | (bidi_class[idx] << 11)
+bidi_class = None
 
 # Find the Boolean properties of each character. This next bit of magic creates
 # a list of empty lists. Using [[]] * MAX_UNICODE gives a list of references to
@@ -704,7 +708,7 @@ for s in caseless_sets:
 # Combine all the tables
 
 table, records = combine_tables(script, category, break_props,
-  caseless_offsets, other_case, scriptx, bidi_class, bool_props, padding_dummy)
+  caseless_offsets, other_case, scriptx_bidi_class, bool_props, padding_dummy)
 
 # Find the record size and create a string definition of the structure for
 # outputting as a comment.
@@ -794,8 +798,7 @@ const ucd_record PRIV(dummy_ucd_record)[] = {{
   ucp_gbOther,    /* grapheme break property */
   0,              /* case set */
   0,              /* other case */
-  ucp_Unknown,    /* script extension */
-  ucp_bidiL,      /* bidi class */
+  0 | (ucp_bidiL << UCD_BIDICLASS_SHIFT), /* script extension and bidi class */
   0,              /* bool properties offset */
   0               /* dummy filler */
   }};

@@ -221,7 +221,7 @@ switch(ptype)
 
   case PT_SCX:
   ok = (pdata == prop->script
-        || MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, pdata) != 0);
+        || MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), pdata) != 0);
   return ok == negated;
 
   /* These are specials */

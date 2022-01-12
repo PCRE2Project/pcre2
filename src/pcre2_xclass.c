@@ -163,7 +163,7 @@ while ((t = *data++) != XCL_END)
 
       case PT_SCX:
       ok = (data[1] == prop->script ||
-            MAPBIT(PRIV(ucd_script_sets) + prop->scriptx, data[1]) != 0);
+            MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), data[1]) != 0);
       if (ok == isprop) return !negated;
       break;
 
@@ -215,7 +215,7 @@ while ((t = *data++) != XCL_END)
       break;
       
       case PT_BIDICL:
-      if ((prop->bidi == data[1]) == isprop)
+      if ((UCD_BIDICLASS_PROP(prop) == data[1]) == isprop)
         return !negated;
       break;    
       

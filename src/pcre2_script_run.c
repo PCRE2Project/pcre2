@@ -136,7 +136,7 @@ for (;;)
   Common is always accepted with any script. If there are extensions, the
   following processing happens for all scripts. */
 
-  if (ucd->scriptx != 0 || (script != ucp_Inherited && script != ucp_Common))
+  if (UCD_SCRIPTX_PROP(ucd) != 0 || (script != ucp_Inherited && script != ucp_Common))
     {
     BOOL OK;
 
@@ -146,7 +146,7 @@ for (;;)
     zero, and then, except for Common or Inherited, add this script's bit to
     the map. */
 
-    memcpy(map, PRIV(ucd_script_sets) + ucd->scriptx, UCD_MAPSIZE * sizeof(uint32_t));
+    memcpy(map, PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(ucd), UCD_MAPSIZE * sizeof(uint32_t));
     memset(map + UCD_MAPSIZE, 0, (FULL_MAPSIZE - UCD_MAPSIZE) * sizeof(uint32_t));
     if (script != ucp_Common && script != ucp_Inherited) MAPSET(map, script);
 
