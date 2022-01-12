@@ -197,7 +197,17 @@ COMMAND LINE OPTIONS
 
        -LM       List modifiers: write a list of available pattern and subject
                  modifiers to the standard output, then exit  with  zero  exit
-                 code.  All other options are ignored.  If both -C and -LM are
+                 code.  All other options are ignored.  If both -C and any -Lx
+                 options are present, whichever is first is recognized.
+
+       -LP       List properties: write a list of recognized  Unicode  proper-
+                 ties  to  the standard output, then exit with zero exit code.
+                 All other options are ignored. If both -C and any -Lx options
+                 are present, whichever is first is recognized.
+
+       -LS       List  scripts: write a list of recogized Unicode script names
+                 to the standard output, then exit with zero  exit  code.  All
+                 other options are ignored. If both -C and any -Lx options are
                  present, whichever is first is recognized.
 
        -pattern modifier-list
@@ -1939,5 +1949,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 November 2021
-       Copyright (c) 1997-2021 University of Cambridge.
+       Last updated: 12 January 2022
+       Copyright (c) 1997-2022 University of Cambridge.

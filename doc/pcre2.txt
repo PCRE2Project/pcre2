@@ -6889,8 +6889,16 @@ BACKSLASH
        ters  whose code points are less than U+0100 and U+10000, respectively.
        In 32-bit non-UTF mode, code points greater than 0x10ffff (the  Unicode
        limit)  may  be  encountered. These are all treated as being in the Un-
-       known script and with an unassigned type. The  extra  escape  sequences
-       are:
+       known script and with an unassigned type.
+
+       Matching characters by Unicode property is not fast, because PCRE2  has
+       to  do  a  multistage table lookup in order to find a character's prop-
+       erty. That is why the traditional escape sequences such as \d and \w do
+       not  use  Unicode  properties  in PCRE2 by default, though you can make
+       them do so by setting the PCRE2_UCP option or by starting  the  pattern
+       with (*UCP).
+
+       The extra escape sequences that provide property support are:
 
          \p{xx}   a character with the xx property
          \P{xx}   a character without the xx property
@@ -6900,71 +6908,36 @@ BACKSLASH
        in accordance with Unicode's "loose matching" rules,  spaces,  hyphens,
        and underscores are ignored. There is support for Unicode script names,
        Unicode general category properties, "Any", which matches any character
-       (including  newline),  Bidi_Control, Bidi_Class, and some special PCRE2
-       properties (described below).  Other Perl properties such  as  "InMusi-
-       calSymbols"  are  not  supported  by PCRE2.  Note that \P{Any} does not
-       match any characters, so always causes a match failure.
+       (including  newline),  Bidi_Class,  a number of binary (yes/no) proper-
+       ties, and some special PCRE2  properties  (described  below).   Certain
+       other  Perl  properties such as "InMusicalSymbols" are not supported by
+       PCRE2. Note that \P{Any} does  not  match  any  characters,  so  always
+       causes a match failure.
+
+   Script properties for \p and \P
 
        There are three different syntax forms for matching a script. Each Uni-
-       code  character  has  a  basic  script and, optionally, a list of other
-       scripts ("Script Extentions") with which it is commonly used. Using the
+       code character has a basic script and,  optionally,  a  list  of  other
+       scripts ("Script Extensions") with which it is commonly used. Using the
        Adlam script as an example, \p{sc:Adlam} matches characters whose basic
        script is Adlam, whereas \p{scx:Adlam} matches, in addition, characters
-       that  have  Adlam in their extensions list. The full names "script" and
+       that have Adlam in their extensions list. The full names  "script"  and
        "script extensions" for the property types are recognized, and a equals
-       sign  is an alternative to the colon. If a script name is given without
-       a property type, for example, \p{Adlam}, it is  treated  as  \p{scx:Ad-
-       lam}.  Perl  changed  to  this interpretation at release 5.26 and PCRE2
+       sign is an alternative to the colon. If a script name is given  without
+       a  property  type,  for example, \p{Adlam}, it is treated as \p{scx:Ad-
+       lam}. Perl changed to this interpretation at  release  5.26  and  PCRE2
        changed at release 10.40.
 
        Unassigned characters (and in non-UTF 32-bit mode, characters with code
        points greater than 0x10FFFF) are assigned the "Unknown" script. Others
-       that are not part of an identified script are lumped together as  "Com-
-       mon". The current list of script names and their 4-letter abbreviations
-       is:
+       that  are not part of an identified script are lumped together as "Com-
+       mon". The current list of recognized script names and their 4-character
+       abbreviations can be obtained by running this command:
 
-       Adlam (Adlm), Ahom (Ahom), Anatolian_Hieroglyphs (Hluw), Arabic (Arab),
-       Armenian   (Armn),  Avestan  (Avst),  Balinese  (Bali),  Bamum  (Bamu),
-       Bassa_Vah (Bass), Batak (Batk), Bengali (Beng), Bhaiksuki (Bhks), Bopo-
-       mofo  (Bopo),  Brahmi  (Brah),  Braille  (Brai), Buginese (Bugi), Buhid
-       (Buhd), Canadian_Aboriginal (Cans), Carian  (Cari),  Caucasian_Albanian
-       (Aghb), Chakma (Cakm), Cham (Cham), Cherokee (Cher), Chorasmian (Chrs),
-       Common  (Zyyy),  Coptic  (Copt),  Cuneiform  (Xsux),  Cypriot   (Cprt),
-       Cypro_Minoan   (Cpmn),  Cyrillic  (Cyrl),  Deseret  (Dsrt),  Devanagari
-       (Deva), Dives_Akuru (Diak), Dogra (Dogr), Duployan (Dupl), Egyptian_Hi-
-       eroglyphs  (Egyp),  Elbasan  (Elba),  Elymaic  (Elym), Ethiopic (Ethi),
-       Georgian (Geor), Glagolitic  (Glag),  Gothic  (Goth),  Grantha  (Gran),
-       Greek  (Grek),  Gujarati (Gujr), Gunjala_Gondi (Gong), Gurmukhi (Guru),
-       Han (Hani), Hangul (Hang), Hanifi_Rohingya (Rohg), Hanunoo (Hano),  Ha-
-       tran  (Hatr),  Hebrew (Hebr), Hiragana (Hira), Imperial_Aramaic (Armi),
-       Inherited (Zinh), Inscriptional_Pahlavi (Phli),  Inscriptional_Parthian
-       (Prti),  Javanese  (Java),  Kaithi  (Kthi),  Kannada  (Knda),  Katakana
-       (Kana), Kayah_Li (Kali), Kharoshthi (Khar), Khitan_Small_Script (Kits),
-       Khmer  (Khmr),  Khojki  (Khoj),  Khudawadi  (Sind),  Lao  (Laoo), Latin
-       (Latn), Lepcha (Lepc), Limbu (Limb), Linear_A (Lina), Linear_B  (Linb),
-       Lisu  (Lisu),  Lycian  (Lyci),  Lydian (Lydi), Mahajani (Majh), Makasar
-       (Maka), Malayalam (Mlym), Mandaic (Mand),  Manichaean  (Mani),  Marchen
-       (Marc),  Masaram_Gondi (Gonm), Medefaidrin (Medf), Meetei_Mayek (Mtei),
-       Mende_Kikakui  (Mend),  Meroitic_Cursive  (Merc),  Meroitic_Hieroglyphs
-       (Mero), Miao (Miao), Modi (Modi), Mongolian (Mong), Mro (Mroo), Multani
-       (Mult),  Myanmar  (Mymr),   Nabataean   (Nbar),   Nandinagari   (Nand),
-       New_Tai_Lue  (Talu),  Newa  (Newa),  Nko  (Nkoo),  Nushu (Nshu), Nyiak-
-       eng_Puachue_Hmong (Hmnp), Ogham (Ogam), Ol_Chiki (Olck),  Old_Hungarian
-       (Hung), Old_Italic (Olck), Old_North_Arabian (Narb), Old_Permic (Perm),
-       Old_Persian  (Orkh),  Old_Sogdian  (Sogo),  Old_South_Arabian   (Sarb),
-       Old_Turkic  (Orkh),  Old_Uyghur (Ougr), Oriya (Orya), Osage (Osge), Os-
-       manya  (Osma),  Pahawh_Hmong  (Hmng),  Palmyrene  (Palm),   Pau_Cin_Hau
-       (Pauc), Phags_Pa (Phag), Phoenician (Phnx), Psalter_Pahlavi (Phli), Re-
-       jang (Rjng), Runic (Runr), Samaritan (Samr), Saurashtra (Saur), Sharada
-       (Shrd),  Shavian  (Shaw),  Siddham  (Sidd), SignWriting (Sgnw), Sinhala
-       (Sinh), Sogdian (Sogd), Sora_Sompeng (Sora), Soyombo (Soyo),  Sundanese
-       (Sund),  Syloti_Nagri  (Sylo),  Syriac (Syrc), Tagalog (Tglg), Tagbanwa
-       (Tagb), Tai_Le (Tale), Tai_Tham (Lana), Tai_Viet (Tavt), Takri  (Takr),
-       Tamil  (Taml),  Tangsa  (Tngs),  Tangut  (Tang),  Telugu (Telu), Thaana
-       (Thaa), Thai (Thai), Tibetan (Tibt), Tifinagh (Tfng),  Tirhuta  (Tirh),
-       Toto  (Toto),  Ugaritic  (Ugar),  Vai  (Vaii),  Vithkuqi (Vith), Wancho
-       (Wcho), Warang_Citi (Wara), Yezidi (Yezi), Yi (Yiii),  Zanabazar_Square
-       (Zanb).
+         pcre2test -LS
+
+
+   The general category property for \p and \P
 
        Each character has exactly one Unicode general category property, spec-
        ified by a two-letter abbreviation. For compatibility with Perl,  nega-
@@ -7050,20 +7023,18 @@ BACKSLASH
        For  example,  \p{Lu}  always  matches only upper case letters. This is
        different from the behaviour of current versions of Perl.
 
-       Matching characters by Unicode property is not fast, because PCRE2  has
-       to  do  a  multistage table lookup in order to find a character's prop-
-       erty. That is why the traditional escape sequences such as \d and \w do
-       not  use  Unicode  properties  in PCRE2 by default, though you can make
-       them do so by setting the PCRE2_UCP option or by starting  the  pattern
-       with (*UCP).
+   Binary (yes/no) properties for \p and \P
 
-   Bi-directional properties for \p and \P
+       Unicode defines a number of  binary  properties,  that  is,  properties
+       whose  only  values  are  true or false. You can obtain a list of those
+       that are recognized by \p and \P, along with  their  abbreviations,  by
+       running this command:
 
-       Two  properties  relating  to  bi-directional text (each with a shorter
-       synonym) are supported:
+         pcre2test -LP
 
-         \p{Bidi_Control}         matches a Bidi control character
-         \p{Bidi_C}               matches a Bidi control character
+
+   The Bidi_Class property for \p and \P
+
          \p{Bidi_Class:<class>}   matches a character with the given class
          \p{BC:<class>}           matches a character with the given class
 
@@ -7093,9 +7064,8 @@ BACKSLASH
          S           segment separator
          WS          which space
 
-       For Bidi_Class, an equals sign may be used  instead  of  a  colon.  The
-       class names are case-insensitive; only the short names listed above are
-       recognized.
+       An  equals  sign  may  be  used instead of a colon. The class names are
+       case-insensitive; only the short names listed above are recognized.
 
    Extended grapheme clusters
 
@@ -9725,8 +9695,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 December 2021
-       Copyright (c) 1997-2021 University of Cambridge.
+       Last updated: 12 January 2022
+       Copyright (c) 1997-2022 University of Cambridge.
 ------------------------------------------------------------------------------
  
  
@@ -10739,60 +10709,28 @@ PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P
        acter set at release 5.18.
 
 
+BINARY PROPERTIES FOR \p AND \P
+
+       Unicode  defines  a  number  of  binary properties, that is, properties
+       whose only values are true or false. You can obtain  a  list  of  those
+       that  are  recognized  by \p and \P, along with their abbreviations, by
+       running this command:
+
+         pcre2test -LP
+
+
 SCRIPT MATCHING WITH \p AND \P
 
-       The  following script names and their 4-letter abbreviations are recog-
-       nized in \p{sc:...} or \p{scx:...} items, or on their own with \p  (and
-       also \P of course):
+       Many script names and their 4-letter abbreviations  are  recognized  in
+       \p{sc:...}  or  \p{scx:...} items, or on their own with \p (and also \P
+       of course). You can obtain a list of these scripts by running this com-
+       mand:
 
-       Adlam (Adlm), Ahom (Ahom), Anatolian_Hieroglyphs (Hluw), Arabic (Arab),
-       Armenian  (Armn),  Avestan  (Avst),  Balinese  (Bali),  Bamum   (Bamu),
-       Bassa_Vah (Bass), Batak (Batk), Bengali (Beng), Bhaiksuki (Bhks), Bopo-
-       mofo (Bopo), Brahmi (Brah),  Braille  (Brai),  Buginese  (Bugi),  Buhid
-       (Buhd),  Canadian_Aboriginal  (Cans), Carian (Cari), Caucasian_Albanian
-       (Aghb), Chakma (Cakm), Cham (Cham), Cherokee (Cher), Chorasmian (Chrs),
-       Common   (Zyyy),  Coptic  (Copt),  Cuneiform  (Xsux),  Cypriot  (Cprt),
-       Cypro_Minoan  (Cpmn),  Cyrillic  (Cyrl),  Deseret  (Dsrt),   Devanagari
-       (Deva), Dives_Akuru (Diak), Dogra (Dogr), Duployan (Dupl), Egyptian_Hi-
-       eroglyphs (Egyp), Elbasan  (Elba),  Elymaic  (Elym),  Ethiopic  (Ethi),
-       Georgian  (Geor),  Glagolitic  (Glag),  Gothic  (Goth), Grantha (Gran),
-       Greek (Grek), Gujarati (Gujr), Gunjala_Gondi (Gong),  Gurmukhi  (Guru),
-       Han  (Hani), Hangul (Hang), Hanifi_Rohingya (Rohg), Hanunoo (Hano), Ha-
-       tran (Hatr), Hebrew (Hebr), Hiragana (Hira),  Imperial_Aramaic  (Armi),
-       Inherited  (Zinh), Inscriptional_Pahlavi (Phli), Inscriptional_Parthian
-       (Prti),  Javanese  (Java),  Kaithi  (Kthi),  Kannada  (Knda),  Katakana
-       (Kana), Kayah_Li (Kali), Kharoshthi (Khar), Khitan_Small_Script (Kits),
-       Khmer (Khmr),  Khojki  (Khoj),  Khudawadi  (Sind),  Lao  (Laoo),  Latin
-       (Latn),  Lepcha (Lepc), Limbu (Limb), Linear_A (Lina), Linear_B (Linb),
-       Lisu (Lisu), Lycian (Lyci), Lydian  (Lydi),  Mahajani  (Majh),  Makasar
-       (Maka),  Malayalam  (Mlym),  Mandaic (Mand), Manichaean (Mani), Marchen
-       (Marc), Masaram_Gondi (Gonm), Medefaidrin (Medf), Meetei_Mayek  (Mtei),
-       Mende_Kikakui  (Mend),  Meroitic_Cursive  (Merc),  Meroitic_Hieroglyphs
-       (Mero), Miao (Miao), Modi (Modi), Mongolian (Mong), Mro (Mroo), Multani
-       (Mult),   Myanmar   (Mymr),   Nabataean   (Nbar),  Nandinagari  (Nand),
-       New_Tai_Lue (Talu), Newa  (Newa),  Nko  (Nkoo),  Nushu  (Nshu),  Nyiak-
-       eng_Puachue_Hmong  (Hmnp), Ogham (Ogam), Ol_Chiki (Olck), Old_Hungarian
-       (Hung), Old_Italic (Olck), Old_North_Arabian (Narb), Old_Permic (Perm),
-       Old_Persian   (Orkh),  Old_Sogdian  (Sogo),  Old_South_Arabian  (Sarb),
-       Old_Turkic (Orkh), Old_Uyghur (Ougr), Oriya (Orya), Osage  (Osge),  Os-
-       manya   (Osma),  Pahawh_Hmong  (Hmng),  Palmyrene  (Palm),  Pau_Cin_Hau
-       (Pauc), Phags_Pa (Phag), Phoenician (Phnx), Psalter_Pahlavi (Phli), Re-
-       jang (Rjng), Runic (Runr), Samaritan (Samr), Saurashtra (Saur), Sharada
-       (Shrd), Shavian (Shaw), Siddham  (Sidd),  SignWriting  (Sgnw),  Sinhala
-       (Sinh),  Sogdian (Sogd), Sora_Sompeng (Sora), Soyombo (Soyo), Sundanese
-       (Sund), Syloti_Nagri (Sylo), Syriac (Syrc),  Tagalog  (Tglg),  Tagbanwa
-       (Tagb),  Tai_Le (Tale), Tai_Tham (Lana), Tai_Viet (Tavt), Takri (Takr),
-       Tamil (Taml), Tangsa  (Tngs),  Tangut  (Tang),  Telugu  (Telu),  Thaana
-       (Thaa),  Thai  (Thai), Tibetan (Tibt), Tifinagh (Tfng), Tirhuta (Tirh),
-       Toto (Toto), Ugaritic  (Ugar),  Vai  (Vaii),  Vithkuqi  (Vith),  Wancho
-       (Wcho),  Warang_Citi (Wara), Yezidi (Yezi), Yi (Yiii), Zanabazar_Square
-       (Zanb).
+         pcre2test -LS
 
 
-BIDI_PROPERTIES FOR \p AND \P
+THE BIDI_CLASS PROPERTY FOR \p AND \P
 
-         \p{Bidi_Control}         matches a Bidi control character
-         \p{Bidi_C}               matches a Bidi control character
          \p{Bidi_Class:<class>}   matches a character with the given class
          \p{BC:<class>}           matches a character with the given class
 
@@ -10846,8 +10784,8 @@ CHARACTER CLASSES
          word        same as \w
          xdigit      hexadecimal digit
 
-       In PCRE2, POSIX character set names recognize only ASCII characters  by
-       default,  but  some of them use Unicode properties if PCRE2_UCP is set.
+       In  PCRE2, POSIX character set names recognize only ASCII characters by
+       default, but some of them use Unicode properties if PCRE2_UCP  is  set.
        You can use \Q...\E inside a character class.
 
 
@@ -10892,8 +10830,8 @@ REPORTED MATCH POINT SETTING
 
          \K          set reported start of match
 
-       From release 10.38 \K is not permitted by default in lookaround  asser-
-       tions,  for  compatibility  with  Perl. However, if the PCRE2_EXTRA_AL-
+       From  release 10.38 \K is not permitted by default in lookaround asser-
+       tions, for compatibility with Perl.  However,  if  the  PCRE2_EXTRA_AL-
        LOW_LOOKAROUND_BSK option is set, the previous behaviour is re-enabled.
        When this option is set, \K is honoured in positive assertions, but ig-
        nored in negative ones.
@@ -10914,8 +10852,8 @@ CAPTURING
          (?|...)         non-capture group; reset group numbers for
                           capture groups in each alternative
 
-       In non-UTF modes, names may contain underscores and ASCII  letters  and
-       digits;  in  UTF  modes, any Unicode letters and Unicode decimal digits
+       In  non-UTF  modes, names may contain underscores and ASCII letters and
+       digits; in UTF modes, any Unicode letters and  Unicode  decimal  digits
        are permitted. In both cases, a name must not start with a digit.
 
 
@@ -10931,7 +10869,7 @@ COMMENT
 
 
 OPTION SETTING
-       Changes of these options within a group are automatically cancelled  at
+       Changes  of these options within a group are automatically cancelled at
        the end of the group.
 
          (?i)            caseless
@@ -10945,7 +10883,7 @@ OPTION SETTING
          (?-...)         unset option(s)
          (?^)            unset imnsx options
 
-       Unsetting  x or xx unsets both. Several options may be set at once, and
+       Unsetting x or xx unsets both. Several options may be set at once,  and
        a mixture of setting and unsetting such as (?i-x) is allowed, but there
        may be only one hyphen. Setting (but no unsetting) is allowed after (?^
        for example (?^in). An option setting may appear at the start of a non-
@@ -10967,11 +10905,11 @@ OPTION SETTING
          (*UTF)          set appropriate UTF mode for the library in use
          (*UCP)          set PCRE2_UCP (use Unicode properties for \d etc)
 
-       Note  that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the
-       value  of  the  limits  set  by  the   caller   of   pcre2_match()   or
-       pcre2_dfa_match(),  not  increase  them. LIMIT_RECURSION is an obsolete
+       Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce  the
+       value   of   the   limits   set  by  the  caller  of  pcre2_match()  or
+       pcre2_dfa_match(), not increase them. LIMIT_RECURSION  is  an  obsolete
        synonym for LIMIT_DEPTH. The application can lock out the use of (*UTF)
-       and  (*UCP)  by setting the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options,
+       and (*UCP) by setting the PCRE2_NEVER_UTF or  PCRE2_NEVER_UCP  options,
        respectively, at compile time.
 
 
@@ -11092,16 +11030,16 @@ CONDITIONAL PATTERNS
          (?(VERSION[>]=n.m)  test PCRE2 version
          (?(assert)          assertion condition
 
-       Note the ambiguity of (?(R) and (?(Rn) which might be  named  reference
-       conditions  or  recursion  tests.  Such a condition is interpreted as a
+       Note  the  ambiguity of (?(R) and (?(Rn) which might be named reference
+       conditions or recursion tests. Such a condition  is  interpreted  as  a
        reference condition if the relevant named group exists.
 
 
 BACKTRACKING CONTROL
 
-       All backtracking control verbs may be in  the  form  (*VERB:NAME).  For
-       (*MARK)  the  name is mandatory, for the others it is optional. (*SKIP)
-       changes its behaviour if :NAME is present. The others just set  a  name
+       All  backtracking  control  verbs  may be in the form (*VERB:NAME). For
+       (*MARK) the name is mandatory, for the others it is  optional.  (*SKIP)
+       changes  its  behaviour if :NAME is present. The others just set a name
        for passing back to the caller, but this is not a name that (*SKIP) can
        see. The following act immediately they are reached:
 
@@ -11109,7 +11047,7 @@ BACKTRACKING CONTROL
          (*FAIL)         force backtrack; synonym (*F)
          (*MARK:NAME)    set name to be passed back; synonym (*:NAME)
 
-       The following act only when a subsequent match failure causes  a  back-
+       The  following  act only when a subsequent match failure causes a back-
        track to reach them. They all force a match failure, but they differ in
        what happens afterwards. Those that advance the start-of-match point do
        so only if the pattern is not anchored.
@@ -11121,7 +11059,7 @@ BACKTRACKING CONTROL
                          (*MARK:NAME); if not found, the (*SKIP) is ignored
          (*THEN)         local failure, backtrack to next alternation
 
-       The  effect  of one of these verbs in a group called as a subroutine is
+       The effect of one of these verbs in a group called as a  subroutine  is
        confined to the subroutine call.
 
 
@@ -11132,14 +11070,14 @@ CALLOUTS
          (?C"text")      callout with string data
 
        The allowed string delimiters are ` ' " ^ % # $ (which are the same for
-       the  start  and the end), and the starting delimiter { matched with the
-       ending delimiter }. To encode the ending delimiter within  the  string,
+       the start and the end), and the starting delimiter { matched  with  the
+       ending  delimiter  }. To encode the ending delimiter within the string,
        double it.
 
 
 SEE ALSO
 
-       pcre2pattern(3),    pcre2api(3),   pcre2callout(3),   pcre2matching(3),
+       pcre2pattern(3),   pcre2api(3),   pcre2callout(3),    pcre2matching(3),
        pcre2(3).
 
 
@@ -11152,8 +11090,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 December 2021
-       Copyright (c) 1997-2021 University of Cambridge.
+       Last updated: 12 January 2022
+       Copyright (c) 1997-2022 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

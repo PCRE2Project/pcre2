@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 December 2021" "PCRE2 10.40"
+.TH PCRE2PATTERN 3 "12 January 2022" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -772,8 +772,15 @@ can be used in any mode, though in 8-bit and 16-bit non-UTF modes these
 sequences are of course limited to testing characters whose code points are
 less than U+0100 and U+10000, respectively. In 32-bit non-UTF mode, code points
 greater than 0x10ffff (the Unicode limit) may be encountered. These are all
-treated as being in the Unknown script and with an unassigned type. The extra
-escape sequences are:
+treated as being in the Unknown script and with an unassigned type. 
+.P
+Matching characters by Unicode property is not fast, because PCRE2 has to do a
+multistage table lookup in order to find a character's property. That is why
+the traditional escape sequences such as \ed and \ew do not use Unicode
+properties in PCRE2 by default, though you can make them do so by setting the
+PCRE2_UCP option or by starting the pattern with (*UCP).
+.P
+The extra escape sequences that provide property support are:
 .sp
   \ep{\fIxx\fP}   a character with the \fIxx\fP property
   \eP{\fIxx\fP}   a character without the \fIxx\fP property
@@ -783,19 +790,24 @@ The property names represented by \fIxx\fP above are not case-sensitive, and in
 accordance with Unicode's "loose matching" rules, spaces, hyphens, and
 underscores are ignored. There is support for Unicode script names, Unicode
 general category properties, "Any", which matches any character (including
-newline), Bidi_Control, Bidi_Class, and some special PCRE2 properties
-(described
+newline), Bidi_Class, a number of binary (yes/no) properties, and some special
+PCRE2 properties (described
 .\" HTML <a href="#extraprops">
 .\" </a>
 below).
 .\"
-Other Perl properties such as "InMusicalSymbols" are not supported by PCRE2.
-Note that \eP{Any} does not match any characters, so always causes a match
-failure.
-.P
+Certain other Perl properties such as "InMusicalSymbols" are not supported by
+PCRE2. Note that \eP{Any} does not match any characters, so always causes a
+match failure.
+.
+.
+.
+.SS "Script properties for \ep and \eP"
+.rs
+.sp
 There are three different syntax forms for matching a script. Each Unicode
 character has a basic script and, optionally, a list of other scripts ("Script
-Extentions") with which it is commonly used. Using the Adlam script as an
+Extensions") with which it is commonly used. Using the Adlam script as an
 example, \ep{sc:Adlam} matches characters whose basic script is Adlam, whereas
 \ep{scx:Adlam} matches, in addition, characters that have Adlam in their
 extensions list. The full names "script" and "script extensions" for the
@@ -806,171 +818,18 @@ interpretation at release 5.26 and PCRE2 changed at release 10.40.
 .P
 Unassigned characters (and in non-UTF 32-bit mode, characters with code points
 greater than 0x10FFFF) are assigned the "Unknown" script. Others that are not
-part of an identified script are lumped together as "Common". The current list
-of script names and their 4-letter abbreviations is:
-.P
-Adlam (Adlm),
-Ahom (Ahom),
-Anatolian_Hieroglyphs (Hluw),
-Arabic (Arab),
-Armenian (Armn),
-Avestan (Avst),
-Balinese (Bali),
-Bamum (Bamu),
-Bassa_Vah (Bass),
-Batak (Batk),
-Bengali (Beng),
-Bhaiksuki (Bhks),
-Bopomofo (Bopo),
-Brahmi (Brah),
-Braille (Brai),
-Buginese (Bugi),
-Buhid (Buhd),
-Canadian_Aboriginal (Cans),
-Carian (Cari),
-Caucasian_Albanian (Aghb),
-Chakma (Cakm),
-Cham (Cham),
-Cherokee (Cher),
-Chorasmian (Chrs),
-Common (Zyyy),
-Coptic (Copt),
-Cuneiform (Xsux),
-Cypriot (Cprt),
-Cypro_Minoan (Cpmn),
-Cyrillic (Cyrl),
-Deseret (Dsrt),
-Devanagari (Deva),
-Dives_Akuru (Diak),
-Dogra (Dogr),
-Duployan (Dupl),
-Egyptian_Hieroglyphs (Egyp),
-Elbasan (Elba),
-Elymaic (Elym),
-Ethiopic (Ethi),
-Georgian (Geor),
-Glagolitic (Glag),
-Gothic (Goth),
-Grantha (Gran),
-Greek (Grek),
-Gujarati (Gujr),
-Gunjala_Gondi (Gong),
-Gurmukhi (Guru),
-Han (Hani),
-Hangul (Hang),
-Hanifi_Rohingya (Rohg),
-Hanunoo (Hano),
-Hatran (Hatr),
-Hebrew (Hebr),
-Hiragana (Hira),
-Imperial_Aramaic (Armi),
-Inherited (Zinh),
-Inscriptional_Pahlavi (Phli),
-Inscriptional_Parthian (Prti),
-Javanese (Java),
-Kaithi (Kthi),
-Kannada (Knda),
-Katakana (Kana),
-Kayah_Li (Kali),
-Kharoshthi (Khar),
-Khitan_Small_Script (Kits),
-Khmer (Khmr),
-Khojki (Khoj),
-Khudawadi (Sind),
-Lao (Laoo),
-Latin (Latn),
-Lepcha (Lepc),
-Limbu (Limb),
-Linear_A (Lina),
-Linear_B (Linb),
-Lisu (Lisu),
-Lycian (Lyci),
-Lydian (Lydi),
-Mahajani (Majh),
-Makasar (Maka),
-Malayalam (Mlym),
-Mandaic (Mand),
-Manichaean (Mani),
-Marchen (Marc),
-Masaram_Gondi (Gonm),
-Medefaidrin (Medf),
-Meetei_Mayek (Mtei),
-Mende_Kikakui (Mend),
-Meroitic_Cursive (Merc),
-Meroitic_Hieroglyphs (Mero),
-Miao (Miao),
-Modi (Modi),
-Mongolian (Mong),
-Mro (Mroo),
-Multani (Mult),
-Myanmar (Mymr),
-Nabataean (Nbar),
-Nandinagari (Nand),
-New_Tai_Lue (Talu),
-Newa (Newa),
-Nko (Nkoo),
-Nushu (Nshu),
-Nyiakeng_Puachue_Hmong (Hmnp),
-Ogham (Ogam),
-Ol_Chiki (Olck),
-Old_Hungarian (Hung),
-Old_Italic (Olck),
-Old_North_Arabian (Narb),
-Old_Permic (Perm),
-Old_Persian (Orkh),
-Old_Sogdian (Sogo),
-Old_South_Arabian (Sarb),
-Old_Turkic (Orkh),
-Old_Uyghur (Ougr),
-Oriya (Orya),
-Osage (Osge),
-Osmanya (Osma),
-Pahawh_Hmong (Hmng),
-Palmyrene (Palm),
-Pau_Cin_Hau (Pauc),
-Phags_Pa (Phag),
-Phoenician (Phnx),
-Psalter_Pahlavi (Phli),
-Rejang (Rjng),
-Runic (Runr),
-Samaritan (Samr),
-Saurashtra (Saur),
-Sharada (Shrd),
-Shavian (Shaw),
-Siddham (Sidd),
-SignWriting (Sgnw),
-Sinhala (Sinh),
-Sogdian (Sogd),
-Sora_Sompeng (Sora),
-Soyombo (Soyo),
-Sundanese (Sund),
-Syloti_Nagri (Sylo),
-Syriac (Syrc),
-Tagalog (Tglg),
-Tagbanwa (Tagb),
-Tai_Le (Tale),
-Tai_Tham (Lana),
-Tai_Viet (Tavt),
-Takri (Takr),
-Tamil (Taml),
-Tangsa (Tngs),
-Tangut (Tang),
-Telugu (Telu),
-Thaana (Thaa),
-Thai (Thai),
-Tibetan (Tibt),
-Tifinagh (Tfng),
-Tirhuta (Tirh),
-Toto (Toto),
-Ugaritic (Ugar),
-Vai (Vaii),
-Vithkuqi (Vith),
-Wancho (Wcho),
-Warang_Citi (Wara),
-Yezidi (Yezi),
-Yi (Yiii),
-Zanabazar_Square (Zanb).
-.P
+part of an identified script are lumped together as "Common". The current list 
+of recognized script names and their 4-character abbreviations can be obtained 
+by running this command:
+.sp
+  pcre2test -LS
+.sp   
+.
+.
+.
+.SS "The general category property for \ep and \eP"
+.rs
+.sp
 Each character has exactly one Unicode general category property, specified by
 a two-letter abbreviation. For compatibility with Perl, negation can be
 specified by including a circumflex between the opening brace and the property
@@ -1056,22 +915,22 @@ Unicode table.
 Specifying caseless matching does not affect these escape sequences. For
 example, \ep{Lu} always matches only upper case letters. This is different from
 the behaviour of current versions of Perl.
-.P
-Matching characters by Unicode property is not fast, because PCRE2 has to do a
-multistage table lookup in order to find a character's property. That is why
-the traditional escape sequences such as \ed and \ew do not use Unicode
-properties in PCRE2 by default, though you can make them do so by setting the
-PCRE2_UCP option or by starting the pattern with (*UCP).
 .
 .
-.SS "Bi-directional properties for \ep and \eP"
+.SS "Binary (yes/no) properties for \ep and \eP"
 .rs
 .sp
-Two properties relating to bi-directional text (each with a shorter synonym)
-are supported:
+Unicode defines a number of binary properties, that is, properties whose only
+values are true or false. You can obtain a list of those that are recognized by
+\ep and \eP, along with their abbreviations, by running this command:
 .sp
-  \ep{Bidi_Control}         matches a Bidi control character
-  \ep{Bidi_C}               matches a Bidi control character
+  pcre2test -LP
+.sp
+.
+.
+.SS "The Bidi_Class property for \ep and \eP"
+.rs
+.sp
   \ep{Bidi_Class:<class>}   matches a character with the given class
   \ep{BC:<class>}           matches a character with the given class
 .sp
@@ -1101,8 +960,8 @@ The recognized classes are:
   S           segment separator
   WS          which space
 .sp
-For Bidi_Class, an equals sign may be used instead of a colon. The class names
-are case-insensitive; only the short names listed above are recognized.
+An equals sign may be used instead of a colon. The class names are
+case-insensitive; only the short names listed above are recognized.
 .
 .
 .SS Extended grapheme clusters
@@ -3955,6 +3814,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 December 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 12 January 2022
+Copyright (c) 1997-2022 University of Cambridge.
 .fi

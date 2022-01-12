@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "28 December 2021" "PCRE2 10.40"
+.TH PCRE2SYNTAX 3 "12 January 2022" "PCRE2 10.40"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -172,181 +172,31 @@ Perl and POSIX space are now the same. Perl added VT to its space character set
 at release 5.18.
 .
 .
+.SH "BINARY PROPERTIES FOR \ep AND \eP"
+.rs
+.sp
+Unicode defines a number of binary properties, that is, properties whose only
+values are true or false. You can obtain a list of those that are recognized by
+\ep and \eP, along with their abbreviations, by running this command:
+.sp
+  pcre2test -LP
+.
+.
+.
 .SH "SCRIPT MATCHING WITH \ep AND \eP"
 .rs
 .sp
-The following script names and their 4-letter abbreviations are recognized in
+Many script names and their 4-letter abbreviations are recognized in
 \ep{sc:...} or \ep{scx:...} items, or on their own with \ep (and also \eP of
-course):
-.P
-Adlam (Adlm),
-Ahom (Ahom),
-Anatolian_Hieroglyphs (Hluw),
-Arabic (Arab),
-Armenian (Armn),
-Avestan (Avst),
-Balinese (Bali),
-Bamum (Bamu),
-Bassa_Vah (Bass),
-Batak (Batk),
-Bengali (Beng),
-Bhaiksuki (Bhks),
-Bopomofo (Bopo),
-Brahmi (Brah),
-Braille (Brai),
-Buginese (Bugi),
-Buhid (Buhd),
-Canadian_Aboriginal (Cans),
-Carian (Cari),
-Caucasian_Albanian (Aghb),
-Chakma (Cakm),
-Cham (Cham),
-Cherokee (Cher),
-Chorasmian (Chrs),
-Common (Zyyy),
-Coptic (Copt),
-Cuneiform (Xsux),
-Cypriot (Cprt),
-Cypro_Minoan (Cpmn),
-Cyrillic (Cyrl),
-Deseret (Dsrt),
-Devanagari (Deva),
-Dives_Akuru (Diak),
-Dogra (Dogr),
-Duployan (Dupl),
-Egyptian_Hieroglyphs (Egyp),
-Elbasan (Elba),
-Elymaic (Elym),
-Ethiopic (Ethi),
-Georgian (Geor),
-Glagolitic (Glag),
-Gothic (Goth),
-Grantha (Gran),
-Greek (Grek),
-Gujarati (Gujr),
-Gunjala_Gondi (Gong),
-Gurmukhi (Guru),
-Han (Hani),
-Hangul (Hang),
-Hanifi_Rohingya (Rohg),
-Hanunoo (Hano),
-Hatran (Hatr),
-Hebrew (Hebr),
-Hiragana (Hira),
-Imperial_Aramaic (Armi),
-Inherited (Zinh),
-Inscriptional_Pahlavi (Phli),
-Inscriptional_Parthian (Prti),
-Javanese (Java),
-Kaithi (Kthi),
-Kannada (Knda),
-Katakana (Kana),
-Kayah_Li (Kali),
-Kharoshthi (Khar),
-Khitan_Small_Script (Kits),
-Khmer (Khmr),
-Khojki (Khoj),
-Khudawadi (Sind),
-Lao (Laoo),
-Latin (Latn),
-Lepcha (Lepc),
-Limbu (Limb),
-Linear_A (Lina),
-Linear_B (Linb),
-Lisu (Lisu),
-Lycian (Lyci),
-Lydian (Lydi),
-Mahajani (Majh),
-Makasar (Maka),
-Malayalam (Mlym),
-Mandaic (Mand),
-Manichaean (Mani),
-Marchen (Marc),
-Masaram_Gondi (Gonm),
-Medefaidrin (Medf),
-Meetei_Mayek (Mtei),
-Mende_Kikakui (Mend),
-Meroitic_Cursive (Merc),
-Meroitic_Hieroglyphs (Mero),
-Miao (Miao),
-Modi (Modi),
-Mongolian (Mong),
-Mro (Mroo),
-Multani (Mult),
-Myanmar (Mymr),
-Nabataean (Nbar),
-Nandinagari (Nand),
-New_Tai_Lue (Talu),
-Newa (Newa),
-Nko (Nkoo),
-Nushu (Nshu),
-Nyiakeng_Puachue_Hmong (Hmnp),
-Ogham (Ogam),
-Ol_Chiki (Olck),
-Old_Hungarian (Hung),
-Old_Italic (Olck),
-Old_North_Arabian (Narb),
-Old_Permic (Perm),
-Old_Persian (Orkh),
-Old_Sogdian (Sogo),
-Old_South_Arabian (Sarb),
-Old_Turkic (Orkh),
-Old_Uyghur (Ougr),
-Oriya (Orya),
-Osage (Osge),
-Osmanya (Osma),
-Pahawh_Hmong (Hmng),
-Palmyrene (Palm),
-Pau_Cin_Hau (Pauc),
-Phags_Pa (Phag),
-Phoenician (Phnx),
-Psalter_Pahlavi (Phli),
-Rejang (Rjng),
-Runic (Runr),
-Samaritan (Samr),
-Saurashtra (Saur),
-Sharada (Shrd),
-Shavian (Shaw),
-Siddham (Sidd),
-SignWriting (Sgnw),
-Sinhala (Sinh),
-Sogdian (Sogd),
-Sora_Sompeng (Sora),
-Soyombo (Soyo),
-Sundanese (Sund),
-Syloti_Nagri (Sylo),
-Syriac (Syrc),
-Tagalog (Tglg),
-Tagbanwa (Tagb),
-Tai_Le (Tale),
-Tai_Tham (Lana),
-Tai_Viet (Tavt),
-Takri (Takr),
-Tamil (Taml),
-Tangsa (Tngs),
-Tangut (Tang),
-Telugu (Telu),
-Thaana (Thaa),
-Thai (Thai),
-Tibetan (Tibt),
-Tifinagh (Tfng),
-Tirhuta (Tirh),
-Toto (Toto),
-Ugaritic (Ugar),
-Vai (Vaii),
-Vithkuqi (Vith),
-Wancho (Wcho),
-Warang_Citi (Wara),
-Yezidi (Yezi),
-Yi (Yiii),
-Zanabazar_Square (Zanb).
+course). You can obtain a list of these scripts by running this command:
+.sp
+  pcre2test -LS
 .
 .
-.SH "BIDI_PROPERTIES FOR \ep AND \eP"
+.
+.SH "THE BIDI_CLASS PROPERTY FOR \ep AND \eP"
 .rs
 .sp
-  \ep{Bidi_Control}         matches a Bidi control character
-  \ep{Bidi_C}               matches a Bidi control character
   \ep{Bidi_Class:<class>}   matches a character with the given class
   \ep{BC:<class>}           matches a character with the given class
 .sp
@@ -728,6 +578,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 December 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 12 January 2022
+Copyright (c) 1997-2022 University of Cambridge.
 .fi
