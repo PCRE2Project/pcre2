@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "28 November 2021" "PCRE 10.40"
+.TH PCRE2TEST 1 "12 January 2022" "PCRE 10.40"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -211,7 +211,17 @@ available, and the use of JIT for matching is verified.
 \fB-LM\fP
 List modifiers: write a list of available pattern and subject modifiers to the
 standard output, then exit with zero exit code. All other options are ignored.
-If both -C and -LM are present, whichever is first is recognized.
+If both -C and any -Lx options are present, whichever is first is recognized.
+.TP 10
+\fB-LP\fP
+List properties: write a list of recognized Unicode properties to the standard
+output, then exit with zero exit code. All other options are ignored. If both
+-C and any -Lx options are present, whichever is first is recognized.
+.TP 10
+\fB-LS\fP
+List scripts: write a list of recogized Unicode script names to the standard
+output, then exit with zero exit code. All other options are ignored. If both
+-C and any -Lx options are present, whichever is first is recognized.
 .TP 10
 \fB-pattern\fP \fImodifier-list\fP
 Behave as if each pattern line contains the given modifiers.
@@ -2109,6 +2119,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 November 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 12 January 2022
+Copyright (c) 1997-2022 University of Cambridge.
 .fi

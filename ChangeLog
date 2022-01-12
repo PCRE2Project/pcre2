@@ -39,7 +39,8 @@ pcre2_substitute(), and the replacement argument of the latter, if the pointer
 is NULL and the length is zero, treat as an empty string. Apparently a number
 of applications treat NULL/0 in this way.
 
-14. Added support for Bidi_Class and Bidi_Control Unicode properties.
+14. Added support for Bidi_Class and a number of binary Unicode properties, 
+including Bidi_Control.
 
 15. Fix some minor issues raised by clang sanitize.
 
@@ -75,6 +76,8 @@ not 16. Whilst the first frame was always suitably aligned, this then
 misaligned the frame that follows, resulting in an alignment fault when storing
 a pointer to Fecode at the start of match. Patch to fix this issue by Jessica
 Clarke PR#72.
+
+20. Added -LP and -LS listing options to pcre2test.
 
 
 Version 10.39 29-October-2021

@@ -5490,7 +5490,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   if ((pat_patctl.options & ~POSIX_SUPPORTED_COMPILE_OPTIONS) != 0)
     {
     show_compile_options(
-      pat_patctl.options & (uint32_t)(~POSIX_SUPPORTED_COMPILE_OPTIONS), 
+      pat_patctl.options & (uint32_t)(~POSIX_SUPPORTED_COMPILE_OPTIONS),
         msg, "");
     msg = "";
     }
@@ -5499,7 +5499,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
        (uint32_t)(~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS)) != 0)
     {
     show_compile_extra_options(
-      FLD(pat_context, extra_options) & 
+      FLD(pat_context, extra_options) &
         (uint32_t)(~POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS), msg, "");
     msg = "";
     }
@@ -5509,7 +5509,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     {
     show_controls(
       pat_patctl.control & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS),
-      pat_patctl.control2 & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS2), 
+      pat_patctl.control2 & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS2),
       msg);
     msg = "";
     }
@@ -7310,7 +7310,7 @@ if (dat_datctl.replacement[0] != 0)
   uint8_t *pr;
   uint8_t rbuffer[REPLACE_BUFFSIZE];
   uint8_t nbuffer[REPLACE_BUFFSIZE];
-  uint8_t *rbptr; 
+  uint8_t *rbptr;
   uint32_t xoptions;
   uint32_t emoption;  /* External match option */
   PCRE2_SIZE j, rlen, nsize, erroroffset;
@@ -7460,10 +7460,10 @@ if (dat_datctl.replacement[0] != 0)
     {
     PCRE2_SET_SUBSTITUTE_CALLOUT(dat_context, NULL, NULL);  /* No callout */
     }
-    
+
   /* There is a special option to set the replacement to NULL in order to test
   that case. */
-  
+
   rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
 
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
@@ -7655,15 +7655,15 @@ for (gmatched = 0;; gmatched++)
     }
 
   /* The result of the match is now in capcount. First handle a successful
-  match. If pp was forced to be NULL (to test NULL handling) it will have been 
-  treated as an empty string if the length was zero. So re-create that for 
+  match. If pp was forced to be NULL (to test NULL handling) it will have been
+  treated as an empty string if the length was zero. So re-create that for
   outputting. */
 
   if (capcount >= 0)
     {
     int i;
-    
-    if (pp == NULL) pp = (uint8_t *)""; 
+
+    if (pp == NULL) pp = (uint8_t *)"";
 
     if (capcount > (int)oveccount)   /* Check for lunatic return value */
       {
@@ -8251,6 +8251,8 @@ printf("  -jit          set default pattern modifier 'jit'\n");
 printf("  -jitfast      set default pattern modifier 'jitfast'\n");
 printf("  -jitverify    set default pattern modifier 'jitverify'\n");
 printf("  -LM           list pattern and subject modifiers, then exit\n");
+printf("  -LP           list non-script properties, then exit\n");
+printf("  -LS           list supported scripts, then exit\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern modifier fields\n");
 printf("  -subject <s>  set default subject modifier fields\n");
@@ -8431,6 +8433,166 @@ return 0;
 }
 
 
+/*************************************************
+*      Format one property/script list item      *
+*************************************************/
+
+#ifdef SUPPORT_UNICODE
+static void
+format_list_item(int16_t *ff, char *buff, BOOL isscript)
+{
+int count;
+int maxi = 0;
+const char *maxs = "";
+size_t max = 0;
+
+for (count = 0; ff[count] >= 0; count++) {}
+
+/* Find the name to put first. For scripts, any 3-character name is chosen.
+For non-scripts, or if there is no 3-character name, take the longest. */
+
+for (int i = 0; ff[i] >= 0; i++)
+  {
+  const char *s = PRIV(utt_names) + ff[i];
+  size_t len = strlen(s);
+  if (isscript && len == 3)
+    {
+    maxi = i;
+    max = len;
+    maxs = s;
+    break;
+    }
+  else if (len > max)
+    {
+    max = len;
+    maxi = i;
+    maxs = s;
+    }
+  }
+
+strcpy(buff, maxs);
+buff += max;
+
+if (count > 1)
+  {
+  const char *sep = " (";
+  for (int i = 0; i < count; i++)
+    {
+    if (i == maxi) continue;
+    buff += sprintf(buff, "%s%s", sep, PRIV(utt_names) + ff[i]);
+    sep = ", ";
+    }
+  (void)sprintf(buff, ")");
+  }
+}
+#endif  /* SUPPORT_UNICODE */
+
+
+
+/*************************************************
+*        Display scripts or properties           *
+*************************************************/
+
+#define MAX_SYNONYMS 5
+
+static void
+display_properties(BOOL wantscripts)
+{
+#ifndef SUPPORT_UNICODE
+printf("** This version of PCRE2 was compiled without Unicode support.\n");
+#else
+
+const char *typename;
+uint16_t seentypes[1024];
+uint16_t seenvalues[1024];
+int seencount = 0;
+int16_t found[256][MAX_SYNONYMS + 1];
+int fc = 0;
+int colwidth = 40;
+int n;
+
+if (wantscripts)
+  {
+  n = ucp_Script_Count;
+  typename = "SCRIPTS";
+  }
+else
+  {
+  n = ucp_Bprop_Count;
+  typename = "PROPERTIES";
+  }
+
+for (size_t i = 0; i < PRIV(utt_size); i++)
+  {
+  int k;
+  int m = 0;
+  int16_t *fv;
+  const ucp_type_table *t = PRIV(utt) + i;
+  unsigned int value = t->value;
+
+  if (wantscripts)
+    {
+    if (t->type != PT_SC && t->type != PT_SCX) continue;
+    }
+  else
+    {
+    if (t->type != PT_BOOL) continue;
+    }
+
+  for (k = 0; k < seencount; k++)
+    {
+    if (t->type == seentypes[k] && t->value == seenvalues[k]) break;
+    }
+  if (k < seencount) continue;
+
+  seentypes[seencount] = t->type;
+  seenvalues[seencount++] = t->value;
+
+  fv = found[fc++];
+  fv[m++] = t->name_offset;
+
+  for (size_t j = i + 1; j < PRIV(utt_size); j++)
+    {
+    const ucp_type_table *tt = PRIV(utt) + j;
+    if (tt->type != t->type || tt->value != value) continue;
+    if (m >= MAX_SYNONYMS)
+      printf("** Too many synonyms: %s ignored\n",
+        PRIV(utt_names) + tt->name_offset);
+    else fv[m++] = tt->name_offset;
+    }
+
+  fv[m] = -1;
+  }
+
+printf("-------------------------- SUPPORTED %s --------------------------\n\n",
+  typename);
+
+if (!wantscripts) printf(
+"This release of PCRE2 supports Unicode's general category properties such\n"
+"as Lu (upper case letter), bi-directional properties such as Bidi_Class,\n"
+"and the following binary (yes/no) properties:\n\n");
+
+
+for (int k = 0; k < (n+1)/2; k++)
+  {
+  int x;
+  char buff1[128];
+  char buff2[128];
+
+  format_list_item(found[k], buff1, wantscripts);
+  x = k + (n+1)/2;
+  if (x < n) format_list_item(found[x], buff2, wantscripts);
+    else buff2[0] = 0;
+
+  x = printf("%s", buff1);
+  while (x++ < colwidth) printf(" ");
+  printf("%s\n", buff2);
+  }
+
+#endif  /* SUPPORT_UNICODE */
+}
+
+
 
 /*************************************************
 *              Display one modifier              *
@@ -8445,8 +8607,8 @@ printf("%c%s", c, m->name);
 for (size_t i = 0; i < C1MODLISTCOUNT; i++)
   {
   if (strcmp(m->name, c1modlist[i].fullname) == 0)
-    printf(" (%c)", c1modlist[i].onechar); 
-  } 
+    printf(" (%c)", c1modlist[i].onechar);
+  }
 }
 
 
@@ -8505,19 +8667,19 @@ for (i = 0; i < MODLISTCOUNT; i++)
     break;
     }
 
-  if (for_pattern == is_pattern) 
+  if (for_pattern == is_pattern)
     {
-    extra[n] = 0; 
+    extra[n] = 0;
     for (size_t k = 0; k < C1MODLISTCOUNT; k++)
       {
       if (strcmp(m->name, c1modlist[k].fullname) == 0)
         {
-        extra[n] += 4;  
+        extra[n] += 4;
         break;
-        }  
-      } 
+        }
+      }
     list[n++] = i;
-    } 
+    }
   }
 
 /* Now print from the list in two columns. */
@@ -8669,6 +8831,22 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   if (strcmp(arg, "-LM") == 0)
     {
     display_modifiers();
+    goto EXIT;
+    }
+
+  /* List properties and exit */
+
+  if (strcmp(arg, "-LP") == 0)
+    {
+    display_properties(FALSE);
+    goto EXIT;
+    }
+
+  /* List scripts and exit */
+
+  if (strcmp(arg, "-LS") == 0)
+    {
+    display_properties(TRUE);
     goto EXIT;
     }
 
