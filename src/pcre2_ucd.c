@@ -422,8 +422,7 @@ const uint32_t PRIV(ucd_boolprop_sets)[] = {
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
 offset to multichar other cases or zero (8 bits), offset to other case or zero
 (32 bits, signed), bidi class (5 bits) and script extension (11 bits) packed
-into a 16-bit field, offset in binary properties table (8 bits), and a dummy
-8-bit field to make the whole thing a multiple of 4 bytes. */
+into a 16-bit field, and offset in binary properties table (16 bits). */
 
 const ucd_record PRIV(ucd_records)[] = { /* 16908 bytes, record size 12 */
   {    69,      0,      2,      0,      0,   6144,      2, }, /*   0 */
