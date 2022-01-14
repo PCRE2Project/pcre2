@@ -1823,8 +1823,7 @@ typedef struct {
   uint8_t caseset;    /* offset to multichar other cases or zero */
   int32_t other_case; /* offset to other case, or zero if none */
   uint16_t scriptx_bidiclass; /* script extension (11 bit) and bidi class (5 bit) values */
-  uint8_t bprops;     /* binary properties offset */
-  uint8_t dummy;      /* spare - to round to multiple of 4 bytes */
+  uint16_t bprops;    /* binary properties offset */
 } ucd_record;
 
 /* UCD access macros */
@@ -1843,9 +1842,11 @@ typedef struct {
 
 #define UCD_SCRIPTX_MASK 0x3ff
 #define UCD_BIDICLASS_SHIFT 11
+#define UCD_BPROPS_MASK 0xfff
 
 #define UCD_SCRIPTX_PROP(prop) ((prop)->scriptx_bidiclass & UCD_SCRIPTX_MASK)
 #define UCD_BIDICLASS_PROP(prop) ((prop)->scriptx_bidiclass >> UCD_BIDICLASS_SHIFT)
+#define UCD_BPROPS_PROP(prop) ((prop)->bprops & UCD_BPROPS_MASK)
 
 #define UCD_CHARTYPE(ch)    GET_UCD(ch)->chartype
 #define UCD_SCRIPT(ch)      GET_UCD(ch)->script
@@ -1854,7 +1855,7 @@ typedef struct {
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   ((uint32_t)((int)ch + (int)(GET_UCD(ch)->other_case)))
 #define UCD_SCRIPTX(ch)     UCD_SCRIPTX_PROP(GET_UCD(ch))
-#define UCD_BPROPS(ch)      GET_UCD(ch)->bprops
+#define UCD_BPROPS(ch)      UCD_BPROPS_PROP(GET_UCD(ch))
 #define UCD_BIDICLASS(ch)   UCD_BIDICLASS_PROP(GET_UCD(ch))
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words

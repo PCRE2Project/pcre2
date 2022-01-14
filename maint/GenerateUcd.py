@@ -181,7 +181,6 @@
 #           -32 (-0x20)       => Other case is U+0041
 #         18432 = 0x4800      => Combined Bidi class + script extension values
 #            22               => Offset to Boolean properties
-#             0               => Dummy value, unused at present
 #
 # The top 5 bits of the sixth field are the Bidi class, with the rest being the
 # script extension value, giving:
@@ -223,7 +222,6 @@
 #             0                 => No other case
 #         26762 = 0x688A        => Combined Bidi class + script extension values
 #            48                 => Offset to Boolean properties
-#             0                 => Dummy value, unused at present
 #
 # The top 5 bits of the sixth field are the Bidi class, with the rest being the
 # script extension value, giving:
@@ -642,15 +640,7 @@ for c in range(MAX_UNICODE):
     bool_props_lists.append(bprops[c])
     i += 1
 
-  bool_props[c] = i
-
-# With the addition of the Script Extensions field, we needed some padding to
-# get the Unicode records up to 12 bytes (multiple of 4). Originally this was a
-# 16-bit field and padding_dummy[0] was set to 256 to ensure this, but 8 bits
-# are now used, so zero will do.
-
-padding_dummy = [0] * MAX_UNICODE
-padding_dummy[0] = 0
+  bool_props[c] = i * bool_props_list_item_size
 
 # This block of code was added by PH in September 2012. It scans the other_case
 # table to find sets of more than two characters that must all match each other
@@ -724,7 +714,7 @@ for s in caseless_sets:
 # Combine all the tables
 
 table, records = combine_tables(script, category, break_props,
-  caseless_offsets, other_case, scriptx_bidi_class, bool_props, padding_dummy)
+  caseless_offsets, other_case, scriptx_bidi_class, bool_props)
 
 # Find the record size and create a string definition of the structure for
 # outputting as a comment.
@@ -816,7 +806,6 @@ const ucd_record PRIV(dummy_ucd_record)[] = {{
   0,              /* other case */
   0 | (ucp_bidiL << UCD_BIDICLASS_SHIFT), /* script extension and bidi class */
   0,              /* bool properties offset */
-  0               /* dummy filler */
   }};
 #endif
 \n""")

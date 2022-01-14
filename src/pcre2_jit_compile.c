@@ -7708,8 +7708,9 @@ if (unicode_status & XCLASS_NEEDS_UCD)
 
   if (unicode_status & XCLASS_HAS_BOOL)
     {
-    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, bprops));
-    OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
+    OP1(SLJIT_MOV_U16, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, bprops));
+    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BPROPS_MASK);
+    OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
 
     while (*cc != XCL_END)
       {

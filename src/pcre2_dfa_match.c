@@ -1251,7 +1251,7 @@ for (;;)
 
           case PT_BOOL:
           OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-            prop->bprops * ucd_boolprop_sets_item_size, code[2]) != 0;
+            UCD_BPROPS_PROP(prop), code[2]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1523,7 +1523,7 @@ for (;;)
 
           case PT_BOOL:
           OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-            prop->bprops * ucd_boolprop_sets_item_size, code[3]) != 0;
+            UCD_BPROPS_PROP(prop), code[3]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1778,7 +1778,7 @@ for (;;)
 
           case PT_BOOL:
           OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-            prop->bprops * ucd_boolprop_sets_item_size, code[3]) != 0;
+            UCD_BPROPS_PROP(prop), code[3]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -2059,8 +2059,7 @@ for (;;)
 
           case PT_BOOL:
           OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-            prop->bprops * ucd_boolprop_sets_item_size,
-              code[1 + IMM2_SIZE + 2]) != 0;
+            UCD_BPROPS_PROP(prop), code[1 + IMM2_SIZE + 2]) != 0;
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
