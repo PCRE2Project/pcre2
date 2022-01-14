@@ -221,7 +221,7 @@ while ((t = *data++) != XCL_END)
       
       case PT_BOOL:
       ok = MAPBIT(PRIV(ucd_boolprop_sets) + 
-        prop->bprops * ucd_boolprop_sets_item_size, data[1]) != 0;
+        UCD_BPROPS_PROP(prop), data[1]) != 0;
       if (ok == isprop) return !negated;
       break;  
 

@@ -2521,7 +2521,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         case PT_BOOL:
           {
           BOOL ok = MAPBIT(PRIV(ucd_boolprop_sets) +
-            prop->bprops * ucd_boolprop_sets_item_size, Fecode[2]) != 0;
+            UCD_BPROPS_PROP(prop), Fecode[2]) != 0;
           if (ok == notmatch) RRETURN(MATCH_NOMATCH);
           }
         break;
@@ -2875,7 +2875,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARINCTEST(fc, Feptr);
             prop = GET_UCD(fc);
             ok = MAPBIT(PRIV(ucd_boolprop_sets) +
-              prop->bprops * ucd_boolprop_sets_item_size, Lpropvalue) != 0;
+              UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
             if (ok == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3695,7 +3695,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARINCTEST(fc, Feptr);
             prop = GET_UCD(fc);
             ok = MAPBIT(PRIV(ucd_boolprop_sets) +
-              prop->bprops * ucd_boolprop_sets_item_size, Lpropvalue) != 0;
+              UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
             if (ok == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
@@ -4263,7 +4263,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
             GETCHARLENTEST(fc, Feptr, len);
             prop = GET_UCD(fc);
             ok = MAPBIT(PRIV(ucd_boolprop_sets) +
-              prop->bprops * ucd_boolprop_sets_item_size, Lpropvalue) != 0;
+              UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
             if (ok == notmatch) break;
             Feptr+= len;
             }
