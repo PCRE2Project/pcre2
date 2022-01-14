@@ -5010,5 +5010,10 @@ Failed: error 147 at offset 8: unknown property after \P or \p
 /\p{soft dotted}\p{sd}/g,utf
     >AF23<>\x{1df1a}\x{69}<>yz<
  0: \x{1df1a}i
+    
+# ------------------------------------------------ 
+
+/\p{\2b[:xäigi:t:_/
+Failed: error 146 at offset 17: malformed \P or \p sequence
 
 # End of testinput5

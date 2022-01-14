@@ -2115,7 +2115,11 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
-    while (c == '_' || c == '-' || isspace(c)) c = *ptr++;
+    while (c == '_' || c == '-' || isspace(c)) 
+      {
+      if (ptr >= cb->end_pattern) goto ERROR_RETURN;
+      c = *ptr++;
+      } 
     if (c == CHAR_NUL) goto ERROR_RETURN;
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
     name[i] = tolower(c);

@@ -40,7 +40,7 @@ is NULL and the length is zero, treat as an empty string. Apparently a number
 of applications treat NULL/0 in this way.
 
 14. Added support for Bidi_Class and a number of binary Unicode properties, 
-including Bidi_Control.
+including Bidi_Control. 
 
 15. Fix some minor issues raised by clang sanitize.
 
@@ -61,6 +61,10 @@ including Bidi_Control.
         
     (d) The standard Unicode 4-letter abbreviations for script names are now 
         recognized.
+        
+    (e) In accordance with Unicode and Perl's "loose matching" rules, spaces,
+        hyphens, and underscores are ignored in property names, which are then 
+        matched independent of case. 
 
 18. The Python scripts in the maint directory have been refactored. There are
 now three scripts that generate pcre2_ucd.c, pcre2_ucp.h, and pcre2_ucptables.c
