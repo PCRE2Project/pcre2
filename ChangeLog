@@ -83,6 +83,9 @@ Clarke PR#72.
 
 20. Added -LP and -LS listing options to pcre2test.
 
+21. A user discovered that the library names in CMakeLists.txt for MSVC 
+debugger (PDB) files were incorrect - perhaps never tried for PCRE2?
+
 
 Version 10.39 29-October-2021
 -----------------------------

@@ -1033,14 +1033,18 @@ INSTALL(FILES ${man3} DESTINATION man/man3)
 INSTALL(FILES ${html} DESTINATION share/doc/pcre2/html)
 
 IF(MSVC AND INSTALL_MSVC_PDB)
-    INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre2.pdb
-                  ${PROJECT_BINARY_DIR}/pcre2posix.pdb
-            DESTINATION bin
-            CONFIGURATIONS RelWithDebInfo)
-    INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre2d.pdb
-                  ${PROJECT_BINARY_DIR}/pcre2posixd.pdb
-            DESTINATION bin
-            CONFIGURATIONS Debug)
+ INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre2-8.pdb
+               ${PROJECT_BINARY_DIR}/pcre2-16.pdb
+               ${PROJECT_BINARY_DIR}/pcre2-32.pdb
+               ${PROJECT_BINARY_DIR}/pcre2-posix.pdb   
+         DESTINATION bin
+         CONFIGURATIONS RelWithDebInfo)
+ INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre2-8d.pdb
+               ${PROJECT_BINARY_DIR}/pcre2-16d.pdb
+               ${PROJECT_BINARY_DIR}/pcre2-32d.pdb
+               ${PROJECT_BINARY_DIR}/pcre2-posixd.pdb 
+         DESTINATION bin
+         CONFIGURATIONS Debug)
 ENDIF(MSVC AND INSTALL_MSVC_PDB)
 
 # Help, only for nice output
