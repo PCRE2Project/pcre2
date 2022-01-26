@@ -5923,4 +5923,13 @@ a)"xI
 
 # --------- 
 
+/[Aa]{2}/BI
+    aabcd
+
+/A{2}/iBI
+    aabcd
+
+/[Aa]{2,3}/BI
+    aabcd
+
 # End of testinput2

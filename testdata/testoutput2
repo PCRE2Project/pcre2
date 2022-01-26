@@ -17702,6 +17702,50 @@ Failed: error -51: NULL argument passed with non-zero length
 
 # --------- 
 
+/[Aa]{2}/BI
+------------------------------------------------------------------
+        Bra
+     /i A{2}
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+First code unit = 'A' (caseless)
+Last code unit = 'A' (caseless)
+Subject length lower bound = 2
+    aabcd
+ 0: aa
+
+/A{2}/iBI
+------------------------------------------------------------------
+        Bra
+     /i A{2}
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: caseless
+First code unit = 'A' (caseless)
+Last code unit = 'A' (caseless)
+Subject length lower bound = 2
+    aabcd
+ 0: aa
+
+/[Aa]{2,3}/BI
+------------------------------------------------------------------
+        Bra
+     /i A{2}
+     /i A?+
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+First code unit = 'A' (caseless)
+Last code unit = 'A' (caseless)
+Subject length lower bound = 2
+    aabcd
+ 0: aa
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

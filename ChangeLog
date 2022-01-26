@@ -86,6 +86,12 @@ Clarke PR#72.
 21. A user discovered that the library names in CMakeLists.txt for MSVC 
 debugger (PDB) files were incorrect - perhaps never tried for PCRE2?
 
+22. An item such as [Aa] is optimized into a caseless single character match.
+When this was quantified (e.g. [Aa]{2}) and was also the last literal item in a
+pattern, the optimizing "must be present for a match" character check was not
+being flagged as caseless, causing some matches that should have succeeded to
+fail.
+
 
 Version 10.39 29-October-2021
 -----------------------------

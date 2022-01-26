@@ -2115,17 +2115,17 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
-    while (c == '_' || c == '-' || isspace(c)) 
+    while (c == '_' || c == '-' || isspace(c))
       {
       if (ptr >= cb->end_pattern) goto ERROR_RETURN;
       c = *ptr++;
-      } 
+      }
     if (c == CHAR_NUL) goto ERROR_RETURN;
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
     name[i] = tolower(c);
     if ((c == ':' || c == '=') && vptr == NULL) vptr = name + i;
     }
-     
+
   if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
   name[i] = 0;
   }
@@ -2159,16 +2159,16 @@ another property can be diagnosed. */
 if (vptr != NULL)
   {
   int offset = 0;
-  PCRE2_UCHAR sname[8]; 
+  PCRE2_UCHAR sname[8];
 
   *vptr = 0;   /* Terminate property name */
   if (PRIV(strcmp_c8)(name, STRING_bidiclass) == 0 ||
       PRIV(strcmp_c8)(name, STRING_bc) == 0)
     {
     offset = 4;
-    sname[0] = CHAR_b; 
+    sname[0] = CHAR_b;
     sname[1] = CHAR_i;  /* There is no strcpy_c8 function */
-    sname[2] = CHAR_d;  
+    sname[2] = CHAR_d;
     sname[3] = CHAR_i;
     }
 
@@ -7023,14 +7023,19 @@ for (;; pptr++)
 #endif  /* MAYBE_UTF_MULTI */
 
       /* Handle the case of a single code unit - either with no UTF support, or
-      with UTF disabled, or for a single-code-unit UTF character. */
+      with UTF disabled, or for a single-code-unit UTF character. In the latter
+      case, for a repeated positive match, get the caseless flag for the
+      required code unit from the previous character, because a class like [Aa]
+      sets a caseless A but by now the req_caseopt flag has been reset. */
+
         {
         mcbuffer[0] = code[-1];
         mclength = 1;
         if (op_previous <= OP_CHARI && repeat_min > 1)
           {
           reqcu = mcbuffer[0];
-          reqcuflags = req_caseopt | cb->req_varyopt;
+          reqcuflags = cb->req_varyopt;
+          if (op_previous == OP_CHARI) reqcuflags |= REQ_CASELESS;
           }
         }
       goto OUTPUT_SINGLE_REPEAT;  /* Code shared with single character types */
