@@ -4138,7 +4138,7 @@ LIMITING PCRE2 RESOURCE USAGE
        for --with-match-limit. You can set a lower default  limit  by  adding,
        for example,
 
-         --with-match-limit_depth=10000
+         --with-match-limit-depth=10000
 
        to  the  configure  command.  This value can be overridden at run time.
        This depth limit indirectly limits the amount of heap  memory  that  is
