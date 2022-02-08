@@ -176,7 +176,11 @@ IF (INTEL_CET_ENABLED)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
 ENDIF(INTEL_CET_ENABLED)
 
-
+include(CheckCCompilerFlag)
+check_c_compiler_flag("-fPIC" FPIC_ENABLED)  # 检查是否有fPIC选项
+if (FPIC_ENABLED)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+endif(FPIC_ENABLED)
 
 # User-configurable options
 #
