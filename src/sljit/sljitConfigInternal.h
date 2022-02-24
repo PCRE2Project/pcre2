@@ -60,7 +60,7 @@ extern "C" {
      SLJIT_LITTLE_ENDIAN : little endian architecture
      SLJIT_BIG_ENDIAN : big endian architecture
      SLJIT_UNALIGNED : allows unaligned memory accesses for non-fpu operations (only!)
-     SLJIT_INDIRECT_CALL : see SLJIT_FUNC_OFFSET() for more information
+     SLJIT_INDIRECT_CALL : see SLJIT_FUNC_ADDR() for more information
 
    Constants:
      SLJIT_NUMBER_OF_REGISTERS : number of available registers
@@ -148,7 +148,7 @@ extern "C" {
 #endif
 #elif defined (__aarch64__)
 #define SLJIT_CONFIG_ARM_64 1
-#elif defined(__ppc64__) || defined(__powerpc64__) || defined(_ARCH_PPC64) || (defined(_POWER) && defined(__64BIT__))
+#elif defined(__ppc64__) || defined(__powerpc64__) || (defined(_ARCH_PPC64) && defined(__64BIT__)) || (defined(_POWER) && defined(__64BIT__))
 #define SLJIT_CONFIG_PPC_64 1
 #elif defined(__ppc__) || defined(__powerpc__) || defined(_ARCH_PPC) || defined(_ARCH_PWR) || defined(_ARCH_PWR2) || defined(_POWER)
 #define SLJIT_CONFIG_PPC_32 1
@@ -645,18 +645,23 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #define SLJIT_NUMBER_OF_REGISTERS 12
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 9
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 7
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
 #define SLJIT_LOCALS_OFFSET_BASE (compiler->locals_offset)
 #define SLJIT_PREF_SHIFT_REG SLJIT_R2
 
 #elif (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 
 #define SLJIT_NUMBER_OF_REGISTERS 13
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 15
 #ifndef _WIN64
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 6
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
 #define SLJIT_LOCALS_OFFSET_BASE 0
 #else /* _WIN64 */
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
-#define SLJIT_LOCALS_OFFSET_BASE (compiler->locals_offset)
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 10
+#define SLJIT_LOCALS_OFFSET_BASE (4 * (sljit_s32)sizeof(sljit_sw))
 #endif /* !_WIN64 */
 #define SLJIT_PREF_SHIFT_REG SLJIT_R3
 
@@ -664,31 +669,39 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #define SLJIT_NUMBER_OF_REGISTERS 12
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 14
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #define SLJIT_LOCALS_OFFSET_BASE 0
 
 #elif (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
 
 #define SLJIT_NUMBER_OF_REGISTERS 12
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 14
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #define SLJIT_LOCALS_OFFSET_BASE 0
 
 #elif (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
 
 #define SLJIT_NUMBER_OF_REGISTERS 26
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 10
-#define SLJIT_LOCALS_OFFSET_BASE 0
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 30
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
+#define SLJIT_LOCALS_OFFSET_BASE (2 * (sljit_s32)sizeof(sljit_sw))
 
 #elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
 
 #define SLJIT_NUMBER_OF_REGISTERS 23
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 17
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 30
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 18
 #if (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64) || (defined _AIX)
-#define SLJIT_LOCALS_OFFSET_BASE ((6 + 8) * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE ((6 + 8) * (sljit_s32)sizeof(sljit_sw))
 #elif (defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32)
 /* Add +1 for double alignment. */
-#define SLJIT_LOCALS_OFFSET_BASE ((3 + 1) * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE ((3 + 1) * (sljit_s32)sizeof(sljit_sw))
 #else
-#define SLJIT_LOCALS_OFFSET_BASE (3 * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE (3 * (sljit_s32)sizeof(sljit_sw))
 #endif /* SLJIT_CONFIG_PPC_64 || _AIX */
 
 #elif (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
@@ -696,19 +709,25 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 #define SLJIT_NUMBER_OF_REGISTERS 21
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
 #if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
-#define SLJIT_LOCALS_OFFSET_BASE (4 * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE (4 * (sljit_s32)sizeof(sljit_sw))
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 13
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 6
 #else
 #define SLJIT_LOCALS_OFFSET_BASE 0
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 29
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #endif
 
 #elif (defined SLJIT_CONFIG_SPARC && SLJIT_CONFIG_SPARC)
 
 #define SLJIT_NUMBER_OF_REGISTERS 18
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 14
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 14
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
 #if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 /* saved registers (16), return struct pointer (1), space for 6 argument words (1),
    4th double arg (2), double alignment (1). */
-#define SLJIT_LOCALS_OFFSET_BASE ((16 + 1 + 6 + 2 + 1) * sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE ((16 + 1 + 6 + 2 + 1) * (sljit_s32)sizeof(sljit_sw))
 #endif
 
 #elif (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
@@ -736,12 +755,16 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #define SLJIT_NUMBER_OF_REGISTERS 12
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 15
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #define SLJIT_LOCALS_OFFSET_BASE SLJIT_S390X_DEFAULT_STACK_FRAME_SIZE
 
 #elif (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
 
 #define SLJIT_NUMBER_OF_REGISTERS 0
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 0
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 0
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
 #define SLJIT_LOCALS_OFFSET_BASE 0
 
 #endif
@@ -750,13 +773,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 
 #define SLJIT_NUMBER_OF_SCRATCH_REGISTERS \
 	(SLJIT_NUMBER_OF_REGISTERS - SLJIT_NUMBER_OF_SAVED_REGISTERS)
-
-#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 6
-#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64) && (defined _WIN64)
-#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 1
-#else
-#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
-#endif
 
 #define SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS \
 	(SLJIT_NUMBER_OF_FLOAT_REGISTERS - SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS)
