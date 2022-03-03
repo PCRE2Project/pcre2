@@ -68,7 +68,7 @@ the tables when not needed. But don't leave a totally empty module because some
 compilers barf at that. Instead, just supply some small dummy tables. */
 
 #ifndef SUPPORT_UNICODE
-const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0,0 }};
+const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0 }};
 const uint16_t PRIV(ucd_stage1)[] = {0};
 const uint16_t PRIV(ucd_stage2)[] = {0};
 const uint32_t PRIV(ucd_caseless_sets)[] = {0};
