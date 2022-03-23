@@ -7489,7 +7489,7 @@ while (*cc != XCL_END)
     {
     SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
     cc++;
-    if (*cc == PT_CLIST)
+    if (*cc == PT_CLIST && *cc == XCL_PROP)
       {
       other_cases = PRIV(ucd_caseless_sets) + cc[1];
       while (*other_cases != NOTACHAR)

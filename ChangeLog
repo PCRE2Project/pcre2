@@ -92,6 +92,9 @@ pattern, the optimizing "must be present for a match" character check was not
 being flagged as caseless, causing some matches that should have succeeded to
 fail.
 
+23. Fixed a unicode properrty matching issue in JIT. The character was not
+fully read in caseless matching.
+
 
 Version 10.39 29-October-2021
 -----------------------------
