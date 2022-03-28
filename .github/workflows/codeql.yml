@@ -13,12 +13,15 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ master, dev ]
+    branches: [ master ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ master ]
   schedule:
-    - cron: '36 3 * * 4'
+    - cron: '27 6 * * 4'
+
+# Declare default permissions as read only.
+permissions: read-all
 
 jobs:
   analyze:
@@ -32,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp' ]
+        language: [ 'cpp', 'python' ]
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
         # Learn more about CodeQL language support at https://git.io/codeql-language-support
 
