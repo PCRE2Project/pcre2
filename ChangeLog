@@ -95,6 +95,9 @@ fail.
 23. Fixed a unicode properrty matching issue in JIT. The character was not
 fully read in caseless matching.
 
+24. Fixed an issue affecting recursions in JIT caused by duplicated data
+transfers.
+
 
 Version 10.39 29-October-2021
 -----------------------------
