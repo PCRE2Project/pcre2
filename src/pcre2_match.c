@@ -7533,4 +7533,8 @@ else match_data->rc = PCRE2_ERROR_NOMATCH;
 return match_data->rc;
 }
 
+#undef NLBLOCK /* Block containing newline information */
+#undef PSSTART /* Field containing processed string start */
+#undef PSEND   /* Field containing processed string end */
+
 /* End of pcre2_match.c */

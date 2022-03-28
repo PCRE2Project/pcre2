@@ -10620,4 +10620,8 @@ re = NULL;
 goto EXIT;
 }
 
+#undef NLBLOCK /* Block containing newline information */
+#undef PSSTART /* Field containing processed string start */
+#undef PSEND   /* Field containing processed string end */
+
 /* End of pcre2_compile.c */
