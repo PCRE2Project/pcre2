@@ -883,14 +883,14 @@ if (char1 == char2)
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                     SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_utf));
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                     SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_utf));
   else
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                     SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs));
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                     SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs));
 #else
-  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                   SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs));
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                   SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs));
 #endif
   }
 else
@@ -904,14 +904,14 @@ else
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf && offset > 0)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_mask_utf));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_mask_utf));
     else
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_mask));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_mask));
 #else
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                     SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_mask));
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                     SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_mask));
 #endif
     }
   else
@@ -922,14 +922,14 @@ else
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf && offset > 0)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_2_utf));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_2_utf));
     else
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_2));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_2));
 #else
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(UW) | SLJIT_ARG3(UW) | SLJIT_ARG4(UW),
-                     SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcs_2));
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                     SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_2));
 #endif
     }
   }
@@ -1084,31 +1084,31 @@ if (diff == 1) {
   if (char1a == char1b && char2a == char2b) {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcps_0_utf));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_0_utf));
     else
 #endif
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcps_0));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_0));
   } else {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcps_1_utf));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_1_utf));
     else
 #endif
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW),
-                       SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcps_1));
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                       SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_1));
   }
 } else {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf)
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW),
-                     SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcps_default_utf));
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                     SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_default_utf));
   else
 #endif
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_RET(SW) | SLJIT_ARG1(SW) | SLJIT_ARG2(SW) | SLJIT_ARG3(SW) | SLJIT_ARG4(SW),
-                     SLJIT_IMM, SLJIT_FUNC_OFFSET(ffcps_default));
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+                     SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_default));
 }
 
 /* Restore STR_PTR register. */
