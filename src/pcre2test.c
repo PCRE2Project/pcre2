@@ -97,7 +97,7 @@ that first, falling back to readline/readline.h. */
 #elif defined(HAVE_EDIT_READLINE_READLINE_H)
 #include <edit/readline/readline.h>
 #else
-#include <readline/readline.h>
+#include <readline.h>
 #endif
 #endif
 #endif
