@@ -3,10 +3,9 @@
 if(EDITLINE_INCLUDE_DIR AND EDITLINE_LIBRARY AND NCURSES_LIBRARY)
   set(EDITLINE_FOUND TRUE)
 else(EDITLINE_INCLUDE_DIR AND EDITLINE_LIBRARY AND NCURSES_LIBRARY)
-  FIND_PATH(EDITLINE_INCLUDE_DIR readline.h
-    /usr/include/editline
-    /usr/include/edit/readline  
-    /usr/include/readline
+  FIND_PATH(EDITLINE_INCLUDE_DIR readline.h PATH_SUFFIXES
+    editline
+    edit/readline
   )
   
   FIND_LIBRARY(EDITLINE_LIBRARY NAMES edit)

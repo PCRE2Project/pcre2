@@ -597,14 +597,14 @@ if test "$enable_pcre2test_libreadline" = "yes"; then
  fi
 fi
 
-
 # Check for the availability of libedit. Different distributions put its
 # headers in different places. Try to cover the most common ones.
 
 if test "$enable_pcre2test_libedit" = "yes"; then
-  AC_CHECK_HEADERS([editline/readline.h], [HAVE_EDITLINE_READLINE_H=1],
-    [AC_CHECK_HEADERS([edit/readline/readline.h], [HAVE_READLINE_READLINE_H=1],
-      [AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_READLINE_H=1])])])
+  AC_CHECK_HEADERS([editline/readline.h edit/readline/readline.h], [
+    HAVE_LIBEDIT_HEADER=1
+    break
+  ])
   AC_CHECK_LIB([edit], [readline], [LIBEDIT="-ledit"])
 fi
 
@@ -940,10 +940,9 @@ if test "$enable_pcre2test_libedit" = "yes"; then
     echo "** Cannot use both --enable-pcre2test-libedit and --enable-pcre2test-readline"
     exit 1
   fi
-  if test "$HAVE_EDITLINE_READLINE_H" != "1" -a \
-          "$HAVE_READLINE_READLINE_H" != "1"; then
+  if test -z "$HAVE_LIBEDIT_HEADER"; then
     echo "** Cannot --enable-pcre2test-libedit because neither editline/readline.h"
-    echo "** nor readline/readline.h was found."
+    echo "** nor edit/readline/readline.h was found."
     exit 1
   fi
   if test -z "$LIBEDIT"; then

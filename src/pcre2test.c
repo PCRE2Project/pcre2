@@ -94,8 +94,10 @@ that first, falling back to readline/readline.h. */
 #else
 #if defined(HAVE_EDITLINE_READLINE_H)
 #include <editline/readline.h>
+#elif defined(HAVE_EDIT_READLINE_READLINE_H)
+#include <edit/readline/readline.h>
 #else
-#include <readline/readline.h>
+#include <readline.h>
 #endif
 #endif
 #endif
