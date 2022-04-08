@@ -98,6 +98,13 @@ fully read in caseless matching.
 24. Fixed an issue affecting recursions in JIT caused by duplicated data
 transfers.
 
+25. Merged patch from @carenas (GitHub #96) which fixes some problems with 
+pcre2test and readline/readedit:
+
+  * Use the right header for libedit in FreeBSD with autoconf
+  * Really allow libedit with cmake
+  * Avoid using readline headers with libedit 
+
 
 Version 10.39 29-October-2021
 -----------------------------
