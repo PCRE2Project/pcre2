@@ -601,7 +601,7 @@ fi
 # headers in different places. Try to cover the most common ones.
 
 if test "$enable_pcre2test_libedit" = "yes"; then
-  AC_CHECK_HEADERS([editline/readline.h edit/readline/readline.h], [
+  AC_CHECK_HEADERS([editline/readline.h edit/readline/readline.h readline.h], [
     HAVE_LIBEDIT_HEADER=1
     break
   ])
@@ -941,8 +941,8 @@ if test "$enable_pcre2test_libedit" = "yes"; then
     exit 1
   fi
   if test -z "$HAVE_LIBEDIT_HEADER"; then
-    echo "** Cannot --enable-pcre2test-libedit because neither editline/readline.h"
-    echo "** nor edit/readline/readline.h was found."
+    echo "** Cannot --enable-pcre2test-libedit because neither editline/readline.h,"
+    echo "** edit/readline/readline.h nor a compatible header was found."
     exit 1
   fi
   if test -z "$LIBEDIT"; then
