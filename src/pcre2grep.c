@@ -3295,19 +3295,25 @@ if (isdirectory(pathname))
 
 #ifdef HAVE_REALPATH
       {
-      char resolvedpath[PATH_MAX];
+      char *resolvedpath;
       BOOL isSame;
       size_t rlen;
-      if (realpath(childpath, resolvedpath) == NULL)
+      if ((resolvedpath = realpath(childpath, NULL)) == NULL)
         continue;     /* This path is invalid - we can skip processing this */
       isSame = strcmp(pathname, resolvedpath) == 0;
-      if (isSame) continue;    /* We have a recursion */
+      if (isSame)
+        {
+          free(resolvedpath);
+          continue;    /* We have a recursion */
+        }
       rlen = strlen(resolvedpath);
-      if (rlen++ < sizeof(resolvedpath) - 3)
+      rlen++;
         {
         BOOL contained;
+        resolvedpath = (char *)realloc(resolvedpath, rlen + 1);
         strcat(resolvedpath, "/");
         contained = strncmp(pathname, resolvedpath, rlen) == 0;
+        free(resolvedpath);
         if (contained) continue;    /* We have a recursion */
         }
       }
