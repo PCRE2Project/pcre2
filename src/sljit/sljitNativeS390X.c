@@ -198,7 +198,8 @@ static sljit_s32 encode_inst(void **ptr, sljit_ins ins)
 }
 
 #define SLJIT_ADD_SUB_NO_COMPARE(status_flags_state) \
-	(((status_flags_state) & (SLJIT_CURRENT_FLAGS_ADD_SUB | SLJIT_CURRENT_FLAGS_COMPARE)) == SLJIT_CURRENT_FLAGS_ADD_SUB)
+	(((status_flags_state) & (SLJIT_CURRENT_FLAGS_ADD | SLJIT_CURRENT_FLAGS_SUB)) \
+		&& !((status_flags_state) & SLJIT_CURRENT_FLAGS_COMPARE))
 
 /* Map the given type to a 4-bit condition code mask. */
 static SLJIT_INLINE sljit_u8 get_cc(struct sljit_compiler *compiler, sljit_s32 type) {
@@ -256,9 +257,19 @@ static SLJIT_INLINE sljit_u8 get_cc(struct sljit_compiler *compiler, sljit_s32 t
 	case SLJIT_LESS_F64:
 		return cc1;
 
+	case SLJIT_NOT_CARRY:
+		if (compiler->status_flags_state & SLJIT_CURRENT_FLAGS_SUB)
+			return (cc2 | cc3);
+		/* fallthrough */
+
 	case SLJIT_SIG_LESS_EQUAL:
 	case SLJIT_LESS_EQUAL_F64:
 		return (cc0 | cc1);
+
+	case SLJIT_CARRY:
+		if (compiler->status_flags_state & SLJIT_CURRENT_FLAGS_SUB)
+			return (cc0 | cc1);
+		/* fallthrough */
 
 	case SLJIT_SIG_GREATER:
 		/* Overflow is considered greater, see SLJIT_SUB. */
@@ -1037,8 +1048,8 @@ static sljit_s32 emit_rr(struct sljit_compiler *compiler, sljit_ins ins,
 	sljit_gpr src_r = tmp1;
 	sljit_s32 needs_move = 1;
 
-	if (IS_GPR_REG(dst)) {
-		dst_r = gpr(dst & REG_MASK);
+	if (FAST_IS_REG(dst)) {
+		dst_r = gpr(dst);
 
 		if (dst == src1)
 			needs_move = 0;
@@ -1052,7 +1063,7 @@ static sljit_s32 emit_rr(struct sljit_compiler *compiler, sljit_ins ins,
 		FAIL_IF(emit_move(compiler, dst_r, src1, src1w));
 
 	if (FAST_IS_REG(src2))
-		src_r = gpr(src2 & REG_MASK);
+		src_r = gpr(src2);
 	else
 		FAIL_IF(emit_move(compiler, tmp1, src2, src2w));
 
@@ -1065,6 +1076,21 @@ static sljit_s32 emit_rr(struct sljit_compiler *compiler, sljit_ins ins,
 	return push_inst(compiler, (compiler->mode & SLJIT_32) ? lr(dst_r, tmp0) : lgr(dst_r, tmp0));
 }
 
+static sljit_s32 emit_rr1(struct sljit_compiler *compiler, sljit_ins ins,
+	sljit_s32 dst,
+	sljit_s32 src1, sljit_sw src1w)
+{
+	sljit_gpr dst_r = FAST_IS_REG(dst) ? gpr(dst) : tmp0;
+	sljit_gpr src_r = tmp1;
+
+	if (FAST_IS_REG(src1))
+		src_r = gpr(src1);
+	else
+		FAIL_IF(emit_move(compiler, tmp1, src1, src1w));
+
+	return push_inst(compiler, ins | R4A(dst_r) | R0A(src_r));
+}
+
 static sljit_s32 emit_rrf(struct sljit_compiler *compiler, sljit_ins ins,
 	sljit_s32 dst,
 	sljit_s32 src1, sljit_sw src1w,
@@ -1075,12 +1101,12 @@ static sljit_s32 emit_rrf(struct sljit_compiler *compiler, sljit_ins ins,
 	sljit_gpr src2_r = tmp1;
 
 	if (FAST_IS_REG(src1))
-		src1_r = gpr(src1 & REG_MASK);
+		src1_r = gpr(src1);
 	else
 		FAIL_IF(emit_move(compiler, tmp0, src1, src1w));
 
 	if (FAST_IS_REG(src2))
-		src2_r = gpr(src2 & REG_MASK);
+		src2_r = gpr(src2);
 	else
 		FAIL_IF(emit_move(compiler, tmp1, src2, src2w));
 
@@ -1101,8 +1127,8 @@ static sljit_s32 emit_ri(struct sljit_compiler *compiler, sljit_ins ins,
 	sljit_gpr dst_r = tmp0;
 	sljit_s32 needs_move = 1;
 
-	if (IS_GPR_REG(dst)) {
-		dst_r = gpr(dst & REG_MASK);
+	if (FAST_IS_REG(dst)) {
+		dst_r = gpr(dst);
 
 		if (dst == src1)
 			needs_move = 0;
@@ -1121,7 +1147,7 @@ static sljit_s32 emit_rie_d(struct sljit_compiler *compiler, sljit_ins ins,
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_sw src2w)
 {
-	sljit_gpr dst_r = FAST_IS_REG(dst) ? gpr(dst & REG_MASK) : tmp0;
+	sljit_gpr dst_r = FAST_IS_REG(dst) ? gpr(dst) : tmp0;
 	sljit_gpr src_r = tmp0;
 
 	if (!FAST_IS_REG(src1))
@@ -1149,7 +1175,7 @@ static sljit_s32 emit_rx(struct sljit_compiler *compiler, sljit_ins ins,
 
 	SLJIT_ASSERT(src2 & SLJIT_MEM);
 
-	if (IS_GPR_REG(dst)) {
+	if (FAST_IS_REG(dst)) {
 		dst_r = gpr(dst);
 
 		if (dst == src1)
@@ -1610,7 +1636,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
 {
-	sljit_s32 arg_count = 0;
+	sljit_s32 word_arg_count = 0;
 	sljit_s32 offset, i, tmp;
 
 	CHECK_ERROR();
@@ -1659,10 +1685,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	FAIL_IF(push_inst(compiler, 0xe30000000071 /* lay */ | R36A(r15) | R28A(r15) | disp_s20(-local_size)));
 
 	arg_types >>= SLJIT_ARG_SHIFT;
+	tmp = 0;
 	while (arg_types > 0) {
 		if ((arg_types & SLJIT_ARG_MASK) < SLJIT_ARG_TYPE_F64) {
-			FAIL_IF(push_inst(compiler, lgr(gpr(SLJIT_S0 - arg_count), gpr(SLJIT_R0 + arg_count))));
-			arg_count++;
+			if (!(arg_types & SLJIT_ARG_TYPE_SCRATCH_REG)) {
+				FAIL_IF(push_inst(compiler, lgr(gpr(SLJIT_S0 - tmp), gpr(SLJIT_R0 + word_arg_count))));
+				tmp++;
+			}
+			word_arg_count++;
 		}
 
 		arg_types >>= SLJIT_ARG_SHIFT;
@@ -2088,14 +2118,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 			FAIL_IF(push_inst(compiler, xr(dst_r, tmp1)));
 		}
 		break;
-	case SLJIT_NEG:
-		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_ADD_SUB;
-		FAIL_IF(push_inst(compiler, lcgr(dst_r, src_r)));
-		break;
-	case SLJIT_NEG32:
-		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_ADD_SUB;
-		FAIL_IF(push_inst(compiler, lcr(dst_r, src_r)));
-		break;
 	case SLJIT_CLZ:
 		if (have_eimm()) {
 			FAIL_IF(push_inst(compiler, flogr(tmp0, src_r))); /* clobbers tmp1 */
@@ -2147,20 +2169,6 @@ static SLJIT_INLINE int is_commutative(sljit_s32 op)
 static SLJIT_INLINE int is_shift(sljit_s32 op) {
 	sljit_s32 v = GET_OPCODE(op);
 	return (v == SLJIT_SHL || v == SLJIT_ASHR || v == SLJIT_LSHR) ? 1 : 0;
-}
-
-static SLJIT_INLINE int sets_signed_flag(sljit_s32 op)
-{
-	switch (GET_FLAG_TYPE(op)) {
-	case SLJIT_OVERFLOW:
-	case SLJIT_NOT_OVERFLOW:
-	case SLJIT_SIG_LESS:
-	case SLJIT_SIG_LESS_EQUAL:
-	case SLJIT_SIG_GREATER:
-	case SLJIT_SIG_GREATER_EQUAL:
-		return 1;
-	}
-	return 0;
 }
 
 static const struct ins_forms add_forms = {
@@ -2267,13 +2275,14 @@ static sljit_s32 sljit_emit_sub(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w)
 {
-	int sets_signed = sets_signed_flag(op);
+	sljit_s32 flag_type = GET_FLAG_TYPE(op);
+	int sets_signed = (flag_type >= SLJIT_SIG_LESS && flag_type <= SLJIT_NOT_OVERFLOW);
 	int sets_zero_overflow = (op & (SLJIT_SET_Z | VARIABLE_FLAG_MASK)) == (SLJIT_SET_Z | SLJIT_SET_OVERFLOW);
 	const struct ins_forms *forms;
 	sljit_ins ins;
 
-	if (dst == (sljit_s32)tmp0 && GET_FLAG_TYPE(op) <= SLJIT_SIG_LESS_EQUAL) {
-		int compare_signed = GET_FLAG_TYPE(op) >= SLJIT_SIG_LESS;
+	if (dst == (sljit_s32)tmp0 && flag_type <= SLJIT_SIG_LESS_EQUAL) {
+		int compare_signed = flag_type >= SLJIT_SIG_LESS;
 
 		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_COMPARE;
 
@@ -2312,6 +2321,12 @@ static sljit_s32 sljit_emit_sub(struct sljit_compiler *compiler, sljit_s32 op,
 		else
 			ins = (op & SLJIT_32) ? 0x1500 /* clr */ : 0xb9210000 /* clgr */;
 		return emit_rr(compiler, ins, src1, src1, src1w, src2, src2w);
+	}
+
+	if (src1 == SLJIT_IMM && src1w == 0 && (flag_type == 0 || sets_signed)) {
+		ins = (op & SLJIT_32) ? 0x1300 /* lcr */ : 0xb9030000 /* lcgr */;
+		FAIL_IF(emit_rr1(compiler, ins, dst, src2, src2w));
+		goto done;
 	}
 
 	if (src2 & SLJIT_IMM) {
@@ -2663,9 +2678,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	compiler->mode = op & SLJIT_32;
 	compiler->status_flags_state = op & (VARIABLE_FLAG_MASK | SLJIT_SET_Z);
 
-	if (GET_OPCODE(op) >= SLJIT_ADD || GET_OPCODE(op) <= SLJIT_SUBC)
-		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_ADD_SUB;
-
 	if (is_commutative(op) && (src1 & SLJIT_IMM) && !(src2 & SLJIT_IMM)) {
 		src1 ^= src2;
 		src2 ^= src1;
@@ -2678,15 +2690,19 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 
 	switch (GET_OPCODE(op)) {
 	case SLJIT_ADD:
+		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_ADD;
 		return sljit_emit_add(compiler, op, dst, dstw, src1, src1w, src2, src2w);
 	case SLJIT_ADDC:
+		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_ADD;
 		FAIL_IF(emit_commutative(compiler, &addc_forms, dst, src1, src1w, src2, src2w));
 		if (dst & SLJIT_MEM)
 			return store_word(compiler, tmp0, dst, dstw, op & SLJIT_32);
 		return SLJIT_SUCCESS;
 	case SLJIT_SUB:
+		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_SUB;
 		return sljit_emit_sub(compiler, op, dst, dstw, src1, src1w, src2, src2w);
 	case SLJIT_SUBC:
+		compiler->status_flags_state |= SLJIT_CURRENT_FLAGS_SUB;
 		FAIL_IF(emit_non_commutative(compiler, &subc_forms, dst, src1, src1w, src2, src2w));
 		if (dst & SLJIT_MEM)
 			return store_word(compiler, tmp0, dst, dstw, op & SLJIT_32);

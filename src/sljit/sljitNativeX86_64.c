@@ -366,6 +366,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 {
 	sljit_uw size;
 	sljit_s32 word_arg_count = 0;
+	sljit_s32 saved_arg_count = 0;
 	sljit_s32 saved_regs_size, tmp, i;
 #ifdef _WIN64
 	sljit_s32 saved_float_regs_size;
@@ -455,7 +456,13 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 				break;
 			}
 #endif /* _WIN64 */
-			EMIT_MOV(compiler, SLJIT_S0 - word_arg_count, 0, tmp, 0);
+			if (arg_types & SLJIT_ARG_TYPE_SCRATCH_REG) {
+				if (tmp != SLJIT_R0 + word_arg_count)
+					EMIT_MOV(compiler, SLJIT_R0 + word_arg_count, 0, tmp, 0);
+			} else {
+				EMIT_MOV(compiler, SLJIT_S0 - saved_arg_count, 0, tmp, 0);
+				saved_arg_count++;
+			}
 			word_arg_count++;
 		} else {
 #ifdef _WIN64
@@ -483,33 +490,28 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 				EMIT_MOV(compiler, TMP_REG1, 0, SLJIT_MEM1(SLJIT_SP), -4096 * 3);
 		}
 		else {
-			EMIT_MOV(compiler, SLJIT_R0, 0, SLJIT_SP, 0);
-			EMIT_MOV(compiler, TMP_REG1, 0, SLJIT_IMM, (local_size - 1) >> 12);
+			EMIT_MOV(compiler, TMP_REG1, 0, SLJIT_IMM, local_size >> 12);
 
-			SLJIT_ASSERT (reg_map[SLJIT_R0] == 0);
-
-			EMIT_MOV(compiler, TMP_REG2, 0, SLJIT_MEM1(SLJIT_R0), -4096);
-			FAIL_IF(emit_non_cum_binary(compiler, BINARY_OPCODE(SUB),
-				SLJIT_R0, 0, SLJIT_R0, 0, SLJIT_IMM, 4096));
-			FAIL_IF(emit_non_cum_binary(compiler, BINARY_OPCODE(SUB),
-				TMP_REG1, 0, TMP_REG1, 0, SLJIT_IMM, 1));
+			EMIT_MOV(compiler, TMP_REG2, 0, SLJIT_MEM1(SLJIT_SP), -4096);
+			BINARY_IMM32(SUB, 4096, SLJIT_SP, 0);
+			BINARY_IMM32(SUB, 1, TMP_REG1, 0);
 
 			inst = (sljit_u8*)ensure_buf(compiler, 1 + 2);
 			FAIL_IF(!inst);
 
 			INC_SIZE(2);
 			inst[0] = JNE_i8;
-			inst[1] = (sljit_u8)-19;
+			inst[1] = (sljit_u8)-21;
+			local_size &= 0xfff;
 		}
 
-		EMIT_MOV(compiler, TMP_REG1, 0, SLJIT_MEM1(SLJIT_SP), -local_size);
+		if (local_size > 0)
+			EMIT_MOV(compiler, TMP_REG1, 0, SLJIT_MEM1(SLJIT_SP), -local_size);
 	}
 #endif /* _WIN64 */
 
-	if (local_size > 0) {
-		FAIL_IF(emit_non_cum_binary(compiler, BINARY_OPCODE(SUB),
-			SLJIT_SP, 0, SLJIT_SP, 0, SLJIT_IMM, local_size));
-	}
+	if (local_size > 0)
+		BINARY_IMM32(SUB, local_size, SLJIT_SP, 0);
 
 #ifdef _WIN64
 	if (saved_float_regs_size > 0) {

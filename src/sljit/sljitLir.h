@@ -256,15 +256,23 @@ extern "C" {
 /* The following argument type definitions are used by sljit_emit_enter,
    sljit_set_context, sljit_emit_call, and sljit_emit_icall functions.
 
-   As for sljit_emit_enter, the first integer argument is available in
-   SLJIT_R0, the second one in SLJIT_R1, and so on. Similarly the first
-   floating point argument is available in SLJIT_FR0, the second one in
-   SLJIT_FR1, and so on.
-
    As for sljit_emit_call and sljit_emit_icall, the first integer argument
    must be placed into SLJIT_R0, the second one into SLJIT_R1, and so on.
    Similarly the first floating point argument must be placed into SLJIT_FR0,
    the second one into SLJIT_FR1, and so on.
+
+   As for sljit_emit_enter, the integer arguments can be stored in scratch
+   or saved registers. The first integer argument without _R postfix is
+   stored in SLJIT_S0, the next one in SLJIT_S1, and so on. The integer
+   arguments with _R postfix are placed into scratch registers. The index
+   of the scratch register is the count of the previous integer arguments
+   starting from SLJIT_R0. The floating point arguments are always placed
+   into SLJIT_FR0, SLJIT_FR1, and so on.
+
+   Note: if a function is called by sljit_emit_call/sljit_emit_icall and
+         an argument is stored in a scratch register by sljit_emit_enter,
+         that argument uses the same scratch register index for both
+         integer and floating point arguments.
 
    Example function definition:
      sljit_f32 SLJIT_FUNC example_c_callback(void *arg_a,
@@ -276,27 +284,51 @@ extern "C" {
         | SLJIT_ARG_VALUE(SLJIT_ARG_TYPE_32, 3) | SLJIT_ARG_VALUE(SLJIT_ARG_TYPE_F32, 4)
 
    Short form of argument type definition:
-     SLJIT_ARGS4(F32, P, F64, 32, F32)
+     SLJIT_ARGS4(32, P, F64, 32, F32)
 
    Argument passing:
      arg_a must be placed in SLJIT_R0
      arg_c must be placed in SLJIT_R1
      arg_b must be placed in SLJIT_FR0
      arg_d must be placed in SLJIT_FR1
- */
+
+   Examples for argument processing by sljit_emit_enter:
+     SLJIT_ARGS4(VOID, P, 32_R, F32, W)
+     Arguments are placed into: SLJIT_S0, SLJIT_R1, SLJIT_FR0, SLJIT_S1
+
+     SLJIT_ARGS4(VOID, W, W_R, W, W_R)
+     Arguments are placed into: SLJIT_S0, SLJIT_R1, SLJIT_S1, SLJIT_R3
+
+     SLJIT_ARGS4(VOID, F64, W, F32, W_R)
+     Arguments are placed into: SLJIT_FR0, SLJIT_S0, SLJIT_FR1, SLJIT_R1
+
+     Note: it is recommended to pass the scratch arguments first
+     followed by the saved arguments:
+
+       SLJIT_ARGS4(VOID, W_R, W_R, W, W)
+       Arguments are placed into: SLJIT_R0, SLJIT_R1, SLJIT_S0, SLJIT_S1
+*/
+
+/* The following flag is only allowed for the integer arguments of
+   sljit_emit_enter. When the flag is set, the integer argument is
+   stored in a scratch register instead of a saved register. */
+#define SLJIT_ARG_TYPE_SCRATCH_REG 0x8
 
 /* Void result, can only be used by SLJIT_ARG_RETURN. */
-#define SLJIT_ARG_TYPE_VOID 0
+#define SLJIT_ARG_TYPE_VOID	0
 /* Machine word sized integer argument or result. */
-#define SLJIT_ARG_TYPE_W 1
+#define SLJIT_ARG_TYPE_W	1
+#define SLJIT_ARG_TYPE_W_R	(SLJIT_ARG_TYPE_W | SLJIT_ARG_TYPE_SCRATCH_REG)
 /* 32 bit integer argument or result. */
-#define SLJIT_ARG_TYPE_32 2
+#define SLJIT_ARG_TYPE_32	2
+#define SLJIT_ARG_TYPE_32_R	(SLJIT_ARG_TYPE_32 | SLJIT_ARG_TYPE_SCRATCH_REG)
 /* Pointer sized integer argument or result. */
-#define SLJIT_ARG_TYPE_P 3
+#define SLJIT_ARG_TYPE_P	3
+#define SLJIT_ARG_TYPE_P_R	(SLJIT_ARG_TYPE_P | SLJIT_ARG_TYPE_SCRATCH_REG)
 /* 64 bit floating point argument or result. */
-#define SLJIT_ARG_TYPE_F64 4
+#define SLJIT_ARG_TYPE_F64	4
 /* 32 bit floating point argument or result. */
-#define SLJIT_ARG_TYPE_F32 5
+#define SLJIT_ARG_TYPE_F32	5
 
 #define SLJIT_ARG_SHIFT 4
 #define SLJIT_ARG_RETURN(type) (type)
@@ -415,8 +447,7 @@ struct sljit_compiler {
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 	sljit_s32 args_size;
 	sljit_s32 locals_offset;
-	sljit_s32 saveds_offset;
-	sljit_s32 stack_tmp_size;
+	sljit_s32 scratches_offset;
 #endif
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
@@ -652,9 +683,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
          overwrites the previous context.
 */
 
-/* The absolute address returned by sljit_get_local_base with
-offset 0 is aligned to sljit_f64. Otherwise it is aligned to sljit_sw. */
-#define SLJIT_F64_ALIGNMENT 0x00000001
+/* The compiled function uses cdecl calling
+ * convention instead of SLJIT_FUNC. */
+#define SLJIT_ENTER_CDECL 0x00000001
 
 /* The local_size must be >= 0 and <= SLJIT_MAX_LOCAL_SIZE. */
 #define SLJIT_MAX_LOCAL_SIZE	65536
@@ -967,14 +998,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
    Note: immediate source argument is not supported */
 #define SLJIT_NOT			(SLJIT_OP1_BASE + 9)
 #define SLJIT_NOT32			(SLJIT_NOT | SLJIT_32)
-/* Flags: Z | OVERFLOW
-   Note: immediate source argument is not supported */
-#define SLJIT_NEG			(SLJIT_OP1_BASE + 10)
-#define SLJIT_NEG32			(SLJIT_NEG | SLJIT_32)
 /* Count leading zeroes
    Flags: - (may destroy flags)
    Note: immediate source argument is not supported */
-#define SLJIT_CLZ			(SLJIT_OP1_BASE + 11)
+#define SLJIT_CLZ			(SLJIT_OP1_BASE + 10)
 #define SLJIT_CLZ32			(SLJIT_CLZ | SLJIT_32)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compiler, sljit_s32 op,
@@ -1175,8 +1202,10 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 #define SLJIT_SET_OVERFLOW		SLJIT_SET(SLJIT_OVERFLOW)
 #define SLJIT_NOT_OVERFLOW		11
 
-/* There is no SLJIT_CARRY or SLJIT_NOT_CARRY. */
-#define SLJIT_SET_CARRY			SLJIT_SET(12)
+/* Unlike other flags, sljit_emit_jump may destroy this flag. */
+#define SLJIT_CARRY			12
+#define SLJIT_SET_CARRY			SLJIT_SET(SLJIT_CARRY)
+#define SLJIT_NOT_CARRY			13
 
 /* Floating point comparison types. */
 #define SLJIT_EQUAL_F64			14
@@ -1538,12 +1567,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *c
 /* Flags were set by a 32 bit operation. */
 #define SLJIT_CURRENT_FLAGS_32			SLJIT_32
 
-/* Flags were set by an ADD, ADDC, SUB, SUBC, or NEG operation. */
-#define SLJIT_CURRENT_FLAGS_ADD_SUB		0x01
+/* Flags were set by an ADD or ADDC operations. */
+#define SLJIT_CURRENT_FLAGS_ADD			0x01
+/* Flags were set by a SUB, SUBC, or NEG operation. */
+#define SLJIT_CURRENT_FLAGS_SUB			0x02
 
 /* Flags were set by sljit_emit_op2u with SLJIT_SUB opcode.
-   Must be combined with SLJIT_CURRENT_FLAGS_ADD_SUB. */
-#define SLJIT_CURRENT_FLAGS_COMPARE		0x02
+   Must be combined with SLJIT_CURRENT_FLAGS_SUB. */
+#define SLJIT_CURRENT_FLAGS_COMPARE		0x04
 
 /* Define the currently available CPU status flags. It is usually used after
    an sljit_emit_label or sljit_emit_op_custom operations to define which CPU

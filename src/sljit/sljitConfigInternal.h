@@ -156,7 +156,7 @@ extern "C" {
 #define SLJIT_CONFIG_MIPS_32 1
 #elif defined(__mips64)
 #define SLJIT_CONFIG_MIPS_64 1
-#elif defined(__sparc__) || defined(__sparc)
+#elif (defined(__sparc__) || defined(__sparc)) && !defined(_LP64)
 #define SLJIT_CONFIG_SPARC_32 1
 #elif defined(__s390x__)
 #define SLJIT_CONFIG_S390X 1
@@ -274,8 +274,12 @@ extern "C" {
 
 #ifndef SLJIT_INLINE
 /* Inline functions. Some old compilers do not support them. */
-#if defined(__SUNPRO_C) && __SUNPRO_C <= 0x510
+#ifdef __SUNPRO_C
+#if __SUNPRO_C < 0x560
 #define SLJIT_INLINE
+#else
+#define SLJIT_INLINE inline
+#endif /* __SUNPRO_C */
 #else
 #define SLJIT_INLINE __inline
 #endif
@@ -319,18 +323,36 @@ extern "C" {
 /* Instruction cache flush. */
 /****************************/
 
+/*
+ * TODO:
+ *
+ * clang >= 15 could be safe to enable below
+ * older versions are known to abort in some targets
+ * https://github.com/PhilipHazel/pcre2/issues/92
+ *
+ * beware APPLE is known to have removed the code in iOS so
+ * it will need to be excempted or result in broken builds
+ */
 #if (!defined SLJIT_CACHE_FLUSH && defined __has_builtin)
-#if __has_builtin(__builtin___clear_cache)
+#if __has_builtin(__builtin___clear_cache) && !defined(__clang__)
 
+/*
+ * https://gcc.gnu.org/bugzilla//show_bug.cgi?id=91248
+ * https://gcc.gnu.org/bugzilla//show_bug.cgi?id=93811
+ * gcc's clear_cache builtin for power and sparc are broken
+ */
+#if !defined(SLJIT_CONFIG_PPC) && !defined(SLJIT_CONFIG_SPARC_32)
 #define SLJIT_CACHE_FLUSH(from, to) \
 	__builtin___clear_cache((char*)(from), (char*)(to))
+#endif
 
-#endif /* __has_builtin(__builtin___clear_cache) */
+#endif /* gcc >= 10 */
 #endif /* (!defined SLJIT_CACHE_FLUSH && defined __has_builtin) */
 
 #ifndef SLJIT_CACHE_FLUSH
 
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
+	|| (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
 
 /* Not required to implement on archs with unified caches. */
 #define SLJIT_CACHE_FLUSH(from, to)
@@ -340,9 +362,9 @@ extern "C" {
 /* Supported by all macs since Mac OS 10.5.
    However, it does not work on non-jailbroken iOS devices,
    although the compilation is successful. */
-
+#include <libkern/OSCacheControl.h>
 #define SLJIT_CACHE_FLUSH(from, to) \
-	sys_icache_invalidate((char*)(from), (char*)(to) - (char*)(from))
+	sys_icache_invalidate((void*)(from), (size_t)((char*)(to) - (char*)(from)))
 
 #elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
 
@@ -351,18 +373,6 @@ extern "C" {
 	ppc_cache_flush((from), (to))
 #define SLJIT_CACHE_FLUSH_OWN_IMPL 1
 
-#elif (defined(__GNUC__) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
-
-#define SLJIT_CACHE_FLUSH(from, to) \
-	__builtin___clear_cache((char*)(from), (char*)(to))
-
-#elif defined __ANDROID__
-
-/* Android lacks __clear_cache; instead, cacheflush should be used. */
-
-#define SLJIT_CACHE_FLUSH(from, to) \
-    cacheflush((long)(from), (long)(to), 0)
-
 #elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 
 /* The __clear_cache() implementation of GCC is a dummy function on Sparc. */
@@ -370,14 +380,26 @@ extern "C" {
 	sparc_cache_flush((from), (to))
 #define SLJIT_CACHE_FLUSH_OWN_IMPL 1
 
+#elif (defined(__GNUC__) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))) || defined(__clang__)
+
+#define SLJIT_CACHE_FLUSH(from, to) \
+	__builtin___clear_cache((char*)(from), (char*)(to))
+
+#elif defined __ANDROID__
+
+/* Android ARMv7 with gcc lacks __clear_cache; use cacheflush instead. */
+#include <sys/cachectl.h>
+#define SLJIT_CACHE_FLUSH(from, to) \
+	cacheflush((long)(from), (long)(to), 0)
+
 #elif defined _WIN32
 
 #define SLJIT_CACHE_FLUSH(from, to) \
-	FlushInstructionCache(GetCurrentProcess(), (char*)(from), (char*)(to) - (char*)(from))
+	FlushInstructionCache(GetCurrentProcess(), (void*)(from), (char*)(to) - (char*)(from))
 
 #else
 
-/* Calls __ARM_NR_cacheflush on ARM-Linux. */
+/* Call __ARM_NR_cacheflush on ARM-Linux or the corresponding MIPS syscall. */
 #define SLJIT_CACHE_FLUSH(from, to) \
 	__clear_cache((char*)(from), (char*)(to))
 
@@ -781,8 +803,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 /* CPU status flags management. */
 /********************************/
 
-#if (defined SLJIT_CONFIG_ARM_32 && SLJIT_CONFIG_ARM_32) \
-	|| (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64) \
+#if (defined SLJIT_CONFIG_ARM && SLJIT_CONFIG_ARM) \
+	|| (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC) \
 	|| (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS) \
 	|| (defined SLJIT_CONFIG_SPARC && SLJIT_CONFIG_SPARC) \
 	|| (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)

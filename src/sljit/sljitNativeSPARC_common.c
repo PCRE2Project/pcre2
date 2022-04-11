@@ -512,9 +512,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
 {
-	sljit_s32 reg_index, types;
+	sljit_s32 reg_index, types, tmp;
 	sljit_u32 float_offset, args_offset;
-	sljit_s32 word_arg_index, float_arg_index;
+	sljit_s32 saved_arg_index, scratch_arg_index, float_arg_index;
 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_enter(compiler, options, arg_types, scratches, saveds, fscratches, fsaveds, local_size));
@@ -564,7 +564,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 	args_offset = (16 + 1 + 6) * sizeof(sljit_sw);
 	float_offset = 16 * sizeof(sljit_sw);
 	reg_index = 24;
-	word_arg_index = 24;
+	saved_arg_index = 24;
+	scratch_arg_index = 8 - 1;
 	float_arg_index = 1;
 
 	while (arg_types) {
@@ -593,14 +594,19 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 			float_offset += sizeof(sljit_f64);
 			break;
 		default:
-			if (reg_index != word_arg_index) {
-				if (reg_index < 24 + 6)
-					FAIL_IF(push_inst(compiler, OR | DA(word_arg_index) | S1(0) | S2A(reg_index), word_arg_index));
-				else
-					FAIL_IF(push_inst(compiler, LDUW | DA(word_arg_index) | S1A(30) | IMM(args_offset), word_arg_index));
-			}
+			scratch_arg_index++;
 
-			word_arg_index++;
+			if (!(arg_types & SLJIT_ARG_TYPE_SCRATCH_REG)) {
+				tmp = saved_arg_index++;
+				if (tmp == reg_index)
+					break;
+			} else
+				tmp = scratch_arg_index;
+
+			if (reg_index < 24 + 6)
+				FAIL_IF(push_inst(compiler, OR | DA(tmp) | S1(0) | S2A(reg_index), tmp));
+			else
+				FAIL_IF(push_inst(compiler, LDUW | DA(tmp) | S1A(30) | IMM(args_offset), tmp));
 			break;
 		}
 
@@ -1018,9 +1024,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 	case SLJIT_NOT:
 	case SLJIT_CLZ:
 		return emit_op(compiler, op, flags, dst, dstw, TMP_REG1, 0, src, srcw);
-
-	case SLJIT_NEG:
-		return emit_op(compiler, SLJIT_SUB, flags | IMM_OP, dst, dstw, SLJIT_IMM, 0, src, srcw);
 	}
 
 	return SLJIT_SUCCESS;
@@ -1395,10 +1398,12 @@ static sljit_ins get_cc(struct sljit_compiler *compiler, sljit_s32 type)
 
 	case SLJIT_LESS:
 	case SLJIT_GREATER_F64: /* Unordered. */
+	case SLJIT_CARRY:
 		return DA(0x5);
 
 	case SLJIT_GREATER_EQUAL:
 	case SLJIT_LESS_EQUAL_F64:
+	case SLJIT_NOT_CARRY:
 		return DA(0xd);
 
 	case SLJIT_GREATER:
@@ -1422,7 +1427,7 @@ static sljit_ins get_cc(struct sljit_compiler *compiler, sljit_s32 type)
 		return DA(0x2);
 
 	case SLJIT_OVERFLOW:
-		if (!(compiler->status_flags_state & SLJIT_CURRENT_FLAGS_ADD_SUB))
+		if (!(compiler->status_flags_state & (SLJIT_CURRENT_FLAGS_ADD | SLJIT_CURRENT_FLAGS_SUB)))
 			return DA(0x9);
 		/* fallthrough */
 
@@ -1430,7 +1435,7 @@ static sljit_ins get_cc(struct sljit_compiler *compiler, sljit_s32 type)
 		return DA(0x7);
 
 	case SLJIT_NOT_OVERFLOW:
-		if (!(compiler->status_flags_state & SLJIT_CURRENT_FLAGS_ADD_SUB))
+		if (!(compiler->status_flags_state & (SLJIT_CURRENT_FLAGS_ADD | SLJIT_CURRENT_FLAGS_SUB)))
 			return DA(0x1);
 		/* fallthrough */
 
