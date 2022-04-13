@@ -114,11 +114,17 @@ Building PCRE2 using autotools
 The following instructions assume the use of the widely used "configure; make;
 make install" (autotools) process.
 
-To build PCRE2 on system that supports autotools, first run the "configure"
-command from the PCRE2 distribution directory, with your current directory set
+If you have downloaded and unpacked a PCRE2 release tarball, run the
+"configure" command from the PCRE2 directory, with your current directory set
 to the directory where you want the files to be created. This command is a
 standard GNU "autoconf" configuration script, for which generic instructions
 are supplied in the file INSTALL.
+
+The files in the GitHub repository do not contain "configure". If you have 
+downloaded the PCRE2 source files from GitHub, before you can run "configure"
+you must run the shell script called autogen.sh. This runs a number of
+autotools to create a "configure" script (you must of course have the autotools
+commands installed in order to do this).
 
 Most commonly, people build PCRE2 within its own distribution directory, and in
 this case, on many systems, just running "./configure" is sufficient. However,
@@ -905,4 +911,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 29 October 2021
+Last updated: 13 April 2022
