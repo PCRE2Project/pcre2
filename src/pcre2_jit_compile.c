@@ -2909,14 +2909,15 @@ while (cc < ccend)
     i = 1 + 32 / (int)sizeof(PCRE2_UCHAR);
 #endif
     if (PRIVATE_DATA(cc) != 0)
+      {
+      private_count = 1;
+      private_srcw[0] = PRIVATE_DATA(cc);
       switch(get_class_iterator_size(cc + i))
         {
         case 1:
-        private_srcw[0] = PRIVATE_DATA(cc);
         break;
 
         case 2:
-        private_srcw[0] = PRIVATE_DATA(cc);
         if (recurse_check_bit(common, private_srcw[0]))
           {
           private_count = 2;
@@ -2929,6 +2930,7 @@ while (cc < ccend)
         SLJIT_UNREACHABLE();
         break;
         }
+      }
     cc += i;
     break;
 
