@@ -82,11 +82,7 @@ from www.cbttape.org. */
 
 /* #define DEBUG_SHOW_MALLOC_ADDRESSES */
 
-/* Both libreadline and libedit are optionally supported. The user-supplied
-original patch uses readline/readline.h for libedit, but in at least one system
-it is installed as editline/readline.h, so the configuration code now looks for
-that first, falling back to readline/readline.h. */
-
+/* Both libreadline and libedit are optionally supported */
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
 #if defined(SUPPORT_LIBREADLINE)
 #include <readline/readline.h>
@@ -98,6 +94,11 @@ that first, falling back to readline/readline.h. */
 #include <edit/readline/readline.h>
 #else
 #include <readline.h>
+/* GNU readline defines this macro but libedit doesn't, if that ever changes
+this needs to be updated or the build could break */
+#ifdef RL_VERSION_MAJOR
+#include <history.h>
+#endif
 #endif
 #endif
 #endif

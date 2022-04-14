@@ -110,6 +110,9 @@ type, gbreak or bidi. The defined values for that property are listed. */
 #include <editline/readline.h>
 #else
 #include <readline/readline.h>
+#ifdef RL_VERSION_MAJOR
+#include <readline/history.h>
+#endif
 #endif
 #endif
 #endif

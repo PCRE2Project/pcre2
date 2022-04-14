@@ -110,6 +110,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 # GET_TARGET_PROPERTY. This should no longer be required.
 # CMAKE_POLICY(SET CMP0026 OLD)
 
+# With a recent cmake, you can provide a rootdir to look for non
+# standard installed library dependencies, but to do so, the policy
+# needs to be set to new (by uncommenting the following)
+# CMAKE_POLICY(SET CMP0074 NEW)
+
 # For FindReadline.cmake. This was changed to allow setting CMAKE_MODULE_PATH
 # on the command line.
 # SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -312,7 +317,11 @@ IF(EDITLINE_FOUND)
   ENDIF(PCRE2_SUPPORT_LIBEDIT)
 ELSE(EDITLINE_FOUND)
   IF(PCRE2_SUPPORT_LIBEDIT)
-    MESSAGE(FATAL_ERROR "libedit not found, set Editline_ROOT if needed")
+    MESSAGE(FATAL_ERROR
+      " libedit not found, set EDITLINE_INCLUDE_DIR to a compatible header\n"
+      " or set Editline_ROOT to a full libedit installed tree, as needed\n"
+      " Might need to enable policy CMP0074 in CMakeLists.txt"
+    )
   ENDIF(PCRE2_SUPPORT_LIBEDIT)
 ENDIF(EDITLINE_FOUND)
 
