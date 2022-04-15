@@ -114,11 +114,17 @@ Building PCRE2 using autotools
 The following instructions assume the use of the widely used "configure; make;
 make install" (autotools) process.
 
-To build PCRE2 on system that supports autotools, first run the "configure"
-command from the PCRE2 distribution directory, with your current directory set
+If you have downloaded and unpacked a PCRE2 release tarball, run the
+"configure" command from the PCRE2 directory, with your current directory set
 to the directory where you want the files to be created. This command is a
 standard GNU "autoconf" configuration script, for which generic instructions
 are supplied in the file INSTALL.
+
+The files in the GitHub repository do not contain "configure". If you have
+downloaded the PCRE2 source files from GitHub, before you can run "configure"
+you must run the shell script called autogen.sh. This runs a number of
+autotools to create a "configure" script (you must of course have the autotools
+commands installed in order to do this).
 
 Most commonly, people build PCRE2 within its own distribution directory, and in
 this case, on many systems, just running "./configure" is sufficient. However,
@@ -188,10 +194,10 @@ library. They are also documented in the pcre2build man page.
 
   As well as supporting UTF strings, Unicode support includes support for the
   \P, \p, and \X sequences that recognize Unicode character properties.
-  However, only the basic two-letter properties such as Lu are supported.
-  Escape sequences such as \d and \w in patterns do not by default make use of
-  Unicode properties, but can be made to do so by setting the PCRE2_UCP option
-  or starting a pattern with (*UCP).
+  However, only a subset of Unicode properties are supported; see the
+  pcre2pattern man page for details. Escape sequences such as \d and \w in
+  patterns do not by default make use of Unicode properties, but can be made to
+  do so by setting the PCRE2_UCP option or starting a pattern with (*UCP).
 
 . You can build PCRE2 to recognize either CR or LF or the sequence CRLF, or any
   of the preceding, or any of the Unicode newline sequences, or the NUL (zero)
@@ -411,7 +417,7 @@ The "configure" script builds the following files for the basic C library:
 . Makefile             the makefile that builds the library
 . src/config.h         build-time configuration options for the library
 . src/pcre2.h          the public PCRE2 header file
-. pcre2-config          script that shows the building settings such as CFLAGS
+. pcre2-config         script that shows the building settings such as CFLAGS
                          that were set for "configure"
 . libpcre2-8.pc        )
 . libpcre2-16.pc       ) data for the pkg-config command
@@ -571,9 +577,9 @@ at build time" for more details.
 Making new tarballs
 -------------------
 
-The command "make dist" creates two PCRE2 tarballs, in tar.gz and zip formats.
-The command "make distcheck" does the same, but then does a trial build of the
-new distribution to ensure that it works.
+The command "make dist" creates three PCRE2 tarballs, in tar.gz, tar.bz2, and
+zip formats. The command "make distcheck" does the same, but then does a trial
+build of the new distribution to ensure that it works.
 
 If you have modified any of the man page sources in the doc directory, you
 should first run the PrepareRelease script before making a distribution. This
@@ -602,13 +608,13 @@ is available. RunTest outputs a comment when it skips a test.
 
 Many (but not all) of the tests that are not skipped are run twice if JIT
 support is available. On the second run, JIT compilation is forced. This
-testing can be suppressed by putting "nojit" on the RunTest command line.
+testing can be suppressed by putting "-nojit" on the RunTest command line.
 
 The entire set of tests is run once for each of the 8-bit, 16-bit and 32-bit
 libraries that are enabled. If you want to run just one set of tests, call
 RunTest with either the -8, -16 or -32 option.
 
-If valgrind is installed, you can run the tests under it by putting "valgrind"
+If valgrind is installed, you can run the tests under it by putting "-valgrind"
 on the RunTest command line. To run pcre2test on just one or more specific test
 files, give their numbers as arguments to RunTest, for example:
 
@@ -905,4 +911,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 29 October 2021
+Last updated: 15 April 2022

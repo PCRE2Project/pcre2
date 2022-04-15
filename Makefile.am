@@ -667,6 +667,7 @@ EXTRA_DIST += \
   testdata/testinput23 \
   testdata/testinput24 \
   testdata/testinput25 \
+  testdata/testinput26 \
   testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -709,6 +710,7 @@ EXTRA_DIST += \
   testdata/testoutput23 \
   testdata/testoutput24 \
   testdata/testoutput25 \
+  testdata/testoutput26 \
   testdata/testoutputEBC \
   testdata/valgrind-jit.supp \
   testdata/wintestinput3 \

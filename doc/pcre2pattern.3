@@ -772,7 +772,7 @@ can be used in any mode, though in 8-bit and 16-bit non-UTF modes these
 sequences are of course limited to testing characters whose code points are
 less than U+0100 and U+10000, respectively. In 32-bit non-UTF mode, code points
 greater than 0x10ffff (the Unicode limit) may be encountered. These are all
-treated as being in the Unknown script and with an unassigned type. 
+treated as being in the Unknown script and with an unassigned type.
 .P
 Matching characters by Unicode property is not fast, because PCRE2 has to do a
 multistage table lookup in order to find a character's property. That is why
@@ -818,12 +818,12 @@ interpretation at release 5.26 and PCRE2 changed at release 10.40.
 .P
 Unassigned characters (and in non-UTF 32-bit mode, characters with code points
 greater than 0x10FFFF) are assigned the "Unknown" script. Others that are not
-part of an identified script are lumped together as "Common". The current list 
-of recognized script names and their 4-character abbreviations can be obtained 
+part of an identified script are lumped together as "Common". The current list
+of recognized script names and their 4-character abbreviations can be obtained
 by running this command:
 .sp
   pcre2test -LS
-.sp   
+.sp
 .
 .
 .

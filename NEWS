@@ -2,6 +2,38 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.40 15-April-2022
+---------------------------
+
+This is mostly a bug-fixing and code-tidying release. However, there are some
+extensions to Unicode property handling:
+
+* Added support for Bidi_Class and a number of binary Unicode properties,
+including Bidi_Control.
+
+* A number of changes to script matching for \p and \P:
+
+  (a) Script extensions for a character are now coded as a bitmap instead of
+      a list of script numbers, which should be faster and does not need a
+      loop.
+
+  (b) Added the syntax \p{script:xxx} and \p{script_extensions:xxx} (synonyms
+      sc and scx).
+
+  (c) Changed \p{scriptname} from being the same as \p{sc:scriptname} to being
+      the same as \p{scx:scriptname} because this change happened in Perl at
+      release 5.26.
+
+  (d) The standard Unicode 4-letter abbreviations for script names are now
+      recognized.
+
+  (e) In accordance with Unicode and Perl's "loose matching" rules, spaces,
+      hyphens, and underscores are ignored in property names, which are then
+      matched independent of case.
+
+As always, see ChangeLog for a list of all changes (also the Git log).
+
+
 Version 10.39 29-October-2021
 -----------------------------
 

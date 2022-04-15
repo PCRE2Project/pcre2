@@ -135,7 +135,7 @@ while ((t = *data++) != XCL_END)
     {
     const ucd_record *prop = GET_UCD(c);
     BOOL isprop = t == XCL_PROP;
-    BOOL ok; 
+    BOOL ok;
 
     switch(*data)
       {
@@ -213,17 +213,17 @@ while ((t = *data++) != XCL_END)
           return !negated;
         }
       break;
-      
+
       case PT_BIDICL:
       if ((UCD_BIDICLASS_PROP(prop) == data[1]) == isprop)
         return !negated;
-      break;    
-      
+      break;
+
       case PT_BOOL:
-      ok = MAPBIT(PRIV(ucd_boolprop_sets) + 
+      ok = MAPBIT(PRIV(ucd_boolprop_sets) +
         UCD_BPROPS_PROP(prop), data[1]) != 0;
       if (ok == isprop) return !negated;
-      break;  
+      break;
 
       /* The following three properties can occur only in an XCLASS, as there
       is no \p or \P coding for them. */

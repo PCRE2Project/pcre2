@@ -2,8 +2,8 @@ Change Log for PCRE2
 --------------------
 
 
-Version 10.40-RC1 xx-xxx-2021
------------------------------
+Version 10.40 15-April-2022
+---------------------------
 
 1. Merged patch from @carenas (GitHub #35, 7db87842) to fix pcre2grep incorrect
 handling of multiple passes.
@@ -39,8 +39,8 @@ pcre2_substitute(), and the replacement argument of the latter, if the pointer
 is NULL and the length is zero, treat as an empty string. Apparently a number
 of applications treat NULL/0 in this way.
 
-14. Added support for Bidi_Class and a number of binary Unicode properties, 
-including Bidi_Control. 
+14. Added support for Bidi_Class and a number of binary Unicode properties,
+including Bidi_Control.
 
 15. Fix some minor issues raised by clang sanitize.
 
@@ -58,13 +58,13 @@ including Bidi_Control.
     (c) Changed \p{scriptname} from being the same as \p{sc:scriptname} to being
         the same as \p{scx:scriptname} because this change happened in Perl at
         release 5.26.
-        
-    (d) The standard Unicode 4-letter abbreviations for script names are now 
+
+    (d) The standard Unicode 4-letter abbreviations for script names are now
         recognized.
-        
+
     (e) In accordance with Unicode and Perl's "loose matching" rules, spaces,
-        hyphens, and underscores are ignored in property names, which are then 
-        matched independent of case. 
+        hyphens, and underscores are ignored in property names, which are then
+        matched independent of case.
 
 18. The Python scripts in the maint directory have been refactored. There are
 now three scripts that generate pcre2_ucd.c, pcre2_ucp.h, and pcre2_ucptables.c
@@ -83,7 +83,7 @@ Clarke PR#72.
 
 20. Added -LP and -LS listing options to pcre2test.
 
-21. A user discovered that the library names in CMakeLists.txt for MSVC 
+21. A user discovered that the library names in CMakeLists.txt for MSVC
 debugger (PDB) files were incorrect - perhaps never tried for PCRE2?
 
 22. An item such as [Aa] is optimized into a caseless single character match.
@@ -98,12 +98,12 @@ fully read in caseless matching.
 24. Fixed an issue affecting recursions in JIT caused by duplicated data
 transfers.
 
-25. Merged patch from @carenas (GitHub #96) which fixes some problems with 
+25. Merged patch from @carenas (GitHub #96) which fixes some problems with
 pcre2test and readline/readedit:
 
   * Use the right header for libedit in FreeBSD with autoconf
   * Really allow libedit with cmake
-  * Avoid using readline headers with libedit 
+  * Avoid using readline headers with libedit
 
 
 Version 10.39 29-October-2021

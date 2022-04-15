@@ -8502,6 +8502,7 @@ static void
 display_properties(BOOL wantscripts)
 {
 #ifndef SUPPORT_UNICODE
+(void)wantscripts;
 printf("** This version of PCRE2 was compiled without Unicode support.\n");
 #else
 

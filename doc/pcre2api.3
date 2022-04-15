@@ -2624,8 +2624,8 @@ The subject string is passed to \fBpcre2_match()\fP as a pointer in
 \fIstartoffset\fP. The length and offset are in code units, not characters.
 That is, they are in bytes for the 8-bit library, 16-bit code units for the
 16-bit library, and 32-bit code units for the 32-bit library, whether or not
-UTF processing is enabled. As a special case, if \fIsubject\fP is NULL and 
-\fIlength\fP is zero, the subject is assumed to be an empty string. If 
+UTF processing is enabled. As a special case, if \fIsubject\fP is NULL and
+\fIlength\fP is zero, the subject is assumed to be an empty string. If
 \fIlength\fP is non-zero, an error occurs if \fIsubject\fP is NULL.
 .P
 If \fIstartoffset\fP is greater than the length of the subject,

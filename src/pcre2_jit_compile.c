@@ -7605,7 +7605,7 @@ while (*cc != XCL_END)
         break;
         }
       compares++;
-      /* Fall through */ 
+      /* Fall through */
 
       case PT_SC:
       unicode_status |= XCLASS_HAS_SCRIPT;
@@ -7846,7 +7846,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
           case PT_SCX:
           if (cc[-1] == XCL_NOTPROP)
             break;
-          /* Fall through */ 
+          /* Fall through */
 
           case PT_SC:
           compares--;
