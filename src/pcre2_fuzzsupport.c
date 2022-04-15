@@ -148,6 +148,9 @@ for (i = 0; i < 2; i++)
 
   if (code != NULL)
     {
+#ifdef SUPPORT_JIT
+    pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
+#endif
     int j;
     uint32_t save_match_options = match_options;
 
