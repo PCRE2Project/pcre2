@@ -148,11 +148,12 @@ for (i = 0; i < 2; i++)
 
   if (code != NULL)
     {
+    int j;
+    uint32_t save_match_options = match_options;
+
 #ifdef SUPPORT_JIT
     pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
 #endif
-    int j;
-    uint32_t save_match_options = match_options;
 
     /* Create match data and context blocks only when we first need them. Set
     low match and depth limits to avoid wasting too much searching large
