@@ -1998,7 +1998,7 @@ static int run_invalid_utf8_test(const struct invalid_utf8_regression_test_case 
 	int pattern_index, int i, pcre2_compile_context_8 *ccontext, pcre2_match_data_8 *mdata)
 {
 	pcre2_code_8 *code;
-	int result, errorcode;
+	int result;
 	PCRE2_SIZE length, erroroffset;
 	PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_8(mdata);
 
@@ -2006,7 +2006,7 @@ static int run_invalid_utf8_test(const struct invalid_utf8_regression_test_case 
 		return 1;
 
 	code = pcre2_compile_8((PCRE2_UCHAR8*)current->pattern[i], PCRE2_ZERO_TERMINATED,
-		current->compile_options, &errorcode, &erroroffset, ccontext);
+		current->compile_options, NULL, &erroroffset, ccontext);
 
 	if (!code) {
 		printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
@@ -2207,7 +2207,7 @@ static int run_invalid_utf16_test(const struct invalid_utf16_regression_test_cas
 	int pattern_index, int i, pcre2_compile_context_16 *ccontext, pcre2_match_data_16 *mdata)
 {
 	pcre2_code_16 *code;
-	int result, errorcode;
+	int result;
 	PCRE2_SIZE length, erroroffset;
 	const PCRE2_UCHAR16 *input;
 	PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_16(mdata);
@@ -2216,7 +2216,7 @@ static int run_invalid_utf16_test(const struct invalid_utf16_regression_test_cas
 		return 1;
 
 	code = pcre2_compile_16(current->pattern[i], PCRE2_ZERO_TERMINATED,
-		current->compile_options, &errorcode, &erroroffset, ccontext);
+		current->compile_options, NULL, &erroroffset, ccontext);
 
 	if (!code) {
 		printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
@@ -2394,7 +2394,7 @@ static int run_invalid_utf32_test(const struct invalid_utf32_regression_test_cas
 	int pattern_index, int i, pcre2_compile_context_32 *ccontext, pcre2_match_data_32 *mdata)
 {
 	pcre2_code_32 *code;
-	int result, errorcode;
+	int result;
 	PCRE2_SIZE length, erroroffset;
 	const PCRE2_UCHAR32 *input;
 	PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_32(mdata);
@@ -2403,7 +2403,7 @@ static int run_invalid_utf32_test(const struct invalid_utf32_regression_test_cas
 		return 1;
 
 	code = pcre2_compile_32(current->pattern[i], PCRE2_ZERO_TERMINATED,
-		current->compile_options, &errorcode, &erroroffset, ccontext);
+		current->compile_options, NULL, &erroroffset, ccontext);
 
 	if (!code) {
 		printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);

@@ -9812,17 +9812,17 @@ PCRE2_UCHAR *cworkspace = (PCRE2_UCHAR *)c16workspace;
 
 /* -------------- Check arguments and set up the pattern ----------------- */
 
-/* There must be error code and offset pointers. */
+/* There must be an error offset pointer. */
 
-if (errorptr == NULL || erroroffset == NULL) return NULL;
-*errorptr = ERR0;
+if (erroroffset == NULL) return NULL;
+if (errorptr) *errorptr = ERR0;
 *erroroffset = 0;
 
 /* There must be a pattern! */
 
 if (pattern == NULL)
   {
-  *errorptr = ERR16;
+  if (errorptr) *errorptr = ERR16;
   return NULL;
   }
 
@@ -9840,7 +9840,7 @@ if ((options & PCRE2_MATCH_INVALID_UTF) != 0) options |= PCRE2_UTF;
 if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0 ||
     (ccontext->extra_options & ~PUBLIC_COMPILE_EXTRA_OPTIONS) != 0)
   {
-  *errorptr = ERR17;
+  if (errorptr) *errorptr = ERR17;
   return NULL;
   }
 
@@ -9848,7 +9848,7 @@ if ((options & PCRE2_LITERAL) != 0 &&
     ((options & ~PUBLIC_LITERAL_COMPILE_OPTIONS) != 0 ||
      (ccontext->extra_options & ~PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS) != 0))
   {
-  *errorptr = ERR92;
+  if (errorptr) *errorptr = ERR92;
   return NULL;
   }
 
@@ -9860,7 +9860,7 @@ if ((zero_terminated = (patlen == PCRE2_ZERO_TERMINATED)))
 
 if (patlen > ccontext->max_pattern_length)
   {
-  *errorptr = ERR88;
+  if (errorptr) *errorptr = ERR88;
   return NULL;
   }
 
@@ -10144,7 +10144,7 @@ if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
     (parsed_size_needed + 1) * sizeof(uint32_t), ccontext->memctl.memory_data);
   if (heap_parsed_pattern == NULL)
     {
-    *errorptr = ERR21;
+    if (errorptr) *errorptr = ERR21;
     goto EXIT;
     }
   cb.parsed_pattern = heap_parsed_pattern;
@@ -10614,7 +10614,7 @@ HAD_EARLY_ERROR:
 *erroroffset = ptr - pattern;
 
 HAD_ERROR:
-*errorptr = errorcode;
+if (errorptr) *errorptr = errorcode;
 pcre2_code_free(re);
 re = NULL;
 goto EXIT;
