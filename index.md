@@ -14,14 +14,14 @@ flexible API, the code of PCRE2 has been much improved since the fork.
 ## Download
 
 As well as downloading from the 
-[GitHub site](https://github.com/PhilipHazel/pcre2), you can download PCRE2 
+[GitHub site](https://github.com/PCRE2Project/pcre2), you can download PCRE2 
 or the older, unmaintained PCRE1 library from an 
 [*unofficial* mirror](https://sourceforge.net/projects/pcre/files/) at SourceForge.
 
 You can check out the PCRE2 source code via Git or Subversion:
 
-    git clone https://github.com/PhilipHazel/pcre2.git
-    svn co    https://github.com/PhilipHazel/pcre2.git
+    git clone https://github.com/PCRE2Project/pcre2.git
+    svn co    https://github.com/PCRE2Project/pcre2.git
 
 ## Contributed Ports
 
@@ -36,7 +36,7 @@ default character encoding, can be found at
 ## Documentation
 
 You can read the PCRE2 documentation 
-[here](https://philiphazel.github.io/pcre2/doc/html/index.html).
+[here](https://PCRE2Project.github.io/pcre2/doc/html/index.html).
 
 Comparisons to Perl's regular expression semantics can be found in the
 community authored Wikipedia entry for PCRE.

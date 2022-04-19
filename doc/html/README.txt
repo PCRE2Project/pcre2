@@ -8,7 +8,7 @@ features, and the internals have been improved. The original PCRE1 library is
 now obsolete and no longer maintained. The latest release of PCRE2 is available
 in .tar.gz, tar.bz2, or .zip form from this GitHub repository:
 
-https://github.com/PhilipHazel/pcre2/releases
+https://github.com/PCRE2Project/pcre2/releases
 
 There is a mailing list for discussion about the development of PCRE2 at
 pcre2-dev@googlegroups.com. You can subscribe by sending an email to
