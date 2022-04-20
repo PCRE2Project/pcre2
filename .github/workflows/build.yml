@@ -21,3 +21,21 @@ jobs:
         
       - name: Test
         run: make check
+
+  windows:
+    name: 32bit Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -B build -A Win32
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: |
+          cd build\Debug
+          ..\..\RunTest.bat
