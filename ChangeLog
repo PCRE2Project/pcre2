@@ -9,6 +9,8 @@ Version 10.41 xx-xxx-2022
 to be the same on all systems. (THere were previously ordering differences in 
 Alpine Linux).
 
+2. Merged patch from @carenas (GitHub #110) for pthreads support in CMake.
+
 
 Version 10.40 15-April-2022
 ---------------------------
