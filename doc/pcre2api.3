@@ -1323,8 +1323,7 @@ If \fIerrorcode\fP or \fIerroroffset\fP is NULL, \fBpcre2_compile()\fP returns
 NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
 respectively, when \fBpcre2_compile()\fP returns NULL because a compilation
-error has occurred. The values are both zero when compilation is successful
-and \fBpcre2_compile()\fP returns a non-NULL value.
+error has occurred. 
 .P
 There are nearly 100 positive error codes that \fBpcre2_compile()\fP may return
 if it finds an error in the pattern. There are also some negative error codes
@@ -1343,14 +1342,17 @@ message"
 below)
 .\"
 should be self-explanatory. Macro names starting with PCRE2_ERROR_ are defined
-for both positive and negative error codes in \fBpcre2.h\fP.
+for both positive and negative error codes in \fBpcre2.h\fP. When compilation
+is successful \fIerrorcode\fP is set to a value that returns the message "no
+error" if passed to \fBpcre2_get_error_message()\fP.
 .P
 The value returned in \fIerroroffset\fP is an indication of where in the
-pattern the error occurred. It is not necessarily the furthest point in the
-pattern that was read. For example, after the error "lookbehind assertion is
-not fixed length", the error offset points to the start of the failing
-assertion. For an invalid UTF-8 or UTF-16 string, the offset is that of the
-first code unit of the failing character.
+pattern an error occurred. When there is no error, zero is returned. A non-zero
+value is not necessarily the furthest point in the pattern that was read. For
+example, after the error "lookbehind assertion is not fixed length", the error
+offset points to the start of the failing assertion. For an invalid UTF-8 or
+UTF-16 string, the offset is that of the first code unit of the failing
+character.
 .P
 Some errors are not detected until the whole pattern has been scanned; in these
 cases, the offset passed back is the length of the pattern. Note that the

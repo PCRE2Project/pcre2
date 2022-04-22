@@ -1372,27 +1372,29 @@ COMPILING A PATTERN
        diately. Otherwise, the variables to which these point are  set  to  an
        error code and an offset (number of code units) within the pattern, re-
        spectively, when pcre2_compile() returns NULL because a compilation er-
-       ror has occurred. The values are both zero when compilation is success-
-       ful and pcre2_compile() returns a non-NULL value.
+       ror has occurred.
 
-       There are nearly 100 positive error codes that pcre2_compile() may  re-
-       turn  if it finds an error in the pattern. There are also some negative
-       error codes that are used for invalid UTF strings when validity  check-
-       ing  is  in  force.  These  are  the same as given by pcre2_match() and
+       There  are nearly 100 positive error codes that pcre2_compile() may re-
+       turn if it finds an error in the pattern. There are also some  negative
+       error  codes that are used for invalid UTF strings when validity check-
+       ing is in force. These are the  same  as  given  by  pcre2_match()  and
        pcre2_dfa_match(), and are described in the pcre2unicode documentation.
-       There  is  no  separate documentation for the positive error codes, be-
-       cause the textual error messages  that  are  obtained  by  calling  the
+       There is no separate documentation for the positive  error  codes,  be-
+       cause  the  textual  error  messages  that  are obtained by calling the
        pcre2_get_error_message() function (see "Obtaining a textual error mes-
-       sage" below) should be  self-explanatory.  Macro  names  starting  with
-       PCRE2_ERROR_  are defined for both positive and negative error codes in
-       pcre2.h.
+       sage"  below)  should  be  self-explanatory.  Macro names starting with
+       PCRE2_ERROR_ are defined for both positive and negative error codes  in
+       pcre2.h.  When  compilation  is  successful errorcode is set to a value
+       that returns the message "no error" if passed  to  pcre2_get_error_mes-
+       sage().
 
        The value returned in erroroffset is an indication of where in the pat-
-       tern  the  error  occurred. It is not necessarily the furthest point in
-       the pattern that was read. For example, after the error "lookbehind as-
-       sertion  is  not fixed length", the error offset points to the start of
-       the failing assertion. For an invalid UTF-8 or UTF-16 string, the  off-
-       set is that of the first code unit of the failing character.
+       tern an error occurred. When there is no error,  zero  is  returned.  A
+       non-zero  value  is  not  necessarily the furthest point in the pattern
+       that was read. For example, after the error  "lookbehind  assertion  is
+       not  fixed length", the error offset points to the start of the failing
+       assertion. For an invalid UTF-8 or UTF-16 string, the offset is that of
+       the first code unit of the failing character.
 
        Some  errors are not detected until the whole pattern has been scanned;
        in these cases, the offset passed back is the length  of  the  pattern.
