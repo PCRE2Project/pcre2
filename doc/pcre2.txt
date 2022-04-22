@@ -1372,8 +1372,8 @@ COMPILING A PATTERN
        diately. Otherwise, the variables to which these point are  set  to  an
        error code and an offset (number of code units) within the pattern, re-
        spectively, when pcre2_compile() returns NULL because a compilation er-
-       ror  has  occurred. The values are not defined when compilation is suc-
-       cessful and pcre2_compile() returns a non-NULL value.
+       ror has occurred. The values are both zero when compilation is success-
+       ful and pcre2_compile() returns a non-NULL value.
 
        There are nearly 100 positive error codes that pcre2_compile() may  re-
        turn  if it finds an error in the pattern. There are also some negative

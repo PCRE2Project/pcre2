@@ -1383,7 +1383,7 @@ If <i>errorcode</i> or <i>erroroffset</i> is NULL, <b>pcre2_compile()</b> return
 NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
 respectively, when <b>pcre2_compile()</b> returns NULL because a compilation
-error has occurred. The values are not defined when compilation is successful
+error has occurred. The values are both zero when compilation is successful
 and <b>pcre2_compile()</b> returns a non-NULL value.
 </P>
 <P>
