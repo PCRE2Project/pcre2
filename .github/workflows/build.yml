@@ -19,5 +19,40 @@ jobs:
       - name: Build
         run: make
         
-      - name: Test
-        run: make check
+      - name: Test (main test script)
+        run: ./RunTest
+
+      - name: Test (JIT test program)
+        run: ./pcre2_jit_test
+
+      - name: Test (pcre2grep test script)
+        run: ./RunGrepTest
+
+  alpine:
+    name: alpine
+    runs-on: ubuntu-latest
+    container: alpine 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Autotools
+        run: apk add --no-cache automake autoconf gcc libtool make musl-dev 
+        
+      - name: Autogen
+        run: ./autogen.sh
+        
+      - name: Configure
+        run: ./configure --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
+        
+      - name: Build
+        run: make
+        
+      - name: Test (main test script)
+        run: ./RunTest
+
+      - name: Test (JIT test program)
+        run: ./pcre2_jit_test
+
+      - name: Test (pcre2grep test script)
+        run: ./RunGrepTest

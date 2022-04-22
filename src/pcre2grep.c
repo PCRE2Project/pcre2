@@ -13,7 +13,7 @@ distribution because other apparatus is needed to compile pcre2grep for z/OS.
 The header can be found in the special z/OS distribution, which is available
 from www.zaconsultants.net or from www.cbttape.org.
 
-           Copyright (c) 1997-2020 University of Cambridge
+           Copyright (c) 1997-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -2437,7 +2437,11 @@ if (pid == 0)
   exit(1);
   }
 else if (pid > 0)
+  {
+  (void)fflush(stdout); 
   (void)waitpid(pid, &result, 0);
+  (void)fflush(stdout); 
+  } 
 #endif  /* End Windows/VMS/other handling */
 
 free(args);
