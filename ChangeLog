@@ -11,6 +11,11 @@ Alpine Linux).
 
 2. Merged patch from @carenas (GitHub #110) for pthreads support in CMake.
 
+3. SSF scorecards grumbled about possible overflow in an expression in
+pcre2test. It never would have overflowed in practice, but some casts have been 
+added and at the some time there's been some tidying of fprints that output 
+size_t values.
+
 
 Version 10.40 15-April-2022
 ---------------------------
