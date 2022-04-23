@@ -5886,7 +5886,7 @@ static BOOL check_fast_forward_char_pair_simd(compiler_common *common, fast_forw
       while (j < i)
         {
         b_pri = chars[j].last_count;
-        if (b_pri > 2 && a_pri + b_pri >= max_pri)
+        if (b_pri > 2 && (sljit_u32)a_pri + (sljit_u32)b_pri >= max_pri)
           {
           b1 = chars[j].chars[0];
           b2 = chars[j].chars[1];
