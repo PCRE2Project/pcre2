@@ -10620,6 +10620,8 @@ re = NULL;
 goto EXIT;
 }
 
+/* These #undefs are here to enable unity builds with CMake. */
+
 #undef NLBLOCK /* Block containing newline information */
 #undef PSSTART /* Field containing processed string start */
 #undef PSEND   /* Field containing processed string end */

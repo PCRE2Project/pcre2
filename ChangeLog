@@ -1,5 +1,5 @@
-Change Log for PCRE2
---------------------
+Change Log for PCRE2 - see also the Git log
+-------------------------------------------
 
 
 Version 10.41 xx-xxx-2022
@@ -15,6 +15,8 @@ Alpine Linux).
 pcre2test. It never would have overflowed in practice, but some casts have been 
 added and at the some time there's been some tidying of fprints that output 
 size_t values.
+
+4. PR #94 showed up an unused enum in pcre2_convert.c, which is now removed. 
 
 
 Version 10.40 15-April-2022
