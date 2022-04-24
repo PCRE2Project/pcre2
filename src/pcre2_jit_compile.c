@@ -9689,7 +9689,7 @@ BACKTRACK_AS(recurse_backtrack)->matchingpath = LABEL();
 return cc + 1 + LINK_SIZE;
 }
 
-static sljit_s32 SLJIT_FUNC do_callout(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
+static sljit_s32 SLJIT_FUNC do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
 {
 PCRE2_SPTR begin;
 PCRE2_SIZE *ovector;
@@ -9806,7 +9806,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
 /* SLJIT_R0 = arguments */
 OP1(SLJIT_MOV, SLJIT_R1, 0, STACK_TOP, 0);
 GET_LOCAL_BASE(SLJIT_R2, 0, OVECTOR_START);
-sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(32, W, W, W), SLJIT_IMM, SLJIT_FUNC_ADDR(do_callout));
+sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(32, W, W, W), SLJIT_IMM, SLJIT_FUNC_ADDR(do_callout_jit));
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 free_stack(common, callout_arg_size);
 
