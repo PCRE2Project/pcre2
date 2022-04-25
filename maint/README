@@ -78,9 +78,9 @@ utf8.c
   A short, freestanding C program for converting a Unicode code point into a
   sequence of bytes in the UTF-8 encoding, and vice versa. If its argument is a
   hex number such as 0x1234, it outputs a list of the equivalent UTF-8 bytes.
-  If its argument is a sequence of concatenated UTF-8 bytes (e.g. e188b4) it
-  treats them as a UTF-8 character and outputs the equivalent code point in
-  hex. See comments at its head for details.
+  If its argument is a sequence of concatenated UTF-8 bytes (e.g. 12e188b4) it
+  treats them as a UTF-8 string and outputs the equivalent code points in hex.
+  See comments at its head for details.
 
 
 Updating to a new Unicode release
@@ -94,8 +94,9 @@ directory.
 Note: Previously, it was necessary to update lists of scripts and their 
 abbreviations by hand before running the Python scripts. This is no longer
 necessary because the scripts have been upgraded to extract this information
-themselves. Also, there used to be explicit lists of script in two of the man
-pages. This is no longer the case.
+themselves. Also, there used to be explicit lists of scripts in two of the man
+pages. This is no longer the case; the pcre2test program can now output a list 
+of supported scripts.
 
 You can give an output file name as an argument to the following scripts, but
 by default:
@@ -129,8 +130,8 @@ files should eventually be installed in the main testdata directory.
 Preparing for a PCRE2 release
 =============================
 
-This section contains a checklist of things that I consult before building a
-distribution for a new release.
+This section contains a checklist of things that I do before building a new
+release.
 
 . Ensure that the version number and version date are correct in configure.ac.
 
@@ -139,17 +140,16 @@ distribution for a new release.
 
 . If new build options or new source files have been added, ensure that they
   are added to the CMake files as well as to the autoconf files. The relevant
-  files are CMakeLists.txt and config-cmake.h.in. After making a release
-  tarball, test it out with CMake if there have been changes here.
+  files are CMakeLists.txt and config-cmake.h.in. After making a release, test
+  it out with CMake if there have been changes here.
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
 . Compile and test with many different config options, and combinations of
   options. Also, test with valgrind by running "RunTest valgrind" and
-  "RunGrepTest valgrind" (which takes quite a long time). The script
-  maint/ManyConfigTests now encapsulates this testing. It runs tests with
-  different configurations, and it also runs some of them with valgrind, all of
-  which can take quite some time.
+  "RunGrepTest valgrind". The script maint/ManyConfigTests now encapsulates
+  this testing. It runs tests with different configurations, and it also runs
+  some of them with valgrind, all of which can take quite some time.
 
 . Run tests in both 32-bit and 64-bit environments if possible. I can no longer
   run 32-bit tests.
@@ -164,7 +164,8 @@ distribution for a new release.
   -fsanitize=signed-integer-overflow
 
 . Do a test build using CMake. Remove src/config.h first, lest it override the
-  version that CMake creates. Do NOT use parallel make.
+  version that CMake creates. Also do a CMake unity build to check that it 
+  still works: [c]cmake -DCMAKE_UNITY_BUILD=ON sets up a unity build.
 
 . Run perltest.sh on the test data for tests 1 and 4. The output should match
   the PCRE2 test output, apart from the version identification at the start of
@@ -183,11 +184,12 @@ distribution for a new release.
   systems. For example, on Solaris it is helpful to test using Sun's cc
   compiler as a change from gcc. Adding -xarch=v9 to the cc options does a
   64-bit test, but it also needs -S 64 for pcre2test to increase the stack size
-  for test 2. Since I retired I can no longer do much of this, but instead I
-  rely on putting out release candidates for testing by the community.
+  for test 2. Since I retired I can no longer do much of this. There are 
+  automated tests under Ubuntu, Alpine, and Windows that are now set up as 
+  GitHub actions. Check that they are running clean.
 
 . The buildbots at http://buildfarm.opencsw.org/ do some automated testing
-  of PCRE2 and should be checked before putting out a release.
+  of PCRE2 and should also be checked before putting out a release.
 
 
 Updating version info for libtool
@@ -243,10 +245,11 @@ it reports them and then aborts. Otherwise it removes trailing spaces from
 sources and refreshes the HTML documentation. Update the GitHub repository with
 "git push".
 
-Once PrepareRelease has run clean, run "make distcheck" to create the tarball
+Once PrepareRelease has run clean, run "make distcheck" to create the tarballs
 and the zipball. I then sign these files. Double-check with "git status" that
-the repository is fully up-to-date, then create a new tag on GitHub. Upload the
-tarball, zipball, and the signatures as "assets" of the GitHub release.
+the repository is fully up-to-date, then create a new tag and a release on
+GitHub. Upload the tarballs, zipball, and the signatures as "assets" of the
+GitHub release.
 
 When the new release is out, don't forget to tell webmaster@pcre.org and the
 mailing list.
@@ -365,8 +368,6 @@ years.
 
   See Unicode TR 29. The last two are very much aimed at natural language.
 
-. (?[...]) extended classes: big project.
-
 . Allow a callout to specify a number of characters to skip. This can be done
   compatibly via an extra callout field.
 
@@ -436,13 +437,8 @@ years.
   with lookarounds for \b and \B. Ideally the setting should last till the end
   of the group, which means remembering all previous settings; maybe a fixed
   amount of stack would do - how deep would anyone want to nest these things?
-  See GitHub issue #13 for a compendium of character class issues.
-
-. Recognize the short script names. They are already listed in maint/
-  Multistage2.py because they are needed for scanning the script extensions
-  file.
-
-. Use script extensions for \p?
+  See GitHub issue #13 for a compendium of character class issues, including
+  (?[...]) extended classes.
 
 . A user suggested something like --with-build-info to set a build information
   string that could be retrieved by pcre2_config(). However, there's no
@@ -461,4 +457,4 @@ years.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 10 January 2022
+Last updated: 25 April 2022
