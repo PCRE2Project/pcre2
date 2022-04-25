@@ -546,7 +546,6 @@ int script = -1;
 int type = -1;
 int gbreak = -1;
 int bidiclass = -1;
-BOOL bidicontrol = FALSE;
 BOOL script_not = FALSE;
 BOOL type_not = FALSE;
 BOOL gbreak_not = FALSE;
@@ -559,12 +558,10 @@ while (*s != 0)
   {
   unsigned int offset = 0;
   BOOL scriptx_not = FALSE;
-  char *value_start;
 
   for (t = name; *s != 0 && !isspace(*s); s++) *t++ = *s;
   *t = 0;
   while (isspace(*s)) s++;
-  value_start = s;
 
   for (t = value; *s != 0 && !isspace(*s); s++) 
     {
