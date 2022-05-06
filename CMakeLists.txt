@@ -658,6 +658,8 @@ IF(MINGW AND BUILD_SHARED_LIBS)
 ENDIF(MINGW AND BUILD_SHARED_LIBS)
 
 IF(MSVC AND BUILD_SHARED_LIBS)
+  SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-posix.pdb ${dll_pdb_files})
+  SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-posixd.pdb ${dll_pdb_debug_files})
   IF (EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
     SET(PCRE2_SOURCES ${PCRE2_SOURCES} pcre2.rc)
   ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
@@ -757,6 +759,8 @@ IF(PCRE2_BUILD_PCRE2_8)
       OUTPUT_NAME pcre2-posix)
     TARGET_LINK_LIBRARIES(pcre2-posix-shared pcre2-8-shared)
     SET(targets ${targets} pcre2-posix-shared)
+    SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-8.pdb ${dll_pdb_files})
+    SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-8d.pdb ${dll_pdb_debug_files})
 
     IF(MINGW)
       IF(NON_STANDARD_LIB_PREFIX)
@@ -819,6 +823,8 @@ IF(PCRE2_BUILD_PCRE2_16)
       TARGET_LINK_LIBRARIES(pcre2-16-shared Threads::Threads)
     ENDIF(REQUIRE_PTHREAD)
     SET(targets ${targets} pcre2-16-shared)
+    SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-16.pdb ${dll_pdb_files})
+    SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-16d.pdb ${dll_pdb_debug_files})
 
     IF(MINGW)
       IF(NON_STANDARD_LIB_PREFIX)
@@ -879,6 +885,8 @@ IF(PCRE2_BUILD_PCRE2_32)
       TARGET_LINK_LIBRARIES(pcre2-32-shared Threads::Threads)
     ENDIF(REQUIRE_PTHREAD)
     SET(targets ${targets} pcre2-32-shared)
+    SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-32.pdb ${dll_pdb_files})
+    SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-32d.pdb ${dll_pdb_debug_files})
 
     IF(MINGW)
       IF(NON_STANDARD_LIB_PREFIX)
@@ -1085,18 +1093,8 @@ INSTALL(FILES ${man3} DESTINATION man/man3)
 INSTALL(FILES ${html} DESTINATION share/doc/pcre2/html)
 
 IF(MSVC AND INSTALL_MSVC_PDB)
- INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre2-8.pdb
-               ${PROJECT_BINARY_DIR}/pcre2-16.pdb
-               ${PROJECT_BINARY_DIR}/pcre2-32.pdb
-               ${PROJECT_BINARY_DIR}/pcre2-posix.pdb
-         DESTINATION bin
-         CONFIGURATIONS RelWithDebInfo)
- INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre2-8d.pdb
-               ${PROJECT_BINARY_DIR}/pcre2-16d.pdb
-               ${PROJECT_BINARY_DIR}/pcre2-32d.pdb
-               ${PROJECT_BINARY_DIR}/pcre2-posixd.pdb
-         DESTINATION bin
-         CONFIGURATIONS Debug)
+ INSTALL(FILES ${dll_pdb_files} DESTINATION bin CONFIGURATIONS RelWithDebInfo)
+ INSTALL(FILES ${dll_pdb_debug_files} DESTINATION bin CONFIGURATIONS Debug)
 ENDIF(MSVC AND INSTALL_MSVC_PDB)
 
 # Help, only for nice output
