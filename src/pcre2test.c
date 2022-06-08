@@ -6763,8 +6763,6 @@ while ((c = *p++) != 0)
     {
     long li;
     char *endptr;
-    size_t qoffset = CAST8VAR(q) - dbuffer;
-    size_t rep_offset = start_rep - dbuffer;
 
     if (*p++ != '{')
       {
@@ -6798,6 +6796,8 @@ while ((c = *p++) != 0)
 
     if (needlen >= dbuffer_size)
       {
+      size_t qoffset = CAST8VAR(q) - dbuffer;
+      size_t rep_offset = start_rep - dbuffer;
       while (needlen >= dbuffer_size) dbuffer_size *= 2;
       dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
       if (dbuffer == NULL)

@@ -18,6 +18,9 @@ size_t values.
 
 4. PR #94 showed up an unused enum in pcre2_convert.c, which is now removed. 
 
+5. Minor code re-arrangement to remove gcc warning about realloc() in 
+pcre2test.
+
 
 Version 10.40 15-April-2022
 ---------------------------
