@@ -21,6 +21,9 @@ size_t values.
 5. Minor code re-arrangement to remove gcc warning about realloc() in 
 pcre2test.
 
+6. Change a number of int variables that hold buffer and line lengths in
+pcre2grep to PCRE2_SIZE (aka size_t).
+
 
 Version 10.40 15-April-2022
 ---------------------------
