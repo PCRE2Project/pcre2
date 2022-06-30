@@ -24,6 +24,11 @@ pcre2test.
 6. Change a number of int variables that hold buffer and line lengths in
 pcre2grep to PCRE2_SIZE (aka size_t).
 
+7. Added an #ifdef to cut out a call to PRIV(jit_free) when JIT is not 
+supported (even though that function would do nothing in that case) at the 
+request of a user who doesn't even want to link with pcre_jit_compile.o. Also 
+tidied up an untidy #ifdef arrangement in pcre2test.
+
 
 Version 10.40 15-April-2022
 ---------------------------

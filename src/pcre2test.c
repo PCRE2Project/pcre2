@@ -4755,19 +4755,19 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
     {
+#ifdef SUPPORT_JIT
     if (FLD(compiled_code, executable_jit) != NULL)
       fprintf(outfile, "JIT compilation was successful\n");
     else
       {
-#ifdef SUPPORT_JIT
       fprintf(outfile, "JIT compilation was not successful");
       if (jitrc != 0 && !print_error_message(jitrc, " (", ")"))
         return PR_ABEND;
       fprintf(outfile, "\n");
+      }
 #else
       fprintf(outfile, "JIT support is not available in this version of PCRE2\n");
 #endif
-      }
     }
   }
 

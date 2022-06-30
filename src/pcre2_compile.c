@@ -1266,8 +1266,10 @@ PCRE2_SIZE* ref_count;
 
 if (code != NULL)
   {
+#ifdef SUPPORT_JIT   
   if (code->executable_jit != NULL)
     PRIV(jit_free)(code->executable_jit, &code->memctl);
+#endif
 
   if ((code->flags & PCRE2_DEREF_TABLES) != 0)
     {
