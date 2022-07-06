@@ -6,27 +6,27 @@ Version 10.41 xx-xxx-2022
 -------------------------
 
 1. Add fflush() before and after a fork callout in pcre2grep to get its output
-to be the same on all systems. (THere were previously ordering differences in 
+to be the same on all systems. (THere were previously ordering differences in
 Alpine Linux).
 
 2. Merged patch from @carenas (GitHub #110) for pthreads support in CMake.
 
 3. SSF scorecards grumbled about possible overflow in an expression in
-pcre2test. It never would have overflowed in practice, but some casts have been 
-added and at the some time there's been some tidying of fprints that output 
+pcre2test. It never would have overflowed in practice, but some casts have been
+added and at the some time there's been some tidying of fprints that output
 size_t values.
 
-4. PR #94 showed up an unused enum in pcre2_convert.c, which is now removed. 
+4. PR #94 showed up an unused enum in pcre2_convert.c, which is now removed.
 
-5. Minor code re-arrangement to remove gcc warning about realloc() in 
+5. Minor code re-arrangement to remove gcc warning about realloc() in
 pcre2test.
 
 6. Change a number of int variables that hold buffer and line lengths in
 pcre2grep to PCRE2_SIZE (aka size_t).
 
-7. Added an #ifdef to cut out a call to PRIV(jit_free) when JIT is not 
-supported (even though that function would do nothing in that case) at the 
-request of a user who doesn't even want to link with pcre_jit_compile.o. Also 
+7. Added an #ifdef to cut out a call to PRIV(jit_free) when JIT is not
+supported (even though that function would do nothing in that case) at the
+request of a user who doesn't even want to link with pcre_jit_compile.o. Also
 tidied up an untidy #ifdef arrangement in pcre2test.
 
 
@@ -120,7 +120,7 @@ pattern, the optimizing "must be present for a match" character check was not
 being flagged as caseless, causing some matches that should have succeeded to
 fail.
 
-23. Fixed a unicode properrty matching issue in JIT. The character was not
+23. Fixed a unicode property matching issue in JIT. The character was not
 fully read in caseless matching.
 
 24. Fixed an issue affecting recursions in JIT caused by duplicated data
@@ -147,10 +147,10 @@ Version 10.39 29-October-2021
   honoured if chosen.
 
   prtdiff_t is signed, so use a signed type instead, and make sure
-  that an appropiate width is chosen if pointers are 64bit wide and
+  that an appropriate width is chosen if pointers are 64bit wide and
   long is not (ex: Windows 64bit).
 
-  IMHO removing the cast (and therefore the positibilty of truncation)
+  IMHO removing the cast (and therefore the possibilty of truncation)
   make the code cleaner and the fallback is likely portable enough
   with all 64-bit POSIX systems doing LP64 except for Windows.
 
@@ -201,7 +201,7 @@ Version 10.38 01-October-2021
 -----------------------------
 
 1. Fix invalid single character repetition issues in JIT when the repetition
-is inside a capturing bracket and the bracket is preceeded by character
+is inside a capturing bracket and the bracket is preceded by character
 literals.
 
 2. Installed revised CMake configuration files provided by Jan-Willem Blokland.
@@ -441,7 +441,7 @@ now correctly backtracked, so this unnecessary restriction has been removed.
 
 7. Added PCRE2_SUBSTITUTE_MATCHED.
 
-8. Added (?* and (?<* as synonms for (*napla: and (*naplb: to match another
+8. Added (?* and (?<* as synonyms for (*napla: and (*naplb: to match another
 regex engine. The Perl regex folks are aware of this usage and have made a note
 about it.
 
@@ -872,7 +872,7 @@ Patch by Guillem Jover.
 warnings were reported.
 
 38. Using the clang compiler with sanitizing options causes runtime complaints
-about truncation for statments such as x = ~x when x is an 8-bit value; it
+about truncation for statements such as x = ~x when x is an 8-bit value; it
 seems to compute ~x as a 32-bit value. Changing such statements to x = 255 ^ x
 gets rid of the warnings. There were also two missing casts in pcre2test.
 

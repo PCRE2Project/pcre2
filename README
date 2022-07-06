@@ -696,7 +696,7 @@ Test 14 contains some special UTF and UCP tests that give different output for
 different code unit widths.
 
 Test 15 contains a number of tests that must not be run with JIT. They check,
-among other non-JIT things, the match-limiting features of the intepretive
+among other non-JIT things, the match-limiting features of the interpretive
 matcher.
 
 Test 16 is run only when JIT support is not available. It checks that an
