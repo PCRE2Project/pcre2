@@ -212,7 +212,7 @@ META_THEN             (*THEN) - no argument (see below for with argument)
 
 The two RANGE values occur only in character classes. They are positioned
 between two literals that define the start and end of the range. In an EBCDIC
-evironment it is necessary to know whether either of the range values was
+environment it is necessary to know whether either of the range values was
 specified as an escape. In an ASCII/Unicode environment the distinction is not
 relevant.
 
@@ -233,7 +233,7 @@ their data in the lower 16 bits of the element. META_RECURSE is followed by an
 offset, for use in error messages.
 
 META_BACKREF is followed by an offset if the back reference group number is 10
-or more. The offsets of the first ocurrences of references to groups whose
+or more. The offsets of the first occurrences of references to groups whose
 numbers are less than 10 are put in cb->small_ref_offset[] (only the first
 occurrence is useful). On 64-bit systems this avoids using more than two parsed
 pattern elements for items such as \3. The offset is used when an error occurs

@@ -306,7 +306,7 @@ cache can be deleted by selecting "File > Delete Cache".
 3.  Create a new, empty build directory, preferably a subdirectory of the
     source dir. For example, C:\pcre2\pcre2-xx\build.
 
-4.  Run cmake-gui from the Shell envirornment of your build tool, for example,
+4.  Run cmake-gui from the Shell environment of your build tool, for example,
     Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++. Do not try
     to start Cmake from the Windows Start menu, as this can lead to errors.
 
