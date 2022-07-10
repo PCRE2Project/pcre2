@@ -1248,6 +1248,14 @@ are supported. */
   else \
     G(a,32) = pcre2_match_data_create_32(b,c)
 
+#define PCRE2_MATCH_DATA_CREATE_WITH_FRAMES(a,b,c) \
+  if (test_mode == PCRE8_MODE) \
+    G(a,8) = pcre2_match_data_create_with_frames_8(b,c); \
+  else if (test_mode == PCRE16_MODE) \
+    G(a,16) = pcre2_match_data_create_with_frames_16(b,c); \
+  else \
+    G(a,32) = pcre2_match_data_create_with_frames_32(b,c)
+
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   if (test_mode == PCRE8_MODE) \
     G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c); \
@@ -1766,6 +1774,12 @@ the three different cases. */
   else \
     G(a,BITTWO) = G(pcre2_match_data_create_,BITTWO)(b,c)
 
+#define PCRE2_MATCH_DATA_CREATE_WITH_FRAMES(a,b,c) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(a,BITONE) = G(pcre2_match_data_create_with_frames_,BITONE)(b,c); \
+  else \
+    G(a,BITTWO) = G(pcre2_match_data_create_with_frames_,BITTWO)(b,c)
+
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(a,BITONE) = G(pcre2_match_data_create_from_pattern_,BITONE)(G(b,BITONE),c); \
@@ -2071,6 +2085,8 @@ the three different cases. */
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h)
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,8) = pcre2_match_data_create_8(b,c)
+#define PCRE2_MATCH_DATA_CREATE_WITH_FRAMES(a,b,c) \
+  G(a,8) = pcre2_match_data_create_with_frames_8(b,c)
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
@@ -2178,6 +2194,8 @@ the three different cases. */
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h)
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,16) = pcre2_match_data_create_16(b,c)
+#define PCRE2_MATCH_DATA_CREATE_WITH_FRAMES(a,b,c) \
+  G(a,16) = pcre2_match_data_create_with_frames_16(b,c)
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
@@ -2285,6 +2303,8 @@ the three different cases. */
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h)
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,32) = pcre2_match_data_create_32(b,c)
+#define PCRE2_MATCH_DATA_CREATE_WITH_FRAMES(a,b,c) \
+  G(a,32) = pcre2_match_data_create_with_frames_32(b,c)
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
@@ -7287,7 +7307,7 @@ else
   {
   max_oveccount = dat_datctl.oveccount;
   PCRE2_MATCH_DATA_FREE(match_data);
-  PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
+  PCRE2_MATCH_DATA_CREATE_WITH_FRAMES(match_data, max_oveccount, NULL);
   }
 
 if (CASTVAR(void *, match_data) == NULL)
@@ -9170,7 +9190,7 @@ max_oveccount = DEFAULT_OVECCOUNT;
   G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
   G(default_con_context,BITS) = G(pcre2_convert_context_create_,BITS)(G(general_context,BITS)); \
   G(con_context,BITS) = G(pcre2_convert_context_copy_,BITS)(G(default_con_context,BITS)); \
-  G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
+  G(match_data,BITS) = G(pcre2_match_data_create_with_frames_,BITS)(max_oveccount, G(general_context,BITS))
 
 #define CONTEXTTESTS \
   (void)G(pcre2_set_compile_extra_options_,BITS)(G(pat_context,BITS), 0); \

@@ -6268,35 +6268,10 @@ switch (Freturn_id)
 #undef LBL
 }
 
-
-/*************************************************
-*           Match a Regular Expression           *
-*************************************************/
-
-/* This function applies a compiled pattern to a subject string and picks out
-portions of the string if it matches. Two elements in the vector are set for
-each substring: the offsets to the start and end of the substring.
-
-Arguments:
-  code            points to the compiled expression
-  subject         points to the subject string
-  length          length of subject string (may contain binary zeros)
-  start_offset    where to start in the subject string
-  options         option bits
-  match_data      points to a match_data block
-  mcontext        points a PCRE2 context
-
-Returns:          > 0 => success; value is the number of ovector pairs filled
-                  = 0 => success, but ovector is not big enough
-                  = -1 => failed to match (PCRE2_ERROR_NOMATCH)
-                  = -2 => partial match (PCRE2_ERROR_PARTIAL)
-                  < -2 => some kind of unexpected problem
-*/
-
-PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
+static int
+match_start(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
-  pcre2_match_context *mcontext)
+  pcre2_match_context *mcontext, heapframe *start_frames)
 {
 int rc;
 int was_zero_terminated = 0;
@@ -6354,24 +6329,7 @@ pcre2_callout_block cb;
 match_block actual_match_block;
 match_block *mb = &actual_match_block;
 
-/* Allocate an initial vector of backtracking frames on the stack. If this
-proves to be too small, it is replaced by a larger one on the heap. To get a
-vector of the size required that is aligned for pointers, allocate it as a
-vector of pointers. */
-
-PCRE2_SPTR stack_frames_vector[START_FRAMES_SIZE/sizeof(PCRE2_SPTR)]
-    PCRE2_KEEP_UNINITIALIZED;
-mb->stack_frames = (heapframe *)stack_frames_vector;
-
-/* Recognize NULL, length 0 as an empty string. */
-
-if (subject == NULL && length == 0) subject = (PCRE2_SPTR)"";
-
-/* Plausibility checks */
-
-if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (code == NULL || subject == NULL || match_data == NULL)
-  return PCRE2_ERROR_NULL;
+mb->stack_frames = start_frames;
 
 start_match = subject + start_offset;
 req_cu_ptr = start_match - 1;
@@ -7531,6 +7489,95 @@ else if (match_partial != NULL)
 else match_data->rc = PCRE2_ERROR_NOMATCH;
 
 return match_data->rc;
+}
+
+#if defined(__GNUC__) /* Works for clang/ICC too */
+#define MATCH_START_ON_STACK_NOT_INLINABLE 1
+#define MATCH_START_ON_STACK_NOINLINE __attribute__ ((noinline))
+#elif defined(_MSC_VER)
+#define MATCH_START_ON_STACK_NOT_INLINABLE 1
+#define MATCH_START_ON_STACK_NOINLINE __declspec(noinline)
+#else
+#define MATCH_START_ON_STACK_NOT_INLINABLE 0
+#define MATCH_START_ON_STACK_NOINLINE
+#endif
+
+static MATCH_START_ON_STACK_NOINLINE int
+match_start_on_stack(const pcre2_code *code, PCRE2_SPTR subject,
+ PCRE2_SIZE length, PCRE2_SIZE start_offset, uint32_t options,
+ pcre2_match_data *match_data, pcre2_match_context *mcontext)
+{
+/* Allocate an initial vector of backtracking frames on the stack. If this
+proves to be too small, it is replaced by a larger one on the heap. To get a
+vector of the size required that is aligned for pointers, allocate it as a
+vector of pointers. */
+
+PCRE2_SPTR stack_frames_vector[START_FRAMES_SIZE/sizeof(PCRE2_SPTR)]
+    PCRE2_KEEP_UNINITIALIZED;
+
+return match_start(code, subject, length, start_offset, options, match_data,
+                   mcontext, (heapframe *)stack_frames_vector);
+}
+
+/*************************************************
+*           Match a Regular Expression           *
+*************************************************/
+
+/* This function applies a compiled pattern to a subject string and picks out
+portions of the string if it matches. Two elements in the vector are set for
+each substring: the offsets to the start and end of the substring.
+
+Arguments:
+  code            points to the compiled expression
+  subject         points to the subject string
+  length          length of subject string (may contain binary zeros)
+  start_offset    where to start in the subject string
+  options         option bits
+  match_data      points to a match_data block
+  mcontext        points a PCRE2 context
+
+Returns:          > 0 => success; value is the number of ovector pairs filled
+                  = 0 => success, but ovector is not big enough
+                  = -1 => failed to match (PCRE2_ERROR_NOMATCH)
+                  = -2 => partial match (PCRE2_ERROR_PARTIAL)
+                  < -2 => some kind of unexpected problem
+*/
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
+  PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
+  pcre2_match_context *mcontext)
+{
+/* Recognize NULL, length 0 as an empty string. */
+
+if (subject == NULL && length == 0) subject = (PCRE2_SPTR)"";
+
+/* Plausibility checks */
+
+if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
+if (code == NULL || subject == NULL || match_data == NULL)
+  return PCRE2_ERROR_NULL;
+
+/* Use stack frames only if match_data does not provide ones, playing some
+ * noinline/indirection games to avoid allocating the frames on stack here
+ * when pcre2_match_data_create_with_frames() was used. */
+if (match_data->start_frames == NULL) {
+#if MATCH_START_ON_STACK_NOT_INLINABLE /* garanteed by the compiler */
+  return match_start_on_stack(code, subject, length, start_offset,
+                              options, match_data, mcontext);
+#else /* indirection that prevents inlining */
+  int (*volatile fn)(const pcre2_code*, PCRE2_SPTR, PCRE2_SIZE,
+                     PCRE2_SIZE, uint32_t, pcre2_match_data*,
+                     pcre2_match_context*) = &match_start_on_stack;
+  return (*fn)(code, subject, length, start_offset, options, match_data,
+               mcontext);
+#endif
+}
+
+/* Use initial heap frames from match_data. */
+return match_start(code, subject, length, start_offset,
+                   options, match_data, mcontext,
+                   match_data->start_frames);
 }
 
 /* These #undefs are here to enable unity builds with CMake. */

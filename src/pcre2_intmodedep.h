@@ -615,6 +615,8 @@ here.) */
 #undef  LOOKBEHIND_MAX
 #define LOOKBEHIND_MAX UINT16_MAX
 
+struct heapframe; /* see below */
+
 typedef struct pcre2_real_code {
   pcre2_memctl memctl;            /* Memory control fields */
   const uint8_t *tables;          /* The character tables */
@@ -661,6 +663,7 @@ typedef struct pcre2_real_match_data {
   uint8_t          flags;         /* Various flags */
   uint16_t         oveccount;     /* Number of pairs */
   int              rc;            /* The return code from the match */
+  struct heapframe *start_frames; /* Initial heap frames (NULL for stack) */
   PCRE2_SIZE       ovector[131072]; /* Must be last in the structure */
 } pcre2_real_match_data;
 
