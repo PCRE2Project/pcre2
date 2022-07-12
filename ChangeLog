@@ -29,6 +29,9 @@ supported (even though that function would do nothing in that case) at the
 request of a user who doesn't even want to link with pcre_jit_compile.o. Also
 tidied up an untidy #ifdef arrangement in pcre2test.
 
+8. Fixed an issue in the backtracking optimization of character repeats in
+JIT. Furthermore optimize star repetitions, not just plus repetitions.
+
 
 Version 10.40 15-April-2022
 ---------------------------
