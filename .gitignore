@@ -75,4 +75,6 @@ src/pcre2.h
 src/pcre2_chartables.c
 src/stamp-h1
 
+/bazel-*
+
 # End
