@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "31 August 2021" "PCRE2 10.38"
+.TH PCRE2GREP 1 "27 July 2022" "PCRE2 10.41"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -516,10 +516,7 @@ counter that is incremented each time around its main processing loop. If the
 value set by \fB--match-limit\fP is reached, an error occurs.
 .sp
 The \fB--heap-limit\fP option specifies, as a number of kibibytes (units of
-1024 bytes), the amount of heap memory that may be used for matching. Heap
-memory is needed only if matching the pattern requires a significant number of
-nested backtracking points to be remembered. This parameter can be set to zero
-to forbid the use of heap memory altogether.
+1024 bytes), the maximum amount of heap memory that may be used for matching. 
 .sp
 The \fB--depth-limit\fP option limits the depth of nested backtracking points,
 which indirectly limits the amount of memory that is used. The amount of memory
@@ -960,6 +957,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 31 August 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 27 July 2022
+Copyright (c) 1997-2022 University of Cambridge.
 .fi

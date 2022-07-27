@@ -32,6 +32,19 @@ tidied up an untidy #ifdef arrangement in pcre2test.
 8. Fixed an issue in the backtracking optimization of character repeats in
 JIT. Furthermore optimize star repetitions, not just plus repetitions.
 
+9. Removed the use of an initial backtracking frames vector on the system stack 
+in pcre2_match() so that it now always uses the heap. (In a multi-thread 
+environment with very small stacks there had been an issue.) This also is 
+tidier for JIT matching, which didn't need that vector. The heap vector is now 
+remembered in the match data block and re-used if that block itself is re-used. 
+It is freed with the match data block.
+
+10. Adjusted the find_limits code in pcre2test to work with change 9 above.
+
+11. Added find_limits_noheap to pcre2test, because the heap limits are now 
+different in different environments and so cannot be included in the standard 
+tests.
+
 
 Version 10.40 15-April-2022
 ---------------------------

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,8 @@ yield = PRIV(memctl_malloc)(
 if (yield == NULL) return NULL;
 yield->oveccount = oveccount;
 yield->flags = 0;
+yield->heapframes = NULL;
+yield->heapframes_size = 0;
 return yield;
 }
 
@@ -95,6 +97,9 @@ pcre2_match_data_free(pcre2_match_data *match_data)
 {
 if (match_data != NULL)
   {
+  if (match_data->heapframes != NULL)
+    match_data->memctl.free(match_data->heapframes,
+      match_data->memctl.memory_data);
   if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
     match_data->memctl.free((void *)match_data->subject,
       match_data->memctl.memory_data);

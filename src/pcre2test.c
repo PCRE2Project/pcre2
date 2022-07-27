@@ -479,7 +479,7 @@ so many of them that they are split into two fields. */
 #define CTL_DFA                          0x00000200u
 #define CTL_EXPAND                       0x00000400u
 #define CTL_FINDLIMITS                   0x00000800u
-#define CTL_FRAMESIZE                    0x00001000u
+#define CTL_FINDLIMITS_NOHEAP            0x00001000u
 #define CTL_FULLBINCODE                  0x00002000u
 #define CTL_GETALL                       0x00004000u
 #define CTL_GLOBAL                       0x00008000u
@@ -522,6 +522,7 @@ so many of them that they are split into two fields. */
 #define CTL2_ALLVECTOR                   0x00000800u
 #define CTL2_NULL_SUBJECT                0x00001000u
 #define CTL2_NULL_REPLACEMENT            0x00002000u
+#define CTL2_FRAMESIZE                   0x00004000u
 
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
@@ -673,8 +674,9 @@ static modstruct modlist[] = {
   { "extended_more",               MOD_PATP, MOD_OPT, PCRE2_EXTENDED_MORE,        PO(options) },
   { "extra_alt_bsux",              MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALT_BSUX,       CO(extra_options) },
   { "find_limits",                 MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
+  { "find_limits_noheap",          MOD_DAT,  MOD_CTL, CTL_FINDLIMITS_NOHEAP,      DO(control) },
   { "firstline",                   MOD_PAT,  MOD_OPT, PCRE2_FIRSTLINE,            PO(options) },
-  { "framesize",                   MOD_PAT,  MOD_CTL, CTL_FRAMESIZE,              PO(control) },
+  { "framesize",                   MOD_PAT,  MOD_CTL, CTL2_FRAMESIZE,             PO(control2) },
   { "fullbincode",                 MOD_PAT,  MOD_CTL, CTL_FULLBINCODE,            PO(control) },
   { "get",                         MOD_DAT,  MOD_NN,  DO(get_numbers),            DO(get_names) },
   { "getall",                      MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
@@ -781,10 +783,11 @@ static modstruct modlist[] = {
 
 #define PUSH_SUPPORTED_COMPILE_CONTROLS ( \
   CTL_BINCODE|CTL_CALLOUT_INFO|CTL_FULLBINCODE|CTL_HEXPAT|CTL_INFO| \
-  CTL_JITVERIFY|CTL_MEMORY|CTL_FRAMESIZE|CTL_PUSH|CTL_PUSHCOPY| \
+  CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY| \
   CTL_PUSHTABLESCOPY|CTL_USE_LENGTH)
 
-#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL2_BSR_SET|CTL2_NL_SET)
+#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL2_BSR_SET|CTL2_FRAMESIZE| \
+  CTL2_NL_SET)
 
 /* Controls that apply only at compile time with 'push'. */
 
@@ -813,8 +816,9 @@ static uint32_t exclusive_pat_controls[] = {
 first control word. */
 
 static uint32_t exclusive_dat_controls[] = {
-  CTL_ALLUSEDTEXT | CTL_STARTCHAR,
-  CTL_FINDLIMITS  | CTL_NULLCONTEXT };
+  CTL_ALLUSEDTEXT        | CTL_STARTCHAR,
+  CTL_FINDLIMITS         | CTL_NULLCONTEXT,
+  CTL_FINDLIMITS_NOHEAP  | CTL_NULLCONTEXT };
 
 /* Table of single-character abbreviated modifiers. The index field is
 initialized to -1, but the first time the modifier is encountered, it is filled
@@ -4112,7 +4116,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4130,7 +4134,8 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_DFA) != 0)? " dfa" : "",
   ((controls & CTL_EXPAND) != 0)? " expand" : "",
   ((controls & CTL_FINDLIMITS) != 0)? " find_limits" : "",
-  ((controls & CTL_FRAMESIZE) != 0)? " framesize" : "",
+  ((controls & CTL_FINDLIMITS_NOHEAP) != 0)? " find_limits_noheap" : "",
+  ((controls2 & CTL2_FRAMESIZE) != 0)? " framesize" : "",
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GETALL) != 0)? " getall" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
@@ -4308,13 +4313,13 @@ if (test_mode == PCRE32_MODE) cblock_size = sizeof(pcre2_real_code_32);
 (void)pattern_info(PCRE2_INFO_NAMECOUNT, &name_count, FALSE);
 (void)pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size, FALSE);
 
-/* The uint32_t variables are cast before multiplying to stop code analyzers 
+/* The uint32_t variables are cast before multiplying to stop code analyzers
 grumbling about potential overflow. */
 
-fprintf(outfile, "Memory allocation (code space): %" SIZ_FORM "\n", size - 
-  (size_t)name_count * (size_t)name_entry_size * (size_t)code_unit_size - 
+fprintf(outfile, "Memory allocation (code space): %" SIZ_FORM "\n", size -
+  (size_t)name_count * (size_t)name_entry_size * (size_t)code_unit_size -
   cblock_size);
-   
+
 if (pat_patctl.jit != 0)
   {
   (void)pattern_info(PCRE2_INFO_JITSIZE, &size, FALSE);
@@ -4986,7 +4991,7 @@ switch(cmd)
     PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
     }
   if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
-  if ((pat_patctl.control & CTL_FRAMESIZE) != 0) show_framesize();
+  if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
   if ((pat_patctl.control & CTL_ANYINFO) != 0)
     {
     rc = show_pattern_info();
@@ -5948,7 +5953,7 @@ if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
 /* Output code size and other information if requested. */
 
 if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
-if ((pat_patctl.control & CTL_FRAMESIZE) != 0) show_framesize();
+if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
 if ((pat_patctl.control & CTL_ANYINFO) != 0)
   {
   int rc = show_pattern_info();
@@ -6027,10 +6032,46 @@ for (;;)
   {
   uint32_t stack_start = 0;
 
+  /* If we are checking the heap limit, free any frames vector that is cached
+  in the match_data so we always start without one. */
+
   if (errnumber == PCRE2_ERROR_HEAPLIMIT)
     {
     PCRE2_SET_HEAP_LIMIT(dat_context, mid);
+
+#ifdef SUPPORT_PCRE2_8
+    if (code_unit_size == 1)
+      {
+      match_data8->memctl.free(match_data8->heapframes,
+        match_data8->memctl.memory_data);
+      match_data8->heapframes = NULL;
+      match_data8->heapframes_size = 0;
+      }
+#endif
+
+#ifdef SUPPORT_PCRE2_16
+    if (code_unit_size == 2)
+      {
+      match_data16->memctl.free(match_data16->heapframes,
+        match_data16->memctl.memory_data);
+      match_data16->heapframes = NULL;
+      match_data16->heapframes_size = 0;
+      }
+#endif
+
+#ifdef SUPPORT_PCRE2_32
+    if (code_unit_size == 4)
+      {
+      match_data32->memctl.free(match_data32->heapframes,
+        match_data32->memctl.memory_data);
+      match_data32->heapframes = NULL;
+      match_data32->heapframes_size = 0;
+      }
+#endif
     }
+
+  /* No need to mess with the frames vector for match or depth limits. */
+
   else if (errnumber == PCRE2_ERROR_MATCHLIMIT)
     {
     PCRE2_SET_MATCH_LIMIT(dat_context, mid);
@@ -6039,6 +6080,8 @@ for (;;)
     {
     PCRE2_SET_DEPTH_LIMIT(dat_context, mid);
     }
+
+  /* Do the appropriate match */
 
   if ((dat_datctl.control & CTL_DFA) != 0)
     {
@@ -6058,7 +6101,6 @@ for (;;)
 
   else
     {
-    stack_start = START_FRAMES_SIZE/1024;
     PCRE2_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
     }
@@ -7584,12 +7626,13 @@ for (gmatched = 0;; gmatched++)
   limits are not relevant for JIT. The return from check_match_limit() is the
   return from the final call to pcre2_match() or pcre2_dfa_match(). */
 
-  if ((dat_datctl.control & CTL_FINDLIMITS) != 0)
+  if ((dat_datctl.control & (CTL_FINDLIMITS|CTL_FINDLIMITS_NOHEAP)) != 0)
     {
     capcount = 0;  /* This stops compiler warnings */
 
-    if (FLD(compiled_code, executable_jit) == NULL ||
-          (dat_datctl.options & PCRE2_NO_JIT) != 0)
+    if ((dat_datctl.control & CTL_FINDLIMITS_NOHEAP) == 0 &&
+        (FLD(compiled_code, executable_jit) == NULL ||
+          (dat_datctl.options & PCRE2_NO_JIT) != 0))
       {
       (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, "heap");
       }

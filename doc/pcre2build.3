@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "08 December 2021" "PCRE2 10.40"
+.TH PCRE2BUILD 3 "27 July 2022" "PCRE2 10.41"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -278,12 +278,11 @@ to the \fBconfigure\fP command. This setting also applies to the
 \fBpcre2_dfa_match()\fP matching function, and to JIT matching (though the
 counting is done differently).
 .P
-The \fBpcre2_match()\fP function starts out using a 20KiB vector on the system
-stack to record backtracking points. The more nested backtracking points there
-are (that is, the deeper the search tree), the more memory is needed. If the
-initial vector is not large enough, heap memory is used, up to a certain limit,
-which is specified in kibibytes (units of 1024 bytes). The limit can be changed
-at run time, as described in the
+The \fBpcre2_match()\fP function uses heap memory to record backtracking
+points. The more nested backtracking points there are (that is, the deeper the
+search tree), the more memory is needed. There is an upper limit, specified in
+kibibytes (units of 1024 bytes). This limit can be changed at run time, as
+described in the
 .\" HREF
 \fBpcre2api\fP
 .\"
@@ -625,7 +624,7 @@ give a warning.
 .sp
 .nf
 Philip Hazel
-University Computing Service
+Retired from University Computing Service
 Cambridge, England.
 .fi
 .
@@ -634,6 +633,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 December 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 27 July 2022
+Copyright (c) 1997-2022 University of Cambridge.
 .fi
