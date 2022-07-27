@@ -6828,7 +6828,7 @@ mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
 large. Set the initial frame vector size to ensure that there are at least 10
 available frames, but enforce a minimum of START_FRAMES_SIZE. If this is
 greater than the heap limit, get as large a vector as possible. Always round
-the size to a multiple of the frame size. (The heap limit is in kibibytes.) */
+the size to a multiple of the frame size. */
 
 heapframes_size = frame_size * 10;
 if (heapframes_size < START_FRAMES_SIZE) heapframes_size = START_FRAMES_SIZE;
