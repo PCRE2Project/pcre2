@@ -1246,19 +1246,19 @@ are supported. */
 
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) \
   if (test_mode == PCRE8_MODE) \
-    G(a,8) = pcre2_match_data_create_8(b,c); \
+    G(a,8) = pcre2_match_data_create_8(b,G(c,8)); \
   else if (test_mode == PCRE16_MODE) \
-    G(a,16) = pcre2_match_data_create_16(b,c); \
+    G(a,16) = pcre2_match_data_create_16(b,G(c,16)); \
   else \
-    G(a,32) = pcre2_match_data_create_32(b,c)
+    G(a,32) = pcre2_match_data_create_32(b,G(c,32))
 
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   if (test_mode == PCRE8_MODE) \
-    G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c); \
+    G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),G(c,8)); \
   else if (test_mode == PCRE16_MODE) \
-    G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c); \
+    G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),G(c,16)); \
   else \
-    G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
+    G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),G(c,32))
 
 #define PCRE2_MATCH_DATA_FREE(a) \
   if (test_mode == PCRE8_MODE) \
@@ -1766,15 +1766,15 @@ the three different cases. */
 
 #define PCRE2_MATCH_DATA_CREATE(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(a,BITONE) = G(pcre2_match_data_create_,BITONE)(b,c); \
+    G(a,BITONE) = G(pcre2_match_data_create_,BITONE)(b,G(c,BITONE)); \
   else \
-    G(a,BITTWO) = G(pcre2_match_data_create_,BITTWO)(b,c)
+    G(a,BITTWO) = G(pcre2_match_data_create_,BITTWO)(b,G(c,BITTWO))
 
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(a,BITONE) = G(pcre2_match_data_create_from_pattern_,BITONE)(G(b,BITONE),c); \
+    G(a,BITONE) = G(pcre2_match_data_create_from_pattern_,BITONE)(G(b,BITONE),G(c,BITONE)); \
   else \
-    G(a,BITTWO) = G(pcre2_match_data_create_from_pattern_,BITTWO)(G(b,BITTWO),c)
+    G(a,BITTWO) = G(pcre2_match_data_create_from_pattern_,BITTWO)(G(b,BITTWO),G(c,BITTWO))
 
 #define PCRE2_MATCH_DATA_FREE(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2074,9 +2074,9 @@ the three different cases. */
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_8(NULL)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h)
-#define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,8) = pcre2_match_data_create_8(b,c)
+#define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,8) = pcre2_match_data_create_8(b,G(c,8))
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
-  G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),c)
+  G(a,8) = pcre2_match_data_create_from_pattern_8(G(b,8),G(c,8))
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_8(G(a,8))
 #define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_convert_8(G(b,8),c,d,(PCRE2_UCHAR8 **)e,f,G(g,8))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_8(G(b,8),c,d)
@@ -2181,9 +2181,9 @@ the three different cases. */
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_16(NULL)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h)
-#define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,16) = pcre2_match_data_create_16(b,c)
+#define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,16) = pcre2_match_data_create_16(b,G(c,16))
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
-  G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),c)
+  G(a,16) = pcre2_match_data_create_from_pattern_16(G(b,16),G(c,16))
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_16(G(a,16))
 #define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_convert_16(G(b,16),c,d,(PCRE2_UCHAR16 **)e,f,G(g,16))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_16(G(b,16),c,d)
@@ -2288,9 +2288,9 @@ the three different cases. */
 #define PCRE2_MAKETABLES(a) a = pcre2_maketables_32(NULL)
 #define PCRE2_MATCH(a,b,c,d,e,f,g,h) \
   a = pcre2_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h)
-#define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,32) = pcre2_match_data_create_32(b,c)
+#define PCRE2_MATCH_DATA_CREATE(a,b,c) G(a,32) = pcre2_match_data_create_32(b,G(c,32))
 #define PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(a,b,c) \
-  G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),c)
+  G(a,32) = pcre2_match_data_create_from_pattern_32(G(b,32),G(c,32))
 #define PCRE2_MATCH_DATA_FREE(a) pcre2_match_data_free_32(G(a,32))
 #define PCRE2_PATTERN_CONVERT(a,b,c,d,e,f,g) a = pcre2_pattern_convert_32(G(b,32),c,d,(PCRE2_UCHAR32 **)e,f,G(g,32))
 #define PCRE2_PATTERN_INFO(a,b,c,d) a = pcre2_pattern_info_32(G(b,32),c,d)
@@ -2784,7 +2784,7 @@ return block;
 static void my_free(void *block, void *data)
 {
 (void)data;
-if (show_memory)
+if (show_memory && block != NULL)
   {
   uint32_t i, j;
   BOOL found = FALSE;
@@ -7318,7 +7318,8 @@ causes a new match data block to be obtained that exactly fits the pattern. */
 if (dat_datctl.oveccount == 0)
   {
   PCRE2_MATCH_DATA_FREE(match_data);
-  PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(match_data, compiled_code, NULL);
+  PCRE2_MATCH_DATA_CREATE_FROM_PATTERN(match_data, compiled_code,
+    general_context);
   PCRE2_GET_OVECTOR_COUNT(max_oveccount, match_data);
   }
 else if (dat_datctl.oveccount <= max_oveccount)
@@ -7329,7 +7330,7 @@ else
   {
   max_oveccount = dat_datctl.oveccount;
   PCRE2_MATCH_DATA_FREE(match_data);
-  PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, NULL);
+  PCRE2_MATCH_DATA_CREATE(match_data, max_oveccount, general_context);
   }
 
 if (CASTVAR(void *, match_data) == NULL)

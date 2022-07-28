@@ -45,6 +45,10 @@ It is freed with the match data block.
 different in different environments and so cannot be included in the standard 
 tests.
 
+12. Created a test for pcre2_match() heap processing that is not part of the 
+tests run by 'make check', but can be run manually. The current output is from 
+a 64-bit system.
+
 
 Version 10.40 15-April-2022
 ---------------------------
