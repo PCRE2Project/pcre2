@@ -1017,7 +1017,7 @@ has its own memory control arrangements (see the
 documentation for more details). If the limit is reached, the negative error
 code PCRE2_ERROR_HEAPLIMIT is returned. The default limit can be set when PCRE2
 is built; if it is not, the default is set very large and is essentially
-"unlimited".
+unlimited.
 </P>
 <P>
 A value for the heap limit may also be supplied by an item at the start of a
@@ -1030,19 +1030,17 @@ less than the limit set by the caller of <b>pcre2_match()</b> or, if no such
 limit is set, less than the default.
 </P>
 <P>
-The <b>pcre2_match()</b> function starts out using a 20KiB vector on the system
-stack for recording backtracking points. The more nested backtracking points
-there are (that is, the deeper the search tree), the more memory is needed.
-Heap memory is used only if the initial vector is too small. If the heap limit
-is set to a value less than 21 (in particular, zero) no heap memory will be
-used. In this case, only patterns that do not have a lot of nested backtracking
-can be successfully processed.
+The <b>pcre2_match()</b> function always needs some heap memory, so setting a
+value of zero guarantees a "heap limit exceeded" error. Details of how
+<b>pcre2_match()</b> uses the heap are given in the
+<a href="pcre2perform.html"><b>pcre2perform</b></a>
+documentation.
 </P>
 <P>
-Similarly, for <b>pcre2_dfa_match()</b>, a vector on the system stack is used
-when processing pattern recursions, lookarounds, or atomic groups, and only if
-this is not big enough is heap memory used. In this case, too, setting a value
-of zero disables the use of the heap.
+For <b>pcre2_dfa_match()</b>, a vector on the system stack is used when
+processing pattern recursions, lookarounds, or atomic groups, and only if this
+is not big enough is heap memory used. In this case, setting a value of zero
+disables the use of the heap.
 <br>
 <br>
 <b>int pcre2_set_match_limit(pcre2_match_context *<i>mcontext</i>,</b>
@@ -1089,10 +1087,10 @@ less than the limit set by the caller of <b>pcre2_match()</b> or
 <br>
 <br>
 This parameter limits the depth of nested backtracking in <b>pcre2_match()</b>.
-Each time a nested backtracking point is passed, a new memory "frame" is used
+Each time a nested backtracking point is passed, a new memory frame is used
 to remember the state of matching at that point. Thus, this parameter
 indirectly limits the amount of memory that is used in a match. However,
-because the size of each memory "frame" depends on the number of capturing
+because the size of each memory frame depends on the number of capturing
 parentheses, the actual memory limit varies from pattern to pattern. This limit
 was more useful in versions before 10.30, where function recursion was used for
 backtracking.
@@ -3148,11 +3146,11 @@ The backtracking match limit was reached.
 <pre>
   PCRE2_ERROR_NOMEMORY
 </pre>
-If a pattern contains many nested backtracking points, heap memory is used to
-remember them. This error is given when the memory allocation function (default
-or custom) fails. Note that a different error, PCRE2_ERROR_HEAPLIMIT, is given
-if the amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is
-also returned if PCRE2_COPY_MATCHED_SUBJECT is set and memory allocation fails.
+Heap memory is used to remember backgracking points. This error is given when
+the memory allocation function (default or custom) fails. Note that a different
+error, PCRE2_ERROR_HEAPLIMIT, is given if the amount of memory needed exceeds
+the heap limit. PCRE2_ERROR_NOMEMORY is also returned if
+PCRE2_COPY_MATCHED_SUBJECT is set and memory allocation fails.
 <pre>
   PCRE2_ERROR_NULL
 </pre>
@@ -4020,9 +4018,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC42" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 December 2021
+Last updated: 27 July 2022
 <br>
-Copyright &copy; 1997-2021 University of Cambridge.
+Copyright &copy; 1997-2022 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

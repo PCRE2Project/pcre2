@@ -49,6 +49,8 @@ tests.
 tests run by 'make check', but can be run manually. The current output is from 
 a 64-bit system.
 
+13. Implemented -Z aka --null in pcre2grep.
+
 
 Version 10.40 15-April-2022
 ---------------------------

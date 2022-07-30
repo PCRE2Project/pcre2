@@ -17,7 +17,7 @@ pcre2-dev+subscribe@googlegroups.com.
 You can access the archives and also subscribe or manage your subscription
 here:
 
-https://groups.google.com/pcre2-dev
+https://groups.google.com/g/pcre2-dev
 
 Please read the NEWS file if you are upgrading from a previous release. The
 contents of this README file are:
@@ -375,7 +375,8 @@ library. They are also documented in the pcre2build man page.
   necessary to specify something like LIBS="-lncurses" as well. This is
   because, to quote the readline INSTALL, "Readline uses the termcap functions,
   but does not link with the termcap or curses library itself, allowing
-  applications which link with readline the to choose an appropriate library."
+  applications which link with readline the option to choose an appropriate
+  library."
   If you get error messages about missing functions tgetstr, tgetent, tputs,
   tgetflag, or tgoto, this is the problem, and linking with the ncurses library
   should fix it.
@@ -400,10 +401,10 @@ library. They are also documented in the pcre2build man page.
   Setting --enable-fuzz-support also causes a binary called pcre2fuzzcheck to
   be created. This is normally run under valgrind or used when PCRE2 is
   compiled with address sanitizing enabled. It calls the fuzzing function and
-  outputs information about it is doing. The input strings are specified by
-  arguments: if an argument starts with "=" the rest of it is a literal input
-  string. Otherwise, it is assumed to be a file name, and the contents of the
-  file are the test string.
+  outputs information about what it is doing. The input strings are specified
+  by arguments: if an argument starts with "=" the rest of it is a literal
+  input string. Otherwise, it is assumed to be a file name, and the contents
+  of the file are the test string.
 
 . Releases before 10.30 could be compiled with --disable-stack-for-recursion,
   which caused pcre2_match() to use individual blocks on the heap for
@@ -695,7 +696,7 @@ Test 14 contains some special UTF and UCP tests that give different output for
 different code unit widths.
 
 Test 15 contains a number of tests that must not be run with JIT. They check,
-among other non-JIT things, the match-limiting features of the intepretive
+among other non-JIT things, the match-limiting features of the interpretive
 matcher.
 
 Test 16 is run only when JIT support is not available. It checks that an

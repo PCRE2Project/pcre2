@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "27 July 2022" "PCRE2 10.41"
+.TH PCRE2GREP 1 "30 July 2022" "PCRE2 10.41"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -43,13 +43,15 @@ For example:
 .sp
   pcre2grep some-pattern file1 - file3
 .sp
-Input files are searched line by line. By default, each line that matches a
+By default, input files are searched line by line. Each line that matches a
 pattern is copied to the standard output, and if there is more than one file,
 the file name is output at the start of each line, followed by a colon.
-However, there are options that can change how \fBpcre2grep\fP behaves. In
-particular, the \fB-M\fP option makes it possible to search for strings that
-span line boundaries. What defines a line boundary is controlled by the
-\fB-N\fP (\fB--newline\fP) option.
+However, there are options that can change how \fBpcre2grep\fP behaves. For
+example, the \fB-M\fP option makes it possible to search for strings that span
+line boundaries. What defines a line boundary is controlled by the \fB-N\fP
+(\fB--newline\fP) option. The \fB-h\fP and \fB-H\fP options control whether or
+not file names are shown, and the \fB-Z\fP option changes the file name
+terminator to a zero byte.
 .P
 The amount of memory used for buffering files that are being scanned is
 controlled by parameters that can be set by the \fB--buffer-size\fP and
@@ -149,9 +151,11 @@ Output up to \fInumber\fP lines of context after each matching line. Fewer
 lines are output if the next match or the end of the file is reached, or if the
 processing buffer size has been set too small. If file names and/or line
 numbers are being output, a hyphen separator is used instead of a colon for the
-context lines. A line containing "--" is output between each group of lines,
-unless they are in fact contiguous in the input file. The value of \fInumber\fP
-is expected to be relatively small. When \fB-c\fP is used, \fB-A\fP is ignored.
+context lines (the \fB-Z\fP option can be used to change the file name
+terminator to a zero byte). A line containing "--" is output between each group
+of lines, unless they are in fact contiguous in the input file. The value of
+\fInumber\fP is expected to be relatively small. When \fB-c\fP is used,
+\fB-A\fP is ignored.
 .TP
 \fB-a\fP, \fB--text\fP
 Treat binary files as text. This is equivalent to
@@ -167,9 +171,10 @@ Output up to \fInumber\fP lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
 \fInumber\fP lines, or if the processing buffer size has been set too small. If
 file names and/or line numbers are being output, a hyphen separator is used
-instead of a colon for the context lines. A line containing "--" is output
-between each group of lines, unless they are in fact contiguous in the input
-file. The value of \fInumber\fP is expected to be relatively small. When
+instead of a colon for the context lines (the \fB-Z\fP option can be used to
+change the file name terminator to a zero byte). A line containing "--" is
+output between each group of lines, unless they are in fact contiguous in the
+input file. The value of \fInumber\fP is expected to be relatively small. When
 \fB-c\fP is used, \fB-B\fP is ignored.
 .TP
 \fB--binary-files=\fP\fIword\fP
@@ -356,19 +361,21 @@ shown separately. This option is mutually exclusive with \fB--output\fP,
 .TP
 \fB-H\fP, \fB--with-filename\fP
 Force the inclusion of the file name at the start of output lines when
-searching a single file. By default, the file name is not shown in this case.
-For matching lines, the file name is followed by a colon; for context lines, a
-hyphen separator is used. If a line number is also being output, it follows the
-file name. When the \fB-M\fP option causes a pattern to match more than one
-line, only the first is preceded by the file name. This option overrides any
-previous \fB-h\fP, \fB-l\fP, or \fB-L\fP options.
+searching a single file. The file name is not normally shown in this case.
+By default, for matching lines, the file name is followed by a colon; for
+context lines, a hyphen separator is used. The \fB-Z\fP option can be used to
+change the terminator to a zero byte. If a line number is also being output,
+it follows the file name. When the \fB-M\fP option causes a pattern to match
+more than one line, only the first is preceded by the file name. This option
+overrides any previous \fB-h\fP, \fB-l\fP, or \fB-L\fP options.
 .TP
 \fB-h\fP, \fB--no-filename\fP
-Suppress the output file names when searching multiple files. By default,
-file names are shown when multiple files are searched. For matching lines, the
-file name is followed by a colon; for context lines, a hyphen separator is used.
-If a line number is also being output, it follows the file name. This option
-overrides any previous \fB-H\fP, \fB-L\fP, or \fB-l\fP options.
+Suppress the output file names when searching multiple files. File names are
+normally shown when multiple files are searched. By default, for matching
+lines, the file name is followed by a colon; for context lines, a hyphen
+separator is used. The \fB-Z\fP option can be used to change the terminator to
+a zero byte. If a line number is also being output, it follows the file name.
+This option overrides any previous \fB-H\fP, \fB-L\fP, or \fB-l\fP options.
 .TP
 \fB--heap-limit\fP=\fInumber\fP
 See \fB--match-limit\fP below.
@@ -417,17 +424,19 @@ given any number of times. If a directory matches both \fB--include-dir\fP and
 \fB-L\fP, \fB--files-without-match\fP
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line. This option overrides any previous \fB-H\fP,
-\fB-h\fP, or \fB-l\fP options.
+output once, on a separate line by default, but if the \fB-Z\fP option is set, 
+they are separated by zero bytes instead of newlines. This option overrides any
+previous \fB-H\fP, \fB-h\fP, or \fB-l\fP options.
 .TP
 \fB-l\fP, \fB--files-with-matches\fP
 Instead of outputting lines from the files, just output the names of the files
 containing lines that would have been output. Each file name is output once, on
-a separate line. Searching normally stops as soon as a matching line is found
-in a file. However, if the \fB-c\fP (count) option is also used, matching
-continues in order to obtain the correct count, and those files that have at
-least one match are listed along with their counts. Using this option with
-\fB-c\fP is a way of suppressing the listing of files with no matches that
+a separate line, but if the \fB-Z\fP option is set, they are separated by zero
+bytes instead of newlines. Searching normally stops as soon as a matching line
+is found in a file. However, if the \fB-c\fP (count) option is also used,
+matching continues in order to obtain the correct count, and those files that
+have at least one match are listed along with their counts. Using this option
+with \fB-c\fP is a way of suppressing the listing of files with no matches that
 occurs with \fB-c\fP on its own. This option overrides any previous \fB-H\fP,
 \fB-h\fP, or \fB-L\fP options.
 .TP
@@ -516,7 +525,7 @@ counter that is incremented each time around its main processing loop. If the
 value set by \fB--match-limit\fP is reached, an error occurs.
 .sp
 The \fB--heap-limit\fP option specifies, as a number of kibibytes (units of
-1024 bytes), the maximum amount of heap memory that may be used for matching. 
+1024 bytes), the maximum amount of heap memory that may be used for matching.
 .sp
 The \fB--depth-limit\fP option limits the depth of nested backtracking points,
 which indirectly limits the amount of memory that is used. The amount of memory
@@ -729,6 +738,12 @@ be more than one line. This is equivalent to having "^(?:" at the start of each
 pattern and ")$" at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the \fB--include\fP or \fB--exclude\fP options.
+.TP
+\fB-Z\fP, \fB--null\fP
+Terminate files names in the regular output with a zero byte (the NUL
+character) instead of what would normally appear. This is useful when file
+names contain unusual characters such as colons, hyphens, or even newlines. The
+option does not apply to file names in error messages.
 .
 .
 .SH "ENVIRONMENT VARIABLES"
@@ -957,6 +972,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 July 2022
+Last updated: 30 July 2022
 Copyright (c) 1997-2022 University of Cambridge.
 .fi

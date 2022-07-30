@@ -68,6 +68,22 @@ diff -b  /dev/null /dev/null 2>/dev/null && cf="diff -b"
 diff -u  /dev/null /dev/null 2>/dev/null && cf="diff -u"
 diff -ub /dev/null /dev/null 2>/dev/null && cf="diff -ub"
 
+# Some tests involve NUL characters. It seems impossible to handle them easily
+# in many operating systems. An earlier version of this script used sed to
+# translate NUL into the string ZERO, but this didn't work on Solaris (aka
+# SunOS), where the version of sed explicitly doesn't like them, and also MacOS
+# (Darwin), OpenBSD, FreeBSD, NetBSD, and some Linux distributions like Alpine,
+# even when using GNU sed. A user suggested using tr instead, which
+# necessitates translating to a single character. However, on (some versions
+# of?) Solaris, the normal "tr" cannot handle binary zeros, but if
+# /usr/xpg4/bin/tr is available, it can do so, so test for that.
+
+if [ -x /usr/xpg4/bin/tr ] ; then
+  tr=/usr/xpg4/bin/tr
+else
+  tr=tr
+fi
+
 # If this test is being run from "make check", $srcdir will be set. If not, set
 # it to the current or parent directory, whichever one contains the test data.
 # Subsequently, we run most of the pcre2grep tests in the source directory so
@@ -685,6 +701,16 @@ echo "---------------------------- Test 134 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep -m1 -O '=$x{41}$x423$o{103}$o1045=' 'fox') <$srcdir/testdata/grepinputv >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 135 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -HZ 'word' ./testdata/grepinputv) | $tr '\000' '@' >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -lZ 'word' ./testdata/grepinputv ./testdata/grepinputv) | $tr '\000' '@' >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -A 1 -B 1 -HZ 'word' ./testdata/grepinputv) | $tr '\000' '@' >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -MHZn 'start[\s]+end' testdata/grepinputM) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep
@@ -758,22 +784,6 @@ $valgrind $vjs $pcre2grep -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >
 
 printf '%c--------------------------- Test N6 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
-
-# This next test involves NUL characters. It seems impossible to handle them
-# easily in many operating systems. An earlier version of this script used sed
-# to translate NUL into the string ZERO, but this didn't work on Solaris (aka
-# SunOS), where the version of sed explicitly doesn't like them, and also MacOS
-# (Darwin), OpenBSD, FreeBSD, NetBSD, and some Linux distributions like Alpine,
-# even when using GNU sed. A user suggested using tr instead, which
-# necessitates translating to a single character (@). However, on (some
-# versions of?) Solaris, the normal "tr" cannot handle binary zeros, but if
-# /usr/xpg4/bin/tr is available, it can do so, so test for that.
-
-if [ -x /usr/xpg4/bin/tr ] ; then
-  tr=/usr/xpg4/bin/tr
-else
-  tr=tr
-fi
 
 printf '%c--------------------------- Test N7 ------------------------------\r\n' - >>testtrygrep
 printf 'abc\0def' >testNinputgrep

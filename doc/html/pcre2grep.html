@@ -71,13 +71,15 @@ For example:
 <pre>
   pcre2grep some-pattern file1 - file3
 </pre>
-Input files are searched line by line. By default, each line that matches a
+By default, input files are searched line by line. Each line that matches a
 pattern is copied to the standard output, and if there is more than one file,
 the file name is output at the start of each line, followed by a colon.
-However, there are options that can change how <b>pcre2grep</b> behaves. In
-particular, the <b>-M</b> option makes it possible to search for strings that
-span line boundaries. What defines a line boundary is controlled by the
-<b>-N</b> (<b>--newline</b>) option.
+However, there are options that can change how <b>pcre2grep</b> behaves. For
+example, the <b>-M</b> option makes it possible to search for strings that span
+line boundaries. What defines a line boundary is controlled by the <b>-N</b>
+(<b>--newline</b>) option. The <b>-h</b> and <b>-H</b> options control whether or
+not file names are shown, and the <b>-Z</b> option changes the file name
+terminator to a zero byte.
 </P>
 <P>
 The amount of memory used for buffering files that are being scanned is
@@ -178,9 +180,11 @@ Output up to <i>number</i> lines of context after each matching line. Fewer
 lines are output if the next match or the end of the file is reached, or if the
 processing buffer size has been set too small. If file names and/or line
 numbers are being output, a hyphen separator is used instead of a colon for the
-context lines. A line containing "--" is output between each group of lines,
-unless they are in fact contiguous in the input file. The value of <i>number</i>
-is expected to be relatively small. When <b>-c</b> is used, <b>-A</b> is ignored.
+context lines (the <b>-Z</b> option can be used to change the file name
+terminator to a zero byte). A line containing "--" is output between each group
+of lines, unless they are in fact contiguous in the input file. The value of
+<i>number</i> is expected to be relatively small. When <b>-c</b> is used,
+<b>-A</b> is ignored.
 </P>
 <P>
 <b>-a</b>, <b>--text</b>
@@ -199,9 +203,10 @@ Output up to <i>number</i> lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
 <i>number</i> lines, or if the processing buffer size has been set too small. If
 file names and/or line numbers are being output, a hyphen separator is used
-instead of a colon for the context lines. A line containing "--" is output
-between each group of lines, unless they are in fact contiguous in the input
-file. The value of <i>number</i> is expected to be relatively small. When
+instead of a colon for the context lines (the <b>-Z</b> option can be used to
+change the file name terminator to a zero byte). A line containing "--" is
+output between each group of lines, unless they are in fact contiguous in the
+input file. The value of <i>number</i> is expected to be relatively small. When
 <b>-c</b> is used, <b>-B</b> is ignored.
 </P>
 <P>
@@ -411,20 +416,22 @@ shown separately. This option is mutually exclusive with <b>--output</b>,
 <P>
 <b>-H</b>, <b>--with-filename</b>
 Force the inclusion of the file name at the start of output lines when
-searching a single file. By default, the file name is not shown in this case.
-For matching lines, the file name is followed by a colon; for context lines, a
-hyphen separator is used. If a line number is also being output, it follows the
-file name. When the <b>-M</b> option causes a pattern to match more than one
-line, only the first is preceded by the file name. This option overrides any
-previous <b>-h</b>, <b>-l</b>, or <b>-L</b> options.
+searching a single file. The file name is not normally shown in this case.
+By default, for matching lines, the file name is followed by a colon; for
+context lines, a hyphen separator is used. The <b>-Z</b> option can be used to
+change the terminator to a zero byte. If a line number is also being output,
+it follows the file name. When the <b>-M</b> option causes a pattern to match
+more than one line, only the first is preceded by the file name. This option
+overrides any previous <b>-h</b>, <b>-l</b>, or <b>-L</b> options.
 </P>
 <P>
 <b>-h</b>, <b>--no-filename</b>
-Suppress the output file names when searching multiple files. By default,
-file names are shown when multiple files are searched. For matching lines, the
-file name is followed by a colon; for context lines, a hyphen separator is used.
-If a line number is also being output, it follows the file name. This option
-overrides any previous <b>-H</b>, <b>-L</b>, or <b>-l</b> options.
+Suppress the output file names when searching multiple files. File names are
+normally shown when multiple files are searched. By default, for matching
+lines, the file name is followed by a colon; for context lines, a hyphen
+separator is used. The <b>-Z</b> option can be used to change the terminator to
+a zero byte. If a line number is also being output, it follows the file name.
+This option overrides any previous <b>-H</b>, <b>-L</b>, or <b>-l</b> options.
 </P>
 <P>
 <b>--heap-limit</b>=<i>number</i>
@@ -481,18 +488,20 @@ given any number of times. If a directory matches both <b>--include-dir</b> and
 <b>-L</b>, <b>--files-without-match</b>
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line. This option overrides any previous <b>-H</b>,
-<b>-h</b>, or <b>-l</b> options.
+output once, on a separate line by default, but if the <b>-Z</b> option is set, 
+they are separated by zero bytes instead of newlines. This option overrides any
+previous <b>-H</b>, <b>-h</b>, or <b>-l</b> options.
 </P>
 <P>
 <b>-l</b>, <b>--files-with-matches</b>
 Instead of outputting lines from the files, just output the names of the files
 containing lines that would have been output. Each file name is output once, on
-a separate line. Searching normally stops as soon as a matching line is found
-in a file. However, if the <b>-c</b> (count) option is also used, matching
-continues in order to obtain the correct count, and those files that have at
-least one match are listed along with their counts. Using this option with
-<b>-c</b> is a way of suppressing the listing of files with no matches that
+a separate line, but if the <b>-Z</b> option is set, they are separated by zero
+bytes instead of newlines. Searching normally stops as soon as a matching line
+is found in a file. However, if the <b>-c</b> (count) option is also used,
+matching continues in order to obtain the correct count, and those files that
+have at least one match are listed along with their counts. Using this option
+with <b>-c</b> is a way of suppressing the listing of files with no matches that
 occurs with <b>-c</b> on its own. This option overrides any previous <b>-H</b>,
 <b>-h</b>, or <b>-L</b> options.
 </P>
@@ -592,10 +601,7 @@ value set by <b>--match-limit</b> is reached, an error occurs.
 <br>
 <br>
 The <b>--heap-limit</b> option specifies, as a number of kibibytes (units of
-1024 bytes), the amount of heap memory that may be used for matching. Heap
-memory is needed only if matching the pattern requires a significant number of
-nested backtracking points to be remembered. This parameter can be set to zero
-to forbid the use of heap memory altogether.
+1024 bytes), the maximum amount of heap memory that may be used for matching.
 <br>
 <br>
 The <b>--depth-limit</b> option limits the depth of nested backtracking points,
@@ -839,6 +845,13 @@ pattern and ")$" at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the <b>--include</b> or <b>--exclude</b> options.
 </P>
+<P>
+<b>-Z</b>, <b>--null</b>
+Terminate files names in the regular output with a zero byte (the NUL
+character) instead of what would normally appear. This is useful when file
+names contain unusual characters such as colons, hyphens, or even newlines. The
+option does not apply to file names in error messages.
+</P>
 <br><a name="SEC7" href="#TOC1">ENVIRONMENT VARIABLES</a><br>
 <P>
 The environment variables <b>LC_ALL</b> and <b>LC_CTYPE</b> are examined, in that
@@ -1053,9 +1066,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 August 2021
+Last updated: 30 July 2022
 <br>
-Copyright &copy; 1997-2021 University of Cambridge.
+Copyright &copy; 1997-2022 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

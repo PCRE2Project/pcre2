@@ -991,3 +991,22 @@ RC=0
 ---------------------------- Test 134 -----------------------------
 =AB3CD5=
 RC=0
+---------------------------- Test 135 -----------------------------
+./testdata/grepinputv@The word is cat in this line
+RC=0
+./testdata/grepinputv@./testdata/grepinputv@RC=0
+./testdata/grepinputv@This line contains \E and (regex) *meta* [characters].
+./testdata/grepinputv@The word is cat in this line
+./testdata/grepinputv@The caterpillar sat on the mat
+RC=0
+testdata/grepinputM 3:start end in between start
+end and following
+testdata/grepinputM 7:start end in between start
+end and following start
+end other stuff
+testdata/grepinputM 11:start end in between start
+
+end
+testdata/grepinputM 16:start end in between start
+end
+RC=0
