@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "30 July 2022" "PCRE2 10.41"
+.TH PCRE2GREP 1 "07 August 2022" "PCRE2 10.41"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -103,14 +103,15 @@ The \fB--locale\fP option can be used to override this.
 .SH "SUPPORT FOR COMPRESSED FILES"
 .rs
 .sp
-It is possible to compile \fBpcre2grep\fP so that it uses \fBlibz\fP or
-\fBlibbz2\fP to read compressed files whose names end in \fB.gz\fP or
+Compile-time options for \fBpcre2grep\fP can set it up to use \fBlibz\fP or
+\fBlibbz2\fP for reading compressed files whose names end in \fB.gz\fP or
 \fB.bz2\fP, respectively. You can find out whether your \fBpcre2grep\fP binary
 has support for one or both of these file types by running it with the
 \fB--help\fP option. If the appropriate support is not present, all files are
-treated as plain text. The standard input is always so treated. When input is
-from a compressed .gz or .bz2 file, the \fB--line-buffered\fP option is
-ignored.
+treated as plain text. The standard input is always so treated. If a file with
+a \fB.gz\fP or \fB.bz2\fP extension is not in fact compressed, it is read as a
+plain text file. When input is from a compressed .gz or .bz2 file, the
+\fB--line-buffered\fP option is ignored.
 .
 .
 .SH "BINARY FILES"
@@ -972,6 +973,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 July 2022
+Last updated: 07 August 2022
 Copyright (c) 1997-2022 University of Cambridge.
 .fi

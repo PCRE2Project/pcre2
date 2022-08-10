@@ -104,13 +104,15 @@ DESCRIPTION
 
 SUPPORT FOR COMPRESSED FILES
 
-       It  is  possible to compile pcre2grep so that it uses libz or libbz2 to
-       read compressed files whose names end in .gz or .bz2, respectively. You
-       can  find out whether your pcre2grep binary has support for one or both
-       of these file types by running it with the --help option. If the appro-
-       priate support is not present, all files are treated as plain text. The
-       standard input is always so treated. When input is  from  a  compressed
-       .gz or .bz2 file, the --line-buffered option is ignored.
+       Compile-time  options for pcre2grep can set it up to use libz or libbz2
+       for reading compressed files whose names end in .gz  or  .bz2,  respec-
+       tively.  You can find out whether your pcre2grep binary has support for
+       one or both of these file types by running it with the  --help  option.
+       If  the  appropriate  support  is not present, all files are treated as
+       plain text. The standard input is always so treated. If a file  with  a
+       .gz  or .bz2 extension is not in fact compressed, it is read as a plain
+       text file. When input is from  a  compressed  .gz  or  .bz2  file,  the
+       --line-buffered option is ignored.
 
 
 BINARY FILES
@@ -1036,5 +1038,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 July 2022
+       Last updated: 07 August 2022
        Copyright (c) 1997-2022 University of Cambridge.

@@ -136,14 +136,15 @@ The <b>--locale</b> option can be used to override this.
 </P>
 <br><a name="SEC3" href="#TOC1">SUPPORT FOR COMPRESSED FILES</a><br>
 <P>
-It is possible to compile <b>pcre2grep</b> so that it uses <b>libz</b> or
-<b>libbz2</b> to read compressed files whose names end in <b>.gz</b> or
+Compile-time options for <b>pcre2grep</b> can set it up to use <b>libz</b> or
+<b>libbz2</b> for reading compressed files whose names end in <b>.gz</b> or
 <b>.bz2</b>, respectively. You can find out whether your <b>pcre2grep</b> binary
 has support for one or both of these file types by running it with the
 <b>--help</b> option. If the appropriate support is not present, all files are
-treated as plain text. The standard input is always so treated. When input is
-from a compressed .gz or .bz2 file, the <b>--line-buffered</b> option is
-ignored.
+treated as plain text. The standard input is always so treated. If a file with
+a <b>.gz</b> or <b>.bz2</b> extension is not in fact compressed, it is read as a
+plain text file. When input is from a compressed .gz or .bz2 file, the
+<b>--line-buffered</b> option is ignored.
 </P>
 <br><a name="SEC4" href="#TOC1">BINARY FILES</a><br>
 <P>
@@ -1066,7 +1067,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 July 2022
+Last updated: 07 August 2022
 <br>
 Copyright &copy; 1997-2022 University of Cambridge.
 <br>

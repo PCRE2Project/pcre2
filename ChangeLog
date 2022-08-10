@@ -51,6 +51,24 @@ a 64-bit system.
 
 13. Implemented -Z aka --null in pcre2grep.
 
+14. A minor change to pcre2test and the addition of several new pcre2grep tests
+have improved LCOV coverage statistics. At the same time, code in pcre2grep and 
+elsewhere that can never be obeyed in normal testing has been excluded from
+coverage.
+
+15. Fixed a bug in pcre2grep that could cause an extra newline to be written
+after output generaed by --output.
+
+16. If a file has a .bz2 extension but is not in fact compressed, pcre2grep 
+should process it as a plain text file. A bug stopped this happening; now fixed 
+and added to the tests.
+
+17. When pcre2grep was running not in UTF mode, if a string specified by
+--output or obtained from a callout in a pattern contained a character (byte)
+greater than 127, it was incorrectly output in UTF-8 format.
+
+18. Added some casts after warnings from Clang sanitize.
+
 
 Version 10.40 15-April-2022
 ---------------------------

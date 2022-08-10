@@ -678,6 +678,9 @@ static patstr *
 add_pattern(char *s, PCRE2_SIZE patlen, patstr *after)
 {
 patstr *p = (patstr *)malloc(sizeof(patstr));
+
+/* LCOV_EXCL_START - These won't be hit in normal testing. */
+
 if (p == NULL)
   {
   fprintf(stderr, "pcre2grep: malloc failed\n");
@@ -690,6 +693,9 @@ if (patlen > MAXPATLEN)
   free(p);
   return NULL;
   }
+
+/* LCOV_EXCL_STOP */
+
 p->next = NULL;
 p->string = s;
 p->length = patlen;
@@ -1371,11 +1377,16 @@ add_number(int n, omstr *after)
 {
 omstr *om = (omstr *)malloc(sizeof(omstr));
 
+/* LCOV_EXCL_START - These lines won't be hit in normal testing. */
+
 if (om == NULL)
   {
   fprintf(stderr, "pcre2grep: malloc failed\n");
   pcre2grep_exit(2);
   }
+
+/* LCOV_EXCL_STOP */
+
 om->next = NULL;
 om->groupnum = n;
 
@@ -2163,18 +2174,19 @@ for (; *string != 0; string++)
         }
       continue;
 
+      /* LCOV_EXCL_START */
       default:  /* Should not occur */
       break;
+      /* LCOV_EXCL_STOP */
       }
     }
 
   else value = *string;  /* Not a $ escape */
 
-  if (utf && value <= 127) fprintf(stdout, "%c", *string); else
+  if (!utf || value <= 127) fprintf(stdout, "%c", value); else
     {
-    int i;
     int n = ord2utf8(value);
-    for (i = 0; i < n; i++) fputc(utf8_buffer[i], stdout);
+    for (int i = 0; i < n; i++) fputc(utf8_buffer[i], stdout);
     }
 
   printed = TRUE;
@@ -2306,9 +2318,11 @@ while (length > 0)
         else if (utf && value > 127) argslen += ord2utf8(value) - 1;
       break;
 
+      /* LCOV_EXCL_START */
       default:         /* Should not occur */
       case DDE_ERROR:
       return 0;
+      /* LCOV_EXCL_STOP */
       }
 
     length -= (string - begin);
@@ -2327,8 +2341,10 @@ if (args == NULL) return 0;
 argsvector = (char**)malloc(argsvectorlen * sizeof(char*));
 if (argsvector == NULL)
   {
+  /* LCOV_EXCL_START */
   free(args);
   return 0;
+  /* LCOV_EXCL_STOP */
   }
 
 /* Now reprocess the string and set up the arguments. */
@@ -2384,11 +2400,13 @@ while (length > 0)
         }
       break;
 
+      /* LCOV_EXCL_START */
       default:         /* Even though this should not occur, the string having */
       case DDE_ERROR:  /* been checked above, we need to include the free() */
       free(args);      /* calls so that source checkers do not complain. */
       free(argsvector);
       return 0;
+      /* LCOV_EXCL_STOP */
       }
 
     length -= (string - begin);
@@ -2478,7 +2496,7 @@ else
 
 #ifdef SUPPORT_LIBBZ2
 if (frtype == FR_LIBBZ2)
-  return BZ2_bzread((BZFILE *)handle, buffer, length);
+  return (PCRE2_SIZE)BZ2_bzread((BZFILE *)handle, buffer, length);
 else
 #endif
 
@@ -2544,10 +2562,8 @@ fail. */
 if (frtype != FR_LIBZ && frtype != FR_LIBBZ2)
   {
   in = (FILE *)handle;
-  if (feof(in))
-    return 1;
-  if (is_file_tty(in))
-    input_line_buffered = TRUE;
+  if (feof(in)) return 1;
+  if (is_file_tty(in)) input_line_buffered = TRUE;
   else
     {
     if (count_limit >= 0  && filename == stdin_name)
@@ -2560,7 +2576,7 @@ bufflength = fill_buffer(handle, frtype, main_buffer, bufsize,
   input_line_buffered);
 
 #ifdef SUPPORT_LIBBZ2
-if (frtype == FR_LIBBZ2 && (int)bufflength < 0) return 2;   /* Gotcha: bufflength is PCRE2_SIZE */
+if (frtype == FR_LIBBZ2 && (int)bufflength < 0) return 3;   /* Gotcha: bufflength is PCRE2_SIZE */
 #endif
 
 endptr = main_buffer + bufflength;
@@ -2634,6 +2650,7 @@ while (ptr < endptr)
 
       if (new_buffer == NULL)
         {
+        /* LCOV_EXCL_START */
         fprintf(stderr,
           "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
           "pcre2grep: not enough memory to increase the buffer size to %"
@@ -2643,6 +2660,7 @@ while (ptr < endptr)
           (filename == NULL)? "" : filename,
           new_bufthird);
         return 2;
+        /* LCOV_EXCL_STOP */
         }
 
       /* Copy the data and adjust pointers to the new buffer location. */
@@ -2774,10 +2792,9 @@ while (ptr < endptr)
 
         else if (output_text != NULL)
           {
-          if (display_output_text((PCRE2_SPTR)output_text, FALSE,
-              (PCRE2_SPTR)ptr, offsets, mrc) || printname != NULL ||
-              number)
-            fprintf(stdout, STDOUT_NL);
+          (void)display_output_text((PCRE2_SPTR)output_text, FALSE,
+              (PCRE2_SPTR)ptr, offsets, mrc);
+          fprintf(stdout, STDOUT_NL);
           }
 
         /* Handle --only-matching, which may occur many times */
@@ -2802,7 +2819,6 @@ while (ptr < endptr)
                 }
               }
             }
-
           if (printed || printname != NULL || number)
             fprintf(stdout, STDOUT_NL);
           }
@@ -3284,10 +3300,12 @@ if (isdirectory(pathname))
 
     if (dir == NULL)
       {
+      /* LCOV_EXCL_START - this is a "never" event */
       if (!silent)
         fprintf(stderr, "pcre2grep: Failed to open directory %s: %s\n", pathname,
           strerror(errno));
       return 2;
+      /* LCOV_EXCL_STOP */
       }
 
     while ((nextfile = readdirectory(dir)) != NULL)
@@ -3296,9 +3314,11 @@ if (isdirectory(pathname))
       int fnlength = strlen(pathname) + strlen(nextfile) + 2;
       if (fnlength > FNBUFSIZ)
         {
+        /* LCOV_EXCL_START - this is a "never" event */
         fprintf(stderr, "pcre2grep: recursive filename is too long\n");
         rc = 2;
         break;
+        /* LCOV_EXCL_STOP */
         }
       sprintf(childpath, "%s%c%s", pathname, FILESEP, nextfile);
 
@@ -3315,7 +3335,9 @@ if (isdirectory(pathname))
       BOOL isSame;
       size_t rlen;
       if (realpath(childpath, resolvedpath) == NULL)
+        /* LCOV_EXCL_START - this is a "never" event */
         continue;     /* This path is invalid - we can skip processing this */
+        /* LCOV_EXCL_STOP */
       isSame = strcmp(pathname, resolvedpath) == 0;
       if (isSame) continue;    /* We have a recursion */
       rlen = strlen(resolvedpath);
@@ -3404,10 +3426,12 @@ if (pathlen > 3 && strcmp(pathname + pathlen - 3, ".gz") == 0)
   ingz = gzopen(pathname, "rb");
   if (ingz == NULL)
     {
+    /* LCOV_EXCL_START */
     if (!silent)
       fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", pathname,
         strerror(errno));
     return 2;
+    /* LCOV_EXCL_STOP */
     }
   handle = (void *)ingz;
   frtype = FR_LIBZ;
@@ -3478,10 +3502,12 @@ if (frtype == FR_LIBBZ2)
       BZ2_bzclose(inbz2);
       goto PLAIN_FILE;
       }
+    /* LCOV_EXCL_START */
     else if (!silent)
       fprintf(stderr, "pcre2grep: Failed to read %s using bzlib: %s\n",
         pathname, err);
     rc = 2;    /* The normal "something went wrong" code */
+    /* LCOV_EXCL_STOP */
     }
   BZ2_bzclose(inbz2);
   }
@@ -3502,6 +3528,8 @@ return rc;
 /*************************************************
 *          Handle a no-data option               *
 *************************************************/
+
+/* This is called when a known option has been identified. */
 
 static int
 handle_option(int letter, int options)
@@ -3546,15 +3574,17 @@ switch(letter)
     fprintf(stdout, "pcre2grep version %s" STDOUT_NL, buffer);
     }
   pcre2grep_exit(0);
-  break;
+  break;  /* LCOV_EXCL_LINE - statement kept to avoid compiler warning */
 
   case 'w': extra_options |= PCRE2_EXTRA_MATCH_WORD; break;
   case 'x': extra_options |= PCRE2_EXTRA_MATCH_LINE; break;
   case 'Z': printname_colon = printname_hyphen = 0; printname_nl = NULL; break;
 
+  /* LCOV_EXCL_START - this is a "never event" */
   default:
   fprintf(stderr, "pcre2grep: Unknown option -%c\n", letter);
   pcre2grep_exit(usage(2));
+  /* LCOV_EXCL_STOP */
   }
 
 return options;
@@ -3732,8 +3762,10 @@ while ((patlen = read_one_line(buffer, sizeof(buffer), f)) > 0)
   *patlastptr = add_pattern(buffer, patlen, *patlastptr);
   if (*patlastptr == NULL)
     {
+    /* LCOV_EXCL_START - won't happen in testing */
     if (f != stdin) fclose(f);
     return FALSE;
+    /* LCOV_EXCL_STOP */
     }
   if (*patptr == NULL) *patptr = *patlastptr;
 
@@ -3886,9 +3918,11 @@ for (i = 1; i < argc; i++)
                      fulllen - baselen - 2, opbra + 1),
              ret < 0 || ret > (int)sizeof(buff2)))
           {
+          /* LCOV_EXCL_START - this is a "never" event */
           fprintf(stderr, "pcre2grep: Buffer overflow when parsing %s option\n",
             op->long_name);
           pcre2grep_exit(2);
+          /* LCOV_EXCL_STOP */
           }
 
         if (strncmp(arg, buff1, arglen) == 0 ||
@@ -4042,8 +4076,10 @@ for (i = 1; i < argc; i++)
     fn = (fnstr *)malloc(sizeof(fnstr));
     if (fn == NULL)
       {
+      /* LCOV_EXCL_START */
       fprintf(stderr, "pcre2grep: malloc failed\n");
       goto EXIT2;
+      /* LCOV_EXCL_STOP */
       }
     fn->next = NULL;
     fn->name = option_data;
@@ -4294,8 +4330,10 @@ main_buffer = (char *)malloc(bufsize);
 
 if (main_buffer == NULL)
   {
+  /* LCOV_EXCL_START */
   fprintf(stderr, "pcre2grep: malloc failed\n");
   goto EXIT2;
+  /* LCOV_EXCL_STOP */
   }
 
 /* If no patterns were provided by -e, and there are no files provided by -f,
@@ -4436,14 +4474,6 @@ for (; i < argc; i++)
   if (frc > 1) rc = frc;
     else if (frc == 0 && rc == 1) rc = 0;
   }
-
-#ifdef SUPPORT_PCRE2GREP_CALLOUT
-/* If separating builtin echo callouts by implicit newline, add one more for
-the final item. */
-
-if (om_separator != NULL && strcmp(om_separator, STDOUT_NL) == 0)
-  fprintf(stdout, STDOUT_NL);
-#endif
 
 /* Show the total number of matches if requested, but not if only one file's
 count was printed. */
