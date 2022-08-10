@@ -144,11 +144,11 @@ regex functions. It's done this way to ensure to they are always linked from
 the PCRE2 library and not by accident from elsewhere (regex_t differs in size
 elsewhere). */
 
-PCRE2POSIX_EXP_DECL int pcre2_regcomp(regex_t *, const char *, int);
-PCRE2POSIX_EXP_DECL int pcre2_regexec(const regex_t *, const char *, size_t,
+PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_regcomp(regex_t *, const char *, int);
+PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_regexec(const regex_t *, const char *, size_t,
                      regmatch_t *, int);
-PCRE2POSIX_EXP_DECL size_t pcre2_regerror(int, const regex_t *, char *, size_t);
-PCRE2POSIX_EXP_DECL void pcre2_regfree(regex_t *);
+PCRE2POSIX_EXP_DECL size_t PCRE2_CALL_CONVENTION pcre2_regerror(int, const regex_t *, char *, size_t);
+PCRE2POSIX_EXP_DECL void PCRE2_CALL_CONVENTION pcre2_regfree(regex_t *);
 
 #define regcomp  pcre2_regcomp
 #define regexec  pcre2_regexec
