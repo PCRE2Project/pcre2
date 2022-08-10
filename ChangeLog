@@ -69,6 +69,12 @@ greater than 127, it was incorrectly output in UTF-8 format.
 
 18. Added some casts after warnings from Clang sanitize.
 
+19. Merged patch from cbouc (GitHub #139): 4 function prototypes were missing
+PCRE2_CALL_CONVENTION in src/pcre2posix.h. All function prototypes returning
+pointers had out of place PCRE2_CALL_CONVENTION in src/pcre2.h.*. These
+produced errors when building for Windows with #define PCRE2_CALL_CONVENTION
+__stdcall.
+
 
 Version 10.40 15-April-2022
 ---------------------------
