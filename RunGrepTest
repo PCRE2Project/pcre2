@@ -68,6 +68,11 @@ diff -b  /dev/null /dev/null 2>/dev/null && cf="diff -b"
 diff -u  /dev/null /dev/null 2>/dev/null && cf="diff -u"
 diff -ub /dev/null /dev/null 2>/dev/null && cf="diff -ub"
 
+# Add a -a (always treat as text) if available. This was added in an attempt
+# to get more detail from an Alpine Linux test failure on GitHub.
+
+$cf -a /dev/null /dev/null 2>/dev/null && cf="$cf -a"
+
 # Some tests involve NUL characters. It seems impossible to handle them easily
 # in many operating systems. An earlier version of this script used sed to
 # translate NUL into the string ZERO, but this didn't work on Solaris (aka
