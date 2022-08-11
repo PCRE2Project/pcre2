@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Autotools
-        run: apk add --no-cache automake autoconf gcc libtool make musl-dev 
+        run: apk add --no-cache automake autoconf bash gcc libtool make musl-dev 
         
       - name: Autogen
         run: ./autogen.sh
@@ -55,7 +55,7 @@ jobs:
         run: ./pcre2_jit_test
 
       - name: Test (pcre2grep test script)
-        run: ./RunGrepTest
+        run: bash ./RunGrepTest
         
   windows:      
     name: 32bit Windows
