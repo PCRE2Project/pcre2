@@ -6844,9 +6844,9 @@ while ((c = *p++) != 0)
       }
 
     i = (int32_t)li;
-    if (i-- == 0)
+    if (i-- <= 0)
       {
-      fprintf(outfile, "** Zero repeat not allowed\n");
+      fprintf(outfile, "** Zero or negative repeat not allowed\n");
       return PR_OK;
       }
 
