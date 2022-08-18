@@ -656,7 +656,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   # Test of internal offsets and code sizes. This test is run only when there
   # is UTF/UCP support. The actual tests are mostly the same as in some of the
   # above, but in this test we inspect some offsets and sizes. This is a
-  # doublecheck for the maintainer, just in case something changes unexpectely.
+  # doublecheck for the maintainer, just in case something changes unexpectedly.
   # The output from this test is different in 8-bit, 16-bit, and 32-bit modes
   # and for different link sizes, so there are different output files for each
   # mode and link size.
