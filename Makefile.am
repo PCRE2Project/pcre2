@@ -739,7 +739,7 @@ CLEANFILES += \
 ## ------------ End of testing -------------
 
 
-# PCRE2 demonstration program. Not built automatcally. The point is that the
+# PCRE2 demonstration program. Not built automatically. The point is that the
 # users should build it themselves. So just distribute the source.
 
 EXTRA_DIST += src/pcre2demo.c
