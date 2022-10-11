@@ -1882,7 +1882,7 @@ static SLJIT_INLINE sljit_s32 sljit_emit_fop1_conv_f64_from_sw(struct sljit_comp
 	   The double precision format has exactly 53 bit precision, so the lower 32 bit represents
 	   the lower 32 bit of such value. The result of xor 2^31 is the same as adding 0x80000000
 	   to the input, which shifts it into the 0 - 0xffffffff range. To get the converted floating
-	   point value, we need to substract 2^53 + 2^31 from the constructed value. */
+	   point value, we need to subtract 2^53 + 2^31 from the constructed value. */
 	FAIL_IF(push_inst(compiler, ADDIS | D(TMP_REG2) | A(0) | 0x4330));
 	if (invert_sign)
 		FAIL_IF(push_inst(compiler, XORIS | S(src) | A(TMP_REG1) | 0x8000));

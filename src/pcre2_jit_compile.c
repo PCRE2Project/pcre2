@@ -4618,7 +4618,7 @@ if (has_cmov)
 else
   exit_invalid[10] = CMP(SLJIT_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0x40);
 
-/* One will be substracted from STR_PTR later. */
+/* One will be subtracted from STR_PTR later. */
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
 
 /* Four byte sequences are not possible. */
