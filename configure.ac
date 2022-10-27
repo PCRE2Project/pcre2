@@ -67,6 +67,8 @@ AC_PROG_INSTALL
 LT_INIT([win32-dll])
 AC_PROG_LN_S
 
+AC_SYS_LARGEFILE
+
 # Check for GCC visibility feature
 
 PCRE2_VISIBILITY
