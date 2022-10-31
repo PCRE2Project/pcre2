@@ -78,6 +78,9 @@ __stdcall.
 20. A negative repeat value in a pcre2test subject line was not being 
 diagnosed, leading to infinite looping.
 
+21. Updated RunGrepTest to discard the warning that Bash now gives when setting 
+LC_CTYPE to an bad value (because older versions didn't).
+
 
 Version 10.40 15-April-2022
 ---------------------------
