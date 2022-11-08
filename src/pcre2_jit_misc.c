@@ -200,6 +200,21 @@ if (jit_stack != NULL)
 
 
 /*************************************************
+*             Test runtime JIT support           *
+*************************************************/
+
+int
+PRIV(jit_supported)(void)
+{
+#ifndef SUPPORT_JIT
+return 0;
+#else  /* SUPPORT_JIT */
+return sljit_get_runtime_support();
+#endif  /* SUPPORT_JIT */
+}
+
+
+/*************************************************
 *               Get target CPU type              *
 *************************************************/
 
