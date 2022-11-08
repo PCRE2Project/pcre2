@@ -107,6 +107,7 @@ static SLJIT_INLINE int create_tempfile(void)
 	int fd;
 	char tmp_name[256];
 	size_t tmp_name_len = 0;
+	size_t tmp_len;
 	char *dir;
 	struct stat st;
 #if defined(SLJIT_SINGLE_THREADED) && SLJIT_SINGLE_THREADED
@@ -125,18 +126,22 @@ static SLJIT_INLINE int create_tempfile(void)
 	dir = secure_getenv("TMPDIR");
 
 	if (dir) {
-		tmp_name_len = strlen(dir);
-		if (tmp_name_len > 0 && tmp_name_len < sizeof(tmp_name)) {
-			if ((stat(dir, &st) == 0) && S_ISDIR(st.st_mode))
+		tmp_len = strlen(dir);
+		if (tmp_len > 0 && tmp_len < sizeof(tmp_name)) {
+			if ((stat(dir, &st) == 0) && S_ISDIR(st.st_mode)) {
 				strcpy(tmp_name, dir);
+				tmp_name_len = tmp_len;
+			}
 		}
 	}
 
 #ifdef P_tmpdir
 	if (!tmp_name_len) {
-		tmp_name_len = strlen(P_tmpdir);
-		if (tmp_name_len > 0 && tmp_name_len < sizeof(tmp_name))
+		tmp_len = strlen(P_tmpdir);
+		if (tmp_len > 0 && tmp_len < sizeof(tmp_name)) {
 			strcpy(tmp_name, P_tmpdir);
+			tmp_name_len = tmp_len;
+		}
 	}
 #endif
 	if (!tmp_name_len) {
