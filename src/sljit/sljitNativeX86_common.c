@@ -74,10 +74,7 @@ static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 3] = {
 
 #define CHECK_EXTRA_REGS(p, w, do) \
 	if (p >= SLJIT_R3 && p <= SLJIT_S3) { \
-		if (p <= compiler->scratches) \
-			w = compiler->scratches_offset + ((p) - SLJIT_R3) * SSIZE_OF(sw); \
-		else \
-			w = compiler->locals_offset + ((p) - SLJIT_S2) * SSIZE_OF(sw); \
+		w = (2 * SSIZE_OF(sw)) + ((p) - SLJIT_R3) * SSIZE_OF(sw); \
 		p = SLJIT_MEM1(SLJIT_SP); \
 		do; \
 	}
@@ -190,6 +187,8 @@ static const sljit_u8 freg_lmap[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 1] = {
 #define CVTTSD2SI_r_xm	0x2c
 #define DIV		(/* GROUP_F7 */ 6 << 3)
 #define DIVSD_x_xm	0x5e
+#define FLDS		0xd9
+#define FLDL		0xdd
 #define FSTPS		0xd9
 #define FSTPD		0xdd
 #define INT3		0xcc
@@ -457,12 +456,12 @@ static sljit_u8* generate_near_jump_code(struct sljit_jump *jump, sljit_u8 *code
 	else
 		label_addr = jump->u.target - (sljit_uw)executable_offset;
 
-	short_jump = (sljit_sw)(label_addr - (jump->addr + 2)) >= -128 && (sljit_sw)(label_addr - (jump->addr + 2)) <= 127;
-
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	if ((sljit_sw)(label_addr - (jump->addr + 1)) > HALFWORD_MAX || (sljit_sw)(label_addr - (jump->addr + 1)) < HALFWORD_MIN)
 		return generate_far_jump_code(jump, code_ptr);
 #endif
+
+	short_jump = (sljit_sw)(label_addr - (jump->addr + 2)) >= -128 && (sljit_sw)(label_addr - (jump->addr + 2)) <= 127;
 
 	if (type == SLJIT_JUMP) {
 		if (short_jump)
@@ -589,32 +588,33 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 	jump = compiler->jumps;
 	while (jump) {
-		jump_addr = jump->addr + (sljit_uw)executable_offset;
+		if (jump->flags & (PATCH_MB | PATCH_MW)) {
+			if (jump->flags & JUMP_LABEL)
+				jump_addr = jump->u.label->addr;
+			else
+				jump_addr = jump->u.target;
 
-		if (jump->flags & PATCH_MB) {
-			SLJIT_ASSERT((sljit_sw)(jump->u.label->addr - (jump_addr + sizeof(sljit_s8))) >= -128 && (sljit_sw)(jump->u.label->addr - (jump_addr + sizeof(sljit_s8))) <= 127);
-			*(sljit_u8*)jump->addr = U8(jump->u.label->addr - (jump_addr + sizeof(sljit_s8)));
-		} else if (jump->flags & PATCH_MW) {
-			if (jump->flags & JUMP_LABEL) {
+			jump_addr -= jump->addr + (sljit_uw)executable_offset;
+
+			if (jump->flags & PATCH_MB) {
+				jump_addr -= sizeof(sljit_s8);
+				SLJIT_ASSERT((sljit_sw)jump_addr >= -128 && (sljit_sw)jump_addr <= 127);
+				*(sljit_u8*)jump->addr = U8(jump_addr);
+			} else {
+				jump_addr -= sizeof(sljit_s32);
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-				sljit_unaligned_store_sw((void*)jump->addr, (sljit_sw)(jump->u.label->addr - (jump_addr + sizeof(sljit_sw))));
+				sljit_unaligned_store_sw((void*)jump->addr, (sljit_sw)jump_addr);
 #else
-				SLJIT_ASSERT((sljit_sw)(jump->u.label->addr - (jump_addr + sizeof(sljit_s32))) >= HALFWORD_MIN && (sljit_sw)(jump->u.label->addr - (jump_addr + sizeof(sljit_s32))) <= HALFWORD_MAX);
-				sljit_unaligned_store_s32((void*)jump->addr, (sljit_s32)(jump->u.label->addr - (jump_addr + sizeof(sljit_s32))));
-#endif
-			}
-			else {
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-				sljit_unaligned_store_sw((void*)jump->addr, (sljit_sw)(jump->u.target - (jump_addr + sizeof(sljit_sw))));
-#else
-				SLJIT_ASSERT((sljit_sw)(jump->u.target - (jump_addr + sizeof(sljit_s32))) >= HALFWORD_MIN && (sljit_sw)(jump->u.target - (jump_addr + sizeof(sljit_s32))) <= HALFWORD_MAX);
-				sljit_unaligned_store_s32((void*)jump->addr, (sljit_s32)(jump->u.target - (jump_addr + sizeof(sljit_s32))));
+				SLJIT_ASSERT((sljit_sw)jump_addr >= HALFWORD_MIN && (sljit_sw)jump_addr <= HALFWORD_MAX);
+				sljit_unaligned_store_s32((void*)jump->addr, (sljit_s32)jump_addr);
 #endif
 			}
 		}
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-		else if (jump->flags & PATCH_MD)
-			sljit_unaligned_store_sw((void*)jump->addr, (sljit_sw)jump->u.label->addr);
+		else if (jump->flags & PATCH_MD) {
+				SLJIT_ASSERT(jump->flags & JUMP_LABEL);
+				sljit_unaligned_store_sw((void*)jump->addr, (sljit_sw)jump->u.label->addr);
+		}
 #endif
 
 		jump = jump->next;
@@ -2311,12 +2311,15 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 		return emit_cum_binary(compiler, BINARY_OPCODE(XOR),
 			dst, dstw, src1, src1w, src2, src2w);
 	case SLJIT_SHL:
+	case SLJIT_MSHL:
 		return emit_shift_with_flags(compiler, SHL, HAS_FLAGS(op),
 			dst, dstw, src1, src1w, src2, src2w);
 	case SLJIT_LSHR:
+	case SLJIT_MLSHR:
 		return emit_shift_with_flags(compiler, SHR, HAS_FLAGS(op),
 			dst, dstw, src1, src1w, src2, src2w);
 	case SLJIT_ASHR:
+	case SLJIT_MASHR:
 		return emit_shift_with_flags(compiler, SAR, HAS_FLAGS(op),
 			dst, dstw, src1, src1w, src2, src2w);
 	}
@@ -2970,7 +2973,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
 
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-	dst_reg &= ~SLJIT_32;
+	type &= ~SLJIT_32;
 
 	if (!sljit_has_cpu_feature(SLJIT_HAS_CMOV) || (dst_reg >= SLJIT_R3 && dst_reg <= SLJIT_S3))
 		return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);
@@ -2983,8 +2986,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	CHECK_EXTRA_REGS(src, srcw, (void)0);
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-	compiler->mode32 = dst_reg & SLJIT_32;
-	dst_reg &= ~SLJIT_32;
+	compiler->mode32 = type & SLJIT_32;
+	type &= ~SLJIT_32;
 #endif
 
 	if (SLJIT_UNLIKELY(src & SLJIT_IMM)) {

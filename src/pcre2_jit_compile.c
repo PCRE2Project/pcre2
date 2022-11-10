@@ -3200,12 +3200,12 @@ if (length < 8)
   }
 else
   {
-  if (sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_STORE | SLJIT_MEM_PRE, SLJIT_R0, SLJIT_MEM1(SLJIT_R1), sizeof(sljit_sw)) == SLJIT_SUCCESS)
+  if (sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_STORE | SLJIT_MEM_PRE, SLJIT_R0, SLJIT_MEM1(SLJIT_R1), sizeof(sljit_sw)) == SLJIT_SUCCESS)
     {
     GET_LOCAL_BASE(SLJIT_R1, 0, OVECTOR_START);
     OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, length - 1);
     loop = LABEL();
-    sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_STORE | SLJIT_MEM_PRE, SLJIT_R0, SLJIT_MEM1(SLJIT_R1), sizeof(sljit_sw));
+    sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_STORE | SLJIT_MEM_PRE, SLJIT_R0, SLJIT_MEM1(SLJIT_R1), sizeof(sljit_sw));
     OP2(SLJIT_SUB | SLJIT_SET_Z, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_IMM, 1);
     JUMPTO(SLJIT_NOT_ZERO, loop);
     }
@@ -3289,12 +3289,12 @@ if (length < 8)
   }
 else
   {
-  if (sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_STORE | SLJIT_MEM_PRE, TMP1, SLJIT_MEM1(TMP2), sizeof(sljit_sw)) == SLJIT_SUCCESS)
+  if (sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_STORE | SLJIT_MEM_PRE, TMP1, SLJIT_MEM1(TMP2), sizeof(sljit_sw)) == SLJIT_SUCCESS)
     {
     GET_LOCAL_BASE(TMP2, 0, OVECTOR_START + sizeof(sljit_sw));
     OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_IMM, length - 2);
     loop = LABEL();
-    sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_STORE | SLJIT_MEM_PRE, TMP1, SLJIT_MEM1(TMP2), sizeof(sljit_sw));
+    sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_STORE | SLJIT_MEM_PRE, TMP1, SLJIT_MEM1(TMP2), sizeof(sljit_sw));
     OP2(SLJIT_SUB | SLJIT_SET_Z, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, 1);
     JUMPTO(SLJIT_NOT_ZERO, loop);
     }
@@ -3386,7 +3386,7 @@ else
   OP2(SLJIT_ADD, SLJIT_R2, 0, SLJIT_R2, 0, SLJIT_IMM, SLJIT_OFFSETOF(pcre2_match_data, ovector) - sizeof(PCRE2_SIZE));
   }
 
-has_pre = sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, SLJIT_S1, SLJIT_MEM1(SLJIT_S0), sizeof(sljit_sw)) == SLJIT_SUCCESS;
+has_pre = sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, SLJIT_S1, SLJIT_MEM1(SLJIT_S0), sizeof(sljit_sw)) == SLJIT_SUCCESS;
 
 GET_LOCAL_BASE(SLJIT_S0, 0, OVECTOR_START - (has_pre ? sizeof(sljit_sw) : 0));
 OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(HAS_VIRTUAL_REGISTERS ? SLJIT_R0 : ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, begin));
@@ -3394,7 +3394,7 @@ OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(HAS_VIRTUAL_REGISTERS ? SLJIT_R0 : ARGUME
 loop = LABEL();
 
 if (has_pre)
-  sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_PRE, SLJIT_S1, SLJIT_MEM1(SLJIT_S0), sizeof(sljit_sw));
+  sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_PRE, SLJIT_S1, SLJIT_MEM1(SLJIT_S0), sizeof(sljit_sw));
 else
   {
   OP1(SLJIT_MOV, SLJIT_S1, 0, SLJIT_MEM1(SLJIT_S0), 0);
@@ -3417,14 +3417,14 @@ JUMPTO(SLJIT_NOT_ZERO, loop);
 /* Calculate the return value, which is the maximum ovector value. */
 if (topbracket > 1)
   {
-  if (sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, SLJIT_R2, SLJIT_MEM1(SLJIT_R0), -(2 * (sljit_sw)sizeof(sljit_sw))) == SLJIT_SUCCESS)
+  if (sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, SLJIT_R2, SLJIT_MEM1(SLJIT_R0), -(2 * (sljit_sw)sizeof(sljit_sw))) == SLJIT_SUCCESS)
     {
     GET_LOCAL_BASE(SLJIT_R0, 0, OVECTOR_START + topbracket * 2 * sizeof(sljit_sw));
     OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, topbracket + 1);
 
     /* OVECTOR(0) is never equal to SLJIT_S2. */
     loop = LABEL();
-    sljit_emit_mem(compiler, SLJIT_MOV | SLJIT_MEM_PRE, SLJIT_R2, SLJIT_MEM1(SLJIT_R0), -(2 * (sljit_sw)sizeof(sljit_sw)));
+    sljit_emit_mem_update(compiler, SLJIT_MOV | SLJIT_MEM_PRE, SLJIT_R2, SLJIT_MEM1(SLJIT_R0), -(2 * (sljit_sw)sizeof(sljit_sw)));
     OP2(SLJIT_SUB, SLJIT_R1, 0, SLJIT_R1, 0, SLJIT_IMM, 1);
     CMPTO(SLJIT_EQUAL, SLJIT_R2, 0, SLJIT_S2, 0, loop);
     OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_R1, 0);
@@ -4652,8 +4652,8 @@ if (common->nltype != NLTYPE_ANY)
   /* All newlines are ascii, just skip intermediate octets. */
   jump[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
   loop = LABEL();
-  if (sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, TMP2, SLJIT_MEM1(STR_PTR), IN_UCHARS(1)) == SLJIT_SUCCESS)
-    sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_POST, TMP2, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+  if (sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, TMP2, SLJIT_MEM1(STR_PTR), IN_UCHARS(1)) == SLJIT_SUCCESS)
+    sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_POST, TMP2, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
   else
     {
     OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
@@ -7159,11 +7159,11 @@ if (char1_reg == STR_END)
   OP1(SLJIT_MOV, RETURN_ADDR, 0, char2_reg, 0);
   }
 
-if (sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
+if (sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
   {
   label = LABEL();
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_POST, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_POST, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
   jump = CMP(SLJIT_NOT_EQUAL, char1_reg, 0, char2_reg, 0);
   OP2(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, TMP2, 0, SLJIT_IMM, IN_UCHARS(1));
   JUMPTO(SLJIT_NOT_ZERO, label);
@@ -7171,14 +7171,14 @@ if (sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, char1_
   JUMPHERE(jump);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
   }
-else if (sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
+else if (sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
   {
   OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(1));
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
   label = LABEL();
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
   jump = CMP(SLJIT_NOT_EQUAL, char1_reg, 0, char2_reg, 0);
   OP2(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, TMP2, 0, SLJIT_IMM, IN_UCHARS(1));
   JUMPTO(SLJIT_NOT_ZERO, label);
@@ -7232,9 +7232,9 @@ else
   lcc_table = TMP3;
   }
 
-if (sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
+if (sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
   opt_type = 1;
-else if (sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
+else if (sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_SUPP | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1)) == SLJIT_SUCCESS)
   opt_type = 2;
 
 sljit_emit_fast_enter(compiler, SLJIT_MEM1(SLJIT_SP), LOCALS0);
@@ -7253,8 +7253,8 @@ OP1(SLJIT_MOV, lcc_table, 0, SLJIT_IMM, common->lcc);
 if (opt_type == 1)
   {
   label = LABEL();
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_POST, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_POST, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_POST, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
   }
 else if (opt_type == 2)
   {
@@ -7262,8 +7262,8 @@ else if (opt_type == 2)
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
   label = LABEL();
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
-  sljit_emit_mem(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char1_reg, SLJIT_MEM1(TMP1), IN_UCHARS(1));
+  sljit_emit_mem_update(compiler, MOV_UCHAR | SLJIT_MEM_PRE, char2_reg, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
   }
 else
   {

@@ -230,27 +230,48 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		return push_inst(compiler, XOR | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_SHL:
+	case SLJIT_MSHL:
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			compiler->imm &= 0x1f;
 			return push_inst(compiler, RLWINM | RC(flags) | S(src1) | A(dst) | (compiler->imm << 11) | ((31 - compiler->imm) << 1));
 		}
+
+		if (op == SLJIT_MSHL) {
+			FAIL_IF(push_inst(compiler, ANDI | S(src2) | A(TMP_REG2) | 0x1f));
+			src2 = TMP_REG2;
+		}
+
 		return push_inst(compiler, SLW | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_LSHR:
+	case SLJIT_MLSHR:
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			compiler->imm &= 0x1f;
 			return push_inst(compiler, RLWINM | RC(flags) | S(src1) | A(dst) | (((32 - compiler->imm) & 0x1f) << 11) | (compiler->imm << 6) | (31 << 1));
 		}
+
+		if (op == SLJIT_MLSHR) {
+			FAIL_IF(push_inst(compiler, ANDI | S(src2) | A(TMP_REG2) | 0x1f));
+			src2 = TMP_REG2;
+		}
+
 		return push_inst(compiler, SRW | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_ASHR:
+	case SLJIT_MASHR:
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			compiler->imm &= 0x1f;
 			return push_inst(compiler, SRAWI | RC(flags) | S(src1) | A(dst) | (compiler->imm << 11));
 		}
+
+		if (op == SLJIT_MASHR) {
+			FAIL_IF(push_inst(compiler, ANDI | S(src2) | A(TMP_REG2) | 0x1f));
+			src2 = TMP_REG2;
+		}
+
 		return push_inst(compiler, SRAW | RC(flags) | S(src1) | A(dst) | B(src2));
 	}
 

@@ -384,6 +384,7 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 		return push_inst(compiler, XOR | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_SHL:
+	case SLJIT_MSHL:
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			if (flags & ALT_FORM2) {
@@ -393,9 +394,16 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 			compiler->imm &= 0x3f;
 			return push_inst(compiler, RLDI(dst, src1, compiler->imm, 63 - compiler->imm, 1) | RC(flags));
 		}
+
+		if (op == SLJIT_MSHL) {
+			FAIL_IF(push_inst(compiler, ANDI | S(src2) | A(TMP_REG2) | ((flags & ALT_FORM2) ? 0x1f : 0x3f)));
+			src2 = TMP_REG2;
+		}
+
 		return push_inst(compiler, ((flags & ALT_FORM2) ? SLW : SLD) | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_LSHR:
+	case SLJIT_MLSHR:
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			if (flags & ALT_FORM2) {
@@ -405,9 +413,16 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 			compiler->imm &= 0x3f;
 			return push_inst(compiler, RLDI(dst, src1, 64 - compiler->imm, compiler->imm, 0) | RC(flags));
 		}
+
+		if (op == SLJIT_MLSHR) {
+			FAIL_IF(push_inst(compiler, ANDI | S(src2) | A(TMP_REG2) | ((flags & ALT_FORM2) ? 0x1f : 0x3f)));
+			src2 = TMP_REG2;
+		}
+
 		return push_inst(compiler, ((flags & ALT_FORM2) ? SRW : SRD) | RC(flags) | S(src1) | A(dst) | B(src2));
 
 	case SLJIT_ASHR:
+	case SLJIT_MASHR:
 		if (flags & ALT_FORM1) {
 			SLJIT_ASSERT(src2 == TMP_REG2);
 			if (flags & ALT_FORM2) {
@@ -417,6 +432,12 @@ static SLJIT_INLINE sljit_s32 emit_single_op(struct sljit_compiler *compiler, sl
 			compiler->imm &= 0x3f;
 			return push_inst(compiler, SRADI | RC(flags) | S(src1) | A(dst) | ((compiler->imm & 0x1f) << 11) | ((compiler->imm & 0x20) >> 4));
 		}
+
+		if (op == SLJIT_MASHR) {
+			FAIL_IF(push_inst(compiler, ANDI | S(src2) | A(TMP_REG2) | ((flags & ALT_FORM2) ? 0x1f : 0x3f)));
+			src2 = TMP_REG2;
+		}
+
 		return push_inst(compiler, ((flags & ALT_FORM2) ? SRAW : SRAD) | RC(flags) | S(src1) | A(dst) | B(src2));
 	}
 

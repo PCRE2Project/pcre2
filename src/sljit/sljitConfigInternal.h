@@ -603,7 +603,7 @@ typedef double sljit_f64;
 #endif
 #endif /* SLJIT_INDIRECT_CALL */
 
-/* The offset which needs to be substracted from the return address to
+/* The offset which needs to be subtracted from the return address to
 determine the next executed instruction after return. */
 #ifndef SLJIT_RETURN_ADDRESS_OFFSET
 #define SLJIT_RETURN_ADDRESS_OFFSET 0
@@ -644,10 +644,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 
 #define SLJIT_NUMBER_OF_REGISTERS 12
-#define SLJIT_NUMBER_OF_SAVED_REGISTERS 9
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 7
 #define SLJIT_NUMBER_OF_FLOAT_REGISTERS 7
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
-#define SLJIT_LOCALS_OFFSET_BASE (compiler->locals_offset)
+#define SLJIT_LOCALS_OFFSET_BASE (8 * SSIZE_OF(sw))
 #define SLJIT_PREF_SHIFT_REG SLJIT_R2
 
 #elif (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
@@ -661,7 +661,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 #else /* _WIN64 */
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 10
-#define SLJIT_LOCALS_OFFSET_BASE (4 * (sljit_s32)sizeof(sljit_sw))
+#define SLJIT_LOCALS_OFFSET_BASE (4 * SSIZE_OF(sw))
 #endif /* !_WIN64 */
 #define SLJIT_PREF_SHIFT_REG SLJIT_R3
 
