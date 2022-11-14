@@ -2689,7 +2689,7 @@ if ((options & PCRE2_EXTENDED_MORE) != 0) options |= PCRE2_EXTENDED;
 while (ptr < ptrend)
   {
   int prev_expect_cond_assert;
-  uint32_t min_repeat, max_repeat;
+  uint32_t min_repeat = 0, max_repeat = 0;
   uint32_t set, unset, *optset;
   uint32_t terminator;
   uint32_t prev_meta_quantifier;
