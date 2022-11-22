@@ -261,11 +261,13 @@ static uint32_t depth_limit = 0;
 
 static pcre2_compile_context *compile_context;
 static pcre2_match_context *match_context;
-static pcre2_match_data *match_data;
-static PCRE2_SIZE *offsets;
+static pcre2_match_data *match_data, *match_data_pair[2];
+static PCRE2_SIZE *offsets, *offsets_pair[2];
+static int match_data_toggle;
 static uint32_t offset_size;
 static uint32_t capture_max = DEFAULT_CAPTURE_MAX;
 
+static BOOL all_matches = FALSE;
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
 #ifdef WIN32
@@ -1812,9 +1814,10 @@ if (after_context > 0 && lastmatchnumber > 0)
 *   Apply patterns to subject till one matches   *
 *************************************************/
 
-/* This function is called to run through all patterns, looking for a match. It
-is used multiple times for the same subject when colouring is enabled, in order
-to find all possible matches.
+/* This function is called to run through all the patterns, looking for a
+match. When all possible matches are required, for example, for colouring, it
+checks all patterns for matching, and returns the earliest match. Otherwise, it
+returns the first pattern that has matched.
 
 Arguments:
   matchptr     the start of the subject
@@ -1823,17 +1826,18 @@ Arguments:
   startoffset  where to start matching
   mrc          address of where to put the result of pcre2_match()
 
-Returns:      TRUE if there was a match
-              FALSE if there was no match
-              invert if there was a non-fatal error
+Returns:       TRUE if there was a match, match_data and offsets are set
+               FALSE if there was no match (but no errors)
+               invert if there was a non-fatal error
 */
 
 static BOOL
 match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
   PCRE2_SIZE startoffset, int *mrc)
 {
-int i;
 PCRE2_SIZE slen = length;
+int first = -1;
+int firstrc = 0;
 patstr *p = patterns;
 const char *msg = "this text:\n\n";
 
@@ -1843,27 +1847,53 @@ if (slen > 200)
   msg = "text that starts:\n\n";
   }
 
-for (i = 1; p != NULL; p = p->next, i++)
+for (int i = 1; p != NULL; p = p->next, i++)
   {
-  *mrc = pcre2_match(p->compiled, (PCRE2_SPTR)matchptr, (int)length,
+  int rc = pcre2_match(p->compiled, (PCRE2_SPTR)matchptr, (int)length,
     startoffset, options, match_data, match_context);
-  if (*mrc >= 0) return TRUE;
-  if (*mrc == PCRE2_ERROR_NOMATCH) continue;
-  fprintf(stderr, "pcre2grep: pcre2_match() gave error %d while matching ", *mrc);
+  if (rc == PCRE2_ERROR_NOMATCH) continue;
+
+  /* Handle a successful match. When all_matches is false, we are done.
+  Otherwise we must save the earliest match. */
+  
+  if (rc >= 0)
+    {
+    if (!all_matches) 
+      {
+      *mrc = rc; 
+      return TRUE;
+      } 
+       
+    if (first < 0 || offsets[0] < offsets_pair[first][0] ||
+         (offsets[0] == offsets_pair[first][0] &&
+          offsets[1] > offsets_pair[first][1]))
+      {
+      first = match_data_toggle;
+      firstrc = rc; 
+      match_data_toggle ^= 1;
+      match_data = match_data_pair[match_data_toggle];
+      offsets = offsets_pair[match_data_toggle];
+      }
+    continue;
+    }
+
+  /* Deal with PCRE2 error. */
+
+  fprintf(stderr, "pcre2grep: pcre2_match() gave error %d while matching ", rc);
   if (patterns->next != NULL) fprintf(stderr, "pattern number %d to ", i);
   fprintf(stderr, "%s", msg);
   FWRITE_IGNORE(matchptr, 1, slen, stderr);   /* In case binary zero included */
   fprintf(stderr, "\n\n");
-  if (*mrc <= PCRE2_ERROR_UTF8_ERR1 &&
-      *mrc >= PCRE2_ERROR_UTF8_ERR21)
+  if (rc <= PCRE2_ERROR_UTF8_ERR1 &&
+      rc >= PCRE2_ERROR_UTF8_ERR21)
     {
     unsigned char mbuffer[256];
     PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
-    (void)pcre2_get_error_message(*mrc, mbuffer, sizeof(mbuffer));
+    (void)pcre2_get_error_message(rc, mbuffer, sizeof(mbuffer));
     fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer, startchar);
     }
-  if (*mrc == PCRE2_ERROR_MATCHLIMIT || *mrc == PCRE2_ERROR_DEPTHLIMIT ||
-      *mrc == PCRE2_ERROR_HEAPLIMIT || *mrc == PCRE2_ERROR_JIT_STACKLIMIT)
+  if (rc == PCRE2_ERROR_MATCHLIMIT || rc == PCRE2_ERROR_DEPTHLIMIT ||
+      rc == PCRE2_ERROR_HEAPLIMIT || rc == PCRE2_ERROR_JIT_STACKLIMIT)
     resource_error = TRUE;
   if (error_count++ > 20)
     {
@@ -1873,7 +1903,18 @@ for (i = 1; p != NULL; p = p->next, i++)
   return invert;    /* No more matching; don't show the line again */
   }
 
-return FALSE;  /* No match, no errors */
+/* We get here when all patterns have been tried. If all_matches is false,
+this means that none of them matched. If all_matches is true, matched_first
+will be non-NULL if there was at least one match, and it will point to the
+appropriate match_data block. */
+
+if (!all_matches || first < 0) return FALSE;
+
+match_data_toggle = first;
+match_data = match_data_pair[first];
+offsets = offsets_pair[first];
+*mrc = firstrc;
+return TRUE;
 }
 
 
@@ -4147,7 +4188,6 @@ if (only_matching_count > 1)
   pcre2grep_exit(usage(2));
   }
 
-
 /* Check that there is a big enough ovector for all -o settings. */
 
 for (om = only_matching; om != NULL; om = om->next)
@@ -4167,13 +4207,18 @@ if (output_text != NULL &&
     !syntax_check_output_text((PCRE2_SPTR)output_text, FALSE))
   goto EXIT2;
 
-/* Set up default compile and match contexts and a match data block. */
+/* Set up default compile and match contexts and match data blocks. */
 
 offset_size = capture_max + 1;
 compile_context = pcre2_compile_context_create(NULL);
 match_context = pcre2_match_context_create(NULL);
-match_data = pcre2_match_data_create(offset_size, NULL);
-offsets = pcre2_get_ovector_pointer(match_data);
+match_data_pair[0] = pcre2_match_data_create(offset_size, NULL);
+match_data_pair[1] = pcre2_match_data_create(offset_size, NULL);
+offsets_pair[0] = pcre2_get_ovector_pointer(match_data_pair[0]);
+offsets_pair[1] = pcre2_get_ovector_pointer(match_data_pair[1]);
+match_data = match_data_pair[0];
+offsets = offsets_pair[0];
+match_data_toggle = 0;
 
 /* If string (script) callouts are supported, set up the callout processing
 function. */
@@ -4251,6 +4296,11 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
 #endif
     }
   }
+
+/* When colouring or otherwise identifying matching substrings, we need to find
+all possible matches when there are multiple patterns. */
+
+all_matches = do_colour || only_matching_count != 0;
 
 /* Sort out a newline setting. */
 
@@ -4496,7 +4546,8 @@ if (character_tables != NULL) pcre2_maketables_free(NULL, character_tables);
 
 pcre2_compile_context_free(compile_context);
 pcre2_match_context_free(match_context);
-pcre2_match_data_free(match_data);
+pcre2_match_data_free(match_data_pair[0]);
+pcre2_match_data_free(match_data_pair[1]);
 
 free_pattern_chain(patterns);
 free_pattern_chain(include_patterns);

@@ -852,7 +852,13 @@ else
 
   (cd $srcdir; unset LC_ALL; export LC_CTYPE=badlocale 2>/dev/null; $valgrind $vjs $pcre2grep abc /dev/null) >>testtrygrep 2>&1
   echo "RC=$?" >>testtrygrep
-fi   
+fi
+
+echo "---------------------------- Test 151 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --colour=always -e this -e The -e 'The wo' testdata/grepinputv) >>testtrygrep
+
+
+
 
 # Now compare the results.
 

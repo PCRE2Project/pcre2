@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "07 August 2022" "PCRE2 10.41"
+.TH PCRE2GREP 1 "21 November 2022" "PCRE2 10.41"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -72,22 +72,26 @@ Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP. When there is more than one pattern
 (specified by the use of \fB-e\fP and/or \fB-f\fP), each pattern is applied to
 each line in the order in which they are defined, except that all the \fB-e\fP
-patterns are tried before the \fB-f\fP patterns.
+patterns are tried before the \fB-f\fP patterns. 
 .P
 By default, as soon as one pattern matches a line, no further patterns are
 considered. However, if \fB--colour\fP (or \fB--color\fP) is used to colour the
-matching substrings, or if \fB--only-matching\fP, \fB--file-offsets\fP, or
-\fB--line-offsets\fP is used to output only the part of the line that matched
-(either shown literally, or as an offset), scanning resumes immediately
-following the match, so that further matches on the same line can be found. If
-there are multiple patterns, they are all tried on the remainder of the line,
-but patterns that follow the one that matched are not tried on the earlier
-matched part of the line.
+matching substrings, or if \fB--only-matching\fP, \fB--file-offsets\fP,
+\fB--line-offsets\fP, or \fB--output\fP is used to output only the part of the
+line that matched (either shown literally, or as an offset), the behaviour is
+different. In this situation, all the patterns are applied to the line. If
+there is more than one match, the one that begins nearest to the start of the
+subject is processed; if there is more than one match at that position, the one
+with the longest matching substring is processed; if the matching substrings
+are equal, the first match found is processed.
 .P
-This behaviour means that the order in which multiple patterns are specified
-can affect the output when one of the above options is used. This is no longer
-the same behaviour as GNU grep, which now manages to display earlier matches
-for later patterns (as long as there is no overlap).
+Scanning with all the patterns resumes immediately following the match, so that
+later matches on the same line can be found. Note, however, that an overlapping
+match that starts in the middle of another match will not be processed.
+.P
+The above behaviour was changed at release 10.41 to be more compatible with GNU 
+grep. In earlier releases, \fBpcre2grep\fP did not recognize matches from 
+later patterns that were earlier in the subject.
 .P
 Patterns that can match an empty string are accepted, but empty string
 matches are never recognized. An example is the pattern "(super)?(man)?", in
@@ -221,12 +225,14 @@ equals sign.
 .TP
 \fB--colour=\fP\fIvalue\fP, \fB--color=\fP\fIvalue\fP
 This option specifies under what circumstances the parts of a line that matched
-a pattern should be coloured in the output. By default, the output is not
-coloured. The value (which is optional, see above) may be "never", "always", or
-"auto". In the latter case, colouring happens only if the standard output is
-connected to a terminal. More resources are used when colouring is enabled,
-because \fBpcre2grep\fP has to search for all possible matches in a line, not
-just one, in order to colour them all.
+a pattern should be coloured in the output. It is ignored if
+\fB--file-offsets\fP, \fB--line-offsets\fP, or \fB--output\fP is set. By
+default, output is not coloured. The value for the \fB--colour\fP option (which
+is optional, see above) may be "never", "always", or "auto". In the latter
+case, colouring happens only if the standard output is connected to a terminal.
+More resources are used when colouring is enabled, because \fBpcre2grep\fP has
+to search for all possible matches in a line, not just one, in order to colour
+them all.
 .sp
 The colour that is used can be specified by setting one of the environment
 variables PCRE2GREP_COLOUR, PCRE2GREP_COLOR, PCREGREP_COLOUR, or
@@ -268,17 +274,11 @@ order to specify several patterns. It can also be used as a way of specifying a
 single pattern that starts with a hyphen. When \fB-e\fP is used, no argument
 pattern is taken from the command line; all arguments are treated as file
 names. There is no limit to the number of patterns. They are applied to each
-line in the order in which they are defined until one matches.
+line in the order in which they are defined.
 .sp
 If \fB-f\fP is used with \fB-e\fP, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
-these options are specified. Note that multiple use of \fB-e\fP is not the same
-as a single pattern with alternatives. For example, X|Y finds the first
-character in a line that is X or Y, whereas if the two patterns are given
-separately, with X first, \fBpcre2grep\fP finds X if it is present, even if it
-follows Y in the line. It finds Y only if there is no X in the line. This
-matters only if you are using \fB-o\fP or \fB--colo(u)r\fP to show the part(s)
-of the line that matched.
+these options are specified. 
 .TP
 \fB--exclude\fP=\fIpattern\fP
 Files (but not directories) whose names match the pattern are skipped without
@@ -322,22 +322,19 @@ files; it does not apply to patterns specified by any of the \fB--include\fP or
 \fB--exclude\fP options.
 .TP
 \fB-f\fP \fIfilename\fP, \fB--file=\fP\fIfilename\fP
-Read patterns from the file, one per line, and match them against each line of
-input. As is the case with patterns on the command line, no delimiters should
-be used. What constitutes a newline when reading the file is the operating
-system's default interpretation of \en. The \fB--newline\fP option has no
-effect on this option. Trailing white space is removed from each line, and
-blank lines are ignored. An empty file contains no patterns and therefore
-matches nothing. Patterns read from a file in this way may contain binary
-zeros, which are treated as ordinary data characters. See also the comments
-about multiple patterns versus a single pattern with alternatives in the
-description of \fB-e\fP above.
+Read patterns from the file, one per line. As is the case with patterns on the
+command line, no delimiters should be used. What constitutes a newline when
+reading the file is the operating system's default interpretation of \en. The
+\fB--newline\fP option has no effect on this option. Trailing white space is
+removed from each line, and blank lines are ignored. An empty file contains no
+patterns and therefore matches nothing. Patterns read from a file in this way
+may contain binary zeros, which are treated as ordinary data characters.
 .sp
 If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
 as "-" to refer to the standard input. When \fB-f\fP is used, patterns
 specified on the command line using \fB-e\fP may also be present; they are
-tested before the file's patterns. However, no other pattern is taken from the
+matched before the file's patterns. However, no pattern is taken from the
 command line; all arguments are treated as the names of paths to be searched.
 .TP
 \fB--file-list\fP=\fIfilename\fP
@@ -355,10 +352,10 @@ specified files are read.
 \fB--file-offsets\fP
 Instead of showing lines or parts of lines that match, show each match as an
 offset from the start of the file and a length, separated by a comma. In this
-mode, no context is shown. That is, the \fB-A\fP, \fB-B\fP, and \fB-C\fP
-options are ignored. If there is more than one match in a line, each of them is
-shown separately. This option is mutually exclusive with \fB--output\fP,
-\fB--line-offsets\fP, and \fB--only-matching\fP.
+mode, \fB--colour\fP has no effect, and no context is shown. That is, the
+\fB-A\fP, \fB-B\fP, and \fB-C\fP options are ignored. If there is more than one
+match in a line, each of them is shown separately. This option is mutually
+exclusive with \fB--output\fP, \fB--line-offsets\fP, and \fB--only-matching\fP.
 .TP
 \fB-H\fP, \fB--with-filename\fP
 Force the inclusion of the file name at the start of output lines when
@@ -462,11 +459,11 @@ ceases to work. When input is from a compressed .gz or .bz2 file,
 Instead of showing lines or parts of lines that match, show each match as a
 line number, the offset from the start of the line, and a length. The line
 number is terminated by a colon (as usual; see the \fB-n\fP option), and the
-offset and length are separated by a comma. In this mode, no context is shown.
-That is, the \fB-A\fP, \fB-B\fP, and \fB-C\fP options are ignored. If there is
-more than one match in a line, each of them is shown separately. This option is
-mutually exclusive with \fB--output\fP, \fB--file-offsets\fP, and
-\fB--only-matching\fP.
+offset and length are separated by a comma. In this mode, \fB--colour\fP has no
+effect, and no context is shown. That is, the \fB-A\fP, \fB-B\fP, and \fB-C\fP
+options are ignored. If there is more than one match in a line, each of them is
+shown separately. This option is mutually exclusive with \fB--output\fP,
+\fB--file-offsets\fP, and \fB--only-matching\fP.
 .TP
 \fB--locale\fP=\fIlocale-name\fP
 This option specifies a locale to be used for pattern matching. It overrides
@@ -589,12 +586,12 @@ It should never be needed in normal use.
 \fB-O\fP \fItext\fP, \fB--output\fP=\fItext\fP
 When there is a match, instead of outputting the line that matched, output just
 the text specified in this option, followed by an operating-system standard
-newline. In this mode, no context is shown. That is, the \fB-A\fP, \fB-B\fP,
-and \fB-C\fP options are ignored. The \fB--newline\fP option has no effect on
-this option, which is mutually exclusive with \fB--only-matching\fP,
-\fB--file-offsets\fP, and \fB--line-offsets\fP. However, like
-\fB--only-matching\fP, if there is more than one match in a line, each of them
-causes a line of output.
+newline. In this mode, \fB--colour\fP has no effect, and no context is shown.
+That is, the \fB-A\fP, \fB-B\fP, and \fB-C\fP options are ignored. The
+\fB--newline\fP option has no effect on this option, which is mutually
+exclusive with \fB--only-matching\fP, \fB--file-offsets\fP, and
+\fB--line-offsets\fP. However, like \fB--only-matching\fP, if there is more
+than one match in a line, each of them causes a line of output.
 .sp
 Escape sequences starting with a dollar character may be used to insert the
 contents of the matched part of the line and/or captured substrings into the
@@ -973,6 +970,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 07 August 2022
+Last updated: 21 November 2022
 Copyright (c) 1997-2022 University of Cambridge.
 .fi

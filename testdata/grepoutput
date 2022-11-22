@@ -425,6 +425,7 @@ RC=0
 595:before
 595:zero
 596:zero
+597:after
 597:zero
 RC=0
 ---------------------------- Test 45 ------------------------------
@@ -1226,3 +1227,8 @@ RC=2
 ---------------------------- Test 150 -----------------------------
 pcre2grep: Failed to set locale badlocale (obtained from LC_CTYPE)
 RC=2
+---------------------------- Test 151 -----------------------------
+[1;31mThe[0m quick brown
+[1;31mThe wo[0mrd is cat in [1;31mthis[0m line
+[1;31mThe[0m caterpillar sat on the mat
+[1;31mThe[0m snowcat is not an animal

@@ -81,6 +81,10 @@ diagnosed, leading to infinite looping.
 21. Updated RunGrepTest to discard the warning that Bash now gives when setting 
 LC_CTYPE to an bad value (because older versions didn't).
 
+22. Updated pcre2grep so that it behaves like GNU grep when matching more than 
+one pattern and a later pattern matches at an earlier point in the subject when 
+the matched substrings are being identified by colour or by offsets.
+
 
 Version 10.40 15-April-2022
 ---------------------------
