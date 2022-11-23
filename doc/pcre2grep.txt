@@ -76,170 +76,176 @@ DESCRIPTION
 
        By default, as soon as one pattern matches a line, no further  patterns
        are considered. However, if --colour (or --color) is used to colour the
-       matching substrings, or if --only-matching, --file-offsets, or  --line-
-       offsets  is  used to output only the part of the line that matched (ei-
-       ther shown literally, or as an offset),  scanning  resumes  immediately
-       following  the  match,  so that further matches on the same line can be
-       found. If there are multiple patterns, they are all tried  on  the  re-
-       mainder  of the line, but patterns that follow the one that matched are
-       not tried on the earlier matched part of the line.
+       matching substrings, or if --only-matching, --file-offsets, --line-off-
+       sets,  or  --output  is  used  to output only the part of the line that
+       matched (either shown literally, or as an  offset),  the  behaviour  is
+       different. In this situation, all the patterns are applied to the line.
+       If there is more than one match, the one that  begins  nearest  to  the
+       start  of  the subject is processed; if there is more than one match at
+       that position, the one with the  longest  matching  substring  is  pro-
+       cessed;  if the matching substrings are equal, the first match found is
+       processed.
 
-       This behaviour means that the order  in  which  multiple  patterns  are
-       specified  can affect the output when one of the above options is used.
-       This is no longer the same behaviour as GNU grep, which now manages  to
-       display  earlier  matches  for  later  patterns (as long as there is no
-       overlap).
+       Scanning with all the patterns resumes immediately following the match,
+       so  that  later  matches  on the same line can be found. Note, however,
+       that an overlapping match that starts in the middle  of  another  match
+       will not be processed.
 
-       Patterns that can match an empty string are accepted, but empty  string
-       matches   are  never  recognized.  An  example  is  the  pattern  "(su-
-       per)?(man)?", in which all components are optional. This pattern  finds
-       all  occurrences  of  both  "super"  and "man"; the output differs from
-       matching with "super|man" when only the matching substrings  are  being
+       The  above behaviour was changed at release 10.41 to be more compatible
+       with GNU grep. In earlier releases, pcre2grep did not recognize matches
+       from later patterns that were earlier in the subject.
+
+       Patterns  that can match an empty string are accepted, but empty string
+       matches  are  never  recognized.  An  example  is  the  pattern   "(su-
+       per)?(man)?",  in which all components are optional. This pattern finds
+       all occurrences of both "super" and  "man";  the  output  differs  from
+       matching  with  "super|man" when only the matching substrings are being
        shown.
 
-       If  the  LC_ALL or LC_CTYPE environment variable is set, pcre2grep uses
+       If the LC_ALL or LC_CTYPE environment variable is set,  pcre2grep  uses
        the value to set a locale when calling the PCRE2 library.  The --locale
        option can be used to override this.
 
 
 SUPPORT FOR COMPRESSED FILES
 
-       Compile-time  options for pcre2grep can set it up to use libz or libbz2
-       for reading compressed files whose names end in .gz  or  .bz2,  respec-
-       tively.  You can find out whether your pcre2grep binary has support for
-       one or both of these file types by running it with the  --help  option.
-       If  the  appropriate  support  is not present, all files are treated as
-       plain text. The standard input is always so treated. If a file  with  a
-       .gz  or .bz2 extension is not in fact compressed, it is read as a plain
-       text file. When input is from  a  compressed  .gz  or  .bz2  file,  the
+       Compile-time options for pcre2grep can set it up to use libz or  libbz2
+       for  reading  compressed  files whose names end in .gz or .bz2, respec-
+       tively. You can find out whether your pcre2grep binary has support  for
+       one  or  both of these file types by running it with the --help option.
+       If the appropriate support is not present, all  files  are  treated  as
+       plain  text.  The standard input is always so treated. If a file with a
+       .gz or .bz2 extension is not in fact compressed, it is read as a  plain
+       text  file.  When  input  is  from  a  compressed .gz or .bz2 file, the
        --line-buffered option is ignored.
 
 
 BINARY FILES
 
-       By  default,  a  file that contains a binary zero byte within the first
-       1024 bytes is identified as a binary file, and is processed  specially.
-       However,  if  the  newline  type is specified as NUL, that is, the line
+       By default, a file that contains a binary zero byte  within  the  first
+       1024  bytes is identified as a binary file, and is processed specially.
+       However, if the newline type is specified as NUL,  that  is,  the  line
        terminator is a binary zero, the test for a binary file is not applied.
-       See  the  --binary-files  option for a means of changing the way binary
+       See the --binary-files option for a means of changing  the  way  binary
        files are handled.
 
 
 BINARY ZEROS IN PATTERNS
 
-       Patterns passed from the command line are strings that  are  terminated
-       by  a  binary zero, so cannot contain internal zeros. However, patterns
+       Patterns  passed  from the command line are strings that are terminated
+       by a binary zero, so cannot contain internal zeros.  However,  patterns
        that are read from a file via the -f option may contain binary zeros.
 
 
 OPTIONS
 
-       The order in which some of the options appear can  affect  the  output.
-       For  example,  both  the  -H and -l options affect the printing of file
-       names. Whichever comes later in the command line will be the  one  that
-       takes  effect.  Similarly,  except  where  noted below, if an option is
-       given twice, the later setting is used. Numerical  values  for  options
-       may  be  followed  by  K  or  M,  to  signify multiplication by 1024 or
+       The  order  in  which some of the options appear can affect the output.
+       For example, both the -H and -l options affect  the  printing  of  file
+       names.  Whichever  comes later in the command line will be the one that
+       takes effect. Similarly, except where noted  below,  if  an  option  is
+       given  twice,  the  later setting is used. Numerical values for options
+       may be followed by K  or  M,  to  signify  multiplication  by  1024  or
        1024*1024 respectively.
 
        --        This terminates the list of options. It is useful if the next
-                 item  on  the command line starts with a hyphen but is not an
-                 option. This allows for the processing of patterns  and  file
+                 item on the command line starts with a hyphen but is  not  an
+                 option.  This  allows for the processing of patterns and file
                  names that start with hyphens.
 
        -A number, --after-context=number
-                 Output  up  to  number  lines  of context after each matching
-                 line. Fewer lines are output if the next match or the end  of
-                 the  file  is  reached,  or if the processing buffer size has
+                 Output up to number lines  of  context  after  each  matching
+                 line.  Fewer lines are output if the next match or the end of
+                 the file is reached, or if the  processing  buffer  size  has
                  been set too small. If file names and/or line numbers are be-
                  ing output, a hyphen separator is used instead of a colon for
-                 the context lines (the -Z option can be used  to  change  the
-                 file  name terminator to a zero byte). A line containing "--"
-                 is output between each group of lines,  unless  they  are  in
+                 the  context  lines  (the -Z option can be used to change the
+                 file name terminator to a zero byte). A line containing  "--"
+                 is  output  between  each  group of lines, unless they are in
                  fact contiguous in the input file. The value of number is ex-
-                 pected to be relatively small. When -c is  used,  -A  is  ig-
+                 pected  to  be  relatively  small. When -c is used, -A is ig-
                  nored.
 
        -a, --text
-                 Treat  binary  files as text. This is equivalent to --binary-
+                 Treat binary files as text. This is equivalent  to  --binary-
                  files=text.
 
        --allow-lookaround-bsk
                  PCRE2 now forbids the use of \K in lookarounds by default, in
-                 line  with  Perl.   This  option  causes pcre2grep to set the
-                 PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK option, which  enables  this
+                 line with Perl.  This option  causes  pcre2grep  to  set  the
+                 PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK  option,  which enables this
                  somewhat dangerous usage.
 
        -B number, --before-context=number
-                 Output  up  to  number  lines of context before each matching
-                 line. Fewer lines are output if the  previous  match  or  the
-                 start  of the file is within number lines, or if the process-
-                 ing buffer size has been set too small. If file names  and/or
+                 Output up to number lines of  context  before  each  matching
+                 line.  Fewer  lines  are  output if the previous match or the
+                 start of the file is within number lines, or if the  process-
+                 ing  buffer size has been set too small. If file names and/or
                  line numbers are being output, a hyphen separator is used in-
-                 stead of a colon for the context lines (the -Z option can  be
-                 used  to  change  the file name terminator to a zero byte). A
-                 line containing "--" is output between each group  of  lines,
-                 unless  they  are  in  fact contiguous in the input file. The
-                 value of number is expected to be relatively small.  When  -c
+                 stead  of a colon for the context lines (the -Z option can be
+                 used to change the file name terminator to a  zero  byte).  A
+                 line  containing  "--" is output between each group of lines,
+                 unless they are in fact contiguous in  the  input  file.  The
+                 value  of  number is expected to be relatively small. When -c
                  is used, -B is ignored.
 
        --binary-files=word
-                 Specify  how binary files are to be processed. If the word is
-                 "binary" (the default), pattern matching is performed on  bi-
-                 nary  files,  but  the  only  output  is  "Binary file <name>
-                 matches" when a match succeeds. If the word is "text",  which
-                 is  equivalent  to  the -a or --text option, binary files are
-                 processed in the same way as any other file.  In  this  case,
-                 when  a  match  succeeds,  the  output may be binary garbage,
-                 which can have nasty effects if sent to a  terminal.  If  the
-                 word  is  "without-match",  which is equivalent to the -I op-
+                 Specify how binary files are to be processed. If the word  is
+                 "binary"  (the default), pattern matching is performed on bi-
+                 nary files, but  the  only  output  is  "Binary  file  <name>
+                 matches"  when a match succeeds. If the word is "text", which
+                 is equivalent to the -a or --text option,  binary  files  are
+                 processed  in  the  same way as any other file. In this case,
+                 when a match succeeds, the  output  may  be  binary  garbage,
+                 which  can  have  nasty effects if sent to a terminal. If the
+                 word is "without-match", which is equivalent to  the  -I  op-
                  tion, binary files are not processed at all; they are assumed
-                 not  to  be  of  interest and are skipped without causing any
+                 not to be of interest and are  skipped  without  causing  any
                  output or affecting the return code.
 
        --buffer-size=number
-                 Set the parameter that controls how much memory  is  obtained
+                 Set  the  parameter that controls how much memory is obtained
                  at the start of processing for buffering files that are being
                  scanned. See also --max-buffer-size below.
 
        -C number, --context=number
-                 Output number lines of context both  before  and  after  each
-                 matching  line.  This is equivalent to setting both -A and -B
+                 Output  number  lines  of  context both before and after each
+                 matching line.  This is equivalent to setting both -A and  -B
                  to the same value.
 
        -c, --count
-                 Do not output lines from the files that  are  being  scanned;
-                 instead  output  the  number  of  lines  that would have been
+                 Do  not  output  lines from the files that are being scanned;
+                 instead output the number  of  lines  that  would  have  been
                  shown, either because they matched, or, if -v is set, because
-                 they  failed  to match. By default, this count is exactly the
-                 same as the number of lines that would have been output,  but
-                 if  the -M (multiline) option is used (without -v), there may
-                 be more suppressed lines than the count (that is, the  number
+                 they failed to match. By default, this count is  exactly  the
+                 same  as the number of lines that would have been output, but
+                 if the -M (multiline) option is used (without -v), there  may
+                 be  more suppressed lines than the count (that is, the number
                  of matches).
 
-                 If  no lines are selected, the number zero is output. If sev-
-                 eral files are are being scanned, a count is output for  each
-                 of  them and the -t option can be used to cause a total to be
-                 output at the end. However, if the  --files-with-matches  op-
-                 tion  is also used, only those files whose counts are greater
+                 If no lines are selected, the number zero is output. If  sev-
+                 eral  files are are being scanned, a count is output for each
+                 of them and the -t option can be used to cause a total to  be
+                 output  at  the end. However, if the --files-with-matches op-
+                 tion is also used, only those files whose counts are  greater
                  than zero are listed. When -c is used, the -A, -B, and -C op-
                  tions are ignored.
 
        --colour, --color
                  If this option is given without any data, it is equivalent to
-                 "--colour=auto".  If data is required, it must  be  given  in
+                 "--colour=auto".   If  data  is required, it must be given in
                  the same shell item, separated by an equals sign.
 
        --colour=value, --color=value
                  This option specifies under what circumstances the parts of a
                  line that matched a pattern should be coloured in the output.
-                 By  default,  the output is not coloured. The value (which is
-                 optional, see above) may be "never", "always", or "auto".  In
-                 the  latter case, colouring happens only if the standard out-
-                 put is connected to a terminal. More resources are used  when
-                 colouring is enabled, because pcre2grep has to search for all
-                 possible matches in a line, not just one, in order to  colour
-                 them all.
+                 It is ignored if --file-offsets, --line-offsets, or  --output
+                 is set. By default, output is not coloured. The value for the
+                 --colour  option  (which  is  optional,  see  above)  may  be
+                 "never",  "always",  or "auto". In the latter case, colouring
+                 happens only if the standard output is connected to a  termi-
+                 nal.   More resources are used when colouring is enabled, be-
+                 cause pcre2grep has to search for all possible matches  in  a
+                 line, not just one, in order to colour them all.
 
                  The  colour  that  is used can be specified by setting one of
                  the environment variables PCRE2GREP_COLOUR,  PCRE2GREP_COLOR,
@@ -287,19 +293,11 @@ OPTIONS
                  with a hyphen. When -e is used, no argument pattern is  taken
                  from  the  command  line;  all  arguments are treated as file
                  names. There is no limit to the number of patterns. They  are
-                 applied  to  each line in the order in which they are defined
-                 until one matches.
+                 applied to each line in the order in which they are defined.
 
-                 If -f is used with -e, the command line patterns are  matched
+                 If  -f is used with -e, the command line patterns are matched
                  first, followed by the patterns from the file(s), independent
-                 of the order in which these options are specified. Note  that
-                 multiple  use  of -e is not the same as a single pattern with
-                 alternatives. For example, X|Y finds the first character in a
-                 line  that  is  X or Y, whereas if the two patterns are given
-                 separately, with X first, pcre2grep finds X if it is present,
-                 even if it follows Y in the line. It finds Y only if there is
-                 no X in the line. This matters only if you are  using  -o  or
-                 --colo(u)r to show the part(s) of the line that matched.
+                 of the order in which these options are specified.
 
        --exclude=pattern
                  Files (but not directories) whose names match the pattern are
@@ -347,50 +345,48 @@ OPTIONS
                  tions.
 
        -f filename, --file=filename
-                 Read patterns from the file, one per  line,  and  match  them
-                 against  each  line of input. As is the case with patterns on
-                 the command line, no delimiters should be used. What  consti-
-                 tutes  a  newline when reading the file is the operating sys-
-                 tem's default interpretation of \n. The --newline option  has
-                 no  effect  on  this  option. Trailing white space is removed
-                 from each line, and blank lines are ignored.  An  empty  file
-                 contains  no patterns and therefore matches nothing. Patterns
-                 read from a file in this way may contain binary zeros,  which
-                 are  treated  as  ordinary data characters. See also the com-
-                 ments about multiple patterns versus a  single  pattern  with
-                 alternatives in the description of -e above.
+                 Read patterns from the file, one per line.  As  is  the  case
+                 with  patterns  on  the command line, no delimiters should be
+                 used. What constitutes a newline when reading the file is the
+                 operating  system's  default interpretation of \n. The --new-
+                 line option has no effect  on  this  option.  Trailing  white
+                 space is removed from each line, and blank lines are ignored.
+                 An empty file contains  no  patterns  and  therefore  matches
+                 nothing.  Patterns  read  from a file in this way may contain
+                 binary zeros, which are treated as ordinary data characters.
 
-                 If  this  option  is  given more than once, all the specified
-                 files are read. A data line is output if any of the  patterns
-                 match  it.  A  file  name can be given as "-" to refer to the
-                 standard input. When -f is used, patterns  specified  on  the
-                 command  line  using  -e may also be present; they are tested
-                 before the file's patterns.  However,  no  other  pattern  is
-                 taken from the command line; all arguments are treated as the
-                 names of paths to be searched.
+                 If this option is given more than  once,  all  the  specified
+                 files  are read. A data line is output if any of the patterns
+                 match it. A file name can be given as "-"  to  refer  to  the
+                 standard  input.  When  -f is used, patterns specified on the
+                 command line using -e may also be present; they  are  matched
+                 before the file's patterns. However, no pattern is taken from
+                 the command line; all arguments are treated as the  names  of
+                 paths to be searched.
 
        --file-list=filename
-                 Read a list of  files  and/or  directories  that  are  to  be
+                 Read  a  list  of  files  and/or  directories  that are to be
                  scanned from the given file, one per line. What constitutes a
-                 newline when reading the file is the operating  system's  de-
-                 fault.  Trailing  white  space is removed from each line, and
+                 newline  when  reading the file is the operating system's de-
+                 fault. Trailing white space is removed from  each  line,  and
                  blank lines are ignored. These paths are processed before any
-                 that  are  listed  on  the command line. The file name can be
-                 given as "-" to refer to the standard input.  If  --file  and
-                 --file-list  are  both  specified  as  "-", patterns are read
-                 first. This is useful only when the standard input is a  ter-
-                 minal,  from  which  further lines (the list of files) can be
+                 that are listed on the command line. The  file  name  can  be
+                 given  as  "-"  to refer to the standard input. If --file and
+                 --file-list are both specified  as  "-",  patterns  are  read
+                 first.  This is useful only when the standard input is a ter-
+                 minal, from which further lines (the list of  files)  can  be
                  read after an end-of-file indication. If this option is given
                  more than once, all the specified files are read.
 
        --file-offsets
-                 Instead  of  showing lines or parts of lines that match, show
-                 each match as an offset from the start  of  the  file  and  a
-                 length,  separated  by  a  comma. In this mode, no context is
-                 shown. That is, the -A, -B, and -C options  are  ignored.  If
-                 there is more than one match in a line, each of them is shown
-                 separately. This option is mutually exclusive with  --output,
-                 --line-offsets, and --only-matching.
+                 Instead of showing lines or parts of lines that  match,  show
+                 each  match  as  an  offset  from the start of the file and a
+                 length, separated by a comma. In this mode, --colour  has  no
+                 effect,  and no context is shown. That is, the -A, -B, and -C
+                 options are ignored. If there is more than  one  match  in  a
+                 line,  each of them is shown separately. This option is mutu-
+                 ally exclusive with  --output,  --line-offsets,  and  --only-
+                 matching.
 
        -H, --with-filename
                  Force  the  inclusion of the file name at the start of output
@@ -507,11 +503,11 @@ OPTIONS
                  each match as a line number, the offset from the start of the
                  line, and a length. The line number is terminated by a  colon
                  (as  usual; see the -n option), and the offset and length are
-                 separated by a comma. In this  mode,  no  context  is  shown.
-                 That  is, the -A, -B, and -C options are ignored. If there is
-                 more than one match in a line, each of them  is  shown  sepa-
-                 rately.  This  option  is  mutually  exclusive with --output,
-                 --file-offsets, and --only-matching.
+                 separated by a comma. In this mode, --colour has  no  effect,
+                 and  no context is shown. That is, the -A, -B, and -C options
+                 are ignored. If there is more than one match in a line,  each
+                 of  them  is shown separately. This option is mutually exclu-
+                 sive with --output, --file-offsets, and --only-matching.
 
        --locale=locale-name
                  This option specifies a locale to be used for pattern  match-
@@ -656,12 +652,12 @@ OPTIONS
                  When there is a match, instead of outputting  the  line  that
                  matched,  output just the text specified in this option, fol-
                  lowed by an operating-system standard newline. In this  mode,
-                 no  context is shown. That is, the -A, -B, and -C options are
-                 ignored. The --newline option has no effect on  this  option,
-                 which is mutually exclusive with --only-matching, --file-off-
-                 sets, and --line-offsets. However, like  --only-matching,  if
-                 there is more than one match in a line, each of them causes a
-                 line of output.
+                 --colour  has  no  effect, and no context is shown.  That is,
+                 the -A, -B, and -C options are ignored. The --newline  option
+                 has  no  effect  on  this option, which is mutually exclusive
+                 with  --only-matching,  --file-offsets,  and  --line-offsets.
+                 However,  like  --only-matching,  if  there  is more than one
+                 match in a line, each of them causes a line of output.
 
                  Escape sequences starting with a dollar character may be used
                  to insert the contents of the matched part of the line and/or
@@ -1038,5 +1034,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 07 August 2022
+       Last updated: 21 November 2022
        Copyright (c) 1997-2022 University of Cambridge.

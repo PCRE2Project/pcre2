@@ -103,24 +103,29 @@ Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in <b>&#60;stdio.h&#62;</b>. When there is more than one pattern
 (specified by the use of <b>-e</b> and/or <b>-f</b>), each pattern is applied to
 each line in the order in which they are defined, except that all the <b>-e</b>
-patterns are tried before the <b>-f</b> patterns.
+patterns are tried before the <b>-f</b> patterns. 
 </P>
 <P>
 By default, as soon as one pattern matches a line, no further patterns are
 considered. However, if <b>--colour</b> (or <b>--color</b>) is used to colour the
-matching substrings, or if <b>--only-matching</b>, <b>--file-offsets</b>, or
-<b>--line-offsets</b> is used to output only the part of the line that matched
-(either shown literally, or as an offset), scanning resumes immediately
-following the match, so that further matches on the same line can be found. If
-there are multiple patterns, they are all tried on the remainder of the line,
-but patterns that follow the one that matched are not tried on the earlier
-matched part of the line.
+matching substrings, or if <b>--only-matching</b>, <b>--file-offsets</b>,
+<b>--line-offsets</b>, or <b>--output</b> is used to output only the part of the
+line that matched (either shown literally, or as an offset), the behaviour is
+different. In this situation, all the patterns are applied to the line. If
+there is more than one match, the one that begins nearest to the start of the
+subject is processed; if there is more than one match at that position, the one
+with the longest matching substring is processed; if the matching substrings
+are equal, the first match found is processed.
 </P>
 <P>
-This behaviour means that the order in which multiple patterns are specified
-can affect the output when one of the above options is used. This is no longer
-the same behaviour as GNU grep, which now manages to display earlier matches
-for later patterns (as long as there is no overlap).
+Scanning with all the patterns resumes immediately following the match, so that
+later matches on the same line can be found. Note, however, that an overlapping
+match that starts in the middle of another match will not be processed.
+</P>
+<P>
+The above behaviour was changed at release 10.41 to be more compatible with GNU 
+grep. In earlier releases, <b>pcre2grep</b> did not recognize matches from 
+later patterns that were earlier in the subject.
 </P>
 <P>
 Patterns that can match an empty string are accepted, but empty string
@@ -260,12 +265,14 @@ equals sign.
 <P>
 <b>--colour=</b><i>value</i>, <b>--color=</b><i>value</i>
 This option specifies under what circumstances the parts of a line that matched
-a pattern should be coloured in the output. By default, the output is not
-coloured. The value (which is optional, see above) may be "never", "always", or
-"auto". In the latter case, colouring happens only if the standard output is
-connected to a terminal. More resources are used when colouring is enabled,
-because <b>pcre2grep</b> has to search for all possible matches in a line, not
-just one, in order to colour them all.
+a pattern should be coloured in the output. It is ignored if
+<b>--file-offsets</b>, <b>--line-offsets</b>, or <b>--output</b> is set. By
+default, output is not coloured. The value for the <b>--colour</b> option (which
+is optional, see above) may be "never", "always", or "auto". In the latter
+case, colouring happens only if the standard output is connected to a terminal.
+More resources are used when colouring is enabled, because <b>pcre2grep</b> has
+to search for all possible matches in a line, not just one, in order to colour
+them all.
 <br>
 <br>
 The colour that is used can be specified by setting one of the environment
@@ -313,18 +320,12 @@ order to specify several patterns. It can also be used as a way of specifying a
 single pattern that starts with a hyphen. When <b>-e</b> is used, no argument
 pattern is taken from the command line; all arguments are treated as file
 names. There is no limit to the number of patterns. They are applied to each
-line in the order in which they are defined until one matches.
+line in the order in which they are defined.
 <br>
 <br>
 If <b>-f</b> is used with <b>-e</b>, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
-these options are specified. Note that multiple use of <b>-e</b> is not the same
-as a single pattern with alternatives. For example, X|Y finds the first
-character in a line that is X or Y, whereas if the two patterns are given
-separately, with X first, <b>pcre2grep</b> finds X if it is present, even if it
-follows Y in the line. It finds Y only if there is no X in the line. This
-matters only if you are using <b>-o</b> or <b>--colo(u)r</b> to show the part(s)
-of the line that matched.
+these options are specified. 
 </P>
 <P>
 <b>--exclude</b>=<i>pattern</i>
@@ -373,23 +374,20 @@ files; it does not apply to patterns specified by any of the <b>--include</b> or
 </P>
 <P>
 <b>-f</b> <i>filename</i>, <b>--file=</b><i>filename</i>
-Read patterns from the file, one per line, and match them against each line of
-input. As is the case with patterns on the command line, no delimiters should
-be used. What constitutes a newline when reading the file is the operating
-system's default interpretation of \n. The <b>--newline</b> option has no
-effect on this option. Trailing white space is removed from each line, and
-blank lines are ignored. An empty file contains no patterns and therefore
-matches nothing. Patterns read from a file in this way may contain binary
-zeros, which are treated as ordinary data characters. See also the comments
-about multiple patterns versus a single pattern with alternatives in the
-description of <b>-e</b> above.
+Read patterns from the file, one per line. As is the case with patterns on the
+command line, no delimiters should be used. What constitutes a newline when
+reading the file is the operating system's default interpretation of \n. The
+<b>--newline</b> option has no effect on this option. Trailing white space is
+removed from each line, and blank lines are ignored. An empty file contains no
+patterns and therefore matches nothing. Patterns read from a file in this way
+may contain binary zeros, which are treated as ordinary data characters.
 <br>
 <br>
 If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
 as "-" to refer to the standard input. When <b>-f</b> is used, patterns
 specified on the command line using <b>-e</b> may also be present; they are
-tested before the file's patterns. However, no other pattern is taken from the
+matched before the file's patterns. However, no pattern is taken from the
 command line; all arguments are treated as the names of paths to be searched.
 </P>
 <P>
@@ -409,10 +407,10 @@ specified files are read.
 <b>--file-offsets</b>
 Instead of showing lines or parts of lines that match, show each match as an
 offset from the start of the file and a length, separated by a comma. In this
-mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b>
-options are ignored. If there is more than one match in a line, each of them is
-shown separately. This option is mutually exclusive with <b>--output</b>,
-<b>--line-offsets</b>, and <b>--only-matching</b>.
+mode, <b>--colour</b> has no effect, and no context is shown. That is, the
+<b>-A</b>, <b>-B</b>, and <b>-C</b> options are ignored. If there is more than one
+match in a line, each of them is shown separately. This option is mutually
+exclusive with <b>--output</b>, <b>--line-offsets</b>, and <b>--only-matching</b>.
 </P>
 <P>
 <b>-H</b>, <b>--with-filename</b>
@@ -530,11 +528,11 @@ ceases to work. When input is from a compressed .gz or .bz2 file,
 Instead of showing lines or parts of lines that match, show each match as a
 line number, the offset from the start of the line, and a length. The line
 number is terminated by a colon (as usual; see the <b>-n</b> option), and the
-offset and length are separated by a comma. In this mode, no context is shown.
-That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b> options are ignored. If there is
-more than one match in a line, each of them is shown separately. This option is
-mutually exclusive with <b>--output</b>, <b>--file-offsets</b>, and
-<b>--only-matching</b>.
+offset and length are separated by a comma. In this mode, <b>--colour</b> has no
+effect, and no context is shown. That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b>
+options are ignored. If there is more than one match in a line, each of them is
+shown separately. This option is mutually exclusive with <b>--output</b>,
+<b>--file-offsets</b>, and <b>--only-matching</b>.
 </P>
 <P>
 <b>--locale</b>=<i>locale-name</i>
@@ -674,12 +672,12 @@ It should never be needed in normal use.
 <b>-O</b> <i>text</i>, <b>--output</b>=<i>text</i>
 When there is a match, instead of outputting the line that matched, output just
 the text specified in this option, followed by an operating-system standard
-newline. In this mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>,
-and <b>-C</b> options are ignored. The <b>--newline</b> option has no effect on
-this option, which is mutually exclusive with <b>--only-matching</b>,
-<b>--file-offsets</b>, and <b>--line-offsets</b>. However, like
-<b>--only-matching</b>, if there is more than one match in a line, each of them
-causes a line of output.
+newline. In this mode, <b>--colour</b> has no effect, and no context is shown.
+That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b> options are ignored. The
+<b>--newline</b> option has no effect on this option, which is mutually
+exclusive with <b>--only-matching</b>, <b>--file-offsets</b>, and
+<b>--line-offsets</b>. However, like <b>--only-matching</b>, if there is more
+than one match in a line, each of them causes a line of output.
 <br>
 <br>
 Escape sequences starting with a dollar character may be used to insert the
@@ -1067,7 +1065,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 07 August 2022
+Last updated: 21 November 2022
 <br>
 Copyright &copy; 1997-2022 University of Cambridge.
 <br>

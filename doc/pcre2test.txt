@@ -205,7 +205,7 @@ COMMAND LINE OPTIONS
                  All other options are ignored. If both -C and any -Lx options
                  are present, whichever is first is recognized.
 
-       -LS       List  scripts: write a list of recogized Unicode script names
+       -LS       List scripts: write a list of recognized Unicode script names
                  to the standard output, then exit with zero  exit  code.  All
                  other options are ignored. If both -C and any -Lx options are
                  present, whichever is first is recognized.
@@ -1231,7 +1231,7 @@ SUBJECT MODIFIERS
        ing functions, unless callout_none is specified. Its behaviour  can  be
        controlled  by  various  modifiers  listed above whose names begin with
        callout_. Details are given in the section entitled  "Callouts"  below.
-       Testing  callouts  from  pcre2_substitute()  is  decribed separately in
+       Testing  callouts  from  pcre2_substitute()  is described separately in
        "Testing the substitution function" below.
 
    Finding all matches in a string
@@ -1931,7 +1931,7 @@ SAVING AND RESTORING COMPILED PATTERNS
        If jitverify is used with #pop, it does not  automatically  imply  jit,
        which is different behaviour from when it is used on a pattern.
 
-       The  #popcopy  command is analagous to the pushcopy modifier in that it
+       The  #popcopy  command is analogous to the pushcopy modifier in that it
        makes current a copy of the topmost stack pattern, leaving the original
        still on the stack.
 

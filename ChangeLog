@@ -85,6 +85,10 @@ LC_CTYPE to an bad value (because older versions didn't).
 one pattern and a later pattern matches at an earlier point in the subject when 
 the matched substrings are being identified by colour or by offsets.
 
+23. Updated the PrepareRelease script so that the man page that it makes for 
+the pcre2demo demonstration program is more standard and does not cause errors 
+when processed by lexgrog or mandb -c (GitHub issue #160).
+
 
 Version 10.40 15-April-2022
 ---------------------------
