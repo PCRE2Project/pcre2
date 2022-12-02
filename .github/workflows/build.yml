@@ -57,6 +57,34 @@ jobs:
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest
         
+  macos:
+    name: macOS universal
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -B build
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test (main test script)
+        run: |
+          cd build
+          ../RunTest
+
+      - name: Test (JIT test program)
+        run: |
+          cd build
+          ./pcre2_jit_test
+
+      - name: Test (pcre2grep test script)
+        run: |
+          cd build
+          ../RunGrepTest
+
   windows:      
     name: 32bit Windows
     runs-on: windows-latest
