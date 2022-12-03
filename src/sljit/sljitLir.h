@@ -609,7 +609,8 @@ static SLJIT_INLINE sljit_sw sljit_get_executable_offset(struct sljit_compiler *
 static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler *compiler) { return compiler->executable_size; }
 
 /* Returns with non-zero if the feature or limitation type passed as its
-   argument is present on the current CPU.
+   argument is present on the current CPU. The return value is one, if a
+   feature is fully supported, and it is two, if partially supported.
 
    Some features (e.g. floating point operations) require hardware (CPU)
    support while others (e.g. move with update) are emulated if not available.
@@ -625,10 +626,14 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
 #define SLJIT_HAS_ZERO_REGISTER		2
 /* [Emulated] Count leading zero is supported. */
 #define SLJIT_HAS_CLZ			3
+/* [Emulated] Count trailing zero is supported. */
+#define SLJIT_HAS_CTZ			4
+/* [Emulated] Rotate left/right is supported. */
+#define SLJIT_HAS_ROT			5
 /* [Emulated] Conditional move is supported. */
-#define SLJIT_HAS_CMOV			4
+#define SLJIT_HAS_CMOV			6
 /* [Emulated] Prefetch instruction is available (emulated as a nop). */
-#define SLJIT_HAS_PREFETCH		5
+#define SLJIT_HAS_PREFETCH		7
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 /* [Not emulated] SSE2 support is available on x86. */
@@ -1061,6 +1066,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
    Note: immediate source argument is not supported */
 #define SLJIT_CLZ			(SLJIT_OP1_BASE + 10)
 #define SLJIT_CLZ32			(SLJIT_CLZ | SLJIT_32)
+/* Count trailing zeroes
+   Flags: - (may destroy flags)
+   Note: immediate source argument is not supported */
+#define SLJIT_CTZ			(SLJIT_OP1_BASE + 11)
+#define SLJIT_CTZ32			(SLJIT_CTZ | SLJIT_32)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
@@ -1132,6 +1142,16 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
    always masked by the length of the shift operation. */
 #define SLJIT_MASHR			(SLJIT_OP2_BASE + 13)
 #define SLJIT_MASHR32			(SLJIT_MASHR | SLJIT_32)
+/* Flags: - (may destroy flags)
+   Let bit_length be the length of the rotate operation: 32 or 64.
+   The second operand is always masked by (bit_length - 1). */
+#define SLJIT_ROTL			(SLJIT_OP2_BASE + 14)
+#define SLJIT_ROTL32			(SLJIT_ROTL | SLJIT_32)
+/* Flags: - (may destroy flags)
+   Let bit_length be the length of the rotate operation: 32 or 64.
+   The second operand is always masked by (bit_length - 1). */
+#define SLJIT_ROTR			(SLJIT_OP2_BASE + 15)
+#define SLJIT_ROTR32			(SLJIT_ROTR | SLJIT_32)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compiler, sljit_s32 op,
 	sljit_s32 dst, sljit_sw dstw,
@@ -1142,6 +1162,49 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
    except the result is discarded. */
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2u(struct sljit_compiler *compiler, sljit_s32 op,
+	sljit_s32 src1, sljit_sw src1w,
+	sljit_s32 src2, sljit_sw src2w);
+
+/* Emit a left or right shift operation, where the bits shifted
+   in comes from a separate source operand. All operands are
+   interpreted as unsigned integers.
+
+   In the followings the value_mask variable is 31 for 32 bit
+     operations and word_size - 1 otherwise.
+
+   op must be one of the following operations:
+     SLJIT_SHL or SLJIT_SHL32:
+       src_dst <<= src2
+       src_dst |= ((src1 >> 1) >> (src2 ^ value_mask))
+     SLJIT_MSHL or SLJIT_MSHL32:
+       src2 &= value_mask
+       perform the SLJIT_SHL or SLJIT_SHL32 operation
+     SLJIT_LSHR or SLJIT_LSHR32:
+       src_dst >>= src2
+       src_dst |= ((src1 << 1) << (src2 ^ value_mask))
+     SLJIT_MLSHR or SLJIT_MLSHR32:
+       src2 &= value_mask
+       perform the SLJIT_LSHR or SLJIT_LSHR32 operation
+
+   op can be combined (or'ed) with SLJIT_SHIFT_INTO_NON_ZERO
+
+   src_dst must be a register which content is updated after
+     the operation is completed
+   src1 / src1w contains the bits which shifted into src_dst
+   src2 / src2w contains the shift amount
+
+   Note: a rotate operation can be performed if src_dst and
+         src1 are set to the same register
+
+   Flags: - (may destroy flags) */
+
+/* The src2 contains a non-zero value. Improves the generated
+   code on certain architectures, which provides a small
+   performance improvement. */
+#define SLJIT_SHIFT_INTO_NON_ZERO	0x200
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_shift_into(struct sljit_compiler *compiler, sljit_s32 op,
+	sljit_s32 src_dst,
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w);
 
