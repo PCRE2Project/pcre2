@@ -753,11 +753,11 @@ $valgrind $vjs $pcre2grep --no-jit --heap-limit=0 b testtemp1grep >>testtrygrep 
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 139 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep --line-buffered 'fox' $srcdir/testdata/grepinputv) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --line-buffered 'fox' testdata/grepinputv) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 140 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep --buffer-size=10 -A1 'brown' $srcdir/testdata/grepinputv) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep --buffer-size=10 -A1 'brown' testdata/grepinputv) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 141 -----------------------------" >>testtrygrep
