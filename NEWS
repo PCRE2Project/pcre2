@@ -2,6 +2,16 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.41 06-December-2022
+------------------------------
+
+This is another mainly bug-fixing and code-tidying release. There is one
+significant upgrade to pcre2grep: it now behaves like GNU grep when matching
+more than one pattern and a later pattern matches at an earlier point in the
+subject when the matched substrings are being identified by colour or by
+offsets.
+
+
 Version 10.40 15-April-2022
 ---------------------------
 

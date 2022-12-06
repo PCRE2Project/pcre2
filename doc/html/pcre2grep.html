@@ -103,7 +103,7 @@ Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in <b>&#60;stdio.h&#62;</b>. When there is more than one pattern
 (specified by the use of <b>-e</b> and/or <b>-f</b>), each pattern is applied to
 each line in the order in which they are defined, except that all the <b>-e</b>
-patterns are tried before the <b>-f</b> patterns. 
+patterns are tried before the <b>-f</b> patterns.
 </P>
 <P>
 By default, as soon as one pattern matches a line, no further patterns are
@@ -123,8 +123,8 @@ later matches on the same line can be found. Note, however, that an overlapping
 match that starts in the middle of another match will not be processed.
 </P>
 <P>
-The above behaviour was changed at release 10.41 to be more compatible with GNU 
-grep. In earlier releases, <b>pcre2grep</b> did not recognize matches from 
+The above behaviour was changed at release 10.41 to be more compatible with GNU
+grep. In earlier releases, <b>pcre2grep</b> did not recognize matches from
 later patterns that were earlier in the subject.
 </P>
 <P>
@@ -325,7 +325,7 @@ line in the order in which they are defined.
 <br>
 If <b>-f</b> is used with <b>-e</b>, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
-these options are specified. 
+these options are specified.
 </P>
 <P>
 <b>--exclude</b>=<i>pattern</i>
@@ -487,7 +487,7 @@ given any number of times. If a directory matches both <b>--include-dir</b> and
 <b>-L</b>, <b>--files-without-match</b>
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line by default, but if the <b>-Z</b> option is set, 
+output once, on a separate line by default, but if the <b>-Z</b> option is set,
 they are separated by zero bytes instead of newlines. This option overrides any
 previous <b>-H</b>, <b>-h</b>, or <b>-l</b> options.
 </P>

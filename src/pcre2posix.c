@@ -342,10 +342,10 @@ preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
 
 if (preg->re_match_data == NULL)
   {
-  /* LCOV_EXCL_START */ 
+  /* LCOV_EXCL_START */
   pcre2_code_free(preg->re_pcre2_code);
   return REG_ESPACE;
-  /* LCOV_EXCL_STOP */ 
+  /* LCOV_EXCL_STOP */
   }
 
 return 0;
@@ -424,7 +424,7 @@ if (rc >= 0)
 
 if (rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF8_ERR21)
   return REG_INVARG;
-  
+
 /* Most of these are events that won't occur during testing, so exclude them
 from coverage. */
 
@@ -432,7 +432,7 @@ switch(rc)
   {
   case PCRE2_ERROR_HEAPLIMIT: return REG_ESPACE;
   case PCRE2_ERROR_NOMATCH: return REG_NOMATCH;
-  
+
   /* LCOV_EXCL_START */
   case PCRE2_ERROR_BADMODE: return REG_INVARG;
   case PCRE2_ERROR_BADMAGIC: return REG_INVARG;
@@ -442,7 +442,7 @@ switch(rc)
   case PCRE2_ERROR_NOMEMORY: return REG_ESPACE;
   case PCRE2_ERROR_NULL: return REG_INVARG;
   default: return REG_ASSERT;
-  /* LCOV_EXCL_STOP */ 
+  /* LCOV_EXCL_STOP */
   }
 }
 

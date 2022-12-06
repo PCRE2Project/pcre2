@@ -2,11 +2,11 @@ Change Log for PCRE2 - see also the Git log
 -------------------------------------------
 
 
-Version 10.41 xx-xxx-2022
--------------------------
+Version 10.41 06-December-2022
+------------------------------
 
 1. Add fflush() before and after a fork callout in pcre2grep to get its output
-to be the same on all systems. (THere were previously ordering differences in
+to be the same on all systems. (There were previously ordering differences in
 Alpine Linux).
 
 2. Merged patch from @carenas (GitHub #110) for pthreads support in CMake.
@@ -32,35 +32,35 @@ tidied up an untidy #ifdef arrangement in pcre2test.
 8. Fixed an issue in the backtracking optimization of character repeats in
 JIT. Furthermore optimize star repetitions, not just plus repetitions.
 
-9. Removed the use of an initial backtracking frames vector on the system stack 
-in pcre2_match() so that it now always uses the heap. (In a multi-thread 
-environment with very small stacks there had been an issue.) This also is 
-tidier for JIT matching, which didn't need that vector. The heap vector is now 
-remembered in the match data block and re-used if that block itself is re-used. 
+9. Removed the use of an initial backtracking frames vector on the system stack
+in pcre2_match() so that it now always uses the heap. (In a multi-thread
+environment with very small stacks there had been an issue.) This also is
+tidier for JIT matching, which didn't need that vector. The heap vector is now
+remembered in the match data block and re-used if that block itself is re-used.
 It is freed with the match data block.
 
 10. Adjusted the find_limits code in pcre2test to work with change 9 above.
 
-11. Added find_limits_noheap to pcre2test, because the heap limits are now 
-different in different environments and so cannot be included in the standard 
+11. Added find_limits_noheap to pcre2test, because the heap limits are now
+different in different environments and so cannot be included in the standard
 tests.
 
-12. Created a test for pcre2_match() heap processing that is not part of the 
-tests run by 'make check', but can be run manually. The current output is from 
+12. Created a test for pcre2_match() heap processing that is not part of the
+tests run by 'make check', but can be run manually. The current output is from
 a 64-bit system.
 
 13. Implemented -Z aka --null in pcre2grep.
 
 14. A minor change to pcre2test and the addition of several new pcre2grep tests
-have improved LCOV coverage statistics. At the same time, code in pcre2grep and 
+have improved LCOV coverage statistics. At the same time, code in pcre2grep and
 elsewhere that can never be obeyed in normal testing has been excluded from
 coverage.
 
 15. Fixed a bug in pcre2grep that could cause an extra newline to be written
 after output generaed by --output.
 
-16. If a file has a .bz2 extension but is not in fact compressed, pcre2grep 
-should process it as a plain text file. A bug stopped this happening; now fixed 
+16. If a file has a .bz2 extension but is not in fact compressed, pcre2grep
+should process it as a plain text file. A bug stopped this happening; now fixed
 and added to the tests.
 
 17. When pcre2grep was running not in UTF mode, if a string specified by
@@ -75,19 +75,21 @@ pointers had out of place PCRE2_CALL_CONVENTION in src/pcre2.h.*. These
 produced errors when building for Windows with #define PCRE2_CALL_CONVENTION
 __stdcall.
 
-20. A negative repeat value in a pcre2test subject line was not being 
+20. A negative repeat value in a pcre2test subject line was not being
 diagnosed, leading to infinite looping.
 
-21. Updated RunGrepTest to discard the warning that Bash now gives when setting 
-LC_CTYPE to an bad value (because older versions didn't).
+21. Updated RunGrepTest to discard the warning that Bash now gives when setting
+LC_CTYPE to a bad value (because older versions didn't).
 
-22. Updated pcre2grep so that it behaves like GNU grep when matching more than 
-one pattern and a later pattern matches at an earlier point in the subject when 
+22. Updated pcre2grep so that it behaves like GNU grep when matching more than
+one pattern and a later pattern matches at an earlier point in the subject when
 the matched substrings are being identified by colour or by offsets.
 
-23. Updated the PrepareRelease script so that the man page that it makes for 
-the pcre2demo demonstration program is more standard and does not cause errors 
+23. Updated the PrepareRelease script so that the man page that it makes for
+the pcre2demo demonstration program is more standard and does not cause errors
 when processed by lexgrog or mandb -c (GitHub issue #160).
+
+24. The JIT compiler was updated.
 
 
 Version 10.40 15-April-2022

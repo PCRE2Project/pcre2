@@ -5452,9 +5452,9 @@ if (pat_patctl.locale[0] != 0)
     {
     strcpy((char *)locale_name, (char *)pat_patctl.locale);
     if (locale_tables != NULL)
-      { 
+      {
       PCRE2_MAKETABLES_FREE(general_context, (void *)locale_tables);
-      } 
+      }
     PCRE2_MAKETABLES(locale_tables, general_context);
     }
   use_tables = locale_tables;

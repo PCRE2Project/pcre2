@@ -444,7 +444,7 @@ return 0;
 }
 
 /* These functions became obsolete at release 10.30. The first is kept as a
-synonym for backwards compatibility. The second now does nothing. Exclude both 
+synonym for backwards compatibility. The second now does nothing. Exclude both
 from coverage reports. */
 
 /* LCOV_EXCL_START */

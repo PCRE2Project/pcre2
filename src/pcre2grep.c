@@ -1855,21 +1855,21 @@ for (int i = 1; p != NULL; p = p->next, i++)
 
   /* Handle a successful match. When all_matches is false, we are done.
   Otherwise we must save the earliest match. */
-  
+
   if (rc >= 0)
     {
-    if (!all_matches) 
+    if (!all_matches)
       {
-      *mrc = rc; 
+      *mrc = rc;
       return TRUE;
-      } 
-       
+      }
+
     if (first < 0 || offsets[0] < offsets_pair[first][0] ||
          (offsets[0] == offsets_pair[first][0] &&
           offsets[1] > offsets_pair[first][1]))
       {
       first = match_data_toggle;
-      firstrc = rc; 
+      firstrc = rc;
       match_data_toggle ^= 1;
       match_data = match_data_pair[match_data_toggle];
       offsets = offsets_pair[match_data_toggle];

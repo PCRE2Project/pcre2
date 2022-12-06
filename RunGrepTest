@@ -846,7 +846,7 @@ if [ $? -ne 0 ]; then
   echo "RC=2" >>testtrygrep
 else
 
-# Bash has started giving a warning when LC_CTYPE is set to a bad value. In 
+# Bash has started giving a warning when LC_CTYPE is set to a bad value. In
 # order to remain compatible with older versions, the following code is a bit
 # contorted.
 

@@ -632,15 +632,23 @@ EXTRA_DIST += \
   testdata/grepinput \
   testdata/grepinput3 \
   testdata/grepinput8 \
+  testdata/grepinputC.bz2 \
+  testdata/grepinputC.gz \
   testdata/grepinputM \
   testdata/grepinputv \
   testdata/grepinputx \
   testdata/greplist \
+  testdata/grepnot.bz2 \
   testdata/grepoutput \
   testdata/grepoutput8 \
   testdata/grepoutputC \
   testdata/grepoutputCN \
+  testdata/grepoutputCNU \
+  testdata/grepoutputCU \
+  testdata/grepoutputCbz2 \
+  testdata/grepoutputCgz \
   testdata/grepoutputN \
+  testdata/grepoutputUN \
   testdata/greppatN4 \
   testdata/testbtables \
   testdata/testinput1 \
@@ -670,6 +678,7 @@ EXTRA_DIST += \
   testdata/testinput25 \
   testdata/testinput26 \
   testdata/testinputEBC \
+  testdata/testinputheap \
   testdata/testoutput1 \
   testdata/testoutput2 \
   testdata/testoutput3 \
@@ -713,6 +722,9 @@ EXTRA_DIST += \
   testdata/testoutput25 \
   testdata/testoutput26 \
   testdata/testoutputEBC \
+  testdata/testoutputheap-16 \
+  testdata/testoutputheap-32 \
+  testdata/testoutputheap-8 \
   testdata/valgrind-jit.supp \
   testdata/wintestinput3 \
   testdata/wintestoutput3 \

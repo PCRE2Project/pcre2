@@ -72,7 +72,7 @@ Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP. When there is more than one pattern
 (specified by the use of \fB-e\fP and/or \fB-f\fP), each pattern is applied to
 each line in the order in which they are defined, except that all the \fB-e\fP
-patterns are tried before the \fB-f\fP patterns. 
+patterns are tried before the \fB-f\fP patterns.
 .P
 By default, as soon as one pattern matches a line, no further patterns are
 considered. However, if \fB--colour\fP (or \fB--color\fP) is used to colour the
@@ -89,8 +89,8 @@ Scanning with all the patterns resumes immediately following the match, so that
 later matches on the same line can be found. Note, however, that an overlapping
 match that starts in the middle of another match will not be processed.
 .P
-The above behaviour was changed at release 10.41 to be more compatible with GNU 
-grep. In earlier releases, \fBpcre2grep\fP did not recognize matches from 
+The above behaviour was changed at release 10.41 to be more compatible with GNU
+grep. In earlier releases, \fBpcre2grep\fP did not recognize matches from
 later patterns that were earlier in the subject.
 .P
 Patterns that can match an empty string are accepted, but empty string
@@ -278,7 +278,7 @@ line in the order in which they are defined.
 .sp
 If \fB-f\fP is used with \fB-e\fP, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
-these options are specified. 
+these options are specified.
 .TP
 \fB--exclude\fP=\fIpattern\fP
 Files (but not directories) whose names match the pattern are skipped without
@@ -422,7 +422,7 @@ given any number of times. If a directory matches both \fB--include-dir\fP and
 \fB-L\fP, \fB--files-without-match\fP
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
-output once, on a separate line by default, but if the \fB-Z\fP option is set, 
+output once, on a separate line by default, but if the \fB-Z\fP option is set,
 they are separated by zero bytes instead of newlines. This option overrides any
 previous \fB-H\fP, \fB-h\fP, or \fB-l\fP options.
 .TP
