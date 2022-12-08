@@ -139,5 +139,9 @@
 \= Expect errors
     \=null_subject
     abc\=null_subject
+    
+/(*LIMIT_HEAP=0)xx/posix
+\= Expect error
+    xxxx 
 
 # End of testdata/testinput18

@@ -83,7 +83,7 @@ From release 10.30, the interpretive (non-JIT) version of <b>pcre2_match()</b>
 uses very little system stack at run time. In earlier releases recursive
 function calls could use a great deal of stack, and this could cause problems,
 but this usage has been eliminated. Backtracking positions are now explicitly
-remembered in memory frames controlled by the code. 
+remembered in memory frames controlled by the code.
 </P>
 <P>
 The size of each frame depends on the size of pointer variables and the number
@@ -92,7 +92,7 @@ system the frame size for a pattern with no captures is 128 bytes. For each
 capturing group the size increases by 16 bytes.
 </P>
 <P>
-Until release 10.41, an initial 20KiB frames vector was allocated on the system 
+Until release 10.41, an initial 20KiB frames vector was allocated on the system
 stack, but this still caused some issues for multi-thread applications where
 each thread has a very small stack. From release 10.41 backtracking memory
 frames are always held in heap memory. An initial heap allocation is obtained
@@ -101,12 +101,12 @@ remembered with the match data block and re-used if that block is used for
 another match. It is freed when the match data block itself is freed.
 </P>
 <P>
-The size of the initial block is the larger of 20KiB or ten times the pattern's 
-frame size, unless the heap limit is less than this, in which case the heap 
+The size of the initial block is the larger of 20KiB or ten times the pattern's
+frame size, unless the heap limit is less than this, in which case the heap
 limit is used. If the initial block proves to be too small during matching, it
-is replaced by a larger block, subject to the heap limit. The heap limit is 
-checked only when a new block is to be allocated. Reducing the heap limit 
-between calls to <b>pcre2_match()</b> with the same match data block does not 
+is replaced by a larger block, subject to the heap limit. The heap limit is
+checked only when a new block is to be allocated. Reducing the heap limit
+between calls to <b>pcre2_match()</b> with the same match data block does not
 affect the saved block.
 </P>
 <P>

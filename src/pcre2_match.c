@@ -636,7 +636,7 @@ copied when a new frame is created. */
 frame_copy_size = frame_size - offsetof(heapframe, eptr);
 
 /* Set up the first frame and the end of the frames vector. We set the local
-heapframes_size to the usuable amount of the vector, that is, a whole number of 
+heapframes_size to the usuable amount of the vector, that is, a whole number of
 frames. */
 
 F = match_data->heapframes;
@@ -684,7 +684,7 @@ if (N >= frames_top)
   match_data->memctl.free(match_data->heapframes, match_data->memctl.memory_data);
   match_data->heapframes = new;
   match_data->heapframes_size = newsize;
-  
+
   heapframes_size = (newsize / frame_size) * frame_size;
   frames_top = (heapframe *)((char *)new + heapframes_size);
   }
@@ -6847,11 +6847,11 @@ if (match_data->heapframes_size < heapframes_size)
     match_data->memctl.memory_data);
   match_data->heapframes = match_data->memctl.malloc(heapframes_size,
     match_data->memctl.memory_data);
-  if (match_data->heapframes == NULL) 
+  if (match_data->heapframes == NULL)
     {
-    match_data->heapframes_size = 0; 
+    match_data->heapframes_size = 0;
     return PCRE2_ERROR_NOMEMORY;
-    } 
+    }
   match_data->heapframes_size = heapframes_size;
   }
 

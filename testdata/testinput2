@@ -5932,4 +5932,7 @@ a)"xI
 /[Aa]{2,3}/BI
     aabcd
 
+--
+    \[X]{-10}
+
 # End of testinput2

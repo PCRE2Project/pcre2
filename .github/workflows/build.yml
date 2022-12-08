@@ -8,13 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: Autogen
         run: ./autogen.sh
         
       - name: Configure
-        run: ./configure --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
+        run: ./configure CPPFLAGS='-Wall -Wextra' --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
         
       - name: Build
         run: make
@@ -34,16 +34,16 @@ jobs:
     container: alpine 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
-      - name: Autotools
+      - name: Setup
         run: apk add --no-cache automake autoconf gcc libtool make musl-dev 
         
       - name: Autogen
         run: ./autogen.sh
         
       - name: Configure
-        run: ./configure --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
+        run: ./configure CPPFLAGS='-Wall -Wextra' --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
         
       - name: Build
         run: make
@@ -62,10 +62,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -B build -A Win32
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_IGNORE_PREFIX_PATH=C:/Strawberry/c -B build -A Win32
 
       - name: Build
         run: cmake --build build

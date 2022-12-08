@@ -1266,7 +1266,7 @@ PCRE2_SIZE* ref_count;
 
 if (code != NULL)
   {
-#ifdef SUPPORT_JIT   
+#ifdef SUPPORT_JIT
   if (code->executable_jit != NULL)
     PRIV(jit_free)(code->executable_jit, &code->memctl);
 #endif
@@ -2689,7 +2689,7 @@ if ((options & PCRE2_EXTENDED_MORE) != 0) options |= PCRE2_EXTENDED;
 while (ptr < ptrend)
   {
   int prev_expect_cond_assert;
-  uint32_t min_repeat, max_repeat;
+  uint32_t min_repeat = 0, max_repeat = 0;
   uint32_t set, unset, *optset;
   uint32_t terminator;
   uint32_t prev_meta_quantifier;
@@ -8554,7 +8554,7 @@ do {
             op == OP_SCBRA || op == OP_SCBRAPOS)
      {
      int n = GET2(scode, 1+LINK_SIZE);
-     int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
+     unsigned int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
      if (!is_startline(scode, new_map, cb, atomcount, inassert)) return FALSE;
      }
 

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -342,8 +342,10 @@ preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
 
 if (preg->re_match_data == NULL)
   {
+  /* LCOV_EXCL_START */
   pcre2_code_free(preg->re_pcre2_code);
   return REG_ESPACE;
+  /* LCOV_EXCL_STOP */
   }
 
 return 0;
@@ -423,17 +425,24 @@ if (rc >= 0)
 if (rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF8_ERR21)
   return REG_INVARG;
 
+/* Most of these are events that won't occur during testing, so exclude them
+from coverage. */
+
 switch(rc)
   {
-  default: return REG_ASSERT;
+  case PCRE2_ERROR_HEAPLIMIT: return REG_ESPACE;
+  case PCRE2_ERROR_NOMATCH: return REG_NOMATCH;
+
+  /* LCOV_EXCL_START */
   case PCRE2_ERROR_BADMODE: return REG_INVARG;
   case PCRE2_ERROR_BADMAGIC: return REG_INVARG;
   case PCRE2_ERROR_BADOPTION: return REG_INVARG;
   case PCRE2_ERROR_BADUTFOFFSET: return REG_INVARG;
   case PCRE2_ERROR_MATCHLIMIT: return REG_ESPACE;
-  case PCRE2_ERROR_NOMATCH: return REG_NOMATCH;
   case PCRE2_ERROR_NOMEMORY: return REG_ESPACE;
   case PCRE2_ERROR_NULL: return REG_INVARG;
+  default: return REG_ASSERT;
+  /* LCOV_EXCL_STOP */
   }
 }
 
