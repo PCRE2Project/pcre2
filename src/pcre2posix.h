@@ -116,6 +116,20 @@ typedef struct {
   regoff_t rm_eo;
 } regmatch_t;
 
+/* When compiling with the MSVC compiler, it is sometimes necessary to include
+a "calling convention" before exported function names. (This is secondhand
+information; I know nothing about MSVC myself). For example, something like
+
+void __cdecl function(....)
+
+might be needed. In order so make this easy, all the exported functions have
+PCRE2_CALL_CONVENTION just before their names. It is rarely needed; if not
+set, we ensure here that it has no effect. */
+
+#ifndef PCRE2_CALL_CONVENTION
+#define PCRE2_CALL_CONVENTION
+#endif
+
 /* When an application links to a PCRE2 DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
 export settings are needed, and are set in pcre2posix.c before including this
