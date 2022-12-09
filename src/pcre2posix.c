@@ -92,20 +92,6 @@ changed. This #define is a copy of the one in pcre2_internal.h. */
 #include "pcre2.h"
 #include "pcre2posix.h"
 
-/* When compiling with the MSVC compiler, it is sometimes necessary to include
-a "calling convention" before exported function names. (This is secondhand
-information; I know nothing about MSVC myself). For example, something like
-
-  void __cdecl function(....)
-
-might be needed. In order to make this easy, all the exported functions have
-PCRE2_CALL_CONVENTION just before their names. It is rarely needed; if not
-set, we ensure here that it has no effect. */
-
-#ifndef PCRE2_CALL_CONVENTION
-#define PCRE2_CALL_CONVENTION
-#endif
-
 /* Table to translate PCRE2 compile time error codes into POSIX error codes.
 Only a few PCRE2 errors with a value greater than 23 turn into special POSIX
 codes: most go to REG_BADPAT. The second table lists, in pairs, those that
