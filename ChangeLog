@@ -13,6 +13,11 @@ pcre2.h failed to compile.
 2. To catch similar issues to the above in future, a new small test program 
 that includes pcre2posix.h but not pcre2.h has been added to the test suite.
 
+3. When the -S option of pcre2test was used to set a stack size greater than 
+the allowed maximum, the error message displayed the hard limit incorrectly. 
+This was pointed out on GitHub pull request #171, but the suggested patch 
+didn't cope with all cases. Some further modification was required.
+
 
 Version 10.41 06-December-2022
 ------------------------------

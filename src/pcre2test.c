@@ -9002,9 +9002,13 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     if (rlim.rlim_cur > rlim.rlim_max)
       {
       fprintf(stderr,
-        "pcre2test: requested stack size %luMiB is greater than hard limit "
-          "%luMiB\n", (unsigned long int)stack_size,
-          (unsigned long int)(rlim.rlim_max / (1024 * 1024)));
+        "pcre2test: requested stack size %luMiB is greater than hard limit ",
+          (unsigned long int)stack_size);
+      if (rlim.rlim_max % (1024*1024) == 0) fprintf(stderr, "%luMiB\n",
+        (unsigned long int)(rlim.rlim_max/(1024 * 1024)));
+      else if (rlim.rlim_max % 1024 == 0) fprintf(stderr, "%luKiB\n",
+        (unsigned long int)(rlim.rlim_max/1024));
+      else fprintf(stderr, "%lu bytes\n", (unsigned long int)(rlim.rlim_max));
       exit(1);
       }
     rc = setrlimit(RLIMIT_STACK, &rlim);
