@@ -2,6 +2,18 @@ Change Log for PCRE2 - see also the Git log
 -------------------------------------------
 
 
+Version 10.42 10-December-2022
+------------------------------
+
+1. Change 19 of 10.41 wasn't quite right; it put the definition of a default, 
+empty value for PCRE2_CALL_CONVENTION in src/pcre2posix.c instead of 
+src/pcre2posix.h, which meant that programs that included pcre2posix.h but not 
+pcre2.h failed to compile.
+
+2. To catch similar issues to the above in future, a new small test program 
+that includes pcre2posix.h but not pcre2.h has been added to the test suite.
+
+
 Version 10.41 06-December-2022
 ------------------------------
 

@@ -554,6 +554,17 @@ endif # WITH_PCRE2_8
 
 ## -------- Testing ----------
 
+## If the 8-bit library is enabled, build the POSIX wrapper test program and
+## arrange for it to run.
+
+if WITH_PCRE2_8
+TESTS += pcre2posix_test
+noinst_PROGRAMS += pcre2posix_test
+pcre2posix_test_SOURCES = src/pcre2posix_test.c
+pcre2posix_test_CFLAGS = $(AM_CFLAGS)
+pcre2posix_test_LDADD = libpcre2-posix.la libpcre2-8.la
+endif # WITH_PCRE2_8
+
 ## If JIT support is enabled, arrange for the JIT test program to run.
 
 if WITH_JIT

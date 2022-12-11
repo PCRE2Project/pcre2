@@ -99,6 +99,7 @@
 #            build in one go.
 # 2021-08-28 PH increased minimum version
 # 2021-08-28 PH added test for realpath()
+# 2022-12-10 PH added support for pcre2posix_test
 
 # Increased minimum to 2.8.5 to support GNUInstallDirs.
 # Increased minimum to 3.1 to support imported targets.
@@ -941,10 +942,16 @@ IF(PCRE2_BUILD_TESTS)
   ENDIF(PCRE2_BUILD_PCRE2_32)
   TARGET_LINK_LIBRARIES(pcre2test ${PCRE2TEST_LIBS} ${PCRE2TEST_LINKER_FLAGS})
 
+  IF(PCRE2_BUILD_PCRE2_8)
+    ADD_EXECUTABLE(pcre2posix_test src/pcre2posix_test.c)
+    SET(targets ${targets} pcre2posix_test) 
+    TARGET_LINK_LIBRARIES(pcre2posix_test pcre2-posix pcre2-8) 
+  ENDIF(PCRE2_BUILD_PCRE2_8)
+
   IF(PCRE2_SUPPORT_JIT)
     ADD_EXECUTABLE(pcre2_jit_test src/pcre2_jit_test.c)
     SET(targets ${targets} pcre2_jit_test)
-    SET(PCRE2_JIT_TEST_LIBS )
+    SET(PCRE2_JIT_TEST_LIBS)
     IF(PCRE2_BUILD_PCRE2_8)
       LIST(APPEND PCRE2_JIT_TEST_LIBS pcre2-8)
     ENDIF(PCRE2_BUILD_PCRE2_8)
@@ -1055,6 +1062,11 @@ echo RunTest.bat tests successfully completed
   IF(PCRE2_SUPPORT_JIT)
     ADD_TEST(pcre2_jit_test pcre2_jit_test)
   ENDIF(PCRE2_SUPPORT_JIT)
+  
+  IF(PCRE2_BUILD_PCRE2_8)
+    ADD_TEST(pcre2posix_test pcre2posix_test) 
+  ENDIF(PCRE2_BUILD_PCRE2_8)
+ 
 
 ENDIF(PCRE2_BUILD_TESTS)
 
