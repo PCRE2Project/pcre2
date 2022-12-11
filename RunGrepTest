@@ -275,7 +275,7 @@ echo "---------------------------- Test 35 -----------------------------" >>test
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 36 -----------------------------" >>testtrygrep
-(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include=grepinput[^C] --exclude 'grepinput$' --exclude=grepinput8 --exclude=grepinputM --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -L -r --include='grepinput[^C]' --exclude 'grepinput$' --exclude=grepinput8 --exclude=grepinputM --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 37 -----------------------------" >>testtrygrep
@@ -846,11 +846,7 @@ if [ $? -ne 0 ]; then
   echo "RC=2" >>testtrygrep
 else
 
-# Bash has started giving a warning when LC_CTYPE is set to a bad value. In
-# order to remain compatible with older versions, the following code is a bit
-# contorted.
-
-  (cd $srcdir; unset LC_ALL; export LC_CTYPE=badlocale 2>/dev/null; $valgrind $vjs $pcre2grep abc /dev/null) >>testtrygrep 2>&1
+  (cd $srcdir; unset LC_ALL; env LC_CTYPE=badlocale $valgrind $vjs $pcre2grep abc /dev/null) >>testtrygrep 2>&1
   echo "RC=$?" >>testtrygrep
 fi
 
