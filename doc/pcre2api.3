@@ -2519,7 +2519,9 @@ large enough to hold as many as are expected.
 A minimum of at least 1 pair is imposed by \fBpcre2_match_data_create()\fP, so
 it is always possible to return the overall matched string in the case of
 \fBpcre2_match()\fP or the longest match in the case of
-\fBpcre2_dfa_match()\fP.
+\fBpcre2_dfa_match()\fP. The maximum number of pairs is 65535; if the the first
+argument of \fBpcre2_match_data_create()\fP is greater than this, 65535 is
+used.
 .P
 The second argument of \fBpcre2_match_data_create()\fP is a pointer to a
 general context, which can specify custom memory management for obtaining the

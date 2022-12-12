@@ -18,6 +18,10 @@ the allowed maximum, the error message displayed the hard limit incorrectly.
 This was pointed out on GitHub pull request #171, but the suggested patch 
 didn't cope with all cases. Some further modification was required.
 
+4. Supplying an ovector count of more than 65535 to pcre2_match_data_create() 
+caused a crash because the field in the match data block is only 16 bits. A 
+maximum of 65535 is now silently applied.
+
 
 Version 10.41 06-December-2022
 ------------------------------

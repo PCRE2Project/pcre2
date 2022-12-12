@@ -5934,5 +5934,10 @@ a)"xI
 
 --
     \[X]{-10}
+    
+# Check imposition of maximum by match_data_create().
+
+/abcd/
+    abcd\=ovector=65536
 
 # End of testinput2
