@@ -2494,7 +2494,9 @@ THE MATCH DATA BLOCK
        A minimum of at least 1 pair is imposed  by  pcre2_match_data_create(),
        so  it  is  always possible to return the overall matched string in the
        case  of  pcre2_match()  or  the  longest  match   in   the   case   of
-       pcre2_dfa_match().
+       pcre2_dfa_match().  The  maximum  number  of pairs is 65535; if the the
+       first argument of pcre2_match_data_create() is greater than this, 65535
+       is used.
 
        The second argument of pcre2_match_data_create() is a pointer to a gen-
        eral context, which can specify custom memory management for  obtaining

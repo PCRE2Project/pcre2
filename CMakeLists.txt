@@ -944,8 +944,8 @@ IF(PCRE2_BUILD_TESTS)
 
   IF(PCRE2_BUILD_PCRE2_8)
     ADD_EXECUTABLE(pcre2posix_test src/pcre2posix_test.c)
-    SET(targets ${targets} pcre2posix_test) 
-    TARGET_LINK_LIBRARIES(pcre2posix_test pcre2-posix pcre2-8) 
+    SET(targets ${targets} pcre2posix_test)
+    TARGET_LINK_LIBRARIES(pcre2posix_test pcre2-posix pcre2-8)
   ENDIF(PCRE2_BUILD_PCRE2_8)
 
   IF(PCRE2_SUPPORT_JIT)
@@ -1062,11 +1062,11 @@ echo RunTest.bat tests successfully completed
   IF(PCRE2_SUPPORT_JIT)
     ADD_TEST(pcre2_jit_test pcre2_jit_test)
   ENDIF(PCRE2_SUPPORT_JIT)
-  
+
   IF(PCRE2_BUILD_PCRE2_8)
-    ADD_TEST(pcre2posix_test pcre2posix_test) 
+    ADD_TEST(pcre2posix_test pcre2posix_test)
   ENDIF(PCRE2_BUILD_PCRE2_8)
- 
+
 
 ENDIF(PCRE2_BUILD_TESTS)
 

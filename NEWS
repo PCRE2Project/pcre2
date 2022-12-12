@@ -2,6 +2,19 @@ News about PCRE2 releases
 -------------------------
 
 
+Version 10.42 11-December-2022
+------------------------------
+
+This is an unexpectedly early release to fix a problem that was introduced in
+10.41. ChangeLog number 19 (GitHub #139) added the default definition of
+PCRE2_CALL_CONVENTION to pcre2posix.c instead of pcre2posix.h, which meant that
+programs including pcre2posix.h but not pcre2.h couldn't compile. A new test
+that checks this case has been added.
+
+A couple of other minor issues are also fixed, and a patch for an intermittent
+JIT fault is also included. See ChangeLog and the Git log.
+
+
 Version 10.41 06-December-2022
 ------------------------------
 

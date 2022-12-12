@@ -2543,7 +2543,9 @@ large enough to hold as many as are expected.
 A minimum of at least 1 pair is imposed by <b>pcre2_match_data_create()</b>, so
 it is always possible to return the overall matched string in the case of
 <b>pcre2_match()</b> or the longest match in the case of
-<b>pcre2_dfa_match()</b>.
+<b>pcre2_dfa_match()</b>. The maximum number of pairs is 65535; if the the first
+argument of <b>pcre2_match_data_create()</b> is greater than this, 65535 is
+used.
 </P>
 <P>
 The second argument of <b>pcre2_match_data_create()</b> is a pointer to a
