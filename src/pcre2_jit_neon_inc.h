@@ -183,6 +183,8 @@ restart:;
 #endif
 
 #if defined(FFCPS)
+if (str_ptr >= str_end)
+  return NULL;
 sljit_u8 *p1 = str_ptr - diff;
 #endif
 sljit_s32 align_offset = ((uint64_t)str_ptr & 0xf);
