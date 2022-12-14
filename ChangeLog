@@ -2,6 +2,14 @@ Change Log for PCRE2 - see also the Git log
 -------------------------------------------
 
 
+Version 10.43 xx-xxx-202x
+-------------------------
+
+1. The test program added by change 2 of 10.42 didn't work when the default 
+newline setting didn't include \n as a newline. One test needed (*LF) to ensure 
+that it worked.
+
+
 Version 10.42 11-December-2022
 ------------------------------
 
