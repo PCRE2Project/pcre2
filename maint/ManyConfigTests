@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# This is a script for the use of PCRE2 maintainers. It configures and rebuilds
+# This is a script for the use of PCRE2 maintainers. It configures and builds
 # PCRE2 with a variety of configuration options, and in each case runs the
 # tests to ensure that all goes well. Every possible combination would take far
 # too long, so we use a representative sample. This script should be run in the
@@ -18,7 +18,8 @@
 # -nojitvalgrind  skip JIT tests with valgrind
 # -nomain         skip all the main (non-JIT) set of tests
 # -nomainvalgrind skip the main (non-JIT) valgrind tests
-# -notmp          skip the test in a temporary directory
+# -notmp          skip the tests in a temporary directory
+# -notmpjit       skip the JIT test in a temporary directory
 # -novalgrind     skip all the valgrind tests
 
 # Alternatively, if any of those names are given with '+' instead of '-no',
@@ -36,6 +37,7 @@ usejitvalgrind=1
 usemain=1
 usemainvalgrind=1
 usetmp=1
+usetmpjit=1
 usevalgrind=1
 
 dummy=0
@@ -53,6 +55,8 @@ while [ $# -gt 0 ] ; do
           usemain=0
           usemainvalgrind=0
           usetmp=0
+          usetmpjit=0 
+          usevalgrind=0 
           seenplus=1
         fi;;
   esac
@@ -63,22 +67,24 @@ while [ $# -gt 0 ] ; do
     -noasan)         useasan=0;;
     -nousan)         useusan=0;;
     -nodebug)        usedebug=0;;
-    -nojit)          usejit=0; usejitvalgrind=0;;
+    -nojit)          usejit=0; usejitvalgrind=0; usetmpjit=0;;
     -nojitmain)      usejit=0;;
     -nojitvalgrind)  usejitvalgrind=0;;
     -nomain)         usemain=0; usemainvalgrind=0;;
     -nomainvalgrind) usemainvalgrind=0;;
-    -notmp)          usetmp=0;;
+    -notmp)          usetmp=0; usetmpjit=0;;
+    -notmpjit)       usetmpjit=0;;
     -novalgrind)     usevalgrind=0;;
     +asan)           useasan=1;;
     +usan)           useusan=1;;
     +debug)          usedebug=1;;
-    +jit)            usejit=1; usejitvalgrind=1;;
+    +jit)            usejit=1; usejitvalgrind=1; usetmpjit=1;;
     +jitmain)        usejit=1;;
     +jitvalgrind)    usejitvalgrind=1;;
     +main)           usemain=1; usemainvalgrind=1;;
     +mainvalgrind)   usemainvalgrind=1;;
     +tmp)            usetmp=1;;
+    +tmpjit)         usetmpjit=1;;
     +valgrind)       usevalgrind=1; usejitvalgrind=1; usemainvalgrind=1;;
     *)               echo "Unknown option '$1'"; exit 1;;
   esac
@@ -124,9 +130,11 @@ if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   CFLAGS="$CFLAGS -Wnested-externs"
   CFLAGS="$CFLAGS -pedantic"
   CFLAGS="$CFLAGS -Wuninitialized"
-  CFLAGS="$CFLAGS -Wmaybe-uninitialized" 
+  CFLAGS="$CFLAGS -Wmaybe-uninitialized"
   CFLAGS="$CFLAGS -Wmissing-prototypes"
   CFLAGS="$CFLAGS -Wstrict-prototypes"
+  CFKAGS="$CFLAGS -Warray-bounds"
+  CFLAGS="$CFLAGS -Wformat-overflow=2"
 fi
 rm -f /tmp/pcre2ccversion
 
@@ -137,7 +145,7 @@ rm -f /tmp/pcre2ccversion
 
 runtest()
   {
-  rm -f $srcdir/pcre2test $srcdir/pcre2grep $srcdir/pcre2_jit_test
+  rm -f $srcdir/pcre2test $srcdir/pcre2grep $srcdir/pcre2_jit_test $srcdir/pcre2posix_test
   testcount=`expr $testcount + 1`
 
   if [ "$opts" = "" ] ; then
@@ -218,13 +226,21 @@ runtest()
       cat teststdoutM
       exit 1
     fi
+    echo "Running pcre2posix test $withvalgrind"
+    $valgrind ./pcre2posix_test >teststdoutM 2>teststderrM
+
+    if [ $? -ne 0 ]; then
+      echo " "
+      echo "**** Test failed ****"
+      exit 1
+    fi
   else
-    echo "Skipping pcre2grep tests: 8-bit library not compiled"
+    echo "Skipping pcre2grep and pcre2posix tests: 8-bit library not compiled"
   fi
 
   if [ "$jit" -gt 0 ]; then
     echo "Running JIT regression tests $withvalgrind"
-    $jrvalgrind $srcdir/pcre2_jit_test >teststdoutM 2>teststderrM
+    $jrvalgrind ./pcre2_jit_test >teststdoutM 2>teststderrM
     if [ $? -ne 0 -o -s teststderrM ]; then
       echo " "
       echo "**** Test failed ****"
@@ -242,7 +258,7 @@ runtest()
 
 testtotal=`expr 17 \* $usemain + \
   1 \* $usemain \* $usedebug + \
-  1 \* $usetmp + \
+  1 \* $usetmp + 1 \* $usetmpjit + \
   1 \* $ISGCC \* $usemain + \
   1 \* $ISGCC \* $usemain \* $useasan + \
   1 \* $ISGCC \* $usemain \* $useusan + \
@@ -293,7 +309,7 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
-# This also seems to be the case for sanitize undefined.   
+# This also seems to be the case for sanitize undefined.
   if [ $useusan -ne 0 ]; then
     echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99 -------"
     CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99"
@@ -301,7 +317,7 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
   fi
-  CFLAGS="$OFLAGS $SAVECFLAGS"
+  CFLAGS="$SAVECFLAGS"
 fi
 
 # This set of tests builds PCRE2 and runs the tests with a variety of configure
@@ -312,6 +328,7 @@ fi
 # library for the subsequent tests.
 
 echo "---------- CFLAGS for the remaining tests ----------"
+CFLAGS="$OFLAGS $CFLAGS"
 echo "CFLAGS=$CFLAGS"
 
 if [ $usemain -ne 0 ]; then
@@ -386,7 +403,7 @@ if [ $usevalgrind -ne 0 ]; then
   fi
 
   if [ $usejitvalgrind -ne 0 ]; then
-    jrvalgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --suppressions=$srcdir/testdata/valgrind-jit.supp" 
+    jrvalgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --suppressions=$srcdir/testdata/valgrind-jit.supp"
     for opts in \
       "--enable-jit --disable-shared" \
       "--enable-jit --enable-pcre2-16 --enable-pcre2-32"
@@ -418,8 +435,7 @@ echo "---------- End of tests in the source directory ----------"
 echo "Removing teststdoutM and teststderrM"
 rm -rf teststdoutM teststderrM
 
-if [ $usetmp -ne 0 ]; then
-  echo "---------- Tests in the $tmp directory ----------"
+if [ $usetmp -ne 0 -o $usetmpjit -ne 0 ]; then
   srcdir=`pwd`
   export srcdir
 
@@ -438,11 +454,23 @@ if [ $usetmp -ne 0 ]; then
     exit 1
   fi
 
-  for opts in \
-    "--disable-shared"
-  do
-    runtest
-  done
+  if [ $usetmp -ne 0 ]; then
+    echo "---------- Tests in the $tmp directory ----------"
+    for opts in \
+      "--disable-shared"
+    do
+      runtest
+    done
+  fi   
+  
+  if [ $usetmpjit -ne 0 ]; then
+    echo "---------- JIT tests in the $tmp directory ----------"
+    for opts in \
+      "--enable-jit --disable-shared"
+    do
+      runtest
+    done
+  fi
 
   echo "Removing $tmp"
   rm -rf $tmp

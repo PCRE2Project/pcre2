@@ -9,6 +9,11 @@ Version 10.43 xx-xxx-202x
 newline setting didn't include \n as a newline. One test needed (*LF) to ensure 
 that it worked.
 
+2. Added the new freestanding POSIX test program to the ManyConfigTests script 
+in the maint directory (overlooked in 2 below). Also improved the selection 
+facilities in that script, and added a test with JIT in a non-source directory, 
+fixing an oversight that would have made such a test fail before.
+
 
 Version 10.42 11-December-2022
 ------------------------------
