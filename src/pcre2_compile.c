@@ -7117,10 +7117,8 @@ for (;; pptr++)
 
         if (lengthptr != NULL)
           {
-          PCRE2_SIZE delta = replicate*(1 + LINK_SIZE);
-          if ((INT64_OR_DOUBLE)replicate*
-                (INT64_OR_DOUBLE)(1 + LINK_SIZE) >
-                  (INT64_OR_DOUBLE)INT_MAX ||
+          INT64_OR_DOUBLE delta = (INT64_OR_DOUBLE)replicate*(INT64_OR_DOUBLE)(1 + LINK_SIZE);
+          if (delta > (INT64_OR_DOUBLE)INT_MAX ||
               OFLOW_MAX - *lengthptr < delta)
             {
             *errorcodeptr = ERR20;
