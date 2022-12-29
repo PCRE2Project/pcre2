@@ -6816,7 +6816,7 @@ frame_size = (offsetof(heapframe, ovector) +
 smaller. */
 
 mb->heap_limit = ((mcontext->heap_limit < re->limit_heap)?
-  mcontext->heap_limit : re->limit_heap) * 1024;
+  mcontext->heap_limit : re->limit_heap);
 
 mb->match_limit = (mcontext->match_limit < re->limit_match)?
   mcontext->match_limit : re->limit_match;
