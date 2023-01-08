@@ -1447,6 +1447,12 @@ or PCRE2_EXTENDED_MORE option is set with PCRE2_ALT_VERBNAMES, unescaped
 whitespace in verb names is skipped and #-comments are recognized, exactly as
 in the rest of the pattern.
 .sp
+  PCRE2_ASCII
+.sp
+When PCRE2_UTF and PCRE2_UCP are both being used, some classes are changed in
+ways that conflict between UTF and ASCII characters. This option can be set
+to restrict \ed to only match the non UTF digits.
+.sp
   PCRE2_AUTO_CALLOUT
 .sp
 If this bit is set, \fBpcre2_compile()\fP automatically inserts callout items,

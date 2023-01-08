@@ -776,7 +776,7 @@ are allowed. */
    PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
    PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_ASCII)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
    (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD)
@@ -3124,14 +3124,18 @@ while (ptr < ptrend)
         }
       else
         {
-        *parsed_pattern++ = META_ESCAPE +
-          ((escape == ESC_d || escape == ESC_s || escape == ESC_w)?
-            ESC_p : ESC_P);
+        if ((options & PCRE2_ASCII) == 0)
+          *parsed_pattern++ = META_ESCAPE +
+            ((escape == ESC_d || escape == ESC_s || escape == ESC_w)?
+              ESC_p : ESC_P);
+        else
+          *parsed_pattern++ = META_ESCAPE + escape;
         switch(escape)
           {
           case ESC_d:
           case ESC_D:
-          *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
+          if ((options & PCRE2_ASCII) == 0)
+            *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
           break;
 
           case ESC_s:
@@ -3671,14 +3675,18 @@ while (ptr < ptrend)
             }
           else
             {
-            *parsed_pattern++ = META_ESCAPE +
-              ((escape == ESC_d || escape == ESC_s || escape == ESC_w)?
-                ESC_p : ESC_P);
+            if ((options & PCRE2_ASCII) == 0)
+              *parsed_pattern++ = META_ESCAPE +
+                ((escape == ESC_d || escape == ESC_s || escape == ESC_w)?
+                  ESC_p : ESC_P);
+            else
+              *parsed_pattern++ = META_ESCAPE + escape;
             switch(escape)
               {
               case ESC_d:
               case ESC_D:
-              *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
+              if ((options & PCRE2_ASCII) == 0)
+                *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
               break;
 
               case ESC_s:

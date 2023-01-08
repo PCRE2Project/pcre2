@@ -73,10 +73,11 @@ appearance in a pattern causes an error.
 .sp
 Another special sequence that may appear at the start of a pattern is (*UCP).
 This has the same effect as setting the PCRE2_UCP option: it causes sequences
-such as \ed and \ew to use Unicode properties to determine character types,
-instead of recognizing only characters with codes less than 256 via a lookup
-table. If also causes upper/lower casing operations to use Unicode properties
-for characters with code points greater than 127, even when UTF is not set.
+such as \ed (unless PCRE2_ASCII was set) and \ew to use Unicode properties
+to determine character types, instead of recognizing only characters with
+codes less than 256 via a lookup table. It also causes upper/lower casing
+operations to use Unicode properties for characters with code points greater
+than 127, even when UTF is not set.
 .P
 Some applications that allow their users to supply patterns may wish to
 restrict them for security reasons. If the PCRE2_NEVER_UCP option is passed to
@@ -670,7 +671,8 @@ determine character types, as follows:
   \ew  any character that matches \ep{L} or \ep{N}, plus underscore
 .sp
 The upper case escapes match the inverse sets of characters. Note that \ed
-matches only decimal digits, whereas \ew matches any Unicode digit, as well as
+matches only decimal digits and could be forced to match only the original
+set with PCRE2_ASCII, whereas \ew matches any Unicode digit, as well as
 any Unicode letter, and underscore. Note also that PCRE2_UCP affects \eb, and
 \eB because they are defined in terms of \ew and \eW. Matching these sequences
 is noticeably slower when PCRE2_UCP is set.

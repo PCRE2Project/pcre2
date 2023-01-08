@@ -101,7 +101,8 @@ or in the 16-bit and 32-bit libraries. However, if locale-specific matching is
 happening, \es and \ew may also match characters with code points in the range
 128-255. If the PCRE2_UCP option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
-characters.
+characters. Alternatively if the PCRE2_ASCII option is also set \ed original
+definition is preserved.
 .P
 Property descriptions in \ep and \eP are matched caselessly; hyphens,
 underscores, and white space are ignored, in accordance with Unicode's "loose

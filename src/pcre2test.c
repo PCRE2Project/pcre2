@@ -640,6 +640,7 @@ static modstruct modlist[] = {
   { "alt_verbnames",               MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
   { "altglobal",                   MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
   { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
+  { "ascii",                       MOD_PATP, MOD_OPT, PCRE2_ASCII,                PO(options) },
   { "auto_callout",                MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,         PO(options) },
   { "bad_escape_is_literal",       MOD_CTC,  MOD_OPT, PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL, CO(extra_options) },
   { "bincode",                     MOD_PAT,  MOD_CTL, CTL_BINCODE,                PO(control) },
@@ -762,8 +763,8 @@ static modstruct modlist[] = {
 /* Controls and options that are supported for use with the POSIX interface. */
 
 #define POSIX_SUPPORTED_COMPILE_OPTIONS ( \
-  PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_LITERAL|PCRE2_MULTILINE|PCRE2_UCP| \
-  PCRE2_UTF|PCRE2_UNGREEDY)
+  PCRE2_ASCII|PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_LITERAL|PCRE2_MULTILINE| \
+  PCRE2_UCP| PCRE2_UTF|PCRE2_UNGREEDY)
 
 #define POSIX_SUPPORTED_COMPILE_EXTRA_OPTIONS (0)
 
@@ -4202,12 +4203,13 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
   ((options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "",
   ((options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? " allow_empty_class" : "",
+  ((options & PCRE2_ASCII) != 0)? " ascii" : "",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_AUTO_CALLOUT) != 0)? " auto_callout" : "",
   ((options & PCRE2_CASELESS) != 0)? " caseless" : "",
