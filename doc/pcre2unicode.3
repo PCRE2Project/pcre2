@@ -442,6 +442,10 @@ would match an instance of WORD that is surrounded by invalid UTF code units.
 Using PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary
 data, knowing that any matched strings that are returned are valid UTF. This
 can be useful when searching for UTF text in executable or other binary files.
+.P
+The test for validity of Unicode characters is done for whole code units, so
+if the valid Unicode string is not aligned to a multiple of the code point size
+it won't be identified as valid.
 .
 .
 .SH AUTHOR
