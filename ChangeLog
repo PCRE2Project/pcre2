@@ -5,14 +5,18 @@ Change Log for PCRE2 - see also the Git log
 Version 10.43 xx-xxx-202x
 -------------------------
 
-1. The test program added by change 2 of 10.42 didn't work when the default 
-newline setting didn't include \n as a newline. One test needed (*LF) to ensure 
+1. The test program added by change 2 of 10.42 didn't work when the default
+newline setting didn't include \n as a newline. One test needed (*LF) to ensure
 that it worked.
 
-2. Added the new freestanding POSIX test program to the ManyConfigTests script 
-in the maint directory (overlooked in 2 below). Also improved the selection 
-facilities in that script, and added a test with JIT in a non-source directory, 
+2. Added the new freestanding POSIX test program to the ManyConfigTests script
+in the maint directory (overlooked in 2 below). Also improved the selection
+facilities in that script, and added a test with JIT in a non-source directory,
 fixing an oversight that would have made such a test fail before.
+
+3. Added pcre2_get_match_data_heapframes_size() and related pcre2test flags
+to allow for finer control of the heap used when pcre2_match() without JIT is
+used and the match_data might be reused.
 
 
 Version 10.42 11-December-2022
