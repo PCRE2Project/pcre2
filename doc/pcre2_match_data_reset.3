@@ -1,0 +1,34 @@
+.TH PCRE2_MATCH_DATA_FREE 3 "16 October 2018" "PCRE2 10.33"
+.SH NAME
+PCRE2 - Perl-compatible regular expressions (revised API)
+.SH SYNOPSIS
+.rs
+.sp
+.B #include <pcre2.h>
+.PP
+.nf
+.B void pcre2_match_data_reset(pcre2_match_data *\fImatch_data\fP);
+.fi
+.
+.SH DESCRIPTION
+.rs
+.sp
+\fImatch_data\fP must point to a match data block, which was created by
+\fIpcre2_match_data_create\fP or \Fipcre2_match_data_create_from_pattern\fP.
+.P
+This will free all heap frames that were previously allocated and used with
+this match data block.
+.P
+If the PCRE2_COPY_MATCHED_SUBJECT was used for a successful match using this
+match data block, the copy of the subject that was kept within the block is
+also freed.
+.P
+There is a complete description of the PCRE2 native API in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+page and a description of the POSIX API in the
+.\" HREF
+\fBpcre2posix\fP
+.\"
+page.

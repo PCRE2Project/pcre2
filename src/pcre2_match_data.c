@@ -91,6 +91,27 @@ return pcre2_match_data_create(((pcre2_real_code *)code)->top_bracket + 1,
 
 
 /*************************************************
+*           Reset a match data block             *
+*************************************************/
+
+PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
+pcre2_match_data_reset(pcre2_match_data *match_data)
+{
+if (match_data->heapframes != NULL)
+  {
+  match_data->memctl.free(match_data->heapframes,
+    match_data->memctl.memory_data);
+  match_data->heapframes = NULL;
+  match_data->heapframes_size = 0;
+  }
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  match_data->memctl.free((void *)match_data->subject,
+    match_data->memctl.memory_data);
+}
+
+
+
+/*************************************************
 *            Free a match data block             *
 *************************************************/
 
@@ -99,12 +120,7 @@ pcre2_match_data_free(pcre2_match_data *match_data)
 {
 if (match_data != NULL)
   {
-  if (match_data->heapframes != NULL)
-    match_data->memctl.free(match_data->heapframes,
-      match_data->memctl.memory_data);
-  if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
-    match_data->memctl.free((void *)match_data->subject,
-      match_data->memctl.memory_data);
+  pcre2_match_data_reset(match_data);
   match_data->memctl.free(match_data, match_data->memctl.memory_data);
   }
 }

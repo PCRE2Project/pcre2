@@ -6058,32 +6058,17 @@ for (;;)
 
 #ifdef SUPPORT_PCRE2_8
     if (code_unit_size == 1)
-      {
-      match_data8->memctl.free(match_data8->heapframes,
-        match_data8->memctl.memory_data);
-      match_data8->heapframes = NULL;
-      match_data8->heapframes_size = 0;
-      }
+      pcre2_match_data_reset_8(match_data8);
 #endif
 
 #ifdef SUPPORT_PCRE2_16
     if (code_unit_size == 2)
-      {
-      match_data16->memctl.free(match_data16->heapframes,
-        match_data16->memctl.memory_data);
-      match_data16->heapframes = NULL;
-      match_data16->heapframes_size = 0;
-      }
+      pcre2_match_data_reset_16(match_data16);
 #endif
 
 #ifdef SUPPORT_PCRE2_32
     if (code_unit_size == 4)
-      {
-      match_data32->memctl.free(match_data32->heapframes,
-        match_data32->memctl.memory_data);
-      match_data32->heapframes = NULL;
-      match_data32->heapframes_size = 0;
-      }
+      pcre2_match_data_reset_32(match_data32);
 #endif
     }
 
