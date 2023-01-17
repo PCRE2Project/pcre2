@@ -686,6 +686,7 @@ heavily used in the test files.
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       unquoted characters are hexadecimal
+      heapframes_size           show match data heapframes size
       jit[=&#60;number&#62;]            use JIT
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
@@ -776,6 +777,12 @@ when it can never be used.
 The <b>framesize</b> modifier shows the size, in bytes, of the storage frames
 used by <b>pcre2_match()</b> for handling backtracking. The size depends on the
 number of capturing parentheses in the pattern.
+</P>
+<P>
+The <b>heapframes_size</b> modifier shows the size, in bytes, of the allocated
+heapframes used by <b>pcre2_match()</b> and associated with the match_data.
+The vector is reused by all matching patterns that use that `pcre2_match_data`
+and will be expanded as needed.
 </P>
 <P>
 The <b>callout_info</b> modifier requests information about all the callouts in

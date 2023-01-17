@@ -1,9 +1,9 @@
 <html>
 <head>
-<title>pcre2_match_data_free specification</title>
+<title>pcre2_get_match_data_heapframes_size specification</title>
 </head>
 <body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-<h1>pcre2_match_data_free man page</h1>
+<h1>pcre2_get_match_data_heapframes_size man page</h1>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
 </p>
@@ -19,21 +19,14 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </P>
 <P>
-<b>void pcre2_match_data_free(pcre2_match_data *<i>match_data</i>);</b>
+<b>PCRE2_SIZE pcre2_get_match_data_heapframes_size(pcre2_match_data *<i>match_data</i>);</b>
 </P>
 <br><b>
 DESCRIPTION
 </b><br>
 <P>
-If <i>match_data</i> is NULL, this function does nothing. Otherwise,
-<i>match_data</i> must point to a match data block, which this function frees,
-using the memory freeing function from the general context or compiled pattern
-with which it was created, or <b>free()</b> if that was not set.
-</P>
-<P>
-If the PCRE2_COPY_MATCHED_SUBJECT was used for a successful match using this
-match data block, the copy of the subject that was referencedd within the block is
-also freed.
+This function returns the size, in bytes, of the heapframes data block that is owned
+by its argument.
 </P>
 <P>
 There is a complete description of the PCRE2 native API in the

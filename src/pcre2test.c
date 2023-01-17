@@ -524,6 +524,7 @@ so many of them that they are split into two fields. */
 #define CTL2_NULL_REPLACEMENT            0x00002000u
 #define CTL2_FRAMESIZE                   0x00004000u
 
+#define CTL2_HEAPFRAMES_SIZE             0x20000000u  /* Informational */
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
 #define CTL2_BSR_SET                     0x80000000u  /* Informational */
 
@@ -682,6 +683,7 @@ static modstruct modlist[] = {
   { "getall",                      MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
   { "global",                      MOD_PNDP, MOD_CTL, CTL_GLOBAL,                 PO(control) },
   { "heap_limit",                  MOD_CTM,  MOD_INT, 0,                          MO(heap_limit) },
+  { "heapframes_size",             MOD_PAT,  MOD_CTL, CTL2_HEAPFRAMES_SIZE,       PO(control2) },
   { "hex",                         MOD_PAT,  MOD_CTL, CTL_HEXPAT,                 PO(control) },
   { "info",                        MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
   { "jit",                         MOD_PAT,  MOD_IND, 7,                          PO(jit) },
@@ -786,8 +788,8 @@ static modstruct modlist[] = {
   CTL_JITVERIFY|CTL_MEMORY|CTL_PUSH|CTL_PUSHCOPY| \
   CTL_PUSHTABLESCOPY|CTL_USE_LENGTH)
 
-#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL2_BSR_SET|CTL2_FRAMESIZE| \
-  CTL2_NL_SET)
+#define PUSH_SUPPORTED_COMPILE_CONTROLS2 (CTL2_BSR_SET| \
+  CTL2_HEAPFRAMES_SIZE|CTL2_FRAMESIZE|CTL2_NL_SET)
 
 /* Controls that apply only at compile time with 'push'. */
 
@@ -4130,7 +4132,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4153,6 +4155,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GETALL) != 0)? " getall" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
+  ((controls & CTL2_HEAPFRAMES_SIZE) != 0)? " heapframes_size" : "",
   ((controls & CTL_HEXPAT) != 0)? " hex" : "",
   ((controls & CTL_INFO) != 0)? " info" : "",
   ((controls & CTL_JITFAST) != 0)? " jitfast" : "",
@@ -4353,6 +4356,31 @@ show_framesize(void)
 size_t frame_size;
 (void)pattern_info(PCRE2_INFO_FRAMESIZE, &frame_size, FALSE);
 fprintf(outfile, "Frame size for pcre2_match(): %" SIZ_FORM "\n", frame_size);
+}
+
+
+
+/*************************************************
+*   Show heapframes size info for a match_data   *
+*************************************************/
+
+static void
+show_heapframes_size(void)
+{
+PCRE2_SIZE heapframes_size;
+#ifdef SUPPORT_PCRE2_8
+if (code_unit_size == 1)
+  heapframes_size = pcre2_get_match_data_heapframes_size_8(match_data8);
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (code_unit_size == 2)
+  heapframes_size = pcre2_get_match_data_heapframes_size_16(match_data16);
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (code_unit_size == 4)
+  heapframes_size = pcre2_get_match_data_heapframes_size_32(match_data32);
+#endif
+fprintf(outfile, "Heapframes size in match_data: %" SIZ_FORM "\n", heapframes_size);
 }
 
 
@@ -5971,6 +5999,7 @@ if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
 
 if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
 if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
+if ((pat_patctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0) show_heapframes_size();
 if ((pat_patctl.control & CTL_ANYINFO) != 0)
   {
   int rc = show_pattern_info();

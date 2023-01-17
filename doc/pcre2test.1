@@ -642,6 +642,7 @@ heavily used in the test files.
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       unquoted characters are hexadecimal
+      heapframes_size           show match data heapframes size
       jit[=<number>]            use JIT
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
@@ -727,6 +728,11 @@ when it can never be used.
 The \fBframesize\fP modifier shows the size, in bytes, of the storage frames
 used by \fBpcre2_match()\fP for handling backtracking. The size depends on the
 number of capturing parentheses in the pattern.
+.P
+The \fBheapframes_size\fP modifier shows the size, in bytes, of the allocated
+heapframes used by \fBpcre2_match()\fP and associated with the match_data.
+The vector is reused by all matching patterns that use that `pcre2_match_data`
+and will be expanded as needed.
 .P
 The \fBcallout_info\fP modifier requests information about all the callouts in
 the pattern. A list of them is output at the end of any other information that
