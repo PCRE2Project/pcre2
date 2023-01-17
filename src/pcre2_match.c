@@ -665,13 +665,28 @@ N = (heapframe *)((char *)F + frame_size);
 if (N >= frames_top)
   {
   heapframe *new;
-  PCRE2_SIZE newsize = match_data->heapframes_size * 2;
+  PCRE2_SIZE newsize;
 
-  if (newsize > mb->heap_limit)
+  if (match_data->heapframes_size >= PCRE2_SIZE_MAX / 2)
     {
-    PCRE2_SIZE maxsize = (mb->heap_limit/frame_size) * frame_size;
-    if (match_data->heapframes_size >= maxsize) return PCRE2_ERROR_HEAPLIMIT;
-    newsize = maxsize;
+    if (match_data->heapframes_size == PCRE2_SIZE_MAX - 1)
+      return PCRE2_ERROR_NOMEMORY;
+    newsize = PCRE2_SIZE_MAX - 1;
+    }
+  else
+    newsize = match_data->heapframes_size * 2;
+
+  if (newsize / 1024 >= mb->heap_limit)
+    {
+    PCRE2_SIZE old_size = match_data->heapframes_size / 1024;
+    if (mb->heap_limit <= old_size) return PCRE2_ERROR_HEAPLIMIT;
+    else
+      {
+      PCRE2_SIZE max_delta = 1024 * (mb->heap_limit - old_size);
+      int over_bytes = match_data->heapframes_size % 1024;
+      if (over_bytes) max_delta -= (1024 - over_bytes);
+      newsize = match_data->heapframes_size + max_delta;
+      }
     }
 
   new = match_data->memctl.malloc(newsize, match_data->memctl.memory_data);
@@ -6801,7 +6816,7 @@ the pattern. It is not used at all if there are no capturing parentheses.
 
   frame_size                   is the total size of each frame
   match_data->heapframes       is the pointer to the frames vector
-  match_data->heapframes_size  is the total size of the vector
+  match_data->heapframes_size  is the allocated size of the vector
 
 We must pad the frame_size for alignment to ensure subsequent frames are as
 aligned as heapframe. Whilst ovector is word-aligned due to being a PCRE2_SIZE
@@ -6816,7 +6831,7 @@ frame_size = (offsetof(heapframe, ovector) +
 smaller. */
 
 mb->heap_limit = ((mcontext->heap_limit < re->limit_heap)?
-  mcontext->heap_limit : re->limit_heap) * 1024;
+  mcontext->heap_limit : re->limit_heap);
 
 mb->match_limit = (mcontext->match_limit < re->limit_match)?
   mcontext->match_limit : re->limit_match;
@@ -6832,14 +6847,15 @@ the size to a multiple of the frame size. */
 
 heapframes_size = frame_size * 10;
 if (heapframes_size < START_FRAMES_SIZE) heapframes_size = START_FRAMES_SIZE;
-if (heapframes_size > mb->heap_limit)
+if (heapframes_size / 1024 > mb->heap_limit)
   {
-  if (frame_size > mb->heap_limit ) return PCRE2_ERROR_HEAPLIMIT;
-  heapframes_size = mb->heap_limit;
+  PCRE2_SIZE max_size = 1024 * mb->heap_limit;
+  if (max_size < frame_size) return PCRE2_ERROR_HEAPLIMIT;
+  heapframes_size = max_size;
   }
 
 /* If an existing frame vector in the match_data block is large enough, we can
-use it.Otherwise, free any pre-existing vector and get a new one. */
+use it. Otherwise, free any pre-existing vector and get a new one. */
 
 if (match_data->heapframes_size < heapframes_size)
   {
