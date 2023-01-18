@@ -6853,7 +6853,7 @@ if (heapframes_size / 1024 > mb->heap_limit)
   if (max_size < frame_size) return PCRE2_ERROR_HEAPLIMIT;
   heapframes_size = max_size;
   }
-
+  
 /* If an existing frame vector in the match_data block is large enough, we can
 use it. Otherwise, free any pre-existing vector and get a new one. */
 

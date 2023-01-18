@@ -11,7 +11,7 @@ hacked-up (non-) design had also run out of steam.
 
                        Written by Philip Hazel
      Original code Copyright (c) 1997-2012 University of Cambridge
-    Rewritten code Copyright (c) 2016-2022 University of Cambridge
+    Rewritten code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -551,7 +551,8 @@ different things in the two cases. */
                     CTL2_SUBSTITUTE_REPLACEMENT_ONLY|\
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
-                    CTL2_ALLVECTOR)
+                    CTL2_ALLVECTOR|\
+                    CTL2_HEAPFRAMES_SIZE)
 
 /* Structures for holding modifier information for patterns and subject strings
 (data). Fields containing modifiers that can be set either for a pattern or a
@@ -683,7 +684,7 @@ static modstruct modlist[] = {
   { "getall",                      MOD_DAT,  MOD_CTL, CTL_GETALL,                 DO(control) },
   { "global",                      MOD_PNDP, MOD_CTL, CTL_GLOBAL,                 PO(control) },
   { "heap_limit",                  MOD_CTM,  MOD_INT, 0,                          MO(heap_limit) },
-  { "heapframes_size",             MOD_PAT,  MOD_CTL, CTL2_HEAPFRAMES_SIZE,       PO(control2) },
+  { "heapframes_size",             MOD_PND,  MOD_CTL, CTL2_HEAPFRAMES_SIZE,       PO(control2) },
   { "hex",                         MOD_PAT,  MOD_CTL, CTL_HEXPAT,                 PO(control) },
   { "info",                        MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
   { "jit",                         MOD_PAT,  MOD_IND, 7,                          PO(jit) },
@@ -1174,6 +1175,14 @@ are supported. */
     r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size/2)); \
   else \
     r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size/4))
+
+#define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
+  if (test_mode == PCRE8_MODE) \
+    r = pcre2_get_match_data_heapframes_size_8(G(a,8)); \
+  else if (test_mode == PCRE16_MODE) \
+    r = pcre2_get_match_data_heapframes_size_16(G(a,16)); \
+  else \
+    r = pcre2_get_match_data_heapframes_size_32(G(a,32))
 
 #define PCRE2_GET_OVECTOR_COUNT(a,b) \
   if (test_mode == PCRE8_MODE) \
@@ -1707,6 +1716,12 @@ the three different cases. */
   else \
     r = G(pcre2_get_error_message_,BITTWO)(a,G(b,BITTWO),G(G(b,BITTWO),_size/BYTETWO))
 
+#define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    r = G(pcre2_get_match_data_heapframes_size_,BITONE)(G(a,BITONE)); \
+  else \
+    r = G(pcre2_get_match_data_heapframes_size_,BITTWO)(G(a,BITTWO))
+
 #define PCRE2_GET_OVECTOR_COUNT(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     a = G(pcre2_get_ovector_count_,BITONE)(G(b,BITONE)); \
@@ -2073,6 +2088,8 @@ the three different cases. */
   a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
+#define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
+  r = pcre2_get_match_data_heapframes_size_8(G(a,8))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_8(G(b,8))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_8(G(b,8))
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_8(G(a,8),b)
@@ -2182,6 +2199,8 @@ the three different cases. */
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size/2))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_16(G(b,16))
+#define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
+  r = pcre2_get_match_data_heapframes_size_16(G(a,16))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_16(G(b,16))
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_16(G(a,16))
@@ -2290,6 +2309,8 @@ the three different cases. */
 #define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
   r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size/4))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_32(G(b,32))
+#define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
+  r = pcre2_get_match_data_heapframes_size_32(G(a,32))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_32(G(b,32))
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_32(G(a,32))
@@ -4155,7 +4176,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_FULLBINCODE) != 0)? " fullbincode" : "",
   ((controls & CTL_GETALL) != 0)? " getall" : "",
   ((controls & CTL_GLOBAL) != 0)? " global" : "",
-  ((controls & CTL2_HEAPFRAMES_SIZE) != 0)? " heapframes_size" : "",
+  ((controls2 & CTL2_HEAPFRAMES_SIZE) != 0)? " heapframes_size" : "",
   ((controls & CTL_HEXPAT) != 0)? " hex" : "",
   ((controls & CTL_INFO) != 0)? " info" : "",
   ((controls & CTL_JITFAST) != 0)? " jitfast" : "",
@@ -4368,19 +4389,9 @@ static void
 show_heapframes_size(void)
 {
 PCRE2_SIZE heapframes_size;
-#ifdef SUPPORT_PCRE2_8
-if (code_unit_size == 1)
-  heapframes_size = pcre2_get_match_data_heapframes_size_8(match_data8);
-#endif
-#ifdef SUPPORT_PCRE2_16
-if (code_unit_size == 2)
-  heapframes_size = pcre2_get_match_data_heapframes_size_16(match_data16);
-#endif
-#ifdef SUPPORT_PCRE2_32
-if (code_unit_size == 4)
-  heapframes_size = pcre2_get_match_data_heapframes_size_32(match_data32);
-#endif
-fprintf(outfile, "Heapframes size in match_data: %" SIZ_FORM "\n", heapframes_size);
+PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(heapframes_size, match_data);
+fprintf(outfile, "Heapframes size in match_data: %" SIZ_FORM "\n",
+  heapframes_size);
 }
 
 
@@ -5571,6 +5582,12 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
       pat_patctl.control2 & (uint32_t)(~POSIX_SUPPORTED_COMPILE_CONTROLS2),
       msg);
     msg = "";
+
+    /* Remove ignored options so as not to get a repeated message for those
+    that are actually subject controls. */
+
+    pat_patctl.control &= (uint32_t)(POSIX_SUPPORTED_COMPILE_CONTROLS);
+    pat_patctl.control2 &= (uint32_t)(POSIX_SUPPORTED_COMPILE_CONTROLS2);
     }
 
   if (local_newline_default != 0) prmsg(&msg, "#newline_default");
@@ -5999,7 +6016,6 @@ if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
 
 if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
 if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
-if ((pat_patctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0) show_heapframes_size();
 if ((pat_patctl.control & CTL_ANYINFO) != 0)
   {
   int rc = show_pattern_info();
@@ -7152,7 +7168,9 @@ if (pat_patctl.replacement[0] != 0)
 if ((dat_datctl.control & CTL_DFA) != 0)
   {
   if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
-    fprintf(outfile, "** Ignored after DFA matching: allcaptures\n");
+    fprintf(outfile, "** Ignored for DFA matching: allcaptures\n");
+  if ((dat_datctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0)
+    fprintf(outfile, "** Ignored for DFA matching: heapframes_size\n");
   }
 
 /* We now have the subject in dbuffer, with len containing the byte length, and
@@ -7207,6 +7225,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
     show_match_options(dat_datctl.options & ~POSIX_SUPPORTED_MATCH_OPTIONS);
     msg = "";
     }
+
   if ((dat_datctl.control & ~POSIX_SUPPORTED_MATCH_CONTROLS) != 0 ||
       (dat_datctl.control2 & ~POSIX_SUPPORTED_MATCH_CONTROLS2) != 0)
     {
@@ -7588,10 +7607,14 @@ if (dat_datctl.replacement[0] != 0)
   fprintf(outfile, "\n");
   show_memory = FALSE;
 
-  /* Show final ovector contents if requested. */
+  /* Show final ovector contents and resulting heapframe size if requested. */
 
   if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
     show_ovector(ovector, oveccount);
+
+  if ((dat_datctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0 &&
+      (dat_datctl.control & CTL_DFA) == 0)
+    show_heapframes_size();
 
   return PR_OK;
   }   /* End of substitution handling */
@@ -8226,6 +8249,12 @@ for (gmatched = 0;; gmatched++)
       }
     }
   }  /* End of global loop */
+
+/* All matching is done; show the resulting heapframe size if requested. */
+
+if ((dat_datctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0 &&
+    (dat_datctl.control & CTL_DFA) == 0)
+  show_heapframes_size();
 
 show_memory = FALSE;
 return PR_OK;

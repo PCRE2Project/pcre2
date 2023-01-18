@@ -1,5 +1,8 @@
-Change Log for PCRE2 - see also the Git log
--------------------------------------------
+Change Log for PCRE2
+--------------------
+
+Before the move to GitHub, this was the only record of changes to PCRE2. Now 
+there is often more detail in the pull requests.
 
 
 Version 10.43 xx-xxx-202x
@@ -16,7 +19,13 @@ fixing an oversight that would have made such a test fail before.
 
 3. Added pcre2_get_match_data_heapframes_size() and related pcre2test flags
 to allow for finer control of the heap used when pcre2_match() without JIT is
-used and the match_data might be reused.
+used and the match_data might be reused. This began as PR #191, but has had 
+further refinement and documentation edits.
+
+4. Applied PR #181 which tidies some casts in pcre2_valid_utf.c.
+
+5. Applied PR #184 which avoids overflow issues with the heap limit (introduced 
+in 10.41/9.
 
 
 Version 10.42 11-December-2022

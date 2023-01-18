@@ -700,9 +700,11 @@ PATTERN MODIFIERS
        no_start_optimize  is  set because the minimum length is not calculated
        when it can never be used.
 
-       The framesize modifier shows the size, in bytes, of the storage  frames
+       The framesize modifier shows the size, in bytes, of each storage  frame
        used  by  pcre2_match()  for handling backtracking. The size depends on
-       the number of capturing parentheses in the pattern.
+       the number of capturing parentheses in the pattern. A vector  of  these
+       frames  is  used  at  matching time; its overall size is shown when the
+       heaframes_size subject modifier is set.
 
        The callout_info modifier requests information about all  the  callouts
        in the pattern. A list of them is output at the end of any other infor-
@@ -966,6 +968,7 @@ PATTERN MODIFIERS
              allusedtext                 show all consulted text
              altglobal                   alternative global matching
          /g  global                      global matching
+             heapframes_size             show match data heapframes size
              jitstack=<n>                set size of JIT stack
              mark                        show mark values
              replace=<string>            specify a replacement string
@@ -1116,6 +1119,7 @@ SUBJECT MODIFIERS
              get=<number or name>       extract captured substring
              getall                     extract all captured substrings
          /g  global                     global matching
+             heapframes_size            show match data heapframes size
              heap_limit=<n>             set a limit on heap memory (Kbytes)
              jitstack=<n>               set size of JIT stack
              mark                       show mark values
@@ -1473,6 +1477,22 @@ SUBJECT MODIFIERS
        modifier to work, the null_context modifier must not be set on both the
        pattern and the subject, though it can be set on one or the other.
 
+   Showing the heap frame overall vector size
+
+       The  heapframes_size   modifier   is   relevant   for   matches   using
+       pcre2_match() without JIT. After a match has run (whether successful or
+       not) the size, in bytes, of the allocated heap frames  vector  that  is
+       left  attached to the match data block is shown. If the matching action
+       involved several calls to pcre2_match() (for example,  global  matching
+       or for timing) only the final value is shown.
+
+       This  modifier  is  ignored, with a warning, for POSIX or DFA matching.
+       JIT matching does not use the heap frames vector, so the size is always
+       zero,  unless there was a previous non-JIT match. Note that specifing a
+       size of zero for the output vector (see below) causes pcre2test to free
+       its match data block (and associated heap frames vector) and allocate a
+       new one.
+
    Setting a starting offset
 
        The offset modifier sets an offset  in  the  subject  string  at  which
@@ -1496,10 +1516,10 @@ SUBJECT MODIFIERS
        A value of zero is useful when testing the POSIX API because it  causes
        regexec() to be called with a NULL capture vector. When not testing the
        POSIX API, a value of  zero  is  used  to  cause  pcre2_match_data_cre-
-       ate_from_pattern()  to  be  called, in order to create a match block of
-       exactly the right size for the pattern. (It is not possible to create a
-       match  block  with  a zero-length ovector; there is always at least one
-       pair of offsets.)
+       ate_from_pattern()  to  be called, in order to create a new match block
+       of exactly the right size for the pattern. (It is not possible to  cre-
+       ate  a match block with a zero-length ovector; there is always at least
+       one pair of offsets.) The old match data block is freed.
 
    Passing the subject as zero-terminated
 
@@ -1951,5 +1971,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 July 2022
-       Copyright (c) 1997-2022 University of Cambridge.
+       Last updated: 18 January 2023
+       Copyright (c) 1997-2023 University of Cambridge.

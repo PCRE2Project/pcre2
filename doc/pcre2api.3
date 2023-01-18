@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "27 July 2022" "PCRE2 10.41"
+.TH PCRE2API 3 "18 January 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -48,6 +48,11 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B PCRE2_SPTR pcre2_get_mark(pcre2_match_data *\fImatch_data\fP);
+.sp
+.B PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *\fImatch_data\fP);
+.sp
+.B PCRE2_SIZE pcre2_get_match_data_heapframes_size(
+.B "  pcre2_match_data *\fImatch_data\fP);"
 .sp
 .B uint32_t pcre2_get_ovector_count(pcre2_match_data *\fImatch_data\fP);
 .sp
@@ -2573,6 +2578,45 @@ calling \fBpcre2_match_data_free()\fP. If this function is called with a NULL
 argument, it returns immediately, without doing anything.
 .
 .
+.SH "MEMORY USE FOR MATCH DATA BLOCKS"
+.rs
+.sp
+.nf
+.B PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *\fImatch_data\fP);
+.sp
+.B PCRE2_SIZE pcre2_get_match_data_heapframes_size(
+.B "  pcre2_match_data *\fImatch_data\fP);"
+.fi
+.P
+The size of a match data block depends on the size of the ovector that it 
+contains. The function \fBpcre2_get_match_data_size()\fP returns the size, in 
+bytes, of the block that is its argument.
+.P
+When \fBpcre2_match()\fP runs interpretively (that is, without using JIT), it
+makes use of a vector of data frames for remembering backtracking positions.
+The size of each individual frame depends on the number of capturing
+parentheses in the pattern and can be obtained by calling
+\fBpcre2_pattern_info()\fP with the PCRE2_INFO_FRAMESIZE option (see the
+section entitled "Information about a compiled pattern"
+.\" HTML <a href="#infoaboutpattern>">
+.\" </a>
+above).
+.\"
+.P
+Heap memory is used for the frames vector; if the initial memory block turns 
+out to be too small during matching, it is automatically expanded. When 
+\fBpcre2_match()\fP returns, the memory is not freed, but remains attached to 
+the match data block, for use by any subsequent matches that use the same 
+block. It is automatically freed when the match data block itself is freed.
+.P
+You can find the current size of the frames vector that a match data block owns
+by calling \fBpcre2_get_match_data_heapframes_size()\fP. For a newly created
+match data block the size will be zero. Some types of match may require a lot
+of frames and thus a large vector; applications that run in environments where
+memory is constrained can check this and free the match data block if the heap
+frames vector has become too big.
+.
+.
 .SH "MATCHING A PATTERN: THE TRADITIONAL FUNCTION"
 .rs
 .sp
@@ -4029,6 +4073,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 27 July 2022
-Copyright (c) 1997-2022 University of Cambridge.
+Last updated: 18 January 2023
+Copyright (c) 1997-2023 University of Cambridge.
 .fi

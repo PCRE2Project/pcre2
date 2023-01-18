@@ -686,7 +686,6 @@ heavily used in the test files.
       fullbincode               show binary code with lengths
   /I  info                      show info about compiled pattern
       hex                       unquoted characters are hexadecimal
-      heapframes_size           show match data heapframes size
       jit[=&#60;number&#62;]            use JIT
       jitfast                   use JIT fast path
       jitverify                 verify JIT use
@@ -774,15 +773,11 @@ ending code units are recorded. The subject length line is omitted when
 when it can never be used.
 </P>
 <P>
-The <b>framesize</b> modifier shows the size, in bytes, of the storage frames
+The <b>framesize</b> modifier shows the size, in bytes, of each storage frame
 used by <b>pcre2_match()</b> for handling backtracking. The size depends on the
-number of capturing parentheses in the pattern.
-</P>
-<P>
-The <b>heapframes_size</b> modifier shows the size, in bytes, of the allocated
-heapframes used by <b>pcre2_match()</b> and associated with the match_data.
-The vector is reused by all matching patterns that use that `pcre2_match_data`
-and will be expanded as needed.
+number of capturing parentheses in the pattern. A vector of these frames is
+used at matching time; its overall size is shown when the <b>heaframes_size</b>
+subject modifier is set.
 </P>
 <P>
 The <b>callout_info</b> modifier requests information about all the callouts in
@@ -1088,6 +1083,7 @@ process.
       allusedtext                 show all consulted text
       altglobal                   alternative global matching
   /g  global                      global matching
+      heapframes_size             show match data heapframes size
       jitstack=&#60;n&#62;                set size of JIT stack
       mark                        show mark values
       replace=&#60;string&#62;            specify a replacement string
@@ -1253,6 +1249,7 @@ pattern, but can be overridden by modifiers on the subject.
       get=&#60;number or name&#62;       extract captured substring
       getall                     extract all captured substrings
   /g  global                     global matching
+      heapframes_size            show match data heapframes size
       heap_limit=&#60;n&#62;             set a limit on heap memory (Kbytes)
       jitstack=&#60;n&#62;               set size of JIT stack
       mark                       show mark values
@@ -1641,6 +1638,24 @@ memory is allocated during matching with JIT. For this modifier to work, the
 subject, though it can be set on one or the other.
 </P>
 <br><b>
+Showing the heap frame overall vector size
+</b><br>
+<P>
+The <b>heapframes_size</b> modifier is relevant for matches using
+<b>pcre2_match()</b> without JIT. After a match has run (whether successful or
+not) the size, in bytes, of the allocated heap frames vector that is left
+attached to the match data block is shown. If the matching action involved
+several calls to <b>pcre2_match()</b> (for example, global matching or for
+timing) only the final value is shown.
+</P>
+<P>
+This modifier is ignored, with a warning, for POSIX or DFA matching. JIT
+matching does not use the heap frames vector, so the size is always zero,
+unless there was a previous non-JIT match. Note that specifing a size of zero
+for the output vector (see below) causes <b>pcre2test</b> to free its match data
+block (and associated heap frames vector) and allocate a new one.
+</P>
+<br><b>
 Setting a starting offset
 </b><br>
 <P>
@@ -1671,9 +1686,9 @@ A value of zero is useful when testing the POSIX API because it causes
 <b>regexec()</b> to be called with a NULL capture vector. When not testing the
 POSIX API, a value of zero is used to cause
 <b>pcre2_match_data_create_from_pattern()</b> to be called, in order to create a
-match block of exactly the right size for the pattern. (It is not possible to
-create a match block with a zero-length ovector; there is always at least one
-pair of offsets.)
+new match block of exactly the right size for the pattern. (It is not possible
+to create a match block with a zero-length ovector; there is always at least
+one pair of offsets.) The old match data block is freed.
 </P>
 <br><b>
 Passing the subject as zero-terminated
@@ -2150,9 +2165,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 July 2022
+Last updated: 18 January 2023
 <br>
-Copyright &copy; 1997-2022 University of Cambridge.
+Copyright &copy; 1997-2023 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
