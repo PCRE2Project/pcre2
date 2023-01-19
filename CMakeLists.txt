@@ -100,11 +100,14 @@
 # 2021-08-28 PH increased minimum version
 # 2021-08-28 PH added test for realpath()
 # 2022-12-10 PH added support for pcre2posix_test
+# 2023-01-15 Carlo added C99 as the minimum required
 
 # Increased minimum to 2.8.5 to support GNUInstallDirs.
 # Increased minimum to 3.1 to support imported targets.
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 PROJECT(PCRE2 C)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 # Set policy CMP0026 to avoid warnings for the use of LOCATION in
 # GET_TARGET_PROPERTY. This should no longer be required.
