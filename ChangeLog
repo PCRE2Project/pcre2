@@ -30,6 +30,9 @@ in 10.41/9.
 6. Applied PR #192, which changes the timing units for pcre2test from 
 milliseconds to microseconds. This is more useful for modern CPUs.
 
+7. Applied PR #193, which makes the requirement for C99 explicit in 
+configure.ac and CMakeLists.txt.
+
 
 Version 10.42 11-December-2022
 ------------------------------
