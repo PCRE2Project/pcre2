@@ -22,10 +22,13 @@ to allow for finer control of the heap used when pcre2_match() without JIT is
 used and the match_data might be reused. This began as PR #191, but has had 
 further refinement and documentation edits.
 
-4. Applied PR #181 which tidies some casts in pcre2_valid_utf.c.
+4. Applied PR #181, which tidies some casts in pcre2_valid_utf.c.
 
-5. Applied PR #184 which avoids overflow issues with the heap limit (introduced 
+5. Applied PR #184, which avoids overflow issues with the heap limit (introduced 
 in 10.41/9.
+
+6. Applied PR #192, which changes the timing units for pcre2test from 
+milliseconds to microseconds. This is more useful for modern CPUs.
 
 
 Version 10.42 11-December-2022
