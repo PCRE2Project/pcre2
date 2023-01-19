@@ -5899,9 +5899,8 @@ if (timeit > 0)
       { SUB1(pcre2_code_free, compiled_code); }
     }
   total_compile_time += time_taken;
-  fprintf(outfile, "Compile time %.4f milliseconds\n",
-    (((double)time_taken * 1000.0) / (double)timeit) /
-      (double)CLOCKS_PER_SEC);
+  fprintf(outfile, "Compile time %8.4f microseconds\n",
+    ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeit);
   }
 
 /* A final compile that is used "for real". */
@@ -5932,9 +5931,8 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
       time_taken += clock() - start_time;
       }
     total_jit_compile_time += time_taken;
-    fprintf(outfile, "JIT compile  %.4f milliseconds\n",
-      (((double)time_taken * 1000.0) / (double)timeit) /
-        (double)CLOCKS_PER_SEC);
+    fprintf(outfile, "JIT compile  %8.4f microseconds\n",
+      ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeit);
     }
   else
     {
@@ -7687,9 +7685,8 @@ for (gmatched = 0;; gmatched++)
         }
       }
     total_match_time += (time_taken = clock() - start_time);
-    fprintf(outfile, "Match time %.4f milliseconds\n",
-      (((double)time_taken * 1000.0) / (double)timeitm) /
-        (double)CLOCKS_PER_SEC);
+    fprintf(outfile, "Match time %7.4f microseconds\n",
+      ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeitm);
     }
 
   /* Find the heap, match and depth limits if requested. The depth and heap
@@ -9493,18 +9490,16 @@ if (showtotaltimes)
   fprintf(outfile, "--------------------------------------\n");
   if (timeit > 0)
     {
-    fprintf(outfile, "Total compile time %.4f milliseconds\n",
-      (((double)total_compile_time * 1000.0) / (double)timeit) /
-        (double)CLOCKS_PER_SEC);
+    fprintf(outfile, "Total compile time %8.2f microseconds\n",
+      ((1000000 / CLOCKS_PER_SEC) * (double)total_compile_time) / timeit);
     if (total_jit_compile_time > 0)
-      fprintf(outfile, "Total JIT compile  %.4f milliseconds\n",
-        (((double)total_jit_compile_time * 1000.0) / (double)timeit) /
-          (double)CLOCKS_PER_SEC);
+      fprintf(outfile, "Total JIT compile  %8.2f microseconds\n",
+        ((1000000 / CLOCKS_PER_SEC) * (double)total_jit_compile_time) / \
+        timeit);
     pad = "  ";
     }
-  fprintf(outfile, "Total match time %s%.4f milliseconds\n", pad,
-    (((double)total_match_time * 1000.0) / (double)timeitm) /
-      (double)CLOCKS_PER_SEC);
+  fprintf(outfile, "Total match time %s%8.2f microseconds\n", pad,
+    ((1000000 / CLOCKS_PER_SEC) * (double)total_match_time) / timeitm);
   }
 
 
