@@ -7655,12 +7655,12 @@ No match
 
 /()()a+/no_auto_possess
     aaa\=allcaptures
-** Ignored after DFA matching: allcaptures
+** Ignored for DFA matching: allcaptures
  0: aaa
  1: aa
  2: a
     a\=allcaptures
-** Ignored after DFA matching: allcaptures
+** Ignored for DFA matching: allcaptures
  0: a
 
 /(*LIMIT_DEPTH=100)^((.)(?1)|.)$/
