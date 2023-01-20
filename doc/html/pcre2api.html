@@ -396,11 +396,8 @@ This contains the function prototypes and other definitions for all three
 libraries. One, two, or all three can be installed simultaneously. On Unix-like
 systems the libraries are called <b>libpcre2-8</b>, <b>libpcre2-16</b>, and
 <b>libpcre2-32</b>, and they can also co-exist with the original PCRE libraries.
-</P>
-<P>
-Character strings are passed to and from a PCRE2 library as a sequence of
-unsigned integers in code units of the appropriate width. Every PCRE2 function
-comes in three different forms, one for each library, for example:
+Every PCRE2 function comes in three different forms, one for each library, for
+example:
 <pre>
   <b>pcre2_compile_8()</b>
   <b>pcre2_compile_16()</b>
@@ -415,6 +412,12 @@ The UCHAR types define unsigned code units of the appropriate widths. For
 example, PCRE2_UCHAR16 is usually defined as `uint16_t'. The SPTR types are
 constant pointers to the equivalent UCHAR types, that is, they are pointers to
 vectors of unsigned code units.
+</P>
+<P>
+Character strings are passed to a PCRE2 library as sequences of unsigned
+integers in code units of the appropriate width. The length of a string may
+be given as a number of code units, or the string may be specified as
+zero-terminated.
 </P>
 <P>
 Many applications use only one code unit width. For their convenience, macros
@@ -567,7 +570,8 @@ unsigned integer type, currently always defined as <i>size_t</i>. The largest
 value that can be stored in such a type (that is ~(PCRE2_SIZE)0) is reserved
 as a special indicator for zero-terminated strings and unset offsets.
 Therefore, the longest string that can be handled is one less than this
-maximum.
+maximum. Note that string lengths are always given in code units. Only in the 
+8-bit library is such a length the same as the number of bytes in the string.
 <a name="newlines"></a></P>
 <br><a name="SEC16" href="#TOC1">NEWLINES</a><br>
 <P>
@@ -1678,7 +1682,11 @@ PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an error.
 </pre>
 This option forces PCRE2_UTF (see below) and also enables support for matching
 by <b>pcre2_match()</b> in subject strings that contain invalid UTF sequences.
-This facility is not supported for DFA matching. For details, see the
+Note, however, that the 16-bit and 32-bit PCRE2 libraries process strings as
+sequences of uint16_t or uint32_t code points. They cannot find valid UTF
+sequences within an arbitrary string of bytes unless such sequences are
+suitably aligned. This facility is not supported for DFA matching. For details,
+see the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 documentation.
 <pre>
@@ -4065,7 +4073,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 January 2023
+Last updated: 20 January 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>
