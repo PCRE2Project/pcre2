@@ -445,7 +445,10 @@ number of other sanity checks are performed on the arguments. For example, if
 the subject pointer is NULL but the length is non-zero, an immediate error is
 given. Also, unless PCRE2_NO_UTF_CHECK is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
-fast path, and if invalid data is passed, the result is undefined.
+fast path, and if invalid UTF data is passed, the result is undefined. The
+program may crash or loop or give wrong results. In the absence of
+PCRE2_MATCH_INVALID_UTF you should only call <b>pcre2_jit_match()</b> in UTF
+mode if you are sure the subject is valid.
 </P>
 <P>
 Bypassing the sanity checks and the <b>pcre2_match()</b> wrapping can give
@@ -466,9 +469,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC14" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 November 2021
+Last updated: 20 January 2023
 <br>
-Copyright &copy; 1997-2021 University of Cambridge.
+Copyright &copy; 1997-2023 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
