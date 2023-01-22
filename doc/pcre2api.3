@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "20 January 2023" "PCRE2 10.43"
+.TH PCRE2API 3 "21 January 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -498,7 +498,7 @@ unsigned integer type, currently always defined as \fIsize_t\fP. The largest
 value that can be stored in such a type (that is ~(PCRE2_SIZE)0) is reserved
 as a special indicator for zero-terminated strings and unset offsets.
 Therefore, the longest string that can be handled is one less than this
-maximum. Note that string lengths are always given in code units. Only in the 
+maximum. Note that string lengths are always given in code units. Only in the
 8-bit library is such a length the same as the number of bytes in the string.
 .
 .
@@ -1124,7 +1124,13 @@ for the amount of heap memory used by \fBpcre2_match()\fP or
   PCRE2_CONFIG_JIT
 .sp
 The output is a uint32_t integer that is set to one if support for just-in-time
-compiling is available; otherwise it is set to zero.
+compiling is included in the library; otherwise it is set to zero. Note that
+having the support in the library does not guarantee that JIT will be used for
+any given match. See the
+.\" HREF
+\fBpcre2jit\fP
+.\"
+documentation for more details.
 .sp
   PCRE2_CONFIG_JITTARGET
 .sp
@@ -2596,8 +2602,8 @@ argument, it returns immediately, without doing anything.
 .B "  pcre2_match_data *\fImatch_data\fP);"
 .fi
 .P
-The size of a match data block depends on the size of the ovector that it 
-contains. The function \fBpcre2_get_match_data_size()\fP returns the size, in 
+The size of a match data block depends on the size of the ovector that it
+contains. The function \fBpcre2_get_match_data_size()\fP returns the size, in
 bytes, of the block that is its argument.
 .P
 When \fBpcre2_match()\fP runs interpretively (that is, without using JIT), it
@@ -2611,10 +2617,10 @@ section entitled "Information about a compiled pattern"
 above).
 .\"
 .P
-Heap memory is used for the frames vector; if the initial memory block turns 
-out to be too small during matching, it is automatically expanded. When 
-\fBpcre2_match()\fP returns, the memory is not freed, but remains attached to 
-the match data block, for use by any subsequent matches that use the same 
+Heap memory is used for the frames vector; if the initial memory block turns
+out to be too small during matching, it is automatically expanded. When
+\fBpcre2_match()\fP returns, the memory is not freed, but remains attached to
+the match data block, for use by any subsequent matches that use the same
 block. It is automatically freed when the match data block itself is freed.
 .P
 You can find the current size of the frames vector that a match data block owns
@@ -4081,6 +4087,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 January 2023
+Last updated: 21 January 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi
