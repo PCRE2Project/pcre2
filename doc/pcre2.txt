@@ -377,8 +377,8 @@ PCRE2 NATIVE API JIT FUNCTIONS
 
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
-       pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE startsize,
-         PCRE2_SIZE maxsize, pcre2_general_context *gcontext);
+       pcre2_jit_stack *pcre2_jit_stack_create(size_t startsize,
+         size_t maxsize, pcre2_general_context *gcontext);
 
        void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
          pcre2_jit_callback callback_function, void *callback_data);
@@ -432,7 +432,7 @@ PCRE2 NATIVE API OBSOLETE FUNCTIONS
 
        int pcre2_set_recursion_memory_management(
          pcre2_match_context *mcontext,
-         void *(*private_malloc)(PCRE2_SIZE, void *),
+         void *(*private_malloc)(size_t, void *),
          void (*private_free)(void *, void *), void *memory_data);
 
        These  functions became obsolete at release 10.30 and are retained only
@@ -1991,8 +1991,8 @@ JUST-IN-TIME (JIT) COMPILATION
 
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
-       pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE startsize,
-         PCRE2_SIZE maxsize, pcre2_general_context *gcontext);
+       pcre2_jit_stack *pcre2_jit_stack_create(size_t startsize,
+         size_t maxsize, pcre2_general_context *gcontext);
 
        void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
          pcre2_jit_callback callback_function, void *callback_data);
@@ -5197,7 +5197,7 @@ AVAILABILITY OF JIT SUPPORT
          Intel x86 32-bit and 64-bit
          MIPS 32-bit and 64-bit
          Power PC 32-bit and 64-bit
-         SPARC 32-bit
+         RISC-V 32-bit and 64-bit
 
        If --enable-jit is set on an unsupported platform, compilation fails.
 
@@ -5596,7 +5596,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 January 2023
+       Last updated: 23 January 2023
        Copyright (c) 1997-2023 University of Cambridge.
 ------------------------------------------------------------------------------
  
