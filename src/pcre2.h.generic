@@ -575,7 +575,7 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_config(uint32_t, void *);
 PCRE2_EXP_DECL pcre2_general_context *PCRE2_CALL_CONVENTION \
   pcre2_general_context_copy(pcre2_general_context *); \
 PCRE2_EXP_DECL pcre2_general_context *PCRE2_CALL_CONVENTION \
-  pcre2_general_context_create(void *(*)(PCRE2_SIZE, void *), \
+  pcre2_general_context_create(void *(*)(size_t, void *), \
     void (*)(void *, void *), void *); \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
   pcre2_general_context_free(pcre2_general_context *);
@@ -628,7 +628,7 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_recursion_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_recursion_memory_management(pcre2_match_context *, \
-    void *(*)(PCRE2_SIZE, void *), void (*)(void *, void *), void *);
+    void *(*)(size_t, void *), void (*)(void *, void *), void *);
 
 #define PCRE2_CONVERT_CONTEXT_FUNCTIONS \
 PCRE2_EXP_DECL pcre2_convert_context *PCRE2_CALL_CONVENTION \
@@ -771,7 +771,7 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
   pcre2_jit_free_unused_memory(pcre2_general_context *); \
 PCRE2_EXP_DECL pcre2_jit_stack *PCRE2_CALL_CONVENTION \
-  pcre2_jit_stack_create(PCRE2_SIZE, PCRE2_SIZE, pcre2_general_context *); \
+  pcre2_jit_stack_create(size_t, size_t, pcre2_general_context *); \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
   pcre2_jit_stack_assign(pcre2_match_context *, pcre2_jit_callback, void *); \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \

@@ -211,8 +211,8 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE \fIstartsize\fP,
-.B "  PCRE2_SIZE \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
+.B pcre2_jit_stack *pcre2_jit_stack_create(size_t \fIstartsize\fP,
+.B "  size_t \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
@@ -275,7 +275,7 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B int pcre2_set_recursion_memory_management(
 .B "  pcre2_match_context *\fImcontext\fP,"
-.B "  void *(*\fIprivate_malloc\fP)(PCRE2_SIZE, void *),"
+.B "  void *(*\fIprivate_malloc\fP)(size_t, void *),"
 .B "  void (*\fIprivate_free\fP)(void *, void *), void *\fImemory_data\fP);"
 .fi
 .sp
@@ -1995,8 +1995,8 @@ also set.
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE \fIstartsize\fP,
-.B "  PCRE2_SIZE \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
+.B pcre2_jit_stack *pcre2_jit_stack_create(size_t \fIstartsize\fP,
+.B "  size_t \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
 .B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"

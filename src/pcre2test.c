@@ -2789,7 +2789,7 @@ return sys_errlist[n];
 
 /* Alternative memory functions, to test functionality. */
 
-static void *my_malloc(PCRE2_SIZE size, void *data)
+static void *my_malloc(size_t size, void *data)
 {
 void *block = malloc(size);
 (void)data;
@@ -4331,7 +4331,7 @@ static void
 show_memory_info(void)
 {
 uint32_t name_count, name_entry_size;
-size_t size, cblock_size;
+PCRE2_SIZE size, cblock_size;
 
 /* One of the test_mode values will always be true, but to stop a compiler
 warning we must initialize cblock_size. */
@@ -4355,7 +4355,7 @@ if (test_mode == PCRE32_MODE) cblock_size = sizeof(pcre2_real_code_32);
 grumbling about potential overflow. */
 
 fprintf(outfile, "Memory allocation (code space): %" SIZ_FORM "\n", size -
-  (size_t)name_count * (size_t)name_entry_size * (size_t)code_unit_size -
+  (PCRE2_SIZE)name_count * (PCRE2_SIZE)name_entry_size * (PCRE2_SIZE)code_unit_size -
   cblock_size);
 
 if (pat_patctl.jit != 0)
@@ -4374,7 +4374,7 @@ if (pat_patctl.jit != 0)
 static void
 show_framesize(void)
 {
-size_t frame_size;
+PCRE2_SIZE frame_size;
 (void)pattern_info(PCRE2_INFO_FRAMESIZE, &frame_size, FALSE);
 fprintf(outfile, "Frame size for pcre2_match(): %" SIZ_FORM "\n", frame_size);
 }
