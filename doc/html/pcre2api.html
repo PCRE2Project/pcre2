@@ -278,8 +278,8 @@ document for an overview of all the PCRE2 documentation.
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE <i>startsize</i>,</b>
-<b>  PCRE2_SIZE <i>maxsize</i>, pcre2_general_context *<i>gcontext</i>);</b>
+<b>pcre2_jit_stack *pcre2_jit_stack_create(size_t <i>startsize</i>,</b>
+<b>  size_t <i>maxsize</i>, pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>void pcre2_jit_stack_assign(pcre2_match_context *<i>mcontext</i>,</b>
@@ -343,7 +343,7 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <b>int pcre2_set_recursion_memory_management(</b>
 <b>  pcre2_match_context *<i>mcontext</i>,</b>
-<b>  void *(*<i>private_malloc</i>)(PCRE2_SIZE, void *),</b>
+<b>  void *(*<i>private_malloc</i>)(size_t, void *),</b>
 <b>  void (*<i>private_free</i>)(void *, void *), void *<i>memory_data</i>);</b>
 <br>
 <br>
@@ -2035,8 +2035,8 @@ also set.
 <b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
-<b>pcre2_jit_stack *pcre2_jit_stack_create(PCRE2_SIZE <i>startsize</i>,</b>
-<b>  PCRE2_SIZE <i>maxsize</i>, pcre2_general_context *<i>gcontext</i>);</b>
+<b>pcre2_jit_stack *pcre2_jit_stack_create(size_t <i>startsize</i>,</b>
+<b>  size_t <i>maxsize</i>, pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>void pcre2_jit_stack_assign(pcre2_match_context *<i>mcontext</i>,</b>

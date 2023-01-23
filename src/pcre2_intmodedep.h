@@ -610,7 +610,7 @@ argument in 8-bit and 16-bit modes, so we need no more than a 16-bit field
 here.) */
 
 #undef  CODE_BLOCKSIZE_TYPE
-#define CODE_BLOCKSIZE_TYPE size_t
+#define CODE_BLOCKSIZE_TYPE PCRE2_SIZE
 
 #undef  LOOKBEHIND_MAX
 #define LOOKBEHIND_MAX UINT16_MAX
