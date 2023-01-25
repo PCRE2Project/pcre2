@@ -23,6 +23,7 @@ cc_library(
     name = "pcre2",
     srcs = [
         "src/pcre2_auto_possess.c",
+        "src/pcre2_ckdint.c",
         "src/pcre2_compile.c",
         "src/pcre2_config.c",
         "src/pcre2_context.c",

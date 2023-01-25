@@ -73,6 +73,32 @@ AC_SYS_LARGEFILE
 
 PCRE2_VISIBILITY
 
+# Check for the mul_overflow() builtin
+
+AC_MSG_CHECKING([for __builtin_mul_overflow()])
+AC_LANG_PUSH([C])
+tmp_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS -Werror"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+		#ifdef HAVE_SYS_TYPES_H
+		#include <sys/types.h>
+		#endif
+		#ifdef HAVE_STDLIB_H
+		#include <stdlib.h>
+		#endif
+		int a, b;
+		size_t m;
+	]], [[__builtin_mul_overflow(a, b, &m)]])],
+	[pcre2_cc_cv_builtin_mul_overflow=yes],
+	[pcre2_cc_cv_builtin_mul_overflow=no])
+AC_MSG_RESULT([$pcre2_cc_cv_builtin_mul_overflow])
+if test "$pcre2_cc_cv_builtin_mul_overflow" = yes; then
+	AC_DEFINE([HAVE_BUILTIN_MUL_OVERFLOW], 1,
+		[Define this if your compiler provides __builtin_mul_overflow()])
+fi
+CFLAGS=$tmp_CFLAGS
+AC_LANG_POP([C])
+
 # Check for Clang __attribute__((uninitialized)) feature
 
 AC_MSG_CHECKING([for __attribute__((uninitialized))])
