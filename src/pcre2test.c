@@ -6839,11 +6839,15 @@ extended if replication is involved). */
 needlen = (size_t)((len+1) * code_unit_size);
 if (dbuffer == NULL || needlen >= dbuffer_size)
   {
-  while (needlen >= dbuffer_size) dbuffer_size *= 2;
+  while (needlen >= dbuffer_size)
+    {
+    if (dbuffer_size < SIZE_MAX/2) dbuffer_size *= 2;
+      else dbuffer_size = needlen + 1;
+    }
   dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
   if (dbuffer == NULL)
     {
-    fprintf(stderr, "pcre2test: realloc(%d) failed\n", (int)dbuffer_size);
+    fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n", dbuffer_size);
     exit(1);
     }
   }
@@ -6900,11 +6904,16 @@ while ((c = *p++) != 0)
       {
       size_t qoffset = CAST8VAR(q) - dbuffer;
       size_t rep_offset = start_rep - dbuffer;
-      while (needlen >= dbuffer_size) dbuffer_size *= 2;
+      while (needlen >= dbuffer_size)
+        {
+        if (dbuffer_size < SIZE_MAX/2) dbuffer_size *= 2;
+          else dbuffer_size = needlen + 1;
+        }
       dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
       if (dbuffer == NULL)
         {
-        fprintf(stderr, "pcre2test: realloc(%d) failed\n", (int)dbuffer_size);
+        fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+          dbuffer_size);
         exit(1);
         }
       SETCASTPTR(q, dbuffer + qoffset);

@@ -33,6 +33,9 @@ milliseconds to microseconds. This is more useful for modern CPUs.
 7. Applied PR #193, which makes the requirement for C99 explicit in 
 configure.ac and CMakeLists.txt.
 
+8. Fixed a bug in pcre2test when a ridiculously large string repeat required a 
+stupid amount of memory. It now gives a clean realloc() failure error.
+
 
 Version 10.42 11-December-2022
 ------------------------------
