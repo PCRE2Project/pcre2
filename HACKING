@@ -369,7 +369,7 @@ data that follows it.
 In many cases listed below, LINK_SIZE data values are specified for offsets
 within the compiled pattern. LINK_SIZE always specifies a number of bytes. The
 default value for LINK_SIZE is 2, except for the 32-bit library, where it can
-only be 4. The 8-bit library can be compiled to used 3-byte or 4-byte values,
+only be 4. The 8-bit library can be compiled to use 3-byte or 4-byte values,
 and the 16-bit library can be compiled to use 4-byte values, though this
 impairs performance. Specifying a LINK_SIZE larger than 2 for these libraries is
 necessary only when patterns whose compiled length is greater than 65535 code
