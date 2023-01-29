@@ -36,6 +36,13 @@ configure.ac and CMakeLists.txt.
 8. Fixed a bug in pcre2test when a ridiculously large string repeat required a 
 stupid amount of memory. It now gives a clean realloc() failure error.
 
+9. Updates to restrict the interaction between ASCII and non-ASCII characters
+for caseless matching and items like \d:
+
+   (a) Added PCRE2_EXTRA_CASELESS_RESTRICT to lock out mixing of ASCII and 
+       non-ASCII when matching caselessly. This is also /r in pcre2test and 
+       (?r) within patterns.
+
 
 Version 10.42 11-December-2022
 ------------------------------

@@ -109,6 +109,8 @@
 # 10-January-2022:   Addition of general Boolean property support
 # 12-January-2022:   Merge scriptx and bidiclass fields
 # 14-January-2022:   Enlarge Boolean property offset to 12 bits
+# 28-January-2023:   Remove ASCII "other case" from non-ASCII character that
+#                      are present in caseless sets.
 #
 # ----------------------------------------------------------------------------
 #
@@ -710,6 +712,16 @@ for s in caseless_sets:
 
 # End of block of code for creating offsets for caseless matching sets.
 
+# Scan the caseless sets, and for any non-ASCII character that has an ASCII
+# character as its "base" other case, remove the other case. This makes it
+# easier to handle those characters when the PCRE2 option for not mixing ASCII
+# and non-ASCII is enabled. In principle one should perhaps scan for a 
+# non-ASCII alternative, but in practice these don't exist.
+
+for s in caseless_sets:
+  for x in s:
+    if x > 127 and x + other_case[x] < 128:
+      other_case[x] = 0  
 
 # Combine all the tables
 

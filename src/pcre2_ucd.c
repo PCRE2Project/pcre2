@@ -68,7 +68,7 @@ the tables when not needed. But don't leave a totally empty module because some
 compilers barf at that. Instead, just supply some small dummy tables. */
 
 #ifndef SUPPORT_UNICODE
-const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0 }};
+const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0}};
 const uint16_t PRIV(ucd_stage1)[] = {0};
 const uint16_t PRIV(ucd_stage2)[] = {0};
 const uint32_t PRIV(ucd_caseless_sets)[] = {0};
@@ -498,7 +498,7 @@ const ucd_record PRIV(ucd_records)[] = { /* 16908 bytes, record size 12 */
   {     0,      5,     12,      0,      0,  18432,     60, }, /*  70 */
   {     0,      5,     12,      0,      0,  18432,     80, }, /*  71 */
   {     0,      9,     12,      0,   -121,  18432,     74, }, /*  72 */
-  {     0,      5,     12,      1,   -268,  18432,     70, }, /*  73 */
+  {     0,      5,     12,      1,      0,  18432,     70, }, /*  73 */
   {     0,      5,     12,      0,    195,  18432,     76, }, /*  74 */
   {     0,      9,     12,      0,    210,  18432,     74, }, /*  75 */
   {     0,      9,     12,      0,    206,  18432,     74, }, /*  76 */
@@ -1155,7 +1155,7 @@ const ucd_record PRIV(ucd_records)[] = { /* 16908 bytes, record size 12 */
   {    69,     26,     14,      0,      0,  28672,    236, }, /* 727 */
   {     1,      9,     12,     96,  -7517,  18432,     74, }, /* 728 */
   {    69,     26,     12,      0,      0,  28672,    118, }, /* 729 */
-  {     0,      9,     12,    100,  -8383,  18432,     74, }, /* 730 */
+  {     0,      9,     12,    100,      0,  18432,     74, }, /* 730 */
   {     0,      9,     12,    104,  -8262,  18432,     74, }, /* 731 */
   {    69,     26,     12,      0,      0,  14336,    238, }, /* 732 */
   {     0,      9,     12,      0,     28,  18432,     74, }, /* 733 */

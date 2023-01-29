@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2016-2021 University of Cambridge
+           Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -153,6 +153,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTRA_ESCAPED_CR_IS_LF         0x00000010u  /* C */
 #define PCRE2_EXTRA_ALT_BSUX                 0x00000020u  /* C */
 #define PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK     0x00000040u  /* C */
+#define PCRE2_EXTRA_CASELESS_RESTRICT        0x00000080u  /* C */
 
 /* These are for pcre2_jit_compile(). */
 

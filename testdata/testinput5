@@ -2212,4 +2212,101 @@
 
 /\p{\2b[:xäigi:t:_/
 
+# Tests for PCRE2_EXTRA_CASELESS_RESTRICT. Compare each test with and without
+# the restriction.
+
+/AskZ/i,utf,caseless_restrict
+    AskZ
+    aSKz
+\= Expect no match
+    A\x{17f}kZ
+    As\x{212a}Z      
+
+/AskZ/i,utf
+    AskZ
+    aSKz
+    A\x{17f}kZ
+    As\x{212a}Z      
+
+/A\x{17f}\x{212a}Z/ir,utf
+    \= Expect no match
+    AskZ
+
+/A\x{17f}\x{212a}Z/i,utf
+    AskZ
+
+/[AskZ]+/i,utf,caseless_restrict
+    AskZ
+    aSKz 
+    A\x{17f}kZ
+    As\x{212a}Z      
+
+/[AskZ]+/i,utf
+    AskZ
+    aSKz 
+    A\x{17f}kZ
+    As\x{212a}Z      
+
+/[\x{17f}\x{212a}]+/ir,utf
+\= Expect no match
+    AskZ
+
+/[\x{17f}\x{212a}]+/i,utf
+    AskZ
+
+/[^s]+/ir,utf
+    A\x{17f}Z 
+
+/[^s]+/i,utf
+    A\x{17f}Z 
+
+/[^k]+/ir,utf
+    A\x{212a}Z 
+    
+/[^k]+/i,utf
+    A\x{212a}Z 
+    
+/[^sk]+/ir,utf
+    A\x{17f}\x{212a}Z 
+
+/[^sk]+/i,utf
+    A\x{17f}\x{212a}Z 
+
+/[^\x{17f}]+/ir,utf
+    AsSZ 
+
+/[^\x{17f}]+/i,utf
+    AsSZ 
+
+/[Ss]+/irB,utf
+    Sss\x{17f}ss
+
+/[Ss]+/iB,utf
+    Sss\x{17f}ss
+
+/[S\x{17f}]/irB,utf
+
+/[S\x{17f}]/iB,utf
+
+/[\x{17f}s]/irB,utf
+
+/[\x{17f}s]/iB,utf
+
+/[\x{4b}\x{6b}]/irB,utf
+
+/[\x{4b}\x{6b}]/iB,utf
+
+/s(?r)s(?-r)s(?r:s)s/i,utf
+    \x{17f}S\x{17f}S\x{17f}
+\= Expect no match     
+    \x{17f}\x{17f}\x{17f}S\x{17f}
+    \x{17f}S\x{17f}\x{17f}\x{17f}
+
+/k(?^i)k/ir,utf
+    K\x{212a}
+\= Expect no match          
+    \x{212a}\x{212a}
+
+# End caseless restrict tests
+
 # End of testinput5

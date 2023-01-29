@@ -471,7 +471,7 @@ switch(bidi)
 printf("U+%04X %s %s: %s, %s, %s", c, bidiclass, typename, fulltypename,
   scriptname, graphbreak);
 
-if (is_just_one && othercase != c)
+if (is_just_one && (othercase != c || caseset != 0))
   {
   printf(", U+%04X", othercase);
   if (caseset != 0)

@@ -655,6 +655,7 @@ static modstruct modlist[] = {
   { "callout_no_where",            MOD_DAT,  MOD_CTL, CTL2_CALLOUT_NO_WHERE,      DO(control2) },
   { "callout_none",                MOD_DAT,  MOD_CTL, CTL_CALLOUT_NONE,           DO(control) },
   { "caseless",                    MOD_PATP, MOD_OPT, PCRE2_CASELESS,             PO(options) },
+  { "caseless_restrict",           MOD_CTC,  MOD_OPT, PCRE2_EXTRA_CASELESS_RESTRICT, CO(extra_options) },
   { "convert",                     MOD_PAT,  MOD_CON, 0,                          PO(convert_type) },
   { "convert_glob_escape",         MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_escape) },
   { "convert_glob_separator",      MOD_PAT,  MOD_CHR, 0,                          PO(convert_glob_separator) },
@@ -836,14 +837,15 @@ typedef struct c1modstruct {
 } c1modstruct;
 
 static c1modstruct c1modlist[] = {
-  { "bincode",         'B',           -1 },
-  { "info",            'I',           -1 },
-  { "global",          'g',           -1 },
-  { "caseless",        'i',           -1 },
-  { "multiline",       'm',           -1 },
-  { "no_auto_capture", 'n',           -1 },
-  { "dotall",          's',           -1 },
-  { "extended",        'x',           -1 }
+  { "bincode",           'B',           -1 },
+  { "info",              'I',           -1 },
+  { "global",            'g',           -1 },
+  { "caseless",          'i',           -1 },
+  { "multiline",         'm',           -1 },
+  { "no_auto_capture",   'n',           -1 },
+  { "caseless_restrict", 'r',           -1 },
+  { "dotall",            's',           -1 },
+  { "extended",          'x',           -1 }
 };
 
 #define C1MODLISTCOUNT sizeof(c1modlist)/sizeof(c1modstruct)
@@ -4281,7 +4283,7 @@ show_compile_extra_options(uint32_t options, const char *before,
   const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
   ((options & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) != 0)? " bad_escape_is_literal" : "",
@@ -4289,6 +4291,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s",
   ((options & PCRE2_EXTRA_MATCH_WORD) != 0)? " match_word" : "",
   ((options & PCRE2_EXTRA_MATCH_LINE) != 0)? " match_line" : "",
   ((options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)? " escaped_cr_is_lf" : "",
+  ((options & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)? " caseless_restrict" : "",
   after);
 }
 
