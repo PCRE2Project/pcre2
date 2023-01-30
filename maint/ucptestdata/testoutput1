@@ -396,6 +396,10 @@ U+1F16D ON  Symbol: Other symbol, common, Extended Pictographic, [changeswhenupp
 findprop U+10e93 U+10eaa
 U+10E93 R   Letter: Other letter, yezidi, Other, [alphabetic, diacritic, graphemebase, idcontinue, xidcontinue]
 U+10EAA R   Control: Unassigned, unknown, Other
+findprop +á +é U+212A
+U+00E1 L   Letter: Lower case letter, latin, Other, U+00C1, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue]
+U+00E9 L   Letter: Lower case letter, latin, Other, U+00C9, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue]
+U+212A L   Letter: Upper case letter, latin, Other, U+004B, U+006B, [alphabetic, graphemeextend, idcontinue, xidcontinue]
 
 findprop 0602 202a 202b 202c 2068 2069 202d 202e 2067
 U+0602 AN  Control: Format, arabic, Prepend, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, lowercase]
