@@ -633,6 +633,17 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void* ptr);
 #define SLJIT_EXEC_OFFSET(ptr) sljit_exec_offset(ptr)
 #else
 #define SLJIT_EXEC_OFFSET(ptr) 0
+
+/* SELinux or grsecurity kernels may deny creating rwx mappings, so we need
+to probe at runtime if JIT memory is supported. */
+#if defined __linux__ && \
+    (!defined SLJIT_PROT_EXECUTABLE_ALLOCATOR || !SLJIT_PROT_EXECUTABLE_ALLOCATOR) && \
+    (!defined SLJIT_WX_EXECUTABLE_ALLOCATOR || !SLJIT_WX_EXECUTABLE_ALLOCATOR)
+SLJIT_API_FUNC_ATTRIBUTE int sljit_get_runtime_support(void);
+#else
+#define sljit_get_runtime_support() 1
+#endif
+
 #endif
 
 #endif /* SLJIT_EXECUTABLE_ALLOCATOR */

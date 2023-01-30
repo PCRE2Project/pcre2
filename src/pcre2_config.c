@@ -145,7 +145,7 @@ switch (what)
 
   case PCRE2_CONFIG_JIT:
 #ifdef SUPPORT_JIT
-  *((uint32_t *)where) = 1;
+  *((uint32_t *)where) = !!PRIV(jit_supported)();
 #else
   *((uint32_t *)where) = 0;
 #endif

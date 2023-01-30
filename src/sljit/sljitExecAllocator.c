@@ -94,6 +94,61 @@ static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 
 #else /* POSIX */
 
+#ifdef __linux__
+#include <errno.h>
+
+static SLJIT_INLINE int is_permission_error(int err)
+{
+	/* PaX uses EPERM, SELinux uses EACCES */
+	return err == EPERM || err == EACCES;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE int sljit_get_runtime_support(void)
+{
+	int status = -1;
+	size_t size;
+	void *addr;
+	FILE *f;
+
+	/* Try to get the status from /proc/self/status, looking for PaX flags. */
+	f = fopen("/proc/self/status", "re");
+	if (f) {
+		char *buf = NULL;
+		size_t len;
+
+		while (getline(&buf, &len, f) != -1) {
+			if (strncmp(buf, "PaX:", 4))
+				continue;
+
+			/* Look for 'm', indicating PaX MPROTECT is disabled. */
+			status = !!strchr(buf+4, 'm');
+			break;
+		}
+
+		fclose(f);
+		free(buf);
+
+		if (status != -1)
+			return status;
+	}
+
+	/*
+	 * Try to create a temporary rwx mapping to probe for its support. If
+	 * this fails, test 'errno' to ensure it failed because we were not
+	 * allowed to create such a mapping and not because of some transient
+	 * error.
+	 */
+	size = get_page_alignment() + 1;
+	addr = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0);
+	if (addr == MAP_FAILED)
+		return is_permission_error(errno) ? 0 : -1;
+
+	munmap(addr, size);
+
+	return 1;
+}
+#endif
+
 #if defined(__APPLE__) && defined(MAP_JIT)
 /*
    On macOS systems, returns MAP_JIT if it is defined _and_ we're running on a

@@ -1992,6 +1992,7 @@ is available. */
 #define _pcre2_jit_free              PCRE2_SUFFIX(_pcre2_jit_free_)
 #define _pcre2_jit_get_size          PCRE2_SUFFIX(_pcre2_jit_get_size_)
 #define _pcre2_jit_get_target        PCRE2_SUFFIX(_pcre2_jit_get_target_)
+#define _pcre2_jit_supported         PCRE2_SUFFIX(_pcre2_jit_supported_)
 #define _pcre2_memctl_malloc         PCRE2_SUFFIX(_pcre2_memctl_malloc_)
 #define _pcre2_ord2utf               PCRE2_SUFFIX(_pcre2_ord2utf_)
 #define _pcre2_script_run            PCRE2_SUFFIX(_pcre2_script_run_)
@@ -2019,6 +2020,7 @@ extern void         _pcre2_jit_free_rodata(void *, void *);
 extern void         _pcre2_jit_free(void *, pcre2_memctl *);
 extern size_t       _pcre2_jit_get_size(void *);
 const char *        _pcre2_jit_get_target(void);
+extern int          _pcre2_jit_supported(void);
 extern void *       _pcre2_memctl_malloc(size_t, pcre2_memctl *);
 extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
 extern BOOL         _pcre2_script_run(PCRE2_SPTR, PCRE2_SPTR, BOOL);
