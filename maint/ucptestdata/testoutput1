@@ -311,7 +311,7 @@ U+FFFF BN  Control: Unassigned, unknown, Other, [changeswhencasemapped, changesw
 findprop 10000 10001 e01ef f0000 100000
 U+10000 L   Letter: Other letter, linearb, Other, [alphabetic, diacritic, graphemebase, idcontinue, xidcontinue]
 U+10001 L   Letter: Other letter, linearb, Other, [alphabetic, diacritic, graphemebase, idcontinue, xidcontinue]
-U+E01EF NSM Mark: Non-spacing mark, inherited, Extend, [ascii, alphabetic, cased, emojicomponent]
+U+E01EF NSM Mark: Non-spacing mark, inherited, Extend, [sentenceterminal, terminalpunctuation, uppercase, xidcontinue]
 U+F0000 L   Control: Private use, unknown, Other
 U+100000 L   Control: Private use, unknown, Other
 

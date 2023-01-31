@@ -183,29 +183,29 @@ static const unsigned char *gb_names[] = {
 };
 
 static const unsigned char *bd_names[] = {
-  US"AL",   US"Arabic letter",
-  US"AN",   US"Arabid number",
-  US"B",    US"Paragraph separator",
-  US"BN",   US"Boundary neutral",
-  US"CS",   US"Common separator",
-  US"EN",   US"European number",
-  US"ES",   US"European separator",
-  US"ET",   US"European terminator",
-  US"FSI",  US"First string isolate",
-  US"L",    US"Left-to-right",
-  US"LRE",  US"Left-to-right embedding",
-  US"LRI",  US"Left-to-right isolate",
-  US"LRO",  US"Left-to-right override",
-  US"NSM",  US"Non-spacing mark",
-  US"ON",   US"Other neutral",
-  US"PDF",  US"Pop directional format",
-  US"PDI",  US"Pop directional isolate",
-  US"R",    US"Right-to-left",
-  US"RLE",  US"Right-to-left embedding",
-  US"RLI",  US"Right-to-left isolate",
-  US"RLO",  US"Right-to-left override",
-  US"S",    US"Segment separator",
-  US"WS",   US"White space"
+  US"AL",   US"ArabicLetter",
+  US"AN",   US"ArabicNumber",
+  US"B",    US"ParagraphSeparator",
+  US"BN",   US"BoundaryNeutral",
+  US"CS",   US"CommonSeparator",
+  US"EN",   US"EuropeanNumber",
+  US"ES",   US"EuropeanSeparator",
+  US"ET",   US"EuropeanTerminator",
+  US"FSI",  US"FirstStrongIsolate",
+  US"L",    US"LeftToRight",
+  US"LRE",  US"LeftToRightEmbedding",
+  US"LRI",  US"LeftToRightIsolate",
+  US"LRO",  US"LeftToRightOverride",
+  US"NSM",  US"NonspacingMark",
+  US"ON",   US"OtherNeutral",
+  US"PDF",  US"PopDirectionalFormat",
+  US"PDI",  US"PopDirectionalIsolate",
+  US"R",    US"RightToLeft",
+  US"RLE",  US"RightToLeftEmbedding",
+  US"RLI",  US"RightToLeftIsolate",
+  US"RLO",  US"RightToLeftOverride",
+  US"S",    US"SegmentSeparator",
+  US"WS",   US"WhiteSpace"
 };
 
 
@@ -642,7 +642,7 @@ while (*s != 0)
         bidiclass_not = TRUE;
         offset = 1;
         }
-      for (i = 0; i < sizeof(bd_names)/sizeof(char *); i += 2)
+      for (i = 0; i < sizeof(bd_names)/sizeof(char *); i++)
         {
         if (strcasecmp(CS (value + offset), CCS bd_names[i]) == 0)
           {

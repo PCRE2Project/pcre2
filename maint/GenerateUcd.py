@@ -271,11 +271,19 @@ NOTACHAR = 0xffffffff
 # ---------------------------------------------------------------------------
 
 
-# Parse a line of Scripts.txt, GraphemeBreakProperty.txt, DerivedBidiClass.txt
-# or DerivedGeneralCategory.txt
+# Parse a line of Scripts.txt, GraphemeBreakProperty.txt or DerivedGeneralCategory.txt
 
 def make_get_names(enum):
   return lambda chardata: enum.index(chardata[1])
+
+
+# Parse a line of DerivedBidiClass.txt
+
+def get_bidi(chardata):
+  if len(chardata[1]) > 3:
+    return bidi_classes_long.index(chardata[1])
+  else:
+    return bidi_classes_short.index(chardata[1])
 
 
 # Parse a line of CaseFolding.txt
@@ -283,7 +291,7 @@ def make_get_names(enum):
 def get_other_case(chardata):
   if chardata[1] == 'C' or chardata[1] == 'S':
     return int(chardata[2], 16) - int(chardata[0], 16)
-  return 0
+  return None
 
 
 # Parse a line of ScriptExtensions.txt
@@ -318,11 +326,16 @@ def read_table(file_name, get_value, default_value):
 
   table = [default_value] * MAX_UNICODE
   for line in file:
+    if file_base == 'DerivedBidiClass':
+      line = re.sub(r'# @missing: ', '', line)
+
     line = re.sub(r'#.*', '', line)
     chardata = list(map(str.strip, line.split(';')))
     if len(chardata) <= 1:
       continue
     value = get_value(chardata)
+    if value is None:
+      continue
     m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
     char = int(m.group(1), 16)
     if m.group(3) is None:
@@ -330,11 +343,8 @@ def read_table(file_name, get_value, default_value):
     else:
       last = int(m.group(3), 16)
     for i in range(char, last + 1):
-      # It is important not to overwrite a previously set value because in the
-      # CaseFolding file there are lines to be ignored (returning the default
-      # value of 0) which often come after a line which has already set data.
-      if table[i] == default_value:
-        table[i] = value
+      table[i] = value
+
   file.close()
   return table
 
@@ -508,7 +518,8 @@ unicode_version = ""
 # strings for use by GenerateUcpHeader. The comments are not wanted here, so
 # remove them.
 
-bidi_classes = bidi_classes[::2]
+bidi_classes_short = bidi_classes[::2]
+bidi_classes_long = bidi_classes[1::2]
 break_properties = break_properties[::2]
 category_names = category_names[::2]
 
@@ -518,7 +529,7 @@ script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), 
 category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names), category_names.index('Cn'))
 break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_names(break_properties), break_properties.index('Other'))
 other_case = read_table('Unicode.tables/CaseFolding.txt', get_other_case, 0)
-bidi_class = read_table('Unicode.tables/DerivedBidiClass.txt', make_get_names(bidi_classes), bidi_classes.index('L'))
+bidi_class = read_table('Unicode.tables/DerivedBidiClass.txt', get_bidi, bidi_classes_short.index('L'))
 
 # The grapheme breaking rules were changed for Unicode 11.0.0 (June 2018). Now
 # we need to find the Extended_Pictographic property for emoji characters. This

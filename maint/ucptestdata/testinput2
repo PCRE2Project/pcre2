@@ -14,6 +14,7 @@ find bidi RLI
 find bidi RLO
 find bidi S
 find bidi WS
+find bidi white_space bool ascii
 find script bopo
 find bool prependedconcatenationmark
 find bool pcm
