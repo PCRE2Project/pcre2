@@ -380,6 +380,8 @@ enum {
   ucp_Tangsa,
   ucp_Toto,
   ucp_Vithkuqi,
+  ucp_Kawi,
+  ucp_Nag_Mundari,
 
   /* This must be last */
   ucp_Script_Count
