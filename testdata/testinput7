@@ -2328,4 +2328,137 @@
 
 # End caseless restrict tests
 
+# TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
+
+# DIGITS
+
+/\d+/i,utf
+    123\x{660}456
+
+/\d+/i,utf,ucp
+    123\x{660}456
+
+/\d+/i,utf,ucp,ascii_bsd
+    123\x{660}456
+
+/[\d]+/i,utf
+    123\x{660}456
+
+/[\d]+/i,utf,ucp
+    123\x{660}456
+
+/[\d]+/i,utf,ucp,ascii_bsd
+    123\x{660}456
+
+/\d(?aD)\d(?-aD)\d/utf,ucp
+    \x{660}9\x{660}
+\= Expect no match     
+    \x{660}\x{660}\x{660}
+
+/\d(?a)\d(?-a)\d/utf,ucp
+    \x{660}9\x{660}
+\= Expect no match     
+    \x{660}\x{660}\x{660}
+
+# SPACES
+
+/>\s+</i,utf
+    >  <
+\= Expect no match     
+    >\x{a0} <
+
+/>\s+</i,utf,ucp
+    >  <
+    >\x{a0} <
+
+/>\s+</i,utf,ucp,ascii_bss
+    >  <
+\= Expect no match     
+    >\x{a0} <
+
+/>[\s]+</i,utf
+    >  <
+\= Expect no match     
+    >\x{a0} <
+
+/>[\s]+</i,utf,ucp
+    >  <
+    >\x{a0} <
+
+/>[\s]+</i,utf,ucp,ascii_bss
+    >  <
+\= Expect no match     
+    >\x{a0} <
+
+/>\s(?aS)\s(?-aS)\s</utf,ucp
+    >\x{a0} \x{a0}<
+\= Expect no match     
+    >\x{a0}\x{a0}\x{a0}<
+
+/>\s(?a)\s(?-a)\s</utf,ucp
+    >\x{a0} \x{a0}<
+\= Expect no match     
+    >\x{a0}\x{a0}\x{a0}<
+    
+# WORDS
+
+/\w+/i,utf
+    123\x{660}abc
+
+/\w+/i,utf,ucp
+    123\x{660}abc
+
+/\w+/i,utf,ucp,ascii_bsw
+    123\x{660}abc
+
+/[\w]+/i,utf
+    123\x{660}abc
+
+/[\w]+/i,utf,ucp
+    123\x{660}abc
+
+/[\w]+/i,utf,ucp,ascii_bsw
+    123\x{660}abc
+
+/\w(?aW)\w(?-aW)\w/utf,ucp
+    \x{660}A\x{c0}
+\= Expect no match     
+    \x{660}\x{c0}\x{c0}
+
+/\w(?a)\w(?-a)\w/utf,ucp
+    \x{660}A\x{c0}
+\= Expect no match     
+    \x{660}\x{c0}\x{c0}
+
+# POSIX
+
+/[[:digit:]]+/utf,ucp
+    123\x{660}456
+
+/[[:digit:]]+/utf,ucp,ascii_posix
+    123\x{660}456
+    
+/>[[:space:]]+</utf,ucp
+    >\x{a0} \x{a0}<
+    >\x{a0}\x{a0}\x{a0}<
+
+/>[[:space:]]+</utf,ucp,ascii_posix
+\= Expect no match     
+    >\x{a0} \x{a0}<
+
+/(?aP)[[:alnum:]]+/i,ucp,utf
+    abcáxyz
+    abc\x{660}xyz
+
+/(?aP)[[:alnum:]\d]+/i,ucp,utf
+    abc\x{660}xyz
+    
+# VARIOUS
+
+/[\d\s\w]+/a,ucp,utf
+    9 A\x{660}À 
+    9 AÀ\x{660} 
+
+# End PCRE2_EXTRA_ASCII_xxx tests
+
 # End of testinput7

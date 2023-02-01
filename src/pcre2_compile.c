@@ -123,7 +123,7 @@ static unsigned int
 #endif
 
 static int
-  compile_regex(uint32_t, uint32_t, PCRE2_UCHAR **, uint32_t **, int *, 
+  compile_regex(uint32_t, uint32_t, PCRE2_UCHAR **, uint32_t **, int *,
     uint32_t, uint32_t *, uint32_t *, uint32_t *, uint32_t *, branch_chain *,
     compile_block *, PCRE2_SIZE *);
 
@@ -694,8 +694,8 @@ static uint32_t chartypeoffset[] = {
 now all in a single string, to reduce the number of relocations when a shared
 library is dynamically loaded. The list of lengths is terminated by a zero
 length entry. The first three must be alpha, lower, upper, as this is assumed
-for handling case independence. The indices for graph, print, and punct are
-needed, so identify them. */
+for handling case independence. The indices for several classes are needed, so
+identify them. */
 
 static const char posix_names[] =
   STRING_alpha0 STRING_lower0 STRING_upper0 STRING_alnum0
@@ -785,7 +785,8 @@ are allowed. */
    (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
     PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
     PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
-    PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
+    PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
+    PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -1059,9 +1060,9 @@ for (;;)
     case META_SKIP: fprintf(stderr, "META (*SKIP)"); break;
     case META_THEN: fprintf(stderr, "META (*THEN)"); break;
 
-    case META_OPTIONS: 
-    fprintf(stderr, "META_OPTIONS 0x%08x 0x%08x", pptr[0], pptr[1]); 
-    pptr += 2; 
+    case META_OPTIONS:
+    fprintf(stderr, "META_OPTIONS 0x%08x 0x%08x", pptr[0], pptr[1]);
+    pptr += 2;
     break;
 
     case META_LOOKBEHIND:
@@ -1494,7 +1495,7 @@ Arguments:
   chptr          points to a returned data character
   errorcodeptr   points to the errorcode variable (containing zero)
   options        the current options bits
-  xoptions       the current extra options bits 
+  xoptions       the current extra options bits
   isclass        TRUE if inside a character class
   cb             compile data block or NULL when called from pcre2_substitute()
 
@@ -2537,6 +2538,85 @@ return parsed_pattern;
 
 
 /*************************************************
+*          Handle \d, \D, \s, \S, \w, \W         *
+*************************************************/
+
+/* This function is called from parse_regex() below, both for freestanding
+escapes, and those within classes, to handle those escapes that may change when
+Unicode property support is requested. Note that PCRE2_UCP will never be set
+without Unicode support because that is checked when pcre2_compile() is called.
+
+Arguments:
+  escape          the ESC_... value
+  parsed_pattern  where to add the code
+  options         options bits
+  xoptions        extra options bits
+
+Returns:          updated value of parsed_pattern
+*/
+static uint32_t *
+handle_escdsw(int escape, uint32_t *parsed_pattern, uint32_t options,
+  uint32_t xoptions)
+{
+uint32_t ascii_option = 0;
+uint32_t prop = ESC_p;
+
+switch(escape)
+  {
+  case ESC_D:
+  prop = ESC_P;
+  /* Fall through */
+  case ESC_d:
+  ascii_option = PCRE2_EXTRA_ASCII_BSD;
+  break;
+
+  case ESC_S:
+  prop = ESC_P;
+  /* Fall through */
+  case ESC_s:
+  ascii_option = PCRE2_EXTRA_ASCII_BSS;
+  break;
+
+  case ESC_W:
+  prop = ESC_P;
+  /* Fall through */
+  case ESC_w:
+  ascii_option = PCRE2_EXTRA_ASCII_BSW;
+  break;
+  }
+
+if ((options & PCRE2_UCP) == 0 || (xoptions & ascii_option) != 0)
+  {
+  *parsed_pattern++ = META_ESCAPE + escape;
+  }
+else
+  {
+  *parsed_pattern++ = META_ESCAPE + prop;
+  switch(escape)
+    {
+    case ESC_d:
+    case ESC_D:
+    *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
+    break;
+
+    case ESC_s:
+    case ESC_S:
+    *parsed_pattern++ = PT_SPACE << 16;
+    break;
+
+    case ESC_w:
+    case ESC_W:
+    *parsed_pattern++ = PT_WORD << 16;
+    break;
+    }
+  }
+
+return parsed_pattern;
+}
+
+
+
+/*************************************************
 *      Parse regex and identify named groups     *
 *************************************************/
 
@@ -2564,7 +2644,7 @@ typedef struct nest_save {
   uint16_t  max_group;
   uint16_t  flags;
   uint32_t  options;
-  uint32_t  xoptions; 
+  uint32_t  xoptions;
 } nest_save;
 
 #define NSF_RESET          0x0001u
@@ -2579,8 +2659,11 @@ the main compiling phase. */
 #define PARSE_TRACKED_OPTIONS (PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_DUPNAMES| \
   PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE| \
   PCRE2_UNGREEDY)
-  
-#define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT) 
+
+#define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT)
+
+#define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT| \
+  PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -3115,9 +3198,7 @@ while (ptr < ptrend)
       *parsed_pattern++ = META_ESCAPE + escape;
       break;
 
-      /* Escapes that change in UCP mode. Note that PCRE2_UCP will never be set
-      without Unicode support because it is checked when pcre2_compile() is
-      called. */
+      /* Escapes that may change in UCP mode. */
 
       case ESC_d:
       case ESC_D:
@@ -3126,33 +3207,8 @@ while (ptr < ptrend)
       case ESC_w:
       case ESC_W:
       okquantifier = TRUE;
-      if ((options & PCRE2_UCP) == 0)
-        {
-        *parsed_pattern++ = META_ESCAPE + escape;
-        }
-      else
-        {
-        *parsed_pattern++ = META_ESCAPE +
-          ((escape == ESC_d || escape == ESC_s || escape == ESC_w)?
-            ESC_p : ESC_P);
-        switch(escape)
-          {
-          case ESC_d:
-          case ESC_D:
-          *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
-          break;
-
-          case ESC_s:
-          case ESC_S:
-          *parsed_pattern++ = PT_SPACE << 16;
-          break;
-
-          case ESC_w:
-          case ESC_W:
-          *parsed_pattern++ = PT_WORD << 16;
-          break;
-          }
-        }
+      parsed_pattern = handle_escdsw(escape, parsed_pattern, options,
+        xoptions);
       break;
 
       /* Unicode property matching */
@@ -3515,18 +3571,22 @@ while (ptr < ptrend)
 
         class_range_state = RANGE_NO;
 
-        /* When PCRE2_UCP is set, some of the POSIX classes are converted to
-        use Unicode properties \p or \P or, in one case, \h or \H. The
-        substitutes table has two values per class, containing the type and
-        value of a \p or \P item. The special cases are specified with a
-        negative type: a non-zero value causes \h or \H to be used, and a zero
-        value falls through to behave like a non-UCP POSIX class. */
+        /* When PCRE2_UCP is set, unless PCRE2_EXTRA_ASCII_POSIX is set, some
+        of the POSIX classes are converted to use Unicode properties \p or \P
+        or, in one case, \h or \H. The substitutes table has two values per
+        class, containing the type and value of a \p or \P item. The special
+        cases are specified with a negative type: a non-zero value causes \h or
+        \H to be used, and a zero value falls through to behave like a non-UCP
+        POSIX class. There are now also some extra options that force ASCII for
+        some classes. */
 
 #ifdef SUPPORT_UNICODE
-        if ((options & PCRE2_UCP) != 0)
+        if ((options & PCRE2_UCP) != 0 &&
+            (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0)
           {
           int ptype = posix_substitutes[2*posix_class];
           int pvalue = posix_substitutes[2*posix_class + 1];
+
           if (ptype >= 0)
             {
             *parsed_pattern++ = META_ESCAPE + (posix_negate? ESC_P : ESC_p);
@@ -3664,7 +3724,7 @@ while (ptr < ptrend)
           *parsed_pattern++ = META_ESCAPE + escape;
           break;
 
-          /* These escapes are converted to Unicode property tests when
+          /* These escapes may be converted to Unicode property tests when
           PCRE2_UCP is set. */
 
           case ESC_d:
@@ -3673,33 +3733,8 @@ while (ptr < ptrend)
           case ESC_S:
           case ESC_w:
           case ESC_W:
-          if ((options & PCRE2_UCP) == 0)
-            {
-            *parsed_pattern++ = META_ESCAPE + escape;
-            }
-          else
-            {
-            *parsed_pattern++ = META_ESCAPE +
-              ((escape == ESC_d || escape == ESC_s || escape == ESC_w)?
-                ESC_p : ESC_P);
-            switch(escape)
-              {
-              case ESC_d:
-              case ESC_D:
-              *parsed_pattern++ = (PT_PC << 16) | ucp_Nd;
-              break;
-
-              case ESC_s:
-              case ESC_S:
-              *parsed_pattern++ = PT_SPACE << 16;
-              break;
-
-              case ESC_w:
-              case ESC_W:
-              *parsed_pattern++ = PT_WORD << 16;
-              break;
-              }
-            }
+          parsed_pattern = handle_escdsw(escape, parsed_pattern, options,
+            xoptions);
           break;
 
           /* Explicit Unicode property matching */
@@ -4052,7 +4087,7 @@ while (ptr < ptrend)
         {
         BOOL hyphenok = TRUE;
         uint32_t oldoptions = options;
-        uint32_t oldxoptions = xoptions; 
+        uint32_t oldxoptions = xoptions;
 
         top_nest->reset_group = 0;
         top_nest->max_group = 0;
@@ -4067,7 +4102,7 @@ while (ptr < ptrend)
           {
           options &= ~(PCRE2_CASELESS|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE|
                        PCRE2_DOTALL|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE);
-          xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT);              
+          xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT);
           hyphenok = FALSE;
           ptr++;
           }
@@ -4085,8 +4120,42 @@ while (ptr < ptrend)
               goto FAILED;
               }
             optset = &unset;
-            xoptset = &xunset; 
+            xoptset = &xunset;
             hyphenok = FALSE;
+            break;
+
+            /* There are some two-character sequences that start with 'a'. */
+
+            case CHAR_a:
+            if (ptr < ptrend)
+              {
+              if (*ptr == CHAR_D)
+                {
+                *xoptset |= PCRE2_EXTRA_ASCII_BSD;
+                ptr++;
+                break;
+                }
+              if (*ptr == CHAR_P)
+                {
+                *xoptset |= PCRE2_EXTRA_ASCII_POSIX;
+                ptr++;
+                break;
+                }
+              if (*ptr == CHAR_S)
+                {
+                *xoptset |= PCRE2_EXTRA_ASCII_BSS;
+                ptr++;
+                break;
+                }
+              if (*ptr == CHAR_W)
+                {
+                *xoptset |= PCRE2_EXTRA_ASCII_BSW;
+                ptr++;
+                break;
+                }
+              }
+            *xoptset |= PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|
+                        PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX;
             break;
 
             case CHAR_J:  /* Record that it changed in the external options */
@@ -4097,7 +4166,7 @@ while (ptr < ptrend)
             case CHAR_i: *optset |= PCRE2_CASELESS; break;
             case CHAR_m: *optset |= PCRE2_MULTILINE; break;
             case CHAR_n: *optset |= PCRE2_NO_AUTO_CAPTURE; break;
-            case CHAR_r: *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT; break; 
+            case CHAR_r: *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
 
@@ -4757,7 +4826,7 @@ while (ptr < ptrend)
     if (top_nest != NULL && top_nest->nest_depth == nest_depth)
       {
       options = (options & ~PARSE_TRACKED_OPTIONS) | top_nest->options;
-      xoptions = (xoptions & ~PARSE_TRACKED_EXTRA_OPTIONS) | top_nest->xoptions; 
+      xoptions = (xoptions & ~PARSE_TRACKED_EXTRA_OPTIONS) | top_nest->xoptions;
       if ((top_nest->flags & NSF_RESET) != 0 &&
           top_nest->max_group > cb->bracount)
         cb->bracount = top_nest->max_group;
@@ -5019,7 +5088,7 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits 
+  xoptions      the extra options bits
   cb            compile data
   start         start of range character
   end           end of range character
@@ -5030,7 +5099,7 @@ Returns:        the number of < 256 characters added
 
 static unsigned int
 add_to_class_internal(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  uint32_t options, uint32_t xoptions, compile_block *cb, uint32_t start, 
+  uint32_t options, uint32_t xoptions, compile_block *cb, uint32_t start,
   uint32_t end)
 {
 uint32_t c;
@@ -5039,7 +5108,7 @@ unsigned int n8 = 0;
 
 /* If caseless matching is required, scan the range and process alternate
 cases. In Unicode, there are 8-bit characters that have alternate cases that
-are greater than 255 and vice-versa (though these may be ignored if caseless 
+are greater than 255 and vice-versa (though these may be ignored if caseless
 restriction is in force). Sometimes we can just extend the original range. */
 
 if ((options & PCRE2_CASELESS) != 0)
@@ -5053,17 +5122,17 @@ if ((options & PCRE2_CASELESS) != 0)
     options &= ~PCRE2_CASELESS;   /* Remove for recursive calls */
     c = start;
 
-    while ((rc = get_othercase_range(&c, end, &oc, &od, 
+    while ((rc = get_othercase_range(&c, end, &oc, &od,
              (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)) >= 0)
       {
       /* Handle a single character that has more than one other case. */
 
-      if (rc > 0) n8 += add_list_to_class_internal(classbits, uchardptr, 
+      if (rc > 0) n8 += add_list_to_class_internal(classbits, uchardptr,
         options, xoptions, cb, PRIV(ucd_caseless_sets) + rc, oc);
 
       /* Do nothing if the other case range is within the original range. */
 
-      else if (oc >= cb->class_range_start && od <= cb->class_range_end) 
+      else if (oc >= cb->class_range_start && od <= cb->class_range_end)
         continue;
 
       /* Extend the original range if there is overlap, noting that if oc < c,
@@ -5178,7 +5247,7 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits 
+  xoptions      the extra options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
   except        character to omit; this is used when adding lists of
@@ -5191,7 +5260,7 @@ Returns:        the number of < 256 characters added
 
 static unsigned int
 add_list_to_class_internal(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  uint32_t options, uint32_t xoptions, compile_block *cb, const uint32_t *p, 
+  uint32_t options, uint32_t xoptions, compile_block *cb, const uint32_t *p,
   unsigned int except)
 {
 unsigned int n8 = 0;
@@ -5201,7 +5270,7 @@ while (p[0] < NOTACHAR)
   if (p[0] != except)
     {
     while(p[n+1] == p[0] + n + 1) n++;
-    n8 += add_to_class_internal(classbits, uchardptr, options, xoptions, cb, 
+    n8 += add_to_class_internal(classbits, uchardptr, options, xoptions, cb,
       p[0], p[n]);
     }
   p += n + 1;
@@ -5223,7 +5292,7 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits 
+  xoptions      the extra options bits
   cb            compile data
   start         start of range character
   end           end of range character
@@ -5238,7 +5307,7 @@ add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
 {
 cb->class_range_start = start;
 cb->class_range_end = end;
-return add_to_class_internal(classbits, uchardptr, options, xoptions, cb, 
+return add_to_class_internal(classbits, uchardptr, options, xoptions, cb,
   start, end);
 }
 
@@ -5257,7 +5326,7 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits 
+  xoptions      the extra options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
   except        character to omit; this is used when adding lists of
@@ -5281,7 +5350,7 @@ while (p[0] < NOTACHAR)
     while(p[n+1] == p[0] + n + 1) n++;
     cb->class_range_start = p[0];
     cb->class_range_end = p[n];
-    n8 += add_to_class_internal(classbits, uchardptr, options, xoptions, cb, 
+    n8 += add_to_class_internal(classbits, uchardptr, options, xoptions, cb,
       p[0], p[n]);
     }
   p += n + 1;
@@ -5302,7 +5371,7 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits 
+  xoptions      the extra options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
 
@@ -5412,7 +5481,7 @@ real compile phase. The value of lengthptr distinguishes the two phases.
 
 Arguments:
   optionsptr        pointer to the option bits
-  xoptionsptr       pointer to the extra option bits 
+  xoptionsptr       pointer to the extra option bits
   codeptr           points to the pointer to the current code point
   pptrptr           points to the current parsed pattern pointer
   errorcodeptr      points to error code variable
@@ -5431,10 +5500,10 @@ Returns:            0 There's been an error, *errorcodeptr is non-zero
 */
 
 static int
-compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, 
-  PCRE2_UCHAR **codeptr, uint32_t **pptrptr, int *errorcodeptr, 
-  uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr, 
-  uint32_t *reqcuflagsptr, branch_chain *bcptr, compile_block *cb, 
+compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
+  PCRE2_UCHAR **codeptr, uint32_t **pptrptr, int *errorcodeptr,
+  uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr,
+  uint32_t *reqcuflagsptr, branch_chain *bcptr, compile_block *cb,
   PCRE2_SIZE *lengthptr)
 {
 int bravalue = 0;
@@ -5757,8 +5826,8 @@ for (;; pptr++)
       uint32_t c = pptr[1];
 
 #ifdef SUPPORT_UNICODE
-      if (UCD_CASESET(c) == 0 || 
-         ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 && 
+      if (UCD_CASESET(c) == 0 ||
+         ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
          c < 128 && pptr[2] < 128))
 #endif
         {
@@ -5851,41 +5920,45 @@ for (;; pptr++)
         XCL_PROP/XCL_NOTPROP directly, which is done here. */
 
 #ifdef SUPPORT_UNICODE
-        if ((options & PCRE2_UCP) != 0) switch(posix_class)
+        if ((options & PCRE2_UCP) != 0 &&
+            (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0)
           {
-          case PC_GRAPH:
-          case PC_PRINT:
-          case PC_PUNCT:
-          *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
-          *class_uchardata++ = (PCRE2_UCHAR)
-            ((posix_class == PC_GRAPH)? PT_PXGRAPH :
-             (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
-          *class_uchardata++ = 0;
-          xclass_has_prop = TRUE;
-          goto CONTINUE_CLASS;
+          switch(posix_class)
+            {
+            case PC_GRAPH:
+            case PC_PRINT:
+            case PC_PUNCT:
+            *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
+            *class_uchardata++ = (PCRE2_UCHAR)
+              ((posix_class == PC_GRAPH)? PT_PXGRAPH :
+               (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
+            *class_uchardata++ = 0;
+            xclass_has_prop = TRUE;
+            goto CONTINUE_CLASS;
 
-          /* For the other POSIX classes (ascii, xdigit) we are going to
-          fall through to the non-UCP case and build a bit map for
-          characters with code points less than 256. However, if we are in
-          a negated POSIX class, characters with code points greater than
-          255 must either all match or all not match, depending on whether
-          the whole class is not or is negated. For example, for
-          [[:^ascii:]... they must all match, whereas for [^[:^xdigit:]...
-          they must not.
+            /* For the other POSIX classes (ascii, xdigit) we are going to
+            fall through to the non-UCP case and build a bit map for
+            characters with code points less than 256. However, if we are in
+            a negated POSIX class, characters with code points greater than
+            255 must either all match or all not match, depending on whether
+            the whole class is not or is negated. For example, for
+            [[:^ascii:]... they must all match, whereas for [^[:^xdigit:]...
+            they must not.
 
-          In the special case where there are no xclass items, this is
-          automatically handled by the use of OP_CLASS or OP_NCLASS, but an
-          explicit range is needed for OP_XCLASS. Setting a flag here
-          causes the range to be generated later when it is known that
-          OP_XCLASS is required. In the 8-bit library this is relevant only in
-          utf mode, since no wide characters can exist otherwise. */
+            In the special case where there are no xclass items, this is
+            automatically handled by the use of OP_CLASS or OP_NCLASS, but an
+            explicit range is needed for OP_XCLASS. Setting a flag here
+            causes the range to be generated later when it is known that
+            OP_XCLASS is required. In the 8-bit library this is relevant only in
+            utf mode, since no wide characters can exist otherwise. */
 
-          default:
+            default:
 #if PCRE2_CODE_UNIT_WIDTH == 8
-          if (utf)
+            if (utf)
 #endif
-          match_all_or_no_wide_chars |= local_negate;
-          break;
+            match_all_or_no_wide_chars |= local_negate;
+            break;
+            }
           }
 #endif  /* SUPPORT_UNICODE */
 
@@ -6011,7 +6084,7 @@ for (;; pptr++)
 
           case ESC_h:
           (void)add_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, xoptions, cb, PRIV(hspace_list), 
+            options & ~PCRE2_CASELESS, xoptions, cb, PRIV(hspace_list),
               NOTACHAR);
           break;
 
@@ -6022,7 +6095,7 @@ for (;; pptr++)
 
           case ESC_v:
           (void)add_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, xoptions, cb, PRIV(vspace_list), 
+            options & ~PCRE2_CASELESS, xoptions, cb, PRIV(vspace_list),
               NOTACHAR);
           break;
 
@@ -6102,7 +6175,7 @@ for (;; pptr++)
             if (C <= CHAR_i)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, &class_uchardata, options, xoptions, 
+                add_to_class(classbits, &class_uchardata, options, xoptions,
                   cb, C + uc, ((D < CHAR_i)? D : CHAR_i) + uc);
               C = CHAR_j;
               }
@@ -6110,7 +6183,7 @@ for (;; pptr++)
             if (C <= D && C <= CHAR_r)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, &class_uchardata, options, xoptions, 
+                add_to_class(classbits, &class_uchardata, options, xoptions,
                   cb, C + uc, ((D < CHAR_r)? D : CHAR_r) + uc);
               C = CHAR_s;
               }
@@ -6118,7 +6191,7 @@ for (;; pptr++)
             if (C <= D)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, &class_uchardata, options, xoptions, 
+                add_to_class(classbits, &class_uchardata, options, xoptions,
                   cb, C + uc, D + uc);
               }
             }
@@ -6126,7 +6199,7 @@ for (;; pptr++)
 #endif
           /* Not an EBCDIC special range */
 
-          class_has_8bitchar += add_to_class(classbits, &class_uchardata, 
+          class_has_8bitchar += add_to_class(classbits, &class_uchardata,
             options, xoptions, cb, c, d);
           goto CONTINUE_CLASS;   /* Go get the next char in the class */
           }  /* End of range handling */
@@ -6135,7 +6208,7 @@ for (;; pptr++)
         /* Handle a single character. */
 
         class_has_8bitchar +=
-          add_to_class(classbits, &class_uchardata, options, xoptions, cb, 
+          add_to_class(classbits, &class_uchardata, options, xoptions, cb,
             meta, meta);
         }
 
@@ -6621,7 +6694,7 @@ for (;; pptr++)
     if ((group_return =
          compile_regex(
          options,                         /* The options state */
-         xoptions,                        /* The extra options state */ 
+         xoptions,                        /* The extra options state */
          &tempcode,                       /* Where to put code (updated) */
          &pptr,                           /* Input pointer (updated) */
          errorcodeptr,                    /* Where to put an error message */
@@ -8020,7 +8093,7 @@ for (;; pptr++)
       {
       uint32_t caseset = UCD_CASESET(meta);
       if (caseset != 0 &&
-           ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 || 
+           ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 ||
            PRIV(ucd_caseless_sets)[caseset] > 127))
         {
         *code++ = OP_PROP;
@@ -8137,7 +8210,7 @@ the two phases.
 
 Arguments:
   options           option bits, including any changes for this subpattern
-  xoptions          extra option bits, ditto 
+  xoptions          extra option bits, ditto
   codeptr           -> the address of the current code pointer
   pptrptr           -> the address of the current parsed pattern pointer
   errorcodeptr      -> pointer to error code variable
@@ -8157,10 +8230,10 @@ Returns:            0 There has been an error
 */
 
 static int
-compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, 
-  uint32_t **pptrptr, int *errorcodeptr, uint32_t skipunits, 
-  uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr, 
-  uint32_t *reqcuflagsptr, branch_chain *bcptr, compile_block *cb, 
+compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
+  uint32_t **pptrptr, int *errorcodeptr, uint32_t skipunits,
+  uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr,
+  uint32_t *reqcuflagsptr, branch_chain *bcptr, compile_block *cb,
   PCRE2_SIZE *lengthptr)
 {
 PCRE2_UCHAR *code = *codeptr;
@@ -8257,7 +8330,7 @@ for (;;)
   into the length. */
 
   if ((branch_return =
-        compile_branch(&options, &xoptions, &code, &pptr, errorcodeptr, 
+        compile_branch(&options, &xoptions, &code, &pptr, errorcodeptr,
           &branchfirstcu, &branchfirstcuflags, &branchreqcu, &branchreqcuflags,
           &bc, cb, (lengthptr == NULL)? NULL : &length)) == 0)
     return 0;
@@ -10292,7 +10365,7 @@ code = cworkspace;
 *code = OP_BRA;
 
 (void)compile_regex(cb.external_options, ccontext->extra_options, &code, &pptr,
-   &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, &cb, 
+   &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, &cb,
    &length);
 
 if (errorcode != 0) goto HAD_CB_ERROR;  /* Offset is in cb.erroroffset */
@@ -10390,8 +10463,8 @@ of the function here. */
 pptr = cb.parsed_pattern;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
-regexrc = compile_regex(re->overall_options, ccontext->extra_options, &code, 
-  &pptr, &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, 
+regexrc = compile_regex(re->overall_options, ccontext->extra_options, &code,
+  &pptr, &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL,
   &cb, NULL);
 if (regexrc < 0) re->flags |= PCRE2_MATCH_EMPTY;
 re->top_bracket = cb.bracount;

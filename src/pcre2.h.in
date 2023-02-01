@@ -154,6 +154,10 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTRA_ALT_BSUX                 0x00000020u  /* C */
 #define PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK     0x00000040u  /* C */
 #define PCRE2_EXTRA_CASELESS_RESTRICT        0x00000080u  /* C */
+#define PCRE2_EXTRA_ASCII_BSD                0x00000100u  /* C */
+#define PCRE2_EXTRA_ASCII_BSS                0x00000200u  /* C */
+#define PCRE2_EXTRA_ASCII_BSW                0x00000400u  /* C */
+#define PCRE2_EXTRA_ASCII_POSIX              0x00000800u  /* C */
 
 /* These are for pcre2_jit_compile(). */
 

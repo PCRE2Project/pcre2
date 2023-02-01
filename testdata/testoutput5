@@ -5196,4 +5196,183 @@ No match
 
 # End caseless restrict tests
 
+# TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
+
+# DIGITS
+
+/\d+/i,utf
+    123\x{660}456
+ 0: 123
+
+/\d+/i,utf,ucp
+    123\x{660}456
+ 0: 123\x{660}456
+
+/\d+/i,utf,ucp,ascii_bsd
+    123\x{660}456
+ 0: 123
+
+/[\d]+/i,utf
+    123\x{660}456
+ 0: 123
+
+/[\d]+/i,utf,ucp
+    123\x{660}456
+ 0: 123\x{660}456
+
+/[\d]+/i,utf,ucp,ascii_bsd
+    123\x{660}456
+ 0: 123
+
+/\d(?aD)\d(?-aD)\d/utf,ucp
+    \x{660}9\x{660}
+ 0: \x{660}9\x{660}
+\= Expect no match     
+    \x{660}\x{660}\x{660}
+No match
+
+/\d(?a)\d(?-a)\d/utf,ucp
+    \x{660}9\x{660}
+ 0: \x{660}9\x{660}
+\= Expect no match     
+    \x{660}\x{660}\x{660}
+No match
+
+# SPACES
+
+/>\s+</i,utf
+    >  <
+ 0: >  <
+\= Expect no match     
+    >\x{a0} <
+No match
+
+/>\s+</i,utf,ucp
+    >  <
+ 0: >  <
+    >\x{a0} <
+ 0: >\x{a0} <
+
+/>\s+</i,utf,ucp,ascii_bss
+    >  <
+ 0: >  <
+\= Expect no match     
+    >\x{a0} <
+No match
+
+/>[\s]+</i,utf
+    >  <
+ 0: >  <
+\= Expect no match     
+    >\x{a0} <
+No match
+
+/>[\s]+</i,utf,ucp
+    >  <
+ 0: >  <
+    >\x{a0} <
+ 0: >\x{a0} <
+
+/>[\s]+</i,utf,ucp,ascii_bss
+    >  <
+ 0: >  <
+\= Expect no match     
+    >\x{a0} <
+No match
+
+/>\s(?aS)\s(?-aS)\s</utf,ucp
+    >\x{a0} \x{a0}<
+ 0: >\x{a0} \x{a0}<
+\= Expect no match     
+    >\x{a0}\x{a0}\x{a0}<
+No match
+
+/>\s(?a)\s(?-a)\s</utf,ucp
+    >\x{a0} \x{a0}<
+ 0: >\x{a0} \x{a0}<
+\= Expect no match     
+    >\x{a0}\x{a0}\x{a0}<
+No match
+    
+# WORDS
+
+/\w+/i,utf
+    123\x{660}abc
+ 0: 123
+
+/\w+/i,utf,ucp
+    123\x{660}abc
+ 0: 123\x{660}abc
+
+/\w+/i,utf,ucp,ascii_bsw
+    123\x{660}abc
+ 0: 123
+
+/[\w]+/i,utf
+    123\x{660}abc
+ 0: 123
+
+/[\w]+/i,utf,ucp
+    123\x{660}abc
+ 0: 123\x{660}abc
+
+/[\w]+/i,utf,ucp,ascii_bsw
+    123\x{660}abc
+ 0: 123
+
+/\w(?aW)\w(?-aW)\w/utf,ucp
+    \x{660}A\x{c0}
+ 0: \x{660}A\x{c0}
+\= Expect no match     
+    \x{660}\x{c0}\x{c0}
+No match
+
+/\w(?a)\w(?-a)\w/utf,ucp
+    \x{660}A\x{c0}
+ 0: \x{660}A\x{c0}
+\= Expect no match     
+    \x{660}\x{c0}\x{c0}
+No match
+    
+# POSIX 
+
+/[[:digit:]]+/utf,ucp
+    123\x{660}456
+ 0: 123\x{660}456
+
+/[[:digit:]]+/utf,ucp,ascii_posix
+    123\x{660}456
+ 0: 123
+
+/>[[:space:]]+</utf,ucp
+    >\x{a0} \x{a0}<
+ 0: >\x{a0} \x{a0}<
+    >\x{a0}\x{a0}\x{a0}<
+ 0: >\x{a0}\x{a0}\x{a0}<
+
+/>[[:space:]]+</utf,ucp,ascii_posix
+\= Expect no match     
+    >\x{a0} \x{a0}<
+No match
+
+/(?aP)[[:alnum:]]+/i,ucp,utf
+    abcáxyz
+ 0: abc
+    abc\x{660}xyz
+ 0: abc
+
+/(?aP)[[:alnum:]\d]+/i,ucp,utf
+    abc\x{660}xyz
+ 0: abc\x{660}xyz
+    
+# VARIOUS
+
+/[\d\s\w]+/a,ucp,utf
+    9 A\x{660}À 
+ 0: 9 A
+    9 AÀ\x{660} 
+ 0: 9 A
+
+# End PCRE2_EXTRA_ASCII_xxx tests
+
 # End of testinput5
