@@ -300,18 +300,18 @@ U+FFED ON  Symbol: Other symbol, common, Other, [alphabetic, caseignorable, exte
 U+FFEE ON  Symbol: Other symbol, common, Other, [alphabetic, caseignorable, extender, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+FFEF L   Control: Unassigned, unknown, Other
 findprop fff8 fff9 fffa fffb fffc fffd fffe ffff
-U+FFF8 BN  Control: Unassigned, unknown, Control, [dash, defaultignorablecodepoint, deprecated, extendedpictographic, joincontrol, lowercase, patternwhitespace, quotationmark, sentenceterminal, softdotted, xidcontinue, xidstart]
-U+FFF9 ON  Control: Format, common, Control, [changeswhenuppercased, deprecated, emojimodifier, emojipresentation, extender, sentenceterminal, xidcontinue, xidstart]
-U+FFFA ON  Control: Format, common, Control, [changeswhenuppercased, deprecated, emojimodifier, emojipresentation, extender, sentenceterminal, xidcontinue, xidstart]
-U+FFFB ON  Control: Format, common, Control, [changeswhenuppercased, deprecated, emojimodifier, emojipresentation, extender, sentenceterminal, xidcontinue, xidstart]
+U+FFF8 BN  Control: Unassigned, unknown, Control, [changeswhencasemapped, changeswhenuppercased, emojimodifier, emojimodifierbase, patternsyntax]
+U+FFF9 ON  Control: Format, common, Control, [changeswhencasemapped, changeswhentitlecased, emojimodifier, emojimodifierbase, graphemeextend, hexdigit, logicalorderexception, lowercase, math, noncharactercodepoint, patternsyntax, patternwhitespace, prependedconcatenationmark, quotationmark, radical, regionalindicator, sentenceterminal, softdotted, terminalpunctuation, unifiedideograph, uppercase, variationselector, whitespace, xidcontinue, xidstart]
+U+FFFA ON  Control: Format, common, Control, [changeswhencasemapped, changeswhentitlecased, emojimodifier, emojimodifierbase, graphemeextend, hexdigit, logicalorderexception, lowercase, math, noncharactercodepoint, patternsyntax, patternwhitespace, prependedconcatenationmark, quotationmark, radical, regionalindicator, sentenceterminal, softdotted, terminalpunctuation, unifiedideograph, uppercase, variationselector, whitespace, xidcontinue, xidstart]
+U+FFFB ON  Control: Format, common, Control, [changeswhencasemapped, changeswhentitlecased, emojimodifier, emojimodifierbase, graphemeextend, hexdigit, logicalorderexception, lowercase, math, noncharactercodepoint, patternsyntax, patternwhitespace, prependedconcatenationmark, quotationmark, radical, regionalindicator, sentenceterminal, softdotted, terminalpunctuation, unifiedideograph, uppercase, variationselector, whitespace, xidcontinue, xidstart]
 U+FFFC ON  Symbol: Other symbol, common, Other, [alphabetic, caseignorable, extender, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+FFFD ON  Symbol: Other symbol, common, Other, [alphabetic, caseignorable, extender, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
-U+FFFE BN  Control: Unassigned, unknown, Other, [changeswhenuppercased, deprecated, emojicomponent, emojimodifierbase, extender, quotationmark, sentenceterminal, xidcontinue, xidstart]
-U+FFFF BN  Control: Unassigned, unknown, Other, [changeswhenuppercased, deprecated, emojicomponent, emojimodifierbase, extender, quotationmark, sentenceterminal, xidcontinue, xidstart]
+U+FFFE BN  Control: Unassigned, unknown, Other, [changeswhencasemapped, changeswhenuppercased, emojimodifier, emojimodifierbase, joincontrol, logicalorderexception, math, patternwhitespace, prependedconcatenationmark]
+U+FFFF BN  Control: Unassigned, unknown, Other, [changeswhencasemapped, changeswhenuppercased, emojimodifier, emojimodifierbase, joincontrol, logicalorderexception, math, patternwhitespace, prependedconcatenationmark]
 findprop 10000 10001 e01ef f0000 100000
 U+10000 L   Letter: Other letter, linearb, Other, [alphabetic, diacritic, graphemebase, idcontinue, xidcontinue]
 U+10001 L   Letter: Other letter, linearb, Other, [alphabetic, diacritic, graphemebase, idcontinue, xidcontinue]
-U+E01EF NSM Mark: Non-spacing mark, inherited, Extend, []
+U+E01EF NSM Mark: Non-spacing mark, inherited, Extend, [ascii, alphabetic, cased, emojicomponent]
 U+F0000 L   Control: Private use, unknown, Other
 U+100000 L   Control: Private use, unknown, Other
 
@@ -391,11 +391,15 @@ findprop 32ff
 U+32FF L   Symbol: Other symbol, common, Other, [han], [alphabetic, caseignorable, extender, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 
 findprop 1f16d
-U+1F16D ON  Symbol: Other symbol, common, Extended Pictographic, [ascii, sentenceterminal, unifiedideograph, whitespace, xidcontinue]
+U+1F16D ON  Symbol: Other symbol, common, Extended Pictographic, [changeswhenuppercased, deprecated, emojimodifier, emojimodifierbase, extender, quotationmark, regionalindicator, xidcontinue, xidstart]
 
 findprop U+10e93 U+10eaa
 U+10E93 R   Letter: Other letter, yezidi, Other, [alphabetic, diacritic, graphemebase, idcontinue, xidcontinue]
 U+10EAA R   Control: Unassigned, unknown, Other
+findprop +á +é U+212A
+U+00E1 L   Letter: Lower case letter, latin, Other, U+00C1, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue]
+U+00E9 L   Letter: Lower case letter, latin, Other, U+00C9, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue]
+U+212A L   Letter: Upper case letter, latin, Other, U+004B, U+006B, [alphabetic, graphemeextend, idcontinue, xidcontinue]
 
 findprop 0602 202a 202b 202c 2068 2069 202d 202e 2067
 U+0602 AN  Control: Format, arabic, Prepend, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, lowercase]
