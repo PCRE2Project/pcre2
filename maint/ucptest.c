@@ -427,8 +427,7 @@ if (scriptx != 0)
 if (bprops != 0)
   {
   const char *sep = "";
-  const uint32_t *p = PRIV(ucd_boolprop_sets) + 
-    bprops * ucd_boolprop_sets_item_size;
+  const uint32_t *p = PRIV(ucd_boolprop_sets) + bprops;
   printf(", [");
   for (int i = 0; i < ucp_Bprop_Count; i++)
   if (MAPBIT(p, i) != 0)
@@ -497,13 +496,13 @@ while (*s != 0)
   if (strcmp(CS name, "script") == 0 ||
       strcmp(CS name, "scriptx") == 0)
     {
+    BOOL x = (name[6] == 'x');
     BOOL scriptx_not = FALSE;
     for (t = value; *t != 0; t++) *t = tolower(*t);
  
     if (value[0] == '!')
       {
-      if (name[6] == 'x') scriptx_not = TRUE;
-        else script_not = TRUE;
+      if (x) scriptx_not = TRUE; else script_not = TRUE;
       offset = 1;
       }
 
@@ -514,7 +513,21 @@ while (*s != 0)
             PRIV(utt_names) + u->name_offset) == 0)
         {
         c = u->value;
-        if (name[6] == 'x')
+        if (x && !scriptx_not && u->type == PT_SC)
+          {
+          if (script < 0)
+            {
+            x = FALSE;
+            script = -1;
+            script_not = scriptx_not;
+            }
+          else if (!script_not)
+            {
+            printf("No characters found\n");
+            return;
+            }
+          }
+        if (x)
           {
           scriptx_list[scriptx_count++] = scriptx_not? (-c):c;
           }
@@ -689,12 +702,15 @@ for (c = 0; c <= 0x10ffff; c++)
       /* Positive requirment */
       if (scriptx_list[i] >= 0)
         {
-        if ((bits_scriptx[x] & (1u<<y)) != 0) found++;
+        if (scriptx_list[i] == UCD_SCRIPT(c) ||
+            ((scriptx_list[i] < ucp_Unknown) &&
+             (bits_scriptx[x] & (1u<<y)) != 0)) found++;
         }
       /* Negative requirement */
       else
         {
-        if ((bits_scriptx[x] & (1u<<y)) == 0) found++;
+        if ((-(scriptx_list[i]) < ucp_Unknown) &&
+            (bits_scriptx[x] & (1u<<y)) == 0) found++;
         }
       }
 
@@ -703,8 +719,7 @@ for (c = 0; c <= 0x10ffff; c++)
 
   if (bprop_count > 0)
     {
-    const uint32_t *bits_bprop = PRIV(ucd_boolprop_sets) + 
-      UCD_BPROPS(c) * ucd_boolprop_sets_item_size;
+    const uint32_t *bits_bprop = PRIV(ucd_boolprop_sets) + UCD_BPROPS(c);
     unsigned int found = 0;
 
     for (i = 0; i < bprop_count; i++)
