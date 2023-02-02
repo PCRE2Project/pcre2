@@ -2453,6 +2453,11 @@
 /(?aP)[[:alnum:]\d]+/i,ucp,utf
     abc\x{660}xyz
     
+/(*UCP)(*UTF)[[:alnum:]](?aP:[[:alnum:]])[[:alnum:]]/
+    \x{660}A\x{660}
+\= Expect no match     
+    \x{660}\x{660}\x{660}
+    
 # VARIOUS
 
 /[\d\s\w]+/a,ucp,utf

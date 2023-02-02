@@ -5365,6 +5365,13 @@ No match
     abc\x{660}xyz
  0: abc\x{660}xyz
     
+/(*UCP)(*UTF)[[:alnum:]](?aP:[[:alnum:]])[[:alnum:]]/
+    \x{660}A\x{660}
+ 0: \x{660}A\x{660}
+\= Expect no match     
+    \x{660}\x{660}\x{660}
+No match
+    
 # VARIOUS
 
 /[\d\s\w]+/a,ucp,utf

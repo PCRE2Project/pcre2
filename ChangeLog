@@ -42,6 +42,9 @@ for caseless matching and items like \d:
    (a) Added PCRE2_EXTRA_CASELESS_RESTRICT to lock out mixing of ASCII and 
        non-ASCII when matching caselessly. This is also /r in pcre2test and 
        (?r) within patterns.
+       
+   (b) Added PCRE2_EXTRA_ASCII_{BSD,BSS,BSW,POSIX} and corresponding (?aD) etc 
+       in patterns and /a in pcre2test.
 
 
 Version 10.42 11-December-2022
