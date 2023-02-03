@@ -114,7 +114,7 @@ utt_table += list(zip(std_bidi_class_names, bidi_class_names, ['PT_BIDICL'] * le
 
 for name in bool_properties:
   utt_table.append((stdname(name), name, 'PT_BOOL'))
-  if name in abbreviations: 
+  if name in abbreviations:
     for abbrev in abbreviations[name]:
       utt_table.append((stdname(abbrev), name, 'PT_BOOL'))
 

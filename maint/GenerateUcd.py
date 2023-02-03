@@ -751,7 +751,7 @@ for block_size in [2 ** i for i in range(5,10)]:
   size = len(records) * record_size
   stage1, stage2 = compress_table(table, block_size)
   size += get_tables_size(stage1, stage2)
-  #print "/* block size %5d  => %5d bytes */" % (block_size, size)
+  #print("/* block size {:3d} => {:5d} bytes */".format(block_size, size))
   if size < min_size:
     min_size = size
     min_stage1, min_stage2 = stage1, stage2

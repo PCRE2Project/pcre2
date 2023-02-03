@@ -1,5 +1,6 @@
 find script Han
 find type Pe script Common scriptx Hangul
+find script !latin scriptx sundanese
 find type Sk
 find type Pd
 find gbreak LVT

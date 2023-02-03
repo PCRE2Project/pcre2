@@ -139,7 +139,8 @@ def getbpropslist():
         if re.match(pat, bplast) != None:
           break
       else:
-        bplist.append(bplast)
+        if bplast not in bplist:
+          bplist.append(bplast)
 
     file.close()
 
@@ -204,7 +205,7 @@ def collect_property_names():
       if match_obj == None:
         continue
 
-      if match_obj.group(2) in bool_properties:
+      if match_obj.group(2) != match_obj.group(1) and match_obj.group(2) in bool_properties:
         if match_obj.group(3) == None:
           abbreviations[match_obj.group(2)] = (match_obj.group(1),)
         else:
@@ -294,7 +295,7 @@ def open_output(default):
   try:
     file = open(output_name, "w")
   except IOError:
-    print ("** Couldn't open %s" % output_name)
+    print("** Couldn't open %s" % output_name)
     sys.exit(1)
 
   script_name = sys.argv[0]
