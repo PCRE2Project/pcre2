@@ -162,6 +162,13 @@ CHECK_C_SOURCE_COMPILES(
 
 set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
+
+CHECK_C_SOURCE_COMPILES(
+  "#include <sys/types.h>
+   int main() { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
+  HAVE_BUILTIN_MUL_OVERFLOW
+)
+
 CHECK_C_SOURCE_COMPILES(
   "int main() { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
   HAVE_ATTRIBUTE_UNINITIALIZED
@@ -610,6 +617,7 @@ SET(PCRE2_HEADERS ${PROJECT_BINARY_DIR}/pcre2.h)
 SET(PCRE2_SOURCES
   src/pcre2_auto_possess.c
   ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+  src/pcre2_chkdint.c
   src/pcre2_compile.c
   src/pcre2_config.c
   src/pcre2_context.c

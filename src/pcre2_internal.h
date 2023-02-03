@@ -156,8 +156,8 @@ pcre2_match() because of the way it backtracks. */
 #define PCRE2_SPTR CUSTOM_SUBJECT_PTR
 #endif
 
-/* When checking for integer overflow in pcre2_compile(), we need to handle
-large integers. If a 64-bit integer type is available, we can use that.
+/* When checking for integer overflow, we need to handle large integers.
+If a 64-bit integer type is available, we can use that.
 Otherwise we have to cast to double, which of course requires floating point
 arithmetic. Handle this by defining a macro for the appropriate type. */
 
@@ -2042,6 +2042,9 @@ extern void *       _pcre2_memmove(void *, const void *, size_t);
 #endif
 
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
+
+extern BOOL         PRIV(ckd_smul)(PCRE2_SIZE *, int, int);
+
 #endif  /* PCRE2_INTERNAL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_internal.h */

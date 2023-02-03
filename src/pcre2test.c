@@ -272,7 +272,7 @@ for building the library. */
 #include "pcre2_internal.h"
 
 /* We need access to some of the data tables that PCRE2 uses. Defining
-PCRE2_PCRETEST makes some minor changes in the files. The previous definition
+PCRE2_PCRE2TEST makes some minor changes in the files. The previous definition
 of PRIV avoids name clashes. */
 
 #define PCRE2_PCRE2TEST
@@ -335,6 +335,8 @@ these inclusions should not be changed. */
 #endif   /* SUPPORT_PCRE2_32 */
 
 #define PCRE2_SUFFIX(a) a
+
+#include "pcre2_chkdint.c"
 
 /* We need to be able to check input text for UTF-8 validity, whatever code
 widths are actually available, because the input to pcre2test is always in
@@ -6852,7 +6854,7 @@ if (dbuffer != NULL)
 the number of code units that will be needed (though the buffer may have to be
 extended if replication is involved). */
 
-needlen = (size_t)((len+1) * code_unit_size);
+needlen = (len+1) * code_unit_size;
 if (dbuffer == NULL || needlen >= dbuffer_size)
   {
   while (needlen >= dbuffer_size)
@@ -6883,6 +6885,7 @@ while ((c = *p++) != 0)
 
   if (c == ']' && start_rep != NULL)
     {
+    PCRE2_SIZE d;
     long li;
     char *endptr;
 
@@ -6914,7 +6917,12 @@ while ((c = *p++) != 0)
       }
 
     replen = CAST8VAR(q) - start_rep;
-    needlen += replen * i;
+    if (PRIV(ckd_smul)(&d, replen, i))
+      {
+      fprintf(outfile, "** Expanded content too large\n");
+      return PR_OK;
+      }
+    needlen += d;
 
     if (needlen >= dbuffer_size)
       {
