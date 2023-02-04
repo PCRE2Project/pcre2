@@ -612,12 +612,11 @@ Setting compilation options
 <P>
 The following modifiers set options for <b>pcre2_compile()</b>. Most of them set
 bits in the options argument of that function, but those whose names start with
-PCRE2_EXTRA are additional options that are set in the compile context. For the
-main options, there are some single-letter abbreviations that are the same as
-Perl options. There is special handling for /x: if a second x is present,
-PCRE2_EXTENDED is converted into PCRE2_EXTENDED_MORE as in Perl. A third
-appearance adds PCRE2_EXTENDED as well, though this makes no difference to the
-way <b>pcre2_compile()</b> behaves. See
+PCRE2_EXTRA are additional options that are set in the compile context.
+Some of these options have single-letter abbreviations. There is special
+handling for /x: if a second x is present, PCRE2_EXTENDED is converted into
+PCRE2_EXTENDED_MORE as in Perl. A third appearance adds PCRE2_EXTENDED as well,
+though this makes no difference to the way <b>pcre2_compile()</b> behaves. See
 <a href="pcre2api.html"><b>pcre2api</b></a>
 for a description of the effects of these options.
 <pre>
@@ -628,9 +627,15 @@ for a description of the effects of these options.
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
       alt_verbnames             set PCRE2_ALT_VERBNAMES
       anchored                  set PCRE2_ANCHORED
+  /a  ascii_all                 set all ASCII options
+      ascii_bsd                 set PCRE2_EXTRA_ASCII_BSD
+      ascii_bss                 set PCRE2_EXTRA_ASCII_BSS
+      ascii_bsw                 set PCRE2_EXTRA_ASCII_BSW
+      ascii_posix               set PCRE2_EXTRA_ASCII_POSIX
       auto_callout              set PCRE2_AUTO_CALLOUT
       bad_escape_is_literal     set PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
   /i  caseless                  set PCRE2_CASELESS
+  /r  caseless_restrict         set PCRE2_EXTRA_CASELESS_RESTRICT
       dollar_endonly            set PCRE2_DOLLAR_ENDONLY
   /s  dotall                    set PCRE2_DOTALL
       dupnames                  set PCRE2_DUPNAMES
@@ -2165,7 +2170,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 January 2023
+Last updated: 04 February 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

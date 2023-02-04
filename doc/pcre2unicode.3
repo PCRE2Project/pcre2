@@ -1,4 +1,4 @@
-.TH PCRE2UNICODE 3 "20 January 2023" "PCRE2 10.43"
+.TH PCRE2UNICODE 3 "04 February 2023" "PCRE2 10.43"
 .SH NAME
 PCRE - Perl-compatible regular expressions (revised API)
 .SH "UNICODE AND UTF SUPPORT"
@@ -107,8 +107,8 @@ and \eB, because they are defined in terms of \ew and \eW. If you want
 to test for a wider sense of, say, "digit", you can use explicit Unicode
 property tests such as \ep{Nd}. Alternatively, if you set the PCRE2_UCP option,
 the way that the character escapes work is changed so that Unicode properties
-are used to determine which characters match. There are more details in the
-section on
+are used to determine which characters match, though there are some options
+that suppress this for individual escapes. For details see the section on
 .\" HTML <a href="pcre2pattern.html#genericchartypes">
 .\" </a>
 generic character types
@@ -119,12 +119,13 @@ in the
 .\"
 documentation.
 .P
-Similarly, characters that match the POSIX named character classes are all
-low-valued characters, unless the PCRE2_UCP option is set.
+Like the escapes, characters that match the POSIX named character classes are
+all low-valued characters unless the PCRE2_UCP option is set, but there is an
+option to override this.
 .P
-However, the special horizontal and vertical white space matching escapes (\eh,
-\eH, \ev, and \eV) do match all the appropriate Unicode characters, whether or
-not PCRE2_UCP is set.
+In contrast to the character escapes and character classes, the special
+horizontal and vertical white space escapes (\eh, \eH, \ev, and \eV) do match
+all the appropriate Unicode characters, whether or not PCRE2_UCP is set.
 .
 .
 .SH "UNICODE CASE-EQUIVALENCE"
@@ -137,6 +138,13 @@ lookup is used for speed. A few Unicode characters such as Greek sigma have
 more than two code points that are case-equivalent, and these are treated
 specially. Setting PCRE2_UCP without PCRE2_UTF allows Unicode-style case
 processing for non-UTF character encodings such as UCS-2.
+.P
+There are two ASCII characters (S and K) that, in addition to their ASCII lower
+case equivalents, have a non-ASCII one as well (long S and Kelvin sign).
+Recognition of these non-ASCII characters as case-equivalent to their ASCII
+counterparts can be disabled by setting the PCRE2_EXTRA_CASELESS_RESTRICT
+option. When this is set, all characters in a case equivalence must either be
+ASCII or non-ASCII; there can be no mixing.
 .
 .
 .\" HTML <a name="scriptruns"></a>
@@ -470,6 +478,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 January 2023
+Last updated: 04 February 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

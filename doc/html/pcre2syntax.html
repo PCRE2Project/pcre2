@@ -136,7 +136,8 @@ or in the 16-bit and 32-bit libraries. However, if locale-specific matching is
 happening, \s and \w may also match characters with code points in the range
 128-255. If the PCRE2_UCP option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
-characters.
+characters, but there are some option settings that can restrict individual
+sequences to matching only ASCII characters.
 </P>
 <P>
 Property descriptions in \p and \P are matched caselessly; hyphens,
@@ -373,16 +374,22 @@ both cases, a name must not start with a digit.
 Changes of these options within a group are automatically cancelled at the end
 of the group.
 <pre>
+  (?a)            all ASCII options
+  (?aD)           restrict \d to ASCII, even in UCP mode
+  (?aS)           restrict \s to ASCII, even in UCP mode
+  (?aW)           restrict \w to ASCII, even in UCP mode
+  (?aP)           restrict POSIX classes to ASCII even in UCP mode
   (?i)            caseless
   (?J)            allow duplicate named groups
   (?m)            multiline
   (?n)            no auto capture
+  (?r)            restrict caseless to either ASCII or non-ASCII
   (?s)            single line (dotall)
   (?U)            default ungreedy (lazy)
   (?x)            extended: ignore white space except in classes
   (?xx)           as (?x) but also ignore space and tab in classes
   (?-...)         unset option(s)
-  (?^)            unset imnsx options
+  (?^)            unset imnrsx options
 </pre>
 Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
@@ -592,9 +599,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 January 2022
+Last updated: 04 February 2023
 <br>
-Copyright &copy; 1997-2022 University of Cambridge.
+Copyright &copy; 1997-2023 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

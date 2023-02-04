@@ -116,6 +116,9 @@ such as \d and \w to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 256 via a lookup
 table. If also causes upper/lower casing operations to use Unicode properties
 for characters with code points greater than 127, even when UTF is not set.
+These behaviours can be changed within the pattern; see the section entitled
+<a href="#internaloptions">"Internal Option Setting"</a>
+below.
 </P>
 <P>
 Some applications that allow their users to supply patterns may wish to
@@ -293,7 +296,9 @@ caseless matching is specified (the PCRE2_CASELESS option or (?i) within the
 pattern), letters are matched independently of case. Note that there are two
 ASCII characters, K and S, that, in addition to their lower case ASCII
 equivalents, are case-equivalent with Unicode U+212A (Kelvin sign) and U+017F
-(long S) respectively when either PCRE2_UTF or PCRE2_UCP is set.
+(long S) respectively when either PCRE2_UTF or PCRE2_UCP is set, unless the
+PCRE2_EXTRA_CASELESS_RESTRICT option is in force (either passed to
+<b>pcre2_compile()</b> or set by (?r) within the pattern).
 </P>
 <P>
 The power of regular expressions comes from the ability to include wild cards,
@@ -680,6 +685,13 @@ matches only decimal digits, whereas \w matches any Unicode digit, as well as
 any Unicode letter, and underscore. Note also that PCRE2_UCP affects \b, and
 \B because they are defined in terms of \w and \W. Matching these sequences
 is noticeably slower when PCRE2_UCP is set.
+</P>
+<P>
+The effect of PCRE2_UCP on any one of these escape sequences can be negated by
+the options PCRE2_EXTRA_ASCII_BSD, PCRE2_EXTRA_ASCII_BSS, and
+PCRE2_EXTRA_ASCII_BSW, respectively. These options can be set and reset within
+a pattern by means of an internal option setting
+<a href="#internaloptions">(see below).</a>
 </P>
 <P>
 The sequences \h, \H, \v, and \V, in contrast to the other sequences, which
@@ -1506,9 +1518,9 @@ supported, and an error is given if they are encountered.
 By default, characters with values greater than 127 do not match any of the
 POSIX character classes, although this may be different for characters in the
 range 128-255 when locale-specific matching is happening. However, if the
-PCRE2_UCP option is passed to <b>pcre2_compile()</b>, some of the classes are
-changed so that Unicode character properties are used. This is achieved by
-replacing certain POSIX classes with other sequences, as follows:
+PCRE2_UCP option is set, some of the classes are changed so that Unicode
+character properties are used. This is achieved by replacing certain POSIX
+classes with other sequences, as follows:
 <pre>
   [:alnum:]  becomes  \p{Xan}
   [:alpha:]  becomes  \p{L}
@@ -1547,8 +1559,10 @@ plus those characters with code points less than 256 that have the S (Symbol)
 property.
 </P>
 <P>
-The other POSIX classes are unchanged, and match only characters with code
-points less than 256.
+The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
+with code points less than 256. The effect of PCRE2_UCP on POSIX classes can be
+negated by setting the PCRE2_EXTRA_ASCII_POSIX option, either when calling
+<b>pcre2_compile()</b> or internally within the pattern.
 </P>
 <br><a name="SEC11" href="#TOC1">COMPATIBILITY FEATURE FOR WORD BOUNDARIES</a><br>
 <P>
@@ -1586,10 +1600,9 @@ alternative in the group.
 <a name="internaloptions"></a></P>
 <br><a name="SEC13" href="#TOC1">INTERNAL OPTION SETTING</a><br>
 <P>
-The settings of the PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL,
-PCRE2_EXTENDED, PCRE2_EXTENDED_MORE, and PCRE2_NO_AUTO_CAPTURE options can be
-changed from within the pattern by a sequence of letters enclosed between "(?"
-and ")". These options are Perl-compatible, and are described in detail in the
+The settings of several options can be changed within a pattern by a sequence
+of letters enclosed between "(?" and ")". The following are Perl-compatible,
+and are described in detail in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation. The option letters are:
 <pre>
@@ -1614,27 +1627,38 @@ setting "(?)" is allowed. Needless to say, it has no effect.
 </P>
 <P>
 If the first character following (? is a circumflex, it causes all of the above
-options to be unset. Thus, (?^) is equivalent to (?-imnsx). Letters may follow
-the circumflex to cause some options to be re-instated, but a hyphen may not
-appear.
+options to be unset. Letters may follow the circumflex to cause some options to
+be re-instated, but a hyphen may not appear.
 </P>
 <P>
-The PCRE2-specific options PCRE2_DUPNAMES and PCRE2_UNGREEDY can be changed in
-the same way as the Perl-compatible options by using the characters J and U
-respectively. However, these are not unset by (?^).
+Some PCRE2-specific options can be changed by the same mechanism using these
+pairs or individual letters:
+<pre>
+  aD for PCRE2_EXTRA_ASCII_BSD
+  aS for PCRE2_EXTRA_ASCII_BSS
+  aW for PCRE2_EXTRA_ASCII_BSW
+  aP for PCRE2_EXTRA_ASCII_POSIX
+  r  for PCRE2_EXTRA_CASELESS_RESTRICT
+  J  for PCRE2_DUPNAMES
+  U  for PCRE2_UNGREEDY
+</pre>
+However, except for 'r', these are not unset by (?^), which is equivalent to
+(?-imnrsx). If 'a' is not followed by any of the upper case letters shown
+above, it sets (or unsets) all the ASCII options.
 </P>
 <P>
-When one of these option changes occurs at top level (that is, not inside
-group parentheses), the change applies to the remainder of the pattern
-that follows. An option change within a group (see below for a description
-of groups) affects only that part of the group that follows it, so
+When one of these option changes occurs at top level (that is, not inside group
+parentheses), the change applies until a subsequent change, or the end of the
+pattern. An option change within a group (see below for a description of
+groups) affects only that part of the group that follows it. At the end of the
+group these options are reset to the state they were before the group. For
+example,
 <pre>
   (a(?i)b)c
 </pre>
-matches abc and aBc and no other strings (assuming PCRE2_CASELESS is not used).
-By this means, options can be made to have different settings in different
-parts of the pattern. Any changes made in one alternative do carry on
-into subsequent branches within the same group. For example,
+matches abc and aBc and no other strings (assuming PCRE2_CASELESS is not set
+externally). Any changes made in one alternative do carry on into subsequent
+branches within the same group. For example,
 <pre>
   (a(?i)b|c)
 </pre>
@@ -1663,7 +1687,7 @@ Details are given in the section entitled
 above. There are also the (*UTF) and (*UCP) leading sequences that can be used
 to set UTF and Unicode property modes; they are equivalent to setting the
 PCRE2_UTF and PCRE2_UCP options, respectively. However, the application can set
-the PCRE2_NEVER_UTF and PCRE2_NEVER_UCP options, which lock out the use of the
+the PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, which lock out the use of the
 (*UTF) and (*UCP) sequences.
 <a name="group"></a></P>
 <br><a name="SEC14" href="#TOC1">GROUPS</a><br>
@@ -3766,9 +3790,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 January 2022
+Last updated: 04 February 2023
 <br>
-Copyright &copy; 1997-2022 University of Cambridge.
+Copyright &copy; 1997-2023 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

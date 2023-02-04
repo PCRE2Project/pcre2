@@ -1540,11 +1540,14 @@ PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
 U+007F. Note that there are two ASCII characters, K and S, that, in addition to
 their lower case ASCII equivalents, are case-equivalent with U+212A (Kelvin
-sign) and U+017F (long S) respectively. For lower valued characters with only
-one other case, a lookup table is used for speed. When neither PCRE2_UTF nor
-PCRE2_UCP is set, a lookup table is used for all code points less than 256, and
-higher code points (available only in 16-bit or 32-bit mode) are treated as not
-having another case.
+sign) and U+017F (long S) respectively. If you do not want this case 
+equivalence, you can suppress it by setting PCRE2_EXTRA_CASELESS_RESTRICT.
+</P>
+<P>
+For lower valued characters with only one other case, a lookup table is used
+for speed. When neither PCRE2_UTF nor PCRE2_UCP is set, a lookup table is used
+for all code points less than 256, and higher code points (available only in
+16-bit or 32-bit mode) are treated as not having another case.
 <pre>
   PCRE2_DOLLAR_ENDONLY
 </pre>
@@ -1884,20 +1887,22 @@ are not representable in UTF-16.
 This option has two effects. Firstly, it change the way PCRE2 processes \B,
 \b, \D, \d, \S, \s, \W, \w, and some of the POSIX character classes. By
 default, only ASCII characters are recognized, but if PCRE2_UCP is set, Unicode
-properties are used instead to classify characters. More details are given in
-the section on
+properties are used to classify characters. There are some PCRE2_EXTRA 
+options (see below) that add finer control to this behaviour. More details are
+given in the section on
 <a href="pcre2pattern.html#genericchartypes">generic character types</a>
 in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-page. If you set PCRE2_UCP, matching one of the items it affects takes much
-longer.
+page.
 </P>
 <P>
 The second effect of PCRE2_UCP is to force the use of Unicode properties for
-upper/lower casing operations on characters with code points greater than 127,
-even when PCRE2_UTF is not set. This makes it possible, for example, to process
-strings in the 16-bit UCS-2 code. This option is available only if PCRE2 has
-been compiled with Unicode support (which is the default).
+upper/lower casing operations, even when PCRE2_UTF is not set. This makes it
+possible to process strings in the 16-bit UCS-2 code. This option is available
+only if PCRE2 has been compiled with Unicode support (which is the default).
+The PCRE2_EXTRA_CASELESS_RESTRICT option (see below) restricts caseless
+matching such that ASCII characters match only ASCII characters and non-ASCII
+characters match only non-ASCII characters.
 <pre>
   PCRE2_UNGREEDY
 </pre>
@@ -1925,8 +1930,7 @@ Unicode support (which is the default). If Unicode support is not available,
 the use of this option provokes an error. Details of how PCRE2_UTF changes the
 behaviour of PCRE2 are given in the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
-page. In particular, note that it changes the way PCRE2_CASELESS handles
-characters with code points greater than 127.
+page. In particular, note that it changes the way PCRE2_CASELESS works.
 <a name="extracompileoptions"></a></P>
 <br><b>
 Extra compile options
@@ -1974,6 +1978,29 @@ defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of
 PCRE2_ALT_BSUX, but in addition it recognizes \u{hhh..} as a hexadecimal
 character code, where hhh.. is any number of hexadecimal digits.
 <pre>
+  PCRE2_EXTRA_ASCII_BSD
+</pre>
+This option forces \d to match only ASCII digits, even when PCRE2_UCP is set.
+It can be changed within a pattern by means of the (?aD) option setting.
+<pre>
+  PCRE2_EXTRA_ASCII_BSS
+</pre>
+This option forces \s to match only ASCII space characters, even when
+PCRE2_UCP is set. It can be changed within a pattern by means of the (?aS)
+option setting.
+<pre>
+  PCRE2_EXTRA_ASCII_BSW
+</pre>
+This option forces \w to match only ASCII word characters, even when PCRE2_UCP
+is set. It can be changed within a pattern by means of the (?aW) option
+setting.
+<pre>
+  PCRE2_EXTRA_ASCII_POSIX
+</pre>
+This option forces the POSIX character classes to match only ASCII characters,
+even when PCRE2_UCP is set. It can be changed within a pattern by means of the
+(?aP) option setting.
+<pre>
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 </pre>
 This is a dangerous option. Use with care. By default, an unrecognized escape
@@ -1994,6 +2021,17 @@ that a sequence such as [\N{] is interpreted as a malformed attempt at
 [\N{...}] and so is treated as [N{] whereas [\N] gives an error because an
 unqualified \N is a valid escape sequence but is not supported in a character
 class. To reiterate: this is a dangerous option. Use with great care.
+<pre>
+  PCRE2_EXTRA_CASELESS_RESTRICT
+</pre>
+When either PCRE2_UCP or PCRE2_UTF is set, caseless matching follows Unicode
+rules, which allow for more than two cases per character. There are two
+case-equivalent character sets that contain both ASCII and non-ASCII
+characters. The ASCII letter S is case-equivalent to U+017f (long S) and the
+ASCII letter K is case-equivalent to U+212a (Kelvin sign). This option disables
+recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a 
+caseless match, both characters must either be ASCII or non-ASCII. The option 
+can be changed with a pattern by the (?r) option setting.
 <pre>
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 </pre>
@@ -2081,7 +2119,8 @@ PCRE2_UCP option can be set when a pattern is compiled; this causes \w and
 friends to use Unicode property support instead of the built-in tables.
 PCRE2_UCP also causes upper/lower casing operations on characters with code
 points greater than 127 to use Unicode properties. These effects apply even
-when PCRE2_UTF is not set.
+when PCRE2_UTF is not set. There are, however, some PCRE2_EXTRA options (see
+above) that can be used to modify or suppress them.
 </P>
 <P>
 The use of locales with Unicode is discouraged. If you are handling characters
@@ -4077,7 +4116,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 January 2023
+Last updated: 03 February 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

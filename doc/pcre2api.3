@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "21 January 2023" "PCRE2 10.43"
+.TH PCRE2API 3 "03 February 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1482,11 +1482,13 @@ PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
 U+007F. Note that there are two ASCII characters, K and S, that, in addition to
 their lower case ASCII equivalents, are case-equivalent with U+212A (Kelvin
-sign) and U+017F (long S) respectively. For lower valued characters with only
-one other case, a lookup table is used for speed. When neither PCRE2_UTF nor
-PCRE2_UCP is set, a lookup table is used for all code points less than 256, and
-higher code points (available only in 16-bit or 32-bit mode) are treated as not
-having another case.
+sign) and U+017F (long S) respectively. If you do not want this case 
+equivalence, you can suppress it by setting PCRE2_EXTRA_CASELESS_RESTRICT.
+.P
+For lower valued characters with only one other case, a lookup table is used
+for speed. When neither PCRE2_UTF nor PCRE2_UCP is set, a lookup table is used
+for all code points less than 256, and higher code points (available only in
+16-bit or 32-bit mode) are treated as not having another case.
 .sp
   PCRE2_DOLLAR_ENDONLY
 .sp
@@ -1836,8 +1838,9 @@ are not representable in UTF-16.
 This option has two effects. Firstly, it change the way PCRE2 processes \eB,
 \eb, \eD, \ed, \eS, \es, \eW, \ew, and some of the POSIX character classes. By
 default, only ASCII characters are recognized, but if PCRE2_UCP is set, Unicode
-properties are used instead to classify characters. More details are given in
-the section on
+properties are used to classify characters. There are some PCRE2_EXTRA 
+options (see below) that add finer control to this behaviour. More details are
+given in the section on
 .\" HTML <a href="pcre2pattern.html#genericchartypes">
 .\" </a>
 generic character types
@@ -1846,14 +1849,15 @@ in the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
-page. If you set PCRE2_UCP, matching one of the items it affects takes much
-longer.
+page.
 .P
 The second effect of PCRE2_UCP is to force the use of Unicode properties for
-upper/lower casing operations on characters with code points greater than 127,
-even when PCRE2_UTF is not set. This makes it possible, for example, to process
-strings in the 16-bit UCS-2 code. This option is available only if PCRE2 has
-been compiled with Unicode support (which is the default).
+upper/lower casing operations, even when PCRE2_UTF is not set. This makes it
+possible to process strings in the 16-bit UCS-2 code. This option is available
+only if PCRE2 has been compiled with Unicode support (which is the default).
+The PCRE2_EXTRA_CASELESS_RESTRICT option (see below) restricts caseless
+matching such that ASCII characters match only ASCII characters and non-ASCII
+characters match only non-ASCII characters.
 .sp
   PCRE2_UNGREEDY
 .sp
@@ -1886,8 +1890,7 @@ behaviour of PCRE2 are given in the
 .\" HREF
 \fBpcre2unicode\fP
 .\"
-page. In particular, note that it changes the way PCRE2_CASELESS handles
-characters with code points greater than 127.
+page. In particular, note that it changes the way PCRE2_CASELESS works.
 .
 .
 .\" HTML <a name="extracompileoptions"></a>
@@ -1934,6 +1937,29 @@ defined by ECMAscript 6; setting PCRE2_EXTRA_ALT_BSUX has the effect of
 PCRE2_ALT_BSUX, but in addition it recognizes \eu{hhh..} as a hexadecimal
 character code, where hhh.. is any number of hexadecimal digits.
 .sp
+  PCRE2_EXTRA_ASCII_BSD
+.sp
+This option forces \ed to match only ASCII digits, even when PCRE2_UCP is set.
+It can be changed within a pattern by means of the (?aD) option setting.
+.sp
+  PCRE2_EXTRA_ASCII_BSS
+.sp
+This option forces \es to match only ASCII space characters, even when
+PCRE2_UCP is set. It can be changed within a pattern by means of the (?aS)
+option setting.
+.sp
+  PCRE2_EXTRA_ASCII_BSW
+.sp
+This option forces \ew to match only ASCII word characters, even when PCRE2_UCP
+is set. It can be changed within a pattern by means of the (?aW) option
+setting.
+.sp
+  PCRE2_EXTRA_ASCII_POSIX
+.sp
+This option forces the POSIX character classes to match only ASCII characters,
+even when PCRE2_UCP is set. It can be changed within a pattern by means of the
+(?aP) option setting.
+.sp
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 .sp
 This is a dangerous option. Use with care. By default, an unrecognized escape
@@ -1953,6 +1979,17 @@ that a sequence such as [\eN{] is interpreted as a malformed attempt at
 [\eN{...}] and so is treated as [N{] whereas [\eN] gives an error because an
 unqualified \eN is a valid escape sequence but is not supported in a character
 class. To reiterate: this is a dangerous option. Use with great care.
+.sp
+  PCRE2_EXTRA_CASELESS_RESTRICT
+.sp
+When either PCRE2_UCP or PCRE2_UTF is set, caseless matching follows Unicode
+rules, which allow for more than two cases per character. There are two
+case-equivalent character sets that contain both ASCII and non-ASCII
+characters. The ASCII letter S is case-equivalent to U+017f (long S) and the
+ASCII letter K is case-equivalent to U+212a (Kelvin sign). This option disables
+recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a 
+caseless match, both characters must either be ASCII or non-ASCII. The option 
+can be changed with a pattern by the (?r) option setting.
 .sp
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 .sp
@@ -2042,7 +2079,8 @@ PCRE2_UCP option can be set when a pattern is compiled; this causes \ew and
 friends to use Unicode property support instead of the built-in tables.
 PCRE2_UCP also causes upper/lower casing operations on characters with code
 points greater than 127 to use Unicode properties. These effects apply even
-when PCRE2_UTF is not set.
+when PCRE2_UTF is not set. There are, however, some PCRE2_EXTRA options (see
+above) that can be used to modify or suppress them.
 .P
 The use of locales with Unicode is discouraged. If you are handling characters
 with code points greater than 127, you should either use Unicode support, or
@@ -4087,6 +4125,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 January 2023
+Last updated: 03 February 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

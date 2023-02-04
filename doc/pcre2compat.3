@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "08 December 2021" "PCRE2 10.40"
+.TH PCRE2COMPAT 3 "03 February 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -194,11 +194,7 @@ the pattern.
 extension to the lookaround facilities. The default, Perl-compatible
 lookarounds are atomic.
 .P
-19. The Perl /a modifier restricts /d numbers to pure ascii, and the /aa
-modifier restricts /i case-insensitive matching to pure ascii, ignoring Unicode
-rules. This separation cannot be represented with PCRE2_UCP.
-.P
-20. Perl has different limits than PCRE2. See the
+19. Perl has different limits than PCRE2. See the
 .\" HREF
 \fBpcre2limit\fP
 .\"
@@ -222,6 +218,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 December 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 03 February 2023
+Copyright (c) 1997-2023 University of Cambridge.
 .fi

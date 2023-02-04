@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "12 January 2022" "PCRE2 10.40"
+.TH PCRE2SYNTAX 3 "04 February 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -101,7 +101,8 @@ or in the 16-bit and 32-bit libraries. However, if locale-specific matching is
 happening, \es and \ew may also match characters with code points in the range
 128-255. If the PCRE2_UCP option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
-characters.
+characters, but there are some option settings that can restrict individual
+sequences to matching only ASCII characters.
 .P
 Property descriptions in \ep and \eP are matched caselessly; hyphens,
 underscores, and white space are ignored, in accordance with Unicode's "loose
@@ -346,16 +347,22 @@ both cases, a name must not start with a digit.
 Changes of these options within a group are automatically cancelled at the end
 of the group.
 .sp
+  (?a)            all ASCII options
+  (?aD)           restrict \ed to ASCII, even in UCP mode
+  (?aS)           restrict \es to ASCII, even in UCP mode
+  (?aW)           restrict \ew to ASCII, even in UCP mode
+  (?aP)           restrict POSIX classes to ASCII even in UCP mode
   (?i)            caseless
   (?J)            allow duplicate named groups
   (?m)            multiline
   (?n)            no auto capture
+  (?r)            restrict caseless to either ASCII or non-ASCII
   (?s)            single line (dotall)
   (?U)            default ungreedy (lazy)
   (?x)            extended: ignore white space except in classes
   (?xx)           as (?x) but also ignore space and tab in classes
   (?-...)         unset option(s)
-  (?^)            unset imnsx options
+  (?^)            unset imnrsx options
 .sp
 Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
@@ -578,6 +585,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 January 2022
-Copyright (c) 1997-2022 University of Cambridge.
+Last updated: 04 February 2023
+Copyright (c) 1997-2023 University of Cambridge.
 .fi
