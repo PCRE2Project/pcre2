@@ -1,7 +1,7 @@
 Change Log for PCRE2
 --------------------
 
-Before the move to GitHub, this was the only record of changes to PCRE2. Now 
+Before the move to GitHub, this was the only record of changes to PCRE2. Now
 there is often more detail in the pull requests.
 
 
@@ -19,32 +19,41 @@ fixing an oversight that would have made such a test fail before.
 
 3. Added pcre2_get_match_data_heapframes_size() and related pcre2test flags
 to allow for finer control of the heap used when pcre2_match() without JIT is
-used and the match_data might be reused. This began as PR #191, but has had 
+used and the match_data might be reused. This began as PR #191, but has had
 further refinement and documentation edits.
 
 4. Applied PR #181, which tidies some casts in pcre2_valid_utf.c.
 
-5. Applied PR #184, which avoids overflow issues with the heap limit (introduced 
+5. Applied PR #184, which avoids overflow issues with the heap limit (introduced
 in 10.41/9.
 
-6. Applied PR #192, which changes the timing units for pcre2test from 
+6. Applied PR #192, which changes the timing units for pcre2test from
 milliseconds to microseconds. This is more useful for modern CPUs.
 
-7. Applied PR #193, which makes the requirement for C99 explicit in 
+7. Applied PR #193, which makes the requirement for C99 explicit in
 configure.ac and CMakeLists.txt.
 
-8. Fixed a bug in pcre2test when a ridiculously large string repeat required a 
+8. Fixed a bug in pcre2test when a ridiculously large string repeat required a
 stupid amount of memory. It now gives a clean realloc() failure error.
 
 9. Updates to restrict the interaction between ASCII and non-ASCII characters
 for caseless matching and items like \d:
 
-   (a) Added PCRE2_EXTRA_CASELESS_RESTRICT to lock out mixing of ASCII and 
-       non-ASCII when matching caselessly. This is also /r in pcre2test and 
+   (a) Added PCRE2_EXTRA_CASELESS_RESTRICT to lock out mixing of ASCII and
+       non-ASCII when matching caselessly. This is also /r in pcre2test and
        (?r) within patterns.
-       
-   (b) Added PCRE2_EXTRA_ASCII_{BSD,BSS,BSW,POSIX} and corresponding (?aD) etc 
+
+   (b) Added PCRE2_EXTRA_ASCII_{BSD,BSS,BSW,POSIX} and corresponding (?aD) etc
        in patterns and /a in pcre2test.
+
+   (c) Corresponding updates to pcre2test.
+
+10. Unicode has been updated to 15.0.0.
+
+11. The Python scripts and ucptest.c in maint have been updated (a) a minor
+change needed for 9(a) above; (b) fix bugs in ucptest,
+
+12. Integer overflow testing is now centralized in a new function.
 
 
 Version 10.42 11-December-2022
