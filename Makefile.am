@@ -443,7 +443,6 @@ CLEANFILES += src/pcre2_chartables.c
 EXTRA_DIST += \
   src/sljit/sljitConfig.h \
   src/sljit/sljitConfigInternal.h \
-  src/sljit/sljitExecAllocator.c \
   src/sljit/sljitLir.c \
   src/sljit/sljitLir.h \
   src/sljit/sljitNativeARM_32.c \
@@ -462,9 +461,16 @@ EXTRA_DIST += \
   src/sljit/sljitNativeX86_32.c \
   src/sljit/sljitNativeX86_64.c \
   src/sljit/sljitNativeX86_common.c \
-  src/sljit/sljitProtExecAllocator.c \
   src/sljit/sljitUtils.c \
-  src/sljit/sljitWXExecAllocator.c
+  src/sljit/allocator_src/sljitExecAllocatorApple.c \
+  src/sljit/allocator_src/sljitExecAllocatorCore.c \
+  src/sljit/allocator_src/sljitExecAllocatorFreeBSD.c \
+  src/sljit/allocator_src/sljitExecAllocatorPosix.c \
+  src/sljit/allocator_src/sljitExecAllocatorWindows.c \
+  src/sljit/allocator_src/sljitProtExecAllocatorNetBSD.c \
+  src/sljit/allocator_src/sljitProtExecAllocatorPosix.c \
+  src/sljit/allocator_src/sljitWXExecAllocatorPosix.c \
+  src/sljit/allocator_src/sljitWXExecAllocatorWindows.c
 
 # Some of the JIT sources are also in separate files that are #included.
 
