@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2015-2022 University of Cambridge
+          New API code Copyright (c) 2015-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -6060,6 +6060,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
+    case OP_NOT_UCP_WORD_BOUNDARY:
+    case OP_UCP_WORD_BOUNDARY:
     if (Feptr == mb->check_subject) prev_is_word = FALSE; else
       {
       PCRE2_SPTR lastptr = Feptr - 1;
@@ -6074,7 +6076,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       fc = *lastptr;
       if (lastptr < mb->start_used_ptr) mb->start_used_ptr = lastptr;
 #ifdef SUPPORT_UNICODE
-      if ((mb->poptions & PCRE2_UCP) != 0)
+      if (Fop == OP_UCP_WORD_BOUNDARY || Fop == OP_NOT_UCP_WORD_BOUNDARY)
         {
         if (fc == '_') prev_is_word = TRUE; else
           {
@@ -6108,7 +6110,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       fc = *Feptr;
       if (nextptr > mb->last_used_ptr) mb->last_used_ptr = nextptr;
 #ifdef SUPPORT_UNICODE
-      if ((mb->poptions & PCRE2_UCP) != 0)
+      if (Fop == OP_UCP_WORD_BOUNDARY || Fop == OP_NOT_UCP_WORD_BOUNDARY)
         {
         if (fc == '_') cur_is_word = TRUE; else
           {
@@ -6123,7 +6125,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     /* Now see if the situation is what we want */
 
-    if ((*Fecode++ == OP_WORD_BOUNDARY)?
+    if ((*Fecode++ == OP_WORD_BOUNDARY || Fop == OP_UCP_WORD_BOUNDARY)?
          cur_is_word == prev_is_word : cur_is_word != prev_is_word)
       RRETURN(MATCH_NOMATCH);
     break;
@@ -6853,7 +6855,7 @@ if (heapframes_size / 1024 > mb->heap_limit)
   if (max_size < frame_size) return PCRE2_ERROR_HEAPLIMIT;
   heapframes_size = max_size;
   }
-  
+
 /* If an existing frame vector in the match_data block is large enough, we can
 use it. Otherwise, free any pre-existing vector and get a new one. */
 

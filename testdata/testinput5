@@ -2411,6 +2411,21 @@
 \= Expect no match     
     \x{660}\x{c0}\x{c0}
     
+# WORD BOUNDARY
+
+/\bABC\b/utf
+    \x{c0}ABC\x{d0}
+
+/\bABC\b/utf,ucp
+\= Expect no match
+    \x{c0}ABC\x{d0}
+
+/\bABC\b/utf,ucp,ascii_bsw
+    \x{c0}ABC\x{d0}\=no_jit
+
+/\bABC\b/utf,ucp,ascii_all
+    \x{c0}ABC\x{d0}\=no_jit
+    
 # POSIX 
 
 /[[:digit:]]+/utf,ucp

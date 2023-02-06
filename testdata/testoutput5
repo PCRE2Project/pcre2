@@ -4016,7 +4016,7 @@ MK: a\x{12345}b\x{09}(d)c
 /(*UCP)(*UTF)[[:>:]]X/B
 ------------------------------------------------------------------
         Bra
-        \b
+        \b (ucp)
         Assert back
         Reverse
         prop Xwd
@@ -5333,6 +5333,25 @@ No match
 \= Expect no match     
     \x{660}\x{c0}\x{c0}
 No match
+    
+# WORD BOUNDARY
+
+/\bABC\b/utf
+    \x{c0}ABC\x{d0}
+ 0: ABC
+
+/\bABC\b/utf,ucp
+\= Expect no match
+    \x{c0}ABC\x{d0}
+No match
+
+/\bABC\b/utf,ucp,ascii_bsw
+    \x{c0}ABC\x{d0}\=no_jit
+ 0: ABC
+
+/\bABC\b/utf,ucp,ascii_all
+    \x{c0}ABC\x{d0}\=no_jit
+ 0: ABC
     
 # POSIX 
 

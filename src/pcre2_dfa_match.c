@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -187,7 +187,8 @@ static const uint8_t coptable[] = {
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
-  0, 0, 0                        /* CLOSE, SKIPZERO, DEFINE                */
+  0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
+  0, 0                           /* \B and \b in UCP mode                  */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -264,7 +265,8 @@ static const uint8_t poptable[] = {
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
-  0, 0, 0                        /* CLOSE, SKIPZERO, DEFINE                */
+  0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
+  1, 1                           /* \B and \b in UCP mode                  */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
@@ -1100,6 +1102,8 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_WORD_BOUNDARY:
       case OP_NOT_WORD_BOUNDARY:
+      case OP_NOT_UCP_WORD_BOUNDARY:
+      case OP_UCP_WORD_BOUNDARY:
         {
         int left_word, right_word;
 
@@ -1112,7 +1116,8 @@ for (;;)
 #endif
           GETCHARTEST(d, temp);
 #ifdef SUPPORT_UNICODE
-          if ((mb->poptions & PCRE2_UCP) != 0)
+          if (codevalue == OP_UCP_WORD_BOUNDARY ||
+              codevalue == OP_NOT_UCP_WORD_BOUNDARY)
             {
             if (d == '_') left_word = TRUE; else
               {
@@ -1137,7 +1142,8 @@ for (;;)
             mb->last_used_ptr = temp;
             }
 #ifdef SUPPORT_UNICODE
-          if ((mb->poptions & PCRE2_UCP) != 0)
+          if (codevalue == OP_UCP_WORD_BOUNDARY ||
+              codevalue == OP_NOT_UCP_WORD_BOUNDARY)
             {
             if (c == '_') right_word = TRUE; else
               {
@@ -1151,7 +1157,9 @@ for (;;)
           }
         else right_word = FALSE;
 
-        if ((left_word == right_word) == (codevalue == OP_NOT_WORD_BOUNDARY))
+        if ((left_word == right_word) ==
+            (codevalue == OP_NOT_WORD_BOUNDARY ||
+             codevalue == OP_NOT_UCP_WORD_BOUNDARY))
           { ADD_ACTIVE(state_offset + 1, 0); }
         }
       break;

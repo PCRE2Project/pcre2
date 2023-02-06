@@ -4950,6 +4950,8 @@ for (;;)
 
     case OP_WORD_BOUNDARY:
     case OP_NOT_WORD_BOUNDARY:
+    case OP_UCP_WORD_BOUNDARY:
+    case OP_NOT_UCP_WORD_BOUNDARY:
     if (!skipassert) return code;
     /* Fall through */
 
@@ -8032,23 +8034,41 @@ for (;; pptr++)
 
     /* For the rest (including \X when Unicode is supported - if not it's
     faulted at parse time), the OP value is the escape value when PCRE2_UCP is
-    not set; if it is set, these escapes do not show up here because they are
-    converted into Unicode property tests in parse_regex(). Note that \b and \B
-    do a one-character lookbehind, and \A also behaves as if it does. */
+    not set; if it is set, most of them do not show up here because they are
+    converted into Unicode property tests in parse_regex().
 
-    if (meta_arg == ESC_C) cb->external_flags |= PCRE2_HASBKC; /* Record */
-    if ((meta_arg == ESC_b || meta_arg == ESC_B || meta_arg == ESC_A) &&
-         cb->max_lookbehind == 0)
-      cb->max_lookbehind = 1;
+    In non-UTF mode, and for both 32-bit modes, we turn \C into OP_ALLANY
+    instead of OP_ANYBYTE so that it works in DFA mode and in lookbehinds.
+    There are special UCP codes for \B and \b which are used in UCP mode unless
+    "word" matching is being forced to ASCII.
 
-    /* In non-UTF mode, and for both 32-bit modes, we turn \C into OP_ALLANY
-    instead of OP_ANYBYTE so that it works in DFA mode and in lookbehinds. */
+    Note that \b and \B do a one-character lookbehind, and \A also behaves as
+    if it does. */
 
+    switch(meta_arg)
+      {
+      case ESC_C:
+      cb->external_flags |= PCRE2_HASBKC;  /* Record */
 #if PCRE2_CODE_UNIT_WIDTH == 32
-    *code++ = (meta_arg == ESC_C)? OP_ALLANY : meta_arg;
+      meta_arg = OP_ALLANY;
 #else
-    *code++ = (!utf && meta_arg == ESC_C)? OP_ALLANY : meta_arg;
+      if (!utf) meta_arg = OP_ALLANY;
 #endif
+      break;
+
+      case ESC_B:
+      case ESC_b:
+      if ((options & PCRE2_UCP) != 0 && (xoptions & PCRE2_EXTRA_ASCII_BSW) == 0)
+        meta_arg = (meta_arg == ESC_B)? OP_NOT_UCP_WORD_BOUNDARY :
+          OP_UCP_WORD_BOUNDARY;
+      /* Fall through */
+
+      case ESC_A:
+      if (cb->max_lookbehind == 0) cb->max_lookbehind = 1;
+      break;
+      }
+
+    *code++ = meta_arg;
     break;  /* End META_ESCAPE */
 
 

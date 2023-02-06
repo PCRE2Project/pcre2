@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1372,8 +1372,8 @@ enum {
   OP_SOD,            /* 1 Start of data: \A */
   OP_SOM,            /* 2 Start of match (subject + offset): \G */
   OP_SET_SOM,        /* 3 Set start of match (\K) */
-  OP_NOT_WORD_BOUNDARY,  /*  4 \B */
-  OP_WORD_BOUNDARY,      /*  5 \b */
+  OP_NOT_WORD_BOUNDARY,  /*  4 \B -- see also OP_NOT_UCP_WORD_BOUNDARY */
+  OP_WORD_BOUNDARY,      /*  5 \b -- see also OP_UCP_WORD_BOUNDARY */
   OP_NOT_DIGIT,          /*  6 \D */
   OP_DIGIT,              /*  7 \d */
   OP_NOT_WHITESPACE,     /*  8 \S */
@@ -1620,6 +1620,12 @@ enum {
 
   OP_DEFINE,         /* 167 */
 
+  /* These opcodes replace their normal counterparts in UCP mode when
+  PCRE2_EXTRA_ASCII_BSW is not set. */
+
+  OP_NOT_UCP_WORD_BOUNDARY, /* 168 */
+  OP_UCP_WORD_BOUNDARY,     /* 169 */
+
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
   some in the past. */
@@ -1679,7 +1685,7 @@ some cases doesn't actually use these names at all). */
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
-  "Close", "Skip zero", "Define"
+  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1775,7 +1781,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 3,                          /* COMMIT, COMMIT_ARG                     */ \
   1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
-  1                              /* DEFINE                                 */
+  1,                             /* DEFINE                                 */ \
+  1, 1                           /* \B and \b in UCP mode                  */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 
