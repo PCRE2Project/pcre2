@@ -164,7 +164,7 @@ set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
 
 CHECK_C_SOURCE_COMPILES(
-  "#include <sys/types.h>
+  "#include <stddef.h>
    int main() { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
   HAVE_BUILTIN_MUL_OVERFLOW
 )
