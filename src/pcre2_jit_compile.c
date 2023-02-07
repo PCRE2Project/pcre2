@@ -474,6 +474,7 @@ typedef struct compiler_common {
   jump_list *stackalloc;
   jump_list *revertframes;
   jump_list *wordboundary;
+  jump_list *ucp_wordboundary;
   jump_list *anynewline;
   jump_list *hspace;
   jump_list *vspace;
@@ -963,6 +964,8 @@ switch(*cc)
   case OP_ASSERT_ACCEPT:
   case OP_CLOSE:
   case OP_SKIPZERO:
+  case OP_NOT_UCP_WORD_BOUNDARY:
+  case OP_UCP_WORD_BOUNDARY:
   return cc + PRIV(OP_lengths)[*cc];
 
   case OP_CHAR:
@@ -1282,6 +1285,8 @@ do
       case OP_CIRCM:
       case OP_DOLL:
       case OP_DOLLM:
+      case OP_NOT_UCP_WORD_BOUNDARY:
+      case OP_UCP_WORD_BOUNDARY:
       /* Zero width assertions. */
       cc++;
       continue;
@@ -2105,6 +2110,9 @@ while (cc < ccend)
 
     case OP_CALLOUT:
     case OP_CALLOUT_STR:
+
+    case OP_NOT_UCP_WORD_BOUNDARY:
+    case OP_UCP_WORD_BOUNDARY:
 
     cc = next_opcode(common, cc);
     SLJIT_ASSERT(cc != NULL);
@@ -5486,6 +5494,8 @@ while (TRUE)
     case OP_CIRCM:
     case OP_DOLL:
     case OP_DOLLM:
+    case OP_NOT_UCP_WORD_BOUNDARY:
+    case OP_UCP_WORD_BOUNDARY:
     /* Zero width assertions. */
     cc++;
     continue;
@@ -6615,7 +6625,7 @@ else
 JUMPTO(SLJIT_JUMP, mainloop);
 }
 
-static void check_wordboundary(compiler_common *common)
+static void check_wordboundary(compiler_common *common, BOOL ucp)
 {
 DEFINE_COMPILER;
 struct sljit_jump *skipread;
@@ -6629,6 +6639,7 @@ jump_list *invalid_utf2 = NULL;
 struct sljit_jump *jump;
 #endif /* PCRE2_CODE_UNIT_WIDTH != 8 || SUPPORT_UNICODE */
 
+SLJIT_UNUSED_ARG(ucp);
 SLJIT_COMPILE_ASSERT(ctype_word == 0x10, ctype_word_must_be_16);
 
 sljit_emit_op_dst(compiler, SLJIT_FAST_ENTER, SLJIT_MEM1(SLJIT_SP), LOCALS0);
@@ -6668,7 +6679,7 @@ else
 
 /* Testing char type. */
 #ifdef SUPPORT_UNICODE
-if (common->ucp)
+if (ucp)
   {
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 1);
   jump = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_UNDERSCORE);
@@ -6714,7 +6725,7 @@ peek_char(common, READ_CHAR_MAX, SLJIT_MEM1(SLJIT_SP), LOCALS1, &invalid_utf2);
 
 valid_utf = LABEL();
 
-if (common->ucp)
+if (ucp)
   {
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 1);
   jump = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_UNDERSCORE);
@@ -8276,16 +8287,18 @@ switch(type)
 
   case OP_NOT_WORD_BOUNDARY:
   case OP_WORD_BOUNDARY:
-  add_jump(compiler, &common->wordboundary, JUMP(SLJIT_FAST_CALL));
+  case OP_NOT_UCP_WORD_BOUNDARY:
+  case OP_UCP_WORD_BOUNDARY:
+  add_jump(compiler, (type == OP_NOT_WORD_BOUNDARY || type == OP_WORD_BOUNDARY) ? &common->wordboundary : &common->ucp_wordboundary, JUMP(SLJIT_FAST_CALL));
 #ifdef SUPPORT_UNICODE
   if (common->invalid_utf)
     {
-    add_jump(compiler, backtracks, CMP((type == OP_NOT_WORD_BOUNDARY) ? SLJIT_NOT_EQUAL : SLJIT_SIG_LESS_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+    add_jump(compiler, backtracks, CMP((type == OP_NOT_WORD_BOUNDARY || type == OP_NOT_UCP_WORD_BOUNDARY) ? SLJIT_NOT_EQUAL : SLJIT_SIG_LESS_EQUAL, TMP2, 0, SLJIT_IMM, 0));
     return cc;
     }
 #endif /* SUPPORT_UNICODE */
   sljit_set_current_flags(compiler, SLJIT_SET_Z);
-  add_jump(compiler, backtracks, JUMP(type == OP_NOT_WORD_BOUNDARY ? SLJIT_NOT_ZERO : SLJIT_ZERO));
+  add_jump(compiler, backtracks, JUMP((type == OP_NOT_WORD_BOUNDARY || type == OP_NOT_UCP_WORD_BOUNDARY) ? SLJIT_NOT_ZERO : SLJIT_ZERO));
   return cc;
 
   case OP_EODN:
@@ -9841,6 +9854,8 @@ while (TRUE)
     case OP_DOLLM:
     case OP_CALLOUT:
     case OP_ALT:
+    case OP_NOT_UCP_WORD_BOUNDARY:
+    case OP_UCP_WORD_BOUNDARY:
     cc += PRIV(OP_lengths)[*cc];
     break;
 
@@ -12116,6 +12131,8 @@ while (cc < ccend)
     case OP_CIRC:
     case OP_CIRCM:
     case OP_REVERSE:
+    case OP_NOT_UCP_WORD_BOUNDARY:
+    case OP_UCP_WORD_BOUNDARY:
     cc = compile_simple_assertion_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
 
@@ -14225,7 +14242,12 @@ if (common->revertframes != NULL)
 if (common->wordboundary != NULL)
   {
   set_jumps(common->wordboundary, LABEL());
-  check_wordboundary(common);
+  check_wordboundary(common, FALSE);
+  }
+if (common->ucp_wordboundary != NULL)
+  {
+  set_jumps(common->ucp_wordboundary, LABEL());
+  check_wordboundary(common, TRUE);
   }
 if (common->anynewline != NULL)
   {

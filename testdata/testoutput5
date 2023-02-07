@@ -5346,11 +5346,11 @@ No match
 No match
 
 /\bABC\b/utf,ucp,ascii_bsw
-    \x{c0}ABC\x{d0}\=no_jit
+    \x{c0}ABC\x{d0}
  0: ABC
 
 /\bABC\b/utf,ucp,ascii_all
-    \x{c0}ABC\x{d0}\=no_jit
+    \x{c0}ABC\x{d0}
  0: ABC
     
 # POSIX 
