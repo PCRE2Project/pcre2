@@ -286,6 +286,15 @@ OPTIONS
        --depth-limit=number
                  See --match-limit below.
 
+       -E, --case-restrict
+                 When case distinctions are being ignored in Unicode mode, two
+                 ASCII letters (K and S) will by default match Unicode charac-
+                 ters  U+212A  (Kelvin sign) and U+017F (long S) respectively,
+                 as well as their lower case ASCII counterparts. When this op-
+                 tion  is  set,  case equivalences are restricted such that no
+                 ASCII character  matches  a  non-ASCII  character,  and  vice
+                 versa.
+
        -e pattern, --regex=pattern, --regexp=pattern
                  Specify a pattern to be matched. This option can be used mul-
                  tiple times in order to specify several patterns. It can also
@@ -421,7 +430,9 @@ OPTIONS
                  files=without-match.
 
        -i, --ignore-case
-                 Ignore upper/lower case distinctions during comparisons.
+                 Ignore upper/lower case distinctions when  pattern  matching.
+                 This applies when matching path names for inclusion or exclu-
+                 sion as well as when matching lines in files.
 
        --include=pattern
                  If any --include patterns are specified, the only files  that
@@ -736,6 +747,19 @@ OPTIONS
                  The default is an empty string. Separating strings are  never
                  coloured.
 
+       -P, --no-ucp
+                 Starting  from release 10.43, when UTF/Unicode mode is speci-
+                 fied with -u or -U, the PCRE2_UCP option is used by  default.
+                 This  means  that  the simple class escapes in patterns match
+                 more than just ASCII characters. For example, \d matches  any
+                 Unicode   decimal   digit.  The  --no-ucp  option  suppresses
+                 PCRE2_UCP, thus restricting the class escapes to ASCII  char-
+                 acters,  as was the case in earlier releases. Note that there
+                 are now more fine-grained  option  settings  within  patterns
+                 that  affect  individual escapes. For example, when PCRE2_UCP
+                 is set, the sequence (?aD)  restricts  \d  to  ASCII  digits,
+                 while allowing \w to match Unicode letters and digits.
+
        -q, --quiet
                  Work quietly, that is, display nothing except error messages.
                  The exit status indicates whether or  not  any  matches  were
@@ -771,57 +795,58 @@ OPTIONS
                  (list files without matches), because the grand  total  would
                  always be zero.
 
-       -u, --utf Operate in UTF-8 mode. This option is available only if PCRE2
-                 has been compiled with UTF-8 support. All patterns (including
-                 those  for any --exclude and --include options) and all lines
-                 that are scanned must be valid strings of  UTF-8  characters.
-                 If an invalid UTF-8 string is encountered, an error occurs.
+       -u, --utf Operate in UTF/Unicode mode. This option is available only if
+                 PCRE2 has been compiled with UTF-8 support. All patterns (in-
+                 cluding  those  for  any --exclude and --include options) and
+                 all lines that are scanned must be  valid  strings  of  UTF-8
+                 characters. If an invalid UTF-8 string is encountered, an er-
+                 ror occurs.
 
        -U, --utf-allow-invalid
-                 As  --utf,  but in addition subject lines may contain invalid
-                 UTF-8 code unit sequences. These can never form part  of  any
-                 pattern  match.  Patterns  themselves, however, must still be
+                 As --utf, but in addition subject lines may  contain  invalid
+                 UTF-8  code  unit sequences. These can never form part of any
+                 pattern match. Patterns themselves, however,  must  still  be
                  valid UTF-8 strings. This facility allows valid UTF-8 strings
                  to be sought within arbitrary byte sequences in executable or
-                 other binary files. For more details about matching  in  non-
+                 other  binary  files. For more details about matching in non-
                  valid UTF-8 strings, see the pcre2unicode(3) documentation.
 
        -V, --version
-                 Write  the version numbers of pcre2grep and the PCRE2 library
-                 to the standard output and then exit. Anything  else  on  the
+                 Write the version numbers of pcre2grep and the PCRE2  library
+                 to  the  standard  output and then exit. Anything else on the
                  command line is ignored.
 
        -v, --invert-match
-                 Invert  the  sense  of  the match, so that lines which do not
-                 match any of the patterns are the ones that are  found.  When
-                 this  option  is  set,  options  such  as --only-matching and
-                 --output, which specify parts of a match that are to be  out-
+                 Invert the sense of the match, so that  lines  which  do  not
+                 match  any  of the patterns are the ones that are found. When
+                 this option is  set,  options  such  as  --only-matching  and
+                 --output,  which specify parts of a match that are to be out-
                  put, are ignored.
 
        -w, --word-regex, --word-regexp
                  Force the patterns only to match "words". That is, there must
-                 be a word boundary at the  start  and  end  of  each  matched
-                 string.  This is equivalent to having "\b(?:" at the start of
-                 each pattern, and ")\b" at the end. This option applies  only
-                 to  the  patterns  that  are  matched against the contents of
-                 files; it does not apply to patterns specified by any of  the
+                 be  a  word  boundary  at  the  start and end of each matched
+                 string. This is equivalent to having "\b(?:" at the start  of
+                 each  pattern, and ")\b" at the end. This option applies only
+                 to the patterns that are  matched  against  the  contents  of
+                 files;  it does not apply to patterns specified by any of the
                  --include or --exclude options.
 
        -x, --line-regex, --line-regexp
-                 Force  the  patterns to start matching only at the beginnings
-                 of lines, and in  addition,  require  them  to  match  entire
+                 Force the patterns to start matching only at  the  beginnings
+                 of  lines,  and  in  addition,  require  them to match entire
                  lines. In multiline mode the match may be more than one line.
                  This is equivalent to having "^(?:" at the start of each pat-
-                 tern  and  ")$"  at  the end. This option applies only to the
-                 patterns that are matched against the contents of  files;  it
-                 does  not apply to patterns specified by any of the --include
+                 tern and ")$" at the end. This option  applies  only  to  the
+                 patterns  that  are matched against the contents of files; it
+                 does not apply to patterns specified by any of the  --include
                  or --exclude options.
 
        -Z, --null
-                 Terminate files names in the regular output with a zero  byte
-                 (the  NUL  character)  instead of what would normally appear.
-                 This is useful when file  names  contain  unusual  characters
-                 such  as  colons,  hyphens, or even newlines. The option does
+                 Terminate  files names in the regular output with a zero byte
+                 (the NUL character) instead of what  would  normally  appear.
+                 This  is  useful  when  file names contain unusual characters
+                 such as colons, hyphens, or even newlines.  The  option  does
                  not apply to file names in error messages.
 
 
@@ -835,137 +860,139 @@ ENVIRONMENT VARIABLES
 
 NEWLINES
 
-       The  -N  (--newline) option allows pcre2grep to scan files with newline
-       conventions that differ from the default. This option affects only  the
-       way  scanned files are processed. It does not affect the interpretation
-       of files specified by the -f,  --file-list,  --exclude-from,  or  --in-
+       The -N (--newline) option allows pcre2grep to scan files  with  newline
+       conventions  that differ from the default. This option affects only the
+       way scanned files are processed. It does not affect the  interpretation
+       of  files  specified  by  the -f, --file-list, --exclude-from, or --in-
        clude-from options.
 
-       Any  parts  of the scanned input files that are written to the standard
-       output are copied with whatever newline sequences they have in the  in-
-       put.  However,  if  the final line of a file is output, and it does not
-       end with a newline sequence, a newline sequence is added. If  the  new-
-       line  setting  is  CR, LF, CRLF or NUL, that line ending is output; for
+       Any parts of the scanned input files that are written to  the  standard
+       output  are copied with whatever newline sequences they have in the in-
+       put. However, if the final line of a file is output, and  it  does  not
+       end  with  a newline sequence, a newline sequence is added. If the new-
+       line setting is CR, LF, CRLF or NUL, that line ending  is  output;  for
        the other settings (ANYCRLF or ANY) a single NL is used.
 
-       The newline setting does not affect the way in which  pcre2grep  writes
-       newlines  in  informational  messages  to the standard output and error
-       streams.  Under Windows, the standard output is set to  be  binary,  so
-       that  "\r\n" at the ends of output lines that are copied from the input
-       is not converted to "\r\r\n" by the C I/O library. This means that  any
-       messages  written  to the standard output must end with "\r\n". For all
-       other operating systems, and for all messages  to  the  standard  error
+       The  newline  setting does not affect the way in which pcre2grep writes
+       newlines in informational messages to the  standard  output  and  error
+       streams.   Under  Windows,  the standard output is set to be binary, so
+       that "\r\n" at the ends of output lines that are copied from the  input
+       is  not converted to "\r\r\n" by the C I/O library. This means that any
+       messages written to the standard output must end with "\r\n".  For  all
+       other  operating  systems,  and  for all messages to the standard error
        stream, "\n" is used.
 
 
-OPTIONS COMPATIBILITY
+OPTIONS COMPATIBILITY WITH GNU GREP
 
        Many of the short and long forms of pcre2grep's options are the same as
-       in the GNU grep program. Any long option of the form --xxx-regexp  (GNU
-       terminology) is also available as --xxx-regex (PCRE2 terminology). How-
-       ever, the  --depth-limit,  --file-list,  --file-offsets,  --heap-limit,
-       --include-dir,  --line-offsets,  --locale,  --match-limit, -M, --multi-
-       line, -N, --newline,  --om-separator,  --output,  -u,  --utf,  -U,  and
-       --utf-allow-invalid options are specific to pcre2grep, as is the use of
-       the --only-matching option with a capturing parentheses number.
+       in  the GNU grep program. Any long option of the form --xxx-regexp (GNU
+       terminology) is also  available  as  --xxx-regex  (PCRE2  terminology).
+       However,  the  --case-restrict, --depth-limit, -E, --file-list, --file-
+       offsets,   --heap-limit,   --include-dir,   --line-offsets,   --locale,
+       --match-limit,  -M,  --multiline, -N, --newline, --no-ucp, --om-separa-
+       tor, --output, -P, -u, --utf, -U, and --utf-allow-invalid  options  are
+       specific to pcre2grep, as is the use of the --only-matching option with
+       a capturing parentheses number.
 
        Although most of the common options work the same way, a few  are  dif-
        ferent  in pcre2grep. For example, the --include option's argument is a
-       glob for GNU grep, but a regular expression for pcre2grep. If both  the
-       -c  and  -l  options are given, GNU grep lists only file names, without
-       counts, but pcre2grep gives the counts as well.
+       glob for GNU grep, but in pcre2grep it is a regular expression to which
+       the  \i  option  applies.  If both the -c and -l options are given, GNU
+       grep lists only file names, without counts,  but  pcre2grep  gives  the
+       counts as well.
 
 
 OPTIONS WITH DATA
 
        There are four different ways in which an option with data can be spec-
-       ified.   If  a  short  form option is used, the data may follow immedi-
+       ified.  If a short form option is used, the  data  may  follow  immedi-
        ately, or (with one exception) in the next command line item. For exam-
        ple:
 
          -f/some/file
          -f /some/file
 
-       The  exception is the -o option, which may appear with or without data.
-       Because of this, if data is present, it must follow immediately in  the
+       The exception is the -o option, which may appear with or without  data.
+       Because  of this, if data is present, it must follow immediately in the
        same item, for example -o3.
 
-       If  a long form option is used, the data may appear in the same command
-       line item, separated by an equals character, or (with  two  exceptions)
+       If a long form option is used, the data may appear in the same  command
+       line  item,  separated by an equals character, or (with two exceptions)
        it may appear in the next command line item. For example:
 
          --file=/some/file
          --file /some/file
 
-       Note,  however, that if you want to supply a file name beginning with ~
-       as data in a shell command, and have the shell expand ~ to a  home  di-
-       rectory,  you  must separate the file name from the option, because the
+       Note, however, that if you want to supply a file name beginning with  ~
+       as  data  in a shell command, and have the shell expand ~ to a home di-
+       rectory, you must separate the file name from the option,  because  the
        shell does not treat ~ specially unless it is at the start of an item.
 
-       The exceptions to the above are the --colour (or --color)  and  --only-
-       matching  options,  for which the data is optional. If one of these op-
-       tions does have data, it must be given in  the  first  form,  using  an
+       The  exceptions  to the above are the --colour (or --color) and --only-
+       matching options, for which the data is optional. If one of  these  op-
+       tions  does  have  data,  it  must be given in the first form, using an
        equals character. Otherwise pcre2grep will assume that it has no data.
 
 
 USING PCRE2'S CALLOUT FACILITY
 
-       pcre2grep  has,  by  default,  support for calling external programs or
-       scripts or echoing specific strings during matching by  making  use  of
-       PCRE2's  callout  facility.  However, this support can be completely or
-       partially disabled when pcre2grep is built. You can  find  out  whether
-       your  binary has support for callouts by running it with the --help op-
-       tion. If callout support is completely disabled, all callouts  in  pat-
+       pcre2grep has, by default, support for  calling  external  programs  or
+       scripts  or  echoing  specific strings during matching by making use of
+       PCRE2's callout facility. However, this support can  be  completely  or
+       partially  disabled  when  pcre2grep is built. You can find out whether
+       your binary has support for callouts by running it with the --help  op-
+       tion.  If  callout support is completely disabled, all callouts in pat-
        terns are ignored by pcre2grep.  If the facility is partially disabled,
-       calling external programs is not supported, and callouts  that  request
+       calling  external  programs is not supported, and callouts that request
        it are ignored.
 
-       A  callout  in a PCRE2 pattern is of the form (?C<arg>) where the argu-
-       ment is either a number or a quoted string (see the pcre2callout  docu-
-       mentation  for  details).  Numbered  callouts are ignored by pcre2grep;
+       A callout in a PCRE2 pattern is of the form (?C<arg>) where  the  argu-
+       ment  is either a number or a quoted string (see the pcre2callout docu-
+       mentation for details). Numbered callouts  are  ignored  by  pcre2grep;
        only callouts with string arguments are useful.
 
    Echoing a specific string
 
-       Starting the callout string with a pipe character  invokes  an  echoing
+       Starting  the  callout  string with a pipe character invokes an echoing
        facility that avoids calling an external program or script. This facil-
-       ity is always available, provided that  callouts  were  not  completely
-       disabled  when  pcre2grep  was built. The rest of the callout string is
-       processed as a zero-terminated string, which means it should  not  con-
-       tain  any  internal  binary  zeros. It is written to the output, having
-       first been passed through the same escape processing as text  from  the
-       --output  (-O) option (see above). However, $0 cannot be used to insert
-       a matched substring because the match is still  in  progress.  Instead,
-       the  single  character '0' is inserted. Any syntax errors in the string
-       (for example, a dollar not followed by another  character)  causes  the
-       callout  to be ignored. No terminator is added to the output string, so
-       if you want a newline, you must include it explicitly using the  escape
+       ity  is  always  available,  provided that callouts were not completely
+       disabled when pcre2grep was built. The rest of the  callout  string  is
+       processed  as  a zero-terminated string, which means it should not con-
+       tain any internal binary zeros. It is written  to  the  output,  having
+       first  been  passed through the same escape processing as text from the
+       --output (-O) option (see above). However, $0 cannot be used to  insert
+       a  matched  substring  because the match is still in progress. Instead,
+       the single character '0' is inserted. Any syntax errors in  the  string
+       (for  example,  a  dollar not followed by another character) causes the
+       callout to be ignored. No terminator is added to the output string,  so
+       if  you want a newline, you must include it explicitly using the escape
        $n. For example:
 
          pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' <some file>
 
-       Matching  continues normally after the string is output. If you want to
-       see only the callout output but not any output from  an  actual  match,
+       Matching continues normally after the string is output. If you want  to
+       see  only  the  callout output but not any output from an actual match,
        you should end the pattern with (*FAIL).
 
    Calling external programs or scripts
 
        This facility can be independently disabled when pcre2grep is built. It
-       is supported for Windows, where a call to _spawnvp() is used, for  VMS,
-       where  lib$spawn()  is  used,  and  for any Unix-like environment where
+       is  supported for Windows, where a call to _spawnvp() is used, for VMS,
+       where lib$spawn() is used, and  for  any  Unix-like  environment  where
        fork() and execv() are available.
 
        If the callout string does not start with a pipe (vertical bar) charac-
-       ter,  it  is parsed into a list of substrings separated by pipe charac-
-       ters. The first substring must be an executable name, with the  follow-
+       ter, it is parsed into a list of substrings separated by  pipe  charac-
+       ters.  The first substring must be an executable name, with the follow-
        ing substrings specifying arguments:
 
          executable_name|arg1|arg2|...
 
-       Any  substring  (including  the executable name) may contain escape se-
-       quences started by a dollar character. These are the same  as  for  the
+       Any substring (including the executable name) may  contain  escape  se-
+       quences  started  by  a dollar character. These are the same as for the
        --output (-O) option documented above, except that $0 cannot insert the
-       matched string because the match is still  in  progress.  Instead,  the
+       matched  string  because  the  match is still in progress. Instead, the
        character '0' is inserted. If you need a literal dollar or pipe charac-
        ter in any substring, use $$ or $| respectively. Here is an example:
 
@@ -980,43 +1007,43 @@ USING PCRE2'S CALLOUT FACILITY
            Arg1: [1] [234] [4] Arg2: |1| ()
            12345
 
-       The parameters for the system call that is used to run the  program  or
+       The  parameters  for the system call that is used to run the program or
        script are zero-terminated strings. This means that binary zero charac-
-       ters in the callout argument will cause premature termination of  their
-       substrings,  and  therefore should not be present. Any syntax errors in
-       the string (for example, a dollar not followed  by  another  character)
+       ters  in the callout argument will cause premature termination of their
+       substrings, and therefore should not be present. Any syntax  errors  in
+       the  string  (for  example, a dollar not followed by another character)
        causes the callout to be ignored.  If running the program fails for any
-       reason (including the non-existence of the executable), a local  match-
+       reason  (including the non-existence of the executable), a local match-
        ing failure occurs and the matcher backtracks in the normal way.
 
 
 MATCHING ERRORS
 
-       It  is  possible  to supply a regular expression that takes a very long
-       time to fail to match certain lines.  Such  patterns  normally  involve
-       nested  indefinite repeats, for example: (a+)*\d when matched against a
-       line of a's with no final digit. The PCRE2 matching function has a  re-
-       source  limit  that  causes it to abort in these circumstances. If this
-       happens, pcre2grep outputs an error message and the  line  that  caused
-       the  problem  to  the  standard error stream. If there are more than 20
+       It is possible to supply a regular expression that takes  a  very  long
+       time  to  fail  to  match certain lines. Such patterns normally involve
+       nested indefinite repeats, for example: (a+)*\d when matched against  a
+       line  of a's with no final digit. The PCRE2 matching function has a re-
+       source limit that causes it to abort in these  circumstances.  If  this
+       happens,  pcre2grep  outputs  an error message and the line that caused
+       the problem to the standard error stream. If there  are  more  than  20
        such errors, pcre2grep gives up.
 
-       The --match-limit option of pcre2grep can be used to  set  the  overall
-       resource  limit.  There are also other limits that affect the amount of
-       memory used during matching; see the  discussion  of  --heap-limit  and
+       The  --match-limit  option  of pcre2grep can be used to set the overall
+       resource limit. There are also other limits that affect the  amount  of
+       memory  used  during  matching;  see the discussion of --heap-limit and
        --depth-limit above.
 
 
 DIAGNOSTICS
 
        Exit status is 0 if any matches were found, 1 if no matches were found,
-       and 2 for syntax errors, overlong lines, non-existent  or  inaccessible
-       files  (even if matches were found in other files) or too many matching
+       and  2  for syntax errors, overlong lines, non-existent or inaccessible
+       files (even if matches were found in other files) or too many  matching
        errors. Using the -s option to suppress error messages about inaccessi-
        ble files does not affect the return code.
 
-       When   run  under  VMS,  the  return  code  is  placed  in  the  symbol
-       PCRE2GREP_RC because VMS  does  not  distinguish  between  exit(0)  and
+       When  run  under  VMS,  the  return  code  is  placed  in  the   symbol
+       PCRE2GREP_RC  because  VMS  does  not  distinguish  between exit(0) and
        exit(1).
 
 
@@ -1034,5 +1061,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 November 2022
-       Copyright (c) 1997-2022 University of Cambridge.
+       Last updated: 08 February 2023
+       Copyright (c) 1997-2023 University of Cambridge.

@@ -55,6 +55,9 @@ change needed for 9(a) above; (b) fix bugs in ucptest,
 
 12. Integer overflow testing is now centralized in a new function.
 
+13. Made PCRE2_UCP the default in UTF mode in pcre2grep, and added new options 
+--case-restrict and --no-ucp.
+
 
 Version 10.42 11-December-2022
 ------------------------------

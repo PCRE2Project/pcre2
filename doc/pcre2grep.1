@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "21 November 2022" "PCRE2 10.41"
+.TH PCRE2GREP 1 "08 February 2023" "PCRE2 10.43"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -268,6 +268,13 @@ end-of-file; in others it may provoke an error.
 \fB--depth-limit\fP=\fInumber\fP
 See \fB--match-limit\fP below.
 .TP
+\fB-E\fP, \fB--case-restrict\fP
+When case distinctions are being ignored in Unicode mode, two ASCII letters (K
+and S) will by default match Unicode characters U+212A (Kelvin sign) and U+017F
+(long S) respectively, as well as their lower case ASCII counterparts. When
+this option is set, case equivalences are restricted such that no ASCII
+character matches a non-ASCII character, and vice versa.
+.TP
 \fB-e\fP \fIpattern\fP, \fB--regex=\fP\fIpattern\fP, \fB--regexp=\fP\fIpattern\fP
 Specify a pattern to be matched. This option can be used multiple times in
 order to specify several patterns. It can also be used as a way of specifying a
@@ -388,7 +395,9 @@ Ignore binary files. This is equivalent to
 \fB--binary-files\fP=\fIwithout-match\fP.
 .TP
 \fB-i\fP, \fB--ignore-case\fP
-Ignore upper/lower case distinctions during comparisons.
+Ignore upper/lower case distinctions when pattern matching. This applies when
+matching path names for inclusion or exclusion as well as when matching lines
+in files.
 .TP
 \fB--include\fP=\fIpattern\fP
 If any \fB--include\fP patterns are specified, the only files that are
@@ -660,6 +669,17 @@ default is 50.
 Specify a separating string for multiple occurrences of \fB-o\fP. The default
 is an empty string. Separating strings are never coloured.
 .TP
+\fB-P\fP, \fB--no-ucp\fP
+Starting from release 10.43, when UTF/Unicode mode is specified with \fB-u\fP
+or \fB-U\fP, the PCRE2_UCP option is used by default. This means that the
+simple class escapes in patterns match more than just ASCII characters. For
+example, \ed matches any Unicode decimal digit. The \fB--no-ucp\fP option
+suppresses PCRE2_UCP, thus restricting the class escapes to ASCII characters,
+as was the case in earlier releases. Note that there are now more fine-grained
+option settings within patterns that affect individual escapes. For example,
+when PCRE2_UCP is set, the sequence (?aD) restricts \ed to ASCII digits, while
+allowing \ew to match Unicode letters and digits.
+.TP
 \fB-q\fP, \fB--quiet\fP
 Work quietly, that is, display nothing except error messages. The exit
 status indicates whether or not any matches were found.
@@ -692,11 +712,11 @@ ignored when used with \fB-L\fP (list files without matches), because the grand
 total would always be zero.
 .TP
 \fB-u\fP, \fB--utf\fP
-Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
-with UTF-8 support. All patterns (including those for any \fB--exclude\fP and
-\fB--include\fP options) and all lines that are scanned must be valid strings
-of UTF-8 characters. If an invalid UTF-8 string is encountered, an error
-occurs.
+Operate in UTF/Unicode mode. This option is available only if PCRE2 has been
+compiled with UTF-8 support. All patterns (including those for any
+\fB--exclude\fP and \fB--include\fP options) and all lines that are scanned
+must be valid strings of UTF-8 characters. If an invalid UTF-8 string is
+encountered, an error occurs.
 .TP
 \fB-U\fP, \fB--utf-allow-invalid\fP
 As \fB--utf\fP, but in addition subject lines may contain invalid UTF-8 code
@@ -778,25 +798,27 @@ standard output must end with "\er\en". For all other operating systems, and
 for all messages to the standard error stream, "\en" is used.
 .
 .
-.SH "OPTIONS COMPATIBILITY"
+.SH "OPTIONS COMPATIBILITY WITH GNU GREP"
 .rs
 .sp
-Many of the short and long forms of \fBpcre2grep\fP's options are the same
-as in the GNU \fBgrep\fP program. Any long option of the form
-\fB--xxx-regexp\fP (GNU terminology) is also available as \fB--xxx-regex\fP
-(PCRE2 terminology). However, the \fB--depth-limit\fP, \fB--file-list\fP,
-\fB--file-offsets\fP, \fB--heap-limit\fP, \fB--include-dir\fP,
-\fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP, \fB-M\fP,
-\fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--om-separator\fP,
-\fB--output\fP, \fB-u\fP, \fB--utf\fP, \fB-U\fP, and \fB--utf-allow-invalid\fP
-options are specific to \fBpcre2grep\fP, as is the use of the
-\fB--only-matching\fP option with a capturing parentheses number.
+Many of the short and long forms of \fBpcre2grep\fP's options are the same as
+in the GNU \fBgrep\fP program. Any long option of the form \fB--xxx-regexp\fP
+(GNU terminology) is also available as \fB--xxx-regex\fP (PCRE2 terminology).
+However, the \fB--case-restrict\fP, \fB--depth-limit\fP, \fB-E\fP,
+\fB--file-list\fP, \fB--file-offsets\fP, \fB--heap-limit\fP,
+\fB--include-dir\fP, \fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP,
+\fB-M\fP, \fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--no-ucp\fP,
+\fB--om-separator\fP, \fB--output\fP, \fB-P\fP, \fB-u\fP, \fB--utf\fP,
+\fB-U\fP, and \fB--utf-allow-invalid\fP options are specific to
+\fBpcre2grep\fP, as is the use of the \fB--only-matching\fP option with a
+capturing parentheses number.
 .P
 Although most of the common options work the same way, a few are different in
 \fBpcre2grep\fP. For example, the \fB--include\fP option's argument is a glob
-for GNU \fBgrep\fP, but a regular expression for \fBpcre2grep\fP. If both the
-\fB-c\fP and \fB-l\fP options are given, GNU grep lists only file names,
-without counts, but \fBpcre2grep\fP gives the counts as well.
+for GNU \fBgrep\fP, but in \fBpcre2grep\fP it is a regular expression to which
+the \ei option applies. If both the \fB-c\fP and \fB-l\fP options are given,
+GNU grep lists only file names, without counts, but \fBpcre2grep\fP gives the
+counts as well.
 .
 .
 .SH "OPTIONS WITH DATA"
@@ -970,6 +992,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 November 2022
-Copyright (c) 1997-2022 University of Cambridge.
+Last updated: 08 February 2023
+Copyright (c) 1997-2023 University of Cambridge.
 .fi

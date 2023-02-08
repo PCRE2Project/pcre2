@@ -854,8 +854,6 @@ echo "---------------------------- Test 151 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep --colour=always -e this -e The -e 'The wo' testdata/grepinputv) >>testtrygrep
 
 
-
-
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep
@@ -891,6 +889,14 @@ if [ $utf8 -ne 0 ] ; then
 
   echo "---------------------------- Test U6 -----------------------------" >>testtrygrep
   (cd $srcdir; $valgrind $vjs $pcre2grep -u -m1 -O '=$x{1d3}$o{744}=' 'fox') <$srcdir/testdata/grepinputv >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U7 ------------------------------" >>testtrygrep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -ui --colour=always 'k+|\babc\b' ./testdata/grepinput8) >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U8 ------------------------------" >>testtrygrep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -UiEP --colour=always 'k+|\babc\b' ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutput8 testtrygrep

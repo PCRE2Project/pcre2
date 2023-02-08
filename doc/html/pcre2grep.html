@@ -21,7 +21,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC6" href="#SEC6">OPTIONS</a>
 <li><a name="TOC7" href="#SEC7">ENVIRONMENT VARIABLES</a>
 <li><a name="TOC8" href="#SEC8">NEWLINES</a>
-<li><a name="TOC9" href="#SEC9">OPTIONS COMPATIBILITY</a>
+<li><a name="TOC9" href="#SEC9">OPTIONS COMPATIBILITY WITH GNU GREP</a>
 <li><a name="TOC10" href="#SEC10">OPTIONS WITH DATA</a>
 <li><a name="TOC11" href="#SEC11">USING PCRE2'S CALLOUT FACILITY</a>
 <li><a name="TOC12" href="#SEC12">MATCHING ERRORS</a>
@@ -314,6 +314,14 @@ end-of-file; in others it may provoke an error.
 See <b>--match-limit</b> below.
 </P>
 <P>
+<b>-E</b>, <b>--case-restrict</b>
+When case distinctions are being ignored in Unicode mode, two ASCII letters (K
+and S) will by default match Unicode characters U+212A (Kelvin sign) and U+017F
+(long S) respectively, as well as their lower case ASCII counterparts. When
+this option is set, case equivalences are restricted such that no ASCII
+character matches a non-ASCII character, and vice versa.
+</P>
+<P>
 <b>-e</b> <i>pattern</i>, <b>--regex=</b><i>pattern</i>, <b>--regexp=</b><i>pattern</i>
 Specify a pattern to be matched. This option can be used multiple times in
 order to specify several patterns. It can also be used as a way of specifying a
@@ -449,7 +457,9 @@ Ignore binary files. This is equivalent to
 </P>
 <P>
 <b>-i</b>, <b>--ignore-case</b>
-Ignore upper/lower case distinctions during comparisons.
+Ignore upper/lower case distinctions when pattern matching. This applies when
+matching path names for inclusion or exclusion as well as when matching lines
+in files.
 </P>
 <P>
 <b>--include</b>=<i>pattern</i>
@@ -759,6 +769,18 @@ Specify a separating string for multiple occurrences of <b>-o</b>. The default
 is an empty string. Separating strings are never coloured.
 </P>
 <P>
+<b>-P</b>, <b>--no-ucp</b>
+Starting from release 10.43, when UTF/Unicode mode is specified with <b>-u</b>
+or <b>-U</b>, the PCRE2_UCP option is used by default. This means that the
+simple class escapes in patterns match more than just ASCII characters. For
+example, \d matches any Unicode decimal digit. The <b>--no-ucp</b> option
+suppresses PCRE2_UCP, thus restricting the class escapes to ASCII characters,
+as was the case in earlier releases. Note that there are now more fine-grained
+option settings within patterns that affect individual escapes. For example,
+when PCRE2_UCP is set, the sequence (?aD) restricts \d to ASCII digits, while
+allowing \w to match Unicode letters and digits.
+</P>
+<P>
 <b>-q</b>, <b>--quiet</b>
 Work quietly, that is, display nothing except error messages. The exit
 status indicates whether or not any matches were found.
@@ -796,11 +818,11 @@ total would always be zero.
 </P>
 <P>
 <b>-u</b>, <b>--utf</b>
-Operate in UTF-8 mode. This option is available only if PCRE2 has been compiled
-with UTF-8 support. All patterns (including those for any <b>--exclude</b> and
-<b>--include</b> options) and all lines that are scanned must be valid strings
-of UTF-8 characters. If an invalid UTF-8 string is encountered, an error
-occurs.
+Operate in UTF/Unicode mode. This option is available only if PCRE2 has been
+compiled with UTF-8 support. All patterns (including those for any
+<b>--exclude</b> and <b>--include</b> options) and all lines that are scanned
+must be valid strings of UTF-8 characters. If an invalid UTF-8 string is
+encountered, an error occurs.
 </P>
 <P>
 <b>-U</b>, <b>--utf-allow-invalid</b>
@@ -883,25 +905,27 @@ ends of output lines that are copied from the input is not converted to
 standard output must end with "\r\n". For all other operating systems, and
 for all messages to the standard error stream, "\n" is used.
 </P>
-<br><a name="SEC9" href="#TOC1">OPTIONS COMPATIBILITY</a><br>
+<br><a name="SEC9" href="#TOC1">OPTIONS COMPATIBILITY WITH GNU GREP</a><br>
 <P>
-Many of the short and long forms of <b>pcre2grep</b>'s options are the same
-as in the GNU <b>grep</b> program. Any long option of the form
-<b>--xxx-regexp</b> (GNU terminology) is also available as <b>--xxx-regex</b>
-(PCRE2 terminology). However, the <b>--depth-limit</b>, <b>--file-list</b>,
-<b>--file-offsets</b>, <b>--heap-limit</b>, <b>--include-dir</b>,
-<b>--line-offsets</b>, <b>--locale</b>, <b>--match-limit</b>, <b>-M</b>,
-<b>--multiline</b>, <b>-N</b>, <b>--newline</b>, <b>--om-separator</b>,
-<b>--output</b>, <b>-u</b>, <b>--utf</b>, <b>-U</b>, and <b>--utf-allow-invalid</b>
-options are specific to <b>pcre2grep</b>, as is the use of the
-<b>--only-matching</b> option with a capturing parentheses number.
+Many of the short and long forms of <b>pcre2grep</b>'s options are the same as
+in the GNU <b>grep</b> program. Any long option of the form <b>--xxx-regexp</b>
+(GNU terminology) is also available as <b>--xxx-regex</b> (PCRE2 terminology).
+However, the <b>--case-restrict</b>, <b>--depth-limit</b>, <b>-E</b>,
+<b>--file-list</b>, <b>--file-offsets</b>, <b>--heap-limit</b>,
+<b>--include-dir</b>, <b>--line-offsets</b>, <b>--locale</b>, <b>--match-limit</b>,
+<b>-M</b>, <b>--multiline</b>, <b>-N</b>, <b>--newline</b>, <b>--no-ucp</b>,
+<b>--om-separator</b>, <b>--output</b>, <b>-P</b>, <b>-u</b>, <b>--utf</b>,
+<b>-U</b>, and <b>--utf-allow-invalid</b> options are specific to
+<b>pcre2grep</b>, as is the use of the <b>--only-matching</b> option with a
+capturing parentheses number.
 </P>
 <P>
 Although most of the common options work the same way, a few are different in
 <b>pcre2grep</b>. For example, the <b>--include</b> option's argument is a glob
-for GNU <b>grep</b>, but a regular expression for <b>pcre2grep</b>. If both the
-<b>-c</b> and <b>-l</b> options are given, GNU grep lists only file names,
-without counts, but <b>pcre2grep</b> gives the counts as well.
+for GNU <b>grep</b>, but in <b>pcre2grep</b> it is a regular expression to which
+the \i option applies. If both the <b>-c</b> and <b>-l</b> options are given,
+GNU grep lists only file names, without counts, but <b>pcre2grep</b> gives the
+counts as well.
 </P>
 <br><a name="SEC10" href="#TOC1">OPTIONS WITH DATA</a><br>
 <P>
@@ -1065,9 +1089,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 November 2022
+Last updated: 08 February 2023
 <br>
-Copyright &copy; 1997-2022 University of Cambridge.
+Copyright &copy; 1997-2023 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
