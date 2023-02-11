@@ -589,7 +589,7 @@ number. This option is forced if \fB--line-offsets\fP is used.
 If the PCRE2 library is built with support for just-in-time compiling (which
 speeds up matching), \fBpcre2grep\fP automatically makes use of this, unless it
 was explicitly disabled at build time. This option can be used to disable the
-use of JIT at run time. It is provided for testing and working round problems.
+use of JIT at run time. It is provided for testing and working around problems.
 It should never be needed in normal use.
 .TP
 \fB-O\fP \fItext\fP, \fB--output\fP=\fItext\fP
@@ -816,9 +816,9 @@ capturing parentheses number.
 Although most of the common options work the same way, a few are different in
 \fBpcre2grep\fP. For example, the \fB--include\fP option's argument is a glob
 for GNU \fBgrep\fP, but in \fBpcre2grep\fP it is a regular expression to which
-the \ei option applies. If both the \fB-c\fP and \fB-l\fP options are given,
-GNU grep lists only file names, without counts, but \fBpcre2grep\fP gives the
-counts as well.
+the \fB-i\fP option applies. If both the \fB-c\fP and \fB-l\fP options are
+given, GNU grep lists only file names, without counts, but \fBpcre2grep\fP
+gives the counts as well.
 .
 .
 .SH "OPTIONS WITH DATA"
