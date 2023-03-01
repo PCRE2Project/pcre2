@@ -9,7 +9,7 @@
 Capture group count = 0
 May match empty string
 Subject length lower bound = 0
-JIT compilation was not successful (no more memory)
+JIT compilation was not successful (pattern not supported by JIT)
 
 # The following pattern cannot be compiled by JIT.
 
@@ -17,7 +17,7 @@ JIT compilation was not successful (no more memory)
 Capture group count = 0
 May match empty string
 Subject length lower bound = 0
-JIT compilation was not successful (no more memory)
+JIT compilation was not successful (pattern not supported by JIT)
 
 # Check that an infinite recursion loop is caught.
 
