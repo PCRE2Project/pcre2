@@ -58,6 +58,11 @@ change needed for 9(a) above; (b) fix bugs in ucptest,
 13. Made PCRE2_UCP the default in UTF mode in pcre2grep, and added new options 
 --case-restrict and --no-ucp.
 
+14. In the debugging printint module (which is normally only linked into 
+pcre2test), avoid the use of a variable called "not" because that's deprecated 
+in C and forbidden in C++. Also rewrite some code to avoid a goto into a block 
+that bypassed its initialization (though it didn't actually matter).
+
 
 Version 10.42 11-December-2022
 ------------------------------
