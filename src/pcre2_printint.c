@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -309,9 +309,8 @@ if (code[1] != PT_CLIST)
   }
 else
   {
-  const char *not = (*code == OP_PROP)? "" : "not ";
   const uint32_t *p = PRIV(ucd_caseless_sets) + code[2];
-  fprintf (f, "%s%sclist", before, not);
+  fprintf (f, "%s%sclist", before, (*code == OP_PROP)? "" : "not ");
   while (*p < NOTACHAR) fprintf(f, " %04x", *p++);
   fprintf(f, "%s", after);
   }
@@ -741,13 +740,11 @@ for(;;)
         PCRE2_UCHAR ch;
         while ((ch = *ccode++) != XCL_END)
           {
-          BOOL not = FALSE;
           const char *notch = "";
 
           switch(ch)
             {
             case XCL_NOTPROP:
-            not = TRUE;
             notch = "^";
             /* Fall through */
 
@@ -773,7 +770,8 @@ for(;;)
 
                 default:
                 s = get_ucpname(ptype, pvalue);
-                fprintf(f, "\\%c{%c%s}", (not? 'P':'p'), toupper(s[0]), s+1);
+                fprintf(f, "\\%c{%c%s}", ((notch[0] == '^')? 'P':'p'),
+                  toupper(s[0]), s+1);
                 break;
                 }
               }
