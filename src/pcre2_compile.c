@@ -1511,6 +1511,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
   compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
+BOOL alt_bsux = 
+  ((options & PCRE2_ALT_BSUX) | (xoptions & PCRE2_EXTRA_ALT_BSUX)) != 0;
 PCRE2_SPTR ptr = *ptrptr;
 uint32_t c, cc;
 int escape = 0;
@@ -1607,8 +1609,6 @@ else
   int s;
   PCRE2_SPTR oldptr;
   BOOL overflow;
-  BOOL alt_bsux =
-    ((options & PCRE2_ALT_BSUX) | (xoptions & PCRE2_EXTRA_ALT_BSUX)) != 0;
 
   /* Filter calls from pcre2_substitute(). */
 
