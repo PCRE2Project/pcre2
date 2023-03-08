@@ -8661,25 +8661,13 @@ display_properties(BOOL wantscripts)
 printf("** This version of PCRE2 was compiled without Unicode support.\n");
 #else
 
-const char *typename;
 uint16_t seentypes[1024];
 uint16_t seenvalues[1024];
 int seencount = 0;
 int16_t found[256][MAX_SYNONYMS + 1];
 int fc = 0;
 int colwidth = 40;
-int n;
-
-if (wantscripts)
-  {
-  n = ucp_Script_Count;
-  typename = "SCRIPTS";
-  }
-else
-  {
-  n = ucp_Bprop_Count;
-  typename = "PROPERTIES";
-  }
+int n = wantscripts? ucp_Script_Count : ucp_Bprop_Count;
 
 for (size_t i = 0; i < PRIV(utt_size); i++)
   {
@@ -8724,7 +8712,7 @@ for (size_t i = 0; i < PRIV(utt_size); i++)
   }
 
 printf("-------------------------- SUPPORTED %s --------------------------\n\n",
-  typename);
+  wantscripts? "SCRIPTS" : "PROPERTIES");
 
 if (!wantscripts) printf(
 "This release of PCRE2 supports Unicode's general category properties such\n"
