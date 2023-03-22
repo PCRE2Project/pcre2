@@ -19,11 +19,14 @@ copy_file(
     out = "src/pcre2_chartables.c",
 )
 
+# Removed src/pcre2_ucptables.c below because it is #included in 
+# src/pcre2_tables.c. Also fixed typo: ckdint should be chkdint.
+# PH, 22-March-2023.
 cc_library(
     name = "pcre2",
     srcs = [
         "src/pcre2_auto_possess.c",
-        "src/pcre2_ckdint.c",
+        "src/pcre2_chkdint.c",
         "src/pcre2_compile.c",
         "src/pcre2_config.c",
         "src/pcre2_context.c",
@@ -46,7 +49,6 @@ cc_library(
         "src/pcre2_substring.c",
         "src/pcre2_tables.c",
         "src/pcre2_ucd.c",
-        "src/pcre2_ucptables.c",
         "src/pcre2_valid_utf.c",
         "src/pcre2_xclass.c",
         ":pcre2_chartables_c",

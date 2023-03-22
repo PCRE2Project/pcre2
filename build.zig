@@ -39,7 +39,7 @@ pub fn build(b: *std.Build) !void {
         "src/pcre2_substring.c",
         "src/pcre2_tables.c",
         "src/pcre2_ucd.c",
-        "src/pcre2_ucptables.c",
+//  "src/pcre2_ucptables.c",  #included in pcre2_tables.c (PH, 22-Mar-2023)
         "src/pcre2_valid_utf.c",
         "src/pcre2_xclass.c",
         "src/pcre2_chartables.c",

@@ -67,6 +67,11 @@ that bypassed its initialization (though it didn't actually matter).
 names ("new" and "typename") and another jump that bypassed an (irrelevant) 
 initialization.
 
+16. Merged a pull request that removed pcre2_ucptables.c from the list of files 
+to compile in NON-AUTOTOOLS-BUILD because it is #included in pcre2_tables.c. 
+Also adjusted the BUILD.bazel and build.zig files, which had the same issue. At 
+the same time, fixed a typo in the Bazel file.
+
 
 Version 10.42 11-December-2022
 ------------------------------
