@@ -4,9 +4,10 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    try b.updateFile("src/config.h.generic", "src/config.h");
-    try b.updateFile("src/pcre2.h.generic", "src/pcre2.h");
-    try b.updateFile("src/pcre2_chartables.c.dist", "src/pcre2_chartables.c");
+    const copyFiles = b.addWriteFiles();
+    copyFiles.addCopyFileToSource(.{ .path = "src/config.h.generic" }, "src/config.h");
+    copyFiles.addCopyFileToSource(.{ .path = "src/pcre2.h.generic" }, "src/pcre2.h");
+    copyFiles.addCopyFileToSource(.{ .path = "src/pcre2_chartables.c.dist" }, "src/pcre2_chartables.c");
 
     const lib = b.addStaticLibrary(.{
         .name = "pcre2",
@@ -39,7 +40,6 @@ pub fn build(b: *std.Build) !void {
         "src/pcre2_substring.c",
         "src/pcre2_tables.c",
         "src/pcre2_ucd.c",
-//  "src/pcre2_ucptables.c",  #included in pcre2_tables.c (PH, 22-Mar-2023)
         "src/pcre2_valid_utf.c",
         "src/pcre2_xclass.c",
         "src/pcre2_chartables.c",
@@ -49,7 +49,8 @@ pub fn build(b: *std.Build) !void {
         "-DPCRE2_CODE_UNIT_WIDTH=8",
         "-DPCRE2_STATIC",
     });
-    lib.installHeader("src/pcre2.h", "pcre2.h");
+    lib.step.dependOn(&copyFiles.step);
+    lib.installHeader("src/pcre2.h.generic", "pcre2.h");
     lib.linkLibC();
     lib.install();
 }
