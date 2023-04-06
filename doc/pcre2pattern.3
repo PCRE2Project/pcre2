@@ -1522,7 +1522,7 @@ classes with other sequences, as follows:
   [:alpha:]  becomes  \ep{L}
   [:blank:]  becomes  \eh
   [:cntrl:]  becomes  \ep{Cc}
-  [:digit:]  becomes  \ep{Nd}
+  [:digit:]  becomes  \ep{Nd}  unless PCRE2_EXTRA_ASCII_DIGIT is set
   [:lower:]  becomes  \ep{Ll}
   [:space:]  becomes  \ep{Xps}
   [:upper:]  becomes  \ep{Lu}

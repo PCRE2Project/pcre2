@@ -2853,7 +2853,7 @@ No match
     ABCD1234\x{6ca}\x{a6c}\x{10a7}_
  0: ABCD1234\x{6ca}\x{a6c}\x{10a7}_
 
-# Unicode properties for \b abd \B 
+# Unicode properties for \b and \B
 
 /\b...\B/utf,ucp
     abc_
@@ -4080,10 +4080,19 @@ No match
     123\x{660}456
  0: 123\x{660}456
 
+/[[:digit:]]+/utf,ucp,ascii_digit
+    123\x{660}456
+ 0: 123
+
+/[[:digit:]]+/g,utf,ucp,ascii_digit
+    123\x{660}456
+ 0: 123
+ 0: 456
+
 /[[:digit:]]+/utf,ucp,ascii_posix
     123\x{660}456
  0: 123
-    
+
 />[[:space:]]+</utf,ucp
     >\x{a0} \x{a0}<
  0: >\x{a0} \x{a0}<

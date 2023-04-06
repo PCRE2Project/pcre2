@@ -27,15 +27,18 @@ options are:
                                          \ex handling
   PCRE2_EXTRA_ASCII_BSD                \ed remains ASCII in UCP mode
   PCRE2_EXTRA_ASCII_BSS                \es remains ASCII in UCP mode
-  PCRE2_EXTRA_ASCII_BSW                \ew remains ASFII in UCP mode
+  PCRE2_EXTRA_ASCII_BSW                \ew remains ASCII in UCP mode
+.\" JOIN
+  PCRE2_EXTRA_ASCII_DIGIT              [:digit:] POSIX class remains ASCII
+                                         in UCP mode
 .\" JOIN
   PCRE2_EXTRA_ASCII_POSIX              POSIX classes remain ASCII in
-                                         UCP mode 
+                                         UCP mode
 .\" JOIN
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as
                                          a literal following character
 .\" JOIN
-  PCRE2_EXTRA_CASELESS_RESTRICT        Disable mixed ASCII/non-ASCII 
+  PCRE2_EXTRA_CASELESS_RESTRICT        Disable mixed ASCII/non-ASCII
                                          case folding
   PCRE2_EXTRA_ESCAPED_CR_IS_LF         Interpret \er as \en
   PCRE2_EXTRA_MATCH_LINE               Pattern matches whole lines

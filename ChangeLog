@@ -55,23 +55,25 @@ change needed for 9(a) above; (b) fix bugs in ucptest,
 
 12. Integer overflow testing is now centralized in a new function.
 
-13. Made PCRE2_UCP the default in UTF mode in pcre2grep, and added new options 
+13. Made PCRE2_UCP the default in UTF mode in pcre2grep, and added new options
 --case-restrict and --no-ucp.
 
-14. In the debugging printint module (which is normally only linked into 
-pcre2test), avoid the use of a variable called "not" because that's deprecated 
-in C and forbidden in C++. Also rewrite some code to avoid a goto into a block 
+14. In the debugging printint module (which is normally only linked into
+pcre2test), avoid the use of a variable called "not" because that's deprecated
+in C and forbidden in C++. Also rewrite some code to avoid a goto into a block
 that bypassed its initialization (though it didn't actually matter).
 
-15. More minor code adjustments to avoid using reserved C++ words as variable 
-names ("new" and "typename") and another jump that bypassed an (irrelevant) 
+15. More minor code adjustments to avoid using reserved C++ words as variable
+names ("new" and "typename") and another jump that bypassed an (irrelevant)
 initialization.
 
-16. Merged a pull request that removed pcre2_ucptables.c from the list of files 
-to compile in NON-AUTOTOOLS-BUILD because it is #included in pcre2_tables.c. 
-Also adjusted the BUILD.bazel and build.zig files, which had the same issue. At 
+16. Merged a pull request that removed pcre2_ucptables.c from the list of files
+to compile in NON-AUTOTOOLS-BUILD because it is #included in pcre2_tables.c.
+Also adjusted the BUILD.bazel and build.zig files, which had the same issue. At
 the same time, fixed a typo in the Bazel file.
 
+17. Add PCRE2_EXTRA_ASCII_DIGIT to allow [:digit:] to be kept on sync with \d
+even in UCP mode.
 
 Version 10.42 11-December-2022
 ------------------------------

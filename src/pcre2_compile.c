@@ -786,7 +786,8 @@ are allowed. */
     PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
     PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
     PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
-    PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX)
+    PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX| \
+    PCRE2_EXTRA_ASCII_DIGIT)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -3581,7 +3582,8 @@ while (ptr < ptrend)
 
 #ifdef SUPPORT_UNICODE
         if ((options & PCRE2_UCP) != 0 &&
-            (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0)
+            (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0 &&
+            !(posix_class == 7 && (xoptions & PCRE2_EXTRA_ASCII_DIGIT) != 0))
           {
           int ptype = posix_substitutes[2*posix_class];
           int pvalue = posix_substitutes[2*posix_class + 1];

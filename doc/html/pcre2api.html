@@ -1540,7 +1540,7 @@ PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
 U+007F. Note that there are two ASCII characters, K and S, that, in addition to
 their lower case ASCII equivalents, are case-equivalent with U+212A (Kelvin
-sign) and U+017F (long S) respectively. If you do not want this case 
+sign) and U+017F (long S) respectively. If you do not want this case
 equivalence, you can suppress it by setting PCRE2_EXTRA_CASELESS_RESTRICT.
 </P>
 <P>
@@ -1887,7 +1887,7 @@ are not representable in UTF-16.
 This option has two effects. Firstly, it change the way PCRE2 processes \B,
 \b, \D, \d, \S, \s, \W, \w, and some of the POSIX character classes. By
 default, only ASCII characters are recognized, but if PCRE2_UCP is set, Unicode
-properties are used to classify characters. There are some PCRE2_EXTRA 
+properties are used to classify characters. There are some PCRE2_EXTRA
 options (see below) that add finer control to this behaviour. More details are
 given in the section on
 <a href="pcre2pattern.html#genericchartypes">generic character types</a>
@@ -1995,6 +1995,11 @@ This option forces \w to match only ASCII word characters, even when PCRE2_UCP
 is set. It can be changed within a pattern by means of the (?aW) option
 setting.
 <pre>
+  PCRE2_EXTRA_ASCII_DIGIT
+</pre>
+This option forces the POSIX character class [:digit:] to match only ASCII
+digits, even when PCRE2_UCP is set.
+<pre>
   PCRE2_EXTRA_ASCII_POSIX
 </pre>
 This option forces the POSIX character classes to match only ASCII characters,
@@ -2029,8 +2034,8 @@ rules, which allow for more than two cases per character. There are two
 case-equivalent character sets that contain both ASCII and non-ASCII
 characters. The ASCII letter S is case-equivalent to U+017f (long S) and the
 ASCII letter K is case-equivalent to U+212a (Kelvin sign). This option disables
-recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a 
-caseless match, both characters must either be ASCII or non-ASCII. The option 
+recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a
+caseless match, both characters must either be ASCII or non-ASCII. The option
 can be changed with a pattern by the (?r) option setting.
 <pre>
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
