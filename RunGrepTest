@@ -899,6 +899,14 @@ if [ $utf8 -ne 0 ] ; then
   (cd $srcdir; $valgrind $vjs $pcre2grep -UiEP --colour=always 'k+|\babc\b' ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
+  echo "---------------------------- Test U9 ------------------------------" >>testtrygrep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -u --colour=always 'A\d' ./testdata/grepinput8) >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U10 ------------------------------" >>testtrygrep
+  (cd $srcdir; $valgrind $vjs $pcre2grep -u --posix-digit --colour=always 'A\d' ./testdata/grepinput8) >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
   $cf $srcdir/testdata/grepoutput8 testtrygrep
   if [ $? != 0 ] ; then exit 1; fi
 

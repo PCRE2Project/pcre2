@@ -288,6 +288,7 @@ static BOOL quiet = FALSE;
 static BOOL show_total_count = FALSE;
 static BOOL silent = FALSE;
 static BOOL utf = FALSE;
+static BOOL posix_digit = FALSE;
 
 static uint8_t utf8_buffer[8];
 
@@ -423,6 +424,7 @@ used to identify them. */
 #define N_MAX_BUFSIZE  (-23)
 #define N_OM_CAPTURE   (-24)
 #define N_ALLABSK      (-25)
+#define N_POSIX_DIGIT  (-26)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -439,6 +441,7 @@ static option_item optionlist[] = {
   { OP_NODATA,     'c',      NULL,              "count",         "print only a count of matching lines per FILE" },
   { OP_STRING,     'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
   { OP_STRING,     'd',      &dee_option,       "directories=action", "how to handle directories" },
+  { OP_NODATA, N_POSIX_DIGIT, NULL,             "posix-digit",   "\\d always matches [0-9], even in UTF/UCP mode" },
   { OP_NODATA,     'E',      NULL,              "case-restrict", "restrict case matching (no mix ASCII/non-ASCII)" },
   { OP_PATLIST,    'e',      &match_patdata,    "regex(p)=pattern", "specify pattern (may be used more than once)" },
   { OP_NODATA,     'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
@@ -472,7 +475,7 @@ static option_item optionlist[] = {
   { OP_OP_NUMBERS, 'o',      &only_matching_data, "only-matching=n", "show only the part of the line that matched" },
   { OP_STRING,     N_OM_SEPARATOR, &om_separator, "om-separator=text", "set separator for multiple -o output" },
   { OP_U32NUMBER,  N_OM_CAPTURE, &capture_max,  "om-capture=n",  "set capture count for --only-matching" },
-  { OP_NODATA,     'P',      NULL,              "no-ucp",        "do not set PCRE2_UCP in Unicode mode" },
+  { OP_NODATA,     'P',      NULL,              "no-ucp",        "do not enable UCP mode with Unicode" },
   { OP_NODATA,     'q',      NULL,              "quiet",         "suppress output, just set return code" },
   { OP_NODATA,     'r',      NULL,              "recursive",     "recursively scan sub-directories" },
   { OP_PATLIST,    N_EXCLUDE,&exclude_patdata,  "exclude=pattern","exclude matching files when recursing" },
@@ -3589,6 +3592,7 @@ switch(letter)
   case N_ALLABSK: extra_options |= PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK; break;
   case 'a': binary_files = BIN_TEXT; break;
   case 'c': count_only = TRUE; break;
+  case N_POSIX_DIGIT: posix_digit = TRUE; break;
   case 'E': case_restrict = TRUE; break;
   case 'F': options |= PCRE2_LITERAL; break;
   case 'H': filenames = FN_FORCE; break;
@@ -3611,7 +3615,7 @@ switch(letter)
   case 's': silent = TRUE; break;
   case 't': show_total_count = TRUE; break;
   case 'u': options |= PCRE2_UTF | PCRE2_UCP; utf = TRUE; break;
-  case 'U': options |= PCRE2_UTF|PCRE2_MATCH_INVALID_UTF|PCRE2_UCP;
+  case 'U': options |= PCRE2_UTF | PCRE2_MATCH_INVALID_UTF | PCRE2_UCP;
             utf = TRUE; break;
   case 'v': invert = TRUE; break;
 
@@ -4364,9 +4368,11 @@ if (DEE_option != NULL)
 
 if (no_ucp) pcre2_options &= ~PCRE2_UCP;
 
-/* If case_restrict is set, adjust the extra options. */
+/* adjust the extra options. */
 
 if (case_restrict) extra_options |= PCRE2_EXTRA_CASELESS_RESTRICT;
+if (posix_digit)
+  extra_options |= (PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_DIGIT);
 
 /* Set the extra options in the compile context. */
 
