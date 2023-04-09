@@ -1953,6 +1953,11 @@ COMPILING A PATTERN
        PCRE2_UCP  is  set.  It can be changed within a pattern by means of the
        (?aW) option setting.
 
+         PCRE2_EXTRA_ASCII_DIGIT
+
+       This option forces the POSIX character class [:digit:]  to  match  only
+       ASCII digits, even when PCRE2_UCP is set.
+
          PCRE2_EXTRA_ASCII_POSIX
 
        This option forces the POSIX character  classes  to  match  only  ASCII
@@ -7688,7 +7693,7 @@ POSIX CHARACTER CLASSES
          [:alpha:]  becomes  \p{L}
          [:blank:]  becomes  \h
          [:cntrl:]  becomes  \p{Cc}
-         [:digit:]  becomes  \p{Nd}
+         [:digit:]  becomes  \p{Nd}  unless PCRE2_EXTRA_ASCII_DIGIT is set
          [:lower:]  becomes  \p{Ll}
          [:space:]  becomes  \p{Xps}
          [:upper:]  becomes  \p{Lu}
