@@ -75,6 +75,9 @@ the same time, fixed a typo in the Bazel file.
 17. Add PCRE2_EXTRA_ASCII_DIGIT to allow [:digit:] to be kept on sync with \d
 even in UCP mode.
 
+18. Fix an invalid match of ascii word classes when invalid utf is enabled.
+
+
 Version 10.42 11-December-2022
 ------------------------------
 

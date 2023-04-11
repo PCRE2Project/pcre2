@@ -4143,6 +4143,7 @@ if (negated)
 
   if (common->invalid_utf)
     {
+    OP1(SLJIT_MOV, TMP1, 0, TMP2, 0);
     add_jump(compiler, &common->utfreadchar_invalid, JUMP(SLJIT_FAST_CALL));
     add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR));
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
