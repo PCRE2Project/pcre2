@@ -672,12 +672,12 @@ is an empty string. Separating strings are never coloured.
 \fB-P\fP, \fB--no-ucp\fP
 Starting from release 10.43, when UTF/Unicode mode is specified with \fB-u\fP
 or \fB-U\fP, the PCRE2_UCP option is used by default. This means that the
-simple class escapes in patterns match more than just ASCII characters. For
-example, \ed matches any Unicode decimal digit. The \fB--no-ucp\fP option
-suppresses PCRE2_UCP, thus restricting the class escapes to ASCII characters,
+POSIX classes in patterns match more than just ASCII characters. For example,
+[:digit:] matches any Unicode decimal digit. The \fB--no-ucp\fP option
+suppresses PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine-grained
-option settings within patterns that affect individual escapes. For example,
-when PCRE2_UCP is set, the sequence (?aD) restricts \ed to ASCII digits, while
+option settings within patterns that affect individual classes. For example,
+when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
 allowing \ew to match Unicode letters and digits.
 .TP
 \fB-q\fP, \fB--quiet\fP
