@@ -6551,7 +6551,7 @@ if (use_jit)
     invalid code point to be an absolute offset in the whole string. */
 
     match_data->rc = PRIV(valid_utf)(start_match,
-      length - (start_match - subject), &(match_data->startchar));
+      length - (start_match - subject), &(match_data->startchar), TRUE);
     if (match_data->rc != 0)
       {
       match_data->startchar += start_match - subject;
@@ -6598,14 +6598,15 @@ If we get here in those circumstances, it means the subject string is valid,
 but for some reason JIT matching was not successful. There is no need to check
 the subject again.
 
-We check only the portion of the subject that might be be inspected during
+We check only the portion of the subject that might be inspected during
 matching - from the offset minus the maximum lookbehind to the given length.
 This saves time when a small part of a large subject is being matched by the
 use of a starting offset. Note that the maximum lookbehind is a number of
 characters, not code units.
 
 Note also that support for invalid UTF forces a check, overriding the setting
-of PCRE2_NO_CHECK_UTF. */
+of PCRE2_NO_CHECK_UTF, so validate_utf() has to be told not to error if a
+surrogate is found and the PCRE2_EXTRA_ALLOW_SURROGATES setting is used. */
 
 #ifdef SUPPORT_UNICODE
 if (utf &&
@@ -6685,8 +6686,11 @@ if (utf &&
 
   for (;;)
     {
+    BOOL strict = (re->extra_options & PCRE2_EXTRA_ALLOW_SURROGATES) == 0;
+
     match_data->rc = PRIV(valid_utf)(mb->check_subject,
-      length - (mb->check_subject - subject), &(match_data->startchar));
+                                     length - (mb->check_subject - subject),
+                                     &(match_data->startchar), strict);
 
     if (match_data->rc == 0) break;   /* Valid UTF string */
 
@@ -7461,7 +7465,7 @@ if (utf && end_subject != true_end_subject &&
 
     mb->check_subject = start_match;
     rc = PRIV(valid_utf)(start_match, length - (start_match - subject),
-      &(match_data->startchar));
+                         &(match_data->startchar), TRUE);
 
     /* The rest of the subject is valid UTF. */
 

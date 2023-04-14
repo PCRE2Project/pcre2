@@ -60,11 +60,13 @@ with the library. In this case, PCRE2_PCRE2TEST is defined. */
 /* This function should never be called when Unicode is not supported. */
 
 int
-PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
+PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length,
+                PCRE2_SIZE *erroroffset, BOOL strict)
 {
 (void)string;
 (void)length;
 (void)erroroffset;
+(void)strict;
 return 0;
 }
 #else  /* UTF is supported */
@@ -85,20 +87,22 @@ Arguments:
   string       points to the string
   length       length of string
   errp         pointer to an error position offset variable
+  strict       enforce strict checks
 
 Returns:       == 0    if the string is a valid UTF string
                != 0    otherwise, setting the offset of the bad character
 */
 
 int
-PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
+PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length,
+                PCRE2_SIZE *erroroffset, BOOL strict)
 {
 PCRE2_SPTR p;
 uint32_t c;
 
-/* ----------------- Check a UTF-8 string ----------------- */
-
 #if PCRE2_CODE_UNIT_WIDTH == 8
+
+/* ----------------- Check a UTF-8 string ----------------- */
 
 /* Originally, this function checked according to RFC 2279, allowing for values
 in the range 0 to 0x7fffffff, up to 6 bytes long, but ensuring that they were
@@ -138,7 +142,7 @@ for (p = string; length > 0; p++)
   c = *p;
   length--;
 
-  if (c < 128) continue;                /* ASCII character */
+  if (c <= 0x7f) continue;              /* ASCII character */
 
   if (c < 0xc0)                         /* Isolated 10xx xxxx byte */
     {
@@ -206,7 +210,7 @@ for (p = string; length > 0; p++)
       *erroroffset = (PCRE2_SIZE)(p - string) - 2;
       return PCRE2_ERROR_UTF8_ERR16;
       }
-    if (c == 0xed && d >= 0xa0)
+    if ((c == 0xed && d >= 0xa0) && strict)
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 2;
       return PCRE2_ERROR_UTF8_ERR14;
@@ -303,7 +307,7 @@ for (p = string; length > 0; p++)
     break;
     }
 
-  /* Character is valid under RFC 2279, but 4-byte and 5-byte characters are
+  /* Character is valid under RFC 2279, but 5-byte and 6-byte characters are
   excluded by RFC 3629. The pointer p is currently at the last byte of the
   character. */
 
@@ -313,12 +317,11 @@ for (p = string; length > 0; p++)
     return (ab == 4)? PCRE2_ERROR_UTF8_ERR11 : PCRE2_ERROR_UTF8_ERR12;
     }
   }
-return 0;
-
-
-/* ----------------- Check a UTF-16 string ----------------- */
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16
+
+/* ----------------- Check a UTF-16 string ----------------- */
+(void)strict;
 
 /* There's not so much work, nor so many errors, for UTF-16.
 PCRE2_ERROR_UTF16_ERR1  Missing low surrogate at the end of the string
@@ -358,13 +361,10 @@ for (p = string; length > 0; p++)
     return PCRE2_ERROR_UTF16_ERR3;
     }
   }
-return 0;
-
-
-
-/* ----------------- Check a UTF-32 string ----------------- */
 
 #else
+
+/* ----------------- Check a UTF-32 string ----------------- */
 
 /* There is very little to do for a UTF-32 string.
 PCRE2_ERROR_UTF32_ERR1  Surrogate character
@@ -377,21 +377,21 @@ for (p = string; length > 0; length--, p++)
   if ((c & 0xfffff800u) != 0xd800u)
     {
     /* Normal UTF-32 code point. Neither high nor low surrogate. */
-    if (c > 0x10ffffu)
+    if (c > MAX_UTF_CODE_POINT)
       {
       *erroroffset = (PCRE2_SIZE)(p - string);
       return PCRE2_ERROR_UTF32_ERR2;
       }
     }
-  else
+  else if (strict)
     {
     /* A surrogate */
     *erroroffset = (PCRE2_SIZE)(p - string);
     return PCRE2_ERROR_UTF32_ERR1;
     }
   }
-return 0;
 #endif  /* CODE_UNIT_WIDTH */
+return 0;
 }
 #endif  /* SUPPORT_UNICODE */
 

@@ -471,7 +471,7 @@ code. */
 /* These are trivial for the 32-bit library, since all UTF-32 characters fit
 into one PCRE2_UCHAR unit. */
 
-#define MAX_UTF_SINGLE_CU (0x10ffffu)
+#define MAX_UTF_SINGLE_CU 0x10ffffu
 #define HAS_EXTRALEN(c) (0)
 #define GET_EXTRALEN(c) (0)
 #define NOT_FIRSTCU(c) (0)

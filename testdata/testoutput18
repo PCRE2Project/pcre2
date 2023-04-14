@@ -23,8 +23,8 @@
 /a(())bc/parens_nest_limit=1
 ** Ignored with POSIX interface: parens_nest_limit
 
-/abc/allow_surrogate_escapes,max_pattern_length=2
-** Ignored with POSIX interface: allow_surrogate_escapes max_pattern_length
+/abc/allow_surrogates,max_pattern_length=2
+** Ignored with POSIX interface: allow_surrogates max_pattern_length
 
 # Real tests
 
