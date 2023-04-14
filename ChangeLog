@@ -77,6 +77,11 @@ even in UCP mode.
 
 18. Fix an invalid match of ascii word classes when invalid utf is enabled.
 
+19. Add a --posix-digit to pcre2grep for compatibility with GNU grep, and
+
+20. Report the bit width of the library in use by pcre2test for usability.
+other tools that prefer the POSIX compatible unicode definition for \d.
+
 
 Version 10.42 11-December-2022
 ------------------------------
