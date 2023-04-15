@@ -8302,7 +8302,7 @@ return PR_OK;
 static void
 print_version(FILE *f, BOOL include_mode)
 {
-char buf[8];
+char buf[16];
 VERSION_TYPE *vp;
 fprintf(f, "PCRE2 version ");
 for (vp = version; *vp != 0; vp++) fprintf(f, "%c", *vp);
