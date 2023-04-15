@@ -800,6 +800,7 @@ The distribution should contain the files listed below.
 
   src/pcre2posix.c         )
   src/pcre2_auto_possess.c )
+  src/pcre2_chkdint.c      )
   src/pcre2_compile.c      )
   src/pcre2_config.c       )
   src/pcre2_context.c      )
@@ -921,4 +922,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 10 December 2022
+Last updated: 15 April 2023
