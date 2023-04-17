@@ -2273,7 +2273,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_mem_update(struct sljit_compiler *
 	switch (type & 0xff) {
 	case SLJIT_MOV:
 	case SLJIT_MOV_P:
-		inst = STURBI | (MEM_SIZE_SHIFT(WORD_SIZE) << 30) | 0x400;
+		inst = STURBI | (MEM_SIZE_SHIFT((sljit_u32)WORD_SIZE) << 30) | 0x400;
 		break;
 	case SLJIT_MOV_S8:
 		sign = 1;
@@ -2296,7 +2296,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_mem_update(struct sljit_compiler *
 		break;
 	default:
 		SLJIT_UNREACHABLE();
-		inst = STURBI | (MEM_SIZE_SHIFT(WORD_SIZE) << 30) | 0x400;
+		inst = STURBI | (MEM_SIZE_SHIFT((sljit_u32)WORD_SIZE) << 30) | 0x400;
 		break;
 	}
 
