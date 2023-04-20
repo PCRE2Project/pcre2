@@ -5825,10 +5825,27 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
 
   else
     {
+    BOOL toolong;
     PCHARSV(converted_pattern, 0, converted_length, utf, outfile);
     fprintf(outfile, "\n");
-    patlen = converted_length;
-    CONVERT_COPY(pbuffer, converted_pattern, converted_length + 1);
+
+    if (test_mode == PCRE8_MODE)
+      toolong = (converted_length + 1 > pbuffer8_size);
+    else if (test_mode == PCRE16_MODE)
+      toolong = (2*(converted_length + 1) > pbuffer8_size);
+    else  /* 32-bit */
+      toolong = (4*(converted_length + 1) > pbuffer8_size);
+
+    if (toolong)
+      {
+      fprintf(outfile, "** Pattern conversion is too long for the buffer\n");
+      convert_return = PR_SKIP;
+      }
+    else
+      {
+      CONVERT_COPY(pbuffer, converted_pattern, converted_length + 1);
+      patlen = converted_length;
+      }
     }
 
   /* Free the converted pattern. */

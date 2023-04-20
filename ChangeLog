@@ -82,6 +82,9 @@ other tools that prefer the POSIX compatible unicode definition for \d.
 
 20. Report the bit width of the library in use by pcre2test for usability.
 
+21. A pathological pattern conversion test could result in a string longer than 
+the available input buffer. Cause such a test to fail.
+
 
 Version 10.42 11-December-2022
 ------------------------------
