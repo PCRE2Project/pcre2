@@ -66,6 +66,10 @@ testtemp2
 testtemp2grep
 testtry
 testtrygrep
+testSinput
+testbtables
+testsaved1
+testsaved2
 
 m4/libtool.m4
 m4/ltoptions.m4
