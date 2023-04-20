@@ -413,6 +413,20 @@
 \= Expect no match
     ab\x{df00}cdef\=ph
 
+/.a/match_invalid_utf
+    ab\=ph
+    ab\=ps
+\= Expect no match
+    b\x{df00}\=ph
+    b\x{df00}\=ps
+
+/.a$/match_invalid_utf
+    ab\=ph
+    ab\=ps
+\= Expect no match
+    b\x{df00}\=ph
+    b\x{df00}\=ps
+
 /ab$/match_invalid_utf
     ab\x{df00}cdeab
 \= Expect no match

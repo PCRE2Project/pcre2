@@ -1520,6 +1520,28 @@ Partial match: ab
     ab\x{df00}cdef\=ph
 No match
 
+/.a/match_invalid_utf
+    ab\=ph
+Partial match: b
+    ab\=ps
+Partial match: b
+\= Expect no match
+    b\x{df00}\=ph
+No match
+    b\x{df00}\=ps
+No match
+
+/.a$/match_invalid_utf
+    ab\=ph
+Partial match: b
+    ab\=ps
+Partial match: b
+\= Expect no match
+    b\x{df00}\=ph
+No match
+    b\x{df00}\=ps
+No match
+
 /ab$/match_invalid_utf
     ab\x{df00}cdeab
  0: ab
