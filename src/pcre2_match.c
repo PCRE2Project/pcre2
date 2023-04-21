@@ -7454,6 +7454,7 @@ if (utf && end_subject != true_end_subject &&
     if (start_match >= true_end_subject)
       {
       rc = MATCH_NOMATCH;  /* In case it was partial */
+      match_partial = NULL;
       break;
       }
 

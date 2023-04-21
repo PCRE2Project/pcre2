@@ -506,6 +506,25 @@
 \= Expect no match
     ab\x80cdef\=ph
 
+/.a/match_invalid_utf
+    ab\=ph
+    ab\=ps
+    b\xf0\x91\x88b\=ph
+    b\xf0\x91\x88b\=ps
+    b\xf0\x91\x88\xb4a
+\= Expect no match
+    b\x80\=ph
+    b\x80\=ps
+    b\xf0\x91\x88\=ph
+    b\xf0\x91\x88\=ps
+
+/.a$/match_invalid_utf
+    ab\=ph
+    ab\=ps
+\= Expect no match
+    b\xf0\x91\x98\=ph
+    b\xf0\x91\x98\=ps
+
 /ab$/match_invalid_utf
     ab\x80cdeab
 \= Expect no match
