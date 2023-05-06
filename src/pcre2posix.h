@@ -130,25 +130,44 @@ set, we ensure here that it has no effect. */
 #define PCRE2_CALL_CONVENTION
 #endif
 
-/* When an application links to a PCRE2 DLL in Windows, the symbols that are
-imported have to be identified as such. When building PCRE2, the appropriate
-export settings are needed, and are set in pcre2posix.c before including this
-file. */
+/* When compiling a DLL for Windows, the exported symbols have to be declared
+using some MS magic. I found some useful information on this web page:
+http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
+information there, using __declspec(dllexport) without "extern" we have a
+definition; with "extern" we have a declaration.
+We use:
 
-#if defined(_WIN32) && !defined(PCRE2_STATIC) && !defined(PCRE2POSIX_EXP_DECL)
-#  define PCRE2POSIX_EXP_DECL  extern __declspec(dllimport)
-#  define PCRE2POSIX_EXP_DEFN  __declspec(dllimport)
-#endif
+  PCRE2_EXP_DECL    for declarations
+  PCRE2_EXP_DEFN    for definitions
 
-/* By default, we use the standard "extern" declarations. */
+The reason for wrapping this in #ifndef PCRE2POSIX_EXP_DECL is so that
+pcre2test, which is an application, but needs to import this file in order to
+"peek" at internals, can #include pcre2posix.h first to get an application's-eye
+view.
+
+In principle, people compiling for non-Windows, non-Unix-like (i.e. uncommon,
+special-purpose environments) might want to stick other stuff in front of
+exported symbols. That's why, in the non-Windows case, we set
+PCRE2POSIX_EXP_DEFN only if it is not already set. */
 
 #ifndef PCRE2POSIX_EXP_DECL
-#  ifdef __cplusplus
-#    define PCRE2POSIX_EXP_DECL  extern "C"
-#    define PCRE2POSIX_EXP_DEFN  extern "C"
+#  ifdef _WIN32
+#    ifndef PCRE2_STATIC
+#      define PCRE2POSIX_EXP_DECL       extern __declspec(dllexport)
+#      define PCRE2POSIX_EXP_DEFN       __declspec(dllexport)
+#    else
+#      define PCRE2POSIX_EXP_DECL       extern
+#      define PCRE2POSIX_EXP_DEFN
+#    endif
 #  else
-#    define PCRE2POSIX_EXP_DECL  extern
-#    define PCRE2POSIX_EXP_DEFN  extern
+#    ifdef __cplusplus
+#      define PCRE2POSIX_EXP_DECL       extern "C"
+#    else
+#      define PCRE2POSIX_EXP_DECL       extern
+#    endif
+#    ifndef PCRE2POSIX_EXP_DEFN
+#      define PCRE2POSIX_EXP_DEFN       PCRE2POSIX_EXP_DECL
+#    endif
 #  endif
 #endif
 
