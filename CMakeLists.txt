@@ -102,12 +102,14 @@
 # 2022-12-10 PH added support for pcre2posix_test
 # 2023-01-15 Carlo added C99 as the minimum required
 
-# Increased minimum to 2.8.5 to support GNUInstallDirs.
-# Increased minimum to 3.1 to support imported targets.
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+# Increased minimum to 3.3 to support visibility.
+CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
 PROJECT(PCRE2 C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+cmake_policy(SET CMP0063 NEW)
 
 # Set policy CMP0026 to avoid warnings for the use of LOCATION in
 # GET_TARGET_PROPERTY. This should no longer be required.
@@ -156,7 +158,7 @@ CHECK_SYMBOL_EXISTS(strerror      "string.h"   HAVE_STRERROR)
 CHECK_C_SOURCE_COMPILES(
   "#include <stdlib.h>
    #include <limits.h>
-   int main(int c, char *v[]) { char buf[PATH_MAX]; realpath(v[1], buf); return 0; }"
+   int main(int c, char *v[]) { char buf[PATH_MAX]; realpath(v[c], buf); return 0; }"
   HAVE_REALPATH
 )
 
@@ -165,14 +167,28 @@ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
 
 CHECK_C_SOURCE_COMPILES(
   "#include <stddef.h>
-   int main() { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
+   int main(void) { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
   HAVE_BUILTIN_MUL_OVERFLOW
 )
 
 CHECK_C_SOURCE_COMPILES(
-  "int main() { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
+  "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
+
+CHECK_C_SOURCE_COMPILES([=[
+  extern __attribute__ ((visibility ("default"))) int f(void);
+  int main(void) { return f(); }
+  int f(void) { return 42; }
+  ]=] HAVE_VISIBILITY
+)
+
+if (HAVE_VISIBILITY)
+  set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
+else()
+  set(PCRE2_EXPORT)
+endif()
+
 set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
@@ -190,8 +206,6 @@ CHECK_C_SOURCE_COMPILES(
 IF (INTEL_CET_ENABLED)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
 ENDIF(INTEL_CET_ENABLED)
-
-
 
 # User-configurable options
 #
@@ -729,7 +743,6 @@ IF(PCRE2_BUILD_PCRE2_8)
       VERSION ${LIBPCRE2_POSIX_VERSION}
       SOVERSION ${LIBPCRE2_POSIX_SOVERSION})
     TARGET_LINK_LIBRARIES(pcre2-posix-static pcre2-8-static)
-    TARGET_COMPILE_DEFINITIONS(pcre2-posix-static PUBLIC PCRE2_STATIC)
     TARGET_INCLUDE_DIRECTORIES(pcre2-posix-static PUBLIC ${PROJECT_BINARY_DIR})
     SET(targets ${targets} pcre2-posix-static)
 
@@ -759,6 +772,7 @@ IF(PCRE2_BUILD_PCRE2_8)
         TARGET_LINK_LIBRARIES(pcre2-8-shared Threads::Threads)
     ENDIF(REQUIRE_PTHREAD)
     SET(targets ${targets} pcre2-8-shared)
+
     ADD_LIBRARY(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(pcre2-posix-shared PUBLIC ${PROJECT_BINARY_DIR})
     SET_TARGET_PROPERTIES(pcre2-posix-shared PROPERTIES
@@ -768,6 +782,7 @@ IF(PCRE2_BUILD_PCRE2_8)
       VERSION ${LIBPCRE2_POSIX_VERSION}
       SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
       OUTPUT_NAME pcre2-posix)
+    TARGET_COMPILE_DEFINITIONS(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
     TARGET_LINK_LIBRARIES(pcre2-posix-shared pcre2-8-shared)
     SET(targets ${targets} pcre2-posix-shared)
     SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-8.pdb ${dll_pdb_files})

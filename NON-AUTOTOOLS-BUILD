@@ -159,7 +159,8 @@ example.
  (7) If you want to build the POSIX wrapper functions (which apply only to the
      8-bit library), ensure that you have the src/pcre2posix.h file and then
      compile src/pcre2posix.c. Link the result (on its own) as the pcre2posix
-     library.
+     library. If targeting a DLL in Windows, make sure to include
+     -DPCRE2POSIX_SHARED with your compiler flags.
 
  (8) The pcre2test program can be linked with any combination of the 8-bit,
      16-bit and 32-bit libraries (depending on what you specfied in

@@ -119,20 +119,20 @@ only if it is not already set. */
 #ifndef PCRE2_EXP_DECL
 #  ifdef _WIN32
 #    ifndef PCRE2_STATIC
-#      define PCRE2_EXP_DECL       extern __declspec(dllexport)
-#      define PCRE2_EXP_DEFN       __declspec(dllexport)
+#      define PCRE2_EXP_DECL		extern __declspec(dllexport)
+#      define PCRE2_EXP_DEFN		__declspec(dllexport)
 #    else
-#      define PCRE2_EXP_DECL       extern
+#      define PCRE2_EXP_DECL		extern PCRE2_EXPORT
 #      define PCRE2_EXP_DEFN
 #    endif
 #  else
 #    ifdef __cplusplus
-#      define PCRE2_EXP_DECL       extern "C"
+#      define PCRE2_EXP_DECL		extern "C" PCRE2_EXPORT
 #    else
-#      define PCRE2_EXP_DECL       extern
+#      define PCRE2_EXP_DECL		extern PCRE2_EXPORT
 #    endif
 #    ifndef PCRE2_EXP_DEFN
-#      define PCRE2_EXP_DEFN       PCRE2_EXP_DECL
+#      define PCRE2_EXP_DEFN		PCRE2_EXP_DECL
 #    endif
 #  endif
 #endif

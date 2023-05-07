@@ -640,6 +640,12 @@ if test "x$enable_shared" = "xno" ; then
 fi
 AC_SUBST(PCRE2_STATIC_CFLAG)
 
+PCRE2POSIX_CFLAG=""
+if test "x$enable_shared" = "xyes" ; then
+  PCRE2POSIX_CFLAG="-DPCRE2POSIX_SHARED"
+fi
+AC_SUBST(PCRE2POSIX_CFLAG)
+
 # Here is where PCRE2-specific defines are handled
 
 if test "$enable_pcre2_8" = "yes"; then
@@ -812,7 +818,7 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   matching attempt. The value is also used to limit a loop counter in
   pcre2_dfa_match(). There is a runtime interface for setting a different
   limit. The limit exists in order to catch runaway regular expressions that
-  take for ever to determine that they do not match. The default is set very
+  take forever to determine that they do not match. The default is set very
   large so that it does not accidentally catch legitimate cases.])
 
 # --with-match-limit-recursion is an obsolete synonym for --with-match-limit-depth
@@ -862,8 +868,9 @@ AH_VERBATIM([PCRE2_EXP_DEFN], [
    Win32, and it needs some magic to be inserted before the definition
    of a function that is exported by the library, define this macro to
    contain the relevant magic. If you do not define this macro, a suitable
-    __declspec value is used for Windows systems; in other environments
-   "extern" is used for a C compiler and "extern C" for a C++ compiler.
+   __declspec value is used for Windows systems; in other environments
+   a compiler relevant "extern" is used with any "visibility" related
+   attributes from PCRE2_EXPORT included.
    This macro apears at the start of every exported function that is part
    of the external API. It does not appear on functions that are "external"
    in the C sense, but which are internal to the library. */
