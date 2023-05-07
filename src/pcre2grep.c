@@ -784,7 +784,7 @@ Unix-style directory scanning can be used (see below). */
 #define iswild(name) (strpbrk(name, "*?") != NULL)
 
 /* Convert ANSI BGR format to RGB used by Windows */
-#define BGR_RGB(x) ((x & 1 ? 4 : 0) | (x & 2) | (x & 4 ? 1 : 0))
+#define BGR_RGB(x) (((x) & 1 ? 4 : 0) | ((x) & 2) | ((x) & 4 ? 1 : 0))
 
 static HANDLE hstdout;
 static CONSOLE_SCREEN_BUFFER_INFO csbi;
