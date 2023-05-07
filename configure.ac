@@ -523,6 +523,7 @@ AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
 AM_CONDITIONAL(WITH_VALGRIND, test "x$enable_valgrind" = "xyes")
 AM_CONDITIONAL(WITH_FUZZ_SUPPORT, test "x$enable_fuzz_support" = "xyes")
+AM_CONDITIONAL(WITH_DLL, test "x$enable_shared" = "xyes")
 
 if test "$enable_fuzz_support" = "yes" -a "$enable_pcre2_8" = "no"; then
   echo "** ERROR: Fuzzer support requires the 8-bit library"
