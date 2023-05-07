@@ -53,16 +53,6 @@ presence of other POSIX regex libraries. */
 #endif
 
 
-/* Ensure that the PCRE2POSIX_EXP_xxx macros are set appropriately for
-compiling these functions. This must come before including pcre2posix.h, where
-they are set for an application (using these functions) if they have not
-previously been set. */
-
-#if defined(_WIN32) && !defined(PCRE2_STATIC)
-#  define PCRE2POSIX_EXP_DECL extern __declspec(dllexport)
-#  define PCRE2POSIX_EXP_DEFN __declspec(dllexport)
-#endif
-
 /* Older versions of MSVC lack snprintf(). This define allows for
 warning/error-free compilation and testing with MSVC compilers back to at least
 MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
