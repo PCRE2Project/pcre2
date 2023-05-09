@@ -734,7 +734,6 @@ typedef struct compile_block {
   uint16_t name_entry_size;        /* Size of each entry */
   uint16_t parens_depth;           /* Depth of nested parentheses */
   uint16_t assert_depth;           /* Depth of nested assertions */
-  open_capitem *open_caps;         /* Chain of open capture items */
   named_group *named_groups;       /* Points to vector in pre-compile */
   uint32_t named_group_list_size;  /* Number of entries in the list */
   uint32_t external_options;       /* External (initial) options */

@@ -125,7 +125,7 @@ static unsigned int
 static int
   compile_regex(uint32_t, uint32_t, PCRE2_UCHAR **, uint32_t **, int *,
     uint32_t, uint32_t *, uint32_t *, uint32_t *, uint32_t *, branch_chain *,
-    compile_block *, PCRE2_SIZE *);
+    open_capitem *, compile_block *, PCRE2_SIZE *);
 
 static int
   get_branchlength(uint32_t **, int *, int *, parsed_recurse_check *,
@@ -5493,6 +5493,7 @@ Arguments:
   reqcuptr          place to put the last required code unit
   reqcuflagsptr     place to put the last required code unit flags
   bcptr             points to current branch chain
+  open_caps         points to current capitem
   cb                contains pointers to tables etc.
   lengthptr         NULL during the real compile phase
                     points to length accumulator during pre-compile phase
@@ -5506,8 +5507,8 @@ static int
 compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
   PCRE2_UCHAR **codeptr, uint32_t **pptrptr, int *errorcodeptr,
   uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr,
-  uint32_t *reqcuflagsptr, branch_chain *bcptr, compile_block *cb,
-  PCRE2_SIZE *lengthptr)
+  uint32_t *reqcuflagsptr, branch_chain *bcptr, open_capitem *open_caps,
+  compile_block *cb, PCRE2_SIZE *lengthptr)
 {
 int bravalue = 0;
 int okreturn = -1;
@@ -6365,7 +6366,7 @@ for (;; pptr++)
 
     case META_ACCEPT:
     cb->had_accept = had_accept = TRUE;
-    for (oc = cb->open_caps;
+    for (oc = open_caps;
          oc != NULL && oc->assert_depth >= cb->assert_depth;
          oc = oc->next)
       {
@@ -6707,6 +6708,7 @@ for (;; pptr++)
          &subreqcu,                       /* For possible last char */
          &subreqcuflags,
          bcptr,                           /* Current branch chain */
+         open_caps,                       /* Pointer to capture stack */
          cb,                              /* Compile data block */
          (lengthptr == NULL)? NULL :      /* Actual compile phase */
            &length_prevgroup              /* Pre-compile phase */
@@ -8246,8 +8248,8 @@ static int
 compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
   uint32_t **pptrptr, int *errorcodeptr, uint32_t skipunits,
   uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr,
-  uint32_t *reqcuflagsptr, branch_chain *bcptr, compile_block *cb,
-  PCRE2_SIZE *lengthptr)
+  uint32_t *reqcuflagsptr, branch_chain *bcptr, open_capitem *open_caps,
+  compile_block *cb, PCRE2_SIZE *lengthptr)
 {
 PCRE2_UCHAR *code = *codeptr;
 PCRE2_UCHAR *last_branch = code;
@@ -8314,9 +8316,9 @@ if (*code == OP_CBRA)
   {
   capnumber = GET2(code, 1 + LINK_SIZE);
   capitem.number = capnumber;
-  capitem.next = cb->open_caps;
+  capitem.next = open_caps;
   capitem.assert_depth = cb->assert_depth;
-  cb->open_caps = &capitem;
+  open_caps = &capitem;
   }
 
 /* Offset is set zero to mark that this bracket is still open */
@@ -8345,7 +8347,7 @@ for (;;)
   if ((branch_return =
         compile_branch(&options, &xoptions, &code, &pptr, errorcodeptr,
           &branchfirstcu, &branchfirstcuflags, &branchreqcu, &branchreqcuflags,
-          &bc, cb, (lengthptr == NULL)? NULL : &length)) == 0)
+          &bc, open_caps, cb, (lengthptr == NULL)? NULL : &length)) == 0)
     return 0;
 
   /* If a branch can match an empty string, so can the whole group. */
@@ -8442,10 +8444,6 @@ for (;;)
     *code = OP_KET;
     PUT(code, 1, (int)(code - start_bracket));
     code += 1 + LINK_SIZE;
-
-    /* If it was a capturing subpattern, remove the block from the chain. */
-
-    if (capnumber > 0) cb->open_caps = cb->open_caps->next;
 
     /* Set values to pass back */
 
@@ -10046,7 +10044,6 @@ cb.name_table = NULL;
 cb.named_groups = named_groups;
 cb.named_group_list_size = NAMED_GROUP_LIST_SIZE;
 cb.names_found = 0;
-cb.open_caps = NULL;
 cb.parens_depth = 0;
 cb.parsed_pattern = stack_parsed_pattern;
 cb.req_varyopt = 0;
@@ -10378,8 +10375,8 @@ code = cworkspace;
 *code = OP_BRA;
 
 (void)compile_regex(cb.external_options, ccontext->extra_options, &code, &pptr,
-   &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, &cb,
-   &length);
+   &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, NULL,
+   &cb, &length);
 
 if (errorcode != 0) goto HAD_CB_ERROR;  /* Offset is in cb.erroroffset */
 
@@ -10457,7 +10454,6 @@ cb.start_code = codestart;
 cb.req_varyopt = 0;
 cb.had_accept = FALSE;
 cb.had_pruneorskip = FALSE;
-cb.open_caps = NULL;
 
 /* If any named groups were found, create the name/number table from the list
 created in the pre-pass. */
@@ -10478,7 +10474,7 @@ code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
 regexrc = compile_regex(re->overall_options, ccontext->extra_options, &code,
   &pptr, &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL,
-  &cb, NULL);
+  NULL, &cb, NULL);
 if (regexrc < 0) re->flags |= PCRE2_MATCH_EMPTY;
 re->top_bracket = cb.bracount;
 re->top_backref = cb.top_backref;
