@@ -90,6 +90,7 @@ static SLJIT_INLINE void apple_update_wx_flags(sljit_s32 enable_exec)
 #endif /* SLJIT_CONFIG_X86 */
 #else /* !TARGET_OS_OSX */
 #define SLJIT_MAP_JIT	(MAP_JIT)
+#define SLJIT_UPDATE_WX_FLAGS(from, to, enable_exec)
 #endif /* TARGET_OS_OSX */
 
 static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
