@@ -76,7 +76,7 @@ Script Extensions and Boolean properties, there may be a mixture of positive
 and negative requirements. All must be satisfied.
 
 Sequences of two or more characters are shown as ranges, for example
-U+0041..U+004A. No more than 100 lines are are output. If there are more
+U+0041..U+004A. No more than 100 lines are output. If there are more
 characters, the list ends with ...
 
 The command "list" must be followed by one of property names script, bool,

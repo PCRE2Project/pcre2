@@ -1856,7 +1856,7 @@ if (slen > 200)
 
 for (int i = 1; p != NULL; p = p->next, i++)
   {
-  int rc = pcre2_match(p->compiled, (PCRE2_SPTR)matchptr, (int)length,
+  int rc = pcre2_match(p->compiled, (PCRE2_SPTR)matchptr, length,
     startoffset, options, match_data, match_context);
   if (rc == PCRE2_ERROR_NOMATCH) continue;
 
