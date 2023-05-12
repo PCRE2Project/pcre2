@@ -5753,8 +5753,8 @@ for (;; pptr++)
 
     If the class contains characters outside the 0-255 range, a different
     opcode is compiled. It may optionally have a bit map for characters < 256,
-    but those above are are explicitly listed afterwards. A flag code unit
-    tells whether the bitmap is present, and whether this is a negated class or
+    but those above are explicitly listed afterwards. A flag code unit tells
+    whether the bitmap is present, and whether this is a negated class or
     not. */
 
     case META_CLASS_NOT:
