@@ -1913,4 +1913,10 @@ Partial match:
     qchq\=ps
 Partial match: 
 
+/line1\nbreak/firstline,utf,match_invalid_utf
+    line1\nbreak
+ 0: line1\x{0a}break
+    line0\nline1\nbreak
+No match
+
 # End of testinput10
