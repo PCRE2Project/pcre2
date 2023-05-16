@@ -5940,4 +5940,11 @@ a)"xI
 /abcd/
     abcd\=ovector=65536
 
+# Use recurse to test \K and Mark in atomic scope.
+/(?>this line\s*((?R)|)\K)/
+    this line this line this line
+
+/(?>this line\s*((?R)|)(*MARK:A))/
+    this line this line this line
+
 # End of testinput2

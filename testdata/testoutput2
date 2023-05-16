@@ -17756,6 +17756,17 @@ Subject length lower bound = 2
     abcd\=ovector=65536
  0: abcd
 
+# Use recurse to test \K and Mark in atomic scope.
+/(?>this line\s*((?R)|)\K)/
+    this line this line this line
+ 0: 
+ 1: this line this line
+
+/(?>this line\s*((?R)|)(*MARK:A))/
+    this line this line this line
+ 0: this line this line this line
+ 1: this line this line
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -636,4 +636,8 @@
     qchq\=ph
     qchq\=ps
 
+/line1\nbreak/firstline,utf,match_invalid_utf
+    line1\nbreak
+    line0\nline1\nbreak
+
 # End of testinput10
