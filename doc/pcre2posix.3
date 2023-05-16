@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "26 April 2021" "PCRE2 10.37"
+.TH PCRE2POSIX 3 "13 May 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -44,7 +44,12 @@ can be accessed by adding \fB-lpcre2-posix\fP to the command for linking an
 application. Because the POSIX functions call the native ones, it is also
 necessary to add \fB-lpcre2-8\fP.
 .P
-Although they were not defined as protypes in \fBpcre2posix.h\fP, releases
+On Windows systems, if you are linking to a DLL version of the library, it is
+recommended that \fBPCRE2POSIX_SHARED\fP is defined before including the
+\fBpcre2posix.h\fP header, as it will allow for a more efficient way to
+invoke the functions by adding the \fB__declspec(dllimport)\fP decorator.
+.P
+Although they were not defined as prototypes in \fBpcre2posix.h\fP, releases
 10.33 to 10.36 of the library contained functions with the POSIX names
 \fBregcomp()\fP etc. These simply passed their arguments to the PCRE2
 functions. These functions were provided for backwards compatibility with
