@@ -865,14 +865,14 @@ static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, P
 {
 DEFINE_COMPILER;
 int_char ic;
-struct sljit_jump *partial_quit;
+struct sljit_jump *partial_quit, *quit;
 /* Save temporary registers. */
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, TMP3, 0);
 
 /* Prepare function arguments */
 OP1(SLJIT_MOV, SLJIT_R0, 0, STR_END, 0);
-OP1(SLJIT_MOV, SLJIT_R1, 0, STR_PTR, 0);
+GET_LOCAL_BASE(SLJIT_R1, 0, LOCALS0);
 OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, offset);
 
 if (char1 == char2)
@@ -944,9 +944,14 @@ if (common->mode == PCRE2_JIT_COMPLETE)
 
 /* Fast forward STR_PTR to the result of memchr. */
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
-
 if (common->mode != PCRE2_JIT_COMPLETE)
+  {
+  quit = CMP(SLJIT_NOT_ZERO, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
   JUMPHERE(partial_quit);
+  OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
+  CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+  JUMPHERE(quit);
+  }
 }
 
 typedef enum {
@@ -1071,7 +1076,7 @@ else
   CMOV(SLJIT_LESS, SLJIT_R0, STR_END, 0);
   }
 
-OP1(SLJIT_MOV, SLJIT_R1, 0, STR_PTR, 0); 
+GET_LOCAL_BASE(SLJIT_R1, 0, LOCALS0);
 OP1(SLJIT_MOV_S32, SLJIT_R2, 0, SLJIT_IMM, offs1);
 OP1(SLJIT_MOV_S32, SLJIT_R3, 0, SLJIT_IMM, offs2);
 ic.c.c1 = char1a;
