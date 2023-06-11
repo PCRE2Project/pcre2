@@ -34,7 +34,7 @@ if("@REQUIRE_PTHREAD@") # REQUIRE_PTHREAD
   find_dependency(Threads)
 endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/@TARGETS_EXPORT_NAME@.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/pcre2-targets.cmake")
 
 # Set version
 set(PCRE2_VERSION "@PCRE2_MAJOR@.@PCRE2_MINOR@.0")
