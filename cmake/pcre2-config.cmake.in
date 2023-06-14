@@ -43,19 +43,20 @@ set(PCRE2_VERSION "@PCRE2_MAJOR@.@PCRE2_MINOR@.0")
 # Chooses the linkage of the library to expose in the
 # unsuffixed edition of the target.
 macro(_pcre2_add_component_target component target)
-  # If the static or shared editions of the library exist,
-  # we mark that we found the package itself and the corresponding component.
-  if (TARGET pcre2::pcre2-${target}-static OR TARGET pcre2::pcre2-${target}-shared)
-    set(PCRE2_${component}_FOUND TRUE)
-  endif()
   # If the static library exists and either PCRE2_USE_STATIC_LIBS
   # is defined, or the dynamic library does not exist, use the static library.
   if (NOT TARGET PCRE2::${component})
     if (TARGET pcre2::pcre2-${target}-static AND (PCRE2_USE_STATIC_LIBS OR NOT TARGET pcre2::pcre2-${target}-shared))
       add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-static)
+      set(PCRE2_${component}_FOUND TRUE)
     # Otherwise use the dynamic library if it exists.
     elseif(TARGET pcre2::pcre2-${target}-shared)
       add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-shared)
+      set(PCRE2_${component}_FOUND TRUE)
+    endif()
+    if (PCRE2_${component}_FOUND)
+      get_target_property(PCRE2_${component}_LIBRARY PCRE2::${component} IMPORTED_LOCATION)
+      set(PCRE2_LIBRARIES ${PCRE2_LIBRARIES} ${PCRE2_${component}_LIBRARY})
     endif()
   endif()
 endmacro()
