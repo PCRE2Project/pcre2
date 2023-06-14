@@ -46,7 +46,6 @@ macro(_pcre2_add_component_target component target)
   # If the static or shared editions of the library exist,
   # we mark that we found the package itself and the corresponding component.
   if (TARGET pcre2::pcre2-${target}-static OR TARGET pcre2::pcre2-${target}-shared)
-    set(PCRE2_FOUND TRUE)
     set(PCRE2_${component}_FOUND TRUE)
   endif()
   # If the static library exists and either PCRE2_USE_STATIC_LIBS
