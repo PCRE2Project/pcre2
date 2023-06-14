@@ -5,9 +5,10 @@
 #
 # Static vs. shared
 # -----------------
-# To make use of the static library instead of the shared one if both have been
-# built, one needs to set the variable PCRE2_USE_STATIC_LIBS to ON before calling find_package.
-# PCRE2_USE_STATIC_LIBS will be ignored if only the static or the shared library has been built.
+# To force using the static library instead of the shared one, one needs
+# to set the variable PCRE2_USE_STATIC_LIBS to ON before calling find_package.
+# If the variable is not set, the static library will be used if only that has
+# been built, otherwise the shared library will be used.
 #
 # The following components are supported: 8BIT, 16BIT, 32BIT and POSIX.
 # They used to be required but not anymore; all available targets will
@@ -45,16 +46,16 @@ set(PCRE2_VERSION "@PCRE2_MAJOR@.@PCRE2_MINOR@.0")
 macro(_pcre2_add_component_target component target)
   # If the static library exists and either PCRE2_USE_STATIC_LIBS
   # is defined, or the dynamic library does not exist, use the static library.
-  if (NOT TARGET PCRE2::${component})
-    if (TARGET pcre2::pcre2-${target}-static AND (PCRE2_USE_STATIC_LIBS OR NOT TARGET pcre2::pcre2-${target}-shared))
+  if(NOT TARGET PCRE2::${component})
+    if(TARGET pcre2::pcre2-${target}-static AND (PCRE2_USE_STATIC_LIBS OR NOT TARGET pcre2::pcre2-${target}-shared))
       add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-static)
       set(PCRE2_${component}_FOUND TRUE)
     # Otherwise use the dynamic library if it exists.
-    elseif(TARGET pcre2::pcre2-${target}-shared)
+    elseif(TARGET pcre2::pcre2-${target}-shared AND NOT PCRE2_USE_STATIC_LIBS)
       add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-shared)
       set(PCRE2_${component}_FOUND TRUE)
     endif()
-    if (PCRE2_${component}_FOUND)
+    if(PCRE2_${component}_FOUND)
       get_target_property(PCRE2_${component}_LIBRARY PCRE2::${component} IMPORTED_LOCATION)
       set(PCRE2_LIBRARIES ${PCRE2_LIBRARIES} ${PCRE2_${component}_LIBRARY})
     endif()
