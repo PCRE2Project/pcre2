@@ -5,8 +5,9 @@
 #
 # Static vs. shared
 # -----------------
-# To make use of the static library instead of the shared one, one needs
-# to set the variable PCRE2_USE_STATIC_LIBS to ON before calling find_package.
+# To make use of the static library instead of the shared one if both have been
+# built, one needs to set the variable PCRE2_USE_STATIC_LIBS to ON before calling find_package.
+# PCRE2_USE_STATIC_LIBS will be ignored if only the static or the shared library has been built.
 #
 # The following components are supported: 8BIT, 16BIT, 32BIT and POSIX.
 # They used to be required but not anymore; all available targets will
