@@ -263,10 +263,16 @@ defined therein. This ensures that PRIV names in the included files do not
 clash with those in the libraries. Also, although pcre2_internal.h does itself
 include pcre2.h, we explicitly include it beforehand, along with pcre2posix.h,
 so that the PCRE2_EXP_xxx macros get set appropriately for an application, not
-for building the library. */
+for building the library.
+
+Setting PCRE2_CODE_UNIT_WIDTH to zero cuts out all the width-specific settings
+in pcre2.h and pcre2_internal.h. Defining PCRE2_BUILDING_PCRE2TEST cuts out the
+check in pcre2_internal.h that ensures PCRE2_CODE_UNIT_WIDTH is 8, 16, or 32
+(which it needs to be when compiling one of the libraries). */
 
 #define PRIV(name) name
 #define PCRE2_CODE_UNIT_WIDTH 0
+#define PCRE2_BUILDING_PCRE2TEST
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
