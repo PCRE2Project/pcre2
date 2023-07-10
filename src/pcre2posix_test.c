@@ -22,6 +22,10 @@ zero. If any test fails there is output to stderr, and the return code is 1.
 For testing purposes, the "-v" option causes verification output to be written
 to stdout. */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <pcre2posix.h>
