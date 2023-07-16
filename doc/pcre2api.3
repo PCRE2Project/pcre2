@@ -1824,8 +1824,8 @@ Note also that setting PCRE2_NO_UTF_CHECK at compile time does not disable the
 error that is given if an escape sequence for an invalid Unicode code point is
 encountered in the pattern. In particular, the so-called "surrogate" code
 points (0xd800 to 0xdfff) are invalid. If you want to allow escape sequences
-such as \ex{d800} you can set the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
-option, as described in the section entitled "Extra compile options"
+such as \ex{d800} you can set the PCRE2_EXTRA_ALLOW_SURROGATES extra option,
+as described in the section entitled "Extra compile options"
 .\" HTML <a href="#extracompileoptions">
 .\" </a>
 below.
@@ -1907,7 +1907,7 @@ assertions, following Perl's lead. This option is provided to re-enable the
 previous behaviour (act in positive lookarounds, ignore in negative ones) in
 case anybody is relying on it.
 .sp
-  PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
+  PCRE2_EXTRA_ALLOW_SURROGATES
 .sp
 This option applies when compiling a pattern in UTF-8 or UTF-32 mode. It is
 forbidden in UTF-16 mode, and ignored in non-UTF modes. Unicode "surrogate"
@@ -1924,10 +1924,16 @@ for the surrogates using escape sequences. The PCRE2_NO_UTF_CHECK option does
 not disable the error that occurs, because it applies only to the testing of
 input strings for UTF validity.
 .P
-If the extra option PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is set, surrogate code
-point values in UTF-8 and UTF-32 patterns no longer provoke errors and are
+If the extra option PCRE2_EXTRA_ALLOW_SURROGATES is set, surrogate code point
+values in UTF-8 and UTF-32 patterns no longer provoke errors and are
 incorporated in the compiled pattern. However, they can only match subject
 characters if the matching function is called with PCRE2_NO_UTF_CHECK set.
+.P
+Before 10.43 this option was known as PCRE2_EXTRA_ALLOW_SURROGATES and that
+is still available for backward compatibility, but the new name should be used
+in new code to better reflect that it also applies to characters in that range
+in UTF-32 as part ot the pattern or subject, including characters encoded in
+UTF-8 if found in the subject.
 .sp
   PCRE2_EXTRA_ALT_BSUX
 .sp

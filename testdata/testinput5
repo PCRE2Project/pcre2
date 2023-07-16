@@ -912,6 +912,16 @@
 \= Expect no match
     \x{09f}
 
+/^\p{Cs}/match_invalid_utf
+\= Expect no match
+    \x{dfff}\=no_utf_check
+    \x{09f}
+
+/^\p{Cs}/match_invalid_utf,allow_surrogates
+    \x{dfff}\=no_utf_check
+\= Expect no match
+    \x{09f}
+
 /^\p{Mn}/utf
     \x{1a1b}
 

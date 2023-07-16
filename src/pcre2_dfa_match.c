@@ -3575,7 +3575,8 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   offset to be an absolute offset in the whole string. */
 
   match_data->rc = PRIV(valid_utf)(check_subject,
-    length - (PCRE2_SIZE)(check_subject - subject), &(match_data->startchar));
+                          length - (PCRE2_SIZE)(check_subject - subject),
+                          &(match_data->startchar), TRUE);
   if (match_data->rc != 0)
     {
     match_data->startchar += (PCRE2_SIZE)(check_subject - subject);

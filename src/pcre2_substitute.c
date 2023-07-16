@@ -345,7 +345,7 @@ if (length == PCRE2_ZERO_TERMINATED)
 #ifdef SUPPORT_UNICODE
 if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-  rc = PRIV(valid_utf)(replacement, rlength, &(match_data->startchar));
+  rc = PRIV(valid_utf)(replacement, rlength, &(match_data->startchar), TRUE);
   if (rc != 0)
     {
     match_data->leftchar = 0;

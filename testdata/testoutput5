@@ -1972,6 +1972,20 @@ No match
     \x{09f}
 No match
 
+/^\p{Cs}/match_invalid_utf
+\= Expect no match
+    \x{dfff}\=no_utf_check
+No match
+    \x{09f}
+No match
+
+/^\p{Cs}/match_invalid_utf,allow_surrogates
+    \x{dfff}\=no_utf_check
+ 0: \x{dfff}
+\= Expect no match
+    \x{09f}
+No match
+
 /^\p{Mn}/utf
     \x{1a1b}
  0: \x{1a1b}

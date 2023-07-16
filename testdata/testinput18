@@ -17,7 +17,7 @@
   
 /a(())bc/parens_nest_limit=1
 
-/abc/allow_surrogate_escapes,max_pattern_length=2
+/abc/allow_surrogates,max_pattern_length=2
 
 # Real tests
 

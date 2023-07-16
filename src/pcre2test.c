@@ -349,7 +349,7 @@ widths are actually available, because the input to pcre2test is always in
 8-bit code units. So we include the UTF validity checking function for 8-bit
 code units. */
 
-extern int valid_utf(PCRE2_SPTR8, PCRE2_SIZE, PCRE2_SIZE *);
+extern int valid_utf(PCRE2_SPTR8, PCRE2_SIZE, PCRE2_SIZE *, BOOL);
 
 #define  PCRE2_CODE_UNIT_WIDTH 8
 #undef   PCRE2_SPTR
@@ -645,7 +645,7 @@ static modstruct modlist[] = {
   { "allcaptures",                 MOD_PND,  MOD_CTL, CTL_ALLCAPTURES,            PO(control) },
   { "allow_empty_class",           MOD_PAT,  MOD_OPT, PCRE2_ALLOW_EMPTY_CLASS,    PO(options) },
   { "allow_lookaround_bsk",        MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, CO(extra_options) },
-  { "allow_surrogate_escapes",     MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES, CO(extra_options) },
+  { "allow_surrogates",            MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALLOW_SURROGATES, CO(extra_options) },
   { "allusedtext",                 MOD_PNDP, MOD_CTL, CTL_ALLUSEDTEXT,            PO(control) },
   { "allvector",                   MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },
   { "alt_bsux",                    MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
@@ -4310,7 +4310,7 @@ show_compile_extra_options(uint32_t options, const char *before,
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
 else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
-  ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
+  ((options & PCRE2_EXTRA_ALLOW_SURROGATES) != 0)? " allow_surrogates" : "",
   ((options & PCRE2_EXTRA_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_EXTRA_ASCII_BSD) != 0)? " ascii_bsd" : "",
   ((options & PCRE2_EXTRA_ASCII_BSS) != 0)? " ascii_bss" : "",
@@ -7580,7 +7580,7 @@ if (dat_datctl.replacement[0] != 0)
   is detected. Otherwise, UTF-8 can be used to include wide characters in a
   replacement. */
 
-  if (utf) badutf = valid_utf(pr, strlen((const char *)pr), &erroroffset);
+  if (utf) badutf = valid_utf(pr, strlen((const char *)pr), &erroroffset, TRUE);
 
   /* Not UTF or invalid UTF-8: just copy the code units. */
 

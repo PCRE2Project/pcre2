@@ -783,7 +783,7 @@ are allowed. */
 
 #define PUBLIC_COMPILE_EXTRA_OPTIONS \
    (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
-    PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
+    PCRE2_EXTRA_ALLOW_SURROGATES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
     PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
     PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
     PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX| \
@@ -1691,7 +1691,7 @@ else
         if (c > 0x10ffffU) *errorcodeptr = ERR77;
         else
           if (c >= 0xd800 && c <= 0xdfff &&
-              (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+              (xoptions & PCRE2_EXTRA_ALLOW_SURROGATES) == 0)
                 *errorcodeptr = ERR73;
         }
       else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77;
@@ -1886,7 +1886,7 @@ else
       else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
         {
         if (utf && c >= 0xd800 && c <= 0xdfff &&
-            (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+            (xoptions & PCRE2_EXTRA_ALLOW_SURROGATES) == 0)
           {
           ptr--;
           *errorcodeptr = ERR73;
@@ -1959,7 +1959,7 @@ else
         else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
           {
           if (utf && c >= 0xd800 && c <= 0xdfff &&
-              (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+              (xoptions & PCRE2_EXTRA_ALLOW_SURROGATES) == 0)
             {
             ptr--;
             *errorcodeptr = ERR73;
@@ -10174,23 +10174,29 @@ if ((cb.external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)
 
 /* Check UTF. We have the original options in 'options', with that value as
 modified by (*UTF) etc in cb->external_options. The extra option
-PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not permitted in UTF-16 mode because the
+PCRE2_EXTRA_ALLOW_SURROGATES is not permitted in UTF-16 mode because the
 surrogate code points cannot be represented in UTF-16. */
 
 utf = (cb.external_options & PCRE2_UTF) != 0;
 if (utf)
   {
+  BOOL strict = TRUE;
+
+#if PCRE2_CODE_UNIT_WIDTH != 16
+  strict = (ccontext->extra_options & PCRE2_EXTRA_ALLOW_SURROGATES) == 0;
+#endif
+
   if ((options & PCRE2_NEVER_UTF) != 0)
     {
     errorcode = ERR74;
     goto HAD_EARLY_ERROR;
     }
   if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
-       (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
+       (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset, strict)) != 0)
     goto HAD_ERROR;  /* Offset was set by valid_utf() */
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
-  if ((ccontext->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)
+  if ((ccontext->extra_options & PCRE2_EXTRA_ALLOW_SURROGATES) != 0)
     {
     errorcode = ERR91;
     goto HAD_EARLY_ERROR;

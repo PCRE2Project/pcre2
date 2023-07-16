@@ -224,7 +224,7 @@ Unicode doesn't go beyond 0x0010ffff. */
 
 /* This is the largest valid UTF/Unicode code point. */
 
-#define MAX_UTF_CODE_POINT 0x10ffff
+#define MAX_UTF_CODE_POINT 0x10ffffu
 
 /* Compile-time positive error numbers (all except UTF errors, which are
 negative) start at this value. It should probably never be changed, in case
@@ -2054,7 +2054,8 @@ extern PCRE2_SIZE   _pcre2_strlen(PCRE2_SPTR);
 extern int          _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int          _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);
 extern int          _pcre2_study(pcre2_real_code *);
-extern int          _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *);
+extern int          _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *,
+                      BOOL);
 extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
 extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);

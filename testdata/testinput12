@@ -367,10 +367,10 @@
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
 
-/\x{d800}/I,utf,allow_surrogate_escapes
+/\x{d800}/I,utf,allow_surrogates
     \x{d800}\=no_utf_check
 
-/\udfff\o{157401}/utf,alt_bsux,allow_surrogate_escapes
+/\udfff\o{157401}/utf,alt_bsux,allow_surrogates
     \x{dfff}\x{df01}\=no_utf_check
 
 # This has different starting code units in 8-bit mode. 
@@ -394,7 +394,7 @@
     \x{30a1}\x{3041}\x{3007}\x{3007}   Katakana Hiragana Han Han
     \x{1100}\x{2e80}\x{2e80}\x{1101}   Hangul Han Han Hangul
  
-/^(*sr:.*)/utf,allow_surrogate_escapes
+/^(*sr:.*)/utf,allow_surrogates
     \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
     \x{d800}\x{dfff}                   Surrogates (Unknown) \=no_utf_check
 

@@ -1090,7 +1090,7 @@ if (utf)
 if (utf && (options & PCRE2_CONVERT_NO_UTF_CHECK) == 0)
   {
   PCRE2_SIZE erroroffset;
-  rc = PRIV(valid_utf)(pattern, plength, &erroroffset);
+  rc = PRIV(valid_utf)(pattern, plength, &erroroffset, TRUE);
   if (rc != 0)
     {
     *bufflenptr = erroroffset;

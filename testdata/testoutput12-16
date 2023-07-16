@@ -1425,12 +1425,12 @@ No match
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
 
-/\x{d800}/I,utf,allow_surrogate_escapes
-Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+/\x{d800}/I,utf,allow_surrogates
+Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATES is not allowed in UTF-16 mode
     \x{d800}\=no_utf_check
 
-/\udfff\o{157401}/utf,alt_bsux,allow_surrogate_escapes
-Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+/\udfff\o{157401}/utf,alt_bsux,allow_surrogates
+Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATES is not allowed in UTF-16 mode
     \x{dfff}\x{df01}\=no_utf_check
 
 # This has different starting code units in 8-bit mode. 
@@ -1491,8 +1491,8 @@ No match
     \x{1100}\x{2e80}\x{2e80}\x{1101}   Hangul Han Han Hangul
  0: \x{1100}\x{2e80}\x{2e80}\x{1101}
  
-/^(*sr:.*)/utf,allow_surrogate_escapes
-Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+/^(*sr:.*)/utf,allow_surrogates
+Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATES is not allowed in UTF-16 mode
     \x{2e80}\x{3105}\x{2e80}\x{30a1}   Han Bopomofo Han Katakana
     \x{d800}\x{dfff}                   Surrogates (Unknown) \=no_utf_check
 
