@@ -633,6 +633,7 @@ PATTERN MODIFIERS
              memory                    show memory used
              newline=<type>            set newline type
              null_context              compile with a NULL context
+             null_pattern              pass pattern as NULL
              parens_nest_limit=<n>     set maximum parentheses depth
              posix                     use the POSIX API
              posix_nosub               use the POSIX API with REG_NOSUB
@@ -723,6 +724,13 @@ PATTERN MODIFIERS
        null_context  modifier  is  set,  however,  NULL is passed. This is for
        testing that pcre2_compile() behaves correctly in this  case  (it  uses
        default values).
+
+   Passing a NULL pattern
+
+       The  null_pattern  modifier  is for testing the behaviour of pcre2_com-
+       pile() when the pattern argument is NULL. The length  value  passed  is
+       the default PCRE2_ZERO_TERMINATED unless use_length is set.  Any length
+       other than zero causes an error.
 
    Specifying pattern characters in hexadecimal
 
@@ -1977,8 +1985,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 February 2023
+       Last updated: 17 July 2023
        Copyright (c) 1997-2023 University of Cambridge.
 
 
-PCRE 10.43                     04 February 2023                   PCRE2TEST(1)
+PCRE 10.43                       17 July 2023                     PCRE2TEST(1)
