@@ -5946,5 +5946,16 @@ a)"xI
 
 /(?>this line\s*((?R)|)(*MARK:A))/
     this line this line this line
+    
+# Check use of NULL pattern with zero length.
+
+//null_pattern,use_length
+    abc
+    
+//null_pattern
+
+/bad null pattern/null_pattern,use_length
+
+/bad null pattern/null_pattern
 
 # End of testinput2

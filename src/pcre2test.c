@@ -528,9 +528,10 @@ so many of them that they are split into two fields. */
 #define CTL2_CALLOUT_NO_WHERE            0x00000200u
 #define CTL2_CALLOUT_EXTRA               0x00000400u
 #define CTL2_ALLVECTOR                   0x00000800u
-#define CTL2_NULL_SUBJECT                0x00001000u
-#define CTL2_NULL_REPLACEMENT            0x00002000u
-#define CTL2_FRAMESIZE                   0x00004000u
+#define CTL2_NULL_PATTERN                0x00001000u
+#define CTL2_NULL_SUBJECT                0x00002000u
+#define CTL2_NULL_REPLACEMENT            0x00004000u
+#define CTL2_FRAMESIZE                   0x00008000u
 
 #define CTL2_HEAPFRAMES_SIZE             0x20000000u  /* Informational */
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
@@ -735,6 +736,7 @@ static modstruct modlist[] = {
   { "notempty_atstart",            MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,     DO(options) },
   { "noteol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTEOL,               DO(options) },
   { "null_context",                MOD_PD,   MOD_CTL, CTL_NULLCONTEXT,            PO(control) },
+  { "null_pattern",                MOD_PAT,  MOD_CTL, CTL2_NULL_PATTERN,          PO(control2) },
   { "null_replacement",            MOD_DAT,  MOD_CTL, CTL2_NULL_REPLACEMENT,      DO(control2) },
   { "null_subject",                MOD_DAT,  MOD_CTL, CTL2_NULL_SUBJECT,          DO(control2) },
   { "offset",                      MOD_DAT,  MOD_INT, 0,                          DO(offset) },
@@ -1169,11 +1171,11 @@ are supported. */
 
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == PCRE8_MODE) \
-    G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,g); \
+    G(a,8) = pcre2_compile_8(b,c,d,e,f,g); \
   else if (test_mode == PCRE16_MODE) \
-    G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,g); \
+    G(a,16) = pcre2_compile_16(b,c,d,e,f,g); \
   else \
-    G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,g)
+    G(a,32) = pcre2_compile_32(b,c,d,e,f,g)
 
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   if (test_mode == PCRE8_MODE) pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a); \
@@ -1712,9 +1714,9 @@ the three different cases. */
 
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(a,BITONE) = G(pcre2_compile_,BITONE)(G(b,BITONE),c,d,e,f,g); \
+    G(a,BITONE) = G(pcre2_compile_,BITONE)(b,c,d,e,f,g); \
   else \
-    G(a,BITTWO) = G(pcre2_compile_,BITTWO)(G(b,BITTWO),c,d,e,f,g)
+    G(a,BITTWO) = G(pcre2_compile_,BITTWO)(b,c,d,e,f,g)
 
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2100,8 +2102,7 @@ the three different cases. */
 #define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,8) = pcre2_code_copy_8(b)
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_8(G(b,8))
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_8(G(b,8))
-#define PCRE2_COMPILE(a,b,c,d,e,f,g) \
-  G(a,8) = pcre2_compile_8(G(b,8),c,d,e,f,g)
+#define PCRE2_COMPILE(a,b,c,d,e,f,g) G(a,8) = pcre2_compile_8(b,c,d,e,f,g)
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -2210,8 +2211,7 @@ the three different cases. */
 #define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,16) = pcre2_code_copy_16(b)
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_16(G(b,16))
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_16(G(b,16))
-#define PCRE2_COMPILE(a,b,c,d,e,f,g) \
-  G(a,16) = pcre2_compile_16(G(b,16),c,d,e,f,g)
+#define PCRE2_COMPILE(a,b,c,d,e,f,g) G(a,16) = pcre2_compile_16(b,c,d,e,f,g)
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   pcre2_converted_pattern_free_16((PCRE2_UCHAR16 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -2320,8 +2320,7 @@ the three different cases. */
 #define PCRE2_CODE_COPY_FROM_VOID(a,b) G(a,32) = pcre2_code_copy_32(b)
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_32(G(b,32))
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_32(G(b,32))
-#define PCRE2_COMPILE(a,b,c,d,e,f,g) \
-  G(a,32) = pcre2_compile_32(G(b,32),c,d,e,f,g)
+#define PCRE2_COMPILE(a,b,c,d,e,f,g) G(a,32) = pcre2_compile_32(b,c,d,e,f,g)
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   pcre2_converted_pattern_free_32((PCRE2_UCHAR32 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -5243,6 +5242,7 @@ uint8_t *p = buffer;
 unsigned int delimiter = *p++;
 int errorcode;
 void *use_pat_context;
+void *use_pbuffer = NULL;
 uint32_t use_forbid_utf = forbid_utf;
 PCRE2_SIZE patlen;
 PCRE2_SIZE valgrind_access_length;
@@ -5932,6 +5932,21 @@ and PCRE2_NEVER_UCP are invalid with it. */
 
 if ((pat_patctl.options & PCRE2_LITERAL) != 0) use_forbid_utf = 0;
 
+/* Set use_pbuffer to the input buffer, or leave it as NULL if requested. */
+
+if ((pat_patctl.control2 & CTL2_NULL_PATTERN) == 0)
+  {
+#ifdef SUPPORT_PCRE2_8
+  if (test_mode == PCRE8_MODE) use_pbuffer = pbuffer8;
+#endif
+#ifdef SUPPORT_PCRE2_16
+  if (test_mode == PCRE16_MODE) use_pbuffer = pbuffer16;
+#endif
+#ifdef SUPPORT_PCRE2_32
+  if (test_mode == PCRE32_MODE) use_pbuffer = pbuffer32;
+#endif
+  }
+
 /* Compile many times when timing. */
 
 if (timeit > 0)
@@ -5941,7 +5956,7 @@ if (timeit > 0)
   for (i = 0; i < timeit; i++)
     {
     clock_t start_time = clock();
-    PCRE2_COMPILE(compiled_code, pbuffer, patlen,
+    PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
       pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
     time_taken += clock() - start_time;
@@ -5955,8 +5970,8 @@ if (timeit > 0)
 
 /* A final compile that is used "for real". */
 
-PCRE2_COMPILE(compiled_code, pbuffer, patlen, pat_patctl.options|use_forbid_utf,
-  &errorcode, &erroroffset, use_pat_context);
+PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
+  pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
 
 /* Call the JIT compiler if requested. When timing, we must free and recompile
 the pattern each time because that is the only way to free the JIT compiled
@@ -5973,7 +5988,7 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
       {
       clock_t start_time;
       SUB1(pcre2_code_free, compiled_code);
-      PCRE2_COMPILE(compiled_code, pbuffer, patlen,
+      PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
         pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
       start_time = clock();

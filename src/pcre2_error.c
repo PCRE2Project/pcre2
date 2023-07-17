@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ static const unsigned char compile_error_texts[] =
   "missing closing parenthesis\0"
   /* 15 */
   "reference to non-existent subpattern\0"
-  "pattern passed as NULL\0"
+  "pattern passed as NULL with non-zero length\0"
   "unrecognised compile-time option bit(s)\0"
   "missing ) after (?# comment\0"
   "parentheses are too deeply nested\0"

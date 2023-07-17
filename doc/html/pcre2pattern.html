@@ -1517,10 +1517,10 @@ supported, and an error is given if they are encountered.
 <P>
 By default, characters with values greater than 127 do not match any of the
 POSIX character classes, although this may be different for characters in the
-range 128-255 when locale-specific matching is happening. However, if the
-PCRE2_UCP option is set, some of the classes are changed so that Unicode
-character properties are used. This is achieved by replacing certain POSIX
-classes with other sequences, as follows:
+range 128-255 when locale-specific matching is happening. However, in UCP mode,
+some of the classes are changed so that Unicode character properties are used.
+This is achieved by replacing certain POSIX classes with other sequences, as
+follows:
 <pre>
   [:alnum:]  becomes  \p{Xan}
   [:alpha:]  becomes  \p{L}

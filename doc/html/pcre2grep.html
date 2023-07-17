@@ -99,6 +99,10 @@ allow for buffering "before" and "after" lines. If the buffer size is too
 small, fewer than requested "before" and "after" lines may be output.
 </P>
 <P>
+When matching with a multiline pattern, the size of the buffer must be at least
+half of the maximum match expected or the pattern might fail to match.
+</P>
+<P>
 Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in <b>&#60;stdio.h&#62;</b>. When there is more than one pattern
 (specified by the use of <b>-e</b> and/or <b>-f</b>), each pattern is applied to
@@ -249,7 +253,7 @@ exactly the same as the number of lines that would have been output, but if the
 suppressed lines than the count (that is, the number of matches).
 <br>
 <br>
-If no lines are selected, the number zero is output. If several files are are
+If no lines are selected, the number zero is output. If several files are
 being scanned, a count is output for each of them and the <b>-t</b> option can
 be used to cause a total to be output at the end. However, if the
 <b>--files-with-matches</b> option is also used, only those files whose counts
@@ -580,8 +584,11 @@ well as possibly handling a two-character newline sequence.
 <br>
 There is a limit to the number of lines that can be matched, imposed by the way
 that <b>pcre2grep</b> buffers the input file as it scans it. With a sufficiently
-large processing buffer, this should not be a problem, but the <b>-M</b> option
-does not work when input is read line by line (see <b>--line-buffered</b>.)
+large processing buffer, this should not be a problem.
+<br>
+<br>
+The <b>-M</b> option does not work when input is read line by line (see
+<b>--line-buffered</b>.)
 </P>
 <P>
 <b>-m</b> <i>number</i>, <b>--max-count</b>=<i>number</i>
@@ -772,12 +779,12 @@ is an empty string. Separating strings are never coloured.
 <b>-P</b>, <b>--no-ucp</b>
 Starting from release 10.43, when UTF/Unicode mode is specified with <b>-u</b>
 or <b>-U</b>, the PCRE2_UCP option is used by default. This means that the
-simple class escapes in patterns match more than just ASCII characters. For
-example, \d matches any Unicode decimal digit. The <b>--no-ucp</b> option
-suppresses PCRE2_UCP, thus restricting the class escapes to ASCII characters,
+POSIX classes in patterns match more than just ASCII characters. For example,
+[:digit:] matches any Unicode decimal digit. The <b>--no-ucp</b> option
+suppresses PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine-grained
-option settings within patterns that affect individual escapes. For example,
-when PCRE2_UCP is set, the sequence (?aD) restricts \d to ASCII digits, while
+option settings within patterns that affect individual classes. For example,
+when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
 allowing \w to match Unicode letters and digits.
 </P>
 <P>

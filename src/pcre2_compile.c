@@ -9968,12 +9968,15 @@ if (errorptr == NULL || erroroffset == NULL) return NULL;
 *errorptr = ERR0;
 *erroroffset = 0;
 
-/* There must be a pattern! */
+/* There must be a pattern, but NULL is allowed with zero length. */
 
 if (pattern == NULL)
   {
-  *errorptr = ERR16;
-  return NULL;
+  if (patlen == 0) pattern = (PCRE2_SPTR)""; else
+    {  
+    *errorptr = ERR16;
+    return NULL;
+    } 
   }
 
 /* A NULL compile context means "use a default context" */

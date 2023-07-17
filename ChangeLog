@@ -88,6 +88,9 @@ the available input buffer. Cause such a test to fail.
 22. Add a check that forces a compiler error if PCRE2_CODE_UNIT_WIDTH is not 8, 
 16, or 32 when compiling any of the library modules.
 
+23. Update pcre2_compile() to treat a NULL pattern with zero length as an empty 
+string.
+
 
 Version 10.42 11-December-2022
 ------------------------------

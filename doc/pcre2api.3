@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "03 February 2023" "PCRE2 10.43"
+.TH PCRE2API 3 "17 July 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1250,10 +1250,12 @@ zero.
 .fi
 .P
 The \fBpcre2_compile()\fP function compiles a pattern into an internal form.
-The pattern is defined by a pointer to a string of code units and a length (in
-code units). If the pattern is zero-terminated, the length can be specified as
-PCRE2_ZERO_TERMINATED. The function returns a pointer to a block of memory that
-contains the compiled pattern and related data, or NULL if an error occurred.
+The pattern is defined by a pointer to a string of code units and a length in
+code units. If the pattern is zero-terminated, the length can be specified as
+PCRE2_ZERO_TERMINATED. A NULL pattern pointer with a length of zero is treated
+as an empty string (NULL with a non-zero length causes an error return). The
+function returns a pointer to a block of memory that contains the compiled
+pattern and related data, or NULL if an error occurred.
 .P
 If the compile context argument \fIccontext\fP is NULL, memory for the compiled
 pattern is obtained by calling \fBmalloc()\fP. Otherwise, it is obtained from
@@ -4130,6 +4132,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 03 February 2023
+Last updated: 17 July 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

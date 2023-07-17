@@ -17766,6 +17766,21 @@ Subject length lower bound = 2
     this line this line this line
  0: this line this line this line
  1: this line this line
+    
+# Check use of NULL pattern with zero length.
+
+//null_pattern,use_length
+    abc
+ 0: 
+    
+//null_pattern
+Failed: error 116 at offset 0: pattern passed as NULL with non-zero length
+
+/bad null pattern/null_pattern,use_length
+Failed: error 116 at offset 0: pattern passed as NULL with non-zero length
+
+/bad null pattern/null_pattern
+Failed: error 116 at offset 0: pattern passed as NULL with non-zero length
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
