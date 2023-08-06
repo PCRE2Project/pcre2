@@ -101,6 +101,7 @@
 # 2021-08-28 PH added test for realpath()
 # 2022-12-10 PH added support for pcre2posix_test
 # 2023-01-15 Carlo added C99 as the minimum required
+# 2023-08-06 PH added support for setting variable length lookbehind maximum
 
 # Increased minimum to 3.3 to support visibility.
 CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
@@ -243,7 +244,7 @@ SET(PCRE2_PARENS_NEST_LIMIT "250" CACHE STRING
 SET(PCRE2_HEAP_LIMIT "20000000" CACHE STRING
     "Default limit on heap memory (kibibytes). See HEAP_LIMIT in config.h.in for details.")
 
-SET(PCRE2_MAX_VARLOOKBEHIND "256" CACHE STRING
+SET(PCRE2_MAX_VARLOOKBEHIND "255" CACHE STRING
     "Default limit on variable lookbehinds.")
 
 SET(PCRE2_MATCH_LIMIT "10000000" CACHE STRING
