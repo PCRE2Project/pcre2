@@ -2790,5 +2790,46 @@
     >AF23<>\x{146}\x{30}<>yz<
 
 # -----------------------------------------------------------------------------
+# Variable-length lookbehinds.
+
+/(?<=áb?c).../g,utf
+    ábcdèfgácxyz
+
+/(?<=PQR|áb?c).../g,utf
+    ábcdèfgácxyzPQR123
+
+/(?<=áb?c|PQR).../g,utf
+    ábcdèfgácxyzPQR123
+
+/(?<=PQ|áb?c).../g,utf
+    ábcdèfgácxyzPQR123
+
+/(?<=áb?c|PQ).../g,utf
+    ábcdèfgácxyzPQR123
+
+/(?<=á(b?c|d?è?è)f)X./g,utf
+     ácfX1zzzáèfX2zzzádèèfX3zzzX4zzz
+
+/(?<!á(b?c|d?è?è)f)X./g,utf
+     ácfX1zzzáèfX2zzzádèèfX3zzzX4zzz
+     
+/(?(?<=áb?c)d|è)/utf
+    ábcdèfg
+    ácdèfg
+    áxdèfg
+    
+/(?<=\d{2,3}|áBC)./utf
+    áBCD   
+
+/(?<=á(b?c){3}d)X/utf
+   ZXácbccdXYZ
+   
+/(?<=á(b?c){0}d)X/utf
+   ZXádXYZ
+ 
+/(?<=á?(b?c){0}d)X./utf
+   ZXádXYZ
+ 
+# -------------------------------------------------------------------------- 
 
 # End of testinput4

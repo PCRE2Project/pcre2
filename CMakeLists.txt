@@ -243,6 +243,9 @@ SET(PCRE2_PARENS_NEST_LIMIT "250" CACHE STRING
 SET(PCRE2_HEAP_LIMIT "20000000" CACHE STRING
     "Default limit on heap memory (kibibytes). See HEAP_LIMIT in config.h.in for details.")
 
+SET(PCRE2_MAX_VARLOOKBEHIND "256" CACHE STRING
+    "Default limit on variable lookbehinds.")
+
 SET(PCRE2_MATCH_LIMIT "10000000" CACHE STRING
     "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details.")
 
@@ -1169,6 +1172,7 @@ IF(PCRE2_SHOW_REPORT)
   MESSAGE(STATUS "  EBCDIC coding with NL=0x25 ...... : ${PCRE2_EBCDIC_NL25}")
   MESSAGE(STATUS "  Rebuild char tables ............. : ${PCRE2_REBUILD_CHARTABLES}")
   MESSAGE(STATUS "  Internal link size .............. : ${PCRE2_LINK_SIZE}")
+  MESSAGE(STATUS "  Maximum variable lookbehind ..... : ${PCRE2_MAX_VARLOOKBEHIND}")
   MESSAGE(STATUS "  Parentheses nest limit .......... : ${PCRE2_PARENS_NEST_LIMIT}")
   MESSAGE(STATUS "  Heap limit ...................... : ${PCRE2_HEAP_LIMIT}")
   MESSAGE(STATUS "  Match limit ..................... : ${PCRE2_MATCH_LIMIT}")

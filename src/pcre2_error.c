@@ -93,7 +93,7 @@ static const unsigned char compile_error_texts[] =
   "internal error: code overflow\0"
   "missing closing parenthesis for condition\0"
   /* 25 */
-  "lookbehind assertion is not fixed length\0"
+  "length of lookbehind assertion is not limited\0"
   "a relative value of zero is not allowed\0"
   "conditional subpattern contains more than two branches\0"
   "assertion expected after (?( or (?(?C)\0"
@@ -187,6 +187,8 @@ static const unsigned char compile_error_texts[] =
   "too many capturing groups (maximum 65535)\0"
   "atomic assertion expected after (?( or (?(?C)\0"
   "\\K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)\0"
+  /* 100 */
+  "branch too long in variable-length lookbehind assertion\0" 
   ;
 
 /* Match-time and UTF error texts are in the same format. */

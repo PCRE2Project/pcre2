@@ -4169,10 +4169,10 @@ No match
 /'#('/hex,extended,utf
 
 /a(?<=A\XB)/utf
-Failed: error 125 at offset 1: lookbehind assertion is not fixed length
+Failed: error 125 at offset 1: length of lookbehind assertion is not limited
 
 /ab(?<=A\RB)/utf
-Failed: error 125 at offset 2: lookbehind assertion is not fixed length
+Failed: error 125 at offset 2: length of lookbehind assertion is not limited
 
 /../utf,auto_callout
     \n\x{123}\x{123}\x{123}\x{123}

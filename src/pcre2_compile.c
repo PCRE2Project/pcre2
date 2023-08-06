@@ -128,7 +128,7 @@ static int
     open_capitem *, compile_block *, PCRE2_SIZE *);
 
 static int
-  get_branchlength(uint32_t **, int *, int *, parsed_recurse_check *,
+  get_branchlength(uint32_t **, int *, int *, int *, parsed_recurse_check *,
     compile_block *);
 
 static BOOL
@@ -806,7 +806,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99 };
+       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -819,7 +819,8 @@ enum { PSO_OPT,     /* Value is an option bit */
        PSO_BSR,     /* Value is a \R type */
        PSO_LIMH,    /* Read integer value for heap limit */
        PSO_LIMM,    /* Read integer value for match limit */
-       PSO_LIMD };  /* Read integer value for depth limit */
+       PSO_LIMD     /* Read integer value for depth limit */
+     };
 
 typedef struct pso {
   const uint8_t *name;
@@ -1067,21 +1068,18 @@ for (;;)
     break;
 
     case META_LOOKBEHIND:
-    fprintf(stderr, "META (?<= %d offset=", meta_arg);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "META (?<= %d %d", meta_arg, *pptr);
+    pptr += 2;
     break;
 
     case META_LOOKBEHIND_NA:
-    fprintf(stderr, "META (*naplb: %d offset=", meta_arg);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "META (*naplb: %d %d", meta_arg, *pptr);
+    pptr += 2;
     break;
 
     case META_LOOKBEHINDNOT:
-    fprintf(stderr, "META (?<! %d offset=", meta_arg);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "META (?<! %d %d", meta_arg, *pptr);
+    pptr += 2;
     break;
 
     case META_CALLOUT_NUMBER:
@@ -1512,7 +1510,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
   compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
-BOOL alt_bsux = 
+BOOL alt_bsux =
   ((options & PCRE2_ALT_BSUX) | (xoptions & PCRE2_EXTRA_ALT_BSUX)) != 0;
 PCRE2_SPTR ptr = *ptrptr;
 uint32_t c, cc;
@@ -8261,6 +8259,7 @@ int okreturn = 1;
 uint32_t *pptr = *pptrptr;
 uint32_t firstcu, reqcu;
 uint32_t lookbehindlength;
+uint32_t lookbehindminlength;
 uint32_t firstcuflags, reqcuflags;
 uint32_t branchfirstcu, branchreqcu;
 uint32_t branchfirstcuflags, branchreqcuflags;
@@ -8303,9 +8302,10 @@ lookbehind = *code == OP_ASSERTBACK ||
 if (lookbehind)
   {
   lookbehindlength = META_DATA(pptr[-1]);
+  lookbehindminlength = *pptr;
   pptr += SIZEOFFSET;
   }
-else lookbehindlength = 0;
+else lookbehindlength = lookbehindminlength = 0;
 
 /* If this is a capturing subpattern, add to the chain of open capturing items
 so that we can detect them if (*ACCEPT) is encountered. Note that only OP_CBRA
@@ -8332,13 +8332,30 @@ for (;;)
   {
   int branch_return;
 
-  /* Insert OP_REVERSE if this is as lookbehind assertion. */
+  /* Insert OP_REVERSE or OP_VREVERSE if this is a lookbehind assertion. There
+  is only a single mimimum length for the whole assertion. When the mimimum
+  length is LOOKBEHIND_MAX it means that all branches are of fixed length,
+  though not necessarily the same length. In this case, the original OP_REVERSE
+  can be used. It can also be used if a branch in a variable length lookbehind
+  has the same maximum and minimum. Otherwise, use OP_VREVERSE, which has both
+  maximum and minimum values. */
 
   if (lookbehind && lookbehindlength > 0)
     {
-    *code++ = OP_REVERSE;
-    PUTINC(code, 0, lookbehindlength);
-    length += 1 + LINK_SIZE;
+    if (lookbehindminlength == LOOKBEHIND_MAX || 
+        lookbehindminlength == lookbehindlength)
+      {
+      *code++ = OP_REVERSE;
+      PUTINC(code, 0, lookbehindlength);
+      length += 1 + LINK_SIZE;
+      }
+    else
+      {
+      *code++ = OP_VREVERSE;
+      PUT2INC(code, 0, lookbehindminlength);
+      PUT2INC(code, 0, lookbehindlength);
+      length += 1 + 2*IMM2_SIZE;
+      }
     }
 
   /* Now compile the branch; in the pre-compile phase its length gets added
@@ -8487,8 +8504,8 @@ for (;;)
     code += 1 + LINK_SIZE;
     }
 
-  /* Set the lookbehind length (if not in a lookbehind the value will be zero)
-  and then advance past the vertical bar. */
+  /* Set the maximum lookbehind length for the next branch (if not in a
+  lookbehind the value will be zero) and then advance past the vertical bar. */
 
   lookbehindlength = META_DATA(*pptr);
   pptr++;
@@ -9199,13 +9216,13 @@ return pptr;
 *************************************************/
 
 /* This is called for nested groups within a branch of a lookbehind whose
-length is being computed. If all the branches in the nested group have the same
-length, that is OK. On entry, the pointer must be at the first element after
-the group initializing code. On exit it points to OP_KET. Caching is used to
-improve processing speed when the same capturing group occurs many times.
+length is being computed. On entry, the pointer must be at the first element
+after the group initializing code. On exit it points to OP_KET. Caching is used
+to improve processing speed when the same capturing group occurs many times.
 
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
+  minptr      where to return the minimum length
   isinline    FALSE if a reference or recursion; TRUE for inline group
   errcodeptr  pointer to the errorcode
   lcptr       pointer to the loop counter
@@ -9213,15 +9230,17 @@ Arguments:
   recurses    chain of recurse_check to catch mutual recursion
   cb          pointer to the compile data
 
-Returns:      the group length or a negative number
+Returns:      the maximum group length or a negative number
 */
 
 static int
-get_grouplength(uint32_t **pptrptr, BOOL isinline, int *errcodeptr, int *lcptr,
-   int group, parsed_recurse_check *recurses, compile_block *cb)
+get_grouplength(uint32_t **pptrptr, int *minptr, BOOL isinline, int *errcodeptr,
+  int *lcptr, int group, parsed_recurse_check *recurses, compile_block *cb)
 {
-int branchlength;
+uint32_t *gi = cb->groupinfo + 2 * group;
+int branchlength, branchminlength;
 int grouplength = -1;
+int groupminlength = INT_MAX;
 
 /* The cache can be used only if there is no possibility of there being two
 groups with the same number. We do not need to set the end pointer for a group
@@ -9230,11 +9249,12 @@ an inline group. */
 
 if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
   {
-  uint32_t groupinfo = cb->groupinfo[group];
+  uint32_t groupinfo = gi[0];
   if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return -1;
   if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
     {
     if (isinline) *pptrptr = parsed_skip(*pptrptr, PSKIP_KET);
+    *minptr = gi[1];
     return groupinfo & GI_FIXED_LENGTH_MASK;
     }
   }
@@ -9243,20 +9263,26 @@ if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
 
 for(;;)
   {
-  branchlength = get_branchlength(pptrptr, errcodeptr, lcptr, recurses, cb);
+  branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr,
+    recurses, cb);
   if (branchlength < 0) goto ISNOTFIXED;
-  if (grouplength == -1) grouplength = branchlength;
-    else if (grouplength != branchlength) goto ISNOTFIXED;
+  if (branchlength > grouplength) grouplength = branchlength;
+  if (branchminlength < groupminlength) groupminlength = branchminlength;
   if (**pptrptr == META_KET) break;
   *pptrptr += 1;   /* Skip META_ALT */
   }
 
 if (group > 0)
-  cb->groupinfo[group] |= (uint32_t)(GI_SET_FIXED_LENGTH | grouplength);
+  {
+  gi[0] |= (uint32_t)(GI_SET_FIXED_LENGTH | grouplength);
+  gi[1] = groupminlength;
+  }
+
+*minptr = groupminlength;
 return grouplength;
 
 ISNOTFIXED:
-if (group > 0) cb->groupinfo[group] |= GI_NOT_FIXED_LENGTH;
+if (group > 0) gi[0] |= GI_NOT_FIXED_LENGTH;
 return -1;
 }
 
@@ -9266,27 +9292,30 @@ return -1;
 *        Find length of a parsed branch          *
 *************************************************/
 
-/* Return a fixed length for a branch in a lookbehind, giving an error if the
-length is not fixed. On entry, *pptrptr points to the first element inside the
-branch. On exit it is set to point to the ALT or KET.
+/* Return fixed maximum and minimum lengths for a branch in a lookbehind,
+giving an error if the length is not limited. On entry, *pptrptr points to the
+first element inside the branch. On exit it is set to point to the ALT or KET.
 
 Arguments:
   pptrptr     pointer to pointer in the parsed pattern
+  minptr      where to return the minimum length
   errcodeptr  pointer to error code
   lcptr       pointer to loop counter
   recurses    chain of recurse_check to catch mutual recursion
   cb          pointer to compile block
 
-Returns:      the length, or a negative value on error
+Returns:      the maximum length, or a negative value on error
 */
 
 static int
-get_branchlength(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
+get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
   parsed_recurse_check *recurses, compile_block *cb)
 {
 int branchlength = 0;
-int grouplength;
+int branchminlength = 0;
+int grouplength, groupminlength;
 uint32_t lastitemlength = 0;
+uint32_t lastitemminlength = 0;
 uint32_t *pptr = *pptrptr;
 PCRE2_SIZE offset;
 parsed_recurse_check this_recurse;
@@ -9310,10 +9339,12 @@ for (;; pptr++)
   uint32_t escape;
   uint32_t group = 0;
   uint32_t itemlength = 0;
+  uint32_t itemminlength = 0;
+  uint32_t min, max;
 
   if (*pptr < META_END)
     {
-    itemlength = 1;
+    itemlength = itemminlength = 1;
     }
 
   else switch (META_CODE(*pptr))
@@ -9352,20 +9383,20 @@ for (;; pptr++)
     break;
 
     case META_BIGVALUE:
-    itemlength = 1;
+    itemlength = itemminlength = 1;
     pptr += 1;
     break;
 
     case META_CLASS:
     case META_CLASS_NOT:
-    itemlength = 1;
+    itemlength = itemminlength = 1;
     pptr = parsed_skip(pptr, PSKIP_CLASS);
     if (pptr == NULL) goto PARSED_SKIP_FAILED;
     break;
 
     case META_CLASS_EMPTY_NOT:
     case META_DOT:
-    itemlength = 1;
+    itemlength = itemminlength = 1;
     break;
 
     case META_CALLOUT_NUMBER:
@@ -9392,7 +9423,7 @@ for (;; pptr++)
         return -1;
         }
 #endif
-      itemlength = 1;
+      itemlength = itemminlength = 1;
       if (escape == ESC_p || escape == ESC_P) pptr++;  /* Skip prop data */
       }
     break;
@@ -9548,14 +9579,15 @@ for (;; pptr++)
     in the cache. */
 
     gptr++;
-    grouplength = get_grouplength(&gptr, FALSE, errcodeptr, lcptr, group,
-      &this_recurse, cb);
+    grouplength = get_grouplength(&gptr, &groupminlength, FALSE, errcodeptr,
+      lcptr, group, &this_recurse, cb);
     if (grouplength < 0)
       {
       if (*errcodeptr == 0) goto ISNOTFIXED;
       return -1;  /* Error already set */
       }
     itemlength = grouplength;
+    itemminlength = groupminlength;
     break;
 
     /* A (DEFINE) group is never obeyed inline and so it does not contribute to
@@ -9593,11 +9625,19 @@ for (;; pptr++)
     case META_SCRIPT_RUN:
     pptr++;
     CHECK_GROUP:
-    grouplength = get_grouplength(&pptr, TRUE, errcodeptr, lcptr, group,
-      recurses, cb);
+    grouplength = get_grouplength(&pptr, &groupminlength, TRUE, errcodeptr,
+      lcptr, group, recurses, cb);
     if (grouplength < 0) return -1;
     itemlength = grouplength;
+    itemminlength = groupminlength;
     break;
+
+    case META_QUERY:
+    case META_QUERY_PLUS:
+    case META_QUERY_QUERY:
+    min = 0;
+    max = 1;
+    goto REPETITION;
 
     /* Exact repetition is OK; variable repetition is not. A repetition of zero
     must subtract the length that has already been added. */
@@ -9605,29 +9645,24 @@ for (;; pptr++)
     case META_MINMAX:
     case META_MINMAX_PLUS:
     case META_MINMAX_QUERY:
-    if (pptr[1] == pptr[2])
+    min = pptr[1];
+    max = pptr[2];
+    pptr += 2;
+
+    REPETITION:
+    if (max != REPEAT_UNLIMITED)
       {
-      switch(pptr[1])
+      if (lastitemlength != 0 &&  /* Should not occur, but just in case */
+          min != 0 &&
+          INT_MAX/lastitemlength < min - 1)
         {
-        case 0:
-        branchlength -= lastitemlength;
-        break;
-
-        case 1:
-        itemlength = 0;
-        break;
-
-        default:  /* Check for integer overflow */
-        if (lastitemlength != 0 &&  /* Should not occur, but just in case */
-            INT_MAX/lastitemlength < pptr[1] - 1)
-          {
-          *errcodeptr = ERR87;  /* Integer overflow; lookbehind too big */
-          return -1;
-          }
-        itemlength = (pptr[1] - 1) * lastitemlength;
-        break;
+        *errcodeptr = ERR87;  /* Integer overflow; lookbehind too big */
+        return -1;
         }
-      pptr += 2;
+      if (min == 0) branchminlength -= lastitemminlength;
+        else itemminlength = (min - 1) * lastitemminlength;
+      if (max == 0) branchlength -= lastitemlength;
+        else itemlength = (max - 1) * lastitemlength;
       break;
       }
     /* Fall through */
@@ -9641,7 +9676,9 @@ for (;; pptr++)
     }
 
   /* Add the item length to the branchlength, checking for integer overflow and
-  for the branch length exceeding the limit. */
+  for the branch length exceeding the overall limit. Later, if there is at 
+  least one variable-length branch in the group, there is a test for the 
+  (smaller) variable-length branch length limit. */
 
   if (INT_MAX - branchlength < (int)itemlength ||
       (branchlength += itemlength) > LOOKBEHIND_MAX)
@@ -9650,13 +9687,17 @@ for (;; pptr++)
     return -1;
     }
 
+  branchminlength += itemminlength;
+
   /* Save this item length for use if the next item is a quantifier. */
 
   lastitemlength = itemlength;
+  lastitemminlength = itemminlength;
   }
 
 EXIT:
 *pptrptr = pptr;
+*minptr = branchminlength;
 return branchlength;
 
 PARSED_SKIP_FAILED:
@@ -9671,9 +9712,9 @@ return -1;
 *************************************************/
 
 /* This function is called for each lookbehind, to set the lengths in its
-branches. An error occurs if any branch does not have a fixed length that is
-less than the maximum (65535). On exit, the pointer must be left on the final
-ket.
+branches. An error occurs if any branch does not have a limited maximum length
+that is less than the limit (65535). On exit, the pointer must be left on the
+final ket.
 
 The function also maintains the max_lookbehind value. Any lookbehind branch
 that contains a nested lookbehind may actually look further back than the
@@ -9696,16 +9737,27 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
   parsed_recurse_check *recurses, compile_block *cb)
 {
 PCRE2_SIZE offset;
-int branchlength;
 uint32_t *bptr = *pptrptr;
+uint32_t *gbptr = bptr;
+int maxlength = 0;
+int minlength = INT_MAX;
+BOOL variable = FALSE;
 
 READPLUSOFFSET(offset, bptr);  /* Offset for error messages */
 *pptrptr += SIZEOFFSET;
 
+/* Each branch can have a different maximum length, but we can keep only a
+single minimum for the whole group, because there's nowhere to save individual
+values in the META_ALT item. */
+
 do
   {
+  int branchlength, branchminlength;
+
   *pptrptr += 1;
-  branchlength = get_branchlength(pptrptr, errcodeptr, lcptr, recurses, cb);
+  branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr,
+    recurses, cb);
+
   if (branchlength < 0)
     {
     /* The errorcode and offset may already be set from a nested lookbehind. */
@@ -9713,12 +9765,37 @@ do
     if (cb->erroroffset == PCRE2_UNSET) cb->erroroffset = offset;
     return FALSE;
     }
+
+  if (branchlength != branchminlength) variable = TRUE;
+  if (branchminlength < minlength) minlength = branchminlength;
+  if (branchlength > maxlength) maxlength = branchlength; 
   if (branchlength > cb->max_lookbehind) cb->max_lookbehind = branchlength;
   *bptr |= branchlength;  /* branchlength never more than 65535 */
   bptr = *pptrptr;
   }
 while (*bptr == META_ALT);
 
+/* If any branch is of variable length, the whole lookbehind is of variable
+length. If the maximum length of any branch exceeds the maximum for variable
+lookbehinds, give an error. Otherwise, the minimum length is set in the word
+that follows the original group META value. For a fixed-length lookbehind, this
+is set to LOOKBEHIND_MAX, to indicate that each branch is of a fixed (but
+possibly different) length. */
+
+if (variable)
+  {
+  gbptr[1] = minlength;
+  if ((uint32_t)maxlength > cb->max_varlookbehind)
+    {
+    *errcodeptr = ERR100;
+    cb->erroroffset = offset;
+    return FALSE;   
+    }   
+  }
+else gbptr[1] = LOOKBEHIND_MAX;     
+
+
+gbptr[1] = variable? minlength : LOOKBEHIND_MAX;
 return TRUE;
 }
 
@@ -9973,10 +10050,10 @@ if (errorptr == NULL || erroroffset == NULL) return NULL;
 if (pattern == NULL)
   {
   if (patlen == 0) pattern = (PCRE2_SPTR)""; else
-    {  
+    {
     *errorptr = ERR16;
     return NULL;
-    } 
+    }
   }
 
 /* A NULL compile context means "use a default context" */
@@ -10041,7 +10118,8 @@ cb.external_options = options;
 cb.groupinfo = stack_groupinfo;
 cb.had_recurse = FALSE;
 cb.lastcapture = 0;
-cb.max_lookbehind = 0;
+cb.max_lookbehind = 0;                               /* Max encountered */
+cb.max_varlookbehind = ccontext->max_varlookbehind;  /* Limit */
 cb.name_entry_size = 0;
 cb.name_table = NULL;
 cb.named_groups = named_groups;
@@ -10308,39 +10386,36 @@ cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed + 1;
 errorcode = parse_regex(ptr, cb.external_options, &has_lookbehind, &cb);
 if (errorcode != 0) goto HAD_CB_ERROR;
 
-/* Workspace is needed to remember information about numbered groups: whether a
-group can match an empty string and what its fixed length is. This is done to
-avoid the possibility of recursive references causing very long compile times
-when checking these features. Unnumbered groups do not have this exposure since
-they cannot be referenced. We use an indexed vector for this purpose. If there
-are sufficiently few groups, the default vector on the stack, as set up above,
-can be used. Otherwise we have to get/free a special vector. The vector must be
-initialized to zero. */
-
-if (cb.bracount >= GROUPINFO_DEFAULT_SIZE)
-  {
-  cb.groupinfo = ccontext->memctl.malloc(
-    (cb.bracount + 1)*sizeof(uint32_t), ccontext->memctl.memory_data);
-  if (cb.groupinfo == NULL)
-    {
-    errorcode = ERR21;
-    cb.erroroffset = 0;
-    goto HAD_CB_ERROR;
-    }
-  }
-memset(cb.groupinfo, 0, (cb.bracount + 1) * sizeof(uint32_t));
-
-/* If there were any lookbehinds, scan the parsed pattern to figure out their
-lengths. */
+/* If there are any lookbehinds, scan the parsed pattern to figure out their
+lengths. Workspace is needed to remember whether numbered groups are or are not
+of limited length, and if limited, what the minimum and maximum lengths are.
+This caching saves re-computing the length of any group that is referenced more
+than once, which is particularly relevant when recursion is involved.
+Unnumbered groups do not have this exposure because they cannot be referenced.
+If there are sufficiently few groups, the default index vector on the stack, as
+set up above, can be used. Otherwise we have to get/free some heap memory. The
+vector must be initialized to zero. */
 
 if (has_lookbehind)
   {
   int loopcount = 0;
+  if (cb.bracount >= GROUPINFO_DEFAULT_SIZE/2)
+    {
+    cb.groupinfo = ccontext->memctl.malloc(
+      (2 * cb.bracount + 1)*sizeof(uint32_t), ccontext->memctl.memory_data);
+    if (cb.groupinfo == NULL)
+      {
+      errorcode = ERR21;
+      cb.erroroffset = 0;
+      goto HAD_CB_ERROR;
+      }
+    }
+  memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));
   errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
   if (errorcode != 0) goto HAD_CB_ERROR;
   }
 
-/* For debugging, there is a function that shows the parsed data vector. */
+/* For debugging, there is a function that shows the parsed pattern vector. */
 
 #ifdef DEBUG_SHOW_PARSED
 fprintf(stderr, "+++ Pre-scan complete:\n");

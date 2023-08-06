@@ -477,10 +477,7 @@ No match
 No match
 
 /abc(?<=a+)b/
-Failed: error 125 at offset 3: lookbehind assertion is not fixed length
-
-/12345(?<=aaa|b{0,3})b/
-Failed: error 125 at offset 5: lookbehind assertion is not fixed length
+Failed: error 125 at offset 3: length of lookbehind assertion is not limited
 
 /(?<!(foo)a\1)bar/
 
@@ -722,13 +719,10 @@ Subject length lower bound = 3
 No match
 
 /(?<=ab(c+)d)ef/
-Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: length of lookbehind assertion is not limited
 
 /(?<=ab(?<=c+)d)ef/
-Failed: error 125 at offset 6: lookbehind assertion is not fixed length
-
-/(?<=ab(c|de)f)g/
-Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+Failed: error 125 at offset 6: length of lookbehind assertion is not limited
 
 /The next three are in testinput2 because they have variable length branches/
 
@@ -920,7 +914,7 @@ Failed: error 124 at offset 4: missing closing parenthesis for condition
 Failed: error 106 at offset 8: missing terminating ] for character class
 
 /(?<=x+)y/
-Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: length of lookbehind assertion is not limited
 
 /a{37,17}/
 Failed: error 104 at offset 7: numbers out of order in {} quantifier
@@ -9643,19 +9637,19 @@ No match
 /(a)(?<=b\1)/
 
 /(a)(?<=b+(?1))/
-Failed: error 125 at offset 3: lookbehind assertion is not fixed length
+Failed: error 125 at offset 3: length of lookbehind assertion is not limited
 
 /(a+)(?<=b(?1))/
-Failed: error 125 at offset 4: lookbehind assertion is not fixed length
+Failed: error 125 at offset 4: length of lookbehind assertion is not limited
 
 /(a(?<=b(?1)))/
-Failed: error 125 at offset 2: lookbehind assertion is not fixed length
+Failed: error 125 at offset 2: length of lookbehind assertion is not limited
 
 /(?<=b(?1))xyz/
 Failed: error 115 at offset 8: reference to non-existent subpattern
 
 /(?<=b(?1))xyz(b+)pqrstuvew/
-Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: length of lookbehind assertion is not limited
 
 /(a|bc)\1/I
 Capture group count = 1
@@ -10600,7 +10594,7 @@ Last code unit = '4'
 Subject length lower bound = 5
 
 /(?<=(abc)+)X/
-Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: length of lookbehind assertion is not limited
 
 /(^ab)/I
 Capture group count = 1
@@ -14277,7 +14271,7 @@ Failed: error 115 at offset 15: reference to non-existent subpattern
 Failed: error 115 at offset 15: reference to non-existent subpattern
 
 ";(?<=()((?3))((?2)))"
-Failed: error 125 at offset 1: lookbehind assertion is not fixed length
+Failed: error 125 at offset 1: length of lookbehind assertion is not limited
 
 # Perl loops on this (PCRE2 used to!)
 
@@ -14455,7 +14449,7 @@ Failed: error 115 at offset 7: reference to non-existent subpattern
 "(?J)(?'d'(?'d'\g{d}))"
 
 "(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
-Failed: error 125 at offset 16: lookbehind assertion is not fixed length
+Failed: error 125 at offset 16: length of lookbehind assertion is not limited
 
 /A(?'')Z/
 Failed: error 162 at offset 4: subpattern name expected
@@ -15416,7 +15410,7 @@ Failed: error 114 at offset 1: missing closing parenthesis
 No match
 
 /(?|([ab]))...(?<=\1)z/
-Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+Failed: error 125 at offset 13: length of lookbehind assertion is not limited
 
 /([ab])(\1)...(?<=\2)z/
     aa11az
@@ -15425,7 +15419,7 @@ Failed: error 125 at offset 13: lookbehind assertion is not fixed length
  2: a
 
 /(a\2)(b\1)(?<=\2)/
-Failed: error 125 at offset 10: lookbehind assertion is not fixed length
+Failed: error 125 at offset 10: length of lookbehind assertion is not limited
 
 /(?<A>[ab])...(?<=\k'A')z/
     a11az
@@ -15439,7 +15433,7 @@ Failed: error 125 at offset 10: lookbehind assertion is not fixed length
 No match
 
 /(?<A>[ab])...(?<=\k'A')(?<A>)z/dupnames
-Failed: error 125 at offset 13: lookbehind assertion is not fixed length
+Failed: error 125 at offset 13: length of lookbehind assertion is not limited
 
 # Perl does not support \g+n
 
@@ -15516,7 +15510,7 @@ May match empty string
 Subject length lower bound = 0
 
 /()(?<=(?0))/
-Failed: error 125 at offset 2: lookbehind assertion is not fixed length
+Failed: error 125 at offset 2: length of lookbehind assertion is not limited
 
 /(?<!|!(?<!))/
 
@@ -17239,11 +17233,17 @@ No match
  0: bb
  1: b
 
+/(*naplb:ab?c|PQ).../g
+    abcdefgacxyzPQR123
+ 0: def
+ 0: xyz
+ 0: R12
+
 # ----
 
 # Expect error (recursion => not fixed length)
 /(\2)((?=(?<=\1)))/
-Failed: error 125 at offset 8: lookbehind assertion is not fixed length
+Failed: error 125 at offset 8: length of lookbehind assertion is not limited
 
 /c*+(?<=[bc])/
     abc\=ph
@@ -17595,7 +17595,7 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 # Expect non-fixed-length error
 
 "(?<=X(?(DEFINE)(.*))(?1))."
-Failed: error 125 at offset 0: lookbehind assertion is not fixed length
+Failed: error 125 at offset 0: length of lookbehind assertion is not limited
 
 /\sxxx\s/tables=1
 \= Expect no match
@@ -17782,6 +17782,22 @@ Failed: error 116 at offset 0: pattern passed as NULL with non-zero length
 /bad null pattern/null_pattern
 Failed: error 116 at offset 0: pattern passed as NULL with non-zero length
 
+# -------- Variable length lookbehinds --------
+/12345(?<=\d{1,256})X/
+Failed: error 200 at offset 5: branch too long in variable-length lookbehind assertion
+
+/(?<=(\d{1,256}))X/max_varlookbehind=256
+    12345XYZ
+ 0: X
+ 1: 12345
+
+/12345(?<=a?bc)X/max_varlookbehind=0
+Failed: error 200 at offset 5: branch too long in variable-length lookbehind assertion
+
+/12345(?<=abc)X/max_varlookbehind=0
+
+# --------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
@@ -17791,4 +17807,4 @@ Error 0: PCRE2_ERROR_BADDATA (unknown error number)
 Error 100: no error
 Error 101: \ at end of pattern
 Error 191: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
-Error 200: PCRE2_ERROR_BADDATA (unknown error number)
+Error 300: PCRE2_ERROR_BADDATA (unknown error number)
