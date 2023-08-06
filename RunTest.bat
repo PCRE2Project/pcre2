@@ -292,6 +292,7 @@ if errorlevel 1 (
     echo.
     goto :eof
 )
+  fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput%
 
   set failed="yes"
   goto :eof
