@@ -40,6 +40,8 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+#ifndef PCRE2POSIX_H_IDEMPOTENT_GUARD
+#define PCRE2POSIX_H_IDEMPOTENT_GUARD
 
 /* Have to include stdlib.h in order to ensure that size_t is defined. */
 
@@ -180,5 +182,7 @@ them having to maintain their own patch, but are not documented by PCRE2. */
 #ifdef __cplusplus
 }   /* extern "C" */
 #endif
+
+#endif /* PCRE2POSIX_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2posix.h */

@@ -336,6 +336,12 @@ AC_ARG_WITH(link-size,
                            [internal link size (2, 3, or 4 allowed; default=2)]),
             , with_link_size=2)
 
+# Handle --with-max-varlookbehind=N
+AC_ARG_WITH(max-varlookbehind,
+            AS_HELP_STRING([--with-max-varlookbehind=N],
+                           [maximum length of variable lookbehind (default=255)]),
+            , with_max_varlookbehind=255)
+
 # Handle --with-parens-nest-limit=N
 AC_ARG_WITH(parens-nest-limit,
             AS_HELP_STRING([--with-parens-nest-limit=N],
@@ -806,6 +812,10 @@ AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   allows for compiled patterns up to 65535 code units long. This covers the
   vast majority of cases. However, PCRE2 can also be compiled to use 3 or 4
   bytes instead. This allows for longer patterns in extreme cases.])
+  
+AC_DEFINE_UNQUOTED([MAX_VARLOOKBEHIND], [$with_max_varlookbehind], [
+  The value of MAX_VARLOOKBEHIND specifies the default maximum length, in
+  characters, for a variable-length lookbehind assertion.])
 
 AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
   The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
@@ -1133,6 +1143,7 @@ $PACKAGE-$VERSION configuration summary:
     EBCDIC code for NL ................. : ${ebcdic_nl_code}
     Rebuild char tables ................ : ${enable_rebuild_chartables}
     Internal link size ................. : ${with_link_size}
+    Maximum variable lookbehind ........ : ${with_max_varlookbehind} 
     Nested parentheses limit ........... : ${with_parens_nest_limit}
     Heap limit ......................... : ${with_heap_limit} kibibytes
     Match limit ........................ : ${with_match_limit}

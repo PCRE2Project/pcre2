@@ -191,8 +191,6 @@
 
 /abc(?<=a+)b/
 
-/12345(?<=aaa|b{0,3})b/
-
 /(?<!(foo)a\1)bar/
 
 /(?i)abc/I
@@ -287,8 +285,6 @@
 /(?<=ab(c+)d)ef/
 
 /(?<=ab(?<=c+)d)ef/
-
-/(?<=ab(c|de)f)g/
 
 /The next three are in testinput2 because they have variable length branches/
 
@@ -5714,6 +5710,9 @@ a)"xI
     aabc
     abbc   
 
+/(*naplb:ab?c|PQ).../g
+    abcdefgacxyzPQR123
+
 # ----
 
 # Expect error (recursion => not fixed length)
@@ -5946,5 +5945,28 @@ a)"xI
 
 /(?>this line\s*((?R)|)(*MARK:A))/
     this line this line this line
+    
+# Check use of NULL pattern with zero length.
+
+//null_pattern,use_length
+    abc
+    
+//null_pattern
+
+/bad null pattern/null_pattern,use_length
+
+/bad null pattern/null_pattern
+
+# -------- Variable length lookbehinds --------
+/12345(?<=\d{1,256})X/
+
+/(?<=(\d{1,256}))X/max_varlookbehind=256
+    12345XYZ
+
+/12345(?<=a?bc)X/max_varlookbehind=0
+
+/12345(?<=abc)X/max_varlookbehind=0
+
+# --------
 
 # End of testinput2

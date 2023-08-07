@@ -138,15 +138,15 @@ error.
 </P>
 <P>
 <b>-16</b>
-If the 16-bit library has been built, this option causes it to be used. If only
-the 16-bit library has been built, this is the default. If the 16-bit library
+If the 16-bit library has been built, this option causes it to be used. If the
+8-bit library has not been built, this is the default. If the 16-bit library
 has not been built, this option causes an error.
 </P>
 <P>
 <b>-32</b>
-If the 32-bit library has been built, this option causes it to be used. If only
-the 32-bit library has been built, this is the default. If the 32-bit library
-has not been built, this option causes an error.
+If the 32-bit library has been built, this option causes it to be used. If no
+other library has been built, this is the default. If the 32-bit library has
+not been built, this option causes an error.
 </P>
 <P>
 <b>-ac</b>
@@ -700,6 +700,7 @@ heavily used in the test files.
       memory                    show memory used
       newline=&#60;type&#62;            set newline type
       null_context              compile with a NULL context
+      null_pattern              pass pattern as NULL 
       parens_nest_limit=&#60;n&#62;     set maximum parentheses depth
       posix                     use the POSIX API
       posix_nosub               use the POSIX API with REG_NOSUB
@@ -799,6 +800,15 @@ Normally, <b>pcre2test</b> passes a context block to <b>pcre2_compile()</b>. If
 the <b>null_context</b> modifier is set, however, NULL is passed. This is for
 testing that <b>pcre2_compile()</b> behaves correctly in this case (it uses
 default values).
+</P>
+<br><b>
+Passing a NULL pattern
+</b><br>
+<P>
+The <b>null_pattern</b> modifier is for testing the behaviour of
+<b>pcre2_compile()</b> when the pattern argument is NULL. The length value
+passed is the default PCRE2_ZERO_TERMINATED unless <b>use_length</b> is set.
+Any length other than zero causes an error.
 </P>
 <br><b>
 Specifying pattern characters in hexadecimal
@@ -2171,7 +2181,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 February 2023
+Last updated: 17 July 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

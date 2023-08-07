@@ -6435,4 +6435,50 @@ ef) x/x,mark
 /(a\K.(?1)*)/
     abac
 
+# -------------------------------------------------------------------------- 
+# Perl-compatible tests of variable-length lookbehinds.
+
+/(?<=ab?c).../g
+    abcdefgacxyz
+
+/(?<=PQR|ab?c).../g
+    abcdefgacxyzPQR123
+
+/(?<=ab?c|PQR).../g
+    abcdefgacxyzPQR123
+
+/(?<=PQ|ab?c).../g
+    abcdefgacxyzPQR123
+
+/(?<=ab?c|PQ).../g
+    abcdefgacxyzPQR123
+
+/(?<=a(b?c|d?e?e)f)X./g
+     acfX1zzzaefX2zzzadeefX3zzzX4zzz
+
+/(?<!a(b?c|d?e?e)f)X./g
+     acfX1zzzaefX2zzzadeefX3zzzX4zzz
+     
+/(?(?<=ab?c)d|e)/
+    abcdefg
+    acdefg
+    axdefg
+    
+/(?<=\d{2,3}|ABC)./
+    ABCD   
+
+/(?<=(\d{1,255}))X/
+    1234X
+
+/(?<=a(b?c){3}d)X/
+   ZXacbccdXYZ
+   
+/(?<=a(b?c){0}d)X/
+   ZXadXYZ
+ 
+/(?<=a?(b?c){0}d)X./
+   ZXadXYZ
+ 
+# -------------------------------------------------------------------------- 
+
 # End of testinput1 

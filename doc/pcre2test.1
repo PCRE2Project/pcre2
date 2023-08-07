@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "04 February 2023" "PCRE 10.43"
+.TH PCRE2TEST 1 "17 July 2023" "PCRE 10.43"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -656,6 +656,7 @@ heavily used in the test files.
       memory                    show memory used
       newline=<type>            set newline type
       null_context              compile with a NULL context
+      null_pattern              pass pattern as NULL 
       parens_nest_limit=<n>     set maximum parentheses depth
       posix                     use the POSIX API
       posix_nosub               use the POSIX API with REG_NOSUB
@@ -749,6 +750,15 @@ Normally, \fBpcre2test\fP passes a context block to \fBpcre2_compile()\fP. If
 the \fBnull_context\fP modifier is set, however, NULL is passed. This is for
 testing that \fBpcre2_compile()\fP behaves correctly in this case (it uses
 default values).
+.
+.
+.SS "Passing a NULL pattern"
+.rs
+.sp
+The \fBnull_pattern\fP modifier is for testing the behaviour of
+\fBpcre2_compile()\fP when the pattern argument is NULL. The length value
+passed is the default PCRE2_ZERO_TERMINATED unless \fBuse_length\fP is set.
+Any length other than zero causes an error.
 .
 .
 .SS "Specifying pattern characters in hexadecimal"
@@ -2148,6 +2158,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 February 2023
+Last updated: 17 July 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

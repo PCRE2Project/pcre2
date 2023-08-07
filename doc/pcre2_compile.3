@@ -1,4 +1,4 @@
-.TH PCRE2_COMPILE 3 "03 February 2023" "PCRE2 10.43"
+.TH PCRE2_COMPILE 3 "17 July 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -26,10 +26,11 @@ arguments are:
   \fIccontext\fP      Pointer to a compile context or NULL
 .sp
 The length of the pattern and any error offset that is returned are in code
-units, not characters. A compile context is needed only if you want to provide
-custom memory allocation functions, or to provide an external function for
-system stack size checking (see \fBpcre2_set_compile_recursion_guard()\fP), or
-to change one or more of these parameters:
+units, not characters. A NULL pattern with zero length is treated as an empty 
+string. A compile context is needed only if you want to provide custom memory
+allocation functions, or to provide an external function for system stack size
+checking (see \fBpcre2_set_compile_recursion_guard()\fP), or to change one or
+more of these parameters:
 .sp
   What \eR matches (Unicode newlines, or CR, LF, CRLF only);
   PCRE2's character tables;

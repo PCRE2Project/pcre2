@@ -68,7 +68,13 @@ application. Because the POSIX functions call the native ones, it is also
 necessary to add <b>-lpcre2-8</b>.
 </P>
 <P>
-Although they were not defined as protypes in <b>pcre2posix.h</b>, releases
+On Windows systems, if you are linking to a DLL version of the library, it is
+recommended that <b>PCRE2POSIX_SHARED</b> is defined before including the
+<b>pcre2posix.h</b> header, as it will allow for a more efficient way to
+invoke the functions by adding the <b>__declspec(dllimport)</b> decorator.
+</P>
+<P>
+Although they were not defined as prototypes in <b>pcre2posix.h</b>, releases
 10.33 to 10.36 of the library contained functions with the POSIX names
 <b>regcomp()</b> etc. These simply passed their arguments to the PCRE2
 functions. These functions were provided for backwards compatibility with

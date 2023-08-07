@@ -10197,4 +10197,81 @@ No match
  0: c
  1: abac
 
+# -------------------------------------------------------------------------- 
+# Perl-compatible tests of variable-length lookbehinds.
+
+/(?<=ab?c).../g
+    abcdefgacxyz
+ 0: def
+ 0: xyz
+
+/(?<=PQR|ab?c).../g
+    abcdefgacxyzPQR123
+ 0: def
+ 0: xyz
+ 0: 123
+
+/(?<=ab?c|PQR).../g
+    abcdefgacxyzPQR123
+ 0: def
+ 0: xyz
+ 0: 123
+
+/(?<=PQ|ab?c).../g
+    abcdefgacxyzPQR123
+ 0: def
+ 0: xyz
+ 0: R12
+
+/(?<=ab?c|PQ).../g
+    abcdefgacxyzPQR123
+ 0: def
+ 0: xyz
+ 0: R12
+
+/(?<=a(b?c|d?e?e)f)X./g
+     acfX1zzzaefX2zzzadeefX3zzzX4zzz
+ 0: X1
+ 1: c
+ 0: X2
+ 1: e
+ 0: X3
+ 1: dee
+
+/(?<!a(b?c|d?e?e)f)X./g
+     acfX1zzzaefX2zzzadeefX3zzzX4zzz
+ 0: X4
+     
+/(?(?<=ab?c)d|e)/
+    abcdefg
+ 0: d
+    acdefg
+ 0: d
+    axdefg
+ 0: e
+    
+/(?<=\d{2,3}|ABC)./
+    ABCD   
+ 0: D
+
+/(?<=(\d{1,255}))X/
+    1234X
+ 0: X
+ 1: 1234
+
+/(?<=a(b?c){3}d)X/
+   ZXacbccdXYZ
+ 0: X
+ 1: c
+   
+/(?<=a(b?c){0}d)X/
+   ZXadXYZ
+ 0: X
+ 
+/(?<=a?(b?c){0}d)X./
+   ZXadXYZ
+ 0: XY
+ 
+# -------------------------------------------------------------------------- 
+
 # End of testinput1 

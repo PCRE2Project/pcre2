@@ -434,6 +434,13 @@ for(;;)
     fprintf(f, "%s", OP_names[*code]);
     break;
 
+    case OP_VREVERSE:
+    if (print_lengths) fprintf(f, "%3d %d ", GET2(code, 1), 
+      GET2(code, 1 + IMM2_SIZE));
+    else fprintf(f, "    ");
+    fprintf(f, "%s", OP_names[*code]);
+    break;
+
     case OP_CLOSE:
     fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
     break;

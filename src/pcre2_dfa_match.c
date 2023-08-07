@@ -168,7 +168,7 @@ static const uint8_t coptable[] = {
   0,                             /* KetRmax                                */
   0,                             /* KetRmin                                */
   0,                             /* KetRpos                                */
-  0,                             /* Reverse                                */
+  0, 0,                          /* Reverse, Vreverse                      */
   0,                             /* Assert                                 */
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
@@ -246,7 +246,7 @@ static const uint8_t poptable[] = {
   0,                             /* KetRmax                                */
   0,                             /* KetRmin                                */
   0,                             /* KetRpos                                */
-  0,                             /* Reverse                                */
+  0, 0,                          /* Reverse, Vreverse                      */
   0,                             /* Assert                                 */
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
