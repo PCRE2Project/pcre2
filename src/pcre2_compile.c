@@ -10402,7 +10402,7 @@ if (has_lookbehind)
   if (cb.bracount >= GROUPINFO_DEFAULT_SIZE/2)
     {
     cb.groupinfo = ccontext->memctl.malloc(
-      (2 * cb.bracount + 1)*sizeof(uint32_t), ccontext->memctl.memory_data);
+      (2 * (cb.bracount + 1))*sizeof(uint32_t), ccontext->memctl.memory_data);
     if (cb.groupinfo == NULL)
       {
       errorcode = ERR21;
