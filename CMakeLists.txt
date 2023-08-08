@@ -1027,6 +1027,7 @@ MESSAGE(\" \")
   FILE(WRITE ${PROJECT_BINARY_DIR}/pcre2_test.sh
   "#! /bin/sh
 # This is a generated file.
+srcdir=${PROJECT_SOURCE_DIR}
 . ${PROJECT_SOURCE_DIR}/RunTest
 if test \"$?\" != \"0\"; then exit 1; fi
 # End
@@ -1040,6 +1041,7 @@ if test \"$?\" != \"0\"; then exit 1; fi
     FILE(WRITE ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh
     "#! /bin/sh
 # This is a generated file.
+srcdir=${PROJECT_SOURCE_DIR}
 . ${PROJECT_SOURCE_DIR}/RunGrepTest
 if test \"$?\" != \"0\"; then exit 1; fi
 # End
