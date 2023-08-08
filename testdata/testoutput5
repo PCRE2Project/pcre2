@@ -5418,4 +5418,8 @@ No match
 
 # End PCRE2_EXTRA_ASCII_xxx tests
 
+/(?<!(|l ))/utf
+    (?<!(|l ))
+No match
+
 # End of testinput5

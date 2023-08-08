@@ -2470,4 +2470,7 @@
 
 # End PCRE2_EXTRA_ASCII_xxx tests
 
+/(?<!(|l ))/utf
+    (?<!(|l ))
+
 # End of testinput5

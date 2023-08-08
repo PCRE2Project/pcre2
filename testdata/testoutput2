@@ -17796,7 +17796,12 @@ Failed: error 200 at offset 5: branch too long in variable-length lookbehind ass
 
 /12345(?<=abc)X/max_varlookbehind=0
 
+/(?<!( {65054}){9,44965})/
+Failed: error 187 at offset 0: lookbehind assertion is too long
+
 # --------
+
+/(?<=(()()()()()()()()()()()()()(()()()()(())()()()()(()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()(())()()()()(()()()()()()(()()()()()()()()()()()()()()()()()()()()()(())()()()()(()()()()()()()()()()()()()(()()()()()()()()()()()()()(()())))))))))/
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
