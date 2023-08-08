@@ -9654,7 +9654,7 @@ for (;; pptr++)
       {
       if (lastitemlength != 0 &&  /* Should not occur, but just in case */
           min != 0 &&
-          INT_MAX/lastitemlength < min - 1)
+          INT_MAX/lastitemlength < max - 1)
         {
         *errcodeptr = ERR87;  /* Integer overflow; lookbehind too big */
         return -1;
