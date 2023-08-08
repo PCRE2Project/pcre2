@@ -5792,7 +5792,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       if (Lmax-- <= Lmin) RRETURN(MATCH_NOMATCH);
       Feptr++;
 #ifdef SUPPORT_UNICODE
-      if (utf) { FORWARDCHAR(Feptr); }
+      if (utf) { FORWARDCHARTEST(Feptr, mb->end_subject); }
 #endif
       }
     /* Control never reaches here */
