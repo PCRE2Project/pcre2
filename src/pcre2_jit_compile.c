@@ -637,8 +637,8 @@ the start pointers when the end of the capturing group has not yet reached. */
   sljit_set_label(sljit_emit_cmp(compiler, (type), (src1), (src1w), (src2), (src2w)), (label))
 #define OP_FLAGS(op, dst, dstw, type) \
   sljit_emit_op_flags(compiler, (op), (dst), (dstw), (type))
-#define CMOV(type, dst_reg, src, srcw) \
-  sljit_emit_cmov(compiler, (type), (dst_reg), (src), (srcw))
+#define SELECT(type, dst_reg, src1, src1w, src2_reg) \
+  sljit_emit_select(compiler, (type), (dst_reg), (src1), (src1w), (src2_reg))
 #define GET_LOCAL_BASE(dst, dstw, offset) \
   sljit_get_local_base(compiler, (dst), (dstw), (offset))
 
@@ -1066,6 +1066,9 @@ switch(*cc)
   case OP_SKIP_ARG:
   case OP_THEN_ARG:
   return cc + 1 + 2 + cc[1];
+
+  case OP_VREVERSE:
+  return NULL;
 
   default:
   SLJIT_UNREACHABLE();
@@ -2269,7 +2272,7 @@ int i;
 for (i = 0; i < RECURSE_TMP_REG_COUNT; i++)
   {
   SLJIT_ASSERT(status->tmp_regs[i] >= 0);
-  SLJIT_ASSERT(sljit_get_register_index(status->saved_tmp_regs[i]) < 0 || status->tmp_regs[i] == status->saved_tmp_regs[i]);
+  SLJIT_ASSERT(sljit_get_register_index(SLJIT_INT_REGISTER, status->saved_tmp_regs[i]) < 0 || status->tmp_regs[i] == status->saved_tmp_regs[i]);
 
   status->store_bases[i] = -1;
   }
@@ -2289,7 +2292,7 @@ SLJIT_ASSERT(load_base > 0 && store_base > 0);
 if (status->store_bases[next_tmp_reg] == -1)
   {
   /* Preserve virtual registers. */
-  if (sljit_get_register_index(status->saved_tmp_regs[next_tmp_reg]) < 0)
+  if (sljit_get_register_index(SLJIT_INT_REGISTER, status->saved_tmp_regs[next_tmp_reg]) < 0)
     OP1(SLJIT_MOV, status->saved_tmp_regs[next_tmp_reg], 0, tmp_reg, 0);
   }
 else
@@ -2318,7 +2321,7 @@ for (i = 0; i < RECURSE_TMP_REG_COUNT; i++)
     OP1(SLJIT_MOV, SLJIT_MEM1(status->store_bases[next_tmp_reg]), status->store_offsets[next_tmp_reg], tmp_reg, 0);
 
     /* Restore virtual registers. */
-    if (sljit_get_register_index(saved_tmp_reg) < 0)
+    if (sljit_get_register_index(SLJIT_INT_REGISTER, saved_tmp_reg) < 0)
       OP1(SLJIT_MOV, tmp_reg, 0, saved_tmp_reg, 0);
     }
 
@@ -3247,7 +3250,7 @@ if (size == sizeof(sljit_sw))
   return;
   }
 
-if (sljit_get_register_index(TMP3) >= 0 && !sljit_has_cpu_feature(SLJIT_HAS_ZERO_REGISTER))
+if (sljit_get_register_index(SLJIT_INT_REGISTER, TMP3) >= 0 && !sljit_has_cpu_feature(SLJIT_HAS_ZERO_REGISTER))
   {
   OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
   src = TMP3;
@@ -3826,9 +3829,9 @@ if (common->invalid_utf)
     {
     OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000);
-    CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
     OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
-    CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
     }
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
@@ -4066,9 +4069,9 @@ if (common->utf)
       OP2(SLJIT_ADD, RETURN_ADDR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
     OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP2, 0, SLJIT_IMM, 0x400);
     if (options & READ_CHAR_UPDATE_STR_PTR)
-      CMOV(SLJIT_LESS, STR_PTR, RETURN_ADDR, 0);
+      SELECT(SLJIT_LESS, STR_PTR, RETURN_ADDR, 0, STR_PTR);
     if (max >= 0xd800)
-      CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, 0x10000);
+      SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, 0x10000, TMP1);
     }
   else
     {
@@ -4093,9 +4096,9 @@ if (common->invalid_utf)
     {
     OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x110000);
-    CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
     OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
-    CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+    SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
     }
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
@@ -4251,7 +4254,7 @@ if (common->utf && negated)
       {
       OP2(SLJIT_ADD, RETURN_ADDR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
       OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP2, 0, SLJIT_IMM, 0x400);
-      CMOV(SLJIT_LESS, STR_PTR, RETURN_ADDR, 0);
+      SELECT(SLJIT_LESS, STR_PTR, RETURN_ADDR, 0, STR_PTR);
       }
     else
       {
@@ -4531,7 +4534,7 @@ OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0x40);
-  CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, 0x20000);
+  SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, 0x20000, TMP1);
   exit_invalid[2] = NULL;
   }
 else
@@ -4546,7 +4549,7 @@ OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x2d800);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, SLJIT_IMM, 0x800);
-  CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR - 0xd800);
+  SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR - 0xd800, TMP1);
   exit_invalid[3] = NULL;
   }
 else
@@ -4557,7 +4560,7 @@ OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, SLJIT_IMM, 0x800);
-  CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+  SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
   exit_invalid[4] = NULL;
   }
 else
@@ -4574,7 +4577,7 @@ OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0x40);
-  CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, 0);
+  SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, 0, TMP1);
   exit_invalid[5] = NULL;
   }
 else
@@ -4584,7 +4587,7 @@ OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc10000);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x100000);
-  CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR - 0x10000);
+  SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR - 0x10000, TMP1);
   exit_invalid[6] = NULL;
   }
 else
@@ -4621,7 +4624,7 @@ OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0x40);
-  CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+  SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
   exit_invalid[10] = NULL;
   }
 else
@@ -4914,7 +4917,7 @@ OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xd800);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, SLJIT_IMM, 0x800);
-  CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, -0xd800);
+  SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, -0xd800, TMP1);
   exit_invalid[2] = NULL;
   }
 else
@@ -4924,7 +4927,7 @@ OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xd800);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, SLJIT_IMM, 0x800);
-  CMOV(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR);
+  SELECT(SLJIT_LESS, TMP1, SLJIT_IMM, INVALID_UTF_CHAR, TMP1);
   exit_invalid[3] = NULL;
   }
 else
@@ -4949,7 +4952,7 @@ OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 if (has_cmov)
   {
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x100000);
-  CMOV(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR - 0x10000);
+  SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, INVALID_UTF_CHAR - 0x10000, TMP1);
   exit_invalid[5] = NULL;
   }
 else
@@ -5388,7 +5391,7 @@ else if (common->utf)
     {
     OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
     OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, SLJIT_IMM, 0x400);
-    CMOV(SLJIT_LESS, STR_PTR, TMP2, 0);
+    SELECT(SLJIT_LESS, STR_PTR, TMP2, 0, STR_PTR);
     }
   else
     {
@@ -5946,7 +5949,7 @@ if (has_match_end)
 
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_END, 0, TMP1, 0);
-  CMOV(SLJIT_GREATER, STR_END, TMP1, 0);
+  SELECT(SLJIT_GREATER, STR_END, TMP1, 0, STR_END);
   }
 
 #ifdef JIT_HAS_FAST_FORWARD_CHAR_SIMD
@@ -6149,7 +6152,7 @@ if (common->match_end_ptr != 0)
   OP2(SLJIT_SUB | SLJIT_SET_LESS, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
   add_jump(compiler, &common->failed_match, JUMP(SLJIT_LESS));
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_END, 0, TMP1, 0);
-  CMOV(SLJIT_GREATER, STR_END, TMP1, 0);
+  SELECT(SLJIT_GREATER, STR_END, TMP1, 0, STR_END);
   }
 else
   {
@@ -6379,7 +6382,7 @@ if (JIT_HAS_FAST_FORWARD_CHAR_SIMD && (common->nltype == NLTYPE_FIXED || common-
     if (common->mode != PCRE2_JIT_COMPLETE)
       {
       OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
-      CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+      SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
       }
     }
   }
@@ -6441,7 +6444,7 @@ if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, RETURN_ADDR, 0, STR_END, 0);
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(1));
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_END, 0, TMP1, 0);
-  CMOV(SLJIT_GREATER, STR_END, TMP1, 0);
+  SELECT(SLJIT_GREATER, STR_END, TMP1, 0, STR_END);
   }
 
 start = LABEL();
@@ -7015,7 +7018,7 @@ while (i < len)
   else
     {
     OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, char_list[i]);
-    CMOV(SLJIT_ZERO, TMP2, TMP1, 0);
+    SELECT(SLJIT_ZERO, TMP2, TMP1, 0, TMP2);
     }
   i++;
   }
@@ -7029,7 +7032,7 @@ if (j != 0)
       {
       j--;
       OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, char_list[i] & 0xff);
-      CMOV(SLJIT_ZERO, TMP2, TMP1, 0);
+      SELECT(SLJIT_ZERO, TMP2, TMP1, 0, TMP2);
       }
   }
 
@@ -9004,7 +9007,7 @@ switch(type)
   if (sljit_has_cpu_feature(SLJIT_HAS_CMOV))
     {
     OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, oc);
-    CMOV(SLJIT_EQUAL, TMP1, SLJIT_IMM, c);
+    SELECT(SLJIT_EQUAL, TMP1, SLJIT_IMM, c, TMP1);
     add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, c));
     }
   else
@@ -11622,7 +11625,7 @@ switch(opcode)
       if (common->mode == PCRE2_JIT_COMPLETE)
         {
         OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
-        CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+        SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
         }
       else
         {
@@ -11915,7 +11918,7 @@ switch(opcode)
     if (common->mode == PCRE2_JIT_COMPLETE)
       {
       OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
-      CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+      SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
       }
     else
       {
@@ -13736,9 +13739,9 @@ jump_list *reqcu_not_found = NULL;
 SLJIT_ASSERT(tables);
 
 #if HAS_VIRTUAL_REGISTERS == 1
-SLJIT_ASSERT(sljit_get_register_index(TMP3) < 0 && sljit_get_register_index(ARGUMENTS) < 0 && sljit_get_register_index(RETURN_ADDR) < 0);
+SLJIT_ASSERT(sljit_get_register_index(SLJIT_INT_REGISTER, TMP3) < 0 && sljit_get_register_index(SLJIT_INT_REGISTER, ARGUMENTS) < 0 && sljit_get_register_index(SLJIT_INT_REGISTER, RETURN_ADDR) < 0);
 #elif HAS_VIRTUAL_REGISTERS == 0
-SLJIT_ASSERT(sljit_get_register_index(TMP3) >= 0 && sljit_get_register_index(ARGUMENTS) >= 0 && sljit_get_register_index(RETURN_ADDR) >= 0);
+SLJIT_ASSERT(sljit_get_register_index(SLJIT_INT_REGISTER, TMP3) >= 0 && sljit_get_register_index(SLJIT_INT_REGISTER, ARGUMENTS) >= 0 && sljit_get_register_index(SLJIT_INT_REGISTER, RETURN_ADDR) >= 0);
 #else
 #error "Invalid value for HAS_VIRTUAL_REGISTERS"
 #endif
@@ -13916,7 +13919,7 @@ set_private_data_ptrs(common, &private_data_size, ccend);
 
 SLJIT_ASSERT(common->early_fail_start_ptr <= common->early_fail_end_ptr);
 
-if (private_data_size > SLJIT_MAX_LOCAL_SIZE)
+if (private_data_size > 65536)
   {
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
   SLJIT_FREE(common->optimized_cbracket, allocator_data);

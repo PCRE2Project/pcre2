@@ -213,8 +213,8 @@ struct sljit_label *restart;
 struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
 vector_compare_type compare_type = vector_compare_match1;
-sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
-sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
 sljit_s32 data_ind = 0;
 sljit_s32 tmp_ind = 1;
 sljit_s32 cmp1_ind = 2;
@@ -340,7 +340,7 @@ if (common->mode != PCRE2_JIT_COMPLETE)
   JUMPHERE(partial_quit[0]);
   JUMPHERE(partial_quit[1]);
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
-  CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+  SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
 else
   add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
@@ -374,8 +374,8 @@ struct sljit_label *start;
 struct sljit_jump *quit;
 jump_list *not_found = NULL;
 vector_compare_type compare_type = vector_compare_match1;
-sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
-sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
 sljit_s32 data_ind = 0;
 sljit_s32 tmp_ind = 1;
 sljit_s32 cmp1_ind = 2;
@@ -508,9 +508,9 @@ vector_compare_type compare2_type = vector_compare_match1;
 sljit_u32 bit1 = 0;
 sljit_u32 bit2 = 0;
 sljit_u32 diff = IN_UCHARS(offs1 - offs2);
-sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
-sljit_s32 tmp2_reg_ind = sljit_get_register_index(TMP2);
-sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 tmp2_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP2);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
 sljit_s32 data1_ind = 0;
 sljit_s32 data2_ind = 1;
 sljit_s32 tmp1_ind = 2;
@@ -538,7 +538,7 @@ if (common->match_end_ptr != 0)
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offs1 + 1));
 
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
-  CMOV(SLJIT_LESS, STR_END, TMP1, 0);
+  SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
   }
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offs1));
@@ -1068,7 +1068,7 @@ else
   OP2(SLJIT_ADD, SLJIT_R0, 0, SLJIT_R0, 0, SLJIT_IMM, IN_UCHARS(offs1 + 1));
 
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, STR_END, 0, SLJIT_R0, 0);
-  CMOV(SLJIT_LESS, SLJIT_R0, STR_END, 0);
+  SELECT(SLJIT_LESS, SLJIT_R0, STR_END, 0, SLJIT_R0);
   }
 
 OP1(SLJIT_MOV, SLJIT_R1, 0, STR_PTR, 0); 
@@ -1177,7 +1177,7 @@ if (step == 0)
   OP1(SLJIT_MOV, tmp_general_reg, 0, SLJIT_IMM, chr);
 
   /* VLVG */
-  instruction[0] = (sljit_u16)(0xe700 | (dst_vreg << 4) | sljit_get_register_index(tmp_general_reg));
+  instruction[0] = (sljit_u16)(0xe700 | (dst_vreg << 4) | sljit_get_register_index(SLJIT_INT_REGISTER, tmp_general_reg));
   instruction[1] = 0;
   instruction[2] = (sljit_u16)((VECTOR_ELEMENT_SIZE << 12) | (0x8 << 8) | 0x22);
   sljit_emit_op_custom(compiler, instruction, 6);
@@ -1256,8 +1256,8 @@ struct sljit_label *restart;
 struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
 vector_compare_type compare_type = vector_compare_match1;
-sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
-sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
 sljit_s32 data_ind = 0;
 sljit_s32 tmp_ind = 1;
 sljit_s32 cmp1_ind = 2;
@@ -1419,7 +1419,7 @@ if (common->mode != PCRE2_JIT_COMPLETE)
   JUMPHERE(partial_quit[0]);
   JUMPHERE(partial_quit[1]);
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
-  CMOV(SLJIT_GREATER, STR_PTR, STR_END, 0);
+  SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
 else
   add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
@@ -1454,8 +1454,8 @@ struct sljit_label *start;
 struct sljit_jump *quit;
 jump_list *not_found = NULL;
 vector_compare_type compare_type = vector_compare_match1;
-sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
-sljit_s32 tmp3_reg_ind = sljit_get_register_index(TMP3);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 tmp3_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP3);
 sljit_s32 data_ind = 0;
 sljit_s32 tmp_ind = 1;
 sljit_s32 cmp1_ind = 2;
@@ -1624,9 +1624,9 @@ vector_compare_type compare2_type = vector_compare_match1;
 sljit_u32 bit1 = 0;
 sljit_u32 bit2 = 0;
 sljit_s32 diff = IN_UCHARS(offs2 - offs1);
-sljit_s32 tmp1_reg_ind = sljit_get_register_index(TMP1);
-sljit_s32 tmp2_reg_ind = sljit_get_register_index(TMP2);
-sljit_s32 str_ptr_reg_ind = sljit_get_register_index(STR_PTR);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 tmp2_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP2);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
 sljit_s32 data1_ind = 0;
 sljit_s32 data2_ind = 1;
 sljit_s32 tmp1_ind = 2;
@@ -1674,7 +1674,7 @@ if (common->match_end_ptr != 0)
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offs1 + 1));
 
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
-  CMOV(SLJIT_LESS, STR_END, TMP1, 0);
+  SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
   }
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offs1));
