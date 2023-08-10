@@ -439,12 +439,14 @@ CLEANFILES += src/pcre2_chartables.c
 
 EXTRA_DIST += \
   src/sljit/sljitConfig.h \
+  src/sljit/sljitConfigCPU.h \
   src/sljit/sljitConfigInternal.h \
   src/sljit/sljitLir.c \
   src/sljit/sljitLir.h \
   src/sljit/sljitNativeARM_32.c \
   src/sljit/sljitNativeARM_64.c \
   src/sljit/sljitNativeARM_T2_32.c \
+  src/sljit/sljitNativeLOONGARCH_64.c \
   src/sljit/sljitNativeMIPS_32.c \
   src/sljit/sljitNativeMIPS_64.c \
   src/sljit/sljitNativeMIPS_common.c \
