@@ -463,8 +463,10 @@ setting with a similar syntax.
 </pre>
 Each top-level branch of a lookbehind must have a limit for the number of
 characters it matches. If any branch can match a variable number of characters,
-the maximum for the entire lookbehind is limited. If every branch matches a
-fixed number of characters, there is no constraint.
+the maximum for each branch is limited to a value set by the caller of
+<b>pcre2_compile()</b> or defaulted. The default is set when PCRE2 is built
+(ultimate default 255). If every branch matches a fixed number of characters,
+the limit for each branch is 65535 characters.
 </P>
 <br><a name="SEC22" href="#TOC1">NON-ATOMIC LOOKAROUND ASSERTIONS</a><br>
 <P>
@@ -602,7 +604,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 09 August 2023
+Last updated: 11 August 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

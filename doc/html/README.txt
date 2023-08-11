@@ -271,7 +271,7 @@ library. They are also documented in the pcre2build man page.
   performance in the 8-bit and 16-bit libraries. In the 32-bit library, the
   link size setting is ignored, as 4-byte offsets are always used.
   
-, Lookbehind assertions in which one or more branches can match a variable
+. Lookbehind assertions in which one or more branches can match a variable
   number of characters are supported only if there is a maximum matching length
   for each top-level branch. There is a limit to this maximum that defaults to
   255 characters. You can alter this default by a setting such as
@@ -933,4 +933,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 09 August 2023
+Last updated: 11 August 2023
