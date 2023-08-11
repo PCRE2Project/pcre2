@@ -1085,10 +1085,10 @@ with anchoring in any way. The pattern:
 matches only when the subject begins with "foobar" (in single line mode),
 though it again reports the matched string as "bar". This feature is similar to
 a lookbehind assertion
-<a href="#lookbehind">(described below).</a>
-However, in this case, the part of the subject before the real match does not
-have to be of fixed length, as lookbehind assertions do. The use of \K does
-not interfere with the setting of
+<a href="#lookbehind">(described below),</a>
+but the part of the pattern that precedes \K is not constrained to match a
+limited number of characters, as is required for a lookbehind assertion. The
+use of \K does not interfere with the setting of
 <a href="#group">captured substrings.</a>
 For example, when the pattern
 <pre>
@@ -2444,39 +2444,32 @@ negative assertions. For example,
   (?&#60;!foo)bar
 </pre>
 does find an occurrence of "bar" that is not preceded by "foo". The contents of
-a lookbehind assertion are restricted such that all the strings it matches must
-have a fixed length. However, if there are several top-level alternatives, they
-do not all have to have the same fixed length. Thus
-<pre>
-  (?&#60;=bullock|donkey)
-</pre>
-is permitted, but
-<pre>
-  (?&#60;!dogs?|cats?)
-</pre>
-causes an error at compile time. Branches that match different length strings
-are permitted only at the top level of a lookbehind assertion. This is an
-extension compared with Perl, which requires all branches to match the same
-length of string. An assertion such as
-<pre>
-  (?&#60;=ab(c|de))
-</pre>
-is not permitted, because its single top-level branch can match two different
-lengths, but it is acceptable to PCRE2 if rewritten to use two top-level
-branches:
-<pre>
-  (?&#60;=abc|abde)
-</pre>
-In some cases, the escape sequence \K
-<a href="#resetmatchstart">(see above)</a>
-can be used instead of a lookbehind assertion to get round the fixed-length
-restriction.
+a lookbehind assertion are restricted such that there must be a known maximum
+to the lengths of all the strings it matches. There are two cases:
 </P>
 <P>
-The implementation of lookbehind assertions is, for each alternative, to
-temporarily move the current position back by the fixed length and then try to
-match. If there are insufficient characters before the current position, the
-assertion fails.
+If every top-level alternative matches a fixed length, for example
+<pre>
+  (?&#60;=colour|color)
+</pre>
+there is no restriction on the lengths, which do not have to be the same, as
+this example demonstrates. This is the only kind of lookbehind supported by
+PCRE2 versions earlier than 10.43 and by the alternative matching function
+<b>pcre2_dfa_match()</b>.
+</P>
+<P>
+In PCRE2 10.43 and later, <b>pcre2_match()</b> supports lookbehind assertions in
+which one or more top-level alternatives can match more than one string length,
+for example
+<pre>
+  (?&#60;=colou?r)
+</pre>
+The maximum matching length for the whole lookbehind is limited to a value set
+by the calling program (default 255 characters). Unlimited repetition (for
+example \d*) is not supported. In some cases, the escape sequence \K
+<a href="#resetmatchstart">(see above)</a>
+can be used instead of a lookbehind assertion at the start of a pattern to get
+round the length limit restriction.
 </P>
 <P>
 In UTF-8 and UTF-16 modes, PCRE2 does not allow the \C escape (which matches a
@@ -2488,27 +2481,27 @@ permitted in lookbehinds.
 <P>
 <a href="#groupsassubroutines">"Subroutine"</a>
 calls (see below) such as (?2) or (?&X) are permitted in lookbehinds, as long
-as the called capture group matches a fixed-length string. However,
+as the called capture group matches a limited-length string. However,
 <a href="#recursion">recursion,</a>
 that is, a "subroutine" call into a group that is already active,
 is not supported.
 </P>
 <P>
-Perl does not support backreferences in lookbehinds. PCRE2 does support them,
-but only if certain conditions are met. The PCRE2_MATCH_UNSET_BACKREF option
-must not be set, there must be no use of (?| in the pattern (it creates
-duplicate group numbers), and if the backreference is by name, the name
-must be unique. Of course, the referenced group must itself match a fixed
-length substring. The following pattern matches words containing at least two
-characters that begin and end with the same character:
+PCRE2 supports backreferences in lookbehinds, but only if certain conditions
+are met. The PCRE2_MATCH_UNSET_BACKREF option must not be set, there must be no
+use of (?| in the pattern (it creates duplicate group numbers), and if the
+backreference is by name, the name must be unique. Of course, the referenced
+group must itself match a limited length substring. The following pattern
+matches words containing at least two characters that begin and end with the
+same character:
 <pre>
    \b(\w)\w++(?&#60;=\1)
 </PRE>
 </P>
 <P>
 Possessive quantifiers can be used in conjunction with lookbehind assertions to
-specify efficient matching of fixed-length strings at the end of subject
-strings. Consider a simple pattern such as
+specify efficient matching at the end of subject strings. Consider a simple
+pattern such as
 <pre>
   abcd$
 </pre>
@@ -2569,11 +2562,10 @@ characters that are not "999".
 <a name="nonatomicassertions"></a></P>
 <br><a name="SEC21" href="#TOC1">NON-ATOMIC ASSERTIONS</a><br>
 <P>
-The traditional Perl-compatible lookaround assertions are atomic. That is, if
-an assertion is true, but there is a subsequent matching failure, there is no
-backtracking into the assertion. However, there are some cases where non-atomic
-positive assertions can be useful. PCRE2 provides these using the following
-syntax:
+Traditional lookaround assertions are atomic. That is, if an assertion is true,
+but there is a subsequent matching failure, there is no backtracking into the
+assertion. However, there are some cases where non-atomic positive assertions
+can be useful. PCRE2 provides these using the following syntax:
 <pre>
   (*non_atomic_positive_lookahead:  or (*napla: or (?*
   (*non_atomic_positive_lookbehind: or (*naplb: or (?&#60;*
@@ -2867,7 +2859,6 @@ Assertion conditions
 If the condition is not in any of the above formats, it must be a parenthesized
 assertion. This may be a positive or negative lookahead or lookbehind
 assertion. However, it must be a traditional atomic assertion, not one of the
-PCRE2-specific
 <a href="#nonatomicassertions">non-atomic assertions.</a>
 </P>
 <P>
@@ -3790,7 +3781,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 February 2023
+Last updated: 09 August 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

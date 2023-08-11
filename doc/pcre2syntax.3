@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "04 February 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "11 August 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -436,7 +436,12 @@ setting with a similar syntax.
   (*nlb:...)                  ) negative lookbehind
   (*negative_lookbehind:...)  )
 .sp
-Each top-level branch of a lookbehind must be of a fixed length.
+Each top-level branch of a lookbehind must have a limit for the number of
+characters it matches. If any branch can match a variable number of characters,
+the maximum for each branch is limited to a value set by the caller of
+\fBpcre2_compile()\fP or defaulted. The default is set when PCRE2 is built
+(ultimate default 255). If every branch matches a fixed number of characters,
+the limit for each branch is 65535 characters.
 .
 .
 .SH "NON-ATOMIC LOOKAROUND ASSERTIONS"
@@ -585,6 +590,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 February 2023
+Last updated: 11 August 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

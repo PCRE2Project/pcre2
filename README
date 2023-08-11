@@ -270,6 +270,17 @@ library. They are also documented in the pcre2build man page.
   libraries) uses four-byte offsets. Increasing the internal link size reduces
   performance in the 8-bit and 16-bit libraries. In the 32-bit library, the
   link size setting is ignored, as 4-byte offsets are always used.
+  
+. Lookbehind assertions in which one or more branches can match a variable
+  number of characters are supported only if there is a maximum matching length
+  for each top-level branch. There is a limit to this maximum that defaults to
+  255 characters. You can alter this default by a setting such as
+
+  --with-max-varlookbehind=100
+
+  The limit can be changed at runtime by calling pcre2_set_max_varlookbehind().
+  Lookbehind assertions in which every branch matches a fixed number of
+  characters (not necessarily all the same) are not constrained by this limit.
 
 . For speed, PCRE2 uses four tables for manipulating and identifying characters
   whose code point values are less than 256. By default, it uses a set of
@@ -922,4 +933,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 15 April 2023
+Last updated: 11 August 2023

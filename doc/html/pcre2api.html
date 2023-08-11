@@ -161,6 +161,10 @@ document for an overview of all the PCRE2 documentation.
 <b>  PCRE2_SIZE <i>value</i>);</b>
 <br>
 <br>
+<b>int pcre2_set_max_varlookbehind(pcre2_compile_contest *<i>ccontext</i>,</b>
+<b>"  uint32_t <i>value</i>);</b>
+<br>
+<br>
 <b>int pcre2_set_newline(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>value</i>);</b>
 <br>
@@ -868,6 +872,16 @@ compiled with this context. If the pattern is longer, an error is generated.
 This facility is provided so that applications that accept patterns from
 external sources can limit their size. The default is the largest number that a
 PCRE2_SIZE variable can hold, which is effectively unlimited.
+<br>
+<br>
+<b>int pcre2_set_max_varlookbehind(pcre2_compile_contest *<i>ccontext</i>,</b>
+<b>"  uint32_t <i>value</i>);</b>
+<br>
+<br>
+This sets a maximum length for the number of characters matched by a
+variable-length lookbehind assertion. The default is set when PCRE2 is built,
+with the ultimate default being 255, the same as Perl. Lookbehind assertions 
+without a bounding length are not supported.
 <br>
 <br>
 <b>int pcre2_set_newline(pcre2_compile_context *<i>ccontext</i>,</b>
@@ -4123,7 +4137,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 July 2023
+Last updated: 09 August 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

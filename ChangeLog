@@ -91,6 +91,10 @@ the available input buffer. Cause such a test to fail.
 23. Update pcre2_compile() to treat a NULL pattern with zero length as an empty 
 string.
 
+24. Add support for limited-length variable-length lookbehind assertions, with 
+default maximum length 255 characters (same as Perl) but with a function to 
+adjust the limit.
+
 
 Version 10.42 11-December-2022
 ------------------------------
