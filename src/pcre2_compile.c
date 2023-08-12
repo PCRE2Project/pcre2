@@ -8342,7 +8342,7 @@ for (;;)
 
   if (lookbehind && lookbehindlength > 0)
     {
-    if (lookbehindminlength == LOOKBEHIND_MAX || 
+    if (lookbehindminlength == LOOKBEHIND_MAX ||
         lookbehindminlength == lookbehindlength)
       {
       *code++ = OP_REVERSE;
@@ -9407,14 +9407,19 @@ for (;; pptr++)
     pptr += 3 + SIZEOFFSET;
     break;
 
-    /* Only some escapes consume a character. Of those, \R and \X are never
-    allowed because they might match more than character. \C is allowed only in
-    32-bit and non-UTF 8/16-bit modes. */
+    /* Only some escapes consume a character. Of those, \R can match one or two
+    characters, but \X is never allowed because it matches an unknown number of
+    characters. \C is allowed only in 32-bit and non-UTF 8/16-bit modes. */
 
     case META_ESCAPE:
     escape = META_DATA(*pptr);
-    if (escape == ESC_R || escape == ESC_X) return -1;
-    if (escape > ESC_b && escape < ESC_Z)
+    if (escape == ESC_X) return -1;
+    if (escape == ESC_R)
+      {
+      itemminlength = 1;
+      itemlength = 2;
+      }
+    else if (escape > ESC_b && escape < ESC_Z)
       {
 #if PCRE2_CODE_UNIT_WIDTH != 32
       if ((cb->external_options & PCRE2_UTF) != 0 && escape == ESC_C)
@@ -9676,8 +9681,8 @@ for (;; pptr++)
     }
 
   /* Add the item length to the branchlength, checking for integer overflow and
-  for the branch length exceeding the overall limit. Later, if there is at 
-  least one variable-length branch in the group, there is a test for the 
+  for the branch length exceeding the overall limit. Later, if there is at
+  least one variable-length branch in the group, there is a test for the
   (smaller) variable-length branch length limit. */
 
   if (INT_MAX - branchlength < (int)itemlength ||
@@ -9768,7 +9773,7 @@ do
 
   if (branchlength != branchminlength) variable = TRUE;
   if (branchminlength < minlength) minlength = branchminlength;
-  if (branchlength > maxlength) maxlength = branchlength; 
+  if (branchlength > maxlength) maxlength = branchlength;
   if (branchlength > cb->max_lookbehind) cb->max_lookbehind = branchlength;
   *bptr |= branchlength;  /* branchlength never more than 65535 */
   bptr = *pptrptr;
@@ -9789,10 +9794,10 @@ if (variable)
     {
     *errcodeptr = ERR100;
     cb->erroroffset = offset;
-    return FALSE;   
-    }   
+    return FALSE;
+    }
   }
-else gbptr[1] = LOOKBEHIND_MAX;     
+else gbptr[1] = LOOKBEHIND_MAX;
 
 
 gbptr[1] = variable? minlength : LOOKBEHIND_MAX;
