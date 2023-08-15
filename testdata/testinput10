@@ -1,6 +1,8 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
+#newline_default lf any anycrlf
+
 # The next 5 patterns have UTF-8 errors
 
 /[Ã]/utf
