@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
     });
-    lib.addIncludePath("src");
+    lib.addIncludePath(.{ .path = "src" });
     lib.addCSourceFiles(&.{
         "src/pcre2_auto_possess.c",
         "src/pcre2_chkdint.c",
@@ -52,5 +52,5 @@ pub fn build(b: *std.Build) !void {
     lib.step.dependOn(&copyFiles.step);
     lib.installHeader("src/pcre2.h.generic", "pcre2.h");
     lib.linkLibC();
-    lib.install();
+    b.installArtifact(lib);
 }
