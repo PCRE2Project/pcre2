@@ -95,6 +95,10 @@ string.
 default maximum length 255 characters (same as Perl) but with a function to 
 adjust the limit.
 
+25. Applied pull request #260, which modernizes the CMake files, also #262, 
+which updates the zig configuration, and #278 which fixes a bug with out-of-
+source-tree CMake build testing.
+
 
 Version 10.42 11-December-2022
 ------------------------------
