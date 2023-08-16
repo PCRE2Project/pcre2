@@ -1,8 +1,32 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) !void {
-    const target = b.standardTargetOptions(.{});
+    const target_input = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const build_pcre2grep = b.option(bool, "build_pcre2grep", "") orelse false;
+
+    var target = target_input;
+
+    if (target_input.getOs().tag == .linux) {
+        // Zig defaults to musl libc on linux, but we want glibc as pcre2grep,
+        // pcre2test and perhaps other parts of pcre2 do not work with musl.
+        // This silently changes the target to glibc, which can be a little
+        // confusing if someone tries to explicitly target musl. It would be
+        // better if we could differentiate between target_input being
+        // explicitly set or if it has the defualt value.
+        // TODO: Add a way to check if a target is the default target or
+        //       explicitly set, if explicitly set, raise a warning and do not
+        //       set it to glibc so that the user sees the error
+        target.abi = .gnu;
+    }
+
+    var flags = std.ArrayList([]const u8).init(b.allocator);
+    defer flags.deinit();
+    flags.append("-std=c99") catch unreachable;
+    flags.append("-DHAVE_CONFIG_H") catch unreachable;
+    flags.append("-DPCRE2_CODE_UNIT_WIDTH=8") catch unreachable;
+    flags.append("-DPCRE2_STATIC") catch unreachable;
+    flags.append("-DMAX_VARLOOKBEHIND=255") catch unreachable;
 
     const copyFiles = b.addWriteFiles();
     copyFiles.addCopyFileToSource(.{ .path = "src/config.h.generic" }, "src/config.h");
@@ -43,14 +67,24 @@ pub fn build(b: *std.Build) !void {
         "src/pcre2_valid_utf.c",
         "src/pcre2_xclass.c",
         "src/pcre2_chartables.c",
-    }, &.{
-        "-std=c99",
-        "-DHAVE_CONFIG_H",
-        "-DPCRE2_CODE_UNIT_WIDTH=8",
-        "-DPCRE2_STATIC",
-    });
+    }, flags.items);
     lib.step.dependOn(&copyFiles.step);
-    lib.installHeader("src/pcre2.h.generic", "pcre2.h");
+    lib.installHeader("src/pcre2.h", "pcre2.h");
     lib.linkLibC();
     b.installArtifact(lib);
+
+    if (build_pcre2grep) {
+        const exe_pcre2grep = b.addExecutable(.{
+            .name = "pcre2grep",
+            .target = target,
+            .optimize = optimize,
+        });
+        exe_pcre2grep.addIncludePath(.{ .path = "src" });
+        exe_pcre2grep.addCSourceFiles(&.{
+            "src/pcre2grep.c",
+        }, flags.items);
+        exe_pcre2grep.linkLibrary(lib);
+        exe_pcre2grep.linkLibC();
+        b.installArtifact(exe_pcre2grep);
+    }
 }
