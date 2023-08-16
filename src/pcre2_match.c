@@ -5757,7 +5757,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
 #ifdef SUPPORT_UNICODE
     if (utf)
-      { 
+      {
       for (i = 0; i < Lmax; i++)
         {
         if (Feptr == mb->start_subject)
@@ -5769,7 +5769,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         Feptr--;
         if (utf) { BACKCHAR(Feptr); }
         }
-      }   
+      }
     else
 #endif
 

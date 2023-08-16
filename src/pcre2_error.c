@@ -188,7 +188,7 @@ static const unsigned char compile_error_texts[] =
   "atomic assertion expected after (?( or (?(?C)\0"
   "\\K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)\0"
   /* 100 */
-  "branch too long in variable-length lookbehind assertion\0" 
+  "branch too long in variable-length lookbehind assertion\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

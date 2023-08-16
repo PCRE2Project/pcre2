@@ -854,7 +854,7 @@ Specifying a maximum for variable lookbehinds
 <P>
 Variable lookbehind assertions are supported only if, for each one, there is a
 maximum length (in characters) that it can match. There is a limit on this,
-whose default can be set at build time, with an ultimate default of 255. The 
+whose default can be set at build time, with an ultimate default of 255. The
 <b>max_varlookbehind</b> modifier uses the <b>pcre2_set_max_varlookbehind()</b>
 function to change the limit. Lookbehinds whose branches each match a fixed
 length are limited to 65535 characters per branch.

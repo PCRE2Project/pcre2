@@ -806,7 +806,7 @@ below), the REG_PEND extension is used to pass the pattern's length.
 .sp
 Variable lookbehind assertions are supported only if, for each one, there is a
 maximum length (in characters) that it can match. There is a limit on this,
-whose default can be set at build time, with an ultimate default of 255. The 
+whose default can be set at build time, with an ultimate default of 255. The
 \fBmax_varlookbehind\fP modifier uses the \fBpcre2_set_max_varlookbehind()\fP
 function to change the limit. Lookbehinds whose branches each match a fixed
 length are limited to 65535 characters per branch.

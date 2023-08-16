@@ -218,6 +218,12 @@ sure both macros are undefined; an emulation function will then be used. */
 #define MAX_NAME_SIZE 32
 #endif
 
+/* The value of MAX_VARLOOKBEHIND specifies the default maximum length, in
+   characters, for a variable-length lookbehind assertion. */
+#ifndef MAX_VARLOOKBEHIND
+#define MAX_VARLOOKBEHIND 255
+#endif
+
 /* Defining NEVER_BACKSLASH_C locks out the use of \C in all patterns. */
 /* #undef NEVER_BACKSLASH_C */
 
