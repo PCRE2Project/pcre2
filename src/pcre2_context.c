@@ -141,7 +141,7 @@ const pcre2_compile_context PRIV(default_compile_context) = {
   PARENS_NEST_LIMIT,                         /* As it says */
   0,                                         /* Extra options */
   MAX_VARLOOKBEHIND                          /* As it says */
-  };  
+  };
 
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */

@@ -270,7 +270,7 @@ library. They are also documented in the pcre2build man page.
   libraries) uses four-byte offsets. Increasing the internal link size reduces
   performance in the 8-bit and 16-bit libraries. In the 32-bit library, the
   link size setting is ignored, as 4-byte offsets are always used.
-  
+
 . Lookbehind assertions in which one or more branches can match a variable
   number of characters are supported only if there is a maximum matching length
   for each top-level branch. There is a limit to this maximum that defaults to

@@ -812,7 +812,7 @@ AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   allows for compiled patterns up to 65535 code units long. This covers the
   vast majority of cases. However, PCRE2 can also be compiled to use 3 or 4
   bytes instead. This allows for longer patterns in extreme cases.])
-  
+
 AC_DEFINE_UNQUOTED([MAX_VARLOOKBEHIND], [$with_max_varlookbehind], [
   The value of MAX_VARLOOKBEHIND specifies the default maximum length, in
   characters, for a variable-length lookbehind assertion.])
@@ -1143,7 +1143,7 @@ $PACKAGE-$VERSION configuration summary:
     EBCDIC code for NL ................. : ${ebcdic_nl_code}
     Rebuild char tables ................ : ${enable_rebuild_chartables}
     Internal link size ................. : ${with_link_size}
-    Maximum variable lookbehind ........ : ${with_max_varlookbehind} 
+    Maximum variable lookbehind ........ : ${with_max_varlookbehind}
     Nested parentheses limit ........... : ${with_parens_nest_limit}
     Heap limit ......................... : ${with_heap_limit} kibibytes
     Match limit ........................ : ${with_match_limit}

@@ -82,22 +82,24 @@ other tools that prefer the POSIX compatible unicode definition for \d.
 
 20. Report the bit width of the library in use by pcre2test for usability.
 
-21. A pathological pattern conversion test could result in a string longer than 
+21. A pathological pattern conversion test could result in a string longer than
 the available input buffer. Cause such a test to fail.
 
-22. Add a check that forces a compiler error if PCRE2_CODE_UNIT_WIDTH is not 8, 
+22. Add a check that forces a compiler error if PCRE2_CODE_UNIT_WIDTH is not 8,
 16, or 32 when compiling any of the library modules.
 
-23. Update pcre2_compile() to treat a NULL pattern with zero length as an empty 
+23. Update pcre2_compile() to treat a NULL pattern with zero length as an empty
 string.
 
-24. Add support for limited-length variable-length lookbehind assertions, with 
-default maximum length 255 characters (same as Perl) but with a function to 
+24. Add support for limited-length variable-length lookbehind assertions, with
+default maximum length 255 characters (same as Perl) but with a function to
 adjust the limit.
 
-25. Applied pull request #260, which modernizes the CMake files, also #262, 
+25. Applied pull request #260, which modernizes the CMake files, also #262,
 which updates the zig configuration, and #278 which fixes a bug with out-of-
 source-tree CMake build testing.
+
+26. Add support for LoongArch in JIT.
 
 
 Version 10.42 11-December-2022
