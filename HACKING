@@ -298,8 +298,8 @@ META_LOOKBEHIND_NA    (*naplb:  start of non-atomic lookbehind
 META_LOOKBEHINDNOT    (?<!      start of negative lookbehind
 
 The following are followed by two elements, the minimum and maximum. The
-maximum value is limited to 65535 (MAX_REPEAT). A maximum value of "unlimited"
-is represented by REPEAT_UNLIMITED, which is bigger than MAX_REPEAT:
+maximum value is limited to 65535 (MAX_REPEAT_COUNT). A maximum value of
+"unlimited" is represented by REPEAT_UNLIMITED, which is bigger than it:
 
 META_MINMAX           {n,m}  repeat
 META_MINMAX_PLUS      {n,m}+ repeat

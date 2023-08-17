@@ -5767,7 +5767,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           break;
           }
         Feptr--;
-        if (utf) { BACKCHAR(Feptr); }
+        BACKCHAR(Feptr);
         }
       }
     else
@@ -5776,7 +5776,8 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* No UTF support or not in UTF mode */
 
       {
-      ptrdiff_t available = Feptr - mb->start_subject;
+      ptrdiff_t diff = Feptr - mb->start_subject;
+      uint32_t available = (diff > 65535)? 65535 : ((diff > 0)? diff : 0);
       if (Lmin > available) RRETURN(MATCH_NOMATCH);
       if (Lmax > available) Lmax = available;
       Feptr -= Lmax;
