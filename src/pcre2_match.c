@@ -597,7 +597,6 @@ heapframe *P = NULL;
 
 heapframe *frames_top;  /* End of frames vector */
 heapframe *assert_accept_frame = NULL;  /* For passing back a frame with captures */
-PCRE2_SIZE heapframes_size;   /* Usable size of frames vector */
 PCRE2_SIZE frame_copy_size;   /* Amount to copy when creating a new frame */
 
 /* Local variables that do not need to be preserved over calls to RRMATCH(). */
@@ -637,13 +636,10 @@ copied when a new frame is created. */
 
 frame_copy_size = frame_size - offsetof(heapframe, eptr);
 
-/* Set up the first frame and the end of the frames vector. We set the local
-heapframes_size to the usuable amount of the vector, that is, a whole number of
-frames. */
+/* Set up the first frame and the end of the frames vector. */
 
 F = match_data->heapframes;
-heapframes_size = (match_data->heapframes_size / frame_size) * frame_size;
-frames_top = (heapframe *)((char *)F + heapframes_size);
+frames_top = (heapframe *)((char *)F + match_data->heapframes_size);
 
 Frdepth = 0;                        /* "Recursion" depth */
 Fcapture_last = 0;                  /* Number of most recent capture */
@@ -664,10 +660,11 @@ MATCH_RECURSE:
 doubling the size, but constrained by the heap limit (which is in KiB). */
 
 N = (heapframe *)((char *)F + frame_size);
-if (N >= frames_top)
+if ((heapframe *)((char *)N + frame_size) >= frames_top)
   {
   heapframe *new;
   PCRE2_SIZE newsize;
+  PCRE2_SIZE usedsize = (char *)N - (char *)(match_data->heapframes);
 
   if (match_data->heapframes_size >= PCRE2_SIZE_MAX / 2)
     {
@@ -681,7 +678,8 @@ if (N >= frames_top)
   if (newsize / 1024 >= mb->heap_limit)
     {
     PCRE2_SIZE old_size = match_data->heapframes_size / 1024;
-    if (mb->heap_limit <= old_size) return PCRE2_ERROR_HEAPLIMIT;
+    if (mb->heap_limit <= old_size)
+      return PCRE2_ERROR_HEAPLIMIT;
     else
       {
       PCRE2_SIZE max_delta = 1024 * (mb->heap_limit - old_size);
@@ -691,19 +689,21 @@ if (N >= frames_top)
       }
     }
 
+  /* With a heap limit set, the permitted additional size may not be enough for
+  another frame, so do a final check. */
+
+  if (newsize - usedsize < frame_size) return PCRE2_ERROR_HEAPLIMIT;
   new = match_data->memctl.malloc(newsize, match_data->memctl.memory_data);
   if (new == NULL) return PCRE2_ERROR_NOMEMORY;
-  memcpy(new, match_data->heapframes, heapframes_size);
+  memcpy(new, match_data->heapframes, usedsize);
 
-  F = (heapframe *)((char *)new + ((char *)F - (char *)match_data->heapframes));
-  N = (heapframe *)((char *)F + frame_size);
+  N = (heapframe *)((char *)new + usedsize);
+  F = (heapframe *)((char *)N - frame_size);
 
   match_data->memctl.free(match_data->heapframes, match_data->memctl.memory_data);
   match_data->heapframes = new;
   match_data->heapframes_size = newsize;
-
-  heapframes_size = (newsize / frame_size) * frame_size;
-  frames_top = (heapframe *)((char *)new + heapframes_size);
+  frames_top = (heapframe *)((char *)new + newsize);
   }
 
 #ifdef DEBUG_SHOW_RMATCH
@@ -6935,8 +6935,7 @@ mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
 /* If a pattern has very many capturing parentheses, the frame size may be very
 large. Set the initial frame vector size to ensure that there are at least 10
 available frames, but enforce a minimum of START_FRAMES_SIZE. If this is
-greater than the heap limit, get as large a vector as possible. Always round
-the size to a multiple of the frame size. */
+greater than the heap limit, get as large a vector as possible. */
 
 heapframes_size = frame_size * 10;
 if (heapframes_size < START_FRAMES_SIZE) heapframes_size = START_FRAMES_SIZE;
@@ -7394,7 +7393,6 @@ for(;;)
   mb->match_call_count = 0;
   mb->end_offset_top = 0;
   mb->skip_arg_count = 0;
-
   rc = match(start_match, mb->start_code, re->top_bracket, frame_size,
     match_data, mb);
 

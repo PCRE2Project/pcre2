@@ -101,6 +101,11 @@ source-tree CMake build testing.
 
 26. Add support for LoongArch in JIT.
 
+27. Fixed a bug in pcre2_match() in the code for handling the vector of
+backtracking frames on the heap, which caused a heap overflow if *LIMIT_HEAP
+restricted an attempt to extend to less than the frame size. Generally tidy up
+the code for extending the heap frames vector. This fixes GitHub issue #275.
+
 
 Version 10.42 11-December-2022
 ------------------------------
