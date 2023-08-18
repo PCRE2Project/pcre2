@@ -106,6 +106,9 @@ backtracking frames on the heap, which caused a heap overflow if *LIMIT_HEAP
 restricted an attempt to extend to less than the frame size. Generally tidy up
 the code for extending the heap frames vector. This fixes GitHub issue #275.
 
+28. Update pcre2_fuzzsupport.c to avoid clang sanitize complaint about shifting 
+left by 16 when there are non-zeros in the top 16 bits.
+
 
 Version 10.42 11-December-2022
 ------------------------------

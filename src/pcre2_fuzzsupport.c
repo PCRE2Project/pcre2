@@ -58,6 +58,7 @@ int LLVMFuzzerTestOneInput(const unsigned char *data, size_t size)
 {
 uint32_t compile_options;
 uint32_t match_options;
+uint32_t random_options;
 pcre2_match_data *match_data = NULL;
 pcre2_match_context *match_context = NULL;
 size_t match_size;
@@ -78,8 +79,9 @@ options. (RAND_MAX is required to be at least 32767, but is commonly
 2147483647, which excludes the top bit.) */
 
 srand((unsigned int)(data[size/2]));
-r1 = rand();
-r2 = rand();
+r1 = rand() & 0xffff;
+r2 = rand() & 0xffff;
+random_options = ((uint32_t)r1 << 16) | (uint32_t)r2;
 
 /* Ensure that all undefined option bits are zero (waste of time trying them)
 and also that PCRE2_NO_UTF_CHECK is unset, as there is no guarantee that the
@@ -87,18 +89,15 @@ input is UTF-8. Also unset PCRE2_NEVER_UTF and PCRE2_NEVER_UCP as there is no
 reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set because
 \C in random patterns is highly likely to cause a crash. */
 
-compile_options =
-  ((((uint32_t)r1 << 16) | ((uint32_t)r2 & 0xffff)) & ALLOWED_COMPILE_OPTIONS) |
+compile_options = (random_options & ALLOWED_COMPILE_OPTIONS) |
   PCRE2_NEVER_BACKSLASH_C;
-  
-match_options =
-  ((((uint32_t)r1 << 16) | ((uint32_t)r2 & 0xffff)) & ALLOWED_MATCH_OPTIONS);
-  
+match_options = random_options & ALLOWED_MATCH_OPTIONS;
+
 /* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
 allowed together and just give an immediate error return. */
 
 if (((compile_options|match_options) & PCRE2_ENDANCHORED) != 0)
-  match_options &= ~(PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT); 
+  match_options &= ~(PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT);
 
 /* Do the compile with and without the options, and after a successful compile,
 likewise do the match with and without the options. */
