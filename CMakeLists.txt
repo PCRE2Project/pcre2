@@ -104,9 +104,10 @@
 # 2023-06-03 Theodore used standard CMake constructs to export the library's targets.
 # 2023-08-06 PH added support for setting variable length lookbehind maximum
 
-# Increased minimum to 3.3 to support visibility.
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
-PROJECT(PCRE2 C)
+# Increased minimum to 3.5 to workaround deprecated backward compatibility
+# since 3.27.
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+project(PCRE2 C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
