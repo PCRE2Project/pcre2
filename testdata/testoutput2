@@ -17803,6 +17803,9 @@ Failed: error 187 at offset 0: lookbehind assertion is too long
 
 /(?<=(()()()()()()()()()()()()()(()()()()(())()()()()(()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()(())()()()()(()()()()()()(()()()()()()()()()()()()()()()()()()()()()(())()()()()(()()()()()()()()()()()()()(()()()()()()()()()()()()()(()())))))))))/
 
+/(?<!( {65054}){0,44965})/auto_callout
+Failed: error 187 at offset 0: lookbehind assertion is too long
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
