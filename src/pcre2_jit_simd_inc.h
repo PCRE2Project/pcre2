@@ -42,7 +42,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #if !(defined SUPPORT_VALGRIND)
 
 #if ((defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
-     || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X))
+     || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
+     || (defined SLJIT_CONFIG_LOONGARCH_64 && SLJIT_CONFIG_LOONGARCH_64))
 
 typedef enum {
   vector_compare_match1,
@@ -1859,5 +1860,521 @@ if (common->match_end_ptr != 0)
 }
 
 #endif /* SLJIT_CONFIG_S390X */
+
+#if (defined SLJIT_CONFIG_LOONGARCH_64 && SLJIT_CONFIG_LOONGARCH_64)
+
+#ifdef __linux__
+/* Using getauxval(AT_HWCAP) under Linux for detecting whether LSX is available */
+#include <sys/auxv.h>
+#define LOONGARCH_HWCAP_LSX  (1 << 4)
+#define HAS_LSX_SUPPORT ((getauxval(AT_HWCAP) & LOONGARCH_HWCAP_LSX) != 0)
+#else
+#define HAS_LSX_SUPPORT 0
+#endif
+
+typedef sljit_ins sljit_u32;
+
+#define SI12_IMM_MASK   0x003ffc00
+#define UI5_IMM_MASK    0x00007c00
+#define UI2_IMM_MASK    0x00000c00
+
+#define VD(vd)      ((sljit_ins)vd << 0)
+#define VJ(vj)      ((sljit_ins)vj << 5)
+#define VK(vk)      ((sljit_ins)vk << 10)
+#define RD_V(rd)    ((sljit_ins)rd << 0)
+#define RJ_V(rj)    ((sljit_ins)rj << 5)
+
+#define IMM_SI12(imm)   (((sljit_ins)(imm) << 10) & SI12_IMM_MASK)
+#define IMM_UI5(imm)    (((sljit_ins)(imm) << 10) & UI5_IMM_MASK)
+#define IMM_UI2(imm)    (((sljit_ins)(imm) << 10) & UI2_IMM_MASK)
+
+// LSX OPCODES:
+#define VLD           0x2c000000
+#define VOR_V         0x71268000
+#define VAND_V        0x71260000
+#define VBSLL_V       0x728e0000
+#define VMSKLTZ_B     0x729c4000
+#define VPICKVE2GR_WU 0x72f3e000
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#define VREPLGR2VR  0x729f0000
+#define VSEQ        0x70000000
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+#define VREPLGR2VR  0x729f0400
+#define VSEQ        0x70008000
+#else
+#define VREPLGR2VR  0x729f0800
+#define VSEQ        0x70010000
+#endif
+
+static void fast_forward_char_pair_lsx_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
+  sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
+{
+if (compare_type != vector_compare_match2)
+  {
+  if (compare_type == vector_compare_match1i)
+    {
+    /* VOR.V vd, vj, vk */
+    push_inst(compiler, VOR_V | VD(dst_ind) | VJ(cmp2_ind) | VK(dst_ind));
+    }
+
+  /* VSEQ.B/H/W vd, vj, vk */
+  push_inst(compiler, VSEQ | VD(dst_ind) | VJ(dst_ind) | VK(cmp1_ind));
+  return;
+  }
+
+/* VBSLL.V vd, vj, ui5 */
+push_inst(compiler, VBSLL_V | VD(tmp_ind) | VJ(dst_ind) | IMM_UI5(0));
+
+/* VSEQ.B/H/W vd, vj, vk */
+push_inst(compiler, VSEQ | VD(dst_ind) | VJ(dst_ind) | VK(cmp1_ind));
+
+/* VSEQ.B/H/W vd, vj, vk */
+push_inst(compiler, VSEQ | VD(tmp_ind) | VJ(tmp_ind) | VK(cmp2_ind));
+
+/* VOR vd, vj, vk */
+push_inst(compiler, VOR_V | VD(dst_ind) | VJ(tmp_ind) | VK(dst_ind));
+return;
+}
+
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD HAS_LSX_SUPPORT
+
+static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
+struct sljit_jump *quit;
+struct sljit_jump *partial_quit[2];
+vector_compare_type compare_type = vector_compare_match1;
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
+sljit_s32 data_ind = 0;
+sljit_s32 tmp_ind = 1;
+sljit_s32 cmp1_ind = 2;
+sljit_s32 cmp2_ind = 3;
+sljit_u32 bit = 0;
+
+SLJIT_UNUSED_ARG(offset);
+
+if (char1 != char2)
+  {
+  bit = char1 ^ char2;
+  compare_type = vector_compare_match1i;
+
+  if (!is_powerof2(bit))
+    {
+    bit = 0;
+    compare_type = vector_compare_match2;
+    }
+  }
+
+partial_quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[0]);
+
+/* First part (unaligned start) */
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1 | bit);
+
+/* VREPLGR2VR.B/H/W vd, rj */
+push_inst(compiler, VREPLGR2VR | VD(cmp1_ind) | RJ_V(tmp1_reg_ind));
+
+if (char1 != char2)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, bit != 0 ? bit : char2);
+
+  /* VREPLGR2VR.B/H/W vd, rj */
+  push_inst(compiler, VREPLGR2VR | VD(cmp2_ind) | RJ_V(tmp1_reg_ind));
+  }
+
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
+
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xf);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(0));
+fast_forward_char_pair_lsx_compare(compiler, compare_type, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+/* VMSKLTZ.B vd, vj */
+push_inst(compiler, VMSKLTZ_B | VD(tmp_ind) | VJ(data_ind));
+
+/* VPICKVE2GR.WU rd, vj, ui2 */
+push_inst(compiler, VPICKVE2GR_WU | RD_V(tmp1_reg_ind) | VJ(tmp_ind) | IMM_UI2(0));
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Second part (aligned) */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+
+partial_quit[1] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[1]);
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(0));
+fast_forward_char_pair_lsx_compare(compiler, compare_type, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+/* VMSKLTZ.B vd, vj */
+push_inst(compiler, VMSKLTZ_B | VD(tmp_ind) | VJ(data_ind));
+
+/* VPICKVE2GR.WU rd, vj, ui2 */
+push_inst(compiler, VPICKVE2GR_WU | RD_V(tmp1_reg_ind) | VJ(tmp_ind) | IMM_UI2(0));
+
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(quit);
+
+/* CTZ.W rd, rj */
+push_inst(compiler, CTZ_W | RD_V(tmp1_reg_ind) | RJ_V(tmp1_reg_ind));
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+if (common->mode != PCRE2_JIT_COMPLETE)
+  {
+  JUMPHERE(partial_quit[0]);
+  JUMPHERE(partial_quit[1]);
+  OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
+  SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
+  }
+else
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf && offset > 0)
+  {
+  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
+
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+  JUMPTO(SLJIT_JUMP, restart);
+
+  JUMPHERE(quit);
+  }
+#endif
+}
+
+#define JIT_HAS_FAST_REQUESTED_CHAR_SIMD HAS_LSX_SUPPORT
+
+static jump_list *fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+struct sljit_jump *quit;
+jump_list *not_found = NULL;
+vector_compare_type compare_type = vector_compare_match1;
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
+sljit_s32 data_ind = 0;
+sljit_s32 tmp_ind = 1;
+sljit_s32 cmp1_ind = 2;
+sljit_s32 cmp2_ind = 3;
+sljit_u32 bit = 0;
+
+if (char1 != char2)
+  {
+  bit = char1 ^ char2;
+  compare_type = vector_compare_match1i;
+
+  if (!is_powerof2(bit))
+    {
+    bit = 0;
+    compare_type = vector_compare_match2;
+    }
+  }
+
+add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0));
+OP1(SLJIT_MOV, TMP2, 0, TMP1, 0);
+OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+
+/* First part (unaligned start) */
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1 | bit);
+
+/* VREPLGR2VR vd, rj */
+push_inst(compiler, VREPLGR2VR | VD(cmp1_ind) | RJ_V(tmp1_reg_ind));
+
+if (char1 != char2)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, bit != 0 ? bit : char2);
+  /* VREPLGR2VR vd, rj */
+  push_inst(compiler, VREPLGR2VR | VD(cmp2_ind) | RJ_V(tmp1_reg_ind));
+  }
+
+OP1(SLJIT_MOV, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xf);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(0));
+fast_forward_char_pair_lsx_compare(compiler, compare_type, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+/* VMSKLTZ.B vd, vj */
+push_inst(compiler, VMSKLTZ_B | VD(tmp_ind) | VJ(data_ind));
+
+/* VPICKVE2GR.WU rd, vj, ui2 */
+push_inst(compiler, VPICKVE2GR_WU | RD_V(tmp1_reg_ind) | VJ(tmp_ind) | IMM_UI2(0));
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Second part (aligned) */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+
+add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(0));
+fast_forward_char_pair_lsx_compare(compiler, compare_type, data_ind, cmp1_ind, cmp2_ind, tmp_ind);
+
+/* VMSKLTZ.B vd, vj */
+push_inst(compiler, VMSKLTZ_B | VD(tmp_ind) | VJ(data_ind));
+
+/* VPICKVE2GR.WU rd, vj, ui2 */
+push_inst(compiler, VPICKVE2GR_WU | RD_V(tmp1_reg_ind) | VJ(tmp_ind) | IMM_UI2(0));
+
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(quit);
+
+/* CTZ.W rd, rj */
+push_inst(compiler, CTZ_W | RD_V(tmp1_reg_ind) | RJ_V(tmp1_reg_ind));
+
+OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, STR_PTR, 0);
+add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0));
+
+OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+return not_found;
+}
+
+#define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD HAS_LSX_SUPPORT
+
+static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1,
+  PCRE2_UCHAR char1a, PCRE2_UCHAR char1b, sljit_s32 offs2, PCRE2_UCHAR char2a, PCRE2_UCHAR char2b)
+{
+DEFINE_COMPILER;
+vector_compare_type compare1_type = vector_compare_match1;
+vector_compare_type compare2_type = vector_compare_match1;
+sljit_u32 bit1 = 0;
+sljit_u32 bit2 = 0;
+sljit_u32 diff = IN_UCHARS(offs1 - offs2);
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP1);
+sljit_s32 tmp2_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, TMP2);
+sljit_s32 str_ptr_reg_ind = sljit_get_register_index(SLJIT_INT_REGISTER, STR_PTR);
+sljit_s32 data1_ind = 0;
+sljit_s32 data2_ind = 1;
+sljit_s32 tmp1_ind = 2;
+sljit_s32 tmp2_ind = 3;
+sljit_s32 cmp1a_ind = 4;
+sljit_s32 cmp1b_ind = 5;
+sljit_s32 cmp2a_ind = 6;
+sljit_s32 cmp2b_ind = 7;
+struct sljit_label *start;
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
+struct sljit_jump *jump[2];
+
+SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offs1 > offs2);
+SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_offset()));
+
+/* Initialize. */
+if (common->match_end_ptr != 0)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offs1 + 1));
+  OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
+
+  OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
+  SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
+  }
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offs1));
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+if (char1a == char1b)
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1a);
+else
+  {
+  bit1 = char1a ^ char1b;
+  if (is_powerof2(bit1))
+    {
+    compare1_type = vector_compare_match1i;
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1a | bit1);
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, bit1);
+    }
+  else
+    {
+    compare1_type = vector_compare_match2;
+    bit1 = 0;
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1a);
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, char1b);
+    }
+  }
+
+/* VREPLGR2VR vd, rj */
+push_inst(compiler, VREPLGR2VR | VD(cmp1a_ind) | RJ_V(tmp1_reg_ind));
+
+if (char1a != char1b)
+  {
+  /* VREPLGR2VR vd, rj */
+  push_inst(compiler, VREPLGR2VR | VD(cmp1b_ind) | RJ_V(tmp2_reg_ind));
+  }
+
+if (char2a == char2b)
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char2a);
+else
+  {
+  bit2 = char2a ^ char2b;
+  if (is_powerof2(bit2))
+    {
+    compare2_type = vector_compare_match1i;
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char2a | bit2);
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, bit2);
+    }
+  else
+    {
+    compare2_type = vector_compare_match2;
+    bit2 = 0;
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char2a);
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, char2b);
+    }
+  }
+
+/* VREPLGR2VR vd, rj */
+push_inst(compiler, VREPLGR2VR | VD(cmp2a_ind) | RJ_V(tmp1_reg_ind));
+
+if (char2a != char2b)
+  {
+  /* VREPLGR2VR vd, rj */
+  push_inst(compiler, VREPLGR2VR | VD(cmp2b_ind) | RJ_V(tmp2_reg_ind));
+  }
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
+
+OP2(SLJIT_SUB, TMP1, 0, STR_PTR, 0, SLJIT_IMM, diff);
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xf);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data1_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(0));
+
+jump[0] = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_PTR, 0);
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data2_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(-(sljit_s8)diff));
+jump[1] = JUMP(SLJIT_JUMP);
+
+JUMPHERE(jump[0]);
+
+/* VBSLL.V vd, vj, ui5 */
+push_inst(compiler, VBSLL_V | VD(data2_ind) | VJ(data1_ind) | IMM_UI5(diff));
+
+JUMPHERE(jump[1]);
+
+fast_forward_char_pair_lsx_compare(compiler, compare2_type, data2_ind, cmp2a_ind, cmp2b_ind, tmp2_ind);
+fast_forward_char_pair_lsx_compare(compiler, compare1_type, data1_ind, cmp1a_ind, cmp1b_ind, tmp1_ind);
+
+/* VAND vd, vj, vk */
+push_inst(compiler, VOR_V | VD(data1_ind) | VJ(data1_ind) | VK(data2_ind));
+
+/* VMSKLTZ.B vd, vj */
+push_inst(compiler, VMSKLTZ_B | VD(tmp1_ind) | VJ(data1_ind));
+
+/* VPICKVE2GR.WU rd, vj, ui2 */
+push_inst(compiler, VPICKVE2GR_WU | RD_V(tmp1_reg_ind) | VJ(tmp1_ind) | IMM_UI2(0));
+
+/* Ignore matches before the first STR_PTR. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+jump[0] = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Main loop. */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+/* VLD vd, rj, si12 */
+push_inst(compiler, VLD | VD(data1_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(0));
+push_inst(compiler, VLD | VD(data2_ind) | RJ_V(str_ptr_reg_ind) | IMM_SI12(-(sljit_s8)diff));
+
+fast_forward_char_pair_lsx_compare(compiler, compare1_type, data1_ind, cmp1a_ind, cmp1b_ind, tmp2_ind);
+fast_forward_char_pair_lsx_compare(compiler, compare2_type, data2_ind, cmp2a_ind, cmp2b_ind, tmp1_ind);
+
+/* VAND.V vd, vj, vk */
+push_inst(compiler, VAND_V | VD(data1_ind) | VJ(data1_ind) | VK(data2_ind));
+
+/* VMSKLTZ.B vd, vj */
+push_inst(compiler, VMSKLTZ_B | VD(tmp1_ind) | VJ(data1_ind));
+
+/* VPICKVE2GR.WU rd, vj, ui2 */
+push_inst(compiler, VPICKVE2GR_WU | RD_V(tmp1_reg_ind) | VJ(tmp1_ind) | IMM_UI2(0));
+
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(jump[0]);
+
+/* CTZ.W rd, rj */
+push_inst(compiler, CTZ_W | RD_V(tmp1_reg_ind) | RJ_V(tmp1_reg_ind));
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf)
+  {
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offs1));
+
+  jump[0] = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, restart);
+
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_JUMP));
+
+  JUMPHERE(jump[0]);
+  }
+#endif
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offs1));
+
+if (common->match_end_ptr != 0)
+  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+}
+
+#endif /* SLJIT_CONFIG_LOONGARCH_64 */
 
 #endif /* !SUPPORT_VALGRIND */
