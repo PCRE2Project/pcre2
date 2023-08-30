@@ -110,23 +110,24 @@ perl <<"END" >pcre2demo.3
             ".sp\n" .  
             ".\\\" Start example.\n" .
             ".de EX\n" .
-	    ".  do ds mF \\\\n[.fam]\n" .
+	    ".	do ds mF \\\\n[.fam]\n" .
             ".  nr mE \\\\n(.f\n" .
             ".  nf\n" .
             ".  nh\n" .
-	    ".  do fam C\n" .
+	    ".	do fam C\n" .
             ".  ft CW\n" .
             "..\n" .
             ".\n" .
             ".\n" .
             ".\\\" End example.\n" .
             ".de EE\n" .
-	    ".  do fam \\\\*(mF\n" .
+	    ".	do fam \\\\*(mF\n" .
             ".  ft \\\\n(mE\n" .
             ".  fi\n" .
             ".  hy \\\\n(HY\n" .
             "..\n" .
             ".\n" .
+            ".RS -7\n" .
             ".EX\n" ;
   while (<IN>)
     {

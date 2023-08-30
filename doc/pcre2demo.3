@@ -5,23 +5,24 @@
 .sp
 .\" Start example.
 .de EX
-.  do ds mF \\n[.fam]
+.	do ds mF \\n[.fam]
 .  nr mE \\n(.f
 .  nf
 .  nh
-.  do fam C
+.	do fam C
 .  ft CW
 ..
 .
 .
 .\" End example.
 .de EE
-.  do fam \\*(mF
+.	do fam \\*(mF
 .  ft \\n(mE
 .  fi
 .  hy \\n(HY
 ..
 .
+.RS -7
 .EX
 /*************************************************
 *           PCRE2 DEMONSTRATION PROGRAM          *
