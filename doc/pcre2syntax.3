@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "11 August 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "13 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -276,6 +276,9 @@ but some of them use Unicode properties if PCRE2_UCP is set. You can use
   {n,}        n or more, greedy
   {n,}+       n or more, possessive
   {n,}?       n or more, lazy
+  {,m}        zero up to m, greedy
+  {,m}+       zero up to m, possessive
+  {,m}?       zero up to m, lazy
 .
 .
 .SH "ANCHORS AND SIMPLE ASSERTIONS"
@@ -590,6 +593,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 August 2023
+Last updated: 13 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

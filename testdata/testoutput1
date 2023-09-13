@@ -10282,4 +10282,63 @@ No match
 
 # -------------------------------------------------------------------------- 
 
+# Altered interpretation of {,n}
+
+/a{,3}B/
+    XBBB
+ 0: B
+    XaBBB
+ 0: aB
+    XaaBBB
+ 0: aaB
+    XaaaBBB
+ 0: aaaB
+    XaaaaBBB
+ 0: aaaB
+
+# But {,} remains not a qualifier
+
+/a{,}B/
+    Xa{,}BBB
+ 0: a{,}B
+\= Expect no match     
+    XBBB
+No match
+    XaBBB
+No match
+    
+# Checks for non-quantifiers after refactored code
+
+/X{/
+    ZZX{}YY
+ 0: X{
+
+/X{A/
+    ZZX{ABC}
+ 0: X{A
+
+/X{}/
+    ZZX{}YZ
+ 0: X{}
+    
+/X{1234/
+    ZZX{123456
+ 0: X{1234
+    
+/X{12ABC}/ 
+    ZZX{12ABC}Y
+ 0: X{12ABC}
+    
+/X{1,/
+    ZZX{1,...
+ 0: X{1,
+    
+/X{,9/
+    ZZX{,9}abc
+ 0: X{,9
+    
+/X{,9]/
+    ZZX{,9]..   
+ 0: X{,9]
+    
 # End of testinput1 

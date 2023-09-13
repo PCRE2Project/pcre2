@@ -109,6 +109,10 @@ the code for extending the heap frames vector. This fixes GitHub issue #275.
 28. Update pcre2_fuzzsupport.c to avoid clang sanitize complaint about shifting 
 left by 16 when there are non-zeros in the top 16 bits.
 
+29. Perl 5.34.0 changed the meaning of (for example) {,3} which did not used to 
+be treated as a quantifier. Now it is interpreted as {0,3} and PCRE2 has 
+changed to match. Note that {,} is still not a quantifier.
+
 
 Version 10.42 11-December-2022
 ------------------------------

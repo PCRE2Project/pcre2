@@ -6486,4 +6486,47 @@ ef) x/x,mark
 
 # -------------------------------------------------------------------------- 
 
+# Altered interpretation of {,n}
+
+/a{,3}B/
+    XBBB
+    XaBBB
+    XaaBBB
+    XaaaBBB
+    XaaaaBBB
+
+# But {,} remains not a qualifier
+
+/a{,}B/
+    Xa{,}BBB
+\= Expect no match     
+    XBBB
+    XaBBB
+    
+# Checks for non-quantifiers after refactored code
+
+/X{/
+    ZZX{}YY
+
+/X{A/
+    ZZX{ABC}
+
+/X{}/
+    ZZX{}YZ
+    
+/X{1234/
+    ZZX{123456
+    
+/X{12ABC}/ 
+    ZZX{12ABC}Y
+    
+/X{1,/
+    ZZX{1,...
+    
+/X{,9/
+    ZZX{,9}abc
+    
+/X{,9]/
+    ZZX{,9]..   
+    
 # End of testinput1 

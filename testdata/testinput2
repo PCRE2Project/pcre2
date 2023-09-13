@@ -909,6 +909,13 @@
 
 /\U/I
 
+/\N{4}/
+    abcdefg
+
+/\N{,}/
+
+/\N{25,ab}/
+
 /a{1,3}b/ungreedy
     ab
 
@@ -1303,13 +1310,13 @@
   abcdabcd
   abcdcdcdcdcd
 
-/([ab]{,4}c|xy)/IB,auto_callout
+/([ab]{,}c|xy)/IB,auto_callout
 \= Expect no match
-    Note: that { does NOT introduce a quantifier
+    Note: that {,} does NOT introduce a quantifier
 
-/([ab]{,4}c|xy)/IB,auto_callout
+/([ab]{,}c|xy)/IB,auto_callout
 \= Expect no match
-    Note: that { does NOT introduce a quantifier
+    Note: that {,} does NOT introduce a quantifier
 
 /([ab]{1,4}c|xy){4,5}?123/IB,auto_callout
     aacaacaacaacaac123
@@ -5974,5 +5981,7 @@ a)"xI
 /(?<=(()()()()()()()()()()()()()(()()()()(())()()()()(()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()(())()()()()(()()()()()()(()()()()()()()()()()()()()()()()()()()()()(())()()()()(()()()()()()()()()()()()()(()()()()()()()()()()()()()(()())))))))))/
 
 /(?<!( {65054}){0,44965})/auto_callout
+
+/A+{,3}/
 
 # End of testinput2

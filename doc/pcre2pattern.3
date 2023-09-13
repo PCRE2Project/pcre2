@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "11 August 2023" "PCRE2 10.43"
+.TH PCRE2PATTERN 3 "13 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -298,7 +298,7 @@ are as follows:
   *      0 or more quantifier
   +      1 or more quantifier; also "possessive quantifier"
   ?      0 or 1 quantifier; also quantifier minimizer
-  {      start min/max quantifier
+  {      potential start of min/max quantifier
 .sp
 Part of a pattern that is in square brackets is called a "character class". In
 a character class the only metacharacters are:
@@ -1931,7 +1931,7 @@ documentation.
 .SH REPETITION
 .rs
 .sp
-Repetition is specified by quantifiers, which can follow any of the following
+Repetition is specified by quantifiers, which may follow any one of these
 items:
 .sp
   a literal data character
@@ -1939,16 +1939,17 @@ items:
   the \eC escape sequence
   the \eR escape sequence
   the \eX escape sequence
-  an escape such as \ed or \epL that matches a single character
+  any escape sequence that matches a single character
   a character class
   a backreference
   a parenthesized group (including lookaround assertions)
   a subroutine call (recursive or otherwise)
 .sp
-The general repetition quantifier specifies a minimum and maximum number of
-permitted matches, by giving the two numbers in curly brackets (braces),
-separated by a comma. The numbers must be less than 65536, and the first must
-be less than or equal to the second. For example,
+If a quantifier does not follow a repeatabke item, an error occurs. The
+general repetition quantifier specifies a minimum and maximum number of
+permitted matches by giving two numbers in curly brackets (braces), separated
+by a comma. The numbers must be less than 65536, and the first must be less
+than or equal to the second. For example,
 .sp
   z{2,4}
 .sp
@@ -1963,10 +1964,19 @@ matches at least 3 successive vowels, but may match many more, whereas
 .sp
   \ed{8}
 .sp
-matches exactly 8 digits. An opening curly bracket that appears in a position
-where a quantifier is not allowed, or one that does not match the syntax of a
-quantifier, is taken as a literal character. For example, {,6} is not a
-quantifier, but a literal string of four characters.
+matches exactly 8 digits. If the first number is omitted, the lower limit is
+taken as zero; in this case the upper limit must be present.
+.sp
+  X{,4} is interpreted as X{0,4}
+.sp
+This is a change in behaviour that happened in Perl 5.34.0 and PCRE2 10.43. In
+earlier versions such a sequence was not interpreted as a quantifier. If the
+characters that follow an opening brace do not match the syntax of a
+quantifier, the brace is taken as a literal character. In particular, this
+means that {,} is a literal string of three characters.
+.P
+Note that not every opening brace is potentially the start of a quantifier
+because braces are used in other items such as \eN{U+345} or \ek{name}.
 .P
 In UTF modes, quantifiers apply to characters rather than to individual code
 units. Thus, for example, \ex{100}{2} matches two characters, each of
@@ -2009,11 +2019,11 @@ repeatedly matching an empty string. This does not prevent backtracking into
 any of the iterations if a subsequent item fails to match.
 .P
 By default, quantifiers are "greedy", that is, they match as much as possible
-(up to the maximum number of permitted times), without causing the rest of the
-pattern to fail. The classic example of where this gives problems is in trying
-to match comments in C programs. These appear between /* and */ and within the
-comment, individual * and / characters may appear. An attempt to match C
-comments by applying the pattern
+(up to the maximum number of permitted repetitions), without causing the rest
+of the pattern to fail. The classic example of where this gives problems is in
+trying to match comments in C programs. These appear between /* and */ and
+within the comment, individual * and / characters may appear. An attempt to
+match C comments by applying the pattern
 .sp
   /\e*.*\e*/
 .sp
@@ -2028,10 +2038,10 @@ pattern
 .sp
   /\e*.*?\e*/
 .sp
-does the right thing with the C comments. The meaning of the various
-quantifiers is not otherwise changed, just the preferred number of matches.
-Do not confuse this use of question mark with its use as a quantifier in its
-own right. Because it has two uses, it can sometimes appear doubled, as in
+does the right thing with C comments. The meaning of the various quantifiers is
+not otherwise changed, just the preferred number of matches. Do not confuse
+this use of question mark with its use as a quantifier in its own right.
+Because it has two uses, it can sometimes appear doubled, as in
 .sp
   \ed??\ed
 .sp
@@ -3833,6 +3843,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 August 2023
+Last updated: 13 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

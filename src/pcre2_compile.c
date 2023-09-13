@@ -1300,9 +1300,9 @@ if (code != NULL)
 *************************************************/
 
 /* This function is used to read numbers in the pattern. The initial pointer
-must be the sign or first digit of the number. When relative values (introduced
-by + or -) are allowed, they are relative group numbers, and the result must be
-greater than zero.
+must be at the sign or first digit of the number. When relative values
+(introduced by + or -) are allowed, they are relative group numbers, and the
+result must be greater than zero.
 
 Arguments:
   ptrptr      points to the character pointer variable
@@ -1386,17 +1386,17 @@ return yield;
 *         Read repeat counts                     *
 *************************************************/
 
-/* Read an item of the form {n,m} and return the values if non-NULL pointers
+/* Read an item of the form {n,m} and return the values when non-NULL pointers
 are supplied. Repeat counts must be less than 65536 (MAX_REPEAT_COUNT); a
 larger value is used for "unlimited". We have to use signed arguments for
-read_number() because it is capable of returning a signed value.
+read_number() because it is capable of returning a signed value. As of Perl
+5.34.0 either n or m may be absent, but not both.
 
 Arguments:
-  ptrptr         points to pointer to character after'{'
+  ptrptr         points to pointer to character after '{'
   ptrend         pointer to end of input
   minp           if not NULL, pointer to int for min
-  maxp           if not NULL, pointer to int for max (-1 if no max)
-                 returned as -1 if no max
+  maxp           if not NULL, pointer to int for max
   errorcodeptr   points to error code variable
 
 Returns:         FALSE if not a repeat quantifier, errorcode set zero
@@ -1408,57 +1408,86 @@ static BOOL
 read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
   uint32_t *maxp, int *errorcodeptr)
 {
-PCRE2_SPTR p;
+PCRE2_SPTR p = *ptrptr;
 BOOL yield = FALSE;
-BOOL had_comma = FALSE;
+BOOL had_minimum = FALSE;
 int32_t min = 0;
 int32_t max = REPEAT_UNLIMITED; /* This value is larger than MAX_REPEAT_COUNT */
 
-/* Check the syntax */
-
 *errorcodeptr = 0;
-for (p = *ptrptr;; p++)
+
+/* Check the syntax before interpreting. Otherwise, a non-quantifier sequence
+such as "X{123456ABC" would incorrectly give a "number too big in quantifier"
+error. */
+
+if (p < ptrend && IS_DIGIT(*p))
   {
-  uint32_t c;
-  if (p >= ptrend) return FALSE;
-  c = *p;
-  if (IS_DIGIT(c)) continue;
-  if (c == CHAR_RIGHT_CURLY_BRACKET) break;
-  if (c == CHAR_COMMA)
-    {
-    if (had_comma) return FALSE;
-    had_comma = TRUE;
-    }
-  else return FALSE;
+  had_minimum = TRUE;
+  while (++p < ptrend && IS_DIGIT(*p)) {}
   }
 
-/* The only error from read_number() is for a number that is too big. */
-
-p = *ptrptr;
-if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &min, errorcodeptr))
-  goto EXIT;
-
+if (p >= ptrend) return FALSE;
 if (*p == CHAR_RIGHT_CURLY_BRACKET)
   {
-  p++;
-  max = min;
+  if (!had_minimum) return FALSE;
   }
 else
   {
-  if (*(++p) != CHAR_RIGHT_CURLY_BRACKET)
+  if (*p++ != CHAR_COMMA || p >= ptrend) return FALSE;
+  if (IS_DIGIT(*p))
     {
-    if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max,
-        errorcodeptr))
-      goto EXIT;
+    while (++p < ptrend && IS_DIGIT(*p)) {}
+    }
+  else if (!had_minimum) return FALSE;
+  if (p >= ptrend || *p != CHAR_RIGHT_CURLY_BRACKET) return FALSE;
+  }
+
+/* Now process the quantifier for real. We know it must be {n} or (n,} or {,m}
+or {n,m}. The only error that read_number() can return is for a number that is
+too big. If *errorcodeptr is returned as zero it means no number was found. */
+
+p = *ptrptr;
+
+/* Deal with {,m} or n too big. If we successfully read m there is no need to
+check m >= n because n defaults to zero. */
+
+if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &min, errorcodeptr))
+  {
+  if (*errorcodeptr != 0) goto EXIT;    /* n too big */
+  p++;  /* Skip comma */
+  if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max, errorcodeptr))
+    {
+    if (*errorcodeptr != 0) goto EXIT;  /* m too big */
+    }
+  }
+
+/* Have read one number. Deal with {n} or {n,} or {n,m} */
+
+else
+  {
+  if (*p == CHAR_RIGHT_CURLY_BRACKET)
+    {
+    max = min;
+    }
+  else   /* Handle {n,} or {n,m} */
+    {
+    p++;    /* Skip comman */ 
+    if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max, errorcodeptr))
+      {
+      if (*errorcodeptr != 0) goto EXIT;   /* m too big */
+      }
+
     if (max < min)
       {
       *errorcodeptr = ERR4;
       goto EXIT;
       }
     }
-  p++;
   }
 
+/* Valid quantifier exists */
+
+p++;
 yield = TRUE;
 if (minp != NULL) *minp = (uint32_t)min;
 if (maxp != NULL) *maxp = (uint32_t)max;
