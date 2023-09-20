@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "13 September 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "19 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -17,6 +17,9 @@ documentation. This document contains a quick-reference summary of the syntax.
 .sp
   \ex         where x is non-alphanumeric is a literal x
   \eQ...\eE    treat enclosed characters as literal
+.sp
+Note that white space inside \eQ...\eE is always treated as literal, even if 
+PCRE2_EXTENDED is set, causing most other white space to be ignored.   
 .
 .
 .SH "ESCAPED CHARACTERS"
@@ -26,7 +29,7 @@ This table applies to ASCII and Unicode environments. An unrecognized escape
 sequence causes an error.
 .sp
   \ea         alarm, that is, the BEL character (hex 07)
-  \ecx        "control-x", where x is any ASCII printing character
+  \ecx        "control-x", where x is a non-control ASCII character
   \ee         escape (hex 1B)
   \ef         form feed (hex 0C)
   \en         newline (hex 0A)
@@ -362,7 +365,7 @@ of the group.
   (?r)            restrict caseless to either ASCII or non-ASCII
   (?s)            single line (dotall)
   (?U)            default ungreedy (lazy)
-  (?x)            extended: ignore white space except in classes
+  (?x)            ignore white space except in classes or \eQ...\eE
   (?xx)           as (?x) but also ignore space and tab in classes
   (?-...)         unset option(s)
   (?^)            unset imnrsx options
@@ -514,8 +517,8 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   (?(condition)yes-pattern|no-pattern)
 .sp
   (?(n)               absolute reference condition
-  (?(+n)              relative reference condition
-  (?(-n)              relative reference condition
+  (?(+n)              relative reference condition (PCRE2 extension)
+  (?(-n)              relative reference condition (PCRE2 extension)
   (?(<name>)          named reference condition (Perl)
   (?('name')          named reference condition (Perl)
   (?(name)            named reference condition (PCRE2, deprecated)
@@ -593,6 +596,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 September 2023
+Last updated: 19 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

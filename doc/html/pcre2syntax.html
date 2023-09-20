@@ -57,7 +57,9 @@ documentation. This document contains a quick-reference summary of the syntax.
 <pre>
   \x         where x is non-alphanumeric is a literal x
   \Q...\E    treat enclosed characters as literal
-</PRE>
+</pre>
+Note that white space inside \Q...\E is always treated as literal, even if 
+PCRE2_EXTENDED is set, causing most other white space to be ignored.   
 </P>
 <br><a name="SEC3" href="#TOC1">ESCAPED CHARACTERS</a><br>
 <P>
@@ -65,7 +67,7 @@ This table applies to ASCII and Unicode environments. An unrecognized escape
 sequence causes an error.
 <pre>
   \a         alarm, that is, the BEL character (hex 07)
-  \cx        "control-x", where x is any ASCII printing character
+  \cx        "control-x", where x is a non-control ASCII character
   \e         escape (hex 1B)
   \f         form feed (hex 0C)
   \n         newline (hex 0A)
@@ -389,7 +391,7 @@ of the group.
   (?r)            restrict caseless to either ASCII or non-ASCII
   (?s)            single line (dotall)
   (?U)            default ungreedy (lazy)
-  (?x)            extended: ignore white space except in classes
+  (?x)            ignore white space except in classes or \Q...\E
   (?xx)           as (?x) but also ignore space and tab in classes
   (?-...)         unset option(s)
   (?^)            unset imnrsx options
@@ -537,8 +539,8 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   (?(condition)yes-pattern|no-pattern)
 
   (?(n)               absolute reference condition
-  (?(+n)              relative reference condition
-  (?(-n)              relative reference condition
+  (?(+n)              relative reference condition (PCRE2 extension)
+  (?(-n)              relative reference condition (PCRE2 extension)
   (?(&#60;name&#62;)          named reference condition (Perl)
   (?('name')          named reference condition (Perl)
   (?(name)            named reference condition (PCRE2, deprecated)
@@ -607,7 +609,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC31" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 September 2023
+Last updated: 19 September 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

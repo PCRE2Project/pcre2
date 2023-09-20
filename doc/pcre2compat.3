@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "13 September 2023" "PCRE2 10.43"
+.TH PCRE2COMPAT 3 "19 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -6,7 +6,7 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
 This document describes some of the known differences in the ways that PCRE2
 and Perl handle regular expressions. The differences described here are with
-respect to Perl version 5.34.0, but as both Perl and PCRE2 are continually
+respect to Perl version 5.38.0, but as both Perl and PCRE2 are continually
 changing, the information may at times be out of date.
 .P
 1. When PCRE2_DOTALL (equivalent to Perl's /s qualifier) is not set, the
@@ -32,9 +32,9 @@ assertion just once). Perl allows some repeat quantifiers on other assertions,
 for example, \eb* , but these do not seem to have any use. PCRE2 does not allow
 any kind of quantifier on non-lookaround assertions.
 .P
-4. If a quantifier appears where there is nothing to repeat (for example, at
-the start of a branch), PCRE2 raises an error whereas Perl treats the
-quantifier characters as literal.
+4. If a braced quantifier such as {1,2} appears where there is nothing to
+repeat (for example, at the start of a branch), PCRE2 raises an error whereas
+Perl treats the quantifier characters as literal.
 .P
 5. Capture groups that occur inside negative lookaround assertions are counted,
 but their entries in the offsets vector are set only when a negative assertion
@@ -94,9 +94,9 @@ external function to be called during pattern matching. See the
 .\"
 documentation for details.
 .P
-10. Subroutine calls (whether recursive or not) were treated as atomic groups up
-to PCRE2 release 10.23, but from release 10.30 this changed, and backtracking
-into subroutine calls is now supported, as in Perl.
+10. Subroutine calls (whether recursive or not) were treated as atomic groups
+up to PCRE2 release 10.23, but from release 10.30 this changed, and
+backtracking into subroutine calls is now supported, as in Perl.
 .P
 11. In PCRE2, if any of the backtracking control verbs are used in a group that
 is called as a subroutine (whether or not recursively), their effect is
@@ -140,7 +140,7 @@ certainly user mistakes.
 17. In PCRE2, the upper/lower case character properties Lu and Ll are not
 affected when case-independent matching is specified. For example, \ep{Lu}
 always matches an upper case letter. I think Perl has changed in this respect;
-in the release at the time of writing (5.34), \ep{Lu} and \ep{Ll} match all
+in the release at the time of writing (5.38), \ep{Lu} and \ep{Ll} match all
 letters, regardless of case, when case independence is specified.
 .P
 18. From release 5.32.0, Perl locks out the use of \eK in lookaround
@@ -152,7 +152,7 @@ negative assertions.
 19. PCRE2 provides some extensions to the Perl regular expression facilities.
 Perl 5.10 included new features that were not in earlier versions of Perl, some
 of which (such as named parentheses) were in PCRE2 for some time before. This
-list is with respect to Perl 5.34:
+list is with respect to Perl 5.38:
 .sp
 (a) If PCRE2_DOLLAR_ENDONLY is set and PCRE2_MULTILINE is not set, the $
 meta-character matches only at the very end of the string.
@@ -188,6 +188,13 @@ the pattern.
 (k) PCRE2 supports non-atomic positive lookaround assertions. This is an
 extension to the lookaround facilities. The default, Perl-compatible
 lookarounds are atomic.
+.sp
+(l) There are three syntactical items in patterns that can refer to a capturing
+group by number: back references such as \eg{2}, subroutine calls such as (?3),
+and condition references such as (?(4)...). PCRE2 supports relative group
+numbers such as +2 and -4 in all three cases. Perl supports both plus and minus
+for subroutine calls, but only minus for back references, and no relative
+numbering at all for conditions.
 .P
 20. Perl has different limits than PCRE2. See the
 .\" HREF
@@ -213,6 +220,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 September 2023
+Last updated: 19 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

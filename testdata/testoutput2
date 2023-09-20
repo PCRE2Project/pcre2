@@ -17815,6 +17815,76 @@ Failed: error 187 at offset 0: lookbehind assertion is too long
 /A+{,3}/
 Failed: error 109 at offset 5: quantifier does not follow a repeatable item
 
+/(\g{+1}Z|(A))+/
+    BAAZCD 
+ 0: AAZ
+ 1: AZ
+ 2: A
+    ZAAAZAZAZAACD 
+ 0: AAAZAZAZAA
+ 1: A
+ 2: A
+
+# This doesn't work in Perl (though I think it used to)
+
+/^(?=.*(?=(([A-Z]).*(?(1)\1)))(?!.+\2)){26}/i
+    The quick brown fox jumps over the lazy dog.
+ 0: 
+ 1: quick brown fox jumps over the lazy dog.
+ 2: q
+    Jackdaws love my big sphinx of quartz.
+ 0: 
+ 1: Jackdaws love my big sphinx of quartz.
+ 2: J
+    Pack my box with five dozen liquor jugs.
+ 0: 
+ 1: Pack my box with five dozen liquor jugs.
+ 2: P
+\= Expect no match
+    The quick brown fox jumps over the lazy cat.
+No match
+    Hackdaws love my big sphinx of quartz.
+No match
+    Pack my fox with five dozen liquor jugs.
+No match
+    
+# These are different to Perl because of the different capturing in repeating
+# groups.
+
+/((foo)|(bar))*/
+    foobar
+ 0: foobar
+ 1: bar
+ 2: foo
+ 3: bar
+
+/(?:(f)(o)(o)|(b)(a)(r))*/
+    foobar
+ 0: foobar
+ 1: f
+ 2: o
+ 3: o
+ 4: b
+ 5: a
+ 6: r
+
+/((Z)+|A)*/
+    ZABCDEFG
+ 0: ZA
+ 1: A
+ 2: Z
+
+/(?:(?P=same)?(?:(?P<same>a)|(?P<same>b))(?P=same))+/g,dupnames
+    bbbaaabaabb
+ 0: bbbaaaba
+ 1: a
+ 2: b
+ 0: bb
+ 1: <unset>
+ 2: b
+
+# --------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

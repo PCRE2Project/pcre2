@@ -3126,9 +3126,6 @@
 /a(?:b|c|d){4,5}?(.)/
     acdbcdbe
 
-/((foo)|(bar))*/
-    foobar
-
 /a(?:b|c|d){6,7}(.)/
     acdbcdbe
 
@@ -3171,9 +3168,6 @@
 \= Expect no match
     aaaaaaaaa
     aaaaaaaaaaa
-
-/(?:(f)(o)(o)|(b)(a)(r))*/
-    foobar
 
 /(?<=a)b/
     ab
@@ -3605,9 +3599,6 @@
     <a href=abcd xyz
     <a href=\"abcd xyz pqr\" cats
     <a href       =       \'abcd xyz pqr\' cats
-
-/((Z)+|A)*/
-    ZABCDEFG
 
 /(Z()|A)*/
     ZABCDEFG
@@ -5676,9 +5667,6 @@ name)/mark
 /(?P=same)?(?P<same>a)(?P<same>b)/g,dupnames
     abbaba
 
-/(?:(?P=same)?(?:(?P<same>a)|(?P<same>b))(?P=same))+/g,dupnames
-    bbbaaabaabb
-
 /(?:(?P=same)?(?:(?P=same)(?P<same>a)(?P=same)|(?P=same)?(?P<same>b)(?P=same)){2}(?P=same)(?P<same>c)(?P=same)){2}(?P<same>z)?/g,dupnames
 \= Expect no match
     bbbaaaccccaaabbbcc
@@ -6386,15 +6374,6 @@ ef) x/x,mark
 /^((\1+)|\d)+133X$/
     111133X
 
-/^(?=.*(?=(([A-Z]).*(?(1)\1)))(?!.+\2)){26}/i
-    The quick brown fox jumps over the lazy dog.
-    Jackdaws love my big sphinx of quartz.
-    Pack my box with five dozen liquor jugs.
-\= Expect no match
-    The quick brown fox jumps over the lazy cat.
-    Hackdaws love my big sphinx of quartz.
-    Pack my fox with five dozen liquor jugs.
-
 /^(?>.*?([A-Z])(?!.*\1)){26}/i
     The quick brown fox jumps over the lazy dog.
     Jackdaws love my big sphinx of quartz.
@@ -6528,5 +6507,19 @@ ef) x/x,mark
     
 /X{,9]/
     ZZX{,9]..   
+    
+# -------------------------------------------------------------------------- 
+
+/(A)(?-1)(?+1)(B)/
+    xxAABBzz
+   
+/(A)(\g{-2}B)/
+    XAABX
+
+/(A)((?-2)B)/
+    XAABX
+
+/a\c\X/
+    --a\x1cX--
     
 # End of testinput1 

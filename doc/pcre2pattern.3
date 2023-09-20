@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "13 September 2023" "PCRE2 10.43"
+.TH PCRE2PATTERN 3 "19 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -310,11 +310,11 @@ a character class the only metacharacters are:
   ]      terminates the character class
 .sp
 If a pattern is compiled with the PCRE2_EXTENDED option, most white space in
-the pattern, other than in a character class, and characters between a #
-outside a character class and the next newline, inclusive, are ignored. An
-escaping backslash can be used to include a white space or a # character as
-part of the pattern. If the PCRE2_EXTENDED_MORE option is set, the same
-applies, but in addition unescaped space and horizontal tab characters are
+the pattern, other than in a character class, within a \eQ...\eE sequence, or
+between a # outside a character class and the next newline, inclusive, are
+ignored. An escaping backslash can be used to include a white space or a #
+character as part of the pattern. If the PCRE2_EXTENDED_MORE option is set, the
+same applies, but in addition unescaped space and horizontal tab characters are
 ignored inside a character class. Note: only these two characters are ignored,
 not the full set of pattern white space characters that are ignored outside a
 character class. Option settings can be changed within a pattern; see the
@@ -347,12 +347,14 @@ other characters (in particular, those whose code points are greater than 127)
 are treated as literals.
 .P
 If you want to treat all characters in a sequence as literals, you can do so by
-putting them between \eQ and \eE. This is different from Perl in that $ and @
-are handled as literals in \eQ...\eE sequences in PCRE2, whereas in Perl, $ and
-@ cause variable interpolation. Also, Perl does "double-quotish backslash
-interpolation" on any backslashes between \eQ and \eE which, its documentation
-says, "may lead to confusing results". PCRE2 treats a backslash between \eQ and
-\eE just like any other character. Note the following examples:
+putting them between \eQ and \eE. Note that this includes white space even when
+the PCRE2_EXTENDED option is set so that most other white space is ignored. The
+behaviour is different from Perl in that $ and @ are handled as literals in
+\eQ...\eE sequences in PCRE2, whereas in Perl, $ and @ cause variable
+interpolation. Also, Perl does "double-quotish backslash interpolation" on any
+backslashes between \eQ and \eE which, its documentation says, "may lead to
+confusing results". PCRE2 treats a backslash between \eQ and \eE just like any
+other character. Note the following examples:
 .sp
   Pattern            PCRE2 matches   Perl matches
 .sp
@@ -368,8 +370,8 @@ The \eQ...\eE sequence is recognized both inside and outside character classes.
 An isolated \eE that is not preceded by \eQ is ignored. If \eQ is not followed
 by \eE later in the pattern, the literal interpretation continues to the end of
 the pattern (that is, \eE is assumed at the end). If the isolated \eQ is inside
-a character class, this causes an error, because the character class is not
-terminated by a closing square bracket.
+a character class, this causes an error, because the character class is then
+not terminated by a closing square bracket.
 .
 .
 .\" HTML <a name="digitsafterbackslash"></a>
@@ -384,7 +386,7 @@ instead of the binary character it represents. In an ASCII or Unicode
 environment, these escapes are as follows:
 .sp
   \ea          alarm, that is, the BEL character (hex 07)
-  \ecx         "control-x", where x is any printable ASCII character
+  \ecx         "control-x", where x is a non-control ASCII character
   \ee          escape (hex 1B)
   \ef          form feed (hex 0C)
   \en          linefeed (hex 0A)
@@ -432,12 +434,13 @@ match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \er in a
 pattern is converted to \en so that it matches a LF (linefeed) instead of a CR
 (carriage return) character.
 .P
-The precise effect of \ecx on ASCII characters is as follows: if x is a lower
-case letter, it is converted to upper case. Then bit 6 of the character (hex
-40) is inverted. Thus \ecA to \ecZ become hex 01 to hex 1A (A is 41, Z is 5A),
-but \ec{ becomes hex 3B ({ is 7B), and \ec; becomes hex 7B (; is 3B). If the
-code unit following \ec has a value less than 32 or greater than 126, a
-compile-time error occurs.
+An error occurs if \ec is not followed by a character whose ASCII code point 
+is in the range 32 to 126. The precise effect of \ecx is as follows: if x is a
+lower case letter, it is converted to upper case. Then bit 6 of the character
+(hex 40) is inverted. Thus \ecA to \ecZ become hex 01 to hex 1A (A is 41, Z is
+5A), but \ec{ becomes hex 3B ({ is 7B), and \ec; becomes hex 7B (; is 3B). If
+the code unit following \ec has a code point less than 32 or greater than 126,
+a compile-time error occurs.
 .P
 When PCRE2 is compiled in EBCDIC mode, \eN{U+hhh..} is not supported. \ea, \ee,
 \ef, \en, \er, and \et generate the appropriate EBCDIC code values. The \ec
@@ -2250,15 +2253,23 @@ the reference. A signed number is a relative reference. Consider this example:
 .sp
   (abc(def)ghi)\eg{-1}
 .sp
-The sequence \eg{-1} is a reference to the most recently started capture group
-before \eg, that is, is it equivalent to \e2 in this example. Similarly,
-\eg{-2} would be equivalent to \e1. The use of relative references can be
-helpful in long patterns, and also in patterns that are created by joining
-together fragments that contain references within themselves.
+The sequence \eg{-1} is a reference to the capture group whose number is one
+less than the number of the next group to be started, so in this example (where
+the next group would be numbered 3) is it equivalent to \e2, and \eg{-2} would
+be equivalent to \e1. Note that if this construct is inside a capture group, 
+that group is included in the count, so in this example \eg{-2} also refers to
+group 1:
+.sp
+  (A)(\eg{-2}B)
+.sp
+The use of relative references can be helpful in long patterns, and also in
+patterns that are created by joining together fragments that contain references
+within themselves.
 .P
-The sequence \eg{+1} is a reference to the next capture group. This kind of
-forward reference can be useful in patterns that repeat. Perl does not support
-the use of + in this way.
+The sequence \eg{+1} is a reference to the next capture group that is started
+after this item, and \eg{+2} refers to the one after that, and so on. This kind
+of forward reference can be useful in patterns that repeat. Perl does not
+support the use of + in this way.
 .P
 A backreference matches whatever actually most recently matched the capture
 group in the current subject string, rather than anything at all that matches
@@ -2759,13 +2770,14 @@ there is more than one capture group with the same number (see the earlier
 .\" </a>
 section about duplicate group numbers),
 .\"
-the condition is true if any of them have matched. An alternative notation is
-to precede the digits with a plus or minus sign. In this case, the group number
-is relative rather than absolute. The most recently opened capture group can be
-referenced by (?(-1), the next most recent by (?(-2), and so on. Inside loops
-it can also make sense to refer to subsequent groups. The next capture group
-can be referenced as (?(+1), and so on. (The value zero in any of these forms
-is not used; it provokes a compile-time error.)
+the condition is true if any of them have matched. An alternative notation, 
+which is a PCRE2 extension, not supported by Perl, is to precede the digits
+with a plus or minus sign. In this case, the group number is relative rather
+than absolute. The most recently opened capture group (which could be enclosing
+this condition) can be referenced by (?(-1), the next most recent by (?(-2),
+and so on. Inside loops it can also make sense to refer to subsequent groups.
+The next capture group to be opened can be referenced as (?(+1), and so on. The
+value zero in any of these forms is not used; it provokes a compile-time error.
 .P
 Consider the following pattern, which contains non-significant white space to
 make it more readable (assume the PCRE2_EXTENDED option) and to divide it into
@@ -3843,6 +3855,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 13 September 2023
+Last updated: 19 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

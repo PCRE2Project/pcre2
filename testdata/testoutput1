@@ -4924,13 +4924,6 @@ No match
  0: acdbcd
  1: d
 
-/((foo)|(bar))*/
-    foobar
- 0: foobar
- 1: bar
- 2: foo
- 3: bar
-
 /a(?:b|c|d){6,7}(.)/
     acdbcdbe
  0: acdbcdbe
@@ -5002,16 +4995,6 @@ No match
 No match
     aaaaaaaaaaa
 No match
-
-/(?:(f)(o)(o)|(b)(a)(r))*/
-    foobar
- 0: foobar
- 1: f
- 2: o
- 3: o
- 4: b
- 5: a
- 6: r
 
 /(?<=a)b/
     ab
@@ -5709,12 +5692,6 @@ No match
  0: <a href       =       'abcd xyz pqr'
  1: '
  2: abcd xyz pqr
-
-/((Z)+|A)*/
-    ZABCDEFG
- 0: ZA
- 1: A
- 2: Z
 
 /(Z()|A)*/
     ZABCDEFG
@@ -9024,15 +9001,6 @@ No match
  1: a
  2: b
 
-/(?:(?P=same)?(?:(?P<same>a)|(?P<same>b))(?P=same))+/g,dupnames
-    bbbaaabaabb
- 0: bbbaaaba
- 1: a
- 2: b
- 0: bb
- 1: <unset>
- 2: b
-
 /(?:(?P=same)?(?:(?P=same)(?P<same>a)(?P=same)|(?P=same)?(?P<same>b)(?P=same)){2}(?P=same)(?P<same>c)(?P=same)){2}(?P<same>z)?/g,dupnames
 \= Expect no match
     bbbaaaccccaaabbbcc
@@ -10116,27 +10084,6 @@ No match
  1: 11
  2: 11
 
-/^(?=.*(?=(([A-Z]).*(?(1)\1)))(?!.+\2)){26}/i
-    The quick brown fox jumps over the lazy dog.
- 0: 
- 1: quick brown fox jumps over the lazy dog.
- 2: q
-    Jackdaws love my big sphinx of quartz.
- 0: 
- 1: Jackdaws love my big sphinx of quartz.
- 2: J
-    Pack my box with five dozen liquor jugs.
- 0: 
- 1: Pack my box with five dozen liquor jugs.
- 2: P
-\= Expect no match
-    The quick brown fox jumps over the lazy cat.
-No match
-    Hackdaws love my big sphinx of quartz.
-No match
-    Pack my fox with five dozen liquor jugs.
-No match
-
 /^(?>.*?([A-Z])(?!.*\1)){26}/i
     The quick brown fox jumps over the lazy dog.
  0: The quick brown fox jumps over the lazy dog
@@ -10340,5 +10287,29 @@ No match
 /X{,9]/
     ZZX{,9]..   
  0: X{,9]
+    
+# -------------------------------------------------------------------------- 
+
+/(A)(?-1)(?+1)(B)/
+    xxAABBzz
+ 0: AABB
+ 1: A
+ 2: B
+   
+/(A)(\g{-2}B)/
+    XAABX
+ 0: AAB
+ 1: A
+ 2: AB
+
+/(A)((?-2)B)/
+    XAABX
+ 0: AAB
+ 1: A
+ 2: AB
+
+/a\c\X/
+    --a\x1cX--
+ 0: a\x1cX
     
 # End of testinput1 
