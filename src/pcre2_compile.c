@@ -1390,7 +1390,8 @@ return yield;
 are supplied. Repeat counts must be less than 65536 (MAX_REPEAT_COUNT); a
 larger value is used for "unlimited". We have to use signed arguments for
 read_number() because it is capable of returning a signed value. As of Perl
-5.34.0 either n or m may be absent, but not both.
+5.34.0 either n or m may be absent, but not both. Perl also allows spaces and
+tabs after { and before } and between the numbers and the comma, so we do too.
 
 Arguments:
   ptrptr         points to pointer to character after '{'
@@ -1409,44 +1410,50 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
   uint32_t *maxp, int *errorcodeptr)
 {
 PCRE2_SPTR p = *ptrptr;
+PCRE2_SPTR pp;
 BOOL yield = FALSE;
 BOOL had_minimum = FALSE;
 int32_t min = 0;
 int32_t max = REPEAT_UNLIMITED; /* This value is larger than MAX_REPEAT_COUNT */
 
 *errorcodeptr = 0;
+while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
 
 /* Check the syntax before interpreting. Otherwise, a non-quantifier sequence
 such as "X{123456ABC" would incorrectly give a "number too big in quantifier"
 error. */
 
-if (p < ptrend && IS_DIGIT(*p))
+pp = p;
+if (pp < ptrend && IS_DIGIT(*pp))
   {
   had_minimum = TRUE;
-  while (++p < ptrend && IS_DIGIT(*p)) {}
+  while (++pp < ptrend && IS_DIGIT(*pp)) {}
   }
 
-if (p >= ptrend) return FALSE;
-if (*p == CHAR_RIGHT_CURLY_BRACKET)
+while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT)) pp++;
+if (pp >= ptrend) return FALSE;
+
+if (*pp == CHAR_RIGHT_CURLY_BRACKET)
   {
   if (!had_minimum) return FALSE;
   }
 else
   {
-  if (*p++ != CHAR_COMMA || p >= ptrend) return FALSE;
-  if (IS_DIGIT(*p))
+  if (*pp++ != CHAR_COMMA) return FALSE;
+  while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT)) pp++;
+  if (pp >= ptrend) return FALSE;
+  if (IS_DIGIT(*pp))
     {
-    while (++p < ptrend && IS_DIGIT(*p)) {}
+    while (++pp < ptrend && IS_DIGIT(*pp)) {}
     }
   else if (!had_minimum) return FALSE;
-  if (p >= ptrend || *p != CHAR_RIGHT_CURLY_BRACKET) return FALSE;
+  while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT)) pp++;
+  if (pp >= ptrend || *pp != CHAR_RIGHT_CURLY_BRACKET) return FALSE;
   }
 
 /* Now process the quantifier for real. We know it must be {n} or (n,} or {,m}
 or {n,m}. The only error that read_number() can return is for a number that is
 too big. If *errorcodeptr is returned as zero it means no number was found. */
-
-p = *ptrptr;
 
 /* Deal with {,m} or n too big. If we successfully read m there is no need to
 check m >= n because n defaults to zero. */
@@ -1454,7 +1461,8 @@ check m >= n because n defaults to zero. */
 if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &min, errorcodeptr))
   {
   if (*errorcodeptr != 0) goto EXIT;    /* n too big */
-  p++;  /* Skip comma */
+  p++;  /* Skip comma and subsequent spaces */
+  while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
   if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max, errorcodeptr))
     {
     if (*errorcodeptr != 0) goto EXIT;  /* m too big */
@@ -1465,13 +1473,15 @@ if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &min, errorcodeptr))
 
 else
   {
+  while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
   if (*p == CHAR_RIGHT_CURLY_BRACKET)
     {
     max = min;
     }
   else   /* Handle {n,} or {n,m} */
     {
-    p++;    /* Skip comman */ 
+    p++;    /* Skip comma and subsequent spaces */
+    while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
     if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max, errorcodeptr))
       {
       if (*errorcodeptr != 0) goto EXIT;   /* m too big */
@@ -1487,6 +1497,7 @@ else
 
 /* Valid quantifier exists */
 
+while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
 p++;
 yield = TRUE;
 if (minp != NULL) *minp = (uint32_t)min;
@@ -1592,6 +1603,10 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
       {
       PCRE2_SPTR p = ptr + 1;
 
+      /* Perl ignores spaces and tabs after { */
+
+      while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+
       /* \N{U+ can be handled by the \x{ code. However, this construction is
       not valid in EBCDIC environments because it specifies a Unicode
       character, not a codepoint in the local code. For example \N{U+0041}
@@ -1606,7 +1621,7 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
 #else
         if (utf)
           {
-          ptr = p + 1;
+          ptr = p + 2;
           escape = 0;   /* Not a fancy escape after all */
           goto COME_FROM_NU;
           }
@@ -1677,8 +1692,16 @@ else
           (xoptions & PCRE2_EXTRA_ALT_BSUX) != 0)
         {
         PCRE2_SPTR hptr = ptr + 1;
-        cc = 0;
+        PCRE2_SPTR ohptr;
 
+        /* Perl ignores spaces and tabs after {, and though this isn't Perl-
+        compatible code, we do so here as well for uniformity. */
+
+        while (hptr < ptrend && (*hptr == CHAR_SPACE || *hptr == CHAR_HT))
+          hptr++;
+
+        ohptr = hptr;
+        cc = 0;
         while (hptr < ptrend && (xc = XDIGIT(*hptr)) != 0xff)
           {
           if ((cc & 0xf0000000) != 0)  /* Test for 32-bit overflow */
@@ -1691,8 +1714,11 @@ else
           hptr++;
           }
 
-        if (hptr == ptr + 1 ||   /* No hex digits */
-            hptr >= ptrend ||    /* Hit end of input */
+        if (hptr == ohptr) break;  /* No hex digits, escape not recognized */
+
+        while (hptr < ptrend && (*hptr == CHAR_SPACE || *hptr == CHAR_HT))
+          hptr++;
+        if (hptr >= ptrend ||    /* Hit end of input */
             *hptr != CHAR_RIGHT_CURLY_BRACKET)  /* No } terminator */
           break;         /* Hex escape not recognized */
 
@@ -1774,12 +1800,16 @@ else
     if (*ptr == CHAR_LEFT_CURLY_BRACKET)
       {
       PCRE2_SPTR p = ptr + 1;
+
+      while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
       if (!read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &s,
           errorcodeptr))
         {
         if (*errorcodeptr == 0) escape = ESC_k;  /* No number found */
         break;
         }
+      while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+
       if (p >= ptrend || *p != CHAR_RIGHT_CURLY_BRACKET)
         {
         *errorcodeptr = ERR57;
@@ -1875,55 +1905,63 @@ else
     break;
 
     /* \o is a relatively new Perl feature, supporting a more general way of
-    specifying character codes in octal. The only supported form is \o{ddd}. */
+    specifying character codes in octal. The only supported form is \o{ddd},
+    with optional spaces or tabs after { and before }. */
 
     case CHAR_o:
     if (ptr >= ptrend || *ptr++ != CHAR_LEFT_CURLY_BRACKET)
       {
       ptr--;
       *errorcodeptr = ERR55;
+      break;
       }
-    else if (ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
-      *errorcodeptr = ERR78;
-    else
+
+    while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+    if (ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
       {
-      c = 0;
-      overflow = FALSE;
-      while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
-        {
-        cc = *ptr++;
-        if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
+      *errorcodeptr = ERR78;
+      break;
+      }
+
+    c = 0;
+    overflow = FALSE;
+    while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
+      {
+      cc = *ptr++;
+      if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
 #if PCRE2_CODE_UNIT_WIDTH == 32
-        if (c >= 0x20000000l) { overflow = TRUE; break; }
+      if (c >= 0x20000000l) { overflow = TRUE; break; }
 #endif
-        c = (c << 3) + (cc - CHAR_0);
+      c = (c << 3) + (cc - CHAR_0);
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
+      if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-        if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
+      if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-        if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
+      if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
 #endif
-        }
-      if (overflow)
-        {
-        while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7) ptr++;
-        *errorcodeptr = ERR34;
-        }
-      else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
-        {
-        if (utf && c >= 0xd800 && c <= 0xdfff &&
-            (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
-          {
-          ptr--;
-          *errorcodeptr = ERR73;
-          }
-        }
-      else
+      }
+
+    while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+
+    if (overflow)
+      {
+      while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7) ptr++;
+      *errorcodeptr = ERR34;
+      }
+    else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
+      {
+      if (utf && c >= 0xd800 && c <= 0xdfff &&
+          (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
         {
         ptr--;
-        *errorcodeptr = ERR64;
+        *errorcodeptr = ERR73;
         }
+      }
+    else
+      {
+      ptr--;
+      *errorcodeptr = ERR64;
       }
     break;
 
@@ -1952,10 +1990,13 @@ else
       {
       if (ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET)
         {
+        ptr++;
+        while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+
 #ifndef EBCDIC
         COME_FROM_NU:
 #endif
-        if (++ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
+        if (ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
           *errorcodeptr = ERR78;
           break;
@@ -1978,6 +2019,12 @@ else
             }
           }
 
+        /* Perl ignores spaces and tabs before } */
+
+        while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+
+        /* On overflow, skip remaining hex digits */
+
         if (overflow)
           {
           while (ptr < ptrend && XDIGIT(*ptr) != 0xff) ptr++;
@@ -1993,10 +2040,10 @@ else
             }
           }
 
-        /* If the sequence of hex digits does not end with '}', give an error.
-        We used just to recognize this construct and fall through to the normal
-        \x handling, but nowadays Perl gives an error, which seems much more
-        sensible, so we do too. */
+        /* If the sequence of hex digits (followed by optional space) does not
+        end with '}', give an error. We used just to recognize this construct
+        and fall through to the normal \x handling, but nowadays Perl gives an
+        error, which seems much more sensible, so we do too. */
 
         else
           {
@@ -2388,12 +2435,13 @@ return -1;
 
 /* This function is called from parse_regex() below whenever it needs to read
 the name of a subpattern or a (*VERB) or an (*alpha_assertion). The initial
-pointer must be to the character before the name. If that character is '*' we
-are reading a verb or alpha assertion name. The pointer is updated to point
-after the name, for a VERB or alpha assertion name, or after tha name's
-terminator for a subpattern name. Returning both the offset and the name
-pointer is redundant information, but some callers use one and some the other,
-so it is simplest just to return both.
+pointer must be to the preceding character. If that character is '*' we are
+reading a verb or alpha assertion name. The pointer is updated to point after
+the name, for a VERB or alpha assertion name, or after tha name's terminator
+for a subpattern name. Returning both the offset and the name pointer is
+redundant information, but some callers use one and some the other, so it is
+simplest just to return both. When the name is in braces, spaces and tabs are
+allowed (and ignored) at either end.
 
 Arguments:
   ptrptr      points to the character pointer variable
@@ -2416,9 +2464,13 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
   int *errorcodeptr, compile_block *cb)
 {
 PCRE2_SPTR ptr = *ptrptr;
-BOOL is_group = (*ptr != CHAR_ASTERISK);
+BOOL is_group = (*ptr++ != CHAR_ASTERISK);
+BOOL is_braced = terminator == CHAR_RIGHT_CURLY_BRACKET;
 
-if (++ptr >= ptrend)               /* No characters in name */
+if (is_braced)
+  while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+
+if (ptr >= ptrend)                 /* No characters in name */
   {
   *errorcodeptr = is_group? ERR62: /* Subpattern name expected */
                             ERR60; /* Verb not recognized or malformed */
@@ -2497,6 +2549,8 @@ if (is_group)
     *errorcodeptr = ERR62;   /* Subpattern name expected */
     goto FAILED;
     }
+  if (is_braced)
+    while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
   if (ptr >= ptrend || *ptr != (PCRE2_UCHAR)terminator)
     {
     *errorcodeptr = ERR42;
@@ -3297,7 +3351,8 @@ while (ptr < ptrend)
         if (errorcode != 0) goto ESCAPE_FAILED;
         }
 
-      /* Not a numerical recursion */
+      /* Not a numerical recursion. Perl allows spaces and tabs after { and
+      before } but not for other delimiters. */
 
       if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
           &errorcode, cb)) goto ESCAPE_FAILED;

@@ -6513,7 +6513,7 @@ ef) x/x,mark
 /(A)(?-1)(?+1)(B)/
     xxAABBzz
    
-/(A)(\g{-2}B)/
+/(A)(\g{ -2 }B)/
     XAABX
 
 /(A)((?-2)B)/
@@ -6522,4 +6522,28 @@ ef) x/x,mark
 /a\c\X/
     --a\x1cX--
     
+/(a)\g{ 1 }/
+    baab
+
+/a{ 1,2 }/
+    Xaaaaa
+
+/a{ 1 , 2 }/
+    Xaaaaa
+
+/(?'name'ab)\k{ name }(?P=name)/
+    XabababX 
+
+/A{,}B/
+    A{,}B
+
+/A{ , }B/
+    A{ , }B
+    
+/A{ ,3}/
+    AAAAAACC 
+
+/A{ 3, }/
+    BBAAAAAACC 
+
 # End of testinput1 

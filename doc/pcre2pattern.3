@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "19 September 2023" "PCRE2 10.43"
+.TH PCRE2PATTERN 3 "25 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -300,6 +300,11 @@ are as follows:
   ?      0 or 1 quantifier; also quantifier minimizer
   {      potential start of min/max quantifier
 .sp
+Brace characters { and } are also used to enclose data for constructions such
+as \eg{2} or \ek{name}. In all uses of braces, space and/or horizontal tab
+characters that follow { or precede } are allowed and are ignored. In the case
+of quantifiers, they may also appear before or after the comma.
+.P
 Part of a pattern that is in square brackets is called a "character class". In
 a character class the only metacharacters are:
 .sp
@@ -476,8 +481,8 @@ numbers greater than 0777, and it also allows octal numbers and backreferences
 to be unambiguously specified.
 .P
 For greater clarity and unambiguity, it is best to avoid following \e by a
-digit greater than zero. Instead, use \eo{} or \ex{} to specify numerical
-character code points, and \eg{} to specify backreferences. The following
+digit greater than zero. Instead, use \eo{...} or \ex{...} to specify numerical
+character code points, and \eg{...} to specify backreferences. The following
 paragraphs describe the old, ambiguous syntax.
 .P
 The handling of a backslash followed by a digit other than 0 is complicated,
@@ -2292,11 +2297,11 @@ matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
 capture group is matched caselessly.
 .P
 There are several different ways of writing backreferences to named capture
-groups. The .NET syntax \ek{name} and the Perl syntax \ek<name> or \ek'name'
-are supported, as is the Python syntax (?P=name). Perl 5.10's unified
-backreference syntax, in which \eg can be used for both numeric and named
-references, is also supported. We could rewrite the above example in any of the
-following ways:
+groups. The .NET syntax is \ek{name}, the Python syntax is (?=name), and the 
+original Perl syntax is \ek<name> or \ek'name'. All of these are now supported 
+by both Perl and PCRE2. Perl 5.10's unified backreference syntax, in which \eg
+can be used for both numeric and named references, is also supported by PCRE2.
+We could rewrite the above example in any of the following ways:
 .sp
   (?<p1>(?i)rah)\es+\ek<p1>
   (?'p1'(?i)rah)\es+\ek{p1}
@@ -3855,6 +3860,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 September 2023
+Last updated: 25 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

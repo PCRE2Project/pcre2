@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "19 September 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "25 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -18,8 +18,17 @@ documentation. This document contains a quick-reference summary of the syntax.
   \ex         where x is non-alphanumeric is a literal x
   \eQ...\eE    treat enclosed characters as literal
 .sp
-Note that white space inside \eQ...\eE is always treated as literal, even if 
-PCRE2_EXTENDED is set, causing most other white space to be ignored.   
+Note that white space inside \eQ...\eE is always treated as literal, even if
+PCRE2_EXTENDED is set, causing most other white space to be ignored.
+.
+.
+.SH "BRACED ITEMS"
+.rs
+.sp
+Wherever brace characters { and } are required to enclose data for
+constructions such as \eg{2} or \ek{name}, space and/or horizontal tab
+characters that follow { or precede } are allowed and are ignored. In the case
+of quantifiers, they may also appear before or after the comma.
 .
 .
 .SH "ESCAPED CHARACTERS"
@@ -596,6 +605,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 September 2023
+Last updated: 25 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

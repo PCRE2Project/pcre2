@@ -325,6 +325,12 @@ are as follows:
   ?      0 or 1 quantifier; also quantifier minimizer
   {      potential start of min/max quantifier
 </pre>
+Brace characters { and } are also used to enclose data for constructions such
+as \g{2} or \k{name}. In all uses of braces, space and/or horizontal tab
+characters that follow { or precede } are allowed and are ignored. In the case
+of quantifiers, they may also appear before or after the comma.
+</P>
+<P>
 Part of a pattern that is in square brackets is called a "character class". In
 a character class the only metacharacters are:
 <pre>
@@ -509,8 +515,8 @@ to be unambiguously specified.
 </P>
 <P>
 For greater clarity and unambiguity, it is best to avoid following \ by a
-digit greater than zero. Instead, use \o{} or \x{} to specify numerical
-character code points, and \g{} to specify backreferences. The following
+digit greater than zero. Instead, use \o{...} or \x{...} to specify numerical
+character code points, and \g{...} to specify backreferences. The following
 paragraphs describe the old, ambiguous syntax.
 </P>
 <P>
@@ -2283,11 +2289,11 @@ capture group is matched caselessly.
 </P>
 <P>
 There are several different ways of writing backreferences to named capture
-groups. The .NET syntax \k{name} and the Perl syntax \k&#60;name&#62; or \k'name'
-are supported, as is the Python syntax (?P=name). Perl 5.10's unified
-backreference syntax, in which \g can be used for both numeric and named
-references, is also supported. We could rewrite the above example in any of the
-following ways:
+groups. The .NET syntax is \k{name}, the Python syntax is (?=name), and the 
+original Perl syntax is \k&#60;name&#62; or \k'name'. All of these are now supported 
+by both Perl and PCRE2. Perl 5.10's unified backreference syntax, in which \g
+can be used for both numeric and named references, is also supported by PCRE2.
+We could rewrite the above example in any of the following ways:
 <pre>
   (?&#60;p1&#62;(?i)rah)\s+\k&#60;p1&#62;
   (?'p1'(?i)rah)\s+\k{p1}
@@ -3804,7 +3810,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 September 2023
+Last updated: 25 September 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

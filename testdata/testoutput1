@@ -10296,7 +10296,7 @@ No match
  1: A
  2: B
    
-/(A)(\g{-2}B)/
+/(A)(\g{ -2 }B)/
     XAABX
  0: AAB
  1: A
@@ -10312,4 +10312,38 @@ No match
     --a\x1cX--
  0: a\x1cX
     
+/(a)\g{ 1 }/
+    baab
+ 0: aa
+ 1: a
+
+/a{ 1,2 }/
+    Xaaaaa
+ 0: aa
+
+/a{ 1 , 2 }/
+    Xaaaaa
+ 0: aa
+
+/(?'name'ab)\k{ name }(?P=name)/
+    XabababX 
+ 0: ababab
+ 1: ab
+
+/A{,}B/
+    A{,}B
+ 0: A{,}B
+
+/A{ , }B/
+    A{ , }B
+ 0: A{ , }B
+    
+/A{ ,3}/
+    AAAAAACC 
+ 0: AAA
+
+/A{ 3, }/
+    BBAAAAAACC 
+ 0: AAAAAA
+
 # End of testinput1 
