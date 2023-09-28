@@ -817,6 +817,14 @@
 /^\u{0000000000010ffff}/utf,extra_alt_bsux
     \x{10ffff}
 
+/\u{ 1bb1}/utf,extra_alt_bsux
+    u{ 1bb1}
+\= Expect no match
+    \x{1bb1}
+
+/\u{}/extra_alt_bsux
+    u{}
+
 /\u/utf,alt_bsux
     \\u
 

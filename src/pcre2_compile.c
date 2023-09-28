@@ -1692,15 +1692,7 @@ else
           (xoptions & PCRE2_EXTRA_ALT_BSUX) != 0)
         {
         PCRE2_SPTR hptr = ptr + 1;
-        PCRE2_SPTR ohptr;
 
-        /* Perl ignores spaces and tabs after {, and though this isn't Perl-
-        compatible code, we do so here as well for uniformity. */
-
-        while (hptr < ptrend && (*hptr == CHAR_SPACE || *hptr == CHAR_HT))
-          hptr++;
-
-        ohptr = hptr;
         cc = 0;
         while (hptr < ptrend && (xc = XDIGIT(*hptr)) != 0xff)
           {
@@ -1714,11 +1706,8 @@ else
           hptr++;
           }
 
-        if (hptr == ohptr) break;  /* No hex digits, escape not recognized */
-
-        while (hptr < ptrend && (*hptr == CHAR_SPACE || *hptr == CHAR_HT))
-          hptr++;
-        if (hptr >= ptrend ||    /* Hit end of input */
+        if (hptr == ptr + 1 ||   /* No hex digits */
+            hptr >= ptrend ||    /* Hit end of input */
             *hptr != CHAR_RIGHT_CURLY_BRACKET)  /* No } terminator */
           break;         /* Hex escape not recognized */
 

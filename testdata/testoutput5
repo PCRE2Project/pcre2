@@ -1737,6 +1737,17 @@ Failed: error 173 at offset 6: disallowed Unicode code point (>= 0xd800 && <= 0x
     \x{10ffff}
  0: \x{10ffff}
 
+/\u{ 1bb1}/utf,extra_alt_bsux
+    u{ 1bb1}
+ 0: u{ 1bb1}
+\= Expect no match
+    \x{1bb1}
+No match
+
+/\u{}/extra_alt_bsux
+    u{}
+ 0: u{}
+
 /\u/utf,alt_bsux
     \\u
  0: u
