@@ -1744,22 +1744,6 @@ Failed: error 173 at offset 6: disallowed Unicode code point (>= 0xd800 && <= 0x
     \x{1bb1}
 No match
 
-/\u{}/extra_alt_bsux
-    u{}
- 0: u{}
-    
-/\u{ 12}/extra_alt_bsux
-    --u{ 12}--
- 0: u{ 12}
-
-/\u{Q12}/extra_alt_bsux
-    --u{Q12}--
- 0: u{Q12}
-
-/\u{{3}}/extra_alt_bsux
-    --u{{{}--
- 0: u{{{}
-
 /\u/utf,alt_bsux
     \\u
  0: u

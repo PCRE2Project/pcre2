@@ -156,12 +156,10 @@ release.
 
 . Run tests with two or more different compilers (e.g. clang and gcc), and
   make use of -fsanitize=address and friends where possible. For gcc,
-  -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime, but
-  needs -fno-sanitize=shift to get rid of warnings for shifts of negative
-  numbers in the JIT compiler. For clang, -fsanitize=address,undefined,integer
-  can be used but -fno-sanitize=alignment,shift,unsigned-integer-overflow must
-  be added when compiling with JIT. Another useful clang option is
-  -fsanitize=signed-integer-overflow
+  -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime.
+  For clang, -fsanitize=address,undefined,integer can be used but
+  -fno-sanitize=unsigned-integer-overflow must be added when compiling with JIT.
+  Another useful clang option is -fsanitize=signed-integer-overflow
 
 . Do a test build using CMake. Remove src/config.h first, lest it override the
   version that CMake creates. Also do a CMake unity build to check that it 
@@ -450,11 +448,12 @@ years.
   gigabyte memory, but perhaps another implementation might be considered.
   Needs coordination between the interpreters and JIT.
 
-. There are regular requests for variable-length lookbehinds.
+. There are regular requests for variable-length lookbehinds. An implementation
+  exists but is missing JIT support.
 
 . See also any suggestions in the GitHub issues.
 
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 25 April 2022
+Last updated: 30 September 2023

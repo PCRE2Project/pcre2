@@ -1345,10 +1345,10 @@ mode rather than an escape sequence. It is also used for [^] in JavaScript
 compatibility mode, and for \C in non-utf mode. In non-DOTALL mode, "." behaves
 like \N.
 
-ESC_ub is a special return from check_escape() when, in BSUX mode, \u{ is not 
-followed by hex digits and }, in which case it should mean a literal "u" 
-followed by a literal "{". This hack is necessary for cases like \u{ 12} 
-because without it, this is interpreted as u{12} now that spaces are allowed in 
+ESC_ub is a special return from check_escape() when, in BSUX mode, \u{ is not
+followed by hex digits and }, in which case it should mean a literal "u"
+followed by a literal "{". This hack is necessary for cases like \u{ 12}
+because without it, this is interpreted as u{12} now that spaces are allowed in
 quantifiers.
 
 Negative numbers are used to encode a backreference (\1, \2, \3, etc.) in
