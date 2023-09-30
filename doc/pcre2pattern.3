@@ -425,8 +425,9 @@ interpreted as a literal "u" character.
 .P
 PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
 \eu{hhh..} is recognized as the character specified by hexadecimal code point.
-There may be any number of hexadecimal digits. This syntax is from ECMAScript
-6.
+There may be any number of hexadecimal digits, but unlike other places that
+also use brackets, spaces are not allowed and would result in the string being
+interpreted as a literal. This syntax is from ECMAScript 6.
 .P
 The \eN{U+hhh..} escape sequence is recognized only when PCRE2 is operating in
 UTF mode. Perl also uses \eN{name} to specify characters by Unicode name; PCRE2
