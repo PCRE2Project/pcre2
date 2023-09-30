@@ -1680,7 +1680,9 @@ else
     is set. Otherwise, \u must be followed by exactly four hex digits or, if
     PCRE2_EXTRA_ALT_BSUX is set, by any number of hex digits in braces.
     Otherwise it is a lowercase u letter. This gives some compatibility with
-    ECMAScript (aka JavaScript). */
+    ECMAScript (aka JavaScript). Unlike other braced items, white space is NOT
+    allowed. When \u{ is not followed by hex digits, a special return is given
+    because otherwise \u{ 12} (for example) would be treated as u{12}. */
 
     case CHAR_u:
     if (!alt_bsux) *errorcodeptr = ERR37; else
@@ -1709,7 +1711,11 @@ else
         if (hptr == ptr + 1 ||   /* No hex digits */
             hptr >= ptrend ||    /* Hit end of input */
             *hptr != CHAR_RIGHT_CURLY_BRACKET)  /* No } terminator */
-          break;         /* Hex escape not recognized */
+          {
+          escape = ESC_ub;    /* Special return */
+          ptr++;              /* Skip { */
+          break;              /* Hex escape not recognized */
+          }
 
         c = cc;          /* Accept the code point */
         ptr = hptr + 1;
@@ -2780,6 +2786,7 @@ int escape;
 int i;
 BOOL inescq = FALSE;
 BOOL inverbname = FALSE;
+BOOL next_is_literal = FALSE;
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL auto_callout = (options & PCRE2_AUTO_CALLOUT) != 0;
 BOOL isdupname;
@@ -2874,6 +2881,16 @@ while (ptr < ptrend)
 
   thisptr = ptr;
   GETCHARINCTEST(c, ptr);
+
+  /* Handle cases where previous processing has determined that the next
+  character is literal. */
+
+  if (next_is_literal)
+    {
+    PARSED_LITERAL(c, parsed_pattern);
+    next_is_literal = FALSE;
+    continue;  /* Next character */
+    }
 
   /* Copy quoted literals until \E, allowing for the possibility of automatic
   callouts, except when processing a (*VERB) "name".  */
@@ -2990,6 +3007,11 @@ while (ptr < ptrend)
         if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
 #endif
         *parsed_pattern++ = c;
+        break;
+
+        case ESC_ub:
+        *parsed_pattern++ = CHAR_u;
+        PARSED_LITERAL(CHAR_LEFT_CURLY_BRACKET, parsed_pattern);
         break;
 
         case ESC_Q:
@@ -3247,6 +3269,16 @@ while (ptr < ptrend)
 #endif
       okquantifier = TRUE;
       *parsed_pattern++ = META_ESCAPE + escape;
+      break;
+
+      /* This is a special return that happens only in EXTRA_ALT_BSUX mode,
+      when \u{ is not followed by hex digits and }. It requests two literal
+      characters, u and { and we need this, as otherwise \u{ 12} (for example)
+      would be treated as u{12} now that spaces are allowed in quantifiers. */
+
+      case ESC_ub:
+      *parsed_pattern++ = CHAR_u;
+      PARSED_LITERAL(CHAR_LEFT_CURLY_BRACKET, parsed_pattern);
       break;
 
       case ESC_X:
@@ -3745,7 +3777,7 @@ while (ptr < ptrend)
           {
           case 0:  /* Escaped character code point is in c */
           char_is_literal = FALSE;
-          goto CLASS_LITERAL;
+          goto CLASS_LITERAL;      /* (a few lines above) */
 
           case ESC_b:
           c = CHAR_BS;    /* \b is backspace in a class */

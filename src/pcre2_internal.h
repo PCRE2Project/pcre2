@@ -1345,6 +1345,12 @@ mode rather than an escape sequence. It is also used for [^] in JavaScript
 compatibility mode, and for \C in non-utf mode. In non-DOTALL mode, "." behaves
 like \N.
 
+ESC_ub is a special return from check_escape() when, in BSUX mode, \u{ is not 
+followed by hex digits and }, in which case it should mean a literal "u" 
+followed by a literal "{". This hack is necessary for cases like \u{ 12} 
+because without it, this is interpreted as u{12} now that spaces are allowed in 
+quantifiers.
+
 Negative numbers are used to encode a backreference (\1, \2, \3, etc.) in
 check_escape(). There are tests in the code for an escape greater than ESC_b
 and less than ESC_Z to detect the types that may be repeated. These are the
@@ -1354,7 +1360,7 @@ consume a character, that code will have to change. */
 enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
        ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z,
-       ESC_E, ESC_Q, ESC_g, ESC_k };
+       ESC_E, ESC_Q, ESC_g, ESC_k, ESC_ub };
 
 
 /********************** Opcode definitions ******************/
