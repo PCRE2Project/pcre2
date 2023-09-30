@@ -326,9 +326,13 @@ are as follows:
   {      potential start of min/max quantifier
 </pre>
 Brace characters { and } are also used to enclose data for constructions such
-as \g{2} or \k{name}. In all uses of braces, space and/or horizontal tab
-characters that follow { or precede } are allowed and are ignored. In the case
-of quantifiers, they may also appear before or after the comma.
+as \g{2} or \k{name}. In almost all uses of braces, space and/or horizontal
+tab characters that follow { or precede } are allowed and are ignored. In the
+case of quantifiers, they may also appear before or after the comma. The 
+exception to this is \u{...} which is an ECMAScript compatibility feature
+that is recognized only when the PCRE2_EXTRA_ALT_BSUX option is set. ECMAScript 
+does not ignore such white space; it causes the item to be interpreted as 
+literal.
 </P>
 <P>
 Part of a pattern that is in square brackets is called a "character class". In
@@ -450,8 +454,9 @@ interpreted as a literal "u" character.
 <P>
 PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
 \u{hhh..} is recognized as the character specified by hexadecimal code point.
-There may be any number of hexadecimal digits. This syntax is from ECMAScript
-6.
+There may be any number of hexadecimal digits, but unlike other places that
+also use curly brackets, spaces are not allowed and would result in the string
+being interpreted as a literal. This syntax is from ECMAScript 6.
 </P>
 <P>
 The \N{U+hhh..} escape sequence is recognized only when PCRE2 is operating in
@@ -1962,8 +1967,11 @@ taken as zero; in this case the upper limit must be present.
   X{,4} is interpreted as X{0,4}
 </pre>
 This is a change in behaviour that happened in Perl 5.34.0 and PCRE2 10.43. In
-earlier versions such a sequence was not interpreted as a quantifier. If the
-characters that follow an opening brace do not match the syntax of a
+earlier versions such a sequence was not interpreted as a quantifier. Other 
+regular expression engines may behave either way.
+</P>
+<P>
+If the characters that follow an opening brace do not match the syntax of a
 quantifier, the brace is taken as a literal character. In particular, this
 means that {,} is a literal string of three characters.
 </P>
@@ -3810,7 +3818,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 September 2023
+Last updated: 30 September 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

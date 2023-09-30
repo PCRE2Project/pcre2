@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "25 September 2023" "PCRE2 10.43"
+.TH PCRE2PATTERN 3 "30 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -301,9 +301,13 @@ are as follows:
   {      potential start of min/max quantifier
 .sp
 Brace characters { and } are also used to enclose data for constructions such
-as \eg{2} or \ek{name}. In all uses of braces, space and/or horizontal tab
-characters that follow { or precede } are allowed and are ignored. In the case
-of quantifiers, they may also appear before or after the comma.
+as \eg{2} or \ek{name}. In almost all uses of braces, space and/or horizontal
+tab characters that follow { or precede } are allowed and are ignored. In the
+case of quantifiers, they may also appear before or after the comma. The 
+exception to this is \eu{...} which is an ECMAScript compatibility feature
+that is recognized only when the PCRE2_EXTRA_ALT_BSUX option is set. ECMAScript 
+does not ignore such white space; it causes the item to be interpreted as 
+literal.
 .P
 Part of a pattern that is in square brackets is called a "character class". In
 a character class the only metacharacters are:
@@ -426,8 +430,8 @@ interpreted as a literal "u" character.
 PCRE2_EXTRA_ALT_BSUX has the same effect as PCRE2_ALT_BSUX and, in addition,
 \eu{hhh..} is recognized as the character specified by hexadecimal code point.
 There may be any number of hexadecimal digits, but unlike other places that
-also use brackets, spaces are not allowed and would result in the string being
-interpreted as a literal. This syntax is from ECMAScript 6.
+also use curly brackets, spaces are not allowed and would result in the string
+being interpreted as a literal. This syntax is from ECMAScript 6.
 .P
 The \eN{U+hhh..} escape sequence is recognized only when PCRE2 is operating in
 UTF mode. Perl also uses \eN{name} to specify characters by Unicode name; PCRE2
@@ -1979,8 +1983,10 @@ taken as zero; in this case the upper limit must be present.
   X{,4} is interpreted as X{0,4}
 .sp
 This is a change in behaviour that happened in Perl 5.34.0 and PCRE2 10.43. In
-earlier versions such a sequence was not interpreted as a quantifier. If the
-characters that follow an opening brace do not match the syntax of a
+earlier versions such a sequence was not interpreted as a quantifier. Other 
+regular expression engines may behave either way.
+.P
+If the characters that follow an opening brace do not match the syntax of a
 quantifier, the brace is taken as a literal character. In particular, this
 means that {,} is a literal string of three characters.
 .P
@@ -3861,6 +3867,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 September 2023
+Last updated: 30 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

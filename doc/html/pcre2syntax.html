@@ -64,10 +64,13 @@ PCRE2_EXTENDED is set, causing most other white space to be ignored.
 </P>
 <br><a name="SEC3" href="#TOC1">BRACED ITEMS</a><br>
 <P>
-Wherever brace characters { and } are required to enclose data for
-constructions such as \g{2} or \k{name}, space and/or horizontal tab
+With one exception, wherever brace characters { and } are required to enclose
+data for constructions such as \g{2} or \k{name}, space and/or horizontal tab
 characters that follow { or precede } are allowed and are ignored. In the case
-of quantifiers, they may also appear before or after the comma.
+of quantifiers, they may also appear before or after the comma. The exception
+is \u{...} which is not Perl-compatible and is recognized only when
+PCRE2_EXTRA_ALT_BSUX is set. This is an ECMAScript compatibility feature, and
+follows ECMAScript's behaviour.
 </P>
 <br><a name="SEC4" href="#TOC1">ESCAPED CHARACTERS</a><br>
 <P>
@@ -617,7 +620,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 September 2023
+Last updated: 30 September 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

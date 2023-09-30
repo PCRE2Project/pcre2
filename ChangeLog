@@ -115,7 +115,9 @@ changed to match. Note that {,} is still not a quantifier.
 
 30. Perl allows spaces and/or horizontal tabs after { or before } in all items
 that use braces, and also before or after the comma in quantifiers. PCRE2 now
-does the same.
+does the same, except for \u{...}, which is recognized only when
+PCRE2_EXTRA_ALT_BSUX is set. This an ECMAScript, non-Perl compatible,
+extension, so PCRE2 follows ECMAScript rather than Perl.
 
 
 Version 10.42 11-December-2022

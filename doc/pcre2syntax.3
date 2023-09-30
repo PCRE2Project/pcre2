@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "25 September 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "30 September 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -25,10 +25,13 @@ PCRE2_EXTENDED is set, causing most other white space to be ignored.
 .SH "BRACED ITEMS"
 .rs
 .sp
-Wherever brace characters { and } are required to enclose data for
-constructions such as \eg{2} or \ek{name}, space and/or horizontal tab
+With one exception, wherever brace characters { and } are required to enclose
+data for constructions such as \eg{2} or \ek{name}, space and/or horizontal tab
 characters that follow { or precede } are allowed and are ignored. In the case
-of quantifiers, they may also appear before or after the comma.
+of quantifiers, they may also appear before or after the comma. The exception
+is \eu{...} which is not Perl-compatible and is recognized only when
+PCRE2_EXTRA_ALT_BSUX is set. This is an ECMAScript compatibility feature, and
+follows ECMAScript's behaviour.
 .
 .
 .SH "ESCAPED CHARACTERS"
@@ -605,6 +608,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 25 September 2023
+Last updated: 30 September 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi
