@@ -2786,7 +2786,6 @@ int escape;
 int i;
 BOOL inescq = FALSE;
 BOOL inverbname = FALSE;
-BOOL next_is_literal = FALSE;
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL auto_callout = (options & PCRE2_AUTO_CALLOUT) != 0;
 BOOL isdupname;
@@ -2881,16 +2880,6 @@ while (ptr < ptrend)
 
   thisptr = ptr;
   GETCHARINCTEST(c, ptr);
-
-  /* Handle cases where previous processing has determined that the next
-  character is literal. */
-
-  if (next_is_literal)
-    {
-    PARSED_LITERAL(c, parsed_pattern);
-    next_is_literal = FALSE;
-    continue;  /* Next character */
-    }
 
   /* Copy quoted literals until \E, allowing for the possibility of automatic
   callouts, except when processing a (*VERB) "name".  */

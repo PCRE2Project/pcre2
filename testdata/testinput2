@@ -3420,6 +3420,18 @@
 /^\u{7a}/extra_alt_bsux
     zoo 
 
+/\u{}/extra_alt_bsux
+    u{}
+
+/\u{Q12}/extra_alt_bsux
+    --u{Q12}--
+
+/\u{ 12}/extra_alt_bsux
+    --u{ 12}--
+
+/\u{{3}}/extra_alt_bsux
+    --u{{{}--
+
 /(?(?=c)c|d)++Y/B
 
 /(?(?=c)c|d)*+Y/B

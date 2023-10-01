@@ -355,6 +355,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "#(A+)#\\d+", "#A#A#0" },
 	{ MU, A, 0, 0, "(?P<size>\\d+)m|M", "4M" },
 	{ M, PCRE2_NEWLINE_CRLF, 0, 0, "\\n?.+#", "\n,\n,#" },
+	{ 0, A, 0, 0, "<(\\w+)[\\s\\w]+id>", "<br><div id>" },
 
 	/* Bracket repeats with limit. */
 	{ MU, A, 0, 0, "(?:(ab){2}){5}M", "abababababababababababM" },
@@ -1982,6 +1983,8 @@ static const struct invalid_utf8_regression_test_case invalid_utf8_regression_te
 
 	{ PCRE2_UTF | PCRE2_UCP, CI, 0, 0, 0, -1, -1, { "[\\s]", NULL }, "\xed\xa0\x80" },
 	{ PCRE2_UTF, CI, 0, 0, 0, 0, 3, { "[\\D]", NULL }, "\xe0\xab\xaa@" },
+	{ PCRE2_UTF, CI, 0, 0, 0, 0, 3, { "\\D+", NULL }, "n\xc3\xb1" },
+	{ PCRE2_UTF, CI, 0, 0, 0, 0, 5, { "\\W+", NULL }, "@\xf0\x9d\x84\x9e" },
 
 	/* These two are not invalid UTF tests, but this infrastructure fits better for them. */
 	{ 0, PCRE2_JIT_COMPLETE, 0, 0, 1, -1, -1, { "\\X{2}", NULL }, "\r\n\n" },
