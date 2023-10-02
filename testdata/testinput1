@@ -4372,6 +4372,9 @@
 /^(?(DEFINE) (?<A> a) (?<B> b) )  (?&A) (?&B) /x
     abcd
 
+/(?<all>(?:(?:a(?&all))|(b))(c?))/
+    aabc
+
 /(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
   (?(DEFINE)
   (?<NAME_PAT>[a-z]+)

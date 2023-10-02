@@ -6948,6 +6948,13 @@ No match
     abcd
  0: ab
 
+/(?<all>(?:(?:a(?&all))|(b))(c?))/
+    aabc
+ 0: aabc
+ 1: aabc
+ 2: <unset>
+ 3: 
+
 /(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
   (?(DEFINE)
   (?<NAME_PAT>[a-z]+)
