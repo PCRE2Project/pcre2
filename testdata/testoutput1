@@ -6954,6 +6954,28 @@ No match
  1: aabc
  2: <unset>
  3: 
+    
+/(a(b)|(c))(?1)/
+    abc
+ 0: abc
+ 1: ab
+ 2: b
+    cab 
+ 0: cab
+ 1: c
+ 2: <unset>
+ 3: c
+
+/(?1)(a(b)|(c))/
+    abc
+ 0: abc
+ 1: c
+ 2: <unset>
+ 3: c
+    cab 
+ 0: cab
+ 1: ab
+ 2: b
 
 /(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
   (?(DEFINE)

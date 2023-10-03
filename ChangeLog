@@ -119,6 +119,10 @@ does the same, except for \u{...}, which is recognized only when
 PCRE2_EXTRA_ALT_BSUX is set. This an ECMAScript, non-Perl compatible,
 extension, so PCRE2 follows ECMAScript rather than Perl.
 
+31. Applied pull request #300 bu Carlo, which fixes #261. The bug was that
+pcre2_match() was not fully resetting all captures that had been set within a
+(possibly recursive) subroutine call such as (?3).
+
 
 Version 10.42 11-December-2022
 ------------------------------

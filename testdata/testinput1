@@ -4374,6 +4374,14 @@
 
 /(?<all>(?:(?:a(?&all))|(b))(c?))/
     aabc
+    
+/(a(b)|(c))(?1)/
+    abc
+    cab 
+
+/(?1)(a(b)|(c))/
+    abc
+    cab 
 
 /(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
   (?(DEFINE)
