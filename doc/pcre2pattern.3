@@ -1569,14 +1569,16 @@ plus those characters with code points less than 256 that have the S (Symbol)
 property.
 .TP 10
 [:xdigit:]
-In addition to the ASCII hexadecimal digits, this also matches the "fullwidth" 
-versions of those characters, whose Unicode code points start at U+FF10. This 
-is a change that was made in PCRE release 10.43 for Perl compatibility.
+In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
+versions of those characters, whose Unicode code points start at U+FF10. The
+effect of PCRE2_UCP can be negated by setting the PCRE2_EXTRA_ASCII_DIGIT
+option, just like it does for [:digit]. This is a change that was made in
+PCRE release 10.43 for Perl compatibility.
 .P
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
-with code points less than 256. The effect of PCRE2_UCP on POSIX classes can be
-negated by setting the PCRE2_EXTRA_ASCII_POSIX option, either when calling
-\fBpcre2_compile()\fP or internally within the pattern.
+with code points less than 256. The effect of PCRE2_UCP on all POSIX classes
+can be negated by setting the PCRE2_EXTRA_ASCII_POSIX option, either when
+calling \fBpcre2_compile()\fP or internally within the pattern.
 .
 .
 .SH "COMPATIBILITY FEATURE FOR WORD BOUNDARIES"

@@ -706,6 +706,7 @@ static const char posix_names[] =
 static const uint8_t posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
 
+#define PC_DIGIT   7
 #define PC_GRAPH   8
 #define PC_PRINT   9
 #define PC_PUNCT  10
@@ -722,20 +723,20 @@ absolute value of the third field has these meanings: 0 => no tweaking, 1 =>
 remove vertical space characters, 2 => remove underscore. */
 
 static const int posix_class_maps[] = {
-  cbit_word,  cbit_digit, -2,             /* alpha */
-  cbit_lower, -1,          0,             /* lower */
-  cbit_upper, -1,          0,             /* upper */
-  cbit_word,  -1,          2,             /* alnum - word without underscore */
-  cbit_print, cbit_cntrl,  0,             /* ascii */
-  cbit_space, -1,          1,             /* blank - a GNU extension */
-  cbit_cntrl, -1,          0,             /* cntrl */
-  cbit_digit, -1,          0,             /* digit */
-  cbit_graph, -1,          0,             /* graph */
-  cbit_print, -1,          0,             /* print */
-  cbit_punct, -1,          0,             /* punct */
-  cbit_space, -1,          0,             /* space */
-  cbit_word,  -1,          0,             /* word - a Perl extension */
-  cbit_xdigit,-1,          0              /* xdigit */
+  cbit_word,   cbit_digit, -2,            /* alpha */
+  cbit_lower,  -1,          0,            /* lower */
+  cbit_upper,  -1,          0,            /* upper */
+  cbit_word,   -1,          2,            /* alnum - word without underscore */
+  cbit_print,  cbit_cntrl,  0,            /* ascii */
+  cbit_space,  -1,          1,            /* blank - a GNU extension */
+  cbit_cntrl,  -1,          0,            /* cntrl */
+  cbit_digit,  -1,          0,            /* digit */
+  cbit_graph,  -1,          0,            /* graph */
+  cbit_print,  -1,          0,            /* print */
+  cbit_punct,  -1,          0,            /* punct */
+  cbit_space,  -1,          0,            /* space */
+  cbit_word,   -1,          0,            /* word - a Perl extension */
+  cbit_xdigit, -1,          0             /* xdigit */
 };
 
 #ifdef SUPPORT_UNICODE
@@ -3676,7 +3677,8 @@ while (ptr < ptrend)
 #ifdef SUPPORT_UNICODE
         if ((options & PCRE2_UCP) != 0 &&
             (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0 &&
-            !(posix_class == 7 && (xoptions & PCRE2_EXTRA_ASCII_DIGIT) != 0))
+            !((xoptions & PCRE2_EXTRA_ASCII_DIGIT) != 0 &&
+              (posix_class == PC_DIGIT || posix_class == PC_XDIGIT)))
           {
           int ptype = posix_substitutes[2*posix_class];
           int pvalue = posix_substitutes[2*posix_class + 1];
@@ -6028,19 +6030,18 @@ for (;; pptr++)
             *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
             *class_uchardata++ = (PCRE2_UCHAR)
               ((posix_class == PC_GRAPH)? PT_PXGRAPH :
-               (posix_class == PC_PRINT)? PT_PXPRINT : 
-               (posix_class == PC_XDIGIT)? PT_PXXDIGIT : PT_PXPUNCT);
+               (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
             *class_uchardata++ = 0;
             xclass_has_prop = TRUE;
             goto CONTINUE_CLASS;
 
-            /* For the other POSIX classes (ascii, xdigit) we are going to
+            /* For the other POSIX classes (ex: ascii) we are going to
             fall through to the non-UCP case and build a bit map for
             characters with code points less than 256. However, if we are in
             a negated POSIX class, characters with code points greater than
             255 must either all match or all not match, depending on whether
             the whole class is not or is negated. For example, for
-            [[:^ascii:]... they must all match, whereas for [^[:^xdigit:]...
+            [[:^ascii:]... they must all match, whereas for [^[:^ascii:]...
             they must not.
 
             In the special case where there are no xclass items, this is
@@ -6352,11 +6353,11 @@ for (;; pptr++)
     characters > 255 are in or not in the class, so any that were explicitly
     given as well can be ignored.
 
-    In the UCP case, if certain negated POSIX classes ([:^ascii:] or
-    [^:xdigit:]) were present in a class, we either have to match or not match
-    all wide characters (depending on whether the whole class is or is not
-    negated). This requirement is indicated by match_all_or_no_wide_chars being
-    true. We do this by including an explicit range, which works in both cases.
+    In the UCP case, if certain negated POSIX classes (ex: [:^ascii:]) were
+    were present in a class, we either have to match or not match all wide
+    characters (depending on whether the whole class is or is not negated).
+    This requirement is indicated by match_all_or_no_wide_chars being true.
+    We do this by including an explicit range, which works in both cases.
     This applies only in UTF and 16-bit and 32-bit non-UTF modes, since there
     cannot be any wide characters in 8-bit non-UTF mode.
 

@@ -1234,6 +1234,8 @@
 
 /[[:xdigit:]]/B,ucp
 
+/[[:xdigit:]]/B,ucp,ascii_digit
+
 # Unicode properties for \b and \B
 
 /\b...\B/utf,ucp
@@ -2444,6 +2446,22 @@
 
 /[[:digit:]]+/utf,ucp,ascii_posix
     123\x{660}456
+
+/^[[:xdigit:]]+$/utf,ucp
+    f0
+    1A
+    d\x{ff10}
+    \x{ff26}8
+\= Expect no match
+    8g\=no_jit
+
+/^[[:xdigit:]]+$/utf,ucp,ascii_digit
+    f0
+    1A
+\= Expect no match
+    d\x{ff10}
+    \x{ff26}8
+    8g
 
 />[[:space:]]+</utf,ucp
     >\x{a0} \x{a0}<
