@@ -778,6 +778,10 @@ for(;;)
               fprintf(f, "[:%spunct:]", notch);
               break;
 
+              case PT_PXXDIGIT:
+              fprintf(f, "[:%sxdigit:]", notch);
+              break;
+
               default:
               s = get_ucpname(ptype, pvalue);
               fprintf(f, "\\%c{%c%s}", ((notch[0] == '^')? 'P':'p'),

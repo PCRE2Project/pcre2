@@ -1299,7 +1299,7 @@ match. */
 #define PT_ALNUM      6    /* Alphanumeric - the union of L and N */
 #define PT_SPACE      7    /* Perl space - general category Z plus 9,10,12,13 */
 #define PT_PXSPACE    8    /* POSIX space - Z plus 9,10,11,12,13 */
-#define PT_WORD       9    /* Word - L plus N plus underscore */
+#define PT_WORD       9    /* Word - L, N, Mn, or Pc */
 #define PT_CLIST     10    /* Pseudo-property: match character list */
 #define PT_UCNC      11    /* Universal Character nameable character */
 #define PT_BIDICL    12    /* Specified bidi class */
@@ -1315,6 +1315,7 @@ table. */
 #define PT_PXGRAPH   14    /* [:graph:] - characters that mark the paper */
 #define PT_PXPRINT   15    /* [:print:] - [:graph:] plus non-control spaces */
 #define PT_PXPUNCT   16    /* [:punct:] - punctuation characters */
+#define PT_PXXDIGIT  17    /* [:xdigit:] - hex digits */
 
 /* This value is used when parsing \p and \P escapes to indicate that neither
 \p{script:...} nor \p{scx:...} has been encountered. */

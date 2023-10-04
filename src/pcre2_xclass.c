@@ -276,6 +276,18 @@ while ((t = *data++) != XCL_END)
         return !negated;
       break;
 
+      /* Perl has two sets of hex digits */
+
+      case PT_PXXDIGIT:
+      if (((c >= CHAR_0 && c <= CHAR_9) ||
+           (c >= CHAR_A && c <= CHAR_F) ||
+           (c >= CHAR_a && c <= CHAR_f) ||
+           (c >= 0xff10 && c <= 0xff19) ||  /* Fullwidth digits */
+           (c >= 0xff21 && c <= 0xff26) ||  /* Fullwidth letters */
+           (c >= 0xff41 && c <= 0xff46)) == isprop)
+        return !negated;
+      break;
+
       /* This should never occur, but compilers may mutter if there is no
       default. */
 

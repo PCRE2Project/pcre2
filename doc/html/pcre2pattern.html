@@ -1552,7 +1552,7 @@ follows:
   [:upper:]  becomes  \p{Lu}
   [:word:]   becomes  \p{Xwd}
 </pre>
-Negated versions, such as [:^alpha:] use \P instead of \p. Three other POSIX
+Negated versions, such as [:^alpha:] use \P instead of \p. Four other POSIX
 classes are handled specially in UCP mode:
 </P>
 <P>
@@ -1577,6 +1577,12 @@ not controls, that is, characters with the Zs property.
 This matches all characters that have the Unicode P (punctuation) property,
 plus those characters with code points less than 256 that have the S (Symbol)
 property.
+</P>
+<P>
+[:xdigit:]
+In addition to the ASCII hexadecimal digits, this also matches the "fullwidth" 
+versions of those characters, whose Unicode code points start at U+FF10. This 
+is a change that was made in PCRE release 10.43 for Perl compatibility.
 </P>
 <P>
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters

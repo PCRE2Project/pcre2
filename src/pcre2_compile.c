@@ -706,9 +706,10 @@ static const char posix_names[] =
 static const uint8_t posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
 
-#define PC_GRAPH  8
-#define PC_PRINT  9
-#define PC_PUNCT 10
+#define PC_GRAPH   8
+#define PC_PRINT   9
+#define PC_PUNCT  10
+#define PC_XDIGIT 13
 
 /* Table of class bit maps for each POSIX class. Each class is formed from a
 base map, with an optional addition or removal of another map. Then, for some
@@ -756,7 +757,7 @@ static int posix_substitutes[] = {
   PT_PXPUNCT, 0,    /* punct */
   PT_PXSPACE, 0,    /* space */   /* Xps is POSIX space, but from 8.34 */
   PT_WORD, 0,       /* word  */   /* Perl and POSIX space are the same */
-  -1, 0             /* xdigit, treat as non-UCP */
+  PT_PXXDIGIT, 0    /* xdigit */  /* Perl has additional hex digits */
 };
 #define POSIX_SUBSIZE (sizeof(posix_substitutes) / (2*sizeof(uint32_t)))
 #endif  /* SUPPORT_UNICODE */
@@ -6027,7 +6028,8 @@ for (;; pptr++)
             *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
             *class_uchardata++ = (PCRE2_UCHAR)
               ((posix_class == PC_GRAPH)? PT_PXGRAPH :
-               (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
+               (posix_class == PC_PRINT)? PT_PXPRINT : 
+               (posix_class == PC_XDIGIT)? PT_PXXDIGIT : PT_PXPUNCT);
             *class_uchardata++ = 0;
             xclass_has_prop = TRUE;
             goto CONTINUE_CLASS;

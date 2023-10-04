@@ -1546,7 +1546,7 @@ follows:
   [:upper:]  becomes  \ep{Lu}
   [:word:]   becomes  \ep{Xwd}
 .sp
-Negated versions, such as [:^alpha:] use \eP instead of \ep. Three other POSIX
+Negated versions, such as [:^alpha:] use \eP instead of \ep. Four other POSIX
 classes are handled specially in UCP mode:
 .TP 10
 [:graph:]
@@ -1567,6 +1567,11 @@ not controls, that is, characters with the Zs property.
 This matches all characters that have the Unicode P (punctuation) property,
 plus those characters with code points less than 256 that have the S (Symbol)
 property.
+.TP 10
+[:xdigit:]
+In addition to the ASCII hexadecimal digits, this also matches the "fullwidth" 
+versions of those characters, whose Unicode code points start at U+FF10. This 
+is a change that was made in PCRE release 10.43 for Perl compatibility.
 .P
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
 with code points less than 256. The effect of PCRE2_UCP on POSIX classes can be
