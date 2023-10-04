@@ -4551,4 +4551,16 @@ No match
     23AB56
  0: A
 
+/\w+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+ 0: cafe\x{300}_au\x{203f}lait
+
+/[\w]+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+ 0: cafe\x{300}_au\x{203f}lait
+
+/[[:word:]]+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+ 0: cafe\x{300}_au\x{203f}lait
+
 # End of testinput4

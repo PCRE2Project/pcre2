@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "30 September 2023" "PCRE2 10.43"
+.TH PCRE2PATTERN 3 "04 October 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -688,11 +688,15 @@ determine character types, as follows:
 .sp
   \ed  any character that matches \ep{Nd} (decimal digit)
   \es  any character that matches \ep{Z} or \eh or \ev
-  \ew  any character that matches \ep{L} or \ep{N}, plus underscore
+  \ew  any character that matches \ep{L}, \ep{N}, \ep{Mn}, or \ep{Pc}
 .sp
+The addition of \ep{Mn} (non-spacing mark) and the replacement of an explicit 
+test for underscore with a test for \ep{Pc} (connector punctuation) happened in 
+PCRE2 release 10.43. This brings PCRE2 into line with Perl.
+.P
 The upper case escapes match the inverse sets of characters. Note that \ed
 matches only decimal digits, whereas \ew matches any Unicode digit, as well as
-any Unicode letter, and underscore. Note also that PCRE2_UCP affects \eb, and
+other character categories. Note also that PCRE2_UCP affects \eb, and
 \eB because they are defined in terms of \ew and \eW. Matching these sequences
 is noticeably slower when PCRE2_UCP is set.
 .P
@@ -1060,7 +1064,8 @@ property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps; in PCRE1 it used to exclude vertical tab, for Perl
 compatibility, but Perl changed. Xwd matches the same characters as Xan, plus
-underscore.
+those that match Mn (non-spacing mark) or Pc (connector punctuation, which 
+includes underscore).
 .P
 There is another non-standard property, Xuc, which matches any character that
 can be represented by a Universal Character Name in C++ and other programming
@@ -3867,6 +3872,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 September 2023
+Last updated: 04 October 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

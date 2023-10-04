@@ -1165,10 +1165,10 @@
 # Some negative checks
 
 /^[\P{Xwd}]+/utf
-    !.+\x{019}\x{35a}AB
+    !.+\x{019}\x{482}AB
 
 /^[\p{^Xwd}]+/utf
-    !.+\x{019}\x{35a}AB
+    !.+\x{019}\x{589}AB
 
 /[\D]/B,utf,ucp
     1\x{3c8}2
@@ -1183,7 +1183,7 @@
     >\x{1680}<
 
 /[\W]/B,utf,ucp
-    A\x{1712}B
+    A\x{1735}B
 
 /[\w]/B,utf,ucp
     >\x{1723}<
@@ -1201,7 +1201,7 @@
     >\x{1680}>
 
 /\W/B,utf,ucp
-    A\x{1712}B
+    A\x{1735}B
 
 /\w/B,utf,ucp
     >\x{1723}<
@@ -1709,7 +1709,7 @@
     \x{de}
     \x{200}
 \= Expect no match
-    \x{300}
+    \x{589}
     \x{37e}
 
 /[[:^ascii:]a]/utf,ucp,bincode

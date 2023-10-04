@@ -1176,6 +1176,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[1])
@@ -1185,8 +1186,9 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
-               prop->chartype == ucp_Lt;
+          chartype = prop->chartype;
+          OK = chartype == ucp_Lu || chartype == ucp_Ll ||
+               chartype == ucp_Lt;
           break;
 
           case PT_GC:
@@ -1209,8 +1211,9 @@ for (;;)
           /* These are specials for combination cases. */
 
           case PT_ALNUM:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N;
           break;
 
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -1233,9 +1236,10 @@ for (;;)
           break;
 
           case PT_WORD:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-               c == CHAR_UNDERSCORE;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N ||
+               chartype == ucp_Mn || chartype == ucp_Pc;
           break;
 
           case PT_CLIST:
@@ -1448,6 +1452,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
@@ -1457,8 +1462,8 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
-            prop->chartype == ucp_Lt;
+          chartype = prop->chartype;
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
           break;
 
           case PT_GC:
@@ -1481,8 +1486,9 @@ for (;;)
           /* These are specials for combination cases. */
 
           case PT_ALNUM:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N;
           break;
 
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -1505,9 +1511,10 @@ for (;;)
           break;
 
           case PT_WORD:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-               c == CHAR_UNDERSCORE;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N ||
+               chartype == ucp_Mn || chartype == ucp_Pc;
           break;
 
           case PT_CLIST:
@@ -1703,6 +1710,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
@@ -1712,8 +1720,8 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
-            prop->chartype == ucp_Lt;
+          chartype = prop->chartype;
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
           break;
 
           case PT_GC:
@@ -1736,8 +1744,9 @@ for (;;)
           /* These are specials for combination cases. */
 
           case PT_ALNUM:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N;
           break;
 
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -1760,9 +1769,10 @@ for (;;)
           break;
 
           case PT_WORD:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-               c == CHAR_UNDERSCORE;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N ||
+               chartype == ucp_Mn || chartype == ucp_Pc;
           break;
 
           case PT_CLIST:
@@ -1983,6 +1993,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[1 + IMM2_SIZE + 1])
@@ -1992,8 +2003,8 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
-            prop->chartype == ucp_Lt;
+          chartype = prop->chartype;
+          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
           break;
 
           case PT_GC:
@@ -2017,8 +2028,9 @@ for (;;)
           /* These are specials for combination cases. */
 
           case PT_ALNUM:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N;
           break;
 
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -2041,9 +2053,10 @@ for (;;)
           break;
 
           case PT_WORD:
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-               PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-               c == CHAR_UNDERSCORE;
+          chartype = prop->chartype;
+          OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
+               PRIV(ucp_gentype)[chartype] == ucp_N ||
+               chartype == ucp_Mn || chartype == ucp_Pc;
           break;
 
           case PT_CLIST:

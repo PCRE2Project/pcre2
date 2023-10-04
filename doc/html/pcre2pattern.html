@@ -692,11 +692,16 @@ determine character types, as follows:
 <pre>
   \d  any character that matches \p{Nd} (decimal digit)
   \s  any character that matches \p{Z} or \h or \v
-  \w  any character that matches \p{L} or \p{N}, plus underscore
+  \w  any character that matches \p{L}, \p{N}, \p{Mn}, or \p{Pc}
 </pre>
+The addition of \p{Mn} (non-spacing mark) and the replacement of an explicit 
+test for underscore with a test for \p{Pc} (connector punctuation) happened in 
+PCRE2 release 10.43. This brings PCRE2 into line with Perl.
+</P>
+<P>
 The upper case escapes match the inverse sets of characters. Note that \d
 matches only decimal digits, whereas \w matches any Unicode digit, as well as
-any Unicode letter, and underscore. Note also that PCRE2_UCP affects \b, and
+other character categories. Note also that PCRE2_UCP affects \b, and
 \B because they are defined in terms of \w and \W. Matching these sequences
 is noticeably slower when PCRE2_UCP is set.
 </P>
@@ -1069,7 +1074,8 @@ property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps; in PCRE1 it used to exclude vertical tab, for Perl
 compatibility, but Perl changed. Xwd matches the same characters as Xan, plus
-underscore.
+those that match Mn (non-spacing mark) or Pc (connector punctuation, which 
+includes underscore).
 </P>
 <P>
 There is another non-standard property, Xuc, which matches any character that
@@ -1942,7 +1948,7 @@ items:
   a parenthesized group (including lookaround assertions)
   a subroutine call (recursive or otherwise)
 </pre>
-If a quantifier does not follow a repeatabke item, an error occurs. The
+If a quantifier does not follow a repeatable item, an error occurs. The
 general repetition quantifier specifies a minimum and maximum number of
 permitted matches by giving two numbers in curly brackets (braces), separated
 by a comma. The numbers must be less than 65536, and the first must be less
@@ -3818,7 +3824,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 September 2023
+Last updated: 04 October 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

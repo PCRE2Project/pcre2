@@ -4131,4 +4131,12 @@ No match
 
 # End PCRE2_EXTRA_ASCII_xxx tests
 
+/\w+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!
+ 0: cafe\x{300}_au\x{203f}lait
+
+/[\w]+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!
+ 0: cafe\x{300}_au\x{203f}lait
+
 # End of testinput7

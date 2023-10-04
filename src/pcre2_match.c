@@ -2452,6 +2452,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     GETCHARINCTEST(fc, Feptr);
       {
       const uint32_t *cp;
+      uint32_t chartype;
       const ucd_record *prop = GET_UCD(fc);
       BOOL notmatch = Fop == OP_NOTPROP;
 
@@ -2462,9 +2463,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         break;
 
         case PT_LAMP:
-        if ((prop->chartype == ucp_Lu ||
-             prop->chartype == ucp_Ll ||
-             prop->chartype == ucp_Lt) == notmatch)
+        chartype = prop->chartype;
+        if ((chartype == ucp_Lu ||
+             chartype == ucp_Ll ||
+             chartype == ucp_Lt) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2494,8 +2496,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         /* These are specials */
 
         case PT_ALNUM:
-        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-             PRIV(ucp_gentype)[prop->chartype] == ucp_N) == notmatch)
+        chartype = prop->chartype;
+        if ((PRIV(ucp_gentype)[chartype] == ucp_L ||
+             PRIV(ucp_gentype)[chartype] == ucp_N) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2520,9 +2523,11 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         break;
 
         case PT_WORD:
-        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-             PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-             fc == CHAR_UNDERSCORE) == notmatch)
+        chartype = prop->chartype;
+        if ((PRIV(ucp_gentype)[chartype] == ucp_L ||
+             PRIV(ucp_gentype)[chartype] == ucp_N ||
+             chartype == ucp_Mn ||
+             chartype == ucp_Pc) == notmatch)
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -2822,16 +2827,17 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           case PT_WORD:
           for (i = 1; i <= Lmin; i++)
             {
-            int category;
+            int chartype, category;
             if (Feptr >= mb->end_subject)
               {
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            category = UCD_CATEGORY(fc);
+            chartype = UCD_CHARTYPE(fc);
+            category = PRIV(ucp_gentype)[chartype];
             if ((category == ucp_L || category == ucp_N ||
-                fc == CHAR_UNDERSCORE) == notmatch)
+                 chartype == ucp_Mn || chartype == ucp_Pc) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3626,7 +3632,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           case PT_WORD:
           for (;;)
             {
-            int category;
+            int chartype, category;
             RMATCH(Fecode, RM215);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
@@ -3636,10 +3642,12 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            category = UCD_CATEGORY(fc);
+            chartype = UCD_CHARTYPE(fc);
+            category = PRIV(ucp_gentype)[chartype];
             if ((category == ucp_L ||
                  category == ucp_N ||
-                 fc == CHAR_UNDERSCORE) == (Lctype == OP_NOTPROP))
+                 chartype == ucp_Mn ||
+                 chartype == ucp_Pc) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4207,7 +4215,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           case PT_WORD:
           for (i = Lmin; i < Lmax; i++)
             {
-            int category;
+            int chartype, category;
             int len = 1;
             if (Feptr >= mb->end_subject)
               {
@@ -4215,9 +4223,12 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            category = UCD_CATEGORY(fc);
-            if ((category == ucp_L || category == ucp_N ||
-                 fc == CHAR_UNDERSCORE) == notmatch)
+            chartype = UCD_CHARTYPE(fc);
+            category = PRIV(ucp_gentype)[chartype];
+            if ((category == ucp_L ||
+                 category == ucp_N ||
+                 chartype == ucp_Mn ||
+                 chartype == ucp_Pc) == notmatch)
               break;
             Feptr+= len;
             }

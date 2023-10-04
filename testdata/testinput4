@@ -2844,4 +2844,13 @@
 /\p{ L }/
     23AB56
 
+/\w+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+
+/[\w]+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+
+/[[:word:]]+/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+
 # End of testinput4
