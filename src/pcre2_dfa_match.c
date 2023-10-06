@@ -428,7 +428,7 @@ overflow. */
 
 else
   {
-  uint32_t newsize = (rws->size >= UINT32_MAX/2)? UINT32_MAX/2 : rws->size * 2;
+  uint32_t newsize = (rws->size >= UINT32_MAX/(sizeof(int)*2))? UINT32_MAX/sizeof(int) : rws->size * 2;
   uint32_t newsizeK = newsize/(1024/sizeof(int));
 
   if (newsizeK + mb->heap_used > mb->heap_limit)
