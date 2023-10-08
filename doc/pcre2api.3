@@ -1972,11 +1972,12 @@ setting.
   PCRE2_EXTRA_ASCII_DIGIT
 .sp
 This option forces the POSIX character classes [:digit:] and [:xdigit:] to
-match only ASCII digits, even when PCRE2_UCP is set.
+match only ASCII digits, even when PCRE2_UCP is set. It can be changed within
+a pattern by means of the (?aT) option setting.
 .sp
   PCRE2_EXTRA_ASCII_POSIX
 .sp
-This option forces the POSIX character classes to match only ASCII characters,
+This option forces all the POSIX character classes to match only ASCII characters,
 even when PCRE2_UCP is set. It can be changed within a pattern by means of the
 (?aP) option setting.
 .sp

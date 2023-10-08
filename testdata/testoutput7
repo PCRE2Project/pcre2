@@ -3971,12 +3971,24 @@ No match
     \x{660}\x{660}\x{660}
 No match
 
+/\d(?-aD)\d(?aD)\d/utf,ucp,ascii_bsd
+    999
+ 0: 999
+    9\x{660}9
+ 0: 9\x{660}9
+
 /\d(?a)\d(?-a)\d/utf,ucp
     \x{660}9\x{660}
  0: \x{660}9\x{660}
 \= Expect no match     
     \x{660}\x{660}\x{660}
 No match
+
+/\d(?-aD)\d(?aD)\d/utf,ucp,ascii_bsd
+    999
+ 0: 999
+    9\x{660}9
+ 0: 9\x{660}9
 
 # SPACES
 
@@ -4076,22 +4088,81 @@ No match
 
 # POSIX
 
-/[[:digit:]]+/utf,ucp
+/^[[:digit:]]+$/utf,ucp
+    123456
+ 0: 123456
     123\x{660}456
  0: 123\x{660}456
 
-/[[:digit:]]+/utf,ucp,ascii_digit
+/^[[:digit:]]+$/utf,ucp,ascii_digit
+    123456
+ 0: 123456
+\= Expect no match
     123\x{660}456
- 0: 123
+No match
 
 /[[:digit:]]+/g,utf,ucp,ascii_digit
     123\x{660}456
  0: 123
  0: 456
 
+/(?-aT)[[:digit:]](?aT)[[:digit:]]/utf,ucp,ascii_digit
+    11
+ 0: 11
+    \x{ff11}1
+ 0: \x{ff11}1
+\= Expect no match
+    1\x{ff11}
+No match
+
+/(?-aT:[[:digit:]])[[:digit:]]/utf,ucp,ascii_digit
+    11
+ 0: 11
+    \x{ff11}1
+ 0: \x{ff11}1
+\= Expect no match
+    1\x{ff11}
+No match
+
+/(?-aT:[[:digit:]])[[:digit:]]/utf,never_ucp,ascii_digit
+    11
+ 0: 11
+\= Expect no match
+    \x{ff11}1
+No match
+    1\x{ff11}
+No match
+
 /[[:digit:]]+/utf,ucp,ascii_posix
     123\x{660}456
  0: 123
+
+/(?-aP)[[:digit:]](?aP)[[:digit:]]/utf,ucp,ascii_posix
+    11
+ 0: 11
+    \x{ff11}1
+ 0: \x{ff11}1
+\= Expect no match
+    1\x{ff11}
+No match
+
+/(?-aP:[[:digit:]])[[:digit:]]/utf,ucp,ascii_posix
+    11
+ 0: 11
+    \x{ff11}1
+ 0: \x{ff11}1
+\= Expect no match
+    1\x{ff11}
+No match
+
+/(?-a:[[:digit:]])[[:digit:]]/a,utf,ucp
+    11
+ 0: 11
+    \x{ff11}1
+ 0: \x{ff11}1
+\= Expect no match
+    1\x{ff11}
+No match
 
 />[[:space:]]+</utf,ucp
     >\x{a0} \x{a0}<
