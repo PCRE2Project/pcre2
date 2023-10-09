@@ -1580,15 +1580,17 @@ property.
 </P>
 <P>
 [:xdigit:]
-In addition to the ASCII hexadecimal digits, this also matches the "fullwidth" 
-versions of those characters, whose Unicode code points start at U+FF10. This 
-is a change that was made in PCRE release 10.43 for Perl compatibility.
+In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
+versions of those characters, whose Unicode code points start at U+FF10. The
+effect of PCRE2_UCP can be negated by setting the PCRE2_EXTRA_ASCII_DIGIT
+option, just like it does for [:digit]. This is a change that was made in
+PCRE release 10.43 for Perl compatibility.
 </P>
 <P>
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
-with code points less than 256. The effect of PCRE2_UCP on POSIX classes can be
-negated by setting the PCRE2_EXTRA_ASCII_POSIX option, either when calling
-<b>pcre2_compile()</b> or internally within the pattern.
+with code points less than 256. The effect of PCRE2_UCP on all POSIX classes
+can be negated by setting the PCRE2_EXTRA_ASCII_POSIX option, either when
+calling <b>pcre2_compile()</b> or internally within the pattern.
 </P>
 <br><a name="SEC11" href="#TOC1">COMPATIBILITY FEATURE FOR WORD BOUNDARIES</a><br>
 <P>

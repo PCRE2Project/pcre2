@@ -132,6 +132,8 @@ includes underscore.
 matches the "fullwidth" versions of the hex digits. Just like it is done for
 [:digit:], PCRE2_EXTRA_ASCII_DIGIT can be used to keep this class ASCII only.
 
+34. GitHub PR305 fixes a potential integer overflow in pcre2_dfa_match().
+
 
 Version 10.42 11-December-2022
 ------------------------------
