@@ -2741,7 +2741,7 @@ the main compiling phase. */
 
 #define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT| \
   PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW| \
-  PCRE2_EXTRA_ASCII_POSIX)
+  PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -4233,13 +4233,19 @@ while (ptr < ptrend)
                 }
               if (*ptr == CHAR_P)
                 {
-                *xoptset |= PCRE2_EXTRA_ASCII_POSIX;
+                *xoptset |= (PCRE2_EXTRA_ASCII_POSIX|PCRE2_EXTRA_ASCII_DIGIT);
                 ptr++;
                 break;
                 }
               if (*ptr == CHAR_S)
                 {
                 *xoptset |= PCRE2_EXTRA_ASCII_BSS;
+                ptr++;
+                break;
+                }
+              if (*ptr == CHAR_T)
+                {
+                *xoptset |= PCRE2_EXTRA_ASCII_DIGIT;
                 ptr++;
                 break;
                 }
@@ -4251,7 +4257,8 @@ while (ptr < ptrend)
                 }
               }
             *xoptset |= PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|
-                        PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX;
+                        PCRE2_EXTRA_ASCII_BSW|
+                        PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX;
             break;
 
             case CHAR_J:  /* Record that it changed in the external options */
