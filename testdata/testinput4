@@ -2856,4 +2856,10 @@
 /[[:xdigit:]]+/utf,ucp
     --123ef\x{ff10}\x{ff19}\x{ff21}\x{ff26}\x{ff1a}\=no_jit
 
+/\b.+?\b/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+
+/caf\B.+?\B/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+
 # End of testinput4

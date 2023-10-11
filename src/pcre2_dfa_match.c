@@ -1119,11 +1119,10 @@ for (;;)
           if (codevalue == OP_UCP_WORD_BOUNDARY ||
               codevalue == OP_NOT_UCP_WORD_BOUNDARY)
             {
-            if (d == '_') left_word = TRUE; else
-              {
-              uint32_t cat = UCD_CATEGORY(d);
-              left_word = (cat == ucp_L || cat == ucp_N);
-              }
+            int chartype = UCD_CHARTYPE(d);
+            int category = PRIV(ucp_gentype)[chartype];
+            left_word = (category == ucp_L || category == ucp_N ||
+              chartype == ucp_Mn || chartype == ucp_Pc);
             }
           else
 #endif
@@ -1145,11 +1144,10 @@ for (;;)
           if (codevalue == OP_UCP_WORD_BOUNDARY ||
               codevalue == OP_NOT_UCP_WORD_BOUNDARY)
             {
-            if (c == '_') right_word = TRUE; else
-              {
-              uint32_t cat = UCD_CATEGORY(c);
-              right_word = (cat == ucp_L || cat == ucp_N);
-              }
+            int chartype = UCD_CHARTYPE(c);
+            int category = PRIV(ucp_gentype)[chartype];
+            right_word = (category == ucp_L || category == ucp_N ||
+              chartype == ucp_Mn || chartype == ucp_Pc);
             }
           else
 #endif

@@ -4139,4 +4139,21 @@ No match
     --cafe\x{300}_au\x{203f}lait!
  0: cafe\x{300}_au\x{203f}lait
 
+/\b.+?\b/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!
+ 0: cafe\x{300}_au\x{203f}lait
+
+/caf\B.+?\B/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!
+ 0: cafe\x{300}_au\x{203f}lait!
+ 1: cafe\x{300}_au\x{203f}lai
+ 2: cafe\x{300}_au\x{203f}la
+ 3: cafe\x{300}_au\x{203f}l
+ 4: cafe\x{300}_au\x{203f}
+ 5: cafe\x{300}_au
+ 6: cafe\x{300}_a
+ 7: cafe\x{300}_
+ 8: cafe\x{300}
+ 9: cafe
+
 # End of testinput7

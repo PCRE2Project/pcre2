@@ -134,6 +134,9 @@ matches the "fullwidth" versions of the hex digits. Just like it is done for
 
 34. GitHub PR305 fixes a potential integer overflow in pcre2_dfa_match().
 
+35. Updated handling of \b and \B in UCP mode to match the changes to \w in 32 
+above because \b and \B are defined in terms of \w.
+
 
 Version 10.42 11-December-2022
 ------------------------------

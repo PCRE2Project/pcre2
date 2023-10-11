@@ -6180,11 +6180,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 #ifdef SUPPORT_UNICODE
       if (Fop == OP_UCP_WORD_BOUNDARY || Fop == OP_NOT_UCP_WORD_BOUNDARY)
         {
-        if (fc == '_') prev_is_word = TRUE; else
-          {
-          int cat = UCD_CATEGORY(fc);
-          prev_is_word = (cat == ucp_L || cat == ucp_N);
-          }
+        int chartype = UCD_CHARTYPE(fc);
+        int category = PRIV(ucp_gentype)[chartype];
+        prev_is_word = (category == ucp_L || category == ucp_N ||
+          chartype == ucp_Mn || chartype == ucp_Pc);
         }
       else
 #endif  /* SUPPORT_UNICODE */
@@ -6214,11 +6213,10 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 #ifdef SUPPORT_UNICODE
       if (Fop == OP_UCP_WORD_BOUNDARY || Fop == OP_NOT_UCP_WORD_BOUNDARY)
         {
-        if (fc == '_') cur_is_word = TRUE; else
-          {
-          int cat = UCD_CATEGORY(fc);
-          cur_is_word = (cat == ucp_L || cat == ucp_N);
-          }
+        int chartype = UCD_CHARTYPE(fc);
+        int category = PRIV(ucp_gentype)[chartype];
+        cur_is_word = (category == ucp_L || category == ucp_N ||
+          chartype == ucp_Mn || chartype == ucp_Pc);
         }
       else
 #endif  /* SUPPORT_UNICODE */

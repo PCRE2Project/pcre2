@@ -4567,4 +4567,12 @@ No match
     --123ef\x{ff10}\x{ff19}\x{ff21}\x{ff26}\x{ff1a}\=no_jit
  0: 123ef\x{ff10}\x{ff19}\x{ff21}\x{ff26}
 
+/\b.+?\b/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+ 0: cafe\x{300}_au\x{203f}lait
+
+/caf\B.+?\B/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!\=no_jit
+ 0: cafe
+
 # End of testinput4

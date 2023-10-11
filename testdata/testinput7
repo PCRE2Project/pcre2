@@ -2478,4 +2478,10 @@
 /[\w]+/utf,ucp
     --cafe\x{300}_au\x{203f}lait!
 
+/\b.+?\b/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!
+
+/caf\B.+?\B/utf,ucp
+    --cafe\x{300}_au\x{203f}lait!
+
 # End of testinput7
