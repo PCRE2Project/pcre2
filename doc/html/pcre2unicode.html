@@ -52,9 +52,12 @@ When PCRE2 is built with Unicode support, the escape sequences \p{..},
 \P{..}, and \X can be used. This is not dependent on the PCRE2_UTF setting.
 The Unicode properties that can be tested are a subset of those that Perl
 supports. Currently they are limited to the general category properties such as
-Lu for an upper case letter or Nd for a decimal number, the Unicode script
-names such as Arabic or Han, Bidi_Class, Bidi_Control, and the derived
-properties Any and LC (synonym L&). Full lists are given in the
+Lu for an upper case letter or Nd for a decimal number, the derived properties
+Any and LC (synonym L&), the Unicode script names such as Arabic or Han,
+Bidi_Class, Bidi_Control, and a few binary properties.
+</P>
+<P>
+The full lists are given in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 and
 <a href="pcre2syntax.html"><b>pcre2syntax</b></a>
@@ -510,7 +513,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 04 February 2023
+Last updated: 12 October 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

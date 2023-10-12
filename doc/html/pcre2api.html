@@ -2014,13 +2014,16 @@ setting.
   PCRE2_EXTRA_ASCII_DIGIT
 </pre>
 This option forces the POSIX character classes [:digit:] and [:xdigit:] to
-match only ASCII digits, even when PCRE2_UCP is set.
+match only ASCII digits, even when PCRE2_UCP is set. It can be changed within
+a pattern by means of the (?aT) option setting.
 <pre>
   PCRE2_EXTRA_ASCII_POSIX
 </pre>
-This option forces the POSIX character classes to match only ASCII characters,
-even when PCRE2_UCP is set. It can be changed within a pattern by means of the
-(?aP) option setting.
+This option forces all the POSIX character classes, including [:digit:] and
+[:xdigit:], to match only ASCII characters, even when PCRE2_UCP is set. It can
+be changed within a pattern by means of the (?aP) option setting, but note that 
+this also sets PCRE2_EXTRA_ASCII_DIGIT in order to ensure that (?-aP) unsets
+all ASCII restrictions for POSIX classes.
 <pre>
   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 </pre>
@@ -4137,7 +4140,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 September 2023
+Last updated: 12 October 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

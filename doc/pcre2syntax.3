@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "30 September 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "12 October 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -366,11 +366,11 @@ Changes of these options within a group are automatically cancelled at the end
 of the group.
 .sp
   (?a)            all ASCII options
-  (?aD)           restrict \ed to ASCII, even in UCP mode
-  (?aS)           restrict \es to ASCII, even in UCP mode
-  (?aW)           restrict \ew to ASCII, even in UCP mode
-  (?aP)           restrict all POSIX classes to ASCII even in UCP mode
-  (?aT)           restrict [:digit:] and [:xdigit:] to ASCII even in UCP mode
+  (?aD)           restrict \ed to ASCII in UCP mode
+  (?aS)           restrict \es to ASCII in UCP mode
+  (?aW)           restrict \ew to ASCII in UCP mode
+  (?aP)           restrict all POSIX classes to ASCII in UCP mode
+  (?aT)           restrict POSIX digit classes to ASCII in UCP mode
   (?i)            caseless
   (?J)            allow duplicate named groups
   (?m)            multiline
@@ -380,9 +380,13 @@ of the group.
   (?U)            default ungreedy (lazy)
   (?x)            ignore white space except in classes or \eQ...\eE
   (?xx)           as (?x) but also ignore space and tab in classes
-  (?-...)         unset option(s)
+  (?-...)         unset the given option(s)
   (?^)            unset imnrsx options
 .sp
+(?aP) implies (?aT) as well, though this has no additional effect. However, it 
+means that (?-aP) is really (?-PT) which disables all ASCII restrictions for 
+POSIX classes.
+.P
 Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
 only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
@@ -609,6 +613,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 September 2023
+Last updated: 12 October 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

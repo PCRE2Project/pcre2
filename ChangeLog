@@ -130,12 +130,17 @@ includes underscore.
 
 33. Changed the meaning of [:xdigit:] in UCP mode to match Perl. It now also
 matches the "fullwidth" versions of the hex digits. Just like it is done for
-[:digit:], PCRE2_EXTRA_ASCII_DIGIT can be used to keep this class ASCII only.
+[:digit:], PCRE2_EXTRA_ASCII_DIGIT can be used to keep this class ASCII only
+without affecting other POSIX classes.
 
 34. GitHub PR305 fixes a potential integer overflow in pcre2_dfa_match().
 
-35. Updated handling of \b and \B in UCP mode to match the changes to \w in 32 
+35. Updated handling of \b and \B in UCP mode to match the changes to \w in 32
 above because \b and \B are defined in terms of \w.
+
+36. Within a pattern (?aT) and (?-aT) set and reset the PCRE2_EXTRA_ASCII_DIGIT
+option, and (?aP) also sets (?aT) so that (?-aP) disables all ASCII
+restrictions on POSIX classes.
 
 
 Version 10.42 11-December-2022

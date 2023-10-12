@@ -1521,7 +1521,7 @@ are:
 The default "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13),
 and space (32). If locale-specific matching is taking place, the list of space
 characters may be different; there may be fewer or more of them. "Space" and
-\s match the same set of characters.
+\s match the same set of characters, as do "word" and \w.
 </P>
 <P>
 The name "word" is a Perl extension, and "blank" is a GNU extension from Perl
@@ -1538,15 +1538,15 @@ supported, and an error is given if they are encountered.
 By default, characters with values greater than 127 do not match any of the
 POSIX character classes, although this may be different for characters in the
 range 128-255 when locale-specific matching is happening. However, in UCP mode,
-some of the classes are changed so that Unicode character properties are used.
-This is achieved by replacing certain POSIX classes with other sequences, as
-follows:
+unless certain options are set (see below), some of the classes are changed so
+that Unicode character properties are used. This is achieved by replacing
+POSIX classes with other sequences, as follows:
 <pre>
   [:alnum:]  becomes  \p{Xan}
   [:alpha:]  becomes  \p{L}
   [:blank:]  becomes  \h
   [:cntrl:]  becomes  \p{Cc}
-  [:digit:]  becomes  \p{Nd}  unless PCRE2_EXTRA_ASCII_DIGIT is set
+  [:digit:]  becomes  \p{Nd}
   [:lower:]  becomes  \p{Ll}
   [:space:]  becomes  \p{Xps}
   [:upper:]  becomes  \p{Lu}
@@ -1581,16 +1581,20 @@ property.
 <P>
 [:xdigit:]
 In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
-versions of those characters, whose Unicode code points start at U+FF10. The
-effect of PCRE2_UCP can be negated by setting the PCRE2_EXTRA_ASCII_DIGIT
-option, just like it does for [:digit]. This is a change that was made in
-PCRE release 10.43 for Perl compatibility.
+versions of those characters, whose Unicode code points start at U+FF10. This
+is a change that was made in PCRE release 10.43 for Perl compatibility.
 </P>
 <P>
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
-with code points less than 256. The effect of PCRE2_UCP on all POSIX classes
-can be negated by setting the PCRE2_EXTRA_ASCII_POSIX option, either when
-calling <b>pcre2_compile()</b> or internally within the pattern.
+with code points less than 256. 
+</P>
+<P>
+There are two options that can be used to restrict the POSIX classes to ASCII
+characters when PCRE2_UCP is set. The option PCRE2_EXTRA_ASCII_DIGIT affects
+just [:digit:] and [:xdigit:]. Within a pattern, this can be set and unset by
+(?aT) and (?-aT). The PCRE2_EXTRA_ASCII_POSIX option disables UCP processing
+for all POSIX classes, including [:digit:] and [:xdigit:]. Within a pattern,
+(?aP) and (?-aP) set and unset both these options for consistency.
 </P>
 <br><a name="SEC11" href="#TOC1">COMPATIBILITY FEATURE FOR WORD BOUNDARIES</a><br>
 <P>
@@ -1609,7 +1613,9 @@ at the start and the end of a word (see
 <a href="#smallassertions">"Simple assertions"</a>
 above), and in a Perl-style pattern the preceding or following character
 normally shows which is wanted, without the need for the assertions that are
-used above in order to give exactly the POSIX behaviour.
+used above in order to give exactly the POSIX behaviour. Note also that the 
+PCRE2_UCP option changes the meaning of \w (and therefore \b) by default, so 
+it also affects these POSIX sequences.
 </P>
 <br><a name="SEC12" href="#TOC1">VERTICAL BAR</a><br>
 <P>
@@ -1643,8 +1649,8 @@ documentation. The option letters are:
 </pre>
 For example, (?im) sets caseless, multiline matching. It is also possible to
 unset these options by preceding the relevant letters with a hyphen, for
-example (?-im). The two "extended" options are not independent; unsetting either
-one cancels the effects of both of them.
+example (?-im). The two "extended" options are not independent; unsetting
+either one cancels the effects of both of them.
 </P>
 <P>
 A combined setting and unsetting such as (?im-sx), which sets PCRE2_CASELESS
@@ -1665,7 +1671,8 @@ pairs or individual letters:
   aD for PCRE2_EXTRA_ASCII_BSD
   aS for PCRE2_EXTRA_ASCII_BSS
   aW for PCRE2_EXTRA_ASCII_BSW
-  aP for PCRE2_EXTRA_ASCII_POSIX
+  aP for PCRE2_EXTRA_ASCII_POSIX and PCRE2_EXTRA_ASCII_DIGIT
+  aT for PCRE2_EXTRA_ASCII_DIGIT
   r  for PCRE2_EXTRA_CASELESS_RESTRICT
   J  for PCRE2_DUPNAMES
   U  for PCRE2_UNGREEDY
@@ -1673,6 +1680,11 @@ pairs or individual letters:
 However, except for 'r', these are not unset by (?^), which is equivalent to
 (?-imnrsx). If 'a' is not followed by any of the upper case letters shown
 above, it sets (or unsets) all the ASCII options.
+</P>
+<P>
+PCRE2_EXTRA_ASCII_DIGIT has no additional effect when PCRE2_EXTRA_ASCII_POSIX 
+is set, but including it in (?aP) means that (?-aP) suppresses all ASCII 
+restrictions for POSIX classes.
 </P>
 <P>
 When one of these option changes occurs at top level (that is, not inside group
@@ -3832,7 +3844,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 October 2023
+Last updated: 12 October 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>
