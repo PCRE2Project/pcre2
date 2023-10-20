@@ -9,7 +9,7 @@ POSIX wrapper interface.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,6 @@ set, we ensure here that it has no effect. */
 #ifndef PCRE2_CALL_CONVENTION
 #define PCRE2_CALL_CONVENTION
 #endif
-
 
 #ifndef PCRE2_EXPORT
 #define PCRE2_EXPORT
