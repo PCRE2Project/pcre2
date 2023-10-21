@@ -573,46 +573,6 @@ IF(WIN32)
   SET(CMAKE_DEBUG_POSTFIX "d")
 ENDIF(WIN32)
 
-# Generate pkg-config files
-
-SET(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
-SET(prefix ${CMAKE_INSTALL_PREFIX})
-
-SET(exec_prefix "\${prefix}")
-SET(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
-SET(includedir "\${prefix}/include")
-IF(WIN32 AND (CMAKE_BUILD_TYPE MATCHES Debug))
-  SET(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-ENDIF()
-CONFIGURE_FILE(libpcre2-posix.pc.in libpcre2-posix.pc @ONLY)
-SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-posix.pc")
-
-IF(PCRE2_BUILD_PCRE2_8)
-  CONFIGURE_FILE(libpcre2-8.pc.in libpcre2-8.pc @ONLY)
-  SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-8.pc")
-  SET(enable_pcre2_8 "yes")
-ELSE()
-  SET(enable_pcre2_8 "no")
-ENDIF()
-
-IF(PCRE2_BUILD_PCRE2_16)
-  CONFIGURE_FILE(libpcre2-16.pc.in libpcre2-16.pc @ONLY)
-  SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-16.pc")
-  SET(enable_pcre2_16 "yes")
-ELSE()
-  SET(enable_pcre2_16 "no")
-ENDIF()
-
-IF(PCRE2_BUILD_PCRE2_32)
-  CONFIGURE_FILE(libpcre2-32.pc.in libpcre2-32.pc @ONLY)
-  SET(pkg_config_files ${pkg_config_files} "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-32.pc")
-  SET(enable_pcre2_32 "yes")
-ELSE()
-  SET(enable_pcre2_32 "no")
-ENDIF()
-
-CONFIGURE_FILE(pcre2-config.in pcre2-config @ONLY)
-
 # Character table generation
 
 OPTION(PCRE2_REBUILD_CHARTABLES "Rebuild char tables" OFF)
@@ -797,7 +757,8 @@ IF(PCRE2_BUILD_PCRE2_8)
       VERSION ${LIBPCRE2_POSIX_VERSION}
       SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
       OUTPUT_NAME pcre2-posix)
-    TARGET_COMPILE_DEFINITIONS(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
+    set(PCRE2POSIX_CFLAG "-DPCRE2POSIX_SHARED")
+    TARGET_COMPILE_DEFINITIONS(pcre2-posix-shared PUBLIC ${PCRE2POSIX_CFLAG})
     TARGET_LINK_LIBRARIES(pcre2-posix-shared pcre2-8-shared)
     SET(targets ${targets} pcre2-posix-shared)
     SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-8.pdb ${dll_pdb_files})
@@ -953,6 +914,46 @@ IF(PCRE2_BUILD_PCRE2_32)
     ADD_LIBRARY(pcre2-32 ALIAS pcre2-32-shared)
   ENDIF(BUILD_STATIC_LIBS)
 ENDIF(PCRE2_BUILD_PCRE2_32)
+
+# Generate pkg-config files
+
+set(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
+set(prefix ${CMAKE_INSTALL_PREFIX})
+
+set(exec_prefix "\${prefix}")
+set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+set(includedir "\${prefix}/include")
+if(WIN32 AND (CMAKE_BUILD_TYPE MATCHES Debug))
+  set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+endif()
+
+if(PCRE2_BUILD_PCRE2_8)
+  configure_file(libpcre2-posix.pc.in libpcre2-posix.pc @ONLY)
+  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-posix.pc")
+  configure_file(libpcre2-8.pc.in libpcre2-8.pc @ONLY)
+  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-8.pc")
+  set(enable_pcre2_8 "yes")
+else()
+  set(enable_pcre2_8 "no")
+endif()
+
+if(PCRE2_BUILD_PCRE2_16)
+  configure_file(libpcre2-16.pc.in libpcre2-16.pc @ONLY)
+  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-16.pc")
+  set(enable_pcre2_16 "yes")
+else()
+  set(enable_pcre2_16 "no")
+endif()
+
+if(PCRE2_BUILD_PCRE2_32)
+  configure_file(libpcre2-32.pc.in libpcre2-32.pc @ONLY)
+  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-32.pc")
+  set(enable_pcre2_32 "yes")
+else()
+  set(enable_pcre2_32 "no")
+endif()
+
+configure_file(pcre2-config.in pcre2-config @ONLY NEWLINE_STYLE LF)
 
 # Executables
 
@@ -1115,7 +1116,6 @@ echo RunTest.bat tests successfully completed
   IF(PCRE2_BUILD_PCRE2_8)
     ADD_TEST(pcre2posix_test pcre2posix_test)
   ENDIF(PCRE2_BUILD_PCRE2_8)
-
 
 ENDIF(PCRE2_BUILD_TESTS)
 
