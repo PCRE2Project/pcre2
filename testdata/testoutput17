@@ -550,7 +550,7 @@ Failed: error -47: match limit exceeded
     match\nmatch
  0: a (JIT)
 
-//jitfast
+//jit
     \=null_subject
  0:  (JIT)
 
