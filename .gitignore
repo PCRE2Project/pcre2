@@ -59,6 +59,8 @@ test-driver
 test-suite.log
 test3input
 test3output
+test3outputA
+test3outputB
 testNinput
 testNinputgrep
 teststderr
