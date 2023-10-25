@@ -59,7 +59,7 @@ be including this file. There is no explicit way of forcing a compile to be
 abandoned, but trying to include a non-existent file seems cleanest. Otherwise
 there will be many irrelevant consequential errors. */
 
-#if !defined PCRE2_BUILDING_PCRE2TEST && \
+#if (!defined PCRE2_BUILDING_PCRE2TEST && !defined PCRE2_DFTABLES) && \
   (!defined PCRE2_CODE_UNIT_WIDTH ||     \
     (PCRE2_CODE_UNIT_WIDTH != 8 &&       \
      PCRE2_CODE_UNIT_WIDTH != 16 &&      \
