@@ -95,11 +95,10 @@ string.
 default maximum length 255 characters (same as Perl) but with a function to
 adjust the limit.
 
-25. Applied pull request #260, which modernizes the CMake files, also #262,
-which updates the zig configuration, and #278 which fixes a bug with out-of-
-source-tree CMake build testing.
+25. Applied pull request #262, which updates the zig configuration, and #278
+which fixes a bug with out-of-source-tree CMake build testing.
 
-26. Add support for LoongArch in JIT.
+26. Add support for LoongArch to JIT.
 
 27. Fixed a bug in pcre2_match() in the code for handling the vector of
 backtracking frames on the heap, which caused a heap overflow if *LIMIT_HEAP
