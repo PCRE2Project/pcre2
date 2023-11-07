@@ -34,7 +34,7 @@ Written by Philip Hazel, October 2016
 #define ALLOWED_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT)
+   PCRE2_PARTIAL_SOFT)
 
 /* This is the callout function. Its only purpose is to halt matching if there
 are more than 100 callouts, as one way of stopping too much time being spent on
@@ -58,30 +58,24 @@ int LLVMFuzzerTestOneInput(const unsigned char *data, size_t size)
 {
 uint32_t compile_options;
 uint32_t match_options;
-uint32_t random_options;
+uint64_t random_options;
 pcre2_match_data *match_data = NULL;
+pcre2_match_data *match_data_jit = NULL;
 pcre2_match_context *match_context = NULL;
 size_t match_size;
 int dfa_workspace[DFA_WORKSPACE_COUNT];
-int r1, r2;
 int i;
 
-if (size < 1) return 0;
+if (size < sizeof(random_options)) return -1;
 
 /* Limiting the length of the subject for matching stops fruitless searches
 in large trees taking too much time. */
 
+random_options = *(uint64_t *)(data);
+data += sizeof(random_options);
+size -= sizeof(random_options);
+
 match_size = (size > MAX_MATCH_SIZE)? MAX_MATCH_SIZE : size;
-
-/* Figure out some options to use. Initialize the random number to ensure
-repeatability. Ensure that we get a 32-bit unsigned random number for testing
-options. (RAND_MAX is required to be at least 32767, but is commonly
-2147483647, which excludes the top bit.) */
-
-srand((unsigned int)(data[size/2]));
-r1 = rand() & 0xffff;
-r2 = rand() & 0xffff;
-random_options = ((uint32_t)r1 << 16) | (uint32_t)r2;
 
 /* Ensure that all undefined option bits are zero (waste of time trying them)
 and also that PCRE2_NO_UTF_CHECK is unset, as there is no guarantee that the
@@ -89,9 +83,9 @@ input is UTF-8. Also unset PCRE2_NEVER_UTF and PCRE2_NEVER_UCP as there is no
 reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set because
 \C in random patterns is highly likely to cause a crash. */
 
-compile_options = (random_options & ALLOWED_COMPILE_OPTIONS) |
+compile_options = ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) |
   PCRE2_NEVER_BACKSLASH_C;
-match_options = random_options & ALLOWED_MATCH_OPTIONS;
+match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) | PCRE2_NO_JIT;
 
 /* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
 allowed together and just give an immediate error return. */
@@ -105,7 +99,8 @@ likewise do the match with and without the options. */
 for (i = 0; i < 2; i++)
   {
   uint32_t callout_count;
-  int errorcode;
+  int errorcode, errorcode_jit;
+  uint32_t ovector_count;
   PCRE2_SIZE erroroffset;
   pcre2_code *code;
 
@@ -161,12 +156,13 @@ for (i = 0; i < 2; i++)
     if (match_data == NULL)
       {
       match_data = pcre2_match_data_create(32, NULL);
-      if (match_data == NULL)
+      match_data_jit = pcre2_match_data_create(32, NULL);
+      if (match_data == NULL || match_data_jit == NULL)
         {
 #ifdef STANDALONE
         printf("** Failed to create match data block\n");
 #endif
-        return 0;
+        abort();
         }
       }
 
@@ -178,7 +174,7 @@ for (i = 0; i < 2; i++)
 #ifdef STANDALONE
         printf("** Failed to create match context block\n");
 #endif
-        return 0;
+        abort();
         }
       (void)pcre2_set_match_limit(match_context, 100);
       (void)pcre2_set_depth_limit(match_context, 100);
@@ -217,7 +213,61 @@ for (i = 0; i < 2; i++)
         }
 #endif
 
-      match_options = 0;  /* For second time */
+      callout_count = 0;
+      errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
+        match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
+
+      if (errorcode_jit != errorcode)
+        {
+        printf("JIT errorcode %d did not match original errorcode %d\n", errorcode_jit, errorcode);
+        abort();
+        }
+
+      ovector_count = pcre2_get_ovector_count(match_data);
+
+      if (ovector_count != pcre2_get_ovector_count(match_data_jit))
+        {
+        puts("JIT ovector count did not match original");
+        abort();
+        }
+
+      for (uint32_t ovector = 0; ovector < ovector_count; ovector++)
+        {
+        PCRE2_UCHAR *bufferptr, *bufferptr_jit;
+        PCRE2_SIZE bufflen, bufflen_jit;
+
+        bufferptr = bufferptr_jit = NULL;
+        bufflen = bufflen_jit = 0;
+
+        errorcode = pcre2_substring_get_bynumber(match_data, ovector, &bufferptr, &bufflen);
+        errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, ovector, &bufferptr_jit, &bufflen_jit);
+
+        if (errorcode != errorcode_jit)
+          {
+          printf("when extracting substring, JIT errorcode %d did not match original %d\n", errorcode_jit, errorcode);
+          abort();
+          }
+
+        if (errorcode >= 0)
+          {
+          if (bufflen != bufflen_jit)
+            {
+            printf("when extracting substring, JIT buffer length %zu did not match original %zu\n", bufflen_jit, bufflen);
+            abort();
+            }
+
+          if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
+            {
+            puts("when extracting substring, JIT buffer contents did not match original");
+            abort();
+            }
+          }
+
+          pcre2_substring_free(bufferptr);
+          pcre2_substring_free(bufferptr_jit);
+        }
+
+      match_options = PCRE2_NO_JIT;  /* For second time */
       }
 
     /* Match with DFA twice, with and without options. */
@@ -278,6 +328,7 @@ for (i = 0; i < 2; i++)
   }
 
 if (match_data != NULL) pcre2_match_data_free(match_data);
+if (match_data_jit != NULL) pcre2_match_data_free(match_data_jit);
 if (match_context != NULL) pcre2_match_context_free(match_context);
 
 return 0;
