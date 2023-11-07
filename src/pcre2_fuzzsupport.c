@@ -146,7 +146,7 @@ for (i = 0; i < 2; i++)
     uint32_t save_match_options = match_options;
 
 #ifdef SUPPORT_JIT
-    pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
+    int jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
 #endif
 
     /* Create match data and context blocks only when we first need them. Set
@@ -213,59 +213,64 @@ for (i = 0; i < 2; i++)
         }
 #endif
 
-      callout_count = 0;
-      errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
-        match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
-
-      if (errorcode_jit != errorcode)
+#ifdef SUPPORT_JIT
+      if (jit_ret >= 0)
         {
-        printf("JIT errorcode %d did not match original errorcode %d\n", errorcode_jit, errorcode);
-        abort();
-        }
+        callout_count = 0;
+        errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
+          match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
-      ovector_count = pcre2_get_ovector_count(match_data);
-
-      if (ovector_count != pcre2_get_ovector_count(match_data_jit))
-        {
-        puts("JIT ovector count did not match original");
-        abort();
-        }
-
-      for (uint32_t ovector = 0; ovector < ovector_count; ovector++)
-        {
-        PCRE2_UCHAR *bufferptr, *bufferptr_jit;
-        PCRE2_SIZE bufflen, bufflen_jit;
-
-        bufferptr = bufferptr_jit = NULL;
-        bufflen = bufflen_jit = 0;
-
-        errorcode = pcre2_substring_get_bynumber(match_data, ovector, &bufferptr, &bufflen);
-        errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, ovector, &bufferptr_jit, &bufflen_jit);
-
-        if (errorcode != errorcode_jit)
+        if (errorcode_jit != errorcode)
           {
-          printf("when extracting substring, JIT errorcode %d did not match original %d\n", errorcode_jit, errorcode);
+          printf("JIT errorcode %d did not match original errorcode %d\n", errorcode_jit, errorcode);
           abort();
           }
 
-        if (errorcode >= 0)
-          {
-          if (bufflen != bufflen_jit)
-            {
-            printf("when extracting substring, JIT buffer length %zu did not match original %zu\n", bufflen_jit, bufflen);
-            abort();
-            }
+        ovector_count = pcre2_get_ovector_count(match_data);
 
-          if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
-            {
-            puts("when extracting substring, JIT buffer contents did not match original");
-            abort();
-            }
+        if (ovector_count != pcre2_get_ovector_count(match_data_jit))
+          {
+          puts("JIT ovector count did not match original");
+          abort();
           }
 
-          pcre2_substring_free(bufferptr);
-          pcre2_substring_free(bufferptr_jit);
+        for (uint32_t ovector = 0; ovector < ovector_count; ovector++)
+          {
+          PCRE2_UCHAR *bufferptr, *bufferptr_jit;
+          PCRE2_SIZE bufflen, bufflen_jit;
+
+          bufferptr = bufferptr_jit = NULL;
+          bufflen = bufflen_jit = 0;
+
+          errorcode = pcre2_substring_get_bynumber(match_data, ovector, &bufferptr, &bufflen);
+          errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, ovector, &bufferptr_jit, &bufflen_jit);
+
+          if (errorcode != errorcode_jit)
+            {
+            printf("when extracting substring, JIT errorcode %d did not match original %d\n", errorcode_jit, errorcode);
+            abort();
+            }
+
+          if (errorcode >= 0)
+            {
+            if (bufflen != bufflen_jit)
+              {
+              printf("when extracting substring, JIT buffer length %zu did not match original %zu\n", bufflen_jit, bufflen);
+              abort();
+              }
+
+            if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
+              {
+              puts("when extracting substring, JIT buffer contents did not match original");
+              abort();
+              }
+            }
+
+            pcre2_substring_free(bufferptr);
+            pcre2_substring_free(bufferptr_jit);
+          }
         }
+#endif
 
       match_options = PCRE2_NO_JIT;  /* For second time */
       }
