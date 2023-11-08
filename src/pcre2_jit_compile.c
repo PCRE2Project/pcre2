@@ -2272,7 +2272,7 @@ int i;
 for (i = 0; i < RECURSE_TMP_REG_COUNT; i++)
   {
   SLJIT_ASSERT(status->tmp_regs[i] >= 0);
-  SLJIT_ASSERT(sljit_get_register_index(SLJIT_INT_REGISTER, status->saved_tmp_regs[i]) < 0 || status->tmp_regs[i] == status->saved_tmp_regs[i]);
+  SLJIT_ASSERT(sljit_get_register_index(SLJIT_GP_REGISTER, status->saved_tmp_regs[i]) < 0 || status->tmp_regs[i] == status->saved_tmp_regs[i]);
 
   status->store_bases[i] = -1;
   }
@@ -2292,7 +2292,7 @@ SLJIT_ASSERT(load_base > 0 && store_base > 0);
 if (status->store_bases[next_tmp_reg] == -1)
   {
   /* Preserve virtual registers. */
-  if (sljit_get_register_index(SLJIT_INT_REGISTER, status->saved_tmp_regs[next_tmp_reg]) < 0)
+  if (sljit_get_register_index(SLJIT_GP_REGISTER, status->saved_tmp_regs[next_tmp_reg]) < 0)
     OP1(SLJIT_MOV, status->saved_tmp_regs[next_tmp_reg], 0, tmp_reg, 0);
   }
 else
@@ -2321,7 +2321,7 @@ for (i = 0; i < RECURSE_TMP_REG_COUNT; i++)
     OP1(SLJIT_MOV, SLJIT_MEM1(status->store_bases[next_tmp_reg]), status->store_offsets[next_tmp_reg], tmp_reg, 0);
 
     /* Restore virtual registers. */
-    if (sljit_get_register_index(SLJIT_INT_REGISTER, saved_tmp_reg) < 0)
+    if (sljit_get_register_index(SLJIT_GP_REGISTER, saved_tmp_reg) < 0)
       OP1(SLJIT_MOV, tmp_reg, 0, saved_tmp_reg, 0);
     }
 
@@ -3250,7 +3250,7 @@ if (size == sizeof(sljit_sw))
   return;
   }
 
-if (sljit_get_register_index(SLJIT_INT_REGISTER, TMP3) >= 0 && !sljit_has_cpu_feature(SLJIT_HAS_ZERO_REGISTER))
+if (sljit_get_register_index(SLJIT_GP_REGISTER, TMP3) >= 0 && !sljit_has_cpu_feature(SLJIT_HAS_ZERO_REGISTER))
   {
   OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
   src = TMP3;
@@ -13739,9 +13739,9 @@ jump_list *reqcu_not_found = NULL;
 SLJIT_ASSERT(tables);
 
 #if HAS_VIRTUAL_REGISTERS == 1
-SLJIT_ASSERT(sljit_get_register_index(SLJIT_INT_REGISTER, TMP3) < 0 && sljit_get_register_index(SLJIT_INT_REGISTER, ARGUMENTS) < 0 && sljit_get_register_index(SLJIT_INT_REGISTER, RETURN_ADDR) < 0);
+SLJIT_ASSERT(sljit_get_register_index(SLJIT_GP_REGISTER, TMP3) < 0 && sljit_get_register_index(SLJIT_GP_REGISTER, ARGUMENTS) < 0 && sljit_get_register_index(SLJIT_GP_REGISTER, RETURN_ADDR) < 0);
 #elif HAS_VIRTUAL_REGISTERS == 0
-SLJIT_ASSERT(sljit_get_register_index(SLJIT_INT_REGISTER, TMP3) >= 0 && sljit_get_register_index(SLJIT_INT_REGISTER, ARGUMENTS) >= 0 && sljit_get_register_index(SLJIT_INT_REGISTER, RETURN_ADDR) >= 0);
+SLJIT_ASSERT(sljit_get_register_index(SLJIT_GP_REGISTER, TMP3) >= 0 && sljit_get_register_index(SLJIT_GP_REGISTER, ARGUMENTS) >= 0 && sljit_get_register_index(SLJIT_GP_REGISTER, RETURN_ADDR) >= 0);
 #else
 #error "Invalid value for HAS_VIRTUAL_REGISTERS"
 #endif
