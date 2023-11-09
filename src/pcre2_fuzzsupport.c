@@ -84,32 +84,31 @@ fprintf(stream, "%s%s%s%s%s%s%s%s%s\n",
   ((match_options & PCRE2_PARTIAL_SOFT) != 0)? ",partial_soft" : "");
 }
 
-static void dump_matches(FILE *stream, pcre2_match_data *match_data, pcre2_match_context *match_context)
+static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data, pcre2_match_context *match_context)
 {
 PCRE2_UCHAR error_buf[256];
 int errorcode;
-uint32_t ovector_count = pcre2_get_ovector_count(match_data);
 
-for (uint32_t ovector = ovector_count; ovector < ovector_count; ovector++)
+for (uint32_t index = 0; index < count; index++)
   {
   PCRE2_UCHAR *bufferptr = NULL;
   PCRE2_SIZE bufflen = 0;
 
-  errorcode = pcre2_substring_get_bynumber(match_data, ovector, &bufferptr, &bufflen);
+  errorcode = pcre2_substring_get_bynumber(match_data, index, &bufferptr, &bufflen);
 
   if (errorcode >= 0)
     {
-    fprintf(stream, "Match %d (hex encoded): ", ovector);
+    fprintf(stream, "Match %d (hex encoded): ", index);
     for (PCRE2_SIZE i = 0; i < bufflen; i++)
       {
-      fprintf(stderr, "%02x", bufferptr[i]);
+      fprintf(stream, "%02x", bufferptr[i]);
       }
-    fprintf(stderr, "\n");
+    fprintf(stream, "\n");
     }
   else
     {
     pcre2_get_error_message(errorcode, error_buf, 256);
-    fprintf(stream, "Match %d failed: %s\n", ovector, error_buf);
+    fprintf(stream, "Match %d failed: %s\n", index, error_buf);
     }
   }
 }
@@ -153,8 +152,8 @@ else
   fprintf(stderr, "Non-JIT'd operation did not emit an error.\n");
   if (match_data != NULL)
     {
-    fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", pcre2_get_ovector_count(match_data));
-    dump_matches(stderr, match_data, match_context);
+    fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", errorcode);
+    dump_matches(stderr, errorcode, match_data, match_context);
     fprintf(stderr, "\n");
     }
   }
@@ -169,8 +168,8 @@ else
   fprintf(stderr, "JIT'd operation did not emit an error.\n");
   if (match_data_jit != NULL)
     {
-    fprintf(stderr, "%d matches discovered by JIT'd regex:\n", pcre2_get_ovector_count(match_data_jit));
-    dump_matches(stderr, match_data_jit, match_context);
+    fprintf(stderr, "%d matches discovered by JIT'd regex:\n", errorcode_jit);
+    dump_matches(stderr, errorcode_jit, match_data_jit, match_context);
     fprintf(stderr, "\n");
     }
   }
@@ -247,7 +246,6 @@ for (i = 0; i < 2; i++)
   int errorcode;
 #ifdef SUPPORT_JIT
   int errorcode_jit;
-  uint32_t ovector_count;
 #endif
   PCRE2_SIZE erroroffset;
   pcre2_code *code;
@@ -339,14 +337,7 @@ for (i = 0; i < 2; i++)
           describe_failure("match errorcode comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
           }
 
-        ovector_count = pcre2_get_ovector_count(match_data);
-
-        if (ovector_count != pcre2_get_ovector_count(match_data_jit))
-          {
-          describe_failure("ovector count comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
-          }
-
-        for (uint32_t ovector = 0; ovector < ovector_count; ovector++)
+        for (int index = 0; index < errorcode; index++)
           {
           PCRE2_UCHAR *bufferptr, *bufferptr_jit;
           PCRE2_SIZE bufflen, bufflen_jit;
@@ -354,8 +345,8 @@ for (i = 0; i < 2; i++)
           bufferptr = bufferptr_jit = NULL;
           bufflen = bufflen_jit = 0;
 
-          errorcode = pcre2_substring_get_bynumber(match_data, ovector, &bufferptr, &bufflen);
-          errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, ovector, &bufferptr_jit, &bufflen_jit);
+          errorcode = pcre2_substring_get_bynumber(match_data, (uint32_t) index, &bufferptr, &bufflen);
+          errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, (uint32_t) index, &bufferptr_jit, &bufflen_jit);
 
           if (errorcode != errorcode_jit)
             {
