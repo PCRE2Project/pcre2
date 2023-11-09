@@ -99,8 +99,11 @@ likewise do the match with and without the options. */
 for (i = 0; i < 2; i++)
   {
   uint32_t callout_count;
-  int errorcode, errorcode_jit;
+  int errorcode;
+#ifdef SUPPORT_JIT
+  int errorcode_jit;
   uint32_t ovector_count;
+#endif
   PCRE2_SIZE erroroffset;
   pcre2_code *code;
 
