@@ -14,6 +14,7 @@ Written by Philip Hazel, October 2016
 #include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
 
@@ -35,6 +36,148 @@ Written by Philip Hazel, October 2016
   (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT)
+
+static void print_compile_options(FILE *stream, uint32_t compile_options)
+{
+fprintf(stream, "Compile options %.8x never_backslash_c", compile_options);
+fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+  ((compile_options & PCRE2_ALT_BSUX) != 0)? ",alt_bsux" : "",
+  ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? ",alt_circumflex" : "",
+  ((compile_options & PCRE2_ALT_VERBNAMES) != 0)? ",alt_verbnames" : "",
+  ((compile_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? ",allow_empty_class" : "",
+  ((compile_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
+  ((compile_options & PCRE2_AUTO_CALLOUT) != 0)? ",auto_callout" : "",
+  ((compile_options & PCRE2_CASELESS) != 0)? ",caseless" : "",
+  ((compile_options & PCRE2_DOLLAR_ENDONLY) != 0)? ",dollar_endonly" : "",
+  ((compile_options & PCRE2_DOTALL) != 0)? ",dotall" : "",
+  ((compile_options & PCRE2_DUPNAMES) != 0)? ",dupnames" : "",
+  ((compile_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
+  ((compile_options & PCRE2_EXTENDED) != 0)? ",extended" : "",
+  ((compile_options & PCRE2_FIRSTLINE) != 0)? ",firstline" : "",
+  ((compile_options & PCRE2_MATCH_UNSET_BACKREF) != 0)? ",match_unset_backref" : "",
+  ((compile_options & PCRE2_MULTILINE) != 0)? ",multiline" : "",
+  ((compile_options & PCRE2_NEVER_UCP) != 0)? ",never_ucp" : "",
+  ((compile_options & PCRE2_NEVER_UTF) != 0)? ",never_utf" : "",
+  ((compile_options & PCRE2_NO_AUTO_CAPTURE) != 0)? ",no_auto_capture" : "",
+  ((compile_options & PCRE2_NO_AUTO_POSSESS) != 0)? ",no_auto_possess" : "",
+  ((compile_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)? ",no_dotstar_anchor" : "",
+  ((compile_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
+  ((compile_options & PCRE2_NO_START_OPTIMIZE) != 0)? ",no_start_optimize" : "",
+  ((compile_options & PCRE2_UCP) != 0)? ",ucp" : "",
+  ((compile_options & PCRE2_UNGREEDY) != 0)? ",ungreedy" : "",
+  ((compile_options & PCRE2_USE_OFFSET_LIMIT) != 0)? ",use_offset_limit" : "",
+  ((compile_options & PCRE2_UTF) != 0)? ",utf" : "");
+}
+
+static void print_match_options(FILE *stream, uint32_t match_options)
+{
+fprintf(stream, "Match options %.8x", match_options);
+fprintf(stream, "%s%s%s%s%s%s%s%s%s\n",
+  ((match_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
+  ((match_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
+  ((match_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
+  ((match_options & PCRE2_NOTBOL) != 0)? ",notbol" : "",
+  ((match_options & PCRE2_NOTEMPTY) != 0)? ",notempty" : "",
+  ((match_options & PCRE2_NOTEMPTY_ATSTART) != 0)? ",notempty_atstart" : "",
+  ((match_options & PCRE2_NOTEOL) != 0)? ",noteol" : "",
+  ((match_options & PCRE2_PARTIAL_HARD) != 0)? ",partial_hard" : "",
+  ((match_options & PCRE2_PARTIAL_SOFT) != 0)? ",partial_soft" : "");
+}
+
+static void dump_matches(FILE *stream, pcre2_match_data *match_data, pcre2_match_context *match_context)
+{
+PCRE2_UCHAR error_buf[256];
+int errorcode;
+uint32_t ovector_count = pcre2_get_ovector_count(match_data);
+
+for (uint32_t ovector = ovector_count; ovector < ovector_count; ovector++)
+  {
+  PCRE2_UCHAR *bufferptr = NULL;
+  PCRE2_SIZE bufflen = 0;
+
+  errorcode = pcre2_substring_get_bynumber(match_data, ovector, &bufferptr, &bufflen);
+
+  if (errorcode >= 0)
+    {
+    fprintf(stream, "Match %d (hex encoded): ", ovector);
+    for (PCRE2_SIZE i = 0; i < bufflen; i++)
+      {
+      fprintf(stderr, "%02x", bufferptr[i]);
+      }
+    fprintf(stderr, "\n");
+    }
+  else
+    {
+    pcre2_get_error_message(errorcode, error_buf, 256);
+    fprintf(stream, "Match %d failed: %s\n", ovector, error_buf);
+    }
+  }
+}
+
+/* This function describes the current test case being evaluated, then aborts */
+
+#ifdef SUPPORT_JIT
+static void describe_failure(
+  const char *task,
+  const unsigned char *data,
+  size_t size,
+  uint32_t compile_options,
+  uint32_t match_options,
+  int errorcode,
+  pcre2_match_data *match_data,
+  int errorcode_jit,
+  pcre2_match_data *match_data_jit,
+  pcre2_match_context *match_context
+) {
+PCRE2_UCHAR buffer[256];
+
+fprintf(stderr, "Encountered failure while performing %s; context:\n", task);
+
+fprintf(stderr, "Pattern/sample string (hex encoded): ");
+for (size_t i = 0; i < size; i++)
+  {
+  fprintf(stderr, "%02x", data[i]);
+  }
+fprintf(stderr, "\n");
+
+print_compile_options(stderr, compile_options);
+print_match_options(stderr, match_options);
+
+if (errorcode < 0)
+  {
+  pcre2_get_error_message(errorcode, buffer, 256);
+  fprintf(stderr, "Non-JIT'd operation emitted an error: %s\n", buffer);
+  }
+else
+  {
+  fprintf(stderr, "Non-JIT'd operation did not emit an error.\n");
+  if (match_data != NULL)
+    {
+    fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", pcre2_get_ovector_count(match_data));
+    dump_matches(stderr, match_data, match_context);
+    fprintf(stderr, "\n");
+    }
+  }
+
+if (errorcode_jit < 0)
+  {
+  pcre2_get_error_message(errorcode_jit, buffer, 256);
+  fprintf(stderr, "JIT'd operation emitted an error: %s\n", buffer);
+  }
+else
+  {
+  fprintf(stderr, "JIT'd operation did not emit an error.\n");
+  if (match_data_jit != NULL)
+    {
+    fprintf(stderr, "%d matches discovered by JIT'd regex:\n", pcre2_get_ovector_count(match_data_jit));
+    dump_matches(stderr, match_data_jit, match_context);
+    fprintf(stderr, "\n");
+    }
+  }
+
+abort();
+}
+#endif
 
 /* This is the callout function. Its only purpose is to halt matching if there
 are more than 100 callouts, as one way of stopping too much time being spent on
@@ -110,34 +253,7 @@ for (i = 0; i < 2; i++)
   pcre2_code *code;
 
 #ifdef STANDALONE
-  printf("Compile options %.8x never_backslash_c", compile_options);
-  printf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-    ((compile_options & PCRE2_ALT_BSUX) != 0)? ",alt_bsux" : "",
-    ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? ",alt_circumflex" : "",
-    ((compile_options & PCRE2_ALT_VERBNAMES) != 0)? ",alt_verbnames" : "",
-    ((compile_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? ",allow_empty_class" : "",
-    ((compile_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
-    ((compile_options & PCRE2_AUTO_CALLOUT) != 0)? ",auto_callout" : "",
-    ((compile_options & PCRE2_CASELESS) != 0)? ",caseless" : "",
-    ((compile_options & PCRE2_DOLLAR_ENDONLY) != 0)? ",dollar_endonly" : "",
-    ((compile_options & PCRE2_DOTALL) != 0)? ",dotall" : "",
-    ((compile_options & PCRE2_DUPNAMES) != 0)? ",dupnames" : "",
-    ((compile_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
-    ((compile_options & PCRE2_EXTENDED) != 0)? ",extended" : "",
-    ((compile_options & PCRE2_FIRSTLINE) != 0)? ",firstline" : "",
-    ((compile_options & PCRE2_MATCH_UNSET_BACKREF) != 0)? ",match_unset_backref" : "",
-    ((compile_options & PCRE2_MULTILINE) != 0)? ",multiline" : "",
-    ((compile_options & PCRE2_NEVER_UCP) != 0)? ",never_ucp" : "",
-    ((compile_options & PCRE2_NEVER_UTF) != 0)? ",never_utf" : "",
-    ((compile_options & PCRE2_NO_AUTO_CAPTURE) != 0)? ",no_auto_capture" : "",
-    ((compile_options & PCRE2_NO_AUTO_POSSESS) != 0)? ",no_auto_possess" : "",
-    ((compile_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)? ",no_dotstar_anchor" : "",
-    ((compile_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
-    ((compile_options & PCRE2_NO_START_OPTIMIZE) != 0)? ",no_start_optimize" : "",
-    ((compile_options & PCRE2_UCP) != 0)? ",ucp" : "",
-    ((compile_options & PCRE2_UNGREEDY) != 0)? ",ungreedy" : "",
-    ((compile_options & PCRE2_USE_OFFSET_LIMIT) != 0)? ",use_offset_limit" : "",
-    ((compile_options & PCRE2_UTF) != 0)? ",utf" : "");
+  print_compile_options(stdout, compile_options);
 #endif
 
   code = pcre2_compile((PCRE2_SPTR)data, (PCRE2_SIZE)size, compile_options,
@@ -169,7 +285,7 @@ for (i = 0; i < 2; i++)
 #endif
         {
 #ifdef STANDALONE
-        printf("** Failed to create match data block\n");
+        fprintf(stderr, "** Failed to create match data block\n");
 #endif
         abort();
         }
@@ -181,7 +297,7 @@ for (i = 0; i < 2; i++)
       if (match_context == NULL)
         {
 #ifdef STANDALONE
-        printf("** Failed to create match context block\n");
+        fprintf(stderr, "** Failed to create match context block\n");
 #endif
         abort();
         }
@@ -195,18 +311,7 @@ for (i = 0; i < 2; i++)
     for (j = 0; j < 2; j++)
       {
 #ifdef STANDALONE
-      printf("Match options %.8x", match_options);
-      printf("%s%s%s%s%s%s%s%s%s%s\n",
-        ((match_options & PCRE2_ANCHORED) != 0)? ",anchored" : "",
-        ((match_options & PCRE2_ENDANCHORED) != 0)? ",endanchored" : "",
-        ((match_options & PCRE2_NO_JIT) != 0)? ",no_jit" : "",
-        ((match_options & PCRE2_NO_UTF_CHECK) != 0)? ",no_utf_check" : "",
-        ((match_options & PCRE2_NOTBOL) != 0)? ",notbol" : "",
-        ((match_options & PCRE2_NOTEMPTY) != 0)? ",notempty" : "",
-        ((match_options & PCRE2_NOTEMPTY_ATSTART) != 0)? ",notempty_atstart" : "",
-        ((match_options & PCRE2_NOTEOL) != 0)? ",noteol" : "",
-        ((match_options & PCRE2_PARTIAL_HARD) != 0)? ",partial_hard" : "",
-        ((match_options & PCRE2_PARTIAL_SOFT) != 0)? ",partial_soft" : "");
+      print_match_options(stdout, match_options);
 #endif
 
       callout_count = 0;
@@ -231,16 +336,14 @@ for (i = 0; i < 2; i++)
 
         if (errorcode_jit != errorcode)
           {
-          printf("JIT errorcode %d did not match original errorcode %d\n", errorcode_jit, errorcode);
-          abort();
+          describe_failure("match errorcode comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
           }
 
         ovector_count = pcre2_get_ovector_count(match_data);
 
         if (ovector_count != pcre2_get_ovector_count(match_data_jit))
           {
-          puts("JIT ovector count did not match original");
-          abort();
+          describe_failure("ovector count comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
           }
 
         for (uint32_t ovector = 0; ovector < ovector_count; ovector++)
@@ -256,22 +359,19 @@ for (i = 0; i < 2; i++)
 
           if (errorcode != errorcode_jit)
             {
-            printf("when extracting substring, JIT errorcode %d did not match original %d\n", errorcode_jit, errorcode);
-            abort();
+            describe_failure("ovector entry errorcode comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
             }
 
           if (errorcode >= 0)
             {
             if (bufflen != bufflen_jit)
               {
-              printf("when extracting substring, JIT buffer length %zu did not match original %zu\n", bufflen_jit, bufflen);
-              abort();
+              describe_failure("ovector entry length comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
               }
 
             if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
               {
-              puts("when extracting substring, JIT buffer contents did not match original");
-              abort();
+              describe_failure("ovector entry content comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
               }
             }
 
