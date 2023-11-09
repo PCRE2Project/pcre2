@@ -2450,7 +2450,7 @@ No match
  0: Az_\x{aa}\x{c0}\x{1c5}\x{2b0}\x{3b6}\x{1d7c9}\x{2fa1d}1\x{660}\x{bef}\x{16ee}
 
 /^[[:xdigit:]]*/utf,ucp
-    1a\x{660}\x{bef}\x{16ee}\=no_jit
+    1a\x{660}\x{bef}\x{16ee}
  0: 1a
 
 /^\d+/utf,ucp
@@ -4552,27 +4552,27 @@ No match
  0: A
 
 /\w+/utf,ucp
-    --cafe\x{300}_au\x{203f}lait!\=no_jit
+    --cafe\x{300}_au\x{203f}lait!
  0: cafe\x{300}_au\x{203f}lait
 
 /[\w]+/utf,ucp
-    --cafe\x{300}_au\x{203f}lait!\=no_jit
+    --cafe\x{300}_au\x{203f}lait!
  0: cafe\x{300}_au\x{203f}lait
 
 /[[:word:]]+/utf,ucp
-    --cafe\x{300}_au\x{203f}lait!\=no_jit
+    --cafe\x{300}_au\x{203f}lait!
  0: cafe\x{300}_au\x{203f}lait
 
 /[[:xdigit:]]+/utf,ucp
-    --123ef\x{ff10}\x{ff19}\x{ff21}\x{ff26}\x{ff1a}\=no_jit
+    --123ef\x{ff10}\x{ff19}\x{ff21}\x{ff26}\x{ff1a}
  0: 123ef\x{ff10}\x{ff19}\x{ff21}\x{ff26}
 
 /\b.+?\b/utf,ucp
-    --cafe\x{300}_au\x{203f}lait!\=no_jit
+    --cafe\x{300}_au\x{203f}lait!
  0: cafe\x{300}_au\x{203f}lait
 
 /caf\B.+?\B/utf,ucp
-    --cafe\x{300}_au\x{203f}lait!\=no_jit
+    --cafe\x{300}_au\x{203f}lait!
  0: cafe
 
 # End of testinput4
