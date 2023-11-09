@@ -60,7 +60,9 @@ uint32_t compile_options;
 uint32_t match_options;
 uint64_t random_options;
 pcre2_match_data *match_data = NULL;
+#ifdef SUPPORT_JIT
 pcre2_match_data *match_data_jit = NULL;
+#endif
 pcre2_match_context *match_context = NULL;
 size_t match_size;
 int dfa_workspace[DFA_WORKSPACE_COUNT];
@@ -159,8 +161,12 @@ for (i = 0; i < 2; i++)
     if (match_data == NULL)
       {
       match_data = pcre2_match_data_create(32, NULL);
+#ifdef SUPPORT_JIT
       match_data_jit = pcre2_match_data_create(32, NULL);
       if (match_data == NULL || match_data_jit == NULL)
+#else
+      if (match_data == NULL)
+#endif
         {
 #ifdef STANDALONE
         printf("** Failed to create match data block\n");
@@ -336,7 +342,9 @@ for (i = 0; i < 2; i++)
   }
 
 if (match_data != NULL) pcre2_match_data_free(match_data);
+#ifdef SUPPORT_JIT
 if (match_data_jit != NULL) pcre2_match_data_free(match_data_jit);
+#endif
 if (match_context != NULL) pcre2_match_context_free(match_context);
 
 return 0;
