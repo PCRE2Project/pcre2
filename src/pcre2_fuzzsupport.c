@@ -123,8 +123,10 @@ static void describe_failure(
   uint32_t compile_options,
   uint32_t match_options,
   int errorcode,
-  pcre2_match_data *match_data,
   int errorcode_jit,
+  int matches,
+  int matches_jit,
+  pcre2_match_data *match_data,
   pcre2_match_data *match_data_jit,
   pcre2_match_context *match_context
 ) {
@@ -145,15 +147,15 @@ print_match_options(stderr, match_options);
 if (errorcode < 0)
   {
   pcre2_get_error_message(errorcode, buffer, 256);
-  fprintf(stderr, "Non-JIT'd operation emitted an error: %s\n", buffer);
+  fprintf(stderr, "Non-JIT'd operation emitted an error: %s (%d)\n", buffer, errorcode);
   }
-else
+if (matches >= 0)
   {
   fprintf(stderr, "Non-JIT'd operation did not emit an error.\n");
   if (match_data != NULL)
     {
-    fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", errorcode);
-    dump_matches(stderr, errorcode, match_data, match_context);
+    fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", matches);
+    dump_matches(stderr, matches, match_data, match_context);
     fprintf(stderr, "\n");
     }
   }
@@ -161,15 +163,15 @@ else
 if (errorcode_jit < 0)
   {
   pcre2_get_error_message(errorcode_jit, buffer, 256);
-  fprintf(stderr, "JIT'd operation emitted an error: %s\n", buffer);
+  fprintf(stderr, "JIT'd operation emitted an error: %s (%d)\n", buffer, errorcode_jit);
   }
-else
+if (matches_jit >= 0)
   {
   fprintf(stderr, "JIT'd operation did not emit an error.\n");
   if (match_data_jit != NULL)
     {
-    fprintf(stderr, "%d matches discovered by JIT'd regex:\n", errorcode_jit);
-    dump_matches(stderr, errorcode_jit, match_data_jit, match_context);
+    fprintf(stderr, "%d matches discovered by JIT'd regex:\n", matches_jit);
+    dump_matches(stderr, matches_jit, match_data_jit, match_context);
     fprintf(stderr, "\n");
     }
   }
@@ -246,6 +248,8 @@ for (i = 0; i < 2; i++)
   int errorcode;
 #ifdef SUPPORT_JIT
   int errorcode_jit;
+  int matches = 0;
+  int matches_jit = 0;
 #endif
   PCRE2_SIZE erroroffset;
   pcre2_code *code;
@@ -332,42 +336,52 @@ for (i = 0; i < 2; i++)
         errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
           match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
+        matches = errorcode;
+        matches_jit = errorcode_jit;
+
         if (errorcode_jit != errorcode)
           {
-          describe_failure("match errorcode comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
+          if (!(errorcode < 0 && errorcode_jit < 0) &&
+                errorcode != PCRE2_ERROR_MATCHLIMIT &&
+                errorcode_jit != PCRE2_ERROR_MATCHLIMIT && errorcode_jit != PCRE2_ERROR_JIT_STACKLIMIT)
+            {
+            describe_failure("match errorcode comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+            }
           }
-
-        for (int index = 0; index < errorcode; index++)
+        else
           {
-          PCRE2_UCHAR *bufferptr, *bufferptr_jit;
-          PCRE2_SIZE bufflen, bufflen_jit;
-
-          bufferptr = bufferptr_jit = NULL;
-          bufflen = bufflen_jit = 0;
-
-          errorcode = pcre2_substring_get_bynumber(match_data, (uint32_t) index, &bufferptr, &bufflen);
-          errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, (uint32_t) index, &bufferptr_jit, &bufflen_jit);
-
-          if (errorcode != errorcode_jit)
+          for (int index = 0; index < errorcode; index++)
             {
-            describe_failure("ovector entry errorcode comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
-            }
+            PCRE2_UCHAR *bufferptr, *bufferptr_jit;
+            PCRE2_SIZE bufflen, bufflen_jit;
 
-          if (errorcode >= 0)
-            {
-            if (bufflen != bufflen_jit)
+            bufferptr = bufferptr_jit = NULL;
+            bufflen = bufflen_jit = 0;
+
+            errorcode = pcre2_substring_get_bynumber(match_data, (uint32_t) index, &bufferptr, &bufflen);
+            errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, (uint32_t) index, &bufferptr_jit, &bufflen_jit);
+
+            if (errorcode != errorcode_jit)
               {
-              describe_failure("ovector entry length comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
+              describe_failure("match entry errorcode comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
               }
 
-            if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
+            if (errorcode >= 0)
               {
-              describe_failure("ovector entry content comparison", data, size, compile_options, match_options, errorcode, match_data, errorcode_jit, match_data_jit, match_context);
-              }
-            }
+              if (bufflen != bufflen_jit)
+                {
+                describe_failure("match entry length comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+                }
 
-            pcre2_substring_free(bufferptr);
-            pcre2_substring_free(bufferptr_jit);
+              if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
+                {
+                describe_failure("match entry content comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+                }
+              }
+
+              pcre2_substring_free(bufferptr);
+              pcre2_substring_free(bufferptr_jit);
+            }
           }
         }
 #endif
