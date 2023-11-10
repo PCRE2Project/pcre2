@@ -5945,6 +5945,7 @@ static BOOL check_fast_forward_char_pair_simd(compiler_common *common, fast_forw
 {
   sljit_s32 i, j, max_i = 0, max_j = 0;
   sljit_u32 max_pri = 0;
+  sljit_s32 max_offset = max_fast_forward_char_pair_offset();
   PCRE2_UCHAR a1, a2, a_pri, b1, b2, b_pri;
 
   for (i = max - 1; i >= 1; i--)
@@ -5955,7 +5956,7 @@ static BOOL check_fast_forward_char_pair_simd(compiler_common *common, fast_forw
       a2 = chars[i].chars[1];
       a_pri = chars[i].last_count;
 
-      j = i - max_fast_forward_char_pair_offset();
+      j = i - max_offset;
       if (j < 0)
         j = 0;
 
@@ -14183,7 +14184,7 @@ common->compiler = compiler;
 
 /* Main pcre2_jit_exec entry. */
 SLJIT_ASSERT((private_data_size & (sizeof(sljit_sw) - 1)) == 0);
-sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), 5, 5, 0, 0, private_data_size);
+sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), 5, 5, SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS, 0, private_data_size);
 
 /* Register init. */
 reset_ovector(common, (re->top_bracket + 1) * 2);
