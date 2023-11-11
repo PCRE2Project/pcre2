@@ -3443,7 +3443,7 @@ anchored = (options & (PCRE2_ANCHORED|PCRE2_DFA_RESTART)) != 0 ||
 where to start. */
 
 startline = (re->flags & PCRE2_STARTLINE) != 0;
-firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
+firstline = !anchored && (re->overall_options & PCRE2_FIRSTLINE) != 0;
 bumpalong_limit = end_subject;
 
 /* Initialize and set up the fixed fields in the callout block, with a pointer

@@ -17901,6 +17901,23 @@ No match
 
 # --------
 
+/
+/anchored, firstline
+    \x0a
+ 0: \x0a
+
+/
+/anchored,firstline,no_start_optimize
+    \x0a
+ 0: \x0a
+
+/
+/firstline
+    \x0a
+ 0: \x0a
+    abc\x0adef
+ 0: \x0a
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

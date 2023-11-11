@@ -7895,4 +7895,21 @@ Partial match:
     ab\=ph,offset=2
 Partial match: 
 
+/
+/anchored, firstline
+    \x0a
+ 0: \x0a
+
+/
+/anchored,firstline,no_start_optimize
+    \x0a
+ 0: \x0a
+
+/
+/firstline
+    \x0a
+ 0: \x0a
+    abc\x0adef
+ 0: \x0a
+
 # End of testinput6

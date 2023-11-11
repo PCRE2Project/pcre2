@@ -142,6 +142,10 @@ above because \b and \B are defined in terms of \w.
 option, and (?aP) also sets (?aT) so that (?-aP) disables all ASCII
 restrictions on POSIX classes.
 
+37. If PCRE2_FIRSTLINE was set on an anchored pattern, pcre2_match() and 
+pcre2_dfa_match() misbehaved. PCRE2_FIRSTLINE is now ignored for anchored 
+patterns.
+
 
 Version 10.42 11-December-2022
 ------------------------------

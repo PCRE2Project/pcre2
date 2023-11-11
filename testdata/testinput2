@@ -6028,4 +6028,17 @@ a)"xI
 
 # --------
 
+/
+/anchored, firstline
+    \x0a
+
+/
+/anchored,firstline,no_start_optimize
+    \x0a
+
+/
+/firstline
+    \x0a
+    abc\x0adef
+
 # End of testinput2

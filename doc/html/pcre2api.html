@@ -1686,7 +1686,7 @@ PCRE2_FIRSTLINE if <i>startoffset</i> is greater than 3. See also
 PCRE2_USE_OFFSET_LIMIT, which provides a more general limiting facility. If
 PCRE2_FIRSTLINE is set with an offset limit, a match must occur in the first
 line and also within the offset limit. In other words, whichever limit comes
-first is used.
+first is used. This option has no effect for anchored patterns.
 <pre>
   PCRE2_LITERAL
 </pre>
@@ -2021,7 +2021,7 @@ a pattern by means of the (?aT) option setting.
 </pre>
 This option forces all the POSIX character classes, including [:digit:] and
 [:xdigit:], to match only ASCII characters, even when PCRE2_UCP is set. It can
-be changed within a pattern by means of the (?aP) option setting, but note that 
+be changed within a pattern by means of the (?aP) option setting, but note that
 this also sets PCRE2_EXTRA_ASCII_DIGIT in order to ensure that (?-aP) unsets
 all ASCII restrictions for POSIX classes.
 <pre>
@@ -4140,7 +4140,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 October 2023
+Last updated: 11 November 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

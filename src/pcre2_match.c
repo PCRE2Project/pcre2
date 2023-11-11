@@ -6836,7 +6836,7 @@ if (mcontext == NULL)
 else mb->memctl = mcontext->memctl;
 
 anchored = ((re->overall_options | options) & PCRE2_ANCHORED) != 0;
-firstline = (re->overall_options & PCRE2_FIRSTLINE) != 0;
+firstline = !anchored && (re->overall_options & PCRE2_FIRSTLINE) != 0;
 startline = (re->flags & PCRE2_STARTLINE) != 0;
 bumpalong_limit = (mcontext->offset_limit == PCRE2_UNSET)?
   true_end_subject : subject + mcontext->offset_limit;

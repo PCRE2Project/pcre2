@@ -1653,7 +1653,8 @@ COMPILING A PATTERN
        greater than 3. See also PCRE2_USE_OFFSET_LIMIT, which provides a  more
        general  limiting  facility.  If  PCRE2_FIRSTLINE is set with an offset
        limit, a match must occur in the first line and also within the  offset
-       limit. In other words, whichever limit comes first is used.
+       limit. In other words, whichever limit comes first is used. This option
+       has no effect for anchored patterns.
 
          PCRE2_LITERAL
 
@@ -3975,11 +3976,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 October 2023
+       Last updated: 11 November 2023
        Copyright (c) 1997-2023 University of Cambridge.
 
 
-PCRE2 10.43                     12 October 2023                    PCRE2API(3)
+PCRE2 10.43                    11 November 2023                    PCRE2API(3)
 ------------------------------------------------------------------------------
  
  
