@@ -64,6 +64,12 @@ the "correct" name, if there is no clash. It provides two structure types,
 \fIregex_t\fP for compiled internal forms, and \fIregmatch_t\fP for returning
 captured substrings. It also defines some constants whose names start with
 "REG_"; these are used for setting options and identifying error codes.
+.P
+Note that there is no warranty for these structures to match the sizes of the
+ones provided by your system, and therefore care should be taken to avoid
+mixing them. Aditionally, the PCRE2 provided \fIregex_t\fP has at least two
+additional fields that might be useful in multithreaded environments, as
+described below, and therefore it is preferred that it be used initialized.
 .
 .
 .SH "USING THE POSIX FUNCTIONS"
@@ -306,6 +312,23 @@ to hold the whole message, including the terminating zero. This value is
 greater than \fIerrbuf_size\fP if the message was truncated.
 .
 .
+.SH MULTITHREADED SAFETY
+.rs
+.sp
+The POSIX interface is \fBNOT\fP thread safe, and therefore it is recommended
+that you use the native interface in thar case.
+.P
+To help with that transition, the provided \fIregex_t\fP structure can be
+instructed to use a provided \fIpcre2_match_data\fP by assigning it to
+the \fIre_match_data\fP field \fBand\fP setting the \fIre_match_data_foreign\fP
+field to 1.
+.P
+This also means that the pointer should be either created and released
+each time it is used, or most likely, be created once as thread local
+and reused for the lifetime of the thread. If the later, might be interested
+on monitoring its heap usage through \fIpcre2_get_match_data_heapframes_size()\fP.
+.
+.
 .SH MEMORY USAGE
 .rs
 .sp
@@ -313,6 +336,12 @@ Compiling a regular expression causes memory to be allocated and associated
 with the \fIpreg\fP structure. The function \fBpcre2_regfree()\fP frees all
 such memory, after which \fIpreg\fP may no longer be used as a compiled
 expression.
+.P
+If the \fIre_match_data_foreign\fP field was set in \fIregex_t\fP then the
+match data used won't be free() and will be reused if the same structure is
+passed to another `fIpcre2_regcomp()\fP call. Remember that in this case
+it is your responsability to eventually free the match data by calling
+\fIpcre2_match_data_free\fP once it is no longer needed.
 .
 .
 .SH AUTHOR

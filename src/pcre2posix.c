@@ -200,7 +200,11 @@ return used + 1;
 PCRE2POSIX_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_regfree(regex_t *preg)
 {
-pcre2_match_data_free(preg->re_match_data);
+if (preg->re_match_data_owner)
+  {
+  pcre2_match_data_free(preg->re_match_data);
+  preg->re_match_data = NULL;
+  }
 pcre2_code_free(preg->re_pcre2_code);
 }
 
@@ -265,16 +269,27 @@ if (preg->re_pcre2_code == NULL)
 (void)pcre2_pattern_info((const pcre2_code *)preg->re_pcre2_code,
   PCRE2_INFO_CAPTURECOUNT, &re_nsub);
 preg->re_nsub = (size_t)re_nsub;
-preg->re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
-preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
-
-if (preg->re_match_data == NULL)
+if (!preg->re_match_data_foreign)
   {
-  /* LCOV_EXCL_START */
-  pcre2_code_free(preg->re_pcre2_code);
-  return REG_ESPACE;
-  /* LCOV_EXCL_STOP */
+  preg->re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
+  if (preg->re_match_data == NULL)
+    {
+    /* LCOV_EXCL_START */
+    pcre2_code_free(preg->re_pcre2_code);
+    return REG_ESPACE;
+    /* LCOV_EXCL_STOP */
+    }
+  preg->re_match_data_owner = 1;
   }
+
+/* TODO:
+   if the provided match_data is not big enough for the expression used then it will
+   crash; checking it here and returning an error would be preferable but will need
+   additional API changes, or at least making this code depend on internal PCRE2
+   library code as well
+ */
+
+preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
 
 return 0;
 }
