@@ -410,7 +410,9 @@ typedef struct compiler_common {
   sljit_s32 match_end_ptr;
   /* Points to the marked string. */
   sljit_s32 mark_ptr;
-  /* Recursive control verb management chain. */
+  /* Head of the recursive control verb management chain.
+     Each item must have a previous offset and type
+     (see control_types) values. See do_search_mark. */
   sljit_s32 control_head_ptr;
   /* Points to the last matched capture block index. */
   sljit_s32 capture_last_ptr;
@@ -6650,7 +6652,8 @@ GET_LOCAL_BASE(TMP1, 0, 0);
 /* Drop frames until we reach STACK_TOP. */
 mainloop = LABEL();
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), -SSIZE_OF(sw));
-jump = CMP(SLJIT_SIG_LESS_EQUAL, TMP2, 0, SLJIT_IMM, 0);
+OP2U(SLJIT_SUB | SLJIT_SET_SIG_LESS_EQUAL | SLJIT_SET_Z, TMP2, 0, SLJIT_IMM, 0);
+jump = JUMP(SLJIT_SIG_LESS_EQUAL);
 
 OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 if (HAS_VIRTUAL_REGISTERS)
@@ -6671,7 +6674,8 @@ else
 JUMPTO(SLJIT_JUMP, mainloop);
 
 JUMPHERE(jump);
-jump = CMP(SLJIT_NOT_ZERO /* SIG_LESS */, TMP2, 0, SLJIT_IMM, 0);
+sljit_set_current_flags(compiler, SLJIT_CURRENT_FLAGS_SUB | SLJIT_CURRENT_FLAGS_COMPARE | SLJIT_SET_SIG_LESS_EQUAL | SLJIT_SET_Z);
+jump = JUMP(SLJIT_NOT_ZERO /* SIG_LESS */);
 /* End of reverting values. */
 OP_SRC(SLJIT_FAST_RETURN, RETURN_ADDR, 0);
 
@@ -11244,7 +11248,7 @@ switch(opcode)
   case OP_CBRAPOS:
   case OP_SCBRAPOS:
   offset = GET2(cc, 1 + LINK_SIZE);
-  /* This case cannot be optimized in the same was as
+  /* This case cannot be optimized in the same way as
   normal capturing brackets. */
   SLJIT_ASSERT(common->optimized_cbracket[offset] == 0);
   cbraprivptr = OVECTOR_PRIV(offset);
@@ -13368,12 +13372,19 @@ static SLJIT_INLINE void compile_bracketpos_backtrackingpath(compiler_common *co
 DEFINE_COMPILER;
 int offset;
 struct sljit_jump *jump;
+PCRE2_SPTR cc;
 
+/* No retry on backtrack, just drop everything. */
 if (CURRENT_AS(bracketpos_backtrack)->framesize < 0)
   {
-  if (*current->cc == OP_CBRAPOS || *current->cc == OP_SCBRAPOS)
+  cc = current->cc;
+
+  if (*cc == OP_BRAPOSZERO)
+    cc++;
+
+  if (*cc == OP_CBRAPOS || *cc == OP_SCBRAPOS)
     {
-    offset = (GET2(current->cc, 1 + LINK_SIZE)) << 1;
+    offset = (GET2(cc, 1 + LINK_SIZE)) << 1;
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset), TMP1, 0);

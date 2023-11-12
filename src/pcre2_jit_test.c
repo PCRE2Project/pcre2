@@ -547,6 +547,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "((b*))++m", "bxbbxbbbxbbm" },
 	{ MU, A, 0, 0, "((b*))*+m", "bxbbxbbbxm" },
 	{ MU, A, 0, 0, "((b*))*+m", "bxbbxbbbxbbm" },
+	{ MU, A, 0, 0, "(A)*+$", "ABC" },
 	{ MU, A, 0, 0 | F_NOMATCH, "(?>(b{2,4}))(?:(?:(aa|c))++m|(?:(aa|c))+n)", "bbaacaaccaaaacxbbbmbn" },
 	{ MU, A, 0, 0, "((?:b)++a)+(cd)*+m", "bbababbacdcdnbbababbacdcdm" },
 	{ MU, A, 0, 0, "((?:(b))++a)+((c)d)*+m", "bbababbacdcdnbbababbacdcdm" },
