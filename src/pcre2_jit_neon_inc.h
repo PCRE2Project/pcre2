@@ -82,6 +82,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #  endif
 # endif
 
+#if (defined(__GNUC__) && __SANITIZE_ADDRESS__) \
+	|| (defined(__clang__) \
+	&& ((__clang_major__ == 3 && __clang_minor__ >= 3) || (__clang_major__ > 3)))
+__attribute__((no_sanitize_address))
+#endif
 static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 **str_ptr, sljit_uw offs1, sljit_uw offs2, sljit_uw chars)
 #undef FF_FUN
 {
