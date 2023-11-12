@@ -71,6 +71,7 @@ MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
+#define BROKEN_SNPRINTF
 #endif
 
 
@@ -162,7 +163,13 @@ static const char *const pstring[] = {
   "match failed"                     /* NOMATCH    */
 };
 
+static int message_len(const char *message, int offset)
+{
+char buf[12];
 
+/* 11 magic number comes from the format below */
+return strlen(message) + 11 + snprintf(buf, sizeof(buf), "%d", offset);
+}
 
 /*************************************************
 *          Translate error code to string        *
@@ -172,23 +179,60 @@ PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_regerror(int errcode, const regex_t *preg, char *errbuf,
   size_t errbuf_size)
 {
-int used;
+int ret;
 const char *message;
+size_t len = 0; /* keeps 0 if snprintf is used */
 
 message = (errcode <= 0 || errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
   "unknown error code" : pstring[errcode];
 
 if (preg != NULL && (int)preg->re_erroffset != -1)
   {
-  used = snprintf(errbuf, errbuf_size, "%s at offset %-6d", message,
-    (int)preg->re_erroffset);
+  /* no need to deal with UB in snprintf */
+  if (errbuf_size > INT_MAX) errbuf_size = INT_MAX;
+
+  /* there are 11 charactes between message and offset,
+     update message_len() if changed */
+  ret = snprintf(errbuf, errbuf_size, "%s at offset %d", message,
+                 (int)preg->re_erroffset);
   }
 else
   {
-  used = snprintf(errbuf, errbuf_size, "%s", message);
+  ret = len = strlen(message);
+  strncpy(errbuf, message, errbuf_size);
+  if (errbuf_size <= len) errbuf[errbuf_size - 1] = '\0';
   }
 
-return used + 1;
+do {
+  if (ret < 0)
+    {
+#ifdef BROKEN_SNPRINTF
+    /* _snprintf returns -1 on overflow and doesn't zero terminate */
+    if (!len)
+      {
+      if (ret == -1 && errbuf_size != 0) errbuf[errbuf_size - 1] = '\0';
+
+      ret = message_len(message, (int)preg->re_erroffset);
+      break;
+      }
+#endif
+    /* snprintf failed, will use a 14 char long message if possible */
+    ret = 14;
+    if (errbuf_size != 0)
+      {
+      strncpy(errbuf, "internal error", errbuf_size);
+      if ((int)errbuf_size <= ret) errbuf[errbuf_size - 1] = '\0';
+      }
+    }
+  else if (ret == (int)errbuf_size && !len)
+    {
+      /* pre C99 snprintf returns used, so redo ret to fix that */
+
+      ret = message_len(message, (int)preg->re_erroffset);
+    }
+} while (0);
+
+return ret + 1;
 }
 
 
