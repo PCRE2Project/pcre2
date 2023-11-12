@@ -14099,7 +14099,7 @@ common->ovector_start += sizeof(sljit_sw);
 if (!check_opcode_types(common, common->start, ccend))
   {
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
-  return PCRE2_ERROR_NOMEMORY;
+  return PCRE2_ERROR_JIT_UNSUPPORTED;
   }
 
 /* Checking flags and updating ovector_start. */
@@ -14174,7 +14174,7 @@ if (private_data_size > 65536)
   {
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
-  return PCRE2_ERROR_NOMEMORY;
+  return PCRE2_ERROR_JIT_UNSUPPORTED;
   }
 
 if (common->has_then)
