@@ -146,6 +146,10 @@ restrictions on POSIX classes.
 pcre2_dfa_match() misbehaved. PCRE2_FIRSTLINE is now ignored for anchored 
 patterns.
 
+38. If PCRE2_ENDANCHORED was set and the end of the pattern was reached during 
+a recursion, pcre2_match() misbehaved and gave the wrong match. For example, 
+the pattern /|a(?0)/ matched against "aaaa".
+
 
 Version 10.42 11-December-2022
 ------------------------------

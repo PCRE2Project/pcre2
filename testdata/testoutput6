@@ -7912,4 +7912,12 @@ Partial match:
     abc\x0adef
  0: \x0a
 
+/|a(?0)/endanchored
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+ 4: 
+
 # End of testinput6

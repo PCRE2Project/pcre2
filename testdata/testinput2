@@ -6041,4 +6041,7 @@ a)"xI
     \x0a
     abc\x0adef
 
+/|a(?0)/endanchored
+    aaaa
+
 # End of testinput2
