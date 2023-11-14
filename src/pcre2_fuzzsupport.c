@@ -14,8 +14,11 @@ Written by Philip Hazel, October 2016
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
+#ifndef PCRE2_CODE_UNIT_WIDTH
 #define PCRE2_CODE_UNIT_WIDTH 8
+#endif
+
+#include "config.h"
 #include "pcre2.h"
 
 #define MAX_MATCH_SIZE 1000
@@ -86,7 +89,9 @@ fprintf(stream, "%s%s%s%s%s%s%s%s%s\n",
 
 static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data, pcre2_match_context *match_context)
 {
+#if PCRE2_CODE_UNIT_WIDTH == 8
 PCRE2_UCHAR error_buf[256];
+#endif
 int errorcode;
 
 for (uint32_t index = 0; index < count; index++)
@@ -107,8 +112,12 @@ for (uint32_t index = 0; index < count; index++)
     }
   else
     {
+#if PCRE2_CODE_UNIT_WIDTH == 8
     pcre2_get_error_message(errorcode, error_buf, 256);
     fprintf(stream, "Match %d failed: %s\n", index, error_buf);
+#else
+    fprintf(stream, "Match %d failed: %d\n", index, errorcode);
+#endif
     }
   }
 }
@@ -130,7 +139,9 @@ static void describe_failure(
   pcre2_match_data *match_data_jit,
   pcre2_match_context *match_context
 ) {
+#if PCRE2_CODE_UNIT_WIDTH == 8
 PCRE2_UCHAR buffer[256];
+#endif
 
 fprintf(stderr, "Encountered failure while performing %s; context:\n", task);
 
@@ -146,8 +157,12 @@ print_match_options(stderr, match_options);
 
 if (errorcode < 0)
   {
+#if PCRE2_CODE_UNIT_WIDTH == 8
   pcre2_get_error_message(errorcode, buffer, 256);
   fprintf(stderr, "Non-JIT'd operation emitted an error: %s (%d)\n", buffer, errorcode);
+#else
+  fprintf(stderr, "Non-JIT'd operation emitted an error: %d\n", errorcode);
+#endif
   }
 if (matches >= 0)
   {
@@ -162,8 +177,12 @@ if (matches >= 0)
 
 if (errorcode_jit < 0)
   {
+#if PCRE2_CODE_UNIT_WIDTH == 8
   pcre2_get_error_message(errorcode_jit, buffer, 256);
   fprintf(stderr, "JIT'd operation emitted an error: %s (%d)\n", buffer, errorcode_jit);
+#else
+  fprintf(stderr, "JIT'd operation emitted an error: %d\n", errorcode);
+#endif
   }
 if (matches_jit >= 0)
   {
@@ -220,6 +239,7 @@ in large trees taking too much time. */
 random_options = *(uint64_t *)(data);
 data += sizeof(random_options);
 size -= sizeof(random_options);
+size /= PCRE2_CODE_UNIT_WIDTH / 8;
 
 match_size = (size > MAX_MATCH_SIZE)? MAX_MATCH_SIZE : size;
 
@@ -323,9 +343,13 @@ for (i = 0; i < 2; i++)
 #ifdef STANDALONE
       if (errorcode >= 0) printf("Match returned %d\n", errorcode); else
         {
+#if PCRE2_CODE_UNIT_WIDTH == 8
         unsigned char buffer[256];
         pcre2_get_error_message(errorcode, buffer, 256);
         printf("Match failed: error %d: %s\n", errorcode, buffer);
+#else
+        printf("Match failed: error %d\n", errorcode);
+#endif
         }
 #endif
 
@@ -417,9 +441,13 @@ for (i = 0; i < 2; i++)
 #ifdef STANDALONE
       if (errorcode >= 0) printf("Match returned %d\n", errorcode); else
         {
+#if PCRE2_CODE_UNIT_WIDTH == 8
         unsigned char buffer[256];
         pcre2_get_error_message(errorcode, buffer, 256);
         printf("Match failed: error %d: %s\n", errorcode, buffer);
+#else
+        printf("Match failed: error %d\n", errorcode);
+#endif
         }
 #endif
 
@@ -434,12 +462,17 @@ for (i = 0; i < 2; i++)
 
   else
     {
+#ifdef STANDALONE
+#if PCRE2_CODE_UNIT_WIDTH == 8
     unsigned char buffer[256];
     pcre2_get_error_message(errorcode, buffer, 256);
-#ifdef STANDALONE
     printf("Error %d at offset %lu: %s\n", errorcode, erroroffset, buffer);
 #else
-    if (strstr((const char *)buffer, "internal error") != NULL) abort();
+    printf("Error %d at offset %lu\n", errorcode, erroroffset);
+#endif
+
+#else
+    if (errorcode == PCRE2_ERROR_INTERNAL) abort();
 #endif
     }
 

@@ -540,27 +540,63 @@ if WITH_GCOV
 pcre2grep_CFLAGS += $(GCOV_CFLAGS)
 pcre2grep_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
+endif # WITH_PCRE2_8
 
 ## If fuzzer support is enabled, build a non-distributed library containing the
 ## fuzzing function. Also build the standalone checking binary from the same
 ## source but using -DSTANDALONE.
 
 if WITH_FUZZ_SUPPORT
-noinst_LIBRARIES = .libs/libpcre2-fuzzsupport.a
+noinst_LIBRARIES = 
+if WITH_PCRE2_8
+noinst_LIBRARIES += .libs/libpcre2-fuzzsupport.a
 _libs_libpcre2_fuzzsupport_a_SOURCES = src/pcre2_fuzzsupport.c
 _libs_libpcre2_fuzzsupport_a_CFLAGS = $(AM_CFLAGS)
 _libs_libpcre2_fuzzsupport_a_LIBADD =
 
-noinst_PROGRAMS += pcre2fuzzcheck
-pcre2fuzzcheck_SOURCES = src/pcre2_fuzzsupport.c
-pcre2fuzzcheck_CFLAGS = -DSTANDALONE $(AM_CFLAGS)
-pcre2fuzzcheck_LDADD = libpcre2-8.la
+noinst_PROGRAMS += pcre2fuzzcheck-8
+pcre2fuzzcheck_8_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_8_CFLAGS = -DSTANDALONE $(AM_CFLAGS)
+pcre2fuzzcheck_8_LDADD = libpcre2-8.la
 if WITH_GCOV
-pcre2fuzzcheck_CFLAGS += $(GCOV_CFLAGS)
-pcre2fuzzcheck_LDADD += $(GCOV_LIBS)
+pcre2fuzzcheck_8_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_8_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
-endif # WITH FUZZ_SUPPORT
 endif # WITH_PCRE2_8
+
+if WITH_PCRE2_16
+noinst_LIBRARIES += .libs/libpcre2-fuzzsupport-16.a
+_libs_libpcre2_fuzzsupport_16_a_SOURCES = src/pcre2_fuzzsupport.c
+_libs_libpcre2_fuzzsupport_16_a_CFLAGS = $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=16
+_libs_libpcre2_fuzzsupport_16_a_LIBADD =
+
+noinst_PROGRAMS += pcre2fuzzcheck-16
+pcre2fuzzcheck_16_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_16_CFLAGS = -DSTANDALONE $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=16
+pcre2fuzzcheck_16_LDADD = libpcre2-16.la
+if WITH_GCOV
+pcre2fuzzcheck_16_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_16_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
+endif # WITH_PCRE2_16
+
+if WITH_PCRE2_32
+noinst_LIBRARIES += .libs/libpcre2-fuzzsupport-32.a
+_libs_libpcre2_fuzzsupport_32_a_SOURCES = src/pcre2_fuzzsupport.c
+_libs_libpcre2_fuzzsupport_32_a_CFLAGS = $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=32
+_libs_libpcre2_fuzzsupport_32_a_LIBADD =
+
+noinst_PROGRAMS += pcre2fuzzcheck-32
+pcre2fuzzcheck_32_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_32_CFLAGS = -DSTANDALONE $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=32
+pcre2fuzzcheck_32_LDADD = libpcre2-32.la
+if WITH_GCOV
+pcre2fuzzcheck_32_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_32_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
+endif # WITH_PCRE2_32
+
+endif # WITH_FUZZ_SUPPORT
 
 ## -------- Testing ----------
 
