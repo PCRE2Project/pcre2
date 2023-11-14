@@ -150,6 +150,9 @@ patterns.
 a recursion, pcre2_match() misbehaved and gave the wrong match. For example, 
 the pattern /|a(?0)/ matched against "aaaa".
 
+39. Add a test for ridiculous ovector offset values to the substring extraction 
+functions.
+
 
 Version 10.42 11-December-2022
 ------------------------------

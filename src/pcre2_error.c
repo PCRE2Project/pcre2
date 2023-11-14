@@ -274,6 +274,7 @@ static const unsigned char match_error_texts[] =
   /* 65 */
   "internal error - duplicate substitution match\0"
   "PCRE2_MATCH_INVALID_UTF is not supported for DFA matching\0"
+  "INTERNAL ERROR: invalid substring offset\0"
   ;
 
 

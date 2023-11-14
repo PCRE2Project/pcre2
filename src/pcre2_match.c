@@ -6669,6 +6669,7 @@ if (use_jit)
     match_data, mcontext);
   if (rc != PCRE2_ERROR_JIT_BADOPTION)
     {
+    match_data->subject_length = length;
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
       length = CU2BYTES(length + was_zero_terminated);
@@ -7603,6 +7604,7 @@ if (rc == MATCH_MATCH)
   {
   match_data->rc = ((int)mb->end_offset_top >= 2 * match_data->oveccount)?
     0 : (int)mb->end_offset_top/2 + 1;
+  match_data->subject_length = length;
   match_data->startchar = start_match - subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
@@ -7617,6 +7619,7 @@ if (rc == MATCH_MATCH)
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
   else match_data->subject = subject;
+
   return match_data->rc;
   }
 
@@ -7638,6 +7641,7 @@ PCRE2_ERROR_PARTIAL. */
 else if (match_partial != NULL)
   {
   match_data->subject = subject;
+  match_data->subject_length = length;
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;

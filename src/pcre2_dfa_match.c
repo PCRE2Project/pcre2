@@ -4013,6 +4013,7 @@ for (;;)
       match_data->ovector[0] = (PCRE2_SIZE)(start_match - subject);
       match_data->ovector[1] = (PCRE2_SIZE)(end_subject - subject);
       }
+    match_data->subject_length = length;
     match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
     match_data->rightchar = (PCRE2_SIZE)( mb->last_used_ptr - subject);
     match_data->startchar = (PCRE2_SIZE)(start_match - subject);

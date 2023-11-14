@@ -309,6 +309,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector is too small
                    PCRE2_ERROR_UNSET: substring is not set
+                   PCRE2_ERROR_INVALIDOFFSET: internal error, should not occur
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -341,6 +342,8 @@ else  /* Matched using pcre2_dfa_match() */
 
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
+if (left > match_data->subject_length || right > match_data->subject_length)
+  return PCRE2_ERROR_INVALIDOFFSET;
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
 return 0;
 }
