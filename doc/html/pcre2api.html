@@ -461,7 +461,7 @@ names, without the _8, _16, or _32 suffix.
 PCRE2 has its own native API, which is described in this document. There are
 also some wrapper functions for the 8-bit library that correspond to the
 POSIX regular expression API, but they do not give access to all the
-functionality of PCRE2. They are described in the
+functionality of PCRE2 and they are not thread-safe. They are described in the
 <a href="pcre2posix.html"><b>pcre2posix</b></a>
 documentation. Both these APIs define a set of C function calls.
 </P>
@@ -4140,7 +4140,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 November 2023
+Last updated: 14 November 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

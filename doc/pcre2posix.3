@@ -1,4 +1,4 @@
-.TH PCRE2POSIX 3 "13 May 2023" "PCRE2 10.43"
+.TH PCRE2POSIX 3 "14 November 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "SYNOPSIS"
@@ -31,9 +31,12 @@ and 32-bit libraries. See the
 documentation for a description of PCRE2's native API, which contains much
 additional functionality.
 .P
-The functions described here are wrapper functions that ultimately call the
-PCRE2 native API. Their prototypes are defined in the \fBpcre2posix.h\fP header
-file, and they all have unique names starting with \fBpcre2_\fP. However, the
+\fBIMPORTANT NOTE\fP: The functions described here are NOT thread-safe, and
+should not be used in multi-threaded applications. Use the native API instead.
+.P
+These functions are wrapper functions that ultimately call the PCRE2 native
+API. Their prototypes are defined in the \fBpcre2posix.h\fP header file, and
+they all have unique names starting with \fBpcre2_\fP. However, the
 \fBpcre2posix.h\fP header also contains macro definitions that convert the
 standard POSIX names such \fBregcomp()\fP into \fBpcre2_regcomp()\fP etc. This
 means that a program can use the usual POSIX names without running the risk of
@@ -69,6 +72,10 @@ captured substrings. It also defines some constants whose names start with
 .SH "USING THE POSIX FUNCTIONS"
 .rs
 .sp
+Note that these functions are just POSIX-style wrappers for PCRE2's native API.
+They do not give POSIX regular expression behaviour, and they are not
+thread-safe.
+.P
 Those POSIX option bits that can reasonably be mapped to PCRE2 native options
 have been implemented. In addition, the option REG_EXTENDED is defined with the
 value zero. This has no effect, but since programs that are written to the
@@ -98,8 +105,10 @@ The function \fBpcre2_regcomp()\fP is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
 zero (but see REG_PEND below). The \fIpreg\fP argument is a pointer to a
 \fBregex_t\fP structure that is used as a base for storing information about
-the compiled regular expression. (It is also used for input when REG_PEND is
-set.)
+the compiled regular expression. It is also used for input when REG_PEND is
+set. The \fBregex_t\fP structure used by \fBpcre2_regcomp()\fP is defined in
+\fBpcre2posix.h\fP and is not the same as the structure used by other libraries
+that provide POSIX-style matching.
 .P
 The argument \fIcflags\fP is either zero, or contains one or more of the bits
 defined by the following macros:
@@ -329,6 +338,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 April 2021
-Copyright (c) 1997-2021 University of Cambridge.
+Last updated: 14 November 2023
+Copyright (c) 1997-2023 University of Cambridge.
 .fi

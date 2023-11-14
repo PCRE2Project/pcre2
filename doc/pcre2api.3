@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "11 November 2023" "PCRE2 10.43"
+.TH PCRE2API 3 "14 November 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -389,7 +389,7 @@ names, without the _8, _16, or _32 suffix.
 PCRE2 has its own native API, which is described in this document. There are
 also some wrapper functions for the 8-bit library that correspond to the
 POSIX regular expression API, but they do not give access to all the
-functionality of PCRE2. They are described in the
+functionality of PCRE2 and they are not thread-safe. They are described in the
 .\" HREF
 \fBpcre2posix\fP
 .\"
@@ -4148,6 +4148,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 November 2023
+Last updated: 14 November 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi
