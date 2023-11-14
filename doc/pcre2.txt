@@ -5020,7 +5020,7 @@ CALLOUT ENUMERATION
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
@@ -6393,7 +6393,7 @@ MULTI-SEGMENT MATCHING WITH pcre2_dfa_match()
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
@@ -10566,7 +10566,7 @@ MEMORY USAGE
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
@@ -10660,7 +10660,7 @@ PCRE2 SAMPLE PROGRAM
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
@@ -10852,7 +10852,7 @@ RE-USING PRECOMPILED PATTERNS
 AUTHOR
 
        Philip Hazel
-       University Computing Service
+       Retired from University Computing Service
        Cambridge, England.
 
 
