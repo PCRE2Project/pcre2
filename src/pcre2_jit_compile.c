@@ -1512,15 +1512,17 @@ do
       case OP_ONCE:
       case OP_BRA:
       case OP_CBRA:
-      end = cc + GET(cc, 1);
-
       prev_fast_forward_allowed = fast_forward_allowed;
       fast_forward_allowed = FALSE;
+
       if (depth >= 4)
         break;
 
-      end = bracketend(cc) - (1 + LINK_SIZE);
-      if (*end != OP_KET || (*cc == OP_CBRA && common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0))
+      if (count == 0 && cc[GET(cc, 1)] == OP_ALT)
+        count = 1;
+
+      end = bracketend(cc);
+      if (end[-1 - LINK_SIZE] != OP_KET || (*cc == OP_CBRA && common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0))
         break;
 
       count = detect_early_fail(common, cc, private_data_start, depth + 1, count, prev_fast_forward_allowed);
@@ -1530,7 +1532,7 @@ do
 
       if (count < EARLY_FAIL_ENHANCE_MAX)
         {
-        cc = end + (1 + LINK_SIZE);
+        cc = end;
         continue;
         }
       break;

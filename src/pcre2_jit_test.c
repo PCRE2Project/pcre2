@@ -275,6 +275,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CM, A, 0, 0, "ab|cd", "CD" },
 	{ CM, A, 0, 0, "a1277|a1377|bX487", "bx487" },
 	{ CM, A, 0, 0, "a1277|a1377|bx487", "bX487" },
+	{ 0, A, 0, 0, "(a|)b*+a", "a" },
 
 	/* Greedy and non-greedy ? operators. */
 	{ MU, A, 0, 0, "(?:a)?a", "laab" },
