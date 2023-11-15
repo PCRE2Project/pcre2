@@ -5718,7 +5718,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     we move back a number of characters, not bytes. */
 
     case OP_REVERSE:
-    number = GET(Fecode, 1);
+    number = GET2(Fecode, 1);
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
@@ -5742,7 +5742,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     /* Save the earliest consulted character, then skip to next opcode */
 
     if (Feptr < mb->start_used_ptr) mb->start_used_ptr = Feptr;
-    Fecode += 1 + LINK_SIZE;
+    Fecode += 1 + IMM2_SIZE;
     break;
 
 

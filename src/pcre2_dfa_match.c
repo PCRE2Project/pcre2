@@ -635,8 +635,8 @@ if (*this_start_code == OP_ASSERTBACK || *this_start_code == OP_ASSERTBACK_NOT)
   end_code = this_start_code;
   do
     {
-    uint32_t revlen = (end_code[1+LINK_SIZE] == OP_REVERSE)? 1 + LINK_SIZE : 0;
-    size_t back = (revlen == 0)? 0 : (size_t)GET(end_code, 2+LINK_SIZE);
+    uint32_t revlen = (end_code[1+LINK_SIZE] == OP_REVERSE)? 1 + IMM2_SIZE : 0;
+    size_t back = (revlen == 0)? 0 : (size_t)GET2(end_code, 2+LINK_SIZE);
     if (back <= gone_back)
       {
       int bstate = (int)(end_code - start_code + 1 + LINK_SIZE + revlen);

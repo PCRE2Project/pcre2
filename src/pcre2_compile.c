@@ -8450,8 +8450,8 @@ for (;;)
         lookbehindminlength == lookbehindlength)
       {
       *code++ = OP_REVERSE;
-      PUTINC(code, 0, lookbehindlength);
-      length += 1 + LINK_SIZE;
+      PUT2INC(code, 0, lookbehindlength);
+      length += 1 + IMM2_SIZE;
       }
     else
       {

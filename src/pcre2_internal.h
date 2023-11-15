@@ -1778,7 +1778,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* KetRmax                                */ \
   1+LINK_SIZE,                   /* KetRmin                                */ \
   1+LINK_SIZE,                   /* KetRpos                                */ \
-  1+LINK_SIZE,                   /* Reverse                                */ \
+  1+IMM2_SIZE,                   /* Reverse                                */ \
   1+2*IMM2_SIZE,                 /* VReverse                               */ \
   1+LINK_SIZE,                   /* Assert                                 */ \
   1+LINK_SIZE,                   /* Assert not                             */ \

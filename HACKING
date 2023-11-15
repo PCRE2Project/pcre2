@@ -735,15 +735,16 @@ OP_ASSERT_NOT.
 Backward assertions use the opcodes OP_ASSERTBACK, OP_ASSERTBACK_NA, and
 OP_ASSERTBACK_NOT. If all the branches of a backward assertion are of fixed
 length (not necessarily the same), the first opcode inside each branch is
-OP_REVERSE, followed by a LINK_SIZE count of the number of characters to move
+OP_REVERSE, followed by an IMM2_SIZE count of the number of characters to move
 back the pointer in the subject string, thus allowing each branch to have a
 different (but fixed) length.
 
 Variable-length backward assertions whose maximum matching length is limited
 are also supported. For such assertions, the first opcode inside each branch is
 OP_VREVERSE, followed by the minimum and maximum lengths for that branch,
-unless these happen to be equal, in which case OP_REVERSE is used. These values
-occupy two code units each in 8-bit mode, and 1 code unit in 16/32 bit modes.
+unless these happen to be equal, in which case OP_REVERSE is used. These 
+IMM2_SIZE values occupy two code units each in 8-bit mode, and 1 code unit in
+16/32 bit modes.
 
 In ASCII or UTF-32 mode, the character counts in OP_REVERSE and OP_VREVERSE are
 also the number of code units, but in UTF-8/16 mode each character may occupy
@@ -849,4 +850,4 @@ not a real opcode, but is used to check at compile time that tables indexed by
 opcode are the correct length, in order to catch updating errors.
 
 Philip Hazel
-July 2023
+November 2023
