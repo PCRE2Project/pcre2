@@ -742,7 +742,7 @@ different (but fixed) length.
 Variable-length backward assertions whose maximum matching length is limited
 are also supported. For such assertions, the first opcode inside each branch is
 OP_VREVERSE, followed by the minimum and maximum lengths for that branch,
-unless these happen to be equal, in which case OP_REVERSE is used. These 
+unless these happen to be equal, in which case OP_REVERSE is used. These
 IMM2_SIZE values occupy two code units each in 8-bit mode, and 1 code unit in
 16/32 bit modes.
 

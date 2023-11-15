@@ -142,15 +142,18 @@ above because \b and \B are defined in terms of \w.
 option, and (?aP) also sets (?aT) so that (?-aP) disables all ASCII
 restrictions on POSIX classes.
 
-37. If PCRE2_FIRSTLINE was set on an anchored pattern, pcre2_match() and 
-pcre2_dfa_match() misbehaved. PCRE2_FIRSTLINE is now ignored for anchored 
+37. If PCRE2_FIRSTLINE was set on an anchored pattern, pcre2_match() and
+pcre2_dfa_match() misbehaved. PCRE2_FIRSTLINE is now ignored for anchored
 patterns.
 
-38. Add a test for ridiculous ovector offset values to the substring extraction 
+38. Add a test for ridiculous ovector offset values to the substring extraction
 functions.
 
-39. Make OP_REVERSE use IMM2_SIZE for its data instead of LINK_SIZE, for 
+39. Make OP_REVERSE use IMM2_SIZE for its data instead of LINK_SIZE, for
 consistency with OP_VREVERSE.
+
+40. In some legacy environments with a pre C99 snprintf, pcre2_regerror could
+return an incorrect value when the provided buffer was too small.
 
 
 Version 10.42 11-December-2022
