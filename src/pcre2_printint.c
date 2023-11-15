@@ -428,6 +428,11 @@ for(;;)
     case OP_SCRIPT_RUN:
     case OP_COND:
     case OP_SCOND:
+    if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
+      else fprintf(f, "    ");
+    fprintf(f, "%s", OP_names[*code]);
+    break;
+
     case OP_REVERSE:
     if (print_lengths) fprintf(f, "%3d ", GET2(code, 1));
       else fprintf(f, "    ");
