@@ -9869,9 +9869,9 @@ SLJIT_ASSERT(parent->top == NULL);
 if (*cc == OP_REVERSE)
   {
   reverse_failed = &parent->topbacktracks;
-  lmin = GET(cc, 1);
+  lmin = GET2(cc, 1);
   lmax = lmin;
-  cc += 1 + LINK_SIZE;
+  cc += 1 + IMM2_SIZE;
 
   SLJIT_ASSERT(lmin > 0);
   }
@@ -9881,9 +9881,9 @@ else
   PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, NULL);
 
   reverse_failed = &backtrack->topbacktracks;
-  lmin = GET(cc, 1);
-  lmax = GET(cc, 1 + IMM2_SIZE);
-  cc += 1 + 2 * LINK_SIZE;
+  lmin = GET2(cc, 1);
+  lmax = GET2(cc, 1 + IMM2_SIZE);
+  cc += 1 + 2 * IMM2_SIZE;
 
   SLJIT_ASSERT(lmin < lmax);
   }
@@ -10211,7 +10211,7 @@ while (1)
     if (conditional)
       {
       if (extrasize > 0)
-        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), needs_control_head ? STACK(-2) : STACK(-1));
+        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(-end_block_size - (needs_control_head ? 2 : 1)));
       }
     else if (bra == OP_BRAZERO)
       {
