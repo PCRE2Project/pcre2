@@ -199,8 +199,11 @@ if (preg != NULL && (int)preg->re_erroffset != -1)
 else
   {
   len = strlen(message);
-  strncpy(errbuf, message, errbuf_size);
-  if (errbuf_size <= len) errbuf[errbuf_size - 1] = '\0';
+  if (errbuf_size != 0)
+    {
+    strncpy(errbuf, message, errbuf_size);
+    if (errbuf_size <= len) errbuf[errbuf_size - 1] = '\0';
+    }
   ret = (int)len;
   }
 
