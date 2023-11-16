@@ -833,18 +833,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     case OP_ACCEPT:
     case OP_END:
 
-    /* Fail if PCRE2_ENDANCHORED is set and the end of the match is not
-    the end of the subject. After (*ACCEPT) we fail the entire match (at this
-    position) but backtrack if we've reached the end of the pattern. This
-    applies whether or not we are in a recursion. */
-
-    if (Feptr < mb->end_subject &&
-        ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0)
-      {
-      if (Fop == OP_END) RRETURN(MATCH_NOMATCH);
-      return MATCH_NOMATCH;   /* (*ACCEPT) */
-      }
-
     /* Handle end of a recursion. */
 
     if (Fcurrent_recurse != RECURSE_UNSET)
@@ -882,6 +870,18 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
            ((mb->moptions & PCRE2_NOTEMPTY_ATSTART) != 0 &&
              Fstart_match == mb->start_subject + mb->start_offset)))
       RRETURN(MATCH_NOMATCH);
+
+    /* Fail if PCRE2_ENDANCHORED is set and the end of the match is not
+    the end of the subject. After (*ACCEPT) we fail the entire match (at this
+    position) but backtrack if we've reached the end of the pattern. This
+    applies whether or not we are in a recursion. */
+
+    if (Feptr < mb->end_subject &&
+        ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0)
+      {
+      if (Fop == OP_END) RRETURN(MATCH_NOMATCH);
+      return MATCH_NOMATCH;   /* (*ACCEPT) */
+      }
 
     /* We have a successful match of the whole pattern. Record the result and
     then do a direct return from the function. If there is space in the offset

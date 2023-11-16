@@ -146,14 +146,10 @@ restrictions on POSIX classes.
 pcre2_dfa_match() misbehaved. PCRE2_FIRSTLINE is now ignored for anchored 
 patterns.
 
-38. If PCRE2_ENDANCHORED was set and the end of the pattern was reached during 
-a recursion, pcre2_match() misbehaved and gave the wrong match. For example, 
-the pattern /|a(?0)/ matched against "aaaa".
-
-39. Add a test for ridiculous ovector offset values to the substring extraction 
+38. Add a test for ridiculous ovector offset values to the substring extraction 
 functions.
 
-40. Make OP_REVERSE use IMM2_SIZE for its data instead of LINK_SIZE, for 
+39. Make OP_REVERSE use IMM2_SIZE for its data instead of LINK_SIZE, for 
 consistency with OP_VREVERSE.
 
 
