@@ -168,7 +168,7 @@ static int message_len(const char *message, int offset)
 char buf[12];
 
 /* 11 magic number comes from the format below */
-return strlen(message) + 11 + snprintf(buf, sizeof(buf), "%d", offset);
+return (int)strlen(message) + 11 + snprintf(buf, sizeof(buf), "%d", offset);
 }
 
 /*************************************************
@@ -198,9 +198,13 @@ if (preg != NULL && (int)preg->re_erroffset != -1)
   }
 else
   {
-  ret = len = strlen(message);
-  strncpy(errbuf, message, errbuf_size);
-  if (errbuf_size <= len) errbuf[errbuf_size - 1] = '\0';
+  len = strlen(message);
+  if (errbuf_size != 0)
+    {
+    strncpy(errbuf, message, errbuf_size);
+    if (errbuf_size <= len) errbuf[errbuf_size - 1] = '\0';
+    }
+  ret = (int)len;
   }
 
 do {
