@@ -591,7 +591,7 @@ if (*this_start_code == OP_ASSERTBACK || *this_start_code == OP_ASSERTBACK_NOT)
   end_code = this_start_code;
   do
     {
-    size_t back = (size_t)GET(end_code, 2+LINK_SIZE);
+    size_t back = (size_t)GET2(end_code, 2+LINK_SIZE);
     if (back > max_back) max_back = back;
     end_code += GET(end_code, 1);
     }
