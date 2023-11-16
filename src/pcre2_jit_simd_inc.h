@@ -496,7 +496,7 @@ struct sljit_jump *jump[2];
 int i;
 
 SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offs1 > offs2 && offs2 >= 0);
-SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_offset()));
+SLJIT_ASSERT(diff <= (unsigned)IN_UCHARS(max_fast_forward_char_pair_offset()));
 
 /* Initialize. */
 if (common->match_end_ptr != 0)

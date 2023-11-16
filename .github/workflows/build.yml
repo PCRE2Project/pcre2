@@ -14,7 +14,7 @@ jobs:
         run: ./autogen.sh
         
       - name: Configure
-        run: ./configure CPPFLAGS='-Wall -Wextra' --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
+        run: ./configure CPPFLAGS='-Wall -Wextra' --enable-jit --enable-pcre2-16 --enable-pcre2-32
         
       - name: Build
         run: make
@@ -43,7 +43,7 @@ jobs:
         run: ./autogen.sh
         
       - name: Configure
-        run: ./configure CPPFLAGS='-Wall -Wextra' --enable-jit --enable-pcre2-8 --enable-pcre2-16 --enable-pcre2-32
+        run: ./configure CPPFLAGS='-Wall -Wextra' --enable-jit --enable-pcre2-16 --enable-pcre2-32
         
       - name: Build
         run: make
