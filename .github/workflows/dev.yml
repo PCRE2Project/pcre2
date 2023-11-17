@@ -1,22 +1,26 @@
 name: Dev
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  linux:
-    name: dev
+
+  canary:
+    name: basic
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Autogen
+      - name: Prepare
         run: ./autogen.sh
 
       - name: Configure
         run: ./configure CC='gcc -fsanitize=undefined,address' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=4
 
       - name: Build
-        run: make -j2
+        run: make -j3
 
       - name: Test (main test script)
         run: ./RunTest
@@ -27,5 +31,23 @@ jobs:
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest
 
-      - name: Test (pcre2posix test program)
+      - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
+
+  bigbird:
+    name: manyconfig
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Prepare
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Run
+        run: |
+          ./autogen.sh
+          ./maint/ManyConfigTests
