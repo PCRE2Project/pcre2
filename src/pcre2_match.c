@@ -43,6 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #endif
 
+#include "pcre2_internal.h"
+
 /* These defines enable debugging code */
 
 /* #define DEBUG_FRAMES_DISPLAY */
@@ -53,14 +55,16 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 #endif
 
+#ifdef DEBUG_SHOW_OPS
+static const char *OP_names[] = { OP_NAME_LIST };
+#endif
+
 /* These defines identify the name of the block containing "static"
 information, and fields within it. */
 
 #define NLBLOCK mb              /* Block containing newline information */
 #define PSSTART start_subject   /* Field containing processed string start */
 #define PSEND   end_subject     /* Field containing processed string end */
-
-#include "pcre2_internal.h"
 
 #define RECURSE_UNSET 0xffffffffu  /* Bigger than max group number */
 
@@ -707,7 +711,7 @@ if ((heapframe *)((char *)N + frame_size) >= frames_top)
   }
 
 #ifdef DEBUG_SHOW_RMATCH
-fprintf(stderr, "++ RMATCH %2d frame=%d", Freturn_id, Frdepth + 1);
+fprintf(stderr, "++ RMATCH %d frame=%d", Freturn_id, Frdepth + 1);
 if (group_frame_type != 0)
   {
   fprintf(stderr, " type=%x ", group_frame_type);
@@ -777,10 +781,16 @@ opcodes. */
 if (mb->match_call_count++ >= mb->match_limit) return PCRE2_ERROR_MATCHLIMIT;
 if (Frdepth >= mb->match_limit_depth) return PCRE2_ERROR_DEPTHLIMIT;
 
+#ifdef DEBUG_SHOW_OPS
+fprintf(stderr, "\n++ New frame: type=0x%x subject offset %ld\n",
+  GF_IDMASK(Fgroup_frame_type), Feptr - mb->start_subject);
+#endif
+
 for (;;)
   {
 #ifdef DEBUG_SHOW_OPS
-fprintf(stderr, "++ op=%d\n", *Fecode);
+fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
+  OP_names[*Fecode]);
 #endif
 
   Fop = (uint8_t)(*Fecode);  /* Cast needed for 16-bit and 32-bit modes */
@@ -837,6 +847,9 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
 
     if (Fcurrent_recurse != RECURSE_UNSET)
       {
+#ifdef DEBUG_SHOW_OPS
+      fprintf(stderr, "++ End within recursion\n");
+#endif
       offset = Flast_group_offset;
       for(;;)
         {
@@ -844,6 +857,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         N = (heapframe *)((char *)match_data->heapframes + offset);
         P = (heapframe *)((char *)N - frame_size);
         if (GF_IDMASK(N->group_frame_type) == GF_RECURSE) break;
+
         offset = P->last_group_offset;
         }
 
@@ -869,7 +883,12 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
          ((mb->moptions & PCRE2_NOTEMPTY) != 0 ||
            ((mb->moptions & PCRE2_NOTEMPTY_ATSTART) != 0 &&
              Fstart_match == mb->start_subject + mb->start_offset)))
+      {
+#ifdef DEBUG_SHOW_OPS
+      fprintf(stderr, "++ Backtrack because empty string\n");
+#endif
       RRETURN(MATCH_NOMATCH);
+      }
 
     /* Fail if PCRE2_ENDANCHORED is set and the end of the match is not
     the end of the subject. After (*ACCEPT) we fail the entire match (at this
@@ -879,7 +898,17 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     if (Feptr < mb->end_subject &&
         ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0)
       {
-      if (Fop == OP_END) RRETURN(MATCH_NOMATCH);
+      if (Fop == OP_END)
+        {
+#ifdef DEBUG_SHOW_OPS
+        fprintf(stderr, "++ Backtrack because not at end (endanchored set)\n");
+#endif
+        RRETURN(MATCH_NOMATCH);
+        }
+
+#ifdef DEBUG_SHOW_OPS
+      fprintf(stderr, "++ Failed ACCEPT not at end (endanchnored set)\n");
+#endif
       return MATCH_NOMATCH;   /* (*ACCEPT) */
       }
 
@@ -5842,7 +5871,6 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
       branch_start += GET(branch_start, 1);
     branch_end = NULL;
 
-
     /* Point N to the frame at the start of the most recent group, and P to its
     predecessor. Remember the subject pointer at the start of the group. */
 
@@ -6372,7 +6400,7 @@ F = (heapframe *)((char *)F - Fback_frame);       /* Backtrack */
 mb->cb->callout_flags |= PCRE2_CALLOUT_BACKTRACK; /* Note for callouts */
 
 #ifdef DEBUG_SHOW_RMATCH
-fprintf(stderr, "++ RETURN %d to %d\n", rrc, Freturn_id);
+fprintf(stderr, "++ RETURN %d to RM%d\n", rrc, Freturn_id);
 #endif
 
 switch (Freturn_id)
@@ -7404,8 +7432,17 @@ for(;;)
   mb->match_call_count = 0;
   mb->end_offset_top = 0;
   mb->skip_arg_count = 0;
+
+#ifdef DEBUG_SHOW_OPS
+  fprintf(stderr, "++ Calling match()\n");
+#endif
+
   rc = match(start_match, mb->start_code, re->top_bracket, frame_size,
     match_data, mb);
+
+#ifdef DEBUG_SHOW_OPS
+  fprintf(stderr, "++ match() returned %d\n\n", rc);
+#endif
 
   if (mb->hitend && start_partial == NULL)
     {
