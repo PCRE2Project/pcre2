@@ -4520,7 +4520,7 @@ for (fn = file_lists; fn != NULL; fn = fn->next)
     {
     int frc;
     char *end = buffer + (int)strlen(buffer);
-    while (end > buffer && isspace(end[-1])) end--;
+    while (end > buffer && isspace((unsigned char)end[-1])) end--;
     *end = 0;
     if (*buffer != 0)
       {

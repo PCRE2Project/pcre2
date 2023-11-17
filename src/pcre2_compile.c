@@ -2194,7 +2194,7 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
-    while (c == '_' || c == '-' || isspace(c))
+    while (c == '_' || c == '-' || (c <= 0xff && isspace(c)))
       {
       if (ptr >= cb->end_pattern) goto ERROR_RETURN;
       c = *ptr++;
