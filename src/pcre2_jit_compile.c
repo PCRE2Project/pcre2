@@ -5891,7 +5891,7 @@ while (TRUE)
               chr++;
               }
             while (byte != 0);
-            chr = (chr + 7) & ~7;
+            chr = (chr + 7) & (sljit_u32)(~7);
             }
           }
         while (chars->count != 255 && bytes < bytes_end);
@@ -6941,7 +6941,7 @@ int i, byte, length = 0;
 
 bit = bits[0] & 0x1;
 /* All bits will be zero or one (since bit is zero or one). */
-all = -bit;
+all = (sljit_u8)-bit;
 
 for (i = 0; i < 256; )
   {
@@ -6958,7 +6958,7 @@ for (i = 0; i < 256; )
       ranges[length] = i;
       length++;
       bit = cbit;
-      all = -cbit;
+      all = (sljit_u8)-cbit; /* sign extend bit into byte */
       }
     i++;
     }
@@ -7102,7 +7102,7 @@ for (i = 0; i < 32; i++)
   byte = bits[i];
 
   if (nclass)
-    byte = ~byte;
+    byte = (sljit_u8)~byte;
 
   j = 0;
   while (byte != 0)
@@ -8003,7 +8003,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
           if (cc[-1] == XCL_NOTPROP)
             invertcmp ^= 0x1;
 
-          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_boolprop_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
+          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_boolprop_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)(1u << (cc[1] & 0x1f)));
           add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
           }
         cc += 2;
@@ -8114,7 +8114,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
             invertcmp ^= 0x1;
             }
 
-          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
+          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)(1u << (cc[1] & 0x1f)));
           add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
 
           if (jump != NULL)
@@ -11321,10 +11321,15 @@ cc += 1 + LINK_SIZE;
 
 if (opcode == OP_ONCE)
   {
+  int data;
+  int framesize = BACKTRACK_AS(bracket_backtrack)->u.framesize;
+
+  SLJIT_ASSERT(SHRT_MIN <= framesize && framesize < SHRT_MAX/2);
   /* We temporarily encode the needs_control_head in the lowest bit.
-     Note: on the target architectures of SLJIT the ((x << 1) >> 1) returns
-     the same value for small signed numbers (including negative numbers). */
-  BACKTRACK_AS(bracket_backtrack)->u.framesize = (int)((unsigned)BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
+     The real value should be short enough for this operation to work
+     without triggering Undefined Behaviour. */
+  data = (int)((short)((unsigned short)framesize << 1) | (needs_control_head ? 1 : 0));
+  BACKTRACK_AS(bracket_backtrack)->u.framesize = data;
   }
 return cc + repeat_length;
 }

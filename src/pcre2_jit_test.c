@@ -148,7 +148,7 @@ int main(void)
 #define F_PROPERTY	0x200000
 
 struct regression_test_case {
-	int compile_options;
+	uint32_t compile_options;
 	int newline;
 	int match_options;
 	int start_offset;
@@ -1172,7 +1172,7 @@ static int regression_tests(void)
 	int counter = 0;
 	int jit_compile_mode;
 	int utf = 0;
-	int disabled_options = 0;
+	uint32_t disabled_options = 0;
 	int i;
 #ifdef SUPPORT_PCRE2_8
 	pcre2_code_8 *re8;
@@ -1377,9 +1377,9 @@ static int regression_tests(void)
 			ovector8_1 = pcre2_get_ovector_pointer_8(mdata8_1);
 			ovector8_2 = pcre2_get_ovector_pointer_8(mdata8_2);
 			for (i = 0; i < OVECTOR_SIZE * 2; ++i)
-				ovector8_1[i] = -2;
+				ovector8_1[i] = (PCRE2_SIZE)(-2);
 			for (i = 0; i < OVECTOR_SIZE * 2; ++i)
-				ovector8_2[i] = -2;
+				ovector8_2[i] = (PCRE2_SIZE)(-2);
 			pcre2_set_match_limit_8(mcontext8, 10000000);
 		}
 		if (re8) {
@@ -1417,9 +1417,9 @@ static int regression_tests(void)
 			ovector16_1 = pcre2_get_ovector_pointer_16(mdata16_1);
 			ovector16_2 = pcre2_get_ovector_pointer_16(mdata16_2);
 			for (i = 0; i < OVECTOR_SIZE * 2; ++i)
-				ovector16_1[i] = -2;
+				ovector16_1[i] = (PCRE2_SIZE)(-2);
 			for (i = 0; i < OVECTOR_SIZE * 2; ++i)
-				ovector16_2[i] = -2;
+				ovector16_2[i] = (PCRE2_SIZE)(-2);
 			pcre2_set_match_limit_16(mcontext16, 10000000);
 		}
 		if (re16) {
@@ -1462,9 +1462,9 @@ static int regression_tests(void)
 			ovector32_1 = pcre2_get_ovector_pointer_32(mdata32_1);
 			ovector32_2 = pcre2_get_ovector_pointer_32(mdata32_2);
 			for (i = 0; i < OVECTOR_SIZE * 2; ++i)
-				ovector32_1[i] = -2;
+				ovector32_1[i] = (PCRE2_SIZE)(-2);
 			for (i = 0; i < OVECTOR_SIZE * 2; ++i)
-				ovector32_2[i] = -2;
+				ovector32_2[i] = (PCRE2_SIZE)(-2);
 			pcre2_set_match_limit_32(mcontext32, 10000000);
 		}
 		if (re32) {
@@ -1844,7 +1844,7 @@ static int check_invalid_utf_result(int pattern_index, const char *type, int res
 #define CPI (PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_INVALID_UTF)
 
 struct invalid_utf8_regression_test_case {
-	int compile_options;
+	uint32_t compile_options;
 	int jit_compile_options;
 	int start_offset;
 	int skip_left;
@@ -2135,7 +2135,7 @@ static int invalid_utf8_regression_tests(void)
 #define CPI (PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_INVALID_UTF)
 
 struct invalid_utf16_regression_test_case {
-	int compile_options;
+	uint32_t compile_options;
 	int jit_compile_options;
 	int start_offset;
 	int skip_left;
@@ -2343,7 +2343,7 @@ static int invalid_utf16_regression_tests(void)
 #define CPI (PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_INVALID_UTF)
 
 struct invalid_utf32_regression_test_case {
-	int compile_options;
+	uint32_t compile_options;
 	int jit_compile_options;
 	int start_offset;
 	int skip_left;

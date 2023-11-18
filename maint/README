@@ -448,6 +448,14 @@ years.
   gigabyte memory, but perhaps another implementation might be considered.
   Needs coordination between the interpreters and JIT.
 
+. The POSIX interface is no longer POSIX compatible, because regoff_t is still
+  defined as an int.
+
+. The POSIX interface is not thread safe because it modifies a pcre2_match
+  inside its regex_t while doing matching. A thread safe version that uses
+  a thread local object has been proposed but it will require that the code
+  requires at least C11 compatibility.
+
 . See also any suggestions in the GitHub issues.
 
 Philip Hazel
