@@ -2194,7 +2194,11 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     {
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
+#if PCRE2_CODE_UNIT_WIDTH != 8
+    while (c == '_' || c == '-' || (c <= 0xff && isspace(c)))
+#else
     while (c == '_' || c == '-' || isspace(c))
+#endif
       {
       if (ptr >= cb->end_pattern) goto ERROR_RETURN;
       c = *ptr++;
