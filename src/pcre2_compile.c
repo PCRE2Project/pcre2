@@ -2781,6 +2781,7 @@ uint32_t *verbstartptr = NULL;
 uint32_t *previous_callout = NULL;
 uint32_t *parsed_pattern = cb->parsed_pattern;
 uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
+uint32_t *this_parsed_item = NULL;
 uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
 uint32_t xoptions = cb->cx->extra_options;
@@ -2866,10 +2867,11 @@ while (ptr < ptrend)
   uint32_t xset, xunset, *xoptset;
   uint32_t terminator;
   uint32_t prev_meta_quantifier;
+  uint32_t *prev_parsed_item = this_parsed_item; 
   BOOL prev_okquantifier;
   PCRE2_SPTR tempptr;
   PCRE2_SIZE offset;
-
+  
   if (parsed_pattern >= parsed_pattern_end)
     {
     errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
@@ -2881,6 +2883,10 @@ while (ptr < ptrend)
     errorcode = ERR19;
     goto FAILED;        /* Parentheses too deeply nested */
     }
+    
+  /* Remember where this item started */
+
+  this_parsed_item = parsed_pattern;
 
   /* Get next input character, save its position for callout handling. */
 
@@ -3173,7 +3179,6 @@ while (ptr < ptrend)
     continue;  /* Next character in pattern */
     }
 
-
   /* Process the next item in the main part of a pattern. */
 
   switch(c)
@@ -3450,7 +3455,7 @@ while (ptr < ptrend)
     wrapping it in non-capturing brackets, but we have to allow for a preceding
     (*MARK) for when (*ACCEPT) has an argument. */
 
-    if (parsed_pattern[-1] == META_ACCEPT)
+    if (*prev_parsed_item == META_ACCEPT)
       {
       uint32_t *p;
       for (p = parsed_pattern - 1; p >= verbstartptr; p--) p[1] = p[0];

@@ -560,4 +560,10 @@
 
 # ---------------------------------------------------- 
 
+# Quantifier after a literal that has the value of META_ACCEPT (not UTF). This
+# fails in 16-bit mode, but is OK for 32-bit.
+
+/\x{802a0000}*/
+    \x{802a0000}\x{802a0000}
+
 # End of testinput12
