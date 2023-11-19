@@ -1921,4 +1921,8 @@ Partial match:
     line0\nline1\nbreak
 No match
 
+/A\z/utf,match_invalid_utf
+    A\x80\x42\n
+No match
+
 # End of testinput10

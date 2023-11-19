@@ -642,4 +642,7 @@
     line1\nbreak
     line0\nline1\nbreak
 
+/A\z/utf,match_invalid_utf
+    A\x80\x42\n
+
 # End of testinput10

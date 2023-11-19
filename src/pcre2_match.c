@@ -6076,10 +6076,12 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     if ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0) goto ASSERT_NL_OR_EOS;
 
     /* Fall through */
-    /* Unconditional end of subject assertion (\z) */
+    /* Unconditional end of subject assertion (\z). We must check NOTEOL
+    because it gets set for invalid UTF fragments. */
 
     case OP_EOD:
-    if (Feptr < mb->end_subject) RRETURN(MATCH_NOMATCH);
+    if (Feptr < mb->end_subject || (mb->moptions & PCRE2_NOTEOL) != 0)
+      RRETURN(MATCH_NOMATCH);
     if (mb->partial != 0)
       {
       mb->hitend = TRUE;

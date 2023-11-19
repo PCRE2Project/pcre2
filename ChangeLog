@@ -162,6 +162,8 @@ locks out any accidental sign-extension.
 literal character with a value greater than or equal to 0x80000000u caused 
 undefined behaviour.
 
+43. \z was misbehaving when matching fragments inside invalid UTF strings.
+
 
 Version 10.42 11-December-2022
 ------------------------------

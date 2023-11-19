@@ -1607,6 +1607,10 @@ No match
 /aa/utf,ucp,match_invalid_utf,global
     \x{d800}aa
  0: aa
+    
+/A\z/utf,match_invalid_utf
+    A\x{df00}\n
+No match
 
 # ---------------------------------------------------- 
 
