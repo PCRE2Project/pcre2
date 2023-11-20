@@ -1,4 +1,4 @@
-.TH PCRE2GREP 1 "08 February 2023" "PCRE2 10.43"
+.TH PCRE2GREP 1 "20 November 2023" "PCRE2 10.43"
 .SH NAME
 pcre2grep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -367,6 +367,10 @@ mode, \fB--colour\fP has no effect, and no context is shown. That is, the
 match in a line, each of them is shown separately. This option is mutually
 exclusive with \fB--output\fP, \fB--line-offsets\fP, and \fB--only-matching\fP.
 .TP
+\fB--group-separator\fP=\fItext\fP
+Output this text string instead of two hyphens between groups of lines when
+\fB-A\fP, \fB-B\fP, or \fB-C\fP is in use. See also \fB--no-group-separator\fP.
+.TP
 \fB-H\fP, \fB--with-filename\fP
 Force the inclusion of the file name at the start of output lines when
 searching a single file. The file name is not normally shown in this case.
@@ -589,6 +593,11 @@ for matching lines or a hyphen for context lines. If the file name is also
 being output, it precedes the line number. When the \fB-M\fP option causes a
 pattern to match more than one line, only the first is preceded by its line
 number. This option is forced if \fB--line-offsets\fP is used.
+.TP
+\fB--no-group-separator\fP\fP
+Do not output a separator between groups of lines when \fB-A\fP, \fB-B\fP, or
+\fB-C\fP is in use. The default is to output a line containing two hyphens. See
+also \fB--group-separator\fP.
 .TP
 \fB--no-jit\fP
 If the PCRE2 library is built with support for just-in-time compiling (which
@@ -997,6 +1006,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 February 2023
+Last updated: 20 November 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

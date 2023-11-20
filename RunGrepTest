@@ -853,6 +853,14 @@ fi
 echo "---------------------------- Test 151 -----------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep --colour=always -e this -e The -e 'The wo' testdata/grepinputv) >>testtrygrep
 
+echo "---------------------------- Test 152 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -nA3 --group-separator='++' 'four' ./testdata/grepinputx) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 153 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -nA3 --no-group-separator 'four' ./testdata/grepinputx) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 
 # Now compare the results.
 

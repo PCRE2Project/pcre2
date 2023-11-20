@@ -155,14 +155,16 @@ consistency with OP_VREVERSE.
 40. In some legacy environments with a pre C99 snprintf, pcre2_regerror could
 return an incorrect value when the provided buffer was too small.
 
-41. Applied pull request #342 which adds sanity checks for ctype functions and 
+41. Applied pull request #342 which adds sanity checks for ctype functions and
 locks out any accidental sign-extension.
 
 42. In the 32-bit library, in non-UTF mode, a quantifier that followed a
-literal character with a value greater than or equal to 0x80000000u caused 
+literal character with a value greater than or equal to 0x80000000u caused
 undefined behaviour.
 
 43. \z was misbehaving when matching fragments inside invalid UTF strings.
+
+44. Implement --group-separator and --no-group-separator for pcre2grep.
 
 
 Version 10.42 11-December-2022

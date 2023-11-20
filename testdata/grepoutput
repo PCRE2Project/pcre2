@@ -1232,3 +1232,24 @@ RC=2
 [1;31mThe wo[0mrd is cat in [1;31mthis[0m line
 [1;31mThe[0m caterpillar sat on the mat
 [1;31mThe[0m snowcat is not an animal
+---------------------------- Test 152 -----------------------------
+24:four
+25-five
+26-six
+27-seven
+++
+34:fourteen
+35-fifteen
+36-sixteen
+37-seventeen
+RC=0
+---------------------------- Test 153 -----------------------------
+24:four
+25-five
+26-six
+27-seven
+34:fourteen
+35-fifteen
+36-sixteen
+37-seventeen
+RC=0
