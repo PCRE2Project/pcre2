@@ -2782,6 +2782,7 @@ uint32_t *previous_callout = NULL;
 uint32_t *parsed_pattern = cb->parsed_pattern;
 uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
 uint32_t *this_parsed_item = NULL;
+uint32_t *prev_parsed_item = NULL;
 uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
 uint32_t xoptions = cb->cx->extra_options;
@@ -2867,11 +2868,10 @@ while (ptr < ptrend)
   uint32_t xset, xunset, *xoptset;
   uint32_t terminator;
   uint32_t prev_meta_quantifier;
-  uint32_t *prev_parsed_item = this_parsed_item; 
   BOOL prev_okquantifier;
   PCRE2_SPTR tempptr;
   PCRE2_SIZE offset;
-  
+
   if (parsed_pattern >= parsed_pattern_end)
     {
     errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
@@ -2883,10 +2883,17 @@ while (ptr < ptrend)
     errorcode = ERR19;
     goto FAILED;        /* Parentheses too deeply nested */
     }
-    
-  /* Remember where this item started */
 
-  this_parsed_item = parsed_pattern;
+  /* If the last time round this loop something was added, parsed_pattern will
+  no longer be equal to this_parsed_item. Remember where the previous item
+  started and reset for the next item. Note that sometimes round the loop,
+  nothing gets added (e.g. for ignored white space). */
+
+  if (this_parsed_item != parsed_pattern)
+    {
+    prev_parsed_item = this_parsed_item;
+    this_parsed_item = parsed_pattern;
+    }
 
   /* Get next input character, save its position for callout handling. */
 
@@ -3440,7 +3447,8 @@ while (ptr < ptrend)
 
     /* ---- Quantifier post-processing ---- */
 
-    /* Check that a quantifier is allowed after the previous item. */
+    /* Check that a quantifier is allowed after the previous item. This
+    guarantees that there is a previous item. */
 
     CHECK_QUANTIFIER:
     if (!prev_okquantifier)

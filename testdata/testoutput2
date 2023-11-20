@@ -17932,6 +17932,8 @@ No match
 # /|a(?0)/endanchored
 #    aaaa
 
+/A +/extended
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

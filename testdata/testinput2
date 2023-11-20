@@ -6051,4 +6051,6 @@ a)"xI
 # /|a(?0)/endanchored
 #    aaaa
 
+/A +/extended
+
 # End of testinput2
