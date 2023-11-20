@@ -13,6 +13,13 @@ Written by Philip Hazel, October 2016
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+/* stack size adjustment */
+#include <sys/time.h>
+#include <sys/resource.h>
+
+#define STACK_SIZE_MB 32
 
 #ifndef PCRE2_CODE_UNIT_WIDTH
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -213,7 +220,30 @@ return (*((uint32_t *)callout_data) > 100)? PCRE2_ERROR_CALLOUT : 0;
 /* Putting in this apparently unnecessary prototype prevents gcc from giving a
 "no previous prototype" warning when compiling at high warning level. */
 
+int LLVMFuzzerInitialize(int *, char ***);
+
 int LLVMFuzzerTestOneInput(const unsigned char *, size_t);
+
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+int rc;
+struct rlimit rlim;
+getrlimit(RLIMIT_STACK, &rlim);
+rlim.rlim_cur = STACK_SIZE_MB * 1024 * 1024;
+if (rlim.rlim_cur > rlim.rlim_max)
+  {
+  fprintf(stderr, "hard stack size limit is too small (needed 8MiB)!\n");
+  _exit(1);
+  }
+rc = setrlimit(RLIMIT_STACK, &rlim);
+if (rc != 0)
+  {
+  fprintf(stderr, "failed to expand stack size\n");
+  _exit(1);
+  }
+
+return 0;
+}
 
 /* Here's the driving function. */
 
@@ -495,6 +525,8 @@ return 0;
 int main(int argc, char **argv)
 {
 int i;
+
+LLVMFuzzerInitialize(&argc, &argv);
 
 if (argc < 2)
   {
