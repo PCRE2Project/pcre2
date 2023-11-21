@@ -3108,8 +3108,11 @@ while (ptr < ptrend)
          !read_repeat_counts(&tempptr, ptrend, NULL, NULL, &errorcode))))
     {
     if (after_manual_callout-- <= 0)
+      {
       parsed_pattern = manage_callouts(thisptr, &previous_callout, auto_callout,
         parsed_pattern, cb);
+      this_parsed_item = parsed_pattern;  /* New start for current item */
+      }
     }
 
   /* If expect_cond_assert is 2, we have just passed (?( and are expecting an
