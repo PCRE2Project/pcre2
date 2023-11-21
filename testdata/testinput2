@@ -6053,4 +6053,6 @@ a)"xI
 
 /A +/extended
 
+/(*ACCEPT)+/B,auto_callout
+
 # End of testinput2

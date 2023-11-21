@@ -2878,7 +2878,7 @@ while (ptr < endptr)
 
         /* Prepare to repeat to find the next match in the line. */
 
-        match = FALSE;
+        //match = FALSE;
         if (line_buffered) fflush(stdout);
         rc = 0;                      /* Had some success */
 

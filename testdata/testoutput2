@@ -17934,6 +17934,18 @@ No match
 
 /A +/extended
 
+/(*ACCEPT)+/B,auto_callout
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 10
+        SBra
+        *ACCEPT
+        KetRmax
+        Callout 255 10 0
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

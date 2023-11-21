@@ -54,7 +54,8 @@ additional functionality.
 </P>
 <P>
 <b>IMPORTANT NOTE</b>: The functions described here are NOT thread-safe, and
-should not be used in multi-threaded applications. Use the native API instead.
+should not be used in multi-threaded applications. They are also limited to
+processing subjects that are not bigger than 2GB. Use the native API instead.
 </P>
 <P>
 These functions are wrapper functions that ultimately call the PCRE2 native
@@ -99,7 +100,7 @@ captured substrings. It also defines some constants whose names start with
 <P>
 Note that these functions are just POSIX-style wrappers for PCRE2's native API.
 They do not give POSIX regular expression behaviour, and they are not
-thread-safe.
+thread-safe or even POSIX compatible.
 </P>
 <P>
 Those POSIX option bits that can reasonably be mapped to PCRE2 native options
@@ -330,6 +331,11 @@ of each substring, respectively. The 0th element of the vector relates to the
 entire portion of <i>string</i> that was matched; subsequent elements relate to
 the capturing subpatterns of the regular expression. Unused entries in the
 array have both structure members set to -1.
+</P>
+<P>
+<i>regmatch_t</i> as well as the <i>regoff_t</i> typedef it uses are defined in
+<b>pcre2posix.h</b> and are not warranted to have the same size or layout as other
+similarly named types from other libraries that provide POSIX-style matching.
 </P>
 <P>
 A successful match yields a zero return; various error codes are defined in the

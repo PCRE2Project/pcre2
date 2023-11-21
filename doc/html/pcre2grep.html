@@ -425,6 +425,11 @@ match in a line, each of them is shown separately. This option is mutually
 exclusive with <b>--output</b>, <b>--line-offsets</b>, and <b>--only-matching</b>.
 </P>
 <P>
+<b>--group-separator</b>=<i>text</i>
+Output this text string instead of two hyphens between groups of lines when
+<b>-A</b>, <b>-B</b>, or <b>-C</b> is in use. See also <b>--no-group-separator</b>.
+</P>
+<P>
 <b>-H</b>, <b>--with-filename</b>
 Force the inclusion of the file name at the start of output lines when
 searching a single file. The file name is not normally shown in this case.
@@ -676,6 +681,12 @@ for matching lines or a hyphen for context lines. If the file name is also
 being output, it precedes the line number. When the <b>-M</b> option causes a
 pattern to match more than one line, only the first is preceded by its line
 number. This option is forced if <b>--line-offsets</b> is used.
+</P>
+<P>
+<b>--no-group-separator</b>
+Do not output a separator between groups of lines when <b>-A</b>, <b>-B</b>, or
+<b>-C</b> is in use. The default is to output a line containing two hyphens. See
+also <b>--group-separator</b>.
 </P>
 <P>
 <b>--no-jit</b>
@@ -1096,7 +1107,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 February 2023
+Last updated: 20 November 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>
