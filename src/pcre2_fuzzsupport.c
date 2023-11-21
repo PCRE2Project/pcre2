@@ -19,7 +19,7 @@ Written by Philip Hazel, October 2016
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#define STACK_SIZE_MB 32
+#define STACK_SIZE_MB 256
 
 #ifndef PCRE2_CODE_UNIT_WIDTH
 #define PCRE2_CODE_UNIT_WIDTH 8
