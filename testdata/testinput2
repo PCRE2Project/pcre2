@@ -6055,4 +6055,8 @@ a)"xI
 
 /(*ACCEPT)+/B,auto_callout
 
+/a\z/
+    a
+    a\=noteol 
+
 # End of testinput2

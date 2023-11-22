@@ -17946,6 +17946,12 @@ No match
         End
 ------------------------------------------------------------------
 
+/a\z/
+    a
+ 0: a
+    a\=noteol 
+ 0: a
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
