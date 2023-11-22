@@ -168,6 +168,8 @@ undefined behaviour.
 
 45. Fix \X matching in 32 bit mode without UTF in JIT.
 
+46. Fix backref iterators when PCRE2_MATCH_UNSET_BACKREF is set in JIT.
+
 
 Version 10.42 11-December-2022
 ------------------------------
