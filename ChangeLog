@@ -166,6 +166,8 @@ undefined behaviour.
 
 44. Implement --group-separator and --no-group-separator for pcre2grep.
 
+45. Fix \X matching in 32 bit mode without UTF in JIT.
+
 
 Version 10.42 11-December-2022
 ------------------------------

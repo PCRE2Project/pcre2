@@ -8718,7 +8718,7 @@ c = *cc++;
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
 if (c >= 0x110000)
-  return NULL;
+  return cc;
 #endif /* PCRE2_CODE_UNIT_WIDTH == 32 */
 lgb = UCD_GRAPHBREAK(c);
 
@@ -8958,7 +8958,7 @@ switch(type)
 #else
   sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS2(W, W, W), SLJIT_IMM,
     common->invalid_utf ? SLJIT_FUNC_ADDR(do_extuni_utf_invalid) : SLJIT_FUNC_ADDR(do_extuni_no_utf));
-  if (!common->utf || common->invalid_utf)
+  if (common->invalid_utf)
     add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
 #endif
 
@@ -12044,7 +12044,7 @@ switch(opcode)
     }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-  if (common->utf)
+  if (type == OP_EXTUNI || common->utf)
     {
     OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
     detect_partial_match(common, &no_match);

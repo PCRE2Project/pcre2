@@ -1814,4 +1814,13 @@ No match
 Failed: error 134 at offset 11: character code point value in \x{} or \o{} is too large
     \x{802a0000}\x{802a0000}
 
+# UTF matching without UTF, check invalid UTF characters
+/\X++/
+    a\x{110000}\x{ffffffff}
+** Character \x{110000} is greater than 0xffff and UTF-16 mode is not enabled.
+** Truncation will probably give the wrong result.
+** Character \x{ffffffff} is greater than 0xffff and UTF-16 mode is not enabled.
+** Truncation will probably give the wrong result.
+ 0: a\x00\x{ffff}
+
 # End of testinput12

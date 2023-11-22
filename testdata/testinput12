@@ -569,4 +569,8 @@
 /\x{802a0000}*/
     \x{802a0000}\x{802a0000}
 
+# UTF matching without UTF, check invalid UTF characters
+/\X++/
+    a\x{110000}\x{ffffffff}
+
 # End of testinput12
