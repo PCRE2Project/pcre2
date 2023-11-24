@@ -157,7 +157,18 @@ library. They are also documented in the pcre2build man page.
   --disable-shared
   --disable-static
 
-  (See also "Shared libraries on Unix-like systems" below.)
+  Setting --disable-shared ensures that PCRE2 libraries are built as static
+  libraries. The binaries that are then created as part of the build process
+  (for example, pcre2test and pcre2grep) are linked statically with one or more
+  PCRE2 libraries, but may also be dynamically linked with other libraries such
+  as libc. If you want these binaries to be fully statically linked, you can
+  set LDFLAGS like this:
+
+  LDFLAGS=--static ./configure --disable-shared
+
+  Note the two hyphens in --static. Of course, this works only if static
+  versions of all the relevant libraries are available for linking. See also
+  "Shared libraries" below.
 
 . By default, only the 8-bit library is built. If you add --enable-pcre2-16 to
   the "configure" command, the 16-bit library is also built. If you add
@@ -560,7 +571,10 @@ configuring it. For example:
 ./configure --prefix=/usr/gnu --disable-shared
 
 Then run "make" in the usual way. Similarly, you can use --disable-static to
-build only shared libraries.
+build only shared libraries. Note, however, that when you build only static
+libraries, binary programs such as pcre2test and pcre2grep may still be
+dynamically linked with other libraries (for example, libc) unless you set
+LDFLAGS to --static when running "configure".
 
 
 Cross-compiling using autotools
@@ -933,4 +947,4 @@ The distribution should contain the files listed below.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 11 August 2023
+Last updated: 24 November 2023

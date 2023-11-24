@@ -1,4 +1,4 @@
-.TH PCRE2BUILD 3 "09 AUgust 2023" "PCRE2 10.43"
+.TH PCRE2BUILD 3 "24 November" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .
@@ -98,7 +98,17 @@ one of
   --disable-shared
   --disable-static
 .sp
-to the \fBconfigure\fP command.
+to the \fBconfigure\fP command. Setting --disable-shared ensures that PCRE2
+libraries are built as static libraries. The binaries that are then created as
+part of the build process (for example, \fBpcre2test\fP and \fBpcre2grep\fP)
+are linked statically with one or more PCRE2 libraries, but may also be
+dynamically linked with other libraries such as \fBlibc\fP. If you want these
+binaries to be fully statically linked, you can set LDFLAGS like this:
+.sp
+LDFLAGS=--static ./configure --disable-shared
+.sp
+Note the two hyphens in --static. Of course, this works only if static versions
+of all the relevant libraries are available for linking.
 .
 .
 .SH "UNICODE AND UTF SUPPORT"
@@ -649,6 +659,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 09 August 2023
+Last updated: 24 November 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi
