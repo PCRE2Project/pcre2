@@ -3093,8 +3093,16 @@ if (*cc == OP_COND || *cc == OP_SCOND)
   has_alternatives = FALSE;
 
 cc = next_opcode(common, cc);
+
 if (has_alternatives)
+  {
+  if (*cc == OP_REVERSE)
+    cc += 1 + IMM2_SIZE;
+  else if (*cc == OP_VREVERSE)
+    cc += 1 + 2 * IMM2_SIZE;
+
   current_offset = common->then_offsets + (cc - common->start);
+  }
 
 while (cc < end)
   {
@@ -3103,7 +3111,18 @@ while (cc < end)
   else
     {
     if (*cc == OP_ALT && has_alternatives)
-      current_offset = common->then_offsets + (cc + 1 + LINK_SIZE - common->start);
+      {
+      cc += 1 + LINK_SIZE;
+
+      if (*cc == OP_REVERSE)
+        cc += 1 + IMM2_SIZE;
+      else if (*cc == OP_VREVERSE)
+        cc += 1 + 2 * IMM2_SIZE;
+
+      current_offset = common->then_offsets + (cc - common->start);
+      continue;
+      }
+
     if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && current_offset != NULL)
       *current_offset = 1;
     cc = next_opcode(common, cc);

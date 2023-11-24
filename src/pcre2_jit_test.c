@@ -879,6 +879,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?!(?(?=a)ab|b(*THEN)d))bn|bnn", "bnn" },
 	{ MU, A, 0, 0, "(?=(*THEN: ))* ", " " },
 	{ MU, A, 0, 0, "a(*THEN)(?R) |", "a" },
+	{ MU, A, 0, 0 | F_NOMATCH, "(?<!(*THEN)a|(*THEN)b|(*THEN)ab?|(*THEN)ba?|)", "c" },
 
 	/* Recurse and control verbs. */
 	{ MU, A, 0, 0, "(a(*ACCEPT)b){0}a(?1)b", "aacaabb" },
