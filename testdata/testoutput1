@@ -10375,4 +10375,124 @@ No match
     BBAAAAAACC 
  0: AAAAAA
 
+# This pattern validates regular expression patterns. The original that I was
+# sent was this:
+# /^((?:(?:[^?+*{}()[\]\\|]+|\\.|\[(?:\^?\\.|\^[^\\]|[^\\^])(?:[^\]\\]+|\\.)*\]|\((?:\?[:=!]|\?<[=!]|\?>)?(?1)??\)|\(\?(?:R|[+-]?\d+)\))(?:(?:[?+*]|\{\d+(?:,\d*)?\})[?+]?)?|\|)*)$/
+# This is not very readable, and also does not handle all features. I have done
+# some work on it.
+
+/^
+(?<re>
+# A regular expression is zero or more of these items.
+  (?:
+  # An item is one of these:
+    (?:
+      [^?+*{}()\[\]\\|]++|  # Non-meta characters or unquoted .
+      \\.|                  # Quoted .
+
+      \[                    # Class, which is [
+      (?:                   # Followed by
+        \^?\\.|             # Optional ^ and any escaped character
+        \^[^\\]|            # OR ^ and not escaped character
+        [^\\^]              # OR neither ^ nor \
+      )                     # Followed by
+      (?:[^\]\\]+|\\.)*+    # Zero or more (not ] or \) OR escaped dot
+      \]|                   # Class ends with ]
+
+      \(                    # Parenthesized group
+        (?:                 # Start with optional
+          \?[:=!]|          # ? followed by : = !
+          \?<[=!]|          # OR ?< followed by = or !
+          \?>               # OR ?>
+        )?
+        (?&re)??            # Then a nested <re>
+      \)|                   # End parenthesized group
+
+      \(\?                  # Other parenthesized items
+        (?:                 # (? followed by
+          R|                # R
+          [+-]?\d++         # Or optional +- and digits
+        )
+      \)|                   # End parens
+
+      \(\*                  # Verbs
+        (?:
+          COMMIT|
+          FAIL|
+          MARK:[^)]*|
+          (?:PRUNE|SKIP|THEN)(?::[^\)]*+)?
+        )
+      \)
+    )                       # End list of items
+
+    # Followed by an optional quantifier
+
+    (?:
+      (?:
+        [?+*]     # ?+*
+        |         # OR
+        \{\d+     # { digits
+        (?:,\d*)? # optionally followed by ,digits
+        \}        # then closing }
+        |         # OR
+        \{,\d+}   # {,digits}
+      )
+      [?+]?       # optional ungreedy or possessive
+    )?
+
+    | # OR an "item" is a branch ending
+
+    \|
+
+  )*  # Zero or more top-level items.
+)     # End regex group.
+$/x
+    [abcdef]
+ 0: [abcdef]
+ 1: [abcdef]
+    [abc\\]def]
+ 0: [abc\]def]
+ 1: [abc\]def]
+    a.b|abcd
+ 0: a.b|abcd
+ 1: a.b|abcd
+    ab()d
+ 0: ab()d
+ 1: ab()d
+    ab{1,3}d
+ 0: ab{1,3}d
+ 1: ab{1,3}d
+    ab{,3}d
+ 0: ab{,3}d
+ 1: ab{,3}d
+    ab(*FAIL)d(*COMMIT)(*SKIP)(*THEN:abc)
+ 0: ab(*FAIL)d(*COMMIT)(*SKIP)(*THEN:abc)
+ 1: ab(*FAIL)d(*COMMIT)(*SKIP)(*THEN:abc)
+    ab(*MARK:xyz)
+ 0: ab(*MARK:xyz)
+ 1: ab(*MARK:xyz)
+    (?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;:])(?=.{8,16})(?!.*[\\s])
+ 0: (?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;:])(?=.{8,16})(?!.*[\s])
+ 1: (?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[,;:])(?=.{8,16})(?!.*[\s])
+    abcd\\t\\n\\r\\f\\a\\e\\071\\x3b\\^\\\\\\?caxyz
+ 0: abcd\t\n\r\f\a\e\071\x3b\^\\\?caxyz
+ 1: abcd\t\n\r\f\a\e\071\x3b\^\\\?caxyz
+    a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz
+ 0: a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz
+ 1: a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz
+    \\G(?:(?=(\\1.|)(.))){1,13}?(?!.*\\2.*\\2)\\1\\K\\2
+ 0: \G(?:(?=(\1.|)(.))){1,13}?(?!.*\2.*\2)\1\K\2
+ 1: \G(?:(?=(\1.|)(.))){1,13}?(?!.*\2.*\2)\1\K\2
+\= Expect no match
+    ab)d
+No match
+    ab(d
+No match
+    {4,5}
+No match
+    a[]b
+No match
+    (a)(?(1)a|b|c)
+No match
+
 # End of testinput1 

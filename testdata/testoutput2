@@ -17952,6 +17952,19 @@ No match
     a\=noteol 
  0: a
 
+# This matches a character that only exists once in the subject, sort of like a
+# hypothetical "(.)(?<!\1.+)(?!.*\1)". That has unlimited variable length
+# lookbehind, so is invalid. This pattern doesn't work in Perl 5.38.0.
+
+/\G(?:(?=(\1.|)(.))){1,13}?(?!.*\2.*\2)\1\K\2/g
+    aaabcccdeee
+ 0: b
+ 1: aaa
+ 2: b
+ 0: d
+ 1: ccc
+ 2: d
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

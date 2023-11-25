@@ -6059,4 +6059,11 @@ a)"xI
     a
     a\=noteol 
 
+# This matches a character that only exists once in the subject, sort of like a
+# hypothetical "(.)(?<!\1.+)(?!.*\1)". That has unlimited variable length
+# lookbehind, so is invalid. This pattern doesn't work in Perl 5.38.0.
+
+/\G(?:(?=(\1.|)(.))){1,13}?(?!.*\2.*\2)\1\K\2/g
+    aaabcccdeee
+
 # End of testinput2
