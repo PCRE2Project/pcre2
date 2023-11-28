@@ -17965,6 +17965,24 @@ No match
  1: ccc
  2: d
 
+# This currently doesn't match JIT
+
+/|(?0)./endanchored,aftertext
+\= Expect error
+    abcd\=no_jit
+Failed: error -52: nested recursion at the same subject position
+
+/|a(?0)/endanchored
+    aaaa
+ 0: aaaa
+
+# This currently doesn't match JIT
+
+/(?:|(?0).)(?(R)|\z)/
+\= Expect error
+    abcd\=no_jit
+Failed: error -52: nested recursion at the same subject position
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

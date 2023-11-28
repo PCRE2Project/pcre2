@@ -170,6 +170,11 @@ undefined behaviour.
 
 46. Fix backref iterators when PCRE2_MATCH_UNSET_BACKREF is set in JIT.
 
+47. Refactor the handling of whole-pattern recursion (?0) in pcre2_match() so
+that its end is handled similarly to other recursions. This has altered the
+behaviour of   /|(?0)./endanchored   which was previously not right. However,
+it still differs from JIT.
+
 
 Version 10.42 11-December-2022
 ------------------------------
