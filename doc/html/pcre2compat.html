@@ -246,6 +246,12 @@ to set characters by context just like Perl's "/d". A regular expression using
 PCRE2_UTF and PCRE2_UCP will use similar rules to Perl's "/u"; something closer
 to "/a" could be selected by adding other PCRE2_EXTRA_ASCII* options on top.
 </P>
+<P>
+22. Some recursive patterns that Perl diagnoses as infinite recursions can be
+handled by PCRE2, either by the interpreter or the JIT. An example is
+/(?:|(?0)abcd)(?(R)|\z)/, which matches a sequence of any number of repeated
+"abcd" substrings at the end of the subject.
+</P>
 <br><b>
 AUTHOR
 </b><br>
@@ -261,7 +267,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 12 October 2023
+Last updated: 30 November 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

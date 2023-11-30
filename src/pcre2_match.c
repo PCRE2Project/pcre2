@@ -5383,9 +5383,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 
     /* ===================================================================== */
-    /* Recursion either matches the current regex, or some subexpression. The
-    offset data is the offset to the starting bracket from the start of the
-    whole pattern. (This is so that it works from duplicated subpatterns.) */
+    /* Pattern recursion either matches the current regex, or some
+    subexpression. The offset data is the offset to the starting bracket from
+    the start of the whole pattern. This is so that it works from duplicated
+    subpatterns. For a whole-pattern recursion, we have to infer the number
+    zero. */
 
 #define Lframe_type F->temp_32[0]
 #define Lstart_branch F->temp_sptr[0]
@@ -5394,9 +5396,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     bracode = mb->start_code + GET(Fecode, 1);
     number = (bracode == mb->start_code)? 0 : GET2(bracode, 1 + LINK_SIZE);
 
-    /* If we are already in a recursion, check for repeating the same one
-    without advancing the subject pointer. This should catch convoluted mutual
-    recursions. (Some simple cases are caught at compile time.) */
+    /* If we are already in a pattern recursion, check for repeating the same
+    one without changing the subject pointer or the last referenced character
+    in the subject. This should catch convoluted mutual recursions. (Some
+    simple cases are caught at compile time.) */
 
     if (Fcurrent_recurse != RECURSE_UNSET)
       {
@@ -5407,15 +5410,18 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         P = (heapframe *)((char *)N - frame_size);
         if (N->group_frame_type == (GF_RECURSE | number))
           {
-          if (Feptr == P->eptr) return PCRE2_ERROR_RECURSELOOP;
+          if (Feptr == P->eptr && mb->last_used_ptr == P->recurse_last_used)
+            return PCRE2_ERROR_RECURSELOOP;
           break;
           }
         offset = P->last_group_offset;
         }
       }
 
-    /* Now run the recursion, branch by branch. */
+    /* Remember the current last referenced character and then run the
+    recursion branch by branch. */
 
+    F->recurse_last_used = mb->last_used_ptr;
     Lstart_branch = bracode;
     Lframe_type = GF_RECURSE | number;
 

@@ -677,8 +677,8 @@ typedef struct pcre2_real_match_data {
 
 #ifndef PCRE2_PCRE2TEST
 
-/* Structures for checking for mutual recursion when scanning compiled or
-parsed code. */
+/* Structures for checking for mutual function recursion when scanning compiled
+or parsed code. */
 
 typedef struct recurse_check {
   struct recurse_check *prev;
@@ -690,7 +690,7 @@ typedef struct parsed_recurse_check {
   uint32_t *groupptr;
 } parsed_recurse_check;
 
-/* Structure for building a cache when filling in recursion offsets. */
+/* Structure for building a cache when filling in pattern recursion offsets. */
 
 typedef struct recurse_cache {
   PCRE2_SPTR group;
@@ -757,7 +757,7 @@ typedef struct compile_block {
   int  max_lookbehind;             /* Maximum lookbehind encountered (characters) */
   BOOL had_accept;                 /* (*ACCEPT) encountered */
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
-  BOOL had_recurse;                /* Had a recursion or subroutine call */
+  BOOL had_recurse;                /* Had a pattern recursion or subroutine call */
   BOOL dupnames;                   /* Duplicate names exist */
 } compile_block;
 
@@ -775,6 +775,7 @@ call within the pattern when running pcre2_dfa_match(). */
 typedef struct dfa_recursion_info {
   struct dfa_recursion_info *prevrec;
   PCRE2_SPTR subject_position;
+  PCRE2_SPTR last_used_ptr;
   uint32_t group_num;
 } dfa_recursion_info;
 
@@ -795,7 +796,7 @@ typedef struct heapframe {
   PCRE2_SIZE length;         /* Used for character, string, or code lengths */
   PCRE2_SIZE back_frame;     /* Amount to subtract on RRETURN */
   PCRE2_SIZE temp_size;      /* Used for short-term PCRE2_SIZE values */
-  uint32_t rdepth;           /* "Recursion" depth */
+  uint32_t rdepth;           /* Function "recursion" depth within pcre2_match() */
   uint32_t group_frame_type; /* Type information for group frames */
   uint32_t temp_32[4];       /* Used for short-term 32-bit or BOOL values */
   uint8_t return_id;         /* Where to go on in internal "return" */
@@ -828,14 +829,15 @@ typedef struct heapframe {
   allows for exactly the right size ovector for the number of capturing
   parentheses. (See also the comment for pcre2_real_match_data above.) */
 
-  PCRE2_SPTR eptr;           /* MUST BE FIRST */
-  PCRE2_SPTR start_match;    /* Can be adjusted by \K */
-  PCRE2_SPTR mark;           /* Most recent mark on the success path */
-  uint32_t current_recurse;  /* Current (deepest) recursion number */
-  uint32_t capture_last;     /* Most recent capture */
-  PCRE2_SIZE last_group_offset;  /* Saved offset to most recent group frame */
-  PCRE2_SIZE offset_top;     /* Offset after highest capture */
-  PCRE2_SIZE ovector[131072]; /* Must be last in the structure */
+  PCRE2_SPTR eptr;              /* MUST BE FIRST */
+  PCRE2_SPTR start_match;       /* Can be adjusted by \K */
+  PCRE2_SPTR mark;              /* Most recent mark on the success path */
+  PCRE2_SPTR recurse_last_used; /* Last character used at time of pattern recursion */
+  uint32_t current_recurse;     /* Group number of current (deepest) pattern recursion */
+  uint32_t capture_last;        /* Most recent capture */
+  PCRE2_SIZE last_group_offset; /* Saved offset to most recent group frame */
+  PCRE2_SIZE offset_top;        /* Offset after highest capture */
+  PCRE2_SIZE ovector[131072];   /* Must be last in the structure */
 } heapframe;
 
 /* This typedef is a check that the size of the heapframe structure is a
@@ -877,7 +879,7 @@ typedef struct match_block {
   uint16_t name_count;            /* Number of names in name table */
   uint16_t name_entry_size;       /* Size of entry in names table */
   PCRE2_SPTR name_table;          /* Table of group names */
-  PCRE2_SPTR start_code;          /* For use when recursing */
+  PCRE2_SPTR start_code;          /* For use in pattern recursion */
   PCRE2_SPTR start_subject;       /* Start of the subject string */
   PCRE2_SPTR check_subject;       /* Where UTF-checked from */
   PCRE2_SPTR end_subject;         /* Usable end of the subject string */
@@ -889,7 +891,7 @@ typedef struct match_block {
   PCRE2_SPTR nomatch_mark;        /* Mark pointer to pass back on failure */
   PCRE2_SPTR verb_ecode_ptr;      /* For passing back info */
   PCRE2_SPTR verb_skip_ptr;       /* For passing back a (*SKIP) name */
-  uint32_t verb_current_recurse;  /* Current recurse when (*VERB) happens */
+  uint32_t verb_current_recurse;  /* Current recursion group when (*VERB) happens */
   uint32_t moptions;              /* Match options */
   uint32_t poptions;              /* Pattern options */
   uint32_t skip_arg_count;        /* For counting SKIP_ARGs */
@@ -929,7 +931,7 @@ typedef struct dfa_match_block {
   pcre2_callout_block *cb;        /* Points to a callout block */
   void *callout_data;             /* To pass back to callouts */
   int (*callout)(pcre2_callout_block *,void *);  /* Callout function or NULL */
-  dfa_recursion_info *recursive;  /* Linked list of recursion data */
+  dfa_recursion_info *recursive;  /* Linked list of pattern recursion data */
 } dfa_match_block;
 
 #endif  /* PCRE2_PCRE2TEST */

@@ -6648,4 +6648,7 @@ $/x
     a[]b
     (a)(?(1)a|b|c)
 
+/^..A(*SKIP)B|C/
+    12ADC
+
 # End of testinput1 

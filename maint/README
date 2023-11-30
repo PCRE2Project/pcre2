@@ -448,12 +448,9 @@ years.
   gigabyte memory, but perhaps another implementation might be considered.
   Needs coordination between the interpreters and JIT.
 
-. There are regular requests for variable-length lookbehinds. An implementation
-  exists but is missing JIT support.
-
 . See also any suggestions in the GitHub issues.
 
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 30 September 2023
+Last updated: 30 November 2023

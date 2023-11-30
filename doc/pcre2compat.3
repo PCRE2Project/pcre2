@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "19 September 2023" "PCRE2 10.43"
+.TH PCRE2COMPAT 3 "30 November 2023" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -210,6 +210,11 @@ fall into any stack-overflow limit. PCRE2 made a similar change at release
 to set characters by context just like Perl's "/d". A regular expression using
 PCRE2_UTF and PCRE2_UCP will use similar rules to Perl's "/u"; something closer
 to "/a" could be selected by adding other PCRE2_EXTRA_ASCII* options on top.
+.P
+22. Some recursive patterns that Perl diagnoses as infinite recursions can be
+handled by PCRE2, either by the interpreter or the JIT. An example is
+/(?:|(?0)abcd)(?(R)|\ez)/, which matches a sequence of any number of repeated
+"abcd" substrings at the end of the subject.
 .
 .
 .SH AUTHOR
@@ -226,6 +231,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 October 2023
+Last updated: 30 November 2023
 Copyright (c) 1997-2023 University of Cambridge.
 .fi

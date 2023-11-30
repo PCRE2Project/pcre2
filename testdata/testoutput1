@@ -10495,4 +10495,8 @@ No match
     (a)(?(1)a|b|c)
 No match
 
+/^..A(*SKIP)B|C/
+    12ADC
+ 0: C
+
 # End of testinput1 

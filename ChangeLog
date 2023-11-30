@@ -172,8 +172,12 @@ undefined behaviour.
 
 47. Refactor the handling of whole-pattern recursion (?0) in pcre2_match() so
 that its end is handled similarly to other recursions. This has altered the
-behaviour of   /|(?0)./endanchored   which was previously not right. However,
-it still differs from JIT.
+behaviour of   /|(?0)./endanchored   which was previously not right.
+
+48. Improved the test for looping recursion by checking the last referenced 
+character as well as the current character. This allows some patterns that 
+previously triggered the check to run to completion instead of giving the loop 
+error. 
 
 
 Version 10.42 11-December-2022

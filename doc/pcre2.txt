@@ -5256,6 +5256,11 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
        to  Perl's  "/u";  something closer to "/a" could be selected by adding
        other PCRE2_EXTRA_ASCII* options on top.
 
+       22. Some recursive patterns that Perl diagnoses as infinite  recursions
+       can be handled by PCRE2, either by the interpreter or the JIT. An exam-
+       ple is /(?:|(?0)abcd)(?(R)|\z)/, which matches a sequence of any number
+       of repeated "abcd" substrings at the end of the subject.
+
 
 AUTHOR
 
@@ -5266,11 +5271,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 October 2023
+       Last updated: 30 November 2023
        Copyright (c) 1997-2023 University of Cambridge.
 
 
-PCRE2 10.43                    19 September 2023                PCRE2COMPAT(3)
+PCRE2 10.43                    30 November 2023                 PCRE2COMPAT(3)
 ------------------------------------------------------------------------------
  
  

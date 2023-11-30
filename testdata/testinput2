@@ -6066,19 +6066,13 @@ a)"xI
 /\G(?:(?=(\1.|)(.))){1,13}?(?!.*\2.*\2)\1\K\2/g
     aaabcccdeee
 
-# This currently doesn't match JIT
-
-/|(?0)./endanchored,aftertext
-\= Expect error
-    abcd\=no_jit
+/|(?0)./endanchored
+    abcd
 
 /|a(?0)/endanchored
     aaaa
 
-# This currently doesn't match JIT
-
 /(?:|(?0).)(?(R)|\z)/
-\= Expect error
-    abcd\=no_jit
+    abcd
 
 # End of testinput2
