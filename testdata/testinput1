@@ -6651,4 +6651,7 @@ $/x
 /^..A(*SKIP)B|C/
     12ADC
 
+/(?<!a?)/
+    a
+
 # End of testinput1 

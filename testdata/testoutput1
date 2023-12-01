@@ -10499,4 +10499,8 @@ No match
     12ADC
  0: C
 
+/(?<!a?)/
+    a
+No match
+
 # End of testinput1 
