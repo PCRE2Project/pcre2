@@ -573,4 +573,8 @@
 /\X++/
     a\x{110000}\x{ffffffff}
 
+# This used to loop in 32-bit mode; it will fail in 16-bit mode.
+/[\x{ffffffff}]/caseless,ucp
+    \x{ffffffff}xyz
+
 # End of testinput12

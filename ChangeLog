@@ -174,10 +174,14 @@ undefined behaviour.
 that its end is handled similarly to other recursions. This has altered the
 behaviour of   /|(?0)./endanchored   which was previously not right.
 
-48. Improved the test for looping recursion by checking the last referenced 
-character as well as the current character. This allows some patterns that 
-previously triggered the check to run to completion instead of giving the loop 
-error. 
+48. Improved the test for looping recursion by checking the last referenced
+character as well as the current character. This allows some patterns that
+previously triggered the check to run to completion instead of giving the loop
+error.
+
+49. In 32-bit mode, the compiler looped for the pattern /[\x{ffffffff}]/ when
+PCRE2_CASELESS and PCRE2_UCP (but not PCRE2_UTF) were set. Fixed by not trying
+to look for other cases for characters above the Unicode range.
 
 
 Version 10.42 11-December-2022

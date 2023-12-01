@@ -5155,10 +5155,14 @@ unsigned int co;
 
 /* Find the first character that has an other case. If it has multiple other
 cases, return its case offset value. When CASELESS_RESTRICT is set, ignore the
-multi-case entries that begin with ASCII values. */
+multi-case entries that begin with ASCII values. In 32-bit mode, a value
+greater than the Unicode maximum ends the range. */
 
 for (c = *cptr; c <= d; c++)
   {
+#if PCRE2_CODE_UNIT_WIDTH == 32
+  if (c > MAX_UTF_CODE_POINT) return -1;
+#endif
   if ((co = UCD_CASESET(c)) != 0 &&
       (!restricted || PRIV(ucd_caseless_sets)[co] > 127))
     {

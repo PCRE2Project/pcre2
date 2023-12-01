@@ -1817,4 +1817,9 @@ No match
     a\x{110000}\x{ffffffff}
  0: a\x{110000}\x{ffffffff}
 
+# This used to loop in 32-bit mode; it will fail in 16-bit mode.
+/[\x{ffffffff}]/caseless,ucp
+    \x{ffffffff}xyz
+ 0: \x{ffffffff}
+
 # End of testinput12

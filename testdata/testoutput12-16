@@ -1823,4 +1823,9 @@ Failed: error 134 at offset 11: character code point value in \x{} or \o{} is to
 ** Truncation will probably give the wrong result.
  0: a\x00\x{ffff}
 
+# This used to loop in 32-bit mode; it will fail in 16-bit mode.
+/[\x{ffffffff}]/caseless,ucp
+Failed: error 134 at offset 12: character code point value in \x{} or \o{} is too large
+    \x{ffffffff}xyz
+
 # End of testinput12
