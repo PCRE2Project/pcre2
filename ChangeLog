@@ -206,6 +206,13 @@ maximum of 65535 is now silently applied.
 
 5. Merged @carenas patch #175 which fixes #86 - segfault on aarch64 (ARM),
 
+6. The prototype for pcre2_substring_list_free() specified its argument as 
+PCRE2_SPTR * which is a const data type, whereas the yield from 
+pcre2_substring_list() is not const. This caused compiler warnings. I have 
+changed the argument of pcre2_substring_list_free() to be PCRE2_UCHAR ** to 
+remove this anomaly. This might cause new warnings in existing code where a 
+cast has been used to avoid previous ones. 
+
 
 Version 10.41 06-December-2022
 ------------------------------

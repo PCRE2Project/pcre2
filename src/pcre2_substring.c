@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -445,7 +445,7 @@ Returns:      nothing
 */
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_substring_list_free(PCRE2_SPTR *list)
+pcre2_substring_list_free(PCRE2_UCHAR **list)
 {
 if (list != NULL)
   {

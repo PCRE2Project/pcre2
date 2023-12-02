@@ -1545,11 +1545,11 @@ are supported. */
 
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   if (test_mode == PCRE8_MODE) \
-    pcre2_substring_list_free_8((PCRE2_SPTR8 *)a); \
+    pcre2_substring_list_free_8((PCRE2_UCHAR8 **)a); \
   else if (test_mode == PCRE16_MODE) \
-    pcre2_substring_list_free_16((PCRE2_SPTR16 *)a); \
+    pcre2_substring_list_free_16((PCRE2_UCHAR16 **)a); \
   else \
-    pcre2_substring_list_free_32((PCRE2_SPTR32 *)a)
+    pcre2_substring_list_free_32((PCRE2_UCHAR32 **)a)
 
 #define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
   if (test_mode == PCRE8_MODE) \
@@ -2034,9 +2034,9 @@ the three different cases. */
 
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(pcre2_substring_list_free_,BITONE)((G(PCRE2_SPTR,BITONE) *)a); \
+    G(pcre2_substring_list_free_,BITONE)((G(PCRE2_UCHAR,BITONE) **)a); \
   else \
-    G(pcre2_substring_list_free_,BITTWO)((G(PCRE2_SPTR,BITTWO) *)a)
+    G(pcre2_substring_list_free_,BITTWO)((G(PCRE2_UCHAR,BITTWO) **)a)
 
 #define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2191,7 +2191,7 @@ the three different cases. */
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_8(G(b,8),(PCRE2_UCHAR8 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
-  pcre2_substring_list_free_8((PCRE2_SPTR8 *)a)
+  pcre2_substring_list_free_8((PCRE2_UCHAR8 **)a)
 #define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
   a = pcre2_substring_number_from_name_8(G(b,8),G(c,8));
 #define PTR(x) (void *)G(x,8)
@@ -2300,7 +2300,7 @@ the three different cases. */
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_16(G(b,16),(PCRE2_UCHAR16 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
-  pcre2_substring_list_free_16((PCRE2_SPTR16 *)a)
+  pcre2_substring_list_free_16((PCRE2_UCHAR16 **)a)
 #define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
   a = pcre2_substring_number_from_name_16(G(b,16),G(c,16));
 #define PTR(x) (void *)G(x,16)
@@ -2409,7 +2409,7 @@ the three different cases. */
 #define PCRE2_SUBSTRING_LIST_GET(a,b,c,d) \
   a = pcre2_substring_list_get_32(G(b,32),(PCRE2_UCHAR32 ***)c,d)
 #define PCRE2_SUBSTRING_LIST_FREE(a) \
-  pcre2_substring_list_free_32((PCRE2_SPTR32 *)a)
+  pcre2_substring_list_free_32((PCRE2_UCHAR32 **)a)
 #define PCRE2_SUBSTRING_NUMBER_FROM_NAME(a,b,c) \
   a = pcre2_substring_number_from_name_32(G(b,32),G(c,32));
 #define PTR(x) (void *)G(x,32)

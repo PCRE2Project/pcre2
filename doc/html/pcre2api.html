@@ -253,7 +253,7 @@ document for an overview of all the PCRE2 documentation.
 <b>  PCRE2_SPTR <i>name</i>);</b>
 <br>
 <br>
-<b>void pcre2_substring_list_free(PCRE2_SPTR *<i>list</i>);</b>
+<b>void pcre2_substring_list_free(PCRE2_UCHAR **<i>list</i>);</b>
 <br>
 <br>
 <b>int pcre2_substring_list_get(pcre2_match_data *<i>match_data</i>,</b>
@@ -3413,7 +3413,7 @@ capturing slots, substring number 1 is unset.
 <b>"  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
 <br>
 <br>
-<b>void pcre2_substring_list_free(PCRE2_SPTR *<i>list</i>);</b>
+<b>void pcre2_substring_list_free(PCRE2_UCHAR **<i>list</i>);</b>
 </P>
 <P>
 The <b>pcre2_substring_list_get()</b> function extracts all available substrings
@@ -4140,7 +4140,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 November 2023
+Last updated: 02 December 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>

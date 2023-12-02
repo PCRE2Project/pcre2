@@ -733,7 +733,7 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_substring_number_from_name(const pcre2_code *, PCRE2_SPTR); \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
-  pcre2_substring_list_free(PCRE2_SPTR *); \
+  pcre2_substring_list_free(PCRE2_UCHAR **); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_substring_list_get(pcre2_match_data *, PCRE2_UCHAR ***, PCRE2_SIZE **);
 
