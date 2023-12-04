@@ -2565,6 +2565,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         break;
 
         case PT_CLIST:
+#if PCRE2_CODE_UNIT_WIDTH == 32
+            if (fc > MAX_UTF_CODE_POINT)
+              {
+              if (notmatch) break;;
+              RRETURN(MATCH_NOMATCH);
+              }
+#endif
         cp = PRIV(ucd_caseless_sets) + Fecode[2];
         for (;;)
           {
@@ -2885,6 +2892,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
+#if PCRE2_CODE_UNIT_WIDTH == 32
+            if (fc > MAX_UTF_CODE_POINT)
+              {
+              if (notmatch) continue;
+              RRETURN(MATCH_NOMATCH);
+              }
+#endif
             cp = PRIV(ucd_caseless_sets) + Lpropvalue;
             for (;;)
               {
@@ -3698,6 +3712,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
+#if PCRE2_CODE_UNIT_WIDTH == 32
+            if (fc > MAX_UTF_CODE_POINT)
+              {
+              if (Lctype == OP_NOTPROP) continue;
+              RRETURN(MATCH_NOMATCH);
+              }
+#endif
             cp = PRIV(ucd_caseless_sets) + Lpropvalue;
             for (;;)
               {
@@ -4278,14 +4299,24 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            cp = PRIV(ucd_caseless_sets) + Lpropvalue;
-            for (;;)
+#if PCRE2_CODE_UNIT_WIDTH == 32
+            if (fc > MAX_UTF_CODE_POINT)
               {
-              if (fc < *cp)
-                { if (notmatch) break; else goto GOT_MAX; }
-              if (fc == *cp++)
-                { if (notmatch) goto GOT_MAX; else break; }
+              if (!notmatch) goto GOT_MAX;
               }
+            else
+#endif
+              {
+              cp = PRIV(ucd_caseless_sets) + Lpropvalue;
+              for (;;)
+                {
+                if (fc < *cp)
+                  { if (notmatch) break; else goto GOT_MAX; }
+                if (fc == *cp++)
+                  { if (notmatch) goto GOT_MAX; else break; }
+                }
+              }
+
             Feptr += len;
             }
           GOT_MAX:

@@ -1241,6 +1241,13 @@ for (;;)
           break;
 
           case PT_CLIST:
+#if PCRE2_CODE_UNIT_WIDTH == 32
+          if (c > MAX_UTF_CODE_POINT)
+            {
+            OK = FALSE;
+            break;
+            }
+#endif
           cp = PRIV(ucd_caseless_sets) + code[2];
           for (;;)
             {
@@ -1516,6 +1523,13 @@ for (;;)
           break;
 
           case PT_CLIST:
+#if PCRE2_CODE_UNIT_WIDTH == 32
+          if (c > MAX_UTF_CODE_POINT)
+            {
+            OK = FALSE;
+            break;
+            }
+#endif
           cp = PRIV(ucd_caseless_sets) + code[3];
           for (;;)
             {
@@ -1774,6 +1788,13 @@ for (;;)
           break;
 
           case PT_CLIST:
+#if PCRE2_CODE_UNIT_WIDTH == 32
+          if (c > MAX_UTF_CODE_POINT)
+            {
+            OK = FALSE;
+            break;
+            }
+#endif
           cp = PRIV(ucd_caseless_sets) + code[3];
           for (;;)
             {
@@ -2058,6 +2079,13 @@ for (;;)
           break;
 
           case PT_CLIST:
+#if PCRE2_CODE_UNIT_WIDTH == 32
+          if (c > MAX_UTF_CODE_POINT)
+            {
+            OK = FALSE;
+            break;
+            }
+#endif
           cp = PRIV(ucd_caseless_sets) + code[1 + IMM2_SIZE + 2];
           for (;;)
             {

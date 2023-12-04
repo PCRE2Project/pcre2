@@ -183,6 +183,10 @@ error.
 PCRE2_CASELESS and PCRE2_UCP (but not PCRE2_UTF) were set. Fixed by not trying
 to look for other cases for characters above the Unicode range.
 
+50. In caseless 32-bit mode with UCP (but not UTF) set, the character
+0xffffffff incorrectly matched any character that has more than one other case, 
+in particular k and s.
+
 
 Version 10.42 11-December-2022
 ------------------------------
