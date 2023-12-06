@@ -655,6 +655,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?=(a(b(*ACCEPT)b)))a", "ab" },
 	{ MU, A, PCRE2_NOTEMPTY, 0, "(?=a*(*ACCEPT))c", "c" },
 	{ MU, A, PCRE2_NOTEMPTY, 0 | F_NOMATCH, "(?=A)", "AB" },
+	{ MU | PCRE2_ENDANCHORED, A, 0, 0, "aa(*ACCEPT)aa", "aaa" },
 
 	/* Conditional blocks. */
 	{ MU, A, 0, 0, "(?(?=(a))a|b)+k", "ababbalbbadabak" },

@@ -489,6 +489,8 @@ typedef struct compiler_common {
   jump_list *casefulcmp;
   jump_list *caselesscmp;
   jump_list *reset_match;
+  /* Same as reset_match, but resets the STR_PTR as well. */
+  jump_list *restart_match;
   BOOL unset_backref;
   BOOL alt_circumflex;
 #ifdef SUPPORT_UNICODE
@@ -3146,7 +3148,7 @@ return (value & (value - 1)) == 0;
 
 static SLJIT_INLINE void set_jumps(jump_list *list, struct sljit_label *label)
 {
-while (list)
+while (list != NULL)
   {
   /* sljit_set_label is clever enough to do nothing
   if either the jump or the label is NULL. */
@@ -12187,7 +12189,7 @@ if (*cc == OP_FAIL)
   }
 
 if (*cc == OP_ACCEPT && common->currententry == NULL && (common->re->overall_options & PCRE2_ENDANCHORED) != 0)
-  add_jump(compiler, &common->reset_match, CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, STR_END, 0));
+  add_jump(compiler, &common->restart_match, CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, STR_END, 0));
 
 if (*cc == OP_ASSERT_ACCEPT || common->currententry != NULL || !common->might_be_empty)
   {
@@ -14552,10 +14554,17 @@ if (common->caselesscmp != NULL)
   set_jumps(common->caselesscmp, LABEL());
   do_caselesscmp(common);
   }
-if (common->reset_match != NULL)
+if (common->reset_match != NULL || common->restart_match != NULL)
   {
+  if (common->restart_match != NULL)
+    {
+    set_jumps(common->restart_match, LABEL());
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->start_ptr);
+    }
+
   set_jumps(common->reset_match, LABEL());
   do_reset_match(common, (re->top_bracket + 1) * 2);
+  /* The value of restart_match is in TMP1. */
   CMPTO(SLJIT_GREATER, STR_PTR, 0, TMP1, 0, continue_match_label);
   OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
   JUMPTO(SLJIT_JUMP, reset_match_label);

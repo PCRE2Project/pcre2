@@ -187,6 +187,8 @@ to look for other cases for characters above the Unicode range.
 0xffffffff incorrectly matched any character that has more than one other case, 
 in particular k and s.
 
+51. Fix accept and endanchored interaction in JIT.
+
 
 Version 10.42 11-December-2022
 ------------------------------
