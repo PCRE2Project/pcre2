@@ -67,121 +67,123 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 3] = {
 /*  Instrucion forms                                                     */
 /* --------------------------------------------------------------------- */
 
-#define ADC 0x9a000000
-#define ADD 0x8b000000
-#define ADDE 0x8b200000
-#define ADDI 0x91000000
-#define AND 0x8a000000
-#define ANDI 0x92000000
-#define ASRV 0x9ac02800
-#define B 0x14000000
-#define B_CC 0x54000000
-#define BL 0x94000000
-#define BLR 0xd63f0000
-#define BR 0xd61f0000
-#define BRK 0xd4200000
-#define CAS 0xc8a07c00
-#define CASB 0x08a07c00
-#define CASH 0x48a07c00
-#define CBZ 0xb4000000
-#define CCMPI 0xfa400800
-#define CLZ 0xdac01000
-#define CSEL 0x9a800000
-#define CSINC 0x9a800400
-#define DUP_e 0x0e000400
-#define DUP_g 0x0e000c00
-#define EOR 0xca000000
-#define EORI 0xd2000000
-#define EXTR 0x93c00000
-#define FABS 0x1e60c000
-#define FADD 0x1e602800
-#define FCMP 0x1e602000
-#define FCSEL 0x1e600c00
-#define FCVT 0x1e224000
-#define FCVTL 0x0e217800
-#define FCVTZS 0x9e780000
-#define FDIV 0x1e601800
-#define FMOV 0x1e604000
-#define FMOV_R 0x9e660000
-#define FMOV_I 0x1e601000
-#define FMUL 0x1e600800
-#define FNEG 0x1e614000
-#define FSUB 0x1e603800
-#define INS 0x4e001c00
-#define INS_e 0x6e000400
-#define LD1 0x0c407000
-#define LD1_s 0x0d400000
-#define LD1R 0x0d40c000
-#define LDRI 0xf9400000
-#define LDRI_F64 0xfd400000
-#define LDRI_POST 0xf8400400
-#define LDP 0xa9400000
-#define LDP_F64 0x6d400000
-#define LDP_POST 0xa8c00000
-#define LDR_PRE 0xf8400c00
-#define LDXR 0xc85f7c00
-#define LDXRB 0x085f7c00
-#define LDXRH 0x485f7c00
-#define LSLV 0x9ac02000
-#define LSRV 0x9ac02400
-#define MADD 0x9b000000
-#define MOVI 0x0f000400
-#define MOVK 0xf2800000
-#define MOVN 0x92800000
-#define MOVZ 0xd2800000
-#define NOP 0xd503201f
-#define ORN 0xaa200000
-#define ORR 0xaa000000
-#define ORR_v 0x0ea01c00
-#define ORRI 0xb2000000
-#define RBIT 0xdac00000
-#define RET 0xd65f0000
-#define REV 0xdac00c00
-#define REV16 0xdac00400
-#define RORV 0x9ac02c00
-#define SBC 0xda000000
-#define SBFM 0x93400000
-#define SCVTF 0x9e620000
-#define SDIV 0x9ac00c00
-#define SMADDL 0x9b200000
-#define SMOV 0x0e002c00
-#define SMULH 0x9b403c00
-#define SSHLL 0x0f00a400
-#define ST1 0x0c007000
-#define ST1_s 0x0d000000
-#define STP 0xa9000000
-#define STP_F64 0x6d000000
-#define STP_PRE 0xa9800000
-#define STRB 0x38206800
-#define STRBI 0x39000000
-#define STRI 0xf9000000
-#define STRI_F64 0xfd000000
-#define STR_FI 0x3d000000
-#define STR_FR 0x3c206800
-#define STUR_FI 0x3c000000
-#define STURBI 0x38000000
-#define STXR 0xc8007c00
-#define STXRB 0x8007c00
-#define STXRH 0x48007c00
-#define SUB 0xcb000000
-#define SUBI 0xd1000000
-#define SUBS 0xeb000000
-#define TBZ 0x36000000
-#define UBFM 0xd3400000
-#define UCVTF 0x9e630000
-#define UDIV 0x9ac00800
-#define UMOV 0x0e003c00
-#define UMULH 0x9bc03c00
-#define USHLL 0x2f00a400
-#define USHR 0x2f000400
-#define USRA 0x2f001400
-#define XTN 0x0e212800
+#define ADC		0x9a000000
+#define ADD		0x8b000000
+#define ADDE		0x8b200000
+#define ADDI		0x91000000
+#define AND		0x8a000000
+#define ANDI		0x92000000
+#define AND_v		0x0e201c00
+#define ASRV		0x9ac02800
+#define B		0x14000000
+#define B_CC		0x54000000
+#define BL		0x94000000
+#define BLR		0xd63f0000
+#define BR		0xd61f0000
+#define BRK		0xd4200000
+#define CAS		0xc8a07c00
+#define CASB		0x08a07c00
+#define CASH		0x48a07c00
+#define CBZ		0xb4000000
+#define CCMPI		0xfa400800
+#define CLZ		0xdac01000
+#define CSEL		0x9a800000
+#define CSINC		0x9a800400
+#define DUP_e		0x0e000400
+#define DUP_g		0x0e000c00
+#define EOR		0xca000000
+#define EOR_v		0x2e201c00
+#define EORI		0xd2000000
+#define EXTR		0x93c00000
+#define FABS		0x1e60c000
+#define FADD		0x1e602800
+#define FCMP		0x1e602000
+#define FCSEL		0x1e600c00
+#define FCVT		0x1e224000
+#define FCVTL		0x0e217800
+#define FCVTZS		0x9e780000
+#define FDIV		0x1e601800
+#define FMOV		0x1e604000
+#define FMOV_R		0x9e660000
+#define FMOV_I		0x1e601000
+#define FMUL		0x1e600800
+#define FNEG		0x1e614000
+#define FSUB		0x1e603800
+#define INS		0x4e001c00
+#define INS_e		0x6e000400
+#define LD1		0x0c407000
+#define LD1_s		0x0d400000
+#define LD1R		0x0d40c000
+#define LDRI		0xf9400000
+#define LDRI_F64	0xfd400000
+#define LDRI_POST	0xf8400400
+#define LDP		0xa9400000
+#define LDP_F64		0x6d400000
+#define LDP_POST	0xa8c00000
+#define LDR_PRE		0xf8400c00
+#define LDXR		0xc85f7c00
+#define LDXRB		0x085f7c00
+#define LDXRH		0x485f7c00
+#define LSLV		0x9ac02000
+#define LSRV		0x9ac02400
+#define MADD		0x9b000000
+#define MOVI		0x0f000400
+#define MOVK		0xf2800000
+#define MOVN		0x92800000
+#define MOVZ		0xd2800000
+#define NOP		0xd503201f
+#define ORN		0xaa200000
+#define ORR		0xaa000000
+#define ORR_v		0x0ea01c00
+#define ORRI		0xb2000000
+#define RBIT		0xdac00000
+#define RET		0xd65f0000
+#define REV		0xdac00c00
+#define REV16		0xdac00400
+#define RORV		0x9ac02c00
+#define SBC		0xda000000
+#define SBFM		0x93400000
+#define SCVTF		0x9e620000
+#define SDIV		0x9ac00c00
+#define SMADDL		0x9b200000
+#define SMOV		0x0e002c00
+#define SMULH		0x9b403c00
+#define SSHLL		0x0f00a400
+#define ST1		0x0c007000
+#define ST1_s		0x0d000000
+#define STP		0xa9000000
+#define STP_F64		0x6d000000
+#define STP_PRE		0xa9800000
+#define STRB		0x38206800
+#define STRBI		0x39000000
+#define STRI		0xf9000000
+#define STRI_F64	0xfd000000
+#define STR_FI		0x3d000000
+#define STR_FR		0x3c206800
+#define STUR_FI		0x3c000000
+#define STURBI		0x38000000
+#define STXR		0xc8007c00
+#define STXRB		0x8007c00
+#define STXRH		0x48007c00
+#define SUB		0xcb000000
+#define SUBI		0xd1000000
+#define SUBS		0xeb000000
+#define TBZ		0x36000000
+#define UBFM		0xd3400000
+#define UCVTF		0x9e630000
+#define UDIV		0x9ac00800
+#define UMOV		0x0e003c00
+#define UMULH		0x9bc03c00
+#define USHLL		0x2f00a400
+#define USHR		0x2f000400
+#define USRA		0x2f001400
+#define XTN		0x0e212800
 
-#define CSET (CSINC | RM(TMP_ZERO) | RN(TMP_ZERO))
-#define LDR (STRI | (1 << 22))
-#define LDRB (STRBI | (1 << 22))
-#define LDRH (LDRB | (1 << 30))
-#define MOV (ORR | RN(TMP_ZERO))
+#define CSET		(CSINC | RM(TMP_ZERO) | RN(TMP_ZERO))
+#define LDR		(STRI | (1 << 22))
+#define LDRB		(STRBI | (1 << 22))
+#define LDRH		(LDRB | (1 << 30))
+#define MOV		(ORR | RN(TMP_ZERO))
 
 static sljit_s32 push_inst(struct sljit_compiler *compiler, sljit_ins ins)
 {
@@ -3042,6 +3044,43 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_simd_sign(struct sljit_compiler *c
 		return emit_op_mem(compiler, STORE | ((type & SLJIT_32) ? INT_SIZE : WORD_SIZE), TMP_REG1, dst, dstw, TMP_REG2);
 
 	return SLJIT_SUCCESS;
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_simd_op2(struct sljit_compiler *compiler, sljit_s32 type,
+	sljit_s32 dst_freg, sljit_s32 src1_freg, sljit_s32 src2_freg)
+{
+	sljit_s32 reg_size = SLJIT_SIMD_GET_REG_SIZE(type);
+	sljit_s32 elem_size = SLJIT_SIMD_GET_ELEM_SIZE(type);
+	sljit_ins ins = 0;
+
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_simd_op2(compiler, type, dst_freg, src1_freg, src2_freg));
+
+	if (reg_size != 3 && reg_size != 4)
+		return SLJIT_ERR_UNSUPPORTED;
+
+	if ((type & SLJIT_SIMD_FLOAT) && (elem_size < 2 || elem_size > 3))
+		return SLJIT_ERR_UNSUPPORTED;
+
+	switch (SLJIT_SIMD_GET_OPCODE(type)) {
+	case SLJIT_SIMD_OP2_AND:
+		ins = AND_v;
+		break;
+	case SLJIT_SIMD_OP2_OR:
+		ins = ORR_v;
+		break;
+	case SLJIT_SIMD_OP2_XOR:
+		ins = EOR_v;
+		break;
+	}
+
+	if (type & SLJIT_SIMD_TEST)
+		return SLJIT_SUCCESS;
+
+	if (reg_size == 4)
+		ins |= (sljit_ins)1 << 30;
+
+	return push_inst(compiler, ins | VD(dst_freg) | VN(src1_freg) | VM(src2_freg));
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_atomic_load(struct sljit_compiler *compiler, sljit_s32 op,

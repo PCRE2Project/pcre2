@@ -483,11 +483,7 @@ sljit_s32 cmp2a_ind = sljit_get_register_index(SLJIT_FLOAT_REGISTER, SLJIT_FR3);
 sljit_s32 cmp1b_ind = sljit_get_register_index(SLJIT_FLOAT_REGISTER, SLJIT_FR4);
 sljit_s32 cmp2b_ind = sljit_get_register_index(SLJIT_FLOAT_REGISTER, SLJIT_FR5);
 sljit_s32 tmp1_ind = sljit_get_register_index(SLJIT_FLOAT_REGISTER, SLJIT_FR6);
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-sljit_s32 tmp2_ind = 0;
-#else /* !SLJIT_CONFIG_X86_32 */
-sljit_s32 tmp2_ind = 4;
-#endif /* SLJIT_CONFIG_X86_32 */
+sljit_s32 tmp2_ind = sljit_get_register_index(SLJIT_FLOAT_REGISTER, SLJIT_TMP_FR0);
 struct sljit_label *start;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 struct sljit_label *restart;
@@ -660,19 +656,7 @@ for (i = 0; i < 4; i++)
   fast_forward_char_pair_sse2_compare(compiler, compare1_type, reg_type, i, data1_ind, cmp1a_ind, cmp1b_ind, tmp1_ind);
   }
 
-/* PAND xmm1, xmm2/m128 */
-if (reg_type == SLJIT_SIMD_REG_256)
-  {
-  instruction[0] = 0xc5;
-  instruction[1] = (sljit_u8)(0xfd ^ (data1_ind << 3));
-  }
-
-/* instruction[0] = 0x66 / 0xc5; */
-/* instruction[1] = 0x0f; */
-instruction[2] = 0xdb;
-instruction[3] = 0xc0 | (data1_ind << 3) | data2_ind;
-sljit_emit_op_custom(compiler, instruction, 4);
-
+sljit_emit_simd_op2(compiler, SLJIT_SIMD_OP2_AND | reg_type, SLJIT_FR0, SLJIT_FR0, SLJIT_FR1);
 sljit_emit_simd_sign(compiler, SLJIT_SIMD_STORE | reg_type | SLJIT_SIMD_ELEM_8, SLJIT_FR0, TMP1, 0);
 
 /* Ignore matches before the first STR_PTR. */
@@ -700,16 +684,7 @@ for (i = 0; i < 4; i++)
   fast_forward_char_pair_sse2_compare(compiler, compare2_type, reg_type, i, data2_ind, cmp2a_ind, cmp2b_ind, tmp1_ind);
   }
 
-/* PAND xmm1, xmm2/m128 */
-if (reg_type == SLJIT_SIMD_REG_256)
-  instruction[1] = (sljit_u8)(0xfd ^ (data1_ind << 3));
-
-/* instruction[0] = 0x66 / 0xc5; */
-/* instruction[1] = 0x0f; */
-instruction[2] = 0xdb;
-instruction[3] = 0xc0 | (data1_ind << 3) | data2_ind;
-sljit_emit_op_custom(compiler, instruction, 4);
-
+sljit_emit_simd_op2(compiler, SLJIT_SIMD_OP2_AND | reg_type, SLJIT_FR0, SLJIT_FR0, SLJIT_FR1);
 sljit_emit_simd_sign(compiler, SLJIT_SIMD_STORE | reg_type | SLJIT_SIMD_ELEM_8, SLJIT_FR0, TMP1, 0);
 
 CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
