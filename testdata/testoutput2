@@ -17977,6 +17977,33 @@ No match
     abcd
  0: abcd
 
+/a?(?=b(*COMMIT)c|)d/I
+Capture group count = 0
+Starting code units: a d 
+Last code unit = 'd'
+Subject length lower bound = 1
+    bd
+ 0: d
+
+/(?=b(*COMMIT)c|)d/I
+Capture group count = 0
+First code unit = 'd'
+Subject length lower bound = 1
+    bd
+ 0: d
+
+/a?(?=b(*COMMIT)c|)d/I,no_start_optimize
+Capture group count = 0
+Options: no_start_optimize
+    bd
+No match
+
+/(?=b(*COMMIT)c|)d/I,no_start_optimize
+Capture group count = 0
+Options: no_start_optimize
+    bd
+No match
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

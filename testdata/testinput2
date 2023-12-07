@@ -6075,4 +6075,16 @@ a)"xI
 /(?:|(?0).)(?(R)|\z)/
     abcd
 
+/a?(?=b(*COMMIT)c|)d/I
+    bd
+
+/(?=b(*COMMIT)c|)d/I
+    bd
+
+/a?(?=b(*COMMIT)c|)d/I,no_start_optimize
+    bd
+
+/(?=b(*COMMIT)c|)d/I,no_start_optimize
+    bd
+
 # End of testinput2

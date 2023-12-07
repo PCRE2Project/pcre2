@@ -184,12 +184,17 @@ PCRE2_CASELESS and PCRE2_UCP (but not PCRE2_UTF) were set. Fixed by not trying
 to look for other cases for characters above the Unicode range.
 
 50. In caseless 32-bit mode with UCP (but not UTF) set, the character
-0xffffffff incorrectly matched any character that has more than one other case, 
+0xffffffff incorrectly matched any character that has more than one other case,
 in particular k and s.
 
 51. Fix accept and endanchored interaction in JIT.
 
 52. Fix backreferences with unset backref and non-greedy iterators in JIT.
+
+53. Improve the logic that checks for a list of starting code units -- positive
+lookahead assertions are now ignored if the immediately following item is one
+that sets a mandatory starting character. For example, /a?(?=bc|)d/ used to set
+all of a, b, and d as possible starting code units; now it sets only a and d.
 
 
 Version 10.42 11-December-2022
@@ -214,12 +219,12 @@ maximum of 65535 is now silently applied.
 
 5. Merged @carenas patch #175 which fixes #86 - segfault on aarch64 (ARM),
 
-6. The prototype for pcre2_substring_list_free() specified its argument as 
-PCRE2_SPTR * which is a const data type, whereas the yield from 
-pcre2_substring_list() is not const. This caused compiler warnings. I have 
-changed the argument of pcre2_substring_list_free() to be PCRE2_UCHAR ** to 
-remove this anomaly. This might cause new warnings in existing code where a 
-cast has been used to avoid previous ones. 
+6. The prototype for pcre2_substring_list_free() specified its argument as
+PCRE2_SPTR * which is a const data type, whereas the yield from
+pcre2_substring_list() is not const. This caused compiler warnings. I have
+changed the argument of pcre2_substring_list_free() to be PCRE2_UCHAR ** to
+remove this anomaly. This might cause new warnings in existing code where a
+cast has been used to avoid previous ones.
 
 
 Version 10.41 06-December-2022
