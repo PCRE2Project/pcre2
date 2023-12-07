@@ -189,6 +189,8 @@ in particular k and s.
 
 51. Fix accept and endanchored interaction in JIT.
 
+52. Fix backreferences with unset backref and non-greedy iterators in JIT.
+
 
 Version 10.42 11-December-2022
 ------------------------------
