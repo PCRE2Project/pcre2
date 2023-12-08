@@ -6087,4 +6087,10 @@ a)"xI
 /(?=b(*COMMIT)c|)d/I,no_start_optimize
     bd
 
+/a?(?=bc|)d/I,auto_callout
+    bd
+    
+/a?(?=bc|)\bd/I 
+    bd
+
 # End of testinput2

@@ -18004,6 +18004,31 @@ Options: no_start_optimize
     bd
 No match
 
+/a?(?=bc|)d/I,auto_callout
+Capture group count = 0
+Options: auto_callout
+Starting code units: a d 
+Last code unit = 'd'
+Subject length lower bound = 1
+    bd
+--->bd
+ +0  ^     a?
+ +2  ^     (?=
+ +5  ^     b
+ +8  ^     )
+ +9  ^     d
++10  ^^    End of pattern
+ 0: d
+    
+/a?(?=bc|)\bd/I 
+Capture group count = 0
+Max lookbehind = 1
+Starting code units: a d 
+Last code unit = 'd'
+Subject length lower bound = 1
+    bd
+No match
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

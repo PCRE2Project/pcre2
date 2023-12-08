@@ -1111,15 +1111,57 @@ do
       tcode++;
       break;
 
-      /* For a positive lookahead assertion, inspect what immediately follows.
-      If the next item is one that sets a mandatory character, skip this
-      assertion. Otherwise, treat it the same as other bracket groups. */
+      /* For a positive lookahead assertion, inspect what immediately follows,
+      ignoring intermediate assertions and callouts. If the next item is one
+      that sets a mandatory character, skip this assertion. Otherwise, treat it
+      the same as other bracket groups. */
 
       case OP_ASSERT:
       case OP_ASSERT_NA:
       ncode = tcode + GET(tcode, 1);
       while (*ncode == OP_ALT) ncode += GET(ncode, 1);
       ncode += 1 + LINK_SIZE;
+
+      /* Skip irrelevant items */
+
+      for (BOOL done = FALSE; !done;)
+        {
+        switch (*ncode)
+          {
+          case OP_ASSERT:
+          case OP_ASSERT_NOT:
+          case OP_ASSERTBACK:
+          case OP_ASSERTBACK_NOT:
+          case OP_ASSERT_NA:
+          case OP_ASSERTBACK_NA:
+          ncode += GET(ncode, 1);
+          while (*ncode == OP_ALT) ncode += GET(ncode, 1);
+          ncode += 1 + LINK_SIZE;
+          break;
+
+          case OP_WORD_BOUNDARY:
+          case OP_NOT_WORD_BOUNDARY:
+          case OP_UCP_WORD_BOUNDARY:
+          case OP_NOT_UCP_WORD_BOUNDARY:
+          ncode++;
+          break;
+
+          case OP_CALLOUT:
+          ncode += PRIV(OP_lengths)[OP_CALLOUT];
+          break;
+
+          case OP_CALLOUT_STR:
+          ncode += GET(ncode, 1 + 2*LINK_SIZE);
+          break;
+
+          default:
+          done = TRUE;
+          break;
+          }
+        }
+
+      /* Now check the next significant item. */
+
       switch(*ncode)
         {
         default:
@@ -1149,7 +1191,7 @@ do
         case OP_WHITESPACE:
         case OP_NOT_WHITESPACE:
         tcode = ncode;
-        continue;   /* With the following opcode */
+        continue;   /* With the following significant opcode */
         }
       /* Fall through */
 
