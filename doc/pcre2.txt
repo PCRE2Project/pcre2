@@ -3506,7 +3506,8 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        terpreted in any way. By default, however, a dollar character is an es-
        cape  character  that can specify the insertion of characters from cap-
        ture groups and names from (*MARK) or other control verbs in  the  pat-
-       tern. The following forms are always recognized:
+       tern. Dollar is the only escape character (backslash is treated as lit-
+       eral). The following forms are always recognized:
 
          $$                  insert a dollar character
          $<n> or ${<n>}      insert the contents of group <n>
@@ -3977,11 +3978,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 02 December 2023
+       Last updated: 08 December 2023
        Copyright (c) 1997-2023 University of Cambridge.
 
 
-PCRE2 10.43                    02 December 2023                    PCRE2API(3)
+PCRE2 10.43                    08 December 2023                    PCRE2API(3)
 ------------------------------------------------------------------------------
  
  

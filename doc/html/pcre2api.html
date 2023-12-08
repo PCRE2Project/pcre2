@@ -3630,7 +3630,8 @@ replacement string causes an immediate return with the relevant UTF error code.
 If PCRE2_SUBSTITUTE_LITERAL is set, the replacement string is not interpreted
 in any way. By default, however, a dollar character is an escape character that
 can specify the insertion of characters from capture groups and names from
-(*MARK) or other control verbs in the pattern. The following forms are always
+(*MARK) or other control verbs in the pattern. Dollar is the only escape
+character (backslash is treated as literal). The following forms are always
 recognized:
 <pre>
   $$                  insert a dollar character
@@ -4140,7 +4141,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 02 December 2023
+Last updated: 08 December 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>
