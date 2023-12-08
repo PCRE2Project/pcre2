@@ -966,6 +966,19 @@ static sljit_s32 emit_cmov_generic(struct sljit_compiler *compiler, sljit_s32 ty
 	sljit_s32 dst_reg,
 	sljit_s32 src, sljit_sw srcw);
 
+static SLJIT_INLINE sljit_s32 emit_vzeroupper(struct sljit_compiler *compiler)
+{
+       /* Emit vzeroupper.  */
+       sljit_u8 *inst;
+       inst = (sljit_u8*)ensure_buf(compiler, 1 + 3);
+       FAIL_IF(!inst);
+       INC_SIZE(3);
+       inst[0] = 0xc5;
+       inst[1] = 0xf8;
+       inst[2] = 0x77;
+       return SLJIT_SUCCESS;
+}
+
 static SLJIT_INLINE sljit_s32 emit_endbranch(struct sljit_compiler *compiler)
 {
 #if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
