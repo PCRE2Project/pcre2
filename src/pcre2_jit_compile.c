@@ -6735,6 +6735,7 @@ JUMPTO(SLJIT_JUMP, mainloop);
 #define UCPCAT_RANGE(start, end) (((1 << ((end) + 1)) - 1) - ((1 << (start)) - 1))
 #define UCPCAT_L UCPCAT_RANGE(ucp_Ll, ucp_Lu)
 #define UCPCAT_N UCPCAT_RANGE(ucp_Nd, ucp_No)
+#define UCPCAT_ALL ((1 << (ucp_Zs + 1)) - 1)
 #endif
 
 static void check_wordboundary(compiler_common *common, BOOL ucp)
@@ -7615,6 +7616,8 @@ BOOL utf = common->utf;
 
 #ifdef SUPPORT_UNICODE
 sljit_u32 unicode_status = 0;
+sljit_u32 category_list = 0;
+sljit_u32 items;
 int typereg = TMP1;
 const sljit_u32 *other_cases;
 #endif /* SUPPORT_UNICODE */
@@ -7633,6 +7636,7 @@ if (cc[-1] & XCL_MAP)
 while (*cc != XCL_END)
   {
   compares++;
+
   if (*cc == XCL_SINGLE)
     {
     cc ++;
@@ -7659,6 +7663,7 @@ while (*cc != XCL_END)
     {
     SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
     cc++;
+
     if (*cc == PT_CLIST && cc[-1] == XCL_PROP)
       {
       other_cases = PRIV(ucd_caseless_sets) + cc[1];
@@ -7675,25 +7680,34 @@ while (*cc != XCL_END)
       min = 0;
       }
 
+    items = 0;
+
     switch(*cc)
       {
       case PT_ANY:
       /* Any either accepts everything or ignored. */
       if (cc[-1] == XCL_PROP)
-        {
-        compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
-        if (list == backtracks)
-          add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
-        return;
-        }
+        items = UCPCAT_ALL;
       break;
 
       case PT_LAMP:
+      items = UCPCAT3(ucp_Lu, ucp_Ll, ucp_Lt);
+      break;
+
       case PT_GC:
+      items = UCPCAT_RANGE(PRIV(ucp_typerange)[(int)cc[1] * 2], PRIV(ucp_typerange)[(int)cc[1] * 2 + 1]);
+      break;
+
       case PT_PC:
+      items = UCPCAT(cc[1]);
+      break;
+
       case PT_WORD:
+      items = UCPCAT2(ucp_Mn, ucp_Pc) | UCPCAT_L | UCPCAT_N;
+      break;
+
       case PT_ALNUM:
-      unicode_status |= XCLASS_HAS_TYPE;
+      items = UCPCAT_L | UCPCAT_N;
       break;
 
       case PT_SCX:
@@ -7736,11 +7750,32 @@ while (*cc != XCL_END)
       SLJIT_UNREACHABLE();
       break;
       }
+
+    if (items > 0)
+      {
+      if (cc[-1] == XCL_NOTPROP)
+        items ^= UCPCAT_ALL;
+      category_list |= items;
+      unicode_status |= XCLASS_HAS_TYPE;
+      compares--;
+      }
+
     cc += 2;
     }
 #endif /* SUPPORT_UNICODE */
   }
-SLJIT_ASSERT(compares > 0);
+SLJIT_ASSERT(compares > 0 || category_list > 0);
+
+#ifdef SUPPORT_UNICODE
+if (category_list == UCPCAT_ALL)
+  {
+  /* All characters are accepted, same as dotall. */
+  compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
+  if (list == backtracks)
+    add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
+  return;
+  }
+#endif /* SUPPORT_UNICODE */
 
 /* We are not necessary in utf mode even in 8 bit mode. */
 cc = ccbegin;
@@ -7840,6 +7875,9 @@ if (unicode_status & XCLASS_NEEDS_UCD)
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
   ccbegin = cc;
+
+  if (category_list != 0)
+    compares++;
 
   if (unicode_status & XCLASS_HAS_BIDICL)
     {
@@ -8045,8 +8083,16 @@ if (unicode_status & XCLASS_NEEDS_UCD)
     if (unicode_status & XCLASS_SAVE_CHAR)
       typereg = RETURN_ADDR;
 
-    OP1(SLJIT_MOV_U8, typereg, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
-    OP2(SLJIT_SHL, typereg, 0, SLJIT_IMM, 1, typereg, 0);
+    OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
+    OP2(SLJIT_SHL, typereg, 0, SLJIT_IMM, 1, TMP2, 0);
+
+    if (category_list > 0)
+      {
+      compares--;
+      invertcmp = (compares == 0 && list != backtracks);
+      OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, category_list);
+      add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
+      }
     }
   }
 #endif /* SUPPORT_UNICODE */
@@ -8126,26 +8172,16 @@ while (*cc != XCL_END)
       break;
 
       case PT_LAMP:
-      OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT3(ucp_Lu, ucp_Ll, ucp_Lt));
-      jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-      break;
-
       case PT_GC:
-      OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT_RANGE(PRIV(ucp_typerange)[(int)cc[1] * 2], PRIV(ucp_typerange)[(int)cc[1] * 2 + 1]));
-      jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-      break;
-
       case PT_PC:
-      OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT(cc[1]));
-      jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-      break;
-
       case PT_SC:
       case PT_SCX:
       case PT_BOOL:
       case PT_BIDICL:
+      case PT_WORD:
+      case PT_ALNUM:
       compares++;
-      /* Do nothing. */
+      /* Already handled. */
       break;
 
       case PT_SPACE:
@@ -8162,16 +8198,6 @@ while (*cc != XCL_END)
 
       OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT_RANGE(ucp_Zl, ucp_Zs));
       OP_FLAGS(SLJIT_OR | SLJIT_SET_Z, TMP2, 0, SLJIT_NOT_ZERO);
-      jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-      break;
-
-      case PT_WORD:
-      OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT2(ucp_Mn, ucp_Pc) | UCPCAT_L | UCPCAT_N);
-      jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-      break;
-
-      case PT_ALNUM:
-      OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT_L | UCPCAT_N);
       jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
       break;
 
