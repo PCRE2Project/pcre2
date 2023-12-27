@@ -8252,6 +8252,7 @@ while (*cc != XCL_END)
       OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT(ucp_Cf));
       jump = JUMP(SLJIT_ZERO);
 
+      c = charoffset;
       /* In case of ucp_Cf, we overwrite the result. */
       SET_CHAR_OFFSET(0x2066);
       OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, 0x2069 - 0x2066);
@@ -8262,6 +8263,9 @@ while (*cc != XCL_END)
 
       OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x180e - 0x2066);
       OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+
+      /* Restore charoffset. */
+      SET_CHAR_OFFSET(c);
 
       JUMPHERE(jump);
       jump = CMP(SLJIT_ZERO ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
@@ -8274,6 +8278,7 @@ while (*cc != XCL_END)
       OP2U(SLJIT_AND | SLJIT_SET_Z, typereg, 0, SLJIT_IMM, UCPCAT(ucp_Cf));
       jump = JUMP(SLJIT_ZERO);
 
+      c = charoffset;
       /* In case of ucp_Cf, we overwrite the result. */
       SET_CHAR_OFFSET(0x2066);
       OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, 0x2069 - 0x2066);
@@ -8281,6 +8286,9 @@ while (*cc != XCL_END)
 
       OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x061c - 0x2066);
       OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+
+      /* Restore charoffset. */
+      SET_CHAR_OFFSET(c);
 
       JUMPHERE(jump);
       jump = CMP(SLJIT_ZERO ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
@@ -8326,7 +8334,7 @@ while (*cc != XCL_END)
       OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, 0xff46 - 0xff41);
       OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_LESS_EQUAL);
 
-      SET_CHAR_OFFSET(CHAR_a);
+      SET_CHAR_OFFSET(0xff10);
 
       JUMPHERE(jump);
       OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, SLJIT_IMM, 0);
