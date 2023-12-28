@@ -10,14 +10,14 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre2_major, [10])
 m4_define(pcre2_minor, [43])
-m4_define(pcre2_prerelease, [-DEV])
-m4_define(pcre2_date, [2023-04-14])
+m4_define(pcre2_prerelease, [-RC1])
+m4_define(pcre2_date, [2023-12-27])
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [11:2:11])
-m4_define(libpcre2_16_version,    [11:2:11])
-m4_define(libpcre2_32_version,    [11:2:11])
-m4_define(libpcre2_posix_version, [3:4:0])
+m4_define(libpcre2_8_version,     [12:0:12])
+m4_define(libpcre2_16_version,    [12:0:12])
+m4_define(libpcre2_32_version,    [12:0:12])
+m4_define(libpcre2_posix_version, [3:5:0])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.

@@ -5280,6 +5280,8 @@ if ((options & PCRE2_CASELESS) != 0)
       }
     }
   else
+#else
+  (void)xoptions;   /* Avoid compiler warning */
 #endif  /* SUPPORT_UNICODE */
 
   /* Not UTF mode */

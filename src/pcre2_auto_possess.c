@@ -561,7 +561,7 @@ matches to an empty string (also represented by a non-zero value). */
 for(;;)
   {
   PCRE2_SPTR bracode;
-    
+
   /* All operations move the code pointer forward.
   Therefore infinite recursions are not possible. */
 
@@ -618,7 +618,7 @@ for(;;)
     so its last iterator can never be possessified if the pattern contains
     recursions. (This could be improved by keeping a list of group numbers that
     are called by recursion.) */
-    
+
     bracode = code - GET(code, 1);
     switch(*bracode)
       {

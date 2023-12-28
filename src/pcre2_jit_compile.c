@@ -9926,8 +9926,8 @@ DEFINE_COMPILER;
 backtrack_common *backtrack = NULL;
 jump_list **reverse_failed;
 unsigned int lmin, lmax;
-struct sljit_jump *jump;
 #ifdef SUPPORT_UNICODE
+struct sljit_jump *jump;
 struct sljit_label *label;
 #endif
 

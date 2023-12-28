@@ -303,10 +303,10 @@ are as follows:
 Brace characters { and } are also used to enclose data for constructions such
 as \eg{2} or \ek{name}. In almost all uses of braces, space and/or horizontal
 tab characters that follow { or precede } are allowed and are ignored. In the
-case of quantifiers, they may also appear before or after the comma. The 
+case of quantifiers, they may also appear before or after the comma. The
 exception to this is \eu{...} which is an ECMAScript compatibility feature
-that is recognized only when the PCRE2_EXTRA_ALT_BSUX option is set. ECMAScript 
-does not ignore such white space; it causes the item to be interpreted as 
+that is recognized only when the PCRE2_EXTRA_ALT_BSUX option is set. ECMAScript
+does not ignore such white space; it causes the item to be interpreted as
 literal.
 .P
 Part of a pattern that is in square brackets is called a "character class". In
@@ -444,7 +444,7 @@ match a newline. If the PCRE2_EXTRA_ESCAPED_CR_IS_LF option is set, \er in a
 pattern is converted to \en so that it matches a LF (linefeed) instead of a CR
 (carriage return) character.
 .P
-An error occurs if \ec is not followed by a character whose ASCII code point 
+An error occurs if \ec is not followed by a character whose ASCII code point
 is in the range 32 to 126. The precise effect of \ecx is as follows: if x is a
 lower case letter, it is converted to upper case. Then bit 6 of the character
 (hex 40) is inverted. Thus \ecA to \ecZ become hex 01 to hex 1A (A is 41, Z is
@@ -690,8 +690,8 @@ determine character types, as follows:
   \es  any character that matches \ep{Z} or \eh or \ev
   \ew  any character that matches \ep{L}, \ep{N}, \ep{Mn}, or \ep{Pc}
 .sp
-The addition of \ep{Mn} (non-spacing mark) and the replacement of an explicit 
-test for underscore with a test for \ep{Pc} (connector punctuation) happened in 
+The addition of \ep{Mn} (non-spacing mark) and the replacement of an explicit
+test for underscore with a test for \ep{Pc} (connector punctuation) happened in
 PCRE2 release 10.43. This brings PCRE2 into line with Perl.
 .P
 The upper case escapes match the inverse sets of characters. Note that \ed
@@ -1064,7 +1064,7 @@ property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps; in PCRE1 it used to exclude vertical tab, for Perl
 compatibility, but Perl changed. Xwd matches the same characters as Xan, plus
-those that match Mn (non-spacing mark) or Pc (connector punctuation, which 
+those that match Mn (non-spacing mark) or Pc (connector punctuation, which
 includes underscore).
 .P
 There is another non-standard property, Xuc, which matches any character that
@@ -1574,7 +1574,7 @@ versions of those characters, whose Unicode code points start at U+FF10. This
 is a change that was made in PCRE release 10.43 for Perl compatibility.
 .P
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
-with code points less than 256. 
+with code points less than 256.
 .P
 There are two options that can be used to restrict the POSIX classes to ASCII
 characters when PCRE2_UCP is set. The option PCRE2_EXTRA_ASCII_DIGIT affects
@@ -1605,8 +1605,8 @@ at the start and the end of a word (see
 .\"
 above), and in a Perl-style pattern the preceding or following character
 normally shows which is wanted, without the need for the assertions that are
-used above in order to give exactly the POSIX behaviour. Note also that the 
-PCRE2_UCP option changes the meaning of \ew (and therefore \eb) by default, so 
+used above in order to give exactly the POSIX behaviour. Note also that the
+PCRE2_UCP option changes the meaning of \ew (and therefore \eb) by default, so
 it also affects these POSIX sequences.
 .
 .
@@ -1680,8 +1680,8 @@ However, except for 'r', these are not unset by (?^), which is equivalent to
 (?-imnrsx). If 'a' is not followed by any of the upper case letters shown
 above, it sets (or unsets) all the ASCII options.
 .P
-PCRE2_EXTRA_ASCII_DIGIT has no additional effect when PCRE2_EXTRA_ASCII_POSIX 
-is set, but including it in (?aP) means that (?-aP) suppresses all ASCII 
+PCRE2_EXTRA_ASCII_DIGIT has no additional effect when PCRE2_EXTRA_ASCII_POSIX
+is set, but including it in (?aP) means that (?-aP) suppresses all ASCII
 restrictions for POSIX classes.
 .P
 When one of these option changes occurs at top level (that is, not inside group
@@ -2005,7 +2005,7 @@ taken as zero; in this case the upper limit must be present.
   X{,4} is interpreted as X{0,4}
 .sp
 This is a change in behaviour that happened in Perl 5.34.0 and PCRE2 10.43. In
-earlier versions such a sequence was not interpreted as a quantifier. Other 
+earlier versions such a sequence was not interpreted as a quantifier. Other
 regular expression engines may behave either way.
 .P
 If the characters that follow an opening brace do not match the syntax of a
@@ -2290,7 +2290,7 @@ the reference. A signed number is a relative reference. Consider this example:
 The sequence \eg{-1} is a reference to the capture group whose number is one
 less than the number of the next group to be started, so in this example (where
 the next group would be numbered 3) is it equivalent to \e2, and \eg{-2} would
-be equivalent to \e1. Note that if this construct is inside a capture group, 
+be equivalent to \e1. Note that if this construct is inside a capture group,
 that group is included in the count, so in this example \eg{-2} also refers to
 group 1:
 .sp
@@ -2326,8 +2326,8 @@ matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
 capture group is matched caselessly.
 .P
 There are several different ways of writing backreferences to named capture
-groups. The .NET syntax is \ek{name}, the Python syntax is (?=name), and the 
-original Perl syntax is \ek<name> or \ek'name'. All of these are now supported 
+groups. The .NET syntax is \ek{name}, the Python syntax is (?=name), and the
+original Perl syntax is \ek<name> or \ek'name'. All of these are now supported
 by both Perl and PCRE2. Perl 5.10's unified backreference syntax, in which \eg
 can be used for both numeric and named references, is also supported by PCRE2.
 We could rewrite the above example in any of the following ways:
@@ -2804,7 +2804,7 @@ there is more than one capture group with the same number (see the earlier
 .\" </a>
 section about duplicate group numbers),
 .\"
-the condition is true if any of them have matched. An alternative notation, 
+the condition is true if any of them have matched. An alternative notation,
 which is a PCRE2 extension, not supported by Perl, is to precede the digits
 with a plus or minus sign. In this case, the group number is relative rather
 than absolute. The most recently opened capture group (which could be enclosing

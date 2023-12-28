@@ -328,10 +328,10 @@ are as follows:
 Brace characters { and } are also used to enclose data for constructions such
 as \g{2} or \k{name}. In almost all uses of braces, space and/or horizontal
 tab characters that follow { or precede } are allowed and are ignored. In the
-case of quantifiers, they may also appear before or after the comma. The 
+case of quantifiers, they may also appear before or after the comma. The
 exception to this is \u{...} which is an ECMAScript compatibility feature
-that is recognized only when the PCRE2_EXTRA_ALT_BSUX option is set. ECMAScript 
-does not ignore such white space; it causes the item to be interpreted as 
+that is recognized only when the PCRE2_EXTRA_ALT_BSUX option is set. ECMAScript
+does not ignore such white space; it causes the item to be interpreted as
 literal.
 </P>
 <P>
@@ -472,7 +472,7 @@ pattern is converted to \n so that it matches a LF (linefeed) instead of a CR
 (carriage return) character.
 </P>
 <P>
-An error occurs if \c is not followed by a character whose ASCII code point 
+An error occurs if \c is not followed by a character whose ASCII code point
 is in the range 32 to 126. The precise effect of \cx is as follows: if x is a
 lower case letter, it is converted to upper case. Then bit 6 of the character
 (hex 40) is inverted. Thus \cA to \cZ become hex 01 to hex 1A (A is 41, Z is
@@ -694,8 +694,8 @@ determine character types, as follows:
   \s  any character that matches \p{Z} or \h or \v
   \w  any character that matches \p{L}, \p{N}, \p{Mn}, or \p{Pc}
 </pre>
-The addition of \p{Mn} (non-spacing mark) and the replacement of an explicit 
-test for underscore with a test for \p{Pc} (connector punctuation) happened in 
+The addition of \p{Mn} (non-spacing mark) and the replacement of an explicit
+test for underscore with a test for \p{Pc} (connector punctuation) happened in
 PCRE2 release 10.43. This brings PCRE2 into line with Perl.
 </P>
 <P>
@@ -1074,7 +1074,7 @@ property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps; in PCRE1 it used to exclude vertical tab, for Perl
 compatibility, but Perl changed. Xwd matches the same characters as Xan, plus
-those that match Mn (non-spacing mark) or Pc (connector punctuation, which 
+those that match Mn (non-spacing mark) or Pc (connector punctuation, which
 includes underscore).
 </P>
 <P>
@@ -1586,7 +1586,7 @@ is a change that was made in PCRE release 10.43 for Perl compatibility.
 </P>
 <P>
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
-with code points less than 256. 
+with code points less than 256.
 </P>
 <P>
 There are two options that can be used to restrict the POSIX classes to ASCII
@@ -1613,8 +1613,8 @@ at the start and the end of a word (see
 <a href="#smallassertions">"Simple assertions"</a>
 above), and in a Perl-style pattern the preceding or following character
 normally shows which is wanted, without the need for the assertions that are
-used above in order to give exactly the POSIX behaviour. Note also that the 
-PCRE2_UCP option changes the meaning of \w (and therefore \b) by default, so 
+used above in order to give exactly the POSIX behaviour. Note also that the
+PCRE2_UCP option changes the meaning of \w (and therefore \b) by default, so
 it also affects these POSIX sequences.
 </P>
 <br><a name="SEC12" href="#TOC1">VERTICAL BAR</a><br>
@@ -1682,8 +1682,8 @@ However, except for 'r', these are not unset by (?^), which is equivalent to
 above, it sets (or unsets) all the ASCII options.
 </P>
 <P>
-PCRE2_EXTRA_ASCII_DIGIT has no additional effect when PCRE2_EXTRA_ASCII_POSIX 
-is set, but including it in (?aP) means that (?-aP) suppresses all ASCII 
+PCRE2_EXTRA_ASCII_DIGIT has no additional effect when PCRE2_EXTRA_ASCII_POSIX
+is set, but including it in (?aP) means that (?-aP) suppresses all ASCII
 restrictions for POSIX classes.
 </P>
 <P>
@@ -1993,7 +1993,7 @@ taken as zero; in this case the upper limit must be present.
   X{,4} is interpreted as X{0,4}
 </pre>
 This is a change in behaviour that happened in Perl 5.34.0 and PCRE2 10.43. In
-earlier versions such a sequence was not interpreted as a quantifier. Other 
+earlier versions such a sequence was not interpreted as a quantifier. Other
 regular expression engines may behave either way.
 </P>
 <P>
@@ -2287,7 +2287,7 @@ the reference. A signed number is a relative reference. Consider this example:
 The sequence \g{-1} is a reference to the capture group whose number is one
 less than the number of the next group to be started, so in this example (where
 the next group would be numbered 3) is it equivalent to \2, and \g{-2} would
-be equivalent to \1. Note that if this construct is inside a capture group, 
+be equivalent to \1. Note that if this construct is inside a capture group,
 that group is included in the count, so in this example \g{-2} also refers to
 group 1:
 <pre>
@@ -2323,8 +2323,8 @@ capture group is matched caselessly.
 </P>
 <P>
 There are several different ways of writing backreferences to named capture
-groups. The .NET syntax is \k{name}, the Python syntax is (?=name), and the 
-original Perl syntax is \k&#60;name&#62; or \k'name'. All of these are now supported 
+groups. The .NET syntax is \k{name}, the Python syntax is (?=name), and the
+original Perl syntax is \k&#60;name&#62; or \k'name'. All of these are now supported
 by both Perl and PCRE2. Perl 5.10's unified backreference syntax, in which \g
 can be used for both numeric and named references, is also supported by PCRE2.
 We could rewrite the above example in any of the following ways:
@@ -2778,7 +2778,7 @@ If the text between the parentheses consists of a sequence of digits, the
 condition is true if a capture group of that number has previously matched. If
 there is more than one capture group with the same number (see the earlier
 <a href="#recursion">section about duplicate group numbers),</a>
-the condition is true if any of them have matched. An alternative notation, 
+the condition is true if any of them have matched. An alternative notation,
 which is a PCRE2 extension, not supported by Perl, is to precede the digits
 with a plus or minus sign. In this case, the group number is relative rather
 than absolute. The most recently opened capture group (which could be enclosing

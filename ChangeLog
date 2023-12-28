@@ -5,8 +5,8 @@ Before the move to GitHub, this was the only record of changes to PCRE2. Now
 there is often more detail in the pull requests.
 
 
-Version 10.43 xx-xxx-202x
--------------------------
+Version 10.43 27-December-2023
+------------------------------
 
 1. The test program added by change 2 of 10.42 didn't work when the default
 newline setting didn't include \n as a newline. One test needed (*LF) to ensure

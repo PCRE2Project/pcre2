@@ -71,15 +71,16 @@ For example:
 <pre>
   pcre2grep some-pattern file1 - file3
 </pre>
-By default, input files are searched line by line. Each line that matches a
-pattern is copied to the standard output, and if there is more than one file,
-the file name is output at the start of each line, followed by a colon.
-However, there are options that can change how <b>pcre2grep</b> behaves. For
-example, the <b>-M</b> option makes it possible to search for strings that span
-line boundaries. What defines a line boundary is controlled by the <b>-N</b>
-(<b>--newline</b>) option. The <b>-h</b> and <b>-H</b> options control whether or
-not file names are shown, and the <b>-Z</b> option changes the file name
-terminator to a zero byte.
+By default, input files are searched line by line, so pattern assertions about
+the beginning and end of a subject string (^, $, \A, \Z, and \z) match at
+the beginning and end of each line. When a line matches a pattern, it is copied
+to the standard output, and if there is more than one file, the file name is
+output at the start of each line, followed by a colon. However, there are
+options that can change how <b>pcre2grep</b> behaves. For example, the <b>-M</b>
+option makes it possible to search for strings that span line boundaries. What
+defines a line boundary is controlled by the <b>-N</b> (<b>--newline</b>) option.
+The <b>-h</b> and <b>-H</b> options control whether or not file names are shown,
+and the <b>-Z</b> option changes the file name terminator to a zero byte.
 </P>
 <P>
 The amount of memory used for buffering files that are being scanned is
@@ -563,16 +564,24 @@ used. There is no short form for this option.
 <P>
 <b>-M</b>, <b>--multiline</b>
 Allow patterns to match more than one line. When this option is set, the PCRE2
-library is called in "multiline" mode. This allows a matched string to extend
-past the end of a line and continue on one or more subsequent lines. Patterns
-used with <b>-M</b> may usefully contain literal newline characters and internal
-occurrences of ^ and $ characters. The output for a successful match may
-consist of more than one line. The first line is the line in which the match
-started, and the last line is the line in which the match ended. If the matched
-string ends with a newline sequence, the output ends at the end of that line.
-If <b>-v</b> is set, none of the lines in a multi-line match are output. Once a
-match has been handled, scanning restarts at the beginning of the line after
-the one in which the match ended.
+library is called in "multiline" mode, and a match is allowed to continue past
+the end of the initial line and onto one or more subsequent lines.
+<br>
+<br>
+Patterns used with <b>-M</b> may usefully contain literal newline characters and
+internal occurrences of ^ and $ characters, because in multiline mode these can
+match at internal newlines. Because <b>pcre2grep</b> is scanning multiple lines,
+the \Z and \z assertions match only at the end of the last line in the file.
+The \A assertion matches at the start of the first line of a match. This can
+be any line in the file; it is not anchored to the first line.
+<br>
+<br>
+The output for a successful match may consist of more than one line. The first
+line is the line in which the match started, and the last line is the line in
+which the match ended. If the matched string ends with a newline sequence, the
+output ends at the end of that line. If <b>-v</b> is set, none of the lines in a
+multi-line match are output. Once a match has been handled, scanning restarts
+at the beginning of the line after the one in which the match ended.
 <br>
 <br>
 The newline sequence that separates multiple lines must be matched as part of
@@ -1107,7 +1116,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 November 2023
+Last updated: 22 December 2023
 <br>
 Copyright &copy; 1997-2023 University of Cambridge.
 <br>
