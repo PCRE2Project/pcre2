@@ -310,4 +310,7 @@
 /(.)(.)/jitfast,replace=$2+$1
     ABCD
 
+/(...)-(...)/jitfast
+    abc-xyz\=get=2
+
 # End of testinput17
