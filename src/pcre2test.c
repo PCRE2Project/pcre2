@@ -7513,9 +7513,9 @@ if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
   dat_datctl.replacement[0] = 0;
   }
 
-/* If a replacement string is provided, call pcre2_substitute() instead of one
-of the matching functions. First we have to convert the replacement string to
-the appropriate width. */
+/* If a replacement string is provided, call pcre2_substitute() instead of or
+after one of the matching functions. First we have to convert the replacement
+string to the appropriate width. */
 
 if (dat_datctl.replacement[0] != 0)
   {
@@ -7559,8 +7559,16 @@ if (dat_datctl.replacement[0] != 0)
 
   if (emoption != 0)
     {
-    PCRE2_MATCH(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
-      dat_datctl.options, match_data, use_dat_context);
+    if ((pat_patctl.control & CTL_JITFAST) != 0)
+      {
+      PCRE2_JIT_MATCH(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
+        dat_datctl.options, match_data, use_dat_context);
+      }
+    else
+      {
+      PCRE2_MATCH(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
+        dat_datctl.options, match_data, use_dat_context);
+      }
     }
 
   xoptions = emoption |

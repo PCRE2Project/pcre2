@@ -197,6 +197,9 @@ all of a, b, and d as possible starting code units; now it sets only a and d.
 
 54. Fix incorrect class character matches in JIT.
 
+55. In pcre2test, ensure pcre2_jit_match() is used when jitfast is used with 
+substitution testing.
+
 
 Version 10.42 11-December-2022
 ------------------------------

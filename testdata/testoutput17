@@ -553,5 +553,9 @@ Failed: error -47: match limit exceeded
 //jit
     \=null_subject
  0:  (JIT)
+    
+/(.)(.)/jitfast,replace=$2+$1
+    ABCD
+ 1: B+ACD
 
 # End of testinput17
