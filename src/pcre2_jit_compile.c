@@ -1558,11 +1558,6 @@ do
         }
       break;
 
-      case OP_ONCE:
-      if (count < 2)
-        count = 2;
-      /* Fall through */
-
       case OP_BRA:
       case OP_CBRA:
       prev_count = count;
