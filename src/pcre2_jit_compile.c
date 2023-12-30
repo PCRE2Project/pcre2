@@ -7688,6 +7688,8 @@ while (*cc != XCL_END)
       /* Any either accepts everything or ignored. */
       if (cc[-1] == XCL_PROP)
         items = UCPCAT_ALL;
+      else
+        compares--;
       break;
 
       case PT_LAMP:
@@ -7764,7 +7766,6 @@ while (*cc != XCL_END)
     }
 #endif /* SUPPORT_UNICODE */
   }
-SLJIT_ASSERT(compares > 0 || category_list > 0);
 
 #ifdef SUPPORT_UNICODE
 if (category_list == UCPCAT_ALL)
@@ -7775,6 +7776,17 @@ if (category_list == UCPCAT_ALL)
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
   return;
   }
+
+if (compares == 0 && category_list == 0)
+  {
+  /* No characters are accepted, same as (*F) or dotall. */
+  compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
+  if (list != backtracks)
+    add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
+  return;
+  }
+#else /* !SUPPORT_UNICODE */
+SLJIT_ASSERT(compares > 0);
 #endif /* SUPPORT_UNICODE */
 
 /* We are not necessary in utf mode even in 8 bit mode. */
@@ -8167,10 +8179,6 @@ while (*cc != XCL_END)
     switch(*cc)
       {
       case PT_ANY:
-      if (!invertcmp)
-        jump = JUMP(SLJIT_JUMP);
-      break;
-
       case PT_LAMP:
       case PT_GC:
       case PT_PC:
@@ -8334,16 +8342,13 @@ while (*cc != XCL_END)
       break;
 
       case PT_PXXDIGIT:
-      SET_CHAR_OFFSET(CHAR_0);
-      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_9 - CHAR_0);
+      SET_CHAR_OFFSET(CHAR_A);
+      OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, ~0x20);
+      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP2, 0, SLJIT_IMM, CHAR_F - CHAR_A);
       OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
 
-      SET_CHAR_OFFSET(CHAR_A);
-      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_F - CHAR_A);
-      OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_LESS_EQUAL);
-
-      SET_CHAR_OFFSET(CHAR_a);
-      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_f - CHAR_a);
+      SET_CHAR_OFFSET(CHAR_0);
+      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_9 - CHAR_0);
       OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_LESS_EQUAL);
 
       SET_CHAR_OFFSET(0xff10);
@@ -8379,6 +8384,7 @@ while (*cc != XCL_END)
     add_jump(compiler, compares > 0 ? list : backtracks, jump);
   }
 
+SLJIT_ASSERT(compares == 0);
 if (found != NULL)
   set_jumps(found, LABEL());
 }
