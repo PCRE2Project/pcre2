@@ -519,6 +519,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0 | F_PROPERTY, "\\X{2,4}..", "#\xcc\x8d#\xcc\x8d##" },
 	{ MU, A, 0, 0, "(c(ab)?+ab)+", "cabcababcab" },
 	{ MU, A, 0, 0, "(?>(a+)b)+aabab", "aaaabaaabaabab" },
+	{ MU | PCRE2_ENDANCHORED, A, 0, 0, "(?>.+?)", "ab" },
 
 	/* Possessive quantifiers. */
 	{ MU, A, 0, 0, "(?:a|b)++m", "mababbaaxababbaam" },
