@@ -55,11 +55,17 @@ typedef enum {
 static SLJIT_INLINE sljit_s32 max_fast_forward_char_pair_offset(void)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
-return sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? 31 : 15;
+/* The AVX2 code path is currently disabled. */
+/* return sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? 31 : 15; */
+return 15;
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-return sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? 15 : 7;
+/* The AVX2 code path is currently disabled. */
+/* return sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? 15 : 7; */
+return 7;
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-return sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? 7 : 3;
+/* The AVX2 code path is currently disabled. */
+/* return sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? 7 : 3; */
+return 3;
 #else
 #error "Unsupported unit width"
 #endif
@@ -228,7 +234,9 @@ static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, P
 {
 DEFINE_COMPILER;
 sljit_u8 instruction[8];
-sljit_s32 reg_type = sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? SLJIT_SIMD_REG_256 : SLJIT_SIMD_REG_128;
+/* The AVX2 code path is currently disabled. */
+/* sljit_s32 reg_type = sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? SLJIT_SIMD_REG_256 : SLJIT_SIMD_REG_128; */
+sljit_s32 reg_type = SLJIT_SIMD_REG_128;
 sljit_s32 value;
 struct sljit_label *start;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
@@ -363,7 +371,9 @@ static jump_list *fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR 
 {
 DEFINE_COMPILER;
 sljit_u8 instruction[8];
-sljit_s32 reg_type = sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? SLJIT_SIMD_REG_256 : SLJIT_SIMD_REG_128;
+/* The AVX2 code path is currently disabled. */
+/* sljit_s32 reg_type = sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? SLJIT_SIMD_REG_256 : SLJIT_SIMD_REG_128; */
+sljit_s32 reg_type = SLJIT_SIMD_REG_128;
 sljit_s32 value;
 struct sljit_label *start;
 struct sljit_jump *quit;
@@ -468,7 +478,9 @@ static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1
 {
 DEFINE_COMPILER;
 sljit_u8 instruction[8];
-sljit_s32 reg_type = sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? SLJIT_SIMD_REG_256 : SLJIT_SIMD_REG_128;
+/* The AVX2 code path is currently disabled. */
+/* sljit_s32 reg_type = sljit_has_cpu_feature(SLJIT_HAS_AVX2) ? SLJIT_SIMD_REG_256 : SLJIT_SIMD_REG_128; */
+sljit_s32 reg_type = SLJIT_SIMD_REG_128;
 sljit_s32 value;
 vector_compare_type compare1_type = vector_compare_match1;
 vector_compare_type compare2_type = vector_compare_match1;
