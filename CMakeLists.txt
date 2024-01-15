@@ -648,8 +648,6 @@ IF(MINGW AND BUILD_SHARED_LIBS)
 ENDIF(MINGW AND BUILD_SHARED_LIBS)
 
 IF(MSVC AND BUILD_SHARED_LIBS)
-  SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-posix.pdb ${dll_pdb_files})
-  SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-posixd.pdb ${dll_pdb_debug_files})
   IF (EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
     SET(PCRE2_SOURCES ${PCRE2_SOURCES} pcre2.rc)
   ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
@@ -751,8 +749,14 @@ IF(PCRE2_BUILD_PCRE2_8)
     TARGET_COMPILE_DEFINITIONS(pcre2-posix-shared PUBLIC ${PCRE2POSIX_CFLAG})
     TARGET_LINK_LIBRARIES(pcre2-posix-shared pcre2-8-shared)
     SET(targets ${targets} pcre2-posix-shared)
-    SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-8.pdb ${dll_pdb_files})
-    SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-8d.pdb ${dll_pdb_debug_files})
+    SET(dll_pdb_files
+      $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8.pdb
+      $<TARGET_PDB_FILE_DIR:pcre2-posix-shared>/pcre2-posix.pdb
+      ${dll_pdb_files})
+    SET(dll_pdb_debug_files
+      $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8d.pdb
+      $<TARGET_PDB_FILE_DIR:pcre2-posix-shared>/pcre2-posixd.pdb
+      ${dll_pdb_debug_files})
 
     IF(MINGW)
       IF(NON_STANDARD_LIB_PREFIX)
@@ -815,8 +819,8 @@ IF(PCRE2_BUILD_PCRE2_16)
       TARGET_LINK_LIBRARIES(pcre2-16-shared Threads::Threads)
     ENDIF(REQUIRE_PTHREAD)
     set(targets ${targets} pcre2-16-shared)
-    SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-16.pdb ${dll_pdb_files})
-    SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-16d.pdb ${dll_pdb_debug_files})
+    SET(dll_pdb_files $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16.pdb ${dll_pdb_files})
+    SET(dll_pdb_debug_files $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16d.pdb ${dll_pdb_debug_files})
 
     IF(MINGW)
       IF(NON_STANDARD_LIB_PREFIX)
@@ -877,8 +881,8 @@ IF(PCRE2_BUILD_PCRE2_32)
       TARGET_LINK_LIBRARIES(pcre2-32-shared Threads::Threads)
     ENDIF(REQUIRE_PTHREAD)
     set(targets ${targets} pcre2-32-shared)
-    SET(dll_pdb_files ${PROJECT_BINARY_DIR}/pcre2-32.pdb ${dll_pdb_files})
-    SET(dll_pdb_debug_files ${PROJECT_BINARY_DIR}/pcre2-32d.pdb ${dll_pdb_debug_files})
+    SET(dll_pdb_files $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32.pdb ${dll_pdb_files})
+    SET(dll_pdb_debug_files $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32d.pdb ${dll_pdb_debug_files})
 
     IF(MINGW)
       IF(NON_STANDARD_LIB_PREFIX)
