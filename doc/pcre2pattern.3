@@ -1285,7 +1285,7 @@ above).
 Dot never matches a single line-ending character. When the two-character
 sequence CRLF is the only line ending, dot does not match CR if it is
 immediately followed by LF, but otherwise it matches all characters (including
-isolated CRs and LFs). When ANYCRLF is selected for line endings, no occurences
+isolated CRs and LFs). When ANYCRLF is selected for line endings, no occurrences
 of CR of LF match dot. When all Unicode line endings are being recognized, dot
 does not match CR or LF or any of the other line ending characters.
 .P
@@ -2668,7 +2668,7 @@ The current matching point is then reset to the start of the subject, and the
 rest of the pattern match checks for two occurrences of the captured word,
 using an ungreedy .*? to scan from the left. If this succeeds, we are done, but
 if the last word in the string does not occur twice, this part of the pattern
-fails. If a traditional atomic lookhead (?= or (*pla: had been used, the
+fails. If a traditional atomic lookahead (?= or (*pla: had been used, the
 assertion could not be re-entered, and the whole match would fail. The pattern
 would succeed only if the very last word in the subject was found twice.
 .P

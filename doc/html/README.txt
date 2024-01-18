@@ -391,7 +391,7 @@ library. They are also documented in the pcre2build man page.
   avoided by linking with libedit (which has a BSD licence) instead.
 
   Enabling libreadline causes the -lreadline option to be added to the
-  pcre2test build. In many operating environments with a sytem-installed
+  pcre2test build. In many operating environments with a system-installed
   readline library this is sufficient. However, in some environments (e.g. if
   an unmodified distribution version of readline is in use), it may be
   necessary to specify something like LIBS="-lncurses" as well. This is
