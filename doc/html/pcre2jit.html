@@ -381,7 +381,7 @@ pattern causes stack overflow with a stack of 1MiB? Is that 1MiB kept until the
 stack is freed?
 <br>
 <br>
-Especially on embedded sytems, it might be a good idea to release memory
+Especially on embedded systems, it might be a good idea to release memory
 sometimes without freeing the stack. There is no API for this at the moment.
 Probably a function call which returns with the currently allocated memory for
 any stack and another which allows releasing memory (shrinking the stack) would
