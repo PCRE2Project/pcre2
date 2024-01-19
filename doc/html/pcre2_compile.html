@@ -98,7 +98,7 @@ If either of <i>errorcode</i> or <i>erroroffset</i> is NULL, the function return
 NULL immediately. Otherwise, the yield of this function is a pointer to a
 private data structure that contains the compiled pattern, or NULL if an error
 was detected. In the error case, a text error message can be obtained by
-passing the value returned via the <i>errorcode</i> argument to the the
+passing the value returned via the <i>errorcode</i> argument to the
 <b>pcre2_get_error_message()</b> function. The offset (in code units) where the
 error was encountered is returned via the <i>erroroffset</i> argument.
 </P>

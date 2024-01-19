@@ -1174,7 +1174,7 @@ gets rid of the warnings. There were also two missing casts in pcre2test.
 Version 10.32 10-September-2018
 -------------------------------
 
-1. When matching using the the REG_STARTEND feature of the POSIX API with a
+1. When matching using the REG_STARTEND feature of the POSIX API with a
 non-zero starting offset, unset capturing groups with lower numbers than a
 group that did capture something were not being correctly returned as "unset"
 (that is, with offset values of -1).
@@ -1349,7 +1349,7 @@ assumed empty second branch cannot be anchored. Demonstrated by test patterns
 such as /(?(1)^())b/ or /(?(?=^))b/.
 
 40. A repeated conditional subpattern that could match an empty string was
-always assumed to be unanchored. Now it it checked just like any other
+always assumed to be unanchored. Now it is checked just like any other
 repeated conditional subpattern, and can be found to be anchored if the minimum
 quantifier is one or more. I can't see much use for a repeated anchored
 pattern, but the behaviour is now consistent.

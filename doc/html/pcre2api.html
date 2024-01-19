@@ -1096,10 +1096,9 @@ is also used in this case (but in a different way) to limit how long the
 matching can continue.
 </P>
 <P>
-The default value for the limit can be set when PCRE2 is built; the default
-default is 10 million, which handles all but the most extreme cases. A value
-for the match limit may also be supplied by an item at the start of a pattern
-of the form
+The default value for the limit can be set when PCRE2 is built; the default is
+10 million, which handles all but the most extreme cases. A value for the match
+limit may also be supplied by an item at the start of a pattern of the form
 <pre>
   (*LIMIT_MATCH=ddd)
 </pre>
@@ -2626,7 +2625,7 @@ large enough to hold as many as are expected.
 A minimum of at least 1 pair is imposed by <b>pcre2_match_data_create()</b>, so
 it is always possible to return the overall matched string in the case of
 <b>pcre2_match()</b> or the longest match in the case of
-<b>pcre2_dfa_match()</b>. The maximum number of pairs is 65535; if the the first
+<b>pcre2_dfa_match()</b>. The maximum number of pairs is 65535; if the first
 argument of <b>pcre2_match_data_create()</b> is greater than this, 65535 is
 used.
 </P>
@@ -3109,8 +3108,8 @@ Offset values that correspond to unused groups at the end of the expression are
 also set to PCRE2_UNSET. For example, if the string "abc" is matched against
 the pattern (abc)(x(yz)?)? groups 2 and 3 are not matched. The return from the
 function is 2, because the highest used capture group number is 1. The offsets
-for for the second and third capture groups (assuming the vector is large
-enough, of course) are set to PCRE2_UNSET.
+for the second and third capture groups (assuming the vector is large enough,
+of course) are set to PCRE2_UNSET.
 </P>
 <P>
 Elements in the ovector that do not correspond to capturing parentheses in the
@@ -3268,7 +3267,7 @@ The backtracking match limit was reached.
 <pre>
   PCRE2_ERROR_NOMEMORY
 </pre>
-Heap memory is used to remember backgracking points. This error is given when
+Heap memory is used to remember backtracking points. This error is given when
 the memory allocation function (default or custom) fails. Note that a different
 error, PCRE2_ERROR_HEAPLIMIT, is given if the amount of memory needed exceeds
 the heap limit. PCRE2_ERROR_NOMEMORY is also returned if
@@ -3863,7 +3862,7 @@ PCRE2_SUBSTITUTE_GLOBAL is set, processing continues with a search for the next
 match. If the value is not zero, the current replacement is not accepted. If
 the value is greater than zero, processing continues when
 PCRE2_SUBSTITUTE_GLOBAL is set. Otherwise (the value is less than zero or
-PCRE2_SUBSTITUTE_GLOBAL is not set), the the rest of the input is copied to the
+PCRE2_SUBSTITUTE_GLOBAL is not set), the rest of the input is copied to the
 output and the call to <b>pcre2_substitute()</b> exits, returning the number of
 matches so far.
 </P>
@@ -4141,9 +4140,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 December 2023
+Last updated: 19 January 2024
 <br>
-Copyright &copy; 1997-2023 University of Cambridge.
+Copyright &copy; 1997-2024 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

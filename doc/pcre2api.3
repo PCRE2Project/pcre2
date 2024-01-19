@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "08 December 2023" "PCRE2 10.43"
+.TH PCRE2API 3 "19 January 2024" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1024,10 +1024,9 @@ matching that goes on for a very long time, and so the \fImatch_limit\fP value
 is also used in this case (but in a different way) to limit how long the
 matching can continue.
 .P
-The default value for the limit can be set when PCRE2 is built; the default
-default is 10 million, which handles all but the most extreme cases. A value
-for the match limit may also be supplied by an item at the start of a pattern
-of the form
+The default value for the limit can be set when PCRE2 is built; the default is
+10 million, which handles all but the most extreme cases. A value for the match
+limit may also be supplied by an item at the start of a pattern of the form
 .sp
   (*LIMIT_MATCH=ddd)
 .sp
@@ -2599,7 +2598,7 @@ large enough to hold as many as are expected.
 A minimum of at least 1 pair is imposed by \fBpcre2_match_data_create()\fP, so
 it is always possible to return the overall matched string in the case of
 \fBpcre2_match()\fP or the longest match in the case of
-\fBpcre2_dfa_match()\fP. The maximum number of pairs is 65535; if the the first
+\fBpcre2_dfa_match()\fP. The maximum number of pairs is 65535; if the first
 argument of \fBpcre2_match_data_create()\fP is greater than this, 65535 is
 used.
 .P
@@ -3854,7 +3853,7 @@ PCRE2_SUBSTITUTE_GLOBAL is set, processing continues with a search for the next
 match. If the value is not zero, the current replacement is not accepted. If
 the value is greater than zero, processing continues when
 PCRE2_SUBSTITUTE_GLOBAL is set. Otherwise (the value is less than zero or
-PCRE2_SUBSTITUTE_GLOBAL is not set), the the rest of the input is copied to the
+PCRE2_SUBSTITUTE_GLOBAL is not set), the rest of the input is copied to the
 output and the call to \fBpcre2_substitute()\fP exits, returning the number of
 matches so far.
 .
@@ -4149,6 +4148,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 December 2023
-Copyright (c) 1997-2023 University of Cambridge.
+Last updated: 19 January 2024
+Copyright (c) 1997-2024 University of Cambridge.
 .fi

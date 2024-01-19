@@ -58,15 +58,15 @@ INPUT ENCODING
        end of file, and no further data is read, so this character  should  be
        avoided unless you really want that action.
 
-       The  input  is  processed using using C's string functions, so must not
-       contain binary zeros, even though in  Unix-like  environments,  fgets()
-       treats  any  bytes  other  than newline as data characters. An error is
-       generated if a binary zero is encountered. By default subject lines are
-       processed for backslash escapes, which makes it possible to include any
-       data value in strings that are passed to the library for matching.  For
-       patterns,  there  is a facility for specifying some or all of the 8-bit
-       input characters as hexadecimal pairs, which makes it possible  to  in-
-       clude binary zeros.
+       The  input is processed using C's string functions, so must not contain
+       binary zeros, even though in Unix-like environments, fgets() treats any
+       bytes other than newline as data characters. An error is generated if a
+       binary zero is encountered. By default subject lines are processed  for
+       backslash escapes, which makes it possible to include any data value in
+       strings  that  are  passed  to  the library for matching. For patterns,
+       there is a facility for specifying some or all of the 8-bit input char-
+       acters as hexadecimal pairs, which makes it possible to include  binary
+       zeros.
 
    Input for the 16-bit and 32-bit libraries
 
@@ -1392,7 +1392,7 @@ SUBJECT MODIFIERS
        tion  is set up. The null_context modifier must not be set, because the
        address of the callout function is passed in a match context. When  the
        callout  function  is  called (after each substitution), details of the
-       the input and output strings are output. For example:
+       input and output strings are output. For example:
 
          /abc/g,replace=<$0>,substitute_callout
              abcdefabcpqr
@@ -1637,7 +1637,7 @@ DEFAULT OUTPUT FROM pcre2test
        \xhh  escapes  if  the  value is less than 256 and UTF mode is not set.
        Otherwise they are output as \x{hh...} escapes. See below for the defi-
        nition of non-printing characters. If the aftertext  modifier  is  set,
-       the  output  for substring 0 is followed by the the rest of the subject
+       the  output  for  substring  0  is  followed by the rest of the subject
        string, identified by "0+" like this:
 
            re> /cat/aftertext
@@ -1997,8 +1997,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 August 2023
-       Copyright (c) 1997-2023 University of Cambridge.
+       Last updated: 19 January 2024
+       Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE 10.43                         11 August                      PCRE2TEST(1)
+PCRE 10.43                      19 January 2024                   PCRE2TEST(1)

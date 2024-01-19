@@ -1098,9 +1098,9 @@ PCRE2 CONTEXTS
        long the matching can continue.
 
        The default value for the limit can be set when PCRE2 is built; the de-
-       fault  default  is  10  million, which handles all but the most extreme
-       cases. A value for the match limit may also be supplied by an  item  at
-       the start of a pattern of the form
+       fault  is  10  million, which handles all but the most extreme cases. A
+       value for the match limit may also be supplied by an item at the  start
+       of a pattern of the form
 
          (*LIMIT_MATCH=ddd)
 
@@ -2580,46 +2580,46 @@ THE MATCH DATA BLOCK
        A minimum of at least 1 pair is imposed  by  pcre2_match_data_create(),
        so  it  is  always possible to return the overall matched string in the
        case  of  pcre2_match()  or  the  longest  match   in   the   case   of
-       pcre2_dfa_match().  The  maximum  number  of pairs is 65535; if the the
-       first argument of pcre2_match_data_create() is greater than this, 65535
-       is used.
+       pcre2_dfa_match().  The  maximum number of pairs is 65535; if the first
+       argument of pcre2_match_data_create() is greater than  this,  65535  is
+       used.
 
        The second argument of pcre2_match_data_create() is a pointer to a gen-
-       eral context, which can specify custom memory management for  obtaining
+       eral  context, which can specify custom memory management for obtaining
        the memory for the match data block. If you are not using custom memory
        management, pass NULL, which causes malloc() to be used.
 
-       For  pcre2_match_data_create_from_pattern(),  the  first  argument is a
+       For pcre2_match_data_create_from_pattern(), the  first  argument  is  a
        pointer to a compiled pattern. The ovector is created to be exactly the
-       right size to hold all the substrings  a  pattern  might  capture  when
+       right  size  to  hold  all  the substrings a pattern might capture when
        matched using pcre2_match(). You should not use this call when matching
-       with  pcre2_dfa_match().  The  second  argument is again a pointer to a
-       general context, but in this case if NULL is passed, the memory is  ob-
-       tained  using the same allocator that was used for the compiled pattern
+       with pcre2_dfa_match(). The second argument is again  a  pointer  to  a
+       general  context, but in this case if NULL is passed, the memory is ob-
+       tained using the same allocator that was used for the compiled  pattern
        (custom or default).
 
-       A match data block can be used many times, with the same  or  different
-       compiled  patterns. You can extract information from a match data block
-       after a match operation has finished,  using  functions  that  are  de-
+       A  match  data block can be used many times, with the same or different
+       compiled patterns. You can extract information from a match data  block
+       after  a  match  operation  has  finished, using functions that are de-
        scribed in the sections on matched strings and other match data below.
 
-       When  a  call  of  pcre2_match()  fails, valid data is available in the
-       match block only  when  the  error  is  PCRE2_ERROR_NOMATCH,  PCRE2_ER-
-       ROR_PARTIAL,  or  one of the error codes for an invalid UTF string. Ex-
+       When a call of pcre2_match() fails, valid  data  is  available  in  the
+       match  block  only  when  the  error  is PCRE2_ERROR_NOMATCH, PCRE2_ER-
+       ROR_PARTIAL, or one of the error codes for an invalid UTF  string.  Ex-
        actly what is available depends on the error, and is detailed below.
 
-       When one of the matching functions is called, pointers to the  compiled
-       pattern  and the subject string are set in the match data block so that
-       they can be referenced by the extraction functions after  a  successful
+       When  one of the matching functions is called, pointers to the compiled
+       pattern and the subject string are set in the match data block so  that
+       they  can  be referenced by the extraction functions after a successful
        match. After running a match, you must not free a compiled pattern or a
-       subject  string until after all operations on the match data block (for
-       that match) have taken place,  unless,  in  the  case  of  the  subject
-       string,  you  have used the PCRE2_COPY_MATCHED_SUBJECT option, which is
-       described in the section entitled "Option bits for  pcre2_match()"  be-
+       subject string until after all operations on the match data block  (for
+       that  match)  have  taken  place,  unless,  in  the case of the subject
+       string, you have used the PCRE2_COPY_MATCHED_SUBJECT option,  which  is
+       described  in  the section entitled "Option bits for pcre2_match()" be-
        low.
 
-       When  a match data block itself is no longer needed, it should be freed
-       by calling pcre2_match_data_free(). If this function is called  with  a
+       When a match data block itself is no longer needed, it should be  freed
+       by  calling  pcre2_match_data_free(). If this function is called with a
        NULL argument, it returns immediately, without doing anything.
 
 
@@ -2630,27 +2630,27 @@ MEMORY USE FOR MATCH DATA BLOCKS
        PCRE2_SIZE pcre2_get_match_data_heapframes_size(
          pcre2_match_data *match_data);
 
-       The  size of a match data block depends on the size of the ovector that
+       The size of a match data block depends on the size of the ovector  that
        it contains. The function pcre2_get_match_data_size() returns the size,
        in bytes, of the block that is its argument.
 
        When pcre2_match() runs interpretively (that is, without using JIT), it
        makes use of a vector of data frames for remembering backtracking posi-
        tions.  The size of each individual frame depends on the number of cap-
-       turing parentheses in the  pattern  and  can  be  obtained  by  calling
+       turing  parentheses  in  the  pattern  and  can  be obtained by calling
        pcre2_pattern_info() with the PCRE2_INFO_FRAMESIZE option (see the sec-
        tion entitled "Information about a compiled pattern" above).
 
-       Heap  memory is used for the frames vector; if the initial memory block
-       turns out to be too small during  matching,  it  is  automatically  ex-
-       panded.  When  pcre2_match()  returns, the memory is not freed, but re-
-       mains attached to the match data  block,  for  use  by  any  subsequent
-       matches  that  use  the  same block. It is automatically freed when the
+       Heap memory is used for the frames vector; if the initial memory  block
+       turns  out  to  be  too  small during matching, it is automatically ex-
+       panded. When pcre2_match() returns, the memory is not  freed,  but  re-
+       mains  attached  to  the  match  data  block, for use by any subsequent
+       matches that use the same block. It is  automatically  freed  when  the
        match data block itself is freed.
 
-       You can find the current size of the frames vector that  a  match  data
-       block  owns  by  calling  pcre2_get_match_data_heapframes_size(). For a
-       newly created match data block the size will be  zero.  Some  types  of
+       You  can  find  the current size of the frames vector that a match data
+       block owns by  calling  pcre2_get_match_data_heapframes_size().  For  a
+       newly  created  match  data  block the size will be zero. Some types of
        match may require a lot of frames and thus a large vector; applications
        that run in environments where memory is constrained can check this and
        free the match data block if the heap frames vector has become too big.
@@ -2663,15 +2663,15 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
          uint32_t options, pcre2_match_data *match_data,
          pcre2_match_context *mcontext);
 
-       The  function pcre2_match() is called to match a subject string against
-       a compiled pattern, which is passed in the code argument. You can  call
+       The function pcre2_match() is called to match a subject string  against
+       a  compiled pattern, which is passed in the code argument. You can call
        pcre2_match() with the same code argument as many times as you like, in
-       order  to  find multiple matches in the subject string or to match dif-
+       order to find multiple matches in the subject string or to  match  dif-
        ferent subject strings with the same pattern.
 
-       This function is the main matching facility of the library, and it  op-
-       erates  in  a Perl-like manner. For specialist use there is also an al-
-       ternative matching function, which is described below  in  the  section
+       This  function is the main matching facility of the library, and it op-
+       erates in a Perl-like manner. For specialist use there is also  an  al-
+       ternative  matching  function,  which is described below in the section
        about the pcre2_dfa_match() function.
 
        Here is an example of a simple call to pcre2_match():
@@ -2686,217 +2686,217 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
            md,             /* the match data block */
            NULL);          /* a match context; NULL means use defaults */
 
-       If  the  subject  string is zero-terminated, the length can be given as
+       If the subject string is zero-terminated, the length can  be  given  as
        PCRE2_ZERO_TERMINATED. A match context must be provided if certain less
        common matching parameters are to be changed. For details, see the sec-
        tion on the match context above.
 
    The string to be matched by pcre2_match()
 
-       The subject string is passed to pcre2_match() as a pointer in  subject,
-       a  length  in  length, and a starting offset in startoffset. The length
-       and offset are in code units, not characters.  That  is,  they  are  in
-       bytes  for the 8-bit library, 16-bit code units for the 16-bit library,
-       and 32-bit code units for the 32-bit library, whether or not  UTF  pro-
+       The  subject string is passed to pcre2_match() as a pointer in subject,
+       a length in length, and a starting offset in  startoffset.  The  length
+       and  offset  are  in  code units, not characters.  That is, they are in
+       bytes for the 8-bit library, 16-bit code units for the 16-bit  library,
+       and  32-bit  code units for the 32-bit library, whether or not UTF pro-
        cessing is enabled. As a special case, if subject is NULL and length is
-       zero,  the  subject is assumed to be an empty string. If length is non-
+       zero, the subject is assumed to be an empty string. If length  is  non-
        zero, an error occurs if subject is NULL.
 
        If startoffset is greater than the length of the subject, pcre2_match()
-       returns PCRE2_ERROR_BADOFFSET. When the starting offset  is  zero,  the
-       search  for a match starts at the beginning of the subject, and this is
+       returns  PCRE2_ERROR_BADOFFSET.  When  the starting offset is zero, the
+       search for a match starts at the beginning of the subject, and this  is
        by far the most common case. In UTF-8 or UTF-16 mode, the starting off-
-       set must point to the start of a character, or to the end of  the  sub-
-       ject  (in  UTF-32 mode, one code unit equals one character, so all off-
-       sets are valid). Like the pattern string, the subject may  contain  bi-
+       set  must  point to the start of a character, or to the end of the sub-
+       ject (in UTF-32 mode, one code unit equals one character, so  all  off-
+       sets  are  valid). Like the pattern string, the subject may contain bi-
        nary zeros.
 
-       A  non-zero  starting offset is useful when searching for another match
-       in the same subject by calling pcre2_match()  again  after  a  previous
-       success.   Setting  startoffset  differs  from passing over a shortened
-       string and setting PCRE2_NOTBOL in the case of a  pattern  that  begins
+       A non-zero starting offset is useful when searching for  another  match
+       in  the  same  subject  by calling pcre2_match() again after a previous
+       success.  Setting startoffset differs from  passing  over  a  shortened
+       string  and  setting  PCRE2_NOTBOL in the case of a pattern that begins
        with any kind of lookbehind. For example, consider the pattern
 
          \Biss\B
 
-       which  finds  occurrences  of "iss" in the middle of words. (\B matches
-       only if the current position in the subject is not  a  word  boundary.)
-       When   applied   to   the   string  "Mississippi"  the  first  call  to
-       pcre2_match() finds the first occurrence. If  pcre2_match()  is  called
+       which finds occurrences of "iss" in the middle of  words.  (\B  matches
+       only  if  the  current position in the subject is not a word boundary.)
+       When  applied  to  the  string  "Mississippi"   the   first   call   to
+       pcre2_match()  finds  the  first occurrence. If pcre2_match() is called
        again with just the remainder of the subject, namely "issippi", it does
-       not  match,  because  \B  is  always false at the start of the subject,
-       which is deemed to be a word boundary.  However,  if  pcre2_match()  is
+       not match, because \B is always false at  the  start  of  the  subject,
+       which  is  deemed  to  be a word boundary. However, if pcre2_match() is
        passed the entire string again, but with startoffset set to 4, it finds
-       the  second  occurrence  of "iss" because it is able to look behind the
+       the second occurrence of "iss" because it is able to  look  behind  the
        starting point to discover that it is preceded by a letter.
 
-       Finding all the matches in a subject is tricky  when  the  pattern  can
+       Finding  all  the  matches  in a subject is tricky when the pattern can
        match an empty string. It is possible to emulate Perl's /g behaviour by
-       first   trying   the   match   again  at  the  same  offset,  with  the
-       PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED options,  and  then  if  that
-       fails,  advancing  the  starting  offset  and  trying an ordinary match
-       again. There is some code that demonstrates  how  to  do  this  in  the
-       pcre2demo  sample  program. In the most general case, you have to check
-       to see if the newline convention recognizes CRLF as a newline,  and  if
-       so,  and the current character is CR followed by LF, advance the start-
+       first  trying  the  match  again  at  the   same   offset,   with   the
+       PCRE2_NOTEMPTY_ATSTART  and  PCRE2_ANCHORED  options,  and then if that
+       fails, advancing the starting  offset  and  trying  an  ordinary  match
+       again.  There  is  some  code  that  demonstrates how to do this in the
+       pcre2demo sample program. In the most general case, you have  to  check
+       to  see  if the newline convention recognizes CRLF as a newline, and if
+       so, and the current character is CR followed by LF, advance the  start-
        ing offset by two characters instead of one.
 
        If a non-zero starting offset is passed when the pattern is anchored, a
        single attempt to match at the given offset is made. This can only suc-
-       ceed if the pattern does not require the match to be at  the  start  of
-       the  subject.  In other words, the anchoring must be the result of set-
-       ting the PCRE2_ANCHORED option or the use of .* with PCRE2_DOTALL,  not
+       ceed  if  the  pattern does not require the match to be at the start of
+       the subject. In other words, the anchoring must be the result  of  set-
+       ting  the PCRE2_ANCHORED option or the use of .* with PCRE2_DOTALL, not
        by starting the pattern with ^ or \A.
 
    Option bits for pcre2_match()
 
        The unused bits of the options argument for pcre2_match() must be zero.
-       The    only    bits    that    may    be    set   are   PCRE2_ANCHORED,
-       PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL,  PCRE2_NO-
+       The   only   bits    that    may    be    set    are    PCRE2_ANCHORED,
+       PCRE2_COPY_MATCHED_SUBJECT,  PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NO-
        TEOL,     PCRE2_NOTEMPTY,     PCRE2_NOTEMPTY_ATSTART,     PCRE2_NO_JIT,
-       PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and  PCRE2_PARTIAL_SOFT.  Their
+       PCRE2_NO_UTF_CHECK,  PCRE2_PARTIAL_HARD,  and PCRE2_PARTIAL_SOFT. Their
        action is described below.
 
-       Setting  PCRE2_ANCHORED  or PCRE2_ENDANCHORED at match time is not sup-
-       ported by the just-in-time (JIT) compiler. If it is set,  JIT  matching
-       is  disabled  and  the interpretive code in pcre2_match() is run. Apart
-       from PCRE2_NO_JIT (obviously), the remaining options are supported  for
+       Setting PCRE2_ANCHORED or PCRE2_ENDANCHORED at match time is  not  sup-
+       ported  by  the just-in-time (JIT) compiler. If it is set, JIT matching
+       is disabled and the interpretive code in pcre2_match()  is  run.  Apart
+       from  PCRE2_NO_JIT (obviously), the remaining options are supported for
        JIT matching.
 
          PCRE2_ANCHORED
 
        The PCRE2_ANCHORED option limits pcre2_match() to matching at the first
-       matching  position.  If  a pattern was compiled with PCRE2_ANCHORED, or
-       turned out to be anchored by virtue of its contents, it cannot be  made
-       unachored  at matching time. Note that setting the option at match time
+       matching position. If a pattern was compiled  with  PCRE2_ANCHORED,  or
+       turned  out to be anchored by virtue of its contents, it cannot be made
+       unachored at matching time. Note that setting the option at match  time
        disables JIT matching.
 
          PCRE2_COPY_MATCHED_SUBJECT
 
-       By default, a pointer to the subject is remembered in  the  match  data
-       block  so  that,  after a successful match, it can be referenced by the
-       substring extraction functions. This means that  the  subject's  memory
-       must  not be freed until all such operations are complete. For some ap-
-       plications where the lifetime of the subject string is not  guaranteed,
-       it  may  be  necessary  to make a copy of the subject string, but it is
-       wasteful to do this unless the match is successful. After a  successful
-       match,  if PCRE2_COPY_MATCHED_SUBJECT is set, the subject is copied and
-       the new pointer is remembered in the match data block  instead  of  the
-       original  subject  pointer.  The memory allocator that was used for the
-       match block itself is  used.  The  copy  is  automatically  freed  when
-       pcre2_match_data_free()  is  called to free the match data block. It is
+       By  default,  a  pointer to the subject is remembered in the match data
+       block so that, after a successful match, it can be  referenced  by  the
+       substring  extraction  functions.  This means that the subject's memory
+       must not be freed until all such operations are complete. For some  ap-
+       plications  where the lifetime of the subject string is not guaranteed,
+       it may be necessary to make a copy of the subject  string,  but  it  is
+       wasteful  to do this unless the match is successful. After a successful
+       match, if PCRE2_COPY_MATCHED_SUBJECT is set, the subject is copied  and
+       the  new  pointer  is remembered in the match data block instead of the
+       original subject pointer. The memory allocator that was  used  for  the
+       match  block  itself  is  used.  The  copy  is automatically freed when
+       pcre2_match_data_free() is called to free the match data block.  It  is
        also automatically freed if the match data block is re-used for another
        match operation.
 
          PCRE2_ENDANCHORED
 
-       If the PCRE2_ENDANCHORED option is set, any string  that  pcre2_match()
-       matches  must be right at the end of the subject string. Note that set-
+       If  the  PCRE2_ENDANCHORED option is set, any string that pcre2_match()
+       matches must be right at the end of the subject string. Note that  set-
        ting the option at match time disables JIT matching.
 
          PCRE2_NOTBOL
 
        This option specifies that first character of the subject string is not
-       the beginning of a line, so the  circumflex  metacharacter  should  not
-       match  before  it.  Setting  this without having set PCRE2_MULTILINE at
+       the  beginning  of  a  line, so the circumflex metacharacter should not
+       match before it. Setting this without  having  set  PCRE2_MULTILINE  at
        compile time causes circumflex never to match. This option affects only
        the behaviour of the circumflex metacharacter. It does not affect \A.
 
          PCRE2_NOTEOL
 
        This option specifies that the end of the subject string is not the end
-       of a line, so the dollar metacharacter should not match it nor  (except
-       in  multiline mode) a newline immediately before it. Setting this with-
-       out having set PCRE2_MULTILINE at compile time causes dollar  never  to
+       of  a line, so the dollar metacharacter should not match it nor (except
+       in multiline mode) a newline immediately before it. Setting this  with-
+       out  having  set PCRE2_MULTILINE at compile time causes dollar never to
        match. This option affects only the behaviour of the dollar metacharac-
        ter. It does not affect \Z or \z.
 
          PCRE2_NOTEMPTY
 
        An empty string is not considered to be a valid match if this option is
-       set.  If  there are alternatives in the pattern, they are tried. If all
-       the alternatives match the empty string, the entire  match  fails.  For
+       set. If there are alternatives in the pattern, they are tried.  If  all
+       the  alternatives  match  the empty string, the entire match fails. For
        example, if the pattern
 
          a?b?
 
-       is  applied  to  a  string not beginning with "a" or "b", it matches an
+       is applied to a string not beginning with "a" or  "b",  it  matches  an
        empty string at the start of the subject. With PCRE2_NOTEMPTY set, this
-       match is not valid, so pcre2_match() searches further into  the  string
+       match  is  not valid, so pcre2_match() searches further into the string
        for occurrences of "a" or "b".
 
          PCRE2_NOTEMPTY_ATSTART
 
-       This  is  like PCRE2_NOTEMPTY, except that it locks out an empty string
+       This is like PCRE2_NOTEMPTY, except that it locks out an  empty  string
        match only at the first matching position, that is, at the start of the
-       subject plus the starting offset. An empty string match  later  in  the
+       subject  plus  the  starting offset. An empty string match later in the
        subject is permitted.  If the pattern is anchored, such a match can oc-
        cur only if the pattern contains \K.
 
          PCRE2_NO_JIT
 
-       By   default,   if   a  pattern  has  been  successfully  processed  by
-       pcre2_jit_compile(), JIT is automatically used  when  pcre2_match()  is
-       called  with  options  that JIT supports. Setting PCRE2_NO_JIT disables
+       By  default,  if  a  pattern  has  been   successfully   processed   by
+       pcre2_jit_compile(),  JIT  is  automatically used when pcre2_match() is
+       called with options that JIT supports.  Setting  PCRE2_NO_JIT  disables
        the use of JIT; it forces matching to be done by the interpreter.
 
          PCRE2_NO_UTF_CHECK
 
        When PCRE2_UTF is set at compile time, the validity of the subject as a
-       UTF  string  is  checked  unless  PCRE2_NO_UTF_CHECK   is   passed   to
+       UTF   string   is   checked  unless  PCRE2_NO_UTF_CHECK  is  passed  to
        pcre2_match() or PCRE2_MATCH_INVALID_UTF was passed to pcre2_compile().
        The latter special case is discussed in detail in the pcre2unicode doc-
        umentation.
 
-       In  the default case, if a non-zero starting offset is given, the check
-       is applied only to that part of the subject  that  could  be  inspected
-       during  matching,  and there is a check that the starting offset points
-       to the first code unit of a character or to the end of the subject.  If
-       there  are no lookbehind assertions in the pattern, the check starts at
+       In the default case, if a non-zero starting offset is given, the  check
+       is  applied  only  to  that part of the subject that could be inspected
+       during matching, and there is a check that the starting  offset  points
+       to  the first code unit of a character or to the end of the subject. If
+       there are no lookbehind assertions in the pattern, the check starts  at
        the starting offset.  Otherwise, it starts at the length of the longest
-       lookbehind before the starting offset, or at the start of  the  subject
-       if  there are not that many characters before the starting offset. Note
+       lookbehind  before  the starting offset, or at the start of the subject
+       if there are not that many characters before the starting offset.  Note
        that the sequences \b and \B are one-character lookbehinds.
 
        The check is carried out before any other processing takes place, and a
-       negative error code is returned if the check fails. There  are  several
-       UTF  error  codes  for each code unit width, corresponding to different
-       problems with the code unit sequence. There are discussions  about  the
-       validity  of  UTF-8  strings, UTF-16 strings, and UTF-32 strings in the
+       negative  error  code is returned if the check fails. There are several
+       UTF error codes for each code unit width,  corresponding  to  different
+       problems  with  the code unit sequence. There are discussions about the
+       validity of UTF-8 strings, UTF-16 strings, and UTF-32  strings  in  the
        pcre2unicode documentation.
 
        If you know that your subject is valid, and you want to skip this check
        for performance reasons, you can set the PCRE2_NO_UTF_CHECK option when
-       calling pcre2_match(). You might want to do this  for  the  second  and
-       subsequent  calls  to pcre2_match() if you are making repeated calls to
+       calling  pcre2_match().  You  might  want to do this for the second and
+       subsequent calls to pcre2_match() if you are making repeated  calls  to
        find multiple matches in the same subject string.
 
-       Warning: Unless PCRE2_MATCH_INVALID_UTF was set at compile  time,  when
-       PCRE2_NO_UTF_CHECK  is  set  at match time the effect of passing an in-
+       Warning:  Unless  PCRE2_MATCH_INVALID_UTF was set at compile time, when
+       PCRE2_NO_UTF_CHECK is set at match time the effect of  passing  an  in-
        valid string as a subject, or an invalid value of startoffset, is unde-
-       fined.  Your program may crash or loop indefinitely or give  wrong  re-
+       fined.   Your  program may crash or loop indefinitely or give wrong re-
        sults.
 
          PCRE2_PARTIAL_HARD
          PCRE2_PARTIAL_SOFT
 
        These options turn on the partial matching feature. A partial match oc-
-       curs  if  the  end  of  the subject string is reached successfully, but
+       curs if the end of the subject  string  is  reached  successfully,  but
        there are not enough subject characters to complete the match. In addi-
-       tion, either at least one character must have  been  inspected  or  the
-       pattern  must  contain  a  lookbehind,  or the pattern must be one that
+       tion,  either  at  least  one character must have been inspected or the
+       pattern must contain a lookbehind, or the  pattern  must  be  one  that
        could match an empty string.
 
-       If this situation arises when PCRE2_PARTIAL_SOFT  (but  not  PCRE2_PAR-
+       If  this  situation  arises when PCRE2_PARTIAL_SOFT (but not PCRE2_PAR-
        TIAL_HARD) is set, matching continues by testing any remaining alterna-
-       tives.  Only  if  no complete match can be found is PCRE2_ERROR_PARTIAL
-       returned instead of PCRE2_ERROR_NOMATCH.  In  other  words,  PCRE2_PAR-
-       TIAL_SOFT  specifies  that  the  caller is prepared to handle a partial
+       tives. Only if no complete match can be  found  is  PCRE2_ERROR_PARTIAL
+       returned  instead  of  PCRE2_ERROR_NOMATCH.  In other words, PCRE2_PAR-
+       TIAL_SOFT specifies that the caller is prepared  to  handle  a  partial
        match, but only if no complete match can be found.
 
-       If PCRE2_PARTIAL_HARD is set, it overrides PCRE2_PARTIAL_SOFT. In  this
-       case,  if  a  partial match is found, pcre2_match() immediately returns
-       PCRE2_ERROR_PARTIAL, without considering  any  other  alternatives.  In
+       If  PCRE2_PARTIAL_HARD is set, it overrides PCRE2_PARTIAL_SOFT. In this
+       case, if a partial match is found,  pcre2_match()  immediately  returns
+       PCRE2_ERROR_PARTIAL,  without  considering  any  other alternatives. In
        other words, when PCRE2_PARTIAL_HARD is set, a partial match is consid-
        ered to be more important that an alternative complete match.
 
@@ -2906,38 +2906,38 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
 
 NEWLINE HANDLING WHEN MATCHING
 
-       When  PCRE2 is built, a default newline convention is set; this is usu-
-       ally the standard convention for the operating system. The default  can
-       be  overridden  in a compile context by calling pcre2_set_newline(). It
-       can also be overridden by starting a pattern string with, for  example,
-       (*CRLF),  as  described  in  the  section on newline conventions in the
-       pcre2pattern page. During matching, the newline choice affects the  be-
-       haviour  of the dot, circumflex, and dollar metacharacters. It may also
-       alter the way the match starting position is  advanced  after  a  match
+       When PCRE2 is built, a default newline convention is set; this is  usu-
+       ally  the standard convention for the operating system. The default can
+       be overridden in a compile context by calling  pcre2_set_newline().  It
+       can  also be overridden by starting a pattern string with, for example,
+       (*CRLF), as described in the section  on  newline  conventions  in  the
+       pcre2pattern  page. During matching, the newline choice affects the be-
+       haviour of the dot, circumflex, and dollar metacharacters. It may  also
+       alter  the  way  the  match starting position is advanced after a match
        failure for an unanchored pattern.
 
        When PCRE2_NEWLINE_CRLF, PCRE2_NEWLINE_ANYCRLF, or PCRE2_NEWLINE_ANY is
-       set  as  the  newline convention, and a match attempt for an unanchored
+       set as the newline convention, and a match attempt  for  an  unanchored
        pattern fails when the current starting position is at a CRLF sequence,
-       and the pattern contains no explicit matches for CR or  LF  characters,
-       the  match  position  is  advanced by two characters instead of one, in
+       and  the  pattern contains no explicit matches for CR or LF characters,
+       the match position is advanced by two characters  instead  of  one,  in
        other words, to after the CRLF.
 
        The above rule is a compromise that makes the most common cases work as
-       expected. For example, if the pattern is .+A (and the PCRE2_DOTALL  op-
-       tion  is  not set), it does not match the string "\r\nA" because, after
-       failing at the start, it skips both the CR and the LF before  retrying.
-       However,  the  pattern  [\r\n]A does match that string, because it con-
+       expected.  For example, if the pattern is .+A (and the PCRE2_DOTALL op-
+       tion is not set), it does not match the string "\r\nA"  because,  after
+       failing  at the start, it skips both the CR and the LF before retrying.
+       However, the pattern [\r\n]A does match that string,  because  it  con-
        tains an explicit CR or LF reference, and so advances only by one char-
        acter after the first failure.
 
        An explicit match for CR of LF is either a literal appearance of one of
-       those characters in the pattern, or one of the \r or \n  or  equivalent
+       those  characters  in the pattern, or one of the \r or \n or equivalent
        octal or hexadecimal escape sequences. Implicit matches such as [^X] do
-       not  count, nor does \s, even though it includes CR and LF in the char-
+       not count, nor does \s, even though it includes CR and LF in the  char-
        acters that it matches.
 
-       Notwithstanding the above, anomalous effects may still occur when  CRLF
+       Notwithstanding  the above, anomalous effects may still occur when CRLF
        is a valid newline sequence and explicit \r or \n escapes appear in the
        pattern.
 
@@ -2948,76 +2948,76 @@ HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS
 
        PCRE2_SIZE *pcre2_get_ovector_pointer(pcre2_match_data *match_data);
 
-       In  general, a pattern matches a certain portion of the subject, and in
-       addition, further substrings from the subject  may  be  picked  out  by
-       parenthesized  parts  of  the  pattern.  Following the usage in Jeffrey
-       Friedl's book, this is called "capturing"  in  what  follows,  and  the
-       phrase  "capture  group" (Perl terminology) is used for a fragment of a
-       pattern that picks out a substring. PCRE2 supports several other  kinds
+       In general, a pattern matches a certain portion of the subject, and  in
+       addition,  further  substrings  from  the  subject may be picked out by
+       parenthesized parts of the pattern.  Following  the  usage  in  Jeffrey
+       Friedl's  book,  this  is  called  "capturing" in what follows, and the
+       phrase "capture group" (Perl terminology) is used for a fragment  of  a
+       pattern  that picks out a substring. PCRE2 supports several other kinds
        of parenthesized group that do not cause substrings to be captured. The
-       pcre2_pattern_info()  function can be used to find out how many capture
+       pcre2_pattern_info() function can be used to find out how many  capture
        groups there are in a compiled pattern.
 
-       You can use auxiliary functions for accessing  captured  substrings  by
+       You  can  use  auxiliary functions for accessing captured substrings by
        number or by name, as described in sections below.
 
        Alternatively, you can make direct use of the vector of PCRE2_SIZE val-
-       ues,  called  the  ovector,  which  contains  the  offsets  of captured
-       strings.  It  is  part  of  the  match  data   block.    The   function
-       pcre2_get_ovector_pointer()  returns  the  address  of the ovector, and
+       ues, called  the  ovector,  which  contains  the  offsets  of  captured
+       strings.   It   is   part  of  the  match  data  block.   The  function
+       pcre2_get_ovector_pointer() returns the address  of  the  ovector,  and
        pcre2_get_ovector_count() returns the number of pairs of values it con-
        tains.
 
        Within the ovector, the first in each pair of values is set to the off-
        set of the first code unit of a substring, and the second is set to the
-       offset of the first code unit after the end of a substring. These  val-
-       ues  are always code unit offsets, not character offsets. That is, they
+       offset  of the first code unit after the end of a substring. These val-
+       ues are always code unit offsets, not character offsets. That is,  they
        are byte offsets in the 8-bit library, 16-bit offsets in the 16-bit li-
        brary, and 32-bit offsets in the 32-bit library.
 
-       After a partial match  (error  return  PCRE2_ERROR_PARTIAL),  only  the
-       first  pair  of  offsets  (that is, ovector[0] and ovector[1]) are set.
-       They identify the part of the subject that was partially  matched.  See
+       After  a  partial  match  (error  return PCRE2_ERROR_PARTIAL), only the
+       first pair of offsets (that is, ovector[0]  and  ovector[1])  are  set.
+       They  identify  the part of the subject that was partially matched. See
        the pcre2partial documentation for details of partial matching.
 
-       After  a  fully  successful match, the first pair of offsets identifies
-       the portion of the subject string that was matched by the  entire  pat-
-       tern.  The  next  pair is used for the first captured substring, and so
-       on. The value returned by pcre2_match() is one more  than  the  highest
-       numbered  pair  that  has been set. For example, if two substrings have
-       been captured, the returned value is 3. If there are no  captured  sub-
+       After a fully successful match, the first pair  of  offsets  identifies
+       the  portion  of the subject string that was matched by the entire pat-
+       tern. The next pair is used for the first captured  substring,  and  so
+       on.  The  value  returned by pcre2_match() is one more than the highest
+       numbered pair that has been set. For example, if  two  substrings  have
+       been  captured,  the returned value is 3. If there are no captured sub-
        strings, the return value from a successful match is 1, indicating that
        just the first pair of offsets has been set.
 
-       If  a  pattern uses the \K escape sequence within a positive assertion,
+       If a pattern uses the \K escape sequence within a  positive  assertion,
        the reported start of a successful match can be greater than the end of
-       the match.  For example, if the pattern  (?=ab\K)  is  matched  against
+       the  match.   For  example,  if the pattern (?=ab\K) is matched against
        "ab", the start and end offset values for the match are 2 and 0.
 
-       If  a  capture group is matched repeatedly within a single match opera-
+       If a capture group is matched repeatedly within a single  match  opera-
        tion, it is the last portion of the subject that it matched that is re-
        turned.
 
        If the ovector is too small to hold all the captured substring offsets,
-       as much as possible is filled in, and the function returns a  value  of
-       zero.  If captured substrings are not of interest, pcre2_match() may be
+       as  much  as possible is filled in, and the function returns a value of
+       zero. If captured substrings are not of interest, pcre2_match() may  be
        called with a match data block whose ovector is of minimum length (that
        is, one pair).
 
-       It is possible for capture group number n+1 to match some part  of  the
-       subject  when  group  n  has  not been used at all. For example, if the
+       It  is  possible for capture group number n+1 to match some part of the
+       subject when group n has not been used at  all.  For  example,  if  the
        string "abc" is matched against the pattern (a|(z))(bc) the return from
-       the function is 4, and groups 1 and 3 are matched, but 2 is  not.  When
-       this  happens,  both values in the offset pairs corresponding to unused
+       the  function  is 4, and groups 1 and 3 are matched, but 2 is not. When
+       this happens, both values in the offset pairs corresponding  to  unused
        groups are set to PCRE2_UNSET.
 
-       Offset values that correspond to unused groups at the end  of  the  ex-
-       pression  are also set to PCRE2_UNSET. For example, if the string "abc"
-       is matched against the pattern (abc)(x(yz)?)? groups 2 and  3  are  not
-       matched.  The  return  from the function is 2, because the highest used
-       capture group number is 1. The offsets for for  the  second  and  third
-       capture  groups  (assuming  the vector is large enough, of course) are
-       set to PCRE2_UNSET.
+       Offset  values  that  correspond to unused groups at the end of the ex-
+       pression are also set to PCRE2_UNSET. For example, if the string  "abc"
+       is  matched  against  the pattern (abc)(x(yz)?)? groups 2 and 3 are not
+       matched. The return from the function is 2, because  the  highest  used
+       capture group number is 1. The offsets for the second and third capture
+       groups  (assuming  the  vector  is  large enough, of course) are set to
+       PCRE2_UNSET.
 
        Elements in the ovector that do not correspond to capturing parentheses
        in the pattern are never changed. That is, if a pattern contains n cap-
@@ -3168,7 +3168,7 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_NOMEMORY
 
-       Heap memory is used to remember  backgracking  points.  This  error  is
+       Heap memory is used to remember  backtracking  points.  This  error  is
        given  when  the  memory allocation function (default or custom) fails.
        Note that a different error, PCRE2_ERROR_HEAPLIMIT,  is  given  if  the
        amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is
@@ -3719,9 +3719,9 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        match. If the value is not zero, the current  replacement  is  not  ac-
        cepted.  If  the  value is greater than zero, processing continues when
        PCRE2_SUBSTITUTE_GLOBAL is set. Otherwise (the value is less than  zero
-       or  PCRE2_SUBSTITUTE_GLOBAL  is  not set), the the rest of the input is
-       copied to the output and the call to pcre2_substitute() exits,  return-
-       ing the number of matches so far.
+       or PCRE2_SUBSTITUTE_GLOBAL is not set), the rest of the input is copied
+       to  the  output and the call to pcre2_substitute() exits, returning the
+       number of matches so far.
 
 
 DUPLICATE CAPTURE GROUP NAMES
@@ -3729,56 +3729,56 @@ DUPLICATE CAPTURE GROUP NAMES
        int pcre2_substring_nametable_scan(const pcre2_code *code,
          PCRE2_SPTR name, PCRE2_SPTR *first, PCRE2_SPTR *last);
 
-       When  a  pattern  is compiled with the PCRE2_DUPNAMES option, names for
-       capture groups are not required to be unique. Duplicate names  are  al-
-       ways  allowed for groups with the same number, created by using the (?|
+       When a pattern is compiled with the PCRE2_DUPNAMES  option,  names  for
+       capture  groups  are not required to be unique. Duplicate names are al-
+       ways allowed for groups with the same number, created by using the  (?|
        feature. Indeed, if such groups are named, they are required to use the
        same names.
 
-       Normally, patterns that use duplicate names are such that  in  any  one
-       match,  only  one of each set of identically-named groups participates.
+       Normally,  patterns  that  use duplicate names are such that in any one
+       match, only one of each set of identically-named  groups  participates.
        An example is shown in the pcre2pattern documentation.
 
-       When  duplicates   are   present,   pcre2_substring_copy_byname()   and
-       pcre2_substring_get_byname()  return  the first substring corresponding
-       to the given name that is set. Only if none are set is  PCRE2_ERROR_UN-
-       SET  is  returned.  The pcre2_substring_number_from_name() function re-
-       turns the error PCRE2_ERROR_NOUNIQUESUBSTRING when there are  duplicate
+       When   duplicates   are   present,   pcre2_substring_copy_byname()  and
+       pcre2_substring_get_byname() return the first  substring  corresponding
+       to  the given name that is set. Only if none are set is PCRE2_ERROR_UN-
+       SET is returned. The  pcre2_substring_number_from_name()  function  re-
+       turns  the error PCRE2_ERROR_NOUNIQUESUBSTRING when there are duplicate
        names.
 
-       If  you want to get full details of all captured substrings for a given
-       name, you must use the pcre2_substring_nametable_scan()  function.  The
-       first  argument is the compiled pattern, and the second is the name. If
-       the third and fourth arguments are NULL, the function returns  a  group
+       If you want to get full details of all captured substrings for a  given
+       name,  you  must use the pcre2_substring_nametable_scan() function. The
+       first argument is the compiled pattern, and the second is the name.  If
+       the  third  and fourth arguments are NULL, the function returns a group
        number for a unique name, or PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
        When the third and fourth arguments are not NULL, they must be pointers
-       to  variables  that are updated by the function. After it has run, they
+       to variables that are updated by the function. After it has  run,  they
        point to the first and last entries in the name-to-number table for the
-       given name, and the function returns the length of each entry  in  code
-       units.  In both cases, PCRE2_ERROR_NOSUBSTRING is returned if there are
+       given  name,  and the function returns the length of each entry in code
+       units. In both cases, PCRE2_ERROR_NOSUBSTRING is returned if there  are
        no entries for the given name.
 
        The format of the name table is described above in the section entitled
-       Information about a pattern. Given all the  relevant  entries  for  the
-       name,  you  can  extract  each of their numbers, and hence the captured
+       Information  about  a  pattern.  Given all the relevant entries for the
+       name, you can extract each of their numbers,  and  hence  the  captured
        data.
 
 
 FINDING ALL POSSIBLE MATCHES AT ONE POSITION
 
-       The traditional matching function uses a  similar  algorithm  to  Perl,
-       which  stops when it finds the first match at a given point in the sub-
+       The  traditional  matching  function  uses a similar algorithm to Perl,
+       which stops when it finds the first match at a given point in the  sub-
        ject. If you want to find all possible matches, or the longest possible
-       match at a given position,  consider  using  the  alternative  matching
-       function  (see  below) instead. If you cannot use the alternative func-
+       match  at  a  given  position,  consider using the alternative matching
+       function (see below) instead. If you cannot use the  alternative  func-
        tion, you can kludge it up by making use of the callout facility, which
        is described in the pcre2callout documentation.
 
        What you have to do is to insert a callout right at the end of the pat-
-       tern.  When your callout function is called, extract and save the  cur-
-       rent  matched  substring.  Then return 1, which forces pcre2_match() to
-       backtrack and try other alternatives. Ultimately, when it runs  out  of
+       tern.   When your callout function is called, extract and save the cur-
+       rent matched substring. Then return 1, which  forces  pcre2_match()  to
+       backtrack  and  try other alternatives. Ultimately, when it runs out of
        matches, pcre2_match() will yield PCRE2_ERROR_NOMATCH.
 
 
@@ -3790,27 +3790,27 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
          pcre2_match_context *mcontext,
          int *workspace, PCRE2_SIZE wscount);
 
-       The  function  pcre2_dfa_match()  is  called  to match a subject string
-       against a compiled pattern, using a matching algorithm that  scans  the
+       The function pcre2_dfa_match() is called  to  match  a  subject  string
+       against  a  compiled pattern, using a matching algorithm that scans the
        subject string just once (not counting lookaround assertions), and does
-       not  backtrack (except when processing lookaround assertions). This has
-       different characteristics to the normal algorithm, and is not  compati-
-       ble  with  Perl.  Some  of  the features of PCRE2 patterns are not sup-
+       not backtrack (except when processing lookaround assertions). This  has
+       different  characteristics to the normal algorithm, and is not compati-
+       ble with Perl. Some of the features of  PCRE2  patterns  are  not  sup-
        ported. Nevertheless, there are times when this kind of matching can be
-       useful. For a discussion of the two matching algorithms, and a list  of
+       useful.  For a discussion of the two matching algorithms, and a list of
        features that pcre2_dfa_match() does not support, see the pcre2matching
        documentation.
 
-       The  arguments  for  the pcre2_dfa_match() function are the same as for
+       The arguments for the pcre2_dfa_match() function are the  same  as  for
        pcre2_match(), plus two extras. The ovector within the match data block
        is used in a different way, and this is described below. The other com-
-       mon arguments are used in the same way as for pcre2_match(),  so  their
+       mon  arguments  are used in the same way as for pcre2_match(), so their
        description is not repeated here.
 
-       The  two  additional  arguments provide workspace for the function. The
-       workspace vector should contain at least 20 elements. It  is  used  for
-       keeping  track  of  multiple paths through the pattern tree. More work-
-       space is needed for patterns and subjects where there are a lot of  po-
+       The two additional arguments provide workspace for  the  function.  The
+       workspace  vector  should  contain at least 20 elements. It is used for
+       keeping track of multiple paths through the pattern  tree.  More  work-
+       space  is needed for patterns and subjects where there are a lot of po-
        tential matches.
 
        Here is an example of a simple call to pcre2_dfa_match():
@@ -3830,45 +3830,45 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
    Option bits for pcre2_dfa_match()
 
-       The  unused  bits of the options argument for pcre2_dfa_match() must be
-       zero.  The  only   bits   that   may   be   set   are   PCRE2_ANCHORED,
-       PCRE2_COPY_MATCHED_SUBJECT,  PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NO-
+       The unused bits of the options argument for pcre2_dfa_match()  must  be
+       zero.   The   only   bits   that   may   be   set  are  PCRE2_ANCHORED,
+       PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL,  PCRE2_NO-
        TEOL,   PCRE2_NOTEMPTY,   PCRE2_NOTEMPTY_ATSTART,   PCRE2_NO_UTF_CHECK,
-       PCRE2_PARTIAL_HARD,    PCRE2_PARTIAL_SOFT,    PCRE2_DFA_SHORTEST,   and
-       PCRE2_DFA_RESTART. All but the last four of these are exactly the  same
+       PCRE2_PARTIAL_HARD,   PCRE2_PARTIAL_SOFT,    PCRE2_DFA_SHORTEST,    and
+       PCRE2_DFA_RESTART.  All but the last four of these are exactly the same
        as for pcre2_match(), so their description is not repeated here.
 
          PCRE2_PARTIAL_HARD
          PCRE2_PARTIAL_SOFT
 
-       These  have  the  same general effect as they do for pcre2_match(), but
-       the details are slightly different. When PCRE2_PARTIAL_HARD is set  for
-       pcre2_dfa_match(),  it  returns  PCRE2_ERROR_PARTIAL  if the end of the
+       These have the same general effect as they do  for  pcre2_match(),  but
+       the  details are slightly different. When PCRE2_PARTIAL_HARD is set for
+       pcre2_dfa_match(), it returns PCRE2_ERROR_PARTIAL if  the  end  of  the
        subject is reached and there is still at least one matching possibility
        that requires additional characters. This happens even if some complete
-       matches have already been found. When PCRE2_PARTIAL_SOFT  is  set,  the
-       return  code  PCRE2_ERROR_NOMATCH is converted into PCRE2_ERROR_PARTIAL
-       if the end of the subject is  reached,  there  have  been  no  complete
+       matches  have  already  been found. When PCRE2_PARTIAL_SOFT is set, the
+       return code PCRE2_ERROR_NOMATCH is converted  into  PCRE2_ERROR_PARTIAL
+       if  the  end  of  the  subject  is reached, there have been no complete
        matches, but there is still at least one matching possibility. The por-
-       tion  of  the  string that was inspected when the longest partial match
+       tion of the string that was inspected when the  longest  partial  match
        was found is set as the first matching string in both cases. There is a
-       more detailed discussion of partial and  multi-segment  matching,  with
+       more  detailed  discussion  of partial and multi-segment matching, with
        examples, in the pcre2partial documentation.
 
          PCRE2_DFA_SHORTEST
 
-       Setting  the PCRE2_DFA_SHORTEST option causes the matching algorithm to
+       Setting the PCRE2_DFA_SHORTEST option causes the matching algorithm  to
        stop as soon as it has found one match. Because of the way the alterna-
-       tive algorithm works, this is necessarily the shortest  possible  match
+       tive  algorithm  works, this is necessarily the shortest possible match
        at the first possible matching point in the subject string.
 
          PCRE2_DFA_RESTART
 
-       When  pcre2_dfa_match() returns a partial match, it is possible to call
+       When pcre2_dfa_match() returns a partial match, it is possible to  call
        it again, with additional subject characters, and have it continue with
        the same match. The PCRE2_DFA_RESTART option requests this action; when
-       it is set, the workspace and wscount options must  reference  the  same
-       vector  as  before  because data about the match so far is left in them
+       it  is  set,  the workspace and wscount options must reference the same
+       vector as before because data about the match so far is  left  in  them
        after a partial match. There is more discussion of this facility in the
        pcre2partial documentation.
 
@@ -3876,8 +3876,8 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
        When pcre2_dfa_match() succeeds, it may have matched more than one sub-
        string in the subject. Note, however, that all the matches from one run
-       of the function start at the same point in  the  subject.  The  shorter
-       matches  are all initial substrings of the longer matches. For example,
+       of  the  function  start  at the same point in the subject. The shorter
+       matches are all initial substrings of the longer matches. For  example,
        if the pattern
 
          <.*>
@@ -3892,80 +3892,80 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
          <something> <something else>
          <something>
 
-       On success, the yield of the function is a number  greater  than  zero,
-       which  is  the  number  of  matched substrings. The offsets of the sub-
-       strings are returned in the ovector, and can be extracted by number  in
-       the  same way as for pcre2_match(), but the numbers bear no relation to
-       any capture groups that may exist in the pattern, because DFA  matching
+       On  success,  the  yield of the function is a number greater than zero,
+       which is the number of matched substrings.  The  offsets  of  the  sub-
+       strings  are returned in the ovector, and can be extracted by number in
+       the same way as for pcre2_match(), but the numbers bear no relation  to
+       any  capture groups that may exist in the pattern, because DFA matching
        does not support capturing.
 
-       Calls  to the convenience functions that extract substrings by name re-
+       Calls to the convenience functions that extract substrings by name  re-
        turn the error PCRE2_ERROR_DFA_UFUNC (unsupported function) if used af-
-       ter a DFA match. The convenience functions that extract  substrings  by
+       ter  a  DFA match. The convenience functions that extract substrings by
        number never return PCRE2_ERROR_NOSUBSTRING.
 
-       The  matched  strings  are  stored  in  the ovector in reverse order of
-       length; that is, the longest matching string is first.  If  there  were
-       too  many matches to fit into the ovector, the yield of the function is
+       The matched strings are stored in  the  ovector  in  reverse  order  of
+       length;  that  is,  the longest matching string is first. If there were
+       too many matches to fit into the ovector, the yield of the function  is
        zero, and the vector is filled with the longest matches.
 
-       NOTE: PCRE2's "auto-possessification" optimization usually  applies  to
-       character  repeats at the end of a pattern (as well as internally). For
-       example, the pattern "a\d+" is compiled as if it were "a\d++". For  DFA
-       matching,  this means that only one possible match is found. If you re-
+       NOTE:  PCRE2's  "auto-possessification" optimization usually applies to
+       character repeats at the end of a pattern (as well as internally).  For
+       example,  the pattern "a\d+" is compiled as if it were "a\d++". For DFA
+       matching, this means that only one possible match is found. If you  re-
        ally do want multiple matches in such cases, either use an ungreedy re-
-       peat such as "a\d+?" or set the PCRE2_NO_AUTO_POSSESS option when  com-
+       peat  such as "a\d+?" or set the PCRE2_NO_AUTO_POSSESS option when com-
        piling.
 
    Error returns from pcre2_dfa_match()
 
        The pcre2_dfa_match() function returns a negative number when it fails.
-       Many  of  the  errors  are  the same as for pcre2_match(), as described
+       Many of the errors are the same  as  for  pcre2_match(),  as  described
        above.  There are in addition the following errors that are specific to
        pcre2_dfa_match():
 
          PCRE2_ERROR_DFA_UITEM
 
-       This return is given if pcre2_dfa_match() encounters  an  item  in  the
-       pattern  that it does not support, for instance, the use of \C in a UTF
+       This  return  is  given  if pcre2_dfa_match() encounters an item in the
+       pattern that it does not support, for instance, the use of \C in a  UTF
        mode or a backreference.
 
          PCRE2_ERROR_DFA_UCOND
 
-       This return is given if pcre2_dfa_match() encounters a  condition  item
+       This  return  is given if pcre2_dfa_match() encounters a condition item
        that uses a backreference for the condition, or a test for recursion in
        a specific capture group. These are not supported.
 
          PCRE2_ERROR_DFA_UINVALID_UTF
 
-       This  return is given if pcre2_dfa_match() is called for a pattern that
-       was compiled with PCRE2_MATCH_INVALID_UTF. This is  not  supported  for
+       This return is given if pcre2_dfa_match() is called for a pattern  that
+       was  compiled  with  PCRE2_MATCH_INVALID_UTF. This is not supported for
        DFA matching.
 
          PCRE2_ERROR_DFA_WSSIZE
 
-       This  return  is  given  if  pcre2_dfa_match() runs out of space in the
+       This return is given if pcre2_dfa_match() runs  out  of  space  in  the
        workspace vector.
 
          PCRE2_ERROR_DFA_RECURSE
 
        When a recursion or subroutine call is processed, the matching function
-       calls itself recursively, using private  memory  for  the  ovector  and
-       workspace.   This  error  is given if the internal ovector is not large
-       enough. This should be extremely rare, as a  vector  of  size  1000  is
+       calls  itself  recursively,  using  private  memory for the ovector and
+       workspace.  This error is given if the internal ovector  is  not  large
+       enough.  This  should  be  extremely  rare, as a vector of size 1000 is
        used.
 
          PCRE2_ERROR_DFA_BADRESTART
 
-       When  pcre2_dfa_match()  is  called  with the PCRE2_DFA_RESTART option,
-       some plausibility checks are made on the  contents  of  the  workspace,
-       which  should  contain data about the previous partial match. If any of
+       When pcre2_dfa_match() is called  with  the  PCRE2_DFA_RESTART  option,
+       some  plausibility  checks  are  made on the contents of the workspace,
+       which should contain data about the previous partial match. If  any  of
        these checks fail, this error is given.
 
 
 SEE ALSO
 
-       pcre2build(3),   pcre2callout(3),    pcre2demo(3),    pcre2matching(3),
+       pcre2build(3),    pcre2callout(3),    pcre2demo(3),   pcre2matching(3),
        pcre2partial(3), pcre2posix(3), pcre2sample(3), pcre2unicode(3).
 
 
@@ -3978,11 +3978,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 08 December 2023
-       Copyright (c) 1997-2023 University of Cambridge.
+       Last updated: 19 January 2024
+       Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.43                    08 December 2023                    PCRE2API(3)
+PCRE2 10.43                     19 January 2024                    PCRE2API(3)
 ------------------------------------------------------------------------------
  
  
@@ -4441,7 +4441,7 @@ PCRE2TEST OPTION FOR LIBREADLINE SUPPORT
 
        Setting --enable-pcre2test-libreadline causes the -lreadline option  to
        be  added to the pcre2test build. In many operating environments with a
-       system-installed readline library this is sufficient. However,  in  some
+       system-installed readline library this is sufficient. However, in  some
        environments (e.g. if an unmodified distribution version of readline is
        in  use),  some  extra configuration may be necessary. The INSTALL file
        for libreadline says this:
@@ -4922,23 +4922,23 @@ THE CALLOUT INTERFACE
        pattern, the length is zero.  When  the  callout  precedes  an  opening
        parenthesis, the length includes meta characters that follow the paren-
        thesis.  For  example,  in a callout before an assertion such as (?=ab)
-       the length is 3. For an an alternation bar or  a  closing  parenthesis,
-       the  length is one, unless a closing parenthesis is followed by a quan-
-       tifier, in which case its length is included.  (This changed in release
-       10.23. In earlier releases, before an opening  parenthesis  the  length
-       was  that of the entire group, and before an alternation bar or a clos-
+       the length is 3. For an alternation bar or a closing  parenthesis,  the
+       length  is  one,  unless a closing parenthesis is followed by a quanti-
+       fier, in which case its length is included. (This  changed  in  release
+       10.23.  In  earlier  releases, before an opening parenthesis the length
+       was that of the entire group, and before an alternation bar or a  clos-
        ing parenthesis the length was zero.)
 
-       The pattern_position and next_item_length fields are intended  to  help
-       in  distinguishing between different automatic callouts, which all have
-       the same callout number. However, they are set for  all  callouts,  and
+       The  pattern_position  and next_item_length fields are intended to help
+       in distinguishing between different automatic callouts, which all  have
+       the  same  callout  number. However, they are set for all callouts, and
        are used by pcre2test to show the next item to be matched when display-
        ing callout information.
 
        In callouts from pcre2_match() the mark field contains a pointer to the
-       zero-terminated  name of the most recently passed (*MARK), (*PRUNE), or
-       (*THEN) item in the match, or NULL if no such items have  been  passed.
-       Instances  of  (*PRUNE)  or  (*THEN) without a name do not obliterate a
+       zero-terminated name of the most recently passed (*MARK), (*PRUNE),  or
+       (*THEN)  item  in the match, or NULL if no such items have been passed.
+       Instances of (*PRUNE) or (*THEN) without a name  do  not  obliterate  a
        previous (*MARK). In callouts from the DFA matching function this field
        always contains NULL.
 
@@ -4948,25 +4948,25 @@ THE CALLOUT INTERFACE
 
          PCRE2_CALLOUT_STARTMATCH
 
-       This  is set for the first callout after the start of matching for each
+       This is set for the first callout after the start of matching for  each
        new starting position in the subject.
 
          PCRE2_CALLOUT_BACKTRACK
 
-       This is set if there has been a matching backtrack since  the  previous
-       callout,  or  since  the start of matching if this is the first callout
+       This  is  set if there has been a matching backtrack since the previous
+       callout, or since the start of matching if this is  the  first  callout
        from a pcre2_match() run.
 
-       Both bits are set when a backtrack has caused a "bumpalong"  to  a  new
-       starting  position in the subject. Output from pcre2test does not indi-
-       cate the presence of these bits unless the  callout_extra  modifier  is
+       Both  bits  are  set when a backtrack has caused a "bumpalong" to a new
+       starting position in the subject. Output from pcre2test does not  indi-
+       cate  the  presence  of these bits unless the callout_extra modifier is
        set.
 
        The information in the callout_flags field is provided so that applica-
-       tions  can track and tell their users how matching with backtracking is
-       done. This can be useful when trying to optimize patterns, or  just  to
-       understand  how  PCRE2  works. There is no support in pcre2_dfa_match()
-       because there is no backtracking in DFA matching, and there is no  sup-
+       tions can track and tell their users how matching with backtracking  is
+       done.  This  can be useful when trying to optimize patterns, or just to
+       understand how PCRE2 works. There is no  support  in  pcre2_dfa_match()
+       because  there is no backtracking in DFA matching, and there is no sup-
        port in JIT because JIT is all about maximimizing matching performance.
        In both these cases the callout_flags field is always zero.
 
@@ -4974,15 +4974,15 @@ THE CALLOUT INTERFACE
 RETURN VALUES FROM CALLOUTS
 
        The external callout function returns an integer to PCRE2. If the value
-       is  zero,  matching  proceeds  as  normal. If the value is greater than
-       zero, matching fails at the current point, but  the  testing  of  other
+       is zero, matching proceeds as normal. If  the  value  is  greater  than
+       zero,  matching  fails  at  the current point, but the testing of other
        matching possibilities goes ahead, just as if a lookahead assertion had
        failed. If the value is less than zero, the match is abandoned, and the
        matching function returns the negative value.
 
-       Negative  values  should  normally  be chosen from the set of PCRE2_ER-
-       ROR_xxx values. In particular, PCRE2_ERROR_NOMATCH  forces  a  standard
-       "no  match"  failure.  The error number PCRE2_ERROR_CALLOUT is reserved
+       Negative values should normally be chosen from  the  set  of  PCRE2_ER-
+       ROR_xxx  values.  In  particular, PCRE2_ERROR_NOMATCH forces a standard
+       "no match" failure. The error number  PCRE2_ERROR_CALLOUT  is  reserved
        for use by callout functions; it will never be used by PCRE2 itself.
 
 
@@ -4993,14 +4993,14 @@ CALLOUT ENUMERATION
          void *user_data);
 
        A script language that supports the use of string arguments in callouts
-       might like to scan all the callouts in a  pattern  before  running  the
+       might  like  to  scan  all the callouts in a pattern before running the
        match. This can be done by calling pcre2_callout_enumerate(). The first
-       argument  is  a  pointer  to a compiled pattern, the second points to a
-       callback function, and the third is arbitrary user data.  The  callback
-       function  is  called  for  every callout in the pattern in the order in
+       argument is a pointer to a compiled pattern, the  second  points  to  a
+       callback  function,  and the third is arbitrary user data. The callback
+       function is called for every callout in the pattern  in  the  order  in
        which they appear. Its first argument is a pointer to a callout enumer-
-       ation block, and its second argument is the user_data  value  that  was
-       passed  to  pcre2_callout_enumerate(). The data block contains the fol-
+       ation  block,  and  its second argument is the user_data value that was
+       passed to pcre2_callout_enumerate(). The data block contains  the  fol-
        lowing fields:
 
          version                Block version number
@@ -5011,17 +5011,17 @@ CALLOUT ENUMERATION
          callout_string_length  Length of callout string
          callout_string         Points to callout string or is NULL
 
-       The version number is currently 0. It will increase if new  fields  are
-       ever  added  to  the  block. The remaining fields are the same as their
-       namesakes in the pcre2_callout block that is used for  callouts  during
+       The  version  number is currently 0. It will increase if new fields are
+       ever added to the block. The remaining fields are  the  same  as  their
+       namesakes  in  the pcre2_callout block that is used for callouts during
        matching, as described above.
 
-       Note  that  the  value  of pattern_position is unique for each callout.
-       However, if a callout occurs inside a group that is quantified  with  a
+       Note that the value of pattern_position is  unique  for  each  callout.
+       However,  if  a callout occurs inside a group that is quantified with a
        non-zero minimum or a fixed maximum, the group is replicated inside the
-       compiled  pattern.  For example, a pattern such as /(a){2}/ is compiled
-       as if it were /(a)(a)/. This means that the callout will be  enumerated
-       more  than  once,  but with the same value for pattern_position in each
+       compiled pattern. For example, a pattern such as /(a){2}/  is  compiled
+       as  if it were /(a)(a)/. This means that the callout will be enumerated
+       more than once, but with the same value for  pattern_position  in  each
        case.
 
        The callback function should normally return zero. If it returns a non-
@@ -5038,11 +5038,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 03 February 2019
-       Copyright (c) 1997-2019 University of Cambridge.
+       Last updated: 19 January 2024
+       Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.33                    03 February 2019                PCRE2CALLOUT(3)
+PCRE2 10.43                     19 January 2024                PCRE2CALLOUT(3)
 ------------------------------------------------------------------------------
  
  
@@ -5615,16 +5615,16 @@ JIT STACK FAQ
        if a pattern causes stack overflow with a stack of 1MiB? Is  that  1MiB
        kept until the stack is freed?
 
-       Especially  on embedded systems, it might be a good idea to release mem-
-       ory sometimes without freeing the stack. There is no API  for  this  at
-       the  moment.  Probably a function call which returns with the currently
-       allocated memory for any stack and another which allows releasing  mem-
+       Especially on embedded systems, it might be a good idea to release mem-
+       ory  sometimes  without  freeing the stack. There is no API for this at
+       the moment.  Probably a function call which returns with the  currently
+       allocated  memory for any stack and another which allows releasing mem-
        ory (shrinking the stack) would be a good idea if someone needs this.
 
        (7) This is too much of a headache. Isn't there any better solution for
        JIT stack handling?
 
-       No,  thanks to Windows. If POSIX threads were used everywhere, we could
+       No, thanks to Windows. If POSIX threads were used everywhere, we  could
        throw out this complicated API.
 
 
@@ -5633,18 +5633,18 @@ FREEING JIT SPECULATIVE MEMORY
        void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 
        The JIT executable allocator does not free all memory when it is possi-
-       ble. It expects new allocations, and keeps some free memory  around  to
-       improve  allocation  speed. However, in low memory conditions, it might
-       be better to free all possible memory. You can cause this to happen  by
-       calling  pcre2_jit_free_unused_memory(). Its argument is a general con-
+       ble.  It  expects new allocations, and keeps some free memory around to
+       improve allocation speed. However, in low memory conditions,  it  might
+       be  better to free all possible memory. You can cause this to happen by
+       calling pcre2_jit_free_unused_memory(). Its argument is a general  con-
        text, for custom memory management, or NULL for standard memory manage-
        ment.
 
 
 EXAMPLE CODE
 
-       This is a single-threaded example that specifies a  JIT  stack  without
-       using  a  callback.  A real program should include error checking after
+       This  is  a  single-threaded example that specifies a JIT stack without
+       using a callback. A real program should include  error  checking  after
        all the function calls.
 
          int rc;
@@ -5672,36 +5672,36 @@ EXAMPLE CODE
 JIT FAST PATH API
 
        Because the API described above falls back to interpreted matching when
-       JIT is not available, it is convenient for programs  that  are  written
+       JIT  is  not  available, it is convenient for programs that are written
        for  general  use  in  many  environments.  However,  calling  JIT  via
        pcre2_match() does have a performance impact. Programs that are written
-       for use where JIT is known to be available, and  which  need  the  best
-       possible  performance,  can  instead  use a "fast path" API to call JIT
-       matching directly instead of calling pcre2_match() (obviously only  for
+       for  use  where  JIT  is known to be available, and which need the best
+       possible performance, can instead use a "fast path"  API  to  call  JIT
+       matching  directly instead of calling pcre2_match() (obviously only for
        patterns that have been successfully processed by pcre2_jit_compile()).
 
-       The  fast  path  function is called pcre2_jit_match(), and it takes ex-
-       actly the same arguments as pcre2_match(). However, the subject  string
-       must  be  specified  with  a  length; PCRE2_ZERO_TERMINATED is not sup-
+       The fast path function is called pcre2_jit_match(), and  it  takes  ex-
+       actly  the same arguments as pcre2_match(). However, the subject string
+       must be specified with a  length;  PCRE2_ZERO_TERMINATED  is  not  sup-
        ported.  Unsupported  option  bits  (for  example,  PCRE2_ANCHORED  and
-       PCRE2_ENDANCHORED)  are ignored, as is the PCRE2_NO_JIT option. The re-
-       turn values are also the same  as  for  pcre2_match(),  plus  PCRE2_ER-
+       PCRE2_ENDANCHORED) are ignored, as is the PCRE2_NO_JIT option. The  re-
+       turn  values  are  also  the  same as for pcre2_match(), plus PCRE2_ER-
        ROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
        that was not compiled.
 
-       When  you call pcre2_match(), as well as testing for invalid options, a
+       When you call pcre2_match(), as well as testing for invalid options,  a
        number of other sanity checks are performed on the arguments. For exam-
-       ple, if the subject pointer is NULL but the length is non-zero, an  im-
-       mediate  error  is given. Also, unless PCRE2_NO_UTF_CHECK is set, a UTF
+       ple,  if the subject pointer is NULL but the length is non-zero, an im-
+       mediate error is given. Also, unless PCRE2_NO_UTF_CHECK is set,  a  UTF
        subject string is tested for validity. In the interests of speed, these
-       checks do not happen on the JIT fast  path.  If  invalid  UTF  data  is
-       passed  when  PCRE2_MATCH_INVALID_UTF  was not set for pcre2_compile(),
-       the result is undefined. The program may crash or loop  or  give  wrong
-       results.  In  the  absence  of  PCRE2_MATCH_INVALID_UTF you should call
-       pcre2_jit_match() in UTF mode only if  you  are  sure  the  subject  is
+       checks  do  not  happen  on  the  JIT fast path. If invalid UTF data is
+       passed when PCRE2_MATCH_INVALID_UTF was not  set  for  pcre2_compile(),
+       the  result  is  undefined. The program may crash or loop or give wrong
+       results. In the absence  of  PCRE2_MATCH_INVALID_UTF  you  should  call
+       pcre2_jit_match()  in  UTF  mode  only  if  you are sure the subject is
        valid.
 
-       Bypassing  the  sanity  checks  and the pcre2_match() wrapping can give
+       Bypassing the sanity checks and the  pcre2_match()  wrapping  can  give
        speedups of more than 10%.
 
 
@@ -5824,18 +5824,18 @@ PCRE2 MATCHING ALGORITHMS
        This document describes the two different algorithms that are available
        in  PCRE2  for  matching  a compiled regular expression against a given
        subject string. The "standard" algorithm is the  one  provided  by  the
-       pcre2_match()  function.  This  works in the same as as Perl's matching
-       function, and provide a Perl-compatible matching operation.  The  just-
-       in-time (JIT) optimization that is described in the pcre2jit documenta-
-       tion is compatible with this function.
+       pcre2_match() function. This works in the same as Perl's matching func-
+       tion,  and  provide  a Perl-compatible matching operation. The just-in-
+       time (JIT) optimization that is described in the pcre2jit documentation
+       is compatible with this function.
 
        An alternative algorithm is provided by the pcre2_dfa_match() function;
        it operates in a different way, and is not Perl-compatible. This alter-
-       native  has advantages and disadvantages compared with the standard al-
+       native has advantages and disadvantages compared with the standard  al-
        gorithm, and these are described below.
 
        When there is only one possible way in which a given subject string can
-       match a pattern, the two algorithms give the same answer. A  difference
+       match  a pattern, the two algorithms give the same answer. A difference
        arises, however, when there are multiple possibilities. For example, if
        the pattern
 
@@ -5852,157 +5852,157 @@ PCRE2 MATCHING ALGORITHMS
 REGULAR EXPRESSIONS AS TREES
 
        The set of strings that are matched by a regular expression can be rep-
-       resented  as  a  tree structure. An unlimited repetition in the pattern
-       makes the tree of infinite size, but it is still a tree.  Matching  the
-       pattern  to a given subject string (from a given starting point) can be
-       thought of as a search of the tree.  There are two  ways  to  search  a
-       tree:  depth-first  and  breadth-first, and these correspond to the two
+       resented as a tree structure. An unlimited repetition  in  the  pattern
+       makes  the  tree of infinite size, but it is still a tree. Matching the
+       pattern to a given subject string (from a given starting point) can  be
+       thought  of  as  a  search of the tree.  There are two ways to search a
+       tree: depth-first and breadth-first, and these correspond  to  the  two
        matching algorithms provided by PCRE2.
 
 
 THE STANDARD MATCHING ALGORITHM
 
-       In the terminology of Jeffrey Friedl's book "Mastering Regular  Expres-
-       sions",  the  standard  algorithm  is an "NFA algorithm". It conducts a
-       depth-first search of the pattern tree. That is, it  proceeds  along  a
+       In  the terminology of Jeffrey Friedl's book "Mastering Regular Expres-
+       sions", the standard algorithm is an "NFA  algorithm".  It  conducts  a
+       depth-first  search  of  the pattern tree. That is, it proceeds along a
        single path through the tree, checking that the subject matches what is
-       required.  When  there  is a mismatch, the algorithm tries any alterna-
-       tives at the current point, and if they all fail, it backs  up  to  the
-       previous  branch  point  in  the  tree,  and tries the next alternative
-       branch at that level. This often involves backing  up  (moving  to  the
-       left)  in  the  subject  string  as well. The order in which repetition
-       branches are tried is controlled by the greedy or  ungreedy  nature  of
+       required. When there is a mismatch, the algorithm  tries  any  alterna-
+       tives  at  the  current point, and if they all fail, it backs up to the
+       previous branch point in the  tree,  and  tries  the  next  alternative
+       branch  at  that  level.  This often involves backing up (moving to the
+       left) in the subject string as well.  The  order  in  which  repetition
+       branches  are  tried  is controlled by the greedy or ungreedy nature of
        the quantifier.
 
-       If  a  leaf  node  is reached, a matching string has been found, and at
-       that point the algorithm stops. Thus, if there is more than one  possi-
-       ble  match, this algorithm returns the first one that it finds. Whether
-       this is the shortest, the longest, or some intermediate length  depends
+       If a leaf node is reached, a matching string has  been  found,  and  at
+       that  point the algorithm stops. Thus, if there is more than one possi-
+       ble match, this algorithm returns the first one that it finds.  Whether
+       this  is the shortest, the longest, or some intermediate length depends
        on the way the alternations and the greedy or ungreedy repetition quan-
        tifiers are specified in the pattern.
 
-       Because  it  ends  up  with a single path through the tree, it is rela-
-       tively straightforward for this algorithm to keep  track  of  the  sub-
-       strings  that  are  matched  by portions of the pattern in parentheses.
+       Because it ends up with a single path through the  tree,  it  is  rela-
+       tively  straightforward  for  this  algorithm to keep track of the sub-
+       strings that are matched by portions of  the  pattern  in  parentheses.
        This provides support for capturing parentheses and backreferences.
 
 
 THE ALTERNATIVE MATCHING ALGORITHM
 
-       This algorithm conducts a breadth-first search of  the  tree.  Starting
-       from  the  first  matching  point  in the subject, it scans the subject
+       This  algorithm  conducts  a breadth-first search of the tree. Starting
+       from the first matching point in the  subject,  it  scans  the  subject
        string from left to right, once, character by character, and as it does
-       this, it remembers all the paths through the tree that represent  valid
-       matches.  In  Friedl's  terminology, this is a kind of "DFA algorithm",
-       though it is not implemented as a traditional finite state machine  (it
+       this,  it remembers all the paths through the tree that represent valid
+       matches. In Friedl's terminology, this is a kind  of  "DFA  algorithm",
+       though  it is not implemented as a traditional finite state machine (it
        keeps multiple states active simultaneously).
 
-       Although  the  general  principle of this matching algorithm is that it
-       scans the subject string only once, without backtracking, there is  one
-       exception:  when  a lookaround assertion is encountered, the characters
-       following or preceding the current point have to be  independently  in-
+       Although the general principle of this matching algorithm  is  that  it
+       scans  the subject string only once, without backtracking, there is one
+       exception: when a lookaround assertion is encountered,  the  characters
+       following  or  preceding the current point have to be independently in-
        spected.
 
-       The  scan  continues until either the end of the subject is reached, or
-       there are no more unterminated paths. At this point,  terminated  paths
-       represent  the different matching possibilities (if there are none, the
-       match has failed).  Thus, if there is more  than  one  possible  match,
-       this  algorithm  finds  all  of  them,  and in particular, it finds the
-       longest. The matches are returned in the output  vector  in  decreasing
-       order  of  length.  There  is an option to stop the algorithm after the
+       The scan continues until either the end of the subject is  reached,  or
+       there  are  no more unterminated paths. At this point, terminated paths
+       represent the different matching possibilities (if there are none,  the
+       match  has  failed).   Thus,  if there is more than one possible match,
+       this algorithm finds all of them,  and  in  particular,  it  finds  the
+       longest.  The  matches  are returned in the output vector in decreasing
+       order of length. There is an option to stop  the  algorithm  after  the
        first match (which is necessarily the shortest) is found.
 
-       Note that the size of vector needed to contain all the results  depends
+       Note  that the size of vector needed to contain all the results depends
        on the number of simultaneous matches, not on the number of parentheses
-       in  the pattern. Using pcre2_match_data_create_from_pattern() to create
-       the match data block is therefore not advisable when doing  DFA  match-
+       in the pattern. Using pcre2_match_data_create_from_pattern() to  create
+       the  match  data block is therefore not advisable when doing DFA match-
        ing.
 
-       Note  also  that all the matches that are found start at the same point
+       Note also that all the matches that are found start at the  same  point
        in the subject. If the pattern
 
          cat(er(pillar)?)?
 
-       is matched against the string "the caterpillar catchment",  the  result
-       is  the  three  strings "caterpillar", "cater", and "cat" that start at
-       the fifth character of the subject. The algorithm  does  not  automati-
+       is  matched  against the string "the caterpillar catchment", the result
+       is the three strings "caterpillar", "cater", and "cat"  that  start  at
+       the  fifth  character  of the subject. The algorithm does not automati-
        cally move on to find matches that start at later positions.
 
        PCRE2's "auto-possessification" optimization usually applies to charac-
-       ter  repeats at the end of a pattern (as well as internally). For exam-
+       ter repeats at the end of a pattern (as well as internally). For  exam-
        ple, the pattern "a\d+" is compiled as if it were "a\d++" because there
-       is no point even considering the possibility of backtracking  into  the
-       repeated  digits.  For  DFA matching, this means that only one possible
-       match is found. If you really do want multiple matches in  such  cases,
-       either  use  an ungreedy repeat ("a\d+?") or set the PCRE2_NO_AUTO_POS-
+       is  no  point even considering the possibility of backtracking into the
+       repeated digits. For DFA matching, this means that  only  one  possible
+       match  is  found. If you really do want multiple matches in such cases,
+       either use an ungreedy repeat ("a\d+?") or set  the  PCRE2_NO_AUTO_POS-
        SESS option when compiling.
 
-       There are a number of features of PCRE2 regular  expressions  that  are
-       not  supported  or behave differently in the alternative matching func-
+       There  are  a  number of features of PCRE2 regular expressions that are
+       not supported or behave differently in the alternative  matching  func-
        tion. Those that are not supported cause an error if encountered.
 
-       1. Because the algorithm finds all possible matches, the greedy or  un-
-       greedy  nature of repetition quantifiers is not relevant (though it may
-       affect auto-possessification,  as  just  described).  During  matching,
-       greedy  and  ungreedy  quantifiers are treated in exactly the same way.
+       1.  Because the algorithm finds all possible matches, the greedy or un-
+       greedy nature of repetition quantifiers is not relevant (though it  may
+       affect  auto-possessification,  as  just  described).  During matching,
+       greedy and ungreedy quantifiers are treated in exactly  the  same  way.
        However, possessive quantifiers can make a difference when what follows
-       could also match what is quantified, for  example  in  a  pattern  like
+       could  also  match  what  is  quantified, for example in a pattern like
        this:
 
          ^a++\w!
 
-       This  pattern matches "aaab!" but not "aaa!", which would be matched by
-       a non-possessive quantifier. Similarly, if an atomic group is  present,
-       it  is matched as if it were a standalone pattern at the current point,
-       and the longest match is then "locked in" for the rest of  the  overall
+       This pattern matches "aaab!" but not "aaa!", which would be matched  by
+       a  non-possessive quantifier. Similarly, if an atomic group is present,
+       it is matched as if it were a standalone pattern at the current  point,
+       and  the  longest match is then "locked in" for the rest of the overall
        pattern.
 
        2. When dealing with multiple paths through the tree simultaneously, it
-       is  not  straightforward  to  keep track of captured substrings for the
-       different matching possibilities, and PCRE2's  implementation  of  this
+       is not straightforward to keep track of  captured  substrings  for  the
+       different  matching  possibilities,  and PCRE2's implementation of this
        algorithm does not attempt to do this. This means that no captured sub-
        strings are available.
 
-       3.  Because  no substrings are captured, backreferences within the pat-
+       3. Because no substrings are captured, backreferences within  the  pat-
        tern are not supported.
 
-       4. For the same reason, conditional expressions that use  a  backrefer-
-       ence  as  the  condition or test for a specific group recursion are not
+       4.  For  the same reason, conditional expressions that use a backrefer-
+       ence as the condition or test for a specific group  recursion  are  not
        supported.
 
        5. Again for the same reason, script runs are not supported.
 
        6. Because many paths through the tree may be active, the \K escape se-
-       quence, which resets the start of the match when encountered  (but  may
+       quence,  which  resets the start of the match when encountered (but may
        be on some paths and not on others), is not supported.
 
-       7.  Callouts  are  supported, but the value of the capture_top field is
+       7. Callouts are supported, but the value of the  capture_top  field  is
        always 1, and the value of the capture_last field is always 0.
 
-       8. The \C escape sequence, which (in  the  standard  algorithm)  always
-       matches  a  single  code  unit, even in a UTF mode, is not supported in
-       these modes, because the alternative algorithm moves through  the  sub-
-       ject  string  one  character  (not code unit) at a time, for all active
+       8.  The  \C  escape  sequence, which (in the standard algorithm) always
+       matches a single code unit, even in a UTF mode,  is  not  supported  in
+       these  modes,  because the alternative algorithm moves through the sub-
+       ject string one character (not code unit) at a  time,  for  all  active
        paths through the tree.
 
-       9. Except for (*FAIL), the backtracking control verbs such as  (*PRUNE)
-       are  not  supported.  (*FAIL)  is supported, and behaves like a failing
+       9.  Except for (*FAIL), the backtracking control verbs such as (*PRUNE)
+       are not supported. (*FAIL) is supported, and  behaves  like  a  failing
        negative assertion.
 
-       10. The PCRE2_MATCH_INVALID_UTF option for pcre2_compile() is not  sup-
+       10.  The PCRE2_MATCH_INVALID_UTF option for pcre2_compile() is not sup-
        ported by pcre2_dfa_match().
 
 
 ADVANTAGES OF THE ALTERNATIVE ALGORITHM
 
-       The  main  advantage  of the alternative algorithm is that all possible
+       The main advantage of the alternative algorithm is  that  all  possible
        matches (at a single point in the subject) are automatically found, and
-       in particular, the longest match is found. To find more than one  match
-       at  the  same point using the standard algorithm, you have to do kludgy
+       in  particular, the longest match is found. To find more than one match
+       at the same point using the standard algorithm, you have to  do  kludgy
        things with callouts.
 
-       Partial matching is possible with this algorithm, though  it  has  some
-       limitations.  The  pcre2partial  documentation gives details of partial
+       Partial  matching  is  possible with this algorithm, though it has some
+       limitations. The pcre2partial documentation gives  details  of  partial
        matching and discusses multi-segment matching.
 
 
@@ -6010,11 +6010,11 @@ DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
 
        The alternative algorithm suffers from a number of disadvantages:
 
-       1. It is substantially slower than  the  standard  algorithm.  This  is
-       partly  because  it has to search for all possible matches, but is also
+       1.  It  is  substantially  slower  than the standard algorithm. This is
+       partly because it has to search for all possible matches, but  is  also
        because it is less susceptible to optimization.
 
-       2. Capturing parentheses, backreferences,  script  runs,  and  matching
+       2.  Capturing  parentheses,  backreferences,  script runs, and matching
        within invalid UTF string are not supported.
 
        3. Although atomic groups are supported, their use does not provide the
@@ -6032,11 +6032,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 August 2021
-       Copyright (c) 1997-2021 University of Cambridge.
+       Last updated: 19 January 2024
+       Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.38                     28 August 2021                PCRE2MATCHING(3)
+PCRE2 10.43                     19 January 2024               PCRE2MATCHING(3)
 ------------------------------------------------------------------------------
  
  
@@ -7568,7 +7568,7 @@ FULL STOP (PERIOD, DOT) AND \N
        ter sequence CRLF is the only line ending, dot does not match CR if  it
        is  immediately followed by LF, but otherwise it matches all characters
        (including isolated CRs and LFs). When ANYCRLF  is  selected  for  line
-       endings,  no  occurrences  of  CR of LF match dot. When all Unicode line
+       endings,  no  occurrences  of CR of LF match dot. When all Unicode line
        endings are being recognized, dot does not match CR or LF or any of the
        other line ending characters.
 
@@ -7708,11 +7708,11 @@ SQUARE BRACKETS AND CHARACTER CLASSES
        [b-d-z] matches letters in the range b to d, a hyphen character, or z.
 
        Perl treats a hyphen as a literal if it appears before or after a POSIX
-       class (see below) or before or after a character type escape such as as
-       \d  or  \H.   However,  unless  the hyphen is the last character in the
-       class, Perl outputs a warning in its warning  mode,  as  this  is  most
-       likely  a user error. As PCRE2 has no facility for warning, an error is
-       given in these cases.
+       class (see below) or before or after a character type escape such as \d
+       or  \H.  However, unless the hyphen is the last character in the class,
+       Perl outputs a warning in its warning mode, as this is  most  likely  a
+       user  error. As PCRE2 has no facility for warning, an error is given in
+       these cases.
 
        It is not possible to have the literal character "]" as the end charac-
        ter of a range. A pattern such as [W-]46] is interpreted as a class  of
@@ -8864,8 +8864,8 @@ NON-ATOMIC ASSERTIONS
        captured  word,  using  an  ungreedy .*? to scan from the left. If this
        succeeds, we are done, but if the last word in the string does not  oc-
        cur  twice,  this  part  of  the pattern fails. If a traditional atomic
-       lookahead (?= or (*pla: had been used, the assertion could not be re-en-
-       tered, and the whole match would fail. The pattern would  succeed  only
+       lookahead (?= or (*pla: had been used, the assertion could not  be  re-
+       entered, and the whole match would fail. The pattern would succeed only
        if the very last word in the subject was found twice.
 
        Using  a  non-atomic  lookahead, however, means that when the last word
@@ -9879,7 +9879,7 @@ BACKTRACKING CONTROL
        match to fail. However, if A and B match, but C fails, the backtrack to
        (*THEN)  causes  the next alternative (ABD) to be tried. This behaviour
        is consistent, but is not always the same as Perl's. It means  that  if
-       two  or  more backtracking verbs appear in succession, all the the last
+       two  or  more backtracking verbs appear in succession, all but the last
        of them has no effect. Consider this example:
 
          ...(*COMMIT)(*PRUNE)...
@@ -9980,11 +9980,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 October 2023
-       Copyright (c) 1997-2023 University of Cambridge.
+       Last updated: 19 January 2024
+       Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.43                     12 October 2023                PCRE2PATTERN(3)
+PCRE2 10.43                     19 January 2024                PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
  
  
@@ -10432,31 +10432,31 @@ COMPILING A PATTERN
        Note that REG_UTF is not part of the POSIX standard.
 
        In the absence of these flags, no options  are  passed  to  the  native
-       function.   This means the the regex is compiled with PCRE2 default se-
-       mantics. In particular, the way it handles newline  characters  in  the
-       subject  string  is  the Perl way, not the POSIX way. Note that setting
+       function.  This means that the regex is compiled with PCRE2 default se-
+       mantics.  In  particular,  the way it handles newline characters in the
+       subject string is the Perl way, not the POSIX way.  Note  that  setting
        PCRE2_MULTILINE has only some of the effects specified for REG_NEWLINE.
-       It does not affect the way newlines are matched by the dot  metacharac-
+       It  does not affect the way newlines are matched by the dot metacharac-
        ter (they are not) or by a negative class such as [^a] (they are).
 
-       The  yield  of  pcre2_regcomp() is zero on success, and non-zero other-
+       The yield of pcre2_regcomp() is zero on success,  and  non-zero  other-
        wise.  The preg structure is filled in on success, and one other member
-       of the structure (as well as re_endp) is public: re_nsub  contains  the
-       number  of capturing subpatterns in the regular expression. Various er-
+       of  the  structure (as well as re_endp) is public: re_nsub contains the
+       number of capturing subpatterns in the regular expression. Various  er-
        ror codes are defined in the header file.
 
        NOTE: If the yield of pcre2_regcomp() is non-zero, you must not attempt
        to use the contents of the preg structure. If, for example, you pass it
-       to pcre2_regexec(), the result is undefined and your program is  likely
+       to  pcre2_regexec(), the result is undefined and your program is likely
        to crash.
 
 
 MATCHING NEWLINE CHARACTERS
 
        This area is not simple, because POSIX and Perl take different views of
-       things.   It  is not possible to get PCRE2 to obey POSIX semantics, but
+       things.  It is not possible to get PCRE2 to obey POSIX  semantics,  but
        then PCRE2 was never intended to be a POSIX engine. The following table
-       lists the different possibilities for matching  newline  characters  in
+       lists  the  different  possibilities for matching newline characters in
        Perl and PCRE2:
 
                                  Default   Change with
@@ -10477,16 +10477,16 @@ MATCHING NEWLINE CHARACTERS
          $ matches \n in middle     no     REG_NEWLINE
          ^ matches \n in middle     no     REG_NEWLINE
 
-       This  behaviour  is not what happens when PCRE2 is called via its POSIX
-       API. By default, PCRE2's behaviour is the same as Perl's,  except  that
-       there  is no equivalent for PCRE2_DOLLAR_ENDONLY in Perl. In both PCRE2
+       This behaviour is not what happens when PCRE2 is called via  its  POSIX
+       API.  By  default, PCRE2's behaviour is the same as Perl's, except that
+       there is no equivalent for PCRE2_DOLLAR_ENDONLY in Perl. In both  PCRE2
        and Perl, there is no way to stop newline from matching [^a].
 
-       Default POSIX newline handling can be obtained by setting  PCRE2_DOTALL
-       and  PCRE2_DOLLAR_ENDONLY  when  calling  pcre2_compile() directly, but
+       Default  POSIX newline handling can be obtained by setting PCRE2_DOTALL
+       and PCRE2_DOLLAR_ENDONLY when  calling  pcre2_compile()  directly,  but
        there is no way to make PCRE2 behave exactly as for the REG_NEWLINE ac-
        tion.  When  using  the  POSIX  API,  passing  REG_NEWLINE  to  PCRE2's
-       pcre2_regcomp()   function  causes  PCRE2_MULTILINE  to  be  passed  to
+       pcre2_regcomp()  function  causes  PCRE2_MULTILINE  to  be  passed   to
        pcre2_compile(), and REG_DOTALL passes PCRE2_DOTALL. There is no way to
        pass PCRE2_DOLLAR_ENDONLY.
 
@@ -10494,8 +10494,8 @@ MATCHING NEWLINE CHARACTERS
 MATCHING A PATTERN
 
        The function pcre2_regexec() is called to match a compiled pattern preg
-       against a given string, which is by default terminated by a  zero  byte
-       (but  see REG_STARTEND below), subject to the options in eflags.  These
+       against  a  given string, which is by default terminated by a zero byte
+       (but see REG_STARTEND below), subject to the options in eflags.   These
        can be:
 
          REG_NOTBOL
@@ -10505,9 +10505,9 @@ MATCHING A PATTERN
 
          REG_NOTEMPTY
 
-       The PCRE2_NOTEMPTY option is set  when  calling  the  underlying  PCRE2
-       matching  function.  Note  that  REG_NOTEMPTY  is not part of the POSIX
-       standard. However, setting this option can give more POSIX-like  behav-
+       The  PCRE2_NOTEMPTY  option  is  set  when calling the underlying PCRE2
+       matching function. Note that REG_NOTEMPTY is  not  part  of  the  POSIX
+       standard.  However, setting this option can give more POSIX-like behav-
        iour in some situations.
 
          REG_NOTEOL
@@ -10517,72 +10517,72 @@ MATCHING A PATTERN
 
          REG_STARTEND
 
-       When  this  option  is  set,  the  subject  string  starts  at string +
-       pmatch[0].rm_so and ends at  string  +  pmatch[0].rm_eo,  which  should
+       When this option  is  set,  the  subject  string  starts  at  string  +
+       pmatch[0].rm_so  and  ends  at  string  + pmatch[0].rm_eo, which should
        point to the first character beyond the string. There may be binary ze-
-       ros  within  the  subject string, and indeed, using REG_STARTEND is the
+       ros within the subject string, and indeed, using  REG_STARTEND  is  the
        only way to pass a subject string that contains a binary zero.
 
-       Whatever the value of  pmatch[0].rm_so,  the  offsets  of  the  matched
-       string  and  any  captured  substrings  are still given relative to the
-       start of string itself. (Before PCRE2 release 10.30  these  were  given
-       relative  to  string + pmatch[0].rm_so, but this differs from other im-
+       Whatever  the  value  of  pmatch[0].rm_so,  the  offsets of the matched
+       string and any captured substrings are  still  given  relative  to  the
+       start  of  string  itself. (Before PCRE2 release 10.30 these were given
+       relative to string + pmatch[0].rm_so, but this differs from  other  im-
        plementations.)
 
-       This is a BSD extension, compatible with  but  not  specified  by  IEEE
-       Standard  1003.2 (POSIX.2), and should be used with caution in software
-       intended to be portable to other systems. Note that  a  non-zero  rm_so
-       does  not  imply REG_NOTBOL; REG_STARTEND affects only the location and
-       length of the string, not how it is matched. Setting  REG_STARTEND  and
-       passing  pmatch as NULL are mutually exclusive; the error REG_INVARG is
+       This  is  a  BSD  extension,  compatible with but not specified by IEEE
+       Standard 1003.2 (POSIX.2), and should be used with caution in  software
+       intended  to  be  portable to other systems. Note that a non-zero rm_so
+       does not imply REG_NOTBOL; REG_STARTEND affects only the  location  and
+       length  of  the string, not how it is matched. Setting REG_STARTEND and
+       passing pmatch as NULL are mutually exclusive; the error REG_INVARG  is
        returned.
 
-       If the pattern was compiled with the REG_NOSUB flag, no data about  any
-       matched  strings  is  returned.  The  nmatch  and  pmatch  arguments of
-       pcre2_regexec() are ignored (except possibly  as  input  for  REG_STAR-
+       If  the pattern was compiled with the REG_NOSUB flag, no data about any
+       matched strings  is  returned.  The  nmatch  and  pmatch  arguments  of
+       pcre2_regexec()  are  ignored  (except  possibly as input for REG_STAR-
        TEND).
 
-       The  value of nmatch may be zero, and the value pmatch may be NULL (un-
-       less REG_STARTEND is set); in  both  these  cases  no  data  about  any
+       The value of nmatch may be zero, and the value pmatch may be NULL  (un-
+       less  REG_STARTEND  is  set);  in  both  these  cases no data about any
        matched strings is returned.
 
-       Otherwise,  the  portion  of  the string that was matched, and also any
+       Otherwise, the portion of the string that was  matched,  and  also  any
        captured substrings, are returned via the pmatch argument, which points
-       to an array of nmatch structures of  type  regmatch_t,  containing  the
-       members  rm_so  and  rm_eo.  These contain the byte offset to the first
+       to  an  array  of  nmatch structures of type regmatch_t, containing the
+       members rm_so and rm_eo. These contain the byte  offset  to  the  first
        character of each substring and the offset to the first character after
-       the end of each substring, respectively. The 0th element of the  vector
-       relates  to  the  entire portion of string that was matched; subsequent
+       the  end of each substring, respectively. The 0th element of the vector
+       relates to the entire portion of string that  was  matched;  subsequent
        elements relate to the capturing subpatterns of the regular expression.
        Unused entries in the array have both structure members set to -1.
 
-       regmatch_t as well as the regoff_t  typedef  it  uses  are  defined  in
-       pcre2posix.h  and  are not warranted to have the same size or layout as
-       other similarly named types from other libraries  that  provide  POSIX-
+       regmatch_t  as  well  as  the  regoff_t  typedef it uses are defined in
+       pcre2posix.h and are not warranted to have the same size or  layout  as
+       other  similarly  named  types from other libraries that provide POSIX-
        style matching.
 
-       A  successful  match  yields a zero return; various error codes are de-
-       fined in the header file, of which REG_NOMATCH is the "expected"  fail-
+       A successful match yields a zero return; various error  codes  are  de-
+       fined  in the header file, of which REG_NOMATCH is the "expected" fail-
        ure code.
 
 
 ERROR MESSAGES
 
-       The  pcre2_regerror()  function  maps  a non-zero errorcode from either
-       pcre2_regcomp() or pcre2_regexec() to a printable message. If  preg  is
-       not  NULL, the error should have arisen from the use of that structure.
-       A message terminated by a binary zero  is  placed  in  errbuf.  If  the
-       buffer  is  too short, only the first errbuf_size - 1 characters of the
+       The pcre2_regerror() function maps a  non-zero  errorcode  from  either
+       pcre2_regcomp()  or  pcre2_regexec() to a printable message. If preg is
+       not NULL, the error should have arisen from the use of that  structure.
+       A  message  terminated  by  a  binary  zero is placed in errbuf. If the
+       buffer is too short, only the first errbuf_size - 1 characters  of  the
        error message are used. The yield of the function is the size of buffer
-       needed to hold the whole message, including the terminating zero.  This
+       needed  to hold the whole message, including the terminating zero. This
        value is greater than errbuf_size if the message was truncated.
 
 
 MEMORY USAGE
 
-       Compiling  a regular expression causes memory to be allocated and asso-
-       ciated with the preg structure. The function pcre2_regfree() frees  all
-       such  memory,  after which preg may no longer be used as a compiled ex-
+       Compiling a regular expression causes memory to be allocated and  asso-
+       ciated  with the preg structure. The function pcre2_regfree() frees all
+       such memory, after which preg may no longer be used as a  compiled  ex-
        pression.
 
 
@@ -10595,11 +10595,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 November 2023
-       Copyright (c) 1997-2023 University of Cambridge.
+       Last updated: 19 January 2024
+       Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.43                    14 November 2023                  PCRE2POSIX(3)
+PCRE2 10.43                     19 January 2024                  PCRE2POSIX(3)
 ------------------------------------------------------------------------------
  
  
@@ -10766,7 +10766,7 @@ SAVING COMPILED PATTERNS
        the length of the vector. The third and fourth arguments point to vari-
        ables which are set to point to the created byte stream and its length,
        respectively. The final argument is a pointer  to  a  general  context,
-       which  can  be  used to specify custom memory management functions. If
+       which  can  be  used  to specify custom memory management functions. If
        this argument is NULL, malloc() is used to obtain memory for  the  byte
        stream. The yield of the function is the number of serialized patterns,
        or one of the following negative error codes:
@@ -10830,18 +10830,18 @@ RE-USING PRECOMPILED PATTERNS
        a  vector.  The  first two arguments are a pointer to a suitable vector
        and its length, and the third argument points to a byte stream. The fi-
        nal argument is a pointer to a general context, which can  be  used  to
-       specify  custom  memory management functions for the decoded patterns.
-       If this argument is NULL, malloc() and free() are used. After deserial-
-       ization, the byte stream is no longer needed and can be discarded.
+       specify custom memory management functions for the decoded patterns. If
+       this argument is NULL, malloc() and free() are used. After deserializa-
+       tion, the byte stream is no longer needed and can be discarded.
 
          pcre2_code *list_of_codes[2];
          uint8_t *bytes = <serialized data>;
          int32_t number_of_codes =
            pcre2_serialize_decode(list_of_codes, 2, bytes, NULL);
 
-       If the vector is not large enough for all  the  patterns  in  the  byte
-       stream,  it  is  filled  with those that fit, and the remainder are ig-
-       nored. The yield of the function is the number of decoded patterns,  or
+       If  the  vector  is  not  large enough for all the patterns in the byte
+       stream, it is filled with those that fit, and  the  remainder  are  ig-
+       nored.  The yield of the function is the number of decoded patterns, or
        one of the following negative error codes:
 
          PCRE2_ERROR_BADDATA    second argument is zero or less
@@ -10851,24 +10851,24 @@ RE-USING PRECOMPILED PATTERNS
          PCRE2_ERROR_MEMORY     memory allocation failed
          PCRE2_ERROR_NULL       first or third argument is NULL
 
-       PCRE2_ERROR_BADMAGIC  may mean that the data is corrupt, or that it was
+       PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it  was
        compiled on a system with different endianness.
 
        Decoded patterns can be used for matching in the usual way, and must be
-       freed by calling pcre2_code_free(). However, be aware that there  is  a
-       potential  race  issue if you are using multiple patterns that were de-
-       coded from a single byte stream in a multithreaded application. A  sin-
-       gle  copy  of  the character tables is used by all the decoded patterns
+       freed  by  calling pcre2_code_free(). However, be aware that there is a
+       potential race issue if you are using multiple patterns that  were  de-
+       coded  from a single byte stream in a multithreaded application. A sin-
+       gle copy of the character tables is used by all  the  decoded  patterns
        and a reference count is used to arrange for its memory to be automati-
-       cally freed when the last pattern is freed, but there is no locking  on
-       this  reference count. Therefore, if you want to call pcre2_code_free()
-       for these patterns in different threads,  you  must  arrange  your  own
-       locking,  and  ensure  that  pcre2_code_free()  cannot be called by two
+       cally  freed when the last pattern is freed, but there is no locking on
+       this reference count. Therefore, if you want to call  pcre2_code_free()
+       for  these  patterns  in  different  threads, you must arrange your own
+       locking, and ensure that pcre2_code_free()  cannot  be  called  by  two
        threads at the same time.
 
-       If a pattern was processed by pcre2_jit_compile() before being  serial-
-       ized,  the  JIT data is discarded and so is no longer available after a
-       save/restore cycle. You can, however, process a restored  pattern  with
+       If  a pattern was processed by pcre2_jit_compile() before being serial-
+       ized, the JIT data is discarded and so is no longer available  after  a
+       save/restore  cycle.  You can, however, process a restored pattern with
        pcre2_jit_compile() if you wish.
 
 
