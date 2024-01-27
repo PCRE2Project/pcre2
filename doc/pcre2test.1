@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "19 January 2024" "PCRE 10.43"
+.TH PCRE2TEST 1 "27 January 2024" "PCRE 10.43"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -1174,18 +1174,19 @@ The following modifiers set options for \fBpcre2_match()\fP or
 .\"
 for a description of their effects.
 .sp
-      anchored                  set PCRE2_ANCHORED
-      endanchored               set PCRE2_ENDANCHORED
-      dfa_restart               set PCRE2_DFA_RESTART
-      dfa_shortest              set PCRE2_DFA_SHORTEST
-      no_jit                    set PCRE2_NO_JIT
-      no_utf_check              set PCRE2_NO_UTF_CHECK
-      notbol                    set PCRE2_NOTBOL
-      notempty                  set PCRE2_NOTEMPTY
-      notempty_atstart          set PCRE2_NOTEMPTY_ATSTART
-      noteol                    set PCRE2_NOTEOL
-      partial_hard (or ph)      set PCRE2_PARTIAL_HARD
-      partial_soft (or ps)      set PCRE2_PARTIAL_SOFT
+      anchored                   set PCRE2_ANCHORED
+      endanchored                set PCRE2_ENDANCHORED
+      dfa_restart                set PCRE2_DFA_RESTART
+      dfa_shortest               set PCRE2_DFA_SHORTEST
+      disable_recurseloop_check  set PCRE2_DISABLE_RECURSELOOP_CHECK
+      no_jit                     set PCRE2_NO_JIT
+      no_utf_check               set PCRE2_NO_UTF_CHECK
+      notbol                     set PCRE2_NOTBOL
+      notempty                   set PCRE2_NOTEMPTY
+      notempty_atstart           set PCRE2_NOTEMPTY_ATSTART
+      noteol                     set PCRE2_NOTEOL
+      partial_hard (or ph)       set PCRE2_PARTIAL_HARD
+      partial_soft (or ps)       set PCRE2_PARTIAL_SOFT
 .sp
 The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
@@ -2169,6 +2170,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 January 2024
+Last updated: 27 January 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

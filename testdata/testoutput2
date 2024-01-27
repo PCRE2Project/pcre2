@@ -18029,6 +18029,15 @@ Subject length lower bound = 1
     bd
 No match
 
+/(?0)/
+    abc\=disable_recurseloop_check,match_limit=100
+Failed: error -47: match limit exceeded
+
+/(a(?1)z||(?1)++)$/
+    abcd\=disable_recurseloop_check
+ 0: 
+ 1: 
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

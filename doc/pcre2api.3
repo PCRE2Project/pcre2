@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "19 January 2024" "PCRE2 10.43"
+.TH PCRE2API 3 "27 January 2024" "PCRE2 10.43"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -2804,13 +2804,15 @@ the use of .* with PCRE2_DOTALL, not by starting the pattern with ^ or \eA.
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
 zero. The only bits that may be set are PCRE2_ANCHORED,
-PCRE2_COPY_MATCHED_SUBJECT, PCRE2_ENDANCHORED, PCRE2_NOTBOL, PCRE2_NOTEOL,
-PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK,
-PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Their action is described below.
+PCRE2_COPY_MATCHED_SUBJECT, PCRE2_DISABLE_RECURSELOOP_CHECK, PCRE2_ENDANCHORED,
+PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
+PCRE2_NO_JIT, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT.
+Their action is described below.
 .P
 Setting PCRE2_ANCHORED or PCRE2_ENDANCHORED at match time is not supported by
 the just-in-time (JIT) compiler. If it is set, JIT matching is disabled and the
-interpretive code in \fBpcre2_match()\fP is run. Apart from PCRE2_NO_JIT
+interpretive code in \fBpcre2_match()\fP is run.
+PCRE2_DISABLE_RECURSELOOP_CHECK is ignored by JIT, but apart from PCRE2_NO_JIT
 (obviously), the remaining options are supported for JIT matching.
 .sp
   PCRE2_ANCHORED
@@ -2836,6 +2838,23 @@ the match block itself is used. The copy is automatically freed when
 \fBpcre2_match_data_free()\fP is called to free the match data block. It is also
 automatically freed if the match data block is re-used for another match
 operation.
+.sp
+  PCRE2_DISABLE_RECURSELOOP_CHECK
+.sp
+This option is relevant only to \fBpcre2_match()\fP for interpretive matching.
+It is ignored when JIT is used, and is forbidden for \fBpcre2_dfa_match()\fP.
+.P
+The use of recursion in patterns can lead to infinite loops. In the
+interpretive matcher these would be eventually caught by the match or heap
+limits, but this could take a long time and/or use a lot of memory if the 
+limits are large. There is therefore a check at the start of each recursion.
+If the same group is still active from a previous call, and the current subject 
+pointer is the same as it was at the start of that group, and the furthest
+inspected character of the subject has not changed, an error is generated.
+.P
+There are rare cases of matches that would complete, but nevertheless trigger
+this error. This option disables the check. It is provided mainly for testing 
+when comparing JIT and interpretive behaviour.
 .sp
   PCRE2_ENDANCHORED
 .sp
@@ -4148,6 +4167,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 January 2024
+Last updated: 27 January 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

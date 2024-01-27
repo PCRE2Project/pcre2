@@ -6093,4 +6093,10 @@ a)"xI
 /a?(?=bc|)\bd/I 
     bd
 
+/(?0)/
+    abc\=disable_recurseloop_check,match_limit=100
+
+/(a(?1)z||(?1)++)$/
+    abcd\=disable_recurseloop_check
+
 # End of testinput2

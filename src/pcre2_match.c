@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2015-2023 University of Cambridge
+          New API code Copyright (c) 2015-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,8 @@ information, and fields within it. */
 #define PUBLIC_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
    PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT|PCRE2_COPY_MATCHED_SUBJECT)
+   PCRE2_PARTIAL_SOFT|PCRE2_NO_JIT|PCRE2_COPY_MATCHED_SUBJECT| \
+   PCRE2_DISABLE_RECURSELOOP_CHECK)
 
 #define PUBLIC_JIT_MATCH_OPTIONS \
    (PCRE2_NO_UTF_CHECK|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY|\
@@ -5429,8 +5430,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     /* If we are already in a pattern recursion, check for repeating the same
     one without changing the subject pointer or the last referenced character
-    in the subject. This should catch convoluted mutual recursions. (Some
-    simple cases are caught at compile time.) */
+    in the subject. This should catch convoluted mutual recursions; some
+    simple cases are caught at compile time. However, there are rare cases when
+    this check needs to be turned off. In this case, actual recursion loops
+    will be caught by the match or heap limits. */
 
     if (Fcurrent_recurse != RECURSE_UNSET)
       {
@@ -5441,7 +5444,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         P = (heapframe *)((char *)N - frame_size);
         if (N->group_frame_type == (GF_RECURSE | number))
           {
-          if (Feptr == P->eptr && mb->last_used_ptr == P->recurse_last_used)
+          if (Feptr == P->eptr && mb->last_used_ptr == P->recurse_last_used &&
+               (mb->moptions & PCRE2_DISABLE_RECURSELOOP_CHECK) == 0)
             return PCRE2_ERROR_RECURSELOOP;
           break;
           }

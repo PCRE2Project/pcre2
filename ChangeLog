@@ -203,6 +203,11 @@ substitution testing.
 56. Insert omitted setting of subject length in match data at the end of 
 pcre2_jit_match().
 
+57. Implemented PCRE2_DISABLE_RECURSELOOP_CHECK for pcre2_match() to enable 
+some apparently looping recursions to run to completion and therefore match the 
+JIT behaviour. With this set, real loops will eventually get caught by match or
+heap limits or run out of resource.
+
 
 Version 10.42 11-December-2022
 ------------------------------

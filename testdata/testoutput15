@@ -529,4 +529,12 @@ No match
  0: abcz
     < >>
 
+# This test triggers the recursion limit in the interpreter, but completes in
+# JIT. It's in testinput2 with disable_recurse_loop_check to get it to work
+# in the interpreter.
+
+/(a(?1)z||(?1)++)$/
+    abcd
+Failed: error -52: nested recursion at the same subject position
+
 # End of testinput15
