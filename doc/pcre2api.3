@@ -344,10 +344,10 @@ There are also three different sets of data types:
   \fBPCRE2_UCHAR8, PCRE2_UCHAR16, PCRE2_UCHAR32\fP
   \fBPCRE2_SPTR8,  PCRE2_SPTR16,  PCRE2_SPTR32\fP
 .sp
-The UCHAR types define unsigned code units of the appropriate widths. For
-example, PCRE2_UCHAR16 is usually defined as `uint16_t'. The SPTR types are
-constant pointers to the equivalent UCHAR types, that is, they are pointers to
-vectors of unsigned code units.
+The UCHAR types define unsigned code units of the appropriate widths.
+For example, PCRE2_UCHAR16 is usually defined as `uint16_t'.
+The SPTR types are pointers to constants of the equivalent UCHAR types,
+that is, they are pointers to vectors of unsigned code units.
 .P
 Character strings are passed to a PCRE2 library as sequences of unsigned
 integers in code units of the appropriate width. The length of a string may
