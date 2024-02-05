@@ -281,7 +281,9 @@ reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set because
 
 compile_options = ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) |
   PCRE2_NEVER_BACKSLASH_C;
-match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) | PCRE2_NO_JIT;
+match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) |
+  PCRE2_NO_JIT |
+  PCRE2_DISABLE_RECURSELOOP_CHECK;
 
 /* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
 allowed together and just give an immediate error return. */
