@@ -833,7 +833,7 @@ typedef struct pso {
 
 /* NB: STRING_UTFn_RIGHTPAR contains the length as well */
 
-static pso pso_list[] = {
+static const pso pso_list[] = {
   { (uint8_t *)STRING_UTFn_RIGHTPAR,                  PSO_OPT, PCRE2_UTF },
   { (uint8_t *)STRING_UTF_RIGHTPAR,                4, PSO_OPT, PCRE2_UTF },
   { (uint8_t *)STRING_UCP_RIGHTPAR,                4, PSO_OPT, PCRE2_UCP },
@@ -10312,7 +10312,7 @@ if ((options & PCRE2_LITERAL) == 0)
     for (i = 0; i < sizeof(pso_list)/sizeof(pso); i++)
       {
       uint32_t c, pp;
-      pso *p = pso_list + i;
+      const pso *p = pso_list + i;
 
       if (patlen - skipatstart - 2 >= p->length &&
           PRIV(strncmp_c8)(ptr + skipatstart + 2, (char *)(p->name),
