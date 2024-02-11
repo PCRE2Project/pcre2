@@ -24,7 +24,7 @@ a list). Those that are not bugfixes or code tidies are:
 
 * Support for LoongArch to JIT.
 
-* Perl changed the meaning of (for examle) {,3} which did not used to be
+* Perl changed the meaning of (for example) {,3} which did not used to be
   recognized as a quantifier. Now it means {0,3} and PCRE2 has also changed.
   Note that {,} is still not a quantifier.
 
@@ -36,7 +36,7 @@ a list). Those that are not bugfixes or code tidies are:
 * Changed the meaning of \w and its synonyms and derivatives (\b and \B) in UCP
   mode to follow Perl. It now matches characters whose general categories are L
   or N or whose particular categories are Mn (non-spacing mark) or Pc
-  (combining puntuation).
+  (combining punctuation).
 
 * Changed the default meaning of [:xdigit:] in UCP mode to follow Perl. It now
   matches the "fullwidth" versions of hex digits. PCRE2_EXTRA_ASCII_DIGIT can
