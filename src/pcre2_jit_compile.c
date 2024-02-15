@@ -43,6 +43,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #endif
 
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+#include <sanitizer/msan_interface.h>
+#endif /* __has_feature(memory_sanitizer) */
+#endif /* defined(__has_feature) */
+
 #include "pcre2_internal.h"
 
 #ifdef SUPPORT_JIT
@@ -9830,7 +9836,7 @@ BACKTRACK_AS(recurse_backtrack)->matchingpath = LABEL();
 return cc + 1 + LINK_SIZE;
 }
 
-static sljit_s32 SLJIT_FUNC do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
+static sljit_s32 SLJIT_FUNC SLJIT_FUNC_ATTRIBUTE do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
 {
 PCRE2_SPTR begin;
 PCRE2_SIZE *ovector;

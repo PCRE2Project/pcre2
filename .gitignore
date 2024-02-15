@@ -50,7 +50,8 @@ pcre2posix_test.exe
 pcre2posix_test.log
 pcre2posix_test.trs
 pcre2demo
-pcre2fuzzcheck
+pcre2fuzzcheck-*
+pcre2fuzzer-*
 pcre2grep
 pcre2grep.exe
 pcre2test

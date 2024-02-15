@@ -522,6 +522,19 @@ typedef double sljit_f64;
 #define SLJIT_FUNC
 #endif /* !SLJIT_FUNC */
 
+/* Disable instrumentation for these functions as they may not be sound */
+#ifndef SLJIT_FUNC_ATTRIBUTE
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+#define SLJIT_FUNC_ATTRIBUTE __attribute__((no_sanitize("memory")))
+#endif /* __has_feature(memory_sanitizer) */
+#endif /* defined(__has_feature) */
+#endif
+
+#ifndef SLJIT_FUNC_ATTRIBUTE
+#define SLJIT_FUNC_ATTRIBUTE
+#endif
+
 #ifndef SLJIT_INDIRECT_CALL
 #if ((defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64) && (!defined _CALL_ELF || _CALL_ELF == 1)) \
 	|| ((defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) && defined _AIX)
