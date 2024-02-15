@@ -208,6 +208,9 @@ some apparently looping recursions to run to completion and therefore match the
 JIT behaviour. With this set, real loops will eventually get caught by match or
 heap limits or run out of resource.
 
+58. AC did a lot of work on pcre2_fuzzsupport.c to extend it to 16-bit and 
+32-bit libraries and to compare JIT and non-JIT matching.
+
 
 Version 10.42 11-December-2022
 ------------------------------

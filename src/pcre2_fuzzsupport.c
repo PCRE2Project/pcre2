@@ -94,14 +94,14 @@ fprintf(stream, "%s%s%s%s%s%s%s%s%s\n",
   ((match_options & PCRE2_PARTIAL_SOFT) != 0)? ",partial_soft" : "");
 }
 
-static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data, pcre2_match_context *match_context)
+static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
 PCRE2_UCHAR error_buf[256];
 #endif
 int errorcode;
 
-for (uint32_t index = 0; index < count; index++)
+for (int index = 0; index < count; index++)
   {
   PCRE2_UCHAR *bufferptr = NULL;
   PCRE2_SIZE bufflen = 0;
@@ -143,8 +143,7 @@ static void describe_failure(
   int matches,
   int matches_jit,
   pcre2_match_data *match_data,
-  pcre2_match_data *match_data_jit,
-  pcre2_match_context *match_context
+  pcre2_match_data *match_data_jit
 ) {
 #if PCRE2_CODE_UNIT_WIDTH == 8
 PCRE2_UCHAR buffer[256];
@@ -177,7 +176,7 @@ if (matches >= 0)
   if (match_data != NULL)
     {
     fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", matches);
-    dump_matches(stderr, matches, match_data, match_context);
+    dump_matches(stderr, matches, match_data);
     fprintf(stderr, "\n");
     }
   }
@@ -197,7 +196,7 @@ if (matches_jit >= 0)
   if (match_data_jit != NULL)
     {
     fprintf(stderr, "%d matches discovered by JIT'd regex:\n", matches_jit);
-    dump_matches(stderr, matches_jit, match_data_jit, match_context);
+    dump_matches(stderr, matches_jit, match_data_jit);
     fprintf(stderr, "\n");
     }
   }
@@ -242,6 +241,8 @@ if (rc != 0)
   _exit(1);
   }
 
+(void)argc;  /* Avoid "unused parameter" warnings */
+(void)argv;
 return 0;
 }
 
@@ -401,7 +402,7 @@ for (i = 0; i < 2; i++)
                 errorcode != PCRE2_ERROR_MATCHLIMIT && errorcode != PCRE2_ERROR_CALLOUT &&
                 errorcode_jit != PCRE2_ERROR_MATCHLIMIT && errorcode_jit != PCRE2_ERROR_JIT_STACKLIMIT && errorcode_jit != PCRE2_ERROR_CALLOUT)
             {
-            describe_failure("match errorcode comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+            describe_failure("match errorcode comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit);
             }
           }
         else
@@ -419,19 +420,25 @@ for (i = 0; i < 2; i++)
 
             if (errorcode != errorcode_jit)
               {
-              describe_failure("match entry errorcode comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+              describe_failure("match entry errorcode comparison", data, size,
+                compile_options, match_options, errorcode, errorcode_jit,
+                matches, matches_jit, match_data, match_data_jit);
               }
 
             if (errorcode >= 0)
               {
               if (bufflen != bufflen_jit)
                 {
-                describe_failure("match entry length comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+                describe_failure("match entry length comparison", data, size,
+                  compile_options, match_options, errorcode, errorcode_jit,
+                  matches, matches_jit, match_data, match_data_jit);
                 }
 
               if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
                 {
-                describe_failure("match entry content comparison", data, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit, match_context);
+                describe_failure("match entry content comparison", data, size,
+                  compile_options, match_options, errorcode, errorcode_jit,
+                  matches, matches_jit, match_data, match_data_jit);
                 }
               }
 
