@@ -5,7 +5,7 @@ Before the move to GitHub, this was the only record of changes to PCRE2. Now
 there is often more detail in the pull requests.
 
 
-Version 10.43 27-December-2023
+Version 10.43 16-February-2024
 ------------------------------
 
 1. The test program added by change 2 of 10.42 didn't work when the default
@@ -197,18 +197,18 @@ all of a, b, and d as possible starting code units; now it sets only a and d.
 
 54. Fix incorrect class character matches in JIT.
 
-55. In pcre2test, ensure pcre2_jit_match() is used when jitfast is used with 
+55. In pcre2test, ensure pcre2_jit_match() is used when jitfast is used with
 substitution testing.
 
-56. Insert omitted setting of subject length in match data at the end of 
+56. Insert omitted setting of subject length in match data at the end of
 pcre2_jit_match().
 
-57. Implemented PCRE2_DISABLE_RECURSELOOP_CHECK for pcre2_match() to enable 
-some apparently looping recursions to run to completion and therefore match the 
+57. Implemented PCRE2_DISABLE_RECURSELOOP_CHECK for pcre2_match() to enable
+some apparently looping recursions to run to completion and therefore match the
 JIT behaviour. With this set, real loops will eventually get caught by match or
 heap limits or run out of resource.
 
-58. AC did a lot of work on pcre2_fuzzsupport.c to extend it to 16-bit and 
+58. AC did a lot of work on pcre2_fuzzsupport.c to extend it to 16-bit and
 32-bit libraries and to compare JIT and non-JIT matching.
 
 

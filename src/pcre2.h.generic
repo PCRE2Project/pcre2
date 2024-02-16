@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2016-2023 University of Cambridge
+           Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE2_MAJOR           10
 #define PCRE2_MINOR           43
-#define PCRE2_PRERELEASE      -RC1
-#define PCRE2_DATE            2023-12-27
+#define PCRE2_PRERELEASE      
+#define PCRE2_DATE            2024-02-16
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -186,11 +186,12 @@ pcre2_jit_match() ignores the latter since it bypasses all sanity checks). */
 #define PCRE2_SUBSTITUTE_UNSET_EMPTY      0x00000400u  /* pcre2_substitute() only */
 #define PCRE2_SUBSTITUTE_UNKNOWN_UNSET    0x00000800u  /* pcre2_substitute() only */
 #define PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  0x00001000u  /* pcre2_substitute() only */
-#define PCRE2_NO_JIT                      0x00002000u  /* Not for pcre2_dfa_match() */
+#define PCRE2_NO_JIT                      0x00002000u  /* not for pcre2_dfa_match() */
 #define PCRE2_COPY_MATCHED_SUBJECT        0x00004000u
 #define PCRE2_SUBSTITUTE_LITERAL          0x00008000u  /* pcre2_substitute() only */
 #define PCRE2_SUBSTITUTE_MATCHED          0x00010000u  /* pcre2_substitute() only */
 #define PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 0x00020000u  /* pcre2_substitute() only */
+#define PCRE2_DISABLE_RECURSELOOP_CHECK   0x00040000u  /* not for pcre2_dfa_match() or pcre2_jit_match() */
 
 /* Options for pcre2_pattern_convert(). */
 

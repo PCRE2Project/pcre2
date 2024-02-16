@@ -2,11 +2,13 @@ News about PCRE2 releases
 -------------------------
 
 
-Version 10.43 27-December-2023
+Version 10.43 16-February-2024
 ------------------------------
 
 There are quite a lot of changes in this release (see ChangeLog and git log for
 a list). Those that are not bugfixes or code tidies are:
+
+* The JIT code no longer supports ARMv5 architecture.
 
 * A new function pcre2_get_match_data_heapframes_size() for finer heap control.
 
@@ -22,7 +24,7 @@ a list). Those that are not bugfixes or code tidies are:
   a default maximum length of 255 characters (same as Perl) but with a function
   to adjust the limit.
 
-* Support for LoongArch to JIT.
+* Support for LoongArch in JIT.
 
 * Perl changed the meaning of (for example) {,3} which did not used to be
   recognized as a quantifier. Now it means {0,3} and PCRE2 has also changed.

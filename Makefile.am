@@ -547,7 +547,7 @@ endif # WITH_PCRE2_8
 ## source but using -DSTANDALONE.
 
 if WITH_FUZZ_SUPPORT
-noinst_LIBRARIES = 
+noinst_LIBRARIES =
 if WITH_PCRE2_8
 noinst_LIBRARIES += .libs/libpcre2-fuzzsupport.a
 _libs_libpcre2_fuzzsupport_a_SOURCES = src/pcre2_fuzzsupport.c

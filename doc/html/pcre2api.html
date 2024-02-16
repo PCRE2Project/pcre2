@@ -412,10 +412,10 @@ There are also three different sets of data types:
   <b>PCRE2_UCHAR8, PCRE2_UCHAR16, PCRE2_UCHAR32</b>
   <b>PCRE2_SPTR8,  PCRE2_SPTR16,  PCRE2_SPTR32</b>
 </pre>
-The UCHAR types define unsigned code units of the appropriate widths. For
-example, PCRE2_UCHAR16 is usually defined as `uint16_t'. The SPTR types are
-constant pointers to the equivalent UCHAR types, that is, they are pointers to
-vectors of unsigned code units.
+The UCHAR types define unsigned code units of the appropriate widths.
+For example, PCRE2_UCHAR16 is usually defined as `uint16_t'.
+The SPTR types are pointers to constants of the equivalent UCHAR types,
+that is, they are pointers to vectors of unsigned code units.
 </P>
 <P>
 Character strings are passed to a PCRE2 library as sequences of unsigned
@@ -2864,15 +2864,15 @@ It is ignored when JIT is used, and is forbidden for <b>pcre2_dfa_match()</b>.
 <P>
 The use of recursion in patterns can lead to infinite loops. In the
 interpretive matcher these would be eventually caught by the match or heap
-limits, but this could take a long time and/or use a lot of memory if the 
+limits, but this could take a long time and/or use a lot of memory if the
 limits are large. There is therefore a check at the start of each recursion.
-If the same group is still active from a previous call, and the current subject 
+If the same group is still active from a previous call, and the current subject
 pointer is the same as it was at the start of that group, and the furthest
 inspected character of the subject has not changed, an error is generated.
 </P>
 <P>
 There are rare cases of matches that would complete, but nevertheless trigger
-this error. This option disables the check. It is provided mainly for testing 
+this error. This option disables the check. It is provided mainly for testing
 when comparing JIT and interpretive behaviour.
 <pre>
   PCRE2_ENDANCHORED
