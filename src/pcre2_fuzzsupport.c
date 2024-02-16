@@ -132,6 +132,7 @@ for (int index = 0; index < count; index++)
 /* This function describes the current test case being evaluated, then aborts */
 
 #ifdef SUPPORT_JIT
+#ifdef SUPPORT_DIFF_FUZZ
 static void describe_failure(
   const char *task,
   const unsigned char *data,
@@ -203,6 +204,7 @@ if (matches_jit >= 0)
 
 abort();
 }
+#endif
 #endif
 
 /* This is the callout function. Its only purpose is to halt matching if there
@@ -393,6 +395,7 @@ for (i = 0; i < 2; i++)
         errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
           match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
+#ifdef SUPPORT_DIFF_FUZZ
         matches = errorcode;
         matches_jit = errorcode_jit;
 
@@ -446,6 +449,7 @@ for (i = 0; i < 2; i++)
               pcre2_substring_free(bufferptr_jit);
             }
           }
+#endif
         }
 #endif
 
