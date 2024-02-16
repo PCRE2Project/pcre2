@@ -7,6 +7,7 @@ If an argument starts with '=' the rest of it it is taken as a literal string
 rather than a file name. This allows easy testing of short strings.
 
 Written by Philip Hazel, October 2016
+Updated February 2024 (Addison Crump added 16-bit/32-bit and JIT support)
 ***************************************************************************/
 
 #include <errno.h>
@@ -47,6 +48,7 @@ Written by Philip Hazel, October 2016
    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT)
 
+#if defined(SUPPORT_DIFF_FUZZ) || defined(STANDALONE)
 static void print_compile_options(FILE *stream, uint32_t compile_options)
 {
 fprintf(stream, "Compile options %.8x never_backslash_c", compile_options);
@@ -93,7 +95,10 @@ fprintf(stream, "%s%s%s%s%s%s%s%s%s\n",
   ((match_options & PCRE2_PARTIAL_HARD) != 0)? ",partial_hard" : "",
   ((match_options & PCRE2_PARTIAL_SOFT) != 0)? ",partial_soft" : "");
 }
+#endif /* defined(SUPPORT_DIFF_FUZZ || defined(STANDALONE) */
 
+#ifdef SUPPORT_JIT
+#ifdef SUPPORT_DIFF_FUZZ
 static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -131,8 +136,6 @@ for (int index = 0; index < count; index++)
 
 /* This function describes the current test case being evaluated, then aborts */
 
-#ifdef SUPPORT_JIT
-#ifdef SUPPORT_DIFF_FUZZ
 static void describe_failure(
   const char *task,
   const unsigned char *data,
@@ -204,8 +207,8 @@ if (matches_jit >= 0)
 
 abort();
 }
-#endif
-#endif
+#endif  /* SUPPORRT_DIFF_FUZZ */
+#endif  /* SUPPORT_JIT */
 
 /* This is the callout function. Its only purpose is to halt matching if there
 are more than 100 callouts, as one way of stopping too much time being spent on
@@ -303,8 +306,10 @@ for (i = 0; i < 2; i++)
   int errorcode;
 #ifdef SUPPORT_JIT
   int errorcode_jit;
+#ifdef SUPPORT_JIT_FUZZ
   int matches = 0;
   int matches_jit = 0;
+#endif
 #endif
   PCRE2_SIZE erroroffset;
   pcre2_code *code;
@@ -395,7 +400,10 @@ for (i = 0; i < 2; i++)
         errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
           match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
-#ifdef SUPPORT_DIFF_FUZZ
+#ifndef SUPPORT_DIFF_FUZZ
+        (void)errorcode_jit;  /* Avoid compiler warning */
+#else
+
         matches = errorcode;
         matches_jit = errorcode_jit;
 
@@ -449,9 +457,9 @@ for (i = 0; i < 2; i++)
               pcre2_substring_free(bufferptr_jit);
             }
           }
-#endif
+#endif  /* SUPPORT_JIT_FUZZ */
         }
-#endif
+#endif  /* SUPPORT_JIT */
 
       match_options = PCRE2_NO_JIT;  /* For second time */
       }
