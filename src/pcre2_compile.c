@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -7549,7 +7549,8 @@ for (;; pptr++)
             if (lengthptr != NULL)
               {
               PCRE2_SIZE delta;
-              if (PRIV(ckd_smul)(&delta, repeat_min - 1, length_prevgroup) ||
+              if (PRIV(ckd_smul)(&delta, repeat_min - 1, 
+                                 (int)length_prevgroup) ||
                   OFLOW_MAX - *lengthptr < delta)
                 {
                 *errorcodeptr = ERR20;
@@ -7599,7 +7600,7 @@ for (;; pptr++)
             {
             PCRE2_SIZE delta;
             if (PRIV(ckd_smul)(&delta, repeat_max,
-                               length_prevgroup + 1 + 2 + 2*LINK_SIZE) ||
+                               (int)length_prevgroup + 1 + 2 + 2*LINK_SIZE) ||
                 OFLOW_MAX + (2 + 2*LINK_SIZE) - *lengthptr < delta)
               {
               *errorcodeptr = ERR20;
