@@ -6247,13 +6247,12 @@ if (range_right >= 0)
 
     char_set = chars[range_right - i].chars;
     char_set_end = char_set + chars[range_right - i].count;
-    do
+    while (char_set < char_set_end)
       {
       if (update_table[(*char_set) & 0xff] > IN_UCHARS(i))
         update_table[(*char_set) & 0xff] = IN_UCHARS(i);
       char_set++;
       }
-    while (char_set < char_set_end);
     }
   }
 
