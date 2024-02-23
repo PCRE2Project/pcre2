@@ -393,17 +393,40 @@ for (i = 0; i < 2; i++)
         }
 #endif
 
+/* If JIT is enabled, do a JIT match and, if appropriately compiled, compare
+with the interpreter. */
+
 #ifdef SUPPORT_JIT
       if (jit_ret >= 0)
         {
+#ifdef STANDALONE
+        printf("Matching with JIT\n");
+#endif
         callout_count = 0;
         errorcode_jit = pcre2_match(code, (PCRE2_SPTR)data, (PCRE2_SIZE)match_size, 0,
           match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
-#ifndef SUPPORT_DIFF_FUZZ
-        (void)errorcode_jit;  /* Avoid compiler warning */
-#else
+/* Without differential matching, just show the result when standalone. */
 
+#ifndef SUPPORT_DIFF_FUZZ
+#ifdef STANDALONE
+        if (errorcode_jit >= 0) printf("Match returned %d\n", errorcode_jit); else
+          {
+#if PCRE2_CODE_UNIT_WIDTH == 8
+          unsigned char buffer[256];
+          pcre2_get_error_message(errorcode_jit, buffer, 256);
+          printf("JIT match failed: error %d: %s\n", errorcode_jit, buffer);
+#else
+          printf("JIT match failed: error %d\n", errorcode_jit);
+#endif
+          }
+#else   /* not STANDALONE */
+        (void)errorcode_jit;  /* Avoid compiler warning */
+#endif  /* STANDALONE */
+
+/* With differential matching enabled, compare with interpreter. */
+
+#else   /* SUPPORT_DIFF_FUZZ */
         matches = errorcode;
         matches_jit = errorcode_jit;
 
