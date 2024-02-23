@@ -207,7 +207,7 @@ if (matches_jit >= 0)
 
 abort();
 }
-#endif  /* SUPPORRT_DIFF_FUZZ */
+#endif  /* SUPPORT_DIFF_FUZZ */
 #endif  /* SUPPORT_JIT */
 
 /* This is the callout function. Its only purpose is to halt matching if there
@@ -306,7 +306,7 @@ for (i = 0; i < 2; i++)
   int errorcode;
 #ifdef SUPPORT_JIT
   int errorcode_jit;
-#ifdef SUPPORT_JIT_FUZZ
+#ifdef SUPPORT_DIFF_FUZZ
   int matches = 0;
   int matches_jit = 0;
 #endif
@@ -457,7 +457,7 @@ for (i = 0; i < 2; i++)
               pcre2_substring_free(bufferptr_jit);
             }
           }
-#endif  /* SUPPORT_JIT_FUZZ */
+#endif  /* SUPPORT_DIFF_FUZZ */
         }
 #endif  /* SUPPORT_JIT */
 
