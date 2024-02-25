@@ -329,8 +329,15 @@ for (i = 0; i < 2; i++)
     uint32_t save_match_options = match_options;
 
 #ifdef SUPPORT_JIT
-    int jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
+    int jit_ret;
+#ifdef STANDALONE
+    printf("Calling JIT compile\n");
 #endif
+    jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
+#ifdef STANDALONE
+    if (jit_ret < 0) printf("JIT compile error %d\n", jit_ret);
+#endif
+#endif  /* SUPPORT_JIT */
 
     /* Create match data and context blocks only when we first need them. Set
     low match and depth limits to avoid wasting too much searching large
