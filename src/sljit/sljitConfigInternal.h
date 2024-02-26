@@ -132,23 +132,23 @@ extern "C" {
 */
 
 #ifndef SLJIT_MALLOC
-#define SLJIT_MALLOC(size, allocator_data) malloc(size)
+#define SLJIT_MALLOC(size, allocator_data) (malloc(size))
 #endif
 
 #ifndef SLJIT_FREE
-#define SLJIT_FREE(ptr, allocator_data) free(ptr)
+#define SLJIT_FREE(ptr, allocator_data) (free(ptr))
 #endif
 
 #ifndef SLJIT_MEMCPY
-#define SLJIT_MEMCPY(dest, src, len) memcpy(dest, src, len)
+#define SLJIT_MEMCPY(dest, src, len) (memcpy(dest, src, len))
 #endif
 
 #ifndef SLJIT_MEMMOVE
-#define SLJIT_MEMMOVE(dest, src, len) memmove(dest, src, len)
+#define SLJIT_MEMMOVE(dest, src, len) (memmove(dest, src, len))
 #endif
 
 #ifndef SLJIT_ZEROMEM
-#define SLJIT_ZEROMEM(dest, len) memset(dest, 0, len)
+#define SLJIT_ZEROMEM(dest, len) (memset(dest, 0, len))
 #endif
 
 /***************************/
@@ -198,7 +198,7 @@ extern "C" {
 /* Type of public API functions. */
 /*********************************/
 
-#ifndef SLJIT_API_FUNC_ATTRIBUTE 
+#ifndef SLJIT_API_FUNC_ATTRIBUTE
 #if (defined SLJIT_CONFIG_STATIC && SLJIT_CONFIG_STATIC)
 /* Static ABI functions. For all-in-one programs. */
 
@@ -399,6 +399,10 @@ typedef double sljit_f64;
 #define SLJIT_CONV_MAX_FLOAT SLJIT_CONV_RESULT_MAX_INT
 #define SLJIT_CONV_MIN_FLOAT SLJIT_CONV_RESULT_MIN_INT
 #define SLJIT_CONV_NAN_FLOAT SLJIT_CONV_RESULT_MIN_INT
+#elif (defined SLJIT_CONFIG_LOONGARCH && SLJIT_CONFIG_LOONGARCH)
+#define SLJIT_CONV_MAX_FLOAT SLJIT_CONV_RESULT_MAX_INT
+#define SLJIT_CONV_MIN_FLOAT SLJIT_CONV_RESULT_MIN_INT
+#define SLJIT_CONV_NAN_FLOAT SLJIT_CONV_RESULT_ZERO
 #else
 #error "Result for float to integer conversion is not defined"
 #endif
@@ -521,19 +525,6 @@ typedef double sljit_f64;
 #ifndef SLJIT_FUNC
 #define SLJIT_FUNC
 #endif /* !SLJIT_FUNC */
-
-/* Disable instrumentation for these functions as they may not be sound */
-#ifndef SLJIT_FUNC_ATTRIBUTE
-#if defined(__has_feature)
-#if __has_feature(memory_sanitizer)
-#define SLJIT_FUNC_ATTRIBUTE __attribute__((no_sanitize("memory")))
-#endif /* __has_feature(memory_sanitizer) */
-#endif /* defined(__has_feature) */
-#endif
-
-#ifndef SLJIT_FUNC_ATTRIBUTE
-#define SLJIT_FUNC_ATTRIBUTE
-#endif
 
 #ifndef SLJIT_INDIRECT_CALL
 #if ((defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64) && (!defined _CALL_ELF || _CALL_ELF == 1)) \

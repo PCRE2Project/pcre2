@@ -283,28 +283,25 @@ static sljit_s32 emit_vex_instruction(struct sljit_compiler *compiler, sljit_uw 
 /*  Enter / return                                                       */
 /* --------------------------------------------------------------------- */
 
-static sljit_u8* generate_far_jump_code(struct sljit_jump *jump, sljit_u8 *code_ptr, sljit_sw executable_offset)
+static sljit_u8* detect_far_jump_type(struct sljit_jump *jump, sljit_u8 *code_ptr, sljit_sw executable_offset)
 {
 	sljit_uw type = jump->flags >> TYPE_SHIFT;
 
 	if (type == SLJIT_JUMP) {
 		*code_ptr++ = JMP_i32;
-		jump->addr++;
-	}
-	else if (type >= SLJIT_FAST_CALL) {
+	} else if (type >= SLJIT_FAST_CALL) {
 		*code_ptr++ = CALL_i32;
-		jump->addr++;
-	}
-	else {
+	} else {
 		*code_ptr++ = GROUP_0F;
 		*code_ptr++ = get_jump_code(type);
-		jump->addr += 2;
 	}
 
-	if (jump->flags & JUMP_LABEL)
-		jump->flags |= PATCH_MW;
-	else
+	jump->addr = (sljit_uw)code_ptr;
+
+	if (jump->flags & JUMP_ADDR)
 		sljit_unaligned_store_sw(code_ptr, (sljit_sw)(jump->u.target - (jump->addr + 4) - (sljit_uw)executable_offset));
+	else
+		jump->flags |= PATCH_MW;
 	code_ptr += 4;
 
 	return code_ptr;

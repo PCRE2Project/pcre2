@@ -288,7 +288,7 @@ typedef struct bracket_backtrack {
     /* For OP_ONCE. Less than 0 if not needed. */
     int framesize;
     /* For brackets with >3 alternatives. */
-    struct sljit_put_label *matching_put_label;
+    struct sljit_jump *matching_mov_addr;
   } u;
   /* Points to our private memory word on the stack. */
   int private_data_ptr;
@@ -9836,7 +9836,7 @@ BACKTRACK_AS(recurse_backtrack)->matchingpath = LABEL();
 return cc + 1 + LINK_SIZE;
 }
 
-static sljit_s32 SLJIT_FUNC SLJIT_FUNC_ATTRIBUTE do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
+static sljit_s32 SLJIT_FUNC do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
 {
 PCRE2_SPTR begin;
 PCRE2_SIZE *ovector;
@@ -11227,7 +11227,7 @@ if (has_alternatives)
     if (i <= 3)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
     else
-      BACKTRACK_AS(bracket_backtrack)->u.matching_put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+      BACKTRACK_AS(bracket_backtrack)->u.matching_mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
     }
   if (ket != OP_KETRMAX)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
@@ -13010,7 +13010,7 @@ struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
 struct sljit_label *rmin_label = NULL;
 struct sljit_label *exact_label = NULL;
-struct sljit_put_label *put_label = NULL;
+struct sljit_jump *mov_addr = NULL;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -13171,8 +13171,8 @@ else if (has_alternatives)
     {
     sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
 
-    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->u.matching_put_label);
-    sljit_set_put_label(CURRENT_AS(bracket_backtrack)->u.matching_put_label, LABEL());
+    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->u.matching_mov_addr);
+    sljit_set_label(CURRENT_AS(bracket_backtrack)->u.matching_mov_addr, LABEL());
     sljit_emit_op0(compiler, SLJIT_ENDBR);
     }
   else
@@ -13325,7 +13325,7 @@ if (has_alternatives)
       if (alt_max <= 3)
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, alt_count);
       else
-        put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+        mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
       }
 
     if (offset != 0 && ket == OP_KETRMAX && common->optimized_cbracket[offset >> 1] != 0)
@@ -13351,7 +13351,7 @@ if (has_alternatives)
         }
       else
         {
-        sljit_set_put_label(put_label, LABEL());
+        sljit_set_label(mov_addr, LABEL());
         sljit_emit_op0(compiler, SLJIT_ENDBR);
         }
       }
@@ -13883,7 +13883,7 @@ jump_list *match = NULL;
 struct sljit_jump *next_alt = NULL;
 struct sljit_jump *accept_exit = NULL;
 struct sljit_label *quit;
-struct sljit_put_label *put_label = NULL;
+struct sljit_jump *mov_addr = NULL;
 
 /* Recurse captures then. */
 common->then_trap = NULL;
@@ -13946,7 +13946,7 @@ while (1)
   if (alt_max > 1 || (recurse_flags & recurse_flag_accept_found))
     {
     if (alt_max > 3)
-      put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(1));
+      mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(1));
     else
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
     }
@@ -13979,7 +13979,7 @@ while (1)
       if (alt_max > 3)
         {
         sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
-        sljit_set_put_label(put_label, LABEL());
+        sljit_set_label(mov_addr, LABEL());
         sljit_emit_op0(compiler, SLJIT_ENDBR);
         }
       else
@@ -13990,7 +13990,7 @@ while (1)
     }
   else if (alt_max > 3)
     {
-    sljit_set_put_label(put_label, LABEL());
+    sljit_set_label(mov_addr, LABEL());
     sljit_emit_op0(compiler, SLJIT_ENDBR);
     }
   else
@@ -14308,7 +14308,7 @@ if (common->has_then)
   set_then_offsets(common, common->start, NULL);
   }
 
-compiler = sljit_create_compiler(allocator_data, NULL);
+compiler = sljit_create_compiler(allocator_data);
 if (!compiler)
   {
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
@@ -14723,7 +14723,7 @@ if (common->getucdtype != NULL)
 SLJIT_FREE(common->optimized_cbracket, allocator_data);
 SLJIT_FREE(common->private_data_ptrs, allocator_data);
 
-executable_func = sljit_generate_code(compiler);
+executable_func = sljit_generate_code(compiler, 0, NULL);
 executable_size = sljit_get_generated_code_size(compiler);
 sljit_free_compiler(compiler);
 
