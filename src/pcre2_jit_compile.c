@@ -11314,7 +11314,7 @@ if (bra == OP_BRAMINZERO)
   /* Continue to the normal backtrack. */
   }
 
-if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO)
+if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO || (has_alternatives && repeat_type != OP_EXACT))
   count_match(common);
 
 cc += 1 + LINK_SIZE;
