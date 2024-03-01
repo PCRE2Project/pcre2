@@ -18038,6 +18038,16 @@ Failed: error -47: match limit exceeded
  0: 
  1: 
 
+/(((?<=123?456456|ABC)))(?<=\2)../
+    ABCDEFG
+ 0: DE
+ 1: 
+ 2: 
+    12345645678910 
+ 0: 78
+ 1: 
+ 2: 
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -6099,4 +6099,8 @@ a)"xI
 /(a(?1)z||(?1)++)$/
     abcd\=disable_recurseloop_check
 
+/(((?<=123?456456|ABC)))(?<=\2)../
+    ABCDEFG
+    12345645678910 
+
 # End of testinput2
