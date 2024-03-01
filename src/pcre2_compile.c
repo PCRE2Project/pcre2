@@ -9909,7 +9909,7 @@ do
   *bptr |= branchlength;  /* branchlength never more than 65535 */
   bptr = *pptrptr;
   }
-while (*bptr == META_ALT);
+while (META_CODE(*bptr) == META_ALT);
 
 /* If any branch is of variable length, the whole lookbehind is of variable
 length. If the maximum length of any branch exceeds the maximum for variable

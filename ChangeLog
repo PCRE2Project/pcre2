@@ -4,6 +4,16 @@ Change Log for PCRE2
 Before the move to GitHub, this was the only record of changes to PCRE2. Now
 there is often more detail in the pull requests.
 
+Version 10.44 xx-xxx-2024
+-------------------------
+
+1. If a pattern contained a variable-length lookbehind in which the first 
+branch was not the one with the shortest minimym length, and the lookbehind 
+contained a capturing group, and elsewhere in the pattern there was another 
+lookbehind that referenced that group, the pattern was incorrectly compiled, 
+leading to unpredictable results, including crashes in JIT compiling. An 
+example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
+
 
 Version 10.43 16-February-2024
 ------------------------------
