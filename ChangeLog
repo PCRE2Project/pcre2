@@ -7,12 +7,26 @@ there is often more detail in the pull requests.
 Version 10.44 xx-xxx-2024
 -------------------------
 
-1. If a pattern contained a variable-length lookbehind in which the first 
-branch was not the one with the shortest minimym length, and the lookbehind 
-contained a capturing group, and elsewhere in the pattern there was another 
-lookbehind that referenced that group, the pattern was incorrectly compiled, 
-leading to unpredictable results, including crashes in JIT compiling. An 
+1. If a pattern contained a variable-length lookbehind in which the first
+branch was not the one with the shortest minimym length, and the lookbehind
+contained a capturing group, and elsewhere in the pattern there was another
+lookbehind that referenced that group, the pattern was incorrectly compiled,
+leading to unpredictable results, including crashes in JIT compiling. An
 example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
+
+2. Further updates to the oss-fuzz support:
+
+   (a) When JIT is enabled, limit quantifiers for groups to be no more than 10.
+       This avoide the very long JIT compile times that happen in some cases
+       when groups are replicated for quantification.
+
+   (b) Added PCRE2_EXTENDED_MORE to the list of allowed options.
+
+   (c) Arranged for text error messages to be shown in 16-bit and 32-bit modes.
+
+   (d) Made the output in standalone mode more readable.
+
+   (e) General code tidies.
 
 
 Version 10.43 16-February-2024
