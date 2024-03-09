@@ -295,10 +295,10 @@ Start the scan at the second character so there can be a lookbehind for a
 backslash, and end it before the end so that the next character can be checked
 for an opening brace. */
 
-for (size_t i = 1; i < size - 2; i++)
+if (size > 3) for (size_t i = 1; i < size - 2; i++)
   {
   size_t j;
-
+  
   if (wdata[i] != ')' || wdata[i-1] == '\\' || wdata[i+1] != '{') continue;
   i++;  /* Points to '{' */
 
