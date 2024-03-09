@@ -271,6 +271,7 @@ uint64_t random_options;
 pcre2_match_data *match_data = NULL;
 #ifdef SUPPORT_JIT
 pcre2_match_data *match_data_jit = NULL;
+PCRE2_UCHAR *newwdata = NULL;
 #endif
 pcre2_match_context *match_context = NULL;
 size_t match_size;
@@ -291,75 +292,83 @@ get around this, we scan the data string for large quantifiers that follow a
 closing parenthesis, and reduce the value of the quantifier to 10, assuming
 that this will make minimal difference to the detection of bugs.
 
-Start the scan at the second character so there can be a lookbehind for a
-backslash, and end it before the end so that the next character can be checked
-for an opening brace. */
+We have to make a copy of the input because oss-fuzz complains if we overwrite
+the original. Start the scan at the second character so there can be a
+lookbehind for a backslash, and end it before the end so that the next
+character can be checked for an opening brace. */
 
-if (size > 3) for (size_t i = 1; i < size - 2; i++)
+if (size > 3)
   {
-  size_t j;
-  
-  if (wdata[i] != ')' || wdata[i-1] == '\\' || wdata[i+1] != '{') continue;
-  i++;  /* Points to '{' */
+  newwdata = malloc(size * sizeof(PCRE2_UCHAR));
+  memcpy(newwdata, wdata, size * sizeof(PCRE2_UCHAR));
+  wdata = newwdata;
 
-  /* Loop for two values a quantifier. Offset i points to brace or comma at the
-  start of the loop.*/
-
-  for (int ii = 0; ii < 2; ii++)
+  for (size_t i = 1; i < size - 2; i++)
     {
-    int q = 0;
+    size_t j;
 
-    /* Ignore leading spaces */
+    if (wdata[i] != ')' || wdata[i-1] == '\\' || wdata[i+1] != '{') continue;
+    i++;  /* Points to '{' */
 
-    while (wdata[i+1] == ' ' || wdata[i+1] == '\t')
+    /* Loop for two values a quantifier. Offset i points to brace or comma at the
+    start of the loop.*/
+
+    for (int ii = 0; ii < 2; ii++)
       {
-      i++;
-      if (i >= size - 1) goto END_QSCAN;
-      }
+      int q = 0;
 
-    /* Scan for a number ending in brace or comma in the first iteration,
-    optionally preceded by space. */
+      /* Ignore leading spaces */
 
-    for (j = i + 1; j < size && j < i + 7; j++)
-      {
-      if (wdata[j] == ' ' || wdata[j] == '\t')
+      while (wdata[i+1] == ' ' || wdata[i+1] == '\t')
         {
-        do j++; while (j < size && (wdata[j] == ' ' || wdata[j] == '\t'));
-        if (wdata[j] != '}' && wdata[j] != ',') goto OUTERLOOP;
+        i++;
+        if (i >= size - 1) goto END_QSCAN;
         }
-      if (wdata[j] == '}' || (ii == 0 && wdata[j] == ',')) break;
-      if (wdata[j] < '0' || wdata[j] > '9') goto OUTERLOOP;
-      q = q * 10 + wdata[j] - '0';
-      }
 
-    /* Hit ',' or '}' or read 6 digits. Six digits is a number > 65536 which is
-    the maximum quantifier. Leave such numbers alone. */
+      /* Scan for a number ending in brace or comma in the first iteration,
+      optionally preceded by space. */
 
-    if (j >= i + 7 || q > 65535) goto OUTERLOOP;
+      for (j = i + 1; j < size && j < i + 7; j++)
+        {
+        if (wdata[j] == ' ' || wdata[j] == '\t')
+          {
+          do j++; while (j < size && (wdata[j] == ' ' || wdata[j] == '\t'));
+          if (wdata[j] != '}' && wdata[j] != ',') goto OUTERLOOP;
+          }
+        if (wdata[j] == '}' || (ii == 0 && wdata[j] == ',')) break;
+        if (wdata[j] < '0' || wdata[j] > '9') goto OUTERLOOP;
+        q = q * 10 + wdata[j] - '0';
+        }
 
-    /* Limit the quantifier size to 10 */
+      /* Hit ',' or '}' or read 6 digits. Six digits is a number > 65536 which is
+      the maximum quantifier. Leave such numbers alone. */
 
-    if (q > 10)
-      {
+      if (j >= i + 7 || q > 65535) goto OUTERLOOP;
+
+      /* Limit the quantifier size to 10 */
+
+      if (q > 10)
+        {
 #ifdef STANDALONE
-      printf("Reduced quantifier value %d to 10.\n", q);
+        printf("Reduced quantifier value %d to 10.\n", q);
 #endif
-      for (size_t k = i + 1; k < j; k++) wdata[k] = '0';
-      wdata[j - 2] = '1';
+        for (size_t k = i + 1; k < j; k++) wdata[k] = '0';
+        wdata[j - 2] = '1';
+        }
+
+      /* Advance to end of number and break if reached closing brace (continue
+      after comma, which is only valid in the first time round this loop). */
+
+      i = j;
+      if (wdata[i] == '}') break;
       }
 
-    /* Advance to end of number and break if reached closing brace (continue
-    after comma, which is only valid in the first time round this loop). */
+    /* Continue along the data string */
 
+    OUTERLOOP:
     i = j;
-    if (wdata[i] == '}') break;
+    continue;
     }
-
-  /* Continue along the data string */
-
-  OUTERLOOP:
-  i = j;
-  continue;
   }
 END_QSCAN:
 #endif  /* SUPPORT_JIT */
@@ -635,6 +644,7 @@ with the interpreter. */
 if (match_data != NULL) pcre2_match_data_free(match_data);
 #ifdef SUPPORT_JIT
 if (match_data_jit != NULL) pcre2_match_data_free(match_data_jit);
+free(newwdata);
 #endif
 if (match_context != NULL) pcre2_match_context_free(match_context);
 
