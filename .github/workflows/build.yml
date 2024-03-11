@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare
         run: ./autogen.sh
@@ -37,7 +37,7 @@ jobs:
     container: alpine
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup
         run: apk add --no-cache automake autoconf gcc libtool make musl-dev #musl-locales
@@ -68,7 +68,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -B build
@@ -101,7 +101,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_IGNORE_PREFIX_PATH=C:/Strawberry/c -B build -A Win32
