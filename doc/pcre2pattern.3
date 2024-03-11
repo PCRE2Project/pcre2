@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "19 January 2024" "PCRE2 10.43"
+.TH PCRE2PATTERN 3 "11 March 2024" "PCRE2 10.44"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1844,7 +1844,7 @@ the naming of capture groups. This feature was not added to Perl until release
 using the Python syntax. PCRE2 supports both the Perl and the Python syntax.
 .P
 In PCRE2, a capture group can be named in one of three ways: (?<name>...) or
-(?'name'...) as in Perl, or (?P<name>...) as in Python. Names may be up to 32
+(?'name'...) as in Perl, or (?P<name>...) as in Python. Names may be up to 128
 code units long. When PCRE2_UTF is not set, they may contain only ASCII
 alphanumeric characters and underscores, but must start with a non-digit. When
 PCRE2_UTF is set, the syntax of group names is extended to allow any Unicode
@@ -3889,6 +3889,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 19 January 2024
+Last updated: 11 March 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
