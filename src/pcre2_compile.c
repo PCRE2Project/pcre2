@@ -7549,7 +7549,7 @@ for (;; pptr++)
             if (lengthptr != NULL)
               {
               PCRE2_SIZE delta;
-              if (PRIV(ckd_smul)(&delta, repeat_min - 1, 
+              if (PRIV(ckd_smul)(&delta, repeat_min - 1,
                                  (int)length_prevgroup) ||
                   OFLOW_MAX - *lengthptr < delta)
                 {

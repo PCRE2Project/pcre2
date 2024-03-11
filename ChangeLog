@@ -27,9 +27,9 @@ example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
    (d) Made the output in standalone mode more readable.
 
    (e) General code tidies.
-   
-3. Increase the maximum length of a name for a group from 32 to 128 because 
-there is a user for whom 32 is too small. 
+
+3. Increase the maximum length of a name for a group from 32 to 128 because
+there is a user for whom 32 is too small.
 
 
 Version 10.43 16-February-2024

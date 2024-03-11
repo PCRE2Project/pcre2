@@ -189,8 +189,8 @@ REVISION
 
 PCRE2 10.38                     27 August 2021                        PCRE2(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
@@ -4004,8 +4004,8 @@ REVISION
 
 PCRE2 10.43                     27 January 2024                    PCRE2API(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
@@ -4630,8 +4630,8 @@ REVISION
 
 PCRE2 10.43                       24 November                    PCRE2BUILD(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
@@ -5064,8 +5064,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024                PCRE2CALLOUT(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
@@ -5298,8 +5298,8 @@ REVISION
 
 PCRE2 10.43                    30 November 2023                 PCRE2COMPAT(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
@@ -5745,8 +5745,8 @@ REVISION
 
 PCRE2 10.43                    21 February 2024                    PCRE2JIT(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
@@ -5829,8 +5829,8 @@ REVISION
 
 PCRE2 10.43                      1 August 2023                  PCRE2LIMITS(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
@@ -6058,8 +6058,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024               PCRE2MATCHING(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
@@ -6442,8 +6442,8 @@ REVISION
 
 PCRE2 10.34                    04 September 2019               PCRE2PARTIAL(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
@@ -10006,8 +10006,8 @@ REVISION
 
 PCRE2 10.44                      11 March 2024                 PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
@@ -10262,8 +10262,8 @@ REVISION
 
 PCRE2 10.41                      27 July 2022                  PCRE2PERFORM(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
@@ -10621,8 +10621,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024                  PCRE2POSIX(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
@@ -10907,8 +10907,8 @@ REVISION
 
 PCRE2 10.32                      27 June 2018                PCRE2SERIALIZE(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
@@ -11494,8 +11494,8 @@ REVISION
 
 PCRE2 10.43                     12 October 2023                 PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
@@ -11960,5 +11960,5 @@ REVISION
 
 PCRE2 10.43                    04 February 2023                PCRE2UNICODE(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
