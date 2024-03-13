@@ -340,6 +340,8 @@ if (size > 3)
         q = q * 10 + wdata[j] - '0';
         }
 
+      if (j >= size) goto END_QSCAN;  /* End of data */
+
       /* Hit ',' or '}' or read 6 digits. Six digits is a number > 65536 which is
       the maximum quantifier. Leave such numbers alone. */
 
