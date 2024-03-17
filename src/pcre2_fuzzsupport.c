@@ -30,6 +30,7 @@ Further updates March 2024 by PH
 
 #include "config.h"
 #include "pcre2.h"
+#include "pcre2_internal.h"
 
 #define MAX_MATCH_SIZE 1000
 
@@ -432,15 +433,27 @@ for (int i = 0; i < 2; i++)
     int j;
     uint32_t save_match_options = match_options;
 
+    /* Call JIT compile only if the compiled pattern is not too big. */
+
 #ifdef SUPPORT_JIT
-    int jit_ret;
+    int jit_ret = -1;
+    if (((struct pcre2_real_code *)code)->blocksize <= 1024 * 1024)
+      {
 #ifdef STANDALONE
-    printf("Calling JIT compile\n");
+      printf("Calling JIT compile\n");
 #endif
-    jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
+      jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
 #ifdef STANDALONE
-    if (jit_ret < 0) printf("JIT compile error %d\n", jit_ret);
+      if (jit_ret < 0) printf("JIT compile error %d\n", jit_ret);
 #endif
+      }
+    else
+      {
+#ifdef STANDALONE
+      printf("Not calling JIT: compiled pattern is too long (%ld bytes)\n",
+        ((struct pcre2_real_code *)code)->blocksize);
+#endif
+      }
 #endif  /* SUPPORT_JIT */
 
     /* Create match data and context blocks only when we first need them. Set
