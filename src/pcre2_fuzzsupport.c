@@ -317,6 +317,8 @@ if (size > 3)
       {
       int q = 0;
 
+      if (i >= size - 1) goto END_QSCAN;  /* Can happen for , */
+
       /* Ignore leading spaces */
 
       while (wdata[i+1] == ' ' || wdata[i+1] == '\t')
