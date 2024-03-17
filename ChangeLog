@@ -32,7 +32,7 @@ example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
 there is a user for whom 32 is too small.
 
 4. Cause pcre2test to output a message when pcre2_jit_compile() gives an error 
-return.
+return if either jitverify or info is specified/
 
 
 Version 10.43 16-February-2024
