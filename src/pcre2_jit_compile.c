@@ -5951,7 +5951,10 @@ while (TRUE)
       chr = *cc;
 #ifdef SUPPORT_UNICODE
       if (common->ucp && chr > 127)
-        othercase[0] = UCD_OTHERCASE(chr);
+        {
+        chr = UCD_OTHERCASE(chr);
+        othercase[0] = (chr == (PCRE2_UCHAR)chr) ? chr : *cc;
+        }
       else
 #endif
         othercase[0] = TABLE_GET(chr, common->fcc, chr);
