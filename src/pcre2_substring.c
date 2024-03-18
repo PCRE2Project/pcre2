@@ -488,6 +488,8 @@ uint16_t top = code->name_count;
 uint16_t entrysize = code->name_entry_size;
 PCRE2_SPTR nametable = (PCRE2_SPTR)((char *)code + sizeof(pcre2_real_code));
 
+ if (entrysize == 0)
+   return PCRE2_ERROR_NOSUBSTRING;
 while (top > bot)
   {
   uint16_t mid = (top + bot) / 2;
