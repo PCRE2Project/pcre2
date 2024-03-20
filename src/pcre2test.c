@@ -5991,6 +5991,33 @@ if (timeit > 0)
 PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
   pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
 
+/* If valgrind is supported, mark the pbuffer as accessible again. The 16-bit
+and 32-bit buffers can be marked completely undefined, but we must leave the
+pattern in the 8-bit buffer defined because it may be read from a callout
+during matching. */
+
+#ifdef SUPPORT_VALGRIND
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE)
+  {
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer8 + valgrind_access_length,
+    pbuffer8_size - valgrind_access_length);
+  }
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE)
+  {
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer16, pbuffer16_size);
+  }
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE)
+  {
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer32, pbuffer32_size);
+  }
+#endif
+#endif
+
 /* Call the JIT compiler if requested. When timing, we must free and recompile
 the pattern each time because that is the only way to free the JIT compiled
 code. We know that compilation will always succeed. */
@@ -6034,33 +6061,6 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
       }
     }
   }
-
-/* If valgrind is supported, mark the pbuffer as accessible again. The 16-bit
-and 32-bit buffers can be marked completely undefined, but we must leave the
-pattern in the 8-bit buffer defined because it may be read from a callout
-during matching. */
-
-#ifdef SUPPORT_VALGRIND
-#ifdef SUPPORT_PCRE2_8
-if (test_mode == PCRE8_MODE)
-  {
-  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer8 + valgrind_access_length,
-    pbuffer8_size - valgrind_access_length);
-  }
-#endif
-#ifdef SUPPORT_PCRE2_16
-if (test_mode == PCRE16_MODE)
-  {
-  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer16, pbuffer16_size);
-  }
-#endif
-#ifdef SUPPORT_PCRE2_32
-if (test_mode == PCRE32_MODE)
-  {
-  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer32, pbuffer32_size);
-  }
-#endif
-#endif
 
 /* Compilation failed; go back for another re, skipping to blank line
 if non-interactive. */
