@@ -6186,25 +6186,34 @@ if (max < 1)
 /* Convert last_count to priority. */
 for (i = 0; i < max; i++)
   {
-  SLJIT_ASSERT(chars[i].count > 0 && chars[i].last_count <= chars[i].count);
+  SLJIT_ASSERT(chars[i].last_count <= chars[i].count);
 
-  if (chars[i].count == 1)
+  switch (chars[i].count)
     {
+    case 0:
+    chars[i].count = 255;
+    chars[i].last_count = 0;
+    break;
+
+    case 1:
     chars[i].last_count = (chars[i].last_count == 1) ? 7 : 5;
     /* Simplifies algorithms later. */
     chars[i].chars[1] = chars[i].chars[0];
-    }
-  else if (chars[i].count == 2)
-    {
+    break;
+
+    case 2:
     SLJIT_ASSERT(chars[i].chars[0] != chars[i].chars[1]);
 
     if (is_powerof2(chars[i].chars[0] ^ chars[i].chars[1]))
       chars[i].last_count = (chars[i].last_count == 2) ? 6 : 4;
     else
       chars[i].last_count = (chars[i].last_count == 2) ? 3 : 2;
-    }
-  else
+    break;
+
+    default:
     chars[i].last_count = (chars[i].count == 255) ? 0 : 1;
+    break;
+    }
   }
 
 #ifdef JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD

@@ -396,6 +396,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "[\\x{10001}-\\x{10fffe}]+", "#\xc3\xa9\xe2\xb1\xa5\xf0\x90\x80\x80\xf0\x90\x80\x81\xf4\x8f\xbf\xbe\xf4\x8f\xbf\xbf" },
 	{ MU, A, 0, 0, "[^\\x{10001}-\\x{10fffe}]+", "\xf0\x90\x80\x81#\xc3\xa9\xe2\xb1\xa5\xf0\x90\x80\x80\xf4\x8f\xbf\xbf\xf4\x8f\xbf\xbe" },
 	{ CMU, A, 0, 0 | F_NOMATCH | F_PROPERTY, "^[\\x{100}-\\x{17f}]", " " },
+	{ M, A, 0, 0 | F_NOMATCH, "[^\\S\\W]{6}", "abcdefghijk" },
 
 	/* Unicode properties. */
 	{ MUP, A, 0, 0, "[1-5\xc3\xa9\\w]", "\xc3\xa1_" },
