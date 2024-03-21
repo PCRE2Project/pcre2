@@ -6102,5 +6102,10 @@ a)"xI
 /(((?<=123?456456|ABC)))(?<=\2)../
     ABCDEFG
     12345645678910 
+    
+# This test is crashing Perl 5.38.2.
+
+/[^\S\W]{6}/
+    .abc def..
 
 # End of testinput2

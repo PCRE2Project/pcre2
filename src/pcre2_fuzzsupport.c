@@ -335,7 +335,9 @@ if (size > 3)
         {
         if (wdata[j] == ' ' || wdata[j] == '\t')
           {
-          do j++; while (j < size && (wdata[j] == ' ' || wdata[j] == '\t'));
+          j++;
+          while (j < size && (wdata[j] == ' ' || wdata[j] == '\t')) j++;
+          if (j >= size) goto OUTERLOOP;
           if (wdata[j] != '}' && wdata[j] != ',') goto OUTERLOOP;
           }
         if (wdata[j] == '}' || (ii == 0 && wdata[j] == ',')) break;

@@ -18047,6 +18047,12 @@ Failed: error -47: match limit exceeded
  0: 78
  1: 
  2: 
+    
+# This test is crashing Perl 5.38.2.
+
+/[^\S\W]{6}/
+    .abc def..
+No match
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
