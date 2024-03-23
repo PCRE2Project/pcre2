@@ -191,7 +191,7 @@ if test "$enable_jit" = "auto"; then
   CPPFLAGS=-I$srcdir
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
   #define SLJIT_CONFIG_AUTO 1
-  #include "src/sljit/sljitConfigInternal.h"
+  #include "src/sljit/sljitConfigCPU.h"
   #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
   #error unsupported
   #endif]])], enable_jit=yes, enable_jit=no)
