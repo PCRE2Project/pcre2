@@ -237,12 +237,12 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size)
 		header->size = chunk_size;
 		next_header = AS_BLOCK_HEADER(header, chunk_size);
 	}
-	SLJIT_ALLOCATOR_UNLOCK();
 	next_header->size = 1;
 	next_header->prev_size = chunk_size;
 #ifdef SLJIT_HAS_EXECUTABLE_OFFSET
 	next_header->executable_offset = executable_offset;
 #endif /* SLJIT_HAS_EXECUTABLE_OFFSET */
+	SLJIT_ALLOCATOR_UNLOCK();
 	return MEM_START(header);
 }
 
