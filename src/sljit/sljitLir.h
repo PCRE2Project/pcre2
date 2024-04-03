@@ -872,7 +872,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_return_to(struct sljit_compiler *c
      int    | 4 byte (physical_address & 0x3 == 0)
      word   | 4 byte if SLJIT_32BIT_ARCHITECTURE is defined and its value is 1
             | 8 byte if SLJIT_64BIT_ARCHITECTURE is defined and its value is 1
-    pointer | size of sljit_p type (4 byte on 32 bit machines, 4 or 8 byte
+    pointer | size of sljit_up type (4 byte on 32 bit machines, 4 or 8 byte
             | on 64 bit machines)
 
    Note:   Different architectures have different addressing limitations.
@@ -1108,7 +1108,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
    S16 - signed 16 bit data transfer
    U32 - unsigned int (32 bit) data transfer
    S32 - signed int (32 bit) data transfer
-   P   - pointer (sljit_p) data transfer
+   P   - pointer (sljit_up) data transfer
 */
 
 /* Flags: - (does not modify flags) */
@@ -1275,6 +1275,19 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2u(struct sljit_compiler *compil
 	sljit_s32 src1, sljit_sw src1w,
 	sljit_s32 src2, sljit_sw src2w);
 
+/* Starting index of opcodes for sljit_emit_op2r. */
+#define SLJIT_OP2R_BASE			96
+
+/* Flags: - (may destroy flags) */
+#define SLJIT_MULADD			(SLJIT_OP2R_BASE + 0)
+#define SLJIT_MULADD32			(SLJIT_MULADD | SLJIT_32)
+
+/* Similar to sljit_emit_fop2, except the destination is always a register. */
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2r(struct sljit_compiler *compiler, sljit_s32 op,
+	sljit_s32 dst_reg,
+	sljit_s32 src1, sljit_sw src1w,
+	sljit_s32 src2, sljit_sw src2w);
+
 /* Emit a left or right shift operation, where the bits shifted
    in comes from a separate source operand. All operands are
    interpreted as unsigned integers.
@@ -1322,7 +1335,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_shift_into(struct sljit_compiler *
 
 /* Starting index of opcodes for sljit_emit_op_src
    and sljit_emit_op_dst. */
-#define SLJIT_OP_SRC_DST_BASE		96
+#define SLJIT_OP_SRC_DST_BASE		112
 
 /* Fast return, see SLJIT_FAST_CALL for more details.
    Note: src cannot be an immedate value
@@ -1374,7 +1387,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_dst(struct sljit_compiler *comp
 	sljit_s32 dst, sljit_sw dstw);
 
 /* Starting index of opcodes for sljit_emit_fop1. */
-#define SLJIT_FOP1_BASE			128
+#define SLJIT_FOP1_BASE			144
 
 /* Flags: - (does not modify flags) */
 #define SLJIT_MOV_F64			(SLJIT_FOP1_BASE + 0)
@@ -1419,7 +1432,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop1(struct sljit_compiler *compil
 	sljit_s32 src, sljit_sw srcw);
 
 /* Starting index of opcodes for sljit_emit_fop2. */
-#define SLJIT_FOP2_BASE			160
+#define SLJIT_FOP2_BASE			176
 
 /* Flags: - (may destroy flags) */
 #define SLJIT_ADD_F64			(SLJIT_FOP2_BASE + 0)
@@ -1440,7 +1453,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fop2(struct sljit_compiler *compil
 	sljit_s32 src2, sljit_sw src2w);
 
 /* Starting index of opcodes for sljit_emit_fop2r. */
-#define SLJIT_FOP2R_BASE		168
+#define SLJIT_FOP2R_BASE		192
 
 /* Flags: - (may destroy flags) */
 #define SLJIT_COPYSIGN_F64		(SLJIT_FOP2R_BASE + 0)
