@@ -2,7 +2,7 @@ Change Log for PCRE2
 --------------------
 
 Before the move to GitHub, this was the only record of changes to PCRE2. Now
-there is often more detail in the pull requests.
+there is also the log of commit messages.
 
 Version 10.44 xx-xxx-2024
 -------------------------
@@ -31,8 +31,11 @@ example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
 3. Increase the maximum length of a name for a group from 32 to 128 because
 there is a user for whom 32 is too small.
 
-4. Cause pcre2test to output a message when pcre2_jit_compile() gives an error 
+4. Cause pcre2test to output a message when pcre2_jit_compile() gives an error
 return if either jitverify or info is specified/
+
+5. Some auxiliary files for building under OpenVMS that were contributed by
+Alexey Chupahin have been installed.
 
 
 Version 10.43 16-February-2024

@@ -260,6 +260,14 @@ EXTRA_DIST += \
   NON-AUTOTOOLS-BUILD \
   HACKING
 
+# These are support files for building under VMS
+
+EXTRA_DIST += \
+  vms/configure.com \
+  vms/openvms_readme.txt \
+  vms/pcre2.h.patch \
+  vms/stdint.h
+
 # These files are used in the preparation of a release
 
 EXTRA_DIST += \
