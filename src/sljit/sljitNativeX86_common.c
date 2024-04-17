@@ -531,16 +531,14 @@ static sljit_u32 execute_get_xcr0_low(void)
 static void get_cpu_features(void)
 {
 	sljit_u32 feature_list = CPU_FEATURE_DETECTED;
-	sljit_u32 info[4];
+	sljit_u32 info[4] = {0};
 	sljit_u32 max_id;
 
-	info[0] = 0;
 	execute_cpu_id(info);
 	max_id = info[0];
 
 	if (max_id >= 7) {
 		info[0] = 7;
-		info[2] = 0;
 		execute_cpu_id(info);
 
 		if (info[1] & 0x8)
@@ -568,7 +566,6 @@ static void get_cpu_features(void)
 	}
 
 	info[0] = 0x80000001;
-	info[2] = 0; /* Silences an incorrect compiler warning. */
 	execute_cpu_id(info);
 
 	if (info[2] & 0x20)
