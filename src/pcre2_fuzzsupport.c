@@ -342,7 +342,11 @@ if (size > 3)
           if (wdata[j] != '}' && wdata[j] != ',') goto OUTERLOOP;
           }
         if (wdata[j] == '}' || (ii == 0 && wdata[j] == ',')) break;
-        if (wdata[j] < '0' || wdata[j] > '9') goto OUTERLOOP;
+        if (wdata[j] < '0' || wdata[j] > '9')
+          {
+          j--;               /* Ensure this character is checked next. The */
+          goto OUTERLOOP;    /* string might be (e.g.) "){9){234}" */
+          }
         q = q * 10 + wdata[j] - '0';
         }
 
