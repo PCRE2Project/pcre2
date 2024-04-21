@@ -16,9 +16,10 @@ example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
 
 2. Further updates to the oss-fuzz support:
 
-   (a) When JIT is enabled, limit quantifiers for groups to be no more than 10.
-       This avoide the very long JIT compile times that happen in some cases
-       when groups are replicated for quantification.
+   (a) Limit quantifiers for groups and classes to be no more than 10. This
+       avoide very long JIT compile times that happen in some cases when groups
+       are replicated for quantification, and very long match times when
+       classes contain a lot of non-ascii characters.
 
    (b) Added PCRE2_EXTENDED_MORE to the list of allowed options.
 

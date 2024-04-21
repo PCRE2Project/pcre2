@@ -267,13 +267,13 @@ return 0;
 int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 {
 PCRE2_UCHAR *wdata;
+PCRE2_UCHAR *newwdata = NULL;
 uint32_t compile_options;
 uint32_t match_options;
 uint64_t random_options;
 pcre2_match_data *match_data = NULL;
 #ifdef SUPPORT_JIT
 pcre2_match_data *match_data_jit = NULL;
-PCRE2_UCHAR *newwdata = NULL;
 #endif
 pcre2_match_context *match_context = NULL;
 size_t match_size;
@@ -287,12 +287,15 @@ wdata = (PCRE2_UCHAR *)data;
 size -= sizeof(random_options);
 size /= PCRE2_CODE_UNIT_WIDTH / 8;
 
-#ifdef SUPPORT_JIT
 /* PCRE2 compiles quantified groups by replicating them. In certain cases of
 very large quantifiers this can lead to unacceptably long JIT compile times. To
 get around this, we scan the data string for large quantifiers that follow a
 closing parenthesis, and reduce the value of the quantifier to 10, assuming
 that this will make minimal difference to the detection of bugs.
+
+Do the same for quantifiers that follow a closing square bracket, because
+classes that contain a number of non-ascii characters can take a lot of time
+when matching.
 
 We have to make a copy of the input because oss-fuzz complains if we overwrite
 the original. Start the scan at the second character so there can be a
@@ -309,7 +312,9 @@ if (size > 3)
     {
     size_t j;
 
-    if (wdata[i] != ')' || wdata[i-1] == '\\' || wdata[i+1] != '{') continue;
+    if ((wdata[i] != ')' && wdata[i] != ']') || wdata[i-1] == '\\' ||
+         wdata[i+1] != '{')
+      continue;
     i++;  /* Points to '{' */
 
     /* Loop for two values a quantifier. Offset i points to brace or comma at the
@@ -383,7 +388,6 @@ if (size > 3)
     }
   }
 END_QSCAN:
-#endif  /* SUPPORT_JIT */
 
 /* Limiting the length of the subject for matching stops fruitless searches
 in large trees taking too much time. */
