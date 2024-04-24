@@ -4694,6 +4694,9 @@ B)x/alt_verbnames,mark
 
 /abcdef/hex,max_pattern_length=3
 
+# Test compiled length limit
+/(abcdefg){10}/max_pattern_compiled_length=100
+
 # These patterns used to take a long time to compile
 
 "(.*)

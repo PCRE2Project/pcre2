@@ -82,6 +82,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_glob_separator.html \
   doc/html/pcre2_set_heap_limit.html \
   doc/html/pcre2_set_match_limit.html \
+  doc/html/pcre2_set_max_pattern_compiled_length.html \
   doc/html/pcre2_set_max_pattern_length.html \
   doc/html/pcre2_set_max_varlookbehind.html \
   doc/html/pcre2_set_offset_limit.html \
@@ -180,6 +181,7 @@ dist_man_MANS = \
   doc/pcre2_set_glob_separator.3 \
   doc/pcre2_set_heap_limit.3 \
   doc/pcre2_set_match_limit.3 \
+  doc/pcre2_set_max_pattern_compiled_length.3 \
   doc/pcre2_set_max_pattern_length.3 \
   doc/pcre2_set_max_varlookbehind.3 \
   doc/pcre2_set_offset_limit.3 \

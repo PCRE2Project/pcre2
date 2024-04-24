@@ -14952,6 +14952,10 @@ Failed: error 188 at offset 0: pattern string is longer than the limit set by th
 
 /abcdef/hex,max_pattern_length=3
 
+# Test compiled length limit
+/(abcdefg){10}/max_pattern_compiled_length=100
+Failed: error 201 at offset 13: compiled pattern would be longer than the limit set by the application
+
 # These patterns used to take a long time to compile
 
 "(.*)

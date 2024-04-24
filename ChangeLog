@@ -29,6 +29,8 @@ example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
 
    (e) General code tidies.
 
+   (f) Limit the size of compiled patterns to 10MB (see 6 below).
+
 3. Increase the maximum length of a name for a group from 32 to 128 because
 there is a user for whom 32 is too small.
 
@@ -37,6 +39,9 @@ return if either jitverify or info is specified/
 
 5. Some auxiliary files for building under OpenVMS that were contributed by
 Alexey Chupahin have been installed.
+
+6. Added pcre2_set_max_pattern_compiled_length() to limit the size of compiled
+patterns.
 
 
 Version 10.43 16-February-2024

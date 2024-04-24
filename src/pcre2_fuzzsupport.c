@@ -8,7 +8,7 @@ rather than a file name. This allows easy testing of short strings.
 
 Written by Philip Hazel, October 2016
 Updated February 2024 (Addison Crump added 16-bit/32-bit and JIT support)
-Further updates March 2024 by PH
+Further updates March/April 2024 by PH
 ***************************************************************************/
 
 #include <errno.h>
@@ -275,6 +275,7 @@ pcre2_match_data *match_data = NULL;
 #ifdef SUPPORT_JIT
 pcre2_match_data *match_data_jit = NULL;
 #endif
+pcre2_compile_context *compile_context = NULL;
 pcre2_match_context *match_context = NULL;
 size_t match_size;
 int dfa_workspace[DFA_WORKSPACE_COUNT];
@@ -394,6 +395,19 @@ in large trees taking too much time. */
 
 match_size = (size > MAX_MATCH_SIZE)? MAX_MATCH_SIZE : size;
 
+/* Create a compile context, and set a limit on the size of the compiled
+pattern. This stops the fuzzer using vast amounts of memory. */
+
+compile_context = pcre2_compile_context_create(NULL);
+if (compile_context == NULL)
+  {
+#ifdef STANDALONE
+  fprintf(stderr, "** Failed to create compile context block\n");
+#endif
+  abort();
+  }
+pcre2_set_max_pattern_compiled_length(compile_context, 10*1024*1024);
+
 /* Ensure that all undefined option bits are zero (waste of time trying them)
 and also that PCRE2_NO_UTF_CHECK is unset, as there is no guarantee that the
 input is valid UTF. Also unset PCRE2_NEVER_UTF and PCRE2_NEVER_UCP as there is
@@ -435,7 +449,7 @@ for (int i = 0; i < 2; i++)
 #endif
 
   code = pcre2_compile((PCRE2_SPTR)wdata, (PCRE2_SIZE)size, compile_options,
-    &errorcode, &erroroffset, NULL);
+    &errorcode, &erroroffset, compile_context);
 
   /* Compilation succeeded */
 
@@ -670,13 +684,15 @@ with the interpreter. */
   compile_options = PCRE2_NEVER_BACKSLASH_C;  /* For second time */
   }
 
+/* Tidy up before exiting */
+
 if (match_data != NULL) pcre2_match_data_free(match_data);
 #ifdef SUPPORT_JIT
 if (match_data_jit != NULL) pcre2_match_data_free(match_data_jit);
 free(newwdata);
 #endif
 if (match_context != NULL) pcre2_match_context_free(match_context);
-
+if (compile_context != NULL) pcre2_compile_context_free(compile_context);
 return 0;
 }
 
