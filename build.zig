@@ -78,6 +78,6 @@ pub fn build(b: *std.Build) !void {
         },
     });
 
-    lib.installHeader("src/pcre2.h.generic", "pcre2.h");
+    lib.installHeader(.{ .path = "src/pcre2.h.generic" }, "pcre2.h");
     b.installArtifact(lib);
 }
