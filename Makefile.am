@@ -240,9 +240,19 @@ bin_PROGRAMS =
 noinst_PROGRAMS =
 
 # Additional files to delete on 'make clean', 'make distclean',
-# and 'make maintainer-clean'.
+# and 'make maintainer-clean'. It turns out that the default is to delete only
+# those binaries that *this* configuration has created. If the configuration
+# has been changed, some binaries may not get automatically deleted. Therefore
+# we list them here.
 
-CLEANFILES =
+CLEANFILES = \
+  pcre2_dftables \
+  pcre2_jit_test \
+  pcre2fuzzcheck-8 \
+  pcre2fuzzcheck-16 \
+  pcre2fuzzcheck-32 \
+  pcre2demo
+
 DISTCLEANFILES = src/config.h.in~
 MAINTAINERCLEANFILES =
 
