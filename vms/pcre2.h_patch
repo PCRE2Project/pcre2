@@ -9,4 +9,4 @@
 #define pcre2_substring_nametable_scan_8    vms_pcre2_substr_nmtab_scan_8
 #define pcre2_substring_length_bynumber_8   vms_pcre2_substr_len_bynum_8
 #define pcre2_substring_number_from_name_8 vms_pcre2_substr_num_f_nam_8
-
+#define pcre2_set_max_pattern_compiled_length vms_pcre2_set_max_pat_cmpl_len
