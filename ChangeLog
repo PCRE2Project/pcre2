@@ -31,6 +31,12 @@ example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
 
    (f) Limit the size of compiled patterns to 10MB (see 6 below).
 
+   (g) Do not run JIT on patterns whose compiled length is greater than 200K
+       bytes because this takes a long time, causing oss-fuzz to time out.
+
+   (h) Avoid compiling or matching twice with the same options (this could
+       happen if the input didn't set any options).
+
 3. Increase the maximum length of a name for a group from 32 to 128 because
 there is a user for whom 32 is too small.
 

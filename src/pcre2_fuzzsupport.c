@@ -8,7 +8,7 @@ rather than a file name. This allows easy testing of short strings.
 
 Written by Philip Hazel, October 2016
 Updated February 2024 (Addison Crump added 16-bit/32-bit and JIT support)
-Further updates March/April 2024 by PH
+Further updates March/April/May 2024 by PH
 ***************************************************************************/
 
 #include <errno.h>
@@ -23,7 +23,7 @@ Further updates March/April 2024 by PH
 #include <sys/resource.h>
 
 #define STACK_SIZE_MB 256
-#define JIT_SIZE_LIMIT (500 * 1024)
+#define JIT_SIZE_LIMIT (200 * 1024)
 
 #ifndef PCRE2_CODE_UNIT_WIDTH
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -56,10 +56,17 @@ below that output them. */
    PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
    PCRE2_PARTIAL_SOFT)
 
+#define BASE_MATCH_OPTIONS \
+  (PCRE2_NO_JIT|PCRE2_DISABLE_RECURSELOOP_CHECK)
+
+
 #if defined(SUPPORT_DIFF_FUZZ) || defined(STANDALONE)
 static void print_compile_options(FILE *stream, uint32_t compile_options)
 {
-fprintf(stream, "Compile options %.8x =", compile_options);
+fprintf(stream, "Compile options %s%.8x =",
+  (compile_options == PCRE2_NEVER_BACKSLASH_C)? "(base) " : "",
+  compile_options);
+
 fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
   ((compile_options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -93,9 +100,12 @@ fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
 
 static void print_match_options(FILE *stream, uint32_t match_options)
 {
-fprintf(stream, "Match options %.8x =", match_options);
-fprintf(stream, "%s%s%s%s%s%s%s%s%s%s\n",
+fprintf(stream, "Match options %s%.8x =",
+  (match_options == BASE_MATCH_OPTIONS)? "(base) " : "", match_options);
+
+fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s\n",
   ((match_options & PCRE2_ANCHORED) != 0)? " anchored" : "",
+  ((match_options & PCRE2_DISABLE_RECURSELOOP_CHECK) != 0)? " disable_recurseloop_check" : "",
   ((match_options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
   ((match_options & PCRE2_NO_JIT) != 0)? " no_jit" : "",
   ((match_options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
@@ -417,8 +427,7 @@ because \C in random patterns is highly likely to cause a crash. */
 compile_options = ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) |
   PCRE2_NEVER_BACKSLASH_C;
 match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) |
-  PCRE2_NO_JIT |
-  PCRE2_DISABLE_RECURSELOOP_CHECK;
+  BASE_MATCH_OPTIONS;
 
 /* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
 allowed together and just give an immediate error return. */
@@ -465,7 +474,7 @@ for (int i = 0; i < 2; i++)
     if (((struct pcre2_real_code *)code)->blocksize <= JIT_SIZE_LIMIT)
       {
 #ifdef STANDALONE
-      printf("Calling JIT compile\n");
+      printf("Compile succeeded; calling JIT compile\n");
 #endif
       jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
 #ifdef STANDALONE
@@ -621,14 +630,14 @@ with the interpreter. */
         }
 #endif  /* SUPPORT_JIT */
 
-      match_options = PCRE2_NO_JIT;  /* For second time */
+      if (match_options == BASE_MATCH_OPTIONS) break;  /* Don't do same twice */
+      match_options = BASE_MATCH_OPTIONS;              /* For second time */
       }
 
     /* Match with DFA twice, with and without options, but remove options that
     are not allowed with DFA. */
 
-    match_options =
-      save_match_options & ~(PCRE2_NO_JIT|PCRE2_DISABLE_RECURSELOOP_CHECK);
+    match_options = save_match_options & ~BASE_MATCH_OPTIONS;
 
 #ifdef STANDALONE
     printf("\n");
@@ -662,7 +671,8 @@ with the interpreter. */
         print_error(stdout, errorcode, "DFA match failed: error %d: ", errorcode);
 #endif
 
-      match_options = 0;  /* For second time */
+      if (match_options == 0) break;  /* No point doing same twice */
+      match_options = 0;              /* For second time */
       }
 
     match_options = save_match_options;  /* Reset for the second compile */
@@ -681,7 +691,8 @@ with the interpreter. */
 #endif
     }
 
-  compile_options = PCRE2_NEVER_BACKSLASH_C;  /* For second time */
+  if (compile_options == PCRE2_NEVER_BACKSLASH_C) break;  /* Avoid same twice */
+  compile_options = PCRE2_NEVER_BACKSLASH_C;              /* For second time */
   }
 
 /* Tidy up before exiting */
