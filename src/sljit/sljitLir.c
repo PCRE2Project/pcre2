@@ -1245,6 +1245,12 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_generate_code(struct sljit_com
 	CHECK_RETURN_OK;
 }
 
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+#define SLJIT_ENTER_CPU_SPECIFIC_OPTIONS (SLJIT_ENTER_USE_VEX)
+#else /* !SLJIT_CONFIG_X86 */
+#define SLJIT_ENTER_CPU_SPECIFIC_OPTIONS (0)
+#endif /* !SLJIT_CONFIG_X86 */
+
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_enter(struct sljit_compiler *compiler,
 	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
 	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
@@ -1253,9 +1259,9 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_enter(struct sljit_compil
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	if (options & SLJIT_ENTER_REG_ARG) {
-		CHECK_ARGUMENT(!(options & ~(0x3 | SLJIT_ENTER_REG_ARG)));
+		CHECK_ARGUMENT(!(options & ~(0x3 | SLJIT_ENTER_REG_ARG | SLJIT_ENTER_CPU_SPECIFIC_OPTIONS)));
 	} else {
-		CHECK_ARGUMENT(options == 0);
+		CHECK_ARGUMENT((options & ~SLJIT_ENTER_CPU_SPECIFIC_OPTIONS) == 0);
 	}
 	CHECK_ARGUMENT(SLJIT_KEPT_SAVEDS_COUNT(options) <= 3 && SLJIT_KEPT_SAVEDS_COUNT(options) <= saveds);
 	CHECK_ARGUMENT(scratches >= 0 && scratches <= SLJIT_NUMBER_OF_REGISTERS);
@@ -1289,11 +1295,17 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_enter(struct sljit_compil
 		fprintf(compiler->verbose, "],");
 
 		if (options & SLJIT_ENTER_REG_ARG) {
-			fprintf(compiler->verbose, " enter:reg_arg,");
-
 			if (SLJIT_KEPT_SAVEDS_COUNT(options) > 0)
-				fprintf(compiler->verbose, " keep:%d,", SLJIT_KEPT_SAVEDS_COUNT(options));
+				fprintf(compiler->verbose, " opt:reg_arg(%d),", SLJIT_KEPT_SAVEDS_COUNT(options));
+			else
+				fprintf(compiler->verbose, " opt:reg_arg,");
 		}
+
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+		if (options & SLJIT_ENTER_USE_VEX) {
+				fprintf(compiler->verbose, " opt:use_vex,");
+		}
+#endif /* !SLJIT_CONFIG_X86 */
 
 		fprintf(compiler->verbose, " scratches:%d, saveds:%d, fscratches:%d, fsaveds:%d, local_size:%d\n",
 			scratches, saveds, fscratches, fsaveds, local_size);
@@ -1310,9 +1322,9 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_set_context(struct sljit_compi
 
 #if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS)
 	if (options & SLJIT_ENTER_REG_ARG) {
-		CHECK_ARGUMENT(!(options & ~(0x3 | SLJIT_ENTER_REG_ARG)));
+		CHECK_ARGUMENT(!(options & ~(0x3 | SLJIT_ENTER_REG_ARG | SLJIT_ENTER_CPU_SPECIFIC_OPTIONS)));
 	} else {
-		CHECK_ARGUMENT(options == 0);
+		CHECK_ARGUMENT((options & ~SLJIT_ENTER_CPU_SPECIFIC_OPTIONS) == 0);
 	}
 	CHECK_ARGUMENT(SLJIT_KEPT_SAVEDS_COUNT(options) <= 3 && SLJIT_KEPT_SAVEDS_COUNT(options) <= saveds);
 	CHECK_ARGUMENT(scratches >= 0 && scratches <= SLJIT_NUMBER_OF_REGISTERS);
@@ -1346,11 +1358,17 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_set_context(struct sljit_compi
 		fprintf(compiler->verbose, "],");
 
 		if (options & SLJIT_ENTER_REG_ARG) {
-			fprintf(compiler->verbose, " enter:reg_arg,");
-
 			if (SLJIT_KEPT_SAVEDS_COUNT(options) > 0)
-				fprintf(compiler->verbose, " keep:%d,", SLJIT_KEPT_SAVEDS_COUNT(options));
+				fprintf(compiler->verbose, " opt:reg_arg(%d),", SLJIT_KEPT_SAVEDS_COUNT(options));
+			else
+				fprintf(compiler->verbose, " opt:reg_arg,");
 		}
+
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
+		if (options & SLJIT_ENTER_USE_VEX) {
+				fprintf(compiler->verbose, " opt:use_vex,");
+		}
+#endif /* !SLJIT_CONFIG_X86 */
 
 		fprintf(compiler->verbose, " scratches:%d, saveds:%d, fscratches:%d, fsaveds:%d, local_size:%d\n",
 			scratches, saveds, fscratches, fsaveds, local_size);
@@ -1358,6 +1376,8 @@ static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_set_context(struct sljit_compi
 #endif
 	CHECK_RETURN_OK;
 }
+
+#undef SLJIT_ENTER_CPU_SPECIFIC_OPTIONS
 
 static SLJIT_INLINE CHECK_RETURN_TYPE check_sljit_emit_return_void(struct sljit_compiler *compiler)
 {
@@ -3368,7 +3388,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fmem_update(struct sljit_compiler 
 
 #if !(defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
 	&& !(defined SLJIT_CONFIG_ARM && SLJIT_CONFIG_ARM) \
-	&& !(defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
+	&& !(defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
+	&& !(defined SLJIT_CONFIG_LOONGARCH && SLJIT_CONFIG_LOONGARCH)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_simd_mov(struct sljit_compiler *compiler, sljit_s32 type,
 	sljit_s32 freg,

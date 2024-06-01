@@ -3722,8 +3722,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		FAIL_IF(push_inst(compiler,
 			WHEN2(op & SLJIT_32, lochi, locghi)));
 	} else {
-		/* TODO(mundaym): no load/store-on-condition 2 facility (ipm? branch-and-set?) */
-		abort();
+		FAIL_IF(push_load_imm_inst(compiler, loc_r, 1));
+		FAIL_IF(push_inst(compiler, brc(mask, 2 + 2)));
+		FAIL_IF(push_load_imm_inst(compiler, loc_r, 0));
 	}
 	#undef LEVAL
 

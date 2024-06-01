@@ -2428,8 +2428,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_ijump(struct sljit_compiler *compi
 	if (src != SLJIT_IMM) {
 		if (src & SLJIT_MEM) {
 			ADJUST_LOCAL_OFFSET(src, srcw);
-			FAIL_IF(emit_op_mem(compiler, WORD_SIZE, TMP_REG1, src, srcw, TMP_REG1));
-			src = TMP_REG1;
+			FAIL_IF(emit_op_mem(compiler, WORD_SIZE, TMP_REG2, src, srcw, TMP_REG2));
+			src = TMP_REG2;
 		}
 		return push_inst(compiler, ((type >= SLJIT_FAST_CALL) ? BLR : BR) | RN(src));
 	}
