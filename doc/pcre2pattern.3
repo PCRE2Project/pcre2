@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "11 March 2024" "PCRE2 10.44"
+.TH PCRE2PATTERN 3 "04 June 2024" "PCRE2 10.44"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1027,15 +1027,17 @@ are of five types: L, V, T, LV, and LVT. An L character may be followed by an
 L, V, LV, or LVT character; an LV or V character may be followed by a V or T
 character; an LVT or T character may be followed only by a T character.
 .P
-4. Do not end before extending characters or spacing marks or the "zero-width
-joiner" character. Characters with the "mark" property always have the
+4. Do not end before extending characters or spacing marks or the zero-width
+joiner (ZWJ) character. Characters with the "mark" property always have the
 "extend" grapheme breaking property.
 .P
 5. Do not end after prepend characters.
 .P
-6. Do not break within emoji modifier sequences or emoji zwj sequences. That
-is, do not break between characters with the Extended_Pictographic property.
-Extend and ZWJ characters are allowed between the characters.
+6. Do not end within emoji modifier sequences or emoji ZWJ (zero-width
+joiner) sequences. An emoji ZWJ sequence consists of a character with the
+Extended_Pictographic property, optionally followed by one or more characters
+with the Extend property, followed by the ZWJ character, followed by another
+Extended_Pictographic character.
 .P
 7. Do not break within emoji flag sequences. That is, do not break between
 regional indicator (RI) characters if there are an odd number of RI characters
@@ -3889,6 +3891,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 11 March 2024
+Last updated: 04 June 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

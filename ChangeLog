@@ -49,6 +49,12 @@ Alexey Chupahin have been installed.
 6. Added pcre2_set_max_pattern_compiled_length() to limit the size of compiled
 patterns.
 
+7. There was a bug in the implementation of \X caused by my (PH) misreading or
+misunderstanding one of the grapheme sequence breaking rules in Unicode Annex
+#29. A break should occur between two characters with the Extended Pictographic
+break property unless a zero-width joiner intervenes. PCRE2 was not insisting
+on the ZWJ, causing \X to match more than it should. See GitHub issue #410.
+
 
 Version 10.43 16-February-2024
 ------------------------------

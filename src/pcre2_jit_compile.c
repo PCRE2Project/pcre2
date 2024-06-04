@@ -8,7 +8,7 @@ and semantics are as close as possible to those of the Perl 5 language.
                        Written by Philip Hazel
                     This module by Zoltan Herczeg
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -8697,6 +8697,10 @@ return cc;
 
 #if PCRE2_CODE_UNIT_WIDTH != 32
 
+/* The code in this function copies the logic of the interpreter function that
+is defined in the pcre2_extuni.c source. If that code is updated, this
+function, and those below it, must be kept in step (note by PH, June 2024). */
+
 static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
@@ -8704,6 +8708,7 @@ PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
 PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
+BOOL was_ep_ZWJ = FALSE;
 uint32_t c;
 
 prevcc = cc;
@@ -8722,6 +8727,12 @@ do
     }
 
   if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0)
+    break;
+
+  /* ZWJ followed by Extended Pictographic is allowed only if the ZWJ was
+  preceded by Extended Pictographic. */
+
+  if (lgb == ucp_gbZWJ && rgb == ucp_gbExtended_Pictographic && !was_ep_ZWJ)
     break;
 
   /* Not breaking between Regional Indicators is allowed only if there
@@ -8748,11 +8759,15 @@ do
     if ((ricount & 1) != 0) break;  /* Grapheme break required */
     }
 
-  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
-  allows any number of them before a following Extended_Pictographic. */
+  /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
+  between; see next statement). */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
-       lgb != ucp_gbExtended_Pictographic)
+  was_ep_ZWJ = (lgb == ucp_gbExtended_Pictographic && rgb == ucp_gbZWJ);
+
+  /* If Extend follows Extended_Pictographic, do not update lgb; this allows
+  any number of them before a following ZWJ. */
+
+  if (rgb != ucp_gbExtend || lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
   prevcc = endcc;
@@ -8765,6 +8780,10 @@ return endcc;
 
 #endif /* PCRE2_CODE_UNIT_WIDTH != 32 */
 
+/* The code in this function copies the logic of the interpreter function that
+is defined in the pcre2_extuni.c source. If that code is updated, this
+function, and the one below it, must be kept in step (note by PH, June 2024). */
+
 static PCRE2_SPTR SLJIT_FUNC do_extuni_utf_invalid(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
@@ -8772,6 +8791,7 @@ PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
 PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
+BOOL was_ep_ZWJ = FALSE;
 uint32_t c;
 
 prevcc = cc;
@@ -8790,6 +8810,12 @@ do
     }
 
   if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0)
+    break;
+
+  /* ZWJ followed by Extended Pictographic is allowed only if the ZWJ was
+  preceded by Extended Pictographic. */
+
+  if (lgb == ucp_gbZWJ && rgb == ucp_gbExtended_Pictographic && !was_ep_ZWJ)
     break;
 
   /* Not breaking between Regional Indicators is allowed only if there
@@ -8815,11 +8841,15 @@ do
       break;  /* Grapheme break required */
     }
 
-  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
-  allows any number of them before a following Extended_Pictographic. */
+  /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
+  between; see next statement). */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
-       lgb != ucp_gbExtended_Pictographic)
+  was_ep_ZWJ = (lgb == ucp_gbExtended_Pictographic && rgb == ucp_gbZWJ);
+
+  /* If Extend follows Extended_Pictographic, do not update lgb; this allows
+  any number of them before a following ZWJ. */
+
+  if (rgb != ucp_gbExtend || lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
   prevcc = endcc;
@@ -8830,6 +8860,10 @@ while (cc < end_subject);
 return endcc;
 }
 
+/* The code in this function copies the logic of the interpreter function that
+is defined in the pcre2_extuni.c source. If that code is updated, this
+function must be kept in step (note by PH, June 2024). */
+
 static PCRE2_SPTR SLJIT_FUNC do_extuni_no_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
@@ -8837,6 +8871,7 @@ PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
 PCRE2_SPTR bptr;
 uint32_t c;
+BOOL was_ep_ZWJ = FALSE;
 
 /* Patch by PH */
 /* GETCHARINC(c, cc); */
@@ -8858,6 +8893,12 @@ while (cc < end_subject)
   rgb = UCD_GRAPHBREAK(c);
 
   if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0)
+    break;
+
+  /* ZWJ followed by Extended Pictographic is allowed only if the ZWJ was
+  preceded by Extended Pictographic. */
+
+  if (lgb == ucp_gbZWJ && rgb == ucp_gbExtended_Pictographic && !was_ep_ZWJ)
     break;
 
   /* Not breaking between Regional Indicators is allowed only if there
@@ -8887,11 +8928,15 @@ while (cc < end_subject)
       break;  /* Grapheme break required */
     }
 
-  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
-  allows any number of them before a following Extended_Pictographic. */
+  /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
+  between; see next statement). */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
-       lgb != ucp_gbExtended_Pictographic)
+  was_ep_ZWJ = (lgb == ucp_gbExtended_Pictographic && rgb == ucp_gbZWJ);
+
+  /* If Extend follows Extended_Pictographic, do not update lgb; this allows
+  any number of them before a following ZWJ. */
+
+  if (rgb != ucp_gbExtend || lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
   cc++;

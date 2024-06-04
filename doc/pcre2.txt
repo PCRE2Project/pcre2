@@ -7370,16 +7370,17 @@ BACKSLASH
        be  followed  by  a V or T character; an LVT or T character may be fol-
        lowed only by a T character.
 
-       4. Do not end before extending  characters  or  spacing  marks  or  the
-       "zero-width  joiner" character. Characters with the "mark" property al-
+       4. Do not end before extending characters or spacing marks or the zero-
+       width joiner (ZWJ) character. Characters with the "mark"  property  al-
        ways have the "extend" grapheme breaking property.
 
        5. Do not end after prepend characters.
 
-       6. Do not break within emoji modifier sequences or emoji zwj sequences.
-       That is, do not break between characters with the Extended_Pictographic
-       property.  Extend and ZWJ characters are allowed  between  the  charac-
-       ters.
+       6.  Do not end within emoji modifier sequences or emoji ZWJ (zero-width
+       joiner) sequences. An emoji ZWJ sequence consists of a  character  with
+       the  Extended_Pictographic property, optionally followed by one or more
+       characters with the Extend property, followed  by  the  ZWJ  character,
+       followed by another Extended_Pictographic character.
 
        7.  Do not break within emoji flag sequences. That is, do not break be-
        tween regional indicator (RI) characters if there are an odd number  of
@@ -10015,11 +10016,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 March 2024
+       Last updated: 04 June 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.44                      11 March 2024                 PCRE2PATTERN(3)
+PCRE2 10.44                      04 June 2024                  PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
  
  
