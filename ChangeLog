@@ -55,6 +55,8 @@ misunderstanding one of the grapheme sequence breaking rules in Unicode Annex
 break property unless a zero-width joiner intervenes. PCRE2 was not insisting
 on the ZWJ, causing \X to match more than it should. See GitHub issue #410.
 
+8. Avoid compilation issues with propietary compilers in UNIX since 10.43.
+
 
 Version 10.43 16-February-2024
 ------------------------------
