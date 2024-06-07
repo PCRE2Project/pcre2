@@ -482,6 +482,7 @@ EXTRA_DIST += \
   src/sljit/sljitNativeX86_32.c \
   src/sljit/sljitNativeX86_64.c \
   src/sljit/sljitNativeX86_common.c \
+  src/sljit/sljitSerialize.c \
   src/sljit/sljitUtils.c \
   src/sljit/allocator_src/sljitExecAllocatorApple.c \
   src/sljit/allocator_src/sljitExecAllocatorCore.c \
