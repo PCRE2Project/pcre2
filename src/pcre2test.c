@@ -4397,7 +4397,7 @@ static void
 show_memory_info(void)
 {
 uint32_t name_count, name_entry_size;
-PCRE2_SIZE size, cblock_size;
+PCRE2_SIZE size, cblock_size, data_size;
 
 /* One of the test_mode values will always be true, but to stop a compiler
 warning we must initialize cblock_size. */
@@ -4417,18 +4417,19 @@ if (test_mode == PCRE32_MODE) cblock_size = sizeof(pcre2_real_code_32);
 (void)pattern_info(PCRE2_INFO_NAMECOUNT, &name_count, FALSE);
 (void)pattern_info(PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size, FALSE);
 
-/* The uint32_t variables are cast before multiplying to stop code analyzers
-grumbling about potential overflow. */
+/* The uint32_t variables are cast before multiplying to avoid potential
+ integer overflow. */
+data_size = (PCRE2_SIZE)name_count * (PCRE2_SIZE)name_entry_size * (PCRE2_SIZE)code_unit_size;
 
-fprintf(outfile, "Memory allocation - compiled block : %" SIZ_FORM "\n", size);
-fprintf(outfile, "Memory allocation - code portion   : %" SIZ_FORM "\n", size -
-  (PCRE2_SIZE)name_count * (PCRE2_SIZE)name_entry_size * (PCRE2_SIZE)code_unit_size -
-  cblock_size);
+fprintf(outfile, "Memory allocation - code size : %" SIZ_FORM "\n", size -
+  cblock_size - data_size);
+if (data_size != 0)
+  fprintf(outfile, "Memory allocation - data size : %" SIZ_FORM "\n", data_size);
 
 if (pat_patctl.jit != 0)
   {
   (void)pattern_info(PCRE2_INFO_JITSIZE, &size, FALSE);
-  fprintf(outfile, "Memory allocation - JIT code       : %" SIZ_FORM "\n", size);
+  fprintf(outfile, "Memory allocation - JIT code  : %" SIZ_FORM "\n", size);
   }
 }
 
