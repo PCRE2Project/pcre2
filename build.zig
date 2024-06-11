@@ -13,8 +13,8 @@ pub fn build(b: *std.Build) !void {
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
 
     const copyFiles = b.addWriteFiles();
-    _ = copyFiles.addCopyFile(.{ .path = "src/config.h.generic" }, "config.h");
-    _ = copyFiles.addCopyFile(.{ .path = "src/pcre2.h.generic" }, "pcre2.h");
+    _ = copyFiles.addCopyFile(b.path("src/config.h.generic"), "config.h");
+    _ = copyFiles.addCopyFile(b.path("src/pcre2.h.generic"), "pcre2.h");
 
     const lib = std.Build.Step.Compile.create(b, .{
         .name = b.fmt("pcre2-{s}", .{@tagName(codeUnitWidth)}),
@@ -34,13 +34,13 @@ pub fn build(b: *std.Build) !void {
     lib.root_module.addCMacro("PCRE2_CODE_UNIT_WIDTH", @tagName(codeUnitWidth));
 
     lib.addCSourceFile(.{
-        .file = copyFiles.addCopyFile(.{ .path = "src/pcre2_chartables.c.dist" }, "pcre2_chartables.c"),
+        .file = copyFiles.addCopyFile(b.path("src/pcre2_chartables.c.dist"), "pcre2_chartables.c"),
         .flags = &.{
             "-DHAVE_CONFIG_H",
         },
     });
 
-    lib.addIncludePath(.{ .path = b.pathFromRoot("src") });
+    lib.addIncludePath(b.path("src"));
     lib.addIncludePath(copyFiles.getDirectory());
 
     lib.addCSourceFiles(.{
@@ -78,6 +78,6 @@ pub fn build(b: *std.Build) !void {
         },
     });
 
-    lib.installHeader(.{ .path = "src/pcre2.h.generic" }, "pcre2.h");
+    lib.installHeader(b.path("src/pcre2.h.generic"), "pcre2.h");
     b.installArtifact(lib);
 }
