@@ -100,5 +100,6 @@ src/stamp-h1
 
 zig-out/
 zig-cache/
+.zig-cache/
 
 # End
