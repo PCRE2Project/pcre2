@@ -27,7 +27,7 @@
 @rem Tidied and updated for new tests 21, 22, 23 by PH, October 2015.
 @rem PH added missing "set type" for test 22, April 2016.
 @rem PH added copy command for new testbtables file, November 2020
-@rem PH caused it to show comparison output when comparison faile, July 2023
+@rem PH caused it to show comparison output when comparison failed, July 2023
 @rem PH updated unknown error number in test
 
 

@@ -104,13 +104,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_IGNORE_PREFIX_PATH=C:/Strawberry/c -B build -A Win32
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -B build -A Win32
 
       - name: Build
         run: cmake --build build
 
       - name: Test
+        id: test
         run: |
-          cd build\Debug
-          ..\..\RunTest.bat
-          ./pcre2posix_test -v
+          cd build
+          ctest -C Debug .
+
+      - name: Debug
+        if: ${{ failure() && steps.test.outcome == 'failure' }}
+        run: type build/Testing/Temporary/LastTest.log
