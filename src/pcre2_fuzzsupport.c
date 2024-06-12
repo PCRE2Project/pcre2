@@ -700,8 +700,8 @@ with the interpreter. */
 if (match_data != NULL) pcre2_match_data_free(match_data);
 #ifdef SUPPORT_JIT
 if (match_data_jit != NULL) pcre2_match_data_free(match_data_jit);
-free(newwdata);
 #endif
+free(newwdata);
 if (match_context != NULL) pcre2_match_context_free(match_context);
 if (compile_context != NULL) pcre2_compile_context_free(compile_context);
 return 0;
