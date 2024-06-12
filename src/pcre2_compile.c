@@ -293,7 +293,7 @@ versions. */
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
 
 /* This is a special "meta code" that is used only to distinguish (*asr: from
-(*sr: in the table of aphabetic assertions. It is never stored in the parsed
+(*sr: in the table of alphabetic assertions. It is never stored in the parsed
 pattern because (*asr: is turned into (*sr:(*atomic: at that stage. There is
 therefore no need for it to have a length entry, so use a high value. */
 
@@ -9469,10 +9469,10 @@ for (;; pptr++)
   parsed_recurse_check *r;
   uint32_t *gptr, *gptrend;
   uint32_t escape;
+  uint32_t min, max;
   uint32_t group = 0;
   uint32_t itemlength = 0;
   uint32_t itemminlength = 0;
-  uint32_t min, max;
 
   if (*pptr < META_END)
     {
@@ -9922,7 +9922,7 @@ possibly different) length. */
 if (variable)
   {
   gbptr[1] = minlength;
-  if ((uint32_t)maxlength > cb->max_varlookbehind)
+  if ((PCRE2_SIZE)maxlength > cb->max_varlookbehind)
     {
     *errcodeptr = ERR100;
     cb->erroroffset = offset;
@@ -9931,8 +9931,6 @@ if (variable)
   }
 else gbptr[1] = LOOKBEHIND_MAX;
 
-
-gbptr[1] = variable? minlength : LOOKBEHIND_MAX;
 return TRUE;
 }
 
@@ -9978,6 +9976,11 @@ for (; *pptr != META_END; pptr++)
   switch (META_CODE(*pptr))
     {
     default:
+
+    /* The following erroroffset is a bogus but safe value.
+    This branch should be avoided by providing a proper
+    implementation for all supported cases below. */
+    cb->erroroffset = 0;
     return ERR70;  /* Unrecognized meta code */
 
     case META_ESCAPE:
@@ -10549,7 +10552,15 @@ if (has_lookbehind)
     }
   memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));
   errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
-  if (errorcode != 0) goto HAD_CB_ERROR;
+  if (errorcode != 0)
+    {
+#ifdef PCRE2_DEBUG
+    /* BUG: check_lookbehinds() is missing code for a valid META */
+    if (errorcode == ERR70) cb.erroroffset = PCRE2_UNSET;
+#endif
+
+    goto HAD_CB_ERROR;
+    }
   }
 
 /* For debugging, there is a function that shows the parsed pattern vector. */
