@@ -861,6 +861,35 @@ echo "---------------------------- Test 153 -----------------------------" >>tes
 (cd $srcdir; $valgrind $vjs $pcre2grep -nA3 --no-group-separator 'four' ./testdata/grepinputx) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 154 -----------------------------" >>testtrygrep
+>testtemp1grep
+(cd $srcdir; $valgrind $vjs $pcre2grep -f $builddir/testtemp1grep ./testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 155 -----------------------------" >>testtrygrep
+echo "" >testtemp1grep
+(cd $srcdir; $valgrind $vjs $pcre2grep -f $builddir/testtemp1grep ./testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 156 -----------------------------" >>testtrygrep
+echo "" >testtemp1grep
+(cd $srcdir; $valgrind $vjs $pcre2grep --posix-pattern-file --file $builddir/testtemp1grep ./testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 157 -----------------------------" >>testtrygrep
+echo "spaces " >testtemp1grep
+(cd $srcdir; $valgrind $vjs $pcre2grep -o --posix-pattern-file --file=$builddir/testtemp1grep ./testdata/grepinputv >testtemp2grep && $valgrind $vjs $pcre2grep -q "s " testtemp2grep) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 158 -----------------------------" >>testtrygrep
+echo "spaces." >testtemp1grep
+(cd $srcdir; $valgrind $vjs $pcre2grep -f $builddir/testtemp1grep ./testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+echo "---------------------------- Test 159 -----------------------------" >>testtrygrep
+printf "spaces.\015\012" >testtemp1grep
+(cd $srcdir; $valgrind $vjs $pcre2grep --posix-pattern-file -f$builddir/testtemp1grep ./testdata/grepinputv) >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 # Now compare the results.
 

@@ -7,13 +7,17 @@ there is also the log of commit messages.
 Version 10.45 xx-xxx-2024
 -------------------------
 
-1. Change 6 of 10.44 broke 32-bit compiles because pcre2test's reporting of 
-memory size was changed to the entire compiled data block, instead of just the 
-pattern and tables data, so as to align with the new length restriction. 
+1. Change 6 of 10.44 broke 32-bit tests because pcre2test's reporting of
+memory size was changed to the entire compiled data block, instead of just the
+pattern and tables data, so as to align with the new length restriction.
 Because the block's header contains pointers, this meant the pcre2test output
 was different in 32-bit mode. A patch by Carlo reverts to the preevious state
 and makes sure that any limit set by pcre2_set_max_pattern_compiled_length()
 also avoids the internal struct overhead.
+
+2. Add --posix-pattern-file to pcre2grep to allow processing of empty patterns
+through the -f option, as well as patterns that end in space characters for
+compatibility with other grep tools.
 
 
 Version 10.44 07-June-2024

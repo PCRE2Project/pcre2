@@ -337,9 +337,10 @@ Read patterns from the file, one per line. As is the case with patterns on the
 command line, no delimiters should be used. What constitutes a newline when
 reading the file is the operating system's default interpretation of \en. The
 \fB--newline\fP option has no effect on this option. Trailing white space is
-removed from each line, and blank lines are ignored. An empty file contains no
+removed from each line, and blank lines are ignored unless the
+\fB--posix-pattern-file\fP option is also provided. An empty file contains no
 patterns and therefore matches nothing. Patterns read from a file in this way
-may contain binary zeros, which are treated as ordinary data characters.
+may contain binary zeros, which are treated as ordinary character literals.
 .sp
 If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
@@ -700,6 +701,14 @@ as was the case in earlier releases. Note that there are now more fine-grained
 option settings within patterns that affect individual classes. For example,
 when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
 allowing \ew to match Unicode letters and digits.
+.TP
+\fB--posix-pattern-file\fP
+When patterns are provided with the \fB-f\fP option, do not trim trailing
+spaces or ignore empty lines in a similar way than other grep tools. To keep
+the behaviour consistent with older versions, if the pattern read was
+terminated with CRLF (as character literals) then both characters won't be
+included as part of it, so if you really need to have pattern ending in '\er',
+use a escape sequence or provide it by a different method.
 .TP
 \fB-q\fP, \fB--quiet\fP
 Work quietly, that is, display nothing except error messages. The exit

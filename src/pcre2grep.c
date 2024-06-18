@@ -290,6 +290,7 @@ static BOOL show_total_count = FALSE;
 static BOOL silent = FALSE;
 static BOOL utf = FALSE;
 static BOOL posix_digit = FALSE;
+static BOOL posix_pattern_file = FALSE;
 
 static uint8_t utf8_buffer[8];
 
@@ -428,6 +429,7 @@ used to identify them. */
 #define N_POSIX_DIGIT  (-26)
 #define N_GROUP_SEPARATOR (-27)
 #define N_NO_GROUP_SEPARATOR (-28)
+#define N_POSIX_PATFILE (-29)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -449,6 +451,7 @@ static option_item optionlist[] = {
   { OP_PATLIST,    'e',      &match_patdata,    "regex(p)=pattern", "specify pattern (may be used more than once)" },
   { OP_NODATA,     'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
   { OP_FILELIST,   'f',      &pattern_files_data, "file=path",   "read patterns from file" },
+  { OP_NODATA, N_POSIX_PATFILE, NULL,           "posix-pattern-file", "use POSIX semantics for pattern files" },
   { OP_FILELIST,   N_FILE_LIST, &file_lists_data, "file-list=path","read files to search from file" },
   { OP_NODATA,     N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_STRING,     N_GROUP_SEPARATOR, &group_separator, "group-separator=text", "set separator between groups of lines" },
@@ -1448,7 +1451,34 @@ while ((c = fgetc(f)) != EOF)
 return yield;
 }
 
+/*************************************************
+*           Read one pattern from file           *
+*************************************************/
 
+/* Wrap around read_one_line() to make sure any terminating '\n' is not
+included in the pattern and empty patterns are correctly identified.
+
+Arguments:
+  buffer     the buffer to read into
+  length     maximum number of characters to read and report how many were
+  f          the file
+
+Returns:     TRUE if a pattern was read into buffer
+*/
+
+static BOOL
+read_pattern(char *buffer, PCRE2_SIZE *length, FILE *f)
+{
+*buffer = '\0';
+*length = read_one_line(buffer, *length, f);
+if (*length > 0 && buffer[*length-1] == '\n') *length = *length - 1;
+if (posix_pattern_file && *length > 0 && buffer[*length-1] == '\r')
+  {
+  *length = *length - 1;
+  if (*length == 0) return TRUE;
+  }
+return (*length > 0 || *buffer == '\n');
+}
 
 /*************************************************
 *             Find end of line                   *
@@ -3598,6 +3628,7 @@ switch(letter)
   case N_NOJIT: use_jit = FALSE; break;
   case N_ALLABSK: extra_options |= PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK; break;
   case N_NO_GROUP_SEPARATOR: group_separator = NULL; break;
+  case N_POSIX_PATFILE: posix_pattern_file = TRUE; break;
   case 'a': binary_files = BIN_TEXT; break;
   case 'c': count_only = TRUE; break;
   case N_POSIX_DIGIT: posix_digit = TRUE; break;
@@ -3808,11 +3839,15 @@ else
   filename = name;
   }
 
-while ((patlen = read_one_line(buffer, sizeof(buffer), f)) > 0)
+while ((patlen = sizeof(buffer)) && read_pattern(buffer, &patlen, f))
   {
-  while (patlen > 0 && isspace((unsigned char)(buffer[patlen-1]))) patlen--;
+  if (!posix_pattern_file)
+   {
+   while (patlen > 0 && isspace((unsigned char)(buffer[patlen-1]))) patlen--;
+   }
+
   linenumber++;
-  if (patlen == 0) continue;   /* Skip blank lines */
+  if (!posix_pattern_file && patlen == 0) continue; /* Skip blank lines */
 
   /* Note: this call to add_pattern() puts a pointer to the local variable
   "buffer" into the pattern chain. However, that pointer is used only when

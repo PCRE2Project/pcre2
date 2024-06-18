@@ -464,6 +464,7 @@ The word is cat in this line
 The caterpillar sat on the mat
 The snowcat is not an animal
 A buried feline in the syndicate
+trailing spaces 
 RC=0
 ---------------------------- Test 52 ------------------------------
 fox [1;31mjumps[0m
@@ -1169,6 +1170,7 @@ The word is cat in this line
 The caterpillar sat on the mat
 The snowcat is not an animal
 A buried feline in the syndicate
+trailing spaces 
 RC=0
 ---------------------------- Test 146 -----------------------------
 (standard input):A123B
@@ -1252,4 +1254,28 @@ RC=0
 35-fifteen
 36-sixteen
 37-seventeen
+RC=0
+---------------------------- Test 154 -----------------------------
+RC=1
+---------------------------- Test 155 -----------------------------
+RC=1
+---------------------------- Test 156 -----------------------------
+The quick brown
+fox jumps
+over the lazy dog.
+This time it jumps and jumps and jumps.
+This line contains \E and (regex) *meta* [characters].
+The word is cat in this line
+The caterpillar sat on the mat
+The snowcat is not an animal
+A buried feline in the syndicate
+trailing spaces 
+RC=0
+---------------------------- Test 157 -----------------------------
+RC=0
+---------------------------- Test 158 -----------------------------
+trailing spaces 
+RC=0
+---------------------------- Test 159 -----------------------------
+trailing spaces 
 RC=0
