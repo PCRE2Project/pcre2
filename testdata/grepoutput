@@ -1225,7 +1225,7 @@ Usage: pcre2grep [-AaBCcDdEeFfHhIilLMmNnOoPqrstuUVvwxZ] [long options] [pattern]
 Type "pcre2grep --help" for more information and the long options.
 RC=2
 ---------------------------- Test 150 -----------------------------
-pcre2grep: Failed to set locale badlocale (obtained from LC_CTYPE)
+pcre2grep: Failed to set locale locale.bad (obtained from LC_CTYPE)
 RC=2
 ---------------------------- Test 151 -----------------------------
 [1;31mThe[0m quick brown

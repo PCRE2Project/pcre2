@@ -842,11 +842,11 @@ echo "RC=$?" >>testtrygrep
 echo "---------------------------- Test 150 -----------------------------" >>testtrygrep
 which locale >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "pcre2grep: Failed to set locale badlocale (obtained from LC_CTYPE)" >>testtrygrep
+  echo "pcre2grep: Failed to set locale locale.bad (obtained from LC_CTYPE)" >>testtrygrep
   echo "RC=2" >>testtrygrep
 else
 
-  (cd $srcdir; unset LC_ALL; env LC_CTYPE=badlocale $valgrind $vjs $pcre2grep abc /dev/null) >>testtrygrep 2>&1
+  (cd $srcdir; unset LC_ALL; env LC_CTYPE=locale.bad $valgrind $vjs $pcre2grep abc /dev/null) >>testtrygrep 2>&1
   echo "RC=$?" >>testtrygrep
 fi
 
