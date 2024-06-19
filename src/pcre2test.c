@@ -6920,7 +6920,11 @@ len = strlen((const char *)buffer);
 while (len > 0 && isspace(buffer[len-1])) len--;
 buffer[len] = 0;
 p = buffer;
-while (isspace(*p)) p++;
+while (isspace(*p))
+  {
+  p++;
+  len--;
+  }
 
 /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
 invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
