@@ -169,8 +169,8 @@ for (int index = 0; index < count; index++)
 
 static void describe_failure(
   const char *task,
-  const unsigned char *data,
-  size_t size,
+  const PCRE2_UCHAR *data,
+  PCRE2_SIZE size,
   uint32_t compile_options,
   uint32_t match_options,
   int errorcode,
