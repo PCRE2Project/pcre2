@@ -11,6 +11,9 @@ and also contains some notes for maintainers. Its contents are:
   Preparing for a PCRE2 release
   Making a PCRE2 release
   Long-term ideas (wish list)
+  
+For a description of the way PCRE2 works, see the file called HACKING in the
+top directory.
 
 
 Files in the maint directory
@@ -87,8 +90,8 @@ Updating to a new Unicode release
 =================================
 
 When there is a new release of Unicode, the files in Unicode.tables must be
-refreshed from the web site. Once that is done, the four Python scripts that 
-generate files from the Unicode data can be run from within the "maint" 
+refreshed from the Unicode web site. Once that is done, the four Python scripts
+that generate files from the Unicode data can be run from within the "maint"
 directory.
 
 Note: Previously, it was necessary to update lists of scripts and their 
@@ -130,8 +133,8 @@ files should eventually be installed in the main testdata directory.
 Preparing for a PCRE2 release
 =============================
 
-This section contains a checklist of things that I do before building a new
-release.
+This section contains a checklist of things that I (PH) do before building a
+new release.
 
 . Ensure that the version number and version date are correct in configure.ac.
 
@@ -145,25 +148,26 @@ release.
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
-. Compile and test with many different config options, and combinations of
-  options. Also, test with valgrind by running "RunTest valgrind" and
-  "RunGrepTest valgrind". The script maint/ManyConfigTests now encapsulates
-  this testing. It runs tests with different configurations, and it also runs
-  some of them with valgrind, all of which can take quite some time.
+. Run the script maint/ManyConfigTests. This compiles and runs the tests for
+  many different sets of configuration options, some with valgrind. It can take
+  quite a long time.
 
 . Run tests in both 32-bit and 64-bit environments if possible. I can no longer
   run 32-bit tests.
 
-. Run tests with two or more different compilers (e.g. clang and gcc), and
-  make use of -fsanitize=address and friends where possible. For gcc,
-  -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime.
-  For clang, -fsanitize=address,undefined,integer can be used but
-  -fno-sanitize=unsigned-integer-overflow must be added when compiling with JIT.
-  Another useful clang option is -fsanitize=signed-integer-overflow
+. Run tests with two or more different compilers (e.g. clang and gcc), and make
+  use of -fsanitize=address and friends where possible. For gcc,
+  -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime. For
+  clang, -fsanitize=address,undefined,integer can be used but
+  -fno-sanitize=unsigned-integer-overflow must be added when compiling with
+  JIT. Another useful clang option is -fsanitize=signed-integer-overflow
 
 . Do a test build using CMake. Remove src/config.h first, lest it override the
-  version that CMake creates. Also do a CMake unity build to check that it 
-  still works: [c]cmake -DCMAKE_UNITY_BUILD=ON sets up a unity build.
+  version that CMake creates. Also ensure there is no leftover CMakeCache.txt
+  in the directory you are testing in. 
+  
+. Remove the CMake cache and then check that a CMake unity build works: 
+  [c]cmake -DCMAKE_UNITY_BUILD=ON sets up a unity build.
 
 . Run perltest.sh on the test data for tests 1 and 4. The output should match
   the PCRE2 test output, apart from the version identification at the start of
@@ -187,7 +191,8 @@ release.
   GitHub actions. Check that they are running clean.
 
 . The buildbots at http://buildfarm.opencsw.org/ do some automated testing
-  of PCRE2 and should also be checked before putting out a release.
+  of PCRE2 and should also be checked before putting out a release. (June 2024: 
+  I am not sure these are currently working properly.)
 
 
 Updating version info for libtool
@@ -240,17 +245,13 @@ Making a PCRE2 release
 Run PrepareRelease and commit the files that it changes. The first thing this
 script does is to run CheckMan on the man pages; if it finds any markup errors,
 it reports them and then aborts. Otherwise it removes trailing spaces from
-sources and refreshes the HTML documentation. Update the GitHub repository with
-"git push".
+sources and refreshes the HTML documentation. Update the GitHub repository.
 
 Once PrepareRelease has run clean, run "make distcheck" to create the tarballs
 and the zipball. I then sign these files. Double-check with "git status" that
 the repository is fully up-to-date, then create a new tag and a release on
 GitHub. Upload the tarballs, zipball, and the signatures as "assets" of the
 GitHub release.
-
-When the new release is out, don't forget to tell webmaster@pcre.org and the
-mailing list.
 
 
 Future ideas (wish list)
@@ -290,11 +291,11 @@ years.
     setting the bits for 0-9 and all values >= xC0 (in 8-bit mode) when a
     pattern starts with \p{N}.
 
-. If Perl gets to a consistent state over the settings of capturing sub-
-  patterns inside repeats, see if we can match it. One example of the
-  difference is the matching of /(main(O)?)+/ against mainOmain, where PCRE2
-  leaves $2 set. In Perl, it's unset. Changing this in PCRE2 will be very hard
-  because I think it needs much more state to be remembered.
+. Perl and PCRE2 sometimes differ in the settings of capturing subpatterns 
+  inside repeats. One example of the difference is the matching of
+  /(main(O)?)+/ against mainOmain, where PCRE2 leaves $2 set. In Perl, it's
+  unset. Changing this in PCRE2 will be very hard because I think it needs much
+  more state to be remembered.
 
 . A feature to suspend a match via a callout was once requested.
 
@@ -382,16 +383,6 @@ years.
 . There was a request for an option for pcre2_match() to return the longest
   match. This would mean searching for all possible matches, of course.
 
-. Perl's /a modifier sets Unicode, but restricts \d etc to ASCII characters,
-  which is the PCRE2 default for PCRE2_UTF (use PCRE2_UCP to change). However,
-  Perl also has /aa, which in addition, disables ASCII/non-ASCII caseless
-  matching. Perhaps we need a new option PCRE2_CASELESS_RESTRICT_ASCII. In
-  practice, this just means not using the ucd_caseless_sets[] table.
-
-. There is more that could be done to the oss-fuzz setup (needs some research).
-  A seed corpus could be built. I noted something about $LIB_FUZZING_ENGINE.
-  The test function could make use of get_substrings() to cover more code.
-
 . A neater way of handling recursion file names in pcre2grep, e.g. a single
   buffer that can grow. See also GitHub issue #2 (recursion looping via
   symlinks).
@@ -461,4 +452,4 @@ years.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 30 November 2023
+Last updated: 25 June 2024
