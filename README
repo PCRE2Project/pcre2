@@ -411,20 +411,19 @@ library. They are also documented in the pcre2build man page.
   Instead of %td or %zu, %lu is used, with a cast for size_t values.
 
 . There is a special option called --enable-fuzz-support for use by people who
-  want to run fuzzing tests on PCRE2. At present this applies only to the 8-bit
-  library. If set, it causes an extra library called libpcre2-fuzzsupport.a to
-  be built, but not installed. This contains a single function called
-  LLVMFuzzerTestOneInput() whose arguments are a pointer to a string and the
-  length of the string. When called, this function tries to compile the string
-  as a pattern, and if that succeeds, to match it. This is done both with no
-  options and with some random options bits that are generated from the string.
-  Setting --enable-fuzz-support also causes a binary called pcre2fuzzcheck to
-  be created. This is normally run under valgrind or used when PCRE2 is
-  compiled with address sanitizing enabled. It calls the fuzzing function and
-  outputs information about what it is doing. The input strings are specified
-  by arguments: if an argument starts with "=" the rest of it is a literal
-  input string. Otherwise, it is assumed to be a file name, and the contents
-  of the file are the test string.
+  want to run fuzzing tests on PCRE2. If set, it causes an extra library
+  called libpcre2-fuzzsupport.a to be built, but not installed. This contains
+  a single function called LLVMFuzzerTestOneInput() whose arguments are a
+  pointer to a string and the length of the string. When called, this function
+  tries to compile the string as a pattern, and if that succeeds, to match
+  it. This is done both with no options and with some random options bits that
+  are generated from the string. Setting --enable-fuzz-support also causes an
+  executable called pcre2fuzzcheck-{8,16,32} to be created. This is normally
+  run under valgrind or used when PCRE2 is compiled with address sanitizing
+  enabled. It calls the fuzzing function and outputs information about what it
+  is doing. The input strings are specified by arguments: if an argument
+  starts with "=" the rest of it is a literal input string. Otherwise, it is
+  assumed to be a file name, and the contents of the file are the test string.
 
 . Releases before 10.30 could be compiled with --disable-stack-for-recursion,
   which caused pcre2_match() to use individual blocks on the heap for
