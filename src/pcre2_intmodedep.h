@@ -772,8 +772,10 @@ typedef struct compile_block {
   uint32_t external_flags;         /* External flag bits to be set */
   uint32_t bracount;               /* Count of capturing parentheses */
   uint32_t lastcapture;            /* Last capture encountered */
-  uint32_t *parsed_pattern;        /* Parsed pattern buffer */
-  uint32_t *parsed_pattern_end;    /* Parsed pattern should not get here */
+  uint32_t *parsed_pattern_buf;    /* Parsed pattern buffer */
+  uint32_t *parsed_pattern;        /* First used position in parsed pattern buffer */
+  uint32_t *parsed_pattern_end;    /* Last used position in parsed pattern buffer + 1 */
+  uint32_t *parsed_pattern_limit;  /* Parsed pattern should not reach here */
   uint32_t *groupinfo;             /* Group info vector */
   uint32_t top_backref;            /* Maximum back reference */
   uint32_t backref_map;            /* Bitmap of low back refs */

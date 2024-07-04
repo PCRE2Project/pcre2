@@ -1040,6 +1040,20 @@ PCRE2 CONTEXTS
        inside an atomic group or a capture group that  is  the  subject  of  a
        backreference, or if the pattern contains (*PRUNE) or (*SKIP).
 
+         PCRE2_PATTERN_REWRITE
+         PCRE2_PATTERN_REWRITE_OFF
+
+       Enable/disable optimizations which occur during the  pattern  rewriting
+       phase (after parsing but before compilation). Pattern rewriting may re-
+       move redundant items, coalesce items, adjust group  structure,  or  re-
+       place  some  constructs with an equivalent construct. Pattern rewriting
+       will never affect which strings are and are not matched, or  what  sub-
+       strings  are  captured  by capture groups. However, since it may change
+       the structure of a pattern, if you are tracing  the  matching  process,
+       you  might  prefer PCRE2 to use the original pattern without rewriting.
+       Disabling rewriting may also be useful for testing.  Pattern  rewriting
+       is disabled if the compile option PCRE2_AUTO_CALLOUT is set.
+
          PCRE2_START_OPTIMIZE
          PCRE2_START_OPTIMIZE_OFF
 
@@ -5005,7 +5019,9 @@ DESCRIPTION
        automatic callouts.  When any callouts are  present,  the  output  from
        pcre2test  indicates  how  the pattern is being matched. This is useful
        information when you are trying to optimize the performance of  a  par-
-       ticular pattern.
+       ticular pattern. However, note that some optimizations which adjust the
+       structure of the pattern are disabled when automatic callouts  are  en-
+       abled.
 
 
 MISSING CALLOUTS
@@ -11931,6 +11947,7 @@ OPTION SETTING
          (*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)
          (*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
          (*NO_JIT)            disable JIT optimization
+         (*NO_REWRITE)        disable pattern rewriting phase of compilation
          (*NO_START_OPT)      no start-match optimization  (PCRE2_NO_START_OP-
        TIMIZE)
          (*TURKISH_CASING)    set PCRE2_EXTRA_TURKISH_CASING when matching

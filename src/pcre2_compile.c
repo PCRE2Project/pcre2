@@ -94,6 +94,7 @@ them will be able to (i.e. assume a 64-bit world). */
 #define GETPLUSOFFSET(s,p) s = *(++p)
 #define READPLUSOFFSET(s,p) s = p[1]
 #define SKIPOFFSET(p) p++
+#define READOFFSET(p) *(p)
 #define SIZEOFFSET 1
 #else
 #define PUTOFFSET(s,p) \
@@ -105,6 +106,7 @@ them will be able to (i.e. assume a 64-bit world). */
 #define READPLUSOFFSET(s,p) \
   { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; }
 #define SKIPOFFSET(p) p += 2
+#define READOFFSET(p) (((PCRE2_SIZE)(p)[0] << 32) | (PCRE2_SIZE)(p)[1])
 #define SIZEOFFSET 2
 #endif
 
@@ -713,6 +715,7 @@ static const pso pso_list[] = {
   { STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPTMZ, PCRE2_OPTIM_AUTO_POSSESS },
   { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPTMZ, PCRE2_OPTIM_DOTSTAR_ANCHOR },
   { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
+  { STRING_NO_REWRITE_RIGHTPAR,        11, PSO_OPTMZ, PCRE2_OPTIM_PATTERN_REWRITE },
   { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPTMZ, PCRE2_OPTIM_START_OPTIMIZE },
   { STRING_CASELESS_RESTRICT_RIGHTPAR, 18, PSO_XOPT, PCRE2_EXTRA_CASELESS_RESTRICT },
   { STRING_TURKISH_CASING_RIGHTPAR,    15, PSO_XOPT, PCRE2_EXTRA_TURKISH_CASING },
@@ -2819,6 +2822,10 @@ days. */
 if ((options & PCRE2_AUTO_CALLOUT) != 0)
   parsed_size_needed += (ptrend - ptr) * 4;
 
+/* All patterns are wrapped in a pair of non-capturing parentheses, to make
+ * recursive traversal of the pattern easier. */
+parsed_size_needed += 2;
+
 return parsed_size_needed;
 }
 
@@ -2934,7 +2941,7 @@ uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
 uint32_t *verbstartptr = NULL;
 uint32_t *previous_callout = NULL;
 uint32_t *parsed_pattern = cb->parsed_pattern;
-uint32_t *parsed_pattern_end = cb->parsed_pattern_end;
+uint32_t *parsed_pattern_limit = cb->parsed_pattern_limit;
 uint32_t *this_parsed_item = NULL;
 uint32_t *prev_parsed_item = NULL;
 uint32_t meta_quantifier = 0;
@@ -2970,6 +2977,10 @@ PCRE2_SPTR ptr_check;
 
 PCRE2_ASSERT(parsed_pattern != NULL);
 
+/* All patterns are wrapped in non-capturing parentheses; this avoids the need for
+ * special-casing the top level when recursing over groups in the parsed pattern */
+*parsed_pattern++ = META_NOCAPTURE;
+
 /* Insert leading items for word and line matching (features provided for the
 benefit of pcre2grep). */
 
@@ -2996,7 +3007,7 @@ if ((options & PCRE2_LITERAL) != 0)
   {
   while (ptr < ptrend)
     {
-    if (parsed_pattern >= parsed_pattern_end)
+    if (parsed_pattern >= parsed_pattern_limit)
       {
       PCRE2_DEBUG_UNREACHABLE();
       errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
@@ -3067,7 +3078,7 @@ while (ptr < ptrend)
   ptr_check = ptr;
 #endif
 
-  if (parsed_pattern >= parsed_pattern_end)
+  if (parsed_pattern >= parsed_pattern_limit)
     {
     /* Weak pre-write check; only ensures parsed_pattern[0] is writeable
     (but the code below can write many chars). Better than nothing. */
@@ -5723,14 +5734,16 @@ else if ((xoptions & PCRE2_EXTRA_MATCH_WORD) != 0)
 /* Terminate the parsed pattern, then return success if all groups are closed.
 Otherwise we have unclosed parentheses. */
 
-if (parsed_pattern >= parsed_pattern_end)
+if (parsed_pattern >= parsed_pattern_limit)
   {
   PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
   goto FAILED;
   }
 
-*parsed_pattern = META_END;
+*parsed_pattern++ = META_KET;
+*parsed_pattern++ = META_END;
+cb->parsed_pattern_end = parsed_pattern;
 if (nest_depth == 0) return 0;
 
 UNCLOSED_PARENTHESIS:
@@ -5755,7 +5768,814 @@ errorcode = ERR79;
 goto FAILED;
 }
 
+/*************************************************
+*      Rewrite parsed pattern (to optimize)      *
+*************************************************/
 
+/* First type of rewrite: Common prefixes in alternation branches
+ * are pulled out from the alternation.
+ *
+ * For example: (ab|ac|ad) ⇒ (a(?:b|c|d))
+ *
+ * Care is needed with this transformation, or we might change behavior.
+ * We cannot pull out any item which is quantified with * or +; for
+ * example, this transformation would be incorrect:
+ *
+ * (a*b|a*c) ⇒ (a*(?:b|c)) (✗ BAD!)
+ *
+ * Also, while it is usually safe to pull out non-quantified items from
+ * a non-capturing group, we cannot do this:
+ *
+ * (?:ab|ac)? ⇒ a(?:b|c)? (✗ BAD!)
+ *
+ * Further, certain constructs are never safe to pull out from alternation,
+ * notably: callouts and certain backtracking control verbs. Also, we can
+ * never pull out a common prefix from a 'conditional' group.
+ *
+ * Second type of rewrite: Alternations which only contain single, literal
+ * characters are rewritten to character classes.
+ *
+ * For example: (?:a|b|c) ⇒ [a-c]
+ */
+
+static inline BOOL is_lookahead(uint32_t code)
+{
+  return code == META_LOOKAHEAD || code == META_LOOKAHEADNOT || code == META_LOOKAHEAD_NA;
+}
+
+static inline BOOL is_lookbehind(uint32_t code)
+{
+  return code == META_LOOKBEHIND || code == META_LOOKBEHIND_NA || code == META_LOOKBEHINDNOT;
+}
+
+static inline BOOL is_condition(uint32_t code)
+{
+  return code >= META_COND_ASSERT && code <= META_COND_VERSION;
+}
+
+static inline BOOL is_substring_scan(uint32_t code)
+{
+  return code == META_SCS;
+}
+
+static inline BOOL is_script_run(uint32_t code)
+{
+  return code == META_SCRIPT_RUN;
+}
+
+/* Does this item (from within a parsed_pattern) start a grouping construct? */
+static inline BOOL is_group_starter(uint32_t code)
+{
+  return code == META_ATOMIC || is_lookahead(code) || is_lookbehind(code) || code == META_NOCAPTURE || code == META_CAPTURE || is_condition(code) || is_substring_scan(code) || is_script_run(code);
+}
+
+static inline BOOL is_group_ender(uint32_t code)
+{
+  return code == META_KET;
+}
+
+static inline BOOL is_class_starter(uint32_t code)
+{
+  return code == META_CLASS || code == META_CLASS_NOT;
+}
+
+static inline BOOL is_quantifier(uint32_t item)
+{
+  return item >= META_ASTERISK && item <= META_QUERY_QUERY;
+}
+
+static inline BOOL is_possessive(uint32_t item)
+{
+  return item == META_ASTERISK_PLUS || item == META_PLUS_PLUS || item == META_QUERY_PLUS || item == META_MINMAX_PLUS;
+}
+
+static inline BOOL is_minmax(uint32_t item)
+{
+  return item == META_MINMAX || item == META_MINMAX_PLUS || item == META_MINMAX_QUERY;
+}
+
+static inline BOOL is_callout(uint32_t item)
+{
+  return item == META_CALLOUT_NUMBER || item == META_CALLOUT_STRING;
+}
+
+static inline BOOL is_backtrack_control(uint32_t item)
+{
+  return item >= META_COMMIT && item <= META_THEN_ARG;
+}
+
+static inline BOOL specific_repeat_count(uint32_t *item)
+{
+  /* `item` points to a quantifier; is it one with a specific, fixed count like {2}?
+   * Or is it something like *, +, or {1,2}? */
+  if (!is_minmax(*item))
+    return FALSE;
+  return item[1] == item[2];
+}
+
+static inline unsigned int number_of_dataitems(uint32_t item, uint32_t *p)
+{
+  uint32_t data;
+
+  PCRE2_ASSERT(item >= META_END);
+
+  switch (META_CODE(item))
+    {
+    case META_ESCAPE:
+    data = META_DATA(item);
+    if (data == ESC_P || data == ESC_p)
+      return 1;
+    else if (data == ESC_g || data == ESC_k)
+      return 2;
+    else
+      return 0;
+
+    case META_BACKREF:
+    return (META_DATA(item) >= 10) ? SIZEOFFSET : 0;
+
+    case META_MARK:
+    case META_COMMIT_ARG:
+    case META_PRUNE_ARG:
+    case META_SKIP_ARG:
+    case META_THEN_ARG:
+    /* Data for this item is variable-length; the next value is the number
+     * of data items */
+    return *(p+1) + 1;
+
+    default:
+    return meta_extra_lengths[(META_CODE(item) >> 16) & 0x7fff];
+    }
+}
+
+static uint32_t* find_group_end(uint32_t *start, uint32_t *limit)
+{
+  unsigned int nest_level = 1;
+  uint32_t item, code;
+
+  PCRE2_ASSERT(start < limit);
+  PCRE2_ASSERT(is_group_starter(META_CODE(*start)));
+  start++;
+
+  while (start < limit)
+    {
+    item = *start;
+    if (item >= META_END)
+      {
+      code = META_CODE(item);
+      if (is_group_starter(code))
+        {
+        nest_level++;
+        }
+      else if (is_group_ender(code))
+        {
+        if (--nest_level == 0)
+          return start+1;
+        }
+      start += number_of_dataitems(item, start);
+      }
+    start++;
+    }
+  PCRE2_UNREACHABLE(); /* Regexp improperly formed; should have been caught during parsing */
+  return limit; /* To satisfy compilers for which we haven't implemented PCRE2_UNREACHABLE */
+}
+
+static uint32_t* find_class_end(uint32_t *start, uint32_t *limit)
+{
+  unsigned int nest_level = 1;
+  uint32_t item;
+
+  PCRE2_ASSERT(start < limit);
+  PCRE2_ASSERT(is_class_starter(META_CODE(*start)));
+
+  start++;
+  while (start < limit)
+    {
+    item = *start++;
+    if (item == META_CLASS_END)
+      {
+      if (--nest_level == 0)
+        return start;
+      }
+    else if (is_class_starter(META_CODE(item)))
+      {
+        nest_level++;
+      }
+    }
+  PCRE2_UNREACHABLE(); /* Regexp improperly formed; should have been caught during parsing */
+  return limit; /* To satisfy compilers for which we haven't implemented PCRE2_UNREACHABLE */
+}
+
+static uint32_t* scan_item(uint32_t *start, uint32_t *limit, uint32_t **quantifier)
+{
+  uint32_t item = *start;
+  uint32_t code = META_CODE(item);
+  uint32_t *result = NULL;
+
+  PCRE2_ASSERT(start < limit);
+
+  if (is_group_starter(code))
+    result = find_group_end(start, limit);
+  else if (is_class_starter(code))
+    result = find_class_end(start, limit);
+  else if (code < META_END)
+    result = start+1;
+  else
+    result = start+number_of_dataitems(item, start)+1;
+
+  /* Check for quantifier suffix */
+  item = *result;
+  if (is_quantifier(item))
+    {
+    if (quantifier != NULL)
+      *quantifier = result;
+    result++;
+    }
+  else if (is_minmax(item))
+    {
+    if (quantifier != NULL)
+      *quantifier = result;
+    result += 3;
+    }
+  return result;
+}
+
+static BOOL group_has_no_backtrack_points(uint32_t *start, uint32_t *end)
+{
+  uint32_t meta = META_CODE(*start);
+  uint32_t *p, *item_end, *item_quant, code;
+
+  if (meta == META_ATOMIC || meta == META_LOOKAHEAD || meta == META_LOOKAHEADNOT || meta == META_LOOKBEHIND || meta == META_LOOKBEHINDNOT)
+    return TRUE;
+
+  p = ++start;
+  if (is_lookbehind(meta))
+    p += 2;
+
+  while (p < end)
+    {
+    item_quant = NULL;
+    item_end = scan_item(p, end, &item_quant);
+    code = META_CODE(*p);
+    if (code == META_ALT)
+      return FALSE;
+    if (item_quant != NULL && !specific_repeat_count(item_quant) && !is_possessive(*item_quant))
+      return FALSE;
+    if (is_group_starter(code) && !group_has_no_backtrack_points(p, item_end))
+      return FALSE;
+    p = item_end;
+    }
+
+  return TRUE;
+}
+
+static BOOL group_has_no_callouts_or_backtrack_control(uint32_t *start, uint32_t *end)
+{
+  uint32_t meta = META_CODE(*start);
+  uint32_t *p = ++start;
+  uint32_t *item_end, code;
+
+  if (is_lookbehind(meta))
+    p += 2;
+
+  while (p < end)
+    {
+    item_end = scan_item(p, end, NULL);
+    code = META_CODE(*p);
+    if (is_callout(code) || is_backtrack_control(code))
+      return FALSE;
+    if (is_group_starter(code) && !group_has_no_callouts_or_backtrack_control(p, item_end))
+      return FALSE;
+    p = item_end;
+    }
+
+  return TRUE;
+}
+
+/* This function assumes there is exactly ONE item in each alternation branch */
+static BOOL all_branches_are_literals(uint32_t *first, unsigned int alt_index, uint32_t **alt_positions)
+{
+  if (*first >= META_END)
+    return FALSE;
+  PCRE2_ASSERT(first+1 == alt_positions[0]);
+  for (unsigned int i = 0; i < alt_index; i++)
+    {
+    if (*(alt_positions[i]+1) >= META_END)
+      return FALSE;
+    }
+  return TRUE;
+}
+
+static BOOL all_branches_end_with_literal(unsigned int alt_index, uint32_t **alt_positions, uint32_t last_item)
+{
+  if (last_item >= META_END)
+    return FALSE;
+  for (unsigned int i = 0; i < alt_index; i++)
+    {
+    if (*(alt_positions[i]-1) >= META_END)
+      return FALSE;
+    }
+  return TRUE;
+}
+
+typedef struct {
+  uint32_t *p;
+  uint32_t *start;
+  uint32_t *limit;
+} rewrite_buf;
+
+#define REWRITE_BUF_BASE_SIZE 16
+#define rewrite_buf_size(buf) ((buf)->limit - (buf)->start)
+#define rewrite_buf_offset(buf) ((buf)->p - (buf)->start)
+#define rewrite_buf_space(buf) (size_t)((buf)->limit - (buf)->p)
+
+static inline void rewrite_buf_init(rewrite_buf *buf)
+{
+  buf->start = buf->p = buf->limit = NULL;
+}
+
+/* To increase performance when required size of buffer is known ahead of time */
+static inline void rewrite_buf_prealloc(rewrite_buf *buf, size_t size, pcre2_memctl *memctl)
+{
+  PCRE2_ASSERT(buf->start == NULL);
+  buf->start = buf->p = memctl->malloc(size * sizeof(uint32_t), memctl->memory_data);
+  buf->limit = buf->start + size;
+}
+
+static inline void rewrite_buf_realloc(rewrite_buf *buf, size_t new_size, pcre2_memctl *memctl)
+{
+  uint32_t *expanded;
+  size_t current_size;
+
+  PCRE2_ASSERT(buf->start != NULL);
+  PCRE2_ASSERT(buf->p >= buf->start);
+
+  expanded = memctl->malloc(new_size * sizeof(uint32_t), memctl->memory_data);
+  current_size = buf->p - buf->start;
+  memcpy(expanded, buf->start, current_size * sizeof(uint32_t));
+  memctl->free(buf->start, memctl->memory_data);
+  buf->start = expanded;
+  buf->p = expanded + current_size;
+  buf->limit = expanded + new_size;
+}
+
+static inline void rewrite_buf_ensure(rewrite_buf *buf, size_t needed, pcre2_memctl *memctl)
+{
+  size_t grow_size;
+
+  if (buf->start == NULL)
+    {
+    if (REWRITE_BUF_BASE_SIZE > needed)
+      needed = REWRITE_BUF_BASE_SIZE;
+    rewrite_buf_prealloc(buf, needed, memctl);
+    }
+  else if (rewrite_buf_space(buf) < needed)
+    {
+    needed += rewrite_buf_offset(buf);
+    grow_size = (size_t)rewrite_buf_size(buf) * 2;
+    if (grow_size > needed)
+      needed = grow_size;
+    rewrite_buf_realloc(buf, needed, memctl);
+    }
+}
+
+static inline void rewrite_buf_append(rewrite_buf *buf, uint32_t item, pcre2_memctl *memctl)
+{
+  rewrite_buf_ensure(buf, 1, memctl);
+  *(buf->p)++ = item;
+}
+
+static inline void rewrite_buf_copy(rewrite_buf *buf, uint32_t *src, size_t count, pcre2_memctl *memctl)
+{
+  rewrite_buf_ensure(buf, count, memctl);
+  memcpy(buf->p, src, count * sizeof(uint32_t));
+  buf->p += count;
+}
+
+static inline void rewrite_finish(rewrite_buf *buf, compile_block *cb, pcre2_memctl *memctl, BOOL heap_parsed_pattern)
+{
+  /* Was the regex actually modified? If so, update `cb` accordingly */
+  if (buf->start != NULL)
+    {
+    rewrite_buf_append(buf, META_END, memctl);
+
+    if (heap_parsed_pattern)
+      memctl->free(cb->parsed_pattern_buf, memctl->memory_data);
+
+    cb->parsed_pattern_buf = cb->parsed_pattern = buf->start;
+    cb->parsed_pattern_end = buf->p;
+    cb->parsed_pattern_limit = buf->limit;
+    rewrite_buf_init(buf);
+    }
+}
+
+static void rewrite_alternation(uint32_t *start, uint32_t *end, uint32_t *quantifier, rewrite_buf *buf, uint32_t *pattern, PCRE2_SPTR patstring, pcre2_memctl *memctl)
+{
+  uint32_t *alt_position_buf[16];
+  uint32_t **alt_positions = alt_position_buf;
+  uint32_t alt_limit = (sizeof(alt_position_buf) / sizeof(uint32_t*));
+  unsigned int alt_index = 0;
+
+  BOOL copy_opening_paren;
+  uint32_t *p, *item, *item_end, *item_quant, *first_branch_end, *extract_up_to, *compare_with;
+  uint32_t code, meta, following, last_item;
+  size_t branch_size, skip, offset, prefix_size, compare_len, compare_offset, name_len, name_offset;
+  PCRE2_SPTR name_ptr, compare_ptr;
+
+  /* Skip over the opening paren */
+  uint32_t *first = start + 1;
+
+  /* We can't rewrite alternation in a conditional group, since it has a special meaning
+   * (the first branch is taken if the condition is true, second branch if false)
+   *
+   * We don't attempt to rewrite alternation in a lookbehind assertion, for a different reason:
+   * In many cases, doing so would convert fixed-length lookbehind to variable lookbehind,
+   * and PCRE2 handles fixed-length lookbehind far more efficiently
+   * Further, in some cases, rewriting alternation in lookbehind assertions could even cause
+   * compilation to fail with a "maximum variable lookbehind length exceeded" error
+   *
+   * However, in either case, the group might still contain subgroups which can be rewritten */
+  if (is_condition(*start) || is_lookbehind(META_CODE(*start)))
+    goto DONT_REWRITE;
+
+  /* Sometimes this function can just pull out some common prefix from a group, like (?:abc|abd) ⇒ ab(?:c|d)
+   * In other cases, we need to copy over the opening paren when rewriting, like (abc|abd) ⇒ (ab(?:c|d)) */
+  copy_opening_paren = (*start != META_NOCAPTURE) || quantifier != NULL;
+  if (*first == META_OPTIONS)
+    {
+    copy_opening_paren = TRUE;
+    first += 3;
+    }
+
+  /* First, pass over the group and find alternation branches */
+  p = first;
+  while (p < end)
+    {
+    item_end = scan_item(p, end, NULL);
+    code = META_CODE(*p);
+    if (code == META_ALT)
+      {
+      if (alt_index == alt_limit)
+        {
+        unsigned int new_limit = alt_limit * 3;
+        uint32_t **new_alt_positions = memctl->malloc(new_limit * sizeof(uint32_t*), memctl->memory_data);
+        memcpy(new_alt_positions, alt_positions, alt_limit * sizeof(uint32_t*));
+        if (alt_positions != alt_position_buf)
+          memctl->free(alt_positions, memctl->memory_data);
+        alt_positions = new_alt_positions;
+        alt_limit = new_limit;
+        }
+      alt_positions[alt_index++] = p;
+      }
+    else if (code == META_KET)
+      {
+      break;
+      }
+    p = item_end;
+    }
+
+  /* See if we can pull out any common prefix */
+  if (alt_index > 0)
+    {
+    size_t smallest_branch = alt_positions[0] - first;
+    size_t largest_branch = smallest_branch;
+    for (unsigned int i = 1; i < alt_index; i++)
+      {
+      branch_size = (alt_positions[i] - alt_positions[i-1]) - 1;
+      if (branch_size < smallest_branch) smallest_branch = branch_size;
+      if (branch_size > largest_branch) largest_branch = branch_size;
+      }
+    branch_size = ((quantifier != NULL ? quantifier : end) - alt_positions[alt_index-1]) - 2;
+    if (branch_size < smallest_branch) smallest_branch = branch_size;
+    if (branch_size > largest_branch) largest_branch = branch_size;
+
+    /* We can't pull a common prefix out if there is an empty alternation branch */
+    if (smallest_branch > 0)
+      {
+      /* First check if we have an alternation like (a|b|c) which can be rewritten
+       * as a character class (i.e. [abc]) */
+      if (largest_branch == 1 && all_branches_are_literals(first, alt_index, alt_positions))
+        {
+        /* First copy some prefix of overall pattern if needed */
+        if (buf->start == NULL)
+          {
+          rewrite_buf_prealloc(buf, end - pattern, memctl);
+          rewrite_buf_copy(buf, pattern, start - pattern, memctl);
+          }
+        if (copy_opening_paren)
+          {
+          rewrite_buf_copy(buf, start, first - start, memctl);
+          }
+        /* Rewrite alternation into character class */
+        rewrite_buf_append(buf, META_CLASS, memctl);
+        rewrite_buf_append(buf, *first, memctl);
+        for (unsigned int i = 0; i < alt_index; i++)
+          {
+          rewrite_buf_append(buf, *(alt_positions[i]+1), memctl);
+          }
+        rewrite_buf_append(buf, META_CLASS_END, memctl);
+        goto FINISH_REWRITE;
+        }
+
+      /* Find longest common prefix, if any, in all the alternation branches */
+      first_branch_end = alt_positions[0];
+      extract_up_to = first;
+      while (extract_up_to < first_branch_end)
+        {
+        item = extract_up_to;
+        item_quant = NULL;
+        item_end = scan_item(item, first_branch_end, &item_quant);
+        if (item_quant != NULL && !specific_repeat_count(item_quant) && !is_possessive(*item_quant))
+          {
+          /* We can't pull out an item with a quantifier like * or + */
+          goto FOUND_LONGEST_PREFIX;
+          }
+        if (is_backtrack_control(*item))
+          {
+          /* Pulling out (*PRUNE), (*COMMIT), (*SKIP), or (*THEN) would change behavior.
+           * These verbs take effect if there is a matching failure which causes
+           * backtracking to reach them, which might not happen if they are pulled
+           * out from an alternation */
+          goto FOUND_LONGEST_PREFIX;
+          }
+        if (is_callout(*item))
+          {
+          /* Pulling out a callout from each alternation branch would change
+           * observable behavior; instead of being called at the beginning of
+           * each branch, the callout function would be called just once */
+          goto FOUND_LONGEST_PREFIX;
+          }
+        PCRE2_ASSERT(item_end > item); /* Don't get stuck in an infinite loop! */
+        if ((size_t)(item_end - first) > smallest_branch)
+          {
+          goto FOUND_LONGEST_PREFIX;
+          }
+        meta = META_CODE(*item);
+        if (is_group_starter(meta))
+          {
+          if (!group_has_no_backtrack_points(item, item_end))
+            {
+            /* We can't pull out a group which the regex engine might backtrack into;
+             * doing so could change what the regex matches
+             * (It would never change a match failure into success, but if there is
+             * more than one substring in the target string which could possibly
+             * match the regex, it might change which one is actually returned) */
+            goto FOUND_LONGEST_PREFIX;
+            }
+          if (!group_has_no_callouts_or_backtrack_control(item, item_end))
+            {
+            /* We can't pull out groups which contain callouts or certain
+             * backtracking control verbs, for the same reasons explained above */
+            goto FOUND_LONGEST_PREFIX;
+            }
+          }
+        /* Check if the corresponding item in all subsequent alternation branches
+         * match the item in the first branch */
+        offset = item - first;
+        compare_len = item_end - item;
+        if (!is_lookbehind(meta) && meta != META_RECURSE && meta != META_RECURSE_BYNAME)
+          {
+          for (unsigned int i = 0; i < alt_index; i++)
+            {
+            compare_with = alt_positions[i]+offset+1;
+            if (memcmp(item, compare_with, compare_len * sizeof(uint32_t)) != 0)
+              {
+              goto FOUND_LONGEST_PREFIX;
+              }
+            following = *(compare_with + compare_len);
+            if (is_quantifier(following) || is_minmax(following))
+              {
+              /* There is an 'identical' item in the first alternation branch and
+               * the one we are just checking... but the latter one is quantified
+               * while the first one was not, so they don't really match */
+              goto FOUND_LONGEST_PREFIX;
+              }
+            }
+          }
+        else
+          {
+          /* For each lookbehind assertion and by-number subroutine call, we
+           * have an offset which points to the location where the construct
+           * occurred in the original pattern string.
+           * Those are used only for error messages, and will obviously be different
+           * even if the constructs are otherwise the same, so don't compare them */
+          skip = SIZEOFFSET+1;
+          if (meta == META_RECURSE_BYNAME)
+            skip++;
+          compare_len -= skip;
+          for (unsigned int i = 0; i < alt_index; i++)
+            {
+            compare_with = alt_positions[i]+offset+1;
+            if (*compare_with != *item)
+              goto FOUND_LONGEST_PREFIX;
+            if (memcmp(item+skip, compare_with+skip, compare_len*sizeof(uint32_t)) != 0)
+              goto FOUND_LONGEST_PREFIX;
+            following = *(compare_with + compare_len + skip);
+            if (is_quantifier(following) || is_minmax(following))
+              goto FOUND_LONGEST_PREFIX;
+            }
+          if (meta == META_RECURSE_BYNAME)
+            {
+            /* All alternation branches have a by-name subroutine call in the same place
+             * Confirm if they are calling the same named group */
+            name_len = item[1];
+            name_offset = READOFFSET(&item[2]);
+            name_ptr = &patstring[name_offset];
+            for (unsigned int i = 0; i < alt_index; i++)
+              {
+              compare_with = alt_positions[i]+offset+1;
+              compare_offset = READOFFSET(&compare_with[2]);
+              if (compare_offset == name_offset)
+                continue;
+              compare_ptr = &patstring[compare_offset];
+              if (name_len != compare_with[1] || memcmp((const char*)name_ptr, (const char*)compare_ptr, name_len * (PCRE2_CODE_UNIT_WIDTH >> 3)) != 0)
+                goto FOUND_LONGEST_PREFIX;
+              }
+            }
+          }
+        extract_up_to = item_end;
+        }
+
+      FOUND_LONGEST_PREFIX:
+      if (extract_up_to != first)
+        {
+        /* Rewrite alternation
+         * Do we need to copy over some prefix of the pattern up until here? */
+        if (buf->start == NULL)
+          {
+          rewrite_buf_prealloc(buf, end - pattern, memctl);
+          rewrite_buf_copy(buf, pattern, start - pattern, memctl);
+          }
+
+        /* Do we need an opening paren? */
+        if (copy_opening_paren)
+          rewrite_buf_copy(buf, start, first - start, memctl);
+
+        /* Copy the common prefix
+         * If it is necessary to grow the rewrite_buf, try to do it just once for
+         * performance. The estimate of buffer space needed for the entire rewritten
+         * group is a bit obscure; the '3' is for an added BRA if needed, plus 2× KET
+         * The '+ 1' is to make space for all instances of | (META_ALT) */
+        rewrite_buf_ensure(buf, 3 + largest_branch + (alt_index * (largest_branch + 1 - (extract_up_to - first))), memctl);
+        item = first;
+        while (item < extract_up_to)
+          {
+          item_quant = NULL;
+          item_end = scan_item(item, extract_up_to, &item_quant);
+          meta = META_CODE(*item);
+          if (is_group_starter(meta))
+            {
+            /* We may need to rewrite groups within the common prefix */
+            rewrite_alternation(item, item_end, item_quant, buf, pattern, patstring, memctl);
+            }
+          else
+            {
+            rewrite_buf_copy(buf, item, item_end - item, memctl);
+            }
+          item = item_end;
+          }
+
+        if (extract_up_to != first_branch_end || smallest_branch != largest_branch)
+          {
+          if (smallest_branch == largest_branch && (first_branch_end - extract_up_to) == 1)
+            {
+            last_item = (quantifier != NULL) ? *(quantifier-2) : *(end-2);
+            if (all_branches_end_with_literal(alt_index, alt_positions, last_item))
+              {
+              /* Create character class for the last literal in each branch */
+              rewrite_buf_append(buf, META_CLASS, memctl);
+              for (unsigned int i = 0; i < alt_index; i++)
+                rewrite_buf_append(buf, *(alt_positions[i]-1), memctl);
+              rewrite_buf_append(buf, last_item, memctl);
+              rewrite_buf_append(buf, META_CLASS_END, memctl);
+              goto FINISH_REWRITE;
+              }
+            }
+
+          /* Add non-capturing paren */
+          rewrite_buf_append(buf, META_NOCAPTURE, memctl);
+
+          /* Copy the part AFTER the common prefix for each branch, separated by META_ALT
+           * When copying each part, allow subgroups to be rewritten */
+          prefix_size = extract_up_to - first;
+          rewrite_buf_copy(buf, extract_up_to, first_branch_end - extract_up_to + 1, memctl);
+          for (unsigned int i = 0; i < alt_index; i++)
+            {
+            uint32_t *copy_from = alt_positions[i] + prefix_size + 1;
+            uint32_t *copy_to = (i+1 < alt_index) ? alt_positions[i+1]+1 : end;
+            while (copy_from < copy_to)
+              {
+              item_quant = NULL;
+              item_end = scan_item(copy_from, copy_to, &item_quant);
+              meta = META_CODE(*copy_from);
+              if (is_group_starter(meta))
+                {
+                rewrite_alternation(copy_from, item_end, item_quant, buf, pattern, patstring, memctl);
+                }
+              else if (meta == META_KET)
+                {
+                /* Finish last part of group */
+                rewrite_buf_append(buf, META_KET, memctl);
+                goto FINISH_REWRITE;
+                }
+              else
+                {
+                rewrite_buf_copy(buf, copy_from, item_end - copy_from, memctl);
+                }
+              copy_from = item_end;
+              }
+            }
+
+          PCRE2_UNREACHABLE();
+          }
+
+        FINISH_REWRITE:
+        if (quantifier != NULL)
+          rewrite_buf_copy(buf, quantifier-1, end-quantifier+1, memctl);
+        else if (copy_opening_paren)
+          rewrite_buf_append(buf, META_KET, memctl);
+
+        if (alt_positions != alt_position_buf)
+          memctl->free(alt_positions, memctl->memory_data);
+        return;
+        }
+      }
+
+    if (alt_positions != alt_position_buf)
+      memctl->free(alt_positions, memctl->memory_data);
+    }
+
+  /* We didn't rewrite this group
+   * Even so, a rewrite of some subgroups might be needed */
+  DONT_REWRITE:
+  item = first;
+  if (buf->start != NULL)
+    {
+    /* It has already been decided that some part of the overall pattern does need to be rewritten */
+    rewrite_buf_copy(buf, start, first - start, memctl);
+    while (item < end)
+      {
+      item_quant = NULL;
+      item_end = scan_item(item, end, &item_quant);
+      meta = META_CODE(*item);
+      if (is_group_starter(meta))
+        rewrite_alternation(item, item_end, item_quant, buf, pattern, patstring, memctl);
+      else
+        rewrite_buf_copy(buf, item, item_end - item, memctl);
+      item = item_end;
+      REWRITE_UNDER_WAY: ;
+      }
+    }
+  else
+    {
+    /* It hasn't yet been decided that we need to rewrite some part of the overall pattern...
+     * But if we find a subgroup which needs rewrite, then we can still initiate that process */
+    while (item < end)
+      {
+      item_quant = NULL;
+      item_end = scan_item(item, end, &item_quant);
+      meta = META_CODE(*item);
+      if (is_group_starter(meta))
+        {
+        rewrite_alternation(item, item_end, item_quant, buf, pattern, patstring, memctl);
+        if (buf->start != NULL)
+          {
+          /* A rewrite has now started, so go to the other loop */
+          item = item_end;
+          goto REWRITE_UNDER_WAY;
+          }
+        }
+      item = item_end;
+      }
+    }
+}
+
+static void rewrite_regex(compile_block *cb, pcre2_compile_context *ccontext, BOOL heap_parsed_pattern)
+{
+  rewrite_buf buf;
+  rewrite_buf_init(&buf);
+
+  rewrite_alternation(cb->parsed_pattern, cb->parsed_pattern_end-1, NULL, &buf, cb->parsed_pattern, cb->start_pattern, &ccontext->memctl);
+  rewrite_finish(&buf, cb, &ccontext->memctl, heap_parsed_pattern);
+}
+
+/* Strip non-capturing parentheses which are wrapping the entire regex.
+ * (During the parsing phase, an extra BRA/KET pair is inserted around the
+ * entire regex to make it easier to traverse recursively during the pattern
+ * rewrite phase.) */
+static void strip_enclosing_nocaptures(compile_block *cb)
+{
+  uint32_t *group_end;
+
+  while (cb->parsed_pattern_end > cb->parsed_pattern && META_CODE(cb->parsed_pattern[0]) == META_NOCAPTURE)
+    {
+    group_end = find_group_end(cb->parsed_pattern, cb->parsed_pattern_end);
+    if (group_end != cb->parsed_pattern_end-1)
+      break;
+
+    cb->parsed_pattern++;
+    cb->parsed_pattern_end--;
+    }
+}
 
 /*************************************************
 *       Find first significant opcode            *
@@ -10239,7 +11059,9 @@ cb.named_groups = named_groups;
 cb.named_group_list_size = NAMED_GROUP_LIST_SIZE;
 cb.names_found = 0;
 cb.parens_depth = 0;
-cb.parsed_pattern = stack_parsed_pattern;
+cb.parsed_pattern_buf = cb.parsed_pattern = stack_parsed_pattern;
+cb.parsed_pattern_end = NULL;
+cb.parsed_pattern_limit = cb.parsed_pattern + PARSED_PATTERN_DEFAULT_SIZE;
 cb.req_varyopt = 0;
 cb.start_code = cworkspace;
 cb.start_pattern = pattern;
@@ -10519,7 +11341,6 @@ parsed_size_needed = max_parsed_pattern(ptr, cb.end_pattern, utf, options);
 
 /* Allow for 2x uint32_t at the start and 2 at the end, for
 PCRE2_EXTRA_MATCH_WORD or PCRE2_EXTRA_MATCH_LINE (which are exclusive). */
-
 if ((ccontext->extra_options &
      (PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_MATCH_LINE)) != 0)
   parsed_size_needed += 4;
@@ -10533,14 +11354,14 @@ parsed_size_needed += 1;  /* For the final META_END */
 
 if (parsed_size_needed > PARSED_PATTERN_DEFAULT_SIZE)
   {
-  uint32_t *heap_parsed_pattern = ccontext->memctl.malloc(
-    parsed_size_needed * sizeof(uint32_t), ccontext->memctl.memory_data);
-  if (heap_parsed_pattern == NULL)
+  cb.parsed_pattern_buf = ccontext->memctl.malloc(parsed_size_needed * sizeof(uint32_t), ccontext->memctl.memory_data);
+  if (cb.parsed_pattern_buf == NULL)
     {
     *errorptr = ERR21;
     goto EXIT;
     }
-  cb.parsed_pattern = heap_parsed_pattern;
+  cb.parsed_pattern = cb.parsed_pattern_buf;
+  cb.parsed_pattern_limit = cb.parsed_pattern + parsed_size_needed + 1;
   }
 cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed;
 
@@ -10548,6 +11369,12 @@ cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed;
 
 errorcode = parse_regex(ptr, cb.external_options, xoptions, &has_lookbehind, &cb);
 if (errorcode != 0) goto HAD_CB_ERROR;
+
+if ((cb.external_options & PCRE2_AUTO_CALLOUT) == 0 &&
+    (optim_flags & PCRE2_OPTIM_PATTERN_REWRITE) != 0)
+  rewrite_regex(&cb, ccontext, cb.parsed_pattern_buf != stack_parsed_pattern);
+
+strip_enclosing_nocaptures(&cb);
 
 /* If there are any lookbehinds, scan the parsed pattern to figure out their
 lengths. Workspace is needed to remember whether numbered groups are or are not
@@ -10581,7 +11408,7 @@ if (has_lookbehind)
 /* For debugging, there is a function that shows the parsed pattern vector. */
 
 #ifdef DEBUG_SHOW_PARSED
-fprintf(stderr, "+++ Pre-scan complete:\n");
+fprintf(stderr, "+++ Pre-scan (and rewrite phase) complete:\n");
 show_parsed(&cb);
 #endif
 
@@ -11048,8 +11875,8 @@ EXIT:
 #ifdef SUPPORT_VALGRIND
 if (zero_terminated) VALGRIND_MAKE_MEM_DEFINED(pattern + patlen, CU2BYTES(1));
 #endif
-if (cb.parsed_pattern != stack_parsed_pattern)
-  ccontext->memctl.free(cb.parsed_pattern, ccontext->memctl.memory_data);
+if (cb.parsed_pattern_buf != stack_parsed_pattern)
+  ccontext->memctl.free(cb.parsed_pattern_buf, ccontext->memctl.memory_data);
 if (cb.named_group_list_size > NAMED_GROUP_LIST_SIZE)
   ccontext->memctl.free((void *)cb.named_groups, ccontext->memctl.memory_data);
 if (cb.groupinfo != stack_groupinfo)

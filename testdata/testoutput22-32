@@ -177,4 +177,19 @@ No match
     [AΏBŀC]
 No match
 
+# Pattern Rewrite
+
+# \C escape (single code unit) can be pulled out
+# ⇒ \C[ab]
+
+/\C\Ca|\C\Cb/B,utf
+------------------------------------------------------------------
+        Bra
+        AllAny
+        AllAny
+        [ab]
+        Ket
+        End
+------------------------------------------------------------------
+
 # End of testinput22

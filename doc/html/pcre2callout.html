@@ -98,7 +98,9 @@ Callouts can be useful for tracking the progress of pattern matching. The
 program has a pattern qualifier (/auto_callout) that sets automatic callouts.
 When any callouts are present, the output from <b>pcre2test</b> indicates how
 the pattern is being matched. This is useful information when you are trying to
-optimize the performance of a particular pattern.
+optimize the performance of a particular pattern. However, note that some
+optimizations which adjust the structure of the pattern are disabled when
+automatic callouts are enabled.
 </P>
 <br><a name="SEC3" href="#TOC1">MISSING CALLOUTS</a><br>
 <P>

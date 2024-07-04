@@ -429,7 +429,7 @@ switch (directive)
   break;
 
   default:
-  if (directive >= PCRE2_AUTO_POSSESS && directive <= PCRE2_START_OPTIMIZE_OFF)
+  if (directive >= PCRE2_AUTO_POSSESS && directive <= PCRE2_PATTERN_REWRITE_OFF)
     {
     /* Even directive numbers starting from 64 switch a bit on;
      * Odd directive numbers starting from 65 switch a bit off */

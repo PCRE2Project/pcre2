@@ -760,6 +760,8 @@ static modstruct modlist[] = {
   { "parens_nest_limit",           MOD_CTC,  MOD_INT, 0,                          CO(parens_nest_limit) },
   { "partial_hard",                MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
   { "partial_soft",                MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_SOFT,         DO(options) },
+  { "pattern_rewrite",             MOD_CTC,  MOD_OPTMZ, PCRE2_PATTERN_REWRITE,     0 },
+  { "pattern_rewrite_off",         MOD_CTC,  MOD_OPTMZ, PCRE2_PATTERN_REWRITE_OFF, 0 },
   { "ph",                          MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
   { "posix",                       MOD_PAT,  MOD_CTL, CTL_POSIX,                  PO(control) },
   { "posix_nosub",                 MOD_PAT,  MOD_CTL, CTL_POSIX|CTL_POSIX_NOSUB,  PO(control) },
@@ -4464,13 +4466,15 @@ static void
 show_optimize_flags(uint32_t flags, const char *before, const char *after)
 {
 if (flags == 0) fprintf(outfile, "%s<none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s",
   before,
   ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0) ? "auto_possess" : "",
   ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0 && (flags >> 1) != 0) ? "," : "",
   ((flags & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0) ? "dotstar_anchor" : "",
   ((flags & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0 && (flags >> 2) != 0) ? "," : "",
   ((flags & PCRE2_OPTIM_START_OPTIMIZE) != 0) ? "start_optimize" : "",
+  ((flags & PCRE2_OPTIM_START_OPTIMIZE) != 0 && (flags >> 3) != 0) ? "," : "",
+  ((flags & PCRE2_OPTIM_PATTERN_REWRITE) != 0) ? "pattern_rewrite" : "",
   after);
 }
 

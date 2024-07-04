@@ -523,7 +523,12 @@ Failed: error -46: JIT stack limit reached
 
 /[axm]{7}/
 
-/(.|.)*?bx/
+/(.|.)*?bx/pattern_rewrite_off
+\= Expect limit exceeded
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax\=match_limit=10000000
+Failed: error -47: match limit exceeded
+
+/(a|.)*?bx/
 \= Expect limit exceeded
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax\=match_limit=10000000
 Failed: error -47: match limit exceeded

@@ -15,4 +15,12 @@
 
 /[\C]/
 
+# Pattern Rewrite
+
+/\Ca|\Cb/B
+     \xffa
+     \xffb
+\= Expect no match
+     \xff\xfe
+
 # End of testinput21

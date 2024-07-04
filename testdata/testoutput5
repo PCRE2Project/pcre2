@@ -109,7 +109,7 @@ No match
 ------------------------------------------------------------------
 Capture group count = 0
 Options: no_start_optimize utf
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 /\65536/IB,utf,no_start_optimize
 ------------------------------------------------------------------
@@ -120,7 +120,7 @@ Optimizations: auto_possess,dotstar_anchor
 ------------------------------------------------------------------
 Capture group count = 0
 Options: no_start_optimize utf
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 /\x{110000}/IB,utf
 Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too large
@@ -498,7 +498,7 @@ Subject length lower bound = 0
 Capture group count = 0
 Compile options: no_start_optimize utf
 Overall options: anchored no_start_optimize utf
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 /()()()()()()()()()()
  ()()()()()()()()()()
@@ -6892,9 +6892,7 @@ No match
 /(?xx:[  ^  5[  ^  \p{Nd}]  ])/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
-        Bra
         [0-46-9\p{Nd}]
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -6911,9 +6909,7 @@ No match
 /(?xx:[  ^  \p{Nd}[  ^  5]  ])/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
-        Bra
         []
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -6930,14 +6926,12 @@ No match
 /(?xx:[  ^  \p{Nd}[  ^  \p{Nd}]  ])/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
-        Bra
         eclass[
           no bitmap
           xclass: [^\p{Nd}]
           xclass: [\p{Nd}]
           AND
         ]
-        Ket
         Ket
         End
 ------------------------------------------------------------------

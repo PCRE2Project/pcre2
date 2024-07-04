@@ -36,18 +36,16 @@ Memory allocation - code size : 48
 ------------------------------------------------------------------
 
 /(?s:.*X|^B)/
-Memory allocation - code size : 46
+Memory allocation - code size : 34
 ------------------------------------------------------------------
-  0  19 Bra
-  3   7 Bra
-  6     AllAny*
-  8     X
- 10   6 Alt
- 13     ^
- 14     B
- 16  13 Ket
- 19  19 Ket
- 22     End
+  0   7 Bra
+  3     AllAny*
+  5     X
+  7   6 Alt
+ 10     ^
+ 11     B
+ 13  13 Ket
+ 16     End
 ------------------------------------------------------------------
 
 /^[[:alnum:]]/
@@ -197,22 +195,20 @@ Memory allocation - code size : 54
 ------------------------------------------------------------------
 
 /a(?P<name1>b|c)d(?P<longername2>e)/
-Memory allocation - code size : 68
+Memory allocation - code size : 88
 Memory allocation - data size : 52
 ------------------------------------------------------------------
-  0  30 Bra
+  0  40 Bra
   3     a
-  5   6 CBra 1
-  9     b
- 11   5 Alt
- 14     c
- 16  11 Ket
- 19     d
- 21   6 CBra 2
- 25     e
- 27   6 Ket
- 30  30 Ket
- 33     End
+  5  21 CBra 1
+  9     [bc]
+ 26  21 Ket
+ 29     d
+ 31   6 CBra 2
+ 35     e
+ 37   6 Ket
+ 40  40 Ket
+ 43     End
 ------------------------------------------------------------------
 
 /(?:a(?P<c>c(?P<d>d)))(?P<a>a)/
@@ -694,31 +690,27 @@ Memory allocation - code size : 18
 
 /abc(d|e)(*THEN)x(123(*THEN)4|567(b|q)(*THEN)xx)/
 ------------------------------------------------------------------
-  0  70 Bra
+  0  90 Bra
   3     abc
-  9   6 CBra 1
- 13     d
- 15   5 Alt
- 18     e
- 20  11 Ket
- 23     *THEN
- 24     x
- 26  13 CBra 2
- 30     123
- 36     *THEN
- 37     4
- 39  28 Alt
- 42     567
- 48   6 CBra 3
- 52     b
- 54   5 Alt
- 57     q
- 59  11 Ket
- 62     *THEN
- 63     xx
- 67  41 Ket
- 70  70 Ket
- 73     End
+  9  21 CBra 1
+ 13     [de]
+ 30  21 Ket
+ 33     *THEN
+ 34     x
+ 36  13 CBra 2
+ 40     123
+ 46     *THEN
+ 47     4
+ 49  38 Alt
+ 52     567
+ 58  21 CBra 3
+ 62     [bq]
+ 79  21 Ket
+ 82     *THEN
+ 83     xx
+ 87  51 Ket
+ 90  90 Ket
+ 93     End
 ------------------------------------------------------------------
 
 /(((a\2)|(a*)\g<-1>))*a?/

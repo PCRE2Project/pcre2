@@ -401,6 +401,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput25
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput26
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput27
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput28
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput29
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput5
@@ -436,6 +438,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput25
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput26
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput27
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput28
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput29
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput3A
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput3B

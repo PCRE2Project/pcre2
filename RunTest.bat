@@ -13,7 +13,7 @@
 @rem line. Added argument validation and added error reporting.
 @rem
 @rem Sheri Pierce added logic to skip feature dependent tests
-@rem tests 4 5 7 10 12 14 19 22 25 and 26 require Unicode support
+@rem tests 4 5 7 10 12 14 19 22 25 26 27 and 29 require Unicode support
 @rem 8 requires Unicode and link size 2
 @rem 16 requires absence of jit support
 @rem 17 requires presence of jit support
@@ -114,18 +114,20 @@ set do24=no
 set do25=no
 set do26=no
 set do27=no
+set do28=no
+set do29=no
 set all=yes
 
 for %%a in (%*) do (
   set valid=no
-  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27) do if %%v == %%a set valid=yes
+  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29) do if %%v == %%a set valid=yes
   if "!valid!" == "yes" (
     set do%%a=yes
     set all=no
   ) else (
     echo Invalid test number - %%a!
     echo Usage %0 [ test_number ] ...
-    echo Where test_number is one or more optional test numbers 1 through 27, default is all tests.
+    echo Where test_number is one or more optional test numbers 1 through 29, default is all tests.
     exit /b 1
   )
 )
@@ -159,6 +161,8 @@ if "%all%" == "yes" (
   set do25=yes
   set do26=yes
   set do27=yes
+  set do28=yes
+  set do29=yes
 )
 
 @echo RunTest.bat's pcre2test output is written to newly created subfolders
@@ -214,6 +218,8 @@ if "%do24%" == "yes" call :do24
 if "%do25%" == "yes" call :do25
 if "%do26%" == "yes" call :do26
 if "%do27%" == "yes" call :do27
+if "%do28%" == "yes" call :do28
+if "%do29%" == "yes" call :do29
 :modeSkip
 if "%mode%" == "" (
   set mode=-16
@@ -538,6 +544,19 @@ if %unicode% EQU 0 (
 )
   call :runsub 27 testout "Auto-generated unicode property tests" -q
   if %jit% EQU 1 call :runsub 27 testoutjit "Test with JIT Override" -q -jit
+goto :eof
+
+:do28
+call :runsub 28 testout "Pattern rewriter tests without UTF" -q
+goto :eof
+
+:do29
+if %unicode% EQU 0 (
+  echo Test 29 Skipped due to absence of Unicode support.
+  goto :eof
+)
+  call :runsub 29 testout "Pattern rewriter tests with UTF" -q
+  if %jit% EQU 1 call :runsub 29 testoutjit "Test with JIT Override" -q -jit
 goto :eof
 
 :conferror

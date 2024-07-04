@@ -1,0 +1,453 @@
+# Tests for the pattern rewriter which precedes regex compilation (without UTF)
+
+#forbid_utf
+
+# Pulling out common prefixes from alternation:
+
+# Simplest case:
+# ⇒ a[b-d]
+/ab|ac|ad/B
+
+# ⇒ a(?:b|c|(d))
+/ab|ac|a(d)/B
+
+# ⇒ ab[bc]
+/abb|abc/B
+
+# Inside a group is also OK:
+# ⇒ (a[b-d])
+/(ab|ac|ad)/B
+
+# Can recurse into deeply nested groups:
+# ⇒ (((a[b-d])))
+/(((ab|ac|ad)))/B
+
+# Another variant
+# ⇒ (a((a[b-d]))b)
+/(a((ab|ac|ad))b)/B
+
+# Common prefix covers all of one alternation branch
+# ⇒ a(?:|b)
+/a|ab/B
+
+# Multiple identical alternation branches
+# (We don't detect this and prune the redundant ones)
+/a|ab|a/B
+
+# Can't be rewritten
+/.+a|.+b/B
+    aaab
+
+# Can't be rewritten
+/.*b|.*c/B
+    bbbc
+
+# Can't be rewritten
+/.?b|.?c/B
+    bc
+
+# However, a quantifier which matches a specific number of times is OK:
+# ⇒ .{2}[bc]
+/.{2}b|.{2}c/B
+
+# Can't be rewritten
+# NOTE: During regex compilation, a{1,2} is converted to aa{0,1}
+# If this conversion was done earlier, we could pull out a common prefix
+# 🤷
+/a{1,2}b|a{1,2}c/B
+
+# Possessive quantifiers are OK:
+# ⇒ .++[ab]
+/.++a|.++b/B
+
+# ⇒ .*+[ab]
+/.*+a|.*+b/B
+
+# ⇒ .?+[ab]
+/.?+a|.?+b/B
+
+# ⇒ .{2,4}+[ab]
+/.{2,4}+a|.{2,4}+b/B
+
+# Non-capturing groups can be pulled out ONLY if they don't contain anything
+# which the regex engine can backtrack into
+# This includes: alternation, non-possessive quantifiers
+# ⇒ (?:aa)[bc]
+/(?:aa)b|(?:aa)c/B
+
+# Can't be rewritten
+/(?:\s|\d)b|(?:\s|\d)c/B
+
+# Will be rewritten into character class
+# ⇒ [ab]b|[ab]c
+/(?:a|b)b|(?:a|b)c/B
+
+# Can't be rewritten
+/(?:.*)b|(?:.*)c/B
+    bbbc
+
+# Capturing groups can't, because it would change the capture numbers
+/(\d)b|(\d)c/B
+    1b
+    1c
+
+# Will be rewritten into character class
+# ⇒ ([ab])b|([ab])c
+/(a|b)b|(a|b)c/B
+    ab
+    ac
+
+# Non-capturing group quantified with *, +, ?
+# Can't be pulled out from alternation... but (?:a|b) will be converted to (?:[ab])
+/(?:a|b)*b|(?:a|b)*c/B
+
+# Can't be pulled out, but can be converted to use [ab]
+/(?:a|b)+b|(?:a|b)+c/B
+
+# Can't be pulled out, but can be converted to use [ab]
+/(?:a|b)?b|(?:a|b)?c/B
+
+# Lookahead can be pulled out
+# ⇒ (?=a)a[AB]
+/(?=a)aA|(?=a)aB/B
+
+# Lookbehind can be pulled out
+# ⇒ (?<=a)[bc]
+/(?<=a)b|(?<=a)c/B
+
+# Non-matching lookbehind can't be pulled out (of course)
+/(?<=a)b|(?<=b)c/B
+
+# Negative lookahead can be pulled out
+# ⇒ (?!a)[bc]
+/(?!a)b|(?!a)c/B
+
+# Negative lookbehind can be pulled out
+# ⇒ (?<!a)[bc]
+/(?<!a)b|(?<!a)c/B
+
+# Non-atomic positive lookahead can be pulled out
+# ⇒ (*napla:a)[bc]
+/(*napla:a)b|(*napla:a)c/B
+
+# ...but not if the engine might need to backtrack into the NA positive lookahead
+/(?|(*napla:.*(\w))a\1|(*napla:.*(\w))ab\1)/B
+    abc
+
+# Just demonstrating that the matched string would be different if (*napla:.*(\w)) was pulled out:
+/(*napla:.*(\w))(?:a\1|ab\1)/
+    abc
+
+# Non-atomic positive lookbehind can be pulled out
+# ⇒ (*naplb:a)[bc]
+/(*naplb:a)b|(*naplb:a)c/B
+
+# ...but not if the engine might need to backtrack into the NA positive lookbehind
+/(?|(*naplb:(ab|b))\1|(*naplb:(ab|b))b)/B
+    abb
+
+# Just demonstrating the the matched string would be different if (*naplb:a|b) was pulled out:
+/(*naplb:(ab|b))(?:\1|b)/
+    abb
+
+# Atomic groups can be pulled out
+# ⇒ (?>aa)a[bc]
+/(?>aa)ab|(?>aa)ac/B
+
+# Sometimes items are pulled out FROM an atomic group...
+# ⇒ (?>a[bc])
+/(?>ab|ac)/B
+
+# Character classes can be pulled out
+# ⇒ [a-z][bc]
+/[a-z]b|[a-z]c/B
+
+# Semantically identical char classes, written in a different way
+# NOTE: If char classes were canonicalized before pattern rewriting,
+# we could pull out a common prefix here
+# 🤷 Too bad
+/[abc]b|[a-c]c/B
+
+# Character types
+# ⇒ \d\s\v\w[ab]
+/\d\s\v\wa|\d\s\v\wb/B
+
+# Start-of-string anchor
+/^a|^b/B
+
+# Rewriting still works with options at beginning of regex
+/(*NOTEMPTY)(*NO_AUTO_POSSESS)ab|ac/B
+
+/(*NO_START_OPT)ab|ac/B
+
+/(*NO_DOTSTAR_ANCHOR)ab|ac/B
+
+/(*LIMIT_HEAP=10000)ab|ac/B
+
+/(*LIMIT_MATCH=10)ab|ac/B
+
+/(*LIMIT_DEPTH=10)ab|ac/B
+
+/(*CR)ab|ac/B
+
+# Dot
+/.a|.b/B
+
+# Extended regex (with embedded whitespace)
+# The whitespace doesn't interfere with rewriting
+/(?x) a b  |	a     a  b/B
+
+# \Q..\E literal sequences
+/\Q$\Ea|\Q$\Eb/B
+
+# Hex escapes
+# 'A' and '\x41' are recognized as equivalent and rewritten
+/Aa|\x41b/B
+
+# Backreferences can be pulled out
+/(\w)(?:\1a|\1b)/B
+
+# Relative backreferences can be pulled out
+/(\w)(?:\g{-1}a|\g{-1}b)/B
+
+# Match reset escape can be pulled out
+/a\Kb|a\Kc/B
+
+# Group with duplicate capture numbers
+# ⇒ (a)[bc]
+/(?|(a)b|(a)c)/B
+    ab
+    ac
+
+# Although capture numbers are the same, capturing groups can't be pulled out
+# if they contain anything which the regex engine can backtrack into
+/(?|(a*)b|(a*)c)/B
+
+/(?|(\d|\s)b|(\d|\s)c)/B
+
+# Non-capturing group with option letters
+/(?i:ab|ac)/B
+
+# Named capture groups
+# This can't be rewritten, because although the capture group
+# names are the same, their numbers are different
+/(?J)(?:(?<n>a)b|(?<n>a)c)\k<n>/B
+
+# Named capture groups with identical capture group numbers
+# These can be rewritten
+/(?|(?<n>a)b|(?<n>a)c)\k<n>/B
+
+# Capture group condition
+# Can't be rewritten
+/(a)(?(1)bc|bd)/B
+
+# Capture group condition (by group name)
+# Can't be rewritten
+/(?<n>a)(?(<n>)bc|bd)/B
+
+# Version number condition
+# Can't be rewritten
+/(?(VERSION>=10.4)ab|ac)/B
+
+# Lookahead assertion condition
+# Can't be rewritten
+/(?(?=a)ab|ac)/B
+
+# However, subgroups of a conditional group can be rewritten
+/(?(?=a)a(?:bb|bc)|ac)/B
+
+# Lookbehind assertion condition
+# Can't be rewritten
+/(?(?<=a)ab|ac)/B
+
+# Recursion condition
+# Can't be rewritten
+/(?(R)ab|ac)/B
+
+# Recursion condition with explicit number
+# Can't be rewritten
+/(a)(?(R1)ab|ac)/B
+
+# Recursion condition by name
+# Can't be rewritten
+/(?<n>a)(?(R&n)ab|ac)/B
+
+# Define
+/(?(DEFINE) a)b|(?(DEFINE) a)\w/B
+
+# Subroutine call by number
+# ⇒ (?|(a)|(b))(?1)[bc]
+/(?|(a)|(b))(?:(?1)b|(?1)c)/B
+
+# Subroutine call by number, but with non-matching number
+/(?:(a)|(b))(?:(?1)b|(?2)c)/B
+
+# Subroutine call by name
+# ⇒ (?<n>a)(?&n)[ab]
+/(?<n>a)(?:(?&n)a|(?&n)b)/B
+
+# Subroutine call by name, but with non-matching name
+/(?<n>a)(?<m>b)(?:(?&n)a|(?&m)b)/B
+
+/(?<abcd>a)(?<abce>b)(?:(?&abce)a|(?&abcd)b)/B
+
+# Callouts are never pulled out
+/(?C0)a|(?C0)b/B
+
+/(?C{ab})a|(?C{ab})b/B
+
+# Callouts are still not pulled out if they are inside a sub-group
+/(?:(?C0))a|(?:(?C0))b/B
+
+/(?:(?C{ab}))a|(?:(?C{ab}))b/B
+
+/(?>(?C0))a|(?>(?C0))b/B
+
+/(?=(?C0))a|(?=(?C0))b/B
+
+/(?<=(?C0))a|(?<=(?C0))b/B
+
+# (*ACCEPT) can be pulled out
+/(*ACCEPT)ab|(*ACCEPT)ac/B
+
+# (*ACCEPT:name) can be pulled out
+/(*ACCEPT:hello)ab|(*ACCEPT:hello)ac/B
+
+# (*ACCEPT:name) but with non-matching names
+/(*ACCEPT:hello)ab|(*ACCEPT:goodbye)ac/B
+
+/(*ACCEPT:a)ab|(*ACCEPT:b)ac/B
+
+# (*FAIL) can be pulled out
+/(*FAIL)ab|(*FAIL)ac/B
+
+# (*FAIL:name) can be pulled out
+/(*FAIL:hello)ab|(*FAIL:hello)ac/B
+
+# (*FAIL:name) but with non-matching names
+/(*FAIL:hello)ab|(*FAIL:goodbye)ac/B
+
+# (*MARK:name) can be pulled out
+/(*MARK:hello)ab|(*MARK:hello)ac/B
+
+# (*MARK:name) but with non-matching names
+/(*MARK:hello)ab|(*MARK:goodbye)ac/B
+
+# (*PRUNE) is never pulled out
+/(*PRUNE)a|(*PRUNE)b/B
+
+/(?:(*PRUNE))a|(?:(*PRUNE))b/B
+
+# (*PRUNE:name) is never pulled out
+/(*PRUNE:abc)a|(*PRUNE:abc)b/B
+
+/(?:(*PRUNE:abc))a|(?:(*PRUNE:abc))b/B
+
+# (*COMMIT) is never pulled out
+/(*COMMIT)a|(*COMMIT)b/B
+
+/(?:(*COMMIT))a|(?:(*COMMIT))b/B
+
+# (*COMMIT:name) is never pulled out
+/(*COMMIT:abc)a|(*COMMIT:abc)b/B
+
+/(?:(*COMMIT:abc))a|(?:(*COMMIT:abc))b/B
+
+# (*SKIP) is never pulled out
+/(*SKIP)a|(*SKIP)b/B
+
+/(?:(*SKIP))a|(?:(*SKIP))b/B
+
+# (*SKIP:name) is never pulled out
+/(*SKIP:abc)a|(*SKIP:abc)b/B
+
+/(?:(*SKIP:abc))a|(?:(*SKIP:abc))b/B
+
+# (*THEN) is never pulled out
+/(*THEN)a|(*THEN)b/B
+
+/(?:(*THEN))a|(?:(*THEN))b/B
+
+# (*THEN:name) is never pulled out
+/(*THEN:abc)a|(*THEN:abc)b/B
+
+/(?:(*THEN:abc))a|(?:(*THEN:abc))b/B
+
+# Common prefix which itself has a common prefix
+# ⇒ (?>a[bc])[de]
+/(?:(?>ab|ac)d|(?>ab|ac)e)/B
+
+# Rewriting common prefix causes parent group to have a common prefix
+# (We don't detect this case)
+# ⇒ (?:a[bc]d|a[bc]e)
+/(?:a(?:b|c)d|(?:ab|ac)e)/B
+
+# Another case:
+# ⇒ (?>a[bc]d|a[bc]e)
+/(?>(?:ab|ac)d|(?:ab|ac)e)/B
+
+# When rewriting groups which are themselves quantified,
+# the extracted items have to stay inside the quantified group
+# ⇒ (?:a[bc])?
+/(?:ab|ac)?/B
+
+/(?:ab|ac)*/B
+
+/(?:ab|ac)+/B
+
+/(?:ab|ac)?+/B
+
+/(?:ab|ac)*+/B
+
+/(?:ab|ac)++/B
+
+/(?:ab|ac){2}/B
+
+/(?:ab|ac){2,4}/B
+
+/(?:ab|ac){2,4}+/B
+
+# Regression test:
+# Pattern rewriter must properly handle assert conditions which contain alternation
+# This should not be rewritten:
+/b(?(?!)|b)/B
+
+# Regression test:
+# For a conditional group which uses an assertion condition, that assertion condition
+# cannot be pulled out
+# This should not be rewritten (and the subject string should not match):
+/(?(?<!a)b|(?<!a))a/B
+    a
+
+# Regression test:
+# This conditional group must not be rewritten as (?(?=a)[bc]), because the two
+# alternation branches of a conditional group are the "yes branch" and "no branch";
+# They can't be combined
+/(?(?=a)b|c)/B
+
+# Regression test:
+# In the original implementation of the pattern rewriter, this regex tickled a bug
+# whereby not enough memory was allocated for the rewritten pattern
+/(?:c|d)a[.}[[.[:[[[[:.bb]]]/
+
+# Regression test:
+# META_COND_NUMBER was wrongly treated as the beginning of a grouping construct
+# Then the leading 0 byte (which was part of its data) was taken as a common prefix
+# This should not be rewritten:
+/(a)(?(1)|\0)/B
+
+# No rewrite occurs if pattern rewriting is disabled
+/ab|ac|ad/B,pattern_rewrite_off
+
+/ab|ac|ad/B,optimization_none
+
+/(*NO_REWRITE)ab|ac|ad/B
+
+# Rewrite into character class
+# ⇒ [a-e]
+/a|b|c|d|e/B
+
+# Rewrite into common prefix followed by character class
+/Xa|Xb|Xc/B
+
+# End of testinput28

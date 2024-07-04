@@ -1128,13 +1128,11 @@ Subject length lower bound = 1
 /(?s:.*X|^B)/IB
 ------------------------------------------------------------------
         Bra
-        Bra
         AllAny*
         X
         Alt
         ^
         B
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -1371,6 +1369,7 @@ Subject length lower bound = 2
 /(abc|ab[cd])/I
 Capture group count = 1
 First code unit = 'a'
+Last code unit = 'b'
 Subject length lower bound = 3
 
 /(a|.)/I
@@ -3028,7 +3027,7 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 Capture group count = 0
-Optimizations: dotstar_anchor,start_optimize
+Optimizations: dotstar_anchor,start_optimize,pattern_rewrite
 First code unit = 'x'
 Subject length lower bound = 1
 
@@ -4173,9 +4172,7 @@ Subject length lower bound = 2
         Bra
         a
         CBra 1
-        b
-        Alt
-        c
+        [bc]
         Ket
         d
         CBra 2
@@ -4723,9 +4720,7 @@ Subject length lower bound = 1
         Bra
         Brazero
         CBra 1
-        a
-        Alt
-        b
+        [ab]
         KetRmax
         Any?
         c
@@ -7985,14 +7980,12 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
 /(?|(abc)|(xyz))/B
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         abc
         Ket
         Alt
         CBra 1
         xyz
-        Ket
         Ket
         Ket
         End
@@ -13706,11 +13699,11 @@ Subject length lower bound = 4
 /abcd/I,no_start_optimize
 Capture group count = 0
 Options: no_start_optimize
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 /abcd/I,start_optimize_off
 Capture group count = 0
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 /abcd/I,optimization_none
 Capture group count = 0
@@ -13730,7 +13723,7 @@ Subject length lower bound = 1
 /(|ab)*?d/I,no_start_optimize
 Capture group count = 1
 Options: no_start_optimize
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
    abd
  0: abd
  1: ab
@@ -14189,7 +14182,7 @@ Subject length lower bound = 3
 Capture group count = 0
 Compile options: no_dotstar_anchor
 Overall options: anchored no_dotstar_anchor
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 First code unit = 'a'
 Subject length lower bound = 3
 
@@ -14197,7 +14190,7 @@ Subject length lower bound = 3
 Capture group count = 0
 Compile options: <none>
 Overall options: anchored
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 First code unit = 'a'
 Subject length lower bound = 3
 
@@ -14224,7 +14217,7 @@ Subject length lower bound = 3
         End
 ------------------------------------------------------------------
 Capture group count = 0
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 Last code unit = 'c'
 Subject length lower bound = 3
 
@@ -14237,7 +14230,7 @@ Subject length lower bound = 3
         End
 ------------------------------------------------------------------
 Capture group count = 0
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 /.*abc/BI,optimization_none
 ------------------------------------------------------------------
@@ -14260,7 +14253,7 @@ Optimizations: <none>
 ------------------------------------------------------------------
 Capture group count = 0
 Options: no_dotstar_anchor
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 Last code unit = 'c'
 Subject length lower bound = 3
 
@@ -14282,7 +14275,7 @@ No match
 /.*\d/info,no_dotstar_anchor,auto_callout
 Capture group count = 0
 Options: auto_callout no_dotstar_anchor
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 Subject length lower bound = 1
 \= Expect no match
     aaa
@@ -14310,14 +14303,14 @@ Subject length lower bound = 1
 /.*\d/dotall,no_dotstar_anchor,info
 Capture group count = 0
 Options: dotall no_dotstar_anchor
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 Subject length lower bound = 1
 
 /(*NO_DOTSTAR_ANCHOR)(?s).*\d/info
 Capture group count = 0
 Compile options: <none>
 Overall options: no_dotstar_anchor
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 Subject length lower bound = 1
 
 '^(?:(a)|b)(?(1)A|B)'
@@ -15484,14 +15477,12 @@ Subject length lower bound = 65535
 /(?|()+|(a)+)/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         SCBra 1
         KetRmax
         Alt
         CBra 1
         a
         KetRmax
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -15502,14 +15493,12 @@ Subject length lower bound = 0
 /(?|(a)+|()+)/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         a
         KetRmax
         Alt
         SCBra 1
         KetRmax
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -15520,13 +15509,11 @@ Subject length lower bound = 0
 /(?|()|(a))/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         Ket
         Alt
         CBra 1
         a
-        Ket
         Ket
         Ket
         End
@@ -15538,13 +15525,11 @@ Subject length lower bound = 0
 /(?|(a)|())/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         a
         Ket
         Alt
         CBra 1
-        Ket
         Ket
         Ket
         End
@@ -16861,7 +16846,7 @@ No match
 /(cat)|dog/I,literal,auto_possess_off
 Capture group count = 0
 Options: literal
-Optimizations: dotstar_anchor,start_optimize
+Optimizations: dotstar_anchor,start_optimize,pattern_rewrite
 First code unit = '('
 Last code unit = 'g'
 Subject length lower bound = 9
@@ -16874,7 +16859,7 @@ No match
 /(cat)|dog/I,literal,dotstar_anchor_off
 Capture group count = 0
 Options: literal
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 First code unit = '('
 Last code unit = 'g'
 Subject length lower bound = 9
@@ -17842,7 +17827,8 @@ Subject length lower bound = 1
 Capture group count = 0
 May match empty string
 First code unit = 'a'
-Subject length lower bound = 1
+Last code unit = 'b'
+Subject length lower bound = 2
 
 /(*napla:a|(.)(*ACCEPT)zz)\1../
     abcd
@@ -18086,7 +18072,7 @@ Subject length lower bound = 5
 
 /(?:c|C)abcd/I
 Capture group count = 0
-First code unit = 'C' (caseless)
+First code unit = 'c' (caseless)
 Last code unit = 'd'
 Subject length lower bound = 5
 
@@ -18626,14 +18612,14 @@ Subject length lower bound = 1
 /a?(?=b(*COMMIT)c|)d/I,no_start_optimize
 Capture group count = 0
 Options: no_start_optimize
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
     bd
 No match
 
 /(?=b(*COMMIT)c|)d/I,no_start_optimize
 Capture group count = 0
 Options: no_start_optimize
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
     bd
 No match
 
@@ -19697,7 +19683,7 @@ Subject length lower bound = 3
 /abc/I,no_auto_possess,auto_possess
 Capture group count = 0
 Options: no_auto_possess
-Optimizations: dotstar_anchor,start_optimize
+Optimizations: dotstar_anchor,start_optimize,pattern_rewrite
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -19705,7 +19691,7 @@ Subject length lower bound = 3
 /abc/I,no_dotstar_anchor,dotstar_anchor
 Capture group count = 0
 Options: no_dotstar_anchor
-Optimizations: auto_possess,start_optimize
+Optimizations: auto_possess,start_optimize,pattern_rewrite
 First code unit = 'a'
 Last code unit = 'c'
 Subject length lower bound = 3
@@ -19713,7 +19699,7 @@ Subject length lower bound = 3
 /abc/I,no_start_optimize,start_optimize
 Capture group count = 0
 Options: no_start_optimize
-Optimizations: auto_possess,dotstar_anchor
+Optimizations: auto_possess,dotstar_anchor,pattern_rewrite
 
 # --------------
 
@@ -20265,9 +20251,7 @@ No match
 /(?xx:[  ^  a[  ^  b]  ])/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
-        Bra
         [b]
-        Ket
         Ket
         End
 ------------------------------------------------------------------

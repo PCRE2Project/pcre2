@@ -104,4 +104,11 @@
 /\C[^\d]+\x80/utf
     [AΏBŀC]
 
+# Pattern Rewrite
+
+# \C escape (single code unit) can be pulled out
+# ⇒ \C[ab]
+
+/\C\Ca|\C\Cb/B,utf
+
 # End of testinput22

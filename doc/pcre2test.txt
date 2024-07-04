@@ -639,6 +639,8 @@ PATTERN MODIFIERS
              auto_possess_off       don't auto-possessify variable quantifiers
              dotstar_anchor         anchor patterns starting with .*
              dotstar_anchor_off     don't anchor patterns starting with .*
+             pattern_rewrite        rewrite some slow constructs
+             pattern_rewrite_off    don't rewrite slow constructs
              start_optimize         enable pre-scan of subject string
              start_optimize_off     disable pre-scan of subject string
 

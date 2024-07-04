@@ -90,7 +90,9 @@ title24="Test 24: Non-UTF pattern conversion tests"
 title25="Test 25: UTF pattern conversion tests"
 title26="Test 26: Unicode property tests (compatible with Perl >= 5.38)"
 title27="Test 27: Auto-generated unicode property tests"
-maxtest=27
+title28="Test 28: Pattern rewriter tests without UTF"
+title29="Test 29: Pattern rewriter tests with UTF"
+maxtest=29
 titleheap="Test 'heap': Environment-specific heap tests"
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
@@ -122,6 +124,8 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title25
   echo $title26
   echo $title27
+  echo $title28
+  echo $title29
   echo ""
   echo $titleheap
   echo ""
@@ -247,6 +251,8 @@ do24=no
 do25=no
 do26=no
 do27=no
+do28=no
+do29=no
 doheap=no
 doebcdic=no
 
@@ -280,6 +286,8 @@ while [ $# -gt 0 ] ; do
    25) do25=yes;;
    26) do26=yes;;
    27) do27=yes;;
+   28) do28=yes;;
+   29) do29=yes;;
    heap) doheap=yes;;
    ebcdic) doebcdic=yes;;
   -8) arg8=yes;;
@@ -433,7 +441,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no -a \
      $do20 = no -a $do21 = no -a $do22 = no -a $do23 = no -a \
      $do24 = no -a $do25 = no -a $do26 = no -a $do27 = no -a \
-     $doheap = no -a $doebcdic = no \
+     $do28 = no -a $do29 = no -a $doheap = no -a $doebcdic = no \
    ]; then
   do0=yes
   do1=yes
@@ -463,6 +471,8 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do25=yes
   do26=yes
   do27=yes
+  do28=yes
+  do29=yes
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -909,6 +919,26 @@ for bmode in "$test8" "$test16" "$test32"; do
         $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput27 testtry
         checkresult $? 27 "$opt"
       done
+    fi
+  fi
+
+  # Pattern rewriter tests (without UTF)
+
+  if [ $do28 = yes ] ; then
+    echo $title28
+    $sim $valgrind ./pcre2test -q $setstack $bmode $testdata/testinput28 testtry
+    checkresult $? 28 ""
+  fi
+
+  # Pattern rewriter tests (with UTF)
+
+  if [ $do29 = yes ] ; then
+    echo $title29
+    if [ $utf -eq 0 ] ; then
+      echo "  Skipped because UTF-$bits support is not available"
+    else
+      $sim $valgrind ./pcre2test -q $setstack $bmode $testdata/testinput29 testtry
+      checkresult $? 29 ""
     fi
   fi
 

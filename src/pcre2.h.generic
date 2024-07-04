@@ -497,6 +497,8 @@ For binary compatibility, only add to this list; do not renumber. */
 #define PCRE2_DOTSTAR_ANCHOR_OFF   67
 #define PCRE2_START_OPTIMIZE       68
 #define PCRE2_START_OPTIMIZE_OFF   69
+#define PCRE2_PATTERN_REWRITE      70
+#define PCRE2_PATTERN_REWRITE_OFF  71
 
 /* Types used in pcre2_set_substitute_case_callout().
 

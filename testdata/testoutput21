@@ -94,4 +94,22 @@ Subject length lower bound = 5
 /[\C]/
 Failed: error 107 at offset 2: escape sequence is invalid in character class
 
+# Pattern Rewrite
+
+/\Ca|\Cb/B
+------------------------------------------------------------------
+        Bra
+        AllAny
+        [ab]
+        Ket
+        End
+------------------------------------------------------------------
+     \xffa
+ 0: \xffa
+     \xffb
+ 0: \xffb
+\= Expect no match
+     \xff\xfe
+No match
+
 # End of testinput21
