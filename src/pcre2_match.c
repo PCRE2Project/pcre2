@@ -5947,7 +5947,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
 
     /* Now try matching, moving forward one character on failure, until we
-    reach the mimimum back length. */
+    reach the minimum back length. */
 
     for (;;)
       {
