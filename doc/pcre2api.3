@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "24 April 2024" "PCRE2 10.44"
+.TH PCRE2API 3 "22 July 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1518,6 +1518,11 @@ For lower valued characters with only one other case, a lookup table is used
 for speed. When neither PCRE2_UTF nor PCRE2_UCP is set, a lookup table is used
 for all code points less than 256, and higher code points (available only in
 16-bit or 32-bit mode) are treated as not having another case.
+.P
+From release 10.45 PCRE2_CASELESS also affects what some of the letter-related
+Unicode property escapes (\ep and \eP) match. The properties Lu (upper case
+letter), Ll (lower case letter), and Lt (title case letter) are all treated as
+LC (cased letter) when PCRE2_CASELESS is set.
 .sp
   PCRE2_DOLLAR_ENDONLY
 .sp
@@ -4182,6 +4187,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 April 2024
+Last updated: 22 July 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

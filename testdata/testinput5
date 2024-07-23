@@ -945,38 +945,6 @@
     \x{2028}
     \x{200d}
 
-# These are here because Perl has problems with the negative versions of the
-# properties and has changed how it behaves for caseless matching.
-
-/\p{^Lu}/i,utf
-    1234
-\= Expect no match
-    ABC
-
-/\P{Lu}/i,utf
-    1234
-\= Expect no match
-    ABC
-
-/\p{Ll}/i,utf
-    a
-    Az
-\= Expect no match
-    ABC
-
-/\p{Lu}/i,utf
-    A
-    a\x{10a0}B
-\= Expect no match
-    a
-    \x{1d00}
-
-/\p{Lu}/i,utf
-    A
-    aZ
-\= Expect no match
-    abc
-
 /[\x{c0}\x{391}]/i,utf
     \x{c0}
     \x{e0}

@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "12 October 2023" "PCRE2 10.43"
+.TH PCRE2SYNTAX 3 "22 July 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -121,7 +121,8 @@ sequences to matching only ASCII characters.
 .P
 Property descriptions in \ep and \eP are matched caselessly; hyphens,
 underscores, and white space are ignored, in accordance with Unicode's "loose
-matching" rules.
+matching" rules. For example, \ep{Bidi_Class=al} is the same as \ep{ bidi class
+= AL }.
 .
 .
 .SH "GENERAL CATEGORY PROPERTIES FOR \ep and \eP"
@@ -135,13 +136,13 @@ matching" rules.
   Cs         Surrogate
 .sp
   L          Letter
+  Lc         Cased letter, the union of Ll, Lu, and Lt
+  L&         Synonym of Lc
   Ll         Lower case letter
   Lm         Modifier letter
   Lo         Other letter
   Lt         Title case letter
   Lu         Upper case letter
-  Lc         Ll, Lu, or Lt
-  L&         Ll, Lu, or Lt
 .sp
   M          Mark
   Mc         Spacing mark
@@ -172,6 +173,9 @@ matching" rules.
   Zl         Line separator
   Zp         Paragraph separator
   Zs         Space separator
+.sp
+From release 10.45, when caseless matching is set, Ll, Lu, and Lt are all
+equivalent to Lc.
 .
 .
 .SH "PCRE2 SPECIAL CATEGORY PROPERTIES FOR \ep and \eP"
@@ -613,6 +617,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 October 2023
-Copyright (c) 1997-2023 University of Cambridge.
+Last updated: 22 July 2024
+Copyright (c) 1997-2024 University of Cambridge.
 .fi

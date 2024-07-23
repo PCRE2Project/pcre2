@@ -19,10 +19,15 @@ also avoids the internal struct overhead.
 through the -f option, as well as patterns that end in space characters, for
 compatibility with other grep tools.
 
-3. Fix a but in the fuzz support quantifier-limiting code. It ignores strings 
+3. Fix a but in the fuzz support quantifier-limiting code. It ignores strings
 of more than 5 digits because they are necessarily numbers greater than 65535,
 the largest legal quantifier. However, it wasn't ignoring non-significant
 leading zeros.
+
+4. The case-independent processing of the letter-matching Unicode properties
+Ll, Lt, and Lu have been changed to match Perl (which changed a while ago).
+When caseless matching is in force, all three of these properties are now
+treated as Lc (cased letter).
 
 
 Version 10.44 07-June-2024

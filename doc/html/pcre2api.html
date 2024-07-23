@@ -1579,6 +1579,12 @@ For lower valued characters with only one other case, a lookup table is used
 for speed. When neither PCRE2_UTF nor PCRE2_UCP is set, a lookup table is used
 for all code points less than 256, and higher code points (available only in
 16-bit or 32-bit mode) are treated as not having another case.
+</P>
+<P>
+From release 10.45 PCRE2_CASELESS also affects what some of the letter-related
+Unicode property escapes (\p and \P) match. The properties Lu (upper case
+letter), Ll (lower case letter), and Lt (title case letter) are all treated as
+LC (cased letter) when PCRE2_CASELESS is set.
 <pre>
   PCRE2_DOLLAR_ENDONLY
 </pre>
@@ -4177,7 +4183,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 April 2024
+Last updated: 22 July 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

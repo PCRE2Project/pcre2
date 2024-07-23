@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "04 June 2024" "PCRE2 10.44"
+.TH PCRE2PATTERN 3 "22 July 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -887,6 +887,7 @@ The following general category property codes are supported:
   Cs    Surrogate
 .sp
   L     Letter
+  Lc    Cased letter
   Ll    Lower case letter
   Lm    Modifier letter
   Lo    Other letter
@@ -923,9 +924,12 @@ The following general category property codes are supported:
   Zp    Paragraph separator
   Zs    Space separator
 .sp
-The special property LC, which has the synonym L&, is also supported: it
-matches a character that has the Lu, Ll, or Lt property, in other words, a
-letter that is not classified as a modifier or "other".
+The Lc property, which has the synonym L&, matches any character that has the
+Lu, Ll, or Lt property, in other words, any letter that is not classified as a
+modifier or "other". From release 10.45 the properties Lu, Ll, and Lt are all
+treated as Lc when case-independent matching is set by the PCRE2_CASELESS
+option or (?i) within the pattern. The other properties are not affected by
+caseless matching.
 .P
 The Cs (Surrogate) property applies only to characters whose code points are in
 the range U+D800 to U+DFFF. These characters are no different to any other
@@ -945,10 +949,6 @@ properties with "Is".
 No character that is in the Unicode table has the Cn (unassigned) property.
 Instead, this property is assumed for any code point that is not in the
 Unicode table.
-.P
-Specifying caseless matching does not affect these escape sequences. For
-example, \ep{Lu} always matches only upper case letters. This is different from
-the behaviour of current versions of Perl.
 .
 .
 .SS "Binary (yes/no) properties for \ep and \eP"
@@ -3891,6 +3891,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 June 2024
+Last updated: 22 July 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

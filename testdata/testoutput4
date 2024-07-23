@@ -4602,4 +4602,49 @@ No match
     --cafe\x{300}_au\x{203f}lait!
  0: cafe
 
+# -------------------------------------------------------------------------- 
+# Case-independent matching property tests added after changing PCRE2 to be
+# compatible with Perl. All three cases (upper, lower, title) conflate.
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/utf
+    >AbbD<
+ 0: AbbD
+    >Abb\x{01c5}<
+ 0: Abb\x{1c5}
+\= Expect no match     
+    >aBBd<
+No match
+    >aB!!< 
+No match
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/i,utf
+    >aB!!< 
+ 0: aB!!
+    >\x{01c5}B!!< 
+ 0: \x{1c5}B!!
+\= Expect no match     
+    >AbbD<
+No match
+    >aBBd<
+No match
+    >Abb\x{01c5}<
+No match
+
+/[.\p{Lu}][.\p{Ll}][.\P{Lu}][.\P{Ll}]/i,utf
+    >aB!!< 
+ 0: aB!!
+\= Expect no match     
+    >AbbD<
+No match
+    >aBBd<
+No match
+    >Abb\x{01c5}<
+No match
+
+/^\p{Lt}+/i,utf
+    \x{1c5}AB
+ 0: \x{1c5}AB
+
+# -------------------------------------------------------------------------- 
+
 # End of testinput4

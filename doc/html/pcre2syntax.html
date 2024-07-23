@@ -155,7 +155,8 @@ sequences to matching only ASCII characters.
 <P>
 Property descriptions in \p and \P are matched caselessly; hyphens,
 underscores, and white space are ignored, in accordance with Unicode's "loose
-matching" rules.
+matching" rules. For example, \p{Bidi_Class=al} is the same as \p{ bidi class
+= AL }.
 </P>
 <br><a name="SEC6" href="#TOC1">GENERAL CATEGORY PROPERTIES FOR \p and \P</a><br>
 <P>
@@ -168,13 +169,13 @@ matching" rules.
   Cs         Surrogate
 
   L          Letter
+  Lc         Cased letter, the union of Ll, Lu, and Lt
+  L&         Synonym of Lc
   Ll         Lower case letter
   Lm         Modifier letter
   Lo         Other letter
   Lt         Title case letter
   Lu         Upper case letter
-  Lc         Ll, Lu, or Lt
-  L&         Ll, Lu, or Lt
 
   M          Mark
   Mc         Spacing mark
@@ -205,7 +206,9 @@ matching" rules.
   Zl         Line separator
   Zp         Paragraph separator
   Zs         Space separator
-</PRE>
+</pre>
+From release 10.45, when caseless matching is set, Ll, Lu, and Lt are all
+equivalent to Lc.
 </P>
 <br><a name="SEC7" href="#TOC1">PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P</a><br>
 <P>
@@ -626,9 +629,9 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 October 2023
+Last updated: 22 July 2024
 <br>
-Copyright &copy; 1997-2023 University of Cambridge.
+Copyright &copy; 1997-2024 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.

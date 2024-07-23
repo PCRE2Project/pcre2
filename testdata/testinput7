@@ -1076,13 +1076,6 @@
 \= Expect no match
       \x{660}\x{661}\x{662}ABC
   
-/\p{Lu}/i,utf
-    A
-    a\x{10a0}B
-\= Expect no match
-    a
-    \x{1d00}
-
 /\p{^Lu}/i,utf
     1234
 \= Expect no match
@@ -1156,30 +1149,6 @@
     a
     A
     
-/\p{Lu}/utf
-    A
-    aZ
-\= Expect no match
-    abc
-
-/\p{Lu}/i,utf
-    A
-    aZ
-\= Expect no match
-    abc
-
-/\p{Ll}/utf
-    a
-    Az
-\= Expect no match
-    ABC
-
-/\p{Ll}/i,utf
-    a
-    Az
-\= Expect no match
-    ABC
-
 /^\x{c0}$/i,utf
     \x{c0}
     \x{e0}
@@ -2530,5 +2499,32 @@
 
 /caf\B.+?\B/utf,ucp
     --cafe\x{300}_au\x{203f}lait!
+
+# -------------------------------------------------------------------------- 
+# Case-independent matching property tests added after changing PCRE2 to be
+# compatible with Perl. All three cases (upper, lower, title) conflate.
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/utf
+    >AbbD<
+    >Abb\x{01c5}<
+\= Expect no match     
+    >aBBd<
+    >aB!!< 
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/i,utf
+    >aB!!< 
+\= Expect no match     
+    >AbbD<
+    >aBBd<
+    >Abb\x{01c5}<
+
+/[.\p{Lu}][.\p{Ll}][.\P{Lu}][.\P{Ll}]/i,utf
+    >aB!!< 
+\= Expect no match     
+    >AbbD<
+    >aBBd<
+    >Abb\x{01c5}<
+
+# -------------------------------------------------------------------------- 
 
 # End of testinput7

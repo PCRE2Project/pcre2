@@ -888,6 +888,7 @@ The following general category property codes are supported:
   Cs    Surrogate
 
   L     Letter
+  Lc    Cased letter
   Ll    Lower case letter
   Lm    Modifier letter
   Lo    Other letter
@@ -924,9 +925,12 @@ The following general category property codes are supported:
   Zp    Paragraph separator
   Zs    Space separator
 </pre>
-The special property LC, which has the synonym L&, is also supported: it
-matches a character that has the Lu, Ll, or Lt property, in other words, a
-letter that is not classified as a modifier or "other".
+The Lc property, which has the synonym L&, matches any character that has the
+Lu, Ll, or Lt property, in other words, any letter that is not classified as a
+modifier or "other". From release 10.45 the properties Lu, Ll, and Lt are all
+treated as Lc when case-independent matching is set by the PCRE2_CASELESS
+option or (?i) within the pattern. The other properties are not affected by
+caseless matching.
 </P>
 <P>
 The Cs (Surrogate) property applies only to characters whose code points are in
@@ -947,11 +951,6 @@ properties with "Is".
 No character that is in the Unicode table has the Cn (unassigned) property.
 Instead, this property is assumed for any code point that is not in the
 Unicode table.
-</P>
-<P>
-Specifying caseless matching does not affect these escape sequences. For
-example, \p{Lu} always matches only upper case letters. This is different from
-the behaviour of current versions of Perl.
 </P>
 <br><b>
 Binary (yes/no) properties for \p and \P
@@ -3846,7 +3845,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 June 2024
+Last updated: 22 July 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

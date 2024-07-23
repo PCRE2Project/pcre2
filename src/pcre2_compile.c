@@ -6246,6 +6246,18 @@ for (;; pptr++)
             {
             uint32_t ptype = *(++pptr) >> 16;
             uint32_t pdata = *pptr & 0xffff;
+            
+            /* In caseless matching, particular characteristics Lu, Ll, and Lt
+            get converted to the general characteristic L&. That is, upper,
+            lower, and title case letters are all conflated. */
+            
+            if ((options & PCRE2_CASELESS) != 0 && ptype == PT_PC &&
+                (pdata == ucp_Lu || pdata == ucp_Ll || pdata == ucp_Lt))
+              {
+              ptype = PT_LAMP;
+              pdata = 0;
+              }
+ 
             *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
             *class_uchardata++ = ptype;
             *class_uchardata++ = pdata;
@@ -8138,6 +8150,17 @@ for (;; pptr++)
       {
       uint32_t ptype = *(++pptr) >> 16;
       uint32_t pdata = *pptr & 0xffff;
+
+      /* In caseless matching, particular characteristics Lu, Ll, and Lt get
+      converted to the general characteristic L&. That is, upper, lower, and
+      title case letters are all conflated. */
+
+      if ((options & PCRE2_CASELESS) != 0 && ptype == PT_PC &&
+          (pdata == ucp_Lu || pdata == ucp_Ll || pdata == ucp_Lt))
+        {
+        ptype = PT_LAMP;
+        pdata = 0;
+        }
 
       /* The special case of \p{Any} is compiled to OP_ALLANY so as to benefit
       from the auto-anchoring code. */

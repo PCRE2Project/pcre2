@@ -2871,4 +2871,35 @@
 /caf\B.+?\B/utf,ucp
     --cafe\x{300}_au\x{203f}lait!
 
+# -------------------------------------------------------------------------- 
+# Case-independent matching property tests added after changing PCRE2 to be
+# compatible with Perl. All three cases (upper, lower, title) conflate.
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/utf
+    >AbbD<
+    >Abb\x{01c5}<
+\= Expect no match     
+    >aBBd<
+    >aB!!< 
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/i,utf
+    >aB!!< 
+    >\x{01c5}B!!< 
+\= Expect no match     
+    >AbbD<
+    >aBBd<
+    >Abb\x{01c5}<
+
+/[.\p{Lu}][.\p{Ll}][.\P{Lu}][.\P{Ll}]/i,utf
+    >aB!!< 
+\= Expect no match     
+    >AbbD<
+    >aBBd<
+    >Abb\x{01c5}<
+
+/^\p{Lt}+/i,utf
+    \x{1c5}AB
+
+# -------------------------------------------------------------------------- 
+
 # End of testinput4
