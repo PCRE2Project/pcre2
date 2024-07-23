@@ -166,6 +166,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_JIT_PARTIAL_SOFT    0x00000002u
 #define PCRE2_JIT_PARTIAL_HARD    0x00000004u
 #define PCRE2_JIT_INVALID_UTF     0x00000100u
+#define PCRE2_JIT_TEST_ALLOC      0x00000200u
 
 /* These are for pcre2_match(), pcre2_dfa_match(), pcre2_jit_match(), and
 pcre2_substitute(). Some are allowed only for one of the functions, and in

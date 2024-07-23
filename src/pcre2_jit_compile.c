@@ -14848,8 +14848,31 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 pcre2_real_code *re = (pcre2_real_code *)code;
 #ifdef SUPPORT_JIT
+void *exec_memory;
 executable_functions *functions;
 static int executable_allocator_is_working = -1;
+
+if (executable_allocator_is_working == -1)
+  {
+  /* Checks whether the executable allocator is working. This check
+     might run multiple times in multi-threaded environments, but the
+     result should not be affected by it. */
+  exec_memory = SLJIT_MALLOC_EXEC(32, NULL);
+  if (exec_memory != NULL)
+    {
+    SLJIT_FREE_EXEC(((sljit_u8*)(exec_memory)) + SLJIT_EXEC_OFFSET(exec_memory), NULL);
+    executable_allocator_is_working = 1;
+    }
+  else executable_allocator_is_working = 0;
+  }
+
+if (options & PCRE2_JIT_TEST_ALLOC)
+  {
+  if (options != PCRE2_JIT_TEST_ALLOC)
+    return PCRE2_ERROR_JIT_BADOPTION;
+
+  return executable_allocator_is_working ? 0 : PCRE2_ERROR_NOMEMORY;
+  }
 #endif
 
 if (code == NULL)
@@ -14911,20 +14934,6 @@ return PCRE2_ERROR_JIT_BADOPTION;
 /* There is JIT support. Do the necessary. */
 
 if ((re->flags & PCRE2_NOJIT) != 0) return 0;
-
-if (executable_allocator_is_working == -1)
-  {
-  /* Checks whether the executable allocator is working. This check
-     might run multiple times in multi-threaded environments, but the
-     result should not be affected by it. */
-  void *ptr = SLJIT_MALLOC_EXEC(32, NULL);
-  if (ptr != NULL)
-    {
-    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr), NULL);
-    executable_allocator_is_working = 1;
-    }
-  else executable_allocator_is_working = 0;
-  }
 
 if (!executable_allocator_is_working)
   return PCRE2_ERROR_NOMEMORY;
