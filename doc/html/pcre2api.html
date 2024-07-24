@@ -1228,7 +1228,10 @@ for the amount of heap memory used by <b>pcre2_match()</b> or
 The output is a uint32_t integer that is set to one if support for just-in-time
 compiling is included in the library; otherwise it is set to zero. Note that
 having the support in the library does not guarantee that JIT will be used for
-any given match. See the
+any given match, and neither does it guarantee that JIT will actually be able
+to function, because it may not be able to allocate executable memory in some
+environments. There is a special call to <b>pcre2_jit_compile()</b> that can be
+used to check this. See the
 <a href="pcre2jit.html"><b>pcre2jit</b></a>
 documentation for more details.
 <pre>
@@ -4183,7 +4186,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 July 2024
+Last updated: 23 July 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

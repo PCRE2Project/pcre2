@@ -201,6 +201,16 @@ to the same value:
   pcre2-8      the 8-bit library was built
   unicode      Unicode support is available
 </pre>
+Note that the availability of JIT support in the library does not guarantee
+that it can actually be used because in some environments it is unable to
+allocate executable memory. The option "jitusable" gives more detailed
+information. It returns one of the following values:
+<pre>
+  0  JIT is available and usable
+  1  JIT is available but cannot allocate executable memory
+  2  JIT is not available
+  3  Unexpected return from test call to <b>pcre2_jit_compile()</b>
+</pre>
 If an unknown option is given, an error message is output; the exit code is 0.
 </P>
 <P>
@@ -2204,7 +2214,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 April 2024
+Last updated: 23 July 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

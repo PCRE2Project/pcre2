@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "22 July 2024" "PCRE2 10.45"
+.TH PCRE2API 3 "23 July 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -1153,7 +1153,10 @@ for the amount of heap memory used by \fBpcre2_match()\fP or
 The output is a uint32_t integer that is set to one if support for just-in-time
 compiling is included in the library; otherwise it is set to zero. Note that
 having the support in the library does not guarantee that JIT will be used for
-any given match. See the
+any given match, and neither does it guarantee that JIT will actually be able
+to function, because it may not be able to allocate executable memory in some
+environments. There is a special call to \fBpcre2_jit_compile()\fP that can be
+used to check this. See the
 .\" HREF
 \fBpcre2jit\fP
 .\"
@@ -4187,6 +4190,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2024
+Last updated: 23 July 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

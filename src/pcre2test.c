@@ -920,7 +920,8 @@ enum { CONF_BSR,
        CONF_FIX,
        CONF_FIZ,
        CONF_INT,
-       CONF_NL
+       CONF_NL,
+       CONF_JU
 };
 
 static coptstruct coptlist[] = {
@@ -929,6 +930,7 @@ static coptstruct coptlist[] = {
   { "ebcdic",      CONF_FIX, SUPPORT_EBCDIC },
   { "ebcdic-nl",   CONF_FIZ, EBCDIC_NL },
   { "jit",         CONF_INT, PCRE2_CONFIG_JIT },
+  { "jitusable",   CONF_JU,  0 },
   { "linksize",    CONF_INT, PCRE2_CONFIG_LINKSIZE },
   { "newline",     CONF_NL,  PCRE2_CONFIG_NEWLINE },
   { "pcre2-16",    CONF_FIX, SUPPORT_16 },
@@ -8511,6 +8513,7 @@ printf("     bsr            \\R type [ANYCRLF, ANY]\n");
 printf("     ebcdic         compiled for EBCDIC character code [0,1]\n");
 printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
 printf("     jit            just-in-time compiler supported [0, 1]\n");
+printf("     jitusable      test JIT usability [0, 1, 2, 3]\n");
 printf("     linksize       internal link size [2, 3, 4]\n");
 printf("     newline        newline type [CR, LF, CRLF, ANYCRLF, ANY, NUL]\n");
 printf("     pcre2-8        8 bit library support enabled [0, 1]\n");
@@ -8598,6 +8601,19 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
     (void)PCRE2_CONFIG(coptlist[i].value, &optval);
     print_newline_config(optval, TRUE);
     break;
+
+    case CONF_JU:
+    SET(compiled_code, NULL);
+    PCRE2_JIT_COMPILE(yield, compiled_code, PCRE2_JIT_TEST_ALLOC);
+    switch(yield)
+      {
+      case 0: break;
+      case PCRE2_ERROR_NOMEMORY: yield = 1; break;
+      case PCRE2_ERROR_NULL: yield = 2; break;
+      default: yield = 3; break;
+      }
+    printf("%d\n", yield);
+    break;
     }
 
 /* For VMS, return the value by setting a symbol, for certain values only. This
@@ -8668,9 +8684,30 @@ else printf("  No Unicode support\n");
 (void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &optval);
 if (optval != 0)
   {
-  printf("  Just-in-time compiler support: ");
+  printf("  Just-in-time compiler support\n");
+  printf("    Architecture: ");
   print_jit_target(stdout);
   printf("\n");
+
+  printf("    Can allocate executable memory: ");
+  SET(compiled_code, NULL);
+  PCRE2_JIT_COMPILE(yield, compiled_code, PCRE2_JIT_TEST_ALLOC);
+  switch(yield)
+    {
+    case 0:
+    printf("Yes\n");
+    break;
+
+    case PCRE2_ERROR_NOMEMORY:
+    printf("No (so cannot work)\n");
+    break;
+
+    default:
+    printf("\n** Unexpected return %d from "
+      "pcre2_jit_compile(NULL, PCRE2_JIT_TEST_ALLOC)\n", yield);
+    printf("** Should not occur\n");
+    break;
+    }
   }
 else
   {

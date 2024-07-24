@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "24 April 2024" "PCRE 10.44"
+.TH PCRE2TEST 1 "23 July 2024" "PCRE 10.45"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -167,6 +167,16 @@ to the same value:
   pcre2-32     the 32-bit library was built
   pcre2-8      the 8-bit library was built
   unicode      Unicode support is available
+.sp
+Note that the availability of JIT support in the library does not guarantee
+that it can actually be used because in some environments it is unable to
+allocate executable memory. The option "jitusable" gives more detailed
+information. It returns one of the following values:
+.sp
+  0  JIT is available and usable
+  1  JIT is available but cannot allocate executable memory
+  2  JIT is not available
+  3  Unexpected return from test call to \fBpcre2_jit_compile()\fP
 .sp
 If an unknown option is given, an error message is output; the exit code is 0.
 .TP 10
@@ -2181,6 +2191,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 April 2024
+Last updated: 23 July 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
