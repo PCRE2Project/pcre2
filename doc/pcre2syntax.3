@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "22 July 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "29 July 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -120,9 +120,9 @@ characters, but there are some option settings that can restrict individual
 sequences to matching only ASCII characters.
 .P
 Property descriptions in \ep and \eP are matched caselessly; hyphens,
-underscores, and white space are ignored, in accordance with Unicode's "loose
-matching" rules. For example, \ep{Bidi_Class=al} is the same as \ep{ bidi class
-= AL }.
+underscores, and ASCII white space characters are ignored, in accordance with
+Unicode's "loose matching" rules. For example, \ep{Bidi_Class=al} is the same
+as \ep{ bidi class = AL }.
 .
 .
 .SH "GENERAL CATEGORY PROPERTIES FOR \ep and \eP"
@@ -617,6 +617,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2024
+Last updated: 29 July 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

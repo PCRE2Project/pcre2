@@ -2499,4 +2499,10 @@
 /(?<!(|l ))/utf
     (?<!(|l ))
 
+/\p{  Aሴ}/utf
+
+/\p{BC: Aሴ}/utf
+
+/\p{BC: A=}/utf
+
 # End of testinput5

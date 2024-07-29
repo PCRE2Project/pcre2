@@ -29,10 +29,23 @@ Ll, Lt, and Lu have been changed to match Perl (which changed a while ago).
 When caseless matching is in force, all three of these properties are now
 treated as Lc (cased letter).
 
-5. The pcre2_jit_compile() function was updated by the addition of a new option 
-PCRE2_JIT_TEST_ALLOC which, if called with a NULL first argument, tests not 
-only the availability of JIT, but also its ability to allocate executable 
+5. The pcre2_jit_compile() function was updated by the addition of a new option
+PCRE2_JIT_TEST_ALLOC which, if called with a NULL first argument, tests not
+only the availability of JIT, but also its ability to allocate executable
 memory. Update pcre2test to use this support to extend the -C option.
+
+6. The code for parsing Unicode property descriptions for \p and \P been
+changed as follows:
+
+  . White space etc. before ^ in a negated value such as \p{ ^L } was not being
+    ignored.
+
+  . The code wouldn't have worked if PCRE2 was compiled for UTF-8 support
+    within an EBCDIC environment. Possibly nobody does this any more, but it
+    should now work.
+
+  . The documentation of the syntax of what can follow \p and \P has been
+    updated.
 
 
 Version 10.44 07-June-2024

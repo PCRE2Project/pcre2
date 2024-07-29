@@ -4972,7 +4972,7 @@ Failed: error 147 at offset 8: unknown property after \P or \p
 # ------------------------------------------------ 
 
 /\p{\2b[:x�igi:t:_/
-Failed: error 146 at offset 17: malformed \P or \p sequence
+Failed: error 146 at offset 10: malformed \P or \p sequence
 
 # Tests for PCRE2_EXTRA_CASELESS_RESTRICT. Compare each test with and without
 # the restriction.
@@ -5468,5 +5468,14 @@ No match
 /(?<!(|l ))/utf
     (?<!(|l ))
 No match
+
+/\p{  Aሴ}/utf
+Failed: error 146 at offset 7: malformed \P or \p sequence
+
+/\p{BC: Aሴ}/utf
+Failed: error 146 at offset 9: malformed \P or \p sequence
+
+/\p{BC: A=}/utf
+Failed: error 147 at offset 10: unknown property after \P or \p
 
 # End of testinput5

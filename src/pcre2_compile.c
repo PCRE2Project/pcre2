@@ -977,7 +977,7 @@ for (;;)
       {
       uint32_t ptype = *pptr >> 16;
       uint32_t pvalue = *pptr++ & 0xffff;
-      fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P)? 'P':'p',
+      fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P)? CHAR_P:CHAR_p,
         ptype, pvalue);
       }
     else
@@ -2179,36 +2179,64 @@ c = *ptr++;
 *negptr = FALSE;
 
 /* \P or \p can be followed by a name in {}, optionally preceded by ^ for
-negation. */
+negation. We must be handling Unicode encoding here, though we may be compiling
+for UTF-8 input in an EBCDIC environment. (PCRE2 does not support both EBCDIC
+input and Unicode input in the same build.) In accordance with Unicode's "loose
+matching" rules, ASCII white space, hyphens, and underscores are ignored. We
+don't use isspace() or tolower() because (a) code points may be greater than
+255, and (b) they wouldn't work when compiling for Unicodein an EBCDIC
+environment. */
 
 if (c == CHAR_LEFT_CURLY_BRACKET)
   {
   if (ptr >= cb->end_pattern) goto ERROR_RETURN;
 
-  if (*ptr == CHAR_CIRCUMFLEX_ACCENT)
-    {
-    *negptr = TRUE;
-    ptr++;
-    }
-
   for (i = 0; i < (int)(sizeof(name) / sizeof(PCRE2_UCHAR)) - 1; i++)
     {
+    REDO:
+
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
     c = *ptr++;
-#if PCRE2_CODE_UNIT_WIDTH != 8
-    while (c == '_' || c == '-' || (c <= 0xff && isspace(c)))
-#else
-    while (c == '_' || c == '-' || isspace(c))
-#endif
+
+    /* Skip ignorable Unicode characters. */
+
+    while (c == CHAR_UNDERSCORE || c == CHAR_MINUS || c == CHAR_SPACE ||
+          (c >= CHAR_HT && c <= CHAR_CR))
       {
       if (ptr >= cb->end_pattern) goto ERROR_RETURN;
       c = *ptr++;
       }
-    if (c == CHAR_NUL) goto ERROR_RETURN;
+
+    /* The first significant character being circumflex negates the meaning of
+    the item. */
+
+    if (i == 0 && !*negptr && c == CHAR_CIRCUMFLEX_ACCENT)
+      {
+      *negptr = TRUE;
+      goto REDO;
+      }
+
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
-    name[i] = tolower(c);
-    if ((c == ':' || c == '=') && vptr == NULL) vptr = name + i;
+
+    /* Names consist of ASCII letters and digits, but equals and colon may also
+    occur as a name/value separator. We must also allow for \p{L&}. A simple
+    check for a value between '&' and 'z' suffices because anything else in a
+    name or value will cause an "unknown property" error anyway. */
+
+    if (c < CHAR_AMPERSAND || c > CHAR_z) goto ERROR_RETURN;
+
+    /* Lower case a capital letter or remember where the name/value separator
+    is. */
+
+    if (c >= CHAR_A && c <= CHAR_Z) c |= 0x20;
+    else if ((c == CHAR_COLON || c == CHAR_EQUALS_SIGN) && vptr == NULL)
+      vptr = name + i;
+
+    name[i] = c;
     }
+
+  /* Error if the loop didn't end with '}' - either we hit the end of the
+  pattern or the name was longer than any legal property name. */
 
   if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
   name[i] = 0;
@@ -2217,14 +2245,19 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
 /* If { doesn't follow \p or \P there is just one following character, which
 must be an ASCII letter. */
 
-else if (MAX_255(c) && (cb->ctypes[c] & ctype_letter) != 0)
+else if (c >= CHAR_A && c <= CHAR_Z)
   {
-  name[0] = tolower(c);
+  name[0] = c | 0x20;  /* Lower case */
+  name[1] = 0;
+  }
+else if (c >= CHAR_a && c <= CHAR_z)
+  {
+  name[0] = c;
   name[1] = 0;
   }
 else goto ERROR_RETURN;
 
-*ptrptr = ptr;
+*ptrptr = ptr;   /* Update pattern pointer */
 
 /* If the property contains ':' or '=' we have class name and value separately
 specified. The following are supported:
@@ -6246,18 +6279,18 @@ for (;; pptr++)
             {
             uint32_t ptype = *(++pptr) >> 16;
             uint32_t pdata = *pptr & 0xffff;
-            
+
             /* In caseless matching, particular characteristics Lu, Ll, and Lt
             get converted to the general characteristic L&. That is, upper,
             lower, and title case letters are all conflated. */
-            
+
             if ((options & PCRE2_CASELESS) != 0 && ptype == PT_PC &&
                 (pdata == ucp_Lu || pdata == ucp_Ll || pdata == ucp_Lt))
               {
               ptype = PT_LAMP;
               pdata = 0;
               }
- 
+
             *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
             *class_uchardata++ = ptype;
             *class_uchardata++ = pdata;
