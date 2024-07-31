@@ -328,10 +328,10 @@ static unsigned char meta_extra_lengths[] = {
   3,             /* META_COND_VERSION */
   0,             /* META_DOLLAR */
   0,             /* META_DOT */
-  0,             /* META_ESCAPE - more for ESC_P, ESC_p, ESC_g, ESC_k */
+  0,             /* META_ESCAPE - one more for ESC_P and ESC_p */
   0,             /* META_KET */
   0,             /* META_NOCAPTURE */
-  1,             /* META_OPTIONS */
+  2,             /* META_OPTIONS */
   1,             /* META_POSIX */
   1,             /* META_POSIX_NEG */
   0,             /* META_RANGE_ESCAPED */
@@ -9328,19 +9328,9 @@ for (;; pptr++)
     if (META_DATA(*pptr) >= 10) pptr += SIZEOFFSET;
     break;
 
-    case META_ESCAPE:   /* A few escapes are followed by data items. */
-    switch (META_DATA(*pptr))
-      {
-      case ESC_P:
-      case ESC_p:
-      pptr += 1;
-      break;
-
-      case ESC_g:
-      case ESC_k:
-      pptr += 1 + SIZEOFFSET;
-      break;
-      }
+    case META_ESCAPE:
+    if (*pptr - META_ESCAPE == ESC_P || *pptr - META_ESCAPE == ESC_p)
+      pptr += 1;     /* Skip prop data */
     break;
 
     case META_MARK:     /* Add the length of the name. */
@@ -9658,7 +9648,9 @@ for (;; pptr++)
     break;
 
     /* A nested lookbehind does not contribute any length to this lookbehind,
-    but must itself be checked and have its lengths set. */
+    but must itself be checked and have its lengths set. Note that
+    set_lookbehind_lengths() updates pptr, leaving it pointing to the final ket
+    of the group, so no need to update it here. */
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
@@ -10033,15 +10025,16 @@ for (; *pptr != META_END; pptr++)
     {
     default:
 
-    /* The following erroroffset is a bogus but safe value.
-    This branch should be avoided by providing a proper
-    implementation for all supported cases below. */
+    /* The following erroroffset is a bogus but safe value. This branch should
+    be avoided by providing a proper implementation for all supported cases
+    below. */
+
     cb->erroroffset = 0;
     return ERR70;  /* Unrecognized meta code */
 
     case META_ESCAPE:
     if (*pptr - META_ESCAPE == ESC_P || *pptr - META_ESCAPE == ESC_p)
-      pptr += 1;
+      pptr += 1;    /* Skip prop data */
     break;
 
     case META_KET:
@@ -10147,6 +10140,9 @@ for (; *pptr != META_END; pptr++)
     case META_THEN_ARG:
     pptr += 1 + pptr[1];
     break;
+
+    /* Note that set_lookbehind_lengths() updates pptr, leaving it pointing to
+    the final ket of the group, so no need to update it here. */
 
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:

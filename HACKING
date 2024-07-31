@@ -230,11 +230,11 @@ occurrence is useful). On 64-bit systems this avoids using more than two parsed
 pattern elements for items such as \3. The offset is used when an error occurs
 because the reference is to a non-existent group.
 
-META_ESCAPE has an ESC_xxx value as its data. For ESC_P and ESC_p, the next
-element contains the 16-bit type and data property values, packed together.
-ESC_g and ESC_k are used only for named references - numerical ones are turned
-into META_RECURSE or META_BACKREF as appropriate. ESC_g and ESC_k are followed
-by a length and an offset into the pattern to specify the name.
+META_ESCAPE is used for escapes such as \d that match a character. It has an
+ESC_xxx value as its data. For ESC_P and ESC_p, the next element contains the
+16-bit type and data property values, packed together. Escape sequences such as
+\g and \k are turned into other items like META_RECURSE or META_BACKREF and
+their ESC_xxx values never occur with META_ESCAPE.
 
 The following have one data item that follows in the next vector element:
 
@@ -258,7 +258,7 @@ META_COND_NAME        (?(<name>) or (?('name') or (?(name)
 META_COND_RNAME       (?(R&name)
 META_COND_RNUMBER     (?(Rdigits)
 META_RECURSE_BYNAME   (?&name)
-META_BACKREF_BYNAME   \k'name'
+META_BACKREF_BYNAME   \k'name' or \k<name> or \k{name} or \g{name}
 
 META_COND_RNUMBER is used for names that start with R and continue with digits,
 because this is an ambiguous case. It could be a back reference to a group with
