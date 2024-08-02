@@ -145,6 +145,7 @@ INCLUDE(CheckIncludeFile)
 INCLUDE(CheckTypeSize)
 INCLUDE(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 
+CHECK_INCLUDE_FILE(assert.h     HAVE_ASSERT_H)
 CHECK_INCLUDE_FILE(dirent.h     HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(sys/stat.h   HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILE(sys/types.h  HAVE_SYS_TYPES_H)
@@ -170,9 +171,19 @@ if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL")
 endif()
 
 CHECK_C_SOURCE_COMPILES(
+  "int main(void) { __builtin_expect(1+1, 2); return 0; }"
+  HAVE_BUILTIN_EXPECT
+)
+
+CHECK_C_SOURCE_COMPILES(
   "#include <stddef.h>
    int main(void) { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
   HAVE_BUILTIN_MUL_OVERFLOW
+)
+
+CHECK_C_SOURCE_COMPILES(
+  "int main(void) { if (0) __builtin_unreachable(); return 0; }"
+  HAVE_BUILTIN_UNREACHABLE
 )
 
 CHECK_C_SOURCE_COMPILES(

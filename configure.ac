@@ -73,6 +73,20 @@ AC_SYS_LARGEFILE
 
 PCRE2_VISIBILITY
 
+# Check for the expect() builtin
+
+AC_MSG_CHECKING([for __builtin_expect()])
+AC_LANG_PUSH([C])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[__builtin_expect(1+1, 2)]])],
+  [pcre2_cc_cv_builtin_expect=yes],
+  [pcre2_cc_cv_builtin_expect=no])
+AC_MSG_RESULT([$pcre2_cc_cv_builtin_expect])
+if test "$pcre2_cc_cv_builtin_expect" = yes; then
+  AC_DEFINE([HAVE_BUILTIN_EXPECT], 1,
+    [Define this if your compiler provides __builtin_expect()])
+fi
+AC_LANG_POP([C])
+
 # Check for the mul_overflow() builtin
 
 AC_MSG_CHECKING([for __builtin_mul_overflow()])
@@ -92,6 +106,20 @@ AC_MSG_RESULT([$pcre2_cc_cv_builtin_mul_overflow])
 if test "$pcre2_cc_cv_builtin_mul_overflow" = yes; then
 	AC_DEFINE([HAVE_BUILTIN_MUL_OVERFLOW], 1,
 		[Define this if your compiler provides __builtin_mul_overflow()])
+fi
+AC_LANG_POP([C])
+
+# Check for the unreachable() builtin
+
+AC_MSG_CHECKING([for __builtin_unreachable()])
+AC_LANG_PUSH([C])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (0) __builtin_unreachable()]])],
+  [pcre2_cc_cv_builtin_unreachable=yes],
+  [pcre2_cc_cv_builtin_unreachable=no])
+AC_MSG_RESULT([$pcre2_cc_cv_builtin_unreachable])
+if test "$pcre2_cc_cv_builtin_unreachable" = yes; then
+  AC_DEFINE([HAVE_BUILTIN_UNREACHABLE], 1,
+    [Define this if your compiler provides __builtin_unreachable()])
 fi
 AC_LANG_POP([C])
 
@@ -521,7 +549,7 @@ HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
 sure both macros are undefined; an emulation function will then be used. */])
 
 # Checks for header files.
-AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
+AC_CHECK_HEADERS(assert.h limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AC_CHECK_HEADERS([sys/wait.h], [HAVE_SYS_WAIT_H=1])
 
