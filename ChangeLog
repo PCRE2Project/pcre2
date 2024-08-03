@@ -46,10 +46,15 @@ changed as follows:
 
   . The documentation of the syntax of what can follow \p and \P has been
     updated.
-    
-7. There was an error in the table of lengths for parsed items for the OPTIONS 
-item, but fortuitously it could never have actually bitten. While fixing this, 
-some other code that could never be obeyed was discovered and removed. 
+
+7. There was an error in the table of lengths for parsed items for the OPTIONS
+item, but fortuitously it could never have actually bitten. While fixing this,
+some other code that could never be obeyed was discovered and removed.
+
+8. Removed some incoreect optimization code from DFA matching that has been
+there since PCRE1, but has just been found to cause a no match return instead
+of a partial match in some cases. It involves partial matching when (*F) is
+present so is unlikely to have actually affected anyone.
 
 
 Version 10.44 07-June-2024

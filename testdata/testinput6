@@ -4392,9 +4392,18 @@
 
 /Z(*F)Q|ZXY/
     Z\=ps
+    XY\=dfa_restart 
 \= Expect no match 
     ZA\=ps
     X\=ps
+    
+/Z(?:(*F)Q|XY)/
+    Z\=ps
+    XY\=dfa_restart 
+    
+/Z(*F)Q|Z(*F)XY/
+\= Expect no match
+    Z\=ps
 
 /\bthe cat\b/
     the cat\=ps

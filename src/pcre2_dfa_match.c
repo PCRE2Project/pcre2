@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -695,7 +695,6 @@ for (;;)
   int i, j;
   int clen, dlen;
   uint32_t c, d;
-  int forced_fail = 0;
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
   reset_could_continue = FALSE;
@@ -2784,7 +2783,6 @@ for (;;)
       though the other "backtracking verbs" are not supported. */
 
       case OP_FAIL:
-      forced_fail++;    /* Count FAILs for multiple states */
       break;
 
       case OP_ASSERT:
@@ -3271,18 +3269,12 @@ for (;;)
   matches that we are going to find. If partial matching has been requested,
   check for appropriate conditions.
 
-  The "forced_ fail" variable counts the number of (*F) encountered for the
-  character. If it is equal to the original active_count (saved in
-  workspace[1]) it means that (*F) was found on every active state. In this
-  case we don't want to give a partial match.
-
   The "could_continue" variable is true if a state could have continued but
   for the fact that the end of the subject was reached. */
 
   if (new_count <= 0)
     {
     if (could_continue &&                            /* Some could go on, and */
-        forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (mb->moptions & PCRE2_PARTIAL_HARD) != 0      /* Hard partial */
         ||                                           /* or... */

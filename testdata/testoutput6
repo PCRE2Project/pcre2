@@ -6769,10 +6769,23 @@ Partial match: dogs
 /Z(*F)Q|ZXY/
     Z\=ps
 Partial match: Z
+    XY\=dfa_restart 
+ 0: XY
 \= Expect no match 
     ZA\=ps
 No match
     X\=ps
+No match
+    
+/Z(?:(*F)Q|XY)/
+    Z\=ps
+Partial match: Z
+    XY\=dfa_restart 
+ 0: XY
+    
+/Z(*F)Q|Z(*F)XY/
+\= Expect no match
+    Z\=ps
 No match
 
 /\bthe cat\b/
