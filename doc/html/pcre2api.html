@@ -3758,11 +3758,18 @@ and force lower case. The escape sequences change the current state: \U and
 terminating a \Q quoted sequence) reverts to no case forcing. The sequences
 \u and \l force the next character (if it is a letter) to upper or lower
 case, respectively, and then the state automatically reverts to no case
-forcing. Case forcing applies to all inserted characters, including those from
-capture groups and letters within \Q...\E quoted sequences. If either
-PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode
-properties are used for case forcing characters whose code points are greater
-than 127.
+forcing.
+</P>
+<P>
+Case forcing applies to all inserted characters, including those from capture
+groups and letters within \Q...\E quoted sequences. If either PCRE2_UTF or
+PCRE2_UCP was set when the pattern was compiled, Unicode properties are used
+for case forcing characters whose code points are greater than 127. However,
+only basic case folding, as determined by the Unicode file
+<b>CaseFolding.txt</b> is supported. PCRE2 does not support language-specific
+special casing rules such as using different lower case Greek sigmas in the
+middle and ends of words (as defined in the Unicode file
+<b>SpecialCasing.txt</b>).
 </P>
 <P>
 Note that case forcing sequences such as \U...\E do not nest. For example,
@@ -4186,7 +4193,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 July 2024
+Last updated: 04 August 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

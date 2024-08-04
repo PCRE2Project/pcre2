@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "23 July 2024" "PCRE2 10.45"
+.TH PCRE2API 3 "04 August 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3755,11 +3755,17 @@ and force lower case. The escape sequences change the current state: \eU and
 terminating a \eQ quoted sequence) reverts to no case forcing. The sequences
 \eu and \el force the next character (if it is a letter) to upper or lower
 case, respectively, and then the state automatically reverts to no case
-forcing. Case forcing applies to all inserted characters, including those from
-capture groups and letters within \eQ...\eE quoted sequences. If either
-PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode
-properties are used for case forcing characters whose code points are greater
-than 127.
+forcing.
+.P
+Case forcing applies to all inserted characters, including those from capture
+groups and letters within \eQ...\eE quoted sequences. If either PCRE2_UTF or
+PCRE2_UCP was set when the pattern was compiled, Unicode properties are used
+for case forcing characters whose code points are greater than 127. However,
+only basic case folding, as determined by the Unicode file
+\fBCaseFolding.txt\fP is supported. PCRE2 does not support language-specific
+special casing rules such as using different lower case Greek sigmas in the
+middle and ends of words (as defined in the Unicode file
+\fBSpecialCasing.txt\fP).
 .P
 Note that case forcing sequences such as \eU...\eE do not nest. For example,
 the result of processing "\eUaa\eLBB\eEcc\eE" is "AAbbcc"; the final \eE has no
@@ -4190,6 +4196,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 23 July 2024
+Last updated: 04 August 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
