@@ -3694,7 +3694,7 @@ if (restrict_for_perl_test) switch(m->which)
   break;
 
   default:
-  fprintf(outfile, "** '%s' is not allowed in a Perl-compatible test\n",
+  fprintf(outfile, "** \"%s\" is not allowed in a Perl-compatible test\n",
     m->name);
   return NULL;
   }
@@ -3735,7 +3735,7 @@ switch (m->which)
 if (field == NULL)
   {
   if (c == 0)
-    fprintf(outfile, "** '%s' is not valid here\n", m->name);
+    fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
   else
     fprintf(outfile, "** /%c is not valid here\n", c);
   return NULL;
@@ -3824,11 +3824,13 @@ for (;;)
 
     if (!first)
       {
-      fprintf(outfile, "** Unrecognized modifier '%.*s'\n", (int)(ep-p), p);
+      fprintf(outfile, "** Unrecognized modifier \"%.*s\"\n", (int)(ep-p), p);
       if (ep - p == 1)
         fprintf(outfile, "** Single-character modifiers must come first\n");
       return FALSE;
       }
+
+    first = FALSE;
 
     for (cc = *p; cc != ',' && cc != '\n' && cc != 0; cc = *(++p))
       {
@@ -3837,8 +3839,8 @@ for (;;)
 
       if (i >= C1MODLISTCOUNT)
         {
-        fprintf(outfile, "** Unrecognized modifier '%c' in '%.*s'\n",
-          *p, (int)(ep-mp), mp);
+        fprintf(outfile, "** Unrecognized modifier '%c' in modifier string "
+          "\"%.*s\"\n", *p, (int)(ep-mp), mp);
         return FALSE;
         }
 
@@ -3854,7 +3856,7 @@ for (;;)
         if (index < 0)
           {
           fprintf(outfile, "** Internal error: single-character equivalent "
-            "modifier '%s' not found\n", c1modlist[i].fullname);
+            "modifier \"%s\" not found\n", c1modlist[i].fullname);
           return FALSE;
           }
         c1modlist[i].index = index;     /* Cache for next time */
@@ -3887,12 +3889,12 @@ for (;;)
     {
     if (*pp++ != '=')
       {
-      fprintf(outfile, "** '=' expected after '%s'\n", m->name);
+      fprintf(outfile, "** '=' expected after \"%s\"\n", m->name);
       return FALSE;
       }
     if (off)
       {
-      fprintf(outfile, "** '-' is not valid for '%s'\n", m->name);
+      fprintf(outfile, "** '-' is not valid for \"%s\"\n", m->name);
       return FALSE;
       }
     }
@@ -4062,7 +4064,7 @@ for (;;)
           field = (char *)field + sizeof(int32_t);
         if (ct <= 0)
           {
-          fprintf(outfile, "** Too many numeric '%s' modifiers\n", m->name);
+          fprintf(outfile, "** Too many numeric \"%s\" modifiers\n", m->name);
           return FALSE;
           }
         }
@@ -4080,13 +4082,13 @@ for (;;)
         {
         if (len > MAX_NAME_SIZE)
           {
-          fprintf(outfile, "** Group name in '%s' is too long\n", m->name);
+          fprintf(outfile, "** Group name in \"%s\" is too long\n", m->name);
           return FALSE;
           }
         while (*nn != 0) nn += strlen(nn) + 1;
         if (nn + len + 2 - (char *)field > LENCPYGET)
           {
-          fprintf(outfile, "** Too many characters in named '%s' modifiers\n",
+          fprintf(outfile, "** Too many characters in named \"%s\" modifiers\n",
             m->name);
           return FALSE;
           }
@@ -4101,7 +4103,7 @@ for (;;)
     case MOD_STR:
     if (len + 1 > m->value)
       {
-      fprintf(outfile, "** Overlong value for '%s' (max %d code units)\n",
+      fprintf(outfile, "** Overlong value for \"%s\" (max %d code units)\n",
         m->name, m->value - 1);
       return FALSE;
       }
@@ -4113,12 +4115,11 @@ for (;;)
 
   if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
     {
-    fprintf(outfile, "** Comma expected after modifier item '%s'\n", m->name);
+    fprintf(outfile, "** Comma expected after modifier item \"%s\"\n", m->name);
     return FALSE;
     }
 
   p = pp;
-  first = FALSE;
 
   if (ctx == CTX_POPPAT &&
      (pctl->options != 0 ||
@@ -4126,7 +4127,7 @@ for (;;)
       pctl->locale[0] != 0 ||
       (pctl->control & NOTPOP_CONTROLS) != 0))
     {
-    fprintf(outfile, "** '%s' is not valid here\n", m->name);
+    fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
     return FALSE;
     }
   }
@@ -4134,7 +4135,7 @@ for (;;)
 return TRUE;
 
 INVALID_VALUE:
-fprintf(outfile, "** Invalid value in '%.*s'\n", (int)(ep-p), p);
+fprintf(outfile, "** Invalid value in \"%.*s\"\n", (int)(ep-p), p);
 return FALSE;
 }
 
@@ -4973,7 +4974,7 @@ if (endf == filename)
 *fptr = fopen((const char *)filename, mode);
 if (*fptr == NULL)
   {
-  fprintf(outfile, "** Failed to open '%s': %s\n", filename, strerror(errno));
+  fprintf(outfile, "** Failed to open \"%s\": %s\n", filename, strerror(errno));
   return PR_ABEND;
   }
 
@@ -5555,7 +5556,7 @@ if (pat_patctl.locale[0] != 0)
     }
   if (setlocale(LC_CTYPE, (const char *)pat_patctl.locale) == NULL)
     {
-    fprintf(outfile, "** Failed to set locale '%s'\n", pat_patctl.locale);
+    fprintf(outfile, "** Failed to set locale \"%s\"\n", pat_patctl.locale);
     return PR_SKIP;
     }
   if (strcmp((const char *)pat_patctl.locale, (const char *)locale_name) != 0)
@@ -6678,13 +6679,13 @@ for (;;)
 
   PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
   if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
-    fprintf(outfile, "Number not found for group '%s'\n", nptr);
+    fprintf(outfile, "Number not found for group \"%s\"\n", nptr);
 
   length = sizeof(copybuffer)/code_unit_size;
   PCRE2_SUBSTRING_COPY_BYNAME(rc, match_data, pbuffer, copybuffer, &length);
   if (rc < 0)
     {
-    fprintf(outfile, "Copy substring '%s' failed (%d): ", nptr, rc);
+    fprintf(outfile, "Copy substring \"%s\" failed (%d): ", nptr, rc);
     if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
@@ -6692,7 +6693,7 @@ for (;;)
     PCRE2_SUBSTRING_LENGTH_BYNAME(rc, match_data, pbuffer, &length2);
     if (rc < 0)
       {
-      fprintf(outfile, "Get substring '%s' length failed (%d): ", nptr, rc);
+      fprintf(outfile, "Get substring \"%s\" length failed (%d): ", nptr, rc);
       if (!print_error_message(rc, "", "\n")) return FALSE;
       }
     else if (length2 != length)
@@ -6759,12 +6760,12 @@ for (;;)
 
   PCRE2_SUBSTRING_NUMBER_FROM_NAME(groupnumber, compiled_code, pbuffer);
   if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
-    fprintf(outfile, "Number not found for group '%s'\n", nptr);
+    fprintf(outfile, "Number not found for group \"%s\"\n", nptr);
 
   PCRE2_SUBSTRING_GET_BYNAME(rc, match_data, pbuffer, &gotbuffer, &length);
   if (rc < 0)
     {
-    fprintf(outfile, "Get substring '%s' failed (%d): ", nptr, rc);
+    fprintf(outfile, "Get substring \"%s\" failed (%d): ", nptr, rc);
     if (!print_error_message(rc, "", "\n")) return FALSE;
     }
   else
@@ -8571,7 +8572,7 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
 
   if (i >= COPTLISTCOUNT)
     {
-    fprintf(stderr, "** Unknown -C option '%s'\n", arg);
+    fprintf(stderr, "** Unknown -C option \"%s\"\n", arg);
     return 0;
     }
 
@@ -8960,7 +8961,7 @@ for (i = 0; i < MODLISTCOUNT; i++)
     is_pattern = FALSE;
     break;
 
-    default: printf("** Unknown type for modifier '%s'\n", m->name);
+    default: printf("** Unknown type for modifier \"%s\"\n", m->name);
     /* Fall through */
     case MOD_PD:        /* Pattern or subject */
     case MOD_PDP:       /* As PD, OK for Perl-compatible test */
@@ -9355,7 +9356,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 
   else
     {
-    fprintf(stderr, "** Unknown or malformed option '%s'\n", arg);
+    fprintf(stderr, "** Unknown or malformed option \"%s\"\n", arg);
     usage();
     yield = 1;
     goto EXIT;
@@ -9413,7 +9414,7 @@ least 128 code units, because it is used for retrieving error messages. */
     errcode = strtol(arg_error, &endptr, 10);
     if (*endptr != 0 && *endptr != CHAR_COMMA)
       {
-      fprintf(stderr, "** '%s' is not a valid error number list\n", arg_error);
+      fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;
       goto EXIT;
       }
@@ -9537,7 +9538,7 @@ if (argc > 1 && strcmp(argv[op], "-") != 0)
   infile = fopen(argv[op], INPUT_MODE);
   if (infile == NULL)
     {
-    printf("** Failed to open '%s': %s\n", argv[op], strerror(errno));
+    printf("** Failed to open \"%s\": %s\n", argv[op], strerror(errno));
     yield = 1;
     goto EXIT;
     }
@@ -9552,7 +9553,7 @@ if (argc > 2)
   outfile = fopen(argv[op+1], OUTPUT_MODE);
   if (outfile == NULL)
     {
-    printf("** Failed to open '%s': %s\n", argv[op+1], strerror(errno));
+    printf("** Failed to open \"%s\": %s\n", argv[op+1], strerror(errno));
     yield = 1;
     goto EXIT;
     }

@@ -56,6 +56,10 @@ there since PCRE1, but has just been found to cause a no match return instead
 of a partial match in some cases. It involves partial matching when (*F) is
 present so is unlikely to have actually affected anyone.
 
+9. Tidy the wording and formatting of some pcre2test error messages concerned 
+with bad modifiers. Also restrict single-letter modifier sequences to the first
+item in a modifier list, as documented and always intended.
+
 
 Version 10.44 07-June-2024
 --------------------------

@@ -6111,4 +6111,8 @@ a)"xI
 /[^\S\W]{6}/
     .abc def..
 
+/(*MARK:a/y_)/debug
+
+//i,sr
+
 # End of testinput2

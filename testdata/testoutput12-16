@@ -1666,13 +1666,13 @@ Subject length lower bound = 1
 # ---------------------------------------------------- 
 # UCP and casing tests
 
-/\x{120}/i,I
+/\x{120}/iI
 Capture group count = 0
 Options: caseless
 First code unit = \x{120}
 Subject length lower bound = 1
 
-/\x{c1}/i,I,ucp
+/\x{c1}/iI,ucp
 Capture group count = 0
 Options: caseless ucp
 First code unit = \xc1 (caseless)

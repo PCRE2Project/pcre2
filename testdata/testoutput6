@@ -7018,7 +7018,7 @@ No match
     abc\=offset=4
 Failed: error -33: bad offset value
     abc\=offset=-4 
-** Invalid value in 'offset=-4'
+** Invalid value in "offset=-4"
 \= Expect no match 
     abc\=offset=3
 No match
@@ -7450,10 +7450,10 @@ Get substring 4 failed (-54): requested value is not available
 /(?<A>aa)/
     aa\=get=A
  0: aa
-Get substring 'A' failed (-41): function is not supported for DFA matching
+Get substring "A" failed (-41): function is not supported for DFA matching
     aa\=copy=A 
  0: aa
-Copy substring 'A' failed (-41): function is not supported for DFA matching
+Copy substring "A" failed (-41): function is not supported for DFA matching
 
 /a+/no_auto_possess
     a\=ovector=2,get=1,get=2,getall

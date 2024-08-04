@@ -4435,8 +4435,8 @@ Subject length lower bound = 8
  0: abcdefgh
  1: cd
  2: gh
-Number not found for group 'three'
-Copy substring 'three' failed (-49): unknown substring
+Number not found for group "three"
+Copy substring "three" failed (-49): unknown substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -5812,8 +5812,8 @@ Subject length lower bound = 2
  0: a1
  1: a1
  2: a1
-Number not found for group 'Z'
-Copy substring 'Z' failed (-49): unknown substring
+Number not found for group "Z"
+Copy substring "Z" failed (-49): unknown substring
   C a1 (2) A (non-unique)
 
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
@@ -5856,7 +5856,7 @@ Subject length lower bound = 2
   C a (1) A (non-unique)
     cd\=copy=A
  0: cd
-Copy substring 'A' failed (-55): requested value is not set
+Copy substring "A" failed (-55): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capture group count = 4
@@ -5900,8 +5900,8 @@ Subject length lower bound = 2
  0: a1
  1: a1
  2: a1
-Number not found for group 'Z'
-Get substring 'Z' failed (-49): unknown substring
+Number not found for group "Z"
+Get substring "Z" failed (-49): unknown substring
   G a1 (2) A (non-unique)
 
 /^(?P<A>a)(?P<A>b)/I,dupnames
@@ -5934,7 +5934,7 @@ Subject length lower bound = 2
   G a (1) A (non-unique)
     cd\=get=A
  0: cd
-Get substring 'A' failed (-55): requested value is not set
+Get substring "A" failed (-55): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capture group count = 4
@@ -6160,7 +6160,7 @@ No match
 No match
 
 /^abc/Im,newline=bad
-** Invalid value in 'newline=bad'
+** Invalid value in "newline=bad"
 
 /.*/I,newline=lf
 Capture group count = 0
@@ -10437,7 +10437,7 @@ No match
     abc\=offset=4
 Failed: error -33: bad offset value
     abc\=offset=-4
-** Invalid value in 'offset=-4'
+** Invalid value in "offset=-4"
 \= Valid data
     abc\=offset=0
  0: abc
@@ -13817,9 +13817,9 @@ Start of matched string is beyond its end - displaying from end to start.
     a\=ovector=1,copy=A,get=A,get=2
 Matched, but too many substrings
  0: a
-Copy substring 'A' failed (-54): requested value is not available
+Copy substring "A" failed (-54): requested value is not available
 Get substring 2 failed (-54): requested value is not available
-Get substring 'A' failed (-54): requested value is not available
+Get substring "A" failed (-54): requested value is not available
     a\=ovector=2,copy=A,get=A,get=2
  0: a
  1: a
@@ -13830,9 +13830,9 @@ Get substring 2 failed (-54): requested value is not available
 Matched, but too many substrings
  0: b
  1: <unset>
-Copy substring 'A' failed (-55): requested value is not set
+Copy substring "A" failed (-55): requested value is not set
 Get substring 2 failed (-54): requested value is not available
-Get substring 'A' failed (-55): requested value is not set
+Get substring "A" failed (-55): requested value is not set
 
 /a(b)c(d)/
     abc\=ph,copy=0,copy=1,getall
@@ -15337,19 +15337,19 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 
 /()()()/use_offset_limit
     \=ovector=11000000000
-** Invalid value in 'ovector=11000000000'
+** Invalid value in "ovector=11000000000"
     \=callout_fail=11000000000
-** Invalid value in 'callout_fail=11000000000'
+** Invalid value in "callout_fail=11000000000"
     \=callout_fail=1:11000000000
-** Invalid value in 'callout_fail=1:11000000000'
+** Invalid value in "callout_fail=1:11000000000"
     \=callout_data=11000000000
-** Invalid value in 'callout_data=11000000000'
+** Invalid value in "callout_data=11000000000"
     \=callout_data=-11000000000
-** Invalid value in 'callout_data=-11000000000'
+** Invalid value in "callout_data=-11000000000"
     \=offset_limit=1100000000000000000000
-** Invalid value in 'offset_limit=1100000000000000000000'
+** Invalid value in "offset_limit=1100000000000000000000"
     \=copy=11000000000
-** Invalid value in 'copy=11000000000'
+** Invalid value in "copy=11000000000"
 
 /(*MARK:A\x00b)/mark
     abc
@@ -15554,9 +15554,9 @@ Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, 
 
 //
 \=get=i00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-** Group name in 'get' is too long
+** Group name in "get" is too long
 \=get=i2345678901234567890123456789012,get=i1245678901234567890123456789012
-** Too many characters in named 'get' modifiers
+** Too many characters in named "get" modifiers
 
 "(?(?C))"
 Failed: error 128 at offset 6: assertion expected after (?( or (?(?C)
@@ -15681,7 +15681,7 @@ Subject length lower bound = 11
 
 //
     \=ovector=7777777777
-** Invalid value in 'ovector=7777777777'
+** Invalid value in "ovector=7777777777"
 
 # This is here because Perl matches, even though a COMMIT is encountered
 # outside of the recursion.
@@ -16230,7 +16230,7 @@ Subject length lower bound = 1
 # These test the dangerous PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL option.
 
 /\j\x{z}\o{82}\L\uabcd\u\U\g{\g/B,\bad_escape_is_literal
-** Unrecognized modifier '\' in '\bad_escape_is_literal'
+** Unrecognized modifier "\bad_escape_is_literal"
 
 /\N{\c/IB,bad_escape_is_literal
 ------------------------------------------------------------------
@@ -18057,6 +18057,12 @@ Failed: error -47: match limit exceeded
 /[^\S\W]{6}/
     .abc def..
 No match
+
+/(*MARK:a/y_)/debug
+** Unrecognized modifier 'y' in modifier string "y_)/debug"
+
+//i,sr
+** Unrecognized modifier "sr"
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
