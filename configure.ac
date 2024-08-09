@@ -285,7 +285,7 @@ AC_ARG_ENABLE(never-backslash-C,
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
-                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-utf; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
+                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-unicode; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
               , enable_ebcdic=no)
 
 # Handle --enable-ebcdic-nl25
