@@ -7930,6 +7930,10 @@ for (gmatched = 0;; gmatched++)
     {
     if (pp == NULL)
       {
+#ifdef SUPPORT_VALGRIND
+      /* Mark the start of dbuffer addressable again. */
+      VALGRIND_MAKE_MEM_UNDEFINED(dbuffer, 1);
+#endif
       pp = dbuffer;
       pp[0] = 0;
       }
