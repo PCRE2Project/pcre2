@@ -1928,7 +1928,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Lmax               F->temp_32[1]
 #define Lstart_eptr        F->temp_sptr[0]
 #define Lbyte_map_address  F->temp_sptr[1]
-#define Lbyte_map          ((unsigned char *)Lbyte_map_address)
+#define Lbyte_map          ((const unsigned char *)Lbyte_map_address)
 
     case OP_NCLASS:
     case OP_CLASS:
@@ -6973,7 +6973,7 @@ mb->mark = mb->nomatch_mark = NULL;          /* In case never set */
 /* The name table is needed for finding all the numbers associated with a
 given name, for condition testing. The code follows the name table. */
 
-mb->name_table = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code));
+mb->name_table = (PCRE2_SPTR)((const uint8_t *)re + sizeof(pcre2_real_code));
 mb->name_count = re->name_count;
 mb->name_entry_size = re->name_entry_size;
 mb->start_code = mb->name_table + re->name_count * re->name_entry_size;

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -114,7 +114,7 @@ uint32_t once_fudge = 0;
 BOOL had_recurse = FALSE;
 BOOL dupcapused = (re->flags & PCRE2_DUPCAPUSED) != 0;
 PCRE2_SPTR nextbranch = code + GET(code, 1);
-PCRE2_UCHAR *cc = (PCRE2_UCHAR *)code + 1 + LINK_SIZE;
+PCRE2_SPTR cc = code + 1 + LINK_SIZE;
 recurse_check this_recurse;
 
 /* If this is a "could be empty" group, its minimum length is 0. */
@@ -136,12 +136,13 @@ passes 16-bits, reset to that value and skip the rest of the branch. */
 for (;;)
   {
   int d, min, recno;
-  PCRE2_UCHAR op, *cs, *ce;
+  PCRE2_UCHAR op;
+  PCRE2_SPTR cs, ce;
 
   if (branchlength >= UINT16_MAX)
     {
     branchlength = UINT16_MAX;
-    cc = (PCRE2_UCHAR *)nextbranch;
+    cc = nextbranch;
     }
 
   op = *cc;
@@ -479,8 +480,8 @@ for (;;)
     if (!dupcapused && (re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
       {
       int count = GET2(cc, 1+IMM2_SIZE);
-      PCRE2_UCHAR *slot =
-        (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
+      PCRE2_SPTR slot =
+        (PCRE2_SPTR)((const uint8_t *)re + sizeof(pcre2_real_code)) +
           GET2(cc, 1) * re->name_entry_size;
 
       d = INT_MAX;
@@ -496,13 +497,12 @@ for (;;)
           dd = backref_cache[recno];
         else
           {
-          ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, recno);
+          ce = cs = PRIV(find_bracket)(startcode, utf, recno);
           if (cs == NULL) return -2;
           do ce += GET(ce, 1); while (*ce == OP_ALT);
 
           dd = 0;
-          if (!dupcapused ||
-              (PCRE2_UCHAR *)PRIV(find_bracket)(ce, utf, recno) == NULL)
+          if (!dupcapused || PRIV(find_bracket)(ce, utf, recno) == NULL)
             {
             if (cc > cs && cc < ce)    /* Simple recursion */
               {
@@ -557,12 +557,11 @@ for (;;)
 
       if ((re->overall_options & PCRE2_MATCH_UNSET_BACKREF) == 0)
         {
-        ce = cs = (PCRE2_UCHAR *)PRIV(find_bracket)(startcode, utf, recno);
+        ce = cs = PRIV(find_bracket)(startcode, utf, recno);
         if (cs == NULL) return -2;
         do ce += GET(ce, 1); while (*ce == OP_ALT);
 
-        if (!dupcapused ||
-            (PCRE2_UCHAR *)PRIV(find_bracket)(ce, utf, recno) == NULL)
+        if (!dupcapused || PRIV(find_bracket)(ce, utf, recno) == NULL)
           {
           if (cc > cs && cc < ce)    /* Simple recursion */
             {
@@ -643,7 +642,7 @@ for (;;)
     pattern contains multiple subpatterns with the same number. */
 
     case OP_RECURSE:
-    cs = ce = (PCRE2_UCHAR *)startcode + GET(cc, 1);
+    cs = ce = startcode + GET(cc, 1);
     recno = GET2(cs, 1+LINK_SIZE);
     if (recno == prev_recurse_recno)
       {
@@ -980,7 +979,7 @@ do
     {
     int rc;
     PCRE2_SPTR ncode;
-    uint8_t *classmap = NULL;
+    const uint8_t *classmap = NULL;
 #ifdef SUPPORT_WIDE_CHARS
     PCRE2_UCHAR xclassflags;
 #endif
@@ -1596,7 +1595,7 @@ do
       map pointer if there is one, and fall through. */
 
       classmap = ((xclassflags & XCL_MAP) == 0)? NULL :
-        (uint8_t *)(tcode + 1 + LINK_SIZE + 1);
+        (const uint8_t *)(tcode + 1 + LINK_SIZE + 1);
 
       /* In UTF-8 mode, scan the character list and set bits for leading bytes,
       then jump to handle the map. */
@@ -1665,7 +1664,7 @@ do
       case OP_CLASS:
       if (*tcode == OP_XCLASS) tcode += GET(tcode, 1); else
         {
-        classmap = (uint8_t *)(++tcode);
+        classmap = (const uint8_t *)(++tcode);
         tcode += 32 / sizeof(PCRE2_UCHAR);
         }
 

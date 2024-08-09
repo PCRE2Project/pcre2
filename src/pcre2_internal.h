@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1971,9 +1971,9 @@ extern const uint8_t          PRIV(utf8_table4)[];
 extern const uint8_t                   PRIV(OP_lengths)[];
 extern const uint32_t                  PRIV(callout_end_delims)[];
 extern const uint32_t                  PRIV(callout_start_delims)[];
-extern const pcre2_compile_context     PRIV(default_compile_context);
-extern const pcre2_convert_context     PRIV(default_convert_context);
-extern const pcre2_match_context       PRIV(default_match_context);
+extern pcre2_compile_context           PRIV(default_compile_context);
+extern pcre2_convert_context           PRIV(default_convert_context);
+extern pcre2_match_context             PRIV(default_match_context);
 extern const uint8_t                   PRIV(default_tables)[];
 extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];

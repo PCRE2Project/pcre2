@@ -318,7 +318,7 @@ else if (enumber < 0)               /* Match or UTF error */
   }
 else                                /* Invalid error number */
   {
-  message = (unsigned char *)"\0";  /* Empty message list */
+  message = (const unsigned char *)"\0";  /* Empty message list */
   n = 1;
   }
 

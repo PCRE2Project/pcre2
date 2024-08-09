@@ -826,7 +826,7 @@ enum { PSO_OPT,     /* Value is an option bit */
      };
 
 typedef struct pso {
-  const uint8_t *name;
+  const char *name;
   uint16_t length;
   uint16_t type;
   uint32_t value;
@@ -835,27 +835,27 @@ typedef struct pso {
 /* NB: STRING_UTFn_RIGHTPAR contains the length as well */
 
 static const pso pso_list[] = {
-  { (uint8_t *)STRING_UTFn_RIGHTPAR,                  PSO_OPT, PCRE2_UTF },
-  { (uint8_t *)STRING_UTF_RIGHTPAR,                4, PSO_OPT, PCRE2_UTF },
-  { (uint8_t *)STRING_UCP_RIGHTPAR,                4, PSO_OPT, PCRE2_UCP },
-  { (uint8_t *)STRING_NOTEMPTY_RIGHTPAR,           9, PSO_FLG, PCRE2_NOTEMPTY_SET },
-  { (uint8_t *)STRING_NOTEMPTY_ATSTART_RIGHTPAR,  17, PSO_FLG, PCRE2_NE_ATST_SET },
-  { (uint8_t *)STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
-  { (uint8_t *)STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPT, PCRE2_NO_DOTSTAR_ANCHOR },
-  { (uint8_t *)STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
-  { (uint8_t *)STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
-  { (uint8_t *)STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
-  { (uint8_t *)STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
-  { (uint8_t *)STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
-  { (uint8_t *)STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMD, 0 },
-  { (uint8_t *)STRING_CR_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_CR },
-  { (uint8_t *)STRING_LF_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_LF },
-  { (uint8_t *)STRING_CRLF_RIGHTPAR,               5, PSO_NL,  PCRE2_NEWLINE_CRLF },
-  { (uint8_t *)STRING_ANY_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_ANY },
-  { (uint8_t *)STRING_NUL_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_NUL },
-  { (uint8_t *)STRING_ANYCRLF_RIGHTPAR,            8, PSO_NL,  PCRE2_NEWLINE_ANYCRLF },
-  { (uint8_t *)STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_ANYCRLF },
-  { (uint8_t *)STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_UNICODE }
+  { STRING_UTFn_RIGHTPAR,                  PSO_OPT, PCRE2_UTF },
+  { STRING_UTF_RIGHTPAR,                4, PSO_OPT, PCRE2_UTF },
+  { STRING_UCP_RIGHTPAR,                4, PSO_OPT, PCRE2_UCP },
+  { STRING_NOTEMPTY_RIGHTPAR,           9, PSO_FLG, PCRE2_NOTEMPTY_SET },
+  { STRING_NOTEMPTY_ATSTART_RIGHTPAR,  17, PSO_FLG, PCRE2_NE_ATST_SET },
+  { STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
+  { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPT, PCRE2_NO_DOTSTAR_ANCHOR },
+  { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
+  { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
+  { STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
+  { STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
+  { STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
+  { STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMD, 0 },
+  { STRING_CR_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_CR },
+  { STRING_LF_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_LF },
+  { STRING_CRLF_RIGHTPAR,               5, PSO_NL,  PCRE2_NEWLINE_CRLF },
+  { STRING_ANY_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_ANY },
+  { STRING_NUL_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_NUL },
+  { STRING_ANYCRLF_RIGHTPAR,            8, PSO_NL,  PCRE2_NEWLINE_ANYCRLF },
+  { STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_ANYCRLF },
+  { STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_UNICODE }
 };
 
 /* This table is used when converting repeating opcodes into possessified
@@ -1199,7 +1199,7 @@ associated JIT data. */
 PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
 pcre2_code_copy(const pcre2_code *code)
 {
-PCRE2_SIZE* ref_count;
+PCRE2_SIZE *ref_count;
 pcre2_code *newcode;
 
 if (code == NULL) return NULL;
@@ -8972,8 +8972,8 @@ Arguments:
 Returns:      pointer to the opcode for OP_RECURSE, or NULL if not found
 */
 
-static PCRE2_SPTR
-find_recurse(PCRE2_SPTR code, BOOL utf)
+static PCRE2_UCHAR *
+find_recurse(PCRE2_UCHAR *code, BOOL utf)
 {
 for (;;)
   {
@@ -10190,7 +10190,7 @@ compile_block cb;                     /* "Static" compile-time data */
 const uint8_t *tables;                /* Char tables base pointer */
 
 PCRE2_UCHAR *code;                    /* Current pointer in compiled code */
-PCRE2_SPTR codestart;                 /* Start of compiled code */
+PCRE2_UCHAR * codestart;              /* Start of compiled code */
 PCRE2_SPTR ptr;                       /* Current pointer in pattern */
 uint32_t *pptr;                       /* Current pointer in parsed pattern */
 
@@ -10372,8 +10372,7 @@ if ((options & PCRE2_LITERAL) == 0)
       const pso *p = pso_list + i;
 
       if (patlen - skipatstart - 2 >= p->length &&
-          PRIV(strncmp_c8)(ptr + skipatstart + 2, (char *)(p->name),
-            p->length) == 0)
+          PRIV(strncmp_c8)(ptr + skipatstart + 2, p->name, p->length) == 0)
         {
         skipatstart += p->length + 2;
         switch(p->type)
@@ -10723,7 +10722,7 @@ re->name_count = cb.names_found;
 /* The basic block is immediately followed by the name table, and the compiled
 code follows after that. */
 
-codestart = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code)) +
+codestart = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_entry_size * re->name_count;
 
 /* Update the compile data block for the actual compile. The starting points of
@@ -10801,9 +10800,9 @@ if (errorcode == 0 && cb.had_recurse)
   int start = RSCAN_CACHE_SIZE;
   recurse_cache rc[RSCAN_CACHE_SIZE];
 
-  for (rcode = (PCRE2_UCHAR *)find_recurse(codestart, utf);
+  for (rcode = find_recurse(codestart, utf);
        rcode != NULL;
-       rcode = (PCRE2_UCHAR *)find_recurse(rcode + 1 + LINK_SIZE, utf))
+       rcode = find_recurse(rcode + 1 + LINK_SIZE, utf))
     {
     int p, groupnumber;
 

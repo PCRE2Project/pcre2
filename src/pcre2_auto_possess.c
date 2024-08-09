@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -748,12 +748,12 @@ for(;;)
     if (base_list[0] == OP_CLASS)
 #endif
       {
-      set1 = (uint8_t *)(base_end - base_list[2]);
+      set1 = (const uint8_t *)(base_end - base_list[2]);
       list_ptr = list;
       }
     else
       {
-      set1 = (uint8_t *)(code - list[2]);
+      set1 = (const uint8_t *)(code - list[2]);
       list_ptr = base_list;
       }
 
@@ -762,7 +762,7 @@ for(;;)
       {
       case OP_CLASS:
       case OP_NCLASS:
-      set2 = (uint8_t *)
+      set2 = (const uint8_t *)
         ((list_ptr == list ? code : base_end) - list_ptr[2]);
       break;
 
@@ -777,7 +777,7 @@ for(;;)
         /* Might be an empty repeat. */
         continue;
         }
-      set2 = (uint8_t *)(xclass_flags + 1);
+      set2 = (const uint8_t *)(xclass_flags + 1);
       break;
 #endif
 
@@ -785,21 +785,21 @@ for(;;)
       invert_bits = TRUE;
       /* Fall through */
       case OP_DIGIT:
-      set2 = (uint8_t *)(cb->cbits + cbit_digit);
+      set2 = (const uint8_t *)(cb->cbits + cbit_digit);
       break;
 
       case OP_NOT_WHITESPACE:
       invert_bits = TRUE;
       /* Fall through */
       case OP_WHITESPACE:
-      set2 = (uint8_t *)(cb->cbits + cbit_space);
+      set2 = (const uint8_t *)(cb->cbits + cbit_space);
       break;
 
       case OP_NOT_WORDCHAR:
       invert_bits = TRUE;
       /* Fall through */
       case OP_WORDCHAR:
-      set2 = (uint8_t *)(cb->cbits + cbit_word);
+      set2 = (const uint8_t *)(cb->cbits + cbit_word);
       break;
 
       default:
@@ -1084,7 +1084,7 @@ for(;;)
 
       case OP_CLASS:
       if (chr > 255) break;
-      class_bitset = (uint8_t *)
+      class_bitset = (const uint8_t *)
         ((list_ptr == list ? code : base_end) - list_ptr[2]);
       if ((class_bitset[chr >> 3] & (1u << (chr & 7))) != 0) return FALSE;
       break;

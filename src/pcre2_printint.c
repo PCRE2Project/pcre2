@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -715,7 +715,7 @@ for(;;)
       if (printmap)
         {
         uint8_t inverted_map[32];
-        uint8_t *map = (uint8_t *)ccode;
+        const uint8_t *map = (const uint8_t *)ccode;
 
         if (invertmap)
           {

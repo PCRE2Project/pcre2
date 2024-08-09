@@ -130,7 +130,7 @@ return gcontext;
 /* A default compile context is set up to save having to initialize at run time
 when no context is supplied to the compile function. */
 
-const pcre2_compile_context PRIV(default_compile_context) = {
+pcre2_compile_context PRIV(default_compile_context) = {
   { default_malloc, default_free, NULL },    /* Default memory handling */
   NULL,                                      /* Stack guard */
   NULL,                                      /* Stack guard data */
@@ -163,7 +163,7 @@ return ccontext;
 /* A default match context is set up to save having to initialize at run time
 when no context is supplied to a match function. */
 
-const pcre2_match_context PRIV(default_match_context) = {
+pcre2_match_context PRIV(default_match_context) = {
   { default_malloc, default_free, NULL },
 #ifdef SUPPORT_JIT
   NULL,          /* JIT callback */
@@ -197,7 +197,7 @@ return mcontext;
 /* A default convert context is set up to save having to initialize at run time
 when no context is supplied to the convert function. */
 
-const pcre2_convert_context PRIV(default_convert_context) = {
+pcre2_convert_context PRIV(default_convert_context) = {
   { default_malloc, default_free, NULL },    /* Default memory handling */
 #ifdef _WIN32
   CHAR_BACKSLASH,                            /* Default path separator */

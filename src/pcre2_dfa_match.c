@@ -2677,7 +2677,7 @@ for (;;)
           if (clen > 0)
             {
             isinclass = (c > 255)? (codevalue == OP_NCLASS) :
-              ((((uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
+              ((((const uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
             }
           }
 
@@ -3520,7 +3520,7 @@ if (mb->match_limit_depth > re->limit_depth)
 if (mb->heap_limit > re->limit_heap)
   mb->heap_limit = re->limit_heap;
 
-mb->start_code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
+mb->start_code = (PCRE2_SPTR)((const uint8_t *)re + sizeof(pcre2_real_code)) +
   re->name_count * re->name_entry_size;
 mb->tables = re->tables;
 mb->start_subject = subject;

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET,
 
 #define PUTCHARS(string) \
   { \
-  for (s = (char *)(string); *s != 0; s++) \
+  for (const char *s = string; *s != 0; s++) \
     { \
     if (p >= endp) return PCRE2_ERROR_NOMEMORY; \
     *p++ = *s; \
@@ -125,7 +125,6 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength,
   BOOL utf, PCRE2_UCHAR *use_buffer, PCRE2_SIZE use_length,
   PCRE2_SIZE *bufflenptr, BOOL dummyrun, pcre2_convert_context *ccontext)
 {
-char *s;
 PCRE2_SPTR posix = pattern;
 PCRE2_UCHAR *p = use_buffer;
 PCRE2_UCHAR *pp = p;

@@ -556,6 +556,11 @@ code that uses them is simpler because it assumes this. */
 /* The real general context structure. At present it holds only data for custom
 memory control. */
 
+/* WARNING: if this is ever changed, code in pcre2_substitute.c will have to be
+changed because it builds a general context "by hand" in order to avoid the
+malloc() call in pcre2_general_context)_create(). There is also code in
+pcre2_match.c that makes the same assumption. */
+
 typedef struct pcre2_real_general_context {
   pcre2_memctl memctl;
 } pcre2_real_general_context;
@@ -725,8 +730,8 @@ typedef struct compile_block {
   const uint8_t *fcc;              /* Points to case-flipping table */
   const uint8_t *cbits;            /* Points to character type table */
   const uint8_t *ctypes;           /* Points to table of type maps */
-  PCRE2_SPTR start_workspace;      /* The start of working space */
-  PCRE2_SPTR start_code;           /* The start of the compiled code */
+  PCRE2_UCHAR *start_workspace;    /* The start of working space */
+  PCRE2_UCHAR * start_code;        /* The start of the compiled code */
   PCRE2_SPTR start_pattern;        /* The start of the pattern */
   PCRE2_SPTR end_pattern;          /* The end of the pattern */
   PCRE2_UCHAR *name_table;         /* The name/number table */

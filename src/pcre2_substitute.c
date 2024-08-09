@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -286,27 +286,34 @@ case, we copy the existing match into the internal block, except for any cached
 heap frame size and pointer. This ensures that no changes are made to the
 external match data block. */
 
+/* WARNING: In both cases below a general context is constructed "by hand"
+because calling pcre2_general_context_create() involves a memory allocation. If
+the contents of a general context control block are ever changed there will
+have to be changes below. */
+
 if (match_data == NULL)
   {
-  pcre2_general_context *gcontext;
+  pcre2_general_context gcontext;
   if (use_existing_match) return PCRE2_ERROR_NULL;
-  gcontext = (mcontext == NULL)?
-    (pcre2_general_context *)code :
-    (pcre2_general_context *)mcontext;
+  gcontext.memctl = (mcontext == NULL)?
+    ((const pcre2_real_code *)code)->memctl :
+    ((pcre2_real_match_context *)mcontext)->memctl;
   match_data = internal_match_data =
-    pcre2_match_data_create_from_pattern(code, gcontext);
+    pcre2_match_data_create_from_pattern(code, &gcontext);
   if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
   }
 
 else if (use_existing_match)
   {
-  pcre2_general_context *gcontext = (mcontext == NULL)?
-    (pcre2_general_context *)code :
-    (pcre2_general_context *)mcontext;
-  int pairs = (code->top_bracket + 1 < match_data->oveccount)?
+  int pairs;
+  pcre2_general_context gcontext;
+  gcontext.memctl = (mcontext == NULL)?
+    ((const pcre2_real_code *)code)->memctl :
+    ((pcre2_real_match_context *)mcontext)->memctl;
+  pairs = (code->top_bracket + 1 < match_data->oveccount)?
     code->top_bracket + 1 : match_data->oveccount;
   internal_match_data = pcre2_match_data_create(match_data->oveccount,
-    gcontext);
+    &gcontext);
   if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
   memcpy(internal_match_data, match_data, offsetof(pcre2_match_data, ovector)
     + 2*pairs*sizeof(PCRE2_SIZE));
