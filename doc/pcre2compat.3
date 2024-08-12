@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "22 July 2024" "PCRE2 10.45"
+.TH PCRE2COMPAT 3 "12 August 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -85,7 +85,12 @@ following examples:
     \eQ\e\eE              \e                 \e\eE
 .sp
 The \eQ...\eE sequence is recognized both inside and outside character classes
-by both PCRE2 and Perl.
+by both PCRE2 and Perl. Another difference from Perl is that any appearance of
+\eQ or \eE inside what might otherwise be a quantifier causes PCRE2 not to
+recognize the sequence as a quantifier. Perl recognizes a quantifier if
+(redundantly) either of the numbers is inside \eQ...\eE, but not if the
+separating comma is. When not recognized as a quantifier a sequence such as
+{\eQ1\eE,2} is treated as the literal string "{1,2}".
 .P
 9. Fairly obviously, PCRE2 does not support the (?{code}) and (??{code})
 constructions. However, PCRE2 does have a "callout" feature, which allows an
@@ -231,6 +236,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2024
+Last updated: 12 August 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

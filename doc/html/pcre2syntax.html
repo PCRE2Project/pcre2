@@ -60,7 +60,10 @@ documentation. This document contains a quick-reference summary of the syntax.
   \Q...\E    treat enclosed characters as literal
 </pre>
 Note that white space inside \Q...\E is always treated as literal, even if
-PCRE2_EXTENDED is set, causing most other white space to be ignored.
+PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also 
+that PCRE2's handling of \Q...\E has some differences from Perl's. See the
+<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
+documentation for details.
 </P>
 <br><a name="SEC3" href="#TOC1">BRACED ITEMS</a><br>
 <P>
@@ -629,7 +632,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC32" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 July 2024
+Last updated: 12 August 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

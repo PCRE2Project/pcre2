@@ -99,7 +99,12 @@ following examples:
     \Q\\E              \                 \\E
 </pre>
 The \Q...\E sequence is recognized both inside and outside character classes
-by both PCRE2 and Perl.
+by both PCRE2 and Perl. Another difference from Perl is that any appearance of
+\Q or \E inside what might otherwise be a quantifier causes PCRE2 not to
+recognize the sequence as a quantifier. Perl recognizes a quantifier if
+(redundantly) either of the numbers is inside \Q...\E, but not if the
+separating comma is. When not recognized as a quantifier a sequence such as
+{\Q1\E,2} is treated as the literal string "{1,2}".
 </P>
 <P>
 9. Fairly obviously, PCRE2 does not support the (?{code}) and (??{code})
@@ -267,7 +272,7 @@ Cambridge, England.
 REVISION
 </b><br>
 <P>
-Last updated: 22 July 2024
+Last updated: 12 August 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

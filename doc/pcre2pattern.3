@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 July 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "12 August 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -320,7 +320,7 @@ a character class the only metacharacters are:
 .sp
 If a pattern is compiled with the PCRE2_EXTENDED option, most white space in
 the pattern, other than in a character class, within a \eQ...\eE sequence, or
-between a # outside a character class and the next newline, inclusive, are
+between a # outside a character class and the next newline, inclusive, is
 ignored. An escaping backslash can be used to include a white space or a #
 character as part of the pattern. If the PCRE2_EXTENDED_MORE option is set, the
 same applies, but in addition unescaped space and horizontal tab characters are
@@ -381,6 +381,13 @@ by \eE later in the pattern, the literal interpretation continues to the end of
 the pattern (that is, \eE is assumed at the end). If the isolated \eQ is inside
 a character class, this causes an error, because the character class is then
 not terminated by a closing square bracket.
+.P
+Another difference from Perl is that any appearance of \eQ or \eE inside what 
+might otherwise be a quantifier causes PCRE2 not to recognize the sequence as a 
+quantifier. Perl recognizes a quantifier if (redundantly) either of the numbers 
+is inside \eQ...\eE, but not if the separating comma is. When not recognized as 
+a quantifier a sequence such as {\eQ1\eE,2} is treated as the literal string 
+"{1,2}".
 .
 .
 .\" HTML <a name="digitsafterbackslash"></a>
@@ -3004,8 +3011,8 @@ for which captures are retained only for positive assertions that succeed.)
 There are two ways of including comments in patterns that are processed by
 PCRE2. In both cases, the start of the comment must not be in a character
 class, nor in the middle of any other sequence of related characters such as
-(?: or a group name or number. The characters that make up a comment play
-no part in the pattern matching.
+(?: or a group name or number or a Unicode property name. The characters that
+make up a comment play no part in the pattern matching.
 .P
 The sequence (?# marks the start of a comment that continues up to the next
 closing parenthesis. Nested parentheses are not permitted. If the
@@ -3909,6 +3916,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 July 2024
+Last updated: 12 August 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
