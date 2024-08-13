@@ -6115,4 +6115,18 @@ a)"xI
 
 //i,sr
 
+# The behaviour of these tests is different from Perl because PCRE2 doesn't
+# recognize \Q or \E within a quantifier, so these examples are not treated
+# as quantifiers. Subsequent processing of the string removes the escapes.
+
+/a{\Q1\E,2}/
+    xa{1,2}x
+\= Expect no match     
+    xaax
+    
+/a{\E1,2}/
+    xa{1,2}x
+\= Expect no match     
+    xaax
+
 # End of testinput2

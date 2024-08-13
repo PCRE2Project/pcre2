@@ -10503,4 +10503,23 @@ No match
     a
 No match
 
+/\Qab*\E{2,}/
+    ab***z
+ 0: ab***
+
+/[\Qabc\E-z]+/
+    abcdwxyz
+ 0: abcdwxyz
+
+/[\Qa-\Ez]+/
+    xz-zaax
+ 0: z-zaa
+
+/a{(?#XYZ),2}/
+    xa{,2}x
+ 0: a{,2}
+\= Expect no match     
+    xaax
+No match
+ 
 # End of testinput1 

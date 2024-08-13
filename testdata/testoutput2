@@ -18064,6 +18064,24 @@ No match
 //i,sr
 ** Unrecognized modifier "sr"
 
+# The behaviour of these tests is different from Perl because PCRE2 doesn't
+# recognize \Q or \E within a quantifier, so these examples are not treated
+# as quantifiers. Subsequent processing of the string removes the escapes.
+
+/a{\Q1\E,2}/
+    xa{1,2}x
+ 0: a{1,2}
+\= Expect no match     
+    xaax
+No match
+    
+/a{\E1,2}/
+    xa{1,2}x
+ 0: a{1,2}
+\= Expect no match     
+    xaax
+No match
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

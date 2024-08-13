@@ -6654,4 +6654,18 @@ $/x
 /(?<!a?)/
     a
 
+/\Qab*\E{2,}/
+    ab***z
+
+/[\Qabc\E-z]+/
+    abcdwxyz
+
+/[\Qa-\Ez]+/
+    xz-zaax
+
+/a{(?#XYZ),2}/
+    xa{,2}x
+\= Expect no match     
+    xaax
+ 
 # End of testinput1 
