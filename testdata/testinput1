@@ -6668,4 +6668,7 @@ $/x
 \= Expect no match     
     xaax
  
+/(?<=PQ|Pc.b?)(.?)(b?)/
+    Pc.b
+    
 # End of testinput1 

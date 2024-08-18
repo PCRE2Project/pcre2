@@ -56,9 +56,15 @@ there since PCRE1, but has just been found to cause a no match return instead
 of a partial match in some cases. It involves partial matching when (*F) is
 present so is unlikely to have actually affected anyone.
 
-9. Tidy the wording and formatting of some pcre2test error messages concerned 
+9. Tidy the wording and formatting of some pcre2test error messages concerned
 with bad modifiers. Also restrict single-letter modifier sequences to the first
 item in a modifier list, as documented and always intended.
+
+10. An iterator at the end of many assertions can always be auto-possessified,
+but not at the end of variable-length lookbehinds. THere was a bug in the code
+that checks for such a lookbehind; it was looking only at the first branch,
+which is wrong because some branches can be fixed length when others are not,
+for example (?<=AB|CD?). Now all branches are checked for variability.
 
 
 Version 10.44 07-June-2024

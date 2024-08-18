@@ -6128,5 +6128,15 @@ a)"xI
     xa{1,2}x
 \= Expect no match     
     xaax
+    
+# --------------
+
+/(?<=|b?)./B
+
+/(?=|b?)./B
+
+/(?>|b?)./B
+
+/(?<=xy|a.b?|cd)/B
 
 # End of testinput2

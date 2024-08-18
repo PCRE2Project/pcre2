@@ -10522,4 +10522,10 @@ No match
     xaax
 No match
  
+/(?<=PQ|Pc.b?)(.?)(b?)/
+    Pc.b
+ 0: b
+ 1: b
+ 2: 
+    
 # End of testinput1 
