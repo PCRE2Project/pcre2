@@ -10528,4 +10528,12 @@ No match
  1: b
  2: 
     
+/(?(?<=aa.b|ab)b).b/
+    aaab
+ 0: ab
+
+/(?(?<=a(?:a.b|b))b).b/
+    aaab
+ 0: ab
+
 # End of testinput1 

@@ -66,6 +66,12 @@ that checks for such a lookbehind; it was looking only at the first branch,
 which is wrong because some branches can be fixed length when others are not,
 for example (?<=AB|CD?). Now all branches are checked for variability.
 
+11. Matching with pcre2_match() could give an incorrect result if a
+variable-length lookbehind was used as the condition in a conditional group.
+The condition could erroneously be treated as true if a branch matched but
+overran the current position. This bug was in the interpreter only; matching 
+with JIT was correct.
+
 
 Version 10.44 07-June-2024
 --------------------------

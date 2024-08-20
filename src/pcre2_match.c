@@ -5931,14 +5931,20 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         (char *)P->eptr - (char *)mb->start_subject);
 #endif
 
-      /* If we are at the end of an assertion that is a condition, return a
-      match, discarding any intermediate backtracking points. Copy back the
-      mark setting and the captures into the frame before N so that they are
-      set on return. Doing this for all assertions, both positive and negative,
-      seems to match what Perl does. */
+      /* If we are at the end of an assertion that is a condition, first check
+      to see if we are at the end of a variable-length branch in a lookbehind.
+      If this is the case and we have not landed on the current character,
+      return no match. Compare code below for non-condition lookbehinds. In
+      other cases, return a match, discarding any intermediate backtracking
+      points. Copy back the mark setting and the captures into the frame before
+      N so that they are set on return. Doing this for all assertions, both
+      positive and negative, seems to match what Perl does. */
 
       if (GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
         {
+        if ((*bracode == OP_ASSERTBACK || *bracode == OP_ASSERTBACK_NOT) &&
+            branch_start[1 + LINK_SIZE] == OP_VREVERSE && Feptr != P->eptr)
+          RRETURN(MATCH_NOMATCH);
         memcpy((char *)P + offsetof(heapframe, ovector), Fovector,
           Foffset_top * sizeof(PCRE2_SIZE));
         P->offset_top = Foffset_top;

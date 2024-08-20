@@ -6671,4 +6671,10 @@ $/x
 /(?<=PQ|Pc.b?)(.?)(b?)/
     Pc.b
     
+/(?(?<=aa.b|ab)b).b/
+    aaab
+
+/(?(?<=a(?:a.b|b))b).b/
+    aaab
+
 # End of testinput1 
