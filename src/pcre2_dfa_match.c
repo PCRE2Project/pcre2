@@ -175,6 +175,7 @@ static const uint8_t coptable[] = {
   0,                             /* Assert behind not                      */
   0,                             /* NA assert                              */
   0,                             /* NA assert behind                       */
+  0,                             /* Assert scan substring                  */
   0,                             /* ONCE                                   */
   0,                             /* SCRIPT_RUN                             */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
@@ -253,6 +254,7 @@ static const uint8_t poptable[] = {
   0,                             /* Assert behind not                      */
   0,                             /* NA assert                              */
   0,                             /* NA assert behind                       */
+  0,                             /* Assert scan substring                  */
   0,                             /* ONCE                                   */
   0,                             /* SCRIPT_RUN                             */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */

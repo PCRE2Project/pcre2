@@ -6139,4 +6139,48 @@ a)"xI
 
 /(?<=xy|a.b?|cd)/B
 
+# Tests for scan substring, a non Perl feature of PCRE2
+
+# Parse errors first
+
+/(*scs:/
+
+/(*scan_substring:(/
+
+/(*scs:('name'/
+
+/(*scs:(1)a|b)/
+
+/(*scan_substring:(1)a|b)/
+
+/(*scs:(<name>)a|b)/
+
+/(*scan_substring:(<name>)a|b)/
+
+# Tests for the feature
+
+/([a-z]++)(*scs:(1)(stx)|(ne))(.)/B
+  ##string##next!##
+  __aastxaa:__
+  __abababab:__
+
+/(?<XX>[a-z]++)##(*scan_substring:('XX').*(..)$)\2/B
+  ##abcd##abcd##cd##
+  ##abcd##abcd##abcd##
+
+/([a-z])([a-z]++)(#+)(*scs:(2)(ab.))/
+  xab##
+  yabc###
+  zababc####
+
+/(?:(?<YYY>[a-z]++)|(?<YYY>[0-9]++)|$)(*scan_substring:('YYY')((?<START>.).*\k<START>$))/dupnames
+  $$abacd$$112345$$abca$$
+  $$abcdeaf$$1234567819$$123456781$$
+
+/([a-zA-Z]+)(*scs:(1).*?(?<ABC>[A-Z]+)(*scan_substring:('ABC').*(.)\3))/
+  ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
+
+/([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
+  ##cdefgh##cdeabxy##
+
 # End of testinput2

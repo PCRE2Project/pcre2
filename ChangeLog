@@ -75,6 +75,10 @@ with JIT was correct.
 12. Add a new error code (PCRE2_ERROR_JIT_UNSUPPORTED) which is yielded
 for unsupported jit features.
 
+13. Add a new experimental feature called scan substring. This feature
+is a new type of assertion which matches the content of a capturing block
+to a sub pattern.
+
 
 Version 10.44 07-June-2024
 --------------------------

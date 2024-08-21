@@ -250,6 +250,7 @@ for (;;)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ASSERT_NA:
+    case OP_ASSERT_SCS:
     case OP_ASSERTBACK_NA:
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     /* Fall through */

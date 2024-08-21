@@ -1110,6 +1110,7 @@ switch(*cc)
 
   default:
   SLJIT_UNREACHABLE();
+  case OP_ASSERT_SCS:
   return NULL;
   }
 }
