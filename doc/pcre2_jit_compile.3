@@ -23,11 +23,12 @@ details are given in the
 documentation.
 .P
 The availability of JIT support can be tested by calling
-\fBpcre2_compile_jit()\fP with a NULL first argument and the single option
-PCRE2_JIT_TEST_ALLOC. Such a call returns zero if JIT is available and has a
-working allocator. Otherwise it returns PCRE2_ERROR_NOMEMORY if JIT is
-available but cannot allocate executable memory, or PCRE2_ERROR_NULL if JIT
-support is not compiled.
+\fBpcre2_compile_jit()\fP with a single option PCRE2_JIT_TEST_ALLOC (the
+code argument is ignored, so a NULL value is accepted). Such a call
+returns zero if JIT is available and has a working allocator. Otherwise
+it returns PCRE2_ERROR_NOMEMORY if JIT is available but cannot allocate
+executable memory, or PCRE2_ERROR_JIT_UNSUPPORTED if JIT support is not
+compiled.
 .P
 Otherwise, the first argument must be a pointer that was returned by a
 successful call to \fBpcre2_compile()\fP, and the second must contain one or
@@ -46,7 +47,8 @@ for success, or a negative error code otherwise. In particular,
 PCRE2_ERROR_JIT_BADOPTION is returned if JIT is not supported or if an unknown
 bit is set in \fIoptions\fP. The function can also return PCRE2_ERROR_NOMEMORY
 if JIT is unable to allocate executable memory for the compiler, even if it was
-because of a system security restriction.
+because of a system security restriction. In a few cases, the function may
+return with PCRE2_ERROR_JIT_UNSUPPORTED for unsupported features.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

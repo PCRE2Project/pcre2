@@ -54,11 +54,11 @@ executable memory in which to build its compiled code. The only guarantee from
 be used.
 .P
 As of release 10.45 there is a more informative way to test for JIT support. If
-\fBpcre2_compile_jit()\fP is called with a NULL first argument and the single
-option PCRE2_JIT_TEST_ALLOC, it returns zero if JIT is available and has a
-working allocator. Otherwise it returns PCRE2_ERROR_NOMEMORY if JIT is
-available but cannot allocate executable memory, or PCRE2_ERROR_NULL if JIT
-support is not compiled.
+\fBpcre2_compile_jit()\fP is called with the single option PCRE2_JIT_TEST_ALLOC
+it returns zero if JIT is available and has a working allocator. Otherwise it
+returns PCRE2_ERROR_NOMEMORY if JIT is available but cannot allocate executable
+memory, or PCRE2_ERROR_JIT_UNSUPPORTED if JIT support is not compiled. The
+code argument is ignored, so it can be a NULL value.
 .P
 A simple program does not need to check availability in order to use JIT when
 possible. The API is implemented in a way that falls back to the interpretive

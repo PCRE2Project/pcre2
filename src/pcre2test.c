@@ -8616,7 +8616,7 @@ if (arg != NULL && arg[0] != CHAR_MINUS)
       {
       case 0: break;
       case PCRE2_ERROR_NOMEMORY: yield = 1; break;
-      case PCRE2_ERROR_NULL: yield = 2; break;
+      case PCRE2_ERROR_JIT_UNSUPPORTED: yield = 2; break;
       default: yield = 3; break;
       }
     printf("%d\n", yield);
