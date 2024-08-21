@@ -668,7 +668,7 @@ for (i = 0; i < 4; i++)
   fast_forward_char_pair_sse2_compare(compiler, compare1_type, reg_type, i, data1_ind, cmp1a_ind, cmp1b_ind, tmp1_ind);
   }
 
-sljit_emit_simd_op2(compiler, SLJIT_SIMD_OP2_AND | reg_type, SLJIT_FR0, SLJIT_FR0, SLJIT_FR1);
+sljit_emit_simd_op2(compiler, SLJIT_SIMD_OP2_AND | reg_type, SLJIT_FR0, SLJIT_FR0, SLJIT_FR1, 0);
 sljit_emit_simd_sign(compiler, SLJIT_SIMD_STORE | reg_type | SLJIT_SIMD_ELEM_8, SLJIT_FR0, TMP1, 0);
 
 /* Ignore matches before the first STR_PTR. */
@@ -696,7 +696,7 @@ for (i = 0; i < 4; i++)
   fast_forward_char_pair_sse2_compare(compiler, compare2_type, reg_type, i, data2_ind, cmp2a_ind, cmp2b_ind, tmp1_ind);
   }
 
-sljit_emit_simd_op2(compiler, SLJIT_SIMD_OP2_AND | reg_type, SLJIT_FR0, SLJIT_FR0, SLJIT_FR1);
+sljit_emit_simd_op2(compiler, SLJIT_SIMD_OP2_AND | reg_type, SLJIT_FR0, SLJIT_FR0, SLJIT_FR1, 0);
 sljit_emit_simd_sign(compiler, SLJIT_SIMD_STORE | reg_type | SLJIT_SIMD_ELEM_8, SLJIT_FR0, TMP1, 0);
 
 CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);

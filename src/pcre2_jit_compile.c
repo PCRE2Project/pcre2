@@ -14376,7 +14376,7 @@ common->compiler = compiler;
 
 /* Main pcre2_jit_exec entry. */
 SLJIT_ASSERT((private_data_size & (sizeof(sljit_sw) - 1)) == 0);
-sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), 5, 5, SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS, 0, private_data_size);
+sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), 5 | SLJIT_ENTER_FLOAT(SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS), 5, private_data_size);
 
 /* Register init. */
 reset_ovector(common, (re->top_bracket + 1) * 2);
