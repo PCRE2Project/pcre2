@@ -1,0 +1,31 @@
+#! /bin/sh
+
+# Script to run the Perl-compatible PCRE2 tests through Perl. The argument can
+# be "1" or "4" to run just a single test. Otherwise it runs both. This script
+# should be run with the main PCRE2 directory current.
+
+if [ "$1" != "4" ]; then
+echo "-----------------------------------------------------------------"
+echo "Perl test: main functionality (PCRE2 test 1)"
+./perltest.sh testdata/testinput1 testtry
+if [ $? = 0 ] ; then
+  tail -n +3 testtry > testtry3
+  diff -u testdata/testoutput1 testtry3
+  /bin/rm -rf testtry3
+fi
+echo ""
+fi
+
+if [ "$1" != "1" ]; then
+echo "-----------------------------------------------------------------"
+echo "Perl test: UTF-8 and Unicode property features (PCRE2 test 4)"
+./perltest.sh -utf8 testdata/testinput4 testtry
+if [ $? = 0 ] ; then
+  tail -n +3 testtry > testtry3
+  diff -u testdata/testoutput4 testtry3
+  /bin/rm -rf testtry3
+fi
+echo ""
+fi
+
+# End

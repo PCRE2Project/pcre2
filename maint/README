@@ -173,7 +173,8 @@ new release.
   the PCRE2 test output, apart from the version identification at the start of
   each test. Sometimes there are other differences in test 4 if PCRE2 and Perl
   are using different Unicode releases. The other tests are not Perl-compatible
-  (they use various PCRE2-specific features or options).
+  (they use various PCRE2-specific features or options). The maint/RunPerlTest 
+  shell script can be used to do this testing in Unix-like environment.
 
 . It is possible to test with the emulated memmove() function by undefining
   HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often.
@@ -452,4 +453,4 @@ years.
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 25 June 2024
+Last updated: 22 August 2024
