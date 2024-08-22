@@ -82,7 +82,7 @@ pcre2_memctl *allocator = ((pcre2_memctl*)allocator_data);
 allocator->free(ptr, allocator->memory_data);
 }
 
-#include "sljit/sljitLir.c"
+#include "../deps/sljit/sljit_src/sljitLir.c"
 
 #if defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED
 #error Unsupported architecture

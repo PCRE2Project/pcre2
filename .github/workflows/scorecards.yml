@@ -24,6 +24,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
+          submodules: true
           persist-credentials: false
 
       - name: "Run analysis"
