@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Prepare
         run: ./autogen.sh
@@ -36,11 +38,13 @@ jobs:
     runs-on: ubuntu-latest
     container: alpine
     steps:
+      - name: Setup
+        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git #musl-locales
+
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup
-        run: apk add --no-cache automake autoconf gcc libtool make musl-dev #musl-locales
+        with:
+          submodules: true
 
       - name: Prepare
         run: ./autogen.sh
@@ -69,6 +73,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Configure
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -B build
@@ -102,6 +108,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Configure
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -B build -A Win32
