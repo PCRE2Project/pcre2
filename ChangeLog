@@ -72,6 +72,9 @@ The condition could erroneously be treated as true if a branch matched but
 overran the current position. This bug was in the interpreter only; matching 
 with JIT was correct.
 
+12. Add a new error code (PCRE2_ERROR_JIT_UNSUPPORTED) which is yielded
+for unsupported jit features.
+
 
 Version 10.44 07-June-2024
 --------------------------

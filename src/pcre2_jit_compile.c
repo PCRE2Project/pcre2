@@ -14280,7 +14280,7 @@ common->ovector_start += sizeof(sljit_sw);
 if (!check_opcode_types(common, common->start, ccend))
   {
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
-  return PCRE2_ERROR_NOMEMORY;
+  return PCRE2_ERROR_JIT_UNSUPPORTED;
   }
 
 /* Checking flags and updating ovector_start. */
@@ -14865,15 +14865,19 @@ if (executable_allocator_is_working == -1)
     }
   else executable_allocator_is_working = 0;
   }
+#endif
 
 if (options & PCRE2_JIT_TEST_ALLOC)
   {
   if (options != PCRE2_JIT_TEST_ALLOC)
     return PCRE2_ERROR_JIT_BADOPTION;
 
+#ifdef SUPPORT_JIT
   return executable_allocator_is_working ? 0 : PCRE2_ERROR_NOMEMORY;
-  }
+#else
+  return PCRE2_ERROR_JIT_UNSUPPORTED;
 #endif
+  }
 
 if (code == NULL)
   return PCRE2_ERROR_NULL;
