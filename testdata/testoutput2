@@ -10747,9 +10747,9 @@ Subject length lower bound = 1
 /(?=a{3})[bcd]/Ii
 Capture group count = 0
 Options: caseless
-First code unit = 'a' (caseless)
+Starting code units: A a
 Last code unit = 'a' (caseless)
-Subject length lower bound = 2
+Subject length lower bound = 1
 
 /(abc)\1+/
 
