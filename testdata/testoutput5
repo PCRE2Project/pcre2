@@ -196,7 +196,7 @@ Subject length lower bound = 3
 Capture group count = 0
 Compile options: utf
 Overall options: anchored utf
-Starting code units: a b 
+Starting code units: a b
 Subject length lower bound = 1
     bar
  0: b

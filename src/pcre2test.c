@@ -4839,24 +4839,24 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     {
     int i;
     int c = 24;
-    fprintf(outfile, "Starting code units: ");
+    fprintf(outfile, "Starting code units:");
     for (i = 0; i < 256; i++)
       {
       if ((start_bits[i/8] & (1u << (i&7))) != 0)
         {
         if (c > 75)
           {
-          fprintf(outfile, "\n  ");
+          fprintf(outfile, "\n ");
           c = 2;
           }
         if (PRINTOK(i) && i != ' ')
           {
-          fprintf(outfile, "%c ", i);
+          fprintf(outfile, " %c", i);
           c += 2;
           }
         else
           {
-          fprintf(outfile, "\\x%02x ", i);
+          fprintf(outfile, " \\x%02x", i);
           c += 5;
           }
         }
