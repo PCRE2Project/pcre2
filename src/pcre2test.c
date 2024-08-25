@@ -3589,7 +3589,7 @@ for (;;)
     }
   }
 
-/* Control never gets here */
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -9451,7 +9451,8 @@ least 128 code units, because it is used for retrieving error messages. */
     if (*endptr == 0) goto EXIT;
     arg_error = endptr + 1;
     }
-  /* Control never reaches here */
+
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
   }  /* End of -error handling */
 
 /* Initialize things that cannot be done until we know which test mode we are

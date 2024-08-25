@@ -900,7 +900,8 @@ for (;;)
   if (strcmp(dent->d_name, ".") != 0 && strcmp(dent->d_name, "..") != 0)
     return dent->d_name;
   }
-/* Control never reaches here */
+
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 static void
@@ -1695,7 +1696,7 @@ switch(endlinetype)
     while (p > startptr && p[-1] != '\n') p--;
     if (p <= startptr + 1 || p[-2] == '\r') return p;
     }
-  /* Control can never get here */
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
