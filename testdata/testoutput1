@@ -10536,4 +10536,12 @@ No match
     aaab
  0: ab
 
+/(?=a)b?a/
+    a
+ 0: a
+
+/(?=a)b?a./
+    ab
+ 0: ab
+
 # End of testinput1 

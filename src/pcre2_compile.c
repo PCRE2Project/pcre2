@@ -10895,8 +10895,19 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   (these are not saved during the compile because they can cause conflicts with
   actual literals that follow). */
 
-  if (firstcuflags >= REQ_NONE)
-    firstcu = find_firstassertedcu(codestart, &firstcuflags, 0);
+  if (firstcuflags >= REQ_NONE) {
+    uint32_t assertedcuflags = 0;
+    uint32_t assertedcu = find_firstassertedcu(codestart, &assertedcuflags, 0);
+    /* It would be wrong to use the asserted first code unit as `firstcu` for
+     * regexes which are able to match a 1-character string (e.g. /(?=a)b?a/)
+     * For that example, if we set both firstcu and reqcu to 'a', it would mean
+     * the subject string needs to be at least 2 characters long, which is wrong.
+     * With more analysis, we would be able to set firstcu in more cases. */
+    if (assertedcuflags < REQ_NONE && assertedcu != reqcu) {
+      firstcu = assertedcu;
+      firstcuflags = assertedcuflags;
+    }
+  }
 
   /* Save the data for a first code unit. The existence of one means the
   minimum length must be at least 1. */

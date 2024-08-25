@@ -195,7 +195,7 @@ No match, mark = m (JIT)
 
 /(a+)*zz/I
 Capture group count = 1
-Starting code units: a z 
+Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
@@ -298,7 +298,7 @@ Failed: error -47: match limit exceeded
 /(*LIMIT_MATCH=3000)(a+)*zz/I
 Capture group count = 1
 Match limit = 3000
-Starting code units: a z 
+Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
@@ -312,7 +312,7 @@ Failed: error -47: match limit exceeded
 /(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
 Capture group count = 1
 Match limit = 3000
-Starting code units: a z 
+Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful
@@ -323,7 +323,7 @@ Failed: error -47: match limit exceeded
 /(*LIMIT_MATCH=60000)(a+)*zz/I
 Capture group count = 1
 Match limit = 60000
-Starting code units: a z 
+Starting code units: a z
 Last code unit = 'z'
 Subject length lower bound = 2
 JIT compilation was successful

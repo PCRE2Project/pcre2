@@ -6677,4 +6677,10 @@ $/x
 /(?(?<=a(?:a.b|b))b).b/
     aaab
 
+/(?=a)b?a/
+    a
+
+/(?=a)b?a./
+    ab
+
 # End of testinput1 
