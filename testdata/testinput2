@@ -6151,13 +6151,41 @@ a)"xI
 
 /(*scs:(1)a|b)/
 
+/(*scs:(0)a)/
+
 /(*scan_substring:(1)a|b)/
 
 /(*scs:(<name>)a|b)/
 
 /(*scan_substring:(<name>)a|b)/
 
-# Tests for the feature
+# Tests for iterating scan_substring
+
+/(a)(*scs:(1)b)*c/B
+
+/(a)(*scs:(1)b)*?c/B
+
+/(a)(*scs:(1)b)*+c/B
+
+/(a)(*scs:(1)b)+c/B
+
+/(a)(*scs:(1)b)+?c/B
+
+/(a)(*scs:(1)b)++c/B
+
+/(a)(*scs:(1)b)?c/B
+
+/(a)(*scs:(1)b)??c/B
+
+/(a)(*scs:(1)b)?+c/B
+
+/(a)(*scs:(1)b){3}c/B
+
+/(a)(*scs:(1)b){3,5}?c/B
+
+/(a)(*scs:(1)b){3,}+c/B
+
+# Tests for scan_substring
 
 /([a-z]++)(*scs:(1)(stx)|(ne))(.)/B
   ##string##next!##
@@ -6182,5 +6210,24 @@ a)"xI
 
 /([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
   ##cdefgh##cdeabxy##
+
+/([a-z]++)##(*scs:(1)(abc))?!/
+  ##xyz##abc##!
+  ##xyz##!
+  ##xyz##
+
+/([a-z]++)##(*scs:(1)(abc))??(?(2)!|:)/
+  ##abc##abc##!
+  ##abc##xyz##:
+  ##abc###
+
+/([a-z]++)##(*scs:(1)(abc)|xyz){8}(?(2)!|:)/
+  ##abc##abc##!
+  ##abc##xyz##:
+  ##nnn##!
+  ##nnn##:
+
+/[A-Z]{3}([A-Z]++)#(*scs:(1)(?<=BC)XY)#/
+  ABCXY##AKCXY##
 
 # End of testinput2

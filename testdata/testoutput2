@@ -18151,10 +18151,13 @@ Failed: error 114 at offset 6: missing closing parenthesis
 Failed: error 114 at offset 18: missing closing parenthesis
 
 /(*scs:('name'/
-Failed: error 114 at offset 14: missing closing parenthesis
+Failed: error 114 at offset 13: missing closing parenthesis
 
 /(*scs:(1)a|b)/
 Failed: error 115 at offset 6: reference to non-existent subpattern
+
+/(*scs:(0)a)/
+Failed: error 115 at offset 8: reference to non-existent subpattern
 
 /(*scan_substring:(1)a|b)/
 Failed: error 115 at offset 17: reference to non-existent subpattern
@@ -18165,7 +18168,259 @@ Failed: error 115 at offset 8: reference to non-existent subpattern
 /(*scan_substring:(<name>)a|b)/
 Failed: error 115 at offset 19: reference to non-existent subpattern
 
-# Tests for the feature
+# Tests for iterating scan_substring
+
+/(a)(*scs:(1)b)*c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)*?c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Braminzero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)*+c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Once
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)+c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)+?c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Braminzero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)++c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Once
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)?c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)??c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Braminzero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b)?+c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Once
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b){3}c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b){3,5}?c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Braminzero
+        Bra
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Braminzero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a)(*scs:(1)b){3,}+c/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Once
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Brazero
+        Scan substring
+      1 Cond ref
+        b
+        Ket
+        Ket
+        c
+        Ket
+        End
+------------------------------------------------------------------
+
+# Tests for scan_substring
 
 /([a-z]++)(*scs:(1)(stx)|(ne))(.)/B
 ------------------------------------------------------------------
@@ -18273,6 +18528,46 @@ No match
  0: abxy
  1: abxy
  2: ab
+
+/([a-z]++)##(*scs:(1)(abc))?!/
+  ##xyz##abc##!
+ 0: abc##!
+ 1: abc
+ 2: abc
+  ##xyz##!
+ 0: xyz##!
+ 1: xyz
+  ##xyz##
+No match
+
+/([a-z]++)##(*scs:(1)(abc))??(?(2)!|:)/
+  ##abc##abc##!
+ 0: abc##!
+ 1: abc
+ 2: abc
+  ##abc##xyz##:
+ 0: xyz##:
+ 1: xyz
+  ##abc###
+No match
+
+/([a-z]++)##(*scs:(1)(abc)|xyz){8}(?(2)!|:)/
+  ##abc##abc##!
+ 0: abc##!
+ 1: abc
+ 2: abc
+  ##abc##xyz##:
+ 0: xyz##:
+ 1: xyz
+  ##nnn##!
+No match
+  ##nnn##:
+No match
+
+/[A-Z]{3}([A-Z]++)#(*scs:(1)(?<=BC)XY)#/
+  ABCXY##AKCXY##
+ 0: ABCXY##
+ 1: XY
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
