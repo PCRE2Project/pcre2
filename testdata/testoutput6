@@ -7933,4 +7933,8 @@ Partial match:
  3: a
  4: 
 
+/([a-z]++)(*scs:(1).)/
+    aa
+Failed: error -42: pattern contains an item that is not supported for DFA matching
+
 # End of testinput6

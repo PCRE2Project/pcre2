@@ -915,6 +915,7 @@ a positive value. */
 #define STRING_naplb0                "naplb\0"
 #define STRING_nla0                  "nla\0"
 #define STRING_nlb0                  "nlb\0"
+#define STRING_scs0                  "scs\0"
 #define STRING_sr0                   "sr\0"
 #define STRING_asr0                  "asr\0"
 #define STRING_positive_lookahead0   "positive_lookahead\0"
@@ -925,6 +926,7 @@ a positive value. */
 #define STRING_negative_lookbehind0  "negative_lookbehind\0"
 #define STRING_script_run0           "script_run\0"
 #define STRING_atomic_script_run     "atomic_script_run"
+#define STRING_scan_substring0       "scan_substring\0"
 
 #define STRING_alpha0                "alpha\0"
 #define STRING_lower0                "lower\0"
@@ -1216,6 +1218,7 @@ only. */
 #define STRING_naplb0                STR_n STR_a STR_p STR_l STR_b "\0"
 #define STRING_nla0                  STR_n STR_l STR_a "\0"
 #define STRING_nlb0                  STR_n STR_l STR_b "\0"
+#define STRING_scs0                  STR_s STR_c STR_s "\0"
 #define STRING_sr0                   STR_s STR_r "\0"
 #define STRING_asr0                  STR_a STR_s STR_r "\0"
 #define STRING_positive_lookahead0   STR_p STR_o STR_s STR_i STR_t STR_i STR_v STR_e STR_UNDERSCORE STR_l STR_o STR_o STR_k STR_a STR_h STR_e STR_a STR_d "\0"
@@ -1226,6 +1229,7 @@ only. */
 #define STRING_negative_lookbehind0  STR_n STR_e STR_g STR_a STR_t STR_i STR_v STR_e STR_UNDERSCORE STR_l STR_o STR_o STR_k STR_b STR_e STR_h STR_i STR_n STR_d "\0"
 #define STRING_script_run0           STR_s STR_c STR_r STR_i STR_p STR_t STR_UNDERSCORE STR_r STR_u STR_n "\0"
 #define STRING_atomic_script_run     STR_a STR_t STR_o STR_m STR_i STR_c STR_UNDERSCORE STR_s STR_c STR_r STR_i STR_p STR_t STR_UNDERSCORE STR_r STR_u STR_n
+#define STRING_scan_substring0       STR_s STR_c STR_a STR_n STR_UNDERSCORE STR_s STR_u STR_b STR_s STR_t STR_r STR_i STR_n STR_g "\0"
 
 #define STRING_alpha0                STR_a STR_l STR_p STR_h STR_a "\0"
 #define STRING_lower0                STR_l STR_o STR_w STR_e STR_r "\0"
@@ -1579,78 +1583,79 @@ enum {
   OP_ASSERTBACK_NOT, /* 130 Negative lookbehind */
   OP_ASSERT_NA,      /* 131 Positive non-atomic lookahead */
   OP_ASSERTBACK_NA,  /* 132 Positive non-atomic lookbehind */
+  OP_ASSERT_SCS,     /* 133 Scan substring */
 
   /* ONCE, SCRIPT_RUN, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come
   immediately after the assertions, with ONCE first, as there's a test for >=
   ONCE for a subpattern that isn't an assertion. The POS versions must
   immediately follow the non-POS versions in each case. */
 
-  OP_ONCE,           /* 133 Atomic group, contains captures */
-  OP_SCRIPT_RUN,     /* 134 Non-capture, but check characters' scripts */
-  OP_BRA,            /* 135 Start of non-capturing bracket */
-  OP_BRAPOS,         /* 136 Ditto, with unlimited, possessive repeat */
-  OP_CBRA,           /* 137 Start of capturing bracket */
-  OP_CBRAPOS,        /* 138 Ditto, with unlimited, possessive repeat */
-  OP_COND,           /* 139 Conditional group */
+  OP_ONCE,           /* 134 Atomic group, contains captures */
+  OP_SCRIPT_RUN,     /* 135 Non-capture, but check characters' scripts */
+  OP_BRA,            /* 136 Start of non-capturing bracket */
+  OP_BRAPOS,         /* 137 Ditto, with unlimited, possessive repeat */
+  OP_CBRA,           /* 138 Start of capturing bracket */
+  OP_CBRAPOS,        /* 139 Ditto, with unlimited, possessive repeat */
+  OP_COND,           /* 140 Conditional group */
 
   /* These five must follow the previous five, in the same order. There's a
   check for >= SBRA to distinguish the two sets. */
 
-  OP_SBRA,           /* 140 Start of non-capturing bracket, check empty  */
-  OP_SBRAPOS,        /* 141 Ditto, with unlimited, possessive repeat */
-  OP_SCBRA,          /* 142 Start of capturing bracket, check empty */
-  OP_SCBRAPOS,       /* 143 Ditto, with unlimited, possessive repeat */
-  OP_SCOND,          /* 144 Conditional group, check empty */
+  OP_SBRA,           /* 141 Start of non-capturing bracket, check empty  */
+  OP_SBRAPOS,        /* 142 Ditto, with unlimited, possessive repeat */
+  OP_SCBRA,          /* 143 Start of capturing bracket, check empty */
+  OP_SCBRAPOS,       /* 144 Ditto, with unlimited, possessive repeat */
+  OP_SCOND,          /* 145 Conditional group, check empty */
 
   /* The next two pairs must (respectively) be kept together. */
 
-  OP_CREF,           /* 145 Used to hold a capture number as condition */
-  OP_DNCREF,         /* 146 Used to point to duplicate names as a condition */
-  OP_RREF,           /* 147 Used to hold a recursion number as condition */
-  OP_DNRREF,         /* 148 Used to point to duplicate names as a condition */
-  OP_FALSE,          /* 149 Always false (used by DEFINE and VERSION) */
-  OP_TRUE,           /* 150 Always true (used by VERSION) */
+  OP_CREF,           /* 146 Used to hold a capture number as condition */
+  OP_DNCREF,         /* 147 Used to point to duplicate names as a condition */
+  OP_RREF,           /* 148 Used to hold a recursion number as condition */
+  OP_DNRREF,         /* 149 Used to point to duplicate names as a condition */
+  OP_FALSE,          /* 150 Always false (used by DEFINE and VERSION) */
+  OP_TRUE,           /* 151 Always true (used by VERSION) */
 
-  OP_BRAZERO,        /* 151 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 152 order. */
-  OP_BRAPOSZERO,     /* 153 */
+  OP_BRAZERO,        /* 152 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 153 order. */
+  OP_BRAPOSZERO,     /* 154 */
 
   /* These are backtracking control verbs */
 
-  OP_MARK,           /* 154 always has an argument */
-  OP_PRUNE,          /* 155 */
-  OP_PRUNE_ARG,      /* 156 same, but with argument */
-  OP_SKIP,           /* 157 */
-  OP_SKIP_ARG,       /* 158 same, but with argument */
-  OP_THEN,           /* 159 */
-  OP_THEN_ARG,       /* 160 same, but with argument */
-  OP_COMMIT,         /* 161 */
-  OP_COMMIT_ARG,     /* 162 same, but with argument */
+  OP_MARK,           /* 155 always has an argument */
+  OP_PRUNE,          /* 156 */
+  OP_PRUNE_ARG,      /* 157 same, but with argument */
+  OP_SKIP,           /* 158 */
+  OP_SKIP_ARG,       /* 159 same, but with argument */
+  OP_THEN,           /* 160 */
+  OP_THEN_ARG,       /* 161 same, but with argument */
+  OP_COMMIT,         /* 162 */
+  OP_COMMIT_ARG,     /* 163 same, but with argument */
 
   /* These are forced failure and success verbs. FAIL and ACCEPT do accept an
   argument, but these cases can be compiled as, for example, (*MARK:X)(*FAIL)
   without the need for a special opcode. */
 
-  OP_FAIL,           /* 163 */
-  OP_ACCEPT,         /* 164 */
-  OP_ASSERT_ACCEPT,  /* 165 Used inside assertions */
-  OP_CLOSE,          /* 166 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 164 */
+  OP_ACCEPT,         /* 165 */
+  OP_ASSERT_ACCEPT,  /* 166 Used inside assertions */
+  OP_CLOSE,          /* 167 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 167 */
+  OP_SKIPZERO,       /* 168 */
 
   /* This is used to identify a DEFINE group during compilation so that it can
   be checked for having only one branch. It is changed to OP_FALSE before
   compilation finishes. */
 
-  OP_DEFINE,         /* 168 */
+  OP_DEFINE,         /* 169 */
 
   /* These opcodes replace their normal counterparts in UCP mode when
   PCRE2_EXTRA_ASCII_BSW is not set. */
 
-  OP_NOT_UCP_WORD_BOUNDARY, /* 169 */
-  OP_UCP_WORD_BOUNDARY,     /* 170 */
+  OP_NOT_UCP_WORD_BOUNDARY, /* 170 */
+  OP_UCP_WORD_BOUNDARY,     /* 171 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1699,6 +1704,7 @@ some cases doesn't actually use these names at all). */
   "Reverse", "VReverse", "Assert", "Assert not",                  \
   "Assert back", "Assert back not",                               \
   "Non-atomic assert", "Non-atomic assert back",                  \
+  "Scan substring",                                               \
   "Once",                                                         \
   "Script run",                                                   \
   "Bra", "BraPos", "CBra", "CBraPos",                             \
@@ -1786,6 +1792,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* Assert behind not                      */ \
   1+LINK_SIZE,                   /* NA Assert                              */ \
   1+LINK_SIZE,                   /* NA Assert behind                       */ \
+  1+LINK_SIZE,                   /* Scan substring                         */ \
   1+LINK_SIZE,                   /* ONCE                                   */ \
   1+LINK_SIZE,                   /* SCRIPT_RUN                             */ \
   1+LINK_SIZE,                   /* BRA                                    */ \

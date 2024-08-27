@@ -231,63 +231,65 @@ code (meta_extra_lengths, just below) must be updated to remain in step. */
 #define META_COND_RNAME       0x80130000u  /* (?(R&name)... */
 #define META_COND_RNUMBER     0x80140000u  /* (?(Rdigits)... */
 #define META_COND_VERSION     0x80150000u  /* (?(VERSION<op>x.y)... */
-#define META_DOLLAR           0x80160000u  /* $ metacharacter */
-#define META_DOT              0x80170000u  /* . metacharacter */
-#define META_ESCAPE           0x80180000u  /* \d and friends */
-#define META_KET              0x80190000u  /* closing parenthesis */
-#define META_NOCAPTURE        0x801a0000u  /* no capture parens */
-#define META_OPTIONS          0x801b0000u  /* (?i) and friends */
-#define META_POSIX            0x801c0000u  /* POSIX class item */
-#define META_POSIX_NEG        0x801d0000u  /* negative POSIX class item */
-#define META_RANGE_ESCAPED    0x801e0000u  /* range with at least one escape */
-#define META_RANGE_LITERAL    0x801f0000u  /* range defined literally */
-#define META_RECURSE          0x80200000u  /* Recursion */
-#define META_RECURSE_BYNAME   0x80210000u  /* (?&name) */
-#define META_SCRIPT_RUN       0x80220000u  /* (*script_run:...) */
+#define META_SCS_NAME         0x80160000u  /* (*scan_substring:(<name>)... */
+#define META_SCS_NUMBER       0x80170000u  /* (*scan_substring:(digits)... */
+#define META_DOLLAR           0x80180000u  /* $ metacharacter */
+#define META_DOT              0x80190000u  /* . metacharacter */
+#define META_ESCAPE           0x801a0000u  /* \d and friends */
+#define META_KET              0x801b0000u  /* closing parenthesis */
+#define META_NOCAPTURE        0x801c0000u  /* no capture parens */
+#define META_OPTIONS          0x801d0000u  /* (?i) and friends */
+#define META_POSIX            0x801e0000u  /* POSIX class item */
+#define META_POSIX_NEG        0x801f0000u  /* negative POSIX class item */
+#define META_RANGE_ESCAPED    0x80200000u  /* range with at least one escape */
+#define META_RANGE_LITERAL    0x80210000u  /* range defined literally */
+#define META_RECURSE          0x80220000u  /* Recursion */
+#define META_RECURSE_BYNAME   0x80230000u  /* (?&name) */
+#define META_SCRIPT_RUN       0x80240000u  /* (*script_run:...) */
 
 /* These must be kept together to make it easy to check that an assertion
 is present where expected in a conditional group. */
 
-#define META_LOOKAHEAD        0x80230000u  /* (?= */
-#define META_LOOKAHEADNOT     0x80240000u  /* (?! */
-#define META_LOOKBEHIND       0x80250000u  /* (?<= */
-#define META_LOOKBEHINDNOT    0x80260000u  /* (?<! */
+#define META_LOOKAHEAD        0x80250000u  /* (?= */
+#define META_LOOKAHEADNOT     0x80260000u  /* (?! */
+#define META_LOOKBEHIND       0x80270000u  /* (?<= */
+#define META_LOOKBEHINDNOT    0x80280000u  /* (?<! */
 
 /* These cannot be conditions */
 
-#define META_LOOKAHEAD_NA     0x80270000u  /* (*napla: */
-#define META_LOOKBEHIND_NA    0x80280000u  /* (*naplb: */
+#define META_LOOKAHEAD_NA     0x80290000u  /* (*napla: */
+#define META_LOOKBEHIND_NA    0x802a0000u  /* (*naplb: */
 
 /* These must be kept in this order, with consecutive values, and the _ARG
 versions of COMMIT, PRUNE, SKIP, and THEN immediately after their non-argument
 versions. */
 
-#define META_MARK             0x80290000u  /* (*MARK) */
-#define META_ACCEPT           0x802a0000u  /* (*ACCEPT) */
-#define META_FAIL             0x802b0000u  /* (*FAIL) */
-#define META_COMMIT           0x802c0000u  /* These               */
-#define META_COMMIT_ARG       0x802d0000u  /*   pairs             */
-#define META_PRUNE            0x802e0000u  /*     must            */
-#define META_PRUNE_ARG        0x802f0000u  /*       be            */
-#define META_SKIP             0x80300000u  /*         kept        */
-#define META_SKIP_ARG         0x80310000u  /*           in        */
-#define META_THEN             0x80320000u  /*             this    */
-#define META_THEN_ARG         0x80330000u  /*               order */
+#define META_MARK             0x802b0000u  /* (*MARK) */
+#define META_ACCEPT           0x802c0000u  /* (*ACCEPT) */
+#define META_FAIL             0x802d0000u  /* (*FAIL) */
+#define META_COMMIT           0x802e0000u  /* These               */
+#define META_COMMIT_ARG       0x802f0000u  /*   pairs             */
+#define META_PRUNE            0x80300000u  /*     must            */
+#define META_PRUNE_ARG        0x80310000u  /*       be            */
+#define META_SKIP             0x80320000u  /*         kept        */
+#define META_SKIP_ARG         0x80330000u  /*           in        */
+#define META_THEN             0x80340000u  /*             this    */
+#define META_THEN_ARG         0x80350000u  /*               order */
 
 /* These must be kept in groups of adjacent 3 values, and all together. */
 
-#define META_ASTERISK         0x80340000u  /* *  */
-#define META_ASTERISK_PLUS    0x80350000u  /* *+ */
-#define META_ASTERISK_QUERY   0x80360000u  /* *? */
-#define META_PLUS             0x80370000u  /* +  */
-#define META_PLUS_PLUS        0x80380000u  /* ++ */
-#define META_PLUS_QUERY       0x80390000u  /* +? */
-#define META_QUERY            0x803a0000u  /* ?  */
-#define META_QUERY_PLUS       0x803b0000u  /* ?+ */
-#define META_QUERY_QUERY      0x803c0000u  /* ?? */
-#define META_MINMAX           0x803d0000u  /* {n,m}  repeat */
-#define META_MINMAX_PLUS      0x803e0000u  /* {n,m}+ repeat */
-#define META_MINMAX_QUERY     0x803f0000u  /* {n,m}? repeat */
+#define META_ASTERISK         0x80360000u  /* *  */
+#define META_ASTERISK_PLUS    0x80370000u  /* *+ */
+#define META_ASTERISK_QUERY   0x80380000u  /* *? */
+#define META_PLUS             0x80390000u  /* +  */
+#define META_PLUS_PLUS        0x803a0000u  /* ++ */
+#define META_PLUS_QUERY       0x803b0000u  /* +? */
+#define META_QUERY            0x803c0000u  /* ?  */
+#define META_QUERY_PLUS       0x803d0000u  /* ?+ */
+#define META_QUERY_QUERY      0x803e0000u  /* ?? */
+#define META_MINMAX           0x803f0000u  /* {n,m}  repeat */
+#define META_MINMAX_PLUS      0x80400000u  /* {n,m}+ repeat */
+#define META_MINMAX_QUERY     0x80410000u  /* {n,m}? repeat */
 
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
@@ -326,6 +328,8 @@ static unsigned char meta_extra_lengths[] = {
   1+SIZEOFFSET,  /* META_COND_RNAME */
   1+SIZEOFFSET,  /* META_COND_RNUMBER */
   3,             /* META_COND_VERSION */
+  1+SIZEOFFSET,  /* META_SCS_NAME */
+  1+SIZEOFFSET,  /* META_SCS_NUMBER */
   0,             /* META_DOLLAR */
   0,             /* META_DOT */
   0,             /* META_ESCAPE - one more for ESC_P and ESC_p */
@@ -656,6 +660,8 @@ static const char alasnames[] =
   STRING_non_atomic_positive_lookbehind0
   STRING_negative_lookahead0
   STRING_negative_lookbehind0
+  STRING_scs0
+  STRING_scan_substring0
   STRING_atomic0
   STRING_sr0
   STRING_asr0
@@ -675,6 +681,8 @@ static const alasitem alasmeta[] = {
   { 30, META_LOOKBEHIND_NA     },
   { 18, META_LOOKAHEADNOT      },
   { 19, META_LOOKBEHINDNOT     },
+  {  3, META_SCS_NUMBER        }, /* placeholder, updated later */
+  { 14, META_SCS_NUMBER        }, /* placeholder, updated later */
   {  6, META_ATOMIC            },
   {  2, META_SCRIPT_RUN        }, /* sr = script run */
   {  3, META_ATOMIC_SCRIPT_RUN }, /* asr = atomic script run */
@@ -1150,6 +1158,19 @@ for (;;)
     fprintf(stderr, "META (?(Rnumber) length=%d offset=", *pptr++);
     GETOFFSET(offset, pptr);
     fprintf(stderr, "%zd", offset);
+    break;
+
+    case META_SCS_NAME:
+    fprintf(stderr, "META (*scan_substring:(<name>) length=%d offset=", *pptr++);
+    GETOFFSET(offset, pptr);
+    fprintf(stderr, "%zd", offset);
+    break;
+
+    case META_SCS_NUMBER:
+    fprintf(stderr, "META_SCS_NUMBER %d offset=", pptr[SIZEOFFSET]);
+    GETOFFSET(offset, pptr);
+    fprintf(stderr, "%zd", offset);
+    pptr++;
     break;
 
     case META_MARK:
@@ -4053,6 +4074,67 @@ while (ptr < ptrend)
           case META_LOOKAHEADNOT:
           goto NEGATIVE_LOOK_AHEAD;
 
+          case META_SCS_NUMBER:
+          nest_depth++;
+
+          if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+
+          if (*ptr != CHAR_LEFT_PARENTHESIS)
+            {
+            errorcode = ERR15;
+            goto FAILED;
+            }
+
+          ptr++;
+
+          /* Handle (scan_substring:([+-]number)... */
+          if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61,
+              &i, &errorcode))
+            {
+            if (i <= 0)
+              {
+              errorcode = ERR15;
+              goto FAILED;
+              }
+            *parsed_pattern++ = META_SCS_NUMBER;
+            offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
+            PUTOFFSET(offset, parsed_pattern);
+            *parsed_pattern++ = i;
+            }
+          else if (errorcode != 0) goto FAILED;   /* Number too big */
+          else
+            {
+            if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+
+            /* Handle (*scan_substring:('name') or (*scan_substring:(<name>) */
+            if (*ptr == CHAR_LESS_THAN_SIGN)
+              terminator = CHAR_GREATER_THAN_SIGN;
+            else if (*ptr == CHAR_APOSTROPHE)
+              terminator = CHAR_APOSTROPHE;
+            else
+              {
+              errorcode = ERR15;
+              goto FAILED;
+              }
+
+            if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name,
+                &namelen, &errorcode, cb)) goto FAILED;
+
+            *parsed_pattern++ = META_SCS_NAME;
+            *parsed_pattern++ = namelen;
+            PUTOFFSET(offset, parsed_pattern);
+            }
+
+          if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+
+          if (*ptr != CHAR_RIGHT_PARENTHESIS)
+            {
+            errorcode = ERR24;
+            break;
+            }
+          ptr++;
+          break;
+
           case META_LOOKBEHIND:
           case META_LOOKBEHINDNOT:
           case META_LOOKBEHIND_NA:
@@ -6642,7 +6724,8 @@ for (;; pptr++)
     case META_COND_RNUMBER:   /* (?(Rdigits) */
     case META_COND_NAME:      /* (?(name) or (?'name') or ?(<name>) */
     case META_COND_RNAME:     /* (?(R&name) - test for recursion */
-    bravalue = OP_COND;
+    case META_SCS_NAME:       /* (*scan_substring:'name') or (*scan_substring:(<name>)) */
+    bravalue = meta == META_SCS_NAME ? OP_ASSERT_SCS : OP_COND;
       {
       int count, index;
       unsigned int i;
@@ -6736,7 +6819,9 @@ for (;; pptr++)
       PUT2(code, 2+LINK_SIZE, index);
       PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);
       }
-    goto GROUP_PROCESS_NOTE_EMPTY;
+    if (meta != META_SCS_NAME) goto GROUP_PROCESS_NOTE_EMPTY;
+    cb->assert_depth += 1;
+    goto GROUP_PROCESS;
 
     /* The DEFINE condition is always false. Its internal groups may never
     be called, so matched_char must remain false, hence the jump to
@@ -6752,7 +6837,8 @@ for (;; pptr++)
     /* Conditional test of a group's being set. */
 
     case META_COND_NUMBER:
-    bravalue = OP_COND;
+    case META_SCS_NUMBER:
+    bravalue = meta == META_SCS_NUMBER ? OP_ASSERT_SCS : OP_COND;
     GETPLUSOFFSET(offset, pptr);
     groupnumber = *(++pptr);
     if (groupnumber > cb->bracount)
@@ -6762,11 +6848,14 @@ for (;; pptr++)
       return 0;
       }
     if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
-    offset -= 2;   /* Point at initial ( for too many branches error */
+    /* Point at initial ( for too many branches error */
+    if (meta != META_SCS_NUMBER) offset -= 2;
     code[1+LINK_SIZE] = OP_CREF;
     skipunits = 1+IMM2_SIZE;
     PUT2(code, 2+LINK_SIZE, groupnumber);
-    goto GROUP_PROCESS_NOTE_EMPTY;
+    if (meta != META_SCS_NUMBER) goto GROUP_PROCESS_NOTE_EMPTY;
+    cb->assert_depth += 1;
+    goto GROUP_PROCESS;
 
     /* Test for the PCRE2 version. */
 
@@ -6900,7 +6989,7 @@ for (;; pptr++)
 
     /* If we've just compiled an assertion, pop the assert depth. */
 
-    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NA)
+    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERT_SCS)
       cb->assert_depth -= 1;
 
     /* At the end of compiling, code is still pointing to the start of the

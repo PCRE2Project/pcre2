@@ -18140,6 +18140,140 @@ No match
         End
 ------------------------------------------------------------------
 
+# Tests for scan substring, a non Perl feature of PCRE2
+
+# Parse errors first
+
+/(*scs:/
+Failed: error 114 at offset 6: missing closing parenthesis
+
+/(*scan_substring:(/
+Failed: error 114 at offset 18: missing closing parenthesis
+
+/(*scs:('name'/
+Failed: error 114 at offset 14: missing closing parenthesis
+
+/(*scs:(1)a|b)/
+Failed: error 115 at offset 6: reference to non-existent subpattern
+
+/(*scan_substring:(1)a|b)/
+Failed: error 115 at offset 17: reference to non-existent subpattern
+
+/(*scs:(<name>)a|b)/
+Failed: error 115 at offset 8: reference to non-existent subpattern
+
+/(*scan_substring:(<name>)a|b)/
+Failed: error 115 at offset 19: reference to non-existent subpattern
+
+# Tests for the feature
+
+/([a-z]++)(*scs:(1)(stx)|(ne))(.)/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        [a-z]++
+        Ket
+        Scan substring
+      1 Cond ref
+        CBra 2
+        stx
+        Ket
+        Alt
+        CBra 3
+        ne
+        Ket
+        Ket
+        CBra 4
+        Any
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+  ##string##next!##
+ 0: next!
+ 1: next
+ 2: <unset>
+ 3: ne
+ 4: !
+  __aastxaa:__
+ 0: stxaa:
+ 1: stxaa
+ 2: stx
+ 3: <unset>
+ 4: :
+  __abababab:__
+No match
+
+/(?<XX>[a-z]++)##(*scan_substring:('XX').*(..)$)\2/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        [a-z]++
+        Ket
+        ##
+        Scan substring
+      1 Cond ref
+        Any*
+        CBra 2
+        Any
+        Any
+        Ket
+        $
+        Ket
+        \2
+        Ket
+        End
+------------------------------------------------------------------
+  ##abcd##abcd##cd##
+ 0: abcd##cd
+ 1: abcd
+ 2: cd
+  ##abcd##abcd##abcd##
+No match
+
+/([a-z])([a-z]++)(#+)(*scs:(2)(ab.))/
+  xab##
+No match
+  yabc###
+ 0: yabc###
+ 1: y
+ 2: abc
+ 3: ###
+ 4: abc
+  zababc####
+ 0: zababc####
+ 1: z
+ 2: ababc
+ 3: ####
+ 4: aba
+
+/(?:(?<YYY>[a-z]++)|(?<YYY>[0-9]++)|$)(*scan_substring:('YYY')((?<START>.).*\k<START>$))/dupnames
+  $$abacd$$112345$$abca$$
+ 0: abca
+ 1: abca
+ 2: <unset>
+ 3: abca
+ 4: a
+  $$abcdeaf$$1234567819$$123456781$$
+ 0: 123456781
+ 1: <unset>
+ 2: 123456781
+ 3: 123456781
+ 4: 1
+
+/([a-zA-Z]+)(*scs:(1).*?(?<ABC>[A-Z]+)(*scan_substring:('ABC').*(.)\3))/
+  ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
+ 0: abCDEFGxyCDEEFGhi
+ 1: abCDEFGxyCDEEFGhi
+ 2: CDEEFG
+ 3: E
+
+/([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
+  ##cdefgh##cdeabxy##
+ 0: abxy
+ 1: abxy
+ 2: ab
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

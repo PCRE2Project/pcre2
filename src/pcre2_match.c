@@ -155,7 +155,7 @@ changed, the code at RETURN_SWITCH below must be updated in sync.  */
 enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
-       RM31,  RM32, RM33, RM34, RM35, RM36, RM37 };
+       RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38 };
 
 #ifdef SUPPORT_WIDE_CHARS
 enum { RM100=100, RM101 };
@@ -5585,6 +5585,84 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #undef Lframe_type
 
+    /* ===================================================================== */
+    /* Handle scan substring operation. */
+
+#define Lframe_type          F->temp_32[0]
+#define Lextra_size          F->temp_32[1]
+#define Lsaved_end_subject   F->temp_sptr[0]
+#define Lsaved_eptr          F->temp_sptr[1]
+
+    case OP_ASSERT_SCS:
+    Lextra_size = PRIV(OP_lengths)[Fecode[1 + LINK_SIZE]];
+
+    if (Fecode[1 + LINK_SIZE] == OP_CREF)
+      offset = (GET2(Fecode, 1 + LINK_SIZE + 1) << 1) - 2;
+    else
+      {
+      /* The OP_DNCREF case. */
+      int count = GET2(Fecode, 1 + LINK_SIZE + 1 + IMM2_SIZE);
+      PCRE2_SPTR slot = mb->name_table +
+                        GET2(Fecode, 1 + LINK_SIZE + 1) * mb->name_entry_size;
+
+      offset = 0; /* Disables compiler warning. */
+      while (count > 0)
+        {
+        offset = (GET2(slot, 0) << 1) - 2;
+        if (offset < Foffset_top && Fovector[offset] != PCRE2_UNSET) break;
+        slot += mb->name_entry_size;
+        count--;
+        }
+
+      /* Not found any valid capturing brackets. */
+      if (count == 0)
+        offset = Foffset_top;
+      }
+
+    if (offset >= Foffset_top && Fovector[offset] == PCRE2_UNSET)
+      RRETURN(MATCH_NOMATCH);
+
+    Lsaved_end_subject = mb->end_subject;
+    Lsaved_eptr = Feptr;
+
+    Feptr = mb->start_subject + Fovector[offset];
+    mb->end_subject = mb->start_subject + Fovector[offset + 1];
+
+    Lframe_type = GF_NOCAPTURE | Fop;
+    for (;;)
+      {
+      group_frame_type = Lframe_type;
+      RMATCH(Fecode + 1 + LINK_SIZE + Lextra_size, RM38);
+      if (rrc == MATCH_ACCEPT)
+        {
+        memcpy(Fovector,
+              (char *)assert_accept_frame + offsetof(heapframe, ovector),
+              assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
+        Foffset_top = assert_accept_frame->offset_top;
+        Fmark = assert_accept_frame->mark;
+        break;
+        }
+
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+
+      Fecode += GET(Fecode, 1);
+      if (*Fecode != OP_ALT)
+        {
+        mb->end_subject = Lsaved_end_subject;
+        RRETURN(MATCH_NOMATCH);
+        }
+      Lextra_size = 0;
+      }
+
+    do Fecode += GET(Fecode, 1); while (*Fecode == OP_ALT);
+    Fecode += 1 + LINK_SIZE;
+    Feptr = Lsaved_eptr;
+    break;
+
+#undef Lframe_type
+#undef Lextra_size
+#undef Lsaved_end_subject
+#undef Lsaved_eptr
 
     /* ===================================================================== */
     /* The callout item calls an external function, if one is provided, passing
@@ -6052,6 +6130,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       will never by exercised if Unicode support it not compiled, because in
       that environment script runs cause an error at compile time. */
 
+      case OP_ASSERT_SCS:
+      mb->end_subject = P->temp_sptr[0];
+      Feptr = P->temp_sptr[1];
+      break;
+
       case OP_SCRIPT_RUN:
       if (!PRIV(script_run)(P->eptr, Feptr, utf)) RRETURN(MATCH_NOMATCH);
       break;
@@ -6488,7 +6571,7 @@ switch (Freturn_id)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(16)
   LBL(17) LBL(18) LBL(19) LBL(20) LBL(21) LBL(22) LBL(23) LBL(24)
   LBL(25) LBL(26) LBL(27) LBL(28) LBL(29) LBL(30) LBL(31) LBL(32)
-  LBL(33) LBL(34) LBL(35) LBL(36) LBL(37)
+  LBL(33) LBL(34) LBL(35) LBL(36) LBL(37) LBL(38)
 
 #ifdef SUPPORT_WIDE_CHARS
   LBL(100) LBL(101)
