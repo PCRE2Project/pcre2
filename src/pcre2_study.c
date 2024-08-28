@@ -1135,6 +1135,7 @@ do
           case OP_ASSERTBACK_NOT:
           case OP_ASSERT_NA:
           case OP_ASSERTBACK_NA:
+          case OP_ASSERT_SCS: 
           ncode += GET(ncode, 1);
           while (*ncode == OP_ALT) ncode += GET(ncode, 1);
           ncode += 1 + LINK_SIZE;
@@ -1253,12 +1254,14 @@ do
       tcode += GET(tcode, 1 + 2*LINK_SIZE);
       break;
 
-      /* Skip over lookbehind and negative lookahead assertions */
+      /* Skip over lookbehind, negative lookahead, and scan substring
+      assertions */
 
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ASSERTBACK_NA:
+      case OP_ASSERT_SCS: 
       do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;
