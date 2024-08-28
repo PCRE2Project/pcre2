@@ -5233,7 +5233,8 @@ for (;;)
     return code;
     }
   }
-/* Control never reaches here */
+
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -8482,7 +8483,7 @@ for (;; pptr++)
     }         /* End of big switch */
   }           /* End of big loop */
 
-/* Control never reaches here. */
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -8610,7 +8611,7 @@ for (;;)
   int branch_return;
 
   /* Insert OP_REVERSE or OP_VREVERSE if this is a lookbehind assertion. There
-  is only a single mimimum length for the whole assertion. When the mimimum
+  is only a single minimum length for the whole assertion. When the minimum
   length is LOOKBEHIND_MAX it means that all branches are of fixed length,
   though not necessarily the same length. In this case, the original OP_REVERSE
   can be used. It can also be used if a branch in a variable length lookbehind
@@ -8787,7 +8788,8 @@ for (;;)
   lookbehindlength = META_DATA(*pptr);
   pptr++;
   }
-/* Control never reaches here */
+
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -9472,8 +9474,8 @@ for (;; pptr++)
   if (meta >= sizeof(meta_extra_lengths)) return NULL;
   pptr += meta_extra_lengths[meta];
   }
-/* Control never reaches here */
-return pptr;
+
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 

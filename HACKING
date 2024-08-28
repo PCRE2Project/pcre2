@@ -276,7 +276,7 @@ The following are at first also followed just by an offset for use in error
 messages. After the lengths of the branches of a lookbehind group have been
 checked the error offset is no longer needed. The lower 16 bits of the main
 word are now set to the maximum length of the first branch of the lookbehind
-group, and the second word is set to the mimimum matching length for a
+group, and the second word is set to the minimum matching length for a
 variable-length lookbehind group, or to LOOKBEHIND_MAX for a group whose
 branches are all of fixed length. These values are used when generating
 OP_REVERSE or OP_VREVERSE for the first branch. The miminum value is also used

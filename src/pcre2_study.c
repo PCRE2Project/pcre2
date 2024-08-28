@@ -758,7 +758,8 @@ for (;;)
     return -3;
     }
   }
-/* Control never gets here */
+
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 

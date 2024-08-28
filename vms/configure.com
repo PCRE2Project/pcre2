@@ -496,12 +496,20 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define this if your compiler supports __attribute__((uninitialized)) */
 #undef HAVE_ATTRIBUTE_UNINITIALIZED
 
+/* Define to 1 if you have the <assert.h> header file. */
+#define HAVE_ASSERT_H 1
+
 /* Define to 1 if you have the 'bcopy' function. */
 #define HAVE_BCOPY 1
+
+/* Define this if your compiler provides __builtin_expect() */
+#undef HAVE_BUILTIN_EXPECT
 
 /* Define this if your compiler provides __builtin_mul_overflow() */
 #undef HAVE_BUILTIN_MUL_OVERFLOW
 
+/* Define this if your compiler provides __builtin_unreachable() */
+#undef HAVE_BUILTIN_UNREACHABLE
 
 /* Define to 1 if you have the <dirent.h> header file. */
 #define HAVE_DIRENT_H 1

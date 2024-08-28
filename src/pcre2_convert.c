@@ -1158,9 +1158,7 @@ for (i = 0; i < 2; i++)
   use_length = *bufflenptr + 1;
   }
 
-/* Control should never get here. */
-
-return PCRE2_ERROR_INTERNAL;
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 

@@ -245,7 +245,8 @@ switch(ptype)
     default:
     return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
     }
-  break;  /* Control never reaches here */
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  break;
 
   case PT_WORD:
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
@@ -259,7 +260,8 @@ switch(ptype)
     if (c < *p) return !negated;
     if (c == *p++) return negated;
     }
-  break;  /* Control never reaches here */
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  break;
 
   /* Haven't yet thought these through. */
 
@@ -1119,8 +1121,7 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
-/* Control never reaches here. There used to be a fail-save return FALSE; here,
-but some compilers complain about an unreachable statement. */
+  PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 

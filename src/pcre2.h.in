@@ -1003,6 +1003,29 @@ PCRE2_SUFFIX a no-op. Otherwise, generate an error. */
 #endif
 #endif  /* PCRE2_CODE_UNIT_WIDTH is defined */
 
+/* Assertion macros */
+
+#ifdef HAVE_BUILTIN_UNREACHABLE
+#define PCRE2_UNREACHABLE() __builtin_unreachable()
+#else
+#define PCRE2_UNREACHABLE() do {} while(0)
+#endif
+
+#ifdef PCRE2_DEBUG
+#if defined(HAVE_BUILTIN_EXPECT) && defined(HAVE_BUILTIN_UNREACHABLE)
+#define PCRE2_ASSERT(x) do { if (__builtin_expect(!(x), 0)) __builtin_unreachable(); } while (0)
+#elif defined(HAVE_ASSERT_H)
+#include <assert.h>
+#define PCRE2_ASSERT(x) assert(x)
+#elif defined(HAVE_STDLIB_H) && defined(HAVE_STDIO_H)
+#define PCRE2_ASSERT(x) do { if (!(x)) { fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); abort(); }} while(0)
+#else
+#define PCRE2_ASSERT(x) do {} while(0)
+#endif
+#else
+#define PCRE2_ASSERT(x) do {} while(0)
+#endif
+
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
