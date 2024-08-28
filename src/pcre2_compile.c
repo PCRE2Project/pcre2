@@ -4075,8 +4075,6 @@ while (ptr < ptrend)
           goto NEGATIVE_LOOK_AHEAD;
 
           case META_SCS_NUMBER:
-          nest_depth++;
-
           if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
           if (*ptr != CHAR_LEFT_PARENTHESIS)
@@ -4125,7 +4123,7 @@ while (ptr < ptrend)
             PUTOFFSET(offset, parsed_pattern);
             }
 
-          if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+          if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
           if (*ptr != CHAR_RIGHT_PARENTHESIS)
             {
@@ -4133,7 +4131,7 @@ while (ptr < ptrend)
             break;
             }
           ptr++;
-          break;
+          goto POST_ASSERTION;
 
           case META_LOOKBEHIND:
           case META_LOOKBEHINDNOT:
@@ -7569,6 +7567,7 @@ for (;; pptr++)
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ASSERTBACK_NA:
+      case OP_ASSERT_SCS:
       case OP_ONCE:
       case OP_SCRIPT_RUN:
       case OP_BRA:
@@ -10139,6 +10138,8 @@ for (; *pptr != META_END; pptr++)
     case META_ATOMIC:
     case META_CAPTURE:
     case META_COND_ASSERT:
+    case META_SCS_NAME:
+    case META_SCS_NUMBER:
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
