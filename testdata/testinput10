@@ -645,4 +645,25 @@
 /A\z/utf,match_invalid_utf
     A\x80\x42\n
 
+/ab$/match_invalid_utf
+\= Expect no match            
+    ab\x80cde         
+
+/ab\z/match_invalid_utf
+\= Expect no match            
+    ab\x80cde         
+
+/ab\Z/match_invalid_utf
+\= Expect no match            
+    ab\x80cde         
+
+/(..)(*scs:(1)ab\z)/match_invalid_utf
+    ab\x80cde         
+
+/(..)(*scs:(1)ab\Z)/match_invalid_utf
+    ab\x80cde         
+
+/(..)(*scs:(1)ab$)/match_invalid_utf
+    ab\x80cde         
+
 # End of testinput10

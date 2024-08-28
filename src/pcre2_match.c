@@ -5608,8 +5608,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #define Lframe_type          F->temp_32[0]
 #define Lextra_size          F->temp_32[1]
+#define Lsaved_moptions      F->temp_32[2]
 #define Lsaved_end_subject   F->temp_sptr[0]
 #define Lsaved_eptr          F->temp_sptr[1]
+#define Ltrue_end_extra      F->temp_size
 
     case OP_ASSERT_SCS:
     Lextra_size = PRIV(OP_lengths)[Fecode[1 + LINK_SIZE]];
@@ -5641,10 +5643,14 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
 
     Lsaved_end_subject = mb->end_subject;
+    Ltrue_end_extra = mb->true_end_subject - mb->end_subject;
     Lsaved_eptr = Feptr;
+    Lsaved_moptions = mb->moptions; 
 
     Feptr = mb->start_subject + Fovector[offset];
-    mb->end_subject = mb->start_subject + Fovector[offset + 1];
+    mb->true_end_subject = mb->end_subject =
+      mb->start_subject + Fovector[offset + 1];
+    mb->moptions &= ~PCRE2_NOTEOL;   
 
     Lframe_type = GF_NOCAPTURE | Fop;
     for (;;)
@@ -5667,6 +5673,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       if (*Fecode != OP_ALT)
         {
         mb->end_subject = Lsaved_end_subject;
+        mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
+        mb->moptions = Lsaved_moptions; 
         RRETURN(MATCH_NOMATCH);
         }
       Lextra_size = 0;
@@ -5681,6 +5689,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #undef Lextra_size
 #undef Lsaved_end_subject
 #undef Lsaved_eptr
+#undef Ltrue_end_extra
+#undef Lsave_moptions
 
     /* ===================================================================== */
     /* The callout item calls an external function, if one is provided, passing
@@ -6273,8 +6283,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     case OP_EODN:
     ASSERT_NL_OR_EOS:
-    if (Feptr < mb->end_subject &&
-        (!IS_NEWLINE(Feptr) || Feptr != mb->end_subject - mb->nllen))
+    if (Feptr < mb->true_end_subject &&
+        (!IS_NEWLINE(Feptr) || Feptr != mb->true_end_subject - mb->nllen))
       {
       if (mb->partial != 0 &&
           Feptr + 1 >= mb->end_subject &&

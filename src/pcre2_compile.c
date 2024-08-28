@@ -4048,8 +4048,7 @@ while (ptr < ptrend)
         if (prev_expect_cond_assert > 0 &&
             (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
           {
-          errorcode = (meta == META_LOOKAHEAD_NA || meta == META_LOOKBEHIND_NA)?
-            ERR98 : ERR28;  /* (Atomic) assertion expected */
+          errorcode = ERR28;  /* Atomic assertion expected */
           goto FAILED;
           }
 

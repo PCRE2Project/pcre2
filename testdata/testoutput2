@@ -553,13 +553,13 @@ Failed: error 124 at offset 4: missing closing parenthesis for condition
 Failed: error 124 at offset 4: missing closing parenthesis for condition
 
 /(?(?i))/
-Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: atomic assertion expected after (?( or (?(?C)
 
 /(?(abc))/
 Failed: error 115 at offset 3: reference to non-existent subpattern
 
 /(?(?<ab))/
-Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: atomic assertion expected after (?( or (?(?C)
 
 /((?s)blah)\s+\1/I
 Capture group count = 1
@@ -14242,7 +14242,7 @@ Failed: error -52: nested recursion at the same subject position
 # Perl fails to diagnose the absence of an assertion
 
 "(?(?<E>.*!.*)?)"
-Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: atomic assertion expected after (?( or (?(?C)
 
 "X((?2)()*+){2}+"B
 ------------------------------------------------------------------
@@ -15559,10 +15559,10 @@ Failed: error 157 at offset 6: \g is not followed by a braced, angle-bracketed, 
 ** Too many characters in named "get" modifiers
 
 "(?(?C))"
-Failed: error 128 at offset 6: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 6: atomic assertion expected after (?( or (?(?C)
 
 /(?(?(?(?(?(?))))))/
-Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: atomic assertion expected after (?( or (?(?C)
 
 /(?<=(?1))((?s))/anchored
 
@@ -15628,14 +15628,14 @@ Subject length lower bound = 1
 # behave unpredictably at match time.
 
 /.+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X/
-Failed: error 128 at offset 63: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 63: atomic assertion expected after (?( or (?(?C)
     .+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X
 
 /[:[:alnum:]-[[a:lnum:]+/
 Failed: error 150 at offset 11: invalid range in character class
 
 /((?(?C'')\QX\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
-Failed: error 128 at offset 11: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 11: atomic assertion expected after (?( or (?(?C)
 
 /((?(?C'')\Q\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
 
@@ -16908,13 +16908,13 @@ No match
 No match
 
 /(?(*ACCEPT)xxx)/
-Failed: error 128 at offset 2: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 2: atomic assertion expected after (?( or (?(?C)
 
 /(?(*atomic:xx)xxx)/
-Failed: error 128 at offset 10: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 10: atomic assertion expected after (?( or (?(?C)
 
 /(?(*script_run:xxx)zzz)/
-Failed: error 128 at offset 14: assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 14: atomic assertion expected after (?( or (?(?C)
 
 /foobar/
     the foobar thing\=copy_matched_subject
@@ -17123,7 +17123,7 @@ Failed: error 187 at offset 10: lookbehind assertion is too long
 
 # Expect error: not allowed as a condition
 /(?(*napla:xx)bc)/
-Failed: error 198 at offset 9: atomic assertion expected after (?( or (?(?C)
+Failed: error 128 at offset 9: atomic assertion expected after (?( or (?(?C)
 
 /\A(*pla:.*\b(\w++))(?>.*?\b\1\b){3}/
     word1 word3 word1 word2 word3 word2 word2 word1 word3 word4
@@ -18420,6 +18420,9 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         End
 ------------------------------------------------------------------
 
+/(\w++)=(?(*scs:(1)(abc))pqr|xyz)(\w++)/
+Failed: error 128 at offset 14: atomic assertion expected after (?( or (?(?C)
+
 # Tests for scan_substring
 
 /([a-z]++)(*scs:(1)(stx)|(ne))(.)/B
@@ -18444,19 +18447,19 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         End
 ------------------------------------------------------------------
-  ##string##next!##
+    ##string##next!##
  0: next!
  1: next
  2: <unset>
  3: ne
  4: !
-  __aastxaa:__
+    __aastxaa:__
  0: stxaa:
  1: stxaa
  2: stx
  3: <unset>
  4: :
-  __abababab:__
+    __abababab:__
 No match
 
 /(?<XX>[a-z]++)##(*scan_substring:('XX').*(..)$)\2/B
@@ -18479,23 +18482,23 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-  ##abcd##abcd##cd##
+    ##abcd##abcd##cd##
  0: abcd##cd
  1: abcd
  2: cd
-  ##abcd##abcd##abcd##
+    ##abcd##abcd##abcd##
 No match
 
 /([a-z])([a-z]++)(#+)(*scs:(2)(ab.))/
-  xab##
+    xab##
 No match
-  yabc###
+    yabc###
  0: yabc###
  1: y
  2: abc
  3: ###
  4: abc
-  zababc####
+    zababc####
  0: zababc####
  1: z
  2: ababc
@@ -18503,13 +18506,13 @@ No match
  4: aba
 
 /(?:(?<YYY>[a-z]++)|(?<YYY>[0-9]++)|$)(*scan_substring:('YYY')((?<START>.).*\k<START>$))/dupnames
-  $$abacd$$112345$$abca$$
+    $$abacd$$112345$$abca$$
  0: abca
  1: abca
  2: <unset>
  3: abca
  4: a
-  $$abcdeaf$$1234567819$$123456781$$
+    $$abcdeaf$$1234567819$$123456781$$
  0: 123456781
  1: <unset>
  2: 123456781
@@ -18517,57 +18520,84 @@ No match
  4: 1
 
 /([a-zA-Z]+)(*scs:(1).*?(?<ABC>[A-Z]+)(*scan_substring:('ABC').*(.)\3))/
-  ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
+    ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
  0: abCDEFGxyCDEEFGhi
  1: abCDEFGxyCDEEFGhi
  2: CDEEFG
  3: E
 
 /([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
-  ##cdefgh##cdeabxy##
+    ##cdefgh##cdeabxy##
  0: abxy
  1: abxy
  2: ab
 
 /([a-z]++)##(*scs:(1)(abc))?!/
-  ##xyz##abc##!
+    ##xyz##abc##!
  0: abc##!
  1: abc
  2: abc
-  ##xyz##!
+    ##xyz##!
  0: xyz##!
  1: xyz
-  ##xyz##
+    ##xyz##
 No match
 
 /([a-z]++)##(*scs:(1)(abc))??(?(2)!|:)/
-  ##abc##abc##!
+    ##abc##abc##!
  0: abc##!
  1: abc
  2: abc
-  ##abc##xyz##:
+    ##abc##xyz##:
  0: xyz##:
  1: xyz
-  ##abc###
+    ##abc###
 No match
 
 /([a-z]++)##(*scs:(1)(abc)|xyz){8}(?(2)!|:)/
-  ##abc##abc##!
+    ##abc##abc##!
  0: abc##!
  1: abc
  2: abc
-  ##abc##xyz##:
+    ##abc##xyz##:
  0: xyz##:
  1: xyz
-  ##nnn##!
+    ##nnn##!
 No match
-  ##nnn##:
+    ##nnn##:
 No match
 
 /[A-Z]{3}([A-Z]++)#(*scs:(1)(?<=BC)XY)#/
-  ABCXY##AKCXY##
+    ABCXY##AKCXY##
  0: ABCXY##
  1: XY
+  
+/()(\w++)=(*scs:(2)(?=abc))(\w++)/
+    xabcx=pqr.
+ 0: abcx=pqr
+ 1: 
+ 2: abcx
+ 3: pqr
+      
+/(\d++)(*scs:(1)\d+\z)(\w+)/
+    X123XYZ
+ 0: 123XYZ
+ 1: 123
+ 2: XYZ
+
+/(\d++)(*scs:(1)\d+\Z)(\w+)/
+    X123XYZ
+ 0: 123XYZ
+ 1: 123
+ 2: XYZ
+
+/(\d++)(*scs:(1)\d+$)(\w+)/
+    X123XYZ
+ 0: 123XYZ
+ 1: 123
+ 2: XYZ
+
+# --------------
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

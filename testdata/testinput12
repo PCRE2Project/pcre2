@@ -468,6 +468,27 @@
 /A\z/utf,match_invalid_utf
     A\x{df00}\n
 
+/ab$/match_invalid_utf
+\= Expect no match            
+    ab\x{df00}cde         
+
+/ab\z/match_invalid_utf
+\= Expect no match            
+    ab\x{df00}cde         
+
+/ab\Z/match_invalid_utf
+\= Expect no match            
+    ab\x{df00}cde         
+
+/(..)(*scs:(1)ab\z)/match_invalid_utf
+    ab\x{df00}cde         
+
+/(..)(*scs:(1)ab\Z)/match_invalid_utf
+    ab\x{df00}cde         
+
+/(..)(*scs:(1)ab$)/match_invalid_utf
+    ab\x{df00}cde         
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I

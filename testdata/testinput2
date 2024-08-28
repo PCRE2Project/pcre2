@@ -6185,49 +6185,65 @@ a)"xI
 
 /(a)(*scs:(1)b){3,}+c/B
 
+/(\w++)=(?(*scs:(1)(abc))pqr|xyz)(\w++)/
+
 # Tests for scan_substring
 
 /([a-z]++)(*scs:(1)(stx)|(ne))(.)/B
-  ##string##next!##
-  __aastxaa:__
-  __abababab:__
+    ##string##next!##
+    __aastxaa:__
+    __abababab:__
 
 /(?<XX>[a-z]++)##(*scan_substring:('XX').*(..)$)\2/B
-  ##abcd##abcd##cd##
-  ##abcd##abcd##abcd##
+    ##abcd##abcd##cd##
+    ##abcd##abcd##abcd##
 
 /([a-z])([a-z]++)(#+)(*scs:(2)(ab.))/
-  xab##
-  yabc###
-  zababc####
+    xab##
+    yabc###
+    zababc####
 
 /(?:(?<YYY>[a-z]++)|(?<YYY>[0-9]++)|$)(*scan_substring:('YYY')((?<START>.).*\k<START>$))/dupnames
-  $$abacd$$112345$$abca$$
-  $$abcdeaf$$1234567819$$123456781$$
+    $$abacd$$112345$$abca$$
+    $$abcdeaf$$1234567819$$123456781$$
 
 /([a-zA-Z]+)(*scs:(1).*?(?<ABC>[A-Z]+)(*scan_substring:('ABC').*(.)\3))/
-  ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
+    ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
 
 /([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
-  ##cdefgh##cdeabxy##
+    ##cdefgh##cdeabxy##
 
 /([a-z]++)##(*scs:(1)(abc))?!/
-  ##xyz##abc##!
-  ##xyz##!
-  ##xyz##
+    ##xyz##abc##!
+    ##xyz##!
+    ##xyz##
 
 /([a-z]++)##(*scs:(1)(abc))??(?(2)!|:)/
-  ##abc##abc##!
-  ##abc##xyz##:
-  ##abc###
+    ##abc##abc##!
+    ##abc##xyz##:
+    ##abc###
 
 /([a-z]++)##(*scs:(1)(abc)|xyz){8}(?(2)!|:)/
-  ##abc##abc##!
-  ##abc##xyz##:
-  ##nnn##!
-  ##nnn##:
+    ##abc##abc##!
+    ##abc##xyz##:
+    ##nnn##!
+    ##nnn##:
 
 /[A-Z]{3}([A-Z]++)#(*scs:(1)(?<=BC)XY)#/
-  ABCXY##AKCXY##
+    ABCXY##AKCXY##
+  
+/()(\w++)=(*scs:(2)(?=abc))(\w++)/
+    xabcx=pqr.
+      
+/(\d++)(*scs:(1)\d+\z)(\w+)/
+    X123XYZ
+
+/(\d++)(*scs:(1)\d+\Z)(\w+)/
+    X123XYZ
+
+/(\d++)(*scs:(1)\d+$)(\w+)/
+    X123XYZ
+
+# --------------
 
 # End of testinput2

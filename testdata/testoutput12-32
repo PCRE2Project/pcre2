@@ -1610,6 +1610,36 @@ No match
     A\x{df00}\n
 No match
 
+/ab$/match_invalid_utf
+\= Expect no match            
+    ab\x{df00}cde         
+No match
+
+/ab\z/match_invalid_utf
+\= Expect no match            
+    ab\x{df00}cde         
+No match
+
+/ab\Z/match_invalid_utf
+\= Expect no match            
+    ab\x{df00}cde         
+No match
+
+/(..)(*scs:(1)ab\z)/match_invalid_utf
+    ab\x{df00}cde         
+ 0: ab
+ 1: ab
+
+/(..)(*scs:(1)ab\Z)/match_invalid_utf
+    ab\x{df00}cde         
+ 0: ab
+ 1: ab
+
+/(..)(*scs:(1)ab$)/match_invalid_utf
+    ab\x{df00}cde         
+ 0: ab
+ 1: ab
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I
