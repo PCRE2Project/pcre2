@@ -6468,8 +6468,7 @@ No match
 Capture group count = 0
 Compile options: caseless
 Overall options: anchored caseless
-Starting code units: A a
-Last code unit = 'A' (caseless)
+First code unit = 'A' (caseless)
 Subject length lower bound = 2
     aaaA5
  0: aaaA5
@@ -10747,8 +10746,7 @@ Subject length lower bound = 1
 /(?=a{3})[bcd]/Ii
 Capture group count = 0
 Options: caseless
-Starting code units: A a
-Last code unit = 'a' (caseless)
+First code unit = 'A' (caseless)
 Subject length lower bound = 1
 
 /(abc)\1+/
@@ -17481,8 +17479,7 @@ Subject length lower bound = 5
 
 /(a)?a/I
 Capture group count = 1
-Starting code units: a
-Last code unit = 'a'
+First code unit = 'a'
 Subject length lower bound = 1
     manm
  0: a
