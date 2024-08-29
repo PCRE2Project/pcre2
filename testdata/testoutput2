@@ -18519,12 +18519,17 @@ No match
  3: 123456781
  4: 1
 
-/([a-zA-Z]+)(*scs:(1).*?(?<ABC>[A-Z]+)(*scan_substring:('ABC').*(.)\3))/
+/([a-zA-Z]+)(*scs:(1).*?(?<ABC>[A-Z]+)(*scan_substring:('ABC').*(.)\3))#+/
     ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
- 0: abCDEFGxyCDEEFGhi
+ 0: abCDEFGxyCDEEFGhi##
  1: abCDEFGxyCDEEFGhi
  2: CDEEFG
  3: E
+    ##abAABCtuTUVXXz!!abCDEFGxyCDEFGGhi##
+ 0: abCDEFGxyCDEFGGhi##
+ 1: abCDEFGxyCDEFGGhi
+ 2: CDEFGG
+ 3: G
 
 /([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
     ##cdefgh##cdeabxy##
@@ -18596,6 +18601,57 @@ No match
  0: 123XYZ
  1: 123
  2: XYZ
+
+/([a-z]{2})[a-z](*scs:(1)(.*?))\2$/
+    abcab
+ 0: abcab
+ 1: ab
+ 2: ab
+    abcabc
+ 0: bcabc
+ 1: bc
+ 2: bc
+
+/^(([a-z]([a-z]*+))(*scs:(2).(?=(?1)|$)\3)|#){5}/
+    abcdefg#hijk#!
+No match
+    abcdefg#hijk#lmnopqr#
+ 0: abcdefg#hijk#lmnopqr
+ 1: lmnopqr
+ 2: lmnopqr
+ 3: mnopqr
+
+/(*scs:(1)a)(a)|x/
+    a
+No match
+    x
+ 0: x
+
+/(*scs:(<GOOD_NAME>)a)(?<GOOD_NAME>a)(?<GOOD_NAME>b)(?<GOOD_NAME>c)(?<GOOD_NAME>d)|x/dupnames
+    abcd
+No match
+    x
+ 0: x
+
+/(*scs:(1)a)?(a)/
+    b
+No match
+    a
+ 0: a
+ 1: a
+
+/(*scs:(1)a)??(a)/
+    b
+No match
+    a
+ 0: a
+ 1: a
+
+# Custom backtrack, goes back n - 1 characters in the input (n=8)
+/x(?|(*scs:(1)(?<=(.)))|()){8}/
+    abcdefghx
+ 0: x
+ 1: c
 
 # --------------
 

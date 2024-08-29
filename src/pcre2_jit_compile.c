@@ -2524,6 +2524,13 @@ while (cc < ccend)
     cc += 1 + LINK_SIZE;
     break;
 
+    case OP_ASSERT_SCS:
+    SLJIT_ASSERT(PRIVATE_DATA(cc) != 0);
+    if (recurse_check_bit(common, PRIVATE_DATA(cc)))
+      length += 2;
+    cc += 1 + LINK_SIZE;
+    break;
+
     case OP_CBRA:
     case OP_SCBRA:
     offset = GET2(cc, 1 + LINK_SIZE);
@@ -2870,6 +2877,14 @@ while (cc < ccend)
     private_srcw[0] = PRIVATE_DATA(cc);
     if (recurse_check_bit(common, private_srcw[0]))
       private_count = 1;
+    cc += 1 + LINK_SIZE;
+    break;
+
+    case OP_ASSERT_SCS:
+    private_srcw[0] = PRIVATE_DATA(cc);
+    private_srcw[1] = private_srcw[0] + sizeof(sljit_sw);
+    if (recurse_check_bit(common, private_srcw[0]))
+      private_count = 2;
     cc += 1 + LINK_SIZE;
     break;
 
