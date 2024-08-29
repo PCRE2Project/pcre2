@@ -1856,25 +1856,22 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
         }
       }
 
-    /* Replace the start code unit bits with a first code unit, but only if it
-    is not the same as a required later code unit. This is because a search for
-    a required code unit starts after an explicit first code unit, but at a
-    code unit found from the bitmap. Patterns such as /a*a/ don't work
-    if both the start unit and required unit are the same. */
+    /* Replace the start code unit bits with a first code unit. If it is the
+    same as a required later code unit, then clear the required later code
+    unit. This is because a search for a required code unit starts after an
+    explicit first code unit, but at a code unit found from the bitmap.
+    Patterns such as /a*a/ don't work if both the start unit and required
+    unit are the same. */
 
-    if (a >= 0 &&
-        (
-        (re->flags & PCRE2_LASTSET) == 0 ||
-          (
-          re->last_codeunit != (uint32_t)a &&
-          (b < 0 || re->last_codeunit != (uint32_t)b)
-          )
-        ))
-      {
+    if (a >= 0) {
+      if ((re->flags & PCRE2_LASTSET) && (re->last_codeunit == (uint32_t)a || (b >= 0 && re->last_codeunit == (uint32_t)b))) {
+        re->flags &= ~(PCRE2_LASTSET | PCRE2_LASTCASELESS);
+        re->last_codeunit = 0;
+      }
       re->first_codeunit = a;
       flags = PCRE2_FIRSTSET;
       if (b >= 0) flags |= PCRE2_FIRSTCASELESS;
-      }
+    }
 
     DONE:
     re->flags |= flags;
