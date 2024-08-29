@@ -155,7 +155,7 @@ changed, the code at RETURN_SWITCH below must be updated in sync.  */
 enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
-       RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38 };
+       RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39 };
 
 #ifdef SUPPORT_WIDE_CHARS
 enum { RM100=100, RM101 };
@@ -6155,14 +6155,26 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       case OP_ASSERT_NOT:
       RRETURN(MATCH_MATCH);
 
+      /* A scan substring group must preserve the current end_subject,
+      and restore it before the backtracking is performed into its sub
+      pattern. */
+
+      case OP_ASSERT_SCS:
+      F->temp_sptr[0] = mb->end_subject;
+      mb->end_subject = P->temp_sptr[0];
+      mb->true_end_subject = mb->end_subject + P->temp_size;
+      Feptr = P->temp_sptr[1];
+
+      RMATCH(Fecode + 1 + LINK_SIZE, RM39);
+
+      mb->end_subject = F->temp_sptr[0];
+      mb->true_end_subject = mb->end_subject;
+      RRETURN(rrc);
+      break;
+
       /* At the end of a script run, apply the script-checking rules. This code
       will never by exercised if Unicode support it not compiled, because in
       that environment script runs cause an error at compile time. */
-
-      case OP_ASSERT_SCS:
-      mb->end_subject = P->temp_sptr[0];
-      Feptr = P->temp_sptr[1];
-      break;
 
       case OP_SCRIPT_RUN:
       if (!PRIV(script_run)(P->eptr, Feptr, utf)) RRETURN(MATCH_NOMATCH);
@@ -6601,7 +6613,7 @@ switch (Freturn_id)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(16)
   LBL(17) LBL(18) LBL(19) LBL(20) LBL(21) LBL(22) LBL(23) LBL(24)
   LBL(25) LBL(26) LBL(27) LBL(28) LBL(29) LBL(30) LBL(31) LBL(32)
-  LBL(33) LBL(34) LBL(35) LBL(36) LBL(37) LBL(38)
+  LBL(33) LBL(34) LBL(35) LBL(36) LBL(37) LBL(38) LBL(39)
 
 #ifdef SUPPORT_WIDE_CHARS
   LBL(100) LBL(101)
