@@ -259,14 +259,16 @@ META_COND_RNAME       (?(R&name)
 META_COND_RNUMBER     (?(Rdigits)
 META_RECURSE_BYNAME   (?&name)
 META_BACKREF_BYNAME   \k'name' or \k<name> or \k{name} or \g{name}
+META_SCS_NAME         (*scs:(<name>)...)
 
 META_COND_RNUMBER is used for names that start with R and continue with digits,
 because this is an ambiguous case. It could be a back reference to a group with
 that name, or it could be a recursion test on a numbered group.
 
-This one is followed by an offset, for use in error messages, then a number:
+These are followed by an offset, for use in error messages, then a number:
 
 META_COND_NUMBER       (?([+-]digits)
+META_SCS_NUMBER        (*scs:(digits)...)
 
 The following is followed just by an offset, for use in error messages:
 
@@ -752,6 +754,10 @@ In ASCII or UTF-32 mode, the character counts in OP_REVERSE and OP_VREVERSE are
 also the number of code units, but in UTF-8/16 mode each character may occupy
 more than one code unit.
 
+The "scan substring" assertion compiles as OP_ASSERT_SCS. What follows takes
+the same form as a conditional subpattern with a back reference condition (see
+next section).
+
 
 Conditional subpatterns
 -----------------------
@@ -859,4 +865,4 @@ The file maint/README contains additional information.
 
 
 Philip Hazel
-June 2024
+August 2024

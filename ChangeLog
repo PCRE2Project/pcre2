@@ -69,15 +69,19 @@ for example (?<=AB|CD?). Now all branches are checked for variability.
 11. Matching with pcre2_match() could give an incorrect result if a
 variable-length lookbehind was used as the condition in a conditional group.
 The condition could erroneously be treated as true if a branch matched but
-overran the current position. This bug was in the interpreter only; matching 
+overran the current position. This bug was in the interpreter only; matching
 with JIT was correct.
 
 12. Add a new error code (PCRE2_ERROR_JIT_UNSUPPORTED) which is yielded
 for unsupported jit features.
 
-13. Add a new experimental feature called scan substring. This feature
-is a new type of assertion which matches the content of a capturing block
-to a sub pattern.
+13. Add a new experimental feature called scan substring. This feature is a new
+type of assertion which matches the content of a capturing block to a sub
+pattern.
+
+14. Item 43 of 10.43 was incomplete because it addressed only \z and not \Z,
+which was still misbehaving when matching fragments inside invalid UTF strings.
+
 
 
 Version 10.44 07-June-2024

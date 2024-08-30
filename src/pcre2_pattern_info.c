@@ -230,7 +230,7 @@ switch(what)
   break;
 
   case PCRE2_INFO_NAMETABLE:
-  *((PCRE2_SPTR *)where) = (PCRE2_SPTR)((const char *)re + 
+  *((PCRE2_SPTR *)where) = (PCRE2_SPTR)((const char *)re +
     sizeof(pcre2_real_code));
   break;
 

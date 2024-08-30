@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "12 August 2024" "PCRE2 10.45"
+.TH PCRE2COMPAT 3 "30 August 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -201,6 +201,9 @@ and condition references such as (?(4)...). PCRE2 supports relative group
 numbers such as +2 and -4 in all three cases. Perl supports both plus and minus
 for subroutine calls, but only minus for back references, and no relative
 numbering at all for conditions.
+.sp
+(m) The scan substring assertion (syntax (*scs:(n)...)) is a PCRE2 extension
+that is not available in Perl.
 .P
 20. Perl has different limits than PCRE2. See the
 .\" HREF
@@ -236,6 +239,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 August 2024
+Last updated: 30 August 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

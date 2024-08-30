@@ -36,15 +36,16 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC21" href="#SEC21">WHAT \R MATCHES</a>
 <li><a name="TOC22" href="#SEC22">LOOKAHEAD AND LOOKBEHIND ASSERTIONS</a>
 <li><a name="TOC23" href="#SEC23">NON-ATOMIC LOOKAROUND ASSERTIONS</a>
-<li><a name="TOC24" href="#SEC24">SCRIPT RUNS</a>
-<li><a name="TOC25" href="#SEC25">BACKREFERENCES</a>
-<li><a name="TOC26" href="#SEC26">SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)</a>
-<li><a name="TOC27" href="#SEC27">CONDITIONAL PATTERNS</a>
-<li><a name="TOC28" href="#SEC28">BACKTRACKING CONTROL</a>
-<li><a name="TOC29" href="#SEC29">CALLOUTS</a>
-<li><a name="TOC30" href="#SEC30">SEE ALSO</a>
-<li><a name="TOC31" href="#SEC31">AUTHOR</a>
-<li><a name="TOC32" href="#SEC32">REVISION</a>
+<li><a name="TOC24" href="#SEC24">SUBSTRING SCAN ASSERTION</a>
+<li><a name="TOC25" href="#SEC25">SCRIPT RUNS</a>
+<li><a name="TOC26" href="#SEC26">BACKREFERENCES</a>
+<li><a name="TOC27" href="#SEC27">SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)</a>
+<li><a name="TOC28" href="#SEC28">CONDITIONAL PATTERNS</a>
+<li><a name="TOC29" href="#SEC29">BACKTRACKING CONTROL</a>
+<li><a name="TOC30" href="#SEC30">CALLOUTS</a>
+<li><a name="TOC31" href="#SEC31">SEE ALSO</a>
+<li><a name="TOC32" href="#SEC32">AUTHOR</a>
+<li><a name="TOC33" href="#SEC33">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY</a><br>
 <P>
@@ -60,7 +61,7 @@ documentation. This document contains a quick-reference summary of the syntax.
   \Q...\E    treat enclosed characters as literal
 </pre>
 Note that white space inside \Q...\E is always treated as literal, even if
-PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also 
+PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also
 that PCRE2's handling of \Q...\E has some differences from Perl's. See the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation for details.
@@ -509,7 +510,19 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   (*non_atomic_positive_lookbehind:...)  )
 </PRE>
 </P>
-<br><a name="SEC24" href="#TOC1">SCRIPT RUNS</a><br>
+<br><a name="SEC24" href="#TOC1">SUBSTRING SCAN ASSERTION</a><br>
+<P>
+This feature is not Perl-compatible.
+<pre>
+  (*scs:(n)...)       scan substring by absolute reference
+  (*scs:(+n)...)      scan substring by relative reference
+  (*scs:(-n)...)      scan substring by relative reference
+  (*scs:(&#60;name&#62;)...)  scan substring by name
+  (*scs:('name')...)  scan substring by name
+</pre>
+The full name "scan_substring" may be used instead of "scs".
+</P>
+<br><a name="SEC25" href="#TOC1">SCRIPT RUNS</a><br>
 <P>
 <pre>
   (*script_run:...)           ) script run, can be backtracked into
@@ -519,7 +532,7 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   (*asr:...)                  )
 </PRE>
 </P>
-<br><a name="SEC25" href="#TOC1">BACKREFERENCES</a><br>
+<br><a name="SEC26" href="#TOC1">BACKREFERENCES</a><br>
 <P>
 <pre>
   \n              reference by number (can be ambiguous)
@@ -536,7 +549,7 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   (?P=name)       reference by name (Python)
 </PRE>
 </P>
-<br><a name="SEC26" href="#TOC1">SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)</a><br>
+<br><a name="SEC27" href="#TOC1">SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)</a><br>
 <P>
 <pre>
   (?R)            recurse whole pattern
@@ -555,7 +568,7 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   \g'-n'          call subroutine by relative number (PCRE2 extension)
 </PRE>
 </P>
-<br><a name="SEC27" href="#TOC1">CONDITIONAL PATTERNS</a><br>
+<br><a name="SEC28" href="#TOC1">CONDITIONAL PATTERNS</a><br>
 <P>
 <pre>
   (?(condition)yes-pattern)
@@ -578,7 +591,7 @@ Note the ambiguity of (?(R) and (?(Rn) which might be named reference
 conditions or recursion tests. Such a condition is interpreted as a reference
 condition if the relevant named group exists.
 </P>
-<br><a name="SEC28" href="#TOC1">BACKTRACKING CONTROL</a><br>
+<br><a name="SEC29" href="#TOC1">BACKTRACKING CONTROL</a><br>
 <P>
 All backtracking control verbs may be in the form (*VERB:NAME). For (*MARK) the
 name is mandatory, for the others it is optional. (*SKIP) changes its behaviour
@@ -605,7 +618,7 @@ pattern is not anchored.
 The effect of one of these verbs in a group called as a subroutine is confined
 to the subroutine call.
 </P>
-<br><a name="SEC29" href="#TOC1">CALLOUTS</a><br>
+<br><a name="SEC30" href="#TOC1">CALLOUTS</a><br>
 <P>
 <pre>
   (?C)            callout (assumed number 0)
@@ -616,12 +629,12 @@ The allowed string delimiters are ` ' " ^ % # $ (which are the same for the
 start and the end), and the starting delimiter { matched with the ending
 delimiter }. To encode the ending delimiter within the string, double it.
 </P>
-<br><a name="SEC30" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC31" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2pattern</b>(3), <b>pcre2api</b>(3), <b>pcre2callout</b>(3),
 <b>pcre2matching</b>(3), <b>pcre2</b>(3).
 </P>
-<br><a name="SEC31" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC32" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -630,9 +643,9 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC32" href="#TOC1">REVISION</a><br>
+<br><a name="SEC33" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 August 2024
+Last updated: 30 August 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

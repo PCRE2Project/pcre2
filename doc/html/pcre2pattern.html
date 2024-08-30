@@ -34,17 +34,18 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC19" href="#SEC19">BACKREFERENCES</a>
 <li><a name="TOC20" href="#SEC20">ASSERTIONS</a>
 <li><a name="TOC21" href="#SEC21">NON-ATOMIC ASSERTIONS</a>
-<li><a name="TOC22" href="#SEC22">SCRIPT RUNS</a>
-<li><a name="TOC23" href="#SEC23">CONDITIONAL GROUPS</a>
-<li><a name="TOC24" href="#SEC24">COMMENTS</a>
-<li><a name="TOC25" href="#SEC25">RECURSIVE PATTERNS</a>
-<li><a name="TOC26" href="#SEC26">GROUPS AS SUBROUTINES</a>
-<li><a name="TOC27" href="#SEC27">ONIGURUMA SUBROUTINE SYNTAX</a>
-<li><a name="TOC28" href="#SEC28">CALLOUTS</a>
-<li><a name="TOC29" href="#SEC29">BACKTRACKING CONTROL</a>
-<li><a name="TOC30" href="#SEC30">SEE ALSO</a>
-<li><a name="TOC31" href="#SEC31">AUTHOR</a>
-<li><a name="TOC32" href="#SEC32">REVISION</a>
+<li><a name="TOC22" href="#SEC22">SCAN SUBSTRING ASSERTIONS</a>
+<li><a name="TOC23" href="#SEC23">SCRIPT RUNS</a>
+<li><a name="TOC24" href="#SEC24">CONDITIONAL GROUPS</a>
+<li><a name="TOC25" href="#SEC25">COMMENTS</a>
+<li><a name="TOC26" href="#SEC26">RECURSIVE PATTERNS</a>
+<li><a name="TOC27" href="#SEC27">GROUPS AS SUBROUTINES</a>
+<li><a name="TOC28" href="#SEC28">ONIGURUMA SUBROUTINE SYNTAX</a>
+<li><a name="TOC29" href="#SEC29">CALLOUTS</a>
+<li><a name="TOC30" href="#SEC30">BACKTRACKING CONTROL</a>
+<li><a name="TOC31" href="#SEC31">SEE ALSO</a>
+<li><a name="TOC32" href="#SEC32">AUTHOR</a>
+<li><a name="TOC33" href="#SEC33">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION DETAILS</a><br>
 <P>
@@ -406,11 +407,11 @@ a character class, this causes an error, because the character class is then
 not terminated by a closing square bracket.
 </P>
 <P>
-Another difference from Perl is that any appearance of \Q or \E inside what 
-might otherwise be a quantifier causes PCRE2 not to recognize the sequence as a 
-quantifier. Perl recognizes a quantifier if (redundantly) either of the numbers 
-is inside \Q...\E, but not if the separating comma is. When not recognized as 
-a quantifier a sequence such as {\Q1\E,2} is treated as the literal string 
+Another difference from Perl is that any appearance of \Q or \E inside what
+might otherwise be a quantifier causes PCRE2 not to recognize the sequence as a
+quantifier. Perl recognizes a quantifier if (redundantly) either of the numbers
+is inside \Q...\E, but not if the separating comma is. When not recognized as
+a quantifier a sequence such as {\Q1\E,2} is treated as the literal string
 "{1,2}".
 <a name="digitsafterbackslash"></a></P>
 <br><b>
@@ -851,7 +852,7 @@ examples are all equivalent:
 <pre>
   \p{bidiclass=al}
   \p{BC=al}
-  \p{ Bidi_Class : AL } 
+  \p{ Bidi_Class : AL }
   \p{ Bi-di class = Al }
   \P{ ^ Bi-di class = Al }
 </pre>
@@ -1099,7 +1100,7 @@ explicitly. These properties are:
 </pre>
 Xan matches characters that have either the L (letter) or the N (number)
 property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
-carriage return, and any other character that has the Z (separator) property 
+carriage return, and any other character that has the Z (separator) property
 (this includes the space character). Xsp is the same as Xps; in PCRE1 it used
 to exclude vertical tab, for Perl compatibility, but Perl changed. Xwd matches
 the same characters as Xan, plus those that match Mn (non-spacing mark) or Pc
@@ -2411,19 +2412,28 @@ as normal.
 <a name="bigassertions"></a></P>
 <br><a name="SEC20" href="#TOC1">ASSERTIONS</a><br>
 <P>
-An assertion is a test on the characters following or preceding the current
-matching point that does not consume any characters. The simple assertions
-coded as \b, \B, \A, \G, \Z, \z, ^ and $ are described
+An assertion is a test that does not consume any characters. The test must
+succeed for the match to continue. The simple assertions coded as \b, \B,
+\A, \G, \Z, \z, ^ and $ are described
 <a href="#smallassertions">above.</a>
 </P>
 <P>
-More complicated assertions are coded as parenthesized groups. There are two
-kinds: those that look ahead of the current position in the subject string, and
-those that look behind it, and in each case an assertion may be positive (must
-match for the assertion to be true) or negative (must not match for the
-assertion to be true). An assertion group is matched in the normal way,
-and if it is true, matching continues after it, but with the matching position
+More complicated assertions are coded as parenthesized groups. If matching such
+a group succeeds, matching continues after it, but with the matching position
 in the subject string reset to what it was before the assertion was processed.
+</P>
+<P>
+A special kind of assertion, called a "scan substring" assertion, matches a
+subpattern against a previously captured substring. This is described in the
+section entitled
+<a href="#scansubstringassertions">"Scan substring assertions"</a>
+below. It is a PCRE2 extension, not compatible with Perl.
+</P>
+<P>
+The other goup-based assertions are of two kinds: those that look ahead of the
+current position in the subject string, and those that look behind it, and in
+each case an assertion may be positive (must match for the assertion to be
+true) or negative (must not match for the assertion to be true).
 </P>
 <P>
 The Perl-compatible lookaround assertions are atomic. If an assertion is true,
@@ -2709,8 +2719,62 @@ contain any control verbs such as (*ACCEPT). (This may change in future). Note
 that assertions that appear as conditions for
 <a href="#conditions">conditional groups</a>
 (see below) must be atomic.
+<a name="scansubstringassertions"></a></P>
+<br><a name="SEC22" href="#TOC1">SCAN SUBSTRING ASSERTIONS</a><br>
+<P>
+A special kind of assertion, not compatible with Perl, makes it possible to
+check the contents of a captured substring by matching it with a subpattern.
+Because this involves capturing, this feature is not supported by
+<b>pcre2_dfa_match()</b>.
 </P>
-<br><a name="SEC22" href="#TOC1">SCRIPT RUNS</a><br>
+<P>
+A scan substring assertion starts with the sequence (*scan_substring: or
+(*scs: which is followed by a substring number (absolute or relative) or a
+substring name enclosed in single quotes or angle brackets, within parentheses.
+The rest of the item is the subpattern that is applied to the substring, as
+shown here:
+<pre>
+  (*scan_substring:(1)...)
+  (*scs:(-2)...)
+  (*scs:('AB')...)
+</pre>
+The pattern match on the substring is always anchored, that is, it must match
+from the start of the substring. There is no "bumpalong" if it does not match
+at the start. The end of the subject is temporarily reset to be the end of the
+substring, so \Z, \z, and $ will match there. However, the start of the
+subject is <i>not</i> reset. This means that ^ matches only if the substring is
+actually at the start of the main subject, but it also means that lookbehind
+assertions into what precedes the substring are possible.
+</P>
+<P>
+Here is a very simple example: find a word that contains the rare (in English)
+sequence of letters "rh" not at the start:
+<pre>
+  \b(\w++)(*scs:(1).+rh)
+</pre>
+The first group captures a word which is then scanned by the second group.
+This example does not actually need this heavyweight feature; the same match
+can be achieved with:
+<pre>
+  \b\w+?rh\w*\b
+</pre>
+When things are more complicated, however, this feature can be useful. For
+exmple, there is a rather complicated pattern in the PCRE2 test data that
+checks an entire subject string for a palindrome, that the sequence of
+letters is the same in both directions. Suppose you want to search for
+individual words of two or more characters such as "level" that are
+palindromes:
+<pre>
+  (\b\w{2,}+\b)(*scs:(1)...palindrome-matching-pattern...)
+</pre>
+A scan substring assertion fails if the group it references has not been set.
+Within the subpattern, references to other groups work as normal. Other
+capturing groups may appear, and will retain their values during ongoing
+matching if the assertion succeeds. When PCRE2_DUPNAMES is set and there are
+ambiguous group names, if the assertion scans a group by name, it is the lowest
+numbered set group of the groups with that name that is scanned.
+</P>
+<br><a name="SEC23" href="#TOC1">SCRIPT RUNS</a><br>
 <P>
 In concept, a script run is a sequence of characters that are all from the same
 Unicode script such as Latin or Greek. However, because some scripts are
@@ -2772,7 +2836,7 @@ parentheses.
 should not be used within a script run group, because it causes an immediate
 exit from the group, bypassing the script run checking.
 <a name="conditions"></a></P>
-<br><a name="SEC23" href="#TOC1">CONDITIONAL GROUPS</a><br>
+<br><a name="SEC24" href="#TOC1">CONDITIONAL GROUPS</a><br>
 <P>
 It is possible to cause the matching process to obey a pattern fragment
 conditionally or to choose between two alternative fragments, depending on
@@ -2973,7 +3037,7 @@ positive and negative assertions, because matching always continues after the
 assertion, whether it succeeds or fails. (Compare non-conditional assertions,
 for which captures are retained only for positive assertions that succeed.)
 <a name="comments"></a></P>
-<br><a name="SEC24" href="#TOC1">COMMENTS</a><br>
+<br><a name="SEC25" href="#TOC1">COMMENTS</a><br>
 <P>
 There are two ways of including comments in patterns that are processed by
 PCRE2. In both cases, the start of the comment must not be in a character
@@ -3003,7 +3067,7 @@ a newline in the pattern. The sequence \n is still literal at this stage, so
 it does not terminate the comment. Only an actual character with the code value
 0x0a (the default newline) does so.
 <a name="recursion"></a></P>
-<br><a name="SEC25" href="#TOC1">RECURSIVE PATTERNS</a><br>
+<br><a name="SEC26" href="#TOC1">RECURSIVE PATTERNS</a><br>
 <P>
 Consider the problem of matching a string in parentheses, allowing for
 unlimited nested parentheses. Without the use of recursion, the best that can
@@ -3191,7 +3255,7 @@ alternative matches "a" and then recurses. In the recursion, \1 does now match
 "b" and so the whole match succeeds. This match used to fail in Perl, but in
 later versions (I tried 5.024) it now works.
 <a name="groupsassubroutines"></a></P>
-<br><a name="SEC26" href="#TOC1">GROUPS AS SUBROUTINES</a><br>
+<br><a name="SEC27" href="#TOC1">GROUPS AS SUBROUTINES</a><br>
 <P>
 If the syntax for a recursive group call (either by number or by name) is used
 outside the parentheses to which it refers, it operates a bit like a subroutine
@@ -3239,7 +3303,7 @@ in groups when called as subroutines is described in the section entitled
 <a href="#btsub">"Backtracking verbs in subroutines"</a>
 below.
 <a name="onigurumasubroutines"></a></P>
-<br><a name="SEC27" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a><br>
+<br><a name="SEC28" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a><br>
 <P>
 For compatibility with Oniguruma, the non-Perl syntax \g followed by a name or
 a number enclosed either in angle brackets or single quotes, is an alternative
@@ -3257,7 +3321,7 @@ plus or a minus sign it is taken as a relative reference. For example:
 Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>not</i>
 synonymous. The former is a backreference; the latter is a subroutine call.
 </P>
-<br><a name="SEC28" href="#TOC1">CALLOUTS</a><br>
+<br><a name="SEC29" href="#TOC1">CALLOUTS</a><br>
 <P>
 Perl has a feature whereby using the sequence (?{...}) causes arbitrary Perl
 code to be obeyed in the middle of matching a regular expression. This makes it
@@ -3333,7 +3397,7 @@ example:
 </pre>
 The doubling is removed before the string is passed to the callout function.
 <a name="backtrackcontrol"></a></P>
-<br><a name="SEC29" href="#TOC1">BACKTRACKING CONTROL</a><br>
+<br><a name="SEC30" href="#TOC1">BACKTRACKING CONTROL</a><br>
 <P>
 There are a number of special "Backtracking Control Verbs" (to use Perl's
 terminology) that modify the behaviour of backtracking during matching. They
@@ -3856,12 +3920,12 @@ enclosing group that has alternatives (its normal behaviour). However, if there
 is no such group within the subroutine's group, the subroutine match fails and
 there is a backtrack at the outer level.
 </P>
-<br><a name="SEC30" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC31" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3), <b>pcre2callout</b>(3), <b>pcre2matching</b>(3),
 <b>pcre2syntax</b>(3), <b>pcre2</b>(3).
 </P>
-<br><a name="SEC31" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC32" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -3870,9 +3934,9 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC32" href="#TOC1">REVISION</a><br>
+<br><a name="SEC33" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 August 2024
+Last updated: 30 August 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

@@ -77,8 +77,8 @@ return yield;
 *  Create a match data block using pattern data  *
 *************************************************/
 
-/* If no context is supplied, use the memory allocator from the code. This code 
-assumes that a general context contains nothing other than a memory allocator. 
+/* If no context is supplied, use the memory allocator from the code. This code
+assumes that a general context contains nothing other than a memory allocator.
 If that ever changes, this code will need fixing. */
 
 PCRE2_EXP_DEFN pcre2_match_data * PCRE2_CALL_CONVENTION

@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "12 August 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "30 August 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -382,11 +382,11 @@ the pattern (that is, \eE is assumed at the end). If the isolated \eQ is inside
 a character class, this causes an error, because the character class is then
 not terminated by a closing square bracket.
 .P
-Another difference from Perl is that any appearance of \eQ or \eE inside what 
-might otherwise be a quantifier causes PCRE2 not to recognize the sequence as a 
-quantifier. Perl recognizes a quantifier if (redundantly) either of the numbers 
-is inside \eQ...\eE, but not if the separating comma is. When not recognized as 
-a quantifier a sequence such as {\eQ1\eE,2} is treated as the literal string 
+Another difference from Perl is that any appearance of \eQ or \eE inside what
+might otherwise be a quantifier causes PCRE2 not to recognize the sequence as a
+quantifier. Perl recognizes a quantifier if (redundantly) either of the numbers
+is inside \eQ...\eE, but not if the separating comma is. When not recognized as
+a quantifier a sequence such as {\eQ1\eE,2} is treated as the literal string
 "{1,2}".
 .
 .
@@ -845,7 +845,7 @@ examples are all equivalent:
 .sp
   \ep{bidiclass=al}
   \ep{BC=al}
-  \ep{ Bidi_Class : AL } 
+  \ep{ Bidi_Class : AL }
   \ep{ Bi-di class = Al }
   \eP{ ^ Bi-di class = Al }
 .sp
@@ -1088,7 +1088,7 @@ explicitly. These properties are:
 .sp
 Xan matches characters that have either the L (letter) or the N (number)
 property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
-carriage return, and any other character that has the Z (separator) property 
+carriage return, and any other character that has the Z (separator) property
 (this includes the space character). Xsp is the same as Xps; in PCRE1 it used
 to exclude vertical tab, for Perl compatibility, but Perl changed. Xwd matches
 the same characters as Xan, plus those that match Mn (non-spacing mark) or Pc
@@ -2419,21 +2419,31 @@ as normal.
 .SH ASSERTIONS
 .rs
 .sp
-An assertion is a test on the characters following or preceding the current
-matching point that does not consume any characters. The simple assertions
-coded as \eb, \eB, \eA, \eG, \eZ, \ez, ^ and $ are described
+An assertion is a test that does not consume any characters. The test must
+succeed for the match to continue. The simple assertions coded as \eb, \eB,
+\eA, \eG, \eZ, \ez, ^ and $ are described
 .\" HTML <a href="#smallassertions">
 .\" </a>
 above.
 .\"
 .P
-More complicated assertions are coded as parenthesized groups. There are two
-kinds: those that look ahead of the current position in the subject string, and
-those that look behind it, and in each case an assertion may be positive (must
-match for the assertion to be true) or negative (must not match for the
-assertion to be true). An assertion group is matched in the normal way,
-and if it is true, matching continues after it, but with the matching position
+More complicated assertions are coded as parenthesized groups. If matching such
+a group succeeds, matching continues after it, but with the matching position
 in the subject string reset to what it was before the assertion was processed.
+.P
+A special kind of assertion, called a "scan substring" assertion, matches a
+subpattern against a previously captured substring. This is described in the
+section entitled
+.\" HTML <a href="#scansubstringassertions">
+.\" </a>
+"Scan substring assertions"
+.\"
+below. It is a PCRE2 extension, not compatible with Perl.
+.P
+The other goup-based assertions are of two kinds: those that look ahead of the
+current position in the subject string, and those that look behind it, and in
+each case an assertion may be positive (must match for the assertion to be
+true) or negative (must not match for the assertion to be true).
 .P
 The Perl-compatible lookaround assertions are atomic. If an assertion is true,
 but there is a subsequent matching failure, there is no backtracking into the
@@ -2724,6 +2734,61 @@ that assertions that appear as conditions for
 conditional groups
 .\"
 (see below) must be atomic.
+.
+.
+.\" HTML <a name="scansubstringassertions"></a>
+.SH "SCAN SUBSTRING ASSERTIONS"
+.rs
+.sp
+A special kind of assertion, not compatible with Perl, makes it possible to
+check the contents of a captured substring by matching it with a subpattern.
+Because this involves capturing, this feature is not supported by
+\fBpcre2_dfa_match()\fP.
+.P
+A scan substring assertion starts with the sequence (*scan_substring: or
+(*scs: which is followed by a substring number (absolute or relative) or a
+substring name enclosed in single quotes or angle brackets, within parentheses.
+The rest of the item is the subpattern that is applied to the substring, as
+shown here:
+.sp
+  (*scan_substring:(1)...)
+  (*scs:(-2)...)
+  (*scs:('AB')...)
+.sp
+The pattern match on the substring is always anchored, that is, it must match
+from the start of the substring. There is no "bumpalong" if it does not match
+at the start. The end of the subject is temporarily reset to be the end of the
+substring, so \eZ, \ez, and $ will match there. However, the start of the
+subject is \fInot\fP reset. This means that ^ matches only if the substring is
+actually at the start of the main subject, but it also means that lookbehind
+assertions into what precedes the substring are possible.
+.P
+Here is a very simple example: find a word that contains the rare (in English)
+sequence of letters "rh" not at the start:
+.sp
+  \eb(\ew++)(*scs:(1).+rh)
+.sp
+The first group captures a word which is then scanned by the second group.
+This example does not actually need this heavyweight feature; the same match
+can be achieved with:
+.sp
+  \eb\ew+?rh\ew*\eb
+.sp
+When things are more complicated, however, this feature can be useful. For
+exmple, there is a rather complicated pattern in the PCRE2 test data that
+checks an entire subject string for a palindrome, that the sequence of
+letters is the same in both directions. Suppose you want to search for
+individual words of two or more characters such as "level" that are
+palindromes:
+.sp
+  (\eb\ew{2,}+\eb)(*scs:(1)...palindrome-matching-pattern...)
+.sp
+A scan substring assertion fails if the group it references has not been set.
+Within the subpattern, references to other groups work as normal. Other
+capturing groups may appear, and will retain their values during ongoing
+matching if the assertion succeeds. When PCRE2_DUPNAMES is set and there are
+ambiguous group names, if the assertion scans a group by name, it is the lowest
+numbered set group of the groups with that name that is scanned.
 .
 .
 .SH "SCRIPT RUNS"
@@ -3916,6 +3981,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 August 2024
+Last updated: 30 August 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

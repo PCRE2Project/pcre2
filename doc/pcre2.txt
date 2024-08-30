@@ -188,8 +188,8 @@ REVISION
 
 PCRE2 10.38                     27 August 2021                        PCRE2(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -4030,8 +4030,8 @@ REVISION
 
 PCRE2 10.45                     04 August 2024                     PCRE2API(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -4656,8 +4656,8 @@ REVISION
 
 PCRE2 10.44                      15 April 2024                   PCRE2BUILD(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -5089,8 +5089,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024                PCRE2CALLOUT(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -5293,20 +5293,23 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
        Perl  supports both plus and minus for subroutine calls, but only minus
        for back references, and no relative numbering at all for conditions.
 
+       (m) The scan substring assertion (syntax (*scs:(n)...)) is a PCRE2  ex-
+       tension that is not available in Perl.
+
        20. Perl has different limits than PCRE2. See the pcre2limit documenta-
        tion for details. Perl went with 5.10 from recursion to iteration keep-
        ing the intermediate matches on the heap, which is ~10% slower but does
-       not fall into any stack-overflow limit. PCRE2 made a similar change  at
-       release  10.30,  and also has many build-time and run-time customizable
+       not  fall into any stack-overflow limit. PCRE2 made a similar change at
+       release 10.30, and also has many build-time and  run-time  customizable
        limits.
 
-       21. Unlike Perl, PCRE2 doesn't have character set  modifiers  and  spe-
-       cially  no  way  to  set characters by context just like Perl's "/d". A
+       21.  Unlike  Perl,  PCRE2 doesn't have character set modifiers and spe-
+       cially no way to set characters by context just  like  Perl's  "/d".  A
        regular expression using PCRE2_UTF and PCRE2_UCP will use similar rules
-       to Perl's "/u"; something closer to "/a" could be  selected  by  adding
+       to  Perl's  "/u";  something closer to "/a" could be selected by adding
        other PCRE2_EXTRA_ASCII* options on top.
 
-       22.  Some recursive patterns that Perl diagnoses as infinite recursions
+       22. Some recursive patterns that Perl diagnoses as infinite  recursions
        can be handled by PCRE2, either by the interpreter or the JIT. An exam-
        ple is /(?:|(?0)abcd)(?(R)|\z)/, which matches a sequence of any number
        of repeated "abcd" substrings at the end of the subject.
@@ -5321,14 +5324,14 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 August 2024
+       Last updated: 30 August 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     12 August 2024                  PCRE2COMPAT(3)
+PCRE2 10.45                     30 August 2024                  PCRE2COMPAT(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -5384,11 +5387,12 @@ AVAILABILITY OF JIT SUPPORT
        be used.
 
        As  of  release  10.45  there is a more informative way to test for JIT
-       support. If pcre2_compile_jit() is called with a  NULL  first  argument
-       and  the  single option PCRE2_JIT_TEST_ALLOC, it returns zero if JIT is
-       available and has a working allocator. Otherwise it  returns  PCRE2_ER-
-       ROR_NOMEMORY if JIT is available but cannot allocate executable memory,
-       or PCRE2_ERROR_NULL if JIT support is not compiled.
+       support. If  pcre2_compile_jit()  is  called  with  the  single  option
+       PCRE2_JIT_TEST_ALLOC  it  returns  zero  if  JIT is available and has a
+       working allocator. Otherwise it returns PCRE2_ERROR_NOMEMORY if JIT  is
+       available but cannot allocate executable memory, or PCRE2_ERROR_JIT_UN-
+       SUPPORTED if JIT support is not compiled. The code argument is ignored,
+       so it can be a NULL value.
 
        A  simple  program  does not need to check availability in order to use
        JIT when possible. The API is implemented in a way that falls  back  to
@@ -5781,8 +5785,8 @@ REVISION
 
 PCRE2 10.45                      23 July 2024                      PCRE2JIT(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5864,8 +5868,8 @@ REVISION
 
 PCRE2 10.43                      1 August 2023                  PCRE2LIMITS(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -5879,7 +5883,7 @@ PCRE2 MATCHING ALGORITHMS
        in  PCRE2  for  matching  a compiled regular expression against a given
        subject string. The "standard" algorithm is the  one  provided  by  the
        pcre2_match() function. This works in the same as Perl's matching func-
-       tion,  and  provide  a Perl-compatible matching operation. The just-in-
+       tion,  and  provides a Perl-compatible matching operation. The just-in-
        time (JIT) optimization that is described in the pcre2jit documentation
        is compatible with this function.
 
@@ -5891,7 +5895,7 @@ PCRE2 MATCHING ALGORITHMS
        When there is only one possible way in which a given subject string can
        match  a pattern, the two algorithms give the same answer. A difference
        arises, however, when there are multiple possibilities. For example, if
-       the pattern
+       the anchored pattern
 
          ^<.*>
 
@@ -5967,83 +5971,86 @@ THE ALTERNATIVE MATCHING ALGORITHM
        first match (which is necessarily the shortest) is found.
 
        Note  that the size of vector needed to contain all the results depends
-       on the number of simultaneous matches, not on the number of parentheses
-       in the pattern. Using pcre2_match_data_create_from_pattern() to  create
-       the  match  data block is therefore not advisable when doing DFA match-
-       ing.
+       on the number of simultaneous matches, not on the number  of  capturing
+       parentheses  in  the  pattern.  Using pcre2_match_data_create_from_pat-
+       tern() to create the match data block is therefore not  advisable  when
+       doing DFA matching.
 
-       Note also that all the matches that are found start at the  same  point
+       Note  also  that all the matches that are found start at the same point
        in the subject. If the pattern
 
          cat(er(pillar)?)?
 
-       is  matched  against the string "the caterpillar catchment", the result
-       is the three strings "caterpillar", "cater", and "cat"  that  start  at
-       the  fifth  character  of the subject. The algorithm does not automati-
+       is matched against the string "the caterpillar catchment",  the  result
+       is  the  three  strings "caterpillar", "cater", and "cat" that start at
+       the fifth character of the subject. The algorithm  does  not  automati-
        cally move on to find matches that start at later positions.
 
        PCRE2's "auto-possessification" optimization usually applies to charac-
-       ter repeats at the end of a pattern (as well as internally). For  exam-
+       ter  repeats at the end of a pattern (as well as internally). For exam-
        ple, the pattern "a\d+" is compiled as if it were "a\d++" because there
-       is  no  point even considering the possibility of backtracking into the
-       repeated digits. For DFA matching, this means that  only  one  possible
-       match  is  found. If you really do want multiple matches in such cases,
-       either use an ungreedy repeat ("a\d+?") or set  the  PCRE2_NO_AUTO_POS-
+       is no point even considering the possibility of backtracking  into  the
+       repeated  digits.  For  DFA matching, this means that only one possible
+       match is found. If you really do want multiple matches in  such  cases,
+       either  use  an ungreedy repeat ("a\d+?") or set the PCRE2_NO_AUTO_POS-
        SESS option when compiling.
 
-       There  are  a  number of features of PCRE2 regular expressions that are
-       not supported or behave differently in the alternative  matching  func-
+       There are a number of features of PCRE2 regular  expressions  that  are
+       not  supported  or behave differently in the alternative matching func-
        tion. Those that are not supported cause an error if encountered.
 
-       1.  Because the algorithm finds all possible matches, the greedy or un-
-       greedy nature of repetition quantifiers is not relevant (though it  may
-       affect  auto-possessification,  as  just  described).  During matching,
-       greedy and ungreedy quantifiers are treated in exactly  the  same  way.
+       1. Because the algorithm finds all possible matches, the greedy or  un-
+       greedy  nature of repetition quantifiers is not relevant (though it may
+       affect auto-possessification,  as  just  described).  During  matching,
+       greedy  and  ungreedy  quantifiers are treated in exactly the same way.
        However, possessive quantifiers can make a difference when what follows
-       could  also  match  what  is  quantified, for example in a pattern like
+       could also match what is quantified, for  example  in  a  pattern  like
        this:
 
          ^a++\w!
 
-       This pattern matches "aaab!" but not "aaa!", which would be matched  by
-       a  non-possessive quantifier. Similarly, if an atomic group is present,
-       it is matched as if it were a standalone pattern at the current  point,
-       and  the  longest match is then "locked in" for the rest of the overall
+       This  pattern matches "aaab!" but not "aaa!", which would be matched by
+       a non-possessive quantifier. Similarly, if an atomic group is  present,
+       it  is matched as if it were a standalone pattern at the current point,
+       and the longest match is then "locked in" for the rest of  the  overall
        pattern.
 
        2. When dealing with multiple paths through the tree simultaneously, it
-       is not straightforward to keep track of  captured  substrings  for  the
-       different  matching  possibilities,  and PCRE2's implementation of this
+       is  not  straightforward  to  keep track of captured substrings for the
+       different matching possibilities, and PCRE2's  implementation  of  this
        algorithm does not attempt to do this. This means that no captured sub-
        strings are available.
 
-       3. Because no substrings are captured, backreferences within  the  pat-
-       tern are not supported.
+       3. Because no substrings are captured, a number of related features are
+       not available:
 
-       4.  For  the same reason, conditional expressions that use a backrefer-
-       ence as the condition or test for a specific group  recursion  are  not
-       supported.
+       (a) Backreferences;
 
-       5. Again for the same reason, script runs are not supported.
+       (b)  Conditional  expressions that use a backreference as the condition
+       or test for a specific group recursion;
 
-       6. Because many paths through the tree may be active, the \K escape se-
-       quence,  which  resets the start of the match when encountered (but may
+       (c) Script runs;
+
+       (d) Scan substring assertions.
+
+       4. Because many paths through the tree may be active, the \K escape se-
+       quence, which resets the start of the match when encountered  (but  may
        be on some paths and not on others), is not supported.
 
-       7. Callouts are supported, but the value of the  capture_top  field  is
+       5.  Callouts  are  supported, but the value of the capture_top field is
        always 1, and the value of the capture_last field is always 0.
 
-       8.  The  \C  escape  sequence, which (in the standard algorithm) always
-       matches a single code unit, even in a UTF mode,  is  not  supported  in
-       these  modes,  because the alternative algorithm moves through the sub-
-       ject string one character (not code unit) at a  time,  for  all  active
-       paths through the tree.
+       6. The \C escape sequence, which (in  the  standard  algorithm)  always
+       matches a single code unit, even in a UTF mode, is not supported in UTF
+       modes  because  the  alternative  algorithm  moves  through the subject
+       string one character (not code unit) at a time, for  all  active  paths
+       through the tree.
 
-       9.  Except for (*FAIL), the backtracking control verbs such as (*PRUNE)
+       7.  Except for (*FAIL), the backtracking control verbs such as (*PRUNE)
        are not supported. (*FAIL) is supported, and  behaves  like  a  failing
        negative assertion.
 
-       10.  The PCRE2_MATCH_INVALID_UTF option for pcre2_compile() is not sup-
+       8.  The  PCRE2_MATCH_INVALID_UTF option for pcre2_compile() is not sup-
        ported by pcre2_dfa_match().
 
 
@@ -6068,13 +6075,15 @@ DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
        partly because it has to search for all possible matches, but  is  also
        because it is less susceptible to optimization.
 
-       2.  Capturing  parentheses,  backreferences,  script runs, and matching
-       within invalid UTF string are not supported.
+       2. Capturing parentheses and other features such as backreferences that
+       rely on them are not supported.
 
-       3. Although atomic groups are supported, their use does not provide the
+       3. Matching within invalid UTF strings is not supported.
+
+       4. Although atomic groups are supported, their use does not provide the
        performance advantage that it does for the standard algorithm.
 
-       4. JIT optimization is not supported.
+       5. JIT optimization is not supported.
 
 
 AUTHOR
@@ -6086,14 +6095,14 @@ AUTHOR
 
 REVISION
 
-       Last updated: 19 January 2024
+       Last updated: 30 August 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.43                     19 January 2024               PCRE2MATCHING(3)
+PCRE2 10.45                     30 August 2024                PCRE2MATCHING(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -6475,8 +6484,8 @@ REVISION
 
 PCRE2 10.34                    04 September 2019               PCRE2PARTIAL(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -8693,19 +8702,25 @@ BACKREFERENCES
 
 ASSERTIONS
 
-       An  assertion  is  a  test on the characters following or preceding the
-       current matching point that does not consume any characters. The simple
-       assertions coded as \b, \B, \A, \G, \Z,  \z,  ^  and  $  are  described
-       above.
+       An  assertion  is a test that does not consume any characters. The test
+       must succeed for the match to continue. The simple assertions coded  as
+       \b, \B, \A, \G, \Z, \z, ^ and $ are described above.
 
-       More  complicated  assertions  are coded as parenthesized groups. There
-       are two kinds: those that look ahead of the  current  position  in  the
-       subject  string, and those that look behind it, and in each case an as-
-       sertion may be positive (must match for the assertion to  be  true)  or
-       negative  (must  not  match for the assertion to be true). An assertion
-       group is matched in the normal way, and if it is true, matching contin-
-       ues after it, but with the matching position in the subject string  re-
-       set to what it was before the assertion was processed.
+       More  complicated  assertions  are  coded  as  parenthesized groups. If
+       matching such a group succeeds, matching continues after it,  but  with
+       the matching position in the subject string reset to what it was before
+       the assertion was processed.
+
+       A  special  kind  of  assertion,  called  a "scan substring" assertion,
+       matches a subpattern against a previously captured substring.  This  is
+       described in the section entitled "Scan substring assertions" below. It
+       is a PCRE2 extension, not compatible with Perl.
+
+       The other goup-based assertions are of two kinds: those that look ahead
+       of  the current position in the subject string, and those that look be-
+       hind it, and in each case an assertion may be positive (must match  for
+       the assertion to be true) or negative (must not match for the assertion
+       to be true).
 
        The  Perl-compatible  lookaround assertions are atomic. If an assertion
        is true, but there is a subsequent matching failure, there is no  back-
@@ -8970,6 +8985,61 @@ NON-ATOMIC ASSERTIONS
        do not contain any control verbs such as (*ACCEPT). (This may change in
        future). Note that assertions that appear as conditions for conditional
        groups (see below) must be atomic.
+
+
+SCAN SUBSTRING ASSERTIONS
+
+       A special kind of assertion, not compatible with Perl, makes it  possi-
+       ble to check the contents of a captured substring by matching it with a
+       subpattern.   Because this involves capturing, this feature is not sup-
+       ported by pcre2_dfa_match().
+
+       A scan substring assertion starts with the  sequence  (*scan_substring:
+       or  (*scs:  which  is followed by a substring number (absolute or rela-
+       tive) or a substring name enclosed in single quotes or angle  brackets,
+       within parentheses.  The rest of the item is the subpattern that is ap-
+       plied to the substring, as shown here:
+
+         (*scan_substring:(1)...)
+         (*scs:(-2)...)
+         (*scs:('AB')...)
+
+       The pattern match on the substring is always anchored, that is, it must
+       match  from  the  start of the substring. There is no "bumpalong" if it
+       does not match at the start. The end of the subject is temporarily  re-
+       set  to be the end of the substring, so \Z, \z, and $ will match there.
+       However, the start of the subject is  not  reset.  This  means  that  ^
+       matches only if the substring is actually at the start of the main sub-
+       ject,  but  it also means that lookbehind assertions into what precedes
+       the substring are possible.
+
+       Here is a very simple example: find a word that contains the  rare  (in
+       English) sequence of letters "rh" not at the start:
+
+         \b(\w++)(*scs:(1).+rh)
+
+       The  first  group  captures  a word which is then scanned by the second
+       group.  This example does not actually need this  heavyweight  feature;
+       the same match can be achieved with:
+
+         \b\w+?rh\w*\b
+
+       When  things are more complicated, however, this feature can be useful.
+       For exmple, there is a rather complicated pattern  in  the  PCRE2  test
+       data  that  checks  an entire subject string for a palindrome, that the
+       sequence of letters is the same in both directions. Suppose you want to
+       search for individual words of two or more characters such  as  "level"
+       that are palindromes:
+
+         (\b\w{2,}+\b)(*scs:(1)...palindrome-matching-pattern...)
+
+       A  scan  substring  assertion  fails if the group it references has not
+       been set.  Within the subpattern, references to other  groups  work  as
+       normal. Other capturing groups may appear, and will retain their values
+       during  ongoing matching if the assertion succeeds. When PCRE2_DUPNAMES
+       is set and there are ambiguous group names, if the  assertion  scans  a
+       group  by  name, it is the lowest numbered set group of the groups with
+       that name that is scanned.
 
 
 SCRIPT RUNS
@@ -10061,14 +10131,14 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 August 2024
+       Last updated: 30 August 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     12 August 2024                 PCRE2PATTERN(3)
+PCRE2 10.45                     30 August 2024                 PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -10322,8 +10392,8 @@ REVISION
 
 PCRE2 10.41                      27 July 2022                  PCRE2PERFORM(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -10680,8 +10750,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024                  PCRE2POSIX(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -10964,8 +11034,8 @@ REVISION
 
 PCRE2 10.32                      27 June 2018                PCRE2SERIALIZE(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -11429,6 +11499,18 @@ NON-ATOMIC LOOKAROUND ASSERTIONS
          (*non_atomic_positive_lookbehind:...)  )
 
 
+SUBSTRING SCAN ASSERTION
+       This feature is not Perl-compatible.
+
+         (*scs:(n)...)       scan substring by absolute reference
+         (*scs:(+n)...)      scan substring by relative reference
+         (*scs:(-n)...)      scan substring by relative reference
+         (*scs:(<name>)...)  scan substring by name
+         (*scs:('name')...)  scan substring by name
+
+       The full name "scan_substring" may be used instead of "scs".
+
+
 SCRIPT RUNS
 
          (*script_run:...)           ) script run, can be backtracked into
@@ -11550,14 +11632,14 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 August 2024
+       Last updated: 30 August 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     12 August 2024                  PCRE2SYNTAX(3)
+PCRE2 10.45                     30 August 2024                  PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -12026,5 +12108,5 @@ REVISION
 
 PCRE2 10.45                      22 July 2024                  PCRE2UNICODE(3)
 ------------------------------------------------------------------------------
- 
- 
+
+

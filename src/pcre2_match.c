@@ -5645,12 +5645,12 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     Lsaved_end_subject = mb->end_subject;
     Ltrue_end_extra = mb->true_end_subject - mb->end_subject;
     Lsaved_eptr = Feptr;
-    Lsaved_moptions = mb->moptions; 
+    Lsaved_moptions = mb->moptions;
 
     Feptr = mb->start_subject + Fovector[offset];
     mb->true_end_subject = mb->end_subject =
       mb->start_subject + Fovector[offset + 1];
-    mb->moptions &= ~PCRE2_NOTEOL;   
+    mb->moptions &= ~PCRE2_NOTEOL;
 
     Lframe_type = GF_NOCAPTURE | Fop;
     for (;;)

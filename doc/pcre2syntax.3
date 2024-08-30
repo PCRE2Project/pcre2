@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "12 August 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "30 August 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -19,7 +19,7 @@ documentation. This document contains a quick-reference summary of the syntax.
   \eQ...\eE    treat enclosed characters as literal
 .sp
 Note that white space inside \eQ...\eE is always treated as literal, even if
-PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also 
+PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also
 that PCRE2's handling of \eQ...\eE has some differences from Perl's. See the
 .\" HREF
 \fBpcre2pattern\fP
@@ -490,6 +490,19 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
   (*non_atomic_positive_lookbehind:...)  )
 .
 .
+.SH "SUBSTRING SCAN ASSERTION"
+.rs
+This feature is not Perl-compatible.
+.sp
+  (*scs:(n)...)       scan substring by absolute reference
+  (*scs:(+n)...)      scan substring by relative reference
+  (*scs:(-n)...)      scan substring by relative reference
+  (*scs:(<name>)...)  scan substring by name
+  (*scs:('name')...)  scan substring by name
+.sp
+The full name "scan_substring" may be used instead of "scs".
+.
+.
 .SH "SCRIPT RUNS"
 .rs
 .sp
@@ -622,6 +635,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 12 August 2024
+Last updated: 30 August 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
