@@ -18650,6 +18650,101 @@ No match
  0: x
  1: c
 
+/(a)(b)(*scs:(2)(*scs:(1)a(*PRUNE)x)).+|(.+)/
+    abcdef
+ 0: bcdef
+ 1: <unset>
+ 2: <unset>
+ 3: bcdef
+
+/(a)(b)(*scs:(2)(*scs:(1)a(*PRUNE:markstr)x)).+|(.+)/mark
+    abcdef
+ 0: bcdef
+ 1: <unset>
+ 2: <unset>
+ 3: bcdef
+
+/(a)(b)(*scs:(2)(*scs:(1)a(*PRUNE:markstr))).+|(.+)/mark
+    abcdef
+ 0: abcdef
+ 1: a
+ 2: b
+MK: markstr
+
+/(a)(b)(*scs:(2)(*scs:(1)a(*COMMIT)x)).+|(.+)/
+    abcdef
+No match
+
+/(a)(b)(*scs:(2)(*scs:(1)a(*COMMIT:markstr)x)).+|(.+)/mark
+    abcdef
+No match, mark = markstr
+
+/(a)(b)(*scs:(2)(*scs:(1)a(*COMMIT:markstr))).+|(.+)/mark
+    abcdef
+ 0: abcdef
+ 1: a
+ 2: b
+MK: markstr
+
+/(abc)(def)(*scs:(1)(*scs:(2)de(*SKIP)x)).+|(.+)/
+    abcdefghi
+ 0: fghi
+ 1: <unset>
+ 2: <unset>
+ 3: fghi
+
+/(abc)(def)(*scs:(2)(*scs:(1)(*SKIP)x)).+|(.+)/
+    abcdefghi
+ 0: bcdefghi
+ 1: <unset>
+ 2: <unset>
+ 3: bcdefghi
+
+/(?<=(abc))(def)(*scs:(2)(*scs:(1)(*SKIP)x)).+|(ef.+)/
+    abcdefghi
+ 0: efghi
+ 1: <unset>
+ 2: <unset>
+ 3: efghi
+
+/(abc)(def)(*scs:(2)(?:(*scs:(1)abc(*SKIP:notfound)x|abcd|(abc)))).+/
+    abcdefghi
+ 0: abcdefghi
+ 1: abc
+ 2: def
+ 3: abc
+
+/(abc)(def)(*MARK:markstr)(*scs:(2)(?:(*scs:(1)abc(*SKIP:markstr)x))).+|(.+)/
+    abcdefghi
+ 0: ghi
+ 1: <unset>
+ 2: <unset>
+ 3: ghi
+
+/^([a-z]++)(?:((?6))|((?7))|((?8))|(#))(?(DEFINE)((*scs:(1)abc(*PRUNE)d))((*scs:(1)abc(*COMMIT)e))((*scs:(1)abc(*SKIP)f)))/
+    abcd#
+ 0: abcd
+ 1: abcd
+ 2: 
+    abce#
+ 0: abce
+ 1: abce
+ 2: <unset>
+ 3: 
+    abcf#
+ 0: abcf
+ 1: abcf
+ 2: <unset>
+ 3: <unset>
+ 4: 
+    abc#
+ 0: abc#
+ 1: abc
+ 2: <unset>
+ 3: <unset>
+ 4: <unset>
+ 5: #
+
 # --------------
 
 # End of testinput2

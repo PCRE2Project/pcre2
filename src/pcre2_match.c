@@ -5667,14 +5667,20 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         break;
         }
 
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
+        {
+        mb->end_subject = Lsaved_end_subject;
+        mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
+        mb->moptions = Lsaved_moptions;
+        RRETURN(rrc);
+        }
 
       Fecode += GET(Fecode, 1);
       if (*Fecode != OP_ALT)
         {
         mb->end_subject = Lsaved_end_subject;
         mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
-        mb->moptions = Lsaved_moptions; 
+        mb->moptions = Lsaved_moptions;
         RRETURN(MATCH_NOMATCH);
         }
       Lextra_size = 0;
