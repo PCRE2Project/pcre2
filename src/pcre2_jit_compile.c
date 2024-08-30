@@ -429,6 +429,11 @@ typedef struct compiler_common {
      Each item must have a previous offset and type
      (see control_types) values. See do_search_mark. */
   sljit_s32 control_head_ptr;
+  /* The offset of the saved STR_END in the outermost
+     scan substring block. Since scan substring restores
+     STR_END after a match, it is enough to restore
+     STR_END inside a scan substring block. */
+  sljit_s32 restore_end_ptr;
   /* Points to the last matched capture block index. */
   sljit_s32 capture_last_ptr;
   /* Fast forward skipping byte code pointer. */
@@ -1223,9 +1228,6 @@ while (cc < ccend)
 
     case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
-    if (cc < assert_na_end)
-      return FALSE;
-    /* Fall through */
     case OP_MARK:
     if (common->mark_ptr == 0)
       {
@@ -1244,8 +1246,6 @@ while (cc < ccend)
     case OP_SKIP:
     if (cc < assert_back_end)
       common->has_skip_in_assert_back = TRUE;
-    if (cc < assert_na_end)
-      return FALSE;
     cc += 1;
     break;
 
@@ -1254,13 +1254,9 @@ while (cc < ccend)
     common->has_skip_arg = TRUE;
     if (cc < assert_back_end)
       common->has_skip_in_assert_back = TRUE;
-    if (cc < assert_na_end)
-      return FALSE;
     cc += 1 + 2 + cc[1];
     break;
 
-    case OP_PRUNE:
-    case OP_COMMIT:
     case OP_ASSERT_ACCEPT:
     if (cc < assert_na_end)
       return FALSE;
@@ -2250,6 +2246,7 @@ if (ccend == NULL)
     cc = next_opcode(common, cc);
   }
 
+/* The data is restored by do_revertframes(). */
 SLJIT_ASSERT(cc != NULL);
 while (cc < ccend)
   switch(*cc)
@@ -10203,6 +10200,7 @@ jump_list **found;
 /* Saving previous accept variables. */
 BOOL save_local_quit_available = common->local_quit_available;
 BOOL save_in_positive_assertion = common->in_positive_assertion;
+sljit_s32 save_restore_end_ptr = common->restore_end_ptr;
 then_trap_backtrack *save_then_trap = common->then_trap;
 struct sljit_label *save_quit_label = common->quit_label;
 struct sljit_label *save_accept_label = common->accept_label;
@@ -10310,6 +10308,7 @@ if (conditional || (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT))
   {
   /* Control verbs cannot escape from these asserts. */
   local_quit_available = TRUE;
+  common->restore_end_ptr = 0;
   common->local_quit_available = TRUE;
   common->quit_label = NULL;
   common->quit = NULL;
@@ -10345,6 +10344,7 @@ while (1)
       common->quit = save_quit;
       }
     common->in_positive_assertion = save_in_positive_assertion;
+    common->restore_end_ptr = save_restore_end_ptr;
     common->then_trap = save_then_trap;
     common->accept_label = save_accept_label;
     common->positive_assertion_quit = save_positive_assertion_quit;
@@ -10442,6 +10442,7 @@ while (1)
       common->quit = save_quit;
       }
     common->in_positive_assertion = save_in_positive_assertion;
+    common->restore_end_ptr = save_restore_end_ptr;
     common->then_trap = save_then_trap;
     common->accept_label = save_accept_label;
     common->positive_assertion_quit = save_positive_assertion_quit;
@@ -10646,7 +10647,9 @@ if (local_quit_available)
   common->quit_label = save_quit_label;
   common->quit = save_quit;
   }
+
 common->in_positive_assertion = save_in_positive_assertion;
+common->restore_end_ptr = save_restore_end_ptr;
 common->then_trap = save_then_trap;
 common->accept_label = save_accept_label;
 common->positive_assertion_quit = save_positive_assertion_quit;
@@ -11114,6 +11117,10 @@ else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SC
   }
 else if (opcode == OP_ASSERT_SCS)
   {
+  /* Nested scs blocks will not update this variable. */
+  if (common->restore_end_ptr == 0)
+    common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
+
   if (*matchingpath == OP_CREF)
     {
     i = OVECTOR(GET2(matchingpath, 1) << 1);
@@ -11388,6 +11395,10 @@ else switch (opcode)
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
     OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw));
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), TMP1, 0);
+
+    /* Nested scs blocks will not update this variable. */
+    if (common->restore_end_ptr == private_data_ptr + (int)sizeof(sljit_sw))
+      common->restore_end_ptr = 0;
     break;
   }
 
@@ -13296,6 +13307,10 @@ else if (SLJIT_UNLIKELY(opcode == OP_ASSERT_SCS))
   OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
   OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), TMP1, 0);
+
+  /* Nested scs blocks will not update this variable. */
+  if (common->restore_end_ptr == 0)
+    common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
   }
 
 if (SLJIT_UNLIKELY(opcode == OP_ONCE))
@@ -13590,6 +13605,10 @@ else if (opcode == OP_ASSERT_SCS)
   free_stack(common, has_alternatives ? 3 : 2);
 
   set_jumps(CURRENT_AS(bracket_backtrack)->u.no_capture, LABEL());
+
+  /* Nested scs blocks will not update this variable. */
+  if (common->restore_end_ptr == private_data_ptr + (int)sizeof(sljit_sw))
+    common->restore_end_ptr = 0;
   }
 else if (opcode == OP_ONCE)
   {
@@ -13771,6 +13790,9 @@ if (opcode == OP_THEN || opcode == OP_THEN_ARG)
     }
   }
 
+if (common->restore_end_ptr != 0 && opcode != OP_SKIP_ARG)
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->restore_end_ptr);
+
 if (common->local_quit_available)
   {
   /* Abort match with a fail. */
@@ -13788,8 +13810,18 @@ if (opcode == OP_SKIP_ARG)
   OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, (sljit_sw)(current->cc + 2));
   sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS2(W, W, W), SLJIT_IMM, SLJIT_FUNC_ADDR(do_search_mark));
 
+  if (common->restore_end_ptr == 0)
+    {
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_R0, 0);
+    add_jump(compiler, &common->reset_match, CMP(SLJIT_NOT_EQUAL, SLJIT_R0, 0, SLJIT_IMM, 0));
+    return;
+    }
+
+  jump = CMP(SLJIT_EQUAL, SLJIT_R0, 0, SLJIT_IMM, 0);
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_R0, 0);
-  add_jump(compiler, &common->reset_match, CMP(SLJIT_NOT_EQUAL, SLJIT_R0, 0, SLJIT_IMM, 0));
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->restore_end_ptr);
+  add_jump(compiler, &common->reset_match, JUMP(SLJIT_JUMP));
+  JUMPHERE(jump);
   return;
   }
 
@@ -14012,8 +14044,12 @@ while (current)
 
     case OP_COMMIT:
     case OP_COMMIT_ARG:
+    if (common->restore_end_ptr != 0)
+      OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->restore_end_ptr);
+
     if (!common->local_quit_available)
       OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
+
     if (common->quit_label == NULL)
       add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
     else
@@ -14718,6 +14754,8 @@ common->early_fail_end_ptr = 0;
 common->currententry = common->entries;
 common->local_quit_available = TRUE;
 quit_label = common->quit_label;
+SLJIT_ASSERT(common->restore_end_ptr == 0);
+
 if (common->currententry != NULL)
   {
   /* A free bit for each private data. */
@@ -14753,8 +14791,10 @@ if (common->currententry != NULL)
     return PCRE2_ERROR_NOMEMORY;
     }
   }
+
 common->local_quit_available = FALSE;
 common->quit_label = quit_label;
+SLJIT_ASSERT(common->restore_end_ptr == 0);
 
 /* Allocating stack, returns with PCRE_ERROR_JIT_STACKLIMIT if fails. */
 /* This is a (really) rare case. */
