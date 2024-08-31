@@ -18749,7 +18749,7 @@ MK: markstr
     sausages and mash
  0: sausages
  1: sausages
-\= Expect no match     
+\= Expect no match
     !sausages and mash
 No match
 
@@ -18780,6 +18780,12 @@ No match
  0: xyzabc
  1: xyz
  2: abc
+
+/^([a-z]++)#(*scs:(1)a|ab|abc|abcd|abcde|abcdef|(abcdefg))\2/
+    abcdefg#abcdefg
+ 0: abcdefg#abcdefg
+ 1: abcdefg
+ 2: abcdefg
 
 # --------------
 

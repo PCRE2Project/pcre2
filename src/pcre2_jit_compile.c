@@ -287,9 +287,9 @@ typedef struct bracket_backtrack {
     assert_backtrack *assert;
     /* For OP_ONCE. Less than 0 if not needed. */
     int framesize;
-    /* For brackets with >3 alternatives. */
-    struct sljit_jump *matching_mov_addr;
   } u;
+  /* For brackets with >3 alternatives. */
+  struct sljit_jump *matching_mov_addr;
   /* Points to our private memory word on the stack. */
   int private_data_ptr;
 } bracket_backtrack;
@@ -11373,7 +11373,7 @@ if (has_alternatives)
     if (i <= 3)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
     else
-      BACKTRACK_AS(bracket_backtrack)->u.matching_mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+      BACKTRACK_AS(bracket_backtrack)->matching_mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
     }
   if (ket != OP_KETRMAX)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
@@ -13344,8 +13344,8 @@ else if (has_alternatives)
     {
     sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
 
-    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->u.matching_mov_addr);
-    sljit_set_label(CURRENT_AS(bracket_backtrack)->u.matching_mov_addr, LABEL());
+    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->matching_mov_addr != NULL);
+    sljit_set_label(CURRENT_AS(bracket_backtrack)->matching_mov_addr, LABEL());
     sljit_emit_op0(compiler, SLJIT_ENDBR);
     }
   else
