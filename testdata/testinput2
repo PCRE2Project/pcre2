@@ -6314,7 +6314,7 @@ a)"xI
 
 /\b(\w++)(*scs:(1)^)/
     sausages and mash
-\= Expect no match     
+\= Expect no match
     !sausages and mash
 
 /(\b\w{3,}+\b)(*scs:(1)\W*+(?:((.)\W*+(?2)\W*+\3|)|((.)\W*+(?4)\W*+\5|\W*+.\W*+))\W*+$)/ig
@@ -6326,6 +6326,9 @@ a)"xI
 # Relative reference
 /(xyz)(abc)(*scs:(-1)abc)(*scs:(-2)\1)/
     >xyzabc<
+
+/^([a-z]++)#(*scs:(1)a|ab|abc|abcd|abcde|abcdef|(abcdefg))\2/
+    abcdefg#abcdefg
 
 # --------------
 
