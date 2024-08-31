@@ -6312,6 +6312,21 @@ a)"xI
     abcf#
     abc#
 
+/\b(\w++)(*scs:(1)^)/
+    sausages and mash
+\= Expect no match     
+    !sausages and mash
+
+/(\b\w{3,}+\b)(*scs:(1)\W*+(?:((.)\W*+(?2)\W*+\3|)|((.)\W*+(?4)\W*+\5|\W*+.\W*+))\W*+$)/ig
+    ipsum lorem revel level able was I ere I saw Elba
+
+/(?:(?'A'a)|(?<A>b))(*scs:('A')b)c/dupnames
+    abc
+
+# Relative reference
+/(xyz)(abc)(*scs:(-1)abc)(*scs:(-2)\1)/
+    >xyzabc<
+
 # --------------
 
 # End of testinput2
