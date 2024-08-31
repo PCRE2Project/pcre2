@@ -878,7 +878,7 @@ echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 157 -----------------------------" >>testtrygrep
 echo "spaces " >testtemp1grep
-(cd $srcdir; $valgrind $vjs $pcre2grep -o --posix-pattern-file --file=$builddir/testtemp1grep ./testdata/grepinputv >testtemp2grep && $valgrind $vjs $pcre2grep -q "s " testtemp2grep) >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -o --posix-pattern-file --file=$builddir/testtemp1grep ./testdata/grepinputv >$builddir/testtemp2grep && $valgrind $vjs $pcre2grep -q "s " $builddir/testtemp2grep) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 158 -----------------------------" >>testtrygrep
