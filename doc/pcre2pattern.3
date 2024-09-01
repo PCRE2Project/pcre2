@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "30 August 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "01 Sepbember 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -3479,8 +3479,8 @@ not there. Any number of these verbs may occur in a pattern. Except for
 .P
 Since these verbs are specifically related to backtracking, most of them can be
 used only when the pattern is to be matched using the traditional matching
-function, because that uses a backtracking algorithm. With the exception of
-(*FAIL), which behaves like a failing negative assertion, the backtracking
+function or JIT, because they use backtracking algorithms. With the exception
+of (*FAIL), which behaves like a failing negative assertion, the backtracking
 control verbs cause an error if encountered by the DFA matching function.
 .P
 The behaviour of these verbs in
@@ -3659,9 +3659,9 @@ The following verbs do nothing when they are encountered. Matching continues
 with what follows, but if there is a subsequent match failure, causing a
 backtrack to the verb, a failure is forced. That is, backtracking cannot pass
 to the left of the verb. However, when one of these verbs appears inside an
-atomic group or in a lookaround assertion that is true, its effect is confined
-to that group, because once the group has been matched, there is never any
-backtracking into it. Backtracking from beyond an assertion or an atomic group
+atomic group or in an atomic lookaround assertion that is true, its effect is
+confined to that group, because once the group has been matched, there is never
+any backtracking into it. Backtracking from beyond an atomic assertion or group
 ignores the entire group, and seeks a preceding backtracking point.
 .P
 These verbs differ in exactly what kind of failure occurs when backtracking
@@ -3913,11 +3913,16 @@ backtrack that occurs after such an assertion is complete does not jump back
 into the assertion. Note in particular that a (*MARK) name that is set in an
 assertion is not "seen" by an instance of (*SKIP:NAME) later in the pattern.
 .P
-PCRE2 now supports non-atomic positive assertions, as described in the section
-entitled
+PCRE2 now supports non-atomic positive assertions and also "scan substring"
+assertions, as described in the sections entitled
 .\" HTML <a href="#nonatomicassertions">
 .\" </a>
 "Non-atomic assertions"
+.\"
+and
+.\" HTML <a href="#scansubstringassertions">
+.\" </a>
+"Scan substring assertions"
 .\"
 above. These assertions must be standalone (not used as conditions). They are
 not Perl-compatible. For these assertions, a later backtrack does jump back
@@ -3926,7 +3931,8 @@ backtracks from later in the pattern.
 .P
 The effect of (*THEN) is not allowed to escape beyond an assertion. If there
 are no more branches to try, (*THEN) causes a positive assertion to be false,
-and a negative assertion to be true.
+and a negative assertion to be true. This behaviour differs from Perl when the
+assertion has only one branch.
 .P
 The other backtracking verbs are not treated specially if they appear in a
 standalone positive assertion. In a conditional positive assertion,
@@ -3981,6 +3987,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2024
+Last updated: 01 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

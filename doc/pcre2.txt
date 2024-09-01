@@ -188,8 +188,8 @@ REVISION
 
 PCRE2 10.38                     27 August 2021                        PCRE2(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2API(3)                Library Functions Manual                PCRE2API(3)
 
 
@@ -4030,8 +4030,8 @@ REVISION
 
 PCRE2 10.45                     04 August 2024                     PCRE2API(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2BUILD(3)              Library Functions Manual              PCRE2BUILD(3)
 
 
@@ -4656,8 +4656,8 @@ REVISION
 
 PCRE2 10.44                      15 April 2024                   PCRE2BUILD(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2CALLOUT(3)            Library Functions Manual            PCRE2CALLOUT(3)
 
 
@@ -5089,8 +5089,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024                PCRE2CALLOUT(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2COMPAT(3)             Library Functions Manual             PCRE2COMPAT(3)
 
 
@@ -5200,7 +5200,9 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
        if  (*THEN)  is  present in a group that is called as a subroutine, its
        action is limited to that group, even if the group does not contain any
        | characters. Note that such groups are processed as  anchored  at  the
-       point where they are tested.
+       point  where  they  are  tested.  PCRE2 also confines all control verbs
+       within atomic assertions, again including (*THEN)  in  assertions  with
+       only one branch.
 
        12.  If a pattern contains more than one backtracking control verb, the
        first one that is backtracked onto acts. For example,  in  the  pattern
@@ -5324,14 +5326,14 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 August 2024
+       Last updated: 01 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     30 August 2024                  PCRE2COMPAT(3)
+PCRE2 10.45                    01 September 2024                PCRE2COMPAT(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2JIT(3)                Library Functions Manual                PCRE2JIT(3)
 
 
@@ -5785,8 +5787,8 @@ REVISION
 
 PCRE2 10.45                      23 July 2024                      PCRE2JIT(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2LIMITS(3)             Library Functions Manual             PCRE2LIMITS(3)
 
 
@@ -5868,8 +5870,8 @@ REVISION
 
 PCRE2 10.43                      1 August 2023                  PCRE2LIMITS(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2MATCHING(3)           Library Functions Manual           PCRE2MATCHING(3)
 
 
@@ -6101,8 +6103,8 @@ REVISION
 
 PCRE2 10.45                     30 August 2024                PCRE2MATCHING(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PARTIAL(3)            Library Functions Manual            PCRE2PARTIAL(3)
 
 
@@ -6484,8 +6486,8 @@ REVISION
 
 PCRE2 10.34                    04 September 2019               PCRE2PARTIAL(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PATTERN(3)            Library Functions Manual            PCRE2PATTERN(3)
 
 
@@ -9670,10 +9672,10 @@ BACKTRACKING CONTROL
 
        Since  these  verbs  are  specifically related to backtracking, most of
        them can be used only when the pattern is to be matched using the  tra-
-       ditional matching function, because that uses a backtracking algorithm.
-       With  the  exception  of (*FAIL), which behaves like a failing negative
-       assertion, the backtracking control verbs cause an error if encountered
-       by the DFA matching function.
+       ditional  matching function or JIT, because they use backtracking algo-
+       rithms. With the exception of (*FAIL), which  behaves  like  a  failing
+       negative  assertion,  the  backtracking control verbs cause an error if
+       encountered by the DFA matching function.
 
        The behaviour of these verbs in repeated  groups,  assertions,  and  in
        capture  groups  called  as subroutines (whether or not recursively) is
@@ -9814,11 +9816,11 @@ BACKTRACKING CONTROL
        tinues  with  what follows, but if there is a subsequent match failure,
        causing a backtrack to the verb, a failure is forced.  That  is,  back-
        tracking  cannot  pass  to  the  left of the verb. However, when one of
-       these verbs appears inside an atomic group or in a lookaround assertion
-       that is true, its effect is confined to that group,  because  once  the
-       group  has been matched, there is never any backtracking into it. Back-
-       tracking from beyond an assertion or an atomic group ignores the entire
-       group, and seeks a preceding backtracking point.
+       these verbs appears inside an atomic group or in an  atomic  lookaround
+       assertion  that  is true, its effect is confined to that group, because
+       once the group has been matched, there is never any  backtracking  into
+       it.  Backtracking  from beyond an atomic assertion or group ignores the
+       entire group, and seeks a preceding backtracking point.
 
        These verbs differ in exactly what kind of failure  occurs  when  back-
        tracking  reaches  them.  The behaviour described below is what happens
@@ -10075,21 +10077,23 @@ BACKTRACKING CONTROL
        (*MARK)  name  that is set in an assertion is not "seen" by an instance
        of (*SKIP:NAME) later in the pattern.
 
-       PCRE2 now supports non-atomic positive assertions, as described in  the
-       section  entitled  "Non-atomic assertions" above. These assertions must
-       be standalone (not used as conditions). They are  not  Perl-compatible.
-       For  these assertions, a later backtrack does jump back into the asser-
-       tion, and therefore verbs such as (*COMMIT) can be triggered  by  back-
-       tracks from later in the pattern.
+       PCRE2 now supports non-atomic positive assertions and also  "scan  sub-
+       string"  assertions,  as described in the sections entitled "Non-atomic
+       assertions" and "Scan substring  assertions"  above.  These  assertions
+       must be standalone (not used as conditions). They are not Perl-compati-
+       ble.  For  these  assertions, a later backtrack does jump back into the
+       assertion, and therefore verbs such as (*COMMIT) can  be  triggered  by
+       backtracks from later in the pattern.
 
        The  effect of (*THEN) is not allowed to escape beyond an assertion. If
        there are no more branches to try, (*THEN) causes a positive  assertion
-       to be false, and a negative assertion to be true.
+       to  be  false, and a negative assertion to be true. This behaviour dif-
+       fers from Perl when the assertion has only one branch.
 
-       The  other  backtracking verbs are not treated specially if they appear
-       in a standalone positive assertion. In a  conditional  positive  asser-
+       The other backtracking verbs are not treated specially if  they  appear
+       in  a  standalone  positive assertion. In a conditional positive asser-
        tion, backtracking (from within the assertion) into (*COMMIT), (*SKIP),
-       or  (*PRUNE) causes the condition to be false. However, for both stand-
+       or (*PRUNE) causes the condition to be false. However, for both  stand-
        alone and conditional negative assertions, backtracking into (*COMMIT),
        (*SKIP), or (*PRUNE) causes the assertion to be true, without consider-
        ing any further alternative branches.
@@ -10099,26 +10103,26 @@ BACKTRACKING CONTROL
        These behaviours occur whether or not the group is called recursively.
 
        (*ACCEPT) in a group called as a subroutine causes the subroutine match
-       to succeed without any further processing. Matching then continues  af-
-       ter  the  subroutine call. Perl documents this behaviour. Perl's treat-
+       to  succeed without any further processing. Matching then continues af-
+       ter the subroutine call. Perl documents this behaviour.  Perl's  treat-
        ment of the other verbs in subroutines is different in some cases.
 
-       (*FAIL) in a group called as a subroutine has  its  normal  effect:  it
+       (*FAIL)  in  a  group  called as a subroutine has its normal effect: it
        forces an immediate backtrack.
 
-       (*COMMIT),  (*SKIP),  and  (*PRUNE)  cause the subroutine match to fail
-       when triggered by being backtracked to in a group called as  a  subrou-
+       (*COMMIT), (*SKIP), and (*PRUNE) cause the  subroutine  match  to  fail
+       when  triggered  by being backtracked to in a group called as a subrou-
        tine. There is then a backtrack at the outer level.
 
        (*THEN), when triggered, skips to the next alternative in the innermost
-       enclosing  group that has alternatives (its normal behaviour). However,
+       enclosing group that has alternatives (its normal behaviour).  However,
        if there is no such group within the subroutine's group, the subroutine
        match fails and there is a backtrack at the outer level.
 
 
 SEE ALSO
 
-       pcre2api(3),   pcre2callout(3),    pcre2matching(3),    pcre2syntax(3),
+       pcre2api(3),    pcre2callout(3),    pcre2matching(3),   pcre2syntax(3),
        pcre2(3).
 
 
@@ -10131,14 +10135,14 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 August 2024
+       Last updated: 01 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     30 August 2024                 PCRE2PATTERN(3)
+PCRE2 10.45                    01 Sepbember 2024               PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2PERFORM(3)            Library Functions Manual            PCRE2PERFORM(3)
 
 
@@ -10392,8 +10396,8 @@ REVISION
 
 PCRE2 10.41                      27 July 2022                  PCRE2PERFORM(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2POSIX(3)              Library Functions Manual              PCRE2POSIX(3)
 
 
@@ -10750,8 +10754,8 @@ REVISION
 
 PCRE2 10.43                     19 January 2024                  PCRE2POSIX(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SAMPLE(3)             Library Functions Manual             PCRE2SAMPLE(3)
 
 
@@ -11034,8 +11038,8 @@ REVISION
 
 PCRE2 10.32                      27 June 2018                PCRE2SERIALIZE(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2SYNTAX(3)             Library Functions Manual             PCRE2SYNTAX(3)
 
 
@@ -11638,8 +11642,8 @@ REVISION
 
 PCRE2 10.45                     30 August 2024                  PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE2UNICODE(3)            Library Functions Manual            PCRE2UNICODE(3)
 
 
@@ -12108,5 +12112,5 @@ REVISION
 
 PCRE2 10.45                      22 July 2024                  PCRE2UNICODE(3)
 ------------------------------------------------------------------------------
-
-
+ 
+ 

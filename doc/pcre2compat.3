@@ -1,4 +1,4 @@
-.TH PCRE2COMPAT 3 "30 August 2024" "PCRE2 10.45"
+.TH PCRE2COMPAT 3 "01 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "DIFFERENCES BETWEEN PCRE2 AND PERL"
@@ -110,7 +110,9 @@ confined to that group; it does not extend to the surrounding pattern. This is
 not always the case in Perl. In particular, if (*THEN) is present in a group
 that is called as a subroutine, its action is limited to that group, even if
 the group does not contain any | characters. Note that such groups are
-processed as anchored at the point where they are tested.
+processed as anchored at the point where they are tested. PCRE2 also confines
+all control verbs within atomic assertions, again including (*THEN) in
+assertions with only one branch.
 .P
 12. If a pattern contains more than one backtracking control verb, the first
 one that is backtracked onto acts. For example, in the pattern
@@ -239,6 +241,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2024
+Last updated: 01 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
