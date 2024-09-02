@@ -138,7 +138,7 @@ example.
      Note that you must compile pcre2_jit_compile.c, even if you have not
      defined SUPPORT_JIT in src/config.h, because when JIT support is not
      configured, dummy functions are compiled. When JIT support IS configured,
-     pcre2_jit_compile.c #includes other files from the sljit subdirectory,
+     pcre2_jit_compile.c #includes other files from the sljit dependency,
      all of whose names begin with "sljit". It also #includes
      src/pcre2_jit_match.c and src/pcre2_jit_misc.c, so you should not compile
      those yourself.
