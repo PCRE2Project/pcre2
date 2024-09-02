@@ -154,7 +154,8 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the <unistd.h> header file. */
 /* #undef HAVE_UNISTD_H */
 
-/* Define to 1 if the compiler supports simple visibility declarations. */
+/* Define to 1 if the compiler supports GCC compatible visibility
+   declarations. */
 /* #undef HAVE_VISIBILITY */
 
 /* Define to 1 if you have the <wchar.h> header file. */

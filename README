@@ -865,7 +865,7 @@ The distribution should contain the files listed below.
   src/pcre2_jit_simd_inc.h header used by JIT
   src/pcre2_ucp.h          header for Unicode property handling
 
-  sljit/*                  source files for the JIT compiler
+  deps/sljit/sljit_src/*   source files for the JIT compiler
 
 (B) Source files for programs that use PCRE2:
 
