@@ -2862,6 +2862,13 @@
     b"11111
     a"11111
 
+/(?:a(?<digit>[0-5])|b(?<digit>[4-7]))c(?(<digit>)d|e)/B,dupnames
+    a4cd
+    b4cd
+\= Expect no match
+    a6cd
+    a6ce
+
 /^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/IBx,dupnames
     abcdX
     eX

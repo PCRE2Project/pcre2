@@ -1711,7 +1711,7 @@ some cases doesn't actually use these names at all). */
   "Cond",                                                         \
   "SBra", "SBraPos", "SCBra", "SCBraPos",                         \
   "SCond",                                                        \
-  "Cond ref", "Cond dnref", "Cond rec", "Cond dnrec",             \
+  "Capture ref", "Capture dnref", "Cond rec", "Cond dnrec",       \
   "Cond false", "Cond true",                                      \
   "Brazero", "Braminzero", "Braposzero",                          \
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
