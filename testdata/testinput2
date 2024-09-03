@@ -6330,6 +6330,21 @@ a)"xI
 /^([a-z]++)#(*scs:(1)a|ab|abc|abcd|abcde|abcdef|(abcdefg))\2/
     abcdefg#abcdefg
 
+/^([a-z]++)(*scs:(1)(a+)(*THEN)b|(a+)(*THEN)c|(aa))/
+    aaaax
+
+/^([a-z]++)(*scs:(1)((a+)(*THEN)b)|(a+)(*THEN)c|(aa))/
+    aaaax
+
+/^([a-z]++)(*scs:(1)((a+)(*THEN)b))?/
+    aaaax
+
+/^([a-z]++)(*scs:(1)(abc|(a+)(*THEN)b))?/
+    aaaax
+
+/^(?:(.){20,30}#|([a-z]++)(*scs:(1)(a+)(*THEN)b){20,30}#|(.){20,30}!)/
+    aaaaaaaaaaaaaaaaaaaaaaaaab!
+
 # --------------
 
 # End of testinput2

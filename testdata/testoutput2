@@ -18787,6 +18787,41 @@ No match
  1: abcdefg
  2: abcdefg
 
+/^([a-z]++)(*scs:(1)(a+)(*THEN)b|(a+)(*THEN)c|(aa))/
+    aaaax
+ 0: aaaax
+ 1: aaaax
+ 2: <unset>
+ 3: <unset>
+ 4: aa
+
+/^([a-z]++)(*scs:(1)((a+)(*THEN)b)|(a+)(*THEN)c|(aa))/
+    aaaax
+ 0: aaaax
+ 1: aaaax
+ 2: <unset>
+ 3: <unset>
+ 4: <unset>
+ 5: aa
+
+/^([a-z]++)(*scs:(1)((a+)(*THEN)b))?/
+    aaaax
+ 0: aaaax
+ 1: aaaax
+
+/^([a-z]++)(*scs:(1)(abc|(a+)(*THEN)b))?/
+    aaaax
+ 0: aaaax
+ 1: aaaax
+
+/^(?:(.){20,30}#|([a-z]++)(*scs:(1)(a+)(*THEN)b){20,30}#|(.){20,30}!)/
+    aaaaaaaaaaaaaaaaaaaaaaaaab!
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaab!
+ 1: <unset>
+ 2: <unset>
+ 3: <unset>
+ 4: b
+
 # --------------
 
 # End of testinput2

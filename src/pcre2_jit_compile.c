@@ -3160,49 +3160,65 @@ static SLJIT_INLINE PCRE2_SPTR set_then_offsets(compiler_common *common, PCRE2_S
 PCRE2_SPTR end = bracketend(cc);
 BOOL has_alternatives = cc[GET(cc, 1)] == OP_ALT;
 
-/* Assert captures then. */
-if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NA)
+/* Assert captures *THEN verb even if it has no alternatives. */
+if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT)
   current_offset = NULL;
-/* Conditional block does not. */
-if (*cc == OP_COND || *cc == OP_SCOND)
+else if (*cc >= OP_ASSERT_NA && *cc <= OP_ASSERT_SCS)
+  has_alternatives = TRUE;
+/* Conditional block does never capture. */
+else if (*cc == OP_COND || *cc == OP_SCOND)
   has_alternatives = FALSE;
 
 cc = next_opcode(common, cc);
 
 if (has_alternatives)
   {
-  if (*cc == OP_REVERSE)
-    cc += 1 + IMM2_SIZE;
-  else if (*cc == OP_VREVERSE)
-    cc += 1 + 2 * IMM2_SIZE;
+  switch (*cc)
+    {
+    case OP_REVERSE:
+    case OP_CREF:
+      cc += 1 + IMM2_SIZE;
+      break;
+    case OP_VREVERSE:
+    case OP_DNCREF:
+      cc += 1 + 2 * IMM2_SIZE;
+      break;
+    }
 
   current_offset = common->then_offsets + (cc - common->start);
   }
 
 while (cc < end)
   {
-  if ((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NA) || (*cc >= OP_ONCE && *cc <= OP_SCOND))
-    cc = set_then_offsets(common, cc, current_offset);
-  else
+  if (*cc >= OP_ASSERT && *cc <= OP_SCOND)
     {
-    if (*cc == OP_ALT && has_alternatives)
-      {
-      cc += 1 + LINK_SIZE;
-
-      if (*cc == OP_REVERSE)
-        cc += 1 + IMM2_SIZE;
-      else if (*cc == OP_VREVERSE)
-        cc += 1 + 2 * IMM2_SIZE;
-
-      current_offset = common->then_offsets + (cc - common->start);
-      continue;
-      }
-
-    if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && current_offset != NULL)
-      *current_offset = 1;
-    cc = next_opcode(common, cc);
+    cc = set_then_offsets(common, cc, current_offset);
+    continue;
     }
+
+  if (*cc == OP_ALT && has_alternatives)
+    {
+    cc += 1 + LINK_SIZE;
+
+    if (*cc == OP_REVERSE)
+      cc += 1 + IMM2_SIZE;
+    else if (*cc == OP_VREVERSE)
+      cc += 1 + 2 * IMM2_SIZE;
+
+    current_offset = common->then_offsets + (cc - common->start);
+    continue;
+    }
+
+  if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && current_offset != NULL)
+    *current_offset = 1;
+  cc = next_opcode(common, cc);
   }
+
+cc = end - 1 - LINK_SIZE;
+
+/* Ignore repeats. */
+if (*cc == OP_KET && PRIVATE_DATA(cc) != 0)
+  end += PRIVATE_DATA(cc + 1);
 
 return end;
 }
@@ -6789,8 +6805,7 @@ jump = JUMP(SLJIT_NOT_ZERO /* SIG_LESS */);
 OP_SRC(SLJIT_FAST_RETURN, RETURN_ADDR, 0);
 
 JUMPHERE(jump);
-OP2(SLJIT_SUB, TMP2, 0, SLJIT_IMM, 0, TMP2, 0);
-OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
+OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, TMP2, 0);
 if (HAS_VIRTUAL_REGISTERS)
   {
   OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), 0, SLJIT_MEM1(STACK_TOP), -(2 * SSIZE_OF(sw)));
