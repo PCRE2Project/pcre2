@@ -458,7 +458,7 @@ for(;;)
     case OP_DNCREF:
       {
       PCRE2_SPTR entry = nametable + (GET2(code, 1) * nesize) + IMM2_SIZE;
-      fprintf(f, " %s Cond ref <", flag);
+      fprintf(f, " %s Capture ref <", flag);
       print_custring(f, entry);
       fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }

@@ -552,7 +552,7 @@ Memory allocation - code size : 47
  10     Brazero
  11  23 SCBra 2
  17   9 Cond
- 21   1 Cond ref
+ 21   1 Capture ref
  24     0
  26   4 Alt
  30  13 Ket
@@ -569,7 +569,7 @@ Memory allocation - code size : 37
   4  24 CBra 1
  10     Brazero
  11   9 SCond
- 15   1 Cond ref
+ 15   1 Capture ref
  18     0
  20   4 Alt
  24  13 KetRmax
@@ -859,36 +859,36 @@ Failed: error 186 at offset 12820: regular expression is too complicated
   0 150 Bra
   4 132 Once
   8  11 Cond
- 12   1 Cond ref
+ 12   1 Capture ref
  15 140 Recurse
  19  11 Ket
  23  11 Cond
- 27   1 Cond ref
+ 27   1 Capture ref
  30 140 Recurse
  34  11 Ket
  38  11 Cond
- 42   1 Cond ref
+ 42   1 Capture ref
  45 140 Recurse
  49  11 Ket
  53  11 Cond
- 57   1 Cond ref
+ 57   1 Capture ref
  60 140 Recurse
  64  11 Ket
  68  11 Cond
- 72   1 Cond ref
+ 72   1 Capture ref
  75 140 Recurse
  79  11 Ket
  83  11 Cond
- 87   1 Cond ref
+ 87   1 Capture ref
  90 140 Recurse
  94  11 Ket
  98  11 Cond
-102   1 Cond ref
+102   1 Capture ref
 105 140 Recurse
 109  11 Ket
 113  19 SBraPos
 117  11 SCond
-121   1 Cond ref
+121   1 Capture ref
 124 140 Recurse
 128  11 Ket
 132  19 KetRpos
@@ -911,7 +911,7 @@ Subject length lower bound = 0
   0  76 Bra
   4  58 Once
   8   7 Cond
- 12   1 Cond ref
+ 12   1 Capture ref
  15  12 Alt
  19     a
  21  66 Recurse
@@ -919,7 +919,7 @@ Subject length lower bound = 0
  27  19 Ket
  31  27 SBraPos
  35   7 SCond
- 39   1 Cond ref
+ 39   1 Capture ref
  42  12 Alt
  46     a
  48  66 Recurse

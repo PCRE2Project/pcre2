@@ -7295,7 +7295,7 @@ No match
         ^
         CBra 1
         Cond
-      2 Cond ref
+      2 Capture ref
         y
         Ket
         [()]
@@ -7819,7 +7819,7 @@ Failed: error 115 at offset 5: reference to non-existent subpattern
         abc
         Ket
         Cond
-      1 Cond ref
+      1 Capture ref
         X
         Alt
         Y
@@ -7842,7 +7842,7 @@ No match
         ^
         CBra 1
         Cond
-      2 Cond ref
+      2 Capture ref
         X
         Alt
         Y
@@ -7874,7 +7874,7 @@ Failed: error 115 at offset 5: reference to non-existent subpattern
         Bra
         CBra 1
         Cond
-      1 Cond ref
+      1 Capture ref
         a
         Ket
         Ket
@@ -7890,7 +7890,7 @@ Failed: error 115 at offset 6: reference to non-existent subpattern
         Bra
         ^
         Cond
-      1 Cond ref
+      1 Capture ref
         X
         Alt
         Y
@@ -9815,6 +9815,43 @@ No match
     a"11111
 No match
 
+/(?:a(?<digit>[0-5])|b(?<digit>[4-7]))c(?(<digit>)d|e)/B,dupnames
+------------------------------------------------------------------
+        Bra
+        Bra
+        a
+        CBra 1
+        [0-5]
+        Ket
+        Alt
+        b
+        CBra 2
+        [4-7]
+        Ket
+        Ket
+        c
+        Cond
+        Capture ref <digit>2
+        d
+        Alt
+        e
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    a4cd
+ 0: a4cd
+ 1: 4
+    b4cd
+ 0: b4cd
+ 1: <unset>
+ 2: 4
+\= Expect no match
+    a6cd
+No match
+    a6ce
+No match
+
 /^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/IBx,dupnames
 ------------------------------------------------------------------
         Bra
@@ -9838,7 +9875,7 @@ No match
         Ket
         Ket
         Cond
-        Cond ref <D>2
+        Capture ref <D>2
         X
         Alt
         Y
@@ -14485,7 +14522,7 @@ Failed: error 161 at offset 17: subpattern number is too big
         ^
         SBra
         SCond
-      1 Cond ref
+      1 Capture ref
         x
         Alt
         KetRmax
@@ -15521,7 +15558,7 @@ Failed: error 150 at offset 5: invalid range in character class
         abc
         Ket
         Cond
-      1 Cond ref
+      1 Capture ref
         xyz
         Ket
         Ket
@@ -17353,7 +17390,7 @@ Subject length lower bound = 1
         a
         Ket
         Cond
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         CBra 2
@@ -17371,7 +17408,7 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
         Bra
         Cond
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         CBra 1
@@ -18175,7 +18212,7 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18191,7 +18228,7 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         Braminzero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18208,7 +18245,7 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Once
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Ket
@@ -18224,12 +18261,12 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         a
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18244,12 +18281,12 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         a
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Braminzero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18265,12 +18302,12 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         Once
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Ket
@@ -18287,7 +18324,7 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18303,7 +18340,7 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         Braminzero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18320,7 +18357,7 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Once
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Ket
@@ -18336,15 +18373,15 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         a
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         c
@@ -18359,26 +18396,26 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         a
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Braminzero
         Bra
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Braminzero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Ket
@@ -18395,20 +18432,20 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
         Ket
         Once
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Brazero
         Scan substring
-      1 Cond ref
+      1 Capture ref
         b
         Ket
         Ket
@@ -18429,7 +18466,7 @@ Failed: error 128 at offset 14: atomic assertion expected after (?( or (?(?C)
         [a-z]++
         Ket
         Scan substring
-      1 Cond ref
+      1 Capture ref
         CBra 2
         stx
         Ket
@@ -18467,7 +18504,7 @@ No match
         Ket
         ##
         Scan substring
-      1 Cond ref
+      1 Capture ref
         Any*
         CBra 2
         Any
