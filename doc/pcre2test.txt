@@ -632,6 +632,7 @@ PATTERN MODIFIERS
              convert_glob_separator=c  set glob separator character
              convert_length            set convert buffer length
              debug                     same as info,fullbincode
+             expand                    expand repetition syntax in pattern
              framesize                 show matching frame size
              fullbincode               show binary code with lengths
          /I  info                      show info about compiled pattern
