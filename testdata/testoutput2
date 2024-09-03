@@ -18202,6 +18202,9 @@ Failed: error 115 at offset 8: reference to non-existent subpattern
 /(*scan_substring:(<name>)a|b)/
 Failed: error 115 at offset 19: reference to non-existent subpattern
 
+/()(*scs:(1)+a)/
+Failed: error 109 at offset 11: quantifier does not follow a repeatable item
+
 # Tests for iterating scan_substring
 
 /(a)(*scs:(1)b)*c/B
@@ -18565,7 +18568,51 @@ No match
  2: CDEFGG
  3: G
 
-/([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
+/([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        [A-Za-z]+
+        Ket
+        Scan substring
+      1 Capture ref
+        CBra 2
+        xy
+        Alt
+        ab
+        Close 2
+        *ASSERT_ACCEPT
+        cd
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    ##cdefgh##cdeabxy##
+ 0: abxy
+ 1: abxy
+ 2: ab
+
+/(?<AA>[a-zA-Z]+)(*scs:('AA')(ab(*ACCEPT)cd|xy))/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        [A-Za-z]+
+        Ket
+        Scan substring
+      1 Capture ref
+        CBra 2
+        ab
+        Close 2
+        *ASSERT_ACCEPT
+        cd
+        Alt
+        xy
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
     ##cdefgh##cdeabxy##
  0: abxy
  1: abxy
@@ -18858,6 +18905,144 @@ No match
  2: <unset>
  3: <unset>
  4: b
+
+# List of captures
+
+/(?:(abc)|(?<PP>def)|ghi)(*scs:(1,'PP').(.))/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        CBra 1
+        abc
+        Ket
+        Alt
+        CBra 2
+        def
+        Ket
+        Alt
+        ghi
+        Ket
+        Scan substring
+      1 Capture ref
+      2 Capture ref
+        Any
+        CBra 3
+        Any
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: abc
+ 1: abc
+ 2: <unset>
+ 3: b
+    def
+ 0: def
+ 1: <unset>
+ 2: def
+ 3: e
+    ghi
+No match
+
+/(?:(?<MM>abc)|(?<MM>def)|(ghi)|(?'NN'jkl)|mno)(*scs:('MM',3,<NN>).(.))/B,dupnames
+------------------------------------------------------------------
+        Bra
+        Bra
+        CBra 1
+        abc
+        Ket
+        Alt
+        CBra 2
+        def
+        Ket
+        Alt
+        CBra 3
+        ghi
+        Ket
+        Alt
+        CBra 4
+        jkl
+        Ket
+        Alt
+        mno
+        Ket
+        Scan substring
+        Capture ref <MM>2
+      3 Capture ref
+      4 Capture ref
+        Any
+        CBra 5
+        Any
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    abc
+ 0: abc
+ 1: abc
+ 2: <unset>
+ 3: <unset>
+ 4: <unset>
+ 5: b
+    def
+ 0: def
+ 1: <unset>
+ 2: def
+ 3: <unset>
+ 4: <unset>
+ 5: e
+    ghi
+ 0: ghi
+ 1: <unset>
+ 2: <unset>
+ 3: ghi
+ 4: <unset>
+ 5: h
+    jkl
+ 0: jkl
+ 1: <unset>
+ 2: <unset>
+ 3: <unset>
+ 4: jkl
+ 5: k
+    mno
+No match
+
+/f(?:(*scs:(+1,+2)(?<=(.)))|()){16}/
+    1234567890abcdef
+ 0: f
+ 1: 2
+ 2: 
+    1ffffffffffffff
+ 0: f
+ 1: 1
+ 2: 
+
+/(?<AA>a)(*scan_substring:(1,'AA',1,<AA>)a)b/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        Scan substring
+      1 Capture ref
+      1 Capture ref
+      1 Capture ref
+      1 Capture ref
+        a
+        Ket
+        b
+        Ket
+        End
+------------------------------------------------------------------
+    ab
+ 0: ab
+ 1: a
+    ac
+No match
 
 # --------------
 

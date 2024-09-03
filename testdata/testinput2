@@ -6165,6 +6165,8 @@ a)"xI
 
 /(*scan_substring:(<name>)a|b)/
 
+/()(*scs:(1)+a)/
+
 # Tests for iterating scan_substring
 
 /(a)(*scs:(1)b)*c/B
@@ -6217,7 +6219,10 @@ a)"xI
     ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
     ##abAABCtuTUVXXz!!abCDEFGxyCDEFGGhi##
 
-/([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/
+/([a-zA-Z]+)(*scs:(1)(xy|ab(*ACCEPT)cd))/B
+    ##cdefgh##cdeabxy##
+
+/(?<AA>[a-zA-Z]+)(*scs:('AA')(ab(*ACCEPT)cd|xy))/B
     ##cdefgh##cdeabxy##
 
 /([a-z]++)##(*scs:(1)(abc))?!/
@@ -6350,6 +6355,28 @@ a)"xI
 
 /^(?:(.){20,30}#|([a-z]++)(*scs:(1)(a+)(*THEN)b){20,30}#|(.){20,30}!)/
     aaaaaaaaaaaaaaaaaaaaaaaaab!
+
+# List of captures
+
+/(?:(abc)|(?<PP>def)|ghi)(*scs:(1,'PP').(.))/B
+    abc
+    def
+    ghi
+
+/(?:(?<MM>abc)|(?<MM>def)|(ghi)|(?'NN'jkl)|mno)(*scs:('MM',3,<NN>).(.))/B,dupnames
+    abc
+    def
+    ghi
+    jkl
+    mno
+
+/f(?:(*scs:(+1,+2)(?<=(.)))|()){16}/
+    1234567890abcdef
+    1ffffffffffffff
+
+/(?<AA>a)(*scan_substring:(1,'AA',1,<AA>)a)b/B
+    ab
+    ac
 
 # --------------
 
