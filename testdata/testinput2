@@ -6057,9 +6057,8 @@ a)"xI
     \x0a
     abc\x0adef
 
-# This test is currently broken in the interpreter
-# /|a(?0)/endanchored
-#    aaaa
+/|a(?0)/endanchored
+    aaaa
 
 /A +/extended
 

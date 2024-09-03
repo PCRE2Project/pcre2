@@ -10544,4 +10544,17 @@ No match
     ab
  0: ab
 
+/\w(?R)*\w/
+    grtgt
+ 0: grtg
+    abcdef
+ 0: abcdef
+    abcdefg
+ 0: abcdef
+    .a.bc.d.
+ 0: bc
+\= Expect no match
+    .a.b.c.
+No match
+
 # End of testinput1 

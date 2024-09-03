@@ -6683,4 +6683,12 @@ $/x
 /(?=a)b?a./
     ab
 
+/\w(?R)*\w/
+    grtgt
+    abcdef
+    abcdefg
+    .a.bc.d.
+\= Expect no match
+    .a.b.c.
+
 # End of testinput1 

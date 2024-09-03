@@ -17966,9 +17966,9 @@ No match
     abc\x0adef
  0: \x0a
 
-# This test is currently broken in the interpreter
-# /|a(?0)/endanchored
-#    aaaa
+/|a(?0)/endanchored
+    aaaa
+ 0: aaaa
 
 /A +/extended
 
