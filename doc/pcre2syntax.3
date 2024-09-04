@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "30 August 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "04 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -494,13 +494,17 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
 .rs
 This feature is not Perl-compatible.
 .sp
-  (*scs:(n)...)       scan substring by absolute reference
-  (*scs:(+n)...)      scan substring by relative reference
-  (*scs:(-n)...)      scan substring by relative reference
-  (*scs:(<name>)...)  scan substring by name
-  (*scs:('name')...)  scan substring by name
+  (*scan_substring:(grouplist)...)  scan captured substring
+  (*scs:(grouplist)...)             scan captured substring
 .sp
-The full name "scan_substring" may be used instead of "scs".
+The comma-separated list may identify groups in any of the following ways:
+.sp
+  n       absolute reference
+  +n      relative reference
+  -n      relative reference
+  <name>  name
+  'name'  name
+.sp
 .
 .
 .SH "SCRIPT RUNS"
@@ -635,6 +639,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 30 August 2024
+Last updated: 04 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

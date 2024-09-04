@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "01 Sepbember 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "04 Sepbember 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -2746,15 +2746,22 @@ Because this involves capturing, this feature is not supported by
 \fBpcre2_dfa_match()\fP.
 .P
 A scan substring assertion starts with the sequence (*scan_substring: or
-(*scs: which is followed by a substring number (absolute or relative) or a
-substring name enclosed in single quotes or angle brackets, within parentheses.
-The rest of the item is the subpattern that is applied to the substring, as
-shown here:
+(*scs: which is followed by a list of substring numbers (absolute or relative)
+and/or substring names enclosed in single quotes or angle brackets, all within
+parentheses. The rest of the item is the subpattern that is applied to the
+substring, as shown in these examples:
 .sp
   (*scan_substring:(1)...)
   (*scs:(-2)...)
   (*scs:('AB')...)
+  (*scs:(1,'AB',-2)...)
 .sp
+The list of groups is checked in the order they are given, and it is the
+contents of the first one that is found to be set that are scanned. When
+PCRE2_DUPNAMES is set and there are ambiguous group names, all groups with the
+same name are checked in numerical order. A scan substring assertion fails if
+none of the groups it references have been set.
+.P
 The pattern match on the substring is always anchored, that is, it must match
 from the start of the substring. There is no "bumpalong" if it does not match
 at the start. The end of the subject is temporarily reset to be the end of the
@@ -2774,21 +2781,18 @@ can be achieved with:
 .sp
   \eb\ew+?rh\ew*\eb
 .sp
-When things are more complicated, however, this feature can be useful. For
-exmple, there is a rather complicated pattern in the PCRE2 test data that
-checks an entire subject string for a palindrome, that the sequence of
-letters is the same in both directions. Suppose you want to search for
-individual words of two or more characters such as "level" that are
-palindromes:
+When things are more complicated, however, scanning a captured substring can be
+a useful way to describe the required match. For exmple, there is a rather
+complicated pattern in the PCRE2 test data that checks an entire subject string
+for a palindrome, that is, the sequence of letters is the same in both
+directions. Suppose you want to search for individual words of two or more
+characters such as "level" that are palindromes:
 .sp
   (\eb\ew{2,}+\eb)(*scs:(1)...palindrome-matching-pattern...)
 .sp
-A scan substring assertion fails if the group it references has not been set.
-Within the subpattern, references to other groups work as normal. Other
-capturing groups may appear, and will retain their values during ongoing
-matching if the assertion succeeds. When PCRE2_DUPNAMES is set and there are
-ambiguous group names, if the assertion scans a group by name, it is the lowest
-numbered set group of the groups with that name that is scanned.
+Within a substring scanning subpattern, references to other groups work as
+normal. Capturing groups may appear, and will retain their values during
+ongoing matching if the assertion succeeds.
 .
 .
 .SH "SCRIPT RUNS"
@@ -3987,6 +3991,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 01 September 2024
+Last updated: 04 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
