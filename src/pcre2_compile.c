@@ -11201,6 +11201,8 @@ HAD_CB_ERROR:
 ptr = pattern + cb.erroroffset;
 
 HAD_EARLY_ERROR:
+PCRE2_ASSERT(ptr >= pattern); /* Ensure we don't return invalid erroroffset */
+PCRE2_ASSERT(ptr <= (pattern + patlen));
 *erroroffset = ptr - pattern;
 
 HAD_ERROR:
