@@ -11136,8 +11136,9 @@ else if (opcode == OP_ASSERT_SCS)
   if (common->restore_end_ptr == 0)
     common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
 
-  if (*matchingpath == OP_CREF)
+  if (*matchingpath == OP_CREF && (matchingpath[1 + IMM2_SIZE] != OP_CREF && matchingpath[1 + IMM2_SIZE] != OP_DNCREF))
     {
+    /* Optimized case for a single capture reference. */
     i = OVECTOR(GET2(matchingpath, 1) << 1);
 
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), i);
@@ -11156,26 +11157,44 @@ else if (opcode == OP_ASSERT_SCS)
     }
   else
     {
-    SLJIT_ASSERT(*matchingpath == OP_DNCREF);
-
-    i = GET2(matchingpath, 1 + IMM2_SIZE);
-    slot = common->name_table + GET2(matchingpath, 1) * common->name_entry_size;
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(1));
-
     jumplist = NULL;
-    while (i-- > 1)
+
+    while (TRUE)
       {
-      sljit_get_local_base(compiler, TMP2, 0, OVECTOR(GET2(slot, 0) << 1));
+      if (*matchingpath == OP_CREF)
+        {
+        sljit_get_local_base(compiler, TMP2, 0, OVECTOR(GET2(matchingpath, 1) << 1));
+        matchingpath += 1 + IMM2_SIZE;
+        }
+      else
+        {
+        SLJIT_ASSERT(*matchingpath == OP_DNCREF);
+
+        i = GET2(matchingpath, 1 + IMM2_SIZE);
+        slot = common->name_table + GET2(matchingpath, 1) * common->name_entry_size;
+
+        while (i-- > 1)
+          {
+          sljit_get_local_base(compiler, TMP2, 0, OVECTOR(GET2(slot, 0) << 1));
+          add_jump(compiler, &jumplist, CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(TMP2), 0, TMP1, 0));
+          slot += common->name_entry_size;
+          }
+
+        sljit_get_local_base(compiler, TMP2, 0, OVECTOR(GET2(slot, 0) << 1));
+        matchingpath += 1 + 2 * IMM2_SIZE;
+        }
+
+      if (*matchingpath != OP_CREF && *matchingpath != OP_DNCREF)
+        break;
+
       add_jump(compiler, &jumplist, CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(TMP2), 0, TMP1, 0));
-      slot += common->name_entry_size;
       }
 
-    sljit_get_local_base(compiler, TMP2, 0, OVECTOR(GET2(slot, 0) << 1));
     add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.no_capture),
       CMP(SLJIT_EQUAL, SLJIT_MEM1(TMP2), 0, TMP1, 0));
 
     set_jumps(jumplist, LABEL());
-    matchingpath += 1 + 2 * IMM2_SIZE;
 
     allocate_stack(common, has_alternatives ? 3 : 2);
 

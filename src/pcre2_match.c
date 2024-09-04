@@ -5614,33 +5614,63 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Ltrue_end_extra      F->temp_size
 
     case OP_ASSERT_SCS:
-    Lextra_size = PRIV(OP_lengths)[Fecode[1 + LINK_SIZE]];
-
-    if (Fecode[1 + LINK_SIZE] == OP_CREF)
-      offset = (GET2(Fecode, 1 + LINK_SIZE + 1) << 1) - 2;
-    else
       {
-      /* The OP_DNCREF case. */
-      int count = GET2(Fecode, 1 + LINK_SIZE + 1 + IMM2_SIZE);
-      PCRE2_SPTR slot = mb->name_table +
-                        GET2(Fecode, 1 + LINK_SIZE + 1) * mb->name_entry_size;
+      PCRE2_SPTR ecode = Fecode + 1 + LINK_SIZE;
+      uint32_t extra_size = 0;
+      int count;
+      PCRE2_SPTR slot;
 
-      offset = 0; /* Disables compiler warning. */
-      while (count > 0)
+      /* Disable compiler warning. */
+      offset = 0;
+      for (;;)
         {
-        offset = (GET2(slot, 0) << 1) - 2;
-        if (offset < Foffset_top && Fovector[offset] != PCRE2_UNSET) break;
-        slot += mb->name_entry_size;
-        count--;
+        if (*ecode == OP_CREF)
+          {
+          extra_size += 1+IMM2_SIZE;
+          offset = (GET2(ecode, 1) << 1) - 2;
+          ecode += 1+IMM2_SIZE;
+          if (offset < Foffset_top && Fovector[offset] != PCRE2_UNSET)
+            goto SCS_OFFSET_FOUND;
+          continue;
+          }
+
+        if (*ecode != OP_DNCREF) RRETURN(MATCH_NOMATCH);
+
+        count = GET2(ecode, 1 + IMM2_SIZE);
+        slot = mb->name_table + GET2(ecode, 1) * mb->name_entry_size;
+        extra_size += 1+2*IMM2_SIZE;
+        ecode += 1+2*IMM2_SIZE;
+
+        while (count > 0)
+          {
+          offset = (GET2(slot, 0) << 1) - 2;
+          if (offset < Foffset_top && Fovector[offset] != PCRE2_UNSET)
+            goto SCS_OFFSET_FOUND;
+          slot += mb->name_entry_size;
+          count--;
+          }
         }
 
-      /* Not found any valid capturing brackets. */
-      if (count == 0)
-        offset = Foffset_top;
-      }
+      SCS_OFFSET_FOUND:
 
-    if (offset >= Foffset_top && Fovector[offset] == PCRE2_UNSET)
-      RRETURN(MATCH_NOMATCH);
+      /* Skip remaining options. */
+      for (;;)
+        {
+        if (*ecode == OP_CREF)
+          {
+          extra_size += 1+IMM2_SIZE;
+          ecode += 1+IMM2_SIZE;
+          }
+        else if (*ecode == OP_DNCREF)
+          {
+          extra_size += 1+2*IMM2_SIZE;
+          ecode += 1+2*IMM2_SIZE;
+          }
+        else break;
+        }
+
+      Lextra_size = extra_size;
+      }
 
     Lsaved_end_subject = mb->end_subject;
     Ltrue_end_extra = mb->true_end_subject - mb->end_subject;
