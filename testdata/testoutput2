@@ -14934,6 +14934,22 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     >abcd1234abcd5678<\=replace=wxyz,substitute_matched
  2: >wxyz1234wxyz5678<
 
+/abc/substitute_extended,replace=>\045<
+    abc
+ 1: >%<
+
+/abc/substitute_extended,replace=>\45<
+    abc
+ 1: >%<
+
+/abc/substitute_extended,replace=>\o{45}<
+    abc
+ 1: >%<
+
+/abc/substitute_extended,replace=>\845<
+    abc
+ 1: >845<
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 Capture group count = 2
 Max back reference = 1

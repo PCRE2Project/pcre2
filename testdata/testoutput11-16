@@ -665,4 +665,12 @@ Subject length lower bound = 1
     A\x{1b6}6666666
  0: A\x{1b6}6666666
 
+/abc/substitute_extended,replace=>\777<
+    abc
+ 1: >\x{1ff}<
+
+/abc/substitute_extended,replace=>\o{012345}<
+    abc
+ 1: >\x{14e5}<
+
 # End of testinput11

@@ -5478,4 +5478,8 @@ Failed: error 146 at offset 9: malformed \P or \p sequence
 /\p{BC: A=}/utf
 Failed: error 147 at offset 10: unknown property after \P or \p
 
+/abc/utf,substitute_extended,replace=>\777<
+    abc
+ 1: >\x{1ff}<
+
 # End of testinput5

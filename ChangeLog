@@ -82,6 +82,9 @@ pattern.
 14. Item 43 of 10.43 was incomplete because it addressed only \z and not \Z,
 which was still misbehaving when matching fragments inside invalid UTF strings.
 
+15. Octal escapes of the form \045 or \111 were not being recognized in 
+substitution strings, and if encountered gave an error, though the \o{...} form
+was recognized. This bug is now fixed.
 
 
 Version 10.44 07-June-2024

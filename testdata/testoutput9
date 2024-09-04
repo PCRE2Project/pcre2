@@ -371,4 +371,14 @@ Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP),
 Failed: error 151 at offset 13: octal value is greater than \377 in 8-bit non-UTF-8 mode
     A\x{1b6}6666666
 
+# Should cause an error
+/abc/substitute_extended,replace=>\777<
+    abc
+Failed: error -57 at offset 5 in replacement: bad escape sequence in replacement string
+
+# Should cause an error
+/abc/substitute_extended,replace=>\o{012345}<
+    abc
+Failed: error -57 at offset 10 in replacement: bad escape sequence in replacement string
+
 # End of testinput9

@@ -263,4 +263,12 @@
 /(?i:A{1,}\6666666666)/
     A\x{1b6}6666666
 
+# Should cause an error
+/abc/substitute_extended,replace=>\777<
+    abc
+
+# Should cause an error
+/abc/substitute_extended,replace=>\o{012345}<
+    abc
+
 # End of testinput9

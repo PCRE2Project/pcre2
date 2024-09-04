@@ -2505,4 +2505,7 @@
 
 /\p{BC: A=}/utf
 
+/abc/utf,substitute_extended,replace=>\777<
+    abc
+
 # End of testinput5

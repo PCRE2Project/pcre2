@@ -4668,6 +4668,18 @@ B)x/alt_verbnames,mark
 /abcd/g
     >abcd1234abcd5678<\=replace=wxyz,substitute_matched
 
+/abc/substitute_extended,replace=>\045<
+    abc
+
+/abc/substitute_extended,replace=>\45<
+    abc
+
+/abc/substitute_extended,replace=>\o{45}<
+    abc
+
+/abc/substitute_extended,replace=>\845<
+    abc
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
 /((p(?'K/

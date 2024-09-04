@@ -1566,8 +1566,8 @@ final code unit of the escape sequence.
 This function is also called from pcre2_substitute() to handle escape sequences
 in replacement strings. In this case, the cb argument is NULL, and in the case
 of escapes that have further processing, only sequences that define a data
-character are recognised. The isclass argument is not relevant; the options
-argument is the final value of the compiled pattern's options.
+character are recognised. The options argument is the final value of the
+compiled pattern's options.
 
 Arguments:
   ptrptr         points to the input position pointer
@@ -1576,7 +1576,7 @@ Arguments:
   errorcodeptr   points to the errorcode variable (containing zero)
   options        the current options bits
   xoptions       the current extra options bits
-  isclass        TRUE if inside a character class
+  isclassorsub   TRUE if in a character class or called from pcre2_substitute()
   cb             compile data block or NULL when called from pcre2_substitute()
 
 Returns:         zero => a data character
@@ -1587,7 +1587,7 @@ Returns:         zero => a data character
 
 int
 PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
-  int *errorcodeptr, uint32_t options, uint32_t xoptions, BOOL isclass,
+  int *errorcodeptr, uint32_t options, uint32_t xoptions, BOOL isclassorsub,
   compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
@@ -1698,7 +1698,8 @@ else
 
   if (cb == NULL)
     {
-    if (c != CHAR_c && c != CHAR_o && c != CHAR_x)
+    if (c < CHAR_0 || 
+       (c > CHAR_9 && (c != CHAR_c && c != CHAR_o && c != CHAR_x)))
       {
       *errorcodeptr = ERR3;
       return 0;
@@ -1816,7 +1817,7 @@ else
     */
 
     case CHAR_g:
-    if (isclass) break;
+    if (isclassorsub) break;
 
     if (ptr >= ptrend)
       {
@@ -1892,7 +1893,7 @@ else
     case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4: case CHAR_5:
     case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
 
-    if (!isclass)
+    if (!isclassorsub)
       {
       oldptr = ptr;
       ptr--;   /* Back to the digit */
