@@ -523,29 +523,29 @@ start/end of string field names are. */
 three must not be changed, because whichever is set is actually the number of
 bytes in a code unit in that mode. */
 
-#define PCRE2_MODE8         0x00000001  /* compiled in 8 bit mode */
-#define PCRE2_MODE16        0x00000002  /* compiled in 16 bit mode */
-#define PCRE2_MODE32        0x00000004  /* compiled in 32 bit mode */
-#define PCRE2_FIRSTSET      0x00000010  /* first_code unit is set */
-#define PCRE2_FIRSTCASELESS 0x00000020  /* caseless first code unit */
-#define PCRE2_FIRSTMAPSET   0x00000040  /* bitmap of first code units is set */
-#define PCRE2_LASTSET       0x00000080  /* last code unit is set */
-#define PCRE2_LASTCASELESS  0x00000100  /* caseless last code unit */
-#define PCRE2_STARTLINE     0x00000200  /* start after \n for multiline */
-#define PCRE2_JCHANGED      0x00000400  /* j option used in pattern */
-#define PCRE2_HASCRORLF     0x00000800  /* explicit \r or \n in pattern */
-#define PCRE2_HASTHEN       0x00001000  /* pattern contains (*THEN) */
-#define PCRE2_MATCH_EMPTY   0x00002000  /* pattern can match empty string */
-#define PCRE2_BSR_SET       0x00004000  /* BSR was set in the pattern */
-#define PCRE2_NL_SET        0x00008000  /* newline was set in the pattern */
-#define PCRE2_NOTEMPTY_SET  0x00010000  /* (*NOTEMPTY) used        ) keep */
-#define PCRE2_NE_ATST_SET   0x00020000  /* (*NOTEMPTY_ATSTART) used) together */
-#define PCRE2_DEREF_TABLES  0x00040000  /* release character tables */
-#define PCRE2_NOJIT         0x00080000  /* (*NOJIT) used */
-#define PCRE2_HASBKPORX     0x00100000  /* contains \P, \p, or \X */
-#define PCRE2_DUPCAPUSED    0x00200000  /* contains (?| */
-#define PCRE2_HASBKC        0x00400000  /* contains \C */
-#define PCRE2_HASACCEPT     0x00800000  /* contains (*ACCEPT) */
+#define PCRE2_MODE8         0x00000001u /* compiled in 8 bit mode */
+#define PCRE2_MODE16        0x00000002u /* compiled in 16 bit mode */
+#define PCRE2_MODE32        0x00000004u /* compiled in 32 bit mode */
+#define PCRE2_FIRSTSET      0x00000010u /* first_code unit is set */
+#define PCRE2_FIRSTCASELESS 0x00000020u /* caseless first code unit */
+#define PCRE2_FIRSTMAPSET   0x00000040u /* bitmap of first code units is set */
+#define PCRE2_LASTSET       0x00000080u /* last code unit is set */
+#define PCRE2_LASTCASELESS  0x00000100u /* caseless last code unit */
+#define PCRE2_STARTLINE     0x00000200u /* start after \n for multiline */
+#define PCRE2_JCHANGED      0x00000400u /* j option used in pattern */
+#define PCRE2_HASCRORLF     0x00000800u /* explicit \r or \n in pattern */
+#define PCRE2_HASTHEN       0x00001000u /* pattern contains (*THEN) */
+#define PCRE2_MATCH_EMPTY   0x00002000u /* pattern can match empty string */
+#define PCRE2_BSR_SET       0x00004000u /* BSR was set in the pattern */
+#define PCRE2_NL_SET        0x00008000u /* newline was set in the pattern */
+#define PCRE2_NOTEMPTY_SET  0x00010000u /* (*NOTEMPTY) used        ) keep */
+#define PCRE2_NE_ATST_SET   0x00020000u /* (*NOTEMPTY_ATSTART) used) together */
+#define PCRE2_DEREF_TABLES  0x00040000u /* release character tables */
+#define PCRE2_NOJIT         0x00080000u /* (*NOJIT) used */
+#define PCRE2_HASBKPORX     0x00100000u /* contains \P, \p, or \X */
+#define PCRE2_DUPCAPUSED    0x00200000u /* contains (?| */
+#define PCRE2_HASBKC        0x00400000u /* contains \C */
+#define PCRE2_HASACCEPT     0x00800000u /* contains (*ACCEPT) */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 

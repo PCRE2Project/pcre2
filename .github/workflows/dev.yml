@@ -50,7 +50,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize=unsigned-integer-overflow' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter -Wno-error=deprecated-declarations -Wno-error=incompatible-library-redeclaration' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=3
+        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter -Wno-error=deprecated-declarations -Wno-error=incompatible-library-redeclaration -Wno-error=incompatible-pointer-types-discards-qualifiers' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=3
 
       - name: Build
         run: make -j3
