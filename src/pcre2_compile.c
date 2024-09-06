@@ -10552,12 +10552,12 @@ if ((options & PCRE2_LITERAL) == 0)
             ptr += pp;
             goto HAD_EARLY_ERROR;
             }
-          while (IS_DIGIT(ptr[pp]))
+          while (pp < patlen && IS_DIGIT(ptr[pp]))
             {
             if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
             c = c*10 + (ptr[pp++] - CHAR_0);
             }
-          if (ptr[pp++] != CHAR_RIGHT_PARENTHESIS)
+          if (pp >= patlen || ptr[pp] != CHAR_RIGHT_PARENTHESIS)
             {
             errorcode = ERR60;
             ptr += pp;
@@ -10566,7 +10566,7 @@ if ((options & PCRE2_LITERAL) == 0)
           if (p->type == PSO_LIMH) limit_heap = c;
             else if (p->type == PSO_LIMM) limit_match = c;
             else limit_depth = c;
-          skipatstart += pp - skipatstart;
+          skipatstart = ++pp;
           break;
           }
         break;   /* Out of the table scan loop */
@@ -10574,6 +10574,7 @@ if ((options & PCRE2_LITERAL) == 0)
       }
     if (i >= sizeof(pso_list)/sizeof(pso)) break;   /* Out of pso loop */
     }
+    PCRE2_ASSERT(skipatstart <= patlen);
   }
 
 /* End of pattern-start options; advance to start of real regex. */
