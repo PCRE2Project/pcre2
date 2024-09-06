@@ -10752,10 +10752,8 @@ if (has_lookbehind)
   errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
   if (errorcode != 0)
     {
-#ifdef PCRE2_DEBUG
     /* BUG: check_lookbehinds() is missing code for a valid META */
-    if (errorcode == ERR70) cb.erroroffset = PCRE2_UNSET;
-#endif
+    PCRE2_ASSERT(errorcode != ERR70);
 
     goto HAD_CB_ERROR;
     }

@@ -73,11 +73,31 @@ AC_SYS_LARGEFILE
 
 PCRE2_VISIBILITY
 
+# Check for Clang __attribute__((uninitialized)) feature
+
+AC_MSG_CHECKING([for __attribute__((uninitialized))])
+AC_LANG_PUSH([C])
+tmp_CFLAGS=$CFLAGS
+if test $WORKING_WERROR -eq 1; then
+  CFLAGS="$CFLAGS -Werror"
+fi
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,
+                   [[char buf[128] __attribute__((uninitialized));(void)buf]])],
+                   [pcre2_cc_cv_attribute_uninitialized=yes],
+                   [pcre2_cc_cv_attribute_uninitialized=no])
+AC_MSG_RESULT([$pcre2_cc_cv_attribute_uninitialized])
+if test "$pcre2_cc_cv_attribute_uninitialized" = yes; then
+  AC_DEFINE([HAVE_ATTRIBUTE_UNINITIALIZED], 1, [Define this if your compiler
+             supports __attribute__((uninitialized))])
+fi
+CFLAGS=$tmp_CFLAGS
+AC_LANG_POP([C])
+
 # Check for the expect() builtin
 
 AC_MSG_CHECKING([for __builtin_expect()])
 AC_LANG_PUSH([C])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[__builtin_expect(1+1, 2)]])],
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__builtin_expect(1+1, 2)) return 1]])],
   [pcre2_cc_cv_builtin_expect=yes],
   [pcre2_cc_cv_builtin_expect=no])
 AC_MSG_RESULT([$pcre2_cc_cv_builtin_expect])
@@ -113,7 +133,7 @@ AC_LANG_POP([C])
 
 AC_MSG_CHECKING([for __builtin_unreachable()])
 AC_LANG_PUSH([C])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (0) __builtin_unreachable()]])],
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[int r;]], [[if (r) __builtin_unreachable()]])],
   [pcre2_cc_cv_builtin_unreachable=yes],
   [pcre2_cc_cv_builtin_unreachable=no])
 AC_MSG_RESULT([$pcre2_cc_cv_builtin_unreachable])
@@ -121,24 +141,6 @@ if test "$pcre2_cc_cv_builtin_unreachable" = yes; then
   AC_DEFINE([HAVE_BUILTIN_UNREACHABLE], 1,
     [Define this if your compiler provides __builtin_unreachable()])
 fi
-AC_LANG_POP([C])
-
-# Check for Clang __attribute__((uninitialized)) feature
-
-AC_MSG_CHECKING([for __attribute__((uninitialized))])
-AC_LANG_PUSH([C])
-tmp_CFLAGS=$CFLAGS
-CFLAGS="$CFLAGS -Werror"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,
-                   [[char buf[128] __attribute__((uninitialized));(void)buf]])],
-                   [pcre2_cc_cv_attribute_uninitialized=yes],
-                   [pcre2_cc_cv_attribute_uninitialized=no])
-AC_MSG_RESULT([$pcre2_cc_cv_attribute_uninitialized])
-if test "$pcre2_cc_cv_attribute_uninitialized" = yes; then
-  AC_DEFINE([HAVE_ATTRIBUTE_UNINITIALIZED], 1, [Define this if your compiler
-             supports __attribute__((uninitialized))])
-fi
-CFLAGS=$tmp_CFLAGS
 AC_LANG_POP([C])
 
 # Versioning

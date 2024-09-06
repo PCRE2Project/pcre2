@@ -744,6 +744,7 @@ PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_substring_list_get(pcre2_match_data *, PCRE2_UCHAR ***, PCRE2_SIZE **);
 
+
 /* Functions for serializing / deserializing compiled patterns. */
 
 #define PCRE2_SERIALIZE_FUNCTIONS \
@@ -1004,29 +1005,6 @@ PCRE2_SUFFIX a no-op. Otherwise, generate an error. */
 #error PCRE2_CODE_UNIT_WIDTH must be 0, 8, 16, or 32.
 #endif
 #endif  /* PCRE2_CODE_UNIT_WIDTH is defined */
-
-/* Assertion macros */
-
-#ifdef HAVE_BUILTIN_UNREACHABLE
-#define PCRE2_UNREACHABLE() __builtin_unreachable()
-#else
-#define PCRE2_UNREACHABLE() do {} while(0)
-#endif
-
-#ifdef PCRE2_DEBUG
-#if defined(HAVE_BUILTIN_EXPECT) && defined(HAVE_BUILTIN_UNREACHABLE)
-#define PCRE2_ASSERT(x) do { if (__builtin_expect(!(x), 0)) __builtin_unreachable(); } while (0)
-#elif defined(HAVE_ASSERT_H)
-#include <assert.h>
-#define PCRE2_ASSERT(x) assert(x)
-#elif defined(HAVE_STDLIB_H) && defined(HAVE_STDIO_H)
-#define PCRE2_ASSERT(x) do { if (!(x)) { fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); abort(); }} while(0)
-#else
-#define PCRE2_ASSERT(x) do {} while(0)
-#endif
-#else
-#define PCRE2_ASSERT(x) do {} while(0)
-#endif
 
 #ifdef __cplusplus
 }  /* extern "C" */

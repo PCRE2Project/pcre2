@@ -12,10 +12,11 @@ dnl __attribute__((__visibility__("default"))).
 dnl
 dnl Set the variable VISIBILITY_CFLAGS.
 dnl Defines and sets the variable HAVE_VISIBILITY.
+dnl Defines and sets the variable WORKING_WERROR.
 
 dnl Modified to fit with PCRE build environment by Cristian Rodríguez.
-dnl Adjusted for PCRE2 by PH
-dnl Refactored to work with non GCC (but compatible) compilers
+dnl Adjusted for PCRE2 by PH.
+dnl Refactored to work with non GCC (but compatible) compilers.
 
 AC_DEFUN([PCRE2_VISIBILITY],
 [
@@ -40,6 +41,12 @@ AC_DEFUN([PCRE2_VISIBILITY],
       ], [])
     CFLAGS="$pcre2_save_CFLAGS"])
   AC_MSG_RESULT([$pcre2_cv_cc_vis_werror])
+  if test -n "$pcre2_cv_cc_vis_werror" && test $pcre2_cv_cc_vis_werror = yes
+  then
+    WORKING_WERROR=1
+  else
+    WORKING_WERROR=0
+  fi
   if test $pcre2_cv_cc_vis_werror = yes; then
     dnl Now check whether GCC compatible visibility declarations are supported.
     AC_MSG_CHECKING([for GCC compatible visibility declarations])

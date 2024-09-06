@@ -2086,6 +2086,8 @@ extern void *       _pcre2_memmove(void *, const void *, size_t);
 
 extern BOOL         PRIV(ckd_smul)(PCRE2_SIZE *, int, int);
 
+#include "pcre2_util.h"
+
 #endif  /* PCRE2_INTERNAL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_internal.h */
