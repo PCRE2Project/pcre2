@@ -401,6 +401,7 @@ COMMON_SOURCES = \
   src/pcre2_tables.c \
   src/pcre2_ucd.c \
   src/pcre2_ucp.h \
+  src/pcre2_util.h \
   src/pcre2_valid_utf.c \
   src/pcre2_xclass.c
 

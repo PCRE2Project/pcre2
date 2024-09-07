@@ -145,6 +145,8 @@ INCLUDE(CheckIncludeFile)
 INCLUDE(CheckTypeSize)
 INCLUDE(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 
+CHECK_INCLUDE_FILE(stdio.h      HAVE_STDIO_H)
+CHECK_INCLUDE_FILE(stdlib.h     HAVE_STDLIB_H)
 CHECK_INCLUDE_FILE(assert.h     HAVE_ASSERT_H)
 CHECK_INCLUDE_FILE(dirent.h     HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(sys/stat.h   HAVE_SYS_STAT_H)
@@ -171,22 +173,6 @@ if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL")
 endif()
 
 CHECK_C_SOURCE_COMPILES(
-  "int main(void) { __builtin_expect(1+1, 2); return 0; }"
-  HAVE_BUILTIN_EXPECT
-)
-
-CHECK_C_SOURCE_COMPILES(
-  "#include <stddef.h>
-   int main(void) { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
-  HAVE_BUILTIN_MUL_OVERFLOW
-)
-
-CHECK_C_SOURCE_COMPILES(
-  "int main(void) { if (0) __builtin_unreachable(); return 0; }"
-  HAVE_BUILTIN_UNREACHABLE
-)
-
-CHECK_C_SOURCE_COMPILES(
   "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
@@ -198,13 +184,29 @@ CHECK_C_SOURCE_COMPILES([=[
   ]=] HAVE_VISIBILITY
 )
 
+set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
+
+CHECK_C_SOURCE_COMPILES(
+  "int main(void) { if (__builtin_expect(1+1, 2)) return 1; return 0; }"
+  HAVE_BUILTIN_EXPECT
+)
+
+CHECK_C_SOURCE_COMPILES(
+  "#include <stddef.h>
+   int main(void) { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
+  HAVE_BUILTIN_MUL_OVERFLOW
+)
+
+CHECK_C_SOURCE_COMPILES(
+  "int main(int c, char *v[]) { if (c) __builtin_unreachable(); return (int)(*v[0]); }"
+  HAVE_BUILTIN_UNREACHABLE
+)
+
 if (HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
 else()
   set(PCRE2_EXPORT)
 endif()
-
-set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
 # code was written by PH, trying to imitate the logic from the autotools

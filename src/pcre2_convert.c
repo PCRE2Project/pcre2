@@ -1158,7 +1158,8 @@ for (i = 0; i < 2; i++)
   use_length = *bufflenptr + 1;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
+return PCRE2_ERROR_INTERNAL;
 }
 
 

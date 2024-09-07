@@ -2,11 +2,12 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/* PCRE is a library of functions to support regular expressions whose syntax
+/* PCRE2 is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
-                     Written by Philip Hazel
-            Copyright (c) 2023 University of Cambridge
+                       Written by Philip Hazel
+     Original API code Copyright (c) 1997-2012 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -37,58 +38,32 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This file contains functions to implement checked integer operation */
+#ifndef PCRE2_UTIL_H_IDEMPOTENT_GUARD
+#define PCRE2_UTIL_H_IDEMPOTENT_GUARD
 
-#ifndef PCRE2_PCRE2TEST
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* Assertion macros */
 
-#include "pcre2_internal.h"
-#endif
-
-/*************************************************
-*        Checked Integer Multiplication          *
-*************************************************/
-
-/*
-Arguments:
-  r         A pointer to PCRE2_SIZE to store the answer
-  a, b      Two integers
-
-Returns:    Bool indicating if the operation overflows
-
-It is modeled after C23's <stdckdint.h> interface
-The INT64_OR_DOUBLE type is a 64-bit integer type when available,
-otherwise double. */
-
-BOOL
-PRIV(ckd_smul)(PCRE2_SIZE *r, int a, int b)
-{
-#ifdef HAVE_BUILTIN_MUL_OVERFLOW
-PCRE2_SIZE m;
-
-if (__builtin_mul_overflow(a, b, &m)) return TRUE;
-
-*r = m;
+#ifdef HAVE_BUILTIN_UNREACHABLE
+#define PCRE2_UNREACHABLE() __builtin_unreachable()
 #else
-INT64_OR_DOUBLE m;
-
-PCRE2_ASSERT(a >= 0 && b >= 0);
-
-m = (INT64_OR_DOUBLE)a * (INT64_OR_DOUBLE)b;
-
-#if defined INT64_MAX || defined int64_t
-if (sizeof(m) > sizeof(*r) && m > (INT64_OR_DOUBLE)PCRE2_SIZE_MAX) return TRUE;
-*r = (PCRE2_SIZE)m;
-#else
-if (m > PCRE2_SIZE_MAX) return TRUE;
-*r = m;
+#define PCRE2_UNREACHABLE() do {} while(0)
 #endif
 
+#ifdef PCRE2_DEBUG
+#if defined(HAVE_BUILTIN_EXPECT) && defined(HAVE_BUILTIN_UNREACHABLE)
+#define PCRE2_ASSERT(x) do { if (__builtin_expect(!(x), 0)) __builtin_unreachable(); } while (0)
+#elif defined(HAVE_ASSERT_H)
+#include <assert.h>
+#define PCRE2_ASSERT(x) assert(x)
+#elif defined(HAVE_STDLIB_H) && defined(HAVE_STDIO_H)
+#define PCRE2_ASSERT(x) do { if (!(x)) { fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); abort(); }} while(0)
+#endif
 #endif
 
-return FALSE;
-}
+#ifndef PCRE2_ASSERT
+#define PCRE2_ASSERT(x) do {} while(0)
+#endif
 
-/* End of pcre_chkdint.c */
+#endif  /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
+
+/* End of pcre2_util.h */

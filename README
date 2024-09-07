@@ -864,6 +864,7 @@ The distribution should contain the files listed below.
   src/pcre2_jit_neon_inc.h header used by JIT
   src/pcre2_jit_simd_inc.h header used by JIT
   src/pcre2_ucp.h          header for Unicode property handling
+  src/pcre2_util.h         header for internal utils
 
   deps/sljit/sljit_src/*   source files for the JIT compiler
 
