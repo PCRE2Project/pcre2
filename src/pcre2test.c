@@ -5078,7 +5078,8 @@ switch(cmd)
           isspace(argptr[nlen]))
         {
         if (i == NEWLINE_DEFAULT) return PR_OK;  /* Default is valid */
-        if (first_listed_newline == 0) first_listed_newline = i;
+        PCRE2_ASSERT(i <= UINT16_MAX);
+        if (first_listed_newline == 0) first_listed_newline = (uint16_t)i;
         }
       }
     while (*argptr != 0 && !isspace(*argptr)) argptr++;
