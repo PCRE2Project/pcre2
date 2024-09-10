@@ -1,6 +1,7 @@
 /* config.h for CMake builds */
 
 #cmakedefine HAVE_ASSERT_H 1
+#cmakedefine HAVE_BUILTIN_ASSUME 1
 #cmakedefine HAVE_BUILTIN_EXPECT 1
 #cmakedefine HAVE_BUILTIN_MUL_OVERFLOW 1
 #cmakedefine HAVE_BUILTIN_UNREACHABLE 1

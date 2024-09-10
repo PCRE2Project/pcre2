@@ -1159,7 +1159,6 @@ for (i = 0; i < 2; i++)
   }
 
 PCRE2_UNREACHABLE(); /* Control never reaches here */
-return PCRE2_ERROR_INTERNAL;
 }
 
 

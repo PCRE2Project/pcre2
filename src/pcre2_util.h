@@ -45,6 +45,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef HAVE_BUILTIN_UNREACHABLE
 #define PCRE2_UNREACHABLE() __builtin_unreachable()
+#elif HAVE_BUILTIN_ASSUME
+#define PCRE2_UNREACHABLE() __assume(0)
 #else
 #define PCRE2_UNREACHABLE() do {} while(0)
 #endif
