@@ -187,6 +187,11 @@ CHECK_C_SOURCE_COMPILES([=[
 set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 CHECK_C_SOURCE_COMPILES(
+  "int main(void) { __assume(1); return 0; }"
+  HAVE_BUILTIN_ASSUME
+)
+
+CHECK_C_SOURCE_COMPILES(
   "int main(void) { if (__builtin_expect(1+1, 2)) return 1; return 0; }"
   HAVE_BUILTIN_EXPECT
 )

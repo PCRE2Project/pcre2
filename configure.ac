@@ -93,6 +93,20 @@ fi
 CFLAGS=$tmp_CFLAGS
 AC_LANG_POP([C])
 
+# Check for the assume() builtin
+
+AC_MSG_CHECKING([for __assume()])
+AC_LANG_PUSH([C])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[__assume(1)]])],
+  [pcre2_cc_cv_builtin_assume=yes],
+  [pcre2_cc_cv_builtin_assume=no])
+AC_MSG_RESULT([$pcre2_cc_cv_builtin_assume])
+if test "$pcre2_cc_cv_builtin_assume" = yes; then
+  AC_DEFINE([HAVE_BUILTIN_ASSUME], 1,
+    [Define this if your compiler provides __assume()])
+fi
+AC_LANG_POP([C])
+
 # Check for the expect() builtin
 
 AC_MSG_CHECKING([for __builtin_expect()])
