@@ -82,7 +82,7 @@ if not exist testout16 md testout16
 if not exist testoutjit16 md testoutjit16
 )
 
-if %support16% EQU 1 (
+if %support32% EQU 1 (
 if not exist testout32 md testout32
 if not exist testoutjit32 md testoutjit32
 )
