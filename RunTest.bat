@@ -13,7 +13,7 @@
 @rem line. Added argument validation and added error reporting.
 @rem
 @rem Sheri Pierce added logic to skip feature dependent tests
-@rem tests 4 5 7 10 12 14 19 and 22 require Unicode support
+@rem tests 4 5 7 10 12 14 19 22 25 and 26 require Unicode support
 @rem 8 requires Unicode and link size 2
 @rem 16 requires absence of jit support
 @rem 17 requires presence of jit support
@@ -318,7 +318,7 @@ if %jit% EQU 1 call :runsub 1 testoutjit "Test with JIT Override" -q -jit
 goto :eof
 
 :do2
-  copy /y %srcdir%\testdata\testbtables testbtables 
+  copy /y %srcdir%\testdata\testbtables testbtables
   call :runsub 2 testout "API, errors, internals, and non-Perl stuff" -q
   if %jit% EQU 1 call :runsub 2 testoutjit "Test with JIT Override" -q -jit
 goto :eof
