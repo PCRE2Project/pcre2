@@ -13,7 +13,7 @@
 @rem line. Added argument validation and added error reporting.
 @rem
 @rem Sheri Pierce added logic to skip feature dependent tests
-@rem tests 4 5 7 10 12 14 19 and 22 require Unicode support
+@rem tests 4 5 7 10 12 14 19 22 25 and 26 require Unicode support
 @rem 8 requires Unicode and link size 2
 @rem 16 requires absence of jit support
 @rem 17 requires presence of jit support
@@ -82,7 +82,7 @@ if not exist testout16 md testout16
 if not exist testoutjit16 md testoutjit16
 )
 
-if %support16% EQU 1 (
+if %support32% EQU 1 (
 if not exist testout32 md testout32
 if not exist testoutjit32 md testoutjit32
 )
@@ -110,18 +110,21 @@ set do20=no
 set do21=no
 set do22=no
 set do23=no
+set do24=no
+set do25=no
+set do26=no
 set all=yes
 
 for %%a in (%*) do (
   set valid=no
-  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23) do if %%v == %%a set valid=yes
+  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26) do if %%v == %%a set valid=yes
   if "!valid!" == "yes" (
     set do%%a=yes
     set all=no
 ) else (
     echo Invalid test number - %%a!
         echo Usage %0 [ test_number ] ...
-        echo Where test_number is one or more optional test numbers 1 through 23, default is all tests.
+        echo Where test_number is one or more optional test numbers 1 through 26, default is all tests.
         exit /b 1
 )
 )
@@ -151,6 +154,9 @@ if "%all%" == "yes" (
   set do21=yes
   set do22=yes
   set do23=yes
+  set do24=yes
+  set do25=yes
+  set do26=yes
 )
 
 @echo RunTest.bat's pcre2test output is written to newly created subfolders
@@ -202,6 +208,9 @@ if "%do20%" == "yes" call :do20
 if "%do21%" == "yes" call :do21
 if "%do22%" == "yes" call :do22
 if "%do23%" == "yes" call :do23
+if "%do24%" == "yes" call :do24
+if "%do25%" == "yes" call :do25
+if "%do26%" == "yes" call :do26
 :modeSkip
 if "%mode%" == "" (
   set mode=-16
@@ -309,7 +318,7 @@ if %jit% EQU 1 call :runsub 1 testoutjit "Test with JIT Override" -q -jit
 goto :eof
 
 :do2
-  copy /y %srcdir%\testdata\testbtables testbtables 
+  copy /y %srcdir%\testdata\testbtables testbtables
   call :runsub 2 testout "API, errors, internals, and non-Perl stuff" -q
   if %jit% EQU 1 call :runsub 2 testoutjit "Test with JIT Override" -q -jit
 goto :eof
@@ -502,6 +511,27 @@ if %supportBSC% EQU 1 (
   goto :eof
 )
   call :runsub 23 testout "Backslash-C disabled test" -q
+goto :eof
+
+:do24
+call :runsub 24 testout "Non-UTF pattern conversion tests" -q
+goto :eof
+
+:do25
+if %unicode% EQU 0 (
+  echo Test 25 Skipped due to absence of Unicode support.
+  goto :eof
+)
+  call :runsub 25 testout "UTF pattern conversion tests" -q
+goto :eof
+
+:do26
+if %unicode% EQU 0 (
+  echo Test 26 Skipped due to absence of Unicode support.
+  goto :eof
+)
+  call :runsub 26 testout "Auto-generated unicode property tests" -q
+  if %jit% EQU 1 call :runsub 26 testoutjit "Test with JIT Override" -q -jit
 goto :eof
 
 :conferror
