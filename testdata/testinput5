@@ -2539,4 +2539,20 @@
 /abc/utf,substitute_extended,python_octal
     abc\=replace=\400
 
+# Character range merging tests
+
+/[\x{1200}\s\x{1202}\d\x{1201}]+/B,utf,ucp
+    \x{11ff}\x{1200}\x{1201}\x{1202}\x{1203}
+
+/[\x{2000}-\x{2500}\x{2100}-\x{2600}\d\x{1800}-\x{1fff}]+/B,utf,ucp
+    \x{17ff}\x{1800}\x{2600}\x{2601}
+
+/[\x{10008}\x{10003}\x{10006}\x{10004}\x{10007}]+/B,utf
+    \x{10002}\x{10005}\x{10003}\x{10004}\x{10006}\x{10007}\x{10008}\x{10009}
+
+/[\x{100}-\x{400}]+/Bi,utf
+    qS\x{ff}\x{100}\x{a7c5}\x{401}
+    \x{2c63}\x{2c64}\x{2c65}\x{2c66}\x{2c67}
+    \x{a7af}\x{a7b0}\x{a7b1}\x{a7b2}\x{a7b3}
+
 # End of testinput5
