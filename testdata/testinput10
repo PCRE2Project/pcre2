@@ -666,4 +666,26 @@
 /(..)(*scs:(1)ab$)/match_invalid_utf
     ab\x80cde         
 
+# python_octal
+
+/\400/
+
+/abc/substitute_extended
+    abc\=replace=\400
+
+/\400/python_octal
+
+/abc/substitute_extended,python_octal
+    abc\=replace=\400
+
+/\400/utf
+
+/abc/utf,substitute_extended
+    abc\=replace=\400
+
+/\400/utf,python_octal
+
+/abc/utf,substitute_extended,python_octal
+    abc\=replace=\400
+
 # End of testinput10

@@ -19115,6 +19115,70 @@ Failed: error 161 at offset 7: subpattern number is too big
 /a\8000000000b/
 Failed: error 161 at offset 7: subpattern number is too big
 
+# --------------
+
+# no_bs0
+
+/a\0b\x00c\00d/
+    a\x{00}b\x{00}c\x{00}d
+ 0: a\x00b\x00c\x00d
+
+/a\0b/no_bs0
+Failed: error 103 at offset 3: unrecognized character follows \
+
+/b\x00c\00d/no_bs0
+    b\x{00}c\x{00}d
+ 0: b\x00c\x00d
+
+/abc/substitute_extended
+    abc\=replace=a\0b\x00c\00d
+ 1: a\x00b\x00c\x00d
+
+/abc/substitute_extended,no_bs0
+    abc\=replace=a\0b
+Failed: error -57 at offset 3 in replacement: bad escape sequence in replacement string
+    abc\=replace=b\x00c\00d
+ 1: b\x00c\x00d
+
+# python_octal
+
+/\0-\00-\01-\012-\0123-\123-\1234/
+    \x00-\x00-\x01-\o{12}-\o{12}3-\o{123}-\o{123}4
+ 0: \x00-\x00-\x01-\x0a-\x0a3-S-S4
+
+/\1/
+Failed: error 115 at offset 1: reference to non-existent subpattern
+
+/\12/
+    \o{12}
+ 0: \x0a
+
+/abc/substitute_extended
+    abc\=replace=\0-\00-\01-\012-\0123-\123-\1234
+ 1: \x00-\x00-\x01-\x0a-\x0a3-S-S4
+    abc\=replace=\1
+Failed: error -49 at offset 2 in replacement: unknown substring
+    abc\=replace=\12
+ 1: \x0a
+
+/\0-\00-\01-\012-\0123-\123-\1234/python_octal
+    \x00-\x00-\x01-\o{12}-\o{12}3-\o{123}-\o{123}4
+ 0: \x00-\x00-\x01-\x0a-\x0a3-S-S4
+
+/\1/python_octal
+Failed: error 115 at offset 1: reference to non-existent subpattern
+
+/\12/python_octal
+Failed: error 115 at offset 2: reference to non-existent subpattern
+
+/abc/substitute_extended,python_octal
+    abc\=replace=\0-\00-\01-\012-\0123-\123-\1234
+ 1: \x00-\x00-\x01-\x0a-\x0a3-S-S4
+    abc\=replace=\1
+Failed: error -49 at offset 2 in replacement: unknown substring
+    abc\=replace=\12
+Failed: error -49 at offset 3 in replacement: unknown substring
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

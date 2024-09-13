@@ -5498,4 +5498,21 @@ Failed: error 147 at offset 10: unknown property after \P or \p
     abc\=replace=>${nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢}<
  1: >b<
 
+# python_octal
+
+/\400/utf
+    \o{400}
+ 0: \x{100}
+
+/\400/utf,python_octal
+Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
+
+/abc/utf,substitute_extended
+    abc\=replace=\400
+ 1: \x{100}
+
+/abc/utf,substitute_extended,python_octal
+    abc\=replace=\400
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
 # End of testinput5

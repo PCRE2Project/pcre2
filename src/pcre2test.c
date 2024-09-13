@@ -730,6 +730,7 @@ static modstruct modlist[] = {
   { "newline",                     MOD_CTC,  MOD_NL,  0,                          CO(newline_convention) },
   { "no_auto_capture",             MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,      PO(options) },
   { "no_auto_possess",             MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,      PO(options) },
+  { "no_bs0",                      MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NO_BS0,         CO(extra_options) },
   { "no_dotstar_anchor",           MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,    PO(options) },
   { "no_jit",                      MOD_DATP, MOD_OPT, PCRE2_NO_JIT,               DO(options) },
   { "no_start_optimize",           MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,    PO(options) },
@@ -756,6 +757,7 @@ static modstruct modlist[] = {
   { "push",                        MOD_PAT,  MOD_CTL, CTL_PUSH,                   PO(control) },
   { "pushcopy",                    MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
   { "pushtablescopy",              MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
+  { "python_octal",                MOD_CTC,  MOD_OPT, PCRE2_EXTRA_PYTHON_OCTAL,   CO(extra_options) },
   { "recursion_limit",             MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
   { "regerror_buffsize",           MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
   { "replace",                     MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },

@@ -517,44 +517,44 @@ in UTF-8 mode. It runs from '0' to 'z'. */
 #define UPPER_CASE(c)       (c-32)
 
 static const short int escapes[] = {
-     0,                       0,
-     0,                       0,
-     0,                       0,
-     0,                       0,
-     0,                       0,
-     CHAR_COLON,              CHAR_SEMICOLON,
-     CHAR_LESS_THAN_SIGN,     CHAR_EQUALS_SIGN,
-     CHAR_GREATER_THAN_SIGN,  CHAR_QUESTION_MARK,
-     CHAR_COMMERCIAL_AT,      -ESC_A,
-     -ESC_B,                  -ESC_C,
-     -ESC_D,                  -ESC_E,
-     0,                       -ESC_G,
-     -ESC_H,                  0,
-     0,                       -ESC_K,
-     0,                       0,
-     -ESC_N,                  0,
-     -ESC_P,                  -ESC_Q,
-     -ESC_R,                  -ESC_S,
-     0,                       0,
-     -ESC_V,                  -ESC_W,
-     -ESC_X,                  0,
-     -ESC_Z,                  CHAR_LEFT_SQUARE_BRACKET,
-     CHAR_BACKSLASH,          CHAR_RIGHT_SQUARE_BRACKET,
-     CHAR_CIRCUMFLEX_ACCENT,  CHAR_UNDERSCORE,
-     CHAR_GRAVE_ACCENT,       CHAR_BEL,
-     -ESC_b,                  0,
-     -ESC_d,                  CHAR_ESC,
-     CHAR_FF,                 0,
-     -ESC_h,                  0,
-     0,                       -ESC_k,
-     0,                       0,
-     CHAR_LF,                 0,
-     -ESC_p,                  0,
-     CHAR_CR,                 -ESC_s,
-     CHAR_HT,                 0,
-     -ESC_v,                  -ESC_w,
-     0,                       0,
-     -ESC_z
+    /* 0 */ 0,                       /* 1 */ 0,
+    /* 2 */ 0,                       /* 3 */ 0,
+    /* 4 */ 0,                       /* 5 */ 0,
+    /* 6 */ 0,                       /* 7 */ 0,
+    /* 8 */ 0,                       /* 9 */ 0,
+    /* : */ CHAR_COLON,              /* ; */ CHAR_SEMICOLON,
+    /* < */ CHAR_LESS_THAN_SIGN,     /* = */ CHAR_EQUALS_SIGN,
+    /* > */ CHAR_GREATER_THAN_SIGN,  /* ? */ CHAR_QUESTION_MARK,
+    /* @ */ CHAR_COMMERCIAL_AT,      /* A */ -ESC_A,
+    /* B */ -ESC_B,                  /* C */ -ESC_C,
+    /* D */ -ESC_D,                  /* E */ -ESC_E,
+    /* F */ 0,                       /* G */ -ESC_G,
+    /* H */ -ESC_H,                  /* I */ 0,
+    /* J */ 0,                       /* K */ -ESC_K,
+    /* L */ 0,                       /* M */ 0,
+    /* N */ -ESC_N,                  /* O */ 0,
+    /* P */ -ESC_P,                  /* Q */ -ESC_Q,
+    /* R */ -ESC_R,                  /* S */ -ESC_S,
+    /* T */ 0,                       /* U */ 0,
+    /* V */ -ESC_V,                  /* W */ -ESC_W,
+    /* X */ -ESC_X,                  /* Y */ 0,
+    /* Z */ -ESC_Z,                  /* [ */ CHAR_LEFT_SQUARE_BRACKET,
+    /* \ */ CHAR_BACKSLASH,          /* ] */ CHAR_RIGHT_SQUARE_BRACKET,
+    /* ^ */ CHAR_CIRCUMFLEX_ACCENT,  /* _ */ CHAR_UNDERSCORE,
+    /* ` */ CHAR_GRAVE_ACCENT,       /* a */ CHAR_BEL,
+    /* b */ -ESC_b,                  /* c */ 0,
+    /* d */ -ESC_d,                  /* e */ CHAR_ESC,
+    /* f */ CHAR_FF,                 /* g */ 0,
+    /* h */ -ESC_h,                  /* i */ 0,
+    /* j */ 0,                       /* k */ -ESC_k,
+    /* l */ 0,                       /* m */ 0,
+    /* n */ CHAR_LF,                 /* o */ 0,
+    /* p */ -ESC_p,                  /* q */ 0,
+    /* r */ CHAR_CR,                 /* s */ -ESC_s,
+    /* t */ CHAR_HT,                 /* u */ 0,
+    /* v */ -ESC_v,                  /* w */ -ESC_w,
+    /* x */ 0,                       /* y */ 0,
+    /* z */ -ESC_z
 };
 
 #else
@@ -801,7 +801,7 @@ are allowed. */
     PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
     PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
     PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX| \
-    PCRE2_EXTRA_ASCII_DIGIT)
+    PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_PYTHON_OCTAL|PCRE2_EXTRA_NO_BS0)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
@@ -1495,7 +1495,7 @@ else
   if (pp >= ptrend || *pp != CHAR_RIGHT_CURLY_BRACKET) return FALSE;
   }
 
-/* Now process the quantifier for real. We know it must be {n} or (n,} or {,m}
+/* Now process the quantifier for real. We know it must be {n} or {n,} or {,m}
 or {n,m}. The only error that read_number() can return is for a number that is
 too big. If *errorcodeptr is returned as zero it means no number was found. */
 
@@ -1889,7 +1889,16 @@ else
     number is less than 10, or if there are that many previous extracting left
     brackets, it is a back reference. Otherwise, up to three octal digits are
     read to form an escaped character code. Thus \123 is likely to be octal 123
-    (cf \0123, which is octal 012 followed by the literal 3).
+    (cf \0123, which is octal 012 followed by the literal 3). This is the "Perl
+    style" of handling ambiguous octal/backrefences such as \12.
+
+    There is an alternative disambiguation strategy, selected by
+    PCRE2_EXTRA_PYTHON_OCTAL, which follows Python's behaviour. An octal must
+    have either a leading zero, or exactly three octal digits; otherwise it's
+    a backreference. The disambiguation is stable, and does not depend on how
+    many capture groups are defined (it's simply an invalid backreference if
+    there is no corresponding capture group). Additionally, octal values above
+    \377 (\xff) are rejected.
 
     Inside a character class, \ followed by a digit is always either a literal
     8 or 9 or an octal number. */
@@ -1897,8 +1906,37 @@ else
     case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4: case CHAR_5:
     case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
 
-    if (!isclass)
+    if (isclass)
       {
+      /* Fall through to octal handling; never a backreference inside a class. */
+      }
+    else if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0)
+      {
+      /* Python-style disambiguation. */
+      if (ptr[-1] <= CHAR_7 && ptr + 1 < ptrend && ptr[0] >= CHAR_0 &&
+          ptr[0] <= CHAR_7 && ptr[1] >= CHAR_0 && ptr[1] <= CHAR_7)
+        {
+        /* We peeked a three-digit octal, so fall through */
+        }
+      else
+        {
+        /* We are at a digit, so the only possible error from read_number() is
+        a number that is too large. */
+        ptr--;   /* Back to the digit */
+
+        if (!read_number(&ptr, ptrend, -1, MAX_GROUP_NUMBER, 0, &s, errorcodeptr))
+          {
+          *errorcodeptr = ERR61;
+          break;
+          }
+
+        escape = -s;
+        break;
+        }
+      }
+    else
+      {
+      /* Perl-style disambiguation. */
       oldptr = ptr;
       ptr--;   /* Back to the digit */
 
@@ -1935,7 +1973,7 @@ else
     /* \0 always starts an octal number, but we may drop through to here with a
     larger first octal digit. The original code used just to take the least
     significant 8 bits of octal numbers (I think this is what early Perls used
-    to do). Nowadays we allow for larger numbers in UTF-8 mode and 16-bit mode,
+    to do). Nowadays we allow for larger numbers in UTF-8 mode and 16/32-bit mode,
     but no more than 3 octal digits. */
 
     case CHAR_0:
@@ -1945,6 +1983,13 @@ else
 #if PCRE2_CODE_UNIT_WIDTH == 8
     if (!utf && c > 0xff) *errorcodeptr = ERR51;
 #endif
+    if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0 && c > 0xff)
+        *errorcodeptr = ERR51;
+
+    /* PCRE2_EXTRA_NO_BS0 disables the NUL escape '\0' but doesn't affect
+    two- or three-character octal escapes \00 and \000, nor \x00. */
+    if ((xoptions & PCRE2_EXTRA_NO_BS0) != 0 && c == 0 && i == 1)
+        *errorcodeptr = ERR3;
     break;
 
     /* \o is a relatively new Perl feature, supporting a more general way of
