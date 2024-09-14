@@ -68,7 +68,7 @@ jobs:
         run: ./pcre2posix_test -v
 
   bat:
-    name: MSVC
+    name: 32bit MSVC
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -78,6 +78,28 @@ jobs:
 
       - name: Configure
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_VERBOSE_MAKEFILE=ON -B build -A Win32
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        shell: cmd
+        run: |
+          cd build
+          ctest -C Debug .
+          type Testing\Temporary\LastTest.log
+
+  pterodactyl:
+    name: MSVC
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Configure
+        run: cmake -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_BUILD_PCRE2GREP=OFF -DPCRE2_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
 
       - name: Build
         run: cmake --build build

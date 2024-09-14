@@ -5071,15 +5071,14 @@ switch(cmd)
     {
     while (isspace(*argptr)) argptr++;
     if (*argptr == 0) break;
-    for (i = 1; i < sizeof(newlines)/sizeof(char *); i++)
+    for (uint16_t j = 1; j < sizeof(newlines)/sizeof(char *); j++)
       {
-      size_t nlen = strlen(newlines[i]);
-      if (strncmpic(argptr, (const uint8_t *)newlines[i], nlen) == 0 &&
+      size_t nlen = strlen(newlines[j]);
+      if (strncmpic(argptr, (const uint8_t *)newlines[j], nlen) == 0 &&
           isspace(argptr[nlen]))
         {
-        if (i == NEWLINE_DEFAULT) return PR_OK;  /* Default is valid */
-        PCRE2_ASSERT(i <= UINT16_MAX);
-        if (first_listed_newline == 0) first_listed_newline = (uint16_t)i;
+        if (j == NEWLINE_DEFAULT) return PR_OK;  /* Default is valid */
+        if (first_listed_newline == 0) first_listed_newline = j;
         }
       }
     while (*argptr != 0 && !isspace(*argptr)) argptr++;
