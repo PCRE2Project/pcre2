@@ -618,6 +618,21 @@ PATTERN MODIFIERS
        causes  pattern  and  subject  strings  to  be  translated to UTF-16 or
        UTF-32, respectively, before being passed to library functions.
 
+       The following modifiers enable or disable performance optimizations  by
+       calling pcre2_set_optimize() before invoking the regex compiler.
+
+             optimization_full      enable all optional optimizations
+             optimization_none      disable all optional optimizations
+             auto_possess           auto-possessify variable quantifiers
+             auto_possess_off       don't auto-possessify variable quantifiers
+             dotstar_anchor         anchor patterns starting with .*
+             dotstar_anchor_off     don't anchor patterns starting with .*
+             start_optimize         enable pre-scan of subject string
+             start_optimize_off     disable pre-scan of subject string
+
+       See the pcre2_set_optimize documentation for details on these optimiza‐
+       tions.
+
    Setting compilation controls
 
        The following modifiers affect the compilation process or  request  in-

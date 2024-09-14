@@ -6788,7 +6788,7 @@ if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
 /* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
 options variable for this function. Users of PCRE2 who are not calling the
 function directly would like to have a way of setting these flags, in the same
-way that they can set pcre2_compile() flags like PCRE2_NO_AUTOPOSSESS with
+way that they can set pcre2_compile() flags like PCRE2_NO_AUTO_POSSESS with
 constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and
 (*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which we now
 transfer to the options for this function. The bits are guaranteed to be
@@ -7326,7 +7326,7 @@ for(;;)
   However, there is an option (settable at compile time) that disables these,
   for testing and for ensuring that all callouts do actually occur. */
 
-  if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
+  if ((re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
     {
     /* If firstline is TRUE, the start of the match is constrained to the first
     line of a multiline string. That is, the match must be before or at the

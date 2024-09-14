@@ -179,6 +179,10 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <b>int pcre2_set_compile_recursion_guard(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  int (*<i>guard_function</i>)(uint32_t, void *), void *<i>user_data</i>);</b>
+<br>
+<br>
+<b>int pcre2_set_optimize(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>  uint32_t <i>directive</i>);</b>
 </P>
 <br><a name="SEC5" href="#TOC1">PCRE2 NATIVE API MATCH CONTEXT FUNCTIONS</a><br>
 <P>
@@ -808,6 +812,7 @@ following compile-time parameters:
   The compile time nested parentheses limit
   The maximum length of the pattern string
   The extra options bits (none set by default)
+  Which performance optimizations the compiler should apply
 </pre>
 A compile context is also required if you are using custom memory management.
 If none of these apply, just pass NULL as the context argument of
@@ -952,6 +957,110 @@ The first argument to the callout function gives the current depth of
 nesting, and the second is user data that is set up by the last argument of
 <b>pcre2_set_compile_recursion_guard()</b>. The callout function should return
 zero if all is well, or non-zero to force an error.
+<br>
+<br>
+<b>int pcre2_set_optimize(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>  uint32_t <i>directive</i>);</b>
+<br>
+<br>
+PCRE2 can apply various performance optimizations during compilation, in order
+to make matching faster. For example, the compiler might convert some regex
+constructs into an equivalent construct which <b>pcre2_match()</b> can execute
+faster. By default, all available optimizations are enabled. However, in rare
+cases, one might wish to disable specific optimizations. For example, if it is
+known that some optimizations cannot benefit a certain regex, it might be
+desirable to disable them, in order to speed up compilation.
+</P>
+<P>
+The permitted values of <i>directive</i> are as follows:
+<pre>
+  PCRE2_OPTIMIZATION_NONE
+</pre>
+Disable all optional performance optimizations.
+<pre>
+  PCRE2_OPTIMIZATION_FULL
+</pre>
+Enable all optional performance optimizations. This is the default value.
+<pre>
+  PCRE2_AUTO_POSSESS
+  PCRE2_AUTO_POSSESS_OFF
+</pre>
+Enable/disable "auto-possessification" of variable quantifiers such as * and +.
+This optimization, for example, turns a+b into a++b in order to avoid
+backtracks into a+ that can never be successful. However, if callouts are in
+use, auto-possessification means that some callouts are never taken. You can
+disable this optimization if you want the matching functions to do a full,
+unoptimized search and run all the callouts.
+<pre>
+  PCRE2_DOTSTAR_ANCHOR
+  PCRE2_DOTSTAR_ANCHOR_OFF
+</pre>
+Enable/disable an optimization that is applied when .* is the first significant
+item in a top-level branch of a pattern, and all the other branches also start
+with .* or with \A or \G or ^. Such a pattern is automatically anchored if
+PCRE2_DOTALL is set for all the .* items and PCRE2_MULTILINE is not set for any
+^ items. Otherwise, the fact that any match must start either at the start of
+the subject or following a newline is remembered. Like other optimizations,
+this can cause callouts to be skipped.
+</P>
+<P>
+Dotstar anchor optimization is automatically disabled for .* if it is inside an
+atomic group or a capture group that is the subject of a backreference, or if
+the pattern contains (*PRUNE) or (*SKIP).
+<pre>
+  PCRE2_START_OPTIMIZE
+  PCRE2_START_OPTIMIZE_OFF
+</pre>
+Enable/disable optimizations which cause matching functions to scan the subject
+string for specific code unit values before attempting a match. For example, if
+it is known that an unanchored match must start with a specific value, the
+matching code searches the subject for that value, and fails immediately if it
+cannot find it, without actually running the main matching function. This means
+that a special item such as (*COMMIT) at the start of a pattern is not
+considered until after a suitable starting point for the match has been found.
+Also, when callouts or (*MARK) items are in use, these "start-up" optimizations
+can cause them to be skipped if the pattern is never actually used. The start-up
+optimizations are in effect a pre-scan of the subject that takes place before
+the pattern is run.
+</P>
+<P>
+Disabling start-up optimizations ensures that in cases where the result is "no
+match", the callouts do occur, and that items such as (*COMMIT) and (*MARK) are
+considered at every possible starting position in the subject string.
+</P>
+<P>
+Disabling start-up optimizations may change the outcome of a matching operation.
+Consider the pattern
+<pre>
+  (*COMMIT)ABC
+</pre>
+When this is compiled, PCRE2 records the fact that a match must start with the
+character "A". Suppose the subject string is "DEFABC". The start-up
+optimization scans along the subject, finds "A" and runs the first match
+attempt from there. The (*COMMIT) item means that the pattern must match the
+current starting position, which in this case, it does. However, if the same
+match is run without start-up optimizations, the initial scan along the subject
+string does not happen. The first match attempt is run starting from "D" and
+when this fails, (*COMMIT) prevents any further matches being tried, so the
+overall result is "no match".
+</P>
+<P>
+Another start-up optimization makes use of a minimum length for a matching
+subject, which is recorded when possible. Consider the pattern
+<pre>
+  (*MARK:1)B(*MARK:2)(X|Y)
+</pre>
+The minimum length for a match is two characters. If the subject is "XXBB", the
+"starting character" optimization skips "XX", then tries to match "BB", which
+is long enough. In the process, (*MARK:2) is encountered and remembered. When
+the match attempt fails, the next "B" is found, but there is only one character
+left, so there are no more attempts, and "no match" is returned with the "last
+mark seen" set to "2". Without start-up optimizations, however, matches are
+tried at every possible starting position, including at the end of the subject,
+where (*MARK:1) is encountered, but there is no "B", so the "last mark seen"
+that is returned is "1". In this case, the optimizations do not affect the
+overall match result, which is still "no match", but they do affect the
+auxiliary information that is returned.
 <a name="matchcontext"></a></P>
 <br><b>
 The match context
@@ -1807,85 +1916,57 @@ though the reference can be by name or by number.
 <pre>
   PCRE2_NO_AUTO_POSSESS
 </pre>
-If this option is set, it disables "auto-possessification", which is an
-optimization that, for example, turns a+b into a++b in order to avoid
+If this (deprecated) option is set, it disables "auto-possessification", which
+is an optimization that, for example, turns a+b into a++b in order to avoid
 backtracks into a+ that can never be successful. However, if callouts are in
 use, auto-possessification means that some callouts are never taken. You can
 set this option if you want the matching functions to do a full unoptimized
 search and run all the callouts, but it is mainly provided for testing
 purposes.
+</P>
+<P>
+If a compile context is available, it is recommended to use
+<b>pcre2_set_optimize()</b> with the <i>directive</i> PCRE2_AUTO_POSSESS_OFF rather
+than the compile option PCRE2_NO_AUTO_POSSESS. Note that PCRE2_NO_AUTO_POSSESS
+takes precedence over the <b>pcre2_set_optimize()</b> optimization directives
+PCRE2_AUTO_POSSESS and PCRE2_AUTO_POSSESS_OFF.
 <pre>
   PCRE2_NO_DOTSTAR_ANCHOR
 </pre>
-If this option is set, it disables an optimization that is applied when .* is
-the first significant item in a top-level branch of a pattern, and all the
-other branches also start with .* or with \A or \G or ^. The optimization is
-automatically disabled for .* if it is inside an atomic group or a capture
-group that is the subject of a backreference, or if the pattern contains
-(*PRUNE) or (*SKIP). When the optimization is not disabled, such a pattern is
-automatically anchored if PCRE2_DOTALL is set for all the .* items and
-PCRE2_MULTILINE is not set for any ^ items. Otherwise, the fact that any match
-must start either at the start of the subject or following a newline is
+If this (deprecated) option is set, it disables an optimization that is applied
+when .* is the first significant item in a top-level branch of a pattern, and
+all the other branches also start with .* or with \A or \G or ^. The
+optimization is automatically disabled for .* if it is inside an atomic group
+or a capture group that is the subject of a backreference, or if the pattern
+contains (*PRUNE) or (*SKIP). When the optimization is not disabled, such a
+pattern is automatically anchored if PCRE2_DOTALL is set for all the .* items
+and PCRE2_MULTILINE is not set for any ^ items. Otherwise, the fact that any
+match must start either at the start of the subject or following a newline is
 remembered. Like other optimizations, this can cause callouts to be skipped.
+(If a compile context is available, it is recommended to use
+<b>pcre2_set_optimize()</b> with the <i>directive</i> PCRE2_DOTSTAR_ANCHOR_OFF
+instead.)
 <pre>
   PCRE2_NO_START_OPTIMIZE
 </pre>
 This is an option whose main effect is at matching time. It does not change
 what <b>pcre2_compile()</b> generates, but it does affect the output of the JIT
-compiler.
+compiler. Setting this option is equivalent to calling <b>pcre2_set_optimize()</b>
+with the <i>directive</i> parameter set to PCRE2_START_OPTIMIZE_OFF.
 </P>
 <P>
 There are a number of optimizations that may occur at the start of a match, in
 order to speed up the process. For example, if it is known that an unanchored
 match must start with a specific code unit value, the matching code searches
 the subject for that value, and fails immediately if it cannot find it, without
-actually running the main matching function. This means that a special item
-such as (*COMMIT) at the start of a pattern is not considered until after a
-suitable starting point for the match has been found. Also, when callouts or
-(*MARK) items are in use, these "start-up" optimizations can cause them to be
-skipped if the pattern is never actually used. The start-up optimizations are
+actually running the main matching function. The start-up optimizations are
 in effect a pre-scan of the subject that takes place before the pattern is run.
 </P>
 <P>
-The PCRE2_NO_START_OPTIMIZE option disables the start-up optimizations,
-possibly causing performance to suffer, but ensuring that in cases where the
-result is "no match", the callouts do occur, and that items such as (*COMMIT)
-and (*MARK) are considered at every possible starting position in the subject
-string.
-</P>
-<P>
-Setting PCRE2_NO_START_OPTIMIZE may change the outcome of a matching operation.
-Consider the pattern
-<pre>
-  (*COMMIT)ABC
-</pre>
-When this is compiled, PCRE2 records the fact that a match must start with the
-character "A". Suppose the subject string is "DEFABC". The start-up
-optimization scans along the subject, finds "A" and runs the first match
-attempt from there. The (*COMMIT) item means that the pattern must match the
-current starting position, which in this case, it does. However, if the same
-match is run with PCRE2_NO_START_OPTIMIZE set, the initial scan along the
-subject string does not happen. The first match attempt is run starting from
-"D" and when this fails, (*COMMIT) prevents any further matches being tried, so
-the overall result is "no match".
-</P>
-<P>
-As another start-up optimization makes use of a minimum length for a matching
-subject, which is recorded when possible. Consider the pattern
-<pre>
-  (*MARK:1)B(*MARK:2)(X|Y)
-</pre>
-The minimum length for a match is two characters. If the subject is "XXBB", the
-"starting character" optimization skips "XX", then tries to match "BB", which
-is long enough. In the process, (*MARK:2) is encountered and remembered. When
-the match attempt fails, the next "B" is found, but there is only one character
-left, so there are no more attempts, and "no match" is returned with the "last
-mark seen" set to "2". If NO_START_OPTIMIZE is set, however, matches are tried
-at every possible starting position, including at the end of the subject, where
-(*MARK:1) is encountered, but there is no "B", so the "last mark seen" that is
-returned is "1". In this case, the optimizations do not affect the overall
-match result, which is still "no match", but they do affect the auxiliary
-information that is returned.
+Disabling the start-up optimizations may cause performance to suffer. However,
+this may be desirable for patterns which contain callouts or items such as
+(*COMMIT) and (*MARK). See the above description of PCRE2_START_OPTIMIZE_OFF
+for further details.
 <pre>
   PCRE2_NO_UTF_CHECK
 </pre>
@@ -2312,6 +2393,7 @@ following are true:
   PCRE2_DOTALL is in force for .*
   Neither (*PRUNE) nor (*SKIP) appears in the pattern
   PCRE2_NO_DOTSTAR_ANCHOR is not set
+  Dotstar anchoring has not been disabled with PCRE2_DOTSTAR_ANCHOR_OFF
 </pre>
 For patterns that are auto-anchored, the PCRE2_ANCHORED bit is set in the
 options returned for PCRE2_INFO_ALLOPTIONS.

@@ -681,6 +681,23 @@ notation. Otherwise, those less than 0x100 are output in hex without the curly
 brackets. Setting <b>utf</b> in 16-bit or 32-bit mode also causes pattern and
 subject strings to be translated to UTF-16 or UTF-32, respectively, before
 being passed to library functions.
+<br>
+<br>
+The following modifiers enable or disable performance optimizations by
+calling <b>pcre2_set_optimize()</b> before invoking the regex compiler.
+<pre>
+      optimization_full      enable all optional optimizations
+      optimization_none      disable all optional optimizations
+      auto_possess           auto-possessify variable quantifiers
+      auto_possess_off       don't auto-possessify variable quantifiers
+      dotstar_anchor         anchor patterns starting with .*
+      dotstar_anchor_off     don't anchor patterns starting with .*
+      start_optimize         enable pre-scan of subject string
+      start_optimize_off     disable pre-scan of subject string
+</pre>
+See the
+<a href="pcre2_set_optimize.html"><b>pcre2_set_optimize</b></a>
+documentation for details on these optimizations.
 <a name="controlmodifiers"></a></P>
 <br><b>
 Setting compilation controls

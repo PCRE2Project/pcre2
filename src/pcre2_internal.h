@@ -609,6 +609,13 @@ total length of the tables. */
 #define ctypes_offset (cbits_offset + cbit_length)  /* Character types */
 #define TABLES_LENGTH (ctypes_offset + 256)
 
+/* Private flags used in compile_context.optimization_flags */
+
+#define PCRE2_OPTIM_AUTO_POSSESS    0x00000001u
+#define PCRE2_OPTIM_DOTSTAR_ANCHOR  0x00000002u
+#define PCRE2_OPTIM_START_OPTIMIZE  0x00000004u
+
+#define PCRE2_OPTIMIZATION_ALL      0x00000007u
 
 /* -------------------- Character and string names ------------------------ */
 

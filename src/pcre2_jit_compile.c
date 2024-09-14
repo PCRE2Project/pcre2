@@ -14474,7 +14474,9 @@ if (!check_opcode_types(common, common->start, ccend))
   }
 
 /* Checking flags and updating ovector_start. */
-if (mode == PCRE2_JIT_COMPLETE && (re->flags & PCRE2_LASTSET) != 0 && (re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
+if (mode == PCRE2_JIT_COMPLETE &&
+    (re->flags & PCRE2_LASTSET) != 0 &&
+    (re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
   {
   common->req_char_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
@@ -14534,7 +14536,9 @@ memset(common->private_data_ptrs, 0, total_length * sizeof(sljit_s32));
 
 private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
 
-if ((re->overall_options & PCRE2_ANCHORED) == 0 && (re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 && !common->has_skip_in_assert_back)
+if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
+    (re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0 &&
+    !common->has_skip_in_assert_back)
   detect_early_fail(common, common->start, &private_data_size, 0, 0);
 
 set_private_data_ptrs(common, &private_data_size, ccend);
@@ -14600,7 +14604,7 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
   mainloop_label = mainloop_entry(common);
   continue_match_label = LABEL();
   /* Forward search if possible. */
-  if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
+  if ((re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
     {
     if (mode == PCRE2_JIT_COMPLETE && fast_forward_first_n_chars(common))
       ;
@@ -14615,7 +14619,8 @@ if ((re->overall_options & PCRE2_ANCHORED) == 0)
 else
   continue_match_label = LABEL();
 
-if (mode == PCRE2_JIT_COMPLETE && re->minlength > 0 && (re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
+if (mode == PCRE2_JIT_COMPLETE && re->minlength > 0 &&
+    (re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
   {
   OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
   OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(re->minlength));

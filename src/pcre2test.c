@@ -468,6 +468,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_NL,     /* Is a newline value */
        MOD_NN,     /* Is a number or a name; more than one may occur */
        MOD_OPT,    /* Is an option bit */
+       MOD_OPTMZ,  /* Is an optimization directive */
        MOD_SIZ,    /* Is a PCRE2_SIZE value */
        MOD_STR };  /* Is a string */
 
@@ -661,6 +662,8 @@ static modstruct modlist[] = {
   { "ascii_digit",                 MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_DIGIT,    CO(extra_options) },
   { "ascii_posix",                 MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_POSIX,    CO(extra_options) },
   { "auto_callout",                MOD_PAT,  MOD_OPT, PCRE2_AUTO_CALLOUT,         PO(options) },
+  { "auto_possess",                MOD_CTC,  MOD_OPTMZ, PCRE2_AUTO_POSSESS,       0 },
+  { "auto_possess_off",            MOD_CTC,  MOD_OPTMZ, PCRE2_AUTO_POSSESS_OFF,   0 },
   { "bad_escape_is_literal",       MOD_CTC,  MOD_OPT, PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL, CO(extra_options) },
   { "bincode",                     MOD_PAT,  MOD_CTL, CTL_BINCODE,                PO(control) },
   { "bsr",                         MOD_CTC,  MOD_BSR, 0,                          CO(bsr_convention) },
@@ -688,6 +691,8 @@ static modstruct modlist[] = {
   { "disable_recurseloop_check",   MOD_DAT,  MOD_OPT, PCRE2_DISABLE_RECURSELOOP_CHECK, DO(options) },
   { "dollar_endonly",              MOD_PAT,  MOD_OPT, PCRE2_DOLLAR_ENDONLY,       PO(options) },
   { "dotall",                      MOD_PATP, MOD_OPT, PCRE2_DOTALL,               PO(options) },
+  { "dotstar_anchor",              MOD_CTC,  MOD_OPTMZ, PCRE2_DOTSTAR_ANCHOR,     0 },
+  { "dotstar_anchor_off",          MOD_CTC,  MOD_OPTMZ, PCRE2_DOTSTAR_ANCHOR_OFF, 0 },
   { "dupnames",                    MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
   { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
   { "escaped_cr_is_lf",            MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ESCAPED_CR_IS_LF, CO(extra_options) },
@@ -744,6 +749,8 @@ static modstruct modlist[] = {
   { "null_subject",                MOD_DAT,  MOD_CTL, CTL2_NULL_SUBJECT,          DO(control2) },
   { "offset",                      MOD_DAT,  MOD_INT, 0,                          DO(offset) },
   { "offset_limit",                MOD_CTM,  MOD_SIZ, 0,                          MO(offset_limit)},
+  { "optimization_full",           MOD_CTC,  MOD_OPTMZ, PCRE2_OPTIMIZATION_FULL,  0 },
+  { "optimization_none",           MOD_CTC,  MOD_OPTMZ, PCRE2_OPTIMIZATION_NONE,  0 },
   { "ovector",                     MOD_DAT,  MOD_INT, 0,                          DO(oveccount) },
   { "parens_nest_limit",           MOD_CTC,  MOD_INT, 0,                          CO(parens_nest_limit) },
   { "partial_hard",                MOD_DAT,  MOD_OPT, PCRE2_PARTIAL_HARD,         DO(options) },
@@ -760,6 +767,8 @@ static modstruct modlist[] = {
   { "regerror_buffsize",           MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
   { "replace",                     MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
   { "stackguard",                  MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
+  { "start_optimize",              MOD_CTC,  MOD_OPTMZ, PCRE2_START_OPTIMIZE,     0 },
+  { "start_optimize_off",          MOD_CTC,  MOD_OPTMZ, PCRE2_START_OPTIMIZE_OFF, 0 },
   { "startchar",                   MOD_PND,  MOD_CTL, CTL_STARTCHAR,              PO(control) },
   { "startoffset",                 MOD_DAT,  MOD_INT, 0,                          DO(offset) },
   { "subject_literal",             MOD_PATP, MOD_CTL, CTL2_SUBJECT_LITERAL,       PO(control2) },
@@ -3884,7 +3893,7 @@ for (;;)
   when needed. */
 
   m = modlist + index;      /* Save typing */
-  if (m->type != MOD_CTL && m->type != MOD_OPT &&
+  if (m->type != MOD_CTL && m->type != MOD_OPT && m->type != MOD_OPTMZ &&
       (m->type != MOD_IND || *pp == '='))
     {
     if (*pp++ != '=')
@@ -3923,6 +3932,21 @@ for (;;)
     case MOD_OPT:
     if (off) *((uint32_t *)field) &= ~m->value;
       else *((uint32_t *)field) |= m->value;
+    break;
+
+    case MOD_OPTMZ:
+#ifdef SUPPORT_PCRE2_8
+    if (test_mode == PCRE8_MODE)
+      pcre2_set_optimize_8((pcre2_compile_context_8*)field, m->value);
+#endif
+#ifdef SUPPORT_PCRE2_16
+    if (test_mode == PCRE16_MODE)
+      pcre2_set_optimize_16((pcre2_compile_context_16*)field, m->value);
+#endif
+#ifdef SUPPORT_PCRE2_32
+    if (test_mode == PCRE32_MODE)
+      pcre2_set_optimize_32((pcre2_compile_context_32*)field, m->value);
+#endif
     break;
 
     case MOD_BSR:
@@ -4361,6 +4385,33 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 }
 
 
+/*************************************************
+*           Show optimization flags              *
+*************************************************/
+
+/*
+Arguments:
+  flags       an options word
+  before      text to print before
+  after       text to print after
+
+Returns:      nothing
+*/
+
+static void
+show_optimize_flags(uint32_t flags, const char *before, const char *after)
+{
+if (flags == 0) fprintf(outfile, "%s<none>%s", before, after);
+else fprintf(outfile, "%s%s%s%s%s%s%s",
+  before,
+  ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0) ? "auto_possess" : "",
+  ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0 && (flags >> 1) != 0) ? "," : "",
+  ((flags & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0) ? "dotstar_anchor" : "",
+  ((flags & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0 && (flags >> 2) != 0) ? "," : "",
+  ((flags & PCRE2_OPTIM_START_OPTIMIZE) != 0) ? "start_optimize" : "",
+  after);
+}
+
 
 #ifdef SUPPORT_PCRE2_8
 /*************************************************
@@ -4777,6 +4828,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (extra_options != 0)
     show_compile_extra_options(extra_options, "Extra options:", "\n");
 
+  if (FLD(compiled_code, optimization_flags) != PCRE2_OPTIMIZATION_ALL)
+    show_optimize_flags(FLD(compiled_code, optimization_flags), "Optimizations: ", "\n");
+
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
   if ((pat_patctl.control2 & CTL2_BSR_SET) != 0 ||
@@ -4879,7 +4933,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       }
     }
 
-  if ((FLD(compiled_code, overall_options) & PCRE2_NO_START_OPTIMIZE) == 0)
+  if ((FLD(compiled_code, optimization_flags) & PCRE2_OPTIM_START_OPTIMIZE) != 0)
     fprintf(outfile, "Subject length lower bound = %d\n", minlength);
 
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)

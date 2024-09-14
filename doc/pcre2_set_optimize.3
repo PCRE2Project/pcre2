@@ -1,0 +1,32 @@
+.TH PCRE2_SET_OPTIMIZE 3 "16 September 2024" "PCRE2 10.45"
+.SH NAME
+PCRE2 - Perl-compatible regular expressions (revised API)
+.SH SYNOPSIS
+.rs
+.sp
+.B #include <pcre2.h>
+.PP
+.nf
+.B int pcre2_set_optimize(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t \fIdirective\fP);"
+.fi
+.
+.SH DESCRIPTION
+.rs
+.sp
+This function controls which performance optimizations will be applied
+by \fBpcre2_compile()\fP. It can be called multiple times with the same compile
+context; the effects are cumulative, with the effects of later calls taking
+precedence over earlier ones.
+.P
+The result is zero for success, PCRE2_ERROR_NULL if \fIccontext\fP is NULL,
+or PCRE2_ERROR_BADOPTION if \fIdirective\fP is unknown. The latter could be
+useful to detect if a certain optimization is available.
+.P
+There is a complete description of the PCRE2 native API, including all
+permitted values for the \fIdirective\fP parameter of \fBpcre2_set_optimize()\fP,
+in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+page.

@@ -834,7 +834,8 @@ enum { PSO_OPT,     /* Value is an option bit */
        PSO_BSR,     /* Value is a \R type */
        PSO_LIMH,    /* Read integer value for heap limit */
        PSO_LIMM,    /* Read integer value for match limit */
-       PSO_LIMD     /* Read integer value for depth limit */
+       PSO_LIMD,    /* Read integer value for depth limit */
+       PSO_OPTMZ    /* Value is an optimization bit */
      };
 
 typedef struct pso {
@@ -852,10 +853,10 @@ static const pso pso_list[] = {
   { STRING_UCP_RIGHTPAR,                4, PSO_OPT, PCRE2_UCP },
   { STRING_NOTEMPTY_RIGHTPAR,           9, PSO_FLG, PCRE2_NOTEMPTY_SET },
   { STRING_NOTEMPTY_ATSTART_RIGHTPAR,  17, PSO_FLG, PCRE2_NE_ATST_SET },
-  { STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPT, PCRE2_NO_AUTO_POSSESS },
-  { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPT, PCRE2_NO_DOTSTAR_ANCHOR },
+  { STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPTMZ, PCRE2_OPTIM_AUTO_POSSESS },
+  { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPTMZ, PCRE2_OPTIM_DOTSTAR_ANCHOR },
   { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
-  { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPT, PCRE2_NO_START_OPTIMIZE },
+  { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPTMZ, PCRE2_OPTIM_START_OPTIMIZE },
   { STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
   { STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
   { STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
@@ -8883,13 +8884,14 @@ Arguments:
   cb             points to the compile data block
   atomcount      atomic group level
   inassert       TRUE if in an assertion
+  dotstar_anchor TRUE if automatic anchoring optimization is enabled
 
 Returns:     TRUE or FALSE
 */
 
 static BOOL
 is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb,
-  int atomcount, BOOL inassert)
+  int atomcount, BOOL inassert, BOOL dotstar_anchor)
 {
 do {
    PCRE2_SPTR scode = first_significant_code(
@@ -8901,7 +8903,7 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert))
+     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
        return FALSE;
      }
 
@@ -8912,14 +8914,14 @@ do {
      {
      int n = GET2(scode, 1+LINK_SIZE);
      uint32_t new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-     if (!is_anchored(scode, new_map, cb, atomcount, inassert)) return FALSE;
+     if (!is_anchored(scode, new_map, cb, atomcount, inassert, dotstar_anchor)) return FALSE;
      }
 
    /* Positive forward assertion */
 
    else if (op == OP_ASSERT || op == OP_ASSERT_NA)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE)) return FALSE;
+     if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor)) return FALSE;
      }
 
    /* Condition. If there is no second branch, it can't be anchored. */
@@ -8927,7 +8929,7 @@ do {
    else if (op == OP_COND || op == OP_SCOND)
      {
      if (scode[GET(scode,1)] != OP_ALT) return FALSE;
-     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert))
+     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
        return FALSE;
      }
 
@@ -8935,7 +8937,7 @@ do {
 
    else if (op == OP_ONCE)
      {
-     if (!is_anchored(scode, bracket_map, cb, atomcount + 1, inassert))
+     if (!is_anchored(scode, bracket_map, cb, atomcount + 1, inassert, dotstar_anchor))
        return FALSE;
      }
 
@@ -8950,8 +8952,7 @@ do {
              op == OP_TYPEPOSSTAR))
      {
      if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip || inassert ||
-         (cb->external_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
+         atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
        return FALSE;
      }
 
@@ -8988,13 +8989,14 @@ Arguments:
   cb             points to the compile data
   atomcount      atomic group level
   inassert       TRUE if in an assertion
+  dotstar_anchor TRUE if automatic anchoring optimization is enabled
 
 Returns:         TRUE or FALSE
 */
 
 static BOOL
 is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
-  int atomcount, BOOL inassert)
+  int atomcount, BOOL inassert, BOOL dotstar_anchor)
 {
 do {
    PCRE2_SPTR scode = first_significant_code(
@@ -9025,7 +9027,8 @@ do {
        return FALSE;
 
        default:     /* Assertion */
-       if (!is_startline(scode, bracket_map, cb, atomcount, TRUE)) return FALSE;
+       if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
+         return FALSE;
        do scode += GET(scode, 1); while (*scode == OP_ALT);
        scode += 1 + LINK_SIZE;
        break;
@@ -9039,7 +9042,7 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_startline(scode, bracket_map, cb, atomcount, inassert))
+     if (!is_startline(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
        return FALSE;
      }
 
@@ -9050,14 +9053,15 @@ do {
      {
      int n = GET2(scode, 1+LINK_SIZE);
      unsigned int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-     if (!is_startline(scode, new_map, cb, atomcount, inassert)) return FALSE;
+     if (!is_startline(scode, new_map, cb, atomcount, inassert, dotstar_anchor))
+       return FALSE;
      }
 
    /* Positive forward assertions */
 
    else if (op == OP_ASSERT || op == OP_ASSERT_NA)
      {
-     if (!is_startline(scode, bracket_map, cb, atomcount, TRUE))
+     if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
        return FALSE;
      }
 
@@ -9065,7 +9069,7 @@ do {
 
    else if (op == OP_ONCE)
      {
-     if (!is_startline(scode, bracket_map, cb, atomcount + 1, inassert))
+     if (!is_startline(scode, bracket_map, cb, atomcount + 1, inassert, dotstar_anchor))
        return FALSE;
      }
 
@@ -9079,8 +9083,7 @@ do {
    else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
      {
      if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip || inassert ||
-         (cb->external_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
+         atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
        return FALSE;
      }
 
@@ -10362,6 +10365,10 @@ int regexrc;                          /* Return from compile */
 
 uint32_t i;                           /* Local loop counter */
 
+/* Enable all optimizations by default. */
+uint32_t optim_flags = ccontext != NULL ? ccontext->optimization_flags :
+                                          PCRE2_OPTIMIZATION_ALL;
+
 /* Comments at the head of this file explain about these variables. */
 
 uint32_t stack_groupinfo[GROUPINFO_DEFAULT_SIZE];
@@ -10431,6 +10438,18 @@ if (patlen > ccontext->max_pattern_length)
   *errorptr = ERR88;
   return NULL;
   }
+
+/* Optimization flags in 'options' can override those in the compile context.
+This is because some options to disable optimizations were added before the
+optimization flags word existed, and we need to continue supporting them
+for backwards compatibility. */
+
+if ((options & PCRE2_NO_AUTO_POSSESS) != 0)
+  optim_flags &= ~PCRE2_OPTIM_AUTO_POSSESS;
+if ((options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)
+  optim_flags &= ~PCRE2_OPTIM_DOTSTAR_ANCHOR;
+if ((options & PCRE2_NO_START_OPTIMIZE) != 0)
+  optim_flags &= ~PCRE2_OPTIM_START_OPTIMIZE;
 
 /* From here on, all returns from this function should end up going via the
 EXIT label. */
@@ -10568,6 +10587,32 @@ if ((options & PCRE2_LITERAL) == 0)
             else limit_depth = c;
           skipatstart = ++pp;
           break;
+
+          case PSO_OPTMZ:
+          optim_flags &= ~(p->value);
+
+          /* For backward compatibility the three original VERBs to disable
+          optimizations need to also update the corresponding external option. */
+
+          switch(p->value)
+            {
+            case PCRE2_OPTIM_AUTO_POSSESS:
+            cb.external_options |= PCRE2_NO_AUTO_POSSESS;
+            break;
+
+            case PCRE2_OPTIM_DOTSTAR_ANCHOR:
+            cb.external_options |= PCRE2_NO_DOTSTAR_ANCHOR;
+            break;
+
+            case PCRE2_OPTIM_START_OPTIMIZE:
+            cb.external_options |= PCRE2_NO_START_OPTIMIZE;
+            break;
+            }
+
+          break;
+
+          default:
+          PCRE2_UNREACHABLE();
           }
         break;   /* Out of the table scan loop */
         }
@@ -10863,6 +10908,7 @@ re->top_bracket = 0;
 re->top_backref = 0;
 re->name_entry_size = cb.name_entry_size;
 re->name_count = cb.names_found;
+re->optimization_flags = optim_flags;
 
 /* The basic block is immediately followed by the name table, and the compiled
 code follows after that. */
@@ -11005,7 +11051,7 @@ used in this code because at least one compiler gives a warning about loss of
 "const" attribute if the cast (PCRE2_UCHAR *)codestart is used directly in the
 function call. */
 
-if (errorcode == 0 && (re->overall_options & PCRE2_NO_AUTO_POSSESS) == 0)
+if (errorcode == 0 && (optim_flags & PCRE2_OPTIM_AUTO_POSSESS) != 0)
   {
   PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
   if (PRIV(auto_possessify)(temp, &cb) != 0) errorcode = ERR80;
@@ -11021,18 +11067,21 @@ or anything else, such as starting with non-atomic .* when DOTALL is set and
 there are no occurrences of *PRUNE or *SKIP (though there is an option to
 disable this case). */
 
-if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
-     is_anchored(codestart, 0, &cb, 0, FALSE))
-  re->overall_options |= PCRE2_ANCHORED;
+if ((re->overall_options & PCRE2_ANCHORED) == 0)
+  {
+  BOOL dotstar_anchor = ((optim_flags & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0);
+  if (is_anchored(codestart, 0, &cb, 0, FALSE, dotstar_anchor))
+    re->overall_options |= PCRE2_ANCHORED;
+  }
 
 /* Set up the first code unit or startline flag, the required code unit, and
-then study the pattern. This code need not be obeyed if PCRE2_NO_START_OPTIMIZE
-is set, as the data it would create will not be used. Note that a first code
+then study the pattern. This code need not be obeyed if PCRE2_OPTIM_START_OPTIMIZE
+is disabled, as the data it would create will not be used. Note that a first code
 unit (but not the startline flag) is useful for anchored patterns because it
 can still give a quick "no match" and also avoid searching for a last code
 unit. */
 
-if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
+if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
   {
   int minminlength = 0;  /* For minimal minlength from first/required CU */
 
@@ -11095,9 +11144,12 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   non-DOTALL matches when *PRUNE and SKIP are not present. (There is an option
   that disables this case.) */
 
-  else if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
-           is_startline(codestart, 0, &cb, 0, FALSE))
-    re->flags |= PCRE2_STARTLINE;
+  else if ((re->overall_options & PCRE2_ANCHORED) == 0)
+    {
+    BOOL dotstar_anchor = ((optim_flags & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0);
+    if (is_startline(codestart, 0, &cb, 0, FALSE, dotstar_anchor))
+      re->flags |= PCRE2_STARTLINE;
+    }
 
   /* Handle the "required code unit", if one is set. In the UTF case we can
   increment the minimum minimum length only if we are sure this really is a

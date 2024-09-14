@@ -142,7 +142,8 @@ Disabling auto-possessification
 </b><br>
 <P>
 If a pattern starts with (*NO_AUTO_POSSESS), it has the same effect as setting
-the PCRE2_NO_AUTO_POSSESS option. This stops PCRE2 from making quantifiers
+the PCRE2_NO_AUTO_POSSESS option, or calling <b>pcre2_set_optimize()</b> with
+a PCRE2_AUTO_POSSESS_OFF directive. This stops PCRE2 from making quantifiers
 possessive when what follows cannot match the repeated item. For example, by
 default a+b is treated as a++b. For more details, see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
@@ -153,8 +154,9 @@ Disabling start-up optimizations
 </b><br>
 <P>
 If a pattern starts with (*NO_START_OPT), it has the same effect as setting the
-PCRE2_NO_START_OPTIMIZE option. This disables several optimizations for quickly
-reaching "no match" results. For more details, see the
+PCRE2_NO_START_OPTIMIZE option, or calling <b>pcre2_set_optimize()</b> with
+a PCRE2_START_OPTIMIZE_OFF directive. This disables several optimizations for
+quickly reaching "no match" results. For more details, see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation.
 </P>
@@ -163,7 +165,8 @@ Disabling automatic anchoring
 </b><br>
 <P>
 If a pattern starts with (*NO_DOTSTAR_ANCHOR), it has the same effect as
-setting the PCRE2_NO_DOTSTAR_ANCHOR option. This disables optimizations that
+setting the PCRE2_NO_DOTSTAR_ANCHOR option, or calling <b>pcre2_set_optimize()</b>
+with a PCRE2_DOTSTAR_ANCHOR_OFF directive. This disables optimizations that
 apply to patterns whose top-level branches all start with .* (match any number
 of arbitrary characters). For more details, see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
@@ -2145,8 +2148,9 @@ one succeeds. Consider this pattern:
   (?&#62;.*?a)b
 </pre>
 It matches "ab" in the subject "aab". The use of the backtracking control verbs
-(*PRUNE) and (*SKIP) also disable this optimization, and there is an option,
-PCRE2_NO_DOTSTAR_ANCHOR, to do so explicitly.
+(*PRUNE) and (*SKIP) also disable this optimization. To do so explicitly,
+either pass the compile option PCRE2_NO_DOTSTAR_ANCHOR, or call
+<b>pcre2_set_optimize()</b> with a PCRE2_DOTSTAR_ANCHOR_OFF directive.
 </P>
 <P>
 When a capture group is repeated, the value captured is the substring that
@@ -2243,8 +2247,9 @@ package, and PCRE1 copied it from there. It found its way into Perl at release
 PCRE2 has an optimization that automatically "possessifies" certain simple
 pattern constructs. For example, the sequence A+B is treated as A++B because
 there is no point in backtracking into a sequence of A's when B must follow.
-This feature can be disabled by the PCRE2_NO_AUTOPOSSESS option, or starting
-the pattern with (*NO_AUTO_POSSESS).
+This feature can be disabled by the PCRE2_NO_AUTO_POSSESS option, by calling
+<b>pcre2_set_optimize()</b> with a PCRE2_AUTO_POSSESS_OFF directive, or by
+starting the pattern with (*NO_AUTO_POSSESS).
 </P>
 <P>
 When a pattern contains an unlimited repeat inside a group that can itself be
@@ -3464,9 +3469,9 @@ minimum length of matching subject, or that a particular character must be
 present. When one of these optimizations bypasses the running of a match, any
 included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE2_NO_START_OPTIMIZE option
-when calling <b>pcre2_compile()</b>, or by starting the pattern with
-(*NO_START_OPT). There is more discussion of this option in the section
-entitled
+when calling <b>pcre2_compile()</b>, by calling <b>pcre2_set_optimize()</b> with a
+PCRE_START_OPTIMIZE_OFF directive, or by starting the pattern with (*NO_START_OPT).
+There is more discussion of this option in the section entitled
 <a href="pcre2api.html#compiling">"Compiling a pattern"</a>
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
@@ -3597,7 +3602,8 @@ attempts starting at "P" and then with an empty string do not get as far as the
 </P>
 <P>
 If you are interested in (*MARK) values after failed matches, you should
-probably set the PCRE2_NO_START_OPTIMIZE option
+probably either set the PCRE2_NO_START_OPTIMIZE option or call
+<b>pcre2_set_optimize()</b> with a PCRE2_START_OPTIMIZE_OFF directive
 <a href="#nooptimize">(see above)</a>
 to ensure that the match is always attempted.
 </P>
