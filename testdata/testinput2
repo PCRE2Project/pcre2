@@ -4612,6 +4612,9 @@ B)x/alt_verbnames,mark
 /a(bc)(DE)/replace=a\u$1\U$1\E$1\l$2\L$2\Eab\Uab\LYZ\EDone,substitute_extended
     abcDE
 
+/(Hello)|wORLD/g,replace=>${1:+\l\U$0:\u\L$0}<,substitute_extended
+    Hello between wORLD
+
 /abcd/replace=xy\kz,substitute_extended
     abcd
 

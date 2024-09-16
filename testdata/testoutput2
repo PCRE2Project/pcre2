@@ -14854,6 +14854,10 @@ No match
     abcDE
  1: aBcBCbcdEdeabAByzDone
 
+/(Hello)|wORLD/g,replace=>${1:+\l\U$0:\u\L$0}<,substitute_extended
+    Hello between wORLD
+ 2: >hELLO< between >World<
+
 /abcd/replace=xy\kz,substitute_extended
     abcd
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
