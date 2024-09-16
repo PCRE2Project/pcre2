@@ -839,6 +839,12 @@ do
         forcecase = -1;
         forcecasereset = 0;
         ptr += 2;
+        if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_U)
+          {
+          /* Perl title-casing feature for \l\U (and \u\L) */
+          forcecasereset = 1;
+          ptr += 2;
+          }
         continue;
 
         case CHAR_U:
@@ -850,6 +856,11 @@ do
         forcecase = 1;
         forcecasereset = 0;
         ptr += 2;
+        if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_L)
+          {
+          forcecasereset = -1;
+          ptr += 2;
+          }
         continue;
 
         default:
