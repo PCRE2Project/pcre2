@@ -130,7 +130,7 @@ for (; ptr < ptrend; ptr++)
 
     ptr += 1;  /* Must point after \ */
     erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode,
-      code->overall_options, code->extra_options, TRUE, NULL);
+      code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
     ptr -= 1;  /* Back to last code unit of escape */
     if (errorcode != 0)
       {
@@ -149,6 +149,8 @@ for (; ptr < ptrend; ptr++)
       break;
 
       default:
+      if (erc < 0)
+          break;  /* capture group reference */
       rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
       }
@@ -240,7 +242,7 @@ BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 #endif
 PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
-PCRE2_SPTR repend;
+PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
@@ -514,6 +516,12 @@ do
     {
     uint32_t ch;
     unsigned int chlen;
+    int group, n;
+    uint32_t special;
+    PCRE2_SPTR text1_start = NULL;
+    PCRE2_SPTR text1_end = NULL;
+    PCRE2_SPTR text2_start = NULL;
+    PCRE2_SPTR text2_end = NULL;
 
     /* If at the end of a nested substring, pop the stack. */
 
@@ -542,21 +550,20 @@ do
 
     if (*ptr == CHAR_DOLLAR_SIGN)
       {
-      int group, n;
-      uint32_t special = 0;
       BOOL inparens;
       BOOL star;
       PCRE2_SIZE sublength;
-      PCRE2_SPTR text1_start = NULL;
-      PCRE2_SPTR text1_end = NULL;
-      PCRE2_SPTR text2_start = NULL;
-      PCRE2_SPTR text2_end = NULL;
       PCRE2_UCHAR next;
       PCRE2_UCHAR name[33];
 
       if (++ptr >= repend) goto BAD;
       if ((next = *ptr) == CHAR_DOLLAR_SIGN) goto LOADLITERAL;
 
+      special = 0;
+      text1_start = NULL;
+      text1_end = NULL;
+      text2_start = NULL;
+      text2_end = NULL;
       group = -1;
       n = 0;
       inparens = FALSE;
@@ -686,6 +693,7 @@ do
         {
         PCRE2_SPTR subptr, subptrend;
 
+        GROUP_SUBSTITUTE:
         /* Find a number for a named group. In case there are duplicate names,
         search for the first one that is set. If the name is not found when
         PCRE2_SUBSTITUTE_UNKNOWN_EMPTY is set, set the group number to a
@@ -858,7 +866,7 @@ do
 
       ptr++;  /* Point after \ */
       rc = PRIV(check_escape)(&ptr, repend, &ch, &errorcode,
-        code->overall_options, code->extra_options, TRUE, NULL);
+        code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
       if (errorcode != 0) goto BADESCAPE;
 
       switch(rc)
@@ -875,6 +883,12 @@ do
         goto LITERAL;
 
         default:
+        if (rc < 0)
+          {
+          special = 0;
+          group = -rc;
+          goto GROUP_SUBSTITUTE;
+          }
         goto BADESCAPE;
         }
       }

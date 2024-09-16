@@ -1576,7 +1576,8 @@ Arguments:
   errorcodeptr   points to the errorcode variable (containing zero)
   options        the current options bits
   xoptions       the current extra options bits
-  isclassorsub   TRUE if in a character class or called from pcre2_substitute()
+  bracount       the number of capturing parentheses encountered so far
+  isclass        TRUE if in a character class
   cb             compile data block or NULL when called from pcre2_substitute()
 
 Returns:         zero => a data character
@@ -1587,8 +1588,8 @@ Returns:         zero => a data character
 
 int
 PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
-  int *errorcodeptr, uint32_t options, uint32_t xoptions, BOOL isclassorsub,
-  compile_block *cb)
+  int *errorcodeptr, uint32_t options, uint32_t xoptions, uint32_t bracount,
+  BOOL isclass, compile_block *cb)
 {
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL alt_bsux =
@@ -1817,7 +1818,7 @@ else
     */
 
     case CHAR_g:
-    if (isclassorsub) break;
+    if (isclass) break;
 
     if (ptr >= ptrend)
       {
@@ -1839,7 +1840,7 @@ else
       PCRE2_SPTR p = ptr + 1;
 
       while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
-      if (!read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &s,
+      if (!read_number(&p, ptrend, bracount, MAX_GROUP_NUMBER, ERR61, &s,
           errorcodeptr))
         {
         if (*errorcodeptr == 0) escape = ESC_k;  /* No number found */
@@ -1859,7 +1860,7 @@ else
 
     else
       {
-      if (!read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &s,
+      if (!read_number(&ptr, ptrend, bracount, MAX_GROUP_NUMBER, ERR61, &s,
           errorcodeptr))
         {
         if (*errorcodeptr == 0) *errorcodeptr = ERR57;  /* No number found */
@@ -1893,7 +1894,7 @@ else
     case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4: case CHAR_5:
     case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
 
-    if (!isclassorsub)
+    if (!isclass)
       {
       oldptr = ptr;
       ptr--;   /* Back to the digit */
@@ -1907,7 +1908,7 @@ else
       are octal escapes if there are not that many previous captures. */
 
       if (read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, 0, &s, errorcodeptr) &&
-          (s < 10 || oldptr[-1] >= CHAR_8 || s <= (int)cb->bracount))
+          (s < 10 || oldptr[-1] >= CHAR_8 || (unsigned)s <= bracount))
         {
         if (s > (int)MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
           else escape = -s;     /* Indicates a back reference */
@@ -3076,7 +3077,7 @@ while (ptr < ptrend)
       if ((options & PCRE2_ALT_VERBNAMES) != 0)
         {
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-          xoptions, FALSE, cb);
+          xoptions, cb->bracount, FALSE, cb);
         if (errorcode != 0) goto FAILED;
         }
       else escape = 0;   /* Treat all as literal */
@@ -3276,7 +3277,7 @@ while (ptr < ptrend)
     case CHAR_BACKSLASH:
     tempptr = ptr;
     escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-      xoptions, FALSE, cb);
+      xoptions, cb->bracount, FALSE, cb);
     if (errorcode != 0)
       {
       ESCAPE_FAILED:
@@ -3844,7 +3845,7 @@ while (ptr < ptrend)
         {
         tempptr = ptr;
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-          xoptions, TRUE, cb);
+          xoptions, cb->bracount, TRUE, cb);
 
         if (errorcode != 0)
           {
