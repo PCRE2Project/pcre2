@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "04 August 2024" "PCRE2 10.45"
+.TH PCRE2API 3 "16 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3757,6 +3757,11 @@ terminating a \eQ quoted sequence) reverts to no case forcing. The sequences
 case, respectively, and then the state automatically reverts to no case
 forcing.
 .P
+However, if \eu is immediately followed by \eL or \el is immediately followed
+by \eU, the next character's case is forced by the first escape sequence, and
+subsequent characters by the second. This provides a "title casing" facility.
+For example, the string "\eu\eLheLLo" becomes "Hello".
+.P
 Case forcing applies to all inserted characters, including those from capture
 groups and letters within \eQ...\eE quoted sequences. If either PCRE2_UTF or
 PCRE2_UCP was set when the pattern was compiled, Unicode properties are used
@@ -4196,6 +4201,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 August 2024
+Last updated: 16 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

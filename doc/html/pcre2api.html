@@ -3761,6 +3761,12 @@ case, respectively, and then the state automatically reverts to no case
 forcing.
 </P>
 <P>
+However, if \u is immediately followed by \L or \l is immediately followed
+by \U, the next character's case is forced by the first escape sequence, and
+subsequent characters by the second. This provides a "title casing" facility.
+For example, the string "\u\LheLLo" becomes "Hello".
+</P>
+<P>
 Case forcing applies to all inserted characters, including those from capture
 groups and letters within \Q...\E quoted sequences. If either PCRE2_UTF or
 PCRE2_UCP was set when the pattern was compiled, Unicode properties are used
@@ -4193,7 +4199,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 August 2024
+Last updated: 16 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

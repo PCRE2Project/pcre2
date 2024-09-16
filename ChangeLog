@@ -86,6 +86,9 @@ which was still misbehaving when matching fragments inside invalid UTF strings.
 substitution strings, and if encountered gave an error, though the \o{...} form
 was recognized. This bug is now fixed.
 
+16. Merged PR475, which implements title casing in substitution strings a la 
+Perl.
+
 
 Version 10.44 07-June-2024
 --------------------------
