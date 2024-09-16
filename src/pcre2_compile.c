@@ -1349,7 +1349,10 @@ Arguments:
   ptrptr      points to the character pointer variable
   ptrend      points to the end of the input string
   allow_sign  if < 0, sign not allowed; if >= 0, sign is relative to this
-  max_value   the largest number allowed
+  max_value   the largest number allowed;
+              you must not pass a value for max_value larger than
+              INT_MAX/10 - 1 because read_number() relies on max_value to
+              avoid integer overflow
   max_error   the error to give for an over-large number
   intptr      where to put the result
   errcodeptr  where to put an error code
@@ -1901,17 +1904,19 @@ else
 
       /* As we know we are at a digit, the only possible error from
       read_number() is a number that is too large to be a group number. In this
-      case we fall through handle this as not a group reference. If we have
-      read a small enough number, check for a back reference.
+      case we treat the group number as too-large (since it may be larger than
+      INT_MAX we cannot return it for the caller to check).
 
       \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
       are octal escapes if there are not that many previous captures. */
 
-      if (read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, 0, &s, errorcodeptr) &&
-          (s < 10 || oldptr[-1] >= CHAR_8 || (unsigned)s <= bracount))
+      if (!read_number(&ptr, ptrend, -1, MAX_GROUP_NUMBER, 0, &s, errorcodeptr))
+        s = INT_MAX;
+
+      if (s < 10 || oldptr[-1] >= CHAR_8 || (unsigned)s <= bracount)
         {
         if (s > (int)MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
-          else escape = -s;     /* Indicates a back reference */
+        else escape = -s;     /* Indicates a back reference */
         break;
         }
 
