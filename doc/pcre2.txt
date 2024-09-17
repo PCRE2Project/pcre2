@@ -3613,35 +3613,40 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        When PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
 
        Firstly, backslash in a replacement string is interpreted as an  escape
-       character. The usual forms such as \n or \x{ddd} can be used to specify
-       particular  character codes, and backslash followed by any non-alphanu-
-       meric character quotes that character. Extended quoting  can  be  coded
-       using \Q...\E, exactly as in pattern strings.
+       character.  The usual forms such as \x{ddd} can be used to specify par-
+       ticular character codes, and backslash followed by any non-alphanumeric
+       character quotes that character. Extended quoting can  be  coded  using
+       \Q...\E, exactly as in pattern strings.
+
+       The  interpretation  of backslash followed by one or more digits is the
+       same as in a pattern, which in Perl has some ambiguities.  Details  are
+       given in the pcre2pattern page.
 
        There  are  also four escape sequences for forcing the case of inserted
-       letters.  The insertion mechanism has three states:  no  case  forcing,
-       force upper case, and force lower case. The escape sequences change the
-       current state: \U and \L change to upper or lower case forcing, respec-
-       tively,  and  \E (when not terminating a \Q quoted sequence) reverts to
-       no case forcing. The sequences \u and \l force the next  character  (if
-       it  is  a  letter)  to  upper or lower case, respectively, and then the
-       state automatically reverts to no case forcing.
+       letters.  Case forcing applies to all  inserted  characters,  including
+       those  from capture groups and letters within \Q...\E quoted sequences.
+       The insertion mechanism has three states: no case forcing, force  upper
+       case,  and  force  lower  case. The escape sequences change the current
+       state: \U and \L change to upper or lower case  forcing,  respectively,
+       and  \E  (when not terminating a \Q quoted sequence) reverts to no case
+       forcing. The sequences \u and \l force the next character (if it  is  a
+       letter)  to upper or lower case, respectively, and then the state auto-
+       matically reverts to no case forcing.
 
        However, if \u is immediately followed by \L or \l is immediately  fol-
        lowed  by  \U,  the next character's case is forced by the first escape
        sequence, and subsequent characters by the second. This provides a "ti-
-       tle casing" facility.  For  example,  the  string  "\u\LheLLo"  becomes
-       "Hello".
+       tle casing" facility that can be applied to group captures.  For  exam-
+       ple,  if  group 1 has captured "heLLo", the replacement string "\u\L$1"
+       becomes "Hello".
 
-       Case  forcing  applies to all inserted characters, including those from
-       capture groups and letters within \Q...\E quoted sequences.  If  either
-       PCRE2_UTF  or  PCRE2_UCP was set when the pattern was compiled, Unicode
-       properties are used for case forcing characters whose code  points  are
-       greater  than  127.  However, only basic case folding, as determined by
-       the Unicode file CaseFolding.txt is supported. PCRE2 does  not  support
-       language-specific  special  casing  rules such as using different lower
-       case Greek sigmas in the middle and ends of words (as  defined  in  the
-       Unicode file SpecialCasing.txt).
+       If either PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled,
+       Unicode properties are used for  case  forcing  characters  whose  code
+       points  are  greater than 127. However, only basic case folding, as de-
+       termined by the Unicode file CaseFolding.txt is supported.  PCRE2  does
+       not  support  language-specific special casing rules such as using dif-
+       ferent lower case Greek sigmas in the middle and ends of words (as  de-
+       fined in the Unicode file SpecialCasing.txt).
 
        Note that case forcing sequences such as \U...\E do not nest. For exam-
        ple,  the  result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc"; the final
@@ -4030,11 +4035,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 September 2024
+       Last updated: 17 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    16 September 2024                   PCRE2API(3)
+PCRE2 10.45                    17 September 2024                   PCRE2API(3)
 ------------------------------------------------------------------------------
  
  
@@ -6862,11 +6867,15 @@ BACKSLASH
          \x{hhh..}   character with hex code hhh..
          \N{U+hhh..} character with Unicode hex code point hhh..
 
-       By default, after \x that is not followed by {, from zero to two  hexa-
-       decimal  digits  are  read (letters can be in upper or lower case). Any
-       number of hexadecimal digits may appear between \x{ and }. If a charac-
-       ter other than a hexadecimal digit appears between \x{  and  },  or  if
-       there is no terminating }, an error occurs.
+       By default, after \x that is not followed by {, one or two  hexadecimal
+       digits are read (letters can be in upper or lower case). If the charac-
+       ter  that follows \x is neither { nor a hexadecimal digit, an error oc-
+       curs. This is different from Perl's default behaviour, which  generates
+       a NUL character, but is in line with Perl's "strict" behaviour.
+
+       Any  number  of  hexadecimal  digits may appear between \x{ and }. If a
+       character other than a hexadecimal digit appears between \x{ and },  or
+       if there is no terminating }, an error occurs.
 
        Characters whose code points are less than 256 can be defined by either
        of the two syntaxes for \x or by an octal sequence. There is no differ-
@@ -10146,11 +10155,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 September 2024
+       Last updated: 17 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    04 Sepbember 2024               PCRE2PATTERN(3)
+PCRE2 10.45                    17 Sepbember 2024               PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
  
  
@@ -11113,12 +11122,12 @@ ESCAPED CHARACTERS
          \uhhhh     character with hex code hhhh
          \u{hh..}   character with hex code hh.. but only for EXTRA_ALT_BSUX
 
-       When  \x  is not followed by {, from zero to two hexadecimal digits are
-       read, but in ALT_BSUX mode \x must be followed by two hexadecimal  dig-
-       its  to  be  recognized as a hexadecimal escape; otherwise it matches a
-       literal "x".  Likewise, if \u (in ALT_BSUX mode)  is  not  followed  by
-       four  hexadecimal  digits or (in EXTRA_ALT_BSUX mode) a sequence of hex
-       digits in curly brackets, it matches a literal "u".
+       When  \x  is not followed by {, one or two hexadecimal digits are read,
+       but in ALT_BSUX mode \x must be followed by two hexadecimal  digits  to
+       be  recognized  as a hexadecimal escape; otherwise it matches a literal
+       "x".  Likewise, if \u (in ALT_BSUX mode) is not followed by four  hexa-
+       decimal  digits or (in EXTRA_ALT_BSUX mode) a sequence of hex digits in
+       curly brackets, it matches a literal "u".
 
        Note that \0dd is always an octal code. The treatment of backslash fol-
        lowed by a non-zero digit is complicated; for details see  the  section
@@ -11651,11 +11660,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 September 2024
+       Last updated: 17 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    04 September 2024                PCRE2SYNTAX(3)
+PCRE2 10.45                    17 September 2024                PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
  
  

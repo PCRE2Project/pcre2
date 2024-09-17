@@ -91,6 +91,8 @@ Perl.
 
 17. Merged PR478, which disallows \x if not followed by { or a hex digit.
 
+18. Merged PR473, which implements Python-style backrefs in substitutions.
+
 
 Version 10.44 07-June-2024
 --------------------------

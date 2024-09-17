@@ -3745,33 +3745,39 @@ PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
 </P>
 <P>
 Firstly, backslash in a replacement string is interpreted as an escape
-character. The usual forms such as \n or \x{ddd} can be used to specify
-particular character codes, and backslash followed by any non-alphanumeric
-character quotes that character. Extended quoting can be coded using \Q...\E,
-exactly as in pattern strings.
+character. The usual forms such as \x{ddd} can be used to specify particular
+character codes, and backslash followed by any non-alphanumeric character
+quotes that character. Extended quoting can be coded using \Q...\E, exactly
+as in pattern strings.
+</P>
+<P>
+The interpretation of backslash followed by one or more digits is the same as
+in a pattern, which in Perl has some ambiguities. Details are given in the
+<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
+page.
 </P>
 <P>
 There are also four escape sequences for forcing the case of inserted letters.
-The insertion mechanism has three states: no case forcing, force upper case,
-and force lower case. The escape sequences change the current state: \U and
-\L change to upper or lower case forcing, respectively, and \E (when not
-terminating a \Q quoted sequence) reverts to no case forcing. The sequences
-\u and \l force the next character (if it is a letter) to upper or lower
-case, respectively, and then the state automatically reverts to no case
-forcing.
+Case forcing applies to all inserted characters, including those from capture
+groups and letters within \Q...\E quoted sequences. The insertion mechanism
+has three states: no case forcing, force upper case, and force lower case. The
+escape sequences change the current state: \U and \L change to upper or lower
+case forcing, respectively, and \E (when not terminating a \Q quoted
+sequence) reverts to no case forcing. The sequences \u and \l force the next
+character (if it is a letter) to upper or lower case, respectively, and then
+the state automatically reverts to no case forcing.
 </P>
 <P>
 However, if \u is immediately followed by \L or \l is immediately followed
 by \U, the next character's case is forced by the first escape sequence, and
-subsequent characters by the second. This provides a "title casing" facility.
-For example, the string "\u\LheLLo" becomes "Hello".
+subsequent characters by the second. This provides a "title casing" facility
+that can be applied to group captures. For example, if group 1 has captured
+"heLLo", the replacement string "\u\L$1" becomes "Hello".
 </P>
 <P>
-Case forcing applies to all inserted characters, including those from capture
-groups and letters within \Q...\E quoted sequences. If either PCRE2_UTF or
-PCRE2_UCP was set when the pattern was compiled, Unicode properties are used
-for case forcing characters whose code points are greater than 127. However,
-only basic case folding, as determined by the Unicode file
+If either PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode
+properties are used for case forcing characters whose code points are greater
+than 127. However, only basic case folding, as determined by the Unicode file
 <b>CaseFolding.txt</b> is supported. PCRE2 does not support language-specific
 special casing rules such as using different lower case Greek sigmas in the
 middle and ends of words (as defined in the Unicode file
@@ -4199,7 +4205,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 September 2024
+Last updated: 17 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

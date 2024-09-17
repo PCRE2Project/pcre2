@@ -439,11 +439,16 @@ environment, these escapes are as follows:
   \x{hhh..}   character with hex code hhh..
   \N{U+hhh..} character with Unicode hex code point hhh..
 </pre>
-By default, after \x that is not followed by {, from zero to two hexadecimal
-digits are read (letters can be in upper or lower case). Any number of
-hexadecimal digits may appear between \x{ and }. If a character other than a
-hexadecimal digit appears between \x{ and }, or if there is no terminating },
-an error occurs.
+By default, after \x that is not followed by {, one or two hexadecimal
+digits are read (letters can be in upper or lower case). If the character that 
+follows \x is neither { nor a hexadecimal digit, an error occurs. This is 
+different from Perl's default behaviour, which generates a NUL character, but 
+is in line with Perl's "strict" behaviour. 
+</P>
+<P>
+Any number of hexadecimal digits may appear between \x{ and }. If a character
+other than a hexadecimal digit appears between \x{ and }, or if there is no
+terminating }, an error occurs.
 </P>
 <P>
 Characters whose code points are less than 256 can be defined by either of the
@@ -3944,7 +3949,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC33" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 September 2024
+Last updated: 17 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>
