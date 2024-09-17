@@ -75,6 +75,12 @@
 
 # ---------------------------------------------------------------------
 
+# Use no_start_optimize because the first code unit is different in 8-bit from
+# the wider modes.
+/\65535/IB,utf,no_start_optimize
+
+/\65536/IB,utf,no_start_optimize
+
 /\x{110000}/IB,utf
 
 /\o{4200000}/IB,utf
