@@ -3983,6 +3983,10 @@
 
 /\xthing/
 
+/^A\xZ/
+
+/^A\x/
+
 /\x{}/
 
 /\x{whatever}/

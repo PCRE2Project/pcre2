@@ -2093,10 +2093,29 @@ else
 
       else
         {
-        c = 0;
-        if (ptr >= ptrend || (cc = XDIGIT(*ptr)) == 0xff) break;  /* Not a hex digit */
+        /* Perl has the surprising/broken behaviour that \x without following
+        hex digits is treated as an escape for NUL. Their source code laments
+        this but keeps it for backwards compatibility. A warning is printed
+        when "use warnings" is enabled, and it's forbidden when "use strict"
+        is enabled. Because we don't have warnings, we simply forbid it. */
+        if (ptr >= ptrend || (cc = XDIGIT(*ptr)) == 0xff)
+          {
+          /* Not a hex digit */
+          *errorcodeptr = ERR78;
+          break;
+          }
         ptr++;
         c = cc;
+
+        /* With "use re 'strict'" Perl actually requires exactly two digits (error
+        for both \xA and \xAAA). This seems overly strict, and there seems
+        little incentive to align with that, given the backwards-compatibility
+        cost.
+
+        For comparison, note that other engines disagree. For example:
+          - Java allows 1 or 2 hex digits. Error if 0 digits. No error if >2 digits
+          - .NET requires 2 hex digits. Error if 0, 1 digits. No error if >2 digits.
+        */
         if (ptr >= ptrend || (cc = XDIGIT(*ptr)) == 0xff) break;  /* Not a hex digit */
         ptr++;
         c = (c << 4) | cc;

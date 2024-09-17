@@ -5610,9 +5610,15 @@ name)/mark
 /^ (?:(?<A>A)|(?'B'B)(?<A>A)) (?('A')x) (?(<B>)y)$/x,dupnames
     Ax
     BAxy 
-    
-/^A\xZ/
-    A\0Z 
+
+/^A\xBz/
+    A\x{0B}z
+
+/^A\xABz/
+    A\x{AB}z
+
+/^A\xABCz/
+    A\x{AB}Cz
 
 /^A\o{123}B/
     A\123B
