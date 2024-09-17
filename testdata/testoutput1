@@ -8919,10 +8919,18 @@ No match
  1: <unset>
  2: B
  3: A
-    
-/^A\xZ/
-    A\0Z 
- 0: A\x00Z
+
+/^A\xBz/
+    A\x{0B}z
+ 0: A\x0bz
+
+/^A\xABz/
+    A\x{AB}z
+ 0: A\xabz
+
+/^A\xABCz/
+    A\x{AB}Cz
+ 0: A\xabCz
 
 /^A\o{123}B/
     A\123B

@@ -4702,7 +4702,7 @@ Callout 0: last capture = 1
 Failed: error 193 at offset 2: \N{U+dddd} is supported only in Unicode (UTF) mode
 
 /\N{U+}/utf
-Failed: error 178 at offset 5: digits missing in \x{} or \o{} or \N{U+}
+Failed: error 178 at offset 5: digits missing after \x or in \x{} or \o{} or \N{U+}
 
 /\N{U}/
 Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
