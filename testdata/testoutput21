@@ -91,4 +91,22 @@ Subject length lower bound = 5
     abZdeX
  0: X
 
+# Pattern Rewrite
+
+/\Ca|\Cb/B
+------------------------------------------------------------------
+        Bra
+        AllAny
+        [ab]
+        Ket
+        End
+------------------------------------------------------------------
+     \xffa
+ 0: \xffa
+     \xffb
+ 0: \xffb
+\= Expect no match
+     \xff\xfe
+No match
+
 # End of testinput21

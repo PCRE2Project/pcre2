@@ -756,6 +756,8 @@ EXTRA_DIST += \
   testdata/testinput24 \
   testdata/testinput25 \
   testdata/testinput26 \
+  testdata/testinput27 \
+  testdata/testinput28 \
   testdata/testinputEBC \
   testdata/testinputheap \
   testdata/testoutput1 \
@@ -800,6 +802,8 @@ EXTRA_DIST += \
   testdata/testoutput24 \
   testdata/testoutput25 \
   testdata/testoutput26 \
+  testdata/testoutput27 \
+  testdata/testoutput28 \
   testdata/testoutputEBC \
   testdata/testoutputheap-16 \
   testdata/testoutputheap-32 \

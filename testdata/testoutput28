@@ -1,0 +1,164 @@
+# Tests for the pattern rewriter which precedes regex compilation (with UTF)
+
+#pattern utf
+
+# Unicode property property escape sequences can be pulled out
+/\p{Greek}a|\p{Greek}b/B
+------------------------------------------------------------------
+        Bra
+        prop Greek
+        [ab]
+        Ket
+        End
+------------------------------------------------------------------
+
+# Handling of script runs:
+# Script runs can be pulled out
+# ⇒ (*sr:..)[ab]
+/(*sr:..)a|(*sr:..)b/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        Any
+        Any
+        Ket
+        [ab]
+        Ket
+        End
+------------------------------------------------------------------
+
+# Common prefix can be pulled out from alternation in a script run:
+# ⇒ (*sr:ab[cd])
+/(*sr:abc|abd)/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        ab
+        [cd]
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+# Script runs themselves can also be part of a common prefix
+# ⇒ (*sr:abc)[cd]
+/(*sr:abc)c|(*sr:abc)d/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        abc
+        Ket
+        [cd]
+        Ket
+        End
+------------------------------------------------------------------
+
+# But if there are backtracking control verbs like (*COMMIT) in a script run
+# it won't be pulled out
+/(*sr:ab(*COMMIT))c|(*sr:ab(*COMMIT))d/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        ab
+        *COMMIT
+        Ket
+        c
+        Alt
+        Script run
+        ab
+        *COMMIT
+        Ket
+        d
+        Ket
+        End
+------------------------------------------------------------------
+
+# Same deal if there is a callout inside a script run
+/(*sr:ab(?C1))c|(*sr:ab(?C1))d/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        ab
+        Callout 1 12 1
+        Ket
+        c
+        Alt
+        Script run
+        ab
+        Callout 1 27 1
+        Ket
+        d
+        Ket
+        End
+------------------------------------------------------------------
+
+# All the above applies to ATOMIC script runs
+/(*asr:abc|abd)/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        Once
+        ab
+        [cd]
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(*asr:abc)c|(*asr:abc)d/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        Once
+        abc
+        Ket
+        Ket
+        [cd]
+        Ket
+        End
+------------------------------------------------------------------
+
+/(*asr:ab(*COMMIT))c|(*asr:ab(*COMMIT))d/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        Once
+        ab
+        *COMMIT
+        Ket
+        Ket
+        c
+        Alt
+        Script run
+        Once
+        ab
+        *COMMIT
+        Ket
+        Ket
+        d
+        Ket
+        End
+------------------------------------------------------------------
+
+/(*asr:ab(?C1))c|(*asr:ab(?C1))d/B
+------------------------------------------------------------------
+        Bra
+        Script run
+        Once
+        ab
+        Callout 1 13 1
+        Ket
+        Ket
+        c
+        Alt
+        Script run
+        Once
+        ab
+        Callout 1 29 1
+        Ket
+        Ket
+        d
+        Ket
+        End
+------------------------------------------------------------------

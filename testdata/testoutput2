@@ -1128,13 +1128,11 @@ Subject length lower bound = 1
 /(?s:.*X|^B)/IB
 ------------------------------------------------------------------
         Bra
-        Bra
         AllAny*
         X
         Alt
         ^
         B
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -1371,6 +1369,7 @@ Subject length lower bound = 2
 /(abc|ab[cd])/I
 Capture group count = 1
 First code unit = 'a'
+Last code unit = 'b'
 Subject length lower bound = 3
 
 /(a|.)/I
@@ -4110,9 +4109,7 @@ Subject length lower bound = 2
         Bra
         a
         CBra 1
-        b
-        Alt
-        c
+        [bc]
         Ket
         d
         CBra 2
@@ -4660,9 +4657,7 @@ Subject length lower bound = 1
         Bra
         Brazero
         CBra 1
-        a
-        Alt
-        b
+        [ab]
         KetRmax
         Any?
         c
@@ -7922,14 +7917,12 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
 /(?|(abc)|(xyz))/B
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         abc
         Ket
         Alt
         CBra 1
         xyz
-        Ket
         Ket
         Ket
         End
@@ -15073,14 +15066,12 @@ Subject length lower bound = 65535
 /(?|()+|(a)+)/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         SCBra 1
         KetRmax
         Alt
         CBra 1
         a
         KetRmax
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -15091,14 +15082,12 @@ Subject length lower bound = 0
 /(?|(a)+|()+)/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         a
         KetRmax
         Alt
         SCBra 1
         KetRmax
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -15109,13 +15098,11 @@ Subject length lower bound = 0
 /(?|()|(a))/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         Ket
         Alt
         CBra 1
         a
-        Ket
         Ket
         Ket
         End
@@ -15127,13 +15114,11 @@ Subject length lower bound = 0
 /(?|(a)|())/BI
 ------------------------------------------------------------------
         Bra
-        Bra
         CBra 1
         a
         Ket
         Alt
         CBra 1
-        Ket
         Ket
         Ket
         End
@@ -17286,7 +17271,8 @@ Subject length lower bound = 1
 Capture group count = 0
 May match empty string
 First code unit = 'a'
-Subject length lower bound = 1
+Last code unit = 'b'
+Subject length lower bound = 2
 
 /(*napla:a|(.)(*ACCEPT)zz)\1../
     abcd
@@ -17530,7 +17516,7 @@ Subject length lower bound = 5
 
 /(?:c|C)abcd/I
 Capture group count = 0
-First code unit = 'C' (caseless)
+First code unit = 'c' (caseless)
 Last code unit = 'd'
 Subject length lower bound = 5
 

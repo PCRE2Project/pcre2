@@ -282,7 +282,11 @@
 
 /[axm]{7}/
 
-/(.|.)*?bx/
+/(.|.)*?bx/no_pattern_rewrite
+\= Expect limit exceeded
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax\=match_limit=10000000
+
+/(a|.)*?bx/
 \= Expect limit exceeded
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax\=match_limit=10000000
     

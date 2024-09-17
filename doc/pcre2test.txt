@@ -604,6 +604,7 @@ PATTERN MODIFIERS
          /n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
              no_auto_possess           set PCRE2_NO_AUTO_POSSESS
              no_dotstar_anchor         set PCRE2_NO_DOTSTAR_ANCHOR
+             no_pattern_rewrite        set PCRE2_NO_PATTERN_REWRITE
              no_start_optimize         set PCRE2_NO_START_OPTIMIZE
              no_utf_check              set PCRE2_NO_UTF_CHECK
              ucp                       set PCRE2_UCP

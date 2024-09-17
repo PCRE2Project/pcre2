@@ -48,6 +48,7 @@ below that output them. */
    PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
    PCRE2_NO_AUTO_CAPTURE| \
    PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
+   PCRE2_NO_PATTERN_REWRITE| \
    PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_USE_OFFSET_LIMIT| \
    PCRE2_UTF)
 
@@ -67,7 +68,7 @@ fprintf(stream, "Compile options %s%.8x =",
   (compile_options == PCRE2_NEVER_BACKSLASH_C)? "(base) " : "",
   compile_options);
 
-fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
   ((compile_options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
   ((compile_options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "",
@@ -90,6 +91,7 @@ fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
   ((compile_options & PCRE2_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
   ((compile_options & PCRE2_NO_AUTO_POSSESS) != 0)? " no_auto_possess" : "",
   ((compile_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)? " no_dotstar_anchor" : "",
+  ((compile_options & PCRE2_NO_PATTERN_REWRITE) != 0)? " no_pattern_rewrite" : "",
   ((compile_options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
   ((compile_options & PCRE2_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
   ((compile_options & PCRE2_UCP) != 0)? " ucp" : "",
