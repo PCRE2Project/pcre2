@@ -14959,7 +14959,19 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 
 /abc/substitute_extended,replace=>\845<
     abc
- 1: >845<
+Failed: error -49 at offset 5 in replacement: unknown substring
+
+/a(b)(c)/substitute_extended,replace=>\1<
+    abc
+ 1: >b<
+
+/a(b)(c)/substitute_extended,replace=>\2<
+    abc
+ 1: >c<
+
+/a(b)(c)/substitute_extended,replace=>\3<
+    abc
+Failed: error -49 at offset 3 in replacement: unknown substring
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 Capture group count = 2

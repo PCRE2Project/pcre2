@@ -4687,6 +4687,15 @@ B)x/alt_verbnames,mark
 /abc/substitute_extended,replace=>\845<
     abc
 
+/a(b)(c)/substitute_extended,replace=>\1<
+    abc
+
+/a(b)(c)/substitute_extended,replace=>\2<
+    abc
+
+/a(b)(c)/substitute_extended,replace=>\3<
+    abc
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
 /((p(?'K/
