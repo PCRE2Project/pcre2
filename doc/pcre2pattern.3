@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "04 Sepbember 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "17 Sepbember 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -415,11 +415,15 @@ environment, these escapes are as follows:
   \ex{hhh..}   character with hex code hhh..
   \eN{U+hhh..} character with Unicode hex code point hhh..
 .sp
-By default, after \ex that is not followed by {, from zero to two hexadecimal
-digits are read (letters can be in upper or lower case). Any number of
-hexadecimal digits may appear between \ex{ and }. If a character other than a
-hexadecimal digit appears between \ex{ and }, or if there is no terminating },
-an error occurs.
+By default, after \ex that is not followed by {, one or two hexadecimal
+digits are read (letters can be in upper or lower case). If the character that 
+follows \ex is neither { nor a hexadecimal digit, an error occurs. This is 
+different from Perl's default behaviour, which generates a NUL character, but 
+is in line with Perl's "strict" behaviour. 
+.P
+Any number of hexadecimal digits may appear between \ex{ and }. If a character
+other than a hexadecimal digit appears between \ex{ and }, or if there is no
+terminating }, an error occurs.
 .P
 Characters whose code points are less than 256 can be defined by either of the
 two syntaxes for \ex or by an octal sequence. There is no difference in the way
@@ -3991,6 +3995,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 September 2024
+Last updated: 17 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

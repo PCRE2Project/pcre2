@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "04 September 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "17 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -66,7 +66,7 @@ following are also recognized:
   \euhhhh     character with hex code hhhh
   \eu{hh..}   character with hex code hh.. but only for EXTRA_ALT_BSUX
 .sp
-When \ex is not followed by {, from zero to two hexadecimal digits are read,
+When \ex is not followed by {, one or two hexadecimal digits are read,
 but in ALT_BSUX mode \ex must be followed by two hexadecimal digits to be
 recognized as a hexadecimal escape; otherwise it matches a literal "x".
 Likewise, if \eu (in ALT_BSUX mode) is not followed by four hexadecimal digits
@@ -639,6 +639,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 September 2024
+Last updated: 17 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

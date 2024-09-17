@@ -89,6 +89,8 @@ was recognized. This bug is now fixed.
 16. Merged PR475, which implements title casing in substitution strings a la 
 Perl.
 
+17. Merged PR478, which disallows \x if not followed by { or a hex digit.
+
 
 Version 10.44 07-June-2024
 --------------------------
