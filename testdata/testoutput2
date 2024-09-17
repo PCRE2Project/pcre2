@@ -19558,6 +19558,175 @@ Failed: error -49 at offset 2 in replacement: unknown substring
     abc\=replace=\12
 Failed: error -49 at offset 3 in replacement: unknown substring
 
+# --------------
+
+# "Vanilla" syntax option
+
+# -- start of pattern
+
+/(*NOTEMPTY)a/
+    a
+ 0: a
+
+/(*NtOMeTpY)a/
+Failed: error 160 at offset 10: (*VERB) not recognized or malformed
+
+/(*NOTEMPTY)a/vanilla_syntax
+Failed: error 160 at offset 10: (*VERB) not recognized or malformed
+
+# -- inline pattern options
+
+/Z(?a)Z(?a:Z)Z(?^a)Z(?x-a)Z(?r)Z/
+    ZZZZZZZ
+ 0: ZZZZZZZ
+
+/Z(?F)Z/
+Failed: error 111 at offset 3: unrecognized character after (? or (?-
+
+/Z(?a)Z/vanilla_syntax
+Failed: error 111 at offset 3: unrecognized character after (? or (?-
+
+/Z(?a:Z)Z/vanilla_syntax
+Failed: error 111 at offset 3: unrecognized character after (? or (?-
+
+/Z(?^a)Z/vanilla_syntax
+Failed: error 111 at offset 4: unrecognized character after (? or (?-
+
+/Z(?x-a)Z/vanilla_syntax
+Failed: error 111 at offset 5: unrecognized character after (? or (?-
+
+/Z(?r)Z/vanilla_syntax
+Failed: error 111 at offset 3: unrecognized character after (? or (?-
+
+/Z(?i:z)Z/vanilla_syntax
+    ZZZ
+ 0: ZZZ
+
+# -- version detection
+
+/(?(VERSION>=10.4)yes|no)/
+    yes
+ 0: yes
+
+/(?(vReSoIn>=10.4)yes|no)/
+Failed: error 142 at offset 10: syntax error in subpattern name (missing terminator?)
+
+/(?(VERSION>=10.4)yes|no)/vanilla_syntax
+Failed: error 142 at offset 10: syntax error in subpattern name (missing terminator?)
+
+# -- callouts
+
+/A(?C0)B/
+    AB
+--->AB
+  0 ^^     B
+ 0: AB
+
+/A(?F0)B/
+Failed: error 111 at offset 3: unrecognized character after (? or (?-
+
+/A(?C0)B/vanilla_syntax
+Failed: error 111 at offset 3: unrecognized character after (? or (?-
+
+# -- scan_substring
+
+/\b(\w++)(*scs:(1).+rh)/
+    >myrrh<
+ 0: myrrh
+ 1: myrrh
+
+/\b(\w++)(*szz:(1).+rh)/
+Failed: error 195 at offset 13: (*alpha_assertion) not recognized
+
+/\b(\w++)(*scs:(1).+rh)/vanilla_syntax
+Failed: error 195 at offset 13: (*alpha_assertion) not recognized
+
+/\b(\w++)(*scan_substring:(1).+rh)/
+    >myrrh<
+ 0: myrrh
+ 1: myrrh
+
+/\b(\w++)(*szzz_zzzzzzzzz:(1).+rh)/
+Failed: error 195 at offset 24: (*alpha_assertion) not recognized
+
+/\b(\w++)(*scan_substring:(1).+rh)/vanilla_syntax
+Failed: error 195 at offset 24: (*alpha_assertion) not recognized
+
+# -- napla
+
+/(*napla:(a{1,2}))\1\1/
+    aa
+ 0: aa
+ 1: a
+
+/(*nzzzz:(a{1,2}))\1\1/
+Failed: error 195 at offset 7: (*alpha_assertion) not recognized
+
+/(*napla:(a{1,2}))\1\1/vanilla_syntax
+Failed: error 195 at offset 7: (*alpha_assertion) not recognized
+
+/(*non_atomic_positive_lookahead:(a{1,2}))\1\1/
+    aa
+ 0: aa
+ 1: a
+
+/(*nzz_zzzzzz_positive_lookahead:(a{1,2}))\1\1/
+Failed: error 195 at offset 31: (*alpha_assertion) not recognized
+
+/(*non_atomic_positive_lookahead:(a{1,2}))\1\1/vanilla_syntax
+Failed: error 195 at offset 31: (*alpha_assertion) not recognized
+
+/(?*(a{1,2}))\1\1/
+    aa
+ 0: aa
+ 1: a
+
+/(?;(a{1,2}))\1\1/
+Failed: error 111 at offset 2: unrecognized character after (? or (?-
+
+/(?*(a{1,2}))\1\1/vanilla_syntax
+Failed: error 111 at offset 2: unrecognized character after (? or (?-
+
+# -- naplb
+
+/^..(*naplb:a(b)|(a)b)\2\2/
+    abaa
+ 0: abaa
+ 1: <unset>
+ 2: a
+
+/^..(*nzzzz:a(b)|(a)b)\2\2/
+Failed: error 195 at offset 10: (*alpha_assertion) not recognized
+
+/^..(*naplb:a(b)|(a)b)\2\2/vanilla_syntax
+Failed: error 195 at offset 10: (*alpha_assertion) not recognized
+
+/^..(*non_atomic_positive_lookbehind:a(b)|(a)b)\2\2/
+    abaa
+ 0: abaa
+ 1: <unset>
+ 2: a
+
+/^..(*nzz_zzzzzz_positive_lookbehind:a(b)|(a)b)\2\2/
+Failed: error 195 at offset 35: (*alpha_assertion) not recognized
+
+/^..(*non_atomic_positive_lookbehind:a(b)|(a)b)\2\2/vanilla_syntax
+Failed: error 195 at offset 35: (*alpha_assertion) not recognized
+
+/^..(?<*a(b)|(a)b)\2\2/
+    abaa
+ 0: abaa
+ 1: <unset>
+ 2: a
+
+/^..(?<;a(b)|(a)b)\2\2/
+Failed: error 162 at offset 6: subpattern name expected
+
+/^..(?<*a(b)|(a)b)\2\2/vanilla_syntax
+Failed: error 162 at offset 6: subpattern name expected
+
+# --------------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -685,7 +685,8 @@ are allowed. */
     PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
     PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
     PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX| \
-    PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_PYTHON_OCTAL|PCRE2_EXTRA_NO_BS0)
+    PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_PYTHON_OCTAL|PCRE2_EXTRA_NO_BS0| \
+    PCRE2_EXTRA_VANILLA_SYNTAX)
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -4045,10 +4046,17 @@ while (ptr < ptrend)
           goto FAILED;
           }
 
+        meta = alasmeta[i].meta;
+        if ((meta == META_SCS_NUMBER || meta == META_LOOKAHEAD_NA || meta == META_LOOKBEHIND_NA) &&
+            (xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) != 0)
+          {
+          errorcode = ERR95;  /* Do not expose hidden non-Perl compatible syntax */
+          goto FAILED;
+          }
+
         /* Check for expecting an assertion condition. If so, only atomic
         lookaround assertions are valid. */
 
-        meta = alasmeta[i].meta;
         if (prev_expect_cond_assert > 0 &&
             (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
           {
@@ -4370,6 +4378,12 @@ while (ptr < ptrend)
             /* There are some two-character sequences that start with 'a'. */
 
             case CHAR_a:
+            if ((xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) != 0)
+              {
+              errorcode = ERR11;
+              ptr--;    /* Correct the offset */
+              goto FAILED;
+              }
             if (ptr < ptrend)
               {
               if (*ptr == CHAR_D)
@@ -4416,9 +4430,18 @@ while (ptr < ptrend)
             case CHAR_i: *optset |= PCRE2_CASELESS; break;
             case CHAR_m: *optset |= PCRE2_MULTILINE; break;
             case CHAR_n: *optset |= PCRE2_NO_AUTO_CAPTURE; break;
-            case CHAR_r: *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
+
+            case CHAR_r:
+            if ((xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) != 0)
+              {
+              errorcode = ERR11;
+              ptr--;    /* Correct the offset */
+              goto FAILED;
+              }
+            *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT;
+            break;
 
             /* If x appears twice it sets the extended extended option. */
 
@@ -4575,6 +4598,11 @@ while (ptr < ptrend)
       /* ---- Callout with numerical or string argument ---- */
 
       case CHAR_C:
+      if ((xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) != 0)
+        {
+        errorcode = ERR11;
+        goto FAILED;
+        }
       if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
       /* If the previous item was a condition starting (?(? an assertion,
@@ -4749,7 +4777,8 @@ while (ptr < ptrend)
 
       else if (ptrend - ptr >= 10 &&
                PRIV(strncmp_c8)(ptr, STRING_VERSION, 7) == 0 &&
-               ptr[7] != CHAR_RIGHT_PARENTHESIS)
+               ptr[7] != CHAR_RIGHT_PARENTHESIS &&
+               (xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) == 0)
         {
         uint32_t ge = 0;
         int major = 0;
@@ -4883,7 +4912,12 @@ while (ptr < ptrend)
       goto POST_ASSERTION;
 
       case CHAR_ASTERISK:
-      POSITIVE_NONATOMIC_LOOK_AHEAD:         /* Come from (?* */
+      if ((xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) != 0)
+        {
+        errorcode = ERR11;
+        goto FAILED;
+        }
+      POSITIVE_NONATOMIC_LOOK_AHEAD:         /* Come from (*napla: */
       *parsed_pattern++ = META_LOOKAHEAD_NA;
       ptr++;
       goto POST_ASSERTION;
@@ -4904,7 +4938,8 @@ while (ptr < ptrend)
       if (ptrend - ptr <= 1 ||
          (ptr[1] != CHAR_EQUALS_SIGN &&
           ptr[1] != CHAR_EXCLAMATION_MARK &&
-          ptr[1] != CHAR_ASTERISK))
+          ptr[1] != CHAR_ASTERISK) ||
+         (ptr[1] == CHAR_ASTERISK && (xoptions & PCRE2_EXTRA_VANILLA_SYNTAX) != 0))
         {
         terminator = CHAR_GREATER_THAN_SIGN;
         goto DEFINE_NAME;
@@ -10411,11 +10446,11 @@ for (i = 0; i < 10; i++) cb.small_ref_offset[i] = PCRE2_UNSET;
 
 /* --------------- Start looking at the pattern --------------- */
 
-/* Unless PCRE2_LITERAL is set, check for global one-time option settings at
-the start of the pattern, and remember the offset to the actual regex. With
-valgrind support, make the terminator of a zero-terminated pattern
-inaccessible. This catches bugs that would otherwise only show up for
-non-zero-terminated patterns. */
+/* Unless PCRE2_LITERAL or PCRE2_EXTRA_VANILLA_SYNTAX is set, check for
+global one-time option settings at the start of the pattern, and remember
+the offset to the actual regex. With valgrind support, make the terminator
+of a zero-terminated pattern inaccessible. This catches bugs that would
+otherwise only show up for non-zero-terminated patterns. */
 
 #ifdef SUPPORT_VALGRIND
 if (zero_terminated) VALGRIND_MAKE_MEM_NOACCESS(pattern + patlen, CU2BYTES(1));
@@ -10424,7 +10459,8 @@ if (zero_terminated) VALGRIND_MAKE_MEM_NOACCESS(pattern + patlen, CU2BYTES(1));
 ptr = pattern;
 skipatstart = 0;
 
-if ((options & PCRE2_LITERAL) == 0)
+if ((options & PCRE2_LITERAL) == 0 &&
+    (ccontext->extra_options & PCRE2_EXTRA_VANILLA_SYNTAX) == 0)
   {
   while (patlen - skipatstart >= 2 &&
          ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&

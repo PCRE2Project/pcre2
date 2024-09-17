@@ -161,6 +161,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTRA_ASCII_DIGIT              0x00001000u  /* C */
 #define PCRE2_EXTRA_PYTHON_OCTAL             0x00002000u  /* C */
 #define PCRE2_EXTRA_NO_BS0                   0x00004000u  /* C */
+#define PCRE2_EXTRA_VANILLA_SYNTAX           0x10000000u  /* C */
 
 /* These are for pcre2_jit_compile(). */
 

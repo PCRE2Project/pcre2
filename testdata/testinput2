@@ -6630,4 +6630,119 @@ a)"xI
     abc\=replace=\1
     abc\=replace=\12
 
+# --------------
+
+# "Vanilla" syntax option
+
+# -- start of pattern
+
+/(*NOTEMPTY)a/
+    a
+
+/(*NtOMeTpY)a/
+
+/(*NOTEMPTY)a/vanilla_syntax
+
+# -- inline pattern options
+
+/Z(?a)Z(?a:Z)Z(?^a)Z(?x-a)Z(?r)Z/
+    ZZZZZZZ
+
+/Z(?F)Z/
+
+/Z(?a)Z/vanilla_syntax
+
+/Z(?a:Z)Z/vanilla_syntax
+
+/Z(?^a)Z/vanilla_syntax
+
+/Z(?x-a)Z/vanilla_syntax
+
+/Z(?r)Z/vanilla_syntax
+
+/Z(?i:z)Z/vanilla_syntax
+    ZZZ
+
+# -- version detection
+
+/(?(VERSION>=10.4)yes|no)/
+    yes
+
+/(?(vReSoIn>=10.4)yes|no)/
+
+/(?(VERSION>=10.4)yes|no)/vanilla_syntax
+
+# -- callouts
+
+/A(?C0)B/
+    AB
+
+/A(?F0)B/
+
+/A(?C0)B/vanilla_syntax
+
+# -- scan_substring
+
+/\b(\w++)(*scs:(1).+rh)/
+    >myrrh<
+
+/\b(\w++)(*szz:(1).+rh)/
+
+/\b(\w++)(*scs:(1).+rh)/vanilla_syntax
+
+/\b(\w++)(*scan_substring:(1).+rh)/
+    >myrrh<
+
+/\b(\w++)(*szzz_zzzzzzzzz:(1).+rh)/
+
+/\b(\w++)(*scan_substring:(1).+rh)/vanilla_syntax
+
+# -- napla
+
+/(*napla:(a{1,2}))\1\1/
+    aa
+
+/(*nzzzz:(a{1,2}))\1\1/
+
+/(*napla:(a{1,2}))\1\1/vanilla_syntax
+
+/(*non_atomic_positive_lookahead:(a{1,2}))\1\1/
+    aa
+
+/(*nzz_zzzzzz_positive_lookahead:(a{1,2}))\1\1/
+
+/(*non_atomic_positive_lookahead:(a{1,2}))\1\1/vanilla_syntax
+
+/(?*(a{1,2}))\1\1/
+    aa
+
+/(?;(a{1,2}))\1\1/
+
+/(?*(a{1,2}))\1\1/vanilla_syntax
+
+# -- naplb
+
+/^..(*naplb:a(b)|(a)b)\2\2/
+    abaa
+
+/^..(*nzzzz:a(b)|(a)b)\2\2/
+
+/^..(*naplb:a(b)|(a)b)\2\2/vanilla_syntax
+
+/^..(*non_atomic_positive_lookbehind:a(b)|(a)b)\2\2/
+    abaa
+
+/^..(*nzz_zzzzzz_positive_lookbehind:a(b)|(a)b)\2\2/
+
+/^..(*non_atomic_positive_lookbehind:a(b)|(a)b)\2\2/vanilla_syntax
+
+/^..(?<*a(b)|(a)b)\2\2/
+    abaa
+
+/^..(?<;a(b)|(a)b)\2\2/
+
+/^..(?<*a(b)|(a)b)\2\2/vanilla_syntax
+
+# --------------
+
 # End of testinput2

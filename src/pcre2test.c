@@ -791,6 +791,7 @@ static modstruct modlist[] = {
   { "use_offset_limit",            MOD_PAT,  MOD_OPT, PCRE2_USE_OFFSET_LIMIT,     PO(options) },
   { "utf",                         MOD_PATP, MOD_OPT, PCRE2_UTF,                  PO(options) },
   { "utf8_input",                  MOD_PAT,  MOD_CTL, CTL_UTF8_INPUT,             PO(control) },
+  { "vanilla_syntax",              MOD_CTC,  MOD_OPT, PCRE2_EXTRA_VANILLA_SYNTAX, CO(extra_options) },
   { "zero_terminate",              MOD_DAT,  MOD_CTL, CTL_ZERO_TERMINATE,         DO(control) }
 };
 
