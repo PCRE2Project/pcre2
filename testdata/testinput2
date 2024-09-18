@@ -4201,6 +4201,12 @@
     123abc123\=substitute_overflow_length,replace=[1]x$1z
     123abc123\=substitute_overflow_length,replace=[0]x$1z
 
+/a(b)c/substitute_extended
+    ZabcZ\=replace=>${1:+ yes : no }
+    ZabcZ\=replace=>${1:+ \o{100} : \o{100} }
+    ZabcZ\=replace=>${1:+ \o{Z} : no }
+    ZabcZ\=replace=>${1:+ yes : \o{Z} }
+
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a
 
