@@ -693,10 +693,11 @@ do
         }
       else
         {
+        PCRE2_SIZE name_len;
         PCRE2_SPTR name_start = ptr;
         if (!read_name(&ptr, repend, utf, code->tables + ctypes_offset))
           goto BAD;
-        PCRE2_SIZE name_len = ptr - name_start;
+        name_len = ptr - name_start;
         memcpy(name, name_start, CU2BYTES(name_len));
         name[name_len] = 0;
         }
