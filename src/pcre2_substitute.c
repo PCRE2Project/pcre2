@@ -316,8 +316,8 @@ BOOL escaped_literal = FALSE;
 BOOL overflowed = FALSE;
 BOOL use_existing_match;
 BOOL replacement_only;
-#ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+#ifdef SUPPORT_UNICODE
 BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 #endif
 PCRE2_UCHAR temp[6];
