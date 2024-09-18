@@ -72,6 +72,8 @@ const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0}};
 const uint16_t PRIV(ucd_stage1)[] = {0};
 const uint16_t PRIV(ucd_stage2)[] = {0};
 const uint32_t PRIV(ucd_caseless_sets)[] = {0};
+const uint32_t PRIV(ucd_nocase_ranges)[] = {0};
+const uint32_t PRIV(ucd_nocase_ranges_size) = 0;
 #else
 
 /* Total size: 112564 bytes, block size: 128. */
@@ -146,6 +148,53 @@ const uint32_t PRIV(ucd_caseless_sets)[] = {
 the large main UCD tables. */
 
 #ifndef PCRE2_PCRE2TEST
+
+/* This table contains character ranges, where the characters in the range has
+no other case. Both start and end values are excluded from the range. */
+
+const uint32_t PRIV(ucd_nocase_ranges)[] = {
+  0x0000, 0x0041, /* 64 */
+  0x007a, 0x00b5, /* 58 */
+  0x00b5, 0x00c0, /* 10 */
+  0x0292, 0x029d, /* 10 */
+  0x029e, 0x0345, /* 166 */
+  0x0345, 0x0370, /* 42 */
+  0x0481, 0x048a, /* 8 */
+  0x0556, 0x0561, /* 10 */
+  0x0586, 0x10a0, /* 2841 */
+  0x10ff, 0x13a0, /* 672 */
+  0x13fd, 0x1c80, /* 2178 */
+  0x1cbf, 0x1d79, /* 185 */
+  0x1d7d, 0x1d8e, /* 16 */
+  0x1d8e, 0x1e00, /* 113 */
+  0x1ffc, 0x2126, /* 297 */
+  0x2132, 0x214e, /* 27 */
+  0x214e, 0x2160, /* 17 */
+  0x2184, 0x24b6, /* 817 */
+  0x24e9, 0x2c00, /* 1814 */
+  0x2cf3, 0x2d00, /* 12 */
+  0x2d2d, 0xa640, /* 30994 */
+  0xa66d, 0xa680, /* 18 */
+  0xa69b, 0xa722, /* 134 */
+  0xa76f, 0xa779, /* 9 */
+  0xa7d9, 0xa7f5, /* 27 */
+  0xa7f6, 0xab53, /* 860 */
+  0xab53, 0xab70, /* 28 */
+  0xabbf, 0xff21, /* 21345 */
+  0xff5a, 0x10400, /* 1189 */
+  0x1044f, 0x104b0, /* 96 */
+  0x104fb, 0x10570, /* 116 */
+  0x105bc, 0x10c80, /* 1731 */
+  0x10cb2, 0x10cc0, /* 13 */
+  0x10cf2, 0x118a0, /* 2989 */
+  0x118df, 0x16e40, /* 21856 */
+  0x16e7f, 0x1e900, /* 31360 */
+  0x1e943, 0x110000, /* 988860 */
+  0xffffffff, 0xffffffff /* terminator */
+};
+
+/* Total: 1110982 characters. */
+const uint32_t PRIV(ucd_nocase_ranges_size) = 74;
 
 /* This table lists the code points for the '9' characters in each set of
 decimal digits. It is used to ensure that all the digits in a script run come

@@ -5368,6 +5368,44 @@ for (++c; c <= d; c++)
 *cptr = c;             /* Rest of input range */
 return 0;
 }
+
+
+
+/*************************************************
+*             Get nocase ranges                  *
+*************************************************/
+
+/* This function returns the next nocase range after a character
+using binary search. The character might be included in the range.
+
+Arguments:
+  c           current character
+
+Yield:        range (start/end pair)
+*/
+
+static const uint32_t*
+get_nocase_range(uint32_t c)
+{
+uint32_t left = 0;
+uint32_t right = PRIV(ucd_nocase_ranges_size);
+uint32_t middle;
+
+if (c > MAX_UTF_CODE_POINT) return PRIV(ucd_nocase_ranges) + right;
+
+while (TRUE)
+  {
+  /* Range end of the middle element. */
+  middle = ((left + right) >> 1) | 0x1;
+
+  if (PRIV(ucd_nocase_ranges)[middle] <= c)
+    left = middle + 1;
+  else if (middle > 1 && PRIV(ucd_nocase_ranges)[middle - 2] > c)
+    right = middle - 1;
+  else
+    return PRIV(ucd_nocase_ranges) + (middle - 1);
+  }
+}
 #endif  /* SUPPORT_UNICODE */
 
 
@@ -5416,14 +5454,45 @@ if ((options & PCRE2_CASELESS) != 0)
   if ((options & (PCRE2_UTF|PCRE2_UCP)) != 0)
     {
     int rc;
-    uint32_t oc, od;
+    uint32_t oc, od, skip_start;
+    const uint32_t *skip_range;
 
     options &= ~PCRE2_CASELESS;   /* Remove for recursive calls */
     c = start;
+    skip_range = get_nocase_range(c);
+    skip_start = skip_range[0];
+    if (c > skip_start)
+      {
+      c = skip_range[1];
+      skip_range += 2;
+      skip_start = skip_range[0];
+      }
 
     while ((rc = get_othercase_range(&c, end, &oc, &od,
              (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)) >= 0)
       {
+      if (c > skip_start)
+        {
+        if (c < skip_range[1])
+          {
+          c = skip_range[1];
+          skip_range += 2;
+          skip_start = skip_range[0];
+          }
+        else
+          {
+          skip_range = get_nocase_range(c);
+          skip_start = skip_range[0];
+
+          if (c > skip_start)
+            {
+            c = skip_range[1];
+            skip_range += 2;
+            skip_start = skip_range[0];
+            }
+          }
+        }
+
       /* Handle a single character that has more than one other case. */
 
       if (rc > 0) n8 += add_list_to_class_internal(classbits, uchardptr,

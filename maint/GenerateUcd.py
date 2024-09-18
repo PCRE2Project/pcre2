@@ -800,6 +800,8 @@ const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0}};
 const uint16_t PRIV(ucd_stage1)[] = {0};
 const uint16_t PRIV(ucd_stage2)[] = {0};
 const uint32_t PRIV(ucd_caseless_sets)[] = {0};
+const uint32_t PRIV(ucd_nocase_ranges)[] = {0};
+const uint32_t PRIV(ucd_nocase_ranges_size) = 0;
 #else
 \n""")
 
@@ -858,6 +860,40 @@ the large main UCD tables. */
 
 #ifndef PCRE2_PCRE2TEST
 \n""")
+
+# --- Output the nocase sets ---
+
+f.write("""\
+/* This table contains character ranges, where the characters in the range has
+no other case. Both start and end values are excluded from the range. */
+
+const uint32_t PRIV(ucd_nocase_ranges)[] = {
+""")
+
+range_start = 0
+size = 0
+# The range size is bigger than eight characters.
+expected_size = 8
+total = 0
+
+for c in range(1, MAX_UNICODE):
+  if other_case[c] != 0:
+    if c - range_start > expected_size:
+      range_size = c - range_start - 1
+      f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, c, range_size))
+      total += range_size
+      size += 2
+    range_start = c
+
+# The else case is unlikely
+if other_case[MAX_UNICODE - 1] == 0 and MAX_UNICODE - range_start > expected_size:
+  range_size = MAX_UNICODE - range_start - 1
+  f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, MAX_UNICODE, range_size))
+  total += range_size
+  size += 2
+
+f.write('  0xffffffff, 0xffffffff /* terminator */\n};\n\n');
+f.write('/* Total: %d characters. */\nconst uint32_t PRIV(ucd_nocase_ranges_size) = %d;\n\n' % (total, size))
 
 # --- Read Scripts.txt again for the sets of 10 digits. ---
 
