@@ -596,7 +596,7 @@ do
     {
     uint32_t ch;
     unsigned int chlen;
-    int group, n;
+    int group;
     uint32_t special;
     PCRE2_SPTR text1_start = NULL;
     PCRE2_SPTR text1_end = NULL;
@@ -645,7 +645,6 @@ do
       text2_start = NULL;
       text2_end = NULL;
       group = -1;
-      n = 0;
       inparens = FALSE;
       star = FALSE;
 
