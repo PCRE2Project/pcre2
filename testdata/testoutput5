@@ -5482,4 +5482,20 @@ Failed: error 147 at offset 10: unknown property after \P or \p
     abc
  1: >\x{1ff}<
 
+/a(?<namED_1>b)c/utf,substitute_extended
+    abc\=replace=>${namED_1}<
+ 1: >b<
+
+/a(?<namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1>b)c/utf,substitute_extended
+    abc\=replace=>${namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1}<
+ 1: >b<
+
+/a(?<nämed>b)c/utf,substitute_extended
+    abc\=replace=>${nämed}<
+ 1: >b<
+
+/a(?<nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢>b)c/utf,substitute_extended
+    abc\=replace=>${nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢}<
+ 1: >b<
+
 # End of testinput5

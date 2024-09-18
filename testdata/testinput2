@@ -4696,6 +4696,12 @@ B)x/alt_verbnames,mark
 /a(b)(c)/substitute_extended,replace=>\3<
     abc
 
+/a(?<namED_1>b)c/substitute_extended
+    abc\=replace=>${namED_1}<
+
+/a(?<namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1>b)c/substitute_extended
+    abc\=replace=>${namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1}<
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
 /((p(?'K/

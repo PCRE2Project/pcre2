@@ -2579,6 +2579,9 @@ if (ptr >= ptrend)                 /* No characters in name */
 *nameptr = ptr;
 *offsetptr = (PCRE2_SIZE)(ptr - cb->start_pattern);
 
+/* If this logic were ever to change, the matching function in pcre2_substitute.c
+ought to be updated to match. */
+
 /* In UTF mode, a group name may contain letters and decimal digits as defined
 by Unicode properties, and underscores, but must not start with a digit. */
 

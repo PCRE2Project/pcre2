@@ -2508,4 +2508,16 @@
 /abc/utf,substitute_extended,replace=>\777<
     abc
 
+/a(?<namED_1>b)c/utf,substitute_extended
+    abc\=replace=>${namED_1}<
+
+/a(?<namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1>b)c/utf,substitute_extended
+    abc\=replace=>${namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1}<
+
+/a(?<nämed>b)c/utf,substitute_extended
+    abc\=replace=>${nämed}<
+
+/a(?<nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢>b)c/utf,substitute_extended
+    abc\=replace=>${nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢}<
+
 # End of testinput5
