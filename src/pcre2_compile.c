@@ -1702,7 +1702,7 @@ else
 
   if (cb == NULL)
     {
-    if (c < CHAR_0 || 
+    if (c < CHAR_0 ||
        (c > CHAR_9 && (c != CHAR_c && c != CHAR_o && c != CHAR_x && c != CHAR_g)))
       {
       *errorcodeptr = ERR3;
@@ -1836,6 +1836,7 @@ else
 
     if (cb == NULL)
       {
+      PCRE2_SPTR p;
       /* Substitution strings */
       if (*ptr != CHAR_LESS_THAN_SIGN)
         {
@@ -1843,7 +1844,7 @@ else
         break;
         }
 
-      PCRE2_SPTR p = ptr + 1;
+      p = ptr + 1;
 
       if (!read_number(&p, ptrend, -1, MAX_GROUP_NUMBER, ERR61, &s,
           errorcodeptr))
