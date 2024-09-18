@@ -134,7 +134,9 @@ for (; ptr < ptrend; ptr++)
     ptr -= 1;  /* Back to last code unit of escape */
     if (errorcode != 0)
       {
-      rc = errorcode;
+      /* errorcode from check_escape is positive, so must not be returned by
+      pcre2_substitute(). */
+      rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
       }
 

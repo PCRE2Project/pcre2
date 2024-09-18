@@ -13818,6 +13818,16 @@ Failed: error -48: no more memory: 10 code units are needed
     123abc123\=substitute_overflow_length,replace=[0]x$1z
 Failed: error -48: no more memory: 10 code units are needed
 
+/a(b)c/substitute_extended
+    ZabcZ\=replace=>${1:+ yes : no }
+ 1: Z> yes Z
+    ZabcZ\=replace=>${1:+ \o{100} : \o{100} }
+ 1: Z> @ Z
+    ZabcZ\=replace=>${1:+ \o{Z} : no }
+Failed: error -57 at offset 9 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>${1:+ yes : \o{Z} }
+Failed: error -57 at offset 15 in replacement: bad escape sequence in replacement string
+
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a
  0: 
