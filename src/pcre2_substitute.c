@@ -697,7 +697,7 @@ do
         if (!read_name(&ptr, repend, utf, code->tables + ctypes_offset))
           goto BAD;
         PCRE2_SIZE name_len = ptr - name_start;
-        memcpy(name, name_start, name_len);
+        memcpy(name, name_start, CU2BYTES(name_len));
         name[name_len] = 0;
         }
 
