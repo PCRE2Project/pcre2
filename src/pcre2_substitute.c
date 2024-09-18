@@ -150,6 +150,15 @@ for (; ptr < ptrend; ptr++)
       literal = TRUE;
       break;
 
+      case ESC_g:
+      /* The \g<name> form (\g<number> already handled by check_escape)
+
+      Don't worry about finding the matching ">". We are super, super lenient
+      about validating ${} replacements inside find_text_end(), so we certainly
+      don't need to worry about other syntax. Importantly, a \g<..> or $<...>
+      sequence can't contain a '}' character. */
+      break;
+
       default:
       if (erc < 0)
           break;  /* capture group reference */
@@ -604,6 +613,7 @@ do
     PCRE2_SPTR text1_end = NULL;
     PCRE2_SPTR text2_start = NULL;
     PCRE2_SPTR text2_end = NULL;
+    PCRE2_UCHAR name[MAX_NAME_SIZE + 1];
 
     /* If at the end of a nested substring, pop the stack. */
 
@@ -633,10 +643,10 @@ do
     if (*ptr == CHAR_DOLLAR_SIGN)
       {
       BOOL inparens;
+      BOOL inangle;
       BOOL star;
       PCRE2_SIZE sublength;
       PCRE2_UCHAR next;
-      PCRE2_UCHAR name[MAX_NAME_SIZE + 1];
 
       if (++ptr >= repend) goto BAD;
       if ((next = *ptr) == CHAR_DOLLAR_SIGN) goto LOADLITERAL;
@@ -648,6 +658,7 @@ do
       text2_end = NULL;
       group = -1;
       inparens = FALSE;
+      inangle = FALSE;
       star = FALSE;
 
       if (next == CHAR_LEFT_CURLY_BRACKET)
@@ -656,15 +667,24 @@ do
         next = *ptr;
         inparens = TRUE;
         }
+      else if (next == CHAR_LESS_THAN_SIGN)
+        {
+        /* JavaScript compatibility syntax, $<name>. Processes only named
+        groups (not numbered) and does not support extensions such as star
+        (you can do ${name} and ${*name}, but not $<*name>). */
+        if (++ptr >= repend) goto BAD;
+        next = *ptr;
+        inangle = TRUE;
+        }
 
-      if (next == CHAR_ASTERISK)
+      if (!inangle && next == CHAR_ASTERISK)
         {
         if (++ptr >= repend) goto BAD;
         next = *ptr;
         star = TRUE;
         }
 
-      if (!star && next >= CHAR_0 && next <= CHAR_9)
+      if (!star && !inangle && next >= CHAR_0 && next <= CHAR_9)
         {
         group = next - CHAR_0;
         while (++ptr < repend)
@@ -744,6 +764,13 @@ do
             }
           }
 
+        ptr++;
+        }
+
+      if (inangle)
+        {
+        if (ptr >= repend || *ptr != CHAR_GREATER_THAN_SIGN)
+          goto BAD;
         ptr++;
         }
 
@@ -972,6 +999,32 @@ do
 
         case 0:      /* Data character */
         goto LITERAL;
+
+        case ESC_g:
+          {
+          PCRE2_SIZE name_len;
+          PCRE2_SPTR name_start;
+
+          /* Parse the \g<name> form (\g<number> already handled by check_escape) */
+          if (ptr >= repend || *ptr != CHAR_LESS_THAN_SIGN)
+            goto BADESCAPE;
+          ++ptr;
+
+          name_start = ptr;
+          if (!read_name(&ptr, repend, utf, code->tables + ctypes_offset))
+            goto BADESCAPE;
+          name_len = ptr - name_start;
+
+          if (ptr >= repend || *ptr != CHAR_GREATER_THAN_SIGN)
+            goto BADESCAPE;
+          ++ptr;
+
+          special = 0;
+          group = -1;
+          memcpy(name, name_start, CU2BYTES(name_len));
+          name[name_len] = 0;
+          goto GROUP_SUBSTITUTE;
+          }
 
         default:
         if (rc < 0)

@@ -13819,6 +13819,78 @@ Failed: error -48: no more memory: 10 code units are needed
 Failed: error -48: no more memory: 10 code units are needed
 
 /a(b)c/substitute_extended
+    ZabcZ\=replace=>\1<
+ 1: Z>b<Z
+    ZabcZ\=replace=>\2<
+Failed: error -49 at offset 3 in replacement: unknown substring
+    ZabcZ\=replace=>\8<
+Failed: error -49 at offset 3 in replacement: unknown substring
+    ZabcZ\=replace=>${1}<
+ 1: Z>b<Z
+    ZabcZ\=replace=>${ 1 }<
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>${2}<
+Failed: error -49 at offset 5 in replacement: unknown substring
+    ZabcZ\=replace=>${8}<
+Failed: error -49 at offset 5 in replacement: unknown substring
+    ZabcZ\=replace=>$<1><
+Failed: error -49 at offset 5 in replacement: unknown substring
+    ZabcZ\=replace=>$< 1 ><
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>$<2><
+Failed: error -49 at offset 5 in replacement: unknown substring
+    ZabcZ\=replace=>$<8><
+Failed: error -49 at offset 5 in replacement: unknown substring
+    ZabcZ\=replace=>\g<1><
+ 1: Z>b<Z
+    ZabcZ\=replace=>\g< 1 ><
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g<2><
+Failed: error -49 at offset 6 in replacement: unknown substring
+    ZabcZ\=replace=>\g<8><
+Failed: error -49 at offset 6 in replacement: unknown substring
+
+/(*:pear)apple/substitute_extended
+    ZappleZ\=replace=>${*MARK}<
+ 1: Z>pear<Z
+    ZappleZ\=replace=>$<*MARK><
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZappleZ\=replace=>\g<*MARK><
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
+/a(?<named>b)c/substitute_extended
+    ZabcZ\=replace=>${named}<
+ 1: Z>b<Z
+    ZabcZ\=replace=>${noexist}<
+Failed: error -49 at offset 11 in replacement: unknown substring
+    ZabcZ\=replace=>${}<
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>${ }<
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>${ named }<
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>$<named><
+ 1: Z>b<Z
+    ZabcZ\=replace=>$<noexist><
+Failed: error -49 at offset 11 in replacement: unknown substring
+    ZabcZ\=replace=>$<><
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>$< ><
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>$< named ><
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>\g<named><
+ 1: Z>b<Z
+    ZabcZ\=replace=>\g<noexist><
+Failed: error -49 at offset 12 in replacement: unknown substring
+    ZabcZ\=replace=>\g<><
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g< ><
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g< named ><
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
+/a(b)c/substitute_extended
     ZabcZ\=replace=>${1:+ yes : no }
  1: Z> yes Z
     ZabcZ\=replace=>${1:+ \o{100} : \o{100} }
@@ -13827,6 +13899,48 @@ Failed: error -48: no more memory: 10 code units are needed
 Failed: error -57 at offset 9 in replacement: bad escape sequence in replacement string
     ZabcZ\=replace=>${1:+ yes : \o{Z} }
 Failed: error -57 at offset 15 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>${1:+ \g<1> : no }
+ 1: Z> b Z
+    ZabcZ\=replace=>${1:+ yes : \g<1> }
+ 1: Z> yes Z
+    ZabcZ\=replace=>${1:+ \g<1 : no }
+Failed: error -57 at offset 8 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>${1:+ yes : \g<1 }
+Failed: error -57 at offset 14 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>${1:+ $<1> : no }
+Failed: error -49 at offset 11 in replacement: unknown substring
+    ZabcZ\=replace=>${1:+ yes : $<1> }
+ 1: Z> yes Z
+    ZabcZ\=replace=>${1:+ $<1 : no }
+Failed: error -35 at offset 10 in replacement: invalid replacement string
+    ZabcZ\=replace=>${1:+ yes : $<1 }
+ 1: Z> yes Z
+
+/a(b)c/substitute_extended
+    ZabcZ\=replace=>${
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>${1
+Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+    ZabcZ\=replace=>${1Z
+Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+    ZabcZ\=replace=>${1;
+Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+    ZabcZ\=replace=>$<
+Failed: error -35 at offset 3 in replacement: invalid replacement string
+    ZabcZ\=replace=>$<1
+Failed: error -35 at offset 4 in replacement: invalid replacement string
+    ZabcZ\=replace=>$<1Z
+Failed: error -35 at offset 5 in replacement: invalid replacement string
+    ZabcZ\=replace=>$<1;
+Failed: error -35 at offset 4 in replacement: invalid replacement string
+    ZabcZ\=replace=>\g<
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g<1
+Failed: error -57 at offset 3 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g<1Z
+Failed: error -57 at offset 3 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g<1;
+Failed: error -57 at offset 3 in replacement: bad escape sequence in replacement string
 
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a

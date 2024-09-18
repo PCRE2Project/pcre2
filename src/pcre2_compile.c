@@ -1703,7 +1703,7 @@ else
   if (cb == NULL)
     {
     if (c < CHAR_0 || 
-       (c > CHAR_9 && (c != CHAR_c && c != CHAR_o && c != CHAR_x)))
+       (c > CHAR_9 && (c != CHAR_c && c != CHAR_o && c != CHAR_x && c != CHAR_g)))
       {
       *errorcodeptr = ERR3;
       return 0;
@@ -1818,6 +1818,11 @@ else
 
     Summary: Return a negative number for a numerical back reference, ESC_k for
     a named back reference, and ESC_g for a named or numbered subroutine call.
+
+    The above describes the \g behaviour inside patterns. Inside replacement
+    strings (pcre2_substitute) we support only \g<nameornum> for Python
+    compatibility. Return ESG_g for the named case, and -num for the
+    numbered case.
     */
 
     case CHAR_g:
@@ -1826,6 +1831,36 @@ else
     if (ptr >= ptrend)
       {
       *errorcodeptr = ERR57;
+      break;
+      }
+
+    if (cb == NULL)
+      {
+      /* Substitution strings */
+      if (*ptr != CHAR_LESS_THAN_SIGN)
+        {
+        *errorcodeptr = ERR57;
+        break;
+        }
+
+      PCRE2_SPTR p = ptr + 1;
+
+      if (!read_number(&p, ptrend, -1, MAX_GROUP_NUMBER, ERR61, &s,
+          errorcodeptr))
+        {
+        if (*errorcodeptr == 0) escape = ESC_g;  /* No number found */
+        break;
+        }
+
+      if (p >= ptrend || *p != CHAR_GREATER_THAN_SIGN)
+        {
+        /* not advancing ptr; report error at the \g character */
+        *errorcodeptr = ERR57;
+        break;
+        }
+
+      ptr = p + 1;
+      escape = -s;
       break;
       }
 
@@ -1853,6 +1888,7 @@ else
 
       if (p >= ptrend || *p != CHAR_RIGHT_CURLY_BRACKET)
         {
+        /* not advancing ptr; report error at the \g character */
         *errorcodeptr = ERR57;
         break;
         }

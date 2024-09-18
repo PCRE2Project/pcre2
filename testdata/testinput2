@@ -4202,10 +4202,71 @@
     123abc123\=substitute_overflow_length,replace=[0]x$1z
 
 /a(b)c/substitute_extended
+    ZabcZ\=replace=>\1<
+    ZabcZ\=replace=>\2<
+    ZabcZ\=replace=>\8<
+    ZabcZ\=replace=>${1}<
+    ZabcZ\=replace=>${ 1 }<
+    ZabcZ\=replace=>${2}<
+    ZabcZ\=replace=>${8}<
+    ZabcZ\=replace=>$<1><
+    ZabcZ\=replace=>$< 1 ><
+    ZabcZ\=replace=>$<2><
+    ZabcZ\=replace=>$<8><
+    ZabcZ\=replace=>\g<1><
+    ZabcZ\=replace=>\g< 1 ><
+    ZabcZ\=replace=>\g<2><
+    ZabcZ\=replace=>\g<8><
+
+/(*:pear)apple/substitute_extended
+    ZappleZ\=replace=>${*MARK}<
+    ZappleZ\=replace=>$<*MARK><
+    ZappleZ\=replace=>\g<*MARK><
+
+/a(?<named>b)c/substitute_extended
+    ZabcZ\=replace=>${named}<
+    ZabcZ\=replace=>${noexist}<
+    ZabcZ\=replace=>${}<
+    ZabcZ\=replace=>${ }<
+    ZabcZ\=replace=>${ named }<
+    ZabcZ\=replace=>$<named><
+    ZabcZ\=replace=>$<noexist><
+    ZabcZ\=replace=>$<><
+    ZabcZ\=replace=>$< ><
+    ZabcZ\=replace=>$< named ><
+    ZabcZ\=replace=>\g<named><
+    ZabcZ\=replace=>\g<noexist><
+    ZabcZ\=replace=>\g<><
+    ZabcZ\=replace=>\g< ><
+    ZabcZ\=replace=>\g< named ><
+
+/a(b)c/substitute_extended
     ZabcZ\=replace=>${1:+ yes : no }
     ZabcZ\=replace=>${1:+ \o{100} : \o{100} }
     ZabcZ\=replace=>${1:+ \o{Z} : no }
     ZabcZ\=replace=>${1:+ yes : \o{Z} }
+    ZabcZ\=replace=>${1:+ \g<1> : no }
+    ZabcZ\=replace=>${1:+ yes : \g<1> }
+    ZabcZ\=replace=>${1:+ \g<1 : no }
+    ZabcZ\=replace=>${1:+ yes : \g<1 }
+    ZabcZ\=replace=>${1:+ $<1> : no }
+    ZabcZ\=replace=>${1:+ yes : $<1> }
+    ZabcZ\=replace=>${1:+ $<1 : no }
+    ZabcZ\=replace=>${1:+ yes : $<1 }
+
+/a(b)c/substitute_extended
+    ZabcZ\=replace=>${
+    ZabcZ\=replace=>${1
+    ZabcZ\=replace=>${1Z
+    ZabcZ\=replace=>${1;
+    ZabcZ\=replace=>$<
+    ZabcZ\=replace=>$<1
+    ZabcZ\=replace=>$<1Z
+    ZabcZ\=replace=>$<1;
+    ZabcZ\=replace=>\g<
+    ZabcZ\=replace=>\g<1
+    ZabcZ\=replace=>\g<1Z
+    ZabcZ\=replace=>\g<1;
 
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a
