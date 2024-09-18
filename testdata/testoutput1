@@ -10168,18 +10168,6 @@ No match
     >\x{8c}748364<
  0: \x8c748364
 
-# larger than GROUP_MAX, smaller than INT_MAX
-/a\800000b/
-Failed: error 161 at offset 7: subpattern number is too big
-
-# coming up on INT_MAX... (used to succeed with \8 being literal 8)
-/a\800000000b/
-Failed: error 161 at offset 7: subpattern number is too big
-
-# over INT_MAX (used to succeed with \8 being literal 8)
-/a\8000000000b/
-Failed: error 161 at offset 7: subpattern number is too big
-
 # smaller than GROUP_MAX
 /\21300/
     \x8b00

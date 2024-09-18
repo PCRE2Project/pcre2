@@ -19085,6 +19085,18 @@ No match
 
 # --------------
 
+# larger than GROUP_MAX, smaller than INT_MAX
+/a\800000b/
+Failed: error 161 at offset 7: subpattern number is too big
+
+# coming up on INT_MAX... (used to succeed with \8 being literal 8)
+/a\800000000b/
+Failed: error 161 at offset 7: subpattern number is too big
+
+# over INT_MAX (used to succeed with \8 being literal 8)
+/a\8000000000b/
+Failed: error 161 at offset 7: subpattern number is too big
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
