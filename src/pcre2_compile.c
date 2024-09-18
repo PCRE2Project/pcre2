@@ -8908,10 +8908,10 @@ for (;;)
     {
     if (lengthptr == NULL)
       {
-      PCRE2_SIZE branch_length = code - last_branch;
+      uint32_t branch_length = (uint32_t)(code - last_branch);
       do
         {
-        PCRE2_SIZE prev_length = GET(last_branch, 1);
+        uint32_t prev_length = GET(last_branch, 1);
         PUT(last_branch, 1, branch_length);
         branch_length = prev_length;
         last_branch -= branch_length;
@@ -8922,7 +8922,7 @@ for (;;)
     /* Fill in the ket */
 
     *code = OP_KET;
-    PUT(code, 1, (int)(code - start_bracket));
+    PUT(code, 1, (uint32_t)(code - start_bracket));
     code += 1 + LINK_SIZE;
 
     /* Set values to pass back */
@@ -11120,7 +11120,7 @@ if (errorcode == 0 && cb.had_recurse)
         }
       }
 
-    PUT(rcode, 1, rgroup - codestart);
+    PUT(rcode, 1, (uint32_t)(rgroup - codestart));
     }
   }
 
