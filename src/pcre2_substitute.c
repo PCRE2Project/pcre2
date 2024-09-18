@@ -165,6 +165,86 @@ return rc;
 }
 
 
+/*************************************************
+*           Validate group name                  *
+*************************************************/
+
+/* This function scans for a capture group name, validating it
+consists of legal characters, is not empty, and does not exceed
+MAX_NAME_SIZE.
+
+Arguments:
+  ptrptr    points to the pointer to the start of the text (updated)
+  ptrend    end of the whole string
+  utf       true if the input is UTF-encoded
+  ctypes    pointer to the character types table
+
+Returns:    TRUE if a name was read
+            FALSE otherwise
+*/
+
+static BOOL
+read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf,
+    const uint8_t* ctypes)
+{
+PCRE2_SPTR ptr = *ptrptr;
+PCRE2_SPTR nameptr = ptr;
+
+if (ptr >= ptrend)                 /* No characters in name */
+  goto FAILED;
+
+/* We do not need to check whether the name starts with a non-digit.
+We are simply referencing names here, not defining them. */
+
+/* See read_name in the pcre2_compile.c for the corresponding logic
+restricting group names inside the pattern itself. */
+
+#ifdef SUPPORT_UNICODE
+if (utf)
+  {
+  uint32_t c, type;
+
+  while (ptr < ptrend)
+    {
+    GETCHAR(c, ptr);
+    type = UCD_CHARTYPE(c);
+    if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
+        c != CHAR_UNDERSCORE) break;
+    ptr++;
+    FORWARDCHARTEST(ptr, ptrend);
+    }
+  }
+else
+#else
+(void)utf;  /* Avoid compiler warning */
+#endif      /* SUPPORT_UNICODE */
+
+/* Handle group names in non-UTF modes. */
+
+  {
+  while (ptr < ptrend && MAX_255(*ptr) && (ctypes[*ptr] & ctype_word) != 0)
+    {
+    ptr++;
+    }
+  }
+
+/* Check name length */
+
+if (ptr - nameptr > MAX_NAME_SIZE)
+  goto FAILED;
+
+/* Subpattern names must not be empty */
+if (ptr == nameptr)
+  goto FAILED;
+
+*ptrptr = ptr;
+return TRUE;
+
+FAILED:
+*ptrptr = ptr;
+return FALSE;
+}
+
 
 /*************************************************
 *              Match and substitute              *
@@ -554,7 +634,7 @@ do
       BOOL star;
       PCRE2_SIZE sublength;
       PCRE2_UCHAR next;
-      PCRE2_UCHAR name[33];
+      PCRE2_UCHAR name[MAX_NAME_SIZE + 1];
 
       if (++ptr >= repend) goto BAD;
       if ((next = *ptr) == CHAR_DOLLAR_SIGN) goto LOADLITERAL;
@@ -614,17 +694,15 @@ do
         }
       else
         {
-        const uint8_t *ctypes = code->tables + ctypes_offset;
-        while (MAX_255(next) && (ctypes[next] & ctype_word) != 0)
-          {
-          name[n++] = next;
-          if (n > 32) goto BAD;
-          if (++ptr >= repend) break;
-          next = *ptr;
-          }
-        if (n == 0) goto BAD;
-        name[n] = 0;
+        PCRE2_SPTR name_start = ptr;
+        if (!read_name(&ptr, repend, utf, code->tables + ctypes_offset))
+          goto BAD;
+        PCRE2_SIZE name_len = ptr - name_start;
+        memcpy(name, name_start, name_len);
+        name[name_len] = 0;
         }
+
+      next = 0; /* not used or updated after this point */
 
       /* In extended mode we recognize ${name:+set text:unset text} and
       ${name:-default text}. */
@@ -632,7 +710,7 @@ do
       if (inparens)
         {
         if ((suboptions & PCRE2_SUBSTITUTE_EXTENDED) != 0 &&
-             !star && ptr < repend - 2 && next == CHAR_COLON)
+             !star && ptr < repend - 2 && *ptr == CHAR_COLON)
           {
           special = *(++ptr);
           if (special != CHAR_PLUS && special != CHAR_MINUS)

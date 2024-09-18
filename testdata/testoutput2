@@ -13696,7 +13696,7 @@ Failed: error -49 at offset 36 in replacement: unknown substring
 
 /abc/replace=a${A23456789012345678901234567890123}z
     123abc
-Failed: error -35 at offset 35 in replacement: invalid replacement string
+Failed: error -49 at offset 37 in replacement: unknown substring
 
 /abc/replace=a${bcd
     123abc
@@ -14972,6 +14972,14 @@ Failed: error -49 at offset 5 in replacement: unknown substring
 /a(b)(c)/substitute_extended,replace=>\3<
     abc
 Failed: error -49 at offset 3 in replacement: unknown substring
+
+/a(?<namED_1>b)c/substitute_extended
+    abc\=replace=>${namED_1}<
+ 1: >b<
+
+/a(?<namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1>b)c/substitute_extended
+    abc\=replace=>${namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1}<
+ 1: >b<
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 Capture group count = 2
