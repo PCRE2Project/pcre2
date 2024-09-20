@@ -98,6 +98,28 @@ No match
 
 # ---------------------------------------------------------------------
 
+# Use no_start_optimize because the first code unit is different in 8-bit from
+# the wider modes.
+/\65535/IB,utf,no_start_optimize
+------------------------------------------------------------------
+        Bra
+        \x{1ad}35
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: no_start_optimize utf
+
+/\65536/IB,utf,no_start_optimize
+------------------------------------------------------------------
+        Bra
+        \x{1ad}36
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: no_start_optimize utf
+
 /\x{110000}/IB,utf
 Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too large
 

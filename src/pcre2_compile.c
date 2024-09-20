@@ -1351,7 +1351,7 @@ Arguments:
   allow_sign  if < 0, sign not allowed; if >= 0, sign is relative to this
   max_value   the largest number allowed;
               you must not pass a value for max_value larger than
-              INT_MAX/10 - 1 because read_number() relies on max_value to
+              INT_MAX/10 - 1 because this function relies on max_value to
               avoid integer overflow
   max_error   the error to give for an over-large number
   intptr      where to put the result
@@ -1370,6 +1370,8 @@ int sign = 0;
 uint32_t n = 0;
 PCRE2_SPTR ptr = *ptrptr;
 BOOL yield = FALSE;
+
+PCRE2_ASSERT(max_value <= INT_MAX/10 - 1);
 
 *errorcodeptr = 0;
 
@@ -1395,6 +1397,7 @@ while (ptr < ptrend && IS_DIGIT(*ptr))
   if (n > max_value)
     {
     *errorcodeptr = max_error;
+    while (ptr < ptrend && IS_DIGIT(*ptr)) ptr++;
     goto EXIT;
     }
   }
@@ -1940,19 +1943,24 @@ else
       ptr--;   /* Back to the digit */
 
       /* As we know we are at a digit, the only possible error from
-      read_number() is a number that is too large to be a group number. In this
-      case we treat the group number as too-large (since it may be larger than
-      INT_MAX we cannot return it for the caller to check).
-
-      \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
-      are octal escapes if there are not that many previous captures. */
+      read_number() is a number that is too large to be a group number. Because
+      that number might be still valid if read as an octal, errorcodeptr is not
+      set on failure and therefore a bogus value of INT_MAX is set instead that
+      will be used later to properly set the error, if not falling through. */
 
       if (!read_number(&ptr, ptrend, -1, MAX_GROUP_NUMBER, 0, &s, errorcodeptr))
         s = INT_MAX;
 
-      if (s < 10 || oldptr[-1] >= CHAR_8 || (unsigned)s <= bracount)
+      /* \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
+      are octal escapes if there are not that many previous captures. */
+
+      if (s < 10 || c >= CHAR_8 || (unsigned)s <= bracount)
         {
-        if (s > (int)MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
+        /* s > MAX_GROUP_NUMBER should not be possible because of read_number(),
+        but we keep it just to be safe and because it will also catch the bogus
+        value set on failure of that function. */
+
+        if ((unsigned)s > MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
         else escape = -s;     /* Indicates a back reference */
         break;
         }
