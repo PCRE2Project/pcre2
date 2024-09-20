@@ -93,6 +93,8 @@ Perl.
 
 18. Merged PR473, which implements Python-style backrefs in substitutions.
 
+19. Merged PR483, which adding \g<n> and $<name> to replacement strings.
+
 
 Version 10.44 07-June-2024
 --------------------------

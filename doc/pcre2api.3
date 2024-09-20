@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "17 September 2024" "PCRE2 10.45"
+.TH PCRE2API 3 "20 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3684,14 +3684,17 @@ character (backslash is treated as literal). The following forms are always
 recognized:
 .sp
   $$                  insert a dollar character
-  $<n> or ${<n>}      insert the contents of group <n>
+  $n or ${n}          insert the contents of group \fIn\fP
   $*MARK or ${*MARK}  insert a control verb name
 .sp
-Either a group number or a group name can be given for <n>. Curly brackets are
-required only if the following character would be interpreted as part of the
-number or name. The number may be zero to include the entire matched string.
-For example, if the pattern a(b)c is matched with "=abc=" and the replacement
-string "+$1$0$1+", the result is "=+babcb+=".
+Either a group number or a group name can be given for \fIn\fP, for example $2 or
+$NAME. Curly brackets are required only if the following character would be
+interpreted as part of the number or name. The number may be zero to include
+the entire matched string. For example, if the pattern a(b)c is matched with
+"=abc=" and the replacement string "+$1$0$1+", the result is "=+babcb+=".
+.P
+The JavaScript form $<name>, where the angle brackets are part of the syntax,
+is also recognized for group names, but not for group numbers or *MARK.
 .P
 $*MARK inserts the name from the last encountered backtracking control verb on
 the matching path that has a name. (*MARK) must always include a name, but the
@@ -3755,6 +3758,10 @@ in a pattern, which in Perl has some ambiguities. Details are given in the
 .\"
 page.
 .P
+The Python form \eg<n>, where the angle brackets are part of the syntax and \fIn\fP
+is either a group name or number, is recognized as an altertive way of
+inserting the contents of a group, for example \eg<3>.
+.P
 There are also four escape sequences for forcing the case of inserted letters.
 Case forcing applies to all inserted characters, including those from capture
 groups and letters within \eQ...\eE quoted sequences. The insertion mechanism
@@ -3788,16 +3795,16 @@ The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
 by Bash:
 .sp
-  ${<n>:-<string>}
-  ${<n>:+<string1>:<string2>}
+  ${n:-string}
+  ${n:+string1:string2}
 .sp
-As before, <n> may be a group number or a name. The first form specifies a
-default value. If group <n> is set, its value is inserted; if not, <string> is
+As before, \fIn\fP may be a group number or a name. The first form specifies a
+default value. If group \fIn\fP is set, its value is inserted; if not, the string is
 expanded and the result inserted. The second form specifies strings that are
-expanded and inserted when group <n> is set or unset, respectively. The first
+expanded and inserted when group \fIn\fP is set or unset, respectively. The first
 form is just a convenient shorthand for
 .sp
-  ${<n>:+${<n>}:<string>}
+  ${n:+${n}:string}
 .sp
 Backslash can be used to escape colons and closing curly brackets in the
 replacement strings. A change of the case forcing state within a replacement
@@ -4208,6 +4215,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 September 2024
+Last updated: 20 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

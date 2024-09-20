@@ -1,16 +1,21 @@
-.TH PCRE2SYNTAX 3 "17 September 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "20 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
 .rs
 .sp
-The full syntax and semantics of the regular expressions that are supported by
-PCRE2 are described in the
+The full syntax and semantics of the regular expression patterns that are
+supported by PCRE2 are described in the
 .\" HREF
 \fBpcre2pattern\fP
 .\"
-documentation. This document contains a quick-reference summary of the syntax.
-.
+documentation. This document contains a quick-reference summary of the pattern
+syntax followed by the syntax of replacement strings in substitution function.
+The full description of the latter is in the
+.\" HREF
+\fBpcre2api\fP
+.\"
+documentation.
 .
 .SH "QUOTING"
 .rs
@@ -618,6 +623,41 @@ start and the end), and the starting delimiter { matched with the ending
 delimiter }. To encode the ending delimiter within the string, double it.
 .
 .
+.SH "REPLACEMENT STRINGS"
+.rs
+.sp
+If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
+\fBpcre2_substitute()\fP is not interpreted. Otherwise, by default, the only
+special character is the dollar character in one of the following forms:
+.sp
+  $$                  insert a dollar character
+  $n or ${n}          insert the contents of group \fIn\fP (name or number)
+  $<name>             insert the contents of named group
+  $*MARK or ${*MARK}  insert a control verb name
+.sp
+If PCRE2_SUBSTITUTE_EXTENDED is set, there is additional interpretation:
+.P
+1. Backslash is an escape character, and the forms described in "ESCAPED
+CHARACTERS" above are recognized. Also:
+.sp
+  \eQ...\eE   can be used to suppress interpretation
+  \el        force the next character to lower case
+  \eu        force the next character to upper case
+  \eL        force subsequent characters to lower case
+  \eU        force subsequent characters to upper case
+  \eu\eL      force next character to upper case, then all lower
+  \el\eU      force next character to lower case, then all upper
+  \eE        end \eL or \eU case forcing
+.sp
+2. Capture substitution supports the following additional forms:
+.sp
+  ${n:-string}             default for unset group
+  ${n:+string1:string2}    values for set/unset group
+.sp
+The substitution strings themselves are expanded. Backslash can be used to
+escape colons and closing curly brackets.
+.
+.
 .SH "SEE ALSO"
 .rs
 .sp
@@ -639,6 +679,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 September 2024
+Last updated: 20 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

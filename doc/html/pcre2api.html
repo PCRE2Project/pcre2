@@ -3680,14 +3680,18 @@ character (backslash is treated as literal). The following forms are always
 recognized:
 <pre>
   $$                  insert a dollar character
-  $&#60;n&#62; or ${&#60;n&#62;}      insert the contents of group &#60;n&#62;
+  $n or ${n}          insert the contents of group <i>n</i>
   $*MARK or ${*MARK}  insert a control verb name
 </pre>
-Either a group number or a group name can be given for &#60;n&#62;. Curly brackets are
-required only if the following character would be interpreted as part of the
-number or name. The number may be zero to include the entire matched string.
-For example, if the pattern a(b)c is matched with "=abc=" and the replacement
-string "+$1$0$1+", the result is "=+babcb+=".
+Either a group number or a group name can be given for <i>n</i>, for example $2 or
+$NAME. Curly brackets are required only if the following character would be
+interpreted as part of the number or name. The number may be zero to include
+the entire matched string. For example, if the pattern a(b)c is matched with
+"=abc=" and the replacement string "+$1$0$1+", the result is "=+babcb+=".
+</P>
+<P>
+The JavaScript form $&#60;name&#62;, where the angle brackets are part of the syntax,
+is also recognized for group names, but not for group numbers or *MARK.
 </P>
 <P>
 $*MARK inserts the name from the last encountered backtracking control verb on
@@ -3757,6 +3761,11 @@ in a pattern, which in Perl has some ambiguities. Details are given in the
 page.
 </P>
 <P>
+The Python form \g&#60;n&#62;, where the angle brackets are part of the syntax and <i>n</i>
+is either a group name or number, is recognized as an altertive way of
+inserting the contents of a group, for example \g&#60;3&#62;.
+</P>
+<P>
 There are also four escape sequences for forcing the case of inserted letters.
 Case forcing applies to all inserted characters, including those from capture
 groups and letters within \Q...\E quoted sequences. The insertion mechanism
@@ -3794,16 +3803,16 @@ The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
 by Bash:
 <pre>
-  ${&#60;n&#62;:-&#60;string&#62;}
-  ${&#60;n&#62;:+&#60;string1&#62;:&#60;string2&#62;}
+  ${n:-string}
+  ${n:+string1:string2}
 </pre>
-As before, &#60;n&#62; may be a group number or a name. The first form specifies a
-default value. If group &#60;n&#62; is set, its value is inserted; if not, &#60;string&#62; is
+As before, <i>n</i> may be a group number or a name. The first form specifies a
+default value. If group <i>n</i> is set, its value is inserted; if not, the string is
 expanded and the result inserted. The second form specifies strings that are
-expanded and inserted when group &#60;n&#62; is set or unset, respectively. The first
+expanded and inserted when group <i>n</i> is set or unset, respectively. The first
 form is just a convenient shorthand for
 <pre>
-  ${&#60;n&#62;:+${&#60;n&#62;}:&#60;string&#62;}
+  ${n:+${n}:string}
 </pre>
 Backslash can be used to escape colons and closing curly brackets in the
 replacement strings. A change of the case forcing state within a replacement
@@ -4205,7 +4214,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 September 2024
+Last updated: 20 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

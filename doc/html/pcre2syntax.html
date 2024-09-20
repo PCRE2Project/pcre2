@@ -43,16 +43,21 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC28" href="#SEC28">CONDITIONAL PATTERNS</a>
 <li><a name="TOC29" href="#SEC29">BACKTRACKING CONTROL</a>
 <li><a name="TOC30" href="#SEC30">CALLOUTS</a>
-<li><a name="TOC31" href="#SEC31">SEE ALSO</a>
-<li><a name="TOC32" href="#SEC32">AUTHOR</a>
-<li><a name="TOC33" href="#SEC33">REVISION</a>
+<li><a name="TOC31" href="#SEC31">REPLACEMENT STRINGS</a>
+<li><a name="TOC32" href="#SEC32">SEE ALSO</a>
+<li><a name="TOC33" href="#SEC33">AUTHOR</a>
+<li><a name="TOC34" href="#SEC34">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY</a><br>
 <P>
-The full syntax and semantics of the regular expressions that are supported by
-PCRE2 are described in the
+The full syntax and semantics of the regular expression patterns that are
+supported by PCRE2 are described in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-documentation. This document contains a quick-reference summary of the syntax.
+documentation. This document contains a quick-reference summary of the pattern
+syntax followed by the syntax of replacement strings in substitution function.
+The full description of the latter is in the
+<a href="pcre2api.html"><b>pcre2api</b></a>
+documentation.
 </P>
 <br><a name="SEC2" href="#TOC1">QUOTING</a><br>
 <P>
@@ -634,12 +639,46 @@ The allowed string delimiters are ` ' " ^ % # $ (which are the same for the
 start and the end), and the starting delimiter { matched with the ending
 delimiter }. To encode the ending delimiter within the string, double it.
 </P>
-<br><a name="SEC31" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC31" href="#TOC1">REPLACEMENT STRINGS</a><br>
+<P>
+If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
+<b>pcre2_substitute()</b> is not interpreted. Otherwise, by default, the only
+special character is the dollar character in one of the following forms:
+<pre>
+  $$                  insert a dollar character
+  $n or ${n}          insert the contents of group <i>n</i> (name or number)
+  $&#60;name&#62;             insert the contents of named group
+  $*MARK or ${*MARK}  insert a control verb name
+</pre>
+If PCRE2_SUBSTITUTE_EXTENDED is set, there is additional interpretation:
+</P>
+<P>
+1. Backslash is an escape character, and the forms described in "ESCAPED
+CHARACTERS" above are recognized. Also:
+<pre>
+  \Q...\E   can be used to suppress interpretation
+  \l        force the next character to lower case
+  \u        force the next character to upper case
+  \L        force subsequent characters to lower case
+  \U        force subsequent characters to upper case
+  \u\L      force next character to upper case, then all lower
+  \l\U      force next character to lower case, then all upper
+  \E        end \L or \U case forcing
+</pre>
+2. Capture substitution supports the following additional forms:
+<pre>
+  ${n:-string}             default for unset group
+  ${n:+string1:string2}    values for set/unset group
+</pre>
+The substitution strings themselves are expanded. Backslash can be used to
+escape colons and closing curly brackets.
+</P>
+<br><a name="SEC32" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2pattern</b>(3), <b>pcre2api</b>(3), <b>pcre2callout</b>(3),
 <b>pcre2matching</b>(3), <b>pcre2</b>(3).
 </P>
-<br><a name="SEC32" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC33" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -648,9 +687,9 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC33" href="#TOC1">REVISION</a><br>
+<br><a name="SEC34" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 September 2024
+Last updated: 20 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

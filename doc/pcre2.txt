@@ -3550,21 +3550,25 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        eral). The following forms are always recognized:
 
          $$                  insert a dollar character
-         $<n> or ${<n>}      insert the contents of group <n>
+         $n or ${n}          insert the contents of group n
          $*MARK or ${*MARK}  insert a control verb name
 
-       Either  a  group  number  or  a  group name can be given for <n>. Curly
-       brackets are required only if the following character would  be  inter-
-       preted as part of the number or name. The number may be zero to include
-       the  entire  matched  string.   For  example,  if  the pattern a(b)c is
-       matched with "=abc=" and the replacement string "+$1$0$1+", the  result
-       is "=+babcb+=".
+       Either  a  group number or a group name can be given for n, for example
+       $2 or $NAME. Curly brackets are required only if the following  charac-
+       ter  would be interpreted as part of the number or name. The number may
+       be zero to include the entire matched string. For example, if the  pat-
+       tern   a(b)c  is  matched  with  "=abc="  and  the  replacement  string
+       "+$1$0$1+", the result is "=+babcb+=".
 
-       $*MARK  inserts the name from the last encountered backtracking control
-       verb on the matching path that has a name. (*MARK) must always  include
-       a  name,  but  the  other  verbs  need not. For example, in the case of
+       The JavaScript form $<name>, where the angle brackets are part  of  the
+       syntax,  is  also recognized for group names, but not for group numbers
+       or *MARK.
+
+       $*MARK inserts the name from the last encountered backtracking  control
+       verb  on the matching path that has a name. (*MARK) must always include
+       a name, but the other verbs need not.  For  example,  in  the  case  of
        (*MARK:A)(*PRUNE) the name inserted is "A", but for (*MARK:A)(*PRUNE:B)
-       the relevant name is "B". This facility can be used to  perform  simple
+       the  relevant  name is "B". This facility can be used to perform simple
        simultaneous substitutions, as this pcre2test example shows:
 
          /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
@@ -3572,15 +3576,15 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
           2: pear orange
 
        PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject
-       string,  replacing every matching substring. If this option is not set,
-       only the first matching substring is replaced. The search  for  matches
-       takes  place in the original subject string (that is, previous replace-
-       ments do not affect it).  Iteration is  implemented  by  advancing  the
-       startoffset  value  for  each search, which is always passed the entire
+       string, replacing every matching substring. If this option is not  set,
+       only  the  first matching substring is replaced. The search for matches
+       takes place in the original subject string (that is, previous  replace-
+       ments  do  not  affect  it).  Iteration is implemented by advancing the
+       startoffset value for each search, which is always  passed  the  entire
        subject string. If an offset limit is set in the match context, search-
        ing stops when that limit is reached.
 
-       You can restrict the effect of a global substitution to  a  portion  of
+       You  can  restrict  the effect of a global substitution to a portion of
        the subject string by setting either or both of startoffset and an off-
        set limit. Here is a pcre2test example:
 
@@ -3588,86 +3592,89 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
          ABC ABC ABC ABC\=offset=3,offset_limit=12
           2: ABC A!C A!C ABC
 
-       When  continuing  with  global substitutions after matching a substring
+       When continuing with global substitutions after  matching  a  substring
        with zero length, an attempt to find a non-empty match at the same off-
        set is performed.  If this is not successful, the offset is advanced by
        one character except when CRLF is a valid newline sequence and the next
-       two characters are CR, LF. In this case, the offset is advanced by  two
+       two  characters are CR, LF. In this case, the offset is advanced by two
        characters.
 
        PCRE2_SUBSTITUTE_UNKNOWN_UNSET causes references to capture groups that
        do not appear in the pattern to be treated as unset groups. This option
-       should  be used with care, because it means that a typo in a group name
+       should be used with care, because it means that a typo in a group  name
        or number no longer causes the PCRE2_ERROR_NOSUBSTRING error.
 
        PCRE2_SUBSTITUTE_UNSET_EMPTY causes unset capture groups (including un-
-       known groups when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) to be  treated
-       as  empty  strings  when inserted as described above. If this option is
+       known  groups when PCRE2_SUBSTITUTE_UNKNOWN_UNSET is set) to be treated
+       as empty strings when inserted as described above. If  this  option  is
        not set, an attempt to insert an unset group causes the PCRE2_ERROR_UN-
-       SET error. This option does not  influence  the  extended  substitution
+       SET  error.  This  option  does not influence the extended substitution
        syntax described below.
 
-       PCRE2_SUBSTITUTE_EXTENDED  causes extra processing to be applied to the
-       replacement string. Without this option, only the dollar  character  is
-       special,  and  only  the  group insertion forms listed above are valid.
+       PCRE2_SUBSTITUTE_EXTENDED causes extra processing to be applied to  the
+       replacement  string.  Without this option, only the dollar character is
+       special, and only the group insertion forms  listed  above  are  valid.
        When PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
 
-       Firstly, backslash in a replacement string is interpreted as an  escape
-       character.  The usual forms such as \x{ddd} can be used to specify par-
+       Firstly,  backslash in a replacement string is interpreted as an escape
+       character. The usual forms such as \x{ddd} can be used to specify  par-
        ticular character codes, and backslash followed by any non-alphanumeric
-       character quotes that character. Extended quoting can  be  coded  using
+       character  quotes  that  character. Extended quoting can be coded using
        \Q...\E, exactly as in pattern strings.
 
-       The  interpretation  of backslash followed by one or more digits is the
-       same as in a pattern, which in Perl has some ambiguities.  Details  are
+       The interpretation of backslash followed by one or more digits  is  the
+       same  as  in a pattern, which in Perl has some ambiguities. Details are
        given in the pcre2pattern page.
 
-       There  are  also four escape sequences for forcing the case of inserted
-       letters.  Case forcing applies to all  inserted  characters,  including
-       those  from capture groups and letters within \Q...\E quoted sequences.
-       The insertion mechanism has three states: no case forcing, force  upper
-       case,  and  force  lower  case. The escape sequences change the current
-       state: \U and \L change to upper or lower case  forcing,  respectively,
-       and  \E  (when not terminating a \Q quoted sequence) reverts to no case
-       forcing. The sequences \u and \l force the next character (if it  is  a
-       letter)  to upper or lower case, respectively, and then the state auto-
+       The Python form \g<n>, where the angle brackets are part of the  syntax
+       and  n  is either a group name or number, is recognized as an altertive
+       way of inserting the contents of a group, for example \g<3>.
+
+       There are also four escape sequences for forcing the case  of  inserted
+       letters.   Case  forcing  applies to all inserted characters, including
+       those from capture groups and letters within \Q...\E quoted  sequences.
+       The  insertion mechanism has three states: no case forcing, force upper
+       case, and force lower case. The escape  sequences  change  the  current
+       state:  \U  and \L change to upper or lower case forcing, respectively,
+       and \E (when not terminating a \Q quoted sequence) reverts to  no  case
+       forcing.  The  sequences \u and \l force the next character (if it is a
+       letter) to upper or lower case, respectively, and then the state  auto-
        matically reverts to no case forcing.
 
-       However, if \u is immediately followed by \L or \l is immediately  fol-
-       lowed  by  \U,  the next character's case is forced by the first escape
+       However,  if \u is immediately followed by \L or \l is immediately fol-
+       lowed by \U, the next character's case is forced by  the  first  escape
        sequence, and subsequent characters by the second. This provides a "ti-
-       tle casing" facility that can be applied to group captures.  For  exam-
-       ple,  if  group 1 has captured "heLLo", the replacement string "\u\L$1"
+       tle  casing"  facility that can be applied to group captures. For exam-
+       ple, if group 1 has captured "heLLo", the replacement  string  "\u\L$1"
        becomes "Hello".
 
        If either PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled,
-       Unicode properties are used for  case  forcing  characters  whose  code
-       points  are  greater than 127. However, only basic case folding, as de-
-       termined by the Unicode file CaseFolding.txt is supported.  PCRE2  does
-       not  support  language-specific special casing rules such as using dif-
-       ferent lower case Greek sigmas in the middle and ends of words (as  de-
+       Unicode  properties  are  used  for  case forcing characters whose code
+       points are greater than 127. However, only basic case folding,  as  de-
+       termined  by  the Unicode file CaseFolding.txt is supported. PCRE2 does
+       not support language-specific special casing rules such as  using  dif-
+       ferent  lower case Greek sigmas in the middle and ends of words (as de-
        fined in the Unicode file SpecialCasing.txt).
 
        Note that case forcing sequences such as \U...\E do not nest. For exam-
-       ple,  the  result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc"; the final
-       \E has no effect. Note  also  that  the  PCRE2_ALT_BSUX  and  PCRE2_EX-
+       ple, the result of processing "\Uaa\LBB\Ecc\E" is "AAbbcc";  the  final
+       \E  has  no  effect.  Note  also  that the PCRE2_ALT_BSUX and PCRE2_EX-
        TRA_ALT_BSUX options do not apply to replacement strings.
 
-       The  second  effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
-       flexibility to capture group substitution. The  syntax  is  similar  to
+       The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to  add  more
+       flexibility  to  capture  group  substitution. The syntax is similar to
        that used by Bash:
 
-         ${<n>:-<string>}
-         ${<n>:+<string1>:<string2>}
+         ${n:-string}
+         ${n:+string1:string2}
 
-       As  before,  <n> may be a group number or a name. The first form speci-
-       fies a default value. If group <n> is set, its value  is  inserted;  if
-       not,  <string>  is  expanded  and  the result inserted. The second form
-       specifies strings that are expanded and inserted when group <n> is  set
-       or  unset,  respectively. The first form is just a convenient shorthand
-       for
+       As before, n may be a group number or a name. The first form  specifies
+       a  default value. If group n is set, its value is inserted; if not, the
+       string is expanded and the result inserted. The second  form  specifies
+       strings  that  are  expanded and inserted when group n is set or unset,
+       respectively. The first form is just a convenient shorthand for
 
-         ${<n>:+${<n>}:<string>}
+         ${n:+${n}:string}
 
        Backslash can be used to escape colons and closing  curly  brackets  in
        the  replacement  strings.  A change of the case forcing state within a
@@ -4035,11 +4042,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 September 2024
+       Last updated: 20 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    17 September 2024                   PCRE2API(3)
+PCRE2 10.45                    20 September 2024                   PCRE2API(3)
 ------------------------------------------------------------------------------
  
  
@@ -11069,9 +11076,11 @@ NAME
 
 PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY
 
-       The  full syntax and semantics of the regular expressions that are sup-
-       ported by PCRE2 are described in the pcre2pattern  documentation.  This
-       document contains a quick-reference summary of the syntax.
+       The  full  syntax and semantics of the regular expression patterns that
+       are supported by PCRE2 are described in the pcre2pattern documentation.
+       This document contains a quick-reference summary of the pattern  syntax
+       followed by the syntax of replacement strings in substitution function.
+       The full description of the latter is in the pcre2api documentation.
 
 
 QUOTING
@@ -11645,6 +11654,42 @@ CALLOUTS
        double it.
 
 
+REPLACEMENT STRINGS
+
+       If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
+       pcre2_substitute() is not interpreted. Otherwise, by default, the  only
+       special  character  is  the  dollar  character  in one of the following
+       forms:
+
+         $$                  insert a dollar character
+         $n or ${n}          insert the contents of group n (name or number)
+         $<name>             insert the contents of named group
+         $*MARK or ${*MARK}  insert a control verb name
+
+       If PCRE2_SUBSTITUTE_EXTENDED is set, there  is  additional  interpreta-
+       tion:
+
+       1.  Backslash  is  an escape character, and the forms described in "ES-
+       CAPED CHARACTERS" above are recognized. Also:
+
+         \Q...\E   can be used to suppress interpretation
+         \l        force the next character to lower case
+         \u        force the next character to upper case
+         \L        force subsequent characters to lower case
+         \U        force subsequent characters to upper case
+         \u\L      force next character to upper case, then all lower
+         \l\U      force next character to lower case, then all upper
+         \E        end \L or \U case forcing
+
+       2. Capture substitution supports the following additional forms:
+
+         ${n:-string}             default for unset group
+         ${n:+string1:string2}    values for set/unset group
+
+       The substitution strings themselves are expanded. Backslash can be used
+       to escape colons and closing curly brackets.
+
+
 SEE ALSO
 
        pcre2pattern(3),   pcre2api(3),   pcre2callout(3),    pcre2matching(3),
@@ -11660,11 +11705,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 September 2024
+       Last updated: 20 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    17 September 2024                PCRE2SYNTAX(3)
+PCRE2 10.45                    20 September 2024                PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
  
  
