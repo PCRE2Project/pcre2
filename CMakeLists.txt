@@ -192,11 +192,6 @@ CHECK_C_SOURCE_COMPILES(
 )
 
 CHECK_C_SOURCE_COMPILES(
-  "int main(void) { if (__builtin_expect(1+1, 2)) return 1; return 0; }"
-  HAVE_BUILTIN_EXPECT
-)
-
-CHECK_C_SOURCE_COMPILES(
   "#include <stddef.h>
    int main(void) { int a,b; size_t m; __builtin_mul_overflow(a,b,&m); return 0; }"
   HAVE_BUILTIN_MUL_OVERFLOW
