@@ -6490,4 +6490,50 @@ a)"xI
 # over INT_MAX (used to succeed with \8 being literal 8)
 /a\8000000000b/
 
+# --------------
+
+# no_bs0
+
+/a\0b\x00c\00d/
+    a\x{00}b\x{00}c\x{00}d
+
+/a\0b/no_bs0
+
+/b\x00c\00d/no_bs0
+    b\x{00}c\x{00}d
+
+/abc/substitute_extended
+    abc\=replace=a\0b\x00c\00d
+
+/abc/substitute_extended,no_bs0
+    abc\=replace=a\0b
+    abc\=replace=b\x00c\00d
+
+# python_octal
+
+/\0-\00-\01-\012-\0123-\123-\1234/
+    \x00-\x00-\x01-\o{12}-\o{12}3-\o{123}-\o{123}4
+
+/\1/
+
+/\12/
+    \o{12}
+
+/abc/substitute_extended
+    abc\=replace=\0-\00-\01-\012-\0123-\123-\1234
+    abc\=replace=\1
+    abc\=replace=\12
+
+/\0-\00-\01-\012-\0123-\123-\1234/python_octal
+    \x00-\x00-\x01-\o{12}-\o{12}3-\o{123}-\o{123}4
+
+/\1/python_octal
+
+/\12/python_octal
+
+/abc/substitute_extended,python_octal
+    abc\=replace=\0-\00-\01-\012-\0123-\123-\1234
+    abc\=replace=\1
+    abc\=replace=\12
+
 # End of testinput2

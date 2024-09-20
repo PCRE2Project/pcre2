@@ -1955,4 +1955,33 @@ No match
  0: ab
  1: ab
 
+# python_octal
+
+/\400/
+Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
+
+/abc/substitute_extended
+    abc\=replace=\400
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
+/\400/python_octal
+Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
+
+/abc/substitute_extended,python_octal
+    abc\=replace=\400
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
+/\400/utf
+
+/abc/utf,substitute_extended
+    abc\=replace=\400
+ 1: \x{100}
+
+/\400/utf,python_octal
+Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
+
+/abc/utf,substitute_extended,python_octal
+    abc\=replace=\400
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
 # End of testinput10

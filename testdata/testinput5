@@ -2526,4 +2526,17 @@
 /a(?<nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢>b)c/utf,substitute_extended
     abc\=replace=>${nämedverylongbutperfectlylegalsoyoushouldnthaveaproblem_٢}<
 
+# python_octal
+
+/\400/utf
+    \o{400}
+
+/\400/utf,python_octal
+
+/abc/utf,substitute_extended
+    abc\=replace=\400
+
+/abc/utf,substitute_extended,python_octal
+    abc\=replace=\400
+
 # End of testinput5
