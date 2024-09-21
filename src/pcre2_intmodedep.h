@@ -733,7 +733,7 @@ typedef struct compile_block {
   const uint8_t *cbits;            /* Points to character type table */
   const uint8_t *ctypes;           /* Points to table of type maps */
   PCRE2_UCHAR *start_workspace;    /* The start of working space */
-  PCRE2_UCHAR * start_code;        /* The start of the compiled code */
+  PCRE2_UCHAR *start_code;         /* The start of the compiled code */
   PCRE2_SPTR start_pattern;        /* The start of the pattern */
   PCRE2_SPTR end_pattern;          /* The end of the pattern */
   PCRE2_UCHAR *name_table;         /* The name/number table */
