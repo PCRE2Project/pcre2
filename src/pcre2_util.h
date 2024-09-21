@@ -52,9 +52,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef PCRE2_DEBUG
-#if defined(HAVE_BUILTIN_EXPECT) && defined(HAVE_BUILTIN_UNREACHABLE)
-#define PCRE2_ASSERT(x) do { if (__builtin_expect(!(x), 0)) __builtin_unreachable(); } while (0)
-#elif defined(HAVE_ASSERT_H)
+#if defined(HAVE_ASSERT_H) && !defined(NDEBUG)
 #include <assert.h>
 #define PCRE2_ASSERT(x) assert(x)
 #elif defined(HAVE_STDLIB_H) && defined(HAVE_STDIO_H)

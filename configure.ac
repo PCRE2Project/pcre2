@@ -107,20 +107,6 @@ if test "$pcre2_cc_cv_builtin_assume" = yes; then
 fi
 AC_LANG_POP([C])
 
-# Check for the expect() builtin
-
-AC_MSG_CHECKING([for __builtin_expect()])
-AC_LANG_PUSH([C])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__builtin_expect(1+1, 2)) return 1]])],
-  [pcre2_cc_cv_builtin_expect=yes],
-  [pcre2_cc_cv_builtin_expect=no])
-AC_MSG_RESULT([$pcre2_cc_cv_builtin_expect])
-if test "$pcre2_cc_cv_builtin_expect" = yes; then
-  AC_DEFINE([HAVE_BUILTIN_EXPECT], 1,
-    [Define this if your compiler provides __builtin_expect()])
-fi
-AC_LANG_POP([C])
-
 # Check for the mul_overflow() builtin
 
 AC_MSG_CHECKING([for __builtin_mul_overflow()])
