@@ -19477,7 +19477,7 @@ Failed: error 161 at offset 12: subpattern number is too big
  0: a\x00b\x00c\x00d
 
 /a\0b/no_bs0
-Failed: error 103 at offset 3: unrecognized character follows \
+Failed: error 198 at offset 3: octal digit missing after \0 (PCRE2_EXTRA_NO_BS0 is set)
 
 /b\x00c\00d/no_bs0
     b\x{00}c\x{00}d

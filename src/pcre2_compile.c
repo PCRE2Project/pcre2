@@ -1890,16 +1890,19 @@ else
     c -= CHAR_0;
     while(i++ < 2 && ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
         c = c * 8 + *ptr++ - CHAR_0;
+    if (c > 0xff)
+      {
+      if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0) *errorcodeptr = ERR102;
 #if PCRE2_CODE_UNIT_WIDTH == 8
-    if (!utf && c > 0xff) *errorcodeptr = ERR51;
+      else if (!utf) *errorcodeptr = ERR51;
 #endif
-    if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0 && c > 0xff)
-        *errorcodeptr = ERR51;
+      }
 
     /* PCRE2_EXTRA_NO_BS0 disables the NUL escape '\0' but doesn't affect
     two- or three-character octal escapes \00 and \000, nor \x00. */
+
     if ((xoptions & PCRE2_EXTRA_NO_BS0) != 0 && c == 0 && i == 1)
-        *errorcodeptr = ERR3;
+        *errorcodeptr = ERR98;
     break;
 
     /* \o is a relatively new Perl feature, supporting a more general way of

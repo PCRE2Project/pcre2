@@ -5530,7 +5530,7 @@ Failed: error 147 at offset 10: unknown property after \P or \p
  0: \x{100}
 
 /\400/utf,python_octal
-Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
+Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)
 
 /abc/utf,substitute_extended
     abc\=replace=\400

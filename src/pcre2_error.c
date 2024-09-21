@@ -185,11 +185,12 @@ static const unsigned char compile_error_texts[] =
   "(*alpha_assertion) not recognized\0"
   "script runs require Unicode support, which this version of PCRE2 does not have\0"
   "too many capturing groups (maximum 65535)\0"
-  "UNUSED ERROR\0"
+  "octal digit missing after \\0 (PCRE2_EXTRA_NO_BS0 is set)\0"
   "\\K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)\0"
   /* 100 */
   "branch too long in variable-length lookbehind assertion\0"
   "compiled pattern would be longer than the limit set by the application\0"
+  "octal value given by \\ddd is greater than \\377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
