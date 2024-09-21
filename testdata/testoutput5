@@ -109,6 +109,7 @@ No match
 ------------------------------------------------------------------
 Capture group count = 0
 Options: no_start_optimize utf
+Optimizations: auto_possess,dotstar_anchor
 
 /\65536/IB,utf,no_start_optimize
 ------------------------------------------------------------------
@@ -119,6 +120,7 @@ Options: no_start_optimize utf
 ------------------------------------------------------------------
 Capture group count = 0
 Options: no_start_optimize utf
+Optimizations: auto_possess,dotstar_anchor
 
 /\x{110000}/IB,utf
 Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too large
