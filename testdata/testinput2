@@ -831,6 +831,19 @@
 
 /x++/IB
 
+# For comparison with the following test, which disables auto-possessification
+# In this regex, x+ should be converted to x++
+/x+y/B,auto_possess
+
+# In this regex, x+ should not be converted to x++
+/x+y/B,auto_possess_off
+
+# Also in this regex, x+ should not be converted to x++
+/x+y/B,optimization_none
+
+# In this one too, x+ should not be converted to x++
+/x+y/B,no_auto_possess
+
 /x{1,3}+/B,no_auto_possess
 
 /x{1,3}+/Bi,no_auto_possess
@@ -838,6 +851,8 @@
 /[^x]{1,3}+/B,no_auto_possess
 
 /[^x]{1,3}+/Bi,no_auto_possess
+
+/x{1,3}+/IB,auto_possess_off
 
 /(x)*+/IB
 
@@ -4060,9 +4075,15 @@
 
 /(?(VERSION=10.101)yes|no)/
 
+# We should see the starting code unit, required code unit, and minimum length set for this regex:
 /abcd/I
 
+# None of the following three should have the starting code unit, required code unit, and minimum length set:
 /abcd/I,no_start_optimize
+
+/abcd/I,start_optimize_off
+
+/abcd/I,optimization_none
 
 /(|ab)*?d/I
    abd
@@ -4294,6 +4315,19 @@
 /^abc/info
 
 /^abc/info,no_dotstar_anchor
+
+/^abc/info,dotstar_anchor_off
+
+# For comparison with the following tests, which disable automatic dotstar anchoring
+/.*abc/BI
+
+/.*abc/BI,dotstar_anchor_off
+
+/.*abc/BI,start_optimize_off
+
+/.*abc/BI,optimization_none
+
+/.*abc/BI,no_dotstar_anchor
 
 /.*\d/info,auto_callout
 \= Expect no match
@@ -5510,6 +5544,28 @@ a)"xI
     snowcat
     syndicate
 
+# Confirm that the pcre2_set_optimize API does not have any undesired effect on literal patterns
+/(cat)|dog/I,literal,auto_possess_off
+    (cat)|dog
+\= Expect no match
+    the cat sat
+
+/(cat)|dog/I,literal,dotstar_anchor_off
+    (cat)|dog
+\= Expect no match
+    the cat sat
+
+/(cat)|dog/I,literal,optimization_none
+    (cat)|dog
+\= Expect no match
+    the cat sat
+
+# These should result in errors, since it is not permitted to use the
+# PCRE2_NO_AUTO_POSSESS and PCRE2_NO_DOTSTAR_ANCHOR options on a literal pattern
+/(cat)|dog/literal,no_auto_possess
+
+/(cat)|dog/literal,no_dotstar_anchor
+
 /a whole line/match_line,multiline
     Rhubarb \na whole line\n custard
 \= Expect no match
@@ -6478,6 +6534,27 @@ a)"xI
 /(?<AA>a)(*scan_substring:(1,'AA',1,<AA>)a)b/B
     ab
     ac
+
+# Tests for pcre2_set_optimize()
+
+/abc/I,optimization_none
+
+/abc/I,optimization_none,auto_possess
+
+/abc/I,optimization_none,dotstar_anchor,auto_possess
+
+/abc/I,optimization_none,start_optimize
+
+/abc/I,dotstar_anchor_off,optimization_full
+
+# If pcre2_set_optimize() is used to turn on some optimization, but at the same time,
+# the compile options word turns it off... the compile options word "wins":
+
+/abc/I,no_auto_possess,auto_possess
+
+/abc/I,no_dotstar_anchor,dotstar_anchor
+
+/abc/I,no_start_optimize,start_optimize
 
 # --------------
 

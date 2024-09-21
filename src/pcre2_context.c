@@ -141,7 +141,8 @@ pcre2_compile_context PRIV(default_compile_context) = {
   NEWLINE_DEFAULT,                           /* Newline convention */
   PARENS_NEST_LIMIT,                         /* As it says */
   0,                                         /* Extra options */
-  MAX_VARLOOKBEHIND                          /* As it says */
+  MAX_VARLOOKBEHIND,                         /* As it says */
+  PCRE2_OPTIMIZATION_ALL                     /* All optimizations enabled */
   };
 
 /* The create function copies the default into the new memory, but must
@@ -409,6 +410,38 @@ ccontext->stack_guard_data = user_data;
 return 0;
 }
 
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_optimize(pcre2_compile_context *ccontext, uint32_t directive)
+{
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+switch (directive)
+  {
+  case PCRE2_OPTIMIZATION_NONE:
+  ccontext->optimization_flags = 0;
+  break;
+
+  case PCRE2_OPTIMIZATION_FULL:
+  ccontext->optimization_flags = PCRE2_OPTIMIZATION_ALL;
+  break;
+
+  default:
+  if (directive >= PCRE2_AUTO_POSSESS && directive <= PCRE2_START_OPTIMIZE_OFF)
+    {
+    /* Even directive numbers starting from 64 switch a bit on;
+     * Odd directive numbers starting from 65 switch a bit off */
+    if ((directive & 1) != 0)
+      ccontext->optimization_flags &= ~(1u << ((directive >> 1) - 32));
+    else
+      ccontext->optimization_flags |= 1u << ((directive >> 1) - 32);
+    return 0;
+    }
+  return PCRE2_ERROR_BADOPTION;
+  }
+
+return 0;
+}
 
 /* ------------ Match context ------------ */
 
