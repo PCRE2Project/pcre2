@@ -2068,6 +2068,19 @@ COMPILING A PATTERN
        end.  The option may be used with PCRE2_LITERAL. However, it is ignored
        if PCRE2_EXTRA_MATCH_LINE is also set.
 
+         PCRE2_EXTRA_NO_BS0
+
+       If this option is set (note that its final character is the digit 0) it
+       locks out the use of the sequence \0 unless at  least  one  more  octal
+       digit follows.
+
+         PCRE2_EXTRA_PYTHON_OCTAL
+
+       If  this  option  is set, PCRE2 follows Python's rules for interpreting
+       octal escape sequences. The rules for handling sequences such  as  \14,
+       which  could  be an octal number or a back reference are different. De-
+       tails are given in the pcre2pattern documentation.
+
 
 JUST-IN-TIME (JIT) COMPILATION
 
@@ -5334,6 +5347,11 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
        ple is /(?:|(?0)abcd)(?(R)|\z)/, which matches a sequence of any number
        of repeated "abcd" substrings at the end of the subject.
 
+       23. From release 10.45, PCRE2 gives an error if \x is not followed by a
+       hexadecimal  digit or a curly bracket. It used to interpret this as the
+       NUL character. Perl still generates NUL, but warns in its  warning  and
+       strict modes.
+
 
 AUTHOR
 
@@ -6868,11 +6886,14 @@ BACKSLASH
          \r          carriage return (hex 0D) (but see below)
          \t          tab (hex 09)
          \0dd        character with octal code 0dd
-         \ddd        character with octal code ddd, or backreference
+         \ddd        character with octal code ddd, or back reference
          \o{ddd..}   character with octal code ddd..
          \xhh        character with hex code hh
          \x{hhh..}   character with hex code hhh..
          \N{U+hhh..} character with Unicode hex code point hhh..
+
+       A description of how back references work is given later, following the
+       discussion of parenthesized groups.
 
        By default, after \x that is not followed by {, one or two  hexadecimal
        digits are read (letters can be in upper or lower case). If the charac-
@@ -6948,39 +6969,43 @@ BACKSLASH
        certain other characters have POSIX-BC values, PCRE2 makes \c? generate
        95; otherwise it generates 255.
 
-       After \0 up to two further octal digits are read. If  there  are  fewer
-       than  two  digits,  just  those that are present are used. Thus the se-
-       quence \0\x\015 specifies two binary zeros followed by a  CR  character
-       (code value 13). Make sure you supply two digits after the initial zero
-       if the pattern character that follows is itself an octal digit.
+   Octal escapes and back references
 
-       The  escape \o must be followed by a sequence of octal digits, enclosed
-       in braces. An error occurs if this is not the case. This  escape  is  a
-       recent  addition  to Perl; it provides way of specifying character code
-       points as octal numbers greater than 0777, and  it  also  allows  octal
-       numbers and backreferences to be unambiguously specified.
+       The escape \o must be followed by a sequence of octal digits,  enclosed
+       in  braces.  An  error occurs if this is not the case. This escape pro-
+       vides a way of  specifying  character  code  points  as  octal  numbers
+       greater  than 0777, and it also allows octal numbers and backreferences
+       to be unambiguously distinguished.
+
+       If braces are not used, after \0 up to two  further  octal  digits  are
+       read.   However,  if the PCRE2_EXTRA_NO_BS0 option is set, at least one
+       more octal digit must follow \0 (use \00 to generate a NUL  character).
+       Make  sure  you supply two digits after the initial zero if the pattern
+       character that follows is itself an octal digit.
+
+       Inside a character class, when a backslash is  followed  by  any  octal
+       digit,  up to three octal digits are read to generate a code point. Any
+       subsequent digits stand for themselves. The sequences  \8  and  \9  are
+       treated as the literal characters "8" and "9".
+
+       Outside a character class, Perl's handling of a backslash followed by a
+       digit  other  than  0 is complicated by ambiguity, and Perl has changed
+       over time, causing PCRE2 also to change. From PCRE2 release 10.45 there
+       is an option called PCRE2_EXTRA_PYTHON_OCTAL that causes PCRE2  to  use
+       Python's  unambiguous  rules. The next two subsections describe the two
+       sets of rules.
 
        For greater clarity and unambiguity, it is best to avoid following \ by
-       a  digit  greater than zero. Instead, use \o{...} or \x{...} to specify
+       a digit greater than zero. Instead, use \o{...} or \x{...}  to  specify
        numerical character code points, and \g{...} to specify backreferences.
-       The following paragraphs describe the old, ambiguous syntax.
 
-       The handling of a backslash followed by a digit other than 0 is compli-
-       cated, and Perl has changed over time, causing PCRE2 also to change.
+   Perl rules for non-class backslash 1-9
 
-       Outside a character class, PCRE2 reads the digit and any following dig-
-       its as a decimal number. If the number is less than 10, begins with the
-       digit 8 or 9, or if there are  at  least  that  many  previous  capture
-       groups  in the expression, the entire sequence is taken as a backrefer-
-       ence. A description of how this works is  given  later,  following  the
-       discussion  of parenthesized groups.  Otherwise, up to three octal dig-
-       its are read to form a character code.
-
-       Inside a character class, PCRE2 handles \8 and \9 as the literal  char-
-       acters  "8"  and "9", and otherwise reads up to three octal digits fol-
-       lowing the backslash, using them to generate a data character. Any sub-
-       sequent digits stand for themselves. For example, outside  a  character
-       class:
+       All  the digits that follow the backslash are read as a decimal number.
+       If the number is less than 10, begins with the digit  8  or  9,  or  if
+       there are at least that many previous capture groups in the expression,
+       the  entire  sequence  is  taken  as a back reference. Otherwise, up to
+       three octal digits are read to form a character code. For example:
 
          \040   is another way of writing an ASCII space
          \40    is the same, provided there are fewer than 40
@@ -6996,9 +7021,20 @@ BACKSLASH
                    the value 255 (decimal)
          \81    is always a backreference
 
-       Note  that octal values of 100 or greater that are specified using this
-       syntax must not be introduced by a leading zero, because no  more  than
+       Note that octal values of 100 or greater that are specified using  this
+       syntax  must  not be introduced by a leading zero, because no more than
        three octal digits are ever read.
+
+   Python rules for non_class backslash 1-9
+
+       If there are at least three octal digits after the  backslash,  exactly
+       three  are read as an octal code point number, but the value must be no
+       greater than \377, even in modes where higher  code  point  values  are
+       supported.  Any  subsequent  digits  stand for themselves. If there are
+       fewer than three octal digits, the sequence is taken as a decimal  back
+       reference.  Thus, for example, \12 is always a back reference, indepen-
+       dent of how many captures there are in the pattern. An error is  gener-
+       ated for a reference to a non-existent capturing group.
 
    Constraints on character values
 
@@ -10162,11 +10198,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 September 2024
+       Last updated: 21 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    17 Sepbember 2024               PCRE2PATTERN(3)
+PCRE2 10.45                    21 Sepbember 2024               PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
  
  
@@ -11705,11 +11741,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 20 September 2024
+       Last updated: 21 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    20 September 2024                PCRE2SYNTAX(3)
+PCRE2 10.45                    21 September 2024                PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
  
  

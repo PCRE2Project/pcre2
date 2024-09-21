@@ -95,6 +95,8 @@ Perl.
 
 19. Merged PR483, which adding \g<n> and $<name> to replacement strings.
 
+20. Merged PR470, which adds PCRE2_EXTRA_NO_BS0 and PCRE2_EXTRA_PYTHON_OCTAL.
+
 
 Version 10.44 07-June-2024
 --------------------------

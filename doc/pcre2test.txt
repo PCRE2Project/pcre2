@@ -603,9 +603,11 @@ PATTERN MODIFIERS
              never_utf                 set PCRE2_NEVER_UTF
          /n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
              no_auto_possess           set PCRE2_NO_AUTO_POSSESS
+             no_bs0                    set PCRE2_EXTRA_NO_BS0
              no_dotstar_anchor         set PCRE2_NO_DOTSTAR_ANCHOR
              no_start_optimize         set PCRE2_NO_START_OPTIMIZE
              no_utf_check              set PCRE2_NO_UTF_CHECK
+             python_octal              set PCRE2_EXTRA_PYTHON_OCTAL
              ucp                       set PCRE2_UCP
              ungreedy                  set PCRE2_UNGREEDY
              use_offset_limit          set PCRE2_USE_OFFSET_LIMIT
@@ -2018,8 +2020,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 July 2024
+       Last updated: 21 September 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE 10.45                       23 July 2024                     PCRE2TEST(1)
+PCRE 10.45                     21 September 2024                  PCRE2TEST(1)

@@ -2106,6 +2106,19 @@ and the end. This is achieved by automatically inserting the code for "\b(?:"
 at the start of the compiled pattern and ")\b" at the end. The option may be
 used with PCRE2_LITERAL. However, it is ignored if PCRE2_EXTRA_MATCH_LINE is
 also set.
+<pre>
+  PCRE2_EXTRA_NO_BS0
+</pre>
+If this option is set (note that its final character is the digit 0) it locks
+out the use of the sequence \0 unless at least one more octal digit follows.
+<pre>
+  PCRE2_EXTRA_PYTHON_OCTAL
+</pre>
+If this option is set, PCRE2 follows Python's rules for interpreting octal
+escape sequences. The rules for handling sequences such as \14, which could
+be an octal number or a back reference are different. Details are given in the
+<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
+documentation.
 <a name="jitcompiling"></a></P>
 <br><a name="SEC21" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
 <P>

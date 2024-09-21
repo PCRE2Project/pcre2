@@ -2061,6 +2061,21 @@ and the end. This is achieved by automatically inserting the code for "\eb(?:"
 at the start of the compiled pattern and ")\eb" at the end. The option may be
 used with PCRE2_LITERAL. However, it is ignored if PCRE2_EXTRA_MATCH_LINE is
 also set.
+.sp
+  PCRE2_EXTRA_NO_BS0
+.sp
+If this option is set (note that its final character is the digit 0) it locks
+out the use of the sequence \e0 unless at least one more octal digit follows.
+.sp
+  PCRE2_EXTRA_PYTHON_OCTAL
+.sp
+If this option is set, PCRE2 follows Python's rules for interpreting octal
+escape sequences. The rules for handling sequences such as \e14, which could
+be an octal number or a back reference are different. Details are given in the
+.\" HREF
+\fBpcre2pattern\fP
+.\"
+documentation.
 .
 .
 .\" HTML <a name="jitcompiling"></a>

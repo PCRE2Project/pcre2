@@ -433,17 +433,23 @@ environment, these escapes are as follows:
   \r          carriage return (hex 0D) (but see below)
   \t          tab (hex 09)
   \0dd        character with octal code 0dd
-  \ddd        character with octal code ddd, or backreference
+  \ddd        character with octal code ddd, or back reference
   \o{ddd..}   character with octal code ddd..
   \xhh        character with hex code hh
   \x{hhh..}   character with hex code hhh..
   \N{U+hhh..} character with Unicode hex code point hhh..
 </pre>
+A description of how back references work is given
+<a href="#backreferences">later,</a>
+following the discussion of
+<a href="#group">parenthesized groups.</a>
+</P>
+<P>
 By default, after \x that is not followed by {, one or two hexadecimal
-digits are read (letters can be in upper or lower case). If the character that 
-follows \x is neither { nor a hexadecimal digit, an error occurs. This is 
-different from Perl's default behaviour, which generates a NUL character, but 
-is in line with Perl's "strict" behaviour. 
+digits are read (letters can be in upper or lower case). If the character that
+follows \x is neither { nor a hexadecimal digit, an error occurs. This is
+different from Perl's default behaviour, which generates a NUL character, but
+is in line with Perl's "strict" behaviour.
 </P>
 <P>
 Any number of hexadecimal digits may appear between \x{ and }. If a character
@@ -518,46 +524,49 @@ them the APC character has the value 255 (hex FF), but in the one Perl calls
 POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
 values, PCRE2 makes \c? generate 95; otherwise it generates 255.
 </P>
-<P>
-After \0 up to two further octal digits are read. If there are fewer than two
-digits, just those that are present are used. Thus the sequence \0\x\015
-specifies two binary zeros followed by a CR character (code value 13). Make
-sure you supply two digits after the initial zero if the pattern character that
-follows is itself an octal digit.
-</P>
+<br><b>
+Octal escapes and back references
+</b><br>
 <P>
 The escape \o must be followed by a sequence of octal digits, enclosed in
-braces. An error occurs if this is not the case. This escape is a recent
-addition to Perl; it provides way of specifying character code points as octal
-numbers greater than 0777, and it also allows octal numbers and backreferences
-to be unambiguously specified.
+braces. An error occurs if this is not the case. This escape provides a way of
+specifying character code points as octal numbers greater than 0777, and it
+also allows octal numbers and backreferences to be unambiguously distinguished.
+</P>
+<P>
+If braces are not used, after \0 up to two further octal digits are read.
+However, if the PCRE2_EXTRA_NO_BS0 option is set, at least one more octal digit
+must follow \0 (use \00 to generate a NUL character). Make sure you supply
+two digits after the initial zero if the pattern character that follows is
+itself an octal digit.
+</P>
+<P>
+Inside a character class, when a backslash is followed by any octal digit, up
+to three octal digits are read to generate a code point. Any subsequent digits
+stand for themselves. The sequences \8 and \9 are treated as the literal
+characters "8" and "9".
+</P>
+<P>
+Outside a character class, Perl's handling of a backslash followed by a digit
+other than 0 is complicated by ambiguity, and Perl has changed over time,
+causing PCRE2 also to change. From PCRE2 release 10.45 there is an option
+called PCRE2_EXTRA_PYTHON_OCTAL that causes PCRE2 to use Python's unambiguous
+rules. The next two subsections describe the two sets of rules.
 </P>
 <P>
 For greater clarity and unambiguity, it is best to avoid following \ by a
 digit greater than zero. Instead, use \o{...} or \x{...} to specify numerical
-character code points, and \g{...} to specify backreferences. The following
-paragraphs describe the old, ambiguous syntax.
+character code points, and \g{...} to specify backreferences.
 </P>
+<br><b>
+Perl rules for non-class backslash 1-9
+</b><br>
 <P>
-The handling of a backslash followed by a digit other than 0 is complicated,
-and Perl has changed over time, causing PCRE2 also to change.
-</P>
-<P>
-Outside a character class, PCRE2 reads the digit and any following digits as a
-decimal number. If the number is less than 10, begins with the digit 8 or 9, or
-if there are at least that many previous capture groups in the expression, the
-entire sequence is taken as a <i>backreference</i>. A description of how this
-works is given
-<a href="#backreferences">later,</a>
-following the discussion of
-<a href="#group">parenthesized groups.</a>
-Otherwise, up to three octal digits are read to form a character code.
-</P>
-<P>
-Inside a character class, PCRE2 handles \8 and \9 as the literal characters
-"8" and "9", and otherwise reads up to three octal digits following the
-backslash, using them to generate a data character. Any subsequent digits stand
-for themselves. For example, outside a character class:
+All the digits that follow the backslash are read as a decimal number. If the
+number is less than 10, begins with the digit 8 or 9, or if there are at least
+that many previous capture groups in the expression, the entire sequence is
+taken as a back reference. Otherwise, up to three octal digits are read to form
+a character code. For example:
 <pre>
   \040   is another way of writing an ASCII space
   \40    is the same, provided there are fewer than 40 previous capture groups
@@ -572,6 +581,19 @@ for themselves. For example, outside a character class:
 Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
 digits are ever read.
+</P>
+<br><b>
+Python rules for non_class backslash 1-9
+</b><br>
+<P>
+If there are at least three octal digits after the backslash, exactly three are
+read as an octal code point number, but the value must be no greater than
+\377, even in modes where higher code point values are supported. Any
+subsequent digits stand for themselves. If there are fewer than three octal
+digits, the sequence is taken as a decimal back reference. Thus, for example,
+\12 is always a back reference, independent of how many captures there are in
+the pattern. An error is generated for a reference to a non-existent capturing
+group.
 </P>
 <br><b>
 Constraints on character values
@@ -3949,7 +3971,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC33" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 September 2024
+Last updated: 21 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>
