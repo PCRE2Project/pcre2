@@ -5261,6 +5261,14 @@ a)"xI
 
 /(*LIMIT_HEAP=0)xxx/I
 
+/(*LIMIT_HEAP=123/use_length
+
+/(*LIMIT_MATCH=/use_length
+
+/(*CRLF)(*LIMIT_DEPTH=/use_length
+
+/(*CRLF)(*LIMIT_RECURSION=1)(*BOGUS/use_length
+
 /\d{0,3}(*:abc)(?C1)xxx/callout_info
 
 # ----------------------------------------------------------------------

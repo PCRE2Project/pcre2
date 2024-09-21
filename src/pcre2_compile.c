@@ -10404,12 +10404,13 @@ if ((options & PCRE2_LITERAL) == 0)
     {
     for (i = 0; i < sizeof(pso_list)/sizeof(pso); i++)
       {
-      uint32_t c, pp;
       const pso *p = pso_list + i;
 
       if (patlen - skipatstart - 2 >= p->length &&
           PRIV(strncmp_c8)(ptr + skipatstart + 2, p->name, p->length) == 0)
         {
+        uint32_t c, pp;
+
         skipatstart += p->length + 2;
         switch(p->type)
           {
@@ -10436,18 +10437,12 @@ if ((options & PCRE2_LITERAL) == 0)
           case PSO_LIMH:
           c = 0;
           pp = skipatstart;
-          if (!IS_DIGIT(ptr[pp]))
-            {
-            errorcode = ERR60;
-            ptr += pp;
-            goto HAD_EARLY_ERROR;
-            }
           while (pp < patlen && IS_DIGIT(ptr[pp]))
             {
             if (c > UINT32_MAX / 10 - 1) break;   /* Integer overflow */
             c = c*10 + (ptr[pp++] - CHAR_0);
             }
-          if (pp >= patlen || ptr[pp] != CHAR_RIGHT_PARENTHESIS)
+          if (pp >= patlen || pp == skipatstart || ptr[pp] != CHAR_RIGHT_PARENTHESIS)
             {
             errorcode = ERR60;
             ptr += pp;
