@@ -123,6 +123,8 @@ if (end > MAX_UTF_CODE_POINT) end = MAX_UTF_CODE_POINT;
 
 while (c <= end)
   {
+  uint32_t co;
+    
   if (c > skip_start)
     {
     c = skip_range[1];
@@ -132,7 +134,7 @@ while (c <= end)
     }
 
   /* Compute caseless set. */
-  uint32_t co = UCD_CASESET(c);
+  co = UCD_CASESET(c);
 
   if (co != 0 && (!(options & PARSE_CLASS_RESTRICTED_UTF)
                   || PRIV(ucd_caseless_sets)[co] > 127))
