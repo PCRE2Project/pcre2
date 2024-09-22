@@ -124,7 +124,7 @@ if (end > MAX_UTF_CODE_POINT) end = MAX_UTF_CODE_POINT;
 while (c <= end)
   {
   uint32_t co;
-    
+
   if (c > skip_start)
     {
     c = skip_range[1];
@@ -236,6 +236,10 @@ while (*ptr != META_CLASS_END)
       PCRE2_ASSERT(*ptr < META_END || *ptr == META_BIGVALUE);
 
       if (*ptr == META_BIGVALUE) ptr++;
+
+#ifdef EBCDIC
+#error "Missing EBCDIC support"
+#endif
       }
 
 #ifdef SUPPORT_UNICODE
@@ -262,13 +266,14 @@ while (*ptr != META_CLASS_END)
   return total_size;
 }
 
-uint32_t *PRIV(optimize_class)(uint32_t *start_ptr, uint32_t options,
-  size_t *buffer_size, compile_block* cb)
+class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
+  uint32_t options, compile_block* cb)
 {
+class_ranges* cranges;
 uint32_t *ptr = start_ptr + 1;
 uint32_t *buffer;
 uint32_t *dst;
-size_t size = 0, i;
+size_t range_list_size = 0, i;
 uint32_t tmp1, tmp2;
 
 PCRE2_ASSERT(*start_ptr == META_CLASS || *start_ptr == META_CLASS_NOT);
@@ -285,33 +290,37 @@ if (cb->cx->extra_options & PCRE2_EXTRA_CASELESS_RESTRICT)
 
 /* Compute required space for the range. */
 
-size = parse_class(start_ptr + 1, options, NULL);
+range_list_size = parse_class(start_ptr + 1, options, NULL);
 
-*buffer_size = size;
-if (size == 0) return NULL;
+/* Allocate buffer. */
 
-/* Allocate and buffer. */
+cranges = cb->cx->memctl.malloc(
+  sizeof(class_ranges) + range_list_size * sizeof(uint32_t),
+  cb->cx->memctl.memory_data);
 
-buffer = (uint32_t*)
-  cb->cx->memctl.malloc(size * sizeof(uint32_t), cb->cx->memctl.memory_data);
+if (cranges == NULL) return NULL;
 
-if (buffer == NULL) return NULL;
+cranges->next = NULL;
+cranges->range_list_size = range_list_size;
 
+if (range_list_size == 0) return cranges;
+
+buffer = (uint32_t*)(cranges + 1);
 parse_class(start_ptr + 1, options, buffer);
 
-if (size == 2) return buffer;
+if (range_list_size == 2) return cranges;
 
 /* In-place sorting of ranges. */
 
-i = (((size >> 2) - 1) << 1);
+i = (((range_list_size >> 2) - 1) << 1);
 while (TRUE)
   {
-  do_heapify(buffer, size, i);
+  do_heapify(buffer, range_list_size, i);
   if (i == 0) break;
   i -= 2;
   }
 
-i = size - 2;
+i = range_list_size - 2;
 while (TRUE)
   {
   tmp1 = buffer[i];
@@ -329,12 +338,12 @@ while (TRUE)
 /* Merge ranges whenever possible. */
 dst = buffer;
 ptr = buffer + 2;
-size -= 2;
+range_list_size -= 2;
 
 /* The second condition is a very rare corner case, where the end of the last
 range is the maximum character. This range cannot be extended further. */
 
-while (size > 0 && dst[1] != ~(uint32_t)0)
+while (range_list_size > 0 && dst[1] != ~(uint32_t)0)
   {
   if (dst[1] + 1 < ptr[0])
     {
@@ -345,11 +354,11 @@ while (size > 0 && dst[1] != ~(uint32_t)0)
   else if (dst[1] < ptr[1]) dst[1] = ptr[1];
 
   ptr += 2;
-  size -= 2;
+  range_list_size -= 2;
   }
 
-*buffer_size = (size_t)(dst + 2 - buffer);
-return buffer;
+cranges->range_list_size = (size_t)(dst + 2 - buffer);
+return cranges;
 }
 
 #endif /* SUPPORT_WIDE_CHARS */

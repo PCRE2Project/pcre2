@@ -598,9 +598,13 @@ do.
 
 For classes containing characters with values greater than 255 or that contain
 \p or \P, OP_XCLASS is used. It optionally uses a bit map if any acceptable
-code points are less than 256, followed by a list of pairs (for a range) and/or
-single characters and/or properties. In caseless mode, all equivalent
-characters are explicitly listed.
+code points are less than 256. After the bit map, the properties of the
+character class are listed, if they are present. The items in the list
+follows the declaration order of the pattern string. The property list
+is followed by single characters and/or character ranges, if they are
+present. The characters/ranges are sorted in ascending order, and at
+least one non-matching character must be present between any two of
+them. In caseless mode, all equivalent characters are explicitly listed.
 
 OP_XCLASS is followed by a LINK_SIZE value containing the total length of the
 opcode and its data. This is followed by a code unit containing flag bits:

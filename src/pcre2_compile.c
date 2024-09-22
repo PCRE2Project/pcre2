@@ -5648,8 +5648,7 @@ PCRE2_UCHAR *class_uchardata;
 #ifdef SUPPORT_WIDE_CHARS
 BOOL xclass;
 PCRE2_UCHAR *class_uchardata_base;
-uint32_t* class_ranges;
-size_t class_ranges_size;
+class_ranges* cranges;
 #endif
 
 /* Set up the default and non-default settings for greediness */
@@ -5963,18 +5962,35 @@ for (;; pptr++)
 
 #ifdef SUPPORT_WIDE_CHARS
 #if PCRE2_CODE_UNIT_WIDTH == 8
-    class_ranges = NULL;
-    class_ranges_size = 0;
+    cranges = NULL;
 
     if (utf)
 #endif
       {
-      class_ranges = PRIV(optimize_class)(pptr, options, &class_ranges_size, cb);
-
-      if (class_ranges == NULL && class_ranges_size != 0)
+      if (lengthptr != NULL)
         {
-        *errorcodeptr = ERR21;
-        return 0;
+        cranges = PRIV(optimize_class)(pptr, options, cb);
+
+        if (cranges == NULL)
+          {
+          *errorcodeptr = ERR21;
+          return 0;
+          }
+
+        /* Caching the pre-processed character ranges. */
+        if (cb->next_cranges != NULL)
+          cb->next_cranges->next = cranges;
+        else
+          cb->cranges = cranges;
+
+        cb->next_cranges = cranges;
+        }
+      else
+        {
+        /* Reuse the pre-processed character ranges. */
+        cranges = cb->cranges;
+        PCRE2_ASSERT(cranges != NULL);
+        cb->cranges = cranges->next;
         }
       }
 
@@ -6277,9 +6293,9 @@ for (;; pptr++)
 
           if (d == CHAR_CR || d == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
 
-#ifdef SUPPORT_WIDE_CHARS
-          /* Character ranges are ignored when class_ranges is present. */
-          if (class_ranges != NULL) continue;
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+          if (cranges != NULL) continue;
 #endif
 
           /* In an EBCDIC environment, Perl treats alphabetic ranges specially
@@ -6327,17 +6343,25 @@ for (;; pptr++)
           class_has_8bitchar += add_to_class(classbits, &class_uchardata,
             options, cb, c, d);
           goto CONTINUE_CLASS;   /* Go get the next char in the class */
+#else
+          PCRE2_ASSERT(cranges != NULL);
+          continue;
+#endif
           }  /* End of range handling */
 
-#ifdef SUPPORT_WIDE_CHARS
         /* Character ranges are ignored when class_ranges is present. */
-        if (class_ranges != NULL) continue;
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+        if (cranges != NULL) continue;
 #endif
-
         /* Handle a single character. */
 
         class_has_8bitchar +=
           add_to_class(classbits, &class_uchardata, options, cb, meta, meta);
+#else
+        PCRE2_ASSERT(cranges != NULL);
+        continue;
+#endif
         }
 
       /* Continue to the next item in the class. */
@@ -6366,12 +6390,12 @@ for (;; pptr++)
       }   /* End of main class-processing loop */
 
 #ifdef SUPPORT_WIDE_CHARS
-    if (class_ranges != NULL)
+    if (cranges != NULL)
       {
-      uint32_t *range = class_ranges;
-      uint32_t *end = class_ranges + class_ranges_size;
+      uint32_t *range = (uint32_t*)(cranges + 1);
+      uint32_t *end = range + cranges->range_list_size;
 
-      do
+      while (range < end)
         {
         class_has_8bitchar +=
           add_to_class(classbits, &class_uchardata, options, cb,
@@ -6389,9 +6413,9 @@ for (;; pptr++)
 
         range += 2;
         }
-      while (range < end);
 
-      cb->cx->memctl.free(class_ranges, cb->cx->memctl.memory_data);
+      if (lengthptr == NULL)
+        cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
       }
 #endif
 
@@ -10360,6 +10384,10 @@ cb.start_code = cworkspace;
 cb.start_pattern = pattern;
 cb.start_workspace = cworkspace;
 cb.workspace_size = COMPILE_WORK_SIZE;
+#ifdef SUPPORT_WIDE_CHARS
+cb.cranges = NULL;
+cb.next_cranges = NULL;
+#endif
 
 /* Maximum back reference and backref bitmap. The bitmap records up to 31 back
 references to help in deciding whether (.*) can be treated as anchored or not.
@@ -11102,6 +11130,8 @@ version of the pattern, free it before returning. Also free the list of named
 groups if a larger one had to be obtained, and likewise the group information
 vector. */
 
+PCRE2_ASSERT(cb.cranges == NULL);
+
 EXIT:
 #ifdef SUPPORT_VALGRIND
 if (zero_terminated) VALGRIND_MAKE_MEM_DEFINED(pattern + patlen, CU2BYTES(1));
@@ -11112,6 +11142,7 @@ if (cb.named_group_list_size > NAMED_GROUP_LIST_SIZE)
   ccontext->memctl.free((void *)cb.named_groups, ccontext->memctl.memory_data);
 if (cb.groupinfo != stack_groupinfo)
   ccontext->memctl.free((void *)cb.groupinfo, ccontext->memctl.memory_data);
+
 return re;    /* Will be NULL after an error */
 
 /* Errors discovered in parse_regex() set the offset value in the compile
@@ -11132,6 +11163,20 @@ HAD_ERROR:
 *errorptr = errorcode;
 pcre2_code_free(re);
 re = NULL;
+
+#ifdef SUPPORT_WIDE_CHARS
+if (cb.cranges != NULL)
+  {
+  class_ranges* cranges = cb.cranges;
+  do
+    {
+    class_ranges* next_cranges = cranges->next;
+    cb.cx->memctl.free(cranges, cb.cx->memctl.memory_data);
+    cranges = next_cranges;
+    }
+  while (cranges != NULL);
+  }
+#endif
 goto EXIT;
 }
 
