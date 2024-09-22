@@ -82,20 +82,22 @@ pattern.
 14. Item 43 of 10.43 was incomplete because it addressed only \z and not \Z,
 which was still misbehaving when matching fragments inside invalid UTF strings.
 
-15. Octal escapes of the form \045 or \111 were not being recognized in 
+15. Octal escapes of the form \045 or \111 were not being recognized in
 substitution strings, and if encountered gave an error, though the \o{...} form
 was recognized. This bug is now fixed.
 
-16. Merged PR475, which implements title casing in substitution strings a la 
+16. Merged PR475, which implements title casing in substitution strings a la
 Perl.
 
 17. Merged PR478, which disallows \x if not followed by { or a hex digit.
 
 18. Merged PR473, which implements Python-style backrefs in substitutions.
 
-19. Merged PR483, which adding \g<n> and $<name> to replacement strings.
+19. Merged PR483, which is adding \g<n> and $<name> to replacement strings.
 
 20. Merged PR470, which adds PCRE2_EXTRA_NO_BS0 and PCRE2_EXTRA_PYTHON_OCTAL.
+
+21. Prevent 1 byte overread when parsing malformed patterns with early VERBs.
 
 
 Version 10.44 07-June-2024
