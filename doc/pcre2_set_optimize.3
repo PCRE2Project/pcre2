@@ -23,9 +23,19 @@ The result is zero for success, PCRE2_ERROR_NULL if \fIccontext\fP is NULL,
 or PCRE2_ERROR_BADOPTION if \fIdirective\fP is unknown. The latter could be
 useful to detect if a certain optimization is available.
 .P
-There is a complete description of the PCRE2 native API, including all
-permitted values for the \fIdirective\fP parameter of \fBpcre2_set_optimize()\fP,
-in the
+The list of possible values for the \fIdirective\fP parameter are:
+.sp
+  PCRE2_OPTIMIZATION_FULL   Enable all optimizations (default)
+  PCRE2_OPTIMIZATION_NONE   Disable all optimizations
+  PCRE2_AUTO_POSSESS        Enable auto-possessification
+  PCRE2_AUTO_POSSESS_OFF    Disable auto-possessification
+  PCRE2_DOTSTAR_ANCHOR      Enable implicit dotstar anchoring
+  PCRE2_DOTSTAR_ANCHOR_OFF  Disable implicit dotstar anchoring
+  PCRE2_START_OPTIMIZE      Enable start-up optimizations at match time
+  PCRE2_START_OPTIMIZE_OFF  Disable start-up optimizations at match time
+.sp
+There is a complete description of the PCRE2 native API, including detailed
+descriptions \fIdirective\fP parameter values in the
 .\" HREF
 \fBpcre2api\fP
 .\"
