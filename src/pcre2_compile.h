@@ -175,8 +175,8 @@ therefore no need for it to have a length entry, so use a high value. */
 
 /* Merge intersecting ranges of classes. */
 
-uint32_t *PRIV(optimize_class)(uint32_t *start_ptr, uint32_t options,
-  size_t *buffer_size, compile_block* cb);
+class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
+  uint32_t options, compile_block* cb);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 

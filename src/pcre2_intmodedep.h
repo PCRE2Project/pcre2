@@ -723,6 +723,15 @@ typedef struct named_group {
   uint16_t     isdup;         /* TRUE if a duplicate */
 } named_group;
 
+/* Structure for caching sorted ranges. This improves the performance
+of translating META code to byte code. */
+
+typedef struct class_ranges {
+  struct class_ranges *next;  /* Next class ranges */
+  size_t range_list_size;     /* Size of ranges array */
+  /* Followed by the list of ranges (start/end pairs) */
+} class_ranges;
+
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
 
@@ -767,6 +776,10 @@ typedef struct compile_block {
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
   BOOL had_recurse;                /* Had a pattern recursion or subroutine call */
   BOOL dupnames;                   /* Duplicate names exist */
+#ifdef SUPPORT_WIDE_CHARS
+  class_ranges* cranges;           /* First class range. */
+  class_ranges* next_cranges;      /* Next class range. */
+#endif
 } compile_block;
 
 /* Structure for keeping the properties of the in-memory stack used

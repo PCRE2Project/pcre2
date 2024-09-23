@@ -2555,4 +2555,9 @@
     \x{2c63}\x{2c64}\x{2c65}\x{2c66}\x{2c67}
     \x{a7af}\x{a7b0}\x{a7b1}\x{a7b2}\x{a7b3}
 
+/[\x{100}-\x{400}\p{Ll}\x{500}-\x{700}\p{OldHungarian}\x{701}\p{bidiLRI}]/B,utf
+
+# Freeing memory on error test
+/[\x{100}-\x{400}][\x{100}-\x{300}][\x{100}-\x{200}]\8/i,utf
+
 # End of testinput5

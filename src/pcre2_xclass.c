@@ -111,7 +111,10 @@ while ((t = *data++) != XCL_END)
     else
 #endif
     x = *data++;
-    if (c == x) return !negated;
+
+    /* Since character ranges follow the properties, and they are
+    sorted, early return is possible for all characters <= x. */
+    if (c <= x) return (c == x) ? !negated : negated;
     }
   else if (t == XCL_RANGE)
     {
@@ -127,7 +130,10 @@ while ((t = *data++) != XCL_END)
       x = *data++;
       y = *data++;
       }
-    if (c >= x && c <= y) return !negated;
+
+    /* Since character ranges follow the properties, and they are
+    sorted, early return is possible for all characters <= y. */
+    if (c <= y) return (c >= x) ? !negated : negated;
     }
 
 #ifdef SUPPORT_UNICODE
