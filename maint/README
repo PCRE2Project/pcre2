@@ -187,11 +187,10 @@ new release.
 
 . I used to test new releases myself on a number of different operating
   systems. For example, on Solaris it is helpful to test using Sun's cc
-  compiler as a change from gcc. Adding -xarch=v9 to the cc options does a
-  64-bit test, but it also needs -S 64 for pcre2test to increase the stack size
-  for test 2. Since I retired I can no longer do much of this. There are 
-  automated tests under Ubuntu, Alpine, and Windows that are now set up as 
-  GitHub actions. Check that they are running clean.
+  compiler as a change from gcc. Adding -m64 to the cc options does a 64-bit
+  build. Since I retired I can no longer do much of this. There are automated
+  tests under Ubuntu, Alpine, macOS and Windows that are now set up as GitHub
+  actions. Check that they are running clean.
 
 . The buildbots at http://buildfarm.opencsw.org/ do some automated testing
   of PCRE2 and should also be checked before putting out a release. (June 2024: 

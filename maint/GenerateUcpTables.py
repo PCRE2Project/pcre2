@@ -164,7 +164,7 @@ for utt in utt_table:
 
 # Output the long string of concatenated names
 
-f.write('\nconst char PRIV(utt_names)[] =\n');
+f.write('\nconst char PRIV(utt_names)[] =\n')
 last = ''
 for utt in utt_table:
   if utt == utt_table[-1]:

@@ -3570,7 +3570,9 @@ switch(re->newline_convention)
   mb->nltype = NLTYPE_ANYCRLF;
   break;
 
-  default: return PCRE2_ERROR_INTERNAL;
+  default:
+  PCRE2_DEBUG_UNREACHABLE();
+  return PCRE2_ERROR_INTERNAL;
   }
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,

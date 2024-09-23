@@ -298,6 +298,7 @@ while ((t = *data++) != XCL_END)
       default. */
 
       default:
+      PCRE2_DEBUG_UNREACHABLE();
       return FALSE;
       }
 

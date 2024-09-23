@@ -262,6 +262,7 @@ from GenerateCommon import \
 
 # Some general parameters
 
+MAX_LIST = 8             # keep on sync with the value in pcre2_auto_possess.c
 MAX_UNICODE = 0x110000
 NOTACHAR = 0xffffffff
 
@@ -648,7 +649,7 @@ for c in range(MAX_UNICODE):
   s = set(bprops[c])
   for i in range(len(bool_props_lists)):
     if s == set(bool_props_lists[i]):
-      break;
+      break
   else:
     bool_props_lists.append(bprops[c])
     i += 1
@@ -693,6 +694,7 @@ for c in range(MAX_UNICODE):
           found = 1
 
       # Add new characters to an existing set
+      # TODO: make sure the data doesn't overflow a list[]
 
       if found:
         found = 0
@@ -715,7 +717,7 @@ for c in range(MAX_UNICODE):
 
 caseless_offsets = [0] * MAX_UNICODE
 
-offset = 1;
+offset = 1
 for s in caseless_sets:
   for x in s:
     caseless_offsets[x] = offset
