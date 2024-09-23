@@ -1064,7 +1064,7 @@ pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength, uint32_t options,
   PCRE2_UCHAR **buffptr, PCRE2_SIZE *bufflenptr,
   pcre2_convert_context *ccontext)
 {
-int i, rc;
+int rc;
 PCRE2_UCHAR dummy_buffer[DUMMY_BUFFER_SIZE];
 PCRE2_UCHAR *use_buffer = dummy_buffer;
 PCRE2_SIZE use_length = DUMMY_BUFFER_SIZE;
@@ -1118,7 +1118,7 @@ if (buffptr != NULL && *buffptr != NULL)
 /* Call an individual converter, either just once (if a buffer was provided or
 just the length is needed), or twice (if a memory allocation is required). */
 
-for (i = 0; i < 2; i++)
+for (int i = 0; i < 2; i++)
   {
   PCRE2_UCHAR *allocated;
   BOOL dummyrun = buffptr == NULL || *buffptr == NULL;
@@ -1158,7 +1158,11 @@ for (i = 0; i < 2; i++)
   use_length = *bufflenptr + 1;
   }
 
-PCRE2_UNREACHABLE(); /* Control never reaches here */
+/* Normally, we should exit this function in the previous loop, but we
+can't return an API call without a meaningful value, so if something
+went terribly wrong, we then will just report it as an intenal error */
+
+return PCRE2_ERROR_INTERNAL;
 }
 
 
