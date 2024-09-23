@@ -15246,6 +15246,20 @@ Failed: error -49 at offset 3 in replacement: unknown substring
     abc\=replace=>${namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1}<
  1: >b<
 
+/abc/substitute_extended
+    abc\=replace=\a\b\e\f\n\r\t\v\\
+ 1: \x07\x08\x1b\x0c\x0a\x0d\x09\x0b\
+
+/a(b)c/substitute_extended
+    LabcR\=replace=>$&<
+ 1: L>abc<R
+    LabcR\=replace=>$`<
+ 1: L>L<R
+    LabcR\=replace=>$'<
+ 1: L>R<R
+    LabcR\=replace=>$_<
+ 1: L>LabcR<R
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 Capture group count = 2
 Max back reference = 1

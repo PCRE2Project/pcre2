@@ -4803,6 +4803,15 @@ B)x/alt_verbnames,mark
 /a(?<namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1>b)c/substitute_extended
     abc\=replace=>${namedverylongbutperfectlylegalsoyoushouldnthaveaproblem_1}<
 
+/abc/substitute_extended
+    abc\=replace=\a\b\e\f\n\r\t\v\\
+
+/a(b)c/substitute_extended
+    LabcR\=replace=>$&<
+    LabcR\=replace=>$`<
+    LabcR\=replace=>$'<
+    LabcR\=replace=>$_<
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
 /((p(?'K/
