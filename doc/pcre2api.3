@@ -3835,13 +3835,14 @@ not influence the extended substitution syntax described below.
 PCRE2_SUBSTITUTE_EXTENDED causes extra processing to be applied to the
 replacement string. Without this option, only the dollar character is special,
 and only the group insertion forms listed above are valid. When
-PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
+PCRE2_SUBSTITUTE_EXTENDED is set, several things change:
 .P
 Firstly, backslash in a replacement string is interpreted as an escape
 character. The usual forms such as \ex{ddd} can be used to specify particular
 character codes, and backslash followed by any non-alphanumeric character
 quotes that character. Extended quoting can be coded using \eQ...\eE, exactly
-as in pattern strings.
+as in pattern strings. The escapes \eb and \ev are interpreted as the
+characters backspace and vertical tab, respectively.
 .P
 The interpretation of backslash followed by one or more digits is the same as
 in a pattern, which in Perl has some ambiguities. Details are given in the
@@ -3883,18 +3884,26 @@ the result of processing "\eUaa\eLBB\eEcc\eE" is "AAbbcc"; the final \eE has no
 effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do
 not apply to replacement strings.
 .P
-The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
+Another effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add the following
+substitutions:
+.sp
+  $&     synonymous with $0 (that is, the entire matched substring)
+  $`     substring that precedes the match
+  $'     substring that follows the match
+  $_     the entire input string
+.sp
+The final effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
 by Bash:
 .sp
   ${n:-string}
   ${n:+string1:string2}
 .sp
-As before, \fIn\fP may be a group number or a name. The first form specifies a
-default value. If group \fIn\fP is set, its value is inserted; if not, the string is
-expanded and the result inserted. The second form specifies strings that are
-expanded and inserted when group \fIn\fP is set or unset, respectively. The first
-form is just a convenient shorthand for
+As in the simple case, \fIn\fP may be a group number or a name. The first form
+specifies a default value. If group \fIn\fP is set, its value is inserted; if
+not, the string is expanded and the result inserted. The second form specifies
+strings that are expanded and inserted when group \fIn\fP is set or unset,
+respectively. The first form is just a convenient shorthand for
 .sp
   ${n:+${n}:string}
 .sp

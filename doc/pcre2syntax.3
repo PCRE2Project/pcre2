@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "21 September 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "23 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -635,7 +635,8 @@ special character is the dollar character in one of the following forms:
   $<name>             insert the contents of named group
   $*MARK or ${*MARK}  insert a control verb name
 .sp
-If PCRE2_SUBSTITUTE_EXTENDED is set, there is additional interpretation:
+$0 inserts the entire matched substring. If PCRE2_SUBSTITUTE_EXTENDED is set,
+there is additional interpretation:
 .P
 1. Backslash is an escape character, and the forms described in "ESCAPED
 CHARACTERS" above are recognized. Also:
@@ -648,14 +649,28 @@ CHARACTERS" above are recognized. Also:
   \eu\eL      force next character to upper case, then all lower
   \el\eU      force next character to lower case, then all upper
   \eE        end \eL or \eU case forcing
+  \eb        backspace character (note: as in character class in pattern)
+  \ev        vertical tab character (note: not the same as in a pattern)
 .sp
-2. Capture substitution supports the following additional forms:
+2. The Python form \eg<n>, where the angle brackets are part of the syntax and 
+\fIn\fP is either a group name or a number, is recognized as an alternative way 
+of inserting the contents of a group, for example \eg<3>.
+.P
+3. Capture substitution supports the following additional forms:
 .sp
   ${n:-string}             default for unset group
   ${n:+string1:string2}    values for set/unset group
 .sp
 The substitution strings themselves are expanded. Backslash can be used to
 escape colons and closing curly brackets.
+.P
+4. The following additional forms of dollar escapes are recognized:
+.sp
+  $&     synonymous with $0
+  $`     substring that precedes the match
+  $'     substring that follows the match
+  $_     the entire input string
+.sp
 .
 .
 .SH "SEE ALSO"
@@ -679,6 +694,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 September 2024
+Last updated: 23 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

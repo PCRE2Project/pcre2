@@ -99,6 +99,9 @@ Perl.
 
 21. Prevent 1 byte overread when parsing malformed patterns with early VERBs.
 
+22. Merged PR491 which adds $& $` $' and $_ to substitution replacements, as
+well as interpreting \b and \v as characters.
+
 
 Version 10.44 07-June-2024
 --------------------------
