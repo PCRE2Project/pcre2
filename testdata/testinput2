@@ -6621,4 +6621,26 @@ a)"xI
     abc\=replace=\1
     abc\=replace=\12
 
+/[[a]/
+    [
+    a
+
+/[[a]/extended_class
+
+/[!--a]/
+    !
+    "
+    a
+    -
+
+/[!--a]/extended_class
+
+/[a||a]/extended_class
+
+/[a&&a]/extended_class
+
+/[a~~a]/extended_class
+
+/[a-/extended_class
+
 # End of testinput2

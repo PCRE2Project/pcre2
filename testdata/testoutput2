@@ -19544,6 +19544,40 @@ Failed: error -49 at offset 2 in replacement: unknown substring
     abc\=replace=\12
 Failed: error -49 at offset 3 in replacement: unknown substring
 
+/[[a]/
+    [
+ 0: [
+    a
+ 0: a
+
+/[[a]/extended_class
+Failed: error 203 at offset 2: unsupported extended character class
+
+/[!--a]/
+    !
+ 0: !
+    "
+ 0: "
+    a
+ 0: a
+    -
+ 0: -
+
+/[!--a]/extended_class
+Failed: error 203 at offset 3: unsupported extended character class
+
+/[a||a]/extended_class
+Failed: error 203 at offset 3: unsupported extended character class
+
+/[a&&a]/extended_class
+Failed: error 203 at offset 3: unsupported extended character class
+
+/[a~~a]/extended_class
+Failed: error 203 at offset 3: unsupported extended character class
+
+/[a-/extended_class
+Failed: error 106 at offset 3: missing terminating ] for character class
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -674,7 +674,7 @@ are allowed. */
    PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
    PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_EXTENDED_CLASS)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
    (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_CASELESS_RESTRICT)
@@ -3654,6 +3654,8 @@ while (ptr < ptrend)
 
     /* Loop for the contents of the class */
 
+    BOOL is_extended = (cb->external_options & PCRE2_EXTENDED_CLASS) != 0;
+
     for (;;)
       {
       BOOL char_is_literal = TRUE;
@@ -3783,6 +3785,16 @@ while (ptr < ptrend)
 
         *parsed_pattern++ = posix_negate? META_POSIX_NEG : META_POSIX;
         *parsed_pattern++ = posix_class;
+        }
+
+      /* Handle unsupported extended syntax */
+      else if (is_extended &&
+               (c == CHAR_LEFT_SQUARE_BRACKET ||
+                ((c == CHAR_VERTICAL_LINE || c == CHAR_MINUS || c == CHAR_AMPERSAND || c == CHAR_TILDE) && ptr < ptrend && *ptr == c)))
+        {
+        /* Unescaped [, or unescaped "||", "--", "&&", "~~" */
+        errorcode = ERR103;
+        goto FAILED;
         }
 
       /* Handle potential start of range */
