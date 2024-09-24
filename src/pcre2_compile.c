@@ -5265,7 +5265,6 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits
   cb            compile data
   start         start of range character
   end           end of range character
@@ -5383,7 +5382,6 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits
   cb            compile data
   start         start of range character
   end           end of range character
@@ -5402,6 +5400,7 @@ return add_to_class_internal(classbits, uchardptr, options, cb, start, end);
 }
 
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
 /*************************************************
 *   External entry point for add list to class   *
 *************************************************/
@@ -5416,12 +5415,8 @@ Arguments:
   classbits     the bit map for characters < 256
   uchardptr     points to the pointer for extra data
   options       the options bits
-  xoptions      the extra options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
-  except        character to omit; this is used when adding lists of
-                  case-equivalent characters to avoid including the one we
-                  already know about
 
 Returns:        the number of < 256 characters added
                 the pointer to extra data is updated
@@ -5429,26 +5424,27 @@ Returns:        the number of < 256 characters added
 
 static unsigned int
 add_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  uint32_t options, compile_block *cb, const uint32_t *p, unsigned int except)
+  uint32_t options, compile_block *cb, const uint32_t *p)
 {
 unsigned int n8 = 0;
-while (p[0] < NOTACHAR)
+while (p[0] < 256)
   {
   unsigned int n = 0;
-  if (p[0] != except)
-    {
-    while(p[n+1] == p[0] + n + 1) n++;
-    cb->class_range_start = p[0];
-    cb->class_range_end = p[n];
-    n8 += add_to_class_internal(classbits, uchardptr, options, cb, p[0], p[n]);
-    }
+
+  while(p[n+1] == p[0] + n + 1) n++;
+  cb->class_range_start = p[0];
+  cb->class_range_end = p[n];
+  n8 += add_to_class_internal(classbits, uchardptr, options, cb, p[0], p[n]);
+
   p += n + 1;
   }
 return n8;
 }
+#endif
 
 
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
 /*************************************************
 *    Add characters not in a list to a class     *
 *************************************************/
@@ -5472,19 +5468,19 @@ static unsigned int
 add_not_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
   uint32_t options, compile_block *cb, const uint32_t *p)
 {
-BOOL utf = (options & PCRE2_UTF) != 0;
 unsigned int n8 = 0;
 if (p[0] > 0)
   n8 += add_to_class(classbits, uchardptr, options, cb, 0, p[0] - 1);
-while (p[0] < NOTACHAR)
+while (p[0] < 256)
   {
   while (p[1] == p[0] + 1) p++;
-  n8 += add_to_class(classbits, uchardptr, options, cb, p[0] + 1,
-    (p[1] == NOTACHAR) ? (utf ? 0x10ffffu : 0xffffffffu) : p[1] - 1);
+  n8 += add_to_class(classbits, uchardptr, options, cb,
+    p[0] + 1, (p[1] > 255) ? 255 : p[1] - 1);
   p++;
   }
 return n8;
 }
+#endif
 
 
 
@@ -6207,25 +6203,51 @@ for (;; pptr++)
           case and by both cases being in the same "not-x" sublist). */
 
           case ESC_h:
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+          if (cranges != NULL) break;
+#endif
           (void)add_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, cb, PRIV(hspace_list),
-              NOTACHAR);
+            options & ~PCRE2_CASELESS, cb, PRIV(hspace_list));
+#else
+          PCRE2_ASSERT(cranges != NULL);
+#endif
           break;
 
           case ESC_H:
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+          if (cranges != NULL) break;
+#endif
           (void)add_not_list_to_class(classbits, &class_uchardata,
             options & ~PCRE2_CASELESS, cb, PRIV(hspace_list));
+#else
+          PCRE2_ASSERT(cranges != NULL);
+#endif
           break;
 
           case ESC_v:
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+          if (cranges != NULL) break;
+#endif
           (void)add_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, cb, PRIV(vspace_list),
-              NOTACHAR);
+            options & ~PCRE2_CASELESS, cb, PRIV(vspace_list));
+#else
+          PCRE2_ASSERT(cranges != NULL);
+#endif
           break;
 
           case ESC_V:
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+          if (cranges != NULL) break;
+#endif
           (void)add_not_list_to_class(classbits, &class_uchardata,
             options & ~PCRE2_CASELESS, cb, PRIV(vspace_list));
+#else
+          PCRE2_ASSERT(cranges != NULL);
+#endif
           break;
 
           /* If Unicode is not supported, \P and \p are not allowed and are

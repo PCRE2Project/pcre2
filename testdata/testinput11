@@ -377,4 +377,10 @@
 /abc/substitute_extended,replace=>\o{012345}<
     abc
 
+# Character range merging tests
+
+/[\x{100}-\x{200}\H\x{8000}-\x{9000}]/B
+
+/[\x{100}-\x{200}\V\x{8000}-\x{9000}]/B
+
 # End of testinput11

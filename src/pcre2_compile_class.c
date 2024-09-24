@@ -78,8 +78,12 @@ while (TRUE)
 
 #ifdef SUPPORT_UNICODE
 
-#define PARSE_CLASS_CASELESS_UTF      0x1
-#define PARSE_CLASS_RESTRICTED_UTF    0x2
+#define PARSE_CLASS_UTF               0x1
+#define PARSE_CLASS_CASELESS_UTF      0x2
+#define PARSE_CLASS_RESTRICTED_UTF    0x4
+
+/* Get the range of nocase characters which includes the
+'c' character passed as argument, or directly follows 'c'. */
 
 static const uint32_t*
 get_nocase_range(uint32_t c)
@@ -104,6 +108,9 @@ while (TRUE)
   }
 }
 
+/* Get the list of othercase characters, which belongs to the passed range.
+Create ranges from these characters, and append them to the buffer argument. */
+
 static size_t
 utf_caseless_extend(uint32_t start, uint32_t end, uint32_t options,
   uint32_t *buffer)
@@ -116,6 +123,10 @@ uint32_t tmp[3];
 size_t result = 2;
 const uint32_t *skip_range = get_nocase_range(c);
 uint32_t skip_start = skip_range[0];
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+PCRE2_ASSERT(options & PARSE_CLASS_UTF);
+#endif
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
 if (end > MAX_UTF_CODE_POINT) end = MAX_UTF_CODE_POINT;
@@ -157,6 +168,10 @@ while (c <= end)
   /* Add characters. */
   do
     {
+#if PCRE2_CODE_UNIT_WIDTH == 16
+    if (!(options & PARSE_CLASS_UTF) && *list > 0xffff) continue;
+#endif
+
     if (*list < new_start)
       {
       if (*list + 1 == new_start)
@@ -197,14 +212,96 @@ while (c <= end)
 
 #endif
 
+/* Add a character list to a buffer. */
+
+static size_t
+append_char_list(const uint32_t *p, uint32_t *buffer)
+{
+const uint32_t *n;
+size_t result = 0;
+
+while (*p != NOTACHAR)
+  {
+  n = p;
+  while (n[0] == n[1] - 1) n++;
+
+  PCRE2_ASSERT(*p < 0xffff);
+
+  if (buffer != NULL)
+    {
+    buffer[0] = *p;
+    buffer[1] = *n;
+    buffer += 2;
+    }
+
+  result += 2;
+  p = n + 1;
+  }
+
+  return result;
+}
+
+/* Add a negated character list to a buffer. */
+static size_t
+append_negated_char_list(const uint32_t *p, uint32_t options, uint32_t *buffer)
+{
+const uint32_t *n;
+uint32_t start = 0;
+size_t result = 2;
+
+(void)options; /* Avoid compiler warning. */
+PCRE2_ASSERT(*p > 0);
+
+while (*p != NOTACHAR)
+  {
+  n = p;
+  while (n[0] == n[1] - 1) n++;
+
+  PCRE2_ASSERT(*p < 0xffff);
+
+  if (buffer != NULL)
+    {
+    buffer[0] = start;
+    buffer[1] = *p - 1;
+    buffer += 2;
+    }
+
+  result += 2;
+  start = *n + 1;
+  p = n + 1;
+  }
+
+  if (buffer != NULL)
+    {
+    buffer[0] = start;
+#if PCRE2_CODE_UNIT_WIDTH == 8
+    buffer[1] = MAX_UTF_CODE_POINT;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+#ifdef SUPPORT_UNICODE
+    buffer[1] = (options & PARSE_CLASS_UTF) ? MAX_UTF_CODE_POINT : 0xffff;
+#else
+    buffer[1] = 0xffff;
+#endif
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+#ifdef SUPPORT_UNICODE
+    buffer[1] = (options & PARSE_CLASS_UTF) ? MAX_UTF_CODE_POINT : 0xffffffff;
+#else
+    buffer[1] = 0xffffffff;
+#endif
+#endif
+    buffer += 2;
+    }
+
+  return result;
+}
+
 static size_t
 parse_class(uint32_t *ptr, uint32_t options, uint32_t *buffer)
 {
 size_t total_size = 0;
+size_t size;
 uint32_t meta_arg;
 uint32_t start_char;
-
-(void)options; /* Avoid compiler warning. */
 
 while (*ptr != META_CLASS_END)
   {
@@ -212,7 +309,37 @@ while (*ptr != META_CLASS_END)
     {
     case META_ESCAPE:
       meta_arg = META_DATA(*ptr);
-      if (meta_arg == ESC_P || meta_arg == ESC_p) ptr++;
+      switch (meta_arg)
+        {
+        case ESC_h:
+        size = append_char_list(PRIV(hspace_list), buffer);
+        total_size += size;
+        if (buffer != NULL) buffer += size;
+        break;
+
+        case ESC_H:
+        size = append_negated_char_list(PRIV(hspace_list), options, buffer);
+        total_size += size;
+        if (buffer != NULL) buffer += size;
+        break;
+
+        case ESC_v:
+        size = append_char_list(PRIV(vspace_list), buffer);
+        total_size += size;
+        if (buffer != NULL) buffer += size;
+        break;
+
+        case ESC_V:
+        size = append_negated_char_list(PRIV(vspace_list), options, buffer);
+        total_size += size;
+        if (buffer != NULL) buffer += size;
+        break;
+
+        case ESC_p:
+        case ESC_P:
+        ptr++;
+        break;
+        }
       ptr++;
       continue;
     case META_POSIX:
@@ -273,24 +400,26 @@ class_ranges* cranges;
 uint32_t *ptr = start_ptr + 1;
 uint32_t *buffer;
 uint32_t *dst;
+uint32_t class_options = 0;
 size_t range_list_size = 0, i;
 uint32_t tmp1, tmp2;
 
 PCRE2_ASSERT(*start_ptr == META_CLASS || *start_ptr == META_CLASS_NOT);
 
 #ifdef SUPPORT_UNICODE
+if (options & PCRE2_UTF)
+  class_options |= PARSE_CLASS_UTF;
+
 if ((options & PCRE2_CASELESS) && (options & (PCRE2_UTF|PCRE2_UCP)))
-  options = PARSE_CLASS_CASELESS_UTF;
-else
-  options = 0;
+  class_options |= PARSE_CLASS_CASELESS_UTF;
 
 if (cb->cx->extra_options & PCRE2_EXTRA_CASELESS_RESTRICT)
-  options |= PARSE_CLASS_RESTRICTED_UTF;
+  class_options |= PARSE_CLASS_RESTRICTED_UTF;
 #endif
 
 /* Compute required space for the range. */
 
-range_list_size = parse_class(start_ptr + 1, options, NULL);
+range_list_size = parse_class(start_ptr + 1, class_options, NULL);
 
 /* Allocate buffer. */
 
@@ -306,7 +435,7 @@ cranges->range_list_size = range_list_size;
 if (range_list_size == 0) return cranges;
 
 buffer = (uint32_t*)(cranges + 1);
-parse_class(start_ptr + 1, options, buffer);
+parse_class(start_ptr + 1, class_options, buffer);
 
 if (range_list_size == 2) return cranges;
 
