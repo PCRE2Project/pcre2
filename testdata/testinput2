@@ -4806,7 +4806,7 @@ B)x/alt_verbnames,mark
 /abc/substitute_extended
     abc\=replace=\a\b\e\f\n\r\t\v\\
 
-/a(b)c/substitute_extended
+/a(b)c/
     LabcR\=replace=>$&<
     LabcR\=replace=>$`<
     LabcR\=replace=>$'<

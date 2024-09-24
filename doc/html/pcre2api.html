@@ -974,13 +974,13 @@ desirable to disable them, in order to speed up compilation.
 <P>
 The permitted values of <i>directive</i> are as follows:
 <pre>
-  PCRE2_OPTIMIZATION_NONE
-</pre>
-Disable all optional performance optimizations.
-<pre>
   PCRE2_OPTIMIZATION_FULL
 </pre>
 Enable all optional performance optimizations. This is the default value.
+<pre>
+  PCRE2_OPTIMIZATION_NONE
+</pre>
+Disable all optional performance optimizations.
 <pre>
   PCRE2_AUTO_POSSESS
   PCRE2_AUTO_POSSESS_OFF
@@ -3771,11 +3771,15 @@ If PCRE2_SUBSTITUTE_LITERAL is set, the replacement string is not interpreted
 in any way. By default, however, a dollar character is an escape character that
 can specify the insertion of characters from capture groups and names from
 (*MARK) or other control verbs in the pattern. Dollar is the only escape
-character (backslash is treated as literal). The following forms are always
+character (backslash is treated as literal). The following forms are
 recognized:
 <pre>
   $$                  insert a dollar character
   $n or ${n}          insert the contents of group <i>n</i>
+  $0 or $&            insert the entire matched substring
+  $`                  insert the substring that precedes the match
+  $'                  insert the substring that follows the match
+  $_                  insert the entire input string
   $*MARK or ${*MARK}  insert a control verb name
 </pre>
 Either a group number or a group name can be given for <i>n</i>, for example $2 or
@@ -3840,14 +3844,15 @@ not influence the extended substitution syntax described below.
 PCRE2_SUBSTITUTE_EXTENDED causes extra processing to be applied to the
 replacement string. Without this option, only the dollar character is special,
 and only the group insertion forms listed above are valid. When
-PCRE2_SUBSTITUTE_EXTENDED is set, two things change:
+PCRE2_SUBSTITUTE_EXTENDED is set, several things change:
 </P>
 <P>
 Firstly, backslash in a replacement string is interpreted as an escape
 character. The usual forms such as \x{ddd} can be used to specify particular
 character codes, and backslash followed by any non-alphanumeric character
 quotes that character. Extended quoting can be coded using \Q...\E, exactly
-as in pattern strings.
+as in pattern strings. The escapes \b and \v are interpreted as the
+characters backspace and vertical tab, respectively.
 </P>
 <P>
 The interpretation of backslash followed by one or more digits is the same as
@@ -3894,18 +3899,18 @@ effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do
 not apply to replacement strings.
 </P>
 <P>
-The second effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
+The final effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
 by Bash:
 <pre>
   ${n:-string}
   ${n:+string1:string2}
 </pre>
-As before, <i>n</i> may be a group number or a name. The first form specifies a
-default value. If group <i>n</i> is set, its value is inserted; if not, the string is
-expanded and the result inserted. The second form specifies strings that are
-expanded and inserted when group <i>n</i> is set or unset, respectively. The first
-form is just a convenient shorthand for
+As in the simple case, <i>n</i> may be a group number or a name. The first form
+specifies a default value. If group <i>n</i> is set, its value is inserted; if
+not, the string is expanded and the result inserted. The second form specifies
+strings that are expanded and inserted when group <i>n</i> is set or unset,
+respectively. The first form is just a convenient shorthand for
 <pre>
   ${n:+${n}:string}
 </pre>
@@ -4309,7 +4314,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 September 2024
+Last updated: 24 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

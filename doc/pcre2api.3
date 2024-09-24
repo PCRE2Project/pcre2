@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "20 September 2024" "PCRE2 10.45"
+.TH PCRE2API 3 "24 September 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -3772,11 +3772,15 @@ If PCRE2_SUBSTITUTE_LITERAL is set, the replacement string is not interpreted
 in any way. By default, however, a dollar character is an escape character that
 can specify the insertion of characters from capture groups and names from
 (*MARK) or other control verbs in the pattern. Dollar is the only escape
-character (backslash is treated as literal). The following forms are always
+character (backslash is treated as literal). The following forms are
 recognized:
 .sp
   $$                  insert a dollar character
   $n or ${n}          insert the contents of group \fIn\fP
+  $0 or $&            insert the entire matched substring
+  $`                  insert the substring that precedes the match
+  $'                  insert the substring that follows the match
+  $_                  insert the entire input string
   $*MARK or ${*MARK}  insert a control verb name
 .sp
 Either a group number or a group name can be given for \fIn\fP, for example $2 or
@@ -3884,14 +3888,6 @@ the result of processing "\eUaa\eLBB\eEcc\eE" is "AAbbcc"; the final \eE has no
 effect. Note also that the PCRE2_ALT_BSUX and PCRE2_EXTRA_ALT_BSUX options do
 not apply to replacement strings.
 .P
-Another effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add the following
-substitutions:
-.sp
-  $&     synonymous with $0 (that is, the entire matched substring)
-  $`     substring that precedes the match
-  $'     substring that follows the match
-  $_     the entire input string
-.sp
 The final effect of setting PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
 by Bash:
@@ -4316,6 +4312,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 September 2024
+Last updated: 24 September 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

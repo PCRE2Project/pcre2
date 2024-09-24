@@ -433,8 +433,8 @@ example (?i:...).
 </P>
 <P>
 The following are recognized only at the very start of a pattern or after one
-of the newline or \R options with similar syntax. More than one of them may
-appear. For the first three, d is a decimal number.
+of the newline or \R sequences or options with similar syntax. More than one
+of them may appear. For the first three, d is a decimal number.
 <pre>
   (*LIMIT_DEPTH=d) set the backtracking limit to d
   (*LIMIT_HEAP=d)  set the heap size limit to d * 1024 bytes
@@ -646,11 +646,16 @@ If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
 special character is the dollar character in one of the following forms:
 <pre>
   $$                  insert a dollar character
-  $n or ${n}          insert the contents of group <i>n</i> (name or number)
+  $n or ${n}          insert the contents of group <i>n</i>
   $&#60;name&#62;             insert the contents of named group
+  $0 or $&            insert the entire matched substring
+  $`                  insert the substring that precedes the match
+  $'                  insert the substring that follows the match
+  $_                  insert the entire input string
   $*MARK or ${*MARK}  insert a control verb name
 </pre>
-If PCRE2_SUBSTITUTE_EXTENDED is set, there is additional interpretation:
+For ${n}, n can be a name or a number. If PCRE2_SUBSTITUTE_EXTENDED is set,
+there is additional interpretation:
 </P>
 <P>
 1. Backslash is an escape character, and the forms described in "ESCAPED
@@ -664,8 +669,15 @@ CHARACTERS" above are recognized. Also:
   \u\L      force next character to upper case, then all lower
   \l\U      force next character to lower case, then all upper
   \E        end \L or \U case forcing
+  \b        backspace character (note: as in character class in pattern)
+  \v        vertical tab character (note: not the same as in a pattern)
 </pre>
-2. Capture substitution supports the following additional forms:
+2. The Python form \g&#60;n&#62;, where the angle brackets are part of the syntax and
+<i>n</i> is either a group name or a number, is recognized as an alternative way
+of inserting the contents of a group, for example \g&#60;3&#62;.
+</P>
+<P>
+3. Capture substitution supports the following additional forms:
 <pre>
   ${n:-string}             default for unset group
   ${n:+string1:string2}    values for set/unset group
@@ -689,7 +701,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC34" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 September 2024
+Last updated: 24 September 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

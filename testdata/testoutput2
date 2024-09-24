@@ -15250,7 +15250,7 @@ Failed: error -49 at offset 3 in replacement: unknown substring
     abc\=replace=\a\b\e\f\n\r\t\v\\
  1: \x07\x08\x1b\x0c\x0a\x0d\x09\x0b\
 
-/a(b)c/substitute_extended
+/a(b)c/
     LabcR\=replace=>$&<
  1: L>abc<R
     LabcR\=replace=>$`<
