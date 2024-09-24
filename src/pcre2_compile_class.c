@@ -372,9 +372,9 @@ while (*ptr != META_CLASS_END)
 #ifdef SUPPORT_UNICODE
     if (options & PARSE_CLASS_CASELESS_UTF)
       {
-      size_t size = utf_caseless_extend(start_char, *ptr++, options, buffer);
-      if (buffer != NULL) buffer += size;
-      total_size += size;
+      size_t usize = utf_caseless_extend(start_char, *ptr++, options, buffer);
+      if (buffer != NULL) buffer += usize;
+      total_size += usize;
       continue;
       }
 #endif
