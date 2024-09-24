@@ -7153,7 +7153,7 @@ while ((c = *p++) != 0)
     case '4': case '5': case '6': case '7':
     c -= '0';
     while (i++ < 2 && isdigit(*p) && *p != '8' && *p != '9')
-      c = c * 8 + *p++ - '0';
+      c = c * 8 + (*p++ - '0');
     break;
 
     case 'o':
@@ -7166,7 +7166,7 @@ while ((c = *p++) != 0)
         if (++i == 12)
           fprintf(outfile, "** Too many octal digits in \\o{...} item; "
                            "using only the first twelve.\n");
-        else c = c * 8 + *pt - '0';
+        else c = c * 8 + (*pt - '0');
         }
       if (*pt == '}') p = pt + 1;
         else fprintf(outfile, "** Missing } after \\o{ (assumed)\n");
@@ -7182,14 +7182,14 @@ while ((c = *p++) != 0)
       /* We used to have "while (isxdigit(*(++pt)))" here, but it fails
       when isxdigit() is a macro that refers to its argument more than
       once. This is banned by the C Standard, but apparently happens in at
-      least one MacOS environment. */
+      least one macOS environment. */
 
       for (pt++; isxdigit(*pt); pt++)
         {
         if (++i == 9)
           fprintf(outfile, "** Too many hex digits in \\x{...} item; "
                            "using only the first eight.\n");
-        else c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10);
+        else c = c * 16 + (tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10));
         }
       if (*pt == '}')
         {
@@ -7207,7 +7207,7 @@ while ((c = *p++) != 0)
     c = 0;
     while (i++ < 2 && isxdigit(*p))
       {
-      c = c * 16 + tolower(*p) - ((isdigit(*p))? '0' : 'a' - 10);
+      c = c * 16 + (tolower(*p) - ((isdigit(*p))? '0' : 'a' - 10));
       p++;
       }
 #if defined SUPPORT_PCRE2_8
@@ -7697,7 +7697,7 @@ if (dat_datctl.replacement[0] != 0)
   if (*pr == '[')
     {
     PCRE2_SIZE n = 0;
-    while ((c = *(++pr)) >= CHAR_0 && c <= CHAR_9) n = n * 10 + c - CHAR_0;
+    while ((c = *(++pr)) >= CHAR_0 && c <= CHAR_9) n = n * 10 + (c - CHAR_0);
     if (*pr++ != ']')
       {
       fprintf(outfile, "Bad buffer size in replacement string\n");

@@ -1258,7 +1258,7 @@ if (allow_sign >= 0 && ptr < ptrend)
 if (ptr >= ptrend || !IS_DIGIT(*ptr)) return FALSE;
 while (ptr < ptrend && IS_DIGIT(*ptr))
   {
-  n = n * 10 + *ptr++ - CHAR_0;
+  n = n * 10 + (*ptr++ - CHAR_0);
   if (n > max_value)
     {
     *errorcodeptr = max_error;
@@ -4662,7 +4662,7 @@ while (ptr < ptrend)
         parsed_pattern += 3;                       /* Skip pattern info */
         while (ptr < ptrend && IS_DIGIT(*ptr))
           {
-          n = n * 10 + *ptr++ - CHAR_0;
+          n = n * 10 + (*ptr++ - CHAR_0);
           if (n > 255)
             {
             errorcode = ERR38;
@@ -6702,7 +6702,7 @@ for (;; pptr++)
           {
           for (i = 1; i < length; i++)
             {
-            groupnumber = groupnumber * 10 + name[i] - CHAR_0;
+            groupnumber = groupnumber * 10 + (name[i] - CHAR_0);
             if (groupnumber > MAX_GROUP_NUMBER)
               {
               *errorcodeptr = ERR61;

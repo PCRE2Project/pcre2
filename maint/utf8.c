@@ -271,7 +271,7 @@ for (; i < argc; i++)
         len = -1;
         break;
         }
-      y = y * 16 + tolower(*x) - ((isdigit(*x))? '0' : 'W');
+      y = y * 16 + (tolower(*x) - ((isdigit(*x))? '0' : 'W'));
       x++;
       if (z)
         {
