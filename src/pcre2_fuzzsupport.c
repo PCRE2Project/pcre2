@@ -373,7 +373,7 @@ if (size > 3)
           j--;               /* Ensure this character is checked next. The */
           goto OUTERLOOP;    /* string might be (e.g.) "){9){234}" */
           }
-        q = q * 10 + wdata[j] - '0';
+        q = q * 10 + (wdata[j] - '0');
         }
 
       if (j >= size) goto END_QSCAN;  /* End of data */

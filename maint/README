@@ -160,7 +160,9 @@ new release.
   -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime. For
   clang, -fsanitize=address,undefined,integer can be used but
   -fno-sanitize=unsigned-integer-overflow must be added when compiling with
-  JIT. Another useful clang option is -fsanitize=signed-integer-overflow
+  JIT. Newer versions of the compiler also need -fno-sanitize=function, at
+  least until pcre2test stops using generic pointers on its callbacks. Another
+  useful clang option is -fsanitize=signed-integer-overflow.
 
 . Do a test build using CMake. Remove src/config.h first, lest it override the
   version that CMake creates. Also ensure there is no leftover CMakeCache.txt

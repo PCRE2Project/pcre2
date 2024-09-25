@@ -5937,8 +5937,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      while (number-- > 0)
+      /* We used to do a simpler `while (number-- > 0)` but that triggers
+      clang's unsigned integer overflow sanitizer. */
+      while (number > 0)
         {
+        --number;
         if (Feptr <= mb->check_subject) RRETURN(MATCH_NOMATCH);
         Feptr--;
         BACKCHAR(Feptr);
@@ -6870,9 +6873,6 @@ if (use_jit)
 #ifdef SUPPORT_UNICODE
   if (utf && (options & PCRE2_NO_UTF_CHECK) == 0 && !allow_invalid)
     {
-#if PCRE2_CODE_UNIT_WIDTH != 32
-    unsigned int i;
-#endif
 
     /* For 8-bit and 16-bit UTF, check that the first code unit is a valid
     character start. */
@@ -6893,7 +6893,7 @@ if (use_jit)
     start of matching. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 32
-    for (i = re->max_lookbehind; i > 0 && start_match > subject; i--)
+    for (unsigned int i = re->max_lookbehind; i > 0 && start_match > subject; i--)
       {
       start_match--;
       while (start_match > subject &&
