@@ -173,6 +173,16 @@ therefore no need for it to have a length entry, so use a high value. */
 #define META_DATA(x)   (x & 0x0000ffffu)
 #define META_DIFF(x,y) ((x-y)>>16)
 
+/* Macro for the highest character value. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#define MAX_UCHAR_VALUE 0xffu
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+#define MAX_UCHAR_VALUE 0xffffu
+#else
+#define MAX_UCHAR_VALUE 0xffffffffu
+#endif
+
 /* Merge intersecting ranges of classes. */
 
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,

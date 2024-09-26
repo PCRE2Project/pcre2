@@ -5251,19 +5251,14 @@ for (;;)
 
 
 /*************************************************
-* Add a character or range to a class (internal) *
+*   External entry point for add range to class  *
 *************************************************/
 
-/* This function packages up the logic of adding a character or range of
-characters to a class. The character values in the arguments will be within the
-valid values for the current mode (8-bit, 16-bit, UTF, etc). This function is
-called only from within the "add to class" group of functions, some of which
-are recursive and mutually recursive. The external entry point is
-add_to_class().
+/* This function sets the overall range for characters < 256.
+It also handles non-utf case folding.
 
 Arguments:
   classbits     the bit map for characters < 256
-  uchardptr     points to the pointer for extra data
   options       the options bits
   cb            compile data
   start         start of range character
@@ -5274,8 +5269,8 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_to_class_internal(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  uint32_t options, compile_block *cb, uint32_t start, uint32_t end)
+add_to_class(uint8_t *classbits, uint32_t options, compile_block *cb,
+  uint32_t start, uint32_t end)
 {
 uint32_t c;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
@@ -5299,15 +5294,6 @@ if ((options & PCRE2_CASELESS) != 0)
       }
   }
 
-/* Now handle the originally supplied range. Adjust the final value according
-to the bit length - this means that the same lists of (e.g.) horizontal spaces
-can be used in all cases. */
-
-if ((options & PCRE2_UTF) == 0 && end > MAX_NON_UTF_CHAR)
-  end = MAX_NON_UTF_CHAR;
-
-if (start > cb->class_range_start && end < cb->class_range_end) return n8;
-
 /* Use the bitmap for characters < 256. Otherwise use extra data.*/
 
 for (c = start; c <= classbits_end; c++)
@@ -5317,86 +5303,7 @@ for (c = start; c <= classbits_end; c++)
   n8++;
   }
 
-#ifdef SUPPORT_WIDE_CHARS
-if (start <= 0xff) start = 0xff + 1;
-
-if (end >= start)
-  {
-  PCRE2_UCHAR *uchardata = *uchardptr;
-
-#ifdef SUPPORT_UNICODE
-  if ((options & PCRE2_UTF) != 0)
-    {
-    if (start < end)
-      {
-      *uchardata++ = XCL_RANGE;
-      uchardata += PRIV(ord2utf)(start, uchardata);
-      uchardata += PRIV(ord2utf)(end, uchardata);
-      }
-    else if (start == end)
-      {
-      *uchardata++ = XCL_SINGLE;
-      uchardata += PRIV(ord2utf)(start, uchardata);
-      }
-    }
-  else
-#endif  /* SUPPORT_UNICODE */
-
-  /* Without UTF support, character values are constrained by the bit length,
-  and can only be > 256 for 16-bit and 32-bit libraries. */
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-    {}
-#else
-  if (start < end)
-    {
-    *uchardata++ = XCL_RANGE;
-    *uchardata++ = start;
-    *uchardata++ = end;
-    }
-  else if (start == end)
-    {
-    *uchardata++ = XCL_SINGLE;
-    *uchardata++ = start;
-    }
-#endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
-  *uchardptr = uchardata;   /* Updata extra data pointer */
-  }
-#else  /* SUPPORT_WIDE_CHARS */
-  (void)uchardptr;          /* Avoid compiler warning */
-#endif /* SUPPORT_WIDE_CHARS */
-
 return n8;    /* Number of 8-bit characters */
-}
-
-
-
-/*************************************************
-*   External entry point for add range to class  *
-*************************************************/
-
-/* This function sets the overall range so that the internal functions can try
-to avoid duplication when handling case-independence.
-
-Arguments:
-  classbits     the bit map for characters < 256
-  uchardptr     points to the pointer for extra data
-  options       the options bits
-  cb            compile data
-  start         start of range character
-  end           end of range character
-
-Returns:        the number of < 256 characters added
-                the pointer to extra data is updated
-*/
-
-static unsigned int
-add_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr, uint32_t options,
-  compile_block *cb, uint32_t start, uint32_t end)
-{
-cb->class_range_start = start;
-cb->class_range_end = end;
-return add_to_class_internal(classbits, uchardptr, options, cb, start, end);
 }
 
 
@@ -5413,7 +5320,6 @@ case-independence.
 
 Arguments:
   classbits     the bit map for characters < 256
-  uchardptr     points to the pointer for extra data
   options       the options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
@@ -5423,8 +5329,8 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  uint32_t options, compile_block *cb, const uint32_t *p)
+add_list_to_class(uint8_t *classbits, uint32_t options, compile_block *cb,
+  const uint32_t *p)
 {
 unsigned int n8 = 0;
 while (p[0] < 256)
@@ -5432,9 +5338,7 @@ while (p[0] < 256)
   unsigned int n = 0;
 
   while(p[n+1] == p[0] + n + 1) n++;
-  cb->class_range_start = p[0];
-  cb->class_range_end = p[n];
-  n8 += add_to_class_internal(classbits, uchardptr, options, cb, p[0], p[n]);
+  n8 += add_to_class(classbits, options, cb, p[0], p[n]);
 
   p += n + 1;
   }
@@ -5454,7 +5358,6 @@ vertical whitespace to a class. The list must be in order.
 
 Arguments:
   classbits     the bit map for characters < 256
-  uchardptr     points to the pointer for extra data
   options       the options bits
   xoptions      the extra options bits
   cb            contains pointers to tables etc.
@@ -5465,16 +5368,16 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_not_list_to_class(uint8_t *classbits, PCRE2_UCHAR **uchardptr,
-  uint32_t options, compile_block *cb, const uint32_t *p)
+add_not_list_to_class(uint8_t *classbits, uint32_t options, compile_block *cb,
+  const uint32_t *p)
 {
 unsigned int n8 = 0;
 if (p[0] > 0)
-  n8 += add_to_class(classbits, uchardptr, options, cb, 0, p[0] - 1);
+  n8 += add_to_class(classbits, options, cb, 0, p[0] - 1);
 while (p[0] < 256)
   {
   while (p[1] == p[0] + 1) p++;
-  n8 += add_to_class(classbits, uchardptr, options, cb,
+  n8 += add_to_class(classbits, options, cb,
     p[0] + 1, (p[1] > 255) ? 255 : p[1] - 1);
   p++;
   }
@@ -5635,15 +5538,11 @@ BOOL ucp = (options & PCRE2_UCP) != 0;
 BOOL utf = FALSE;
 #endif
 
-/* Helper variables for OP_XCLASS opcode (for characters > 255). We define
-class_uchardata always so that it can be passed to add_to_class() always,
-though it will not be used in non-UTF 8-bit cases. This avoids having to supply
-alternative calls for the different cases. */
+/* Helper variables for OP_XCLASS opcode (for characters > 255). */
 
-PCRE2_UCHAR *class_uchardata;
 #ifdef SUPPORT_WIDE_CHARS
+PCRE2_UCHAR *class_uchardata;
 BOOL xclass;
-PCRE2_UCHAR *class_uchardata_base;
 class_ranges* cranges;
 #endif
 
@@ -5681,7 +5580,6 @@ for (;; pptr++)
 #endif
   BOOL negate_class;
   BOOL should_flip_negation;
-  BOOL match_all_or_no_wide_chars;
   BOOL possessive_quantifier;
   BOOL note_group_empty;
   int class_has_8bitchar;
@@ -5951,7 +5849,7 @@ for (;; pptr++)
     need to insert specific matching or non-matching code for wide characters.
     */
 
-    should_flip_negation = match_all_or_no_wide_chars = FALSE;
+    should_flip_negation = FALSE;
 
     /* Extended class (xclass) will be used when characters > 255
     might match. */
@@ -5992,7 +5890,6 @@ for (;; pptr++)
 
     xclass = FALSE;
     class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
-    class_uchardata_base = class_uchardata;   /* Save the start */
 #endif
 
     /* For optimization purposes, we track some properties of the class:
@@ -6048,13 +5945,20 @@ for (;; pptr++)
             case PC_GRAPH:
             case PC_PRINT:
             case PC_PUNCT:
-            *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
-            *class_uchardata++ = (PCRE2_UCHAR)
-              ((posix_class == PC_GRAPH)? PT_PXGRAPH :
-               (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
-            *class_uchardata++ = 0;
+
+            if (lengthptr != NULL)
+              *lengthptr += 3;
+            else
+              {
+              *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
+              *class_uchardata++ = (PCRE2_UCHAR)
+                ((posix_class == PC_GRAPH)? PT_PXGRAPH :
+                 (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
+              *class_uchardata++ = 0;
+              }
+            xclass = TRUE;
             xclass_has_prop = TRUE;
-            goto CONTINUE_CLASS;
+            continue;
 
             /* For the other POSIX classes (ex: ascii) we are going to
             fall through to the non-UCP case and build a bit map for
@@ -6073,10 +5977,6 @@ for (;; pptr++)
             utf mode, since no wide characters can exist otherwise. */
 
             default:
-#if PCRE2_CODE_UNIT_WIDTH == 8
-            if (utf)
-#endif
-            match_all_or_no_wide_chars |= local_negate;
             break;
             }
           }
@@ -6126,7 +6026,7 @@ for (;; pptr++)
         /* Every class contains at least one < 256 character. */
 
         class_has_8bitchar = 1;
-        goto CONTINUE_CLASS;    /* End of POSIX handling */
+        continue;               /* End of POSIX handling */
         }
 
       /* Other than POSIX classes, the only items we should encounter are
@@ -6207,8 +6107,8 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, cb, PRIV(hspace_list));
+          (void)add_list_to_class(classbits, options & ~PCRE2_CASELESS,
+            cb, PRIV(hspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -6219,8 +6119,8 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_not_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, cb, PRIV(hspace_list));
+          (void)add_not_list_to_class(classbits, options & ~PCRE2_CASELESS,
+            cb, PRIV(hspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -6231,8 +6131,8 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, cb, PRIV(vspace_list));
+          (void)add_list_to_class(classbits, options & ~PCRE2_CASELESS,
+            cb, PRIV(vspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -6243,8 +6143,8 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_not_list_to_class(classbits, &class_uchardata,
-            options & ~PCRE2_CASELESS, cb, PRIV(vspace_list));
+          (void)add_not_list_to_class(classbits, options & ~PCRE2_CASELESS,
+            cb, PRIV(vspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -6271,9 +6171,15 @@ for (;; pptr++)
               pdata = 0;
               }
 
-            *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
-            *class_uchardata++ = ptype;
-            *class_uchardata++ = pdata;
+            if (lengthptr != NULL)
+              *lengthptr += 3;
+            else
+              {
+              *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
+              *class_uchardata++ = ptype;
+              *class_uchardata++ = pdata;
+              }
+            xclass = TRUE;
             xclass_has_prop = TRUE;
             class_has_8bitchar--;                /* Undo! */
             }
@@ -6281,7 +6187,7 @@ for (;; pptr++)
 #endif
           }
 
-        goto CONTINUE_CLASS;
+        continue;
         }  /* End handling \d-type escapes */
 
       /* A literal character may be followed by a range meta. At parse time
@@ -6338,37 +6244,34 @@ for (;; pptr++)
             if (C <= CHAR_i)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, &class_uchardata, options,
-                  cb, C + uc, ((D < CHAR_i)? D : CHAR_i) + uc);
+                add_to_class(classbits, options, cb, C + uc,
+                  ((D < CHAR_i)? D : CHAR_i) + uc);
               C = CHAR_j;
               }
 
             if (C <= D && C <= CHAR_r)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, &class_uchardata, options,
-                  cb, C + uc, ((D < CHAR_r)? D : CHAR_r) + uc);
+                add_to_class(classbits, options, cb, C + uc,
+                  ((D < CHAR_r)? D : CHAR_r) + uc);
               C = CHAR_s;
               }
 
             if (C <= D)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, &class_uchardata, options,
-                  cb, C + uc, D + uc);
+                add_to_class(classbits, options, cb, C + uc, D + uc);
               }
             }
           else
 #endif
           /* Not an EBCDIC special range */
 
-          class_has_8bitchar += add_to_class(classbits, &class_uchardata,
-            options, cb, c, d);
-          goto CONTINUE_CLASS;   /* Go get the next char in the class */
+          class_has_8bitchar += add_to_class(classbits, options, cb, c, d);
 #else
           PCRE2_ASSERT(cranges != NULL);
-          continue;
 #endif
+          continue;
           }  /* End of range handling */
 
         /* Character ranges are ignored when class_ranges is present. */
@@ -6378,37 +6281,12 @@ for (;; pptr++)
 #endif
         /* Handle a single character. */
 
-        class_has_8bitchar +=
-          add_to_class(classbits, &class_uchardata, options, cb, meta, meta);
+        class_has_8bitchar += add_to_class(classbits, options, cb, meta, meta);
 #else
         PCRE2_ASSERT(cranges != NULL);
         continue;
 #endif
         }
-
-      /* Continue to the next item in the class. */
-
-      CONTINUE_CLASS:
-
-#ifdef SUPPORT_WIDE_CHARS
-      /* If any wide characters or Unicode properties have been encountered,
-      set xclass = TRUE. Then, in the pre-compile phase, accumulate the length
-      of the extra data and reset the pointer. This is so that very large
-      classes that contain a zillion wide characters or Unicode property tests
-      do not overwrite the workspace (which is on the stack). */
-
-      if (class_uchardata > class_uchardata_base)
-        {
-        xclass = TRUE;
-        if (lengthptr != NULL)
-          {
-          *lengthptr += class_uchardata - class_uchardata_base;
-          class_uchardata = class_uchardata_base;
-          }
-        }
-#endif
-
-      continue;  /* Needed to avoid error when not supporting wide chars */
       }   /* End of main class-processing loop */
 
 #ifdef SUPPORT_WIDE_CHARS
@@ -6417,23 +6295,82 @@ for (;; pptr++)
       uint32_t *range = (uint32_t*)(cranges + 1);
       uint32_t *end = range + cranges->range_list_size;
 
+      while (range < end && range[0] < 256)
+        {
+        /* Add range to bitset. */
+        class_has_8bitchar +=
+          add_to_class(classbits, options, cb, range[0], range[1]);
+
+        if (range[1] > 255) break;
+        range += 2;
+        }
+
+      if (!xclass_has_prop && range < end && range[0] <= 256 &&
+          range[1] >= (utf ? MAX_UTF_CODE_POINT : MAX_UCHAR_VALUE))
+        {
+        PCRE2_ASSERT(range + 2 == end);
+        should_flip_negation = TRUE;
+        range = end;
+        }
+
       while (range < end)
         {
-        class_has_8bitchar +=
-          add_to_class(classbits, &class_uchardata, options, cb,
-            range[0], range[1]);
-
-        if (class_uchardata > class_uchardata_base)
-          {
-          xclass = TRUE;
-          if (lengthptr != NULL)
-            {
-            *lengthptr += class_uchardata - class_uchardata_base;
-            class_uchardata = class_uchardata_base;
-            }
-          }
+        uint32_t range_start = range[0];
+        uint32_t range_end = range[1];
 
         range += 2;
+        xclass = TRUE;
+
+        if (range_start < 256) range_start = 256;
+
+        if (lengthptr != NULL)
+          {
+#ifdef SUPPORT_UNICODE
+          if (utf)
+            {
+            *lengthptr += 1;
+
+            if (range_start < range_end)
+              *lengthptr += PRIV(ord2utf)(range_start, class_uchardata);
+
+            *lengthptr += PRIV(ord2utf)(range_end, class_uchardata);
+            continue;
+            }
+#endif  /* SUPPORT_UNICODE */
+
+          *lengthptr += range_start < range_end ? 3 : 2;
+          continue;
+          }
+
+#ifdef SUPPORT_UNICODE
+        if (utf)
+          {
+          if (range_start < range_end)
+            {
+            *class_uchardata++ = XCL_RANGE;
+            class_uchardata += PRIV(ord2utf)(range_start, class_uchardata);
+            }
+          else
+            *class_uchardata++ = XCL_SINGLE;
+
+          class_uchardata += PRIV(ord2utf)(range_end, class_uchardata);
+          continue;
+          }
+#endif  /* SUPPORT_UNICODE */
+
+        /* Without UTF support, character values are constrained by the bit length,
+        and can only be > 256 for 16-bit and 32-bit libraries. */
+#if PCRE2_CODE_UNIT_WIDTH != 8
+        if (range_start < range_end)
+          {
+          *class_uchardata++ = XCL_RANGE;
+          *class_uchardata++ = range_start;
+          }
+        else
+          *class_uchardata++ = XCL_SINGLE;
+
+        *class_uchardata++ = range_end;
+#endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
         }
 
       if (lengthptr == NULL)
@@ -6475,35 +6412,8 @@ for (;; pptr++)
     the bitmap in the actual compiled code. */
 
 #ifdef SUPPORT_WIDE_CHARS  /* Defined for 16/32 bits, or 8-bit with Unicode */
-    if (xclass && (
-#ifdef SUPPORT_UNICODE
-        (options & PCRE2_UCP) != 0 ||
-#endif
-        xclass_has_prop || !should_flip_negation))
+    if (xclass)
       {
-      if (match_all_or_no_wide_chars || (
-#if PCRE2_CODE_UNIT_WIDTH == 8
-           utf &&
-#endif
-           should_flip_negation && !negate_class && (options & PCRE2_UCP) == 0))
-        {
-        *class_uchardata++ = XCL_RANGE;
-        if (utf)   /* Will always be utf in the 8-bit library */
-          {
-          class_uchardata += PRIV(ord2utf)(0x100, class_uchardata);
-          class_uchardata += PRIV(ord2utf)(MAX_UTF_CODE_POINT, class_uchardata);
-          }
-        else       /* Can only happen for the 16-bit & 32-bit libraries */
-          {
-#if PCRE2_CODE_UNIT_WIDTH == 16
-          *class_uchardata++ = 0x100;
-          *class_uchardata++ = 0xffffu;
-#elif PCRE2_CODE_UNIT_WIDTH == 32
-          *class_uchardata++ = 0x100;
-          *class_uchardata++ = 0xffffffffu;
-#endif
-          }
-        }
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
       code += LINK_SIZE;
