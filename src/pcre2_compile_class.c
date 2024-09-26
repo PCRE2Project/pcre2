@@ -241,6 +241,22 @@ while (*p != NOTACHAR)
   return result;
 }
 
+static uint32_t
+get_highest_char(uint32_t options)
+{
+(void)options; /* Avoid compiler warning. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+return MAX_UTF_CODE_POINT;
+#else
+#ifdef SUPPORT_UNICODE
+return (options & PARSE_CLASS_UTF) ? MAX_UTF_CODE_POINT : MAX_UCHAR_VALUE;
+#else
+return MAX_UCHAR_VALUE;
+#endif
+#endif
+}
+
 /* Add a negated character list to a buffer. */
 static size_t
 append_negated_char_list(const uint32_t *p, uint32_t options, uint32_t *buffer)
@@ -249,7 +265,6 @@ const uint32_t *n;
 uint32_t start = 0;
 size_t result = 2;
 
-(void)options; /* Avoid compiler warning. */
 PCRE2_ASSERT(*p > 0);
 
 while (*p != NOTACHAR)
@@ -274,25 +289,21 @@ while (*p != NOTACHAR)
   if (buffer != NULL)
     {
     buffer[0] = start;
-#if PCRE2_CODE_UNIT_WIDTH == 8
-    buffer[1] = MAX_UTF_CODE_POINT;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-#ifdef SUPPORT_UNICODE
-    buffer[1] = (options & PARSE_CLASS_UTF) ? MAX_UTF_CODE_POINT : 0xffff;
-#else
-    buffer[1] = 0xffff;
-#endif
-#elif PCRE2_CODE_UNIT_WIDTH == 32
-#ifdef SUPPORT_UNICODE
-    buffer[1] = (options & PARSE_CLASS_UTF) ? MAX_UTF_CODE_POINT : 0xffffffff;
-#else
-    buffer[1] = 0xffffffff;
-#endif
-#endif
+    buffer[1] = get_highest_char(options);
     buffer += 2;
     }
 
   return result;
+}
+
+static uint32_t *
+append_non_ascii_range(uint32_t options, uint32_t *buffer)
+{
+  if (buffer == NULL) return NULL;
+
+  buffer[0] = 0x100;
+  buffer[1] = get_highest_char(options);
+  return buffer + 2;
 }
 
 static size_t
@@ -311,6 +322,13 @@ while (*ptr != META_CLASS_END)
       meta_arg = META_DATA(*ptr);
       switch (meta_arg)
         {
+        case ESC_D:
+        case ESC_W:
+        case ESC_S:
+        buffer = append_non_ascii_range(options, buffer);
+        total_size += 2;
+        break;
+
         case ESC_h:
         size = append_char_list(PRIV(hspace_list), buffer);
         total_size += size;
@@ -342,8 +360,12 @@ while (*ptr != META_CLASS_END)
         }
       ptr++;
       continue;
-    case META_POSIX:
     case META_POSIX_NEG:
+      buffer = append_non_ascii_range(options, buffer);
+      total_size += 2;
+      ptr += 2;
+      continue;
+    case META_POSIX:
       ptr += 2;
       continue;
     case META_BIGVALUE:
@@ -372,9 +394,9 @@ while (*ptr != META_CLASS_END)
 #ifdef SUPPORT_UNICODE
     if (options & PARSE_CLASS_CASELESS_UTF)
       {
-      size_t usize = utf_caseless_extend(start_char, *ptr++, options, buffer);
-      if (buffer != NULL) buffer += usize;
-      total_size += usize;
+      size = utf_caseless_extend(start_char, *ptr++, options, buffer);
+      if (buffer != NULL) buffer += size;
+      total_size += size;
       continue;
       }
 #endif
@@ -487,6 +509,8 @@ while (range_list_size > 0 && dst[1] != ~(uint32_t)0)
   }
 
 cranges->range_list_size = (size_t)(dst + 2 - buffer);
+
+PCRE2_ASSERT(dst[1] <= get_highest_char(class_options));
 return cranges;
 }
 
