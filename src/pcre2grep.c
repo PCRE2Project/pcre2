@@ -4282,6 +4282,8 @@ function in the match context. */
 
 #ifdef SUPPORT_PCRE2GREP_CALLOUT
 pcre2_set_callout(match_context, pcre2grep_callout, NULL);
+#else
+extra_options |= PCRE2_EXTRA_NEVER_CALLOUT;
 #endif
 
 /* Put limits into the match context. */

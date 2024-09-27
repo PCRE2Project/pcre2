@@ -685,7 +685,8 @@ are allowed. */
     PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
     PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
     PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX| \
-    PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_PYTHON_OCTAL|PCRE2_EXTRA_NO_BS0)
+    PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_PYTHON_OCTAL|PCRE2_EXTRA_NO_BS0| \
+    PCRE2_EXTRA_NEVER_CALLOUT)
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -4575,6 +4576,12 @@ while (ptr < ptrend)
       /* ---- Callout with numerical or string argument ---- */
 
       case CHAR_C:
+      if ((xoptions & PCRE2_EXTRA_NEVER_CALLOUT) != 0)
+        {
+        errorcode = ERR103;
+        goto FAILED;
+        }
+
       if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
       /* If the previous item was a condition starting (?(? an assertion,

@@ -2152,6 +2152,13 @@ be an octal number or a back reference are different. Details are given in the
 \fBpcre2pattern\fP
 .\"
 documentation.
+.sp
+  PCRE2_EXTRA_NEVER_CALLOUT
+.sp
+If this option is set, PCRE2 treats callouts in the pattern as a syntax error,
+returning PCRE2_ERROR_CALLOUT_CALLER_DISABLED. This is useful if the application
+knows that a callout will not be provided to \fBpcre2_match()\fP, so that
+callouts in the pattern are not silently ignored.
 .
 .
 .\" HTML <a name="jitcompiling"></a>
