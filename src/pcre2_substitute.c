@@ -514,8 +514,9 @@ do
 
     save_start = start_offset++;
     if (subject[start_offset-1] == CHAR_CR &&
-        code->newline_convention != PCRE2_NEWLINE_CR &&
-        code->newline_convention != PCRE2_NEWLINE_LF &&
+        (code->newline_convention == PCRE2_NEWLINE_CRLF ||
+         code->newline_convention == PCRE2_NEWLINE_ANY ||
+         code->newline_convention == PCRE2_NEWLINE_ANYCRLF) &&
         start_offset < length &&
         subject[start_offset] == CHAR_LF)
       start_offset++;
@@ -824,10 +825,10 @@ do
           PCRE2_SPTR mark = pcre2_get_mark(match_data);
           if (mark != NULL)
             {
-            PCRE2_SPTR mark_start = mark;
-            while (*mark != 0) mark++;
-            fraglength = mark - mark_start;
-            CHECKMEMCPY(mark_start, fraglength);
+            /* Peek backwards one code unit to obtain the length of the mark.
+            It can (theoretically) contain an embedded NUL. */
+            fraglength = mark[-1];
+            CHECKMEMCPY(mark, fraglength);
             }
           }
         else goto BAD;
