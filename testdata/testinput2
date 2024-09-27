@@ -4208,6 +4208,9 @@
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[23]${*MARK}
     apple lemon blackberry
 
+/"(*:fruit" 00 "juice)apple"/hex,g,replace=${*MARK}
+    apple lemon blackberry
+
 /abc/
     123abc123\=replace=[9]XYZ
     123abc123\=substitute_overflow_length,replace=[9]XYZ

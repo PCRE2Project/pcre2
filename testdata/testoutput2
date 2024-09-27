@@ -13860,6 +13860,10 @@ Failed: error -48: no more memory: 23 code units are needed
     apple lemon blackberry
  3: pear orange strawberry
 
+/"(*:fruit" 00 "juice)apple"/hex,g,replace=${*MARK}
+    apple lemon blackberry
+ 1: fruit\x00juice lemon blackberry
+
 /abc/
     123abc123\=replace=[9]XYZ
 Failed: error -48: no more memory
