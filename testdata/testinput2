@@ -4234,6 +4234,8 @@
     ZabcZ\=replace=>$< 1 ><
     ZabcZ\=replace=>$<2><
     ZabcZ\=replace=>$<8><
+    ZabcZ\=replace=>\g<-1><
+    ZabcZ\=replace=>\g<0><
     ZabcZ\=replace=>\g<1><
     ZabcZ\=replace=>\g< 1 ><
     ZabcZ\=replace=>\g<2><
