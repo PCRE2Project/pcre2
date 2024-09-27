@@ -13907,6 +13907,10 @@ Failed: error -35 at offset 3 in replacement: invalid replacement string
 Failed: error -49 at offset 5 in replacement: unknown substring
     ZabcZ\=replace=>$<8><
 Failed: error -49 at offset 5 in replacement: unknown substring
+    ZabcZ\=replace=>\g<-1><
+Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+    ZabcZ\=replace=>\g<0><
+ 1: Z>abc<Z
     ZabcZ\=replace=>\g<1><
  1: Z>b<Z
     ZabcZ\=replace=>\g< 1 ><

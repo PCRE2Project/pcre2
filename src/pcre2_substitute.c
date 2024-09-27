@@ -1077,7 +1077,7 @@ do
         if (rc < 0)
           {
           special = 0;
-          group = -rc;
+          group = -rc - 1;
           goto GROUP_SUBSTITUTE;
           }
         goto BADESCAPE;

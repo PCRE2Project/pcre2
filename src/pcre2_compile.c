@@ -1430,7 +1430,7 @@ return yield;
 
 /* This function is called when a \ has been encountered. It either returns a
 positive value for a simple escape such as \d, or 0 for a data character, which
-is placed in chptr. A backreference to group n is returned as negative n. On
+is placed in chptr. A backreference to group n is returned as -(n+1). On
 entry, ptr is pointing at the character after \. On exit, it points after the
 final code unit of the escape sequence.
 
@@ -1684,12 +1684,13 @@ else
     (possibly recursive) subroutine calls, _not_ backreferences. We return
     the ESC_g code.
 
-    Summary: Return a negative number for a numerical back reference, ESC_k for
-    a named back reference, and ESC_g for a named or numbered subroutine call.
+    Summary: Return a negative number for a numerical back reference (offset
+    by 1), ESC_k for a named back reference, and ESC_g for a named or
+    numbered subroutine call.
 
     The above describes the \g behaviour inside patterns. Inside replacement
     strings (pcre2_substitute) we support only \g<nameornum> for Python
-    compatibility. Return ESG_g for the named case, and -num for the
+    compatibility. Return ESG_g for the named case, and -(num+1) for the
     numbered case.
     */
 
@@ -1728,8 +1729,11 @@ else
         break;
         }
 
+      /* This is the reason that back references are returned as -(s+1) rather
+      than just -s. In a pattern, \0 is not a back reference, but \g<0> is
+      valid in a substitution string, so this must be representable. */
       ptr = p + 1;
-      escape = -s;
+      escape = -(s+1);
       break;
       }
 
@@ -1782,7 +1786,7 @@ else
       break;
       }
 
-    escape = -s;
+    escape = -(s+1);
     break;
 
     /* The handling of escape sequences consisting of a string of digits
@@ -1835,7 +1839,7 @@ else
           break;
           }
 
-        escape = -s;
+        escape = -(s+1);
         break;
         }
       }
@@ -1864,7 +1868,7 @@ else
         value set on failure of that function. */
 
         if ((unsigned)s > MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
-        else escape = -s;     /* Indicates a back reference */
+        else escape = -(s+1);     /* Indicates a back reference */
         break;
         }
 
@@ -3293,7 +3297,7 @@ while (ptr < ptrend)
     else if (escape < 0)
       {
       offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 1);
-      escape = -escape;
+      escape = -escape - 1;
       *parsed_pattern++ = META_BACKREF | (uint32_t)escape;
       if (escape < 10)
         {
@@ -3405,7 +3409,7 @@ while (ptr < ptrend)
 
       /* When \g is used with quotes or angle brackets as delimiters, it is a
       numerical or named subroutine call, and control comes here. When used
-      with brace delimiters it is a numberical back reference and does not come
+      with brace delimiters it is a numerical back reference and does not come
       here because check_escape() returns it directly as a reference. \k is
       always a named back reference. */
 
