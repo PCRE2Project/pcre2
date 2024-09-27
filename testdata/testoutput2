@@ -3303,6 +3303,15 @@ Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, 
 /\N{25,ab}/
 Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
 
+/[\N]/
+Failed: error 171 at offset 3: \N is not supported in a class
+
+/[\N{4}]/
+Failed: error 137 at offset 3: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
+
+/[\N{name}]/
+Failed: error 137 at offset 3: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
+
 /a{1,3}b/ungreedy
     ab
  0: ab

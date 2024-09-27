@@ -1542,6 +1542,14 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
 #endif
         }
 
+      /* Give an error in contexts where quantifiers are not allowed
+      (character classes; substitution strings). */
+
+      else if (isclass || cb == NULL)
+        {
+        *errorcodeptr = ERR37;
+        }
+
       /* Give an error if what follows is not a quantifier, but don't override
       an error set by the quantifier reader (e.g. number overflow). */
 
