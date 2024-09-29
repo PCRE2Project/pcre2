@@ -86,10 +86,11 @@ fi
 
 (echo "$prefix" ; cat <<'PERLEND'
 
-# The alpha assertions currently give warnings even when -w is not specified.
+# Avoid warnings for some of the experimental features that are being used.
 
 no warnings "experimental::alpha_assertions";
 no warnings "experimental::script_run";
+no warnings "experimental::vlb";
 
 # Function for turning a string into a string of printing chars.
 
@@ -143,7 +144,7 @@ if (@ARGV > 1)
   }
 else { $outfile = "STDOUT"; }
 
-printf($outfile "Perl $^V\n\n");
+printf($outfile "Perl $^V\n");
 
 $extra_modifiers = "";
 $default_show_mark = 0;

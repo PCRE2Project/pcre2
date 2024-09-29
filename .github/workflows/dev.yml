@@ -159,3 +159,34 @@ jobs:
         run: |
           ./autogen.sh
           ./maint/ManyConfigTests
+
+  camel:
+    name: perl
+    runs-on: ubuntu-latest
+    container: perl:devel
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: yes
+
+      - name: Prepare
+        run: |
+          apt-get -qq update
+          apt-get -qq install cmake ninja-build
+
+      - name: Configure
+        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        env:
+          PCRETEST: build/pcre2test
+        run: |
+          cd build
+          ctest .
+          cd ..
+          perl -v
+          maint/RunPerlTest
