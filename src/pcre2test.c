@@ -7174,10 +7174,10 @@ while ((c = *p++) != 0)
     break;
 
     case 'x':
+    c = 0;
     if (*p == '{')
       {
       uint8_t *pt = p;
-      c = 0;
 
       /* We used to have "while (isxdigit(*(++pt)))" here, but it fails
       when isxdigit() is a macro that refers to its argument more than
@@ -7187,36 +7187,41 @@ while ((c = *p++) != 0)
       for (pt++; isxdigit(*pt); pt++)
         {
         if (++i == 9)
+          {
           fprintf(outfile, "** Too many hex digits in \\x{...} item; "
                            "using only the first eight.\n");
-        else c = c * 16 + (tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10));
+          while (isxdigit(*pt)) pt++;
+          break;
+          }
+        else c = c * 16 + (tolower(*pt) - (isdigit(*pt)? '0' : 'a' - 10));
         }
-      if (*pt == '}')
+      if (i == 0 || *pt != '}')
         {
-        p = pt + 1;
-        break;
+        fprintf(outfile, "** Malformed \\x{ escape\n");
+        return PR_OK;
         }
-      /* Not correct form for \x{...}; fall through */
+      else p = pt + 1;
       }
-
-    /* \x without {} always defines just one byte in 8-bit mode. This
-    allows UTF-8 characters to be constructed byte by byte, and also allows
-    invalid UTF-8 sequences to be made. Just copy the byte in UTF-8 mode.
-    Otherwise, pass it down as data. */
-
-    c = 0;
-    while (i++ < 2 && isxdigit(*p))
+    else
       {
-      c = c * 16 + (tolower(*p) - ((isdigit(*p))? '0' : 'a' - 10));
-      p++;
-      }
+      /* \x without {} always defines just one byte in 8-bit mode. This
+      allows UTF-8 characters to be constructed byte by byte, and also allows
+      invalid UTF-8 sequences to be made. Just copy the byte in UTF-8 mode.
+      Otherwise, pass it down as data. */
+
+      while (i++ < 2 && isxdigit(*p))
+        {
+        c = c * 16 + (tolower(*p) - (isdigit(*p)? '0' : 'a' - 10));
+        p++;
+        }
 #if defined SUPPORT_PCRE2_8
-    if (utf && (test_mode == PCRE8_MODE))
-      {
-      *q8++ = c;
-      continue;
-      }
+      if (utf && (test_mode == PCRE8_MODE))
+        {
+        *q8++ = c;
+        continue;
+        }
 #endif
+      }
     break;
 
     case 0:     /* \ followed by EOF allows for an empty line */
@@ -7309,10 +7314,7 @@ while ((c = *p++) != 0)
     }
 #endif
 #ifdef SUPPORT_PCRE2_32
-  if (test_mode == PCRE32_MODE)
-    {
-    *q32++ = c;
-    }
+  if (test_mode == PCRE32_MODE) *q32++ = c;
 #endif
   }
 

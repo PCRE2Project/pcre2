@@ -226,9 +226,15 @@ handled by PCRE2, either by the interpreter or the JIT. An example is
 /(?:|(?0)abcd)(?(R)|\ez)/, which matches a sequence of any number of repeated
 "abcd" substrings at the end of the subject.
 .P
-23. From release 10.45, PCRE2 gives an error if \ex is not followed by a 
-hexadecimal digit or a curly bracket. It used to interpret this as the NUL 
-character. Perl still generates NUL, but warns in its warning mode.
+23. Both PCRE2 and Perl error when \ex{ escapes are invalid, but Perl tries to
+recover and prints a warning if the problem was that an invalid hexadecimal
+digit was found, since PCRE2 doesn't have warnings it returns an error instead.
+Additionally, Perl accepts \ex{} and generates NUL unlike PCRE2.
+.P
+24. From release 10.45, PCRE2 gives an error if \ex is not followed by a
+hexadecimal digit or a curly bracket. It used to interpret this as the NUL
+character. Perl still generates NUL, but warns when in warning mode in most
+cases.
 .
 .
 .SH AUTHOR
