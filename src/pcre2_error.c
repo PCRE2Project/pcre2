@@ -191,6 +191,7 @@ static const unsigned char compile_error_texts[] =
   "branch too long in variable-length lookbehind assertion\0"
   "compiled pattern would be longer than the limit set by the application\0"
   "octal value given by \\ddd is greater than \\377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)\0"
+  "unsupported extended character class\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

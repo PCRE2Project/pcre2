@@ -698,6 +698,7 @@ static modstruct modlist[] = {
   { "escaped_cr_is_lf",            MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ESCAPED_CR_IS_LF, CO(extra_options) },
   { "expand",                      MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
   { "extended",                    MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
+  { "extended_class",              MOD_PAT,  MOD_OPT, PCRE2_EXTENDED_CLASS,       PO(options) },
   { "extended_more",               MOD_PATP, MOD_OPT, PCRE2_EXTENDED_MORE,        PO(options) },
   { "extra_alt_bsux",              MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ALT_BSUX,       CO(extra_options) },
   { "find_limits",                 MOD_DAT,  MOD_CTL, CTL_FINDLIMITS,             DO(control) },
