@@ -7894,61 +7894,28 @@ else
 #endif /* SUPPORT_UNICODE */
   }
 
-if ((cc[-1] & XCL_HASPROP) == 0)
+if ((cc[-1] & XCL_MAP) != 0)
   {
-  if ((cc[-1] & XCL_MAP) != 0)
+  jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
+  if (!optimize_class(common, (const sljit_u8 *)cc, (((const sljit_u8 *)cc)[31] & 0x80) != 0, TRUE, &found))
     {
-    jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
-    if (!optimize_class(common, (const sljit_u8 *)cc, (((const sljit_u8 *)cc)[31] & 0x80) != 0, TRUE, &found))
-      {
-      OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
-      OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
-      OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)cc);
-      OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
-      OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, TMP2, 0);
-      add_jump(compiler, &found, JUMP(SLJIT_NOT_ZERO));
-      }
-
-    add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
-    JUMPHERE(jump);
-
-    cc += 32 / sizeof(PCRE2_UCHAR);
-    }
-  else
-    {
-    OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, min);
-    add_jump(compiler, (cc[-1] & XCL_NOT) == 0 ? backtracks : &found, CMP(SLJIT_GREATER, TMP2, 0, SLJIT_IMM, max - min));
-    }
-  }
-else if ((cc[-1] & XCL_MAP) != 0)
-  {
-  OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
-#ifdef SUPPORT_UNICODE
-  unicode_status |= XCLASS_CHAR_SAVED;
-#endif /* SUPPORT_UNICODE */
-  if (!optimize_class(common, (const sljit_u8 *)cc, FALSE, TRUE, list))
-    {
-#if PCRE2_CODE_UNIT_WIDTH == 8
-    jump = NULL;
-    if (common->utf)
-#endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
-      jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
-
     OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
     OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
     OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)cc);
     OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
     OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, TMP2, 0);
-    add_jump(compiler, list, JUMP(SLJIT_NOT_ZERO));
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-    if (common->utf)
-#endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
-      JUMPHERE(jump);
+    add_jump(compiler, &found, JUMP(SLJIT_NOT_ZERO));
     }
 
-  OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
+  add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
+  JUMPHERE(jump);
+
   cc += 32 / sizeof(PCRE2_UCHAR);
+  }
+else
+  {
+  OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, min);
+  add_jump(compiler, (cc[-1] & XCL_NOT) == 0 ? backtracks : &found, CMP(SLJIT_GREATER, TMP2, 0, SLJIT_IMM, max - min));
   }
 
 #ifdef SUPPORT_UNICODE
@@ -9033,7 +9000,7 @@ switch(type)
 #ifdef SUPPORT_UNICODE
   case OP_NOTPROP:
   case OP_PROP:
-  propdata[0] = XCL_HASPROP;
+  propdata[0] = 0;
   propdata[1] = type == OP_NOTPROP ? XCL_NOTPROP : XCL_PROP;
   propdata[2] = cc[0];
   propdata[3] = cc[1];

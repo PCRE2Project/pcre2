@@ -2058,6 +2058,7 @@ is available. */
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
 #define _pcre2_optimize_class        PCRE2_SUFFIX(_pcre2_optimize_class_)
+#define _pcre2_update_classbits      PCRE2_SUFFIX(_pcre2_update_classbits_)
 
 extern int          _pcre2_auto_possessify(PCRE2_UCHAR *,
                       const compile_block *);

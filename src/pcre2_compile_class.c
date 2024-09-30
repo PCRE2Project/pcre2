@@ -516,4 +516,124 @@ return cranges;
 
 #endif /* SUPPORT_WIDE_CHARS */
 
+#ifdef SUPPORT_UNICODE
+
+void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated,
+  uint8_t *classbits)
+{
+/* Update PRIV(xclass) when this function is changed. */
+int c, chartype;
+const ucd_record *prop;
+uint32_t gentype;
+BOOL set_bit;
+
+if (ptype == PT_ANY)
+  {
+  if (!negated) memset(classbits, 0xff, 32 * sizeof(uint8_t));
+  return;
+  }
+
+for (c = 0; c < 256; c++)
+  {
+  prop = GET_UCD(c);
+  set_bit = FALSE;
+
+  switch (ptype)
+    {
+    case PT_LAMP:
+    chartype = prop->chartype;
+    set_bit = (chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt);
+    break;
+
+    case PT_GC:
+    set_bit = (PRIV(ucp_gentype)[prop->chartype] == pdata);
+    break;
+
+    case PT_PC:
+    set_bit = (prop->chartype == pdata);
+    break;
+
+    case PT_SC:
+    set_bit = (prop->script == pdata);
+    break;
+
+    case PT_SCX:
+    set_bit = (prop->script == pdata ||
+      MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), pdata) != 0);
+    break;
+
+    case PT_ALNUM:
+    gentype = PRIV(ucp_gentype)[prop->chartype];
+    set_bit = (gentype == ucp_L || gentype == ucp_N);
+    break;
+
+    case PT_SPACE:    /* Perl space */
+    case PT_PXSPACE:  /* POSIX space */
+    switch(c)
+      {
+      HSPACE_BYTE_CASES:
+      VSPACE_BYTE_CASES:
+      set_bit = TRUE;
+      break;
+
+      default:
+      set_bit = (PRIV(ucp_gentype)[prop->chartype] == ucp_Z);
+      break;
+      }
+    break;
+
+    case PT_WORD:
+    chartype = prop->chartype;
+    gentype = PRIV(ucp_gentype)[chartype];
+    set_bit = (gentype == ucp_L || gentype == ucp_N ||
+               chartype == ucp_Mn || chartype == ucp_Pc);
+    break;
+
+    case PT_UCNC:
+    set_bit = (c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+               c == CHAR_GRAVE_ACCENT || c >= 0xa0);
+    break;
+
+    case PT_BIDICL:
+    set_bit = (UCD_BIDICLASS_PROP(prop) == pdata);
+    break;
+
+    case PT_BOOL:
+    set_bit = MAPBIT(PRIV(ucd_boolprop_sets) +
+                     UCD_BPROPS_PROP(prop), pdata) != 0;
+    break;
+
+    case PT_PXGRAPH:
+    chartype = prop->chartype;
+    gentype = PRIV(ucp_gentype)[chartype];
+    set_bit = (gentype != ucp_Z && (gentype != ucp_C || chartype == ucp_Cf));
+    break;
+
+    case PT_PXPRINT:
+    chartype = prop->chartype;
+    set_bit = (chartype != ucp_Zl && chartype != ucp_Zp &&
+       (PRIV(ucp_gentype)[chartype] != ucp_C || chartype == ucp_Cf));
+    break;
+
+    case PT_PXPUNCT:
+    gentype = PRIV(ucp_gentype)[prop->chartype];
+    set_bit = (gentype == ucp_P || (c < 128 && gentype == ucp_S));
+    break;
+
+    default:
+    PCRE2_ASSERT(ptype == PT_PXXDIGIT);
+    set_bit = (c >= CHAR_0 && c <= CHAR_9) ||
+              (c >= CHAR_A && c <= CHAR_F) ||
+              (c >= CHAR_a && c <= CHAR_f);
+    break;
+    }
+
+  if (negated) set_bit = !set_bit;
+  if (set_bit) *classbits |= (uint8_t)(1 << (c & 0x7));
+  if ((c & 0x7) == 0x7) classbits++;
+  }
+}
+
+#endif /* SUPPORT_UNICODE */
+
 /* End of pcre2_compile_class.c */

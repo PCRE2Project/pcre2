@@ -700,7 +700,7 @@ for(;;)
         printmap = (*ccode & XCL_MAP) != 0;
         if ((*ccode & XCL_NOT) != 0)
           {
-          invertmap = (*ccode & XCL_HASPROP) == 0;
+          invertmap = TRUE;
           fprintf(f, "^");
           }
         ccode++;
