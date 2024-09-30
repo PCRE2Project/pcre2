@@ -183,10 +183,19 @@ therefore no need for it to have a length entry, so use a high value. */
 #define MAX_UCHAR_VALUE 0xffffffffu
 #endif
 
+/* Macro for setting individual bits in class bitmaps. */
+
+#define SETBIT(a,b) a[(b) >> 3] |= (uint8_t)(1u << ((b) & 0x7))
+
 /* Merge intersecting ranges of classes. */
 
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
   uint32_t options, compile_block* cb);
+
+/* Set bits in classbits according to the property type */
+
+void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated,
+  uint8_t *classbits);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 

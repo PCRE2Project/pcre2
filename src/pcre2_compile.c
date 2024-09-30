@@ -266,17 +266,6 @@ static unsigned char meta_extra_lengths[] = {
 
 enum { PSKIP_ALT, PSKIP_CLASS, PSKIP_KET };
 
-/* Macro for setting individual bits in class bitmaps. It took some
-experimenting to figure out how to stop gcc 5.3.0 from warning with
--Wconversion. This version gets a warning:
-
-  #define SETBIT(a,b) a[(b)/8] |= (uint8_t)(1u << ((b)&7))
-
-Let's hope the apparently less efficient version isn't actually so bad if the
-compiler is clever with identical subexpressions. */
-
-#define SETBIT(a,b) a[(b)/8] = (uint8_t)(a[(b)/8] | (1u << ((b)&7)))
-
 /* Values and flags for the unsigned xxcuflags variables that accompany xxcu
 variables, which are concerned with first and required code units. A value
 greater than or equal to REQ_NONE means "no code unit set"; otherwise the
@@ -5270,7 +5259,6 @@ for (;;)
 It also handles non-utf case folding.
 
 Arguments:
-  classbits     the bit map for characters < 256
   options       the options bits
   cb            compile data
   start         start of range character
@@ -5281,9 +5269,9 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_to_class(uint8_t *classbits, uint32_t options, compile_block *cb,
-  uint32_t start, uint32_t end)
+add_to_class(uint32_t options, compile_block *cb, uint32_t start, uint32_t end)
 {
+uint8_t *classbits = cb->classbits;
 uint32_t c;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
 unsigned int n8 = 0;
@@ -5331,7 +5319,6 @@ so that the internal functions can try to avoid duplication when handling
 case-independence.
 
 Arguments:
-  classbits     the bit map for characters < 256
   options       the options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
@@ -5341,8 +5328,7 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_list_to_class(uint8_t *classbits, uint32_t options, compile_block *cb,
-  const uint32_t *p)
+add_list_to_class(uint32_t options, compile_block *cb, const uint32_t *p)
 {
 unsigned int n8 = 0;
 while (p[0] < 256)
@@ -5350,7 +5336,7 @@ while (p[0] < 256)
   unsigned int n = 0;
 
   while(p[n+1] == p[0] + n + 1) n++;
-  n8 += add_to_class(classbits, options, cb, p[0], p[n]);
+  n8 += add_to_class(options, cb, p[0], p[n]);
 
   p += n + 1;
   }
@@ -5369,7 +5355,6 @@ return n8;
 vertical whitespace to a class. The list must be in order.
 
 Arguments:
-  classbits     the bit map for characters < 256
   options       the options bits
   xoptions      the extra options bits
   cb            contains pointers to tables etc.
@@ -5380,16 +5365,15 @@ Returns:        the number of < 256 characters added
 */
 
 static unsigned int
-add_not_list_to_class(uint8_t *classbits, uint32_t options, compile_block *cb,
-  const uint32_t *p)
+add_not_list_to_class(uint32_t options, compile_block *cb, const uint32_t *p)
 {
 unsigned int n8 = 0;
 if (p[0] > 0)
-  n8 += add_to_class(classbits, options, cb, 0, p[0] - 1);
+  n8 += add_to_class(options, cb, 0, p[0] - 1);
 while (p[0] < 256)
   {
   while (p[1] == p[0] + 1) p++;
-  n8 += add_to_class(classbits, options, cb,
+  n8 += add_to_class(options, cb,
     p[0] + 1, (p[1] > 255) ? 255 : p[1] - 1);
   p++;
   }
@@ -5537,7 +5521,7 @@ BOOL matched_char = FALSE;
 BOOL previous_matched_char = FALSE;
 BOOL reset_caseful = FALSE;
 const uint8_t *cbits = cb->cbits;
-uint8_t classbits[32];
+uint8_t *classbits = cb->classbits;
 
 /* We can fish out the UTF setting once and for all into a BOOL, but we must
 not do this for other options (e.g. PCRE2_EXTENDED) that may change dynamically
@@ -6119,7 +6103,7 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_list_to_class(classbits, options & ~PCRE2_CASELESS,
+          (void)add_list_to_class(options & ~PCRE2_CASELESS,
             cb, PRIV(hspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
@@ -6131,7 +6115,7 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_not_list_to_class(classbits, options & ~PCRE2_CASELESS,
+          (void)add_not_list_to_class(options & ~PCRE2_CASELESS,
             cb, PRIV(hspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
@@ -6143,7 +6127,7 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_list_to_class(classbits, options & ~PCRE2_CASELESS,
+          (void)add_list_to_class(options & ~PCRE2_CASELESS,
             cb, PRIV(vspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
@@ -6155,7 +6139,7 @@ for (;; pptr++)
 #ifdef SUPPORT_UNICODE
           if (cranges != NULL) break;
 #endif
-          (void)add_not_list_to_class(classbits, options & ~PCRE2_CASELESS,
+          (void)add_not_list_to_class(options & ~PCRE2_CASELESS,
             cb, PRIV(vspace_list));
 #else
           PCRE2_ASSERT(cranges != NULL);
@@ -6187,6 +6171,9 @@ for (;; pptr++)
               *lengthptr += 3;
             else
               {
+              PRIV(update_classbits)(ptype, pdata, (escape == ESC_P),
+                classbits);
+
               *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
               *class_uchardata++ = ptype;
               *class_uchardata++ = pdata;
@@ -6256,7 +6243,7 @@ for (;; pptr++)
             if (C <= CHAR_i)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, options, cb, C + uc,
+                add_to_class(options, cb, C + uc,
                   ((D < CHAR_i)? D : CHAR_i) + uc);
               C = CHAR_j;
               }
@@ -6264,7 +6251,7 @@ for (;; pptr++)
             if (C <= D && C <= CHAR_r)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, options, cb, C + uc,
+                add_to_class(options, cb, C + uc,
                   ((D < CHAR_r)? D : CHAR_r) + uc);
               C = CHAR_s;
               }
@@ -6272,14 +6259,14 @@ for (;; pptr++)
             if (C <= D)
               {
               class_has_8bitchar +=
-                add_to_class(classbits, options, cb, C + uc, D + uc);
+                add_to_class(options, cb, C + uc, D + uc);
               }
             }
           else
 #endif
           /* Not an EBCDIC special range */
 
-          class_has_8bitchar += add_to_class(classbits, options, cb, c, d);
+          class_has_8bitchar += add_to_class(options, cb, c, d);
 #else
           PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -6293,7 +6280,7 @@ for (;; pptr++)
 #endif
         /* Handle a single character. */
 
-        class_has_8bitchar += add_to_class(classbits, options, cb, meta, meta);
+        class_has_8bitchar += add_to_class(options, cb, meta, meta);
 #else
         PCRE2_ASSERT(cranges != NULL);
         continue;
@@ -6311,7 +6298,7 @@ for (;; pptr++)
         {
         /* Add range to bitset. */
         class_has_8bitchar +=
-          add_to_class(classbits, options, cb, range[0], range[1]);
+          add_to_class(options, cb, range[0], range[1]);
 
         if (range[1] > 255) break;
         range += 2;
@@ -6440,7 +6427,7 @@ for (;; pptr++)
         *code++ |= XCL_MAP;
         (void)memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
           CU2BYTES(class_uchardata - code));
-        if (negate_class && !xclass_has_prop)
+        if (negate_class)
           {
           /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
           for (int i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];

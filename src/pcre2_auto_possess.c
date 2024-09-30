@@ -780,7 +780,8 @@ for(;;)
 
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
-      xclass_flags = (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE;
+      xclass_flags = (list_ptr == list ? code : base_end) -
+        list_ptr[2] + LINK_SIZE;
       if ((*xclass_flags & XCL_HASPROP) != 0) return FALSE;
       if ((*xclass_flags & XCL_MAP) == 0)
         {

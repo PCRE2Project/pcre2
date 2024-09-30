@@ -749,6 +749,7 @@ typedef struct compile_block {
   PCRE2_SIZE workspace_size;       /* Size of workspace */
   PCRE2_SIZE small_ref_offset[10]; /* Offsets for \1 to \9 */
   PCRE2_SIZE erroroffset;          /* Offset of error in pattern */
+  uint8_t classbits[32];           /* Temporary store for classbits */
   uint16_t names_found;            /* Number of entries so far */
   uint16_t name_entry_size;        /* Size of each entry */
   uint16_t parens_depth;           /* Depth of nested parentheses */
