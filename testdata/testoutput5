@@ -5575,7 +5575,7 @@ Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement
 /[\x{100}-\x{400}]+/Bi,utf
 ------------------------------------------------------------------
         Bra
-        [Ss\xb5\xff\x{100}-\x{400}\x{450}\x{1fbe}\x{2126}\x{2c62}\x{2c64}-\x{2c66}\x{2c6d}-\x{2c70}\x{2c7e}-\x{2c7f}\x{a78d}\x{a7aa}-\x{a7ae}\x{a7b0}-\x{a7b2}\x{a7c5}]++
+        [Ss\xb5\xff\x{100}-\x{400}\x{450}\x{1fbe}\x{1fd3}\x{1fe3}\x{2126}\x{2c62}\x{2c64}-\x{2c66}\x{2c6d}-\x{2c70}\x{2c7e}-\x{2c7f}\x{a78d}\x{a7aa}-\x{a7ae}\x{a7b0}-\x{a7b2}\x{a7c5}\x{a7cb}\x{a7dc}]++
         Ket
         End
 ------------------------------------------------------------------

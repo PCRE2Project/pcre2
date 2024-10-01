@@ -189,14 +189,14 @@ U+00AF ON  Symbol: Modifier symbol, common, Other, [caseignorable, diacritic, gr
 findprop b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf 
 U+00B0 ET  Symbol: Other symbol, common, Other, [graphemebase, patternsyntax]
 U+00B1 ET  Symbol: Mathematical symbol, common, Other, [graphemebase, math, patternsyntax]
-U+00B2 EN  Number: Other number, common, Other, [graphemebase]
-U+00B3 EN  Number: Other number, common, Other, [graphemebase]
+U+00B2 EN  Number: Other number, common, Other, [graphemebase, idcompatmathcontinue]
+U+00B3 EN  Number: Other number, common, Other, [graphemebase, idcompatmathcontinue]
 U+00B4 ON  Symbol: Modifier symbol, common, Other, [caseignorable, diacritic, graphemebase]
 U+00B5 L   Letter: Lower case letter, common, Other, U+03BC, U+039C, [alphabetic, cased, changeswhencasefolded, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
 U+00B6 ON  Punctuation: Other punctuation, common, Other, [graphemebase, patternsyntax]
-U+00B7 ON  Punctuation: Other punctuation, common, Other, [caseignorable, diacritic, extender, graphemebase, idcontinue, xidcontinue]
+U+00B7 ON  Punctuation: Other punctuation, common, Other, [latin, greek, georgian, han, gothic, shavian, coptic, glagolitic, carian, lydian, avestan, duployan, elbasan, mahajani, oldpermic, gunjalagondi], [caseignorable, diacritic, extender, graphemebase, idcontinue, xidcontinue]
 U+00B8 ON  Symbol: Modifier symbol, common, Other, [caseignorable, diacritic, graphemebase]
-U+00B9 EN  Number: Other number, common, Other, [graphemebase]
+U+00B9 EN  Number: Other number, common, Other, [graphemebase, idcompatmathcontinue]
 U+00BA L   Letter: Other letter, latin, Other, [alphabetic, cased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
 U+00BB ON  Punctuation: Final punctuation, common, Other, [bidimirrored, graphemebase, patternsyntax, quotationmark]
 U+00BC ON  Number: Other number, common, Other, [graphemebase]
@@ -311,12 +311,12 @@ U+FFFF BN  Control: Unassigned, unknown, Other, [noncharactercodepoint]
 findprop 10000 10001 e01ef f0000 100000
 U+10000 L   Letter: Other letter, linearb, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+10001 L   Letter: Other letter, linearb, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
-U+E01EF NSM Mark: Non-spacing mark, inherited, Extend, [caseignorable, defaultignorablecodepoint, graphemeextend, idcontinue, variationselector, xidcontinue]
+U+E01EF NSM Mark: Non-spacing mark, inherited, Extend, [caseignorable, defaultignorablecodepoint, graphemeextend, idcontinue, incb, variationselector, xidcontinue]
 U+F0000 L   Control: Private use, unknown, Other
 U+100000 L   Control: Private use, unknown, Other
 
 findprop 1b00 12000 7c0 a840 10900
-U+1B00 NSM Mark: Non-spacing mark, balinese, Extend, [alphabetic, caseignorable, graphemeextend, idcontinue, xidcontinue]
+U+1B00 NSM Mark: Non-spacing mark, balinese, Extend, [alphabetic, caseignorable, graphemeextend, idcontinue, incb, xidcontinue]
 U+12000 L   Letter: Other letter, cuneiform, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+07C0 R   Number: Decimal number, nko, Other, [graphemebase, idcontinue, xidcontinue]
 U+A840 L   Letter: Other letter, phagspa, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
@@ -341,7 +341,7 @@ U+10840 R   Letter: Other letter, imperialaramaic, Other, [alphabetic, graphemeb
 U+10855 R   Letter: Other letter, imperialaramaic, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 
 findprop 11100 1113c 11680 116c0
-U+11100 NSM Mark: Non-spacing mark, chakma, Extend, [alphabetic, caseignorable, graphemeextend, idcontinue, xidcontinue]
+U+11100 NSM Mark: Non-spacing mark, chakma, Extend, [alphabetic, caseignorable, graphemeextend, idcontinue, incb, xidcontinue]
 U+1113C L   Number: Decimal number, chakma, Other, [graphemebase, idcontinue, xidcontinue]
 U+11680 L   Letter: Other letter, takri, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+116C0 L   Number: Decimal number, takri, Other, [graphemebase, idcontinue, xidcontinue]
@@ -350,7 +350,7 @@ findprop 0d 0a 0e 0711 1b04 1111 1169 11fe ae4c ad89
 U+000D B   Control: Control, common, CR, [ascii, patternwhitespace, whitespace]
 U+000A B   Control: Control, common, LF, [ascii, patternwhitespace, whitespace]
 U+000E BN  Control: Control, common, Control, [ascii]
-U+0711 NSM Mark: Non-spacing mark, syriac, Extend, [alphabetic, caseignorable, graphemeextend, idcontinue, xidcontinue]
+U+0711 NSM Mark: Non-spacing mark, syriac, Extend, [alphabetic, caseignorable, graphemeextend, idcontinue, incb, xidcontinue]
 U+1B04 L   Mark: Spacing mark, balinese, SpacingMark, [alphabetic, graphemebase, idcontinue, xidcontinue]
 U+1111 L   Letter: Other letter, hangul, Hangul syllable type L, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+1169 L   Letter: Other letter, hangul, Hangul syllable type V, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
@@ -374,7 +374,7 @@ findprop 11800 1e903 11da9 10d27 11ee0 16e48 10f27 10f30
 U+11800 L   Letter: Other letter, dogra, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+1E903 R   Letter: Upper case letter, adlam, Other, U+1E925, [alphabetic, cased, changeswhencasefolded, changeswhencasemapped, changeswhenlowercased, graphemebase, idcontinue, idstart, uppercase, xidcontinue, xidstart]
 U+11DA9 L   Number: Decimal number, gunjalagondi, Other, [graphemebase, idcontinue, xidcontinue]
-U+10D27 NSM Mark: Non-spacing mark, hanifirohingya, Extend, [alphabetic, caseignorable, diacritic, graphemeextend, idcontinue, xidcontinue]
+U+10D27 NSM Mark: Non-spacing mark, hanifirohingya, Extend, [alphabetic, caseignorable, diacritic, graphemeextend, idcontinue, incb, xidcontinue]
 U+11EE0 L   Letter: Other letter, makasar, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
 U+16E48 L   Letter: Upper case letter, medefaidrin, Other, U+16E68, [alphabetic, cased, changeswhencasefolded, changeswhencasemapped, changeswhenlowercased, graphemebase, idcontinue, idstart, uppercase, xidcontinue, xidstart]
 U+10F27 R   Letter: Other letter, oldsogdian, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
@@ -382,10 +382,10 @@ U+10F30 AL  Letter: Other letter, sogdian, Other, [alphabetic, graphemebase, idc
 
 findprop  a836  a833  1cf4  20f0  1cd0
 U+A836 L   Symbol: Other symbol, common, Other, [devanagari, gurmukhi, gujarati, kaithi, takri, khojki, mahajani, modi, khudawadi, tirhuta, dogra], [graphemebase]
-U+A833 L   Number: Other number, common, Other, [devanagari, gurmukhi, gujarati, kannada, kaithi, takri, khojki, mahajani, modi, khudawadi, tirhuta, dogra, nandinagari], [graphemebase]
-U+1CF4 NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, kannada, grantha], [caseignorable, diacritic, graphemeextend, idcontinue, xidcontinue]
-U+20F0 NSM Mark: Non-spacing mark, inherited, Extend, [latin, devanagari, grantha], [caseignorable, graphemeextend, idcontinue, xidcontinue]
-U+1CD0 NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, bengali, kannada, grantha], [caseignorable, diacritic, graphemeextend, idcontinue, xidcontinue]
+U+A833 L   Number: Other number, common, Other, [devanagari, gurmukhi, gujarati, kannada, kaithi, sharada, takri, khojki, mahajani, modi, khudawadi, tirhuta, dogra, nandinagari, tulutigalari], [graphemebase]
+U+1CF4 NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, kannada, grantha, tulutigalari], [caseignorable, diacritic, graphemeextend, idcontinue, incb, xidcontinue]
+U+20F0 NSM Mark: Non-spacing mark, inherited, Extend, [latin, devanagari, grantha], [caseignorable, graphemeextend, idcontinue, incb, xidcontinue]
+U+1CD0 NSM Mark: Non-spacing mark, inherited, Extend, [devanagari, bengali, kannada, grantha], [caseignorable, diacritic, graphemeextend, idcontinue, incb, xidcontinue]
 
 findprop 32ff
 U+32FF L   Symbol: Other symbol, common, Other, [han], [graphemebase]

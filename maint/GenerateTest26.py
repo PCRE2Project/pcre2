@@ -55,7 +55,7 @@ def gen_script_tests():
   script_data = [None] * len(script_names)
   char_data = [None] * 0x110000
 
-  property_re = re.compile("^([0-9A-F]{4,6})(?:\\.\\.([0-9A-F]{4,6}))? +; ([A-Za-z_ ]+) #")
+  property_re = re.compile("^([0-9A-F]{4,6})(?:\\.\\.([0-9A-F]{4,6}))? +; ([A-Za-z_ ]+[A-Za-z]) +#")
   prev_name = ""
   script_idx = -1
 

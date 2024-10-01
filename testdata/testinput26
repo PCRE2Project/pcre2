@@ -13,17 +13,17 @@
 
 # Script extension check
 /^\p{Latin}/utf
-    \x{363}
+    \x{b7}
 
 /^\p{scx=Latn}/utf
     \x{a92e}
 
 # Script extension only character
 /^\p{Latin}/utf
-    \x{363}
+    \x{b7}
 
 /^\p{sc=Latin}/utf
-    \x{363}
+    \x{b7}
 
 # Character not in script
 /^\p{Latin}/utf
@@ -38,17 +38,17 @@
 
 # Script extension check
 /^\p{Greek}/utf
-    \x{342}
+    \x{b7}
 
 /^\p{Script_Extensions=Grek}/utf
-    \x{1dc1}
+    \x{205d}
 
 # Script extension only character
 /^\p{Greek}/utf
-    \x{342}
+    \x{b7}
 
 /^\p{sc=Greek}/utf
-    \x{342}
+    \x{b7}
 
 # Character not in script
 /^\p{Greek}/utf
@@ -63,21 +63,71 @@
 
 # Script extension check
 /^\p{Cyrillic}/utf
-    \x{483}
+    \x{2bc}
 
 /^\p{scx=Cyrl}/utf
     \x{a66f}
 
 # Script extension only character
 /^\p{Cyrillic}/utf
-    \x{2e43}
+    \x{2bc}
 
 /^\p{sc=Cyrillic}/utf
-    \x{2e43}
+    \x{2bc}
 
 # Character not in script
 /^\p{Cyrillic}/utf
     \x{1e090}
+
+# Base script check
+/^\p{sc=Armenian}/utf
+    \x{531}
+
+/^\p{Script=Armn}/utf
+    \x{fb17}
+
+# Script extension check
+/^\p{Armenian}/utf
+    \x{308}
+
+/^\p{Script_Extensions=Armn}/utf
+    \x{589}
+
+# Script extension only character
+/^\p{Armenian}/utf
+    \x{308}
+
+/^\p{sc=Armenian}/utf
+    \x{308}
+
+# Character not in script
+/^\p{Armenian}/utf
+    \x{fb18}
+
+# Base script check
+/^\p{sc=Hebrew}/utf
+    \x{591}
+
+/^\p{Script=Hebr}/utf
+    \x{fb4f}
+
+# Script extension check
+/^\p{Hebrew}/utf
+    \x{307}
+
+/^\p{scx=Hebr}/utf
+    \x{308}
+
+# Script extension only character
+/^\p{Hebrew}/utf
+    \x{307}
+
+/^\p{sc=Hebrew}/utf
+    \x{307}
+
+# Character not in script
+/^\p{Hebrew}/utf
+    \x{fb50}
 
 # Base script check
 /^\p{sc=Arabic}/utf
@@ -95,10 +145,10 @@
 
 # Script extension only character
 /^\p{Arabic}/utf
-    \x{102e0}
+    \x{60c}
 
 /^\p{sc=Arabic}/utf
-    \x{102e0}
+    \x{60c}
 
 # Character not in script
 /^\p{Arabic}/utf
@@ -113,17 +163,17 @@
 
 # Script extension check
 /^\p{Syriac}/utf
-    \x{60c}
+    \x{303}
 
 /^\p{scx=Syrc}/utf
     \x{1dfa}
 
 # Script extension only character
 /^\p{Syriac}/utf
-    \x{1dfa}
+    \x{303}
 
 /^\p{sc=Syriac}/utf
-    \x{1dfa}
+    \x{303}
 
 # Character not in script
 /^\p{Syriac}/utf
@@ -145,10 +195,10 @@
 
 # Script extension only character
 /^\p{Thaana}/utf
-    \x{fdf2}
+    \x{60c}
 
 /^\p{sc=Thaana}/utf
-    \x{fdf2}
+    \x{60c}
 
 # Character not in script
 /^\p{Thaana}/utf
@@ -163,17 +213,17 @@
 
 # Script extension check
 /^\p{Devanagari}/utf
-    \x{951}
+    \x{2bc}
 
 /^\p{scx=Deva}/utf
     \x{a8f3}
 
 # Script extension only character
 /^\p{Devanagari}/utf
-    \x{1cd1}
+    \x{2bc}
 
 /^\p{sc=Devanagari}/utf
-    \x{1cd1}
+    \x{2bc}
 
 # Character not in script
 /^\p{Devanagari}/utf
@@ -188,17 +238,17 @@
 
 # Script extension check
 /^\p{Bengali}/utf
-    \x{951}
+    \x{2bc}
 
 /^\p{Script_Extensions=Beng}/utf
     \x{a8f1}
 
 # Script extension only character
 /^\p{Bengali}/utf
-    \x{1cf7}
+    \x{2bc}
 
 /^\p{sc=Bengali}/utf
-    \x{1cf7}
+    \x{2bc}
 
 # Character not in script
 /^\p{Bengali}/utf
@@ -220,10 +270,10 @@
 
 # Script extension only character
 /^\p{Gurmukhi}/utf
-    \x{a836}
+    \x{951}
 
 /^\p{sc=Gurmukhi}/utf
-    \x{a836}
+    \x{951}
 
 # Character not in script
 /^\p{Gurmukhi}/utf
@@ -245,10 +295,10 @@
 
 # Script extension only character
 /^\p{Gujarati}/utf
-    \x{a836}
+    \x{951}
 
 /^\p{sc=Gujarati}/utf
-    \x{a836}
+    \x{951}
 
 # Character not in script
 /^\p{Gujarati}/utf
@@ -270,10 +320,10 @@
 
 # Script extension only character
 /^\p{Oriya}/utf
-    \x{1cda}
+    \x{951}
 
 /^\p{sc=Oriya}/utf
-    \x{1cda}
+    \x{951}
 
 # Character not in script
 /^\p{Oriya}/utf
@@ -295,10 +345,10 @@
 
 # Script extension only character
 /^\p{Tamil}/utf
-    \x{a8f3}
+    \x{951}
 
 /^\p{sc=Tamil}/utf
-    \x{a8f3}
+    \x{951}
 
 # Character not in script
 /^\p{Tamil}/utf
@@ -320,10 +370,10 @@
 
 # Script extension only character
 /^\p{Telugu}/utf
-    \x{1cda}
+    \x{951}
 
 /^\p{sc=Telugu}/utf
-    \x{1cda}
+    \x{951}
 
 # Character not in script
 /^\p{Telugu}/utf
@@ -345,10 +395,10 @@
 
 # Script extension only character
 /^\p{Kannada}/utf
-    \x{1cf4}
+    \x{951}
 
 /^\p{sc=Kannada}/utf
-    \x{1cf4}
+    \x{951}
 
 # Character not in script
 /^\p{Kannada}/utf
@@ -370,10 +420,10 @@
 
 # Script extension only character
 /^\p{Malayalam}/utf
-    \x{1cda}
+    \x{951}
 
 /^\p{sc=Malayalam}/utf
-    \x{1cda}
+    \x{951}
 
 # Character not in script
 /^\p{Malayalam}/utf
@@ -391,7 +441,7 @@
     \x{964}
 
 /^\p{Script_Extensions=Sinh}/utf
-    \x{965}
+    \x{1cf2}
 
 # Script extension only character
 /^\p{Sinhala}/utf
@@ -405,11 +455,61 @@
     \x{111f5}
 
 # Base script check
+/^\p{sc=Thai}/utf
+    \x{e01}
+
+/^\p{Script=Thai}/utf
+    \x{e5b}
+
+# Script extension check
+/^\p{Thai}/utf
+    \x{2bc}
+
+/^\p{scx=Thai}/utf
+    \x{331}
+
+# Script extension only character
+/^\p{Thai}/utf
+    \x{2bc}
+
+/^\p{sc=Thai}/utf
+    \x{2bc}
+
+# Character not in script
+/^\p{Thai}/utf
+    \x{e5c}
+
+# Base script check
+/^\p{sc=Tibetan}/utf
+    \x{f00}
+
+/^\p{Script=Tibt}/utf
+    \x{fda}
+
+# Script extension check
+/^\p{Tibetan}/utf
+    \x{3008}
+
+/^\p{Script_Extensions=Tibt}/utf
+    \x{300b}
+
+# Script extension only character
+/^\p{Tibetan}/utf
+    \x{3008}
+
+/^\p{sc=Tibetan}/utf
+    \x{3008}
+
+# Character not in script
+/^\p{Tibetan}/utf
+    \x{300c}
+
+# Base script check
 /^\p{sc=Myanmar}/utf
     \x{1000}
 
 /^\p{Script=Mymr}/utf
-    \x{aa7f}
+    \x{116e3}
 
 # Script extension check
 /^\p{Myanmar}/utf
@@ -427,7 +527,7 @@
 
 # Character not in script
 /^\p{Myanmar}/utf
-    \x{aa80}
+    \x{116e4}
 
 # Base script check
 /^\p{sc=Georgian}/utf
@@ -438,21 +538,21 @@
 
 # Script extension check
 /^\p{Georgian}/utf
-    \x{10fb}
+    \x{b7}
 
 /^\p{Script_Extensions=Geor}/utf
-    \x{10fb}
+    \x{2e31}
 
 # Script extension only character
 /^\p{Georgian}/utf
-    \x{10fb}
+    \x{b7}
 
 /^\p{sc=Georgian}/utf
-    \x{10fb}
+    \x{b7}
 
 # Character not in script
 /^\p{Georgian}/utf
-    \x{2d2e}
+    \x{2e32}
 
 # Base script check
 /^\p{sc=Hangul}/utf
@@ -470,14 +570,89 @@
 
 # Script extension only character
 /^\p{Hangul}/utf
-    \x{3003}
+    \x{3001}
 
 /^\p{sc=Hangul}/utf
-    \x{3003}
+    \x{3001}
 
 # Character not in script
 /^\p{Hangul}/utf
     \x{ffdd}
+
+# Base script check
+/^\p{sc=Ethiopic}/utf
+    \x{1200}
+
+/^\p{Script=Ethi}/utf
+    \x{1e7fe}
+
+# Script extension check
+/^\p{Ethiopic}/utf
+    \x{30e}
+
+/^\p{Script_Extensions=Ethi}/utf
+    \x{30e}
+
+# Script extension only character
+/^\p{Ethiopic}/utf
+    \x{30e}
+
+/^\p{sc=Ethiopic}/utf
+    \x{30e}
+
+# Character not in script
+/^\p{Ethiopic}/utf
+    \x{1e7ff}
+
+# Base script check
+/^\p{sc=Cherokee}/utf
+    \x{13a0}
+
+/^\p{Script=Cher}/utf
+    \x{abbf}
+
+# Script extension check
+/^\p{Cherokee}/utf
+    \x{300}
+
+/^\p{scx=Cher}/utf
+    \x{331}
+
+# Script extension only character
+/^\p{Cherokee}/utf
+    \x{300}
+
+/^\p{sc=Cherokee}/utf
+    \x{300}
+
+# Character not in script
+/^\p{Cherokee}/utf
+    \x{abc0}
+
+# Base script check
+/^\p{sc=Runic}/utf
+    \x{16a0}
+
+/^\p{Script=Runr}/utf
+    \x{16f8}
+
+# Script extension check
+/^\p{Runic}/utf
+    \x{16eb}
+
+/^\p{Script_Extensions=Runr}/utf
+    \x{16ed}
+
+# Script extension only character
+/^\p{Runic}/utf
+    \x{16eb}
+
+/^\p{sc=Runic}/utf
+    \x{16eb}
+
+# Character not in script
+/^\p{Runic}/utf
+    \x{16f9}
 
 # Base script check
 /^\p{sc=Mongolian}/utf
@@ -490,15 +665,15 @@
 /^\p{Mongolian}/utf
     \x{1802}
 
-/^\p{Script_Extensions=Mong}/utf
-    \x{202f}
+/^\p{scx=Mong}/utf
+    \x{300b}
 
 # Script extension only character
 /^\p{Mongolian}/utf
-    \x{202f}
+    \x{1802}
 
 /^\p{sc=Mongolian}/utf
-    \x{202f}
+    \x{1802}
 
 # Character not in script
 /^\p{Mongolian}/utf
@@ -515,15 +690,15 @@
 /^\p{Hiragana}/utf
     \x{3001}
 
-/^\p{scx=Hira}/utf
+/^\p{Script_Extensions=Hira}/utf
     \x{ff9f}
 
 # Script extension only character
 /^\p{Hiragana}/utf
-    \x{3031}
+    \x{3001}
 
 /^\p{sc=Hiragana}/utf
-    \x{3031}
+    \x{3001}
 
 # Character not in script
 /^\p{Hiragana}/utf
@@ -538,17 +713,17 @@
 
 # Script extension check
 /^\p{Katakana}/utf
-    \x{3001}
+    \x{305}
 
-/^\p{Script_Extensions=Kana}/utf
+/^\p{scx=Kana}/utf
     \x{ff9f}
 
 # Script extension only character
 /^\p{Katakana}/utf
-    \x{3031}
+    \x{305}
 
 /^\p{sc=Katakana}/utf
-    \x{3031}
+    \x{305}
 
 # Character not in script
 /^\p{Katakana}/utf
@@ -563,17 +738,17 @@
 
 # Script extension check
 /^\p{Bopomofo}/utf
-    \x{3001}
+    \x{2c7}
 
-/^\p{scx=Bopo}/utf
+/^\p{Script_Extensions=Bopo}/utf
     \x{ff65}
 
 # Script extension only character
 /^\p{Bopomofo}/utf
-    \x{302a}
+    \x{2c7}
 
 /^\p{sc=Bopomofo}/utf
-    \x{302a}
+    \x{2c7}
 
 # Character not in script
 /^\p{Bopomofo}/utf
@@ -588,17 +763,17 @@
 
 # Script extension check
 /^\p{Han}/utf
-    \x{3001}
+    \x{b7}
 
-/^\p{Script_Extensions=Hani}/utf
+/^\p{scx=Hani}/utf
     \x{1f251}
 
 # Script extension only character
 /^\p{Han}/utf
-    \x{3006}
+    \x{b7}
 
 /^\p{sc=Han}/utf
-    \x{3006}
+    \x{b7}
 
 # Character not in script
 /^\p{Han}/utf
@@ -615,7 +790,7 @@
 /^\p{Yi}/utf
     \x{3001}
 
-/^\p{scx=Yiii}/utf
+/^\p{Script_Extensions=Yiii}/utf
     \x{ff65}
 
 # Script extension only character
@@ -628,6 +803,31 @@
 # Character not in script
 /^\p{Yi}/utf
     \x{ff66}
+
+# Base script check
+/^\p{sc=Gothic}/utf
+    \x{10330}
+
+/^\p{Script=Goth}/utf
+    \x{1034a}
+
+# Script extension check
+/^\p{Gothic}/utf
+    \x{b7}
+
+/^\p{scx=Goth}/utf
+    \x{331}
+
+# Script extension only character
+/^\p{Gothic}/utf
+    \x{b7}
+
+/^\p{sc=Gothic}/utf
+    \x{b7}
+
+# Character not in script
+/^\p{Gothic}/utf
+    \x{1034b}
 
 # Base script check
 /^\p{sc=Tagalog}/utf
@@ -763,17 +963,17 @@
 
 # Script extension check
 /^\p{Tai_Le}/utf
-    \x{1040}
+    \x{300}
 
 /^\p{scx=Tale}/utf
     \x{1049}
 
 # Script extension only character
 /^\p{Tai_Le}/utf
-    \x{1040}
+    \x{300}
 
 /^\p{sc=Tai_Le}/utf
-    \x{1040}
+    \x{300}
 
 # Character not in script
 /^\p{Tai_Le}/utf
@@ -795,14 +995,39 @@
 
 # Script extension only character
 /^\p{Linear_B}/utf
-    \x{10102}
+    \x{10100}
 
 /^\p{sc=Linear_B}/utf
-    \x{10102}
+    \x{10100}
 
 # Character not in script
 /^\p{Linear_B}/utf
     \x{10140}
+
+# Base script check
+/^\p{sc=Shavian}/utf
+    \x{10450}
+
+/^\p{Script=Shaw}/utf
+    \x{1047f}
+
+# Script extension check
+/^\p{Shavian}/utf
+    \x{b7}
+
+/^\p{scx=Shaw}/utf
+    \x{b7}
+
+# Script extension only character
+/^\p{Shavian}/utf
+    \x{b7}
+
+/^\p{sc=Shavian}/utf
+    \x{b7}
+
+# Character not in script
+/^\p{Shavian}/utf
+    \x{10480}
 
 # Base script check
 /^\p{sc=Cypriot}/utf
@@ -815,15 +1040,15 @@
 /^\p{Cypriot}/utf
     \x{10100}
 
-/^\p{scx=Cprt}/utf
+/^\p{Script_Extensions=Cprt}/utf
     \x{1013f}
 
 # Script extension only character
 /^\p{Cypriot}/utf
-    \x{10102}
+    \x{10100}
 
 /^\p{sc=Cypriot}/utf
-    \x{10102}
+    \x{10100}
 
 # Character not in script
 /^\p{Cypriot}/utf
@@ -840,7 +1065,7 @@
 /^\p{Buginese}/utf
     \x{a9cf}
 
-/^\p{Script_Extensions=Bugi}/utf
+/^\p{scx=Bugi}/utf
     \x{a9cf}
 
 # Script extension only character
@@ -863,17 +1088,17 @@
 
 # Script extension check
 /^\p{Coptic}/utf
-    \x{102e0}
+    \x{b7}
 
-/^\p{scx=Copt}/utf
+/^\p{Script_Extensions=Copt}/utf
     \x{102fb}
 
 # Script extension only character
 /^\p{Coptic}/utf
-    \x{102e0}
+    \x{b7}
 
 /^\p{sc=Coptic}/utf
-    \x{102e0}
+    \x{b7}
 
 # Character not in script
 /^\p{Coptic}/utf
@@ -888,21 +1113,46 @@
 
 # Script extension check
 /^\p{Glagolitic}/utf
-    \x{484}
+    \x{b7}
 
-/^\p{Script_Extensions=Glag}/utf
+/^\p{scx=Glag}/utf
     \x{a66f}
 
 # Script extension only character
 /^\p{Glagolitic}/utf
-    \x{484}
+    \x{b7}
 
 /^\p{sc=Glagolitic}/utf
-    \x{484}
+    \x{b7}
 
 # Character not in script
 /^\p{Glagolitic}/utf
     \x{1e02b}
+
+# Base script check
+/^\p{sc=Tifinagh}/utf
+    \x{2d30}
+
+/^\p{Script=Tfng}/utf
+    \x{2d7f}
+
+# Script extension check
+/^\p{Tifinagh}/utf
+    \x{302}
+
+/^\p{Script_Extensions=Tfng}/utf
+    \x{309}
+
+# Script extension only character
+/^\p{Tifinagh}/utf
+    \x{302}
+
+/^\p{sc=Tifinagh}/utf
+    \x{302}
+
+# Character not in script
+/^\p{Tifinagh}/utf
+    \x{2d80}
 
 # Base script check
 /^\p{sc=Syloti_Nagri}/utf
@@ -920,10 +1170,10 @@
 
 # Script extension only character
 /^\p{Syloti_Nagri}/utf
-    \x{9e6}
+    \x{964}
 
 /^\p{sc=Syloti_Nagri}/utf
-    \x{9e6}
+    \x{964}
 
 # Character not in script
 /^\p{Syloti_Nagri}/utf
@@ -941,7 +1191,7 @@
     \x{1802}
 
 /^\p{Script_Extensions=Phag}/utf
-    \x{1805}
+    \x{3002}
 
 # Script extension only character
 /^\p{Phags_Pa}/utf
@@ -970,10 +1220,10 @@
 
 # Script extension only character
 /^\p{Nko}/utf
-    \x{fd3e}
+    \x{60c}
 
 /^\p{sc=Nko}/utf
-    \x{fd3e}
+    \x{60c}
 
 # Character not in script
 /^\p{Nko}/utf
@@ -1005,6 +1255,156 @@
     \x{a930}
 
 # Base script check
+/^\p{sc=Lycian}/utf
+    \x{10280}
+
+/^\p{Script=Lyci}/utf
+    \x{1029c}
+
+# Script extension check
+/^\p{Lycian}/utf
+    \x{205a}
+
+/^\p{scx=Lyci}/utf
+    \x{205a}
+
+# Script extension only character
+/^\p{Lycian}/utf
+    \x{205a}
+
+/^\p{sc=Lycian}/utf
+    \x{205a}
+
+# Character not in script
+/^\p{Lycian}/utf
+    \x{1029d}
+
+# Base script check
+/^\p{sc=Carian}/utf
+    \x{102a0}
+
+/^\p{Script=Cari}/utf
+    \x{102d0}
+
+# Script extension check
+/^\p{Carian}/utf
+    \x{b7}
+
+/^\p{Script_Extensions=Cari}/utf
+    \x{2e31}
+
+# Script extension only character
+/^\p{Carian}/utf
+    \x{b7}
+
+/^\p{sc=Carian}/utf
+    \x{b7}
+
+# Character not in script
+/^\p{Carian}/utf
+    \x{102d1}
+
+# Base script check
+/^\p{sc=Lydian}/utf
+    \x{10920}
+
+/^\p{Script=Lydi}/utf
+    \x{1093f}
+
+# Script extension check
+/^\p{Lydian}/utf
+    \x{b7}
+
+/^\p{scx=Lydi}/utf
+    \x{2e31}
+
+# Script extension only character
+/^\p{Lydian}/utf
+    \x{b7}
+
+/^\p{sc=Lydian}/utf
+    \x{b7}
+
+# Character not in script
+/^\p{Lydian}/utf
+    \x{10940}
+
+# Base script check
+/^\p{sc=Avestan}/utf
+    \x{10b00}
+
+/^\p{Script=Avst}/utf
+    \x{10b3f}
+
+# Script extension check
+/^\p{Avestan}/utf
+    \x{b7}
+
+/^\p{Script_Extensions=Avst}/utf
+    \x{2e31}
+
+# Script extension only character
+/^\p{Avestan}/utf
+    \x{b7}
+
+/^\p{sc=Avestan}/utf
+    \x{b7}
+
+# Character not in script
+/^\p{Avestan}/utf
+    \x{10b40}
+
+# Base script check
+/^\p{sc=Samaritan}/utf
+    \x{800}
+
+/^\p{Script=Samr}/utf
+    \x{83e}
+
+# Script extension check
+/^\p{Samaritan}/utf
+    \x{2e31}
+
+/^\p{scx=Samr}/utf
+    \x{2e31}
+
+# Script extension only character
+/^\p{Samaritan}/utf
+    \x{2e31}
+
+/^\p{sc=Samaritan}/utf
+    \x{2e31}
+
+# Character not in script
+/^\p{Samaritan}/utf
+    \x{2e32}
+
+# Base script check
+/^\p{sc=Lisu}/utf
+    \x{a4d0}
+
+/^\p{Script=Lisu}/utf
+    \x{11fb0}
+
+# Script extension check
+/^\p{Lisu}/utf
+    \x{2bc}
+
+/^\p{Script_Extensions=Lisu}/utf
+    \x{300b}
+
+# Script extension only character
+/^\p{Lisu}/utf
+    \x{2bc}
+
+/^\p{sc=Lisu}/utf
+    \x{2bc}
+
+# Character not in script
+/^\p{Lisu}/utf
+    \x{11fb1}
+
+# Base script check
 /^\p{sc=Javanese}/utf
     \x{a980}
 
@@ -1030,6 +1430,31 @@
     \x{a9e0}
 
 # Base script check
+/^\p{sc=Old_Turkic}/utf
+    \x{10c00}
+
+/^\p{Script=Orkh}/utf
+    \x{10c48}
+
+# Script extension check
+/^\p{Old_Turkic}/utf
+    \x{205a}
+
+/^\p{Script_Extensions=Orkh}/utf
+    \x{2e30}
+
+# Script extension only character
+/^\p{Old_Turkic}/utf
+    \x{205a}
+
+/^\p{sc=Old_Turkic}/utf
+    \x{205a}
+
+# Character not in script
+/^\p{Old_Turkic}/utf
+    \x{10c49}
+
+# Base script check
 /^\p{sc=Kaithi}/utf
     \x{11080}
 
@@ -1040,7 +1465,7 @@
 /^\p{Kaithi}/utf
     \x{966}
 
-/^\p{Script_Extensions=Kthi}/utf
+/^\p{scx=Kthi}/utf
     \x{a839}
 
 # Script extension only character
@@ -1065,7 +1490,7 @@
 /^\p{Mandaic}/utf
     \x{640}
 
-/^\p{scx=Mand}/utf
+/^\p{Script_Extensions=Mand}/utf
     \x{640}
 
 # Script extension only character
@@ -1090,7 +1515,7 @@
 /^\p{Chakma}/utf
     \x{9e6}
 
-/^\p{Script_Extensions=Cakm}/utf
+/^\p{scx=Cakm}/utf
     \x{1049}
 
 # Script extension only character
@@ -1105,6 +1530,31 @@
     \x{11148}
 
 # Base script check
+/^\p{sc=Meroitic_Hieroglyphs}/utf
+    \x{10980}
+
+/^\p{Script=Mero}/utf
+    \x{1099f}
+
+# Script extension check
+/^\p{Meroitic_Hieroglyphs}/utf
+    \x{205d}
+
+/^\p{Script_Extensions=Mero}/utf
+    \x{205d}
+
+# Script extension only character
+/^\p{Meroitic_Hieroglyphs}/utf
+    \x{205d}
+
+/^\p{sc=Meroitic_Hieroglyphs}/utf
+    \x{205d}
+
+# Character not in script
+/^\p{Meroitic_Hieroglyphs}/utf
+    \x{109a0}
+
+# Base script check
 /^\p{sc=Sharada}/utf
     \x{11180}
 
@@ -1116,14 +1566,14 @@
     \x{951}
 
 /^\p{scx=Shrd}/utf
-    \x{1ce0}
+    \x{a838}
 
 # Script extension only character
 /^\p{Sharada}/utf
-    \x{1cd7}
+    \x{951}
 
 /^\p{sc=Sharada}/utf
-    \x{1cd7}
+    \x{951}
 
 # Character not in script
 /^\p{Sharada}/utf
@@ -1145,14 +1595,39 @@
 
 # Script extension only character
 /^\p{Takri}/utf
-    \x{a836}
+    \x{964}
 
 /^\p{sc=Takri}/utf
-    \x{a836}
+    \x{964}
 
 # Character not in script
 /^\p{Takri}/utf
     \x{116ca}
+
+# Base script check
+/^\p{sc=Caucasian_Albanian}/utf
+    \x{10530}
+
+/^\p{Script=Aghb}/utf
+    \x{1056f}
+
+# Script extension check
+/^\p{Caucasian_Albanian}/utf
+    \x{304}
+
+/^\p{scx=Aghb}/utf
+    \x{35e}
+
+# Script extension only character
+/^\p{Caucasian_Albanian}/utf
+    \x{304}
+
+/^\p{sc=Caucasian_Albanian}/utf
+    \x{304}
+
+# Character not in script
+/^\p{Caucasian_Albanian}/utf
+    \x{10570}
 
 # Base script check
 /^\p{sc=Duployan}/utf
@@ -1163,21 +1638,46 @@
 
 # Script extension check
 /^\p{Duployan}/utf
-    \x{1bca0}
+    \x{b7}
 
-/^\p{scx=Dupl}/utf
+/^\p{Script_Extensions=Dupl}/utf
     \x{1bca3}
 
 # Script extension only character
 /^\p{Duployan}/utf
-    \x{1bca0}
+    \x{b7}
 
 /^\p{sc=Duployan}/utf
-    \x{1bca0}
+    \x{b7}
 
 # Character not in script
 /^\p{Duployan}/utf
     \x{1bca4}
+
+# Base script check
+/^\p{sc=Elbasan}/utf
+    \x{10500}
+
+/^\p{Script=Elba}/utf
+    \x{10527}
+
+# Script extension check
+/^\p{Elbasan}/utf
+    \x{b7}
+
+/^\p{scx=Elba}/utf
+    \x{305}
+
+# Script extension only character
+/^\p{Elbasan}/utf
+    \x{b7}
+
+/^\p{sc=Elbasan}/utf
+    \x{b7}
+
+# Character not in script
+/^\p{Elbasan}/utf
+    \x{10528}
 
 # Base script check
 /^\p{sc=Grantha}/utf
@@ -1195,10 +1695,10 @@
 
 # Script extension only character
 /^\p{Grantha}/utf
-    \x{1cd3}
+    \x{951}
 
 /^\p{sc=Grantha}/utf
-    \x{1cd3}
+    \x{951}
 
 # Character not in script
 /^\p{Grantha}/utf
@@ -1263,17 +1763,17 @@
 
 # Script extension check
 /^\p{Mahajani}/utf
-    \x{964}
+    \x{b7}
 
 /^\p{scx=Mahj}/utf
     \x{a839}
 
 # Script extension only character
 /^\p{Mahajani}/utf
-    \x{966}
+    \x{b7}
 
 /^\p{sc=Mahajani}/utf
-    \x{966}
+    \x{b7}
 
 # Character not in script
 /^\p{Mahajani}/utf
@@ -1320,10 +1820,10 @@
 
 # Script extension only character
 /^\p{Modi}/utf
-    \x{a836}
+    \x{a830}
 
 /^\p{sc=Modi}/utf
-    \x{a836}
+    \x{a830}
 
 # Character not in script
 /^\p{Modi}/utf
@@ -1338,17 +1838,17 @@
 
 # Script extension check
 /^\p{Old_Permic}/utf
-    \x{483}
+    \x{b7}
 
 /^\p{Script_Extensions=Perm}/utf
     \x{483}
 
 # Script extension only character
 /^\p{Old_Permic}/utf
-    \x{483}
+    \x{b7}
 
 /^\p{sc=Old_Permic}/utf
-    \x{483}
+    \x{b7}
 
 # Character not in script
 /^\p{Old_Permic}/utf
@@ -1395,10 +1895,10 @@
 
 # Script extension only character
 /^\p{Khudawadi}/utf
-    \x{a836}
+    \x{964}
 
 /^\p{sc=Khudawadi}/utf
-    \x{a836}
+    \x{964}
 
 # Character not in script
 /^\p{Khudawadi}/utf
@@ -1420,10 +1920,10 @@
 
 # Script extension only character
 /^\p{Tirhuta}/utf
-    \x{1cf2}
+    \x{951}
 
 /^\p{sc=Tirhuta}/utf
-    \x{1cf2}
+    \x{951}
 
 # Character not in script
 /^\p{Tirhuta}/utf
@@ -1455,6 +1955,31 @@
     \x{112aa}
 
 # Base script check
+/^\p{sc=Old_Hungarian}/utf
+    \x{10c80}
+
+/^\p{Script=Hung}/utf
+    \x{10cff}
+
+# Script extension check
+/^\p{Old_Hungarian}/utf
+    \x{205a}
+
+/^\p{scx=Hung}/utf
+    \x{2e41}
+
+# Script extension only character
+/^\p{Old_Hungarian}/utf
+    \x{205a}
+
+/^\p{sc=Old_Hungarian}/utf
+    \x{205a}
+
+# Character not in script
+/^\p{Old_Hungarian}/utf
+    \x{10d00}
+
+# Base script check
 /^\p{sc=Adlam}/utf
     \x{1e900}
 
@@ -1465,8 +1990,8 @@
 /^\p{Adlam}/utf
     \x{61f}
 
-/^\p{scx=Adlm}/utf
-    \x{640}
+/^\p{Script_Extensions=Adlm}/utf
+    \x{2e41}
 
 # Script extension only character
 /^\p{Adlam}/utf
@@ -1480,6 +2005,56 @@
     \x{1e960}
 
 # Base script check
+/^\p{sc=Osage}/utf
+    \x{104b0}
+
+/^\p{Script=Osge}/utf
+    \x{104fb}
+
+# Script extension check
+/^\p{Osage}/utf
+    \x{301}
+
+/^\p{scx=Osge}/utf
+    \x{358}
+
+# Script extension only character
+/^\p{Osage}/utf
+    \x{301}
+
+/^\p{sc=Osage}/utf
+    \x{301}
+
+# Character not in script
+/^\p{Osage}/utf
+    \x{104fc}
+
+# Base script check
+/^\p{sc=Tangut}/utf
+    \x{16fe0}
+
+/^\p{Script=Tang}/utf
+    \x{18d08}
+
+# Script extension check
+/^\p{Tangut}/utf
+    \x{2ff0}
+
+/^\p{Script_Extensions=Tang}/utf
+    \x{31ef}
+
+# Script extension only character
+/^\p{Tangut}/utf
+    \x{2ff0}
+
+/^\p{sc=Tangut}/utf
+    \x{2ff0}
+
+# Character not in script
+/^\p{Tangut}/utf
+    \x{18d09}
+
+# Base script check
 /^\p{sc=Masaram_Gondi}/utf
     \x{11d00}
 
@@ -1490,7 +2065,7 @@
 /^\p{Masaram_Gondi}/utf
     \x{964}
 
-/^\p{Script_Extensions=Gonm}/utf
+/^\p{scx=Gonm}/utf
     \x{965}
 
 # Script extension only character
@@ -1515,15 +2090,15 @@
 /^\p{Dogra}/utf
     \x{964}
 
-/^\p{scx=Dogr}/utf
+/^\p{Script_Extensions=Dogr}/utf
     \x{a839}
 
 # Script extension only character
 /^\p{Dogra}/utf
-    \x{966}
+    \x{964}
 
 /^\p{sc=Dogra}/utf
-    \x{966}
+    \x{964}
 
 # Character not in script
 /^\p{Dogra}/utf
@@ -1538,17 +2113,17 @@
 
 # Script extension check
 /^\p{Gunjala_Gondi}/utf
-    \x{964}
+    \x{b7}
 
-/^\p{Script_Extensions=Gong}/utf
+/^\p{scx=Gong}/utf
     \x{965}
 
 # Script extension only character
 /^\p{Gunjala_Gondi}/utf
-    \x{964}
+    \x{b7}
 
 /^\p{sc=Gunjala_Gondi}/utf
-    \x{964}
+    \x{b7}
 
 # Character not in script
 /^\p{Gunjala_Gondi}/utf
@@ -1565,15 +2140,15 @@
 /^\p{Hanifi_Rohingya}/utf
     \x{60c}
 
-/^\p{scx=Rohg}/utf
+/^\p{Script_Extensions=Rohg}/utf
     \x{6d4}
 
 # Script extension only character
 /^\p{Hanifi_Rohingya}/utf
-    \x{6d4}
+    \x{60c}
 
 /^\p{sc=Hanifi_Rohingya}/utf
-    \x{6d4}
+    \x{60c}
 
 # Character not in script
 /^\p{Hanifi_Rohingya}/utf
@@ -1590,7 +2165,7 @@
 /^\p{Sogdian}/utf
     \x{640}
 
-/^\p{Script_Extensions=Sogd}/utf
+/^\p{scx=Sogd}/utf
     \x{640}
 
 # Script extension only character
@@ -1615,15 +2190,15 @@
 /^\p{Nandinagari}/utf
     \x{964}
 
-/^\p{scx=Nand}/utf
+/^\p{Script_Extensions=Nand}/utf
     \x{a835}
 
 # Script extension only character
 /^\p{Nandinagari}/utf
-    \x{1cfa}
+    \x{964}
 
 /^\p{sc=Nandinagari}/utf
-    \x{1cfa}
+    \x{964}
 
 # Character not in script
 /^\p{Nandinagari}/utf
@@ -1640,15 +2215,15 @@
 /^\p{Yezidi}/utf
     \x{60c}
 
-/^\p{Script_Extensions=Yezi}/utf
+/^\p{scx=Yezi}/utf
     \x{669}
 
 # Script extension only character
 /^\p{Yezidi}/utf
-    \x{660}
+    \x{60c}
 
 /^\p{sc=Yezidi}/utf
-    \x{660}
+    \x{60c}
 
 # Character not in script
 /^\p{Yezidi}/utf
@@ -1665,7 +2240,7 @@
 /^\p{Cypro_Minoan}/utf
     \x{10100}
 
-/^\p{scx=Cpmn}/utf
+/^\p{Script_Extensions=Cpmn}/utf
     \x{10101}
 
 # Script extension only character
@@ -1690,19 +2265,194 @@
 /^\p{Old_Uyghur}/utf
     \x{640}
 
-/^\p{Script_Extensions=Ougr}/utf
+/^\p{scx=Ougr}/utf
     \x{10af2}
 
 # Script extension only character
 /^\p{Old_Uyghur}/utf
-    \x{10af2}
+    \x{640}
 
 /^\p{sc=Old_Uyghur}/utf
-    \x{10af2}
+    \x{640}
 
 # Character not in script
 /^\p{Old_Uyghur}/utf
     \x{10f8a}
+
+# Base script check
+/^\p{sc=Toto}/utf
+    \x{1e290}
+
+/^\p{Script=Toto}/utf
+    \x{1e2ae}
+
+# Script extension check
+/^\p{Toto}/utf
+    \x{2bc}
+
+/^\p{Script_Extensions=Toto}/utf
+    \x{2bc}
+
+# Script extension only character
+/^\p{Toto}/utf
+    \x{2bc}
+
+/^\p{sc=Toto}/utf
+    \x{2bc}
+
+# Character not in script
+/^\p{Toto}/utf
+    \x{1e2af}
+
+# Base script check
+/^\p{sc=Garay}/utf
+    \x{10d40}
+
+/^\p{Script=Gara}/utf
+    \x{10d8f}
+
+# Script extension check
+/^\p{Garay}/utf
+    \x{60c}
+
+/^\p{scx=Gara}/utf
+    \x{61f}
+
+# Script extension only character
+/^\p{Garay}/utf
+    \x{60c}
+
+/^\p{sc=Garay}/utf
+    \x{60c}
+
+# Character not in script
+/^\p{Garay}/utf
+    \x{10d90}
+
+# Base script check
+/^\p{sc=Gurung_Khema}/utf
+    \x{16100}
+
+/^\p{Script=Gukh}/utf
+    \x{16139}
+
+# Script extension check
+/^\p{Gurung_Khema}/utf
+    \x{965}
+
+/^\p{Script_Extensions=Gukh}/utf
+    \x{965}
+
+# Script extension only character
+/^\p{Gurung_Khema}/utf
+    \x{965}
+
+/^\p{sc=Gurung_Khema}/utf
+    \x{965}
+
+# Character not in script
+/^\p{Gurung_Khema}/utf
+    \x{1613a}
+
+# Base script check
+/^\p{sc=Ol_Onal}/utf
+    \x{1e5d0}
+
+/^\p{Script=Onao}/utf
+    \x{1e5ff}
+
+# Script extension check
+/^\p{Ol_Onal}/utf
+    \x{964}
+
+/^\p{scx=Onao}/utf
+    \x{965}
+
+# Script extension only character
+/^\p{Ol_Onal}/utf
+    \x{964}
+
+/^\p{sc=Ol_Onal}/utf
+    \x{964}
+
+# Character not in script
+/^\p{Ol_Onal}/utf
+    \x{1e600}
+
+# Base script check
+/^\p{sc=Sunuwar}/utf
+    \x{11bc0}
+
+/^\p{Script=Sunu}/utf
+    \x{11bf9}
+
+# Script extension check
+/^\p{Sunuwar}/utf
+    \x{300}
+
+/^\p{Script_Extensions=Sunu}/utf
+    \x{331}
+
+# Script extension only character
+/^\p{Sunuwar}/utf
+    \x{300}
+
+/^\p{sc=Sunuwar}/utf
+    \x{300}
+
+# Character not in script
+/^\p{Sunuwar}/utf
+    \x{11bfa}
+
+# Base script check
+/^\p{sc=Todhri}/utf
+    \x{105c0}
+
+/^\p{Script=Todr}/utf
+    \x{105f3}
+
+# Script extension check
+/^\p{Todhri}/utf
+    \x{301}
+
+/^\p{scx=Todr}/utf
+    \x{35e}
+
+# Script extension only character
+/^\p{Todhri}/utf
+    \x{301}
+
+/^\p{sc=Todhri}/utf
+    \x{301}
+
+# Character not in script
+/^\p{Todhri}/utf
+    \x{105f4}
+
+# Base script check
+/^\p{sc=Tulu_Tigalari}/utf
+    \x{11380}
+
+/^\p{Script=Tutg}/utf
+    \x{113e2}
+
+# Script extension check
+/^\p{Tulu_Tigalari}/utf
+    \x{ce6}
+
+/^\p{Script_Extensions=Tutg}/utf
+    \x{a8f1}
+
+# Script extension only character
+/^\p{Tulu_Tigalari}/utf
+    \x{ce6}
+
+/^\p{sc=Tulu_Tigalari}/utf
+    \x{ce6}
+
+# Character not in script
+/^\p{Tulu_Tigalari}/utf
+    \x{113e3}
 
 # Base script check
 /^\p{sc=Common}/utf
@@ -1716,39 +2466,6 @@
     \x{e0080}
 
 # Base script check
-/^\p{sc=Armenian}/utf
-    \x{531}
-
-/^\p{Script=Armn}/utf
-    \x{fb17}
-
-# Character not in script
-/^\p{Armenian}/utf
-    \x{fb18}
-
-# Base script check
-/^\p{sc=Hebrew}/utf
-    \x{591}
-
-/^\p{Script=Hebr}/utf
-    \x{fb4f}
-
-# Character not in script
-/^\p{Hebrew}/utf
-    \x{fb50}
-
-# Base script check
-/^\p{sc=Thai}/utf
-    \x{e01}
-
-/^\p{Script=Thai}/utf
-    \x{e5b}
-
-# Character not in script
-/^\p{Thai}/utf
-    \x{e5c}
-
-# Base script check
 /^\p{sc=Lao}/utf
     \x{e81}
 
@@ -1758,39 +2475,6 @@
 # Character not in script
 /^\p{Lao}/utf
     \x{ee0}
-
-# Base script check
-/^\p{sc=Tibetan}/utf
-    \x{f00}
-
-/^\p{Script=Tibt}/utf
-    \x{fda}
-
-# Character not in script
-/^\p{Tibetan}/utf
-    \x{fdb}
-
-# Base script check
-/^\p{sc=Ethiopic}/utf
-    \x{1200}
-
-/^\p{Script=Ethi}/utf
-    \x{1e7fe}
-
-# Character not in script
-/^\p{Ethiopic}/utf
-    \x{1e7ff}
-
-# Base script check
-/^\p{sc=Cherokee}/utf
-    \x{13a0}
-
-/^\p{Script=Cher}/utf
-    \x{abbf}
-
-# Character not in script
-/^\p{Cherokee}/utf
-    \x{abc0}
 
 # Base script check
 /^\p{sc=Canadian_Aboriginal}/utf
@@ -1815,17 +2499,6 @@
     \x{169d}
 
 # Base script check
-/^\p{sc=Runic}/utf
-    \x{16a0}
-
-/^\p{Script=Runr}/utf
-    \x{16f8}
-
-# Character not in script
-/^\p{Runic}/utf
-    \x{16f9}
-
-# Base script check
 /^\p{sc=Khmer}/utf
     \x{1780}
 
@@ -1846,17 +2519,6 @@
 # Character not in script
 /^\p{Old_Italic}/utf
     \x{10330}
-
-# Base script check
-/^\p{sc=Gothic}/utf
-    \x{10330}
-
-/^\p{Script=Goth}/utf
-    \x{1034a}
-
-# Character not in script
-/^\p{Gothic}/utf
-    \x{1034b}
 
 # Base script check
 /^\p{sc=Deseret}/utf
@@ -1892,17 +2554,6 @@
     \x{103a0}
 
 # Base script check
-/^\p{sc=Shavian}/utf
-    \x{10450}
-
-/^\p{Script=Shaw}/utf
-    \x{1047f}
-
-# Character not in script
-/^\p{Shavian}/utf
-    \x{10480}
-
-# Base script check
 /^\p{sc=Osmanya}/utf
     \x{10480}
 
@@ -1936,17 +2587,6 @@
     \x{19e0}
 
 # Base script check
-/^\p{sc=Tifinagh}/utf
-    \x{2d30}
-
-/^\p{Script=Tfng}/utf
-    \x{2d7f}
-
-# Character not in script
-/^\p{Tifinagh}/utf
-    \x{2d80}
-
-# Base script check
 /^\p{sc=Old_Persian}/utf
     \x{103a0}
 
@@ -1973,11 +2613,11 @@
     \x{1b00}
 
 /^\p{Script=Bali}/utf
-    \x{1b7e}
+    \x{1b7f}
 
 # Character not in script
 /^\p{Balinese}/utf
-    \x{1b7f}
+    \x{1b80}
 
 # Base script check
 /^\p{sc=Cuneiform}/utf
@@ -2068,39 +2708,6 @@
     \x{a960}
 
 # Base script check
-/^\p{sc=Lycian}/utf
-    \x{10280}
-
-/^\p{Script=Lyci}/utf
-    \x{1029c}
-
-# Character not in script
-/^\p{Lycian}/utf
-    \x{1029d}
-
-# Base script check
-/^\p{sc=Carian}/utf
-    \x{102a0}
-
-/^\p{Script=Cari}/utf
-    \x{102d0}
-
-# Character not in script
-/^\p{Carian}/utf
-    \x{102d1}
-
-# Base script check
-/^\p{sc=Lydian}/utf
-    \x{10920}
-
-/^\p{Script=Lydi}/utf
-    \x{1093f}
-
-# Character not in script
-/^\p{Lydian}/utf
-    \x{10940}
-
-# Base script check
 /^\p{sc=Cham}/utf
     \x{aa00}
 
@@ -2134,48 +2741,15 @@
     \x{aae0}
 
 # Base script check
-/^\p{sc=Avestan}/utf
-    \x{10b00}
-
-/^\p{Script=Avst}/utf
-    \x{10b3f}
-
-# Character not in script
-/^\p{Avestan}/utf
-    \x{10b40}
-
-# Base script check
 /^\p{sc=Egyptian_Hieroglyphs}/utf
     \x{13000}
 
 /^\p{Script=Egyp}/utf
-    \x{13455}
+    \x{143fa}
 
 # Character not in script
 /^\p{Egyptian_Hieroglyphs}/utf
-    \x{13456}
-
-# Base script check
-/^\p{sc=Samaritan}/utf
-    \x{800}
-
-/^\p{Script=Samr}/utf
-    \x{83e}
-
-# Character not in script
-/^\p{Samaritan}/utf
-    \x{83f}
-
-# Base script check
-/^\p{sc=Lisu}/utf
-    \x{a4d0}
-
-/^\p{Script=Lisu}/utf
-    \x{11fb0}
-
-# Character not in script
-/^\p{Lisu}/utf
-    \x{11fb1}
+    \x{143fb}
 
 # Base script check
 /^\p{sc=Bamum}/utf
@@ -2244,17 +2818,6 @@
     \x{10b80}
 
 # Base script check
-/^\p{sc=Old_Turkic}/utf
-    \x{10c00}
-
-/^\p{Script=Orkh}/utf
-    \x{10c48}
-
-# Character not in script
-/^\p{Old_Turkic}/utf
-    \x{10c49}
-
-# Base script check
 /^\p{sc=Batak}/utf
     \x{1bc0}
 
@@ -2288,17 +2851,6 @@
     \x{10a00}
 
 # Base script check
-/^\p{sc=Meroitic_Hieroglyphs}/utf
-    \x{10980}
-
-/^\p{Script=Mero}/utf
-    \x{1099f}
-
-# Character not in script
-/^\p{Meroitic_Hieroglyphs}/utf
-    \x{109a0}
-
-# Base script check
 /^\p{sc=Miao}/utf
     \x{16f00}
 
@@ -2321,17 +2873,6 @@
     \x{110fa}
 
 # Base script check
-/^\p{sc=Caucasian_Albanian}/utf
-    \x{10530}
-
-/^\p{Script=Aghb}/utf
-    \x{1056f}
-
-# Character not in script
-/^\p{Caucasian_Albanian}/utf
-    \x{10570}
-
-# Base script check
 /^\p{sc=Bassa_Vah}/utf
     \x{16ad0}
 
@@ -2341,17 +2882,6 @@
 # Character not in script
 /^\p{Bassa_Vah}/utf
     \x{16af6}
-
-# Base script check
-/^\p{sc=Elbasan}/utf
-    \x{10500}
-
-/^\p{Script=Elba}/utf
-    \x{10527}
-
-# Character not in script
-/^\p{Elbasan}/utf
-    \x{10528}
 
 # Base script check
 /^\p{sc=Pahawh_Hmong}/utf
@@ -2486,17 +3016,6 @@
     \x{10900}
 
 # Base script check
-/^\p{sc=Old_Hungarian}/utf
-    \x{10c80}
-
-/^\p{Script=Hung}/utf
-    \x{10cff}
-
-# Character not in script
-/^\p{Old_Hungarian}/utf
-    \x{10d00}
-
-# Base script check
 /^\p{sc=SignWriting}/utf
     \x{1d800}
 
@@ -2539,28 +3058,6 @@
 # Character not in script
 /^\p{Newa}/utf
     \x{11462}
-
-# Base script check
-/^\p{sc=Osage}/utf
-    \x{104b0}
-
-/^\p{Script=Osge}/utf
-    \x{104fb}
-
-# Character not in script
-/^\p{Osage}/utf
-    \x{104fc}
-
-# Base script check
-/^\p{sc=Tangut}/utf
-    \x{16fe0}
-
-/^\p{Script=Tang}/utf
-    \x{18d08}
-
-# Character not in script
-/^\p{Tangut}/utf
-    \x{18d09}
 
 # Base script check
 /^\p{sc=Nushu}/utf
@@ -2688,11 +3185,11 @@
     \x{16fe4}
 
 /^\p{Script=Kits}/utf
-    \x{18cd5}
+    \x{18cff}
 
 # Character not in script
 /^\p{Khitan_Small_Script}/utf
-    \x{18cd6}
+    \x{18d00}
 
 # Base script check
 /^\p{sc=Tangsa}/utf
@@ -2704,17 +3201,6 @@
 # Character not in script
 /^\p{Tangsa}/utf
     \x{16aca}
-
-# Base script check
-/^\p{sc=Toto}/utf
-    \x{1e290}
-
-/^\p{Script=Toto}/utf
-    \x{1e2ae}
-
-# Character not in script
-/^\p{Toto}/utf
-    \x{1e2af}
 
 # Base script check
 /^\p{sc=Vithkuqi}/utf
@@ -2732,11 +3218,11 @@
     \x{11f00}
 
 /^\p{Script=Kawi}/utf
-    \x{11f59}
+    \x{11f5a}
 
 # Character not in script
 /^\p{Kawi}/utf
-    \x{11f5a}
+    \x{11f5b}
 
 # Base script check
 /^\p{sc=Nag_Mundari}/utf
@@ -2748,5 +3234,16 @@
 # Character not in script
 /^\p{Nag_Mundari}/utf
     \x{1e4fa}
+
+# Base script check
+/^\p{sc=Kirat_Rai}/utf
+    \x{16d40}
+
+/^\p{Script=Krai}/utf
+    \x{16d79}
+
+# Character not in script
+/^\p{Kirat_Rai}/utf
+    \x{16d7a}
 
 # End of testinput26
