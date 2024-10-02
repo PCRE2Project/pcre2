@@ -314,7 +314,13 @@ for (;;)
       }
     else
       {
-      $x = eval "\"$_\"";   # To get escapes processed
+      s/(?<!\\)\\$//;     # Remove pcre2test specific trailing backslash
+      $x = eval "\"$_\""; # To get escapes processed
+      if ($interact && $@)
+        {
+        print STDERR "$@";
+        redo;
+        }
       }
 
     # Empty array for holding results, ensure $REGERROR and $REGMARK are
