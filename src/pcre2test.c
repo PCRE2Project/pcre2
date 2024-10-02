@@ -730,6 +730,7 @@ static modstruct modlist[] = {
   { "memory",                      MOD_PD,   MOD_CTL, CTL_MEMORY,                 PD(control) },
   { "multiline",                   MOD_PATP, MOD_OPT, PCRE2_MULTILINE,            PO(options) },
   { "never_backslash_c",           MOD_PAT,  MOD_OPT, PCRE2_NEVER_BACKSLASH_C,    PO(options) },
+  { "never_callout",               MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NEVER_CALLOUT,  CO(extra_options) },
   { "never_ucp",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UCP,            PO(options) },
   { "never_utf",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UTF,            PO(options) },
   { "newline",                     MOD_CTC,  MOD_NL,  0,                          CO(newline_convention) },
@@ -4369,7 +4370,7 @@ show_compile_extra_options(uint32_t options, const char *before,
   const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) != 0) ? " allow_lookaround_bsk" : "",
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
@@ -4384,6 +4385,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)? " escaped_cr_is_lf" : "",
   ((options & PCRE2_EXTRA_MATCH_WORD) != 0)? " match_word" : "",
   ((options & PCRE2_EXTRA_MATCH_LINE) != 0)? " match_line" : "",
+  ((options & PCRE2_EXTRA_NEVER_CALLOUT) != 0)? " never_callout" : "",
   ((options & PCRE2_EXTRA_NO_BS0) != 0)? " no_bs0" : "",
   ((options & PCRE2_EXTRA_PYTHON_OCTAL) != 0)? " python_octal" : "",
   after);

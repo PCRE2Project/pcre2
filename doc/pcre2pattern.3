@@ -3415,7 +3415,9 @@ code. The feature is called "callout". The caller of PCRE2 provides an external
 function by putting its entry point in a match context using the function
 \fBpcre2_set_callout()\fP, and then passing that context to \fBpcre2_match()\fP
 or \fBpcre2_dfa_match()\fP. If no match context is passed, or if the callout
-entry point is set to NULL, callouts are disabled.
+entry point is set to NULL, callout points will be passed over silently during
+matching. To disallow callouts in the pattern syntax, you may use the
+PCRE2_EXTRA_NEVER_CALLOUT option.
 .P
 Within a regular expression, (?C<arg>) indicates a point at which the external
 function is to be called. There are two kinds of callout: those with a

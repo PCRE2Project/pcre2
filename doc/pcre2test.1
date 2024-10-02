@@ -618,6 +618,7 @@ for a description of the effects of these options.
       match_word                set PCRE2_EXTRA_MATCH_WORD
   /m  multiline                 set PCRE2_MULTILINE
       never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
+      never_callout             set PCRE2_EXTRA_NEVER_CALLOUT
       never_ucp                 set PCRE2_NEVER_UCP
       never_utf                 set PCRE2_NEVER_UTF
   /n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
@@ -666,8 +667,8 @@ The following modifiers affect the compilation process or request information
 about the pattern. There are single-letter abbreviations for some that are
 heavily used in the test files.
 .sp
-      bsr=[anycrlf|unicode]     specify \eR handling
   /B  bincode                   show binary code without lengths
+      bsr=[anycrlf|unicode]     specify \eR handling
       callout_info              show callout information
       convert=<options>         request foreign pattern conversion
       convert_glob_escape=c     set glob escape character
@@ -696,6 +697,7 @@ heavily used in the test files.
       posix_nosub               use the POSIX API with REG_NOSUB
       push                      push compiled pattern onto the stack
       pushcopy                  push a copy onto the stack
+      pushtablescopy            push a copy with tables onto the stack
       stackguard=<number>       test the stackguard feature
       subject_literal           treat all subject lines as literal
       tables=[0|1|2|3]          select internal tables
@@ -1217,6 +1219,7 @@ The following modifiers set options for \fBpcre2_match()\fP or
 for a description of their effects.
 .sp
       anchored                   set PCRE2_ANCHORED
+      copy_matched_subject       set PCRE2_COPY_MATCHED_SUBJECT
       endanchored                set PCRE2_ENDANCHORED
       dfa_restart                set PCRE2_DFA_RESTART
       dfa_shortest               set PCRE2_DFA_SHORTEST
@@ -1267,8 +1270,8 @@ pattern, but can be overridden by modifiers on the subject.
       aftertext                  show text after match
       allaftertext               show text after captures
       allcaptures                show all captures
-      allvector                  show the entire ovector
       allusedtext                show all consulted text (non-JIT only)
+      allvector                  show the entire ovector
       altglobal                  alternative global matching
       callout_capture            show captures at callout time
       callout_data=<n>           set a value to pass via callouts

@@ -2200,6 +2200,13 @@ escape sequences. The rules for handling sequences such as \14, which could
 be an octal number or a back reference are different. Details are given in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation.
+<pre>
+  PCRE2_EXTRA_NEVER_CALLOUT
+</pre>
+If this option is set, PCRE2 treats callouts in the pattern as a syntax error,
+returning PCRE2_ERROR_CALLOUT_CALLER_DISABLED. This is useful if the application
+knows that a callout will not be provided to <b>pcre2_match()</b>, so that
+callouts in the pattern are not silently ignored.
 <a name="jitcompiling"></a></P>
 <br><a name="SEC21" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
 <P>

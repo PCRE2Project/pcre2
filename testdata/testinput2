@@ -6641,4 +6641,12 @@ a)"xI
     abc\=replace=\1
     abc\=replace=\12
 
+# --------------
+
+/a(?C)b/
+    abc
+    abc\=callout_none
+
+/a(?C)b/never_callout
+
 # End of testinput2

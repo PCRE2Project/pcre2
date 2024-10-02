@@ -19575,6 +19575,19 @@ Failed: error -49 at offset 2 in replacement: unknown substring
     abc\=replace=\12
 Failed: error -49 at offset 3 in replacement: unknown substring
 
+# --------------
+
+/a(?C)b/
+    abc
+--->abc
+  0 ^^      b
+ 0: ab
+    abc\=callout_none
+ 0: ab
+
+/a(?C)b/never_callout
+Failed: error 203 at offset 3: using callouts is disabled by the application
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

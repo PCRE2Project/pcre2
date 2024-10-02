@@ -4282,6 +4282,8 @@ function in the match context. */
 
 #ifdef SUPPORT_PCRE2GREP_CALLOUT
 pcre2_set_callout(match_context, pcre2grep_callout, NULL);
+#else
+extra_options |= PCRE2_EXTRA_NEVER_CALLOUT;
 #endif
 
 /* Put limits into the match context. */
@@ -4419,6 +4421,8 @@ if (no_ucp) pcre2_options &= ~PCRE2_UCP;
 if (case_restrict) extra_options |= PCRE2_EXTRA_CASELESS_RESTRICT;
 if (posix_digit)
   extra_options |= (PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_DIGIT);
+if ((pcre2_options & PCRE2_LITERAL) != 0)
+  extra_options &= ~PCRE2_EXTRA_NEVER_CALLOUT;
 
 /* Set the extra options in the compile context. */
 

@@ -891,7 +891,7 @@ scripts or echoing specific strings during matching by making use of PCRE2's
 callout facility. However, this support can be completely or partially disabled
 when \fBpcre2grep\fP is built. You can find out whether your binary has support
 for callouts by running it with the \fB--help\fP option. If callout support is
-completely disabled, all callouts in patterns are ignored by \fBpcre2grep\fP.
+completely disabled, callouts in patterns are forbidden by \fBpcre2grep\fP.
 If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.
 .P
