@@ -49,6 +49,10 @@ repeats into possessive repeats where possible. */
 
 #include "pcre2_internal.h"
 
+/* This macro represents the max size of list[] and that is used to keep
+track of UCD info in several places, it should be kept on sync with the
+value used by GenerateUcd.py */
+#define MAX_LIST 8
 
 /*************************************************
 *        Tables for auto-possessification        *
@@ -199,7 +203,7 @@ static BOOL
 check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
   BOOL negated)
 {
-BOOL ok;
+BOOL ok, rc;
 const uint32_t *p;
 const ucd_record *prop = GET_UCD(c);
 
@@ -240,13 +244,13 @@ switch(ptype)
     {
     HSPACE_CASES:
     VSPACE_CASES:
-    return negated;
+    rc = negated;
+    break;
 
     default:
-    return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
+    rc = (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
-  break;
+  return rc;
 
   case PT_WORD:
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
@@ -260,7 +264,7 @@ switch(ptype)
     if (c < *p) return !negated;
     if (c == *p++) return negated;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
   break;
 
   /* Haven't yet thought these through. */
@@ -452,10 +456,12 @@ switch(c)
   code += 2;
 
   do {
-     if (clist_dest >= list + 8)
+     if (clist_dest >= list + MAX_LIST)
        {
-       /* Early return if there is not enough space. This should never
-       happen, since all clists are shorter than 5 character now. */
+       /* Early return if there is not enough space. GenerateUcd.py
+       generated a list with more than 5 characters and something
+       must be done about that going forward. */
+       PCRE2_DEBUG_UNREACHABLE();   /* Remove if it ever triggers */
        list[2] = code[0];
        list[3] = code[1];
        return code;
@@ -539,7 +545,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
   const uint32_t *base_list, PCRE2_SPTR base_end, int *rec_limit)
 {
 PCRE2_UCHAR c;
-uint32_t list[8];
+uint32_t list[MAX_LIST];
 const uint32_t *chr_ptr;
 const uint32_t *ochr_ptr;
 const uint32_t *list_ptr;
@@ -1122,7 +1128,7 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -1152,7 +1158,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
 PCRE2_UCHAR c;
 PCRE2_SPTR end;
 PCRE2_UCHAR *repeat_opcode;
-uint32_t list[8];
+uint32_t list[MAX_LIST];
 int rec_limit = 1000;  /* Was 10,000 but clang+ASAN uses a lot of stack. */
 BOOL utf = (cb->external_options & PCRE2_UTF) != 0;
 BOOL ucp = (cb->external_options & PCRE2_UCP) != 0;

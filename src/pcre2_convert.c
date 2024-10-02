@@ -1137,8 +1137,7 @@ for (int i = 0; i < 2; i++)
     break;
 
     default:
-    *bufflenptr = 0;  /* Error offset */
-    return PCRE2_ERROR_INTERNAL;
+    goto EXIT;
     }
 
   if (rc != 0 ||           /* Error */
@@ -1158,10 +1157,12 @@ for (int i = 0; i < 2; i++)
   use_length = *bufflenptr + 1;
   }
 
-/* Normally, we should exit this function in the previous loop, but we
-can't return an API call without a meaningful value, so if something
-went terribly wrong, we then will just report it as an intenal error */
+/* Something went terribly wrong. Trigger an assert and return an error */
+PCRE2_DEBUG_UNREACHABLE();
 
+EXIT:
+
+*bufflenptr = 0;  /* Error offset */
 return PCRE2_ERROR_INTERNAL;
 }
 

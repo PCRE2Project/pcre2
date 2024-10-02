@@ -755,11 +755,12 @@ for (;;)
     new ones get added they are properly considered. */
 
     default:
+    PCRE2_DEBUG_UNREACHABLE();
     return -3;
     }
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -1633,6 +1634,7 @@ do
           goto HANDLE_CLASSMAP;
 
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           return SSB_UNKNOWN;   /* Internal error, should not occur */
           }
         }
@@ -1783,7 +1785,11 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
   int depth = 0;
   int rc = set_start_bits(re, code, utf, ucp, &depth);
-  if (rc == SSB_UNKNOWN) return 1;
+  if (rc == SSB_UNKNOWN)
+    {
+    PCRE2_DEBUG_UNREACHABLE();
+    return 1;
+    }
 
   /* If a list of starting code units was set up, scan the list to see if only
   one or two were listed. Having only one listed is rare because usually a
@@ -1899,9 +1905,11 @@ if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
     break;    /* Leave minlength unchanged (will be zero) */
 
     case -2:
+    PCRE2_DEBUG_UNREACHABLE();
     return 2; /* missing capturing bracket */
 
     case -3:
+    PCRE2_DEBUG_UNREACHABLE();
     return 3; /* unrecognized opcode */
 
     default:
