@@ -691,4 +691,18 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 
+/[\x00-\x{6000}\x{3000}-\x{ffff}]#[\x00-\x{6000}\x{3000}-\x{ffff}]{5,7}?/B
+------------------------------------------------------------------
+        Bra
+        AllAny
+        #
+        AllAny{5}
+        AllAny{0,2}?
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\x00-\x{6000}\x{3000}-\x{ffffffff}]#[\x00-\x{6000}\x{3000}-\x{ffffffff}]{5,7}?/B
+Failed: error 134 at offset 34: character code point value in \x{} or \o{} is too large
+
 # End of testinput11

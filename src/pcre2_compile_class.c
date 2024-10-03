@@ -250,7 +250,7 @@ get_highest_char(uint32_t options)
 return MAX_UTF_CODE_POINT;
 #else
 #ifdef SUPPORT_UNICODE
-return (options & PARSE_CLASS_UTF) ? MAX_UTF_CODE_POINT : MAX_UCHAR_VALUE;
+return GET_MAX_CHAR_VALUE((options & PARSE_CLASS_UTF) != 0);
 #else
 return MAX_UCHAR_VALUE;
 #endif
@@ -356,6 +356,16 @@ while (*ptr != META_CLASS_END)
         case ESC_p:
         case ESC_P:
         ptr++;
+        if (meta_arg == ESC_p && *ptr == PT_ANY)
+          {
+          if (buffer != NULL)
+            {
+            buffer[0] = 0;
+            buffer[1] = get_highest_char(options);
+            buffer += 2;
+            }
+          total_size += 2;
+          }
         break;
         }
       ptr++;

@@ -183,6 +183,9 @@ therefore no need for it to have a length entry, so use a high value. */
 #define MAX_UCHAR_VALUE 0xffffffffu
 #endif
 
+#define GET_MAX_CHAR_VALUE(utf) \
+  ((utf) ? MAX_UTF_CODE_POINT : MAX_UCHAR_VALUE)
+
 /* Macro for setting individual bits in class bitmaps. */
 
 #define SETBIT(a,b) a[(b) >> 3] |= (uint8_t)(1u << ((b) & 0x7))

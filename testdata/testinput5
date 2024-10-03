@@ -2573,6 +2573,18 @@
 /[\x80-\x{4000}\x90\x{400}-\x{f000}\xa0\pN\x{4000}-\x{10ffff}]++/B,utf
     \x{7f}\x{80}\x{100}090\x{10fffe}\x{10ffff}\x00
 
+/[\x00-\x{4000}\x{2000}-\x{10ffff}]++/B,utf
+    abcd
+
+/[abc\p{Any}]{5,7}/B,utf
+    xyz
+
+/[\pN\xf0-\x{10ffff}]{5,8}/B,utf
+    ab0123456cd
+
+/[\x00-\x{398}\x{39a}-\x{10ffff}]*#(?i)[\x00-\x{398}\x{39a}-\x{10ffff}]*?#/B,utf
+    abcd#efg#
+
 # Freeing memory on error test
 /[\x{100}-\x{400}][\x{100}-\x{300}][\x{100}-\x{200}]\8/i,utf
 
