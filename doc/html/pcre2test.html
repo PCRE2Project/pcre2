@@ -561,7 +561,7 @@ this makes it possible to construct invalid UTF-8 sequences for testing
 purposes. On the other hand, \x{hh} is interpreted as a UTF-8 character in
 UTF-8 mode, generating more than one byte if the value is greater than 127.
 When testing the 8-bit library not in UTF-8 mode, \x{hh} generates one byte
-for values less than 256, and causes an error for greater values.
+for values that could fit on it, and causes an error for greater values.
 </P>
 <P>
 In UTF-16 mode, all 4-digit \x{hhhh} values are accepted. This makes it
@@ -2260,7 +2260,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 September 2024
+Last updated: 04 October 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

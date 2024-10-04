@@ -4078,16 +4078,16 @@ transformations. This does not affect any case insensitivity behaviour when
 performing a match, but only the user-visible transformations performed when
 processing a substitution such as:
 <pre>
-    pcre2_substitute(..., "\\U$1")
+    pcre2_substitute(..., "\\U$1", ...)
 </PRE>
 </P>
 <P>
-The default case transformations applied by PCRE2 are reasonably complete, and
-perform the basic locale-invariant case transformations as specified by
-Unicode. This is suitable for the internal (invisible) case-equivalence
-procedures used during pattern matching, but an application may wish to use
-more sophisticated locale-aware processing for the user-visible substitution
-transformations.
+The default case transformations applied by PCRE2 are reasonably complete, and, 
+in UTF or UCP mode, perform the basic locale-invariant case transformations as
+specified by Unicode. This is suitable for the internal (invisible)
+case-equivalence procedures used during pattern matching, but an application
+may wish to use more sophisticated locale-aware processing for the user-visible
+substitution transformations.
 </P>
 <P>
 One example implementation of the <i>callout_function</i> using the ICU
@@ -4389,7 +4389,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC43" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 September 2024
+Last updated: 04 October 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

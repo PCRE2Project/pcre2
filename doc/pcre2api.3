@@ -1,4 +1,4 @@
-.TH PCRE2API 3 "24 September 2024" "PCRE2 10.45"
+.TH PCRE2API 3 "04 October 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .sp
@@ -4062,14 +4062,14 @@ transformations. This does not affect any case insensitivity behaviour when
 performing a match, but only the user-visible transformations performed when
 processing a substitution such as:
 .sp
-    pcre2_substitute(..., "\e\eU$1")
+    pcre2_substitute(..., "\e\eU$1", ...)
 .P
-The default case transformations applied by PCRE2 are reasonably complete, and
-perform the basic locale-invariant case transformations as specified by
-Unicode. This is suitable for the internal (invisible) case-equivalence
-procedures used during pattern matching, but an application may wish to use
-more sophisticated locale-aware processing for the user-visible substitution
-transformations.
+The default case transformations applied by PCRE2 are reasonably complete, and, 
+in UTF or UCP mode, perform the basic locale-invariant case transformations as
+specified by Unicode. This is suitable for the internal (invisible)
+case-equivalence procedures used during pattern matching, but an application
+may wish to use more sophisticated locale-aware processing for the user-visible
+substitution transformations.
 .P
 One example implementation of the \fIcallout_function\fP using the ICU
 library would be:
@@ -4383,6 +4383,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 September 2024
+Last updated: 04 October 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
