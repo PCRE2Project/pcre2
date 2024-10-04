@@ -2443,7 +2443,7 @@ the three different cases. */
   pcre2_set_substitute_callout_32(G(a,32), \
     (int (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
 #define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(a,b,c) \
-  pcre2_set_substitute_case_callout_32(G(a,32)b,c)
+  pcre2_set_substitute_case_callout_32(G(a,32),b,c)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h, \
     (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
