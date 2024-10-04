@@ -482,6 +482,12 @@ For binary compatibility, only add to this list; do not renumber. */
 #define PCRE2_START_OPTIMIZE       68
 #define PCRE2_START_OPTIMIZE_OFF   69
 
+/* Types used in pcre2_set_substitute_case_callout(). */
+
+#define PCRE2_SUBSTITUTE_CASE_LOWER 0
+#define PCRE2_SUBSTITUTE_CASE_UPPER 1
+#define PCRE2_SUBSTITUTE_CASE_TITLE 2
+
 /* Types for code units in patterns and subject strings. */
 
 typedef uint8_t  PCRE2_UCHAR8;
@@ -651,6 +657,9 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_substitute_callout(pcre2_match_context *, \
     int (*)(pcre2_substitute_callout_block *, void *), void *); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_substitute_case_callout(pcre2_match_context *, \
+    uint32_t (*)(uint32_t, int, void *), void *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_depth_limit(pcre2_match_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
@@ -933,6 +942,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_offset_limit                PCRE2_SUFFIX(pcre2_set_offset_limit_)
 #define pcre2_set_optimize                    PCRE2_SUFFIX(pcre2_set_optimize_)
 #define pcre2_set_substitute_callout          PCRE2_SUFFIX(pcre2_set_substitute_callout_)
+#define pcre2_set_substitute_case_callout     PCRE2_SUFFIX(pcre2_set_substitute_case_callout_)
 #define pcre2_substitute                      PCRE2_SUFFIX(pcre2_substitute_)
 #define pcre2_substring_copy_byname           PCRE2_SUFFIX(pcre2_substring_copy_byname_)
 #define pcre2_substring_copy_bynumber         PCRE2_SUFFIX(pcre2_substring_copy_bynumber_)

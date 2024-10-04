@@ -590,10 +590,12 @@ typedef struct pcre2_real_match_context {
   pcre2_jit_callback jit_callback;
   void *jit_callback_data;
 #endif
-  int    (*callout)(pcre2_callout_block *, void *);
-  void    *callout_data;
-  int    (*substitute_callout)(pcre2_substitute_callout_block *, void *);
-  void    *substitute_callout_data;
+  int      (*callout)(pcre2_callout_block *, void *);
+  void      *callout_data;
+  int      (*substitute_callout)(pcre2_substitute_callout_block *, void *);
+  void      *substitute_callout_data;
+  uint32_t (*substitute_case_callout)(uint32_t, int, void *);
+  void      *substitute_case_callout_data;
   PCRE2_SIZE offset_limit;
   uint32_t heap_limit;
   uint32_t match_limit;

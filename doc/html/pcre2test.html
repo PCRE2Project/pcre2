@@ -1160,6 +1160,7 @@ process.
       replace=&#60;string&#62;            specify a replacement string
       startchar                   show starting character when relevant
       substitute_callout          use substitution callouts
+      substitute_case_callout=&#60;string&#62; use substitution case callouts
       substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
       substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
       substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
@@ -1339,6 +1340,7 @@ pattern, but can be overridden by modifiers on the subject.
       startchar                  show startchar when relevant
       startoffset=&#60;n&#62;            same as offset=&#60;n&#62;
       substitute_callout         use substitution callouts
+      substitute_case_callout=&#60;string&#62; use substitution case callouts
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
       substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
       substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
@@ -1623,6 +1625,27 @@ either of them are set, <b>substitute_callout</b> is assumed. For example:
 </pre>
 If both are set for the same number, stop takes precedence. Only a single skip
 or stop is supported, which is sufficient for testing that the feature works.
+</P>
+<br><b>
+Testing substitute case callouts
+</b><br>
+<P>
+If the <b>substitute_case_callout=&#60;string&#62;</b> modifier is set, a substitution
+case callout function is set up. The callout function is called for each
+substituted character which is to be case-transformed, and the mapping used
+is specified by the modifier's string argument.
+</P>
+<P>
+The string argument is parsed as four-character blocks, with each block
+interpreted as "&#60;input&#62;&#60;lower&#62;&#60;upper&#62;&#60;title&#62;". The input character is used
+to find a matching block, and the corresponding character is then returned.
+For example, to specify a custom uppercasing of the letter "a" to "Z":
+<pre>
+  /a/g,replace=\U$0,substitute_extended,substitute_case_callout=a.Z.
+      a
+   1: Z
+
+</PRE>
 </P>
 <br><b>
 Setting the JIT stack size

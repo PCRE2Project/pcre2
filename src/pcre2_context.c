@@ -174,6 +174,8 @@ pcre2_match_context PRIV(default_match_context) = {
   NULL,          /* Callout data */
   NULL,          /* Substitute callout function */
   NULL,          /* Substitute callout data */
+  NULL,          /* Substitute case callout function */
+  NULL,          /* Substitute case callout data */
   PCRE2_UNSET,   /* Offset limit */
   HEAP_LIMIT,
   MATCH_LIMIT,
@@ -461,6 +463,16 @@ pcre2_set_substitute_callout(pcre2_match_context *mcontext,
 {
 mcontext->substitute_callout = substitute_callout;
 mcontext->substitute_callout_data = substitute_callout_data;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_substitute_case_callout(pcre2_match_context *mcontext,
+  uint32_t (*substitute_case_callout)(uint32_t, int, void *),
+    void *substitute_case_callout_data)
+{
+mcontext->substitute_case_callout = substitute_case_callout;
+mcontext->substitute_case_callout_data = substitute_case_callout_data;
 return 0;
 }
 
