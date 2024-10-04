@@ -6491,7 +6491,7 @@ Each four-character block is parsed as a character list of the form
 like: "aaAA...AaAA...". */
 while ((c = *pr++) != 0)
   {
-  if (HASUTF8EXTRALEN(c)) { --pr; GETUTF8INC(c, pr); }
+  if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
 
   if (skip != 0)
     {
@@ -7830,7 +7830,7 @@ if (dat_datctl.replacement[0] != 0)
 
   else while ((c = *pr++) != 0)
     {
-    if (HASUTF8EXTRALEN(c)) { --pr; GETUTF8INC(c, pr); }
+    if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
 
 #ifdef SUPPORT_PCRE2_8
     if (test_mode == PCRE8_MODE) r8 += ord2utf8(c, r8);
