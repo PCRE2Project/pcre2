@@ -959,8 +959,8 @@ do
                   type != ((forcecase > 0)? ucp_Lu : ucp_Ll))
                 ch = UCD_OTHERCASE(ch);
               }
-            else
 #endif
+            else
               {
               if (((code->tables + cbits_offset +
                   ((forcecase > 0)? cbit_upper:cbit_lower)
@@ -1121,8 +1121,8 @@ do
               type != ((forcecase > 0)? ucp_Lu : ucp_Ll))
             ch = UCD_OTHERCASE(ch);
           }
-        else
 #endif
+        else
           {
           if (((code->tables + cbits_offset +
               ((forcecase > 0)? cbit_upper:cbit_lower)
