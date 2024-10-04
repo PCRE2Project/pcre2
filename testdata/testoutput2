@@ -18052,6 +18052,20 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     XabcY\=replace=  
  0: abc
 
+/abc/replace=\U$0,substitute_extended,substitute_case_callout=a.U.b.V.
+    XabcY
+ 1: XUVcY
+
+/a/substitute_extended
+    XaY\=replace=\U$0,substitute_case_callout=a.U.
+ 1: XUY
+    XaY\=replace=\L$0,substitute_case_callout=aL..
+ 1: XLY
+    XaY\=replace=\u\L$0,substitute_case_callout=a..T
+ 1: XTY
+    XaY\=replace=\l\U$0,substitute_case_callout=aL..
+ 1: XLY
+
 # Expect non-fixed-length error
 
 "(?<=X(?(DEFINE)(.*))(?1))."

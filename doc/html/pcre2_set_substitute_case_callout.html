@@ -1,9 +1,9 @@
 <html>
 <head>
-<title>pcre2_set_substitute_callout specification</title>
+<title>pcre2_set_substitute_case_callout specification</title>
 </head>
 <body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-<h1>pcre2_set_substitute_callout man page</h1>
+<h1>pcre2_set_substitute_case_callout man page</h1>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
 </p>
@@ -19,16 +19,16 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </P>
 <P>
-<b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  int (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
+<b>int pcre2_set_substitute_case_callout(pcre2_match_context *<i>mcontext</i>,</b>
+<b>  uint32_t (*<i>callout_function</i>)(uint32_t, int, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 </P>
 <br><b>
 DESCRIPTION
 </b><br>
 <P>
-This function sets the substitute callout fields in a match context (the first
-argument). The second argument specifies a callout function, and the third
+This function sets the substitute case callout fields in a match context (the
+first argument). The second argument specifies a callout function, and the third
 argument is an opaque data item that is passed to it. The result of this
 function is always zero.
 </P>

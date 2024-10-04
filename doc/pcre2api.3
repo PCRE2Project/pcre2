@@ -141,6 +141,10 @@ document for an overview of all the PCRE2 documentation.
 .B "  int (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
 .B "  void *\fIcallout_data\fP);"
 .sp
+.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
+.B "  void *\fIcallout_data\fP);"
+.sp
 .B int pcre2_set_offset_limit(pcre2_match_context *\fImcontext\fP,
 .B "  PCRE2_SIZE \fIvalue\fP);"
 .sp
@@ -1040,6 +1044,20 @@ documentation.
 This sets up a callout function for PCRE2 to call after each substitution
 made by \fBpcre2_substitute()\fP. Details are given in the section entitled
 "Creating a new string with substitutions"
+.\" HTML <a href="#substitutions">
+.\" </a>
+below.
+.\"
+.sp
+.nf
+.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
+.B "  void *\fIcallout_data\fP);"
+.fi
+.sp
+This sets up a callout function for PCRE2 to call when performing case
+transformations inside \fBpcre2_substitute()\fP. Details are given in the
+section entitled "Creating a new string with substitutions"
 .\" HTML <a href="#substitutions">
 .\" </a>
 below.
@@ -4020,6 +4038,52 @@ PCRE2_SUBSTITUTE_GLOBAL is set. Otherwise (the value is less than zero or
 PCRE2_SUBSTITUTE_GLOBAL is not set), the rest of the input is copied to the
 output and the call to \fBpcre2_substitute()\fP exits, returning the number of
 matches so far.
+.
+.
+.SS "Substitution case callouts"
+.rs
+.sp
+.nf
+.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
+.B "  void *\fIcallout_data\fP);"
+.fi
+.sp
+The \fBpcre2_set_substitution_case_callout()\fP function can be used to specify
+a callout function for \fBpcre2_substitute()\fP to use when performing case
+transformations. This does not affect any case insensitivity behaviour when
+performing a match, but only the user-visible transformations performed when
+processing a substitution such as:
+.sp
+    pcre2_substitute(..., "\e\eU$1")
+.P
+The default case transformations applied by PCRE2 are reasonably complete, and
+perform the basic locale-invariant case transformations as specified by
+Unicode. This is suitable for the internal (invisible) case-equivalence
+procedures used during pattern matching, but an application may wish to use
+more sophisticated locale-aware processing for the user-visible substitution
+transformations.
+.P
+One example implementation of the \fIcallout_function\fP using the ICU
+library would be:
+.sp
+    static uint32_t icu_case_callout(uint32_t ch, int to, void *)
+    {
+      return to == PCRE2_SUBSTITUTE_CASE_LOWER ? u_tolower(ch)
+           : to == PCRE2_SUBSTITUTE_CASE_UPPER ? u_toupper(ch)
+           : to == PCRE2_SUBSTITUTE_CASE_TITLE ? u_totitle(ch)
+           : ch;
+    }
+.P
+The first argument of the case callout function is the Unicode character to
+transform.
+.P
+The second argument is one of the constants PCRE2_SUBSTITUTE_CASE_LOWER,
+PCRE2_SUBSTITUTE_CASE_UPPER, or PCRE2_SUBSTITUTE_CASE_TITLE.
+.P
+The third argument is the \fIcallout_data\fP supplied to
+\fBpcre2_set_substitute_case_callout()\fP, and the return value is the
+transformed Unicode character, which may be equal to the input character.
 .
 .
 .SH "DUPLICATE CAPTURE GROUP NAMES"

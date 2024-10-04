@@ -6057,6 +6057,15 @@ a)"xI
     XABCY
     XabcY\=replace=  
 
+/abc/replace=\U$0,substitute_extended,substitute_case_callout=a.U.b.V.
+    XabcY
+
+/a/substitute_extended
+    XaY\=replace=\U$0,substitute_case_callout=a.U.
+    XaY\=replace=\L$0,substitute_case_callout=aL..
+    XaY\=replace=\u\L$0,substitute_case_callout=a..T
+    XaY\=replace=\l\U$0,substitute_case_callout=aL..
+
 # Expect non-fixed-length error
 
 "(?<=X(?(DEFINE)(.*))(?1))."

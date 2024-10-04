@@ -942,8 +942,17 @@ do
           GETCHARINCTEST(ch, subptr);
           if (forcecase != 0)
             {
+            if (mcontext->substitute_case_callout)
+              {
+              ch = mcontext->substitute_case_callout(
+                ch,
+                forcecase > 0 && forcecasereset < 0 ? PCRE2_SUBSTITUTE_CASE_TITLE
+                  : forcecase > 0 ? PCRE2_SUBSTITUTE_CASE_UPPER
+                  : PCRE2_SUBSTITUTE_CASE_LOWER,
+                mcontext->substitute_case_callout_data);
+              }
 #ifdef SUPPORT_UNICODE
-            if (utf || ucp)
+            else if (utf || ucp)
               {
               uint32_t type = UCD_CHARTYPE(ch);
               if (PRIV(ucp_gentype)[type] == ucp_L &&
@@ -1095,8 +1104,17 @@ do
       LITERAL:
       if (forcecase != 0)
         {
+        if (mcontext->substitute_case_callout)
+          {
+          ch = mcontext->substitute_case_callout(
+            ch,
+            forcecase > 0 && forcecasereset < 0 ? PCRE2_SUBSTITUTE_CASE_TITLE
+              : forcecase > 0 ? PCRE2_SUBSTITUTE_CASE_UPPER
+              : PCRE2_SUBSTITUTE_CASE_LOWER,
+            mcontext->substitute_case_callout_data);
+          }
 #ifdef SUPPORT_UNICODE
-        if (utf || ucp)
+        else if (utf || ucp)
           {
           uint32_t type = UCD_CHARTYPE(ch);
           if (PRIV(ucp_gentype)[type] == ucp_L &&

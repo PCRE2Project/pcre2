@@ -1,4 +1,4 @@
-.TH PCRE2_SET_SUBSTITUTE_CALLOUT 3 "12 November 2018" "PCRE2 10.33"
+.TH PCRE2_SET_SUBSTITUTE_CASE_CALLOUT 3 "4 October 2024" "PCRE2 10.33"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -7,16 +7,16 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
+.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
 .B "  void *\fIcallout_data\fP);"
 .fi
 .
 .SH DESCRIPTION
 .rs
 .sp
-This function sets the substitute callout fields in a match context (the first
-argument). The second argument specifies a callout function, and the third
+This function sets the substitute case callout fields in a match context (the
+first argument). The second argument specifies a callout function, and the third
 argument is an opaque data item that is passed to it. The result of this
 function is always zero.
 .P
