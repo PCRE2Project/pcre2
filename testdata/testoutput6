@@ -6569,9 +6569,8 @@ No match
 No match
 
 /a[]*+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
-\= Expect no match
     ab 
-No match
+ 0: ab
 
 /a[^]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aXb

@@ -387,4 +387,7 @@
 
 /[\x00-\x{6000}\x{3000}-\x{ffffffff}]#[\x00-\x{6000}\x{3000}-\x{ffffffff}]{5,7}?/B
 
+/[\x00-\x2f\x11-\xff]*?!/B
+    abcd!e
+
 # End of testinput11

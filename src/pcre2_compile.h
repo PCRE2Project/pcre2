@@ -190,6 +190,14 @@ therefore no need for it to have a length entry, so use a high value. */
 
 #define SETBIT(a,b) a[(b) >> 3] |= (uint8_t)(1u << ((b) & 0x7))
 
+/* Macro for 8 bit specific checks. */
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#define SELECT_VALUE8(value8, value) (value8)
+#else
+#define SELECT_VALUE8(value8, value) (value)
+#endif
+
+
 /* Merge intersecting ranges of classes. */
 
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,

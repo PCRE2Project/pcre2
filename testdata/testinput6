@@ -4308,7 +4308,6 @@
     ab 
 
 /a[]*+b/alt_bsux,allow_empty_class,match_unset_backref,dupnames
-\= Expect no match
     ab 
 
 /a[^]b/alt_bsux,allow_empty_class,match_unset_backref,dupnames

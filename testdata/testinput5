@@ -860,6 +860,8 @@
 
 /[\P{Any}]/B
 
+/[^\P{Any}\P{Any}]/B
+
 /[\P{Any}\E]/B
 
 /(\P{Yi}+\277)/
@@ -2578,6 +2580,9 @@
 
 /[abc\p{Any}]{5,7}/B,utf
     xyz
+
+/[^\p{Any}\x34\p{Any}]*cat/B,utf
+    cat
 
 /[\pN\xf0-\x{10ffff}]{5,8}/B,utf
     ab0123456cd

@@ -5282,8 +5282,8 @@ Returns:        cb->classbits is updated
 static void
 add_to_class(uint32_t options, compile_block *cb, uint32_t start, uint32_t end)
 {
-uint8_t *classbits = cb->classbits;
-uint32_t c;
+uint8_t *classbits = cb->classbits.classbits;
+uint32_t c, byte_start, byte_end;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
 
 /* If caseless matching is required, scan the range and process alternate
@@ -5303,8 +5303,27 @@ if ((options & PCRE2_CASELESS) != 0)
 
 /* Use the bitmap for characters < 256. Otherwise use extra data.*/
 
-for (c = start; c <= classbits_end; c++)
-  /* Regardless of start, c will always be <= 255. */
+byte_start = (start + 7) >> 3;
+byte_end = (classbits_end + 1) >> 3;
+
+if (byte_start >= byte_end)
+  {
+  for (c = start; c <= classbits_end; c++)
+    /* Regardless of start, c will always be <= 255. */
+    SETBIT(classbits, c);
+  return;
+  }
+
+for (c = byte_start; c < byte_end; c++)
+  classbits[c] = 0xff;
+
+byte_start <<= 3;
+byte_end <<= 3;
+
+for (c = start; c < byte_start; c++)
+  SETBIT(classbits, c);
+
+for (c = byte_end; c <= classbits_end; c++)
   SETBIT(classbits, c);
 }
 
@@ -5534,7 +5553,7 @@ BOOL matched_char = FALSE;
 BOOL previous_matched_char = FALSE;
 BOOL reset_caseful = FALSE;
 const uint8_t *cbits = cb->cbits;
-uint8_t *classbits = cb->classbits;
+uint8_t *classbits = cb->classbits.classbits;
 
 /* We can fish out the UTF setting once and for all into a BOOL, but we must
 not do this for other options (e.g. PCRE2_EXTENDED) that may change dynamically
@@ -5723,7 +5742,14 @@ for (;; pptr++)
     case META_CLASS_EMPTY:
     case META_CLASS_EMPTY_NOT:
     matched_char = TRUE;
-    *code++ = (meta == META_CLASS_EMPTY_NOT)? OP_ALLANY : OP_FAIL;
+    if (meta == META_CLASS_EMPTY_NOT) *code++ = OP_ALLANY;
+    else
+      {
+      *code++ = OP_CLASS;
+      memset(code, 0, 32 * sizeof(uint8_t));
+      code += 32 / sizeof(PCRE2_UCHAR);
+      }
+
     if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
     zerofirstcu = firstcu;
     zerofirstcuflags = firstcuflags;
@@ -6176,6 +6202,15 @@ for (;; pptr++)
             uint32_t ptype = *(++pptr) >> 16;
             uint32_t pdata = *pptr & 0xffff;
 
+            /* The "Any" is processed by PRIV(update_classbits)(). */
+            if (ptype == PT_ANY)
+              {
+#if PCRE2_CODE_UNIT_WIDTH == 8
+              if (!utf && escape == ESC_p) memset(classbits, 0xff, 32 * sizeof(uint8_t));
+#endif
+              continue;
+              }
+
             /* In caseless matching, particular characteristics Lu, Ll, and Lt
             get converted to the general characteristic L&. That is, upper,
             lower, and title case letters are all conflated. */
@@ -6335,16 +6370,6 @@ for (;; pptr++)
       uint32_t *range = (uint32_t*)(cranges + 1);
       uint32_t *end = range + cranges->range_list_size;
 
-      if (!negate_class && (xclass_props & XCLASS_HIGH_ANY) != 0 &&
-          range + 2 == end && range[0] == 0)
-        {
-        *code++ = OP_ALLANY;
-
-        if (lengthptr == NULL)
-          cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
-        break;  /* End of class processing */
-        }
-
       while (range < end && range[0] < 256)
         {
         PCRE2_ASSERT((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0);
@@ -6491,16 +6516,32 @@ for (;; pptr++)
     (non-UCP) in the class. Then copy the 32-byte map into the code vector,
     negating it if necessary. */
 
+    if (negate_class)
+      {
+      uint32_t *classwords = cb->classbits.classwords;
+
+      for (int i = 0; i < 8; i++) classwords[i] = ~classwords[i];
+      }
+
+    if ((SELECT_VALUE8(!utf, 0) || negate_class != should_flip_negation) &&
+        cb->classbits.classwords[0] == ~(uint32_t)0)
+      {
+      uint32_t *classwords = cb->classbits.classwords;
+      int i;
+
+      for (i = 0; i < 8; i++)
+        if (classwords[i] != ~(uint32_t)0) break;
+
+      if (i == 8)
+        {
+        *code++ = OP_ALLANY;
+        break;
+        }
+      }
+
     *code++ = (negate_class == should_flip_negation) ? OP_CLASS : OP_NCLASS;
     if (lengthptr == NULL)    /* Save time in the pre-compile phase */
-      {
-      if (negate_class)
-        {
-        /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-        for (int i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
-        }
       memcpy(code, classbits, 32);
-      }
     code += 32 / sizeof(PCRE2_UCHAR);
     break;  /* End of class processing */
 
