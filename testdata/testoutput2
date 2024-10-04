@@ -8818,6 +8818,17 @@ No match
     cat
 No match
 
+/cat[]/B,allow_empty_class
+------------------------------------------------------------------
+        Bra
+        cat
+        []
+        Ket
+        End
+------------------------------------------------------------------
+    cat\=ph
+Partial match: cat
+
 /(\3)(\1)(a)/allow_empty_class,match_unset_backref,dupnames
     cat
  0: a
@@ -8888,9 +8899,8 @@ No match
 No match
 
 /a[]*+b/allow_empty_class,match_unset_backref,dupnames
-\= Expect no match
     ab
-No match
+ 0: ab
 
 /a[^]b/allow_empty_class,match_unset_backref,dupnames
     aXb

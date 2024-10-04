@@ -1503,7 +1503,7 @@ Failed: error -22: UTF-8 error: isolated byte with 0x80 bit set at offset 1
 /[\W\p{Any}]/B
 ------------------------------------------------------------------
         Bra
-        [\x00-\xff\p{Any}]
+        AllAny
         Ket
         End
 ------------------------------------------------------------------
@@ -1967,5 +1967,25 @@ Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (f
 /abc/utf,substitute_extended,python_octal
     abc\=replace=\400
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+
+/[\x00-\x2f\x11-\xff]+/B
+------------------------------------------------------------------
+        Bra
+        AllAny++
+        Ket
+        End
+------------------------------------------------------------------
+    abcd
+ 0: abcd
+
+/[\x00-\x2f\x11-\xff]{4,}/B,utf
+------------------------------------------------------------------
+        Bra
+        [\x00-\xff]{4,}+
+        Ket
+        End
+------------------------------------------------------------------
+    abcd
+ 0: abcd
 
 # End of testinput10

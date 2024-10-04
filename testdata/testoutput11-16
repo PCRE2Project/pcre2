@@ -705,4 +705,15 @@ Subject length lower bound = 1
 /[\x00-\x{6000}\x{3000}-\x{ffffffff}]#[\x00-\x{6000}\x{3000}-\x{ffffffff}]{5,7}?/B
 Failed: error 134 at offset 34: character code point value in \x{} or \o{} is too large
 
+/[\x00-\x2f\x11-\xff]*?!/B
+------------------------------------------------------------------
+        Bra
+        [\x00-\xff]*?
+        !
+        Ket
+        End
+------------------------------------------------------------------
+    abcd!e
+ 0: abcd!
+
 # End of testinput11

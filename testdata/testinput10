@@ -685,4 +685,10 @@
 /abc/utf,substitute_extended,python_octal
     abc\=replace=\400
 
+/[\x00-\x2f\x11-\xff]+/B
+    abcd
+
+/[\x00-\x2f\x11-\xff]{4,}/B,utf
+    abcd
+
 # End of testinput10
