@@ -18,6 +18,10 @@ findprop f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 fa fb fc fd fe ff
 
 findprop 0100 0101 0102 0103 0104 0105 0106
 
+findprop 345 399 03b9 1fbe
+
+findprop 00390 1fd3
+
 findprop ffe0 ffe1 ffe2 ffe3 ffe4 ffe5 ffe6 ffe7 
 findprop ffe8 ffe9 ffea ffeb ffec ffed ffee ffef
 findprop fff8 fff9 fffa fffb fffc fffd fffe ffff
@@ -49,3 +53,7 @@ findprop U+10e93 U+10eaa
 findprop +á +é U+212A
 
 findprop 0602 202a 202b 202c 2068 2069 202d 202e 2067
+
+findprop 143e5
+findprop 1CC4E
+findprop U+1FAE9

@@ -281,6 +281,16 @@ U+0104 L   Letter: Upper case letter, latin, Other, U+0105, [alphabetic, cased, 
 U+0105 L   Letter: Lower case letter, latin, Other, U+0104, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
 U+0106 L   Letter: Upper case letter, latin, Other, U+0107, [alphabetic, cased, changeswhencasefolded, changeswhencasemapped, changeswhenlowercased, graphemebase, idcontinue, idstart, uppercase, xidcontinue, xidstart]
 
+findprop 345 399 03b9 1fbe
+U+0345 NSM Mark: Non-spacing mark, inherited, Extend, U+03B9, U+0399, U+1FBE, [greek], [alphabetic, caseignorable, cased, changeswhencasefolded, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, diacritic, graphemeextend, idcontinue, incb, lowercase, xidcontinue]
+U+0399 L   Letter: Upper case letter, greek, Other, U+03B9, U+0345, U+1FBE, [alphabetic, cased, changeswhencasefolded, changeswhencasemapped, changeswhenlowercased, graphemebase, idcontinue, idstart, uppercase, xidcontinue, xidstart]
+U+03B9 L   Letter: Lower case letter, greek, Other, U+0345, U+0399, U+1FBE, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
+U+1FBE L   Letter: Lower case letter, greek, Other, U+03B9, U+0345, U+0399, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
+
+findprop 00390 1fd3
+U+0390 L   Letter: Lower case letter, greek, Other, U+1FD3, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
+U+1FD3 L   Letter: Lower case letter, greek, Other, U+0390, [alphabetic, cased, changeswhencasemapped, changeswhentitlecased, changeswhenuppercased, graphemebase, idcontinue, idstart, lowercase, xidcontinue, xidstart]
+
 findprop ffe0 ffe1 ffe2 ffe3 ffe4 ffe5 ffe6 ffe7 
 U+FFE0 ET  Symbol: Currency symbol, common, Other, [graphemebase]
 U+FFE1 ET  Symbol: Currency symbol, common, Other, [graphemebase]
@@ -411,3 +421,10 @@ U+2069 PDI Control: Format, common, Control, [bidicontrol, caseignorable, defaul
 U+202D LRO Control: Format, common, Control, [bidicontrol, caseignorable, defaultignorablecodepoint]
 U+202E RLO Control: Format, common, Control, [bidicontrol, caseignorable, defaultignorablecodepoint]
 U+2067 RLI Control: Format, common, Control, [bidicontrol, caseignorable, defaultignorablecodepoint]
+
+findprop 143e5
+U+143E5 L   Letter: Other letter, egyptianhieroglyphs, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
+findprop 1CC4E
+U+1CC4E ON  Symbol: Other symbol, common, Other, [graphemebase]
+findprop U+1FAE9
+U+1FAE9 ON  Symbol: Other symbol, common, Extended Pictographic, [emoji, emojipresentation, extendedpictographic, graphemebase]
