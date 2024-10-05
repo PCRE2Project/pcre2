@@ -298,15 +298,15 @@ def get_other_case(chardata):
 # Parse a line of ScriptExtensions.txt
 
 def get_script_extension(chardata):
-  global last_script_extension
+  script_extension = tuple(script_abbrevs.index(abbrev) for abbrev in chardata[1].split(' '))
 
-  offset = len(script_lists) * script_list_item_size
-  if last_script_extension == chardata[1]:
-    return offset - script_list_item_size
+  try:
+    index = script_lists.index(script_extension)
+  except ValueError:
+    index = len(script_lists)
+    script_lists.append(script_extension)
 
-  last_script_extension = chardata[1]
-  script_lists.append(tuple(script_abbrevs.index(abbrev) for abbrev in last_script_extension.split(' ')))
-  return offset
+  return index * script_list_item_size
 
 
 # Read a whole table in memory, setting/checking the Unicode version
@@ -344,6 +344,8 @@ def read_table(file_name, get_value, default_value):
     else:
       last = int(m.group(3), 16)
     for i in range(char, last + 1):
+      if file_base == 'CaseFolding' and table[i] != default_value:
+        print("WARNING: multiple rules for other_case[0x{:X}]".format(i))
       table[i] = value
 
   file.close()
@@ -565,7 +567,6 @@ file.close()
 # characters that have no script extensions.
 
 script_lists = [[]]
-last_script_extension = ""
 scriptx_bidi_class = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, 0)
 
 for idx in range(len(scriptx_bidi_class)):

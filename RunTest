@@ -88,8 +88,9 @@ title22="Test 22: \C tests with UTF (not supported for DFA matching)"
 title23="Test 23: \C disabled test"
 title24="Test 24: Non-UTF pattern conversion tests"
 title25="Test 25: UTF pattern conversion tests"
-title26="Test 26: Auto-generated unicode property tests"
-maxtest=26
+title26="Test 26: Unicode property tests (compatible with Perl >= 5.38)"
+title27="Test 27: Auto-generated unicode property tests"
+maxtest=27
 titleheap="Test 'heap': Environment-specific heap tests"
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
@@ -120,6 +121,7 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title24
   echo $title25
   echo $title26
+  echo $title27
   echo ""
   echo $titleheap
   echo ""
@@ -255,6 +257,7 @@ do23=no
 do24=no
 do25=no
 do26=no
+do27=no
 doheap=no
 
 while [ $# -gt 0 ] ; do
@@ -286,6 +289,7 @@ while [ $# -gt 0 ] ; do
    24) do24=yes;;
    25) do25=yes;;
    26) do26=yes;;
+   27) do27=yes;;
  heap) doheap=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
@@ -437,7 +441,8 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do12 = no -a $do13 = no -a $do14 = no -a $do15 = no -a \
      $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no -a \
      $do20 = no -a $do21 = no -a $do22 = no -a $do23 = no -a \
-     $do24 = no -a $do25 = no -a $do26 = no -a $doheap = no \
+     $do24 = no -a $do25 = no -a $do26 = no -a $do27 = no -a \
+     $doheap = no \
    ]; then
   do0=yes
   do1=yes
@@ -466,6 +471,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do24=yes
   do25=yes
   do26=yes
+  do27=yes
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -884,7 +890,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     fi
   fi
 
-  # Auto-generated unicode property tests
+  # Unicode property tests
 
   if [ $do26 = yes ] ; then
     echo $title26
@@ -894,6 +900,20 @@ for bmode in "$test8" "$test16" "$test32"; do
       for opt in "" $jitopt; do
         $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput26 testtry
         checkresult $? 26 "$opt"
+      done
+    fi
+  fi
+
+  # Auto-generated Unicode property tests
+
+  if [ $do27 = yes ] ; then
+    echo $title27
+    if [ $utf -eq 0 ] ; then
+      echo "  Skipped because UTF-$bits support is not available"
+    else
+      for opt in "" $jitopt; do
+        $sim $valgrind ${opt:+$vjs} ./pcre2test -q $setstack $bmode $opt $testdata/testinput27 testtry
+        checkresult $? 27 "$opt"
       done
     fi
   fi

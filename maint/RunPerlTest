@@ -5,21 +5,11 @@
 # second is taken as the Perl command to use, and both are then removed.
 #
 # The argument can be the number of the specific Perl compatible test to run
-# (ex: "1", "4" or "26"), otherwise it runs all tests and returns as exit
-# value, the test number which output was incorrect or the test number plus 32
+# (ex: "1", "4", "26" or "27"), otherwise it runs all tests and returns at
+# exit, the test number with an incorrect output or the test number plus 32
 # if it failed to run completely. It returns with 0 on success.
 
-# This script should be run with the main PCRE2 directory current. It needs
-# pcre2test for Unicode version compatibility detection and so will use a
-# provided PCRETEST variable pointing to it.
-
-if [ -z "$PCRETEST" ]; then
-  if [ -x pcre2test ]; then
-    PCRETEST=$(readlink -f pcre2test)
-  else
-    PCRETEST=pcre2test
-  fi
-fi
+# This script should be run with the main PCRE2 directory current.
 
 if [ "$1" = "-perl" ]; then
   PERL="$2"
@@ -58,11 +48,12 @@ fi
 echo ""
 fi
 
+P=$($PERL -MUnicode::UCD -e 'print Unicode::UCD::UnicodeVersion, "\n"')
+
 if [ -z "$1" ] || [ "$1" = "26" ]; then
 echo "-----------------------------------------------------------------"
 echo "Perl test: Unicode property tests (PCRE2 test 26)"
-U=$($PCRETEST -C | $PERL -ne 'print "$1\n" if /\(Unicode version ([\d.]+)\)/')
-P=$($PERL -MUnicode::UCD -e 'print Unicode::UCD::UnicodeVersion, "\n"')
+U=$(head -5 testdata/testinput26 | $PERL -ne 'print "$1\n" if /tests for version ([\d.]+)$/')
 if [ "$U" != "$P" ]; then
   echo "SKIPPED: Perl uses Unicode $P but version $U was expected"
 else
@@ -72,6 +63,24 @@ else
     /bin/rm -rf testtry2
   else
     RC=58
+  fi
+  echo ""
+  fi
+fi
+
+if [ -z "$1" ] || [ "$1" = "27" ]; then
+echo "-----------------------------------------------------------------"
+echo "Perl test: Unicode property tests (PCRE2 test 27)"
+U=$(head -5 testdata/testinput27 | $PERL -ne 'print "$1\n" if /tests for version ([\d.]+)$/')
+if [ "$U" != "$P" ]; then
+  echo "SKIPPED: Perl uses Unicode $P but version $U was expected"
+else
+  if ./perltest.sh $ARGS testdata/testinput27 testtry; then
+    tail -n +2 testtry > testtry2
+    diff -u testdata/testoutput27 testtry2 || RC=27
+    /bin/rm -rf testtry2
+  else
+    RC=59
   fi
   echo ""
   fi

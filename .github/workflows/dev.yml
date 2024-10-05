@@ -176,14 +176,12 @@ jobs:
           apt-get -qq install cmake ninja-build
 
       - name: Configure
-        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON
+        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON
 
       - name: Build
         run: cmake --build build
 
       - name: Test
-        env:
-          PCRETEST: build/pcre2test
         run: |
           cd build
           ctest .
