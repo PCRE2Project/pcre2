@@ -2289,6 +2289,52 @@
     s\x{212a}s
     K\x{17f}K
 
+/(.) \1/i,utf,caseless_restrict
+    s S
+    k K
+\= Expect no match
+    s \x{17f}
+    k \x{212a}
+
+/(.) (?r:\1)/i,utf
+    s S
+    k K
+\= Expect no match
+    s \x{17f}
+    k \x{212a}
+
+/(.) \1/i,utf
+    s S
+    k K
+    s \x{17f}
+    k \x{212a}
+
+/(?:(?<A>ss)|(?<A>kk)) \k<A>/i,utf,dupnames,caseless_restrict
+    sS Ss
+    kK Kk
+\= Expect no match
+    sS \x{17f}s
+    kK \x{212a}k
+
+/(?:(?<A>ss)|(?<A>kk)) \k<A>/i,utf,dupnames
+    sS Ss
+    kK Kk
+    sS \x{17f}s
+    kK \x{212a}k
+
+/(?:(?<A>s)|(?<A>k)) \k<A>{3,}!/i,utf,dupnames,caseless_restrict
+    s SsSs!
+    k KkKk!
+\= Expect no match
+    s \x{17f}sSs\x{17f}!
+    k \x{212a}kKk\x{212a}!
+
+/(?:(?<A>s)|(?<A>k)) \k<A>{3,}!/i,utf,dupnames
+    s SsSs!
+    k KkKk!
+    s \x{17f}sSs\x{17f}!
+    k \x{212a}kKk\x{212a}!
+
 # End caseless restrict tests
 
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.

@@ -540,7 +540,7 @@ for (;;)
         }
       }
     else d = 0;
-    cc += 1 + 2*IMM2_SIZE;
+    cc += PRIV(OP_lengths)[*cc];
     goto REPEAT_BACK_REFERENCE;
 
     /* Single back reference by number. References by name are converted to by
@@ -593,7 +593,7 @@ for (;;)
       backref_cache[0] = recno;
       }
 
-    cc += 1 + IMM2_SIZE;
+    cc += PRIV(OP_lengths)[*cc];
 
     /* Handle repeated back references */
 

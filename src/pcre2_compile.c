@@ -7188,6 +7188,9 @@ for (;; pptr++)
       *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
       PUT2INC(code, 0, index);
       PUT2INC(code, 0, count);
+      if ((options & PCRE2_CASELESS) != 0)
+        *code++ = ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
+            REFI_FLAG_CASELESS_RESTRICT : 0;
       }
     break;
 
@@ -8142,6 +8145,9 @@ for (;; pptr++)
     if (firstcuflags == REQ_UNSET) zerofirstcuflags = firstcuflags = REQ_NONE;
     *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
     PUT2INC(code, 0, meta_arg);
+    if ((options & PCRE2_CASELESS) != 0)
+      *code++ = ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
+          REFI_FLAG_CASELESS_RESTRICT : 0;
 
     /* Update the map of back references, and keep the highest one. We
     could do this in parse_regex() for numerical back references, but not

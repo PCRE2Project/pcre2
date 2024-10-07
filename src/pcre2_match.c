@@ -348,6 +348,7 @@ seems unlikely.)
 Arguments:
   offset      index into the offset vector
   caseless    TRUE if caseless
+  caseopts    bitmask of REFI_FLAG_XYZ values
   F           the current backtracking frame pointer
   mb          points to match block
   lengthptr   pointer for returning the length matched
@@ -358,8 +359,8 @@ Returns:      = 0 sucessful match; number of code units matched is set
 */
 
 static int
-match_ref(PCRE2_SIZE offset, BOOL caseless, heapframe *F, match_block *mb,
-  PCRE2_SIZE *lengthptr)
+match_ref(PCRE2_SIZE offset, BOOL caseless, int caseopts, heapframe *F,
+  match_block *mb, PCRE2_SIZE *lengthptr)
 {
 PCRE2_SPTR p;
 PCRE2_SIZE length;
@@ -389,6 +390,7 @@ if (caseless)
   {
 #if defined SUPPORT_UNICODE
   BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
+  BOOL caseless_restrict = (caseopts & REFI_FLAG_CASELESS_RESTRICT) != 0;
 
   if (utf || (mb->poptions & PCRE2_UCP) != 0)
     {
@@ -424,6 +426,11 @@ if (caseless)
       if (c != d && c != (uint32_t)((int)d + ur->other_case))
         {
         const uint32_t *pp = PRIV(ucd_caseless_sets) + ur->caseset;
+
+        /* When PCRE2_EXTRA_CASELESS_RESTRICT is set, ignore any caseless sets
+        that start with an ASCII character. */
+        if (caseless_restrict && *pp < 128) return -1;  /* No match */
+
         for (;;)
           {
           if (c < *pp) return -1;  /* No match */
@@ -5006,16 +5013,18 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Lmin      F->temp_32[0]
 #define Lmax      F->temp_32[1]
 #define Lcaseless F->temp_32[2]
+#define Lcaseopts F->temp_32[3]
 #define Lstart    F->temp_sptr[0]
 #define Loffset   F->temp_size
 
     case OP_DNREF:
     case OP_DNREFI:
     Lcaseless = (Fop == OP_DNREFI);
+    Lcaseopts = (Fop == OP_DNREFI)? Fecode[1 + 2*IMM2_SIZE] : 0;
       {
       int count = GET2(Fecode, 1+IMM2_SIZE);
       PCRE2_SPTR slot = mb->name_table + GET2(Fecode, 1) * mb->name_entry_size;
-      Fecode += 1 + 2*IMM2_SIZE;
+      Fecode += 1 + 2*IMM2_SIZE + (Fop == OP_DNREFI? 1 : 0);
 
       while (count-- > 0)
         {
@@ -5029,8 +5038,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     case OP_REF:
     case OP_REFI:
     Lcaseless = (Fop == OP_REFI);
+    Lcaseopts = (Fop == OP_REFI)? Fecode[1 + IMM2_SIZE] : 0;
     Loffset = (GET2(Fecode, 1) << 1) - 2;
-    Fecode += 1 + IMM2_SIZE;
+    Fecode += 1 + IMM2_SIZE + (Fop == OP_REFI? 1 : 0);
 
     /* Set up for repetition, or handle the non-repeated case. The maximum and
     minimum must be in the heap frame, but as they are short-term values, we
@@ -5062,7 +5072,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       default:                  /* No repeat follows */
         {
-        rrc = match_ref(Loffset, Lcaseless, F, mb, &length);
+        rrc = match_ref(Loffset, Lcaseless, Lcaseopts, F, mb, &length);
         if (rrc != 0)
           {
           if (rrc > 0) Feptr = mb->end_subject;   /* Partial match */
@@ -5096,7 +5106,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     for (i = 1; i <= Lmin; i++)
       {
       PCRE2_SIZE slength;
-      rrc = match_ref(Loffset, Lcaseless, F, mb, &slength);
+      rrc = match_ref(Loffset, Lcaseless, Lcaseopts, F, mb, &slength);
       if (rrc != 0)
         {
         if (rrc > 0) Feptr = mb->end_subject;   /* Partial match */
@@ -5120,7 +5130,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         RMATCH(Fecode, RM20);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
-        rrc = match_ref(Loffset, Lcaseless, F, mb, &slength);
+        rrc = match_ref(Loffset, Lcaseless, Lcaseopts, F, mb, &slength);
         if (rrc != 0)
           {
           if (rrc > 0) Feptr = mb->end_subject;   /* Partial match */
@@ -5145,7 +5155,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       for (i = Lmin; i < Lmax; i++)
         {
         PCRE2_SIZE slength;
-        rrc = match_ref(Loffset, Lcaseless, F, mb, &slength);
+        rrc = match_ref(Loffset, Lcaseless, Lcaseopts, F, mb, &slength);
         if (rrc != 0)
           {
           /* Can't use CHECK_PARTIAL because we don't want to update Feptr in
@@ -5196,7 +5206,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           for (i = Lmin; i < Lmax; i++)
             {
             PCRE2_SIZE slength;
-            (void)match_ref(Loffset, Lcaseless, F, mb, &slength);
+            (void)match_ref(Loffset, Lcaseless, Lcaseopts, F, mb, &slength);
             Feptr += slength;
             }
           }
