@@ -5896,7 +5896,7 @@ for (;; pptr++)
       {
       if (lengthptr != NULL)
         {
-        cranges = PRIV(optimize_class)(pptr, options, cb);
+        cranges = PRIV(optimize_class)(pptr, options, xoptions, cb);
 
         if (cranges == NULL)
           {

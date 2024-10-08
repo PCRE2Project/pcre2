@@ -619,6 +619,15 @@
 \= Expect no match
     Kk\x{ffffffff}\x{ffffffff}\x{ffffffff}Z
 
+/[sk](?r:[sk])[sk]/Bi,ucp
+    SKS
+    sks
+    \x{212a}S\x{17f}
+    \x{17f}K\x{212a}
+\= Expect no match
+    s\x{212a}s
+    K\x{17f}K
+
 # --------------------------------------------------------- 
 
 # End of testinput12
