@@ -259,7 +259,10 @@ static unsigned char meta_extra_lengths[] = {
   0,             /* META_QUERY_QUERY */
   2,             /* META_MINMAX */
   2,             /* META_MINMAX_PLUS */
-  2              /* META_MINMAX_QUERY */
+  2,             /* META_MINMAX_QUERY */
+  0,             /* META_SCLASS_OR */
+  0,             /* META_SCLASS_AND */
+  0              /* META_SCLASS_SUB */
 };
 
 /* Types for skipping parts of a parsed pattern. */
@@ -663,7 +666,7 @@ are allowed. */
    PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
    PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_SET_CLASS)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
    (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_CASELESS_RESTRICT)
@@ -1073,6 +1076,10 @@ for (;;)
       }
     fprintf(stderr, ") length=%u", length);
     break;
+
+    case META_SCLASS_OR: fprintf(stderr, "META_SCLASS_OR"); break;
+    case META_SCLASS_AND: fprintf(stderr, "META_SCLASS_AND"); break;
+    case META_SCLASS_SUB: fprintf(stderr, "META_SCLASS_SUB"); break;
     }
   fprintf(stderr, "\n");
   }
@@ -2818,6 +2825,10 @@ must be last. */
 
 enum { RANGE_NO, RANGE_STARTED, RANGE_OK_ESCAPED, RANGE_OK_LITERAL };
 
+/* States used for analyzing operators and operands in character classes. */
+
+enum { CLASS_OP_NONE, CLASS_OP_OPERAND, CLASS_OP_OPERATOR };
+
 /* Only in 32-bit mode can there be literals > META_END. A macro encapsulates
 the storing of literal values in the main parsed pattern, where they can always
 be quantified. */
@@ -2842,6 +2853,7 @@ uint32_t c;
 uint32_t delimiter;
 uint32_t namelen;
 uint32_t class_range_state;
+uint32_t class_op_state;
 uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
 uint32_t *verbstartptr = NULL;
 uint32_t *previous_callout = NULL;
@@ -2853,6 +2865,8 @@ uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
 uint32_t xoptions = cb->cx->extra_options;
 uint16_t nest_depth = 0;
+uint16_t class_depth = 0;
+uint8_t class_op_used[SCLASS_NEST_LIMIT];
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
 int errorcode = 0;
@@ -3610,47 +3624,6 @@ while (ptr < ptrend)
       goto FAILED;
       }
 
-    /* Process a regular character class. If the first character is '^', set
-    the negation flag. If the first few characters (either before or after ^)
-    are \Q\E or \E or space or tab in extended-more mode, we skip them too.
-    This makes for compatibility with Perl. */
-
-    negate_class = FALSE;
-    while (ptr < ptrend)
-      {
-      GETCHARINCTEST(c, ptr);
-      if (c == CHAR_BACKSLASH)
-        {
-        if (ptr < ptrend && *ptr == CHAR_E) ptr++;
-        else if (ptrend - ptr >= 3 &&
-             PRIV(strncmp_c8)(ptr, STR_Q STR_BACKSLASH STR_E, 3) == 0)
-          ptr += 3;
-        else
-          break;
-        }
-      else if ((options & PCRE2_EXTENDED_MORE) != 0 &&
-               (c == CHAR_SPACE || c == CHAR_HT))  /* Note: just these two */
-        continue;
-      else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
-        negate_class = TRUE;
-      else break;
-      }
-
-    /* Now the real contents of the class; c has the first "real" character.
-    Empty classes are permitted only if the option is set. */
-
-    if (c == CHAR_RIGHT_SQUARE_BRACKET &&
-        (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
-      {
-      *parsed_pattern++ = negate_class? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
-      break;  /* End of class processing */
-      }
-
-    /* Process a non-empty class. */
-
-    *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
-    class_range_state = RANGE_NO;
-
     /* In an EBCDIC environment, Perl treats alphabetic ranges specially
     because there are holes in the encoding, and simply using the range A-Z
     (for example) would include the characters in the holes. This applies only
@@ -3659,7 +3632,25 @@ while (ptr < ptrend)
     character values are literal or not, and a state variable for handling
     ranges. */
 
-    /* Loop for the contents of the class */
+    /* Loop for the contents of the class. Classes may be nested, if
+    PCRE2_SET_CLASS is set. */
+
+    /* c is still set to '[' so the loop will handle the start of the class. */
+
+    // XXX work out the parser (Pratt?) that will consume this and produce opcodes
+    // XXX implement the new opcodes...
+
+    // XXX A character class can contain the following metas:
+    //     - empty & empty_not
+    //     - literals
+    //     - meta esc, meta posix
+    //     - the new ops!
+    //     - meta range
+    /// - open/close
+
+    class_depth = 0;
+    class_range_state = RANGE_NO;
+    class_op_state = CLASS_OP_NONE;
 
     for (;;)
       {
@@ -3676,6 +3667,115 @@ while (ptr < ptrend)
           goto CLASS_CONTINUE;
           }
         goto CLASS_LITERAL;
+        }
+
+      if (c == CHAR_LEFT_SQUARE_BRACKET &&
+          (class_depth == 0 || (options & PCRE2_SET_CLASS) != 0))
+        {
+        /* Tidy up the other class before starting the nested class. */
+        /* -[ beginning a nested class is a literal '-' */
+
+        if (class_range_state == RANGE_STARTED)
+          parsed_pattern[-1] = CHAR_MINUS;
+
+        /* Validate nesting depth */
+        if (class_depth >= SCLASS_NEST_LIMIT)
+          {
+          errorcode = ERR104;
+          goto FAILED;        /* Classes too deeply nested */
+          }
+
+        /* Process the character class start. If the first character is '^', set
+        the negation flag. If the first few characters (either before or after ^)
+        are \Q\E or \E or space or tab in extended-more mode, we skip them too.
+        This makes for compatibility with Perl. */
+
+        negate_class = FALSE;
+        for (;;)
+          {
+          if (ptr >= ptrend)
+            {
+            errorcode = ERR6;  /* Missing terminating ']' */
+            goto FAILED;
+            }
+
+          GETCHARINCTEST(c, ptr);
+          if (c == CHAR_BACKSLASH)
+            {
+            if (ptr < ptrend && *ptr == CHAR_E) ptr++;
+            else if (ptrend - ptr >= 3 &&
+                PRIV(strncmp_c8)(ptr, STR_Q STR_BACKSLASH STR_E, 3) == 0)
+              ptr += 3;
+            else
+              break;
+            }
+          else if ((options & PCRE2_EXTENDED_MORE) != 0 &&
+                  (c == CHAR_SPACE || c == CHAR_HT))  /* Note: just these two */
+            continue;
+          else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
+            negate_class = TRUE;
+          else break;
+          }
+
+        /* Now the real contents of the class; c has the first "real" character.
+        Empty classes are permitted only if the option is set. */
+
+        if (c == CHAR_RIGHT_SQUARE_BRACKET &&
+            (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
+          {
+          *parsed_pattern++ = negate_class? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
+
+          /* Leave nesting depth unchanged; but check for zero depth to handle the
+          very first (top-level) class being empty. */
+          if (class_depth == 0) break;
+
+          class_range_state = RANGE_NO; /* for processing the containing class */
+          class_op_state = CLASS_OP_OPERAND;
+          goto CLASS_CONTINUE;
+          }
+
+        /* Enter a non-empty class. */
+
+        *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
+        class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_NONE;
+        ++class_depth;
+        class_op_used[class_depth-1] = 0; /* reset; no op seen yet at new depth */
+
+        /* Implement the special start-of-class literal meaning of ']'. */
+        if (c == CHAR_RIGHT_SQUARE_BRACKET)
+          {
+          class_range_state = RANGE_OK_LITERAL;
+          class_op_state = CLASS_OP_OPERAND;
+          PARSED_LITERAL(c, parsed_pattern);
+          goto CLASS_CONTINUE;
+          }
+
+        continue;  /* We have already loaded c with the next character */
+        }
+
+      /* Check for the end of the class. */
+
+      if (c == CHAR_RIGHT_SQUARE_BRACKET)
+        {
+        /* Check no trailing operator. */
+        if (class_op_state == CLASS_OP_OPERATOR)
+          {
+          errorcode = ERR107;
+          goto FAILED;
+          }
+
+        /* -] at the end of a class is a literal '-' */
+        if (class_range_state == RANGE_STARTED)
+          parsed_pattern[-1] = CHAR_MINUS;
+
+        *parsed_pattern++ = META_CLASS_END;
+
+        if (--class_depth == 0) break;
+
+        class_range_state = RANGE_NO; /* for processing the containing class */
+        class_op_state = CLASS_OP_OPERAND;
+        goto CLASS_CONTINUE;
         }
 
       /* Skip over space and tab (only) in extended-more mode. */
@@ -3750,6 +3850,7 @@ while (ptr < ptrend)
         special apparatus to do otherwise. */
 
         class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERAND;
 
         /* When PCRE2_UCP is set, unless PCRE2_EXTRA_ASCII_POSIX is set, some
         of the POSIX classes are converted to use Unicode properties \p or \P
@@ -3792,6 +3893,48 @@ while (ptr < ptrend)
         *parsed_pattern++ = posix_class;
         }
 
+      /* Handle a set operator */
+
+      else if ((options & PCRE2_SET_CLASS) != 0 &&
+               (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS || c == CHAR_AMPERSAND) &&
+               ptr < ptrend && *ptr == c)
+        {
+        ++ptr;
+
+        /* Check there isn't a triple-repetition. */
+        if (ptr < ptrend && *ptr == c)
+          {
+          errorcode = ERR105;
+          goto FAILED;
+          }
+
+        /* Check for a preceding operand. */
+        if (class_op_state != CLASS_OP_OPERAND)
+          {
+          errorcode = ERR106;
+          goto FAILED;
+          }
+
+        /* Check for mixed precedence. Forbid [A--B&&C]. */
+        if (class_op_used[class_depth-1] != 0 &&
+            class_op_used[class_depth-1] != (uint8_t)c)
+          {
+          errorcode = ERR108;
+          goto FAILED;
+          }
+
+        /* Dangling '-' before an operator is a literal */
+        if (class_range_state == RANGE_STARTED)
+          parsed_pattern[-1] = CHAR_MINUS;
+
+        *parsed_pattern++ = c == CHAR_VERTICAL_LINE? META_SCLASS_OR :
+                            c == CHAR_MINUS? META_SCLASS_SUB :
+                            META_SCLASS_AND;
+        class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERATOR;
+        class_op_used[class_depth-1] = (uint8_t)c;
+        }
+
       /* Handle potential start of range */
 
       else if (c == CHAR_MINUS && class_range_state >= RANGE_OK_ESCAPED)
@@ -3822,11 +3965,13 @@ while (ptr < ptrend)
             PARSED_LITERAL(c, parsed_pattern);
             }
           class_range_state = RANGE_NO;
+          class_op_state = CLASS_OP_OPERAND;
           }
         else  /* Potential start of range */
           {
           class_range_state = char_is_literal?
             RANGE_OK_LITERAL : RANGE_OK_ESCAPED;
+          class_op_state = CLASS_OP_OPERAND;
           PARSED_LITERAL(c, parsed_pattern);
           }
         }
@@ -3893,6 +4038,7 @@ while (ptr < ptrend)
         allowed in a class. None may start a range. */
 
         class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERAND;
         switch(escape)
           {
           case ESC_N:
@@ -3965,18 +4111,8 @@ while (ptr < ptrend)
         goto FAILED;
         }
       GETCHARINCTEST(c, ptr);
-      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
       }     /* End of class-processing loop */
 
-    /* -] at the end of a class is a literal '-' */
-
-    if (class_range_state == RANGE_STARTED)
-      {
-      parsed_pattern[-1] = CHAR_MINUS;
-      class_range_state = RANGE_NO;
-      }
-
-    *parsed_pattern++ = META_CLASS_END;
     break;  /* End of character class */
 
 
