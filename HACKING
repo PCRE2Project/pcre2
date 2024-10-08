@@ -365,8 +365,10 @@ Changeable options
 The /i, /m, or /s options (PCRE2_CASELESS, PCRE2_MULTILINE, PCRE2_DOTALL) and
 some others may be changed in the middle of patterns by items such as (?i).
 Their processing is handled entirely at compile time by generating different
-opcodes for the different settings. The runtime functions do not need to keep
-track of an option's state.
+opcodes for the different settings. Some options are copied into the opcode's
+data, for opcodes such as OP_REFI which depends on the (?r)
+(PCRE2_EXTRA_CASELESS_RESTRICT) option. The runtime functions do not need to
+keep track of an option's state.
 
 PCRE2_DUPNAMES, PCRE2_EXTENDED, PCRE2_EXTENDED_MORE, and PCRE2_NO_AUTO_CAPTURE
 are tracked and processed during the parsing pre-pass. The others are handled
@@ -638,6 +640,9 @@ generates OP_DNREF or OP_DNREFI. These are followed by two counts: the index
 (not the byte offset) in the group name table of the first entry for the
 required name, followed by the number of groups with the same name. The
 matching code can then search for the first one that is set.
+
+OP_REFI and OP_DNREFI are further followed by an item containing any
+case-insensitivity flags.
 
 
 Repeating character classes and back references

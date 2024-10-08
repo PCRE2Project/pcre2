@@ -633,14 +633,17 @@ for(;;)
 
     case OP_REFI:
     flag = "/i";
+    extra = code[1 + IMM2_SIZE];
     /* Fall through */
     case OP_REF:
     fprintf(f, " %s \\%d", flag, GET2(code,1));
+    if (extra != 0) fprintf(f, " 0x%02x", extra);
     ccode = code + OP_lengths[*code];
     goto CLASS_REF_REPEAT;
 
     case OP_DNREFI:
     flag = "/i";
+    extra = code[1 + 2*IMM2_SIZE];
     /* Fall through */
     case OP_DNREF:
       {
@@ -648,6 +651,7 @@ for(;;)
       fprintf(f, " %s \\k<", flag);
       print_custring(f, entry);
       fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
+      if (extra != 0) fprintf(f, " 0x%02x", extra);
       }
     ccode = code + OP_lengths[*code];
     goto CLASS_REF_REPEAT;

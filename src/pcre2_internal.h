@@ -1780,9 +1780,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+(32/sizeof(PCRE2_UCHAR)),    /* NCLASS                                 */ \
   0,                             /* XCLASS - variable length               */ \
   1+IMM2_SIZE,                   /* REF                                    */ \
-  1+IMM2_SIZE,                   /* REFI                                   */ \
+  1+IMM2_SIZE+1,                 /* REFI                                   */ \
   1+2*IMM2_SIZE,                 /* DNREF                                  */ \
-  1+2*IMM2_SIZE,                 /* DNREFI                                 */ \
+  1+2*IMM2_SIZE+1,               /* DNREFI                                 */ \
   1+LINK_SIZE,                   /* RECURSE                                */ \
   1+2*LINK_SIZE+1,               /* CALLOUT                                */ \
   0,                             /* CALLOUT_STR - variable length          */ \
@@ -1828,6 +1828,10 @@ in UTF-8 mode. The code that uses this table must know about such things. */
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 
 #define RREF_ANY  0xffff
+
+/* Constants used by OP_REFI and OP_DNREFI to control matching behaviour. */
+
+#define REFI_FLAG_CASELESS_RESTRICT  0x1
 
 
 /* ---------- Private structures that are mode-independent. ---------- */

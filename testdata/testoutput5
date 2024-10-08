@@ -5210,6 +5210,106 @@ No match
     K\x{17f}K
 No match
 
+/(.) \1/i,utf,caseless_restrict
+    s S
+ 0: s S
+ 1: s
+    k K
+ 0: k K
+ 1: k
+\= Expect no match
+    s \x{17f}
+No match
+    k \x{212a}
+No match
+
+/(.) (?r:\1)/i,utf
+    s S
+ 0: s S
+ 1: s
+    k K
+ 0: k K
+ 1: k
+\= Expect no match
+    s \x{17f}
+No match
+    k \x{212a}
+No match
+
+/(.) \1/i,utf
+    s S
+ 0: s S
+ 1: s
+    k K
+ 0: k K
+ 1: k
+    s \x{17f}
+ 0: s \x{17f}
+ 1: s
+    k \x{212a}
+ 0: k \x{212a}
+ 1: k
+
+/(?:(?<A>ss)|(?<A>kk)) \k<A>/i,utf,dupnames,caseless_restrict
+    sS Ss
+ 0: sS Ss
+ 1: sS
+    kK Kk
+ 0: kK Kk
+ 1: <unset>
+ 2: kK
+\= Expect no match
+    sS \x{17f}s
+No match
+    kK \x{212a}k
+No match
+
+/(?:(?<A>ss)|(?<A>kk)) \k<A>/i,utf,dupnames
+    sS Ss
+ 0: sS Ss
+ 1: sS
+    kK Kk
+ 0: kK Kk
+ 1: <unset>
+ 2: kK
+    sS \x{17f}s
+ 0: sS \x{17f}s
+ 1: sS
+    kK \x{212a}k
+ 0: kK \x{212a}k
+ 1: <unset>
+ 2: kK
+
+/(?:(?<A>s)|(?<A>k)) \k<A>{3,}!/i,utf,dupnames,caseless_restrict
+    s SsSs!
+ 0: s SsSs!
+ 1: s
+    k KkKk!
+ 0: k KkKk!
+ 1: <unset>
+ 2: k
+\= Expect no match
+    s \x{17f}sSs\x{17f}!
+No match
+    k \x{212a}kKk\x{212a}!
+No match
+
+/(?:(?<A>s)|(?<A>k)) \k<A>{3,}!/i,utf,dupnames
+    s SsSs!
+ 0: s SsSs!
+ 1: s
+    k KkKk!
+ 0: k KkKk!
+ 1: <unset>
+ 2: k
+    s \x{17f}sSs\x{17f}!
+ 0: s \x{17f}sSs\x{17f}!
+ 1: s
+    k \x{212a}kKk\x{212a}!
+ 0: k \x{212a}kKk\x{212a}!
+ 1: <unset>
+ 2: k
+
 # End caseless restrict tests
 
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
