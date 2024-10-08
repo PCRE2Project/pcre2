@@ -637,6 +637,8 @@ echo "RC=$?" >>testtrygrep
 echo "---------------------------- Test 120 ------------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -HO '$0:$2$1$3' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtrygrep
 echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -HO '$&:$2$1$3' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -m 1 -O '$0:$a$b$e$f$r$t$v' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -HO '${X}' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtrygrep 2>&1

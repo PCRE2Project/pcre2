@@ -52,7 +52,7 @@ a list). Those that are not bugfixes or code tidies are:
   matches the "fullwidth" versions of hex digits. PCRE2_EXTRA_ASCII_DIGIT can
   be used to keep it ASCII only.
 
-* Make PCRE2_UCP the default in UTF mode in pcre2grep and add -no_ucp,
+* Make PCRE2_UCP the default in UTF mode in pcre2grep and add --no-ucp,
   --case-restrict and --posix-digit.
 
 * Add --group-separator and --no-group-separator to pcre2grep.

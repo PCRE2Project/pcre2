@@ -140,7 +140,7 @@ static const int eint2[] = {
   92, REG_INVARG,  /* invalid option bits with PCRE2_LITERAL */
   98, REG_EESCAPE, /* missing digit after \0 in NO_BS0 mode */
   99, REG_EESCAPE, /* \K in lookaround */
- 102, REG_EESCAPE  /* \ddd octal > \377 in PYTHON_OCTAL mode */  
+ 102, REG_EESCAPE  /* \ddd octal > \377 in PYTHON_OCTAL mode */
 };
 
 /* Table of texts corresponding to POSIX error codes */
