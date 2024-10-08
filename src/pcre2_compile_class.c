@@ -426,7 +426,7 @@ while (*ptr != META_CLASS_END)
 }
 
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
-  uint32_t options, compile_block* cb)
+  uint32_t options, uint32_t xoptions, compile_block* cb)
 {
 class_ranges* cranges;
 uint32_t *ptr = start_ptr + 1;
@@ -445,7 +445,7 @@ if (options & PCRE2_UTF)
 if ((options & PCRE2_CASELESS) && (options & (PCRE2_UTF|PCRE2_UCP)))
   class_options |= PARSE_CLASS_CASELESS_UTF;
 
-if (cb->cx->extra_options & PCRE2_EXTRA_CASELESS_RESTRICT)
+if (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT)
   class_options |= PARSE_CLASS_RESTRICTED_UTF;
 #endif
 

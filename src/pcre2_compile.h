@@ -201,7 +201,7 @@ therefore no need for it to have a length entry, so use a high value. */
 /* Merge intersecting ranges of classes. */
 
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
-  uint32_t options, compile_block* cb);
+  uint32_t options, uint32_t xoptions, compile_block* cb);
 
 /* Set bits in classbits according to the property type */
 
