@@ -2525,7 +2525,7 @@ codes starting at ptr.
 */
 
 static BOOL
-check_simple_class(const uint32_t *ptr, const uint32_t **pendptr)
+check_simple_class(uint32_t *ptr, uint32_t **pendptr)
 {
 while (TRUE)
   {
@@ -2569,7 +2569,7 @@ while (TRUE)
 become a single OP_CLASS (or OP_NCLASS, OP_XCLASS). */
 
 static void
-compile_class_leaf(const uint32_t *ptr, const uint32_t *endptr,
+compile_class_leaf(uint32_t *ptr, uint32_t *endptr,
   PCRE2_UCHAR **pcode, BOOL negated)
 {
 PCRE2_UCHAR *code = *pcode;
@@ -2578,6 +2578,10 @@ PCRE2_UCHAR *code = *pcode;
 // XXX this function is the guts of the logic.
 //     - takes a list of META codes
 //     - emit one compiled OP
+(void)ptr;
+(void)endptr;
+(void)negated;
+
 *code++ = OP_CLASS;
 memset(code, 0, 32 * sizeof(uint8_t));
 code += 32 / sizeof(PCRE2_UCHAR);
@@ -2587,19 +2591,19 @@ code += 32 / sizeof(PCRE2_UCHAR);
 
 /* Forward-declaration for recursion. */
 static void
-compile_class_nested(const uint32_t **pptr, PCRE2_UCHAR **pcode);
+compile_class_nested(uint32_t **pptr, PCRE2_UCHAR **pcode);
 
 /* This function consumes a group of implicitly-unioned class elements.
 These can be characters, ranges, properties, or nested classes, as long
 as they are all joined by being placed adjacently. */
 
 static void
-compile_class_operand(const uint32_t **pptr, PCRE2_UCHAR **pcode)
+compile_class_operand(uint32_t **pptr, PCRE2_UCHAR **pcode)
 {
-const uint32_t *ptr = *pptr;
+uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
 BOOL first = TRUE;
-const uint32_t *endptr;
+uint32_t *endptr;
 
 while (TRUE)
   {
@@ -2666,9 +2670,9 @@ applications.
 The pptr will be left pointing at the matching META_CLASS_END. */
 
 static void
-compile_class_nested(const uint32_t **pptr, PCRE2_UCHAR **pcode)
+compile_class_nested(uint32_t **pptr, PCRE2_UCHAR **pcode)
 {
-const uint32_t *ptr = *pptr;
+uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
 BOOL negated;
 
