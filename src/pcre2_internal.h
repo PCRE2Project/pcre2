@@ -1670,6 +1670,15 @@ enum {
   OP_NOT_UCP_WORD_BOUNDARY, /* 170 */
   OP_UCP_WORD_BOUNDARY,     /* 171 */
 
+  /* These are used for "set classes" such as [a-z -- aeiou]. */
+
+  OP_SCLASS,         /* 172 */
+  OP_SCLASS_OR,      /* 173 */
+  OP_SCLASS_AND,     /* 174 */
+  OP_SCLASS_SUB,     /* 175 */
+  OP_SCLASS_NOT,     /* 176 */
+  OP_SCLASS_END,     /* 177 */
+
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
   some in the past. */
@@ -1730,7 +1739,8 @@ some cases doesn't actually use these names at all). */
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
-  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)"
+  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
+  "sclass[", "||", "&&", "--", "!!", "sclass]"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1829,7 +1839,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
-  1, 1                           /* \B and \b in UCP mode                  */
+  1, 1,                          /* \B and \b in UCP mode                  */ \
+  1, 1, 1, 1, 1, 1               /* SCLASS codes */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

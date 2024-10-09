@@ -2501,6 +2501,209 @@ return -1;
 
 
 /*************************************************
+*          Implement set classes                 *
+*************************************************/
+
+/* This function is called to test whether a series of META codes can be
+compiled to a simple class (OP_CLASS, OP_NCLASS, OP_XCLASS) or whether
+it requires a set-class (OP_SCLASS).
+
+Arguments:
+  ptr       points to the first META code, which should be one past the
+            META_CLASS or META_CLASS_NOT start code
+  pendptr   optional out-pointer to receive the end of the simple codes
+
+Returns:    TRUE if the pointed-to META_CLASS is simple, that is, we
+              reached a META_CLASS_END without encountering set-class
+              syntax. In this case, *pendptr is set to the position of the
+              META_CLASS_END itself.
+            FALSE otherwise. In this case, *pendptr is set to the position
+              of the META code that caused the function to return FALSE.
+
+In both cases, the span ptr...*pendptr is the longest sequence of simple
+codes starting at ptr.
+*/
+
+static BOOL
+check_simple_class(const uint32_t *ptr, const uint32_t **pendptr)
+{
+while (TRUE)
+  {
+  uint32_t meta = META_CODE(*ptr);
+  uint32_t meta_arg = META_DATA(*ptr);
+
+  switch (meta)
+    {
+    case META_ESCAPE:
+    if (meta_arg == ESC_P || meta_arg == ESC_p)
+      ptr += 1;     /* Skip prop data */
+    break;
+
+    case META_BIGVALUE:
+    case META_POSIX:
+    case META_POSIX_NEG:
+    ptr += 1;
+    break;
+
+    case META_RANGE_ESCAPED:
+    case META_RANGE_LITERAL:
+    break;
+
+    case META_CLASS_END:
+    if (pendptr != NULL) *pendptr = ptr;
+    return TRUE;
+
+    default:
+    if (meta < META_END) break; /* Literal */
+
+    /* Other META (operator, or nested class) - not a simple class. */
+    if (pendptr != NULL) *pendptr = ptr;
+    return FALSE;
+    }
+
+  ++ptr;
+  }
+}
+
+/* This function consumes a "leaf", which is a set of characters that will
+become a single OP_CLASS (or OP_NCLASS, OP_XCLASS). */
+
+static void
+compile_class_leaf(const uint32_t *ptr, const uint32_t *endptr,
+  PCRE2_UCHAR **pcode, BOOL negated)
+{
+PCRE2_UCHAR *code = *pcode;
+
+// XXX there's about 600 lines of code below, which need to get moved in here.
+// XXX this function is the guts of the logic.
+//     - takes a list of META codes
+//     - emit one compiled OP
+*code++ = OP_CLASS;
+memset(code, 0, 32 * sizeof(uint8_t));
+code += 32 / sizeof(PCRE2_UCHAR);
+
+*pcode = code;
+}
+
+/* Forward-declaration for recursion. */
+static void
+compile_class_nested(const uint32_t **pptr, PCRE2_UCHAR **pcode);
+
+/* This function consumes a group of implicitly-unioned class elements.
+These can be characters, ranges, properties, or nested classes, as long
+as they are all joined by being placed adjacently. */
+
+static void
+compile_class_operand(const uint32_t **pptr, PCRE2_UCHAR **pcode)
+{
+const uint32_t *ptr = *pptr;
+PCRE2_UCHAR *code = *pcode;
+BOOL first = TRUE;
+const uint32_t *endptr;
+
+while (TRUE)
+  {
+  switch (*ptr)
+    {
+    case META_CLASS_END:
+    case META_SCLASS_OR:
+    case META_SCLASS_AND:
+    case META_SCLASS_SUB:
+    goto DONE;
+
+    case META_CLASS_EMPTY:
+    case META_CLASS_EMPTY_NOT:
+    *code++ = *ptr == META_CLASS_EMPTY? OP_CLASS : OP_NCLASS;
+    memset(code, *ptr == META_CLASS_EMPTY? 0 : 0xffu, 32 * sizeof(uint8_t));
+    code += 32 / sizeof(PCRE2_UCHAR);
+    ++ptr;
+    break;
+
+    case META_CLASS:
+    case META_CLASS_NOT:
+    if (check_simple_class(ptr + 1, &endptr))
+      {
+      compile_class_leaf(ptr + 1, endptr, &code, *ptr == META_CLASS_NOT);
+      ptr = endptr;
+      }
+    else
+      {
+      compile_class_nested(&ptr, &code);
+      PCRE2_ASSERT(*ptr == META_CLASS_END);
+      ++ptr;
+      }
+    break;
+
+    default:
+    /* Scan forward characters, ranges, and properties.
+    For example: inside [a-z_ -- m] we don't have brackets around "a-z_" but
+    we still need to collect that fragment up into a "leaf" OP_CLASS. */
+    (void)check_simple_class(ptr, &endptr);
+    compile_class_leaf(ptr, endptr, &code, FALSE);
+    ptr = endptr;
+    break;
+    }
+
+  /* Join second and subsequent leaves with an OR. */
+  if (!first) *code++ = OP_SCLASS_OR;
+
+  first = FALSE;
+  }
+
+DONE:
+PCRE2_ASSERT(!first);  /* Confirm that we found something. */
+
+*pptr = ptr;
+*pcode = code;
+}
+
+/* This function converts the META codes in pptr into opcodes written to
+pcode. The pptr must start at a META_CLASS or META_CLASS_NOT.
+
+The class is compiled as a left-associative sequence of operator
+applications.
+
+The pptr will be left pointing at the matching META_CLASS_END. */
+
+static void
+compile_class_nested(const uint32_t **pptr, PCRE2_UCHAR **pcode)
+{
+const uint32_t *ptr = *pptr;
+PCRE2_UCHAR *code = *pcode;
+BOOL negated;
+
+PCRE2_ASSERT(*ptr == META_CLASS || *ptr == META_CLASS_NOT);
+
+negated = *ptr++ == META_CLASS_NOT;
+
+/* Because it's a non-empty class, there must be an operand at the start. */
+compile_class_operand(&ptr, &code);
+
+while (*ptr >= META_SCLASS_OR && *ptr <= META_SCLASS_SUB)
+  {
+  uint32_t op = *ptr == META_SCLASS_OR ? OP_SCLASS_OR :
+                *ptr == META_SCLASS_AND ? OP_SCLASS_AND :
+                OP_SCLASS_SUB;
+  ++ptr;
+
+  /* An operand must follow the operator. */
+  compile_class_operand(&ptr, &code);
+
+  /* Convert infix to postfix (RPN). */
+  *code++ = op;
+  }
+
+if (negated) *code++ = OP_SCLASS_NOT;
+
+PCRE2_ASSERT(*ptr == META_CLASS_END);
+
+*pptr = ptr;
+*pcode = code;
+}
+
+
+
+/*************************************************
 *       Read a subpattern or VERB name           *
 *************************************************/
 
@@ -3636,17 +3839,6 @@ while (ptr < ptrend)
     PCRE2_SET_CLASS is set. */
 
     /* c is still set to '[' so the loop will handle the start of the class. */
-
-    // XXX work out the parser (Pratt?) that will consume this and produce opcodes
-    // XXX implement the new opcodes...
-
-    // XXX A character class can contain the following metas:
-    //     - empty & empty_not
-    //     - literals
-    //     - meta esc, meta posix
-    //     - the new ops!
-    //     - meta range
-    /// - open/close
 
     class_depth = 0;
     class_range_state = RANGE_NO;
@@ -5910,6 +6102,17 @@ for (;; pptr++)
     matched_char = TRUE;
     negate_class = meta == META_CLASS_NOT;
 
+    /* Check for complex set-classes and hnadle them separately. */
+
+    if (!check_simple_class(pptr +  1, NULL))
+      {
+      *code++ = OP_SCLASS;
+      compile_class_nested(&pptr, &code);
+      *code++ = OP_SCLASS_END;
+
+      break;   /* We are finished with this class */
+      }
+
     /* We can optimize the case of a single character in a class by generating
     OP_CHAR or OP_CHARI if it's positive, or OP_NOT or OP_NOTI if it's
     negative. In the negative case there can be no first char if this item is
@@ -6009,6 +6212,9 @@ for (;; pptr++)
           }
         }
       }
+
+    // XXX OK, all this long logic below should be lifted out into compile_class_leaf().
+    // XXX vvvvvvvvvvvvvvvvv
 
     /* If a non-extended class contains a negative special such as \S, we need
     to flip the negation flag at the end, so that support for characters > 255
@@ -6679,6 +6885,10 @@ for (;; pptr++)
     if (lengthptr == NULL)    /* Save time in the pre-compile phase */
       memcpy(code, classbits, 32);
     code += 32 / sizeof(PCRE2_UCHAR);
+
+    // XXX ^^^^^^^^^^^^^^^^^
+    // XXX OK, all this long logic above should be lifted out into compile_class_leaf().
+
     break;  /* End of class processing */
 
 
