@@ -2024,11 +2024,23 @@ switch (*(++string))
   *last = string;
   return DDE_ERROR;
 
+  case '&':
+  /* In a callout, no capture is available. Return the character '0' for
+  consistency with $0. */
+
+  if (callout) *value = '0';
+  else
+    {
+    *value = 0;
+    rc = DDE_CAPTURE;
+    }
+  break;
+
   case '{':
   brace = TRUE;
   string++;
-  if (!isdigit((unsigned char)(*string)))  /* Syntax error: a decimal number required. */
-    {
+  if (!isdigit((unsigned char)(*string)))  /* Syntax error:              */
+    {                                      /* a decimal number required. */
     if (!callout)
       fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
         (int)(string - begin), "decimal number expected");
@@ -2105,9 +2117,9 @@ switch (*(++string))
     {
     if (!isxdigit(*string)) break;
     if (*string >= '0' && *string <= '9')
-      c = c *16 + *string++ - '0';
+      c = c *16 + (*string++ - '0');
     else
-      c = c * 16 + (*string++ | 0x20) - 'a' + 10;
+      c = c * 16 + ((*string++ | 0x20) - 'a') + 10;
     }
   *value = c;
   string--;  /* Point to last digit */

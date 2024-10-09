@@ -876,6 +876,10 @@ RC=0
 ./testdata/grepinput:a binary zero:zeroa
 ./testdata/grepinput:the binary zero.:zerothe.
 RC=0
+./testdata/grepinput:the binary zero.:zerothe.
+./testdata/grepinput:a binary zero:zeroa
+./testdata/grepinput:the binary zero.:zerothe.
+RC=0
 the binary zero.:	
 RC=0
 pcre2grep: Error in output text at offset 2: decimal number expected

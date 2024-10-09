@@ -629,9 +629,9 @@ contents of the matched part of the line and/or captured substrings into the
 text.
 .sp
 $<digits> or ${<digits>} is replaced by the captured substring of the given
-decimal number; zero substitutes the whole match. If the number is greater than
-the number of capturing substrings, or if the capture is unset, the replacement
-is empty.
+decimal number; $& (or the legacy $0) substitutes the whole match. If the
+number is greater than the number of capturing substrings, or if the capture
+is unset, the replacement is empty.
 .sp
 $a is replaced by bell; $b by backspace; $e by escape; $f by form feed; $n by
 newline; $r by carriage return; $t by tab; $v by vertical tab.
@@ -914,9 +914,9 @@ available, provided that callouts were not completely disabled when
 zero-terminated string, which means it should not contain any internal binary
 zeros. It is written to the output, having first been passed through the same
 escape processing as text from the \fB--output\fP (\fB-O\fP) option (see
-above). However, $0 cannot be used to insert a matched substring because the
-match is still in progress. Instead, the single character '0' is inserted. Any
-syntax errors in the string (for example, a dollar not followed by another
+above). However, $0 or $& cannot be used to insert a matched substring because
+the match is still in progress. Instead, the single character '0' is inserted.
+Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
 the escape $n. For example:
@@ -945,9 +945,9 @@ arguments:
 .sp
 Any substring (including the executable name) may contain escape sequences
 started by a dollar character. These are the same as for the \fB--output\fP
-(\fB-O\fP) option documented above, except that $0 cannot insert the matched
-string because the match is still in progress. Instead, the character '0'
-is inserted. If you need a literal dollar or pipe character in any
+(\fB-O\fP) option documented above, except that $0 or $& cannot insert the
+matched string because the match is still in progress. Instead, the character
+'0' is inserted. If you need a literal dollar or pipe character in any
 substring, use $$ or $| respectively. Here is an example:
 .sp
   echo -e "abcde\en12345" | pcre2grep \e
