@@ -6110,6 +6110,8 @@ for (;; pptr++)
       compile_class_nested(&pptr, &code);
       *code++ = OP_SCLASS_END;
 
+      // XXX URGH all the "reqcu" and "firstcu" flags etc... need to work out what to set them to
+
       break;   /* We are finished with this class */
       }
 
