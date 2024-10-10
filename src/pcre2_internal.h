@@ -1677,7 +1677,6 @@ enum {
   OP_ECLASS_AND,     /* 174 */
   OP_ECLASS_SUB,     /* 175 */
   OP_ECLASS_NOT,     /* 176 */
-  OP_ECLASS_END,     /* 177 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1740,7 +1739,7 @@ some cases doesn't actually use these names at all). */
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
   "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
-  "eclass[", "||", "&&", "--", "!!", "eclass]"
+  "eclass", "||", "&&", "--", "!!"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1840,7 +1839,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
   1, 1,                          /* \B and \b in UCP mode                  */ \
-  1, 1, 1, 1, 1, 1               /* ECLASS codes */
+  0,                             /* ECLASS - variable length               */ \
+  1, 1, 1, 1                     /* ECLASS ops, nested inside ECLASS       */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

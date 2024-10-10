@@ -2573,17 +2573,28 @@ compile_class_leaf(uint32_t *ptr, uint32_t *endptr,
   PCRE2_UCHAR **pcode, BOOL negated)
 {
 PCRE2_UCHAR *code = *pcode;
+uint8_t classbits[32] = { 0 };
 
 // XXX there's about 600 lines of code below, which need to get moved in here.
 // XXX this function is the guts of the logic.
 //     - takes a list of META codes
 //     - emit one compiled OP
-(void)ptr;
-(void)endptr;
-(void)negated;
+for (; ptr < endptr; ++ptr)
+  {
+  uint32_t meta = META_CODE(*ptr);
+ 
+  if (meta < META_END)
+    {
+    SETBIT(classbits, *ptr);
+    }
+  else
+    {
+    fprintf(stderr, "XXX/TODO: not yet extracted class-building logic\n");
+    }
+  }
 
-*code++ = OP_CLASS;
-memset(code, 0, 32 * sizeof(uint8_t));
+*code++ = negated ? OP_NCLASS : OP_CLASS;
+memcpy(code, classbits, 32);
 code += 32 / sizeof(PCRE2_UCHAR);
 
 *pcode = code;
@@ -6110,9 +6121,11 @@ for (;; pptr++)
 
     if (!check_simple_class(pptr +  1, NULL))
       {
+      previous = code;
       *code++ = OP_ECLASS;
+      code += LINK_SIZE;
       compile_class_nested(&pptr, &code);
-      *code++ = OP_ECLASS_END;
+      PUT(previous, 1, (int)(code - previous));
 
       // XXX URGH all the "reqcu" and "firstcu" flags etc... need to work out what to set them to
 

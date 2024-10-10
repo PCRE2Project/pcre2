@@ -1937,8 +1937,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     case OP_ECLASS:
       {
       uint32_t stack = 0;
+      PCRE2_SPTR ecode_end = Fecode + GET(Fecode, 1);
 
-      Fecode += 1;  /* Advance past OP_ECLASS. */
+      Fecode += 1 + LINK_SIZE;  /* Advance past OP_ECLASS header + length. */
 
       /* Read in the character to test. */
 
@@ -1964,8 +1965,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           fc = *Feptr++;
         }
 
-      /* Now do a little loop, until we reach OP_ECLASS_END. */
-      while (TRUE)
+      /* Now do a little loop, until we reach the end of the ECLASS. */
+      while (Fecode < ecode_end)
         {
         switch (*Fecode)
           {
@@ -2003,15 +2004,16 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
             }
 
+#ifdef SUPPORT_WIDE_CHARS
           case OP_XCLASS:
-            // XXX need to extract & share the code from the OP_XCLASS matching
-            Fecode += GET(Fecode, 1);
-            stack = (stack << 1) | 1 /* XXX dummy */;
-            break;
+            {
+            uint32_t matched = PRIV(xclass)(fc, Fecode + 1 + LINK_SIZE, utf);
 
-          case OP_ECLASS_END:
-            ++Fecode;
-            goto ECLASS_DONE;
+            Fecode += GET(Fecode, 1);
+            stack = (stack << 1) | matched;
+            break;
+            }
+#endif
 
           default:
           PCRE2_DEBUG_UNREACHABLE();
@@ -2019,7 +2021,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           }
         }
 
-      ECLASS_DONE:
       /* The final bit left on the stack now holds the match result. */
       if (!(stack & 1)) RRETURN(MATCH_NOMATCH);
       }

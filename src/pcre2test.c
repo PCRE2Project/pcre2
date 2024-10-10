@@ -655,6 +655,7 @@ static modstruct modlist[] = {
   { "allvector",                   MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },
   { "alt_bsux",                    MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
   { "alt_circumflex",              MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,       PO(options) },
+  { "alt_extended_class",          MOD_PAT,  MOD_OPT, PCRE2_ALT_EXTENDED_CLASS,   PO(options) },
   { "alt_verbnames",               MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
   { "altglobal",                   MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
   { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
