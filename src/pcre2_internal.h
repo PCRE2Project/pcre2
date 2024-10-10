@@ -574,6 +574,12 @@ modes. */
 #define REQ_CU_MAX       2000
 #endif
 
+/* The maximum nesting depth for Unicode character class sets.
+Currently fixed. Warning: the interpreter relies on this so it can encode
+the operand stack in a uint32_t. */
+
+#define ECLASS_NEST_LIMIT  15
+
 /* Offsets for the bitmap tables in the cbits set of tables. Each table
 contains a set of bits for a class map. Some classes are built by combining
 these tables. */
@@ -1664,6 +1670,14 @@ enum {
   OP_NOT_UCP_WORD_BOUNDARY, /* 170 */
   OP_UCP_WORD_BOUNDARY,     /* 171 */
 
+  /* These are used for "extended classes" such as [a-z -- aeiou]. */
+
+  OP_ECLASS,         /* 172 */
+  OP_ECLASS_OR,      /* 173 */
+  OP_ECLASS_AND,     /* 174 */
+  OP_ECLASS_SUB,     /* 175 */
+  OP_ECLASS_NOT,     /* 176 */
+
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
   some in the past. */
@@ -1724,7 +1738,8 @@ some cases doesn't actually use these names at all). */
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
-  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)"
+  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
+  "eclass", "||", "&&", "--", "!!"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1823,7 +1838,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
-  1, 1                           /* \B and \b in UCP mode                  */
+  1, 1,                          /* \B and \b in UCP mode                  */ \
+  0,                             /* ECLASS - variable length               */ \
+  1, 1, 1, 1                     /* ECLASS ops, nested inside ECLASS       */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

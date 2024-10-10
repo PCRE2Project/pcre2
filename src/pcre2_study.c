@@ -413,6 +413,11 @@ for (;;)
     cc += PRIV(OP_lengths)[op];
     break;
 
+    case OP_ECLASS:
+    branchlength++;
+    cc += GET(cc, 1);
+    break;
+
     /* Check a class for variable quantification */
 
     case OP_CLASS:
@@ -1070,6 +1075,7 @@ do
       case OP_SOM:
       case OP_THEN:
       case OP_THEN_ARG:
+      case OP_ECLASS:
       return SSB_FAIL;
 
       /* OP_CIRC happens only at the start of an anchored branch (multiline ^

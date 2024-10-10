@@ -1295,6 +1295,7 @@ for (;;)
     code += GET(code, 1 + 2*LINK_SIZE);
     break;
 
+    case OP_ECLASS:
 #ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
     code += GET(code, 1);

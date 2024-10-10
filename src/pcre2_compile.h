@@ -61,7 +61,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
        ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100,
-       ERR101,ERR102,ERR103 };
+       ERR101,ERR102,ERR103,ERR104,ERR105,ERR106,ERR107,ERR108 };
 
 /* Code values for parsed patterns, which are stored in a vector of 32-bit
 unsigned ints. Values less than META_END are literal data values. The coding
@@ -70,7 +70,7 @@ additional data that some of them need. The META_CODE, META_DATA, and META_DIFF
 macros are used to manipulate parsed pattern elements.
 
 NOTE: When these definitions are changed, the table of extra lengths for each
-code (meta_extra_lengths, just below) must be updated to remain in step. */
+code (meta_extra_lengths) must be updated to remain in step. */
 
 #define META_END              0x80000000u  /* End of pattern */
 
@@ -159,6 +159,10 @@ versions. */
 
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
+
+#define META_ECLASS_OR        0x80440000u  /* || in a class */
+#define META_ECLASS_AND       0x80450000u  /* && in a class */
+#define META_ECLASS_SUB       0x80460000u  /* -- in a class */
 
 /* This is a special "meta code" that is used only to distinguish (*asr: from
 (*sr: in the table of alphabetic assertions. It is never stored in the parsed

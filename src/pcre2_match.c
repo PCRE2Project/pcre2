@@ -1930,6 +1930,104 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 
     /* ===================================================================== */
+    /* Match a complex, set-based character class. These opcodes are used when
+    there is complex nesting or logical operations within the character
+    class. */
+
+    case OP_ECLASS:
+      {
+      uint32_t stack = 0;
+      PCRE2_SPTR ecode_end = Fecode + GET(Fecode, 1);
+
+      Fecode += 1 + LINK_SIZE;  /* Advance past OP_ECLASS header + length. */
+
+      /* Read in the character to test. */
+
+#ifdef SUPPORT_UNICODE
+      if (utf)
+        {
+        if (Feptr >= mb->end_subject)
+          {
+          SCHECK_PARTIAL();
+          RRETURN(MATCH_NOMATCH);
+          }
+        GETCHARINC(fc, Feptr);
+        }
+      else
+#endif
+      /* Not UTF mode */
+        {
+          if (Feptr >= mb->end_subject)
+            {
+            SCHECK_PARTIAL();
+            RRETURN(MATCH_NOMATCH);
+            }
+          fc = *Feptr++;
+        }
+
+      /* Now do a little loop, until we reach the end of the ECLASS. */
+      while (Fecode < ecode_end)
+        {
+        switch (*Fecode)
+          {
+          case OP_ECLASS_OR:
+          ++Fecode;
+          stack = (stack >> 1) | (stack & 1u);
+          break;
+
+          case OP_ECLASS_AND:
+          ++Fecode;
+          stack = (stack >> 1) & (stack & 1u);
+          break;
+
+          case OP_ECLASS_SUB:
+          ++Fecode;
+          stack = (stack >> 1) & (~stack & 1u);
+          break;
+
+          case OP_ECLASS_NOT:
+          ++Fecode;
+          stack ^= 1u;
+          break;
+
+          case OP_CLASS:
+          case OP_NCLASS:
+            {
+            uint32_t matched;
+            if (fc > 255)
+              matched = *Fecode == OP_NCLASS;
+            else
+              matched = (((const unsigned char *)(Fecode+1))[fc/8] & (1u << (fc&7))) != 0;
+
+            Fecode += 1 + (32 / sizeof(PCRE2_UCHAR));
+            stack = (stack << 1) | matched;
+            break;
+            }
+
+#ifdef SUPPORT_WIDE_CHARS
+          case OP_XCLASS:
+            {
+            uint32_t matched = PRIV(xclass)(fc, Fecode + 1 + LINK_SIZE, utf);
+
+            Fecode += GET(Fecode, 1);
+            stack = (stack << 1) | matched;
+            break;
+            }
+#endif
+
+          default:
+          PCRE2_DEBUG_UNREACHABLE();
+          return PCRE2_ERROR_INTERNAL;
+          }
+        }
+
+      /* The final bit left on the stack now holds the match result. */
+      if (!(stack & 1)) RRETURN(MATCH_NOMATCH);
+      }
+    break;
+
+
+    /* ===================================================================== */
     /* Match a bit-mapped character class, possibly repeatedly. These opcodes
     are used when all the characters in the class have values in the range
     0-255, and either the matching is caseful, or the characters are in the
