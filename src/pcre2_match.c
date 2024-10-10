@@ -1934,11 +1934,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     there is complex nesting or logical operations within the character
     class. */
 
-    case OP_SCLASS:
+    case OP_ECLASS:
       {
       uint32_t stack = 0;
 
-      Fecode += 1;  /* Advance past OP_SCLASS. */
+      Fecode += 1;  /* Advance past OP_ECLASS. */
 
       /* Read in the character to test. */
 
@@ -1964,27 +1964,27 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           fc = *Feptr++;
         }
 
-      /* Now do a little loop, until we reach OP_SCLASS_END. */
+      /* Now do a little loop, until we reach OP_ECLASS_END. */
       while (TRUE)
         {
         switch (*Fecode)
           {
-          case OP_SCLASS_OR:
+          case OP_ECLASS_OR:
           ++Fecode;
           stack = (stack >> 1) | (stack & 1u);
           break;
 
-          case OP_SCLASS_AND:
+          case OP_ECLASS_AND:
           ++Fecode;
           stack = (stack >> 1) & (stack & 1u);
           break;
 
-          case OP_SCLASS_SUB:
+          case OP_ECLASS_SUB:
           ++Fecode;
           stack = (stack >> 1) & (~stack & 1u);
           break;
 
-          case OP_SCLASS_NOT:
+          case OP_ECLASS_NOT:
           ++Fecode;
           stack ^= 1u;
           break;
@@ -2009,9 +2009,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             stack = (stack << 1) | 1 /* XXX dummy */;
             break;
 
-          case OP_SCLASS_END:
+          case OP_ECLASS_END:
             ++Fecode;
-            goto SCLASS_DONE;
+            goto ECLASS_DONE;
 
           default:
           PCRE2_DEBUG_UNREACHABLE();
@@ -2019,7 +2019,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           }
         }
 
-      SCLASS_DONE:
+      ECLASS_DONE:
       /* The final bit left on the stack now holds the match result. */
       if (!(stack & 1)) RRETURN(MATCH_NOMATCH);
       }

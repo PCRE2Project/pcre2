@@ -160,9 +160,9 @@ versions. */
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
 
-#define META_SCLASS_OR        0x80440000u  /* || in a class */
-#define META_SCLASS_AND       0x80450000u  /* && in a class */
-#define META_SCLASS_SUB       0x80460000u  /* -- in a class */
+#define META_ECLASS_OR        0x80440000u  /* || in a class */
+#define META_ECLASS_AND       0x80450000u  /* && in a class */
+#define META_ECLASS_SUB       0x80460000u  /* -- in a class */
 
 /* This is a special "meta code" that is used only to distinguish (*asr: from
 (*sr: in the table of alphabetic assertions. It is never stored in the parsed

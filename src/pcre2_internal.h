@@ -578,7 +578,7 @@ modes. */
 Currently fixed. Warning: the interpreter relies on this so it can encode
 the operand stack in a uint32_t. */
 
-#define SCLASS_NEST_LIMIT  15
+#define ECLASS_NEST_LIMIT  15
 
 /* Offsets for the bitmap tables in the cbits set of tables. Each table
 contains a set of bits for a class map. Some classes are built by combining
@@ -1670,14 +1670,14 @@ enum {
   OP_NOT_UCP_WORD_BOUNDARY, /* 170 */
   OP_UCP_WORD_BOUNDARY,     /* 171 */
 
-  /* These are used for "set classes" such as [a-z -- aeiou]. */
+  /* These are used for "extended classes" such as [a-z -- aeiou]. */
 
-  OP_SCLASS,         /* 172 */
-  OP_SCLASS_OR,      /* 173 */
-  OP_SCLASS_AND,     /* 174 */
-  OP_SCLASS_SUB,     /* 175 */
-  OP_SCLASS_NOT,     /* 176 */
-  OP_SCLASS_END,     /* 177 */
+  OP_ECLASS,         /* 172 */
+  OP_ECLASS_OR,      /* 173 */
+  OP_ECLASS_AND,     /* 174 */
+  OP_ECLASS_SUB,     /* 175 */
+  OP_ECLASS_NOT,     /* 176 */
+  OP_ECLASS_END,     /* 177 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1740,7 +1740,7 @@ some cases doesn't actually use these names at all). */
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
   "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
-  "sclass[", "||", "&&", "--", "!!", "sclass]"
+  "eclass[", "||", "&&", "--", "!!", "eclass]"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1840,7 +1840,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
   1, 1,                          /* \B and \b in UCP mode                  */ \
-  1, 1, 1, 1, 1, 1               /* SCLASS codes */
+  1, 1, 1, 1, 1, 1               /* ECLASS codes */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

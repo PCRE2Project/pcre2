@@ -143,7 +143,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTENDED_MORE       0x01000000u  /* C       */
 #define PCRE2_LITERAL             0x02000000u  /* C       */
 #define PCRE2_MATCH_INVALID_UTF   0x04000000u  /*   J M D */
-#define PCRE2_SET_CLASS           0x08000000u  /* C       */
+#define PCRE2_ALT_EXTENDED_CLASS  0x08000000u  /* C       */
 
 /* An additional compile options word is available in the compile context. */
 
@@ -329,11 +329,11 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_PATTERN_COMPILED_SIZE_TOO_BIG  201
 #define PCRE2_ERROR_OVERSIZE_PYTHON_OCTAL          202
 #define PCRE2_ERROR_CALLOUT_CALLER_DISABLED        203
-#define PCRE2_ERROR_SET_CLASS_NEST_TOO_DEEP        204
-#define PCRE2_ERROR_SET_CLASS_INVALID_OPERATOR     205
-#define PCRE2_ERROR_SET_CLASS_UNEXPECTED_OPERATOR  206
-#define PCRE2_ERROR_SET_CLASS_EXPECTED_OPERAND     207
-#define PCRE2_ERROR_SET_CLASS_MIXED_OPERATORS      208
+#define PCRE2_ERROR_ECLASS_NEST_TOO_DEEP           204
+#define PCRE2_ERROR_ECLASS_INVALID_OPERATOR        205
+#define PCRE2_ERROR_ECLASS_UNEXPECTED_OPERATOR     206
+#define PCRE2_ERROR_ECLASS_EXPECTED_OPERAND        207
+#define PCRE2_ERROR_ECLASS_MIXED_OPERATORS         208
 
 
 /* "Expected" matching error codes: no match and partial match. */

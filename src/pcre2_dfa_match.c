@@ -190,7 +190,7 @@ static const uint8_t coptable[] = {
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
   0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
   0, 0,                          /* \B and \b in UCP mode                  */
-  0, 0, 0, 0, 0, 0               /* SCLASS codes */
+  0, 0, 0, 0, 0, 0               /* ECLASS codes */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -270,7 +270,7 @@ static const uint8_t poptable[] = {
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
   0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
   1, 1,                          /* \B and \b in UCP mode                  */
-  1, 0, 0, 0, 0, 0               /* SCLASS codes */
+  1, 0, 0, 0, 0, 0               /* ECLASS codes */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,

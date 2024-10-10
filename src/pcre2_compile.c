@@ -260,9 +260,9 @@ static unsigned char meta_extra_lengths[] = {
   2,             /* META_MINMAX */
   2,             /* META_MINMAX_PLUS */
   2,             /* META_MINMAX_QUERY */
-  0,             /* META_SCLASS_OR */
-  0,             /* META_SCLASS_AND */
-  0              /* META_SCLASS_SUB */
+  0,             /* META_ECLASS_OR */
+  0,             /* META_ECLASS_AND */
+  0              /* META_ECLASS_SUB */
 };
 
 /* Types for skipping parts of a parsed pattern. */
@@ -666,7 +666,7 @@ are allowed. */
    PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
    PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_SET_CLASS)
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_ALT_EXTENDED_CLASS)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
    (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_CASELESS_RESTRICT)
@@ -1077,9 +1077,9 @@ for (;;)
     fprintf(stderr, ") length=%u", length);
     break;
 
-    case META_SCLASS_OR: fprintf(stderr, "META_SCLASS_OR"); break;
-    case META_SCLASS_AND: fprintf(stderr, "META_SCLASS_AND"); break;
-    case META_SCLASS_SUB: fprintf(stderr, "META_SCLASS_SUB"); break;
+    case META_ECLASS_OR: fprintf(stderr, "META_ECLASS_OR"); break;
+    case META_ECLASS_AND: fprintf(stderr, "META_ECLASS_AND"); break;
+    case META_ECLASS_SUB: fprintf(stderr, "META_ECLASS_SUB"); break;
     }
   fprintf(stderr, "\n");
   }
@@ -2501,12 +2501,12 @@ return -1;
 
 
 /*************************************************
-*          Implement set classes                 *
+*          Implement extended classes            *
 *************************************************/
 
 /* This function is called to test whether a series of META codes can be
 compiled to a simple class (OP_CLASS, OP_NCLASS, OP_XCLASS) or whether
-it requires a set-class (OP_SCLASS).
+it requires an extended class (OP_ECLASS).
 
 Arguments:
   ptr       points to the first META code, which should be one past the
@@ -2514,7 +2514,7 @@ Arguments:
   pendptr   optional out-pointer to receive the end of the simple codes
 
 Returns:    TRUE if the pointed-to META_CLASS is simple, that is, we
-              reached a META_CLASS_END without encountering set-class
+              reached a META_CLASS_END without encountering extended class
               syntax. In this case, *pendptr is set to the position of the
               META_CLASS_END itself.
             FALSE otherwise. In this case, *pendptr is set to the position
@@ -2610,9 +2610,9 @@ while (TRUE)
   switch (*ptr)
     {
     case META_CLASS_END:
-    case META_SCLASS_OR:
-    case META_SCLASS_AND:
-    case META_SCLASS_SUB:
+    case META_ECLASS_OR:
+    case META_ECLASS_AND:
+    case META_ECLASS_SUB:
     goto DONE;
 
     case META_CLASS_EMPTY:
@@ -2649,7 +2649,7 @@ while (TRUE)
     }
 
   /* Join second and subsequent leaves with an OR. */
-  if (!first) *code++ = OP_SCLASS_OR;
+  if (!first) *code++ = OP_ECLASS_OR;
 
   first = FALSE;
   }
@@ -2683,11 +2683,11 @@ negated = *ptr++ == META_CLASS_NOT;
 /* Because it's a non-empty class, there must be an operand at the start. */
 compile_class_operand(&ptr, &code);
 
-while (*ptr >= META_SCLASS_OR && *ptr <= META_SCLASS_SUB)
+while (*ptr >= META_ECLASS_OR && *ptr <= META_ECLASS_SUB)
   {
-  uint32_t op = *ptr == META_SCLASS_OR ? OP_SCLASS_OR :
-                *ptr == META_SCLASS_AND ? OP_SCLASS_AND :
-                OP_SCLASS_SUB;
+  uint32_t op = *ptr == META_ECLASS_OR ? OP_ECLASS_OR :
+                *ptr == META_ECLASS_AND ? OP_ECLASS_AND :
+                OP_ECLASS_SUB;
   ++ptr;
 
   /* An operand must follow the operator. */
@@ -2697,7 +2697,7 @@ while (*ptr >= META_SCLASS_OR && *ptr <= META_SCLASS_SUB)
   *code++ = op;
   }
 
-if (negated) *code++ = OP_SCLASS_NOT;
+if (negated) *code++ = OP_ECLASS_NOT;
 
 PCRE2_ASSERT(*ptr == META_CLASS_END);
 
@@ -3073,7 +3073,7 @@ uint32_t add_after_mark = 0;
 uint32_t xoptions = cb->cx->extra_options;
 uint16_t nest_depth = 0;
 uint16_t class_depth = 0;
-uint8_t class_op_used[SCLASS_NEST_LIMIT];
+uint8_t class_op_used[ECLASS_NEST_LIMIT];
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
 int errorcode = 0;
@@ -3840,7 +3840,7 @@ while (ptr < ptrend)
     ranges. */
 
     /* Loop for the contents of the class. Classes may be nested, if
-    PCRE2_SET_CLASS is set. */
+    PCRE2_ALT_EXTENDED_CLASS is set. */
 
     /* c is still set to '[' so the loop will handle the start of the class. */
 
@@ -3866,7 +3866,7 @@ while (ptr < ptrend)
         }
 
       if (c == CHAR_LEFT_SQUARE_BRACKET &&
-          (class_depth == 0 || (options & PCRE2_SET_CLASS) != 0))
+          (class_depth == 0 || (options & PCRE2_ALT_EXTENDED_CLASS) != 0))
         {
         /* Tidy up the other class before starting the nested class. */
         /* -[ beginning a nested class is a literal '-' */
@@ -3875,7 +3875,7 @@ while (ptr < ptrend)
           parsed_pattern[-1] = CHAR_MINUS;
 
         /* Validate nesting depth */
-        if (class_depth >= SCLASS_NEST_LIMIT)
+        if (class_depth >= ECLASS_NEST_LIMIT)
           {
           errorcode = ERR104;
           goto FAILED;        /* Classes too deeply nested */
@@ -4091,7 +4091,7 @@ while (ptr < ptrend)
 
       /* Handle a set operator */
 
-      else if ((options & PCRE2_SET_CLASS) != 0 &&
+      else if ((options & PCRE2_ALT_EXTENDED_CLASS) != 0 &&
                (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS || c == CHAR_AMPERSAND) &&
                ptr < ptrend && *ptr == c)
         {
@@ -4123,9 +4123,9 @@ while (ptr < ptrend)
         if (class_range_state == RANGE_STARTED)
           parsed_pattern[-1] = CHAR_MINUS;
 
-        *parsed_pattern++ = c == CHAR_VERTICAL_LINE? META_SCLASS_OR :
-                            c == CHAR_MINUS? META_SCLASS_SUB :
-                            META_SCLASS_AND;
+        *parsed_pattern++ = c == CHAR_VERTICAL_LINE? META_ECLASS_OR :
+                            c == CHAR_MINUS? META_ECLASS_SUB :
+                            META_ECLASS_AND;
         class_range_state = RANGE_NO;
         class_op_state = CLASS_OP_OPERATOR;
         class_op_used[class_depth-1] = (uint8_t)c;
@@ -6106,13 +6106,13 @@ for (;; pptr++)
     matched_char = TRUE;
     negate_class = meta == META_CLASS_NOT;
 
-    /* Check for complex set-classes and hnadle them separately. */
+    /* Check for complex extended classes and handle them separately. */
 
     if (!check_simple_class(pptr +  1, NULL))
       {
-      *code++ = OP_SCLASS;
+      *code++ = OP_ECLASS;
       compile_class_nested(&pptr, &code);
-      *code++ = OP_SCLASS_END;
+      *code++ = OP_ECLASS_END;
 
       // XXX URGH all the "reqcu" and "firstcu" flags etc... need to work out what to set them to
 
