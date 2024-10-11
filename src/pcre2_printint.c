@@ -681,6 +681,12 @@ for(;;)
     print_prop(f, code, "    ", "");
     break;
 
+    case OP_ECLASS:
+    extra = GET(code, 1);
+    fprintf(f, " %s %s", flag, OP_names[*code]);
+    /* We could/should print the opcodes contained inside as well. */
+    break;
+
     /* OP_XCLASS cannot occur in 8-bit, non-UTF mode. However, there's no harm
     in having this code always here, and it makes it less messy without all
     those #ifdefs. */

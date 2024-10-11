@@ -192,6 +192,12 @@ static const unsigned char compile_error_texts[] =
   "compiled pattern would be longer than the limit set by the application\0"
   "octal value given by \\ddd is greater than \\377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)\0"
   "using callouts is disabled by the application\0"
+  "character classes are too deeply nested\0"
+  /* 105 */
+  "invalid operator in character class\0"
+  "unexpected operator in character class (no preceding operand)\0"
+  "expected operand after operator in character class\0"
+  "brackets needed to clarify operator precedence in character class\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
