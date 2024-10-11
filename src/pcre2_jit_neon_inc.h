@@ -87,7 +87,7 @@ POSSIBILITY OF SUCH DAMAGE.
 	&& ((__clang_major__ == 3 && __clang_minor__ >= 3) || (__clang_major__ > 3)))
 __attribute__((no_sanitize_address))
 #endif
-static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 **str_ptr, sljit_uw offs1, sljit_uw offs2, sljit_uw chars)
+static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 **str_ptr, sljit_uw offs1, sljit_uw offs2, sljit_u32 chars)
 #undef FF_FUN
 {
 quad_word qw;
@@ -119,7 +119,7 @@ vect_t vmask = VDUPQ(mask);
 compare_type compare1_type = compare_match1;
 compare_type compare2_type = compare_match1;
 vect_t cmp1a, cmp1b, cmp2a, cmp2b;
-const sljit_u32 diff = IN_UCHARS(offs1 - offs2);
+const sljit_uw diff = IN_UCHARS(offs1 - offs2);
 PCRE2_UCHAR char1a = ic.c.c1;
 PCRE2_UCHAR char2a = ic.c.c3;
 

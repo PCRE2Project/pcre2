@@ -609,7 +609,7 @@ typedef struct datctl {       /* Structure for data line modifiers. */
    int32_t  copy_numbers[MAXCPYGET];
    int32_t  get_numbers[MAXCPYGET];
   uint32_t  oveccount;
-  uint32_t  offset;
+  size_t    offset;
   uint8_t   copy_names[LENCPYGET];
   uint8_t   get_names[LENCPYGET];
 } datctl;
@@ -3130,7 +3130,7 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, this function just
 counts chars without printing (because pchar() does that). */
 
-static int pchars8(PCRE2_SPTR8 p, int length, BOOL utf, FILE *f)
+static int pchars8(PCRE2_SPTR8 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 PCRE2_SPTR8 end;
 uint32_t c = 0;
@@ -3169,7 +3169,7 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, just counts chars
 without printing. */
 
-static int pchars16(PCRE2_SPTR16 p, int length, BOOL utf, FILE *f)
+static int pchars16(PCRE2_SPTR16 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 int yield = 0;
 if (length < 0) length = *p++;
@@ -3204,7 +3204,7 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, just counts chars
 without printing. */
 
-static int pchars32(PCRE2_SPTR32 p, int length, BOOL utf, FILE *f)
+static int pchars32(PCRE2_SPTR32 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 int yield = 0;
 (void)(utf);  /* Avoid compiler warning */
@@ -3503,13 +3503,13 @@ Returns:   nothing (aborts if malloc() fails)
 static void
 expand_input_buffers(void)
 {
-int new_pbuffer8_size = 2*pbuffer8_size;
+size_t new_pbuffer8_size = 2*pbuffer8_size;
 uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
 uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
 
 if (new_buffer == NULL || new_pbuffer8 == NULL)
   {
-  fprintf(stderr, "pcre2test: malloc(%d) failed\n", new_pbuffer8_size);
+  fprintf(stderr, "pcre2test: malloc(%zd) failed\n", new_pbuffer8_size);
   exit(1);
   }
 
@@ -3589,7 +3589,8 @@ for (;;)
 
       {
       if (INTERACTIVE(f)) printf("%s", prompt);
-      if (fgets((char *)here, rlen,  f) == NULL)
+      if (rlen > INT_MAX) rlen = INT_MAX;
+      if (fgets((char *)here, (int)rlen,  f) == NULL)
         return (here == start)? NULL : start;
       }
 
@@ -3645,7 +3646,7 @@ Returns:    < 0, = 0, or > 0, according to the comparison
 */
 
 static int
-strncmpic(const uint8_t *s, const uint8_t *t, int n)
+strncmpic(const uint8_t *s, const uint8_t *t, size_t n)
 {
 while (n--)
   {
@@ -3671,7 +3672,7 @@ Returns:    an index in the modifier list, or -1 on failure
 */
 
 static int
-scan_modifiers(const uint8_t *p, unsigned int len)
+scan_modifiers(const uint8_t *p, size_t len)
 {
 int bot = 0;
 int top = MODLISTCOUNT;
@@ -3679,12 +3680,13 @@ int top = MODLISTCOUNT;
 while (top > bot)
   {
   int mid = (bot + top)/2;
-  unsigned int mlen = strlen(modlist[mid].name);
-  int c = strncmp((const char *)p, modlist[mid].name, (len < mlen)? len : mlen);
+  size_t mlen = strlen(modlist[mid].name);
+  ptrdiff_t c = strncmp((const char *)p, modlist[mid].name,
+                        (len < mlen)? len : mlen);
   if (c == 0)
     {
     if (len == mlen) return mid;
-    c = (int)len - (int)mlen;
+    c = (ptrdiff_t)len - (ptrdiff_t)mlen;
     }
   if (c > 0) bot = mid + 1; else top = mid;
   }
@@ -3818,7 +3820,8 @@ for (;;)
   void *field;
   modstruct *m;
   BOOL off = FALSE;
-  unsigned int i, len;
+  unsigned int i;
+  size_t len;
   int index;
   char *endptr;
 
@@ -5103,7 +5106,7 @@ cmdlen = 0;
 for (i = 0; i < cmdlistcount; i++)
   {
   cmdname = cmdlist[i].name;
-  cmdlen = strlen(cmdname);
+  cmdlen = (int)strlen(cmdname);
   if (strncmp((char *)(buffer+1), cmdname, cmdlen) == 0 &&
       isspace(buffer[cmdlen+1]))
     {
@@ -5160,7 +5163,7 @@ switch(cmd)
     if (*argptr == 0) break;
     for (uint16_t j = 1; j < sizeof(newlines)/sizeof(char *); j++)
       {
-      size_t nlen = strlen(newlines[j]);
+      int nlen = (int)strlen(newlines[j]);
       if (strncmpic(argptr, (const uint8_t *)newlines[j], nlen) == 0 &&
           isspace(argptr[nlen]))
         {
@@ -5564,7 +5567,7 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
         {
         if (pe[0] == ']' && pe[1] == '{')
           {
-          uint32_t clen = pe - pc - 2;
+          size_t clen = pe - pc - 2;
           uint32_t i = 0;
           unsigned long uli;
           char *endptr;
@@ -6810,7 +6813,7 @@ for (;;)
   int groupnumber;
   PCRE2_SIZE length, length2;
   uint32_t copybuffer[256];
-  int namelen = strlen((const char *)nptr);
+  size_t namelen = strlen((const char *)nptr);
 #if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
   PCRE2_SIZE cnl = namelen;
 #endif
@@ -6891,7 +6894,7 @@ for (;;)
   void *gotbuffer;
   int rc;
   int groupnumber;
-  int namelen = strlen((const char *)nptr);
+  size_t namelen = strlen((const char *)nptr);
 #if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
   PCRE2_SIZE cnl = namelen;
 #endif
@@ -9161,7 +9164,7 @@ for (i = 0, j = (n+1)/2; i < (n+1)/2; i++, j++)
   display_one_modifier(m, for_pattern);
   if (j < n)
     {
-    uint32_t k = 27 - strlen(m->name) - extra[i];
+    uint32_t k = 27 - (unsigned int)strlen(m->name) - extra[i];
     while (k-- > 0) printf(" ");
     display_one_modifier(modlist + list[j], for_pattern);
     }
@@ -9578,7 +9581,7 @@ least 128 code units, because it is used for retrieving error messages. */
 
   for (;;)
     {
-    errcode = strtol(arg_error, &endptr, 10);
+    errcode = (int) strtol(arg_error, &endptr, 10);
     if (*endptr != 0 && *endptr != CHAR_COMMA)
       {
       fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);

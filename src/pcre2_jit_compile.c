@@ -2362,7 +2362,7 @@ SLJIT_ASSERT(stackpos == STACK(stacktop));
 typedef struct delayed_mem_copy_status {
   struct sljit_compiler *compiler;
   int store_bases[RECURSE_TMP_REG_COUNT];
-  int store_offsets[RECURSE_TMP_REG_COUNT];
+  sljit_sw store_offsets[RECURSE_TMP_REG_COUNT];
   int tmp_regs[RECURSE_TMP_REG_COUNT];
   int saved_tmp_regs[RECURSE_TMP_REG_COUNT];
   int next_tmp_reg;
@@ -3302,7 +3302,8 @@ OP2(SLJIT_SUB | SLJIT_SET_Z, COUNT_MATCH, 0, COUNT_MATCH, 0, SLJIT_IMM, 1);
 add_jump(compiler, &common->calllimit, JUMP(SLJIT_ZERO));
 }
 
-static SLJIT_INLINE void allocate_stack(compiler_common *common, int size)
+static SLJIT_INLINE void allocate_stack(compiler_common *common,
+                                        PCRE2_SIZE size)
 {
 /* May destroy all locals and registers except TMP2. */
 DEFINE_COMPILER;
@@ -3319,7 +3320,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, TMP1, 0);
 add_stub(common, CMP(SLJIT_LESS, STACK_TOP, 0, STACK_LIMIT, 0));
 }
 
-static SLJIT_INLINE void free_stack(compiler_common *common, int size)
+static SLJIT_INLINE void free_stack(compiler_common *common, PCRE2_SIZE size)
 {
 DEFINE_COMPILER;
 
@@ -4064,7 +4065,7 @@ if (common->invalid_utf)
 #define READ_CHAR_NEWLINE (READ_CHAR_UPDATE_STR_PTR | READ_CHAR_UTF8_NEWLINE)
 #define READ_CHAR_VALID_UTF 0x4
 
-static void read_char(compiler_common *common, sljit_u32 min, sljit_u32 max,
+static void read_char(compiler_common *common, sljit_uw min, sljit_uw max,
   jump_list **backtracks, sljit_u32 options)
 {
 /* Reads the precise value of a character into TMP1, if the character is

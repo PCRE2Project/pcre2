@@ -345,7 +345,8 @@ PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
-int rc, so, eo;
+int rc;
+regoff_t so, eo;
 int options = 0;
 pcre2_match_data *md = (pcre2_match_data *)preg->re_match_data;
 

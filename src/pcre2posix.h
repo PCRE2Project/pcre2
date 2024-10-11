@@ -43,8 +43,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PCRE2POSIX_H_IDEMPOTENT_GUARD
 #define PCRE2POSIX_H_IDEMPOTENT_GUARD
 
-/* Have to include stdlib.h in order to ensure that size_t is defined. */
+/* Respectively ensure that ptrdiff_t and size_t are defined. */
 
+#include <stddef.h>
 #include <stdlib.h>
 
 /* Allow for C++ users */
@@ -111,7 +112,7 @@ typedef struct {
 
 /* The structure in which a captured offset is returned. */
 
-typedef int regoff_t;
+typedef ptrdiff_t regoff_t;
 
 typedef struct {
   regoff_t rm_so;

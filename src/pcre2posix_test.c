@@ -181,11 +181,11 @@ for (int i = 0; i < count; i++)
           fprintf(stderr, "Mismatched results for successful match\n");
           fprintf(stderr, "Pattern is: %s\n", pattern);
           fprintf(stderr, "Subject is: %s\n", *subjects);
-          fprintf(stderr, "Result %d: expected %d %d received %d %d\n",
+          fprintf(stderr, "Result %d: expected %d %d received %zd %zd\n",
             j, rd[-1], rd[0], m->rm_so, m->rm_eo);
           return 1;
           }
-        PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);
+        PRINTF(" (%d %zd %zd)", j, m->rm_so, m->rm_eo);
         }
       }
 

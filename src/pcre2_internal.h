@@ -2116,7 +2116,7 @@ extern void *       _pcre2_memmove(void *, const void *, size_t);
 
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
 
-extern BOOL         PRIV(ckd_smul)(PCRE2_SIZE *, int, int);
+extern BOOL         PRIV(ckd_smul)(PCRE2_SIZE *, ptrdiff_t, ptrdiff_t);
 
 #include "pcre2_util.h"
 
