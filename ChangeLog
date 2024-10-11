@@ -102,6 +102,8 @@ Perl.
 22. Merged PR491 which adds $& $` $' and $_ to substitution replacements, as
 well as interpreting \b and \v as characters.
 
+23. Updated perltest.sh to enable locale setting.
+
 
 Version 10.44 07-June-2024
 --------------------------

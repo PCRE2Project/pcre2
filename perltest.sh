@@ -1,31 +1,45 @@
 #! /bin/sh
 
-# Script for testing regular expressions with perl to check that PCRE2 handles
-# them the same. For testing with different versions of Perl, if the first
-# argument is -perl then the second is taken as the Perl command to use, and
-# both are then removed. If the next argument is "-w", Perl is called with
-# "-w", which turns on its warning mode.
+# This is a script for testing regular expressions with Perl to check that
+# it handles them the same way as PCRE2. For testing with different versions of
+# Perl, if the first argument is -perl, the second is taken as the Perl command
+# to use, and both are then removed. If the next argument is "-w", Perl is
+# called with "-w", which turns on its warning mode.
 #
 # The Perl code has to have "use utf8" and "require Encode" at the start when
-# running UTF-8 tests, but *not* for non-utf8 tests. (The "require" would
+# running UTF-8 tests, but *not* for non-utf8 tests. The "require" would
 # actually be OK for non-utf8-tests, but is not always installed, so this way
-# the script will always run for these tests.)
+# the script will always run for these tests.
 #
 # The desired effect is achieved by making this a shell script that passes the
-# Perl script to Perl through a pipe. If the next argument is "-utf8", a
-# suitable prefix is set up.
+# a script to Perl through a pipe. See comments below about the data for the
+# Perl script. If the next argument of this script is "-utf8", a suitable
+# prefix for the Perl script is set up.
+
+# If the next argument of this script is -locale, it must be followed by the
+# name of a locale, which is then set when running the tests. Setting a locale
+# implies -utf8. For example:
 #
-# The remaining arguments, if any, are passed to Perl. They are an input file
-# and an output file. If there is one argument, the output is written to
-# STDOUT. If Perl receives no arguments, it opens /dev/tty as input, and writes
-# output to STDOUT. (I haven't found a way of getting it to use STDIN, because
-# of the contorted piping input.)
+#   ./perltest.sh -locale tr_TR.utf8 some-file
+#
+# The remaining arguments of this script, if any, are passed to Perl. They are
+# an input file and an output file. If there is one argument, the output is
+# written to STDOUT. If Perl receives no arguments, it opens /dev/tty as input,
+# and writes output to STDOUT. (I haven't found a way of getting it to use
+# STDIN, because of the contorted piping input.)
+
+
+# Handle the shell script arguments.
 
 perl=perl
 perlarg=''
 prefix=''
 
-if [ $# -gt 1 -a "$1" = "-perl" ] ; then
+if [ $# -gt 0 -a "$1" = "-perl" ] ; then
+  if [ $# -lt 2 ] ; then
+    echo "perltest.sh: Missing perl command after -perl"
+    exit 1
+  fi
   shift
   perl=$1
   shift
@@ -38,6 +52,23 @@ fi
 
 if [ $# -gt 0 -a "$1" = "-utf8" ] ; then
   prefix="use utf8; require Encode;"
+  shift
+fi
+
+if [ $# -gt 0 -a "$1" = "-locale" ] ; then
+  if [ $# -lt 2 ] ; then
+    echo "perltest.sh: Missing locale name - abandoned"
+    exit 1
+  fi
+  prefix="use utf8;\
+  use POSIX qw(locale_h);\
+  use locale;\
+  \$loc=setlocale(LC_ALL, \"$2\");\
+  if (\"\$loc\" eq \"\")\
+    { die \"perltest.sh: Failed to set locale \\\"$2\\\" - abandoned\\n\";}\
+  print \"Locale: \$loc\\n\";\
+  require Encode;"
+  shift
   shift
 fi
 
