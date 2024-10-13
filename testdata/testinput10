@@ -623,6 +623,9 @@
 /X(\x{e1})Y/i,ucp,replace=>\L$1<,substitute_extended
     X\x{c1}Y
 
+/[a\x{c1}]/iI,ucp
+    \x{e1}
+
 # Without UTF or UCP characters > 127 have only one case in the default locale.
 
 /X(\x{e1})Y/replace=>\U$1<,substitute_extended

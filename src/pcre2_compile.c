@@ -5891,7 +5891,7 @@ for (;; pptr++)
 #if PCRE2_CODE_UNIT_WIDTH == 8
     cranges = NULL;
 
-    if (utf)
+    if (utf || ucp)
 #endif
       {
       if (lengthptr != NULL)
@@ -6388,6 +6388,12 @@ for (;; pptr++)
         range = end;
         }
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
+      /* If code unit width is 8 bits, and UCP flag is set, but UTF flag is not, we still
+       * generate cranges, but in that case we should not process any crange > 0xFF,
+       * because it's impossible to encounter code points > 0xFF in the subject string */
+      if (utf)
+#endif
       while (range < end)
         {
         uint32_t range_start = range[0];
@@ -6479,6 +6485,9 @@ for (;; pptr++)
 #ifdef SUPPORT_WIDE_CHARS  /* Defined for 16/32 bits, or 8-bit with Unicode */
     if ((xclass_props & XCLASS_REQUIRED) != 0)
       {
+      /* We should never generate a (useless) xclass in 8-bit library when UTF flag is false */
+      PCRE2_ASSERT(PCRE2_CODE_UNIT_WIDTH != 8 || utf);
+
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
       code += LINK_SIZE;

@@ -125,7 +125,7 @@ const uint32_t *skip_range = get_nocase_range(c);
 uint32_t skip_start = skip_range[0];
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-PCRE2_ASSERT(options & PARSE_CLASS_UTF);
+PCRE2_ASSERT(options & (PARSE_CLASS_UTF | PARSE_CLASS_CASELESS_UTF));
 #endif
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
