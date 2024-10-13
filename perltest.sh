@@ -15,12 +15,19 @@
 # a script to Perl through a pipe. See comments below about the data for the
 # Perl script. If the next argument of this script is "-utf8", a suitable
 # prefix for the Perl script is set up.
-
-# If the next argument of this script is -locale, it must be followed by the
-# name of a locale, which is then set when running the tests. Setting a locale
-# implies -utf8. For example:
 #
-#   ./perltest.sh -locale tr_TR.utf8 some-file
+# A similar process is used to indicate the desire to set a specific locale
+# tables per pattern in a similar way to pcre2test through a locale modifier,
+# by using the -locale argument. This can be optionally combined with the
+# previous arguments; for example, to process an UTF-8 test file in Turkish,
+# add the locale=tr_TR.utf8 modifier to the pattern and -locale to perltest,
+# or invoke something like (the specific names of the locale might vary):
+#
+#   ./perltest.sh -utf8 -locale=tr_TR.utf8 some-file
+#
+# If the -locale argument has no setting, a suitable default locale is used
+# when possible and reported at startup, it can be always overriden using the
+# locale modifier for each pattern.
 #
 # The remaining arguments of this script, if any, are passed to Perl. They are
 # an input file and an output file. If there is one argument, the output is
@@ -33,7 +40,7 @@
 
 perl=perl
 perlarg=""
-prefix=''
+prefix=""
 spc=""
 
 if [ $# -gt 0 -a "$1" = "-perl" ] ; then
@@ -53,27 +60,37 @@ if [ $# -gt 0 -a "$1" = "-w" ] ; then
 fi
 
 if [ $# -gt 0 -a "$1" = "-utf8" ] ; then
-  prefix="use utf8; require Encode;"
+  default_locale="C.utf8"
+  prefix="\
+  use utf8;\
+  require Encode;"
   perlarg="$perlarg$spc-CSD"
-
   shift
 fi
 
-if [ $# -gt 0 -a "$1" = "-locale" ] ; then
-  if [ $# -lt 2 ] ; then
-    echo "perltest.sh: Missing locale name - abandoned"
-    exit 1
+if [ $# -gt 0 ] ; then
+  case "$1" in
+  -locale=*)
+    default_locale=${1#-locale=}
+    ;;
+  -locale)
+    default_locale=${default_locale:-C}
+    ;;
+  *)
+    skip=1
+  esac
+  if [ -z "$skip" ] ; then
+    prefix="\
+    use POSIX qw(locale_h);\
+    use locale qw(:ctype);\
+    \
+    \$default_locale = setlocale(LC_CTYPE, \"$default_locale\");\
+    if (!defined(\$default_locale))\
+      { die \"perltest: Failed to set locale \\\"$default_locale\\\"\\\n\"; }\
+    print \"Locale: \$default_locale\\\n\";\
+    $prefix"
+    shift
   fi
-  prefix="use utf8;\
-  use POSIX qw(locale_h);\
-  use locale;\
-  \$loc=setlocale(LC_ALL, \"$2\");\
-  if (\"\$loc\" eq \"\")\
-    { die \"perltest.sh: Failed to set locale \\\"$2\\\" - abandoned\\n\";}\
-  print \"Locale: \$loc\\n\";\
-  require Encode;"
-  shift
-  shift
 fi
 
 
@@ -87,6 +104,7 @@ fi
 #   dupnames           ignored (Perl always allows)
 #   hex                preprocess pattern with embedded octets
 #   jitstack           ignored
+#   locale             use a specific locale tables
 #   mark               show mark information
 #   no_auto_possess    ignored
 #   no_start_optimize  insert (??{""}) at pattern start (disables optimizing)
@@ -146,7 +164,7 @@ else
   {
   foreach $c (split(//, $_[0]))
     {
-    if (ord $c >= 32 && ord $c < 127) { $t .= $c; }
+    if ($c =~ /^[[:print:]]$/) { $t .= $c; }
       else { $t .= sprintf("\\x%02x", ord $c); }
     }
   }
@@ -190,6 +208,12 @@ $default_show_mark = 0;
 NEXT_RE:
 for (;;)
   {
+  if (defined $locale && defined $default_locale)
+    {
+    setlocale(LC_CTYPE, $default_locale);
+    undef $locale;
+    }
+
   printf "  re> " if $interact;
   last if ! ($_ = <$infile>);
   printf $outfile "$_" if ! $interact;
@@ -263,10 +287,6 @@ for (;;)
 
   $mod =~ s/allaftertext,?//;
 
-  # Detect utf
-
-  $utf8 = $mod =~ s/utf,?//;
-
   # Remove "dupnames".
 
   $mod =~ s/dupnames,?//;
@@ -274,6 +294,19 @@ for (;;)
   # Remove "jitstack".
 
   $mod =~ s/jitstack=\d+,?//;
+
+  # The "locale" modifier indicates which locale to use
+  if ($mod =~ /locale=([^,]+),?/)
+    {
+    die "perltest: missing -locale cmdline flag" unless defined &setlocale;
+    $locale = setlocale(LC_CTYPE, $1);
+    if (!defined $locale)
+      {
+      print "** Failed to set locale '$1'\n";
+      next NEXT_RE;
+      }
+    }
+  $mod =~ s/locale=[^,]*,?//;                # Remove it; "locale=" Ignored
 
   # The "mark" modifier requests checking of MARK data */
 
@@ -283,11 +316,16 @@ for (;;)
 
   $mod =~ s/ucp,?/u/;
 
+  # Detect utf
+
+  $utf8 = $mod =~ s/utf,?//;
+
   # Remove "no_auto_possess".
 
   $mod =~ s/no_auto_possess,?//;
 
-  # The "hex" modifier instructs us to preprocess the pattern
+  # The "hex" modifier instructs us to preprocess a pattern with embedded
+  # octets formatted as two digit hexadecimals
 
   if ($mod =~ s/hex,?//)
     {
@@ -321,12 +359,11 @@ for (;;)
 
   $mod =~ s/-no_start_optimize,?//;
 
-  if ($mod =~ s/no_start_optimize,?//) { $pat =~ s/$del/$del(??{""})/; }
+  if ($mod =~ s/no_start_optimize,?//) { $pat = '(??{""})' . $pat; }
 
   # Add back retained modifiers and check that the pattern is valid.
 
   $mod =~ s/,//g;
-
   $pattern = "$del$pat$del$mod";
 
   eval "\$_ =~ ${pattern}";
@@ -419,7 +456,7 @@ for (;;)
 
     if ($@)
       {
-      printf $outfile "Error: $@\n";
+      printf $outfile "Error: $@";
       next NEXT_RE;
       }
     elsif (scalar(@subs) == 0)

@@ -720,7 +720,7 @@ static modstruct modlist[] = {
   { "jitstack",                    MOD_PNDP, MOD_INT, 0,                          PO(jitstack) },
   { "jitverify",                   MOD_PAT,  MOD_CTL, CTL_JITVERIFY,              PO(control) },
   { "literal",                     MOD_PAT,  MOD_OPT, PCRE2_LITERAL,              PO(options) },
-  { "locale",                      MOD_PAT,  MOD_STR, LOCALESIZE,                 PO(locale) },
+  { "locale",                      MOD_PATP, MOD_STR, LOCALESIZE,                 PO(locale) },
   { "mark",                        MOD_PNDP, MOD_CTL, CTL_MARK,                   PO(control) },
   { "match_invalid_utf",           MOD_PAT,  MOD_OPT, PCRE2_MATCH_INVALID_UTF,    PO(options) },
   { "match_limit",                 MOD_CTM,  MOD_INT, 0,                          MO(match_limit) },

@@ -5087,6 +5087,15 @@ name)/mark
 \= Expect no match
     D 
 
+/(*COMMIT)ABC/no_start_optimize
+    ABC
+\= Expect no match
+    DEFABC
+
+/(*COMMIT)ABC/
+    ABC
+    DEFABC
+
 # This should fail, as the skip causes a bump to offset 3 (the skip).
 
 /A(*MARK:A)A+(*SKIP)(B|Z) | AC/x,mark
