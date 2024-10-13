@@ -437,6 +437,26 @@ while (*ptr != META_CLASS_END)
   return total_size;
 }
 
+/* Extra uint32_t values for storing the lengths of range lists in
+the worst case. Two uint32_t lengths and a range end for a range
+starting before 255 */
+#define CHAR_LIST_EXTRA_SIZE 3
+
+/* Starting character values for each character list. */
+
+static const uint32_t char_list_starts[] = {
+#if PCRE2_CODE_UNIT_WIDTH == 32
+  XCL_CHAR_LIST_HIGH_32_START,
+#endif
+#if PCRE2_CODE_UNIT_WIDTH == 32 || defined SUPPORT_UNICODE
+  XCL_CHAR_LIST_LOW_32_START,
+#endif
+  XCL_CHAR_LIST_HIGH_16_START,
+  /* Must be terminated by XCL_CHAR_LIST_LOW_16_START,
+  which also represents the end of the bitset. */
+  XCL_CHAR_LIST_LOW_16_START,
+};
+
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
   uint32_t options, uint32_t xoptions, compile_block* cb)
 {
@@ -445,8 +465,12 @@ uint32_t *ptr = start_ptr + 1;
 uint32_t *buffer;
 uint32_t *dst;
 uint32_t class_options = 0;
-size_t range_list_size = 0, i;
+size_t range_list_size = 0, total_size, i;
 uint32_t tmp1, tmp2;
+const uint32_t *char_list_next;
+uint16_t *next_char;
+uint32_t char_list_start, char_list_end;
+uint32_t range_start, range_end;
 
 PCRE2_ASSERT(*start_ptr == META_CLASS || *start_ptr == META_CLASS_NOT);
 
@@ -468,16 +492,22 @@ if (xoptions & PCRE2_EXTRA_TURKISH_CASING)
 
 range_list_size = parse_class(start_ptr + 1, class_options, NULL);
 
-/* Allocate buffer. */
+/* Allocate buffer. The total_size also represents the end of the buffer. */
+
+total_size = range_list_size +
+   ((range_list_size >= 2) ? CHAR_LIST_EXTRA_SIZE : 0);
 
 cranges = cb->cx->memctl.malloc(
-  sizeof(class_ranges) + range_list_size * sizeof(uint32_t),
+  sizeof(class_ranges) + total_size * sizeof(uint32_t),
   cb->cx->memctl.memory_data);
 
 if (cranges == NULL) return NULL;
 
 cranges->next = NULL;
-cranges->range_list_size = range_list_size;
+cranges->range_list_size = (uint16_t)range_list_size;
+cranges->char_lists_types = 0;
+cranges->char_lists_size = 0;
+cranges->char_lists_start = 0;
 
 if (range_list_size == 0) return cranges;
 
@@ -533,9 +563,134 @@ while (range_list_size > 0 && dst[1] != ~(uint32_t)0)
   range_list_size -= 2;
   }
 
-cranges->range_list_size = (size_t)(dst + 2 - buffer);
-
 PCRE2_ASSERT(dst[1] <= get_highest_char(class_options));
+
+/* When the number of ranges are less than six,
+they are not converted to range lists. */
+
+ptr = buffer;
+while (ptr < dst && ptr[1] < 0x100) ptr += 2;
+if (dst - ptr < (2 * (6 - 1)))
+  {
+  cranges->range_list_size = (uint16_t)(dst + 2 - buffer);
+  return cranges;
+  }
+
+/* Compute character lists structures. */
+
+char_list_next = char_list_starts;
+char_list_start = *char_list_next++;
+#if PCRE2_CODE_UNIT_WIDTH == 32
+char_list_end = XCL_CHAR_LIST_HIGH_32_END;
+#elif defined SUPPORT_UNICODE
+char_list_end = XCL_CHAR_LIST_LOW_32_END;
+#else
+char_list_end = XCL_CHAR_LIST_HIGH_16_END;
+#endif
+next_char = (uint16_t*)(buffer + total_size);
+
+tmp1 = 0;
+tmp2 = ((sizeof(char_list_starts) / sizeof(uint32_t)) - 1) * XCL_TYPE_BIT_LEN;
+PCRE2_ASSERT(tmp2 <= 3 * XCL_TYPE_BIT_LEN && tmp2 >= XCL_TYPE_BIT_LEN);
+range_start = dst[0];
+range_end = dst[1];
+
+while (TRUE)
+  {
+  if (range_start >= char_list_start)
+    {
+    if (range_start == range_end || range_end < char_list_end)
+      {
+      tmp1++;
+      next_char--;
+
+      if (char_list_start < XCL_CHAR_LIST_LOW_32_START)
+        *next_char = (uint16_t)((range_end << XCL_CHAR_SHIFT) | XCL_CHAR_END);
+      else
+        *(uint32_t*)(--next_char) =
+          (range_end << XCL_CHAR_SHIFT) | XCL_CHAR_END;
+      }
+
+    if (range_start < range_end)
+      {
+      if (range_start > char_list_start)
+        {
+        tmp1++;
+        next_char--;
+
+        if (char_list_start < XCL_CHAR_LIST_LOW_32_START)
+          *next_char = (uint16_t)(range_start << XCL_CHAR_SHIFT);
+        else
+          *(uint32_t*)(--next_char) = (range_start << XCL_CHAR_SHIFT);
+        }
+      else
+        cranges->char_lists_types |= XCL_BEGIN_WITH_RANGE << tmp2;
+      }
+
+    PCRE2_ASSERT((uint32_t*)next_char >= dst + 2);
+
+    if (dst > buffer)
+      {
+      dst -= 2;
+      range_start = dst[0];
+      range_end = dst[1];
+      continue;
+      }
+
+    range_start = 0;
+    range_end = 0;
+    }
+
+  if (range_end >= char_list_start)
+    {
+    PCRE2_ASSERT(range_start < char_list_start);
+
+    if (range_end < char_list_end)
+      {
+      tmp1++;
+      next_char--;
+
+      if (char_list_start < XCL_CHAR_LIST_LOW_32_START)
+        *next_char = (uint16_t)((range_end << XCL_CHAR_SHIFT) | XCL_CHAR_END);
+      else
+        *(uint32_t*)(--next_char) =
+          (range_end << XCL_CHAR_SHIFT) | XCL_CHAR_END;
+
+      PCRE2_ASSERT((uint32_t*)next_char >= dst + 2);
+      }
+
+    cranges->char_lists_types |= XCL_BEGIN_WITH_RANGE << tmp2;
+    }
+
+  if (tmp1 >= XCL_ITEM_COUNT_MASK)
+    {
+    cranges->char_lists_types |= XCL_ITEM_COUNT_MASK << tmp2;
+    next_char--;
+
+    if (char_list_start < XCL_CHAR_LIST_LOW_32_START)
+      *next_char = (uint16_t)tmp1;
+    else
+      *(uint32_t*)(--next_char) = tmp1;
+    }
+  else
+    cranges->char_lists_types |= tmp1 << tmp2;
+
+  if (range_start < XCL_CHAR_LIST_LOW_16_START) break;
+
+  PCRE2_ASSERT(tmp2 >= XCL_TYPE_BIT_LEN);
+  char_list_end = char_list_start - 1;
+  char_list_start = *char_list_next++;
+  tmp1 = 0;
+  tmp2 -= XCL_TYPE_BIT_LEN;
+  }
+
+if (dst[0] < XCL_CHAR_LIST_LOW_16_START) dst += 2;
+PCRE2_ASSERT((uint16_t*)dst <= next_char);
+
+cranges->char_lists_size =
+  (size_t)((uint8_t*)(buffer + total_size) - (uint8_t*)next_char);
+cranges->char_lists_start = (size_t)((uint8_t*)next_char - (uint8_t*)buffer);
+cranges->range_list_size = (uint16_t)(dst - buffer);
 return cranges;
 }
 

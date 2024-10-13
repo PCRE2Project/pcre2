@@ -1349,6 +1349,83 @@ contain characters with values greater than 255. */
 #define XCL_RANGE    2     /* A range (two multibyte chars) follows */
 #define XCL_PROP     3     /* Unicode property (2-byte property code follows) */
 #define XCL_NOTPROP  4     /* Unicode inverted property (ditto) */
+/* This value represents the beginning of character lists. The value
+is 16 bit long, and stored as a high and low byte pair in 8 bit mode.
+The lower 12 bit contains information about character lists (see later)
+and next two bits contains the alignment (padding) data. */
+#define XCL_LIST     (sizeof(PCRE2_UCHAR) == 1 ? 0x40 : 0x4000)
+
+/* When a character class contains many characters/ranges,
+they are stored in character lists. There are four character
+lists which contain characters/ranges within a given range.
+
+The name, character range and item size for each list:
+Low16    [0x100 - 0x7fff]            16 bit items
+High16   [0x8000 - 0xffff]           16 bit items
+Low32    [0x10000 - 0x7fffffff]      32 bit items
+High32   [0x80000000 - 0xffffffff]   32 bit items
+
+The Low32 character list is used only when utf encoding or 32 bit
+character width is enabled, and the High32 character is used only
+when 32 bit character width is enabled.
+
+Each character list contain items. The lowest bit represents that
+an item is the beginning of a range (bit is cleared), or not (bit
+is set). The other bits represent the character shifted left by
+one, so its highest bit is discarded. Due to the layout of character
+lists, the highest bit of a character is always known:
+
+Low16 and Low32: the highest bit is always zero
+High16 and High32: the highest bit is always one
+
+The items are ordered in increasing order, so binary search can be
+used to find the lower bound of an input character. The lower bound
+is the highest item, which value is less or equal than the input
+character. If the lower bit of the item is cleard, or the character
+stored in the item equals to the input character, the input
+character is in the character list. */
+
+/* Character list constants. */
+#define XCL_CHAR_LIST_LOW_16_START 0x100
+#define XCL_CHAR_LIST_LOW_16_END 0x7fff
+#define XCL_CHAR_LIST_LOW_16_ADD 0x0
+
+#define XCL_CHAR_LIST_HIGH_16_START 0x8000
+#define XCL_CHAR_LIST_HIGH_16_END 0xffff
+#define XCL_CHAR_LIST_HIGH_16_ADD 0x8000
+
+#define XCL_CHAR_LIST_LOW_32_START 0x10000
+#define XCL_CHAR_LIST_LOW_32_END 0x7fffffff
+#define XCL_CHAR_LIST_LOW_32_ADD 0x0
+
+#define XCL_CHAR_LIST_HIGH_32_START 0x80000000
+#define XCL_CHAR_LIST_HIGH_32_END 0xffffffff
+#define XCL_CHAR_LIST_HIGH_32_ADD 0x80000000
+
+/* Mask for getting the descriptors of character list ranges.
+Each descriptor has XCL_TYPE_BIT_LEN bits, and can be processed
+by XCL_BEGIN_WITH_RANGE and XCL_ITEM_COUNT_MASK macros. */
+#define XCL_TYPE_MASK 0xfff
+#define XCL_TYPE_BIT_LEN 3
+/* If this bit is set, the first item of the character list is the
+end of a range, which started before the starting character of the
+character list. */
+#define XCL_BEGIN_WITH_RANGE 0x4
+/* Number of items in the character list: 0, 1, or 2. The value 3
+represents that the item count is stored at the begining of the
+character list. The item count has the same width as the items
+in the character list (e.g. 16 bit for Low16 and High16 lists). */
+#define XCL_ITEM_COUNT_MASK 0x3
+/* Shift and mask for getting alignment data. The items of a character
+list are always naturally aligned. Adding this value to the byte position
+of the XCL_LIST header ensures the required alignment of the items. */
+#define XCL_ALIGNMENT_SHIFT 12
+#define XCL_ALIGNMENT_MASK 0x3
+/* Shift and flag for constructing character list items. The XCL_CHAR_END
+is set, when the item is not the beginning of a range. The XCL_CHAR_SHIFT
+can be used to encode / decode the character value stored in an item. */
+#define XCL_CHAR_END 0x1
+#define XCL_CHAR_SHIFT 1
 
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns 0

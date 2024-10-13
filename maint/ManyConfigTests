@@ -349,7 +349,7 @@ if [ $usemain -ne 0 ]; then
     "--disable-unicode --enable-newline-is-crlf --disable-shared" \
     "--disable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
     "--enable-newline-is-any --disable-static" \
-    "--disable-unicode --enable-pcre2-16" \
+    "--disable-unicode --enable-pcre2-16 --enable-debug" \
     "--enable-pcre2-16 --disable-shared" \
     "--disable-unicode --enable-pcre2-32" \
     "--enable-pcre2-32 --disable-shared" \
