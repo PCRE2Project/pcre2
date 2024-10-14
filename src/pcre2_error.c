@@ -192,6 +192,10 @@ static const unsigned char compile_error_texts[] =
   "compiled pattern would be longer than the limit set by the application\0"
   "octal value given by \\ddd is greater than \\377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)\0"
   "using callouts is disabled by the application\0"
+  "PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode\0"
+  /* 105 */
+  "PCRE2_EXTRA_TURKISH_CASING requires UTF in 8-bit mode\0"
+  "PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT are not compatible\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

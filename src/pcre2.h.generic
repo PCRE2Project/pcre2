@@ -162,6 +162,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTRA_PYTHON_OCTAL             0x00002000u  /* C */
 #define PCRE2_EXTRA_NO_BS0                   0x00004000u  /* C */
 #define PCRE2_EXTRA_NEVER_CALLOUT            0x00008000u  /* C */
+#define PCRE2_EXTRA_TURKISH_CASING           0x00010000u  /* C */
 
 /* These are for pcre2_jit_compile(). */
 
@@ -328,6 +329,9 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_PATTERN_COMPILED_SIZE_TOO_BIG  201
 #define PCRE2_ERROR_OVERSIZE_PYTHON_OCTAL          202
 #define PCRE2_ERROR_CALLOUT_CALLER_DISABLED        203
+#define PCRE2_ERROR_EXTRA_CASING_REQUIRES_UNICODE  204
+#define PCRE2_ERROR_TURKISH_CASING_REQUIRES_UTF    205
+#define PCRE2_ERROR_EXTRA_CASING_INCOMPATIBLE      206
 
 
 /* "Expected" matching error codes: no match and partial match. */

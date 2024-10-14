@@ -147,6 +147,31 @@ Recognition of these non-ASCII characters as case-equivalent to their ASCII
 counterparts can be disabled by setting the PCRE2_EXTRA_CASELESS_RESTRICT
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non-ASCII; there can be no mixing.
+.sp
+    Without PCRE2_EXTRA_CASELESS_RESTRICT:
+      'k' = 'K' = U+212A (Kelvin sign)
+      's' = 'S' = U+017F (long S)
+    With PCRE2_EXTRA_CASELESS_RESTRICT:
+      'k' = 'K'
+      U+212A (Kelvin sign)  only case-equivalent to itself
+      's' = 'S'
+      U+017F (long S)       only case-equivalent to itself
+.P
+One language family, Turkish and Azeri, has its own case-insensitivity rules,
+which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
+behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
+(small dotless i) characters.
+.sp
+    Without PCRE2_EXTRA_TURKISH_CASING:
+      'i' = 'I'
+      U+0130 (capital I with dot above)  only case-equivalent to itself
+      U+0131 (small dotless i)           only case-equivalent to itself
+    With PCRE2_EXTRA_TURKISH_CASING:
+      'i' = U+0130 (capital I with dot above)
+      U+0131 (small dotless i) = 'I'
+.P
+It is not allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
+PCRE2_EXTRA_TURKISH_CASING together.
 .P
 From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
 case), and Lt (title case) are all treated as Lc (cased letter) when caseless

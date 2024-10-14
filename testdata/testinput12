@@ -579,7 +579,74 @@
 \= Expect no match
     \x{17f} 
 
+/(.) \1/i,ucp
+    i I
+
+/(.) \1/i,ucp,turkish_casing
+\= Expect no match
+    i I
+
+/(.) \1/i,ucp
+    i I
+    \x{212a} k
+\= Expect no match
+    i \x{0130}
+    \x{0131} I
+
+/(.) \1/i,ucp,turkish_casing
+    \x{212a} k
+    i \x{0130}
+    \x{0131} I
+\= Expect no match
+    i I
+
+/(.) (?r:\1)/i,ucp,turkish_casing
+    i I
+\= Expect no match
+    i \x{0130}
+    \x{0131} I
+    \x{212a} k
+
+/[a-z][^i]I/ucp,turkish_casing
+    bII
+    b\x{0130}I
+    b\x{0131}I
+\= Expect no match
+    biI
+
+/[a-z][^i]I/i,ucp,turkish_casing
+    b\x{0131}I
+    bII
+\= Expect no match
+    biI
+    b\x{0130}I
+
+/[a-z](?r:[^i])I/i,ucp,turkish_casing
+    b\x{0131}I
+    b\x{0130}I
+\= Expect no match
+    bII
+    biI
+
+/b(?r:[\x{00FF}-\x{FFEE}])/i,ucp,turkish_casing
+    b\x{0130}
+    b\x{0131}
+    B\x{212a}
+\= Expect no match
+    bi
+    bI
+    bk
+
 # ---------------------------------------------------- 
+
+/b[\x{00FF}-\x{FFEE}]/ir
+    b\x{0130}
+    b\x{0131}
+    B\x{212a}
+\= Expect no match
+    bi
+    bI
+    bk
 
 # Quantifier after a literal that has the value of META_ACCEPT (not UTF). This
 # fails in 16-bit mode, but is OK for 32-bit.

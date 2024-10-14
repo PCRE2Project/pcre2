@@ -974,6 +974,8 @@ a positive value. */
 #define STRING_NO_START_OPT_RIGHTPAR      "NO_START_OPT)"
 #define STRING_NOTEMPTY_RIGHTPAR          "NOTEMPTY)"
 #define STRING_NOTEMPTY_ATSTART_RIGHTPAR  "NOTEMPTY_ATSTART)"
+#define STRING_CASELESS_RESTRICT_RIGHTPAR "CASELESS_RESTRICT)"
+#define STRING_TURKISH_CASING_RIGHTPAR    "TURKISH_CASING)"
 #define STRING_LIMIT_HEAP_EQ              "LIMIT_HEAP="
 #define STRING_LIMIT_MATCH_EQ             "LIMIT_MATCH="
 #define STRING_LIMIT_DEPTH_EQ             "LIMIT_DEPTH="
@@ -1277,6 +1279,8 @@ only. */
 #define STRING_NO_START_OPT_RIGHTPAR      STR_N STR_O STR_UNDERSCORE STR_S STR_T STR_A STR_R STR_T STR_UNDERSCORE STR_O STR_P STR_T STR_RIGHT_PARENTHESIS
 #define STRING_NOTEMPTY_RIGHTPAR          STR_N STR_O STR_T STR_E STR_M STR_P STR_T STR_Y STR_RIGHT_PARENTHESIS
 #define STRING_NOTEMPTY_ATSTART_RIGHTPAR  STR_N STR_O STR_T STR_E STR_M STR_P STR_T STR_Y STR_UNDERSCORE STR_A STR_T STR_S STR_T STR_A STR_R STR_T STR_RIGHT_PARENTHESIS
+#define STRING_CASELESS_RESTRICT_RIGHTPAR STR_C STR_A STR_S STR_E STR_L STR_E STR_S STR_S STR_UNDERSCORE STR_R STR_E STR_S STR_T STR_R STR_I STR_C STR_T STR_RIGHT_PARENTHESIS
+#define STRING_TURKISH_CASING_RIGHTPAR    STR_T STR_U STR_R STR_K STR_I STR_S STR_H STR_UNDERSCORE STR_C STR_A STR_S STR_I STR_N STR_G STR_RIGHT_PARENTHESIS
 #define STRING_LIMIT_HEAP_EQ              STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_H STR_E STR_A STR_P STR_EQUALS_SIGN
 #define STRING_LIMIT_MATCH_EQ             STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_M STR_A STR_T STR_C STR_H STR_EQUALS_SIGN
 #define STRING_LIMIT_DEPTH_EQ             STR_L STR_I STR_M STR_I STR_T STR_UNDERSCORE STR_D STR_E STR_P STR_T STR_H STR_EQUALS_SIGN
@@ -1832,6 +1836,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
 /* Constants used by OP_REFI and OP_DNREFI to control matching behaviour. */
 
 #define REFI_FLAG_CASELESS_RESTRICT  0x1
+#define REFI_FLAG_TURKISH_CASING     0x2
 
 
 /* ---------- Private structures that are mode-independent. ---------- */
@@ -1908,6 +1913,14 @@ typedef struct {
 #define UCD_SCRIPTX(ch)     UCD_SCRIPTX_PROP(GET_UCD(ch))
 #define UCD_BPROPS(ch)      UCD_BPROPS_PROP(GET_UCD(ch))
 #define UCD_BIDICLASS(ch)   UCD_BIDICLASS_PROP(GET_UCD(ch))
+#define UCD_ANY_I(ch) \
+  /* match any of the four characters 'i', 'I', U+0130, U+0131 */ \
+  (((uint32_t)(ch) | 0x20u) == 0x69u || ((uint32_t)(ch) | 1u) == 0x0131u)
+#define UCD_DOTTED_I(ch) \
+  ((uint32_t)(ch) == 0x69u || (uint32_t)(ch) == 0x0130u)
+#define UCD_FOLD_I_TURKISH(ch) \
+  ((uint32_t)(ch) == 0x0130u ?   0x69u : \
+   (uint32_t)(ch) ==   0x49u ? 0x0131u : (uint32_t)(ch))
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These
@@ -1973,6 +1986,7 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #define _pcre2_vspace_list             PCRE2_SUFFIX(_pcre2_vspace_list_)
 #define _pcre2_ucd_boolprop_sets       PCRE2_SUFFIX(_pcre2_ucd_boolprop_sets_)
 #define _pcre2_ucd_caseless_sets       PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
+#define _pcre2_ucd_turkish_dotted_i_caseset  PCRE2_SUFFIX(_pcre2_ucd_turkish_dotted_i_caseset_)
 #define _pcre2_ucd_nocase_ranges       PCRE2_SUFFIX(_pcre2_ucd_nocase_ranges_)
 #define _pcre2_ucd_nocase_ranges_size  PCRE2_SUFFIX(_pcre2_ucd_nocase_ranges_size_)
 #define _pcre2_ucd_digit_sets          PCRE2_SUFFIX(_pcre2_ucd_digit_sets_)
@@ -1999,6 +2013,7 @@ extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];
 extern const uint32_t                  PRIV(ucd_boolprop_sets)[];
 extern const uint32_t                  PRIV(ucd_caseless_sets)[];
+extern const uint32_t                  PRIV(ucd_turkish_dotted_i_caseset);
 extern const uint32_t                  PRIV(ucd_nocase_ranges)[];
 extern const uint32_t                  PRIV(ucd_nocase_ranges_size);
 extern const uint32_t                  PRIV(ucd_digit_sets)[];

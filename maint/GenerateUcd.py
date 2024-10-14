@@ -737,6 +737,12 @@ for s in caseless_sets:
     if x > 127 and x + other_case[x] < 128:
       other_case[x] = 0  
 
+# Append a couple of extra caseless sets (unreferenced by the record objects)
+# to hold the optional Turkish case equivalences.
+turkish_dotted_i_index = offset
+caseless_sets.append([0x69, 0x0130])
+caseless_sets.append([0x49, 0x0131])
+
 # Combine all the tables
 
 table, records = combine_tables(script, category, break_props,
@@ -855,6 +861,17 @@ for s in caseless_sets:
   f.write('  NOTACHAR,\n')
 f.write('};\n\n')
 
+# --- Output the indices of the Turkish caseless character sets ---
+
+f.write("""\
+/* This is the index, within ucd_caseless_sets, of the additional
+Turkish case-equivalences. The dotted I ones are this offset; the
+dotless I are +3 from here. */
+
+const uint32_t PRIV(ucd_turkish_dotted_i_caseset) = %d;
+
+""" % (turkish_dotted_i_index))
+
 # --- Other tables are not needed by pcre2test ---
 
 f.write("""\
@@ -867,7 +884,7 @@ the large main UCD tables. */
 # --- Output the nocase sets ---
 
 f.write("""\
-/* This table contains character ranges, where the characters in the range has
+/* This table contains character ranges, where the characters in the range have
 no other case. Both start and end values are excluded from the range. */
 
 const uint32_t PRIV(ucd_nocase_ranges)[] = {
@@ -880,7 +897,7 @@ expected_size = 8
 total = 0
 
 for c in range(1, MAX_UNICODE):
-  if other_case[c] != 0:
+  if other_case[c] != 0 or c in [0x0130, 0x0131]: # add the two chars that gain casing in Turkish
     if c - range_start > expected_size:
       range_size = c - range_start - 1
       f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, c, range_size))
@@ -980,6 +997,6 @@ f.write("""\
 /* End of pcre2_ucd.c */
 """)
 
-f.close
+f.close()
 
 # End

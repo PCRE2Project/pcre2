@@ -390,4 +390,6 @@
 /[\x00-\x2f\x11-\xff]*?!/B
     abcd!e
 
+/i/turkish_casing
+
 # End of testinput11

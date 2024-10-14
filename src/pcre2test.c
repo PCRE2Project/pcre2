@@ -790,6 +790,7 @@ static modstruct modlist[] = {
   { "substitute_unknown_unset",    MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
   { "substitute_unset_empty",      MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNSET_EMPTY, PO(control2) },
   { "tables",                      MOD_PAT,  MOD_INT, 0,                          PO(tables_id) },
+  { "turkish_casing",              MOD_CTC,  MOD_OPT, PCRE2_EXTRA_TURKISH_CASING, CO(extra_options) },
   { "ucp",                         MOD_PATP, MOD_OPT, PCRE2_UCP,                  PO(options) },
   { "ungreedy",                    MOD_PAT,  MOD_OPT, PCRE2_UNGREEDY,             PO(options) },
   { "use_length",                  MOD_PAT,  MOD_CTL, CTL_USE_LENGTH,             PO(control) },
@@ -4394,7 +4395,7 @@ show_compile_extra_options(uint32_t options, const char *before,
   const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) != 0) ? " allow_lookaround_bsk" : "",
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
@@ -4412,6 +4413,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_EXTRA_NEVER_CALLOUT) != 0)? " never_callout" : "",
   ((options & PCRE2_EXTRA_NO_BS0) != 0)? " no_bs0" : "",
   ((options & PCRE2_EXTRA_PYTHON_OCTAL) != 0)? " python_octal" : "",
+  ((options & PCRE2_EXTRA_TURKISH_CASING) != 0)? " turkish_casing" : "",
   after);
 }
 

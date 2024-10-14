@@ -729,4 +729,7 @@ Subject length lower bound = 1
     abcd!e
  0: abcd!
 
+/i/turkish_casing
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
+
 # End of testinput11

@@ -381,4 +381,7 @@ Failed: error -57 at offset 5 in replacement: bad escape sequence in replacement
     abc
 Failed: error -57 at offset 10 in replacement: bad escape sequence in replacement string
 
+/i/turkish_casing
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
+
 # End of testinput9

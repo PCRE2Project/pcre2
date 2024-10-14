@@ -391,6 +391,7 @@ if (caseless)
 #if defined SUPPORT_UNICODE
   BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
   BOOL caseless_restrict = (caseopts & REFI_FLAG_CASELESS_RESTRICT) != 0;
+  BOOL turkish_casing = !caseless_restrict && (caseopts & REFI_FLAG_TURKISH_CASING) != 0;
 
   if (utf || (mb->poptions & PCRE2_UCP) != 0)
     {
@@ -422,8 +423,13 @@ if (caseless)
         d = *p++;
         }
 
-      ur = GET_UCD(d);
-      if (c != d && c != (uint32_t)((int)d + ur->other_case))
+      if (turkish_casing && UCD_ANY_I(d))
+        {
+        c = UCD_FOLD_I_TURKISH(c);
+        d = UCD_FOLD_I_TURKISH(d);
+        if (c != d) return -1;  /* No match */
+        }
+      else if (c != d && c != (uint32_t)((int)d + (ur = GET_UCD(d))->other_case))
         {
         const uint32_t *pp = PRIV(ucd_caseless_sets) + ur->caseset;
 

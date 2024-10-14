@@ -1697,10 +1697,19 @@ letters in the subject. It is equivalent to Perl's /i option, and it can be
 changed within a pattern by a (?i) option setting. If either PCRE2_UTF or
 PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
-U+007F. Note that there are two ASCII characters, K and S, that, in addition to
+U+007F.
+</P>
+<P>
+Note that there are two ASCII characters, K and S, that, in addition to
 their lower case ASCII equivalents, are case-equivalent with U+212A (Kelvin
 sign) and U+017F (long S) respectively. If you do not want this case
 equivalence, you can suppress it by setting PCRE2_EXTRA_CASELESS_RESTRICT.
+</P>
+<P>
+One language family, Turkish and Azeri, has its own case-insensitivity rules,
+which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
+behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
+(small dotless i) characters.
 </P>
 <P>
 For lower valued characters with only one other case, a lookup table is used
@@ -2037,9 +2046,16 @@ The second effect of PCRE2_UCP is to force the use of Unicode properties for
 upper/lower casing operations, even when PCRE2_UTF is not set. This makes it
 possible to process strings in the 16-bit UCS-2 code. This option is available
 only if PCRE2 has been compiled with Unicode support (which is the default).
-The PCRE2_EXTRA_CASELESS_RESTRICT option (see below) restricts caseless
+</P>
+<P>
+The PCRE2_EXTRA_CASELESS_RESTRICT option (see above) restricts caseless
 matching such that ASCII characters match only ASCII characters and non-ASCII
-characters match only non-ASCII characters.
+characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING option
+(see above) alters the matching of the 'i' characters to follow their behaviour
+in Turkish and Azeri languages. For further details on
+PCRE2_EXTRA_CASELESS_RESTRICT and PCRE2_EXTRA_TURKISH_CASING, see the
+<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
+page.
 <pre>
   PCRE2_UNGREEDY
 </pre>
@@ -2176,7 +2192,8 @@ characters. The ASCII letter S is case-equivalent to U+017f (long S) and the
 ASCII letter K is case-equivalent to U+212a (Kelvin sign). This option disables
 recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a
 caseless match, both characters must either be ASCII or non-ASCII. The option
-can be changed with a pattern by the (?r) option setting.
+can be changed within a pattern by the (*CASELESS_RESTRICT) or (?r) option
+settings.
 <pre>
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 </pre>
@@ -2223,6 +2240,14 @@ If this option is set, PCRE2 treats callouts in the pattern as a syntax error,
 returning PCRE2_ERROR_CALLOUT_CALLER_DISABLED. This is useful if the application
 knows that a callout will not be provided to <b>pcre2_match()</b>, so that
 callouts in the pattern are not silently ignored.
+<pre>
+  PCRE2_EXTRA_TURKISH_CASING
+</pre>
+This option alters case-equivalence of the 'i' letters to follow the
+alphabet used by Turkish and Azeri languages. The option can be changed within
+a pattern by the (*TURKISH_CASING) start-of-pattern setting. Either the UTF or
+UCP options must be set. In the 8-bit library, UTF must be set. This option
+cannot be combined with PCRE2_EXTRA_CASELESS_RESTRICT.
 <a name="jitcompiling"></a></P>
 <br><a name="SEC21" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
 <P>

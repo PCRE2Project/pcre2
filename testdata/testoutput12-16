@@ -1819,7 +1819,119 @@ No match
     \x{17f} 
 No match
 
+/(.) \1/i,ucp
+    i I
+ 0: i I
+ 1: i
+
+/(.) \1/i,ucp,turkish_casing
+\= Expect no match
+    i I
+No match
+
+/(.) \1/i,ucp
+    i I
+ 0: i I
+ 1: i
+    \x{212a} k
+ 0: \x{212a} k
+ 1: \x{212a}
+\= Expect no match
+    i \x{0130}
+No match
+    \x{0131} I
+No match
+
+/(.) \1/i,ucp,turkish_casing
+    \x{212a} k
+ 0: \x{212a} k
+ 1: \x{212a}
+    i \x{0130}
+ 0: i \x{130}
+ 1: i
+    \x{0131} I
+ 0: \x{131} I
+ 1: \x{131}
+\= Expect no match
+    i I
+No match
+
+/(.) (?r:\1)/i,ucp,turkish_casing
+    i I
+ 0: i I
+ 1: i
+\= Expect no match
+    i \x{0130}
+No match
+    \x{0131} I
+No match
+    \x{212a} k
+No match
+
+/[a-z][^i]I/ucp,turkish_casing
+    bII
+ 0: bII
+    b\x{0130}I
+ 0: b\x{130}I
+    b\x{0131}I
+ 0: b\x{131}I
+\= Expect no match
+    biI
+No match
+
+/[a-z][^i]I/i,ucp,turkish_casing
+    b\x{0131}I
+ 0: b\x{131}I
+    bII
+ 0: bII
+\= Expect no match
+    biI
+No match
+    b\x{0130}I
+No match
+
+/[a-z](?r:[^i])I/i,ucp,turkish_casing
+    b\x{0131}I
+ 0: b\x{131}I
+    b\x{0130}I
+ 0: b\x{130}I
+\= Expect no match
+    bII
+No match
+    biI
+No match
+
+/b(?r:[\x{00FF}-\x{FFEE}])/i,ucp,turkish_casing
+    b\x{0130}
+ 0: b\x{130}
+    b\x{0131}
+ 0: b\x{131}
+    B\x{212a}
+ 0: B\x{212a}
+\= Expect no match
+    bi
+No match
+    bI
+No match
+    bk
+No match
+
 # ---------------------------------------------------- 
+
+/b[\x{00FF}-\x{FFEE}]/ir
+    b\x{0130}
+ 0: b\x{130}
+    b\x{0131}
+ 0: b\x{131}
+    B\x{212a}
+ 0: B\x{212a}
+\= Expect no match
+    bi
+No match
+    bI
+No match
+    bk
+No match
 
 # Quantifier after a literal that has the value of META_ACCEPT (not UTF). This
 # fails in 16-bit mode, but is OK for 32-bit.

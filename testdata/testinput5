@@ -2337,6 +2337,213 @@
 
 # End caseless restrict tests
 
+# TESTS for PCRE2_EXTRA_TURKISH_CASING - again, tests with and without.
+
+/i/i,utf
+    i
+    I
+\= Expect no match
+    \x{0130}
+    \x{0131}
+
+/i/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/I/i,utf
+    i
+    I
+\= Expect no match
+    \x{0130}
+    \x{0131}
+
+/I/i,utf,turkish_casing
+    I
+    \x{0131}
+\= Expect no match
+    i
+    \x{0130}
+
+/\x{0130}/i,utf
+    \x{0130}
+\= Expect no match
+    i
+    I
+    \x{0131}
+
+/\x{0130}/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/\x{0131}/i,utf
+    \x{0131}
+\= Expect no match
+    i
+    I
+    \x{0130}
+
+/\x{0131}/i,utf,turkish_casing
+    I
+    \x{0131}
+\= Expect no match
+    i
+    \x{0130}
+
+/[i]/i,utf
+    i
+    I
+\= Expect no match
+    \x{0130}
+    \x{0131}
+
+/[i]/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/[^i]/i,utf
+    \x{0130}
+    \x{0131}
+\= Expect no match
+    i
+    I
+
+/[^i]/i,utf,turkish_casing
+    I
+    \x{0131}
+\= Expect no match
+    i
+    \x{0130}
+
+/[\x{0130}]/i,utf
+    \x{0130}
+\= Expect no match
+    i
+    I
+    \x{0131}
+
+/[\x{0130}]/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/[\x{0120}-\x{0130}]/i,utf
+    \x{0130}
+\= Expect no match
+    i
+    I
+    \x{0131}
+
+/[\x{0120}-\x{0130}]/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/[zi]/i,utf
+    i
+    I
+\= Expect no match
+    \x{0130}
+    \x{0131}
+
+/[zi]/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/[z\x{0130}]/i,utf
+    \x{0130}
+\= Expect no match
+    i
+    I
+    \x{0131}
+
+/[z\x{0130}]/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/[iI]/i,utf
+    i
+    I
+\= Expect no match
+    \x{0130}
+    \x{0131}
+
+/[iI]/i,utf,turkish_casing
+    i
+    I
+    \x{0130}
+    \x{0131}
+
+/[i\x{0130}]/i,utf
+    i
+    I
+    \x{0130}
+\= Expect no match
+    \x{0131}
+
+/[i\x{0130}]/i,utf,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/(.) \1/i,utf
+    i I
+\= Expect no match
+    i \x{0130}
+    \x{0131} I
+
+/(*TURKISH_CASING)(.) \1/i,utf
+    i \x{0130}
+    \x{0131} I
+\= Expect no match
+    i I
+
+/(.) \1/i,utf,turkish_casing
+    i \x{0130}
+    \x{0131} I
+\= Expect no match
+    i I
+
+/i/i,utf,caseless_restrict,turkish_casing
+
+/i/i,turkish_casing
+
+/i/i,utf,caseless_restrict
+    i
+
+/i/i,ucp,caseless_restrict
+    i
+
+/b(?r:[\x{00FF}-\x{FFEE}])/i,utf,turkish_casing
+    b\x{0130}
+    b\x{0131}
+\= Expect no match
+    bi
+    bI
+    bk
+
+# End Turkish casing tests
+
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
 
 # DIGITS
