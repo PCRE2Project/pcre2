@@ -716,4 +716,7 @@ Failed: error 134 at offset 34: character code point value in \x{} or \o{} is to
     abcd!e
  0: abcd!
 
+/i/turkish_casing
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
+
 # End of testinput11

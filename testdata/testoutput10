@@ -1939,6 +1939,14 @@ No match
  0: ab
  1: ab
 
+/(.) \1/i,ucp
+    i I
+ 0: i I
+ 1: i
+
+/(.) \1/i,ucp,turkish_casing
+Failed: error 205 at offset 0: PCRE2_EXTRA_TURKISH_CASING requires UTF in 8-bit mode
+
 # python_octal
 
 /\400/

@@ -411,17 +411,19 @@ The following are recognized only at the very start of a pattern or after one
 of the newline or \eR sequences or options with similar syntax. More than one
 of them may appear. For the first three, d is a decimal number.
 .sp
-  (*LIMIT_DEPTH=d) set the backtracking limit to d
-  (*LIMIT_HEAP=d)  set the heap size limit to d * 1024 bytes
-  (*LIMIT_MATCH=d) set the match limit to d
-  (*NOTEMPTY)      set PCRE2_NOTEMPTY when matching
-  (*NOTEMPTY_ATSTART) set PCRE2_NOTEMPTY_ATSTART when matching
-  (*NO_AUTO_POSSESS) no auto-possessification (PCRE2_NO_AUTO_POSSESS)
+  (*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
+  (*LIMIT_DEPTH=d)     set the backtracking limit to d
+  (*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes
+  (*LIMIT_MATCH=d)     set the match limit to d
+  (*NOTEMPTY)          set PCRE2_NOTEMPTY when matching
+  (*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching
+  (*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)
   (*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
-  (*NO_JIT)       disable JIT optimization
-  (*NO_START_OPT) no start-match optimization (PCRE2_NO_START_OPTIMIZE)
-  (*UTF)          set appropriate UTF mode for the library in use
-  (*UCP)          set PCRE2_UCP (use Unicode properties for \ed etc)
+  (*NO_JIT)            disable JIT optimization
+  (*NO_START_OPT)      no start-match optimization (PCRE2_NO_START_OPTIMIZE)
+  (*TURKISH_CASING)    set PCRE2_EXTRA_TURKISH_CASING when matching
+  (*UTF)               set appropriate UTF mode for the library in use
+  (*UCP)               set PCRE2_UCP (use Unicode properties for \ed etc)
 .sp
 Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the value of
 the limits set by the caller of \fBpcre2_match()\fP or \fBpcre2_dfa_match()\fP,

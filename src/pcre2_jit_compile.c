@@ -8226,9 +8226,10 @@ while (*cc != XCL_END)
       case PT_CLIST:
       other_cases = PRIV(ucd_caseless_sets) + cc[1];
 
-      /* At least three characters are required.
+      /* At least two characters are required.
          Otherwise this case would be handled by the normal code path. */
-      SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR && other_cases[2] != NOTACHAR);
+      SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR);
+      /* NOTACHAR is the unsigned maximum. */
       SLJIT_ASSERT(other_cases[0] < other_cases[1] && other_cases[1] < other_cases[2]);
 
       /* Optimizing character pairs, if their difference is power of 2. */
@@ -8247,6 +8248,8 @@ while (*cc != XCL_END)
         }
       else if (is_powerof2(other_cases[2] ^ other_cases[1]))
         {
+        SLJIT_ASSERT(other_cases[2] != NOTACHAR);
+
         if (charoffset == 0)
           OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, other_cases[2] ^ other_cases[1]);
         else
@@ -9428,6 +9431,8 @@ struct sljit_jump *nopartial;
 #if defined SUPPORT_UNICODE
 struct sljit_label *loop;
 struct sljit_label *caseless_loop;
+struct sljit_jump *turkish_ascii_i = NULL;
+struct sljit_jump *turkish_non_ascii_i = NULL;
 jump_list *no_match = NULL;
 int source_reg = COUNT_MATCH;
 int source_end_reg = ARGUMENTS;
@@ -9450,7 +9455,7 @@ else
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), 0);
 
 #if defined SUPPORT_UNICODE
-if (common->utf && (*cc == OP_REFI || *cc == OP_DNREFI))
+if ((common->utf || common->ucp) && (*cc == OP_REFI || *cc == OP_DNREFI))
   {
   SLJIT_ASSERT(common->iref_ptr != 0);
 
@@ -9488,6 +9493,16 @@ if (common->utf && (*cc == OP_REFI || *cc == OP_DNREFI))
 
   CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
 
+  if ((refi_flag & (REFI_FLAG_TURKISH_CASING|REFI_FLAG_CASELESS_RESTRICT)) ==
+        REFI_FLAG_TURKISH_CASING)
+    {
+    OP2(SLJIT_OR, SLJIT_TMP_DEST_REG, 0, char1_reg, 0, SLJIT_IMM, 0x20);
+    turkish_ascii_i = CMP(SLJIT_EQUAL, SLJIT_TMP_DEST_REG, 0, SLJIT_IMM, 0x69);
+
+    OP2(SLJIT_OR, SLJIT_TMP_DEST_REG, 0, char1_reg, 0, SLJIT_IMM, 0x1);
+    turkish_non_ascii_i = CMP(SLJIT_EQUAL, SLJIT_TMP_DEST_REG, 0, SLJIT_IMM, 0x131);
+    }
+
   OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
 
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
@@ -9503,11 +9518,12 @@ if (common->utf && (*cc == OP_REFI || *cc == OP_DNREFI))
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP3, 0);
   CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
 
-  if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
-    add_jump(compiler, &no_match, CMP(SLJIT_LESS, char1_reg, 0, SLJIT_IMM, 128));
   add_jump(compiler, &no_match, CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
   OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_caseless_sets));
+
+  if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
+    add_jump(compiler, &no_match, CMP(SLJIT_LESS | SLJIT_32, SLJIT_MEM1(TMP2), 0, SLJIT_IMM, 128));
 
   caseless_loop = LABEL();
   OP1(SLJIT_MOV_U32, TMP1, 0, SLJIT_MEM1(TMP2), 0);
@@ -9515,6 +9531,28 @@ if (common->utf && (*cc == OP_REFI || *cc == OP_DNREFI))
   OP2U(SLJIT_SUB | SLJIT_SET_Z | SLJIT_SET_LESS, TMP1, 0, char1_reg, 0);
   JUMPTO(SLJIT_EQUAL, loop);
   JUMPTO(SLJIT_LESS, caseless_loop);
+
+  if ((refi_flag & (REFI_FLAG_TURKISH_CASING|REFI_FLAG_CASELESS_RESTRICT)) ==
+        REFI_FLAG_TURKISH_CASING)
+    {
+    add_jump(compiler, &no_match, JUMP(SLJIT_JUMP));
+    JUMPHERE(turkish_ascii_i);
+
+    OP2(SLJIT_LSHR, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 5);
+    OP2(SLJIT_AND, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_XOR, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_ADD, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 0x130);
+    CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
+
+    add_jump(compiler, &no_match, JUMP(SLJIT_JUMP));
+    JUMPHERE(turkish_non_ascii_i);
+
+    OP2(SLJIT_AND, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_XOR, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_SHL, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 5);
+    OP2(SLJIT_ADD, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 0x49);
+    CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
+    }
 
   set_jumps(no_match, LABEL());
   if (common->mode == PCRE2_JIT_COMPLETE)

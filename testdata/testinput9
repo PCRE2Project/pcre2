@@ -271,4 +271,6 @@
 /abc/substitute_extended,replace=>\o{012345}<
     abc
 
+/i/turkish_casing
+
 # End of testinput9

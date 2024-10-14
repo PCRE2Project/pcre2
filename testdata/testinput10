@@ -663,6 +663,11 @@
 /(..)(*scs:(1)ab$)/match_invalid_utf
     ab\x80cde         
 
+/(.) \1/i,ucp
+    i I
+
+/(.) \1/i,ucp,turkish_casing
+
 # python_octal
 
 /\400/

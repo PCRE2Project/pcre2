@@ -278,7 +278,10 @@ ASCII characters, K and S, that, in addition to their lower case ASCII
 equivalents, are case-equivalent with Unicode U+212A (Kelvin sign) and U+017F
 (long S) respectively when either PCRE2_UTF or PCRE2_UCP is set, unless the
 PCRE2_EXTRA_CASELESS_RESTRICT option is in force (either passed to
-\fBpcre2_compile()\fP or set by (?r) within the pattern).
+\fBpcre2_compile()\fP or set by (*CASELESS_RESTRICT) or (?r) within the
+pattern). If the PCRE2_EXTRA_TURKISH_CASING option is in force (either passed
+to \fBpcre2_compile()\fP or set by (*TURKISH_CASING) within the pattern), then
+the 'i' letters are matched according to Turkish and Azeri languages.
 .P
 The power of regular expressions comes from the ability to include wild cards,
 character classes, alternatives, and repetitions in the pattern. These are

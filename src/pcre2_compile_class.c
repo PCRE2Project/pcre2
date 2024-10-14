@@ -81,6 +81,7 @@ while (TRUE)
 #define PARSE_CLASS_UTF               0x1
 #define PARSE_CLASS_CASELESS_UTF      0x2
 #define PARSE_CLASS_RESTRICTED_UTF    0x4
+#define PARSE_CLASS_TURKISH_UTF       0x8
 
 /* Get the range of nocase characters which includes the
 'c' character passed as argument, or directly follows 'c'. */
@@ -145,10 +146,21 @@ while (c <= end)
     }
 
   /* Compute caseless set. */
-  co = UCD_CASESET(c);
 
-  if (co != 0 && (!(options & PARSE_CLASS_RESTRICTED_UTF)
-                  || PRIV(ucd_caseless_sets)[co] > 127))
+  if ((options & (PARSE_CLASS_TURKISH_UTF|PARSE_CLASS_RESTRICTED_UTF)) ==
+        PARSE_CLASS_TURKISH_UTF &&
+      UCD_ANY_I(c))
+    {
+    co = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(c)? 0 : 3);
+    }
+  else if ((co = UCD_CASESET(c)) != 0 &&
+           (options & PARSE_CLASS_RESTRICTED_UTF) != 0 &&
+           PRIV(ucd_caseless_sets)[co] < 128)
+    {
+    co = 0;  /* Ignore the caseless set if it's restricted. */
+    }
+
+  if (co != 0)
     list = PRIV(ucd_caseless_sets) + co;
   else
     {
@@ -447,6 +459,9 @@ if ((options & PCRE2_CASELESS) && (options & (PCRE2_UTF|PCRE2_UCP)))
 
 if (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT)
   class_options |= PARSE_CLASS_RESTRICTED_UTF;
+
+if (xoptions & PCRE2_EXTRA_TURKISH_CASING)
+  class_options |= PARSE_CLASS_TURKISH_UTF;
 #endif
 
 /* Compute required space for the range. */
