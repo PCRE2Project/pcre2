@@ -646,10 +646,23 @@ Subject length lower bound = 1
 # We can use pcre2test's utf8_input modifier to create wide pattern characters,
 # even though this test is run when UTF is not supported.
 
+/a\x{ffff}b/utf8_input
+    aï¿¿b
+ 0: a\x{ffff}b
+    a\x{ffff}b
+ 0: a\x{ffff}b
+    a\o{177777}b
+ 0: a\x{ffff}b
+\= Expect no match
+    a\N{U+ffff}z
+No match
+
 /abý¿¿¿¿¿z/utf8_input
 ** Failed: character value greater than 0xffff cannot be converted to 16-bit in non-UTF mode
     abý¿¿¿¿¿z
     ab\x{7fffffff}z
+    ab\o{17777777777}z
+    ab\N{U+7fffffff}z
 
 /abÿý¿¿¿¿¿z/utf8_input
 ** Failed: invalid UTF-8 string cannot be converted to 16-bit string
@@ -660,6 +673,16 @@ Subject length lower bound = 1
 ** Failed: invalid UTF-8 string cannot be converted to 16-bit string
     abÿAz
     ab\x{80000041}z 
+\= Expect no match
+    abAz
+    aAz
+    ab\377Az
+    ab\xff\N{U+0041}z
+    ab\N{U+ff}\N{U+41}z
+
+/ab\x{80000041}z/
+Failed: error 134 at offset 13: character code point value in \x{} or \o{} is too large
+    ab\x{80000041}z
 
 /(?i:A{1,}\6666666666)/
     A\x{1b6}6666666

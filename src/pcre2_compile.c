@@ -1523,17 +1523,15 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
 
       if (ptrend - p > 1 && *p == CHAR_U && p[1] == CHAR_PLUS)
         {
-#ifdef EBCDIC
-        *errorcodeptr = ERR93;
-#else
+#ifndef EBCDIC
         if (utf)
           {
           ptr = p + 2;
           escape = 0;   /* Not a fancy escape after all */
           goto COME_FROM_NU;
           }
-        else *errorcodeptr = ERR93;
 #endif
+        *errorcodeptr = ERR93;
         }
 
       /* Give an error in contexts where quantifiers are not allowed

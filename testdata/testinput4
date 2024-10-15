@@ -2335,6 +2335,9 @@
 /[\N{U+1234}]/utf
     \x{1234}
 
+/(\x{1234}) \1/utf
+    \N{U+1234} \o{11064}
+
 # Test the full list of Unicode "Pattern White Space" characters that are to
 # be ignored by /x. The pattern lines below may show up oddly in text editors
 # or when listed to the screen. Note that characters such as U+2002, which are
