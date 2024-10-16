@@ -713,7 +713,7 @@ static modstruct modlist[] = {
   { "global",                      MOD_PNDP, MOD_CTL, CTL_GLOBAL,                 PO(control) },
   { "heap_limit",                  MOD_CTM,  MOD_INT, 0,                          MO(heap_limit) },
   { "heapframes_size",             MOD_PND,  MOD_CTL, CTL2_HEAPFRAMES_SIZE,       PO(control2) },
-  { "hex",                         MOD_PAT,  MOD_CTL, CTL_HEXPAT,                 PO(control) },
+  { "hex",                         MOD_PATP, MOD_CTL, CTL_HEXPAT,                 PO(control) },
   { "info",                        MOD_PAT,  MOD_CTL, CTL_INFO,                   PO(control) },
   { "jit",                         MOD_PAT,  MOD_IND, 7,                          PO(jit) },
   { "jitfast",                     MOD_PAT,  MOD_CTL, CTL_JITFAST,                PO(control) },

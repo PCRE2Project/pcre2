@@ -85,6 +85,7 @@ fi
 #   aftertext          interpreted as "print $' afterwards"
 #   afteralltext       ignored
 #   dupnames           ignored (Perl always allows)
+#   hex                preprocess pattern with embedded octets
 #   jitstack           ignored
 #   mark               show mark information
 #   no_auto_possess    ignored
@@ -244,9 +245,9 @@ for (;;)
 
   # Split the pattern from the modifiers and adjust them as necessary.
 
-  $pattern =~ /^\s*((.).*\2)(.*)$/s;
-  $pat = $1;
-  $del = $2;
+  $pattern =~ /^\s*(.)(.*)\1(.*)$/s;
+  $del = $1;
+  $pat = $2;
   $mod = "$3,$extra_modifiers";
   $mod =~ s/^,\s*//;
 
@@ -286,6 +287,34 @@ for (;;)
 
   $mod =~ s/no_auto_possess,?//;
 
+  # The "hex" modifier instructs us to preprocess the pattern
+
+  if ($mod =~ s/hex,?//)
+    {
+    my $t = "";
+
+    # find either 2 digit hex octets, optionally surrounded by spaces, to
+    # add as code points or quoted strings that will be copied verbatim
+
+    while ($pat =~ /\s*(?:(\p{ahex}{2})|(['"])([^\2]+?)\2)\s*/g)
+      {
+      if (defined $1)
+        {
+        no utf8;
+        $t .= chr(hex($1));
+        use if $utf8, "utf8";
+        }
+      else
+        {
+        $t .= $3;
+        }
+      }
+    no utf8;
+    utf8::decode($t) if $utf8;
+    use if $utf8, "utf8";
+    $pat = $t;
+    }
+
   # Use no_start_optimize (disable PCRE2 start-up optimization) to disable Perl
   # optimization by inserting (??{""}) at the start of the pattern. We may
   # also encounter -no_start_optimize from a #pattern setting.
@@ -297,7 +326,8 @@ for (;;)
   # Add back retained modifiers and check that the pattern is valid.
 
   $mod =~ s/,//g;
-  $pattern = "$pat$mod";
+
+  $pattern = "$del$pat$del$mod";
 
   eval "\$_ =~ ${pattern}";
   if ($@)

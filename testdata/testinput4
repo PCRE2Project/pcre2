@@ -2908,4 +2908,9 @@
 /\p{  ^ L u }/
     AbCd
 
+# hex
+
+/c3 b1/hex,utf
+    \N{U+00F1}
+
 # End of testinput4

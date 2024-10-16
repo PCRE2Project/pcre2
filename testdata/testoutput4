@@ -4656,4 +4656,10 @@ No match
     AbCd
  0: b
 
+# hex
+
+/c3 b1/hex,utf
+    \N{U+00F1}
+ 0: \x{f1}
+
 # End of testinput4
