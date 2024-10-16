@@ -1883,6 +1883,14 @@ Subject length lower bound = 1
     X\x{c1}Y
  1: >\xe1<
 
+/[a\x{c1}]/iI,ucp
+Capture group count = 0
+Options: caseless ucp
+Starting code units: A a \xc1 \xe1
+Subject length lower bound = 1
+    \x{e1}
+ 0: \xe1
+
 # Without UTF or UCP characters > 127 have only one case in the default locale.
 
 /X(\x{e1})Y/replace=>\U$1<,substitute_extended
