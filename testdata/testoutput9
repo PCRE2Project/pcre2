@@ -4,17 +4,36 @@
 #forbid_utf
 #newline_default lf any anycrlf
 
-/ab/
-\= Expect error message (too big char) and no match
-    A\x{123}B
+/a\xc4\xa3b/
+    a\N{U+123}b
+ 0: a\xc4\xa3b
+\= Expect no match # error message (too big char)
+    a\x{0123}b
 ** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
 ** Truncation will probably give the wrong result.
 No match
-    A\o{443}B
+    a\o{00443}b
 ** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
 ** Truncation will probably give the wrong result.
 No match
-  
+    a\443b
+** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
+** Truncation will probably give the wrong result.
+No match
+
+/fd bf bf bf bf bf/I,hex
+Capture group count = 0
+First code unit = \xfd
+Last code unit = \xbf
+Subject length lower bound = 6
+    \N{U+7fffffff}
+ 0: \xfd\xbf\xbf\xbf\xbf\xbf
+\= Expect no match # error message (too big char)
+    \x{7fffffff}
+** Character \x{7fffffff} is greater than 255 and UTF-8 mode is not enabled.
+** Truncation will probably give the wrong result.
+No match
+
 /\x{100}/I
 Failed: error 134 at offset 6: character code point value in \x{} or \o{} is too large
 

@@ -1077,7 +1077,7 @@ Subject length lower bound = 1
 
 /A/utf
   \x{ff000041}
-** Character \x{ff000041} is greater than 0x7fffffff and so cannot be converted to UTF-8
+** Character \N{U+ff000041} is greater than 0x7fffffff and therefore cannot be encoded as UTF-8
   \x{7f000041}
 Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 0
 

@@ -32,8 +32,9 @@
 # Handle the shell script arguments.
 
 perl=perl
-perlarg=''
+perlarg=""
 prefix=''
+spc=""
 
 if [ $# -gt 0 -a "$1" = "-perl" ] ; then
   if [ $# -lt 2 ] ; then
@@ -47,11 +48,14 @@ fi
 
 if [ $# -gt 0 -a "$1" = "-w" ] ; then
   perlarg="-w"
+  spc=" "
   shift
 fi
 
 if [ $# -gt 0 -a "$1" = "-utf8" ] ; then
   prefix="use utf8; require Encode;"
+  perlarg="$perlarg$spc-CSD"
+
   shift
 fi
 
