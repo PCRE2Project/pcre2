@@ -753,4 +753,21 @@ Failed: error 134 at offset 34: character code point value in \x{} or \o{} is to
 /i/turkish_casing
 Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
 
+# Character list tests
+
+/([\x{100}-\x{7fff}\x{9000}\x{9002}\x{9004}\x{9006}\x{9008}\x{10000}-\x{7fffffff}]{3,8}?).#/B
+Failed: error 134 at offset 66: character code point value in \x{} or \o{} is too large
+  \x{9001}\x{9007}\x{8000}\x{ffff}\x{9002}\x{7fff}\x{10000}\x{7fffffff}\x{500000}\x{9006}#
+
+/([\x{3000}\x{3001}\x{3003}\x{3004}\x{3006}\x{3007}\x{8000}-\x{ffff}\x{100001}\x{100002}\x{100004}\x{100005}\x{100007}\x{100008}\x{10000a}\x{10000b}\x{80000000}-\x{ffffffff}]{5,}).#/B
+Failed: error 134 at offset 76: character code point value in \x{} or \o{} is too large
+  \x{2fff}\x{3002}\x{7fff}\x{100000}\x{7fffffff}\x{3000}\x{3007}\x{8000}\x{ffff}\x{100001}\x{10000b}\x{80000000}\x{ffffffff}\x{3000}#
+
+/([^\x{4000}\x{4002}\x{4004}\x{4005}\x{4007}\x{4009}\x{400a}\x{f000}\x{f002}\x{f004}\x{f005}\x{f007}\x{f009}\x{f00a}\x{100000}\x{100002}\x{100004}\x{100005}\x{100007}\x{100009}\x{10000a}\x{a0000000}\x{a0000002}\x{a0000004}\x{a0000005}\x{a0000007}\x{a0000009}\x{a000000a}]+).#/B
+Failed: error 134 at offset 124: character code point value in \x{} or \o{} is too large
+  \x{4000}\x{4002}\x{4004}\x{4005}\x{4007}\x{4009}\x{400a}\x{3fff}\x{4001}\x{4003}\x{4006}\x{4008}\x{400b}\x{100}#
+  \x{f000}\x{f002}\x{f004}\x{f005}\x{f007}\x{f009}\x{f00a}\x{efff}\x{f001}\x{f003}\x{f006}\x{f008}\x{f00b}\x{100}#
+  \x{100000}\x{100002}\x{100004}\x{100005}\x{100007}\x{100009}\x{10000a}\x{fffff}\x{100001}\x{100003}\x{100006}\x{100008}\x{10000b}\x{100}#
+  \x{a0000000}\x{a0000002}\x{a0000004}\x{a0000005}\x{a0000007}\x{a0000009}\x{a000000a}\x{9fffffff}\x{a0000001}\x{a0000003}\x{a0000006}\x{a0000008}\x{a000000b}\x{100}#
+
 # End of testinput11

@@ -921,6 +921,138 @@ if (table_limit != 32) for (c = 24; c < 32; c++) re->start_bitmap[c] = 0xff;
 
 
 
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
+/*************************************************
+*     Set starting bits for a character list.    *
+*************************************************/
+
+/* This function sets starting bits for a character list. It enumerates
+all characters and character ranges in the character list, and sets
+the starting bits accordingly.
+
+Arguments:
+  code           pointer to the code
+  start_bitmap   pointer to the starting bitmap
+
+Returns:         nothing
+*/
+static void
+study_char_list(PCRE2_SPTR code, uint8_t *start_bitmap)
+{
+uint32_t type, list_ind;
+uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
+uint32_t range_start = ~(uint32_t)0, range_end = 0;
+const uint8_t *next_char;
+PCRE2_UCHAR start_buffer[6], end_buffer[6];
+PCRE2_UCHAR start, end;
+
+/* Only needed in 8-bit mode at the moment. */
+type = (uint32_t)(code[0] << 8) | code[1];
+code += 2;
+
+/* Align characters. */
+next_char = (const uint8_t*)code;
+next_char += (type >> XCL_ALIGNMENT_SHIFT) & XCL_ALIGNMENT_MASK;
+type &= XCL_TYPE_MASK;
+list_ind = 0;
+
+if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+  range_start = XCL_CHAR_LIST_LOW_16_START;
+
+while (type > 0)
+  {
+  uint32_t item_count = type & XCL_ITEM_COUNT_MASK;
+
+  if (item_count == XCL_ITEM_COUNT_MASK)
+    {
+    if (list_ind <= 1)
+      {
+      item_count = *(const uint16_t*)next_char;
+      next_char += 2;
+      }
+    else
+      {
+      item_count = *(const uint32_t*)next_char;
+      next_char += 4;
+      }
+    }
+
+  while (item_count > 0)
+    {
+    if (list_ind <= 1)
+      {
+      range_end = *(const uint16_t*)next_char;
+      next_char += 2;
+      }
+    else
+      {
+      range_end = *(const uint32_t*)next_char;
+      next_char += 4;
+      }
+
+    if ((range_end & XCL_CHAR_END) != 0)
+      {
+      range_end = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+
+      PRIV(ord2utf)(range_end, end_buffer);
+      end = end_buffer[0];
+
+      if (range_start < range_end)
+        {
+        PRIV(ord2utf)(range_start, start_buffer);
+        for (start = start_buffer[0]; start <= end; start++)
+          start_bitmap[start / 8] |= (1u << (start & 7));
+        }
+      else
+        start_bitmap[end / 8] |= (1u << (end & 7));
+
+      range_start = ~(uint32_t)0;
+      }
+    else
+      range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+
+    item_count--;
+    }
+
+  list_ind++;
+  type >>= XCL_TYPE_BIT_LEN;
+
+  if (range_start == ~(uint32_t)0)
+    {
+    if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+      {
+      /* In 8 bit mode XCL_CHAR_LIST_HIGH_32_START is not possible. */
+      if (list_ind == 1) range_start = XCL_CHAR_LIST_HIGH_16_START;
+      else range_start = XCL_CHAR_LIST_LOW_32_START;
+      }
+    }
+  else if ((type & XCL_BEGIN_WITH_RANGE) == 0)
+    {
+    PRIV(ord2utf)(range_start, start_buffer);
+
+    /* In 8 bit mode XCL_CHAR_LIST_LOW_32_END and
+    XCL_CHAR_LIST_HIGH_32_END are not possible. */
+    if (list_ind == 1) range_end = XCL_CHAR_LIST_LOW_16_END;
+    else range_end = XCL_CHAR_LIST_HIGH_16_END;
+
+    PRIV(ord2utf)(range_end, end_buffer);
+    end = end_buffer[0];
+
+    for (start = start_buffer[0]; start <= end; start++)
+      start_bitmap[start / 8] |= (1u << (start & 7));
+
+    range_start = ~(uint32_t)0;
+    }
+
+  /* In 8 bit mode XCL_CHAR_LIST_HIGH_32_ADD is not possible. */
+  if (list_ind == 1) char_list_add = XCL_CHAR_LIST_HIGH_16_ADD;
+  else char_list_add = XCL_CHAR_LIST_LOW_32_ADD;
+  }
+}
+#endif
+
+
+
 /*************************************************
 *      Create bitmap of starting code units      *
 *************************************************/
@@ -1612,6 +1744,12 @@ do
         PCRE2_UCHAR b, e;
         PCRE2_SPTR p = tcode + 1 + LINK_SIZE + 1 + ((classmap == NULL)? 0:32);
         tcode += GET(tcode, 1);
+
+        if (*p >= XCL_LIST)
+          {
+          study_char_list(p, re->start_bitmap);
+          goto HANDLE_CLASSMAP;
+          }
 
         for (;;) switch (*p++)
           {
