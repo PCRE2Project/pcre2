@@ -7930,20 +7930,21 @@ static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, 
 DEFINE_COMPILER;
 jump_list *found = NULL;
 jump_list **list = (cc[0] & XCL_NOT) == 0 ? &found : backtracks;
-sljit_uw c, charoffset, max = 256, min = READ_CHAR_MAX;
+sljit_uw c, charoffset;
+sljit_u32 max = 256, min = READ_CHAR_MAX;
 struct sljit_jump *jump = NULL;
 PCRE2_SPTR ccbegin;
 sljit_u32 compares, invertcmp, depth;
 sljit_u32 first_item, last_item, mid_item;
 sljit_u32 range_start, range_end;
 xclass_ranges ranges;
+BOOL has_cmov;
 
 #ifdef SUPPORT_UNICODE
 sljit_u32 unicode_status = 0;
 sljit_u32 category_list = 0;
 sljit_u32 items;
 int typereg = TMP1;
-const sljit_u32 *other_cases;
 #endif /* SUPPORT_UNICODE */
 
 /* Scanning the necessary info. */
@@ -7962,22 +7963,8 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
   {
   compares++;
   cc++;
-
-  if (*cc == PT_CLIST && cc[-1] == XCL_PROP)
-    {
-    other_cases = PRIV(ucd_caseless_sets) + cc[1];
-    while (*other_cases != NOTACHAR)
-      {
-      if (*other_cases > max) max = *other_cases;
-      if (*other_cases < min) min = *other_cases;
-      other_cases++;
-      }
-    }
-  else
-    {
-    max = READ_CHAR_MAX;
-    min = 0;
-    }
+  max = READ_CHAR_MAX;
+  min = 0;
 
   items = 0;
 
@@ -8033,7 +8020,6 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     unicode_status |= XCLASS_SAVE_CHAR | XCLASS_HAS_TYPE;
     break;
 
-    case PT_CLIST:
     case PT_UCNC:
     case PT_PXXDIGIT:
     unicode_status |= XCLASS_SAVE_CHAR;
@@ -8387,62 +8373,6 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
     break;
 
-    case PT_CLIST:
-    other_cases = PRIV(ucd_caseless_sets) + cc[1];
-
-    /* At least two characters are required.
-       Otherwise this case would be handled by the normal code path. */
-    SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR);
-    SLJIT_ASSERT(other_cases[0] < other_cases[1] && other_cases[1] < other_cases[2]);
-    /* NOTACHAR is the unsigned maximum. */
-
-    /* Optimizing character pairs, if their difference is power of 2. */
-    if (is_powerof2(other_cases[1] ^ other_cases[0]))
-      {
-      if (charoffset == 0)
-        OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, other_cases[1] ^ other_cases[0]);
-      else
-        {
-        OP2(SLJIT_ADD, TMP2, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)charoffset);
-        OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, other_cases[1] ^ other_cases[0]);
-        }
-      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, SLJIT_IMM, other_cases[1]);
-      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-      other_cases += 2;
-      }
-    else if (is_powerof2(other_cases[2] ^ other_cases[1]))
-      {
-      SLJIT_ASSERT(other_cases[2] != NOTACHAR);
-
-      if (charoffset == 0)
-        OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, other_cases[2] ^ other_cases[1]);
-      else
-        {
-        OP2(SLJIT_ADD, TMP2, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)charoffset);
-        OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, other_cases[1] ^ other_cases[0]);
-        }
-      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, SLJIT_IMM, other_cases[2]);
-      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-
-      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(other_cases[0] - charoffset));
-      OP_FLAGS(SLJIT_OR | ((other_cases[3] == NOTACHAR) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
-
-      other_cases += 3;
-      }
-    else
-      {
-      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(*other_cases++ - charoffset));
-      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-      }
-
-    while (*other_cases != NOTACHAR)
-      {
-      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(*other_cases++ - charoffset));
-      OP_FLAGS(SLJIT_OR | ((*other_cases == NOTACHAR) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
-      }
-    jump = JUMP(SLJIT_NOT_ZERO ^ invertcmp);
-    break;
-
     case PT_UCNC:
     OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(CHAR_DOLLAR_SIGN - charoffset));
     OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
@@ -8585,68 +8515,128 @@ depth = 0;
 first_item = 0;
 last_item = ranges.range_count;
 compares = ranges.range_count;
+has_cmov = sljit_has_cpu_feature(SLJIT_HAS_CMOV) != 0;
 
 while (TRUE)
   {
   SLJIT_ASSERT(first_item < last_item);
 
-  mid_item = ((first_item + last_item) >> 1) & ~(sljit_u32)1;
-
-  compares -= 2;
-  invertcmp = (compares == 0 && list != backtracks);
-
-  range_start = ranges.ranges[mid_item];
-  range_end = ranges.ranges[mid_item + 1];
-
-  if (last_item > mid_item + 2)
+  if (first_item + 6 >= last_item)
     {
-    SLJIT_ASSERT(charoffset == 0);
-    ranges.stack[depth].first_item = (sljit_u8)(mid_item + 2);
-    ranges.stack[depth].last_item = (sljit_u8)last_item;
-
-    if (range_start < range_end)
-      {
-      ranges.stack[depth].jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)range_end);
-      jump = CMP(SLJIT_GREATER_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
-      }
-    else
-      {
-      OP2U(SLJIT_SUB | SLJIT_SET_GREATER | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
-      ranges.stack[depth].jump = JUMP(SLJIT_GREATER);
-      jump = JUMP(SLJIT_EQUAL ^ invertcmp);
-      }
-
-    depth++;
-    SLJIT_ASSERT(ranges.stack == ranges.local_stack ?
-      depth <= XCLASS_LOCAL_RANGES_LOG2_SIZE : (ranges.stack + depth) <= (xclass_stack_item*)ranges.ranges);
-    }
-  else
-    {
-    SLJIT_ASSERT(first_item + 2 >= mid_item);
+    range_start = ranges.ranges[first_item];
+    range_end = ranges.ranges[first_item + 1];
+    first_item += 2;
+    compares -= 2;
+    invertcmp = (compares == 0 && list != backtracks);
+    charoffset = 0;
+    jump = NULL;
 
     if (range_start < range_end)
       {
       SET_CHAR_OFFSET(range_start);
-      jump = CMP(SLJIT_LESS_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+
+      if (first_item < last_item)
+        {
+        OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+        OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
+        }
+      else
+        jump = CMP(SLJIT_LESS_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
       }
     else
-      jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+      {
+      if (first_item < last_item)
+        {
+        OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
+        OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+        }
+      else
+        jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
+      }
+
+    if (first_item < last_item)
+      {
+      do
+        {
+        range_start = ranges.ranges[first_item];
+        range_end = ranges.ranges[first_item + 1];
+        first_item += 2;
+        compares -= 2;
+
+        if (range_start < range_end)
+          {
+          SET_CHAR_OFFSET(range_start);
+          OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+
+          if (has_cmov)
+            SELECT(SLJIT_LESS_EQUAL, TMP2, STR_END, 0, TMP2);
+          else
+            OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_LESS_EQUAL);
+          }
+        else
+          {
+          OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+
+          if (has_cmov)
+            SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
+          else
+            OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
+          }
+        }
+      while (first_item < last_item);
+
+      invertcmp = (compares == 0 && list != backtracks);
+
+      if (has_cmov)
+        jump = CMP(SLJIT_NOT_EQUAL ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
+      else
+        jump = JUMP(SLJIT_NOT_EQUAL ^ invertcmp);
+      }
+
+    add_jump(compiler, compares > 0 ? list : backtracks, jump);
+
+    if (depth == 0) break;
+
+    add_jump(compiler, list == backtracks ? &found : backtracks, JUMP(SLJIT_JUMP));
+
+    /* The charoffset resets after the end of a branch is reached. */
+    depth--;
+    first_item = ranges.stack[depth].first_item;
+    last_item = ranges.stack[depth].last_item;
+    JUMPHERE(ranges.stack[depth].jump);
+    continue;
     }
+
+  mid_item = ((first_item + last_item) >> 1) & ~(sljit_u32)1;
+  SLJIT_ASSERT(last_item > mid_item + 2);
+
+  range_start = ranges.ranges[mid_item];
+  range_end = ranges.ranges[mid_item + 1];
+
+  ranges.stack[depth].first_item = (sljit_u8)(mid_item + 2);
+  ranges.stack[depth].last_item = (sljit_u8)last_item;
+
+  compares -= 2;
+  invertcmp = (compares == 0 && list != backtracks);
+
+  if (range_start < range_end)
+    {
+    ranges.stack[depth].jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)range_end);
+    jump = CMP(SLJIT_GREATER_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
+    }
+  else
+    {
+    OP2U(SLJIT_SUB | SLJIT_SET_GREATER | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
+    ranges.stack[depth].jump = JUMP(SLJIT_GREATER);
+    jump = JUMP(SLJIT_EQUAL ^ invertcmp);
+    }
+
+  depth++;
+  SLJIT_ASSERT(ranges.stack == ranges.local_stack ?
+    depth <= XCLASS_LOCAL_RANGES_LOG2_SIZE : (ranges.stack + depth) <= (xclass_stack_item*)ranges.ranges);
 
   add_jump(compiler, compares > 0 ? list : backtracks, jump);
   last_item = mid_item;
-
-  if (first_item < last_item) continue;
-  if (depth == 0) break;
-
-  add_jump(compiler, list == backtracks ? &found : backtracks, JUMP(SLJIT_JUMP));
-
-  /* The charoffset resets after the end of a branch is reached. */
-  charoffset = 0;
-  depth--;
-  first_item = ranges.stack[depth].first_item;
-  last_item = ranges.stack[depth].last_item;
-  JUMPHERE(ranges.stack[depth].jump);
   }
 
 SLJIT_ASSERT(compares == 0);
@@ -9157,6 +9147,91 @@ while (cc < end_subject)
 return cc;
 }
 
+static void compile_clist(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
+{
+DEFINE_COMPILER;
+const sljit_u32 *other_cases;
+struct sljit_jump *jump;
+sljit_u32 min = 0, max = READ_CHAR_MAX;
+BOOL has_cmov = sljit_has_cpu_feature(SLJIT_HAS_CMOV) != 0;
+
+SLJIT_ASSERT(cc[1] == PT_CLIST);
+
+if (cc[0] == OP_PROP)
+  {
+  other_cases = PRIV(ucd_caseless_sets) + cc[2];
+
+  min = *other_cases++;
+  max = min;
+
+  while (*other_cases != NOTACHAR)
+    {
+    if (*other_cases > max) max = *other_cases;
+    if (*other_cases < min) min = *other_cases;
+    other_cases++;
+    }
+  }
+
+other_cases = PRIV(ucd_caseless_sets) + cc[2];
+SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR);
+/* The NOTACHAR is higher than any character. */
+SLJIT_ASSERT(other_cases[0] < other_cases[1] && other_cases[1] < other_cases[2]);
+
+read_char(common, min, max, backtracks, READ_CHAR_UPDATE_STR_PTR);
+
+/* At least two characters are required.
+   Otherwise this case would be handled by the normal code path. */
+/* NOTACHAR is the unsigned maximum. */
+
+/* Optimizing character pairs, if their difference is power of 2. */
+if (is_powerof2(other_cases[1] ^ other_cases[0]))
+  {
+  OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)(other_cases[1] ^ other_cases[0]));
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, SLJIT_IMM, other_cases[1]);
+  OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+  other_cases += 2;
+  }
+else if (is_powerof2(other_cases[2] ^ other_cases[1]))
+  {
+  SLJIT_ASSERT(other_cases[2] != NOTACHAR);
+
+  OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)(other_cases[2] ^ other_cases[1]));
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP2, 0, SLJIT_IMM, other_cases[2]);
+  OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)other_cases[0]);
+
+  if (has_cmov)
+    SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
+  else
+    OP_FLAGS(SLJIT_OR | ((other_cases[3] == NOTACHAR) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
+
+  other_cases += 3;
+  }
+else
+  {
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(*other_cases++));
+  OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+  }
+
+while (*other_cases != NOTACHAR)
+  {
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(*other_cases++));
+
+  if (has_cmov)
+    SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
+  else
+    OP_FLAGS(SLJIT_OR | ((*other_cases == NOTACHAR) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
+  }
+
+if (has_cmov)
+  jump = CMP(cc[0] == OP_PROP ? SLJIT_EQUAL : SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0);
+else
+  jump = JUMP(cc[0] == OP_PROP ? SLJIT_ZERO : SLJIT_NOT_ZERO);
+
+add_jump(compiler, backtracks, jump);
+}
+
 #endif /* SUPPORT_UNICODE */
 
 static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr)
@@ -9262,13 +9337,19 @@ switch(type)
 #ifdef SUPPORT_UNICODE
   case OP_NOTPROP:
   case OP_PROP:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  if (cc[0] == PT_CLIST)
+    {
+    compile_clist(common, cc - 1, backtracks);
+    return cc + 2;
+    }
+
   propdata[0] = 0;
   propdata[1] = type == OP_NOTPROP ? XCL_NOTPROP : XCL_PROP;
   propdata[2] = cc[0];
   propdata[3] = cc[1];
   propdata[4] = XCL_END;
-  if (check_str_ptr)
-    detect_partial_match(common, backtracks);
   compile_xclass_matchingpath(common, propdata, backtracks);
   return cc + 2;
 #endif
