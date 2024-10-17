@@ -962,7 +962,7 @@ return isatty(fileno(f));
 /************* Print optionally coloured match Unix-style and z/OS **********/
 
 static void
-print_match(const void *buf, int length)
+print_match(const void *buf, size_t length)
 {
 if (length == 0) return;
 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
@@ -1301,7 +1301,7 @@ Returns:    TRUE if the path is not excluded
 static BOOL
 test_incexc(char *path, patstr *ip, patstr *ep)
 {
-int plen = strlen((const char *)path);
+size_t plen = strlen((const char *)path);
 
 for (; ep != NULL; ep = ep->next)
   {
@@ -2590,15 +2590,17 @@ fill_buffer(void *handle, int frtype, char *buffer, PCRE2_SIZE length,
 (void)frtype;  /* Avoid warning when not used */
 
 #ifdef SUPPORT_LIBZ
-if (frtype == FR_LIBZ)
-  return gzread((gzFile)handle, buffer, length);
-else
+if (frtype == FR_LIBZ) {
+  if (length > UINT_MAX) length = UINT_MAX;
+  return gzread((gzFile)handle, buffer, (unsigned int) length);
+} else
 #endif
 
 #ifdef SUPPORT_LIBBZ2
-if (frtype == FR_LIBBZ2)
-  return (PCRE2_SIZE)BZ2_bzread((BZFILE *)handle, buffer, length);
-else
+if (frtype == FR_LIBBZ2) {
+  if (length > INT_MAX) length = INT_MAX;
+  return (PCRE2_SIZE)BZ2_bzread((BZFILE *)handle, buffer, (int) length);
+} else
 #endif
 
 return (input_line_buffered ?
@@ -2910,7 +2912,7 @@ while (ptr < endptr)
             int n = om->groupnum;
             if (n == 0 || n < mrc)
               {
-              int plen = offsets[2*n + 1] - offsets[2*n];
+              size_t plen = offsets[2*n + 1] - offsets[2*n];
               if (plen > 0)
                 {
                 if (printed && om_separator != NULL)
@@ -3414,7 +3416,7 @@ if (isdirectory(pathname))
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc;
-      int fnlength = strlen(pathname) + strlen(nextfile) + 2;
+      size_t fnlength = strlen(pathname) + strlen(nextfile) + 2;
       if (fnlength > FNBUFSIZ)
         {
         /* LCOV_EXCL_START - this is a "never" event */
@@ -4231,9 +4233,9 @@ for (i = 1; i < argc; i++)
   else
     {
     unsigned long int n = decode_number(option_data, op, longop);
-    if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = n;
+    if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = (uint32_t) n;
       else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n;
-      else *((int *)op->dataptr) = n;
+      else *((int *)op->dataptr) = (int) n;
     }
   }
 
