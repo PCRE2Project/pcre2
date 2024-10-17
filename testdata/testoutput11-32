@@ -649,6 +649,17 @@ Subject length lower bound = 1
 # We can use pcre2test's utf8_input modifier to create wide pattern characters,
 # even though this test is run when UTF is not supported.
 
+/a\x{d800}b/utf8_input
+    aí €b
+ 0: a\x{d800}b
+    a\x{d800}b
+ 0: a\x{d800}b
+    a\o{154000}b
+ 0: a\x{d800}b
+\= Expect warning unless 32bit
+    a\N{U+d800}b
+ 0: a\x{d800}b
+
 /a\x{ffff}b/utf8_input
     aï¿¿b
  0: a\x{ffff}b
@@ -656,9 +667,8 @@ Subject length lower bound = 1
  0: a\x{ffff}b
     a\o{177777}b
  0: a\x{ffff}b
-\= Expect no match
-    a\N{U+ffff}z
-No match
+    a\N{U+ffff}b
+ 0: a\x{ffff}b
 
 /abý¿¿¿¿¿z/utf8_input
     abý¿¿¿¿¿z
@@ -668,6 +678,7 @@ No match
     ab\o{17777777777}z
  0: ab\x{7fffffff}z
     ab\N{U+7fffffff}z
+** Warning: character \N{U+7fffffff} is greater than 0x10ffff and should not be encoded as UTF-32
  0: ab\x{7fffffff}z
 
 /abÿý¿¿¿¿¿z/utf8_input

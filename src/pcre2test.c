@@ -7264,7 +7264,7 @@ while ((c = *p++) != 0)
       c = 0;
       for (pt++; isdigit(*pt) && *pt < '8'; ++i, pt++)
         {
-        if (c >= 0x20000000l)
+        if (c >= 0x20000000u)
           {
           fprintf(outfile, "** \\o{ escape too large\n");
           return PR_OK;
@@ -7397,6 +7397,10 @@ while ((c = *p++) != 0)
                          "and therefore cannot be encoded as UTF-8\n", c);
         return PR_OK;
         }
+      else if (encoding == FORCE_UTF && c > MAX_UTF_CODE_POINT)
+        fprintf(outfile, "** Warning: character \\N{U+%x} is greater than "
+                         "0x%x and should not be encoded as UTF-8\n",
+                         c, MAX_UTF_CODE_POINT);
       q8 += ord2utf8(c, q8);
       }
     }
@@ -7404,24 +7408,10 @@ while ((c = *p++) != 0)
 #ifdef SUPPORT_PCRE2_16
   if (test_mode == PCRE16_MODE)
     {
-    if (encoding == FORCE_UTF || utf)
-      {
-      if (c > 0x10ffffu)
-        {
-        fprintf(outfile, "** Failed: character \\N{U+%x} is greater than "
-                         "0x10ffff and therefore cannot be encoded as "
-                         "UTF-16\n", c);
-        return PR_OK;
-        }
-      else if (c >= 0x10000u)
-        {
-        c -= 0x10000u;
-        *q16++ = 0xD800 | (c >> 10);
-        *q16++ = 0xDC00 | (c & 0x3ff);
-        }
-      else *q16++ = c;
-      }
-    else
+    /* Unlike the 8-bit code, there are no forced raw suggestions for the
+    16-bit mode, so assume raw unless utf is preferred */
+
+    if (!(encoding == FORCE_UTF || utf))
       {
       if (c > 0xffffu)
         {
@@ -7430,13 +7420,42 @@ while ((c = *p++) != 0)
         fprintf(outfile, "** Truncation will probably give the wrong "
           "result.\n");
         }
-
       *q16++ = (uint16_t)c;
+      }
+    else
+      {
+      if (c > MAX_UTF_CODE_POINT)
+        {
+        fprintf(outfile, "** Failed: character \\N{U+%x} is greater than "
+                         "0x%x and therefore cannot be encoded as UTF-16\n",
+                c, MAX_UTF_CODE_POINT);
+        return PR_OK;
+        }
+      else if (c >= 0x10000u)
+        {
+        c -= 0x10000u;
+        *q16++ = 0xD800 | (c >> 10);
+        *q16++ = 0xDC00 | (c & 0x3ff);
+        }
+      else
+        {
+        if (encoding == FORCE_UTF && 0xe000u > c && c >= 0xd800u)
+          fprintf(outfile, "** Warning: character \\N{U+%x} is a surrogate "
+                           "and should not be encoded as UTF-16\n", c);
+        *q16++ = c;
+        }
       }
     }
 #endif
 #ifdef SUPPORT_PCRE2_32
-  if (test_mode == PCRE32_MODE) *q32++ = c;
+  if (test_mode == PCRE32_MODE)
+    {
+    if (encoding == FORCE_UTF && c > MAX_UTF_CODE_POINT)
+      fprintf(outfile, "** Warning: character \\N{U+%x} is greater than "
+                       "0x%x and should not be encoded as UTF-32\n",
+                       c, MAX_UTF_CODE_POINT);
+    *q32++ = c;
+    }
 #endif
   }
 

@@ -26,7 +26,9 @@ Capture group count = 0
 First code unit = \xfd
 Last code unit = \xbf
 Subject length lower bound = 6
+\= Expect warning
     \N{U+7fffffff}
+** Warning: character \N{U+7fffffff} is greater than 0x10ffff and should not be encoded as UTF-8
  0: \xfd\xbf\xbf\xbf\xbf\xbf
 \= Expect no match # error message (too big char)
     \x{7fffffff}

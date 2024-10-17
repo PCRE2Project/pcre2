@@ -1940,7 +1940,7 @@ else
       cc = *ptr++;
       if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
 #if PCRE2_CODE_UNIT_WIDTH == 32
-      if (c >= 0x20000000l) { overflow = TRUE; break; }
+      if (c >= 0x20000000u) { overflow = TRUE; break; }
 #endif
       c = (c << 3) + (cc - CHAR_0);
 #if PCRE2_CODE_UNIT_WIDTH == 8
