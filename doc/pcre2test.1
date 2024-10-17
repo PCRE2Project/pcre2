@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "04 October 2024" "PCRE 10.45"
+.TH PCRE2TEST 1 "16 October 2024" "PCRE 10.45"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -511,7 +511,9 @@ means of encoding non-printing characters in a visible way:
 .sp
 Invoking \eN{U+hh...} or \ex{hh...} doesn't require the use of the \fButf\fP
 modifier on the pattern. It is always recognized. There may be any number of
-hexadecimal digits inside the braces; invalid values provoke error messages.
+hexadecimal digits inside the braces; invalid values provoke error messages
+but when using \eN{U+hh...} with some invalid unicode characters they will
+be accepted with a warning instead.
 .P
 Note that even in UTF-8 mode, \exhh (and depending of how large, \eddd)
 describe one byte rather than one character; this makes it possible to
@@ -526,7 +528,7 @@ When testing te 16-bit library, not in UTF-16 mode, all 4-digit \ex{hhhh}
 values are accepted. This makes it possible to construct invalid UTF-16
 sequences for testing purposes.
 .P
-When testing the 32-bit library, not In UTF-32 mode, all 4 to 8-digit \ex{...}
+When testing the 32-bit library, not in UTF-32 mode, all 4 to 8-digit \ex{...}
 values are accepted. This makes it possible to construct invalid UTF-32
 sequences for testing purposes.
 .P
@@ -2243,6 +2245,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 04 October 2024
+Last updated: 16 October 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

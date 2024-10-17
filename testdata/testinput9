@@ -12,6 +12,7 @@
     a\443b
 
 /fd bf bf bf bf bf/I,hex
+\= Expect warning
     \N{U+7fffffff}
 \= Expect no match # error message (too big char)
     \x{7fffffff}

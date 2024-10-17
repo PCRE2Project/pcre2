@@ -6709,4 +6709,7 @@ $/x
 \= Expect no match
     .a.b.c.
 
+/65 00 64/hex
+    e\0d
+
 # End of testinput1 

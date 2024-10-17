@@ -10580,4 +10580,8 @@ No match
     .a.b.c.
 No match
 
+/65 00 64/hex
+    e\0d
+ 0: e\x00d
+
 # End of testinput1 
