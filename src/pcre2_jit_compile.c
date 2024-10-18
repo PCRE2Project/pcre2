@@ -12054,12 +12054,7 @@ while (*cc != OP_KETRPOS)
       add_jump(compiler, &emptymatch, CMP(SLJIT_EQUAL, TMP1, 0, STR_PTR, 0));
 
     if (!zero)
-      {
-      if (framesize < 0)
-        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize - 1), SLJIT_IMM, 0);
-      else
-        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
-      }
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
     }
 
   JUMPTO(SLJIT_JUMP, loop);
