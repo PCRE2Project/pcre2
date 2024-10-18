@@ -10898,7 +10898,8 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
     {
     JUMPTO(SLJIT_JUMP, backtrack->matchingpath);
     JUMPHERE(brajump);
-    if (framesize >= 0)
+    SLJIT_ASSERT(framesize != 0);
+    if (framesize > 1)
       {
       OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
       add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
@@ -13504,7 +13505,7 @@ PCRE2_SPTR ccbegin;
 PCRE2_SPTR ccprev;
 PCRE2_UCHAR bra = OP_BRA;
 PCRE2_UCHAR ket;
-assert_backtrack *assert;
+const assert_backtrack *assert;
 BOOL has_alternatives;
 BOOL needs_control_head = FALSE;
 BOOL has_vreverse;
@@ -13703,14 +13704,17 @@ if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND))
   if (ccbegin[1 + LINK_SIZE] >= OP_ASSERT && ccbegin[1 + LINK_SIZE] <= OP_ASSERTBACK_NOT)
     {
     SLJIT_ASSERT(has_alternatives);
-    assert = CURRENT_AS(bracket_backtrack)->u.assert;
-    if (assert->framesize >= 0 && (ccbegin[1 + LINK_SIZE] == OP_ASSERT || ccbegin[1 + LINK_SIZE] == OP_ASSERTBACK))
+    if (ccbegin[1 + LINK_SIZE] == OP_ASSERT || ccbegin[1 + LINK_SIZE] == OP_ASSERTBACK)
       {
-      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr);
-      add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(-2));
-      OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (assert->framesize - 1) * sizeof(sljit_sw));
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr, TMP1, 0);
+      assert = CURRENT_AS(bracket_backtrack)->u.assert;
+      if (assert->framesize > 1)
+        {
+        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr);
+        add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(-2));
+        OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (assert->framesize - 1) * sizeof(sljit_sw));
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr, TMP1, 0);
+        }
       }
     cond = JUMP(SLJIT_JUMP);
     set_jumps(CURRENT_AS(bracket_backtrack)->u.assert->condfailed, LABEL());
@@ -13887,14 +13891,18 @@ if (has_alternatives)
   if (cond != NULL)
     {
     SLJIT_ASSERT(opcode == OP_COND || opcode == OP_SCOND);
-    assert = CURRENT_AS(bracket_backtrack)->u.assert;
-    if ((ccbegin[1 + LINK_SIZE] == OP_ASSERT_NOT || ccbegin[1 + LINK_SIZE] == OP_ASSERTBACK_NOT) && assert->framesize >= 0)
+    if (ccbegin[1 + LINK_SIZE] == OP_ASSERT_NOT || ccbegin[1 + LINK_SIZE] == OP_ASSERTBACK_NOT)
       {
-      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr);
-      add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(-2));
-      OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (assert->framesize - 1) * sizeof(sljit_sw));
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr, TMP1, 0);
+      assert = CURRENT_AS(bracket_backtrack)->u.assert;
+      if (assert->framesize > 1)
+        {
+        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr);
+        add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(-2));
+        OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (assert->framesize - 1) * sizeof(sljit_sw));
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), assert->private_data_ptr, TMP1, 0);
+        }
+      else if (assert->framesize == 0) SLJIT_UNREACHABLE();
       }
     JUMPHERE(cond);
     }
