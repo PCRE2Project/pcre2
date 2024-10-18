@@ -65,6 +65,7 @@ static const char *OP_names[] = { OP_NAME_LIST };
 #define print_custring        PCRE2_SUFFIX(print_custring_)
 #define print_custring_bylen  PCRE2_SUFFIX(print_custring_bylen_)
 #define print_prop            PCRE2_SUFFIX(print_prop_)
+#define print_char_list       PCRE2_SUFFIX(print_char_list_)
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
 the definition is next to the definition of the opcodes in pcre2_internal.h.
@@ -314,6 +315,129 @@ else
   while (*p < NOTACHAR) fprintf(f, " %04x", *p++);
   fprintf(f, "%s", after);
   }
+}
+
+
+
+/*************************************************
+*              Print character list              *
+*************************************************/
+
+/* Prints the characters and character ranges in a character list.
+
+Arguments:
+  f            file to write to
+  code         pointer in the compiled code
+
+Returns:       end of the character list
+*/
+
+static PCRE2_SPTR
+print_char_list(FILE *f, PCRE2_SPTR code)
+{
+uint32_t type, list_ind;
+uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
+uint32_t range_start = ~(uint32_t)0, range_end = 0;
+const uint8_t *next_char;
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+type = (uint32_t)(code[0] << 8) | code[1];
+code += 2;
+#else
+type = code[0];
+code++;
+#endif  /* CODE_UNIT_WIDTH */
+
+/* Align characters. */
+next_char = (const uint8_t*)code;
+next_char += (type >> XCL_ALIGNMENT_SHIFT) & XCL_ALIGNMENT_MASK;
+type &= XCL_TYPE_MASK;
+list_ind = 0;
+
+if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+  range_start = XCL_CHAR_LIST_LOW_16_START;
+
+while (type > 0)
+  {
+  uint32_t item_count = type & XCL_ITEM_COUNT_MASK;
+
+  if (item_count == XCL_ITEM_COUNT_MASK)
+    {
+    if (list_ind <= 1)
+      {
+      item_count = *(const uint16_t*)next_char;
+      next_char += 2;
+      }
+    else
+      {
+      item_count = *(const uint32_t*)next_char;
+      next_char += 4;
+      }
+    }
+
+  while (item_count > 0)
+    {
+    if (list_ind <= 1)
+      {
+      range_end = *(const uint16_t*)next_char;
+      next_char += 2;
+      }
+    else
+      {
+      range_end = *(const uint32_t*)next_char;
+      next_char += 4;
+      }
+
+    if ((range_end & XCL_CHAR_END) != 0)
+      {
+      range_end = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+
+      if (range_start < range_end)
+        fprintf(f, "\\x{%x}-", range_start);
+
+      fprintf(f, "\\x{%x}", range_end);
+      range_start = ~(uint32_t)0;
+      }
+    else
+      range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+
+    item_count--;
+    }
+
+  list_ind++;
+  type >>= XCL_TYPE_BIT_LEN;
+
+  /* The following code could be optimized to 8/16/32 bit,
+  but it is not worth it for a debugging function. */
+
+  if (range_start == ~(uint32_t)0)
+    {
+    if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+      {
+      if (list_ind == 1) range_start = XCL_CHAR_LIST_HIGH_16_START;
+      else if (list_ind == 2) range_start = XCL_CHAR_LIST_LOW_32_START;
+      else range_start = XCL_CHAR_LIST_HIGH_32_START;
+      }
+    }
+  else if ((type & XCL_BEGIN_WITH_RANGE) == 0)
+    {
+    fprintf(f, "\\x{%x}-", range_start);
+
+    if (list_ind == 1) range_end = XCL_CHAR_LIST_LOW_16_END;
+    else if (list_ind == 2) range_end = XCL_CHAR_LIST_HIGH_16_END;
+    else if (list_ind == 3) range_end = XCL_CHAR_LIST_LOW_32_END;
+    else range_end = XCL_CHAR_LIST_HIGH_32_END;
+
+    fprintf(f, "\\x{%x}", range_end);
+    range_start = ~(uint32_t)0;
+    }
+
+  if (list_ind == 1) char_list_add = XCL_CHAR_LIST_HIGH_16_ADD;
+  else if (list_ind == 2) char_list_add = XCL_CHAR_LIST_LOW_32_ADD;
+  else char_list_add = XCL_CHAR_LIST_HIGH_32_ADD;
+  }
+
+return (PCRE2_SPTR)next_char;
 }
 
 
@@ -761,6 +885,12 @@ for(;;)
       while ((ch = *ccode++) != XCL_END)
         {
         const char *notch = "";
+
+        if (ch >= XCL_LIST)
+          {
+          ccode = print_char_list(f, ccode - 1);
+          break;
+          }
 
         switch(ch)
           {

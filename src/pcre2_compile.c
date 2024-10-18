@@ -5481,8 +5481,10 @@ return TRUE;
 #define XCLASS_HAS_8BIT_CHARS 0x2
 /* XClass has properties. */
 #define XCLASS_HAS_PROPS 0x4
+/* XClass has character lists. */
+#define XCLASS_HAS_CHAR_LISTS 0x8
 /* XClass matches to all >= 256 characters. */
-#define XCLASS_HIGH_ANY 0x8
+#define XCLASS_HIGH_ANY 0x10
 
 #endif
 
@@ -5945,7 +5947,7 @@ for (;; pptr++)
 
       if (cranges->range_list_size > 0)
         {
-        uint32_t *ranges = (uint32_t*)(cranges + 1);
+        const uint32_t *ranges = (const uint32_t*)(cranges + 1);
 
         if (ranges[0] <= 255)
           xclass_props |= XCLASS_HAS_8BIT_CHARS;
@@ -6403,76 +6405,86 @@ for (;; pptr++)
         range += 2;
         }
 
-      if ((xclass_props & XCLASS_HIGH_ANY) != 0)
+      if (cranges->char_lists_size > 0)
         {
-        PCRE2_ASSERT(range + 2 == end && range[0] <= 256 &&
-          range[1] >= GET_MAX_CHAR_VALUE(utf));
-        should_flip_negation = TRUE;
-        range = end;
+        /* The cranges structure is still used and freed later. */
+        PCRE2_ASSERT((xclass_props & XCLASS_HIGH_ANY) == 0);
+        xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_CHAR_LISTS;
         }
-
-      while (range < end)
+      else
         {
-        uint32_t range_start = range[0];
-        uint32_t range_end = range[1];
-
-        range += 2;
-        xclass_props |= XCLASS_REQUIRED;
-
-        if (range_start < 256) range_start = 256;
-
-        if (lengthptr != NULL)
+        if ((xclass_props & XCLASS_HIGH_ANY) != 0)
           {
+          PCRE2_ASSERT(range + 2 == end && range[0] <= 256 &&
+            range[1] >= GET_MAX_CHAR_VALUE(utf));
+          should_flip_negation = TRUE;
+          range = end;
+          }
+
+        while (range < end)
+          {
+          uint32_t range_start = range[0];
+          uint32_t range_end = range[1];
+
+          range += 2;
+          xclass_props |= XCLASS_REQUIRED;
+
+          if (range_start < 256) range_start = 256;
+
+          if (lengthptr != NULL)
+            {
+#ifdef SUPPORT_UNICODE
+            if (utf)
+              {
+              *lengthptr += 1;
+
+              if (range_start < range_end)
+                *lengthptr += PRIV(ord2utf)(range_start, class_uchardata);
+
+              *lengthptr += PRIV(ord2utf)(range_end, class_uchardata);
+              continue;
+              }
+#endif  /* SUPPORT_UNICODE */
+
+            *lengthptr += range_start < range_end ? 3 : 2;
+            continue;
+            }
+
 #ifdef SUPPORT_UNICODE
           if (utf)
             {
-            *lengthptr += 1;
-
             if (range_start < range_end)
-              *lengthptr += PRIV(ord2utf)(range_start, class_uchardata);
+              {
+              *class_uchardata++ = XCL_RANGE;
+              class_uchardata += PRIV(ord2utf)(range_start, class_uchardata);
+              }
+            else
+              *class_uchardata++ = XCL_SINGLE;
 
-            *lengthptr += PRIV(ord2utf)(range_end, class_uchardata);
+            class_uchardata += PRIV(ord2utf)(range_end, class_uchardata);
             continue;
             }
 #endif  /* SUPPORT_UNICODE */
 
-          *lengthptr += range_start < range_end ? 3 : 2;
-          continue;
-          }
-
-#ifdef SUPPORT_UNICODE
-        if (utf)
-          {
+          /* Without UTF support, character values are constrained
+          by the bit length, and can only be > 256 for 16-bit and
+          32-bit libraries. */
+#if PCRE2_CODE_UNIT_WIDTH != 8
           if (range_start < range_end)
             {
             *class_uchardata++ = XCL_RANGE;
-            class_uchardata += PRIV(ord2utf)(range_start, class_uchardata);
+            *class_uchardata++ = range_start;
             }
           else
             *class_uchardata++ = XCL_SINGLE;
 
-          class_uchardata += PRIV(ord2utf)(range_end, class_uchardata);
-          continue;
-          }
-#endif  /* SUPPORT_UNICODE */
-
-        /* Without UTF support, character values are constrained by the bit length,
-        and can only be > 256 for 16-bit and 32-bit libraries. */
-#if PCRE2_CODE_UNIT_WIDTH != 8
-        if (range_start < range_end)
-          {
-          *class_uchardata++ = XCL_RANGE;
-          *class_uchardata++ = range_start;
-          }
-        else
-          *class_uchardata++ = XCL_SINGLE;
-
-        *class_uchardata++ = range_end;
+          *class_uchardata++ = range_end;
 #endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
-        }
+          }
 
-      if (lengthptr == NULL)
-        cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
+        if (lengthptr == NULL)
+          cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
+        }
       }
 #endif
 
@@ -6502,7 +6514,8 @@ for (;; pptr++)
 #ifdef SUPPORT_WIDE_CHARS  /* Defined for 16/32 bits, or 8-bit with Unicode */
     if ((xclass_props & XCLASS_REQUIRED) != 0)
       {
-      *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
+      if ((xclass_props & XCLASS_HAS_CHAR_LISTS) == 0)
+        *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
       code += LINK_SIZE;
       *code = negate_class? XCL_NOT:0;
@@ -6525,6 +6538,101 @@ for (;; pptr++)
         code = class_uchardata + (32 / sizeof(PCRE2_UCHAR));
         }
       else code = class_uchardata;
+
+      if ((xclass_props & XCLASS_HAS_CHAR_LISTS) != 0)
+        {
+        /* Char lists size is an even number,
+        because all items are 16 or 32 bit values. */
+        size_t char_lists_size = cranges->char_lists_size;
+        PCRE2_ASSERT((char_lists_size & 0x1) == 0);
+
+        if (lengthptr != NULL)
+          {
+          /* At this point, we don't know the precise location
+          so the maximum alignment is added to the length. */
+#if PCRE2_CODE_UNIT_WIDTH == 8
+          *lengthptr += 2 /* sizeof(type) in PCRE2_UCHARs */ +
+             3 /* maximum alignment. */;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+          *lengthptr += 1 /* sizeof(type) in PCRE2_UCHARs */ +
+             1 /* maximum alignment. */;
+          char_lists_size >>= 1;
+#else
+          *lengthptr += 1 /* sizeof(type) in PCRE2_UCHARs */;
+          /* Padding, when the size is not divisible by 4. */
+          if ((char_lists_size & 0x2) != 0)
+            char_lists_size += 2;
+          char_lists_size >>= 2;
+#endif
+
+          if (OFLOW_MAX - *lengthptr < char_lists_size)
+            {
+            *errorcodeptr = ERR20;   /* Integer overflow */
+            return 0;
+            }
+
+          *lengthptr += char_lists_size;
+
+          if (*lengthptr > MAX_PATTERN_SIZE)
+            {
+            *errorcodeptr = ERR20;   /* Pattern is too large */
+            return 0;
+            }
+          }
+        else
+          {
+          uint8_t *char_buffer = (uint8_t*)code;
+
+          PCRE2_ASSERT(cranges->char_lists_types <= XCL_TYPE_MASK);
+#if PCRE2_CODE_UNIT_WIDTH == 8
+          /* Encode as high / low bytes. */
+          code[0] = (uint8_t)(XCL_LIST |
+            (cranges->char_lists_types >> 8));
+          code[1] = (uint8_t)cranges->char_lists_types;
+          char_buffer += 2;
+
+          /* Compute alignment. */
+          if (((uintptr_t)char_buffer & 0x1) != 0)
+            {
+            code[0] |= 1u << (XCL_ALIGNMENT_SHIFT - 8);
+            char_buffer += 1;
+            }
+
+          if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
+            {
+            code[0] |= 2u << (XCL_ALIGNMENT_SHIFT - 8);
+            char_buffer += 2;
+            }
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+          code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
+          char_buffer += 2;
+
+          /* Compute alignment. */
+          if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
+            {
+            code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
+            char_buffer += 2;
+            }
+#else
+          code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
+          char_buffer += 4;
+
+          /* Padding. */
+          if ((char_lists_size & 0x2) != 0)
+            {
+            code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
+            char_buffer += 2;
+            }
+#endif
+          memcpy(char_buffer,
+            (uint8_t*)(cranges + 1) + cranges->char_lists_start,
+            char_lists_size);
+
+          code = (PCRE2_UCHAR*)(char_buffer + char_lists_size);
+
+          cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
+          }
+        }
 
       /* Now fill in the complete length of the item */
 
@@ -6549,7 +6657,7 @@ for (;; pptr++)
     if ((SELECT_VALUE8(!utf, 0) || negate_class != should_flip_negation) &&
         cb->classbits.classwords[0] == ~(uint32_t)0)
       {
-      uint32_t *classwords = cb->classbits.classwords;
+      const uint32_t *classwords = cb->classbits.classwords;
       int i;
 
       for (i = 0; i < 8; i++)
@@ -11222,7 +11330,9 @@ version of the pattern, free it before returning. Also free the list of named
 groups if a larger one had to be obtained, and likewise the group information
 vector. */
 
+#ifdef SUPPORT_UNICODE
 PCRE2_ASSERT(cb.cranges == NULL);
+#endif
 
 EXIT:
 #ifdef SUPPORT_VALGRIND

@@ -729,8 +729,11 @@ typedef struct named_group {
 of translating META code to byte code. */
 
 typedef struct class_ranges {
-  struct class_ranges *next;  /* Next class ranges */
-  size_t range_list_size;     /* Size of ranges array */
+  struct class_ranges *next;       /* Next class ranges */
+  size_t char_lists_size;          /* Total size of encoded char lists */
+  size_t char_lists_start;         /* Start offset of encoded char lists */
+  uint16_t range_list_size;        /* Size of ranges array */
+  uint16_t char_lists_types;       /* The XCL_LIST header of char lists */
   /* Followed by the list of ranges (start/end pairs) */
 } class_ranges;
 
