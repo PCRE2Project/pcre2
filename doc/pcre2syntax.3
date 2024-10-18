@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "24 September 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "20 October 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -254,7 +254,7 @@ The recognized classes are:
   RLI         right-to-left isolate
   RLO         right-to-left override
   S           segment separator
-  WS          which space
+  WS          white space
 .
 .
 .SH "CHARACTER CLASSES"
@@ -398,7 +398,7 @@ of the group.
   (?^)            unset imnrsx options
 .sp
 (?aP) implies (?aT) as well, though this has no additional effect. However, it
-means that (?-aP) is really (?-PT) which disables all ASCII restrictions for
+means that (?-aP) also implies (?-aT) and disables all ASCII restrictions for
 POSIX classes.
 .P
 Unsetting x or xx unsets both. Several options may be set at once, and a
@@ -411,10 +411,10 @@ The following are recognized only at the very start of a pattern or after one
 of the newline or \eR sequences or options with similar syntax. More than one
 of them may appear. For the first three, d is a decimal number.
 .sp
-  (*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
   (*LIMIT_DEPTH=d)     set the backtracking limit to d
   (*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes
   (*LIMIT_MATCH=d)     set the match limit to d
+  (*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
   (*NOTEMPTY)          set PCRE2_NOTEMPTY when matching
   (*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching
   (*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)
@@ -692,6 +692,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 24 September 2024
+Last updated: 20 October 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
