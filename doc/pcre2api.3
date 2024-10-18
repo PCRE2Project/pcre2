@@ -1602,6 +1602,18 @@ end of the subject, for compatibility with Perl. If you want a multiline
 circumflex also to match after a terminating newline, you must set
 PCRE2_ALT_CIRCUMFLEX.
 .sp
+  PCRE2_ALT_EXTENDED_CLASS
+.sp
+Alters the parsing of character classes to follow the "extended" syntax
+described by Unicode UTS#18. The PCRE2_ALT_EXTENDED_CLASS option has no impact
+on the behaviour of the Perl-specific "(?[...])" syntax for extended classes,
+but instead enables the alternative syntax of extended class behaviour inside
+ordinary "[...]" character classes. See the
+.\" HREF
+\fBpcre2pattern\fP
+.\"
+documentation for details of the character classes supported.
+.sp
   PCRE2_ALT_VERBNAMES
 .sp
 By default, for compatibility with Perl, the name in any verb sequence such as
