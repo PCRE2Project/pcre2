@@ -1972,22 +1972,22 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           {
           case OP_ECLASS_OR:
           ++Fecode;
-          stack = (stack >> 1) | (stack & 1u);
+          stack = (stack >> 1) | (stack & (uint32_t)1u);
           break;
 
           case OP_ECLASS_AND:
           ++Fecode;
-          stack = (stack >> 1) & (stack & 1u);
+          stack = (stack >> 1) & (stack | ~(uint32_t)1u);
           break;
 
           case OP_ECLASS_SUB:
           ++Fecode;
-          stack = (stack >> 1) & (~stack & 1u);
+          stack = (stack >> 1) & (~stack | ~(uint32_t)1u);
           break;
 
           case OP_ECLASS_NOT:
           ++Fecode;
-          stack ^= 1u;
+          stack ^= (uint32_t)1u;
           break;
 
           case OP_CLASS:
@@ -2022,7 +2022,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         }
 
       /* The final bit left on the stack now holds the match result. */
-      if (!(stack & 1)) RRETURN(MATCH_NOMATCH);
+      if (!(stack & 1u)) RRETURN(MATCH_NOMATCH);
       }
     break;
 

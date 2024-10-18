@@ -6660,4 +6660,36 @@ a)"xI
 
 /a(?C)b/never_callout
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+# JIT not yet supported for extended classes
+
+#pattern jit=0
+
+/[a[]/
+    [
+
+/[a[]/alt_extended_class
+
+/[a[B]/alt_extended_class
+
+/[a[B]]C/B,alt_extended_class
+  aC
+  BC
+\= Expect no match
+  [C
+
+/[[A][B]]/B,alt_extended_class
+  A
+  B
+\= Expect no match
+  [
+  ]
+
+#pattern jit=7
+
+# --------------
+
 # End of testinput2

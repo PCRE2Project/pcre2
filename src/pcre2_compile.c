@@ -2639,7 +2639,8 @@ while (TRUE)
     if (check_simple_class(ptr + 1, &endptr))
       {
       compile_class_leaf(ptr + 1, endptr, &code, *ptr == META_CLASS_NOT);
-      ptr = endptr;
+      PCRE2_ASSERT(*endptr == META_CLASS_END);
+      ptr = endptr + 1;
       }
     else
       {
@@ -6128,6 +6129,11 @@ for (;; pptr++)
       PUT(previous, 1, (int)(code - previous));
 
       // XXX URGH all the "reqcu" and "firstcu" flags etc... need to work out what to set them to
+      zeroreqcu = reqcu;
+      zeroreqcuflags = reqcuflags;
+      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      zerofirstcu = firstcu;
+      zerofirstcuflags = firstcuflags;
 
       break;   /* We are finished with this class */
       }
