@@ -477,7 +477,7 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_heap_limit(pcre2_match_context *mcontext, uint32_t limit)
+pcre2_set_heap_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
 {
 mcontext->heap_limit = limit;
 return 0;
