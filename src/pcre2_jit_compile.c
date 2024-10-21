@@ -7929,6 +7929,7 @@ static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, 
 {
 DEFINE_COMPILER;
 jump_list *found = NULL;
+jump_list *check_result = NULL;
 jump_list **list = (cc[0] & XCL_NOT) == 0 ? &found : backtracks;
 sljit_uw c, charoffset;
 sljit_u32 max = 256, min = READ_CHAR_MAX;
@@ -8507,139 +8508,135 @@ SLJIT_ASSERT(ranges.range_count > 0);
 #endif /* SUPPORT_UNICODE */
 
 SLJIT_ASSERT(compares == 1);
-if (charoffset != 0)
-  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)charoffset);
+invertcmp = (list != backtracks);
 
-charoffset = 0;
+if (ranges.range_count == 2)
+  {
+  range_start = ranges.ranges[0];
+  range_end = ranges.ranges[1];
+
+  if (range_start < range_end)
+    {
+    SET_CHAR_OFFSET(range_start);
+    jump = CMP(SLJIT_LESS_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+    }
+  else
+    jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+
+  add_jump(compiler, backtracks, jump);
+
+  SLJIT_ASSERT(ranges.stack == ranges.local_stack);
+  if (found != NULL)
+    set_jumps(found, LABEL());
+  return;
+  }
+
+if (ranges.range_count > 6 && charoffset != 0)
+  {
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)charoffset);
+  charoffset = 0;
+  }
+
 depth = 0;
 first_item = 0;
-last_item = ranges.range_count;
-compares = ranges.range_count;
+last_item = ranges.range_count - 2;
 has_cmov = sljit_has_cpu_feature(SLJIT_HAS_CMOV) != 0;
 
 while (TRUE)
   {
+  /* At least two items are present. */
   SLJIT_ASSERT(first_item < last_item);
 
-  if (first_item + 6 >= last_item)
+  if (first_item + 6 <= last_item)
     {
-    range_start = ranges.ranges[first_item];
-    range_end = ranges.ranges[first_item + 1];
-    first_item += 2;
-    compares -= 2;
-    invertcmp = (compares == 0 && list != backtracks);
-    charoffset = 0;
-    jump = NULL;
+    SLJIT_ASSERT(charoffset == 0);
+    mid_item = ((first_item + last_item) >> 1) & ~(sljit_u32)1;
+    SLJIT_ASSERT(last_item >= mid_item + 4);
 
-    if (range_start < range_end)
-      {
-      SET_CHAR_OFFSET(range_start);
+    range_end = ranges.ranges[mid_item + 1];
+    ranges.stack[depth].jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)range_end);
+    ranges.stack[depth].first_item = (sljit_u32)(mid_item + 2);
+    ranges.stack[depth].last_item = (sljit_u32)last_item;
 
-      if (first_item < last_item)
-        {
-        OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
-        OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
-        }
-      else
-        jump = CMP(SLJIT_LESS_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
-      }
-    else
-      {
-      if (first_item < last_item)
-        {
-        OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
-        OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-        }
-      else
-        jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
-      }
+    depth++;
+    SLJIT_ASSERT(ranges.stack == ranges.local_stack ?
+      depth <= XCLASS_LOCAL_RANGES_LOG2_SIZE : (ranges.stack + depth) <= (xclass_stack_item*)ranges.ranges);
 
-    if (first_item < last_item)
-      {
-      do
-        {
-        range_start = ranges.ranges[first_item];
-        range_end = ranges.ranges[first_item + 1];
-        first_item += 2;
-        compares -= 2;
-
-        if (range_start < range_end)
-          {
-          SET_CHAR_OFFSET(range_start);
-          OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
-
-          if (has_cmov)
-            SELECT(SLJIT_LESS_EQUAL, TMP2, STR_END, 0, TMP2);
-          else
-            OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_LESS_EQUAL);
-          }
-        else
-          {
-          OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
-
-          if (has_cmov)
-            SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
-          else
-            OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
-          }
-        }
-      while (first_item < last_item);
-
-      invertcmp = (compares == 0 && list != backtracks);
-
-      if (has_cmov)
-        jump = CMP(SLJIT_NOT_EQUAL ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
-      else
-        jump = JUMP(SLJIT_NOT_EQUAL ^ invertcmp);
-      }
-
-    add_jump(compiler, compares > 0 ? list : backtracks, jump);
-
-    if (depth == 0) break;
-
-    add_jump(compiler, list == backtracks ? &found : backtracks, JUMP(SLJIT_JUMP));
-
-    /* The charoffset resets after the end of a branch is reached. */
-    depth--;
-    first_item = ranges.stack[depth].first_item;
-    last_item = ranges.stack[depth].last_item;
-    JUMPHERE(ranges.stack[depth].jump);
+    last_item = mid_item;
     continue;
     }
 
-  mid_item = ((first_item + last_item) >> 1) & ~(sljit_u32)1;
-  SLJIT_ASSERT(last_item > mid_item + 2);
-
-  range_start = ranges.ranges[mid_item];
-  range_end = ranges.ranges[mid_item + 1];
-
-  ranges.stack[depth].first_item = (sljit_u8)(mid_item + 2);
-  ranges.stack[depth].last_item = (sljit_u8)last_item;
-
-  compares -= 2;
-  invertcmp = (compares == 0 && list != backtracks);
+  range_start = ranges.ranges[first_item];
+  range_end = ranges.ranges[first_item + 1];
 
   if (range_start < range_end)
     {
-    ranges.stack[depth].jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)range_end);
-    jump = CMP(SLJIT_GREATER_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
+    SET_CHAR_OFFSET(range_start);
+    OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+    OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
     }
   else
     {
-    OP2U(SLJIT_SUB | SLJIT_SET_GREATER | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
-    ranges.stack[depth].jump = JUMP(SLJIT_GREATER);
-    jump = JUMP(SLJIT_EQUAL ^ invertcmp);
+    OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
+    OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
     }
 
-  depth++;
-  SLJIT_ASSERT(ranges.stack == ranges.local_stack ?
-    depth <= XCLASS_LOCAL_RANGES_LOG2_SIZE : (ranges.stack + depth) <= (xclass_stack_item*)ranges.ranges);
+  if (first_item < last_item)
+    {
+    do
+      {
+      first_item += 2;
+      range_start = ranges.ranges[first_item];
+      range_end = ranges.ranges[first_item + 1];
 
-  add_jump(compiler, compares > 0 ? list : backtracks, jump);
-  last_item = mid_item;
+      if (range_start < range_end)
+        {
+        SET_CHAR_OFFSET(range_start);
+        OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+
+        if (has_cmov)
+          SELECT(SLJIT_LESS_EQUAL, TMP2, STR_END, 0, TMP2);
+        else
+          OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_LESS_EQUAL);
+        }
+      else
+        {
+        OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+
+        if (has_cmov)
+          SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
+        else
+          OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
+        }
+      }
+    while (first_item < last_item);
+    }
+
+  if (depth == 0) break;
+
+  add_jump(compiler, &check_result, JUMP(SLJIT_JUMP));
+
+  /* The charoffset resets after the end of a branch is reached. */
+  charoffset = 0;
+  depth--;
+  first_item = ranges.stack[depth].first_item;
+  last_item = ranges.stack[depth].last_item;
+  JUMPHERE(ranges.stack[depth].jump);
   }
 
-SLJIT_ASSERT(compares == 0);
+if (check_result != NULL)
+  set_jumps(check_result, LABEL());
+
+if (has_cmov)
+  jump = CMP(SLJIT_NOT_EQUAL ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
+else
+  {
+  sljit_set_current_flags(compiler, SLJIT_SET_Z);
+  jump = JUMP(SLJIT_NOT_EQUAL ^ invertcmp);
+  }
+
+add_jump(compiler, backtracks, jump);
+
 if (found != NULL)
   set_jumps(found, LABEL());
 
