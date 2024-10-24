@@ -189,7 +189,9 @@ static const uint8_t coptable[] = {
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
   0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
-  0, 0                           /* \B and \b in UCP mode                  */
+  0, 0,                          /* \B and \b in UCP mode                  */
+  0,                             /* ECLASS                                 */
+  0, 0, 0, 0                     /* ECLASS ops, nested inside ECLASS       */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -268,7 +270,9 @@ static const uint8_t poptable[] = {
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
   0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
-  1, 1                           /* \B and \b in UCP mode                  */
+  1, 1,                          /* \B and \b in UCP mode                  */
+  1,                             /* ECLASS                                 */
+  0, 0, 0, 0                     /* ECLASS ops, nested inside ECLASS       */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
@@ -2665,15 +2669,35 @@ for (;;)
       case OP_CLASS:
       case OP_NCLASS:
       case OP_XCLASS:
+      case OP_ECLASS:
         {
         BOOL isinclass = FALSE;
         int next_state_offset;
         PCRE2_SPTR ecode;
 
+        /* An extended class may have a table or a list of single characters,
+        ranges, or both, and it may be positive or negative. There's a
+        function that sorts all this out. */
+
+        if (codevalue == OP_XCLASS)
+         {
+         ecode = code + GET(code, 1);
+         if (clen > 0) isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE, utf);
+         }
+
+        /* A nested set-based class has internal opcodes for performing
+        set operations. */
+
+        else if (codevalue == OP_ECLASS)
+         {
+         ecode = code + GET(code, 1);
+         if (clen > 0) isinclass = PRIV(eclass)(c, code + 1 + LINK_SIZE, ecode, utf);
+         }
+
         /* For a simple class, there is always just a 32-byte table, and we
         can set isinclass from it. */
 
-        if (codevalue != OP_XCLASS)
+        else
           {
           ecode = code + 1 + (32 / sizeof(PCRE2_UCHAR));
           if (clen > 0)
@@ -2682,16 +2706,6 @@ for (;;)
               ((((const uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
             }
           }
-
-        /* An extended class may have a table or a list of single characters,
-        ranges, or both, and it may be positive or negative. There's a
-        function that sorts all this out. */
-
-        else
-         {
-         ecode = code + GET(code, 1);
-         if (clen > 0) isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE, utf);
-         }
 
         /* At this point, isinclass is set for all kinds of class, and ecode
         points to the byte after the end of the class. If there is a

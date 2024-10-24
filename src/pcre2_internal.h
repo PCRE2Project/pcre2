@@ -574,6 +574,13 @@ modes. */
 #define REQ_CU_MAX       2000
 #endif
 
+/* The maximum nesting depth for Unicode character class sets.
+Currently fixed. Warning: the interpreter relies on this so it can encode
+the operand stack in a uint32_t. A nesting limit of 15 implies (15*2+1)=31
+stack operands required. */
+
+#define ECLASS_NEST_LIMIT  15
+
 /* Offsets for the bitmap tables in the cbits set of tables. Each table
 contains a set of bits for a class map. Some classes are built by combining
 these tables. */
@@ -1745,6 +1752,14 @@ enum {
   OP_NOT_UCP_WORD_BOUNDARY, /* 170 */
   OP_UCP_WORD_BOUNDARY,     /* 171 */
 
+  /* These are used for "extended classes" such as [a-z -- aeiou]. */
+
+  OP_ECLASS,         /* 172 */
+  OP_ECLASS_OR,      /* 173 */
+  OP_ECLASS_AND,     /* 174 */
+  OP_ECLASS_SUB,     /* 175 */
+  OP_ECLASS_NOT,     /* 176 */
+
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
   some in the past. */
@@ -1805,7 +1820,8 @@ some cases doesn't actually use these names at all). */
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
-  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)"
+  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
+  "eclass", "||", "&&", "--", "!!"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1904,7 +1920,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
-  1, 1                           /* \B and \b in UCP mode                  */
+  1, 1,                          /* \B and \b in UCP mode                  */ \
+  0,                             /* ECLASS - variable length               */ \
+  1, 1, 1, 1                     /* ECLASS ops, nested inside ECLASS       */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 
@@ -2153,8 +2171,7 @@ is available. */
 #define _pcre2_valid_utf             PCRE2_SUFFIX(_pcre2_valid_utf_)
 #define _pcre2_was_newline           PCRE2_SUFFIX(_pcre2_was_newline_)
 #define _pcre2_xclass                PCRE2_SUFFIX(_pcre2_xclass_)
-#define _pcre2_optimize_class        PCRE2_SUFFIX(_pcre2_optimize_class_)
-#define _pcre2_update_classbits      PCRE2_SUFFIX(_pcre2_update_classbits_)
+#define _pcre2_eclass                PCRE2_SUFFIX(_pcre2_eclass_)
 
 extern int          _pcre2_auto_possessify(PCRE2_UCHAR *,
                       const compile_block *);
@@ -2183,6 +2200,7 @@ extern int          _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *);
 extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
 extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);
+extern BOOL         _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR, BOOL);
 
 /* This function is needed only when memmove() is not available. */
 

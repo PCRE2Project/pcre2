@@ -76,12 +76,13 @@ for (;;)
   if (c == OP_END) return NULL;
 
   /* XCLASS is used for classes that cannot be represented just by a bit map.
-  This includes negated single high-valued characters. CALLOUT_STR is used for
-  callouts with string arguments. In both cases the length in the table is
+  This includes negated single high-valued characters. ECLASS is used for
+  classes that use set operations internally. CALLOUT_STR is used for
+  callouts with string arguments. In each case the length in the table is
   zero; the actual length is stored in the compiled code. */
 
-  if (c == OP_XCLASS) code += GET(code, 1);
-    else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
+  if (c == OP_XCLASS || c == OP_ECLASS) code += GET(code, 1);
+  else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
 
   /* Handle lookbehind */
 

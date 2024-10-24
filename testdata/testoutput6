@@ -7937,4 +7937,216 @@ Partial match:
     aa
 Failed: error -42: pattern contains an item that is not supported for DFA matching
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+/[a[]/
+    [
+ 0: [
+
+/[a[B]]C/alt_extended_class
+    aC
+ 0: aC
+    BC
+ 0: BC
+\= Expect no match
+    [C
+No match
+
+/[[A][B]]/alt_extended_class
+    A
+ 0: A
+    B
+ 0: B
+\= Expect no match
+    [
+No match
+    ]
+No match
+
+/[[A]||[B]]/alt_extended_class
+    A
+ 0: A
+    B
+ 0: B
+\= Expect no match
+    C
+No match
+
+/[[^A][B]]/alt_extended_class
+    B
+ 0: B
+    C
+ 0: C
+\= Expect no match
+    A
+No match
+
+/[^[A][B]]/alt_extended_class
+    C
+ 0: C
+\= Expect no match
+    A
+No match
+    B
+No match
+
+/[^[A]&&[B]]/alt_extended_class
+    A
+ 0: A
+    B
+ 0: B
+    C
+ 0: C
+
+/[A[]]]/alt_extended_class
+    A
+ 0: A
+    ]
+ 0: ]
+\= Expect no match
+    [
+No match
+
+/[A[^]]]/alt_extended_class
+    A
+ 0: A
+    [
+ 0: [
+    C
+ 0: C
+\= Expect no match
+    ]
+No match
+
+/[A[]]/alt_extended_class,allow_empty_class
+    A
+ 0: A
+\= Expect no match
+    ]
+No match
+    [
+No match
+
+/[A[^]]/alt_extended_class,allow_empty_class
+    A
+ 0: A
+    C
+ 0: C
+    [
+ 0: [
+    ]
+ 0: ]
+
+/[A-C--B]/alt_extended_class
+    A
+ 0: A
+    C
+ 0: C
+\= Expect no match
+    B
+No match
+
+/[^A-C--B]/alt_extended_class
+    B
+ 0: B
+\= Expect no match
+    A
+No match
+    C
+No match
+
+/[[\d\D]--b]/alt_extended_class
+    a
+ 0: a
+    c
+ 0: c
+\= Expect no match
+    b
+No match
+
+/[\dAC-E[:space:]&&[^z]]/alt_extended_class
+    0
+ 0: 0
+    A
+ 0: A
+    C
+ 0: C
+    D
+ 0: D
+    E
+ 0: E
+    \t
+ 0: \x09
+\= Expect no match
+    B
+No match
+    F
+No match
+    ;
+No match
+
+/[z||[^\dAC-E[:space:]]]/alt_extended_class
+    z
+ 0: z
+    B
+ 0: B
+    F
+ 0: F
+    ;
+ 0: ;
+\= Expect no match
+    0
+No match
+    A
+No match
+    C
+No match
+    D
+No match
+    E
+No match
+    \t
+No match
+
+/[a-c--b]+/alt_extended_class
+    ac
+ 0: ac
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/[a-c--b]{2,3}/alt_extended_class
+    ac
+ 0: ac
+    cac
+ 0: cac
+\= Expect no match
+    a
+No match
+    bb
+No match
+
+/x[a-c--b]+y/alt_extended_class
+    xacy
+ 0: xacy
+    xaay
+ 0: xaay
+    xay
+ 0: xay
+\= Expect no match
+    zacy
+No match
+    xacz
+No match
+    xy
+No match
+    xby
+No match
+
+# --------------
+
 # End of testinput6

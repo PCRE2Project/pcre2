@@ -384,11 +384,10 @@ while (TRUE)
 #endif
     break;
 
-#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
+    case OP_ECLASS:
     cc += GET(cc, 1);
     break;
-#endif
 
     case OP_MARK:
     case OP_COMMIT_ARG:

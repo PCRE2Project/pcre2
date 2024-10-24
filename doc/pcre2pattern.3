@@ -1547,6 +1547,52 @@ the next two sections), and the terminating closing square bracket. However,
 escaping other non-alphanumeric characters does no harm.
 .
 .
+.SH "UTS#18 EXTENDED CHARACTER CLASSES"
+.rs
+The PCRE2_ALT_EXTENDED_CLASS option enables an alternative to Perl's "(?[...])"
+syntax, allowing instead extended class behaviour inside ordinary "[...]"
+character classes. This altered syntax for "[...]" classes is loosely described
+by the Unicode standard UTS#18.
+.P
+Firstly, in Perl syntax, an expression such as "[a[]" is a character class
+with two literal characters "a" and "[", but in UTS#18 extended classes the "["
+character becomes an additional metacharacter within classes, denoting the start
+of a nested class, so a literal "[" must be escaped as "\e[".
+.P
+Secondly, within the UTS#18 extended syntax, there are additional operators
+"||", "&&" and "--" which denote character class union, intersection, and
+subtraction respectively. In standard Perl syntax, these would simply be
+needlessly-repeated literals (except for "-" which can denote a range). These
+operators can be used in constructs such as "[\ep{L}--[QW]]" for "Unicode
+letters, other than Q and W". A literal "-" at the end of a range must be
+escaped (so while "[--1]" in Perl syntax is the range from hyphen to "1", it
+must be escaped as "[\e--1]" in UTS#18 extended classes).
+.P
+The specific rules in PCRE2 are that classes can be nested:
+"[...[B]...[^C]...]". The individual class items (literal characters, literal
+ranges, properties such as \ed or \ep{...}, and nested classes) can be
+combined by juxtaposition or by an operator "||", "&&", or "--".
+Juxtaposition is the implicit union operator, and binds more tightly than any
+explicit operator. Precedence between the explicit operators is not defined,
+so mixing operators is a syntax error (thus "[A&&B--C]" is an error, but
+"[A&&[B--C]]" is accepted).
+.P
+This is an emerging syntax which is being adopted gradually across the regex
+ecosystem: for example JavaScript adopted the "/v" flag in ECMAScript 2024;
+Python's "re" module reserves the syntax for future use with a FutureWarning
+for unescaped use of "[" as a literal within character classes. Due to UTS#18
+providing insufficient guidance, engines interpret the syntax differently.
+Rust's "regex" crate and Python's "regex" PyPi module both implement UTS#18
+extended classes, but with slight incompatibilities ("[A||B&&C]" is parsed as
+"[A||[B&&C]]" in Python's "regex" but as "[[A||B]&&C]" in Rust's "regex").
+.P
+PCRE2's syntax adds syntax restrictions similar to ECMASCript's /v flag, so
+that all the extended classes accepted as valid by PCRE2 have the property
+that they are interpreted either with the same behaviour, or as invalid, by
+all other major engines. Please file an issue if you are aware of cross-engine
+differences in behaviour between PCRE2 and another major engine.
+.
+.
 .SH "POSIX CHARACTER CLASSES"
 .rs
 .sp
