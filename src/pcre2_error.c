@@ -196,6 +196,13 @@ static const unsigned char compile_error_texts[] =
   /* 105 */
   "PCRE2_EXTRA_TURKISH_CASING requires UTF in 8-bit mode\0"
   "PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT are not compatible\0"
+  "character classes are too deeply nested\0"
+  "invalid operator in character class\0"
+  "unexpected operator in character class (no preceding operand)\0"
+  /* 110 */
+  "expected operand after operator in character class\0"
+  "brackets needed to clarify operator precedence in character class\0"
+  "missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

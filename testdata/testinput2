@@ -6660,4 +6660,314 @@ a)"xI
 
 /a(?C)b/never_callout
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+/[a[]/
+    [
+
+/[a[]/alt_extended_class
+
+/[a[B]/alt_extended_class
+
+/[a[B]]C/B,alt_extended_class
+    aC
+    BC
+\= Expect no match
+    [C
+
+/[[A][B]]/B,alt_extended_class
+    A
+    B
+\= Expect no match
+    [
+    ]
+
+/[[A]||[B]]/B,alt_extended_class
+    A
+    B
+\= Expect no match
+    C
+
+/[[^A][B]]/B,alt_extended_class
+    B
+    C
+\= Expect no match
+    A
+
+/[^[A][B]]/B,alt_extended_class
+    C
+\= Expect no match
+    A
+    B
+
+/[^[A]&&[B]]/B,alt_extended_class
+    A
+    B
+    C
+
+/[A[]]]/B,alt_extended_class
+    A
+    ]
+\= Expect no match
+    [
+
+/[A[^]]]/B,alt_extended_class
+    A
+    [
+    C
+\= Expect no match
+    ]
+
+/[A[]]/B,alt_extended_class,allow_empty_class
+    A
+\= Expect no match
+    ]
+    [
+
+/[A[^]]/B,alt_extended_class,allow_empty_class
+    A
+    C
+    [
+    ]
+
+/[A-C--B]/B,alt_extended_class
+    A
+    C
+\= Expect no match
+    B
+
+/[^A-C--B]/B,alt_extended_class
+    B
+\= Expect no match
+    A
+    C
+
+/[[\d\D]--b]/B,alt_extended_class
+    a
+    c
+\= Expect no match
+    b
+
+/[\dAC-E[:space:]&&[^z]]/B,alt_extended_class
+    0
+    A
+    C
+    D
+    E
+    \t
+\= Expect no match
+    B
+    F
+    ;
+
+/[z||[^\dAC-E[:space:]]]/B,alt_extended_class
+    z
+    B
+    F
+    ;
+\= Expect no match
+    0
+    A
+    C
+    D
+    E
+    \t
+
+/[ab||cd]/B,alt_extended_class
+    a
+    c
+\= Expect no match
+    e
+
+/[[a]b||[c]d]/B,alt_extended_class
+    a
+    c
+\= Expect no match
+    e
+
+/[a[b]||c[d]]/B,alt_extended_class
+    a
+    c
+\= Expect no match
+    e
+
+/[-&&-]/B,alt_extended_class
+    -
+\= Expect no match
+    a
+
+/[a-&&-a]/B,alt_extended_class
+    -
+    a
+\= Expect no match
+    b
+
+/[-a&&a-]/B,alt_extended_class
+    -
+    a
+\= Expect no match
+    b
+
+/[[a]-&&-[a]]/B,alt_extended_class
+    -
+    a
+\= Expect no match
+    b
+
+/[-[a]&&[a]-]/B,alt_extended_class
+    -
+    a
+\= Expect no match
+    b
+
+/(?xx:[  ^  a[  ^  b]  ])/B,alt_extended_class
+    b
+\= Expect no match
+    A
+    a
+    c
+
+/[  ^  a[  ^  b]  ]/B,alt_extended_class
+    \x20
+    ^
+    a
+    b
+\= Expect no match
+    c
+
+/[a-c--b]+/B,alt_extended_class
+    ac
+    a
+\= Expect no match
+    b
+
+/[a-c--b]{2,3}/B,alt_extended_class
+    ac
+    cac
+\= Expect no match
+    a
+    bb
+
+/x[a-c--b]+y/B,alt_extended_class
+    xacy
+    xaay
+    xay
+\= Expect no match
+    zacy
+    xacz
+    xy
+    xby
+
+/[A--B--C--D]/B,alt_extended_class
+    A
+\= Expect no match
+    B
+
+/[A--A--A]/B,alt_extended_class
+\= Expect no match
+    A
+    B
+
+/[[A--A]--A]/B,alt_extended_class
+\= Expect no match
+    A
+    B
+
+/[A--[A--A]]/B,alt_extended_class
+    A
+\= Expect no match
+    B
+
+/[A--^B]/B,alt_extended_class
+    A
+\= Expect no match
+    B
+    ^
+    z
+
+/([a-z--n])\1/B,alt_extended_class
+    aa
+    zz
+\= Expect no match
+    az
+    nn
+
+/(x[a-z--n]y)\1/B,alt_extended_class
+    xayxay
+    xzyxzy
+\= Expect no match
+    xnyxny
+
+/(?:_\1|([a-z--n])){2}/B,alt_extended_class
+    a_a
+    z_z
+\= Expect no match
+    a_z
+    n_n
+
+/(?:_\1|([a-z--n]))+/B,alt_extended_class
+    a_a
+    z_z
+    a_partial
+\= Expect no match
+    n_n
+
+/[a--/alt_extended_class
+
+/[a--a/alt_extended_class
+
+/[a--[a/alt_extended_class
+
+/[a--[a]/alt_extended_class
+
+/[a--[a]--/alt_extended_class
+
+/[a--]/alt_extended_class
+
+/[--a]/alt_extended_class
+
+/[^--a]/alt_extended_class
+
+/[--]/alt_extended_class
+
+/[a---b]/alt_extended_class
+
+/[a----b]/alt_extended_class
+
+/[a&&&b]/alt_extended_class
+
+/[a|||b]/alt_extended_class
+
+/[a||b&&c]/alt_extended_class
+
+/[a--b&&c]/alt_extended_class
+
+/[a||b--c]/alt_extended_class
+
+/[a||[b--c]]/alt_extended_class
+    a
+    b
+\= Expect no match
+    c
+
+/[\d-z]/B,alt_extended_class
+
+/[z-\d]/B,alt_extended_class
+
+/[abc -- b]+/B,alt_extended_class
+    acacbac
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a]]]]]]]]]]]]]]]/alt_extended_class
+    a
+\= Expect no match
+    b
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[z]&&a]]]]]]]]]]]]]]]/alt_extended_class
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
+
+# --------------
+
 # End of testinput2

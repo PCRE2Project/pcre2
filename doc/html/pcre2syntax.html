@@ -280,7 +280,7 @@ The recognized classes are:
   RLI         right-to-left isolate
   RLO         right-to-left override
   S           segment separator
-  WS          which space
+  WS          white space
 </PRE>
 </P>
 <br><a name="SEC11" href="#TOC1">CHARACTER CLASSES</a><br>
@@ -421,7 +421,7 @@ of the group.
   (?^)            unset imnrsx options
 </pre>
 (?aP) implies (?aT) as well, though this has no additional effect. However, it
-means that (?-aP) is really (?-PT) which disables all ASCII restrictions for
+means that (?-aP) also implies (?-aT) and disables all ASCII restrictions for
 POSIX classes.
 </P>
 <P>
@@ -436,10 +436,10 @@ The following are recognized only at the very start of a pattern or after one
 of the newline or \R sequences or options with similar syntax. More than one
 of them may appear. For the first three, d is a decimal number.
 <pre>
-  (*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
   (*LIMIT_DEPTH=d)     set the backtracking limit to d
   (*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes
   (*LIMIT_MATCH=d)     set the match limit to d
+  (*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
   (*NOTEMPTY)          set PCRE2_NOTEMPTY when matching
   (*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching
   (*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)
@@ -703,7 +703,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC34" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 September 2024
+Last updated: 20 October 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

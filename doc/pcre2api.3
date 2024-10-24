@@ -1493,7 +1493,7 @@ error code and an offset (number of code units) within the pattern,
 respectively, when \fBpcre2_compile()\fP returns NULL because a compilation
 error has occurred.
 .P
-There are nearly 100 positive error codes that \fBpcre2_compile()\fP may return
+There are over 100 positive error codes that \fBpcre2_compile()\fP may return
 if it finds an error in the pattern. There are also some negative error codes
 that are used for invalid UTF strings when validity checking is in force. These
 are the same as given by \fBpcre2_match()\fP and \fBpcre2_dfa_match()\fP, and
@@ -1601,6 +1601,18 @@ after any internal newline. However, it does not match after a newline at the
 end of the subject, for compatibility with Perl. If you want a multiline
 circumflex also to match after a terminating newline, you must set
 PCRE2_ALT_CIRCUMFLEX.
+.sp
+  PCRE2_ALT_EXTENDED_CLASS
+.sp
+Alters the parsing of character classes to follow the extended syntax
+described by Unicode UTS#18. The PCRE2_ALT_EXTENDED_CLASS option has no impact
+on the behaviour of the Perl-specific "(?[...])" syntax for extended classes,
+but instead enables the alternative syntax of extended class behaviour inside
+ordinary "[...]" character classes. See the
+.\" HREF
+\fBpcre2pattern\fP
+.\"
+documentation for details of the character classes supported.
 .sp
   PCRE2_ALT_VERBNAMES
 .sp

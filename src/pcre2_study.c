@@ -417,17 +417,14 @@ for (;;)
 
     case OP_CLASS:
     case OP_NCLASS:
-#ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
+    case OP_ECLASS:
     /* The original code caused an unsigned overflow in 64 bit systems,
     so now we use a conditional statement. */
-    if (op == OP_XCLASS)
+    if (op == OP_XCLASS || op == OP_ECLASS)
       cc += GET(cc, 1);
     else
       cc += PRIV(OP_lengths)[OP_CLASS];
-#else
-    cc += PRIV(OP_lengths)[OP_CLASS];
-#endif
 
     switch (*cc)
       {
@@ -1714,6 +1711,11 @@ do
 
       tcode += 2;
       break;
+
+      /* Set-based ECLASS: treat it the same as a "complex" XCLASS; give up. */
+
+      case OP_ECLASS:
+      return SSB_FAIL;
 
       /* Extended class: if there are any property checks, or if this is a
       negative XCLASS without a map, give up. If there are no property checks,
