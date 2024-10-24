@@ -1102,10 +1102,9 @@ switch(*cc)
   case OP_CALLOUT_STR:
   return cc + GET(cc, 1 + 2*LINK_SIZE);
 
-#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
+  case OP_ECLASS:
   case OP_XCLASS:
   return cc + GET(cc, 1);
-#endif
 
   case OP_MARK:
   case OP_COMMIT_ARG:
@@ -1270,6 +1269,16 @@ while (cc < ccend)
       return FALSE;
     cc++;
     break;
+
+    case OP_ECLASS:
+    return FALSE;  /* Lacking JIT support, for now */
+
+#if !(defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8)
+    /* JIT shares the assumption, throughout the rest of PCRE2, that OP_XCLASS
+    is only emitted under these conditions. */
+    case OP_XCLASS:
+    return FALSE;
+#endif
 
     default:
     cc = next_opcode(common, cc);

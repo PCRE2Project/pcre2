@@ -2887,4 +2887,303 @@
 /[^[:xdigit:]\x{400}-\x{410}\x{500}\x{600}-\x{610}\x{700}\x{800}-\x{810}]+/utf,ucp
   \x{800}<\x{3ff}\x{411}\x{4ff}\x{501}\x{5ff}\x{611}\x{6ff}\x{701}\x{7ff}\x{811}>\x{810}
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+/[\p{Lu}[\p{Nd}]]/B,alt_extended_class
+    0
+    C
+\= Expect no match
+    [
+    a
+
+/[[\pL][\p{Nd}]]/B,alt_extended_class
+    0
+    a
+\= Expect no match
+    [
+    ]
+
+/[[\p{Lu}]||[\p{Nd}]]/B,alt_extended_class
+    A
+    1
+\= Expect no match
+    a
+
+/[[^\pL][\p{Nd}]]/B,alt_extended_class
+    0
+    .
+\= Expect no match
+    A
+
+/[^[\pL][\p{Nd}]]/B,alt_extended_class
+    .
+\= Expect no match
+    A
+    0
+
+/[^[\pL]&&[\p{Nd}]]/B,alt_extended_class
+    A
+    0
+
+/[\pL[]]]/B,alt_extended_class
+    A
+    ]
+\= Expect no match
+    [
+
+/[\pL[^]]]/B,alt_extended_class
+    A
+    [
+    0
+\= Expect no match
+    ]
+
+/[\pL[]]/B,alt_extended_class,allow_empty_class
+    A
+\= Expect no match
+    ]
+    [
+
+/[\pL[^]]/B,alt_extended_class,allow_empty_class
+    A
+    0
+    [
+    ]
+
+/[\dAC-E[:space:]\p{Lu}&&[^z]]/B,alt_extended_class
+    0
+    A
+    C
+    D
+    E
+    \t
+\= Expect no match
+    a
+    ;
+
+/[z||[^\dAC-E[:space:]\p{Lu}]]/B,alt_extended_class
+    z
+    ;
+\= Expect no match
+    0
+    A
+    C
+    D
+    E
+    B
+    F
+    \t
+
+/[\p{Lu}\p{Nd}||cd]/B,alt_extended_class
+    A
+    0
+    c
+\= Expect no match
+    e
+
+/[[\p{Lu}]\p{Nd}||[c]d]/B,alt_extended_class
+    A
+    0
+    c
+\= Expect no match
+    e
+
+/[\p{Lu}[\p{Nd}]||c[d]]/B,alt_extended_class
+    A
+    0
+    c
+\= Expect no match
+    e
+
+/[\p{Lu}-]/B,alt_extended_class
+    A
+    -
+\= Expect no match
+    a
+
+/[-\p{Lu}]/B,alt_extended_class
+    A
+    -
+\= Expect no match
+    a
+
+/[\pL-]/B,alt_extended_class
+    A
+    -
+\= Expect no match
+    0
+
+/[-\pL]/B,alt_extended_class
+    A
+    -
+\= Expect no match
+    0
+
+/[\p{Lu}-]/B
+    A
+    -
+\= Expect no match
+    a
+
+/[-\p{Lu}]/B
+    A
+    -
+\= Expect no match
+    a
+
+/[\pL-]/B
+    A
+    -
+\= Expect no match
+    0
+
+/[-\pL]/B
+    A
+    -
+\= Expect no match
+    0
+
+/[\p{Lu}-z]/B,alt_extended_class
+
+/[z-\p{Lu}]/B,alt_extended_class
+
+/[\pL-z]/B,alt_extended_class
+
+/[z-\pL]/B,alt_extended_class
+
+/[\p{Lu}-&&-\pL]/B,alt_extended_class
+    -
+    A
+\= Expect no match
+    a
+
+/[-\p{Lu}&&\pL-]/B,alt_extended_class
+    -
+    A
+\= Expect no match
+    a
+
+/[[\p{Lu}]-&&-[\pL]]/B,alt_extended_class
+    -
+    A
+\= Expect no match
+    a
+
+/[-[\p{Lu}]&&[\pL]-]/B,alt_extended_class
+    -
+    A
+\= Expect no match
+    a
+
+/(?xx:[  ^  5[  ^  \p{Nd}]  ])/B,alt_extended_class
+    4
+\= Expect no match
+    a
+    ;
+    5
+
+/(?xx:[  ^  \p{Nd}[  ^  5]  ])/B,alt_extended_class
+\= Expect no match
+    a
+    ;
+    4
+    5
+
+/(?xx:[  ^  \p{Nd}[  ^  \p{Nd}]  ])/B,alt_extended_class
+\= Expect no match
+    a
+    ;
+    4
+    5
+
+/[  ^  \p{Ll}[  ^  \p{Nd}]  ]/B,alt_extended_class
+    \x20
+    ^
+    a
+    0
+\= Expect no match
+    A
+    ;
+
+/[a-c--\p{Nd}]+/B,alt_extended_class
+    ac
+    a
+\= Expect no match
+    0
+
+/[a-c--\p{Nd}]{2,3}/B,alt_extended_class
+    ac
+    cac
+\= Expect no match
+    a
+    00
+
+/x[a-c--\p{Nd}]+y/B,alt_extended_class
+    xacy
+    xaay
+    xay
+\= Expect no match
+    zacy
+    xacz
+    xy
+    x0y
+
+/[\pL--\pL--\pL]/B,alt_extended_class
+\= Expect no match
+    A
+    1
+
+/[[\pL--\pL]--\pL]/B,alt_extended_class
+\= Expect no match
+    A
+    1
+
+/[\pL--[\pL--\pL]]/B,alt_extended_class
+    A
+\= Expect no match
+    1
+
+/[\pL--^\p{Nd}]/B,alt_extended_class
+    A
+\= Expect no match
+    1
+    ^
+
+/([a-z--[\pL&&n]])\1/B,alt_extended_class
+    aa
+    zz
+\= Expect no match
+    az
+    nn
+
+/(x[a-z--[\pL&&n]]y)\1/B,alt_extended_class
+    xayxay
+    xzyxzy
+\= Expect no match
+    xnyxny
+
+/(?:_\1|([a-z--[\pL&&n]])){2}/B,alt_extended_class
+    a_a
+    z_z
+\= Expect no match
+    a_z
+    n_n
+
+/(?:_\1|([a-z--[\pL&&n]]))+/B,alt_extended_class
+    a_a
+    z_z
+    a_partial
+\= Expect no match
+    n_n
+
+/[\p{Nd}||[\pL--\p{Lu}]]/alt_extended_class
+    a
+    0
+\= Expect no match
+    C
+
+# --------------
+
 # End of testinput5
