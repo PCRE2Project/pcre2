@@ -6582,6 +6582,7 @@ for (;; pptr++)
         else
           {
           uint8_t *char_buffer = (uint8_t*)code;
+          uint8_t *header_end;
 
           PCRE2_ASSERT(cranges->char_lists_types <= XCL_TYPE_MASK);
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -6589,7 +6590,7 @@ for (;; pptr++)
           code[0] = (uint8_t)(XCL_LIST |
             (cranges->char_lists_types >> 8));
           code[1] = (uint8_t)cranges->char_lists_types;
-          char_buffer += 2;
+          char_buffer += 2 * sizeof(PCRE2_UCHAR);
 
           /* Compute alignment. */
           if (((uintptr_t)char_buffer & 0x1) != 0)
@@ -6603,9 +6604,11 @@ for (;; pptr++)
             code[0] |= 2u << (XCL_ALIGNMENT_SHIFT - 8);
             char_buffer += 2;
             }
+
+          header_end = code + 2;
 #elif PCRE2_CODE_UNIT_WIDTH == 16
           code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
-          char_buffer += 2;
+          char_buffer += sizeof(PCRE2_UCHAR);
 
           /* Compute alignment. */
           if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
@@ -6613,9 +6616,11 @@ for (;; pptr++)
             code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
             char_buffer += 2;
             }
+
+          header_end = (uint8_t*)(code + 1);
 #else
           code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
-          char_buffer += 4;
+          char_buffer += sizeof(PCRE2_UCHAR);
 
           /* Padding. */
           if ((char_lists_size & 0x2) != 0)
@@ -6623,7 +6628,15 @@ for (;; pptr++)
             code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
             char_buffer += 2;
             }
+
+          header_end = (uint8_t*)(code + 1);
 #endif
+          /* Clear padding bytes. Although the padding bytes are never
+          used for matching, they are checked in some cases, such as
+          pattern repeat detection in JIT. */
+          if (header_end < char_buffer)
+            memset(header_end, 0, (size_t)(char_buffer - header_end));
+
           memcpy(char_buffer,
             (uint8_t*)(cranges + 1) + cranges->char_lists_start,
             char_lists_size);
