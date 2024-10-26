@@ -206,6 +206,9 @@ therefore no need for it to have a length entry, so use a high value. */
 #define SELECT_VALUE8(value8, value) (value)
 #endif
 
+/* Macro for aligning data. */
+#define CLIST_ALIGN_TO(base, align) \
+  ((base + ((size_t)(align) - 1)) & ~((size_t)(align) - 1))
 
 /* Macros for the definitions below, to prevent name collisions. */
 

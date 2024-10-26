@@ -631,6 +631,7 @@ typedef struct pcre2_real_code {
   void    *executable_jit;        /* Pointer to JIT code */
   uint8_t  start_bitmap[32];      /* Bitmap for starting code unit < 256 */
   CODE_BLOCKSIZE_TYPE blocksize;  /* Total (bytes) that was malloc-ed */
+  CODE_BLOCKSIZE_TYPE code_start; /* Byte code start offset */
   uint32_t magic_number;          /* Paranoid and endianness check */
   uint32_t compile_options;       /* Options passed to pcre2_compile() */
   uint32_t overall_options;       /* Options after processing the pattern */
@@ -786,8 +787,9 @@ typedef struct compile_block {
   BOOL had_recurse;                /* Had a pattern recursion or subroutine call */
   BOOL dupnames;                   /* Duplicate names exist */
 #ifdef SUPPORT_WIDE_CHARS
-  class_ranges* cranges;           /* First class range. */
-  class_ranges* next_cranges;      /* Next class range. */
+  class_ranges *cranges;           /* First class range. */
+  class_ranges *next_cranges;      /* Next class range. */
+  size_t char_lists_size;          /* Current size of character lists */
 #endif
 } compile_block;
 

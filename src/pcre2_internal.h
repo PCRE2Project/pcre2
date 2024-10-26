@@ -1358,9 +1358,8 @@ contain characters with values greater than 255. */
 #define XCL_NOTPROP  4     /* Unicode inverted property (ditto) */
 /* This value represents the beginning of character lists. The value
 is 16 bit long, and stored as a high and low byte pair in 8 bit mode.
-The lower 12 bit contains information about character lists (see later)
-and next two bits contains the alignment (padding) data. */
-#define XCL_LIST     (sizeof(PCRE2_UCHAR) == 1 ? 0x40 : 0x4000)
+The lower 12 bit contains information about character lists (see later). */
+#define XCL_LIST     (sizeof(PCRE2_UCHAR) == 1 ? 0x10 : 0x1000)
 
 /* When a character class contains many characters/ranges,
 they are stored in character lists. There are four character
@@ -1423,11 +1422,6 @@ represents that the item count is stored at the begining of the
 character list. The item count has the same width as the items
 in the character list (e.g. 16 bit for Low16 and High16 lists). */
 #define XCL_ITEM_COUNT_MASK 0x3
-/* Shift and mask for getting alignment data. The items of a character
-list are always naturally aligned. Adding this value to the byte position
-of the XCL_LIST header ensures the required alignment of the items. */
-#define XCL_ALIGNMENT_SHIFT 12
-#define XCL_ALIGNMENT_MASK 0x3
 /* Shift and flag for constructing character list items. The XCL_CHAR_END
 is set, when the item is not the beginning of a range. The XCL_CHAR_SHIFT
 can be used to encode / decode the character value stored in an item. */
@@ -2199,8 +2193,9 @@ extern int          _pcre2_study(pcre2_real_code *);
 extern int          _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *);
 extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
-extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, BOOL);
-extern BOOL         _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR, BOOL);
+extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, const uint8_t *, BOOL);
+extern BOOL         _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR,
+                      const uint8_t *, BOOL);
 
 /* This function is needed only when memmove() is not available. */
 

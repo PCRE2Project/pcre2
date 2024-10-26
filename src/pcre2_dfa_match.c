@@ -2682,7 +2682,9 @@ for (;;)
         if (codevalue == OP_XCLASS)
          {
          ecode = code + GET(code, 1);
-         if (clen > 0) isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE, utf);
+         if (clen > 0)
+           isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE,
+             (const uint8_t*)mb->start_code, utf);
          }
 
         /* A nested set-based class has internal opcodes for performing
@@ -2691,7 +2693,9 @@ for (;;)
         else if (codevalue == OP_ECLASS)
          {
          ecode = code + GET(code, 1);
-         if (clen > 0) isinclass = PRIV(eclass)(c, code + 1 + LINK_SIZE, ecode, utf);
+         if (clen > 0)
+           isinclass = PRIV(eclass)(c, code + 1 + LINK_SIZE, ecode,
+             (const uint8_t*)mb->start_code, utf);
          }
 
         /* For a simple class, there is always just a 32-byte table, and we
@@ -3536,8 +3540,7 @@ if (mb->match_limit_depth > re->limit_depth)
 if (mb->heap_limit > re->limit_heap)
   mb->heap_limit = re->limit_heap;
 
-mb->start_code = (PCRE2_SPTR)((const uint8_t *)re + sizeof(pcre2_real_code)) +
-  re->name_count * re->name_entry_size;
+mb->start_code = (PCRE2_SPTR)((const uint8_t *)re + re->code_start);
 mb->tables = re->tables;
 mb->start_subject = subject;
 mb->end_subject = end_subject;

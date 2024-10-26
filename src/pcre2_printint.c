@@ -334,7 +334,7 @@ Returns:       end of the character list
 */
 
 static PCRE2_SPTR
-print_char_list(FILE *f, PCRE2_SPTR code)
+print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
 {
 uint32_t type, list_ind;
 uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
@@ -350,8 +350,7 @@ code++;
 #endif  /* CODE_UNIT_WIDTH */
 
 /* Align characters. */
-next_char = (const uint8_t*)code;
-next_char += (type >> XCL_ALIGNMENT_SHIFT) & XCL_ALIGNMENT_MASK;
+next_char = char_lists_end - (GET(code, 0) << 1);
 type &= XCL_TYPE_MASK;
 list_ind = 0;
 
@@ -438,7 +437,7 @@ while (type > 0)
   else char_list_add = XCL_CHAR_LIST_HIGH_32_ADD;
   }
 
-return (PCRE2_SPTR)next_char;
+return code + LINK_SIZE;
 }
 
 
@@ -461,7 +460,8 @@ Returns:       nothing
 */
 
 static void
-print_class(FILE *f, PCRE2_SPTR code, BOOL utf, const char *before, const char *after)
+print_class(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end, BOOL utf,
+  const char *before, const char *after)
 {
 BOOL printmap, invertmap;
 PCRE2_SPTR ccode;
@@ -532,7 +532,7 @@ if (*code == OP_XCLASS)
     const char *notch = "";
     if (ch >= XCL_LIST)
       {
-      ccode = print_char_list(f, ccode - 1);
+      ccode = print_char_list(f, ccode - 1, char_lists_end);
       break;
       }
     switch(ch)
@@ -609,7 +609,7 @@ uint32_t nesize = re->name_entry_size;
 BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
 nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
-code = codestart = nametable + re->name_count * re->name_entry_size;
+code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
 for(;;)
   {
@@ -984,7 +984,7 @@ for(;;)
         case OP_CLASS:
         case OP_NCLASS:
         case OP_XCLASS:
-        print_class(f, ccode, utf, "      cls:", "\n");
+        print_class(f, ccode, (uint8_t*)codestart, utf, "      cls:", "\n");
         if (*ccode == OP_XCLASS)
           ccode += GET(ccode, 1);
         else
@@ -1012,7 +1012,7 @@ for(;;)
     case OP_CLASS:
     case OP_NCLASS:
     case OP_XCLASS:
-    print_class(f, code, utf, "    ", "");
+    print_class(f, code, (uint8_t*)codestart, utf, "    ", "");
     if (*code == OP_XCLASS)
       extra = GET(code, 1);
     ccode = code + OP_lengths[*code] + extra;

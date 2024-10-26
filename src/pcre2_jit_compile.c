@@ -7778,8 +7778,7 @@ cc++;
 #endif  /* CODE_UNIT_WIDTH */
 
 /* Align characters. */
-next_char = (const uint8_t*)cc;
-next_char += (type >> XCL_ALIGNMENT_SHIFT) & XCL_ALIGNMENT_MASK;
+next_char = (const uint8_t*)common->start - (GET(cc, 0) << 1);
 type &= XCL_TYPE_MASK;
 
 /* Estimate size. */
@@ -7851,6 +7850,7 @@ while (type > 0)
   if (item_count == XCL_ITEM_COUNT_MASK)
     {
     READ_FROM_CHAR_LIST(item_count);
+    SLJIT_ASSERT(item_count >= XCL_ITEM_COUNT_MASK);
     }
 
   while (item_count > 0)
@@ -7918,6 +7918,7 @@ while (type > 0)
   }
 
 SLJIT_ASSERT(range_count > 0 && range_count <= (est_range_count << 1));
+SLJIT_ASSERT(next_char <= (const uint8_t*)common->start);
 ranges->range_count = range_count;
 }
 
@@ -14702,7 +14703,7 @@ memset(&rootbacktrack, 0, sizeof(backtrack_common));
 memset(common, 0, sizeof(compiler_common));
 common->re = re;
 common->name_table = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
-rootbacktrack.cc = common->name_table + re->name_count * re->name_entry_size;
+rootbacktrack.cc = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
 #ifdef SUPPORT_UNICODE
 common->invalid_utf = (mode & PCRE2_JIT_INVALID_UTF) != 0;
