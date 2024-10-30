@@ -259,7 +259,10 @@ static unsigned char meta_extra_lengths[] = {
   0,             /* META_QUERY_QUERY */
   2,             /* META_MINMAX */
   2,             /* META_MINMAX_PLUS */
-  2              /* META_MINMAX_QUERY */
+  2,             /* META_MINMAX_QUERY */
+  0,             /* META_ECLASS_OR */
+  0,             /* META_ECLASS_AND */
+  0              /* META_ECLASS_SUB */
 };
 
 /* Types for skipping parts of a parsed pattern. */
@@ -579,8 +582,11 @@ static uint32_t chartypeoffset[] = {
 now all in a single string, to reduce the number of relocations when a shared
 library is dynamically loaded. The list of lengths is terminated by a zero
 length entry. The first three must be alpha, lower, upper, as this is assumed
-for handling case independence. The indices for several classes are needed, so
-identify them. */
+for handling case independence.
+
+The indices for several classes are stored in pcre2_compile.h - these must
+be kept in sync with posix_names, posix_name_lengths, posix_class_maps,
+and posix_substitutes. */
 
 static const char posix_names[] =
   STRING_alpha0 STRING_lower0 STRING_upper0 STRING_alnum0
@@ -590,12 +596,6 @@ static const char posix_names[] =
 
 static const uint8_t posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
-
-#define PC_DIGIT   7
-#define PC_GRAPH   8
-#define PC_PRINT   9
-#define PC_PUNCT  10
-#define PC_XDIGIT 13
 
 /* Table of class bit maps for each POSIX class. Each class is formed from a
 base map, with an optional addition or removal of another map. Then, for some
@@ -607,7 +607,7 @@ addition or a negative value for map subtraction (if there are two maps). The
 absolute value of the third field has these meanings: 0 => no tweaking, 1 =>
 remove vertical space characters, 2 => remove underscore. */
 
-static const int posix_class_maps[] = {
+const int PRIV(posix_class_maps)[] = {
   cbit_word,   cbit_digit, -2,            /* alpha */
   cbit_lower,  -1,          0,            /* lower */
   cbit_upper,  -1,          0,            /* upper */
@@ -645,7 +645,6 @@ static int posix_substitutes[] = {
   PT_WORD, 0,       /* word  */   /* Perl and POSIX space are the same */
   PT_PXXDIGIT, 0    /* xdigit */  /* Perl has additional hex digits */
 };
-#define POSIX_SUBSIZE (sizeof(posix_substitutes) / (2*sizeof(uint32_t)))
 #endif  /* SUPPORT_UNICODE */
 
 /* Masks for checking option settings. When PCRE2_LITERAL is set, only a subset
@@ -663,7 +662,7 @@ are allowed. */
    PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
    PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
    PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
+   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_ALT_EXTENDED_CLASS)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
    (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD| \
@@ -1077,6 +1076,10 @@ for (;;)
       }
     fprintf(stderr, ") length=%u", length);
     break;
+
+    case META_ECLASS_OR: fprintf(stderr, "META_ECLASS_OR"); break;
+    case META_ECLASS_AND: fprintf(stderr, "META_ECLASS_AND"); break;
+    case META_ECLASS_SUB: fprintf(stderr, "META_ECLASS_SUB"); break;
     }
   fprintf(stderr, "\n");
   }
@@ -2215,7 +2218,7 @@ for UTF-8 input in an EBCDIC environment. (PCRE2 does not support both EBCDIC
 input and Unicode input in the same build.) In accordance with Unicode's "loose
 matching" rules, ASCII white space, hyphens, and underscores are ignored. We
 don't use isspace() or tolower() because (a) code points may be greater than
-255, and (b) they wouldn't work when compiling for Unicodein an EBCDIC
+255, and (b) they wouldn't work when compiling for Unicode in an EBCDIC
 environment. */
 
 if (c == CHAR_LEFT_CURLY_BRACKET)
@@ -2820,6 +2823,10 @@ must be last. */
 
 enum { RANGE_NO, RANGE_STARTED, RANGE_OK_ESCAPED, RANGE_OK_LITERAL };
 
+/* States used for analyzing operators and operands in character classes. */
+
+enum { CLASS_OP_NONE, CLASS_OP_OPERAND, CLASS_OP_OPERATOR };
+
 /* Only in 32-bit mode can there be literals > META_END. A macro encapsulates
 the storing of literal values in the main parsed pattern, where they can always
 be quantified. */
@@ -2844,6 +2851,7 @@ uint32_t c;
 uint32_t delimiter;
 uint32_t namelen;
 uint32_t class_range_state;
+uint32_t class_op_state;
 uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
 uint32_t *verbstartptr = NULL;
 uint32_t *previous_callout = NULL;
@@ -2854,6 +2862,9 @@ uint32_t *prev_parsed_item = NULL;
 uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
 uint16_t nest_depth = 0;
+uint16_t class_depth = 0;
+uint16_t class_maxdepth = 0;
+uint8_t class_op_used[ECLASS_NEST_LIMIT];
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
 int errorcode = 0;
@@ -3561,6 +3572,13 @@ while (ptr < ptrend)
     case CHAR_LEFT_SQUARE_BRACKET:
     okquantifier = TRUE;
 
+    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/536
+    We shall support Perl's (?[...]) syntax. We need a variable class_perlext = true
+    and a goto jumping here if we see "(?[...". We need to check for closing "])" and
+    also implement the completely idiosyncratic nesting and operator rules in this
+    mode. We can hopefully emit exactly the same META codes as for the UTS#18
+    syntax, so that only parser changes are required for the Perl syntax. */
+
     /* In another (POSIX) regex library, the ugly syntax [[:<:]] and [[:>:]] is
     used for "start of word" and "end of word". As these are otherwise illegal
     sequences, we don't break anything by recognizing them. They are replaced
@@ -3611,47 +3629,6 @@ while (ptr < ptrend)
       goto FAILED;
       }
 
-    /* Process a regular character class. If the first character is '^', set
-    the negation flag. If the first few characters (either before or after ^)
-    are \Q\E or \E or space or tab in extended-more mode, we skip them too.
-    This makes for compatibility with Perl. */
-
-    negate_class = FALSE;
-    while (ptr < ptrend)
-      {
-      GETCHARINCTEST(c, ptr);
-      if (c == CHAR_BACKSLASH)
-        {
-        if (ptr < ptrend && *ptr == CHAR_E) ptr++;
-        else if (ptrend - ptr >= 3 &&
-             PRIV(strncmp_c8)(ptr, STR_Q STR_BACKSLASH STR_E, 3) == 0)
-          ptr += 3;
-        else
-          break;
-        }
-      else if ((options & PCRE2_EXTENDED_MORE) != 0 &&
-               (c == CHAR_SPACE || c == CHAR_HT))  /* Note: just these two */
-        continue;
-      else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
-        negate_class = TRUE;
-      else break;
-      }
-
-    /* Now the real contents of the class; c has the first "real" character.
-    Empty classes are permitted only if the option is set. */
-
-    if (c == CHAR_RIGHT_SQUARE_BRACKET &&
-        (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
-      {
-      *parsed_pattern++ = negate_class? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
-      break;  /* End of class processing */
-      }
-
-    /* Process a non-empty class. */
-
-    *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
-    class_range_state = RANGE_NO;
-
     /* In an EBCDIC environment, Perl treats alphabetic ranges specially
     because there are holes in the encoding, and simply using the range A-Z
     (for example) would include the characters in the holes. This applies only
@@ -3660,7 +3637,15 @@ while (ptr < ptrend)
     character values are literal or not, and a state variable for handling
     ranges. */
 
-    /* Loop for the contents of the class */
+    /* Loop for the contents of the class. Classes may be nested, if
+    PCRE2_ALT_EXTENDED_CLASS is set. */
+
+    /* c is still set to '[' so the loop will handle the start of the class. */
+
+    class_depth = 0;
+    class_maxdepth = 0;
+    class_range_state = RANGE_NO;
+    class_op_state = CLASS_OP_NONE;
 
     for (;;)
       {
@@ -3691,7 +3676,8 @@ while (ptr < ptrend)
       [.ch.] and [=ch=] ("collating elements") and fault them, as Perl
       5.6 and 5.8 do. */
 
-      if (c == CHAR_LEFT_SQUARE_BRACKET &&
+      if (class_depth > 0 &&
+          c == CHAR_LEFT_SQUARE_BRACKET &&
           ptrend - ptr >= 3 &&
           (*ptr == CHAR_COLON || *ptr == CHAR_DOT ||
            *ptr == CHAR_EQUALS_SIGN) &&
@@ -3737,9 +3723,13 @@ while (ptr < ptrend)
         have a warning mode, so we give an error, because this is likely an
         error on the user's part. */
 
-        if (ptr < ptrend - 1 && *ptr == CHAR_MINUS &&
-            ptr[1] != CHAR_RIGHT_SQUARE_BRACKET)
+        if (ptr < ptrend && *ptr == CHAR_MINUS &&
+            !((options & PCRE2_ALT_EXTENDED_CLASS) != 0 && ptr + 1 < ptrend &&
+              ptr[1] == CHAR_MINUS) &&
+            (ptr + 1 == ptrend || ptr[1] != CHAR_RIGHT_SQUARE_BRACKET))
           {
+          /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/538
+          We need a better lookahead here to match Perl; should skip \Q\E, and whitespace in /xx mode. */
           errorcode = ERR50;
           goto FAILED;
           }
@@ -3751,6 +3741,7 @@ while (ptr < ptrend)
         special apparatus to do otherwise. */
 
         class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERAND;
 
         /* When PCRE2_UCP is set, unless PCRE2_EXTRA_ASCII_POSIX is set, some
         of the POSIX classes are converted to use Unicode properties \p or \P
@@ -3793,6 +3784,160 @@ while (ptr < ptrend)
         *parsed_pattern++ = posix_class;
         }
 
+      /* Check for the start of the outermost class, or the start of a nested class. */
+
+      else if (c == CHAR_LEFT_SQUARE_BRACKET &&
+               (class_depth == 0 || (options & PCRE2_ALT_EXTENDED_CLASS) != 0))
+        {
+        /* Tidy up the other class before starting the nested class. */
+        /* -[ beginning a nested class is a literal '-' */
+
+        if (class_range_state == RANGE_STARTED)
+          parsed_pattern[-1] = CHAR_MINUS;
+
+        /* Validate nesting depth */
+        if (class_depth >= ECLASS_NEST_LIMIT)
+          {
+          errorcode = ERR107;
+          goto FAILED;        /* Classes too deeply nested */
+          }
+
+        /* Process the character class start. If the first character is '^', set
+        the negation flag. If the first few characters (either before or after ^)
+        are \Q\E or \E or space or tab in extended-more mode, we skip them too.
+        This makes for compatibility with Perl. */
+
+        negate_class = FALSE;
+        for (;;)
+          {
+          if (ptr >= ptrend)
+            {
+            errorcode = ERR6;  /* Missing terminating ']' */
+            goto FAILED;
+            }
+
+          GETCHARINCTEST(c, ptr);
+          if (c == CHAR_BACKSLASH)
+            {
+            if (ptr < ptrend && *ptr == CHAR_E) ptr++;
+            else if (ptrend - ptr >= 3 &&
+                PRIV(strncmp_c8)(ptr, STR_Q STR_BACKSLASH STR_E, 3) == 0)
+              ptr += 3;
+            else
+              break;
+            }
+          else if ((options & PCRE2_EXTENDED_MORE) != 0 &&
+                  (c == CHAR_SPACE || c == CHAR_HT))  /* Note: just these two */
+            continue;
+          else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
+            negate_class = TRUE;
+          else break;
+          }
+
+        /* Now the real contents of the class; c has the first "real" character.
+        Empty classes are permitted only if the option is set. */
+
+        if (c == CHAR_RIGHT_SQUARE_BRACKET &&
+            (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
+          {
+          *parsed_pattern++ = negate_class? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
+
+          /* Leave nesting depth unchanged; but check for zero depth to handle the
+          very first (top-level) class being empty. */
+          if (class_depth == 0) break;
+
+          class_range_state = RANGE_NO; /* for processing the containing class */
+          class_op_state = CLASS_OP_OPERAND;
+          goto CLASS_CONTINUE;
+          }
+
+        /* Enter a non-empty class. */
+
+        *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
+        class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_NONE;
+        ++class_depth;
+        class_maxdepth = class_depth > class_maxdepth ?class_depth :class_maxdepth;
+        class_op_used[class_depth-1] = 0; /* reset; no op seen yet at new depth */
+
+        /* Implement the special start-of-class literal meaning of ']'. */
+        if (c == CHAR_RIGHT_SQUARE_BRACKET)
+          {
+          class_range_state = RANGE_OK_LITERAL;
+          class_op_state = CLASS_OP_OPERAND;
+          PARSED_LITERAL(c, parsed_pattern);
+          goto CLASS_CONTINUE;
+          }
+
+        continue;  /* We have already loaded c with the next character */
+        }
+
+      /* Check for the end of the class. */
+
+      else if (c == CHAR_RIGHT_SQUARE_BRACKET)
+        {
+        /* Check no trailing operator. */
+        if (class_op_state == CLASS_OP_OPERATOR)
+          {
+          errorcode = ERR110;
+          goto FAILED;
+          }
+
+        /* -] at the end of a class is a literal '-' */
+        if (class_range_state == RANGE_STARTED)
+          parsed_pattern[-1] = CHAR_MINUS;
+
+        *parsed_pattern++ = META_CLASS_END;
+
+        if (--class_depth == 0) break;
+
+        class_range_state = RANGE_NO; /* for processing the containing class */
+        class_op_state = CLASS_OP_OPERAND;
+        }
+
+      /* Handle a set operator */
+
+      else if ((options & PCRE2_ALT_EXTENDED_CLASS) != 0 &&
+               (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS || c == CHAR_AMPERSAND) &&
+               ptr < ptrend && *ptr == c)
+        {
+        ++ptr;
+
+        /* Check there isn't a triple-repetition. */
+        if (ptr < ptrend && *ptr == c)
+          {
+          while (ptr < ptrend && *ptr == c) ++ptr;  /* Improve error offset. */
+          errorcode = ERR108;
+          goto FAILED;
+          }
+
+        /* Check for a preceding operand. */
+        if (class_op_state != CLASS_OP_OPERAND)
+          {
+          errorcode = ERR109;
+          goto FAILED;
+          }
+
+        /* Check for mixed precedence. Forbid [A--B&&C]. */
+        if (class_op_used[class_depth-1] != 0 &&
+            class_op_used[class_depth-1] != (uint8_t)c)
+          {
+          errorcode = ERR111;
+          goto FAILED;
+          }
+
+        /* Dangling '-' before an operator is a literal */
+        if (class_range_state == RANGE_STARTED)
+          parsed_pattern[-1] = CHAR_MINUS;
+
+        *parsed_pattern++ = c == CHAR_VERTICAL_LINE? META_ECLASS_OR :
+                            c == CHAR_MINUS? META_ECLASS_SUB :
+                            META_ECLASS_AND;
+        class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERATOR;
+        class_op_used[class_depth-1] = (uint8_t)c;
+        }
+
       /* Handle potential start of range */
 
       else if (c == CHAR_MINUS && class_range_state >= RANGE_OK_ESCAPED)
@@ -3823,11 +3968,13 @@ while (ptr < ptrend)
             PARSED_LITERAL(c, parsed_pattern);
             }
           class_range_state = RANGE_NO;
+          class_op_state = CLASS_OP_OPERAND;
           }
         else  /* Potential start of range */
           {
           class_range_state = char_is_literal?
             RANGE_OK_LITERAL : RANGE_OK_ESCAPED;
+          class_op_state = CLASS_OP_OPERAND;
           PARSED_LITERAL(c, parsed_pattern);
           }
         }
@@ -3894,6 +4041,7 @@ while (ptr < ptrend)
         allowed in a class. None may start a range. */
 
         class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERAND;
         switch(escape)
           {
           case ESC_N:
@@ -3949,9 +4097,13 @@ while (ptr < ptrend)
         /* Perl gives a warning unless a following hyphen is the last character
         in the class. PCRE throws an error. */
 
-        if (ptr < ptrend - 1 && *ptr == CHAR_MINUS &&
-            ptr[1] != CHAR_RIGHT_SQUARE_BRACKET)
+        if (ptr < ptrend && *ptr == CHAR_MINUS &&
+            !((options & PCRE2_ALT_EXTENDED_CLASS) != 0 && ptr + 1 < ptrend &&
+              ptr[1] == CHAR_MINUS) &&
+            (ptr + 1 == ptrend || ptr[1] != CHAR_RIGHT_SQUARE_BRACKET))
           {
+          /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/538
+          We need a better lookahead here to match Perl; should skip \Q\E, and whitespace in /xx mode. */
           errorcode = ERR50;
           goto FAILED;
           }
@@ -3962,22 +4114,16 @@ while (ptr < ptrend)
       CLASS_CONTINUE:
       if (ptr >= ptrend)
         {
-        errorcode = ERR6;  /* Missing terminating ']' */
+        if ((options & PCRE2_ALT_EXTENDED_CLASS) != 0 &&
+            class_depth == 1 && class_maxdepth == 2)
+          errorcode = ERR112;  /* Missing terminating ']', but we saw '[ [ ]...' */
+        else
+          errorcode = ERR6;  /* Missing terminating ']' */
         goto FAILED;
         }
       GETCHARINCTEST(c, ptr);
-      if (c == CHAR_RIGHT_SQUARE_BRACKET && !inescq) break;
       }     /* End of class-processing loop */
 
-    /* -] at the end of a class is a literal '-' */
-
-    if (class_range_state == RANGE_STARTED)
-      {
-      parsed_pattern[-1] = CHAR_MINUS;
-      class_range_state = RANGE_NO;
-      }
-
-    *parsed_pattern++ = META_CLASS_END;
     break;  /* End of character class */
 
 
@@ -5265,140 +5411,6 @@ PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 
 
 /*************************************************
-*   External entry point for add range to class  *
-*************************************************/
-
-/* This function sets the overall range for characters < 256.
-It also handles non-utf case folding.
-
-Arguments:
-  options       the options bits
-  cb            compile data
-  start         start of range character
-  end           end of range character
-
-Returns:        cb->classbits is updated
-*/
-
-static void
-add_to_class(uint32_t options, compile_block *cb, uint32_t start, uint32_t end)
-{
-uint8_t *classbits = cb->classbits.classbits;
-uint32_t c, byte_start, byte_end;
-uint32_t classbits_end = (end <= 0xff ? end : 0xff);
-
-/* If caseless matching is required, scan the range and process alternate
-cases. In Unicode, there are 8-bit characters that have alternate cases that
-are greater than 255 and vice-versa (though these may be ignored if caseless
-restriction is in force). Sometimes we can just extend the original range. */
-
-if ((options & PCRE2_CASELESS) != 0)
-  {
-#ifdef SUPPORT_UNICODE
-  if ((options & (PCRE2_UTF|PCRE2_UCP)) == 0)
-#endif  /* SUPPORT_UNICODE */
-    /* Not UTF mode */
-    for (c = start; c <= classbits_end; c++)
-      SETBIT(classbits, cb->fcc[c]);
-  }
-
-/* Use the bitmap for characters < 256. Otherwise use extra data.*/
-
-byte_start = (start + 7) >> 3;
-byte_end = (classbits_end + 1) >> 3;
-
-if (byte_start >= byte_end)
-  {
-  for (c = start; c <= classbits_end; c++)
-    /* Regardless of start, c will always be <= 255. */
-    SETBIT(classbits, c);
-  return;
-  }
-
-for (c = byte_start; c < byte_end; c++)
-  classbits[c] = 0xff;
-
-byte_start <<= 3;
-byte_end <<= 3;
-
-for (c = start; c < byte_start; c++)
-  SETBIT(classbits, c);
-
-for (c = byte_end; c <= classbits_end; c++)
-  SETBIT(classbits, c);
-}
-
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-/*************************************************
-*   External entry point for add list to class   *
-*************************************************/
-
-/* This function is used for adding a list of horizontal or vertical whitespace
-characters to a class. The list must be in order so that ranges of characters
-can be detected and handled appropriately. This function sets the overall range
-so that the internal functions can try to avoid duplication when handling
-case-independence.
-
-Arguments:
-  options       the options bits
-  cb            contains pointers to tables etc.
-  p             points to row of 32-bit values, terminated by NOTACHAR
-
-Returns:        cb->classbits is updated
-*/
-
-static void
-add_list_to_class(uint32_t options, compile_block *cb, const uint32_t *p)
-{
-while (p[0] < 256)
-  {
-  unsigned int n = 0;
-
-  while(p[n+1] == p[0] + n + 1) n++;
-  add_to_class(options, cb, p[0], p[n]);
-
-  p += n + 1;
-  }
-}
-#endif
-
-
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-/*************************************************
-*    Add characters not in a list to a class     *
-*************************************************/
-
-/* This function is used for adding the complement of a list of horizontal or
-vertical whitespace to a class. The list must be in order.
-
-Arguments:
-  options       the options bits
-  xoptions      the extra options bits
-  cb            contains pointers to tables etc.
-  p             points to row of 32-bit values, terminated by NOTACHAR
-
-Returns:        cb->classbits is updated
-*/
-
-static void
-add_not_list_to_class(uint32_t options, compile_block *cb, const uint32_t *p)
-{
-if (p[0] > 0)
-  add_to_class(options, cb, 0, p[0] - 1);
-while (p[0] < 256)
-  {
-  while (p[1] == p[0] + 1) p++;
-  add_to_class(options, cb, p[0] + 1, (p[1] > 255) ? 255 : p[1] - 1);
-  p++;
-  }
-}
-#endif
-
-
-
-/*************************************************
 *    Find details of duplicate group names       *
 *************************************************/
 
@@ -5469,25 +5481,6 @@ return TRUE;
 
 
 
-#ifdef SUPPORT_WIDE_CHARS
-
-/*************************************************
-*  Extended Class (xclass) related properties    *
-*************************************************/
-
-/* XClass needs to be generated. */
-#define XCLASS_REQUIRED 0x1
-/* XClass has 8 bit character. */
-#define XCLASS_HAS_8BIT_CHARS 0x2
-/* XClass has properties. */
-#define XCLASS_HAS_PROPS 0x4
-/* XClass has character lists. */
-#define XCLASS_HAS_CHAR_LISTS 0x8
-/* XClass matches to all >= 256 characters. */
-#define XCLASS_HIGH_ANY 0x10
-
-#endif
-
 /*************************************************
 *           Compile one branch                   *
 *************************************************/
@@ -5536,7 +5529,6 @@ uint32_t options = *optionsptr;               /* May change dynamically */
 uint32_t xoptions = *xoptionsptr;             /* May change dynamically */
 uint32_t firstcu, reqcu;
 uint32_t zeroreqcu, zerofirstcu;
-uint32_t escape;
 uint32_t *pptr = *pptrptr;
 uint32_t meta, meta_arg;
 uint32_t firstcuflags, reqcuflags;
@@ -5555,8 +5547,6 @@ BOOL had_accept = FALSE;
 BOOL matched_char = FALSE;
 BOOL previous_matched_char = FALSE;
 BOOL reset_caseful = FALSE;
-const uint8_t *cbits = cb->cbits;
-uint8_t *classbits = cb->classbits.classbits;
 
 /* We can fish out the UTF setting once and for all into a BOOL, but we must
 not do this for other options (e.g. PCRE2_EXTENDED) that may change dynamically
@@ -5567,14 +5557,6 @@ BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL ucp = (options & PCRE2_UCP) != 0;
 #else  /* No Unicode support */
 BOOL utf = FALSE;
-#endif
-
-/* Helper variables for OP_XCLASS opcode (for characters > 255). */
-
-#ifdef SUPPORT_WIDE_CHARS
-uint32_t xclass_props;
-PCRE2_UCHAR *class_uchardata;
-class_ranges* cranges;
 #endif
 
 /* Set up the default and non-default settings for greediness */
@@ -5606,8 +5588,6 @@ req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS : 0;
 
 for (;; pptr++)
   {
-  BOOL negate_class;
-  BOOL should_flip_negation;
   BOOL possessive_quantifier;
   BOOL note_group_empty;
   uint32_t mclength;
@@ -5616,6 +5596,7 @@ for (;; pptr++)
   uint32_t groupnumber;
   uint32_t verbarglen, verbculen;
   uint32_t subreqcuflags, subfirstcuflags;
+  uint32_t *end_ptr;
   open_capitem *oc;
   PCRE2_UCHAR mcbuffer[8];
 
@@ -5779,7 +5760,27 @@ for (;; pptr++)
     case META_CLASS_NOT:
     case META_CLASS:
     matched_char = TRUE;
-    negate_class = meta == META_CLASS_NOT;
+
+    /* Check for complex extended classes and handle them separately. */
+
+    if (!PRIV(check_class_not_nested)(pptr +  1, &end_ptr))
+      {
+      previous = code;
+      *code++ = OP_ECLASS;
+      code += LINK_SIZE;
+      if (!PRIV(compile_class_nested)(options, xoptions, &pptr, &code,
+                                      errorcodeptr, cb, lengthptr))
+        return 0;
+      PUT(previous, 1, (int)(code - previous));
+
+      zeroreqcu = reqcu;
+      zeroreqcuflags = reqcuflags;
+      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      zerofirstcu = firstcu;
+      zerofirstcuflags = firstcuflags;
+
+      break;   /* We are finished with this class */
+      }
 
     /* We can optimize the case of a single character in a class by generating
     OP_CHAR or OP_CHARI if it's positive, or OP_NOT or OP_NOTI if it's
@@ -5899,482 +5900,15 @@ for (;; pptr++)
         }
       }
 
-    /* If a non-extended class contains a negative special such as \S, we need
-    to flip the negation flag at the end, so that support for characters > 255
-    works correctly (they are all included in the class). An extended class may
-    need to insert specific matching or non-matching code for wide characters.
-    */
-
-    should_flip_negation = FALSE;
-
-    /* Extended class (xclass) will be used when characters > 255
-    might match. */
-
-#ifdef SUPPORT_WIDE_CHARS
-    xclass_props = 0;
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-    cranges = NULL;
-
-    if (utf)
-#endif
-      {
-      if (lengthptr != NULL)
-        {
-        cranges = PRIV(optimize_class)(pptr, options, xoptions, cb);
-
-        if (cranges == NULL)
-          {
-          *errorcodeptr = ERR21;
-          return 0;
-          }
-
-        /* Caching the pre-processed character ranges. */
-        if (cb->next_cranges != NULL)
-          cb->next_cranges->next = cranges;
-        else
-          cb->cranges = cranges;
-
-        cb->next_cranges = cranges;
-        }
-      else
-        {
-        /* Reuse the pre-processed character ranges. */
-        cranges = cb->cranges;
-        PCRE2_ASSERT(cranges != NULL);
-        cb->cranges = cranges->next;
-        }
-
-      if (cranges->range_list_size > 0)
-        {
-        const uint32_t *ranges = (const uint32_t*)(cranges + 1);
-
-        if (ranges[0] <= 255)
-          xclass_props |= XCLASS_HAS_8BIT_CHARS;
-
-        if (ranges[cranges->range_list_size - 1] == GET_MAX_CHAR_VALUE(utf) &&
-            ranges[cranges->range_list_size - 2] <= 256)
-          xclass_props |= XCLASS_HIGH_ANY;
-        }
-      }
-
-    class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
-#endif
-
-    /* Initialize the 256-bit (32-byte) bit map to all zeros. We build the map
-    in a temporary bit of memory, in case the class contains fewer than two
-    8-bit characters because in that case the compiled code doesn't use the bit
-    map. */
-
-    memset(classbits, 0, 32 * sizeof(uint8_t));
-
-    /* Process items until META_CLASS_END is reached. */
-
-    while ((meta = *(++pptr)) != META_CLASS_END)
-      {
-      /* Handle POSIX classes such as [:alpha:] etc. */
-
-      if (meta == META_POSIX || meta == META_POSIX_NEG)
-        {
-        BOOL local_negate = (meta == META_POSIX_NEG);
-        int posix_class = *(++pptr);
-        int taboffset, tabopt;
-        uint8_t pbits[32];
-
-        should_flip_negation = local_negate;  /* Note negative special */
-
-        /* If matching is caseless, upper and lower are converted to alpha.
-        This relies on the fact that the class table starts with alpha,
-        lower, upper as the first 3 entries. */
-
-        if ((options & PCRE2_CASELESS) != 0 && posix_class <= 2)
-          posix_class = 0;
-
-        /* When PCRE2_UCP is set, some of the POSIX classes are converted to
-        different escape sequences that use Unicode properties \p or \P.
-        Others that are not available via \p or \P have to generate
-        XCL_PROP/XCL_NOTPROP directly, which is done here. */
-
-#ifdef SUPPORT_UNICODE
-        if ((options & PCRE2_UCP) != 0 &&
-            (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0)
-          {
-          switch(posix_class)
-            {
-            case PC_GRAPH:
-            case PC_PRINT:
-            case PC_PUNCT:
-
-            if (lengthptr != NULL)
-              {
-              if ((xclass_props & XCLASS_HIGH_ANY) == 0)
-                {
-                *lengthptr += 3;
-                xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
-                }
-              }
-            else
-              {
-              uint32_t ptype = ((posix_class == PC_GRAPH)? PT_PXGRAPH :
-                (posix_class == PC_PRINT)? PT_PXPRINT : PT_PXPUNCT);
-
-              PRIV(update_classbits)(ptype, 0, !local_negate, classbits);
-
-              if ((xclass_props & XCLASS_HIGH_ANY) == 0)
-                {
-                *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
-                *class_uchardata++ = (PCRE2_UCHAR)ptype;
-                *class_uchardata++ = 0;
-                xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
-                }
-              }
-            continue;
-
-            /* For the other POSIX classes (ex: ascii) we are going to
-            fall through to the non-UCP case and build a bit map for
-            characters with code points less than 256. However, if we are in
-            a negated POSIX class, characters with code points greater than
-            255 must either all match or all not match, depending on whether
-            the whole class is not or is negated. For example, for
-            [[:^ascii:]... they must all match, whereas for [^[:^ascii:]...
-            they must not.
-
-            In the special case where there are no xclass items, this is
-            automatically handled by the use of OP_CLASS or OP_NCLASS, but an
-            explicit range is needed for OP_XCLASS. Setting a flag here
-            causes the range to be generated later when it is known that
-            OP_XCLASS is required. In the 8-bit library this is relevant only in
-            utf mode, since no wide characters can exist otherwise. */
-
-            default:
-            break;
-            }
-          }
-#endif  /* SUPPORT_UNICODE */
-
-        /* In the non-UCP case, or when UCP makes no difference, we build the
-        bit map for the POSIX class in a chunk of local store because we may
-        be adding and subtracting from it, and we don't want to subtract bits
-        that may be in the main map already. At the end we or the result into
-        the bit map that is being built. */
-
-        posix_class *= 3;
-
-        /* Copy in the first table (always present) */
-
-        memcpy(pbits, cbits + posix_class_maps[posix_class],
-          32 * sizeof(uint8_t));
-
-        /* If there is a second table, add or remove it as required. */
-
-        taboffset = posix_class_maps[posix_class + 1];
-        tabopt = posix_class_maps[posix_class + 2];
-
-        if (taboffset >= 0)
-          {
-          if (tabopt >= 0)
-            for (int i = 0; i < 32; i++) pbits[i] |= cbits[(int)i + taboffset];
-          else
-            for (int i = 0; i < 32; i++) pbits[i] &= ~cbits[(int)i + taboffset];
-          }
-
-        /* Now see if we need to remove any special characters. An option
-        value of 1 removes vertical space and 2 removes underscore. */
-
-        if (tabopt < 0) tabopt = -tabopt;
-        if (tabopt == 1) pbits[1] &= ~0x3c;
-          else if (tabopt == 2) pbits[11] &= 0x7f;
-
-        /* Add the POSIX table or its complement into the main table that is
-        being built and we are done. */
-
-        if (local_negate)
-          for (int i = 0; i < 32; i++) classbits[i] |= (uint8_t)(~pbits[i]);
-        else
-          for (int i = 0; i < 32; i++) classbits[i] |= pbits[i];
-
-#ifdef SUPPORT_UNICODE
-        /* Every class contains at least one < 256 character. */
-        xclass_props |= XCLASS_HAS_8BIT_CHARS;
-#endif
-        continue;               /* End of POSIX handling */
-        }
-
-      /* Other than POSIX classes, the only items we should encounter are
-      \d-type escapes and literal characters (possibly as ranges). */
-
-      if (meta == META_BIGVALUE)
-        {
-        meta = *(++pptr);
-        goto CLASS_LITERAL;
-        }
-
-      /* Any other non-literal must be an escape */
-
-      if (meta >= META_END)
-        {
-        if (META_CODE(meta) != META_ESCAPE)
-          {
-#ifdef DEBUG_SHOW_PARSED
-          fprintf(stderr, "** Unrecognized parsed pattern item 0x%.8x "
-                          "in character class\n", meta);
-#endif
-          *errorcodeptr = ERR89;  /* Internal error - unrecognized. */
-          return 0;
-          }
-        escape = META_DATA(meta);
-
-        switch(escape)
-          {
-          case ESC_d:
-          for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_digit];
-          break;
-
-          case ESC_D:
-          should_flip_negation = TRUE;
-          for (int i = 0; i < 32; i++)
-            classbits[i] |= (uint8_t)(~cbits[i+cbit_digit]);
-          break;
-
-          case ESC_w:
-          for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_word];
-          break;
-
-          case ESC_W:
-          should_flip_negation = TRUE;
-          for (int i = 0; i < 32; i++)
-            classbits[i] |= (uint8_t)(~cbits[i+cbit_word]);
-          break;
-
-          /* Perl 5.004 onwards omitted VT from \s, but restored it at Perl
-          5.18. Before PCRE 8.34, we had to preserve the VT bit if it was
-          previously set by something earlier in the character class.
-          Luckily, the value of CHAR_VT is 0x0b in both ASCII and EBCDIC, so
-          we could just adjust the appropriate bit. From PCRE 8.34 we no
-          longer treat \s and \S specially. */
-
-          case ESC_s:
-          for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_space];
-          break;
-
-          case ESC_S:
-          should_flip_negation = TRUE;
-          for (int i = 0; i < 32; i++)
-            classbits[i] |= (uint8_t)(~cbits[i+cbit_space]);
-          break;
-
-          /* When adding the horizontal or vertical space lists to a class, or
-          their complements, disable PCRE2_CASELESS, because it justs wastes
-          time, and in the "not-x" UTF cases can create unwanted duplicates in
-          the XCLASS list (provoked by characters that have more than one other
-          case and by both cases being in the same "not-x" sublist). */
-
-          case ESC_h:
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-          if (cranges != NULL) break;
-#endif
-          add_list_to_class(options & ~PCRE2_CASELESS,
-            cb, PRIV(hspace_list));
-#else
-          PCRE2_ASSERT(cranges != NULL);
-#endif
-          break;
-
-          case ESC_H:
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-          if (cranges != NULL) break;
-#endif
-          add_not_list_to_class(options & ~PCRE2_CASELESS,
-            cb, PRIV(hspace_list));
-#else
-          PCRE2_ASSERT(cranges != NULL);
-#endif
-          break;
-
-          case ESC_v:
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-          if (cranges != NULL) break;
-#endif
-          add_list_to_class(options & ~PCRE2_CASELESS,
-            cb, PRIV(vspace_list));
-#else
-          PCRE2_ASSERT(cranges != NULL);
-#endif
-          break;
-
-          case ESC_V:
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-          if (cranges != NULL) break;
-#endif
-          add_not_list_to_class(options & ~PCRE2_CASELESS,
-            cb, PRIV(vspace_list));
-#else
-          PCRE2_ASSERT(cranges != NULL);
-#endif
-          break;
-
-          /* If Unicode is not supported, \P and \p are not allowed and are
-          faulted at parse time, so will never appear here. */
-
-#ifdef SUPPORT_UNICODE
-          case ESC_p:
-          case ESC_P:
-            {
-            uint32_t ptype = *(++pptr) >> 16;
-            uint32_t pdata = *pptr & 0xffff;
-
-            /* The "Any" is processed by PRIV(update_classbits)(). */
-            if (ptype == PT_ANY)
-              {
-#if PCRE2_CODE_UNIT_WIDTH == 8
-              if (!utf && escape == ESC_p) memset(classbits, 0xff, 32 * sizeof(uint8_t));
-#endif
-              continue;
-              }
-
-            /* In caseless matching, particular characteristics Lu, Ll, and Lt
-            get converted to the general characteristic L&. That is, upper,
-            lower, and title case letters are all conflated. */
-
-            if ((options & PCRE2_CASELESS) != 0 && ptype == PT_PC &&
-                (pdata == ucp_Lu || pdata == ucp_Ll || pdata == ucp_Lt))
-              {
-              ptype = PT_LAMP;
-              pdata = 0;
-              }
-
-            if (lengthptr != NULL)
-              {
-              if ((xclass_props & XCLASS_HIGH_ANY) == 0)
-                {
-                *lengthptr += 3;
-                xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
-                }
-              }
-            else
-              {
-              PRIV(update_classbits)(ptype, pdata,
-                (escape == ESC_P), classbits);
-
-              if ((xclass_props & XCLASS_HIGH_ANY) == 0)
-                {
-                *class_uchardata++ = (escape == ESC_p)? XCL_PROP : XCL_NOTPROP;
-                *class_uchardata++ = ptype;
-                *class_uchardata++ = pdata;
-                xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
-                }
-              }
-            }
-          continue;
-#endif
-          }
-
-#ifdef SUPPORT_WIDE_CHARS
-        /* Every non-property class contains at least one < 256 character. */
-        xclass_props |= XCLASS_HAS_8BIT_CHARS;
-#endif
-        continue;
-        }  /* End handling \d-type escapes */
-
-      /* A literal character may be followed by a range meta. At parse time
-      there are checks for out-of-order characters, for ranges where the two
-      characters are equal, and for hyphens that cannot indicate a range. At
-      this point, therefore, no checking is needed. */
-
-      else
-        {
-        uint32_t c, d;
-
-        CLASS_LITERAL:
-        c = d = meta;
-
-        /* Remember if \r or \n were explicitly used */
-
-        if (c == CHAR_CR || c == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
-
-        /* Process a character range */
-
-        if (pptr[1] == META_RANGE_LITERAL || pptr[1] == META_RANGE_ESCAPED)
-          {
-#ifdef EBCDIC
-          BOOL range_is_literal = (pptr[1] == META_RANGE_LITERAL);
-#endif
-          pptr += 2;
-          d = *pptr;
-          if (d == META_BIGVALUE) d = *(++pptr);
-
-          /* Remember an explicit \r or \n, and add the range to the class. */
-
-          if (d == CHAR_CR || d == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-          if (cranges != NULL) continue;
-          xclass_props |= XCLASS_HAS_8BIT_CHARS;
-#endif
-
-          /* In an EBCDIC environment, Perl treats alphabetic ranges specially
-          because there are holes in the encoding, and simply using the range
-          A-Z (for example) would include the characters in the holes. This
-          applies only to literal ranges; [\xC1-\xE9] is different to [A-Z]. */
-
-#ifdef EBCDIC
-          if (range_is_literal &&
-               (cb->ctypes[c] & ctype_letter) != 0 &&
-               (cb->ctypes[d] & ctype_letter) != 0 &&
-               (c <= CHAR_z) == (d <= CHAR_z))
-            {
-            uint32_t uc = (d <= CHAR_z)? 0 : 64;
-            uint32_t C = c - uc;
-            uint32_t D = d - uc;
-
-            if (C <= CHAR_i)
-              {
-              add_to_class(options, cb, C + uc,
-                ((D < CHAR_i)? D : CHAR_i) + uc);
-              C = CHAR_j;
-              }
-
-            if (C <= D && C <= CHAR_r)
-              {
-              add_to_class(options, cb, C + uc,
-                ((D < CHAR_r)? D : CHAR_r) + uc);
-              C = CHAR_s;
-              }
-
-            if (C <= D)
-              add_to_class(options, cb, C + uc, D + uc);
-            }
-          else
-#endif
-          /* Not an EBCDIC special range */
-
-          add_to_class(options, cb, c, d);
-#else
-          PCRE2_ASSERT(cranges != NULL);
-#endif
-          continue;
-          }  /* End of range handling */
-
-        /* Character ranges are ignored when class_ranges is present. */
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-        if (cranges != NULL) continue;
-        xclass_props |= XCLASS_HAS_8BIT_CHARS;
-#endif
-        /* Handle a single character. */
-
-        add_to_class(options, cb, meta, meta);
-#else
-        PCRE2_ASSERT(cranges != NULL);
-        continue;
-#endif
-        }
-      }   /* End of main class-processing loop */
+    /* Now emit the OP_CLASS/OP_NCLASS/OP_XCLASS/OP_ALLANY opcode. */
+
+    if (!PRIV(compile_class_not_nested)(options, xoptions, pptr + 1, end_ptr,
+                                        &code, meta == META_CLASS_NOT,
+                                        errorcodeptr, cb, lengthptr))
+      return 0;
+
+    PCRE2_ASSERT(*end_ptr == META_CLASS_END);
+    pptr = end_ptr;
 
     /* If this class is the first thing in the branch, there can be no first
     char setting, whatever the repeat count. Any reqcu setting must remain
@@ -6386,294 +5920,6 @@ for (;; pptr++)
     zeroreqcu = reqcu;
     zeroreqcuflags = reqcuflags;
 
-#ifdef SUPPORT_WIDE_CHARS
-    PCRE2_ASSERT((xclass_props & XCLASS_HAS_PROPS) == 0 ||
-                 (xclass_props & XCLASS_HIGH_ANY) == 0);
-
-    if (cranges != NULL)
-      {
-      uint32_t *range = (uint32_t*)(cranges + 1);
-      uint32_t *end = range + cranges->range_list_size;
-
-      while (range < end && range[0] < 256)
-        {
-        PCRE2_ASSERT((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0);
-        /* Add range to bitset. */
-        add_to_class(options, cb, range[0], range[1]);
-
-        if (range[1] > 255) break;
-        range += 2;
-        }
-
-      if (cranges->char_lists_size > 0)
-        {
-        /* The cranges structure is still used and freed later. */
-        PCRE2_ASSERT((xclass_props & XCLASS_HIGH_ANY) == 0);
-        xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_CHAR_LISTS;
-        }
-      else
-        {
-        if ((xclass_props & XCLASS_HIGH_ANY) != 0)
-          {
-          PCRE2_ASSERT(range + 2 == end && range[0] <= 256 &&
-            range[1] >= GET_MAX_CHAR_VALUE(utf));
-          should_flip_negation = TRUE;
-          range = end;
-          }
-
-        while (range < end)
-          {
-          uint32_t range_start = range[0];
-          uint32_t range_end = range[1];
-
-          range += 2;
-          xclass_props |= XCLASS_REQUIRED;
-
-          if (range_start < 256) range_start = 256;
-
-          if (lengthptr != NULL)
-            {
-#ifdef SUPPORT_UNICODE
-            if (utf)
-              {
-              *lengthptr += 1;
-
-              if (range_start < range_end)
-                *lengthptr += PRIV(ord2utf)(range_start, class_uchardata);
-
-              *lengthptr += PRIV(ord2utf)(range_end, class_uchardata);
-              continue;
-              }
-#endif  /* SUPPORT_UNICODE */
-
-            *lengthptr += range_start < range_end ? 3 : 2;
-            continue;
-            }
-
-#ifdef SUPPORT_UNICODE
-          if (utf)
-            {
-            if (range_start < range_end)
-              {
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(range_start, class_uchardata);
-              }
-            else
-              *class_uchardata++ = XCL_SINGLE;
-
-            class_uchardata += PRIV(ord2utf)(range_end, class_uchardata);
-            continue;
-            }
-#endif  /* SUPPORT_UNICODE */
-
-          /* Without UTF support, character values are constrained
-          by the bit length, and can only be > 256 for 16-bit and
-          32-bit libraries. */
-#if PCRE2_CODE_UNIT_WIDTH != 8
-          if (range_start < range_end)
-            {
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = range_start;
-            }
-          else
-            *class_uchardata++ = XCL_SINGLE;
-
-          *class_uchardata++ = range_end;
-#endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
-          }
-
-        if (lengthptr == NULL)
-          cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
-        }
-      }
-#endif
-
-    /* If there are characters with values > 255, or Unicode property settings
-    (\p or \P), we have to compile an extended class, with its own opcode,
-    unless there were no property settings and there was a negated special such
-    as \S in the class, and PCRE2_UCP is not set, because in that case all
-    characters > 255 are in or not in the class, so any that were explicitly
-    given as well can be ignored.
-
-    In the UCP case, if certain negated POSIX classes (ex: [:^ascii:]) were
-    were present in a class, we either have to match or not match all wide
-    characters (depending on whether the whole class is or is not negated).
-    This requirement is indicated by match_all_or_no_wide_chars being true.
-    We do this by including an explicit range, which works in both cases.
-    This applies only in UTF and 16-bit and 32-bit non-UTF modes, since there
-    cannot be any wide characters in 8-bit non-UTF mode.
-
-    When there *are* properties in a positive UTF-8 or any 16-bit or 32_bit
-    class where \S etc is present without PCRE2_UCP, causing an extended class
-    to be compiled, we make sure that all characters > 255 are included by
-    forcing match_all_or_no_wide_chars to be true.
-
-    If, when generating an xclass, there are no characters < 256, we can omit
-    the bitmap in the actual compiled code. */
-
-#ifdef SUPPORT_WIDE_CHARS  /* Defined for 16/32 bits, or 8-bit with Unicode */
-    if ((xclass_props & XCLASS_REQUIRED) != 0)
-      {
-      if ((xclass_props & XCLASS_HAS_CHAR_LISTS) == 0)
-        *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
-      *code++ = OP_XCLASS;
-      code += LINK_SIZE;
-      *code = negate_class? XCL_NOT:0;
-      if ((xclass_props & XCLASS_HAS_PROPS) != 0) *code |= XCL_HASPROP;
-
-      /* If the map is required, move up the extra data to make room for it;
-      otherwise just move the code pointer to the end of the extra data. */
-
-      if ((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0)
-        {
-        *code++ |= XCL_MAP;
-        (void)memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
-          CU2BYTES(class_uchardata - code));
-        if (negate_class)
-          {
-          /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-          for (int i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
-          }
-        memcpy(code, classbits, 32);
-        code = class_uchardata + (32 / sizeof(PCRE2_UCHAR));
-        }
-      else code = class_uchardata;
-
-      if ((xclass_props & XCLASS_HAS_CHAR_LISTS) != 0)
-        {
-        /* Char lists size is an even number,
-        because all items are 16 or 32 bit values. */
-        size_t char_lists_size = cranges->char_lists_size;
-        PCRE2_ASSERT((char_lists_size & 0x1) == 0);
-
-        if (lengthptr != NULL)
-          {
-          /* At this point, we don't know the precise location
-          so the maximum alignment is added to the length. */
-#if PCRE2_CODE_UNIT_WIDTH == 8
-          *lengthptr += 2 /* sizeof(type) in PCRE2_UCHARs */ +
-             3 /* maximum alignment. */;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-          *lengthptr += 1 /* sizeof(type) in PCRE2_UCHARs */ +
-             1 /* maximum alignment. */;
-          char_lists_size >>= 1;
-#else
-          *lengthptr += 1 /* sizeof(type) in PCRE2_UCHARs */;
-          /* Padding, when the size is not divisible by 4. */
-          if ((char_lists_size & 0x2) != 0)
-            char_lists_size += 2;
-          char_lists_size >>= 2;
-#endif
-
-          if (OFLOW_MAX - *lengthptr < char_lists_size)
-            {
-            *errorcodeptr = ERR20;   /* Integer overflow */
-            return 0;
-            }
-
-          *lengthptr += char_lists_size;
-
-          if (*lengthptr > MAX_PATTERN_SIZE)
-            {
-            *errorcodeptr = ERR20;   /* Pattern is too large */
-            return 0;
-            }
-          }
-        else
-          {
-          uint8_t *char_buffer = (uint8_t*)code;
-
-          PCRE2_ASSERT(cranges->char_lists_types <= XCL_TYPE_MASK);
-#if PCRE2_CODE_UNIT_WIDTH == 8
-          /* Encode as high / low bytes. */
-          code[0] = (uint8_t)(XCL_LIST |
-            (cranges->char_lists_types >> 8));
-          code[1] = (uint8_t)cranges->char_lists_types;
-          char_buffer += 2;
-
-          /* Compute alignment. */
-          if (((uintptr_t)char_buffer & 0x1) != 0)
-            {
-            code[0] |= 1u << (XCL_ALIGNMENT_SHIFT - 8);
-            char_buffer += 1;
-            }
-
-          if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
-            {
-            code[0] |= 2u << (XCL_ALIGNMENT_SHIFT - 8);
-            char_buffer += 2;
-            }
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-          code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
-          char_buffer += 2;
-
-          /* Compute alignment. */
-          if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
-            {
-            code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
-            char_buffer += 2;
-            }
-#else
-          code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
-          char_buffer += 4;
-
-          /* Padding. */
-          if ((char_lists_size & 0x2) != 0)
-            {
-            code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
-            char_buffer += 2;
-            }
-#endif
-          memcpy(char_buffer,
-            (uint8_t*)(cranges + 1) + cranges->char_lists_start,
-            char_lists_size);
-
-          code = (PCRE2_UCHAR*)(char_buffer + char_lists_size);
-
-          cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
-          }
-        }
-
-      /* Now fill in the complete length of the item */
-
-      PUT(previous, 1, (int)(code - previous));
-      break;   /* End of class handling */
-      }
-#endif  /* SUPPORT_WIDE_CHARS */
-
-    /* If there are no characters > 255, or they are all to be included or
-    excluded, set the opcode to OP_CLASS or OP_NCLASS, depending on whether the
-    whole class was negated and whether there were negative specials such as \S
-    (non-UCP) in the class. Then copy the 32-byte map into the code vector,
-    negating it if necessary. */
-
-    if (negate_class)
-      {
-      uint32_t *classwords = cb->classbits.classwords;
-
-      for (int i = 0; i < 8; i++) classwords[i] = ~classwords[i];
-      }
-
-    if ((SELECT_VALUE8(!utf, 0) || negate_class != should_flip_negation) &&
-        cb->classbits.classwords[0] == ~(uint32_t)0)
-      {
-      const uint32_t *classwords = cb->classbits.classwords;
-      int i;
-
-      for (i = 0; i < 8; i++)
-        if (classwords[i] != ~(uint32_t)0) break;
-
-      if (i == 8)
-        {
-        *code++ = OP_ALLANY;
-        break;
-        }
-      }
-
-    *code++ = (negate_class == should_flip_negation) ? OP_CLASS : OP_NCLASS;
-    if (lengthptr == NULL)    /* Save time in the pre-compile phase */
-      memcpy(code, classbits, 32);
-    code += 32 / sizeof(PCRE2_UCHAR);
     break;  /* End of class processing */
 
 
@@ -7544,6 +6790,9 @@ for (;; pptr++)
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
 #endif
+      /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+      Enclose in the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+      case OP_ECLASS:
       case OP_CLASS:
       case OP_NCLASS:
       case OP_REF:
@@ -7573,12 +6822,13 @@ for (;; pptr++)
         }
       break;
 
-      /* If previous is OP_FAIL, it was generated by an empty class []
-      (PCRE2_ALLOW_EMPTY_CLASS is set). The other ways in which OP_FAIL can be
-      generated, that is by (*FAIL) or (?!), disallow a quantifier at parse
-      time. We can just ignore this repeat. */
+      /* The ways in which OP_FAIL can be generated, that is by (*FAIL) or
+      (?!), disallow a quantifier at parse time. We ought to be able to ignore this. */
 
       case OP_FAIL:
+      /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/541
+      Should this be removed, now that '[]' has been changed so it doesn't produce OP_FAIL? */
+      PCRE2_UNREACHABLE();
       goto END_REPEAT;
 
       /* Prior to 10.30, repeated recursions were wrapped in OP_ONCE brackets
@@ -8192,11 +7442,12 @@ for (;; pptr++)
         tempcode += 1 + 32/sizeof(PCRE2_UCHAR);
         break;
 
-#ifdef SUPPORT_WIDE_CHARS
+        /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+        Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
         case OP_XCLASS:
+        case OP_ECLASS:
         tempcode += GET(tempcode, 1);
         break;
-#endif
         }
 
       /* If tempcode is equal to code (which points to the end of the repeated
@@ -8653,8 +7904,6 @@ uint32_t firstcu, reqcu;
 uint32_t lookbehindlength;
 uint32_t lookbehindminlength;
 uint32_t firstcuflags, reqcuflags;
-uint32_t branchfirstcu, branchreqcu;
-uint32_t branchfirstcuflags, branchreqcuflags;
 PCRE2_SIZE length;
 branch_chain bc;
 
@@ -8723,6 +7972,8 @@ code += 1 + LINK_SIZE + skipunits;
 for (;;)
   {
   int branch_return;
+  uint32_t branchfirstcu = 0, branchreqcu = 0;
+  uint32_t branchfirstcuflags = REQ_UNSET, branchreqcuflags = REQ_UNSET;
 
   /* Insert OP_REVERSE or OP_VREVERSE if this is a lookbehind assertion. There
   is only a single minimum length for the whole assertion. When the minimum
@@ -9189,12 +8440,13 @@ for (;;)
   if (c == OP_RECURSE) return code;
 
   /* XCLASS is used for classes that cannot be represented just by a bit map.
-  This includes negated single high-valued characters. CALLOUT_STR is used for
-  callouts with string arguments. In both cases the length in the table is
+  This includes negated single high-valued characters. ECLASS is used for
+  classes that use set operations internally. CALLOUT_STR is used for
+  callouts with string arguments. In each case the length in the table is
   zero; the actual length is stored in the compiled code. */
 
-  if (c == OP_XCLASS) code += GET(code, 1);
-    else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
+  if (c == OP_XCLASS || c == OP_ECLASS) code += GET(code, 1);
+  else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
 
   /* Otherwise, we can get the item's length from the table, except that for
   repeated character types, we have to test for \p and \P, which have an extra

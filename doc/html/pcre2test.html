@@ -105,8 +105,8 @@ Input for the 16-bit and 32-bit libraries
 <P>
 When testing the 16-bit or 32-bit libraries, there is a need to be able to
 generate character code points greater than 255 in the strings that are passed
-to the library. For subject lines, backslash escapes can be used. In addition,
-when the <b>utf</b> modifier (see
+to the library. For subject lines and some patterns, backslash escapes can be
+used. In addition, when the <b>utf</b> modifier (see
 <a href="#optionmodifiers">"Setting compilation options"</a>
 below) is set, the pattern and any following subject lines are interpreted as
 UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate.
@@ -125,9 +125,8 @@ UTF-8 (in its original definition) is not capable of encoding values greater
 than 0x7fffffff, but such values can be handled by the 32-bit library. When
 testing this library in non-UTF mode with <b>utf8_input</b> set, if any
 character is preceded by the byte 0xff (which is an invalid byte in UTF-8)
-0x80000000 is added to the character's value. This is the only way of passing
-such code points in a pattern string. For subject strings, using an escape
-sequence is preferable.
+0x80000000 is added to the character's value. For subject strings, using an
+escape sequence is preferable.
 </P>
 <br><a name="SEC4" href="#TOC1">COMMAND LINE OPTIONS</a><br>
 <P>
@@ -537,39 +536,48 @@ space is removed, and the line is scanned for backslash escapes, unless the
 <b>subject_literal</b> modifier was set for the pattern. The following provide a
 means of encoding non-printing characters in a visible way:
 <pre>
-  \a         alarm (BEL, \x07)
-  \b         backspace (\x08)
-  \e         escape (\x27)
-  \f         form feed (\x0c)
-  \n         newline (\x0a)
-  \r         carriage return (\x0d)
-  \t         tab (\x09)
-  \v         vertical tab (\x0b)
-  \nnn       octal character (up to 3 octal digits); always
-               a byte unless &#62; 255 in UTF-8 or 16-bit or 32-bit mode
-  \o{dd...}  octal character (any number of octal digits}
-  \xhh       hexadecimal byte (up to 2 hex digits)
-  \x{hh...}  hexadecimal character (any number of hex digits)
+  \a          alarm (BEL, \x07)
+  \b          backspace (\x08)
+  \e          escape (\x27)
+  \f          form feed (\x0c)
+  \n          newline (\x0a)
+  \N{U+hh...} unicode character (any number of hex digits)
+  \r          carriage return (\x0d)
+  \t          tab (\x09)
+  \v          vertical tab (\x0b)
+  \ddd        octal number (up to 3 octal digits); represent a single
+                code point unless larger than 255 with the 8-bit library
+  \o{dd...}   octal number (any number of octal digits} representing a
+                character in UTF mode or a code point
+  \xhh        hexadecimal byte (up to 2 hex digits)
+  \x{hh...}   hexadecimal number (up to 8 hex digits) representing a
+                character in UTF mode or a code point
 </pre>
-The use of \x{hh...} is not dependent on the use of the <b>utf</b> modifier on
-the pattern. It is recognized always. There may be any number of hexadecimal
-digits inside the braces; invalid values provoke error messages.
+Invoking \N{U+hh...} or \x{hh...} doesn't require the use of the <b>utf</b>
+modifier on the pattern. It is always recognized. There may be any number of
+hexadecimal digits inside the braces; invalid values provoke error messages
+but when using \N{U+hh...} with some invalid unicode characters they will
+be accepted with a warning instead.
 </P>
 <P>
-Note that \xhh specifies one byte rather than one character in UTF-8 mode;
-this makes it possible to construct invalid UTF-8 sequences for testing
-purposes. On the other hand, \x{hh} is interpreted as a UTF-8 character in
-UTF-8 mode, generating more than one byte if the value is greater than 127.
-When testing the 8-bit library not in UTF-8 mode, \x{hh} generates one byte
-for values that could fit on it, and causes an error for greater values.
+Note that even in UTF-8 mode, \xhh (and depending of how large, \ddd)
+describe one byte rather than one character; this makes it possible to
+construct invalid UTF-8 sequences for testing purposes. On the other hand,
+\x{hh...} is interpreted as a UTF-8 character in UTF-8 mode, only generating
+more than one byte if the value is greater than 127. To avoid the ambiguity
+it is preferred to use \N{U+hh...} when describing characters. When testing
+the 8-bit library not in UTF-8 mode, \x{hh} generates one byte for values
+that could fit on it, and causes an error for greater values.
 </P>
 <P>
-In UTF-16 mode, all 4-digit \x{hhhh} values are accepted. This makes it
-possible to construct invalid UTF-16 sequences for testing purposes.
+When testing te 16-bit library, not in UTF-16 mode, all 4-digit \x{hhhh}
+values are accepted. This makes it possible to construct invalid UTF-16
+sequences for testing purposes.
 </P>
 <P>
-In UTF-32 mode, all 4- to 8-digit \x{...} values are accepted. This makes it
-possible to construct invalid UTF-32 sequences for testing purposes.
+When testing the 32-bit library, not in UTF-32 mode, all 4 to 8-digit \x{...}
+values are accepted. This makes it possible to construct invalid UTF-32
+sequences for testing purposes.
 </P>
 <P>
 There is a special backslash sequence that specifies replication of one or more
@@ -635,6 +643,7 @@ for a description of the effects of these options.
       allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
       alt_bsux                  set PCRE2_ALT_BSUX
       alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
+      alt_extended_class        set PCRE2_ALT_EXTENDED_CLASS
       alt_verbnames             set PCRE2_ALT_VERBNAMES
       anchored                  set PCRE2_ANCHORED
   /a  ascii_all                 set all ASCII options
@@ -2261,7 +2270,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC21" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 October 2024
+Last updated: 16 October 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

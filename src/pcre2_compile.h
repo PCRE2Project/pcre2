@@ -61,7 +61,8 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
        ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100,
-       ERR101,ERR102,ERR103,ERR104,ERR105,ERR106 };
+       ERR101,ERR102,ERR103,ERR104,ERR105,ERR106,ERR107,ERR108,ERR109,ERR110,
+       ERR111,ERR112 };
 
 /* Code values for parsed patterns, which are stored in a vector of 32-bit
 unsigned ints. Values less than META_END are literal data values. The coding
@@ -70,7 +71,7 @@ additional data that some of them need. The META_CODE, META_DATA, and META_DIFF
 macros are used to manipulate parsed pattern elements.
 
 NOTE: When these definitions are changed, the table of extra lengths for each
-code (meta_extra_lengths, just below) must be updated to remain in step. */
+code (meta_extra_lengths) must be updated to remain in step. */
 
 #define META_END              0x80000000u  /* End of pattern */
 
@@ -157,6 +158,14 @@ versions. */
 #define META_MINMAX_PLUS      0x80420000u  /* {n,m}+ repeat */
 #define META_MINMAX_QUERY     0x80430000u  /* {n,m}? repeat */
 
+/* These meta codes have no ordering constraints. */
+
+#define META_ECLASS_OR        0x80440000u  /* || in a class */
+#define META_ECLASS_AND       0x80450000u  /* && in a class */
+#define META_ECLASS_SUB       0x80460000u  /* -- in a class */
+
+/* Convenience aliases. */
+
 #define META_FIRST_QUANTIFIER META_ASTERISK
 #define META_LAST_QUANTIFIER  META_MINMAX_QUERY
 
@@ -198,15 +207,61 @@ therefore no need for it to have a length entry, so use a high value. */
 #endif
 
 
+/* Macros for the definitions below, to prevent name collisions. */
+
+#define _pcre2_posix_class_maps          PCRE2_SUFFIX(_pcre2_posix_class_maps)
+#define _pcre2_optimize_class            PCRE2_SUFFIX(_pcre2_optimize_class_)
+#define _pcre2_update_classbits          PCRE2_SUFFIX(_pcre2_update_classbits_)
+#define _pcre2_check_class_not_nested    PCRE2_SUFFIX(_pcre2_check_class_not_nested_)
+#define _pcre2_compile_class_nested      PCRE2_SUFFIX(_pcre2_compile_class_nested_)
+#define _pcre2_compile_class_not_nested  PCRE2_SUFFIX(_pcre2_compile_class_not_nested_)
+
+
+/* Indices of the POSIX classes in posix_names, posix_name_lengths,
+posix_class_maps, and posix_substitutes. They must be kept in sync. */
+
+#define PC_DIGIT   7
+#define PC_GRAPH   8
+#define PC_PRINT   9
+#define PC_PUNCT  10
+#define PC_XDIGIT 13
+
+extern const int PRIV(posix_class_maps)[];
+
+
 /* Merge intersecting ranges of classes. */
 
 class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
-  uint32_t options, uint32_t xoptions, compile_block* cb);
+  const uint32_t *end_ptr, uint32_t options, uint32_t xoptions,
+  compile_block *cb);
 
 /* Set bits in classbits according to the property type */
 
 void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated,
   uint8_t *classbits);
+
+/* Returns TRUE when a series of META codes can be compiled to a simple class
+(OP_CLASS, OP_NCLASS, OP_XCLASS, OP_ALLANY); otherwise FALSE if it requires an
+extended class (OP_ECLASS).*/
+
+BOOL PRIV(check_class_not_nested)(uint32_t *ptr, uint32_t **pendptr);
+
+/* Compile the META codes in pptr into opcodes written to pcode. The pptr must
+start at a META_CLASS or META_CLASS_NOT.
+
+The pptr will be left pointing at the matching META_CLASS_END. */
+
+BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
+  uint32_t **pptr, PCRE2_UCHAR **pcode, int *errorcodeptr,
+  compile_block *cb, PCRE2_SIZE *lengthptr);
+
+/* Compile the META codes from start_ptr...end_ptr, writing a single OP_CLASS
+OP_CLASS, OP_NCLASS, OP_XCLASS, or OP_ALLANY into pcode. */
+
+BOOL PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
+  uint32_t *start_ptr, const uint32_t *end_ptr, PCRE2_UCHAR **pcode,
+  BOOL negate_class, int *errorcodeptr, compile_block *cb,
+  PCRE2_SIZE *lengthptr);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 

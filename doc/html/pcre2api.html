@@ -1559,7 +1559,7 @@ respectively, when <b>pcre2_compile()</b> returns NULL because a compilation
 error has occurred.
 </P>
 <P>
-There are nearly 100 positive error codes that <b>pcre2_compile()</b> may return
+There are over 100 positive error codes that <b>pcre2_compile()</b> may return
 if it finds an error in the pattern. There are also some negative error codes
 that are used for invalid UTF strings when validity checking is in force. These
 are the same as given by <b>pcre2_match()</b> and <b>pcre2_dfa_match()</b>, and
@@ -1667,6 +1667,16 @@ after any internal newline. However, it does not match after a newline at the
 end of the subject, for compatibility with Perl. If you want a multiline
 circumflex also to match after a terminating newline, you must set
 PCRE2_ALT_CIRCUMFLEX.
+<pre>
+  PCRE2_ALT_EXTENDED_CLASS
+</pre>
+Alters the parsing of character classes to follow the extended syntax
+described by Unicode UTS#18. The PCRE2_ALT_EXTENDED_CLASS option has no impact
+on the behaviour of the Perl-specific "(?[...])" syntax for extended classes,
+but instead enables the alternative syntax of extended class behaviour inside
+ordinary "[...]" character classes. See the
+<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
+documentation for details of the character classes supported.
 <pre>
   PCRE2_ALT_VERBNAMES
 </pre>

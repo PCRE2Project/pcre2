@@ -19612,6 +19612,939 @@ Failed: error -49 at offset 3 in replacement: unknown substring
 /a(?C)b/never_callout
 Failed: error 203 at offset 3: using callouts is disabled by the application
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+/[a[]/
+    [
+ 0: [
+
+/[a[]/alt_extended_class
+Failed: error 106 at offset 4: missing terminating ] for character class
+
+/[a[B]/alt_extended_class
+Failed: error 212 at offset 5: missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+
+/[a[B]]C/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[a]
+          cls:[B]
+          op: ||
+        ]
+        C
+        Ket
+        End
+------------------------------------------------------------------
+    aC
+ 0: aC
+    BC
+ 0: BC
+\= Expect no match
+    [C
+No match
+
+/[[A][B]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[B]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    B
+ 0: B
+\= Expect no match
+    [
+No match
+    ]
+No match
+
+/[[A]||[B]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[B]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    B
+ 0: B
+\= Expect no match
+    C
+No match
+
+/[[^A][B]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\x00-@B-\xff] (neg)
+          cls:[B]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    B
+ 0: B
+    C
+ 0: C
+\= Expect no match
+    A
+No match
+
+/[^[A][B]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[B]
+          op: ||
+          op: ^
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    C
+ 0: C
+\= Expect no match
+    A
+No match
+    B
+No match
+
+/[^[A]&&[B]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[B]
+          op: &&
+          op: ^
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    B
+ 0: B
+    C
+ 0: C
+
+/[A[]]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[\]]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    ]
+ 0: ]
+\= Expect no match
+    [
+No match
+
+/[A[^]]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[\x00-\^-\xff] (neg)
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    [
+ 0: [
+    C
+ 0: C
+\= Expect no match
+    ]
+No match
+
+/[A[]]/B,alt_extended_class,allow_empty_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+\= Expect no match
+    ]
+No match
+    [
+No match
+
+/[A[^]]/B,alt_extended_class,allow_empty_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          AllAny
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    C
+ 0: C
+    [
+ 0: [
+    ]
+ 0: ]
+
+/[A-C--B]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A-C]
+          cls:[B]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    C
+ 0: C
+\= Expect no match
+    B
+No match
+
+/[^A-C--B]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A-C]
+          cls:[B]
+          op: --
+          op: ^
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    B
+ 0: B
+\= Expect no match
+    A
+No match
+    C
+No match
+
+/[[\d\D]--b]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          AllAny
+          cls:[b]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    c
+ 0: c
+\= Expect no match
+    b
+No match
+
+/[\dAC-E[:space:]&&[^z]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\x09-\x0d 0-9AC-E]
+          cls:[\x00-y{-\xff] (neg)
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    0
+ 0: 0
+    A
+ 0: A
+    C
+ 0: C
+    D
+ 0: D
+    E
+ 0: E
+    \t
+ 0: \x09
+\= Expect no match
+    B
+No match
+    F
+No match
+    ;
+No match
+
+/[z||[^\dAC-E[:space:]]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[z]
+          cls:[\x00-\x08\x0e-\x1f!-/:-@BF-\xff] (neg)
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    z
+ 0: z
+    B
+ 0: B
+    F
+ 0: F
+    ;
+ 0: ;
+\= Expect no match
+    0
+No match
+    A
+No match
+    C
+No match
+    D
+No match
+    E
+No match
+    \t
+No match
+
+/[ab||cd]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[ab]
+          cls:[cd]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    c
+ 0: c
+\= Expect no match
+    e
+No match
+
+/[[a]b||[c]d]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[a]
+          cls:[b]
+          op: ||
+          cls:[c]
+          cls:[d]
+          op: ||
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    c
+ 0: c
+\= Expect no match
+    e
+No match
+
+/[a[b]||c[d]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[a]
+          cls:[b]
+          op: ||
+          cls:[c]
+          cls:[d]
+          op: ||
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    c
+ 0: c
+\= Expect no match
+    e
+No match
+
+/[-&&-]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-]
+          cls:[\-]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    -
+ 0: -
+\= Expect no match
+    a
+No match
+
+/[a-&&-a]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-a]
+          cls:[\-a]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    -
+ 0: -
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/[-a&&a-]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-a]
+          cls:[\-a]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    -
+ 0: -
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/[[a]-&&-[a]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[a]
+          cls:[\-]
+          op: ||
+          cls:[\-]
+          cls:[a]
+          op: ||
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    -
+ 0: -
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/[-[a]&&[a]-]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-]
+          cls:[a]
+          op: ||
+          cls:[a]
+          cls:[\-]
+          op: ||
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    -
+ 0: -
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/(?xx:[  ^  a[  ^  b]  ])/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        Bra
+        eclass[
+          cls:[a]
+          cls:[\x00-ac-\xff] (neg)
+          op: ||
+          op: ^
+        ]
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    b
+ 0: b
+\= Expect no match
+    A
+No match
+    a
+No match
+    c
+No match
+
+/[  ^  a[  ^  b]  ]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[ ^a]
+          cls:[ ^b]
+          op: ||
+          cls:[ ]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    \x20
+ 0:  
+    ^
+ 0: ^
+    a
+ 0: a
+    b
+ 0: b
+\= Expect no match
+    c
+No match
+
+/[a-c--b]+/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[a-c]
+          cls:[b]
+          op: --
+        ]++
+        Ket
+        End
+------------------------------------------------------------------
+    ac
+ 0: ac
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/[a-c--b]{2,3}/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[a-c]
+          cls:[b]
+          op: --
+        ]{2,3}+
+        Ket
+        End
+------------------------------------------------------------------
+    ac
+ 0: ac
+    cac
+ 0: cac
+\= Expect no match
+    a
+No match
+    bb
+No match
+
+/x[a-c--b]+y/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        x
+        eclass[
+          cls:[a-c]
+          cls:[b]
+          op: --
+        ]++
+        y
+        Ket
+        End
+------------------------------------------------------------------
+    xacy
+ 0: xacy
+    xaay
+ 0: xaay
+    xay
+ 0: xay
+\= Expect no match
+    zacy
+No match
+    xacz
+No match
+    xy
+No match
+    xby
+No match
+
+/[A--B--C--D]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[B]
+          op: --
+          cls:[C]
+          op: --
+          cls:[D]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+\= Expect no match
+    B
+No match
+
+/[A--A--A]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[A]
+          op: --
+          cls:[A]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+\= Expect no match
+    A
+No match
+    B
+No match
+
+/[[A--A]--A]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[A]
+          op: --
+          cls:[A]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+\= Expect no match
+    A
+No match
+    B
+No match
+
+/[A--[A--A]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[A]
+          cls:[A]
+          op: --
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+\= Expect no match
+    B
+No match
+
+/[A--^B]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[A]
+          cls:[B^]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+\= Expect no match
+    B
+No match
+    ^
+No match
+    z
+No match
+
+/([a-z--n])\1/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        eclass[
+          cls:[a-z]
+          cls:[n]
+          op: --
+        ]
+        Ket
+        \1
+        Ket
+        End
+------------------------------------------------------------------
+    aa
+ 0: aa
+ 1: a
+    zz
+ 0: zz
+ 1: z
+\= Expect no match
+    az
+No match
+    nn
+No match
+
+/(x[a-z--n]y)\1/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        x
+        eclass[
+          cls:[a-z]
+          cls:[n]
+          op: --
+        ]
+        y
+        Ket
+        \1
+        Ket
+        End
+------------------------------------------------------------------
+    xayxay
+ 0: xayxay
+ 1: xay
+    xzyxzy
+ 0: xzyxzy
+ 1: xzy
+\= Expect no match
+    xnyxny
+No match
+
+/(?:_\1|([a-z--n])){2}/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        Bra
+        _
+        \1
+        Alt
+        CBra 1
+        eclass[
+          cls:[a-z]
+          cls:[n]
+          op: --
+        ]
+        Ket
+        Ket
+        Bra
+        _
+        \1
+        Alt
+        CBra 1
+        eclass[
+          cls:[a-z]
+          cls:[n]
+          op: --
+        ]
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    a_a
+ 0: a_a
+ 1: a
+    z_z
+ 0: z_z
+ 1: z
+\= Expect no match
+    a_z
+No match
+    n_n
+No match
+
+/(?:_\1|([a-z--n]))+/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        Bra
+        _
+        \1
+        Alt
+        CBra 1
+        eclass[
+          cls:[a-z]
+          cls:[n]
+          op: --
+        ]
+        Ket
+        KetRmax
+        Ket
+        End
+------------------------------------------------------------------
+    a_a
+ 0: a_a
+ 1: a
+    z_z
+ 0: z_z
+ 1: z
+    a_partial
+ 0: a
+ 1: a
+\= Expect no match
+    n_n
+No match
+
+/[a--/alt_extended_class
+Failed: error 106 at offset 4: missing terminating ] for character class
+
+/[a--a/alt_extended_class
+Failed: error 106 at offset 5: missing terminating ] for character class
+
+/[a--[a/alt_extended_class
+Failed: error 106 at offset 6: missing terminating ] for character class
+
+/[a--[a]/alt_extended_class
+Failed: error 212 at offset 7: missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+
+/[a--[a]--/alt_extended_class
+Failed: error 212 at offset 9: missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+
+/[a--]/alt_extended_class
+Failed: error 210 at offset 5: expected operand after operator in character class
+
+/[--a]/alt_extended_class
+Failed: error 209 at offset 3: unexpected operator in character class (no preceding operand)
+
+/[^--a]/alt_extended_class
+Failed: error 209 at offset 4: unexpected operator in character class (no preceding operand)
+
+/[--]/alt_extended_class
+Failed: error 209 at offset 3: unexpected operator in character class (no preceding operand)
+
+/[a---b]/alt_extended_class
+Failed: error 208 at offset 5: invalid operator in character class
+
+/[a----b]/alt_extended_class
+Failed: error 208 at offset 6: invalid operator in character class
+
+/[a&&&b]/alt_extended_class
+Failed: error 208 at offset 5: invalid operator in character class
+
+/[a|||b]/alt_extended_class
+Failed: error 208 at offset 5: invalid operator in character class
+
+/[a||b&&c]/alt_extended_class
+Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+
+/[a--b&&c]/alt_extended_class
+Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+
+/[a||b--c]/alt_extended_class
+Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+
+/[a||[b--c]]/alt_extended_class
+    a
+ 0: a
+    b
+ 0: b
+\= Expect no match
+    c
+No match
+
+/[\d-z]/B,alt_extended_class
+Failed: error 150 at offset 3: invalid range in character class
+
+/[z-\d]/B,alt_extended_class
+Failed: error 150 at offset 5: invalid range in character class
+
+/[abc -- b]+/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[ a-c]
+          cls:[ b]
+          op: --
+        ]++
+        Ket
+        End
+------------------------------------------------------------------
+    acacbac
+ 0: acac
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a]]]]]]]]]]]]]]]/alt_extended_class
+    a
+ 0: a
+\= Expect no match
+    b
+No match
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[z]&&a]]]]]]]]]]]]]]]/alt_extended_class
+Failed: error 207 at offset 115: character classes are too deeply nested
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
+Failed: error 207 at offset 118: character classes are too deeply nested
+
+# --------------
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

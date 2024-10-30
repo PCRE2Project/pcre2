@@ -161,6 +161,8 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
 enum { RM100=100, RM101 };
 #endif
 
+enum { RM150=150, RM151 };
+
 #ifdef SUPPORT_UNICODE
 enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
        RM208,     RM209, RM210, RM211, RM212, RM213, RM214, RM215,
@@ -2313,6 +2315,148 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #undef Lstart_eptr
 #undef Lxclass_data
+#undef Lmin
+#undef Lmax
+
+
+    /* ===================================================================== */
+    /* Match a complex, set-based character class. This opcodes are used when
+    there is complex nesting or logical operations within the character
+    class. */
+
+#define Lstart_eptr  F->temp_sptr[0]
+#define Leclass_data F->temp_sptr[1]
+#define Leclass_len  F->temp_size
+#define Lmin         F->temp_32[0]
+#define Lmax         F->temp_32[1]
+
+    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+    Enclose in "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+    case OP_ECLASS:
+      {
+      Leclass_data = Fecode + 1 + LINK_SIZE;  /* Save for matching */
+      Fecode += GET(Fecode, 1);               /* Advance past the item */
+      Leclass_len = (PCRE2_SIZE)(Fecode - Leclass_data);
+
+      switch (*Fecode)
+        {
+        case OP_CRSTAR:
+        case OP_CRMINSTAR:
+        case OP_CRPLUS:
+        case OP_CRMINPLUS:
+        case OP_CRQUERY:
+        case OP_CRMINQUERY:
+        case OP_CRPOSSTAR:
+        case OP_CRPOSPLUS:
+        case OP_CRPOSQUERY:
+        fc = *Fecode++ - OP_CRSTAR;
+        Lmin = rep_min[fc];
+        Lmax = rep_max[fc];
+        reptype = rep_typ[fc];
+        break;
+
+        case OP_CRRANGE:
+        case OP_CRMINRANGE:
+        case OP_CRPOSRANGE:
+        Lmin = GET2(Fecode, 1);
+        Lmax = GET2(Fecode, 1 + IMM2_SIZE);
+        if (Lmax == 0) Lmax = UINT32_MAX;  /* Max 0 => infinity */
+        reptype = rep_typ[*Fecode - OP_CRSTAR];
+        Fecode += 1 + 2 * IMM2_SIZE;
+        break;
+
+        default:               /* No repeat follows */
+        Lmin = Lmax = 1;
+        break;
+        }
+
+      /* First, ensure the minimum number of matches are present. */
+
+      for (i = 1; i <= Lmin; i++)
+        {
+        if (Feptr >= mb->end_subject)
+          {
+          SCHECK_PARTIAL();
+          RRETURN(MATCH_NOMATCH);
+          }
+        GETCHARINCTEST(fc, Feptr);
+        if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len, utf))
+          RRETURN(MATCH_NOMATCH);
+        }
+
+      /* If Lmax == Lmin we can just continue with the main loop. */
+
+      if (Lmin == Lmax) continue;
+
+      /* If minimizing, keep testing the rest of the expression and advancing
+      the pointer while it matches the class. */
+
+      if (reptype == REPTYPE_MIN)
+        {
+        for (;;)
+          {
+          RMATCH(Fecode, RM150);
+          if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+          if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
+          if (Feptr >= mb->end_subject)
+            {
+            SCHECK_PARTIAL();
+            RRETURN(MATCH_NOMATCH);
+            }
+          GETCHARINCTEST(fc, Feptr);
+          if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len, utf))
+            RRETURN(MATCH_NOMATCH);
+          }
+        PCRE2_UNREACHABLE(); /* Control never reaches here */
+        }
+
+      /* If maximizing, find the longest possible run, then work backwards. */
+
+      else
+        {
+        Lstart_eptr = Feptr;
+        for (i = Lmin; i < Lmax; i++)
+          {
+          int len = 1;
+          if (Feptr >= mb->end_subject)
+            {
+            SCHECK_PARTIAL();
+            break;
+            }
+#ifdef SUPPORT_UNICODE
+          GETCHARLENTEST(fc, Feptr, len);
+#else
+          fc = *Feptr;
+#endif
+          if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len, utf))
+            break;
+          Feptr += len;
+          }
+
+        if (reptype == REPTYPE_POS) continue;    /* No backtracking */
+
+        /* After \C in UTF mode, Lstart_eptr might be in the middle of a
+        Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
+        go too far. */
+
+        for(;;)
+          {
+          RMATCH(Fecode, RM151);
+          if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+          if (Feptr-- <= Lstart_eptr) break;  /* Tried at original position */
+#ifdef SUPPORT_UNICODE
+          if (utf) BACKCHAR(Feptr);
+#endif
+          }
+        RRETURN(MATCH_NOMATCH);
+        }
+
+      PCRE2_UNREACHABLE(); /* Control never reaches here */
+      }
+
+#undef Lstart_eptr
+#undef Leclass_data
+#undef Leclass_len
 #undef Lmin
 #undef Lmax
 
@@ -6678,6 +6822,8 @@ switch (Freturn_id)
 #ifdef SUPPORT_WIDE_CHARS
   LBL(100) LBL(101)
 #endif
+
+  LBL(150) LBL(151)
 
 #ifdef SUPPORT_UNICODE
   LBL(200) LBL(201) LBL(202) LBL(203) LBL(204) LBL(205) LBL(206)

@@ -334,6 +334,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc,
 PCRE2_UCHAR c = *code;
 PCRE2_UCHAR base;
 PCRE2_SPTR end;
+PCRE2_SPTR class_end;
 uint32_t chr;
 
 #ifdef SUPPORT_UNICODE
@@ -479,13 +480,15 @@ switch(c)
 
   case OP_NCLASS:
   case OP_CLASS:
-#ifdef SUPPORT_WIDE_CHARS
   case OP_XCLASS:
-  if (c == OP_XCLASS)
+  case OP_ECLASS:
+  /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+  Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+  if (c == OP_XCLASS || c == OP_ECLASS)
     end = code + GET(code, 0) - 1;
   else
-#endif
     end = code + 32 / sizeof(PCRE2_UCHAR);
+  class_end = end;
 
   switch(*end)
     {
@@ -513,6 +516,7 @@ switch(c)
     break;
     }
   list[2] = (uint32_t)(end - code);
+  list[3] = (uint32_t)(end - class_end);
   return end;
   }
 
@@ -1115,6 +1119,14 @@ for(;;)
       break;
 #endif
 
+      /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+      Enclose in "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+      case OP_ECLASS:
+      if (PRIV(eclass)(chr,
+          (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE,
+          (list_ptr == list ? code : base_end) - list_ptr[3], utf)) return FALSE;
+      break;
+
       default:
       return FALSE;
       }
@@ -1216,20 +1228,20 @@ for (;;)
       }
     c = *code;
     }
-  else if (c == OP_CLASS || c == OP_NCLASS || c == OP_XCLASS)
+  else if (c == OP_CLASS || c == OP_NCLASS || c == OP_XCLASS || c == OP_ECLASS)
     {
-#ifdef SUPPORT_WIDE_CHARS
-    if (c == OP_XCLASS)
+    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+    Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+    if (c == OP_XCLASS || c == OP_ECLASS)
       repeat_opcode = code + GET(code, 1);
     else
-#endif
       repeat_opcode = code + 1 + (32 / sizeof(PCRE2_UCHAR));
 
     c = *repeat_opcode;
     if (c >= OP_CRSTAR && c <= OP_CRMINRANGE)
       {
       /* The return from get_chr_property_list() will never be NULL when
-      *code (aka c) is one of the three class opcodes. However, gcc with
+      *code (aka c) is one of the four class opcodes. However, gcc with
       -fanalyzer notes that a NULL return is possible, and grumbles. Hence we
       put in a check. */
 
@@ -1295,11 +1307,12 @@ for (;;)
     code += GET(code, 1 + 2*LINK_SIZE);
     break;
 
-#ifdef SUPPORT_WIDE_CHARS
+    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
+    Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+    case OP_ECLASS:
     case OP_XCLASS:
     code += GET(code, 1);
     break;
-#endif
 
     case OP_MARK:
     case OP_COMMIT_ARG:

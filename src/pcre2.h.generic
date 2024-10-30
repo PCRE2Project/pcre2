@@ -143,6 +143,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTENDED_MORE       0x01000000u  /* C       */
 #define PCRE2_LITERAL             0x02000000u  /* C       */
 #define PCRE2_MATCH_INVALID_UTF   0x04000000u  /*   J M D */
+#define PCRE2_ALT_EXTENDED_CLASS  0x08000000u  /* C       */
 
 /* An additional compile options word is available in the compile context. */
 
@@ -332,7 +333,12 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_EXTRA_CASING_REQUIRES_UNICODE  204
 #define PCRE2_ERROR_TURKISH_CASING_REQUIRES_UTF    205
 #define PCRE2_ERROR_EXTRA_CASING_INCOMPATIBLE      206
-
+#define PCRE2_ERROR_ECLASS_NEST_TOO_DEEP           207
+#define PCRE2_ERROR_ECLASS_INVALID_OPERATOR        208
+#define PCRE2_ERROR_ECLASS_UNEXPECTED_OPERATOR     209
+#define PCRE2_ERROR_ECLASS_EXPECTED_OPERAND        210
+#define PCRE2_ERROR_ECLASS_MIXED_OPERATORS         211
+#define PCRE2_ERROR_ECLASS_HINT_SQUARE_BRACKET     212
 
 /* "Expected" matching error codes: no match and partial match. */
 

@@ -38,9 +38,9 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This module contains an internal function that is used to match an extended
-class. It is used by pcre2_auto_possessify() and by both pcre2_match() and
-pcre2_def_match(). */
+/* This module contains two internal functions that are used to match
+OP_XCLASS and OP_ECLASS. It is used by pcre2_auto_possessify() and by both
+pcre2_match() and pcre2_dfa_match(). */
 
 
 #ifdef HAVE_CONFIG_H
@@ -439,6 +439,98 @@ while (TRUE)
   else
     return (value == c || (value & XCL_CHAR_END) == 0) == not_negated;
   }
+}
+
+
+
+/*************************************************
+*       Match character against an ECLASS        *
+*************************************************/
+
+/* This function is called to match a character against an extended class
+used for describing characters using boolean operations on sets.
+
+Arguments:
+  c           the character
+  data_start  points to the start of the ECLASS data
+  data_end    points one-past-the-last of the ECLASS data
+  utf         TRUE if in UTF mode
+
+Returns:      TRUE if character matches, else FALSE
+*/
+
+BOOL
+PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end, BOOL utf)
+{
+PCRE2_SPTR ptr = data_start;
+uint32_t stack = 0;
+
+/* Do a little loop, until we reach the end of the ECLASS. */
+while (ptr < data_end)
+  {
+  switch (*ptr)
+    {
+    case OP_ECLASS_OR:
+    ++ptr;
+    stack = (stack >> 1) | (stack & (uint32_t)1u);
+    break;
+
+    case OP_ECLASS_AND:
+    ++ptr;
+    stack = (stack >> 1) & (stack | ~(uint32_t)1u);
+    break;
+
+    case OP_ECLASS_SUB:
+    ++ptr;
+    stack = (stack >> 1) & (~stack | ~(uint32_t)1u);
+    break;
+
+    case OP_ECLASS_NOT:
+    ++ptr;
+    stack ^= (uint32_t)1u;
+    break;
+
+    case OP_CLASS:
+    case OP_NCLASS:
+      {
+      uint32_t matched;
+      if (c > 255)
+        matched = *ptr == OP_NCLASS;
+      else
+        matched = (((const unsigned char *)(ptr+1))[c/8] & (1u << (c&7))) != 0;
+
+      ptr += 1 + (32 / sizeof(PCRE2_UCHAR));
+      stack = (stack << 1) | matched;
+      break;
+      }
+
+#ifdef SUPPORT_WIDE_CHARS
+    case OP_XCLASS:
+      {
+      uint32_t matched = PRIV(xclass)(c, ptr + 1 + LINK_SIZE, utf);
+
+      ptr += GET(ptr, 1);
+      stack = (stack << 1) | matched;
+      break;
+      }
+#endif
+
+    case OP_ALLANY:
+    ++ptr;
+    stack = (stack << 1) | 1u;
+    break;
+
+    /* This should never occur, but compilers may mutter if there is no
+    default. */
+
+    default:
+    PCRE2_DEBUG_UNREACHABLE();
+    return FALSE;
+    }
+  }
+
+/* The final bit left on the stack now holds the match result. */
+return (stack & 1u) != 0;
 }
 
 /* End of pcre2_xclass.c */

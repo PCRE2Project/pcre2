@@ -655,6 +655,7 @@ static modstruct modlist[] = {
   { "allvector",                   MOD_PND,  MOD_CTL, CTL2_ALLVECTOR,             PO(control2) },
   { "alt_bsux",                    MOD_PAT,  MOD_OPT, PCRE2_ALT_BSUX,             PO(options) },
   { "alt_circumflex",              MOD_PAT,  MOD_OPT, PCRE2_ALT_CIRCUMFLEX,       PO(options) },
+  { "alt_extended_class",          MOD_PAT,  MOD_OPT, PCRE2_ALT_EXTENDED_CLASS,   PO(options) },
   { "alt_verbnames",               MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
   { "altglobal",                   MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
   { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
@@ -4347,10 +4348,11 @@ static void
 show_compile_options(uint32_t options, const char *before, const char *after)
 {
 if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
+  ((options & PCRE2_ALT_EXTENDED_CLASS) != 0)? " alt_extended_class" : "",
   ((options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "",
   ((options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? " allow_empty_class" : "",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
