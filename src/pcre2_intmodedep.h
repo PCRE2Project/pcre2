@@ -779,6 +779,8 @@ typedef struct compile_block {
   uint32_t nltype;                 /* Newline type */
   uint32_t nllen;                  /* Newline string length */
   PCRE2_UCHAR nl[4];               /* Newline string when fixed length */
+  uint8_t class_op_used[ECLASS_NEST_LIMIT]; /* Operation used for
+                                               extended classes */
   uint32_t req_varyopt;            /* "After variable item" flag for reqbyte */
   uint32_t max_varlookbehind;      /* Limit for variable lookbehinds */
   int  max_lookbehind;             /* Maximum lookbehind encountered (characters) */
