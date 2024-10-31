@@ -1703,47 +1703,38 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
 
   if ((xclass_props & XCLASS_HAS_CHAR_LISTS) != 0)
     {
-    /* Char lists size is an even number,
-    because all items are 16 or 32 bit values. */
+    /* Char lists size is an even number, because all items are 16 or 32
+    bit values. The character list data is always aligned to 32 bits. */
     size_t char_lists_size = cranges->char_lists_size;
-    PCRE2_ASSERT((char_lists_size & 0x1) == 0);
+    PCRE2_ASSERT((char_lists_size & 0x1) == 0 &&
+                 (cb->char_lists_size & 0x3) == 0);
 
     if (lengthptr != NULL)
       {
-      /* At this point, we don't know the precise location
-      so the maximum alignment is added to the length. */
+      char_lists_size = CLIST_ALIGN_TO(char_lists_size, sizeof(uint32_t));
+
 #if PCRE2_CODE_UNIT_WIDTH == 8
-      *lengthptr += 2 /* sizeof(type) in PCRE2_UCHARs */ +
-         3 /* maximum alignment. */;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-      *lengthptr += 1 /* sizeof(type) in PCRE2_UCHARs */ +
-         1 /* maximum alignment. */;
-      char_lists_size >>= 1;
+      *lengthptr += 2 + LINK_SIZE;
 #else
-      *lengthptr += 1 /* sizeof(type) in PCRE2_UCHARs */;
-      /* Padding, when the size is not divisible by 4. */
-      if ((char_lists_size & 0x2) != 0)
-        char_lists_size += 2;
-      char_lists_size >>= 2;
+      *lengthptr += 1 + LINK_SIZE;
 #endif
 
-      if (INT_MAX - *lengthptr < char_lists_size)
-        {
-        *errorcodeptr = ERR20;   /* Integer overflow */
-        return FALSE;
-        }
+      cb->char_lists_size += char_lists_size;
 
-      *lengthptr += char_lists_size;
+      char_lists_size /= sizeof(PCRE2_UCHAR);
 
-      if (*lengthptr > MAX_PATTERN_SIZE)
+      /* Storage space for character lists is included
+      in the maximum pattern size. */
+      if (*lengthptr > MAX_PATTERN_SIZE ||
+          MAX_PATTERN_SIZE - *lengthptr < char_lists_size)
         {
         *errorcodeptr = ERR20;   /* Pattern is too large */
-        return FALSE;
+        return 0;
         }
       }
     else
       {
-      uint8_t *char_buffer = (uint8_t*)code;
+      uint8_t *data;
 
       PCRE2_ASSERT(cranges->char_lists_types <= XCL_TYPE_MASK);
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -1751,46 +1742,44 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
       code[0] = (uint8_t)(XCL_LIST |
         (cranges->char_lists_types >> 8));
       code[1] = (uint8_t)cranges->char_lists_types;
-      char_buffer += 2;
-
-      /* Compute alignment. */
-      if (((uintptr_t)char_buffer & 0x1) != 0)
-        {
-        code[0] |= 1u << (XCL_ALIGNMENT_SHIFT - 8);
-        char_buffer += 1;
-        }
-
-      if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
-        {
-        code[0] |= 2u << (XCL_ALIGNMENT_SHIFT - 8);
-        char_buffer += 2;
-        }
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-      code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
-      char_buffer += 2;
-
-      /* Compute alignment. */
-      if (((uintptr_t)char_buffer & 0x2) != (char_lists_size & 0x2))
-        {
-        code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
-        char_buffer += 2;
-        }
+      code += 2;
 #else
-      code[0] = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
-      char_buffer += 4;
-
-      /* Padding. */
-      if ((char_lists_size & 0x2) != 0)
-        {
-        code[0] |= 2u << XCL_ALIGNMENT_SHIFT;
-        char_buffer += 2;
-        }
+      *code++ = (PCRE2_UCHAR)(XCL_LIST | cranges->char_lists_types);
 #endif
-      memcpy(char_buffer,
-        (uint8_t*)(cranges + 1) + cranges->char_lists_start,
+
+      /* Character lists are stored in backwards direction from
+      byte code start. The non-dfa/dfa matchers can access these
+      lists using the byte code start stored in match blocks.
+      Each list is aligned to 32 bit with an optional unused
+      16 bit value at the beginning of the character list. */
+
+      cb->char_lists_size += char_lists_size;
+      data = (uint8_t*)cb->start_code - cb->char_lists_size;
+
+      memcpy(data, (uint8_t*)(cranges + 1) + cranges->char_lists_start,
         char_lists_size);
 
-      code = (PCRE2_UCHAR*)(char_buffer + char_lists_size);
+      /* Since character lists total size is less than MAX_PATTERN_SIZE,
+      their starting offset fits into a value which size is LINK_SIZE. */
+
+      char_lists_size = cb->char_lists_size;
+      PUT(code, 0, (uint32_t)(char_lists_size >> 1));
+      code += LINK_SIZE;
+
+#if defined PCRE2_DEBUG || defined SUPPORT_VALGRIND
+      if ((char_lists_size & 0x2) != 0)
+        {
+        /* In debug the unused 16 bit value is set
+        to a fixed value and marked unused. */
+        ((uint16_t*)data)[-1] = 0x5555;
+#ifdef SUPPORT_VALGRIND
+        VALGRIND_MAKE_MEM_NOACCESS(data - 2, 2);
+#endif
+        }
+#endif
+
+      cb->char_lists_size =
+        CLIST_ALIGN_TO(char_lists_size, sizeof(uint32_t));
 
       cb->cx->memctl.free(cranges, cb->cx->memctl.memory_data);
       }

@@ -66,7 +66,7 @@ Returns:      TRUE if character matches, else FALSE
 */
 
 BOOL
-PRIV(xclass)(uint32_t c, PCRE2_SPTR data, BOOL utf)
+PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL utf)
 {
 /* Update PRIV(update_classbits) when this function is changed. */
 PCRE2_UCHAR t;
@@ -320,8 +320,7 @@ data++;
 #endif  /* CODE_UNIT_WIDTH */
 
 /* Align characters. */
-next_char = (const uint8_t*)data;
-next_char += (type >> XCL_ALIGNMENT_SHIFT) & XCL_ALIGNMENT_MASK;
+next_char = char_lists_end - (GET(data, 0) << 1);
 type &= XCL_TYPE_MASK;
 
 /* Alignment check. */
@@ -333,6 +332,7 @@ if (c >= XCL_CHAR_LIST_HIGH_16_START)
   if (max_index == XCL_ITEM_COUNT_MASK)
     {
     max_index = *(const uint16_t*)next_char;
+    PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
     next_char += 2;
     }
 
@@ -349,6 +349,7 @@ if (c < XCL_CHAR_LIST_LOW_32_START)
   if (max_index == XCL_ITEM_COUNT_MASK)
     {
     max_index = *(const uint16_t*)next_char;
+    PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
     next_char += 2;
     }
 
@@ -382,6 +383,7 @@ max_index = type & XCL_ITEM_COUNT_MASK;
 if (max_index == XCL_ITEM_COUNT_MASK)
   {
   max_index = *(const uint16_t*)next_char;
+  PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
   next_char += 2;
   }
 
@@ -399,6 +401,7 @@ if (c >= XCL_CHAR_LIST_HIGH_32_START)
   if (max_index == XCL_ITEM_COUNT_MASK)
     {
     max_index = *(const uint32_t*)next_char;
+    PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
     next_char += 4;
     }
 
@@ -460,7 +463,8 @@ Returns:      TRUE if character matches, else FALSE
 */
 
 BOOL
-PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end, BOOL utf)
+PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end,
+  const uint8_t *char_lists_end, BOOL utf)
 {
 PCRE2_SPTR ptr = data_start;
 uint32_t stack = 0;
@@ -507,7 +511,7 @@ while (ptr < data_end)
 #ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
       {
-      uint32_t matched = PRIV(xclass)(c, ptr + 1 + LINK_SIZE, utf);
+      uint32_t matched = PRIV(xclass)(c, ptr + 1 + LINK_SIZE, char_lists_end, utf);
 
       ptr += GET(ptr, 1);
       stack = (stack << 1) | matched;

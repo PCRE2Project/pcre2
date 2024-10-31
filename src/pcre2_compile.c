@@ -5919,7 +5919,6 @@ for (;; pptr++)
     zerofirstcuflags = firstcuflags;
     zeroreqcu = reqcu;
     zeroreqcuflags = reqcuflags;
-
     break;  /* End of class processing */
 
 
@@ -9810,6 +9809,7 @@ cb.workspace_size = COMPILE_WORK_SIZE;
 #ifdef SUPPORT_WIDE_CHARS
 cb.cranges = NULL;
 cb.next_cranges = NULL;
+cb.char_lists_size = 0;
 #endif
 
 /* Maximum back reference and backref bitmap. The bitmap records up to 31 back
@@ -10200,7 +10200,13 @@ if (errorcode != 0) goto HAD_CB_ERROR;  /* Offset is in cb.erroroffset */
 
 /* This should be caught in compile_regex(), but just in case... */
 
+#if defined SUPPORT_WIDE_CHARS
+PCRE2_ASSERT((cb.char_lists_size & 0x3) == 0);
+if (length > MAX_PATTERN_SIZE ||
+    MAX_PATTERN_SIZE - length < (cb.char_lists_size / sizeof(PCRE2_UCHAR)))
+#else
 if (length > MAX_PATTERN_SIZE)
+#endif
   {
   errorcode = ERR20;
   goto HAD_CB_ERROR;
@@ -10211,8 +10217,22 @@ block for storing the compiled pattern and names table. Integer overflow should
 no longer be possible because nowadays we limit the maximum value of
 cb.names_found and cb.name_entry_size. */
 
-re_blocksize = CU2BYTES(length +
-  (PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
+re_blocksize =
+  CU2BYTES((PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
+
+#if defined SUPPORT_WIDE_CHARS
+if (cb.char_lists_size != 0)
+  {
+#if PCRE2_CODE_UNIT_WIDTH != 32
+  /* Align to 32 bit first. This ensures the
+  allocated area will also be 32 bit aligned. */
+  re_blocksize = (PCRE2_SIZE)CLIST_ALIGN_TO(re_blocksize, sizeof(uint32_t));
+#endif
+  re_blocksize += cb.char_lists_size;
+  }
+#endif
+
+re_blocksize += CU2BYTES(length);
 
 if (re_blocksize > ccontext->max_pattern_compiled_length)
   {
@@ -10241,6 +10261,7 @@ re->tables = tables;
 re->executable_jit = NULL;
 memset(re->start_bitmap, 0, 32 * sizeof(uint8_t));
 re->blocksize = re_blocksize;
+re->code_start = re_blocksize - CU2BYTES(length);
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
 re->overall_options = cb.external_options;
@@ -10264,8 +10285,7 @@ re->optimization_flags = optim_flags;
 /* The basic block is immediately followed by the name table, and the compiled
 code follows after that. */
 
-codestart = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
-  re->name_entry_size * re->name_count;
+codestart = (PCRE2_UCHAR *)((uint8_t *)re + re->code_start);
 
 /* Update the compile data block for the actual compile. The starting points of
 the name/number translation table and of the code are passed around in the
@@ -10280,6 +10300,10 @@ cb.start_code = codestart;
 cb.req_varyopt = 0;
 cb.had_accept = FALSE;
 cb.had_pruneorskip = FALSE;
+#ifdef SUPPORT_WIDE_CHARS
+cb.char_lists_size = 0;
+#endif
+
 
 /* If any named groups were found, create the name/number table from the list
 created in the pre-pass. */

@@ -2241,7 +2241,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           RRETURN(MATCH_NOMATCH);
           }
         GETCHARINCTEST(fc, Feptr);
-        if (!PRIV(xclass)(fc, Lxclass_data, utf)) RRETURN(MATCH_NOMATCH);
+        if (!PRIV(xclass)(fc, Lxclass_data,
+            (const uint8_t*)mb->start_code, utf))
+          RRETURN(MATCH_NOMATCH);
         }
 
       /* If Lmax == Lmin we can just continue with the main loop. */
@@ -2264,7 +2266,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINCTEST(fc, Feptr);
-          if (!PRIV(xclass)(fc, Lxclass_data, utf)) RRETURN(MATCH_NOMATCH);
+          if (!PRIV(xclass)(fc, Lxclass_data,
+              (const uint8_t*)mb->start_code, utf))
+            RRETURN(MATCH_NOMATCH);
           }
         PCRE2_UNREACHABLE(); /* Control never reaches here */
         }
@@ -2287,7 +2291,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #else
           fc = *Feptr;
 #endif
-          if (!PRIV(xclass)(fc, Lxclass_data, utf)) break;
+          if (!PRIV(xclass)(fc, Lxclass_data,
+              (const uint8_t*)mb->start_code, utf)) break;
           Feptr += len;
           }
 
@@ -2380,7 +2385,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           RRETURN(MATCH_NOMATCH);
           }
         GETCHARINCTEST(fc, Feptr);
-        if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len, utf))
+        if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
+                          (const uint8_t*)mb->start_code, utf))
           RRETURN(MATCH_NOMATCH);
         }
 
@@ -2404,7 +2410,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINCTEST(fc, Feptr);
-          if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len, utf))
+          if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
+                            (const uint8_t*)mb->start_code, utf))
             RRETURN(MATCH_NOMATCH);
           }
         PCRE2_UNREACHABLE(); /* Control never reaches here */
@@ -2428,7 +2435,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #else
           fc = *Feptr;
 #endif
-          if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len, utf))
+          if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
+                            (const uint8_t*)mb->start_code, utf))
             break;
           Feptr += len;
           }
@@ -7311,7 +7319,7 @@ given name, for condition testing. The code follows the name table. */
 mb->name_table = (PCRE2_SPTR)((const uint8_t *)re + sizeof(pcre2_real_code));
 mb->name_count = re->name_count;
 mb->name_entry_size = re->name_entry_size;
-mb->start_code = mb->name_table + re->name_count * re->name_entry_size;
+mb->start_code = (PCRE2_SPTR)((const uint8_t *)re + re->code_start);
 
 /* Process the \R and newline settings. */
 

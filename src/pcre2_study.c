@@ -937,7 +937,8 @@ Arguments:
 Returns:         nothing
 */
 static void
-study_char_list(PCRE2_SPTR code, uint8_t *start_bitmap)
+study_char_list(PCRE2_SPTR code, uint8_t *start_bitmap,
+  const uint8_t *char_lists_end)
 {
 uint32_t type, list_ind;
 uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
@@ -951,8 +952,7 @@ type = (uint32_t)(code[0] << 8) | code[1];
 code += 2;
 
 /* Align characters. */
-next_char = (const uint8_t*)code;
-next_char += (type >> XCL_ALIGNMENT_SHIFT) & XCL_ALIGNMENT_MASK;
+next_char = char_lists_end - (GET(code, 0) << 1);
 type &= XCL_TYPE_MASK;
 list_ind = 0;
 
@@ -1755,7 +1755,8 @@ do
 
         if (*p >= XCL_LIST)
           {
-          study_char_list(p, re->start_bitmap);
+          study_char_list(p, re->start_bitmap,
+            ((const uint8_t *)re + re->code_start));
           goto HANDLE_CLASSMAP;
           }
 
@@ -1920,8 +1921,7 @@ BOOL ucp = (re->overall_options & PCRE2_UCP) != 0;
 
 /* Find start of compiled code */
 
-code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
-  re->name_entry_size * re->name_count;
+code = (PCRE2_UCHAR *)((uint8_t *)re + re->code_start);
 
 /* For a pattern that has a first code unit, or a multiline pattern that
 matches only at "line start", there is no point in seeking a list of starting
