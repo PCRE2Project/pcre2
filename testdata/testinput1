@@ -5801,12 +5801,6 @@ ef) x/x,mark
 
 /(?'c')XX(?'YYYYYYYYYYYYYYYYYYYYYYYCl')/
 
-/[s[:digit:]\E-H]+/
-    s09-H
-
-/[s[:digit:]\Q\E-H]+/
-    s09-H
-
 /a+(?:|b)a/
     aaaa
 
@@ -6720,5 +6714,19 @@ $/x
 
 /65 00 64/hex
     e\0d
+
+/[[:digit:]-   ]/xx
+    1
+    -
+\= Expect no match
+    z
+    \ \
+
+/[\d-   ]/xx
+    1
+    -
+\= Expect no match
+    z
+    \ \
 
 # End of testinput1 

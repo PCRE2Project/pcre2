@@ -9264,14 +9264,6 @@ No match
 
 /(?'c')XX(?'YYYYYYYYYYYYYYYYYYYYYYYCl')/
 
-/[s[:digit:]\E-H]+/
-    s09-H
- 0: s09-H
-
-/[s[:digit:]\Q\E-H]+/
-    s09-H
- 0: s09-H
-
 /a+(?:|b)a/
     aaaa
  0: aaaa
@@ -10596,5 +10588,27 @@ No match
 /65 00 64/hex
     e\0d
  0: e\x00d
+
+/[[:digit:]-   ]/xx
+    1
+ 0: 1
+    -
+ 0: -
+\= Expect no match
+    z
+No match
+    \ \
+No match
+
+/[\d-   ]/xx
+    1
+ 0: 1
+    -
+ 0: -
+\= Expect no match
+    z
+No match
+    \ \
+No match
 
 # End of testinput1 

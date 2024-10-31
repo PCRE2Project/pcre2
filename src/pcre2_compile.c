@@ -2821,7 +2821,14 @@ the main compiling phase. */
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
 
-enum { RANGE_NO, RANGE_STARTED, RANGE_OK_ESCAPED, RANGE_OK_LITERAL };
+enum {
+  RANGE_NO, /* State after '[' (initial), or '[a-z'; hyphen is literal */
+  RANGE_STARTED, /* State after '[1-'; last-emitted code is META_RANGE_XYZ */
+  RANGE_FORBID_NO, /* State after '[\d'; '-]' is allowed but not '-1]' */
+  RANGE_FORBID_STARTED, /* State after '[\d-'*/
+  RANGE_OK_ESCAPED, /* State after '[1'; hyphen may be a range */
+  RANGE_OK_LITERAL /* State after '[\1'; hyphen may be a range */
+};
 
 /* States used for analyzing operators and operands in character classes. */
 
@@ -2881,6 +2888,7 @@ PCRE2_SPTR thisptr;
 PCRE2_SPTR name;
 PCRE2_SPTR ptrend = cb->end_pattern;
 PCRE2_SPTR verbnamestart = NULL;    /* Value avoids compiler warning */
+PCRE2_SPTR class_range_forbid_ptr = NULL;
 named_group *ng;
 nest_save *top_nest, *end_nests;
 
@@ -3697,6 +3705,21 @@ while (ptr < ptrend)
           goto FAILED;
           }
 
+        /* Perl treats a hyphen after a POSIX class as a literal, not the
+        start of a range. However, it gives a warning in its warning mode
+        unless the hyphen is the last character in the class. PCRE does not
+        have a warning mode, so we give an error, because this is likely an
+        error on the user's part.
+
+        Roll back to the hyphen for the error position. */
+
+        if (class_range_state == RANGE_FORBID_STARTED)
+          {
+          ptr = class_range_forbid_ptr;
+          errorcode = ERR50;
+          goto FAILED;
+          }
+
         if (*ptr != CHAR_COLON)
           {
           errorcode = ERR13;
@@ -3717,30 +3740,12 @@ while (ptr < ptrend)
           }
         ptr = tempptr + 2;
 
-        /* Perl treats a hyphen after a POSIX class as a literal, not the
-        start of a range. However, it gives a warning in its warning mode
-        unless the hyphen is the last character in the class. PCRE does not
-        have a warning mode, so we give an error, because this is likely an
-        error on the user's part. */
+        /* Set "a hyphen is forbidden to be the start of a range". For the '-]'
+        case, the hyphen is treated as a literal, but for '-1' it is disallowed
+        (because it would be interpreted as range). */
 
-        if (ptr < ptrend && *ptr == CHAR_MINUS &&
-            !((options & PCRE2_ALT_EXTENDED_CLASS) != 0 && ptr + 1 < ptrend &&
-              ptr[1] == CHAR_MINUS) &&
-            (ptr + 1 == ptrend || ptr[1] != CHAR_RIGHT_SQUARE_BRACKET))
-          {
-          /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/538
-          We need a better lookahead here to match Perl; should skip \Q\E, and whitespace in /xx mode. */
-          errorcode = ERR50;
-          goto FAILED;
-          }
-
-        /* Set "a hyphen is not the start of a range" for the -] case, and also
-        in case the POSIX class is followed by \E or \Q\E (possibly repeated -
-        fuzzers do that kind of thing) and *then* a hyphen. This causes that
-        hyphen to be treated as a literal. I don't think it's worth setting up
-        special apparatus to do otherwise. */
-
-        class_range_state = RANGE_NO;
+        class_range_state = RANGE_FORBID_NO;
+        class_range_forbid_ptr = ptr;
         class_op_state = CLASS_OP_OPERAND;
 
         /* When PCRE2_UCP is set, unless PCRE2_EXTRA_ASCII_POSIX is set, some
@@ -3947,6 +3952,14 @@ while (ptr < ptrend)
         class_range_state = RANGE_STARTED;
         }
 
+      /* Handle forbidden start of range */
+
+      else if (c == CHAR_MINUS && class_range_state == RANGE_FORBID_NO)
+        {
+        *parsed_pattern++ = CHAR_MINUS;
+        class_range_state = RANGE_FORBID_STARTED;
+        }
+
       /* Handle a literal character */
 
       else if (c != CHAR_BACKSLASH)
@@ -3969,6 +3982,12 @@ while (ptr < ptrend)
             }
           class_range_state = RANGE_NO;
           class_op_state = CLASS_OP_OPERAND;
+          }
+        else if (class_range_state == RANGE_FORBID_STARTED)
+          {
+          ptr = class_range_forbid_ptr;
+          errorcode = ERR50;
+          goto FAILED;
           }
         else  /* Potential start of range */
           {
@@ -4034,14 +4053,26 @@ while (ptr < ptrend)
         if (class_range_state == RANGE_STARTED)
           {
           errorcode = ERR50;
-          goto FAILED;  /* Not CLASS_ESCAPE_FAILED; always an error */
+          goto FAILED;
+          }
+
+        /* Perl gives a warning unless the hyphen following a multi-character
+        escape is the last character in the class. PCRE throws an error. */
+
+        if (class_range_state == RANGE_FORBID_STARTED)
+          {
+          ptr = class_range_forbid_ptr;
+          errorcode = ERR50;
+          goto FAILED;
           }
 
         /* Of the remaining escapes, only those that define characters are
         allowed in a class. None may start a range. */
 
-        class_range_state = RANGE_NO;
+        class_range_state = RANGE_FORBID_NO;
+        class_range_forbid_ptr = ptr;
         class_op_state = CLASS_OP_OPERAND;
+
         switch(escape)
           {
           case ESC_N:
@@ -4081,6 +4112,7 @@ while (ptr < ptrend)
             if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
             *parsed_pattern++ = META_ESCAPE + escape;
             *parsed_pattern++ = (ptype << 16) | pdata;
+            class_range_forbid_ptr = ptr;
             }
 #else
           errorcode = ERR45;
@@ -4091,20 +4123,6 @@ while (ptr < ptrend)
           default:    /* All others are not allowed in a class */
           errorcode = ERR7;
           ptr--;
-          goto FAILED;
-          }
-
-        /* Perl gives a warning unless a following hyphen is the last character
-        in the class. PCRE throws an error. */
-
-        if (ptr < ptrend && *ptr == CHAR_MINUS &&
-            !((options & PCRE2_ALT_EXTENDED_CLASS) != 0 && ptr + 1 < ptrend &&
-              ptr[1] == CHAR_MINUS) &&
-            (ptr + 1 == ptrend || ptr[1] != CHAR_RIGHT_SQUARE_BRACKET))
-          {
-          /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/538
-          We need a better lookahead here to match Perl; should skip \Q\E, and whitespace in /xx mode. */
-          errorcode = ERR50;
           goto FAILED;
           }
         }
