@@ -6696,11 +6696,23 @@ Failed: error 150 at offset 4: invalid range in character class
 Failed: error 150 at offset 5: invalid range in character class
 
 /[\p{Lu}-&&-\pL]/B,alt_extended_class
-Failed: error 150 at offset 7: invalid range in character class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-A-Z\xc0-\xd6\xd8-\xde\p{Lu}]
+          cls:[\-A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff\p{L}]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
     -
+ 0: -
     A
+ 0: A
 \= Expect no match
     a
+No match
 
 /[-\p{Lu}&&\pL-]/B,alt_extended_class
 ------------------------------------------------------------------

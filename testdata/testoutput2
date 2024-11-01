@@ -20453,6 +20453,114 @@ No match
     n_n
 No match
 
+/[\d-[z]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-0-9]
+          cls:[z]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    -
+ 0: -
+    z
+ 0: z
+
+/[\d-||z]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-0-9]
+          cls:[z]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    -
+ 0: -
+    z
+ 0: z
+
+/[z[\d-]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[z]
+          cls:[\-0-9]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    -
+ 0: -
+    z
+ 0: z
+
+/[1-[z]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-1]
+          cls:[z]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    -
+ 0: -
+    z
+ 0: z
+
+/[1-||z]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\-1]
+          cls:[z]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    -
+ 0: -
+    z
+ 0: z
+
+/[z[1-]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[z]
+          cls:[\-1]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    -
+ 0: -
+    z
+ 0: z
+
 /[a--/alt_extended_class
 Failed: error 106 at offset 4: missing terminating ] for character class
 
@@ -20544,6 +20652,18 @@ Failed: error 207 at offset 115: character classes are too deeply nested
 Failed: error 207 at offset 118: character classes are too deeply nested
 
 # --------------
+
+/[[:digit:]   -Z]/xx
+Failed: error 150 at offset 10: invalid range in character class
+
+/[\d   -Z]/xx
+Failed: error 150 at offset 3: invalid range in character class
+
+/[[:digit:]\E-H]/
+Failed: error 150 at offset 10: invalid range in character class
+
+/[[:digit:]\Q\E-H]+/
+Failed: error 150 at offset 10: invalid range in character class
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

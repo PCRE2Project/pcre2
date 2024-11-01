@@ -6914,6 +6914,36 @@ a)"xI
 \= Expect no match
     n_n
 
+/[\d-[z]]/B,alt_extended_class
+    1
+    -
+    z
+
+/[\d-||z]/B,alt_extended_class
+    1
+    -
+    z
+
+/[z[\d-]]/B,alt_extended_class
+    1
+    -
+    z
+
+/[1-[z]]/B,alt_extended_class
+    1
+    -
+    z
+
+/[1-||z]/B,alt_extended_class
+    1
+    -
+    z
+
+/[z[1-]]/B,alt_extended_class
+    1
+    -
+    z
+
 /[a--/alt_extended_class
 
 /[a--a/alt_extended_class
@@ -6969,5 +6999,13 @@ a)"xI
 /[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
 
 # --------------
+
+/[[:digit:]   -Z]/xx
+
+/[\d   -Z]/xx
+
+/[[:digit:]\E-H]/
+
+/[[:digit:]\Q\E-H]+/
 
 # End of testinput2

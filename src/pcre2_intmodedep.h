@@ -435,7 +435,7 @@ UTF-16 mode. */
   c = *eptr; \
   if ((c & 0xfc00u) == 0xd800u) GETUTF16LEN(c, eptr, len);
 
-/* Get the next UTF-816character, testing for UTF-16 mode, not advancing the
+/* Get the next UTF-16 character, testing for UTF-16 mode, not advancing the
 pointer, incrementing length if there is a low surrogate. This is called when
 we do not know if we are in UTF-16 mode. */
 
