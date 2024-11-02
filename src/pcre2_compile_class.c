@@ -1790,6 +1790,7 @@ compile_class_operand(uint32_t options, uint32_t xoptions, uint32_t **pptr,
 {
 uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
+PCRE2_UCHAR *code_start = code;
 BOOL first = TRUE;
 
 while (TRUE)
@@ -1844,11 +1845,18 @@ while (TRUE)
   /* Join second and subsequent leaves with an OR. */
   if (!first) *code++ = OP_ECLASS_OR;
 
+  if (lengthptr != NULL)
+    {
+    *lengthptr += code - code_start;
+    code = code_start;
+    }
+
   first = FALSE;
   }
 
 DONE:
 PCRE2_ASSERT(!first);  /* Confirm that we found something. */
+PCRE2_ASSERT(lengthptr == NULL || (code == code_start));
 
 *pptr = ptr;
 *pcode = code;
@@ -1879,6 +1887,9 @@ held by the OP_ECLASS. */
 uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
 BOOL negated;
+#ifdef PCRE2_DEBUG
+PCRE2_UCHAR *start_code = *pcode;
+#endif
 
 /* The CLASS_IS_ECLASS bit must be set since it is a nested class. */
 PCRE2_ASSERT(*ptr == (META_CLASS | CLASS_IS_ECLASS) ||
@@ -1904,12 +1915,22 @@ while (*ptr >= META_ECLASS_OR && *ptr <= META_ECLASS_SUB)
     return FALSE;
 
   /* Convert infix to postfix (RPN). */
-  *code++ = op;
+  if (lengthptr != NULL)
+    (*lengthptr)++;
+  else
+    *code++ = op;
   }
 
-if (negated) *code++ = OP_ECLASS_NOT;
+if (negated)
+  {
+  if (lengthptr != NULL)
+    (*lengthptr)++;
+  else
+    *code++ = OP_ECLASS_NOT;
+  }
 
 PCRE2_ASSERT(*ptr == META_CLASS_END);
+PCRE2_ASSERT(lengthptr == NULL || code == start_code);
 
 *pptr = ptr;
 *pcode = code;
