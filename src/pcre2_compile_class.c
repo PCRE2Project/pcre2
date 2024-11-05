@@ -44,6 +44,31 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_compile.h"
 
+/* Checks the allowed tokens at the end of a class structure in debug mode.
+When a new token is not processed by all loops, and the token is equals to
+a) one of the cases here:
+   the compiler will complain about a duplicated case value.
+b) none of the cases here:
+   the loop without the handler will stop with an assertion failure. */
+
+#ifdef PCRE2_DEBUG
+#define CLASS_END_CASES(meta) \
+  default: \
+  PCRE2_ASSERT((meta) <= META_END); \
+  /* Fall through */ \
+  case META_CLASS: \
+  case META_CLASS_NOT: \
+  case META_CLASS_EMPTY: \
+  case META_CLASS_EMPTY_NOT: \
+  case META_CLASS_END: \
+  case META_ECLASS_OR: \
+  case META_ECLASS_AND: \
+  case META_ECLASS_SUB:
+#else
+#define CLASS_END_CASES(meta) \
+  default:
+#endif
+
 #ifdef SUPPORT_WIDE_CHARS
 
 /* Heapsort algorithm. */
@@ -319,15 +344,14 @@ append_non_ascii_range(uint32_t options, uint32_t *buffer)
 }
 
 static size_t
-parse_class(uint32_t *ptr, const uint32_t *end_ptr, uint32_t options,
-  uint32_t *buffer)
+parse_class(uint32_t *ptr, uint32_t options, uint32_t *buffer)
 {
 size_t total_size = 0;
 size_t size;
 uint32_t meta_arg;
 uint32_t start_char;
 
-while (ptr < end_ptr)
+while (TRUE)
   {
   switch (META_CODE(*ptr))
     {
@@ -395,8 +419,8 @@ while (ptr < end_ptr)
       /* Character literal */
       ptr++;
       break;
-    default:
-      PCRE2_ASSERT(*ptr < META_END);
+    CLASS_END_CASES(*ptr)
+      if (*ptr >= META_END) return total_size;
       break;
     }
 
@@ -458,9 +482,9 @@ static const uint32_t char_list_starts[] = {
   XCL_CHAR_LIST_LOW_16_START,
 };
 
-class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
-  const uint32_t *end_ptr, uint32_t options, uint32_t xoptions,
-  compile_block *cb)
+static class_ranges *
+optimize_class(uint32_t *start_ptr, uint32_t options,
+  uint32_t xoptions, compile_block *cb)
 {
 class_ranges* cranges;
 uint32_t *ptr;
@@ -490,7 +514,8 @@ if (xoptions & PCRE2_EXTRA_TURKISH_CASING)
 
 /* Compute required space for the range. */
 
-range_list_size = parse_class(start_ptr, end_ptr, class_options, NULL);
+range_list_size = parse_class(start_ptr, class_options, NULL);
+PCRE2_ASSERT((range_list_size & 0x1) == 0);
 
 /* Allocate buffer. The total_size also represents the end of the buffer. */
 
@@ -512,9 +537,10 @@ cranges->char_lists_start = 0;
 if (range_list_size == 0) return cranges;
 
 buffer = (uint32_t*)(cranges + 1);
-parse_class(start_ptr, end_ptr, class_options, buffer);
+parse_class(start_ptr, class_options, buffer);
 
-if (range_list_size == 2) return cranges;
+/* Using <= instead of == to help static analysis. */
+if (range_list_size <= 2) return cranges;
 
 /* In-place sorting of ranges. */
 
@@ -970,81 +996,13 @@ while (p[0] < 256)
 
 
 
-/*************************************************
-*      Implement extended classes (ECLASS)       *
-*************************************************/
-
-/* This function is called to test whether a series of META codes can be
-compiled to a simple class (OP_CLASS, OP_NCLASS, OP_XCLASS, OP_ALLANY) or
-whether it requires an extended class (OP_ECLASS).
-
-Arguments:
-  ptr       points to the first META code, which should be one past the
-            META_CLASS or META_CLASS_NOT start code
-  pendptr   out-pointer to receive the end of the simple codes
-
-Returns:    TRUE if the pointed-to META_CLASS is simple, that is, we
-              reached a META_CLASS_END without encountering extended class
-              syntax. In this case, *pendptr is set to the position of the
-              META_CLASS_END itself.
-            FALSE otherwise. In this case, *pendptr is set to the position
-              of the META code that caused the function to return FALSE.
-
-In both cases, the span ptr...*pendptr is the longest sequence of simple
-codes starting at ptr.
-*/
-
-BOOL
-PRIV(check_class_not_nested)(uint32_t *ptr, uint32_t **pendptr)
-{
-while (TRUE)
-  {
-  uint32_t meta = META_CODE(*ptr);
-  uint32_t meta_arg = META_DATA(*ptr);
-
-  switch (meta)
-    {
-    case META_ESCAPE:
-    if (meta_arg == ESC_P || meta_arg == ESC_p)
-      ptr += 1;     /* Skip prop data */
-    break;
-
-    case META_BIGVALUE:
-    case META_POSIX:
-    case META_POSIX_NEG:
-    ptr += 1;
-    break;
-
-    case META_RANGE_ESCAPED:
-    case META_RANGE_LITERAL:
-    break;
-
-    case META_CLASS_END:
-    *pendptr = ptr;
-    return TRUE;
-
-    default:
-    if (meta < META_END) break; /* Literal */
-
-    /* Other META (operator, or nested class) - not a simple class. */
-    *pendptr = ptr;
-    return FALSE;
-    }
-
-  ++ptr;
-  }
-}
-
-
-
 /* This function consumes a "leaf", which is a set of characters that will
 become a single OP_CLASS (or OP_NCLASS, OP_XCLASS, or OP_ALLANY). */
 
-BOOL
+uint32_t *
 PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t *start_ptr, const uint32_t *end_ptr, PCRE2_UCHAR **pcode,
-  BOOL negate_class, int *errorcodeptr, compile_block *cb,
-  PCRE2_SIZE *lengthptr)
+  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class,
+  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
 {
 uint32_t *pptr = start_ptr;
 PCRE2_UCHAR *code = *pcode;
@@ -1087,12 +1045,12 @@ if (utf)
   {
   if (lengthptr != NULL)
     {
-    cranges = PRIV(optimize_class)(pptr, end_ptr, options, xoptions, cb);
+    cranges = optimize_class(pptr, options, xoptions, cb);
 
     if (cranges == NULL)
       {
       *errorcodeptr = ERR21;
-      return FALSE;
+      return NULL;
       }
 
     /* Caching the pre-processed character ranges. */
@@ -1136,18 +1094,23 @@ memset(classbits, 0, 32 * sizeof(uint8_t));
 
 /* Process items until end_ptr is reached. */
 
-while (pptr < end_ptr)
+while (TRUE)
   {
   uint32_t meta = *(pptr++);
+  BOOL local_negate;
+  int posix_class;
+  int taboffset, tabopt;
+  uint8_t pbits[32];
+  uint32_t escape, c, d;
 
   /* Handle POSIX classes such as [:alpha:] etc. */
-
-  if (meta == META_POSIX || meta == META_POSIX_NEG)
+  switch (META_CODE(meta))
     {
-    BOOL local_negate = (meta == META_POSIX_NEG);
-    int posix_class = *(pptr++);
-    int taboffset, tabopt;
-    uint8_t pbits[32];
+    case META_POSIX:
+    case META_POSIX_NEG:
+
+    local_negate = (meta == META_POSIX_NEG);
+    posix_class = *(pptr++);
 
     should_flip_negation = local_negate;  /* Note negative special */
 
@@ -1266,32 +1229,14 @@ while (pptr < end_ptr)
     xclass_props |= XCLASS_HAS_8BIT_CHARS;
 #endif
     continue;               /* End of POSIX handling */
-    }
 
-  /* Other than POSIX classes, the only items we should encounter are
-  \d-type escapes and literal characters (possibly as ranges). */
+    /* Other than POSIX classes, the only items we should encounter are
+    \d-type escapes and literal characters (possibly as ranges). */
+    case META_BIGVALUE:
+      meta = *(pptr++);
+      break;
 
-  if (meta == META_BIGVALUE)
-    {
-    meta = *(pptr++);
-    goto CLASS_LITERAL;
-    }
-
-  /* Any other non-literal must be an escape */
-
-  if (meta >= META_END)
-    {
-    uint32_t escape;
-
-    if (META_CODE(meta) != META_ESCAPE)
-      {
-#ifdef DEBUG_SHOW_PARSED
-      fprintf(stderr, "** Unrecognized parsed pattern item 0x%.8x "
-                      "in character class\n", meta);
-#endif
-      *errorcodeptr = ERR89;  /* Internal error - unrecognized. */
-      return FALSE;
-      }
+    case META_ESCAPE:
     escape = META_DATA(meta);
 
     switch(escape)
@@ -1447,104 +1392,105 @@ while (pptr < end_ptr)
     /* Every non-property class contains at least one < 256 character. */
     xclass_props |= XCLASS_HAS_8BIT_CHARS;
 #endif
+    /* End handling \d-type escapes */
     continue;
-    }  /* End handling \d-type escapes */
+
+    CLASS_END_CASES(meta)
+    /* Literals. */
+    if (meta < META_END) break;
+    goto END_PROCESSING;
+    }
 
   /* A literal character may be followed by a range meta. At parse time
   there are checks for out-of-order characters, for ranges where the two
   characters are equal, and for hyphens that cannot indicate a range. At
   this point, therefore, no checking is needed. */
 
-  else
+  c = d = meta;
+
+  /* Remember if \r or \n were explicitly used */
+
+  if (c == CHAR_CR || c == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
+
+  /* Process a character range */
+
+  if (*pptr == META_RANGE_LITERAL || *pptr == META_RANGE_ESCAPED)
     {
-    uint32_t c, d;
-
-    CLASS_LITERAL:
-    c = d = meta;
-
-    /* Remember if \r or \n were explicitly used */
-
-    if (c == CHAR_CR || c == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
-
-    /* Process a character range */
-
-    if (*pptr == META_RANGE_LITERAL || *pptr == META_RANGE_ESCAPED)
-      {
 #ifdef EBCDIC
-      BOOL range_is_literal = (*pptr == META_RANGE_LITERAL);
+    BOOL range_is_literal = (*pptr == META_RANGE_LITERAL);
 #endif
-      ++pptr;
-      d = *(pptr++);
-      if (d == META_BIGVALUE) d = *(pptr++);
+    ++pptr;
+    d = *(pptr++);
+    if (d == META_BIGVALUE) d = *(pptr++);
 
-      /* Remember an explicit \r or \n, and add the range to the class. */
+    /* Remember an explicit \r or \n, and add the range to the class. */
 
-      if (d == CHAR_CR || d == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
+    if (d == CHAR_CR || d == CHAR_NL) cb->external_flags |= PCRE2_HASCRORLF;
 
-#if PCRE2_CODE_UNIT_WIDTH == 8
-#ifdef SUPPORT_UNICODE
-      if (cranges != NULL) continue;
-      xclass_props |= XCLASS_HAS_8BIT_CHARS;
-#endif
-
-      /* In an EBCDIC environment, Perl treats alphabetic ranges specially
-      because there are holes in the encoding, and simply using the range
-      A-Z (for example) would include the characters in the holes. This
-      applies only to literal ranges; [\xC1-\xE9] is different to [A-Z]. */
-
-#ifdef EBCDIC
-      if (range_is_literal &&
-           (cb->ctypes[c] & ctype_letter) != 0 &&
-           (cb->ctypes[d] & ctype_letter) != 0 &&
-           (c <= CHAR_z) == (d <= CHAR_z))
-        {
-        uint32_t uc = (d <= CHAR_z)? 0 : 64;
-        uint32_t C = c - uc;
-        uint32_t D = d - uc;
-
-        if (C <= CHAR_i)
-          {
-          add_to_class(options, cb, C + uc,
-            ((D < CHAR_i)? D : CHAR_i) + uc);
-          C = CHAR_j;
-          }
-
-        if (C <= D && C <= CHAR_r)
-          {
-          add_to_class(options, cb, C + uc,
-            ((D < CHAR_r)? D : CHAR_r) + uc);
-          C = CHAR_s;
-          }
-
-        if (C <= D)
-          add_to_class(options, cb, C + uc, D + uc);
-        }
-      else
-#endif
-      /* Not an EBCDIC special range */
-
-      add_to_class(options, cb, c, d);
-#else
-      PCRE2_ASSERT(cranges != NULL);
-#endif
-      continue;
-      }  /* End of range handling */
-
-    /* Character ranges are ignored when class_ranges is present. */
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #ifdef SUPPORT_UNICODE
     if (cranges != NULL) continue;
     xclass_props |= XCLASS_HAS_8BIT_CHARS;
 #endif
-    /* Handle a single character. */
 
-    add_to_class(options, cb, meta, meta);
+    /* In an EBCDIC environment, Perl treats alphabetic ranges specially
+    because there are holes in the encoding, and simply using the range
+    A-Z (for example) would include the characters in the holes. This
+    applies only to literal ranges; [\xC1-\xE9] is different to [A-Z]. */
+
+#ifdef EBCDIC
+    if (range_is_literal &&
+         (cb->ctypes[c] & ctype_letter) != 0 &&
+         (cb->ctypes[d] & ctype_letter) != 0 &&
+         (c <= CHAR_z) == (d <= CHAR_z))
+      {
+      uint32_t uc = (d <= CHAR_z)? 0 : 64;
+      uint32_t C = c - uc;
+      uint32_t D = d - uc;
+
+      if (C <= CHAR_i)
+        {
+        add_to_class(options, cb, C + uc,
+          ((D < CHAR_i)? D : CHAR_i) + uc);
+        C = CHAR_j;
+        }
+
+      if (C <= D && C <= CHAR_r)
+        {
+        add_to_class(options, cb, C + uc,
+          ((D < CHAR_r)? D : CHAR_r) + uc);
+        C = CHAR_s;
+        }
+
+      if (C <= D)
+        add_to_class(options, cb, C + uc, D + uc);
+      }
+    else
+#endif
+    /* Not an EBCDIC special range */
+
+    add_to_class(options, cb, c, d);
 #else
     PCRE2_ASSERT(cranges != NULL);
-    continue;
 #endif
-    }
+    continue;
+    }  /* End of range handling */
+
+  /* Character ranges are ignored when class_ranges is present. */
+#if PCRE2_CODE_UNIT_WIDTH == 8
+#ifdef SUPPORT_UNICODE
+  if (cranges != NULL) continue;
+  xclass_props |= XCLASS_HAS_8BIT_CHARS;
+#endif
+  /* Handle a single character. */
+
+  add_to_class(options, cb, meta, meta);
+#else
+  PCRE2_ASSERT(cranges != NULL);
+#endif
   }   /* End of main class-processing loop */
+
+END_PROCESSING:
 
 #ifdef SUPPORT_WIDE_CHARS
 PCRE2_ASSERT((xclass_props & XCLASS_HAS_PROPS) == 0 ||
@@ -1729,7 +1675,7 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
           MAX_PATTERN_SIZE - *lengthptr < char_lists_size)
         {
         *errorcodeptr = ERR20;   /* Pattern is too large */
-        return 0;
+        return NULL;
         }
       }
     else
@@ -1828,7 +1774,7 @@ code += 32 / sizeof(PCRE2_UCHAR);
 
 DONE:
 *pcode = code;
-return TRUE;
+return pptr - 1;
 }
 
 
@@ -1845,11 +1791,10 @@ compile_class_operand(uint32_t options, uint32_t xoptions, uint32_t **pptr,
 uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
 BOOL first = TRUE;
-uint32_t *end_ptr;
 
 while (TRUE)
   {
-  switch (*ptr)
+  switch (META_CODE(*ptr))
     {
     case META_CLASS_END:
     case META_ECLASS_OR:
@@ -1871,35 +1816,28 @@ while (TRUE)
 
     case META_CLASS:
     case META_CLASS_NOT:
-    if (PRIV(check_class_not_nested)(ptr + 1, &end_ptr))
+    if ((*ptr & CLASS_IS_ECLASS) == 0)
       {
-      if (!PRIV(compile_class_not_nested)(options, xoptions, ptr + 1, end_ptr,
-                                          &code, *ptr == META_CLASS_NOT,
-                                          errorcodeptr, cb, lengthptr))
-        return FALSE;
-      PCRE2_ASSERT(*end_ptr == META_CLASS_END);
-      ptr = end_ptr + 1;
+      ptr = PRIV(compile_class_not_nested)(options, xoptions, ptr + 1,
+                                           &code, *ptr == META_CLASS_NOT,
+                                           errorcodeptr, cb, lengthptr);
+      if (ptr == NULL) return FALSE;
       }
-    else
-      {
-      if (!PRIV(compile_class_nested)(options, xoptions, &ptr, &code,
-                                      errorcodeptr, cb, lengthptr))
-        return FALSE;
-      PCRE2_ASSERT(*ptr == META_CLASS_END);
-      ++ptr;
-      }
+    else if (!PRIV(compile_class_nested)(options, xoptions, &ptr, &code,
+                                         errorcodeptr, cb, lengthptr))
+      return FALSE;
+
+    PCRE2_ASSERT(*ptr == META_CLASS_END);
+    ptr++;
     break;
 
     default:
     /* Scan forward characters, ranges, and properties.
     For example: inside [a-z_ -- m] we don't have brackets around "a-z_" but
     we still need to collect that fragment up into a "leaf" OP_CLASS. */
-    (void)PRIV(check_class_not_nested)(ptr, &end_ptr);
-    PCRE2_ASSERT(end_ptr > ptr);
-    if (!PRIV(compile_class_not_nested)(options, xoptions, ptr, end_ptr, &code,
-                                        FALSE, errorcodeptr, cb, lengthptr))
-      return FALSE;
-    ptr = end_ptr;
+    ptr = PRIV(compile_class_not_nested)(options, xoptions, ptr, &code,
+                                         FALSE, errorcodeptr, cb, lengthptr);
+    if (ptr == NULL) return FALSE;
     break;
     }
 
@@ -1942,9 +1880,11 @@ uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
 BOOL negated;
 
-PCRE2_ASSERT(*ptr == META_CLASS || *ptr == META_CLASS_NOT);
+/* The CLASS_IS_ECLASS bit must be set since it is a nested class. */
+PCRE2_ASSERT(*ptr == (META_CLASS | CLASS_IS_ECLASS) ||
+             *ptr == (META_CLASS_NOT | CLASS_IS_ECLASS));
 
-negated = *ptr++ == META_CLASS_NOT;
+negated = *ptr++ == (META_CLASS_NOT | CLASS_IS_ECLASS);
 
 /* Because it's a non-empty class, there must be an operand at the start. */
 if (!compile_class_operand(options, xoptions, &ptr, &code, errorcodeptr, cb,

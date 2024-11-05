@@ -2859,6 +2859,7 @@ uint32_t delimiter;
 uint32_t namelen;
 uint32_t class_range_state;
 uint32_t class_op_state;
+uint32_t *class_start;
 uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
 uint32_t *verbstartptr = NULL;
 uint32_t *previous_callout = NULL;
@@ -2869,9 +2870,8 @@ uint32_t *prev_parsed_item = NULL;
 uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
 uint16_t nest_depth = 0;
-uint16_t class_depth = 0;
-uint16_t class_maxdepth = 0;
-uint8_t class_op_used[ECLASS_NEST_LIMIT];
+int16_t class_depth_m1 = -1; /* The m1 means minus 1. */
+int16_t class_maxdepth_m1 = -1;
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
 int errorcode = 0;
@@ -3650,10 +3650,11 @@ while (ptr < ptrend)
 
     /* c is still set to '[' so the loop will handle the start of the class. */
 
-    class_depth = 0;
-    class_maxdepth = 0;
+    class_depth_m1 = -1;
+    class_maxdepth_m1 = -1;
     class_range_state = RANGE_NO;
     class_op_state = CLASS_OP_NONE;
+    class_start = NULL;
 
     for (;;)
       {
@@ -3684,7 +3685,7 @@ while (ptr < ptrend)
       [.ch.] and [=ch=] ("collating elements") and fault them, as Perl
       5.6 and 5.8 do. */
 
-      if (class_depth > 0 &&
+      if (class_depth_m1 >= 0 &&
           c == CHAR_LEFT_SQUARE_BRACKET &&
           ptrend - ptr >= 3 &&
           (*ptr == CHAR_COLON || *ptr == CHAR_DOT ||
@@ -3792,7 +3793,7 @@ while (ptr < ptrend)
       /* Check for the start of the outermost class, or the start of a nested class. */
 
       else if (c == CHAR_LEFT_SQUARE_BRACKET &&
-               (class_depth == 0 || (options & PCRE2_ALT_EXTENDED_CLASS) != 0))
+               (class_depth_m1 < 0 || (options & PCRE2_ALT_EXTENDED_CLASS) != 0))
         {
         /* Tidy up the other class before starting the nested class. */
         /* -[ beginning a nested class is a literal '-' */
@@ -3801,7 +3802,7 @@ while (ptr < ptrend)
           parsed_pattern[-1] = CHAR_MINUS;
 
         /* Validate nesting depth */
-        if (class_depth >= ECLASS_NEST_LIMIT)
+        if (class_depth_m1 >= ECLASS_NEST_LIMIT - 1)
           {
           errorcode = ERR107;
           goto FAILED;        /* Classes too deeply nested */
@@ -3845,11 +3846,19 @@ while (ptr < ptrend)
         if (c == CHAR_RIGHT_SQUARE_BRACKET &&
             (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
           {
+          if (class_start != NULL)
+            {
+            PCRE2_ASSERT(class_depth_m1 >= 0);
+            /* Represents that the class is an extended class. */
+            *class_start |= CLASS_IS_ECLASS;
+            class_start = NULL;
+            }
+
           *parsed_pattern++ = negate_class? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
 
           /* Leave nesting depth unchanged; but check for zero depth to handle the
           very first (top-level) class being empty. */
-          if (class_depth == 0) break;
+          if (class_depth_m1 < 0) break;
 
           class_range_state = RANGE_NO; /* for processing the containing class */
           class_op_state = CLASS_OP_OPERAND;
@@ -3858,12 +3867,23 @@ while (ptr < ptrend)
 
         /* Enter a non-empty class. */
 
+        if (class_start != NULL)
+          {
+          PCRE2_ASSERT(class_depth_m1 >= 0);
+          /* Represents that the class is an extended class. */
+          *class_start |= CLASS_IS_ECLASS;
+          class_start = NULL;
+          }
+
+        class_start = parsed_pattern;
         *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
         class_range_state = RANGE_NO;
         class_op_state = CLASS_OP_NONE;
-        ++class_depth;
-        class_maxdepth = class_depth > class_maxdepth ?class_depth :class_maxdepth;
-        class_op_used[class_depth-1] = 0; /* reset; no op seen yet at new depth */
+        ++class_depth_m1;
+        if (class_maxdepth_m1 < class_depth_m1)
+          class_maxdepth_m1 = class_depth_m1;
+        /* Reset; no op seen yet at new depth. */
+        cb->class_op_used[class_depth_m1] = 0;
 
         /* Implement the special start-of-class literal meaning of ']'. */
         if (c == CHAR_RIGHT_SQUARE_BRACKET)
@@ -3894,10 +3914,13 @@ while (ptr < ptrend)
 
         *parsed_pattern++ = META_CLASS_END;
 
-        if (--class_depth == 0) break;
+        if (--class_depth_m1 < 0) break;
 
         class_range_state = RANGE_NO; /* for processing the containing class */
         class_op_state = CLASS_OP_OPERAND;
+        /* The extended class flag has already
+        been set for the parent class. */
+        class_start = NULL;
         }
 
       /* Handle a set operator */
@@ -3924,11 +3947,19 @@ while (ptr < ptrend)
           }
 
         /* Check for mixed precedence. Forbid [A--B&&C]. */
-        if (class_op_used[class_depth-1] != 0 &&
-            class_op_used[class_depth-1] != (uint8_t)c)
+        if (cb->class_op_used[class_depth_m1] != 0 &&
+            cb->class_op_used[class_depth_m1] != (uint8_t)c)
           {
           errorcode = ERR111;
           goto FAILED;
+          }
+
+        if (class_start != NULL)
+          {
+          PCRE2_ASSERT(class_depth_m1 >= 0);
+          /* Represents that the class is an extended class. */
+          *class_start |= CLASS_IS_ECLASS;
+          class_start = NULL;
           }
 
         /* Dangling '-' before an operator is a literal */
@@ -3940,7 +3971,7 @@ while (ptr < ptrend)
                             META_ECLASS_AND;
         class_range_state = RANGE_NO;
         class_op_state = CLASS_OP_OPERATOR;
-        class_op_used[class_depth-1] = (uint8_t)c;
+        cb->class_op_used[class_depth_m1] = (uint8_t)c;
         }
 
       /* Handle potential start of range */
@@ -4133,7 +4164,7 @@ while (ptr < ptrend)
       if (ptr >= ptrend)
         {
         if ((options & PCRE2_ALT_EXTENDED_CLASS) != 0 &&
-            class_depth == 1 && class_maxdepth == 2)
+            class_depth_m1 == 0 && class_maxdepth_m1 == 1)
           errorcode = ERR112;  /* Missing terminating ']', but we saw '[ [ ]...' */
         else
           errorcode = ERR6;  /* Missing terminating ']' */
@@ -5614,7 +5645,6 @@ for (;; pptr++)
   uint32_t groupnumber;
   uint32_t verbarglen, verbculen;
   uint32_t subreqcuflags, subfirstcuflags;
-  uint32_t *end_ptr;
   open_capitem *oc;
   PCRE2_UCHAR mcbuffer[8];
 
@@ -5781,7 +5811,7 @@ for (;; pptr++)
 
     /* Check for complex extended classes and handle them separately. */
 
-    if (!PRIV(check_class_not_nested)(pptr +  1, &end_ptr))
+    if ((*pptr & CLASS_IS_ECLASS) != 0)
       {
       previous = code;
       *code++ = OP_ECLASS;
@@ -5920,13 +5950,11 @@ for (;; pptr++)
 
     /* Now emit the OP_CLASS/OP_NCLASS/OP_XCLASS/OP_ALLANY opcode. */
 
-    if (!PRIV(compile_class_not_nested)(options, xoptions, pptr + 1, end_ptr,
-                                        &code, meta == META_CLASS_NOT,
-                                        errorcodeptr, cb, lengthptr))
-      return 0;
-
-    PCRE2_ASSERT(*end_ptr == META_CLASS_END);
-    pptr = end_ptr;
+    pptr = PRIV(compile_class_not_nested)(options, xoptions, pptr + 1,
+                                          &code, meta == META_CLASS_NOT,
+                                          errorcodeptr, cb, lengthptr);
+    if (pptr == NULL) return 0;
+    PCRE2_ASSERT(*pptr == META_CLASS_END);
 
     /* If this class is the first thing in the branch, there can be no first
     char setting, whatever the repeat count. Any reqcu setting must remain

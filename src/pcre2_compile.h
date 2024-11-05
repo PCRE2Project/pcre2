@@ -182,6 +182,10 @@ therefore no need for it to have a length entry, so use a high value. */
 #define META_DATA(x)   (x & 0x0000ffffu)
 #define META_DIFF(x,y) ((x-y)>>16)
 
+/* Extended class management flags. */
+
+#define CLASS_IS_ECLASS 0x1
+
 /* Macro for the highest character value. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -213,7 +217,6 @@ therefore no need for it to have a length entry, so use a high value. */
 /* Macros for the definitions below, to prevent name collisions. */
 
 #define _pcre2_posix_class_maps          PCRE2_SUFFIX(_pcre2_posix_class_maps)
-#define _pcre2_optimize_class            PCRE2_SUFFIX(_pcre2_optimize_class_)
 #define _pcre2_update_classbits          PCRE2_SUFFIX(_pcre2_update_classbits_)
 #define _pcre2_check_class_not_nested    PCRE2_SUFFIX(_pcre2_check_class_not_nested_)
 #define _pcre2_compile_class_nested      PCRE2_SUFFIX(_pcre2_compile_class_nested_)
@@ -231,12 +234,6 @@ posix_class_maps, and posix_substitutes. They must be kept in sync. */
 
 extern const int PRIV(posix_class_maps)[];
 
-
-/* Merge intersecting ranges of classes. */
-
-class_ranges *PRIV(optimize_class)(uint32_t *start_ptr,
-  const uint32_t *end_ptr, uint32_t options, uint32_t xoptions,
-  compile_block *cb);
 
 /* Set bits in classbits according to the property type */
 
@@ -261,10 +258,9 @@ BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
 /* Compile the META codes from start_ptr...end_ptr, writing a single OP_CLASS
 OP_CLASS, OP_NCLASS, OP_XCLASS, or OP_ALLANY into pcode. */
 
-BOOL PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t *start_ptr, const uint32_t *end_ptr, PCRE2_UCHAR **pcode,
-  BOOL negate_class, int *errorcodeptr, compile_block *cb,
-  PCRE2_SIZE *lengthptr);
+uint32_t *PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
+  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class,
+  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 
