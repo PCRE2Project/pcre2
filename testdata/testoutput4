@@ -4662,4 +4662,64 @@ No match
     \N{U+00F1}
  0: \x{f1}
 
+/[^\P{Lu}1]/i,utf,ucp
+    a
+ 0: a
+    A
+ 0: A
+    \x{3a3}
+ 0: \x{3a3}
+    \x{3c3}
+ 0: \x{3c3}
+\= Expect no match
+    1
+No match
+    2
+No match
+
+/[^\P{Lu}1]/utf,ucp
+    A
+ 0: A
+    \x{3a3}
+ 0: \x{3a3}
+\= Expect no match
+    1
+No match
+    2
+No match
+    a
+No match
+    \x{3c3}
+No match
+
+/[\P{Lu}1]/i,utf,ucp
+    1
+ 0: 1
+    2
+ 0: 2
+\= Expect no match
+    a
+No match
+    A
+No match
+    \x{3a3}
+No match
+    \x{3c3}
+No match
+
+/[\P{Lu}1]/utf,ucp
+    1
+ 0: 1
+    2
+ 0: 2
+    a
+ 0: a
+    \x{3c3}
+ 0: \x{3c3}
+\= Expect no match
+    A
+No match
+    \x{3a3}
+No match
+
 # End of testinput4
