@@ -2913,4 +2913,40 @@
 /c3 b1/hex,utf
     \N{U+00F1}
 
+/[^\P{Lu}1]/i,utf,ucp
+    a
+    A
+    \x{3a3}
+    \x{3c3}
+\= Expect no match
+    1
+    2
+
+/[^\P{Lu}1]/utf,ucp
+    A
+    \x{3a3}
+\= Expect no match
+    1
+    2
+    a
+    \x{3c3}
+
+/[\P{Lu}1]/i,utf,ucp
+    1
+    2
+\= Expect no match
+    a
+    A
+    \x{3a3}
+    \x{3c3}
+
+/[\P{Lu}1]/utf,ucp
+    1
+    2
+    a
+    \x{3c3}
+\= Expect no match
+    A
+    \x{3a3}
+
 # End of testinput4
