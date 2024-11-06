@@ -2170,13 +2170,13 @@ Starting code units: % 0 1 A B C D E F G H I J K L M N O P Q R S T U V W
 Subject length lower bound = 1
 
 /[[.ch.]]/I
-Failed: error 113 at offset 1: POSIX collating elements are not supported
+Failed: error 113 at offset 7: POSIX collating elements are not supported
 
 /[[=ch=]]/I
-Failed: error 113 at offset 1: POSIX collating elements are not supported
+Failed: error 113 at offset 7: POSIX collating elements are not supported
 
 /[[:rhubarb:]]/I
-Failed: error 130 at offset 3: unknown POSIX class name
+Failed: error 130 at offset 12: unknown POSIX class name
 
 /[[:upper:]]/Ii
 Capture group count = 0
@@ -8775,31 +8775,31 @@ Failed: error 162 at offset 4: subpattern name expected
 Failed: error 162 at offset 4: subpattern name expected
 
 /[[:foo:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
+Failed: error 130 at offset 8: unknown POSIX class name
 
 /[[:1234:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
+Failed: error 130 at offset 9: unknown POSIX class name
 
 /[[:f\oo:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
+Failed: error 130 at offset 9: unknown POSIX class name
 
 /[[: :]]/
-Failed: error 130 at offset 3: unknown POSIX class name
-
-/[[:...:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
-
-/[[:l\ower:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
-
-/[[:abc\:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
-
-/[abc[:x\]pqr:]]/
 Failed: error 130 at offset 6: unknown POSIX class name
 
+/[[:...:]]/
+Failed: error 130 at offset 8: unknown POSIX class name
+
+/[[:l\ower:]]/
+Failed: error 130 at offset 11: unknown POSIX class name
+
+/[[:abc\:]]/
+Failed: error 130 at offset 9: unknown POSIX class name
+
+/[abc[:x\]pqr:]]/
+Failed: error 130 at offset 14: unknown POSIX class name
+
 /[[:a\dz:]]/
-Failed: error 130 at offset 3: unknown POSIX class name
+Failed: error 130 at offset 9: unknown POSIX class name
 
 /(^(a|b\g<-1'c))/
 Failed: error 157 at offset 8: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number
@@ -11524,7 +11524,7 @@ Failed: error 171 at offset 4: \N is not supported in a class
     aNc
 
 /a[B-\Nc]/
-Failed: error 150 at offset 6: invalid range in character class
+Failed: error 171 at offset 6: \N is not supported in a class
 
 /a[B\Nc]/
 Failed: error 171 at offset 5: \N is not supported in a class
@@ -13347,16 +13347,16 @@ Failed: error 178 at offset 5: digits missing after \x or in \x{} or \o{} or \N{
 ------------------------------------------------------------------
 
 /[a-[:digit:]]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 12: invalid range in character class
 
 /[A-[:digit:]]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 12: invalid range in character class
 
 /[a-[.xxx.]]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 10: invalid range in character class
 
 /[a-[=xxx=]]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 10: invalid range in character class
 
 /[a-[!xxx!]]+/
 Failed: error 108 at offset 3: range out of order in character class
@@ -13477,7 +13477,7 @@ No match
 No match
 
 /[a[:<:]] should give error/
-Failed: error 130 at offset 4: unknown POSIX class name
+Failed: error 130 at offset 7: unknown POSIX class name
 
 /(?=ab\K)/aftertext,allow_lookaround_bsk
     abcd\=startchar
@@ -15879,11 +15879,11 @@ Failed: error 125 at offset 13: length of lookbehind assertion is not limited
 # Perl accepts these, but gives a warning. We can't warn, so give an error.
 
 /[a-[:digit:]]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 12: invalid range in character class
     a-a9-a
 
 /[A-[:digit:]]+/
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 12: invalid range in character class
     A-A9-A
 
 /[a-\d]+/
@@ -16020,7 +16020,7 @@ Failed: error 128 at offset 63: atomic assertion expected after (?( or (?(?C)
     .+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X
 
 /[:[:alnum:]-[[a:lnum:]+/
-Failed: error 150 at offset 11: invalid range in character class
+Failed: error 150 at offset 12: invalid range in character class
 
 /((?(?C'')\QX\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
 Failed: error 128 at offset 11: atomic assertion expected after (?( or (?(?C)
@@ -16654,10 +16654,10 @@ Subject length lower bound = 3
 ------------------------------------------------------------------
 
 /[Q-\N]/B,bad_escape_is_literal
-Failed: error 150 at offset 5: invalid range in character class
+Failed: error 171 at offset 5: \N is not supported in a class
 
 /[\s-_]/bad_escape_is_literal
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[_-\s]/bad_escape_is_literal
 Failed: error 150 at offset 5: invalid range in character class
@@ -16857,19 +16857,19 @@ No match
 No match
 
 /[[:digit:]-a]/
-Failed: error 150 at offset 10: invalid range in character class
+Failed: error 150 at offset 11: invalid range in character class
 
 /[[:digit:]-[:print:]]/
-Failed: error 150 at offset 10: invalid range in character class
+Failed: error 150 at offset 11: invalid range in character class
 
 /[\d-a]/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[\H-z]/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[\d-[:print:]]/
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 # Perl gets the second of these wrong, giving no match.
 
@@ -20619,7 +20619,7 @@ Failed: error 211 at offset 7: brackets needed to clarify operator precedence in
 No match
 
 /[\d-z]/B,alt_extended_class
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 4: invalid range in character class
 
 /[z-\d]/B,alt_extended_class
 Failed: error 150 at offset 5: invalid range in character class
@@ -20654,16 +20654,28 @@ Failed: error 207 at offset 118: character classes are too deeply nested
 # --------------
 
 /[[:digit:]   -Z]/xx
-Failed: error 150 at offset 10: invalid range in character class
+Failed: error 150 at offset 14: invalid range in character class
 
 /[\d   -Z]/xx
-Failed: error 150 at offset 3: invalid range in character class
+Failed: error 150 at offset 7: invalid range in character class
 
 /[[:digit:]\E-H]/
-Failed: error 150 at offset 10: invalid range in character class
+Failed: error 150 at offset 13: invalid range in character class
 
 /[[:digit:]\Q\E-H]+/
-Failed: error 150 at offset 10: invalid range in character class
+Failed: error 150 at offset 15: invalid range in character class
+
+/[z-[:space:]]/
+Failed: error 150 at offset 12: invalid range in character class
+
+/[z-\d]/
+Failed: error 150 at offset 5: invalid range in character class
+
+/[[:space:]-z]/
+Failed: error 150 at offset 11: invalid range in character class
+
+/[\d-z]/
+Failed: error 150 at offset 4: invalid range in character class
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

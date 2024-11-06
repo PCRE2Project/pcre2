@@ -820,7 +820,7 @@ No match
 No match
 
 /[[:a\x{100}b:]]/utf
-Failed: error 130 at offset 3: unknown POSIX class name
+Failed: error 130 at offset 14: unknown POSIX class name
 
 /a[^]b/utf,allow_empty_class,match_unset_backref
     a\x{1234}b
@@ -6684,16 +6684,16 @@ No match
 No match
 
 /[\p{Lu}-z]/B,alt_extended_class
-Failed: error 150 at offset 7: invalid range in character class
+Failed: error 150 at offset 8: invalid range in character class
 
 /[z-\p{Lu}]/B,alt_extended_class
-Failed: error 150 at offset 5: invalid range in character class
+Failed: error 150 at offset 9: invalid range in character class
 
 /[\pL-z]/B,alt_extended_class
-Failed: error 150 at offset 4: invalid range in character class
+Failed: error 150 at offset 5: invalid range in character class
 
 /[z-\pL]/B,alt_extended_class
-Failed: error 150 at offset 5: invalid range in character class
+Failed: error 150 at offset 6: invalid range in character class
 
 /[\p{Lu}-&&-\pL]/B,alt_extended_class
 ------------------------------------------------------------------
@@ -7204,5 +7204,17 @@ No match
   \x09\x0a\x0d,\x{1680}\x{2028}\x{1680},\x{180e}\x{2029}\x{180e},\x{9000}\x{9000}\x{9000},
  0: \x{09}\x{0a}\x{0d},\x{1680}\x{2028}\x{1680},\x{180e}\x{2029}\x{180e},\x{9000}\x{9000}\x{9000},
  1: \x{9000}\x{9000}\x{9000},
+
+/[z-\p{Lu}]/
+Failed: error 150 at offset 9: invalid range in character class
+
+/[z-\pL]/
+Failed: error 150 at offset 6: invalid range in character class
+
+/[\p{Lu}-z]/
+Failed: error 150 at offset 8: invalid range in character class
+
+/[\pL-z]/
+Failed: error 150 at offset 5: invalid range in character class
 
 # End of testinput5

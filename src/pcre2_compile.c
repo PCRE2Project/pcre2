@@ -3702,6 +3702,7 @@ while (ptr < ptrend)
 
         if (class_range_state == RANGE_STARTED)
           {
+          ptr = tempptr + 2;
           errorcode = ERR50;
           goto FAILED;
           }
@@ -3723,8 +3724,9 @@ while (ptr < ptrend)
 
         if (*ptr != CHAR_COLON)
           {
+          ptr = tempptr + 2;
           errorcode = ERR13;
-          goto FAILED_BACK;
+          goto FAILED;
           }
 
         if (*(++ptr) == CHAR_CIRCUMFLEX_ACCENT)
@@ -3734,19 +3736,18 @@ while (ptr < ptrend)
           }
 
         posix_class = check_posix_name(ptr, (int)(tempptr - ptr));
+        ptr = tempptr + 2;
         if (posix_class < 0)
           {
           errorcode = ERR30;
           goto FAILED;
           }
-        ptr = tempptr + 2;
 
         /* Set "a hyphen is forbidden to be the start of a range". For the '-]'
         case, the hyphen is treated as a literal, but for '-1' it is disallowed
         (because it would be interpreted as range). */
 
         class_range_state = RANGE_FORBID_NO;
-        class_range_forbid_ptr = ptr;
         class_op_state = CLASS_OP_OPERAND;
 
         /* When PCRE2_UCP is set, unless PCRE2_EXTRA_ASCII_POSIX is set, some
@@ -3989,6 +3990,7 @@ while (ptr < ptrend)
         {
         *parsed_pattern++ = CHAR_MINUS;
         class_range_state = RANGE_FORBID_STARTED;
+        class_range_forbid_ptr = ptr;
         }
 
       /* Handle a literal character */
@@ -4073,40 +4075,8 @@ while (ptr < ptrend)
           errorcode = ERR7;
           ptr--;
           goto FAILED;
-          }
 
-        /* The second part of a range can be a single-character escape
-        sequence (detected above), but not any of the other escapes. Perl
-        treats a hyphen as a literal in such circumstances. However, in Perl's
-        warning mode, a warning is given, so PCRE now faults it, as it is
-        almost certainly a mistake on the user's part. */
-
-        if (class_range_state == RANGE_STARTED)
-          {
-          errorcode = ERR50;
-          goto FAILED;
-          }
-
-        /* Perl gives a warning unless the hyphen following a multi-character
-        escape is the last character in the class. PCRE throws an error. */
-
-        if (class_range_state == RANGE_FORBID_STARTED)
-          {
-          ptr = class_range_forbid_ptr;
-          errorcode = ERR50;
-          goto FAILED;
-          }
-
-        /* Of the remaining escapes, only those that define characters are
-        allowed in a class. None may start a range. */
-
-        class_range_state = RANGE_FORBID_NO;
-        class_range_forbid_ptr = ptr;
-        class_op_state = CLASS_OP_OPERAND;
-
-        switch(escape)
-          {
-          case ESC_N:
+          case ESC_N:     /* Not permitted by Perl either */
           errorcode = ERR71;
           goto FAILED;
 
@@ -4143,7 +4113,6 @@ while (ptr < ptrend)
             if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
             *parsed_pattern++ = META_ESCAPE + escape;
             *parsed_pattern++ = (ptype << 16) | pdata;
-            class_range_forbid_ptr = ptr;
             }
 #else
           errorcode = ERR45;
@@ -4156,6 +4125,34 @@ while (ptr < ptrend)
           ptr--;
           goto FAILED;
           }
+
+        /* All the switch-cases above which end in "break" describe a set
+        of characters. None may start a range. */
+
+        /* The second part of a range can be a single-character escape
+        sequence (detected above), but not any of the other escapes. Perl
+        treats a hyphen as a literal in such circumstances. However, in Perl's
+        warning mode, a warning is given, so PCRE now faults it, as it is
+        almost certainly a mistake on the user's part. */
+
+        if (class_range_state == RANGE_STARTED)
+          {
+          errorcode = ERR50;
+          goto FAILED;
+          }
+
+        /* Perl gives a warning unless the hyphen following a multi-character
+        escape is the last character in the class. PCRE throws an error. */
+
+        if (class_range_state == RANGE_FORBID_STARTED)
+          {
+          ptr = class_range_forbid_ptr;
+          errorcode = ERR50;
+          goto FAILED;
+          }
+
+        class_range_state = RANGE_FORBID_NO;
+        class_op_state = CLASS_OP_OPERAND;
         }
 
       /* Proceed to next thing in the class. */

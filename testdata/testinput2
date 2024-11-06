@@ -7008,4 +7008,12 @@ a)"xI
 
 /[[:digit:]\Q\E-H]+/
 
+/[z-[:space:]]/
+
+/[z-\d]/
+
+/[[:space:]-z]/
+
+/[\d-z]/
+
 # End of testinput2
