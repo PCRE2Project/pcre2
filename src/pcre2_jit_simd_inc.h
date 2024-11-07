@@ -843,12 +843,13 @@ DEFINE_COMPILER;
 int_char ic;
 struct sljit_jump *partial_quit, *quit;
 /* Save temporary registers. */
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, TMP3, 0);
+SLJIT_ASSERT(common->locals_size >= 2 * (int)sizeof(sljit_sw));
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_PTR, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL1, TMP3, 0);
 
 /* Prepare function arguments */
 OP1(SLJIT_MOV, SLJIT_R0, 0, STR_END, 0);
-GET_LOCAL_BASE(SLJIT_R1, 0, LOCALS0);
+GET_LOCAL_BASE(SLJIT_R1, 0, LOCAL0);
 OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, offset);
 
 if (char1 == char2)
@@ -910,8 +911,8 @@ else
     }
   }
 /* Restore registers. */
-OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
-OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), LOCALS1);
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
+OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), LOCAL1);
 
 /* Check return value. */
 partial_quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
@@ -1038,7 +1039,7 @@ SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_offset()));
 SLJIT_ASSERT(compiler->scratches == 5);
 
 /* Save temporary register STR_PTR. */
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_PTR, 0);
 
 /* Prepare arguments for the function call. */
 if (common->match_end_ptr == 0)
@@ -1052,7 +1053,7 @@ else
   SELECT(SLJIT_LESS, SLJIT_R0, STR_END, 0, SLJIT_R0);
   }
 
-GET_LOCAL_BASE(SLJIT_R1, 0, LOCALS0);
+GET_LOCAL_BASE(SLJIT_R1, 0, LOCAL0);
 OP1(SLJIT_MOV_S32, SLJIT_R2, 0, SLJIT_IMM, offs1);
 OP1(SLJIT_MOV_S32, SLJIT_R3, 0, SLJIT_IMM, offs2);
 ic.c.c1 = char1a;
@@ -1093,7 +1094,7 @@ if (diff == 1) {
 }
 
 /* Restore STR_PTR register. */
-OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
 
 /* Check return value. */
 partial_quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
