@@ -360,6 +360,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "(?P<size>\\d+)m|M", "4M" },
 	{ M, PCRE2_NEWLINE_CRLF, 0, 0, "\\n?.+#", "\n,\n,#" },
 	{ 0, A, 0, 0, "<(\\w+)[\\s\\w]+id>", "<br><div id>" },
+	{ MU, A, 0, 0, "([a-z]{0,3}c;)+", "ccccc;c;cc;ccc;cccccccccccccccc;" },
 
 	/* Bracket repeats with limit. */
 	{ MU, A, 0, 0, "(?:(ab){2}){5}M", "abababababababababababM" },
@@ -481,6 +482,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "\\R{3,}\n", "\r\n\r\n\nab\n\n\n\r\r\n\n" },
 	{ MU, A, 0, 0, "\\R{0,3}\n", "\r\n\r\n\r\n\n" },
 	{ MU, A, 0, 0, "\\R{0,3}\n", "\r\n\r\n\r\n\r" },
+	{ MU, A, 0, 0, "(\\R{0,3}\n;)+", "\r\n\r\n\r\n\r\n\n;\n;\n\n;\n\n\n;\n\n\n\n\n;" },
 	{ MU, A, 0, 0 | F_NOMATCH, "\\R+\\R\\R", "\r\n\r\n" },
 	{ MU, A, 0, 0, "\\R+\\R\\R", "\r\r\r" },
 	{ MU, A, 0, 0, "\\R*\\R\\R", "\n\r" },

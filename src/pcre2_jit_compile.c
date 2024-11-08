@@ -2005,13 +2005,13 @@ while (cc < ccend)
 
     CASE_ITERATOR_TYPE_PRIVATE_DATA_2A
     size = 1;
-    if (cc[1] != OP_ANYNL && cc[1] != OP_EXTUNI)
+    if (cc[1] != OP_EXTUNI)
       space = 2;
     break;
 
     case OP_TYPEUPTO:
     size = 1 + IMM2_SIZE;
-    if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
+    if (cc[1 + IMM2_SIZE] != OP_EXTUNI)
       space = 2;
     break;
 
@@ -12411,7 +12411,7 @@ switch(opcode)
   case OP_UPTO:
   SLJIT_ASSERT(early_fail_ptr == 0 || opcode == OP_STAR);
 
-  if (type == OP_ANYNL || type == OP_EXTUNI)
+  if (type == OP_EXTUNI)
     {
     SLJIT_ASSERT(private_data_ptr == 0);
     SLJIT_ASSERT(early_fail_ptr == 0);
@@ -12536,6 +12536,7 @@ switch(opcode)
       }
     }
 
+  SLJIT_ASSERT(tmp_base == TMP3);
   if (charpos_enabled)
     {
     if (opcode == OP_UPTO)
@@ -12561,7 +12562,13 @@ switch(opcode)
     CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, charpos_char, label);
 
     if (private_data_ptr == 0)
+      {
+      if (opcode == OP_UPTO)
+        OP1(SLJIT_MOV, TMP2, 0, tmp_base, tmp_offset);
       allocate_stack(common, 2);
+      if (opcode == OP_UPTO)
+        OP1(SLJIT_MOV, tmp_base, tmp_offset, TMP2, 0);
+      }
     OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
     OP1(SLJIT_MOV, base, offset1, STR_PTR, 0);
 
@@ -13295,6 +13302,26 @@ SLJIT_ASSERT(cc == ccend);
 
 #define CURRENT_AS(type) ((type *)current)
 
+static void compile_newline_move_back(compiler_common *common)
+{
+DEFINE_COMPILER;
+struct sljit_jump *jump;
+
+OP2(SLJIT_SUB, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+jump = CMP(SLJIT_LESS_EQUAL, TMP1, 0, TMP2, 0);
+OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NL);
+OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-2));
+OP_FLAGS(SLJIT_MOV, SLJIT_TMP_DEST_REG, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_CR);
+OP_FLAGS(SLJIT_AND, SLJIT_TMP_DEST_REG, 0, SLJIT_EQUAL);
+#if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+OP2(SLJIT_SHL, SLJIT_TMP_DEST_REG, 0, SLJIT_TMP_DEST_REG, 0, SLJIT_IMM, UCHAR_SHIFT);
+#endif
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_TMP_DEST_REG, 0);
+JUMPHERE(jump);
+}
+
 static void compile_iterator_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
@@ -13317,7 +13344,7 @@ switch(opcode)
   {
   case OP_STAR:
   case OP_UPTO:
-  if (type == OP_ANYNL || type == OP_EXTUNI)
+  if (type == OP_EXTUNI)
     {
     SLJIT_ASSERT(private_data_ptr == 0);
     set_jumps(CURRENT_AS(char_iterator_backtrack)->u.backtracks, LABEL());
@@ -13335,6 +13362,8 @@ switch(opcode)
 
       jump = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, TMP2, 0);
       label = LABEL();
+      if (type == OP_ANYNL)
+        compile_newline_move_back(common);
       OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
       OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
       if (CURRENT_AS(char_iterator_backtrack)->u.charpos.othercasebit != 0)
@@ -13346,7 +13375,15 @@ switch(opcode)
     else
       {
       OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-      jump = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, base, offset1);
+      if (type == OP_ANYNL)
+        {
+        OP1(SLJIT_MOV, TMP2, 0, base, offset1);
+        jump = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, TMP2, 0);
+        compile_newline_move_back(common);
+        }
+      else
+        jump = CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, base, offset1);
+
       move_back(common, NULL, TRUE);
       OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
       JUMPTO(SLJIT_JUMP, CURRENT_AS(char_iterator_backtrack)->matchingpath);
