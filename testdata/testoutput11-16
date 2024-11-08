@@ -822,4 +822,32 @@ Failed: error 134 at offset 13: character code point value in \x{} or \o{} is to
 
 # --------------
 
+# EXTENDED CHARACTER CLASSES (Perl)
+
+# META_BIGVALUE tests
+
+/(?[[\x{80000000}-\x{8000000f}]+\x{8fffffff}])/B
+Failed: error 134 at offset 15: character code point value in \x{} or \o{} is too large
+    \x{80000002}
+    \x{8fffffff}
+\= Expect no match
+    \x{7fffffff}
+    \x{90000000}
+
+/(?[[\x{80000000}-\x{8000000f}]-\x{80000002}])/B
+Failed: error 134 at offset 15: character code point value in \x{} or \o{} is too large
+    \x{80000001}
+    \x{80000003}
+\= Expect no match
+    \x{80000002}
+
+/(?[[\x{80000000}-\x{8000000f}]-\x{80000002}])/B
+Failed: error 134 at offset 15: character code point value in \x{} or \o{} is too large
+    \x{80000001}
+    \x{80000003}
+\= Expect no match
+    \x{80000002}
+
+# --------------
+
 # End of testinput11

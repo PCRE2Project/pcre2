@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "21 Sepbember 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "08 November 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -1547,35 +1547,74 @@ the next two sections), and the terminating closing square bracket. However,
 escaping other non-alphanumeric characters does no harm.
 .
 .
+.SH "PERL EXTENDED CHARACTER CLASSES"
+.rs
+PCRE2 supports Perl's (?[...]) extended character class syntax. This can
+be used to perform set operations, such intersection.
+.P
+The syntax permitted within (?[...]) is quite different to ordinary character
+classes. Inside the extended class, there is an expression syntax consisting of
+"atoms", operators, and ordinary parentheses "()" used for grouping.
+.P
+The allowed atoms are any escaped characters or sets such as \en or \ed, POSIX
+classes such as [:alpha:], and any ordinary character class may be nested as an
+atom within an extended class. For example, in (?[\ed & [...]]) the nested
+ordinary class [...] follows the ordinary rules for character classes, in which
+parentheses are not metacharacters, and character literals and ranges are
+permitted.
+.P
+However, when outside a nested ordinary character class, such as in
+(?[... + (...)]), character literals and ranges may not be used, as they are not
+atoms in the extended syntax. The extended syntax does not introduce any
+additional escape sequences, so (?[\ey]) is an unknown escape, as it would be
+inside [\ey].
+.P
+In the extended syntax, ^ does not negate a class (except within an
+ordinary class nested inside an extended class); it is instead a binary
+operator.
+.P
+The binary operators are "&" (intersection), "|" or "+" (union), "-"
+(subtraction) and "^" (symmetric difference). These are left-associative and
+"&" has higher (tighter) precedence, while the others have equal lower
+precedence. The one prefix unary operator is "!" (complement), with highest
+precedence.
+.P
+A Perl extended character class always has the /xx modifier turned on within
+it.
+.
+.
 .SH "UTS#18 EXTENDED CHARACTER CLASSES"
 .rs
-The PCRE2_ALT_EXTENDED_CLASS option enables an alternative to Perl's "(?[...])"
-syntax, allowing instead extended class behaviour inside ordinary "[...]"
-character classes. This altered syntax for "[...]" classes is loosely described
-by the Unicode standard UTS#18.
+The PCRE2_ALT_EXTENDED_CLASS option enables an alternative to Perl's (?[...])
+syntax, allowing instead extended class behaviour inside ordinary [...]
+character classes. This altered syntax for [...] classes is loosely described
+by the Unicode standard UTS#18. (The PCRE2_ALT_EXTENDED_CLASS option does not
+prevent use of (?[...]) classes, but only changes the meaning of [...]
+classes.)
 .P
-Firstly, in Perl syntax, an expression such as "[a[]" is a character class
-with two literal characters "a" and "[", but in UTS#18 extended classes the "["
-character becomes an additional metacharacter within classes, denoting the start
-of a nested class, so a literal "[" must be escaped as "\e[".
+Firstly, in ordinary Perl [...] syntax, an expression such as "[a[]" is a
+character class with two literal characters "a" and "[", but in UTS#18 extended
+classes the "[" character becomes an additional metacharacter within classes,
+denoting the start of a nested class, so a literal "[" must be escaped as "\e[".
 .P
 Secondly, within the UTS#18 extended syntax, there are additional operators
-"||", "&&" and "--" which denote character class union, intersection, and
-subtraction respectively. In standard Perl syntax, these would simply be
-needlessly-repeated literals (except for "-" which can denote a range). These
-operators can be used in constructs such as "[\ep{L}--[QW]]" for "Unicode
-letters, other than Q and W". A literal "-" at the end of a range must be
-escaped (so while "[--1]" in Perl syntax is the range from hyphen to "1", it
-must be escaped as "[\e--1]" in UTS#18 extended classes).
+"||", "&&", "--" and "~~" which denote character class union, intersection,
+subtraction, and symmetric difference respectively. In standard Perl syntax,
+these would simply be needlessly-repeated literals (except for "-" which can
+denote a range). These operators can be used in constructs such as
+[\ep{L}--[QW]] for "Unicode letters, other than Q and W". A literal "-" at
+the end of a range must be escaped (so while "[--1]" in Perl syntax is the
+range from hyphen to "1", it must be escaped as "[\e--1]" in UTS#18 extended
+classes).
 .P
-The specific rules in PCRE2 are that classes can be nested:
-"[...[B]...[^C]...]". The individual class items (literal characters, literal
+The specific rules in PCRE2 are: Classes can be nested, for example
+[...[B]...[^C]...]. The individual class items (literal characters, literal
 ranges, properties such as \ed or \ep{...}, and nested classes) can be
-combined by juxtaposition or by an operator "||", "&&", or "--".
+combined by juxtaposition or by an operator "||", "&&", "--", or "~~".
 Juxtaposition is the implicit union operator, and binds more tightly than any
 explicit operator. Precedence between the explicit operators is not defined,
-so mixing operators is a syntax error (thus "[A&&B--C]" is an error, but
-"[A&&[B--C]]" is accepted).
+so mixing operators is a syntax error (thus [A&&B--C] is an error, but
+[A&&[B--C]] is accepted).
 .P
 This is an emerging syntax which is being adopted gradually across the regex
 ecosystem: for example JavaScript adopted the "/v" flag in ECMAScript 2024;
@@ -1583,8 +1622,8 @@ Python's "re" module reserves the syntax for future use with a FutureWarning
 for unescaped use of "[" as a literal within character classes. Due to UTS#18
 providing insufficient guidance, engines interpret the syntax differently.
 Rust's "regex" crate and Python's "regex" PyPi module both implement UTS#18
-extended classes, but with slight incompatibilities ("[A||B&&C]" is parsed as
-"[A||[B&&C]]" in Python's "regex" but as "[[A||B]&&C]" in Rust's "regex").
+extended classes, but with slight incompatibilities ([A||B&&C] is parsed as
+[A||[B&&C]] in Python's "regex" but as [[A||B]&&C] in Rust's "regex").
 .P
 PCRE2's syntax adds syntax restrictions similar to ECMASCript's /v flag, so
 that all the extended classes accepted as valid by PCRE2 have the property
@@ -4075,6 +4114,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 21 September 2024
+Last updated: 08 November 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

@@ -62,7 +62,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
        ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100,
        ERR101,ERR102,ERR103,ERR104,ERR105,ERR106,ERR107,ERR108,ERR109,ERR110,
-       ERR111,ERR112 };
+       ERR111,ERR112,ERR113,ERR114,ERR115,ERR116 };
 
 /* Code values for parsed patterns, which are stored in a vector of 32-bit
 unsigned ints. Values less than META_END are literal data values. The coding
@@ -158,11 +158,14 @@ versions. */
 #define META_MINMAX_PLUS      0x80420000u  /* {n,m}+ repeat */
 #define META_MINMAX_QUERY     0x80430000u  /* {n,m}? repeat */
 
-/* These meta codes have no ordering constraints. */
+/* These meta codes must be kept in a group, with the OR/SUB/XOR in
+this order. */
 
-#define META_ECLASS_OR        0x80440000u  /* || in a class */
-#define META_ECLASS_AND       0x80450000u  /* && in a class */
-#define META_ECLASS_SUB       0x80460000u  /* -- in a class */
+#define META_ECLASS_AND       0x80440000u  /* && (or &) in a class */
+#define META_ECLASS_OR        0x80450000u  /* || (or |, +) in a class */
+#define META_ECLASS_SUB       0x80460000u  /* -- (or -) in a class */
+#define META_ECLASS_XOR       0x80470000u  /* ~~ (or ^) in a class */
+#define META_ECLASS_NOT       0x80480000u  /* ! in a class */
 
 /* Convenience aliases. */
 

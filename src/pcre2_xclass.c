@@ -474,19 +474,24 @@ while (ptr < data_end)
   {
   switch (*ptr)
     {
-    case OP_ECLASS_OR:
-    ++ptr;
-    stack = (stack >> 1) | (stack & (uint32_t)1u);
-    break;
-
     case OP_ECLASS_AND:
     ++ptr;
     stack = (stack >> 1) & (stack | ~(uint32_t)1u);
     break;
 
+    case OP_ECLASS_OR:
+    ++ptr;
+    stack = (stack >> 1) | (stack & (uint32_t)1u);
+    break;
+
     case OP_ECLASS_SUB:
     ++ptr;
     stack = (stack >> 1) & (~stack | ~(uint32_t)1u);
+    break;
+
+    case OP_ECLASS_XOR:
+    ++ptr;
+    stack = (stack >> 1) ^ (stack & (uint32_t)1u);
     break;
 
     case OP_ECLASS_NOT:

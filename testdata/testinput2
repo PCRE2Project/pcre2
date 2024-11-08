@@ -3975,6 +3975,12 @@
     no reduction
     Alfred Winifred
 
+/[[:<:]]+red/B
+    little red riding hood
+    red is a colour
+\= Expect no match
+    Alfred
+
 /[a[:<:]] should give error/
 
 /(?=ab\K)/aftertext,allow_lookaround_bsk
@@ -6707,6 +6713,34 @@ a)"xI
     B
     C
 
+/[[AC]||[BC]]/B,alt_extended_class
+    A
+    B
+    C
+\= Expect no match
+    D
+
+/[[AC]&&[BC]]/B,alt_extended_class
+    C
+\= Expect no match
+    A
+    B
+    D
+
+/[[AC]--[BC]]/B,alt_extended_class
+    A
+\= Expect no match
+    B
+    C
+    D
+
+/[[AC]~~[BC]]/B,alt_extended_class
+    A
+    B
+\= Expect no match
+    C
+    D
+
 /[A[]]]/B,alt_extended_class
     A
     ]
@@ -6970,7 +7004,23 @@ a)"xI
 
 /[a|||b]/alt_extended_class
 
+/[a~~~b]/alt_extended_class
+
+/[a~~~~b]/alt_extended_class
+
+/[a~~/alt_extended_class
+
+/[a~~~/alt_extended_class
+
+/[a~~~~/alt_extended_class
+
 /[a||b&&c]/alt_extended_class
+
+/[a||b~~c]/alt_extended_class
+
+/[a~~b&&c]/alt_extended_class
+
+/[a--b~~c]/alt_extended_class
 
 /[a--b&&c]/alt_extended_class
 
@@ -6998,6 +7048,120 @@ a)"xI
 
 /[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
 
+/[z&/alt_extended_class
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+# allow-empty-class does nothing inside (?[...])
+/(?[ []] ])/B,allow_empty_class
+    ]
+
+# bad-escape-is-literal does nothing inside (?[...])
+/[ \j ]/
+
+/[ /\
+
+/(?[ \j ])/
+
+/(?[ /\
+
+/[ \j ]/bad_escape_is_literal
+    j
+\= Expect no match
+    k
+
+/[ /\bad_escape_is_literal
+
+/(?[ \j ])/bad_escape_is_literal
+
+/(?[ /\bad_escape_is_literal
+
+/(?[ [\j] ])/bad_escape_is_literal
+
+/(?[ (\j) ])/bad_escape_is_literal
+
+# We can't test error cases in testinput1
+
+/(?[])/
+
+/(?[/
+
+/(?[]/
+
+/(?[\n/
+
+/(?[\n]/
+
+/(?[\n]z)/
+
+/(?[\n] )/
+
+/(?[(/
+
+/(?[( /
+
+/(?[(\n/
+
+/(?[ \n + () ])/
+
+/(?[1])/
+
+/(?[a])/
+
+/(?[a-c])/
+
+/(?[(])/
+
+/(?[(\n])/
+
+/(?[\n)])/
+
+/(?[^\n])/
+
+/(?[ \n \t ])/
+
+/(?[ \d \t ])/
+
+/(?[ [\n] \t ])/
+
+/(?[ (\n) \t ])/
+
+/(?[ [:alpha:] \t ])/
+
+/(?[ \n + \t \d ])/
+
+/(?[ !\n \t ])/
+
+/(?[ \n [:alpha:] ])/
+
+/(?[ \n [\d] ])/
+
+/(?[ \n (\t) ])/
+
+/(?[ \n !\t ])/
+
+/(?[ \n \t ])/
+
+/(?[:graph:])/
+
+/(?[\Qn\E])/
+
+# maximum depth tests
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&\n))))))))))))))])/
+    \n
+\= Expect no match
+    a
+    b
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+([\n]&\n))))))))))))))])/
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
+
 # --------------
 
 /[[:digit:]   -Z]/xx
@@ -7015,5 +7179,42 @@ a)"xI
 /[[:space:]-z]/
 
 /[\d-z]/
+
+/[\d-\w]/
+
+/[\Q/
+
+/[\Q/\
+
+/[\Q\E/
+
+/[\Q\n/
+
+/[\Q\n]/
+
+/[\Q\n/\
+
+/[\Q\n\]/
+
+/[\Q\n\E/
+
+/[\Q\n\E]/
+    \\
+    n
+\= Expect no match
+    \n
+    Q
+
+/[z\Q/
+
+/[z\Q/\
+
+/[z\Q\E/
+
+/[/\
+
+/[\n/
+
+/[\E/
 
 # End of testinput2

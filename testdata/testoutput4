@@ -4722,4 +4722,144 @@ No match
     \x{3a3}
 No match
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+/(?[\p{L} - \p{Lu}])/
+    a
+ 0: a
+\= Expect no match
+    A
+No match
+    1
+No match
+
+/(?[\p{L} & \p{Lu}])/
+    A
+ 0: A
+\= Expect no match
+    a
+No match
+    1
+No match
+
+/(?[[\p{Lu}z] ^ [\p{Ll}G]])/
+    A
+ 0: A
+    p
+ 0: p
+\= Expect no match
+    G
+No match
+    z
+No match
+    1
+No match
+
+/(?[\p{Ll} | \p{Nd}])/
+    a
+ 0: a
+    1
+ 0: 1
+\= Expect no match
+    A
+No match
+
+/(?[\p{Ll} + [\p{Nd}]])/
+    a
+ 0: a
+    1
+ 0: 1
+\= Expect no match
+    A
+No match
+
+/(?[ ![\p{Nd}z] ])/
+    _
+ 0: _
+    Z
+ 0: Z
+\= Expect no match
+    1
+No match
+    z
+No match
+
+/(?[ \P{Nd} + [2] ])/
+    _
+ 0: _
+    Z
+ 0: Z
+    2
+ 0: 2
+\= Expect no match
+    1
+No match
+    3
+No match
+
+/(?[ ![\P{Nd}] ])/
+    1
+ 0: 1
+    2
+ 0: 2
+\= Expect no match
+    _
+No match
+    z
+No match
+
+# caseless tests
+
+/(?[ \p{Lu} ^ \p{Ll} ])/
+    a
+ 0: a
+    A
+ 0: A
+\= Expect no match
+    _
+No match
+    1
+No match
+
+/(?[ [\p{Lu}1] ^ \p{Ll} ])/i
+    1
+ 0: 1
+\= Expect no match
+    a
+No match
+    A
+No match
+    _
+No match
+
+/(?[ [\p{Lu}1] & [\p{Ll}1] ])/
+    1
+ 0: 1
+\= Expect no match
+    a
+No match
+    A
+No match
+    _
+No match
+    2
+No match
+
+/(?[ [\p{Lu}1] & [\p{Ll}1] ])/i
+    a
+ 0: a
+    A
+ 0: A
+    1
+ 0: 1
+\= Expect no match
+    _
+No match
+    2
+No match
+
+# --------------
+
 # End of testinput4

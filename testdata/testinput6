@@ -5189,4 +5189,15 @@
 
 # --------------
 
+# EXTENDED CHARACTER CLASSES (Perl)
+
+/(?[[A]+[B]])/
+    A
+    B
+\= Expect no match
+    [
+    ]
+
+# --------------
+
 # End of testinput6
