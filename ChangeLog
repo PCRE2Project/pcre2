@@ -104,6 +104,9 @@ well as interpreting \b and \v as characters.
 
 23. Updated perltest.sh to enable locale setting.
 
+24. Fixed a bug in JIT affecting greedy bounded repeats. The upper limit of
+repeats inside a repeated bracket might be incorrectly checked.
+
 
 Version 10.44 07-June-2024
 --------------------------
