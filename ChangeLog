@@ -107,6 +107,10 @@ well as interpreting \b and \v as characters.
 24. Fixed a bug in JIT affecting greedy bounded repeats. The upper limit of
 repeats inside a repeated bracket might be incorrectly checked.
 
+25. Fixed a bug in JIT affecting caseful matching of backreferences. When
+utf is disabled, and dupnames is enabled, caseless matching was used even
+if caseful matching was needed.
+
 
 Version 10.44 07-June-2024
 --------------------------
