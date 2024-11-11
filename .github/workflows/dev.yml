@@ -21,7 +21,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='gcc -O0 -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=4
+        run: ./configure CC='gcc' CFLAGS='-O0 -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=4
 
       - name: Build
         run: make -j3
