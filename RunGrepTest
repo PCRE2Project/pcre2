@@ -25,8 +25,8 @@ unset cp ls mv rm
 # valgrind settings when requested.
 
 builddir=`pwd`
-pcre2grep=$builddir/pcre2grep
-pcre2test=$builddir/pcre2test
+: ${pcre2grep:=$builddir/pcre2grep}
+: ${pcre2test:=$builddir/pcre2test}
 
 if [ ! -x $pcre2grep ] ; then
   echo "** $pcre2grep does not exist or is not executable."

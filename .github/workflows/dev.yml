@@ -8,7 +8,8 @@ on:
 jobs:
 
   canary:
-    name: gcc
+    # Tests with: Debug & assertions; link-size=4
+    name: GCC -O0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,7 +39,8 @@ jobs:
         run: ./pcre2posix_test -v
 
   dragon:
-    name: clang
+    # Tests with: clang AB/UB; link-size=3
+    name: Clang
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -67,9 +69,31 @@ jobs:
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
 
+  greatawk:
+    # Tests with: GCC, -O3, oldest supported Ubuntu (in non-extended support)
+    name: GCC -O3
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Configure
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+
+      - name: Build
+        run: cd build && make -j3
+
+      - name: Test
+        run: cd build && make test
+
   wasp:
-    name: No JIT
-    runs-on: ubuntu-24.04
+    # Tests with: French locale; oldest supported CMake; no JIT; -Os
+    name: GCC -Os, CMake+ninja, no JIT
+    runs-on: ubuntu-latest
+    env:
+      CMAKE_VER: "3.15.7"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -79,25 +103,33 @@ jobs:
       - name: Prepare
         run: |
           sudo apt-get -qq update
-          sudo apt-get -qq install language-pack-fr
-          ./autogen.sh
+          sudo apt-get -qq install language-pack-fr ninja-build
+
+      - name: Cache CMake
+        uses: actions/cache@v4
+        with:
+          key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
+          path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
+
+      - name: Install CMake
+        run: |
+          [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
+          tar -xz -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz
+          realpath "cmake-${CMAKE_VER}-Linux-x86_64/bin" >> "$GITHUB_PATH"
 
       - name: Configure
-        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function' --enable-pcre2-16 --enable-pcre2-32 --enable-debug
+        run: |
+          cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
+          CC='clang' CFLAGS='-fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function -pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
 
       - name: Build
-        run: make CPPFLAGS='-pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' -j3
+        run: ninja -C build
 
-      - name: Test (main test script)
-        run: ./RunTest
-
-      - name: Test (pcre2grep test script)
-        run: ./RunGrepTest
-
-      - name: Test (pcre2posix program)
-        run: ./pcre2posix_test -v
+      - name: Test
+        run: ninja -C build test
 
   bat:
+    # Tests with: MSVC 32-bit, and a variety of CMake options
     name: 32bit MSVC
     runs-on: windows-latest
     steps:
@@ -110,17 +142,17 @@ jobs:
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_VERBOSE_MAKEFILE=ON -B build -A Win32
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --config RelWithDebInfo
 
       - name: Test
         shell: cmd
         run: |
           cd build
-          ctest -C Debug .
-          type Testing\Temporary\LastTest.log
+          ctest -C RelWithDebInfo .
 
   pterodactyl:
-    name: MSVC
+    # Tests with: MSVC 64-bit, Debug, shared libraries
+    name: 64bit MSVC
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -129,19 +161,19 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_BUILD_PCRE2GREP=OFF -DPCRE2_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+        run: cmake -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_BUILD_PCRE2GREP=OFF -DPCRE2_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --config Debug
 
       - name: Test
         shell: cmd
         run: |
           cd build
           ctest -C Debug .
-          type Testing\Temporary\LastTest.log
 
   bigbird:
+    # Job to execute ManyConfigTests
     name: manyconfig
     runs-on: ubuntu-latest
     steps:
@@ -161,6 +193,7 @@ jobs:
           ./maint/ManyConfigTests
 
   camel:
+    # Job to execute RunPerlTest
     name: perl
     runs-on: ubuntu-latest
     container: perl:devel
@@ -176,7 +209,7 @@ jobs:
           apt-get -qq install cmake ninja-build
 
       - name: Configure
-        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON
+        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON -DPCRE2_DEBUG=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
       - name: Build
         run: cmake --build build
