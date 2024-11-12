@@ -7891,6 +7891,7 @@ for (;; pptr++)
   }           /* End of big loop */
 
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
+return 0;                  /* Avoid compiler warnings */
 }
 
 
@@ -8197,6 +8198,7 @@ for (;;)
   }
 
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
+return 0;                  /* Avoid compiler warnings */
 }
 
 

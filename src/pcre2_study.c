@@ -761,6 +761,7 @@ for (;;)
   }
 
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
+return -3;                 /* Avoid compiler warnings */
 }
 
 
