@@ -5670,11 +5670,38 @@ if (last)
   chars->last_count++;
 }
 
-static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, fast_forward_char_data *chars, int max_chars, sljit_u32 *rec_count)
+/* Value can be increased if needed. Patterns
+such as /(a|){33}b/ can exhaust the stack.
+
+Note: /(a|){29}b/ already stops scan_prefix()
+because it reaches the maximum step_count. */
+#define SCAN_PREFIX_STACK_END 32
+
+/*
+Scan prefix stores the prefix string in the chars array.
+The elements of the chars array is either small character
+sets or "any" (count is set to 255).
+
+Examples (the chars array is represented by a simple regex):
+
+/(abc|xbyd)/ prefix: /[ax]b[cy]/ (length: 3)
+/a[a-z]b+c/ prefix: a.b (length: 3)
+/ab?cd/ prefix: a[bc][cd] (length: 3)
+/(ab|cd)|(ef|gh)/ prefix: [aceg][bdfh] (length: 2)
+
+The length is returned by scan_prefix(). The length is
+less than or equal than the minimum length of the pattern.
+*/
+
+static int scan_prefix(compiler_common *common, PCRE2_SPTR cc, fast_forward_char_data *chars)
 {
-/* Recursive function, which scans prefix literals. */
+fast_forward_char_data *chars_start = chars;
+fast_forward_char_data *chars_end = chars + MAX_N_CHARS;
+PCRE2_SPTR cc_stack[SCAN_PREFIX_STACK_END];
+fast_forward_char_data *chars_stack[SCAN_PREFIX_STACK_END];
+sljit_u8 next_alternative_stack[SCAN_PREFIX_STACK_END];
 BOOL last, any, class, caseless;
-int len, repeat, len_save, consumed = 0;
+int stack_ptr, step_count, repeat, len, len_save;
 sljit_u32 chr; /* Any unicode character. */
 sljit_u8 *bytes, *bytes_end, byte;
 PCRE2_SPTR alternative, cc_save, oc;
@@ -5687,11 +5714,44 @@ PCRE2_UCHAR othercase[1];
 #endif
 
 repeat = 1;
+stack_ptr = 0;
+step_count = 10000;
 while (TRUE)
   {
-  if (*rec_count == 0)
+  if (--step_count == 0)
     return 0;
-  (*rec_count)--;
+
+  SLJIT_ASSERT(chars <= chars_start + MAX_N_CHARS);
+
+  if (chars >= chars_end)
+    {
+    if (stack_ptr == 0)
+      return (int)(chars_end - chars_start);
+
+    --stack_ptr;
+    cc = cc_stack[stack_ptr];
+    chars = chars_stack[stack_ptr];
+
+    if (chars >= chars_end)
+      continue;
+
+    if (next_alternative_stack[stack_ptr] != 0)
+      {
+      /* When an alternative is processed, the
+      next alternative is pushed onto the stack. */
+      SLJIT_ASSERT(*cc == OP_ALT);
+      alternative = cc + GET(cc, 1);
+      if (*alternative == OP_ALT)
+        {
+        SLJIT_ASSERT(stack_ptr < SCAN_PREFIX_STACK_END);
+        SLJIT_ASSERT(chars_stack[stack_ptr] == chars);
+        SLJIT_ASSERT(next_alternative_stack[stack_ptr] == 1);
+        cc_stack[stack_ptr] = alternative;
+        stack_ptr++;
+        }
+      cc += 1 + LINK_SIZE;
+      }
+    }
 
   last = TRUE;
   any = FALSE;
@@ -5768,9 +5828,17 @@ while (TRUE)
 #ifdef SUPPORT_UNICODE
     if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
 #endif
-    max_chars = scan_prefix(common, cc + len, chars, max_chars, rec_count);
-    if (max_chars == 0)
-      return consumed;
+    if (stack_ptr >= SCAN_PREFIX_STACK_END)
+      {
+      chars_end = chars;
+      continue;
+      }
+
+    cc_stack[stack_ptr] = cc + len;
+    chars_stack[stack_ptr] = chars;
+    next_alternative_stack[stack_ptr] = 0;
+    stack_ptr++;
+
     last = FALSE;
     break;
 
@@ -5788,12 +5856,18 @@ while (TRUE)
     case OP_CBRA:
     case OP_CBRAPOS:
     alternative = cc + GET(cc, 1);
-    while (*alternative == OP_ALT)
+    if (*alternative == OP_ALT)
       {
-      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, max_chars, rec_count);
-      if (max_chars == 0)
-        return consumed;
-      alternative += GET(alternative, 1);
+      if (stack_ptr >= SCAN_PREFIX_STACK_END)
+        {
+        chars_end = chars;
+        continue;
+        }
+
+      cc_stack[stack_ptr] = alternative;
+      chars_stack[stack_ptr] = chars;
+      next_alternative_stack[stack_ptr] = 1;
+      stack_ptr++;
       }
 
     if (*cc == OP_CBRA || *cc == OP_CBRAPOS)
@@ -5804,14 +5878,21 @@ while (TRUE)
     case OP_CLASS:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
     if (common->utf && !is_char7_bitset((const sljit_u8 *)(cc + 1), FALSE))
-      return consumed;
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     class = TRUE;
     break;
 
     case OP_NCLASS:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-    if (common->utf) return consumed;
+    if (common->utf)
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     class = TRUE;
     break;
@@ -5819,7 +5900,11 @@ while (TRUE)
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-    if (common->utf) return consumed;
+    if (common->utf)
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     cc += GET(cc, 1);
@@ -5829,7 +5914,10 @@ while (TRUE)
     case OP_DIGIT:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
     if (common->utf && !is_char7_bitset((const sljit_u8 *)common->ctypes - cbit_length + cbit_digit, FALSE))
-      return consumed;
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     cc++;
@@ -5838,7 +5926,10 @@ while (TRUE)
     case OP_WHITESPACE:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
     if (common->utf && !is_char7_bitset((const sljit_u8 *)common->ctypes - cbit_length + cbit_space, FALSE))
-      return consumed;
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     cc++;
@@ -5847,7 +5938,10 @@ while (TRUE)
     case OP_WORDCHAR:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
     if (common->utf && !is_char7_bitset((const sljit_u8 *)common->ctypes - cbit_length + cbit_word, FALSE))
-      return consumed;
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     cc++;
@@ -5863,7 +5957,11 @@ while (TRUE)
     case OP_ANY:
     case OP_ALLANY:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-    if (common->utf) return consumed;
+    if (common->utf)
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     cc++;
@@ -5873,7 +5971,11 @@ while (TRUE)
     case OP_NOTPROP:
     case OP_PROP:
 #if PCRE2_CODE_UNIT_WIDTH != 32
-    if (common->utf) return consumed;
+    if (common->utf)
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     cc += 1 + 2;
@@ -5888,7 +5990,11 @@ while (TRUE)
     case OP_NOTEXACT:
     case OP_NOTEXACTI:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-    if (common->utf) return consumed;
+    if (common->utf)
+      {
+      chars_end = chars;
+      continue;
+      }
 #endif
     any = TRUE;
     repeat = GET2(cc, 1);
@@ -5896,21 +6002,20 @@ while (TRUE)
     break;
 
     default:
-    return consumed;
+    chars_end = chars;
+    continue;
     }
+
+  SLJIT_ASSERT(chars < chars_end);
 
   if (any)
     {
     do
       {
       chars->count = 255;
-
-      consumed++;
-      if (--max_chars == 0)
-        return consumed;
       chars++;
       }
-    while (--repeat > 0);
+    while (--repeat > 0 && chars < chars_end);
 
     repeat = 1;
     continue;
@@ -5921,17 +6026,27 @@ while (TRUE)
     bytes = (sljit_u8*) (cc + 1);
     cc += 1 + 32 / sizeof(PCRE2_UCHAR);
 
+    SLJIT_ASSERT(last == TRUE && repeat == 1);
     switch (*cc)
       {
-      case OP_CRSTAR:
-      case OP_CRMINSTAR:
-      case OP_CRPOSSTAR:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
       case OP_CRPOSQUERY:
-      max_chars = scan_prefix(common, cc + 1, chars, max_chars, rec_count);
-      if (max_chars == 0)
-        return consumed;
+      last = FALSE;
+      /* Fall through */
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPOSSTAR:
+      if (stack_ptr >= SCAN_PREFIX_STACK_END)
+        {
+        chars_end = chars;
+        continue;
+        }
+
+      cc_stack[stack_ptr] = ++cc;
+      chars_stack[stack_ptr] = chars;
+      next_alternative_stack[stack_ptr] = 0;
+      stack_ptr++;
       break;
 
       default:
@@ -5945,7 +6060,13 @@ while (TRUE)
       case OP_CRPOSRANGE:
       repeat = GET2(cc, 1);
       if (repeat <= 0)
-        return consumed;
+        {
+        chars_end = chars;
+        continue;
+        }
+
+      last = (repeat != (int)GET2(cc, 1 + IMM2_SIZE));
+      cc += 1 + 2 * IMM2_SIZE;
       break;
       }
 
@@ -5980,36 +6101,13 @@ while (TRUE)
         bytes = bytes_end - 32;
         }
 
-      consumed++;
-      if (--max_chars == 0)
-        return consumed;
       chars++;
       }
-    while (--repeat > 0);
-
-    switch (*cc)
-      {
-      case OP_CRSTAR:
-      case OP_CRMINSTAR:
-      case OP_CRPOSSTAR:
-      return consumed;
-
-      case OP_CRQUERY:
-      case OP_CRMINQUERY:
-      case OP_CRPOSQUERY:
-      cc++;
-      break;
-
-      case OP_CRRANGE:
-      case OP_CRMINRANGE:
-      case OP_CRPOSRANGE:
-      if (GET2(cc, 1) != GET2(cc, 1 + IMM2_SIZE))
-        return consumed;
-      cc += 1 + 2 * IMM2_SIZE;
-      break;
-      }
+    while (--repeat > 0 && chars < chars_end);
 
     repeat = 1;
+    if (last)
+      chars_end = chars;
     continue;
     }
 
@@ -6025,7 +6123,10 @@ while (TRUE)
       {
       GETCHAR(chr, cc);
       if ((int)PRIV(ord2utf)(char_othercase(common, chr), othercase) != len)
-        return consumed;
+        {
+        chars_end = chars;
+        continue;
+        }
       }
     else
 #endif
@@ -6056,7 +6157,6 @@ while (TRUE)
     do
       {
       len--;
-      consumed++;
 
       chr = *cc;
       add_prefix_char(*cc, chars, len == 0);
@@ -6064,15 +6164,13 @@ while (TRUE)
       if (caseless)
         add_prefix_char(*oc, chars, len == 0);
 
-      if (--max_chars == 0)
-        return consumed;
       chars++;
       cc++;
       oc++;
       }
-    while (len > 0);
+    while (len > 0 && chars < chars_end);
 
-    if (--repeat == 0)
+    if (--repeat == 0 || chars >= chars_end)
       break;
 
     len = len_save;
@@ -6081,7 +6179,7 @@ while (TRUE)
 
   repeat = 1;
   if (last)
-    return consumed;
+    chars_end = chars;
   }
 }
 
@@ -6251,7 +6349,6 @@ int i, max, from;
 int range_right = -1, range_len;
 sljit_u8 *update_table = NULL;
 BOOL in_range;
-sljit_u32 rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
   {
@@ -6259,8 +6356,7 @@ for (i = 0; i < MAX_N_CHARS; i++)
   chars[i].last_count = 0;
   }
 
-rec_count = 10000;
-max = scan_prefix(common, common->start, chars, MAX_N_CHARS, &rec_count);
+max = scan_prefix(common, common->start, chars);
 
 if (max < 1)
   return FALSE;
