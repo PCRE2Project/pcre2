@@ -18637,13 +18637,13 @@ Failed: error 114 at offset 18: missing closing parenthesis
 Failed: error 114 at offset 13: missing closing parenthesis
 
 /(*scs:(1)a|b)/
-Failed: error 115 at offset 6: reference to non-existent subpattern
+Failed: error 115 at offset 7: reference to non-existent subpattern
 
 /(*scs:(0)a)/
 Failed: error 115 at offset 8: reference to non-existent subpattern
 
 /(*scan_substring:(1)a|b)/
-Failed: error 115 at offset 17: reference to non-existent subpattern
+Failed: error 115 at offset 18: reference to non-existent subpattern
 
 /(*scs:(<name>)a|b)/
 Failed: error 115 at offset 8: reference to non-existent subpattern
@@ -18653,6 +18653,12 @@ Failed: error 115 at offset 19: reference to non-existent subpattern
 
 /()(*scs:(1)+a)/
 Failed: error 109 at offset 11: quantifier does not follow a repeatable item
+
+/()(*scs:(1,1,1,1,1,1,1,1,2))/
+Failed: error 115 at offset 25: reference to non-existent subpattern
+
+/()()(*scs:(1,2,1,2,1,2,2,'XYZ'))/
+Failed: error 115 at offset 26: reference to non-existent subpattern
 
 # Tests for iterating scan_substring
 
@@ -19492,6 +19498,25 @@ No match
  1: a
     ac
 No match
+
+/()()()(?<=ab(*scs:(1,2,3))cd)xyz/
+    abcdxyz
+ 0: xyz
+ 1: 
+ 2: 
+ 3: 
+
+/()()()(?<=ab(*ACCEPT)(*scs:(1,2,3))cd|efg)xyz/
+    abxyz
+ 0: xyz
+ 1: 
+ 2: 
+ 3: 
+    efgxyz
+ 0: xyz
+ 1: 
+ 2: 
+ 3: 
 
 # Tests for pcre2_set_optimize()
 

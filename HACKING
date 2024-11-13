@@ -768,9 +768,15 @@ In ASCII or UTF-32 mode, the character counts in OP_REVERSE and OP_VREVERSE are
 also the number of code units, but in UTF-8/16 mode each character may occupy
 more than one code unit.
 
-The "scan substring" assertion compiles as OP_ASSERT_SCS. What follows takes
-the same form as a conditional subpattern with a back reference condition (see
-next section).
+The "scan substring" assertion compiles as OP_ASSERT_SCS. This opcode is
+followed by a list of arguments. Each argument is either an OP_CREF or
+OP_DNCREF byte code sequence. The details of these sequences are described
+in the next section.
+
+For example (*scs:(1,'NAME')...PATTERN...) is translated to:
+[OP_ASSERT_SCS] [OP_CREF] [OP_CREF] ...PATTERN... [OP_KET]
+
+If 'NAME' is a duplicated name, the second [OP_CREF] is [OP_DNCREF] instead.
 
 
 Conditional subpatterns

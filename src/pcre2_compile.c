@@ -214,10 +214,10 @@ static unsigned char meta_extra_lengths[] = {
   1+SIZEOFFSET,  /* META_COND_RNAME */
   1+SIZEOFFSET,  /* META_COND_RNUMBER */
   3,             /* META_COND_VERSION */
-  1+SIZEOFFSET,  /* META_SCS_NAME */
-  1+SIZEOFFSET,  /* META_SCS_NUMBER */
-  1+SIZEOFFSET,  /* META_SCS_NEXT_NAME */
-  1+SIZEOFFSET,  /* META_SCS_NEXT_NUMBER */
+  SIZEOFFSET,    /* META_OFFSET */
+  0,             /* META_SCS */
+  1,             /* META_SCS_NAME */
+  1,             /* META_SCS_NUMBER */
   0,             /* META_DOLLAR */
   0,             /* META_DOT */
   0,             /* META_ESCAPE - one more for ESC_P and ESC_p */
@@ -1024,30 +1024,22 @@ for (;;)
     fprintf(stderr, "%zd", offset);
     break;
 
-    case META_SCS_NAME:
-    fprintf(stderr, "META (*scan_substring:(<name>) length=%d offset=", *pptr++);
+    case META_OFFSET:
+    fprintf(stderr, "META_OFFSET offset=");
     GETOFFSET(offset, pptr);
     fprintf(stderr, "%zd", offset);
+    break;
+
+    case META_SCS:
+    fprintf(stderr, "META (*scan_substring:");
+    break;
+
+    case META_SCS_NAME:
+    fprintf(stderr, "META_SCS_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
     break;
 
     case META_SCS_NUMBER:
-    fprintf(stderr, "META_SCS_NUMBER %d offset=", pptr[SIZEOFFSET]);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    pptr++;
-    break;
-
-    case META_SCS_NEXT_NAME:
-    fprintf(stderr, "META_SCS_NEXT_NAME length=%d offset=", *pptr++);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_SCS_NEXT_NUMBER:
-    fprintf(stderr, "META_SCS_NEXT_NUMBER %d offset=", pptr[SIZEOFFSET]);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    pptr++;
+    fprintf(stderr, "META_SCS_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
     break;
 
     case META_MARK:
@@ -4504,11 +4496,14 @@ while (ptr < ptrend)
             }
 
           ptr++;
+          *parsed_pattern++ = META_SCS;
           /* Temporary variable, zero in the first iteration. */
-          meta = 0;
+          offset = 0;
 
           for (;;)
             {
+            PCRE2_SIZE next_offset = (PCRE2_SIZE)(ptr - cb->start_pattern);
+
             /* Handle (scan_substring:([+-]number)... */
             if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61,
                 &i, &errorcode))
@@ -4519,10 +4514,8 @@ while (ptr < ptrend)
                 errorcode = ERR15;
                 goto FAILED;
                 }
-              *parsed_pattern++ = meta ? META_SCS_NEXT_NUMBER : META_SCS_NUMBER;
-              offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
-              PUTOFFSET(offset, parsed_pattern);
-              *parsed_pattern++ = i;
+              meta = META_SCS_NUMBER;
+              namelen = (uint32_t)i;
               }
             else if (errorcode != 0) goto FAILED;   /* Number too big */
             else
@@ -4540,13 +4533,27 @@ while (ptr < ptrend)
                 goto FAILED;
                 }
 
-              if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name,
-                  &namelen, &errorcode, cb)) goto FAILED;
+              if (!read_name(&ptr, ptrend, utf, terminator, &next_offset,
+                  &name, &namelen, &errorcode, cb)) goto FAILED;
 
-              *parsed_pattern++ = meta ? META_SCS_NEXT_NAME : META_SCS_NAME;
-              *parsed_pattern++ = namelen;
-              PUTOFFSET(offset, parsed_pattern);
+              meta = META_SCS_NAME;
               }
+
+            PCRE2_ASSERT(next_offset > 0);
+            if (offset == 0 || (next_offset - offset) >= 0x10000)
+              {
+              *parsed_pattern++ = META_OFFSET;
+              PUTOFFSET(next_offset, parsed_pattern);
+              offset = next_offset;
+              }
+
+            /* The offset is encoded as a relative offset, because for some
+            inputs such as ",2" in (*scs:(1,2,3)...), we only have space for
+            two uint32_t values, and an opcode and absolute offset may require
+            three uint32_t values. */
+            *parsed_pattern++ = meta | (uint32_t)(next_offset - offset);
+            *parsed_pattern++ = namelen;
+            offset = next_offset;
 
             if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
@@ -4559,7 +4566,6 @@ while (ptr < ptrend)
               }
 
             ptr++;
-            meta = 1;
             }
           ptr++;
           goto POST_ASSERTION;
@@ -5807,6 +5813,8 @@ uint32_t meta, meta_arg;
 uint32_t firstcuflags, reqcuflags;
 uint32_t zeroreqcuflags, zerofirstcuflags;
 uint32_t req_caseopt, reqvary, tempreqvary;
+/* Some opcodes, such as META_SCS_NUMBER or META_SCS_NAME,
+depends on the previous value of offset. */
 PCRE2_SIZE offset = 0;
 PCRE2_SIZE length_prevgroup = 0;
 PCRE2_UCHAR *code = *codeptr;
@@ -6294,6 +6302,15 @@ for (;; pptr++)
     req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS : 0;
     break;
 
+    case META_OFFSET:
+    GETPLUSOFFSET(offset, pptr);
+    break;
+
+    case META_SCS:
+    bravalue = OP_ASSERT_SCS;
+    cb->assert_depth += 1;
+    goto GROUP_PROCESS;
+
 
     /* ===================================================================*/
     /* Handle conditional subpatterns. The case of (?(Rdigits) is ambiguous
@@ -6305,9 +6322,8 @@ for (;; pptr++)
     case META_COND_RNUMBER:   /* (?(Rdigits) */
     case META_COND_NAME:      /* (?(name) or (?'name') or ?(<name>) */
     case META_COND_RNAME:     /* (?(R&name) - test for recursion */
-    case META_SCS_NAME:       /* (*scan_substring:'name') or (*scan_substring:(<name>)) */
-    case META_SCS_NEXT_NAME:  /* More names for scan substring. */
-    bravalue = meta == META_SCS_NAME ? OP_ASSERT_SCS : OP_COND;
+    case META_SCS_NAME:       /* Name of scan substring */
+    bravalue = OP_COND;
       {
       int count, index;
       unsigned int i;
@@ -6315,7 +6331,10 @@ for (;; pptr++)
       named_group *ng = cb->named_groups;
       uint32_t length = *(++pptr);
 
-      GETPLUSOFFSET(offset, pptr);
+      if (meta == META_SCS_NAME)
+        offset += meta_arg;
+      else
+        GETPLUSOFFSET(offset, pptr);
       name = cb->start_pattern + offset;
 
       /* In the first pass, the names generated in the pre-pass are available,
@@ -6371,7 +6390,7 @@ for (;; pptr++)
         /* Otherwise found a duplicated name */
         if (ng->number > cb->top_backref) cb->top_backref = ng->number;
 
-        if (meta == META_SCS_NEXT_NAME)
+        if (meta == META_SCS_NAME)
           {
           code[0] = OP_CREF;
           PUT2(code, 1, ng->number);
@@ -6395,7 +6414,7 @@ for (;; pptr++)
       if (lengthptr == NULL && !find_dupname_details(name, length, &index,
             &count, errorcodeptr, cb)) return 0;
 
-      if (meta == META_SCS_NEXT_NAME)
+      if (meta == META_SCS_NAME)
         {
         code[0] = OP_DNCREF;
         PUT2(code, 1, index);
@@ -6415,9 +6434,8 @@ for (;; pptr++)
       PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);
       }
 
-    if (meta != META_SCS_NAME) goto GROUP_PROCESS_NOTE_EMPTY;
-    cb->assert_depth += 1;
-    goto GROUP_PROCESS;
+    PCRE2_ASSERT(meta != META_SCS_NAME);
+    goto GROUP_PROCESS_NOTE_EMPTY;
 
     /* The DEFINE condition is always false. Its internal groups may never
     be called, so matched_char must remain false, hence the jump to
@@ -6434,9 +6452,12 @@ for (;; pptr++)
 
     case META_COND_NUMBER:
     case META_SCS_NUMBER:
-    case META_SCS_NEXT_NUMBER:
-    bravalue = meta == META_SCS_NUMBER ? OP_ASSERT_SCS : OP_COND;
-    GETPLUSOFFSET(offset, pptr);
+    bravalue = OP_COND;
+    if (meta == META_SCS_NUMBER)
+      offset += meta_arg;
+    else
+      GETPLUSOFFSET(offset, pptr);
+
     groupnumber = *(++pptr);
     if (groupnumber > cb->bracount)
       {
@@ -6446,7 +6467,7 @@ for (;; pptr++)
       }
     if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
 
-    if (meta == META_SCS_NEXT_NUMBER)
+    if (meta == META_SCS_NUMBER)
       {
       code[0] = OP_CREF;
       PUT2(code, 1, groupnumber);
@@ -6455,13 +6476,11 @@ for (;; pptr++)
       }
 
     /* Point at initial ( for too many branches error */
-    if (meta != META_SCS_NUMBER) offset -= 2;
+    offset -= 2;
     code[1+LINK_SIZE] = OP_CREF;
     skipunits = 1+IMM2_SIZE;
     PUT2(code, 2+LINK_SIZE, groupnumber);
-    if (meta != META_SCS_NUMBER) goto GROUP_PROCESS_NOTE_EMPTY;
-    cb->assert_depth += 1;
-    goto GROUP_PROCESS;
+    goto GROUP_PROCESS_NOTE_EMPTY;
 
     /* Test for the PCRE2 version. */
 
@@ -9089,6 +9108,7 @@ for (;; pptr++)
     case META_COND_RNAME:
     case META_COND_RNUMBER:
     case META_COND_VERSION:
+    case META_SCS:
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
@@ -9350,6 +9370,7 @@ for (;; pptr++)
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
+    case META_SCS:
     *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb, lcptr);
     if (*errcodeptr != 0) return -1;
 
@@ -9781,8 +9802,7 @@ for (; *pptr != META_END; pptr++)
     case META_ATOMIC:
     case META_CAPTURE:
     case META_COND_ASSERT:
-    case META_SCS_NAME:
-    case META_SCS_NUMBER:
+    case META_SCS:
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
@@ -9820,6 +9840,7 @@ for (; *pptr != META_END; pptr++)
     case META_THEN:
     break;
 
+    case META_OFFSET:
     case META_RECURSE:
     pptr += SIZEOFFSET;
     break;
@@ -9838,8 +9859,6 @@ for (; *pptr != META_END; pptr++)
     case META_COND_NUMBER:
     case META_COND_RNAME:
     case META_COND_RNUMBER:
-    case META_SCS_NEXT_NAME:
-    case META_SCS_NEXT_NUMBER:
     pptr += 1 + SIZEOFFSET;
     nestlevel++;
     break;
@@ -9856,6 +9875,8 @@ for (; *pptr != META_END; pptr++)
     case META_BIGVALUE:
     case META_POSIX:
     case META_POSIX_NEG:
+    case META_SCS_NAME:
+    case META_SCS_NUMBER:
     pptr += 1;
     break;
 

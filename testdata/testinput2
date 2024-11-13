@@ -6369,6 +6369,10 @@ a)"xI
 
 /()(*scs:(1)+a)/
 
+/()(*scs:(1,1,1,1,1,1,1,1,2))/
+
+/()()(*scs:(1,2,1,2,1,2,2,'XYZ'))/
+
 # Tests for iterating scan_substring
 
 /(a)(*scs:(1)b)*c/B
@@ -6579,6 +6583,13 @@ a)"xI
 /(?<AA>a)(*scan_substring:(1,'AA',1,<AA>)a)b/B
     ab
     ac
+
+/()()()(?<=ab(*scs:(1,2,3))cd)xyz/
+    abcdxyz
+
+/()()()(?<=ab(*ACCEPT)(*scs:(1,2,3))cd|efg)xyz/
+    abxyz
+    efgxyz
 
 # Tests for pcre2_set_optimize()
 
