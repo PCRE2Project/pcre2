@@ -943,7 +943,7 @@ do
           GETCHARINCTEST(ch, subptr);
           if (forcecase != 0)
             {
-            if (mcontext->substitute_case_callout)
+            if (mcontext != NULL && mcontext->substitute_case_callout != NULL)
               {
               ch = mcontext->substitute_case_callout(
                 ch,
@@ -1105,7 +1105,7 @@ do
       LITERAL:
       if (forcecase != 0)
         {
-        if (mcontext->substitute_case_callout)
+        if (mcontext != NULL && mcontext->substitute_case_callout != NULL)
           {
           ch = mcontext->substitute_case_callout(
             ch,

@@ -4226,6 +4226,37 @@
     apple lemon blackberry
 
 /abc/
+    123abc123\=replace=XYZ
+    123abc123\=replace=[10]XYZ
+\= Expect error
+    123abc123\=replace=[9]XYZ
+    123abc123\=substitute_overflow_length,replace=[9]XYZ
+    123abc123\=substitute_overflow_length,replace=[6]XYZ
+    123abc123\=substitute_overflow_length,replace=[1]XYZ
+    123abc123\=substitute_overflow_length,replace=[0]XYZ
+
+/abc/
+    123abc123\=replace=XY
+    123abc123\=replace=[9]XY
+    123abc123\=replace=[9]XY,substitute_literal
+\= Expect error
+    123abc123\=replace=[8]XY,substitute_overflow_length
+    123abc123\=replace=[8]XY,substitute_overflow_length,substitute_literal
+    123abc123\=replace=[6]XY,substitute_overflow_length
+    123abc123\=replace=[6]XY,substitute_overflow_length,substitute_literal
+    123abc123\=replace=[5]XY,substitute_overflow_length
+    123abc123\=replace=[5]XY,substitute_overflow_length,substitute_literal
+    123abc123\=replace=[4]XY,substitute_overflow_length
+    123abc123\=replace=[4]XY,substitute_overflow_length,substitute_literal
+    123abc123\=replace=[3]XY,substitute_overflow_length
+    123abc123\=replace=[3]XY,substitute_overflow_length,substitute_literal
+    123abc123\=replace=[2]XY,substitute_overflow_length
+    123abc123\=replace=[2]XY,substitute_overflow_length,substitute_literal
+
+/abc/substitute_literal
+    123abc123\=replace=XYZ
+    123abc123\=replace=[10]XYZ
+\= Expect error
     123abc123\=replace=[9]XYZ
     123abc123\=substitute_overflow_length,replace=[9]XYZ
     123abc123\=substitute_overflow_length,replace=[6]XYZ
@@ -4720,7 +4751,7 @@ B)x/alt_verbnames,mark
 
 /abcd/null_context
     abcd\=null_context
-\= Expect error - not allowed together
+\= Expect not allowed together
     abcd\=null_context,find_limits
     abcd\=allusedtext,startchar
 
@@ -6067,6 +6098,8 @@ a)"xI
 
 /abc/replace=\U$0,substitute_extended,substitute_case_callout=a.U.b.V.
     XabcY
+\= Expect not supported
+    XabcY\=null_context
 
 /a/substitute_extended
     XaY\=replace=\U$0,substitute_case_callout=a.U.
