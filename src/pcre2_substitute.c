@@ -289,13 +289,14 @@ Returns:          >= 0 number of substitutions made
 overflow, either give an error immediately, or keep on, accumulating the
 length. */
 
-#define CHECKMEMCPY(from,length) \
+#define CHECKMEMCPY(from,length) do \
   { \
   if (!overflowed && lengthleft < length) \
     { \
     if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
     overflowed = TRUE; \
     extra_needed = length - lengthleft; \
+    lengthleft = 0; \
     } \
   else if (overflowed) \
     { \
@@ -307,7 +308,7 @@ length. */
     buff_offset += length; \
     lengthleft -= length; \
     } \
-  }
+  } while (0)
 
 /* Here's the function */
 
@@ -439,8 +440,7 @@ if (subject == NULL)
 
 /* Find length of zero-terminated subject */
 
-if (length == PCRE2_ZERO_TERMINATED)
-  length = subject? PRIV(strlen)(subject) : 0;
+if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
 
 /* Check UTF replacement string if necessary. */
 
@@ -597,9 +597,7 @@ do
 
   ptr = replacement;
   if ((suboptions & PCRE2_SUBSTITUTE_LITERAL) != 0)
-    {
     CHECKMEMCPY(ptr, rlength);
-    }
 
   /* Within a non-literal replacement, which must be scanned character by
   character, local literal mode can be set by \Q, but only in extended mode
@@ -942,7 +940,7 @@ do
           GETCHARINCTEST(ch, subptr);
           if (forcecase != 0)
             {
-            if (mcontext->substitute_case_callout)
+            if (mcontext != NULL && mcontext->substitute_case_callout != NULL)
               {
               ch = mcontext->substitute_case_callout(
                 ch,
@@ -1104,7 +1102,7 @@ do
       LITERAL:
       if (forcecase != 0)
         {
-        if (mcontext->substitute_case_callout)
+        if (mcontext != NULL && mcontext->substitute_case_callout != NULL)
           {
           ch = mcontext->substitute_case_callout(
             ch,
@@ -1194,8 +1192,17 @@ if (!replacement_only)
   CHECKMEMCPY(subject + start_offset, fraglength);
   }
 
-temp[0] = 0;
-CHECKMEMCPY(temp, 1);
+/* Zero terminate the output string, truncating if needed. */
+
+if (lengthleft-- > 0) ++buff_offset;
+else
+  {
+  if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM;
+  overflowed = TRUE;
+  extra_needed++;
+  lengthleft = 0;
+  }
+if (!overflowed || lengthleft == 0) buffer[buff_offset] = 0; else extra_needed++;
 
 /* If overflowed is set it means the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH is set,
 and matching has carried on after a full buffer, in order to compute the length
@@ -1222,6 +1229,7 @@ if (internal_match_data != NULL) pcre2_match_data_free(internal_match_data);
 return rc;
 
 NOROOM:
+buffer[buff_offset] = 0;
 rc = PCRE2_ERROR_NOMEMORY;
 goto EXIT;
 
