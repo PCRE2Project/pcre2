@@ -3815,9 +3815,10 @@ PCRE2_SUBSTITUTE_OVERFLOW_LENGTH changes what happens when the output buffer is
 too small. The default action is to return PCRE2_ERROR_NOMEMORY immediately. If
 this option is set, however, \fBpcre2_substitute()\fP continues to go through
 the motions of matching and substituting (without, of course, writing anything)
-in order to compute the size of buffer that is needed. This value is passed
-back via the \fIoutlengthptr\fP variable, with the result of the function still
-being PCRE2_ERROR_NOMEMORY.
+in order to compute the size of buffer that is needed, which will include the
+extra space for the terminating NUL. This value is passed back via the
+\fIoutlengthptr\fP variable, with the result of the function still being
+PCRE2_ERROR_NOMEMORY.
 .P
 Passing a buffer size of zero is a permitted way of finding out how much memory
 is needed for given substitution. However, this does mean that the entire
@@ -3938,7 +3939,7 @@ that can be applied to group captures. For example, if group 1 has captured
 .P
 If either PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled, Unicode
 properties are used for case forcing characters whose code points are greater
-than 127. However, only basic case folding, as determined by the Unicode file
+than 127. However, only simple case folding, as determined by the Unicode file
 \fBCaseFolding.txt\fP is supported. PCRE2 does not support language-specific
 special casing rules such as using different lower case Greek sigmas in the
 middle and ends of words (as defined in the Unicode file

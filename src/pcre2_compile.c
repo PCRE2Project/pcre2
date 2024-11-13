@@ -826,12 +826,12 @@ for (;;)
     return;
 
     case META_CAPTURE:
-    fprintf(stderr, "META_CAPTURE %d", meta_arg);
+    fprintf(stderr, "META_CAPTURE %u", meta_arg);
     break;
 
     case META_RECURSE:
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "META_RECURSE %d %zd", meta_arg, offset);
+    fprintf(stderr, "META_RECURSE %u %zu", meta_arg, offset);
     break;
 
     case META_BACKREF:
@@ -839,7 +839,7 @@ for (;;)
       offset = cb->small_ref_offset[meta_arg];
     else
       GETOFFSET(offset, pptr);
-    fprintf(stderr, "META_BACKREF %d %zd", meta_arg, offset);
+    fprintf(stderr, "META_BACKREF %u %zu", meta_arg, offset);
     break;
 
     case META_ESCAPE:
@@ -847,7 +847,7 @@ for (;;)
       {
       uint32_t ptype = *pptr >> 16;
       uint32_t pvalue = *pptr++ & 0xffff;
-      fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P)? CHAR_P:CHAR_p,
+      fprintf(stderr, "META \\%c %u %u", (meta_arg == ESC_P)? CHAR_P:CHAR_p,
         ptype, pvalue);
       }
     else
@@ -914,7 +914,7 @@ for (;;)
     case META_LOOKAHEAD_NA: fprintf(stderr, "META (*napla:"); break;
     case META_SCRIPT_RUN: fprintf(stderr, "META (*sr:"); break;
     case META_KET: fprintf(stderr, "META )"); break;
-    case META_ALT: fprintf(stderr, "META | %d", meta_arg); break;
+    case META_ALT: fprintf(stderr, "META | %u", meta_arg); break;
 
     case META_CLASS: fprintf(stderr, "META ["); break;
     case META_CLASS_NOT: fprintf(stderr, "META [^"); break;
@@ -925,8 +925,8 @@ for (;;)
     case META_RANGE_LITERAL: fprintf(stderr, "META - (literal)"); break;
     case META_RANGE_ESCAPED: fprintf(stderr, "META - (escaped)"); break;
 
-    case META_POSIX: fprintf(stderr, "META_POSIX %d", *pptr++); break;
-    case META_POSIX_NEG: fprintf(stderr, "META_POSIX_NEG %d", *pptr++); break;
+    case META_POSIX: fprintf(stderr, "META_POSIX %u", *pptr++); break;
+    case META_POSIX_NEG: fprintf(stderr, "META_POSIX_NEG %u", *pptr++); break;
 
     case META_ACCEPT: fprintf(stderr, "META (*ACCEPT)"); break;
     case META_FAIL: fprintf(stderr, "META (*FAIL)"); break;
@@ -941,22 +941,22 @@ for (;;)
     break;
 
     case META_LOOKBEHIND:
-    fprintf(stderr, "META (?<= %d %d", meta_arg, *pptr);
+    fprintf(stderr, "META (?<= %u %u", meta_arg, *pptr);
     pptr += 2;
     break;
 
     case META_LOOKBEHIND_NA:
-    fprintf(stderr, "META (*naplb: %d %d", meta_arg, *pptr);
+    fprintf(stderr, "META (*naplb: %u %u", meta_arg, *pptr);
     pptr += 2;
     break;
 
     case META_LOOKBEHINDNOT:
-    fprintf(stderr, "META (?<! %d %d", meta_arg, *pptr);
+    fprintf(stderr, "META (?<! %u %u", meta_arg, *pptr);
     pptr += 2;
     break;
 
     case META_CALLOUT_NUMBER:
-    fprintf(stderr, "META (?C%d) next=%d/%d", pptr[2], pptr[0],
+    fprintf(stderr, "META (?C%u) next=%u/%u", pptr[2], pptr[0],
        pptr[1]);
     pptr += 3;
     break;
@@ -965,86 +965,86 @@ for (;;)
       {
       uint32_t patoffset = *pptr++;    /* Offset of next pattern item */
       uint32_t patlength = *pptr++;    /* Length of next pattern item */
-      fprintf(stderr, "META (?Cstring) length=%d offset=", *pptr++);
+      fprintf(stderr, "META (?Cstring) length=%u offset=", *pptr++);
       GETOFFSET(offset, pptr);
-      fprintf(stderr, "%zd next=%d/%d", offset, patoffset, patlength);
+      fprintf(stderr, "%zu next=%u/%u", offset, patoffset, patlength);
       }
     break;
 
     case META_RECURSE_BYNAME:
-    fprintf(stderr, "META (?(&name) length=%d offset=", *pptr++);
+    fprintf(stderr, "META (?(&name) length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_BACKREF_BYNAME:
-    fprintf(stderr, "META_BACKREF_BYNAME length=%d offset=", *pptr++);
+    fprintf(stderr, "META_BACKREF_BYNAME length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_COND_NUMBER:
-    fprintf(stderr, "META_COND_NUMBER %d offset=", pptr[SIZEOFFSET]);
+    fprintf(stderr, "META_COND_NUMBER %u offset=", pptr[SIZEOFFSET]);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     pptr++;
     break;
 
     case META_COND_DEFINE:
     fprintf(stderr, "META (?(DEFINE) offset=");
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_COND_VERSION:
     fprintf(stderr, "META (?(VERSION%s", (*pptr++ == 0)? "=" : ">=");
-    fprintf(stderr, "%d.", *pptr++);
-    fprintf(stderr, "%d)", *pptr++);
+    fprintf(stderr, "%u.", *pptr++);
+    fprintf(stderr, "%u)", *pptr++);
     break;
 
     case META_COND_NAME:
-    fprintf(stderr, "META (?(<name>) length=%d offset=", *pptr++);
+    fprintf(stderr, "META (?(<name>) length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_COND_RNAME:
-    fprintf(stderr, "META (?(R&name) length=%d offset=", *pptr++);
+    fprintf(stderr, "META (?(R&name) length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     /* This is kept as a name, because it might be. */
 
     case META_COND_RNUMBER:
-    fprintf(stderr, "META (?(Rnumber) length=%d offset=", *pptr++);
+    fprintf(stderr, "META (?(Rnumber) length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_SCS_NAME:
-    fprintf(stderr, "META (*scan_substring:(<name>) length=%d offset=", *pptr++);
+    fprintf(stderr, "META (*scan_substring:(<name>) length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_SCS_NUMBER:
-    fprintf(stderr, "META_SCS_NUMBER %d offset=", pptr[SIZEOFFSET]);
+    fprintf(stderr, "META_SCS_NUMBER %u offset=", pptr[SIZEOFFSET]);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     pptr++;
     break;
 
     case META_SCS_NEXT_NAME:
-    fprintf(stderr, "META_SCS_NEXT_NAME length=%d offset=", *pptr++);
+    fprintf(stderr, "META_SCS_NEXT_NAME length=%u offset=", *pptr++);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     break;
 
     case META_SCS_NEXT_NUMBER:
-    fprintf(stderr, "META_SCS_NEXT_NUMBER %d offset=", pptr[SIZEOFFSET]);
+    fprintf(stderr, "META_SCS_NEXT_NUMBER %u offset=", pptr[SIZEOFFSET]);
     GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
+    fprintf(stderr, "%zu", offset);
     pptr++;
     break;
 
@@ -1099,7 +1099,6 @@ associated JIT data. */
 PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
 pcre2_code_copy(const pcre2_code *code)
 {
-PCRE2_SIZE *ref_count;
 pcre2_code *newcode;
 
 if (code == NULL) return NULL;
@@ -1113,7 +1112,7 @@ in the decoded tables. */
 
 if ((code->flags & PCRE2_DEREF_TABLES) != 0)
   {
-  ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
+  PCRE2_SIZE *ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
   (*ref_count)++;
   }
 
@@ -2597,9 +2596,7 @@ won't be recognized. */
     }
 
   while (ptr < ptrend && MAX_255(*ptr) && (cb->ctypes[*ptr] & ctype_word) != 0)
-    {
     ptr++;
-    }
   }
 
 /* Check name length */
@@ -5479,7 +5476,7 @@ static BOOL
 find_dupname_details(PCRE2_SPTR name, uint32_t length, int *indexptr,
   int *countptr, int *errorcodeptr, compile_block *cb)
 {
-uint32_t i, groupnumber;
+uint32_t i;
 int count;
 PCRE2_UCHAR *slot = cb->name_table;
 
@@ -5511,8 +5508,9 @@ count = 0;
 
 for (;;)
   {
+  uint32_t groupnumber = GET2(slot,0);
+
   count++;
-  groupnumber = GET2(slot,0);
   cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
   if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
   if (++i >= cb->names_found) break;
@@ -6800,7 +6798,7 @@ for (;; pptr++)
 #ifdef MAYBE_UTF_MULTI
       if (utf && NOT_FIRSTCU(code[-1]))
         {
-        PCRE2_UCHAR *lastchar = code - 1;
+        PCRE2_SPTR lastchar = code - 1;
         BACKCHAR(lastchar);
         mclength = (uint32_t)(code - lastchar);   /* Length of UTF character */
         memcpy(mcbuffer, lastchar, CU2BYTES(mclength));  /* Save the char */
@@ -7940,7 +7938,6 @@ PCRE2_UCHAR *last_branch = code;
 PCRE2_UCHAR *start_bracket = code;
 BOOL lookbehind;
 open_capitem capitem;
-int capnumber = 0;
 int okreturn = 1;
 uint32_t *pptr = *pptrptr;
 uint32_t firstcu, reqcu;
@@ -7998,7 +7995,7 @@ OP_SCBRAPOS, happens later, after the group has been compiled. */
 
 if (*code == OP_CBRA)
   {
-  capnumber = GET2(code, 1 + LINK_SIZE);
+  int capnumber = GET2(code, 1 + LINK_SIZE);
   capitem.number = capnumber;
   capitem.next = open_caps;
   capitem.assert_depth = cb->assert_depth;
@@ -10212,11 +10209,9 @@ show_parsed(&cb);
 #ifdef DEBUG_SHOW_CAPTURES
   {
   named_group *ng = cb.named_groups;
-  fprintf(stderr, "+++Captures: %d\n", cb.bracount);
+  fprintf(stderr, "+++Captures: %u\n", cb.bracount);
   for (i = 0; i < cb.names_found; i++, ng++)
-    {
-    fprintf(stderr, "+++%3d %.*s\n", ng->number, ng->length, ng->name);
-    }
+    fprintf(stderr, "+++%3u %.*s\n", ng->number, ng->length, ng->name);
   }
 #endif
 
@@ -10415,11 +10410,11 @@ if (errorcode == 0 && cb.had_recurse)
        rcode != NULL;
        rcode = find_recurse(rcode + 1 + LINK_SIZE, utf))
     {
-    int p, groupnumber;
+    int groupnumber = (int)GET(rcode, 1);
 
-    groupnumber = (int)GET(rcode, 1);
     if (groupnumber == 0) rgroup = codestart; else
       {
+      int p;
       PCRE2_SPTR search_from = codestart;
       rgroup = NULL;
       for (i = 0, p = start; i < ccount; i++, p = (p + 1) & 7)
