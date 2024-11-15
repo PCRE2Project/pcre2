@@ -21,7 +21,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='gcc' CFLAGS='-O0 -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=4
+        run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS='-O0 -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=4
 
       - name: Build
         run: make -j3
@@ -42,6 +42,9 @@ jobs:
     # Tests with: clang AB/UB; link-size=3
     name: Clang
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        opt: ["-O0", "-O2"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,13 +55,15 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function' CPPFLAGS='-Wall -Wextra -Werror -Wno-error=unused-but-set-parameter -Wno-error=deprecated-declarations -Wno-error=incompatible-library-redeclaration -Wno-error=incompatible-pointer-types-discards-qualifiers' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=3
+        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function' CFLAGS='${{ matrix.opt }} -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter -Wno-error=deprecated-declarations -Wno-error=incompatible-library-redeclaration -Wno-error=incompatible-pointer-types-discards-qualifiers' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=3
 
       - name: Build
         run: make -j3
 
       - name: Test (main test script)
-        run: ./RunTest
+        run: |
+          ulimit -S -s 32768 # Raise stack limit; ASAN with -O0 is very stack-hungry
+          ./RunTest
 
       - name: Test (JIT test program)
         run: ./pcre2_jit_test
