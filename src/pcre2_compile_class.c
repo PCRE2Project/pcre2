@@ -61,9 +61,11 @@ b) none of the cases here:
   case META_CLASS_EMPTY: \
   case META_CLASS_EMPTY_NOT: \
   case META_CLASS_END: \
-  case META_ECLASS_OR: \
   case META_ECLASS_AND: \
-  case META_ECLASS_SUB:
+  case META_ECLASS_OR: \
+  case META_ECLASS_SUB: \
+  case META_ECLASS_XOR: \
+  case META_ECLASS_NOT:
 #else
 #define CLASS_END_CASES(meta) \
   default:
@@ -1798,9 +1800,11 @@ while (TRUE)
   switch (META_CODE(*ptr))
     {
     case META_CLASS_END:
-    case META_ECLASS_OR:
     case META_ECLASS_AND:
+    case META_ECLASS_OR:
     case META_ECLASS_SUB:
+    case META_ECLASS_XOR:
+    case META_ECLASS_NOT:
     goto DONE;
 
     case META_CLASS_EMPTY_NOT:
@@ -1865,6 +1869,139 @@ return TRUE;
 
 
 
+/* This function consumes unary prefix operators. */
+
+static BOOL
+compile_class_unary(uint32_t options, uint32_t xoptions, uint32_t **pptr,
+  PCRE2_UCHAR **pcode, int *errorcodeptr, compile_block *cb,
+  PCRE2_SIZE *lengthptr)
+{
+uint32_t *ptr = *pptr;
+PCRE2_UCHAR *code = *pcode;
+BOOL negated = FALSE;
+#ifdef PCRE2_DEBUG
+PCRE2_UCHAR *start_code = *pcode;
+#endif
+
+while (*ptr == META_ECLASS_NOT)
+  {
+  ++ptr;
+  negated = !negated;
+  }
+
+/* Because it's a non-empty class, there must be an operand. */
+if (!compile_class_operand(options, xoptions, &ptr, &code, errorcodeptr, cb,
+                           lengthptr))
+  return FALSE;
+
+/* Convert prefix to postfix (RPN). */
+if (negated)
+  {
+  if (lengthptr != NULL)
+    (*lengthptr)++;
+  else
+    *code++ = OP_ECLASS_NOT;
+  }
+
+PCRE2_ASSERT(lengthptr == NULL || code == start_code);
+
+*pptr = ptr;
+*pcode = code;
+return TRUE;
+}
+
+
+
+/* This function consumes tightly-binding binary operators. */
+
+static BOOL
+compile_class_binary_tight(uint32_t options, uint32_t xoptions, uint32_t **pptr,
+  PCRE2_UCHAR **pcode, int *errorcodeptr, compile_block *cb,
+  PCRE2_SIZE *lengthptr)
+{
+uint32_t *ptr = *pptr;
+PCRE2_UCHAR *code = *pcode;
+#ifdef PCRE2_DEBUG
+PCRE2_UCHAR *start_code = *pcode;
+#endif
+
+/* Because it's a non-empty class, there must be an operand at the start. */
+if (!compile_class_unary(options, xoptions, &ptr, &code, errorcodeptr, cb,
+                         lengthptr))
+  return FALSE;
+
+while (*ptr == META_ECLASS_AND)
+  {
+  uint32_t op = OP_ECLASS_AND;
+  ++ptr;
+
+  /* An operand must follow the operator. */
+  if (!compile_class_unary(options, xoptions, &ptr, &code, errorcodeptr, cb,
+                           lengthptr))
+    return FALSE;
+
+  /* Convert infix to postfix (RPN). */
+  if (lengthptr != NULL)
+    (*lengthptr)++;
+  else
+    *code++ = op;
+  }
+
+PCRE2_ASSERT(lengthptr == NULL || code == start_code);
+
+*pptr = ptr;
+*pcode = code;
+return TRUE;
+}
+
+
+
+/* This function consumes loosely-binding binary operators. */
+
+static BOOL
+compile_class_binary_loose(uint32_t options, uint32_t xoptions, uint32_t **pptr,
+  PCRE2_UCHAR **pcode, int *errorcodeptr, compile_block *cb,
+  PCRE2_SIZE *lengthptr)
+{
+uint32_t *ptr = *pptr;
+PCRE2_UCHAR *code = *pcode;
+#ifdef PCRE2_DEBUG
+PCRE2_UCHAR *start_code = *pcode;
+#endif
+
+/* Because it's a non-empty class, there must be an operand at the start. */
+if (!compile_class_binary_tight(options, xoptions, &ptr, &code, errorcodeptr,
+                                cb, lengthptr))
+  return FALSE;
+
+while (*ptr >= META_ECLASS_OR && *ptr <= META_ECLASS_XOR)
+  {
+  uint32_t op = *ptr == META_ECLASS_OR ? OP_ECLASS_OR :
+                *ptr == META_ECLASS_SUB ? OP_ECLASS_SUB :
+                OP_ECLASS_XOR;
+  ++ptr;
+
+  /* An operand must follow the operator. */
+  if (!compile_class_binary_tight(options, xoptions, &ptr, &code, errorcodeptr,
+                                  cb, lengthptr))
+    return FALSE;
+
+  /* Convert infix to postfix (RPN). */
+  if (lengthptr != NULL)
+    (*lengthptr)++;
+  else
+    *code++ = op;
+  }
+
+PCRE2_ASSERT(lengthptr == NULL || code == start_code);
+
+*pptr = ptr;
+*pcode = code;
+return TRUE;
+}
+
+
+
 /* This function converts the META codes in pptr into opcodes written to
 pcode. The pptr must start at a META_CLASS or META_CLASS_NOT.
 
@@ -1898,28 +2035,9 @@ PCRE2_ASSERT(*ptr == (META_CLASS | CLASS_IS_ECLASS) ||
 negated = *ptr++ == (META_CLASS_NOT | CLASS_IS_ECLASS);
 
 /* Because it's a non-empty class, there must be an operand at the start. */
-if (!compile_class_operand(options, xoptions, &ptr, &code, errorcodeptr, cb,
-                           lengthptr))
+if (!compile_class_binary_loose(options, xoptions, &ptr, &code, errorcodeptr,
+                                cb, lengthptr))
   return FALSE;
-
-while (*ptr >= META_ECLASS_OR && *ptr <= META_ECLASS_SUB)
-  {
-  uint32_t op = *ptr == META_ECLASS_OR ? OP_ECLASS_OR :
-                *ptr == META_ECLASS_AND ? OP_ECLASS_AND :
-                OP_ECLASS_SUB;
-  ++ptr;
-
-  /* An operand must follow the operator. */
-  if (!compile_class_operand(options, xoptions, &ptr, &code, errorcodeptr, cb,
-                             lengthptr))
-    return FALSE;
-
-  /* Convert infix to postfix (RPN). */
-  if (lengthptr != NULL)
-    (*lengthptr)++;
-  else
-    *code++ = op;
-  }
 
 if (negated)
   {

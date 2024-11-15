@@ -339,6 +339,10 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_ECLASS_EXPECTED_OPERAND        210
 #define PCRE2_ERROR_ECLASS_MIXED_OPERATORS         211
 #define PCRE2_ERROR_ECLASS_HINT_SQUARE_BRACKET     212
+#define PCRE2_ERROR_PERL_ECLASS_UNEXPECTED_EXPR    213
+#define PCRE2_ERROR_PERL_ECLASS_EMPTY_EXPR         214
+#define PCRE2_ERROR_PERL_ECLASS_MISSING_CLOSE      215
+#define PCRE2_ERROR_PERL_ECLASS_UNEXPECTED_CHAR    216
 
 /* "Expected" matching error codes: no match and partial match. */
 

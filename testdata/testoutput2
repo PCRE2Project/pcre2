@@ -13476,6 +13476,29 @@ No match
     Alfred Winifred
 No match
 
+/[[:<:]]+red/B
+------------------------------------------------------------------
+        Bra
+        \b
+        Assert
+        \w
+        Ket
+        Brazero
+        Assert
+        \w
+        Ket
+        red
+        Ket
+        End
+------------------------------------------------------------------
+    little red riding hood
+ 0: red
+    red is a colour
+ 0: red
+\= Expect no match
+    Alfred
+No match
+
 /[a[:<:]] should give error/
 Failed: error 130 at offset 7: unknown POSIX class name
 
@@ -19744,6 +19767,90 @@ No match
     C
  0: C
 
+/[[AC]||[BC]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[AC]
+          cls:[BC]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    B
+ 0: B
+    C
+ 0: C
+\= Expect no match
+    D
+No match
+
+/[[AC]&&[BC]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[AC]
+          cls:[BC]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    C
+ 0: C
+\= Expect no match
+    A
+No match
+    B
+No match
+    D
+No match
+
+/[[AC]--[BC]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[AC]
+          cls:[BC]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+\= Expect no match
+    B
+No match
+    C
+No match
+    D
+No match
+
+/[[AC]~~[BC]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[AC]
+          cls:[BC]
+          op: ~~
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    B
+ 0: B
+\= Expect no match
+    C
+No match
+    D
+No match
+
 /[A[]]]/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
@@ -20600,7 +20707,31 @@ Failed: error 208 at offset 5: invalid operator in character class
 /[a|||b]/alt_extended_class
 Failed: error 208 at offset 5: invalid operator in character class
 
+/[a~~~b]/alt_extended_class
+Failed: error 208 at offset 5: invalid operator in character class
+
+/[a~~~~b]/alt_extended_class
+Failed: error 208 at offset 6: invalid operator in character class
+
+/[a~~/alt_extended_class
+Failed: error 106 at offset 4: missing terminating ] for character class
+
+/[a~~~/alt_extended_class
+Failed: error 208 at offset 5: invalid operator in character class
+
+/[a~~~~/alt_extended_class
+Failed: error 208 at offset 6: invalid operator in character class
+
 /[a||b&&c]/alt_extended_class
+Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+
+/[a||b~~c]/alt_extended_class
+Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+
+/[a~~b&&c]/alt_extended_class
+Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+
+/[a--b~~c]/alt_extended_class
 Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
 
 /[a--b&&c]/alt_extended_class
@@ -20646,10 +20777,183 @@ Failed: error 150 at offset 5: invalid range in character class
 No match
 
 /[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[z]&&a]]]]]]]]]]]]]]]/alt_extended_class
-Failed: error 207 at offset 115: character classes are too deeply nested
+Failed: error 207 at offset 115: character class nesting is too deep
 
 /[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
-Failed: error 207 at offset 118: character classes are too deeply nested
+Failed: error 207 at offset 118: character class nesting is too deep
+
+/[z&/alt_extended_class
+Failed: error 106 at offset 3: missing terminating ] for character class
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+# allow-empty-class does nothing inside (?[...])
+/(?[ []] ])/B,allow_empty_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\]]
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    ]
+ 0: ]
+
+# bad-escape-is-literal does nothing inside (?[...])
+/[ \j ]/
+Failed: error 103 at offset 3: unrecognized character follows \
+
+/[ /\
+Failed: error 101 at offset 3: \ at end of pattern
+
+/(?[ \j ])/
+Failed: error 103 at offset 5: unrecognized character follows \
+
+/(?[ /\
+Failed: error 101 at offset 5: \ at end of pattern
+
+/[ \j ]/bad_escape_is_literal
+    j
+ 0: j
+\= Expect no match
+    k
+No match
+
+/[ /\bad_escape_is_literal
+Failed: error 106 at offset 3: missing terminating ] for character class
+
+/(?[ \j ])/bad_escape_is_literal
+Failed: error 103 at offset 5: unrecognized character follows \
+
+/(?[ /\bad_escape_is_literal
+Failed: error 101 at offset 5: \ at end of pattern
+
+/(?[ [\j] ])/bad_escape_is_literal
+Failed: error 103 at offset 6: unrecognized character follows \
+
+/(?[ (\j) ])/bad_escape_is_literal
+Failed: error 103 at offset 6: unrecognized character follows \
+
+# We can't test error cases in testinput1
+
+/(?[])/
+Failed: error 214 at offset 4: empty expression in character class
+
+/(?[/
+Failed: error 106 at offset 3: missing terminating ] for character class
+
+/(?[]/
+Failed: error 214 at offset 4: empty expression in character class
+
+/(?[\n/
+Failed: error 106 at offset 5: missing terminating ] for character class
+
+/(?[\n]/
+Failed: error 215 at offset 6: unexpected ] with no following parenthesis in (?[...
+
+/(?[\n]z)/
+Failed: error 215 at offset 6: unexpected ] with no following parenthesis in (?[...
+
+/(?[\n] )/
+Failed: error 215 at offset 6: unexpected ] with no following parenthesis in (?[...
+
+/(?[(/
+Failed: error 114 at offset 4: missing closing parenthesis
+
+/(?[( /
+Failed: error 106 at offset 5: missing terminating ] for character class
+
+/(?[(\n/
+Failed: error 106 at offset 6: missing terminating ] for character class
+
+/(?[ \n + () ])/
+Failed: error 214 at offset 11: empty expression in character class
+
+/(?[1])/
+Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+
+/(?[a])/
+Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+
+/(?[a-c])/
+Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+
+/(?[(])/
+Failed: error 114 at offset 4: missing closing parenthesis
+
+/(?[(\n])/
+Failed: error 114 at offset 6: missing closing parenthesis
+
+/(?[\n)])/
+Failed: error 122 at offset 6: unmatched closing parenthesis
+
+/(?[^\n])/
+Failed: error 209 at offset 4: unexpected operator in character class (no preceding operand)
+
+/(?[ \n \t ])/
+Failed: error 213 at offset 9: unexpected expression in character class (no preceding operator)
+
+/(?[ \d \t ])/
+Failed: error 213 at offset 9: unexpected expression in character class (no preceding operator)
+
+/(?[ [\n] \t ])/
+Failed: error 213 at offset 11: unexpected expression in character class (no preceding operator)
+
+/(?[ (\n) \t ])/
+Failed: error 213 at offset 11: unexpected expression in character class (no preceding operator)
+
+/(?[ [:alpha:] \t ])/
+Failed: error 213 at offset 16: unexpected expression in character class (no preceding operator)
+
+/(?[ \n + \t \d ])/
+Failed: error 213 at offset 14: unexpected expression in character class (no preceding operator)
+
+/(?[ !\n \t ])/
+Failed: error 213 at offset 10: unexpected expression in character class (no preceding operator)
+
+/(?[ \n [:alpha:] ])/
+Failed: error 213 at offset 16: unexpected expression in character class (no preceding operator)
+
+/(?[ \n [\d] ])/
+Failed: error 213 at offset 8: unexpected expression in character class (no preceding operator)
+
+/(?[ \n (\t) ])/
+Failed: error 213 at offset 8: unexpected expression in character class (no preceding operator)
+
+/(?[ \n !\t ])/
+Failed: error 213 at offset 8: unexpected expression in character class (no preceding operator)
+
+/(?[ \n \t ])/
+Failed: error 213 at offset 9: unexpected expression in character class (no preceding operator)
+
+/(?[:graph:])/
+Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+
+/(?[\Qn\E])/
+Failed: error 216 at offset 6: unexpected character in (?[...]) character class
+
+# maximum depth tests
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&\n))))))))))))))])/
+    \n
+ 0: \x0a
+\= Expect no match
+    a
+No match
+    b
+No match
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+([\n]&\n))))))))))))))])/
+Failed: error 207 at offset 158: character class nesting is too deep
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
+Failed: error 207 at offset 161: character class nesting is too deep
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
+Failed: error 207 at offset 158: character class nesting is too deep
 
 # --------------
 
@@ -20676,6 +20980,62 @@ Failed: error 150 at offset 11: invalid range in character class
 
 /[\d-z]/
 Failed: error 150 at offset 4: invalid range in character class
+
+/[\d-\w]/
+Failed: error 150 at offset 4: invalid range in character class
+
+/[\Q/
+Failed: error 106 at offset 3: missing terminating ] for character class
+
+/[\Q/\
+Failed: error 106 at offset 4: missing terminating ] for character class
+
+/[\Q\E/
+Failed: error 106 at offset 5: missing terminating ] for character class
+
+/[\Q\n/
+Failed: error 106 at offset 5: missing terminating ] for character class
+
+/[\Q\n]/
+Failed: error 106 at offset 6: missing terminating ] for character class
+
+/[\Q\n/\
+Failed: error 106 at offset 6: missing terminating ] for character class
+
+/[\Q\n\]/
+Failed: error 106 at offset 7: missing terminating ] for character class
+
+/[\Q\n\E/
+Failed: error 106 at offset 7: missing terminating ] for character class
+
+/[\Q\n\E]/
+    \\
+ 0: \
+    n
+ 0: n
+\= Expect no match
+    \n
+No match
+    Q
+No match
+
+/[z\Q/
+Failed: error 106 at offset 4: missing terminating ] for character class
+
+/[z\Q/\
+Failed: error 106 at offset 5: missing terminating ] for character class
+
+/[z\Q\E/
+Failed: error 106 at offset 6: missing terminating ] for character class
+
+/[/\
+Failed: error 101 at offset 2: \ at end of pattern
+
+/[\n/
+Failed: error 106 at offset 3: missing terminating ] for character class
+
+/[\E/
+Failed: error 106 at offset 3: missing terminating ] for character class
 
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)

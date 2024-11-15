@@ -6351,6 +6351,90 @@ No match
     0
  0: 0
 
+/[[\p{Lu}\p{Ll}]||[\p{Nd}\p{Ll}]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\p{Lu}\p{Ll}]
+          cls:[\p{Nd}\p{Ll}]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    1
+ 0: 1
+    c
+ 0: c
+\= Expect no match
+    _
+No match
+
+/[[\p{Lu}\p{Ll}]&&[\p{Nd}\p{Ll}]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\p{Lu}\p{Ll}]
+          cls:[\p{Nd}\p{Ll}]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    c
+ 0: c
+\= Expect no match
+    A
+No match
+    1
+No match
+    _
+No match
+
+/[[\p{Lu}\p{Ll}]--[\p{Nd}\p{Ll}]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\p{Lu}\p{Ll}]
+          cls:[\p{Nd}\p{Ll}]
+          op: --
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+\= Expect no match
+    1
+No match
+    c
+No match
+    _
+No match
+
+/[[\p{Lu}\p{Ll}]~~[\p{Nd}\p{Ll}]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\p{Lu}\p{Ll}]
+          cls:[\p{Nd}\p{Ll}]
+          op: ~~
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    A
+ 0: A
+    1
+ 0: 1
+\= Expect no match
+    c
+No match
+    _
+No match
+
 /[\pL[]]]/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
@@ -7158,13 +7242,158 @@ No match
     n_n
 No match
 
-/[\p{Nd}||[\pL--\p{Lu}]]/alt_extended_class
+/[\p{Nd}||[\pL--\p{Lu}]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\p{Nd}]
+          cls:[\p{L}]
+          cls:[\p{Lu}]
+          op: --
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
     a
  0: a
     0
  0: 0
 \= Expect no match
     C
+No match
+
+/[\P{Nd}||2]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\P{Nd}]
+          cls:[2]
+          op: ||
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    _
+ 0: _
+    Z
+ 0: Z
+    2
+ 0: 2
+\= Expect no match
+    1
+No match
+    3
+No match
+
+/[^[\P{Nd}]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\P{Nd}]
+          op: ^
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+    2
+ 0: 2
+\= Expect no match
+    _
+No match
+    z
+No match
+
+# caseless tests
+
+/[\p{Lu}~~\p{Ll}]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[\p{Lu}]
+          cls:[\p{Ll}]
+          op: ~~
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    A
+ 0: A
+\= Expect no match
+    _
+No match
+    1
+No match
+
+/[[\p{Lu}1]~~\p{Ll}]/iB,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[1A-Za-z\xb5\xc0-\xd6\xd8-\xf6\xf8-\xff\p{Lc}]
+          cls:[\p{Lc}]
+          op: ~~
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+\= Expect no match
+    a
+No match
+    A
+No match
+    _
+No match
+
+/[[\p{Lu}1]&&[\p{Ll}1]]/B,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[1A-Z\xc0-\xd6\xd8-\xde\p{Lu}]
+          cls:[1a-z\xb5\xdf-\xf6\xf8-\xff\p{Ll}]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    1
+ 0: 1
+\= Expect no match
+    a
+No match
+    A
+No match
+    _
+No match
+    2
+No match
+
+/[[\p{Lu}1]&&[\p{Ll}1]]/iB,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        eclass[
+          cls:[1A-Za-z\xb5\xc0-\xd6\xd8-\xf6\xf8-\xff\p{Lc}]
+          cls:[1A-Za-z\xb5\xc0-\xd6\xd8-\xf6\xf8-\xff\p{Lc}]
+          op: &&
+        ]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    A
+ 0: A
+    1
+ 0: 1
+\= Expect no match
+    _
+No match
+    2
 No match
 
 /[[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]

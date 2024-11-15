@@ -966,16 +966,20 @@ for(;;)
         fprintf(f, "      op: &&\n");
         ccode += OP_lengths[*ccode];
         break;
-        case OP_ECLASS_NOT:
-        fprintf(f, "      op: ^\n");
-        ccode += OP_lengths[*ccode];
-        break;
         case OP_ECLASS_OR:
         fprintf(f, "      op: ||\n");
         ccode += OP_lengths[*ccode];
         break;
         case OP_ECLASS_SUB:
         fprintf(f, "      op: --\n");
+        ccode += OP_lengths[*ccode];
+        break;
+        case OP_ECLASS_XOR:
+        fprintf(f, "      op: ~~\n");
+        ccode += OP_lengths[*ccode];
+        break;
+        case OP_ECLASS_NOT:
+        fprintf(f, "      op: ^\n");
         ccode += OP_lengths[*ccode];
         break;
 

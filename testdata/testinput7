@@ -2682,6 +2682,64 @@
     >aBBd<
     >Abb\x{01c5}<
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES
+
+/[\p{Ll}[\p{Nd}]]C/alt_extended_class
+    aC
+    1C
+\= Expect no match
+    [C
+
+/[[\p{Ll}][\p{Nd}]]/alt_extended_class
+    a
+    1
+\= Expect no match
+    [
+    ]
+
+/[[\p{Ll}]||[\p{Nd}]]/alt_extended_class
+    a
+    1
+\= Expect no match
+    C
+
+/[[^\p{Ll}][\p{Nd}]]/alt_extended_class
+    1
+    A
+\= Expect no match
+    a
+
+/[^[\p{Ll}][\p{Nd}]]/alt_extended_class
+    A
+\= Expect no match
+    a
+    1
+
+/[^[\p{Ll}]&&[\p{Nd}]]/alt_extended_class
+    a
+    1
+    A
+
+/(?[[\p{Ll}]+[\p{Nd}]])/
+    a
+    1
+\= Expect no match
+    [
+    ]
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+/(?[[\p{Ll}Z]&[\p{Lu}a]])/
+    a
+    Z
+\= Expect no match
+    A
+    z
+
 # -------------------------------------------------------------------------- 
 
 # End of testinput7

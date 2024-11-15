@@ -260,9 +260,11 @@ static unsigned char meta_extra_lengths[] = {
   2,             /* META_MINMAX */
   2,             /* META_MINMAX_PLUS */
   2,             /* META_MINMAX_QUERY */
-  0,             /* META_ECLASS_OR */
   0,             /* META_ECLASS_AND */
-  0              /* META_ECLASS_SUB */
+  0,             /* META_ECLASS_OR */
+  0,             /* META_ECLASS_SUB */
+  0,             /* META_ECLASS_XOR */
+  0              /* META_ECLASS_NOT */
 };
 
 /* Types for skipping parts of a parsed pattern. */
@@ -1077,9 +1079,11 @@ for (;;)
     fprintf(stderr, ") length=%u", length);
     break;
 
-    case META_ECLASS_OR: fprintf(stderr, "META_ECLASS_OR"); break;
     case META_ECLASS_AND: fprintf(stderr, "META_ECLASS_AND"); break;
+    case META_ECLASS_OR: fprintf(stderr, "META_ECLASS_OR"); break;
     case META_ECLASS_SUB: fprintf(stderr, "META_ECLASS_SUB"); break;
+    case META_ECLASS_XOR: fprintf(stderr, "META_ECLASS_XOR"); break;
+    case META_ECLASS_NOT: fprintf(stderr, "META_ECLASS_NOT"); break;
     }
   fprintf(stderr, "\n");
   }
@@ -1273,7 +1277,7 @@ if (allow_sign >= 0 && sign != 0)
     }
 
   if (sign > 0) n += allow_sign;
-  else if ((int)n > allow_sign)
+  else if (n > (uint32_t)allow_sign)
     {
     *errorcodeptr = ERR15;  /* Non-existent subpattern */
     goto EXIT;
@@ -2826,13 +2830,28 @@ enum {
   RANGE_STARTED, /* State after '[1-'; last-emitted code is META_RANGE_XYZ */
   RANGE_FORBID_NO, /* State after '[\d'; '-]' is allowed but not '-1]' */
   RANGE_FORBID_STARTED, /* State after '[\d-'*/
-  RANGE_OK_ESCAPED, /* State after '[1'; hyphen may be a range */
-  RANGE_OK_LITERAL /* State after '[\1'; hyphen may be a range */
+  RANGE_OK_ESCAPED, /* State after '[\1'; hyphen may be a range */
+  RANGE_OK_LITERAL /* State after '[1'; hyphen may be a range */
 };
 
-/* States used for analyzing operators and operands in character classes. */
+/* States used for analyzing operators and operands in extended character
+classes. */
 
-enum { CLASS_OP_NONE, CLASS_OP_OPERAND, CLASS_OP_OPERATOR };
+enum {
+  CLASS_OP_EMPTY, /* At start of an expression; empty previous contents */
+  CLASS_OP_OPERAND, /* Have preceding operand; after "z" a "--" can follow */
+  CLASS_OP_OPERATOR /* Have preceding operator; after "--" operand must follow */
+};
+
+/* States used for determining the parse mode in character classes. The two
+PERL_EXT values must be last. */
+
+enum {
+  CLASS_MODE_NORMAL, /* Ordinary PCRE2 '[...]' class. */
+  CLASS_MODE_ALT_EXT, /* UTS#18-style extended '[...]' class. */
+  CLASS_MODE_PERL_EXT, /* Perl extended '(?[...])' class. */
+  CLASS_MODE_PERL_EXT_LEAF /* Leaf within extended '(?[ [...] ])' class. */
+};
 
 /* Only in 32-bit mode can there be literals > META_END. A macro encapsulates
 the storing of literal values in the main parsed pattern, where they can always
@@ -2859,6 +2878,7 @@ uint32_t delimiter;
 uint32_t namelen;
 uint32_t class_range_state;
 uint32_t class_op_state;
+uint32_t class_mode_state;
 uint32_t *class_start;
 uint32_t *verblengthptr = NULL;     /* Value avoids compiler warning */
 uint32_t *verbstartptr = NULL;
@@ -3543,7 +3563,7 @@ while (ptr < ptrend)
     if (!prev_okquantifier)
       {
       errorcode = ERR9;
-      goto FAILED_BACK;
+      goto FAILED_BACK;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
       }
 
     /* Most (*VERB)s are not allowed to be quantified, but an ungreedy
@@ -3578,14 +3598,6 @@ while (ptr < ptrend)
     /* ---- Character class ---- */
 
     case CHAR_LEFT_SQUARE_BRACKET:
-    okquantifier = TRUE;
-
-    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/536
-    We shall support Perl's (?[...]) syntax. We need a variable class_perlext = true
-    and a goto jumping here if we see "(?[...". We need to check for closing "])" and
-    also implement the completely idiosyncratic nesting and operator rules in this
-    mode. We can hopefully emit exactly the same META codes as for the UTS#18
-    syntax, so that only parser changes are required for the Perl syntax. */
 
     /* In another (POSIX) regex library, the ugly syntax [[:<:]] and [[:>:]] is
     used for "start of word" and "end of word". As these are otherwise illegal
@@ -3623,6 +3635,7 @@ while (ptr < ptrend)
         }
       *parsed_pattern++ = META_KET;
       ptr += 6;
+      okquantifier = TRUE;
       break;
       }
 
@@ -3637,6 +3650,15 @@ while (ptr < ptrend)
       goto FAILED;
       }
 
+    class_mode_state = ((options & PCRE2_ALT_EXTENDED_CLASS) != 0)?
+        CLASS_MODE_ALT_EXT : CLASS_MODE_NORMAL;
+
+    /* Jump here from '(?[...])'. That jump must initialize class_mode_state,
+    set c to the '[' character, and ptr to just after the '['. */
+
+    FROM_PERL_EXTENDED_CLASS:
+    okquantifier = TRUE;
+
     /* In an EBCDIC environment, Perl treats alphabetic ranges specially
     because there are holes in the encoding, and simply using the range A-Z
     (for example) would include the characters in the holes. This applies only
@@ -3646,14 +3668,14 @@ while (ptr < ptrend)
     ranges. */
 
     /* Loop for the contents of the class. Classes may be nested, if
-    PCRE2_ALT_EXTENDED_CLASS is set. */
+    PCRE2_ALT_EXTENDED_CLASS is set, or the class is of the form (?[...]). */
 
     /* c is still set to '[' so the loop will handle the start of the class. */
 
     class_depth_m1 = -1;
     class_maxdepth_m1 = -1;
     class_range_state = RANGE_NO;
-    class_op_state = CLASS_OP_NONE;
+    class_op_state = CLASS_OP_EMPTY;
     class_start = NULL;
 
     for (;;)
@@ -3670,13 +3692,26 @@ while (ptr < ptrend)
           ptr++;                            /* Skip the 'E' */
           goto CLASS_CONTINUE;
           }
+
+        /* Surprisingly, you cannot use \Q..\E to escape a character inside a
+        Perl extended class. However, empty \Q\E sequences are allowed, so here
+        were're only giving an error if the \Q..\E is non-empty. */
+
+        if (class_mode_state == CLASS_MODE_PERL_EXT)
+          {
+          errorcode = ERR116;
+          goto FAILED;
+          }
+
         goto CLASS_LITERAL;
         }
 
-      /* Skip over space and tab (only) in extended-more mode. */
+      /* Skip over space and tab (only) in extended-more mode, or anywhere
+      inside a Perl extended class (which implies /xx). */
 
-      if ((options & PCRE2_EXTENDED_MORE) != 0 &&
-          (c == CHAR_SPACE || c == CHAR_HT))
+      if ((c == CHAR_SPACE || c == CHAR_HT) &&
+          ((options & PCRE2_EXTENDED_MORE) != 0 ||
+           class_mode_state >= CLASS_MODE_PERL_EXT))
         goto CLASS_CONTINUE;
 
       /* Handle POSIX class names. Perl allows a negation extension of the
@@ -3719,6 +3754,16 @@ while (ptr < ptrend)
           {
           ptr = class_range_forbid_ptr;
           errorcode = ERR50;
+          goto FAILED;
+          }
+
+        /* Disallow implicit union in Perl extended classes. */
+
+        if (class_op_state == CLASS_OP_OPERAND &&
+            class_mode_state == CLASS_MODE_PERL_EXT)
+          {
+          ptr = tempptr + 2;
+          errorcode = ERR113;
           goto FAILED;
           }
 
@@ -3793,14 +3838,38 @@ while (ptr < ptrend)
 
       /* Check for the start of the outermost class, or the start of a nested class. */
 
-      else if (c == CHAR_LEFT_SQUARE_BRACKET &&
-               (class_depth_m1 < 0 || (options & PCRE2_ALT_EXTENDED_CLASS) != 0))
+      else if ((c == CHAR_LEFT_SQUARE_BRACKET &&
+                (class_depth_m1 < 0 || class_mode_state == CLASS_MODE_ALT_EXT ||
+                 class_mode_state == CLASS_MODE_PERL_EXT)) ||
+               (c == CHAR_LEFT_PARENTHESIS &&
+                class_mode_state == CLASS_MODE_PERL_EXT))
         {
+        uint32_t start_c = c;
+        uint32_t new_class_mode_state;
+
+        /* Update the class mode, if moving into a 'leaf' inside a Perl extended
+        class. */
+
+        if (start_c == CHAR_LEFT_SQUARE_BRACKET &&
+            class_mode_state == CLASS_MODE_PERL_EXT && class_depth_m1 >= 0)
+          new_class_mode_state = CLASS_MODE_PERL_EXT_LEAF;
+        else
+          new_class_mode_state = class_mode_state;
+
         /* Tidy up the other class before starting the nested class. */
         /* -[ beginning a nested class is a literal '-' */
 
         if (class_range_state == RANGE_STARTED)
           parsed_pattern[-1] = CHAR_MINUS;
+
+        /* Disallow implicit union in Perl extended classes. */
+
+        if (class_op_state == CLASS_OP_OPERAND &&
+            class_mode_state == CLASS_MODE_PERL_EXT)
+          {
+          errorcode = ERR113;
+          goto FAILED;
+          }
 
         /* Validate nesting depth */
         if (class_depth_m1 >= ECLASS_NEST_LIMIT - 1)
@@ -3819,12 +3888,16 @@ while (ptr < ptrend)
           {
           if (ptr >= ptrend)
             {
-            errorcode = ERR6;  /* Missing terminating ']' */
+            if (start_c == CHAR_LEFT_PARENTHESIS)
+              errorcode = ERR14;  /* Missing terminating ')' */
+            else
+              errorcode = ERR6;   /* Missing terminating ']' */
             goto FAILED;
             }
 
           GETCHARINCTEST(c, ptr);
-          if (c == CHAR_BACKSLASH)
+          if (new_class_mode_state == CLASS_MODE_PERL_EXT) break;
+          else if (c == CHAR_BACKSLASH)
             {
             if (ptr < ptrend && *ptr == CHAR_E) ptr++;
             else if (ptrend - ptr >= 3 &&
@@ -3833,8 +3906,9 @@ while (ptr < ptrend)
             else
               break;
             }
-          else if ((options & PCRE2_EXTENDED_MORE) != 0 &&
-                  (c == CHAR_SPACE || c == CHAR_HT))  /* Note: just these two */
+          else if ((c == CHAR_SPACE || c == CHAR_HT) &&  /* Note: just these two */
+                   ((options & PCRE2_EXTENDED_MORE) != 0 ||
+                    new_class_mode_state >= CLASS_MODE_PERL_EXT))
             continue;
           else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
             negate_class = TRUE;
@@ -3842,11 +3916,15 @@ while (ptr < ptrend)
           }
 
         /* Now the real contents of the class; c has the first "real" character.
-        Empty classes are permitted only if the option is set. */
+        Empty classes are permitted only if the option is set, and if it's not
+        a Perl-extended class. */
 
         if (c == CHAR_RIGHT_SQUARE_BRACKET &&
-            (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)
+            (cb->external_options & PCRE2_ALLOW_EMPTY_CLASS) != 0 &&
+            new_class_mode_state < CLASS_MODE_PERL_EXT)
           {
+          PCRE2_ASSERT(start_c == CHAR_LEFT_SQUARE_BRACKET);
+
           if (class_start != NULL)
             {
             PCRE2_ASSERT(class_depth_m1 >= 0);
@@ -3879,7 +3957,8 @@ while (ptr < ptrend)
         class_start = parsed_pattern;
         *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
         class_range_state = RANGE_NO;
-        class_op_state = CLASS_OP_NONE;
+        class_op_state = CLASS_OP_EMPTY;
+        class_mode_state = new_class_mode_state;
         ++class_depth_m1;
         if (class_maxdepth_m1 < class_depth_m1)
           class_maxdepth_m1 = class_depth_m1;
@@ -3887,7 +3966,8 @@ while (ptr < ptrend)
         cb->class_op_used[class_depth_m1] = 0;
 
         /* Implement the special start-of-class literal meaning of ']'. */
-        if (c == CHAR_RIGHT_SQUARE_BRACKET)
+        if (c == CHAR_RIGHT_SQUARE_BRACKET &&
+            new_class_mode_state != CLASS_MODE_PERL_EXT)
           {
           class_range_state = RANGE_OK_LITERAL;
           class_op_state = CLASS_OP_OPERAND;
@@ -3900,12 +3980,37 @@ while (ptr < ptrend)
 
       /* Check for the end of the class. */
 
-      else if (c == CHAR_RIGHT_SQUARE_BRACKET)
+      else if (c == CHAR_RIGHT_SQUARE_BRACKET ||
+               (c == CHAR_RIGHT_PARENTHESIS && class_mode_state == CLASS_MODE_PERL_EXT))
         {
+        /* In Perl extended mode, the ']' can only be used to match the
+        opening '[', and ')' must match an opening parenthesis. */
+        if (class_mode_state == CLASS_MODE_PERL_EXT)
+          {
+          if (c == CHAR_RIGHT_SQUARE_BRACKET && class_depth_m1 != 0)
+            {
+            errorcode = ERR14;
+            goto FAILED_BACK;
+            }
+          if (c == CHAR_RIGHT_PARENTHESIS && class_depth_m1 < 1)
+            {
+            errorcode = ERR22;
+            goto FAILED;
+            }
+          }
+
         /* Check no trailing operator. */
         if (class_op_state == CLASS_OP_OPERATOR)
           {
           errorcode = ERR110;
+          goto FAILED;
+          }
+
+        /* Check no empty expression for Perl extended expressions. */
+        if (class_mode_state == CLASS_MODE_PERL_EXT &&
+            class_op_state == CLASS_OP_EMPTY)
+          {
+          errorcode = ERR114;
           goto FAILED;
           }
 
@@ -3915,19 +4020,99 @@ while (ptr < ptrend)
 
         *parsed_pattern++ = META_CLASS_END;
 
-        if (--class_depth_m1 < 0) break;
+        if (--class_depth_m1 < 0)
+          {
+          /* Check for and consume ')' after '(?[...]'. */
+          PCRE2_ASSERT(class_mode_state != CLASS_MODE_PERL_EXT_LEAF);
+          if (class_mode_state == CLASS_MODE_PERL_EXT)
+            {
+            if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
+              {
+              errorcode = ERR115;
+              goto FAILED;
+              }
+
+            ptr++;
+            }
+
+          break;
+          }
 
         class_range_state = RANGE_NO; /* for processing the containing class */
         class_op_state = CLASS_OP_OPERAND;
+        if (class_mode_state == CLASS_MODE_PERL_EXT_LEAF)
+          class_mode_state = CLASS_MODE_PERL_EXT;
         /* The extended class flag has already
         been set for the parent class. */
         class_start = NULL;
         }
 
-      /* Handle a set operator */
+      /* Handle a Perl set binary operator */
 
-      else if ((options & PCRE2_ALT_EXTENDED_CLASS) != 0 &&
-               (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS || c == CHAR_AMPERSAND) &&
+      else if (class_mode_state == CLASS_MODE_PERL_EXT &&
+               (c == CHAR_PLUS || c == CHAR_VERTICAL_LINE || c == CHAR_MINUS ||
+                c == CHAR_AMPERSAND || c == CHAR_CIRCUMFLEX_ACCENT))
+        {
+        /* Check for a preceding operand. */
+        if (class_op_state != CLASS_OP_OPERAND)
+          {
+          errorcode = ERR109;
+          goto FAILED;
+          }
+
+        if (class_start != NULL)
+          {
+          PCRE2_ASSERT(class_depth_m1 >= 0);
+          /* Represents that the class is an extended class. */
+          *class_start |= CLASS_IS_ECLASS;
+          class_start = NULL;
+          }
+
+        PCRE2_ASSERT(class_range_state != RANGE_STARTED &&
+                     class_range_state != RANGE_FORBID_STARTED);
+
+        *parsed_pattern++ = c == CHAR_PLUS? META_ECLASS_OR :
+                            c == CHAR_VERTICAL_LINE? META_ECLASS_OR :
+                            c == CHAR_MINUS? META_ECLASS_SUB :
+                            c == CHAR_AMPERSAND? META_ECLASS_AND :
+                            META_ECLASS_XOR;
+        class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERATOR;
+        }
+
+      /* Handle a Perl set unary operator */
+
+      else if (class_mode_state == CLASS_MODE_PERL_EXT &&
+               c == CHAR_EXCLAMATION_MARK)
+        {
+        /* Check for no preceding operand. */
+        if (class_op_state == CLASS_OP_OPERAND)
+          {
+          errorcode = ERR113;
+          goto FAILED;
+          }
+
+        if (class_start != NULL)
+          {
+          PCRE2_ASSERT(class_depth_m1 >= 0);
+          /* Represents that the class is an extended class. */
+          *class_start |= CLASS_IS_ECLASS;
+          class_start = NULL;
+          }
+
+        PCRE2_ASSERT(class_range_state != RANGE_STARTED &&
+                     class_range_state != RANGE_FORBID_STARTED);
+
+        *parsed_pattern++ = META_ECLASS_NOT;
+        class_range_state = RANGE_NO;
+        class_op_state = CLASS_OP_OPERATOR;
+        }
+
+      /* Handle a UTS#18 set operator */
+
+      else if (class_mode_state == CLASS_MODE_ALT_EXT &&
+               (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS ||
+                c == CHAR_AMPERSAND || c == CHAR_TILDE) &&
                ptr < ptrend && *ptr == c)
         {
         ++ptr;
@@ -3969,71 +4154,16 @@ while (ptr < ptrend)
 
         *parsed_pattern++ = c == CHAR_VERTICAL_LINE? META_ECLASS_OR :
                             c == CHAR_MINUS? META_ECLASS_SUB :
-                            META_ECLASS_AND;
+                            c == CHAR_AMPERSAND? META_ECLASS_AND :
+                            META_ECLASS_XOR;
         class_range_state = RANGE_NO;
         class_op_state = CLASS_OP_OPERATOR;
         cb->class_op_used[class_depth_m1] = (uint8_t)c;
         }
 
-      /* Handle potential start of range */
-
-      else if (c == CHAR_MINUS && class_range_state >= RANGE_OK_ESCAPED)
-        {
-        *parsed_pattern++ = (class_range_state == RANGE_OK_LITERAL)?
-          META_RANGE_LITERAL : META_RANGE_ESCAPED;
-        class_range_state = RANGE_STARTED;
-        }
-
-      /* Handle forbidden start of range */
-
-      else if (c == CHAR_MINUS && class_range_state == RANGE_FORBID_NO)
-        {
-        *parsed_pattern++ = CHAR_MINUS;
-        class_range_state = RANGE_FORBID_STARTED;
-        class_range_forbid_ptr = ptr;
-        }
-
-      /* Handle a literal character */
-
-      else if (c != CHAR_BACKSLASH)
-        {
-        CLASS_LITERAL:
-        if (class_range_state == RANGE_STARTED)
-          {
-          if (c == parsed_pattern[-2])       /* Optimize one-char range */
-            parsed_pattern--;
-          else if (parsed_pattern[-2] > c)   /* Check range is in order */
-            {
-            errorcode = ERR8;
-            goto FAILED_BACK;
-            }
-          else
-            {
-            if (!char_is_literal && parsed_pattern[-1] == META_RANGE_LITERAL)
-              parsed_pattern[-1] = META_RANGE_ESCAPED;
-            PARSED_LITERAL(c, parsed_pattern);
-            }
-          class_range_state = RANGE_NO;
-          class_op_state = CLASS_OP_OPERAND;
-          }
-        else if (class_range_state == RANGE_FORBID_STARTED)
-          {
-          ptr = class_range_forbid_ptr;
-          errorcode = ERR50;
-          goto FAILED;
-          }
-        else  /* Potential start of range */
-          {
-          class_range_state = char_is_literal?
-            RANGE_OK_LITERAL : RANGE_OK_ESCAPED;
-          class_op_state = CLASS_OP_OPERAND;
-          PARSED_LITERAL(c, parsed_pattern);
-          }
-        }
-
       /* Handle escapes in a class */
 
-      else
+      else if (c == CHAR_BACKSLASH)
         {
         tempptr = ptr;
         escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
@@ -4041,7 +4171,8 @@ while (ptr < ptrend)
 
         if (errorcode != 0)
           {
-          if ((xoptions & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
+          if ((xoptions & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0 ||
+              class_mode_state >= CLASS_MODE_PERL_EXT)
             goto FAILED;
           ptr = tempptr;
           if (ptr >= ptrend) c = CHAR_BACKSLASH; else
@@ -4151,8 +4282,92 @@ while (ptr < ptrend)
           goto FAILED;
           }
 
+        /* Disallow implicit union in Perl extended classes. */
+
+        if (class_op_state == CLASS_OP_OPERAND &&
+            class_mode_state == CLASS_MODE_PERL_EXT)
+          {
+          errorcode = ERR113;
+          goto FAILED;
+          }
+
         class_range_state = RANGE_FORBID_NO;
         class_op_state = CLASS_OP_OPERAND;
+        }
+
+      /* Forbid unescaped literals, and the special meaning of '-', inside a
+      Perl extended class. */
+
+      else if (class_mode_state == CLASS_MODE_PERL_EXT)
+        {
+        errorcode = ERR116;
+        goto FAILED;
+        }
+
+      /* Handle potential start of range */
+
+      else if (c == CHAR_MINUS && class_range_state >= RANGE_OK_ESCAPED)
+        {
+        *parsed_pattern++ = (class_range_state == RANGE_OK_LITERAL)?
+          META_RANGE_LITERAL : META_RANGE_ESCAPED;
+        class_range_state = RANGE_STARTED;
+        }
+
+      /* Handle forbidden start of range */
+
+      else if (c == CHAR_MINUS && class_range_state == RANGE_FORBID_NO)
+        {
+        *parsed_pattern++ = CHAR_MINUS;
+        class_range_state = RANGE_FORBID_STARTED;
+        class_range_forbid_ptr = ptr;
+        }
+
+      /* Handle a literal character */
+
+      else
+        {
+        CLASS_LITERAL:
+
+        /* Disallow implicit union in Perl extended classes. */
+
+        if (class_op_state == CLASS_OP_OPERAND &&
+            class_mode_state == CLASS_MODE_PERL_EXT)
+          {
+          errorcode = ERR113;
+          goto FAILED;
+          }
+
+        if (class_range_state == RANGE_STARTED)
+          {
+          if (c == parsed_pattern[-2])       /* Optimize one-char range */
+            parsed_pattern--;
+          else if (parsed_pattern[-2] > c)   /* Check range is in order */
+            {
+            errorcode = ERR8;
+            goto FAILED_BACK;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
+            }
+          else
+            {
+            if (!char_is_literal && parsed_pattern[-1] == META_RANGE_LITERAL)
+              parsed_pattern[-1] = META_RANGE_ESCAPED;
+            PARSED_LITERAL(c, parsed_pattern);
+            }
+          class_range_state = RANGE_NO;
+          class_op_state = CLASS_OP_OPERAND;
+          }
+        else if (class_range_state == RANGE_FORBID_STARTED)
+          {
+          ptr = class_range_forbid_ptr;
+          errorcode = ERR50;
+          goto FAILED;
+          }
+        else  /* Potential start of range */
+          {
+          class_range_state = char_is_literal?
+            RANGE_OK_LITERAL : RANGE_OK_ESCAPED;
+          class_op_state = CLASS_OP_OPERAND;
+          PARSED_LITERAL(c, parsed_pattern);
+          }
         }
 
       /* Proceed to next thing in the class. */
@@ -4160,11 +4375,13 @@ while (ptr < ptrend)
       CLASS_CONTINUE:
       if (ptr >= ptrend)
         {
-        if ((options & PCRE2_ALT_EXTENDED_CLASS) != 0 &&
+        if (class_mode_state == CLASS_MODE_PERL_EXT && class_depth_m1 > 0)
+          errorcode = ERR14;   /* Missing terminating ')' */
+        if (class_mode_state == CLASS_MODE_ALT_EXT &&
             class_depth_m1 == 0 && class_maxdepth_m1 == 1)
           errorcode = ERR112;  /* Missing terminating ']', but we saw '[ [ ]...' */
         else
-          errorcode = ERR6;  /* Missing terminating ']' */
+          errorcode = ERR6;    /* Missing terminating ']' */
         goto FAILED;
         }
       GETCHARINCTEST(c, ptr);
@@ -4296,6 +4513,7 @@ while (ptr < ptrend)
             if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61,
                 &i, &errorcode))
               {
+              PCRE2_ASSERT(i >= 0);
               if (i <= 0)
                 {
                 errorcode = ERR15;
@@ -4743,11 +4961,7 @@ while (ptr < ptrend)
           (IS_DIGIT(*ptr))? -1:(int)(cb->bracount), /* + and - are relative */
           MAX_GROUP_NUMBER, ERR61,
           &i, &errorcode)) goto FAILED;
-      if (i < 0)  /* NB (?0) is permitted */
-        {
-        errorcode = ERR15;   /* Unknown group */
-        goto FAILED_BACK;
-        }
+      PCRE2_ASSERT(i >= 0);  /* NB (?0) is permitted, represented by i=0 */
       if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
         goto UNCLOSED_PARENTHESIS;
 
@@ -4939,6 +5153,7 @@ while (ptr < ptrend)
       if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i,
           &errorcode))
         {
+        PCRE2_ASSERT(i >= 0);
         if (i <= 0)
           {
           errorcode = ERR15;
@@ -5089,7 +5304,7 @@ while (ptr < ptrend)
       goto POST_ASSERTION;
 
       case CHAR_ASTERISK:
-      POSITIVE_NONATOMIC_LOOK_AHEAD:         /* Come from (?* */
+      POSITIVE_NONATOMIC_LOOK_AHEAD:         /* Come from (*napla: */
       *parsed_pattern++ = META_LOOKAHEAD_NA;
       ptr++;
       goto POST_ASSERTION;
@@ -5254,6 +5469,18 @@ while (ptr < ptrend)
       cb->named_groups[cb->names_found].isdup = (uint16_t)isdupname;
       cb->names_found++;
       break;
+
+
+      /* ---- Perl extended character class ---- */
+
+      /* These are of the form '(?[...])'. We handle these via the same parser
+      that consumes ordinary '[...]' classes, but with a flag set to activate
+      the extended behaviour. */
+
+      case CHAR_LEFT_SQUARE_BRACKET:
+      class_mode_state = CLASS_MODE_PERL_EXT;
+      c = *ptr++;
+      goto FROM_PERL_EXTENDED_CLASS;
       }        /* End of (? switch */
     break;     /* End of ( handling */
 
@@ -5300,7 +5527,7 @@ while (ptr < ptrend)
     if (nest_depth == 0)    /* Unmatched closing parenthesis */
       {
       errorcode = ERR22;
-      goto FAILED_BACK;
+      goto FAILED_BACK;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
       }
     nest_depth--;
     *parsed_pattern++ = META_KET;

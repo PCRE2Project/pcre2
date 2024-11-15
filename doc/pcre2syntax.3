@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "20 October 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "08 November 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -284,6 +284,43 @@ The recognized classes are:
 In PCRE2, POSIX character set names recognize only ASCII characters by default,
 but some of them use Unicode properties if PCRE2_UCP is set. You can use
 \eQ...\eE inside a character class.
+.P
+When PCRE2_ALT_EXTENDED_CLASS is set, UTS#18 extended character classes may be
+used, allowing nested character classes, combined using set operators.
+.sp
+  [x&&[^y]]   UTS#18 extended character class
+.sp
+  x||y        set union (OR)
+  x&&y        set intersection (AND)
+  x--y        set difference (AND NOT)
+  x~~y        set symmetric difference (XOR)
+.sp
+.
+.
+.SH "PERL EXTENDED CHARACTER CLASSES"
+.rs
+.sp
+  (?[...])                Perl extended character class
+  (?[\ep{Thai} & \ep{Nd}])  operators; whitespace ignored
+  (?[(x - y) & z])        parentheses for grouping
+.sp
+  (?[ [^3] & \ep{Nd} ])    [...] is a nested ordinary class
+  (?[ [:alpha:] - [z] ])  POSIX set is allowed outside [...]
+  (?[ \ed - [3] ])         backslash-escaped set is allowed outside [...]
+  (?[ !\en & [:ascii:] ])  backslash-escaped character is allowed outside [...]
+                      all other characters or ranges must be enclosed in [...]
+.sp
+  x|y, x+y                set union (OR)
+  x&y                     set intersection (AND)
+  x-y                     set difference (AND NOT)
+  x^y                     set symmetric difference (XOR)
+  !x                      set complement (NOT)
+.sp
+Inside a Perl extended character class, [...] switches mode to be interpreted
+as an ordinary character class. Outside of a nested [...], the only items
+permitted are backslash-escapes, POSIX sets, operators, and parentheses. Inside
+a nested ordinary class, ^ has its usual meaning (inverts the class when used
+as the first character); outside of a nested class, ^ is the XOR operator.
 .
 .
 .SH "QUANTIFIERS"
@@ -692,6 +729,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 20 October 2024
+Last updated: 08 November 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

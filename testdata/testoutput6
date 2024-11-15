@@ -8149,4 +8149,19 @@ No match
 
 # --------------
 
+# EXTENDED CHARACTER CLASSES (Perl)
+
+/(?[[A]+[B]])/
+    A
+ 0: A
+    B
+ 0: B
+\= Expect no match
+    [
+No match
+    ]
+No match
+
+# --------------
+
 # End of testinput6

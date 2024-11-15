@@ -199,9 +199,11 @@ META_RANGE_ESCAPED    hyphen in class range with at least one escape
 META_RANGE_LITERAL    hyphen in class range defined literally
 META_SKIP             (*SKIP) - no argument (see below for with argument)
 META_THEN             (*THEN) - no argument (see below for with argument)
-META_ECLASS_OR        || in an extended character class
-META_ECLASS_AND       && in an extended character class
-META_ECLASS_SUB       -- in an extended character class
+META_ECLASS_AND       && (or &) in an extended character class
+META_ECLASS_OR        || (or |, +) in an extended character class
+META_ECLASS_SUB       -- (or -) in an extended character class
+META_ECLASS_XOR       ~~ (or ^) in an extended character class
+META_ECLASS_NOT       ! in an extended character class
 
 The two RANGE values occur only in character classes. They are positioned
 between two literals that define the start and end of the range. In an EBCDIC

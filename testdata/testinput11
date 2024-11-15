@@ -476,4 +476,29 @@
 
 # --------------
 
+# EXTENDED CHARACTER CLASSES (Perl)
+
+# META_BIGVALUE tests
+
+/(?[[\x{80000000}-\x{8000000f}]+\x{8fffffff}])/B
+    \x{80000002}
+    \x{8fffffff}
+\= Expect no match
+    \x{7fffffff}
+    \x{90000000}
+
+/(?[[\x{80000000}-\x{8000000f}]-\x{80000002}])/B
+    \x{80000001}
+    \x{80000003}
+\= Expect no match
+    \x{80000002}
+
+/(?[[\x{80000000}-\x{8000000f}]-\x{80000002}])/B
+    \x{80000001}
+    \x{80000003}
+\= Expect no match
+    \x{80000002}
+
+# --------------
+
 # End of testinput11

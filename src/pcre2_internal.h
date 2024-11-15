@@ -577,7 +577,10 @@ modes. */
 /* The maximum nesting depth for Unicode character class sets.
 Currently fixed. Warning: the interpreter relies on this so it can encode
 the operand stack in a uint32_t. A nesting limit of 15 implies (15*2+1)=31
-stack operands required. */
+stack operands required, due to the fact that we have two (and only two)
+levels of operator precedence. In the UTS#18 syntax, you can write 'x&&y[z]'
+and in Perl syntax you can write '(?[ x - y & (z) ])', both of which imply
+pushing the match results for x & y to the stack. */
 
 #define ECLASS_NEST_LIMIT  15
 
@@ -1749,10 +1752,11 @@ enum {
   /* These are used for "extended classes" such as [a-z -- aeiou]. */
 
   OP_ECLASS,         /* 172 */
-  OP_ECLASS_OR,      /* 173 */
-  OP_ECLASS_AND,     /* 174 */
+  OP_ECLASS_AND,     /* 173 */
+  OP_ECLASS_OR,      /* 174 */
   OP_ECLASS_SUB,     /* 175 */
-  OP_ECLASS_NOT,     /* 176 */
+  OP_ECLASS_XOR,     /* 176 */
+  OP_ECLASS_NOT,     /* 177 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1815,7 +1819,7 @@ some cases doesn't actually use these names at all). */
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
   "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
-  "eclass", "||", "&&", "--", "!!"
+  "eclass", "&&", "||", "--", "~~", "!!"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1916,7 +1920,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1,                             /* DEFINE                                 */ \
   1, 1,                          /* \B and \b in UCP mode                  */ \
   0,                             /* ECLASS - variable length               */ \
-  1, 1, 1, 1                     /* ECLASS ops, nested inside ECLASS       */
+  1, 1, 1, 1, 1                  /* ECLASS ops, nested inside ECLASS       */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

@@ -2949,4 +2949,96 @@
     A
     \x{3a3}
 
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+/(?[\p{L} - \p{Lu}])/
+    a
+\= Expect no match
+    A
+    1
+
+/(?[\p{L} & \p{Lu}])/
+    A
+\= Expect no match
+    a
+    1
+
+/(?[[\p{Lu}z] ^ [\p{Ll}G]])/
+    A
+    p
+\= Expect no match
+    G
+    z
+    1
+
+/(?[\p{Ll} | \p{Nd}])/
+    a
+    1
+\= Expect no match
+    A
+
+/(?[\p{Ll} + [\p{Nd}]])/
+    a
+    1
+\= Expect no match
+    A
+
+/(?[ ![\p{Nd}z] ])/
+    _
+    Z
+\= Expect no match
+    1
+    z
+
+/(?[ \P{Nd} + [2] ])/
+    _
+    Z
+    2
+\= Expect no match
+    1
+    3
+
+/(?[ ![\P{Nd}] ])/
+    1
+    2
+\= Expect no match
+    _
+    z
+
+# caseless tests
+
+/(?[ \p{Lu} ^ \p{Ll} ])/
+    a
+    A
+\= Expect no match
+    _
+    1
+
+/(?[ [\p{Lu}1] ^ \p{Ll} ])/i
+    1
+\= Expect no match
+    a
+    A
+    _
+
+/(?[ [\p{Lu}1] & [\p{Ll}1] ])/
+    1
+\= Expect no match
+    a
+    A
+    _
+    2
+
+/(?[ [\p{Lu}1] & [\p{Ll}1] ])/i
+    a
+    A
+    1
+\= Expect no match
+    _
+    2
+
+# --------------
+
 # End of testinput4

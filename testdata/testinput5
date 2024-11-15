@@ -2927,6 +2927,34 @@
     A
     0
 
+/[[\p{Lu}\p{Ll}]||[\p{Nd}\p{Ll}]]/B,alt_extended_class
+    A
+    1
+    c
+\= Expect no match
+    _
+
+/[[\p{Lu}\p{Ll}]&&[\p{Nd}\p{Ll}]]/B,alt_extended_class
+    c
+\= Expect no match
+    A
+    1
+    _
+
+/[[\p{Lu}\p{Ll}]--[\p{Nd}\p{Ll}]]/B,alt_extended_class
+    A
+\= Expect no match
+    1
+    c
+    _
+
+/[[\p{Lu}\p{Ll}]~~[\p{Nd}\p{Ll}]]/B,alt_extended_class
+    A
+    1
+\= Expect no match
+    c
+    _
+
 /[\pL[]]]/B,alt_extended_class
     A
     ]
@@ -3178,11 +3206,58 @@
 \= Expect no match
     n_n
 
-/[\p{Nd}||[\pL--\p{Lu}]]/alt_extended_class
+/[\p{Nd}||[\pL--\p{Lu}]]/B,alt_extended_class
     a
     0
 \= Expect no match
     C
+
+/[\P{Nd}||2]/B,alt_extended_class
+    _
+    Z
+    2
+\= Expect no match
+    1
+    3
+
+/[^[\P{Nd}]]/B,alt_extended_class
+    1
+    2
+\= Expect no match
+    _
+    z
+
+# caseless tests
+
+/[\p{Lu}~~\p{Ll}]/B,alt_extended_class
+    a
+    A
+\= Expect no match
+    _
+    1
+
+/[[\p{Lu}1]~~\p{Ll}]/iB,alt_extended_class
+    1
+\= Expect no match
+    a
+    A
+    _
+
+/[[\p{Lu}1]&&[\p{Ll}1]]/B,alt_extended_class
+    1
+\= Expect no match
+    a
+    A
+    _
+    2
+
+/[[\p{Lu}1]&&[\p{Ll}1]]/iB,alt_extended_class
+    a
+    A
+    1
+\= Expect no match
+    _
+    2
 
 /[[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]
 &&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]
