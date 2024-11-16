@@ -8104,6 +8104,187 @@ SLJIT_ASSERT(next_char <= (const uint8_t*)common->start);
 ranges->range_count = range_count;
 }
 
+#if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
+
+static void xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr, sljit_u32 *max_ptr)
+{
+uint32_t type, list_ind, c;
+sljit_u32 min = *min_ptr;
+sljit_u32 max = *max_ptr;
+uint32_t char_list_add;
+const uint8_t *next_char;
+BOOL utf = TRUE;
+
+/* This function is pointless without utf 8/16. */
+SLJIT_ASSERT(common->utf);
+if (*cc == XCL_SINGLE || *cc == XCL_RANGE)
+  {
+  /* Only a few ranges are present. */
+  do
+    {
+    type = *cc++;
+    SLJIT_ASSERT(type == XCL_SINGLE || type == XCL_RANGE);
+    GETCHARINCTEST(c, cc);
+
+    if (c < min)
+      min = c;
+
+    if (type == XCL_RANGE)
+      {
+      GETCHARINCTEST(c, cc);
+      }
+
+    if (c > max)
+      max = c;
+    }
+  while (*cc != XCL_END);
+
+  SLJIT_ASSERT(min <= MAX_UTF_CODE_POINT && max <= MAX_UTF_CODE_POINT && min <= max);
+  *min_ptr = min;
+  *max_ptr = max;
+  return;
+  }
+
+SLJIT_ASSERT(cc[0] >= XCL_LIST);
+#if PCRE2_CODE_UNIT_WIDTH == 8
+type = (uint32_t)(cc[0] << 8) | cc[1];
+cc += 2;
+#else
+type = cc[0];
+cc++;
+#endif  /* CODE_UNIT_WIDTH */
+
+/* Align characters. */
+next_char = (const uint8_t*)common->start - (GET(cc, 0) << 1);
+type &= XCL_TYPE_MASK;
+
+SLJIT_ASSERT(type != 0);
+
+/* Detect minimum. */
+
+/* Skip unused ranges. */
+list_ind = 0;
+while ((type & (XCL_BEGIN_WITH_RANGE | XCL_ITEM_COUNT_MASK)) == 0)
+  {
+  type >>= XCL_TYPE_BIT_LEN;
+  list_ind++;
+  }
+
+SLJIT_ASSERT(list_ind <= 2);
+switch (list_ind)
+  {
+  case 0:
+  char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
+  c = XCL_CHAR_LIST_LOW_16_START;
+  break;
+
+  case 1:
+  char_list_add = XCL_CHAR_LIST_HIGH_16_ADD;
+  c = XCL_CHAR_LIST_HIGH_16_START;
+  break;
+
+  default:
+  char_list_add = XCL_CHAR_LIST_LOW_32_ADD;
+  c = XCL_CHAR_LIST_LOW_32_START;
+  break;
+  }
+
+if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+  {
+  if (c < min)
+    min = c;
+  }
+else
+  {
+  if ((type & XCL_ITEM_COUNT_MASK) == XCL_ITEM_COUNT_MASK)
+    {
+    if (list_ind <= 1)
+      c = *(const uint16_t*)(next_char + 2);
+    else
+      c = *(const uint32_t*)(next_char + 4);
+    }
+  else
+    {
+    if (list_ind <= 1)
+      c = *(const uint16_t*)next_char;
+    else
+      c = *(const uint32_t*)next_char;
+    }
+
+  c = char_list_add + (c >> XCL_CHAR_SHIFT);
+  if (c < min)
+    min = c;
+  }
+
+/* Detect maximum. */
+
+/* Skip intermediate ranges. */
+while (TRUE)
+  {
+  if ((type & XCL_ITEM_COUNT_MASK) == XCL_ITEM_COUNT_MASK)
+    {
+    if (list_ind <= 1)
+      {
+      c = *(const uint16_t*)next_char;
+      next_char += (c + 1) << 1;
+      }
+    else
+      {
+      c = *(const uint32_t*)next_char;
+      next_char += (c + 1) << 2;
+      }
+    }
+  else
+    next_char += (type & XCL_ITEM_COUNT_MASK) << (list_ind <= 1 ? 1 : 2);
+
+  if ((type >> XCL_TYPE_BIT_LEN) == 0)
+    break;
+
+  list_ind++;
+  type >>= XCL_TYPE_BIT_LEN;
+  }
+
+SLJIT_ASSERT(list_ind <= 2 && type != 0);
+switch (list_ind)
+  {
+  case 0:
+  char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
+  c = XCL_CHAR_LIST_LOW_16_END;
+  break;
+
+  case 1:
+  char_list_add = XCL_CHAR_LIST_HIGH_16_ADD;
+  c = XCL_CHAR_LIST_HIGH_16_END;
+  break;
+
+  default:
+  char_list_add = XCL_CHAR_LIST_LOW_32_ADD;
+  c = XCL_CHAR_LIST_LOW_32_END;
+  break;
+  }
+
+if ((type & XCL_ITEM_COUNT_MASK) != 0)
+  {
+  /* Type is reused as temporary. */
+  if (list_ind <= 1)
+    type = *(const uint16_t*)(next_char - 2);
+  else
+    type = *(const uint32_t*)(next_char - 4);
+
+  if (type & XCL_CHAR_END)
+    c = char_list_add + (type >> XCL_CHAR_SHIFT);
+  }
+
+if (c > max)
+  max = c;
+
+SLJIT_ASSERT(min <= MAX_UTF_CODE_POINT && max <= MAX_UTF_CODE_POINT && min <= max);
+*min_ptr = min;
+*max_ptr = max;
+}
+
+#endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == [8|16] */
+
 #ifdef SUPPORT_UNICODE
 #define XCLASS_SAVE_CHAR 0x001
 #define XCLASS_CHAR_SAVED 0x002
@@ -8126,7 +8307,7 @@ jump_list *found = NULL;
 jump_list *check_result = NULL;
 jump_list **list = (cc[0] & XCL_NOT) == 0 ? &found : backtracks;
 sljit_uw c, charoffset;
-sljit_u32 max = 256, min = READ_CHAR_MAX;
+sljit_u32 max = READ_CHAR_MAX, min = 0;
 struct sljit_jump *jump = NULL;
 PCRE2_SPTR ccbegin;
 sljit_u32 compares, invertcmp, depth;
@@ -8149,18 +8330,13 @@ ccbegin = cc;
 compares = 0;
 
 if (cc[-1] & XCL_MAP)
-  {
-  min = 0;
   cc += 32 / sizeof(PCRE2_UCHAR);
-  }
 
 #ifdef SUPPORT_UNICODE
 while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
   {
   compares++;
   cc++;
-  max = READ_CHAR_MAX;
-  min = 0;
 
   items = 0;
 
@@ -8256,22 +8432,16 @@ if (category_list == UCPCAT_ALL)
   }
 #endif
 
-ranges.range_count = 0;
-ranges.ranges = ranges.local_ranges;
-ranges.stack = ranges.local_stack;
-
 if (*cc != XCL_END)
   {
-  xclass_compute_ranges(common, cc, &ranges);
-
-  if (ranges.stack == NULL)
-    return;
-
-  if (ranges.ranges[ranges.range_count - 1] > max)
-    max = ranges.ranges[ranges.range_count - 1];
-  if (ranges.ranges[0] < min)
-    min = ranges.ranges[0];
-
+#if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
+  if (common->utf && compares == 0)
+    {
+    max = 0;
+    min = (ccbegin[-1] & XCL_MAP) != 0 ? 0 : READ_CHAR_MAX;
+    xclass_update_min_max(common, cc, &min, &max);
+    }
+#endif
   compares++;
 #ifdef SUPPORT_UNICODE
   unicode_status |= XCLASS_SAVE_CHAR;
@@ -8282,8 +8452,6 @@ if (*cc != XCL_END)
 if (compares == 0 && category_list == 0)
   {
   /* No characters are accepted, same as (*F) or dotall. */
-  SLJIT_ASSERT(ranges.stack == ranges.local_stack);
-
   compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
   if (list != backtracks)
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
@@ -8323,11 +8491,6 @@ if ((cc[-1] & XCL_MAP) != 0)
   JUMPHERE(jump);
 
   cc += 32 / sizeof(PCRE2_UCHAR);
-  }
-else
-  {
-  OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, min);
-  add_jump(compiler, (cc[-1] & XCL_NOT) == 0 ? backtracks : &found, CMP(SLJIT_GREATER, TMP2, 0, SLJIT_IMM, max - min));
   }
 
 #ifdef SUPPORT_UNICODE
@@ -8690,19 +8853,35 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     add_jump(compiler, compares > 0 ? list : backtracks, jump);
   }
 
-if (ranges.range_count == 0)
+if (compares == 0)
   {
-  SLJIT_ASSERT(compares == 0 && ranges.stack == ranges.local_stack);
-
   if (found != NULL)
     set_jumps(found, LABEL());
   return;
   }
-#else
-SLJIT_ASSERT(ranges.range_count > 0);
 #endif /* SUPPORT_UNICODE */
 
 SLJIT_ASSERT(compares == 1);
+ranges.range_count = 0;
+ranges.ranges = ranges.local_ranges;
+ranges.stack = ranges.local_stack;
+
+xclass_compute_ranges(common, cc, &ranges);
+
+if (ranges.stack == NULL)
+  return;
+
+#if (defined SLJIT_DEBUG && SLJIT_DEBUG) && \
+  defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
+if (common->utf)
+  {
+  min = 0xffffffff;
+  max = 0;
+  xclass_update_min_max(common, cc, &min, &max);
+  SLJIT_ASSERT(ranges.ranges[0] == min && ranges.ranges[ranges.range_count - 1] == max);
+  }
+#endif /* SLJIT_DEBUG && SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == [8|16] */
+
 invertcmp = (list != backtracks);
 
 if (ranges.range_count == 2)
