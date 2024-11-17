@@ -609,6 +609,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CMU | PCRE2_DUPNAMES, A, 0, 0, "(?:(?<A>AA)|(?<A>BB))\\k<A>{1,3}M", "aaaaaaaabbbbaabbbbm" },
 	{ CMU | PCRE2_DUPNAMES, A, 0, 0, "(?:(?<A>AA)|(?<A>BB))\\k<A>{0,3}?M", "aaaaaabbbbbbaabbbbbbbbbbm" },
 	{ CMU | PCRE2_DUPNAMES, A, 0, 0, "(?:(?<A>AA)|(?<A>BB))\\k<A>{2,3}?", "aaaabbbbaaaabbbbbbbbbb" },
+	{ MU | PCRE2_DUPNAMES, A, 0, 0, "^(?P<NAME>..)(?P<NAME>..)\\k<NAME>{2,4}", "AaAAAaAaAaaA" },
 	{ MU | PCRE2_MATCH_UNSET_BACKREF, A, 0, 0, "(a)|\\1+c", "xxc" },
 	{ MU | PCRE2_MATCH_UNSET_BACKREF, A, 0, 0, "\\1+?()", "" },
 
@@ -819,6 +820,8 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, PCRE2_PARTIAL_SOFT, 0, "abc|(?<=xxa)bc", "xxab" },
 	{ MU, A, PCRE2_PARTIAL_SOFT, 0, "a\\B", "a" },
 	{ MU, A, PCRE2_PARTIAL_HARD, 0, "a\\b", "a" },
+	{ M | PCRE2_DUPNAMES, A, PCRE2_PARTIAL_HARD, 0, "^(?P<NAME>..)(?P<NAME>..)\\k<NAME>{2,4}", "AaAAAaAaAaA" },
+	{ M | PCRE2_DUPNAMES, A, PCRE2_PARTIAL_HARD, 0, "^(?P<NAME>..)(?P<NAME>..)\\k<NAME>{2,4}", "AaAAAaAaAaa" },
 
 	/* (*MARK) verb. */
 	{ MU, A, 0, 0, "a(*MARK:aa)a", "ababaa" },
