@@ -8314,7 +8314,7 @@ sljit_u32 compares, invertcmp, depth;
 sljit_u32 first_item, last_item, mid_item;
 sljit_u32 range_start, range_end;
 xclass_ranges ranges;
-BOOL has_cmov;
+BOOL has_cmov, last_range_set;
 
 #ifdef SUPPORT_UNICODE
 sljit_u32 unicode_status = 0;
@@ -8905,11 +8905,11 @@ if (ranges.range_count == 2)
   return;
   }
 
-if (ranges.range_count > 6 && charoffset != 0)
-  {
-  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)charoffset);
-  charoffset = 0;
-  }
+range_start = ranges.ranges[0];
+range_end = ranges.ranges[ranges.range_count - 1];
+SET_CHAR_OFFSET(range_start);
+add_jump(compiler, (ccbegin[-1] & XCL_NOT) == 0 ? backtracks : &found,
+  CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start)));
 
 depth = 0;
 first_item = 0;
@@ -8919,16 +8919,25 @@ has_cmov = sljit_has_cpu_feature(SLJIT_HAS_CMOV) != 0;
 while (TRUE)
   {
   /* At least two items are present. */
-  SLJIT_ASSERT(first_item < last_item);
+  SLJIT_ASSERT(first_item < last_item && charoffset == ranges.ranges[0]);
+  last_range_set = FALSE;
 
   if (first_item + 6 <= last_item)
     {
-    SLJIT_ASSERT(charoffset == 0);
     mid_item = ((first_item + last_item) >> 1) & ~(sljit_u32)1;
     SLJIT_ASSERT(last_item >= mid_item + 4);
 
     range_end = ranges.ranges[mid_item + 1];
-    ranges.stack[depth].jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)range_end);
+    if (first_item + 6 > mid_item && ranges.ranges[mid_item] == range_end)
+      {
+      OP2U(SLJIT_SUB | SLJIT_SET_GREATER | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - charoffset));
+      ranges.stack[depth].jump = JUMP(SLJIT_GREATER);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+      last_range_set = TRUE;
+      }
+    else
+      ranges.stack[depth].jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - charoffset));
+
     ranges.stack[depth].first_item = (sljit_u32)(mid_item + 2);
     ranges.stack[depth].last_item = (sljit_u32)last_item;
 
@@ -8937,61 +8946,68 @@ while (TRUE)
       depth <= XCLASS_LOCAL_RANGES_LOG2_SIZE : (ranges.stack + depth) <= (xclass_stack_item*)ranges.ranges);
 
     last_item = mid_item;
-    continue;
+    if (!last_range_set)
+      continue;
+
+    last_item -= 2;
     }
 
-  range_start = ranges.ranges[first_item];
-  range_end = ranges.ranges[first_item + 1];
+  if (!last_range_set)
+    {
+    range_start = ranges.ranges[first_item];
+    range_end = ranges.ranges[first_item + 1];
 
-  if (range_start < range_end)
-    {
-    SET_CHAR_OFFSET(range_start);
-    OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
-    OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
-    }
-  else
-    {
-    OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)range_start);
-    OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-    }
-
-  if (first_item < last_item)
-    {
-    do
+    if (range_start < range_end)
       {
-      first_item += 2;
-      range_start = ranges.ranges[first_item];
-      range_end = ranges.ranges[first_item + 1];
-
-      if (range_start < range_end)
-        {
-        SET_CHAR_OFFSET(range_start);
-        OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
-
-        if (has_cmov)
-          SELECT(SLJIT_LESS_EQUAL, TMP2, STR_END, 0, TMP2);
-        else
-          OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_LESS_EQUAL);
-        }
-      else
-        {
-        OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
-
-        if (has_cmov)
-          SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
-        else
-          OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
-        }
+      SET_CHAR_OFFSET(range_start);
+      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
       }
-    while (first_item < last_item);
+    else
+      {
+      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+      }
+    first_item += 2;
     }
+
+  SLJIT_ASSERT(first_item <= last_item);
+
+  do
+    {
+    range_start = ranges.ranges[first_item];
+    range_end = ranges.ranges[first_item + 1];
+
+    if (range_start < range_end)
+      {
+      SET_CHAR_OFFSET(range_start);
+      OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start));
+
+      if (has_cmov)
+        SELECT(SLJIT_LESS_EQUAL, TMP2, STR_END, 0, TMP2);
+      else
+        OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_LESS_EQUAL);
+      }
+    else
+      {
+      OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+
+      if (has_cmov)
+        SELECT(SLJIT_EQUAL, TMP2, STR_END, 0, TMP2);
+      else
+        OP_FLAGS(SLJIT_OR | ((first_item == last_item) ? SLJIT_SET_Z : 0), TMP2, 0, SLJIT_EQUAL);
+      }
+
+    first_item += 2;
+    }
+  while (first_item <= last_item);
 
   if (depth == 0) break;
 
   add_jump(compiler, &check_result, JUMP(SLJIT_JUMP));
 
   /* The charoffset resets after the end of a branch is reached. */
-  charoffset = 0;
+  charoffset = ranges.ranges[0];
   depth--;
   first_item = ranges.stack[depth].first_item;
   last_item = ranges.stack[depth].last_item;
