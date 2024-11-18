@@ -563,8 +563,8 @@ static const alasitem alasmeta[] = {
   { 30, META_LOOKBEHIND_NA     },
   { 18, META_LOOKAHEADNOT      },
   { 19, META_LOOKBEHINDNOT     },
-  {  3, META_SCS_NUMBER        }, /* placeholder, updated later */
-  { 14, META_SCS_NUMBER        }, /* placeholder, updated later */
+  {  3, META_SCS               },
+  { 14, META_SCS               },
   {  6, META_ATOMIC            },
   {  2, META_SCRIPT_RUN        }, /* sr = script run */
   {  3, META_ATOMIC_SCRIPT_RUN }, /* asr = atomic script run */
@@ -2767,6 +2767,60 @@ return parsed_pattern;
 
 
 /*************************************************
+* Maximum size of parsed_pattern for given input *
+*************************************************/
+
+/* This function is called from parse_regex() below, to determine the amount
+of memory to allocate for parsed_pattern. It is also called to check whether
+the amount of data written respects the amount of memory allocated.
+
+Arguments:
+  ptr             points to the start of the pattern
+  ptrend          points to the end of the pattern
+  utf             TRUE in UTF mode
+  options         the options bits
+
+Returns:          the number of uint32_t units for parsed_pattern
+*/
+static ptrdiff_t
+max_parsed_pattern(PCRE2_SPTR ptr, PCRE2_SPTR ptrend, BOOL utf,
+  uint32_t options)
+{
+PCRE2_SIZE big32count = 0;
+ptrdiff_t parsed_size_needed;
+
+/* When PCRE2_AUTO_CALLOUT is not set, in all but one case the number of
+unsigned 32-bit ints written out to the parsed pattern is bounded by the length
+of the pattern. The exceptional case is when running in 32-bit, non-UTF mode,
+when literal characters greater than META_END (0x80000000) have to be coded as
+two units. In this case, therefore, we scan the pattern to check for such
+values. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 32
+if (!utf)
+  {
+  PCRE2_SPTR p;
+  for (p = ptr; p < ptrend; p++) if (*p >= META_END) big32count++;
+  }
+#else
+(void)utf;  /* Avoid compiler warning */
+#endif
+
+parsed_size_needed = (ptrend - ptr) + big32count;
+
+/* When PCRE2_AUTO_CALLOUT is set we have to assume a numerical callout (4
+elements) for each character. This is overkill, but memory is plentiful these
+days. */
+
+if ((options & PCRE2_AUTO_CALLOUT) != 0)
+  parsed_size_needed += (ptrend - ptr) * 4;
+
+return parsed_size_needed;
+}
+
+
+
+/*************************************************
 *      Parse regex and identify named groups     *
 *************************************************/
 
@@ -2903,6 +2957,12 @@ PCRE2_SPTR verbnamestart = NULL;    /* Value avoids compiler warning */
 PCRE2_SPTR class_range_forbid_ptr = NULL;
 named_group *ng;
 nest_save *top_nest, *end_nests;
+#ifdef PCRE2_DEBUG
+uint32_t *parsed_pattern_check;
+ptrdiff_t parsed_pattern_extra = 0;
+ptrdiff_t parsed_pattern_extra_check = 0;
+PCRE2_SPTR ptr_check;
+#endif
 
 /* Insert leading items for word and line matching (features provided for the
 benefit of pcre2grep). */
@@ -2917,6 +2977,11 @@ else if ((xoptions & PCRE2_EXTRA_MATCH_WORD) != 0)
   *parsed_pattern++ = META_ESCAPE + ESC_b;
   *parsed_pattern++ = META_NOCAPTURE;
   }
+
+#ifdef PCRE2_DEBUG
+parsed_pattern_check = parsed_pattern;
+ptr_check = ptr;
+#endif
 
 /* If the pattern is actually a literal string, process it separately to avoid
 cluttering up the main loop. */
@@ -2970,16 +3035,37 @@ while (ptr < ptrend)
   PCRE2_SPTR tempptr;
   PCRE2_SIZE offset;
 
-  if (parsed_pattern >= parsed_pattern_end)
-    {
-    errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
-    goto FAILED;
-    }
-
   if (nest_depth > cb->cx->parens_nest_limit)
     {
     errorcode = ERR19;
     goto FAILED;        /* Parentheses too deeply nested */
+    }
+
+  /* Check that we haven't emitted too much into parsed_pattern. We allocate
+  a suitably-sized buffer upfront, then do unchecked writes to it. If we only
+  write a little bit too much, everything will appear to be OK, because the
+  upfront size is an overestimate... but a malicious pattern could end up
+  forcing a write past the buffer end. We must catch this during
+  development. */
+
+#ifdef PCRE2_DEBUG
+  /* Strong post-write check. Won't help in release builds - at this point
+  the write has already occurred so it's too late. However, should stop us
+  committing unsafe code. */
+  PCRE2_ASSERT((parsed_pattern - parsed_pattern_check) +
+               (parsed_pattern_extra - parsed_pattern_extra_check) <=
+                 max_parsed_pattern(ptr_check, ptr, utf, options));
+  parsed_pattern_check = parsed_pattern;
+  parsed_pattern_extra_check = parsed_pattern_extra;
+  ptr_check = ptr;
+#endif
+
+  if (parsed_pattern >= parsed_pattern_end)
+    {
+    /* Weak pre-write check; only ensures parsed_pattern[0] is writeable
+    (but the code below can write many chars). Better than nothing. */
+    errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
+    goto FAILED;
     }
 
   /* If the last time round this loop something was added, parsed_pattern will
@@ -3571,6 +3657,11 @@ while (ptr < ptrend)
       *verbstartptr = META_NOCAPTURE;
       parsed_pattern[1] = META_KET;
       parsed_pattern += 2;
+
+#ifdef PCRE2_DEBUG
+      PCRE2_ASSERT(parsed_pattern_extra >= 2);
+      parsed_pattern_extra -= 2;
+#endif
       }
 
     /* Now we can put the quantifier into the parsed pattern vector. At this
@@ -4486,7 +4577,7 @@ while (ptr < ptrend)
           case META_LOOKAHEADNOT:
           goto NEGATIVE_LOOK_AHEAD;
 
-          case META_SCS_NUMBER:
+          case META_SCS:
           if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
           if (*ptr != CHAR_LEFT_PARENTHESIS)
@@ -4601,6 +4692,12 @@ while (ptr < ptrend)
             top_nest->flags = NSF_ATOMICSR;
             top_nest->options = options & PARSE_TRACKED_OPTIONS;
             top_nest->xoptions = xoptions & PARSE_TRACKED_EXTRA_OPTIONS;
+
+#ifdef PCRE2_DEBUG
+            /* We'll write out two META_KETs for a single ")" in the input
+            pattern, so we reserve space for that in our bounds check. */
+            parsed_pattern_extra++;
+#endif
             }
           break;
 #else  /* SUPPORT_UNICODE */
@@ -4660,6 +4757,11 @@ while (ptr < ptrend)
 
         verbstartptr = parsed_pattern;
         okquantifier = (verbs[i].meta == META_ACCEPT);
+#ifdef PCRE2_DEBUG
+        /* Reserve space in our bounds check for optionally wrapping the (*ACCEPT)
+        with a non-capturing bracket, if there is a following quantifier. */
+        if (okquantifier) parsed_pattern_extra += 2;
+#endif
 
         /* It appears that Perl allows any characters whatsoever, other than a
         closing parenthesis, to appear in arguments ("names"), so we no longer
@@ -5525,6 +5627,11 @@ while (ptr < ptrend)
       if ((top_nest->flags & NSF_ATOMICSR) != 0)
         {
         *parsed_pattern++ = META_KET;
+
+#ifdef PCRE2_DEBUG
+        PCRE2_ASSERT(parsed_pattern_extra > 0);
+        parsed_pattern_extra--;
+#endif
         }
 
       if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
@@ -5549,9 +5656,15 @@ if (inverbname && ptr >= ptrend)
   goto FAILED;
   }
 
-/* Manage callout for the final item */
 
 PARSED_END:
+
+PCRE2_ASSERT((parsed_pattern - parsed_pattern_check) +
+             (parsed_pattern_extra - parsed_pattern_extra_check) <=
+               max_parsed_pattern(ptr_check, ptr, utf, options));
+
+/* Manage callout for the final item */
+
 parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout,
   parsed_pattern, cb);
 
@@ -9955,7 +10068,6 @@ uint32_t *pptr;                       /* Current pointer in parsed pattern */
 PCRE2_SIZE length = 1;                /* Allow for final END opcode */
 PCRE2_SIZE usedlength;                /* Actual length used */
 PCRE2_SIZE re_blocksize;              /* Size of memory block */
-PCRE2_SIZE big32count = 0;            /* 32-bit literals >= 0x80000000 */
 PCRE2_SIZE parsed_size_needed;        /* Needed for parsed pattern */
 
 uint32_t firstcuflags, reqcuflags;    /* Type of first/req code unit */
@@ -10363,42 +10475,31 @@ switch(newline)
 their numerical equivalents, so that this information is always available for
 the remaining processing. (2) At the same time, parse the pattern and put a
 processed version into the parsed_pattern vector. This has escapes interpreted
-and comments removed (amongst other things).
+and comments removed (amongst other things). */
 
-In all but one case, when PCRE2_AUTO_CALLOUT is not set, the number of unsigned
-32-bit ints in the parsed pattern is bounded by the length of the pattern plus
-one (for the terminator) plus four if PCRE2_EXTRA_WORD or PCRE2_EXTRA_LINE is
-set. The exceptional case is when running in 32-bit, non-UTF mode, when literal
-characters greater than META_END (0x80000000) have to be coded as two units. In
-this case, therefore, we scan the pattern to check for such values. */
+/* Ensure that the parsed pattern buffer is big enough. For many smaller
+patterns the vector on the stack (which was set up above) can be used. */
 
-#if PCRE2_CODE_UNIT_WIDTH == 32
-if (!utf)
-  {
-  PCRE2_SPTR p;
-  for (p = ptr; p < cb.end_pattern; p++) if (*p >= META_END) big32count++;
-  }
-#endif
+parsed_size_needed = max_parsed_pattern(ptr, cb.end_pattern, utf, options);
 
-/* Ensure that the parsed pattern buffer is big enough. When PCRE2_AUTO_CALLOUT
-is set we have to assume a numerical callout (4 elements) for each character
-plus one at the end. This is overkill, but memory is plentiful these days. For
-many smaller patterns the vector on the stack (which was set up above) can be
-used. */
-
-parsed_size_needed = patlen - skipatstart + big32count;
+/* Allow for 2x uint32_t at the start and 2 at the end, for
+PCRE2_EXTRA_MATCH_WORD or PCRE2_EXTRA_MATCH_LINE (which are exclusive). */
 
 if ((ccontext->extra_options &
      (PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_MATCH_LINE)) != 0)
   parsed_size_needed += 4;
 
-if ((options & PCRE2_AUTO_CALLOUT) != 0)
-  parsed_size_needed = (parsed_size_needed + 1) * 5;
+/* When PCRE2_AUTO_CALLOUT is set we allow for one callout at the end. */
 
-if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
+if ((options & PCRE2_AUTO_CALLOUT) != 0)
+  parsed_size_needed += 4;
+
+parsed_size_needed += 1;  /* For the final META_END */
+
+if (parsed_size_needed > PARSED_PATTERN_DEFAULT_SIZE)
   {
   uint32_t *heap_parsed_pattern = ccontext->memctl.malloc(
-    (parsed_size_needed + 1) * sizeof(uint32_t), ccontext->memctl.memory_data);
+    parsed_size_needed * sizeof(uint32_t), ccontext->memctl.memory_data);
   if (heap_parsed_pattern == NULL)
     {
     *errorptr = ERR21;
@@ -10406,7 +10507,7 @@ if (parsed_size_needed >= PARSED_PATTERN_DEFAULT_SIZE)
     }
   cb.parsed_pattern = heap_parsed_pattern;
   }
-cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed + 1;
+cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed;
 
 /* Do the parsing scan. */
 
