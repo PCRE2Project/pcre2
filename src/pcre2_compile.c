@@ -2992,6 +2992,7 @@ if ((options & PCRE2_LITERAL) != 0)
     {
     if (parsed_pattern >= parsed_pattern_end)
       {
+      PCRE2_DEBUG_UNREACHABLE();
       errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
       goto FAILED;
       }
@@ -3064,6 +3065,7 @@ while (ptr < ptrend)
     {
     /* Weak pre-write check; only ensures parsed_pattern[0] is writeable
     (but the code below can write many chars). Better than nothing. */
+    PCRE2_DEBUG_UNREACHABLE();
     errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
     goto FAILED;
     }
@@ -4562,6 +4564,7 @@ while (ptr < ptrend)
         switch(meta)
           {
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           errorcode = ERR89;  /* Unknown code; should never occur because */
           goto FAILED;        /* the meta values come from a table above. */
 
@@ -5687,6 +5690,7 @@ Otherwise we have unclosed parentheses. */
 
 if (parsed_pattern >= parsed_pattern_end)
   {
+  PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
   goto FAILED;
   }
@@ -6006,8 +6010,13 @@ for (;; pptr++)
     if (code > cb->start_workspace + cb->workspace_size -
         WORK_SIZE_SAFETY_MARGIN)                       /* Check for overrun */
       {
-      *errorcodeptr = (code >= cb->start_workspace + cb->workspace_size)?
-        ERR52 : ERR86;
+      if (code >= cb->start_workspace + cb->workspace_size)
+        {
+        PCRE2_DEBUG_UNREACHABLE();
+        *errorcodeptr = ERR52;  /* Over-ran workspace - internal error */
+        }
+      else
+        *errorcodeptr = ERR86;
       return 0;
       }
 
@@ -7223,15 +7232,6 @@ for (;; pptr++)
         }
       break;
 
-      /* The ways in which OP_FAIL can be generated, that is by (*FAIL) or
-      (?!), disallow a quantifier at parse time. We ought to be able to ignore this. */
-
-      case OP_FAIL:
-      /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/541
-      Should this be removed, now that '[]' has been changed so it doesn't produce OP_FAIL? */
-      PCRE2_UNREACHABLE();
-      goto END_REPEAT;
-
       /* Prior to 10.30, repeated recursions were wrapped in OP_ONCE brackets
       because pcre2_match() could not handle backtracking into recursively
       called groups. Now that this backtracking is available, we no longer need
@@ -7640,9 +7640,10 @@ for (;; pptr++)
       here because it just makes it horribly messy. */
 
       default:
-      if (op_previous >= OP_EODN)   /* Not a character type - internal error */
+      if (op_previous >= OP_EODN || op_previous <= OP_WORD_BOUNDARY)
         {
-        *errorcodeptr = ERR10;
+        PCRE2_DEBUG_UNREACHABLE();
+        *errorcodeptr = ERR10;  /* Not a character type - internal error */
         return 0;
         }
       else
@@ -8112,9 +8113,7 @@ for (;; pptr++)
     default:
     if (meta >= META_END)
       {
-#ifdef DEBUG_SHOW_PARSED
-      fprintf(stderr, "** Unrecognized parsed pattern item 0x%.8x\n", *pptr);
-#endif
+      PCRE2_DEBUG_UNREACHABLE();
       *errorcodeptr = ERR89;  /* Internal error - unrecognized. */
       return 0;
       }
@@ -9753,7 +9752,8 @@ EXIT:
 return branchlength;
 
 PARSED_SKIP_FAILED:
-*errcodeptr = ERR90;
+PCRE2_DEBUG_UNREACHABLE();
+*errcodeptr = ERR90;  /* Unhandled META code - internal error */
 return -1;
 }
 
@@ -9896,6 +9896,7 @@ for (; *pptr != META_END; pptr++)
     be avoided by providing a proper implementation for all supported cases
     below. */
 
+    PCRE2_DEBUG_UNREACHABLE();
     cb->erroroffset = 0;
     return ERR70;  /* Unrecognized meta code */
 
@@ -10467,6 +10468,7 @@ switch(newline)
   break;
 
   default:
+  PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR56;
   goto HAD_EARLY_ERROR;
   }
@@ -10540,13 +10542,7 @@ if (has_lookbehind)
     }
   memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));
   errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
-  if (errorcode != 0)
-    {
-    /* BUG: check_lookbehinds() is missing code for a valid META */
-    PCRE2_ASSERT(errorcode != ERR70);
-
-    goto HAD_CB_ERROR;
-    }
+  if (errorcode != 0) goto HAD_CB_ERROR;
   }
 
 /* For debugging, there is a function that shows the parsed pattern vector. */
@@ -10738,7 +10734,12 @@ memory as unaddressable, so that any out-of-bound reads can be detected. */
 
 *code++ = OP_END;
 usedlength = code - codestart;
-if (usedlength > length) errorcode = ERR23; else
+if (usedlength > length)
+  {
+  PCRE2_DEBUG_UNREACHABLE();
+  errorcode = ERR23;  /* Overflow of code block - internal error */
+  }
+else
   {
   re->blocksize -= CU2BYTES(length - usedlength);
 #ifdef SUPPORT_VALGRIND
@@ -10791,6 +10792,7 @@ if (errorcode == 0 && cb.had_recurse)
         rgroup = PRIV(find_bracket)(search_from, utf, groupnumber);
         if (rgroup == NULL)
           {
+          PCRE2_DEBUG_UNREACHABLE();
           errorcode = ERR53;
           break;
           }
@@ -10823,7 +10825,11 @@ function call. */
 if (errorcode == 0 && (optim_flags & PCRE2_OPTIM_AUTO_POSSESS) != 0)
   {
   PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
-  if (PRIV(auto_possessify)(temp, &cb) != 0) errorcode = ERR80;
+  if (PRIV(auto_possessify)(temp, &cb) != 0)
+    {
+    PCRE2_DEBUG_UNREACHABLE();
+    errorcode = ERR80;
+    }
   }
 
 /* Failed to compile, or error while post-processing. */
@@ -10978,6 +10984,7 @@ if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
 
   if (PRIV(study)(re) != 0)
     {
+    PCRE2_DEBUG_UNREACHABLE();
     errorcode = ERR31;
     goto HAD_CB_ERROR;
     }
