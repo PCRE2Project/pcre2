@@ -129,3 +129,61 @@ jobs:
       - name: Debug
         if: ${{ failure() && steps.test.outcome == 'failure' }}
         run: type build/Testing/Temporary/LastTest.log
+
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Configure
+        run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake -DCMAKE_BUILD_TYPE=Debug -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -B build
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: LLVM_PROFILE_FILE="coverage-%m.profraw" cmake --build build --target test
+
+      - name: Report
+        run: |
+          LLVM_VER=`clang --version | head -n1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1`
+          echo "Using LLVM version $LLVM_VER"
+
+          # Merge the profiles gathered
+          cd build
+          llvm-profdata-$LLVM_VER merge -sparse coverage-*.profraw -o coverage.profdata
+
+          # Output HTML, for archiving and browsing later
+          llvm-cov-$LLVM_VER show \
+            -format=html -output-dir=coverage-report -show-line-counts-or-regions -show-branches=percent \
+            -instr-profile=coverage.profdata \
+            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+            ../src/ ./
+
+          # Output LCOV-compatible output, for downstream tools
+          llvm-cov-$LLVM_VER export \
+            -format=lcov \
+            -instr-profile=coverage.profdata \
+            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+            ../src/ ./ \
+            > ./coverage-lcov.info
+
+          # Output text summary to build log
+          echo '```' > "$GITHUB_STEP_SUMMARY"
+          llvm-cov-$LLVM_VER report \
+            -instr-profile=coverage.profdata \
+            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+            ../src/ ./ \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Coverage report"
+          path: './build/coverage-report'
+          if-no-files-found: error
