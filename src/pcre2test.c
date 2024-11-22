@@ -8056,6 +8056,7 @@ for (gmatched = 0;; gmatched++)
   if ((dat_datctl.control & (CTL_FINDLIMITS|CTL_FINDLIMITS_NOHEAP)) != 0)
     {
     capcount = 0;  /* This stops compiler warnings */
+    (void)capcount;
 
     if ((dat_datctl.control & CTL_FINDLIMITS_NOHEAP) == 0 &&
         (FLD(compiled_code, executable_jit) == NULL ||

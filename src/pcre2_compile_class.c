@@ -1103,7 +1103,7 @@ while (TRUE)
   int posix_class;
   int taboffset, tabopt;
   uint8_t pbits[32];
-  uint32_t escape, c, d;
+  uint32_t escape, c;
 
   /* Handle POSIX classes such as [:alpha:] etc. */
   switch (META_CODE(meta))
@@ -1408,7 +1408,7 @@ while (TRUE)
   characters are equal, and for hyphens that cannot indicate a range. At
   this point, therefore, no checking is needed. */
 
-  c = d = meta;
+  c = meta;
 
   /* Remember if \r or \n were explicitly used */
 
@@ -1418,6 +1418,8 @@ while (TRUE)
 
   if (*pptr == META_RANGE_LITERAL || *pptr == META_RANGE_ESCAPED)
     {
+    uint32_t d;
+
 #ifdef EBCDIC
     BOOL range_is_literal = (*pptr == META_RANGE_LITERAL);
 #endif

@@ -766,6 +766,7 @@ do
         }
 
       next = 0; /* not used or updated after this point */
+      (void)next;
 
       /* In extended mode we recognize ${name:+set text:unset text} and
       ${name:-default text}. */

@@ -2964,6 +2964,8 @@ ptrdiff_t parsed_pattern_extra_check = 0;
 PCRE2_SPTR ptr_check;
 #endif
 
+PCRE2_ASSERT(parsed_pattern != NULL);
+
 /* Insert leading items for word and line matching (features provided for the
 benefit of pcre2grep). */
 
@@ -7131,6 +7133,7 @@ for (;; pptr++)
     /* Save start of previous item, in case we have to move it up in order to
     insert something before it, and remember what it was. */
 
+    PCRE2_ASSERT(previous != NULL);
     tempcode = previous;
     op_previous = *previous;
 
@@ -10154,6 +10157,7 @@ PCRE2_ZERO_TERMINATED. Check for an overlong pattern. */
 
 if ((zero_terminated = (patlen == PCRE2_ZERO_TERMINATED)))
   patlen = PRIV(strlen)(pattern);
+(void)zero_terminated; /* Silence compiler; only used if Valgrind enabled */
 
 if (patlen > ccontext->max_pattern_length)
   {
