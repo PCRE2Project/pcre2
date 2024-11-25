@@ -8,7 +8,7 @@
 #forbid_utf
 
 /^[\w]+/
-    *** Failers
+\= Expect no match
     École
 
 /^[\w]+/locale=french
@@ -18,21 +18,21 @@
     École
 
 /^[\W]+/locale=french
-    *** Failers
+\= Expect no match
     École
 
 /[\b]/
     \b
-    *** Failers
+\= Expect no match
     a
 
 /[\b]/locale=french
     \b
-    *** Failers
+\= Expect no match
     a
 
 /^\w+/
-    *** Failers
+\= Expect no match
     École
 
 /^\w+/locale=french
@@ -42,12 +42,12 @@
     École
 
 /(.+)\b(.+)/locale=french
-    *** Failers
+\= Expect no match
     École
 
 /École/i
     École
-    *** Failers
+\= Expect no match
     école
 
 /École/i,locale=french
@@ -68,18 +68,21 @@
 
 /^[\xc8-\xc9]/
     École
-    *** Failers 
+\= Expect no match 
     école
 
 /\xb5/i
     µ
-    *** Failers
+\= Expect no match
     \x9c
 
 /ÿ/i
     \xff
-    *** Failers
+\= Expect no match
     y
+
+/(.)\1/i
+    \xfe\xde
 
 /\W+/
     >>>\xaa<<<
@@ -107,4 +110,4 @@
     
 /[[:alpha:]][[:lower:]][[:upper:]]/IB
 
-# End of testinput3 
+# End of wintestinput3 

@@ -8,8 +8,7 @@
 #forbid_utf
 
 /^[\w]+/
-    *** Failers
-No match
+\= Expect no match
     École
 No match
 
@@ -22,30 +21,26 @@ No match
  0: \xc9
 
 /^[\W]+/locale=french
-    *** Failers
- 0: *** 
+\= Expect no match
     École
 No match
 
 /[\b]/
     \b
  0: \x08
-    *** Failers
-No match
+\= Expect no match
     a
 No match
 
 /[\b]/locale=french
     \b
  0: \x08
-    *** Failers
-No match
+\= Expect no match
     a
 No match
 
 /^\w+/
-    *** Failers
-No match
+\= Expect no match
     École
 No match
 
@@ -60,18 +55,14 @@ No match
  2: cole
 
 /(.+)\b(.+)/locale=french
-    *** Failers
- 0: *** Failers
- 1: *** 
- 2: Failers
+\= Expect no match
     École
 No match
 
 /École/i
     École
  0: \xc9cole
-    *** Failers
-No match
+\= Expect no match
     école
 No match
 
@@ -109,26 +100,28 @@ Subject length lower bound = 1
 /^[\xc8-\xc9]/
     École
  0: É
-    *** Failers 
-No match
+\= Expect no match 
     école
 No match
 
 /\xb5/i
     µ
  0: µ
-    *** Failers
-No match
+\= Expect no match
     \x9c
 No match
 
 /ÿ/i
     \xff
  0: ÿ
-    *** Failers
-No match
+\= Expect no match
     y
 No match
+
+/(.)\1/i
+    \xfe\xde
+ 0: þÞ
+ 1: þ
 
 /\W+/
     >>>\xaa<<<
@@ -182,4 +175,4 @@ Starting code units: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
   æ ç è é ê ë ì í î ï ð ñ ò ó ô õ ö ø ù ú û ü ý þ ÿ
 Subject length lower bound = 3
 
-# End of testinput3 
+# End of wintestinput3 

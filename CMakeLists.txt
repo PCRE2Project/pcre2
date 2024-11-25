@@ -1014,13 +1014,6 @@ IF(PCRE2_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(pcre2_jit_test ${PCRE2_JIT_TEST_LIBS})
   ENDIF(PCRE2_SUPPORT_JIT)
 
-  # exes in Debug location tested by the RunTest and RunGrepTest shell scripts
-  # via "make test"
-
-  IF(PCRE2_BUILD_PCRE2GREP)
-    SET(PCRE2GREP_EXE $<TARGET_FILE:pcre2grep>)
-  ENDIF(PCRE2_BUILD_PCRE2GREP)
-
 # =================================================
   # Write out a CTest configuration file
   #
@@ -1082,10 +1075,31 @@ if errorlevel 1 exit /b 1
 echo RunTest.bat tests successfully completed
 ")
 
-  ADD_TEST(NAME pcre2_test_bat
-  COMMAND pcre2_test.bat)
-  SET_TESTS_PROPERTIES(pcre2_test_bat PROPERTIES
-  PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
+    ADD_TEST(NAME pcre2_test_bat
+      COMMAND pcre2_test.bat)
+    SET_TESTS_PROPERTIES(pcre2_test_bat PROPERTIES
+      PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
+
+    IF(PCRE2_BUILD_PCRE2GREP)
+      FILE(WRITE ${PROJECT_BINARY_DIR}/pcre2_grep_test.bat
+      "\@REM This is a generated file.
+\@echo off
+setlocal
+SET srcdir=\"${winsrc}\"
+SET pcre2test=\"${winbin}\\pcre2test.exe\"
+if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
+SET pcre2grep=\"${winbin}\\pcre2grep.exe\"
+if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2grep=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2grep.exe\"
+call %srcdir%\\RunGrepTest.bat
+if errorlevel 1 exit /b 1
+echo RunGrepTest.bat tests successfully completed
+")
+
+      ADD_TEST(NAME pcre2_grep_test_bat
+        COMMAND pcre2_grep_test.bat)
+      SET_TESTS_PROPERTIES(pcre2_grep_test_bat PROPERTIES
+        PASS_REGULAR_EXPRESSION "RunGrepTest\\.bat tests successfully completed")
+    ENDIF(PCRE2_BUILD_PCRE2GREP)
 
     IF("$ENV{OSTYPE}" STREQUAL "msys")
       # Both the sh and bat file versions of RunTest are run if make test is used

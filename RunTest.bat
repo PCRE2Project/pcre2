@@ -141,9 +141,9 @@ if "%all%" == "yes" (
   set do7=yes
   set do8=yes
   set do9=yes
-  set do10=no
+  set do10=yes
   set do11=yes
-  set do12=no
+  set do12=yes
   set do13=yes
   set do14=yes
   set do15=yes
@@ -259,7 +259,15 @@ if [%3] == [] (
 )
 
 if %1 == 8 (
-  set outnum=8-%bits%-%link_size%
+  set outnum=%1-%bits%-%link_size%
+) else if %1 == 11 (
+  set outnum=%1-%bits%
+) else if %1 == 12 (
+  set outnum=%1-%bits%
+) else if %1 == 14 (
+  set outnum=%1-%bits%
+) else if %1 == 22 (
+  set outnum=%1-%bits%
 ) else (
   set outnum=%1
 )
@@ -281,21 +289,7 @@ if errorlevel 1 (
   %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -70,-62,-2,-1,0,100,101,191,300 >>%2%bits%\%testoutput%
 )
 
-set type=
-if [%1]==[11] (
-  set type=-%bits%
-)
-if [%1]==[12] (
-  set type=-%bits%
-)
-if [%1]==[14] (
-  set type=-%bits%
-)
-if [%1]==[22] (
-  set type=-%bits%
-)
-
-fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput% >NUL
+fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput% >NUL
 
 if errorlevel 1 (
   echo.          failed comparison: fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
@@ -306,7 +300,7 @@ if errorlevel 1 (
     echo.
     goto :eof
 )
-  fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput%
+  fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
 
   set failed="yes"
   goto :eof

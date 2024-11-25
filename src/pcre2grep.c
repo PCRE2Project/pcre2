@@ -2529,6 +2529,7 @@ while (length > 0)
 necessary, otherwise assume fork(). */
 
 #ifdef WIN32
+(void)fflush(stdout);
 result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector);
 
 #elif defined __VMS
@@ -2552,6 +2553,7 @@ result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector);
   }
 
 #else  /* Neither Windows nor VMS */
+(void)fflush(stdout);
 pid = fork();
 if (pid == 0)
   {
@@ -2561,9 +2563,7 @@ if (pid == 0)
   }
 else if (pid > 0)
   {
-  (void)fflush(stdout);
   (void)waitpid(pid, &result, 0);
-  (void)fflush(stdout);
   }
 #endif  /* End Windows/VMS/other handling */
 

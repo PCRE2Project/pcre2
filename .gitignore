@@ -1,6 +1,7 @@
 # Public .gitignore file for PCRE2
 
 build/
+build-*/
 
 *.a
 *.gcda
