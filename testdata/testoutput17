@@ -506,7 +506,7 @@ Failed: error -46: JIT stack limit reached
 /[^\xff]((?1))/BI
 ------------------------------------------------------------------
         Bra
-        [^\x{ff}]
+        [^\x{ff}] (not)
         CBra 1
         Recurse
         Ket

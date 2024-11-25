@@ -453,7 +453,7 @@ Failed: error -52: nested recursion at the same subject position
 /[^\xff]((?1))/BI
 ------------------------------------------------------------------
         Bra
-        [^\x{ff}]
+        [^\x{ff}] (not)
         CBra 1
         Recurse
         Ket
