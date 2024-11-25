@@ -485,7 +485,7 @@ static const uint32_t char_list_starts[] = {
 };
 
 static class_ranges *
-optimize_class(uint32_t *start_ptr, uint32_t options,
+compile_optimize_class(uint32_t *start_ptr, uint32_t options,
   uint32_t xoptions, compile_block *cb)
 {
 class_ranges* cranges;
@@ -1047,7 +1047,7 @@ if (utf)
   {
   if (lengthptr != NULL)
     {
-    cranges = optimize_class(pptr, options, xoptions, cb);
+    cranges = compile_optimize_class(pptr, options, xoptions, cb);
 
     if (cranges == NULL)
       {
