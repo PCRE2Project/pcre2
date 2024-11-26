@@ -2820,7 +2820,7 @@ No match
     !\x{c0}+++++
  0: \x{c0}++
 
-# Without PCRE_UCP, non-ASCII always fail, even if < 256  
+# Without PCRE2_UCP, non-ASCII always fail, even if < 256  
 
 /\b...\B/utf
     abc_
@@ -2835,7 +2835,7 @@ No match
     !\x{c0}+++++
 No match
 
-# With PCRE_UCP, non-UTF8 chars that are < 256 still check properties  
+# With PCRE2_UCP, non-UTF8 chars that are < 256 still check properties  
 
 /\b...\B/ucp
     abc_

@@ -91,4 +91,4 @@ if (m > PCRE2_SIZE_MAX) return TRUE;
 return FALSE;
 }
 
-/* End of pcre_chkdint.c */
+/* End of pcre2_chkdint.c */

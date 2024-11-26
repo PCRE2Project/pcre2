@@ -68,7 +68,7 @@ The Unicode property types (\P and \p) have to be present to fill out the table
 because of what their opcode values are, but the table values should always be
 zero because property types are handled separately in the code. The last four
 columns apply to items that cannot be repeated, so there is no need to have
-rows for them. Note that OP_DIGIT etc. are generated only when PCRE_UCP is
+rows for them. Note that OP_DIGIT etc. are generated only when PCRE2_UCP is
 *not* set. When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
 
 #define APTROWS (LAST_AUTOTAB_LEFT_OP - FIRST_AUTOTAB_OP + 1)

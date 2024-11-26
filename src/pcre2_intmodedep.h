@@ -47,7 +47,7 @@ to have access to the hidden structures at all supported widths.
 
 Some of the mode-dependent macros are required at different widths for
 different parts of the pcre2test code (in particular, the included
-pcre_printint.c file). We undefine them here so that they can be re-defined for
+pcre2_printint.c file). We undefine them here so that they can be re-defined for
 multiple inclusions. Not all of these are used in pcre2test, but it's easier
 just to undefine them all. */
 
@@ -826,7 +826,7 @@ typedef struct heapframe {
   to RRMATCH(), but which do not need to be copied to new frames. */
 
   PCRE2_SPTR ecode;          /* The current position in the pattern */
-  PCRE2_SPTR temp_sptr[2];   /* Used for short-term PCRE_SPTR values */
+  PCRE2_SPTR temp_sptr[2];   /* Used for short-term PCRE2_SPTR values */
   PCRE2_SIZE length;         /* Used for character, string, or code lengths */
   PCRE2_SIZE back_frame;     /* Amount to subtract on RRETURN */
   PCRE2_SIZE temp_size;      /* Used for short-term PCRE2_SIZE values */

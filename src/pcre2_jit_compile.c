@@ -13073,7 +13073,7 @@ common->name_entry_size = re->name_entry_size;
 common->unset_backref = (re->overall_options & PCRE2_MATCH_UNSET_BACKREF) != 0;
 common->alt_circumflex = (re->overall_options & PCRE2_ALT_CIRCUMFLEX) != 0;
 #ifdef SUPPORT_UNICODE
-/* PCRE_UTF[16|32] have the same value as PCRE_UTF8. */
+/* PCRE2_UTF[16|32] have the same value as PCRE2_UTF8. */
 common->utf = (re->overall_options & PCRE2_UTF) != 0;
 common->ucp = (re->overall_options & PCRE2_UCP) != 0;
 if (common->utf)
@@ -13488,7 +13488,7 @@ common->local_quit_available = FALSE;
 common->quit_label = quit_label;
 SLJIT_ASSERT(common->restore_end_ptr == 0);
 
-/* Allocating stack, returns with PCRE_ERROR_JIT_STACKLIMIT if fails. */
+/* Allocating stack, returns with PCRE2_ERROR_JIT_STACKLIMIT if fails. */
 /* This is a (really) rare case. */
 set_jumps(common->stackalloc, LABEL());
 /* RETURN_ADDR is not a saved register. */
