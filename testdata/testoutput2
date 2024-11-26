@@ -19672,7 +19672,7 @@ Failed: error 203 at offset 3: using callouts is disabled by the application
 Failed: error 106 at offset 4: missing terminating ] for character class
 
 /[a[B]/alt_extended_class
-Failed: error 212 at offset 5: missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+Failed: error 212 at offset 5: missing terminating ] for extended character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
 
 /[a[B]]C/B,alt_extended_class
 ------------------------------------------------------------------
@@ -20703,67 +20703,67 @@ Failed: error 106 at offset 5: missing terminating ] for character class
 Failed: error 106 at offset 6: missing terminating ] for character class
 
 /[a--[a]/alt_extended_class
-Failed: error 212 at offset 7: missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+Failed: error 212 at offset 7: missing terminating ] for extended character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
 
 /[a--[a]--/alt_extended_class
-Failed: error 212 at offset 9: missing terminating ] for character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+Failed: error 212 at offset 9: missing terminating ] for extended character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
 
 /[a--]/alt_extended_class
-Failed: error 210 at offset 5: expected operand after operator in character class
+Failed: error 210 at offset 5: expected operand after operator in extended character class
 
 /[--a]/alt_extended_class
-Failed: error 209 at offset 3: unexpected operator in character class (no preceding operand)
+Failed: error 209 at offset 3: unexpected operator in extended character class (no preceding operand)
 
 /[^--a]/alt_extended_class
-Failed: error 209 at offset 4: unexpected operator in character class (no preceding operand)
+Failed: error 209 at offset 4: unexpected operator in extended character class (no preceding operand)
 
 /[--]/alt_extended_class
-Failed: error 209 at offset 3: unexpected operator in character class (no preceding operand)
+Failed: error 209 at offset 3: unexpected operator in extended character class (no preceding operand)
 
 /[a---b]/alt_extended_class
-Failed: error 208 at offset 5: invalid operator in character class
+Failed: error 208 at offset 5: invalid operator in extended character class
 
 /[a----b]/alt_extended_class
-Failed: error 208 at offset 6: invalid operator in character class
+Failed: error 208 at offset 6: invalid operator in extended character class
 
 /[a&&&b]/alt_extended_class
-Failed: error 208 at offset 5: invalid operator in character class
+Failed: error 208 at offset 5: invalid operator in extended character class
 
 /[a|||b]/alt_extended_class
-Failed: error 208 at offset 5: invalid operator in character class
+Failed: error 208 at offset 5: invalid operator in extended character class
 
 /[a~~~b]/alt_extended_class
-Failed: error 208 at offset 5: invalid operator in character class
+Failed: error 208 at offset 5: invalid operator in extended character class
 
 /[a~~~~b]/alt_extended_class
-Failed: error 208 at offset 6: invalid operator in character class
+Failed: error 208 at offset 6: invalid operator in extended character class
 
 /[a~~/alt_extended_class
 Failed: error 106 at offset 4: missing terminating ] for character class
 
 /[a~~~/alt_extended_class
-Failed: error 208 at offset 5: invalid operator in character class
+Failed: error 208 at offset 5: invalid operator in extended character class
 
 /[a~~~~/alt_extended_class
-Failed: error 208 at offset 6: invalid operator in character class
+Failed: error 208 at offset 6: invalid operator in extended character class
 
 /[a||b&&c]/alt_extended_class
-Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+Failed: error 211 at offset 7: square brackets needed to clarify operator precedence in extended character class
 
 /[a||b~~c]/alt_extended_class
-Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+Failed: error 211 at offset 7: square brackets needed to clarify operator precedence in extended character class
 
 /[a~~b&&c]/alt_extended_class
-Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+Failed: error 211 at offset 7: square brackets needed to clarify operator precedence in extended character class
 
 /[a--b~~c]/alt_extended_class
-Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+Failed: error 211 at offset 7: square brackets needed to clarify operator precedence in extended character class
 
 /[a--b&&c]/alt_extended_class
-Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+Failed: error 211 at offset 7: square brackets needed to clarify operator precedence in extended character class
 
 /[a||b--c]/alt_extended_class
-Failed: error 211 at offset 7: brackets needed to clarify operator precedence in character class
+Failed: error 211 at offset 7: square brackets needed to clarify operator precedence in extended character class
 
 /[a||[b--c]]/alt_extended_class
     a
@@ -20802,10 +20802,10 @@ Failed: error 150 at offset 5: invalid range in character class
 No match
 
 /[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[z]&&a]]]]]]]]]]]]]]]/alt_extended_class
-Failed: error 207 at offset 115: character class nesting is too deep
+Failed: error 207 at offset 115: extended character class nesting is too deep
 
 /[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
-Failed: error 207 at offset 118: character class nesting is too deep
+Failed: error 207 at offset 118: extended character class nesting is too deep
 
 /[z&/alt_extended_class
 Failed: error 106 at offset 3: missing terminating ] for character class
@@ -20865,25 +20865,25 @@ Failed: error 103 at offset 6: unrecognized character follows \
 # We can't test error cases in testinput1
 
 /(?[])/
-Failed: error 214 at offset 4: empty expression in character class
+Failed: error 214 at offset 4: empty expression in extended character class
 
 /(?[/
 Failed: error 106 at offset 3: missing terminating ] for character class
 
 /(?[]/
-Failed: error 214 at offset 4: empty expression in character class
+Failed: error 214 at offset 4: empty expression in extended character class
 
 /(?[\n/
 Failed: error 106 at offset 5: missing terminating ] for character class
 
 /(?[\n]/
-Failed: error 215 at offset 6: unexpected ] with no following parenthesis in (?[...
+Failed: error 215 at offset 6: terminating ] with no following closing parenthesis in (?[...]
 
 /(?[\n]z)/
-Failed: error 215 at offset 6: unexpected ] with no following parenthesis in (?[...
+Failed: error 215 at offset 6: terminating ] with no following closing parenthesis in (?[...]
 
 /(?[\n] )/
-Failed: error 215 at offset 6: unexpected ] with no following parenthesis in (?[...
+Failed: error 215 at offset 6: terminating ] with no following closing parenthesis in (?[...]
 
 /(?[(/
 Failed: error 114 at offset 4: missing closing parenthesis
@@ -20895,16 +20895,16 @@ Failed: error 106 at offset 5: missing terminating ] for character class
 Failed: error 106 at offset 6: missing terminating ] for character class
 
 /(?[ \n + () ])/
-Failed: error 214 at offset 11: empty expression in character class
+Failed: error 214 at offset 11: empty expression in extended character class
 
 /(?[1])/
-Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+Failed: error 216 at offset 4: unexpected character in (?[...]) extended character class
 
 /(?[a])/
-Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+Failed: error 216 at offset 4: unexpected character in (?[...]) extended character class
 
 /(?[a-c])/
-Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+Failed: error 216 at offset 4: unexpected character in (?[...]) extended character class
 
 /(?[(])/
 Failed: error 114 at offset 4: missing closing parenthesis
@@ -20916,49 +20916,49 @@ Failed: error 114 at offset 6: missing closing parenthesis
 Failed: error 122 at offset 6: unmatched closing parenthesis
 
 /(?[^\n])/
-Failed: error 209 at offset 4: unexpected operator in character class (no preceding operand)
+Failed: error 209 at offset 4: unexpected operator in extended character class (no preceding operand)
 
 /(?[ \n \t ])/
-Failed: error 213 at offset 9: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 9: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \d \t ])/
-Failed: error 213 at offset 9: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 9: unexpected expression in extended character class (no preceding operator)
 
 /(?[ [\n] \t ])/
-Failed: error 213 at offset 11: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 11: unexpected expression in extended character class (no preceding operator)
 
 /(?[ (\n) \t ])/
-Failed: error 213 at offset 11: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 11: unexpected expression in extended character class (no preceding operator)
 
 /(?[ [:alpha:] \t ])/
-Failed: error 213 at offset 16: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 16: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \n + \t \d ])/
-Failed: error 213 at offset 14: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 14: unexpected expression in extended character class (no preceding operator)
 
 /(?[ !\n \t ])/
-Failed: error 213 at offset 10: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 10: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \n [:alpha:] ])/
-Failed: error 213 at offset 16: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 16: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \n [\d] ])/
-Failed: error 213 at offset 8: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 8: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \n (\t) ])/
-Failed: error 213 at offset 8: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 8: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \n !\t ])/
-Failed: error 213 at offset 8: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 8: unexpected expression in extended character class (no preceding operator)
 
 /(?[ \n \t ])/
-Failed: error 213 at offset 9: unexpected expression in character class (no preceding operator)
+Failed: error 213 at offset 9: unexpected expression in extended character class (no preceding operator)
 
 /(?[:graph:])/
-Failed: error 216 at offset 4: unexpected character in (?[...]) character class
+Failed: error 216 at offset 4: unexpected character in (?[...]) extended character class
 
 /(?[\Qn\E])/
-Failed: error 216 at offset 6: unexpected character in (?[...]) character class
+Failed: error 216 at offset 6: unexpected character in (?[...]) extended character class
 
 # maximum depth tests
 
@@ -20972,13 +20972,13 @@ No match
 No match
 
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+([\n]&\n))))))))))))))])/
-Failed: error 207 at offset 158: character class nesting is too deep
+Failed: error 207 at offset 158: extended character class nesting is too deep
 
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
-Failed: error 207 at offset 161: character class nesting is too deep
+Failed: error 207 at offset 161: extended character class nesting is too deep
 
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
-Failed: error 207 at offset 158: character class nesting is too deep
+Failed: error 207 at offset 158: extended character class nesting is too deep
 
 # --------------
 

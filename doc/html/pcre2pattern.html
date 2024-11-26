@@ -1451,13 +1451,12 @@ is actually required as a member of the class, ensure it is not the first
 character, or escape it with a backslash.
 </P>
 <P>
-For example, the character class [aeiou] matches any lower case vowel, while
-[^aeiou] matches any character that is not a lower case vowel. Note that a
-circumflex is just a convenient notation for specifying the characters that
-are in the class by enumerating those that are not. A class that starts with a
-circumflex is not an assertion; it still consumes a character from the subject
-string, and therefore it fails if the current pointer is at the end of the
-string.
+For example, the character class [aeiou] matches any lower case English vowel,
+whereas [^aeiou] matches all other characters. Note that a circumflex is just a
+convenient notation for specifying the characters that are in the class by
+enumerating those that are not. A class that starts with a circumflex is not an
+assertion; it still consumes a character from the subject string, and therefore
+it fails to match if the current pointer is at the end of the string.
 </P>
 <P>
 Characters in a class may be specified by their code points using \o, \x, or
@@ -1467,7 +1466,10 @@ a caseless [aeiou] matches "A" as well as "a", and a caseless [^aeiou] does not
 match "A", whereas a caseful version would. Note that there are two ASCII
 characters, K and S, that, in addition to their lower case ASCII equivalents,
 are case-equivalent with Unicode U+212A (Kelvin sign) and U+017F (long S)
-respectively when either PCRE2_UTF or PCRE2_UCP is set.
+respectively when either PCRE2_UTF or PCRE2_UCP is set. If you do not want
+these ASCII/non-ASCII case equivalences, you can suppress them by setting
+PCRE2_EXTRA_CASELESS_RESTRICT, either as an option in a compile context, or by
+including (*CASELESS_RESTRICT) or (?r) within a pattern.
 </P>
 <P>
 Characters that might indicate line breaks are never treated in any special way
@@ -1510,9 +1512,9 @@ It is not possible to have the literal character "]" as the end character of a
 range. A pattern such as [W-]46] is interpreted as a class of two characters
 ("W" and "-") followed by a literal string "46]", so it would match "W46]" or
 "-46]". However, if the "]" is escaped with a backslash it is interpreted as
-the end of range, so [W-\]46] is interpreted as a class containing a range
-followed by two other characters. The octal or hexadecimal representation of
-"]" can also be used to end a range.
+the end of a range, so [W-\]46] is interpreted as a class containing a range
+and two other characters. The octal or hexadecimal representation of "]" can
+also be used to end a range.
 </P>
 <P>
 Ranges normally include all code points between the start and end characters,
@@ -1549,37 +1551,44 @@ whereas [\w] includes underscore. A positive character class should be read as
 something AND NOT ...".
 </P>
 <P>
-The only metacharacters that are recognized in character classes are backslash,
-hyphen (only where it can be interpreted as specifying a range), circumflex
-(only at the start), opening square bracket (only when it can be interpreted as
-introducing a POSIX class name, or for a special compatibility feature - see
-the next two sections), and the terminating closing square bracket. However,
-escaping other non-alphanumeric characters does no harm.
+The metacharacters that are recognized in character classes are backslash,
+hyphen (when it can be interpreted as specifying a range), circumflex
+(only at the start), and the terminating closing square bracket. An opening 
+square bracket is also special when it can be interpreted as introducing a 
+POSIX class (see
+<a href="#posixclasses">"Posix character classes"</a>
+below), or a special compatibility feature (see
+<a href="#wordboundcompat">"Compatibility feature for word boundaries"</a>
+below. Escaping any non-alphanumeric character in a class turns it into a 
+literal, whether or not it would otherwise be a metacharacter.
 </P>
 <br><a name="SEC10" href="#TOC1">PERL EXTENDED CHARACTER CLASSES</a><br>
 <P>
-PCRE2 supports Perl's (?[...]) extended character class syntax. This can
-be used to perform set operations, such intersection.
+From release 10.45 PCRE2 supports Perl's (?[...]) extended character class
+syntax. This can be used to perform set operations such intersection on
+character classes.
 </P>
 <P>
 The syntax permitted within (?[...]) is quite different to ordinary character
 classes. Inside the extended class, there is an expression syntax consisting of
-"atoms", operators, and ordinary parentheses "()" used for grouping.
+"atoms", operators, and ordinary parentheses "()" used for grouping. Such
+classes always have the Perl /xx modifier (PCRE2 option PCRE2_EXTENDED_MORE)
+turned on within them. This means that literal space and tab characters are
+ignored everywhere in the class.
 </P>
 <P>
-The allowed atoms are any escaped characters or sets such as \n or \d, POSIX
-classes such as [:alpha:], and any ordinary character class may be nested as an
-atom within an extended class. For example, in (?[\d & [...]]) the nested
-ordinary class [...] follows the ordinary rules for character classes, in which
-parentheses are not metacharacters, and character literals and ranges are
-permitted.
+The allowed atoms are individual characters specified by escape sequences such
+as \n or \x{123}, character types such as \d, POSIX classes such as
+[:alpha:], and nested ordinary (non-extended) character classes. For example,
+in (?[\d & [...]]) the nested class [...] follows the usual rules for ordinary
+character classes, in which parentheses are not metacharacters, and character
+literals and ranges are permitted.
 </P>
 <P>
-However, when outside a nested ordinary character class, such as in
-(?[... + (...)]), character literals and ranges may not be used, as they are not
-atoms in the extended syntax. The extended syntax does not introduce any
-additional escape sequences, so (?[\y]) is an unknown escape, as it would be
-inside [\y].
+Character literals and ranges may not appear outside a nested ordinary
+character class because they are not atoms in the extended syntax. The extended
+syntax does not introduce any additional escape sequences, so (?[\y]) is an
+unknown escape, as it would be in [\y].
 </P>
 <P>
 In the extended syntax, ^ does not negate a class (except within an
@@ -1593,18 +1602,14 @@ The binary operators are "&" (intersection), "|" or "+" (union), "-"
 precedence. The one prefix unary operator is "!" (complement), with highest
 precedence.
 </P>
-<P>
-A Perl extended character class always has the /xx modifier turned on within
-it.
-</P>
 <br><a name="SEC11" href="#TOC1">UTS#18 EXTENDED CHARACTER CLASSES</a><br>
 <P>
 The PCRE2_ALT_EXTENDED_CLASS option enables an alternative to Perl's (?[...])
 syntax, allowing instead extended class behaviour inside ordinary [...]
 character classes. This altered syntax for [...] classes is loosely described
-by the Unicode standard UTS#18. (The PCRE2_ALT_EXTENDED_CLASS option does not
-prevent use of (?[...]) classes, but only changes the meaning of [...]
-classes.)
+by the Unicode standard UTS#18. The PCRE2_ALT_EXTENDED_CLASS option does not
+prevent use of (?[...]) classes; it just changes the meaning of all
+[...] classes that are not nested inside a Perl (?[...]) class. 
 </P>
 <P>
 Firstly, in ordinary Perl [...] syntax, an expression such as "[a[]" is a
@@ -1613,25 +1618,42 @@ classes the "[" character becomes an additional metacharacter within classes,
 denoting the start of a nested class, so a literal "[" must be escaped as "\[".
 </P>
 <P>
-Secondly, within the UTS#18 extended syntax, there are additional operators
-"||", "&&", "--" and "~~" which denote character class union, intersection,
-subtraction, and symmetric difference respectively. In standard Perl syntax,
-these would simply be needlessly-repeated literals (except for "-" which can
-denote a range). These operators can be used in constructs such as
-[\p{L}--[QW]] for "Unicode letters, other than Q and W". A literal "-" at
-the end of a range must be escaped (so while "[--1]" in Perl syntax is the
-range from hyphen to "1", it must be escaped as "[\--1]" in UTS#18 extended
-classes).
+Secondly, within the UTS#18 extended syntax, there are operators "||", "&&",
+"--" and "~~" which denote character class union, intersection, subtraction,
+and symmetric difference respectively. In standard Perl syntax, these would
+simply be needlessly-repeated literals (except for "--" which could be the 
+start of a range). In UTS#18 extended classes these operators can be used in
+constructs such as [\p{L}--[QW]] for "Unicode letters, other than Q and W". A
+literal "-" at the end of a range must be escaped, so while "[--1]" in Perl
+syntax is the range from hyphen to "1", it must be escaped as "[\--1]" in
+UTS#18 extended classes.
 </P>
 <P>
-The specific rules in PCRE2 are: Classes can be nested, for example
-[...[B]...[^C]...]. The individual class items (literal characters, literal
-ranges, properties such as \d or \p{...}, and nested classes) can be
-combined by juxtaposition or by an operator "||", "&&", "--", or "~~".
-Juxtaposition is the implicit union operator, and binds more tightly than any
-explicit operator. Precedence between the explicit operators is not defined,
-so mixing operators is a syntax error (thus [A&&B--C] is an error, but
-[A&&[B--C]] is accepted).
+Unlike Perl's (?[...]) extended classes, the PCRE2_EXTENDED_MORE option to 
+ignore space and tab characters is not automatically enabled for UTS#18 
+extended classes, but it is honoured if set.
+</P>
+<P>
+Extended UTS#18 classes can be nested, and nested classes are themselves
+extended classes (unlike Perl, where nested classes must be simple classes).
+For example, [\p{L}&&[\p{Thai}||\p{Greek}]] matches any letter that is in 
+the Thai or Greek scripts. Note that this means that no special grouping 
+characters (such as the parentheses used in Perl's (?[...]) class syntax) are 
+needed.
+</P>
+<P>
+Individual class items (literal characters, literal ranges, properties such as
+\d or \p{...}, and nested classes) can be combined by juxtaposition or by an
+operator. Juxtaposition is the implicit union operator, and binds more tightly
+than any explicit operator. Thus a sequence of literals and/or ranges behaves
+as if it is enclosed in square brackets. For example, [A-Z0-9&&[^E8]] is the
+same as [[A-Z0-9]&&[^E8]], which matches any upper case alphanumeric character
+except "E" or "8".
+</P>
+<P>
+Precedence between the explicit operators is not defined, so mixing operators
+is a syntax error. For example, [A&&B--C] is an error, but [A&&[B--C]] is
+valid.
 </P>
 <P>
 This is an emerging syntax which is being adopted gradually across the regex
@@ -1645,16 +1667,16 @@ extended classes, but with slight incompatibilities ([A||B&&C] is parsed as
 </P>
 <P>
 PCRE2's syntax adds syntax restrictions similar to ECMASCript's /v flag, so
-that all the extended classes accepted as valid by PCRE2 have the property
-that they are interpreted either with the same behaviour, or as invalid, by
-all other major engines. Please file an issue if you are aware of cross-engine
-differences in behaviour between PCRE2 and another major engine.
-</P>
+that all the UTS#18 extended classes accepted as valid by PCRE2 have the
+property that they are interpreted either with the same behaviour, or as
+invalid, by all other major engines. Please file an issue if you are aware of
+cross-engine differences in behaviour between PCRE2 and another major engine.
+<a name="posixclasses"></a></P>
 <br><a name="SEC12" href="#TOC1">POSIX CHARACTER CLASSES</a><br>
 <P>
 Perl supports the POSIX notation for character classes. This uses names
 enclosed by [: and :] within the enclosing square brackets. PCRE2 also supports
-this notation. For example,
+this notation, in both ordinary and extended classes. For example,
 <pre>
   [01[:alpha:]%]
 </pre>
@@ -1740,7 +1762,7 @@ property.
 [:xdigit:]
 In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
 versions of those characters, whose Unicode code points start at U+FF10. This
-is a change that was made in PCRE release 10.43 for Perl compatibility.
+is a change that was made in PCRE2 release 10.43 for Perl compatibility.
 </P>
 <P>
 The other POSIX classes are unchanged by PCRE2_UCP, and match only characters
@@ -1753,7 +1775,7 @@ just [:digit:] and [:xdigit:]. Within a pattern, this can be set and unset by
 (?aT) and (?-aT). The PCRE2_EXTRA_ASCII_POSIX option disables UCP processing
 for all POSIX classes, including [:digit:] and [:xdigit:]. Within a pattern,
 (?aP) and (?-aP) set and unset both these options for consistency.
-</P>
+<a name="wordboundcompat"></a></P>
 <br><a name="SEC13" href="#TOC1">COMPATIBILITY FEATURE FOR WORD BOUNDARIES</a><br>
 <P>
 In the POSIX.2 compliant library that was included in 4.4BSD Unix, the ugly
@@ -3598,8 +3620,9 @@ present. When one of these optimizations bypasses the running of a match, any
 included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE2_NO_START_OPTIMIZE option
 when calling <b>pcre2_compile()</b>, by calling <b>pcre2_set_optimize()</b> with a
-PCRE_START_OPTIMIZE_OFF directive, or by starting the pattern with (*NO_START_OPT).
-There is more discussion of this option in the section entitled
+PCRE2_START_OPTIMIZE_OFF directive, or by starting the pattern with
+(*NO_START_OPT). There is more discussion of this option in the section
+entitled
 <a href="pcre2api.html#compiling">"Compiling a pattern"</a>
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
@@ -4078,7 +4101,7 @@ Cambridge, England.
 </P>
 <br><a name="SEC35" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 November 2024
+Last updated: 26 November 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

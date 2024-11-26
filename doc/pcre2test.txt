@@ -71,26 +71,25 @@ INPUT ENCODING
 
        When testing the 16-bit or 32-bit libraries, there is a need to be able
        to  generate character code points greater than 255 in the strings that
-       are passed to the library. For subject lines, backslash escapes can  be
-       used.  In addition, when the utf modifier (see "Setting compilation op-
-       tions" below) is set, the pattern and any following subject  lines  are
-       interpreted  as UTF-8 strings and translated to UTF-16 or UTF-32 as ap-
-       propriate.
+       are passed to the library. For subject lines and some  patterns,  back-
+       slash  escapes  can  be  used.  In addition, when the utf modifier (see
+       "Setting compilation options" below) is set, the pattern and  any  fol-
+       lowing subject lines are interpreted as UTF-8 strings and translated to
+       UTF-16 or UTF-32 as appropriate.
 
-       For non-UTF testing of wide characters, the utf8_input modifier can  be
-       used.  This  is  mutually  exclusive  with  utf, and is allowed only in
-       16-bit or 32-bit mode. It causes  the  pattern  and  following  subject
-       lines  to be treated as UTF-8 according to the original definition (RFC
+       For  non-UTF testing of wide characters, the utf8_input modifier can be
+       used. This is mutually exclusive with  utf,  and  is  allowed  only  in
+       16-bit  or  32-bit  mode.  It  causes the pattern and following subject
+       lines to be treated as UTF-8 according to the original definition  (RFC
        2279), which allows for character values up to 0x7fffffff. Each charac-
-       ter is placed in one 16-bit or 32-bit code unit (in  the  16-bit  case,
+       ter  is  placed  in one 16-bit or 32-bit code unit (in the 16-bit case,
        values greater than 0xffff cause an error to occur).
 
-       UTF-8  (in  its  original definition) is not capable of encoding values
-       greater than 0x7fffffff, but such values can be handled by  the  32-bit
+       UTF-8 (in its original definition) is not capable  of  encoding  values
+       greater  than  0x7fffffff, but such values can be handled by the 32-bit
        library. When testing this library in non-UTF mode with utf8_input set,
        if any character is preceded by the byte 0xff (which is an invalid byte
-       in  UTF-8)  0x80000000  is  added to the character's value. This is the
-       only way of passing such code points in a pattern string.  For  subject
+       in UTF-8) 0x80000000 is added to the  character's  value.  For  subject
        strings, using an escape sequence is preferable.
 
 
@@ -475,39 +474,47 @@ SUBJECT LINE SYNTAX
        modifier  was set for the pattern. The following provide a means of en-
        coding non-printing characters in a visible way:
 
-         \a         alarm (BEL, \x07)
-         \b         backspace (\x08)
-         \e         escape (\x27)
-         \f         form feed (\x0c)
-         \n         newline (\x0a)
-         \r         carriage return (\x0d)
-         \t         tab (\x09)
-         \v         vertical tab (\x0b)
-         \nnn       octal character (up to 3 octal digits); always
-                      a byte unless > 255 in UTF-8 or 16-bit or 32-bit mode
-         \o{dd...}  octal character (any number of octal digits}
-         \xhh       hexadecimal byte (up to 2 hex digits)
-         \x{hh...}  hexadecimal character (any number of hex digits)
+         \a          alarm (BEL, \x07)
+         \b          backspace (\x08)
+         \e          escape (\x27)
+         \f          form feed (\x0c)
+         \n          newline (\x0a)
+         \N{U+hh...} unicode character (any number of hex digits)
+         \r          carriage return (\x0d)
+         \t          tab (\x09)
+         \v          vertical tab (\x0b)
+         \ddd        octal number (up to 3 octal digits); represent a single
+                       code point unless larger than 255 with  the  8-bit  li-
+       brary
+         \o{dd...}   octal number (any number of octal digits} representing a
+                       character in UTF mode or a code point
+         \xhh        hexadecimal byte (up to 2 hex digits)
+         \x{hh...}   hexadecimal number (up to 8 hex digits) representing a
+                       character in UTF mode or a code point
 
-       The use of \x{hh...} is not dependent on the use of the utf modifier on
-       the pattern. It is recognized always. There may be any number of  hexa-
-       decimal  digits  inside  the  braces; invalid values provoke error mes-
-       sages.
+       Invoking  \N{U+hh...}  or  \x{hh...} doesn't require the use of the utf
+       modifier on the pattern. It is always recognized. There may be any num-
+       ber of hexadecimal digits inside the braces; invalid values provoke er-
+       ror messages but when using \N{U+hh...} with some invalid unicode char-
+       acters they will be accepted with a warning instead.
 
-       Note that \xhh specifies one byte rather than one  character  in  UTF-8
-       mode;  this  makes it possible to construct invalid UTF-8 sequences for
-       testing purposes. On the other hand, \x{hh} is interpreted as  a  UTF-8
-       character  in UTF-8 mode, generating more than one byte if the value is
-       greater than 127.  When testing the 8-bit library not  in  UTF-8  mode,
-       \x{hh}  generates  one byte for values that could fit on it, and causes
-       an error for greater values.
+       Note that even in UTF-8 mode, \xhh (and depending of how  large,  \ddd)
+       describe  one byte rather than one character; this makes it possible to
+       construct invalid UTF-8 sequences for testing purposes.  On  the  other
+       hand, \x{hh...} is interpreted as a UTF-8 character in UTF-8 mode, only
+       generating  more  than  one  byte  if the value is greater than 127. To
+       avoid the ambiguity it is preferred to use \N{U+hh...} when  describing
+       characters.  When  testing  the 8-bit library not in UTF-8 mode, \x{hh}
+       generates one byte for values that could fit on it, and causes an error
+       for greater values.
 
-       In UTF-16 mode, all 4-digit \x{hhhh} values are accepted. This makes it
-       possible to construct invalid UTF-16 sequences for testing purposes.
+       When testing te  16-bit  library,  not  in  UTF-16  mode,  all  4-digit
+       \x{hhhh}  values  are accepted. This makes it possible to construct in-
+       valid UTF-16 sequences for testing purposes.
 
-       In UTF-32 mode, all 4- to 8-digit \x{...}  values  are  accepted.  This
-       makes  it  possible  to  construct invalid UTF-32 sequences for testing
-       purposes.
+       When testing the 32-bit library, not in UTF-32 mode, all 4  to  8-digit
+       \x{...}  values  are  accepted. This makes it possible to construct in-
+       valid UTF-32 sequences for testing purposes.
 
        There is a special backslash sequence that specifies replication of one
        or more characters:
@@ -571,6 +578,7 @@ PATTERN MODIFIERS
              allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
              alt_bsux                  set PCRE2_ALT_BSUX
              alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
+             alt_extended_class        set PCRE2_ALT_EXTENDED_CLASS
              alt_verbnames             set PCRE2_ALT_VERBNAMES
              anchored                  set PCRE2_ANCHORED
          /a  ascii_all                 set all ASCII options
@@ -609,6 +617,7 @@ PATTERN MODIFIERS
              no_start_optimize         set PCRE2_NO_START_OPTIMIZE
              no_utf_check              set PCRE2_NO_UTF_CHECK
              python_octal              set PCRE2_EXTRA_PYTHON_OCTAL
+             turkish_casing            set PCRE2_EXTRA_TURKISH_CASING
              ucp                       set PCRE2_UCP
              ungreedy                  set PCRE2_UNGREEDY
              use_offset_limit          set PCRE2_USE_OFFSET_LIMIT
@@ -2058,8 +2067,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 October 2024
+       Last updated: 16 October 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE 10.45                      04 October 2024                   PCRE2TEST(1)
+PCRE 10.45                      16 October 2024                   PCRE2TEST(1)
