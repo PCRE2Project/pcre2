@@ -329,8 +329,6 @@ else
 Arguments:
   f            file to write to
   code         pointer in the compiled code
-
-Returns:       end of the character list
 */
 
 static PCRE2_SPTR
@@ -527,14 +525,17 @@ if (printmap)
 if (*code == OP_XCLASS)
   {
   PCRE2_UCHAR ch;
+
   while ((ch = *ccode++) != XCL_END)
     {
     const char *notch = "";
+
     if (ch >= XCL_LIST)
       {
       ccode = print_char_list(f, ccode - 1, char_lists_end);
       break;
       }
+
     switch(ch)
       {
       case XCL_NOTPROP:
@@ -567,6 +568,7 @@ if (*code == OP_XCLASS)
           }
         }
       break;
+
       default:
       ccode += 1 + print_char(f, ccode, utf);
       if (ch == XCL_RANGE)
@@ -577,6 +579,8 @@ if (*code == OP_XCLASS)
       break;
       }
     }
+
+  PCRE2_ASSERT(ccode == code + GET(code, 1));
   }
 
 /* Indicate a non-UTF class which was created by negation */

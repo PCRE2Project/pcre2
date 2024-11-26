@@ -1539,12 +1539,13 @@ switch(endlinetype)
   for (;;)
     {
     while (p < endptr && *p != '\r') p++;
-    if (++p >= endptr)
+    if (p == endptr)
       {
       *lenptr = 0;
       return endptr;
       }
-    if (*p == '\n')
+    p++;
+    if (p < endptr && *p == '\n')
       {
       *lenptr = 2;
       return p + 1;

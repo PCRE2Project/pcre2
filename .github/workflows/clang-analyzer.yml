@@ -1,0 +1,51 @@
+
+name: Clang Static Analyzer
+on: [push, pull_request]
+
+jobs:
+  Analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install ninja-build clang-tools
+
+      - name: Configure
+        run: |
+          mkdir build
+          cd build
+          scan-build cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DCMAKE_BUILD_TYPE=Debug ..
+
+      - name: Build
+        run: |
+          # Inefficiently run clang scan twice; once to generate HTML, and secondly
+          # to generate SARIF files. Ideally we would have some way to scan once and
+          # generate one of those outputs from the other, but I don't know a good way
+          # to do that.
+          cd build
+          scan-build -o clang-report/ ninja
+
+          ninja clean
+          scan-build -o clang-sarif -sarif ninja
+          # Work around issue in GitHub's SARIF ingestion - merge all SARIF files into one
+          npx -y @microsoft/sarif-multitool merge clang-sarif/*/*.sarif --output-file=clang.sarif
+
+      # Upload the browsable HTML report as an artifact.
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Clang Static Analyzer report"
+          path: './build/clang-report'
+
+      # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: build/clang.sarif
+          category: clang-analyzer

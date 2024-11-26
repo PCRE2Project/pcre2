@@ -5792,6 +5792,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       /* Disable compiler warning. */
       offset = 0;
+      (void)offset;
+
       for (;;)
         {
         if (*ecode == OP_CREF)
