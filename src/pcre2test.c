@@ -242,7 +242,7 @@ to hold them as 32-bit code units. */
 enum { PR_OK, PR_SKIP, PR_ABEND };
 
 /* The macro PRINTABLE determines whether to print an output character as-is or
-as a hex value when showing compiled patterns. is We use it in cases when the
+as a hex value when showing compiled patterns. We use it in cases when the
 locale has not been explicitly changed, so as to get consistent output from
 systems that differ in their output from isprint() even in the "C" locale. */
 

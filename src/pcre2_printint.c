@@ -461,38 +461,35 @@ static void
 print_class(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end, BOOL utf,
   const char *before, const char *after)
 {
-BOOL printmap, invertmap;
+BOOL printmap, negated;
 PCRE2_SPTR ccode;
 int i;
 
-fprintf(f, "%s[", before);
-
-/* Negative XCLASS has an inverted map whereas the original opcodes have
-already done the inversion. */
-invertmap = FALSE;
+/* Negative XCLASS and NCLASS both have a bitmap indicating which characters
+are accepted. For clarity we print this inverted and prefixed by "^". */
 if (*code == OP_XCLASS)
   {
   ccode = code + LINK_SIZE + 1;
   printmap = (*ccode & XCL_MAP) != 0;
-  if ((*ccode & XCL_NOT) != 0)
-    {
-    invertmap = TRUE;
-    fprintf(f, "^");
-    }
+  negated = (*ccode & XCL_NOT) != 0;
   ccode++;
   }
 else  /* CLASS or NCLASS */
   {
   printmap = TRUE;
+  negated = *code == OP_NCLASS;
   ccode = code + 1;
   }
+
+fprintf(f, "%s[%s", before, negated? "^" : "");
 
 /* Print a bit map */
 if (printmap)
   {
+  BOOL first = TRUE;
   uint8_t inverted_map[32];
   const uint8_t *map = (const uint8_t *)ccode;
-  if (invertmap)
+  if (negated)
     {
     /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
     for (i = 0; i < 32; i++) inverted_map[i] = 255 ^ map[i];
@@ -505,13 +502,15 @@ if (printmap)
       int j;
       for (j = i+1; j < 256; j++)
         if ((map[j/8] & (1u << (j&7))) == 0) break;
-      if (i == '-' || i == ']') fprintf(f, "\\");
+      if (i == '-' || i == '\\' || i == ']' || (first && i == '^'))
+        fprintf(f, "\\");
       if (PRINTABLE(i)) fprintf(f, "%c", i);
         else fprintf(f, "\\x%02x", i);
+      first = FALSE;
       if (--j > i)
         {
         if (j != i + 1) fprintf(f, "-");
-        if (j == '-' || j == ']') fprintf(f, "\\");
+        if (j == '-' || j == '\\' || j == ']') fprintf(f, "\\");
         if (PRINTABLE(j)) fprintf(f, "%c", j);
           else fprintf(f, "\\x%02x", j);
         }
@@ -584,7 +583,7 @@ if (*code == OP_XCLASS)
   }
 
 /* Indicate a non-UTF class which was created by negation */
-fprintf(f, "]%s%s", (*code == OP_NCLASS)? " (neg)" : "", after);
+fprintf(f, "]%s", after);
 }
 
 
@@ -846,7 +845,7 @@ for(;;)
     case OP_NOT:
     fprintf(f, " %s [^", flag);
     extra = print_char(f, code + 1, utf);
-    fprintf(f, "]");
+    fprintf(f, "] (not)");
     break;
 
     case OP_NOTSTARI:
@@ -872,7 +871,7 @@ for(;;)
     case OP_NOTPOSQUERY:
     fprintf(f, " %s [^", flag);
     extra = print_char(f, code + 1, utf);
-    fprintf(f, "]%s", OP_names[*code]);
+    fprintf(f, "]%s (not)", OP_names[*code]);
     break;
 
     case OP_NOTEXACTI:
@@ -894,6 +893,7 @@ for(;;)
     if (*code == OP_NOTMINUPTO || *code == OP_NOTMINUPTOI) fprintf(f, "?");
       else
     if (*code == OP_NOTPOSUPTO || *code == OP_NOTPOSUPTOI) fprintf(f, "+");
+    fprintf(f, " (not)");
     break;
 
     case OP_RECURSE:
