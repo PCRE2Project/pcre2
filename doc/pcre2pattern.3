@@ -1543,8 +1543,8 @@ something AND NOT ...".
 .P
 The metacharacters that are recognized in character classes are backslash,
 hyphen (when it can be interpreted as specifying a range), circumflex
-(only at the start), and the terminating closing square bracket. An opening 
-square bracket is also special when it can be interpreted as introducing a 
+(only at the start), and the terminating closing square bracket. An opening
+square bracket is also special when it can be interpreted as introducing a
 POSIX class (see
 .\" HTML <a href="#posixclasses">
 .\" </a>
@@ -1555,7 +1555,7 @@ below), or a special compatibility feature (see
 .\" </a>
 "Compatibility feature for word boundaries"
 .\"
-below. Escaping any non-alphanumeric character in a class turns it into a 
+below. Escaping any non-alphanumeric character in a class turns it into a
 literal, whether or not it would otherwise be a metacharacter.
 .
 .
@@ -1563,7 +1563,7 @@ literal, whether or not it would otherwise be a metacharacter.
 .rs
 .sp
 From release 10.45 PCRE2 supports Perl's (?[...]) extended character class
-syntax. This can be used to perform set operations such intersection on
+syntax. This can be used to perform set operations such as intersection on
 character classes.
 .P
 The syntax permitted within (?[...]) is quite different to ordinary character
@@ -1604,7 +1604,7 @@ syntax, allowing instead extended class behaviour inside ordinary [...]
 character classes. This altered syntax for [...] classes is loosely described
 by the Unicode standard UTS#18. The PCRE2_ALT_EXTENDED_CLASS option does not
 prevent use of (?[...]) classes; it just changes the meaning of all
-[...] classes that are not nested inside a Perl (?[...]) class. 
+[...] classes that are not nested inside a Perl (?[...]) class.
 .P
 Firstly, in ordinary Perl [...] syntax, an expression such as "[a[]" is a
 character class with two literal characters "a" and "[", but in UTS#18 extended
@@ -1614,22 +1614,22 @@ denoting the start of a nested class, so a literal "[" must be escaped as "\e[".
 Secondly, within the UTS#18 extended syntax, there are operators "||", "&&",
 "--" and "~~" which denote character class union, intersection, subtraction,
 and symmetric difference respectively. In standard Perl syntax, these would
-simply be needlessly-repeated literals (except for "--" which could be the 
-start of a range). In UTS#18 extended classes these operators can be used in
-constructs such as [\ep{L}--[QW]] for "Unicode letters, other than Q and W". A
-literal "-" at the end of a range must be escaped, so while "[--1]" in Perl
-syntax is the range from hyphen to "1", it must be escaped as "[\e--1]" in
-UTS#18 extended classes.
+simply be needlessly-repeated literals (except for "--" which could be the
+start or end of a range). In UTS#18 extended classes these operators can be used
+in constructs such as [\ep{L}--[QW]] for "Unicode letters, other than Q and W".
+A literal "-" at the start or end of a range must be escaped, so while "[--1]"
+in Perl syntax is the range from hyphen to "1", it must be escaped as "[\e--1]"
+in UTS#18 extended classes.
 .P
-Unlike Perl's (?[...]) extended classes, the PCRE2_EXTENDED_MORE option to 
-ignore space and tab characters is not automatically enabled for UTS#18 
+Unlike Perl's (?[...]) extended classes, the PCRE2_EXTENDED_MORE option to
+ignore space and tab characters is not automatically enabled for UTS#18
 extended classes, but it is honoured if set.
 .P
 Extended UTS#18 classes can be nested, and nested classes are themselves
 extended classes (unlike Perl, where nested classes must be simple classes).
-For example, [\ep{L}&&[\ep{Thai}||\ep{Greek}]] matches any letter that is in 
-the Thai or Greek scripts. Note that this means that no special grouping 
-characters (such as the parentheses used in Perl's (?[...]) class syntax) are 
+For example, [\ep{L}&&[\ep{Thai}||\ep{Greek}]] matches any letter that is in
+the Thai or Greek scripts. Note that this means that no special grouping
+characters (such as the parentheses used in Perl's (?[...]) class syntax) are
 needed.
 .P
 Individual class items (literal characters, literal ranges, properties such as

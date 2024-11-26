@@ -4140,7 +4140,7 @@ while (ptr < ptrend)
                (c == CHAR_PLUS || c == CHAR_VERTICAL_LINE || c == CHAR_MINUS ||
                 c == CHAR_AMPERSAND || c == CHAR_CIRCUMFLEX_ACCENT))
         {
-        /* Check for a preceding operand. */
+        /* Check that there was a preceding operand. */
         if (class_op_state != CLASS_OP_OPERAND)
           {
           errorcode = ERR109;
@@ -4172,7 +4172,8 @@ while (ptr < ptrend)
       else if (class_mode_state == CLASS_MODE_PERL_EXT &&
                c == CHAR_EXCLAMATION_MARK)
         {
-        /* Check for no preceding operand. */
+        /* Check that the "!" has not got a preceding operand (i.e. it's the
+        start of the class, or follows an operator). */
         if (class_op_state == CLASS_OP_OPERAND)
           {
           errorcode = ERR113;
