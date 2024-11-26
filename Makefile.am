@@ -387,6 +387,7 @@ COMMON_SOURCES = \
   src/pcre2_find_bracket.c \
   src/pcre2_internal.h \
   src/pcre2_intmodedep.h \
+  src/pcre2_jit_char_inc.h \
   src/pcre2_jit_compile.c \
   src/pcre2_jit_neon_inc.h \
   src/pcre2_jit_simd_inc.h \
