@@ -45,7 +45,7 @@ RC=0
 ---------------------------- Test 10 -----------------------------
 RC=1
 ---------------------------- Test 11 -----------------------------
-1:This is a second file of input for the pcregrep tests.
+1:This is a second file of input for the pcre2grep tests.
 2:
 4:
 5:Pattern
@@ -329,7 +329,7 @@ RC=0
 ./testdata/grepinput-622-
 ./testdata/grepinput:623:Check up on PATTERN near the end.
 --
-./testdata/grepinputx-1-This is a second file of input for the pcregrep tests.
+./testdata/grepinputx-1-This is a second file of input for the pcre2grep tests.
 ./testdata/grepinputx-2-
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx-4-
@@ -555,7 +555,7 @@ RC=0
 pear
 RC=0
 ---------------------------- Test 69 -----------------------------
-1:This is a second file of input for the pcregrep tests.
+1:This is a second file of input for the pcre2grep tests.
 2:
 4:
 5:Pattern
