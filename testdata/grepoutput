@@ -104,7 +104,6 @@ pcre2grep: Error in command-line regex at offset 4: quantifier does not follow a
 RC=2
 ---------------------------- Test 16 -----------------------------
 pcre2grep: Failed to open ./testdata/nonexistfile: No such file or directory
-./testdata/grepinput:abc
 RC=2
 ---------------------------- Test 17 -----------------------------
 features should be added at the end, because some of the tests involve the
@@ -1306,7 +1305,7 @@ RC=0
 630-dfg
 631-ghj
 632:jkl
-633-abc
+633-abx
 634-def
 635-ghi
 RC=0
