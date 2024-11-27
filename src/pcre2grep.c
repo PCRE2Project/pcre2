@@ -3001,12 +3001,15 @@ while (ptr < endptr)
           FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
           lastmatchrestart = pp;
           }
+
         if (lastmatchrestart != ptr) hyphenpending = TRUE;
         }
 
-      /* If there were non-contiguous lines printed above, insert hyphens. */
+      /* If hyphenpending is TRUE when there is no "after" context, it means we 
+      are at the start of a new file, having output something from the previous 
+      file. Output a separator if enabled.*/
 
-      if (hyphenpending)
+      else if (hyphenpending)
         {
         if (group_separator != NULL)
           fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
@@ -3033,6 +3036,7 @@ while (ptr < endptr)
         if (lastmatchnumber > 0 && p > lastmatchrestart && !hyphenprinted &&
             group_separator != NULL)
           fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
+        hyphenpending = FALSE;
 
         while (p < ptr)
           {
@@ -3047,11 +3051,23 @@ while (ptr < endptr)
           }
         }
 
+      /* If hyphenpending is TRUE here, it was set after outputting some 
+      "after" lines (and there are no "before" lines). */
+
+      else if (hyphenpending)
+        {
+        if (group_separator != NULL)
+          fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
+        hyphenpending = FALSE;
+        hyphenprinted = TRUE;
+        }
+
       /* Now print the matching line(s); ensure we set hyphenpending at the end
       of the file if any context lines are being output. */
 
       if (after_context > 0 || before_context > 0)
         endhyphenpending = TRUE;
+        
 
       if (printname != NULL) fprintf(stdout, "%s%c", printname,
         printname_colon);

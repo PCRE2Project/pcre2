@@ -10,7 +10,7 @@ RC=0
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
-623:Check up on PATTERN near the end.
+642:Check up on PATTERN near the end.
 RC=0
 ---------------------------- Test 4 ------------------------------
 4
@@ -19,7 +19,7 @@ RC=0
 ./testdata/grepinput:7:PATTERN at the start of a line.
 ./testdata/grepinput:8:In the middle of a line, PATTERN appears.
 ./testdata/grepinput:10:This pattern is in lower case.
-./testdata/grepinput:623:Check up on PATTERN near the end.
+./testdata/grepinput:642:Check up on PATTERN near the end.
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx:5:Pattern
 ./testdata/grepinputx:42:This line contains pattern not on a line by itself.
@@ -28,7 +28,7 @@ RC=0
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
-623:Check up on PATTERN near the end.
+642:Check up on PATTERN near the end.
 3:Here is the pattern again.
 5:Pattern
 42:This line contains pattern not on a line by itself.
@@ -104,6 +104,7 @@ pcre2grep: Error in command-line regex at offset 4: quantifier does not follow a
 RC=2
 ---------------------------- Test 16 -----------------------------
 pcre2grep: Failed to open ./testdata/nonexistfile: No such file or directory
+./testdata/grepinput:abc
 RC=2
 ---------------------------- Test 17 -----------------------------
 features should be added at the end, because some of the tests involve the
@@ -324,10 +325,10 @@ RC=0
 ./testdata/grepinput-9-
 ./testdata/grepinput:10:This pattern is in lower case.
 --
-./testdata/grepinput-620-PUT NEW DATA ABOVE THIS LINE.
-./testdata/grepinput-621-=============================
-./testdata/grepinput-622-
-./testdata/grepinput:623:Check up on PATTERN near the end.
+./testdata/grepinput-639-PUT NEW DATA ABOVE THIS LINE.
+./testdata/grepinput-640-=============================
+./testdata/grepinput-641-
+./testdata/grepinput:642:Check up on PATTERN near the end.
 --
 ./testdata/grepinputx-1-This is a second file of input for the pcre2grep tests.
 ./testdata/grepinputx-2-
@@ -349,8 +350,8 @@ RC=0
 ./testdata/grepinput-12-Here follows a whole lot of stuff that makes the file over 24KiB long.
 ./testdata/grepinput-13-
 --
-./testdata/grepinput:623:Check up on PATTERN near the end.
-./testdata/grepinput-624-This is the last line of this file.
+./testdata/grepinput:642:Check up on PATTERN near the end.
+./testdata/grepinput-643-This is the last line of this file.
 --
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx-4-
@@ -1292,4 +1293,33 @@ trailing spaces
 RC=0
 ---------------------------- Test 159 -----------------------------
 trailing spaces 
+RC=0
+---------------------------- Test 160 -----------------------------
+622-bnm
+623-asd
+624-qwe
+625:ert
+626-tyu
+627-uio
+628-ggg
+629-asd
+630-dfg
+631-ghj
+632:jkl
+633-abc
+634-def
+635-ghi
+RC=0
+621-cvb
+622-bnm
+623-asd
+624-qwe
+625:ert
+626-tyu
+627-uio
+628-ggg
+629-asd
+630:dfg
+631-ghj
+632-jkl
 RC=0

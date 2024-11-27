@@ -897,6 +897,13 @@ printf "spaces.\r\n" >testtemp1grep
 (cd $srcdir; $valgrind $vjs $pcre2grep --posix-pattern-file -f$builddir/testtemp1grep ./testdata/grepinputv) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 160 -----------------------------" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -nC3 '^(ert|jkl)' ./testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+(cd $srcdir; $valgrind $vjs $pcre2grep -n -B4 -A2 '^(ert|dfg)' ./testdata/grepinput) >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtrygrep
