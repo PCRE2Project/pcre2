@@ -8,10 +8,15 @@ on:
 jobs:
 
   canary:
-    # Tests with: Debug & assertions; link-size=4
+    # Tests with: Debug & assertions; link-size=4; libedit
     name: GCC -O0
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install libedit-dev
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -21,7 +26,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS='-O0 -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=4
+        run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS='-O0 -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-pcre2test-libedit --with-link-size=4
 
       - name: Build
         run: make -j3
@@ -95,21 +100,21 @@ jobs:
         run: cd build && ctest -j3 --output-on-failure
 
   wasp:
-    # Tests with: French locale; oldest supported CMake; no JIT; -Os
+    # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
     name: GCC -Os, CMake+ninja, no JIT
     runs-on: ubuntu-latest
     env:
       CMAKE_VER: "3.15.7"
     steps:
+      - name: Setup
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install language-pack-fr ninja-build libreadline-dev
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: true
-
-      - name: Prepare
-        run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq install language-pack-fr ninja-build
 
       - name: Cache CMake
         uses: actions/cache@v4
@@ -126,7 +131,7 @@ jobs:
       - name: Configure
         run: |
           cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
-          CC='clang' CFLAGS='-fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function -pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
+          CC='clang' CFLAGS='-fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function -pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
 
       - name: Build
         run: ninja -C build
@@ -177,15 +182,15 @@ jobs:
     name: manyconfig
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: true
-
-      - name: Prepare
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
 
       - name: Run
         run: |
@@ -198,15 +203,15 @@ jobs:
     runs-on: ubuntu-latest
     container: perl:devel
     steps:
+      - name: Setup
+        run: |
+          apt-get -qq update
+          apt-get -qq install cmake ninja-build
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: yes
-
-      - name: Prepare
-        run: |
-          apt-get -qq update
-          apt-get -qq install cmake ninja-build
 
       - name: Configure
         run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON -DPCRE2_DEBUG=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
