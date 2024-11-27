@@ -861,6 +861,12 @@ echo ---------------------------- Test 159 ----------------------------->>testtr
 (pushd %srcdir% & %pcre2grep% --posix-pattern-file -f%builddir%\testtemp1grep ./testdata/grepinputv & popd) >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
+echo ---------------------------- Test 160 ----------------------------->>testtrygrep
+(pushd %srcdir% & %pcre2grep% -nC3 "^ert|jkl)" ./testdata/grepinput & popd) >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+(pushd %srcdir% & %pcre2grep% -n -B4 -A2 "^ert|dfg)" ./testdata/grepinput & popd) >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+
 :: Now compare the results.
 
 %cf% %srcdir%\testdata\grepoutput testtrygrep %cfout%
