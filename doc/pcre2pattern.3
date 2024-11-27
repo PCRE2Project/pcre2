@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "26 November 2024" "PCRE2 10.45"
+.TH PCRE2PATTERN 3 "27 November 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -10,9 +10,11 @@ are described in detail below. There is a quick-reference syntax summary in the
 \fBpcre2syntax\fP
 .\"
 page. PCRE2 tries to match Perl syntax and semantics as closely as it can.
-PCRE2 also supports some alternative regular expression syntax (which does not
-conflict with the Perl syntax) in order to provide some compatibility with
-regular expressions in Python, .NET, and Oniguruma.
+PCRE2 also supports some alternative regular expression syntax that does not
+conflict with the Perl syntax in order to provide some compatibility with
+regular expressions in Python, .NET, and Oniguruma. There are in addition some
+options that enable alternative syntax and semantics that are not the same as
+in Perl.
 .P
 Perl's regular expressions are described in its own documentation, and regular
 expressions in general are covered in a number of books, some of which have
@@ -31,6 +33,23 @@ function, are discussed in the
 \fBpcre2matching\fP
 .\"
 page.
+.
+.
+.SH "EBCDIC CHARACTER CODES"
+.rs
+.sp
+Most computers use ASCII or Unicode for encoding characters, and PCRE2 assumes
+this by default. However, it can be compiled to run in an environment that uses
+the EBCDIC code, which is the case for some IBM mainframe operating systems. In
+the sections below, character code values are ASCII or Unicode; in an EBCDIC
+environment these characters may have different code values, and there are no
+code points greater than 255. Differences in behaviour when PCRE2 is running in
+an EBCDIC environment are described in the section
+.\" HTML <a href="#ebcdicenvironments">
+.\" </a>
+"EBCDIC environments"
+.\"
+below, which you can ignore unless you really are in an EBCDIC environment.
 .
 .
 .SH "SPECIAL START-OF-PATTERN ITEMS"
@@ -252,16 +271,6 @@ at compile time. This effect can also be achieved by starting a pattern with
 corresponding to PCRE2_BSR_UNICODE.
 .
 .
-.SH "EBCDIC CHARACTER CODES"
-.rs
-.sp
-PCRE2 can be compiled to run in an environment that uses EBCDIC as its
-character code instead of ASCII or Unicode (typically a mainframe system). In
-the sections below, character code values are ASCII or Unicode; in an EBCDIC
-environment these characters may have different code values, and there are no
-code points greater than 255.
-.
-.
 .SH "CHARACTERS AND METACHARACTERS"
 .rs
 .sp
@@ -480,26 +489,13 @@ lower case letter, it is converted to upper case. Then bit 6 of the character
 the code unit following \ec has a code point less than 32 or greater than 126,
 a compile-time error occurs.
 .P
-When PCRE2 is compiled in EBCDIC mode, \eN{U+hhh..} is not supported. \ea, \ee,
-\ef, \en, \er, and \et generate the appropriate EBCDIC code values. The \ec
-escape is processed as specified for Perl in the \fBperlebcdic\fP document. The
-only characters that are allowed after \ec are A-Z, a-z, or one of @, [, \e, ],
-^, _, or ?. Any other character provokes a compile-time error. The sequence
-\ec@ encodes character code 0; after \ec the letters (in either case) encode
-characters 1-26 (hex 01 to hex 1A); [, \e, ], ^, and _ encode characters 27-31
-(hex 1B to hex 1F), and \ec? becomes either 255 (hex FF) or 95 (hex 5F).
-.P
-Thus, apart from \ec?, these escapes generate the same character code values as
-they do in an ASCII environment, though the meanings of the values mostly
-differ. For example, \ecG always generates code value 7, which is BEL in ASCII
-but DEL in EBCDIC.
-.P
-The sequence \ec? generates DEL (127, hex 7F) in an ASCII environment, but
-because 127 is not a control character in EBCDIC, Perl makes it generate the
-APC character. Unfortunately, there are several variants of EBCDIC. In most of
-them the APC character has the value 255 (hex FF), but in the one Perl calls
-POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
-values, PCRE2 makes \ec? generate 95; otherwise it generates 255.
+For differences in the way some escapes behave in EBCDIC environments,
+see section
+.\" HTML <a href="#ebcdicenvironments">
+.\" </a>
+"EBCDIC environments"
+.\"
+below.
 .
 .
 .SS "Octal escapes and back references"
@@ -1497,6 +1493,14 @@ indicating a range, typically as the first or last character in the class,
 or immediately after a range. For example, [b-d-z] matches letters in the range
 b to d, a hyphen character, or z.
 .P
+There is some special treatment for alphabetic ranges in EBCDIC environments;
+see the section
+.\" HTML <a href="#ebcdicenvironments">
+.\" </a>
+"EBCDIC environments"
+.\"
+below.
+.P
 Perl treats a hyphen as a literal if it appears before or after a POSIX class
 (see below) or before or after a character type escape such as \ed or \eH.
 However, unless the hyphen is the last character in the class, Perl outputs a
@@ -1519,14 +1523,6 @@ whose code points lie between 0xd800 and 0xdfff inclusive) may not be specified
 explicitly by default (the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES option disables
 this check). However, ranges such as [\ex{d7ff}-\ex{e000}], which include the
 surrogates, are always permitted.
-.P
-There is a special case in EBCDIC environments for ranges whose end points are
-both specified as literal letters in the same case. For compatibility with
-Perl, EBCDIC code points within the range that are not letters are omitted. For
-example, [h-k] matches only four characters, even though the codes for h and k
-are 0x88 and 0x92, a range of 11 code points. However, if the range is
-specified numerically, for example, [\ex88-\ex92] or [h-\ex92], all code points
-are included.
 .P
 If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, [W-c] is equivalent to
@@ -4124,6 +4120,51 @@ is no such group within the subroutine's group, the subroutine match fails and
 there is a backtrack at the outer level.
 .
 .
+.\" HTML <a name="ebcdicenvironments"></a>
+.SH "EBCDIC ENVIRONMENTS"
+.rs
+.sp
+Differences in the way PCRE behaves when it is running in an EBCDIC environment
+are covered in this section.
+.
+.
+.SS "Escape sequences"
+.rs
+.sp
+When PCRE2 is compiled in EBCDIC mode, \eN{U+hhh..} is not supported. \ea, \ee,
+\ef, \en, \er, and \et generate the appropriate EBCDIC code values. The \ec
+escape is processed as specified for Perl in the \fBperlebcdic\fP document. The
+only characters that are allowed after \ec are A-Z, a-z, or one of @, [, \e, ],
+^, _, or ?. Any other character provokes a compile-time error. The sequence
+\ec@ encodes character code 0; after \ec the letters (in either case) encode
+characters 1-26 (hex 01 to hex 1A); [, \e, ], ^, and _ encode characters 27-31
+(hex 1B to hex 1F), and \ec? becomes either 255 (hex FF) or 95 (hex 5F).
+.P
+Thus, apart from \ec?, these escapes generate the same character code values as
+they do in an ASCII or Unicode environment, though the meanings of the values
+mostly differ. For example, \ecG always generates code value 7, which is BEL in
+ASCII but DEL in EBCDIC.
+.P
+The sequence \ec? generates DEL (127, hex 7F) in an ASCII environment, but
+because 127 is not a control character in EBCDIC, Perl makes it generate the
+APC character. Unfortunately, there are several variants of EBCDIC. In most of
+them the APC character has the value 255 (hex FF), but in the one Perl calls
+POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
+values, PCRE2 makes \ec? generate 95; otherwise it generates 255.
+.
+.
+.SS "Character classes"
+.rs
+.sp
+In character classes there is a special case in EBCDIC environments for ranges
+whose end points are both specified as literal letters in the same case. For
+compatibility with Perl, EBCDIC code points within the range that are not
+letters are omitted. For example, [h-k] matches only four characters, even
+though the EBCDIC codes for h and k are 0x88 and 0x92, a range of 11 code
+points. However, if the range is specified numerically, for example,
+[\ex88-\ex92] or [h-\ex92], all code points are included.
+.
+.
 .SH "SEE ALSO"
 .rs
 .sp
@@ -4145,6 +4186,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 26 November 2024
+Last updated: 27 November 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

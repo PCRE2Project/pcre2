@@ -133,8 +133,8 @@ COMMAND LINE OPTIONS
                  the exit code as indicated:
 
                    ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
-                                0x15 or 0x25
-                                0 if used in an ASCII environment
+                                either 0x15 or 0x25
+                                0 if used in an ASCII/Unicode environment
                                 exit code is always 0
                    linksize   the configured internal link size (2, 3, or 4)
                                 exit code is set to the link size
@@ -1127,7 +1127,7 @@ SUBJECT MODIFIERS
    Setting match options
 
        The   following   modifiers   set   options   for   pcre2_match()    or
-       pcre2_dfa_match(). See pcreapi for a description of their effects.
+       pcre2_dfa_match(). See pcre2api for a description of their effects.
 
              anchored                   set PCRE2_ANCHORED
              copy_matched_subject       set PCRE2_COPY_MATCHED_SUBJECT
@@ -2067,8 +2067,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 October 2024
+       Last updated: 27 November 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE 10.45                      16 October 2024                   PCRE2TEST(1)
+PCRE2 10.45                    27 November 2024                   PCRE2TEST(1)

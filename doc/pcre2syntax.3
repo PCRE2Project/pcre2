@@ -1,4 +1,4 @@
-.TH PCRE2SYNTAX 3 "08 November 2024" "PCRE2 10.45"
+.TH PCRE2SYNTAX 3 "27 November 2024" "PCRE2 10.45"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -64,6 +64,10 @@ sequence causes an error.
   \exhh       character with hex code hh
   \ex{hh..}   character with hex code hh..
 .sp
+\eN{U+hh..} is synonymous with \ex{hh..} but is not supported in environments
+that use EBCDIC code (mainly IBM mainframes). Note that \eN not followed by an
+opening curly bracket has a different meaning (see below).
+.P
 If PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set ("ALT_BSUX mode"), the
 following are also recognized:
 .sp
@@ -89,9 +93,7 @@ in the
 \fBpcre2pattern\fP
 .\"
 documentation, where details of escape processing in EBCDIC environments are
-also given. \eN{U+hh..} is synonymous with \ex{hh..} in PCRE2 but is not
-supported in EBCDIC environments. Note that \eN not followed by an opening
-curly bracket has a different meaning (see below).
+also given.
 .
 .
 .SH "CHARACTER TYPES"
@@ -729,6 +731,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2024
+Last updated: 27 November 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

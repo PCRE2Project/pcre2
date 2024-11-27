@@ -1,4 +1,4 @@
-.TH PCRE2TEST 1 "16 October 2024" "PCRE2 10.45"
+.TH PCRE2TEST 1 "27 November 2024" "PCRE2 10.45"
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -144,8 +144,8 @@ functionality is intended for use in scripts such as \fBRunTest\fP. The
 following options output the value and set the exit code as indicated:
 .sp
   ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
-               0x15 or 0x25
-               0 if used in an ASCII environment
+               either 0x15 or 0x25
+               0 if used in an ASCII/Unicode environment
                exit code is always 0
   linksize   the configured internal link size (2, 3, or 4)
                exit code is set to the link size
@@ -2246,6 +2246,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 16 October 2024
+Last updated: 27 November 2024
 Copyright (c) 1997-2024 University of Cambridge.
 .fi

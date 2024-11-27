@@ -14,8 +14,8 @@ please consult the man page, in case the conversion went wrong.
 <br>
 <ul>
 <li><a name="TOC1" href="#SEC1">PCRE2 REGULAR EXPRESSION DETAILS</a>
-<li><a name="TOC2" href="#SEC2">SPECIAL START-OF-PATTERN ITEMS</a>
-<li><a name="TOC3" href="#SEC3">EBCDIC CHARACTER CODES</a>
+<li><a name="TOC2" href="#SEC2">EBCDIC CHARACTER CODES</a>
+<li><a name="TOC3" href="#SEC3">SPECIAL START-OF-PATTERN ITEMS</a>
 <li><a name="TOC4" href="#SEC4">CHARACTERS AND METACHARACTERS</a>
 <li><a name="TOC5" href="#SEC5">BACKSLASH</a>
 <li><a name="TOC6" href="#SEC6">CIRCUMFLEX AND DOLLAR</a>
@@ -45,9 +45,10 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC30" href="#SEC30">ONIGURUMA SUBROUTINE SYNTAX</a>
 <li><a name="TOC31" href="#SEC31">CALLOUTS</a>
 <li><a name="TOC32" href="#SEC32">BACKTRACKING CONTROL</a>
-<li><a name="TOC33" href="#SEC33">SEE ALSO</a>
-<li><a name="TOC34" href="#SEC34">AUTHOR</a>
-<li><a name="TOC35" href="#SEC35">REVISION</a>
+<li><a name="TOC33" href="#SEC33">EBCDIC ENVIRONMENTS</a>
+<li><a name="TOC34" href="#SEC34">SEE ALSO</a>
+<li><a name="TOC35" href="#SEC35">AUTHOR</a>
+<li><a name="TOC36" href="#SEC36">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION DETAILS</a><br>
 <P>
@@ -55,9 +56,11 @@ The syntax and semantics of the regular expressions that are supported by PCRE2
 are described in detail below. There is a quick-reference syntax summary in the
 <a href="pcre2syntax.html"><b>pcre2syntax</b></a>
 page. PCRE2 tries to match Perl syntax and semantics as closely as it can.
-PCRE2 also supports some alternative regular expression syntax (which does not
-conflict with the Perl syntax) in order to provide some compatibility with
-regular expressions in Python, .NET, and Oniguruma.
+PCRE2 also supports some alternative regular expression syntax that does not
+conflict with the Perl syntax in order to provide some compatibility with
+regular expressions in Python, .NET, and Oniguruma. There are in addition some
+options that enable alternative syntax and semantics that are not the same as
+in Perl.
 </P>
 <P>
 Perl's regular expressions are described in its own documentation, and regular
@@ -77,7 +80,19 @@ function, are discussed in the
 <a href="pcre2matching.html"><b>pcre2matching</b></a>
 page.
 </P>
-<br><a name="SEC2" href="#TOC1">SPECIAL START-OF-PATTERN ITEMS</a><br>
+<br><a name="SEC2" href="#TOC1">EBCDIC CHARACTER CODES</a><br>
+<P>
+Most computers use ASCII or Unicode for encoding characters, and PCRE2 assumes
+this by default. However, it can be compiled to run in an environment that uses
+the EBCDIC code, which is the case for some IBM mainframe operating systems. In
+the sections below, character code values are ASCII or Unicode; in an EBCDIC
+environment these characters may have different code values, and there are no
+code points greater than 255. Differences in behaviour when PCRE2 is running in
+an EBCDIC environment are described in the section
+<a href="#ebcdicenvironments">"EBCDIC environments"</a>
+below, which you can ignore unless you really are in an EBCDIC environment.
+</P>
+<br><a name="SEC3" href="#TOC1">SPECIAL START-OF-PATTERN ITEMS</a><br>
 <P>
 A number of options that can be passed to <b>pcre2_compile()</b> can also be set
 by special items at the start of a pattern. These are not Perl-compatible, but
@@ -280,14 +295,6 @@ complete set of Unicode line endings) by setting the option PCRE2_BSR_ANYCRLF
 at compile time. This effect can also be achieved by starting a pattern with
 (*BSR_ANYCRLF). For completeness, (*BSR_UNICODE) is also recognized,
 corresponding to PCRE2_BSR_UNICODE.
-</P>
-<br><a name="SEC3" href="#TOC1">EBCDIC CHARACTER CODES</a><br>
-<P>
-PCRE2 can be compiled to run in an environment that uses EBCDIC as its
-character code instead of ASCII or Unicode (typically a mainframe system). In
-the sections below, character code values are ASCII or Unicode; in an EBCDIC
-environment these characters may have different code values, and there are no
-code points greater than 255.
 </P>
 <br><a name="SEC4" href="#TOC1">CHARACTERS AND METACHARACTERS</a><br>
 <P>
@@ -509,28 +516,10 @@ the code unit following \c has a code point less than 32 or greater than 126,
 a compile-time error occurs.
 </P>
 <P>
-When PCRE2 is compiled in EBCDIC mode, \N{U+hhh..} is not supported. \a, \e,
-\f, \n, \r, and \t generate the appropriate EBCDIC code values. The \c
-escape is processed as specified for Perl in the <b>perlebcdic</b> document. The
-only characters that are allowed after \c are A-Z, a-z, or one of @, [, \, ],
-^, _, or ?. Any other character provokes a compile-time error. The sequence
-\c@ encodes character code 0; after \c the letters (in either case) encode
-characters 1-26 (hex 01 to hex 1A); [, \, ], ^, and _ encode characters 27-31
-(hex 1B to hex 1F), and \c? becomes either 255 (hex FF) or 95 (hex 5F).
-</P>
-<P>
-Thus, apart from \c?, these escapes generate the same character code values as
-they do in an ASCII environment, though the meanings of the values mostly
-differ. For example, \cG always generates code value 7, which is BEL in ASCII
-but DEL in EBCDIC.
-</P>
-<P>
-The sequence \c? generates DEL (127, hex 7F) in an ASCII environment, but
-because 127 is not a control character in EBCDIC, Perl makes it generate the
-APC character. Unfortunately, there are several variants of EBCDIC. In most of
-them the APC character has the value 255 (hex FF), but in the one Perl calls
-POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
-values, PCRE2 makes \c? generate 95; otherwise it generates 255.
+For differences in the way some escapes behave in EBCDIC environments,
+see section
+<a href="#ebcdicenvironments">"EBCDIC environments"</a>
+below.
 </P>
 <br><b>
 Octal escapes and back references
@@ -1501,6 +1490,12 @@ or immediately after a range. For example, [b-d-z] matches letters in the range
 b to d, a hyphen character, or z.
 </P>
 <P>
+There is some special treatment for alphabetic ranges in EBCDIC environments;
+see the section
+<a href="#ebcdicenvironments">"EBCDIC environments"</a>
+below.
+</P>
+<P>
 Perl treats a hyphen as a literal if it appears before or after a POSIX class
 (see below) or before or after a character type escape such as \d or \H.
 However, unless the hyphen is the last character in the class, Perl outputs a
@@ -1527,15 +1522,6 @@ this check). However, ranges such as [\x{d7ff}-\x{e000}], which include the
 surrogates, are always permitted.
 </P>
 <P>
-There is a special case in EBCDIC environments for ranges whose end points are
-both specified as literal letters in the same case. For compatibility with
-Perl, EBCDIC code points within the range that are not letters are omitted. For
-example, [h-k] matches only four characters, even though the codes for h and k
-are 0x88 and 0x92, a range of 11 code points. However, if the range is
-specified numerically, for example, [\x88-\x92] or [h-\x92], all code points
-are included.
-</P>
-<P>
 If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, [W-c] is equivalent to
 [][\\^_`wxyzabc], matched caselessly, and in a non-UTF mode, if character
@@ -1553,19 +1539,19 @@ something AND NOT ...".
 <P>
 The metacharacters that are recognized in character classes are backslash,
 hyphen (when it can be interpreted as specifying a range), circumflex
-(only at the start), and the terminating closing square bracket. An opening 
-square bracket is also special when it can be interpreted as introducing a 
+(only at the start), and the terminating closing square bracket. An opening
+square bracket is also special when it can be interpreted as introducing a
 POSIX class (see
 <a href="#posixclasses">"Posix character classes"</a>
 below), or a special compatibility feature (see
 <a href="#wordboundcompat">"Compatibility feature for word boundaries"</a>
-below. Escaping any non-alphanumeric character in a class turns it into a 
+below. Escaping any non-alphanumeric character in a class turns it into a
 literal, whether or not it would otherwise be a metacharacter.
 </P>
 <br><a name="SEC10" href="#TOC1">PERL EXTENDED CHARACTER CLASSES</a><br>
 <P>
 From release 10.45 PCRE2 supports Perl's (?[...]) extended character class
-syntax. This can be used to perform set operations such intersection on
+syntax. This can be used to perform set operations such as intersection on
 character classes.
 </P>
 <P>
@@ -1609,7 +1595,7 @@ syntax, allowing instead extended class behaviour inside ordinary [...]
 character classes. This altered syntax for [...] classes is loosely described
 by the Unicode standard UTS#18. The PCRE2_ALT_EXTENDED_CLASS option does not
 prevent use of (?[...]) classes; it just changes the meaning of all
-[...] classes that are not nested inside a Perl (?[...]) class. 
+[...] classes that are not nested inside a Perl (?[...]) class.
 </P>
 <P>
 Firstly, in ordinary Perl [...] syntax, an expression such as "[a[]" is a
@@ -1621,24 +1607,24 @@ denoting the start of a nested class, so a literal "[" must be escaped as "\[".
 Secondly, within the UTS#18 extended syntax, there are operators "||", "&&",
 "--" and "~~" which denote character class union, intersection, subtraction,
 and symmetric difference respectively. In standard Perl syntax, these would
-simply be needlessly-repeated literals (except for "--" which could be the 
-start of a range). In UTS#18 extended classes these operators can be used in
-constructs such as [\p{L}--[QW]] for "Unicode letters, other than Q and W". A
-literal "-" at the end of a range must be escaped, so while "[--1]" in Perl
-syntax is the range from hyphen to "1", it must be escaped as "[\--1]" in
-UTS#18 extended classes.
+simply be needlessly-repeated literals (except for "--" which could be the
+start or end of a range). In UTS#18 extended classes these operators can be used
+in constructs such as [\p{L}--[QW]] for "Unicode letters, other than Q and W".
+A literal "-" at the start or end of a range must be escaped, so while "[--1]"
+in Perl syntax is the range from hyphen to "1", it must be escaped as "[\--1]"
+in UTS#18 extended classes.
 </P>
 <P>
-Unlike Perl's (?[...]) extended classes, the PCRE2_EXTENDED_MORE option to 
-ignore space and tab characters is not automatically enabled for UTS#18 
+Unlike Perl's (?[...]) extended classes, the PCRE2_EXTENDED_MORE option to
+ignore space and tab characters is not automatically enabled for UTS#18
 extended classes, but it is honoured if set.
 </P>
 <P>
 Extended UTS#18 classes can be nested, and nested classes are themselves
 extended classes (unlike Perl, where nested classes must be simple classes).
-For example, [\p{L}&&[\p{Thai}||\p{Greek}]] matches any letter that is in 
-the Thai or Greek scripts. Note that this means that no special grouping 
-characters (such as the parentheses used in Perl's (?[...]) class syntax) are 
+For example, [\p{L}&&[\p{Thai}||\p{Greek}]] matches any letter that is in
+the Thai or Greek scripts. Note that this means that no special grouping
+characters (such as the parentheses used in Perl's (?[...]) class syntax) are
 needed.
 </P>
 <P>
@@ -4084,13 +4070,57 @@ then a backtrack at the outer level.
 enclosing group that has alternatives (its normal behaviour). However, if there
 is no such group within the subroutine's group, the subroutine match fails and
 there is a backtrack at the outer level.
+<a name="ebcdicenvironments"></a></P>
+<br><a name="SEC33" href="#TOC1">EBCDIC ENVIRONMENTS</a><br>
+<P>
+Differences in the way PCRE behaves when it is running in an EBCDIC environment
+are covered in this section.
 </P>
-<br><a name="SEC33" href="#TOC1">SEE ALSO</a><br>
+<br><b>
+Escape sequences
+</b><br>
+<P>
+When PCRE2 is compiled in EBCDIC mode, \N{U+hhh..} is not supported. \a, \e,
+\f, \n, \r, and \t generate the appropriate EBCDIC code values. The \c
+escape is processed as specified for Perl in the <b>perlebcdic</b> document. The
+only characters that are allowed after \c are A-Z, a-z, or one of @, [, \, ],
+^, _, or ?. Any other character provokes a compile-time error. The sequence
+\c@ encodes character code 0; after \c the letters (in either case) encode
+characters 1-26 (hex 01 to hex 1A); [, \, ], ^, and _ encode characters 27-31
+(hex 1B to hex 1F), and \c? becomes either 255 (hex FF) or 95 (hex 5F).
+</P>
+<P>
+Thus, apart from \c?, these escapes generate the same character code values as
+they do in an ASCII or Unicode environment, though the meanings of the values
+mostly differ. For example, \cG always generates code value 7, which is BEL in
+ASCII but DEL in EBCDIC.
+</P>
+<P>
+The sequence \c? generates DEL (127, hex 7F) in an ASCII environment, but
+because 127 is not a control character in EBCDIC, Perl makes it generate the
+APC character. Unfortunately, there are several variants of EBCDIC. In most of
+them the APC character has the value 255 (hex FF), but in the one Perl calls
+POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
+values, PCRE2 makes \c? generate 95; otherwise it generates 255.
+</P>
+<br><b>
+Character classes
+</b><br>
+<P>
+In character classes there is a special case in EBCDIC environments for ranges
+whose end points are both specified as literal letters in the same case. For
+compatibility with Perl, EBCDIC code points within the range that are not
+letters are omitted. For example, [h-k] matches only four characters, even
+though the EBCDIC codes for h and k are 0x88 and 0x92, a range of 11 code
+points. However, if the range is specified numerically, for example,
+[\x88-\x92] or [h-\x92], all code points are included.
+</P>
+<br><a name="SEC34" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre2api</b>(3), <b>pcre2callout</b>(3), <b>pcre2matching</b>(3),
 <b>pcre2syntax</b>(3), <b>pcre2</b>(3).
 </P>
-<br><a name="SEC34" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC35" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -4099,9 +4129,9 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </P>
-<br><a name="SEC35" href="#TOC1">REVISION</a><br>
+<br><a name="SEC36" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 November 2024
+Last updated: 27 November 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>
