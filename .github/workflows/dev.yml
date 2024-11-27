@@ -43,6 +43,7 @@ jobs:
     name: Clang
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         opt: ["-O0", "-O2"]
     steps:
@@ -91,7 +92,7 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && make test
+        run: cd build && ctest -j3 --output-on-failure
 
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os
@@ -131,11 +132,11 @@ jobs:
         run: ninja -C build
 
       - name: Test
-        run: ninja -C build test
+        run: cd build && ctest -j3 --output-on-failure
 
   bat:
     # Tests with: MSVC 32-bit, and a variety of CMake options
-    name: 32bit MSVC
+    name: Windows (Win32)
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -144,20 +145,17 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_VERBOSE_MAKEFILE=ON -B build -A Win32
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A Win32
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo
 
       - name: Test
-        shell: cmd
-        run: |
-          cd build
-          ctest -C RelWithDebInfo .
+        run: cd build && ctest -C RelWithDebInfo -j3 --output-on-failure
 
   pterodactyl:
     # Tests with: MSVC 64-bit, Debug, shared libraries
-    name: 64bit MSVC
+    name: Windows (x64)
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -166,16 +164,13 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_BUILD_PCRE2GREP=OFF -DPCRE2_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
+        run: cmake -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
 
       - name: Build
         run: cmake --build build --config Debug
 
       - name: Test
-        shell: cmd
-        run: |
-          cd build
-          ctest -C Debug .
+        run: cd build && ctest -C Debug -j3 --output-on-failure
 
   bigbird:
     # Job to execute ManyConfigTests
@@ -217,12 +212,12 @@ jobs:
         run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON -DPCRE2_DEBUG=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
       - name: Build
-        run: cmake --build build
+        run: ninja -C build
 
       - name: Test
         run: |
           cd build
-          ctest .
+          ctest -j3 --output-on-failure
           cd ..
           perl -v
           maint/RunPerlTest
@@ -243,4 +238,4 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && make test
+        run: cd build && ctest -j3 --output-on-failure

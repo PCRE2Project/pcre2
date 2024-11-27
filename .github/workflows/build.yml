@@ -19,7 +19,7 @@ jobs:
         run: ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
 
       - name: Build
-        run: make -j2 CPPFLAGS='-Wall -Wextra -Werror'
+        run: make -j3 CPPFLAGS='-Wall -Wextra -Werror'
 
       - name: Test (main test script)
         run: ./RunTest
@@ -53,7 +53,7 @@ jobs:
         run: ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
 
       - name: Build
-        run: make -j2 CPPFLAGS='-Wall -Wextra -Werror'
+        run: make -j3 CPPFLAGS='-Wall -Wextra -Werror'
 
       - name: Test (main test script)
         run: ./RunTest
@@ -80,32 +80,16 @@ jobs:
         run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
-        run: cmake --build build
+        run: cd build && make -j3
 
-      - name: Test (main test script)
-        run: |
-          cd build
-          ../RunTest
-
-      - name: Test (JIT test program)
-        run: |
-          cd build
-          ./pcre2_jit_test
-
-      - name: Test (pcre2grep test script)
-        run: |
-          cd build
-          ../RunGrepTest
-
-      - name: Test (pcre2posix program)
-        run: |
-          cd build
-          ./pcre2posix_test -v
+      - name: Test
+        run: cd build && ctest -j3 --output-on-failure
 
   windows:
     name: Windows
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         arch: ["Win32", "x64"]
     steps:
@@ -121,14 +105,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Test
-        id: test
-        run: |
-          cd build
-          ctest -C Release .
-
-      - name: Debug
-        if: ${{ failure() && steps.test.outcome == 'failure' }}
-        run: type build/Testing/Temporary/LastTest.log
+        run: cd build && ctest -C Release -j3 --output-on-failure
 
   coverage:
     name: Code coverage
@@ -143,10 +120,10 @@ jobs:
         run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake -DCMAKE_BUILD_TYPE=Debug -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -B build
 
       - name: Build
-        run: cmake --build build
+        run: cd build && make -j3
 
       - name: Test
-        run: LLVM_PROFILE_FILE="coverage-%m.profraw" cmake --build build --target test
+        run: cd build && LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
 
       - name: Report
         run: |

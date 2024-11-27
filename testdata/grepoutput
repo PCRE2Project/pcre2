@@ -493,7 +493,9 @@ RC=0
 ./testdata/grepinput:456
 ./testdata/grepinput3:0
 ./testdata/grepinput8:0
+./testdata/grepinputBad8:0
 ./testdata/grepinputM:0
+./testdata/grepinputUN:0
 ./testdata/grepinputv:1
 ./testdata/grepinputx:0
 RC=0
@@ -722,6 +724,7 @@ RC=0
 ---------------------------- Test 96 -----------------------------
 ./testdata/grepinput3
 ./testdata/grepinput8
+./testdata/grepinputBad8
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 97 -----------------------------
@@ -833,7 +836,9 @@ RC=0
 testdata/grepinput:469
 testdata/grepinput3:0
 testdata/grepinput8:0
+testdata/grepinputBad8:0
 testdata/grepinputM:2
+testdata/grepinputUN:0
 testdata/grepinputv:3
 testdata/grepinputx:6
 TOTAL:480
@@ -852,7 +857,9 @@ RC=0
 469
 0
 0
+0
 2
+0
 3
 6
 480
@@ -860,6 +867,8 @@ RC=0
 ---------------------------- Test 118 -----------------------------
 testdata/grepinput3
 testdata/grepinput8
+testdata/grepinputBad8
+testdata/grepinputUN
 RC=0
 ---------------------------- Test 119 -----------------------------
 123
@@ -1238,6 +1247,7 @@ RC=2
 [1;31mThe wo[0mrd is cat in [1;31mthis[0m line
 [1;31mThe[0m caterpillar sat on the mat
 [1;31mThe[0m snowcat is not an animal
+RC=0
 ---------------------------- Test 152 -----------------------------
 24:four
 25-five
