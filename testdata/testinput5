@@ -3258,6 +3258,205 @@
 \= Expect no match
     _
     2
+    \
+
+/[\p{Thai}&&\p{Nd}]/B,utf,alt_extended_class
+    \x{0e51}
+\= Expect no match
+    0
+    a
+    \x{0e01}
+
+/[\p{Thai}||\p{Nd}]/B,utf,alt_extended_class
+    \x{0e51}
+    \x{0e01}
+    0
+\= Expect no match
+    a
+
+/[\p{Thai}~~\p{Nd}]/B,utf,alt_extended_class
+    \x{0e01}
+    0
+\= Expect no match
+    \x{0e51}
+    a
+
+/[[\p{Thai}&&\p{Nd}]~~[^a]]/B,utf,alt_extended_class
+    \x{0e01}
+    b
+    0
+\= Expect no match
+    a
+    \x{0e51}
+
+/^[\p{Thai}&&\p{Nd}]?$/B,utf,alt_extended_class
+    \x{0e51}
+    \
+\= Expect no match
+    a
+
+/^[\p{Thai}&&\p{Nd}]??$/B,utf,alt_extended_class
+    \x{0e51}
+    \
+\= Expect no match
+    a
+
+/^[\p{Thai}&&\p{Nd}]?+$/B,utf,alt_extended_class
+    \x{0e51}
+    \
+\= Expect no match
+    a
+
+/^[\p{Thai}&&\p{Nd}]{3}$/B,utf,alt_extended_class
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]{3,}$/B,utf,alt_extended_class
+    \x{0e51}\x{0e51}\x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]{3,}?$/B,utf,alt_extended_class
+    \x{0e51}\x{0e51}\x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]{3,}+$/B,utf,alt_extended_class
+    \x{0e51}\x{0e51}\x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]{,3}$/B,utf,alt_extended_class
+    \
+    \x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}\x{0e51}\x{0e51}\x{0e51}
+    a
+
+/^[\p{Thai}&&\p{Nd}]{,3}?$/B,utf,alt_extended_class
+    \
+    \x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}\x{0e51}\x{0e51}\x{0e51}
+    a
+
+/^[\p{Thai}&&\p{Nd}]{,3}+$/B,utf,alt_extended_class
+    \
+    \x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}\x{0e51}\x{0e51}\x{0e51}
+    a
+
+/^[\p{Thai}&&\p{Nd}]+\x{0e51}$/B,utf,alt_extended_class
+    \x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]+?\x{0e51}$/B,utf,alt_extended_class
+    \x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]++\x{0e51}$/B,utf,alt_extended_class
+\= Expect no match
+    \x{0e51}
+    \x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]*\x{0e51}$/B,utf,alt_extended_class
+    \x{0e51}
+    \x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]*?\x{0e51}$/B,utf,alt_extended_class
+    \x{0e51}
+    \x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+\= Expect no match
+    \
+    a
+
+/^[\p{Thai}&&\p{Nd}]*+\x{0e51}$/B,utf,alt_extended_class
+\= Expect no match
+    \x{0e51}
+    \x{0e51}\x{0e51}
+    \x{0e51}\x{0e51}\x{0e51}
+    \
+    a
+
+/[^[^\p{Thai}]]/B,utf,alt_extended_class
+    \x{0e51}
+\= Expect no match
+    a
+
+/[^[^\p{L}]]/B,utf,alt_extended_class
+    \x{0e01}
+    a
+\= Expect no match
+    0
+
+/[\p{Thai}~~[^]]/B,utf,alt_extended_class,allow_empty_class
+    \x{0d01}
+    a
+\= Expect no match
+    \x{0e01}
+
+/[[]~~[^]]/B,utf,alt_extended_class,allow_empty_class
+    \x{0d01}
+    a
+
+/[[^]~~[]]/B,utf,alt_extended_class,allow_empty_class
+    \x{0d01}
+    a
+
+/[[^]~~[^]]/B,utf,alt_extended_class,allow_empty_class
+\= Expect no match
+    \x{0d01}
+    a
+
+/[[^]||\pL]/B,utf,alt_extended_class,allow_empty_class
+    0
+    a
+
+/[\pL||[^]]/B,utf,alt_extended_class,allow_empty_class
+    0
+    a
+
+/[\pL~~[^]]/B,utf,alt_extended_class,allow_empty_class
+    0
+\= Expect no match
+    a
+
+/[[^]~~\pL]/B,utf,alt_extended_class,allow_empty_class
+    0
+\= Expect no match
+    a
 
 /[[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]
 &&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]&&[\pN--[\pC||\x{9F5}]]

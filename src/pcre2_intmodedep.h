@@ -874,11 +874,10 @@ typedef struct heapframe {
   PCRE2_SIZE ovector[131072];   /* Must be last in the structure */
 } heapframe;
 
-/* This typedef is a check that the size of the heapframe structure is a
-multiple of PCRE2_SIZE. See various comments above. */
+/* Assert that the size of the heapframe structure is a multiple of PCRE2_SIZE.
+See various comments above. */
 
-typedef char check_heapframe_size[
-  ((sizeof(heapframe) % sizeof(PCRE2_SIZE)) == 0)? (+1):(-1)];
+STATIC_ASSERT((sizeof(heapframe) % sizeof(PCRE2_SIZE)) == 0, heapframe_size);
 
 /* Structure for computing the alignment of heapframe. */
 

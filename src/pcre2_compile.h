@@ -160,7 +160,7 @@ versions. */
 #define META_MINMAX_QUERY     0x80430000u  /* {n,m}? repeat */
 
 /* These meta codes must be kept in a group, with the OR/SUB/XOR in
-this order. */
+this order, and AND/NOT at the start/end. */
 
 #define META_ECLASS_AND       0x80440000u  /* && (or &) in a class */
 #define META_ECLASS_OR        0x80450000u  /* || (or |, +) in a class */
@@ -218,11 +218,26 @@ therefore no need for it to have a length entry, so use a high value. */
 #define CLIST_ALIGN_TO(base, align) \
   ((base + ((size_t)(align) - 1)) & ~((size_t)(align) - 1))
 
+/* Structure for holding information about an OP_ECLASS internal operand.
+An "operand" here could be just a single OP_[X]CLASS, or it could be some
+complex expression; but it's some sequence of ECL_* codes which pushes one
+value to the stack. */
+typedef struct {
+  /* The position of the operand - or NULL if (lengthptr != NULL). */
+  PCRE2_UCHAR *code_start;
+  PCRE2_SIZE length;
+  /* The operand's type if it is a single code (ECL_XCLASS, ECL_ANY, ECL_NONE);
+  otherwise zero if the operand is not atomic. */
+  uint8_t op_single_type;
+  /* Regardless of whether it's a single code or not, we fully constant-fold
+  the bitmap for code points < 256. */
+  class_bits_storage bits;
+} eclass_op_info;
+
 /* Macros for the definitions below, to prevent name collisions. */
 
 #define _pcre2_posix_class_maps          PCRE2_SUFFIX(_pcre2_posix_class_maps)
 #define _pcre2_update_classbits          PCRE2_SUFFIX(_pcre2_update_classbits_)
-#define _pcre2_check_class_not_nested    PCRE2_SUFFIX(_pcre2_check_class_not_nested_)
 #define _pcre2_compile_class_nested      PCRE2_SUFFIX(_pcre2_compile_class_nested_)
 #define _pcre2_compile_class_not_nested  PCRE2_SUFFIX(_pcre2_compile_class_not_nested_)
 
@@ -244,11 +259,12 @@ extern const int PRIV(posix_class_maps)[];
 void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated,
   uint8_t *classbits);
 
-/* Returns TRUE when a series of META codes can be compiled to a simple class
-(OP_CLASS, OP_NCLASS, OP_XCLASS, OP_ALLANY); otherwise FALSE if it requires an
-extended class (OP_ECLASS).*/
+/* Compile the META codes from start_ptr...end_ptr, writing a single OP_CLASS
+OP_CLASS, OP_NCLASS, OP_XCLASS, or OP_ALLANY into pcode. */
 
-BOOL PRIV(check_class_not_nested)(uint32_t *ptr, uint32_t **pendptr);
+uint32_t *PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
+  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class, BOOL always_map,
+  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
 
 /* Compile the META codes in pptr into opcodes written to pcode. The pptr must
 start at a META_CLASS or META_CLASS_NOT.
@@ -256,14 +272,7 @@ start at a META_CLASS or META_CLASS_NOT.
 The pptr will be left pointing at the matching META_CLASS_END. */
 
 BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t **pptr, PCRE2_UCHAR **pcode, int *errorcodeptr,
-  compile_block *cb, PCRE2_SIZE *lengthptr);
-
-/* Compile the META codes from start_ptr...end_ptr, writing a single OP_CLASS
-OP_CLASS, OP_NCLASS, OP_XCLASS, or OP_ALLANY into pcode. */
-
-uint32_t *PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class,
+  BOOL negated, uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
   int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */

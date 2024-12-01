@@ -68,7 +68,7 @@ jobs:
 
       - name: Test (main test script)
         run: |
-          ulimit -S -s 32768 # Raise stack limit; ASAN with -O0 is very stack-hungry
+          ulimit -S -s 49152 # Raise stack limit; ASAN with -O0 is very stack-hungry
           ./RunTest
 
       - name: Test (JIT test program)

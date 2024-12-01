@@ -88,6 +88,12 @@ typedef int BOOL;
 #define TRUE    1
 #endif
 
+/* Helper macro for static (compile-time) assertions. Can be used inside
+functions, or at the top-level of a file. */
+#define STATIC_ASSERT_JOIN(a,b) a ## b
+#define STATIC_ASSERT(cond, msg) \
+  typedef int STATIC_ASSERT_JOIN(static_assertion_,msg)[(cond)?1:-1]
+
 /* Valgrind (memcheck) support */
 
 #ifdef SUPPORT_VALGRIND
@@ -1431,6 +1437,23 @@ can be used to encode / decode the character value stored in an item. */
 #define XCL_CHAR_END 0x1
 #define XCL_CHAR_SHIFT 1
 
+/* Flag bits for an extended class (OP_ECLASS), which is used for complex
+character matches such as [\p{Greek} && \p{Ll}]. */
+
+#define ECL_MAP     0x01  /* Flag: a 32-byte map is present */
+
+/* Type tags for the items stored in an extended class (OP_ECLASS). These items
+follow the OP_ECLASS's flag char and bitmap, and represent a Reverse Polish
+Notation list of operands and operators manipulating a stack of bits. */
+
+#define ECL_AND     1 /* Pop two from the stack, AND, and push result. */
+#define ECL_OR      2 /* Pop two from the stack, OR, and push result. */
+#define ECL_XOR     3 /* Pop two from the stack, XOR, and push result. */
+#define ECL_NOT     4 /* Pop one from the stack, NOT, and push result. */
+#define ECL_XCLASS  5 /* XCLASS nested within ECLASS; match and push result. */
+#define ECL_ANY     6 /* Temporary, only used during compilation. */
+#define ECL_NONE    7 /* Temporary, only used during compilation. */
+
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns 0
 for a data character. In the escapes[] table in pcre2_compile.c their values
@@ -1651,112 +1674,105 @@ enum {
                               character > 255 is encountered. */
   OP_XCLASS,         /* 112 Extended class for handling > 255 chars within the
                               class. This does both positive and negative. */
-  OP_REF,            /* 113 Match a back reference, casefully */
-  OP_REFI,           /* 114 Match a back reference, caselessly */
-  OP_DNREF,          /* 115 Match a duplicate name backref, casefully */
-  OP_DNREFI,         /* 116 Match a duplicate name backref, caselessly */
-  OP_RECURSE,        /* 117 Match a numbered subpattern (possibly recursive) */
-  OP_CALLOUT,        /* 118 Call out to external function if provided */
-  OP_CALLOUT_STR,    /* 119 Call out with string argument */
+  OP_ECLASS,         /* 113 Really-extended class, for handling logical
+                              expressions computed over characters. */
+  OP_REF,            /* 114 Match a back reference, casefully */
+  OP_REFI,           /* 115 Match a back reference, caselessly */
+  OP_DNREF,          /* 116 Match a duplicate name backref, casefully */
+  OP_DNREFI,         /* 117 Match a duplicate name backref, caselessly */
+  OP_RECURSE,        /* 118 Match a numbered subpattern (possibly recursive) */
+  OP_CALLOUT,        /* 119 Call out to external function if provided */
+  OP_CALLOUT_STR,    /* 120 Call out with string argument */
 
-  OP_ALT,            /* 120 Start of alternation */
-  OP_KET,            /* 121 End of group that doesn't have an unbounded repeat */
-  OP_KETRMAX,        /* 122 These two must remain together and in this */
-  OP_KETRMIN,        /* 123 order. They are for groups the repeat for ever. */
-  OP_KETRPOS,        /* 124 Possessive unlimited repeat. */
+  OP_ALT,            /* 121 Start of alternation */
+  OP_KET,            /* 122 End of group that doesn't have an unbounded repeat */
+  OP_KETRMAX,        /* 123 These two must remain together and in this */
+  OP_KETRMIN,        /* 124 order. They are for groups the repeat for ever. */
+  OP_KETRPOS,        /* 125 Possessive unlimited repeat. */
 
   /* The assertions must come before BRA, CBRA, ONCE, and COND. */
 
-  OP_REVERSE,        /* 125 Move pointer back - used in lookbehind assertions */
-  OP_VREVERSE,       /* 126 Move pointer back - variable */
-  OP_ASSERT,         /* 127 Positive lookahead */
-  OP_ASSERT_NOT,     /* 128 Negative lookahead */
-  OP_ASSERTBACK,     /* 129 Positive lookbehind */
-  OP_ASSERTBACK_NOT, /* 130 Negative lookbehind */
-  OP_ASSERT_NA,      /* 131 Positive non-atomic lookahead */
-  OP_ASSERTBACK_NA,  /* 132 Positive non-atomic lookbehind */
-  OP_ASSERT_SCS,     /* 133 Scan substring */
+  OP_REVERSE,        /* 126 Move pointer back - used in lookbehind assertions */
+  OP_VREVERSE,       /* 127 Move pointer back - variable */
+  OP_ASSERT,         /* 128 Positive lookahead */
+  OP_ASSERT_NOT,     /* 129 Negative lookahead */
+  OP_ASSERTBACK,     /* 130 Positive lookbehind */
+  OP_ASSERTBACK_NOT, /* 131 Negative lookbehind */
+  OP_ASSERT_NA,      /* 132 Positive non-atomic lookahead */
+  OP_ASSERTBACK_NA,  /* 133 Positive non-atomic lookbehind */
+  OP_ASSERT_SCS,     /* 134 Scan substring */
 
   /* ONCE, SCRIPT_RUN, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come
   immediately after the assertions, with ONCE first, as there's a test for >=
   ONCE for a subpattern that isn't an assertion. The POS versions must
   immediately follow the non-POS versions in each case. */
 
-  OP_ONCE,           /* 134 Atomic group, contains captures */
-  OP_SCRIPT_RUN,     /* 135 Non-capture, but check characters' scripts */
-  OP_BRA,            /* 136 Start of non-capturing bracket */
-  OP_BRAPOS,         /* 137 Ditto, with unlimited, possessive repeat */
-  OP_CBRA,           /* 138 Start of capturing bracket */
-  OP_CBRAPOS,        /* 139 Ditto, with unlimited, possessive repeat */
-  OP_COND,           /* 140 Conditional group */
+  OP_ONCE,           /* 135 Atomic group, contains captures */
+  OP_SCRIPT_RUN,     /* 136 Non-capture, but check characters' scripts */
+  OP_BRA,            /* 137 Start of non-capturing bracket */
+  OP_BRAPOS,         /* 138 Ditto, with unlimited, possessive repeat */
+  OP_CBRA,           /* 139 Start of capturing bracket */
+  OP_CBRAPOS,        /* 140 Ditto, with unlimited, possessive repeat */
+  OP_COND,           /* 141 Conditional group */
 
   /* These five must follow the previous five, in the same order. There's a
   check for >= SBRA to distinguish the two sets. */
 
-  OP_SBRA,           /* 141 Start of non-capturing bracket, check empty  */
-  OP_SBRAPOS,        /* 142 Ditto, with unlimited, possessive repeat */
-  OP_SCBRA,          /* 143 Start of capturing bracket, check empty */
-  OP_SCBRAPOS,       /* 144 Ditto, with unlimited, possessive repeat */
-  OP_SCOND,          /* 145 Conditional group, check empty */
+  OP_SBRA,           /* 142 Start of non-capturing bracket, check empty  */
+  OP_SBRAPOS,        /* 143 Ditto, with unlimited, possessive repeat */
+  OP_SCBRA,          /* 144 Start of capturing bracket, check empty */
+  OP_SCBRAPOS,       /* 145 Ditto, with unlimited, possessive repeat */
+  OP_SCOND,          /* 146 Conditional group, check empty */
 
   /* The next two pairs must (respectively) be kept together. */
 
-  OP_CREF,           /* 146 Used to hold a capture number as condition */
-  OP_DNCREF,         /* 147 Used to point to duplicate names as a condition */
-  OP_RREF,           /* 148 Used to hold a recursion number as condition */
-  OP_DNRREF,         /* 149 Used to point to duplicate names as a condition */
-  OP_FALSE,          /* 150 Always false (used by DEFINE and VERSION) */
-  OP_TRUE,           /* 151 Always true (used by VERSION) */
+  OP_CREF,           /* 147 Used to hold a capture number as condition */
+  OP_DNCREF,         /* 148 Used to point to duplicate names as a condition */
+  OP_RREF,           /* 149 Used to hold a recursion number as condition */
+  OP_DNRREF,         /* 150 Used to point to duplicate names as a condition */
+  OP_FALSE,          /* 151 Always false (used by DEFINE and VERSION) */
+  OP_TRUE,           /* 152 Always true (used by VERSION) */
 
-  OP_BRAZERO,        /* 152 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 153 order. */
-  OP_BRAPOSZERO,     /* 154 */
+  OP_BRAZERO,        /* 153 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 154 order. */
+  OP_BRAPOSZERO,     /* 155 */
 
   /* These are backtracking control verbs */
 
-  OP_MARK,           /* 155 always has an argument */
-  OP_PRUNE,          /* 156 */
-  OP_PRUNE_ARG,      /* 157 same, but with argument */
-  OP_SKIP,           /* 158 */
-  OP_SKIP_ARG,       /* 159 same, but with argument */
-  OP_THEN,           /* 160 */
-  OP_THEN_ARG,       /* 161 same, but with argument */
-  OP_COMMIT,         /* 162 */
-  OP_COMMIT_ARG,     /* 163 same, but with argument */
+  OP_MARK,           /* 156 always has an argument */
+  OP_PRUNE,          /* 157 */
+  OP_PRUNE_ARG,      /* 158 same, but with argument */
+  OP_SKIP,           /* 159 */
+  OP_SKIP_ARG,       /* 160 same, but with argument */
+  OP_THEN,           /* 161 */
+  OP_THEN_ARG,       /* 162 same, but with argument */
+  OP_COMMIT,         /* 163 */
+  OP_COMMIT_ARG,     /* 164 same, but with argument */
 
   /* These are forced failure and success verbs. FAIL and ACCEPT do accept an
   argument, but these cases can be compiled as, for example, (*MARK:X)(*FAIL)
   without the need for a special opcode. */
 
-  OP_FAIL,           /* 164 */
-  OP_ACCEPT,         /* 165 */
-  OP_ASSERT_ACCEPT,  /* 166 Used inside assertions */
-  OP_CLOSE,          /* 167 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 165 */
+  OP_ACCEPT,         /* 166 */
+  OP_ASSERT_ACCEPT,  /* 167 Used inside assertions */
+  OP_CLOSE,          /* 168 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 168 */
+  OP_SKIPZERO,       /* 169 */
 
   /* This is used to identify a DEFINE group during compilation so that it can
   be checked for having only one branch. It is changed to OP_FALSE before
   compilation finishes. */
 
-  OP_DEFINE,         /* 169 */
+  OP_DEFINE,         /* 170 */
 
   /* These opcodes replace their normal counterparts in UCP mode when
   PCRE2_EXTRA_ASCII_BSW is not set. */
 
-  OP_NOT_UCP_WORD_BOUNDARY, /* 170 */
-  OP_UCP_WORD_BOUNDARY,     /* 171 */
-
-  /* These are used for "extended classes" such as [a-z -- aeiou]. */
-
-  OP_ECLASS,         /* 172 */
-  OP_ECLASS_AND,     /* 173 */
-  OP_ECLASS_OR,      /* 174 */
-  OP_ECLASS_SUB,     /* 175 */
-  OP_ECLASS_XOR,     /* 176 */
-  OP_ECLASS_NOT,     /* 177 */
+  OP_NOT_UCP_WORD_BOUNDARY, /* 171 */
+  OP_UCP_WORD_BOUNDARY,     /* 172 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1799,7 +1815,8 @@ some cases doesn't actually use these names at all). */
   "*+","++", "?+", "{",                                           \
   "*", "*?", "+", "+?", "?", "??", "{", "{",                      \
   "*+","++", "?+", "{",                                           \
-  "class", "nclass", "xclass", "Ref", "Refi", "DnRef", "DnRefi",  \
+  "class", "nclass", "xclass", "eclass",                          \
+  "Ref", "Refi", "DnRef", "DnRefi",                               \
   "Recurse", "Callout", "CalloutStr",                             \
   "Alt", "Ket", "KetRmax", "KetRmin", "KetRpos",                  \
   "Reverse", "VReverse", "Assert", "Assert not",                  \
@@ -1818,8 +1835,7 @@ some cases doesn't actually use these names at all). */
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
-  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)",       \
-  "eclass", "&&", "||", "--", "~~", "!!"
+  "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1874,6 +1890,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+(32/sizeof(PCRE2_UCHAR)),    /* CLASS                                  */ \
   1+(32/sizeof(PCRE2_UCHAR)),    /* NCLASS                                 */ \
   0,                             /* XCLASS - variable length               */ \
+  0,                             /* ECLASS - variable length               */ \
   1+IMM2_SIZE,                   /* REF                                    */ \
   1+IMM2_SIZE+1,                 /* REFI                                   */ \
   1+2*IMM2_SIZE,                 /* DNREF                                  */ \
@@ -1918,9 +1935,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */ \
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
-  1, 1,                          /* \B and \b in UCP mode                  */ \
-  0,                             /* ECLASS - variable length               */ \
-  1, 1, 1, 1, 1                  /* ECLASS ops, nested inside ECLASS       */
+  1, 1                           /* \B and \b in UCP mode                  */
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

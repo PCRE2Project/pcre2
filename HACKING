@@ -633,6 +633,43 @@ When XCL_NOT is set, the bit map, if present, contains bits for characters that
 are allowed (exactly as for OP_NCLASS), but the list of items that follow it
 specifies characters and properties that are not allowed.
 
+The meaning of the bitmap indicated by XCL_MAP is that, if one is present, then
+it fully describes which code points < 256 match the class (without needing to
+invert the check according to XCL_NOT); the other items in the OP_XCLASS need
+not be consulted. However, if a bitmap is not present, then code points < 256
+may still match, so the other items in the OP_XCLASS must be consulted.
+
+For classes containing logical expressions, such as "[\p{Greek} && \p{Lu}]" for
+"uppercase Greek letters", OP_ECLASS is used. The expression is encoded as a a
+stack-based series of operands and operators, in Reverse Polish Notation. Like
+an OP_XCLASS, the OP_ECLASS is first followed by a LINK_SIZE value containing
+the total length of the opcode and its data. That is followed by a code unit
+containing flags: currently just ECL_MAP indicating that a bit map is present.
+There follows the bit map, if ECL_MAP is set. Finally, there is a sequence of
+items that are either an operand or operator. Each item starts with a single
+code unit containing its type:
+
+  ECL_AND       AND; no additional data
+  ECL_OR        OR; no additional data
+  ECL_XOR       XOR; no additional data
+  ECL_NOT       NOT; no additional data
+  ECL_XCLASS    The additional data which follows ECL_XCLASS is the same as for
+                an OP_XCLASS, except that this data is preceded by ECL_XCLASS
+                rather than OP_XCLASS.
+                Because the OP_ECLASS has its own bitmap (if required), an
+                ECL_XCLASS should not contain a bitmap.
+
+Additionally, there are two intermediate values used during compilation, but
+these are folded away during generation of the opcode, and so never appear
+inside an OP_ECLASS at match time. They are:
+
+  ECL_ANY       match all characters; no additional data
+  ECL_NONE      match no characters; no additional data
+
+The meaning of the bitmap indicated by ECL_MAP is different to that of XCL_MAP
+for OP_XCLASS, in one way. The ECL_MAP bitmap is present whenever any code
+points < 256 match the class.
+
 
 Back references
 ---------------

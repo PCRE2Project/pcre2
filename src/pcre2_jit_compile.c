@@ -1105,11 +1105,11 @@ switch(*cc)
   case OP_CALLOUT_STR:
   return cc + GET(cc, 1 + 2*LINK_SIZE);
 
-  /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
-  Add back the "if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8" once we stop emitting ECLASS for this case. */
+#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
   case OP_ECLASS:
   case OP_XCLASS:
   return cc + GET(cc, 1);
+#endif
 
   case OP_MARK:
   case OP_COMMIT_ARG:

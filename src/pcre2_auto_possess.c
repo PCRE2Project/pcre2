@@ -480,13 +480,13 @@ switch(c)
 
   case OP_NCLASS:
   case OP_CLASS:
+#ifdef SUPPORT_WIDE_CHARS
   case OP_XCLASS:
   case OP_ECLASS:
-  /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
-  Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
   if (c == OP_XCLASS || c == OP_ECLASS)
     end = code + GET(code, 0) - 1;
   else
+#endif
     end = code + 32 / sizeof(PCRE2_UCHAR);
   class_end = end;
 
@@ -1118,10 +1118,7 @@ for(;;)
           list_ptr[2] + LINK_SIZE, (const uint8_t*)cb->start_code, utf))
         return FALSE;
       break;
-#endif
 
-      /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
-      Enclose in "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
       case OP_ECLASS:
       if (PRIV(eclass)(chr,
           (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE,
@@ -1129,6 +1126,7 @@ for(;;)
           (const uint8_t*)cb->start_code, utf))
         return FALSE;
       break;
+#endif /* SUPPORT_WIDE_CHARS */
 
       default:
       return FALSE;
@@ -1236,13 +1234,17 @@ for (;;)
       }
     c = *code;
     }
-  else if (c == OP_CLASS || c == OP_NCLASS || c == OP_XCLASS || c == OP_ECLASS)
+  else if (c == OP_CLASS || c == OP_NCLASS
+#ifdef SUPPORT_WIDE_CHARS
+           || c == OP_XCLASS || c == OP_ECLASS
+#endif
+           )
     {
-    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
-    Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+#ifdef SUPPORT_WIDE_CHARS
     if (c == OP_XCLASS || c == OP_ECLASS)
       repeat_opcode = code + GET(code, 1);
     else
+#endif
       repeat_opcode = code + 1 + (32 / sizeof(PCRE2_UCHAR));
 
     c = *repeat_opcode;
@@ -1315,12 +1317,12 @@ for (;;)
     code += GET(code, 1 + 2*LINK_SIZE);
     break;
 
-    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
-    Add back the "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
-    case OP_ECLASS:
+#ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
+    case OP_ECLASS:
     code += GET(code, 1);
     break;
+#endif
 
     case OP_MARK:
     case OP_COMMIT_ARG:
