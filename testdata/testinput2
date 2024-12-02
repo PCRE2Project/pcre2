@@ -7255,4 +7255,35 @@ a)"xI
 
 /[A-\\]/B
 
+/[\A]/
+
+/[\Z]/
+
+/[\z]/
+
+/[\G]/
+
+/[\K]/
+
+/[\g<1>]/
+    <
+    g
+\= Expect no match
+    \\
+
+/[\k<1>]/
+    <
+    k
+\= Expect no match
+    \\
+
+/[\u{ 1z}]/alt_bsux,extra_alt_bsux
+    u
+    {
+    }
+    \x20
+    1
+\= Expect no match
+    \\
+
 # End of testinput2
