@@ -541,38 +541,46 @@ For hard partial matching, we immediately return a partial match. Otherwise,
 carrying on means that a complete match on the current subject will be sought.
 A partial match is returned only if no complete match can be found. */
 
-#define CHECK_PARTIAL()\
-  if (Feptr >= mb->end_subject) \
-    { \
-    SCHECK_PARTIAL(); \
-    }
+#define CHECK_PARTIAL() \
+  do { \
+     if (Feptr >= mb->end_subject) \
+       { \
+       SCHECK_PARTIAL(); \
+       } \
+     } \
+  while (0)
 
-#define SCHECK_PARTIAL()\
-  if (mb->partial != 0 && \
-      (Feptr > mb->start_used_ptr || mb->allowemptypartial)) \
-    { \
-    mb->hitend = TRUE; \
-    if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
-    }
+#define SCHECK_PARTIAL() \
+  do { \
+     if (mb->partial != 0 && \
+         (Feptr > mb->start_used_ptr || mb->allowemptypartial)) \
+       { \
+       mb->hitend = TRUE; \
+       if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
+       } \
+     } \
+  while (0)
 
 
 /* These macros are used to implement backtracking. They simulate a recursive
 call to the match() function by means of a local vector of frames which
 remember the backtracking points. */
 
-#define RMATCH(ra,rb)\
-  {\
-  start_ecode = ra;\
-  Freturn_id = rb;\
-  goto MATCH_RECURSE;\
-  L_##rb:;\
-  }
+#define RMATCH(ra,rb) \
+  do { \
+     start_ecode = ra; \
+     Freturn_id = rb; \
+     goto MATCH_RECURSE; \
+     L_##rb:; \
+     } \
+  while (0)
 
-#define RRETURN(ra)\
-  {\
-  rrc = ra;\
-  goto RETURN_SWITCH;\
-  }
+#define RRETURN(ra) \
+  do { \
+     rrc = ra; \
+     goto RETURN_SWITCH; \
+     } \
+  while (0)
 
 
 
