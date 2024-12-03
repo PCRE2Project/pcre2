@@ -94,6 +94,7 @@ changed. This #define is a copy of the one in pcre2_internal.h. */
 
 #include "pcre2.h"
 #include "pcre2posix.h"
+#include "pcre2_util.h"
 
 /* Table to translate PCRE2 compile time error codes into POSIX error codes.
 Only a few PCRE2 errors with a value greater than 23 turn into special POSIX
@@ -194,7 +195,7 @@ if (preg != NULL && (int)preg->re_erroffset != -1)
   /* no need to deal with UB in snprintf */
   if (errbuf_size > INT_MAX) errbuf_size = INT_MAX;
 
-  /* there are 11 charactes between message and offset,
+  /* there are 11 characters between message and offset;
      update message_len() if changed */
   ret = snprintf(errbuf, errbuf_size, "%s at offset %d", message,
                  (int)preg->re_erroffset);
@@ -209,6 +210,8 @@ else
     }
   ret = (int)len;
   }
+
+PCRE2_ASSERT(len > 0 || preg != NULL);
 
 do {
   if (ret < 0)

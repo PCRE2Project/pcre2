@@ -3059,7 +3059,6 @@ while (ptr < endptr)
         if (group_separator != NULL)
           fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
         hyphenpending = FALSE;
-        hyphenprinted = TRUE;
         }
 
       /* Now print the matching line(s); ensure we set hyphenpending at the end
@@ -3874,8 +3873,12 @@ else
   filename = name;
   }
 
-while ((patlen = sizeof(buffer)) && read_pattern(buffer, &patlen, f))
+while (TRUE)
   {
+  patlen = sizeof(buffer);
+  if (!read_pattern(buffer, &patlen, f))
+    break;
+
   if (!posix_pattern_file)
    {
    while (patlen > 0 && isspace((unsigned char)(buffer[patlen-1]))) patlen--;
