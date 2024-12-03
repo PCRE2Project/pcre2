@@ -436,8 +436,11 @@ RC=0
 RC=0
 ---------------------------- Test 46 ------------------------------
 pcre2grep: Error in 1st command-line regex at offset 8: unmatched closing parenthesis
+RC=2
 pcre2grep: Error in 2nd command-line regex at offset 9: missing closing parenthesis
+RC=2
 pcre2grep: Error in 3rd command-line regex at offset 9: missing terminating ] for character class
+RC=2
 pcre2grep: Error in 4th command-line regex at offset 9: missing terminating ] for character class
 RC=2
 ---------------------------- Test 47 ------------------------------
@@ -494,6 +497,7 @@ RC=0
 ./testdata/grepinput3:0
 ./testdata/grepinput8:0
 ./testdata/grepinputBad8:0
+./testdata/grepinputBad8_Trail:0
 ./testdata/grepinputM:0
 ./testdata/grepinputUN:0
 ./testdata/grepinputv:1
@@ -725,6 +729,7 @@ RC=0
 ./testdata/grepinput3
 ./testdata/grepinput8
 ./testdata/grepinputBad8
+./testdata/grepinputBad8_Trail
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 97 -----------------------------
@@ -837,6 +842,7 @@ testdata/grepinput:469
 testdata/grepinput3:0
 testdata/grepinput8:0
 testdata/grepinputBad8:0
+testdata/grepinputBad8_Trail:0
 testdata/grepinputM:2
 testdata/grepinputUN:0
 testdata/grepinputv:3
@@ -858,6 +864,7 @@ RC=0
 0
 0
 0
+0
 2
 0
 3
@@ -868,6 +875,7 @@ RC=0
 testdata/grepinput3
 testdata/grepinput8
 testdata/grepinputBad8
+testdata/grepinputBad8_Trail
 testdata/grepinputUN
 RC=0
 ---------------------------- Test 119 -----------------------------

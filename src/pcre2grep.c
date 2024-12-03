@@ -99,10 +99,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <bzlib.h>
 #endif
 
-#include "pcre2_util.h"
-
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
+#include "pcre2_internal.h"
 
 /* Older versions of MSVC lack snprintf(). This define allows for
 warning/error-free compilation and testing with MSVC compilers back to at least
@@ -125,11 +124,6 @@ be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #else
 #define SIZ_FORM "zu"
 #endif
-
-#define FALSE 0
-#define TRUE 1
-
-typedef int BOOL;
 
 #define DEFAULT_CAPTURE_MAX 50
 
@@ -2588,6 +2582,7 @@ static PCRE2_SIZE
 fill_buffer(void *handle, int frtype, char *buffer, PCRE2_SIZE length,
   BOOL input_line_buffered)
 {
+PCRE2_SIZE nread;
 (void)frtype;  /* Avoid warning when not used */
 
 #ifdef SUPPORT_LIBZ
@@ -2602,9 +2597,16 @@ if (frtype == FR_LIBBZ2)
 else
 #endif
 
-return (input_line_buffered ?
+nread = (input_line_buffered ?
   read_one_line(buffer, length, (FILE *)handle) :
   fread(buffer, 1, length, (FILE *)handle));
+
+#ifdef SUPPORT_VALGRIND
+if (nread > 0) VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(buffer, nread);
+if (nread < length) VALGRIND_MAKE_MEM_UNDEFINED(buffer + nread, length - nread);
+#endif
+
+return nread;
 }
 
 

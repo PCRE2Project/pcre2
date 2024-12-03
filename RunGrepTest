@@ -41,7 +41,7 @@ fi
 valgrind=
 while [ $# -gt 0 ] ; do
   case $1 in
-    valgrind) valgrind="valgrind -q --leak-check=no --smc-check=all-non-file";;
+    valgrind|-valgrind) valgrind="valgrind -q --leak-check=no --smc-check=all-non-file --error-exitcode=70";;
     *) echo "RunGrepTest: Unknown argument $1"; exit 1;;
   esac
   shift
@@ -318,8 +318,11 @@ echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 46 ------------------------------" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -e 'unopened)' -e abc ./testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -eabc -e '(unclosed' ./testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -eabc -e xyz -e '[unclosed' ./testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep --regex=123 -eabc -e xyz -e '[unclosed' ./testdata/grepinput) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
@@ -975,31 +978,48 @@ printf 'abc\rdef\r\nghi\njkl' >testNinputgrep
 
 printf '%c--------------------------- Test N1 ------------------------------\r\n' - >testtrygrep
 $valgrind $vjs $pcre2grep -n -N CR "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep -B1 -n -N CR "^def" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 printf '%c--------------------------- Test N2 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=crlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep -B1 -n -N CRLF "^ghi" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 printf '%c--------------------------- Test N3 ------------------------------\r\n' - >>testtrygrep
 pattern=`printf 'def\rjkl'`
 $valgrind $vjs $pcre2grep -n --newline=cr -F "$pattern" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 printf '%c--------------------------- Test N4 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=crlf -F -f $srcdir/testdata/greppatN4 testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 printf '%c--------------------------- Test N5 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep -B1 -n --newline=any "^def" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 printf '%c--------------------------- Test N6 ------------------------------\r\n' - >>testtrygrep
 $valgrind $vjs $pcre2grep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep -B1 -n --newline=anycrlf "^jkl" testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 printf '%c--------------------------- Test N7 ------------------------------\r\n' - >>testtrygrep
 printf 'xyz\0abc\0def' >testNinputgrep
 $valgrind $vjs $pcre2grep -na --newline=nul "^(abc|def)" testNinputgrep | $tr '\000' '@' >>testtrygrep
+echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep -B1 -na --newline=nul "^(abc|def)" testNinputgrep | $tr '\000' '@' >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
+printf '%c--------------------------- Test N8 ------------------------------\r\n' - >>testtrygrep
+$valgrind $vjs $pcre2grep -na --newline=anycrlf "^a" $srcdir/testdata/grepinputBad8_Trail >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 echo "" >>testtrygrep
 
 $cf $srcdir/testdata/grepoutputN testtrygrep
@@ -1013,6 +1033,12 @@ if [ $utf8 -ne 0 ] ; then
 
   printf '%c--------------------------- Test UN1 ------------------------------\r\n' - >testtrygrep
   $valgrind $vjs $pcre2grep -nau --newline=anycrlf "^(abc|def)" $srcdir/testdata/grepinputUN >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
+  printf '%c--------------------------- Test UN2 ------------------------------\r\n' - >testtrygrep
+  $valgrind $vjs $pcre2grep -nauU --newline=anycrlf "^a" $srcdir/testdata/grepinputBad8_Trail >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
   echo "" >>testtrygrep
 
   $cf $srcdir/testdata/grepoutputUN testtrygrep
@@ -1031,16 +1057,22 @@ if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q 'callout scri
   echo "Testing pcre2grep script callouts"
   echo "--- Test 1 ---" >testtrygrep
   $valgrind $vjs $pcre2grep '(T)(..(.))(?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4) ($14) ($0)")()' $srcdir/testdata/grepinputv >>testtrygrep
+  echo "RC=$?" >>testtrygrep
   echo "--- Test 2 ---" >>testtrygrep
   $valgrind $vjs $pcre2grep '(T)(..(.))()()()()()()()(..)(?C"/bin/echo|Arg1: [$11] [${11}]")' $srcdir/testdata/grepinputv >>testtrygrep
+  echo "RC=$?" >>testtrygrep
   echo "--- Test 3 ---" >>testtrygrep
   $valgrind $vjs $pcre2grep '(T)(?C"|$0:$1$n")' $srcdir/testdata/grepinputv >>testtrygrep
+  echo "RC=$?" >>testtrygrep
   echo "--- Test 4 ---" >>testtrygrep
   $valgrind $vjs $pcre2grep '(T)(?C"/bin/echo|$0:$1$n")' $srcdir/testdata/grepinputv >>testtrygrep
+  echo "RC=$?" >>testtrygrep
   echo "--- Test 5 ---" >>testtrygrep
   $valgrind $vjs $pcre2grep '(T)(?C"|$1$n")(*F)' $srcdir/testdata/grepinputv >>testtrygrep
+  echo "RC=$?" >>testtrygrep
   echo "--- Test 6 ---" >>testtrygrep
   $valgrind $vjs $pcre2grep -m1 '(T)(?C"|$0:$1:$x{41}$o{101}$n")' $srcdir/testdata/grepinputv >>testtrygrep
+  echo "RC=$?" >>testtrygrep
 
   if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q 'Non-fork callout scripts in patterns are supported'; then
     nonfork=1
@@ -1057,8 +1089,10 @@ if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q 'callout scri
     echo "Testing pcre2grep script callout with UTF-8 features"
     echo "--- Test 1 ---" >testtrygrep
     $valgrind $vjs $pcre2grep -u '(T)(?C"|$0:$x{a6}$n")' $srcdir/testdata/grepinputv >>testtrygrep
+    echo "RC=$?" >>testtrygrep
     echo "--- Test 2 ---" >>testtrygrep
     $valgrind $vjs $pcre2grep -u '(T)(?C"/bin/echo|$0:$x{a6}$n")' $srcdir/testdata/grepinputv >>testtrygrep
+    echo "RC=$?" >>testtrygrep
 
     if [ $nonfork = 1 ] ; then
       $cf $srcdir/testdata/grepoutputCNU testtrygrep

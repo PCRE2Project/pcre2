@@ -288,7 +288,7 @@ while [ $# -gt 0 ] ; do
    bigstack|-bigstack) bigstack=yes;;
    nojit|-nojit) nojit=yes;;
    sim|-sim) shift; sim=$1;;
-   valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all-non-file";;
+   valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --error-exitcode=70";;
    valgrind-log|-valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all-non-file --log-file=report.%p ";;
    ~*)
      if expr "$1" : '~[0-9][0-9]*$' >/dev/null; then
