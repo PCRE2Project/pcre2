@@ -158,10 +158,8 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39 };
 
 #ifdef SUPPORT_WIDE_CHARS
-enum { RM100=100, RM101 };
+enum { RM100=100, RM101, RM102, RM103 };
 #endif
-
-enum { RM150=150, RM151 };
 
 #ifdef SUPPORT_UNICODE
 enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
@@ -2335,8 +2333,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Lmin         F->temp_32[0]
 #define Lmax         F->temp_32[1]
 
-    /* TODO: [EC] https://github.com/PCRE2Project/pcre2/issues/537
-    Enclose in "ifdef SUPPORT_WIDE_CHARS" once we stop emitting ECLASS for this case. */
+#ifdef SUPPORT_WIDE_CHARS
     case OP_ECLASS:
       {
       Leclass_data = Fecode + 1 + LINK_SIZE;  /* Save for matching */
@@ -2401,7 +2398,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         for (;;)
           {
-          RMATCH(Fecode, RM150);
+          RMATCH(Fecode, RM102);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
           if (Feptr >= mb->end_subject)
@@ -2449,7 +2446,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
         for(;;)
           {
-          RMATCH(Fecode, RM151);
+          RMATCH(Fecode, RM103);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (Feptr-- <= Lstart_eptr) break;  /* Tried at original position */
 #ifdef SUPPORT_UNICODE
@@ -2461,6 +2458,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       PCRE2_UNREACHABLE(); /* Control never reaches here */
       }
+#endif  /* SUPPORT_WIDE_CHARS: end of ECLASS */
 
 #undef Lstart_eptr
 #undef Leclass_data
@@ -6830,10 +6828,8 @@ switch (Freturn_id)
   LBL(33) LBL(34) LBL(35) LBL(36) LBL(37) LBL(38) LBL(39)
 
 #ifdef SUPPORT_WIDE_CHARS
-  LBL(100) LBL(101)
+  LBL(100) LBL(101) LBL(102) LBL(103)
 #endif
-
-  LBL(150) LBL(151)
 
 #ifdef SUPPORT_UNICODE
   LBL(200) LBL(201) LBL(202) LBL(203) LBL(204) LBL(205) LBL(206)

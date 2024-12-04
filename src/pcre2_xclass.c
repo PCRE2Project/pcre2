@@ -467,67 +467,71 @@ PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end,
   const uint8_t *char_lists_end, BOOL utf)
 {
 PCRE2_SPTR ptr = data_start;
+PCRE2_UCHAR flags;
 uint32_t stack = 0;
+int stack_depth = 0;
+
+PCRE2_ASSERT(data_start < data_end);
+flags = *ptr++;
+PCRE2_ASSERT((flags & ECL_MAP) == 0 ||
+             (data_end - ptr) >= 32 / (int)sizeof(PCRE2_UCHAR));
+
+/* Code points < 256 are matched against a bitmap, if one is present. If no
+bitmap is present, then the ECLASS does not match any code points < 256. */
+
+if (c < 256)
+  {
+  if ((flags & ECL_MAP) != 0)
+    return (((const uint8_t *)ptr)[c/8] & (1u << (c&7))) != 0;
+  return FALSE;
+  }
+
+/* Skip the bitmap. */
+
+if ((flags & ECL_MAP) != 0)
+  ptr += 32 / sizeof(PCRE2_UCHAR);
 
 /* Do a little loop, until we reach the end of the ECLASS. */
 while (ptr < data_end)
   {
   switch (*ptr)
     {
-    case OP_ECLASS_AND:
+    case ECL_AND:
     ++ptr;
     stack = (stack >> 1) & (stack | ~(uint32_t)1u);
+    PCRE2_ASSERT(stack_depth >= 2);
+    --stack_depth;
     break;
 
-    case OP_ECLASS_OR:
+    case ECL_OR:
     ++ptr;
     stack = (stack >> 1) | (stack & (uint32_t)1u);
+    PCRE2_ASSERT(stack_depth >= 2);
+    --stack_depth;
     break;
 
-    case OP_ECLASS_SUB:
-    ++ptr;
-    stack = (stack >> 1) & (~stack | ~(uint32_t)1u);
-    break;
-
-    case OP_ECLASS_XOR:
+    case ECL_XOR:
     ++ptr;
     stack = (stack >> 1) ^ (stack & (uint32_t)1u);
+    PCRE2_ASSERT(stack_depth >= 2);
+    --stack_depth;
     break;
 
-    case OP_ECLASS_NOT:
+    case ECL_NOT:
     ++ptr;
     stack ^= (uint32_t)1u;
+    PCRE2_ASSERT(stack_depth >= 1);
     break;
 
-    case OP_CLASS:
-    case OP_NCLASS:
-      {
-      uint32_t matched;
-      if (c > 255)
-        matched = *ptr == OP_NCLASS;
-      else
-        matched = (((const unsigned char *)(ptr+1))[c/8] & (1u << (c&7))) != 0;
-
-      ptr += 1 + (32 / sizeof(PCRE2_UCHAR));
-      stack = (stack << 1) | matched;
-      break;
-      }
-
-#ifdef SUPPORT_WIDE_CHARS
-    case OP_XCLASS:
+    case ECL_XCLASS:
       {
       uint32_t matched = PRIV(xclass)(c, ptr + 1 + LINK_SIZE, char_lists_end, utf);
 
       ptr += GET(ptr, 1);
       stack = (stack << 1) | matched;
+      ++stack_depth;
       break;
       }
-#endif
-
-    case OP_ALLANY:
-    ++ptr;
-    stack = (stack << 1) | 1u;
-    break;
 
     /* This should never occur, but compilers may mutter if there is no
     default. */
@@ -537,6 +541,9 @@ while (ptr < data_end)
     return FALSE;
     }
   }
+
+PCRE2_ASSERT(stack_depth == 1);
+(void)stack_depth;  /* Ignore unused variable, if assertions are disabled. */
 
 /* The final bit left on the stack now holds the match result. */
 return (stack & 1u) != 0;

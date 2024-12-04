@@ -384,10 +384,12 @@ while (TRUE)
 #endif
     break;
 
+#ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
     case OP_ECLASS:
     cc += GET(cc, 1);
     break;
+#endif
 
     case OP_MARK:
     case OP_COMMIT_ARG:

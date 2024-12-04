@@ -7061,6 +7061,13 @@ a)"xI
 
 /[z&/alt_extended_class
 
+/[[^]~~[^]]/B,alt_extended_class,allow_empty_class
+\= Expect no match
+    a
+
+/[^[[^]~~[^]]]/B,alt_extended_class,allow_empty_class
+    a
+
 # --------------
 
 # EXTENDED CHARACTER CLASSES (Perl)
@@ -7241,5 +7248,11 @@ a)"xI
 /[]z]/B
 
 /[ \]]/B
+
+/[ --]/B
+
+/[A-\]]/B
+
+/[A-\\]/B
 
 # End of testinput2

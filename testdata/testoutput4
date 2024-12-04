@@ -4860,6 +4860,50 @@ No match
     2
 No match
 
+/(?[ \p{Lu} + \p{Ll} & [a-z] ])/utf
+    \x{0411}
+ 0: \x{411}
+    a
+ 0: a
+    A
+ 0: A
+\= Expect no match
+    \x{0431}
+No match
+
+/(?[ (\p{Lu} + \p{Ll}) & [a-z] ])/utf
+    a
+ 0: a
+\= Expect no match
+    \x{0411}
+No match
+    \x{0431}
+No match
+    A
+No match
+
+/(?[ [a-z] & \p{Lu} + \p{Ll} ])/utf
+    a
+ 0: a
+    \x{0431}
+ 0: \x{431}
+\= Expect no match
+    \x{0411}
+No match
+    A
+No match
+
+/(?[ [a-z] & (\p{Lu} + \p{Ll}) ])/utf
+    a
+ 0: a
+\= Expect no match
+    \x{0431}
+No match
+    \x{0411}
+No match
+    A
+No match
+
 # --------------
 
 # End of testinput4
