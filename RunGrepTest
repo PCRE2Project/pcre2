@@ -47,16 +47,11 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-vjs=
 pcre2grep_version=`$pcre2grep -V`
 if [ "$valgrind" = "" ] ; then
   echo "Testing $pcre2grep_version"
 else
   echo "Testing $pcre2grep_version using valgrind"
-  $pcre2test -C jit >/dev/null
-  if [ $? -ne 0 ]; then
-    vjs="--suppressions=./testdata/valgrind-jit.supp"
-  fi
 fi
 
 # Set up a suitable "diff" command for comparison. Some systems have a diff
@@ -102,6 +97,16 @@ if [ -z "$srcdir" -o ! -d "$srcdir/testdata" ] ; then
   else
     echo "Cannot find the testdata directory"
     exit 1
+  fi
+fi
+
+# Set up the path to the valgrind JIT suppressions
+
+vjs=
+if [ "$valgrind" != "" ] ; then
+  $pcre2test -C jit >/dev/null
+  if [ $? -ne 0 ]; then
+    vjs="--suppressions=`realpath "$srcdir"`/testdata/valgrind-jit.supp"
   fi
 fi
 
