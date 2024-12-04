@@ -1,10 +1,18 @@
-
 name: Clang Static Analyzer
 on: [push, pull_request]
+
+permissions:
+  contents: read
 
 jobs:
   Analyze:
     runs-on: ubuntu-latest
+
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      contents: read
+
     steps:
       - name: Setup
         run: |
@@ -12,7 +20,7 @@ jobs:
           sudo apt-get -qq install ninja-build clang-tools
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: true
 
@@ -38,14 +46,14 @@ jobs:
 
       # Upload the browsable HTML report as an artifact.
       - name: Upload report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: "Clang Static Analyzer report"
           path: './build/clang-report'
 
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3.27.6
         with:
           sarif_file: build/clang.sarif
           category: clang-analyzer
