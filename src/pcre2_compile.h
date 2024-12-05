@@ -263,7 +263,7 @@ void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated,
 OP_CLASS, OP_NCLASS, OP_XCLASS, or OP_ALLANY into pcode. */
 
 uint32_t *PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class, BOOL always_map,
+  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class, BOOL* has_bitmap,
   int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
 
 /* Compile the META codes in pptr into opcodes written to pcode. The pptr must
@@ -272,8 +272,8 @@ start at a META_CLASS or META_CLASS_NOT.
 The pptr will be left pointing at the matching META_CLASS_END. */
 
 BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
-  BOOL negated, uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
+  uint32_t **pptr, PCRE2_UCHAR **pcode, int *errorcodeptr,
+  compile_block *cb, PCRE2_SIZE *lengthptr);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 

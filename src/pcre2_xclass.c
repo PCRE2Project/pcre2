@@ -476,20 +476,17 @@ flags = *ptr++;
 PCRE2_ASSERT((flags & ECL_MAP) == 0 ||
              (data_end - ptr) >= 32 / (int)sizeof(PCRE2_UCHAR));
 
-/* Code points < 256 are matched against a bitmap, if one is present. If no
-bitmap is present, then the ECLASS does not match any code points < 256. */
-
-if (c < 256)
-  {
-  if ((flags & ECL_MAP) != 0)
-    return (((const uint8_t *)ptr)[c/8] & (1u << (c&7))) != 0;
-  return FALSE;
-  }
-
-/* Skip the bitmap. */
+/* Code points < 256 are matched against a bitmap, if one is present.
+Otherwise all codepoints are checked later. */
 
 if ((flags & ECL_MAP) != 0)
+  {
+  if (c < 256)
+    return (((const uint8_t *)ptr)[c/8] & (1u << (c&7))) != 0;
+
+  /* Skip the bitmap. */
   ptr += 32 / sizeof(PCRE2_UCHAR);
+  }
 
 /* Do a little loop, until we reach the end of the ECLASS. */
 while (ptr < data_end)
