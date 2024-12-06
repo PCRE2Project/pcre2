@@ -1,5 +1,6 @@
 name: Scorecards supply-chain security
 on:
+  workflow_dispatch:
   # Only the default branch is supported.
   branch_protection_rule:
   schedule:
@@ -7,8 +8,7 @@ on:
   push:
     branches: [ master ]
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   analysis:
@@ -18,6 +18,8 @@ jobs:
     permissions:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
+      # Needed to publish the results to Scorecard's service.
+      id-token: write
       actions: read
       contents: read
 
@@ -33,9 +35,7 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          # Read-only PAT token. To create it,
-          # follow the steps in https://github.com/ossf/scorecard-action#pat-token-creation.
-          repo_token: ${{ secrets.SCORECARD_READ_TOKEN }}
+          # repo_token: ${{ secrets.GITHUB_TOKEN }}
           # Publish the results to enable scorecard badges. For more details, see
           # https://github.com/ossf/scorecard-action#publishing-results.
           # For private repositories, `publish_results` will automatically be set to `false`,
