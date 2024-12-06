@@ -87,6 +87,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
+#ifdef SUPPORT_VALGRIND
+#include <valgrind/memcheck.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -98,8 +102,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifdef SUPPORT_LIBBZ2
 #include <bzlib.h>
 #endif
-
-#include "pcre2_util.h"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
@@ -1556,42 +1558,25 @@ switch(endlinetype)
   case PCRE2_NEWLINE_ANYCRLF:
   while (p < endptr)
     {
-    int extra = 0;
-    int c = *((unsigned char *)p);
-
-    if (utf && c >= 0xc0)
+    if (*p == '\n')
       {
-      int gcii, gcss;
-      extra = utf8_table4[c & 0x3f];  /* Number of additional bytes */
-      gcss = 6*extra;
-      c = (c & utf8_table3[extra]) << gcss;
-      for (gcii = 1; gcii <= extra; gcii++)
-        {
-        gcss -= 6;
-        c |= (p[gcii] & 0x3f) << gcss;
-        }
+      *lenptr = 1;
+      return p + 1;
       }
 
-    p += 1 + extra;
-
-    switch (c)
+    if (*p == '\r')
       {
-      case '\n':
-      *lenptr = 1;
-      return p;
-
-      case '\r':
-      if (p < endptr && *p == '\n')
+      if (p + 1 < endptr && p[1] == '\n')
         {
         *lenptr = 2;
-        p++;
+        return p + 2;
         }
-      else *lenptr = 1;
-      return p;
 
-      default:
-      break;
+      *lenptr = 1;
+      return p + 1;
       }
+
+    p++;
     }   /* End of loop for ANYCRLF case */
 
   *lenptr = 0;  /* Must have hit the end */
@@ -1607,6 +1592,11 @@ switch(endlinetype)
       {
       int gcii, gcss;
       extra = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+      if (endptr - p < 1 + extra)
+        {
+        *lenptr = 0;  /* Hit the end, halfway through a character */
+        return endptr;
+        }
       gcss = 6*extra;
       c = (c & utf8_table3[extra]) << gcss;
       for (gcii = 1; gcii <= extra; gcii++)
@@ -1623,26 +1613,26 @@ switch(endlinetype)
       case '\n':    /* LF */
       case '\v':    /* VT */
       case '\f':    /* FF */
-      *lenptr = 1;
+      *lenptr = 1 + extra;
       return p;
 
       case '\r':    /* CR */
-      if (p < endptr && *p == '\n')
+      if (extra == 0 && p < endptr && *p == '\n')
         {
         *lenptr = 2;
         p++;
         }
-      else *lenptr = 1;
+      else *lenptr = 1 + extra;
       return p;
 
 #ifndef EBCDIC
       case 0x85:    /* Unicode NEL */
-      *lenptr = utf? 2 : 1;
+      *lenptr = 1 + extra;
       return p;
 
       case 0x2028:  /* Unicode LS */
       case 0x2029:  /* Unicode PS */
-      *lenptr = 3;
+      *lenptr = 1 + extra;
       return p;
 #endif  /* Not EBCDIC */
 
@@ -1693,33 +1683,53 @@ switch(endlinetype)
   return p;
 
   case PCRE2_NEWLINE_CRLF:
+  p -= 2;
   for (;;)
     {
-    p -= 2;
     while (p > startptr && p[-1] != '\n') p--;
-    if (p <= startptr + 1 || p[-2] == '\r') break;
+    if (p == startptr) break;
+    if (p - startptr >= 2 && p[-2] == '\r') break;
+    p--;
+    }
+  return p;
+
+  case PCRE2_NEWLINE_ANYCRLF:
+  if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n') p -= 2;
+    else p--;
+  while (p > startptr)
+    {
+    if (p[-1] == '\n' || p[-1] == '\r') break;
+    p--;
     }
   return p;
 
   case PCRE2_NEWLINE_ANY:
-  case PCRE2_NEWLINE_ANYCRLF:
-  if (*(--p) == '\n' && p > startptr && p[-1] == '\r') p--;
-  if (utf) while ((*p & 0xc0) == 0x80) p--;
+  if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n') p -= 2;
+  else
+    {
+    if (utf) while (p > startptr && (p[-1] & 0xc0) == 0x80) p--;
+    if (p > startptr) p--;
+    }
 
   while (p > startptr)
     {
-    unsigned int c;
+    int c;
     char *pp = p - 1;
 
     if (utf)
       {
       int extra = 0;
-      while ((*pp & 0xc0) == 0x80) pp--;
+      while (pp > startptr && (*pp & 0xc0) == 0x80) pp--;
       c = *((unsigned char *)pp);
       if (c >= 0xc0)
         {
         int gcii, gcss;
         extra = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+        if (p - pp < 1 + extra)
+          {
+          p = pp;  /* Rewind over the broken character */
+          continue;
+          }
         gcss = 6*extra;
         c = (c & utf8_table3[extra]) << gcss;
         for (gcii = 1; gcii <= extra; gcii++)
@@ -1731,17 +1741,7 @@ switch(endlinetype)
       }
     else c = *((unsigned char *)pp);
 
-    if (endlinetype == PCRE2_NEWLINE_ANYCRLF) switch (c)
-      {
-      case '\n':    /* LF */
-      case '\r':    /* CR */
-      return p;
-
-      default:
-      break;
-      }
-
-    else switch (c)
+    switch (c)
       {
       case '\n':    /* LF */
       case '\v':    /* VT */
@@ -1761,7 +1761,7 @@ switch(endlinetype)
     p = pp;  /* Back one character */
     }        /* End of loop for ANY case */
 
-  return startptr;  /* Hit start of data */
+  return p;
   }     /* End of overall switch */
 }
 
@@ -2506,7 +2506,7 @@ while (length > 0)
       case DDE_ERROR:
       free(args);
       free(argsvector);
-      PCRE2_DEBUG_UNREACHABLE();
+      abort();
       return 0;
       /* LCOV_EXCL_STOP */
       }
@@ -2588,6 +2588,7 @@ static PCRE2_SIZE
 fill_buffer(void *handle, int frtype, char *buffer, PCRE2_SIZE length,
   BOOL input_line_buffered)
 {
+PCRE2_SIZE nread;
 (void)frtype;  /* Avoid warning when not used */
 
 #ifdef SUPPORT_LIBZ
@@ -2602,9 +2603,16 @@ if (frtype == FR_LIBBZ2)
 else
 #endif
 
-return (input_line_buffered ?
+nread = (input_line_buffered ?
   read_one_line(buffer, length, (FILE *)handle) :
   fread(buffer, 1, length, (FILE *)handle));
+
+#ifdef SUPPORT_VALGRIND
+if (nread > 0) VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(buffer, nread);
+if (nread < length) VALGRIND_MAKE_MEM_UNDEFINED(buffer + nread, length - nread);
+#endif
+
+return nread;
 }
 
 
@@ -3005,8 +3013,8 @@ while (ptr < endptr)
         if (lastmatchrestart != ptr) hyphenpending = TRUE;
         }
 
-      /* If hyphenpending is TRUE when there is no "after" context, it means we 
-      are at the start of a new file, having output something from the previous 
+      /* If hyphenpending is TRUE when there is no "after" context, it means we
+      are at the start of a new file, having output something from the previous
       file. Output a separator if enabled.*/
 
       else if (hyphenpending)
@@ -3051,7 +3059,7 @@ while (ptr < endptr)
           }
         }
 
-      /* If hyphenpending is TRUE here, it was set after outputting some 
+      /* If hyphenpending is TRUE here, it was set after outputting some
       "after" lines (and there are no "before" lines). */
 
       else if (hyphenpending)
@@ -3067,7 +3075,7 @@ while (ptr < endptr)
 
       if (after_context > 0 || before_context > 0)
         endhyphenpending = TRUE;
-        
+
 
       if (printname != NULL) fprintf(stdout, "%s%c", printname,
         printname_colon);

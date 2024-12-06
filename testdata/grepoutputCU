@@ -11,6 +11,7 @@ The word is cat in this line
 The caterpillar sat on the mat
 0:¦
 The snowcat is not an animal
+RC=0
 --- Test 2 ---
 0:¦
 
@@ -30,3 +31,4 @@ The caterpillar sat on the mat
 0:¦
 
 The snowcat is not an animal
+RC=0

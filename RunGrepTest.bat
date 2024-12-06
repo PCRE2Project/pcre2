@@ -281,8 +281,11 @@ echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test 46 ------------------------------>>testtrygrep
 (pushd %srcdir% & %pcre2grep% -e "unopened)" -e abc ./testdata/grepinput & popd) >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
 (pushd %srcdir% & %pcre2grep% -eabc -e "(unclosed" ./testdata/grepinput & popd) >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
 (pushd %srcdir% & %pcre2grep% -eabc -e xyz -e "[unclosed" ./testdata/grepinput & popd) >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
 (pushd %srcdir% & %pcre2grep% --regex=123 -eabc -e xyz -e "[unclosed" ./testdata/grepinput & popd) >>testtrygrep 2>&1
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
@@ -937,31 +940,48 @@ echo Testing pcre2grep newline settings
 
 echo ---------------------------- Test N1 ------------------------------>testtrygrep
 %pcre2grep% -n -N CR "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 %pcre2grep% -B1 -n -N CR "^def" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N2 ------------------------------>>testtrygrep
 %pcre2grep% -n --newline=crlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 %pcre2grep% -B1 -n -N CRLF "^ghi" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N3 ------------------------------>>testtrygrep
 for /f %%a in ('%printf% "def\rjkl"') do set pattern=%%a
 %pcre2grep% -n --newline=cr -F "!pattern!" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N4 ------------------------------>>testtrygrep
 %pcre2grep% -n --newline=crlf -F -f %srcdir%\testdata\greppatN4 testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N5 ------------------------------>>testtrygrep
 %pcre2grep% -n --newline=any "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 %pcre2grep% -B1 -n --newline=any "^def" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N6 ------------------------------>>testtrygrep
 %pcre2grep% -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 %pcre2grep% -B1 -n --newline=anycrlf "^jkl" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N7 ------------------------------>>testtrygrep
 %printf% "xyz\0abc\0def" >testNinputgrep
 %pcre2grep% -na --newline=nul "^(abc|def)" testNinputgrep | %trnull% >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
 %pcre2grep% -B1 -na --newline=nul "^(abc|def)" testNinputgrep | %trnull% >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+
+echo ---------------------------- Test N8 ------------------------------>>testtrygrep
+%pcre2grep% -na --newline=anycrlf "^a" %srcdir%\testdata\grepinputBad8_Trail >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+
 %printf% "\n" >>testtrygrep
 
 %cf% %srcdir%\testdata\grepoutputN testtrygrep %cfout%
@@ -975,6 +995,12 @@ if %utf8% neq 0 (
 
   echo ---------------------------- Test UN1 ------------------------------>testtrygrep
   %pcre2grep% -nau --newline=anycrlf "^(abc|def)" %srcdir%\testdata\grepinputUN >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
+
+  echo ---------------------------- Test UN2 ------------------------------>testtrygrep
+  %pcre2grep% -nauU --newline=anycrlf "^a" %srcdir%\testdata\grepinputBad8_Trail >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
+
   %printf% "\n" >>testtrygrep
 
   %cf% %srcdir%\testdata\grepoutputUN testtrygrep %cfout%
@@ -996,16 +1022,22 @@ if %ERRORLEVEL% equ 0 (
 
   echo --- Test 1 --->testtrygrep
   %pcre2grep% "(T)(..(.))(?C'cmd|/c echo|Arg1: [$1] [$2] [$3]|Arg2: ^$|${1}^$| ($4) ($14) ($0)')()" %srcdir%\testdata\grepinputv >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 2 --->>testtrygrep
   %pcre2grep% "(T)(..(.))()()()()()()()(..)(?C'cmd|/c echo|Arg1: [$11] [${11}]')" %srcdir%\testdata\grepinputv >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 3 --->>testtrygrep
   %pcre2grep% "(T)(?C'|$0:$1$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 4 --->>testtrygrep
   %pcre2grep% "(T)(?C'cscript|//nologo|printf.js|%%s\r\n|$0:$1$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 5 --->>testtrygrep
   %pcre2grep% "(T)(?C'|$1$n')(*F)" %srcdir%\testdata\grepinputv >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 6 --->>testtrygrep
   %pcre2grep% -m1 "(T)(?C'|$0:$1:$x{41}$o{101}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+  echo RC=^!ERRORLEVEL!>>testtrygrep
 
   %pcre2grep% --help | %pcre2grep% -q "Non-fork callout scripts in patterns are supported"
   if ^!ERRORLEVEL! equ 0 (
@@ -1024,8 +1056,10 @@ if %ERRORLEVEL% equ 0 (
 
     echo --- Test 1 --->testtrygrep
     %pcre2grep% -u "(T)(?C'|$0:$x{a6}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+    echo RC=^!ERRORLEVEL!>>testtrygrep
     echo --- Test 2 --->>testtrygrep
     %pcre2grep% -u "(T)(?C'cscript|//nologo|printf.js|%%s\r\n|$0:$x{a6}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+    echo RC=^!ERRORLEVEL!>>testtrygrep
 
     if ^!nonfork! equ 1 (
       %cf% %srcdir%\testdata\grepoutputCNU testtrygrep %cfout%

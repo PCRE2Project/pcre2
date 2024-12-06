@@ -11,6 +11,7 @@ Arg1: [T] [he ] [ ] Arg2: |T| () () (0)
 The caterpillar sat on the mat
 Arg1: [T] [he ] [ ] Arg2: |T| () () (0)
 The snowcat is not an animal
+RC=0
 --- Test 2 ---
 Arg1: [qu] [qu]
 The quick brown
@@ -24,6 +25,7 @@ Arg1: [ca] [ca]
 The caterpillar sat on the mat
 Arg1: [sn] [sn]
 The snowcat is not an animal
+RC=0
 --- Test 3 ---
 0:T
 The quick brown
@@ -37,6 +39,7 @@ The word is cat in this line
 The caterpillar sat on the mat
 0:T
 The snowcat is not an animal
+RC=0
 --- Test 4 ---
 0:T
 
@@ -56,6 +59,7 @@ The caterpillar sat on the mat
 0:T
 
 The snowcat is not an animal
+RC=0
 --- Test 5 ---
 T
 T
@@ -63,6 +67,8 @@ T
 T
 T
 T
+RC=1
 --- Test 6 ---
 0:T:AA
 The quick brown
+RC=0
