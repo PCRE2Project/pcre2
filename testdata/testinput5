@@ -3426,6 +3426,25 @@
 \= Expect no match
     a
 
+/[\pL&&\x{100}-\x{1000}]{3,6}+/utf,alt_extended_class
+    \x{145}\x{18b}A\x{145}\x{18b}\x{1C2}\x{21a}\x{257}\x{2ae}\x{0145}\x{18b}
+    \x{145}A\x{145}\x{18b}\x{1C2}B
+
+/[\pL&&\x{100}-\x{1000}]{3,6}\x{2A3}/utf,alt_extended_class
+    \x{145}\x{18b}\x{2a3}A\x{145}\x{18b}\x{1c2}\x{21a}\x{257}\x{2ae}\x{2a3}
+    \x{145}\x{2a3}A\x{145}\x{18b}\x{1c2}\x{2a3}
+    \x{2a3}A\x{145}\x{18b}\x{1c2}\x{2a3}\x{2a3}
+    \x{0145}\x{18b}\x{2a3}A\x{145}\x{18b}\x{1c2}\x{21a}\x{257}\x{2ae}\x{145}\x{2a3}
+
+/[\pL&&\x{100}-\x{1000}]{3,6}?\x{2A3}/utf,alt_extended_class
+    \x{145}\x{18b}\x{2a3}A\x{145}\x{18b}\x{1c2}\x{21a}\x{257}\x{2ae}\x{2a3}
+    \x{145}\x{2a3}A\x{145}\x{18b}\x{1c2}\x{2a3}
+    \x{2a3}A\x{145}\x{18b}\x{1c2}\x{2a3}\x{2a3}
+    \x{0145}\x{18b}\x{2a3}A\x{145}\x{18b}\x{1c2}\x{21a}\x{257}\x{2ae}\x{145}\x{2a3}
+
+/[\P{scx=Beng}\P{scx=Deva}\pM--[\x{2000}-\x{3000}]]+/utf,alt_extended_class
+    \x{964}\x{2000}\x{3000}A\x{951}\x{1fff}\x{3001}\x{965}
+
 /[\p{Thai}~~[^]]/B,utf,alt_extended_class,allow_empty_class
     \x{0d01}
     a
