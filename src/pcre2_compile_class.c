@@ -44,6 +44,17 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre2_compile.h"
 
+typedef struct {
+  /* Option bits for eclass. */
+  uint32_t options;
+  uint32_t xoptions;
+  /* Rarely used members. */
+  int *errorcodeptr;
+  compile_block *cb;
+  /* Bitmap is needed. */
+  BOOL needs_bitmap;
+} eclass_context;
+
 /* Checks the allowed tokens at the end of a class structure in debug mode.
 When a new token is not processed by all loops, and the token is equals to
 a) one of the cases here:
@@ -1007,14 +1018,16 @@ become a single OP_CLASS OP_NCLASS, OP_XCLASS, or OP_ALLANY. */
 
 uint32_t *
 PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class, BOOL always_map,
+  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class, BOOL* has_bitmap,
   int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
 {
 uint32_t *pptr = start_ptr;
 PCRE2_UCHAR *code = *pcode;
 BOOL should_flip_negation;
 const uint8_t *cbits = cb->cbits;
-uint8_t *classbits = cb->classbits.classbits;
+/* Some functions such as add_to_class() or eclass processing
+expects that the bitset is stored in cb->classbits.classbits. */
+uint8_t *const classbits = cb->classbits.classbits;
 
 #ifdef SUPPORT_UNICODE
 BOOL utf = (options & PCRE2_UTF) != 0;
@@ -1639,19 +1652,28 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
   /* If the map is required, move up the extra data to make room for it;
   otherwise just move the code pointer to the end of the extra data. */
 
-  if ((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0 ||
-      always_map)
+  if ((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0 || has_bitmap != NULL)
     {
-    *code++ |= XCL_MAP;
-    (void)memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
-      CU2BYTES(class_uchardata - code));
     if (negate_class)
       {
-      /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-      for (int i = 0; i < 32; i++) classbits[i] = 255 ^ classbits[i];
+      uint32_t *classwords = cb->classbits.classwords;
+      for (int i = 0; i < 8; i++) classwords[i] = ~classwords[i];
       }
-    memcpy(code, classbits, 32);
-    code = class_uchardata + (32 / sizeof(PCRE2_UCHAR));
+
+    if (has_bitmap == NULL)
+      {
+      *code++ |= XCL_MAP;
+      (void)memmove(code + (32 / sizeof(PCRE2_UCHAR)), code,
+        CU2BYTES(class_uchardata - code));
+      memcpy(code, classbits, 32);
+      code = class_uchardata + (32 / sizeof(PCRE2_UCHAR));
+      }
+    else
+      {
+      code = class_uchardata;
+      if ((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0)
+        *has_bitmap = TRUE;
+      }
     }
   else code = class_uchardata;
 
@@ -2033,14 +2055,19 @@ switch (op)
 
 
 
+static BOOL
+compile_eclass_nested(eclass_context *context, BOOL negated,
+  uint32_t **pptr, PCRE2_UCHAR **pcode,
+  eclass_op_info *pop_info, PCRE2_SIZE *lengthptr);
+
 /* This function consumes a group of implicitly-unioned class elements.
 These can be characters, ranges, properties, or nested classes, as long
 as they are all joined by being placed adjacently. */
 
 static BOOL
-compile_class_operand(uint32_t options, uint32_t xoptions, BOOL negated,
+compile_class_operand(eclass_context *context, BOOL negated,
   uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+  PCRE2_SIZE *lengthptr)
 {
 uint32_t *ptr = *pptr;
 uint32_t *prev_ptr;
@@ -2072,8 +2099,8 @@ switch (meta)
   case META_CLASS_NOT:
   if ((*ptr & CLASS_IS_ECLASS) != 0)
     {
-    if (!PRIV(compile_class_nested)(options, xoptions, negated, &ptr, &code,
-                                    pop_info, errorcodeptr, cb, lengthptr))
+    if (!compile_eclass_nested(context, negated, &ptr, &code,
+                               pop_info, lengthptr))
       return FALSE;
 
     PCRE2_ASSERT(*ptr == META_CLASS_END);
@@ -2090,9 +2117,10 @@ switch (meta)
   we still need to collect that fragment up into a "leaf" OP_CLASS. */
 
   prev_ptr = ptr;
-  ptr = PRIV(compile_class_not_nested)(options, xoptions, ptr, &code,
-                                       (meta != META_CLASS_NOT) == negated,
-                                       TRUE, errorcodeptr, cb, lengthptr);
+  ptr = PRIV(compile_class_not_nested)(
+    context->options, context->xoptions, ptr, &code,
+    (meta != META_CLASS_NOT) == negated, &context->needs_bitmap,
+    context->errorcodeptr, context->cb, lengthptr);
   if (ptr == NULL) return FALSE;
 
   /* We must have a 100% guarantee that ptr increases when
@@ -2143,6 +2171,20 @@ switch (meta)
     if (lengthptr != NULL)
       *lengthptr += code - (code_start + 1);
     code = code_start + 1;
+
+    if (!context->needs_bitmap && *code_start == ECL_NONE)
+      {
+      uint32_t *classwords = pop_info->bits.classwords;
+
+      for (int i = 0; i < 8; i++)
+        if (classwords[i] != 0)
+          {
+          context->needs_bitmap = TRUE;
+          break;
+          }
+      }
+    else
+      context->needs_bitmap = TRUE;
     }
 
   /* Finally, for OP_XCLASS we hoist out the bitmap (if any), and convert to
@@ -2150,42 +2192,12 @@ switch (meta)
 
   else
     {
-    PCRE2_UCHAR flags;
-    PCRE2_UCHAR *map_start;
-    PCRE2_UCHAR *data_start;
-    PCRE2_SIZE put_length;
-
     PCRE2_ASSERT(*code_start == OP_XCLASS);
     *code_start = pop_info->op_single_type = ECL_XCLASS;
 
     PCRE2_ASSERT(code - code_start >= 1 + LINK_SIZE + 1);
-    flags = code_start[1 + LINK_SIZE];
 
-    if ((flags & XCL_MAP) != 0)
-      {
-      PCRE2_ASSERT(code - code_start >=
-          1 + LINK_SIZE + 1 + 32 / (int)sizeof(PCRE2_UCHAR));
-
-      put_length = GET(code_start, 1) - 32 / sizeof(PCRE2_UCHAR);
-      PUT(code_start, 1, (int)put_length);
-      code_start[1 + LINK_SIZE] &= ~(PCRE2_UCHAR)XCL_MAP;
-
-      map_start = code_start + 1 + LINK_SIZE + 1;
-      data_start = map_start + 32 / sizeof(PCRE2_UCHAR);
-      memcpy(pop_info->bits.classbits, map_start, 32);
-      memmove(map_start, data_start, CU2BYTES(code - data_start));
-
-      /* Rewind the code pointer, but make sure we adjust *lengthptr, because we
-      do need to reserve that space (even though we only use it temporarily). */
-      if (lengthptr != NULL)
-        *lengthptr += 32 / sizeof(PCRE2_UCHAR);
-      code -= 32 / sizeof(PCRE2_UCHAR);
-      }
-    else
-      {
-      memset(pop_info->bits.classbits, 0, 32);
-      }
-
+    memcpy(pop_info->bits.classbits, context->cb->classbits.classbits, 32);
     pop_info->length = (code - code_start) + extra_length;
     }
 
@@ -2215,9 +2227,9 @@ These can be characters, ranges, properties, or nested classes, as long
 as they are all joined by being placed adjacently. */
 
 static BOOL
-compile_class_juxtaposition(uint32_t options, uint32_t xoptions, BOOL negated,
+compile_class_juxtaposition(eclass_context *context, BOOL negated,
   uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+  PCRE2_SIZE *lengthptr)
 {
 uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
@@ -2229,8 +2241,7 @@ PCRE2_UCHAR *start_code = *pcode;
 the "negated" flag. */
 
 /* Because it's a non-empty class, there must be an operand at the start. */
-if (!compile_class_operand(options, xoptions, negated, &ptr, &code, pop_info,
-                           errorcodeptr, cb, lengthptr))
+if (!compile_class_operand(context, negated, &ptr, &code, pop_info, lengthptr))
   return FALSE;
 
 while (*ptr != META_CLASS_END &&
@@ -2254,8 +2265,8 @@ while (*ptr != META_CLASS_END &&
     }
 
   /* An operand must follow the operator. */
-  if (!compile_class_operand(options, xoptions, rhs_negated, &ptr, &code,
-                             &rhs_op_info, errorcodeptr, cb, lengthptr))
+  if (!compile_class_operand(context, rhs_negated, &ptr, &code,
+                             &rhs_op_info, lengthptr))
     return FALSE;
 
   /* Convert infix to postfix (RPN). */
@@ -2276,12 +2287,11 @@ return TRUE;
 /* This function consumes unary prefix operators. */
 
 static BOOL
-compile_class_unary(uint32_t options, uint32_t xoptions, BOOL negated,
+compile_class_unary(eclass_context *context, BOOL negated,
   uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+  PCRE2_SIZE *lengthptr)
 {
 uint32_t *ptr = *pptr;
-PCRE2_UCHAR *code = *pcode;
 #ifdef PCRE2_DEBUG
 PCRE2_UCHAR *start_code = *pcode;
 #endif
@@ -2292,15 +2302,13 @@ while (*ptr == META_ECLASS_NOT)
   negated = !negated;
   }
 
+*pptr = ptr;
 /* Because it's a non-empty class, there must be an operand. */
-if (!compile_class_juxtaposition(options, xoptions, negated, &ptr, &code,
-                                 pop_info, errorcodeptr, cb, lengthptr))
+if (!compile_class_juxtaposition(context, negated, pptr, pcode,
+                                 pop_info, lengthptr))
   return FALSE;
 
-PCRE2_ASSERT(lengthptr == NULL || code == start_code);
-
-*pptr = ptr;
-*pcode = code;
+PCRE2_ASSERT(lengthptr == NULL || *pcode == start_code);
 return TRUE;
 }
 
@@ -2309,9 +2317,9 @@ return TRUE;
 /* This function consumes tightly-binding binary operators. */
 
 static BOOL
-compile_class_binary_tight(uint32_t options, uint32_t xoptions, BOOL negated,
+compile_class_binary_tight(eclass_context *context, BOOL negated,
   uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+  PCRE2_SIZE *lengthptr)
 {
 uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
@@ -2323,8 +2331,7 @@ PCRE2_UCHAR *start_code = *pcode;
 the "negated" flag. */
 
 /* Because it's a non-empty class, there must be an operand at the start. */
-if (!compile_class_unary(options, xoptions, negated, &ptr, &code, pop_info,
-                         errorcodeptr, cb, lengthptr))
+if (!compile_class_unary(context, negated, &ptr, &code, pop_info, lengthptr))
   return FALSE;
 
 while (*ptr == META_ECLASS_AND)
@@ -2349,8 +2356,8 @@ while (*ptr == META_ECLASS_AND)
   ++ptr;
 
   /* An operand must follow the operator. */
-  if (!compile_class_unary(options, xoptions, rhs_negated, &ptr, &code,
-                           &rhs_op_info, errorcodeptr, cb, lengthptr))
+  if (!compile_class_unary(context, rhs_negated, &ptr, &code,
+                           &rhs_op_info, lengthptr))
     return FALSE;
 
   /* Convert infix to postfix (RPN). */
@@ -2371,9 +2378,9 @@ return TRUE;
 /* This function consumes loosely-binding binary operators. */
 
 static BOOL
-compile_class_binary_loose(uint32_t options, uint32_t xoptions, BOOL negated,
+compile_class_binary_loose(eclass_context *context, BOOL negated,
   uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+  PCRE2_SIZE *lengthptr)
 {
 uint32_t *ptr = *pptr;
 PCRE2_UCHAR *code = *pcode;
@@ -2399,8 +2406,8 @@ the following binary operator will be, we can produce an expression which is
 equivalent. */
 
 /* Because it's a non-empty class, there must be an operand at the start. */
-if (!compile_class_binary_tight(options, xoptions, negated, &ptr, &code,
-                                pop_info, errorcodeptr, cb, lengthptr))
+if (!compile_class_binary_tight(context, negated, &ptr, &code,
+                                pop_info, lengthptr))
   return FALSE;
 
 while (*ptr >= META_ECLASS_OR && *ptr <= META_ECLASS_XOR)
@@ -2439,8 +2446,8 @@ while (*ptr >= META_ECLASS_OR && *ptr <= META_ECLASS_XOR)
   ++ptr;
 
   /* An operand must follow the operator. */
-  if (!compile_class_binary_tight(options, xoptions, rhs_negated, &ptr, &code,
-                                  &rhs_op_info, errorcodeptr, cb, lengthptr))
+  if (!compile_class_binary_tight(context, rhs_negated, &ptr, &code,
+                                  &rhs_op_info, lengthptr))
     return FALSE;
 
   /* Convert infix to postfix (RPN). */
@@ -2467,13 +2474,12 @@ applications.
 
 The pptr will be left pointing at the matching META_CLASS_END. */
 
-BOOL
-PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, BOOL negated,
-  uint32_t **pptr, PCRE2_UCHAR **pcode, eclass_op_info *pop_info,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+static BOOL
+compile_eclass_nested(eclass_context *context, BOOL negated,
+  uint32_t **pptr, PCRE2_UCHAR **pcode,
+  eclass_op_info *pop_info, PCRE2_SIZE *lengthptr)
 {
 uint32_t *ptr = *pptr;
-PCRE2_UCHAR *code = *pcode;
 #ifdef PCRE2_DEBUG
 PCRE2_UCHAR *start_code = *pcode;
 #endif
@@ -2485,15 +2491,213 @@ PCRE2_ASSERT(*ptr == (META_CLASS | CLASS_IS_ECLASS) ||
 if (*ptr++ == (META_CLASS_NOT | CLASS_IS_ECLASS))
   negated = !negated;
 
+(*pptr)++;
+
 /* Because it's a non-empty class, there must be an operand at the start. */
-if (!compile_class_binary_loose(options, xoptions, negated, &ptr, &code,
-                                pop_info, errorcodeptr, cb, lengthptr))
+if (!compile_class_binary_loose(context, negated, pptr, pcode,
+                                pop_info, lengthptr))
   return FALSE;
 
-PCRE2_ASSERT(*ptr == META_CLASS_END);
-PCRE2_ASSERT(lengthptr == NULL || code == start_code);
+PCRE2_ASSERT(**pptr == META_CLASS_END);
+PCRE2_ASSERT(lengthptr == NULL || *pcode == start_code);
+return TRUE;
+}
 
-*pptr = ptr;
+BOOL
+PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
+  uint32_t **pptr, PCRE2_UCHAR **pcode, int *errorcodeptr,
+  compile_block *cb, PCRE2_SIZE *lengthptr)
+{
+eclass_context context;
+eclass_op_info op_info;
+PCRE2_SIZE previous_length = (lengthptr != NULL)? *lengthptr : 0;
+PCRE2_UCHAR *code = *pcode;
+PCRE2_UCHAR *previous;
+BOOL allbitsone = TRUE;
+
+context.needs_bitmap = FALSE;
+context.options = options;
+context.xoptions = xoptions;
+context.errorcodeptr = errorcodeptr;
+context.cb = cb;
+
+previous = code;
+*code++ = OP_ECLASS;
+code += LINK_SIZE;
+*code++ = 0;  /* Flags, currently zero. */
+if (!compile_eclass_nested(&context, FALSE, pptr, &code, &op_info, lengthptr))
+  return FALSE;
+
+if (lengthptr != NULL)
+  {
+  *lengthptr += code - previous;
+  code = previous;
+  /* (*lengthptr - previous_length) now holds the amount of buffer that
+  we require to make the call to compile_class_nested() with
+  lengthptr = NULL, and including the (1+LINK_SIZE+1) that we write out
+  before that call. */
+  }
+
+/* Do some useful counting of what's in the bitmap. */
+for (int i = 0; i < 8; i++)
+  if (op_info.bits.classwords[i] != 0xffffffff)
+    {
+    allbitsone = FALSE;
+    break;
+    }
+
+/* After constant-folding the extended class syntax, it may turn out to be
+a simple class after all. In that case, we can unwrap it from the
+OP_ECLASS container - and in fact, we must do so, because in 8-bit
+no-Unicode mode the matcher is compiled without support for OP_ECLASS. */
+
+#ifndef SUPPORT_WIDE_CHARS
+PCRE2_ASSERT(op_info.op_single_type != 0);
+#else
+if (op_info.op_single_type != 0)
+#endif
+  {
+  /* Rewind back over the OP_ECLASS. */
+  code = previous;
+
+  /* If the bits are all ones, and the "high characters" are all matched
+  too, we use a special-cased encoding of OP_ALLANY. */
+
+  if (op_info.op_single_type == ECL_ANY && allbitsone)
+    {
+    /* Advancing code means rewinding lengthptr, at this point. */
+    if (lengthptr != NULL) *lengthptr -= 1;
+    *code++ = OP_ALLANY;
+    }
+
+  /* If the high bits are all matched / all not-matched, then we emit an
+  OP_NCLASS/OP_CLASS respectively. */
+
+  else if (op_info.op_single_type == ECL_ANY ||
+           op_info.op_single_type == ECL_NONE)
+    {
+    PCRE2_SIZE required_len = 1 + (32 / sizeof(PCRE2_UCHAR));
+
+    if (lengthptr != NULL)
+      {
+      if (required_len > (*lengthptr - previous_length))
+      *lengthptr = previous_length + required_len;
+      }
+
+    /* Advancing code means rewinding lengthptr, at this point. */
+    if (lengthptr != NULL) *lengthptr -= required_len;
+    *code++ = (op_info.op_single_type == ECL_ANY)? OP_NCLASS : OP_CLASS;
+    memcpy(code, op_info.bits.classbits, 32);
+    code += 32 / sizeof(PCRE2_UCHAR);
+    }
+
+  /* Otherwise, we have an ECL_XCLASS, so we have the OP_XCLASS data
+  there, but, we pulled out its bitmap into op_info, so now we have to
+  put that back into the OP_XCLASS. */
+
+  else
+    {
+#ifndef SUPPORT_WIDE_CHARS
+    PCRE2_DEBUG_UNREACHABLE();
+#else
+    BOOL need_map = context.needs_bitmap;
+    PCRE2_SIZE required_len;
+
+    PCRE2_ASSERT(op_info.op_single_type == ECL_XCLASS);
+    required_len = op_info.length + (need_map? 32/sizeof(PCRE2_UCHAR) : 0);
+
+    if (lengthptr != NULL)
+      {
+      /* Don't unconditionally request all the space we need - we may
+      already have asked for more during processing of the ECLASS. */
+      if (required_len > (*lengthptr - previous_length))
+        *lengthptr = previous_length + required_len;
+
+      /* The code we write out here won't be ignored, even during the
+      (lengthptr != NULL) phase, because if there's a following quantifier
+      it will peek backwards. So we do have to write out a (truncated)
+      OP_XCLASS, even on this branch. */
+      *lengthptr -= 1 + LINK_SIZE + 1;
+      *code++ = OP_XCLASS;
+      PUT(code, 0, 1 + LINK_SIZE + 1);
+      code += LINK_SIZE;
+      *code++ = 0;
+      }
+    else
+      {
+      PCRE2_UCHAR *rest;
+      PCRE2_SIZE rest_len;
+      PCRE2_UCHAR flags;
+
+      /* 1 unit: OP_XCLASS | LINK_SIZE units | 1 unit: flags | ...rest */
+      PCRE2_ASSERT(op_info.length >= 1 + LINK_SIZE + 1);
+      rest = op_info.code_start + 1 + LINK_SIZE + 1;
+      rest_len = (op_info.code_start + op_info.length) - rest;
+
+      /* First read any data we use, before memmove splats it. */
+      flags = op_info.code_start[1 + LINK_SIZE];
+      PCRE2_ASSERT((flags & XCL_MAP) == 0);
+
+      /* Next do the memmove before any writes. */
+      memmove(code + 1 + LINK_SIZE + 1 + (need_map? 32/sizeof(PCRE2_UCHAR) : 0),
+              rest, CU2BYTES(rest_len));
+
+      /* Finally write the header data. */
+      *code++ = OP_XCLASS;
+      PUT(code, 0, (int)required_len);
+      code += LINK_SIZE;
+      *code++ = flags | (need_map? XCL_MAP : 0);
+      if (need_map)
+        {
+        memcpy(code, op_info.bits.classbits, 32);
+        code += 32 / sizeof(PCRE2_UCHAR);
+        }
+      code += rest_len;
+      }
+#endif /* SUPPORT_WIDE_CHARS */
+    }
+  }
+
+/* Otherwise, we're going to keep the OP_ECLASS. However, again we need
+to do some adjustment to insert the bitmap if we have one. */
+
+#ifdef SUPPORT_WIDE_CHARS
+else
+  {
+  BOOL need_map = context.needs_bitmap;
+  PCRE2_SIZE required_len =
+    1 + LINK_SIZE + 1 + (need_map? 32/sizeof(PCRE2_UCHAR) : 0) + op_info.length;
+
+  if (lengthptr != NULL)
+    {
+    if (required_len > (*lengthptr - previous_length))
+      *lengthptr = previous_length + required_len;
+
+    /* As for the XCLASS branch above, we do have to write out a dummy
+    OP_ECLASS, because of the backwards peek by the quantifier code. Write
+    out a (truncated) OP_ECLASS, even on this branch. */
+    *lengthptr -= 1 + LINK_SIZE + 1;
+    *code++ = OP_ECLASS;
+    PUT(code, 0, 1 + LINK_SIZE + 1);
+    code += LINK_SIZE;
+    *code++ = 0;
+    }
+  else
+    {
+    if (need_map)
+      {
+      PCRE2_UCHAR *map_start = previous + 1 + LINK_SIZE + 1;
+      previous[1 + LINK_SIZE] |= ECL_MAP;
+      memmove(map_start + 32/sizeof(PCRE2_UCHAR), map_start,
+              CU2BYTES(code - map_start));
+      memcpy(map_start, op_info.bits.classbits, 32);
+      code += 32 / sizeof(PCRE2_UCHAR);
+      }
+    PUT(previous, 1, (int)(code - previous));
+    }
+  }
+#endif /* SUPPORT_WIDE_CHARS */
+
 *pcode = code;
 return TRUE;
 }

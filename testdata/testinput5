@@ -3421,6 +3421,11 @@
 \= Expect no match
     0
 
+/[\pL&&[^\x00-\xFF]]/B,utf,alt_extended_class
+    \x{21e}
+\= Expect no match
+    a
+
 /[\p{Thai}~~[^]]/B,utf,alt_extended_class,allow_empty_class
     \x{0d01}
     a

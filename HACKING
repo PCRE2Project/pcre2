@@ -666,9 +666,8 @@ inside an OP_ECLASS at match time. They are:
   ECL_ANY       match all characters; no additional data
   ECL_NONE      match no characters; no additional data
 
-The meaning of the bitmap indicated by ECL_MAP is different to that of XCL_MAP
-for OP_XCLASS, in one way. The ECL_MAP bitmap is present whenever any code
-points < 256 match the class.
+The meaning of the bitmap indicated by ECL_MAP is the same as XCL_MAP.
+If the bitmap is present, all codepoints < 256 are checked against the bitmap.
 
 
 Back references

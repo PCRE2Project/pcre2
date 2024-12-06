@@ -6238,7 +6238,7 @@ Failed: error 115 at offset 52: reference to non-existent subpattern
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9A-Z\xc0-\xd6\xd8-\xde]
+          no bitmap
           xclass: [\p{Lu}]
           xclass: [\p{Nd}]
           OR
@@ -6260,7 +6260,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
+          no bitmap
           xclass: [\p{L}]
           xclass: [\p{Nd}]
           OR
@@ -6282,7 +6282,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9A-Z\xc0-\xd6\xd8-\xde]
+          no bitmap
           xclass: [\p{Lu}]
           xclass: [\p{Nd}]
           OR
@@ -6302,7 +6302,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [^A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
+          no bitmap
           xclass: [^\p{L}]
           xclass: [\p{Nd}]
           OR
@@ -6322,7 +6322,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [^0-9A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
+          no bitmap
           xclass: [^\p{L}]
           xclass: [^\p{Nd}]
           AND
@@ -6342,7 +6342,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [^]
+          no bitmap
           xclass: [^\p{L}]
           xclass: [^\p{Nd}]
           OR
@@ -6359,7 +6359,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9A-Za-z\xb5\xc0-\xd6\xd8-\xf6\xf8-\xff]
+          no bitmap
           xclass: [\p{Lu}\p{Ll}]
           xclass: [\p{Nd}\p{Ll}]
           OR
@@ -6381,7 +6381,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [a-z\xb5\xdf-\xf6\xf8-\xff]
+          no bitmap
           xclass: [\p{Lu}\p{Ll}]
           xclass: [\p{Nd}\p{Ll}]
           AND
@@ -6403,7 +6403,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [A-Z\xc0-\xd6\xd8-\xde]
+          no bitmap
           xclass: [\p{Lu}\p{Ll}]
           xclass: [^\p{Nd}\p{Ll}]
           AND
@@ -6425,7 +6425,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9A-Z\xc0-\xd6\xd8-\xde]
+          no bitmap
           xclass: [\p{Lu}\p{Ll}]
           xclass: [\p{Nd}\p{Ll}]
           XOR
@@ -6478,7 +6478,7 @@ No match
 /[\pL[]]/B,alt_extended_class,allow_empty_class
 ------------------------------------------------------------------
         Bra
-        [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff\p{L}]
+        [\p{L}]
         Ket
         End
 ------------------------------------------------------------------
@@ -7022,7 +7022,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
+          no bitmap
           xclass: [\p{L}]
           xclass: [^\p{L}]
           xclass: [\p{L}]
@@ -7167,7 +7167,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9a-z\xaa\xb5\xba\xdf-\xf6\xf8-\xff]
+          no bitmap
           xclass: [\p{Nd}]
           xclass: [\p{L}]
           xclass: [^\p{Lu}]
@@ -7207,7 +7207,7 @@ No match
 /[^[\P{Nd}]]/B,alt_extended_class
 ------------------------------------------------------------------
         Bra
-        [^\x00-/:-\xff\P{Nd}]
+        [^\P{Nd}]
         Ket
         End
 ------------------------------------------------------------------
@@ -7227,7 +7227,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [A-Za-z\xb5\xc0-\xd6\xd8-\xf6\xf8-\xff]
+          no bitmap
           xclass: [\p{Lu}]
           xclass: [\p{Ll}]
           XOR
@@ -7343,7 +7343,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9]
+          no bitmap
           xclass: [\p{Thai}]
           xclass: [\p{Nd}]
           OR
@@ -7365,7 +7365,7 @@ No match
 ------------------------------------------------------------------
         Bra
         eclass[
-          bitmap: [0-9]
+          no bitmap
           xclass: [\p{Thai}]
           xclass: [\p{Nd}]
           XOR
@@ -7832,7 +7832,7 @@ No match
 /[^[^\p{L}]]/B,utf,alt_extended_class
 ------------------------------------------------------------------
         Bra
-        [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff\p{L}]
+        [\p{L}]
         Ket
         End
 ------------------------------------------------------------------
@@ -7842,6 +7842,19 @@ No match
  0: a
 \= Expect no match
     0
+No match
+
+/[\pL&&[^\x00-\xFF]]/B,utf,alt_extended_class
+------------------------------------------------------------------
+        Bra
+        [\p{L}]
+        Ket
+        End
+------------------------------------------------------------------
+    \x{21e}
+ 0: \x{21e}
+\= Expect no match
+    a
 No match
 
 /[\p{Thai}~~[^]]/B,utf,alt_extended_class,allow_empty_class
@@ -7923,7 +7936,7 @@ No match
 /[\pL~~[^]]/B,utf,alt_extended_class,allow_empty_class
 ------------------------------------------------------------------
         Bra
-        [^A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff\p{L}]
+        [^\p{L}]
         Ket
         End
 ------------------------------------------------------------------
@@ -7936,7 +7949,7 @@ No match
 /[[^]~~\pL]/B,utf,alt_extended_class,allow_empty_class
 ------------------------------------------------------------------
         Bra
-        [^A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff\p{L}]
+        [^\p{L}]
         Ket
         End
 ------------------------------------------------------------------
