@@ -20933,6 +20933,54 @@ Failed: error 106 at offset 3: missing terminating ] for character class
         End
 ------------------------------------------------------------------
 
+/[\A]/
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[\Z]/
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[\z]/
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[\G]/
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[\K]/
+Failed: error 107 at offset 2: escape sequence is invalid in character class
+
+/[\g<1>]/
+    <
+ 0: <
+    g
+ 0: g
+\= Expect no match
+    \\
+No match
+
+/[\k<1>]/
+    <
+ 0: <
+    k
+ 0: k
+\= Expect no match
+    \\
+No match
+
+/[\u{ 1z}]/alt_bsux,extra_alt_bsux
+    u
+ 0: u
+    {
+ 0: {
+    }
+ 0: }
+    \x20
+ 0:  
+    1
+ 0: 1
+\= Expect no match
+    \\
+No match
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

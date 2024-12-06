@@ -1628,6 +1628,7 @@ else
             hptr >= ptrend ||    /* Hit end of input */
             *hptr != CHAR_RIGHT_CURLY_BRACKET)  /* No } terminator */
           {
+          if (isclass) break; /* In a class, just treat as '\u' literal */
           escape = ESC_ub;    /* Special return */
           ptr++;              /* Skip { */
           break;              /* Hex escape not recognized */
@@ -4284,6 +4285,11 @@ while (ptr < ptrend)
           char_is_literal = FALSE;
           goto CLASS_LITERAL;
 
+          case ESC_k:
+          c = CHAR_k;     /* \k is not special in a class, just like \g */
+          char_is_literal = FALSE;
+          goto CLASS_LITERAL;
+
           case ESC_Q:
           inescq = TRUE;  /* Enter literal mode */
           goto CLASS_CONTINUE;
@@ -4295,7 +4301,7 @@ while (ptr < ptrend)
           case ESC_R:
           case ESC_X:
           errorcode = ERR7;
-          ptr--;
+          ptr--;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
           goto FAILED;
 
           case ESC_N:     /* Not permitted by Perl either */
@@ -4342,9 +4348,20 @@ while (ptr < ptrend)
 #endif
           break;  /* End \P and \p */
 
-          default:    /* All others are not allowed in a class */
+          /* All others are not allowed in a class */
+
+          default:
+          PCRE2_DEBUG_UNREACHABLE();
+          /* Fall through */
+
+          case ESC_A:
+          case ESC_Z:
+          case ESC_z:
+          case ESC_G:
+          case ESC_K:
+          case ESC_C:
           errorcode = ERR7;
-          ptr--;
+          ptr--;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
           goto FAILED;
           }
 
