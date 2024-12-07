@@ -77,8 +77,8 @@ for file in pcre2 pcre2api pcre2build pcre2callout pcre2compat pcre2jit \
   /bin/rm $file.rawtxt
   echo "------------------------------------------------------------------------------" >>pcre2.txt
   if [ "$file" != "pcre2sample" ] ; then
-    echo " " >>pcre2.txt
-    echo " " >>pcre2.txt
+    echo "" >>pcre2.txt
+    echo "" >>pcre2.txt
   fi
 done
 
