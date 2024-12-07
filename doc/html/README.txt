@@ -509,6 +509,7 @@ system. The following are installed (file names are all relative to the
     LICENCE
     NEWS
     README
+    SECURITY
     pcre2.txt         (a concatenation of the man(3) pages)
     pcre2test.txt     the pcre2test man page
     pcre2grep.txt     the pcre2grep man page
@@ -606,8 +607,9 @@ zip formats. The command "make distcheck" does the same, but then does a trial
 build of the new distribution to ensure that it works.
 
 If you have modified any of the man page sources in the doc directory, you
-should first run the PrepareRelease script before making a distribution. This
-script creates the .txt and HTML forms of the documentation from the man pages.
+should first run the maint/PrepareRelease script before making a distribution.
+This script creates the .txt and HTML forms of the documentation from the man
+pages.
 
 
 Testing PCRE2
@@ -881,19 +883,19 @@ The distribution should contain the files listed below.
 
 (C) Auxiliary files:
 
-  AUTHORS                  information about the author of PCRE2
+  AUTHORS                  information about the authors of PCRE2
   ChangeLog                log of changes to the code
   HACKING                  some notes about the internals of PCRE2
   INSTALL                  generic installation instructions
   LICENCE                  conditions for the use of PCRE2
   COPYING                  the same, using GNU's standard name
+  SECURITY                 information on reporting vulnerabilities
   Makefile.in              ) template for Unix Makefile, which is built by
                            )   "configure"
   Makefile.am              ) the automake input that was used to create
                            )   Makefile.in
   NEWS                     important changes in this release
   NON-AUTOTOOLS-BUILD      notes on building PCRE2 without using autotools
-  PrepareRelease           script to make preparations for "make dist"
   README                   this file
   RunTest                  a Unix shell script for running tests
   RunGrepTest              a Unix shell script for pcre2grep tests

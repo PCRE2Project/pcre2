@@ -111,8 +111,8 @@ repeats inside a repeated bracket might be incorrectly checked.
 utf is disabled, and dupnames is enabled, caseless matching was used even
 if caseful matching was needed.
 
-26. Fixed a bug in pcre2grep reported by Alejandro Colomar <alx@kernel.org> 
-(GitHub issue #577). In certain cases, when lines of above and below context 
+26. Fixed a bug in pcre2grep reported by Alejandro Colomar <alx@kernel.org>
+(GitHub issue #577). In certain cases, when lines of above and below context
 were contiguous, a separator line was incorrectly being inserted.
 
 
