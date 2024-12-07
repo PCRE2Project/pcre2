@@ -7113,7 +7113,6 @@ for (;; pptr++)
     single-char opcodes. */
 
     reqvary = (repeat_min == repeat_max)? 0 : REQ_VARY;
-    op_type = 0;
 
     /* Adjust first and required code units for a zero repeat. */
 
@@ -7676,7 +7675,8 @@ for (;; pptr++)
           }
         else
           {
-          /* Come here from just above with a character in mcbuffer/mclength. */
+          /* Come here from just above with a character in mcbuffer/mclength.
+          You must also set op_type before the jump. */
           OUTPUT_SINGLE_REPEAT:
           prop_type = prop_value = -1;
           }

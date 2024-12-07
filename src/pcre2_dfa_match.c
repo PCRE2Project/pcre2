@@ -3070,7 +3070,7 @@ for (;;)
         if (codevalue == OP_BRAPOSZERO)
           {
           allow_zero = TRUE;
-          codevalue = *(++code);  /* Codevalue will be one of above BRAs */
+          ++code;  /* The following opcode will be one of the above BRAs */
           }
         else allow_zero = FALSE;
 
