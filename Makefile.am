@@ -82,6 +82,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_glob_separator.html \
   doc/html/pcre2_set_heap_limit.html \
   doc/html/pcre2_set_match_limit.html \
+  doc/html/pcre2_set_max_pattern_compiled_length.html \
   doc/html/pcre2_set_max_pattern_length.html \
   doc/html/pcre2_set_max_varlookbehind.html \
   doc/html/pcre2_set_offset_limit.html \
@@ -90,6 +91,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_recursion_limit.html \
   doc/html/pcre2_set_recursion_memory_management.html \
   doc/html/pcre2_set_substitute_callout.html \
+  doc/html/pcre2_set_substitute_case_callout.html \
   doc/html/pcre2_substitute.html \
   doc/html/pcre2_substring_copy_byname.html \
   doc/html/pcre2_substring_copy_bynumber.html \
@@ -180,6 +182,7 @@ dist_man_MANS = \
   doc/pcre2_set_glob_separator.3 \
   doc/pcre2_set_heap_limit.3 \
   doc/pcre2_set_match_limit.3 \
+  doc/pcre2_set_max_pattern_compiled_length.3 \
   doc/pcre2_set_max_pattern_length.3 \
   doc/pcre2_set_max_varlookbehind.3 \
   doc/pcre2_set_offset_limit.3 \
@@ -188,6 +191,7 @@ dist_man_MANS = \
   doc/pcre2_set_recursion_limit.3 \
   doc/pcre2_set_recursion_memory_management.3 \
   doc/pcre2_set_substitute_callout.3 \
+  doc/pcre2_set_substitute_case_callout.3 \
   doc/pcre2_substitute.3 \
   doc/pcre2_substring_copy_byname.3 \
   doc/pcre2_substring_copy_bynumber.3 \
@@ -238,9 +242,19 @@ bin_PROGRAMS =
 noinst_PROGRAMS =
 
 # Additional files to delete on 'make clean', 'make distclean',
-# and 'make maintainer-clean'.
+# and 'make maintainer-clean'. It turns out that the default is to delete only
+# those binaries that *this* configuration has created. If the configuration
+# has been changed, some binaries may not get automatically deleted. Therefore
+# we list them here.
 
-CLEANFILES =
+CLEANFILES = \
+  pcre2_dftables \
+  pcre2_jit_test \
+  pcre2fuzzcheck-8 \
+  pcre2fuzzcheck-16 \
+  pcre2fuzzcheck-32 \
+  pcre2demo
+
 DISTCLEANFILES = src/config.h.in~
 MAINTAINERCLEANFILES =
 
@@ -259,6 +273,14 @@ EXTRA_DIST += \
 EXTRA_DIST += \
   NON-AUTOTOOLS-BUILD \
   HACKING
+
+# These are support files for building under VMS
+
+EXTRA_DIST += \
+  vms/configure.com \
+  vms/openvms_readme.txt \
+  vms/pcre2.h_patch \
+  vms/stdint.h
 
 # These files are used in the preparation of a release
 
@@ -354,6 +376,8 @@ COMMON_SOURCES = \
   src/pcre2_auto_possess.c \
   src/pcre2_chkdint.c \
   src/pcre2_compile.c \
+  src/pcre2_compile.h \
+  src/pcre2_compile_class.c \
   src/pcre2_config.c \
   src/pcre2_context.c \
   src/pcre2_convert.c \
@@ -363,6 +387,7 @@ COMMON_SOURCES = \
   src/pcre2_find_bracket.c \
   src/pcre2_internal.h \
   src/pcre2_intmodedep.h \
+  src/pcre2_jit_char_inc.h \
   src/pcre2_jit_compile.c \
   src/pcre2_jit_neon_inc.h \
   src/pcre2_jit_simd_inc.h \
@@ -381,6 +406,7 @@ COMMON_SOURCES = \
   src/pcre2_tables.c \
   src/pcre2_ucd.c \
   src/pcre2_ucp.h \
+  src/pcre2_util.h \
   src/pcre2_valid_utf.c \
   src/pcre2_xclass.c
 
@@ -440,38 +466,39 @@ CLEANFILES += src/pcre2_chartables.c
 # when pcre2_jit_compile.c is processed, so they must be distributed.
 
 EXTRA_DIST += \
-  src/sljit/sljitConfig.h \
-  src/sljit/sljitConfigCPU.h \
-  src/sljit/sljitConfigInternal.h \
-  src/sljit/sljitLir.c \
-  src/sljit/sljitLir.h \
-  src/sljit/sljitNativeARM_32.c \
-  src/sljit/sljitNativeARM_64.c \
-  src/sljit/sljitNativeARM_T2_32.c \
-  src/sljit/sljitNativeLOONGARCH_64.c \
-  src/sljit/sljitNativeMIPS_32.c \
-  src/sljit/sljitNativeMIPS_64.c \
-  src/sljit/sljitNativeMIPS_common.c \
-  src/sljit/sljitNativePPC_32.c \
-  src/sljit/sljitNativePPC_64.c \
-  src/sljit/sljitNativePPC_common.c \
-  src/sljit/sljitNativeRISCV_32.c \
-  src/sljit/sljitNativeRISCV_64.c \
-  src/sljit/sljitNativeRISCV_common.c \
-  src/sljit/sljitNativeS390X.c \
-  src/sljit/sljitNativeX86_32.c \
-  src/sljit/sljitNativeX86_64.c \
-  src/sljit/sljitNativeX86_common.c \
-  src/sljit/sljitUtils.c \
-  src/sljit/allocator_src/sljitExecAllocatorApple.c \
-  src/sljit/allocator_src/sljitExecAllocatorCore.c \
-  src/sljit/allocator_src/sljitExecAllocatorFreeBSD.c \
-  src/sljit/allocator_src/sljitExecAllocatorPosix.c \
-  src/sljit/allocator_src/sljitExecAllocatorWindows.c \
-  src/sljit/allocator_src/sljitProtExecAllocatorNetBSD.c \
-  src/sljit/allocator_src/sljitProtExecAllocatorPosix.c \
-  src/sljit/allocator_src/sljitWXExecAllocatorPosix.c \
-  src/sljit/allocator_src/sljitWXExecAllocatorWindows.c
+  deps/sljit/sljit_src/sljitConfig.h \
+  deps/sljit/sljit_src/sljitConfigCPU.h \
+  deps/sljit/sljit_src/sljitConfigInternal.h \
+  deps/sljit/sljit_src/sljitLir.c \
+  deps/sljit/sljit_src/sljitLir.h \
+  deps/sljit/sljit_src/sljitNativeARM_32.c \
+  deps/sljit/sljit_src/sljitNativeARM_64.c \
+  deps/sljit/sljit_src/sljitNativeARM_T2_32.c \
+  deps/sljit/sljit_src/sljitNativeLOONGARCH_64.c \
+  deps/sljit/sljit_src/sljitNativeMIPS_32.c \
+  deps/sljit/sljit_src/sljitNativeMIPS_64.c \
+  deps/sljit/sljit_src/sljitNativeMIPS_common.c \
+  deps/sljit/sljit_src/sljitNativePPC_32.c \
+  deps/sljit/sljit_src/sljitNativePPC_64.c \
+  deps/sljit/sljit_src/sljitNativePPC_common.c \
+  deps/sljit/sljit_src/sljitNativeRISCV_32.c \
+  deps/sljit/sljit_src/sljitNativeRISCV_64.c \
+  deps/sljit/sljit_src/sljitNativeRISCV_common.c \
+  deps/sljit/sljit_src/sljitNativeS390X.c \
+  deps/sljit/sljit_src/sljitNativeX86_32.c \
+  deps/sljit/sljit_src/sljitNativeX86_64.c \
+  deps/sljit/sljit_src/sljitNativeX86_common.c \
+  deps/sljit/sljit_src/sljitSerialize.c \
+  deps/sljit/sljit_src/sljitUtils.c \
+  deps/sljit/sljit_src/allocator_src/sljitExecAllocatorApple.c \
+  deps/sljit/sljit_src/allocator_src/sljitExecAllocatorCore.c \
+  deps/sljit/sljit_src/allocator_src/sljitExecAllocatorFreeBSD.c \
+  deps/sljit/sljit_src/allocator_src/sljitExecAllocatorPosix.c \
+  deps/sljit/sljit_src/allocator_src/sljitExecAllocatorWindows.c \
+  deps/sljit/sljit_src/allocator_src/sljitProtExecAllocatorNetBSD.c \
+  deps/sljit/sljit_src/allocator_src/sljitProtExecAllocatorPosix.c \
+  deps/sljit/sljit_src/allocator_src/sljitWXExecAllocatorPosix.c \
+  deps/sljit/sljit_src/allocator_src/sljitWXExecAllocatorWindows.c
 
 # Some of the JIT sources are also in separate files that are #included.
 
@@ -540,27 +567,63 @@ if WITH_GCOV
 pcre2grep_CFLAGS += $(GCOV_CFLAGS)
 pcre2grep_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
+endif # WITH_PCRE2_8
 
 ## If fuzzer support is enabled, build a non-distributed library containing the
 ## fuzzing function. Also build the standalone checking binary from the same
 ## source but using -DSTANDALONE.
 
 if WITH_FUZZ_SUPPORT
-noinst_LIBRARIES = .libs/libpcre2-fuzzsupport.a
+noinst_LIBRARIES =
+if WITH_PCRE2_8
+noinst_LIBRARIES += .libs/libpcre2-fuzzsupport.a
 _libs_libpcre2_fuzzsupport_a_SOURCES = src/pcre2_fuzzsupport.c
 _libs_libpcre2_fuzzsupport_a_CFLAGS = $(AM_CFLAGS)
 _libs_libpcre2_fuzzsupport_a_LIBADD =
 
-noinst_PROGRAMS += pcre2fuzzcheck
-pcre2fuzzcheck_SOURCES = src/pcre2_fuzzsupport.c
-pcre2fuzzcheck_CFLAGS = -DSTANDALONE $(AM_CFLAGS)
-pcre2fuzzcheck_LDADD = libpcre2-8.la
+noinst_PROGRAMS += pcre2fuzzcheck-8
+pcre2fuzzcheck_8_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_8_CFLAGS = -DSTANDALONE $(AM_CFLAGS)
+pcre2fuzzcheck_8_LDADD = libpcre2-8.la
 if WITH_GCOV
-pcre2fuzzcheck_CFLAGS += $(GCOV_CFLAGS)
-pcre2fuzzcheck_LDADD += $(GCOV_LIBS)
+pcre2fuzzcheck_8_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_8_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
-endif # WITH FUZZ_SUPPORT
 endif # WITH_PCRE2_8
+
+if WITH_PCRE2_16
+noinst_LIBRARIES += .libs/libpcre2-fuzzsupport-16.a
+_libs_libpcre2_fuzzsupport_16_a_SOURCES = src/pcre2_fuzzsupport.c
+_libs_libpcre2_fuzzsupport_16_a_CFLAGS = $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=16
+_libs_libpcre2_fuzzsupport_16_a_LIBADD =
+
+noinst_PROGRAMS += pcre2fuzzcheck-16
+pcre2fuzzcheck_16_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_16_CFLAGS = -DSTANDALONE $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=16
+pcre2fuzzcheck_16_LDADD = libpcre2-16.la
+if WITH_GCOV
+pcre2fuzzcheck_16_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_16_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
+endif # WITH_PCRE2_16
+
+if WITH_PCRE2_32
+noinst_LIBRARIES += .libs/libpcre2-fuzzsupport-32.a
+_libs_libpcre2_fuzzsupport_32_a_SOURCES = src/pcre2_fuzzsupport.c
+_libs_libpcre2_fuzzsupport_32_a_CFLAGS = $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=32
+_libs_libpcre2_fuzzsupport_32_a_LIBADD =
+
+noinst_PROGRAMS += pcre2fuzzcheck-32
+pcre2fuzzcheck_32_SOURCES = src/pcre2_fuzzsupport.c
+pcre2fuzzcheck_32_CFLAGS = -DSTANDALONE $(AM_CFLAGS) -DPCRE2_CODE_UNIT_WIDTH=32
+pcre2fuzzcheck_32_LDADD = libpcre2-32.la
+if WITH_GCOV
+pcre2fuzzcheck_32_CFLAGS += $(GCOV_CFLAGS)
+pcre2fuzzcheck_32_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
+endif # WITH_PCRE2_32
+
+endif # WITH_FUZZ_SUPPORT
 
 ## -------- Testing ----------
 
@@ -698,6 +761,7 @@ EXTRA_DIST += \
   testdata/testinput24 \
   testdata/testinput25 \
   testdata/testinput26 \
+  testdata/testinput27 \
   testdata/testinputEBC \
   testdata/testinputheap \
   testdata/testoutput1 \
@@ -742,6 +806,7 @@ EXTRA_DIST += \
   testdata/testoutput24 \
   testdata/testoutput25 \
   testdata/testoutput26 \
+  testdata/testoutput27 \
   testdata/testoutputEBC \
   testdata/testoutputheap-16 \
   testdata/testoutputheap-32 \
@@ -900,7 +965,6 @@ endif # WITH_GCOV
 EXTRA_DIST += \
   cmake/COPYING-CMAKE-SCRIPTS \
   cmake/FindEditline.cmake \
-  cmake/FindPackageHandleStandardArgs.cmake \
   cmake/FindReadline.cmake \
   cmake/pcre2-config-version.cmake.in \
   cmake/pcre2-config.cmake.in \

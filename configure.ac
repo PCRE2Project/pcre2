@@ -9,20 +9,20 @@ dnl The PCRE2_PRERELEASE feature is for identifying release candidates. It might
 dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre2_major, [10])
-m4_define(pcre2_minor, [43])
-m4_define(pcre2_prerelease, [-RC1])
-m4_define(pcre2_date, [2023-12-27])
+m4_define(pcre2_minor, [45])
+m4_define(pcre2_prerelease, [-DEV])
+m4_define(pcre2_date, [2024-06-09])
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [12:0:12])
-m4_define(libpcre2_16_version,    [12:0:12])
-m4_define(libpcre2_32_version,    [12:0:12])
+m4_define(libpcre2_8_version,     [13:0:13])
+m4_define(libpcre2_16_version,    [13:0:13])
+m4_define(libpcre2_32_version,    [13:0:13])
 m4_define(libpcre2_posix_version, [3:5:0])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
-AC_PREREQ([2.62])
+AC_PREREQ([2.60])
 AC_INIT([PCRE2],pcre2_major.pcre2_minor[]pcre2_prerelease,[],[pcre2])
 AC_CONFIG_SRCDIR([src/pcre2.h.in])
 AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
@@ -73,6 +73,40 @@ AC_SYS_LARGEFILE
 
 PCRE2_VISIBILITY
 
+# Check for Clang __attribute__((uninitialized)) feature
+
+AC_MSG_CHECKING([for __attribute__((uninitialized))])
+AC_LANG_PUSH([C])
+tmp_CFLAGS=$CFLAGS
+if test $WORKING_WERROR -eq 1; then
+  CFLAGS="$CFLAGS -Werror"
+fi
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,
+                   [[char buf[128] __attribute__((uninitialized));(void)buf]])],
+                   [pcre2_cc_cv_attribute_uninitialized=yes],
+                   [pcre2_cc_cv_attribute_uninitialized=no])
+AC_MSG_RESULT([$pcre2_cc_cv_attribute_uninitialized])
+if test "$pcre2_cc_cv_attribute_uninitialized" = yes; then
+  AC_DEFINE([HAVE_ATTRIBUTE_UNINITIALIZED], 1, [Define this if your compiler
+             supports __attribute__((uninitialized))])
+fi
+CFLAGS=$tmp_CFLAGS
+AC_LANG_POP([C])
+
+# Check for the assume() builtin
+
+AC_MSG_CHECKING([for __assume()])
+AC_LANG_PUSH([C])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[__assume(1)]])],
+  [pcre2_cc_cv_builtin_assume=yes],
+  [pcre2_cc_cv_builtin_assume=no])
+AC_MSG_RESULT([$pcre2_cc_cv_builtin_assume])
+if test "$pcre2_cc_cv_builtin_assume" = yes; then
+  AC_DEFINE([HAVE_BUILTIN_ASSUME], 1,
+    [Define this if your compiler provides __assume()])
+fi
+AC_LANG_POP([C])
+
 # Check for the mul_overflow() builtin
 
 AC_MSG_CHECKING([for __builtin_mul_overflow()])
@@ -95,22 +129,18 @@ if test "$pcre2_cc_cv_builtin_mul_overflow" = yes; then
 fi
 AC_LANG_POP([C])
 
-# Check for Clang __attribute__((uninitialized)) feature
+# Check for the unreachable() builtin
 
-AC_MSG_CHECKING([for __attribute__((uninitialized))])
+AC_MSG_CHECKING([for __builtin_unreachable()])
 AC_LANG_PUSH([C])
-tmp_CFLAGS=$CFLAGS
-CFLAGS="$CFLAGS -Werror"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,
-                   [[char buf[128] __attribute__((uninitialized));(void)buf]])],
-                   [pcre2_cc_cv_attribute_uninitialized=yes],
-                   [pcre2_cc_cv_attribute_uninitialized=no])
-AC_MSG_RESULT([$pcre2_cc_cv_attribute_uninitialized])
-if test "$pcre2_cc_cv_attribute_uninitialized" = yes; then
-  AC_DEFINE([HAVE_ATTRIBUTE_UNINITIALIZED], 1, [Define this if your compiler
-             supports __attribute__((uninitialized))])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[int r;]], [[if (r) __builtin_unreachable()]])],
+  [pcre2_cc_cv_builtin_unreachable=yes],
+  [pcre2_cc_cv_builtin_unreachable=no])
+AC_MSG_RESULT([$pcre2_cc_cv_builtin_unreachable])
+if test "$pcre2_cc_cv_builtin_unreachable" = yes; then
+  AC_DEFINE([HAVE_BUILTIN_UNREACHABLE], 1,
+    [Define this if your compiler provides __builtin_unreachable()])
 fi
-CFLAGS=$tmp_CFLAGS
 AC_LANG_POP([C])
 
 # Versioning
@@ -191,7 +221,7 @@ if test "$enable_jit" = "auto"; then
   CPPFLAGS=-I$srcdir
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
   #define SLJIT_CONFIG_AUTO 1
-  #include "src/sljit/sljitConfigInternal.h"
+  #include "deps/sljit/sljit_src/sljitConfigCPU.h"
   #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
   #error unsupported
   #endif]])], enable_jit=yes, enable_jit=no)
@@ -285,7 +315,7 @@ AC_ARG_ENABLE(never-backslash-C,
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
-                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-utf; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
+                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-unicode; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
               , enable_ebcdic=no)
 
 # Handle --enable-ebcdic-nl25
@@ -394,6 +424,12 @@ AC_ARG_ENABLE(fuzz_support,
               AS_HELP_STRING([--enable-fuzz-support],
                              [enable fuzzer support]),
               , enable_fuzz_support=no)
+
+# Handle --enable-diff-fuzz-support
+AC_ARG_ENABLE(diff_fuzz_support,
+              AS_HELP_STRING([--enable-diff-fuzz-support],
+                             [enable differential fuzzer support]),
+              , enable_diff_fuzz_support=no)
 
 # Handle --disable-stack-for-recursion
 # This option became obsolete at release 10.30.
@@ -515,7 +551,7 @@ HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
 sure both macros are undefined; an emulation function will then be used. */])
 
 # Checks for header files.
-AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
+AC_CHECK_HEADERS(assert.h limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AC_CHECK_HEADERS([sys/wait.h], [HAVE_SYS_WAIT_H=1])
 
@@ -529,10 +565,24 @@ AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
 AM_CONDITIONAL(WITH_VALGRIND, test "x$enable_valgrind" = "xyes")
 AM_CONDITIONAL(WITH_FUZZ_SUPPORT, test "x$enable_fuzz_support" = "xyes")
+AM_CONDITIONAL(WITH_DIFF_FUZZ_SUPPORT, test "x$enable_diff_fuzz_support" = "xyes")
 
 if test "$enable_fuzz_support" = "yes" -a "$enable_pcre2_8" = "no"; then
   echo "** ERROR: Fuzzer support requires the 8-bit library"
   exit 1
+fi
+
+if test "$enable_diff_fuzz_support" = "yes"; then
+  if test "$enable_fuzz_support" = "no"; then
+    echo "** ERROR: Differential fuzzing support requires fuzzing support"
+    exit 1
+  fi
+  if test "$enable_jit" = "no"; then
+    echo "** ERROR: Differential fuzzing support requires Just-in-Time compilation support"
+    exit 1
+  fi
+  AC_DEFINE([SUPPORT_DIFF_FUZZ], [], [
+    Define to any value to enable differential fuzzing support.])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -863,7 +913,7 @@ AC_DEFINE_UNQUOTED([HEAP_LIMIT], [$with_heap_limit], [
   a pattern. It applies to both pcre2_match() and pcre2_dfa_match(). It does
   not apply to JIT matching. The value is in kibibytes (units of 1024 bytes).])
 
-AC_DEFINE([MAX_NAME_SIZE], [32], [
+AC_DEFINE([MAX_NAME_SIZE], [128], [
   This limit is parameterized just in case anybody ever wants to
   change it. Care must be taken if it is increased, because it guards
   against integer overflow caused by enormously large patterns.])
@@ -1162,6 +1212,7 @@ $PACKAGE-$VERSION configuration summary:
     Valgrind support ................... : ${enable_valgrind}
     Code coverage ...................... : ${enable_coverage}
     Fuzzer support ..................... : ${enable_fuzz_support}
+    Differential fuzzer support ........ : ${enable_diff_fuzz_support}
     Use %zu and %td .................... : ${enable_percent_zt}
 
 EOF

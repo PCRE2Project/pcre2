@@ -133,7 +133,7 @@ if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   CFLAGS="$CFLAGS -Wmaybe-uninitialized"
   CFLAGS="$CFLAGS -Wmissing-prototypes"
   CFLAGS="$CFLAGS -Wstrict-prototypes"
-  CFKAGS="$CFLAGS -Warray-bounds"
+  CFLAGS="$CFLAGS -Warray-bounds"
   CFLAGS="$CFLAGS -Wformat-overflow=2"
 fi
 rm -f /tmp/pcre2ccversion
@@ -289,9 +289,7 @@ fi
 # throw up warnings that are not detected with -O0. Then run a second test with
 # -fsanitize=address, which also may throw up new warnings as well as checking
 # things at runtime. Finally, run another test using -fsanitize=undefined
-# -std-gnu99 to check for runtime actions that are not well defined. However,
-# we also use -fno-sanitize=shift to avoid warnings for shifts of negative
-# numbers, which occur in src/pcre2_jit_compile.c.
+# -std-gnu99 to check for runtime actions that are not well defined.
 
 if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
@@ -311,8 +309,8 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   fi
 # This also seems to be the case for sanitize undefined.
   if [ $useusan -ne 0 ]; then
-    echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99 -------"
-    CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=undefined -fno-sanitize=shift -fno-sanitize=alignment -std=gnu99"
+    echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=alignment -std=gnu99 -------"
+    CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=undefined -fno-sanitize=alignment -std=gnu99"
     echo "CFLAGS=$CFLAGS"
     opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
     runtest
@@ -351,7 +349,7 @@ if [ $usemain -ne 0 ]; then
     "--disable-unicode --enable-newline-is-crlf --disable-shared" \
     "--disable-unicode --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
     "--enable-newline-is-any --disable-static" \
-    "--disable-unicode --enable-pcre2-16" \
+    "--disable-unicode --enable-pcre2-16 --enable-debug" \
     "--enable-pcre2-16 --disable-shared" \
     "--disable-unicode --enable-pcre2-32" \
     "--enable-pcre2-32 --disable-shared" \

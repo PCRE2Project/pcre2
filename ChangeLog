@@ -2,10 +2,175 @@ Change Log for PCRE2
 --------------------
 
 Before the move to GitHub, this was the only record of changes to PCRE2. Now
-there is often more detail in the pull requests.
+there is also the log of commit messages.
+
+Version 10.45 xx-xxx-2024
+-------------------------
+
+1. Change 6 of 10.44 broke 32-bit tests because pcre2test's reporting of
+memory size was changed to the entire compiled data block, instead of just the
+pattern and tables data, so as to align with the new length restriction.
+Because the block's header contains pointers, this meant the pcre2test output
+was different in 32-bit mode. A patch by Carlo reverts to the previous state
+and makes sure that any limit set by pcre2_set_max_pattern_compiled_length()
+also avoids the internal struct overhead.
+
+2. Add --posix-pattern-file to pcre2grep to allow processing of empty patterns
+through the -f option, as well as patterns that end in space characters, for
+compatibility with other grep tools.
+
+3. Fix a but in the fuzz support quantifier-limiting code. It ignores strings
+of more than 5 digits because they are necessarily numbers greater than 65535,
+the largest legal quantifier. However, it wasn't ignoring non-significant
+leading zeros.
+
+4. The case-independent processing of the letter-matching Unicode properties
+Ll, Lt, and Lu have been changed to match Perl (which changed a while ago).
+When caseless matching is in force, all three of these properties are now
+treated as Lc (cased letter).
+
+5. The pcre2_jit_compile() function was updated by the addition of a new option
+PCRE2_JIT_TEST_ALLOC which, if called with a NULL first argument, tests not
+only the availability of JIT, but also its ability to allocate executable
+memory. Update pcre2test to use this support to extend the -C option.
+
+6. The code for parsing Unicode property descriptions for \p and \P been
+changed as follows:
+
+  . White space etc. before ^ in a negated value such as \p{ ^L } was not being
+    ignored.
+
+  . The code wouldn't have worked if PCRE2 was compiled for UTF-8 support
+    within an EBCDIC environment. Possibly nobody does this any more, but it
+    should now work.
+
+  . The documentation of the syntax of what can follow \p and \P has been
+    updated.
+
+7. There was an error in the table of lengths for parsed items for the OPTIONS
+item, but fortuitously it could never have actually bitten. While fixing this,
+some other code that could never be obeyed was discovered and removed.
+
+8. Removed some incoreect optimization code from DFA matching that has been
+there since PCRE1, but has just been found to cause a no match return instead
+of a partial match in some cases. It involves partial matching when (*F) is
+present so is unlikely to have actually affected anyone.
+
+9. Tidy the wording and formatting of some pcre2test error messages concerned
+with bad modifiers. Also restrict single-letter modifier sequences to the first
+item in a modifier list, as documented and always intended.
+
+10. An iterator at the end of many assertions can always be auto-possessified,
+but not at the end of variable-length lookbehinds. THere was a bug in the code
+that checks for such a lookbehind; it was looking only at the first branch,
+which is wrong because some branches can be fixed length when others are not,
+for example (?<=AB|CD?). Now all branches are checked for variability.
+
+11. Matching with pcre2_match() could give an incorrect result if a
+variable-length lookbehind was used as the condition in a conditional group.
+The condition could erroneously be treated as true if a branch matched but
+overran the current position. This bug was in the interpreter only; matching
+with JIT was correct.
+
+12. Add a new error code (PCRE2_ERROR_JIT_UNSUPPORTED) which is yielded
+for unsupported jit features.
+
+13. Add a new experimental feature called scan substring. This feature is a new
+type of assertion which matches the content of a capturing block to a sub
+pattern.
+
+14. Item 43 of 10.43 was incomplete because it addressed only \z and not \Z,
+which was still misbehaving when matching fragments inside invalid UTF strings.
+
+15. Octal escapes of the form \045 or \111 were not being recognized in
+substitution strings, and if encountered gave an error, though the \o{...} form
+was recognized. This bug is now fixed.
+
+16. Merged PR475, which implements title casing in substitution strings a la
+Perl.
+
+17. Merged PR478, which disallows \x if not followed by { or a hex digit.
+
+18. Merged PR473, which implements Python-style backrefs in substitutions.
+
+19. Merged PR483, which is adding \g<n> and $<name> to replacement strings.
+
+20. Merged PR470, which adds PCRE2_EXTRA_NO_BS0 and PCRE2_EXTRA_PYTHON_OCTAL.
+
+21. Prevent 1 byte overread when parsing malformed patterns with early VERBs.
+
+22. Merged PR491 which adds $& $` $' and $_ to substitution replacements, as
+well as interpreting \b and \v as characters.
+
+23. Updated perltest.sh to enable locale setting.
+
+24. Fixed a bug in JIT affecting greedy bounded repeats. The upper limit of
+repeats inside a repeated bracket might be incorrectly checked.
+
+25. Fixed a bug in JIT affecting caseful matching of backreferences. When
+utf is disabled, and dupnames is enabled, caseless matching was used even
+if caseful matching was needed.
+
+26. Fixed a bug in pcre2grep reported by Alejandro Colomar <alx@kernel.org> 
+(GitHub issue #577). In certain cases, when lines of above and below context 
+were contiguous, a separator line was incorrectly being inserted.
 
 
-Version 10.43 27-December-2023
+Version 10.44 07-June-2024
+--------------------------
+
+1. If a pattern contained a variable-length lookbehind in which the first
+branch was not the one with the shortest minimum length, and the lookbehind
+contained a capturing group, and elsewhere in the pattern there was another
+lookbehind that referenced that group, the pattern was incorrectly compiled,
+leading to unpredictable results, including crashes in JIT compiling. An
+example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
+
+2. Further updates to the oss-fuzz support:
+
+   (a) Limit quantifiers for groups and classes to be no more than 10. This
+       avoids very long JIT compile times that happen in some cases when groups
+       are replicated for quantification, and very long match times when
+       classes contain a lot of non-ascii characters.
+
+   (b) Added PCRE2_EXTENDED_MORE to the list of allowed options.
+
+   (c) Arranged for text error messages to be shown in 16-bit and 32-bit modes.
+
+   (d) Made the output in standalone mode more readable.
+
+   (e) General code tidies.
+
+   (f) Limit the size of compiled patterns to 10MB (see 6 below).
+
+   (g) Do not run JIT on patterns whose compiled length is greater than 200K
+       bytes because this takes a long time, causing oss-fuzz to time out.
+
+   (h) Avoid compiling or matching twice with the same options (this could
+       happen if the input didn't set any options).
+
+3. Increase the maximum length of a name for a group from 32 to 128 because
+there is a user for whom 32 is too small.
+
+4. Cause pcre2test to output a message when pcre2_jit_compile() gives an error
+return if either jitverify or info is specified.
+
+5. Some auxiliary files for building under OpenVMS that were contributed by
+Alexey Chupahin have been installed.
+
+6. Added pcre2_set_max_pattern_compiled_length() to limit the size of compiled
+patterns.
+
+7. There was a bug in the implementation of \X caused by my (PH) misreading or
+misunderstanding one of the grapheme sequence breaking rules in Unicode Annex
+#29. A break should occur between two characters with the Extended Pictographic
+break property unless a zero-width joiner intervenes. PCRE2 was not insisting
+on the ZWJ, causing \X to match more than it should. See GitHub issue #410.
+
+8. Avoid compilation issues with proprietary compilers in UNIX since 10.43.
+
+
+Version 10.43 16-February-2024
 ------------------------------
 
 1. The test program added by change 2 of 10.42 didn't work when the default
@@ -124,7 +289,7 @@ pcre2_match() was not fully resetting all captures that had been set within a
 
 32. Changed the meaning of \w (and its synonyms) in UCP mode to match Perl. It
 now matches characters whose general categories are L or N or whose particular
-categories are Mn (non-spacing mark) or Pc (combining puntuation). The latter
+categories are Mn (non-spacing mark) or Pc (combining punctuation). The latter
 includes underscore.
 
 33. Changed the meaning of [:xdigit:] in UCP mode to match Perl. It now also
@@ -197,11 +362,19 @@ all of a, b, and d as possible starting code units; now it sets only a and d.
 
 54. Fix incorrect class character matches in JIT.
 
-55. In pcre2test, ensure pcre2_jit_match() is used when jitfast is used with 
+55. In pcre2test, ensure pcre2_jit_match() is used when jitfast is used with
 substitution testing.
 
-56. Insert omitted setting of subject length in match data at the end of 
+56. Insert omitted setting of subject length in match data at the end of
 pcre2_jit_match().
+
+57. Implemented PCRE2_DISABLE_RECURSELOOP_CHECK for pcre2_match() to enable
+some apparently looping recursions to run to completion and therefore match the
+JIT behaviour. With this set, real loops will eventually get caught by match or
+heap limits or run out of resource.
+
+58. AC did a lot of work on pcre2_fuzzsupport.c to extend it to 16-bit and
+32-bit libraries and to compare JIT and non-JIT matching.
 
 
 Version 10.42 11-December-2022
@@ -289,7 +462,7 @@ elsewhere that can never be obeyed in normal testing has been excluded from
 coverage.
 
 15. Fixed a bug in pcre2grep that could cause an extra newline to be written
-after output generaed by --output.
+after output generated by --output.
 
 16. If a file has a .bz2 extension but is not in fact compressed, pcre2grep
 should process it as a plain text file. A bug stopped this happening; now fixed
@@ -444,7 +617,7 @@ Version 10.39 29-October-2021
   that an appropriate width is chosen if pointers are 64bit wide and
   long is not (ex: Windows 64bit).
 
-  IMHO removing the cast (and therefore the possibilty of truncation)
+  IMHO removing the cast (and therefore the possibility of truncation)
   make the code cleaner and the fallback is likely portable enough
   with all 64-bit POSIX systems doing LP64 except for Windows.
 
@@ -579,7 +752,7 @@ now the same as Perl.
   quantifier was nevertheless complaining that a quantifier number was too big.
 
 5. A run of autoconf suggested that configure.ac was out-of-date with respect
-to the lastest autoconf. Running autoupdate made some valid changes, some valid
+to the latest autoconf. Running autoupdate made some valid changes, some valid
 suggestions, and also some invalid changes, which were fixed by hand. Autoconf
 now runs clean and the resulting "configure" seems to work, so I hope nothing
 is broken. Later: the requirement for autoconf 2.70 broke some automatic test
@@ -611,7 +784,7 @@ compiler. This fixes https://bugs.exim.org/show_bug.cgi?id=2578. Patch for
 Makefile.am and configure.ac by H.J. Lu. Equivalent patch for CMakeLists.txt
 invented by PH.
 
-2. Fix inifinite loop when a single byte newline is searched in JIT when
+2. Fix infinite loop when a single byte newline is searched in JIT when
 invalid utf8 mode is enabled.
 
 3. Updated CMakeLists.txt with patch from Wolfgang Stöggl (Bugzilla #2584):
@@ -724,7 +897,7 @@ after the end a repeated group, the captured substrings had their values from
 the final repetition, not from an earlier repetition that might be the
 destination of a backtrack. This feature was documented, and was carried over
 into PCRE2. However, it has now been realized that the major refactoring that
-was done for 10.30 has made this atomicizing unnecessary, and it is confusing
+was done for 10.30 has made this atomizing unnecessary, and it is confusing
 when users are unaware of it, making some patterns appear not to be working as
 expected. Capture values of recursive back references in repeated groups are
 now correctly backtracked, so this unnecessary restriction has been removed.
@@ -1174,7 +1347,7 @@ gets rid of the warnings. There were also two missing casts in pcre2test.
 Version 10.32 10-September-2018
 -------------------------------
 
-1. When matching using the the REG_STARTEND feature of the POSIX API with a
+1. When matching using the REG_STARTEND feature of the POSIX API with a
 non-zero starting offset, unset capturing groups with lower numbers than a
 group that did capture something were not being correctly returned as "unset"
 (that is, with offset values of -1).
@@ -1349,7 +1522,7 @@ assumed empty second branch cannot be anchored. Demonstrated by test patterns
 such as /(?(1)^())b/ or /(?(?=^))b/.
 
 40. A repeated conditional subpattern that could match an empty string was
-always assumed to be unanchored. Now it it checked just like any other
+always assumed to be unanchored. Now it is checked just like any other
 repeated conditional subpattern, and can be found to be anchored if the minimum
 quantifier is one or more. I can't see much use for a repeated anchored
 pattern, but the behaviour is now consistent.
@@ -1887,7 +2060,7 @@ not recognize this syntax.
 7. Automatic callouts are no longer generated before and after callouts in the
 pattern.
 
-8. When pcre2test was outputing information from a callout, the caret indicator
+8. When pcre2test was outputting information from a callout, the caret indicator
 for the current position in the subject line was incorrect if it was after an
 escape sequence for a character whose code point was greater than \x{ff}.
 
@@ -2268,7 +2441,7 @@ if it fails when running the interpreter with a 16MiB stack (and if changing
 the stack size via pcre2test is possible). This avoids having to manually set a
 large stack size when testing with clang.
 
-42. Fix register overwite in JIT when SSE2 acceleration is enabled.
+42. Fix register overwrite in JIT when SSE2 acceleration is enabled.
 
 43. Detect integer overflow in pcre2test pattern and data repetition counts.
 
@@ -3021,7 +3194,7 @@ characters, for example: /(?:(?=.)|(?<!x))a/.
 7. When an (*ACCEPT) is triggered inside capturing parentheses, it arranges for
 those parentheses to be closed with whatever has been captured so far. However,
 it was failing to mark any other groups between the highest capture so far and
-the currrent group as "unset". Thus, the ovector for those groups contained
+the current group as "unset". Thus, the ovector for those groups contained
 whatever was previously there. An example is the pattern /(x)|((*ACCEPT))/ when
 matched against "abcd".
 
