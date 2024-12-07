@@ -675,7 +675,7 @@ the start pointers when the end of the capturing group has not yet reached. */
 #define GET_LOCAL_BASE(dst, dstw, offset) \
   sljit_get_local_base(compiler, (dst), (dstw), (offset))
 
-#define READ_CHAR_MAX 0x7fffffff
+#define READ_CHAR_MAX ((sljit_u32)0xffffffff)
 
 #define INVALID_UTF_CHAR -1
 #define UNASSIGNED_UTF_CHAR 888

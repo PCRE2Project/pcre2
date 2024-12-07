@@ -639,7 +639,7 @@ if (category_list == UCPCAT_ALL)
 if (*cc != XCL_END)
   {
 #if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
-  if (common->utf && compares == 0 && (status & XCLASS_IS_ECLASS))
+  if (common->utf && compares == 0 && !(status & XCLASS_IS_ECLASS))
     {
     max = 0;
     min = (ccbegin[-1] & XCL_MAP) != 0 ? 0 : READ_CHAR_MAX;
@@ -1080,7 +1080,7 @@ if (ranges.stack == NULL)
   defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
 if (common->utf)
   {
-  min = 0xffffffff;
+  min = READ_CHAR_MAX;
   max = 0;
   xclass_update_min_max(common, cc, &min, &max);
   SLJIT_ASSERT(ranges.ranges[0] == min && ranges.ranges[ranges.range_count - 1] == max);
