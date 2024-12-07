@@ -9,6 +9,8 @@ AM_CPPFLAGS="-I$(srcdir)/src"
 
 ## Specify the documentation files that are distributed.
 
+## XXX Add code here to budge AUTHORS.md, LICENCE.md and SECURITY.md
+
 dist_doc_DATA = \
   AUTHORS \
   COPYING \
@@ -16,6 +18,7 @@ dist_doc_DATA = \
   LICENCE \
   NEWS \
   README \
+  SECURITY \
   doc/pcre2.txt \
   doc/pcre2-config.txt \
   doc/pcre2grep.txt \
@@ -281,16 +284,6 @@ EXTRA_DIST += \
   vms/openvms_readme.txt \
   vms/pcre2.h_patch \
   vms/stdint.h
-
-# These files are used in the preparation of a release
-
-EXTRA_DIST += \
-  PrepareRelease \
-  CheckMan \
-  CleanTxt \
-  Detrail \
-  132html \
-  doc/index.html.src
 
 # These files are usable versions of pcre2.h and config.h that are distributed
 # for the benefit of people who are building PCRE2 manually, without the

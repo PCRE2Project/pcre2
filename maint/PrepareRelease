@@ -43,7 +43,7 @@ echo Processing documentation
 
 # Check the remaining man pages
 
-perl ../CheckMan *.1 *.3
+perl ../maint/CheckMan *.1 *.3
 if [ $? != 0 ] ; then exit 1; fi
 
 # Make Text form of the documentation. It needs some mangling to make it
@@ -70,7 +70,7 @@ for file in pcre2 pcre2api pcre2build pcre2callout pcre2compat pcre2jit \
             pcre2unicode ; do
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt
-  perl ../CleanTxt <$file.rawtxt >>pcre2.txt
+  perl ../maint/CleanTxt <$file.rawtxt >>pcre2.txt
   /bin/rm $file.rawtxt
   echo "------------------------------------------------------------------------------" >>pcre2.txt
   if [ "$file" != "pcre2sample" ] ; then
@@ -83,7 +83,7 @@ done
 for file in pcre2test pcre2grep pcre2-config ; do
   echo Making $file.txt
   nroff -c -man $file.1 >$file.rawtxt
-  perl ../CleanTxt <$file.rawtxt >$file.txt
+  perl ../maint/CleanTxt <$file.rawtxt >$file.txt
   /bin/rm $file.rawtxt
 done
 
@@ -154,7 +154,7 @@ cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
 for file in *.1 ; do
   base=`basename $file .1`
   echo "  Making $base.html"
-  perl ../132html -toc $base <$file >html/$base.html
+  perl ../maint/132html -toc $base <$file >html/$base.html
 done
 
 # Exclude table of contents for function summaries. It seems that expr
@@ -173,7 +173,7 @@ for file in *.3 ; do
     toc=""
   fi
   echo "  Making $base.html"
-  perl ../132html $toc $base <$file >html/$base.html
+  perl ../maint/132html $toc $base <$file >html/$base.html
   if [ $? != 0 ] ; then exit 1; fi
 done
 
@@ -192,15 +192,13 @@ files="\
   Makefile.am \
   configure.ac \
   README \
-  LICENCE \
+  LICENCE.md \
   COPYING \
-  AUTHORS \
+  AUTHORS.md \
   NEWS \
   NON-AUTOTOOLS-BUILD \
   INSTALL \
-  132html \
-  CleanTxt \
-  Detrail \
+  SECURITY.md \
   ChangeLog \
   CMakeLists.txt \
   RunGrepTest \
@@ -255,7 +253,7 @@ files="\
   src/pcre2test.c"
 
 echo Detrailing
-perl ./Detrail $files doc/p* doc/html/*
+perl maint/Detrail $files doc/p* doc/html/*
 
 echo Done
 

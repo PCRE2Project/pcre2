@@ -385,7 +385,7 @@ library. They are also documented in the pcre2build man page.
 
   If this is done, when pcre2test's input is from a terminal, it reads it using
   the readline() function. This provides line-editing and history facilities.
-  Note that libreadline is GPL-licenced, so if you distribute a binary of
+  Note that libreadline is GPL-licensed, so if you distribute a binary of
   pcre2test linked in this way, there may be licensing issues. These can be
   avoided by linking with libedit (which has a BSD licence) instead.
 
@@ -881,11 +881,8 @@ The distribution should contain the files listed below.
 
 (C) Auxiliary files:
 
-  132html                  script to turn "man" pages into HTML
   AUTHORS                  information about the author of PCRE2
   ChangeLog                log of changes to the code
-  CleanTxt                 script to clean nroff output for txt man pages
-  Detrail                  script to remove trailing spaces
   HACKING                  some notes about the internals of PCRE2
   INSTALL                  generic installation instructions
   LICENCE                  conditions for the use of PCRE2
@@ -910,7 +907,6 @@ The distribution should contain the files listed below.
                            )   automake
   doc/*.3                  man page sources for PCRE2
   doc/*.1                  man page sources for pcre2grep and pcre2test
-  doc/index.html.src       the base HTML page
   doc/html/*               HTML documentation
   doc/pcre2.txt            plain text version of the man pages
   doc/pcre2test.txt        plain text documentation of test program
