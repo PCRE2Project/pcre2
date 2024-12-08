@@ -97,8 +97,8 @@ echo "Making pcre2demo.3"
 perl <<"END" >pcre2demo.3
   use Time::Piece;
   open(VH, "<", "../src/config.h.generic") || die "Failed to open src/config.h.generic\n";
-  open(IN, "../src/pcre2demo.c") || die "Failed to open src/pcre2demo.c\n";
-  open(OUT, ">pcre2demo.3") || die "Failed to open pcre2demo.3\n";
+  open(IN, "<", "../src/pcre2demo.c") || die "Failed to open src/pcre2demo.c\n";
+  open(OUT, ">", "pcre2demo.3") || die "Failed to open pcre2demo.3\n";
   my $version;
   while (<VH>)
   {
