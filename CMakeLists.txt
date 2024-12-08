@@ -351,6 +351,13 @@ option(PCRE2_SHOW_REPORT "Show the final configuration report" ON)
 option(PCRE2_BUILD_PCRE2GREP "Build pcre2grep" ON)
 option(PCRE2_BUILD_TESTS "Build the tests" ON)
 
+set(
+  PCRE2_INSTALL_CMAKEDIR
+  "${CMAKE_INSTALL_LIBDIR}/cmake/pcre2"
+  CACHE STRING
+  "Path used during CMake install for placing PCRE2's CMake config files, relative to the installation root (prefix)"
+)
+
 if(MINGW)
   option(
     NON_STANDARD_LIB_PREFIX
@@ -1257,7 +1264,7 @@ configure_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} @ONLY)
 set(PCRE2_CONFIG_VERSION_IN ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pcre2-config-version.cmake.in)
 set(PCRE2_CONFIG_VERSION_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config-version.cmake)
 configure_file(${PCRE2_CONFIG_VERSION_IN} ${PCRE2_CONFIG_VERSION_OUT} @ONLY)
-install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION cmake)
+install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION "${PCRE2_INSTALL_CMAKEDIR}")
 
 file(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html)
 file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
