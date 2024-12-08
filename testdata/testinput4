@@ -1604,6 +1604,15 @@
     \x0a\x{1b04}LF, spacingmark
     \x0b\x{0711}Control, extend
     \x09\x{1b04}Control, spacingmark
+    *Test Extended Pictographic after bug fix
+    \x{261d}\x{261d}B              Extended_Pictographic Extended_Pictographic 
+    \x{261D}\x{1F3FB}\x{261d}B     Extended_Pictographic Extend E-P
+    \x{261D}\x{1F3FB}\x{200d}\x{261d}B     Extended_Pictographic Extend ZWJ E-P
+    \x{1f3f3}\x{fe0f}\x{200d}\x{1f308}\x{1f3f4}\x{200d}\x{2620}\x{fe0f}\x{1f3f3}\x{fe0f}\x{200d}\x{1f308}\x{1f3f4}\x{200d}\x{2620}\x{fe0f}
+    A\x{200d}\x{1f308}B
+    A\x{200d}B                     A ZWJ
+    \x{261D}\x{1F3FB}B             Extended_Pictographic Extend
+    \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
     *There are no Prepend characters, so we can't test Prepend, CR
 
 /^(?>\X{2})X/utf,aftertext
@@ -2326,6 +2335,9 @@
 /[\N{U+1234}]/utf
     \x{1234}
 
+/(\x{1234}) \1/utf
+    \N{U+1234} \o{11064}
+
 # Test the full list of Unicode "Pattern White Space" characters that are to
 # be ignored by /x. The pattern lines below may show up oddly in text editors
 # or when listed to the screen. Note that characters such as U+2002, which are
@@ -2861,5 +2873,200 @@
 
 /caf\B.+?\B/utf,ucp
     --cafe\x{300}_au\x{203f}lait!
+
+# -------------------------------------------------------------------------- 
+# Case-independent matching property tests added after changing PCRE2 to be
+# compatible with Perl. All three cases (upper, lower, title) conflate.
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/utf
+    >AbbD<
+    >Abb\x{01c5}<
+\= Expect no match     
+    >aBBd<
+    >aB!!< 
+
+/\p{Lu}\p{Ll}\P{Lu}\P{Ll}/i,utf
+    >aB!!< 
+    >\x{01c5}B!!< 
+\= Expect no match     
+    >AbbD<
+    >aBBd<
+    >Abb\x{01c5}<
+
+/[.\p{Lu}][.\p{Ll}][.\P{Lu}][.\P{Ll}]/i,utf
+    >aB!!< 
+\= Expect no match     
+    >AbbD<
+    >aBBd<
+    >Abb\x{01c5}<
+
+/^\p{Lt}+/i,utf
+    \x{1c5}AB
+
+# -------------------------------------------------------------------------- 
+
+/\p{  ^ L u }/
+    AbCd
+
+# hex
+
+/c3 b1/hex,utf
+    \N{U+00F1}
+
+/[^\P{Lu}1]/i,utf,ucp
+    a
+    A
+    \x{3a3}
+    \x{3c3}
+\= Expect no match
+    1
+    2
+
+/[^\P{Lu}1]/utf,ucp
+    A
+    \x{3a3}
+\= Expect no match
+    1
+    2
+    a
+    \x{3c3}
+
+/[\P{Lu}1]/i,utf,ucp
+    1
+    2
+\= Expect no match
+    a
+    A
+    \x{3a3}
+    \x{3c3}
+
+/[\P{Lu}1]/utf,ucp
+    1
+    2
+    a
+    \x{3c3}
+\= Expect no match
+    A
+    \x{3a3}
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+/(?[\p{L} - \p{Lu}])/
+    a
+\= Expect no match
+    A
+    1
+
+/(?[\p{L} & \p{Lu}])/
+    A
+\= Expect no match
+    a
+    1
+
+/(?[[\p{Lu}z] ^ [\p{Ll}G]])/
+    A
+    p
+\= Expect no match
+    G
+    z
+    1
+
+/(?[\p{Ll} | \p{Nd}])/
+    a
+    1
+\= Expect no match
+    A
+
+/(?[\p{Ll} + [\p{Nd}]])/
+    a
+    1
+\= Expect no match
+    A
+
+/(?[ ![\p{Nd}z] ])/
+    _
+    Z
+\= Expect no match
+    1
+    z
+
+/(?[ \P{Nd} + [2] ])/
+    _
+    Z
+    2
+\= Expect no match
+    1
+    3
+
+/(?[ ![\P{Nd}] ])/
+    1
+    2
+\= Expect no match
+    _
+    z
+
+# caseless tests
+
+/(?[ \p{Lu} ^ \p{Ll} ])/
+    a
+    A
+\= Expect no match
+    _
+    1
+
+/(?[ [\p{Lu}1] ^ \p{Ll} ])/i
+    1
+\= Expect no match
+    a
+    A
+    _
+
+/(?[ [\p{Lu}1] & [\p{Ll}1] ])/
+    1
+\= Expect no match
+    a
+    A
+    _
+    2
+
+/(?[ [\p{Lu}1] & [\p{Ll}1] ])/i
+    a
+    A
+    1
+\= Expect no match
+    _
+    2
+
+/(?[ \p{Lu} + \p{Ll} & [a-z] ])/utf
+    \x{0411}
+    a
+    A
+\= Expect no match
+    \x{0431}
+
+/(?[ (\p{Lu} + \p{Ll}) & [a-z] ])/utf
+    a
+\= Expect no match
+    \x{0411}
+    \x{0431}
+    A
+
+/(?[ [a-z] & \p{Lu} + \p{Ll} ])/utf
+    a
+    \x{0431}
+\= Expect no match
+    \x{0411}
+    A
+
+/(?[ [a-z] & (\p{Lu} + \p{Ll}) ])/utf
+    a
+\= Expect no match
+    \x{0431}
+    \x{0411}
+    A
+
+# --------------
 
 # End of testinput4

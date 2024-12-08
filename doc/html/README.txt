@@ -24,7 +24,6 @@ contents of this README file are:
 
   The PCRE2 APIs
   Documentation for PCRE2
-  Contributions by users of PCRE2
   Building PCRE2 on non-Unix-like systems
   Building PCRE2 without using autotools
   Building PCRE2 using autotools
@@ -391,7 +390,7 @@ library. They are also documented in the pcre2build man page.
   avoided by linking with libedit (which has a BSD licence) instead.
 
   Enabling libreadline causes the -lreadline option to be added to the
-  pcre2test build. In many operating environments with a sytem-installed
+  pcre2test build. In many operating environments with a system-installed
   readline library this is sufficient. However, in some environments (e.g. if
   an unmodified distribution version of readline is in use), it may be
   necessary to specify something like LIBS="-lncurses" as well. This is
@@ -412,20 +411,19 @@ library. They are also documented in the pcre2build man page.
   Instead of %td or %zu, %lu is used, with a cast for size_t values.
 
 . There is a special option called --enable-fuzz-support for use by people who
-  want to run fuzzing tests on PCRE2. At present this applies only to the 8-bit
-  library. If set, it causes an extra library called libpcre2-fuzzsupport.a to
-  be built, but not installed. This contains a single function called
-  LLVMFuzzerTestOneInput() whose arguments are a pointer to a string and the
-  length of the string. When called, this function tries to compile the string
-  as a pattern, and if that succeeds, to match it. This is done both with no
-  options and with some random options bits that are generated from the string.
-  Setting --enable-fuzz-support also causes a binary called pcre2fuzzcheck to
-  be created. This is normally run under valgrind or used when PCRE2 is
-  compiled with address sanitizing enabled. It calls the fuzzing function and
-  outputs information about what it is doing. The input strings are specified
-  by arguments: if an argument starts with "=" the rest of it is a literal
-  input string. Otherwise, it is assumed to be a file name, and the contents
-  of the file are the test string.
+  want to run fuzzing tests on PCRE2. If set, it causes an extra library
+  called libpcre2-fuzzsupport.a to be built, but not installed. This contains
+  a single function called LLVMFuzzerTestOneInput() whose arguments are a
+  pointer to a string and the length of the string. When called, this function
+  tries to compile the string as a pattern, and if that succeeds, to match
+  it. This is done both with no options and with some random options bits that
+  are generated from the string. Setting --enable-fuzz-support also causes an
+  executable called pcre2fuzzcheck-{8,16,32} to be created. This is normally
+  run under valgrind or used when PCRE2 is compiled with address sanitizing
+  enabled. It calls the fuzzing function and outputs information about what it
+  is doing. The input strings are specified by arguments: if an argument
+  starts with "=" the rest of it is a literal input string. Otherwise, it is
+  assumed to be a file name, and the contents of the file are the test string.
 
 . Releases before 10.30 could be compiled with --disable-stack-for-recursion,
   which caused pcre2_match() to use individual blocks on the heap for
@@ -823,37 +821,38 @@ The distribution should contain the files listed below.
                            ASCII coding; unless --enable-rebuild-chartables is
                            specified, used by copying to pcre2_chartables.c
 
-  src/pcre2posix.c         )
-  src/pcre2_auto_possess.c )
-  src/pcre2_chkdint.c      )
-  src/pcre2_compile.c      )
-  src/pcre2_config.c       )
-  src/pcre2_context.c      )
-  src/pcre2_convert.c      )
-  src/pcre2_dfa_match.c    )
-  src/pcre2_error.c        )
-  src/pcre2_extuni.c       )
-  src/pcre2_find_bracket.c )
-  src/pcre2_jit_compile.c  )
-  src/pcre2_jit_match.c    ) sources for the functions in the library,
-  src/pcre2_jit_misc.c     )   and some internal functions that they use
-  src/pcre2_maketables.c   )
-  src/pcre2_match.c        )
-  src/pcre2_match_data.c   )
-  src/pcre2_newline.c      )
-  src/pcre2_ord2utf.c      )
-  src/pcre2_pattern_info.c )
-  src/pcre2_script_run.c   )
-  src/pcre2_serialize.c    )
-  src/pcre2_string_utils.c )
-  src/pcre2_study.c        )
-  src/pcre2_substitute.c   )
-  src/pcre2_substring.c    )
-  src/pcre2_tables.c       )
-  src/pcre2_ucd.c          )
-  src/pcre2_ucptables.c    )
-  src/pcre2_valid_utf.c    )
-  src/pcre2_xclass.c       )
+  src/pcre2posix.c           )
+  src/pcre2_auto_possess.c   )
+  src/pcre2_chkdint.c        )
+  src/pcre2_compile.c        )
+  src/pcre2_compile_class.c  )
+  src/pcre2_config.c         )
+  src/pcre2_context.c        )
+  src/pcre2_convert.c        )
+  src/pcre2_dfa_match.c      )
+  src/pcre2_error.c          )
+  src/pcre2_extuni.c         )
+  src/pcre2_find_bracket.c   )
+  src/pcre2_jit_compile.c    )
+  src/pcre2_jit_match.c      ) sources for the functions in the library,
+  src/pcre2_jit_misc.c       )   and some internal functions that they use
+  src/pcre2_maketables.c     )
+  src/pcre2_match.c          )
+  src/pcre2_match_data.c     )
+  src/pcre2_newline.c        )
+  src/pcre2_ord2utf.c        )
+  src/pcre2_pattern_info.c   )
+  src/pcre2_script_run.c     )
+  src/pcre2_serialize.c      )
+  src/pcre2_string_utils.c   )
+  src/pcre2_study.c          )
+  src/pcre2_substitute.c     )
+  src/pcre2_substring.c      )
+  src/pcre2_tables.c         )
+  src/pcre2_ucd.c            )
+  src/pcre2_ucptables.c      )
+  src/pcre2_valid_utf.c      )
+  src/pcre2_xclass.c         )
 
   src/pcre2_printint.c     debugging function that is used by pcre2test,
   src/pcre2_fuzzsupport.c  function for (optional) fuzzing support
@@ -861,13 +860,16 @@ The distribution should contain the files listed below.
   src/config.h.in          template for config.h, when built by "configure"
   src/pcre2.h.in           template for pcre2.h when built by "configure"
   src/pcre2posix.h         header for the external POSIX wrapper API
+  src/pcre2_compile.h      header for internal use
   src/pcre2_internal.h     header for internal use
   src/pcre2_intmodedep.h   a mode-specific internal header
+  src/pcre2_jit_char_inc.h header used by JIT
   src/pcre2_jit_neon_inc.h header used by JIT
   src/pcre2_jit_simd_inc.h header used by JIT
   src/pcre2_ucp.h          header for Unicode property handling
+  src/pcre2_util.h         header for internal utils
 
-  sljit/*                  source files for the JIT compiler
+  deps/sljit/sljit_src/*   source files for the JIT compiler
 
 (B) Source files for programs that use PCRE2:
 
@@ -931,7 +933,6 @@ The distribution should contain the files listed below.
 (D) Auxiliary files for cmake support
 
   cmake/COPYING-CMAKE-SCRIPTS
-  cmake/FindPackageHandleStandardArgs.cmake
   cmake/FindEditline.cmake
   cmake/FindReadline.cmake
   CMakeLists.txt
@@ -944,7 +945,14 @@ The distribution should contain the files listed below.
   src/config.h.generic    ) a version of config.h for use in non-"configure"
                           )   environments
 
+(F) Auxiliary files for building PCRE2 under OpenVMS
+
+  vms/configure.com       )
+  vms/openvms_readme.txt  ) These files were contributed by a PCRE2 user.
+  vms/pcre2.h_patch       )
+  vms/stdint.h            )
+
 Philip Hazel
 Email local part: Philip.Hazel
 Email domain: gmail.com
-Last updated: 24 November 2023
+Last updated: 15 April 2024

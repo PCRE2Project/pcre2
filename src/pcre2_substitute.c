@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2022 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -130,17 +130,21 @@ for (; ptr < ptrend; ptr++)
 
     ptr += 1;  /* Must point after \ */
     erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode,
-      code->overall_options, code->extra_options, FALSE, NULL);
+      code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
     ptr -= 1;  /* Back to last code unit of escape */
     if (errorcode != 0)
       {
-      rc = errorcode;
+      /* errorcode from check_escape is positive, so must not be returned by
+      pcre2_substitute(). */
+      rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
       }
 
     switch(erc)
       {
       case 0:      /* Data character */
+      case ESC_b:  /* Data character */
+      case ESC_v:  /* Data character */
       case ESC_E:  /* Isolated \E is ignored */
       break;
 
@@ -148,7 +152,18 @@ for (; ptr < ptrend; ptr++)
       literal = TRUE;
       break;
 
+      case ESC_g:
+      /* The \g<name> form (\g<number> already handled by check_escape)
+
+      Don't worry about finding the matching ">". We are super, super lenient
+      about validating ${} replacements inside find_text_end(), so we certainly
+      don't need to worry about other syntax. Importantly, a \g<..> or $<...>
+      sequence can't contain a '}' character. */
+      break;
+
       default:
+      if (erc < 0)
+          break;  /* capture group reference */
       rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
       }
@@ -162,6 +177,86 @@ EXIT:
 return rc;
 }
 
+
+/*************************************************
+*           Validate group name                  *
+*************************************************/
+
+/* This function scans for a capture group name, validating it
+consists of legal characters, is not empty, and does not exceed
+MAX_NAME_SIZE.
+
+Arguments:
+  ptrptr    points to the pointer to the start of the text (updated)
+  ptrend    end of the whole string
+  utf       true if the input is UTF-encoded
+  ctypes    pointer to the character types table
+
+Returns:    TRUE if a name was read
+            FALSE otherwise
+*/
+
+static BOOL
+read_name_subst(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf,
+    const uint8_t* ctypes)
+{
+PCRE2_SPTR ptr = *ptrptr;
+PCRE2_SPTR nameptr = ptr;
+
+if (ptr >= ptrend)                 /* No characters in name */
+  goto FAILED;
+
+/* We do not need to check whether the name starts with a non-digit.
+We are simply referencing names here, not defining them. */
+
+/* See read_name in the pcre2_compile.c for the corresponding logic
+restricting group names inside the pattern itself. */
+
+#ifdef SUPPORT_UNICODE
+if (utf)
+  {
+  uint32_t c, type;
+
+  while (ptr < ptrend)
+    {
+    GETCHAR(c, ptr);
+    type = UCD_CHARTYPE(c);
+    if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
+        c != CHAR_UNDERSCORE) break;
+    ptr++;
+    FORWARDCHARTEST(ptr, ptrend);
+    }
+  }
+else
+#else
+(void)utf;  /* Avoid compiler warning */
+#endif      /* SUPPORT_UNICODE */
+
+/* Handle group names in non-UTF modes. */
+
+  {
+  while (ptr < ptrend && MAX_255(*ptr) && (ctypes[*ptr] & ctype_word) != 0)
+    {
+    ptr++;
+    }
+  }
+
+/* Check name length */
+
+if (ptr - nameptr > MAX_NAME_SIZE)
+  goto FAILED;
+
+/* Subpattern names must not be empty */
+if (ptr == nameptr)
+  goto FAILED;
+
+*ptrptr = ptr;
+return TRUE;
+
+FAILED:
+*ptrptr = ptr;
+return FALSE;
+}
 
 
 /*************************************************
@@ -234,13 +329,13 @@ BOOL escaped_literal = FALSE;
 BOOL overflowed = FALSE;
 BOOL use_existing_match;
 BOOL replacement_only;
-#ifdef SUPPORT_UNICODE
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+#ifdef SUPPORT_UNICODE
 BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 #endif
 PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
-PCRE2_SPTR repend;
+PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
@@ -286,27 +381,34 @@ case, we copy the existing match into the internal block, except for any cached
 heap frame size and pointer. This ensures that no changes are made to the
 external match data block. */
 
+/* WARNING: In both cases below a general context is constructed "by hand"
+because calling pcre2_general_context_create() involves a memory allocation. If
+the contents of a general context control block are ever changed there will
+have to be changes below. */
+
 if (match_data == NULL)
   {
-  pcre2_general_context *gcontext;
+  pcre2_general_context gcontext;
   if (use_existing_match) return PCRE2_ERROR_NULL;
-  gcontext = (mcontext == NULL)?
-    (pcre2_general_context *)code :
-    (pcre2_general_context *)mcontext;
+  gcontext.memctl = (mcontext == NULL)?
+    ((const pcre2_real_code *)code)->memctl :
+    ((pcre2_real_match_context *)mcontext)->memctl;
   match_data = internal_match_data =
-    pcre2_match_data_create_from_pattern(code, gcontext);
+    pcre2_match_data_create_from_pattern(code, &gcontext);
   if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
   }
 
 else if (use_existing_match)
   {
-  pcre2_general_context *gcontext = (mcontext == NULL)?
-    (pcre2_general_context *)code :
-    (pcre2_general_context *)mcontext;
-  int pairs = (code->top_bracket + 1 < match_data->oveccount)?
+  int pairs;
+  pcre2_general_context gcontext;
+  gcontext.memctl = (mcontext == NULL)?
+    ((const pcre2_real_code *)code)->memctl :
+    ((pcre2_real_match_context *)mcontext)->memctl;
+  pairs = (code->top_bracket + 1 < match_data->oveccount)?
     code->top_bracket + 1 : match_data->oveccount;
   internal_match_data = pcre2_match_data_create(match_data->oveccount,
-    gcontext);
+    &gcontext);
   if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
   memcpy(internal_match_data, match_data, offsetof(pcre2_match_data, ovector)
     + 2*pairs*sizeof(PCRE2_SIZE));
@@ -412,8 +514,9 @@ do
 
     save_start = start_offset++;
     if (subject[start_offset-1] == CHAR_CR &&
-        code->newline_convention != PCRE2_NEWLINE_CR &&
-        code->newline_convention != PCRE2_NEWLINE_LF &&
+        (code->newline_convention == PCRE2_NEWLINE_CRLF ||
+         code->newline_convention == PCRE2_NEWLINE_ANY ||
+         code->newline_convention == PCRE2_NEWLINE_ANYCRLF) &&
         start_offset < length &&
         subject[start_offset] == CHAR_LF)
       start_offset++;
@@ -507,6 +610,13 @@ do
     {
     uint32_t ch;
     unsigned int chlen;
+    int group;
+    uint32_t special;
+    PCRE2_SPTR text1_start = NULL;
+    PCRE2_SPTR text1_end = NULL;
+    PCRE2_SPTR text2_start = NULL;
+    PCRE2_SPTR text2_end = NULL;
+    PCRE2_UCHAR name[MAX_NAME_SIZE + 1];
 
     /* If at the end of a nested substring, pop the stack. */
 
@@ -535,25 +645,62 @@ do
 
     if (*ptr == CHAR_DOLLAR_SIGN)
       {
-      int group, n;
-      uint32_t special = 0;
       BOOL inparens;
+      BOOL inangle;
       BOOL star;
       PCRE2_SIZE sublength;
-      PCRE2_SPTR text1_start = NULL;
-      PCRE2_SPTR text1_end = NULL;
-      PCRE2_SPTR text2_start = NULL;
-      PCRE2_SPTR text2_end = NULL;
       PCRE2_UCHAR next;
-      PCRE2_UCHAR name[33];
+      PCRE2_SPTR subptr, subptrend;
 
       if (++ptr >= repend) goto BAD;
       if ((next = *ptr) == CHAR_DOLLAR_SIGN) goto LOADLITERAL;
 
+      special = 0;
+      text1_start = NULL;
+      text1_end = NULL;
+      text2_start = NULL;
+      text2_end = NULL;
       group = -1;
-      n = 0;
       inparens = FALSE;
+      inangle = FALSE;
       star = FALSE;
+      subptr = NULL;
+      subptrend = NULL;
+
+      /* Special $ sequences, as supported by Perl, JavaScript, .NET and others. */
+      if (next == CHAR_AMPERSAND)
+        {
+        ++ptr;
+        group = 0;
+        goto GROUP_SUBSTITUTE;
+        }
+      if (next == CHAR_GRAVE_ACCENT || next == CHAR_APOSTROPHE)
+        {
+        ++ptr;
+        rc = pcre2_substring_length_bynumber(match_data, 0, &sublength);
+        if (rc < 0) goto PTREXIT; /* (Sanity-check ovector before reading from it.) */
+
+        if (next == CHAR_GRAVE_ACCENT)
+          {
+          subptr = subject;
+          subptrend = subject + ovector[0];
+          }
+        else
+          {
+          subptr = subject + ovector[1];
+          subptrend = subject + length;
+          }
+
+        goto SUBPTR_SUBSTITUTE;
+        }
+      if (next == CHAR_UNDERSCORE)
+        {
+        /* Java, .NET support $_ for "entire input string". */
+        ++ptr;
+        subptr = subject;
+        subptrend = subject + length;
+        goto SUBPTR_SUBSTITUTE;
+        }
 
       if (next == CHAR_LEFT_CURLY_BRACKET)
         {
@@ -561,22 +708,31 @@ do
         next = *ptr;
         inparens = TRUE;
         }
+      else if (next == CHAR_LESS_THAN_SIGN)
+        {
+        /* JavaScript compatibility syntax, $<name>. Processes only named
+        groups (not numbered) and does not support extensions such as star
+        (you can do ${name} and ${*name}, but not $<*name>). */
+        if (++ptr >= repend) goto BAD;
+        next = *ptr;
+        inangle = TRUE;
+        }
 
-      if (next == CHAR_ASTERISK)
+      if (!inangle && next == CHAR_ASTERISK)
         {
         if (++ptr >= repend) goto BAD;
         next = *ptr;
         star = TRUE;
         }
 
-      if (!star && next >= CHAR_0 && next <= CHAR_9)
+      if (!star && !inangle && next >= CHAR_0 && next <= CHAR_9)
         {
         group = next - CHAR_0;
         while (++ptr < repend)
           {
           next = *ptr;
           if (next < CHAR_0 || next > CHAR_9) break;
-          group = group * 10 + next - CHAR_0;
+          group = group * 10 + (next - CHAR_0);
 
           /* A check for a number greater than the hightest captured group
           is sufficient here; no need for a separate overflow check. If unknown
@@ -600,17 +756,17 @@ do
         }
       else
         {
-        const uint8_t *ctypes = code->tables + ctypes_offset;
-        while (MAX_255(next) && (ctypes[next] & ctype_word) != 0)
-          {
-          name[n++] = next;
-          if (n > 32) goto BAD;
-          if (++ptr >= repend) break;
-          next = *ptr;
-          }
-        if (n == 0) goto BAD;
-        name[n] = 0;
+        PCRE2_SIZE name_len;
+        PCRE2_SPTR name_start = ptr;
+        if (!read_name_subst(&ptr, repend, utf, code->tables + ctypes_offset))
+          goto BAD;
+        name_len = ptr - name_start;
+        memcpy(name, name_start, CU2BYTES(name_len));
+        name[name_len] = 0;
         }
+
+      next = 0; /* not used or updated after this point */
+      (void)next;
 
       /* In extended mode we recognize ${name:+set text:unset text} and
       ${name:-default text}. */
@@ -618,7 +774,7 @@ do
       if (inparens)
         {
         if ((suboptions & PCRE2_SUBSTITUTE_EXTENDED) != 0 &&
-             !star && ptr < repend - 2 && next == CHAR_COLON)
+             !star && ptr < repend - 2 && *ptr == CHAR_COLON)
           {
           special = *(++ptr);
           if (special != CHAR_PLUS && special != CHAR_MINUS)
@@ -653,6 +809,13 @@ do
         ptr++;
         }
 
+      if (inangle)
+        {
+        if (ptr >= repend || *ptr != CHAR_GREATER_THAN_SIGN)
+          goto BAD;
+        ptr++;
+        }
+
       /* Have found a syntactically correct group number or name, or *name.
       Only *MARK is currently recognized. */
 
@@ -663,10 +826,10 @@ do
           PCRE2_SPTR mark = pcre2_get_mark(match_data);
           if (mark != NULL)
             {
-            PCRE2_SPTR mark_start = mark;
-            while (*mark != 0) mark++;
-            fraglength = mark - mark_start;
-            CHECKMEMCPY(mark_start, fraglength);
+            /* Peek backwards one code unit to obtain the length of the mark.
+            It can (theoretically) contain an embedded NUL. */
+            fraglength = mark[-1];
+            CHECKMEMCPY(mark, fraglength);
             }
           }
         else goto BAD;
@@ -677,8 +840,7 @@ do
 
       else
         {
-        PCRE2_SPTR subptr, subptrend;
-
+        GROUP_SUBSTITUTE:
         /* Find a number for a named group. In case there are duplicate names,
         search for the first one that is set. If the name is not found when
         PCRE2_SUBSTITUTE_UNKNOWN_EMPTY is set, set the group number to a
@@ -775,21 +937,31 @@ do
 
         /* Substitute a literal string, possibly forcing alphabetic case. */
 
+        SUBPTR_SUBSTITUTE:
         while (subptr < subptrend)
           {
           GETCHARINCTEST(ch, subptr);
           if (forcecase != 0)
             {
+            if (mcontext->substitute_case_callout)
+              {
+              ch = mcontext->substitute_case_callout(
+                ch,
+                forcecase > 0 && forcecasereset < 0 ? PCRE2_SUBSTITUTE_CASE_TITLE
+                  : forcecase > 0 ? PCRE2_SUBSTITUTE_CASE_UPPER
+                  : PCRE2_SUBSTITUTE_CASE_LOWER,
+                mcontext->substitute_case_callout_data);
+              }
 #ifdef SUPPORT_UNICODE
-            if (utf || ucp)
+            else if (utf || ucp)
               {
               uint32_t type = UCD_CHARTYPE(ch);
               if (PRIV(ucp_gentype)[type] == ucp_L &&
                   type != ((forcecase > 0)? ucp_Lu : ucp_Ll))
                 ch = UCD_OTHERCASE(ch);
               }
-            else
 #endif
+            else
               {
               if (((code->tables + cbits_offset +
                   ((forcecase > 0)? cbit_upper:cbit_lower)
@@ -832,6 +1004,12 @@ do
         forcecase = -1;
         forcecasereset = 0;
         ptr += 2;
+        if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_U)
+          {
+          /* Perl title-casing feature for \l\U (and \u\L) */
+          forcecasereset = 1;
+          ptr += 2;
+          }
         continue;
 
         case CHAR_U:
@@ -843,6 +1021,11 @@ do
         forcecase = 1;
         forcecasereset = 0;
         ptr += 2;
+        if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_L)
+          {
+          forcecasereset = -1;
+          ptr += 2;
+          }
         continue;
 
         default:
@@ -851,7 +1034,7 @@ do
 
       ptr++;  /* Point after \ */
       rc = PRIV(check_escape)(&ptr, repend, &ch, &errorcode,
-        code->overall_options, code->extra_options, FALSE, NULL);
+        code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
       if (errorcode != 0) goto BADESCAPE;
 
       switch(rc)
@@ -867,7 +1050,47 @@ do
         case 0:      /* Data character */
         goto LITERAL;
 
+        case ESC_b:
+        ch = CHAR_BS;    /* \b is backspace in a substitution */
+        goto LITERAL;
+
+        case ESC_v:
+        ch = CHAR_VT;    /* \v is vertical tab in a substitution */
+        goto LITERAL;
+
+        case ESC_g:
+          {
+          PCRE2_SIZE name_len;
+          PCRE2_SPTR name_start;
+
+          /* Parse the \g<name> form (\g<number> already handled by check_escape) */
+          if (ptr >= repend || *ptr != CHAR_LESS_THAN_SIGN)
+            goto BADESCAPE;
+          ++ptr;
+
+          name_start = ptr;
+          if (!read_name_subst(&ptr, repend, utf, code->tables + ctypes_offset))
+            goto BADESCAPE;
+          name_len = ptr - name_start;
+
+          if (ptr >= repend || *ptr != CHAR_GREATER_THAN_SIGN)
+            goto BADESCAPE;
+          ++ptr;
+
+          special = 0;
+          group = -1;
+          memcpy(name, name_start, CU2BYTES(name_len));
+          name[name_len] = 0;
+          goto GROUP_SUBSTITUTE;
+          }
+
         default:
+        if (rc < 0)
+          {
+          special = 0;
+          group = -rc - 1;
+          goto GROUP_SUBSTITUTE;
+          }
         goto BADESCAPE;
         }
       }
@@ -882,16 +1105,25 @@ do
       LITERAL:
       if (forcecase != 0)
         {
+        if (mcontext->substitute_case_callout)
+          {
+          ch = mcontext->substitute_case_callout(
+            ch,
+            forcecase > 0 && forcecasereset < 0 ? PCRE2_SUBSTITUTE_CASE_TITLE
+              : forcecase > 0 ? PCRE2_SUBSTITUTE_CASE_UPPER
+              : PCRE2_SUBSTITUTE_CASE_LOWER,
+            mcontext->substitute_case_callout_data);
+          }
 #ifdef SUPPORT_UNICODE
-        if (utf || ucp)
+        else if (utf || ucp)
           {
           uint32_t type = UCD_CHARTYPE(ch);
           if (PRIV(ucp_gentype)[type] == ucp_L &&
               type != ((forcecase > 0)? ucp_Lu : ucp_Ll))
             ch = UCD_OTHERCASE(ch);
           }
-        else
 #endif
+        else
           {
           if (((code->tables + cbits_offset +
               ((forcecase > 0)? cbit_upper:cbit_lower)

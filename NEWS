@@ -2,11 +2,21 @@ News about PCRE2 releases
 -------------------------
 
 
-Version 10.43 27-December-2023
+Version 10.44 07-June-2024
+--------------------------
+
+This is mostly a bug-fix and tidying release. There is one new function, to set
+a maximum size for a compiled pattern. The maximum name length for groups is
+increased to 128. Some auxiliary files for building under VMS are added.
+
+
+Version 10.43 16-February-2024
 ------------------------------
 
 There are quite a lot of changes in this release (see ChangeLog and git log for
 a list). Those that are not bugfixes or code tidies are:
+
+* The JIT code no longer supports ARMv5 architecture.
 
 * A new function pcre2_get_match_data_heapframes_size() for finer heap control.
 
@@ -22,9 +32,9 @@ a list). Those that are not bugfixes or code tidies are:
   a default maximum length of 255 characters (same as Perl) but with a function
   to adjust the limit.
 
-* Support for LoongArch to JIT.
+* Support for LoongArch in JIT.
 
-* Perl changed the meaning of (for examle) {,3} which did not used to be
+* Perl changed the meaning of (for example) {,3} which did not used to be
   recognized as a quantifier. Now it means {0,3} and PCRE2 has also changed.
   Note that {,} is still not a quantifier.
 
@@ -36,13 +46,13 @@ a list). Those that are not bugfixes or code tidies are:
 * Changed the meaning of \w and its synonyms and derivatives (\b and \B) in UCP
   mode to follow Perl. It now matches characters whose general categories are L
   or N or whose particular categories are Mn (non-spacing mark) or Pc
-  (combining puntuation).
+  (combining punctuation).
 
 * Changed the default meaning of [:xdigit:] in UCP mode to follow Perl. It now
   matches the "fullwidth" versions of hex digits. PCRE2_EXTRA_ASCII_DIGIT can
   be used to keep it ASCII only.
 
-* Make PCRE2_UCP the default in UTF mode in pcre2grep and add -no_ucp,
+* Make PCRE2_UCP the default in UTF mode in pcre2grep and add --no-ucp,
   --case-restrict and --posix-digit.
 
 * Add --group-separator and --no-group-separator to pcre2grep.

@@ -187,9 +187,6 @@
     \x{c0}
     \x{f0}
 
-/Ā{3,4}/IB,utf
-  \x{100}\x{100}\x{100}\x{100\x{100}
-
 /(\x{100}+|x)/IB,utf
 
 /(\x{100}*a|x)/IB,utf
@@ -487,11 +484,11 @@
     
 # Check name length with non-ASCII characters 
 
-/(?'ABáC678901234567890123456789012'...)/utf
+/(?'ABáC678901234567890123456789012012345678901234567890123456789AB012345678901234567890123456789AB012345678901234567890123456789AB'...)/utf
 
-/(?'ABáC6789012345678901234567890123'...)/utf
+/(?'ABáC6789012345678901234567890123012345678901234567890123456789AB012345678901234567890123456789AB012345678901234567890123456789AB'...)/utf
 
-/(?'ABZC6789012345678901234567890123'...)/utf
+/(?'ABZC6789012345678901234567890123012345678901234567890123456789AB012345678901234567890123456789AB012345678901234567890123456789AB'...)/utf
 
 /(?(n/utf
 
@@ -644,5 +641,59 @@
 
 /A\z/utf,match_invalid_utf
     A\x80\x42\n
+
+/ab$/match_invalid_utf
+\= Expect no match            
+    ab\x80cde         
+
+/ab\z/match_invalid_utf
+\= Expect no match            
+    ab\x80cde         
+
+/ab\Z/match_invalid_utf
+\= Expect no match            
+    ab\x80cde         
+
+/(..)(*scs:(1)ab\z)/match_invalid_utf
+    ab\x80cde         
+
+/(..)(*scs:(1)ab\Z)/match_invalid_utf
+    ab\x80cde         
+
+/(..)(*scs:(1)ab$)/match_invalid_utf
+    ab\x80cde         
+
+/(.) \1/i,ucp
+    i I
+
+/(.) \1/i,ucp,turkish_casing
+
+# python_octal
+
+/\400/
+
+/abc/substitute_extended
+    abc\=replace=\400
+
+/\400/python_octal
+
+/abc/substitute_extended,python_octal
+    abc\=replace=\400
+
+/\400/utf
+
+/abc/utf,substitute_extended
+    abc\=replace=\400
+
+/\400/utf,python_octal
+
+/abc/utf,substitute_extended,python_octal
+    abc\=replace=\400
+
+/[\x00-\x2f\x11-\xff]+/B
+    abcd
+
+/[\x00-\x2f\x11-\xff]{4,}/B,utf
+    abcd
 
 # End of testinput10

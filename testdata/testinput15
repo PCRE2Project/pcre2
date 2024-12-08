@@ -243,4 +243,11 @@
     abc
     abcz
 
+# This test triggers the recursion limit in the interpreter, but completes in
+# JIT. It's in testinput2 with disable_recurse_loop_check to get it to work
+# in the interpreter.
+
+/(a(?1)z||(?1)++)$/
+    abcd
+
 # End of testinput15

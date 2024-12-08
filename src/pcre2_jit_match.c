@@ -42,6 +42,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #error This file must be included from pcre2_jit_compile.c.
 #endif
 
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+#include <sanitizer/msan_interface.h>
+#endif /* __has_feature(memory_sanitizer) */
+#endif /* defined(__has_feature) */
+
 #ifdef SUPPORT_JIT
 
 static SLJIT_NOINLINE int jit_machine_stack_exec(jit_arguments *arguments, jit_function executable_func)
@@ -77,7 +83,7 @@ Arguments:
 
 Returns:          > 0 => success; value is the number of ovector pairs filled
                   = 0 => success, but ovector is not big enough
-                   -1 => failed to match (PCRE_ERROR_NOMATCH)
+                   -1 => failed to match (PCRE2_ERROR_NOMATCH)
                  < -1 => some kind of unexpected problem
 */
 
@@ -178,6 +184,13 @@ match_data->leftchar = 0;
 match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
 match_data->matchedby = PCRE2_MATCHEDBY_JIT;
+
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+if (rc > 0)
+  __msan_unpoison(match_data->ovector, 2 * rc * sizeof(match_data->ovector[0]));
+#endif /* __has_feature(memory_sanitizer) */
+#endif /* defined(__has_feature) */
 
 return match_data->rc;
 

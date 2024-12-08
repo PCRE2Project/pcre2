@@ -1,6 +1,7 @@
 # Public .gitignore file for PCRE2
 
 build/
+build-*/
 
 *.a
 *.gcda
@@ -50,7 +51,8 @@ pcre2posix_test.exe
 pcre2posix_test.log
 pcre2posix_test.trs
 pcre2demo
-pcre2fuzzcheck
+pcre2fuzzcheck-*
+pcre2fuzzer-*
 pcre2grep
 pcre2grep.exe
 pcre2test
@@ -73,6 +75,7 @@ testtemp1grep
 testtemp2
 testtemp2grep
 testtry
+testtry2
 testtrygrep
 testSinput
 testbtables
@@ -85,9 +88,6 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 
-maint/ucptest
-maint/utf8
-
 src/.deps
 src/.dirstamp
 src/config.h
@@ -99,5 +99,6 @@ src/stamp-h1
 
 zig-out/
 zig-cache/
+.zig-cache/
 
 # End
