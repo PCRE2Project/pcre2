@@ -1,8 +1,7 @@
 #/bin/sh
 
 # Script to prepare the files for building a PCRE2 release. It does some
-# processing of the documentation, detrails files, and creates pcre2.h.generic
-# and config.h.generic (for use by builders who can't run ./configure).
+# processing of the documentation and detrails files.
 
 # You must run this script before runnning "make dist". If its first argument
 # is "doc", it stops after preparing the documentation. There are no other
@@ -232,7 +231,7 @@ perl maint/Detrail \
   $files \
   cmake/{*.cmake,*.cmake.in} \
   m4/* \
-  src/pcre2_*.{h,cpp} \
+  src/pcre2_*.{h,c} \
   doc/p* \
   doc/html/*
 

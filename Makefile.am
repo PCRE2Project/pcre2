@@ -9,16 +9,14 @@ AM_CPPFLAGS="-I$(srcdir)/src"
 
 ## Specify the documentation files that are distributed.
 
-## XXX Add code here to budge AUTHORS.md, LICENCE.md and SECURITY.md
-
 dist_doc_DATA = \
-  AUTHORS \
+  AUTHORS.md \
   COPYING \
   ChangeLog \
-  LICENCE \
+  LICENCE.md \
   NEWS \
   README \
-  SECURITY \
+  SECURITY.md \
   doc/pcre2.txt \
   doc/pcre2-config.txt \
   doc/pcre2grep.txt \
@@ -89,6 +87,7 @@ dist_html_DATA = \
   doc/html/pcre2_set_max_pattern_length.html \
   doc/html/pcre2_set_max_varlookbehind.html \
   doc/html/pcre2_set_offset_limit.html \
+  doc/html/pcre2_set_optimize.html \
   doc/html/pcre2_set_newline.html \
   doc/html/pcre2_set_parens_nest_limit.html \
   doc/html/pcre2_set_recursion_limit.html \
@@ -189,6 +188,7 @@ dist_man_MANS = \
   doc/pcre2_set_max_pattern_length.3 \
   doc/pcre2_set_max_varlookbehind.3 \
   doc/pcre2_set_offset_limit.3 \
+  doc/pcre2_set_optimize.3 \
   doc/pcre2_set_newline.3 \
   doc/pcre2_set_parens_nest_limit.3 \
   doc/pcre2_set_recursion_limit.3 \
@@ -276,6 +276,14 @@ EXTRA_DIST += \
 EXTRA_DIST += \
   NON-AUTOTOOLS-BUILD \
   HACKING
+
+# These are support files for building with Bazel or Zig
+
+EXTRA_DIST += \
+  BUILD.bazel \
+  MODULE.bazel \
+  WORKSPACE.bazel \
+  build.zig
 
 # These are support files for building under VMS
 
@@ -709,9 +717,12 @@ EXTRA_DIST += \
   testdata/grepinput \
   testdata/grepinput3 \
   testdata/grepinput8 \
+  testdata/grepinputBad8 \
+  testdata/grepinputBad8_Trail \
   testdata/grepinputC.bz2 \
   testdata/grepinputC.gz \
   testdata/grepinputM \
+  testdata/grepinputUN \
   testdata/grepinputv \
   testdata/grepinputx \
   testdata/greplist \
