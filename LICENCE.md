@@ -31,8 +31,8 @@ COPYRIGHT
     Retired from University of Cambridge Computing Service,
     Cambridge, England.
 
-    Copyright (c) 1997-???? University of Cambridge
-    Copyright (c) ????-2024 Philip Hazel
+    Copyright (c) 1997-2007 University of Cambridge
+    Copyright (c) 2007-2024 Philip Hazel
     All rights reserved.
 
 ### PCRE2 Just-In-Time compilation support
