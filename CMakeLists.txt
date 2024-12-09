@@ -1259,13 +1259,25 @@ set(PCRE2_CONFIG_VERSION_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config-vers
 configure_file(${PCRE2_CONFIG_VERSION_IN} ${PCRE2_CONFIG_VERSION_OUT} @ONLY)
 install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION cmake)
 
-file(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html)
+file(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html ${PROJECT_SOURCE_DIR}/doc/html/*.txt)
+file(
+  GLOB txts
+  ${PROJECT_SOURCE_DIR}/doc/*.txt
+  AUTHORS.md
+  COPYING
+  ChangeLog
+  LICENCE.md
+  NEWS
+  README
+  SECURITY.md
+)
 file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
 file(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/*.3)
 
 install(FILES ${man1} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 install(FILES ${man3} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
-install(FILES ${html} DESTINATION share/doc/pcre2/html)
+install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
+install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(MSVC AND INSTALL_MSVC_PDB)
   install(FILES ${DLL_PDB_FILES} DESTINATION bin CONFIGURATIONS RelWithDebInfo)
