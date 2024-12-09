@@ -256,6 +256,7 @@ while (c <= end)
     buffer[0] = new_start;
     buffer[1] = new_end;
     buffer += 2;
+    (void)buffer;
     }
   return result;
 }
@@ -341,6 +342,7 @@ while (*p != NOTACHAR)
     buffer[0] = start;
     buffer[1] = get_highest_char(options);
     buffer += 2;
+    (void)buffer;
     }
 
   return result;
@@ -756,6 +758,7 @@ for (c = 0; c < 256; c++)
   {
   prop = GET_UCD(c);
   set_bit = FALSE;
+  (void)set_bit;
 
   switch (ptype)
     {

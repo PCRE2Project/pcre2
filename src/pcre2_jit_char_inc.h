@@ -43,6 +43,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef SUPPORT_WIDE_CHARS
 
+#define ECLASS_CHAR_DATA STACK_TOP
+#define ECLASS_STACK_DATA STACK_LIMIT
+
 #define SET_CHAR_OFFSET(value) \
   if ((value) != charoffset) \
     { \
@@ -277,6 +280,26 @@ SLJIT_ASSERT(next_char <= (const uint8_t*)common->start);
 ranges->range_count = range_count;
 }
 
+static void xclass_check_bitset(compiler_common *common, const sljit_u8 *bitset, jump_list **found, jump_list **backtracks)
+{
+DEFINE_COMPILER;
+struct sljit_jump *jump;
+
+jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
+if (!optimize_class(common, bitset, (bitset[31] & 0x80) != 0, TRUE, found))
+  {
+  OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
+  OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
+  OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)bitset);
+  OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
+  OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, TMP2, 0);
+  add_jump(compiler, found, JUMP(SLJIT_NOT_ZERO));
+  }
+
+add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
+JUMPHERE(jump);
+}
+
 #if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
 
 static void xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr, sljit_u32 *max_ptr)
@@ -458,9 +481,9 @@ SLJIT_ASSERT(min <= MAX_UTF_CODE_POINT && max <= MAX_UTF_CODE_POINT && min <= ma
 
 #endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == [8|16] */
 
+#define XCLASS_IS_ECLASS 0x001
 #ifdef SUPPORT_UNICODE
-#define XCLASS_SAVE_CHAR 0x001
-#define XCLASS_CHAR_SAVED 0x002
+#define XCLASS_SAVE_CHAR 0x002
 #define XCLASS_HAS_TYPE 0x004
 #define XCLASS_HAS_SCRIPT 0x008
 #define XCLASS_HAS_SCRIPT_EXTENSION 0x010
@@ -475,7 +498,7 @@ SLJIT_ASSERT(min <= MAX_UTF_CODE_POINT && max <= MAX_UTF_CODE_POINT && min <= ma
 static PCRE2_SPTR compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc, jump_list **backtracks, BOOL check_str_ptr);
 
 /* TMP3 must be preserved because it is used by compile_iterator_matchingpath. */
-static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
+static void compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks, sljit_u32 status)
 {
 DEFINE_COMPILER;
 jump_list *found = NULL;
@@ -492,7 +515,6 @@ xclass_ranges ranges;
 BOOL has_cmov, last_range_set;
 
 #ifdef SUPPORT_UNICODE
-sljit_u32 unicode_status = 0;
 sljit_u32 category_list = 0;
 sljit_u32 items;
 int typereg = TMP1;
@@ -546,17 +568,17 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     break;
 
     case PT_SCX:
-    unicode_status |= XCLASS_HAS_SCRIPT_EXTENSION;
+    status |= XCLASS_HAS_SCRIPT_EXTENSION;
     if (cc[-1] == XCL_NOTPROP)
       {
-      unicode_status |= XCLASS_SCRIPT_EXTENSION_NOTPROP;
+      status |= XCLASS_SCRIPT_EXTENSION_NOTPROP;
       break;
       }
     compares++;
     /* Fall through */
 
     case PT_SC:
-    unicode_status |= XCLASS_HAS_SCRIPT;
+    status |= XCLASS_HAS_SCRIPT;
     break;
 
     case PT_SPACE:
@@ -564,20 +586,20 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     case PT_PXGRAPH:
     case PT_PXPRINT:
     case PT_PXPUNCT:
-    unicode_status |= XCLASS_SAVE_CHAR | XCLASS_HAS_TYPE;
+    status |= XCLASS_SAVE_CHAR | XCLASS_HAS_TYPE;
     break;
 
     case PT_UCNC:
     case PT_PXXDIGIT:
-    unicode_status |= XCLASS_SAVE_CHAR;
+    status |= XCLASS_SAVE_CHAR;
     break;
 
     case PT_BOOL:
-    unicode_status |= XCLASS_HAS_BOOL;
+    status |= XCLASS_HAS_BOOL;
     break;
 
     case PT_BIDICL:
-    unicode_status |= XCLASS_HAS_BIDICL;
+    status |= XCLASS_HAS_BIDICL;
     break;
 
     default:
@@ -590,7 +612,7 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     if (cc[-1] == XCL_NOTPROP)
       items ^= UCPCAT_ALL;
     category_list |= items;
-    unicode_status |= XCLASS_HAS_TYPE;
+    status |= XCLASS_HAS_TYPE;
     compares--;
     }
 
@@ -599,7 +621,14 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
 
 if (category_list == UCPCAT_ALL)
   {
-  /* All characters are accepted, same as dotall. */
+  /* All or no characters are accepted, same as dotall. */
+  if (status & XCLASS_IS_ECLASS)
+    {
+    if (list != backtracks)
+      OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    return;
+    }
+
   compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
   if (list == backtracks)
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
@@ -610,7 +639,7 @@ if (category_list == UCPCAT_ALL)
 if (*cc != XCL_END)
   {
 #if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
-  if (common->utf && compares == 0)
+  if (common->utf && compares == 0 && !(status & XCLASS_IS_ECLASS))
     {
     max = 0;
     min = (ccbegin[-1] & XCL_MAP) != 0 ? 0 : READ_CHAR_MAX;
@@ -619,14 +648,21 @@ if (*cc != XCL_END)
 #endif
   compares++;
 #ifdef SUPPORT_UNICODE
-  unicode_status |= XCLASS_SAVE_CHAR;
+  status |= XCLASS_SAVE_CHAR;
 #endif /* SUPPORT_UNICODE */
   }
 
 #ifdef SUPPORT_UNICODE
 if (compares == 0 && category_list == 0)
   {
-  /* No characters are accepted, same as (*F) or dotall. */
+  /* No or all characters are accepted. */
+  if (status & XCLASS_IS_ECLASS)
+    {
+    if (list == backtracks)
+      OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    return;
+    }
+
   compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
   if (list != backtracks)
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
@@ -638,48 +674,38 @@ SLJIT_ASSERT(compares > 0);
 
 /* We are not necessary in utf mode even in 8 bit mode. */
 cc = ccbegin;
-if ((cc[-1] & XCL_NOT) != 0)
-  read_char(common, min, max, backtracks, READ_CHAR_UPDATE_STR_PTR);
-else
+if (!(status & XCLASS_IS_ECLASS))
   {
+  if ((cc[-1] & XCL_NOT) != 0)
+    read_char(common, min, max, backtracks, READ_CHAR_UPDATE_STR_PTR);
+  else
+    {
 #ifdef SUPPORT_UNICODE
-  read_char(common, min, max, (unicode_status & XCLASS_NEEDS_UCD) ? backtracks : NULL, 0);
+    read_char(common, min, max, (status & XCLASS_NEEDS_UCD) ? backtracks : NULL, 0);
 #else /* !SUPPORT_UNICODE */
-  read_char(common, min, max, NULL, 0);
+    read_char(common, min, max, NULL, 0);
 #endif /* SUPPORT_UNICODE */
+    }
   }
 
 if ((cc[-1] & XCL_MAP) != 0)
   {
-  jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
-  if (!optimize_class(common, (const sljit_u8 *)cc, (((const sljit_u8 *)cc)[31] & 0x80) != 0, TRUE, &found))
-    {
-    OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
-    OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
-    OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)cc);
-    OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
-    OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, TMP2, 0);
-    add_jump(compiler, &found, JUMP(SLJIT_NOT_ZERO));
-    }
-
-  add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
-  JUMPHERE(jump);
-
+  SLJIT_ASSERT(!(status & XCLASS_IS_ECLASS));
+  xclass_check_bitset(common, (const sljit_u8 *)cc, &found, backtracks);
   cc += 32 / sizeof(PCRE2_UCHAR);
   }
 
 #ifdef SUPPORT_UNICODE
-if (unicode_status & XCLASS_NEEDS_UCD)
+if (status & XCLASS_NEEDS_UCD)
   {
-  if ((unicode_status & (XCLASS_SAVE_CHAR | XCLASS_CHAR_SAVED)) == XCLASS_SAVE_CHAR)
+  if ((status & (XCLASS_SAVE_CHAR | XCLASS_IS_ECLASS)) == XCLASS_SAVE_CHAR)
     OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
   if (!common->utf)
     {
-    jump = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, MAX_UTF_CODE_POINT + 1);
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, UNASSIGNED_UTF_CHAR);
-    JUMPHERE(jump);
+    OP2U(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, MAX_UTF_CODE_POINT + 1);
+    SELECT(SLJIT_GREATER_EQUAL, TMP1, SLJIT_IMM, UNASSIGNED_UTF_CHAR, TMP1);
     }
 #endif /* PCRE2_CODE_UNIT_WIDTH == 32 */
 
@@ -700,7 +726,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
   if (category_list != 0)
     compares++;
 
-  if (unicode_status & XCLASS_HAS_BIDICL)
+  if (status & XCLASS_HAS_BIDICL)
     {
     OP1(SLJIT_MOV_U16, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx_bidiclass));
     OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BIDICLASS_SHIFT);
@@ -724,7 +750,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
     cc = ccbegin;
     }
 
-  if (unicode_status & XCLASS_HAS_BOOL)
+  if (status & XCLASS_HAS_BOOL)
     {
     OP1(SLJIT_MOV_U16, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, bprops));
     OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BPROPS_MASK);
@@ -749,7 +775,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
     cc = ccbegin;
     }
 
-  if (unicode_status & XCLASS_HAS_SCRIPT)
+  if (status & XCLASS_HAS_SCRIPT)
     {
     OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
 
@@ -778,25 +804,25 @@ if (unicode_status & XCLASS_NEEDS_UCD)
     cc = ccbegin;
     }
 
-  if (unicode_status & XCLASS_HAS_SCRIPT_EXTENSION)
+  if (status & XCLASS_HAS_SCRIPT_EXTENSION)
     {
     OP1(SLJIT_MOV_U16, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, scriptx_bidiclass));
     OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_SCRIPTX_MASK);
     OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 2);
 
-    if (unicode_status & XCLASS_SCRIPT_EXTENSION_NOTPROP)
+    if (status & XCLASS_SCRIPT_EXTENSION_NOTPROP)
       {
-      if (unicode_status & XCLASS_HAS_TYPE)
+      if (status & XCLASS_HAS_TYPE)
         {
-        if (unicode_status & XCLASS_SAVE_CHAR)
+        if ((status & (XCLASS_SAVE_CHAR | XCLASS_IS_ECLASS)) == XCLASS_SAVE_CHAR)
           {
           OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, TMP2, 0);
-          unicode_status |= XCLASS_SCRIPT_EXTENSION_RESTORE_LOCAL0;
+          status |= XCLASS_SCRIPT_EXTENSION_RESTORE_LOCAL0;
           }
         else
           {
           OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP2, 0);
-          unicode_status |= XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR;
+          status |= XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR;
           }
         }
       OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
@@ -832,19 +858,19 @@ if (unicode_status & XCLASS_NEEDS_UCD)
       cc += 2;
       }
 
-    if (unicode_status & XCLASS_SCRIPT_EXTENSION_RESTORE_LOCAL0)
+    if (status & XCLASS_SCRIPT_EXTENSION_RESTORE_LOCAL0)
       OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
-    else if (unicode_status & XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR)
+    else if (status & XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR)
       OP1(SLJIT_MOV, TMP2, 0, RETURN_ADDR, 0);
     cc = ccbegin;
     }
 
-  if (unicode_status & XCLASS_SAVE_CHAR)
-    OP1(SLJIT_MOV, TMP1, 0, RETURN_ADDR, 0);
+  if (status & XCLASS_SAVE_CHAR)
+    OP1(SLJIT_MOV, TMP1, 0, (status & XCLASS_IS_ECLASS) ? ECLASS_CHAR_DATA : RETURN_ADDR, 0);
 
-  if (unicode_status & XCLASS_HAS_TYPE)
+  if (status & XCLASS_HAS_TYPE)
     {
-    if (unicode_status & XCLASS_SAVE_CHAR)
+    if (status & XCLASS_SAVE_CHAR)
       typereg = RETURN_ADDR;
 
     OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, chartype));
@@ -1032,6 +1058,9 @@ if (compares == 0)
   {
   if (found != NULL)
     set_jumps(found, LABEL());
+
+  if (status & XCLASS_IS_ECLASS)
+    OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
   return;
   }
 #endif /* SUPPORT_UNICODE */
@@ -1043,6 +1072,7 @@ ranges.stack = ranges.local_stack;
 
 xclass_compute_ranges(common, cc, &ranges);
 
+/* Memory error is set for the compiler. */
 if (ranges.stack == NULL)
   return;
 
@@ -1050,7 +1080,7 @@ if (ranges.stack == NULL)
   defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
 if (common->utf)
   {
-  min = 0xffffffff;
+  min = READ_CHAR_MAX;
   max = 0;
   xclass_update_min_max(common, cc, &min, &max);
   SLJIT_ASSERT(ranges.ranges[0] == min && ranges.ranges[ranges.range_count - 1] == max);
@@ -1077,6 +1107,9 @@ if (ranges.range_count == 2)
   SLJIT_ASSERT(ranges.stack == ranges.local_stack);
   if (found != NULL)
     set_jumps(found, LABEL());
+
+  if (status & XCLASS_IS_ECLASS)
+    OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
   return;
   }
 
@@ -1205,8 +1238,95 @@ add_jump(compiler, backtracks, jump);
 if (found != NULL)
   set_jumps(found, LABEL());
 
+if (status & XCLASS_IS_ECLASS)
+  OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+
 if (ranges.stack != ranges.local_stack)
   SLJIT_FREE(ranges.stack, compiler->allocator_data);
+}
+
+static PCRE2_SPTR compile_eclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **backtracks)
+{
+DEFINE_COMPILER;
+PCRE2_SPTR end = cc + GET(cc, 0) - 1;
+PCRE2_SPTR begin;
+jump_list *not_found;
+jump_list *found = NULL;
+
+cc += LINK_SIZE;
+
+/* Should be optimized later. */
+read_char(common, 0, READ_CHAR_MAX, backtracks, 0);
+
+if (((*cc++) & ECL_MAP) != 0)
+  {
+  xclass_check_bitset(common, (const sljit_u8 *)cc, &found, backtracks);
+  cc += 32 / sizeof(PCRE2_UCHAR);
+  }
+
+begin = cc;
+
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, ECLASS_CHAR_DATA, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL1, ECLASS_STACK_DATA, 0);
+OP1(SLJIT_MOV, ECLASS_STACK_DATA, 0, SLJIT_IMM, 0);
+OP1(SLJIT_MOV, ECLASS_CHAR_DATA, 0, TMP1, 0);
+
+/* All eclass must start with an xclass. */
+SLJIT_ASSERT(*cc == ECL_XCLASS);
+
+while (cc < end)
+  {
+  switch (*cc)
+    {
+    case ECL_AND:
+    ++cc;
+    OP2(SLJIT_OR, TMP2, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, ~(sljit_sw)1);
+    OP2(SLJIT_LSHR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_AND, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, TMP2, 0);
+    break;
+
+    case ECL_OR:
+    ++cc;
+    OP2(SLJIT_AND, TMP2, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_LSHR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, TMP2, 0);
+    break;
+
+    case ECL_XOR:
+    ++cc;
+    OP2(SLJIT_AND, TMP2, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_LSHR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_XOR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, TMP2, 0);
+    break;
+
+    case ECL_NOT:
+    ++cc;
+    OP2(SLJIT_XOR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+    break;
+
+    default:
+    SLJIT_ASSERT(*cc == ECL_XCLASS);
+    if (cc != begin)
+      {
+      OP1(SLJIT_MOV, TMP1, 0, ECLASS_CHAR_DATA, 0);
+      OP2(SLJIT_SHL, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
+      }
+
+    not_found = NULL;
+    compile_xclass_matchingpath(common, cc + 1 + LINK_SIZE, &not_found, XCLASS_IS_ECLASS);
+    set_jumps(not_found, LABEL());
+
+    cc += GET(cc, 1);
+    break;
+    }
+  }
+
+OP2U(SLJIT_SUB | SLJIT_SET_Z, ECLASS_STACK_DATA, 0, SLJIT_IMM, 0);
+OP1(SLJIT_MOV, ECLASS_CHAR_DATA, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
+OP1(SLJIT_MOV, ECLASS_STACK_DATA, 0, SLJIT_MEM1(SLJIT_SP), LOCAL1);
+add_jump(compiler, backtracks, JUMP(SLJIT_EQUAL));
+set_jumps(found, LABEL());
+return end;
 }
 
 /* Generic character matching code. */
@@ -1826,7 +1946,7 @@ switch(type)
   propdata[2] = cc[0];
   propdata[3] = cc[1];
   propdata[4] = XCL_END;
-  compile_xclass_matchingpath(common, propdata, backtracks);
+  compile_xclass_matchingpath(common, propdata, backtracks, 0);
   return cc + 2;
 #endif
 
@@ -2095,8 +2215,13 @@ switch(type)
   case OP_XCLASS:
   if (check_str_ptr)
     detect_partial_match(common, backtracks);
-  compile_xclass_matchingpath(common, cc + LINK_SIZE, backtracks);
+  compile_xclass_matchingpath(common, cc + LINK_SIZE, backtracks, 0);
   return cc + GET(cc, 0) - 1;
+
+  case OP_ECLASS:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  return compile_eclass_matchingpath(common, cc, backtracks);
 #endif
   }
 SLJIT_UNREACHABLE();

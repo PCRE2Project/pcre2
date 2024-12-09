@@ -931,7 +931,6 @@ The distribution should contain the files listed below.
 (D) Auxiliary files for cmake support
 
   cmake/COPYING-CMAKE-SCRIPTS
-  cmake/FindPackageHandleStandardArgs.cmake
   cmake/FindEditline.cmake
   cmake/FindReadline.cmake
   CMakeLists.txt

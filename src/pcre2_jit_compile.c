@@ -675,7 +675,7 @@ the start pointers when the end of the capturing group has not yet reached. */
 #define GET_LOCAL_BASE(dst, dstw, offset) \
   sljit_get_local_base(compiler, (dst), (dstw), (offset))
 
-#define READ_CHAR_MAX 0x7fffffff
+#define READ_CHAR_MAX ((sljit_u32)0xffffffff)
 
 #define INVALID_UTF_CHAR -1
 #define UNASSIGNED_UTF_CHAR 888
@@ -1108,6 +1108,7 @@ switch(*cc)
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
   case OP_ECLASS:
   case OP_XCLASS:
+  SLJIT_COMPILE_ASSERT(OP_XCLASS + 1 == OP_ECLASS && OP_CLASS + 1 == OP_NCLASS && OP_NCLASS < OP_XCLASS, class_byte_code_order);
   return cc + GET(cc, 1);
 #endif
 
@@ -1303,16 +1304,6 @@ while (cc < ccend)
       return FALSE;
     cc++;
     break;
-
-    case OP_ECLASS:
-    return FALSE;  /* Lacking JIT support, for now */
-
-#if !(defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8)
-    /* JIT shares the assumption, throughout the rest of PCRE2, that OP_XCLASS
-    is only emitted under these conditions. */
-    case OP_XCLASS:
-    return FALSE;
-#endif
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     case OP_CRPOSRANGE:
@@ -1606,8 +1597,9 @@ do
       case OP_NCLASS:
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
       case OP_XCLASS:
+      case OP_ECLASS:
       accelerated_start = cc;
-      cc += ((*cc == OP_XCLASS) ? GET(cc, 1) : (unsigned int)(1 + (32 / sizeof(PCRE2_UCHAR))));
+      cc += (*cc >= OP_XCLASS) ? GET(cc, 1) : (unsigned int)(1 + (32 / sizeof(PCRE2_UCHAR)));
 #else
       accelerated_start = cc;
       cc += (1 + (32 / sizeof(PCRE2_UCHAR)));
@@ -2085,6 +2077,7 @@ while (cc < ccend)
 
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
+    case OP_ECLASS:
     size = GET(cc, 1);
     space = get_class_iterator_size(cc + size);
     break;
@@ -2300,6 +2293,7 @@ while (cc < ccend)
     case OP_CLASS:
     case OP_NCLASS:
     case OP_XCLASS:
+    case OP_ECLASS:
 
     case OP_CALLOUT:
     case OP_CALLOUT_STR:
@@ -2731,7 +2725,8 @@ while (cc < ccend)
     case OP_NCLASS:
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
-    size = (*cc == OP_XCLASS) ? GET(cc, 1) : 1 + 32 / (int)sizeof(PCRE2_UCHAR);
+    case OP_ECLASS:
+    size = (*cc >= OP_XCLASS) ? GET(cc, 1) : 1 + 32 / (int)sizeof(PCRE2_UCHAR);
 #else
     size = 1 + 32 / (int)sizeof(PCRE2_UCHAR);
 #endif
@@ -3121,7 +3116,8 @@ while (cc < ccend)
     case OP_NCLASS:
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
-    i = (*cc == OP_XCLASS) ? GET(cc, 1) : 1 + 32 / (int)sizeof(PCRE2_UCHAR);
+    case OP_ECLASS:
+    i = (*cc >= OP_XCLASS) ? GET(cc, 1) : 1 + 32 / (int)sizeof(PCRE2_UCHAR);
 #else
     i = 1 + 32 / (int)sizeof(PCRE2_UCHAR);
 #endif
@@ -5954,6 +5950,7 @@ while (TRUE)
 
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
+    case OP_ECLASS:
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
       {
@@ -10434,7 +10431,7 @@ else if (*opcode >= OP_TYPESTAR && *opcode <= OP_TYPEPOSUPTO)
   }
 else
   {
-  SLJIT_ASSERT(*opcode == OP_CLASS || *opcode == OP_NCLASS || *opcode == OP_XCLASS);
+  SLJIT_ASSERT(*opcode == OP_CLASS || *opcode == OP_NCLASS || *opcode == OP_XCLASS || *opcode == OP_ECLASS);
   *type = *opcode;
   class_len = (*type < OP_XCLASS) ? (int)(1 + (32 / sizeof(PCRE2_UCHAR))) : GET(cc, 1);
   *opcode = cc[class_len];
@@ -11368,6 +11365,7 @@ while (cc < ccend)
 
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
     case OP_XCLASS:
+    case OP_ECLASS:
     if (*(cc + GET(cc, 1)) >= OP_CRSTAR && *(cc + GET(cc, 1)) <= OP_CRPOSRANGE)
       cc = compile_iterator_matchingpath(common, cc, parent);
     else
@@ -12651,10 +12649,13 @@ while (current)
     case OP_TYPEPOSPLUS:
     case OP_TYPEPOSQUERY:
     case OP_TYPEPOSUPTO:
+    /* Since classes has no backtracking path, this
+    backtrackingpath was pushed by an iterator. */
     case OP_CLASS:
     case OP_NCLASS:
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
+    case OP_ECLASS:
 #endif
     compile_iterator_backtrackingpath(common, current);
     break;
