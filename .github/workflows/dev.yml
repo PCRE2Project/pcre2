@@ -103,6 +103,28 @@ jobs:
       - name: Test
         run: cd build && ctest -j3 --output-on-failure
 
+  dodo:
+    # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
+    name: GCC -Os
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Configure
+        run: ./configure CFLAGS='-Os -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug
+
+      - name: Build
+        run: make -j3
+
+      - name: Test
+        run: make check
+
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
     name: GCC -Os, CMake+ninja, no JIT
