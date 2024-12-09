@@ -18,7 +18,6 @@ __pycache__
 .deps
 .libs
 
-INSTALL
 Makefile
 Makefile.in
 RunGrepTest.log
