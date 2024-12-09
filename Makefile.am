@@ -7,6 +7,12 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS="-I$(srcdir)/src"
 
+## The rules below specify AUTHORS.md, which is absolutely fine with newer
+## versions of automake (>= 1.16.4, since 2021). However automake on Ubuntu
+## 20.04 is not happy. Silence it.
+
+AUTHORS: AUTHORS.md  # dummy rule
+
 ## Specify the documentation files that are distributed.
 
 dist_doc_DATA = \
