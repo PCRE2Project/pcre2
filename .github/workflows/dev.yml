@@ -105,7 +105,7 @@ jobs:
 
   dodo:
     # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
-    name: GCC -Os
+    name: GCC -Os, old Autotools
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
