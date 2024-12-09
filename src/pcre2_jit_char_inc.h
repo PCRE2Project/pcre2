@@ -539,14 +539,6 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
 
   switch(*cc)
     {
-    case PT_ANY:
-    /* Any either accepts everything or ignored. */
-    if (cc[-1] == XCL_PROP)
-      items = UCPCAT_ALL;
-    else
-      compares--;
-    break;
-
     case PT_LAMP:
     items = UCPCAT3(ucp_Lu, ucp_Ll, ucp_Lt);
     break;
@@ -653,21 +645,7 @@ if (*cc != XCL_END)
   }
 
 #ifdef SUPPORT_UNICODE
-if (compares == 0 && category_list == 0)
-  {
-  /* No or all characters are accepted. */
-  if (status & XCLASS_IS_ECLASS)
-    {
-    if (list == backtracks)
-      OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
-    return;
-    }
-
-  compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
-  if (list != backtracks)
-    add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
-  return;
-  }
+SLJIT_ASSERT(compares > 0 || category_list != 0);
 #else /* !SUPPORT_UNICODE */
 SLJIT_ASSERT(compares > 0);
 #endif /* SUPPORT_UNICODE */
@@ -902,7 +880,6 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
   cc++;
   switch(*cc)
     {
-    case PT_ANY:
     case PT_LAMP:
     case PT_GC:
     case PT_PC:

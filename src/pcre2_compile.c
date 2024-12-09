@@ -8052,12 +8052,19 @@ for (;; pptr++)
         pdata = 0;
         }
 
-      /* The special case of \p{Any} is compiled to OP_ALLANY so as to benefit
-      from the auto-anchoring code. */
+      /* The special case of \p{Any} is compiled to OP_ALLANY and \P{Any}
+      is compiled to [] so as to benefit from the auto-anchoring code. */
 
-      if (meta_arg == ESC_p && ptype == PT_ANY)
+      if (ptype == PT_ANY)
         {
-        *code++ = OP_ALLANY;
+        if (meta_arg == ESC_P)
+          {
+          *code++ = OP_CLASS;
+          memset(code, 0, 32);
+          code += 32 / sizeof(PCRE2_UCHAR);
+          }
+        else
+          *code++ = OP_ALLANY;
         }
       else
         {
