@@ -193,73 +193,48 @@ if [ "$1" = "doc" ] ; then exit; fi
 # configure files are also omitted from the detrailing.
 
 files="\
-  Makefile.am \
-  configure.ac \
-  README \
-  LICENCE.md \
-  COPYING \
   AUTHORS.md \
+  BUILD.bazel \
+  CMakeLists.txt \
+  COPYING \
+  ChangeLog \
+  HACKING \
+  LICENCE.md \
+  MODULE.bazel \
+  Makefile.am \
   NEWS \
   NON-AUTOTOOLS-BUILD \
-  SECURITY.md \
-  ChangeLog \
-  CMakeLists.txt \
+  README \
   RunGrepTest \
   RunTest \
-  pcre2-config.in \
-  perltest.sh \
+  SECURITY.md \
+  WORKSPACE.bazel \
+  build.zig \
+  config-cmake.h.in \
+  configure.ac \
   libpcre2-8.pc.in \
   libpcre2-16.pc.in \
   libpcre2-32.pc.in \
   libpcre2-posix.pc.in \
-  src/pcre2_dftables.c \
-  src/pcre2.h.generic \
+  pcre2-config.in \
+  perltest.sh \
+  cmake/COPYING-CMAKE-SCRIPTS \
   src/pcre2.h.in \
-  src/pcre2_auto_possess.c \
-  src/pcre2_chkdint.c \
-  src/pcre2_compile.c \
-  src/pcre2_compile.h \
-  src/pcre2_compile_class.c \
-  src/pcre2_config.c \
-  src/pcre2_context.c \
-  src/pcre2_convert.c \
-  src/pcre2_dfa_match.c \
-  src/pcre2_error.c \
-  src/pcre2_extuni.c \
-  src/pcre2_find_bracket.c \
-  src/pcre2_internal.h \
-  src/pcre2_intmodedep.h \
-  src/pcre2_jit_compile.c \
-  src/pcre2_jit_match.c \
-  src/pcre2_jit_misc.c \
-  src/pcre2_jit_test.c \
-  src/pcre2_maketables.c \
-  src/pcre2_match.c \
-  src/pcre2_match_data.c \
-  src/pcre2_newline.c \
-  src/pcre2_ord2utf.c \
-  src/pcre2_pattern_info.c \
-  src/pcre2_printint.c \
-  src/pcre2_string_utils.c \
-  src/pcre2_study.c \
-  src/pcre2_substring.c \
-  src/pcre2_tables.c \
-  src/pcre2_ucd.c \
-  src/pcre2_ucp.h \
-  src/pcre2_util.h \
-  src/pcre2_valid_utf.c \
-  src/pcre2_xclass.c \
   src/pcre2demo.c \
   src/pcre2grep.c \
   src/pcre2posix.c \
   src/pcre2posix.h \
+  src/pcre2posix_test.c \
   src/pcre2test.c"
 
 echo Detrailing
-perl maint/Detrail $files doc/p* doc/html/*
-for i in INSTALL ; do
-  [ -f $i ] && perl maint/Detrail $i
-done
+perl maint/Detrail \
+  $files \
+  cmake/{*.cmake,*.cmake.in} \
+  m4/* \
+  src/pcre2_*.{h,cpp} \
+  doc/p* \
+  doc/html/*
 
 echo Done
 

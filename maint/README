@@ -19,6 +19,22 @@ top directory.
 Files in the maint directory
 ============================
 
+132html
+  A Perl script to convert man pages to HTML (.1 and .3 files "two" HTML),
+  used by PrepareRelease.
+
+CheckMan
+  A Perl script to validate the syntax in PCRE2 man pages, used by
+  PrepareRelease.
+
+CheckMan
+  A Perl script to clean up the nroff output in PCRE2 man pages, used by
+  PrepareRelease.
+
+Detrail
+  A Perl script to remove trailing whitespace from PCRE2 files, used by
+  PrepareRelease.
+
 GenerateCommon.py
   A Python module containing data and functions that are used by the other
   Generate scripts.
@@ -47,6 +63,10 @@ GenerateUcpTables.py
 ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
   different configuration settings.
+
+PrepareRelease
+  A shell script to ensure that all auto-generated outputs are ready for
+  release.
 
 pcre2_chartables.c.non-standard
   This is a set of character tables that came from a Windows system. It has
@@ -401,7 +421,7 @@ years.
   to do with matches that are close together. Maybe a simpler way would be a
   flag to disable showing matched lines, only valid with either -A or -B?
 
-. There was a suggestiong for a pcre2grep colour default, or possibly a more
+. There was a suggestion for a pcre2grep colour default, or possibly a more
   general PCRE2GREP_OPT, but only for some options - not file names or patterns.
 
 . Breaking loops that match an empty string: perhaps find a way of continuing
@@ -433,8 +453,6 @@ years.
   with lookarounds for \b and \B. Ideally the setting should last till the end
   of the group, which means remembering all previous settings; maybe a fixed
   amount of stack would do - how deep would anyone want to nest these things?
-  See GitHub issue #13 for a compendium of character class issues, including
-  (?[...]) extended classes.
 
 . A user suggested something like --with-build-info to set a build information
   string that could be retrieved by pcre2_config(). However, there's no

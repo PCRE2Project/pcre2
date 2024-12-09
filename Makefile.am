@@ -820,7 +820,7 @@ CLEANFILES += \
         test3outputB \
         testtry \
         teststdout \
-	teststderr \
+        teststderr \
         teststderrgrep \
         testtemp1grep \
         testtemp2grep \

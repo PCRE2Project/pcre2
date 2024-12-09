@@ -115,6 +115,10 @@ if caseful matching was needed.
 (GitHub issue #577). In certain cases, when lines of above and below context
 were contiguous, a separator line was incorrectly being inserted.
 
+27. Split out the sljit sub-project into a "git submodule". Git users must
+now run `git submodule init; git submodule update` after a Git checkout, or
+the build will fail due to missing files in deps/sljit.
+
 
 Version 10.44 07-June-2024
 --------------------------
