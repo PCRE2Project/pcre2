@@ -191,49 +191,107 @@ if [ "$1" = "doc" ] ; then exit; fi
 # line endings and the detrail script removes all trailing white space. The
 # configure files are also omitted from the detrailing.
 
-files="\
-  AUTHORS.md \
-  BUILD.bazel \
-  CMakeLists.txt \
-  COPYING \
-  ChangeLog \
-  HACKING \
-  LICENCE.md \
-  MODULE.bazel \
-  Makefile.am \
-  NEWS \
-  NON-AUTOTOOLS-BUILD \
-  README \
-  RunGrepTest \
-  RunTest \
-  SECURITY.md \
-  WORKSPACE.bazel \
-  build.zig \
-  config-cmake.h.in \
-  configure.ac \
-  libpcre2-8.pc.in \
-  libpcre2-16.pc.in \
-  libpcre2-32.pc.in \
-  libpcre2-posix.pc.in \
-  pcre2-config.in \
-  perltest.sh \
-  cmake/COPYING-CMAKE-SCRIPTS \
-  src/pcre2.h.in \
-  src/pcre2demo.c \
-  src/pcre2grep.c \
-  src/pcre2posix.c \
-  src/pcre2posix.h \
-  src/pcre2posix_test.c \
-  src/pcre2test.c"
+txt_files=(
+  AUTHORS.md
+  BUILD.bazel
+  CMakeLists.txt
+  COPYING
+  ChangeLog
+  HACKING
+  INSTALL
+  LICENCE.md
+  MODULE.bazel
+  Makefile.am
+  NEWS
+  NON-AUTOTOOLS-BUILD
+  README
+  RunGrepTest
+  RunTest
+  SECURITY.md
+  WORKSPACE.bazel
+  build.zig
+  configure.ac
+  libpcre2-8.pc.in
+  libpcre2-16.pc.in
+  libpcre2-32.pc.in
+  libpcre2-posix.pc.in
+  pcre2-config.in
+  perltest.sh
+  cmake/COPYING-CMAKE-SCRIPTS
+  cmake/{*.cmake,*.cmake.in}
+  m4/ax_pthread.m4
+  m4/pcre2_visibility.m4
+  doc/p*
+  doc/html/*
+  )
+
+crlf_files=(
+  RunGrepTest.bat
+  RunTest.bat
+  )
+
+c_files=(
+  config-cmake.h.in
+  src/pcre2.h.in
+  src/pcre2_auto_possess.c
+  src/pcre2_chartables.c.dist
+  src/pcre2_chkdint.c
+  src/pcre2_compile.c
+  src/pcre2_compile.h
+  src/pcre2_compile_class.c
+  src/pcre2_config.c
+  src/pcre2_context.c
+  src/pcre2_convert.c
+  src/pcre2_dfa_match.c
+  src/pcre2_dftables.c
+  src/pcre2_error.c
+  src/pcre2_extuni.c
+  src/pcre2_find_bracket.c
+  src/pcre2_fuzzsupport.c
+  src/pcre2_internal.h
+  src/pcre2_intmodedep.h
+  src/pcre2_jit_char_inc.h
+  src/pcre2_jit_compile.c
+  src/pcre2_jit_match.c
+  src/pcre2_jit_misc.c
+  src/pcre2_jit_neon_inc.h
+  src/pcre2_jit_simd_inc.h
+  src/pcre2_jit_test.c
+  src/pcre2_maketables.c
+  src/pcre2_match.c
+  src/pcre2_match_data.c
+  src/pcre2_newline.c
+  src/pcre2_ord2utf.c
+  src/pcre2_pattern_info.c
+  src/pcre2_printint.c
+  src/pcre2_script_run.c
+  src/pcre2_serialize.c
+  src/pcre2_string_utils.c
+  src/pcre2_study.c
+  src/pcre2_substitute.c
+  src/pcre2_substring.c
+  src/pcre2_tables.c
+  src/pcre2_ucd.c
+  src/pcre2_ucp.h
+  src/pcre2_ucptables.c
+  src/pcre2_util.h
+  src/pcre2_valid_utf.c
+  src/pcre2_xclass.c
+  src/pcre2demo.c
+  src/pcre2grep.c
+  src/pcre2posix.c
+  src/pcre2posix.h
+  src/pcre2posix_test.c
+  src/pcre2test.c
+  )
 
 echo Detrailing
-perl maint/Detrail \
-  $files \
-  cmake/{*.cmake,*.cmake.in} \
-  m4/* \
-  src/pcre2_*.{h,c} \
-  doc/p* \
-  doc/html/*
+perl maint/Detrail "${txt_files[@]}" "${c_files[@]}"
+
+echo Validating all text
+perl maint/CheckTxt "${files[@]}"
+perl maint/CheckTxt -ascii "${c_files[@]}"
+perl maint/CheckTxt -crlf "${crlf_files[@]}"
 
 echo Done
 
