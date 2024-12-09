@@ -91,6 +91,7 @@ m4/lt~obsolete.m4
 src/.deps
 src/.dirstamp
 src/config.h
+src/config.h.in
 src/pcre2.h
 src/pcre2_chartables.c
 src/stamp-h1
