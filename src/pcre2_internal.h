@@ -1321,21 +1321,22 @@ only. */
 changed, the autopossessifying table in pcre2_auto_possess.c must be updated to
 match. */
 
-#define PT_ANY        0    /* Any property - matches all chars */
-#define PT_LAMP       1    /* L& - the union of Lu, Ll, Lt */
-#define PT_GC         2    /* Specified general characteristic (e.g. L) */
-#define PT_PC         3    /* Specified particular characteristic (e.g. Lu) */
-#define PT_SC         4    /* Script only (e.g. Han) */
-#define PT_SCX        5    /* Script extensions (includes SC) */
-#define PT_ALNUM      6    /* Alphanumeric - the union of L and N */
-#define PT_SPACE      7    /* Perl space - general category Z plus 9,10,12,13 */
-#define PT_PXSPACE    8    /* POSIX space - Z plus 9,10,11,12,13 */
-#define PT_WORD       9    /* Word - L, N, Mn, or Pc */
-#define PT_CLIST     10    /* Pseudo-property: match character list */
-#define PT_UCNC      11    /* Universal Character nameable character */
-#define PT_BIDICL    12    /* Specified bidi class */
-#define PT_BOOL      13    /* Boolean property */
-#define PT_TABSIZE   14    /* Size of square table for autopossessify tests */
+#define PT_LAMP       0    /* L& - the union of Lu, Ll, Lt */
+#define PT_GC         1    /* Specified general characteristic (e.g. L) */
+#define PT_PC         2    /* Specified particular characteristic (e.g. Lu) */
+#define PT_SC         3    /* Script only (e.g. Han) */
+#define PT_SCX        4    /* Script extensions (includes SC) */
+#define PT_ALNUM      5    /* Alphanumeric - the union of L and N */
+#define PT_SPACE      6    /* Perl space - general category Z plus 9,10,12,13 */
+#define PT_PXSPACE    7    /* POSIX space - Z plus 9,10,11,12,13 */
+#define PT_WORD       8    /* Word - L, N, Mn, or Pc */
+#define PT_CLIST      9    /* Pseudo-property: match character list */
+#define PT_UCNC      10    /* Universal Character nameable character */
+#define PT_BIDICL    11    /* Specified bidi class */
+#define PT_BOOL      12    /* Boolean property */
+#define PT_ANY       13    /* Must be the last entry!
+                              Any property - matches all chars */
+#define PT_TABSIZE PT_ANY  /* Size of square table for autopossessify tests */
 
 /* The following special properties are used only in XCLASS items, when POSIX
 classes are specified and PCRE2_UCP is set - in other words, for Unicode
