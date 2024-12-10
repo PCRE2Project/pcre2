@@ -3669,9 +3669,9 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        ORY  immediately.  If  this  option is set, however, pcre2_substitute()
        continues to go through the motions of matching and substituting (with-
        out, of course, writing anything) in  order  to  compute  the  size  of
-       buffer  that  is needed. This value is passed back via the outlengthptr
-       variable, with  the  result  of  the  function  still  being  PCRE2_ER-
-       ROR_NOMEMORY.
+       buffer  that is needed, which will include the extra space for the ter-
+       minating NUL. This value is passed back via the outlengthptr  variable,
+       with the result of the function still being PCRE2_ERROR_NOMEMORY.
 
        Passing  a  buffer  size  of zero is a permitted way of finding out how
        much memory is needed for given substitution. However, this  does  mean
@@ -3798,7 +3798,7 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
 
        If either PCRE2_UTF or PCRE2_UCP was set when the pattern was compiled,
        Unicode  properties  are  used  for  case forcing characters whose code
-       points are greater than 127. However, only basic case folding,  as  de-
+       points are greater than 127. However, only simple case folding, as  de-
        termined  by  the Unicode file CaseFolding.txt is supported. PCRE2 does
        not support language-specific special casing rules such as  using  dif-
        ferent  lower case Greek sigmas in the middle and ends of words (as de-

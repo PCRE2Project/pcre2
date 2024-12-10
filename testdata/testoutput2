@@ -13907,6 +13907,61 @@ Failed: error -48: no more memory: 23 code units are needed
  1: fruit\x00juice lemon blackberry
 
 /abc/
+    123abc123\=replace=XYZ
+ 1: 123XYZ123
+    123abc123\=replace=[10]XYZ
+ 1: 123XYZ123
+\= Expect error
+    123abc123\=replace=[9]XYZ
+Failed: error -48: no more memory
+    123abc123\=substitute_overflow_length,replace=[9]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[6]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[1]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+    123abc123\=substitute_overflow_length,replace=[0]XYZ
+Failed: error -48: no more memory: 10 code units are needed
+
+/abc/
+    123abc123\=replace=XY
+ 1: 123XY123
+    123abc123\=replace=[9]XY
+ 1: 123XY123
+    123abc123\=replace=[9]XY,substitute_literal
+ 1: 123XY123
+\= Expect error
+    123abc123\=replace=[8]XY,substitute_overflow_length
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[8]XY,substitute_overflow_length,substitute_literal
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[6]XY,substitute_overflow_length
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[6]XY,substitute_overflow_length,substitute_literal
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[5]XY,substitute_overflow_length
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[5]XY,substitute_overflow_length,substitute_literal
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[4]XY,substitute_overflow_length
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[4]XY,substitute_overflow_length,substitute_literal
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[3]XY,substitute_overflow_length
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[3]XY,substitute_overflow_length,substitute_literal
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[2]XY,substitute_overflow_length
+Failed: error -48: no more memory: 9 code units are needed
+    123abc123\=replace=[2]XY,substitute_overflow_length,substitute_literal
+Failed: error -48: no more memory: 9 code units are needed
+
+/abc/substitute_literal
+    123abc123\=replace=XYZ
+ 1: 123XYZ123
+    123abc123\=replace=[10]XYZ
+ 1: 123XYZ123
+\= Expect error
     123abc123\=replace=[9]XYZ
 Failed: error -48: no more memory
     123abc123\=substitute_overflow_length,replace=[9]XYZ
@@ -15154,7 +15209,7 @@ No match
 /abcd/null_context
     abcd\=null_context
  0: abcd
-\= Expect error - not allowed together
+\= Expect not allowed together
     abcd\=null_context,find_limits
 ** Not allowed together: find_limits null_context
     abcd\=allusedtext,startchar
@@ -18088,6 +18143,9 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 /abc/replace=\U$0,substitute_extended,substitute_case_callout=a.U.b.V.
     XabcY
  1: XUVcY
+\= Expect not supported
+    XabcY\=null_context
+** Replacement case callouts are not supported with null_context.
 
 /a/substitute_extended
     XaY\=replace=\U$0,substitute_case_callout=a.U.

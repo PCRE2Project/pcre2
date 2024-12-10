@@ -7500,6 +7500,13 @@ if (pat_patctl.replacement[0] != 0)
     return PR_OK;
     }
 
+  if (pat_patctl.replacement_case[0] != 0 &&
+      (dat_datctl.control & CTL_NULLCONTEXT) != 0)
+    {
+    fprintf(outfile, "** Replacement case callouts are not supported with null_context.\n");
+    return PR_OK;
+    }
+
   if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
     fprintf(outfile, "** Ignored with replacement text: allcaptures\n");
   }
