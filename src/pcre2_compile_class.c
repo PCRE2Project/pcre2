@@ -408,7 +408,7 @@ while (TRUE)
         case ESC_p:
         case ESC_P:
         ptr++;
-        if (meta_arg == ESC_p && *ptr == PT_ANY)
+        if (meta_arg == ESC_p && (*ptr >> 16) == PT_ANY)
           {
           if (buffer != NULL)
             {

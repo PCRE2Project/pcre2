@@ -165,7 +165,7 @@ enum { RM100=100, RM101, RM102, RM103 };
 enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
        RM208,     RM209, RM210, RM211, RM212, RM213, RM214, RM215,
        RM216,     RM217, RM218, RM219, RM220, RM221, RM222, RM223,
-       RM224,     RM225 };
+       RM224 };
 #endif
 
 /* Define short names for general fields in the current backtrack frame, which
@@ -2670,10 +2670,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       switch(Fecode[1])
         {
-        case PT_ANY:
-        if (notmatch) RRETURN(MATCH_NOMATCH);
-        break;
-
         case PT_LAMP:
         chartype = prop->chartype;
         if ((chartype == ucp_Lu ||
@@ -2907,19 +2903,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         BOOL notmatch = Lctype == OP_NOTPROP;
         switch(proptype)
           {
-          case PT_ANY:
-          if (notmatch) RRETURN(MATCH_NOMATCH);
-          for (i = 1; i <= Lmin; i++)
-            {
-            if (Feptr >= mb->end_subject)
-              {
-              SCHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
-            GETCHARINCTEST(fc, Feptr);
-            }
-          break;
-
           case PT_LAMP:
           for (i = 1; i <= Lmin; i++)
             {
@@ -3698,27 +3681,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         switch(proptype)
           {
-          case PT_ANY:
-          for (;;)
-            {
-            RMATCH(Fecode, RM208);
-            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
-            if (Feptr >= mb->end_subject)
-              {
-              SCHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
-            GETCHARINCTEST(fc, Feptr);
-            if (Lctype == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
-            }
-          PCRE2_UNREACHABLE(); /* Control never reaches here */
-
           case PT_LAMP:
           for (;;)
             {
             int chartype;
-            RMATCH(Fecode, RM209);
+            RMATCH(Fecode, RM208);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3738,7 +3705,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           case PT_GC:
           for (;;)
             {
-            RMATCH(Fecode, RM210);
+            RMATCH(Fecode, RM209);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3755,7 +3722,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           case PT_PC:
           for (;;)
             {
-            RMATCH(Fecode, RM211);
+            RMATCH(Fecode, RM210);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3772,7 +3739,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           case PT_SC:
           for (;;)
             {
-            RMATCH(Fecode, RM212);
+            RMATCH(Fecode, RM211);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3791,7 +3758,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             {
             BOOL ok;
             const ucd_record *prop;
-            RMATCH(Fecode, RM225);
+            RMATCH(Fecode, RM224);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3812,7 +3779,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           for (;;)
             {
             int category;
-            RMATCH(Fecode, RM213);
+            RMATCH(Fecode, RM212);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3835,7 +3802,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           case PT_PXSPACE:  /* POSIX space */
           for (;;)
             {
-            RMATCH(Fecode, RM214);
+            RMATCH(Fecode, RM213);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3863,7 +3830,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           for (;;)
             {
             int chartype, category;
-            RMATCH(Fecode, RM215);
+            RMATCH(Fecode, RM214);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3886,7 +3853,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           for (;;)
             {
             const uint32_t *cp;
-            RMATCH(Fecode, RM216);
+            RMATCH(Fecode, RM215);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3922,7 +3889,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           case PT_UCNC:
           for (;;)
             {
-            RMATCH(Fecode, RM217);
+            RMATCH(Fecode, RM216);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3941,7 +3908,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           case PT_BIDICL:
           for (;;)
             {
-            RMATCH(Fecode, RM224);
+            RMATCH(Fecode, RM223);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3960,7 +3927,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             {
             BOOL ok;
             const ucd_record *prop;
-            RMATCH(Fecode, RM223);
+            RMATCH(Fecode, RM222);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
             if (Feptr >= mb->end_subject)
@@ -3991,7 +3958,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         for (;;)
           {
-          RMATCH(Fecode, RM218);
+          RMATCH(Fecode, RM217);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
           if (Feptr >= mb->end_subject)
@@ -4018,7 +3985,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         for (;;)
           {
-          RMATCH(Fecode, RM219);
+          RMATCH(Fecode, RM218);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
           if (Feptr >= mb->end_subject)
@@ -4303,21 +4270,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         BOOL notmatch = Lctype == OP_NOTPROP;
         switch(proptype)
           {
-          case PT_ANY:
-          for (i = Lmin; i < Lmax; i++)
-            {
-            int len = 1;
-            if (Feptr >= mb->end_subject)
-              {
-              SCHECK_PARTIAL();
-              break;
-              }
-            GETCHARLENTEST(fc, Feptr, len);
-            if (notmatch) break;
-            Feptr+= len;
-            }
-          break;
-
           case PT_LAMP:
           for (i = Lmin; i < Lmax; i++)
             {
@@ -4578,7 +4530,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         for(;;)
           {
           if (Feptr <= Lstart_eptr) break;
-          RMATCH(Fecode, RM222);
+          RMATCH(Fecode, RM221);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           Feptr--;
           if (utf) BACKCHAR(Feptr);
@@ -4621,7 +4573,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           PCRE2_SPTR fptr;
 
           if (Feptr <= Lstart_eptr) break;   /* At start of char run */
-          RMATCH(Fecode, RM220);
+          RMATCH(Fecode, RM219);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
 
           /* Backtracking over an extended grapheme cluster involves inspecting
@@ -4895,7 +4847,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         for(;;)
           {
           if (Feptr <= Lstart_eptr) break;
-          RMATCH(Fecode, RM221);
+          RMATCH(Fecode, RM220);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           Feptr--;
           BACKCHAR(Feptr);
@@ -6843,7 +6795,7 @@ switch (Freturn_id)
   LBL(200) LBL(201) LBL(202) LBL(203) LBL(204) LBL(205) LBL(206)
   LBL(207) LBL(208) LBL(209) LBL(210) LBL(211) LBL(212) LBL(213)
   LBL(214) LBL(215) LBL(216) LBL(217) LBL(218) LBL(219) LBL(220)
-  LBL(221) LBL(222) LBL(223) LBL(224) LBL(225)
+  LBL(221) LBL(222) LBL(223) LBL(224)
 #endif
 
   default:

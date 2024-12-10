@@ -1173,10 +1173,6 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[1])
           {
-          case PT_ANY:
-          OK = TRUE;
-          break;
-
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll ||
@@ -1456,10 +1452,6 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
-          case PT_ANY:
-          OK = TRUE;
-          break;
-
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
@@ -1721,10 +1713,6 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
-          case PT_ANY:
-          OK = TRUE;
-          break;
-
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
@@ -2011,10 +1999,6 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[1 + IMM2_SIZE + 1])
           {
-          case PT_ANY:
-          OK = TRUE;
-          break;
-
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;

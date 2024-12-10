@@ -105,10 +105,6 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
 
     switch(*data)
       {
-      case PT_ANY:
-      if (isprop) return not_negated;
-      break;
-
       case PT_LAMP:
       chartype = prop->chartype;
       if ((chartype == ucp_Lu || chartype == ucp_Ll ||

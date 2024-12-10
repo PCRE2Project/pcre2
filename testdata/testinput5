@@ -864,6 +864,10 @@
 
 /[\P{Any}\E]/B
 
+/\p{Any}#\P{Any}![\p{Any}]:[\P{Any}]@[\p{Any}a-z]%[\P{Any}c]/B,utf
+
+/[\P{Any}\P{Any}\P{Any}]![\p{Any}\p{Any}\p{Any}]:[^\P{Any}\P{Any}]@[^\p{Any}\p{Any}]%[^\p{Any}\P{Any}]/B,utf
+
 /(\P{Yi}+\277)/
 
 /(\P{Yi}+\277)?/
