@@ -133,7 +133,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@v1
+        uses: vmactions/freebsd-vm@debf37ca7b7fa40e19c542ef7ba30d6054a706a4 # v1.1.5
         with:
           usesh: true
           run: |
@@ -156,7 +156,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/solaris-vm@v1
+        uses: vmactions/solaris-vm@a89b9438868c70db27e41625f0a5de6ff5e90809 # v1.1.0
         with:
           usesh: true
           prepare: |
