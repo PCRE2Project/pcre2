@@ -19,7 +19,7 @@ copy_file(
     out = "src/pcre2_chartables.c",
 )
 
-# Removed src/pcre2_ucptables.c below because it is #included in 
+# Removed src/pcre2_ucptables.c below because it is #included in
 # src/pcre2_tables.c. Also fixed typo: ckdint should be chkdint.
 # PH, 22-March-2023.
 cc_library(
