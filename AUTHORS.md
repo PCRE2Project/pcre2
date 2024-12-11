@@ -77,7 +77,7 @@ All names listed alphabetically.
 
 ### Contributors to PCRE2
 
-This list is includes names up until the PCRE2 10.44 release. New names will be
+This list includes names up until the PCRE2 10.44 release. New names will be
 added from the Git history on each release.
 
     Scott Bell
