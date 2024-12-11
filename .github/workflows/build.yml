@@ -119,6 +119,55 @@ jobs:
       - name: Test
         run: cd build && ctest -C Release -j3 --output-on-failure
 
+  freebsd:
+    name: FreeBSD
+    runs-on: ubuntu-latest
+    if: github.event_name != "pull_request"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          run: |
+            set -e
+            ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
+            make -j3 CPPFLAGS='-Wall -Wextra -Werror'
+            make check
+
+  solaris:
+    name: Solaris
+    runs-on: ubuntu-latest
+    if: github.event_name != "pull_request"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        uses: vmactions/solaris-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg install developer/gcc system/header
+
+          run: |
+            set -e
+            ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
+            gmake -j3 CPPFLAGS='-Wall -Wextra -Werror'
+            gmake check
+
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
