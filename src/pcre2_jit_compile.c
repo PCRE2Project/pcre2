@@ -11217,6 +11217,7 @@ DEFINE_COMPILER;
 backtrack_common *backtrack;
 BOOL has_then_trap = FALSE;
 then_trap_backtrack *save_then_trap = NULL;
+size_t op_len;
 
 SLJIT_ASSERT(*ccend == OP_END || (*ccend >= OP_ALT && *ccend <= OP_KETRPOS));
 
@@ -11366,7 +11367,8 @@ while (cc < ccend)
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
     case OP_XCLASS:
     case OP_ECLASS:
-    if (*(cc + GET(cc, 1)) >= OP_CRSTAR && *(cc + GET(cc, 1)) <= OP_CRPOSRANGE)
+    op_len = GET(cc, 1);
+    if (cc[op_len] >= OP_CRSTAR && cc[op_len] <= OP_CRPOSRANGE)
       cc = compile_iterator_matchingpath(common, cc, parent);
     else
       cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->simple_backtracks : &parent->own_backtracks, TRUE);
@@ -11375,8 +11377,7 @@ while (cc < ccend)
 
     case OP_REF:
     case OP_REFI:
-    {
-    int op_len = PRIV(OP_lengths)[*cc];
+    op_len = PRIV(OP_lengths)[*cc];
     if (cc[op_len] >= OP_CRSTAR && cc[op_len] <= OP_CRPOSRANGE)
       cc = compile_ref_iterator_matchingpath(common, cc, parent);
     else
@@ -11384,13 +11385,11 @@ while (cc < ccend)
       compile_ref_matchingpath(common, cc, parent->top != NULL ? &parent->top->simple_backtracks : &parent->own_backtracks, TRUE, FALSE);
       cc += op_len;
       }
-    }
     break;
 
     case OP_DNREF:
     case OP_DNREFI:
-    {
-    int op_len = PRIV(OP_lengths)[*cc];
+    op_len = PRIV(OP_lengths)[*cc];
     if (cc[op_len] >= OP_CRSTAR && cc[op_len] <= OP_CRPOSRANGE)
       cc = compile_ref_iterator_matchingpath(common, cc, parent);
     else
@@ -11399,7 +11398,6 @@ while (cc < ccend)
       compile_ref_matchingpath(common, cc, parent->top != NULL ? &parent->top->simple_backtracks : &parent->own_backtracks, TRUE, FALSE);
       cc += op_len;
       }
-    }
     break;
 
     case OP_RECURSE:
@@ -12998,8 +12996,7 @@ int private_data_size;
 PCRE2_SPTR ccend;
 executable_functions *functions;
 void *executable_func;
-sljit_uw executable_size;
-sljit_uw total_length;
+sljit_uw executable_size, private_data_length, total_length;
 struct sljit_label *mainloop_label = NULL;
 struct sljit_label *continue_match_label;
 struct sljit_label *empty_match_found_label = NULL;
@@ -13107,9 +13104,25 @@ ccend = bracketend(common->start);
 
 /* Calculate the local space size on the stack. */
 common->ovector_start = LOCAL0;
-common->optimized_cbracket = (sljit_u8 *)SLJIT_MALLOC(re->top_bracket + 1, allocator_data);
-if (!common->optimized_cbracket)
+/* Allocate space for temporary data structures. */
+private_data_length = ccend - common->start;
+/* The chance of overflow is very low, but might happen on 32 bit. */
+if (private_data_length > ~(sljit_uw)0 / sizeof(sljit_s32))
   return PCRE2_ERROR_NOMEMORY;
+
+private_data_length *= sizeof(sljit_s32);
+/* Align to 32 bit. */
+total_length = ((re->top_bracket + 1) + (sljit_uw)(sizeof(sljit_s32) - 1)) & ~(sljit_uw)(sizeof(sljit_s32) - 1);
+if (~(sljit_uw)0 - private_data_length < total_length)
+  return PCRE2_ERROR_NOMEMORY;
+
+total_length += private_data_length;
+common->private_data_ptrs = (sljit_s32*)SLJIT_MALLOC(total_length, allocator_data);
+if (!common->private_data_ptrs)
+  return PCRE2_ERROR_NOMEMORY;
+
+memset(common->private_data_ptrs, 0, private_data_length);
+common->optimized_cbracket = ((sljit_u8 *)common->private_data_ptrs) + private_data_length;
 #if defined DEBUG_FORCE_UNOPTIMIZED_CBRAS && DEBUG_FORCE_UNOPTIMIZED_CBRAS == 1
 memset(common->optimized_cbracket, 0, re->top_bracket + 1);
 #else
@@ -13123,7 +13136,7 @@ common->ovector_start += sizeof(sljit_sw);
 #endif
 if (!check_opcode_types(common, common->start, ccend))
   {
-  SLJIT_FREE(common->optimized_cbracket, allocator_data);
+  SLJIT_FREE(common->private_data_ptrs, allocator_data);
   return PCRE2_ERROR_JIT_UNSUPPORTED;
   }
 
@@ -13135,6 +13148,7 @@ if (mode == PCRE2_JIT_COMPLETE &&
   common->req_char_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
   }
+
 if (mode != PCRE2_JIT_COMPLETE)
   {
   common->start_used_ptr = common->ovector_start;
@@ -13145,19 +13159,23 @@ if (mode != PCRE2_JIT_COMPLETE)
     common->ovector_start += sizeof(sljit_sw);
     }
   }
+
 if ((re->overall_options & (PCRE2_FIRSTLINE | PCRE2_USE_OFFSET_LIMIT)) != 0)
   {
   common->match_end_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
   }
+
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
 common->control_head_ptr = 1;
 #endif
+
 if (common->control_head_ptr != 0)
   {
   common->control_head_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
   }
+
 if (common->has_set_som)
   {
   /* Saving the real start pointer is necessary. */
@@ -13178,16 +13196,6 @@ if (common->capture_last_ptr != 0)
 
 SLJIT_ASSERT(!(common->req_char_ptr != 0 && common->start_used_ptr != 0));
 common->cbra_ptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_sw);
-
-total_length = ccend - common->start;
-common->private_data_ptrs = (sljit_s32*)SLJIT_MALLOC(total_length * (sizeof(sljit_s32) + (common->has_then ? 1 : 0)), allocator_data);
-if (!common->private_data_ptrs)
-  {
-  SLJIT_FREE(common->optimized_cbracket, allocator_data);
-  return PCRE2_ERROR_NOMEMORY;
-  }
-memset(common->private_data_ptrs, 0, total_length * sizeof(sljit_s32));
-
 private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
 
 if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
@@ -13202,13 +13210,18 @@ SLJIT_ASSERT(common->early_fail_start_ptr <= common->early_fail_end_ptr);
 if (private_data_size > 65536)
   {
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
-  SLJIT_FREE(common->optimized_cbracket, allocator_data);
-  return PCRE2_ERROR_NOMEMORY;
+  return PCRE2_ERROR_JIT_UNSUPPORTED;
   }
 
 if (common->has_then)
   {
-  common->then_offsets = (sljit_u8 *)(common->private_data_ptrs + total_length);
+  total_length = ccend - common->start;
+  common->then_offsets = (sljit_u8 *)SLJIT_MALLOC(total_length, allocator_data);
+  if (!common->then_offsets)
+    {
+    SLJIT_FREE(common->private_data_ptrs, allocator_data);
+    return PCRE2_ERROR_NOMEMORY;
+    }
   memset(common->then_offsets, 0, total_length);
   set_then_offsets(common, common->start, NULL);
   }
@@ -13216,8 +13229,9 @@ if (common->has_then)
 compiler = sljit_create_compiler(allocator_data);
 if (!compiler)
   {
-  SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
+  if (common->has_then)
+    SLJIT_FREE(common->then_offsets, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 common->compiler = compiler;
@@ -13309,8 +13323,9 @@ compile_matchingpath(common, common->start, ccend, &rootbacktrack);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
   sljit_free_compiler(compiler);
-  SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
+  if (common->has_then)
+    SLJIT_FREE(common->then_offsets, allocator_data);
   PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
@@ -13365,8 +13380,9 @@ compile_backtrackingpath(common, rootbacktrack.top);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
   sljit_free_compiler(compiler);
-  SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
+  if (common->has_then)
+    SLJIT_FREE(common->then_offsets, allocator_data);
   PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
@@ -13478,8 +13494,9 @@ if (common->currententry != NULL)
     SLJIT_ASSERT(sljit_get_compiler_error(compiler) || common->recurse_bitset == NULL);
 
     sljit_free_compiler(compiler);
-    SLJIT_FREE(common->optimized_cbracket, allocator_data);
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
+    if (common->has_then)
+      SLJIT_FREE(common->then_offsets, allocator_data);
     PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
     }
@@ -13631,8 +13648,9 @@ if (common->getucdtype != NULL)
   }
 #endif /* SUPPORT_UNICODE */
 
-SLJIT_FREE(common->optimized_cbracket, allocator_data);
 SLJIT_FREE(common->private_data_ptrs, allocator_data);
+if (common->has_then)
+  SLJIT_FREE(common->then_offsets, allocator_data);
 
 executable_func = sljit_generate_code(compiler, 0, NULL);
 executable_size = sljit_get_generated_code_size(compiler);
