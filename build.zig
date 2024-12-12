@@ -16,6 +16,8 @@ pub fn build(b: *std.Build) !void {
     _ = copyFiles.addCopyFile(b.path("src/config.h.generic"), "config.h");
     _ = copyFiles.addCopyFile(b.path("src/pcre2.h.generic"), "pcre2.h");
 
+    // pcre2-8/16/32.so
+
     const lib = std.Build.Step.Compile.create(b, .{
         .name = b.fmt("pcre2-{s}", .{@tagName(codeUnitWidth)}),
         .root_module = .{
@@ -27,21 +29,20 @@ pub fn build(b: *std.Build) !void {
         .linkage = linkage,
     });
 
+    lib.defineCMacro("HAVE_CONFIG_H", null);
+    lib.defineCMacro("HAVE_MEMMOVE", null);
+    lib.defineCMacro("PCRE2_CODE_UNIT_WIDTH", @tagName(codeUnitWidth));
+    lib.defineCMacro("SUPPORT_UNICODE", null);
     if (linkage == .static) {
-        try lib.root_module.c_macros.append(b.allocator, "-DPCRE2_STATIC");
+        lib.defineCMacro("PCRE2_STATIC", null);
     }
-
-    lib.root_module.addCMacro("PCRE2_CODE_UNIT_WIDTH", @tagName(codeUnitWidth));
-
-    lib.addCSourceFile(.{
-        .file = copyFiles.addCopyFile(b.path("src/pcre2_chartables.c.dist"), "pcre2_chartables.c"),
-        .flags = &.{
-            "-DHAVE_CONFIG_H",
-        },
-    });
 
     lib.addIncludePath(b.path("src"));
     lib.addIncludePath(copyFiles.getDirectory());
+
+    lib.addCSourceFile(.{
+        .file = copyFiles.addCopyFile(b.path("src/pcre2_chartables.c.dist"), "pcre2_chartables.c"),
+    });
 
     lib.addCSourceFiles(.{
         .files = &.{
@@ -56,6 +57,7 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_error.c",
             "src/pcre2_extuni.c",
             "src/pcre2_find_bracket.c",
+            "src/pcre2_jit_compile.c",
             "src/pcre2_maketables.c",
             "src/pcre2_match.c",
             "src/pcre2_match_data.c",
@@ -73,12 +75,79 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_valid_utf.c",
             "src/pcre2_xclass.c",
         },
-        .flags = &.{
-            "-DHAVE_CONFIG_H",
-            "-DPCRE2_STATIC",
-        },
     });
 
     lib.installHeader(b.path("src/pcre2.h.generic"), "pcre2.h");
     b.installArtifact(lib);
+
+
+    // pcre2test
+
+    const pcre2test = b.addExecutable(.{
+        .name = "pcre2test",
+        .target = target,
+        .optimize = optimize,
+    });
+
+
+    // pcre2-posix.so
+
+    if (codeUnitWidth == CodeUnitWidth.@"8") {
+        const posixLib = std.Build.Step.Compile.create(b, .{
+            .name = "pcre2-posix",
+            .root_module = .{
+                .target = target,
+                .optimize = optimize,
+                .link_libc = true,
+            },
+            .kind = .lib,
+            .linkage = linkage,
+        });
+
+        posixLib.defineCMacro("HAVE_CONFIG_H", null);
+        posixLib.defineCMacro("HAVE_MEMMOVE", null);
+        posixLib.defineCMacro("PCRE2_CODE_UNIT_WIDTH", @tagName(codeUnitWidth));
+        posixLib.defineCMacro("SUPPORT_UNICODE", null);
+        if (linkage == .static) {
+            posixLib.defineCMacro("PCRE2_STATIC", null);
+        }
+
+        posixLib.addIncludePath(b.path("src"));
+        posixLib.addIncludePath(copyFiles.getDirectory());
+
+        posixLib.addCSourceFiles(.{
+            .files = &.{
+                "src/pcre2posix.c",
+            },
+        });
+
+        b.installArtifact(posixLib);
+
+        pcre2test.linkLibrary(posixLib);
+    }
+
+
+    // pcre2test (again)
+
+    pcre2test.defineCMacro("HAVE_CONFIG_H", null);
+    pcre2test.defineCMacro("HAVE_MEMMOVE", null);
+    pcre2test.defineCMacro("HAVE_UNISTD_H", null);
+    pcre2test.defineCMacro("HAVE_STRERROR", null);
+    pcre2test.defineCMacro("SUPPORT_UNICODE", null);
+    pcre2test.defineCMacro(b.fmt("SUPPORT_PCRE2_{s}", .{@tagName(codeUnitWidth)}), null);
+    if (linkage == .static) {
+        pcre2test.defineCMacro("PCRE2_STATIC", null);
+    }
+
+    pcre2test.addIncludePath(b.path("src"));
+    pcre2test.addIncludePath(copyFiles.getDirectory());
+
+    pcre2test.addCSourceFile(.{
+        .file = b.path("src/pcre2test.c"),
+    });
+
+    pcre2test.linkLibC();
+    pcre2test.linkLibrary(lib);
+
+    b.installArtifact(pcre2test);
 }
