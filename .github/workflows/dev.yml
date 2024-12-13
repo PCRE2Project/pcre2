@@ -279,22 +279,13 @@ jobs:
     name: Bazel
     runs-on: ubuntu-latest
     steps:
-      - name: Setup
-        run: |
-          sudo apt-get -qq install apt-transport-https curl gnupg -y
-          curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor >bazel-archive-keyring.gpg
-          sudo mv bazel-archive-keyring.gpg /usr/share/keyrings
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-
-          sudo apt-get -qq update && sudo apt-get -qq install bazel
-
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: true
 
       - name: Build
-        run: bazel build :all
+        run: bazelisk build :all
 
       - name: Test
         run: srcdir=`pwd` pcre2test=`pwd`/bazel-bin/pcre2test ./RunTest
