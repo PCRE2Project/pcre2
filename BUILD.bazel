@@ -159,17 +159,8 @@ sh_test(
     env = {"pcre2test": "$(location :pcre2test)"},
     target_compatible_with = select({
         "//conditions:default": [],
+        # cannot use sh_test on windows
+        # https://github.com/bazelbuild/bazel/issues/20345
         "@platforms//os:windows": ["@platforms//:incompatible"],
-    }),
-)
-
-sh_test(
-    name = "test_windows",
-    srcs = ["RunTest.bat"],
-    data = [":pcre2test", ":testdata"],
-    env = {"pcre2test": "$(location :pcre2test)"},
-    target_compatible_with = select({
-        "//conditions:default": ["@platforms//:incompatible"],
-        "@platforms//os:windows": [],
     }),
 )
