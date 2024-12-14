@@ -96,6 +96,7 @@ src/pcre2_chartables.c
 src/stamp-h1
 
 /bazel-*
+*.bazel.lock
 
 zig-out/
 zig-cache/

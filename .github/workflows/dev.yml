@@ -277,7 +277,11 @@ jobs:
   bazel:
     # Tests with: Bazel build system
     name: Bazel
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -285,10 +289,10 @@ jobs:
           submodules: true
 
       - name: Build
-        run: bazelisk build :all
+        run: bazelisk build //...
 
       - name: Test
-        run: srcdir=`pwd` pcre2test=`pwd`/bazel-bin/pcre2test ./RunTest
+        run: bazelisk test //... --test_output=all
 
   heron:
     # Job to verify that the tasks performed by PrepareRelease have been done. It is
