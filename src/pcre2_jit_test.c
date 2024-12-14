@@ -474,6 +474,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MU, A, 0, 0, "\\R+", "ab\r\n\r" },
 	{ MU, A, 0, 0, "\\R*", "ab\r\n\r" },
 	{ MU, A, 0, 0, "\\R*", "\r\n\r" },
+	{ M, A, 0, 0, "\\R+\x85", "\r\n\n\r#\r\x85\n" },
 	{ MU, A, 0, 0, "\\R{2,4}", "\r\nab\r\r" },
 	{ MU, A, 0, 0, "\\R{2,4}", "\r\nab\n\n\n\r\r\r" },
 	{ MU, A, 0, 0, "\\R{2,}", "\r\nab\n\n\n\r\r\r" },
