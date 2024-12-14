@@ -157,6 +157,7 @@ sh_test(
     srcs = ["RunTest"],
     data = [":pcre2test", ":testdata"],
     env = {"pcre2test": "$(location :pcre2test)"},
+    size = "small",
     target_compatible_with = select({
         "//conditions:default": [],
         # cannot use sh_test on windows
