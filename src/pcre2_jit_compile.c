@@ -10624,7 +10624,7 @@ if (exact > 1)
     JUMPTO(SLJIT_NOT_ZERO, label);
     }
   }
-else if (exact == 1)
+else if (exact == 1 && opcode != OP_POSSTAR && opcode != OP_MINSTAR)
   compile_char1_matchingpath(common, type, cc, &backtrack->own_backtracks, TRUE);
 
 if (early_fail_type == type_fail_range)
@@ -10909,8 +10909,18 @@ switch(opcode)
   case OP_MINSTAR:
   if (private_data_ptr == 0)
     allocate_stack(common, 1);
-  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-  BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
+
+  if (exact == 1)
+    {
+    BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
+    compile_char1_matchingpath(common, type, cc, &BACKTRACK_AS(char_iterator_backtrack)->u.backtracks, TRUE);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    }
+  else
+    {
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    BACKTRACK_AS(char_iterator_backtrack)->matchingpath = LABEL();
+    }
   if (early_fail_ptr != 0)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), early_fail_ptr, STR_PTR, 0);
   break;
@@ -10945,6 +10955,9 @@ switch(opcode)
   if (type == OP_ALLANY)
 #endif
     {
+    if (exact == 1)
+      detect_partial_match(common, &backtrack->own_backtracks);
+
     OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
     process_partial_match(common);
     if (early_fail_ptr != 0)
@@ -10956,7 +10969,8 @@ switch(opcode)
   if (type == OP_EXTUNI || common->utf)
     {
     SLJIT_ASSERT(tmp_base == TMP3 || common->locals_size >= 3 * SSIZE_OF(sw));
-    OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
+
+    OP1(SLJIT_MOV, tmp_base, tmp_offset, exact == 1 ? SLJIT_IMM : STR_PTR, 0);
     detect_partial_match(common, &no_match);
     label = LABEL();
     compile_char1_matchingpath(common, type, cc, &no_match, FALSE);
@@ -10965,6 +10979,9 @@ switch(opcode)
 
     set_jumps(no_match, LABEL());
     OP1(SLJIT_MOV, STR_PTR, 0, tmp_base, tmp_offset);
+    if (exact == 1)
+      add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0));
+
     if (early_fail_ptr != 0)
       {
       if (!HAS_VIRTUAL_REGISTERS && tmp_base == TMP3)
@@ -10976,6 +10993,9 @@ switch(opcode)
     }
 #endif
 
+  if (exact == 1)
+    OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
+
   detect_partial_match(common, &no_match);
   label = LABEL();
   compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
@@ -10985,6 +11005,10 @@ switch(opcode)
   set_jumps(no_char1_match, LABEL());
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   set_jumps(no_match, LABEL());
+
+  if (exact == 1)
+    add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_EQUAL, tmp_base, tmp_offset, STR_PTR, 0));
+
   if (early_fail_ptr != 0)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), early_fail_ptr, STR_PTR, 0);
   break;
@@ -11643,10 +11667,13 @@ switch(opcode)
 
   case OP_MINSTAR:
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-  compile_char1_matchingpath(common, type, cc, &jumplist, TRUE);
-  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+  if (exact != 1)
+    {
+    compile_char1_matchingpath(common, type, cc, &jumplist, TRUE);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    }
   JUMPTO(SLJIT_JUMP, CURRENT_AS(char_iterator_backtrack)->matchingpath);
-  set_jumps(jumplist, LABEL());
+  set_jumps(exact == 1 ? CURRENT_AS(char_iterator_backtrack)->u.backtracks : jumplist, LABEL());
   if (private_data_ptr == 0)
     free_stack(common, 1);
   break;
