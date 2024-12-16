@@ -207,7 +207,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake -DCMAKE_BUILD_TYPE=Debug -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -B build
+        run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake -DCMAKE_BUILD_TYPE=Debug -DPCRE2_DEBUG=OFF -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -B build
 
       - name: Build
         run: cd build && make -j3
