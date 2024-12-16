@@ -277,7 +277,12 @@ jobs:
   bazel:
     # Tests with: Bazel build system
     name: Bazel
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+    runs-on: ${{ matrix.os }}
+    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -285,10 +290,10 @@ jobs:
           submodules: true
 
       - name: Build
-        run: bazelisk build //... --incompatible_strict_action_env
+        run: bazelisk build //... --enable_runfiles --incompatible_strict_action_env
 
       - name: Test
-        run: bazelisk test //... --incompatible_strict_action_env --test_output=all
+        run: bazelisk test //... --enable_runfiles --incompatible_strict_action_env --test_output=all
 
   heron:
     # Job to verify that the tasks performed by PrepareRelease have been done. It is

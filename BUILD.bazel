@@ -1,4 +1,5 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:native_binary.bzl", "native_test")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 copy_file(
@@ -143,6 +144,10 @@ cc_binary(
         "@platforms//os:windows": [],
         "//conditions:default": ["HAVE_UNISTD_H"],
     }),
+    linkopts = select({
+        "@platforms//os:windows": ["-STACK:2500000"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
     deps = [":pcre2test_dotc_headers", ":pcre2", ":pcre2-posix"],
 )
@@ -152,16 +157,16 @@ filegroup(
     srcs = glob(["testdata/*"]),
 )
 
-sh_test(
-    name = "test_posix",
-    srcs = ["RunTest"],
-    data = [":pcre2test", ":testdata"],
-    env = {"pcre2test": "$(location :pcre2test)"},
-    size = "small",
-    target_compatible_with = select({
-        "//conditions:default": [],
-        # cannot use sh_test on windows
-        # https://github.com/bazelbuild/bazel/issues/20345
-        "@platforms//os:windows": ["@platforms//:incompatible"],
+native_test(
+    name = "pcre2_test",
+    src = select({
+        "@platforms//os:windows": "RunTest.bat",
+        "//conditions:default": "RunTest",
     }),
+    out = select({
+        "@platforms//os:windows": "RunTest.bat",
+        "//conditions:default": "RunTest",
+    }),
+    data = [":pcre2test", ":testdata"],
+    size = "small",
 )
