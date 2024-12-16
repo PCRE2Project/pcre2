@@ -45,6 +45,11 @@ jobs:
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
 
+      - name: Install
+        run: |
+          make install "DESTDIR=`pwd`/install-dir"
+          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+
   alpine:
     name: alpine
     runs-on: ubuntu-latest
@@ -79,6 +84,11 @@ jobs:
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
 
+      - name: Install
+        run: |
+          make install "DESTDIR=`pwd`/install-dir"
+          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+
   macos:
     name: macOS universal
     runs-on: macos-latest
@@ -89,13 +99,19 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
 
       - name: Test
         run: cd build && ctest -j3 --output-on-failure
+
+      - name: Install
+        run: |
+          cd build
+          cmake --install . --prefix install-dir
+          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
 
   windows:
     name: Windows
@@ -111,13 +127,19 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
 
       - name: Build
         run: cmake --build build --config Release
 
       - name: Test
         run: cd build && ctest -C Release -j3 --output-on-failure
+
+      - name: Install
+        run: |
+          cd build
+          cmake --install . --config Release --prefix install-dir
+          ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
 
   freebsd:
     name: FreeBSD
@@ -141,6 +163,9 @@ jobs:
             ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
             make -j3 CPPFLAGS='-Wall -Wextra -Werror'
             make check
+
+            make install "DESTDIR=`pwd`/install-dir"
+            maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
 
   solaris:
     name: Solaris
@@ -191,6 +216,32 @@ jobs:
             ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
             make CPPFLAGS='-Wall -Wextra -Werror'
             make check
+
+            make install "DESTDIR=`pwd`/install-dir"
+            maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+
+  distcheck:
+    name: Build & verify distribution
+    runs-on: ubuntu-24.04 # TODO: Update to ubuntu-latest when that switches to 24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Configure
+        run: ./configure
+
+      - name: Distcheck
+        run: make distcheck -j3
+
+      - name: Manifest
+        run: |
+          mkdir tarball-dir && tar -C tarball-dir -xzf pcre2-*.tar.gz
+          maint/RunManifestTest tarball-dir maint/manifest-tarball
 
   coverage:
     name: Code coverage
