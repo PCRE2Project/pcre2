@@ -131,7 +131,9 @@ pub fn build(b: *std.Build) !void {
 
     pcre2test.defineCMacro("HAVE_CONFIG_H", null);
     pcre2test.defineCMacro("HAVE_MEMMOVE", null);
-    pcre2test.defineCMacro("HAVE_UNISTD_H", null);
+    if (target.result.os.tag != .windows) {
+        pcre2test.defineCMacro("HAVE_UNISTD_H", null);
+    }
     pcre2test.defineCMacro("HAVE_STRERROR", null);
     pcre2test.defineCMacro("SUPPORT_UNICODE", null);
     pcre2test.defineCMacro(b.fmt("SUPPORT_PCRE2_{s}", .{@tagName(codeUnitWidth)}), null);
