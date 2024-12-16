@@ -69,7 +69,7 @@ cc_library(
     hdrs = [
         ":pcre2_h_generic",
     ],
-    defines = [
+    local_defines = [
         "HAVE_CONFIG_H",
         "HAVE_MEMMOVE",
         "PCRE2_CODE_UNIT_WIDTH=8",
@@ -90,7 +90,7 @@ cc_library(
     hdrs = [
         "src/pcre2posix.h",
     ],
-    defines = [
+    local_defines = [
         "HAVE_CONFIG_H",
         "HAVE_MEMMOVE",
         "PCRE2_CODE_UNIT_WIDTH=8",
@@ -132,7 +132,7 @@ cc_binary(
         "src/pcre2test.c",
         ":config_h_generic",
     ],
-    defines = [
+    local_defines = [
         "HAVE_CONFIG_H",
         "HAVE_MEMMOVE",
         "HAVE_STRERROR",
