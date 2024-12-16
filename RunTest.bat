@@ -39,7 +39,7 @@ if exist ..\testdata\ set srcdir=..)
 if [%srcdir%]==[] (
 if exist ..\..\testdata\ set srcdir=..\..)
 if NOT exist %srcdir%\testdata\ (
-Error: echo distribution testdata folder not found!
+echo Error: distribution testdata folder not found!
 call :conferror
 exit /b 1
 goto :eof
