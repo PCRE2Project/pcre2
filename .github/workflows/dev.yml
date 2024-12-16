@@ -285,10 +285,10 @@ jobs:
           submodules: true
 
       - name: Build
-        run: bazelisk build //...
+        run: bazelisk build //... --incompatible_strict_action_env
 
       - name: Test
-        run: bazelisk test //... --test_output=all
+        run: bazelisk test //... --incompatible_strict_action_env --test_output=all
 
   heron:
     # Job to verify that the tasks performed by PrepareRelease have been done. It is
