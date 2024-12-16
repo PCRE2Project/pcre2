@@ -278,6 +278,7 @@ jobs:
     # Tests with: Zig compiler
     name: Zig
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - name: Setup
         run: |
