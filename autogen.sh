@@ -39,11 +39,6 @@ autoheader -f -W all
 
 automake -a -c -f -W all,no-portability
 
-# Workaround for incorrect filesystem permissions on /usr/share/aclocal, which
-# causes the m4 macros to be copied with incorrect permissions.
-
-chmod u=rw,go=r m4/*.m4
-
 rm -rf autom4te.cache
 exit 0
 

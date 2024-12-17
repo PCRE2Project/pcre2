@@ -1,7 +1,7 @@
 tarball-dir:
-drwxr-xr-x pcre2-10.45-DEV
+drwxr-xr-x pcre2-SNAPSHOT
 
-tarball-dir/pcre2-10.45-DEV:
+tarball-dir/pcre2-SNAPSHOT:
 -rw-r--r-- AUTHORS.md
 -rw-r--r-- BUILD.bazel
 -rw-r--r-- CMakeLists.txt
@@ -50,20 +50,20 @@ drwxr-xr-x src
 drwxr-xr-x testdata
 drwxr-xr-x vms
 
-tarball-dir/pcre2-10.45-DEV/cmake:
+tarball-dir/pcre2-SNAPSHOT/cmake:
 -rw-r--r-- COPYING-CMAKE-SCRIPTS
 -rw-r--r-- FindEditline.cmake
 -rw-r--r-- FindReadline.cmake
 -rw-r--r-- pcre2-config-version.cmake.in
 -rw-r--r-- pcre2-config.cmake.in
 
-tarball-dir/pcre2-10.45-DEV/deps:
+tarball-dir/pcre2-SNAPSHOT/deps:
 drwxr-xr-x sljit
 
-tarball-dir/pcre2-10.45-DEV/deps/sljit:
+tarball-dir/pcre2-SNAPSHOT/deps/sljit:
 drwxr-xr-x sljit_src
 
-tarball-dir/pcre2-10.45-DEV/deps/sljit/sljit_src:
+tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src:
 drwxr-xr-x allocator_src
 -rw-r--r-- sljitConfig.h
 -rw-r--r-- sljitConfigCPU.h
@@ -90,7 +90,7 @@ drwxr-xr-x allocator_src
 -rw-r--r-- sljitSerialize.c
 -rw-r--r-- sljitUtils.c
 
-tarball-dir/pcre2-10.45-DEV/deps/sljit/sljit_src/allocator_src:
+tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/allocator_src:
 -rw-r--r-- sljitExecAllocatorApple.c
 -rw-r--r-- sljitExecAllocatorCore.c
 -rw-r--r-- sljitExecAllocatorFreeBSD.c
@@ -101,7 +101,7 @@ tarball-dir/pcre2-10.45-DEV/deps/sljit/sljit_src/allocator_src:
 -rw-r--r-- sljitWXExecAllocatorPosix.c
 -rw-r--r-- sljitWXExecAllocatorWindows.c
 
-tarball-dir/pcre2-10.45-DEV/doc:
+tarball-dir/pcre2-SNAPSHOT/doc:
 drwxr-xr-x html
 -rw-r--r-- pcre2-config.1
 -rw-r--r-- pcre2-config.txt
@@ -207,7 +207,7 @@ drwxr-xr-x html
 -rw-r--r-- pcre2test.txt
 -rw-r--r-- pcre2unicode.3
 
-tarball-dir/pcre2-10.45-DEV/doc/html:
+tarball-dir/pcre2-SNAPSHOT/doc/html:
 -rw-r--r-- NON-AUTOTOOLS-BUILD.txt
 -rw-r--r-- README.txt
 -rw-r--r-- index.html
@@ -311,7 +311,7 @@ tarball-dir/pcre2-10.45-DEV/doc/html:
 -rw-r--r-- pcre2test.html
 -rw-r--r-- pcre2unicode.html
 
-tarball-dir/pcre2-10.45-DEV/m4:
+tarball-dir/pcre2-SNAPSHOT/m4:
 -rw-r--r-- ax_pthread.m4
 -rw-r--r-- libtool.m4
 -rw-r--r-- ltoptions.m4
@@ -320,7 +320,7 @@ tarball-dir/pcre2-10.45-DEV/m4:
 -rw-r--r-- lt~obsolete.m4
 -rw-r--r-- pcre2_visibility.m4
 
-tarball-dir/pcre2-10.45-DEV/src:
+tarball-dir/pcre2-SNAPSHOT/src:
 -rw-r--r-- config.h.generic
 -rw-r--r-- config.h.in
 -rw-r--r-- pcre2.h.generic
@@ -376,7 +376,7 @@ tarball-dir/pcre2-10.45-DEV/src:
 -rw-r--r-- pcre2posix_test.c
 -rw-r--r-- pcre2test.c
 
-tarball-dir/pcre2-10.45-DEV/testdata:
+tarball-dir/pcre2-SNAPSHOT/testdata:
 -rw-r--r-- grepbinary
 -rw-r--r-- grepfilelist
 -rw-r--r-- grepinput
@@ -484,7 +484,7 @@ tarball-dir/pcre2-10.45-DEV/testdata:
 -rw-r--r-- wintestinput3
 -rw-r--r-- wintestoutput3
 
-tarball-dir/pcre2-10.45-DEV/vms:
+tarball-dir/pcre2-SNAPSHOT/vms:
 -rw-r--r-- configure.com
 -rw-r--r-- openvms_readme.txt
 -rw-r--r-- pcre2.h_patch
