@@ -142,7 +142,8 @@ document for an overview of all the PCRE2 documentation.
 .B "  void *\fIcallout_data\fP);"
 .sp
 .B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
+.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SPTR,"
+.B "                                       PCRE2_SIZE, int, void *),"
 .B "  void *\fIcallout_data\fP);"
 .sp
 .B int pcre2_set_offset_limit(pcre2_match_context *\fImcontext\fP,
@@ -1051,7 +1052,8 @@ below.
 .sp
 .nf
 .B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
+.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SPTR,"
+.B "                                       PCRE2_SIZE, int, void *),"
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
@@ -4089,7 +4091,8 @@ matches so far.
 .sp
 .nf
 .B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t (*\fIcallout_function\fP)(uint32_t, int, void *),"
+.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SPTR,"
+.B "                                       PCRE2_SIZE, int, void *),"
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
@@ -4111,23 +4114,43 @@ substitution transformations.
 One example implementation of the \fIcallout_function\fP using the ICU
 library would be:
 .sp
-    static uint32_t icu_case_callout(uint32_t ch, int to, void *)
+    static PCRE2_SIZE icu_case_callout(
+      PCRE2_SPTR input, PCRE2_SIZE input_len,
+      PCRE2_SPTR output, PCRE2_SIZE output_cap,
+      int to_case, void *data_ptr);
     {
-      return to == PCRE2_SUBSTITUTE_CASE_LOWER ? u_tolower(ch)
-           : to == PCRE2_SUBSTITUTE_CASE_UPPER ? u_toupper(ch)
-           : to == PCRE2_SUBSTITUTE_CASE_TITLE ? u_totitle(ch)
-           : ch;
+      UErrorCode err = U_ZERO_ERROR;
+      int32_t r = ;
+      r = to == PCRE2_SUBSTITUTE_CASE_LOWER
+        ? u_strToLower(output, output_cap, input, input_len, NULL, &err)
+        : to == PCRE2_SUBSTITUTE_CASE_UPPER
+        ? u_strToUpper(output, output_cap, input, input_len, NULL, &err)
+        : u_strToTitle(output, output_cap, input, input_len, NULL, NULL, &err);
+      if (U_FAILURE(e)) return (~(PCRE2_SIZE)0);
+      return r;
     }
 .P
-The first argument of the case callout function is the Unicode character to
-transform.
+The first and second arguments of the case callout function are the Unicode
+string to transform.
 .P
-The second argument is one of the constants PCRE2_SUBSTITUTE_CASE_LOWER,
+The third and fourth arguments are the output buffer and its capacity.
+.P
+The fifth is one of the constants PCRE2_SUBSTITUTE_CASE_LOWER,
 PCRE2_SUBSTITUTE_CASE_UPPER, or PCRE2_SUBSTITUTE_CASE_TITLE.
 .P
-The third argument is the \fIcallout_data\fP supplied to
-\fBpcre2_set_substitute_case_callout()\fP, and the return value is the
-transformed Unicode character, which may be equal to the input character.
+The sixth argument is the \fIcallout_data\fP supplied to
+\fBpcre2_set_substitute_case_callout()\fP.
+.P
+The resulting string in the destination buffer may be larger or smaller than the
+input, if the casing rules merge or split characters. The return value is the
+length required for the output string. If a buffer of sufficient size was
+provided to the callout, then the result is written to the buffer and the number
+of code units is returned. If the result does not fit in the provided buffer,
+then the required capacity is returned and PCRE2 will not make use of the output
+buffer. PCRE2 provides input and output buffers which do not overlap.
+.P
+Otherwise, if the callout wishes to indicate an error, then it may return
+(~(PCRE2_SIZE)0).
 .
 .
 .SH "DUPLICATE CAPTURE GROUP NAMES"

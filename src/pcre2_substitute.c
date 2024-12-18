@@ -260,6 +260,15 @@ return FALSE;
 
 
 /*************************************************
+*              Case transformations              *
+*************************************************/
+
+#define PCRE2_SUBSTITUTE_CASE_NONE  -1
+
+
+
+
+/*************************************************
 *              Match and substitute              *
 *************************************************/
 
@@ -1144,6 +1153,8 @@ do
       } /* End handling a literal code unit */
     }   /* End of loop for scanning the replacement. */
 
+  // XXX DO ALL THE CASING HERE
+
   /* The replacement has been copied to the output, or its size has been
   remembered. Do the callout if there is one and we have done an actual
   replacement. */
@@ -1220,6 +1231,7 @@ else
 EXIT:
 if (internal_match_data != NULL) pcre2_match_data_free(internal_match_data);
   else match_data->rc = rc;
+// XXX free replacement buffers
 return rc;
 
 NOROOM:
