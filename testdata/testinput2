@@ -6144,16 +6144,20 @@ a)"xI
     XABCY
     XabcY\=replace=  
 
-/abc/replace=\U$0,substitute_extended,substitute_case_callout=a.U.b.V.
+# XXX vvv NEEDS TOTALLY RE-TESTING
+
+/abc/replace=\U$0,substitute_extended,substitute_case_callout
     XabcY
 \= Expect not supported
     XabcY\=null_context
 
-/a/substitute_extended
-    XaY\=replace=\U$0,substitute_case_callout=a.U.
-    XaY\=replace=\L$0,substitute_case_callout=aL..
-    XaY\=replace=\u\L$0,substitute_case_callout=a..T
-    XaY\=replace=\l\U$0,substitute_case_callout=aL..
+/a/substitute_extended,substitute_case_callout
+    XaY\=replace=\U$0
+    XaY\=replace=\L$0
+    XaY\=replace=\u\L$0
+    XaY\=replace=\l\U$0
+
+# XXX ^^^ NEEDS TOTALLY RE-TESTING
 
 # Expect non-fixed-length error
 

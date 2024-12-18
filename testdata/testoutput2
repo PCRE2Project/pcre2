@@ -18228,22 +18228,26 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     XabcY\=replace=  
  0: abc
 
-/abc/replace=\U$0,substitute_extended,substitute_case_callout=a.U.b.V.
+# XXX vvv NEEDS TOTALLY RE-TESTING
+
+/abc/replace=\U$0,substitute_extended,substitute_case_callout
     XabcY
- 1: XUVcY
+ 1: XABCY
 \= Expect not supported
     XabcY\=null_context
 ** Replacement case callouts are not supported with null_context.
 
-/a/substitute_extended
-    XaY\=replace=\U$0,substitute_case_callout=a.U.
- 1: XUY
-    XaY\=replace=\L$0,substitute_case_callout=aL..
- 1: XLY
-    XaY\=replace=\u\L$0,substitute_case_callout=a..T
- 1: XTY
-    XaY\=replace=\l\U$0,substitute_case_callout=aL..
- 1: XLY
+/a/substitute_extended,substitute_case_callout
+    XaY\=replace=\U$0
+ 1: XAY
+    XaY\=replace=\L$0
+ 1: XaY
+    XaY\=replace=\u\L$0
+ 1: XAY
+    XaY\=replace=\l\U$0
+ 1: XaY
+
+# XXX ^^^ NEEDS TOTALLY RE-TESTING
 
 # Expect non-fixed-length error
 

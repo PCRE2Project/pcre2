@@ -260,6 +260,328 @@ return FALSE;
 
 
 /*************************************************
+*              Case transformations              *
+*************************************************/
+
+#define PCRE2_SUBSTITUTE_CASE_NONE                 0
+// 1, 2, 3 are PCRE2_SUBSTITUTE_CASE_LOWER, UPPER, TITLE_FIRST.
+#define PCRE2_SUBSTITUTE_CASE_REVERSE_TITLE_FIRST  4
+
+typedef struct {
+  int to_case; /* One of PCRE2_SUBSTITUTE_CASE_xyz */
+  BOOL single_char;
+} case_state;
+
+/* Helper to guess how much a string is likely to increase in size when
+case-transformed. Usually, strings don't change size at all, but some rare
+characters do grow. Estimate +10%, plus another few characters.
+
+Performing this estimation is unfortunate, but inevitable, since we can't call
+the callout if we ran out of buffer space to prepare its input.
+
+Because this estimate is inexact (and in pathological cases, underestimates the
+required buffer size) we must document that when you have a
+substitute_case_callout, and you are using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH, you
+may need more than two calls to determine the final buffer size. */
+
+static PCRE2_SIZE
+pessimistic_case_inflation(PCRE2_SIZE len)
+{
+return (len >> 3u) + 10;
+}
+
+/* Case transformation behaviour if no callout is passed. */
+
+// XXX You know what? Maybe I was totally wrong to implement our default behaviour
+// via the exact same API that we use for custom callouts. We have totally
+// different buffering requirements anyway! Maybe I should just make it so that
+// the "deferred" callouts are going via the do_case_copy thing, and the
+// "eager" ones in CHECKCASECPY go to this default behaviour, but which is
+// done via a different signature, so that we can simplify down the buffer
+// management in do_case_copy, so that at least it's only doing one thing.
+
+static PCRE2_SIZE
+default_substitute_case_callout(
+  PCRE2_SPTR input, PCRE2_SIZE input_len,
+  PCRE2_UCHAR *output, PCRE2_SIZE output_cap,
+  int to_case, void *substitute_case_callout_data)
+{
+PCRE2_SPTR input_end = input + input_len;
+const pcre2_code *code = (const pcre2_code *)substitute_case_callout_data;
+#ifdef SUPPORT_UNICODE
+BOOL utf;
+BOOL ucp;
+#endif
+PCRE2_UCHAR temp[6];
+BOOL next_to_upper;
+BOOL rest_to_upper;
+BOOL overflow = FALSE;
+PCRE2_SIZE written = 0;
+
+PCRE2_ASSERT(code != NULL);
+
+#ifdef SUPPORT_UNICODE
+utf = (code->overall_options & PCRE2_UTF) != 0;
+ucp = (code->overall_options & PCRE2_UCP) != 0;
+#endif
+
+if (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
+  {
+  next_to_upper = TRUE;
+  rest_to_upper = FALSE;
+  }
+else
+  {
+  next_to_upper = rest_to_upper = (to_case == PCRE2_SUBSTITUTE_CASE_UPPER);
+  }
+
+while (input < input_end)
+  {
+  uint32_t ch;
+  unsigned int chlen;
+
+  GETCHARINCTEST(ch, input);
+
+#ifdef SUPPORT_UNICODE
+  if ((utf || ucp) && ch >= 128)
+    {
+    uint32_t type = UCD_CHARTYPE(ch);
+    if (PRIV(ucp_gentype)[type] == ucp_L &&
+        type != (next_to_upper? ucp_Lu : ucp_Ll))
+      ch = UCD_OTHERCASE(ch);
+
+    /* TODO This is far from correct... it doesn't support the SpecialCasing.txt
+    mappings, but worse, it's not even correct for all the ordinary case
+    mappings. We should add support for those (at least), and then add the
+    SpecialCasing.txt mappings for Esszet and ligatures, and finally use the
+    Turkish casing flag on the match context. */
+    }
+  else
+#endif
+  if (MAX_255(ch))
+    {
+    if (((code->tables + cbits_offset +
+        (next_to_upper? cbit_upper:cbit_lower)
+        )[ch/8] & (1u << (ch%8))) == 0)
+      ch = (code->tables + fcc_offset)[ch];
+    }
+
+#ifdef SUPPORT_UNICODE
+  if (utf) chlen = PRIV(ord2utf)(ch, temp); else
+#endif
+    {
+    temp[0] = ch;
+    chlen = 1;
+    }
+
+  if (!overflow && chlen < output_cap)
+    {
+    memcpy(output, temp, chlen);
+    output += chlen;
+    output_cap -= chlen;
+    }
+  else
+    {
+    overflow = TRUE;
+    }
+
+  if (chlen > ~(PCRE2_SIZE)0 - written)  /* Integer overflow */
+    return ~(PCRE2_SIZE)0;
+  written += chlen;
+
+  next_to_upper = rest_to_upper;
+  }
+
+return written;
+}
+
+/* Helper to perform the call to the substitute_case_callout. We wrap the
+user-provided callout because our internal arguments are slightly extended. We
+don't want the user callout to handle the case of "\l" (first character only to
+lowercase) or "\l\U" (first character to lowercase, rest to uppercase) because
+those are not operations defined by Unicode. Instead the user callout simply
+needs to provide the three Unicode primitives: lower, upper, titlecase. */
+
+static PCRE2_SIZE
+do_case_copy(
+  PCRE2_SPTR input, PCRE2_SIZE input_len,
+  PCRE2_UCHAR *output, PCRE2_SIZE output_cap,
+  case_state *state, BOOL utf,
+  PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *,
+                                        PCRE2_SIZE, int, void *),
+  void *substitute_case_callout_data)
+{
+PCRE2_SIZE rc;
+PCRE2_SIZE rc2;
+int ch1_to_case;
+int rest_to_case;
+PCRE2_UCHAR ch1[6];
+PCRE2_SIZE ch1_len;
+PCRE2_SPTR rest;
+PCRE2_SIZE rest_len;
+BOOL ch1_overflow = FALSE;
+BOOL rest_overflow = FALSE;
+
+if (input_len == 0) return 0;
+
+/* Helpful simplifying invariant: input == output when the callout is non-null;
+or for our default behaviour, they are disjoint buffers.
+I believe that this code is technically undefined behaviour, because the two
+pointers input/output are "unrelated" pointers and hence not comparable. Casting
+via char* bypasses some but not all of those technical rules. It is not included
+in release builds, in any case. */
+PCRE2_ASSERT((substitute_case_callout != NULL)?
+               ((char *)input == (char *)output) :
+               (((char *)(input + input_len) <= (char *)output) ||
+                ((char *)(output + output_cap) <= (char *)input)));
+
+switch (state->to_case)
+  {
+  default:
+  PCRE2_DEBUG_UNREACHABLE();
+  return 0;
+
+  case PCRE2_SUBSTITUTE_CASE_LOWER: // Can be single_char TRUE or FALSE
+  case PCRE2_SUBSTITUTE_CASE_UPPER: // Can only be single_char FALSE
+  case PCRE2_SUBSTITUTE_CASE_TITLE_FIRST: // Can be single_char TRUE or FALSE
+
+  /* The easy case, where our internal casing operations align with those of
+  the callout. */
+
+  if (state->single_char == FALSE)
+    {
+    if (substitute_case_callout == NULL)
+      substitute_case_callout = default_substitute_case_callout;
+
+    rc = substitute_case_callout(input, input_len, output, output_cap,
+                                 state->to_case, substitute_case_callout_data);
+
+    if (state->to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
+      state->to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
+
+    return rc;
+    }
+
+  ch1_to_case = state->to_case;
+  rest_to_case = PCRE2_SUBSTITUTE_CASE_NONE;
+  break;
+
+  case PCRE2_SUBSTITUTE_CASE_REVERSE_TITLE_FIRST: // Can only be single_char FALSE
+  ch1_to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
+  rest_to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
+  break;
+  }
+
+/* Identify the leading character. Take copy, because its storage could
+overlap with `output`, and hence be scrambled by the callout. */
+  {
+  PCRE2_SPTR ch_end = input;
+  uint32_t ch;
+
+  GETCHARINCTEST(ch, ch_end);
+  (void) ch;
+  PCRE2_ASSERT(ch_end <= input + input_len && ch_end - input <= 6);
+  ch1_len = ch_end - input;
+  memcpy(ch1, input, CU2BYTES(ch1_len));
+  }
+
+rest = input + ch1_len;
+rest_len = input_len - ch1_len;
+
+/* Transform just ch1. With the default callout, the buffers are disjoint; no
+need for anything fancy. */
+
+if (substitute_case_callout == NULL)
+  {
+  rc = default_substitute_case_callout(ch1, ch1_len, output, output_cap,
+                                       ch1_to_case,
+                                       substitute_case_callout_data);
+  if (rc > output_cap) ch1_overflow = TRUE;
+  }
+
+/* Transform just ch1. The buffers are always in-place (input == output). With a
+custom callout, we need a loop to discover its required buffer size. The loop
+wouldn't be required if the callout were well-behaved, but it might be naughty
+and return "5" the first time, then "10" the next time we call it using the
+exact same input! */
+
+else
+  {
+  PCRE2_SIZE ch1_cap;
+  PCRE2_SIZE max_ch1_cap;
+
+  ch1_cap = ch1_len;  /* First attempt uses the space vacated by ch1. */
+  PCRE2_ASSERT(output_cap >= input_len && input_len >= rest_len);
+  max_ch1_cap = output_cap - rest_len;
+
+  while (TRUE)
+    {
+    rc = substitute_case_callout(ch1, ch1_len, output, ch1_cap, ch1_to_case,
+                                 substitute_case_callout_data);
+    if (rc == ~(PCRE2_SIZE)0) return rc;
+
+    if (rc <= ch1_cap) break;
+
+    if (rc > max_ch1_cap)
+      {
+      ch1_overflow = TRUE;
+      break;
+      }
+
+    /* Move the rest to the right, to make room for expanding ch1. */
+
+    memmove((PCRE2_UCHAR *)input + rc, rest, CU2BYTES(rest_len));
+    rest = input + rc;
+
+    ch1_cap = rc;
+
+    /* Proof of loop termination: `ch1_cap` is growing on each iteration, but
+    the loop ends if `rc` reaches the (unchanging) upper bound of output_cap. */
+    }
+  }
+
+if (rest_to_case == PCRE2_SUBSTITUTE_CASE_NONE)
+  {
+  if (!ch1_overflow && rest_len <= output_cap - rc)
+    memmove(output + rc, rest, CU2BYTES(rest_len));
+  rc2 = rest_len;
+
+  state->to_case = PCRE2_SUBSTITUTE_CASE_NONE;
+  }
+else
+  {
+  PCRE2_UCHAR dummy[1];
+
+  if (substitute_case_callout == NULL)
+    substitute_case_callout = default_substitute_case_callout;
+
+  rc2 = substitute_case_callout(rest, rest_len,
+                                ch1_overflow? dummy : output + rc,
+                                ch1_overflow? 0u : output_cap - rc,
+                                rest_to_case, substitute_case_callout_data);
+  if (rc2 == ~(PCRE2_SIZE)0) return rc2;
+
+  if (!ch1_overflow && rc2 > output_cap - rc) rest_overflow = TRUE;
+
+  /* If ch1 grows so that `xform(ch1)+rest` can't fit in the buffer, but then
+  `rest` shrinks, it's actually possible for the total calculated length of
+  `xform(ch1)+xform(rest)` to come out at less than output_cap. But we can't
+  report that, because it would make it seem that the operation succeeded.
+  If either of xform(ch1) or xform(rest) won't fit in the buffer, our final
+  result must be > output_cap. */
+  if (ch1_overflow && rc2 < rest_len)
+    rc2 = rest_len;
+
+  state->to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
+  }
+
+if (rc2 > ~(PCRE2_SIZE)0 - rc) return ~(PCRE2_SIZE)0;  /* Integer overflow */
+PCRE2_ASSERT(!(ch1_overflow || rest_overflow) || rc + rc2 > output_cap);
+return rc + rc2;
+}
+
+
+/*************************************************
 *              Match and substitute              *
 *************************************************/
 
@@ -289,25 +611,85 @@ Returns:          >= 0 number of substitutions made
 overflow, either give an error immediately, or keep on, accumulating the
 length. */
 
-#define CHECKMEMCPY(from,length) \
-  { \
-  if (!overflowed && lengthleft < length) \
-    { \
-    if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
-    overflowed = TRUE; \
-    extra_needed = length - lengthleft; \
-    } \
-  else if (overflowed) \
-    { \
-    extra_needed += length; \
-    }  \
-  else \
-    {  \
-    memcpy(buffer + buff_offset, from, CU2BYTES(length)); \
-    buff_offset += length; \
-    lengthleft -= length; \
-    } \
-  }
+#define CHECKMEMCPY(from, length_) \
+  do {    \
+     PCRE2_SIZE length = length_; \
+     if (!overflowed && lengthleft < length) \
+       {  \
+       if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
+       overflowed = TRUE; \
+       extra_needed = length - lengthleft; \
+       }  \
+     else if (overflowed) \
+       {  \
+       extra_needed += length; \
+       }  \
+     else \
+       {  \
+       memcpy(buffer + buff_offset, from, CU2BYTES(length)); \
+       buff_offset += length; \
+       lengthleft -= length; \
+       }  \
+     }    \
+  while (0)
+
+/* This macro checks for space and copies characters with casing modifications.
+On overflow, it behaves as for CHECKMEMCPY().
+
+When substitute_case_callout is NULL, the source and destination buffers must
+not overlap, because our default handler does not support this. */
+
+#define CHECKCASECPY(from, length_) \
+  do {    \
+     PCRE2_SIZE length = (PCRE2_SIZE)(length_); \
+     PCRE2_SIZE rc = do_case_copy(from, length, buffer + buff_offset,       \
+                                  overflowed? 0 : lengthleft,               \
+                                  &forcecase, utf, substitute_case_callout, \
+                                  substitute_case_callout_data);            \
+     if (rc == ~(PCRE2_SIZE)0) goto CASEERROR; \
+     if (!overflowed && lengthleft < rc) \
+       {  \
+       if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
+       overflowed = TRUE; \
+       extra_needed = rc - lengthleft; \
+       }  \
+     else if (overflowed) \
+       {  \
+       extra_needed += rc; \
+       }  \
+     else \
+       {  \
+       buff_offset += rc; \
+       lengthleft -= rc; \
+       }  \
+     }    \
+  while (0)
+
+/* This macro does a delayed case transformation, for the situation when we have
+a case-forcing callout. */
+
+#define DELAYEDFORCECASE() \
+  do {      \
+     PCRE2_SIZE chars_outstanding = (buff_offset - casestart_offset) + \
+            (extra_needed - casestart_extra_needed); \
+     if (chars_outstanding > 0) \
+       {    \
+       if (!overflowed) \
+         {  \
+         /* Rewind the buffer */ \
+         lengthleft += (buff_offset - casestart_offset); \
+         buff_offset = casestart_offset; \
+         /* Care! In-place case transformation */ \
+         CHECKCASECPY(buffer + buff_offset, chars_outstanding); \
+         }  \
+       else \
+         {  \
+         extra_needed += pessimistic_case_inflation(chars_outstanding); \
+         }  \
+       }    \
+     }      \
+  while (0)
+
 
 /* Here's the function */
 
@@ -319,8 +701,6 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 {
 int rc;
 int subs;
-int forcecase = 0;
-int forcecasereset = 0;
 uint32_t ovector_count;
 uint32_t goptions = 0;
 uint32_t suboptions;
@@ -336,12 +716,17 @@ BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend = NULL;
+// XXX AARGH! All the arithmetic on extra_needed is done without overflow
+// checking - it can totally fail, especially on 32-bit systems
 PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
 PCRE2_SIZE ovecsave[3];
 pcre2_substitute_callout_block scb;
 PCRE2_SIZE sub_start_extra_needed;
+PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *,
+                                      PCRE2_SIZE, int, void *) = NULL;
+void *substitute_case_callout_data = NULL;
 
 /* General initialization */
 
@@ -349,6 +734,16 @@ buff_offset = 0;
 lengthleft = buff_length = *blength;
 *blength = PCRE2_UNSET;
 ovecsave[0] = ovecsave[1] = ovecsave[2] = PCRE2_UNSET;
+
+if (mcontext != NULL)
+  {
+  substitute_case_callout = mcontext->substitute_case_callout;
+  substitute_case_callout_data = mcontext->substitute_case_callout_data;
+  }
+if (substitute_case_callout == NULL)
+  {
+  substitute_case_callout_data = (void *)code;
+  }
 
 /* Partial matching is not valid. This must come after setting *blength to
 PCRE2_UNSET, so as not to imply an offset in the replacement. */
@@ -483,6 +878,9 @@ do
   {
   PCRE2_SPTR ptrstack[PTR_STACK_SIZE];
   uint32_t ptrstackptr = 0;
+  case_state forcecase = { PCRE2_SUBSTITUTE_CASE_NONE, FALSE };
+  PCRE2_SIZE casestart_offset = 0;
+  PCRE2_SIZE casestart_extra_needed = 0;
 
   if (use_existing_match)
     {
@@ -832,8 +1230,15 @@ do
             /* Peek backwards one code unit to obtain the length of the mark.
             It can (theoretically) contain an embedded NUL. */
             fraglength = mark[-1];
-            CHECKMEMCPY(mark, fraglength);
+            if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
+                substitute_case_callout == NULL)
+              CHECKCASECPY(mark, fraglength);
+            else
+              CHECKMEMCPY(mark, fraglength);
             }
+
+            // XXX ^^^ This is a behavioural change (to do casing on a MARK)
+            // Ensure we have test coverage, and check it's OK with Philip
           }
         else goto BAD;
         }
@@ -941,50 +1346,13 @@ do
         /* Substitute a literal string, possibly forcing alphabetic case. */
 
         SUBPTR_SUBSTITUTE:
-        while (subptr < subptrend)
-          {
-          GETCHARINCTEST(ch, subptr);
-          if (forcecase != 0)
-            {
-            if (mcontext != NULL && mcontext->substitute_case_callout != NULL)
-              {
-              ch = mcontext->substitute_case_callout(
-                ch,
-                forcecase > 0 && forcecasereset < 0 ? PCRE2_SUBSTITUTE_CASE_TITLE
-                  : forcecase > 0 ? PCRE2_SUBSTITUTE_CASE_UPPER
-                  : PCRE2_SUBSTITUTE_CASE_LOWER,
-                mcontext->substitute_case_callout_data);
-              }
-#ifdef SUPPORT_UNICODE
-            else if (utf || ucp)
-              {
-              uint32_t type = UCD_CHARTYPE(ch);
-              if (PRIV(ucp_gentype)[type] == ucp_L &&
-                  type != ((forcecase > 0)? ucp_Lu : ucp_Ll))
-                ch = UCD_OTHERCASE(ch);
-              }
-#endif
-            else
-              {
-              if (((code->tables + cbits_offset +
-                  ((forcecase > 0)? cbit_upper:cbit_lower)
-                  )[ch/8] & (1u << (ch%8))) == 0)
-                ch = (code->tables + fcc_offset)[ch];
-              }
-            forcecase = forcecasereset;
-            }
-
-#ifdef SUPPORT_UNICODE
-          if (utf) chlen = PRIV(ord2utf)(ch, temp); else
-#endif
-            {
-            temp[0] = ch;
-            chlen = 1;
-            }
-          CHECKMEMCPY(temp, chlen);
-          }
+        if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
+            substitute_case_callout == NULL)
+          CHECKCASECPY(subptr, subptrend - subptr);
+        else
+          CHECKMEMCPY(subptr, subptrend - subptr);
         }
-      }
+      }   /* End of $ processing */
 
     /* Handle an escape sequence in extended mode. We can use check_escape()
     to process \Q, \E, \c, \o, \x and \ followed by non-alphanumerics, but
@@ -995,44 +1363,70 @@ do
               *ptr == CHAR_BACKSLASH)
       {
       int errorcode;
+      case_state new_forcecase = { PCRE2_SUBSTITUTE_CASE_NONE, FALSE };
 
       if (ptr < repend - 1) switch (ptr[1])
         {
         case CHAR_L:
-        forcecase = forcecasereset = -1;
+        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
+        new_forcecase.single_char = FALSE;
         ptr += 2;
-        continue;
+        break;
 
         case CHAR_l:
-        forcecase = -1;
-        forcecasereset = 0;
+        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
+        new_forcecase.single_char = TRUE;
         ptr += 2;
         if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_U)
           {
-          /* Perl title-casing feature for \l\U (and \u\L) */
-          forcecasereset = 1;
+          /* Perl reverse-title-casing feature for \l\U */
+          new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_REVERSE_TITLE_FIRST;
+          new_forcecase.single_char = FALSE;
           ptr += 2;
           }
-        continue;
+        break;
 
         case CHAR_U:
-        forcecase = forcecasereset = 1;
+        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
+        new_forcecase.single_char = FALSE;
         ptr += 2;
-        continue;
+        break;
 
         case CHAR_u:
-        forcecase = 1;
-        forcecasereset = 0;
+        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_TITLE_FIRST;
+        new_forcecase.single_char = TRUE;
         ptr += 2;
         if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_L)
           {
-          forcecasereset = -1;
+          /* Perl title-casing feature for \u\L */
+          new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_TITLE_FIRST;
+          new_forcecase.single_char = FALSE;
           ptr += 2;
           }
-        continue;
+        break;
 
         default:
         break;
+        }
+
+      if (new_forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE)
+        {
+        SETFORCECASE:
+
+        /* If the substitute_case_callout is unset, our case-forcing is done
+        immediately. If there is a callout however, then its action is delayed
+        until all the characters have been collected.
+
+        Apply the callout now, before we set the new casing mode. */
+
+        if (substitute_case_callout != NULL &&
+            forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE)
+          DELAYEDFORCECASE();
+
+        forcecase = new_forcecase;
+        casestart_offset = buff_offset;
+        casestart_extra_needed = extra_needed;
+        continue;
         }
 
       ptr++;  /* Point after \ */
@@ -1043,23 +1437,33 @@ do
       switch(rc)
         {
         case ESC_E:
-        forcecase = forcecasereset = 0;
-        continue;
+        goto SETFORCECASE;
 
         case ESC_Q:
         escaped_literal = TRUE;
         continue;
 
         case 0:      /* Data character */
-        goto LITERAL;
+        case ESC_b:  /* \b is backspace in a substitution */
+        case ESC_v:  /* \v is vertical tab in a substitution */
 
-        case ESC_b:
-        ch = CHAR_BS;    /* \b is backspace in a substitution */
-        goto LITERAL;
+        if (rc == ESC_b) ch = CHAR_BS;
+        if (rc == ESC_v) ch = CHAR_VT;
 
-        case ESC_v:
-        ch = CHAR_VT;    /* \v is vertical tab in a substitution */
-        goto LITERAL;
+#ifdef SUPPORT_UNICODE
+        if (utf) chlen = PRIV(ord2utf)(ch, temp); else
+#endif
+          {
+          temp[0] = ch;
+          chlen = 1;
+          }
+
+        if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
+            substitute_case_callout == NULL)
+          CHECKCASECPY(temp, chlen);
+        else
+          CHECKMEMCPY(temp, chlen);
+        continue;
 
         case ESC_g:
           {
@@ -1096,56 +1500,37 @@ do
           }
         goto BADESCAPE;
         }
-      }
+      }   /* End of backslash processing */
 
     /* Handle a literal code unit */
 
     else
       {
+      PCRE2_SPTR ch_start;
+
       LOADLITERAL:
+      ch_start = ptr;
       GETCHARINCTEST(ch, ptr);    /* Get character value, increment pointer */
+      (void) ch;
 
-      LITERAL:
-      if (forcecase != 0)
-        {
-        if (mcontext != NULL && mcontext->substitute_case_callout != NULL)
-          {
-          ch = mcontext->substitute_case_callout(
-            ch,
-            forcecase > 0 && forcecasereset < 0 ? PCRE2_SUBSTITUTE_CASE_TITLE
-              : forcecase > 0 ? PCRE2_SUBSTITUTE_CASE_UPPER
-              : PCRE2_SUBSTITUTE_CASE_LOWER,
-            mcontext->substitute_case_callout_data);
-          }
-#ifdef SUPPORT_UNICODE
-        else if (utf || ucp)
-          {
-          uint32_t type = UCD_CHARTYPE(ch);
-          if (PRIV(ucp_gentype)[type] == ucp_L &&
-              type != ((forcecase > 0)? ucp_Lu : ucp_Ll))
-            ch = UCD_OTHERCASE(ch);
-          }
-#endif
-        else
-          {
-          if (((code->tables + cbits_offset +
-              ((forcecase > 0)? cbit_upper:cbit_lower)
-              )[ch/8] & (1u << (ch%8))) == 0)
-            ch = (code->tables + fcc_offset)[ch];
-          }
-        forcecase = forcecasereset;
-        }
-
-#ifdef SUPPORT_UNICODE
-      if (utf) chlen = PRIV(ord2utf)(ch, temp); else
-#endif
-        {
-        temp[0] = ch;
-        chlen = 1;
-        }
-      CHECKMEMCPY(temp, chlen);
+      if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
+          substitute_case_callout == NULL)
+        CHECKCASECPY(ch_start, ptr - ch_start);
+      else
+        CHECKMEMCPY(ch_start, ptr - ch_start);
       } /* End handling a literal code unit */
     }   /* End of loop for scanning the replacement. */
+
+  /* If the substitute_case_callout is unset, our case-forcing is done
+  immediately. If there is a callout however, then its action is delayed
+  until all the characters have been collected.
+
+  We now clean up any trailing section of the replacement for which we deferred
+  the case-forcing. */
+
+  if (substitute_case_callout != NULL &&
+      forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE)
+    DELAYEDFORCECASE();
 
   /* The replacement has been copied to the output, or its size has been
   remembered. Handle the callout if there is one. */
@@ -1258,6 +1643,10 @@ return rc;
 
 NOROOM:
 rc = PCRE2_ERROR_NOMEMORY;
+goto EXIT;
+
+CASEERROR:
+rc = PCRE2_ERROR_REPLACECASE;
 goto EXIT;
 
 BAD:

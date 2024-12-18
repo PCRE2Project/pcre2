@@ -1129,7 +1129,7 @@ process.
       replace=<string>            specify a replacement string
       startchar                   show starting character when relevant
       substitute_callout          use substitution callouts
-      substitute_case_callout=<string> use substitution case callouts
+      substitute_case_callout     use substitution case callouts
       substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
       substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
       substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
@@ -1316,7 +1316,7 @@ pattern, but can be overridden by modifiers on the subject.
       startchar                  show startchar when relevant
       startoffset=<n>            same as offset=<n>
       substitute_callout         use substitution callouts
-      substitute_case_callout=<string> use substitution case callouts
+      substitute_case_callout    use substitution case callouts
       substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
       substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
       substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
@@ -1605,20 +1605,15 @@ or stop is supported, which is sufficient for testing that the feature works.
 .SS "Testing substitute case callouts"
 .rs
 .sp
-If the \fBsubstitute_case_callout=<string>\fP modifier is set, a substitution
+If the \fBsubstitute_case_callout\fP modifier is set, a substitution
 case callout function is set up. The callout function is called for each
-substituted character which is to be case-transformed, and the mapping used
-is specified by the modifier's string argument.
+substituted chunk which is to be case-transformed.
 .P
-The string argument is parsed as four-character blocks, with each block
-interpreted as "<input><lower><upper><title>". The input character is used
-to find a matching block, and the corresponding character is then returned.
-For example, to specify a custom uppercasing of the letter "a" to "Z":
-.sp
-  /a/g,replace=\eU$0,substitute_extended,substitute_case_callout=a.Z.
-      a
-   1: Z
-.sp
+The callout function passed is a fixed function with implementation for certain
+behaviours: inputs which shrink when case-transformed; inputs which grow; inputs
+with distinct upper/lower/titlecase forms. The characters which are not
+special-cased for testing purposes are left unmodified, as if they are caseless
+characters.
 .
 .
 .SS "Setting the JIT stack size"
