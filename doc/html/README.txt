@@ -964,7 +964,7 @@ The distribution should contain the files listed below.
   vms/pcre2.h_patch       )
   vms/stdint.h            )
 
-Philip Hazel
-Email local part: Philip.Hazel
-Email domain: gmail.com
-Last updated: 15 April 2024
+===========================
+Last Updated: 15 April 2024
+===========================
+
