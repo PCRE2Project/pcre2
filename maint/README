@@ -160,6 +160,23 @@ are written to testinput and testoutput in the current directory, but they
 should be moved to replace the files inside the main testdata directory and
 that are being used for tests 27 or 26.
 
+In summary:
+
+```
+./GenerateUcd.py       ../src/pcre2_ucd.c
+./GenerateUcpHeader.py ../src/pcre2_ucp.h
+./GenerateUcpTables.py ../src/pcre2_ucptables.c
+./GenerateTest.py
+mv testinput ../testdata/testinput27
+mv testoutput ../testdata/testoutput27
+
+...compile ucptest.c
+for i in 1 2; do
+  ./ucptest < ucptestdata/testinput$i > testoutput$i
+  diff -U3 testoutput$i ucptestdata/testoutput$i
+done
+```
+
 
 Preparing for a PCRE2 release
 =============================

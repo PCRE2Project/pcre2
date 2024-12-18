@@ -26,9 +26,9 @@ if [ -f /usr/bin/ggrep ] ; then
   grep=/usr/bin/ggrep
 fi
 
-find "$input_dir" -print0 | \
-  sort -z | \
-  xargs -0 -n1 -- ls -l -d -n | \
+find "$input_dir" -print | \
+  sort | \
+  xargs -n1 -- ls -l -d -n | \
   $sed -E -e 's/ {2,}/ /g' | \
   cut -d' ' -f '1,9-' \
   > "$base"
@@ -36,9 +36,9 @@ find "$input_dir" -print0 | \
 if ! diff -u "$expected_manifest" "$base"; then
   echo "Installed files differ from expected" >&2
 
-  echo "===Actual==="
-  cat "$base"
-  echo "===End==="
+  echo "===Actual===" >&2
+  cat "$base" >&2
+  echo "===End===" >&2
 
   exit 1
 fi

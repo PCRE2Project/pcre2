@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 #                   PCRE2 UNICODE PROPERTY SUPPORT
 #                   ------------------------------
 
