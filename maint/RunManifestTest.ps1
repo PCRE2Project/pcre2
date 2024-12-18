@@ -1,5 +1,3 @@
-#/bin/sh
-
 # Script to test a directory listing. We use this to verify that the list of
 # files installed by "make install" or "cmake --install" matches what we expect.
 
@@ -35,3 +33,4 @@ if ($expectedFiles -ne $actualFiles) {
 }
 
 Write-Host "Installed files match expected"
+Remove-Item -Path $base -Force

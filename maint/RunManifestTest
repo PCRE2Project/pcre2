@@ -1,9 +1,9 @@
-#/bin/sh
+#! /bin/sh
 
 # Script to test a directory listing. We use this to verify that the list of
 # files installed by "make install" or "cmake --install" matches what we expect.
 
-LANG=C # Ensure stable ordering of `ls` output
+LANG=C # Ensure stable ordering of `sort` output
 export LANG
 
 if [ "$1" = "" -o "$2" = "" ] ; then
@@ -26,8 +26,9 @@ if [ -f /usr/bin/ggrep ] ; then
   grep=/usr/bin/ggrep
 fi
 
-ls -R -l -n -A "$input_dir" | \
-  $grep -v '^total' | \
+find "$input_dir" -print0 | \
+  sort -z | \
+  xargs -0 -n1 -- ls -l -d -n | \
   $sed -E -e 's/ {2,}/ /g' | \
   cut -d' ' -f '1,9-' \
   > "$base"
@@ -43,3 +44,4 @@ if ! diff -u "$expected_manifest" "$base"; then
 fi
 
 echo "Installed files match expected"
+rm -f "$base"

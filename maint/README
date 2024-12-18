@@ -60,6 +60,10 @@ GenerateUcpTables.py
   GenerateCommon.py and Unicode data files. The generated file contains tables
   for looking up Unicode property names.
 
+manifest-*
+  Data files used to verify the contents of the distribution tarball and
+  `make install` file lists.
+
 ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
   different configuration settings.
@@ -75,6 +79,11 @@ pcre2_chartables.c.non-standard
 
 README
   This file.
+
+RunManifestTest
+RunManifestTest.ps1
+  Scripts to generate and verify a list of files against an expected 'manifest'
+  detailing what the directory should contain.
 
 Unicode.tables
   The files in this directory were downloaded from the Unicode web site. They

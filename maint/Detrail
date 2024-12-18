@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! /usr/bin/perl
 
 # This is a script for removing trailing whitespace from lines in files that
 # are listed on the command line.
