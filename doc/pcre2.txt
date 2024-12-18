@@ -185,11 +185,11 @@ AUTHORS
 
 REVISION
 
-       Last updated: 27 August 2021
+       Last updated: 18 December 2024
        Copyright (c) 1997-2021 University of Cambridge.
 
 
-PCRE2 10.38                     27 August 2021                        PCRE2(3)
+PCRE2 10.45-DEV                18 December 2024                       PCRE2(3)
 ------------------------------------------------------------------------------
 
 
@@ -4237,11 +4237,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 October 2024
+       Last updated: 10 December 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     04 October 2024                    PCRE2API(3)
+PCRE2 10.45-DEV                10 December 2024                    PCRE2API(3)
 ------------------------------------------------------------------------------
 
 
@@ -4863,11 +4863,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 15 April 2024
+       Last updated: 16 April 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.44                      15 April 2024                   PCRE2BUILD(3)
+PCRE2 10.45-DEV                  16 April 2024                   PCRE2BUILD(3)
 ------------------------------------------------------------------------------
 
 
@@ -5300,7 +5300,7 @@ REVISION
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.43                     19 January 2024                PCRE2CALLOUT(3)
+PCRE2 10.45-DEV                 19 January 2024                PCRE2CALLOUT(3)
 ------------------------------------------------------------------------------
 
 
@@ -5550,11 +5550,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 September 2024
+       Last updated: 02 October 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    01 September 2024                PCRE2COMPAT(3)
+PCRE2 10.45-DEV                 02 October 2024                 PCRE2COMPAT(3)
 ------------------------------------------------------------------------------
 
 
@@ -6005,11 +6005,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 23 July 2024
+       Last updated: 22 August 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                      23 July 2024                      PCRE2JIT(3)
+PCRE2 10.45-DEV                 22 August 2024                     PCRE2JIT(3)
 ------------------------------------------------------------------------------
 
 
@@ -6088,11 +6088,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: August 2023
+       Last updated: 16 August 2023
        Copyright (c) 1997-2023 University of Cambridge.
 
 
-PCRE2 10.43                      1 August 2023                  PCRE2LIMITS(3)
+PCRE2 10.45-DEV                 16 August 2023                  PCRE2LIMITS(3)
 ------------------------------------------------------------------------------
 
 
@@ -6325,7 +6325,7 @@ REVISION
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                     30 August 2024                PCRE2MATCHING(3)
+PCRE2 10.45-DEV                 30 August 2024                PCRE2MATCHING(3)
 ------------------------------------------------------------------------------
 
 
@@ -6704,11 +6704,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 September 2019
+       Last updated: 27 November 2024
        Copyright (c) 1997-2019 University of Cambridge.
 
 
-PCRE2 10.34                    04 September 2019               PCRE2PARTIAL(3)
+PCRE2 10.45-DEV                27 November 2024                PCRE2PARTIAL(3)
 ------------------------------------------------------------------------------
 
 
@@ -10538,7 +10538,7 @@ REVISION
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    27 November 2024                PCRE2PATTERN(3)
+PCRE2 10.45-DEV                27 November 2024                PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
 
 
@@ -10789,11 +10789,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 July 2022
+       Last updated: 06 December 2022
        Copyright (c) 1997-2022 University of Cambridge.
 
 
-PCRE2 10.41                      27 July 2022                  PCRE2PERFORM(3)
+PCRE2 10.45-DEV                06 December 2022                PCRE2PERFORM(3)
 ------------------------------------------------------------------------------
 
 
@@ -11147,11 +11147,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 19 January 2024
+       Last updated: 27 November 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.43                     19 January 2024                  PCRE2POSIX(3)
+PCRE2 10.45-DEV                27 November 2024                  PCRE2POSIX(3)
 ------------------------------------------------------------------------------
 
 
@@ -11240,11 +11240,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 02 February 2016
+       Last updated: 14 November 2023
        Copyright (c) 1997-2016 University of Cambridge.
 
 
-PCRE2 10.22                    02 February 2016                 PCRE2SAMPLE(3)
+PCRE2 10.45-DEV                14 November 2023                 PCRE2SAMPLE(3)
 ------------------------------------------------------------------------------
 PCRE2SERIALIZE(3)          Library Functions Manual          PCRE2SERIALIZE(3)
 
@@ -11431,11 +11431,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 27 June 2018
+       Last updated: 19 January 2024
        Copyright (c) 1997-2018 University of Cambridge.
 
 
-PCRE2 10.32                      27 June 2018                PCRE2SERIALIZE(3)
+PCRE2 10.45-DEV                 19 January 2024              PCRE2SERIALIZE(3)
 ------------------------------------------------------------------------------
 
 
@@ -12139,7 +12139,7 @@ REVISION
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                    27 November 2024                 PCRE2SYNTAX(3)
+PCRE2 10.45-DEV                27 November 2024                 PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
 
 
@@ -12630,11 +12630,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 22 July 2024
+       Last updated: 27 November 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45                      22 July 2024                  PCRE2UNICODE(3)
+PCRE2 10.45-DEV                27 November 2024                PCRE2UNICODE(3)
 ------------------------------------------------------------------------------
 
 
