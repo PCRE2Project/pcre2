@@ -1,1 +1,2 @@
-testdata/*    -text
+testdata/*        -text
+maint/manifest-*  -text

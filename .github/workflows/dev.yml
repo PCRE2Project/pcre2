@@ -95,13 +95,19 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
 
       - name: Test
         run: cd build && ctest -j3 --output-on-failure
+
+      - name: Install
+        run: |
+          cd build
+          cmake --install . --prefix install-dir
+          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
 
   dodo:
     # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
@@ -124,6 +130,11 @@ jobs:
 
       - name: Test
         run: make check
+
+      - name: Install
+        run: |
+          make install "DESTDIR=`pwd`/install-dir"
+          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
 
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
@@ -157,13 +168,19 @@ jobs:
       - name: Configure
         run: |
           cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
-          CC='clang' CFLAGS='-fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function -pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
+          CC='clang' CFLAGS='-fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function -pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
 
       - name: Build
         run: ninja -C build
 
       - name: Test
         run: cd build && ctest -j3 --output-on-failure
+
+      - name: Install
+        run: |
+          cd build
+          cmake --install . --prefix install-dir
+          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
 
   bat:
     # Tests with: MSVC 32-bit, and a variety of CMake options

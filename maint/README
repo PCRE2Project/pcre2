@@ -60,6 +60,10 @@ GenerateUcpTables.py
   GenerateCommon.py and Unicode data files. The generated file contains tables
   for looking up Unicode property names.
 
+manifest-*
+  Data files used to verify the contents of the distribution tarball and
+  `make install` file lists.
+
 ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
   different configuration settings.
@@ -75,6 +79,11 @@ pcre2_chartables.c.non-standard
 
 README
   This file.
+
+RunManifestTest
+RunManifestTest.ps1
+  Scripts to generate and verify a list of files against an expected 'manifest'
+  detailing what the directory should contain.
 
 Unicode.tables
   The files in this directory were downloaded from the Unicode web site. They
@@ -150,6 +159,23 @@ are automatically generated from the Unicode data files. By default, the files
 are written to testinput and testoutput in the current directory, but they
 should be moved to replace the files inside the main testdata directory and
 that are being used for tests 27 or 26.
+
+In summary:
+
+```
+./GenerateUcd.py       ../src/pcre2_ucd.c
+./GenerateUcpHeader.py ../src/pcre2_ucp.h
+./GenerateUcpTables.py ../src/pcre2_ucptables.c
+./GenerateTest.py
+mv testinput ../testdata/testinput27
+mv testoutput ../testdata/testoutput27
+
+...compile ucptest.c
+for i in 1 2; do
+  ./ucptest < ucptestdata/testinput$i > testoutput$i
+  diff -U3 testoutput$i ucptestdata/testoutput$i
+done
+```
 
 
 Preparing for a PCRE2 release

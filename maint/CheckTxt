@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! /usr/bin/perl
 
 # This is a script for checking whether a file contains any carriage return
 # characters, and whether it is valid UTF-8.

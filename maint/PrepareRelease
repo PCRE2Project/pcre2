@@ -1,4 +1,4 @@
-#/bin/sh
+#! /bin/bash
 
 # Script to prepare the files for building a PCRE2 release. It does some
 # processing of the documentation and detrails files.
