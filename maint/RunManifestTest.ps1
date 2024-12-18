@@ -19,7 +19,7 @@ $installedFiles = Get-ChildItem -Recurse -Force -Path $inputDir |
   Sort-Object {[System.BitConverter]::ToString([system.Text.Encoding]::UTF8.GetBytes($_.FullName))} |
   ForEach-Object { $_.Mode.Substring(0,5) + " " + ($_.FullName | Resolve-Path -Relative) }
 
-$null = New-Item -Force $base -Value ($installedFiles | Out-String)
+$null = New-Item -Force $base -Value (($installedFiles | Out-String) -replace "`r`n", "`n")
 
 $expectedFiles = Get-Content -Path $manifestName -Raw
 $actualFiles = Get-Content -Path $base -Raw
