@@ -7034,6 +7034,15 @@ $/x
 \= Expect no match
     z
 
+/^.{4}/s
+    abcdef
+    abcde
+    abcd
+\= Expect no match
+    abc
+    ab
+    a
+
 # --------------
 
 # End of testinput1 

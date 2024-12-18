@@ -11054,6 +11054,21 @@ No match
     z
 No match
 
+/^.{4}/s
+    abcdef
+ 0: abcd
+    abcde
+ 0: abcd
+    abcd
+ 0: abcd
+\= Expect no match
+    abc
+No match
+    ab
+No match
+    a
+No match
+
 # --------------
 
 # End of testinput1 

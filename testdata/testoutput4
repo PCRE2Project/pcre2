@@ -1648,6 +1648,19 @@ No match
     \x{660}\x{661}\x{662}ABC
 No match
 
+/^\pN{3,}+(.)/utf
+   \x{7c0}8\x{662}\x{966}\x{95c}
+ 0: \x{7c0}8\x{662}\x{966}\x{95c}
+ 1: \x{95c}
+   \x{7c0}8\x{662}\x{95c}
+ 0: \x{7c0}8\x{662}\x{95c}
+ 1: \x{95c}
+\= Expect no match
+   \x{7c0}8\x{662}\x{966}
+No match
+   \x{7c0}8\x{95c}
+No match
+
 /(?<=A\p{Nd})XYZ/utf
     A2XYZ
  0: XYZ
@@ -1865,6 +1878,19 @@ No match
     A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
  0: A\x{300}\x{301}B\x{300}C
  1: C
+
+/^\X{3,}+/utf
+    A\x{300}B\x{301}U\x{303}\x{0301}
+ 0: A\x{300}B\x{301}U\x{303}\x{301}
+    A\x{300}B\x{301}U\x{303}\x{0301}X
+ 0: A\x{300}B\x{301}U\x{303}\x{301}X
+\= Expect no match
+    A\x{300}
+No match
+    A\x{300}B\x{301}
+No match
+    A\x{300}U\x{303}\x{0301}
+No match
 
 /^\X/utf
     A
