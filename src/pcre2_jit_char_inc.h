@@ -2007,7 +2007,7 @@ switch(type)
   if (common->mode == PCRE2_JIT_PARTIAL_HARD)
     {
     jump[0] = CMP(SLJIT_LESS, SLJIT_RETURN_REG, 0, STR_END, 0);
-    /* Since we successfully read a char above, partial matching must occure. */
+    /* Since we successfully read a char above, partial matching must occur. */
     check_partial(common, TRUE);
     JUMPHERE(jump[0]);
     }
