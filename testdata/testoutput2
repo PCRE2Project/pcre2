@@ -17419,6 +17419,64 @@ Subject length lower bound = 1
  1(2) Old 2 5 "abc" New 2 7 "<abc> STOPPED"
  1: 12abc34xyz
 
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[1]12
+    abc\=substitute_skip=1
+Failed: error -48: no more memory: 3 code units are needed
+    abc
+Failed: error -48: no more memory: 3 code units are needed
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[2]12
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 2 "12 SKIPPED"
+Failed: error -48: no more memory: 4 code units are needed
+    abc
+ 1(2) Old 0 3 "abc" New 0 2 "12"
+Failed: error -48: no more memory: 3 code units are needed
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[3]12
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 2 "12 SKIPPED"
+Failed: error -48: no more memory: 4 code units are needed
+    abc
+ 1(2) Old 0 3 "abc" New 0 2 "12"
+ 1: 12
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[4]12
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 2 "12 SKIPPED"
+ 1: abc
+    abc
+ 1(2) Old 0 3 "abc" New 0 2 "12"
+ 1: 12
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[2]1234
+    abc\=substitute_skip=1
+Failed: error -48: no more memory: 5 code units are needed
+    abc
+Failed: error -48: no more memory: 5 code units are needed
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[3]1234
+    abc\=substitute_skip=1
+Failed: error -48: no more memory: 5 code units are needed
+    abc
+Failed: error -48: no more memory: 5 code units are needed
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[4]1234
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 4 "1234 SKIPPED"
+ 1: abc
+    abc
+ 1(2) Old 0 3 "abc" New 0 4 "1234"
+Failed: error -48: no more memory: 5 code units are needed
+
+/a(b)c/substitute_overflow_length,substitute_callout,replace=[5]1234
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 4 "1234 SKIPPED"
+ 1: abc
+    abc
+ 1(2) Old 0 3 "abc" New 0 4 "1234"
+ 1: 1234
+
 /abc\rdef/
     abc\ndef
 No match
