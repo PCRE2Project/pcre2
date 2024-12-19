@@ -1148,60 +1148,62 @@ do
     }   /* End of loop for scanning the replacement. */
 
   /* The replacement has been copied to the output, or its size has been
-  remembered. Do the callout if there is one and we have done an actual
-  replacement. */
+  remembered. Handle the callout if there is one. */
 
-  if (mcontext == NULL || mcontext->substitute_callout == NULL)
-    {}
-
-  else if (!overflowed)
+  if (mcontext != NULL && mcontext->substitute_callout != NULL)
     {
-    scb.subscount = subs;
-    scb.output_offsets[1] = buff_offset;
-    rc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data);
+    /* If we an actual (non-simulated) replacement, do the callout. */
 
-    /* A non-zero return means cancel this substitution. Instead, copy the
-    matched string fragment. */
-
-    if (rc != 0)
+    if (!overflowed)
       {
-      PCRE2_SIZE newlength = scb.output_offsets[1] - scb.output_offsets[0];
+      scb.subscount = subs;
+      scb.output_offsets[1] = buff_offset;
+      rc = mcontext->substitute_callout(&scb,
+                                        mcontext->substitute_callout_data);
+
+      /* A non-zero return means cancel this substitution. Instead, copy the
+      matched string fragment. */
+
+      if (rc != 0)
+        {
+        PCRE2_SIZE newlength = scb.output_offsets[1] - scb.output_offsets[0];
+        PCRE2_SIZE oldlength = ovector[1] - ovector[0];
+
+        buff_offset -= newlength;
+        lengthleft += newlength;
+        if (!replacement_only) CHECKMEMCPY(subject + ovector[0], oldlength);
+
+        /* A negative return means do not do any more. */
+
+        if (rc < 0) suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
+        }
+      }
+
+    /* In this interesting case, we cannot do the callout, so it's hard to
+    estimate the required buffer size. What callers want is to be able to make
+    two calls to pcre2_substitute(), once with PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+    to discover the buffer size, and then a second and final call. Older
+    versions of PCRE2 violated this assumption, by proceding as if the callout
+    had returned zero - but on the second call to pcre2_substitute() it could
+    return non-zero and then overflow the buffer again. Callers probably don't
+    want to keep on looping to incrementally discover the buffer size. */
+
+    else
+      {
+      PCRE2_SIZE newlength = (buff_offset - scb.output_offsets[0]) +
+          (extra_needed - sub_start_extra_needed);
       PCRE2_SIZE oldlength = ovector[1] - ovector[0];
 
-      buff_offset -= newlength;
-      lengthleft += newlength;
-      if (!replacement_only) CHECKMEMCPY(subject + ovector[0], oldlength);
+      /* Be pessimistic: request whichever buffer size is larger out of
+      accepting or rejecting the substitution. */
 
-      /* A negative return means do not do any more. */
+      if (oldlength > newlength)
+        extra_needed += oldlength - newlength;
 
-      if (rc < 0) suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
+      /* Proceed as if the callout did not return a negative. A negative
+      effectively rejects all future substitutions, but we want to examine them
+      pessimistically. */
       }
-    }
-
-  /* In this interesting case, we cannot do the callout, so it's hard to
-  estimate the required buffer size. What callers want is to be able to make
-  two calls to pcre2_substitute(), once with PCRE2_SUBSTITUTE_OVERFLOW_LENGTH to
-  discover the buffer size, and then a second and final call. Older versions of
-  PCRE2 violated this assumption, by proceding as if the callout had returned
-  zero - but on the second call to pcre2_substitute() it could return non-zero
-  and then overflow the buffer again. Callers probably don't want to keep on
-  looping to incrementally discover the buffer size. */
-
-  else
-    {
-    PCRE2_SIZE newlength = (buff_offset - scb.output_offsets[0]) +
-        (extra_needed - sub_start_extra_needed);
-    PCRE2_SIZE oldlength = ovector[1] - ovector[0];
-
-    /* Be pessimistic: request whichever buffer size is larger out of
-    accepting or rejecting the substitution. */
-
-    if (oldlength > newlength)
-      extra_needed += oldlength - newlength;
-
-    /* Proceed as if the callout did not return a negative. A negative
-    effectively rejects all future substitutions, but we want to examine them
-    pessimistically. */
     }
 
   /* Save the details of this match. See above for how this data is used. If we
