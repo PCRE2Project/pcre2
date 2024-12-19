@@ -17477,6 +17477,36 @@ Failed: error -48: no more memory: 5 code units are needed
  1(2) Old 0 3 "abc" New 0 4 "1234"
  1: 1234
 
+/a(b)c/substitute_callout,replace=[1]12
+    abc\=substitute_skip=1
+Failed: error -48: no more memory
+    abc
+Failed: error -48: no more memory
+
+/a(b)c/substitute_callout,replace=[2]12
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 2 "12 SKIPPED"
+Failed: error -48: no more memory
+    abc
+ 1(2) Old 0 3 "abc" New 0 2 "12"
+Failed: error -48: no more memory
+
+/a(b)c/substitute_callout,replace=[3]12
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 2 "12 SKIPPED"
+Failed: error -48: no more memory
+    abc
+ 1(2) Old 0 3 "abc" New 0 2 "12"
+ 1: 12
+
+/a(b)c/substitute_callout,replace=[4]12
+    abc\=substitute_skip=1
+ 1(2) Old 0 3 "abc" New 0 2 "12 SKIPPED"
+ 1: abc
+    abc
+ 1(2) Old 0 3 "abc" New 0 2 "12"
+ 1: 12
+
 /abc\rdef/
     abc\ndef
 No match
