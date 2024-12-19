@@ -4038,9 +4038,17 @@ above).
 The \fBpcre2_set_substitution_callout()\fP function can be used to specify a
 callout function for \fBpcre2_substitute()\fP. This information is passed in
 a match context. The callout function is called after each substitution has
-been processed, but it can cause the replacement not to happen. The callout
-function is not called for simulated substitutions that happen as a result of
-the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option.
+been processed, but it can cause the replacement not to happen.
+.P
+The callout function is not called for simulated substitutions that happen as a
+result of the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option. In this mode, when
+substitution processing exceeds the buffer space provided by the caller,
+processing continues by counting code units. The simulation is unable to
+populate the callout block, and so the simulation is pessimistic about the
+required buffer size. Whichever is larger of accepted or rejected substitution
+is reported as the required size. Therefore, the returned buffer length may be
+an overestimate (without a substitution callout, it is normally an exact
+measurement).
 .P
 The first argument of the callout function is a pointer to a substitute callout
 block structure, which contains the following fields, not necessarily in this
