@@ -17421,9 +17421,9 @@ Subject length lower bound = 1
 
 /a(b)c/substitute_overflow_length,substitute_callout,replace=[1]12
     abc\=substitute_skip=1
-Failed: error -48: no more memory: 3 code units are needed
+Failed: error -48: no more memory: 4 code units are needed
     abc
-Failed: error -48: no more memory: 3 code units are needed
+Failed: error -48: no more memory: 4 code units are needed
 
 /a(b)c/substitute_overflow_length,substitute_callout,replace=[2]12
     abc\=substitute_skip=1

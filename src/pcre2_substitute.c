@@ -341,6 +341,7 @@ PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
 PCRE2_SIZE ovecsave[3];
 pcre2_substitute_callout_block scb;
+PCRE2_SIZE sub_start_extra_needed;
 
 /* General initialization */
 
@@ -583,14 +584,16 @@ do
     }
   subs++;
 
-  /* Copy the text leading up to the match (unless not required), and remember
-  where the insert begins and how many ovector pairs are set. */
+  /* Copy the text leading up to the match (unless not required); remember
+  where the insert begins and how many ovector pairs are set; and remember how
+  much space we have requested in extra_needed. */
 
   if (rc == 0) rc = ovector_count;
   fraglength = ovector[0] - start_offset;
   if (!replacement_only) CHECKMEMCPY(subject + start_offset, fraglength);
   scb.output_offsets[0] = buff_offset;
   scb.oveccount = rc;
+  sub_start_extra_needed = extra_needed;
 
   /* Process the replacement string. If the entire replacement is literal, just
   copy it with length check. */
@@ -1148,7 +1151,10 @@ do
   remembered. Do the callout if there is one and we have done an actual
   replacement. */
 
-  if (!overflowed && mcontext != NULL && mcontext->substitute_callout != NULL)
+  if (mcontext == NULL || mcontext->substitute_callout == NULL)
+    {}
+
+  else if (!overflowed)
     {
     scb.subscount = subs;
     scb.output_offsets[1] = buff_offset;
@@ -1170,6 +1176,32 @@ do
 
       if (rc < 0) suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
       }
+    }
+
+  /* In this interesting case, we cannot do the callout, so it's hard to
+  estimate the required buffer size. What callers want is to be able to make
+  two calls to pcre2_substitute(), once with PCRE2_SUBSTITUTE_OVERFLOW_LENGTH to
+  discover the buffer size, and then a second and final call. Older versions of
+  PCRE2 violated this assumption, by proceding as if the callout had returned
+  zero - but on the second call to pcre2_substitute() it could return non-zero
+  and then overflow the buffer again. Callers probably don't want to keep on
+  looping to incrementally discover the buffer size. */
+
+  else
+    {
+    PCRE2_SIZE newlength = (buff_offset - scb.output_offsets[0]) +
+        (extra_needed - sub_start_extra_needed);
+    PCRE2_SIZE oldlength = ovector[1] - ovector[0];
+
+    /* Be pessimistic: request whichever buffer size is larger out of
+    accepting or rejecting the substitution. */
+
+    if (oldlength > newlength)
+      extra_needed += oldlength - newlength;
+
+    /* Proceed as if the callout did not return a negative. A negative
+    effectively rejects all future substitutions, but we want to examine them
+    pessimistically. */
     }
 
   /* Save the details of this match. See above for how this data is used. If we
