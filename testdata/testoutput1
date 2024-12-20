@@ -11069,6 +11069,38 @@ No match
     a
 No match
 
+/^(.{3,6}!)+$/s
+  abc!defghi!
+ 0: abc!defghi!
+ 1: defghi!
+  abcdef!ghi!
+ 0: abcdef!ghi!
+ 1: ghi!
+  abc!def!ghi!jkl!
+ 0: abc!def!ghi!jkl!
+ 1: jkl!
+  ab!cd!
+ 0: ab!cd!
+ 1: ab!cd!
+\= Expect no match
+  abcd!ef!
+No match
+  ab!cdefg!
+No match
+
+/[a-z]{5,}b|x/
+  abcdefghbijb
+ 0: abcdefghbijb
+  abcdefghbij
+ 0: abcdefghb
+  abcdeb
+ 0: abcdeb
+\= Expect no match
+  abcdb
+No match
+  abcdefghijk
+No match
+
 # --------------
 
 # End of testinput1 

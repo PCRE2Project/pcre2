@@ -7043,6 +7043,23 @@ $/x
     ab
     a
 
+/^(.{3,6}!)+$/s
+  abc!defghi!
+  abcdef!ghi!
+  abc!def!ghi!jkl!
+  ab!cd!
+\= Expect no match
+  abcd!ef!
+  ab!cdefg!
+
+/[a-z]{5,}b|x/
+  abcdefghbijb
+  abcdefghbij
+  abcdeb
+\= Expect no match
+  abcdb
+  abcdefghijk
+
 # --------------
 
 # End of testinput1 
