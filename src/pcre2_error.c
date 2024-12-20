@@ -295,6 +295,7 @@ static const unsigned char match_error_texts[] =
   "PCRE2_MATCH_INVALID_UTF is not supported for DFA matching\0"
   "INTERNAL ERROR: invalid substring offset\0"
   "feature is not supported by the JIT compiler\0"
+  "error performing replacement case transformation\0"
   ;
 
 
