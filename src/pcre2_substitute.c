@@ -376,7 +376,7 @@ while (input < input_end)
 
   if (!overflow && chlen < output_cap)
     {
-    memcpy(output, temp, chlen);
+    memcpy(output, temp, CU2BYTES(chlen));
     output += chlen;
     output_cap -= chlen;
     }
@@ -421,6 +421,10 @@ PCRE2_SPTR rest;
 PCRE2_SIZE rest_len;
 BOOL ch1_overflow = FALSE;
 BOOL rest_overflow = FALSE;
+
+#if PCRE2_CODE_UNIT_WIDTH == 32 || !defined(SUPPORT_UNICODE)
+(void)utf; /* Avoid compiler warning. */
+#endif
 
 if (input_len == 0) return 0;
 
@@ -576,7 +580,10 @@ else
   }
 
 if (rc2 > ~(PCRE2_SIZE)0 - rc) return ~(PCRE2_SIZE)0;  /* Integer overflow */
+
 PCRE2_ASSERT(!(ch1_overflow || rest_overflow) || rc + rc2 > output_cap);
+(void)rest_overflow;
+
 return rc + rc2;
 }
 
@@ -613,22 +620,22 @@ length. */
 
 #define CHECKMEMCPY(from, length_) \
   do {    \
-     PCRE2_SIZE length = length_; \
-     if (!overflowed && lengthleft < length) \
+     PCRE2_SIZE cmc_length = length_; \
+     if (!overflowed && lengthleft < cmc_length) \
        {  \
        if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
        overflowed = TRUE; \
-       extra_needed = length - lengthleft; \
+       extra_needed = cmc_length - lengthleft; \
        }  \
      else if (overflowed) \
        {  \
-       extra_needed += length; \
+       extra_needed += cmc_length; \
        }  \
      else \
        {  \
-       memcpy(buffer + buff_offset, from, CU2BYTES(length)); \
-       buff_offset += length; \
-       lengthleft -= length; \
+       memcpy(buffer + buff_offset, from, CU2BYTES(cmc_length)); \
+       buff_offset += cmc_length; \
+       lengthleft -= cmc_length; \
        }  \
      }    \
   while (0)
@@ -641,26 +648,27 @@ not overlap, because our default handler does not support this. */
 
 #define CHECKCASECPY(from, length_) \
   do {    \
-     PCRE2_SIZE length = (PCRE2_SIZE)(length_); \
-     PCRE2_SIZE rc = do_case_copy(from, length, buffer + buff_offset,       \
-                                  overflowed? 0 : lengthleft,               \
-                                  &forcecase, utf, substitute_case_callout, \
-                                  substitute_case_callout_data);            \
-     if (rc == ~(PCRE2_SIZE)0) goto CASEERROR; \
-     if (!overflowed && lengthleft < rc) \
+     PCRE2_SIZE cmc_length = (PCRE2_SIZE)(length_); \
+     PCRE2_SIZE cmc_rc = do_case_copy(from, cmc_length, buffer + buff_offset, \
+                                      overflowed? 0 : lengthleft,             \
+                                      &forcecase, utf,                        \
+                                      substitute_case_callout,                \
+                                      substitute_case_callout_data);          \
+     if (cmc_rc == ~(PCRE2_SIZE)0) goto CASEERROR; \
+     if (!overflowed && lengthleft < cmc_rc) \
        {  \
        if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
        overflowed = TRUE; \
-       extra_needed = rc - lengthleft; \
+       extra_needed = cmc_rc - lengthleft; \
        }  \
      else if (overflowed) \
        {  \
-       extra_needed += rc; \
+       extra_needed += cmc_rc; \
        }  \
      else \
        {  \
-       buff_offset += rc; \
-       lengthleft -= rc; \
+       buff_offset += cmc_rc; \
+       lengthleft -= cmc_rc; \
        }  \
      }    \
   while (0)
@@ -710,9 +718,6 @@ BOOL overflowed = FALSE;
 BOOL use_existing_match;
 BOOL replacement_only;
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
-#ifdef SUPPORT_UNICODE
-BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
-#endif
 PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend = NULL;

@@ -563,6 +563,7 @@ different things in the two cases. */
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
                     CTL2_ALLVECTOR|\
+                    CTL2_SUBSTITUTE_CASE_CALLOUT|\
                     CTL2_HEAPFRAMES_SIZE)
 
 /* Structures for holding modifier information for patterns and subject strings
@@ -6516,6 +6517,11 @@ G(substitute_case_callout_function,BITS)( \
   G(PCRE2_UCHAR,BITS) *output, PCRE2_SIZE output_cap, \
   int to_case, void *data_ptr) \
 { \
+(void)input;   /* Not used */ \
+(void)input_len;   /* Not used */ \
+(void)output;   /* Not used */ \
+(void)output_cap;   /* Not used */ \
+(void)to_case;   /* Not used */ \
 (void)data_ptr;   /* Not used */ \
 \
 /* XXX TODO */ \
@@ -7488,7 +7494,7 @@ for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
     }
   }
 
-if (pat_patctl.replacement[0] != 0)
+if (dat_datctl.replacement[0] != 0)
   {
   if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0 &&
       (dat_datctl.control & CTL_NULLCONTEXT) != 0)
@@ -7497,7 +7503,7 @@ if (pat_patctl.replacement[0] != 0)
     return PR_OK;
     }
 
-  if ((pat_patctl.control2 & CTL2_SUBSTITUTE_CASE_CALLOUT) != 0 &&
+  if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CASE_CALLOUT) != 0 &&
       (dat_datctl.control & CTL_NULLCONTEXT) != 0)
     {
     fprintf(outfile, "** Replacement case callouts are not supported with null_context.\n");

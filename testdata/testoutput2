@@ -18232,20 +18232,20 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 
 /abc/replace=\U$0,substitute_extended,substitute_case_callout
     XabcY
- 1: XABCY
+ 1: XY
 \= Expect not supported
     XabcY\=null_context
 ** Replacement case callouts are not supported with null_context.
 
 /a/substitute_extended,substitute_case_callout
     XaY\=replace=\U$0
- 1: XAY
+ 1: XY
     XaY\=replace=\L$0
- 1: XaY
+ 1: XY
     XaY\=replace=\u\L$0
- 1: XAY
+ 1: XY
     XaY\=replace=\l\U$0
- 1: XaY
+ 1: XY
 
 # XXX ^^^ NEEDS TOTALLY RE-TESTING
 
