@@ -6498,16 +6498,130 @@ return yield;
 *        Substitute case callout function        *
 *************************************************/
 
+/* Function to implement our test-only custom case mappings.
+To ease implementation, we only work in the ASCII range (so that we don't need
+to read & write UTF sequences).
+However, we aim to implement case mappings which fairly well represent the range
+of interesting behaviours that exist for Unicode codepoints. */
+
+static BOOL
+case_transform(int to_case, int num_in, int *num_read, int *num_write,
+  uint32_t *c1, uint32_t *c2)
+{
+/* Let's have one character which aborts the substitution. */
+if (*c1 == '!') return FALSE;
+
+/* Default behaviour is to read one character, and write back that same one
+character (treating all characters as "uncased"). */
+*num_read = *num_write = 1;
+
+/* Add a normal case pair 'a' (l) <-> 'B' (t,u). Standard ASCII letter
+behaviour, but with switched letters for testing. */
+if (*c1 == 'a' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'B';
+else if (*c1 == 'B' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'a';
+
+/* Add a titlecased triplet 'd' (l) <-> 'D' (t) <-> 'Z' (u). Example: the
+'dz'/'Dz'/'DZ' ligature character ("Latin Small Letter DZ" <-> "Latin Capital
+Letter D with Small Letter Z" <-> "Latin Capital Letter DZ"). */
+else if (*c1 == 'd' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)? 'D' : 'Z';
+else if (*c1 == 'D' && to_case != PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
+  *c1 = (to_case == PCRE2_SUBSTITUTE_CASE_LOWER)? 'd' : 'Z';
+else if (*c1 == 'Z' && to_case != PCRE2_SUBSTITUTE_CASE_UPPER)
+  *c1 = (to_case == PCRE2_SUBSTITUTE_CASE_LOWER)? 'd' : 'D';
+
+/* Expands when uppercased. Example: Esszet 'f' <-> 'SS'. */
+else if (*c1 == 'f' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'S';
+  *c2 = 'S';
+  *num_write = 2;
+  }
+else if (*c1 == 's' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'S';
+else if (*c1 == 'S' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 's';
+
+/* Expanding and contracting characters, 'o' <-> 'OO'. You can get this purely
+due to UTF-8 encoding length, for example uppercase Omega (3 bytes in UTF-8)
+lowercases to 2 bytes in UTF-8. */
+else if (num_in == 2 && *c1 == 'O' && *c2 == 'O' &&
+         to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'o';
+  *num_read = 2;
+  }
+else if (*c1 == 'o' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'O';
+  *c2 = 'O';
+  *num_write = 2;
+  }
+
+/* Use 'l' -> 'Mn' or 'MN' as an expanding ligature, like 'fi' -> 'Fi' ->
+'FI'. */
+else if (*c1 == 'l' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'M';
+  *c2 = (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)? 'n' : 'N';
+  *num_write = 2;
+  }
+else if (*c1 == 'M' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'm';
+else if (*c1 == 'm' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'M';
+else if (*c1 == 'N' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'n';
+else if (*c1 == 'n' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'N';
+
+/* An example of a context-dependent mapping, the Greek Sigma. It lowercases
+depending on the following character. Use 'c'/'k' -> 'K'. */
+else if ((*c1 == 'c' || *c1 == 'k') && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'K';
+else if (*c1 == 'K' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = (num_in == 1 || *c2 == ' ')? 'c' : 'k';
+
+/* An example of a context-dependent multi mapping, the Dutch IJ. When those
+letters appear together, they titlecase 'ij' (l) <-> 'IJ' (t) <-> 'IJ' (u).
+Namely, English titlecasing of 'ijnssel' would be 'Ijnssel' (just uppercase the
+first letter), but the Dutch rule is 'IJnssel'. */
+else if (num_in == 2 && (*c1 == 'i' || *c1 == 'I') &&
+         (*c2 == 'j' || *c2 == 'J') &&
+         to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
+  {
+  *c1 = 'I';
+  *c2 = 'J';
+  *num_read = 2;
+  *num_write = 2;
+  }
+else if (*c1 == 'i' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'I';
+else if (*c1 == 'I' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'i';
+else if (*c1 == 'j' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'J';
+else if (*c1 == 'J' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'j';
+
+return TRUE;
+}
+
 /* Called from pcre2_substitute() when the substitute_case_callout
 modifier is set. The substitute callout block is not identical for all code unit
 widths, so we have to duplicate the function for each supported width.
 
 Arguments:
-  ch          the input character
-  to          the case conversion type
-  data_ptr    callout data, which will be a UTF-8 string
+  input          the input character
+  input_len      the length of the input
+  output         the output buffer
+  output_cap     the output buffer capacity
+  to_case        the case conversion type
+  data_ptr       callout data (unused)
 
-Returns:      the new character
+Returns:         the number of code units of the output
 */
 
 #define substitute_case_callout_function(BITS) \
@@ -6517,16 +6631,65 @@ G(substitute_case_callout_function,BITS)( \
   G(PCRE2_UCHAR,BITS) *output, PCRE2_SIZE output_cap, \
   int to_case, void *data_ptr) \
 { \
-(void)input;   /* Not used */ \
-(void)input_len;   /* Not used */ \
-(void)output;   /* Not used */ \
-(void)output_cap;   /* Not used */ \
-(void)to_case;   /* Not used */ \
+G(PCRE2_UCHAR,BITS) buf[16]; \
+G(PCRE2_SPTR,BITS) input_copy; \
+PCRE2_SIZE written = 0; \
+\
 (void)data_ptr;   /* Not used */ \
 \
-/* XXX TODO */ \
+if (input_len > sizeof(buf)/sizeof(*buf)) \
+  { \
+  G(PCRE2_UCHAR,BITS) *input_buf = malloc( \
+      input_len * sizeof(G(PCRE2_UCHAR,BITS))); \
+  if (input_buf == NULL) return ~(PCRE2_SIZE)0; \
+  memcpy(input_buf, input, input_len * sizeof(G(PCRE2_UCHAR,BITS))); \
+  input_copy = input_buf; \
+  } \
+else \
+  { \
+  memcpy(buf, input, input_len * sizeof(G(PCRE2_UCHAR,BITS))); \
+  input_copy = buf; \
+  } \
 \
-return 0; \
+for (PCRE2_SIZE i = 0; i < input_len; ) \
+  { \
+  int num_in = i + 1 < input_len ? 2 : 1; \
+  uint32_t c1 = input_copy[i]; \
+  uint32_t c2 = i + 1 < input_len ? input_copy[i + 1] : 0; \
+  int num_read; \
+  int num_write; \
+  \
+  if (!case_transform(to_case, num_in, &num_read, &num_write, &c1, &c2)) \
+    { \
+    written = ~(PCRE2_SIZE)0; \
+    goto END; \
+    } \
+  \
+  i += num_read; \
+  if (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST) \
+    to_case = PCRE2_SUBSTITUTE_CASE_LOWER; \
+  \
+  if (written + num_write > output_cap) \
+    { \
+    written += num_write; \
+    } \
+  else \
+    { \
+    if (num_write > 0) output[written++] = c1; \
+    if (num_write > 1) output[written++] = c2; \
+    } \
+  } \
+\
+END: \
+if (input_copy != buf) free((G(PCRE2_UCHAR,BITS) *)input_copy); \
+\
+/* Let's be maximally cruel. The case callout is allowed to leave the output
+buffer in any state at all if it overflows, so let's use random garbage. */ \
+if (written > output_cap) \
+  memset(output, time(NULL) & 1 ? 0xcd : 0xdc, \
+         output_cap * sizeof(G(PCRE2_UCHAR,BITS))); \
+\
+return written; \
 }
 
 #if defined SUPPORT_PCRE2_8
