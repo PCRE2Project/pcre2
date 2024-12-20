@@ -6,7 +6,7 @@ codecov:
     notify_error: true
 
 coverage:
-  range: 65..80
+  range: 75..90
   round: nearest
   precision: 2
 
@@ -33,7 +33,7 @@ component_management:
     - component_id: library
       name: "Core library"
       paths:
-        - '!src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint.c)\.c'
+        - '!src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c'
       statuses:
         - type: project
           target: auto
@@ -42,7 +42,7 @@ component_management:
     - component_id: test_binaries
       name: "Test binaries"
       paths:
-        - 'src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint.c)\.c'
+        - 'src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c'
       statuses:
         - type: project
           target: auto
