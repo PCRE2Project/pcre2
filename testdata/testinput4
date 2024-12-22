@@ -1869,6 +1869,15 @@
     ab\x{600}\x{700}ijklh
     ab\x{600}h\x{700}ijklmh
 
+/([a-z\x{1000}\x{2000}]{1,2}?u)+$/utf
+    \x{1000}uu\x{2000}u
+    \x{1001}uuuu
+    \x{2001}uuuuu
+    uuuu\x{1fff}#u#\x{2000}\x{1000}u\x{2000}u
+\= Expect no match
+    abuabuabuabu!
+    uuuuuuuuuuuu#
+
 # --------------------------------------
 
 /(ΣΆΜΟΣ) \1/i,utf

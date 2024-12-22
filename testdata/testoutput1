@@ -11095,10 +11095,29 @@ No match
  0: abcdefghb
   abcdeb
  0: abcdeb
+  abcdefghijx
+ 0: x
 \= Expect no match
   abcdb
 No match
   abcdefghijk
+No match
+
+/[a-z]{1,6}?s|x/
+  asbs
+ 0: as
+  abcdefs
+ 0: abcdefs
+  abcdefghijkss
+ 0: fghijks
+  abcdefghijkx
+ 0: x
+  ss
+ 0: ss
+\= Expect no match
+  s
+No match
+  aaa
 No match
 
 # --------------

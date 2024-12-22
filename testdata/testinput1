@@ -7056,9 +7056,20 @@ $/x
   abcdefghbijb
   abcdefghbij
   abcdeb
+  abcdefghijx
 \= Expect no match
   abcdb
   abcdefghijk
+
+/[a-z]{1,6}?s|x/
+  asbs
+  abcdefs
+  abcdefghijkss
+  abcdefghijkx
+  ss
+\= Expect no match
+  s
+  aaa
 
 # --------------
 

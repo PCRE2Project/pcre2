@@ -3055,6 +3055,25 @@ No match
     ab\x{600}h\x{700}ijklmh
 No match
 
+/([a-z\x{1000}\x{2000}]{1,2}?u)+$/utf
+    \x{1000}uu\x{2000}u
+ 0: \x{1000}uu\x{2000}u
+ 1: u\x{2000}u
+    \x{1001}uuuu
+ 0: uuuu
+ 1: uu
+    \x{2001}uuuuu
+ 0: uuuuu
+ 1: uuu
+    uuuu\x{1fff}#u#\x{2000}\x{1000}u\x{2000}u
+ 0: \x{2000}\x{1000}u\x{2000}u
+ 1: \x{2000}u
+\= Expect no match
+    abuabuabuabu!
+No match
+    uuuuuuuuuuuu#
+No match
+
 # --------------------------------------
 
 /(ΣΆΜΟΣ) \1/i,utf
