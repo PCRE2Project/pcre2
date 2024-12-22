@@ -21412,7 +21412,7 @@ Failed: error -48: no more memory: 4 code units are needed
 # do_case_copy tests
 #
 
-/aa/substitute_extended
+/aa/i,substitute_extended
     XaaY\=replace=\Uaa\uaa\LAA\lAA\U\lAA\L\uaa\u\LaaA\l\UAAa
  1: XAAAaaaaAaAAaAaaaAAY
     XaaY\=replace=[1]\uaa
@@ -21427,6 +21427,18 @@ Failed: error -48: no more memory
 Failed: error -48: no more memory
     XaaY\=replace=[3]\u$0
 Failed: error -48: no more memory
+    XaaY\=replace=[1]\lAA
+Failed: error -48: no more memory
+    XaaY\=replace=[2]\lAA
+Failed: error -48: no more memory
+    XaaY\=replace=[3]\lAA
+Failed: error -48: no more memory
+    XAAY\=replace=[1]\l$0
+Failed: error -48: no more memory
+    XAAY\=replace=[2]\l$0
+Failed: error -48: no more memory
+    XAAY\=replace=[3]\l$0
+Failed: error -48: no more memory
     XaaY\=replace=[1]\l\Uaa
 Failed: error -48: no more memory
     XaaY\=replace=[2]\l\Uaa
@@ -21439,8 +21451,20 @@ Failed: error -48: no more memory
 Failed: error -48: no more memory
     XaaY\=replace=[3]\l\U$0
 Failed: error -48: no more memory
+    XaaY\=replace=[1]\u\LaA
+Failed: error -48: no more memory
+    XaaY\=replace=[2]\u\LaA
+Failed: error -48: no more memory
+    XaaY\=replace=[3]\u\LaA
+Failed: error -48: no more memory
+    XaAY\=replace=[1]\u\L$0
+Failed: error -48: no more memory
+    XaAY\=replace=[2]\u\L$0
+Failed: error -48: no more memory
+    XaAY\=replace=[3]\u\L$0
+Failed: error -48: no more memory
 
-/aa/substitute_extended,substitute_overflow_length
+/aa/i,substitute_extended,substitute_overflow_length
     XaaY\=replace=[1]\uaa
 Failed: error -48: no more memory: 5 code units are needed
     XaaY\=replace=[2]\uaa
@@ -21453,6 +21477,18 @@ Failed: error -48: no more memory: 5 code units are needed
 Failed: error -48: no more memory: 5 code units are needed
     XaaY\=replace=[3]\u$0
 Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[1]\lAA
+Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[2]\lAA
+Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[3]\lAA
+Failed: error -48: no more memory: 5 code units are needed
+    XAAY\=replace=[1]\l$0
+Failed: error -48: no more memory: 5 code units are needed
+    XAAY\=replace=[2]\l$0
+Failed: error -48: no more memory: 5 code units are needed
+    XAAY\=replace=[3]\l$0
+Failed: error -48: no more memory: 5 code units are needed
     XaaY\=replace=[1]\l\Uaa
 Failed: error -48: no more memory: 5 code units are needed
     XaaY\=replace=[2]\l\Uaa
@@ -21465,8 +21501,20 @@ Failed: error -48: no more memory: 5 code units are needed
 Failed: error -48: no more memory: 5 code units are needed
     XaaY\=replace=[3]\l\U$0
 Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[1]\u\LaA
+Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[2]\u\LaA
+Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[3]\u\LaA
+Failed: error -48: no more memory: 5 code units are needed
+    XaAY\=replace=[1]\u\L$0
+Failed: error -48: no more memory: 5 code units are needed
+    XaAY\=replace=[2]\u\L$0
+Failed: error -48: no more memory: 5 code units are needed
+    XaAY\=replace=[3]\u\L$0
+Failed: error -48: no more memory: 5 code units are needed
 
-/aa/substitute_extended,substitute_case_callout
+/aa/i,substitute_extended,substitute_case_callout
     XaaY\=replace=\Uaa\uaa\LBB\lBB\U\lBB\L\uaa\u\LaaB\l\UBBa
  1: XBBBaaaaBaBBaBaaaBBY
     XaaY\=replace=[1]\uaa
@@ -21481,6 +21529,18 @@ Failed: error -48: no more memory
 Failed: error -48: no more memory
     XaaY\=replace=[3]\u$0
 Failed: error -48: no more memory
+    XaaY\=replace=[1]\lAA
+Failed: error -48: no more memory
+    XaaY\=replace=[2]\lAA
+Failed: error -48: no more memory
+    XaaY\=replace=[3]\lAA
+Failed: error -48: no more memory
+    XAAY\=replace=[1]\l$0
+Failed: error -48: no more memory
+    XAAY\=replace=[2]\l$0
+Failed: error -48: no more memory
+    XAAY\=replace=[3]\l$0
+Failed: error -48: no more memory
     XaaY\=replace=[1]\l\Uaa
 Failed: error -48: no more memory
     XaaY\=replace=[2]\l\Uaa
@@ -21493,8 +21553,20 @@ Failed: error -48: no more memory
 Failed: error -48: no more memory
     XaaY\=replace=[3]\l\U$0
 Failed: error -48: no more memory
+    XaaY\=replace=[1]\u\LaA
+Failed: error -48: no more memory
+    XaaY\=replace=[2]\u\LaA
+Failed: error -48: no more memory
+    XaaY\=replace=[3]\u\LaA
+Failed: error -48: no more memory
+    XaAY\=replace=[1]\u\L$0
+Failed: error -48: no more memory
+    XaAY\=replace=[2]\u\L$0
+Failed: error -48: no more memory
+    XaAY\=replace=[3]\u\L$0
+Failed: error -48: no more memory
 
-/aa/substitute_extended,substitute_case_callout,substitute_overflow_length
+/aa/i,substitute_extended,substitute_case_callout,substitute_overflow_length
     XaaY\=replace=[1]\uaa
 Failed: error -48: no more memory: 15 code units are needed
     XaaY\=replace=[2]\uaa
@@ -21507,6 +21579,18 @@ Failed: error -48: no more memory: 15 code units are needed
 Failed: error -48: no more memory: 15 code units are needed
     XaaY\=replace=[3]\u$0
 Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[1]\lAA
+Failed: error -48: no more memory: 15 code units are needed
+    XaaY\=replace=[2]\lAA
+Failed: error -48: no more memory: 15 code units are needed
+    XaaY\=replace=[3]\lAA
+Failed: error -48: no more memory: 5 code units are needed
+    XAAY\=replace=[1]\l$0
+Failed: error -48: no more memory: 15 code units are needed
+    XAAY\=replace=[2]\l$0
+Failed: error -48: no more memory: 15 code units are needed
+    XAAY\=replace=[3]\l$0
+Failed: error -48: no more memory: 5 code units are needed
     XaaY\=replace=[1]\l\Uaa
 Failed: error -48: no more memory: 15 code units are needed
     XaaY\=replace=[2]\l\Uaa
@@ -21518,6 +21602,18 @@ Failed: error -48: no more memory: 15 code units are needed
     XaaY\=replace=[2]\l\U$0
 Failed: error -48: no more memory: 15 code units are needed
     XaaY\=replace=[3]\l\U$0
+Failed: error -48: no more memory: 5 code units are needed
+    XaaY\=replace=[1]\u\LaA
+Failed: error -48: no more memory: 15 code units are needed
+    XaaY\=replace=[2]\u\LaA
+Failed: error -48: no more memory: 15 code units are needed
+    XaaY\=replace=[3]\u\LaA
+Failed: error -48: no more memory: 5 code units are needed
+    XaAY\=replace=[1]\u\L$0
+Failed: error -48: no more memory: 15 code units are needed
+    XaAY\=replace=[2]\u\L$0
+Failed: error -48: no more memory: 15 code units are needed
+    XaAY\=replace=[3]\u\L$0
 Failed: error -48: no more memory: 5 code units are needed
 
 /aa/substitute_extended,substitute_case_callout

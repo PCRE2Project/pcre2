@@ -7558,7 +7558,7 @@ a)"xI
 # do_case_copy tests
 #
 
-/aa/substitute_extended
+/aa/i,substitute_extended
     XaaY\=replace=\Uaa\uaa\LAA\lAA\U\lAA\L\uaa\u\LaaA\l\UAAa
     XaaY\=replace=[1]\uaa
     XaaY\=replace=[2]\uaa
@@ -7566,28 +7566,52 @@ a)"xI
     XaaY\=replace=[1]\u$0
     XaaY\=replace=[2]\u$0
     XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\lAA
+    XaaY\=replace=[2]\lAA
+    XaaY\=replace=[3]\lAA
+    XAAY\=replace=[1]\l$0
+    XAAY\=replace=[2]\l$0
+    XAAY\=replace=[3]\l$0
     XaaY\=replace=[1]\l\Uaa
     XaaY\=replace=[2]\l\Uaa
     XaaY\=replace=[3]\l\Uaa
     XaaY\=replace=[1]\l\U$0
     XaaY\=replace=[2]\l\U$0
     XaaY\=replace=[3]\l\U$0
+    XaaY\=replace=[1]\u\LaA
+    XaaY\=replace=[2]\u\LaA
+    XaaY\=replace=[3]\u\LaA
+    XaAY\=replace=[1]\u\L$0
+    XaAY\=replace=[2]\u\L$0
+    XaAY\=replace=[3]\u\L$0
 
-/aa/substitute_extended,substitute_overflow_length
+/aa/i,substitute_extended,substitute_overflow_length
     XaaY\=replace=[1]\uaa
     XaaY\=replace=[2]\uaa
     XaaY\=replace=[3]\uaa
     XaaY\=replace=[1]\u$0
     XaaY\=replace=[2]\u$0
     XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\lAA
+    XaaY\=replace=[2]\lAA
+    XaaY\=replace=[3]\lAA
+    XAAY\=replace=[1]\l$0
+    XAAY\=replace=[2]\l$0
+    XAAY\=replace=[3]\l$0
     XaaY\=replace=[1]\l\Uaa
     XaaY\=replace=[2]\l\Uaa
     XaaY\=replace=[3]\l\Uaa
     XaaY\=replace=[1]\l\U$0
     XaaY\=replace=[2]\l\U$0
     XaaY\=replace=[3]\l\U$0
+    XaaY\=replace=[1]\u\LaA
+    XaaY\=replace=[2]\u\LaA
+    XaaY\=replace=[3]\u\LaA
+    XaAY\=replace=[1]\u\L$0
+    XaAY\=replace=[2]\u\L$0
+    XaAY\=replace=[3]\u\L$0
 
-/aa/substitute_extended,substitute_case_callout
+/aa/i,substitute_extended,substitute_case_callout
     XaaY\=replace=\Uaa\uaa\LBB\lBB\U\lBB\L\uaa\u\LaaB\l\UBBa
     XaaY\=replace=[1]\uaa
     XaaY\=replace=[2]\uaa
@@ -7595,26 +7619,50 @@ a)"xI
     XaaY\=replace=[1]\u$0
     XaaY\=replace=[2]\u$0
     XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\lAA
+    XaaY\=replace=[2]\lAA
+    XaaY\=replace=[3]\lAA
+    XAAY\=replace=[1]\l$0
+    XAAY\=replace=[2]\l$0
+    XAAY\=replace=[3]\l$0
     XaaY\=replace=[1]\l\Uaa
     XaaY\=replace=[2]\l\Uaa
     XaaY\=replace=[3]\l\Uaa
     XaaY\=replace=[1]\l\U$0
     XaaY\=replace=[2]\l\U$0
     XaaY\=replace=[3]\l\U$0
+    XaaY\=replace=[1]\u\LaA
+    XaaY\=replace=[2]\u\LaA
+    XaaY\=replace=[3]\u\LaA
+    XaAY\=replace=[1]\u\L$0
+    XaAY\=replace=[2]\u\L$0
+    XaAY\=replace=[3]\u\L$0
 
-/aa/substitute_extended,substitute_case_callout,substitute_overflow_length
+/aa/i,substitute_extended,substitute_case_callout,substitute_overflow_length
     XaaY\=replace=[1]\uaa
     XaaY\=replace=[2]\uaa
     XaaY\=replace=[3]\uaa
     XaaY\=replace=[1]\u$0
     XaaY\=replace=[2]\u$0
     XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\lAA
+    XaaY\=replace=[2]\lAA
+    XaaY\=replace=[3]\lAA
+    XAAY\=replace=[1]\l$0
+    XAAY\=replace=[2]\l$0
+    XAAY\=replace=[3]\l$0
     XaaY\=replace=[1]\l\Uaa
     XaaY\=replace=[2]\l\Uaa
     XaaY\=replace=[3]\l\Uaa
     XaaY\=replace=[1]\l\U$0
     XaaY\=replace=[2]\l\U$0
     XaaY\=replace=[3]\l\U$0
+    XaaY\=replace=[1]\u\LaA
+    XaaY\=replace=[2]\u\LaA
+    XaaY\=replace=[3]\u\LaA
+    XaAY\=replace=[1]\u\L$0
+    XaAY\=replace=[2]\u\L$0
+    XaAY\=replace=[3]\u\L$0
 
 /aa/substitute_extended,substitute_case_callout
     XaaY\=replace=\l\U!a

@@ -392,7 +392,7 @@ while (input < input_end)
     chlen = 1;
     }
 
-  if (!overflow && chlen < output_cap)
+  if (!overflow && chlen <= output_cap)
     {
     memcpy(output, temp, CU2BYTES(chlen));
     output += chlen;
@@ -461,7 +461,7 @@ BOOL rest_overflow = FALSE;
 (void)utf; /* Avoid compiler warning. */
 #endif
 
-if (input_len == 0) return 0;
+PCRE2_ASSERT(input_len != 0);
 
 switch (state->to_case)
   {
@@ -555,8 +555,11 @@ exact same input! */
 
 if (rest_to_case == PCRE2_SUBSTITUTE_CASE_NONE)
   {
-  if (!ch1_overflow && rest_len <= output_cap - rc)
+  if (!ch1_overflow)
+    {
+    PCRE2_ASSERT(rest_len <= output_cap - rc);
     memmove(output + rc, rest, CU2BYTES(rest_len));
+    }
   rc2 = rest_len;
 
   state->to_case = PCRE2_SUBSTITUTE_CASE_NONE;
@@ -585,7 +588,8 @@ else
   state->to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
   }
 
-if (rc2 > ~(PCRE2_SIZE)0 - rc) return ~(PCRE2_SIZE)0;  /* Integer overflow */
+if (rc2 > ~(PCRE2_SIZE)0 - rc)  /* Integer overflow */
+  return ~(PCRE2_SIZE)0;
 
 PCRE2_ASSERT(!(ch1_overflow || rest_overflow) || rc + rc2 > output_cap);
 (void)rest_overflow;
@@ -657,11 +661,7 @@ not overlap, because our default handler does not support this. */
      PCRE2_SIZE chkcc_length = (PCRE2_SIZE)(length_); \
      PCRE2_SIZE chkcc_rc; \
      do_call \
-     if (overflowed) \
-       {  \
-       extra_needed += chkcc_rc; \
-       }  \
-     else if (lengthleft < chkcc_rc) \
+     if (lengthleft < chkcc_rc) \
        {  \
        if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
        overflowed = TRUE; \
@@ -677,18 +677,23 @@ not overlap, because our default handler does not support this. */
 
 #define CHECKCASECPY_DEFAULT(from, length_) \
   CHECKCASECPY_BASE(length_, { \
-    chkcc_rc = default_substitute_case_callout(from, chkcc_length, \
-                                               buffer + buff_offset, \
+    chkcc_rc = default_substitute_case_callout(from, chkcc_length,         \
+                                               buffer + buff_offset,       \
                                                overflowed? 0 : lengthleft, \
-                                               &forcecase, code); \
+                                               &forcecase, code);          \
+    if (overflowed) \
+      { \
+      extra_needed += chkcc_rc; \
+      break; \
+      } \
   })
 
 #define CHECKCASECPY_CALLOUT(length_) \
   CHECKCASECPY_BASE(length_, { \
-  chkcc_rc = do_case_copy(buffer + buff_offset, chkcc_length, \
-                          overflowed? 0 : lengthleft, &forcecase, utf, \
-                          substitute_case_callout, \
-                          substitute_case_callout_data); \
+    chkcc_rc = do_case_copy(buffer + buff_offset, chkcc_length, \
+                            lengthleft, &forcecase, utf,        \
+                            substitute_case_callout,            \
+                            substitute_case_callout_data);      \
     if (chkcc_rc == ~(PCRE2_SIZE)0) goto CASEERROR; \
   })
 
