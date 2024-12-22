@@ -620,22 +620,22 @@ length. */
 
 #define CHECKMEMCPY(from, length_) \
   do {    \
-     PCRE2_SIZE cmc_length = length_; \
-     if (!overflowed && lengthleft < cmc_length) \
+     PCRE2_SIZE chkmc_length = length_; \
+     if (overflowed) \
+       {  \
+       extra_needed += chkmc_length; \
+       }  \
+     else if (lengthleft < chkmc_length) \
        {  \
        if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
        overflowed = TRUE; \
-       extra_needed = cmc_length - lengthleft; \
-       }  \
-     else if (overflowed) \
-       {  \
-       extra_needed += cmc_length; \
+       extra_needed = chkmc_length - lengthleft; \
        }  \
      else \
        {  \
-       memcpy(buffer + buff_offset, from, CU2BYTES(cmc_length)); \
-       buff_offset += cmc_length; \
-       lengthleft -= cmc_length; \
+       memcpy(buffer + buff_offset, from, CU2BYTES(chkmc_length)); \
+       buff_offset += chkmc_length; \
+       lengthleft -= chkmc_length; \
        }  \
      }    \
   while (0)
@@ -648,27 +648,28 @@ not overlap, because our default handler does not support this. */
 
 #define CHECKCASECPY(from, length_) \
   do {    \
-     PCRE2_SIZE cmc_length = (PCRE2_SIZE)(length_); \
-     PCRE2_SIZE cmc_rc = do_case_copy(from, cmc_length, buffer + buff_offset, \
-                                      overflowed? 0 : lengthleft,             \
-                                      &forcecase, utf,                        \
-                                      substitute_case_callout,                \
-                                      substitute_case_callout_data);          \
-     if (cmc_rc == ~(PCRE2_SIZE)0) goto CASEERROR; \
-     if (!overflowed && lengthleft < cmc_rc) \
+     PCRE2_SIZE chkcc_length = (PCRE2_SIZE)(length_); \
+     PCRE2_SIZE chkcc_rc = do_case_copy(from, chkcc_length,            \
+                                        buffer + buff_offset,          \
+                                        overflowed? 0 : lengthleft,    \
+                                        &forcecase, utf,               \
+                                        substitute_case_callout,       \
+                                        substitute_case_callout_data); \
+     if (chkcc_rc == ~(PCRE2_SIZE)0) goto CASEERROR; \
+     if (overflowed) \
+       {  \
+       extra_needed += chkcc_rc; \
+       }  \
+     else if (lengthleft < chkcc_rc) \
        {  \
        if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
        overflowed = TRUE; \
-       extra_needed = cmc_rc - lengthleft; \
-       }  \
-     else if (overflowed) \
-       {  \
-       extra_needed += cmc_rc; \
+       extra_needed = chkcc_rc - lengthleft; \
        }  \
      else \
        {  \
-       buff_offset += cmc_rc; \
-       lengthleft -= cmc_rc; \
+       buff_offset += chkcc_rc; \
+       lengthleft -= chkcc_rc; \
        }  \
      }    \
   while (0)
@@ -682,17 +683,17 @@ a case-forcing callout. */
             (extra_needed - casestart_extra_needed); \
      if (chars_outstanding > 0) \
        {    \
-       if (!overflowed) \
+       if (overflowed) \
+         {  \
+         extra_needed += pessimistic_case_inflation(chars_outstanding); \
+         }  \
+       else \
          {  \
          /* Rewind the buffer */ \
          lengthleft += (buff_offset - casestart_offset); \
          buff_offset = casestart_offset; \
          /* Care! In-place case transformation */ \
          CHECKCASECPY(buffer + buff_offset, chars_outstanding); \
-         }  \
-       else \
-         {  \
-         extra_needed += pessimistic_case_inflation(chars_outstanding); \
          }  \
        }    \
      }      \
@@ -1241,9 +1242,6 @@ do
             else
               CHECKMEMCPY(mark, fraglength);
             }
-
-            // XXX ^^^ This is a behavioural change (to do casing on a MARK)
-            // Ensure we have test coverage, and check it's OK with Philip
           }
         else goto BAD;
         }

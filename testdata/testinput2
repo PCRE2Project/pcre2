@@ -6144,8 +6144,6 @@ a)"xI
     XABCY
     XabcY\=replace=  
 
-# XXX vvv NEEDS TOTALLY RE-TESTING
-
 /abc/replace=\U$0,substitute_extended,substitute_case_callout
     XabcY
 \= Expect not supported
@@ -6156,8 +6154,6 @@ a)"xI
     XaY\=replace=\L$0
     XaY\=replace=\u\L$0
     XaY\=replace=\l\U$0
-
-# XXX ^^^ NEEDS TOTALLY RE-TESTING
 
 # Expect non-fixed-length error
 
@@ -7370,5 +7366,289 @@ a)"xI
     1
 \= Expect no match
     \\
+
+# --------------
+
+# Attempt at full coverage of the substitution buffer-management code - not
+# just covering each line in each macro, but covering each instantiation of each
+# line in those macros.
+
+#
+# CHECKMEMCPY tests
+#
+# Four conditions for CHECKMEMCPY:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   overflow after previous overflow
+# Additionally some CHECKMEMCPYs have a substitute_replacement_only branch.
+#
+
+# pre-start-offset fragment
+# no "overflow after previous overflow" condition
+/a/
+    XYaZ\=offset=2,replace=foo
+    XYaZ\=offset=2,replace=[1]foo
+    XYaZ\=offset=2,substitute_overflow_length,replace=[1]foo
+    XYaZ\=offset=2,substitute_replacement_only,replace=foo
+
+# pre-match fragment
+/a/
+    XYaZ\=replace=foo
+    XYaZ\=replace=[1]foo
+    XYaZ\=substitute_overflow_length,replace=[1]foo
+    XXYaZ\=offset=2,substitute_overflow_length,replace=[1]foo
+    XYaZ\=substitute_replacement_only,replace=foo
+
+# empty match bumpalong
+/(?<=abc)(|DEF)/g
+    abcDEFabcZ\=replace=+
+    abcDEFabcZ\=replace=[5]+
+    abcDEFabcZ\=substitute_overflow_length,replace=[5]+
+    abcDEFabcZ\=replace=[9]+
+    abcDEFabcZ\=substitute_overflow_length,replace=[9]+
+    abcDEFabcZ\=substitute_overflow_length,replace=[1]+
+    abcDEFabcZ\=substitute_replacement_only,replace=+
+
+# literal replacement
+/a/
+    XYaZ\=substitute_literal,replace=$0
+    XYaZ\=substitute_literal,replace=[3]$0
+    XYaZ\=substitute_literal,substitute_overflow_length,replace=[3]$0
+    XYaZ\=substitute_literal,substitute_overflow_length,replace=[1]$0
+
+# a MARK
+/(*:pear)apple/
+    XappleY\=replace=${*MARK}
+    XappleY\=replace=[3]${*MARK}
+    XappleY\=substitute_overflow_length,replace=[3]${*MARK}
+    XXappleY\=substitute_overflow_length,replace=[1]${*MARK}
+
+# a subject fragment
+/a(bb)c/
+    XabbcY\=replace=$1
+    XabbcY\=replace=[2]$1
+    XabbcY\=substitute_overflow_length,replace=[2]$1
+    XXabbcY\=substitute_overflow_length,replace=[1]$1
+
+# a zero-length subject fragment
+/a()c/
+    XacY\=replace=$1
+    XacY\=replace=[2]$1
+    XacY\=substitute_overflow_length,replace=[2]$1
+
+# a data character via an escape
+/abc/substitute_extended
+    XabcY\=replace=\x{48}
+    XabcY\=replace=[1]\x{48}
+    XabcY\=substitute_overflow_length,replace=[1]\x{48}
+    XXabcY\=substitute_overflow_length,replace=[1]\x{48}
+
+# a replacement literal character
+/abc/
+    XabcY\=replace=Z
+    XabcY\=replace=[1]Z
+    XabcY\=substitute_overflow_length,replace=[1]Z
+    XXabcY\=substitute_overflow_length,replace=[1]Z
+
+# a cancelled substitution
+# no "overflow after previous overflow" condition
+/abc/substitute_skip=1
+    XabcY\=replace=Z
+    XabcY\=replace=[3]Z
+    XabcY\=substitute_overflow_length,replace=[3]Z
+    XabcY\=substitute_replacement_only,replace=Z
+
+# the rest of the subject
+/abc/
+    XabcYY\=replace=Z
+    XabcYY\=replace=[3]Z
+    XabcYY\=substitute_overflow_length,replace=[3]Z
+    XabcYY\=substitute_overflow_length,replace=[1]Z
+    XabcYY\=substitute_replacement_only,replace=Z
+
+# the trailing NULL
+/abc/
+    XabcY\=replace=Z
+    XabcY\=replace=[3]Z
+    XabcY\=substitute_overflow_length,replace=[3]Z
+    XabcY\=substitute_overflow_length,replace=[1]Z
+
+#
+# CHECKCASECPY tests
+#
+# The same four conditions for CHECKCASECPY as for CHECKMEMCPY:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   overflow after previous overflow
+# Also the condition where CHECKCASECPY isn't called due to a custom callout
+#
+
+# a MARK
+/(*:pear)apple/substitute_extended
+    XappleY\=replace=\U${*MARK}
+    XappleY\=replace=[3]\U${*MARK}
+    XappleY\=substitute_overflow_length,replace=[3]\U${*MARK}
+    XXappleY\=substitute_overflow_length,replace=[1]\U${*MARK}
+    XappleY\=substitute_case_callout,replace=\U${*MARK}
+
+# a subject fragment
+/a(bb)c/substitute_extended
+    XabbcY\=replace=\U$1
+    XabbcY\=replace=[2]\U$1
+    XabbcY\=substitute_overflow_length,replace=[2]\U$1
+    XXabbcY\=substitute_overflow_length,replace=[1]\U$1
+    XabbcY\=substitute_case_callout,replace=\U$1
+
+# a zero-length subject fragment
+/a()c/substitute_extended
+    XacY\=replace=\U$1
+    XacY\=replace=[2]\U$1
+    XacY\=substitute_overflow_length,replace=[2]\U$1
+
+# a data character via an escape
+/abc/substitute_extended
+    XabcY\=replace=\U\x{48}
+    XabcY\=replace=[1]\U\x{48}
+    XabcY\=substitute_overflow_length,replace=[1]\U\x{48}
+    XXabcY\=substitute_overflow_length,replace=[1]\U\x{48}
+    XabcY\=substitute_case_callout,replace=\U\x{48}
+
+# a replacement literal character
+/abc/substitute_extended
+    XabcY\=replace=\UZ
+    XabcY\=replace=[1]\UZ
+    XabcY\=substitute_overflow_length,replace=[1]\UZ
+    XXabcY\=substitute_overflow_length,replace=[1]\UZ
+    XabcY\=substitute_case_callout,replace=\UZ
+
+#
+# DELAYEDFORCECASE tests
+#
+# Some different triggering conditions for DELAYEDFORCECASE:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   if there was a previous overflow, then the case callout can't be invoked
+# Also, the CASEERROR branch.
+# Also, the branch for where chars_outstanding is zero, both with and without
+#   a previous overflow.
+#
+
+# on set casing mode
+/abc/substitute_extended,substitute_case_callout
+    XabcY\=replace=\Uf\Lq
+    XabcY\=replace=[2]\Uf\Lq
+    XabcY\=substitute_overflow_length,replace=[2]\Uf\Lq
+    XabcY\=substitute_overflow_length,replace=[1]\Uf\Lq
+    XabcY\=replace=\U!\Lq
+    XabcY\=replace=\U\Lq
+    XXabcY\=substitute_overflow_length,replace=[1]\U\Lq
+
+# trailing fragment
+/abc/substitute_extended,substitute_case_callout
+    XabcY\=replace=f
+    XabcY\=replace=\Uf
+    XabcY\=replace=[2]\Uf
+    XabcY\=substitute_overflow_length,replace=[2]\Uf
+    XabcY\=substitute_overflow_length,replace=[1]\Uf
+    XabcY\=replace=\U!
+    XabcY\=replace=\U
+    XXabcY\=substitute_overflow_length,replace=[1]\U
+
+#
+# do_case_copy tests
+#
+
+/aa/substitute_extended
+    XaaY\=replace=\Uaa\uaa\LAA\lAA\U\lAA\L\uaa\u\LaaA\l\UAAa
+    XaaY\=replace=[1]\uaa
+    XaaY\=replace=[2]\uaa
+    XaaY\=replace=[3]\uaa
+    XaaY\=replace=[1]\u$0
+    XaaY\=replace=[2]\u$0
+    XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\l\Uaa
+    XaaY\=replace=[2]\l\Uaa
+    XaaY\=replace=[3]\l\Uaa
+    XaaY\=replace=[1]\l\U$0
+    XaaY\=replace=[2]\l\U$0
+    XaaY\=replace=[3]\l\U$0
+
+/aa/substitute_extended,substitute_overflow_length
+    XaaY\=replace=[1]\uaa
+    XaaY\=replace=[2]\uaa
+    XaaY\=replace=[3]\uaa
+    XaaY\=replace=[1]\u$0
+    XaaY\=replace=[2]\u$0
+    XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\l\Uaa
+    XaaY\=replace=[2]\l\Uaa
+    XaaY\=replace=[3]\l\Uaa
+    XaaY\=replace=[1]\l\U$0
+    XaaY\=replace=[2]\l\U$0
+    XaaY\=replace=[3]\l\U$0
+
+/aa/substitute_extended,substitute_case_callout
+    XaaY\=replace=\Uaa\uaa\LBB\lBB\U\lBB\L\uaa\u\LaaB\l\UBBa
+    XaaY\=replace=[1]\uaa
+    XaaY\=replace=[2]\uaa
+    XaaY\=replace=[3]\uaa
+    XaaY\=replace=[1]\u$0
+    XaaY\=replace=[2]\u$0
+    XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\l\Uaa
+    XaaY\=replace=[2]\l\Uaa
+    XaaY\=replace=[3]\l\Uaa
+    XaaY\=replace=[1]\l\U$0
+    XaaY\=replace=[2]\l\U$0
+    XaaY\=replace=[3]\l\U$0
+
+/aa/substitute_extended,substitute_case_callout,substitute_overflow_length
+    XaaY\=replace=[1]\uaa
+    XaaY\=replace=[2]\uaa
+    XaaY\=replace=[3]\uaa
+    XaaY\=replace=[1]\u$0
+    XaaY\=replace=[2]\u$0
+    XaaY\=replace=[3]\u$0
+    XaaY\=replace=[1]\l\Uaa
+    XaaY\=replace=[2]\l\Uaa
+    XaaY\=replace=[3]\l\Uaa
+    XaaY\=replace=[1]\l\U$0
+    XaaY\=replace=[2]\l\U$0
+    XaaY\=replace=[3]\l\U$0
+
+/aa/substitute_extended,substitute_case_callout
+    XaaY\=replace=\l\U!a
+    XaaY\=replace=\l\Ua!
+    XaaY\=replace=\ufa
+    XaaY\=replace=[3]\ufa
+    XaaY\=replace=\l\Uaoo
+    XaaY\=replace=[4]\l\Uaoo
+    XaaY\=replace=\l\UPa
+    XaaY\=replace=[3]\l\UPa
+    XaaY\=replace=[4]\l\UPa
+    XaaY\=replace=\l\UPo
+    XaaY\=replace=[3]\l\UPo
+    XaaY\=replace=[4]\l\UPo
+    XaaY\=replace=\l\UPpp
+    XaaY\=replace=[4]\l\UPpp
+    XaaY\=replace=[5]\l\UPpp
+
+#
+# special test-callback case transformation tests
+#
+
+/aa/substitute_extended,substitute_case_callout
+    XaaY\=replace=\l!
+    XaaY\=replace=\ua\lB
+    XaaY\=replace=\LdDZ\UdDZ\ud\uD\uZ
+    XaaY\=replace=\uf\Uf\Lf\Us\Ls\uS\lS
+    XaaY\=replace=\LOO\LOQ\UOO\uo\lo
+    XaaY\=replace=\upq\upp\lpp\Upp\Lpp\lP\uP
+    XaaY\=replace=\ll\ul\Ul\LMmNn\UMmNn
+    XaaY\=replace=\Uac\Uaca\Uak\Uaka\Lck\LBK\LBKB\LBK \UK
+    Xaay\=replace=\u\Lqj\u\Lij\u\LIj\u\LiJ\u\LIJ\u\Liq\u\Lij\Uij\UiIjJ\LiIjJ
+    Xaay\=replace=\Uaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+# --------------
 
 # End of testinput2

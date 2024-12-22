@@ -6559,6 +6559,18 @@ else if (*c1 == 'o' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
   *c2 = 'O';
   *num_write = 2;
   }
+else if (num_in == 2 && *c1 == 'p' && *c2 == 'p' &&
+         to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'P';
+  *num_read = 2;
+  }
+else if (*c1 == 'P' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'p';
+  *c2 = 'p';
+  *num_write = 2;
+  }
 
 /* Use 'l' -> 'Mn' or 'MN' as an expanding ligature, like 'fi' -> 'Fi' ->
 'FI'. */
