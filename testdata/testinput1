@@ -7043,6 +7043,34 @@ $/x
     ab
     a
 
+/^(.{3,6}!)+$/s
+  abc!defghi!
+  abcdef!ghi!
+  abc!def!ghi!jkl!
+  ab!cd!
+\= Expect no match
+  abcd!ef!
+  ab!cdefg!
+
+/[a-z]{5,}b|x/
+  abcdefghbijb
+  abcdefghbij
+  abcdeb
+  abcdefghijx
+\= Expect no match
+  abcdb
+  abcdefghijk
+
+/[a-z]{1,6}?s|x/
+  asbs
+  abcdefs
+  abcdefghijkss
+  abcdefghijkx
+  ss
+\= Expect no match
+  s
+  aaa
+
 # --------------
 
 # End of testinput1 

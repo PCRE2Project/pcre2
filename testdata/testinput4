@@ -1856,6 +1856,28 @@
 /[z\x{017f}]+/i,utf
     \x{0053}\x{0073}\x{017f}
 
+/^[a-z\x{500}-\x{1000}]{3,}[a-h]|x/utf
+    ab\x{600}ijklmh
+    ab\x{600}hijklm
+\= Expect no match
+    ab\x{600}ijklm
+
+/^[a-z\x{500}-\x{1000}]{4,7}[a-h]|x/utf
+    ab\x{600}\x{700}ijkh
+    ab\x{600}\x{700}hijkl
+\= Expect no match
+    ab\x{600}\x{700}ijklh
+    ab\x{600}h\x{700}ijklmh
+
+/([a-z\x{1000}\x{2000}]{1,2}?u)+$/utf
+    \x{1000}uu\x{2000}u
+    \x{1001}uuuu
+    \x{2001}uuuuu
+    uuuu\x{1fff}#u#\x{2000}\x{1000}u\x{2000}u
+\= Expect no match
+    abuabuabuabu!
+    uuuuuuuuuuuu#
+
 # --------------------------------------
 
 /(ΣΆΜΟΣ) \1/i,utf
