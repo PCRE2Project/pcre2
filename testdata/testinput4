@@ -2918,24 +2918,34 @@
 /\p{Lu}\p{Ll}\P{Lu}\P{Ll}/utf
     >AbbD<
     >Abb\x{01c5}<
-\= Expect no match     
+\= Expect no match
     >aBBd<
-    >aB!!< 
+    >aB!!<
 
 /\p{Lu}\p{Ll}\P{Lu}\P{Ll}/i,utf
-    >aB!!< 
-    >\x{01c5}B!!< 
-\= Expect no match     
+    >aB!!<
+    >\x{01c5}B!!<
+\= Expect no match
     >AbbD<
     >aBBd<
     >Abb\x{01c5}<
 
 /[.\p{Lu}][.\p{Ll}][.\P{Lu}][.\P{Ll}]/i,utf
-    >aB!!< 
-\= Expect no match     
+    >aB!!<
+\= Expect no match
     >AbbD<
     >aBBd<
     >Abb\x{01c5}<
+
+/[\p{Lt}\x{36b}][\P{Lt}\x{10a0}]/i,utf
+    >A!<
+    >\x{3c9}\x{58d}<
+    >\x{413}\x{940}<
+\= Expect no match
+    \x{3c9}\x{3c9}
+    \x{58d}\x{58d}
+    \x{413}\x{413}
+    \x{940}\x{940}
 
 /^\p{Lt}+/i,utf
     \x{1c5}AB
