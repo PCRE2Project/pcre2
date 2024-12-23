@@ -634,7 +634,8 @@ length. */
      PCRE2_SIZE chkmc_length = length_; \
      if (overflowed) \
        {  \
-       if (chkmc_length > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE; \
+       if (chkmc_length > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
+         goto TOOLARGEREPLACE; \
        extra_needed += chkmc_length; \
        }  \
      else if (lengthleft < chkmc_length) \
@@ -685,7 +686,8 @@ not overlap, because our default handler does not support this. */
                                                &forcecase, code);          \
     if (overflowed) \
       { \
-      if (chkcc_rc > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE; \
+      if (chkcc_rc > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
+        goto TOOLARGEREPLACE; \
       extra_needed += chkcc_rc; \
       break; \
       } \
@@ -712,7 +714,8 @@ a case-forcing callout. */
        if (overflowed) \
          {  \
          PCRE2_SIZE guess = pessimistic_case_inflation(chars_outstanding); \
-         if (guess > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE; \
+         if (guess > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
+           goto TOOLARGEREPLACE; \
          extra_needed += guess; \
          }  \
        else \
@@ -1613,7 +1616,8 @@ do
       if (oldlength > newlength)
         {
         PCRE2_SIZE additional = oldlength - newlength;
-        if (additional > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE;
+        if (additional > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */
+          goto TOOLARGEREPLACE;
         extra_needed += additional;
         }
 
@@ -1657,7 +1661,8 @@ if (overflowed)
   {
   rc = PCRE2_ERROR_NOMEMORY;
 
-  if (extra_needed > ~(PCRE2_SIZE)0 - buff_length) goto TOOLARGEREPLACE;
+  if (extra_needed > ~(PCRE2_SIZE)0 - buff_length)  /* Integer overflow */
+    goto TOOLARGEREPLACE;
   *blength = buff_length + extra_needed;
   }
 
