@@ -889,6 +889,7 @@ It also handles non-utf case folding.
 
 Arguments:
   options       the options bits
+  xoptions      the extra options bits
   cb            compile data
   start         start of range character
   end           end of range character
@@ -897,7 +898,8 @@ Returns:        cb->classbits is updated
 */
 
 static void
-add_to_class(uint32_t options, compile_block *cb, uint32_t start, uint32_t end)
+add_to_class(uint32_t options, uint32_t xoptions, compile_block *cb,
+  uint32_t start, uint32_t end)
 {
 uint8_t *classbits = cb->classbits.classbits;
 uint32_t c, byte_start, byte_end;
@@ -911,14 +913,45 @@ restriction is in force). Sometimes we can just extend the original range. */
 if ((options & PCRE2_CASELESS) != 0)
   {
 #ifdef SUPPORT_UNICODE
-  if ((options & (PCRE2_UTF|PCRE2_UCP)) == 0)
+  /* UTF mode. This branch is taken if we don't support wide characters (e.g.
+  8-bit library, without UTF), but we do treat those characters as Unicode
+  (if UCP flag is set). In this case, we only need to expand the character class
+  set to include the case pairs which are in the 0-255 codepoint range. */
+  if ((options & (PCRE2_UTF|PCRE2_UCP)) != 0)
+    {
+      BOOL turkish_i = (xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+        PCRE2_EXTRA_TURKISH_CASING;
+      if (start < 128)
+        {
+        uint32_t lo_end = (classbits_end < 127 ? classbits_end : 127);
+        for (c = start; c <= lo_end; c++)
+          {
+          if (turkish_i && UCD_ANY_I(c)) continue;
+          SETBIT(classbits, cb->fcc[c]);
+          }
+        }
+      if (classbits_end >= 128)
+        {
+        uint32_t hi_start = (start > 128 ? start : 128);
+        for (c = hi_start; c <= classbits_end; c++)
+          {
+          uint32_t co = UCD_OTHERCASE(c);
+          if (co <= 0xff) SETBIT(classbits, co);
+          }
+        }
+    }
+
+  else
 #endif  /* SUPPORT_UNICODE */
-    /* Not UTF mode */
+
+  /* Not UTF mode */
+    {
     for (c = start; c <= classbits_end; c++)
       SETBIT(classbits, cb->fcc[c]);
+    }
   }
 
-/* Use the bitmap for characters < 256. Otherwise use extra data.*/
+/* Use the bitmap for characters < 256. Otherwise use extra data. */
 
 byte_start = (start + 7) >> 3;
 byte_end = (classbits_end + 1) >> 3;
@@ -958,6 +991,7 @@ case-independence.
 
 Arguments:
   options       the options bits
+  xoptions      the extra options bits
   cb            contains pointers to tables etc.
   p             points to row of 32-bit values, terminated by NOTACHAR
 
@@ -965,14 +999,15 @@ Returns:        cb->classbits is updated
 */
 
 static void
-add_list_to_class(uint32_t options, compile_block *cb, const uint32_t *p)
+add_list_to_class(uint32_t options, uint32_t xoptions, compile_block *cb,
+  const uint32_t *p)
 {
 while (p[0] < 256)
   {
   unsigned int n = 0;
 
   while(p[n+1] == p[0] + n + 1) n++;
-  add_to_class(options, cb, p[0], p[n]);
+  add_to_class(options, xoptions, cb, p[0], p[n]);
 
   p += n + 1;
   }
@@ -997,14 +1032,15 @@ Returns:        cb->classbits is updated
 */
 
 static void
-add_not_list_to_class(uint32_t options, compile_block *cb, const uint32_t *p)
+add_not_list_to_class(uint32_t options, uint32_t xoptions, compile_block *cb,
+  const uint32_t *p)
 {
 if (p[0] > 0)
-  add_to_class(options, cb, 0, p[0] - 1);
+  add_to_class(options, xoptions, cb, 0, p[0] - 1);
 while (p[0] < 256)
   {
   while (p[1] == p[0] + 1) p++;
-  add_to_class(options, cb, p[0] + 1, (p[1] > 255) ? 255 : p[1] - 1);
+  add_to_class(options, xoptions, cb, p[0] + 1, (p[1] > 255) ? 255 : p[1] - 1);
   p++;
   }
 }
@@ -1316,7 +1352,7 @@ while (TRUE)
 #ifdef SUPPORT_UNICODE
       if (cranges != NULL) break;
 #endif
-      add_list_to_class(options & ~PCRE2_CASELESS,
+      add_list_to_class(options & ~PCRE2_CASELESS, xoptions,
         cb, PRIV(hspace_list));
 #else
       PCRE2_ASSERT(cranges != NULL);
@@ -1328,7 +1364,7 @@ while (TRUE)
 #ifdef SUPPORT_UNICODE
       if (cranges != NULL) break;
 #endif
-      add_not_list_to_class(options & ~PCRE2_CASELESS,
+      add_not_list_to_class(options & ~PCRE2_CASELESS, xoptions,
         cb, PRIV(hspace_list));
 #else
       PCRE2_ASSERT(cranges != NULL);
@@ -1340,7 +1376,7 @@ while (TRUE)
 #ifdef SUPPORT_UNICODE
       if (cranges != NULL) break;
 #endif
-      add_list_to_class(options & ~PCRE2_CASELESS,
+      add_list_to_class(options & ~PCRE2_CASELESS, xoptions,
         cb, PRIV(vspace_list));
 #else
       PCRE2_ASSERT(cranges != NULL);
@@ -1352,7 +1388,7 @@ while (TRUE)
 #ifdef SUPPORT_UNICODE
       if (cranges != NULL) break;
 #endif
-      add_not_list_to_class(options & ~PCRE2_CASELESS,
+      add_not_list_to_class(options & ~PCRE2_CASELESS, xoptions,
         cb, PRIV(vspace_list));
 #else
       PCRE2_ASSERT(cranges != NULL);
@@ -1473,26 +1509,26 @@ while (TRUE)
 
       if (C <= CHAR_i)
         {
-        add_to_class(options, cb, C + uc,
+        add_to_class(options, xoptions, cb, C + uc,
           ((D < CHAR_i)? D : CHAR_i) + uc);
         C = CHAR_j;
         }
 
       if (C <= D && C <= CHAR_r)
         {
-        add_to_class(options, cb, C + uc,
+        add_to_class(options, xoptions, cb, C + uc,
           ((D < CHAR_r)? D : CHAR_r) + uc);
         C = CHAR_s;
         }
 
       if (C <= D)
-        add_to_class(options, cb, C + uc, D + uc);
+        add_to_class(options, xoptions, cb, C + uc, D + uc);
       }
     else
 #endif
     /* Not an EBCDIC special range */
 
-    add_to_class(options, cb, c, d);
+    add_to_class(options, xoptions, cb, c, d);
 #else
     PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -1507,7 +1543,7 @@ while (TRUE)
 #endif
   /* Handle a single character. */
 
-  add_to_class(options, cb, meta, meta);
+  add_to_class(options, xoptions, cb, meta, meta);
 #else
   PCRE2_ASSERT(cranges != NULL);
 #endif
@@ -1528,7 +1564,7 @@ if (cranges != NULL)
     {
     PCRE2_ASSERT((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0);
     /* Add range to bitset. */
-    add_to_class(options, cb, range[0], range[1]);
+    add_to_class(options, xoptions, cb, range[0], range[1]);
 
     if (range[1] > 255) break;
     range += 2;

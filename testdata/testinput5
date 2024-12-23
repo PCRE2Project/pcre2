@@ -3562,4 +3562,27 @@
 
 /[\pL-z]/
 
+/[a\x{e1}]/iB
+    a
+    A
+    \x{e1}
+
+/[a\x{e1}]/iB,utf
+    a
+    A
+    \x{e1}
+    \x{c1}
+
+/[a\x{e1}]/iB,ucp
+    a
+    A
+    \x{e1}
+    \x{c1}
+
+/[a\x{e1}]/iB,ucp,utf
+    a
+    A
+    \x{e1}
+    \x{c1}
+
 # End of testinput5
