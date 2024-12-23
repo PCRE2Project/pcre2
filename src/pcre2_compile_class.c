@@ -1563,8 +1563,12 @@ if (cranges != NULL)
   while (range < end && range[0] < 256)
     {
     PCRE2_ASSERT((xclass_props & XCLASS_HAS_8BIT_CHARS) != 0);
-    /* Add range to bitset. */
-    add_to_class(options, xoptions, cb, range[0], range[1]);
+    /* Add range to bitset. If we are in UTF or UCP mode, then clear the
+    caseless bit, because the cranges handle caselessness (only) in this
+    condition; see the condition for PARSE_CLASS_CASELESS_UTF in
+    compile_optimize_class(). */
+    add_to_class(((options & (PCRE2_UTF|PCRE2_UCP)) != 0)?
+        (options & ~PCRE2_CASELESS) : options, xoptions, cb, range[0], range[1]);
 
     if (range[1] > 255) break;
     range += 2;
