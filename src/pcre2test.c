@@ -217,7 +217,6 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #define PARENS_NEST_DEFAULT 220   /* Default parentheses nest limit */
 #define PATSTACKSIZE 20           /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
-#define REPLACE_CASE_MODSIZE 24   /* Field for reading 8-bit case-replacement */
 #define VERSION_SIZE 64           /* Size of buffer for the version strings */
 
 /* Default JIT compile options */
@@ -534,6 +533,7 @@ so many of them that they are split into two fields. */
 #define CTL2_NULL_SUBJECT                0x00002000u
 #define CTL2_NULL_REPLACEMENT            0x00004000u
 #define CTL2_FRAMESIZE                   0x00008000u
+#define CTL2_SUBSTITUTE_CASE_CALLOUT     0x00010000u
 
 #define CTL2_HEAPFRAMES_SIZE             0x20000000u  /* Informational */
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
@@ -563,6 +563,7 @@ different things in the two cases. */
                     CTL2_SUBSTITUTE_UNKNOWN_UNSET|\
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
                     CTL2_ALLVECTOR|\
+                    CTL2_SUBSTITUTE_CASE_CALLOUT|\
                     CTL2_HEAPFRAMES_SIZE)
 
 /* Structures for holding modifier information for patterns and subject strings
@@ -576,9 +577,8 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  control2;         /* Must be in same position as datctl */
   uint32_t  jitstack;         /* Must be in same position as datctl */
    uint8_t  replacement[REPLACE_MODSIZE];            /* So must this */
-   uint8_t  replacement_case[REPLACE_CASE_MODSIZE];  /* So must this */
-  uint32_t  substitute_skip;  /* Must be in same position as patctl */
-  uint32_t  substitute_stop;  /* Must be in same position as patctl */
+  uint32_t  substitute_skip;  /* Must be in same position as datctl */
+  uint32_t  substitute_stop;  /* Must be in same position as datctl */
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
@@ -599,7 +599,6 @@ typedef struct datctl {       /* Structure for data line modifiers. */
   uint32_t  control2;         /* Must be in same position as patctl */
   uint32_t  jitstack;         /* Must be in same position as patctl */
    uint8_t  replacement[REPLACE_MODSIZE];            /* So must this */
-   uint8_t  replacement_case[REPLACE_CASE_MODSIZE];  /* So must this */
   uint32_t  substitute_skip;  /* Must be in same position as patctl */
   uint32_t  substitute_stop;  /* Must be in same position as patctl */
   uint32_t  startend[2];
@@ -780,7 +779,7 @@ static modstruct modlist[] = {
   { "startoffset",                 MOD_DAT,  MOD_INT, 0,                          DO(offset) },
   { "subject_literal",             MOD_PATP, MOD_CTL, CTL2_SUBJECT_LITERAL,       PO(control2) },
   { "substitute_callout",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CALLOUT,    PO(control2) },
-  { "substitute_case_callout",     MOD_PND,  MOD_STR, REPLACE_CASE_MODSIZE,       PO(replacement_case) },
+  { "substitute_case_callout",     MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_CASE_CALLOUT, PO(control2) },
   { "substitute_extended",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_literal",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_LITERAL,    PO(control2) },
   { "substitute_matched",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_MATCHED,    PO(control2) },
@@ -1509,11 +1508,19 @@ are supported. */
 
 #define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(a,b,c) \
   if (test_mode == PCRE8_MODE) \
-    pcre2_set_substitute_case_callout_8(G(a,8),b,c); \
+    pcre2_set_substitute_case_callout_8(G(a,8),G(b,8),c); \
   else if (test_mode == PCRE16_MODE) \
-    pcre2_set_substitute_case_callout_16(G(a,16),b,c); \
+    pcre2_set_substitute_case_callout_16(G(a,16),G(b,16),c); \
   else \
-    pcre2_set_substitute_case_callout_32(G(a,32),b,c)
+    pcre2_set_substitute_case_callout_32(G(a,32),G(b,32),c)
+
+#define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT_NULL(a) \
+  if (test_mode == PCRE8_MODE) \
+    pcre2_set_substitute_case_callout_8(G(a,8),NULL,NULL); \
+  else if (test_mode == PCRE16_MODE) \
+    pcre2_set_substitute_case_callout_16(G(a,16),NULL,NULL); \
+  else \
+    pcre2_set_substitute_case_callout_32(G(a,32),NULL,NULL)
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == PCRE8_MODE) \
@@ -2018,9 +2025,15 @@ the three different cases. */
 
 #define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    G(pcre2_set_substitute_case_callout_,BITONE)(G(a,BITONE),b,c); \
+    G(pcre2_set_substitute_case_callout_,BITONE)(G(a,BITONE),G(b,BITONE),c); \
   else \
-    G(pcre2_set_substitute_case_callout_,BITTWO)(G(a,BITTWO),b,c)
+    G(pcre2_set_substitute_case_callout_,BITTWO)(G(a,BITTWO),G(b,BITTWO),c)
+
+#define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT_NULL(a) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(pcre2_set_substitute_case_callout_,BITONE)(G(a,BITONE),NULL,NULL); \
+  else \
+    G(pcre2_set_substitute_case_callout_,BITTWO)(G(a,BITTWO),NULL,NULL)
 
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2231,7 +2244,9 @@ the three different cases. */
   pcre2_set_substitute_callout_8(G(a,8), \
     (int (*)(pcre2_substitute_callout_block_8 *, void *))b,c)
 #define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(a,b,c) \
-  pcre2_set_substitute_case_callout_8(G(a,8),b,c)
+  pcre2_set_substitute_case_callout_8(G(a,8),G(b,8),c)
+#define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT_NULL(a) \
+  pcre2_set_substitute_case_callout_8(G(a,8),NULL,NULL)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h, \
     (PCRE2_SPTR8)i,j,(PCRE2_UCHAR8 *)k,l)
@@ -2342,7 +2357,9 @@ the three different cases. */
   pcre2_set_substitute_callout_16(G(a,16), \
     (int (*)(pcre2_substitute_callout_block_16 *, void *))b,c)
 #define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(a,b,c) \
-  pcre2_set_substitute_case_callout_16(G(a,16),b,c)
+  pcre2_set_substitute_case_callout_16(G(a,16),G(b,16),c)
+#define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT_NULL(a) \
+  pcre2_set_substitute_case_callout_16(G(a,16),NULL,NULL)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h, \
     (PCRE2_SPTR16)i,j,(PCRE2_UCHAR16 *)k,l)
@@ -2453,7 +2470,9 @@ the three different cases. */
   pcre2_set_substitute_callout_32(G(a,32), \
     (int (*)(pcre2_substitute_callout_block_32 *, void *))b,c)
 #define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(a,b,c) \
-  pcre2_set_substitute_case_callout_32(G(a,32),b,c)
+  pcre2_set_substitute_case_callout_32(G(a,32),G(b,32),c)
+#define PCRE2_SET_SUBSTITUTE_CASE_CALLOUT_NULL(a) \
+  pcre2_set_substitute_case_callout_32(G(a,32),NULL,NULL)
 #define PCRE2_SUBSTITUTE(a,b,c,d,e,f,g,h,i,j,k,l) \
   a = pcre2_substitute_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h, \
     (PCRE2_SPTR32)i,j,(PCRE2_UCHAR32 *)k,l)
@@ -4275,7 +4294,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -4316,6 +4335,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_PUSHTABLESCOPY) != 0)? " pushtablescopy" : "",
   ((controls & CTL_STARTCHAR) != 0)? " startchar" : "",
   ((controls2 & CTL2_SUBSTITUTE_CALLOUT) != 0)? " substitute_callout" : "",
+  ((controls2 & CTL2_SUBSTITUTE_CASE_CALLOUT) != 0)? " substitute_case_callout" : "",
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_LITERAL) != 0)? " substitute_literal" : "",
   ((controls2 & CTL2_SUBSTITUTE_MATCHED) != 0)? " substitute_matched" : "",
@@ -6478,62 +6498,221 @@ return yield;
 *        Substitute case callout function        *
 *************************************************/
 
-/* Called from pcre2_substitute() when the substitute_case_callout
-modifier is set. The user-data is a uint8_t UTF-8 buffer of
-characters, containing data for the case conversion.
+/* Function to implement our test-only custom case mappings.
+To ease implementation, we only work in the ASCII range (so that we don't need
+to read & write UTF sequences).
+However, we aim to implement case mappings which fairly well represent the range
+of interesting behaviours that exist for Unicode codepoints. */
 
-Arguments:
-  ch          the input character
-  to          the case conversion type
-  data_ptr    callout data, which will be a UTF-8 string
-
-Returns:      the new character
-*/
-
-static uint32_t
-substitute_case_callout_function(uint32_t ch, int to, void *data_ptr)
+static BOOL
+case_transform(int to_case, int num_in, int *num_read, int *num_write,
+  uint32_t *c1, uint32_t *c2)
 {
-uint32_t c;
-uint8_t *pr = (uint8_t *)data_ptr;
-int skip = 0;
-BOOL test_or_return = TRUE;
+/* Let's have one character which aborts the substitution. */
+if (*c1 == '!') return FALSE;
 
-/* The input string should have a multiple of four characters.
-Each four-character block is parsed as a character list of the form
-"<input><lower><upper><title>". Standard ASCII replacements would look
-like: "aaAA...AaAA...". */
-while ((c = *pr++) != 0)
+/* Default behaviour is to read one character, and write back that same one
+character (treating all characters as "uncased"). */
+*num_read = *num_write = 1;
+
+/* Add a normal case pair 'a' (l) <-> 'B' (t,u). Standard ASCII letter
+behaviour, but with switched letters for testing. */
+if (*c1 == 'a' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'B';
+else if (*c1 == 'B' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'a';
+
+/* Add a titlecased triplet 'd' (l) <-> 'D' (t) <-> 'Z' (u). Example: the
+'dz'/'Dz'/'DZ' ligature character ("Latin Small Letter DZ" <-> "Latin Capital
+Letter D with Small Letter Z" <-> "Latin Capital Letter DZ"). */
+else if (*c1 == 'd' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)? 'D' : 'Z';
+else if (*c1 == 'D' && to_case != PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
+  *c1 = (to_case == PCRE2_SUBSTITUTE_CASE_LOWER)? 'd' : 'Z';
+else if (*c1 == 'Z' && to_case != PCRE2_SUBSTITUTE_CASE_UPPER)
+  *c1 = (to_case == PCRE2_SUBSTITUTE_CASE_LOWER)? 'd' : 'D';
+
+/* Expands when uppercased. Example: Esszet 'f' <-> 'SS'. */
+else if (*c1 == 'f' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
   {
-  if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
+  *c1 = 'S';
+  *c2 = 'S';
+  *num_write = 2;
+  }
+else if (*c1 == 's' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'S';
+else if (*c1 == 'S' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 's';
 
-  if (skip != 0)
-    {
-    --skip;
-    }
-  else if (test_or_return)
-    {
-    /* In "test" state we are searching for a block of four characters, where
-    the first character matches the input. */
-    if (c == ch)
-      {
-      test_or_return = FALSE;
-      skip = to;
-      }
-    else
-      {
-      skip = 3;
-      }
-    }
-  else
-    {
-    /* In "return" state we are skipping UTF-8 characters until we reach the
-    one that we want to return (we are in a matching block). */
-    return c;
-    }
+/* Expanding and contracting characters, 'o' <-> 'OO'. You can get this purely
+due to UTF-8 encoding length, for example uppercase Omega (3 bytes in UTF-8)
+lowercases to 2 bytes in UTF-8. */
+else if (num_in == 2 && *c1 == 'O' && *c2 == 'O' &&
+         to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'o';
+  *num_read = 2;
+  }
+else if (*c1 == 'o' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'O';
+  *c2 = 'O';
+  *num_write = 2;
+  }
+else if (num_in == 2 && *c1 == 'p' && *c2 == 'p' &&
+         to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'P';
+  *num_read = 2;
+  }
+else if (*c1 == 'P' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'p';
+  *c2 = 'p';
+  *num_write = 2;
   }
 
-return ch;
+/* Use 'l' -> 'Mn' or 'MN' as an expanding ligature, like 'fi' -> 'Fi' ->
+'FI'. */
+else if (*c1 == 'l' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  {
+  *c1 = 'M';
+  *c2 = (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)? 'n' : 'N';
+  *num_write = 2;
+  }
+else if (*c1 == 'M' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'm';
+else if (*c1 == 'm' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'M';
+else if (*c1 == 'N' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'n';
+else if (*c1 == 'n' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'N';
+
+/* An example of a context-dependent mapping, the Greek Sigma. It lowercases
+depending on the following character. Use 'c'/'k' -> 'K'. */
+else if ((*c1 == 'c' || *c1 == 'k') && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'K';
+else if (*c1 == 'K' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = (num_in == 1 || *c2 == ' ')? 'c' : 'k';
+
+/* An example of a context-dependent multi mapping, the Dutch IJ. When those
+letters appear together, they titlecase 'ij' (l) <-> 'IJ' (t) <-> 'IJ' (u).
+Namely, English titlecasing of 'ijnssel' would be 'Ijnssel' (just uppercase the
+first letter), but the Dutch rule is 'IJnssel'. */
+else if (num_in == 2 && (*c1 == 'i' || *c1 == 'I') &&
+         (*c2 == 'j' || *c2 == 'J') &&
+         to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
+  {
+  *c1 = 'I';
+  *c2 = 'J';
+  *num_read = 2;
+  *num_write = 2;
+  }
+else if (*c1 == 'i' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'I';
+else if (*c1 == 'I' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'i';
+else if (*c1 == 'j' && to_case != PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'J';
+else if (*c1 == 'J' && to_case == PCRE2_SUBSTITUTE_CASE_LOWER)
+  *c1 = 'j';
+
+return TRUE;
 }
+
+/* Called from pcre2_substitute() when the substitute_case_callout
+modifier is set. The substitute callout block is not identical for all code unit
+widths, so we have to duplicate the function for each supported width.
+
+Arguments:
+  input          the input character
+  input_len      the length of the input
+  output         the output buffer
+  output_cap     the output buffer capacity
+  to_case        the case conversion type
+  data_ptr       callout data (unused)
+
+Returns:         the number of code units of the output
+*/
+
+#define substitute_case_callout_function(BITS) \
+static PCRE2_SIZE \
+G(substitute_case_callout_function,BITS)( \
+  G(PCRE2_SPTR,BITS) input, PCRE2_SIZE input_len, \
+  G(PCRE2_UCHAR,BITS) *output, PCRE2_SIZE output_cap, \
+  int to_case, void *data_ptr) \
+{ \
+G(PCRE2_UCHAR,BITS) buf[16]; \
+G(PCRE2_SPTR,BITS) input_copy; \
+PCRE2_SIZE written = 0; \
+\
+(void)data_ptr;   /* Not used */ \
+\
+if (input_len > sizeof(buf)/sizeof(*buf)) \
+  { \
+  G(PCRE2_UCHAR,BITS) *input_buf = malloc( \
+      input_len * sizeof(G(PCRE2_UCHAR,BITS))); \
+  if (input_buf == NULL) return ~(PCRE2_SIZE)0; \
+  memcpy(input_buf, input, input_len * sizeof(G(PCRE2_UCHAR,BITS))); \
+  input_copy = input_buf; \
+  } \
+else \
+  { \
+  memcpy(buf, input, input_len * sizeof(G(PCRE2_UCHAR,BITS))); \
+  input_copy = buf; \
+  } \
+\
+for (PCRE2_SIZE i = 0; i < input_len; ) \
+  { \
+  int num_in = i + 1 < input_len ? 2 : 1; \
+  uint32_t c1 = input_copy[i]; \
+  uint32_t c2 = i + 1 < input_len ? input_copy[i + 1] : 0; \
+  int num_read; \
+  int num_write; \
+  \
+  if (!case_transform(to_case, num_in, &num_read, &num_write, &c1, &c2)) \
+    { \
+    written = ~(PCRE2_SIZE)0; \
+    goto END; \
+    } \
+  \
+  i += num_read; \
+  if (to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST) \
+    to_case = PCRE2_SUBSTITUTE_CASE_LOWER; \
+  \
+  if (written + num_write > output_cap) \
+    { \
+    written += num_write; \
+    } \
+  else \
+    { \
+    if (num_write > 0) output[written++] = c1; \
+    if (num_write > 1) output[written++] = c2; \
+    } \
+  } \
+\
+END: \
+if (input_copy != buf) free((G(PCRE2_UCHAR,BITS) *)input_copy); \
+\
+/* Let's be maximally cruel. The case callout is allowed to leave the output
+buffer in any state at all if it overflows, so let's use random garbage. */ \
+if (written > output_cap) \
+  memset(output, time(NULL) & 1 ? 0xcd : 0xdc, \
+         output_cap * sizeof(G(PCRE2_UCHAR,BITS))); \
+\
+return written; \
+}
+
+#if defined SUPPORT_PCRE2_8
+substitute_case_callout_function(8)
+#endif
+#if defined SUPPORT_PCRE2_16
+substitute_case_callout_function(16)
+#endif
+#if defined SUPPORT_PCRE2_32
+substitute_case_callout_function(32)
+#endif
 
 
 /*************************************************
@@ -7059,7 +7238,6 @@ memcpy(&dat_datctl, &def_datctl, sizeof(datctl));
 dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
 dat_datctl.control2 |= (pat_patctl.control2 & CTL2_ALLPD);
 strcpy((char *)dat_datctl.replacement, (char *)pat_patctl.replacement);
-strcpy((char *)dat_datctl.replacement_case, (char *)pat_patctl.replacement_case);
 if (dat_datctl.jitstack == 0) dat_datctl.jitstack = pat_patctl.jitstack;
 
 if (dat_datctl.substitute_skip == 0)
@@ -7491,7 +7669,7 @@ for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
     }
   }
 
-if (pat_patctl.replacement[0] != 0)
+if (dat_datctl.replacement[0] != 0)
   {
   if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0 &&
       (dat_datctl.control & CTL_NULLCONTEXT) != 0)
@@ -7500,7 +7678,7 @@ if (pat_patctl.replacement[0] != 0)
     return PR_OK;
     }
 
-  if (pat_patctl.replacement_case[0] != 0 &&
+  if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CASE_CALLOUT) != 0 &&
       (dat_datctl.control & CTL_NULLCONTEXT) != 0)
     {
     fprintf(outfile, "** Replacement case callouts are not supported with null_context.\n");
@@ -7934,13 +8112,13 @@ if (dat_datctl.replacement[0] != 0)
     PCRE2_SET_SUBSTITUTE_CALLOUT(dat_context, NULL, NULL);  /* No callout */
     }
 
-  if (dat_datctl.replacement_case[0] != 0)
+  if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CASE_CALLOUT) != 0)
     {
-    PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(dat_context, substitute_case_callout_function, (void *)&dat_datctl.replacement_case[0]);
+    PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(dat_context, substitute_case_callout_function, NULL);
     }
   else
     {
-    PCRE2_SET_SUBSTITUTE_CASE_CALLOUT(dat_context, NULL, NULL);  /* No callout */
+    PCRE2_SET_SUBSTITUTE_CASE_CALLOUT_NULL(dat_context);  /* No callout */
     }
 
   /* There is a special option to set the replacement to NULL in order to test

@@ -208,7 +208,9 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <br>
 <b>int pcre2_set_substitute_case_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t (*<i>callout_function</i>)(uint32_t, int, void *),</b>
+<b>  PCRE2_SIZE (*<i>callout_function</i>)(PCRE2_SPTR, PCRE2_SIZE,</b>
+<b>                                       PCRE2_UCHAR *, PCRE2_SIZE,</b>
+<b>                                       int, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
@@ -1126,7 +1128,9 @@ made by <b>pcre2_substitute()</b>. Details are given in the section entitled
 <br>
 <br>
 <b>int pcre2_set_substitute_case_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t (*<i>callout_function</i>)(uint32_t, int, void *),</b>
+<b>  PCRE2_SIZE (*<i>callout_function</i>)(PCRE2_SPTR, PCRE2_SIZE,</b>
+<b>                                       PCRE2_UCHAR *, PCRE2_SIZE,</b>
+<b>                                       int, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
@@ -4113,7 +4117,9 @@ Substitution case callouts
 </b><br>
 <P>
 <b>int pcre2_set_substitute_case_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  uint32_t (*<i>callout_function</i>)(uint32_t, int, void *),</b>
+<b>  PCRE2_SIZE (*<i>callout_function</i>)(PCRE2_SPTR, PCRE2_SIZE,</b>
+<b>                                       PCRE2_UCHAR *, PCRE2_SIZE,</b>
+<b>                                       int, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
@@ -4128,7 +4134,7 @@ processing a substitution such as:
 </P>
 <P>
 The default case transformations applied by PCRE2 are reasonably complete, and,
-in UTF or UCP mode, perform the basic locale-invariant case transformations as
+in UTF or UCP mode, perform the simple locale-invariant case transformations as
 specified by Unicode. This is suitable for the internal (invisible)
 case-equivalence procedures used during pattern matching, but an application
 may wish to use more sophisticated locale-aware processing for the user-visible
@@ -4137,28 +4143,75 @@ substitution transformations.
 <P>
 One example implementation of the <i>callout_function</i> using the ICU
 library would be:
+<br>
+<br>
 <pre>
-    static uint32_t icu_case_callout(uint32_t ch, int to, void *)
+    PCRE2_SIZE
+    icu_case_callout(
+      PCRE2_SPTR input, PCRE2_SIZE input_len,
+      PCRE2_UCHAR *output, PCRE2_SIZE output_cap,
+      int to_case, void *data_ptr)
     {
-      return to == PCRE2_SUBSTITUTE_CASE_LOWER ? u_tolower(ch)
-           : to == PCRE2_SUBSTITUTE_CASE_UPPER ? u_toupper(ch)
-           : to == PCRE2_SUBSTITUTE_CASE_TITLE ? u_totitle(ch)
-           : ch;
+      UErrorCode err = U_ZERO_ERROR;
+      int32_t r = to_case == PCRE2_SUBSTITUTE_CASE_LOWER
+        ? u_strToLower(output, output_cap, input, input_len, NULL, &err)
+        : to_case == PCRE2_SUBSTITUTE_CASE_UPPER
+        ? u_strToUpper(output, output_cap, input, input_len, NULL, &err)
+        : u_strToTitle(output, output_cap, input, input_len, &first_char_only,
+                       NULL, &err);
+      if (U_FAILURE(err)) return (~(PCRE2_SIZE)0);
+      return r;
     }
 </PRE>
 </P>
 <P>
-The first argument of the case callout function is the Unicode character to
-transform.
+The first and second arguments of the case callout function are the Unicode
+string to transform.
 </P>
 <P>
-The second argument is one of the constants PCRE2_SUBSTITUTE_CASE_LOWER,
-PCRE2_SUBSTITUTE_CASE_UPPER, or PCRE2_SUBSTITUTE_CASE_TITLE.
+The third and fourth arguments are the output buffer and its capacity.
 </P>
 <P>
-The third argument is the <i>callout_data</i> supplied to
-<b>pcre2_set_substitute_case_callout()</b>, and the return value is the
-transformed Unicode character, which may be equal to the input character.
+The fifth is one of the constants PCRE2_SUBSTITUTE_CASE_LOWER,
+PCRE2_SUBSTITUTE_CASE_UPPER, or PCRE2_SUBSTITUTE_CASE_TITLE_FIRST.
+PCRE2_SUBSTITUTE_CASE_LOWER and PCRE2_SUBSTITUTE_CASE_UPPER are passed to the
+callout to indicate that the case of the entire callout input should be
+case-transformed. PCRE2_SUBSTITUTE_CASE_TITLE_FIRST is passed to indicate that
+only the first character or glyph should be transformed to Unicode titlecase
+and the rest to Unicode lowercase (note that titlecasing sometimes uses Unicode
+properties to titlecase each word in a string; but PCRE2 is requesting that only
+the single leading character is to be titlecased).
+</P>
+<P>
+The sixth argument is the <i>callout_data</i> supplied to
+<b>pcre2_set_substitute_case_callout()</b>.
+</P>
+<P>
+The resulting string in the destination buffer may be larger or smaller than the
+input, if the casing rules merge or split characters. The return value is the
+length required for the output string. If a buffer of sufficient size was
+provided to the callout, then the result must be written to the buffer and the
+number of code units returned. If the result does not fit in the provided
+buffer, then the required capacity must be returned and PCRE2 will not make use
+of the output buffer. PCRE2 provides input and output buffers which overlap, so
+the callout must support this by suitable internal buffering.
+</P>
+<P>
+Alternatively, if the callout wishes to indicate an error, then it may return
+(~(PCRE2_SIZE)0). In this case pcre2_substitute() will immediately fail with
+error PCRE2_ERROR_REPLACECASE.
+</P>
+<P>
+When a case callout is combined with the PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+option, there are situations when pcre2_substitute() will return an
+underestimate of the required buffer size. If you call pcre2_substitute() once
+with PCRE2_SUBSTITUTE_OVERFLOW_LENGTH, and the input buffer is too small for
+the replacement string to be constructed, then instead of calling the case
+callout, pcre2_substitute() will make an estimate of the required buffer size.
+The second call should also pass PCRE2_SUBSTITUTE_OVERFLOW_LENGTH, because that
+second call is not guaranteed to succeed either, if the case callout requires
+more buffer space than expected. The caller must make repeated attempts in a
+loop.
 </P>
 <br><a name="SEC38" href="#TOC1">DUPLICATE CAPTURE GROUP NAMES</a><br>
 <P>
