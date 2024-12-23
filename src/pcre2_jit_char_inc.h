@@ -626,6 +626,9 @@ if (category_list == UCPCAT_ALL)
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
   return;
   }
+
+if (category_list != 0)
+  compares++;
 #endif
 
 if (*cc != XCL_END)
@@ -633,6 +636,7 @@ if (*cc != XCL_END)
 #if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
   if (common->utf && compares == 0 && !(status & XCLASS_IS_ECLASS))
     {
+    SLJIT_ASSERT(category_list == 0);
     max = 0;
     min = (ccbegin[-1] & XCL_MAP) != 0 ? 0 : READ_CHAR_MAX;
     xclass_update_min_max(common, cc, &min, &max);
@@ -700,9 +704,6 @@ if (status & XCLASS_NEEDS_UCD)
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
   ccbegin = cc;
-
-  if (category_list != 0)
-    compares++;
 
   if (status & XCLASS_HAS_BIDICL)
     {
