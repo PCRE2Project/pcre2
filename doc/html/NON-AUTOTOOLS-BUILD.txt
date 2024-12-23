@@ -321,7 +321,7 @@ cache can be deleted by selecting "File > Delete Cache".
 
 4.  Run cmake-gui from the Shell environment of your build tool, for example,
     Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++. Do not try
-    to start Cmake from the Windows Start menu, as this can lead to errors.
+    to start CMake from the Windows Start menu, as this can lead to errors.
 
 5.  Enter C:\pcre2\pcre2-xx and C:\pcre2\pcre2-xx\build for the source and
     build directories, respectively.
