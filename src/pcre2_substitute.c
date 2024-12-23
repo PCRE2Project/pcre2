@@ -350,7 +350,7 @@ switch (state->to_case)
   }
 
 single_char = state->single_char;
-if (state->single_char)
+if (single_char)
   state->to_case = PCRE2_SUBSTITUTE_CASE_NONE;
 
 while (input < input_end)
@@ -499,6 +499,7 @@ switch (state->to_case)
 
 /* Identify the leading character. Take copy, because its storage overlaps with
 `output`, and hence may be scrambled by the callout. */
+
   {
   PCRE2_SPTR ch_end = input;
   uint32_t ch;
@@ -633,6 +634,7 @@ length. */
      PCRE2_SIZE chkmc_length = length_; \
      if (overflowed) \
        {  \
+       if (chkmc_length > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE; \
        extra_needed += chkmc_length; \
        }  \
      else if (lengthleft < chkmc_length) \
@@ -683,6 +685,7 @@ not overlap, because our default handler does not support this. */
                                                &forcecase, code);          \
     if (overflowed) \
       { \
+      if (chkcc_rc > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE; \
       extra_needed += chkcc_rc; \
       break; \
       } \
@@ -708,7 +711,9 @@ a case-forcing callout. */
        {    \
        if (overflowed) \
          {  \
-         extra_needed += pessimistic_case_inflation(chars_outstanding); \
+         PCRE2_SIZE guess = pessimistic_case_inflation(chars_outstanding); \
+         if (guess > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE; \
+         extra_needed += guess; \
          }  \
        else \
          {  \
@@ -745,8 +750,6 @@ BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 PCRE2_UCHAR temp[6];
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend = NULL;
-// XXX AARGH! All the arithmetic on extra_needed is done without overflow
-// checking - it can totally fail, especially on 32-bit systems
 PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
@@ -1597,15 +1600,22 @@ do
 
     else
       {
-      PCRE2_SIZE newlength = (buff_offset - scb.output_offsets[0]) +
-          (extra_needed - sub_start_extra_needed);
+      PCRE2_SIZE newlength_buf = buff_offset - scb.output_offsets[0];
+      PCRE2_SIZE newlength_extra = extra_needed - sub_start_extra_needed;
+      PCRE2_SIZE newlength =
+        (newlength_extra > ~(PCRE2_SIZE)0 - newlength_buf)?  /* Integer overflow */
+        ~(PCRE2_SIZE)0 : newlength_buf + newlength_extra;    /* Cap the addition */
       PCRE2_SIZE oldlength = ovector[1] - ovector[0];
 
       /* Be pessimistic: request whichever buffer size is larger out of
       accepting or rejecting the substitution. */
 
       if (oldlength > newlength)
-        extra_needed += oldlength - newlength;
+        {
+        PCRE2_SIZE additional = oldlength - newlength;
+        if (additional > ~(PCRE2_SIZE)0 - extra_needed) goto TOOLARGEREPLACE;
+        extra_needed += additional;
+        }
 
       /* Proceed as if the callout did not return a negative. A negative
       effectively rejects all future substitutions, but we want to examine them
@@ -1646,6 +1656,8 @@ needed. Otherwise, an overflow generates an immediate error return. */
 if (overflowed)
   {
   rc = PCRE2_ERROR_NOMEMORY;
+
+  if (extra_needed > ~(PCRE2_SIZE)0 - buff_length) goto TOOLARGEREPLACE;
   *blength = buff_length + extra_needed;
   }
 
@@ -1669,6 +1681,10 @@ goto EXIT;
 
 CASEERROR:
 rc = PCRE2_ERROR_REPLACECASE;
+goto EXIT;
+
+TOOLARGEREPLACE:
+rc = PCRE2_ERROR_TOOLARGEREPLACE;
 goto EXIT;
 
 BAD:

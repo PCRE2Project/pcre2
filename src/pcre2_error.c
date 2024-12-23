@@ -296,6 +296,8 @@ static const unsigned char match_error_texts[] =
   "INTERNAL ERROR: invalid substring offset\0"
   "feature is not supported by the JIT compiler\0"
   "error performing replacement case transformation\0"
+  /* 70 */
+  "replacement too large (longer than PCRE2_SIZE)\0"
   ;
 
 

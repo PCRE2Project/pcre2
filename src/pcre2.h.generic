@@ -431,6 +431,7 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_INVALIDOFFSET     (-67)
 #define PCRE2_ERROR_JIT_UNSUPPORTED   (-68)
 #define PCRE2_ERROR_REPLACECASE       (-69)
+#define PCRE2_ERROR_TOOLARGEREPLACE   (-70)
 
 
 /* Request types for pcre2_pattern_info() */
