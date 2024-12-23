@@ -68,7 +68,8 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 {
 /* Update PRIV(update_classbits) when this function is changed. */
 PCRE2_UCHAR t;
-BOOL not_negated = (*data & XCL_NOT) == 0;
+PCRE2_UCHAR flags = *data++;
+BOOL not_negated = (flags & XCL_NOT) == 0;
 uint32_t type, max_index, min_index, value;
 const uint8_t *next_char;
 
@@ -79,7 +80,7 @@ utf = TRUE;
 
 /* Code points < 256 are matched against a bitmap, if one is present. */
 
-if ((*data++ & XCL_MAP) != 0)
+if ((flags & XCL_MAP) != 0)
   {
   if (c < 256)
     return (((const uint8_t *)data)[c/8] & (1u << (c&7))) != 0;
@@ -90,12 +91,26 @@ if ((*data++ & XCL_MAP) != 0)
 /* Match against the list of Unicode properties. We won't ever
 encounter XCL_PROP or XCL_NOTPROP when UTF support is not compiled. */
 #ifdef SUPPORT_UNICODE
-if (*data == XCL_PROP || *data == XCL_NOTPROP)
+if ((flags & XCL_HASPROP) != 0)
   {
   /* The UCD record is the same for all properties. */
   const ucd_record *prop = GET_UCD(c);
 
-  do
+  PCRE2_ASSERT(*data == XCL_PROP || *data == XCL_NOTPROP ||
+               (flags & XCL_HASCATLIST) != 0);
+
+  if ((flags & XCL_HASCATLIST) != 0)
+    {
+    uint32_t category_list;
+    memcpy(&category_list, data, sizeof(uint32_t));
+
+    if (category_list & (1 << prop->chartype)) return not_negated;
+
+    /* Skip bitmap. */
+    data += sizeof(uint32_t) / sizeof(PCRE2_UCHAR);
+    }
+
+  while (*data == XCL_PROP || *data == XCL_NOTPROP)
     {
     int chartype;
     BOOL isprop = (*data++) == XCL_PROP;
@@ -103,21 +118,6 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
 
     switch(*data)
       {
-      case PT_LAMP:
-      chartype = prop->chartype;
-      if ((chartype == ucp_Lu || chartype == ucp_Ll ||
-           chartype == ucp_Lt) == isprop) return not_negated;
-      break;
-
-      case PT_GC:
-      if ((data[1] == PRIV(ucp_gentype)[prop->chartype]) == isprop)
-        return not_negated;
-      break;
-
-      case PT_PC:
-      if ((data[1] == prop->chartype) == isprop) return not_negated;
-      break;
-
       case PT_SC:
       if ((data[1] == prop->script) == isprop) return not_negated;
       break;
@@ -126,13 +126,6 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
       ok = (data[1] == prop->script ||
             MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), data[1]) != 0);
       if (ok == isprop) return not_negated;
-      break;
-
-      case PT_ALNUM:
-      chartype = prop->chartype;
-      if ((PRIV(ucp_gentype)[chartype] == ucp_L ||
-           PRIV(ucp_gentype)[chartype] == ucp_N) == isprop)
-        return not_negated;
       break;
 
       /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -153,14 +146,6 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
           return not_negated;
         break;
         }
-      break;
-
-      case PT_WORD:
-      chartype = prop->chartype;
-      if ((PRIV(ucp_gentype)[chartype] == ucp_L ||
-           PRIV(ucp_gentype)[chartype] == ucp_N ||
-           chartype == ucp_Mn || chartype == ucp_Pc) == isprop)
-        return not_negated;
       break;
 
       case PT_UCNC:
@@ -257,7 +242,6 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
 
     data += 2;
     }
-  while (*data == XCL_PROP || *data == XCL_NOTPROP);
   }
 #else
   (void)utf;  /* Avoid compiler warning */
