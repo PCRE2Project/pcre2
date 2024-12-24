@@ -5670,6 +5670,25 @@ No match
     bk
 No match
 
+/[\x60-\x7f]/i,ucp
+    i
+ 0: i
+    I
+ 0: I
+
+/[\x60-\xc0]/i,ucp
+    i
+ 0: i
+    I
+ 0: I
+
+/[\x80-\xc0]/i,ucp
+\= Expect no match
+    i
+No match
+    I
+No match
+
 # End Turkish casing tests
 
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.

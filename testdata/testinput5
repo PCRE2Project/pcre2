@@ -2546,6 +2546,19 @@
     bI
     bk
 
+/[\x60-\x7f]/i,ucp
+    i
+    I
+
+/[\x60-\xc0]/i,ucp
+    i
+    I
+
+/[\x80-\xc0]/i,ucp
+\= Expect no match
+    i
+    I
+
 # End Turkish casing tests
 
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
