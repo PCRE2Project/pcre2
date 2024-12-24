@@ -21127,6 +21127,20 @@ No match
     \\
 No match
 
+/[a\x{e1}]/iB
+------------------------------------------------------------------
+        Bra
+        [Aa\xe1]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    A
+ 0: A
+    \x{e1}
+ 0: \xe1
+
 # End of testinput2
 Error -70: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

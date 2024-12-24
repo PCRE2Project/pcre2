@@ -1914,6 +1914,27 @@ No match
     bk
 No match
 
+/[\x60-\x7f]/i,ucp,turkish_casing
+    i
+ 0: i
+\= Expect no match
+    I
+No match
+
+/[\x60-\xc0]/i,ucp,turkish_casing
+    i
+ 0: i
+\= Expect no match
+    I
+No match
+
+/[\x80-\xc0]/i,ucp,turkish_casing
+\= Expect no match
+    i
+No match
+    I
+No match
+
 # ---------------------------------------------------- 
 
 /b[\x{00FF}-\x{FFEE}]/ir

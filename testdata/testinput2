@@ -7367,4 +7367,9 @@ a)"xI
 \= Expect no match
     \\
 
+/[a\x{e1}]/iB
+    a
+    A
+    \x{e1}
+
 # End of testinput2
