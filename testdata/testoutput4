@@ -4681,18 +4681,18 @@ No match
  0: AbbD
     >Abb\x{01c5}<
  0: Abb\x{1c5}
-\= Expect no match     
+\= Expect no match
     >aBBd<
 No match
-    >aB!!< 
+    >aB!!<
 No match
 
 /\p{Lu}\p{Ll}\P{Lu}\P{Ll}/i,utf
-    >aB!!< 
+    >aB!!<
  0: aB!!
-    >\x{01c5}B!!< 
+    >\x{01c5}B!!<
  0: \x{1c5}B!!
-\= Expect no match     
+\= Expect no match
     >AbbD<
 No match
     >aBBd<
@@ -4701,14 +4701,31 @@ No match
 No match
 
 /[.\p{Lu}][.\p{Ll}][.\P{Lu}][.\P{Ll}]/i,utf
-    >aB!!< 
+    >aB!!<
  0: aB!!
-\= Expect no match     
+\= Expect no match
     >AbbD<
 No match
     >aBBd<
 No match
     >Abb\x{01c5}<
+No match
+
+/[\p{Lt}\x{36b}][\P{Lt}\x{10a0}]/i,utf
+    >A!<
+ 0: A!
+    >\x{3c9}\x{58d}<
+ 0: \x{3c9}\x{58d}
+    >\x{413}\x{940}<
+ 0: \x{413}\x{940}
+\= Expect no match
+    \x{3c9}\x{3c9}
+No match
+    \x{58d}\x{58d}
+No match
+    \x{413}\x{413}
+No match
+    \x{940}\x{940}
 No match
 
 /^\p{Lt}+/i,utf

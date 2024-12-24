@@ -626,6 +626,9 @@ if (category_list == UCPCAT_ALL)
     add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
   return;
   }
+
+if (category_list != 0)
+  compares++;
 #endif
 
 if (*cc != XCL_END)
@@ -700,9 +703,6 @@ if (status & XCLASS_NEEDS_UCD)
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
 
   ccbegin = cc;
-
-  if (category_list != 0)
-    compares++;
 
   if (status & XCLASS_HAS_BIDICL)
     {

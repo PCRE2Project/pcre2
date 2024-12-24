@@ -822,6 +822,9 @@ No match
 /[[:a\x{100}b:]]/utf
 Failed: error 130 at offset 14: unknown POSIX class name
 
+/[\p{InvalidOrBadProperty}]/
+Failed: error 147 at offset 25: unknown property after \P or \p
+
 /a[^]b/utf,allow_empty_class,match_unset_backref
     a\x{1234}b
  0: a\x{1234}b

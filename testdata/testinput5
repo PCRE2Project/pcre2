@@ -339,6 +339,8 @@
 
 /[[:a\x{100}b:]]/utf
 
+/[\p{InvalidOrBadProperty}]/
+
 /a[^]b/utf,allow_empty_class,match_unset_backref
     a\x{1234}b
     a\nb

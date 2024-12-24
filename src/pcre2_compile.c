@@ -4338,6 +4338,18 @@ while (ptr < ptrend)
             uint16_t ptype = 0, pdata = 0;
             if (!get_ucp(&ptr, &negated, &ptype, &pdata, &errorcode, cb))
               goto FAILED;
+
+            /* In caseless matching, particular characteristics Lu, Ll, and Lt
+            get converted to the general characteristic L&. That is, upper,
+            lower, and title case letters are all conflated. */
+
+            if ((options & PCRE2_CASELESS) != 0 && ptype == PT_PC &&
+                (pdata == ucp_Lu || pdata == ucp_Ll || pdata == ucp_Lt))
+              {
+              ptype = PT_LAMP;
+              pdata = 0;
+              }
+
             if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
             *parsed_pattern++ = META_ESCAPE + escape;
             *parsed_pattern++ = (ptype << 16) | pdata;
