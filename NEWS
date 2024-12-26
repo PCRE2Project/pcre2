@@ -1,8 +1,8 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.45 xx-xxx-2024
---------------------------
+Version 10.45-RC1 27-December-2024
+----------------------------------
 
 This is a comparatively large release, incorporating new features, some
 bugfixes, and a few changes with slight backwards compatibility implications.
