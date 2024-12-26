@@ -323,8 +323,8 @@ PCRE2 NATIVE API MATCH CONTEXT FUNCTIONS
 
        int pcre2_set_substitute_case_callout(pcre2_match_context *mcontext,
          PCRE2_SIZE (*callout_function)(PCRE2_SPTR, PCRE2_SIZE,
-                                              PCRE2_UCHAR *, PCRE2_SIZE,
-                                              int, void *),
+                                        PCRE2_UCHAR *, PCRE2_SIZE,
+                                        int, void *),
          void *callout_data);
 
        int pcre2_set_offset_limit(pcre2_match_context *mcontext,
@@ -1142,8 +1142,8 @@ PCRE2 CONTEXTS
 
        int pcre2_set_substitute_case_callout(pcre2_match_context *mcontext,
          PCRE2_SIZE (*callout_function)(PCRE2_SPTR, PCRE2_SIZE,
-                                              PCRE2_UCHAR *, PCRE2_SIZE,
-                                              int, void *),
+                                        PCRE2_UCHAR *, PCRE2_SIZE,
+                                        int, void *),
          void *callout_data);
 
        This  sets up a callout function for PCRE2 to call when performing case
@@ -3955,8 +3955,8 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
 
        int pcre2_set_substitute_case_callout(pcre2_match_context *mcontext,
          PCRE2_SIZE (*callout_function)(PCRE2_SPTR, PCRE2_SIZE,
-                                              PCRE2_UCHAR *, PCRE2_SIZE,
-                                              int, void *),
+                                        PCRE2_UCHAR *, PCRE2_SIZE,
+                                        int, void *),
          void *callout_data);
 
        The pcre2_set_substitution_case_callout() function can be used to spec-
