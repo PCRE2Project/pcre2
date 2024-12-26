@@ -107,7 +107,8 @@ which was still misbehaving when matching fragments inside invalid UTF strings.
 in substitution strings, and if encountered gave an error, though the \o{...}
 form was recognized. This bug is now fixed.
 
-22. (#463) Fix out-of-bounds read when parsing malformed limits (e.g. LIMIT_HEAP)
+22. (#463, #487) Fix 1 byte out-of-bounds read when parsing malformed limits
+(e.g. LIMIT_HEAP)
 
 23. Many improvements to test infrastructure. Many more platforms and
 configurations are now run in Continuous Integration, and all the platforms now
@@ -134,64 +135,61 @@ improvements to parsing and optimising of character classes.
 32. (#471) Add new API function pcre2_set_optimize() for controlling which
 optimizations are enabled.
 
-33. (#487) Prevent 1 byte overread when parsing malformed patterns with early
-VERBs.
-
-34. (#491) Adds $& $` $' and $_ to substitution replacements, as well as
+33. (#491) Adds $& $` $' and $_ to substitution replacements, as well as
 interpreting \b and \v as characters.
 
-35. (#499) Add option PCRE2_EXTRA_NEVER_CALLOUT to disable callouts.
+34. (#499) Add option PCRE2_EXTRA_NEVER_CALLOUT to disable callouts.
 
-36. (#503, #513) Update Unicode support to UCD 16.
+35. (#503, #513) Update Unicode support to UCD 16.
 
-37. (#512, #618, #638) Add new function pcre2_set_substitute_case_callout() to
+36. (#512, #618, #638) Add new function pcre2_set_substitute_case_callout() to
 allow clients to provide a custom callback with locale-aware case
 transformation.
 
-38. (#516) Fix case-insensitive matching of backreferences when using the
+37. (#516) Fix case-insensitive matching of backreferences when using the
 PCRE2_EXTRA_CASELESS_RESTRICT option.
 
-39. (#519) In pcre2grep, add $& as an alias for $0
+38. (#519) In pcre2grep, add $& as an alias for $0
 
-40. (c9bf8339, #534) Updated perltest.sh to enable locale setting.
+39. (c9bf8339, #534) Updated perltest.sh to enable locale setting.
 
-41. (#521) Add support for Turkish I casefolding, using new options
+40. (#521) Add support for Turkish I casefolding, using new options
 PCRE2_EXTRA_TURKISH_CASING, and added pre-pattern flags (*TURKISH_CASING) and
 (*CASELESS_RESTRICT).
 
-42. (#523, #546, #547) Add support for UTS#18 compatible character classes,
+41. (#523, #546, #547) Add support for UTS#18 compatible character classes,
 using the new option PCRE2_ALT_EXTENDED_CLASS. This adds '[' as a metacharacter
 within character classes and the operators '&&', '--' and '~~', allowing
 subtractions and intersections of character classes to be easily expressed.
 
-43. (#553, #586, #596, #597) Add support for Perl-style extended character
+42. (#553, #586, #596, #597) Add support for Perl-style extended character
 classes, using the syntax (?[...]). This also allows expressing subtractions and
 intersections of character classes, but using a different syntax to UTS#18.
 
-44. (#554) Fixed a bug in JIT affecting greedy bounded repeats. The upper limit
+43. (#554) Fixed a bug in JIT affecting greedy bounded repeats. The upper limit
 of repeats inside a repeated bracket might be incorrectly checked.
 
-45. (#556) Fixed a bug in JIT affecting caseful matching of backreferences. When
+44. (#556) Fixed a bug in JIT affecting caseful matching of backreferences. When
 utf is disabled, and dupnames is enabled, caseless matching was used even
 if caseful matching was needed.
 
-46. (f34fc0a3) Fixed a bug in pcre2grep reported by Alejandro Colomar
+45. (f34fc0a3) Fixed a bug in pcre2grep reported by Alejandro Colomar
 <alx@kernel.org> (GitHub issue #577). In certain cases, when lines of above and
 below context were contiguous, a separator line was incorrectly being inserted.
 
-47. (#594) Fix a small (one/two byte) out-of-bounds read on invalid UTF-8 input
+46. (#594) Fix a small (one/two byte) out-of-bounds read on invalid UTF-8 input
 in pcre2grep.
 
-48. (#370) Fix the INSTALL_MSVC_PDB CMake flag.
+47. (#370) Fix the INSTALL_MSVC_PDB CMake flag.
 
-49. (#366) Install cmake files in prefix/lib/cmake/pcre2 rather than
+48. (#366) Install cmake files in prefix/lib/cmake/pcre2 rather than
 prefix/cmake. The new CMake flag PCRE2_INSTALL_CMAKEDIR allows customising this
 location.
 
-50. (#624, #626, #628, #632, #639, #641) Reduce code size of generated JIT code
+49. (#624, #626, #628, #632, #639, #641) Reduce code size of generated JIT code
 for repeated character classes.
 
-51. (#623) Update the Bazel build files.
+50. (#623) Update the Bazel build files.
 
 
 Version 10.44 07-June-2024

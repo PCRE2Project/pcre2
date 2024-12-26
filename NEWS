@@ -11,6 +11,12 @@ Please see the ChangeLog and Git log for further details.
 Only changes to behaviour, changes to the API, and major changes to the pattern
 syntax are described here.
 
+This release is the first to be available as a (signed) Git tag, or
+alternatively as a (signed) tarball of the Git tag.
+
+This is also the first release to be made by the new maintainers of PCRE2, and
+we would like to thank Philip Hazel, creator and maintainer of PCRE and PCRE2.
+
 * (Git change) The sljit project has been split out into a separate Git
   repository. Git users must now run `git submodule init; git submodule update`
   after a Git checkout.
@@ -58,6 +64,10 @@ syntax are described here.
 
   Example: to match Thai or Greek letters (but not letters or other characters
   in those scripts), use (?[\p{L} & (\p{Thai} + \p{Greek})]).
+
+* (Minor feature) Significant improvements to the character class match engine.
+  Compiled character classes are now more compact, and have faster matching
+  for large or complex character sets, using binary search through the set.
 
 * JIT compilation now fails with the new error code PCRE2_ERROR_JIT_UNSUPPORTED
   for patterns which use features not supported by the JIT compiler.
