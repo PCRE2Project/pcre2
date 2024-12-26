@@ -668,6 +668,21 @@
 
 /(.) \1/i,ucp,turkish_casing
 
+/[\x60-\x7f]/i,ucp,turkish_casing
+    i
+\= Expect no match
+    I
+
+/[\x60-\xc0]/i,ucp,turkish_casing
+    i
+\= Expect no match
+    I
+
+/[\x80-\xc0]/i,ucp,turkish_casing
+\= Expect no match
+    i
+    I
+
 # python_octal
 
 /\400/
