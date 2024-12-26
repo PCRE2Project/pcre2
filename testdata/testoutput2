@@ -21127,6 +21127,20 @@ No match
     \\
 No match
 
+/[a\x{e1}]/iB
+------------------------------------------------------------------
+        Bra
+        [Aa\xe1]
+        Ket
+        End
+------------------------------------------------------------------
+    a
+ 0: a
+    A
+ 0: A
+    \x{e1}
+ 0: \xe1
+
 # --------------
 
 # Attempt at full coverage of the substitution buffer-management code - not

@@ -428,6 +428,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUP, 0, 0, 0 | F_NOMATCH, "[^[:print:]\\x{f6f6}]", "\xef\x9b\xb6" },
 	{ MUP, 0, 0, 0, "[[:xdigit:]\\x{6500}]#", "\xe6\x94\x80#" },
 	{ MUP, 0, 0, 0 | F_PROPERTY, "[\\pC\\PC]#", "A#" },
+	{ MUP, 0, 0, 0 | F_PROPERTY, "[\\x80-\\xff\\x{800}\\x{802}\\x{804}\\p{Cc}]", "\xdf\xbf\xe0\xa0\x80" },
 
 	/* Possible empty brackets. */
 	{ MU, A, 0, 0, "(?:|ab||bc|a)+d", "abcxabcabd" },

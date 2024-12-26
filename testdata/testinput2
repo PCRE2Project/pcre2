@@ -7367,6 +7367,11 @@ a)"xI
 \= Expect no match
     \\
 
+/[a\x{e1}]/iB
+    a
+    A
+    \x{e1}
+
 # --------------
 
 # Attempt at full coverage of the substitution buffer-management code - not
