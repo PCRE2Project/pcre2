@@ -1048,7 +1048,7 @@ PATTERN MODIFIERS
              replace=<string>            specify a replacement string
              startchar                   show starting character when relevant
              substitute_callout          use substitution callouts
-             substitute_case_callout=<string> use substitution case callouts
+             substitute_case_callout     use substitution case callouts
              substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
              substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
              substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
@@ -1213,8 +1213,8 @@ SUBJECT MODIFIERS
              startchar                  show startchar when relevant
              startoffset=<n>            same as offset=<n>
              substitute_callout         use substitution callouts
-             substitute_case_callout=<string> use substitution case callouts
-             substitute_extedded        use PCRE2_SUBSTITUTE_EXTENDED
+             substitute_case_callout    use substitution case callouts
+             substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
              substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
              substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
              substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
@@ -1482,21 +1482,15 @@ SUBJECT MODIFIERS
 
    Testing substitute case callouts
 
-       If the substitute_case_callout=<string> modifier is set, a substitution
-       case  callout  function  is  set up. The callout function is called for
-       each substituted character which is to  be  case-transformed,  and  the
-       mapping used is specified by the modifier's string argument.
+       If  the  substitute_case_callout  modifier  is set, a substitution case
+       callout function is set up. The callout function  is  called  for  each
+       substituted chunk which is to be case-transformed.
 
-       The string argument is parsed as four-character blocks, with each block
-       interpreted  as  "<input><lower><upper><title>". The input character is
-       used to find a matching block, and the corresponding character is  then
-       returned.   For  example, to specify a custom uppercasing of the letter
-       "a" to "Z":
-
-         /a/g,replace=\U$0,substitute_extended,substitute_case_callout=a.Z.
-             a
-          1: Z
-
+       The callout function passed is a fixed function with implementation for
+       certain  behaviours:  inputs which shrink when case-transformed; inputs
+       which grow; inputs with distinct upper/lower/titlecase forms. The char-
+       acters which are not special-cased for testing purposes are left unmod-
+       ified, as if they are caseless characters.
 
    Setting the JIT stack size
 
