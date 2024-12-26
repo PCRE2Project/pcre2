@@ -507,6 +507,7 @@ jump_list **list = (cc[0] & XCL_NOT) == 0 ? &found : backtracks;
 sljit_uw c, charoffset;
 sljit_u32 max = READ_CHAR_MAX, min = 0;
 struct sljit_jump *jump = NULL;
+PCRE2_UCHAR flags;
 PCRE2_SPTR ccbegin;
 sljit_u32 compares, invertcmp, depth;
 sljit_u32 first_item, last_item, mid_item;
@@ -522,11 +523,11 @@ int typereg = TMP1;
 
 SLJIT_ASSERT(common->locals_size >= SSIZE_OF(sw));
 /* Scanning the necessary info. */
-cc++;
+flags = *cc++;
 ccbegin = cc;
 compares = 0;
 
-if (cc[-1] & XCL_MAP)
+if (flags & XCL_MAP)
   cc += 32 / sizeof(PCRE2_UCHAR);
 
 #ifdef SUPPORT_UNICODE
@@ -638,7 +639,7 @@ if (*cc != XCL_END)
     {
     SLJIT_ASSERT(category_list == 0);
     max = 0;
-    min = (ccbegin[-1] & XCL_MAP) != 0 ? 0 : READ_CHAR_MAX;
+    min = (flags & XCL_MAP) != 0 ? 0 : READ_CHAR_MAX;
     xclass_update_min_max(common, cc, &min, &max);
     }
 #endif
@@ -658,7 +659,7 @@ SLJIT_ASSERT(compares > 0);
 cc = ccbegin;
 if (!(status & XCLASS_IS_ECLASS))
   {
-  if ((cc[-1] & XCL_NOT) != 0)
+  if ((flags & XCL_NOT) != 0)
     read_char(common, min, max, backtracks, READ_CHAR_UPDATE_STR_PTR);
   else
     {
@@ -670,7 +671,7 @@ if (!(status & XCLASS_IS_ECLASS))
     }
   }
 
-if ((cc[-1] & XCL_MAP) != 0)
+if ((flags & XCL_MAP) != 0)
   {
   SLJIT_ASSERT(!(status & XCLASS_IS_ECLASS));
   xclass_check_bitset(common, (const sljit_u8 *)cc, &found, backtracks);
@@ -1092,10 +1093,14 @@ if (ranges.range_count == 2)
   }
 
 range_start = ranges.ranges[0];
-range_end = ranges.ranges[ranges.range_count - 1];
 SET_CHAR_OFFSET(range_start);
-add_jump(compiler, (ccbegin[-1] & XCL_NOT) == 0 ? backtracks : &found,
-  CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start)));
+if (ranges.range_count >= 6)
+  {
+  /* Early fail. */
+  range_end = ranges.ranges[ranges.range_count - 1];
+  add_jump(compiler, (flags & XCL_NOT) == 0 ? backtracks : &found,
+    CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - range_start)));
+  }
 
 depth = 0;
 first_item = 0;
