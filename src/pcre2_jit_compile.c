@@ -1767,7 +1767,7 @@ switch(*cc)
   if (max == 0)
     return (*cc == OP_CRRANGE) ? 2 : 1;
   max -= min;
-  if (max > (*cc == OP_CRRANGE ? 0 : 1))
+  if (max > (sljit_u32)(*cc == OP_CRRANGE ? 0 : 1))
     max = 2;
   return max;
 
