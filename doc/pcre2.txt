@@ -4293,11 +4293,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 10 December 2024
+       Last updated: 26 December 2024
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.45-DEV                10 December 2024                    PCRE2API(3)
+PCRE2 10.45-DEV                26 December 2024                    PCRE2API(3)
 ------------------------------------------------------------------------------
 
 
