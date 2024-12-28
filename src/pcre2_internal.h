@@ -1357,9 +1357,10 @@ table. */
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
 
-#define XCL_NOT      0x01  /* Flag: this is a negative class */
-#define XCL_MAP      0x02  /* Flag: a 32-byte map is present */
-#define XCL_HASPROP  0x04  /* Flag: property checks are present. */
+#define XCL_NOT         0x01  /* Flag: this is a negative class */
+#define XCL_MAP         0x02  /* Flag: a 32-byte map is present */
+#define XCL_HASPROP     0x04  /* Flag: property checks are present */
+#define XCL_HASCATLIST  0x08  /* Flag: category list is present */
 
 #define XCL_END      0     /* Marks end of individual items */
 #define XCL_SINGLE   1     /* Single item (one multibyte char) follows */
@@ -2030,6 +2031,18 @@ typedef struct {
 #define UCD_FOLD_I_TURKISH(ch) \
   ((uint32_t)(ch) == 0x0130u ?   0x69u : \
    (uint32_t)(ch) ==   0x49u ? 0x0131u : (uint32_t)(ch))
+
+/* UCP bitset manipulating macros. */
+
+#ifdef SUPPORT_UNICODE
+#define UCPCAT(bit) (1 << (bit))
+#define UCPCAT2(bit1, bit2) (UCPCAT(bit1) | UCPCAT(bit2))
+#define UCPCAT3(bit1, bit2, bit3) (UCPCAT(bit1) | UCPCAT(bit2) | UCPCAT(bit3))
+#define UCPCAT_RANGE(start, end) (((1 << ((end) + 1)) - 1) - ((1 << (start)) - 1))
+#define UCPCAT_L UCPCAT_RANGE(ucp_Ll, ucp_Lu)
+#define UCPCAT_N UCPCAT_RANGE(ucp_Nd, ucp_No)
+#define UCPCAT_ALL ((1 << (ucp_Zs + 1)) - 1)
+#endif
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These

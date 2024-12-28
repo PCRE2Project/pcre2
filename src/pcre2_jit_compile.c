@@ -7007,16 +7007,6 @@ else
 JUMPTO(SLJIT_JUMP, mainloop);
 }
 
-#ifdef SUPPORT_UNICODE
-#define UCPCAT(bit) (1 << (bit))
-#define UCPCAT2(bit1, bit2) (UCPCAT(bit1) | UCPCAT(bit2))
-#define UCPCAT3(bit1, bit2, bit3) (UCPCAT(bit1) | UCPCAT(bit2) | UCPCAT(bit3))
-#define UCPCAT_RANGE(start, end) (((1 << ((end) + 1)) - 1) - ((1 << (start)) - 1))
-#define UCPCAT_L UCPCAT_RANGE(ucp_Ll, ucp_Lu)
-#define UCPCAT_N UCPCAT_RANGE(ucp_Nd, ucp_No)
-#define UCPCAT_ALL ((1 << (ucp_Zs + 1)) - 1)
-#endif
-
 static void check_wordboundary(compiler_common *common, BOOL ucp)
 {
 DEFINE_COMPILER;

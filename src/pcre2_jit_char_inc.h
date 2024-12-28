@@ -531,6 +531,13 @@ if (flags & XCL_MAP)
   cc += 32 / sizeof(PCRE2_UCHAR);
 
 #ifdef SUPPORT_UNICODE
+if (flags & XCL_HASCATLIST)
+  {
+  memcpy(&category_list, cc, sizeof(uint32_t));
+  status |= XCLASS_HAS_TYPE;
+  cc += sizeof(uint32_t) / sizeof(PCRE2_UCHAR);
+  }
+
 while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
   {
   compares++;
@@ -545,7 +552,7 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
     break;
 
     case PT_GC:
-    items = UCPCAT_RANGE(PRIV(ucp_typerange)[(int)cc[1] * 2], PRIV(ucp_typerange)[(int)cc[1] * 2 + 1]);
+    items = UCPCAT_RANGE(PRIV(ucp_typerange)[(int)cc[1]], PRIV(ucp_typerange)[(int)cc[1] + 1] - 1);
     break;
 
     case PT_PC:
@@ -612,21 +619,7 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
   cc += 2;
   }
 
-if (category_list == UCPCAT_ALL)
-  {
-  /* All or no characters are accepted, same as dotall. */
-  if (status & XCLASS_IS_ECLASS)
-    {
-    if (list != backtracks)
-      OP2(SLJIT_OR, ECLASS_STACK_DATA, 0, ECLASS_STACK_DATA, 0, SLJIT_IMM, 1);
-    return;
-    }
-
-  compile_char1_matchingpath(common, OP_ALLANY, cc, backtracks, FALSE);
-  if (list == backtracks)
-    add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
-  return;
-  }
+SLJIT_ASSERT(category_list != UCPCAT_ALL);
 
 if (category_list != 0)
   compares++;
@@ -679,6 +672,9 @@ if ((flags & XCL_MAP) != 0)
   }
 
 #ifdef SUPPORT_UNICODE
+if (flags & XCL_HASCATLIST)
+  cc += sizeof(uint32_t) / sizeof(PCRE2_UCHAR);
+
 if (status & XCLASS_NEEDS_UCD)
   {
   if ((status & (XCLASS_SAVE_CHAR | XCLASS_IS_ECLASS)) == XCLASS_SAVE_CHAR)

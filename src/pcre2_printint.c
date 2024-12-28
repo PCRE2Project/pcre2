@@ -68,6 +68,7 @@ STATIC_ASSERT(sizeof(OP_names)/sizeof(*OP_names) == OP_TABLE_LENGTH, OP_names);
 #define print_prop            PCRE2_SUFFIX(print_prop_)
 #define print_char_list       PCRE2_SUFFIX(print_char_list_)
 #define print_map             PCRE2_SUFFIX(print_map_)
+#define print_catlist         PCRE2_SUFFIX(print_catlist_)
 #define print_class           PCRE2_SUFFIX(print_class_)
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
@@ -498,6 +499,74 @@ for (i = 0; i < 256; i++)
 
 
 /*************************************************
+*       Print a character bitmap                 *
+*************************************************/
+
+/* Prints a 32-byte bitmap, which occurs within a character class opcode.
+
+Arguments:
+  f            file to write to
+  list         unicode category list
+
+Returns:       nothing
+*/
+
+static void
+print_catlist(FILE *f, const uint8_t *list)
+{
+uint32_t category_list;
+uint32_t bitcount, mask, pc_start;
+int i, j;
+const char *name;
+
+memcpy(&category_list, list, sizeof(uint32_t));
+
+/* Scan negated general categories first. */
+for (i = 0; i < 7; i++)
+  {
+  mask = ((1 << (PRIV(ucp_typerange)[i + 1])) - 1) -
+         ((1 << PRIV(ucp_typerange)[i]) - 1);
+
+  if ((category_list | mask) == UCPCAT_ALL)
+    {
+    name = get_ucpname(PT_GC, i);
+    fprintf(f, "\\P{%c}", toupper(name[0]));
+    category_list &= mask;
+    break;
+    }
+  }
+
+pc_start = 0;
+for (i = 0; i < 7; i++)
+  {
+  /* Scan general categories. */
+  bitcount = PRIV(ucp_typerange)[i + 1] - PRIV(ucp_typerange)[i];
+  mask = (1 << bitcount) - 1;
+
+  if ((category_list & mask) == mask)
+    {
+    name = get_ucpname(PT_GC, i);
+    fprintf(f, "\\p{%c}", toupper(name[0]));
+    }
+  else if ((category_list & mask) != 0)
+    {
+    /* Scan particular categories. */
+    for (j = 0; j < bitcount; j++)
+      if ((category_list & (1 << j)) != 0)
+        {
+        name = get_ucpname(PT_PC, pc_start + j);
+        fprintf(f, "\\p{%c%s}", toupper(name[0]), name + 1);
+        }
+    }
+
+  category_list >>= bitcount;
+  pc_start += bitcount;
+  }
+}
+
+
+
+/*************************************************
 *       Print character class                    *
 *************************************************/
 
@@ -519,7 +588,7 @@ static void
 print_class(FILE *f, int type, PCRE2_SPTR code, const uint8_t *char_lists_end,
   BOOL utf, const char *before, const char *after)
 {
-BOOL printmap, negated;
+BOOL printmap, printcatlist, negated;
 PCRE2_SPTR ccode;
 
 /* Negative XCLASS and NCLASS both have a bitmap indicating which characters
@@ -528,12 +597,14 @@ if (type == OP_XCLASS)
   {
   ccode = code + LINK_SIZE;
   printmap = (*ccode & XCL_MAP) != 0;
+  printcatlist = (*ccode & XCL_HASCATLIST) != 0;
   negated = (*ccode & XCL_NOT) != 0;
   ccode++;
   }
 else  /* CLASS or NCLASS */
   {
   printmap = TRUE;
+  printcatlist = FALSE;
   negated = type == OP_NCLASS;
   ccode = code;
   }
@@ -545,6 +616,12 @@ if (printmap)
   {
   print_map(f, (const uint8_t *)ccode, negated);
   ccode += 32 / sizeof(PCRE2_UCHAR);
+  }
+
+if (printcatlist)
+  {
+  print_catlist(f, (const uint8_t *)ccode);
+  ccode += sizeof(uint32_t) / sizeof(PCRE2_UCHAR);
   }
 
 /* For an XCLASS there is always some additional data */
