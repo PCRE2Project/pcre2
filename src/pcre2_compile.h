@@ -186,6 +186,36 @@ therefore no need for it to have a length entry, so use a high value. */
 #define META_DATA(x)   (x & 0x0000ffffu)
 #define META_DIFF(x,y) ((x-y)>>16)
 
+/* Macros to store and retrieve a PCRE2_SIZE value in the parsed pattern, which
+consists of uint32_t elements. Assume that if uint32_t can't hold it, two of
+them will be able to (i.e. assume a 64-bit world). */
+
+#if PCRE2_SIZE_MAX <= UINT32_MAX
+#define PUTOFFSET(s,p) *p++ = s
+#define GETOFFSET(s,p) s = *p++
+#define GETPLUSOFFSET(s,p) s = *(++p)
+#define READPLUSOFFSET(s,p) s = p[1]
+#define SKIPOFFSET(p) p++
+#define SIZEOFFSET 1
+#else
+#define PUTOFFSET(s,p) \
+  { *p++ = (uint32_t)(s >> 32); *p++ = (uint32_t)(s & 0xffffffff); }
+#define GETOFFSET(s,p) \
+  { s = ((PCRE2_SIZE)p[0] << 32) | (PCRE2_SIZE)p[1]; p += 2; }
+#define GETPLUSOFFSET(s,p) \
+  { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; p += 2; }
+#define READPLUSOFFSET(s,p) \
+  { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; }
+#define SKIPOFFSET(p) p += 2
+#define SIZEOFFSET 2
+#endif
+
+#ifdef PCRE2_DEBUG
+/* Compile data types. */
+#define CDATA_RECURSE_ARGS       0 /* Argument list for recurse */
+#define CDATA_CRANGE             1 /* Character range list */
+#endif
+
 /* Extended class management flags. */
 
 #define CLASS_IS_ECLASS 0x1
@@ -244,6 +274,7 @@ typedef struct {
 #define _pcre2_compile_find_named_group        PCRE2_SUFFIX(_pcre2_compile_find_named_group)
 #define _pcre2_compile_find_dupname_details    PCRE2_SUFFIX(_pcre2_compile_find_dupname_details)
 #define _pcre2_compile_add_name_to_table       PCRE2_SUFFIX(_pcre2_compile_add_name_to_table)
+#define _pcre2_compile_parse_recurse_args      PCRE2_SUFFIX(_pcre2_compile_parse_recurse_args)
 
 
 /* Indices of the POSIX classes in posix_names, posix_name_lengths,
@@ -309,6 +340,10 @@ in indexptr and countptr. */
 BOOL PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
   int *indexptr, int *countptr, int *errorcodeptr, compile_block *cb);
 
+/* Parse the arguments of recurse operations. */
+
+BOOL PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
+  PCRE2_SIZE offset, int *errorcodeptr, compile_block *cb);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 
