@@ -260,7 +260,7 @@ static const uint8_t *character_tables = NULL;
 
 static uint32_t pcre2_options = 0;
 static uint32_t extra_options = 0;
-static PCRE2_SIZE heap_limit = PCRE2_UNSET;
+static uint32_t heap_limit = ~(uint32_t)0;
 static uint32_t match_limit = 0;
 static uint32_t depth_limit = 0;
 
@@ -469,7 +469,7 @@ static option_item optionlist[] = {
   { OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
-  { OP_SIZE,       N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kibibytes)" },
+  { OP_U32NUMBER,  N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kibibytes)" },
   { OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE2 match limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "depth-limit=number", "set PCRE2 depth limit option" },
   { OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number", "obsolete synonym for depth-limit" },
@@ -831,7 +831,7 @@ return result;
 
 
 static void
-init_colour_output()
+init_colour_output(void)
 {
 if (do_colour)
   {
@@ -964,7 +964,7 @@ return isatty(fileno(f));
 /************* Print optionally coloured match Unix-style and z/OS **********/
 
 static void
-print_match(const void *buf, int length)
+print_match(const void *buf, size_t length)
 {
 if (length == 0) return;
 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
@@ -1100,7 +1100,7 @@ return _isatty(_fileno(f));
 /************* Print optionally coloured match in Windows **********/
 
 static void
-print_match(const void *buf, int length)
+print_match(const void *buf, size_t length)
 {
 if (length == 0) return;
 if (do_colour)
@@ -1159,7 +1159,7 @@ return FALSE;
 /************* Print optionally coloured match when we can't do it **********/
 
 static void
-print_match(const void *buf, int length)
+print_match(const void *buf, size_t length)
 {
 if (length == 0) return;
 FWRITE_IGNORE(buf, 1, length, stdout);
@@ -1263,8 +1263,8 @@ for (op = optionlist; op->one_char != 0; op++)
     n = 31 - printf("  -%c", op->one_char);
   else
     {
-    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char);
-      else strcpy(s, "   ");
+    if (op->one_char > 0) snprintf(s, sizeof(s), "-%c,", op->one_char);
+      else snprintf(s, sizeof(s), "   ");
     n = 31 - printf("  %s --%s", s, op->long_name);
     }
 
@@ -1303,7 +1303,7 @@ Returns:    TRUE if the path is not excluded
 static BOOL
 test_incexc(char *path, patstr *ip, patstr *ep)
 {
-int plen = strlen((const char *)path);
+size_t plen = strlen((const char *)path);
 
 for (; ep != NULL; ep = ep->next)
   {
@@ -2530,7 +2530,7 @@ necessary, otherwise assume fork(). */
 
 #ifdef WIN32
 (void)fflush(stdout);
-result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector);
+result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector) != 0;
 
 #elif defined __VMS
   {
@@ -2919,7 +2919,7 @@ while (ptr < endptr)
             int n = om->groupnum;
             if (n == 0 || n < mrc)
               {
-              int plen = offsets[2*n + 1] - offsets[2*n];
+              size_t plen = offsets[2*n + 1] - offsets[2*n];
               if (plen > 0)
                 {
                 if (printed && om_separator != NULL)
@@ -3438,7 +3438,7 @@ if (isdirectory(pathname))
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc;
-      int fnlength = strlen(pathname) + strlen(nextfile) + 2;
+      size_t fnlength = strlen(pathname) + strlen(nextfile) + 2;
       if (fnlength > FNBUFSIZ)
         {
         /* LCOV_EXCL_START - this is a "never" event */
@@ -3447,7 +3447,7 @@ if (isdirectory(pathname))
         break;
         /* LCOV_EXCL_STOP */
         }
-      sprintf(childpath, "%s%c%s", pathname, FILESEP, nextfile);
+      snprintf(childpath, sizeof(childpath), "%s%c%s", pathname, FILESEP, nextfile);
 
       /* If the realpath() function is available, we can try to prevent endless
       recursion caused by a symlink pointing to a parent directory (GitHub
@@ -3507,7 +3507,15 @@ if (iswild(pathname))
   while ((nextfile = readdirectory(dir)) != NULL)
     {
     int frc;
-    sprintf(buffer, "%.512s%.128s", pathname, nextfile);
+    if (strlen(pathname) + strlen(nextfile) + 1 > sizeof(buffer))
+      {
+      /* LCOV_EXCL_START - this is a "never" event */
+      fprintf(stderr, "pcre2grep: wildcard filename is too long\n");
+      rc = 2;
+      break;
+      /* LCOV_EXCL_STOP */
+      }
+    snprintf(buffer, sizeof(buffer), "%s%s", pathname, nextfile);
     frc = grep_or_recurse(buffer, dir_recurse, FALSE);
     if (frc > 1) rc = frc;
      else if (frc == 0 && rc == 1) rc = 0;
@@ -3736,16 +3744,16 @@ ordin(int n)
 {
 static char buffer[14];
 char *p = buffer;
-sprintf(p, "%d", n);
+snprintf(p, sizeof(buffer), "%d", n);
 while (*p != 0) p++;
 n %= 100;
 if (n >= 11 && n <= 13) n = 0;
 switch (n%10)
   {
-  case 1: strcpy(p, "st"); break;
-  case 2: strcpy(p, "nd"); break;
-  case 3: strcpy(p, "rd"); break;
-  default: strcpy(p, "th"); break;
+  case 1: snprintf(p, (buffer + sizeof(buffer)) - p, "st"); break;
+  case 2: snprintf(p, (buffer + sizeof(buffer)) - p, "nd"); break;
+  case 3: snprintf(p, (buffer + sizeof(buffer)) - p, "rd"); break;
+  default: snprintf(p, (buffer + sizeof(buffer)) - p, "th"); break;
   }
 return buffer;
 }
@@ -4331,7 +4339,7 @@ extra_options |= PCRE2_EXTRA_NEVER_CALLOUT;
 
 /* Put limits into the match context. */
 
-if (heap_limit != PCRE2_UNSET) pcre2_set_heap_limit(match_context, heap_limit);
+if (heap_limit != ~(uint32_t)0) pcre2_set_heap_limit(match_context, heap_limit);
 if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit);
 if (depth_limit > 0) pcre2_set_depth_limit(match_context, depth_limit);
 

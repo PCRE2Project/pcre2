@@ -118,13 +118,15 @@ cc --version >/tmp/pcre2ccversion 2>/dev/null
 if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   ISGCC=1
   CFLAGS="$CFLAGS -Wall"
+  CFLAGS="$CFLAGS -Wextra"
   CFLAGS="$CFLAGS -Wno-overlength-strings"
   CFLAGS="$CFLAGS -Wpointer-arith"
   CFLAGS="$CFLAGS -Wwrite-strings"
-  CFLAGS="$CFLAGS -Wundef -Wshadow"
+  CFLAGS="$CFLAGS -Wundef"
+  CFLAGS="$CFLAGS -Wshadow"
   CFLAGS="$CFLAGS -Wmissing-field-initializers"
   CFLAGS="$CFLAGS -Wunused-parameter"
-  CFLAGS="$CFLAGS -Wextra -Wformat"
+  CFLAGS="$CFLAGS -Wformat"
   CFLAGS="$CFLAGS -Wbad-function-cast"
   CFLAGS="$CFLAGS -Wmissing-declarations"
   CFLAGS="$CFLAGS -Wnested-externs"
@@ -135,6 +137,8 @@ if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   CFLAGS="$CFLAGS -Wstrict-prototypes"
   CFLAGS="$CFLAGS -Warray-bounds"
   CFLAGS="$CFLAGS -Wformat-overflow=2"
+  CFLAGS="$CFLAGS -Wformat-truncation=2"
+  CFLAGS="$CFLAGS -Wdeclaration-after-statement"
 fi
 rm -f /tmp/pcre2ccversion
 

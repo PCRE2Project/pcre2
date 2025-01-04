@@ -1838,7 +1838,8 @@ if (*next == OP_BRAZERO || *next == OP_BRAMINZERO)
 
       if (i == max)
         {
-        common->private_data_ptrs[max_end - common->start - LINK_SIZE] = next_end - max_end;
+        /* Patterns must fit into an int32 even for link-size=4. */
+        common->private_data_ptrs[max_end - common->start - LINK_SIZE] = (sljit_s32)(next_end - max_end);
         common->private_data_ptrs[max_end - common->start - LINK_SIZE + 1] = (type == OP_BRAZERO) ? OP_UPTO : OP_MINUPTO;
         /* +2 the original and the last. */
         common->private_data_ptrs[max_end - common->start - LINK_SIZE + 2] = max + 2;
@@ -1853,7 +1854,7 @@ if (*next == OP_BRAZERO || *next == OP_BRAMINZERO)
 
 if (min >= 3)
   {
-  common->private_data_ptrs[end - common->start - LINK_SIZE] = max_end - end;
+  common->private_data_ptrs[end - common->start - LINK_SIZE] = (sljit_s32)(max_end - end);
   common->private_data_ptrs[end - common->start - LINK_SIZE + 1] = OP_EXACT;
   common->private_data_ptrs[end - common->start - LINK_SIZE + 2] = min;
   return TRUE;
@@ -2438,7 +2439,7 @@ SLJIT_ASSERT(stackpos == STACK(stacktop));
 typedef struct delayed_mem_copy_status {
   struct sljit_compiler *compiler;
   int store_bases[RECURSE_TMP_REG_COUNT];
-  int store_offsets[RECURSE_TMP_REG_COUNT];
+  sljit_sw store_offsets[RECURSE_TMP_REG_COUNT];
   int tmp_regs[RECURSE_TMP_REG_COUNT];
   int saved_tmp_regs[RECURSE_TMP_REG_COUNT];
   int next_tmp_reg;
@@ -3380,7 +3381,7 @@ OP2(SLJIT_SUB | SLJIT_SET_Z, COUNT_MATCH, 0, COUNT_MATCH, 0, SLJIT_IMM, 1);
 add_jump(compiler, &common->calllimit, JUMP(SLJIT_ZERO));
 }
 
-static SLJIT_INLINE void allocate_stack(compiler_common *common, int size)
+static SLJIT_INLINE void allocate_stack(compiler_common *common, sljit_sw size)
 {
 /* May destroy all locals and registers except TMP2. */
 DEFINE_COMPILER;
@@ -3401,7 +3402,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL1, TMP1, 0);
 add_stub(common, CMP(SLJIT_LESS, STACK_TOP, 0, STACK_LIMIT, 0));
 }
 
-static SLJIT_INLINE void free_stack(compiler_common *common, int size)
+static SLJIT_INLINE void free_stack(compiler_common *common, sljit_sw size)
 {
 DEFINE_COMPILER;
 
@@ -8567,7 +8568,7 @@ unsigned int callout_length = (*cc == OP_CALLOUT)
 sljit_sw value1;
 sljit_sw value2;
 sljit_sw value3;
-sljit_uw callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw);
+sljit_sw callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw);
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 

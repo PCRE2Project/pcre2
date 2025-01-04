@@ -1104,7 +1104,7 @@ if (ranges.range_count >= 6)
 
 depth = 0;
 first_item = 0;
-last_item = ranges.range_count - 2;
+last_item = (sljit_u32)(ranges.range_count - 2);
 has_cmov = sljit_has_cpu_feature(SLJIT_HAS_CMOV) != 0;
 
 while (TRUE)

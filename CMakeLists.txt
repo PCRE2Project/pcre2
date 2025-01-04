@@ -118,16 +118,12 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
-cmake_policy(SET CMP0063 NEW)
 
-# Set policy CMP0026 to avoid warnings for the use of LOCATION in
-# GET_TARGET_PROPERTY. This should no longer be required.
-# CMAKE_POLICY(SET CMP0026 OLD)
-
-# With a recent cmake, you can provide a rootdir to look for non
-# standard installed library dependencies, but to do so, the policy
-# needs to be set to new (by uncommenting the following)
-# CMAKE_POLICY(SET CMP0074 NEW)
+# The following policies have been set in the PCRE2 CMake file in the past.
+# Since we specify a minimum of CMake 3.15, these are no longer required.
+# cmake_policy(SET CMP0063 NEW)
+# cmake_policy(SET CMP0026 OLD)
+# cmake_policy(SET CMP0074 NEW)
 
 # For FindReadline.cmake. This was changed to allow setting CMAKE_MODULE_PATH
 # on the command line.
@@ -175,7 +171,7 @@ check_c_source_compiles(
 )
 
 set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL")
+if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL" AND NOT CMAKE_C_COMPILER_ID STREQUAL "SunPro")
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
 endif()
 
