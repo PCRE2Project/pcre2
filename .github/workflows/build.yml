@@ -12,7 +12,7 @@ permissions:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Setup
         run: |
@@ -52,7 +52,7 @@ jobs:
 
   alpine:
     name: alpine
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: alpine
     steps:
       - name: Setup
@@ -143,7 +143,7 @@ jobs:
 
   freebsd:
     name: FreeBSD
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
@@ -169,7 +169,7 @@ jobs:
 
   solaris:
     name: Solaris
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
@@ -277,7 +277,7 @@ jobs:
 
   coverage:
     name: Code coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Setup
         run: |

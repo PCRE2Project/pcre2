@@ -14,7 +14,7 @@ jobs:
   canary:
     # Tests with: Debug & assertions; link-size=4; libedit
     name: GCC -O0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Setup
         run: |
@@ -50,7 +50,7 @@ jobs:
   dragon:
     # Tests with: clang AB/UB; link-size=3
     name: Clang
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -139,7 +139,7 @@ jobs:
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
     name: GCC -Os, CMake+ninja, no JIT
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       CMAKE_VER: "3.15.7"
     steps:
@@ -223,7 +223,7 @@ jobs:
   bigbird:
     # Job to execute ManyConfigTests
     name: manyconfig
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Setup
         run: |
@@ -243,7 +243,7 @@ jobs:
   camel:
     # Job to execute RunPerlTest
     name: perl
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: perl:devel
     steps:
       - name: Setup
@@ -275,7 +275,7 @@ jobs:
     # If this fails, it's usually because two different files define some file-static
     # functions or macros which collide.
     name: CMake unity build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -294,7 +294,7 @@ jobs:
   zebrilus:
     # Tests with: Zig compiler
     name: Zig
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request'
     steps:
       - name: Setup
@@ -322,7 +322,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
+        os: ["ubuntu-24.04", "windows-latest"]
     runs-on: ${{ matrix.os }}
     if: github.event_name != 'pull_request'
     steps:
