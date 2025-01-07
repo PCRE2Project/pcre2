@@ -39,10 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #if defined(__has_feature)
 #if __has_feature(memory_sanitizer)
 #include <sanitizer/msan_interface.h>

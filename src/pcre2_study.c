@@ -38,15 +38,14 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+
 /* This module contains functions for scanning a compiled pattern and
 collecting data (e.g. minimum matching length). */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "pcre2_internal.h"
+
+
 
 /* The maximum remembered capturing brackets minimum. */
 

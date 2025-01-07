@@ -38,17 +38,15 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+
 /* This module contains two internal functions that are used to match
 OP_XCLASS and OP_ECLASS. It is used by pcre2_auto_possessify() and by both
 pcre2_match() and pcre2_dfa_match(). */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
 #include "pcre2_internal.h"
+
+
 
 /*************************************************
 *       Match character against an XCLASS        *

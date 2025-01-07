@@ -663,11 +663,17 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do8 = yes ] ; then
     echo $title8
+    bits_link_size=$link_size
+    if [ $bits = "16" -a $link_size = "3" ] ; then
+      bits_link_size=4
+    elif [ $bits = "32" ] ; then
+      bits_link_size=4
+    fi
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
       $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput8 testtry
-      checkresult $? 8-$bits-$link_size ""
+      checkresult $? 8-$bits-$bits_link_size ""
     fi
   fi
 

@@ -72,15 +72,13 @@ Overall, I concluded that the gains in some cases did not outweigh the losses
 in others, so I abandoned this code. */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "pcre2_internal.h"
+
+
 
 #define NLBLOCK mb             /* Block containing newline information */
 #define PSSTART start_subject  /* Field containing processed string start */
 #define PSEND   end_subject    /* Field containing processed string end */
-
-#include "pcre2_internal.h"
 
 #define PUBLIC_DFA_MATCH_OPTIONS \
   (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \

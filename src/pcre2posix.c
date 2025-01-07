@@ -41,18 +41,25 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This module is a wrapper that provides a POSIX API to the underlying PCRE2
 functions. The functions are called pcre2_regcomp(), pcre2_regexec(), etc.
-pcre2posix.h defines the POSIX names as macros for the corresonding pcre2_xxx
+pcre2posix.h defines the POSIX names as macros for the corresponding pcre2_xxx
 functions, so any program that includes it and uses the POSIX names will call
 the PCRE2 implementations instead. */
 
 
-#ifdef HAVE_CONFIG_H
+/* This module doesn't use pcre2_internal.h, because we want to be able to
+customize the value of PCRE2_STATIC inside this module, based on
+PCRE2POSIX_SHARED. This is unusual, and justifies a (rare) direct inclusion of
+config.h. */
+
+#if defined HAVE_CONFIG_H && !defined PCRE2_CONFIG_H_IDEMPOTENT_GUARD
+#define PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #include "config.h"
 #endif
 
 #ifdef PCRE2POSIX_SHARED
 #undef PCRE2_STATIC
 #endif
+
 
 
 /* Ensure that the PCRE2POSIX_EXP_xxx macros are set appropriately for

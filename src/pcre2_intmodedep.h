@@ -97,11 +97,23 @@ unit string is now handled by the macros that are defined here.
 The macros are controlled by the value of LINK_SIZE. This defaults to 2, but
 values of 3 or 4 are also supported. */
 
+#ifndef CONFIGURED_LINK_SIZE
+#if LINK_SIZE == 2
+#define CONFIGURED_LINK_SIZE 2
+#elif LINK_SIZE == 3
+#define CONFIGURED_LINK_SIZE 3
+#elif LINK_SIZE == 4
+#define CONFIGURED_LINK_SIZE 4
+#else
+#error LINK_SIZE must be 2, 3, or 4
+#endif
+#endif /* CONFIGURED_LINK_SIZE */
+
 /* ------------------- 8-bit support  ------------------ */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 
-#if LINK_SIZE == 2
+#if CONFIGURED_LINK_SIZE == 2
 #define PUT(a,n,d)   \
   (a[n] = (PCRE2_UCHAR)((d) >> 8)), \
   (a[(n)+1] = (PCRE2_UCHAR)((d) & 255))
@@ -109,7 +121,7 @@ values of 3 or 4 are also supported. */
   (unsigned int)(((a)[n] << 8) | (a)[(n)+1])
 #define MAX_PATTERN_SIZE (1 << 16)
 
-#elif LINK_SIZE == 3
+#elif CONFIGURED_LINK_SIZE == 3
 #define PUT(a,n,d)       \
   (a[n] = (PCRE2_UCHAR)((d) >> 16)),    \
   (a[(n)+1] = (PCRE2_UCHAR)((d) >> 8)), \
@@ -118,7 +130,7 @@ values of 3 or 4 are also supported. */
   (unsigned int)(((a)[n] << 16) | ((a)[(n)+1] << 8) | (a)[(n)+2])
 #define MAX_PATTERN_SIZE (1 << 24)
 
-#elif LINK_SIZE == 4
+#elif CONFIGURED_LINK_SIZE == 4
 #define PUT(a,n,d)        \
   (a[n] = (PCRE2_UCHAR)((d) >> 24)),     \
   (a[(n)+1] = (PCRE2_UCHAR)((d) >> 16)), \
@@ -128,8 +140,6 @@ values of 3 or 4 are also supported. */
   (unsigned int)(((a)[n] << 24) | ((a)[(n)+1] << 16) | ((a)[(n)+2] << 8) | (a)[(n)+3])
 #define MAX_PATTERN_SIZE (1 << 30)   /* Keep it positive */
 
-#else
-#error LINK_SIZE must be 2, 3, or 4
 #endif
 
 
@@ -137,7 +147,7 @@ values of 3 or 4 are also supported. */
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16
 
-#if LINK_SIZE == 2
+#if CONFIGURED_LINK_SIZE == 2
 #undef LINK_SIZE
 #define LINK_SIZE 1
 #define PUT(a,n,d)   \
@@ -146,7 +156,7 @@ values of 3 or 4 are also supported. */
   (a[n])
 #define MAX_PATTERN_SIZE (1 << 16)
 
-#elif LINK_SIZE == 3 || LINK_SIZE == 4
+#elif CONFIGURED_LINK_SIZE == 3 || CONFIGURED_LINK_SIZE == 4
 #undef LINK_SIZE
 #define LINK_SIZE 2
 #define PUT(a,n,d)   \
@@ -156,8 +166,6 @@ values of 3 or 4 are also supported. */
   (unsigned int)(((a)[n] << 16) | (a)[(n)+1])
 #define MAX_PATTERN_SIZE (1 << 30)  /* Keep it positive */
 
-#else
-#error LINK_SIZE must be 2, 3, or 4
 #endif
 
 

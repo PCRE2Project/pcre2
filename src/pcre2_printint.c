@@ -47,6 +47,7 @@ that comprise the library. It can also optionally be included in
 pcre2_compile.c for detailed debugging in error situations. */
 
 
+
 /* Tables of operator names. The same 8-bit table is used for all code unit
 widths, so it must be defined only once. The list itself is defined in
 pcre2_internal.h, which is #included by pcre2test before this file. */

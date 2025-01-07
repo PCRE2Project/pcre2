@@ -54,9 +54,13 @@ pcre2_internal.h that depend on PCRE2_CODE_UNIT_WIDTH. It does, however, make
 use of SUPPORT_PCRE2_8, SUPPORT_PCRE2_16, and SUPPORT_PCRE2_32, to ensure that
 it references only the enabled library functions. */
 
-#ifdef HAVE_CONFIG_H
+
+#if defined HAVE_CONFIG_H && !defined PCRE2_CONFIG_H_IDEMPOTENT_GUARD
+#define PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #include "config.h"
 #endif
+
+
 
 #include <ctype.h>
 #include <stdio.h>
@@ -341,8 +345,6 @@ these inclusions should not be changed. */
 #endif   /* SUPPORT_PCRE2_32 */
 
 #define PCRE2_SUFFIX(a) a
-
-#include "pcre2_chkdint.c"
 
 /* We need to be able to check input text for UTF-8 validity, whatever code
 widths are actually available, because the input to pcre2test is always in
@@ -7329,7 +7331,6 @@ while ((c = *p++) != 0)
 
   if (c == ']' && start_rep != NULL)
     {
-    PCRE2_SIZE d;
     long li;
     char *endptr;
 
@@ -7361,12 +7362,12 @@ while ((c = *p++) != 0)
       }
 
     replen = CAST8VAR(q) - start_rep;
-    if (PRIV(ckd_smul)(&d, replen, i))
+    if (replen > (SIZE_MAX - needlen) / i)
       {
       fprintf(outfile, "** Expanded content too large\n");
       return PR_OK;
       }
-    needlen += d;
+    needlen += replen * i;
 
     if (needlen >= dbuffer_size)
       {

@@ -29,8 +29,6 @@ Further updates March/April/May 2024 by PH
 #define PCRE2_CODE_UNIT_WIDTH 8
 #endif
 
-#include "config.h"
-#include "pcre2.h"
 #include "pcre2_internal.h"
 
 #define MAX_MATCH_SIZE 1000

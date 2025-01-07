@@ -790,9 +790,6 @@ just one of these tables is actually needed. When compiling the library, some
 headers are needed. */
 
 #ifndef PCRE2_PCRE2TEST
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "pcre2_internal.h"
 #endif /* PCRE2_PCRE2TEST */
 
