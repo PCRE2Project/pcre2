@@ -2439,7 +2439,7 @@ SLJIT_ASSERT(stackpos == STACK(stacktop));
 typedef struct delayed_mem_copy_status {
   struct sljit_compiler *compiler;
   int store_bases[RECURSE_TMP_REG_COUNT];
-  int store_offsets[RECURSE_TMP_REG_COUNT];
+  sljit_s32 store_offsets[RECURSE_TMP_REG_COUNT];
   int tmp_regs[RECURSE_TMP_REG_COUNT];
   int saved_tmp_regs[RECURSE_TMP_REG_COUNT];
   int next_tmp_reg;
@@ -2461,7 +2461,7 @@ status->compiler = common->compiler;
 }
 
 static void delayed_mem_copy_move(delayed_mem_copy_status *status, int load_base, sljit_sw load_offset,
-  int store_base, int store_offset)
+  int store_base, sljit_s32 store_offset)
 {
 struct sljit_compiler *compiler = status->compiler;
 int next_tmp_reg = status->next_tmp_reg;
@@ -3185,7 +3185,7 @@ while (cc < ccend)
       SLJIT_ASSERT(private_srcw[i] != 0);
 
       if (!from_sp)
-        delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, (int)private_srcw[i]); // XXX @zherczeg: cast OK?
+        delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, (sljit_s32)private_srcw[i]);
 
       if (from_sp || type == recurse_swap_global)
         delayed_mem_copy_move(&status, SLJIT_SP, private_srcw[i], base_reg, stackptr);
@@ -3205,7 +3205,7 @@ while (cc < ccend)
       SLJIT_ASSERT(shared_srcw[i] != 0);
 
       if (!from_sp)
-        delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, (int)shared_srcw[i]); // XXX @zherczeg: cast OK?
+        delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, (sljit_s32)shared_srcw[i]);
 
       if (from_sp || type == recurse_swap_global)
         delayed_mem_copy_move(&status, SLJIT_SP, shared_srcw[i], base_reg, stackptr);
@@ -3225,7 +3225,7 @@ while (cc < ccend)
       SLJIT_ASSERT(kept_shared_srcw[i] != 0);
 
       if (!from_sp)
-        delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, (int)kept_shared_srcw[i]); // XXX @zherczeg: cast OK?
+        delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, (sljit_s32)kept_shared_srcw[i]);
 
       if (from_sp || type == recurse_swap_global)
         delayed_mem_copy_move(&status, SLJIT_SP, kept_shared_srcw[i], base_reg, stackptr);
@@ -3381,7 +3381,7 @@ OP2(SLJIT_SUB | SLJIT_SET_Z, COUNT_MATCH, 0, COUNT_MATCH, 0, SLJIT_IMM, 1);
 add_jump(compiler, &common->calllimit, JUMP(SLJIT_ZERO));
 }
 
-static SLJIT_INLINE void allocate_stack(compiler_common *common, int size)
+static SLJIT_INLINE void allocate_stack(compiler_common *common, sljit_s32 size)
 {
 /* May destroy all locals and registers except TMP2. */
 DEFINE_COMPILER;
@@ -3402,7 +3402,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL1, TMP1, 0);
 add_stub(common, CMP(SLJIT_LESS, STACK_TOP, 0, STACK_LIMIT, 0));
 }
 
-static SLJIT_INLINE void free_stack(compiler_common *common, int size)
+static SLJIT_INLINE void free_stack(compiler_common *common, sljit_s32 size)
 {
 DEFINE_COMPILER;
 
@@ -8568,7 +8568,7 @@ unsigned int callout_length = (*cc == OP_CALLOUT)
 sljit_sw value1;
 sljit_sw value2;
 sljit_sw value3;
-int callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw);
+sljit_s32 callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw); /* top_bracket is uint16 so maximum is 1MiB */
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 

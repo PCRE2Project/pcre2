@@ -3586,41 +3586,42 @@ uint8_t *here = start;
 
 for (;;)
   {
+  size_t dlen;
   size_t rlen = (size_t)(pbuffer8_size - (here - buffer));
+
+  /* If libreadline or libedit support is required, use readline() to read a
+  line if the input is a terminal. Note that readline() removes the trailing
+  newline, so we must put it back again, to be compatible with fgets(). */
+
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
+  if (INTERACTIVE(f))
+    {
+    char *s = readline(prompt);
+    if (s == NULL) return (here == start)? NULL : start;
+    dlen = strlen(s);
+    if (dlen > rlen - 2)
+      {
+      fprintf(outfile, "** Interactive input exceeds buffer space\n");
+      exit(1);
+      }
+    if (dlen > 0) add_history(s);
+    memcpy(here, s, dlen);
+    here[dlen] = '\n';
+    here[dlen+1] = 0;
+    free(s);
+    return start;
+    }
+#endif
 
   if (rlen > 1000)
     {
-    size_t dlen;
-
-    /* If libreadline or libedit support is required, use readline() to read a
-    line if the input is a terminal. Note that readline() removes the trailing
-    newline, so we must put it back again, to be compatible with fgets(). */
-
-#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
-    if (INTERACTIVE(f))
-      {
-      size_t len;
-      char *s = readline(prompt);
-      if (s == NULL) return (here == start)? NULL : start;
-      len = strlen(s);
-      if (len > 0) add_history(s);
-      if (len > rlen - 1) len = rlen - 1;
-      memcpy(here, s, len);
-      here[len] = '\n';
-      here[len+1] = 0;
-      free(s);
-      }
-    else
-#endif
+    int rlen_trunc = (rlen > (unsigned)INT_MAX)? INT_MAX : (int)rlen;
 
     /* Read the next line by normal means, prompting if the file is a tty. */
 
-      {
-      if (INTERACTIVE(f)) printf("%s", prompt);
-      if (fgets((char *)here, rlen > (unsigned)INT_MAX ? INT_MAX : (int)rlen,
-                f) == NULL)
-        return (here == start)? NULL : start;
-      }
+    if (INTERACTIVE(f)) printf("%s", prompt);
+    if (fgets((char *)here, rlen_trunc, f) == NULL)
+      return (here == start)? NULL : start;
 
     dlen = strlen((char *)here);
     here += dlen;
@@ -3637,7 +3638,7 @@ for (;;)
     strlen() to give a short length. This is a hard error because pcre2test
     expects to work with C strings. */
 
-    if (!INTERACTIVE(f) && dlen < rlen - 1 && !feof(f))
+    if (dlen < (unsigned)rlen_trunc - 1 && !feof(f))
       {
       fprintf(outfile, "** Binary zero encountered in input\n");
       fprintf(outfile, "** pcre2test run abandoned\n");
