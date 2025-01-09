@@ -334,7 +334,7 @@ fi
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.
 
-$sim $pcre2test -S 32 /dev/null /dev/null
+$sim $pcre2test -S 32 /dev/null /dev/null >/dev/null 2>&1
 support_setstack=$?
 if [ $support_setstack -eq 0 -a "$bigstack" != "" ] ; then
   setstack="-S 32"
@@ -562,15 +562,18 @@ for bmode in "$test8" "$test16" "$test32"; do
             outfile=$testdata/testoutput3
             outfile2=$testdata/testoutput3A
             outfile3=$testdata/testoutput3B
+            outfile4=$testdata/testoutput3C
           else
             infile=test3input
             outfile=test3output
             outfile2=test3outputA
             outfile3=test3outputB
+            outfile4=test3outputC
             sed "s/fr_FR/$loc/" $testdata/testinput3 >test3input
             sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
             sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
             sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
+            sed "s/fr_FR/$loc/" $testdata/testoutput3C >test3outputC
           fi
           break
         fi
@@ -588,12 +591,13 @@ for bmode in "$test8" "$test16" "$test32"; do
           esac
           if $cf $outfile testtry >teststdout || \
              $cf $outfile2 testtry >teststdout || \
-             $cf $outfile3 testtry >teststdout
+             $cf $outfile3 testtry >teststdout || \
+             $cf $outfile4 testtry >teststdout
           then
             echo "  OK$with"
           else
             echo "** Locale test did not run successfully$with. The output did not match"
-            echo "   $outfile, $outfile2 or $outfile3."
+            echo "   $outfile, $outfile2, $outfile3 or $outfile4."
             echo "   This may mean that there is a problem with the locale settings rather"
             echo "   than a bug in PCRE2."
             exit 1
