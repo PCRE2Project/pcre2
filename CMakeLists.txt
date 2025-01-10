@@ -1212,7 +1212,7 @@ echo RunGrepTest.bat tests successfully completed
       )
     endif()
 
-    if("$ENV{OSTYPE}" STREQUAL "msys")
+    if("$ENV{OSTYPE}" STREQUAL "msys" OR MSYS2)
       # Both the sh and bat file versions of RunTest are run if make test is used
       # in msys
       add_test(pcre2_test_sh sh.exe ${PROJECT_BINARY_DIR}/pcre2_test.sh)

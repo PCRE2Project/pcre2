@@ -860,7 +860,9 @@ native z/OS, and "no support". */
 
 /************* Directory scanning Unix-style and z/OS ***********/
 
-#if (defined HAVE_SYS_STAT_H && defined HAVE_DIRENT_H && defined HAVE_SYS_TYPES_H) || defined NATIVE_ZOS
+#if !defined WIN32 && \
+  (defined HAVE_SYS_STAT_H && defined HAVE_DIRENT_H && defined HAVE_SYS_TYPES_H) || \
+  defined NATIVE_ZOS
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
