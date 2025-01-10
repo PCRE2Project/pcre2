@@ -291,6 +291,49 @@ jobs:
       - name: Test
         run: cd build && ctest -j3 --output-on-failure
 
+  msys2:
+    # Tests with: MSYS2 unix-on-Windows environment
+    name: MSYS2
+    runs-on: windows-latest
+    if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        # UCRT64 is the new default MSYS2 runtime, which builds native 64-bit
+        # binaries which can then be shipped and run on systems without MSYS2
+        # installed (using MinGW-x64 + the UCRT).
+        # MSYS is the Unix-variant runtime, which builds binaries that have a
+        # dependency on MSYS2 being installed, but those binaries then use a
+        # full emulated Unix environment at runtime.
+        msystem: ["UCRT64", "MSYS"]
+    steps:
+      - name: Pre-checkout
+        run: git config --global core.autocrlf input
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Setup
+        uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2.26.0
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          pacboy: diffutils gcc:p cmake:p ninja:p ${{ matrix.msystem == 'MSYS' && 'libreadline:p' || 'readline:p' }}
+
+      - name: Configure
+        shell: msys2 {0}
+        run: cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+
+      - name: Build
+        shell: msys2 {0}
+        run: ninja -C build
+
+      - name: Test
+        shell: msys2 {0}
+        run: cd build && ctest -j3 --output-on-failure
+
   zebrilus:
     # Tests with: Zig compiler
     name: Zig
