@@ -818,7 +818,7 @@ if (match_data == NULL)
   pcre2_general_context gcontext;
   if (use_existing_match) return PCRE2_ERROR_NULL;
   gcontext.memctl = (mcontext == NULL)?
-    ((const pcre2_real_code *)code)->memctl :
+    ((pcre2_real_code *)code)->memctl :
     ((pcre2_real_match_context *)mcontext)->memctl;
   match_data = internal_match_data =
     pcre2_match_data_create_from_pattern(code, &gcontext);
@@ -830,7 +830,7 @@ else if (use_existing_match)
   int pairs;
   pcre2_general_context gcontext;
   gcontext.memctl = (mcontext == NULL)?
-    ((const pcre2_real_code *)code)->memctl :
+    ((pcre2_real_code *)code)->memctl :
     ((pcre2_real_match_context *)mcontext)->memctl;
   pairs = (code->top_bracket + 1 < match_data->oveccount)?
     code->top_bracket + 1 : match_data->oveccount;

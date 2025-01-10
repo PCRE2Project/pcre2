@@ -448,6 +448,16 @@ AC_ARG_ENABLE(percent-zt,
                              [disable the use of z and t formatting modifiers]),
               , enable_percent_zt=auto)
 
+# Handle --enable-Werror/errwarn
+AC_ARG_ENABLE(Werror,
+              AS_HELP_STRING([--enable-Werror],
+                             [Add -Werror to CFLAGS (GCC/Clang style); if -Werror is passed to ./configure via CFLAGS it interferes with feature detection]),
+              , enable_Werror=no)
+AC_ARG_ENABLE(errwarn,
+              AS_HELP_STRING([--enable-errwarn],
+                             [Add -errwarn=%all to CFLAGS (Sun cc style)]),
+              , enable_errwarn=no)
+
 # Set the default value for pcre2-8
 if test "x$enable_pcre2_8" = "xunset"
 then
@@ -659,9 +669,9 @@ if test "$enable_pcre2test_libreadline" = "yes"; then
        [unset ac_cv_lib_readline_readline;
         AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncurses"],
          [unset ac_cv_lib_readline_readline;
-	  AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncursesw"],
+          AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncursesw"],
            [unset ac_cv_lib_readline_readline;
-	    AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltermcap"],
+            AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltermcap"],
              [LIBREADLINE=""],
              [-ltermcap])],
            [-lncursesw])],
@@ -1144,6 +1154,15 @@ AC_CONFIG_COMMANDS([script-chmod], [chmod a+x pcre2-config])
 # Make sure that pcre2_chartables.c is removed in case the method for
 # creating it was changed by reconfiguration.
 AC_CONFIG_COMMANDS([delete-old-chartables], [rm -f pcre2_chartables.c])
+
+# Handle --enable-Werror/errwarn. This must come last, so that we don't mess
+# with any of the library-detection tests (or similar).
+if test "X$enable_Werror" = Xyes; then
+  CFLAGS="$CFLAGS -Werror"
+fi
+if test "X$enable_errwarn" = Xyes; then
+  CFLAGS="$CFLAGS -errwarn=%all"
+fi
 
 AC_OUTPUT
 

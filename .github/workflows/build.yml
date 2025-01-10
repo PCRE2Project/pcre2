@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+env:
+  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings'
+  CFLAGS_MSVC: '/W3'
+  CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
+
 jobs:
   linux:
     name: Linux
@@ -28,10 +33,10 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2
+        run: ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --enable-Werror
 
       - name: Build
-        run: make -j3 CPPFLAGS='-Wall -Wextra -Werror'
+        run: make -j3
 
       - name: Test (main test script)
         run: ./RunTest
@@ -56,7 +61,7 @@ jobs:
     container: alpine
     steps:
       - name: Setup
-        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev #musl-locales
+        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev
 
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -67,10 +72,10 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2
+        run: ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --enable-Werror
 
       - name: Build
-        run: make -j3 CPPFLAGS='-Wall -Wextra -Werror'
+        run: make -j3
 
       - name: Test (main test script)
         run: ./RunTest
@@ -99,7 +104,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS='-Wall -Wextra' -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -127,7 +132,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
 
       - name: Build
         run: cmake --build build --config Release
@@ -157,15 +162,36 @@ jobs:
       - name: Build & test
         uses: vmactions/freebsd-vm@debf37ca7b7fa40e19c542ef7ba30d6054a706a4 # v1.1.5
         with:
+          envs: 'CFLAGS_GCC_STYLE'
           usesh: true
+          prepare: |
+            pkg install -y cmake
+
           run: |
             set -e
-            ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
-            make -j3 CPPFLAGS='-Wall -Wextra -Werror'
+
+            cp -rp . ../build-autoconf
+            cp -rp . ../build-cmake
+
+            echo "== Autoconf =="
+            cd ../build-autoconf
+
+            ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
+            make -j3
             make check
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
+
+            echo "== CMake =="
+            cd ../build-cmake
+
+            cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+            cd build
+            make -j3
+            ctest -j3 --output-on-failure
+            cmake --install . --prefix install-dir
+            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
 
   solaris:
     name: Solaris
@@ -191,6 +217,7 @@ jobs:
       - name: Build & test
         uses: vmactions/solaris-vm@a89b9438868c70db27e41625f0a5de6ff5e90809 # v1.1.0
         with:
+          envs: 'CFLAGS_SOLARIS_CC'
           usesh: true
           # Seriously! Solaris is the only OS to actually ship without a C
           # compiler, and not even to provide a simple download to get one!
@@ -203,22 +230,47 @@ jobs:
               -k /root/pkg.oracle.com.key.pem \
               -c /root/pkg.oracle.com.certificate.pem \
               -G "*" -g https://pkg.oracle.com/solarisstudio/release solarisstudio
-            pkg install developer/build/make system/header
+            pkg install developer/build/make developer/build/cmake system/header
             pkg install --accept developerstudio-126/cc
 
           run: |
             set -e
             PATH=/opt/developerstudio12.6/bin:"$PATH"
             export PATH
-            CC=cc
-            export CC
 
-            ./configure --enable-jit --enable-pcre2-16 --enable-pcre2-32
-            make CPPFLAGS='-Wall -Wextra -Werror'
+            cp -rp . ../build-autoconf-32
+            cp -rp . ../build-autoconf-64
+            cp -rp . ../build-cmake-64
+
+            echo "== Autoconf, 32-bit =="
+            cd ../build-autoconf-32
+
+            ./configure CC="cc -m32" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
+            make
             make check
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+
+            echo "== Autoconf, 64-bit =="
+            cd ../build-autoconf-64
+
+            ./configure CC="cc -m64" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
+            make
+            make check
+
+            make install "DESTDIR=`pwd`/install-dir"
+            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+
+            echo "== CMake, 64-bit =="
+            cd ../build-cmake-64
+
+            CC="cc -m64" cmake -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+            cd build
+            make
+            ctest -j3 --output-on-failure
+            cmake --install . --prefix install-dir
+            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
 
   distcheck:
     name: Build & verify distribution

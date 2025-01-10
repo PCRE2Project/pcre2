@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings'
+  CFLAGS_MSVC: '/W3'
+
 jobs:
 
   canary:
@@ -30,7 +34,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS='-O0 -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-pcre2test-libedit --with-link-size=4
+        run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS="-O0 $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror --enable-pcre2test-libedit --with-link-size=4
 
       - name: Build
         run: make -j3
@@ -65,7 +69,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function' CFLAGS='${{ matrix.opt }} -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter -Wno-error=deprecated-declarations -Wno-error=incompatible-library-redeclaration -Wno-error=incompatible-pointer-types-discards-qualifiers' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --with-link-size=3
+        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function' CFLAGS="${{ matrix.opt }} $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror --with-link-size=3
 
       - name: Build
         run: make -j3
@@ -95,7 +99,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -123,7 +127,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Configure
-        run: ./configure CFLAGS='-Os -Wall -Wextra -Werror -Wno-error=unused-but-set-parameter' --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug
+        run: ./configure CFLAGS="-Os $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror
 
       - name: Build
         run: make -j3
@@ -168,7 +172,7 @@ jobs:
       - name: Configure
         run: |
           cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
-          CC='clang' CFLAGS='-fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-shift-base,function -pedantic -Wall -Wextra -Wpedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Werror -Wno-error=incompatible-pointer-types-discards-qualifiers' cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
+          CC='clang' cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
 
       - name: Build
         run: ninja -C build
@@ -193,7 +197,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A Win32
+        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A Win32
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo
@@ -212,7 +216,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
+        run: cmake -DPCRE2_SUPPORT_JIT=OFF -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
 
       - name: Build
         run: cmake --build build --config Debug
@@ -246,27 +250,13 @@ jobs:
     runs-on: ubuntu-24.04
     container: perl:devel
     steps:
-      - name: Setup
-        run: |
-          apt-get -qq update
-          apt-get -qq install cmake ninja-build
-
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: yes
 
-      - name: Configure
-        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON -DPCRE2_DEBUG=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-
-      - name: Build
-        run: ninja -C build
-
       - name: Test
         run: |
-          cd build
-          ctest -j3 --output-on-failure
-          cd ..
           perl -v
           maint/RunPerlTest
 
@@ -276,6 +266,13 @@ jobs:
     # functions or macros which collide.
     name: CMake unity build
     runs-on: ubuntu-24.04
+    env:
+      # Disallowing shadowing would be very spammy for unity builds, because the
+      # same variable name can be used in multiple files.
+      # We disable format truncation/overflow because the heuristics used for
+      # these warnings are not very good, and are apparently affected by the
+      # inliner, which is used much less aggressively in unity builds.
+      CFLAGS_UNITY: "-Wno-shadow -Wno-format-truncation -Wno-format-overflow"
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -283,7 +280,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $CFLAGS_UNITY" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -324,7 +321,7 @@ jobs:
 
       - name: Configure
         shell: msys2 {0}
-        run: cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE -Wno-format-truncation -Wno-format-overflow" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         shell: msys2 {0}

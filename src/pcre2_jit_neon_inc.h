@@ -82,6 +82,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #  endif
 # endif
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
+
 #if (defined(__GNUC__) && __SANITIZE_ADDRESS__) \
 	|| (defined(__clang__) \
 	&& ((__clang_major__ == 3 && __clang_minor__ >= 3) || (__clang_major__ > 3)))
@@ -352,3 +357,7 @@ match:;
 /* Failed match. */
 return NULL;
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

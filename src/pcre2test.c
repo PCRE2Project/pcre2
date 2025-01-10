@@ -576,7 +576,7 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  control;          /* Must be in same position as datctl */
   uint32_t  control2;         /* Must be in same position as datctl */
   uint32_t  jitstack;         /* Must be in same position as datctl */
-   uint8_t  replacement[REPLACE_MODSIZE];            /* So must this */
+   uint8_t  replacement[REPLACE_MODSIZE];           /* So must this */
   uint32_t  substitute_skip;  /* Must be in same position as datctl */
   uint32_t  substitute_stop;  /* Must be in same position as datctl */
   uint32_t  jit;
@@ -593,24 +593,24 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
 #define MAXCPYGET 10
 #define LENCPYGET 64
 
-typedef struct datctl {       /* Structure for data line modifiers. */
-  uint32_t  options;          /* Must be in same position as patctl */
-  uint32_t  control;          /* Must be in same position as patctl */
-  uint32_t  control2;         /* Must be in same position as patctl */
-  uint32_t  jitstack;         /* Must be in same position as patctl */
-   uint8_t  replacement[REPLACE_MODSIZE];            /* So must this */
-  uint32_t  substitute_skip;  /* Must be in same position as patctl */
-  uint32_t  substitute_stop;  /* Must be in same position as patctl */
-  uint32_t  startend[2];
-  uint32_t  cerror[2];
-  uint32_t  cfail[2];
-   int32_t  callout_data;
-   int32_t  copy_numbers[MAXCPYGET];
-   int32_t  get_numbers[MAXCPYGET];
-  uint32_t  oveccount;
-  uint32_t  offset;
-  uint8_t   copy_names[LENCPYGET];
-  uint8_t   get_names[LENCPYGET];
+typedef struct datctl {        /* Structure for data line modifiers. */
+  uint32_t   options;          /* Must be in same position as patctl */
+  uint32_t   control;          /* Must be in same position as patctl */
+  uint32_t   control2;         /* Must be in same position as patctl */
+  uint32_t   jitstack;         /* Must be in same position as patctl */
+   uint8_t   replacement[REPLACE_MODSIZE];           /* So must this */
+  uint32_t   substitute_skip;  /* Must be in same position as patctl */
+  uint32_t   substitute_stop;  /* Must be in same position as patctl */
+  uint32_t   startend[2];
+  uint32_t   cerror[2];
+  uint32_t   cfail[2];
+   int32_t   callout_data;
+   int32_t   copy_numbers[MAXCPYGET];
+   int32_t   get_numbers[MAXCPYGET];
+  uint32_t   oveccount;
+  PCRE2_SIZE offset;
+  uint8_t    copy_names[LENCPYGET];
+  uint8_t    get_names[LENCPYGET];
 } datctl;
 
 /* Ids for which context to modify. */
@@ -1027,7 +1027,7 @@ static regex_t preg = { NULL, NULL, 0, 0, 0, 0 };
 static int *dfa_workspace = NULL;
 static const uint8_t *locale_tables = NULL;
 static const uint8_t *use_tables = NULL;
-static uint8_t locale_name[32];
+static uint8_t locale_name[LOCALESIZE];
 static uint8_t *tables3 = NULL;         /* For binary-loaded tables */
 static uint32_t loadtables_length = 0;
 
@@ -3111,7 +3111,7 @@ if (c < 0x100)
   }
 
 if (f != NULL) n = fprintf(f, "\\x{%02x}", c);
-  else n = sprintf(tempbuffer, "\\x{%02x}", c);
+  else n = snprintf(tempbuffer, sizeof(tempbuffer), "\\x{%02x}", c);
 
 return n >= 0 ? n : 0;
 }
@@ -3157,7 +3157,7 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, this function just
 counts chars without printing (because pchar() does that). */
 
-static int pchars8(PCRE2_SPTR8 p, int length, BOOL utf, FILE *f)
+static int pchars8(PCRE2_SPTR8 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 PCRE2_SPTR8 end;
 uint32_t c = 0;
@@ -3196,7 +3196,7 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, just counts chars
 without printing. */
 
-static int pchars16(PCRE2_SPTR16 p, int length, BOOL utf, FILE *f)
+static int pchars16(PCRE2_SPTR16 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 int yield = 0;
 if (length < 0) length = *p++;
@@ -3231,7 +3231,7 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, just counts chars
 without printing. */
 
-static int pchars32(PCRE2_SPTR32 p, int length, BOOL utf, FILE *f)
+static int pchars32(PCRE2_SPTR32 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 int yield = 0;
 (void)(utf);  /* Avoid compiler warning */
@@ -3530,13 +3530,14 @@ Returns:   nothing (aborts if malloc() fails)
 static void
 expand_input_buffers(void)
 {
-int new_pbuffer8_size = 2*pbuffer8_size;
+size_t new_pbuffer8_size = 2*pbuffer8_size;
 uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
 uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
 
 if (new_buffer == NULL || new_pbuffer8 == NULL)
   {
-  fprintf(stderr, "pcre2test: malloc(%d) failed\n", new_pbuffer8_size);
+  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
+          new_pbuffer8_size);
   exit(1);
   }
 
@@ -3585,40 +3586,42 @@ uint8_t *here = start;
 
 for (;;)
   {
+  size_t dlen;
   size_t rlen = (size_t)(pbuffer8_size - (here - buffer));
+
+  /* If libreadline or libedit support is required, use readline() to read a
+  line if the input is a terminal. Note that readline() removes the trailing
+  newline, so we must put it back again, to be compatible with fgets(). */
+
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
+  if (INTERACTIVE(f))
+    {
+    char *s = readline(prompt);
+    if (s == NULL) return (here == start)? NULL : start;
+    dlen = strlen(s);
+    if (dlen > rlen - 2)
+      {
+      fprintf(outfile, "** Interactive input exceeds buffer space\n");
+      exit(1);
+      }
+    if (dlen > 0) add_history(s);
+    memcpy(here, s, dlen);
+    here[dlen] = '\n';
+    here[dlen+1] = 0;
+    free(s);
+    return start;
+    }
+#endif
 
   if (rlen > 1000)
     {
-    size_t dlen;
-
-    /* If libreadline or libedit support is required, use readline() to read a
-    line if the input is a terminal. Note that readline() removes the trailing
-    newline, so we must put it back again, to be compatible with fgets(). */
-
-#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
-    if (INTERACTIVE(f))
-      {
-      size_t len;
-      char *s = readline(prompt);
-      if (s == NULL) return (here == start)? NULL : start;
-      len = strlen(s);
-      if (len > 0) add_history(s);
-      if (len > rlen - 1) len = rlen - 1;
-      memcpy(here, s, len);
-      here[len] = '\n';
-      here[len+1] = 0;
-      free(s);
-      }
-    else
-#endif
+    int rlen_trunc = (rlen > (unsigned)INT_MAX)? INT_MAX : (int)rlen;
 
     /* Read the next line by normal means, prompting if the file is a tty. */
 
-      {
-      if (INTERACTIVE(f)) printf("%s", prompt);
-      if (fgets((char *)here, rlen,  f) == NULL)
-        return (here == start)? NULL : start;
-      }
+    if (INTERACTIVE(f)) printf("%s", prompt);
+    if (fgets((char *)here, rlen_trunc, f) == NULL)
+      return (here == start)? NULL : start;
 
     dlen = strlen((char *)here);
     here += dlen;
@@ -3635,7 +3638,7 @@ for (;;)
     strlen() to give a short length. This is a hard error because pcre2test
     expects to work with C strings. */
 
-    if (!INTERACTIVE(f) && dlen < rlen - 1 && !feof(f))
+    if (dlen < (unsigned)rlen_trunc - 1 && !feof(f))
       {
       fprintf(outfile, "** Binary zero encountered in input\n");
       fprintf(outfile, "** pcre2test run abandoned\n");
@@ -3672,7 +3675,7 @@ Returns:    < 0, = 0, or > 0, according to the comparison
 */
 
 static int
-strncmpic(const uint8_t *s, const uint8_t *t, int n)
+strncmpic(const uint8_t *s, const uint8_t *t, size_t n)
 {
 while (n--)
   {
@@ -3698,7 +3701,7 @@ Returns:    an index in the modifier list, or -1 on failure
 */
 
 static int
-scan_modifiers(const uint8_t *p, unsigned int len)
+scan_modifiers(const uint8_t *p, size_t len)
 {
 int bot = 0;
 int top = MODLISTCOUNT;
@@ -3706,12 +3709,12 @@ int top = MODLISTCOUNT;
 while (top > bot)
   {
   int mid = (bot + top)/2;
-  unsigned int mlen = strlen(modlist[mid].name);
+  size_t mlen = strlen(modlist[mid].name);
   int c = strncmp((const char *)p, modlist[mid].name, (len < mlen)? len : mlen);
   if (c == 0)
     {
     if (len == mlen) return mid;
-    c = (int)len - (int)mlen;
+    c = len > mlen ? 1 : -1;
     }
   if (c > 0) bot = mid + 1; else top = mid;
   }
@@ -3845,7 +3848,8 @@ for (;;)
   void *field;
   modstruct *m;
   BOOL off = FALSE;
-  unsigned int i, len;
+  unsigned int i;
+  size_t len;
   int index;
   char *endptr;
 
@@ -5076,9 +5080,9 @@ open_file(uint8_t *buffptr, const char *mode, FILE **fptr, const char *name)
 {
 char *endf;
 char *filename = (char *)buffptr;
-while (isspace(*filename)) filename++;
+while (isspace((unsigned char)*filename)) filename++;
 endf = filename + strlen8(filename);
-while (endf > filename && isspace(endf[-1])) endf--;
+while (endf > filename && isspace((unsigned char)endf[-1])) endf--;
 
 if (endf == filename)
   {
@@ -5120,9 +5124,10 @@ process_command(void)
 FILE *f;
 PCRE2_SIZE serial_size;
 size_t i;
-int rc, cmd, cmdlen, yield;
+int rc, cmd, yield;
 uint16_t first_listed_newline;
 const char *cmdname;
+size_t cmdlen;
 uint8_t *argptr, *serial;
 
 yield = PR_OK;
@@ -5593,7 +5598,7 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
         {
         if (pe[0] == ']' && pe[1] == '{')
           {
-          uint32_t clen = pe - pc - 2;
+          size_t clen = pe - pc - 2;
           uint32_t i = 0;
           unsigned long uli;
           char *endptr;
@@ -5677,7 +5682,7 @@ if (pat_patctl.locale[0] != 0)
     }
   if (strcmp((const char *)pat_patctl.locale, (const char *)locale_name) != 0)
     {
-    strcpy((char *)locale_name, (char *)pat_patctl.locale);
+    snprintf((char *)locale_name, sizeof(locale_name), "%s", (char *)pat_patctl.locale);
     if (locale_tables != NULL)
       {
       PCRE2_MAKETABLES_FREE(general_context, (const void *)locale_tables);
@@ -6998,7 +7003,7 @@ for (;;)
   int groupnumber;
   PCRE2_SIZE length, length2;
   uint32_t copybuffer[256];
-  int namelen = strlen((const char *)nptr);
+  size_t namelen = strlen((const char *)nptr);
 #if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
   PCRE2_SIZE cnl = namelen;
 #endif
@@ -7079,7 +7084,7 @@ for (;;)
   void *gotbuffer;
   int rc;
   int groupnumber;
-  int namelen = strlen((const char *)nptr);
+  size_t namelen = strlen((const char *)nptr);
 #if defined SUPPORT_PCRE2_16 || defined SUPPORT_PCRE2_32
   PCRE2_SIZE cnl = namelen;
 #endif
@@ -7329,7 +7334,6 @@ while ((c = *p++) != 0)
 
   if (c == ']' && start_rep != NULL)
     {
-    PCRE2_SIZE d;
     long li;
     char *endptr;
 
@@ -7361,12 +7365,12 @@ while ((c = *p++) != 0)
       }
 
     replen = CAST8VAR(q) - start_rep;
-    if (PRIV(ckd_smul)(&d, replen, i))
+    if (replen > (SIZE_MAX - needlen) / i)
       {
       fprintf(outfile, "** Expanded content too large\n");
       return PR_OK;
       }
-    needlen += d;
+    needlen += replen * i;
 
     if (needlen >= dbuffer_size)
       {
@@ -7775,9 +7779,9 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
   if (dat_datctl.startend[0] != CFORE_UNSET)
     {
-    pmatch[0].rm_so = dat_datctl.startend[0];
+    pmatch[0].rm_so = (regoff_t)dat_datctl.startend[0];
     pmatch[0].rm_eo = (dat_datctl.startend[1] != 0)?
-      dat_datctl.startend[1] : len;
+      (regoff_t)dat_datctl.startend[1] : (regoff_t)len;
     eflags |= REG_STARTEND;
     }
 
@@ -8819,14 +8823,12 @@ return PR_OK;
 static void
 print_version(FILE *f, BOOL include_mode)
 {
-char buf[16];
 VERSION_TYPE *vp;
 fprintf(f, "PCRE2 version ");
 for (vp = version; *vp != 0; vp++) fprintf(f, "%c", *vp);
 if (include_mode)
   {
-  sprintf(buf, "%d-bit", test_mode);
-  fprintf(f, " (%s)", buf);
+  fprintf(f, " (%d-bit)", test_mode);
   }
 fprintf(f, "\n");
 }
@@ -9399,7 +9401,7 @@ for (i = 0, j = (n+1)/2; i < (n+1)/2; i++, j++)
   display_one_modifier(m, for_pattern);
   if (j < n)
     {
-    uint32_t k = 27 - strlen(m->name) - extra[i];
+    size_t k = 27 - strlen(m->name) - extra[i];
     while (k-- > 0) printf(" ");
     display_one_modifier(modlist + list[j], for_pattern);
     }
