@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 630 630"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="pcre2-icon.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   inkscape:export-filename="pcre2-logo.png"
+   inkscape:export-xdpi="76.190475"
+   inkscape:export-ydpi="76.190475"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="213.12397"
+       y="199.93388"
+       width="322.46281"
+       height="192.99174"
+       id="rect2" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.7875"
+     inkscape:cx="258.4127"
+     inkscape:cy="226.66667"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1"
+     showguides="false"
+     showgrid="true">
+    <inkscape:grid
+       id="grid19"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="26.25"
+       spacingy="26.25"
+       empcolor="#006ba0"
+       empopacity="0.30196078"
+       color="#004669"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <rect
+     width="630"
+     height="630"
+     fill="#f7df1e"
+     id="rect1"
+     style="fill:#0085cc;fill-opacity:1" />
+  <g
+     id="g19"
+     transform="matrix(0.90096613,0,0,0.90096613,34.384075,30.692058)">
+    <text
+       style="font-weight:800;font-size:325.15px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:6.00823px;white-space:pre;fill:#fafafa;fill-opacity:1;stroke-width:27.0958"
+       x="46.225414"
+       y="279.21027"
+       id="text12">P</text>
+    <text
+       style="font-weight:800;font-size:325.15px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:6.00823px;white-space:pre;fill:#fafafa;fill-opacity:1;stroke-width:27.0958"
+       x="248.94965"
+       y="279.21027"
+       id="text11">C</text>
+    <text
+       style="font-weight:800;font-size:325.15px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:6.00823px;white-space:pre;fill:#fafafa;fill-opacity:1;stroke-width:27.0958"
+       x="56.95528"
+       y="577.5"
+       id="text10">R</text>
+    <text
+       style="font-weight:800;font-size:325.15px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:6.00823px;white-space:pre;fill:#fafafa;fill-opacity:1;stroke-width:27.0958"
+       x="264.55701"
+       y="577.5"
+       id="text9">E</text>
+    <text
+       style="font-weight:800;font-size:407.747px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:37.6726px;white-space:pre;fill:#fafafa;fill-opacity:1;stroke-width:33.9789"
+       x="440.16559"
+       y="652.89886"
+       id="text8">2</text>
+  </g>
+</svg>

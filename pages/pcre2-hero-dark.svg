@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 700 540"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="pcre2-hero-dark.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   inkscape:export-filename="pcre2-logo.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   width="700"
+   height="540"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="213.12396"
+       y="199.93388"
+       width="322.4628"
+       height="192.99174"
+       id="rect2" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.0185705"
+     inkscape:cx="68.723766"
+     inkscape:cy="324.47435"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1"
+     showguides="false"
+     showgrid="true">
+    <inkscape:grid
+       id="grid19"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="26.25"
+       spacingy="26.25"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <rect
+     style="fill:#000000;stroke:none;stroke-width:1.41958"
+     id="rect3"
+     width="532.14001"
+     height="292.02664"
+     x="48.929993"
+     y="198.01129" />
+  <rect
+     width="700"
+     height="540"
+     fill="#f7df1e"
+     id="rect1"
+     style="fill:#33b8ff;fill-opacity:1;stroke-width:0.9759"
+     x="0"
+     y="0" />
+  <g
+     id="g19"
+     style="fill:#0d1417;fill-opacity:1"
+     transform="translate(35,-89.824285)">
+    <text
+       style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;fill-opacity:1;stroke-width:14.4604"
+       x="114.11927"
+       y="340.52917"
+       id="text12">P</text>
+    <text
+       style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;fill-opacity:1;stroke-width:14.4604"
+       x="222.30835"
+       y="340.52917"
+       id="text11">C</text>
+    <text
+       style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;fill-opacity:1;stroke-width:14.4604"
+       x="119.84554"
+       y="499.71927"
+       id="text10">R</text>
+    <text
+       style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;fill-opacity:1;stroke-width:14.4604"
+       x="230.63762"
+       y="499.71927"
+       id="text9">E</text>
+    <text
+       style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:16.0323px;white-space:pre;fill:#0d1417;fill-opacity:1;stroke-width:14.4604"
+       x="325.7222"
+       y="506.76541"
+       id="text8">2</text>
+  </g>
+  <g
+     id="g15"
+     style="fill:#0075b4;fill-opacity:1"
+     transform="matrix(3.2064547,0,0,3.2064547,-1166.3274,-235.87544)">
+    <path
+       id="text13"
+       style="font-weight:800;font-size:12px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:0.22174px;white-space:pre;fill:#0075b4;fill-opacity:1"
+       d="m 216.33198,202.44359 -2.24859,8.55605 h 1.9961 l 2.23905,-8.55605 z"
+       transform="matrix(4.5097838,0,0,4.5097838,-580.03036,-798.83814)" />
+    <text
+       style="font-weight:800;font-size:54.1174px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:0.999999px;white-space:pre;fill:#0075b4;fill-opacity:1;stroke-width:4.50978"
+       x="502.88928"
+       y="201.39702"
+       id="text7">.</text>
+    <text
+       style="font-weight:800;font-size:54.1174px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:0.999999px;white-space:pre;fill:#0075b4;fill-opacity:1;stroke-width:4.50978"
+       x="514.17163"
+       y="201.39702"
+       id="text6">*</text>
+    <path
+       id="text5"
+       style="font-weight:800;font-size:54.1174px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:0.999999px;white-space:pre;fill:#0075b4;fill-opacity:1;stroke-width:4.50978"
+       d="m 551.39844,163.78516 -9.88477,37.61132 h 9.00195 l 9.8418,-37.61132 z" />
+  </g>
+</svg>
