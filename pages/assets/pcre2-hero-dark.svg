@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 700 540"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="pcre2-hero-dark.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   inkscape:export-filename="pcre2-logo.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   width="700"
+   height="540"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="213.12396"
+       y="199.93388"
+       width="322.4628"
+       height="192.99174"
+       id="rect2" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.0185705"
+     inkscape:cx="11.290333"
+     inkscape:cy="324.96523"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1"
+     showguides="false"
+     showgrid="true">
+    <inkscape:grid
+       id="grid19"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="26.25"
+       spacingy="26.25"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <rect
+     width="700"
+     height="540"
+     fill="#f7df1e"
+     id="rect1"
+     style="fill:#33b8ff;fill-opacity:1;stroke-width:0.9759"
+     x="0"
+     y="0" />
+  <path
+     d="M 199.78856,130.10502 H 158.48961 V 250.7049 h 32.10213 v -38.8696 h 12.32027 c 28.28457,0 48.06642,-13.70848 48.06642,-41.81953 0,-26.72285 -19.4348,-39.91075 -51.18987,-39.91075 z m 0.17353,58.82498 h -9.37035 v -36.26673 h 8.67625 c 12.84085,0 18.91422,6.07338 18.91422,17.52603 0,13.36142 -6.59395,18.7407 -18.22012,18.7407 z"
+     id="path310"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;stroke-width:14.4604" />
+  <path
+     d="m 318.0421,126.98157 c -32.6227,0 -56.04858,22.9053 -56.04858,63.1631 0,41.47248 22.38473,63.68367 56.56915,63.68367 16.6584,0 30.19335,-7.63509 38.69608,-16.13782 l -14.22905,-18.0466 c -7.28805,5.72633 -14.05553,9.89093 -23.07883,9.89093 -15.09667,0 -24.64055,-12.14675 -24.64055,-39.39018 0,-27.59047 9.7174,-39.73722 24.2935,-39.73722 8.15568,0 14.5761,3.12345 21.17005,8.15567 l 15.09668,-17.87307 C 345.63257,132.0138 333.83287,126.98157 318.0421,126.98157 Z"
+     id="path323"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;stroke-width:14.4604" />
+  <path
+     d="m 228.7672,409.89499 h 35.74615 l -30.01983,-50.32225 c 15.09668,-7.98215 22.2112,-17.17897 22.2112,-32.79622 0,-25.6817 -17.00545,-37.4814 -50.6693,-37.4814 H 164.2159 v 120.59987 h 32.10212 v -44.4224 h 8.84978 z m -32.44918,-98.21515 h 9.0233 c 12.14675,0 18.39365,4.68518 18.39365,15.09668 0,11.62617 -5.72632,16.83192 -16.6584,16.83192 h -10.75855 z"
+     id="path314"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;stroke-width:14.4604" />
+  <path
+     d="m 351.53251,289.29512 h -76.52453 v 120.59987 h 76.00395 v -22.73178 h -43.90182 v -27.41694 h 35.91967 v -22.03768 h -35.91967 v -25.6817 h 41.12542 z"
+     id="path317"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0d1417;stroke-width:14.4604" />
+  <path
+     d="m 394.38605,286.27681 c -12.66733,0 -22.2112,5.89985 -28.28458,13.882 l 12.66733,10.06445 c 4.1646,-5.03222 7.98215,-7.28805 13.01437,-7.28805 5.03223,0 7.98215,2.7764 7.98215,7.46158 0,7.11452 -5.5528,13.36142 -30.5404,35.39909 v 15.61725 h 53.09865 l 2.25583,-17.00545 h -30.01983 c 23.77293,-18.39365 28.4581,-26.02874 28.4581,-36.09319 0,-11.27913 -9.37035,-22.03768 -28.63162,-22.03768 z"
+     id="path320"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:16.0323px;white-space:pre;fill:#0d1417;stroke-width:14.4604" />
+  <path
+     id="text13"
+     style="font-weight:800;font-size:12px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:0.22174px;white-space:pre;fill:#0075b4;fill-opacity:1;stroke-width:14.4604"
+     d="M 102.08214,130.10503 69.566592,253.82908 H 98.431031 L 130.80863,130.10503 Z" />
+  <path
+     d="m 466.98731,379.52812 c -9.37035,0 -16.83193,7.63509 -16.83193,16.83192 0,9.19682 7.46158,16.6584 16.83193,16.6584 9.37035,0 16.83192,-7.46158 16.83192,-16.6584 0,-9.19683 -7.46157,-16.83192 -16.83192,-16.83192 z"
+     id="path333"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0075b4;stroke-width:14.4604" />
+  <path
+     d="m 560.07983,318.27379 -7.98215,-24.2935 -21.51709,11.45265 3.99107,-24.46702 h -26.02875 l 3.99108,24.2935 -21.5171,-11.1056 -7.98215,24.2935 23.94645,3.4705 -17.17898,17.00545 21.17005,15.44372 10.58503,-21.86415 10.93207,21.69063 21.17005,-15.44373 -17.52602,-16.83192 z"
+     id="path330"
+     style="font-weight:800;font-size:173.525px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:3.20645px;white-space:pre;fill:#0075b4;stroke-width:14.4604" />
+  <path
+     id="text5"
+     style="font-weight:800;font-size:54.1174px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Ultra-Bold';font-variant-position:super;letter-spacing:0.999999px;white-space:pre;fill:#0075b4;fill-opacity:1;stroke-width:14.4604"
+     d="M 601.70672,289.29426 570.01165,409.89325 H 598.876 l 31.55728,-120.59899 z" />
+</svg>
