@@ -5080,9 +5080,9 @@ open_file(uint8_t *buffptr, const char *mode, FILE **fptr, const char *name)
 {
 char *endf;
 char *filename = (char *)buffptr;
-while (isspace(*filename)) filename++;
+while (isspace((unsigned char)*filename)) filename++;
 endf = filename + strlen8(filename);
-while (endf > filename && isspace(endf[-1])) endf--;
+while (endf > filename && isspace((unsigned char)endf[-1])) endf--;
 
 if (endf == filename)
   {
