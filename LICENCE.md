@@ -1,4 +1,4 @@
-PCRE2 License
+PCRE2 Licence
 =============
 
 | SPDX-License-Identifier: | BSD-3-Clause WITH PCRE2-exception |
