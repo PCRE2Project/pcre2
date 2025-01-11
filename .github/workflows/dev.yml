@@ -133,7 +133,7 @@ jobs:
         run: make -j3
 
       - name: Test
-        run: make check
+        run: make check || (cat ./test-suite.log; false)
 
       - name: Install
         run: |
@@ -330,6 +330,71 @@ jobs:
       - name: Test
         shell: msys2 {0}
         run: cd build && ctest -j3 --output-on-failure
+
+  ptarmigan:
+    # Tests with various unusual processor architectures
+    name: Multiarch
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # S390x is important, because it's basically the only supported big-endian
+          # architecture I can find anywhere. I used to work on SPARC and PPC-be systems
+          # a long time ago, but even Debian has dropped those architectures now, so
+          # it's nice that there's *least one* arch remaining to shake out endian
+          # assumptions.
+          - arch: "s390x"
+            distro: ubuntu_latest
+          # Big-iron POWER only (this is not the PowerPC arch used in old Apple Macs)
+          - arch: "ppc64le"
+            distro: "ubuntu_latest"
+          # A 32-bit Linux build. i386 is mostly gone now, so ARMv7 is all that's left.
+          - arch: "armv7"
+            distro: "ubuntu_latest"
+          # The only really widely-deployed non-x86 archicture, at least that's likely
+          # to be running PCRE2.
+          - arch: "aarch64"
+            distro: "ubuntu_latest"
+          # Not used by anyone yet, really, but potentially the "next big thing".
+          - arch: "riscv64"
+            distro: "ubuntu_latest"
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write # Necessary for uraimo/run-on-arch-action to use GitHub's Docker repository as a cache
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - uses: uraimo/run-on-arch-action@ac33288c3728ca72563c97b8b88dda5a65a84448 # v2.8.1
+        name: Configure, build, and test
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds by storing container images in
+          # a GitHub package registry.
+          githubToken: ${{ github.token }}
+
+          env: | # YAML, but pipe character is necessary
+            CFLAGS_GCC_STYLE: ${{ env.CFLAGS_GCC_STYLE }}
+
+          install: |
+            apt-get -qq update
+            apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev
+
+          run: |
+            set -e
+            # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
+            cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE -Wno-format-truncation -Wno-format-overflow" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
+            ninja -C build
+            (cd build && ctest -j3 --output-on-failure)
 
   zebrilus:
     # Tests with: Zig compiler
