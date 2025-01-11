@@ -972,7 +972,7 @@ EXTRA_DIST += \
   cmake/FindReadline.cmake \
   cmake/pcre2-config-version.cmake.in \
   cmake/pcre2-config.cmake.in \
-  CMakeLists.txt \
-  config-cmake.h.in
+  src/config-cmake.h.in \
+  CMakeLists.txt
 
 ## end Makefile.am

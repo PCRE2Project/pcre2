@@ -940,8 +940,8 @@ The distribution should contain the files listed below.
   cmake/FindReadline.cmake
   cmake/pcre2-config-version.cmake.in
   cmake/pcre2-config.cmake.in
+  src/config-cmake.h.in
   CMakeLists.txt
-  config-cmake.h.in
 
 (E) Auxiliary files for building PCRE2 "by hand"
 

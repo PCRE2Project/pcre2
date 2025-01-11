@@ -17,7 +17,7 @@ pub fn build(b: *std.Build) !void {
 
     const config_header = b.addConfigHeader(
         .{
-            .style = .{ .cmake = b.path("config-cmake.h.in") },
+            .style = .{ .cmake = b.path("src/config-cmake.h.in") },
             .include_path = "config.h",
         },
         .{

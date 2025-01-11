@@ -246,7 +246,7 @@ crlf_files=(
   )
 
 c_files=(
-  config-cmake.h.in
+  src/config-cmake.h.in
   src/pcre2.h.in
   src/pcre2_auto_possess.c
   src/pcre2_chartables.c.dist
