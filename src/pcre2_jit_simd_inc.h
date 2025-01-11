@@ -1289,7 +1289,7 @@ if (char1 != char2)
 
 #else /* PCRE2_CODE_UNIT_WIDTH == 32 */
 
-for (int i = 0; i < 2; i++)
+for (i = 0; i < 2; i++)
   {
   replicate_imm_vector(compiler, i, cmp1_ind, char1 | bit, TMP1);
 
@@ -1483,7 +1483,7 @@ if (char1 != char2)
 
 #else /* PCRE2_CODE_UNIT_WIDTH == 32 */
 
-for (int i = 0; i < 2; i++)
+for (i = 0; i < 2; i++)
   {
   replicate_imm_vector(compiler, i, cmp1_ind, char1 | bit, TMP3);
 
@@ -1699,7 +1699,7 @@ if (char2a != char2b)
 
 #else /* PCRE2_CODE_UNIT_WIDTH == 32 */
 
-for (int i = 0; i < 2; i++)
+for (i = 0; i < 2; i++)
   {
   replicate_imm_vector(compiler, i, cmp1a_ind, char1a | bit1, TMP1);
 

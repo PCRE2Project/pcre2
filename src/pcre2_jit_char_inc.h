@@ -1486,7 +1486,7 @@ static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
 PCRE2_SPTR end_subject = args->end;
-int lgb, rgb, ricount;
+int lgb = 0, rgb, ricount;
 PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
 BOOL was_ep_ZWJ = FALSE;
@@ -1569,7 +1569,7 @@ static PCRE2_SPTR SLJIT_FUNC do_extuni_utf_invalid(jit_arguments *args, PCRE2_SP
 {
 PCRE2_SPTR start_subject = args->begin;
 PCRE2_SPTR end_subject = args->end;
-int lgb, rgb, ricount;
+int lgb = 0, rgb, ricount;
 PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
 BOOL was_ep_ZWJ = FALSE;

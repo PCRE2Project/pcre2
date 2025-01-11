@@ -178,7 +178,7 @@ jobs:
 
             ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
             make -j3
-            make check
+            make check || (cat ./test-suite.log; false)
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
@@ -247,7 +247,7 @@ jobs:
 
             ./configure CC="cc -m32" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
             make
-            make check
+            make check || (cat ./test-suite.log; false)
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
@@ -257,7 +257,7 @@ jobs:
 
             ./configure CC="cc -m64" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
             make
-            make check
+            make check || (cat ./test-suite.log; false)
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
