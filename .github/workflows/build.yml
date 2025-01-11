@@ -291,6 +291,7 @@ jobs:
 
           # Workaround for incorrect filesystem permissions on /usr/share/aclocal, which
           # causes the m4 macros to be copied with incorrect permissions.
+          # https://github.com/actions/runner-images/issues/11212
           chmod u=rw,go=r m4/*.m4
 
       - name: Configure
@@ -303,7 +304,7 @@ jobs:
         run: |
           mkdir tarball-dir
           tar -C tarball-dir -xzf pcre2-*.tar.gz
-          # Budge the directory, so we don't back the version number into the
+          # Budge the directory, so we don't bake the version number into the
           # `manifest-tarball` file:
           mv tarball-dir/pcre2-* tarball-dir/pcre2-SNAPSHOT
           maint/RunManifestTest tarball-dir maint/manifest-tarball
