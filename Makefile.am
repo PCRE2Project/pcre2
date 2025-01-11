@@ -778,10 +778,7 @@ EXTRA_DIST += \
   testdata/testoutput6 \
   testdata/testoutput7 \
   testdata/testoutput8-16-2 \
-  testdata/testoutput8-16-3 \
   testdata/testoutput8-16-4 \
-  testdata/testoutput8-32-2 \
-  testdata/testoutput8-32-3 \
   testdata/testoutput8-32-4 \
   testdata/testoutput8-8-2 \
   testdata/testoutput8-8-3 \

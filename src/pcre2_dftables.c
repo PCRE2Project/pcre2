@@ -47,9 +47,7 @@ option can be used to select the current locale from the LC_ALL environment
 variable. By default, the tables are written in source form, but if -b is
 given, they are written in binary. */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+
 
 #include <ctype.h>
 #include <stdio.h>
@@ -197,20 +195,7 @@ the very long string otherwise. */
   "pcre2_dftables manually with the -L option to build tables using the LC_ALL\n"
   "locale. */\n\n");
 
-/* Force config.h in z/OS */
-
-#if defined NATIVE_ZOS
 (void)fprintf(f,
-  "/* For z/OS, config.h is forced */\n"
-  "#ifndef HAVE_CONFIG_H\n"
-  "#define HAVE_CONFIG_H 1\n"
-  "#endif\n\n");
-#endif
-
-(void)fprintf(f,
-  "#ifdef HAVE_CONFIG_H\n"
-  "#include \"config.h\"\n"
-  "#endif\n\n"
   "#include \"pcre2_internal.h\"\n\n");
 
 (void)fprintf(f,

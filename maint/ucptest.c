@@ -82,11 +82,6 @@ characters, the list ends with ...
 The command "list" must be followed by one of property names script, bool,
 type, gbreak or bidi. The defined values for that property are listed. */
 
-
-#ifdef HAVE_CONFIG_H
-#include "../src/config.h"
-#endif
-
 #ifndef SUPPORT_UNICODE
 #error "Unicode support not enabled"
 #endif

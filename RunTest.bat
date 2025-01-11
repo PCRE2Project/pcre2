@@ -259,7 +259,10 @@ if [%3] == [] (
 )
 
 if %1 == 8 (
-  set outnum=%1-%bits%-%link_size%
+  set bits_link_size=%link_size%
+  if %bits% EQU 16 if %link_size% EQU 3 set bits_link_size=4
+  if %bits% EQU 32 set bits_link_size=4
+  set outnum=%1-%bits%-!bits_link_size!
 ) else if %1 == 11 (
   set outnum=%1-%bits%
 ) else if %1 == 12 (

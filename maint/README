@@ -396,9 +396,6 @@ years.
   perhaps be used as a way round this problem. However, note that Perl does not
   distinguish: like PCRE2, a name is just an alias for a number in Perl.
 
-. Instead of having #ifdef HAVE_CONFIG_H in each module, put #include
-  "something" and the the #ifdef appears only in one place, in "something".
-
 . Implement something like (?(R2+)... to check outer recursions.
 
 . If Perl ever supports the POSIX notation [[.something.]] PCRE2 should try

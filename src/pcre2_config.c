@@ -38,17 +38,10 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-/* Save the configured link size, which is in bytes. In 16-bit and 32-bit modes
-its value gets changed by pcre2_intmodedep.h (included by pcre2_internal.h) to
-be in code units. */
-
-static int configured_link_size = LINK_SIZE;
 
 #include "pcre2_internal.h"
+
+
 
 /* These macros are the standard way of turning unquoted text into C strings.
 They allow macros like PCRE2_MAJOR to be defined without quotes, which is
@@ -163,7 +156,7 @@ switch (what)
 #endif
 
   case PCRE2_CONFIG_LINKSIZE:
-  *((uint32_t *)where) = (uint32_t)configured_link_size;
+  *((uint32_t *)where) = (uint32_t)CONFIGURED_LINK_SIZE;
   break;
 
   case PCRE2_CONFIG_MATCHLIMIT:

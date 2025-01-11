@@ -38,16 +38,14 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+
 /* This module contains functions that scan a compiled pattern and change
 repeats into possessive repeats where possible. */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
 #include "pcre2_internal.h"
+
+
 
 /* This macro represents the max size of list[] and that is used to keep
 track of UCD info in several places, it should be kept on sync with the

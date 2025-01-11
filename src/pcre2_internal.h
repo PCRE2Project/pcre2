@@ -41,6 +41,15 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PCRE2_INTERNAL_H_IDEMPOTENT_GUARD
 #define PCRE2_INTERNAL_H_IDEMPOTENT_GUARD
 
+/* We do not assume that the config.h file has an idempotent include guard,
+since it may well be written by clients. The standard Autoheader config.h does
+not have an include guard (although we could customise that). */
+
+#if defined HAVE_CONFIG_H && !defined PCRE2_CONFIG_H_IDEMPOTENT_GUARD
+#define PCRE2_CONFIG_H_IDEMPOTENT_GUARD
+#include "config.h"
+#endif
+
 /* We do not support both EBCDIC and Unicode at the same time. The "configure"
 script prevents both being selected, but not everybody uses "configure". EBCDIC
 is only supported for the 8-bit library, but the check for this has to be later
@@ -2165,6 +2174,7 @@ is available. */
 
 #define _pcre2_auto_possessify       PCRE2_SUFFIX(_pcre2_auto_possessify_)
 #define _pcre2_check_escape          PCRE2_SUFFIX(_pcre2_check_escape_)
+#define _pcre2_ckd_smul              PCRE2_SUFFIX(_pcre2_ckd_smul_)
 #define _pcre2_extuni                PCRE2_SUFFIX(_pcre2_extuni_)
 #define _pcre2_find_bracket          PCRE2_SUFFIX(_pcre2_find_bracket_)
 #define _pcre2_is_newline            PCRE2_SUFFIX(_pcre2_is_newline_)
@@ -2191,6 +2201,7 @@ extern int          _pcre2_auto_possessify(PCRE2_UCHAR *,
                       const compile_block *);
 extern int          _pcre2_check_escape(PCRE2_SPTR *, PCRE2_SPTR, uint32_t *,
                       int *, uint32_t, uint32_t, uint32_t, BOOL, compile_block *);
+extern BOOL         _pcre2_ckd_smul(PCRE2_SIZE *, int, int);
 extern PCRE2_SPTR   _pcre2_extuni(uint32_t, PCRE2_SPTR, PCRE2_SPTR, PCRE2_SPTR,
                       BOOL, int *);
 extern PCRE2_SPTR   _pcre2_find_bracket(PCRE2_SPTR, BOOL, int);
@@ -2225,8 +2236,6 @@ extern void *       _pcre2_memmove(void *, const void *, size_t);
 #endif
 
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
-
-extern BOOL         PRIV(ckd_smul)(PCRE2_SIZE *, int, int);
 
 #include "pcre2_util.h"
 

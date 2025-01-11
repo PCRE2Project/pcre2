@@ -38,9 +38,13 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#ifdef HAVE_CONFIG_H
+
+#if defined HAVE_CONFIG_H && !defined PCRE2_CONFIG_H_IDEMPOTENT_GUARD
+#define PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #include "config.h"
 #endif
+
+
 
 #include <stdio.h>
 #include <string.h>

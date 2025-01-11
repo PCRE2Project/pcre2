@@ -39,15 +39,13 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "pcre2_compile.h"
+
+
 
 #define NLBLOCK cb             /* Block containing newline information */
 #define PSSTART start_pattern  /* Field containing processed string start */
 #define PSEND   end_pattern    /* Field containing processed string end */
-
-#include "pcre2_compile.h"
 
 /* In rare error cases debugging might require calling pcre2_printint(). */
 
