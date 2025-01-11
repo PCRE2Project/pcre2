@@ -579,7 +579,7 @@ endif()
 
 # Output files
 
-configure_file(config-cmake.h.in ${PROJECT_BINARY_DIR}/config.h @ONLY)
+configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/config.h @ONLY)
 
 # Parse version numbers and date out of configure.ac
 
