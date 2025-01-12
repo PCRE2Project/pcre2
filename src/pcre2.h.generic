@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE2_MAJOR           10
-#define PCRE2_MINOR           45
+#define PCRE2_MINOR           46
 #define PCRE2_PRERELEASE      -DEV
 #define PCRE2_DATE            2024-06-09
 
