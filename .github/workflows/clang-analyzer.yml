@@ -23,6 +23,7 @@ jobs:
       # turn aborts when it finds that GitHub's CI machine doesn't have ICU.
       # Just turn off localisation. A future version of the ubuntu-24.04 or
       # ubuntu-latest runners might not need this workaround.
+      # https://github.com/actions/runner-images/issues/10989
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
 
     steps:
