@@ -309,11 +309,22 @@ library. They are also documented in the pcre2build man page.
 
   --enable-ebcdic --disable-unicode
 
-  This automatically implies --enable-rebuild-chartables (see above). However,
-  when PCRE2 is built this way, it always operates in EBCDIC. It cannot support
-  both EBCDIC and UTF-8/16/32. There is a second option, --enable-ebcdic-nl25,
-  which specifies that the code value for the EBCDIC NL character is 0x25
-  instead of the default 0x15.
+  This automatically implies --enable-rebuild-chartables (see above), in order
+  to ensure that you have the correct default character tables for your system's
+  codepage. There is an exception when you set --enable-ebcdic-ignoring-compiler
+  (see below), which allows using a default set of EBCDIC 1047 character tables
+  rather than forcing use of --enable-rebuild-chartables.
+
+  When PCRE2 is built with EBCDIC support, it always operates in EBCDIC. It
+  cannot support both EBCDIC and ASCII or UTF-8/16/32.
+
+  There is a second option, --enable-ebcdic-nl25, which specifies that the code
+  value for the EBCDIC NL character is 0x25 instead of the default 0x15.
+
+  There is a third option, --enable-ebcdic-ignoring-compiler, which disregards
+  the compiler's codepage for determining the numeric value of C character
+  constants such as 'z', and instead forces PCRE2 to use numeric constants for
+  the EBCDIC 1047 codepage instead.
 
 . If you specify --enable-debug, additional debugging code is included in the
   build. This option is intended for use by the PCRE2 maintainers.
@@ -822,6 +833,10 @@ The distribution should contain the files listed below.
   src/pcre2_chartables.c.dist  a default set of character tables that assume
                            ASCII coding; unless --enable-rebuild-chartables is
                            specified, used by copying to pcre2_chartables.c
+  src/pcre2_chartables.c.ebcdic-1047-{nl15,nl25}  a default set of character
+                           tables for EBCDIC 1047; used if
+                           --enable-ebcdic-ignoring-compiler is specified
+                           without --enable-rebuild-chartables
 
   src/pcre2posix.c           )
   src/pcre2_auto_possess.c   )

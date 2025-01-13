@@ -439,6 +439,26 @@ jobs:
       - name: Test
         run: bazelisk test //... --enable_runfiles --incompatible_strict_action_env --test_output=all
 
+  ebcdic:
+    # Tests the full support for EBCDIC on a non-EBCDIC platform, using a
+    # hardcoded EBCDIC-1047 codepage.
+    name: EBCDIC
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Configure
+        run: cmake -DPCRE2_SUPPORT_JIT=OFF -DPCRE2_SUPPORT_UNICODE=OFF -DPCRE2_EBCDIC=ON -DPCRE2_EBCDIC_IGNORING_COMPILER=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+
+      - name: Build
+        run: cd build && make -j3
+
+      - name: Test
+        run: cd build && ../RunTest
+
   heron:
     # Job to verify that the tasks performed by PrepareRelease have been done. It is
     # the committer's responsibility (currently) to run PrepareRelease themselves when

@@ -188,6 +188,7 @@ while (plength > 0)
       switch (posix_state)
         {
         case POSIX_CLASS_STARTED:
+        // XXX EBCDIC
         if (c <= 127 && islower(c)) break;  /* Remain in started state */
         posix_state = POSIX_CLASS_NOT_STARTED;
         if (c == CHAR_COLON  && plength > 0 &&
@@ -275,6 +276,7 @@ while (plength > 0)
     if (plength == 0) return PCRE2_ERROR_END_BACKSLASH;
     if (extended) nextisliteral = TRUE; else
       {
+      // XXX EBCDIC
       if (*posix < 127 && strchr(posix_meta_escapes, *posix) != NULL)
         {
         if (isdigit(*posix)) PUTCHARS(STR_BACKSLASH);
@@ -333,6 +335,7 @@ while (plength > 0)
     /* Fall through */
 
     default:
+    // XXX EBCDIC
     if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
       {
       ESCAPE_LITERAL:
@@ -472,6 +475,7 @@ static int
 convert_glob_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end,
   pcre2_output_context *out)
 {
+// XXX EBCDIC
 static const char *posix_classes = "alnum:alpha:ascii:blank:cntrl:digit:"
   "graph:lower:print:punct:space:upper:word:xdigit:";
 PCRE2_SPTR start = *from + 1;
@@ -545,6 +549,7 @@ if (c > 0xff)
   }
 #endif
 
+// XXX EBCDIC
 switch (class_index)
   {
   case 1: return isalnum(c);
@@ -1003,6 +1008,7 @@ while (pattern < pattern_end)
     c = *pattern++;
     }
 
+  // XXX EBCDIC
   if (c < 128 && strchr(pcre2_escaped_literals, c) != NULL)
     convert_glob_write(&out, CHAR_BACKSLASH);
 

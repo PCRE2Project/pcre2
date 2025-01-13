@@ -244,6 +244,19 @@ to hold them as 32-bit code units. */
 
 enum { PR_OK, PR_SKIP, PR_ABEND };
 
+/* The macro EBCDIC_IO describes whether pcre2tests takes ASCII or EBCDIC as
+its input files (or terminal input). If the compiler uses ASCII for character
+literals, then we make pcre2test take ASCII as its input and output. This is
+different to the core PCRE2 library, where we use macros like "CHAR_A" for every
+single character and string literal used in pattern parsing and matching. It
+would simply be too arduous to do the same for pcre2test, so we make its
+input/output format match the compiler's codepage. */
+#if defined(EBCDIC) && 'a' == 0x81
+#define EBCDIC_IO 1
+#else
+#define EBCDIC_IO 0
+#endif
+
 /* The macro PRINTABLE determines whether to print an output character as-is or
 as a hex value when showing compiled patterns. We use it in cases when the
 locale has not been explicitly changed, so as to get consistent output from
@@ -255,7 +268,21 @@ systems that differ in their output from isprint() even in the "C" locale. */
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
 
-#define PRINTOK(c) ((use_tables != NULL && c < 256)? isprint(c) : PRINTABLE(c))
+#define PRINTOK(c) \
+  (PRINTABLE(c) && \
+   (use_tables == NULL || \
+    (((c) > 255)? FALSE : \
+     ((use_tables + cbits_offset + cbit_print)[(c)/8] & (1u << ((c)&7))) != 0)))
+
+/* The macro CHAR_OUTPUT is used to output characters in pcre2test's output
+format. The input character is encoded in PCRE2's native codepage (EBCDIC, if
+enabled), but the output may differ in the case where pcre2test uses ASCII input
+and output. */
+#if defined(EBCDIC) && !EBCDIC_IO
+#define CHAR_OUTPUT(c)  ebcdic_to_ascii(c)
+#else
+#define CHAR_OUTPUT(c)  (c)
+#endif
 
 /* We have to include some of the library source files because we need
 to use some of the macros, internal structure definitions, and other internal
@@ -270,22 +297,21 @@ so that the PCRE2_EXP_xxx macros get set appropriately for an application, not
 for building the library.
 
 Setting PCRE2_CODE_UNIT_WIDTH to zero cuts out all the width-specific settings
-in pcre2.h and pcre2_internal.h. Defining PCRE2_BUILDING_PCRE2TEST cuts out the
-check in pcre2_internal.h that ensures PCRE2_CODE_UNIT_WIDTH is 8, 16, or 32
-(which it needs to be when compiling one of the libraries). */
+in pcre2.h and pcre2_internal.h. Defining PCRE2_PCRE2TEST cuts out the check in
+pcre2_internal.h that ensures PCRE2_CODE_UNIT_WIDTH is 8, 16, or 32 (which it
+needs to be when compiling one of the libraries). */
 
 #define PRIV(name) name
 #define PCRE2_CODE_UNIT_WIDTH 0
-#define PCRE2_BUILDING_PCRE2TEST
+#define PCRE2_PCRE2TEST
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
 
-/* We need access to some of the data tables that PCRE2 uses. Defining
-PCRE2_PCRE2TEST makes some minor changes in the files. The previous definition
-of PRIV avoids name clashes. */
+/* We need access to some of the data tables that PCRE2 uses. The previous
+definition of PCRE2_PCRE2TEST makes some minor changes in the files. The
+previous definition of PRIV avoids name clashes. */
 
-#define PCRE2_PCRE2TEST
 #include "pcre2_tables.c"
 #include "pcre2_ucd.c"
 
@@ -948,6 +974,7 @@ static coptstruct coptlist[] = {
   { "bsr",         CONF_BSR, PCRE2_CONFIG_BSR },
   { "ebcdic",      CONF_FIX, SUPPORT_EBCDIC },
   { "ebcdic-nl",   CONF_FIZ, EBCDIC_NL },
+  { "ebcdic-io",   CONF_FIX, EBCDIC_IO },
   { "jit",         CONF_INT, PCRE2_CONFIG_JIT },
   { "jitusable",   CONF_JU,  0 },
   { "linksize",    CONF_INT, PCRE2_CONFIG_LINKSIZE },
@@ -964,6 +991,8 @@ static coptstruct coptlist[] = {
 #undef SUPPORT_16
 #undef SUPPORT_32
 #undef SUPPORT_EBCDIC
+#undef EBDCIC_NL
+#undef BACKSLASH_C
 
 /* Types for the parser, to be used in process_data() */
 
@@ -3006,6 +3035,26 @@ return (PCRE2_JIT_STACK *)arg;
 
 
 /*************************************************
+*         EBCDIC support functions               *
+*************************************************/
+
+#if defined(EBCDIC) && !EBCDIC_IO
+static void
+ascii_to_ebcdic(uint8_t *buf, size_t len)
+{
+for (size_t i = 0; i < len; ++i)
+  buf[i] = ascii_to_ebcdic_1047[buf[i]];
+}
+
+static uint32_t
+ebcdic_to_ascii(uint32_t c)
+{
+return (c < 256)? ebcdic_1047_to_ascii[c] : c;
+}
+#endif
+
+
+/*************************************************
 *      Convert UTF-8 character to code point     *
 *************************************************/
 
@@ -3094,9 +3143,12 @@ char tempbuffer[16];
 
 if (PRINTOK(c))
   {
+  c = CHAR_OUTPUT(c);
   if (f != NULL) fprintf(f, "%c", c);
   return 1;
   }
+
+c = CHAR_OUTPUT(c);
 
 if (c < 0x100)
   {
@@ -3461,59 +3513,6 @@ else while (len > 0)
 return 0;
 }
 #endif /* SUPPORT_PCRE2_32 */
-
-
-
-/* This function is no longer used. Keep it around for a while, just in case it
-needs to be re-instated. */
-
-#ifdef NEVERNEVERNEVER
-
-/*************************************************
-*         Move back by so many characters        *
-*************************************************/
-
-/* Given a code unit offset in a subject string, move backwards by a number of
-characters, and return the resulting offset.
-
-Arguments:
-  subject   pointer to the string
-  offset    start offset
-  count     count to move back by
-  utf       TRUE if in UTF mode
-
-Returns:   a possibly changed offset
-*/
-
-static PCRE2_SIZE
-backchars(uint8_t *subject, PCRE2_SIZE offset, uint32_t count, BOOL utf)
-{
-if (!utf || test_mode == PCRE32_MODE)
-  return (count >= offset)? 0 : (offset - count);
-
-else if (test_mode == PCRE8_MODE)
-  {
-  PCRE2_SPTR8 pp = (PCRE2_SPTR8)subject + offset;
-  for (; count > 0 && pp > (PCRE2_SPTR8)subject; count--)
-    {
-    pp--;
-    while ((*pp & 0xc0) == 0x80) pp--;
-    }
-  return pp - (PCRE2_SPTR8)subject;
-  }
-
-else  /* 16-bit mode */
-  {
-  PCRE2_SPTR16 pp = (PCRE2_SPTR16)subject + offset;
-  for (; count > 0 && pp > (PCRE2_SPTR16)subject; count--)
-    {
-    pp--;
-    if ((*pp & 0xfc00) == 0xdc00) pp--;
-    }
-  return pp - (PCRE2_SPTR16)subject;
-  }
-}
-#endif  /* NEVERNEVERNEVER */
 
 
 
@@ -4603,7 +4602,21 @@ if (len < 0)
 else
   {
   fprintf(outfile, "%s", before);
-  PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
+
+  /* In the rare configuration of EBCDIC-with-ASCII-compiler, we currently
+  output ASCII strings for the error messages, so we do special filtering for
+  that here. */
+
+#ifdef SUPPORT_PCRE2_16
+  if (test_mode == PCRE16_MODE)
+    for (int i = 0; i <= len; i++) pbuffer8[i] = (uint8_t)pbuffer16[i];
+#endif
+#ifdef SUPPORT_PCRE2_32
+  if (test_mode == PCRE32_MODE)
+    for (int i = 0; i <= len; i++) pbuffer8[i] = (uint8_t)pbuffer32[i];
+#endif
+  fprintf(outfile, "%s", pbuffer8);
+
   fprintf(outfile, "%s", after);
   }
 return len >= 0;
@@ -4682,6 +4695,7 @@ BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
 
 if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
   {
+    // XXX XXX NEEDS EBCDIC SUPPORT
   fprintf(outfile, "------------------------------------------------------------------\n");
   PCRE2_PRINTINT((pat_patctl.control & CTL_FULLBINCODE) != 0);
   }
@@ -4949,7 +4963,8 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       ((FLD(compiled_code, flags) & PCRE2_FIRSTCASELESS) == 0)?
       "" : " (caseless)";
     if (PRINTOK(first_cunit))
-      fprintf(outfile, "First code unit = \'%c\'%s\n", first_cunit, caseless);
+      fprintf(outfile, "First code unit = \'%c\'%s\n", CHAR_OUTPUT(first_cunit),
+              caseless);
     else
       {
       fprintf(outfile, "First code unit = ");
@@ -4971,14 +4986,14 @@ if ((pat_patctl.control & CTL_INFO) != 0)
           fprintf(outfile, "\n ");
           c = 2;
           }
-        if (PRINTOK(i) && i != ' ')
+        if (PRINTOK(i) && i != CHAR_SPACE)
           {
-          fprintf(outfile, " %c", i);
+          fprintf(outfile, " %c", CHAR_OUTPUT(i));
           c += 2;
           }
         else
           {
-          fprintf(outfile, " \\x%02x", i);
+          fprintf(outfile, " \\x%02x", CHAR_OUTPUT(i));
           c += 5;
           }
         }
@@ -4992,7 +5007,8 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       ((FLD(compiled_code, flags) & PCRE2_LASTCASELESS) == 0)?
       "" : " (caseless)";
     if (PRINTOK(last_cunit))
-      fprintf(outfile, "Last code unit = \'%c\'%s\n", last_cunit, caseless);
+      fprintf(outfile, "Last code unit = \'%c\'%s\n", CHAR_OUTPUT(last_cunit),
+              caseless);
     else
       {
       fprintf(outfile, "Last code unit = ");
@@ -5902,6 +5918,10 @@ if ((pat_patctl.control & (CTL_PUSH|CTL_PUSHCOPY|CTL_PUSHTABLESCOPY)) != 0)
 /* Convert the input in non-8-bit modes. */
 
 errorcode = 0;
+
+#if defined(EBCDIC) && !EBCDIC_IO
+ascii_to_ebcdic(pbuffer8, patlen);
+#endif
 
 #ifdef SUPPORT_PCRE2_16
 if (test_mode == PCRE16_MODE) errorcode = to16(pbuffer8, utf, &patlen);
@@ -7014,6 +7034,9 @@ for (;;)
 #ifdef SUPPORT_PCRE2_8
   if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
 #endif
+#if defined(EBCDIC) && !EBCDIC_IO
+  ascii_to_ebcdic(pbuffer8, namelen);
+#endif
 #ifdef SUPPORT_PCRE2_16
   if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
 #endif
@@ -7094,6 +7117,9 @@ for (;;)
 
 #ifdef SUPPORT_PCRE2_8
   if (test_mode == PCRE8_MODE) strcpy((char *)pbuffer8, (char *)nptr);
+#endif
+#if defined(EBCDIC) && !EBCDIC_IO
+  ascii_to_ebcdic(pbuffer8, namelen);
 #endif
 #ifdef SUPPORT_PCRE2_16
   if (test_mode == PCRE16_MODE)(void)to16(nptr, utf, &cnl);
@@ -7721,6 +7747,10 @@ c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
 pp = memmove(dbuffer + dbuffer_size - len - c, dbuffer, len + c);
 #ifdef SUPPORT_VALGRIND
   VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
+#endif
+
+#if defined(EBCDIC) && !EBCDIC_IO
+ascii_to_ebcdic(pp, len);
 #endif
 
 /* Now pp points to the subject string, but if null_subject was specified, set
@@ -8920,8 +8950,10 @@ printf("  -C arg        show a specific compile-time option and exit with its\n"
 printf("                  value if numeric (else 0). The arg can be:\n");
 printf("     backslash-C    use of \\C is enabled [0, 1]\n");
 printf("     bsr            \\R type [ANYCRLF, ANY]\n");
-printf("     ebcdic         compiled for EBCDIC character code [0,1]\n");
+printf("     ebcdic         compiled for EBCDIC character code [0, 1]\n");
 printf("     ebcdic-nl      NL code if compiled for EBCDIC\n");
+printf("     ebcdic-io      if PCRE2 is compiled for EBCDIC, whether pcre2test's\n");
+printf("                      input and output is EBCDIC or ASCII [0, 1]\n");
 printf("     jit            just-in-time compiler supported [0, 1]\n");
 printf("     jitusable      test JIT usability [0, 1, 2, 3]\n");
 printf("     linksize       internal link size [2, 3, 4]\n");
@@ -9070,6 +9102,11 @@ printf("Compiled with\n");
 printf("  EBCDIC code support: LF is 0x%02x\n", CHAR_LF);
 #if defined NATIVE_ZOS
 printf("  EBCDIC code page %s or similar\n", pcrz_cpversion());
+#endif
+#if EBCDIC_IO
+printf("  Input/output for pcre2test is EBCDIC\n");
+#else
+printf("  Input/output for pcre2test is ASCII, not EBCDIC\n");
 #endif
 #endif
 
@@ -9821,7 +9858,7 @@ least 128 code units, because it is used for retrieving error messages. */
   for (;;)
     {
     errcode = strtol(arg_error, &endptr, 10);
-    if (*endptr != 0 && *endptr != CHAR_COMMA)
+    if (*endptr != 0 && *endptr != ',')
       {
       fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;
@@ -9848,7 +9885,15 @@ least 128 code units, because it is used for retrieving error messages. */
       }
     else
       {
-      PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, stdout);
+#ifdef SUPPORT_PCRE2_16
+      if (test_mode == PCRE16_MODE)
+        for (int i = 0; i <= len; i++) pbuffer8[i] = (uint8_t)pbuffer16[i];
+#endif
+#ifdef SUPPORT_PCRE2_32
+      if (test_mode == PCRE32_MODE)
+        for (int i = 0; i <= len; i++) pbuffer8[i] = (uint8_t)pbuffer32[i];
+#endif
+      printf("%s", pbuffer8);
       }
     printf("\n");
     if (*endptr == 0) goto EXIT;

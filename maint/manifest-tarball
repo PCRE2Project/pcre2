@@ -304,6 +304,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_auto_possess.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chartables.c.dist
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chartables.c.ebcdic-1047-nl15
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chartables.c.ebcdic-1047-nl25
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chkdint.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile.h
