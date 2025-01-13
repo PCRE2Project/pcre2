@@ -524,6 +524,9 @@ if (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT)
 
 if (xoptions & PCRE2_EXTRA_TURKISH_CASING)
   class_options |= PARSE_CLASS_TURKISH_UTF;
+#else
+(void)options;   /* Avoid compiler warning. */
+(void)xoptions;  /* Avoid compiler warning. */
 #endif
 
 /* Compute required space for the range. */
@@ -904,6 +907,10 @@ uint8_t *classbits = cb->classbits.classbits;
 uint32_t c, byte_start, byte_end;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
 
+#ifndef SUPPORT_UNICODE
+(void)xoptions; /* Avoid compiler warning. */
+#endif
+
 /* If caseless matching is required, scan the range and process alternate
 cases. In Unicode, there are 8-bit characters that have alternate cases that
 are greater than 255 and vice-versa (though these may be ignored if caseless
@@ -1079,6 +1086,10 @@ BOOL utf = FALSE;
 uint32_t xclass_props;
 PCRE2_UCHAR *class_uchardata;
 class_ranges* cranges;
+#else
+(void)has_bitmap;    /* Avoid compiler warning. */
+(void)errorcodeptr;  /* Avoid compiler warning. */
+(void)lengthptr;     /* Avoid compiler warning. */
 #endif
 
 /* If an XClass contains a negative special such as \S, we need to flip the

@@ -519,6 +519,8 @@ BOOL has_cmov, last_range_set;
 sljit_u32 category_list = 0;
 sljit_u32 items;
 int typereg = TMP1;
+#else
+(void)c; /* Avoid compiler warning. */
 #endif /* SUPPORT_UNICODE */
 
 SLJIT_ASSERT(common->locals_size >= SSIZE_OF(sw));

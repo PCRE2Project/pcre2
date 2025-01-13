@@ -365,6 +365,10 @@ PCRE2_SIZE length;
 PCRE2_SPTR eptr;
 PCRE2_SPTR eptr_start;
 
+#ifndef SUPPORT_UNICODE
+(void)caseopts; /* Avoid compiler warning. */
+#endif
+
 /* Deal with an unset group. The default is no match, but there is an option to
 match an empty string. */
 
