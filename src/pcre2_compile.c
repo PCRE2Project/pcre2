@@ -8115,6 +8115,7 @@ for (;; pptr++)
       cb->external_flags |= PCRE2_HASBKC;  /* Record */
 #if PCRE2_CODE_UNIT_WIDTH == 32
       meta_arg = OP_ALLANY;
+      (void)utf; /* Avoid compiler warning. */
 #else
       if (!utf) meta_arg = OP_ALLANY;
 #endif
