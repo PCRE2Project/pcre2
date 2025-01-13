@@ -3440,8 +3440,11 @@ if (isdirectory(pathname))
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc;
-      size_t fnlength = strlen(pathname) + strlen(nextfile) + 2;
-      if (fnlength > FNBUFSIZ)
+      int prc;
+      if (strlen(pathname) + strlen(nextfile) + 2 > sizeof(childpath) ||
+        (prc = snprintf(childpath, sizeof(childpath), "%s%c%s", pathname,
+                        FILESEP, nextfile)) < 0 ||
+        prc >= (int)sizeof(childpath))
         {
         /* LCOV_EXCL_START - this is a "never" event */
         fprintf(stderr, "pcre2grep: recursive filename is too long\n");
@@ -3449,7 +3452,6 @@ if (isdirectory(pathname))
         break;
         /* LCOV_EXCL_STOP */
         }
-      snprintf(childpath, sizeof(childpath), "%s%c%s", pathname, FILESEP, nextfile);
 
       /* If the realpath() function is available, we can try to prevent endless
       recursion caused by a symlink pointing to a parent directory (GitHub
@@ -3509,7 +3511,11 @@ if (iswild(pathname))
   while ((nextfile = readdirectory(dir)) != NULL)
     {
     int frc;
-    if (strlen(pathname) + strlen(nextfile) + 1 > sizeof(buffer))
+    int prc;
+    if (strlen(pathname) + strlen(nextfile) + 1 > sizeof(buffer) ||
+      (prc = snprintf(buffer, sizeof(buffer), "%s%s", pathname,
+                      nextfile)) < 0 ||
+      prc >= (int)sizeof(buffer))
       {
       /* LCOV_EXCL_START - this is a "never" event */
       fprintf(stderr, "pcre2grep: wildcard filename is too long\n");
@@ -3517,7 +3523,7 @@ if (iswild(pathname))
       break;
       /* LCOV_EXCL_STOP */
       }
-    snprintf(buffer, sizeof(buffer), "%s%s", pathname, nextfile);
+
     frc = grep_or_recurse(buffer, dir_recurse, FALSE);
     if (frc > 1) rc = frc;
      else if (frc == 0 && rc == 1) rc = 0;
@@ -4064,10 +4070,10 @@ for (i = 1; i < argc; i++)
           (int)strlen(arg) : (int)(argequals - arg);
 
         if ((ret = snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name),
-             ret < 0 || ret > (int)sizeof(buff1)) ||
+             ret < 0 || ret >= (int)sizeof(buff1)) ||
             (ret = snprintf(buff2, sizeof(buff2), "%s%.*s", buff1,
                      fulllen - baselen - 2, opbra + 1),
-             ret < 0 || ret > (int)sizeof(buff2)))
+             ret < 0 || ret >= (int)sizeof(buff2)))
           {
           /* LCOV_EXCL_START - this is a "never" event */
           fprintf(stderr, "pcre2grep: Buffer overflow when parsing %s option\n",

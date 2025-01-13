@@ -113,10 +113,11 @@ OFLAGS="-O0"
 CC="${CC:=cc}"
 ISGCC=0
 
-# If the compiler is gcc, add a lot of warning switches.
+# If the compiler is GCC or Clang, add a lot of warning switches.
 
-$CC --version >/tmp/pcre2ccversion 2>/dev/null
-if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
+CC_VER_OUTPUT=`printf '#ifdef __GNUC__\nGCC=yes\n#endif\n' | $CC -E -`
+if [ $? -eq 0 ] && (echo "$CC_VER_OUTPUT" | grep GCC=yes) >/dev/null; then
+  echo "Treating $CC as GCC"
   ISGCC=1
   CFLAGS="$CFLAGS -Wall"
   CFLAGS="$CFLAGS -Wextra"
@@ -138,10 +139,9 @@ if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   CFLAGS="$CFLAGS -Wstrict-prototypes"
   CFLAGS="$CFLAGS -Warray-bounds"
   CFLAGS="$CFLAGS -Wformat-overflow=2"
-  CFLAGS="$CFLAGS -Wformat-truncation=2"
+  CFLAGS="$CFLAGS -Wformat-truncation=1"
   CFLAGS="$CFLAGS -Wdeclaration-after-statement"
 fi
-rm -f /tmp/pcre2ccversion
 
 # This function runs a single test with the set of configuration options that
 # are in $opts. The source directory must be set in srcdir. The function must
@@ -162,7 +162,7 @@ runtest()
 
   if [ $dummy -eq 1 ]; then return; fi
 
-  CFLAGS="$CFLAGS" \
+  CC="$CC" CFLAGS="$CFLAGS" \
     $srcdir/configure $opts >/dev/null 2>teststderrM
   if [ $? -ne 0 ]; then
     echo " "
