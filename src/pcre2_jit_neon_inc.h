@@ -82,7 +82,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #  endif
 # endif
 
-#if (defined(__GNUC__) && __SANITIZE_ADDRESS__) \
+#if (defined(__GNUC__) && defined(__SANITIZE_ADDRESS__) && __SANITIZE_ADDRESS__ ) \
 	|| (defined(__clang__) \
 	&& ((__clang_major__ == 3 && __clang_minor__ >= 3) || (__clang_major__ > 3)))
 __attribute__((no_sanitize_address))

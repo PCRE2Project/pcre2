@@ -110,11 +110,12 @@ tmp=/tmp/pcre2testing
 
 CFLAGS="-g"
 OFLAGS="-O0"
+CC="${CC:=cc}"
 ISGCC=0
 
 # If the compiler is gcc, add a lot of warning switches.
 
-cc --version >/tmp/pcre2ccversion 2>/dev/null
+$CC --version >/tmp/pcre2ccversion 2>/dev/null
 if [ $? -eq 0 ] && grep GCC /tmp/pcre2ccversion >/dev/null; then
   ISGCC=1
   CFLAGS="$CFLAGS -Wall"
