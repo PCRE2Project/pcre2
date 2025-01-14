@@ -113,9 +113,9 @@ OFLAGS="-O0"
 CC="${CC:=cc}"
 ISGCC=0
 
-# If the compiler is GCC or Clang, add a lot of warning switches.
+# If the compiler is GCC, add a lot of warning switches.
 
-CC_VER_OUTPUT=`printf '#ifdef __GNUC__\nGCC=yes\n#endif\n' | $CC -E -`
+CC_VER_OUTPUT=`printf '#if defined(__GNUC__) && !defined(__clang__)\nGCC=yes\n#endif\n' | $CC -E -`
 if [ $? -eq 0 ] && (echo "$CC_VER_OUTPUT" | grep GCC=yes) >/dev/null; then
   echo "Treating $CC as GCC"
   ISGCC=1
