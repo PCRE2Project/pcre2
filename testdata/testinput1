@@ -23,8 +23,10 @@
     What do you know about the quick brown fox?
     What do you know about THE QUICK BROWN FOX?
 
+# ifndef EBCDIC
 /abcd\t\n\r\f\a\e\071\x3b\$\\\?caxyz/
     abcd\t\n\r\f\a\e9;\$\\?caxyz
+# endif
 
 /a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz/
     abxyzpqrrrabbxyyyypqAzz

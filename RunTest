@@ -167,7 +167,12 @@ checkresult()
     -dfa) with=" with DFA";;
     *)    with="";;
   esac
-  $cf $testdata/testoutput$2 testtry
+  cf_out="$testdata/testoutput$2"
+  if [ $ebcdic -eq 1 ] ; then
+    sed '/^# ifndef EBCDIC/,/^# endif/d' "$cf_out" >testtry2
+    cf_out=testtry2
+  fi
+  $cf "$cf_out" testtry
   if [ $? != 0 ] ; then
     echo ""
     echo "** Test $2 failed$with"
@@ -358,6 +363,35 @@ $sim $pcre2test -C ebcdic >/dev/null
 ebcdic=$?
 $sim $pcre2test -C ebcdic-io >/dev/null
 ebcdic_io=$?
+if [ $ebcdic -eq 1 ]; then
+  filterebcdic()
+    {
+    filter_cmd="$1"
+    filter_args=
+    shift
+    while [ $# -gt 0 ] ; do
+      case "$1" in
+        -C|-error|-pattern|-S|-subject|-t|-tm|-T|-TM)
+          if [ $# -gt 1 ] ; then
+            filter_args="$filter_args $1 $2"; shift; shift
+          else
+            filter_args="$filter_args $1"; shift
+          fi
+          ;;
+        -*) filter_args="$filter_args $1"; shift;;
+        *) break;;
+      esac
+    done
+    if [ $# -gt 0 ] ; then
+      input="$1"
+      shift
+      sed '/^# ifndef EBCDIC/,/^# endif/d' "$input" | "$filter_cmd" $filter_args "/dev/stdin" "$@"
+    else
+      "$filter_cmd" $filter_args "$@"
+    fi
+    }
+  sim="filterebcdic $sim"
+fi
 
 # Check for EBCDIC newline
 ebcdic_nl=`$sim $pcre2test -C ebcdic-nl`
@@ -986,6 +1020,6 @@ done
 
 
 # Clean up local working files
-rm -f testbtables testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry
+rm -f testbtables testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry testtry2
 
 # End
