@@ -45,15 +45,9 @@
 # very much more stack than normal. In environments where the stack can be
 # set at runtime, -bigstack sets a gigantic stack.
 #
-# There are two special cases where only one argument is allowed:
-#
-# If the first and only argument is "ebcdic", the script runs the special
-# EBCDIC test that can be useful for checking certain EBCDIC features, even
-# when run in an ASCII environment. PCRE2 must be built with EBCDIC support for
-# this test to be run.
-#
-# If the script is obeyed as "RunTest list", a list of available tests is
-# output, but none of them are run.
+# Special cases where only one argument is allowed:
+#   - If the script is invoked as "RunTest list", a list of available tests is
+#     output, but none of them are run.
 ###############################################################################
 
 # Define test titles in variables so that they can be output as a list. Some
@@ -90,7 +84,8 @@ title24="Test 24: Non-UTF pattern conversion tests"
 title25="Test 25: UTF pattern conversion tests"
 title26="Test 26: Unicode property tests (compatible with Perl >= 5.38)"
 title27="Test 27: Auto-generated unicode property tests"
-maxtest=27
+title28="Test 28: EBCDIC-specific tests"
+maxtest=28
 titleheap="Test 'heap': Environment-specific heap tests"
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
@@ -122,6 +117,7 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title25
   echo $title26
   echo $title27
+  echo $title28
   echo ""
   echo $titleheap
   echo ""
@@ -171,7 +167,12 @@ checkresult()
     -dfa) with=" with DFA";;
     *)    with="";;
   esac
-  $cf $testdata/testoutput$2 testtry
+  cf_out="$testdata/testoutput$2"
+  if [ $ebcdic -eq 1 ] ; then
+    sed '/^# ifndef EBCDIC/,/^# endif/d' "$cf_out" >testtry2
+    cf_out=testtry2
+  fi
+  $cf "$cf_out" testtry
   if [ $? != 0 ] ; then
     echo ""
     echo "** Test $2 failed$with"
@@ -247,8 +248,8 @@ do24=no
 do25=no
 do26=no
 do27=no
+do28=no
 doheap=no
-doebcdic=no
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -280,8 +281,8 @@ while [ $# -gt 0 ] ; do
    25) do25=yes;;
    26) do26=yes;;
    27) do27=yes;;
+   28) do28=yes;;
    heap) doheap=yes;;
-   ebcdic) doebcdic=yes;;
   -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
@@ -356,6 +357,51 @@ support32=$?
 
 $sim $pcre2test -C backslash-C >/dev/null
 supportBSC=$?
+
+# Check if compiled in EBCDIC mode, and whether we have EBCDIC I/O
+$sim $pcre2test -C ebcdic >/dev/null
+ebcdic=$?
+$sim $pcre2test -C ebcdic-io >/dev/null
+ebcdic_io=$?
+if [ $ebcdic -eq 1 ]; then
+  filterebcdic()
+    {
+    filter_cmd="$1"
+    filter_args=
+    shift
+    while [ $# -gt 0 ] ; do
+      case "$1" in
+        -C|-error|-pattern|-S|-subject|-t|-tm|-T|-TM)
+          if [ $# -gt 1 ] ; then
+            filter_args="$filter_args $1 $2"; shift; shift
+          else
+            filter_args="$filter_args $1"; shift
+          fi
+          ;;
+        -*) filter_args="$filter_args $1"; shift;;
+        *) break;;
+      esac
+    done
+    if [ $# -gt 0 ] ; then
+      input="$1"
+      shift
+      sed '/^# ifndef EBCDIC/,/^# endif/d' "$input" | "$filter_cmd" $filter_args "/dev/stdin" "$@"
+    else
+      "$filter_cmd" $filter_args "$@"
+    fi
+    }
+  sim="filterebcdic $sim"
+fi
+
+# Check for EBCDIC newline
+ebcdic_nl=`$sim $pcre2test -C ebcdic-nl`
+if [ "x$ebcdic_nl" = x21 ]; then
+  ebcdic_nl=15
+elif [ "x$ebcdic_nl" = x37 ]; then
+  ebcdic_nl=25
+else
+  ebcdic_nl='n/a'
+fi
 
 # Initialize all bitsizes skipped
 
@@ -433,7 +479,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
      $do16 = no -a $do17 = no -a $do18 = no -a $do19 = no -a \
      $do20 = no -a $do21 = no -a $do22 = no -a $do23 = no -a \
      $do24 = no -a $do25 = no -a $do26 = no -a $do27 = no -a \
-     $doheap = no -a $doebcdic = no \
+     $do28 = no -a $doheap = no \
    ]; then
   do0=yes
   do1=yes
@@ -463,6 +509,7 @@ if [ $do0  = no -a $do1  = no -a $do2  = no -a $do3  = no -a \
   do25=yes
   do26=yes
   do27=yes
+  do28=yes
 fi
 
 # Handle any explicit skips at this stage, so that an argument list may consist
@@ -922,6 +969,43 @@ for bmode in "$test8" "$test16" "$test32"; do
     fi
   fi
 
+  # EBCDIC tests
+
+  if [ $do28 = yes ] ; then
+    echo $title28
+    if [ $ebcdic -eq 0 ] ; then
+      echo "  Skipped because EBCDIC support is not available"
+    else
+      if [ $ebcdic_io -eq 0 ] ; then
+        # Our testdata files are in ASCII, and the pcre2test program is using
+        # ASCII input: all easy.
+        for opt in "" "-dfa"; do
+          $sim $valgrind $pcre2test -q $setstack $bmode $opt $testdata/testinput28 testtry
+          checkresult $? "28-nl$ebcdic_nl" "$opt"
+        done
+      else
+        echo "Cannot run EBCDIC tests:"
+        echo "  Ironically this particular test script does not automatically"
+        echo "  run the tests on an actual EBCDIC system. The testdata files"
+        echo "  shipped with PCRE2 are in ASCII."
+        echo "  You may be able to run the tests manually if you know which"
+        echo "  EBCDIC codepage you used when compiling PCRE2, and then convert"
+        echo "  the testdata to match. For example, if the C compiler used to build"
+        echo "  PCRE2 was using IBM-1047:"
+        echo ""
+        echo "  iconv -f ISO8859-1 -t IBM-1047 <testdata/testinputEBC >testinputEBC-native"
+        echo "  pcre2test -q -$bmode testinputEBC-native >testoutputEBC-native"
+        echo "  [ $? -eq 0 ] || echo 'pcre2test failed'"
+        echo "  iconv -f IBM-1047 -t ISO8859-1 <testoutputEBC-native >testoutputEBC-ascii"
+        echo "  $cf testdata/testoutputEBC testoutputEBC-ascii"
+        echo ""
+        echo "This is speculative. The PCRE2 maintainers do not have access to an"
+        echo "EBCDIC system to test this. Please report back if you try it."
+        exit 1
+      fi
+    fi
+  fi
+
   # Manually selected heap tests - output may vary in different environments,
   # which is why that are not automatically run.
 
@@ -935,23 +1019,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 done
 
 
-# ------ Special EBCDIC Test -------
-
-if [ $doebcdic = yes ] ; then
-  $sim $valgrind $pcre2test -C ebcdic >/dev/null
-  ebcdic=$?
-  if [ $ebcdic -ne 1 ] ; then
-    echo "Cannot run EBCDIC tests: EBCDIC support not compiled"
-    exit 1
-  fi
-  for opt in "" "-dfa"; do
-    $sim $valgrind $pcre2test -q $opt $testdata/testinputEBC >testtry
-    checkresult $? EBC "$opt"
-  done
-fi
-
-
 # Clean up local working files
-rm -f testbtables testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry
+rm -f testbtables testSinput test3input testsaved1 testsaved2 test3output test3outputA test3outputB teststdout teststderr testtry testtry2
 
 # End
