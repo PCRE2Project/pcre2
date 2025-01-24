@@ -947,7 +947,7 @@ Any substring (including the executable name) may contain escape sequences
 started by a dollar character. These are the same as for the \fB--output\fP
 (\fB-O\fP) option documented above, except that $0 or $& cannot insert the
 matched string because the match is still in progress. Instead, the character
-'0' is inserted. If you need a literal dollar or pipe character in any
+\&'0' is inserted. If you need a literal dollar or pipe character in any
 substring, use $$ or $| respectively. Here is an example:
 .sp
   echo -e "abcde\en12345" | pcre2grep \e
