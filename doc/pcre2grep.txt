@@ -1030,7 +1030,8 @@ USING PCRE2'S CALLOUT FACILITY
        quences  started  by  a dollar character. These are the same as for the
        --output (-O) option documented above, except that $0 or $& cannot  in-
        sert  the  matched  string  because the match is still in progress. In-
-       stead, the character substring, use $$ or $| respectively. Here  is  an
+       stead, the character '0' is inserted. If you need a literal  dollar  or
+       pipe  character in any substring, use $$ or $| respectively. Here is an
        example:
 
          echo -e "abcde\n12345" | pcre2grep \
@@ -1044,43 +1045,43 @@ USING PCRE2'S CALLOUT FACILITY
            Arg1: [1] [234] [4] Arg2: |1| ()
            12345
 
-       The  parameters  for the system call that is used to run the program or
+       The parameters for the system call that is used to run the  program  or
        script are zero-terminated strings. This means that binary zero charac-
-       ters in the callout argument will cause premature termination of  their
-       substrings,  and  therefore should not be present. Any syntax errors in
-       the string (for example, a dollar not followed  by  another  character)
+       ters  in the callout argument will cause premature termination of their
+       substrings, and therefore should not be present. Any syntax  errors  in
+       the  string  (for  example, a dollar not followed by another character)
        causes the callout to be ignored.  If running the program fails for any
-       reason  (including the non-existence of the executable), a local match-
+       reason (including the non-existence of the executable), a local  match-
        ing failure occurs and the matcher backtracks in the normal way.
 
 
 MATCHING ERRORS
 
-       It is possible to supply a regular expression that takes  a  very  long
-       time  to  fail  to  match certain lines. Such patterns normally involve
-       nested indefinite repeats, for example: (a+)*\d when matched against  a
-       line  of a's with no final digit. The PCRE2 matching function has a re-
-       source limit that causes it to abort in these  circumstances.  If  this
-       happens,  pcre2grep  outputs  an error message and the line that caused
-       the problem to the standard error stream. If there  are  more  than  20
+       It  is  possible  to supply a regular expression that takes a very long
+       time to fail to match certain lines.  Such  patterns  normally  involve
+       nested  indefinite repeats, for example: (a+)*\d when matched against a
+       line of a's with no final digit. The PCRE2 matching function has a  re-
+       source  limit  that  causes it to abort in these circumstances. If this
+       happens, pcre2grep outputs an error message and the  line  that  caused
+       the  problem  to  the  standard error stream. If there are more than 20
        such errors, pcre2grep gives up.
 
-       The  --match-limit  option  of pcre2grep can be used to set the overall
-       resource limit. There are also other limits that affect the  amount  of
-       memory  used  during  matching;  see the discussion of --heap-limit and
+       The --match-limit option of pcre2grep can be used to  set  the  overall
+       resource  limit.  There are also other limits that affect the amount of
+       memory used during matching; see the  discussion  of  --heap-limit  and
        --depth-limit above.
 
 
 DIAGNOSTICS
 
        Exit status is 0 if any matches were found, 1 if no matches were found,
-       and 2 for syntax errors, overlong lines, non-existent  or  inaccessible
-       files  (even if matches were found in other files) or too many matching
+       and  2  for syntax errors, overlong lines, non-existent or inaccessible
+       files (even if matches were found in other files) or too many  matching
        errors. Using the -s option to suppress error messages about inaccessi-
        ble files does not affect the return code.
 
-       When  run  under  VMS,  the  return  code  is  placed  in  the   symbol
-       PCRE2GREP_RC  because  VMS  does  not  distinguish  between exit(0) and
+       When   run  under  VMS,  the  return  code  is  placed  in  the  symbol
+       PCRE2GREP_RC because VMS  does  not  distinguish  between  exit(0)  and
        exit(1).
 
 
