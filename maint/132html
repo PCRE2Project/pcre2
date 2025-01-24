@@ -14,6 +14,7 @@ $s =~ s"\\fI(.*?)\\f[RP]"<i>$1</i>"g;
 $s =~ s"\\fB(.*?)\\f[RP]"<b>$1</b>"g;
 $s =~ s"\\e"\\"g;
 $s =~ s/(?<=Copyright )\(c\)/&copy;/g;
+$s =~ s/\\&//g;                     # Deal with the \& 0-width space
 $s;
 }
 

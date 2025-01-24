@@ -161,6 +161,17 @@ END
 if [ $? != 0 ] ; then exit 1; fi
 
 
+# Verify that `man` can process the pages without warnings.
+
+for file in *.1 *.3 ; do
+  MAN_OUT=`MANROFFSEQ='' MANWIDTH=80 man --warnings=w,all -E UTF-8 -l -Tutf8 -Z "$file" 2>&1 >/dev/null`
+  if [ "$MAN_OUT" != "" ]; then
+    printf "Running man generated warnings:\n%s\n" "$MAN_OUT"
+    exit 1
+  fi
+done
+
+
 # Make HTML form of the documentation.
 
 echo "Making HTML documentation"
