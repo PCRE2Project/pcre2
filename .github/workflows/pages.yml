@@ -1,0 +1,59 @@
+name: Deploy Pages
+on:
+  workflow_dispatch:
+  push:
+    branches: [ pages ]
+  pull_request:
+    branches: [ pages ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  Build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Setup
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install hugo
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Hugo
+        env:
+          HUGO_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: pages/maint/Build.py
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./pages/public
+
+  Deploy:
+    needs: build
+
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/pages'
+
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
