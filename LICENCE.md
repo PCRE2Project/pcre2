@@ -99,5 +99,3 @@ not apply all the way down a chain of software. If binary package A includes
 PCRE2, it must respect the condition, but if package B is software that
 includes package A, the condition is not imposed on package B unless it uses
 PCRE2 independently.
-
-End
