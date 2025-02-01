@@ -15,25 +15,25 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_set_max_pattern_compiled_length(</b>
 <b>  pcre2_compile_context *<i>ccontext</i>, PCRE2_SIZE <i>value</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function sets, in a compile context, the maximum size (in bytes) for the
 memory needed to hold the compiled version of a pattern that is using this
 context. The result is always zero. If a pattern that is passed to
 <b>pcre2_compile()</b> referencing this context needs more memory, an error is
 generated. The default is the largest number that a PCRE2_SIZE variable can
 hold, which is effectively unlimited.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the POSIX API in the

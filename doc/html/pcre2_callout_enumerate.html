@@ -15,18 +15,18 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
 <b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
 <b>  void *<i>callout_data</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function scans a compiled regular expression and calls the <i>callback()</i>
 function for each callout within the pattern. The yield of the function is zero
 for success and non-zero otherwise. The arguments are:
@@ -51,8 +51,8 @@ that was passed to <b>pcre2_callout_enumerate()</b>. The <b>callback()</b>
 function must return zero for success. Any other value causes the pattern scan
 to stop, with the value being passed back as the result of
 <b>pcre2_callout_enumerate()</b>.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the POSIX API in the

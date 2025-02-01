@@ -15,18 +15,18 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int32_t pcre2_serialize_decode(pcre2_code **<i>codes</i>,</b>
 <b>  int32_t <i>number_of_codes</i>, const uint8_t *<i>bytes</i>,</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function decodes a serialized set of compiled patterns back into a list of
 individual patterns. This is possible only on a host that is running the same
 version of PCRE2, with the same code unit width, and the host must also have
@@ -53,8 +53,8 @@ the following negative error codes:
 </pre>
 PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the serialization functions in the

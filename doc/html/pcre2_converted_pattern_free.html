@@ -15,23 +15,23 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>void pcre2_converted_pattern_free(PCRE2_UCHAR *<i>converted_pattern</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a converted pattern that was obtained by
 calling <b>pcre2_pattern_convert()</b> with arguments that caused it to place
 the converted pattern into newly obtained heap memory. If the argument is NULL,
 the function returns immediately without doing anything.
-</P>
-<P>
+</p>
+<p>
 The pattern conversion functions are described in the
 <a href="pcre2convert.html"><b>pcre2convert</b></a>
 documentation.

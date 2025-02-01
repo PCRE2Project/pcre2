@@ -22,14 +22,14 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC7" href="#SEC7">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">EXPERIMENTAL PATTERN CONVERSION FUNCTIONS</a><br>
-<P>
+<p>
 This document describes a set of functions that can be used to convert
 "foreign" patterns into PCRE2 regular expressions. This facility is currently
 experimental, and may be changed in future releases. Two kinds of pattern,
 globs and POSIX patterns, are supported.
-</P>
+</p>
 <br><a name="SEC2" href="#TOC1">THE CONVERT CONTEXT</a><br>
-<P>
+<p>
 <b>pcre2_convert_context *pcre2_convert_context_create(</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
 <br>
@@ -55,21 +55,21 @@ you want to override the defaults. There are the usual create, copy, and free
 functions. If custom memory management functions are set in a general context
 that is passed to <b>pcre2_convert_context_create()</b>, they are used for all
 memory management within the conversion functions.
-</P>
-<P>
+</p>
+<p>
 There are only two parameters in the convert context at present. Both apply
 only to glob conversions. The escape character defaults to grave accent under
 Windows, otherwise backslash. It can be set to zero, meaning no escape
 character, or to any punctuation character with a code point less than 256.
 The separator character defaults to backslash under Windows, otherwise forward
 slash. It can be set to forward slash, backslash, or dot.
-</P>
-<P>
+</p>
+<p>
 The two setting functions return zero on success, or PCRE2_ERROR_BADDATA if
 their second argument is invalid.
-</P>
+</p>
 <br><a name="SEC3" href="#TOC1">THE CONVERSION FUNCTION</a><br>
-<P>
+<p>
 <b>int pcre2_pattern_convert(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
 <b>  uint32_t <i>options</i>, PCRE2_UCHAR **<i>buffer</i>,</b>
 <b>  PCRE2_SIZE *<i>blength</i>, pcre2_convert_context *<i>cvcontext</i>);</b>
@@ -94,94 +94,94 @@ set to define the type of conversion that is required:
 </pre>
 Details of the conversions are given below. The <b>buffer</b> and <b>blength</b>
 arguments define how the output is handled:
-</P>
-<P>
+</p>
+<p>
 If <b>buffer</b> is NULL, the function just returns the length of the converted
 pattern via <b>blength</b>. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.
-</P>
-<P>
+</p>
+<p>
 If <b>buffer</b> points to a NULL pointer, an output buffer is obtained using
 the allocator in the context or <b>malloc()</b> if no context is supplied. A
 pointer to this buffer is placed in the variable to which <b>buffer</b> points.
 When no longer needed the output buffer must be freed by calling
 <b>pcre2_converted_pattern_free()</b>. If this function is called with a NULL
 argument, it returns immediately without doing anything.
-</P>
-<P>
+</p>
+<p>
 If <b>buffer</b> points to a non-NULL pointer, <b>blength</b> must be set to the
 actual length of the buffer provided (in code units).
-</P>
-<P>
+</p>
+<p>
 In all cases, after successful conversion, the variable pointed to by
 <b>blength</b> is updated to the length actually used (in code units), excluding
 the terminating zero that is always added.
-</P>
-<P>
+</p>
+<p>
 If an error occurs, the length (via <b>blength</b>) is set to the offset
 within the input pattern where the error was detected. Only gross syntax errors
 are caught; there are plenty of errors that will get passed on for
 <b>pcre2_compile()</b> to discover.
-</P>
-<P>
+</p>
+<p>
 The return from <b>pcre2_pattern_convert()</b> is zero on success or a non-zero
 PCRE2 error code. Note that PCRE2 error codes may be positive or negative:
 <b>pcre2_compile()</b> uses mostly positive codes and <b>pcre2_match()</b>
 negative ones; <b>pcre2_convert()</b> uses existing codes of both kinds. A
 textual error message can be obtained by calling
 <b>pcre2_get_error_message()</b>.
-</P>
+</p>
 <br><a name="SEC4" href="#TOC1">CONVERTING GLOBS</a><br>
-<P>
+<p>
 Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
 otherwise. If PCRE2_CONVERT_GLOB is set, the wildcards * and ? are not
 permitted to match separator characters, but the double-star (**) feature
 (which does match separators) is supported.
-</P>
-<P>
+</p>
+<p>
 PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
 match separator characters. PCRE2_CONVERT_GLOB_NO_STARSTAR matches globs with
 the double-star feature disabled. These options may be given together.
-</P>
+</p>
 <br><a name="SEC5" href="#TOC1">CONVERTING POSIX PATTERNS</a><br>
-<P>
+<p>
 POSIX defines two kinds of regular expression pattern: basic and extended.
 These can be processed by setting PCRE2_CONVERT_POSIX_BASIC or
 PCRE2_CONVERT_POSIX_EXTENDED, respectively.
-</P>
-<P>
+</p>
+<p>
 In POSIX patterns, backslash is not special in a character class. Unmatched
 closing parentheses are treated as literals.
-</P>
-<P>
+</p>
+<p>
 In basic patterns, ? + | {} and () must be escaped to be recognized
 as metacharacters outside a character class. If the first character in the
 pattern is * it is treated as a literal. ^ is a metacharacter only at the start
 of a branch.
-</P>
-<P>
+</p>
+<p>
 In extended patterns, a backslash not in a character class always
 makes the next character literal, whatever it is. There are no backreferences.
-</P>
-<P>
+</p>
+<p>
 Note: POSIX mandates that the longest possible match at the first matching
 position must be found. This is not what <b>pcre2_match()</b> does; it yields
 the first match that is found. An application can use <b>pcre2_dfa_match()</b>
 to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).
-</P>
+</p>
 <br><a name="SEC6" href="#TOC1">AUTHOR</a><br>
-<P>
+<p>
 Philip Hazel
 <br>
 Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
-</P>
+</p>
 <br><a name="SEC7" href="#TOC1">REVISION</a><br>
-<P>
+<p>
 Last updated: 14 November 2023
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.

@@ -1,6 +1,8 @@
-# Security policies
+Security policies
+=================
 
-## Release security
+Release security
+----------------
 
 The PCRE2 project provides source-only releases, with no binaries.
 
@@ -20,7 +22,8 @@ Git checkout of the (GPG-signed) release tag.
 Please contact the maintainers for any queries about release integrity or the
 project's supply-chain.
 
-## Reporting vulnerabilities
+Reporting vulnerabilities
+-------------------------
 
 The PCRE2 project prioritises security. We appreciate third-party testing and
 security research, and would be grateful if you could responsibly disclose your

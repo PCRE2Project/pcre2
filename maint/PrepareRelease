@@ -184,6 +184,7 @@ for file in *.1 ; do
   base=`basename $file .1`
   echo "  Making $base.html"
   perl ../maint/132html -toc $base <$file >html/$base.html
+  if [ $? != 0 ] ; then exit 1; fi
 done
 
 # Exclude table of contents for function summaries. It seems that expr

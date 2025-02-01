@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" width="100%" height="100px" srcset="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/pages/pages/assets/pcre2-readme-dark.svg">
-  <img alt="PCRE2: Perl-Compatible Regular Expressions" width="100%" height="100px" src="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/pages/pages/assets/pcre2-readme-light.svg">
+  <source media="(prefers-color-scheme: dark)" width="100%" height="100px" srcset="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/pages/pages/static/images/pcre2-readme-dark.svg">
+  <img alt="PCRE2: Perl-Compatible Regular Expressions" width="100%" height="100px" src="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/pages/pages/static/images/pcre2-readme-light.svg">
 </picture>
 
 ## Overview
@@ -64,7 +64,7 @@ x86, ARM, RISC-V, POWER, S390X; many others known to work
 
 <picture>
   <source media="(prefers-color-scheme: dark)" width="787px" srcset="https://github.com/user-attachments/assets/1886bc4b-2e05-4827-af83-e4ed45f25ab1">
-  <img width="787px" src="https://github.com/user-attachments/assets/7b90180e-276e-4202-b590-b72871cff91a">
+  <img alt="Recording of a terminal session showing the PCRE2 quickstart; reproduced in text form below" width="787px" src="https://github.com/user-attachments/assets/7b90180e-276e-4202-b590-b72871cff91a">
 </picture>
 
 <details>
@@ -86,12 +86,20 @@ git clone https://github.com/PCRE2Project/pcre2.git ./pcre2 \
 
 # Here's a quick little demo to show how we can make use of PCRE2.
 # For a fuller example, see './pcre2/src/pcre2demo.c'.
-# Try this pre-prepared sample code:
-cat demo.c
+# See below for the demo code.
 
-----------------------------------------------------------------------
-File: demo.c
-----------------------------------------------------------------------
+# Compile the demo:
+gcc -g -I./pcre2/build -L./pcre2/build demo.c -o demo -lpcre2-8
+
+# Finally, run our demo:
+./demo 'c.t' 'dogs and cats'
+
+# We fetched, built, and called PCRE2 successfully! :)
+```
+
+File `demo.c`:
+
+```c
 /* Set PCRE2_CODE_UNIT_WIDTH to indicate we will use 8-bit input. */
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
@@ -150,15 +158,6 @@ int main(int argc, char* argv[]) {
     pcre2_code_free(re);
     return 0;
 }
-----------------------------------------------------------------------
-
-# Compile the demo:
-gcc -g -I./pcre2/build -L./pcre2/build demo.c -o demo -lpcre2-8
-
-# Finally, run our demo:
-./demo 'c.t' 'dogs and cats'
-
-# We fetched, built, and called PCRE2 successfully! :)
 ```
 
 </details>
@@ -213,7 +212,7 @@ There are accompanying utility functions for converting glob patterns and POSIX 
 
 As well as the PCRE2 API, the library also offers a POSIX-compatible `<regex.h>` header and `regexec()` function. However, this does not provide the ability to pass PCRE2 flags, so we recommend users consume the PCRE2 API if possible.
 
-See the [full library and API documentation](https://pcre2project.github.io/pcre2/doc/html/index.html) for further details.
+See the [full library and API documentation](https://pcre2project.github.io/pcre2/doc/) for further details.
 
 For third-party documentation, see further:
 
@@ -241,7 +240,7 @@ Other systems are likely to work (including mobile, embedded platforms, and comm
 
 PCRE2 releases support CMake for building, and for UNIX platforms include a `./configure` script built by Autoconf. Build files for the Bazel build system and `zig build` are also included. Integrating PCRE2 with other systems can be done by including the `.c` files in an existing project.
 
-Please see the files [README](./README) and [NON-AUTOTOOLS-BUILD](./NON-AUTOTOOLS-BUILD) for full build documentation, as well as the man pages, including [`man pcre2/doc/pcre2build.3`](https://pcre2project.github.io/pcre2/doc/html/pcre2build.html).
+Please see the files [README](./README) and [NON-AUTOTOOLS-BUILD](./NON-AUTOTOOLS-BUILD) for full build documentation, as well as the man pages, including [`man pcre2/doc/pcre2build.3`](https://pcre2project.github.io/pcre2/doc/pcre2build/).
 
 ## Licence
 
