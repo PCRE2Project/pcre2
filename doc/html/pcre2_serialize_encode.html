@@ -15,18 +15,18 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int32_t pcre2_serialize_encode(const pcre2_code **<i>codes</i>,</b>
 <b>  int32_t <i>number_of_codes</i>, uint8_t **<i>serialized_bytes</i>,</b>
 <b>  PCRE2_SIZE *<i>serialized_size</i>, pcre2_general_context *<i>gcontext</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function encodes a list of compiled patterns into a byte stream that can
 be saved on disc or elsewhere. Note that this is not an abstract format like
 Java or .NET. Conversion of the byte stream back into usable compiled patterns
@@ -54,8 +54,8 @@ serialized patterns, or one of the following negative error codes:
 </pre>
 PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the serialization functions in the

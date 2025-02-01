@@ -15,17 +15,17 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_get_error_message(int <i>errorcode</i>, PCRE2_UCHAR *<i>buffer</i>,</b>
 <b>  PCRE2_SIZE <i>bufflen</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function provides a textual error message for each PCRE2 error code.
 Compilation errors are positive numbers; UTF formatting errors and matching
 errors are negative numbers. The arguments are:
@@ -39,8 +39,8 @@ trailing zero, or the negative error code PCRE2_ERROR_NOMEMORY if the buffer is
 too small. In this case, the returned message is truncated (but still with a
 trailing zero). If <i>errorcode</i> does not contain a recognized error code
 number, the negative value PCRE2_ERROR_BADDATA is returned.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the POSIX API in the

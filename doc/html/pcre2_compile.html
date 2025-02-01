@@ -15,18 +15,18 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>pcre2_code *pcre2_compile(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
 <b>  uint32_t <i>options</i>, int *<i>errorcode</i>, PCRE2_SIZE *<i>erroroffset,</i></b>
 <b>  pcre2_compile_context *<i>ccontext</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function compiles a regular expression pattern into an internal form. Its
 arguments are:
 <pre>
@@ -88,13 +88,13 @@ The primary option bits are:
 </pre>
 PCRE2 must be built with Unicode support (the default) in order to use
 PCRE2_UTF, PCRE2_UCP and related options.
-</P>
-<P>
+</p>
+<p>
 Additional options may be set in the compile context via the
 <a href="pcre2_set_compile_extra_options.html"><b>pcre2_set_compile_extra_options</b></a>
 function.
-</P>
-<P>
+</p>
+<p>
 If either of <i>errorcode</i> or <i>erroroffset</i> is NULL, the function returns
 NULL immediately. Otherwise, the yield of this function is a pointer to a
 private data structure that contains the compiled pattern, or NULL if an error
@@ -102,13 +102,13 @@ was detected. In the error case, a text error message can be obtained by
 passing the value returned via the <i>errorcode</i> argument to the
 <b>pcre2_get_error_message()</b> function. The offset (in code units) where the
 error was encountered is returned via the <i>erroroffset</i> argument.
-</P>
-<P>
+</p>
+<p>
 If there is no error, the value passed via <i>errorcode</i> returns the message
 "no error" if passed to <b>pcre2_get_error_message()</b>, and the value passed
 via <i>erroroffset</i> is zero.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API, with more detail on
 each option, in the
 <a href="pcre2api.html"><b>pcre2api</b></a>

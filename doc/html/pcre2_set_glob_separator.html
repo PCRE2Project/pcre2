@@ -15,25 +15,25 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_set_glob_separator(pcre2_convert_context *<i>cvcontext</i>,</b>
 <b>  uint32_t <i>separator_char</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function is part of an experimental set of pattern conversion functions.
 It sets the component separator character that is used when converting globs.
 The second argument must be one of the characters forward slash, backslash, or
 dot. The default is backslash when running under Windows, otherwise forward
 slash. The result of the function is zero for success or PCRE2_ERROR_BADDATA if
 the second argument is invalid.
-</P>
-<P>
+</p>
+<p>
 The pattern conversion functions are described in the
 <a href="pcre2convert.html"><b>pcre2convert</b></a>
 documentation.

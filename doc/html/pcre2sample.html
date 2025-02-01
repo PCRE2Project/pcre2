@@ -15,35 +15,35 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 PCRE2 SAMPLE PROGRAM
 </b><br>
-<P>
+<p>
 A simple, complete demonstration program to get you started with using PCRE2 is
 supplied in the file <i>pcre2demo.c</i> in the <b>src</b> directory in the PCRE2
 distribution. A listing of this program is given in the
 <a href="pcre2demo.html"><b>pcre2demo</b></a>
 documentation. If you do not have a copy of the PCRE2 distribution, you can
 save this listing to re-create the contents of <i>pcre2demo.c</i>.
-</P>
-<P>
+</p>
+<p>
 The demonstration program compiles the regular expression that is its
 first argument, and matches it against the subject string in its second
 argument. No PCRE2 options are set, and default character tables are used. If
 matching succeeds, the program outputs the portion of the subject that matched,
 together with the contents of any captured substrings.
-</P>
-<P>
+</p>
+<p>
 If the -g option is given on the command line, the program then goes on to
 check for further matches of the same regular expression in the same subject
 string. The logic is a little bit tricky because of the possibility of matching
 an empty string. Comments in the code explain what is going on.
-</P>
-<P>
+</p>
+<p>
 The code in <b>pcre2demo.c</b> is an 8-bit program that uses the PCRE2 8-bit
 library. It handles strings and characters that are stored in 8-bit code units.
 By default, one character corresponds to one code unit, but if the pattern
 starts with "(*UTF)", both it and the subject are treated as UTF-8 strings,
 where characters may occupy multiple code units.
-</P>
-<P>
+</p>
+<p>
 If PCRE2 is installed in the standard include and library directories for your
 operating system, you should be able to compile the demonstration program using
 a command like this:
@@ -70,8 +70,8 @@ three PCRE2 libraries (8-bit, 16-bit, and 32-bit, though not all three need be
 installed). The
 <a href="pcre2demo.html"><b>pcre2demo</b></a>
 program is provided as a relatively simple coding example.
-</P>
-<P>
+</p>
+<p>
 If you try to run
 <a href="pcre2demo.html"><b>pcre2demo</b></a>
 when PCRE2 is not installed in the standard library directory, you may get an
@@ -85,22 +85,22 @@ need to add
   -R/usr/local/lib
 </pre>
 (for example) to the compile command to get round this problem.
-</P>
+</p>
 <br><b>
 AUTHOR
 </b><br>
-<P>
+<p>
 Philip Hazel
 <br>
 Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
-</P>
+</p>
 <br><b>
 REVISION
 </b><br>
-<P>
+<p>
 Last updated: 14 November 2023
 <br>
 Copyright &copy; 1997-2016 University of Cambridge.
