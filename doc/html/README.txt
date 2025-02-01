@@ -1,5 +1,5 @@
 README file for PCRE2 (Perl-compatible regular expression library)
-------------------------------------------------------------------
+==================================================================
 
 PCRE2 is a re-working of the original PCRE1 library to provide an entirely new
 API. Since its initial release in 2015, there has been further development of

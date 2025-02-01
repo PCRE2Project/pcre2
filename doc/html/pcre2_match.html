@@ -15,19 +15,19 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_match(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
 <b>  uint32_t <i>options</i>, pcre2_match_data *<i>match_data</i>,</b>
 <b>  pcre2_match_context *<i>mcontext</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function matches a compiled regular expression against a given subject
 string, using a matching algorithm that is similar to Perl's. It returns
 offsets to what it has matched and to captured substrings via the

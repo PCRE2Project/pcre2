@@ -1,9 +1,12 @@
 # Common helpers for UpdateRelease.py and UpdateDates.py.
 
 import re
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 def get_current_release():
-    with open('configure.ac', 'r') as file:
+    with open(f"{script_dir}/../configure.ac", 'r') as file:
         content = file.read()
 
     matches = [match[1] for match in re.findall(r"m4_define\(pcre2_(major|minor|prerelease), \[(.*?)\]\)", content)]

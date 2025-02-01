@@ -51,7 +51,7 @@ while (scalar(@ARGV) > 0)
         $yield = 1;
         }
       }
-    elsif (/\\[^ef]|\\f[^IBP]/)
+    elsif (/\\[^ef&]|\\f[^IBP]/)
       {
       printf "Bad backslash in line $line of $file\n";
       $yield = 1;

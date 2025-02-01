@@ -1,14 +1,14 @@
 PCRE2 Authorship and Contributors
 =================================
 
-COPYRIGHT
+Copyright
 ---------
 
 Please see the file [LICENCE](./LICENCE.md) in the PCRE2 distribution for
 copyright details.
 
 
-MAINTAINERS
+Maintainers
 -----------
 
 The PCRE and PCRE2 libraries were authored and maintained by Philip Hazel.
@@ -62,7 +62,7 @@ Both administrators are volunteers acting in a personal capacity.
 </table>
 
 
-CONTRIBUTORS
+Contributors
 ------------
 
 Many others have participated and contributed to PCRE2 over its history.

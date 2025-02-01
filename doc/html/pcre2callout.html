@@ -23,35 +23,35 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC8" href="#SEC8">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int (*pcre2_callout)(pcre2_callout_block *, void *);</b>
 <br>
 <br>
 <b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
 <b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
 <b>  void *<i>user_data</i>);</b>
-</P>
+</p>
 <br><a name="SEC2" href="#TOC1">DESCRIPTION</a><br>
-<P>
+<p>
 PCRE2 provides a feature called "callout", which is a means of temporarily
 passing control to the caller of PCRE2 in the middle of pattern matching. The
 caller of PCRE2 provides an external function by putting its entry point in
 a match context (see <b>pcre2_set_callout()</b> in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation).
-</P>
-<P>
+</p>
+<p>
 When using the <b>pcre2_substitute()</b> function, an additional callout feature
 is available. This does a callout after each change to the subject string and
 is described in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation; the rest of this document is concerned with callouts during
 pattern matching.
-</P>
-<P>
+</p>
+<p>
 Within a regular expression, (?C&#60;arg&#62;) indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
@@ -91,25 +91,25 @@ condition. Such a callout may also be inserted explicitly, for example:
 </pre>
 This applies only to assertion conditions (because they are themselves
 independent groups).
-</P>
-<P>
+</p>
+<p>
 Callouts can be useful for tracking the progress of pattern matching. The
 <a href="pcre2test.html"><b>pcre2test</b></a>
 program has a pattern qualifier (/auto_callout) that sets automatic callouts.
 When any callouts are present, the output from <b>pcre2test</b> indicates how
 the pattern is being matched. This is useful information when you are trying to
 optimize the performance of a particular pattern.
-</P>
+</p>
 <br><a name="SEC3" href="#TOC1">MISSING CALLOUTS</a><br>
-<P>
+<p>
 You should be aware that, because of optimizations in the way PCRE2 compiles
 and matches patterns, callouts sometimes do not happen exactly as you might
 expect.
-</P>
+</p>
 <br><b>
 Auto-possessification
 </b><br>
-<P>
+<p>
 At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
 what follows cannot be part of the repeat. For example, a+[bc] is compiled as
 if it were a++[bc]. The <b>pcre2test</b> output when this pattern is compiled
@@ -137,25 +137,25 @@ the pattern with (*NO_AUTO_POSSESS). In this case, the output changes to this:
 </pre>
 This time, when matching [bc] fails, the matcher backtracks into a+ and tries
 again, repeatedly, until a+ itself fails.
-</P>
+</p>
 <br><b>
 Automatic .* anchoring
 </b><br>
-<P>
+<p>
 By default, an optimization is applied when .* is the first significant item in
 a pattern. If PCRE2_DOTALL is set, so that the dot can match any character, the
 pattern is automatically anchored. If PCRE2_DOTALL is not set, a match can
 start only after an internal newline or at the beginning of the subject, and
 <b>pcre2_compile()</b> remembers this. If a pattern has more than one top-level
 branch, automatic anchoring occurs if all branches are anchorable.
-</P>
-<P>
+</p>
+<p>
 This optimization is disabled, however, if .* is in an atomic group or if there
 is a backreference to the capture group in which it appears. It is also
 disabled if the pattern contains (*PRUNE) or (*SKIP). However, the presence of
 callouts does not affect it.
-</P>
-<P>
+</p>
+<p>
 For example, if the pattern .*\d is compiled with PCRE2_AUTO_CALLOUT and
 applied to the string "aa", the <b>pcre2test</b> output is:
 <pre>
@@ -184,11 +184,11 @@ pattern with (*NO_DOTSTAR_ANCHOR). In this case, the output changes to:
 This shows more match attempts, starting at the second subject character.
 Another optimization, described in the next section, means that there is no
 subsequent attempt to match with an empty subject.
-</P>
+</p>
 <br><b>
 Other optimizations
 </b><br>
-<P>
+<p>
 Other optimizations that provide fast "no match" results also affect callouts.
 For example, if the pattern is
 <pre>
@@ -198,21 +198,21 @@ PCRE2 knows that any matching string must contain the letter "d". If the
 subject string is "abyz", the lack of "d" means that matching doesn't ever
 start, and the callout is never reached. However, with "abyd", though the
 result is still no match, the callout is obeyed.
-</P>
-<P>
+</p>
+<p>
 For most patterns PCRE2 also knows the minimum length of a matching string, and
 will immediately give a "no match" return without actually running a match if
 the subject is not long enough, or, for unanchored patterns, if it has been
 scanned far enough.
-</P>
-<P>
+</p>
+<p>
 You can disable these optimizations by passing the PCRE2_NO_START_OPTIMIZE
 option to <b>pcre2_compile()</b>, or by starting the pattern with
 (*NO_START_OPT). This slows down the matching process, but does ensure that
 callouts such as the example above are obeyed.
-<a name="calloutinterface"></a></P>
+<a name="calloutinterface"></a></p>
 <br><a name="SEC4" href="#TOC1">THE CALLOUT INTERFACE</a><br>
-<P>
+<p>
 During matching, when PCRE2 reaches a callout point, if an external function is
 provided in the match context, it is called. This applies to both normal,
 DFA, and JIT matching. The first argument to the callout function is a pointer
@@ -247,20 +247,20 @@ application that might use an earlier release of PCRE2, you should check the
 version number before accessing any of these fields. The version number will
 increase in future if more fields are added, but the intention is never to
 remove any of the existing fields.
-</P>
+</p>
 <br><b>
 Fields for numerical callouts
 </b><br>
-<P>
+<p>
 For a numerical callout, <i>callout_string</i> is NULL, and <i>callout_number</i>
 contains the number of the callout, in the range 0-255. This is the number
 that follows (?C for callouts that part of the pattern; it is 255 for
 automatically generated callouts.
-</P>
+</p>
 <br><b>
 Fields for string callouts
 </b><br>
-<P>
+<p>
 For callouts with string arguments, <i>callout_number</i> is always zero, and
 <i>callout_string</i> points to the string that is contained within the compiled
 pattern. Its length is given by <i>callout_string_length</i>. Duplicated ending
@@ -271,34 +271,34 @@ string, but is not included in the length. The delimiter that was used to start
 the string is also stored within the pattern, immediately before the string
 itself. You can access this delimiter as <i>callout_string</i>[-1] if you need
 it.
-</P>
-<P>
+</p>
+<p>
 The <i>callout_string_offset</i> field is the code unit offset to the start of
 the callout argument string within the original pattern string. This is
 provided for the benefit of applications such as script languages that might
 need to report errors in the callout string within the pattern.
-</P>
+</p>
 <br><b>
 Fields for all callouts
 </b><br>
-<P>
+<p>
 The remaining fields in the callout block are the same for both kinds of
 callout.
-</P>
-<P>
+</p>
+<p>
 The <i>offset_vector</i> field is a pointer to a vector of capturing offsets
 (the "ovector"). You may read the elements in this vector, but you must not
 change any of them.
-</P>
-<P>
+</p>
+<p>
 For calls to <b>pcre2_match()</b>, the <i>offset_vector</i> field is not (since
 release 10.30) a pointer to the actual ovector that was passed to the matching
 function in the match data block. Instead it points to an internal ovector of a
 size large enough to hold all possible captured substrings in the pattern. Note
 that whenever a recursion or subroutine call within a pattern completes, the
 capturing state is reset to what it was before.
-</P>
-<P>
+</p>
+<p>
 The <i>capture_last</i> field contains the number of the most recently captured
 substring, and the <i>capture_top</i> field contains one more than the number of
 the highest numbered captured substring so far. If no substrings have yet been
@@ -306,8 +306,8 @@ captured, the value of <i>capture_last</i> is 0 and the value of
 <i>capture_top</i> is 1. The values of these fields do not always differ by one;
 for example, when the callout in the pattern ((a)(b))(?C2) is taken,
 <i>capture_last</i> is 1 but <i>capture_top</i> is 4.
-</P>
-<P>
+</p>
+<p>
 The contents of ovector[2] to ovector[&#60;capture_top&#62;*2-1] can be inspected in
 order to extract substrings that have been matched so far, in the same way as
 extracting substrings after a match has completed. The values in ovector[0] and
@@ -315,8 +315,8 @@ ovector[1] are always PCRE2_UNSET because the match is by definition not
 complete. Substrings that have not been captured but whose numbers are less
 than <i>capture_top</i> also have both of their ovector slots set to
 PCRE2_UNSET.
-</P>
-<P>
+</p>
+<p>
 For DFA matching, the <i>offset_vector</i> field points to the ovector that was
 passed to the matching function in the match data block for callouts at the top
 level, but to an internal ovector during the processing of pattern recursions,
@@ -324,28 +324,28 @@ lookarounds, and atomic groups. However, these ovectors hold no useful
 information because <b>pcre2_dfa_match()</b> does not support substring
 capturing. The value of <i>capture_top</i> is always 1 and the value of
 <i>capture_last</i> is always 0 for DFA matching.
-</P>
-<P>
+</p>
+<p>
 The <i>subject</i> and <i>subject_length</i> fields contain copies of the values
 that were passed to the matching function.
-</P>
-<P>
+</p>
+<p>
 The <i>start_match</i> field normally contains the offset within the subject at
 which the current match attempt started. However, if the escape sequence \K
 has been encountered, this value is changed to reflect the modified starting
 point. If the pattern is not anchored, the callout function may be called
 several times from the same point in the pattern for different starting points
 in the subject.
-</P>
-<P>
+</p>
+<p>
 The <i>current_position</i> field contains the offset within the subject of the
 current match pointer.
-</P>
-<P>
+</p>
+<p>
 The <i>pattern_position</i> field contains the offset in the pattern string to
 the next item to be matched.
-</P>
-<P>
+</p>
+<p>
 The <i>next_item_length</i> field contains the length of the next item to be
 processed in the pattern string. When the callout is at the end of the pattern,
 the length is zero. When the callout precedes an opening parenthesis, the
@@ -356,22 +356,22 @@ is followed by a quantifier, in which case its length is included. (This
 changed in release 10.23. In earlier releases, before an opening parenthesis
 the length was that of the entire group, and before an alternation bar or a
 closing parenthesis the length was zero.)
-</P>
-<P>
+</p>
+<p>
 The <i>pattern_position</i> and <i>next_item_length</i> fields are intended to
 help in distinguishing between different automatic callouts, which all have the
 same callout number. However, they are set for all callouts, and are used by
 <b>pcre2test</b> to show the next item to be matched when displaying callout
 information.
-</P>
-<P>
+</p>
+<p>
 In callouts from <b>pcre2_match()</b> the <i>mark</i> field contains a pointer to
 the zero-terminated name of the most recently passed (*MARK), (*PRUNE), or
 (*THEN) item in the match, or NULL if no such items have been passed. Instances
 of (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
 callouts from the DFA matching function this field always contains NULL.
-</P>
-<P>
+</p>
+<p>
 The <i>callout_flags</i> field is always zero in callouts from
 <b>pcre2_dfa_match()</b> or when JIT is being used. When <b>pcre2_match()</b>
 without JIT is used, the following bits may be set:
@@ -386,13 +386,13 @@ starting position in the subject.
 This is set if there has been a matching backtrack since the previous callout,
 or since the start of matching if this is the first callout from a
 <b>pcre2_match()</b> run.
-</P>
-<P>
+</p>
+<p>
 Both bits are set when a backtrack has caused a "bumpalong" to a new starting
 position in the subject. Output from <b>pcre2test</b> does not indicate the
 presence of these bits unless the <b>callout_extra</b> modifier is set.
-</P>
-<P>
+</p>
+<p>
 The information in the <b>callout_flags</b> field is provided so that
 applications can track and tell their users how matching with backtracking is
 done. This can be useful when trying to optimize patterns, or just to
@@ -400,24 +400,24 @@ understand how PCRE2 works. There is no support in <b>pcre2_dfa_match()</b>
 because there is no backtracking in DFA matching, and there is no support in
 JIT because JIT is all about maximimizing matching performance. In both these
 cases the <b>callout_flags</b> field is always zero.
-</P>
+</p>
 <br><a name="SEC5" href="#TOC1">RETURN VALUES FROM CALLOUTS</a><br>
-<P>
+<p>
 The external callout function returns an integer to PCRE2. If the value is
 zero, matching proceeds as normal. If the value is greater than zero, matching
 fails at the current point, but the testing of other matching possibilities
 goes ahead, just as if a lookahead assertion had failed. If the value is less
 than zero, the match is abandoned, and the matching function returns the
 negative value.
-</P>
-<P>
+</p>
+<p>
 Negative values should normally be chosen from the set of PCRE2_ERROR_xxx
 values. In particular, PCRE2_ERROR_NOMATCH forces a standard "no match"
 failure. The error number PCRE2_ERROR_CALLOUT is reserved for use by callout
 functions; it will never be used by PCRE2 itself.
-</P>
+</p>
 <br><a name="SEC6" href="#TOC1">CALLOUT ENUMERATION</a><br>
-<P>
+<p>
 <b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
 <b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
 <b>  void *<i>user_data</i>);</b>
@@ -446,31 +446,31 @@ added to the block. The remaining fields are the same as their namesakes in the
 <b>pcre2_callout</b> block that is used for callouts during matching, as
 described
 <a href="#calloutinterface">above.</a>
-</P>
-<P>
+</p>
+<p>
 Note that the value of <i>pattern_position</i> is unique for each callout.
 However, if a callout occurs inside a group that is quantified with a non-zero
 minimum or a fixed maximum, the group is replicated inside the compiled
 pattern. For example, a pattern such as /(a){2}/ is compiled as if it were
 /(a)(a)/. This means that the callout will be enumerated more than once, but
 with the same value for <i>pattern_position</i> in each case.
-</P>
-<P>
+</p>
+<p>
 The callback function should normally return zero. If it returns a non-zero
 value, scanning the pattern stops, and that value is returned from
 <b>pcre2_callout_enumerate()</b>.
-</P>
+</p>
 <br><a name="SEC7" href="#TOC1">AUTHOR</a><br>
-<P>
+<p>
 Philip Hazel
 <br>
 Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
-</P>
+</p>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
-<P>
+<p>
 Last updated: 19 January 2024
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.

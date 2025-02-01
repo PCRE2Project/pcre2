@@ -15,16 +15,16 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_config(uint32_t <i>what</i>, void *<i>where</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function makes it possible for a client program to find out which optional
 features are available in the version of the PCRE2 library it is using. The
 arguments are as follows:
@@ -35,8 +35,8 @@ arguments are as follows:
 If <i>where</i> is NULL, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
 code units; for other types of data it is in bytes.
-</P>
-<P>
+</p>
+<p>
 If <b>where</b> is not NULL, for PCRE2_CONFIG_JITTARGET,
 PCRE2_CONFIG_UNICODE_VERSION, and PCRE2_CONFIG_VERSION it must point to a
 buffer that is large enough to hold the string. For all other codes it must
@@ -72,8 +72,8 @@ PCRE2_ERROR_BADOPTION otherwise. This is also the result for the
 PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string is
 requested, the function returns the number of code units used, including the
 terminating zero.
-</P>
-<P>
+</p>
+<p>
 There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 page and a description of the POSIX API in the

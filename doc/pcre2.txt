@@ -76,7 +76,7 @@ INTRODUCTION
        client to discover which features are  available.  The  features  them-
        selves are described in the pcre2build page. Documentation about build-
        ing  PCRE2 for various operating systems can be found in the README and
-       NON-AUTOTOOLS_BUILD files in the source distribution.
+       NON-AUTOTOOLS-BUILD files in the source distribution.
 
        The libraries contains a number of undocumented internal functions  and
        data  tables  that  are  used by more than one of the exported external
@@ -5567,12 +5567,12 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
        (m) The scan substring assertion (syntax (*scs:(n)...)) is a PCRE2  ex-
        tension that is not available in Perl.
 
-       20. Perl has different limits than PCRE2. See the pcre2limit documenta-
-       tion for details. Perl went with 5.10 from recursion to iteration keep-
-       ing the intermediate matches on the heap, which is ~10% slower but does
-       not  fall into any stack-overflow limit. PCRE2 made a similar change at
-       release 10.30, and also has many build-time and  run-time  customizable
-       limits.
+       20.  Perl has different limits than PCRE2. See the pcre2limits documen-
+       tation for details. Perl went with 5.10  from  recursion  to  iteration
+       keeping  the intermediate matches on the heap, which is ~10% slower but
+       does not fall into any  stack-overflow  limit.  PCRE2  made  a  similar
+       change at release 10.30, and also has many build-time and run-time cus-
+       tomizable limits.
 
        21.  Unlike  Perl,  PCRE2 doesn't have character set modifiers and spe-
        cially no way to set characters by context just  like  Perl's  "/d".  A

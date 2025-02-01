@@ -14,6 +14,7 @@ $s =~ s"\\fI(.*?)\\f[RP]"<i>$1</i>"g;
 $s =~ s"\\fB(.*?)\\f[RP]"<b>$1</b>"g;
 $s =~ s"\\e"\\"g;
 $s =~ s/(?<=Copyright )\(c\)/&copy;/g;
+$s =~ s/\\&//g;                     # Deal with the \& 0-width space
 $s;
 }
 
@@ -22,8 +23,8 @@ $s;
 sub end_para {
 if ($inpara)
   {
-  print TEMP "</PRE>\n" if ($inpre);
-  print TEMP "</P>\n";
+  print TEMP "</pre>\n" if ($inpre);
+  print TEMP "</p>\n";
   }
 $inpara = $inpre = 0;
 $wrotetext = 0;
@@ -33,7 +34,7 @@ $wrotetext = 0;
 
 sub new_para {
 &end_para();
-print TEMP "<P>\n";
+print TEMP "<p>\n";
 $inpara = 1;
 }
 
@@ -45,17 +46,21 @@ $inpara = 0;
 $inpre = 0;
 $wrotetext = 0;
 $toc = 0;
+$header = 1;
 $ref = 1;
 
 while ($#ARGV >= 0 && $ARGV[0] =~ /^-/)
   {
   $toc = 1 if $ARGV[0] eq "-toc";
+  $header = 0 if $ARGV[0] eq "-noheader";
   shift;
   }
 
 # Initial output to STDOUT
 
-print <<End ;
+if ($header)
+  {
+  print <<End ;
 <html>
 <head>
 <title>$ARGV[0] specification</title>
@@ -71,6 +76,7 @@ automatically from the original man page. If there is any nonsense in it,
 please consult the man page, in case the conversion went wrong.
 <br>
 End
+  }
 
 print "<ul>\n" if ($toc);
 
@@ -241,7 +247,7 @@ while (<STDIN>)
 
     elsif (/^\.EX\s*$/)
       {
-      print TEMP "<PRE>\n";
+      print TEMP "<pre>\n";
       while (<STDIN>)
         {
         last if /^\.EE\s*$/;
@@ -305,11 +311,14 @@ open(TEMP, "/tmp/$$") || die "Can't open /tmp/$$ for input\n";
 
 print while (<TEMP>);
 
-print <<End ;
+if ($header)
+  {
+  print <<End ;
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
 </p>
 End
+  }
 
 close(TEMP);
 unlink("/tmp/$$");

@@ -15,24 +15,24 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>pcre2_convert_context *pcre2_convert_context_create(</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function is part of an experimental set of pattern conversion functions.
 It creates and initializes a new convert context. If its argument is
 NULL, <b>malloc()</b> is used to get the necessary memory; otherwise the memory
 allocation function within the general context is used. The result is NULL if
 the memory could not be obtained.
-</P>
-<P>
+</p>
+<p>
 The pattern conversion functions are described in the
 <a href="pcre2convert.html"><b>pcre2convert</b></a>
 documentation.

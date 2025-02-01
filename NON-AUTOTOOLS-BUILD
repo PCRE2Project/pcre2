@@ -1,5 +1,5 @@
 Building PCRE2 without using autotools
---------------------------------------
+======================================
 
 This document contains the following sections:
 
@@ -16,7 +16,8 @@ This document contains the following sections:
   Building PCRE2 under VMS
 
 
-GENERAL
+General
+-------
 
 The source of the PCRE2 libraries consists entirely of code written in Standard
 C, and so should compile successfully on any system that has a Standard C
@@ -37,7 +38,8 @@ provided for those who build PCRE2 without using "configure" or CMake. If you
 use "configure" or CMake, the .generic versions are not used.
 
 
-GENERIC INSTRUCTIONS FOR THE PCRE2 C LIBRARIES
+Generic instructions for the PCRE2 C libraries
+----------------------------------------------
 
 There are three possible PCRE2 libraries, each handling data with a specific
 code unit width: 8, 16, or 32 bits. You can build any combination of them. The
@@ -207,20 +209,23 @@ example.
      defining SUPPORT_JIT, pcre2grep does not try to make use of JIT.
 
 
-STACK SIZE IN WINDOWS ENVIRONMENTS
+Stack size in Windows environments
+----------------------------------
 
 Prior to release 10.30 the default system stack size of 1MiB in some Windows
 environments caused issues with some tests. This should no longer be the case
 for 10.30 and later releases.
 
 
-LINKING PROGRAMS IN WINDOWS ENVIRONMENTS
+Linking programs in Windows environments
+----------------------------------------
 
 If you want to statically link a program against a PCRE2 library in the form of
 a non-dll .a file, you must define PCRE2_STATIC before including src/pcre2.h.
 
 
-CALLING CONVENTIONS IN WINDOWS ENVIRONMENTS
+Calling conventions in Windows environments
+-------------------------------------------
 
 It is possible to compile programs to use different calling conventions using
 MSVC. Search the web for "calling conventions" for more information. To make it
@@ -231,7 +236,8 @@ not set, it defaults to empty; the default calling convention is then used
 (which is what is wanted most of the time).
 
 
-COMMENTS ABOUT WIN32 BUILDS (see also "BUILDING PCRE2 ON WINDOWS WITH CMAKE")
+Comments about Win32 builds (see also "Building PCRE2 on Windows with CMake")
+---------------------------
 
 There are two ways of building PCRE2 using the "configure, make, make install"
 paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
@@ -293,7 +299,8 @@ newline option that includes LF as a valid newline, it may be necessary to
 change the line terminators in the test files to get some of the tests to work.
 
 
-BUILDING PCRE2 ON WINDOWS WITH CMAKE
+Building PCRE2 on Windows with CMake
+------------------------------------
 
 CMake is an alternative configuration facility that can be used instead of
 "configure". CMake creates project files (make files, solution files, etc.)
@@ -364,7 +371,8 @@ be deleted.
    Regardless of build system used, `ctest` will run the tests.
 
 
-BUILDING PCRE2 ON WINDOWS WITH VISUAL STUDIO
+Building PCRE2 on Windows with Visual Studio
+--------------------------------------------
 
 The code currently cannot be compiled without an inttypes.h header, which is
 available only with Visual Studio 2013 or newer. However, this portable and
@@ -376,7 +384,8 @@ alternative:
 Just rename it and drop it into the top level of the build tree.
 
 
-TESTING WITH RUNTEST.BAT
+Testing with RunTest.bat
+------------------------
 
 If configured with CMake, building the test project ("make test" or building
 ALL_TESTS in Visual Studio) creates (and runs) pcre2_test.bat (and depending
@@ -410,7 +419,8 @@ Otherwise:
 To independently test the just-in-time compiler, run pcre2_jit_test.exe.
 
 
-BUILDING PCRE2 ON NATIVE Z/OS AND Z/VM
+Building PCRE2 on native z/OS and z/VM
+--------------------------------------
 
 z/OS and z/VM are operating systems for mainframe computers, produced by IBM.
 The character code used is EBCDIC, not ASCII or Unicode. In z/OS, UNIX APIs and
@@ -429,7 +439,8 @@ z/OS file formats. The port provides an API for LE languages such as COBOL and
 for the z/OS and z/VM versions of the Rexx languages.
 
 
-BUILDING PCRE2 UNDER VMS
+Building PCRE2 under VMS
+------------------------
 
 Alexey Chuphin has contributed some auxiliary files for building PCRE2 under
 OpenVMS. They are in the "vms" directory in the distribution tarball. Please

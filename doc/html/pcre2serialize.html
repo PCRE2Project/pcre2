@@ -21,7 +21,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC6" href="#SEC6">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SAVING AND RE-USING PRECOMPILED PCRE2 PATTERNS</a><br>
-<P>
+<p>
 <b>int32_t pcre2_serialize_decode(pcre2_code **<i>codes</i>,</b>
 <b>  int32_t <i>number_of_codes</i>, const uint8_t *<i>bytes</i>,</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
@@ -48,8 +48,8 @@ the same code unit width, and must also have the same endianness, pointer width
 and PCRE2_SIZE type. For example, patterns compiled on a 32-bit system using
 PCRE2's 16-bit library cannot be reloaded on a 64-bit system, nor can they be
 reloaded using the 8-bit library.
-</P>
-<P>
+</p>
+<p>
 Note that "serialization" in PCRE2 does not convert compiled patterns to an
 abstract format like Java or .NET serialization. The serialized output is
 really just a bytecode dump, which is why it can only be reloaded in the same
@@ -57,9 +57,9 @@ environment as the one that created it. Hence the restrictions mentioned above.
 Applications that are not statically linked with a fixed version of PCRE2 must
 be prepared to recompile patterns from their sources, in order to be immune to
 PCRE2 upgrades.
-</P>
+</p>
 <br><a name="SEC2" href="#TOC1">SECURITY CONCERNS</a><br>
-<P>
+<p>
 The facility for saving and restoring compiled patterns is intended for use
 within individual applications. As such, the data supplied to
 <b>pcre2_serialize_decode()</b> is expected to be trusted data, not data from
@@ -68,9 +68,9 @@ complete validation of what is being re-loaded. Corrupted data may cause
 undefined results. For example, if the length field of a pattern in the
 serialized data is corrupted, the deserializing code may read beyond the end of
 the byte stream that is passed to it.
-</P>
+</p>
 <br><a name="SEC3" href="#TOC1">SAVING COMPILED PATTERNS</a><br>
-<P>
+<p>
 Before compiled patterns can be saved they must be serialized, which in PCRE2
 means converting the pattern to a stream of bytes. A single byte stream may
 contain any number of compiled patterns, but they must all use the same
@@ -80,8 +80,8 @@ character tables. A single copy of the tables is included in the byte stream
 in the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation.
-</P>
-<P>
+</p>
+<p>
 The function <b>pcre2_serialize_encode()</b> creates a serialized byte stream
 from a list of compiled patterns. Its first two arguments specify the list,
 being a pointer to a vector of pointers to compiled patterns, and the length of
@@ -100,8 +100,8 @@ of serialized patterns, or one of the following negative error codes:
 </pre>
 PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.
-</P>
-<P>
+</p>
+<p>
 Once a set of patterns has been serialized you can save the data in any
 appropriate manner. Here is sample code that compiles two patterns and writes
 them to a file. It assumes that the variable <i>fd</i> refers to a file that is
@@ -124,17 +124,17 @@ application has been omitted for simplicity.
 Note that the serialized data is binary data that may contain any of the 256
 possible byte values. On systems that make a distinction between binary and
 non-binary data, be sure that the file is opened for binary output.
-</P>
-<P>
+</p>
+<p>
 Serializing a set of patterns leaves the original data untouched, so they can
 still be used for matching. Their memory must eventually be freed in the usual
 way by calling <b>pcre2_code_free()</b>. When you have finished with the byte
 stream, it too must be freed by calling <b>pcre2_serialize_free()</b>. If this
 function is called with a NULL argument, it returns immediately without doing
 anything.
-</P>
+</p>
 <br><a name="SEC4" href="#TOC1">RE-USING PRECOMPILED PATTERNS</a><br>
-<P>
+<p>
 In order to re-use a set of saved patterns you must first make the serialized
 byte stream available in main memory (for example, by reading from a file). The
 management of this memory block is up to the application. You can use the
@@ -173,8 +173,8 @@ error codes:
 </pre>
 PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
-</P>
-<P>
+</p>
+<p>
 Decoded patterns can be used for matching in the usual way, and must be freed
 by calling <b>pcre2_code_free()</b>. However, be aware that there is a potential
 race issue if you are using multiple patterns that were decoded from a single
@@ -185,24 +185,24 @@ freed, but there is no locking on this reference count. Therefore, if you want
 to call <b>pcre2_code_free()</b> for these patterns in different threads, you
 must arrange your own locking, and ensure that <b>pcre2_code_free()</b> cannot
 be called by two threads at the same time.
-</P>
-<P>
+</p>
+<p>
 If a pattern was processed by <b>pcre2_jit_compile()</b> before being
 serialized, the JIT data is discarded and so is no longer available after a
 save/restore cycle. You can, however, process a restored pattern with
 <b>pcre2_jit_compile()</b> if you wish.
-</P>
+</p>
 <br><a name="SEC5" href="#TOC1">AUTHOR</a><br>
-<P>
+<p>
 Philip Hazel
 <br>
 Retired from University Computing Service
 <br>
 Cambridge, England.
 <br>
-</P>
+</p>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
-<P>
+<p>
 Last updated: 19 January 2024
 <br>
 Copyright &copy; 1997-2018 University of Cambridge.

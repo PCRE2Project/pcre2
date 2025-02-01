@@ -15,28 +15,28 @@ please consult the man page, in case the conversion went wrong.
 <br><b>
 SYNOPSIS
 </b><br>
-<P>
+<p>
 <b>#include &#60;pcre2.h&#62;</b>
-</P>
-<P>
+</p>
+<p>
 <b>int pcre2_set_optimize(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t <i>directive</i>);</b>
-</P>
+</p>
 <br><b>
 DESCRIPTION
 </b><br>
-<P>
+<p>
 This function controls which performance optimizations will be applied
 by <b>pcre2_compile()</b>. It can be called multiple times with the same compile
 context; the effects are cumulative, with the effects of later calls taking
 precedence over earlier ones.
-</P>
-<P>
+</p>
+<p>
 The result is zero for success, PCRE2_ERROR_NULL if <i>ccontext</i> is NULL,
 or PCRE2_ERROR_BADOPTION if <i>directive</i> is unknown. The latter could be
 useful to detect if a certain optimization is available.
-</P>
-<P>
+</p>
+<p>
 The list of possible values for the <i>directive</i> parameter are:
 <pre>
   PCRE2_OPTIMIZATION_FULL   Enable all optimizations (default)
