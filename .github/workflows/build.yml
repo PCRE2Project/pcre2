@@ -215,7 +215,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/solaris-vm@a89b9438868c70db27e41625f0a5de6ff5e90809 # v1.1.0
+        uses: vmactions/solaris-vm@cc8f82fa1a7cc746153ec3f71bf11f311f16e225 # v1.1.1
         with:
           envs: 'CFLAGS_SOLARIS_CC'
           usesh: true
