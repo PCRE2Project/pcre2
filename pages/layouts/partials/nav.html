@@ -1,0 +1,15 @@
+<header>
+<div class="header-content">
+
+    <nav>
+        <a class="nav-home" href="{{ "" | relURL }}" role="button" aria-label="Home"></a>
+        <div class="nav-glue"></div>
+        {{ partial "nav-lhs.html" . }}
+        <div class="nav-glue"></div>
+        {{ partial "nav-rhs.html" . }}
+    </nav>
+
+    {{ partial "header-search-results.html" . }}
+
+</div>
+</header>

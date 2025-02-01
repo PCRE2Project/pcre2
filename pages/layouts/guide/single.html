@@ -1,0 +1,20 @@
+{{ partial "header.html" . }}
+
+{{ partial "nav.html" . }}
+
+<main>
+<div class="main-content">
+
+    <div class="guide-h1">
+        <h1>{{ .Title }}</h1>
+        <div>Documentation for PCRE2 {{ .Site.Params.release }}</div>
+    </div>
+
+    <div class="guide-content">
+    {{ .Content }}
+    </div>
+
+</div>
+</main>
+
+{{ partial "footer.html" . }}

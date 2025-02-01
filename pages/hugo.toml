@@ -1,0 +1,14 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'PCRE2 - Perl-Compatible Regular Expressions'
+disableKinds = ["taxonomy", "term", "rss"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    noClasses = false
+
+[params]
+  release = 'Unknown'

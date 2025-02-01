@@ -1,0 +1,72 @@
+{{ partial "header.html" . }}
+
+<header>
+<div class="header-content">
+
+    <nav>
+        <div class="nav-home" style="background: none;"></div>
+        <div class="nav-glue"></div>
+        {{ partial "nav-lhs.html" . }}
+        <div class="nav-glue"></div>
+        {{ partial "nav-rhs.html" . }}
+    </nav>
+
+    {{ partial "header-search-results.html" . }}
+
+    <picture>
+        <source media="(prefers-color-scheme: dark)" inert width="1400" height="220" srcset="{{ "images/pcre2-header-dark.svg" | relURL }}">
+        <img alt="PCRE2: Perl-Compatible Regular Expressions" inert style="margin-left: -1.9%; width: 100%; height: auto;" width="1400" height="220" src="{{ "images/pcre2-header-light.svg" | relURL }}">
+    </picture>
+
+</div>
+</header>
+
+<section class="index-intro">
+<h2>Overview</h2>
+<div class="index-intro-content">
+
+    <div>
+    <div>
+    The PCRE2 library is a set of C functions that implement<br />
+    <strong>regular expression pattern matching</strong>.
+    </div>
+    </div>
+
+    <div>
+    {{ (resources.Get "font-awesome/rocket.svg").Content | safeHTML }}
+    <div>
+    It is <strong>self-contained and portable</strong>, and designed to be <strong>easy to embed</strong> into existing projects and build systems, on almost <strong>any platform</strong> or build target.
+    </div>
+    </div>
+
+    <div>
+    {{ (resources.Get "font-awesome/code-pull-request.svg").Content | safeHTML }}
+    <div>
+    The PCRE2 library is <strong>free and open-source</strong> (BSD licence), and permitted in proprietary software.
+    </div>
+    </div>
+
+    <div>
+    {{ (resources.Get "font-awesome/gauge-high.svg").Content | safeHTML }}
+    <div>
+    It supports Unicode matching and a very wide range of regular expression features. It accepts input in various character encodings, and optionally includes a highly <strong>performant JIT matching engine</strong>.
+    </div>
+    </div>
+
+    <div>
+    {{ (resources.Get "font-awesome/shield-halved.svg").Content | safeHTML }}
+    <div>
+    PCRE2 is <strong>mature and highly-trusted</strong>: bundled in dozens or hundreds of open-source and commercial products, such as Excel, Safari, Apache, and Git, and used as the basis for regular expressions in several programming languages including PHP and&nbsp;R.
+    </div>
+    </div>
+
+</div>
+</section>
+
+<main>
+<div class="main-content">
+    {{ .Content }}
+</div>
+</main>
+
+{{ partial "footer.html" . }}
