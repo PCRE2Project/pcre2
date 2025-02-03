@@ -232,8 +232,8 @@ header {
 }
 
 nav {
-  padding-top: 8px;
-  margin-bottom: 8px;
+  padding-top: 12px;
+  margin-bottom: 12px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -396,6 +396,15 @@ nav {
         color: var(--colour-fg);
       }
     }
+  }
+}
+
+@media (max-width: 410px) {
+  .nav-glue {
+    min-width: initial;
+  }
+  .nav-menu, .nav-item {
+    font-size: 14px;
   }
 }
 
