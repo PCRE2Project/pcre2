@@ -9,7 +9,7 @@ and also contains some notes for maintainers. Its contents are:
   Files in the maint directory
   Updating to a new Unicode release
   Preparing for a PCRE2 release
-  Making a PCRE2 release
+  Updating version info for libtool
   Long-term ideas (wish list)
 
 For a description of the way PCRE2 works, see the file called HACKING in the
@@ -21,19 +21,19 @@ Files in the maint directory
 
 132html
   A Perl script to convert man pages to HTML (.1 and .3 files "two" HTML),
-  used by PrepareRelease.
+  used by UpdateAlways.
 
 CheckMan
   A Perl script to validate the syntax in PCRE2 man pages, used by
-  PrepareRelease.
+  UpdateAlways.
 
-CheckMan
+CleanTxt
   A Perl script to clean up the nroff output in PCRE2 man pages, used by
-  PrepareRelease.
+  UpdateAlways.
 
 Detrail
   A Perl script to remove trailing whitespace from PCRE2 files, used by
-  PrepareRelease.
+  UpdateAlways.
 
 GenerateCommon.py
   A Python module containing data and functions that are used by the other
@@ -68,9 +68,20 @@ ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
   different configuration settings.
 
-PrepareRelease
+UpdateAlways
   A shell script to ensure that all auto-generated outputs are ready for
   release.
+
+  It should be run often (by CI on each commit) to ensure that the repository
+  is in a clean and consistent state.
+
+UpdateDates.py
+UpdateRelease.py
+  Python scripts to be run less frequently than UpdateAlways. These should only
+  be needed immediately before a release, when finalising the repository.
+  UpdateDates.py checks in the last-updated times on documentation pages.
+  UpdateRelease.py is needed after any change to the version number in
+  configure.ac.
 
 pcre2_chartables.c.non-standard
   This is a set of character tables that came from a Windows system. It has
@@ -181,71 +192,123 @@ done
 Preparing for a PCRE2 release
 =============================
 
-This section contains a checklist of things that I (PH) do before building a
+This section contains a checklist of things that I (NCW) do before building a
 new release.
 
-. Ensure that the version number and version date are correct in configure.ac.
+* First of all, make sure that the master branch is in good condition.
 
-. Update the library version numbers in configure.ac according to the rules
+  - Basically, test it. The CI jobs should all be passing. This ensures that
+    pcre2tests are passing, that the build is warning-free, and that all our
+    platforms are running correctly. The CI jobs should be running the Perl
+    tests (which assert that `testdata/testinput1` tests give the same results
+    using Perl's regex engine). The ManyConfigTests exercise a variety of
+    build options and combinations. The Autoconf and CMake builds must pass.
+
+  - If new build options have been added, ensure that they are added to the
+    CMake files as well as to the Autoconf files.
+
+  - Run perltest.sh on the test data for tests 1 and 4. The output should match
+    the PCRE2 test output, apart from the version identification at the start of
+    each test. Sometimes there are other differences in test 4 if PCRE2 and Perl
+    are using different Unicode releases. The other tests are not
+    Perl-compatible (they use various PCRE2-specific features or options). The
+    maint/RunPerlTest shell script can be used to do this testing in Unix-like
+    environment.
+
+  - It is possible to test with the emulated memmove() function by undefining
+    HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often.
+
+  - Check the external testing tools. CodeQL & Clang Static Analyzer report
+    their results to the GitHub "Security" dashboard. Coverity has its own
+    external dashboard, as does OSS-Fuzz. Since we have these tools, we should
+    at least confirm they haven't flagged anything.
+
+  - Documentation: check the documentation is ready; and LICENCE,
+    NON-AUTOTOOLS-BUILD, and README. Many of these won't need changing, but over
+    the long term things do change.
+
+* Ensure the AUTHORS file is up-to-date with any new contributors since the
+  last release.
+
+* Ensure the ChangeLog and NEWS files are updated with everything that you want
+  to announce in the new release.
+
+* Update the library version numbers in configure.ac according to the rules
   given below.
 
-. If new build options or new source files have been added, ensure that they
-  are added to the CMake files as well as to the autoconf files. The relevant
-  files are CMakeLists.txt and config-cmake.h.in. After making a release, test
-  it out with CMake if there have been changes here.
+* Push all these changes to master.
 
-. Run ./autogen.sh to ensure everything is up-to-date.
+* Take a branch off master, named "release/pcre2-10.XX-RC1" or
+  "release/pcre2-10.XX".
 
-. Run the script maint/ManyConfigTests. This compiles and runs the tests for
-  many different sets of configuration options, some with valgrind. It can take
-  quite a long time.
+* In the new branch, remove the "-DEV" prefix from the version number and set
+  the release date in configure.ac. Update the release date in the ChangeLog and
+  NEWS files.
 
-. Run tests in both 32-bit and 64-bit environments if possible. I can no longer
-  run 32-bit tests.
+  ```
+  vim configure.ac
+  vim NEWS
+  vim ChangeLog
+  git add -u configure.ac NEWS ChangeLog
+  git commit -m"Update version number and release date"
+  ```
 
-. Run tests with two or more different compilers (e.g. clang and gcc), and make
-  use of -fsanitize=address and friends where possible. For gcc,
-  -fsanitize=undefined -std=gnu99 picks up undefined behaviour at runtime. For
-  clang, -fsanitize=address,undefined,integer can be used but an exception is
-  needed to allow XCLASS with very large ranges in the 32-bit library so it
-  should be followed by -fno-sanitize=unsigned-shift-base, additionally
-  -fno-sanitize=unsigned-integer-overflow must be added when compiling with
-  JIT. Newer versions of clang also need -fno-sanitize=function, at least
-  until pcre2test stops using generic pointers on its callbacks. Another
-  useful clang option is -fsanitize=signed-integer-overflow but that should
-  be already included if using "integer".
+* Perform updates of the automatically-generated files.
 
-. Do a test build using CMake. Remove src/config.h first, lest it override the
-  version that CMake creates. Also ensure there is no leftover CMakeCache.txt
-  in the directory you are testing in.
+  ```
+  ./autogen.sh && ./configure
+  rm src/config.h.generic src/pcre2.h.generic
+  make src/config.h.generic src/pcre2.h.generic
+  git clean -idx .
+  git add -u src/config.h.generic src/pcre2.h.generic
+  git commit -m"Automatic update of .generic files"
 
-. Remove the CMake cache and then check that a CMake unity build works:
-  [c]cmake -DCMAKE_UNITY_BUILD=ON sets up a unity build.
+  maint/UpdateRelease.py
+  maint/UpdateDates.py
+  maint/UpdateDocs
+  git add -u
+  git commit -m"Automatic update of doc files #noupdate"
+  ```
 
-. Run perltest.sh on the test data for tests 1 and 4. The output should match
-  the PCRE2 test output, apart from the version identification at the start of
-  each test. Sometimes there are other differences in test 4 if PCRE2 and Perl
-  are using different Unicode releases. The other tests are not Perl-compatible
-  (they use various PCRE2-specific features or options). The maint/RunPerlTest
-  shell script can be used to do this testing in Unix-like environment.
+* Commit the Autoconf files to the branch. This is required so that users can
+  check out the Git tag, and receive the same contents as the tarball users.
 
-. It is possible to test with the emulated memmove() function by undefining
-  HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often.
+  ```
+  ./autogen.sh
+  git add -f Makefile.in aclocal.m4 ar-lib compile config.guess config.sub \
+    configure depcomp install-sh ltmain.sh m4/libtool.m4 m4/ltoptions.m4 \
+    m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 missing src/config.h.in \
+    test-driver
+  git commit -m"Commit autogen.sh output"
+  ```
 
-. Documentation: check AUTHORS, ChangeLog (check version and date), LICENCE,
-  NEWS (check version and date), NON-AUTOTOOLS-BUILD, and README. Many of these
-  won't need changing, but over the long term things do change.
+* Now, wait for the CI job to build the tarball. We can't do this locally: we
+  want to be releasing a tarball which is signed by GitHub. The GitHub signature
+  says, "Yes, the developer did not tamper with this tarball, we certify that it
+  was derived solely from the contents of the Git repository at this commit
+  hash".
 
-. I used to test new releases myself on a number of different operating
-  systems. For example, on Solaris it is helpful to test using Sun's cc
-  compiler as a change from gcc. Adding -m64 to the cc options does a 64-bit
-  build. Since I retired I can no longer do much of this. There are automated
-  tests under Ubuntu, Alpine, macOS and Windows that are now set up as GitHub
-  actions. Check that they are running clean.
+* Create the tag locally. We can't do this via the GitHub UI: it has no way to
+  create signed tags (since my GPG key lives on a Yubikey).
 
-. The buildbots at http://buildfarm.opencsw.org/ do some automated testing
-  of PCRE2 and should also be checked before putting out a release. (June 2024:
-  I am not sure these are currently working properly.)
+  ```
+  git config user.signingkey 'FB63B406!'
+  git tag -s pcre2-10.XX -m"Release 10.XX"
+  git tag -v pcre2-10.XX
+  ```
+
+* Download the tarball from the CI artifacts. Sign these using the GPG key.
+
+  ```
+  KEYID=FB63B406
+  for i in pcre2-10.XX.{zip,tar.gz,tar.bz2}; do
+    gpg --output $i.sig --detach-sig --default-key $KEYID $i
+    gpg --verify $i.sig
+  done
+  ```
+
+* In the GitHub UI, create a "release" from the tag (which must have been
+  already pushed). Add the tarballs and GPG signatures.
 
 
 Updating version info for libtool
@@ -290,21 +353,6 @@ changes in a shared library:
 
 3. Programs may need to be changed, recompiled, relinked in order to use the
    new version. Increment current, set revision and age to 0.
-
-
-Making a PCRE2 release
-======================
-
-Run PrepareRelease and commit the files that it changes. The first thing this
-script does is to run CheckMan on the man pages; if it finds any markup errors,
-it reports them and then aborts. Otherwise it removes trailing spaces from
-sources and refreshes the HTML documentation. Update the GitHub repository.
-
-Once PrepareRelease has run clean, run "make distcheck" to create the tarballs
-and the zipball. I then sign these files. Double-check with "git status" that
-the repository is fully up-to-date, then create a new tag and a release on
-GitHub. Upload the tarballs, zipball, and the signatures as "assets" of the
-GitHub release.
 
 
 Future ideas (wish list)

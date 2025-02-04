@@ -47,6 +47,8 @@ for filename in glob.glob('doc/*.1'):
 
 # doc/*.3
 for filename in glob.glob('doc/*.3'):
+    if filename == 'doc/pcre2demo.3':
+        continue
     update_man_date(filename)
 
 # README, NON-AUTOTOOLS-BUILD
