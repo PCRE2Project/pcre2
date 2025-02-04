@@ -7,8 +7,8 @@ there is also the log of commit messages.
 Internal changes which are not visible to clients of the library are mostly not
 listed here.
 
-Version 10.45 xx-xxx-2024
--------------------------
+Version 10.45 05-February-2025
+------------------------------
 
 1. (#418) Change 6 of 10.44 broke 32-bit tests because pcre2test's reporting of
 memory size was changed to the entire compiled data block, instead of just the
