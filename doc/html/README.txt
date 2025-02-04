@@ -606,9 +606,10 @@ The command "make dist" creates three PCRE2 tarballs, in tar.gz, tar.bz2, and
 zip formats. The command "make distcheck" does the same, but then does a trial
 build of the new distribution to ensure that it works.
 
-You should run the maint/UpdateAlways script before making a distribution.
+If you have modified any of the man page sources in the doc directory, you
+should first run the maint/UpdateAlways script before making a distribution.
 This script creates the .txt and HTML forms of the documentation from the man
-pages, and checks various things.
+pages.
 
 
 Testing PCRE2
