@@ -360,6 +360,10 @@ jobs:
           rm -f src/*.generic
           make src/config.h.generic src/pcre2.h.generic
 
+          # Workaround for incorrect filesystem permissions on /usr/share/aclocal, which
+          # causes the m4 macros to be copied with incorrect permissions.
+          chmod u=rw,go=r m4/*.m4
+
       - name: Working directory clean
         run:  |
           if [ -n "`git status --porcelain`" ] ; then
