@@ -607,7 +607,7 @@ zip formats. The command "make distcheck" does the same, but then does a trial
 build of the new distribution to ensure that it works.
 
 If you have modified any of the man page sources in the doc directory, you
-should first run the maint/PrepareRelease script before making a distribution.
+should first run the maint/UpdateAlways script before making a distribution.
 This script creates the .txt and HTML forms of the documentation from the man
 pages.
 
