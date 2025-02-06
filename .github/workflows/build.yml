@@ -17,7 +17,7 @@ env:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup
         run: |
@@ -57,7 +57,7 @@ jobs:
 
   alpine:
     name: alpine
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: alpine
     steps:
       - name: Setup
@@ -148,7 +148,7 @@ jobs:
 
   freebsd:
     name: FreeBSD
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
@@ -195,7 +195,7 @@ jobs:
 
   solaris:
     name: Solaris
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
@@ -274,7 +274,7 @@ jobs:
 
   distcheck:
     name: Build & verify distribution
-    runs-on: ubuntu-24.04 # TODO: Update to ubuntu-latest when that switches to 24.04
+    runs-on: ubuntu-latest
     permissions:
       id-token: write # Needed to make calls to the Sigstore service
       attestations: write # Needed to write the attestation to GitHub's database
@@ -330,7 +330,7 @@ jobs:
 
   coverage:
     name: Code coverage
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup
         run: |
