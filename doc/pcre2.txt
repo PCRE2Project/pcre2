@@ -3894,7 +3894,7 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
          int (*callout_function)(pcre2_substitute_callout_block *, void *),
          void *callout_data);
 
-       The pcre2_set_substitution_callout() function can be used to specify  a
+       The pcre2_set_substitute_callout() function can be used to specify  a
        callout  function for pcre2_substitute(). This information is passed in
        a match context. The callout function is called after each substitution
        has been processed, but it can cause the replacement not to happen.
@@ -3959,7 +3959,7 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
                                         int, void *),
          void *callout_data);
 
-       The pcre2_set_substitution_case_callout() function can be used to spec-
+       The pcre2_set_substitute_case_callout() function can be used to spec-
        ify  a  callout  function for pcre2_substitute() to use when performing
        case transformations. This does not affect any case  insensitivity  be-
        haviour  when performing a match, but only the user-visible transforma-

@@ -4039,7 +4039,7 @@ above).
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
-The \fBpcre2_set_substitution_callout()\fP function can be used to specify a
+The \fBpcre2_set_substitute_callout()\fP function can be used to specify a
 callout function for \fBpcre2_substitute()\fP. This information is passed in
 a match context. The callout function is called after each substitution has
 been processed, but it can cause the replacement not to happen.
@@ -4107,7 +4107,7 @@ matches so far.
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
-The \fBpcre2_set_substitution_case_callout()\fP function can be used to specify
+The \fBpcre2_set_substitute_case_callout()\fP function can be used to specify
 a callout function for \fBpcre2_substitute()\fP to use when performing case
 transformations. This does not affect any case insensitivity behaviour when
 performing a match, but only the user-visible transformations performed when
