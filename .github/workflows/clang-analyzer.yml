@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   Analyze:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     permissions:
       # Needed to upload the results to code-scanning dashboard.
