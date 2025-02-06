@@ -101,7 +101,7 @@ int_char ic;
 SLJIT_UNUSED_ARG(offs1);
 SLJIT_UNUSED_ARG(offs2);
 
-ic.x = chars;
+ic.x = (int)chars;  /* Cast is OK as chars come from an int_char in the first place. */
 
 #if defined(FFCS)
 sljit_u8 c1 = ic.c.c1;
@@ -124,7 +124,7 @@ vect_t vmask = VDUPQ(mask);
 compare_type compare1_type = compare_match1;
 compare_type compare2_type = compare_match1;
 vect_t cmp1a, cmp1b, cmp2a, cmp2b;
-const sljit_u32 diff = IN_UCHARS(offs1 - offs2);
+const sljit_uw diff = IN_UCHARS(offs1 - offs2);
 PCRE2_UCHAR char1a = ic.c.c1;
 PCRE2_UCHAR char2a = ic.c.c3;
 
