@@ -4049,7 +4049,7 @@ Substitution callouts
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
-The <b>pcre2_set_substitution_callout()</b> function can be used to specify a
+The <b>pcre2_set_substitute_callout()</b> function can be used to specify a
 callout function for <b>pcre2_substitute()</b>. This information is passed in
 a match context. The callout function is called after each substitution has
 been processed, but it can cause the replacement not to happen.
@@ -4123,7 +4123,7 @@ Substitution case callouts
 <b>  void *<i>callout_data</i>);</b>
 <br>
 <br>
-The <b>pcre2_set_substitution_case_callout()</b> function can be used to specify
+The <b>pcre2_set_substitute_case_callout()</b> function can be used to specify
 a callout function for <b>pcre2_substitute()</b> to use when performing case
 transformations. This does not affect any case insensitivity behaviour when
 performing a match, but only the user-visible transformations performed when
