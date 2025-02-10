@@ -112,6 +112,7 @@ jobs:
           cd build
           cmake --install . --prefix install-dir
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
+          ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   dodo:
     # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
@@ -139,6 +140,7 @@ jobs:
         run: |
           make install "DESTDIR=`pwd`/install-dir"
           maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
@@ -185,6 +187,7 @@ jobs:
           cd build
           cmake --install . --prefix install-dir
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
+          ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   bat:
     # Tests with: MSVC 32-bit, and a variety of CMake options
