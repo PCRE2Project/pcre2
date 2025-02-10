@@ -467,6 +467,8 @@ CLEANFILES += src/pcre2_chartables.c
 # when pcre2_jit_compile.c is processed, so they must be distributed.
 
 EXTRA_DIST += \
+  deps/sljit/LICENSE \
+  deps/sljit/README \
   deps/sljit/sljit_src/sljitConfig.h \
   deps/sljit/sljit_src/sljitConfigCPU.h \
   deps/sljit/sljit_src/sljitConfigInternal.h \
