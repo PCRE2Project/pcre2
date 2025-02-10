@@ -9820,7 +9820,7 @@ least 128 code units, because it is used for retrieving error messages. */
 
   for (;;)
     {
-    errcode = strtol(arg_error, &endptr, 10);
+    errcode = (int)strtol(arg_error, &endptr, 10);
     if (*endptr != 0 && *endptr != CHAR_COMMA)
       {
       fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
