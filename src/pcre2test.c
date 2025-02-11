@@ -9782,6 +9782,7 @@ if (arg_error != NULL)
   int len;
   int errcode;
   char *endptr;
+  long li;
 
 /* Ensure the relevant non-8-bit buffer is available. Ensure that it is at
 least 128 code units, because it is used for retrieving error messages. */
@@ -9820,13 +9821,14 @@ least 128 code units, because it is used for retrieving error messages. */
 
   for (;;)
     {
-    errcode = (int)strtol(arg_error, &endptr, 10);
-    if (*endptr != 0 && *endptr != CHAR_COMMA)
+    li = strtol(arg_error, &endptr, 10);
+    if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != CHAR_COMMA))
       {
       fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;
       goto EXIT;
       }
+    errcode = (int)li;
     printf("Error %d: ", errcode);
     PCRE2_GET_ERROR_MESSAGE(len, errcode, pbuffer);
     if (len < 0)
