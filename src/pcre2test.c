@@ -9628,30 +9628,34 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     fprintf(stderr, "pcre2test: -S is not supported on this OS\n");
     exit(1);
 #else
-    int rc;
+    int rc = 0;
     uint32_t stack_size;
-    struct rlimit rlim;
-    if (U32OVERFLOW(uli))
+    struct rlimit rlim, rlim_old;
+    if (uli > INT32_MAX / (1024 * 1024))
       {
       fprintf(stderr, "** Argument for -S is too big\n");
       exit(1);
       }
     stack_size = (uint32_t)uli;
-    getrlimit(RLIMIT_STACK, &rlim);
+    getrlimit(RLIMIT_STACK, &rlim_old);
+    rlim = rlim_old;
     rlim.rlim_cur = stack_size * 1024 * 1024;
-    if (rlim.rlim_cur > rlim.rlim_max)
+    if (rlim.rlim_max != RLIM_INFINITY && rlim.rlim_cur > rlim.rlim_max)
       {
       fprintf(stderr,
         "pcre2test: requested stack size %luMiB is greater than hard limit ",
           (unsigned long int)stack_size);
-      if (rlim.rlim_max % (1024*1024) == 0) fprintf(stderr, "%luMiB\n",
-        (unsigned long int)(rlim.rlim_max/(1024 * 1024)));
-      else if (rlim.rlim_max % 1024 == 0) fprintf(stderr, "%luKiB\n",
-        (unsigned long int)(rlim.rlim_max/1024));
-      else fprintf(stderr, "%lu bytes\n", (unsigned long int)(rlim.rlim_max));
+      if (rlim.rlim_max % (1024*1024) == 0)
+        fprintf(stderr, "%luMiB\n", (unsigned long)(rlim.rlim_max/(1024*1024)));
+      else if (rlim.rlim_max % 1024 == 0)
+        fprintf(stderr, "%luKiB\n", (unsigned long)(rlim.rlim_max/1024));
+      else
+        fprintf(stderr, "%lu bytes\n", (unsigned long)(rlim.rlim_max));
       exit(1);
       }
-    rc = setrlimit(RLIMIT_STACK, &rlim);
+    if (rlim_old.rlim_cur != RLIM_INFINITY && rlim_old.rlim_cur <= INT32_MAX &&
+        rlim.rlim_cur > rlim_old.rlim_cur)
+      rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
       fprintf(stderr, "pcre2test: setting stack size %luMiB failed: %s\n",
