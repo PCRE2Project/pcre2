@@ -21,7 +21,11 @@
 
 "[ab/cd]"
 
+#if !ebcdic
+
 "[,-/]"
+
+#endif
 
 /[ab/
 
@@ -144,12 +148,16 @@
 \= Expect no match
     pic03.j/g
 
+#if !ebcdic
+
 /A[+-0]B/
     A+B
     A.B
     A0B
 \= Expect no match
     A/B
+
+#endif
 
 /*x?z/
     abc.xyz
@@ -161,14 +169,20 @@
 \= Expect no match
     .xyz
 
+#if !ebcdic
+
 "[,-0]x?z"
     ,xyz
 \= Expect no match
     /xyz
     .xyz
 
+#endif
+
 ".x*"
     .xabc
+
+#if !ebcdic
 
 /a[--0]z/
     a-z
@@ -177,6 +191,8 @@
 \= Expect no match
     a/z
     a1z
+
+#endif
 
 /<[a-c-d]>/
     <a>

@@ -1652,8 +1652,7 @@ case the following character).
 (3) \x matches a lower case "x" character unless it is followed by two
 hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, as in Perl, a hexadecimal number is always expected after
-\x, but it may have zero, one, or two digits (so, for example, \xz matches a
-binary zero character followed by z).
+\x, but it may have one or two digits.
 </p>
 <p>
 ECMAscript 6 added additional functionality to \u. This can be accessed using

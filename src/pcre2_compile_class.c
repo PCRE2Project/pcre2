@@ -1280,8 +1280,23 @@ while (TRUE)
     value of 1 removes vertical space and 2 removes underscore. */
 
     if (tabopt < 0) tabopt = -tabopt;
+#ifdef EBCDIC
+      {
+      uint8_t posix_vertical[4] = { CHAR_LF, CHAR_VT, CHAR_FF, CHAR_CR };
+      uint8_t posix_underscore = CHAR_UNDERSCORE;
+      uint8_t *chars = NULL;
+      uint n = 0;
+
+      if (tabopt == 1) { chars = posix_vertical; n = 4; }
+      else if (tabopt == 2) { chars = &posix_underscore; n = 1; }
+
+      for (; n > 0; ++chars, --n)
+        pbits.classbits[*chars/8] &= ~(1u << (*chars&7));
+      }
+#else
     if (tabopt == 1) pbits.classbits[1] &= ~0x3c;
-      else if (tabopt == 2) pbits.classbits[11] &= 0x7f;
+    else if (tabopt == 2) pbits.classbits[11] &= 0x7f;
+#endif
 
     /* Add the POSIX table or its complement into the main table that is
     being built and we are done. */

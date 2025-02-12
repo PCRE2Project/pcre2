@@ -4,6 +4,8 @@
 #forbid_utf
 #newline_default lf any anycrlf
 
+#if !ebcdic
+
 /a\xc4\xa3b/
     a\N{U+123}b
  0: a\xc4\xa3b
@@ -36,11 +38,15 @@ Subject length lower bound = 6
 ** Truncation will probably give the wrong result.
 No match
 
+#endif
+
 /\x{100}/I
 Failed: error 134 at offset 6: character code point value in \x{} or \o{} is too large
 
 /\o{400}/I
 Failed: error 134 at offset 6: character code point value in \x{} or \o{} is too large
+
+#if !ebcdic
 
 /  (?: [\040\t] |  \(
 (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
@@ -244,6 +250,8 @@ Starting code units: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8
   f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f
 Subject length lower bound = 3
 
+#endif
+
 /\h/I
 Capture group count = 0
 Starting code units: \x09 \x20 \xa0
@@ -319,6 +327,8 @@ Subject length lower bound = 1
         End
 ------------------------------------------------------------------
 
+#if !ebcdic
+
 /[\x0a\V]/B
 ------------------------------------------------------------------
         Bra
@@ -326,6 +336,8 @@ Subject length lower bound = 1
         Ket
         End
 ------------------------------------------------------------------
+
+#endif
 
 /\777/I
 Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
@@ -354,6 +366,8 @@ Failed: error 177 at offset 6: character code point value in \u.... sequence is 
 /[\u0100-\u0200]/alt_bsux,allow_empty_class,match_unset_backref,dupnames
 Failed: error 177 at offset 7: character code point value in \u.... sequence is too large
 
+#if !ebcdic
+
 /[^\x00-a]{12,}[^b-\xff]*/B
 ------------------------------------------------------------------
         Bra
@@ -362,6 +376,8 @@ Failed: error 177 at offset 7: character code point value in \u.... sequence is 
         Ket
         End
 ------------------------------------------------------------------
+
+#endif
 
 /[^\s]*\s* [^\W]+\W+ [^\d]*?\d0 [^\d\w]{4,6}?\w*A/B
 ------------------------------------------------------------------

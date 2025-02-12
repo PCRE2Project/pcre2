@@ -54,12 +54,16 @@ given, they are written in binary. */
 #include <string.h>
 #include <locale.h>
 
-#define PCRE2_DFTABLES            /* for pcre2_internal.h, pcre2_maketables.c */
+/* For pcre2_internal.h, pcre2_maketables.c, pcre2_tables.c */
+#define PCRE2_DFTABLES
+/* For pcre2_tables.c */
+#define PRIV(name) name
 
 #define PCRE2_CODE_UNIT_WIDTH 0   /* Must be set, but not relevant here */
 #include "pcre2_internal.h"
 
 #include "pcre2_maketables.c"
+#include "pcre2_tables.c"
 
 
 static const char *classlist[] =
@@ -68,6 +72,23 @@ static const char *classlist[] =
   "word", "graph", "print", "punct", "cntrl"
   };
 
+static int identity(int c) { return c; }
+
+#ifdef EBCDIC
+static int ebcdic_to_unicode(int c)
+{
+if (c < 0 || c > 255) abort();
+
+return ebcdic_1047_to_ascii[c];
+}
+
+static int unicode_to_ebcdic(int c)
+{
+if (c < 0 || c > 255) abort();
+
+return ascii_to_ebcdic_1047[c];
+}
+#endif
 
 
 /*************************************************
@@ -81,6 +102,9 @@ usage(void)
   "Usage: pcre2_dftables [options] <output file>\n"
   "  -b    Write output in binary (default is source code)\n"
   "  -L    Use locale from LC_ALL (default is \"C\" locale)\n"
+#ifdef EBCDIC
+  "  -E    Use EBCDIC 1047 via locale C.UTF-8\n"
+#endif
   );
 }
 
@@ -99,6 +123,8 @@ BOOL binary = FALSE;
 char *env = (char *)"C";
 const uint8_t *tables;
 const uint8_t *base_of_tables;
+int (*charfn_to)(int) = identity;
+int (*charfn_from)(int) = identity;
 
 /* Process options */
 
@@ -123,6 +149,24 @@ for (i = 1; i < argc; i++)
     env = getenv("LC_ALL");
     }
 
+#ifdef EBCDIC
+  else if (strcmp(arg, "-E") == 0)
+    {
+    if (setlocale(LC_ALL, "C.UTF-8") == NULL)
+      {
+      (void)fprintf(stderr, "pcre2_dftables: setlocale() failed\n");
+      return 1;
+      }
+#ifdef EBCDIC_NL25
+    env = "EBCDIC 1047 (NL 0x25)";
+#else
+    env = "EBCDIC 1047 (NL 0x15)";
+#endif
+    charfn_to = ebcdic_to_unicode;
+    charfn_from = unicode_to_ebcdic;
+    }
+#endif
+
   else if (strcmp(arg, "-b") == 0)
     binary = TRUE;
 
@@ -141,7 +185,7 @@ if (i != argc - 1)
 
 /* Make the tables */
 
-tables = maketables();
+tables = maketables(charfn_to, charfn_from);
 base_of_tables = tables;
 
 f = fopen(argv[i], "wb");

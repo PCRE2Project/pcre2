@@ -4313,7 +4313,7 @@ for (i = 1; i < argc; i++)
   else
     {
     unsigned long int n = decode_number(option_data, op, longop);
-    if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = (int)n;
+    if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = (uint32_t)n;
       else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n;
       else *((int *)op->dataptr) = (int)n;
     }

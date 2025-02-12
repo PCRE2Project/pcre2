@@ -324,7 +324,7 @@ AC_ARG_ENABLE(never-backslash-C,
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
-                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-unicode; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
+                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-unicode; use only in (uncommon) EBCDIC environments]),
               , enable_ebcdic=no)
 
 # Handle --enable-ebcdic-nl25
@@ -332,6 +332,12 @@ AC_ARG_ENABLE(ebcdic-nl25,
               AS_HELP_STRING([--enable-ebcdic-nl25],
                              [set EBCDIC code for NL to 0x25 instead of 0x15; it implies --enable-ebcdic]),
               , enable_ebcdic_nl25=no)
+
+# Handle --enable-ebcdic-ignoring-compiler
+AC_ARG_ENABLE(ebcdic-ignoring-compiler,
+              AS_HELP_STRING([--enable-ebcdic-ignoring-compiler],
+                             [force EBCDIC 1047 using numeric literals rather than C character literals; it implies --enable-ebcdic]),
+              , enable_ebcdic_ignoring_compiler=no)
 
 # Handle --enable-pcre2grep-libz
 AC_ARG_ENABLE(pcre2grep-libz,
@@ -512,19 +518,21 @@ case "$enable_newline" in
   ;;
 esac
 
-# --enable-ebcdic-nl25 implies --enable-ebcdic
-if test "x$enable_ebcdic_nl25" = "xyes"; then
+# --enable-ebcdic-nl25 and --enable-ebcdic-ignoring-compiler imply --enable-ebcdic
+if test "x$enable_ebcdic_nl25" = "xyes" -o "x$enable_ebcdic_ignoring_compiler" = "xyes"; then
   enable_ebcdic=yes
 fi
 
-# Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
+# Make sure that if enable_ebcdic is set (without
+# enable_ebcdic_ignoring_compiler), rebuild_chartables is also enabled.
 # Also check that UTF support is not requested, because PCRE2 cannot handle
 # EBCDIC and UTF in the same build. To do so it would need to use different
-# character constants depending on the mode. Also, EBCDIC cannot be used with
-# 16-bit and 32-bit libraries.
-#
+# character constants depending on the mode.
+# Also, EBCDIC cannot be used with 16-bit and 32-bit libraries.
 if test "x$enable_ebcdic" = "xyes"; then
-  enable_rebuild_chartables=yes
+  if test "x$enable_ebcdic_ignoring_compiler" != "xyes"; then
+    enable_rebuild_chartables=yes
+  fi
   if test "x$enable_unicode" = "xyes"; then
     AC_MSG_ERROR([support for EBCDIC and Unicode cannot be enabled at the same time])
   fi
@@ -581,6 +589,8 @@ AM_CONDITIONAL(WITH_PCRE2_32, test "x$enable_pcre2_32" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UNICODE, test "x$enable_unicode" = "xyes")
+AM_CONDITIONAL(WITH_EBCDIC, test "x$enable_ebcdic" = "xyes")
+AM_CONDITIONAL(WITH_EBCDIC_NL25, test "x$enable_ebcdic_nl25" = "xyes")
 AM_CONDITIONAL(WITH_VALGRIND, test "x$enable_valgrind" = "xyes")
 AM_CONDITIONAL(WITH_FUZZ_SUPPORT, test "x$enable_fuzz_support" = "xyes")
 AM_CONDITIONAL(WITH_DIFF_FUZZ_SUPPORT, test "x$enable_diff_fuzz_support" = "xyes")
@@ -961,7 +971,7 @@ if test "$enable_ebcdic" = "yes"; then
     assumes that all input strings are in EBCDIC. If you do not define this
     macro, PCRE2 will assume input strings are ASCII or UTF-8/16/32 Unicode. It
     is not possible to build a version of PCRE2 that supports both EBCDIC and
-    UTF-8/16/32.])
+    ASCII or UTF-8/16/32.])
 fi
 
 if test "$enable_ebcdic_nl25" = "yes"; then
@@ -969,6 +979,13 @@ if test "$enable_ebcdic_nl25" = "yes"; then
     In an EBCDIC environment, define this macro to any value to arrange for
     the NL character to be 0x25 instead of the default 0x15. NL plays the role
     that LF does in an ASCII/Unicode environment.])
+fi
+
+if test "$enable_ebcdic_ignoring_compiler" = "yes"; then
+  AC_DEFINE_UNQUOTED([EBCDIC_IGNORING_COMPILER], [], [
+    To force an EBCDIC environment, define this macro to make the core PCRE2
+    library functions use EBCDIC codepage 1047, regardless of whether the
+    compiler supports it using C character literals.])
 fi
 
 if test "$enable_valgrind" = "yes"; then
@@ -1161,7 +1178,7 @@ AC_CONFIG_COMMANDS([script-chmod], [chmod a+x pcre2-config])
 
 # Make sure that pcre2_chartables.c is removed in case the method for
 # creating it was changed by reconfiguration.
-AC_CONFIG_COMMANDS([delete-old-chartables], [rm -f pcre2_chartables.c])
+AC_CONFIG_COMMANDS([delete-old-chartables], [rm -f src/pcre2_chartables.c])
 
 # Handle --enable-Werror/errwarn. This must come last, so that we don't mess
 # with any of the library-detection tests (or similar).
@@ -1218,6 +1235,7 @@ $PACKAGE-$VERSION configuration summary:
     \C is disabled ..................... : ${enable_never_backslash_C}
     EBCDIC coding ...................... : ${enable_ebcdic}
     EBCDIC code for NL ................. : ${ebcdic_nl_code}
+    EBCDIC coding ignoring compiler .... : ${enable_ebcdic_ignoring_compiler}
     Rebuild char tables ................ : ${enable_rebuild_chartables}
     Internal link size ................. : ${with_link_size}
     Maximum variable lookbehind ........ : ${with_max_varlookbehind}
