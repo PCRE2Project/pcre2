@@ -71,6 +71,10 @@ set unicode=%ERRORLEVEL%
 set jit=%ERRORLEVEL%
 %pcre2test% -C backslash-C >NUL
 set supportBSC=%ERRORLEVEL%
+%pcre2test% -C ebcdic >NUL
+set ebcdic=%ERRORLEVEL%
+%pcre2test% -C ebcdic-nl25 >NUL
+set ebcdic_nl25=%ERRORLEVEL%
 
 if %support8% EQU 1 (
 if not exist testout8 md testout8
@@ -114,18 +118,20 @@ set do24=no
 set do25=no
 set do26=no
 set do27=no
+set do28=no
+set do29=no
 set all=yes
 
 for %%a in (%*) do (
   set valid=no
-  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27) do if %%v == %%a set valid=yes
+  for %%v in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29) do if %%v == %%a set valid=yes
   if "!valid!" == "yes" (
     set do%%a=yes
     set all=no
   ) else (
     echo Invalid test number - %%a!
     echo Usage %0 [ test_number ] ...
-    echo Where test_number is one or more optional test numbers 1 through 27, default is all tests.
+    echo Where test_number is one or more optional test numbers 1 through 29, default is all tests.
     exit /b 1
   )
 )
@@ -159,6 +165,8 @@ if "%all%" == "yes" (
   set do25=yes
   set do26=yes
   set do27=yes
+  set do28=yes
+  set do29=yes
 )
 
 @echo RunTest.bat's pcre2test output is written to newly created subfolders
@@ -214,6 +222,8 @@ if "%do24%" == "yes" call :do24
 if "%do25%" == "yes" call :do25
 if "%do26%" == "yes" call :do26
 if "%do27%" == "yes" call :do27
+if "%do28%" == "yes" call :do28
+if "%do29%" == "yes" call :do29
 :modeSkip
 if "%mode%" == "" (
   set mode=-16
@@ -292,10 +302,20 @@ if errorlevel 1 (
   %pcre2test% %mode% %4 %5 %6 %7 %8 %9 -error -80,-62,-2,-1,0,100,101,191,300 >>%2%bits%\%testoutput%
 )
 
-fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput% >NUL
+set testexpected=%srcdir%\testdata\%testoutput%
+
+if %ebcdic% EQU 1 (
+  @rem We currently only use the #if ... #endif support in pcre2test for EBCDIC
+  @rem testing. Run in "preprocess-only" mode (-E) on the testoutput file to trim
+  @rem the output lines matching the input lines which are discarded.
+  %pcre2test% -q -E %testexpected% >%2%bits%\%testoutput%-trimmed
+  set testexpected=%2%bits%\%testoutput%-trimmed
+)
+
+fc /n %testexpected% %2%bits%\%testoutput% >NUL
 
 if errorlevel 1 (
-  echo.          failed comparison: fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
+  echo.          failed comparison: fc /n %testexpected% %2%bits%\%testoutput%
   if [%1]==[3] (
     echo.
     echo ** Test 3 failure usually means french locale is not
@@ -303,7 +323,7 @@ if errorlevel 1 (
     echo.
     goto :eof
 )
-  fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
+  fc /n %testexpected% %2%bits%\%testoutput%
 
   set failed="yes"
   goto :eof
@@ -541,6 +561,30 @@ if %unicode% EQU 0 (
 )
   call :runsub 27 testout "Auto-generated unicode property tests" -q
   if %jit% EQU 1 call :runsub 27 testoutjit "Test with JIT Override" -q -jit
+goto :eof
+
+:do28
+if %ebcdic% EQU 0 (
+  echo Test 28 Skipped when not targetting EBCDIC.
+  goto :eof
+)
+  call :runsub 28 testout "EBCDIC-specific tests" -q
+  call :runsub 28 testout "EBCDIC-specific tests (DFA)" -q -dfa
+  if %jit% EQU 1 call :runsub 28 testoutjit "Test with JIT Override" -q -jit
+goto :eof
+
+:do29
+if %ebcdic% EQU 0 (
+  echo Test 29 Skipped when not targetting EBCDIC.
+  goto :eof
+)
+if %ebcdic_nl25% EQU 0 (
+  echo Test 29 Skipped because EBCDIC newline is not 0x25.
+  goto :eof
+)
+  call :runsub 29 testout "EBCDIC-specific tests for NL=0x25" -q
+  call :runsub 29 testout "EBCDIC-specific tests for NL=0x25 (DFA)" -q -dfa
+  if %jit% EQU 1 call :runsub 29 testoutjit "Test with JIT Override" -q -jit
 goto :eof
 
 :conferror

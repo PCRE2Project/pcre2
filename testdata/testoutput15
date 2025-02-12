@@ -450,6 +450,8 @@ Failed: error -52: nested recursion at the same subject position
     bbb
 Failed: error -52: nested recursion at the same subject position
 
+#if !ebcdic
+
 /[^\xff]((?1))/BI
 ------------------------------------------------------------------
         Bra
@@ -464,6 +466,8 @@ Capture group count = 1
 Subject length lower bound = 1
     abcd
 Failed: error -52: nested recursion at the same subject position
+
+#endif
 
 # These tests don't behave the same with JIT
 

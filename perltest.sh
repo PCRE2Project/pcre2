@@ -118,9 +118,10 @@ fi
 # already have. NOTE: this is different to pcre2test where #pattern sets
 # defaults which can be overridden on individual patterns. The #subject command
 # may be used to set or unset a default "mark" modifier for data lines. This is
-# the only use of #subject that is supported. The #perltest, #forbid_utf, and
-# #newline_default commands, which are needed in the relevant pcre2test files,
-# are ignored. Any other #-command is ignored, with a warning message.
+# the only use of #subject that is supported. The #perltest, #forbid_utf,
+# #newline_default, and #if...#endif commands, which are needed in the relevant
+# pcre2test files, are ignored. Any other #-command is ignored, with a warning
+# message.
 #
 # The pattern lines should use only / as the delimiter. The other characters
 # that pcre2test supports cause problems with this script.
@@ -247,7 +248,7 @@ for (;;)
     }
   elsif ($_ =~ /^#/)
     {
-    if ($_ !~ /^#newline_default|^#perltest|^#forbid_utf/)
+    if ($_ !~ /^#newline_default|^#perltest|^#forbid_utf|^#if|^#endif/)
       {
       printf $outfile "** Warning: #-command ignored: %s", $_;
       }

@@ -143,10 +143,6 @@ Output information about a specific build-time option, then exit. This
 functionality is intended for use in scripts such as \fBRunTest\fP. The
 following options output the value and set the exit code as indicated:
 .sp
-  ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
-               either 0x15 or 0x25
-               0 if used in an ASCII/Unicode environment
-               exit code is always 0
   linksize   the configured internal link size (2, 3, or 4)
                exit code is set to the link size
   newline    the default newline setting:
@@ -161,6 +157,10 @@ to the same value:
 .sp
   backslash-C  \eC is supported (not locked out)
   ebcdic       compiled for an EBCDIC environment
+  ebcdic-io    if PCRE2 is compiled for EBCDIC, whether pcre2test's input and
+                 output is EBCDIC or ASCII
+  ebcdic-nl25  if PCRE2 is compiled for EBCDIC, whether NL (= LF) is 0x25
+                 (otherwise it is 0x15, the default)
   jit          just-in-time support is available
   pcre2-16     the 16-bit library was built
   pcre2-32     the 32-bit library was built
@@ -188,6 +188,10 @@ form and information about the compiled pattern is output after compilation;
 Behave as if each subject line has the \fBdfa\fP modifier; matching is done
 using the \fBpcre2_dfa_match()\fP function instead of the default
 \fBpcre2_match()\fP.
+.TP 10
+\fB-E\fP
+Run in "preprocess only" mode (similar to "gcc -E"). The "#if ... #endif"
+commands are processed, and all other lines are printed verbatim.
 .TP 10
 \fB-error\fP \fInumber[,number,...]\fP
 Call \fBpcre2_get_error_message()\fP for each of the error numbers in the
@@ -420,6 +424,17 @@ below.
 .sp
 This command sets a default modifier list that applies to all subsequent
 subject lines. Modifiers on a subject line can change these settings.
+.sp
+  #if CONDITION
+  ...
+  #endif
+.sp
+If CONDITION is true, then the command is printed, and its contents are
+processed as normal, including printing the commandlines to the output. If
+CONDITION is false, then all lines between the "#if" and "#endif" are skipped
+and not printed. The CONDITION can be any of the conditions which are tested by
+the "-C" commandline option and which set pcre2test's exit code to a boolean
+value. The CONDITION may also be preceded by "!".
 .
 .
 .SH "MODIFIER SYNTAX"
