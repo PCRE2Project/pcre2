@@ -119,6 +119,17 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
+# Solaris-specific fix for "CMAKE_C_VISIBILITY_PRESET": this feature was only
+# recently added to CMake for the `cc` compiler (Oracle Developer Studio). The
+# CMake version from OpenCSW and Oracle's package repository is too old and
+# requires this fix.
+if (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND
+    CMAKE_VERSION VERSION_LESS 3.31 AND
+    CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND
+    CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.15)
+  set(CMAKE_C_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
+endif()
+
 # The following policies have been set in the PCRE2 CMake file in the past.
 # Since we specify a minimum of CMake 3.15, these are no longer required.
 # cmake_policy(SET CMP0063 NEW)

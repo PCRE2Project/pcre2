@@ -1,0 +1,4 @@
+T pcre2_regcomp
+T pcre2_regerror
+T pcre2_regexec
+T pcre2_regfree
