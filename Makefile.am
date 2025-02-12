@@ -841,6 +841,7 @@ EXTRA_DIST += \
 
 CLEANFILES += \
         testSinput \
+        testSoutput \
         test3input \
         test3output \
         test3outputA \
@@ -853,6 +854,13 @@ CLEANFILES += \
         testtemp2grep \
         testtrygrep \
         testNinputgrep
+
+clean-local: testoutput-clean
+.PHONY: testoutput-clean
+testoutput-clean:
+	-rm -rf testoutput8 testoutput8-jit testoutput8-dfa
+	-rm -rf testoutput16 testoutput16-jit testoutput16-dfa
+	-rm -rf testoutput32 testoutput32-jit testoutput32-dfa
 
 ## ------------ End of testing -------------
 
