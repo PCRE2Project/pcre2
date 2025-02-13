@@ -338,13 +338,13 @@ src/config.h.generic: configure.ac
 	cs=$(srcdir)/config.status; test ! -f $$cs.aside || mv -f $$cs.aside $$cs
 	test -f _generic/src/config.h
 	perl -n \
-	  -e 'BEGIN{$$blank=0;}' \
-	  -e 'if(/(.+?)\s*__attribute__ \(\(visibility/){print"$$1\n";$$blank=0;next;}' \
-	  -e 'if(/LT_OBJDIR/){print"/* This is ignored unless you are using libtool. */\n";}' \
-	  -e 'if(/^#define\s((?:HAVE|SUPPORT|STDC)_\w+)/){print"/* #undef $$1 */\n";$$blank=0;next;}' \
-	  -e 'if(/^#define\s(?!PACKAGE|VERSION)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$blank=0;next;}' \
-	  -e 'if(/^\s*$$/){print unless $$blank; $$blank=1;} else{print;$$blank=0;}' \
-	  _generic/src/config.h >$@
+		-e 'BEGIN{$$blank=0;}' \
+		-e 'if(/(.+?)\s*__attribute__ \(\(visibility/){print"$$1\n";$$blank=0;next;}' \
+		-e 'if(/LT_OBJDIR/){print"/* This is ignored unless you are using libtool. */\n";}' \
+		-e 'if(/^#define\s((?:HAVE|SUPPORT|STDC)_\w+)/){print"/* #undef $$1 */\n";$$blank=0;next;}' \
+		-e 'if(/^#define\s(?!PACKAGE|VERSION)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$blank=0;next;}' \
+		-e 'if(/^\s*$$/){print unless $$blank; $$blank=1;} else{print;$$blank=0;}' \
+		_generic/src/config.h >$@
 	rm -rf _generic
 
 MAINTAINERCLEANFILES += src/pcre2.h.generic src/config.h.generic
@@ -847,20 +847,20 @@ EXTRA_DIST += \
 # they don't, add their working files to CLEANFILES.
 
 CLEANFILES += \
-        testSinput \
-        testSoutput \
-        test3input \
-        test3output \
-        test3outputA \
-        test3outputB \
-        testtry \
-        teststdout \
-        teststderr \
-        teststderrgrep \
-        testtemp1grep \
-        testtemp2grep \
-        testtrygrep \
-        testNinputgrep
+  testSinput \
+  testSoutput \
+  test3input \
+  test3output \
+  test3outputA \
+  test3outputB \
+  testtry \
+  teststdout \
+  teststderr \
+  teststderrgrep \
+  testtemp1grep \
+  testtemp2grep \
+  testtrygrep \
+  testNinputgrep
 
 testoutput-clean:
 	-rm -rf testoutput8 testoutput8-jit testoutput8-dfa

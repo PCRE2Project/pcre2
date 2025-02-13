@@ -1,0 +1,23 @@
+# EditorConfig helps ensure that files are opened in editors with the correct
+# settings, regardless of the editor or platform. See http://editorconfig.org.
+
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = lf
+
+[Makefile.am]
+indent_style = tab
+
+[*.bat]
+end_of_line = crlf
+
+[testdata/*]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+[testdata/test{input,output}{1,2,3,3A,3B,3C,6,28,29}]
+charset = latin1
