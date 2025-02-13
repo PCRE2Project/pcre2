@@ -1584,8 +1584,7 @@ case the following character).
 (3) \ex matches a lower case "x" character unless it is followed by two
 hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, as in Perl, a hexadecimal number is always expected after
-\ex, but it may have zero, one, or two digits (so, for example, \exz matches a
-binary zero character followed by z).
+\ex, but it may have one or two digits.
 .P
 ECMAscript 6 added additional functionality to \eu. This can be accessed using
 the PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"

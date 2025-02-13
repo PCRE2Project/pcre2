@@ -24,8 +24,12 @@
 "[ab/cd]"
 (?s)\A[ab/cd](?<!/)\z
 
+#if !ebcdic
+
 "[,-/]"
 (?s)\A[,-/](?<!/)\z
+
+#endif
 
 /[ab/
 ** Pattern conversion error at offset 3: missing terminating ] for character class
@@ -223,6 +227,8 @@ No match
     pic03.j/g
 No match
 
+#if !ebcdic
+
 /A[+-0]B/
 (?s)\AA[+-0](?<!/)B\z
     A+B
@@ -234,6 +240,8 @@ No match
 \= Expect no match
     A/B
 No match
+
+#endif
 
 /*x?z/
 (?s)\A[^/]*?x[^/]z\z
@@ -251,6 +259,8 @@ No match
     .xyz
  0: .xyz
 
+#if !ebcdic
+
 "[,-0]x?z"
 (?s)\A[,-0](?<!/)x[^/]z\z
     ,xyz
@@ -261,10 +271,14 @@ No match
     .xyz
  0: .xyz
 
+#endif
+
 ".x*"
 (?s)\A\.x(*COMMIT)[^/]*+\z
     .xabc
  0: .xabc
+
+#if !ebcdic
 
 /a[--0]z/
 (?s)\Aa[\--0](?<!/)z\z
@@ -279,6 +293,8 @@ No match
 No match
     a1z
 No match
+
+#endif
 
 /<[a-c-d]>/
 (?s)\A<[a-c\-d]>\z

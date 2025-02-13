@@ -1,13 +1,45 @@
 /*************************************************
-*        PCRE2 POSIX interface test program      *
+*      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/*
-Written by Philip Hazel, December 2022
-Copyright (c) 2022
-File last edited: December 2022
+/* PCRE is a library of functions to support regular expressions whose syntax
+and semantics are as close as possible to those of the Perl 5 language.
 
-This program tests the POSIX wrapper to the PCRE2 regular expression library.
+                       Written by Philip Hazel
+     Original API code Copyright (c) 1997-2012 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
+
+-----------------------------------------------------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of the University of Cambridge nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+-----------------------------------------------------------------------------
+*/
+
+
+/* This program tests the POSIX wrapper to the PCRE2 regular expression library.
 The main PCRE2 test program is pcre2test, which also tests these function
 calls. This little program is needed to test the case where the client includes
 pcre2posix.h but not pcre2.h, mainly to make sure that it builds successfully.
@@ -21,6 +53,7 @@ zero. If any test fails there is output to stderr, and the return code is 1.
 
 For testing purposes, the "-v" option causes verification output to be written
 to stdout. */
+
 
 #include <stdio.h>
 #include <string.h>

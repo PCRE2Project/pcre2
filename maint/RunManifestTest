@@ -3,6 +3,8 @@
 # Script to test a directory listing. We use this to verify that the list of
 # files installed by "make install" or "cmake --install" matches what we expect.
 
+set -e
+
 LANG=C # Ensure stable ordering of `sort` output
 export LANG
 
@@ -17,13 +19,9 @@ expected_manifest="$2"
 base=`basename $expected_manifest`
 
 sed=sed
-grep=grep
-# Helpers for Solaris
+# Helper for Solaris
 if [ -f /usr/bin/gsed ] ; then
   sed=/usr/bin/gsed
-fi
-if [ -f /usr/bin/ggrep ] ; then
-  grep=/usr/bin/ggrep
 fi
 
 find "$input_dir" -print | \

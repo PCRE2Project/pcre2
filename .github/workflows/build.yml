@@ -54,6 +54,7 @@ jobs:
         run: |
           make install "DESTDIR=`pwd`/install-dir"
           maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   alpine:
     name: alpine
@@ -93,6 +94,7 @@ jobs:
         run: |
           make install "DESTDIR=`pwd`/install-dir"
           maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   macos:
     name: macOS universal
@@ -117,6 +119,7 @@ jobs:
           cd build
           cmake --install . --prefix install-dir
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
+          ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   windows:
     name: Windows
@@ -145,6 +148,7 @@ jobs:
           cd build
           cmake --install . --config Release --prefix install-dir
           ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
+          ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
 
   freebsd:
     name: FreeBSD
@@ -182,6 +186,7 @@ jobs:
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
             cd ../build-cmake
@@ -192,6 +197,7 @@ jobs:
             ctest -j3 --output-on-failure
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   solaris:
     name: Solaris
@@ -251,6 +257,7 @@ jobs:
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== Autoconf, 64-bit =="
             cd ../build-autoconf-64
@@ -261,6 +268,7 @@ jobs:
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
@@ -271,6 +279,7 @@ jobs:
             ctest -j3 --output-on-failure
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   distcheck:
     name: Build & verify distribution

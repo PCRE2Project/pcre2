@@ -1966,9 +1966,9 @@ switch(type)
     detect_partial_match(common, backtracks);
 
   if (type == OP_NOT_HSPACE)
-    read_char(common, 0x9, 0x3000, backtracks, READ_CHAR_UPDATE_STR_PTR);
+    read_char(common, 0x1, 0x3000, backtracks, READ_CHAR_UPDATE_STR_PTR);
   else
-    read_char(common, 0x9, 0x3000, NULL, 0);
+    read_char(common, 0x1, 0x3000, NULL, 0);
 
   add_jump(compiler, &common->hspace, JUMP(SLJIT_FAST_CALL));
   sljit_set_current_flags(compiler, SLJIT_SET_Z);
@@ -1981,9 +1981,9 @@ switch(type)
     detect_partial_match(common, backtracks);
 
   if (type == OP_NOT_VSPACE)
-    read_char(common, 0xa, 0x2029, backtracks, READ_CHAR_UPDATE_STR_PTR);
+    read_char(common, 0x1, 0x2029, backtracks, READ_CHAR_UPDATE_STR_PTR);
   else
-    read_char(common, 0xa, 0x2029, NULL, 0);
+    read_char(common, 0x1, 0x2029, NULL, 0);
 
   add_jump(compiler, &common->vspace, JUMP(SLJIT_FAST_CALL));
   sljit_set_current_flags(compiler, SLJIT_SET_Z);

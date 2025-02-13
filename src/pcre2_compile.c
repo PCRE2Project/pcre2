@@ -55,7 +55,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
+#define CHAR_OUTPUT(c)  (c)
+#define CHAR_INPUT(c)   (c)
 #include "pcre2_printint.c"
+#undef PRINTABLE
+#undef CHAR_OUTPUT
+#undef CHAR_INPUT
 #define DEBUG_CALL_PRINTINT
 #endif
 
@@ -398,10 +403,10 @@ static const short int escapes[] = {
     /* 4 */ 0,                       /* 5 */ 0,
     /* 6 */ 0,                       /* 7 */ 0,
     /* 8 */ 0,                       /* 9 */ 0,
-    /* : */ CHAR_COLON,              /* ; */ CHAR_SEMICOLON,
-    /* < */ CHAR_LESS_THAN_SIGN,     /* = */ CHAR_EQUALS_SIGN,
-    /* > */ CHAR_GREATER_THAN_SIGN,  /* ? */ CHAR_QUESTION_MARK,
-    /* @ */ CHAR_COMMERCIAL_AT,      /* A */ -ESC_A,
+    /* : */ ESCAPES_FIRST+0x0a,      /* ; */ ESCAPES_FIRST+0x0b,
+    /* < */ ESCAPES_FIRST+0x0c,      /* = */ ESCAPES_FIRST+0x0d,
+    /* > */ ESCAPES_FIRST+0x0e,      /* ? */ ESCAPES_FIRST+0x0f,
+    /* @ */ ESCAPES_FIRST+0x10,      /* A */ -ESC_A,
     /* B */ -ESC_B,                  /* C */ -ESC_C,
     /* D */ -ESC_D,                  /* E */ -ESC_E,
     /* F */ 0,                       /* G */ -ESC_G,
@@ -414,10 +419,10 @@ static const short int escapes[] = {
     /* T */ 0,                       /* U */ 0,
     /* V */ -ESC_V,                  /* W */ -ESC_W,
     /* X */ -ESC_X,                  /* Y */ 0,
-    /* Z */ -ESC_Z,                  /* [ */ CHAR_LEFT_SQUARE_BRACKET,
-    /* \ */ CHAR_BACKSLASH,          /* ] */ CHAR_RIGHT_SQUARE_BRACKET,
-    /* ^ */ CHAR_CIRCUMFLEX_ACCENT,  /* _ */ CHAR_UNDERSCORE,
-    /* ` */ CHAR_GRAVE_ACCENT,       /* a */ CHAR_BEL,
+    /* Z */ -ESC_Z,                  /* [ */ ESCAPES_FIRST+0x2b,
+    /* \ */ ESCAPES_FIRST+0x2c,      /* ] */ ESCAPES_FIRST+0x2d,
+    /* ^ */ ESCAPES_FIRST+0x2e,      /* _ */ ESCAPES_FIRST+0x2f,
+    /* ` */ ESCAPES_FIRST+0x30,      /* a */ CHAR_BEL,
     /* b */ -ESC_b,                  /* c */ 0,
     /* d */ -ESC_d,                  /* e */ CHAR_ESC,
     /* f */ CHAR_FF,                 /* g */ 0,
@@ -436,43 +441,94 @@ static const short int escapes[] = {
 #else
 
 /* This is the "abnormal" table for EBCDIC systems without UTF-8 support.
-It runs from 'a' to '9'. For some minimal testing of EBCDIC features, the code
-is sometimes compiled on an ASCII system. In this case, we must not use CHAR_a
-because it is defined as 'a', which of course picks up the ASCII value. */
+It runs from 'a' to '9'. Our EBCDIC support can be provided via the compiler,
+which can interpret character literals like 'a' or '[' in an EBCDIC codepage;
+in this case, there is wide variance between codepages on the interpretation of
+characters between the letters ('[' and '{' and so on are placed in all sorts of
+different positions in the table). Thankfully however, all EBCDIC codepages
+place the letters and digits in the same location, so we hardcode that here.
+Our EBCDIC support can also be provided via numeric literals instead of
+character literals, so either way, 'CHAR_a' will be 0x81 when PCRE2 is compiled
+in EBCDIC mode. */
 
-#if 'a' == 0x81                    /* Check for a real EBCDIC environment */
 #define ESCAPES_FIRST       CHAR_a
 #define ESCAPES_LAST        CHAR_9
 #define UPPER_CASE(c)       (c+64)
-#else                              /* Testing in an ASCII environment */
-#define ESCAPES_FIRST  ((unsigned char)'\x81')   /* EBCDIC 'a' */
-#define ESCAPES_LAST   ((unsigned char)'\xf9')   /* EBCDIC '9' */
-#define UPPER_CASE(c)  (c-32)
-#endif
 
 static const short int escapes[] = {
-/*  80 */         CHAR_BEL, -ESC_b,       0, -ESC_d, CHAR_ESC, CHAR_FF,      0,
-/*  88 */ -ESC_h,        0,      0,     '{',      0,        0,       0,      0,
-/*  90 */      0,        0, -ESC_k,       0,      0,  CHAR_LF,       0, -ESC_p,
-/*  98 */      0,  CHAR_CR,      0,     '}',      0,        0,       0,      0,
-/*  A0 */      0,      '~', -ESC_s, CHAR_HT,      0,   -ESC_v,  -ESC_w,      0,
-/*  A8 */      0,   -ESC_z,      0,       0,      0,      '[',       0,      0,
-/*  B0 */      0,        0,      0,       0,      0,        0,       0,      0,
-/*  B8 */      0,        0,      0,       0,      0,      ']',     '=',    '-',
-/*  C0 */    '{',   -ESC_A, -ESC_B,  -ESC_C, -ESC_D,   -ESC_E,       0, -ESC_G,
-/*  C8 */ -ESC_H,        0,      0,       0,      0,        0,       0,      0,
-/*  D0 */    '}',        0, -ESC_K,       0,      0,   -ESC_N,       0, -ESC_P,
-/*  D8 */ -ESC_Q,   -ESC_R,      0,       0,      0,        0,       0,      0,
-/*  E0 */   '\\',        0, -ESC_S,       0,      0,   -ESC_V,  -ESC_W, -ESC_X,
-/*  E8 */      0,   -ESC_Z,      0,       0,      0,        0,       0,      0,
-/*  F0 */      0,        0,      0,       0,      0,        0,       0,      0,
-/*  F8 */      0,        0
+    /* 0x81 a */ CHAR_BEL,             /* 0x82 b */ -ESC_b,
+    /* 0x83 c */ 0,                    /* 0x84 d */ -ESC_d,
+    /* 0x85 e */ CHAR_ESC,             /* 0x86 f */ CHAR_FF,
+    /* 0x87 g */ 0,                    /* 0x88 h */ -ESC_h,
+    /* 0x89 i */ 0,                    /* 0x8a   */ ESCAPES_FIRST+0x09,
+    /* 0x8b   */ ESCAPES_FIRST+0x0a,   /* 0x8c   */ ESCAPES_FIRST+0x0b,
+    /* 0x8d   */ ESCAPES_FIRST+0x0c,   /* 0x8e   */ ESCAPES_FIRST+0x0d,
+    /* 0x8f   */ ESCAPES_FIRST+0x0e,   /* 0x90   */ ESCAPES_FIRST+0x0f,
+    /* 0x91 j */ 0,                    /* 0x92 k */ -ESC_k,
+    /* 0x93 l */ 0,                    /* 0x94 m */ 0,
+    /* 0x95 n */ CHAR_LF,              /* 0x96 o */ 0,
+    /* 0x97 p */ -ESC_p,               /* 0x98 q */ 0,
+    /* 0x99 r */ CHAR_CR,              /* 0x9a   */ ESCAPES_FIRST+0x19,
+    /* 0x9b   */ ESCAPES_FIRST+0x1a,   /* 0x9c   */ ESCAPES_FIRST+0x1b,
+    /* 0x9d   */ ESCAPES_FIRST+0x1c,   /* 0x9e   */ ESCAPES_FIRST+0x1d,
+    /* 0x9f   */ ESCAPES_FIRST+0x1e,   /* 0xa0   */ ESCAPES_FIRST+0x1f,
+    /* 0xa1   */ ESCAPES_FIRST+0x20,   /* 0xa2 s */ -ESC_s,
+    /* 0xa3 t */ CHAR_HT,              /* 0xa4 u */ 0,
+    /* 0xa5 v */ -ESC_v,               /* 0xa6 w */ -ESC_w,
+    /* 0xa7 x */ 0,                    /* 0xa8 y */ 0,
+    /* 0xa9 z */ -ESC_z,               /* 0xaa   */ ESCAPES_FIRST+0x29,
+    /* 0xab   */ ESCAPES_FIRST+0x2a,   /* 0xac   */ ESCAPES_FIRST+0x2b,
+    /* 0xad   */ ESCAPES_FIRST+0x2c,   /* 0xae   */ ESCAPES_FIRST+0x2d,
+    /* 0xaf   */ ESCAPES_FIRST+0x2e,   /* 0xb0   */ ESCAPES_FIRST+0x2f,
+    /* 0xb1   */ ESCAPES_FIRST+0x30,   /* 0xb2   */ ESCAPES_FIRST+0x31,
+    /* 0xb3   */ ESCAPES_FIRST+0x32,   /* 0xb4   */ ESCAPES_FIRST+0x33,
+    /* 0xb5   */ ESCAPES_FIRST+0x34,   /* 0xb6   */ ESCAPES_FIRST+0x35,
+    /* 0xb7   */ ESCAPES_FIRST+0x36,   /* 0xb8   */ ESCAPES_FIRST+0x37,
+    /* 0xb9   */ ESCAPES_FIRST+0x38,   /* 0xba   */ ESCAPES_FIRST+0x39,
+    /* 0xbb   */ ESCAPES_FIRST+0x3a,   /* 0xbc   */ ESCAPES_FIRST+0x3b,
+    /* 0xbd   */ ESCAPES_FIRST+0x3c,   /* 0xbe   */ ESCAPES_FIRST+0x3d,
+    /* 0xbf   */ ESCAPES_FIRST+0x3e,   /* 0xc0   */ ESCAPES_FIRST+0x3f,
+    /* 0xc1 A */ -ESC_A,               /* 0xc2 B */ -ESC_B,
+    /* 0xc3 C */ -ESC_C,               /* 0xc4 D */ -ESC_D,
+    /* 0xc5 E */ -ESC_E,               /* 0xc6 F */ 0,
+    /* 0xc7 G */ -ESC_G,               /* 0xc8 H */ -ESC_H,
+    /* 0xc9 I */ 0,                    /* 0xca   */ ESCAPES_FIRST+0x49,
+    /* 0xcb   */ ESCAPES_FIRST+0x4a,   /* 0xcc   */ ESCAPES_FIRST+0x4b,
+    /* 0xcd   */ ESCAPES_FIRST+0x4c,   /* 0xce   */ ESCAPES_FIRST+0x4d,
+    /* 0xcf   */ ESCAPES_FIRST+0x4e,   /* 0xd0   */ ESCAPES_FIRST+0x4f,
+    /* 0xd1 J */ 0,                    /* 0xd2 K */ -ESC_K,
+    /* 0xd3 L */ 0,                    /* 0xd4 M */ 0,
+    /* 0xd5 N */ -ESC_N,               /* 0xd6 O */ 0,
+    /* 0xd7 P */ -ESC_P,               /* 0xd8 Q */ -ESC_Q,
+    /* 0xd9 R */ -ESC_R,               /* 0xda   */ ESCAPES_FIRST+0x59,
+    /* 0xdb   */ ESCAPES_FIRST+0x5a,   /* 0xdc   */ ESCAPES_FIRST+0x5b,
+    /* 0xdd   */ ESCAPES_FIRST+0x5c,   /* 0xde   */ ESCAPES_FIRST+0x5d,
+    /* 0xdf   */ ESCAPES_FIRST+0x5e,   /* 0xe0   */ ESCAPES_FIRST+0x5f,
+    /* 0xe1   */ ESCAPES_FIRST+0x60,   /* 0xe2 S */ -ESC_S,
+    /* 0xe3 T */ 0,                    /* 0xe4 U */ 0,
+    /* 0xe5 V */ -ESC_V,               /* 0xe6 W */ -ESC_W,
+    /* 0xe7 X */ -ESC_X,               /* 0xe8 Y */ 0,
+    /* 0xe9 Z */ -ESC_Z,               /* 0xea   */ ESCAPES_FIRST+0x69,
+    /* 0xeb   */ ESCAPES_FIRST+0x6a,   /* 0xec   */ ESCAPES_FIRST+0x6b,
+    /* 0xed   */ ESCAPES_FIRST+0x6c,   /* 0xee   */ ESCAPES_FIRST+0x6d,
+    /* 0xef   */ ESCAPES_FIRST+0x6e,   /* 0xf0 0 */ 0,
+    /* 0xf1 1 */ 0,                    /* 0xf2 2 */ 0,
+    /* 0xf3 3 */ 0,                    /* 0xf4 4 */ 0,
+    /* 0xf5 5 */ 0,                    /* 0xf6 6 */ 0,
+    /* 0xf7 7 */ 0,                    /* 0xf8 8 */ 0,
+    /* 0xf9 9 */ 0,
 };
 
 /* We also need a table of characters that may follow \c in an EBCDIC
 environment for characters 0-31. */
 
-static unsigned char ebcdic_escape_c[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+static unsigned char ebcdic_escape_c[] = {
+  CHAR_COMMERCIAL_AT, CHAR_A, CHAR_B, CHAR_C, CHAR_D, CHAR_E, CHAR_F, CHAR_G,
+  CHAR_H, CHAR_I, CHAR_J, CHAR_K, CHAR_L, CHAR_M, CHAR_N, CHAR_O, CHAR_P,
+  CHAR_Q, CHAR_R, CHAR_S, CHAR_T, CHAR_U, CHAR_V, CHAR_W, CHAR_X, CHAR_Y,
+  CHAR_Z, CHAR_LEFT_SQUARE_BRACKET, CHAR_BACKSLASH, CHAR_RIGHT_SQUARE_BRACKET,
+  CHAR_CIRCUMFLEX_ACCENT, CHAR_UNDERSCORE
+};
 
 #endif   /* EBCDIC */
 
@@ -1570,8 +1626,8 @@ else
 
   if (cb == NULL)
     {
-    if (c < CHAR_0 ||
-       (c > CHAR_9 && (c != CHAR_c && c != CHAR_o && c != CHAR_x && c != CHAR_g)))
+    if (!(c >= CHAR_0 && c <= CHAR_9) && c != CHAR_c && c != CHAR_o &&
+        c != CHAR_x && c != CHAR_g)
       {
       *errorcodeptr = ERR3;
       return 0;
@@ -2111,11 +2167,7 @@ else
     For testing the EBCDIC handling of \c in an ASCII environment, recognize
     the EBCDIC value of 'c' explicitly. */
 
-#if defined EBCDIC && 'a' != 0x81
-    case 0x83:
-#else
     case CHAR_c:
-#endif
     if (ptr >= ptrend)
       {
       *errorcodeptr = ERR2;
@@ -2141,7 +2193,7 @@ else
 
 #else
     if (c == CHAR_QUESTION_MARK)
-      c = ('\\' == 188 && '`' == 74)? 0x5f : 0xff;
+      c = (CHAR_BACKSLASH == 188 && CHAR_GRAVE_ACCENT == 74)? 0x5f : 0xff;
     else
       {
       for (i = 0; i < 32; i++)
