@@ -208,6 +208,7 @@ arg16=
 arg32=
 nojit=
 bigstack=
+malloc=
 sim=
 skip=
 valgrind=
@@ -294,6 +295,7 @@ while [ $# -gt 0 ] ; do
   -16) arg16=yes;;
   -32) arg32=yes;;
    bigstack|-bigstack) bigstack=yes;;
+   malloc|-malloc) malloc=yes;;
    nojit|-nojit) nojit=yes;;
    sim|-sim) shift; sim=$1;;
    valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --error-exitcode=70";;
@@ -348,6 +350,13 @@ if [ $support_setstack -eq 0 -a "$bigstack" != "" ] ; then
   setstack="-S 32"
 else
   setstack=""
+fi
+
+# If the malloc option is given, then call pcre2test with -malloc.
+
+if [ "$malloc" != "" ] ; then
+  # XXX RENAME setstack to somthing like "extraoptions"
+  setstack="$setstack -malloc"
 fi
 
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
@@ -558,7 +567,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput2 testtry
       saverc=$?
       if [ $saverc = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testtry
+        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testtry
         checkresult $? 2 "$opt"
       else
         checkresult $saverc 2 "$opt"

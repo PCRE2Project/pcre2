@@ -8943,6 +8943,7 @@ while (1)
 
   has_vreverse = (*ccbegin == OP_VREVERSE);
   if (*ccbegin == OP_REVERSE || has_vreverse)
+    // XXX what if error?
     ccbegin = compile_reverse_matchingpath(common, ccbegin, &altbacktrack);
 
   compile_matchingpath(common, ccbegin, cc, &altbacktrack);
@@ -9714,6 +9715,7 @@ else if (opcode == OP_ASSERTBACK_NA && PRIVATE_DATA(ccbegin + 1))
 
   has_vreverse = (*matchingpath == OP_VREVERSE);
   if (*matchingpath == OP_REVERSE || has_vreverse)
+    // XXX what if error?
     matchingpath = compile_reverse_matchingpath(common, matchingpath, backtrack);
   }
 else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
@@ -9725,6 +9727,7 @@ else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SC
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
 
   if (*matchingpath == OP_REVERSE)
+    // XXX what if error?
     matchingpath = compile_reverse_matchingpath(common, matchingpath, backtrack);
   }
 else if (opcode == OP_ASSERT_SCS)
@@ -12694,6 +12697,8 @@ if (current->cc[1] > OP_ASSERTBACK_NOT)
   {
   /* Manual call of compile_bracket_matchingpath and compile_bracket_backtrackingpath. */
   compile_bracket_matchingpath(common, current->cc, current);
+  if (SLJIT_UNLIKELY(sljit_get_compiler_error(common->compiler)))
+    return;
   compile_bracket_backtrackingpath(common, current->top);
   }
 else
@@ -12979,6 +12984,7 @@ while (current)
 
     case OP_BRAMINZERO:
     compile_braminzero_backtrackingpath(common, current);
+    // XXX what if error?
     break;
 
     case OP_MARK:

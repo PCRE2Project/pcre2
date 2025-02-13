@@ -1024,6 +1024,7 @@ static BOOL restrict_for_perl_test = FALSE;
 static BOOL show_memory = FALSE;
 static BOOL preprocess_only = FALSE;
 static BOOL inside_if = FALSE;
+static BOOL malloc_testing = FALSE;
 
 static int jitrc;                             /* Return from JIT compile */
 static int test_mode = DEFAULT_TEST_MODE;
@@ -2943,12 +2944,60 @@ return sys_errlist[n];
 *            Local memory functions              *
 *************************************************/
 
+static int mallocs_until_failure = INT_MAX;
+static int mallocs_called = 0;
+
 /* Alternative memory functions, to test functionality. */
 
 static void *my_malloc(size_t size, void *data)
 {
-void *block = malloc(size);
+void *block;
+
 (void)data;
+
+
+/*
+XXX
+
+list of all malloc'ing functions:
+
+FIXED COUNT:
+,pcre2_code_copy
+,pcre2_code_copy_with_tables
+,pcre2_compile_context_copy_8,__libc_start_main,_start,
+,pcre2_convert_context_copy_8,__libc_start_main,_start,
+,pcre2_general_context_copy_8,__libc_start_main,_start,
+,pcre2_match_context_copy_8,__libc_start_main,_start,
+,pcre2_compile_context_create_8,__libc_start_main,_start,
+,pcre2_convert_context_create_8,__libc_start_main,_start,
+,pcre2_general_context_create_8,__libc_start_main,_start,
+,pcre2_match_context_create_8,__libc_start_main,_start,
+,pcre2_general_context_create_8,__libc_start_main,_start,
+
+,pcre2_maketables_8,__libc_start_main,_start,
+,pcre2_match_data_create_8,__libc_start_main,_start,
+,pcre2_match_data_create_from_pattern_8,__libc_start_main,_start,
+,pcre2_pattern_convert_8,__libc_start_main,_start,
+
+,pcre2_serialize_decode_8,__libc_start_main,_start,
+,pcre2_serialize_encode_8,__libc_start_main,_start,
+,pcre2_substring_get_bynumber_8,__libc_start_main,_start,
+,pcre2_substring_get_byname_8,__libc_start_main,_start,
+,pcre2_substring_list_get_8,__libc_start_main,_start,
+
+// XXX VARIABLE:
+,pcre2_match_8,__libc_start_main,_start,
+,pcre2_dfa_match_8,__libc_start_main,_start,
+,pcre2_substitute_8,__libc_start_main,_start,
+
+
+*/
+
+mallocs_called++;
+if (mallocs_until_failure != INT_MAX && mallocs_until_failure-- <= 0)
+  return NULL;
+
+block = malloc(size);
 if (show_memory)
   {
   if (block == NULL)
@@ -6219,8 +6268,34 @@ if (timeit > 0)
 
 /* A final compile that is used "for real". */
 
+mallocs_called = 0;
 PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
   pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
+
+/* For malloc testing, we repeat the compilation. */
+
+if (malloc_testing)
+  {
+  for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+    {
+    if (TEST(compiled_code, !=, NULL))
+      { SUB1(pcre2_code_free, compiled_code); }
+
+    errorcode = erroroffset = 0;
+    mallocs_until_failure = i;
+    PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
+      pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
+    mallocs_until_failure = INT_MAX;
+
+    if (i < target_mallocs &&
+        !(TEST(compiled_code, ==, NULL) && errorcode == PCRE2_ERROR_HEAP_FAILED))
+      {
+      fprintf(outfile, "** malloc() compile test did not fail as expected (%d)\n",
+              errorcode);
+      return PR_ABEND;
+      }
+    }
+  }
 
 /* If valgrind is supported, mark the pbuffer as accessible again. We leave the
 pattern in the test-mode's buffer defined because it may be read from a callout
@@ -6262,9 +6337,9 @@ else
 #endif
 #endif
 
-/* Call the JIT compiler if requested. When timing, we must free and recompile
-the pattern each time because that is the only way to free the JIT compiled
-code. We know that compilation will always succeed. */
+/* Call the JIT compiler if requested. When timing, or testing malloc failures,
+we must free and recompile the pattern each time because that is the only way to
+free the JIT compiled code. We know that compilation will always succeed. */
 
 if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
   {
@@ -6275,14 +6350,20 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
 
     for (i = 0; i < timeit; i++)
       {
-      clock_t start_time;
+      clock_t start_time = clock();
+      PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
+      time_taken += clock() - start_time;
+
       SUB1(pcre2_code_free, compiled_code);
       PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
         pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
         use_pat_context);
-      start_time = clock();
-      PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
-      time_taken += clock() - start_time;
+      if (TEST(compiled_code, ==, NULL))
+        {
+        fprintf(outfile, "** Unexpected - pattern compilation not successful\n");
+        return PR_ABEND;
+        }
+
       if (jitrc != 0)
         {
         fprintf(outfile, "JIT compilation was not successful");
@@ -6295,14 +6376,46 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
       fprintf(outfile, "JIT compile  %8.4f microseconds\n",
         ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeit);
     }
-  else
+
+  mallocs_called = 0;
+  PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
+
+  /* For malloc testing, we repeat the compilation. */
+
+  if (malloc_testing)
     {
-    PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
-    if (jitrc != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
+    for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
       {
-      fprintf(outfile, "JIT compilation was not successful");
-      if (!print_error_message(jitrc, " (", ")\n")) return PR_ABEND;
+      SUB1(pcre2_code_free, compiled_code);
+      PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
+        pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset,
+        use_pat_context);
+      if (TEST(compiled_code, ==, NULL))
+        {
+        fprintf(outfile, "** Unexpected - pattern compilation not successful\n");
+        return PR_ABEND;
+        }
+
+      mallocs_until_failure = i;
+      PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
+      mallocs_until_failure = INT_MAX;
+
+      if (i < target_mallocs && jitrc != PCRE2_ERROR_NOMEMORY)
+        {
+        fprintf(outfile, "** malloc() JIT compile test did not fail as expected (%d)\n",
+                jitrc);
+        return PR_ABEND;
+        }
       }
+    }
+
+  /* Check whether JIT compilation failed; but continue with an error message
+  if not. */
+
+  if (jitrc != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)
+    {
+    fprintf(outfile, "JIT compilation was not successful");
+    if (!print_error_message(jitrc, " (", ")\n")) return PR_ABEND;
     }
   }
 
@@ -8419,6 +8532,7 @@ for (gmatched = 0;; gmatched++)
 
     /* Run a single DFA or NFA match. */
 
+    mallocs_called = 0;
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
       if (dfa_workspace == NULL)
@@ -8446,6 +8560,50 @@ for (gmatched = 0;; gmatched++)
         {
         fprintf(outfile, "Matched, but too many substrings\n");
         capcount = dat_datctl.oveccount;
+        }
+      }
+
+    /* For malloc testing, we repeat the matching. */
+
+    if (malloc_testing && (dat_datctl.control & CTL_CALLOUT_NONE) != 0)
+      {
+      int target_capcount = capcount;
+
+      for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+        {
+        mallocs_until_failure = i;
+
+        if ((dat_datctl.control & CTL_DFA) != 0)
+          {
+          if (dfa_matched++ == 0)
+            dfa_workspace[0] = -1;  /* To catch bad restart */
+          PCRE2_DFA_MATCH(capcount, compiled_code, pp, arg_ulen,
+            dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
+            use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
+          }
+        else
+          {
+          if ((pat_patctl.control & CTL_JITFAST) != 0)
+            PCRE2_JIT_MATCH(capcount, compiled_code, pp, arg_ulen, dat_datctl.offset,
+              dat_datctl.options | g_notempty, match_data, use_dat_context);
+          else
+            PCRE2_MATCH(capcount, compiled_code, pp, arg_ulen, dat_datctl.offset,
+              dat_datctl.options | g_notempty, match_data, use_dat_context);
+          }
+
+        mallocs_until_failure = INT_MAX;
+
+        if (capcount == 0)
+          capcount = dat_datctl.oveccount;
+
+        // XXX this is a hack. Clearly some memory is being held-on-to so it's
+        //     not managing to exercise one of the code paths
+        if (i < target_mallocs && !(capcount == target_capcount || capcount == PCRE2_ERROR_NOMEMORY))
+          {
+          fprintf(outfile, "** malloc() match test did not fail as expected (%d)\n",
+                  capcount);
+          return PR_ABEND;
+          }
         }
       }
     }
@@ -9077,6 +9235,7 @@ printf("  -t [<n>]      time compilation and execution, repeating <n> times\n");
 printf("  -tm [<n>]     time execution (matching) only, repeating <n> times\n");
 printf("  -T            same as -t, but show total times at the end\n");
 printf("  -TM           same as -tm, but show total time at the end\n");
+printf("  -malloc       exercise malloc() failures\n");
 printf("  -v|--version  show PCRE2 version and exit\n");
 }
 
@@ -9845,6 +10004,13 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       }
     else timeitm = LOOPREPEAT;
     if (both) timeit = timeitm;
+    }
+
+  /* Set malloc testing */
+
+  else if (strcmp(arg, "-malloc") == 0)
+    {
+    malloc_testing = TRUE;
     }
 
   /* Give help */

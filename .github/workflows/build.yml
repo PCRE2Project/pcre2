@@ -358,7 +358,10 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
+        run: |
+          cd build
+          LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
+          LLVM_PROFILE_FILE="coverage-%m.profraw" srcdir=.. pcre2test=./pcre2test ../RunTest -malloc
 
       - name: Report
         run: |
