@@ -219,8 +219,8 @@ static unsigned char meta_extra_lengths[] = {
   3,             /* META_COND_VERSION */
   SIZEOFFSET,    /* META_OFFSET */
   0,             /* META_SCS */
-  1,             /* META_SCS_NAME */
-  1,             /* META_SCS_NUMBER */
+  1,             /* META_CAPTURE_NAME */
+  1,             /* META_CAPTURE_NUMBER */
   0,             /* META_DOLLAR */
   0,             /* META_DOT */
   0,             /* META_ESCAPE - one more for ESC_P and ESC_p */
@@ -1091,12 +1091,12 @@ for (;;)
     fprintf(stderr, "META (*scan_substring:");
     break;
 
-    case META_SCS_NAME:
-    fprintf(stderr, "META_SCS_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
+    case META_CAPTURE_NAME:
+    fprintf(stderr, "META_CAPTURE_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
     break;
 
-    case META_SCS_NUMBER:
-    fprintf(stderr, "META_SCS_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
+    case META_CAPTURE_NUMBER:
+    fprintf(stderr, "META_CAPTURE_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
     break;
 
     case META_MARK:
@@ -4693,7 +4693,7 @@ while (ptr < ptrend)
                 errorcode = ERR15;
                 goto FAILED;
                 }
-              meta = META_SCS_NUMBER;
+              meta = META_CAPTURE_NUMBER;
               namelen = (uint32_t)i;
               }
             else if (errorcode != 0) goto FAILED;   /* Number too big */
@@ -4715,7 +4715,7 @@ while (ptr < ptrend)
               if (!read_name(&ptr, ptrend, utf, terminator, &next_offset,
                   &name, &namelen, &errorcode, cb)) goto FAILED;
 
-              meta = META_SCS_NAME;
+              meta = META_CAPTURE_NAME;
               }
 
             PCRE2_ASSERT(next_offset > 0);
@@ -6015,7 +6015,7 @@ uint32_t meta, meta_arg;
 uint32_t firstcuflags, reqcuflags;
 uint32_t zeroreqcuflags, zerofirstcuflags;
 uint32_t req_caseopt, reqvary, tempreqvary;
-/* Some opcodes, such as META_SCS_NUMBER or META_SCS_NAME,
+/* Some opcodes, such as META_CAPTURE_NUMBER or META_CAPTURE_NAME,
 depends on the previous value of offset. */
 PCRE2_SIZE offset = 0;
 PCRE2_SIZE length_prevgroup = 0;
@@ -6520,16 +6520,18 @@ for (;; pptr++)
     case META_COND_RNUMBER:   /* (?(Rdigits) */
     case META_COND_NAME:      /* (?(name) or (?'name') or ?(<name>) */
     case META_COND_RNAME:     /* (?(R&name) - test for recursion */
-    case META_SCS_NAME:       /* Name of scan substring */
+    case META_CAPTURE_NAME:   /* Generic capture name */
     bravalue = OP_COND;
+
+    if (lengthptr != NULL)
       {
-      int count, index;
-      unsigned int i;
+      uint32_t i;
       PCRE2_SPTR name;
       named_group *ng = cb->named_groups;
+      uint32_t *start_pptr = pptr;
       uint32_t length = *(++pptr);
 
-      if (meta == META_SCS_NAME)
+      if (meta == META_CAPTURE_NAME)
         offset += meta_arg;
       else
         GETPLUSOFFSET(offset, pptr);
@@ -6578,61 +6580,121 @@ for (;; pptr++)
         translated into RREF_ANY (which is 0xffff). */
 
         if (groupnumber == 0) groupnumber = RREF_ANY;
-        code[1+LINK_SIZE] = OP_RREF;
-        PUT2(code, 2+LINK_SIZE, groupnumber);
+        PCRE2_ASSERT(start_pptr[0] == META_COND_RNUMBER);
+        start_pptr[1] = groupnumber;
         skipunits = 1+IMM2_SIZE;
         goto GROUP_PROCESS_NOTE_EMPTY;
         }
-      else if (!ng->isdup)
+
+      /* From here on, we know we have a name (not a number),
+      so treat META_COND_RNUMBER the same as META_COND_NAME. */
+      if (meta == META_COND_RNUMBER) meta = META_COND_NAME;
+
+      if (!ng->isdup)
         {
-        /* Otherwise found a duplicated name */
+        /* Otherwise found a duplicated name. Since it is a global,
+        it is enough to update it in the pre-processing phase. */
         if (ng->number > cb->top_backref) cb->top_backref = ng->number;
 
-        if (meta == META_SCS_NAME)
+        start_pptr[0] = meta;
+        start_pptr[1] = ng->number;
+
+        if (meta == META_CAPTURE_NAME)
           {
-          code[0] = OP_CREF;
-          PUT2(code, 1, ng->number);
-          code += 1+IMM2_SIZE;
+          code += 1 + IMM2_SIZE;
           break;
           }
 
-        code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_RREF : OP_CREF;
-        PUT2(code, 2+LINK_SIZE, ng->number);
-        skipunits = 1+IMM2_SIZE;
-        if (meta != META_SCS_NAME) goto GROUP_PROCESS_NOTE_EMPTY;
-        cb->assert_depth += 1;
-        goto GROUP_PROCESS;
+        skipunits = 1 + IMM2_SIZE;
+        goto GROUP_PROCESS_NOTE_EMPTY;
         }
 
       /* We have a duplicated name. In the compile pass we have to search the
       main table in order to get the index and count values. */
 
+      PCRE2_ASSERT(i == (uint32_t)(ng - cb->named_groups));
+
+      start_pptr[0] = meta | 1;
+      start_pptr[1] = i;
+
+      if (meta == META_CAPTURE_NAME)
+        {
+        code += 1 + 2 * IMM2_SIZE;
+        break;
+        }
+
+      /* A duplicated name was found. Note that if an R<digits> name is found
+      (META_COND_RNUMBER), it is a reference test, not a recursion test. */
+      skipunits = 1 + 2 * IMM2_SIZE;
+      }
+    else
+      {
+      /* Otherwise lengthptr equals to NULL,
+      which is the second phase of compilation. */
+      int count, index;
+      named_group *ng;
+
+      /* Generate code using the data
+      collected in the pre-processing phase. */
+
+      if (meta == META_COND_RNUMBER)
+        {
+        code[1+LINK_SIZE] = OP_RREF;
+        PUT2(code, 2 + LINK_SIZE, pptr[1]);
+        skipunits = 1 + IMM2_SIZE;
+        pptr += 1 + SIZEOFFSET;
+        goto GROUP_PROCESS_NOTE_EMPTY;
+        }
+
+      if (meta_arg == 0)
+        {
+        if (meta == META_CAPTURE_NAME)
+          {
+          code[0] = OP_CREF;
+          PUT2(code, 1, pptr[1]);
+          code += 1 + IMM2_SIZE;
+          pptr++;
+          break;
+          }
+
+        code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_RREF : OP_CREF;
+        PUT2(code, 2 + LINK_SIZE, pptr[1]);
+        skipunits = 1 + IMM2_SIZE;
+        pptr += 1 + SIZEOFFSET;
+        goto GROUP_PROCESS_NOTE_EMPTY;
+        }
+
+      ng = cb->named_groups + pptr[1];
       count = 0;  /* Values for first pass (avoids compiler warning) */
       index = 0;
-      if (lengthptr == NULL && !find_dupname_details(name, length, &index,
+
+      /* The failed case is an internal error. */
+      if (!find_dupname_details(ng->name, ng->length, &index,
             &count, errorcodeptr, cb)) return 0;
 
-      if (meta == META_SCS_NAME)
+      if (meta == META_CAPTURE_NAME)
         {
         code[0] = OP_DNCREF;
         PUT2(code, 1, index);
-        PUT2(code, 1+IMM2_SIZE, count);
-        code += 1+2*IMM2_SIZE;
+        PUT2(code, 1 + IMM2_SIZE, count);
+        code += 1 + 2 * IMM2_SIZE;
+        pptr++;
         break;
         }
 
       /* A duplicated name was found. Note that if an R<digits> name is found
       (META_COND_RNUMBER), it is a reference test, not a recursion test. */
 
-      code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_DNRREF : OP_DNCREF;
+      code[1 + LINK_SIZE] = (meta == META_COND_RNAME)? OP_DNRREF : OP_DNCREF;
 
       /* Insert appropriate data values. */
-      skipunits = 1+2*IMM2_SIZE;
-      PUT2(code, 2+LINK_SIZE, index);
-      PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);
+      PUT2(code, 2 + LINK_SIZE, index);
+      PUT2(code, 2 + LINK_SIZE + IMM2_SIZE, count);
+      skipunits = 1 + 2 * IMM2_SIZE;
+      pptr += 1 + SIZEOFFSET;
       }
 
-    PCRE2_ASSERT(meta != META_SCS_NAME);
+    PCRE2_ASSERT(meta != META_CAPTURE_NAME);
     goto GROUP_PROCESS_NOTE_EMPTY;
 
     /* The DEFINE condition is always false. Its internal groups may never
@@ -6649,9 +6711,9 @@ for (;; pptr++)
     /* Conditional test of a group's being set. */
 
     case META_COND_NUMBER:
-    case META_SCS_NUMBER:
+    case META_CAPTURE_NUMBER:
     bravalue = OP_COND;
-    if (meta == META_SCS_NUMBER)
+    if (meta == META_CAPTURE_NUMBER)
       offset += meta_arg;
     else
       GETPLUSOFFSET(offset, pptr);
@@ -6665,7 +6727,7 @@ for (;; pptr++)
       }
     if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
 
-    if (meta == META_SCS_NUMBER)
+    if (meta == META_CAPTURE_NUMBER)
       {
       code[0] = OP_CREF;
       PUT2(code, 1, groupnumber);
@@ -10072,8 +10134,8 @@ for (; *pptr != META_END; pptr++)
     case META_BIGVALUE:
     case META_POSIX:
     case META_POSIX_NEG:
-    case META_SCS_NAME:
-    case META_SCS_NUMBER:
+    case META_CAPTURE_NAME:
+    case META_CAPTURE_NUMBER:
     pptr += 1;
     break;
 
