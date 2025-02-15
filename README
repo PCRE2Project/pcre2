@@ -637,9 +637,9 @@ NON-AUTOTOOLS-BUILD.
 The RunTest script runs the pcre2test test program (which is documented in its
 own man page) on each of the relevant testinput files in the testdata
 directory, and compares the output with the contents of the corresponding
-testoutput files. RunTest uses a file called testtry to hold the main output
-from pcre2test. Other files whose names begin with "test" are used as working
-files in some tests.
+testoutput files. RunTest places its output in directories
+testoutput{8,16,32}{,-jit,-dfa}. Other files whose names begin with "test" are
+used as working files in some tests.
 
 Some tests are relevant only when certain build-time options were selected. For
 example, the tests for UTF-8/16/32 features are run only when Unicode support
