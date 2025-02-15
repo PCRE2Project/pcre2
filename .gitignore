@@ -77,9 +77,19 @@ testtry
 testtry2
 testtrygrep
 testSinput
+testSoutput
 testbtables
 testsaved1
 testsaved2
+testoutput8
+testoutput8-jit
+testoutput8-dfa
+testoutput16
+testoutput16-jit
+testoutput16-dfa
+testoutput32
+testoutput32-jit
+testoutput32-dfa
 
 m4/libtool.m4
 m4/ltoptions.m4
