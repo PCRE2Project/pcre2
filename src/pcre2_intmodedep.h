@@ -726,13 +726,15 @@ typedef struct branch_chain {
 } branch_chain;
 
 /* Structure for building a list of named groups during the first pass of
-compiling. */
+compiling. When a duplicate name is stored in the list, its name is set to
+the name of the first entry with the same name, and its length is set to 0. */
 
 typedef struct named_group {
   PCRE2_SPTR   name;          /* Points to the name in the pattern */
   uint32_t     number;        /* Group number */
   uint16_t     length;        /* Length of the name */
-  uint16_t     isdup;         /* TRUE if a duplicate */
+  uint16_t     hash_dup;      /* A concatenation of a 15 bit hash code and
+                                 a singe bit which represents duplication */
 } named_group;
 
 /* Structure for caching sorted ranges. This improves the performance
