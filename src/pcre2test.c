@@ -8138,6 +8138,18 @@ if (CASTVAR(void *, match_data) == NULL)
 ovector = FLD(match_data, ovector);
 PCRE2_GET_OVECTOR_COUNT(oveccount, match_data);
 
+/* Helper to clear any cached heap frames from the match_data. */
+
+#define CLEAR_HEAP_FRAMES() \
+  do { \
+     void *heapframes = (void *)(FLD(match_data, heapframes)); \
+     void *memory_data = FLD(match_data, memctl.memory_data); \
+     FLD(match_data, memctl.free(heapframes, memory_data)); \
+     SETFLD(match_data,heapframes,NULL); \
+     SETFLD(match_data,heapframes_size,0); \
+     } \
+  while (0)
+
 /* Replacement processing is ignored for DFA matching. */
 
 if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
@@ -8332,6 +8344,7 @@ if (dat_datctl.replacement[0] != 0)
 
   rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
 
+  if (malloc_testing) CLEAR_HEAP_FRAMES();
   mallocs_called = 0;
   nsize_input = nsize;
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
@@ -8342,10 +8355,10 @@ if (dat_datctl.replacement[0] != 0)
 
   if (malloc_testing && (dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) == 0)
     {
-    int target_rc = rc;
-
     for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
       {
+      CLEAR_HEAP_FRAMES();
+
       mallocs_until_failure = i;
       nsize = nsize_input;
       PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
@@ -8353,9 +8366,7 @@ if (dat_datctl.replacement[0] != 0)
         rbptr, rlen, nbuffer, &nsize);
       mallocs_until_failure = INT_MAX;
 
-      // XXX this is a hack. Clearly some memory is being held-on-to so it's
-      //     not managing to exercise one of the code paths
-      if (i < target_mallocs && !(rc == target_rc || rc == PCRE2_ERROR_NOMEMORY))
+      if (i < target_mallocs && rc != PCRE2_ERROR_NOMEMORY)
         {
         fprintf(outfile, "** malloc() Substitution test did not fail as expected (%d)\n",
                 rc);
@@ -8523,6 +8534,7 @@ for (gmatched = 0;; gmatched++)
 
     /* Run a single DFA or NFA match. */
 
+    if (malloc_testing) CLEAR_HEAP_FRAMES();
     mallocs_called = 0;
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
@@ -8558,10 +8570,10 @@ for (gmatched = 0;; gmatched++)
 
     if (malloc_testing && (dat_datctl.control & CTL_CALLOUT_NONE) != 0)
       {
-      int target_capcount = capcount;
-
       for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
         {
+        CLEAR_HEAP_FRAMES();
+
         mallocs_until_failure = i;
 
         if ((dat_datctl.control & CTL_DFA) != 0)
@@ -8587,9 +8599,7 @@ for (gmatched = 0;; gmatched++)
         if (capcount == 0)
           capcount = dat_datctl.oveccount;
 
-        // XXX this is a hack. Clearly some memory is being held-on-to so it's
-        //     not managing to exercise one of the code paths
-        if (i < target_mallocs && !(capcount == target_capcount || capcount == PCRE2_ERROR_NOMEMORY))
+        if (i < target_mallocs && capcount != PCRE2_ERROR_NOMEMORY)
           {
           fprintf(outfile, "** malloc() match test did not fail as expected (%d)\n",
                   capcount);
