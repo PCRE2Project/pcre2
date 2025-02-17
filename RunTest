@@ -195,7 +195,7 @@ checkresult()
 
 checkspecial()
   {
-  $sim $valgrind $vjs $pcre2test $1 >>testSoutput
+  $sim $valgrind $vjs $pcre2test -q $1 >>testSoutput
   if [ $? -ne 0 ] ; then
     echo "** pcre2test $1 failed - check testSoutput"
     yield=1
@@ -219,6 +219,7 @@ sim=
 skip=
 valgrind=
 vjs=
+globalopts="-q"
 : ${pcre2test:=./pcre2test}
 
 # This is in case the caller has set aliases (as I do - PH)
@@ -353,16 +354,13 @@ fi
 $sim $pcre2test -S 32 /dev/null /dev/null >/dev/null 2>&1
 support_setstack=$?
 if [ $support_setstack -eq 0 -a "$bigstack" != "" ] ; then
-  setstack="-S 32"
-else
-  setstack=""
+  globalopts="$globalopts -S 32"
 fi
 
 # If the malloc option is given, then call pcre2test with -malloc.
 
 if [ "$malloc" != "" ] ; then
-  # XXX RENAME setstack to somthing like "extraoptions"
-  setstack="$setstack -malloc"
+  globalopts="$globalopts -malloc"
 fi
 
 # All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
@@ -566,7 +564,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   if [ $do1 = yes ] ; then
     echo $title1
     for opt in "" $jitopt; do
-      $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput1 testoutput$bits$opt/testoutput1
+      $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput1 testoutput$bits$opt/testoutput1
       checkresult $? 1 "$opt"
     done
   fi
@@ -578,10 +576,10 @@ for bmode in "$test8" "$test16" "$test32"; do
     echo $title2 "(excluding UTF-$bits)"
     cp $testdata/testbtables .
     for opt in "" $jitopt; do
-      $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput2 testoutput$bits$opt/testoutput2
+      $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput2 testoutput$bits$opt/testoutput2
       saverc=$?
       if [ $saverc = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testoutput$bits$opt/testoutput2
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testoutput$bits$opt/testoutput2
         checkresult $? 2 "$opt"
       else
         checkresult $saverc 2 "$opt"
@@ -637,7 +635,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ "$locale" != "" ] ; then
       echo $title3 "(using '$locale' locale)"
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $infile testoutput$bits/testoutput3
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $infile testoutput$bits/testoutput3
         if [ $? = 0 ] ; then
           case "$opt" in
             -jit) with=" with JIT";;
@@ -679,7 +677,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput4 testoutput$bits$opt/testoutput4
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput4 testoutput$bits$opt/testoutput4
         checkresult $? 4 "$opt"
       done
     fi
@@ -691,7 +689,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput5 testoutput$bits$opt/testoutput5
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput5 testoutput$bits$opt/testoutput5
         checkresult $? 5 "$opt"
       done
     fi
@@ -701,7 +699,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do6 = yes ] ; then
     echo $title6
-    $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput6 testoutput$bits/testoutput6
+    $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput6 testoutput$bits/testoutput6
     checkresult $? 6 ""
   fi
 
@@ -710,7 +708,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput7 testoutput$bits/testoutput7
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput7 testoutput$bits/testoutput7
       checkresult $? 7 ""
     fi
   fi
@@ -734,7 +732,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput8 testoutput$bits/testoutput8-$bits-$bits_link_size
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput8 testoutput$bits/testoutput8-$bits-$bits_link_size
       checkresult $? 8-$bits-$bits_link_size ""
     fi
   fi
@@ -747,7 +745,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped when running 16/32-bit tests"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput9 testoutput$bits$opt/testoutput9
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput9 testoutput$bits$opt/testoutput9
         checkresult $? 9 "$opt"
       done
     fi
@@ -763,7 +761,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput10 testoutput$bits$opt/testoutput10
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput10 testoutput$bits$opt/testoutput10
         checkresult $? 10 "$opt"
       done
     fi
@@ -777,7 +775,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped when running 8-bit tests"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput11 testoutput$bits$opt/testoutput11-$bits
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput11 testoutput$bits$opt/testoutput11-$bits
         checkresult $? 11-$bits "$opt"
       done
     fi
@@ -794,7 +792,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput12 testoutput$bits$opt/testoutput12-$bits
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput12 testoutput$bits$opt/testoutput12-$bits
         checkresult $? 12-$bits "$opt"
       done
     fi
@@ -807,7 +805,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ "$bits" = "8" ] ; then
       echo "  Skipped when running 8-bit tests"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput13 testoutput$bits/testoutput13
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput13 testoutput$bits/testoutput13
       checkresult $? 13 ""
     fi
   fi
@@ -819,7 +817,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput14 testoutput$bits/testoutput14-$bits
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput14 testoutput$bits/testoutput14-$bits
       checkresult $? 14-$bits ""
     fi
   fi
@@ -828,7 +826,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do15 = yes ] ; then
     echo $title15
-    $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput15 testoutput$bits/testoutput15
+    $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput15 testoutput$bits/testoutput15
     checkresult $? 15 ""
   fi
 
@@ -839,7 +837,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $jit -ne 0 ] ; then
       echo "  Skipped because JIT is available"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput16 testoutput$bits/testoutput16
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput16 testoutput$bits/testoutput16
       checkresult $? 16 ""
     fi
   fi
@@ -851,7 +849,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
       echo "  Skipped because JIT is not available or nojit was specified"
     else
-      $sim $valgrind $vjs $pcre2test -q $setstack $bmode $testdata/testinput17 testoutput$bits/testoutput17
+      $sim $valgrind $vjs $pcre2test $globalopts $bmode $testdata/testinput17 testoutput$bits/testoutput17
       checkresult $? 17 ""
     fi
   fi
@@ -863,7 +861,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ "$bits" = "16" -o "$bits" = "32" ] ; then
       echo "  Skipped when running 16/32-bit tests"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput18 testoutput$bits/testoutput18
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput18 testoutput$bits/testoutput18
       checkresult $? 18 ""
     fi
   fi
@@ -877,7 +875,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     elif [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput19 testoutput$bits/testoutput19
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput19 testoutput$bits/testoutput19
       checkresult $? 19 ""
     fi
   fi
@@ -886,7 +884,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do20 = yes ] ; then
     echo $title20
-    $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput20 testoutput$bits/testoutput20
+    $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput20 testoutput$bits/testoutput20
     checkresult $? 20 ""
   fi
 
@@ -898,7 +896,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because \C is disabled"
     else
       for opt in "" $jitopt -dfa; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput21 testoutput$bits$opt/testoutput21
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput21 testoutput$bits$opt/testoutput21
         checkresult $? 21 "$opt"
       done
     fi
@@ -914,7 +912,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput22 testoutput$bits$opt/testoutput22-$bits
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput22 testoutput$bits$opt/testoutput22-$bits
         checkresult $? 22-$bits "$opt"
       done
     fi
@@ -927,7 +925,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $supportBSC -ne 0 ] ; then
       echo "  Skipped because \C is not disabled"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput23 testoutput$bits/testoutput23
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput23 testoutput$bits/testoutput23
       checkresult $? 23 ""
     fi
   fi
@@ -936,7 +934,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ "$do24" = yes ] ; then
     echo $title24
-    $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput24 testoutput$bits/testoutput24
+    $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput24 testoutput$bits/testoutput24
     checkresult $? 24 ""
   fi
 
@@ -947,7 +945,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else
-      $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinput25 testoutput$bits/testoutput25
+      $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinput25 testoutput$bits/testoutput25
       checkresult $? 25 ""
     fi
   fi
@@ -960,7 +958,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput26 testoutput$bits$opt/testoutput26
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput26 testoutput$bits$opt/testoutput26
         checkresult $? 26 "$opt"
       done
     fi
@@ -974,7 +972,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput27 testoutput$bits$opt/testoutput27
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput27 testoutput$bits$opt/testoutput27
         checkresult $? 27 "$opt"
       done
     fi
@@ -988,7 +986,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped when not targetting EBCDIC"
     else
       for opt in "" $jitopt "-dfa"; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput28 testoutput$bits$opt/testoutput28
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput28 testoutput$bits$opt/testoutput28
         checkresult $? 28 "$opt"
       done
     fi
@@ -1004,7 +1002,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because EBCDIC newline is not 0x25"
     else
       for opt in "" $jitopt "-dfa"; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test -q $setstack $bmode $opt $testdata/testinput29 testoutput$bits$opt/testoutput29
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput29 testoutput$bits$opt/testoutput29
         checkresult $? 29 "$opt"
       done
     fi
@@ -1015,7 +1013,7 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $doheap = yes ] ; then
     echo $titleheap
-    $sim $valgrind $pcre2test -q $setstack $bmode $testdata/testinputheap testoutput$bits/testoutputheap-$bits
+    $sim $valgrind $pcre2test $globalopts $bmode $testdata/testinputheap testoutput$bits/testoutputheap-$bits
     checkresult $? heap-$bits ""
   fi
 

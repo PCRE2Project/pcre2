@@ -2955,44 +2955,6 @@ void *block;
 
 (void)data;
 
-
-/*
-XXX
-
-list of all malloc'ing functions:
-
-FIXED COUNT:
-,pcre2_code_copy
-,pcre2_code_copy_with_tables
-,pcre2_compile_context_copy_8,__libc_start_main,_start,
-,pcre2_convert_context_copy_8,__libc_start_main,_start,
-,pcre2_general_context_copy_8,__libc_start_main,_start,
-,pcre2_match_context_copy_8,__libc_start_main,_start,
-,pcre2_compile_context_create_8,__libc_start_main,_start,
-,pcre2_convert_context_create_8,__libc_start_main,_start,
-,pcre2_general_context_create_8,__libc_start_main,_start,
-,pcre2_match_context_create_8,__libc_start_main,_start,
-,pcre2_general_context_create_8,__libc_start_main,_start,
-
-,pcre2_maketables_8,__libc_start_main,_start,
-,pcre2_match_data_create_8,__libc_start_main,_start,
-,pcre2_match_data_create_from_pattern_8,__libc_start_main,_start,
-,pcre2_pattern_convert_8,__libc_start_main,_start,
-
-,pcre2_serialize_decode_8,__libc_start_main,_start,
-,pcre2_serialize_encode_8,__libc_start_main,_start,
-,pcre2_substring_get_bynumber_8,__libc_start_main,_start,
-,pcre2_substring_get_byname_8,__libc_start_main,_start,
-,pcre2_substring_list_get_8,__libc_start_main,_start,
-
-// XXX VARIABLE:
-,pcre2_match_8,__libc_start_main,_start,
-,pcre2_dfa_match_8,__libc_start_main,_start,
-,pcre2_substitute_8,__libc_start_main,_start,
-
-
-*/
-
 mallocs_called++;
 if (mallocs_until_failure != INT_MAX && mallocs_until_failure-- <= 0)
   return NULL;
@@ -4693,7 +4655,7 @@ static int callout_callback(pcre2_callout_enumerate_block_8 *cb,
 uint32_t i;
 void *pattern_string = CASTVAR(void *, pbuffer);
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
-int next_item_length = cb->next_item_length;
+PCRE2_SIZE next_item_length = cb->next_item_length;
 
 (void)callout_data;  /* Not currently displayed */
 
@@ -6281,7 +6243,8 @@ if (malloc_testing)
     if (TEST(compiled_code, !=, NULL))
       { SUB1(pcre2_code_free, compiled_code); }
 
-    errorcode = erroroffset = 0;
+    errorcode = 0;
+    erroroffset = 0;
     mallocs_until_failure = i;
     PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
       pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
@@ -8196,7 +8159,7 @@ if (dat_datctl.replacement[0] != 0)
   uint8_t *rbptr;
   uint32_t xoptions;
   uint32_t emoption;  /* External match option */
-  PCRE2_SIZE j, rlen, nsize, erroroffset;
+  PCRE2_SIZE j, rlen, nsize, nsize_input, erroroffset;
   BOOL badutf = FALSE;
 
 #ifdef SUPPORT_PCRE2_8
@@ -8369,9 +8332,37 @@ if (dat_datctl.replacement[0] != 0)
 
   rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
 
+  mallocs_called = 0;
+  nsize_input = nsize;
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
     dat_datctl.options|xoptions, match_data, use_dat_context,
     rbptr, rlen, nbuffer, &nsize);
+
+  /* For malloc testing, we repeat the substitution. */
+
+  if (malloc_testing && (dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) == 0)
+    {
+    int target_rc = rc;
+
+    for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+      {
+      mallocs_until_failure = i;
+      nsize = nsize_input;
+      PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
+        dat_datctl.options|xoptions, match_data, use_dat_context,
+        rbptr, rlen, nbuffer, &nsize);
+      mallocs_until_failure = INT_MAX;
+
+      // XXX this is a hack. Clearly some memory is being held-on-to so it's
+      //     not managing to exercise one of the code paths
+      if (i < target_mallocs && !(rc == target_rc || rc == PCRE2_ERROR_NOMEMORY))
+        {
+        fprintf(outfile, "** malloc() Substitution test did not fail as expected (%d)\n",
+                rc);
+        return PR_ABEND;
+        }
+      }
+    }
 
   if (rc < 0)
     {
