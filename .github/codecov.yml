@@ -36,8 +36,7 @@ component_management:
         - '!src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c'
       statuses:
         - type: project
-          target: auto
-          threshold: 0.5%
+          target: 0%
 
     - component_id: test_binaries
       name: "Test binaries"

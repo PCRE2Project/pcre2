@@ -96,11 +96,11 @@ code (meta_extra_lengths) must be updated to remain in step. */
 #define META_COND_RNAME       0x80130000u  /* (?(R&name)... */
 #define META_COND_RNUMBER     0x80140000u  /* (?(Rdigits)... */
 #define META_COND_VERSION     0x80150000u  /* (?(VERSION<op>x.y)... */
-#define META_OFFSET           0x80160000u  /* Setting offset for various
-                                              META codes (e.g. META_SCS_NAME) */
+#define META_OFFSET           0x80160000u  /* Setting offset for various META
+                                              codes (e.g. META_CAPTURE_NAME) */
 #define META_SCS              0x80170000u  /* (*scan_substring:... */
-#define META_SCS_NAME         0x80180000u  /* Next <name> of scan_substring */
-#define META_SCS_NUMBER       0x80190000u  /* Next digits of scan_substring */
+#define META_CAPTURE_NAME     0x80180000u  /* Next <name> in capture lists */
+#define META_CAPTURE_NUMBER   0x80190000u  /* Next digits in capture lists */
 #define META_DOLLAR           0x801a0000u  /* $ metacharacter */
 #define META_DOT              0x801b0000u  /* . metacharacter */
 #define META_ESCAPE           0x801c0000u  /* \d and friends */
