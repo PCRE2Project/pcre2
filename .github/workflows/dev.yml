@@ -358,7 +358,7 @@ jobs:
           # Not used by anyone yet, really, but potentially the "next big thing".
           - arch: "riscv64"
             distro: "ubuntu_latest"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write # Necessary for uraimo/run-on-arch-action to use GitHub's Docker repository as a cache
