@@ -8684,7 +8684,7 @@ if (*cc == OP_REVERSE)
 else
   {
   SLJIT_ASSERT(*cc == OP_VREVERSE);
-  PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, NULL);
+  PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, cc + 1 + 2 * IMM2_SIZE);
 
   reverse_failed = &backtrack->own_backtracks;
   lmin = GET2(cc, 1);
@@ -8943,7 +8943,6 @@ while (1)
 
   has_vreverse = (*ccbegin == OP_VREVERSE);
   if (*ccbegin == OP_REVERSE || has_vreverse)
-    // XXX what if error?
     ccbegin = compile_reverse_matchingpath(common, ccbegin, &altbacktrack);
 
   compile_matchingpath(common, ccbegin, cc, &altbacktrack);
@@ -9715,7 +9714,6 @@ else if (opcode == OP_ASSERTBACK_NA && PRIVATE_DATA(ccbegin + 1))
 
   has_vreverse = (*matchingpath == OP_VREVERSE);
   if (*matchingpath == OP_REVERSE || has_vreverse)
-    // XXX what if error?
     matchingpath = compile_reverse_matchingpath(common, matchingpath, backtrack);
   }
 else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SCRIPT_RUN || opcode == OP_SBRA || opcode == OP_SCOND)
@@ -9727,7 +9725,6 @@ else if (opcode == OP_ASSERT_NA || opcode == OP_ASSERTBACK_NA || opcode == OP_SC
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
 
   if (*matchingpath == OP_REVERSE)
-    // XXX what if error?
     matchingpath = compile_reverse_matchingpath(common, matchingpath, backtrack);
   }
 else if (opcode == OP_ASSERT_SCS)
@@ -12984,7 +12981,6 @@ while (current)
 
     case OP_BRAMINZERO:
     compile_braminzero_backtrackingpath(common, current);
-    // XXX what if error?
     break;
 
     case OP_MARK:
