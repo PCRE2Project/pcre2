@@ -1590,7 +1590,7 @@ character. Here is an example that tests the edge case:
       123abc123\=replace=[10]XYZ
    1: 123XYZ123
       123abc123\=replace=[9]XYZ
-  Failed: error -47: no more memory
+  Failed: error -48: no more memory
 </pre>
 The default action of <b>pcre2_substitute()</b> is to return
 PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
@@ -1603,7 +1603,7 @@ for the trailing zero) as part of the error message. For example:
 <pre>
   /abc/substitute_overflow_length
       123abc123\=replace=[9]XYZ
-  Failed: error -47: no more memory: 10 code units are needed
+  Failed: error -48: no more memory: 10 code units are needed
 </pre>
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
