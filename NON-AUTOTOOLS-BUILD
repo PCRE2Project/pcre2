@@ -107,6 +107,7 @@ example.
        pcre2_chkdint.c
        pcre2_chartables.c
        pcre2_compile.c
+       pcre2_compile_cgroup.c
        pcre2_compile_class.c
        pcre2_config.c
        pcre2_context.c
