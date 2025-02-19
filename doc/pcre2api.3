@@ -207,7 +207,7 @@ document for an overview of all the PCRE2 documentation.
 .B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
 .B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
 .B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacementz\fP,"
+.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacement\fP,"
 .B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\fP,"
 .B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
 .fi
@@ -2998,7 +2998,7 @@ PCRE2_DISABLE_RECURSELOOP_CHECK is ignored by JIT, but apart from PCRE2_NO_JIT
 .sp
 The PCRE2_ANCHORED option limits \fBpcre2_match()\fP to matching at the first
 matching position. If a pattern was compiled with PCRE2_ANCHORED, or turned out
-to be anchored by virtue of its contents, it cannot be made unachored at
+to be anchored by virtue of its contents, it cannot be made unanchored at
 matching time. Note that setting the option at match time disables JIT
 matching.
 .sp
