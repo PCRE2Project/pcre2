@@ -8960,7 +8960,7 @@ while (1)
     common->accept_label = save_accept_label;
     common->positive_assertion_quit = save_positive_assertion_quit;
     common->accept = save_accept;
-    return NULL;
+    goto end;
     }
 
   if (has_vreverse)
@@ -9058,7 +9058,7 @@ while (1)
     common->accept_label = save_accept_label;
     common->positive_assertion_quit = save_positive_assertion_quit;
     common->accept = save_accept;
-    return NULL;
+    goto end;
     }
   set_jumps(altbacktrack.own_backtracks, LABEL());
 
@@ -9266,6 +9266,8 @@ common->then_trap = save_then_trap;
 common->accept_label = save_accept_label;
 common->positive_assertion_quit = save_positive_assertion_quit;
 common->accept = save_accept;
+
+end:
 return cc + 1 + LINK_SIZE;
 }
 
