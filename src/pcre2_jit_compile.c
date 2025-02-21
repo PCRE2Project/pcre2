@@ -8960,7 +8960,7 @@ while (1)
     common->accept_label = save_accept_label;
     common->positive_assertion_quit = save_positive_assertion_quit;
     common->accept = save_accept;
-    goto end;
+    return NULL;
     }
 
   if (has_vreverse)
@@ -9058,7 +9058,7 @@ while (1)
     common->accept_label = save_accept_label;
     common->positive_assertion_quit = save_positive_assertion_quit;
     common->accept = save_accept;
-    goto end;
+    return NULL;
     }
   set_jumps(altbacktrack.own_backtracks, LABEL());
 
@@ -9266,8 +9266,6 @@ common->then_trap = save_then_trap;
 common->accept_label = save_accept_label;
 common->positive_assertion_quit = save_positive_assertion_quit;
 common->accept = save_accept;
-
-end:
 return cc + 1 + LINK_SIZE;
 }
 
@@ -9922,6 +9920,8 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     assert->common.cc = matchingpath;
     BACKTRACK_AS(bracket_backtrack)->u.assert = assert;
     matchingpath = compile_assert_matchingpath(common, matchingpath, assert, TRUE);
+    if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
+      return NULL;
     }
   }
 
@@ -12707,6 +12707,8 @@ else
   backtrack.matchingpath = CURRENT_AS(braminzero_backtrack)->matchingpath;
   /* Manual call of compile_assert_matchingpath. */
   compile_assert_matchingpath(common, current->cc, &backtrack, FALSE);
+  if (SLJIT_UNLIKELY(sljit_get_compiler_error(common->compiler)))
+    return;
   }
 SLJIT_ASSERT(!current->simple_backtracks && !current->own_backtracks);
 }
