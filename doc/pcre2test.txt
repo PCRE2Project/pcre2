@@ -424,7 +424,7 @@ MODIFIER SYNTAX
 
        Modifier lists are used with both pattern and subject lines. Items in a
        list are separated by commas followed by optional white space. Trailing
-       whitespace  in  a modifier list is ignored. Some modifiers may be given
+       white  space in a modifier list is ignored. Some modifiers may be given
        for both patterns and subject lines, whereas others are valid only  for
        one  or  the  other.  Each  modifier  has a long name, for example "an-
        chored", and some of them must be followed by  an  equals  sign  and  a
@@ -552,7 +552,7 @@ SUBJECT LINE SYNTAX
 
          abc\=notbol,notempty
 
-       If the subject string is empty and \= is followed  by  whitespace,  the
+       If the subject string is empty and \= is followed by white  space,  the
        line  is  treated  as a comment line, and is not used for matching. For
        example:
 
