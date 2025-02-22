@@ -194,7 +194,7 @@ example.
 (10) If you have built PCRE2 with SUPPORT_JIT, the JIT features can be tested
      by running pcre2test with the -jit option. This is done automatically by
      the RunTest script. You might also like to build and run the freestanding
-     JIT test program, src/pcre2_jit_test.c.
+     JIT test program, src/pcre2jit_test.c.
 
 (11) The pcre2test program tests the POSIX wrapper library, but there is also a
      freestanding test program in src/pcre2posix_test.c. It must be linked with
@@ -416,7 +416,7 @@ Otherwise:
 4. Run RunTest.bat. Test outputs will automatically be compared to expected
    results, and discrepancies will be identified in the console output.
 
-To independently test the just-in-time compiler, run pcre2_jit_test.exe.
+To independently test the just-in-time compiler, run pcre2jit_test.exe.
 
 
 Building PCRE2 on native z/OS and z/VM

@@ -40,11 +40,11 @@ libtool
 ltmain.sh
 missing
 pcre2-config
-pcre2_dftables
-pcre2_jit_test
-pcre2_jit_test.exe
-pcre2_jit_test.log
-pcre2_jit_test.trs
+pcre2dftables
+pcre2jit_test
+pcre2jit_test.exe
+pcre2jit_test.log
+pcre2jit_test.trs
 pcre2posix_test
 pcre2posix_test.exe
 pcre2posix_test.log

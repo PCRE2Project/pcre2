@@ -251,8 +251,8 @@ noinst_PROGRAMS =
 # we list them here.
 
 CLEANFILES = \
-  pcre2_dftables \
-  pcre2_jit_test \
+  pcre2dftables \
+  pcre2jit_test \
   pcre2fuzzcheck-8 \
   pcre2fuzzcheck-16 \
   pcre2fuzzcheck-32 \
@@ -349,18 +349,18 @@ include_HEADERS = src/pcre2posix.h
 bin_SCRIPTS = pcre2-config
 
 ## ---------------------------------------------------------------
-## The pcre2_dftables program is used to rebuild character tables before
+## The pcre2dftables program is used to rebuild character tables before
 ## compiling PCRE2, if --enable-rebuild-chartables is specified. It is not an
 ## installed program. The default (when --enable-rebuild-chartables is not
 ## specified) is to copy a distributed set of tables that are defined for ASCII
-## code. In this case, pcre2_dftables is not needed.
+## code. In this case, pcre2dftables is not needed.
 
 if WITH_REBUILD_CHARTABLES
-noinst_PROGRAMS += pcre2_dftables
-pcre2_dftables_SOURCES = src/pcre2_dftables.c
-src/pcre2_chartables.c: pcre2_dftables$(EXEEXT)
+noinst_PROGRAMS += pcre2dftables
+pcre2dftables_SOURCES = src/pcre2dftables.c
+src/pcre2_chartables.c: pcre2dftables$(EXEEXT)
 	rm -f $@
-	./pcre2_dftables$(EXEEXT) $@
+	./pcre2dftables$(EXEEXT) $@
 else
 if WITH_EBCDIC
 if WITH_EBCDIC_NL25
@@ -562,7 +562,7 @@ endif # WITH_GCOV
 
 if WITH_PCRE2_8
 lib_LTLIBRARIES += libpcre2-posix.la
-libpcre2_posix_la_SOURCES = src/pcre2posix.c
+libpcre2_posix_la_SOURCES = src/pcre2posix.c # XXX RENAME to _posix.c?
 libpcre2_posix_la_CFLAGS = \
   -DPCRE2_CODE_UNIT_WIDTH=8 @PCRE2POSIX_CFLAG@ \
   $(VISIBILITY_CFLAGS) $(AM_CFLAGS)
@@ -659,23 +659,23 @@ endif # WITH_PCRE2_8
 ## If JIT support is enabled, arrange for the JIT test program to run.
 
 if WITH_JIT
-TESTS += pcre2_jit_test
-noinst_PROGRAMS += pcre2_jit_test
-pcre2_jit_test_SOURCES = src/pcre2_jit_test.c
-pcre2_jit_test_CFLAGS = $(AM_CFLAGS)
-pcre2_jit_test_LDADD =
+TESTS += pcre2jit_test
+noinst_PROGRAMS += pcre2jit_test
+pcre2jit_test_SOURCES = src/pcre2jit_test.c
+pcre2jit_test_CFLAGS = $(AM_CFLAGS)
+pcre2jit_test_LDADD =
 if WITH_PCRE2_8
-pcre2_jit_test_LDADD += libpcre2-8.la
+pcre2jit_test_LDADD += libpcre2-8.la
 endif # WITH_PCRE2_8
 if WITH_PCRE2_16
-pcre2_jit_test_LDADD += libpcre2-16.la
+pcre2jit_test_LDADD += libpcre2-16.la
 endif # WITH_PCRE2_16
 if WITH_PCRE2_32
-pcre2_jit_test_LDADD += libpcre2-32.la
+pcre2jit_test_LDADD += libpcre2-32.la
 endif # WITH_PCRE2_32
 if WITH_GCOV
-pcre2_jit_test_CFLAGS += $(GCOV_CFLAGS)
-pcre2_jit_test_LDADD += $(GCOV_LIBS)
+pcre2jit_test_CFLAGS += $(GCOV_CFLAGS)
+pcre2jit_test_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
 endif # WITH_JIT
 

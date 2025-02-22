@@ -2,7 +2,7 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/* This file was automatically written by the pcre2_dftables auxiliary
+/* This file was automatically written by the pcre2dftables auxiliary
 program. It contains character tables that are used when no external
 tables are passed to PCRE2 by the application that calls it. The tables
 are used only for characters whose code values are less than 256, and
@@ -13,10 +13,10 @@ only relevant if not in UCP mode. */
 /* The pcre2_ftables program (which is distributed with PCRE2) can be used
 to build alternative versions of this file. This is necessary if you are
 running in an EBCDIC environment, or if you want to default to a different
-encoding, for example ISO-8859-1. When pcre2_dftables is run, it creates
+encoding, for example ISO-8859-1. When pcre2dftables is run, it creates
 these tables in the "C" locale by default. This happens automatically if
 PCRE2 is configured with --enable-rebuild-chartables. However, you can run
-pcre2_dftables manually with the -L option to build tables using the LC_ALL
+pcre2dftables manually with the -L option to build tables using the LC_ALL
 locale. */
 
 #include "pcre2_internal.h"

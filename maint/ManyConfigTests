@@ -159,7 +159,7 @@ fi
 
 runtest()
   {
-  rm -f $srcdir/pcre2test $srcdir/pcre2grep $srcdir/pcre2_jit_test $srcdir/pcre2posix_test
+  rm -f $srcdir/pcre2test $srcdir/pcre2grep $srcdir/pcre2jit_test $srcdir/pcre2posix_test
   testcount=`expr $testcount + 1`
 
   if [ "$opts" = "" ] ; then
@@ -260,7 +260,7 @@ runtest()
     echo "Skipping JIT regression tests: tests not supported on EBCDIC"
   else
     echo "Running JIT regression tests $withvalgrind"
-    $jrvalgrind ./pcre2_jit_test >teststdoutM 2>teststderrM
+    $jrvalgrind ./pcre2jit_test >teststdoutM 2>teststderrM
     if [ $? -ne 0 -o -s teststderrM ]; then
       echo " "
       echo "**** Test failed ****"

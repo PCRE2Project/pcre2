@@ -14047,7 +14047,7 @@ actions are needed:
 
   2. Replace PCRE2_JIT_INVALID_UTF with a local flag in this module.
 
-  3. Replace PCRE2_JIT_INVALID_UTF in pcre2_jit_test.c.
+  3. Replace PCRE2_JIT_INVALID_UTF in pcre2jit_test.c.
 
   4. Delete the following short block of code. The setting of "re" and
      "functions" can be moved into the JIT-only block below, but if that is

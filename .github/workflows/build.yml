@@ -42,7 +42,7 @@ jobs:
         run: ./RunTest
 
       - name: Test (JIT test program)
-        run: ./pcre2_jit_test
+        run: ./pcre2jit_test
 
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest
@@ -82,7 +82,7 @@ jobs:
         run: ./RunTest
 
       - name: Test (JIT test program)
-        run: ./pcre2_jit_test
+        run: ./pcre2jit_test
 
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest
@@ -373,14 +373,14 @@ jobs:
           llvm-cov-$LLVM_VER show \
             -format=html -output-dir=coverage-report -show-line-counts-or-regions -show-branches=percent \
             -instr-profile=coverage.profdata \
-            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2jit_test \
             ../src/ ./
 
           # Output LCOV-compatible output, for downstream tools
           llvm-cov-$LLVM_VER export \
             -format=lcov \
             -instr-profile=coverage.profdata \
-            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2jit_test \
             ../src/ ./ \
             > ./coverage-lcov.info
 
@@ -388,7 +388,7 @@ jobs:
           echo '```' > "$GITHUB_STEP_SUMMARY"
           llvm-cov-$LLVM_VER report \
             -instr-profile=coverage.profdata \
-            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2jit_test \
             ../src/ ./ \
             >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"

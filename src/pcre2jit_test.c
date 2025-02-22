@@ -112,7 +112,7 @@ int main(void)
 	pcre2_config_32(PCRE2_CONFIG_JIT, &jit);
 #endif
 	if (!jit) {
-		printf("JIT must be enabled to run pcre2_jit_test\n");
+		printf("JIT must be enabled to run pcre2jit_test\n");
 		return 1;
 	}
 	return regression_tests()
@@ -1239,7 +1239,7 @@ static int regression_tests(void)
 
 	/* This test compares the behaviour of interpreter and JIT. Although disabling
 	utf or ucp may make tests fail, if the pcre2_match result is the SAME, it is
-	still considered successful from pcre2_jit_test point of view. */
+	still considered successful from pcre2jit_test point of view. */
 
 #if defined SUPPORT_PCRE2_8
 	pcre2_config_8(PCRE2_CONFIG_JITTARGET, &cpu_info);
@@ -2542,4 +2542,4 @@ static int invalid_utf32_regression_tests(void)
 
 #endif /* SUPPORT_UNICODE && SUPPORT_PCRE2_32 */
 
-/* End of pcre2_jit_test.c */
+/* End of pcre2jit_test.c */

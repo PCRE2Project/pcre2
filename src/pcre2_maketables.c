@@ -42,11 +42,11 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains the external function pcre2_maketables(), which builds
 character tables for PCRE2 in the current locale. The file is compiled on its
 own as part of the PCRE2 library. It is also included in the compilation of
-pcre2_dftables.c as a freestanding program, in which case the macro
-PCRE2_DFTABLES is defined. */
+pcre2dftables.c as a freestanding program, in which case the macro
+PCRE2_PCRE2DFTABLES is defined. */
 
 
-#ifndef PCRE2_DFTABLES    /* Compiling the library */
+#ifndef PCRE2_PCRE2DFTABLES    /* Compiling the library */
 #include "pcre2_internal.h"
 #endif
 
@@ -60,23 +60,23 @@ PCRE2_DFTABLES is defined. */
 a pointer to them. They are build using the ctype functions, and consequently
 their contents will depend upon the current locale setting. When compiled as
 part of the library, the store is obtained via a general context malloc, if
-supplied, but when PCRE2_DFTABLES is defined (when compiling the pcre2_dftables
-freestanding auxiliary program) malloc() is used, and the function has a
-different name so as not to clash with the prototype in pcre2.h.
+supplied, but when PCRE2_PCRE2DFTABLES is defined (when compiling the
+pcre2dftables freestanding auxiliary program) malloc() is used, and the function
+has a different name so as not to clash with the prototype in pcre2.h.
 
-Arguments:   pointers to character-transforming functions when PCRE2_DFTABLES is
-             defined;
+Arguments:   pointers to character-transforming functions when
+             PCRE2_PCRE2DFTABLES is defined;
                else a PCRE2 general context or NULL
 Returns:     pointer to the contiguous block of data;
                else NULL if memory allocation failed
 */
 
-#ifdef PCRE2_DFTABLES  /* Included in freestanding pcre2_dftables program */
+#ifdef PCRE2_PCRE2DFTABLES  /* Included in freestanding pcre2dftables program */
 static const uint8_t *maketables(int (*charfn_to)(int), int (*charfn_from)(int))
 {
 uint8_t *yield = (uint8_t *)malloc(TABLES_LENGTH);
 
-#else  /* Not PCRE2_DFTABLES, that is, compiling the library */
+#else  /* Not PCRE2_PCRE2DFTABLES, that is, compiling the library */
 PCRE2_EXP_DEFN const uint8_t * PCRE2_CALL_CONVENTION
 pcre2_maketables(pcre2_general_context *gcontext)
 {
@@ -86,7 +86,7 @@ uint8_t *yield = (uint8_t *)((gcontext != NULL)?
 
 #define charfn_to(c)    (c)
 #define charfn_from(c)  (c)
-#endif  /* PCRE2_DFTABLES */
+#endif  /* PCRE2_PCRE2DFTABLES */
 
 int i;
 uint8_t *p;
@@ -160,7 +160,7 @@ for (i = 0; i < 256; i++)
 return yield;
 }
 
-#ifndef PCRE2_DFTABLES   /* Compiling the library */
+#ifndef PCRE2_PCRE2DFTABLES   /* Compiling the library */
 #undef charfn_to
 #undef charfn_from
 

@@ -356,25 +356,25 @@ only. If you add
   --enable-rebuild-chartables
 .sp
 to the \fBconfigure\fP command, the distributed tables are no longer used.
-Instead, a program called \fBpcre2_dftables\fP is compiled and run. This
+Instead, a program called \fBpcre2dftables\fP is compiled and run. This
 outputs the source for new set of tables, created in the default locale of your
 C run-time system. This method of replacing the tables does not work if you are
-cross compiling, because \fBpcre2_dftables\fP needs to be run on the local
+cross compiling, because \fBpcre2dftables\fP needs to be run on the local
 host and therefore not compiled with the cross compiler.
 .P
 If you need to create alternative tables when cross compiling, you will have to
 do so "by hand". There may also be other reasons for creating tables manually.
-To cause \fBpcre2_dftables\fP to be built on the local host, run a normal
+To cause \fBpcre2dftables\fP to be built on the local host, run a normal
 compiling command, and then run the program with the output file as its
 argument, for example:
 .sp
-  cc src/pcre2_dftables.c -o pcre2_dftables
-  ./pcre2_dftables src/pcre2_chartables.c
+  cc src/pcre2dftables.c -o pcre2dftables
+  ./pcre2dftables src/pcre2_chartables.c
 .sp
 This builds the tables in the default locale of the local host. If you want to
 specify a locale, you must use the -L option:
 .sp
-  LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c
+  LC_ALL=fr_FR ./pcre2dftables -L src/pcre2_chartables.c
 .sp
 You can also specify -b (with or without -L). This causes the tables to be
 written in binary instead of as source code. A set of binary tables can be

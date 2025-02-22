@@ -43,7 +43,7 @@ jobs:
         run: ./RunTest
 
       - name: Test (JIT test program)
-        run: ./pcre2_jit_test
+        run: ./pcre2jit_test
 
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest
@@ -80,7 +80,7 @@ jobs:
           ./RunTest
 
       - name: Test (JIT test program)
-        run: ./pcre2_jit_test
+        run: ./pcre2jit_test
 
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest

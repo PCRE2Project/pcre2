@@ -693,12 +693,12 @@ endif()
 # Character table generation
 
 if(REBUILD_CHARTABLES)
-  add_executable(pcre2_dftables src/pcre2_dftables.c)
+  add_executable(pcre2dftables src/pcre2dftables.c)
   add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/pcre2_chartables.c
-    COMMAND pcre2_dftables
+    COMMAND pcre2dftables
     ARGS ${PROJECT_BINARY_DIR}/pcre2_chartables.c
-    DEPENDS pcre2_dftables
+    DEPENDS pcre2dftables
     COMMENT "Generating character tables (pcre2_chartables.c) for current locale"
     VERBATIM
   )
@@ -1140,18 +1140,18 @@ if(PCRE2_BUILD_TESTS)
   endif()
 
   if(PCRE2_SUPPORT_JIT)
-    add_executable(pcre2_jit_test src/pcre2_jit_test.c)
-    set(PCRE2_JIT_TEST_LIBS)
+    add_executable(pcre2jit_test src/pcre2jit_test.c)
+    set(PCRE2JIT_TEST_LIBS)
     if(PCRE2_BUILD_PCRE2_8)
-      list(APPEND PCRE2_JIT_TEST_LIBS pcre2-8)
+      list(APPEND PCRE2JIT_TEST_LIBS pcre2-8)
     endif()
     if(PCRE2_BUILD_PCRE2_16)
-      list(APPEND PCRE2_JIT_TEST_LIBS pcre2-16)
+      list(APPEND PCRE2JIT_TEST_LIBS pcre2-16)
     endif()
     if(PCRE2_BUILD_PCRE2_32)
-      list(APPEND PCRE2_JIT_TEST_LIBS pcre2-32)
+      list(APPEND PCRE2JIT_TEST_LIBS pcre2-32)
     endif()
-    target_link_libraries(pcre2_jit_test ${PCRE2_JIT_TEST_LIBS})
+    target_link_libraries(pcre2jit_test ${PCRE2JIT_TEST_LIBS})
   endif()
 
   # =================================================
@@ -1268,7 +1268,7 @@ echo RunGrepTest.bat tests successfully completed
   # Changed to accommodate testing whichever location was just built
 
   if(PCRE2_SUPPORT_JIT)
-    add_test(pcre2_jit_test pcre2_jit_test)
+    add_test(pcre2jit_test pcre2jit_test)
   endif()
 
   if(PCRE2_BUILD_PCRE2_8)

@@ -55,7 +55,7 @@ given, they are written in binary. */
 #include <locale.h>
 
 /* For pcre2_internal.h, pcre2_maketables.c, pcre2_tables.c */
-#define PCRE2_DFTABLES
+#define PCRE2_PCRE2DFTABLES
 /* For pcre2_tables.c */
 #define PRIV(name) name
 
@@ -99,7 +99,7 @@ static void
 usage(void)
 {
 (void)fprintf(stderr,
-  "Usage: pcre2_dftables [options] <output file>\n"
+  "Usage: pcre2dftables [options] <output file>\n"
   "  -b    Write output in binary (default is source code)\n"
   "  -L    Use locale from LC_ALL (default is \"C\" locale)\n"
 #ifdef EBCDIC
@@ -143,7 +143,7 @@ for (i = 1; i < argc; i++)
     {
     if (setlocale(LC_ALL, "") == NULL)
       {
-      (void)fprintf(stderr, "pcre2_dftables: setlocale() failed\n");
+      (void)fprintf(stderr, "pcre2dftables: setlocale() failed\n");
       return 1;
       }
     env = getenv("LC_ALL");
@@ -172,14 +172,14 @@ for (i = 1; i < argc; i++)
 
   else
     {
-    (void)fprintf(stderr, "pcre2_dftables: unrecognized option %s\n", arg);
+    (void)fprintf(stderr, "pcre2dftables: unrecognized option %s\n", arg);
     return 1;
     }
   }
 
 if (i != argc - 1)
   {
-  (void)fprintf(stderr, "pcre2_dftables: one filename argument is required\n");
+  (void)fprintf(stderr, "pcre2dftables: one filename argument is required\n");
   return 1;
   }
 
@@ -191,7 +191,7 @@ base_of_tables = tables;
 f = fopen(argv[i], "wb");
 if (f == NULL)
   {
-  fprintf(stderr, "pcre2_dftables: failed to open %s for writing\n", argv[1]);
+  fprintf(stderr, "pcre2dftables: failed to open %s for writing\n", argv[1]);
   return 1;
   }
 
@@ -203,7 +203,7 @@ if (binary)
   size_t len = fwrite(tables, 1, TABLES_LENGTH, f);
   if (len != TABLES_LENGTH)
     {
-    (void)fprintf(stderr, "pcre2_dftables: fwrite() returned wrong length %d "
+    (void)fprintf(stderr, "pcre2dftables: fwrite() returned wrong length %d "
      "instead of %d\n", (int)len, TABLES_LENGTH);
     yield = 1;
     }
@@ -220,7 +220,7 @@ the very long string otherwise. */
   "/*************************************************\n"
   "*      Perl-Compatible Regular Expressions       *\n"
   "*************************************************/\n\n"
-  "/* This file was automatically written by the pcre2_dftables auxiliary\n"
+  "/* This file was automatically written by the pcre2dftables auxiliary\n"
   "program. It contains character tables that are used when no external\n"
   "tables are passed to PCRE2 by the application that calls it. The tables\n"
   "are used only for characters whose code values are less than 256, and\n"
@@ -233,10 +233,10 @@ the very long string otherwise. */
   "/* The pcre2_ftables program (which is distributed with PCRE2) can be used\n"
   "to build alternative versions of this file. This is necessary if you are\n"
   "running in an EBCDIC environment, or if you want to default to a different\n"
-  "encoding, for example ISO-8859-1. When pcre2_dftables is run, it creates\n"
+  "encoding, for example ISO-8859-1. When pcre2dftables is run, it creates\n"
   "these tables in the \"C\" locale by default. This happens automatically if\n"
   "PCRE2 is configured with --enable-rebuild-chartables. However, you can run\n"
-  "pcre2_dftables manually with the -L option to build tables using the LC_ALL\n"
+  "pcre2dftables manually with the -L option to build tables using the LC_ALL\n"
   "locale. */\n\n");
 
 (void)fprintf(f,
@@ -323,4 +323,4 @@ free((void *)base_of_tables);
 return 0;
 }
 
-/* End of pcre2_dftables.c */
+/* End of pcre2dftables.c */
