@@ -446,7 +446,7 @@ value. The CONDITION may also be preceded by "!".
 .rs
 .sp
 Modifier lists are used with both pattern and subject lines. Items in a list
-are separated by commas followed by optional white space. Trailing whitespace
+are separated by commas followed by optional white space. Trailing white space
 in a modifier list is ignored. Some modifiers may be given for both patterns
 and subject lines, whereas others are valid only for one or the other. Each
 modifier has a long name, for example "anchored", and some of them must be
@@ -570,7 +570,7 @@ the start of a modifier list. For example:
 .sp
   abc\e=notbol,notempty
 .sp
-If the subject string is empty and \e= is followed by whitespace, the line is
+If the subject string is empty and \e= is followed by white space, the line is
 treated as a comment line, and is not used for matching. For example:
 .sp
   \e= This is a comment.
@@ -1560,7 +1560,7 @@ character. Here is an example that tests the edge case:
       123abc123\e=replace=[10]XYZ
    1: 123XYZ123
       123abc123\e=replace=[9]XYZ
-  Failed: error -47: no more memory
+  Failed: error -48: no more memory
 .sp
 The default action of \fBpcre2_substitute()\fP is to return
 PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
@@ -1573,7 +1573,7 @@ for the trailing zero) as part of the error message. For example:
 .sp
   /abc/substitute_overflow_length
       123abc123\e=replace=[9]XYZ
-  Failed: error -47: no more memory: 10 code units are needed
+  Failed: error -48: no more memory: 10 code units are needed
 .sp
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from

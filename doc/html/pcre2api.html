@@ -279,7 +279,7 @@ document for an overview of all the PCRE2 documentation.
 <b>int pcre2_substitute(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
 <b>  uint32_t <i>options</i>, pcre2_match_data *<i>match_data</i>,</b>
-<b>  pcre2_match_context *<i>mcontext</i>, PCRE2_SPTR <i>replacementz</i>,</b>
+<b>  pcre2_match_context *<i>mcontext</i>, PCRE2_SPTR <i>replacement</i>,</b>
 <b>  PCRE2_SIZE <i>rlength</i>, PCRE2_UCHAR *<i>outputbuffer</i>,</b>
 <b>  PCRE2_SIZE *<i>outlengthptr</i>);</b>
 </p>
@@ -1691,7 +1691,7 @@ option is set, normal backslash processing is applied to verb names and only an
 unescaped closing parenthesis terminates the name. A closing parenthesis can be
 included in a name either as \) or between \Q and \E. If the PCRE2_EXTENDED
 or PCRE2_EXTENDED_MORE option is set with PCRE2_ALT_VERBNAMES, unescaped
-whitespace in verb names is skipped and #-comments are recognized, exactly as
+white space in verb names is skipped and #-comments are recognized, exactly as
 in the rest of the pattern.
 <pre>
   PCRE2_AUTO_CALLOUT
@@ -3017,7 +3017,7 @@ PCRE2_DISABLE_RECURSELOOP_CHECK is ignored by JIT, but apart from PCRE2_NO_JIT
 </pre>
 The PCRE2_ANCHORED option limits <b>pcre2_match()</b> to matching at the first
 matching position. If a pattern was compiled with PCRE2_ANCHORED, or turned out
-to be anchored by virtue of its contents, it cannot be made unachored at
+to be anchored by virtue of its contents, it cannot be made unanchored at
 matching time. Note that setting the option at match time disables JIT
 matching.
 <pre>
@@ -3924,7 +3924,7 @@ page.
 </p>
 <p>
 The Python form \g&#60;n&#62;, where the angle brackets are part of the syntax and <i>n</i>
-is either a group name or number, is recognized as an altertive way of
+is either a group name or number, is recognized as an alternative way of
 inserting the contents of a group, for example \g&#60;3&#62;.
 </p>
 <p>

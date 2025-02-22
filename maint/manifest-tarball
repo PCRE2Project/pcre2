@@ -311,6 +311,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chkdint.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile.h
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile_cgroup.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile_class.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_config.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_context.c

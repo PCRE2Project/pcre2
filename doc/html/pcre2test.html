@@ -494,7 +494,7 @@ value. The CONDITION may also be preceded by "!".
 <br><a name="SEC7" href="#TOC1">MODIFIER SYNTAX</a><br>
 <p>
 Modifier lists are used with both pattern and subject lines. Items in a list
-are separated by commas followed by optional white space. Trailing whitespace
+are separated by commas followed by optional white space. Trailing white space
 in a modifier list is ignored. Some modifiers may be given for both patterns
 and subject lines, whereas others are valid only for one or the other. Each
 modifier has a long name, for example "anchored", and some of them must be
@@ -621,7 +621,7 @@ the start of a modifier list. For example:
 <pre>
   abc\=notbol,notempty
 </pre>
-If the subject string is empty and \= is followed by whitespace, the line is
+If the subject string is empty and \= is followed by white space, the line is
 treated as a comment line, and is not used for matching. For example:
 <pre>
   \= This is a comment.
@@ -1596,7 +1596,7 @@ character. Here is an example that tests the edge case:
       123abc123\=replace=[10]XYZ
    1: 123XYZ123
       123abc123\=replace=[9]XYZ
-  Failed: error -47: no more memory
+  Failed: error -48: no more memory
 </pre>
 The default action of <b>pcre2_substitute()</b> is to return
 PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
@@ -1609,7 +1609,7 @@ for the trailing zero) as part of the error message. For example:
 <pre>
   /abc/substitute_overflow_length
       123abc123\=replace=[9]XYZ
-  Failed: error -47: no more memory: 10 code units are needed
+  Failed: error -48: no more memory: 10 code units are needed
 </pre>
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from

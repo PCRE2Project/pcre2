@@ -76,6 +76,7 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_auto_possess.c",
             "src/pcre2_chkdint.c",
             "src/pcre2_compile.c",
+            "src/pcre2_compile_cgroup.c",
             "src/pcre2_compile_class.c",
             "src/pcre2_config.c",
             "src/pcre2_context.c",
