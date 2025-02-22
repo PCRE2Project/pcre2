@@ -15,8 +15,7 @@ coverage:
 
     patch:
       default:
-        target: auto
-        threshold: 2%
+        target: 0%
 
 github_checks:
   annotations: false
@@ -36,7 +35,8 @@ component_management:
         - '!src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c'
       statuses:
         - type: project
-          target: 0%
+          target: auto
+          threshold: 0.5%
 
     - component_id: test_binaries
       name: "Test binaries"
