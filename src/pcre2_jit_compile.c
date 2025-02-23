@@ -8684,7 +8684,7 @@ if (*cc == OP_REVERSE)
 else
   {
   SLJIT_ASSERT(*cc == OP_VREVERSE);
-  PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, NULL);
+  PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, cc + 1 + 2 * IMM2_SIZE);
 
   reverse_failed = &backtrack->own_backtracks;
   lmin = GET2(cc, 1);
@@ -9920,6 +9920,8 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     assert->common.cc = matchingpath;
     BACKTRACK_AS(bracket_backtrack)->u.assert = assert;
     matchingpath = compile_assert_matchingpath(common, matchingpath, assert, TRUE);
+    if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
+      return NULL;
     }
   }
 
@@ -12694,6 +12696,8 @@ if (current->cc[1] > OP_ASSERTBACK_NOT)
   {
   /* Manual call of compile_bracket_matchingpath and compile_bracket_backtrackingpath. */
   compile_bracket_matchingpath(common, current->cc, current);
+  if (SLJIT_UNLIKELY(sljit_get_compiler_error(common->compiler)))
+    return;
   compile_bracket_backtrackingpath(common, current->top);
   }
 else
@@ -12703,6 +12707,8 @@ else
   backtrack.matchingpath = CURRENT_AS(braminzero_backtrack)->matchingpath;
   /* Manual call of compile_assert_matchingpath. */
   compile_assert_matchingpath(common, current->cc, &backtrack, FALSE);
+  if (SLJIT_UNLIKELY(sljit_get_compiler_error(common->compiler)))
+    return;
   }
 SLJIT_ASSERT(!current->simple_backtracks && !current->own_backtracks);
 }

@@ -216,8 +216,8 @@ runtest()
   ./pcre2test -C pcre2-8 >/dev/null
   pcre2_8=$?
 
-  echo "Running PCRE2 library tests $withvalgrind"
-  $srcdir/RunTest $valgrind >teststdoutM 2>teststderrM
+  echo "Running PCRE2 library tests $withvalgrind $withmalloc"
+  $srcdir/RunTest $valgrind $malloc >teststdoutM 2>teststderrM
 
   if [ $? -ne 0 -o -s teststderrM ]; then
     echo " "
@@ -296,6 +296,8 @@ fi
 valgrind=
 jrvalgrind=
 withvalgrind=
+malloc=
+withmalloc=
 srcdir=.
 export srcdir
 
@@ -436,6 +438,9 @@ if [ $usevalgrind -ne 0 ]; then
   valgrind=valgrind
   withvalgrind="with valgrind"
 
+  malloc=-malloc
+  withmalloc="with -malloc"
+
   if [ $usemainvalgrind -ne 0 ]; then
     for opts in \
       "--disable-shared" \
@@ -443,8 +448,15 @@ if [ $usevalgrind -ne 0 ]; then
     do
       opts="--enable-valgrind $opts"
       runtest
+
+      # Only need to run the first test with -malloc.
+      malloc=
+      withmalloc=
     done
   fi
+
+  malloc=-malloc
+  withmalloc="with -malloc"
 
   if [ $usejitvalgrind -ne 0 ]; then
     jrvalgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --suppressions=$srcdir/testdata/valgrind-jit.supp"
@@ -454,6 +466,10 @@ if [ $usevalgrind -ne 0 ]; then
     do
       opts="--enable-valgrind $opts"
       runtest
+
+      # Only need to run the first test with -malloc.
+      malloc=
+      withmalloc=
     done
   fi
 fi
@@ -461,6 +477,8 @@ fi
 valgrind=
 jrvalgrind=
 withvalgrind=
+malloc=
+withmalloc=
 
 # Clean up the distribution and then do at least one build and test in a
 # directory other than the source directory. It doesn't work unless the
