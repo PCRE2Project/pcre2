@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
         &error_offset,         /* for error offset */
         NULL);                 /* use default compile context */
     if (re == NULL) {
-        fprintf(stderr, "Invalid pattern: %s\n", argv[1]);
+        fprintf(stderr, "Invalid pattern: %s\n", pattern);
         return 1;
     }
 

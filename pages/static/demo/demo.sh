@@ -11,11 +11,19 @@
 #$ expect ~home: \$ 
 #$ wait 1000
 
+ # If using the JIT, remember to fetch the Git submodule:
+#$ wait 100
+ (cd ./pcre2; git submodule update --init)
+#$ expect ~home: \$ 
+#$ wait 500
+
  # Now let's build PCRE2:
 #$ wait 500
 #$ send \x20(cd ./pcre2; \\\n
 #$ expect >
-#$ send \x20\x20\x20\x20cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -B build; \\\n
+#$ send \x20\x20\x20\x20cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug \\\n
+#$ expect >
+#$ send \x20\x20\x20\x20    -DPCRE2_SUPPORT_JIT=ON -B build; \\\n
 #$ expect >
 #$ send \x20\x20\x20\x20cmake --build build/)
 #$ wait 1000

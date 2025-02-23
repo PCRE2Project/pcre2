@@ -22,7 +22,7 @@
 
 set -e
 
-export PCRE2_VERSION=10.44
+export PCRE2_VERSION=10.45
 touch ./.hushlogin
 
 if [ "$ISDARK" = 1 ]; then
