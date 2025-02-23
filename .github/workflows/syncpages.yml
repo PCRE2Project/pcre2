@@ -22,8 +22,8 @@ jobs:
 
       - name: Commit and push, if docs have changed
         run: |
-          if git diff origin/master -- ./doc ./AUTHORS.md ./LICENCE.md ./SECURITY.md \
-                                       ./README ./NON-AUTOTOOLS-BUILD >/dev/null ; then
+          if ! git diff origin/master -- ./doc ./AUTHORS.md ./LICENCE.md ./SECURITY.md \
+                                         ./README ./NON-AUTOTOOLS-BUILD >/dev/null ; then
             # Differences from master: merge and push
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
