@@ -115,10 +115,11 @@ while (TRUE)
 
 #ifdef SUPPORT_UNICODE
 
-#define PARSE_CLASS_UTF               0x1
-#define PARSE_CLASS_CASELESS_UTF      0x2
-#define PARSE_CLASS_RESTRICTED_UTF    0x4
-#define PARSE_CLASS_TURKISH_UTF       0x8
+#define PARSE_CLASS_UTF               0x01
+#define PARSE_CLASS_CASELESS_UTF      0x02
+#define PARSE_CLASS_RESTRICTED_UTF    0x04
+#define PARSE_CLASS_TURKISH_UTF       0x08
+#define PARSE_CLASS_COMPUTE_CATLIST   0x10
 
 /* Get the range of nocase characters which includes the
 'c' character passed as argument, or directly follows 'c'. */
@@ -357,6 +358,7 @@ append_non_ascii_range(uint32_t options, uint32_t *buffer)
   return buffer + 2;
 }
 
+/* The buffer may represent the categry list pointer when utf is enabled. */
 static size_t
 parse_class(uint32_t *ptr, uint32_t options, uint32_t *buffer)
 {
@@ -364,6 +366,20 @@ size_t total_size = 0;
 size_t size;
 uint32_t meta_arg;
 uint32_t start_char;
+uint32_t ptype;
+#ifdef SUPPORT_UNICODE
+uint32_t pdata;
+uint32_t category_list;
+uint32_t *pcategory_list = NULL;
+#endif
+
+#ifdef SUPPORT_UNICODE
+if ((options & PARSE_CLASS_COMPUTE_CATLIST) != 0)
+  {
+  pcategory_list = buffer;
+  buffer = NULL;
+  }
+#endif
 
 while (TRUE)
   {
@@ -407,7 +423,8 @@ while (TRUE)
         case ESC_p:
         case ESC_P:
         ptr++;
-        if (meta_arg == ESC_p && (*ptr >> 16) == PT_ANY)
+        ptype = (*ptr >> 16);
+        if (meta_arg == ESC_p && ptype == PT_ANY)
           {
           if (buffer != NULL)
             {
@@ -417,6 +434,43 @@ while (TRUE)
             }
           total_size += 2;
           }
+#ifdef SUPPORT_UNICODE
+        if (pcategory_list == NULL) break;
+
+        category_list = 0;
+
+        switch(ptype)
+          {
+          case PT_LAMP:
+          category_list = UCPCAT3(ucp_Lu, ucp_Ll, ucp_Lt);
+          break;
+
+          case PT_GC:
+          pdata = *ptr & 0xffff;
+          category_list = UCPCAT_RANGE(PRIV(ucp_typerange)[pdata],
+                                       PRIV(ucp_typerange)[pdata + 1] - 1);
+          break;
+
+          case PT_PC:
+          pdata = *ptr & 0xffff;
+          category_list = UCPCAT(pdata);
+          break;
+
+          case PT_WORD:
+          category_list = UCPCAT2(ucp_Mn, ucp_Pc) | UCPCAT_L | UCPCAT_N;
+          break;
+
+          case PT_ALNUM:
+          category_list = UCPCAT_L | UCPCAT_N;
+          break;
+          }
+
+        if (category_list > 0)
+          {
+          if (meta_arg == ESC_P) category_list ^= UCPCAT_ALL;
+          *pcategory_list |= category_list;
+          }
+#endif
         break;
         }
       ptr++;
@@ -511,6 +565,9 @@ const uint32_t *char_list_next;
 uint16_t *next_char;
 uint32_t char_list_start, char_list_end;
 uint32_t range_start, range_end;
+#ifdef SUPPORT_UNICODE
+uint32_t category_list = 0;
+#endif
 
 #ifdef SUPPORT_UNICODE
 if (options & PCRE2_UTF)
@@ -531,10 +588,20 @@ if (xoptions & PCRE2_EXTRA_TURKISH_CASING)
 
 /* Compute required space for the range. */
 
+#ifdef SUPPORT_UNICODE
+range_list_size = parse_class(start_ptr,
+                              class_options | PARSE_CLASS_COMPUTE_CATLIST,
+                              &category_list);
+#else
 range_list_size = parse_class(start_ptr, class_options, NULL);
+#endif
 PCRE2_ASSERT((range_list_size & 0x1) == 0);
 
 /* Allocate buffer. The total_size also represents the end of the buffer. */
+
+#ifdef SUPPORT_UNICODE
+if (category_list == UCPCAT_ALL) range_list_size = 2;
+#endif
 
 total_size = range_list_size +
    ((range_list_size >= 2) ? CHAR_LIST_EXTRA_SIZE : 0);
@@ -550,6 +617,21 @@ cranges->range_list_size = (uint16_t)range_list_size;
 cranges->char_lists_types = 0;
 cranges->char_lists_size = 0;
 cranges->char_lists_start = 0;
+#ifdef SUPPORT_UNICODE
+cranges->category_list = category_list;
+#endif
+
+#ifdef SUPPORT_UNICODE
+if (category_list == UCPCAT_ALL)
+  {
+  /* Replace the xclass with OP_ALLANY. */
+  cranges->category_list = 0;
+  buffer = (uint32_t*)(cranges + 1);
+  buffer[0] = 0;
+  buffer[1] = get_highest_char(options);
+  return cranges;
+  }
+#endif
 
 if (range_list_size == 0) return cranges;
 
@@ -1084,6 +1166,7 @@ BOOL utf = FALSE;
 
 #ifdef SUPPORT_WIDE_CHARS
 uint32_t xclass_props;
+uint32_t category_list;
 PCRE2_UCHAR *class_uchardata;
 class_ranges* cranges;
 #else
@@ -1104,6 +1187,7 @@ should_flip_negation = FALSE;
 
 #ifdef SUPPORT_WIDE_CHARS
 xclass_props = 0;
+category_list = 0;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 cranges = NULL;
@@ -1137,6 +1221,9 @@ if (utf)
     cb->cranges = cranges->next;
     }
 
+  category_list = cranges->category_list;
+  PCRE2_ASSERT(category_list != UCPCAT_ALL);
+
   if (cranges->range_list_size > 0)
     {
     const uint32_t *ranges = (const uint32_t*)(cranges + 1);
@@ -1151,6 +1238,13 @@ if (utf)
   }
 
 class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
+
+if (cranges != NULL && category_list != 0 &&
+    (xclass_props & XCLASS_HIGH_ANY) == 0)
+  {
+  xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
+  class_uchardata += sizeof(uint32_t) / sizeof(PCRE2_UCHAR);
+  }
 #endif /* SUPPORT_WIDE_CHARS */
 
 /* Initialize the 256-bit (32-byte) bit map to all zeros. We build the map
@@ -1441,7 +1535,9 @@ while (TRUE)
 
         PRIV(update_classbits)(ptype, pdata, (escape == ESC_P), classbits);
 
-        if ((xclass_props & XCLASS_HIGH_ANY) == 0)
+        if ((xclass_props & XCLASS_HIGH_ANY) == 0 &&
+            ptype != PT_LAMP && ptype != PT_GC && ptype != PT_PC &&
+            ptype != PT_WORD && ptype != PT_ALNUM)
           {
           if (lengthptr != NULL)
             *lengthptr += 3;
@@ -1705,6 +1801,12 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
   code += LINK_SIZE;
   *code = negate_class? XCL_NOT:0;
   if ((xclass_props & XCLASS_HAS_PROPS) != 0) *code |= XCL_HASPROP;
+  /* This should be the last one. */
+  if (category_list != 0)
+    {
+    *code |= XCL_HASCATLIST;
+    memmove(code + 1, &category_list, sizeof(uint32_t));
+    }
 
   /* If the map is required, move up the extra data to make room for it;
   otherwise just move the code pointer to the end of the extra data. */
