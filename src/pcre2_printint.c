@@ -119,9 +119,14 @@ if (utf)
 
 if (one_code_unit)
   {
-  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
-  else if (c < 0x80) fprintf(f, "\\x%02x", c);
-  else fprintf(f, "\\x{%02x}", c);
+  if (PRINTABLE(c))
+    fprintf(f, "%c", (char)CHAR_OUTPUT(c));
+  else
+    {
+    c = CHAR_OUTPUT(c);
+    if (c < 0x80) fprintf(f, "\\x%02x", c);
+    else fprintf(f, "\\x{%02x}", c);
+    }
   return 0;
   }
 
@@ -213,7 +218,8 @@ print_custring(FILE *f, PCRE2_SPTR ptr)
 while (*ptr != '\0')
   {
   uint32_t c = *ptr++;
-  if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x{%x}", c);
+  if (PRINTABLE(c)) fprintf(f, "%c", CHAR_OUTPUT(c));
+  else fprintf(f, "\\x{%x}", CHAR_OUTPUT(c));
   }
 }
 
@@ -223,7 +229,8 @@ print_custring_bylen(FILE *f, PCRE2_SPTR ptr, PCRE2_UCHAR len)
 for (; len > 0; len--)
   {
   uint32_t c = *ptr++;
-  if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x{%x}", c);
+  if (PRINTABLE(c)) fprintf(f, "%c", CHAR_OUTPUT(c));
+  else fprintf(f, "\\x{%x}", CHAR_OUTPUT(c));
   }
 }
 
@@ -463,7 +470,7 @@ print_map(FILE *f, const uint8_t *map, BOOL negated)
 {
 BOOL first = TRUE;
 uint8_t inverted_map[32];
-int i;
+int i, input;
 
 if (negated)
   {
@@ -472,26 +479,35 @@ if (negated)
   map = inverted_map;
   }
 
-for (i = 0; i < 256; i++)
+for (input = 0; input < 256; input++)
   {
+  i = CHAR_INPUT(input);
   if ((map[i/8] & (1u << (i&7))) != 0)
     {
-    int j;
-    for (j = i+1; j < 256; j++)
-      if ((map[j/8] & (1u << (j&7))) == 0) break;
-    if (i == '-' || i == '\\' || i == ']' || (first && i == '^'))
-      fprintf(f, "\\");
-    if (PRINTABLE(i)) fprintf(f, "%c", i);
-      else fprintf(f, "\\x%02x", i);
-    first = FALSE;
-    if (--j > i)
+    int j, jinput;
+    for (jinput = input; jinput+1 < 256; jinput++)
       {
-      if (j != i + 1) fprintf(f, "-");
-      if (j == '-' || j == '\\' || j == ']') fprintf(f, "\\");
-      if (PRINTABLE(j)) fprintf(f, "%c", j);
-        else fprintf(f, "\\x%02x", j);
+      j = CHAR_INPUT(jinput+1);
+      if ((map[j/8] & (1u << (j&7))) == 0) break;
       }
-    i = j;
+    j = CHAR_INPUT(jinput);
+    if (i == CHAR_MINUS || i == CHAR_BACKSLASH ||
+        i == CHAR_RIGHT_SQUARE_BRACKET ||
+        (first && i == CHAR_CIRCUMFLEX_ACCENT))
+      fprintf(f, "\\");
+    if (PRINTABLE(i)) fprintf(f, "%c", CHAR_OUTPUT(i));
+    else fprintf(f, "\\x%02x", CHAR_OUTPUT(i));
+    first = FALSE;
+    if (jinput > input)
+      {
+      if (jinput != input + 1) fprintf(f, "-");
+      if (j == CHAR_MINUS || j == CHAR_BACKSLASH ||
+          j == CHAR_RIGHT_SQUARE_BRACKET)
+        fprintf(f, "\\");
+      if (PRINTABLE(j)) fprintf(f, "%c", CHAR_OUTPUT(j));
+      else fprintf(f, "\\x%02x", CHAR_OUTPUT(j));
+      }
+    input = jinput;
     }
   }
 }
@@ -948,7 +964,7 @@ for(;;)
 
     case OP_CALLOUT_STR:
     c = code[1 + 4*LINK_SIZE];
-    fprintf(f, "    %s %c", OP_names[*code], c);
+    fprintf(f, "    %s %c", OP_names[*code], CHAR_OUTPUT(c));
     extra = GET(code, 1 + 2*LINK_SIZE);
     print_custring_bylen(f, code + 2 + 4*LINK_SIZE, extra - 3 - 4*LINK_SIZE);
     for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
@@ -957,8 +973,8 @@ for(;;)
         c = PRIV(callout_end_delims)[i];
         break;
         }
-    fprintf(f, "%c %d %d %d", c, GET(code, 1 + 3*LINK_SIZE), GET(code, 1),
-      GET(code, 1 + LINK_SIZE));
+    fprintf(f, "%c %d %d %d", CHAR_OUTPUT(c), GET(code, 1 + 3*LINK_SIZE),
+      GET(code, 1), GET(code, 1 + LINK_SIZE));
     break;
 
     case OP_PROP:

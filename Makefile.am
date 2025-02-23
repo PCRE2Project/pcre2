@@ -362,9 +362,21 @@ src/pcre2_chartables.c: pcre2_dftables$(EXEEXT)
 	rm -f $@
 	./pcre2_dftables$(EXEEXT) $@
 else
+if WITH_EBCDIC
+if WITH_EBCDIC_NL25
+src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25
+	rm -f $@
+	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25 $(abs_builddir)/src/pcre2_chartables.c
+else # WITH_EBCDIC_NL25
+src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15
+	rm -f $@
+	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15 $(abs_builddir)/src/pcre2_chartables.c
+endif # WITH_EBCDIC_NL25
+else # WITH_EBCDIC
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.dist
 	rm -f $@
 	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.dist $(abs_builddir)/src/pcre2_chartables.c
+endif # WITH_EBCDIC
 endif # WITH_REBUILD_CHARTABLES
 
 BUILT_SOURCES = src/pcre2_chartables.c
@@ -378,6 +390,7 @@ COMMON_SOURCES = \
   src/pcre2_chkdint.c \
   src/pcre2_compile.c \
   src/pcre2_compile.h \
+  src/pcre2_compile_cgroup.c \
   src/pcre2_compile_class.c \
   src/pcre2_config.c \
   src/pcre2_context.c \
@@ -460,13 +473,18 @@ endif # WITH_PCRE2_32
 # The pcre2_chartables.c.dist file is the default version of
 # pcre2_chartables.c, used unless --enable-rebuild-chartables is specified.
 
-EXTRA_DIST += src/pcre2_chartables.c.dist
+EXTRA_DIST += \
+  src/pcre2_chartables.c.dist \
+  src/pcre2_chartables.c.ebcdic-1047-nl15 \
+  src/pcre2_chartables.c.ebcdic-1047-nl25
 CLEANFILES += src/pcre2_chartables.c
 
 # The JIT compiler lives in a separate directory, but its files are #included
 # when pcre2_jit_compile.c is processed, so they must be distributed.
 
 EXTRA_DIST += \
+  deps/sljit/LICENSE \
+  deps/sljit/README \
   deps/sljit/sljit_src/sljitConfig.h \
   deps/sljit/sljit_src/sljitConfigCPU.h \
   deps/sljit/sljit_src/sljitConfigInternal.h \
@@ -766,7 +784,8 @@ EXTRA_DIST += \
   testdata/testinput25 \
   testdata/testinput26 \
   testdata/testinput27 \
-  testdata/testinputEBC \
+  testdata/testinput28 \
+  testdata/testinput29 \
   testdata/testinputheap \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -808,7 +827,8 @@ EXTRA_DIST += \
   testdata/testoutput25 \
   testdata/testoutput26 \
   testdata/testoutput27 \
-  testdata/testoutputEBC \
+  testdata/testoutput28 \
+  testdata/testoutput29 \
   testdata/testoutputheap-16 \
   testdata/testoutputheap-32 \
   testdata/testoutputheap-8 \
@@ -822,6 +842,7 @@ EXTRA_DIST += \
 
 CLEANFILES += \
         testSinput \
+        testSoutput \
         test3input \
         test3output \
         test3outputA \
@@ -834,6 +855,13 @@ CLEANFILES += \
         testtemp2grep \
         testtrygrep \
         testNinputgrep
+
+clean-local: testoutput-clean
+.PHONY: testoutput-clean
+testoutput-clean:
+	-rm -rf testoutput8 testoutput8-jit testoutput8-dfa
+	-rm -rf testoutput16 testoutput16-jit testoutput16-dfa
+	-rm -rf testoutput32 testoutput32-jit testoutput32-dfa
 
 ## ------------ End of testing -------------
 

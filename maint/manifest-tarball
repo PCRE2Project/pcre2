@@ -37,6 +37,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/depcomp
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/LICENSE
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/README
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/allocator_src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/allocator_src/sljitExecAllocatorApple.c
@@ -304,9 +306,12 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_auto_possess.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chartables.c.dist
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chartables.c.ebcdic-1047-nl15
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chartables.c.ebcdic-1047-nl25
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_chkdint.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile.h
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile_cgroup.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_compile_class.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_config.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_context.c
@@ -401,6 +406,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput25
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput26
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput27
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput28
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput29
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput5
@@ -408,7 +415,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput7
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput8
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinput9
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinputEBC
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testinputheap
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput1
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput10
@@ -436,6 +442,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput25
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput26
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput27
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput28
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput29
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput3A
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput3B
@@ -450,7 +458,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput8-8-3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput8-8-4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutput9
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutputEBC
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutputheap-16
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutputheap-32
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/testdata/testoutputheap-8

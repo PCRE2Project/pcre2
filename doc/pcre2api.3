@@ -207,7 +207,7 @@ document for an overview of all the PCRE2 documentation.
 .B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
 .B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
 .B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacementz\fP,"
+.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacement\fP,"
 .B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\fP,"
 .B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
 .fi
@@ -1584,8 +1584,7 @@ case the following character).
 (3) \ex matches a lower case "x" character unless it is followed by two
 hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, as in Perl, a hexadecimal number is always expected after
-\ex, but it may have zero, one, or two digits (so, for example, \exz matches a
-binary zero character followed by z).
+\ex, but it may have one or two digits.
 .P
 ECMAscript 6 added additional functionality to \eu. This can be accessed using
 the PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"
@@ -1628,7 +1627,7 @@ option is set, normal backslash processing is applied to verb names and only an
 unescaped closing parenthesis terminates the name. A closing parenthesis can be
 included in a name either as \e) or between \eQ and \eE. If the PCRE2_EXTENDED
 or PCRE2_EXTENDED_MORE option is set with PCRE2_ALT_VERBNAMES, unescaped
-whitespace in verb names is skipped and #-comments are recognized, exactly as
+white space in verb names is skipped and #-comments are recognized, exactly as
 in the rest of the pattern.
 .sp
   PCRE2_AUTO_CALLOUT
@@ -2999,7 +2998,7 @@ PCRE2_DISABLE_RECURSELOOP_CHECK is ignored by JIT, but apart from PCRE2_NO_JIT
 .sp
 The PCRE2_ANCHORED option limits \fBpcre2_match()\fP to matching at the first
 matching position. If a pattern was compiled with PCRE2_ANCHORED, or turned out
-to be anchored by virtue of its contents, it cannot be made unachored at
+to be anchored by virtue of its contents, it cannot be made unanchored at
 matching time. Note that setting the option at match time disables JIT
 matching.
 .sp
@@ -3922,7 +3921,7 @@ in a pattern, which in Perl has some ambiguities. Details are given in the
 page.
 .P
 The Python form \eg<n>, where the angle brackets are part of the syntax and \fIn\fP
-is either a group name or number, is recognized as an altertive way of
+is either a group name or number, is recognized as an alternative way of
 inserting the contents of a group, for example \eg<3>.
 .P
 There are also four escape sequences for forcing the case of inserted letters.
@@ -4039,7 +4038,7 @@ above).
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
-The \fBpcre2_set_substitution_callout()\fP function can be used to specify a
+The \fBpcre2_set_substitute_callout()\fP function can be used to specify a
 callout function for \fBpcre2_substitute()\fP. This information is passed in
 a match context. The callout function is called after each substitution has
 been processed, but it can cause the replacement not to happen.
@@ -4107,7 +4106,7 @@ matches so far.
 .B "  void *\fIcallout_data\fP);"
 .fi
 .sp
-The \fBpcre2_set_substitution_case_callout()\fP function can be used to specify
+The \fBpcre2_set_substitute_case_callout()\fP function can be used to specify
 a callout function for \fBpcre2_substitute()\fP to use when performing case
 transformations. This does not affect any case insensitivity behaviour when
 performing a match, but only the user-visible transformations performed when

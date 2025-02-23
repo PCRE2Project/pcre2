@@ -44,8 +44,13 @@ sure both macros are undefined; an emulation function will then be used. */
    assumes that all input strings are in EBCDIC. If you do not define this
    macro, PCRE2 will assume input strings are ASCII or UTF-8/16/32 Unicode. It
    is not possible to build a version of PCRE2 that supports both EBCDIC and
-   UTF-8/16/32. */
+   ASCII or UTF-8/16/32. */
 /* #undef EBCDIC */
+
+/* To force an EBCDIC environment, define this macro to make the core PCRE2
+   library functions use EBCDIC codepage 1047, regardless of whether the
+   compiler supports it using C character literals. */
+/* #undef EBCDIC_IGNORING_COMPILER */
 
 /* In an EBCDIC environment, define this macro to any value to arrange for the
    NL character to be 0x25 instead of the default 0x15. NL plays the role that

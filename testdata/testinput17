@@ -275,8 +275,12 @@
     aaa
     bbb 
 
+#if !ebcdic
+
 /[^\xff]((?1))/BI
     abcd
+
+#endif
 
 /(x(?1)){4}/
 

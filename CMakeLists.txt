@@ -119,6 +119,17 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
+# Solaris-specific fix for "CMAKE_C_VISIBILITY_PRESET": this feature was only
+# recently added to CMake for the `cc` compiler (Oracle Developer Studio). The
+# CMake version from OpenCSW and Oracle's package repository is too old and
+# requires this fix.
+if (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND
+    CMAKE_VERSION VERSION_LESS 3.31 AND
+    CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND
+    CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.15)
+  set(CMAKE_C_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
+endif()
+
 # The following policies have been set in the PCRE2 CMake file in the past.
 # Since we specify a minimum of CMake 3.15, these are no longer required.
 # cmake_policy(SET CMP0063 NEW)
@@ -260,6 +271,10 @@ set(
 )
 
 set(PCRE2_EBCDIC_NL25 OFF CACHE BOOL "Use 0x25 as EBCDIC NL character instead of 0x15; implies EBCDIC.")
+
+set(PCRE2_EBCDIC_IGNORING_COMPILER OFF CACHE BOOL "Force EBCDIC 1047 using numeric literals rather than C character literals; implies EBCDIC.")
+
+option(PCRE2_REBUILD_CHARTABLES "Rebuild char tables" OFF)
 
 set(
   PCRE2_LINK_SIZE
@@ -568,13 +583,42 @@ if(NEWLINE_DEFAULT STREQUAL "")
   )
 endif()
 
+set(REBUILD_CHARTABLES OFF)
+if(PCRE2_REBUILD_CHARTABLES)
+  set(REBUILD_CHARTABLES ON)
+endif()
+
+set(EBCDIC OFF)
 if(PCRE2_EBCDIC)
-  set(EBCDIC 1)
+  set(EBCDIC ON)
 endif()
 
 if(PCRE2_EBCDIC_NL25)
-  set(EBCDIC 1)
-  set(EBCDIC_NL25 1)
+  set(EBCDIC ON)
+  set(EBCDIC_NL25 ON)
+endif()
+
+if(PCRE2_EBCDIC_IGNORING_COMPILER)
+  set(EBCDIC ON)
+  set(EBCDIC_IGNORING_COMPILER ON)
+endif()
+
+# Make sure that if EBCDIC is set (without EBCDIC_IGNORING_COMPILER), then
+# REBUILD_CHARTABLES is also enabled.
+# Also check that UTF support is not requested, because PCRE2 cannot handle
+# EBCDIC and UTF in the same build. To do so it would need to use different
+# character constants depending on the mode.
+# Also, EBCDIC cannot be used with 16-bit and 32-bit libraries.
+if(EBCDIC)
+  if(NOT EBCDIC_IGNORING_COMPILER)
+    set(REBUILD_CHARTABLES ON)
+  endif()
+  if(PCRE2_SUPPORT_UNICODE)
+    message(FATAL_ERROR "Support for EBCDIC and Unicode cannot be enabled at the same time")
+  endif()
+  if(PCRE2_BUILD_PCRE2_16 OR PCRE2_BUILD_PCRE2_32)
+    message(FATAL_ERROR "EBCDIC support is available only for the 8-bit library")
+  endif()
 endif()
 
 # Output files
@@ -648,8 +692,7 @@ endif()
 
 # Character table generation
 
-option(PCRE2_REBUILD_CHARTABLES "Rebuild char tables" OFF)
-if(PCRE2_REBUILD_CHARTABLES)
+if(REBUILD_CHARTABLES)
   add_executable(pcre2_dftables src/pcre2_dftables.c)
   add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/pcre2_chartables.c
@@ -659,8 +702,12 @@ if(PCRE2_REBUILD_CHARTABLES)
     COMMENT "Generating character tables (pcre2_chartables.c) for current locale"
     VERBATIM
   )
-else()
+elseif(NOT PCRE2_EBCDIC)
   configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.dist ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
+elseif(PCRE2_EBCDIC_NL25)
+  configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl25 ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
+else()
+  configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl15 ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
 endif()
 
 # Source code
@@ -673,6 +720,7 @@ set(
   ${PROJECT_BINARY_DIR}/pcre2_chartables.c
   src/pcre2_chkdint.c
   src/pcre2_compile.c
+  src/pcre2_compile_cgroup.c
   src/pcre2_compile_class.c
   src/pcre2_config.c
   src/pcre2_context.c
@@ -1334,9 +1382,19 @@ if(PCRE2_SHOW_REPORT)
   message(STATUS "  Newline char/sequence ............. : ${PCRE2_NEWLINE}")
   message(STATUS "  \\R matches only ANYCRLF ........... : ${PCRE2_SUPPORT_BSR_ANYCRLF}")
   message(STATUS "  \\C is disabled .................... : ${PCRE2_NEVER_BACKSLASH_C}")
-  message(STATUS "  EBCDIC coding ..................... : ${PCRE2_EBCDIC}")
-  message(STATUS "  EBCDIC coding with NL=0x25 ........ : ${PCRE2_EBCDIC_NL25}")
-  message(STATUS "  Rebuild char tables ............... : ${PCRE2_REBUILD_CHARTABLES}")
+
+  if(NOT EBCDIC)
+    set(EBCDIC_NL_CODE "n/a")
+  elseif(EBCDIC_NL25)
+    set(EBCDIC_NL_CODE "0x25")
+  else()
+    set(EBCDIC_NL_CODE "0x15")
+  endif()
+  message(STATUS "  EBCDIC coding ..................... : ${EBCDIC}")
+  message(STATUS "  EBCDIC code for NL ................ : ${EBCDIC_NL_CODE}")
+  message(STATUS "  EBCDIC coding ignoring compiler ... : ${PCRE2_EBCDIC_IGNORING_COMPILER}")
+  message(STATUS "  Rebuild char tables ............... : ${REBUILD_CHARTABLES}")
+
   message(STATUS "  Internal link size ................ : ${PCRE2_LINK_SIZE}")
   message(STATUS "  Maximum variable lookbehind ....... : ${PCRE2_MAX_VARLOOKBEHIND}")
   message(STATUS "  Parentheses nest limit ............ : ${PCRE2_PARENS_NEST_LIMIT}")

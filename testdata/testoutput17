@@ -503,6 +503,8 @@ Failed: error -46: JIT stack limit reached
     bbb 
 Failed: error -46: JIT stack limit reached
 
+#if !ebcdic
+
 /[^\xff]((?1))/BI
 ------------------------------------------------------------------
         Bra
@@ -518,6 +520,8 @@ Subject length lower bound = 1
 JIT compilation was successful
     abcd
 Failed: error -46: JIT stack limit reached
+
+#endif
 
 /(x(?1)){4}/
 

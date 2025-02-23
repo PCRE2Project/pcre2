@@ -176,10 +176,6 @@ Output information about a specific build-time option, then exit. This
 functionality is intended for use in scripts such as <b>RunTest</b>. The
 following options output the value and set the exit code as indicated:
 <pre>
-  ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
-               either 0x15 or 0x25
-               0 if used in an ASCII/Unicode environment
-               exit code is always 0
   linksize   the configured internal link size (2, 3, or 4)
                exit code is set to the link size
   newline    the default newline setting:
@@ -194,6 +190,10 @@ to the same value:
 <pre>
   backslash-C  \C is supported (not locked out)
   ebcdic       compiled for an EBCDIC environment
+  ebcdic-io    if PCRE2 is compiled for EBCDIC, whether pcre2test's input and
+                 output is EBCDIC or ASCII
+  ebcdic-nl25  if PCRE2 is compiled for EBCDIC, whether NL (= LF) is 0x25
+                 (otherwise it is 0x15, the default)
   jit          just-in-time support is available
   pcre2-16     the 16-bit library was built
   pcre2-32     the 32-bit library was built
@@ -223,6 +223,11 @@ form and information about the compiled pattern is output after compilation;
 Behave as if each subject line has the <b>dfa</b> modifier; matching is done
 using the <b>pcre2_dfa_match()</b> function instead of the default
 <b>pcre2_match()</b>.
+</p>
+<p>
+<b>-E</b>
+Run in "preprocess only" mode (similar to "gcc -E"). The "#if ... #endif"
+commands are processed, and all other lines are printed verbatim.
 </p>
 <p>
 <b>-error</b> <i>number[,number,...]</i>
@@ -311,6 +316,12 @@ compile phase.
 <b>-T</b> <b>-TM</b>
 These behave like <b>-t</b> and <b>-tm</b>, but in addition, at the end of a run,
 the total times for all compiles and matches are output.
+</p>
+<p>
+<b>-malloc</b>
+Exercise malloc() failures, by first counting the number of calls made to malloc
+during pattern compilation and matching, then re-running the compilation and
+matching that many times, exercising a failure of each malloc() call.
 </p>
 <p>
 <b>-version</b>
@@ -468,11 +479,22 @@ in the section entitled "Saving and restoring compiled patterns"
 </pre>
 This command sets a default modifier list that applies to all subsequent
 subject lines. Modifiers on a subject line can change these settings.
+<pre>
+  #if CONDITION
+  ...
+  #endif
+</pre>
+If CONDITION is true, then the command is printed, and its contents are
+processed as normal, including printing the commandlines to the output. If
+CONDITION is false, then all lines between the "#if" and "#endif" are skipped
+and not printed. The CONDITION can be any of the conditions which are tested by
+the "-C" commandline option and which set pcre2test's exit code to a boolean
+value. The CONDITION may also be preceded by "!".
 </p>
 <br><a name="SEC7" href="#TOC1">MODIFIER SYNTAX</a><br>
 <p>
 Modifier lists are used with both pattern and subject lines. Items in a list
-are separated by commas followed by optional white space. Trailing whitespace
+are separated by commas followed by optional white space. Trailing white space
 in a modifier list is ignored. Some modifiers may be given for both patterns
 and subject lines, whereas others are valid only for one or the other. Each
 modifier has a long name, for example "anchored", and some of them must be
@@ -599,7 +621,7 @@ the start of a modifier list. For example:
 <pre>
   abc\=notbol,notempty
 </pre>
-If the subject string is empty and \= is followed by whitespace, the line is
+If the subject string is empty and \= is followed by white space, the line is
 treated as a comment line, and is not used for matching. For example:
 <pre>
   \= This is a comment.
@@ -1574,7 +1596,7 @@ character. Here is an example that tests the edge case:
       123abc123\=replace=[10]XYZ
    1: 123XYZ123
       123abc123\=replace=[9]XYZ
-  Failed: error -47: no more memory
+  Failed: error -48: no more memory
 </pre>
 The default action of <b>pcre2_substitute()</b> is to return
 PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
@@ -1587,7 +1609,7 @@ for the trailing zero) as part of the error message. For example:
 <pre>
   /abc/substitute_overflow_length
       123abc123\=replace=[9]XYZ
-  Failed: error -47: no more memory: 10 code units are needed
+  Failed: error -48: no more memory: 10 code units are needed
 </pre>
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from

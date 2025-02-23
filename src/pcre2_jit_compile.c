@@ -3824,9 +3824,12 @@ oc = TABLE_GET(c, common->fcc, c);
 SLJIT_ASSERT(c != oc);
 
 bit = c ^ oc;
+
+#ifndef EBCDIC
 /* Optimized for English alphabet. */
 if (c <= 127 && bit == 0x20)
   return (0 << 8) | 0x20;
+#endif
 
 /* Since c != oc, they must have at least 1 bit difference. */
 if (!is_powerof2(bit))
@@ -7432,10 +7435,22 @@ DEFINE_COMPILER;
 
 sljit_emit_op_dst(compiler, SLJIT_FAST_ENTER, RETURN_ADDR, 0);
 
-OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0a);
-OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, 0x0d - 0x0a);
+#ifdef EBCDIC
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_LF);
+OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_VT);
+OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_FF);
+OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_CR);
+OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NEL);
+#else
+OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, CHAR_LF);
+OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR - CHAR_LF);
 OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
-OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x85 - 0x0a);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NEL - CHAR_LF);
+#endif
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #if PCRE2_CODE_UNIT_WIDTH == 8
 if (common->utf)
@@ -7443,7 +7458,7 @@ if (common->utf)
 #endif
   OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
   OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x1);
-  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x2029 - 0x0a);
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x2029 - CHAR_LF);
 #if PCRE2_CODE_UNIT_WIDTH == 8
   }
 #endif
@@ -7459,11 +7474,11 @@ DEFINE_COMPILER;
 
 sljit_emit_op_dst(compiler, SLJIT_FAST_ENTER, RETURN_ADDR, 0);
 
-OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x09);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_HT);
 OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
-OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x20);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_SPACE);
 OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
-OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0xa0);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NBSP);
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #if PCRE2_CODE_UNIT_WIDTH == 8
 if (common->utf)
@@ -7498,10 +7513,22 @@ DEFINE_COMPILER;
 
 sljit_emit_op_dst(compiler, SLJIT_FAST_ENTER, RETURN_ADDR, 0);
 
-OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0a);
-OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, 0x0d - 0x0a);
+#ifdef EBCDIC
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_LF);
+OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_VT);
+OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_FF);
+OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_CR);
+OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NEL);
+#else
+OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, CHAR_LF);
+OP2U(SLJIT_SUB | SLJIT_SET_LESS_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR - CHAR_LF);
 OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_LESS_EQUAL);
-OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x85 - 0x0a);
+OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NEL - CHAR_LF);
+#endif
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #if PCRE2_CODE_UNIT_WIDTH == 8
 if (common->utf)
@@ -7509,7 +7536,7 @@ if (common->utf)
 #endif
   OP_FLAGS(SLJIT_OR, TMP2, 0, SLJIT_EQUAL);
   OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x1);
-  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x2029 - 0x0a);
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0x2029 - CHAR_LF);
 #if PCRE2_CODE_UNIT_WIDTH == 8
   }
 #endif
@@ -8657,7 +8684,7 @@ if (*cc == OP_REVERSE)
 else
   {
   SLJIT_ASSERT(*cc == OP_VREVERSE);
-  PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, NULL);
+  PUSH_BACKTRACK(sizeof(vreverse_backtrack), cc, cc + 1 + 2 * IMM2_SIZE);
 
   reverse_failed = &backtrack->own_backtracks;
   lmin = GET2(cc, 1);
@@ -9893,6 +9920,8 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     assert->common.cc = matchingpath;
     BACKTRACK_AS(bracket_backtrack)->u.assert = assert;
     matchingpath = compile_assert_matchingpath(common, matchingpath, assert, TRUE);
+    if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
+      return NULL;
     }
   }
 
@@ -12667,6 +12696,8 @@ if (current->cc[1] > OP_ASSERTBACK_NOT)
   {
   /* Manual call of compile_bracket_matchingpath and compile_bracket_backtrackingpath. */
   compile_bracket_matchingpath(common, current->cc, current);
+  if (SLJIT_UNLIKELY(sljit_get_compiler_error(common->compiler)))
+    return;
   compile_bracket_backtrackingpath(common, current->top);
   }
 else
@@ -12676,6 +12707,8 @@ else
   backtrack.matchingpath = CURRENT_AS(braminzero_backtrack)->matchingpath;
   /* Manual call of compile_assert_matchingpath. */
   compile_assert_matchingpath(common, current->cc, &backtrack, FALSE);
+  if (SLJIT_UNLIKELY(sljit_get_compiler_error(common->compiler)))
+    return;
   }
 SLJIT_ASSERT(!current->simple_backtracks && !current->own_backtracks);
 }

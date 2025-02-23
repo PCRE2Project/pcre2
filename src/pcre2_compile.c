@@ -55,7 +55,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
+#define CHAR_OUTPUT(c)  (c)
+#define CHAR_INPUT(c)   (c)
 #include "pcre2_printint.c"
+#undef PRINTABLE
+#undef CHAR_OUTPUT
+#undef CHAR_INPUT
 #define DEBUG_CALL_PRINTINT
 #endif
 
@@ -214,8 +219,8 @@ static unsigned char meta_extra_lengths[] = {
   3,             /* META_COND_VERSION */
   SIZEOFFSET,    /* META_OFFSET */
   0,             /* META_SCS */
-  1,             /* META_SCS_NAME */
-  1,             /* META_SCS_NUMBER */
+  1,             /* META_CAPTURE_NAME */
+  1,             /* META_CAPTURE_NUMBER */
   0,             /* META_DOLLAR */
   0,             /* META_DOT */
   0,             /* META_ESCAPE - one more for ESC_P and ESC_p */
@@ -398,10 +403,10 @@ static const short int escapes[] = {
     /* 4 */ 0,                       /* 5 */ 0,
     /* 6 */ 0,                       /* 7 */ 0,
     /* 8 */ 0,                       /* 9 */ 0,
-    /* : */ CHAR_COLON,              /* ; */ CHAR_SEMICOLON,
-    /* < */ CHAR_LESS_THAN_SIGN,     /* = */ CHAR_EQUALS_SIGN,
-    /* > */ CHAR_GREATER_THAN_SIGN,  /* ? */ CHAR_QUESTION_MARK,
-    /* @ */ CHAR_COMMERCIAL_AT,      /* A */ -ESC_A,
+    /* : */ ESCAPES_FIRST+0x0a,      /* ; */ ESCAPES_FIRST+0x0b,
+    /* < */ ESCAPES_FIRST+0x0c,      /* = */ ESCAPES_FIRST+0x0d,
+    /* > */ ESCAPES_FIRST+0x0e,      /* ? */ ESCAPES_FIRST+0x0f,
+    /* @ */ ESCAPES_FIRST+0x10,      /* A */ -ESC_A,
     /* B */ -ESC_B,                  /* C */ -ESC_C,
     /* D */ -ESC_D,                  /* E */ -ESC_E,
     /* F */ 0,                       /* G */ -ESC_G,
@@ -414,10 +419,10 @@ static const short int escapes[] = {
     /* T */ 0,                       /* U */ 0,
     /* V */ -ESC_V,                  /* W */ -ESC_W,
     /* X */ -ESC_X,                  /* Y */ 0,
-    /* Z */ -ESC_Z,                  /* [ */ CHAR_LEFT_SQUARE_BRACKET,
-    /* \ */ CHAR_BACKSLASH,          /* ] */ CHAR_RIGHT_SQUARE_BRACKET,
-    /* ^ */ CHAR_CIRCUMFLEX_ACCENT,  /* _ */ CHAR_UNDERSCORE,
-    /* ` */ CHAR_GRAVE_ACCENT,       /* a */ CHAR_BEL,
+    /* Z */ -ESC_Z,                  /* [ */ ESCAPES_FIRST+0x2b,
+    /* \ */ ESCAPES_FIRST+0x2c,      /* ] */ ESCAPES_FIRST+0x2d,
+    /* ^ */ ESCAPES_FIRST+0x2e,      /* _ */ ESCAPES_FIRST+0x2f,
+    /* ` */ ESCAPES_FIRST+0x30,      /* a */ CHAR_BEL,
     /* b */ -ESC_b,                  /* c */ 0,
     /* d */ -ESC_d,                  /* e */ CHAR_ESC,
     /* f */ CHAR_FF,                 /* g */ 0,
@@ -436,43 +441,94 @@ static const short int escapes[] = {
 #else
 
 /* This is the "abnormal" table for EBCDIC systems without UTF-8 support.
-It runs from 'a' to '9'. For some minimal testing of EBCDIC features, the code
-is sometimes compiled on an ASCII system. In this case, we must not use CHAR_a
-because it is defined as 'a', which of course picks up the ASCII value. */
+It runs from 'a' to '9'. Our EBCDIC support can be provided via the compiler,
+which can interpret character literals like 'a' or '[' in an EBCDIC codepage;
+in this case, there is wide variance between codepages on the interpretation of
+characters between the letters ('[' and '{' and so on are placed in all sorts of
+different positions in the table). Thankfully however, all EBCDIC codepages
+place the letters and digits in the same location, so we hardcode that here.
+Our EBCDIC support can also be provided via numeric literals instead of
+character literals, so either way, 'CHAR_a' will be 0x81 when PCRE2 is compiled
+in EBCDIC mode. */
 
-#if 'a' == 0x81                    /* Check for a real EBCDIC environment */
 #define ESCAPES_FIRST       CHAR_a
 #define ESCAPES_LAST        CHAR_9
 #define UPPER_CASE(c)       (c+64)
-#else                              /* Testing in an ASCII environment */
-#define ESCAPES_FIRST  ((unsigned char)'\x81')   /* EBCDIC 'a' */
-#define ESCAPES_LAST   ((unsigned char)'\xf9')   /* EBCDIC '9' */
-#define UPPER_CASE(c)  (c-32)
-#endif
 
 static const short int escapes[] = {
-/*  80 */         CHAR_BEL, -ESC_b,       0, -ESC_d, CHAR_ESC, CHAR_FF,      0,
-/*  88 */ -ESC_h,        0,      0,     '{',      0,        0,       0,      0,
-/*  90 */      0,        0, -ESC_k,       0,      0,  CHAR_LF,       0, -ESC_p,
-/*  98 */      0,  CHAR_CR,      0,     '}',      0,        0,       0,      0,
-/*  A0 */      0,      '~', -ESC_s, CHAR_HT,      0,   -ESC_v,  -ESC_w,      0,
-/*  A8 */      0,   -ESC_z,      0,       0,      0,      '[',       0,      0,
-/*  B0 */      0,        0,      0,       0,      0,        0,       0,      0,
-/*  B8 */      0,        0,      0,       0,      0,      ']',     '=',    '-',
-/*  C0 */    '{',   -ESC_A, -ESC_B,  -ESC_C, -ESC_D,   -ESC_E,       0, -ESC_G,
-/*  C8 */ -ESC_H,        0,      0,       0,      0,        0,       0,      0,
-/*  D0 */    '}',        0, -ESC_K,       0,      0,   -ESC_N,       0, -ESC_P,
-/*  D8 */ -ESC_Q,   -ESC_R,      0,       0,      0,        0,       0,      0,
-/*  E0 */   '\\',        0, -ESC_S,       0,      0,   -ESC_V,  -ESC_W, -ESC_X,
-/*  E8 */      0,   -ESC_Z,      0,       0,      0,        0,       0,      0,
-/*  F0 */      0,        0,      0,       0,      0,        0,       0,      0,
-/*  F8 */      0,        0
+    /* 0x81 a */ CHAR_BEL,             /* 0x82 b */ -ESC_b,
+    /* 0x83 c */ 0,                    /* 0x84 d */ -ESC_d,
+    /* 0x85 e */ CHAR_ESC,             /* 0x86 f */ CHAR_FF,
+    /* 0x87 g */ 0,                    /* 0x88 h */ -ESC_h,
+    /* 0x89 i */ 0,                    /* 0x8a   */ ESCAPES_FIRST+0x09,
+    /* 0x8b   */ ESCAPES_FIRST+0x0a,   /* 0x8c   */ ESCAPES_FIRST+0x0b,
+    /* 0x8d   */ ESCAPES_FIRST+0x0c,   /* 0x8e   */ ESCAPES_FIRST+0x0d,
+    /* 0x8f   */ ESCAPES_FIRST+0x0e,   /* 0x90   */ ESCAPES_FIRST+0x0f,
+    /* 0x91 j */ 0,                    /* 0x92 k */ -ESC_k,
+    /* 0x93 l */ 0,                    /* 0x94 m */ 0,
+    /* 0x95 n */ CHAR_LF,              /* 0x96 o */ 0,
+    /* 0x97 p */ -ESC_p,               /* 0x98 q */ 0,
+    /* 0x99 r */ CHAR_CR,              /* 0x9a   */ ESCAPES_FIRST+0x19,
+    /* 0x9b   */ ESCAPES_FIRST+0x1a,   /* 0x9c   */ ESCAPES_FIRST+0x1b,
+    /* 0x9d   */ ESCAPES_FIRST+0x1c,   /* 0x9e   */ ESCAPES_FIRST+0x1d,
+    /* 0x9f   */ ESCAPES_FIRST+0x1e,   /* 0xa0   */ ESCAPES_FIRST+0x1f,
+    /* 0xa1   */ ESCAPES_FIRST+0x20,   /* 0xa2 s */ -ESC_s,
+    /* 0xa3 t */ CHAR_HT,              /* 0xa4 u */ 0,
+    /* 0xa5 v */ -ESC_v,               /* 0xa6 w */ -ESC_w,
+    /* 0xa7 x */ 0,                    /* 0xa8 y */ 0,
+    /* 0xa9 z */ -ESC_z,               /* 0xaa   */ ESCAPES_FIRST+0x29,
+    /* 0xab   */ ESCAPES_FIRST+0x2a,   /* 0xac   */ ESCAPES_FIRST+0x2b,
+    /* 0xad   */ ESCAPES_FIRST+0x2c,   /* 0xae   */ ESCAPES_FIRST+0x2d,
+    /* 0xaf   */ ESCAPES_FIRST+0x2e,   /* 0xb0   */ ESCAPES_FIRST+0x2f,
+    /* 0xb1   */ ESCAPES_FIRST+0x30,   /* 0xb2   */ ESCAPES_FIRST+0x31,
+    /* 0xb3   */ ESCAPES_FIRST+0x32,   /* 0xb4   */ ESCAPES_FIRST+0x33,
+    /* 0xb5   */ ESCAPES_FIRST+0x34,   /* 0xb6   */ ESCAPES_FIRST+0x35,
+    /* 0xb7   */ ESCAPES_FIRST+0x36,   /* 0xb8   */ ESCAPES_FIRST+0x37,
+    /* 0xb9   */ ESCAPES_FIRST+0x38,   /* 0xba   */ ESCAPES_FIRST+0x39,
+    /* 0xbb   */ ESCAPES_FIRST+0x3a,   /* 0xbc   */ ESCAPES_FIRST+0x3b,
+    /* 0xbd   */ ESCAPES_FIRST+0x3c,   /* 0xbe   */ ESCAPES_FIRST+0x3d,
+    /* 0xbf   */ ESCAPES_FIRST+0x3e,   /* 0xc0   */ ESCAPES_FIRST+0x3f,
+    /* 0xc1 A */ -ESC_A,               /* 0xc2 B */ -ESC_B,
+    /* 0xc3 C */ -ESC_C,               /* 0xc4 D */ -ESC_D,
+    /* 0xc5 E */ -ESC_E,               /* 0xc6 F */ 0,
+    /* 0xc7 G */ -ESC_G,               /* 0xc8 H */ -ESC_H,
+    /* 0xc9 I */ 0,                    /* 0xca   */ ESCAPES_FIRST+0x49,
+    /* 0xcb   */ ESCAPES_FIRST+0x4a,   /* 0xcc   */ ESCAPES_FIRST+0x4b,
+    /* 0xcd   */ ESCAPES_FIRST+0x4c,   /* 0xce   */ ESCAPES_FIRST+0x4d,
+    /* 0xcf   */ ESCAPES_FIRST+0x4e,   /* 0xd0   */ ESCAPES_FIRST+0x4f,
+    /* 0xd1 J */ 0,                    /* 0xd2 K */ -ESC_K,
+    /* 0xd3 L */ 0,                    /* 0xd4 M */ 0,
+    /* 0xd5 N */ -ESC_N,               /* 0xd6 O */ 0,
+    /* 0xd7 P */ -ESC_P,               /* 0xd8 Q */ -ESC_Q,
+    /* 0xd9 R */ -ESC_R,               /* 0xda   */ ESCAPES_FIRST+0x59,
+    /* 0xdb   */ ESCAPES_FIRST+0x5a,   /* 0xdc   */ ESCAPES_FIRST+0x5b,
+    /* 0xdd   */ ESCAPES_FIRST+0x5c,   /* 0xde   */ ESCAPES_FIRST+0x5d,
+    /* 0xdf   */ ESCAPES_FIRST+0x5e,   /* 0xe0   */ ESCAPES_FIRST+0x5f,
+    /* 0xe1   */ ESCAPES_FIRST+0x60,   /* 0xe2 S */ -ESC_S,
+    /* 0xe3 T */ 0,                    /* 0xe4 U */ 0,
+    /* 0xe5 V */ -ESC_V,               /* 0xe6 W */ -ESC_W,
+    /* 0xe7 X */ -ESC_X,               /* 0xe8 Y */ 0,
+    /* 0xe9 Z */ -ESC_Z,               /* 0xea   */ ESCAPES_FIRST+0x69,
+    /* 0xeb   */ ESCAPES_FIRST+0x6a,   /* 0xec   */ ESCAPES_FIRST+0x6b,
+    /* 0xed   */ ESCAPES_FIRST+0x6c,   /* 0xee   */ ESCAPES_FIRST+0x6d,
+    /* 0xef   */ ESCAPES_FIRST+0x6e,   /* 0xf0 0 */ 0,
+    /* 0xf1 1 */ 0,                    /* 0xf2 2 */ 0,
+    /* 0xf3 3 */ 0,                    /* 0xf4 4 */ 0,
+    /* 0xf5 5 */ 0,                    /* 0xf6 6 */ 0,
+    /* 0xf7 7 */ 0,                    /* 0xf8 8 */ 0,
+    /* 0xf9 9 */ 0,
 };
 
 /* We also need a table of characters that may follow \c in an EBCDIC
 environment for characters 0-31. */
 
-static unsigned char ebcdic_escape_c[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+static unsigned char ebcdic_escape_c[] = {
+  CHAR_COMMERCIAL_AT, CHAR_A, CHAR_B, CHAR_C, CHAR_D, CHAR_E, CHAR_F, CHAR_G,
+  CHAR_H, CHAR_I, CHAR_J, CHAR_K, CHAR_L, CHAR_M, CHAR_N, CHAR_O, CHAR_P,
+  CHAR_Q, CHAR_R, CHAR_S, CHAR_T, CHAR_U, CHAR_V, CHAR_W, CHAR_X, CHAR_Y,
+  CHAR_Z, CHAR_LEFT_SQUARE_BRACKET, CHAR_BACKSLASH, CHAR_RIGHT_SQUARE_BRACKET,
+  CHAR_CIRCUMFLEX_ACCENT, CHAR_UNDERSCORE
+};
 
 #endif   /* EBCDIC */
 
@@ -1035,12 +1091,12 @@ for (;;)
     fprintf(stderr, "META (*scan_substring:");
     break;
 
-    case META_SCS_NAME:
-    fprintf(stderr, "META_SCS_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
+    case META_CAPTURE_NAME:
+    fprintf(stderr, "META_CAPTURE_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
     break;
 
-    case META_SCS_NUMBER:
-    fprintf(stderr, "META_SCS_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
+    case META_CAPTURE_NUMBER:
+    fprintf(stderr, "META_CAPTURE_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
     break;
 
     case META_MARK:
@@ -1570,8 +1626,8 @@ else
 
   if (cb == NULL)
     {
-    if (c < CHAR_0 ||
-       (c > CHAR_9 && (c != CHAR_c && c != CHAR_o && c != CHAR_x && c != CHAR_g)))
+    if (!(c >= CHAR_0 && c <= CHAR_9) && c != CHAR_c && c != CHAR_o &&
+        c != CHAR_x && c != CHAR_g)
       {
       *errorcodeptr = ERR3;
       return 0;
@@ -2111,11 +2167,7 @@ else
     For testing the EBCDIC handling of \c in an ASCII environment, recognize
     the EBCDIC value of 'c' explicitly. */
 
-#if defined EBCDIC && 'a' != 0x81
-    case 0x83:
-#else
     case CHAR_c:
-#endif
     if (ptr >= ptrend)
       {
       *errorcodeptr = ERR2;
@@ -2141,7 +2193,7 @@ else
 
 #else
     if (c == CHAR_QUESTION_MARK)
-      c = ('\\' == 188 && '`' == 74)? 0x5f : 0xff;
+      c = (CHAR_BACKSLASH == 188 && CHAR_GRAVE_ACCENT == 74)? 0x5f : 0xff;
     else
       {
       for (i = 0; i < 32; i++)
@@ -2940,6 +2992,7 @@ uint32_t add_after_mark = 0;
 uint16_t nest_depth = 0;
 int16_t class_depth_m1 = -1; /* The m1 means minus 1. */
 int16_t class_maxdepth_m1 = -1;
+uint16_t hash;
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
 int errorcode = 0;
@@ -2949,7 +3002,7 @@ BOOL inescq = FALSE;
 BOOL inverbname = FALSE;
 BOOL utf = (options & PCRE2_UTF) != 0;
 BOOL auto_callout = (options & PCRE2_AUTO_CALLOUT) != 0;
-BOOL isdupname;
+BOOL is_dupname;
 BOOL negate_class;
 BOOL okquantifier = FALSE;
 PCRE2_SPTR thisptr;
@@ -4641,7 +4694,7 @@ while (ptr < ptrend)
                 errorcode = ERR15;
                 goto FAILED;
                 }
-              meta = META_SCS_NUMBER;
+              meta = META_CAPTURE_NUMBER;
               namelen = (uint32_t)i;
               }
             else if (errorcode != 0) goto FAILED;   /* Number too big */
@@ -4663,7 +4716,7 @@ while (ptr < ptrend)
               if (!read_name(&ptr, ptrend, utf, terminator, &next_offset,
                   &name, &namelen, &errorcode, cb)) goto FAILED;
 
-              meta = META_SCS_NAME;
+              meta = META_CAPTURE_NAME;
               }
 
             PCRE2_ASSERT(next_offset > 0);
@@ -5557,21 +5610,37 @@ while (ptr < ptrend)
       scanning in case this is a duplicate with the same number. For
       non-duplicate names, give an error if the number is duplicated. */
 
-      isdupname = FALSE;
+      is_dupname = FALSE;
+      hash = PRIV(compile_get_hash_from_name)(name, namelen);
       ng = cb->named_groups;
       for (i = 0; i < cb->names_found; i++, ng++)
         {
-        if (namelen == ng->length &&
+        if (namelen == ng->length && hash == NAMED_GROUP_GET_HASH(ng) &&
             PRIV(strncmp)(name, ng->name, (PCRE2_SIZE)namelen) == 0)
           {
+          /* When a bracket is referenced by the same name multiple
+          times, is not considered as a duplicate and ignored. */
           if (ng->number == cb->bracount) break;
           if ((options & PCRE2_DUPNAMES) == 0)
             {
             errorcode = ERR43;
             goto FAILED;
             }
-          isdupname = ng->isdup = TRUE;     /* Mark as a duplicate */
+
+          ng->hash_dup |= NAMED_GROUP_IS_DUPNAME;
+          is_dupname = TRUE;                /* Mark as a duplicate */
           cb->dupnames = TRUE;              /* Duplicate names exist */
+
+          /* The entry represents a duplicate. */
+          name = ng->name;
+          namelen = 0;
+
+          /* Even duplicated names may refer to the same
+          capture index. These references are also ignored. */
+          for (; i < cb->names_found; i++, ng++)
+            if (ng->name == name && ng->number == cb->bracount)
+              break;
+          break;
           }
         else if (ng->number == cb->bracount)
           {
@@ -5580,7 +5649,8 @@ while (ptr < ptrend)
           }
         }
 
-      if (i < cb->names_found) break;   /* Ignore duplicate with same number */
+      /* Ignore duplicate with same number. */
+      if (i < cb->names_found) break;
 
       /* Increase the list size if necessary */
 
@@ -5606,11 +5676,13 @@ while (ptr < ptrend)
         }
 
       /* Add this name to the list */
+      if (is_dupname)
+        hash |= NAMED_GROUP_IS_DUPNAME;
 
       cb->named_groups[cb->names_found].name = name;
       cb->named_groups[cb->names_found].length = (uint16_t)namelen;
       cb->named_groups[cb->names_found].number = cb->bracount;
-      cb->named_groups[cb->names_found].isdup = (uint16_t)isdupname;
+      cb->named_groups[cb->names_found].hash_dup = hash;
       cb->names_found++;
       break;
 
@@ -5840,77 +5912,6 @@ PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 
 
 /*************************************************
-*    Find details of duplicate group names       *
-*************************************************/
-
-/* This is called from compile_branch() when it needs to know the index and
-count of duplicates in the names table when processing named backreferences,
-either directly, or as conditions.
-
-Arguments:
-  name          points to the name
-  length        the length of the name
-  indexptr      where to put the index
-  countptr      where to put the count of duplicates
-  errorcodeptr  where to put an error code
-  cb            the compile block
-
-Returns:        TRUE if OK, FALSE if not, error code set
-*/
-
-static BOOL
-find_dupname_details(PCRE2_SPTR name, uint32_t length, int *indexptr,
-  int *countptr, int *errorcodeptr, compile_block *cb)
-{
-uint32_t i, groupnumber;
-int count;
-PCRE2_UCHAR *slot = cb->name_table;
-
-/* Find the first entry in the table */
-
-for (i = 0; i < cb->names_found; i++)
-  {
-  if (PRIV(strncmp)(name, slot+IMM2_SIZE, length) == 0 &&
-      slot[IMM2_SIZE+length] == 0) break;
-  slot += cb->name_entry_size;
-  }
-
-/* This should not occur, because this function is called only when we know we
-have duplicate names. Give an internal error. */
-
-if (i >= cb->names_found)
-  {
-  PCRE2_DEBUG_UNREACHABLE();
-  *errorcodeptr = ERR53;
-  cb->erroroffset = name - cb->start_pattern;
-  return FALSE;
-  }
-
-/* Record the index and then see how many duplicates there are, updating the
-backref map and maximum back reference as we do. */
-
-*indexptr = i;
-count = 0;
-
-for (;;)
-  {
-  count++;
-  groupnumber = GET2(slot,0);
-  cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
-  if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
-  if (++i >= cb->names_found) break;
-  slot += cb->name_entry_size;
-  if (PRIV(strncmp)(name, slot+IMM2_SIZE, length) != 0 ||
-    (slot+IMM2_SIZE)[length] != 0) break;
-  }
-
-*countptr = count;
-return TRUE;
-}
-
-
-
-/*************************************************
 *           Compile one branch                   *
 *************************************************/
 
@@ -5963,7 +5964,7 @@ uint32_t meta, meta_arg;
 uint32_t firstcuflags, reqcuflags;
 uint32_t zeroreqcuflags, zerofirstcuflags;
 uint32_t req_caseopt, reqvary, tempreqvary;
-/* Some opcodes, such as META_SCS_NUMBER or META_SCS_NAME,
+/* Some opcodes, such as META_CAPTURE_NUMBER or META_CAPTURE_NAME,
 depends on the previous value of offset. */
 PCRE2_SIZE offset = 0;
 PCRE2_SIZE length_prevgroup = 0;
@@ -6468,16 +6469,18 @@ for (;; pptr++)
     case META_COND_RNUMBER:   /* (?(Rdigits) */
     case META_COND_NAME:      /* (?(name) or (?'name') or ?(<name>) */
     case META_COND_RNAME:     /* (?(R&name) - test for recursion */
-    case META_SCS_NAME:       /* Name of scan substring */
+    case META_CAPTURE_NAME:   /* Generic capture name */
     bravalue = OP_COND;
+
+    if (lengthptr != NULL)
       {
-      int count, index;
-      unsigned int i;
+      uint32_t i;
       PCRE2_SPTR name;
-      named_group *ng = cb->named_groups;
+      named_group *ng;
+      uint32_t *start_pptr = pptr;
       uint32_t length = *(++pptr);
 
-      if (meta == META_SCS_NAME)
+      if (meta == META_CAPTURE_NAME)
         offset += meta_arg;
       else
         GETPLUSOFFSET(offset, pptr);
@@ -6489,11 +6492,9 @@ for (;; pptr++)
       this name is duplicated. If it is not duplicated, we can handle it as a
       numerical group. */
 
-      for (i = 0; i < cb->names_found; i++, ng++)
-        if (length == ng->length &&
-            PRIV(strncmp)(name, ng->name, length) == 0) break;
+      ng = PRIV(compile_find_named_group)(name, length, cb);
 
-      if (i >= cb->names_found)
+      if (ng == NULL)
         {
         /* If the name was not found we have a bad reference, unless we are
         dealing with R<digits>, which is treated as a recursion test by
@@ -6526,61 +6527,119 @@ for (;; pptr++)
         translated into RREF_ANY (which is 0xffff). */
 
         if (groupnumber == 0) groupnumber = RREF_ANY;
-        code[1+LINK_SIZE] = OP_RREF;
-        PUT2(code, 2+LINK_SIZE, groupnumber);
+        PCRE2_ASSERT(start_pptr[0] == META_COND_RNUMBER);
+        start_pptr[1] = groupnumber;
         skipunits = 1+IMM2_SIZE;
         goto GROUP_PROCESS_NOTE_EMPTY;
         }
-      else if (!ng->isdup)
+
+      /* From here on, we know we have a name (not a number),
+      so treat META_COND_RNUMBER the same as META_COND_NAME. */
+      if (meta == META_COND_RNUMBER) meta = META_COND_NAME;
+
+      if ((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) == 0)
         {
-        /* Otherwise found a duplicated name */
+        /* Found a non-duplicated name. Since it is a global,
+        it is enough to update it in the pre-processing phase. */
         if (ng->number > cb->top_backref) cb->top_backref = ng->number;
 
-        if (meta == META_SCS_NAME)
+        start_pptr[0] = meta;
+        start_pptr[1] = ng->number;
+
+        if (meta == META_CAPTURE_NAME)
           {
-          code[0] = OP_CREF;
-          PUT2(code, 1, ng->number);
-          code += 1+IMM2_SIZE;
+          code += 1 + IMM2_SIZE;
           break;
           }
 
-        code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_RREF : OP_CREF;
-        PUT2(code, 2+LINK_SIZE, ng->number);
-        skipunits = 1+IMM2_SIZE;
-        if (meta != META_SCS_NAME) goto GROUP_PROCESS_NOTE_EMPTY;
-        cb->assert_depth += 1;
-        goto GROUP_PROCESS;
+        skipunits = 1 + IMM2_SIZE;
+        goto GROUP_PROCESS_NOTE_EMPTY;
         }
 
       /* We have a duplicated name. In the compile pass we have to search the
       main table in order to get the index and count values. */
 
+      start_pptr[0] = meta | 1;
+      start_pptr[1] = (uint32_t)(ng - cb->named_groups);
+
+      if (meta == META_CAPTURE_NAME)
+        {
+        code += 1 + 2 * IMM2_SIZE;
+        break;
+        }
+
+      /* A duplicated name was found. Note that if an R<digits> name is found
+      (META_COND_RNUMBER), it is a reference test, not a recursion test. */
+      skipunits = 1 + 2 * IMM2_SIZE;
+      }
+    else
+      {
+      /* Otherwise lengthptr equals to NULL,
+      which is the second phase of compilation. */
+      int count, index;
+      named_group *ng;
+
+      /* Generate code using the data
+      collected in the pre-processing phase. */
+
+      if (meta == META_COND_RNUMBER)
+        {
+        code[1+LINK_SIZE] = OP_RREF;
+        PUT2(code, 2 + LINK_SIZE, pptr[1]);
+        skipunits = 1 + IMM2_SIZE;
+        pptr += 1 + SIZEOFFSET;
+        goto GROUP_PROCESS_NOTE_EMPTY;
+        }
+
+      if (meta_arg == 0)
+        {
+        if (meta == META_CAPTURE_NAME)
+          {
+          code[0] = OP_CREF;
+          PUT2(code, 1, pptr[1]);
+          code += 1 + IMM2_SIZE;
+          pptr++;
+          break;
+          }
+
+        code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_RREF : OP_CREF;
+        PUT2(code, 2 + LINK_SIZE, pptr[1]);
+        skipunits = 1 + IMM2_SIZE;
+        pptr += 1 + SIZEOFFSET;
+        goto GROUP_PROCESS_NOTE_EMPTY;
+        }
+
+      ng = cb->named_groups + pptr[1];
       count = 0;  /* Values for first pass (avoids compiler warning) */
       index = 0;
-      if (lengthptr == NULL && !find_dupname_details(name, length, &index,
+
+      /* The failed case is an internal error. */
+      if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index,
             &count, errorcodeptr, cb)) return 0;
 
-      if (meta == META_SCS_NAME)
+      if (meta == META_CAPTURE_NAME)
         {
         code[0] = OP_DNCREF;
         PUT2(code, 1, index);
-        PUT2(code, 1+IMM2_SIZE, count);
-        code += 1+2*IMM2_SIZE;
+        PUT2(code, 1 + IMM2_SIZE, count);
+        code += 1 + 2 * IMM2_SIZE;
+        pptr++;
         break;
         }
 
       /* A duplicated name was found. Note that if an R<digits> name is found
       (META_COND_RNUMBER), it is a reference test, not a recursion test. */
 
-      code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_DNRREF : OP_DNCREF;
+      code[1 + LINK_SIZE] = (meta == META_COND_RNAME)? OP_DNRREF : OP_DNCREF;
 
       /* Insert appropriate data values. */
-      skipunits = 1+2*IMM2_SIZE;
-      PUT2(code, 2+LINK_SIZE, index);
-      PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);
+      PUT2(code, 2 + LINK_SIZE, index);
+      PUT2(code, 2 + LINK_SIZE + IMM2_SIZE, count);
+      skipunits = 1 + 2 * IMM2_SIZE;
+      pptr += 1 + SIZEOFFSET;
       }
 
-    PCRE2_ASSERT(meta != META_SCS_NAME);
+    PCRE2_ASSERT(meta != META_CAPTURE_NAME);
     goto GROUP_PROCESS_NOTE_EMPTY;
 
     /* The DEFINE condition is always false. Its internal groups may never
@@ -6597,9 +6656,9 @@ for (;; pptr++)
     /* Conditional test of a group's being set. */
 
     case META_COND_NUMBER:
-    case META_SCS_NUMBER:
+    case META_CAPTURE_NUMBER:
     bravalue = OP_COND;
-    if (meta == META_SCS_NUMBER)
+    if (meta == META_CAPTURE_NUMBER)
       offset += meta_arg;
     else
       GETPLUSOFFSET(offset, pptr);
@@ -6613,7 +6672,7 @@ for (;; pptr++)
       }
     if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
 
-    if (meta == META_SCS_NUMBER)
+    if (meta == META_CAPTURE_NUMBER)
       {
       code[0] = OP_CREF;
       PUT2(code, 1, groupnumber);
@@ -6928,8 +6987,7 @@ for (;; pptr++)
       {
       int count, index;
       PCRE2_SPTR name;
-      BOOL is_dupname = FALSE;
-      named_group *ng = cb->named_groups;
+      named_group *ng;
       uint32_t length = *(++pptr);
 
       GETPLUSOFFSET(offset, pptr);
@@ -6941,46 +6999,39 @@ for (;; pptr++)
       this name is duplicated. */
 
       groupnumber = 0;
-      for (unsigned int i = 0; i < cb->names_found; i++, ng++)
+      ng = PRIV(compile_find_named_group)(name, length, cb);
+
+      if (ng == NULL)
         {
-        if (length == ng->length &&
-            PRIV(strncmp)(name, ng->name, length) == 0)
-          {
-          is_dupname = ng->isdup;
-          groupnumber = ng->number;
-
-          /* For a recursion, that's all that is needed. We can now go to
-          the code that handles numerical recursion, applying it to the first
-          group with the given name. */
-
-          if (meta == META_RECURSE_BYNAME)
-            {
-            meta_arg = groupnumber;
-            goto HANDLE_NUMERICAL_RECURSION;
-            }
-
-          /* For a back reference, update the back reference map and the
-          maximum back reference. */
-
-          cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
-          if (groupnumber > cb->top_backref)
-            cb->top_backref = groupnumber;
-          }
-        }
-
-      /* If the name was not found we have a bad reference. */
-
-      if (groupnumber == 0)
-        {
+        /* If the name was not found we have a bad reference. */
         *errorcodeptr = ERR15;
         cb->erroroffset = offset;
         return 0;
         }
 
+      groupnumber = ng->number;
+
+      /* For a recursion, that's all that is needed. We can now go to
+      the code that handles numerical recursion, applying it to the first
+      group with the given name. */
+
+      if (meta == META_RECURSE_BYNAME)
+        {
+        meta_arg = groupnumber;
+        goto HANDLE_NUMERICAL_RECURSION;
+        }
+
+      /* For a back reference, update the back reference map and the
+      maximum back reference. */
+
+      cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
+      if (groupnumber > cb->top_backref)
+        cb->top_backref = groupnumber;
+
       /* If a back reference name is not duplicated, we can handle it as
       a numerical reference. */
 
-      if (!is_dupname)
+      if ((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) == 0)
         {
         meta_arg = groupnumber;
         goto HANDLE_SINGLE_REFERENCE;
@@ -6992,8 +7043,8 @@ for (;; pptr++)
 
       count = 0;  /* Values for first pass (avoids compiler warning) */
       index = 0;
-      if (lengthptr == NULL && !find_dupname_details(name, length, &index,
-            &count, errorcodeptr, cb)) return 0;
+      if (lengthptr == NULL && !PRIV(compile_find_dupname_details)(name, length,
+            &index, &count, errorcodeptr, cb)) return 0;
 
       if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
       *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
@@ -9108,67 +9159,6 @@ return c;
 
 
 /*************************************************
-*     Add an entry to the name/number table      *
-*************************************************/
-
-/* This function is called between compiling passes to add an entry to the
-name/number table, maintaining alphabetical order. Checking for permitted
-and forbidden duplicates has already been done.
-
-Arguments:
-  cb           the compile data block
-  name         the name to add
-  length       the length of the name
-  groupno      the group number
-  tablecount   the count of names in the table so far
-
-Returns:       nothing
-*/
-
-static void
-add_name_to_table(compile_block *cb, PCRE2_SPTR name, int length,
-  unsigned int groupno, uint32_t tablecount)
-{
-uint32_t i;
-PCRE2_UCHAR *slot = cb->name_table;
-
-for (i = 0; i < tablecount; i++)
-  {
-  int crc = memcmp(name, slot+IMM2_SIZE, CU2BYTES(length));
-  if (crc == 0 && slot[IMM2_SIZE+length] != 0)
-    crc = -1; /* Current name is a substring */
-
-  /* Make space in the table and break the loop for an earlier name. For a
-  duplicate or later name, carry on. We do this for duplicates so that in the
-  simple case (when ?(| is not used) they are in order of their numbers. In all
-  cases they are in the order in which they appear in the pattern. */
-
-  if (crc < 0)
-    {
-    (void)memmove(slot + cb->name_entry_size, slot,
-      CU2BYTES((tablecount - i) * cb->name_entry_size));
-    break;
-    }
-
-  /* Continue the loop for a later or duplicate name */
-
-  slot += cb->name_entry_size;
-  }
-
-PUT2(slot, 0, groupno);
-memcpy(slot + IMM2_SIZE, name, CU2BYTES(length));
-
-/* Add a terminating zero and fill the rest of the slot with zeroes so that
-the memory is all initialized. Otherwise valgrind moans about uninitialized
-memory when saving serialized compiled patterns. */
-
-memset(slot + IMM2_SIZE + length, 0,
-  CU2BYTES(cb->name_entry_size - length - IMM2_SIZE));
-}
-
-
-
-/*************************************************
 *             Skip in parsed pattern             *
 *************************************************/
 
@@ -9569,31 +9559,25 @@ for (;; pptr++)
 
     case META_RECURSE_BYNAME:
       {
-      int i;
       PCRE2_SPTR name;
       BOOL is_dupname = FALSE;
-      named_group *ng = cb->named_groups;
+      named_group *ng;
       uint32_t meta_code = META_CODE(*pptr);
       uint32_t length = *(++pptr);
 
       GETPLUSOFFSET(offset, pptr);
       name = cb->start_pattern + offset;
-      for (i = 0; i < cb->names_found; i++, ng++)
-        {
-        if (length == ng->length && PRIV(strncmp)(name, ng->name, length) == 0)
-          {
-          group = ng->number;
-          is_dupname = ng->isdup;
-          break;
-          }
-        }
+      ng = PRIV(compile_find_named_group)(name, length, cb);
 
-      if (group == 0)
+      if (ng == NULL)
         {
         *errcodeptr = ERR15;  /* Non-existent subpattern */
         cb->erroroffset = offset;
         return -1;
         }
+
+      group = ng->number;
+      is_dupname = (ng->hash_dup & NAMED_GROUP_IS_DUPNAME) != 0;
 
       /* A numerical back reference can be fixed length if duplicate capturing
       groups are not being used. A non-duplicate named back reference can also
@@ -10020,8 +10004,8 @@ for (; *pptr != META_END; pptr++)
     case META_BIGVALUE:
     case META_POSIX:
     case META_POSIX_NEG:
-    case META_SCS_NAME:
-    case META_SCS_NUMBER:
+    case META_CAPTURE_NAME:
+    case META_CAPTURE_NUMBER:
     pptr += 1;
     break;
 
@@ -10733,8 +10717,14 @@ created in the pre-pass. */
 if (cb.names_found > 0)
   {
   named_group *ng = cb.named_groups;
+  uint32_t tablecount = 0;
+
+  /* Length 0 represents duplicates, and they have already been handled. */
   for (i = 0; i < cb.names_found; i++, ng++)
-    add_name_to_table(&cb, ng->name, ng->length, ng->number, i);
+    if (ng->length > 0)
+      tablecount = PRIV(compile_add_name_to_table)(&cb, ng, tablecount);
+
+  PCRE2_ASSERT(tablecount == cb.names_found);
   }
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On

@@ -1486,10 +1486,10 @@ do
       SET_BIT(CHAR_SPACE);
 
       /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set
-      the bits for 0xA0 and for code units >= 255, independently of UTF. */
+      the bits for NBSP and for code units >= 255, independently of UTF. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
-      SET_BIT(0xA0);
+      SET_BIT(CHAR_NBSP);
       SET_BIT(0xFF);
 #else
       /* For the 8-bit library in UTF-8 mode, set the bits for the first code
@@ -1505,12 +1505,9 @@ do
         }
       else
 #endif
-      /* For the 8-bit library not in UTF-8 mode, set the bit for 0xA0, unless
-      the code is EBCDIC. */
+      /* For the 8-bit library not in UTF-8 mode, set the bit for NBSP. */
         {
-#ifndef EBCDIC
-        SET_BIT(0xA0);
-#endif  /* Not EBCDIC */
+        SET_BIT(CHAR_NBSP);
         }
 #endif  /* 8-bit support */
 
@@ -1625,10 +1622,10 @@ do
         SET_BIT(CHAR_SPACE);
 
         /* For the 16-bit and 32-bit libraries (which can never be EBCDIC), set
-        the bits for 0xA0 and for code units >= 255, independently of UTF. */
+        the bits for NBSP and for code units >= 255, independently of UTF. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
-        SET_BIT(0xA0);
+        SET_BIT(CHAR_NBSP);
         SET_BIT(0xFF);
 #else
         /* For the 8-bit library in UTF-8 mode, set the bits for the first code
@@ -1644,12 +1641,9 @@ do
           }
         else
 #endif
-        /* For the 8-bit library not in UTF-8 mode, set the bit for 0xA0, unless
-        the code is EBCDIC. */
+        /* For the 8-bit library not in UTF-8 mode, set the bit for NBSP. */
           {
-#ifndef EBCDIC
-          SET_BIT(0xA0);
-#endif  /* Not EBCDIC */
+          SET_BIT(CHAR_NBSP);
           }
 #endif  /* 8-bit support */
         break;
@@ -2001,6 +1995,16 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
 
           if (d != a) goto DONE;   /* Not the other case of a */
           b = c;                   /* Save second in b */
+
+#ifdef EBCDIC
+          /* To match ASCII (which puts the uppercase one in a), swap a & b
+          if needed. This doesn't really matter, but neatens the tests. */
+          if (TABLE_GET((unsigned int)a, re->tables + lcc_offset, a) == a)
+            {
+            b = a;
+            a = c;
+            }
+#endif
           }
         else goto DONE;   /* More than two characters found */
         }

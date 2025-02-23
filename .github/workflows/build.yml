@@ -17,7 +17,7 @@ env:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup
         run: |
@@ -54,10 +54,11 @@ jobs:
         run: |
           make install "DESTDIR=`pwd`/install-dir"
           maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   alpine:
     name: alpine
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: alpine
     steps:
       - name: Setup
@@ -93,6 +94,7 @@ jobs:
         run: |
           make install "DESTDIR=`pwd`/install-dir"
           maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   macos:
     name: macOS universal
@@ -117,6 +119,7 @@ jobs:
           cd build
           cmake --install . --prefix install-dir
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
+          ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   windows:
     name: Windows
@@ -145,10 +148,11 @@ jobs:
           cd build
           cmake --install . --config Release --prefix install-dir
           ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
+          ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
 
   freebsd:
     name: FreeBSD
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
@@ -182,6 +186,7 @@ jobs:
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
             cd ../build-cmake
@@ -192,10 +197,11 @@ jobs:
             ctest -j3 --output-on-failure
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   solaris:
     name: Solaris
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
@@ -251,6 +257,7 @@ jobs:
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== Autoconf, 64-bit =="
             cd ../build-autoconf-64
@@ -261,6 +268,7 @@ jobs:
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
@@ -271,10 +279,11 @@ jobs:
             ctest -j3 --output-on-failure
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   distcheck:
     name: Build & verify distribution
-    runs-on: ubuntu-24.04 # TODO: Update to ubuntu-latest when that switches to 24.04
+    runs-on: ubuntu-latest
     permissions:
       id-token: write # Needed to make calls to the Sigstore service
       attestations: write # Needed to write the attestation to GitHub's database
@@ -330,7 +339,7 @@ jobs:
 
   coverage:
     name: Code coverage
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup
         run: |
@@ -349,7 +358,13 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
+        run: |
+          cd build
+          echo "== Running all tests with CTest =="
+          LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
+          echo ""
+          echo "== Re-running pcre2test with -malloc =="
+          LLVM_PROFILE_FILE="coverage-%m.profraw" srcdir=.. pcre2test=./pcre2test ../RunTest -malloc
 
       - name: Report
         run: |

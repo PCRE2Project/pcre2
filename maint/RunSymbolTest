@@ -1,0 +1,72 @@
+#! /bin/sh
+
+# Script to test that all the symbols of a shared object are as expected.
+
+set -e
+
+LANG=C # Ensure stable ordering of `sort` output
+export LANG
+
+if [ "$1" = "" -o "$2" = "" ] ; then
+    echo "Usage: $0 <so_dir> <manifest_dir>" >&2
+  exit 1
+fi
+
+input_dir="$1"
+manifest_dir="$2"
+
+sed=sed
+grep=grep
+# Helpers for Solaris
+if [ -f /usr/bin/gsed ] ; then
+  sed=/usr/bin/gsed
+fi
+if [ -f /usr/bin/ggrep ] ; then
+  grep=/usr/bin/ggrep
+fi
+
+nm="nm -B -D"
+if [ "`uname -s`" = "SunOS" ]; then
+  nm="nm -p -h -D -g"
+elif [ "`uname -s`" = "Darwin" ]; then
+  nm="nm -B -g"
+fi
+
+so_ext=so
+so_mangling() { cat; }
+if [ "`uname -s`" = "Darwin" ]; then
+  so_ext=dylib
+  so_mangling()
+    {
+    sed -E -e 's/_([_0-9a-zA-Z]+)$/\1/g'
+    }
+fi
+
+for so_name in "libpcre2-8" "libpcre2-16" "libpcre2-32" "libpcre2-posix"; do
+  expected_file="$manifest_dir/manifest-$so_name.so"
+  so_file="$input_dir/$so_name.$so_ext"
+  base=`basename $expected_file`
+
+  $nm "$so_file" | \
+    $sed -E -e 's/^[0-9a-fA-F]* *//g' | \
+    $grep -E -v '^[Uw] ' | \
+    $grep -E -v ' (_init|_fini)$' | \
+    $grep -E -v ' (_end|_DYNAMIC|_GLOBAL_OFFSET_TABLE_|_PROCEDURE_LINKAGE_TABLE_|_edata|_etext)$' | \
+    so_mangling | \
+    sort \
+    > "$base"
+
+  if ! diff -u "$expected_file" "$base"; then
+    echo "Shared object contents for $so_file differ from expected" >&2
+
+    echo "===Actual===" >&2
+    cat "$base" >&2
+    echo "===End===" >&2
+
+    exit 1
+  fi
+
+  echo "Shared object contents for $so_file match expected"
+  rm -f "$base"
+
+done

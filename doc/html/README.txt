@@ -309,11 +309,22 @@ library. They are also documented in the pcre2build man page.
 
   --enable-ebcdic --disable-unicode
 
-  This automatically implies --enable-rebuild-chartables (see above). However,
-  when PCRE2 is built this way, it always operates in EBCDIC. It cannot support
-  both EBCDIC and UTF-8/16/32. There is a second option, --enable-ebcdic-nl25,
-  which specifies that the code value for the EBCDIC NL character is 0x25
-  instead of the default 0x15.
+  This automatically implies --enable-rebuild-chartables (see above), in order
+  to ensure that you have the correct default character tables for your system's
+  codepage. There is an exception when you set --enable-ebcdic-ignoring-compiler
+  (see below), which allows using a default set of EBCDIC 1047 character tables
+  rather than forcing use of --enable-rebuild-chartables.
+
+  When PCRE2 is built with EBCDIC support, it always operates in EBCDIC. It
+  cannot support both EBCDIC and ASCII or UTF-8/16/32.
+
+  There is a second option, --enable-ebcdic-nl25, which specifies that the code
+  value for the EBCDIC NL character is 0x25 instead of the default 0x15.
+
+  There is a third option, --enable-ebcdic-ignoring-compiler, which disregards
+  the compiler's codepage for determining the numeric value of C character
+  constants such as 'z', and instead forces PCRE2 to use numeric constants for
+  the EBCDIC 1047 codepage instead.
 
 . If you specify --enable-debug, additional debugging code is included in the
   build. This option is intended for use by the PCRE2 maintainers.
@@ -607,7 +618,7 @@ zip formats. The command "make distcheck" does the same, but then does a trial
 build of the new distribution to ensure that it works.
 
 If you have modified any of the man page sources in the doc directory, you
-should first run the maint/PrepareRelease script before making a distribution.
+should first run the maint/UpdateAlways script before making a distribution.
 This script creates the .txt and HTML forms of the documentation from the man
 pages.
 
@@ -626,9 +637,9 @@ NON-AUTOTOOLS-BUILD.
 The RunTest script runs the pcre2test test program (which is documented in its
 own man page) on each of the relevant testinput files in the testdata
 directory, and compares the output with the contents of the corresponding
-testoutput files. RunTest uses a file called testtry to hold the main output
-from pcre2test. Other files whose names begin with "test" are used as working
-files in some tests.
+testoutput files. RunTest places its output in directories
+testoutput{8,16,32}{,-jit,-dfa}. Other files whose names begin with "test" are
+used as working files in some tests.
 
 Some tests are relevant only when certain build-time options were selected. For
 example, the tests for UTF-8/16/32 features are run only when Unicode support
@@ -744,8 +755,16 @@ and with UTF support, respectively. Test 23 tests \C when it is locked out.
 Tests 24 and 25 test the experimental pattern conversion functions, without and
 with UTF support, respectively.
 
-Test 26 checks Unicode property support using tests that are generated
-automatically from the Unicode data tables.
+Test 26 checks Unicode property support using tests that were generated
+automatically from the Unicode data tables. These are the archived version of
+the tests from Unicode 15.
+
+Test 27 checks Unicode property support using tests that are generated
+automatically from the currently-used Unicode data tables.
+
+Test 28 tests EBCDIC support, and is only run when PCRE2 is specifically
+compiled for EBCDIC. Test 29 tests EBCDIC when NL has been configured to be
+0x25.
 
 
 Character tables
@@ -822,11 +841,16 @@ The distribution should contain the files listed below.
   src/pcre2_chartables.c.dist  a default set of character tables that assume
                            ASCII coding; unless --enable-rebuild-chartables is
                            specified, used by copying to pcre2_chartables.c
+  src/pcre2_chartables.c.ebcdic-1047-{nl15,nl25}  a default set of character
+                           tables for EBCDIC 1047; used if
+                           --enable-ebcdic-ignoring-compiler is specified
+                           without --enable-rebuild-chartables
 
   src/pcre2posix.c           )
   src/pcre2_auto_possess.c   )
   src/pcre2_chkdint.c        )
   src/pcre2_compile.c        )
+  src/pcre2_compile_cgroup.c )
   src/pcre2_compile_class.c  )
   src/pcre2_config.c         )
   src/pcre2_context.c        )

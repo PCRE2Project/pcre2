@@ -8124,6 +8124,8 @@ No match
         End
 ------------------------------------------------------------------
 
+#if !ebcdic
+
 /\V+\x0a/B
 ------------------------------------------------------------------
         Bra
@@ -8132,6 +8134,8 @@ No match
         Ket
         End
 ------------------------------------------------------------------
+
+#endif
 
 /A+\h/B
 ------------------------------------------------------------------
@@ -10558,8 +10562,12 @@ Failed: error -33: bad offset value
     abc\=offset=3
 No match
 
+#if !ebcdic
+
 /^\cģ/
 Failed: error 168 at offset 3: \c must be followed by a printable ASCII character
+
+#endif
 
 /(?P<abn>(?P=abn)xxx)/B
 ------------------------------------------------------------------
@@ -11415,6 +11423,8 @@ No match
         End
 ------------------------------------------------------------------
 
+#if !ebcdic
+
 /^a\x41z/alt_bsux,allow_empty_class,match_unset_backref,dupnames
     aAz
  0: aAz
@@ -11465,6 +11475,8 @@ No match
 /^\u{7a}/extra_alt_bsux
     zoo 
  0: z
+
+#endif
 
 /\u{}/extra_alt_bsux
     u{}
@@ -13358,12 +13370,16 @@ Failed: error 150 at offset 10: invalid range in character class
 /[a-[=xxx=]]+/
 Failed: error 150 at offset 10: invalid range in character class
 
+#if !ebcdic
+
 /[a-[!xxx!]]+/
 Failed: error 108 at offset 3: range out of order in character class
 
 /[A-[!xxx!]]+/
     A]]]
  0: A]]]
+
+#endif
 
 /[a-\d]+/
 Failed: error 150 at offset 5: invalid range in character class
@@ -14064,8 +14080,6 @@ Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement
 /a(b)c/substitute_extended
     ZabcZ\=replace=>${1:+ yes : no }
  1: Z> yes Z
-    ZabcZ\=replace=>${1:+ \o{100} : \o{100} }
- 1: Z> @ Z
     ZabcZ\=replace=>${1:+ \o{Z} : no }
 Failed: error -57 at offset 9 in replacement: bad escape sequence in replacement string
     ZabcZ\=replace=>${1:+ yes : \o{Z} }
@@ -14086,6 +14100,14 @@ Failed: error -49 at offset 11 in replacement: unknown substring
 Failed: error -35 at offset 10 in replacement: invalid replacement string
     ZabcZ\=replace=>${1:+ yes : $<1 }
  1: Z> yes Z
+
+#if !ebcdic
+
+/a(b)c/substitute_extended
+    ZabcZ\=replace=>${1:+ \o{100} : \o{100} }
+ 1: Z> @ Z
+
+#endif
 
 /a(b)c/substitute_extended
     ZabcZ\=replace=>${
@@ -15215,6 +15237,8 @@ No match
     abcd\=allusedtext,startchar
 ** Not allowed together: allusedtext startchar
 
+#if !ebcdic
+
 /abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended
     abcd
  1: w\x0dx\x82y\xdbz(12\$34$$\x345$)
@@ -15222,6 +15246,8 @@ No match
 /abcd/replace=w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$),substitute_extended,substitute_literal
     >>abcd<<
  1: >>w\rx\x82y\o{333}z(\Q12\$34$$\x34\E5$$)<<
+
+#endif
     
 /abcd/g,replace=\$1$2\,substitute_literal
     XabcdYabcdZ
@@ -15315,6 +15341,8 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     >abcd1234abcd5678<\=replace=wxyz,substitute_matched
  2: >wxyz1234wxyz5678<
 
+#if !ebcdic
+
 /abc/substitute_extended,replace=>\045<
     abc
  1: >%<
@@ -15326,6 +15354,8 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 /abc/substitute_extended,replace=>\o{45}<
     abc
  1: >%<
+
+#endif
 
 /abc/substitute_extended,replace=>\845<
     abc
@@ -15662,6 +15692,8 @@ Subject length lower bound = 0
  0: ]
  1: 
 
+#if !ebcdic
+
 /\x8a+f|;T?(*:;.'?`(\xeap ){![^()!y*''C*(?';]{1;(\x08)/B,alt_verbnames,dupnames,extended
 ------------------------------------------------------------------
         Bra
@@ -15680,6 +15712,8 @@ Subject length lower bound = 0
         Ket
         End
 ------------------------------------------------------------------
+
+#endif
 
 # Tests for NULL characters in comments and verb "names" and callouts
 
@@ -18250,6 +18284,8 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 "(?<=X(?(DEFINE)(.*))(?1))."
 Failed: error 125 at offset 0: length of lookbehind assertion is not limited
 
+#if !ebcdic
+
 /\sxxx\s/tables=1
 \= Expect no match
     AB\x{85}xxx\x{a0}XYZ
@@ -18258,6 +18294,8 @@ No match
 /\sxxx\s/tables=2
     AB\x{85}xxx\x{a0}XYZ
  0: \x85xxx\xa0
+
+#endif
 
 /^\w+/tables=2
     École
@@ -19756,6 +19794,8 @@ Failed: error -57 at offset 3 in replacement: bad escape sequence in replacement
 
 # python_octal
 
+#if !ebcdic
+
 /\0-\00-\01-\012-\0123-\123-\1234/
     \x00-\x00-\x01-\o{12}-\o{12}3-\o{123}-\o{123}4
  0: \x00-\x00-\x01-\x0a-\x0a3-S-S4
@@ -19792,6 +19832,8 @@ Failed: error 115 at offset 2: reference to non-existent subpattern
 Failed: error -49 at offset 2 in replacement: unknown substring
     abc\=replace=\12
 Failed: error -49 at offset 3 in replacement: unknown substring
+
+#endif
 
 # --------------
 
@@ -21023,6 +21065,8 @@ Failed: error 106 at offset 3: missing terminating ] for character class
         End
 ------------------------------------------------------------------
 
+#if !ebcdic
+
 /[0-z]/B
 ------------------------------------------------------------------
         Bra
@@ -21030,6 +21074,8 @@ Failed: error 106 at offset 3: missing terminating ] for character class
         Ket
         End
 ------------------------------------------------------------------
+
+#endif
 
 /[0\-z]/B
 ------------------------------------------------------------------
@@ -21055,6 +21101,8 @@ Failed: error 106 at offset 3: missing terminating ] for character class
         End
 ------------------------------------------------------------------
 
+#if !ebcdic
+
 /[ --]/B
 ------------------------------------------------------------------
         Bra
@@ -21078,6 +21126,8 @@ Failed: error 106 at offset 3: missing terminating ] for character class
         Ket
         End
 ------------------------------------------------------------------
+
+#endif
 
 /[\A]/
 Failed: error 107 at offset 2: escape sequence is invalid in character class
@@ -21127,6 +21177,8 @@ No match
     \\
 No match
 
+#if !ebcdic
+
 /[a\x{e1}]/iB
 ------------------------------------------------------------------
         Bra
@@ -21140,6 +21192,8 @@ No match
  0: A
     \x{e1}
  0: \xe1
+
+#endif
 
 # --------------
 
@@ -21241,6 +21295,8 @@ Failed: error -48: no more memory
     XacY\=substitute_overflow_length,replace=[2]$1
 Failed: error -48: no more memory: 3 code units are needed
 
+#if !ebcdic
+
 # a data character via an escape
 /abc/substitute_extended
     XabcY\=replace=\x{48}
@@ -21251,6 +21307,8 @@ Failed: error -48: no more memory
 Failed: error -48: no more memory: 4 code units are needed
     XXabcY\=substitute_overflow_length,replace=[1]\x{48}
 Failed: error -48: no more memory: 5 code units are needed
+
+#endif
 
 # a replacement literal character
 /abc/
@@ -21348,6 +21406,8 @@ Failed: error -48: no more memory
     XacY\=substitute_overflow_length,replace=[2]\U$1
 Failed: error -48: no more memory: 3 code units are needed
 
+#if !ebcdic
+
 # a data character via an escape
 /abc/substitute_extended
     XabcY\=replace=\U\x{48}
@@ -21360,6 +21420,8 @@ Failed: error -48: no more memory: 4 code units are needed
 Failed: error -48: no more memory: 5 code units are needed
     XabcY\=substitute_case_callout,replace=\U\x{48}
  1: XHY
+
+#endif
 
 # a replacement literal character
 /abc/substitute_extended
