@@ -6202,8 +6202,6 @@ a)"xI
 /\sxxx\s/tables=2
     AB\x{85}xxx\x{a0}XYZ
 
-#endif
-
 /^\w+/tables=2
     École
 
@@ -6214,6 +6212,8 @@ a)"xI
 
 /^\w+/tables=3
     École
+
+#endif
 
 /"(*MARK:>" 00 "<).."/hex,mark,no_start_optimize
     AB

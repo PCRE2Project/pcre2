@@ -1285,7 +1285,7 @@ while (TRUE)
       uint8_t posix_vertical[4] = { CHAR_LF, CHAR_VT, CHAR_FF, CHAR_CR };
       uint8_t posix_underscore = CHAR_UNDERSCORE;
       uint8_t *chars = NULL;
-      uint n = 0;
+      int n = 0;
 
       if (tabopt == 1) { chars = posix_vertical; n = 4; }
       else if (tabopt == 2) { chars = &posix_underscore; n = 1; }

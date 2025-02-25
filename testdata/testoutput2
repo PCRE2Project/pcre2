@@ -18295,8 +18295,6 @@ No match
     AB\x{85}xxx\x{a0}XYZ
  0: \x85xxx\xa0
 
-#endif
-
 /^\w+/tables=2
     École
  0: \xc3
@@ -18310,6 +18308,8 @@ No match
 /^\w+/tables=3
     École
  0: \xc3
+
+#endif
 
 /"(*MARK:>" 00 "<).."/hex,mark,no_start_optimize
     AB

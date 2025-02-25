@@ -262,10 +262,8 @@ as a hex value when showing compiled patterns. We use it in cases when the
 locale has not been explicitly changed, so as to get consistent output from
 systems that differ in their output from isprint() even in the "C" locale. */
 
-#if defined(EBCDIC) && !EBCDIC_IO
-#define PRINTABLE(c) (ebcdic_to_ascii(c) >= 32 && ebcdic_to_ascii(c) < 127)
-#elif defined(EBCDIC)
-#define PRINTABLE(c) ((c) >= 64 && (c) < 255)
+#if defined(EBCDIC)
+#define PRINTABLE(c) printable(c)
 #else
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
@@ -275,11 +273,20 @@ format. The input character is encoded in PCRE2's native codepage (EBCDIC, if
 enabled), but the output may differ in the case where pcre2test uses ASCII input
 and output. */
 #if defined(EBCDIC) && !EBCDIC_IO
-#define CHAR_OUTPUT(c)  ebcdic_to_ascii(c)
-#define CHAR_INPUT(c)   ascii_to_ebcdic(c)
+#define CHAR_OUTPUT(c)      ebcdic_to_ascii(c)
+#define CHAR_OUTPUT_HEX(c)  CHAR_OUTPUT(c)
+#define CHAR_INPUT(c)       ascii_to_ebcdic(c)
+#define CHAR_INPUT_HEX(c)   CHAR_INPUT(c)
+#elif defined(EBCDIC)
+#define CHAR_OUTPUT(c)      (c)
+#define CHAR_OUTPUT_HEX(c)  ebcdic_to_ascii(c)
+#define CHAR_INPUT(c)       (c)
+#define CHAR_INPUT_HEX(c)   ascii_to_ebcdic(c)
 #else
-#define CHAR_OUTPUT(c)  (c)
-#define CHAR_INPUT(c)   (c)
+#define CHAR_OUTPUT(c)      (c)
+#define CHAR_OUTPUT_HEX(c)  CHAR_OUTPUT(c)
+#define CHAR_INPUT(c)       (c)
+#define CHAR_INPUT_HEX(c)   CHAR_INPUT(c)
 #endif
 
 /* We have to include some of the library source files because we need
@@ -313,10 +320,15 @@ previous definition of PRIV avoids name clashes. */
 #include "pcre2_tables.c"
 #include "pcre2_ucd.c"
 
-/* Forward-declarations for PRINTABLE(). */
+/* Forward-declarations for PRINTABLE(), etc. */
 
+#if defined(EBCDIC)
+static BOOL printable(uint32_t c);
+#endif
 #if defined(EBCDIC) && !EBCDIC_IO
 static void ascii_to_ebcdic_str(uint8_t *buf, size_t len);
+#endif
+#if defined(EBCDIC)
 static uint32_t ascii_to_ebcdic(uint32_t c);
 static uint32_t ebcdic_to_ascii(uint32_t c);
 #endif
@@ -3045,6 +3057,61 @@ return (PCRE2_JIT_STACK *)arg;
 *         EBCDIC support functions               *
 *************************************************/
 
+#if defined(EBCDIC)
+static BOOL
+printable(uint32_t c)
+{
+if ((c >= CHAR_a && c <= CHAR_i) ||
+    (c >= CHAR_j && c <= CHAR_r) ||
+    (c >= CHAR_s && c <= CHAR_z) ||
+    (c >= CHAR_A && c <= CHAR_I) ||
+    (c >= CHAR_J && c <= CHAR_R) ||
+    (c >= CHAR_S && c <= CHAR_Z) ||
+    (c >= CHAR_0 && c <= CHAR_9))
+  return TRUE;
+
+switch (c)
+  {
+  case CHAR_SPACE:
+  case CHAR_EXCLAMATION_MARK:
+  case CHAR_QUOTATION_MARK:
+  case CHAR_NUMBER_SIGN:
+  case CHAR_DOLLAR_SIGN:
+  case CHAR_PERCENT_SIGN:
+  case CHAR_AMPERSAND:
+  case CHAR_APOSTROPHE:
+  case CHAR_LEFT_PARENTHESIS:
+  case CHAR_RIGHT_PARENTHESIS:
+  case CHAR_ASTERISK:
+  case CHAR_PLUS:
+  case CHAR_COMMA:
+  case CHAR_MINUS:
+  case CHAR_DOT:
+  case CHAR_SLASH:
+  case CHAR_COLON:
+  case CHAR_SEMICOLON:
+  case CHAR_LESS_THAN_SIGN:
+  case CHAR_EQUALS_SIGN:
+  case CHAR_GREATER_THAN_SIGN:
+  case CHAR_QUESTION_MARK:
+  case CHAR_COMMERCIAL_AT:
+  case CHAR_LEFT_SQUARE_BRACKET:
+  case CHAR_BACKSLASH:
+  case CHAR_RIGHT_SQUARE_BRACKET:
+  case CHAR_CIRCUMFLEX_ACCENT:
+  case CHAR_UNDERSCORE:
+  case CHAR_GRAVE_ACCENT:
+  case CHAR_LEFT_CURLY_BRACKET:
+  case CHAR_VERTICAL_LINE:
+  case CHAR_RIGHT_CURLY_BRACKET:
+  case CHAR_TILDE:
+  return TRUE;
+  }
+
+return FALSE;
+}
+#endif
+
 #if defined(EBCDIC) && !EBCDIC_IO
 static void
 ascii_to_ebcdic_str(uint8_t *buf, size_t len)
@@ -3052,7 +3119,9 @@ ascii_to_ebcdic_str(uint8_t *buf, size_t len)
 for (size_t i = 0; i < len; ++i)
   buf[i] = ascii_to_ebcdic_1047[buf[i]];
 }
+#endif
 
+#if defined(EBCDIC)
 static uint32_t
 ascii_to_ebcdic(uint32_t c)
 {
@@ -3161,7 +3230,7 @@ if (PRINTABLE(c))
   return 1;
   }
 
-c = CHAR_OUTPUT(c);
+c = CHAR_OUTPUT_HEX(c);
 
 if (c < 0x100)
   {
@@ -4983,7 +5052,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     fprintf(outfile, "Starting code units:");
     for (input = 0; input < 256; input++)
       {
-      int i = CHAR_INPUT(input);
+      int i = CHAR_INPUT_HEX(input);
       if ((start_bits[i/8] & (1u << (i&7))) != 0)
         {
         if (c > 75)
@@ -4998,7 +5067,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
           }
         else
           {
-          fprintf(outfile, " \\x%02x", CHAR_OUTPUT(i));
+          fprintf(outfile, " \\x%02x", CHAR_OUTPUT_HEX(i));
           c += 5;
           }
         }
@@ -5645,8 +5714,9 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
         }
       c = toupper(c);
       d = toupper(d);
-      *pt++ = ((isdigit(c)? (c - '0') : (c - 'A' + 10)) << 4) +
-               (isdigit(d)? (d - '0') : (d - 'A' + 10));
+      c = isdigit(c)? (c - '0') : (c - 'A' + 10);
+      d = isdigit(d)? (d - '0') : (d - 'A' + 10);
+      *pt++ = CHAR_OUTPUT(CHAR_INPUT_HEX((c << 4) + d));
       }
     }
   *pt = 0;
@@ -7554,6 +7624,7 @@ while ((c = *p++) != 0)
     c -= '0';
     while (i++ < 2 && isdigit(*p) && *p < '8')
       c = c * 8 + (*p++ - '0');
+    c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
 
     encoding = (utf && c > 255)? FORCE_UTF : FORCE_RAW;
     break;
@@ -7572,6 +7643,7 @@ while ((c = *p++) != 0)
           }
         else c = c * 8 + (*pt - '0');
         }
+      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
       if (i == 0 || *pt != '}')
         {
         fprintf(outfile, "** Malformed \\o{ escape\n");
@@ -7603,6 +7675,7 @@ while ((c = *p++) != 0)
           }
         else c = c * 16 + (tolower(*pt) - (isdigit(*pt)? '0' : 'a' - 10));
         }
+      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
       if (i == 0 || *pt != '}')
         {
         fprintf(outfile, "** Malformed \\x{ escape\n");
@@ -7622,6 +7695,7 @@ while ((c = *p++) != 0)
         c = c * 16 + (tolower(*p) - (isdigit(*p)? '0' : 'a' - 10));
         p++;
         }
+      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
 #if defined SUPPORT_PCRE2_8
       if (utf && (test_mode == PCRE8_MODE)) encoding = FORCE_RAW;
 #endif
