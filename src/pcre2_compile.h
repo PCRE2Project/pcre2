@@ -96,11 +96,11 @@ code (meta_extra_lengths) must be updated to remain in step. */
 #define META_COND_RNAME       0x80130000u  /* (?(R&name)... */
 #define META_COND_RNUMBER     0x80140000u  /* (?(Rdigits)... */
 #define META_COND_VERSION     0x80150000u  /* (?(VERSION<op>x.y)... */
-#define META_OFFSET           0x80160000u  /* Setting offset for various
-                                              META codes (e.g. META_SCS_NAME) */
+#define META_OFFSET           0x80160000u  /* Setting offset for various META
+                                              codes (e.g. META_CAPTURE_NAME) */
 #define META_SCS              0x80170000u  /* (*scan_substring:... */
-#define META_SCS_NAME         0x80180000u  /* Next <name> of scan_substring */
-#define META_SCS_NUMBER       0x80190000u  /* Next digits of scan_substring */
+#define META_CAPTURE_NAME     0x80180000u  /* Next <name> in capture lists */
+#define META_CAPTURE_NUMBER   0x80190000u  /* Next digits in capture lists */
 #define META_DOLLAR           0x801a0000u  /* $ metacharacter */
 #define META_DOT              0x801b0000u  /* . metacharacter */
 #define META_ESCAPE           0x801c0000u  /* \d and friends */
@@ -236,10 +236,14 @@ typedef struct {
 
 /* Macros for the definitions below, to prevent name collisions. */
 
-#define _pcre2_posix_class_maps          PCRE2_SUFFIX(_pcre2_posix_class_maps)
-#define _pcre2_update_classbits          PCRE2_SUFFIX(_pcre2_update_classbits_)
-#define _pcre2_compile_class_nested      PCRE2_SUFFIX(_pcre2_compile_class_nested_)
-#define _pcre2_compile_class_not_nested  PCRE2_SUFFIX(_pcre2_compile_class_not_nested_)
+#define _pcre2_posix_class_maps                PCRE2_SUFFIX(_pcre2_posix_class_maps)
+#define _pcre2_update_classbits                PCRE2_SUFFIX(_pcre2_update_classbits_)
+#define _pcre2_compile_class_nested            PCRE2_SUFFIX(_pcre2_compile_class_nested_)
+#define _pcre2_compile_class_not_nested        PCRE2_SUFFIX(_pcre2_compile_class_not_nested_)
+#define _pcre2_compile_get_hash_from_name      PCRE2_SUFFIX(_pcre2_compile_get_hash_from_name)
+#define _pcre2_compile_find_named_group        PCRE2_SUFFIX(_pcre2_compile_find_named_group)
+#define _pcre2_compile_find_dupname_details    PCRE2_SUFFIX(_pcre2_compile_find_dupname_details)
+#define _pcre2_compile_add_name_to_table       PCRE2_SUFFIX(_pcre2_compile_add_name_to_table)
 
 
 /* Indices of the POSIX classes in posix_names, posix_name_lengths,
@@ -253,6 +257,14 @@ posix_class_maps, and posix_substitutes. They must be kept in sync. */
 
 extern const int PRIV(posix_class_maps)[];
 
+/* Defines for hash_dup member in named_group structure. */
+
+#define NAMED_GROUP_HASH_MASK      ((uint16_t)0x7fff)
+#define NAMED_GROUP_IS_DUPNAME     ((uint16_t)0x8000)
+
+#define NAMED_GROUP_GET_HASH(ng)   ((ng)->hash_dup & NAMED_GROUP_HASH_MASK)
+
+/* Exported functions from pcre2_compile_class.c file: */
 
 /* Set bits in classbits according to the property type */
 
@@ -274,6 +286,29 @@ The pptr will be left pointing at the matching META_CLASS_END. */
 BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
   uint32_t **pptr, PCRE2_UCHAR **pcode, int *errorcodeptr,
   compile_block *cb, PCRE2_SIZE *lengthptr);
+
+/* Exported functions from pcre2_compile_cgroup.c file: */
+
+/* Compute hash from a capture name. */
+
+uint16_t PRIV(compile_get_hash_from_name)(PCRE2_SPTR name, uint32_t length);
+
+/* Get the descriptor of a known named capture. */
+
+named_group *PRIV(compile_find_named_group)(PCRE2_SPTR name,
+  uint32_t length, compile_block *cb);
+
+/* Add entires to name table in alphabetical order. */
+
+uint32_t PRIV(compile_add_name_to_table)(compile_block *cb,
+  named_group *ng, uint32_t tablecount);
+
+/* Searches the properties of duplicated names, and returns them
+in indexptr and countptr. */
+
+BOOL PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
+  int *indexptr, int *countptr, int *errorcodeptr, compile_block *cb);
+
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 

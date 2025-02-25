@@ -63,8 +63,8 @@ x86, ARM, RISC-V, POWER, S390X; many others known to work
 ## Quickstart
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" width="787px" srcset="https://github.com/user-attachments/assets/1886bc4b-2e05-4827-af83-e4ed45f25ab1">
-  <img alt="Recording of a terminal session showing the PCRE2 quickstart; reproduced in text form below" width="787px" src="https://github.com/user-attachments/assets/7b90180e-276e-4202-b590-b72871cff91a">
+  <source media="(prefers-color-scheme: dark)" width="787px" srcset="https://github.com/user-attachments/assets/f38bd06c-abda-44bf-a3b1-3f9b59d3a287">
+  <img alt="Recording of a terminal session showing the PCRE2 quickstart; reproduced in text form below" width="787px" src="https://github.com/user-attachments/assets/9d3e9d99-96e3-430a-83c1-e08024d83d27">
 </picture>
 
 <details>
@@ -77,9 +77,13 @@ git clone https://github.com/PCRE2Project/pcre2.git ./pcre2 \
     --branch pcre2-$PCRE2_VERSION \
     -c advice.detachedHead=false --depth 1
 
+# If using the JIT, remember to fetch the Git submodule:
+(cd ./pcre2; git submodule update --init)
+
 # Now let's build PCRE2:
 (cd ./pcre2; \
-    cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -B build; \
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+        -DPCRE2_SUPPORT_JIT=ON -B build; \
     cmake --build build/)
 
 # Great, PCRE2 is built.
@@ -127,7 +131,7 @@ int main(int argc, char* argv[]) {
         &error_offset,         /* for error offset */
         NULL);                 /* use default compile context */
     if (re == NULL) {
-        fprintf(stderr, "Invalid pattern: %s\n", argv[1]);
+        fprintf(stderr, "Invalid pattern: %s\n", pattern);
         return 1;
     }
 
@@ -174,9 +178,15 @@ The main ways of obtaining PCRE2 are:
 
     Please use a release tag in production, not the development branch!
 
-2. Via download of the [release tarball](https://github.com/PCRE2Project/pcre2/releases/latest).
+    Because PCRE2's JIT uses code from a Git submodule, you must check this out after a fresh clone:
 
-3. Finally, PCRE2 is also bundled by various downstream package managers (such as Linux distributions, or [vcpkg](https://vcpkg.io/)). These are provided by third parties, not the PCRE2 project.
+    ```
+    git submodule update --init
+    ```
+
+3. Via download of the [release tarball](https://github.com/PCRE2Project/pcre2/releases/latest).
+
+4. Finally, PCRE2 is also bundled by various downstream package managers (such as Linux distributions, or [vcpkg](https://vcpkg.io/)). These are provided by third parties, not the PCRE2 project.
 
 The main ways of building PCRE2 are:
 

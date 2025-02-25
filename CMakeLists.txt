@@ -720,6 +720,7 @@ set(
   ${PROJECT_BINARY_DIR}/pcre2_chartables.c
   src/pcre2_chkdint.c
   src/pcre2_compile.c
+  src/pcre2_compile_cgroup.c
   src/pcre2_compile_class.c
   src/pcre2_config.c
   src/pcre2_context.c
