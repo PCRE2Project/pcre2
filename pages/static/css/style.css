@@ -34,17 +34,28 @@
   padding: 0;
 }
 
+html {
+  background-color: var(--colour-primary-bright);
+}
+
 body {
   color: var(--colour-fg);
   background-color: var(--colour-bg);
+  overflow-wrap: break-word;
 }
 
 body, input {
   font-family: 'Fira Sans', Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
 }
 
+pre {
+  text-align: start;
+}
+
 pre, code, kbd {
   font-family: 'Fira Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  overflow-wrap: initial;
+  hyphens: initial;
 }
 
 input[type="text"] {
@@ -562,23 +573,35 @@ nav {
 .man-h1, .guide-h1 {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: baseline;
+  flex-wrap: wrap;
 
   & > h1 {
     padding-bottom: 0;
     border-bottom: none;
     margin-bottom: 0;
+    min-width: 0;
+    flex-grow: 1;
   }
 
-  & > :last-child {
-    font-variant: all-small-caps;
+  & > :not(:first-child) {
+    text-transform: uppercase;
+    font-size: 12px;
+    line-height: 20px;
+    padding-left: 24px;
+    text-align: end;
   }
 }
 
 .guide-content {
   font-size: calc(min(1.7vw, 16px));
   line-height: 1.5em;
+}
+
+main {
+  hyphens: auto;
+  text-align: justify;
 }
 
 main > div {
