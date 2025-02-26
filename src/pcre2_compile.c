@@ -55,11 +55,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
-#define CHAR_OUTPUT(c)  (c)
-#define CHAR_INPUT(c)   (c)
+#define CHAR_OUTPUT(c)      (c)
+#define CHAR_OUTPUT_HEX(c)  (c)
+#define CHAR_INPUT(c)       (c)
+#define CHAR_INPUT_HEX(c)   (c)
 #include "pcre2_printint.c"
 #undef PRINTABLE
 #undef CHAR_OUTPUT
+#undef CHAR_OUTPUT_HEX
 #undef CHAR_INPUT
 #define DEBUG_CALL_PRINTINT
 #endif

@@ -130,9 +130,11 @@ fi
 
 # Set up a suitable "diff" command for comparison. Some systems
 # have a diff that lacks a -u option. Try to deal with this.
+# Use gdiff if available.
 
 cf="diff"
-diff -u /dev/null /dev/null 2>/dev/null && cf="diff -u"
+gdiff /dev/null /dev/null 2>/dev/null && cf="gdiff"
+$cf -u /dev/null /dev/null 2>/dev/null && cf="$cf -u"
 
 # Find the test data
 

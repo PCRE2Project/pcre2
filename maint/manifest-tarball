@@ -295,6 +295,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ltversion.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/lt~obsolete.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_visibility.m4
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_zos.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/missing
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/pcre2-config.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/perltest.sh

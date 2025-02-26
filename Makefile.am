@@ -235,6 +235,7 @@ lib_LTLIBRARIES =
 # TESTS is for binary unit tests, check_SCRIPTS for script-based tests
 
 TESTS =
+XFAIL_TESTS =
 check_SCRIPTS =
 dist_noinst_SCRIPTS =
 
@@ -725,6 +726,9 @@ if WITH_PCRE2_8
 TESTS += RunGrepTest
 EXTRA_DIST += RunGrepTest.bat
 dist_noinst_SCRIPTS += RunGrepTest
+if WITH_EBCDIC
+XFAIL_TESTS += RunGrepTest
+endif # WITH_EBCDIC
 endif # WITH_PCRE2_8
 
 ## Distribute all the test data files

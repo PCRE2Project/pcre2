@@ -72,6 +72,9 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 # Check for a 64-bit integer type
 AC_TYPE_INT64_T
 
+# Check for xlc which has some special (broken/non-standard) behaviour on z/OS.
+PCRE2_ZOS_FIXES
+
 AC_PROG_INSTALL
 LT_INIT([win32-dll])
 AC_PROG_LN_S
