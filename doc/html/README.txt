@@ -886,13 +886,13 @@ The distribution should contain the files listed below.
   src/pcre2_internal.h     header for internal use
   src/pcre2_intmodedep.h   a mode-specific internal header
   src/pcre2_jit_char_inc.h header used by JIT
-  src/pcre2_jit_match_inc.h    header used by JIT
-  src/pcre2_jit_misc_inc.h     header used by JIT
+  src/pcre2_jit_match_inc.h header used by JIT
+  src/pcre2_jit_misc_inc.h header used by JIT
   src/pcre2_jit_neon_inc.h header used by JIT
   src/pcre2_jit_simd_inc.h header used by JIT
-  src/pcre2_printint_inc.h     debugging function that is used by pcre2test
+  src/pcre2_printint_inc.h debugging function that is used by pcre2test
   src/pcre2_ucp.h          header for Unicode property handling
-  src/pcre2_ucptables_inc.h    header with Unicode data tables
+  src/pcre2_ucptables_inc.h header with Unicode data tables
   src/pcre2_util.h         header for internal utils
 
   deps/sljit/sljit_src/*   source files for the JIT compiler
