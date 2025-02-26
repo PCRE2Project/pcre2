@@ -22,7 +22,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC7" href="#SEC7">AUTHOR</a>
 <li><a name="TOC8" href="#SEC8">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">PARTIAL MATCHING IN PCRE2</a><br>
+<h2><a name="SEC1" href="#TOC1">PARTIAL MATCHING IN PCRE2</a></h2>
 <p>
 In normal use of PCRE2, if there is a match up to the end of a subject string,
 but more characters are needed to match the entire pattern, PCRE2_ERROR_NOMATCH
@@ -69,7 +69,7 @@ partially. PCRE2 also remembers a minimum length of a matching string, and does
 not bother to run the matching function on shorter strings. This optimization
 is also disabled for partial matching.
 </p>
-<br><a name="SEC2" href="#TOC1">REQUIREMENTS FOR A PARTIAL MATCH</a><br>
+<h2><a name="SEC2" href="#TOC1">REQUIREMENTS FOR A PARTIAL MATCH</a></h2>
 <p>
 A possible partial match occurs during matching when the end of the subject
 string is reached successfully, but either more characters are needed to
@@ -114,7 +114,7 @@ which in this case means "there is going to be a match at this point, but until
 some more characters are added, we do not know if it will be an empty string or
 something longer".
 </p>
-<br><a name="SEC3" href="#TOC1">PARTIAL MATCHING USING pcre2_match()</a><br>
+<h2><a name="SEC3" href="#TOC1">PARTIAL MATCHING USING pcre2_match()</a></h2>
 <p>
 When a partial matching option is set, the result of calling
 <b>pcre2_match()</b> can be one of the following:
@@ -159,9 +159,9 @@ PCRE2_ERROR_PARTIAL is returned. The offsets are set to 3 and 9, identifying
 "123dog" as the first partial match. (In this example, there are two partial
 matches, because "dog" on its own partially matches the second alternative.)
 </p>
-<br><b>
+<h3>
 How a partial match is processed by pcre2_match()
-</b><br>
+</h3>
 <p>
 What happens when a partial match is identified depends on which of the two
 partial matching options is set.
@@ -208,9 +208,9 @@ to follow this explanation by thinking of the two patterns like this:
 The second pattern will never match "dogsbody", because it will always find the
 shorter match first.
 </p>
-<br><b>
+<h3>
 Example of partial matching using pcre2test
-</b><br>
+</h3>
 <p>
 The <b>pcre2test</b> data modifiers <b>partial_hard</b> (or <b>ph</b>) and
 <b>partial_soft</b> (or <b>ps</b>) set PCRE2_PARTIAL_HARD and PCRE2_PARTIAL_SOFT,
@@ -240,7 +240,7 @@ With PCRE2_PARTIAL_SOFT, the subject is matched completely. For
 PCRE2_PARTIAL_HARD, however, the subject is assumed not to be complete, so
 there is only a partial match.
 </p>
-<br><a name="SEC4" href="#TOC1">MULTI-SEGMENT MATCHING WITH pcre2_match()</a><br>
+<h2><a name="SEC4" href="#TOC1">MULTI-SEGMENT MATCHING WITH pcre2_match()</a></h2>
 <p>
 PCRE was not originally designed with multi-segment matching in mind. However,
 over time, features (including partial matching) that make multi-segment
@@ -318,7 +318,7 @@ In a non-UTF or a 32-bit case, moving back is just a subtraction, but in
 UTF-8 or UTF-16 you have to count characters while moving back through the code
 units.
 </p>
-<br><a name="SEC5" href="#TOC1">PARTIAL MATCHING USING pcre2_dfa_match()</a><br>
+<h2><a name="SEC5" href="#TOC1">PARTIAL MATCHING USING pcre2_dfa_match()</a></h2>
 <p>
 The DFA function moves along the subject string character by character, without
 backtracking, searching for all possible matches simultaneously. If the end of
@@ -344,7 +344,7 @@ Whereas the standard function stops as soon as it finds the complete match for
 "dog", the DFA function also finds the partial match for "dogsbody", and so
 returns that when PCRE2_PARTIAL_HARD is set.
 </p>
-<br><a name="SEC6" href="#TOC1">MULTI-SEGMENT MATCHING WITH pcre2_dfa_match()</a><br>
+<h2><a name="SEC6" href="#TOC1">MULTI-SEGMENT MATCHING WITH pcre2_dfa_match()</a></h2>
 <p>
 When a partial match has been found using the DFA matching function, it is
 possible to continue the match by providing additional subject data and calling
@@ -388,7 +388,7 @@ two buffers. If a partial match at offset <i>n</i> in the first buffer is
 followed by "no match" when PCRE2_DFA_RESTART is used on the second buffer, you
 can then try a new match starting at offset <i>n+1</i> in the first buffer.
 </p>
-<br><a name="SEC7" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC7" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -397,7 +397,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC8" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC8" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 27 November 2024
 <br>

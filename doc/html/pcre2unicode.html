@@ -12,9 +12,9 @@ This page is part of the PCRE2 HTML documentation. It was generated
 automatically from the original man page. If there is any nonsense in it,
 please consult the man page, in case the conversion went wrong.
 <br>
-<br><b>
+<h2>
 UNICODE AND UTF SUPPORT
-</b><br>
+</h2>
 <p>
 PCRE2 is normally built with Unicode support, though if you do not need it, you
 can build it without, in which case the library will be smaller. With Unicode
@@ -44,9 +44,9 @@ it are treated as UTF strings instead of strings of individual one-code-unit
 characters. There are also some other changes to the way characters are
 handled, as documented below.
 </p>
-<br><b>
+<h2>
 UNICODE PROPERTY SUPPORT
-</b><br>
+</h2>
 <p>
 When PCRE2 is built with Unicode support, the escape sequences \p{..},
 \P{..}, and \X can be used. This is not dependent on the PCRE2_UTF setting.
@@ -66,9 +66,9 @@ For example, \p{L} matches a letter. Its longer synonym, \p{Letter}, is not
 supported. Furthermore, in Perl, many properties may optionally be prefixed by
 "Is", for compatibility with Perl 5.6. PCRE2 does not support this.
 </p>
-<br><b>
+<h2>
 WIDE CHARACTERS AND UTF MODES
-</b><br>
+</h2>
 <p>
 Code points less than 256 can be specified in patterns by either braced or
 unbraced hexadecimal escape sequences (for example, \x{b3} or \xb3). Larger
@@ -138,9 +138,9 @@ In contrast to the character escapes and character classes, the special
 horizontal and vertical white space escapes (\h, \H, \v, and \V) do match
 all the appropriate Unicode characters, whether or not PCRE2_UCP is set.
 </p>
-<br><b>
+<h2>
 UNICODE CASE-EQUIVALENCE
-</b><br>
+</h2>
 <p>
 If either PCRE2_UTF or PCRE2_UCP is set, upper/lower case processing makes use
 of Unicode properties except for characters whose code points are less than 128
@@ -192,9 +192,9 @@ From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
 case), and Lt (title case) are all treated as Lc (cased letter) when caseless
 matching is set by the PCRE2_CASELESS option or (?i) within the pattern.
 <a name="scriptruns"></a></p>
-<br><b>
+<h2>
 SCRIPT RUNS
-</b><br>
+</h2>
 <p>
 The pattern constructs (*script_run:...) and (*atomic_script_run:...), with
 synonyms (*sr:...) and (*asr:...), verify that the string matched within the
@@ -241,9 +241,9 @@ of characters is a script run. Note, however, that there are some special cases
 involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.
 </p>
-<br><b>
+<h3>
 Basic script run rules
-</b><br>
+</h3>
 <p>
 A string that is less than two characters long is a script run. This is the
 only case in which an Unknown character can be part of a script run. Longer
@@ -276,9 +276,9 @@ Thaana; the second has just Arabic and Hanifi Rohingya. Both of them could
 appear in script runs of either Arabic or Hanifi Rohingya. The first could also
 appear in Syriac or Thaana script runs, but the second could not.
 </p>
-<br><b>
+<h3>
 The Chinese Han script
-</b><br>
+</h3>
 <p>
 The Chinese Han script is commonly used in conjunction with other scripts for
 writing certain languages. Japanese uses the Hiragana and Katakana scripts
@@ -291,9 +291,9 @@ Hangul and Bopomofo and Han. PCRE2 (like Perl) follows Unicode's Technical
 Standard 39 ("Unicode Security Mechanisms", http://unicode.org/reports/tr39/)
 in allowing such mixtures.
 </p>
-<br><b>
+<h3>
 Decimal digits
-</b><br>
+</h3>
 <p>
 Unicode contains many sets of 10 decimal digits in different scripts, and some
 scripts (including the Common script) contain more than one set. Some of these
@@ -302,9 +302,9 @@ digits. In addition to the script checking described above, if a script run
 contains any decimal digits, they must all come from the same set of 10
 adjacent characters.
 </p>
-<br><b>
+<h2>
 VALIDITY OF UTF STRINGS
-</b><br>
+</h2>
 <p>
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions. If an
@@ -375,9 +375,9 @@ surrogate code point) you can set the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
 option. However, this is possible only in UTF-8 and UTF-32 modes, because these
 values are not representable in UTF-16.
 <a name="utf8strings"></a></p>
-<br><b>
+<h3>
 Errors in UTF-8 strings
-</b><br>
+</h3>
 <p>
 The following negative error codes are given for invalid UTF-8 strings:
 <pre>
@@ -443,9 +443,9 @@ character.
 The first byte of a character has the value 0xfe or 0xff. These values can
 never occur in a valid UTF-8 string.
 <a name="utf16strings"></a></p>
-<br><b>
+<h3>
 Errors in UTF-16 strings
-</b><br>
+</h3>
 <p>
 The following negative error codes are given for invalid UTF-16 strings:
 <pre>
@@ -455,9 +455,9 @@ The following negative error codes are given for invalid UTF-16 strings:
 
 <a name="utf32strings"></a></pre>
 </p>
-<br><b>
+<h3>
 Errors in UTF-32 strings
-</b><br>
+</h3>
 <p>
 The following negative error codes are given for invalid UTF-32 strings:
 <pre>
@@ -466,9 +466,9 @@ The following negative error codes are given for invalid UTF-32 strings:
 
 <a name="matchinvalid"></a></pre>
 </p>
-<br><b>
+<h2>
 MATCHING IN INVALID UTF STRINGS
-</b><br>
+</h2>
 <p>
 You can run pattern matches on subject strings that may contain invalid UTF
 sequences if you call <b>pcre2_compile()</b> with the PCRE2_MATCH_INVALID_UTF
@@ -532,9 +532,9 @@ sequences of uint16_t or uint32_t code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned.
 </p>
-<br><b>
+<h2>
 AUTHOR
-</b><br>
+</h2>
 <p>
 Philip Hazel
 <br>
@@ -543,9 +543,9 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><b>
+<h2>
 REVISION
-</b><br>
+</h2>
 <p>
 Last updated: 27 November 2024
 <br>

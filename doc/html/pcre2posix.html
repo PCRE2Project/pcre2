@@ -24,7 +24,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC9" href="#SEC9">AUTHOR</a>
 <li><a name="TOC10" href="#SEC10">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
+<h2><a name="SEC1" href="#TOC1">SYNOPSIS</a></h2>
 <p>
 <b>#include &#60;pcre2posix.h&#62;</b>
 </p>
@@ -43,7 +43,7 @@ please consult the man page, in case the conversion went wrong.
 <br>
 <b>void pcre2_regfree(regex_t *<i>preg</i>);</b>
 </p>
-<br><a name="SEC2" href="#TOC1">DESCRIPTION</a><br>
+<h2><a name="SEC2" href="#TOC1">DESCRIPTION</a></h2>
 <p>
 This set of functions provides a POSIX-style API for the PCRE2 regular
 expression 8-bit library. There are no POSIX-style wrappers for PCRE2's 16-bit
@@ -96,7 +96,7 @@ the "correct" name, if there is no clash. It provides two structure types,
 captured substrings. It also defines some constants whose names start with
 "REG_"; these are used for setting options and identifying error codes.
 </p>
-<br><a name="SEC3" href="#TOC1">USING THE POSIX FUNCTIONS</a><br>
+<h2><a name="SEC3" href="#TOC1">USING THE POSIX FUNCTIONS</a></h2>
 <p>
 Note that these functions are just POSIX-style wrappers for PCRE2's native API.
 They do not give POSIX regular expression behaviour, and they are not
@@ -127,7 +127,7 @@ The descriptions below use the actual names of the functions, but, as described
 above, the standard POSIX names (without the <b>pcre2_</b> prefix) may also be
 used.
 </p>
-<br><a name="SEC4" href="#TOC1">COMPILING A PATTERN</a><br>
+<h2><a name="SEC4" href="#TOC1">COMPILING A PATTERN</a></h2>
 <p>
 The function <b>pcre2_regcomp()</b> is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
@@ -227,7 +227,7 @@ to use the contents of the <i>preg</i> structure. If, for example, you pass it
 to <b>pcre2_regexec()</b>, the result is undefined and your program is likely to
 crash.
 </p>
-<br><a name="SEC5" href="#TOC1">MATCHING NEWLINE CHARACTERS</a><br>
+<h2><a name="SEC5" href="#TOC1">MATCHING NEWLINE CHARACTERS</a></h2>
 <p>
 This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
@@ -265,7 +265,7 @@ the POSIX API, passing REG_NEWLINE to PCRE2's <b>pcre2_regcomp()</b> function
 causes PCRE2_MULTILINE to be passed to <b>pcre2_compile()</b>, and REG_DOTALL
 passes PCRE2_DOTALL. There is no way to pass PCRE2_DOLLAR_ENDONLY.
 </p>
-<br><a name="SEC6" href="#TOC1">MATCHING A PATTERN</a><br>
+<h2><a name="SEC6" href="#TOC1">MATCHING A PATTERN</a></h2>
 <p>
 The function <b>pcre2_regexec()</b> is called to match a compiled pattern
 <i>preg</i> against a given <i>string</i>, which is by default terminated by a
@@ -341,7 +341,7 @@ similarly named types from other libraries that provide POSIX-style matching.
 A successful match yields a zero return; various error codes are defined in the
 header file, of which REG_NOMATCH is the "expected" failure code.
 </p>
-<br><a name="SEC7" href="#TOC1">ERROR MESSAGES</a><br>
+<h2><a name="SEC7" href="#TOC1">ERROR MESSAGES</a></h2>
 <p>
 The <b>pcre2_regerror()</b> function maps a non-zero errorcode from either
 <b>pcre2_regcomp()</b> or <b>pcre2_regexec()</b> to a printable message. If
@@ -352,14 +352,14 @@ error message are used. The yield of the function is the size of buffer needed
 to hold the whole message, including the terminating zero. This value is
 greater than <i>errbuf_size</i> if the message was truncated.
 </p>
-<br><a name="SEC8" href="#TOC1">MEMORY USAGE</a><br>
+<h2><a name="SEC8" href="#TOC1">MEMORY USAGE</a></h2>
 <p>
 Compiling a regular expression causes memory to be allocated and associated
 with the <i>preg</i> structure. The function <b>pcre2_regfree()</b> frees all
 such memory, after which <i>preg</i> may no longer be used as a compiled
 expression.
 </p>
-<br><a name="SEC9" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC9" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -368,7 +368,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC10" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC10" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 27 November 2024
 <br>

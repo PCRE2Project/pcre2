@@ -22,7 +22,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC7" href="#SEC7">AUTHOR</a>
 <li><a name="TOC8" href="#SEC8">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">PCRE2 MATCHING ALGORITHMS</a><br>
+<h2><a name="SEC1" href="#TOC1">PCRE2 MATCHING ALGORITHMS</a></h2>
 <p>
 This document describes the two different algorithms that are available in
 PCRE2 for matching a compiled regular expression against a given subject
@@ -53,7 +53,7 @@ is matched against the string
 there are three possible answers. The standard algorithm finds only one of
 them, whereas the alternative algorithm finds all three.
 </p>
-<br><a name="SEC2" href="#TOC1">REGULAR EXPRESSIONS AS TREES</a><br>
+<h2><a name="SEC2" href="#TOC1">REGULAR EXPRESSIONS AS TREES</a></h2>
 <p>
 The set of strings that are matched by a regular expression can be represented
 as a tree structure. An unlimited repetition in the pattern makes the tree of
@@ -62,7 +62,7 @@ string (from a given starting point) can be thought of as a search of the tree.
 There are two ways to search a tree: depth-first and breadth-first, and these
 correspond to the two matching algorithms provided by PCRE2.
 </p>
-<br><a name="SEC3" href="#TOC1">THE STANDARD MATCHING ALGORITHM</a><br>
+<h2><a name="SEC3" href="#TOC1">THE STANDARD MATCHING ALGORITHM</a></h2>
 <p>
 In the terminology of Jeffrey Friedl's book "Mastering Regular Expressions",
 the standard algorithm is an "NFA algorithm". It conducts a depth-first search
@@ -88,7 +88,7 @@ straightforward for this algorithm to keep track of the substrings that are
 matched by portions of the pattern in parentheses. This provides support for
 capturing parentheses and backreferences.
 </p>
-<br><a name="SEC4" href="#TOC1">THE ALTERNATIVE MATCHING ALGORITHM</a><br>
+<h2><a name="SEC4" href="#TOC1">THE ALTERNATIVE MATCHING ALGORITHM</a></h2>
 <p>
 This algorithm conducts a breadth-first search of the tree. Starting from the
 first matching point in the subject, it scans the subject string from left to
@@ -205,7 +205,7 @@ supported. (*FAIL) is supported, and behaves like a failing negative assertion.
 8. The PCRE2_MATCH_INVALID_UTF option for <b>pcre2_compile()</b> is not
 supported by <b>pcre2_dfa_match()</b>.
 </p>
-<br><a name="SEC5" href="#TOC1">ADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
+<h2><a name="SEC5" href="#TOC1">ADVANTAGES OF THE ALTERNATIVE ALGORITHM</a></h2>
 <p>
 The main advantage of the alternative algorithm is that all possible matches
 (at a single point in the subject) are automatically found, and in particular,
@@ -219,7 +219,7 @@ limitations. The
 documentation gives details of partial matching and discusses multi-segment
 matching.
 </p>
-<br><a name="SEC6" href="#TOC1">DISADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
+<h2><a name="SEC6" href="#TOC1">DISADVANTAGES OF THE ALTERNATIVE ALGORITHM</a></h2>
 <p>
 The alternative algorithm suffers from a number of disadvantages:
 </p>
@@ -242,7 +242,7 @@ performance advantage that it does for the standard algorithm.
 <p>
 5. JIT optimization is not supported.
 </p>
-<br><a name="SEC7" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC7" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -251,7 +251,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC8" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC8" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 30 August 2024
 <br>

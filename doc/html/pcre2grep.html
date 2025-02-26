@@ -30,11 +30,11 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC15" href="#SEC15">AUTHOR</a>
 <li><a name="TOC16" href="#SEC16">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
+<h2><a name="SEC1" href="#TOC1">SYNOPSIS</a></h2>
 <p>
 <b>pcre2grep [options] [long options] [pattern] [path1 path2 ...]</b>
 </p>
-<br><a name="SEC2" href="#TOC1">DESCRIPTION</a><br>
+<h2><a name="SEC2" href="#TOC1">DESCRIPTION</a></h2>
 <p>
 <b>pcre2grep</b> searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE2 regular expression library to support
@@ -144,7 +144,7 @@ If the <b>LC_ALL</b> or <b>LC_CTYPE</b> environment variable is set,
 <b>pcre2grep</b> uses the value to set a locale when calling the PCRE2 library.
 The <b>--locale</b> option can be used to override this.
 </p>
-<br><a name="SEC3" href="#TOC1">SUPPORT FOR COMPRESSED FILES</a><br>
+<h2><a name="SEC3" href="#TOC1">SUPPORT FOR COMPRESSED FILES</a></h2>
 <p>
 Compile-time options for <b>pcre2grep</b> can set it up to use <b>libz</b> or
 <b>libbz2</b> for reading compressed files whose names end in <b>.gz</b> or
@@ -156,7 +156,7 @@ a <b>.gz</b> or <b>.bz2</b> extension is not in fact compressed, it is read as a
 plain text file. When input is from a compressed .gz or .bz2 file, the
 <b>--line-buffered</b> option is ignored.
 </p>
-<br><a name="SEC4" href="#TOC1">BINARY FILES</a><br>
+<h2><a name="SEC4" href="#TOC1">BINARY FILES</a></h2>
 <p>
 By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. However, if the
@@ -164,13 +164,13 @@ newline type is specified as NUL, that is, the line terminator is a binary
 zero, the test for a binary file is not applied. See the <b>--binary-files</b>
 option for a means of changing the way binary files are handled.
 </p>
-<br><a name="SEC5" href="#TOC1">BINARY ZEROS IN PATTERNS</a><br>
+<h2><a name="SEC5" href="#TOC1">BINARY ZEROS IN PATTERNS</a></h2>
 <p>
 Patterns passed from the command line are strings that are terminated by a
 binary zero, so cannot contain internal zeros. However, patterns that are read
 from a file via the <b>-f</b> option may contain binary zeros.
 </p>
-<br><a name="SEC6" href="#TOC1">OPTIONS</a><br>
+<h2><a name="SEC6" href="#TOC1">OPTIONS</a></h2>
 <p>
 The order in which some of the options appear can affect the output. For
 example, both the <b>-H</b> and <b>-l</b> options affect the printing of file
@@ -910,14 +910,14 @@ character) instead of what would normally appear. This is useful when file
 names contain unusual characters such as colons, hyphens, or even newlines. The
 option does not apply to file names in error messages.
 </p>
-<br><a name="SEC7" href="#TOC1">ENVIRONMENT VARIABLES</a><br>
+<h2><a name="SEC7" href="#TOC1">ENVIRONMENT VARIABLES</a></h2>
 <p>
 The environment variables <b>LC_ALL</b> and <b>LC_CTYPE</b> are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
 by the <b>--locale</b> option. If no locale is set, the PCRE2 library's default
 (usually the "C" locale) is used.
 </p>
-<br><a name="SEC8" href="#TOC1">NEWLINES</a><br>
+<h2><a name="SEC8" href="#TOC1">NEWLINES</a></h2>
 <p>
 The <b>-N</b> (<b>--newline</b>) option allows <b>pcre2grep</b> to scan files with
 newline conventions that differ from the default. This option affects only the
@@ -942,7 +942,7 @@ ends of output lines that are copied from the input is not converted to
 standard output must end with "\r\n". For all other operating systems, and
 for all messages to the standard error stream, "\n" is used.
 </p>
-<br><a name="SEC9" href="#TOC1">OPTIONS COMPATIBILITY WITH GNU GREP</a><br>
+<h2><a name="SEC9" href="#TOC1">OPTIONS COMPATIBILITY WITH GNU GREP</a></h2>
 <p>
 Many of the short and long forms of <b>pcre2grep</b>'s options are the same as
 in the GNU <b>grep</b> program. Any long option of the form <b>--xxx-regexp</b>
@@ -964,7 +964,7 @@ the <b>-i</b> option applies. If both the <b>-c</b> and <b>-l</b> options are
 given, GNU grep lists only file names, without counts, but <b>pcre2grep</b>
 gives the counts as well.
 </p>
-<br><a name="SEC10" href="#TOC1">OPTIONS WITH DATA</a><br>
+<h2><a name="SEC10" href="#TOC1">OPTIONS WITH DATA</a></h2>
 <p>
 There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
@@ -996,7 +996,7 @@ The exceptions to the above are the <b>--colour</b> (or <b>--color</b>) and
 options does have data, it must be given in the first form, using an equals
 character. Otherwise <b>pcre2grep</b> will assume that it has no data.
 </p>
-<br><a name="SEC11" href="#TOC1">USING PCRE2'S CALLOUT FACILITY</a><br>
+<h2><a name="SEC11" href="#TOC1">USING PCRE2'S CALLOUT FACILITY</a></h2>
 <p>
 <b>pcre2grep</b> has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
@@ -1014,9 +1014,9 @@ either a number or a quoted string (see the
 documentation for details). Numbered callouts are ignored by <b>pcre2grep</b>;
 only callouts with string arguments are useful.
 </p>
-<br><b>
+<h3>
 Echoing a specific string
-</b><br>
+</h3>
 <p>
 Starting the callout string with a pipe character invokes an echoing facility
 that avoids calling an external program or script. This facility is always
@@ -1038,9 +1038,9 @@ Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
 pattern with (*FAIL).
 </p>
-<br><b>
+<h3>
 Calling external programs or scripts
-</b><br>
+</h3>
 <p>
 This facility can be independently disabled when <b>pcre2grep</b> is built. It
 is supported for Windows, where a call to <b>_spawnvp()</b> is used, for VMS,
@@ -1082,7 +1082,7 @@ If running the program fails for any reason (including the non-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
 normal way.
 </p>
-<br><a name="SEC12" href="#TOC1">MATCHING ERRORS</a><br>
+<h2><a name="SEC12" href="#TOC1">MATCHING ERRORS</a></h2>
 <p>
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
@@ -1098,7 +1098,7 @@ overall resource limit. There are also other limits that affect the amount of
 memory used during matching; see the discussion of <b>--heap-limit</b> and
 <b>--depth-limit</b> above.
 </p>
-<br><a name="SEC13" href="#TOC1">DIAGNOSTICS</a><br>
+<h2><a name="SEC13" href="#TOC1">DIAGNOSTICS</a></h2>
 <p>
 Exit status is 0 if any matches were found, 1 if no matches were found, and 2
 for syntax errors, overlong lines, non-existent or inaccessible files (even if
@@ -1110,12 +1110,12 @@ affect the return code.
 When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
 because VMS does not distinguish between exit(0) and exit(1).
 </p>
-<br><a name="SEC14" href="#TOC1">SEE ALSO</a><br>
+<h2><a name="SEC14" href="#TOC1">SEE ALSO</a></h2>
 <p>
 <b>pcre2pattern</b>(3), <b>pcre2syntax</b>(3), <b>pcre2callout</b>(3),
 <b>pcre2unicode</b>(3).
 </p>
-<br><a name="SEC15" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC15" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -1124,7 +1124,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC16" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC16" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 09 October 2024
 <br>
