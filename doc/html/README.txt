@@ -860,10 +860,8 @@ The distribution should contain the files listed below.
   src/pcre2_extuni.c         )
   src/pcre2_find_bracket.c   )
   src/pcre2_jit_compile.c    )
-  src/pcre2_jit_match.c      ) sources for the functions in the library,
-  src/pcre2_jit_misc.c       )   and some internal functions that they use
-  src/pcre2_maketables.c     )
-  src/pcre2_match.c          )
+  src/pcre2_maketables.c     ) sources for the functions in the library,
+  src/pcre2_match.c          )   and some internal functions that they use
   src/pcre2_match_data.c     )
   src/pcre2_newline.c        )
   src/pcre2_ord2utf.c        )
@@ -876,11 +874,9 @@ The distribution should contain the files listed below.
   src/pcre2_substring.c      )
   src/pcre2_tables.c         )
   src/pcre2_ucd.c            )
-  src/pcre2_ucptables.c      )
   src/pcre2_valid_utf.c      )
   src/pcre2_xclass.c         )
 
-  src/pcre2_printint.c     debugging function that is used by pcre2test,
   src/pcre2_fuzzsupport.c  function for (optional) fuzzing support
 
   src/config.h.in          template for config.h, when built by "configure"
@@ -890,9 +886,13 @@ The distribution should contain the files listed below.
   src/pcre2_internal.h     header for internal use
   src/pcre2_intmodedep.h   a mode-specific internal header
   src/pcre2_jit_char_inc.h header used by JIT
+  src/pcre2_jit_match_inc.h    header used by JIT
+  src/pcre2_jit_misc_inc.h     header used by JIT
   src/pcre2_jit_neon_inc.h header used by JIT
   src/pcre2_jit_simd_inc.h header used by JIT
+  src/pcre2_printint_inc.h     debugging function that is used by pcre2test
   src/pcre2_ucp.h          header for Unicode property handling
+  src/pcre2_ucptables_inc.h    header with Unicode data tables
   src/pcre2_util.h         header for internal utils
 
   deps/sljit/sljit_src/*   source files for the JIT compiler

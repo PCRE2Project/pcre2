@@ -20,9 +20,6 @@ copy_file(
     out = "src/pcre2_chartables.c",
 )
 
-# Removed src/pcre2_ucptables.c below because it is #included in
-# src/pcre2_tables.c. Also fixed typo: ckdint should be chkdint.
-# PH, 22-March-2023.
 cc_library(
     name = "pcre2",
     srcs = [
@@ -39,12 +36,15 @@ cc_library(
         "src/pcre2_extuni.c",
         "src/pcre2_find_bracket.c",
         "src/pcre2_jit_compile.c",
+        "src/pcre2_jit_match_inc.h",
+        "src/pcre2_jit_misc_inc.h",
         "src/pcre2_maketables.c",
         "src/pcre2_match.c",
         "src/pcre2_match_data.c",
         "src/pcre2_newline.c",
         "src/pcre2_ord2utf.c",
         "src/pcre2_pattern_info.c",
+        "src/pcre2_printint_inc.h",
         "src/pcre2_script_run.c",
         "src/pcre2_serialize.c",
         "src/pcre2_string_utils.c",
@@ -60,13 +60,11 @@ cc_library(
         "src/pcre2_internal.h",
         "src/pcre2_intmodedep.h",
         "src/pcre2_ucp.h",
+        "src/pcre2_ucptables_inc.h",
         "src/pcre2_util.h",
         ":config_h_generic",
     ],
     textual_hdrs = [
-        "src/pcre2_jit_match.c",
-        "src/pcre2_jit_misc.c",
-        "src/pcre2_ucptables.c",
     ],
     hdrs = [
         ":pcre2_h_generic",
@@ -119,7 +117,6 @@ cc_library(
     name = "pcre2test_dotc_headers",
     hdrs = [
         "src/pcre2_chkdint.c",
-        "src/pcre2_printint.c",
         "src/pcre2_tables.c",
         "src/pcre2_ucd.c",
         "src/pcre2_valid_utf.c",

@@ -365,7 +365,7 @@ these inclusions should not be changed. */
 #define  PCRE2_CODE_UNIT_WIDTH 8
 #define  PCRE2_SUFFIX(a) G(a,8)
 #include "pcre2_intmodedep.h"
-#include "pcre2_printint.c"
+#include "pcre2_printint_inc.h"
 #undef   PCRE2_CODE_UNIT_WIDTH
 #undef   PCRE2_SUFFIX
 #endif   /* SUPPORT_PCRE2_8 */
@@ -374,7 +374,7 @@ these inclusions should not be changed. */
 #define  PCRE2_CODE_UNIT_WIDTH 16
 #define  PCRE2_SUFFIX(a) G(a,16)
 #include "pcre2_intmodedep.h"
-#include "pcre2_printint.c"
+#include "pcre2_printint_inc.h"
 #undef   PCRE2_CODE_UNIT_WIDTH
 #undef   PCRE2_SUFFIX
 #endif   /* SUPPORT_PCRE2_16 */
@@ -383,7 +383,7 @@ these inclusions should not be changed. */
 #define  PCRE2_CODE_UNIT_WIDTH 32
 #define  PCRE2_SUFFIX(a) G(a,32)
 #include "pcre2_intmodedep.h"
-#include "pcre2_printint.c"
+#include "pcre2_printint_inc.h"
 #undef   PCRE2_CODE_UNIT_WIDTH
 #undef   PCRE2_SUFFIX
 #endif   /* SUPPORT_PCRE2_32 */
