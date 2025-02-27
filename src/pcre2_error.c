@@ -206,6 +206,8 @@ static const unsigned char compile_error_texts[] =
   /* 115 */
   "terminating ] with no following closing parenthesis in (?[...]\0"
   "unexpected character in (?[...]) extended character class\0"
+  "expected capture group number or name\0"
+  "missing opening parenthesis\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

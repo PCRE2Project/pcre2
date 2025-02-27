@@ -18812,10 +18812,10 @@ No match
 # Parse errors first
 
 /(*scs:/
-Failed: error 114 at offset 6: missing closing parenthesis
+Failed: error 218 at offset 6: missing opening parenthesis
 
 /(*scan_substring:(/
-Failed: error 114 at offset 18: missing closing parenthesis
+Failed: error 217 at offset 18: expected capture group number or name
 
 /(*scs:('name'/
 Failed: error 114 at offset 13: missing closing parenthesis
@@ -21885,13 +21885,16 @@ Failed: error -69: error performing replacement case transformation
 # Parse error tests
 
 /(?1:/
-Failed: error 115 at offset 4: reference to non-existent subpattern
+Failed: error 218 at offset 4: missing opening parenthesis
 
 /(?1:1/
-Failed: error 115 at offset 4: reference to non-existent subpattern
+Failed: error 218 at offset 4: missing opening parenthesis
+
+/(?R:(1/
+Failed: error 114 at offset 6: missing closing parenthesis
 
 /(?R:(1,/
-Failed: error 114 at offset 7: missing closing parenthesis
+Failed: error 217 at offset 7: expected capture group number or name
 
 /(?R0:(1,2!/
 Failed: error 158 at offset 3: (?R (recursive pattern call) must be followed by a closing parenthesis

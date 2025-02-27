@@ -2707,7 +2707,7 @@ int i;
 
 if (ptr >= ptrend || *ptr != CHAR_LEFT_PARENTHESIS)
   {
-  *errorcodeptr = ERR15;
+  *errorcodeptr = ERR118;
   goto FAILED;
   }
 
@@ -2715,6 +2715,12 @@ for (;;)
   {
   ptr++;
   next_offset = (PCRE2_SIZE)(ptr - cb->start_pattern);
+
+  if (ptr >= ptrend)
+    {
+    *errorcodeptr = ERR117;
+    goto FAILED;
+    }
 
   /* Handle [+-]number cases */
   if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61,
@@ -2732,8 +2738,6 @@ for (;;)
   else if (*errorcodeptr != 0) goto FAILED; /* Number too big */
   else
     {
-    if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
-
     /* Handle 'name' or <name> cases. */
     if (*ptr == CHAR_LESS_THAN_SIGN)
       terminator = CHAR_GREATER_THAN_SIGN;
@@ -2741,7 +2745,7 @@ for (;;)
       terminator = CHAR_APOSTROPHE;
     else
       {
-      *errorcodeptr = ERR15;
+      *errorcodeptr = ERR117;
       goto FAILED;
       }
 
@@ -4767,8 +4771,7 @@ while (ptr < ptrend)
           goto NEGATIVE_LOOK_AHEAD;
 
           case META_SCS:
-          if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
-
+          ptr++;
           *parsed_pattern++ = META_SCS;
 
           parsed_pattern = parse_capture_list(&ptr, ptrend, utf, parsed_pattern,
