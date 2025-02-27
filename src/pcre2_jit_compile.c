@@ -14235,7 +14235,7 @@ return 0;
 
 #define INCLUDED_FROM_PCRE2_JIT_COMPILE
 
-#include "pcre2_jit_match.c"
-#include "pcre2_jit_misc.c"
+#include "pcre2_jit_match_inc.h"
+#include "pcre2_jit_misc_inc.h"
 
 /* End of pcre2_jit_compile.c */

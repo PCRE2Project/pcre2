@@ -1125,4 +1125,4 @@ for(;;)
   }
 }
 
-/* End of pcre2_printint.c */
+/* End of pcre2_printint_inc.h */

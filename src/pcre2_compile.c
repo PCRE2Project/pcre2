@@ -59,7 +59,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define CHAR_OUTPUT_HEX(c)  (c)
 #define CHAR_INPUT(c)       (c)
 #define CHAR_INPUT_HEX(c)   (c)
-#include "pcre2_printint.c"
+#include "pcre2_printint_inc.h"
 #undef PRINTABLE
 #undef CHAR_OUTPUT
 #undef CHAR_OUTPUT_HEX
