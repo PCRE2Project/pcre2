@@ -545,7 +545,10 @@ cranges = cb->cx->memctl.malloc(
 
 if (cranges == NULL) return NULL;
 
-cranges->next = NULL;
+cranges->header.next = NULL;
+#ifdef PCRE2_DEBUG
+cranges->header.type = CDATA_CRANGE;
+#endif
 cranges->range_list_size = (uint16_t)range_list_size;
 cranges->char_lists_types = 0;
 cranges->char_lists_size = 0;
@@ -1122,19 +1125,19 @@ if (utf)
       }
 
     /* Caching the pre-processed character ranges. */
-    if (cb->next_cranges != NULL)
-      cb->next_cranges->next = cranges;
+    if (cb->last_data != NULL)
+      cb->last_data->next = &cranges->header;
     else
-      cb->cranges = cranges;
+      cb->first_data = &cranges->header;
 
-    cb->next_cranges = cranges;
+    cb->last_data = &cranges->header;
     }
   else
     {
     /* Reuse the pre-processed character ranges. */
-    cranges = cb->cranges;
-    PCRE2_ASSERT(cranges != NULL);
-    cb->cranges = cranges->next;
+    cranges = (class_ranges*)cb->first_data;
+    PCRE2_ASSERT(cranges != NULL && cranges->header.type == CDATA_CRANGE);
+    cb->first_data = cranges->header.next;
     }
 
   if (cranges->range_list_size > 0)

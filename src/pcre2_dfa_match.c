@@ -2939,6 +2939,9 @@ for (;;)
         uint32_t recno = (callpat == mb->start_code)? 0 :
           GET2(callpat, 1 + LINK_SIZE);
 
+        /* Argument list has not been supported yet. */
+        if (code[1 + LINK_SIZE] == OP_CREF) return PCRE2_ERROR_DFA_UITEM;
+
         if (rws->free < RWS_RSIZE + RWS_OVEC_RSIZE)
           {
           rc = more_workspace(&rws, RWS_OVEC_RSIZE, mb);

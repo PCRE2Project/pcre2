@@ -8212,4 +8212,8 @@ No match
 
 # --------------
 
+/^(?1:(2))(?(DEFINE)(a(.)b))/
+   axb
+Failed: error -42: pattern contains an item that is not supported for DFA matching
+
 # End of testinput6
