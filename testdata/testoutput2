@@ -19668,9 +19668,6 @@ No match
         Ket
         Scan substring
       1 Capture ref
-      1 Capture ref
-      1 Capture ref
-      1 Capture ref
         a
         Ket
         b
@@ -19701,6 +19698,116 @@ No match
  1: 
  2: 
  3: 
+
+# Duplicated capture references
+
+/(a)(b)(c)(d)(*scs:(4,3,1,2,2,1,3,3,4,4)x)/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Ket
+        Scan substring
+      4 Capture ref
+      3 Capture ref
+      1 Capture ref
+      2 Capture ref
+        x
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<n>a)(?<n>b)(?<n>c)(d)(*scs:(2,3,1,1,<n>,<n>)abc)/B,dupnames
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Ket
+        Scan substring
+      2 Capture ref
+      3 Capture ref
+      1 Capture ref
+        abc
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<n>a)(?<n>b)(?<n>c)(d)(*scs:(2,1,1,<n>,<n>)abc)/B,dupnames
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Ket
+        Scan substring
+      2 Capture ref
+      1 Capture ref
+        Capture ref <n>3
+        abc
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<n>a)(?<n>b)(?<n>c)(d)(?<m>e)(?<m>f)(*scs:(<n>,5,3,2,1,4,1,4,<m>,6,<n>,<m>)abc)/B,dupnames
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Ket
+        CBra 5
+        e
+        Ket
+        CBra 6
+        f
+        Ket
+        Scan substring
+        Capture ref <n>3
+      5 Capture ref
+      4 Capture ref
+        Capture ref <m>2
+        abc
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
 
 # Tests for pcre2_set_optimize()
 
