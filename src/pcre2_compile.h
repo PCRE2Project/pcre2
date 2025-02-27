@@ -274,6 +274,7 @@ typedef struct {
 #define _pcre2_compile_find_named_group        PCRE2_SUFFIX(_pcre2_compile_find_named_group)
 #define _pcre2_compile_find_dupname_details    PCRE2_SUFFIX(_pcre2_compile_find_dupname_details)
 #define _pcre2_compile_add_name_to_table       PCRE2_SUFFIX(_pcre2_compile_add_name_to_table)
+#define _pcre2_compile_parse_scan_substr_args  PCRE2_SUFFIX(_pcre2_compile_parse_scan_substr_args)
 #define _pcre2_compile_parse_recurse_args      PCRE2_SUFFIX(_pcre2_compile_parse_recurse_args)
 
 
@@ -339,6 +340,11 @@ in indexptr and countptr. */
 
 BOOL PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
   int *indexptr, int *countptr, int *errorcodeptr, compile_block *cb);
+
+/* Parse the arguments of recurse operations. */
+
+uint32_t * PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
+  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
 
 /* Parse the arguments of recurse operations. */
 

@@ -6495,8 +6495,63 @@ for (;; pptr++)
     req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS : 0;
     break;
 
+    /* ===================================================================*/
+    /* Handle scan substring. Scan substring assertion starts with META_SCS,
+    which recursively calls compile_branch. The first opcode processed by
+    this recursive call is always META_OFFSET. */
+
     case META_OFFSET:
-    GETPLUSOFFSET(offset, pptr);
+    if (lengthptr != NULL)
+      {
+      pptr = PRIV(compile_parse_scan_substr_args)(pptr, errorcodeptr, cb, lengthptr);
+      if (pptr == NULL)
+        return 0;
+      break;
+      }
+
+    while (TRUE)
+      {
+      int count, index;
+      named_group *ng;
+
+      switch (META_CODE(*pptr))
+        {
+        case META_OFFSET:
+        pptr++;
+        SKIPOFFSET(pptr);
+        continue;
+
+        case META_CAPTURE_NAME:
+        ng = cb->named_groups + pptr[1];
+        pptr += 2;
+        count = 0;
+        index = 0;
+
+        if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index,
+          &count, errorcodeptr, cb)) return 0;
+
+        code[0] = OP_DNCREF;
+        PUT2(code, 1, index);
+        PUT2(code, 1 + IMM2_SIZE, count);
+        code += 1 + 2 * IMM2_SIZE;
+        continue;
+
+        case META_CAPTURE_NUMBER:
+        pptr += 2;
+        if (pptr[-1] == 0) continue;
+
+        code[0] = OP_CREF;
+        PUT2(code, 1, pptr[-1]);
+        code += 1 + IMM2_SIZE;
+        continue;
+
+        default:
+        break;
+        }
+
+      break;
+      }
+    --pptr;
     break;
 
     case META_SCS:
@@ -6515,7 +6570,6 @@ for (;; pptr++)
     case META_COND_RNUMBER:   /* (?(Rdigits) */
     case META_COND_NAME:      /* (?(name) or (?'name') or ?(<name>) */
     case META_COND_RNAME:     /* (?(R&name) - test for recursion */
-    case META_CAPTURE_NAME:   /* Generic capture name */
     bravalue = OP_COND;
 
     if (lengthptr != NULL)
@@ -6526,10 +6580,7 @@ for (;; pptr++)
       uint32_t *start_pptr = pptr;
       uint32_t length = *(++pptr);
 
-      if (meta == META_CAPTURE_NAME)
-        offset += meta_arg;
-      else
-        GETPLUSOFFSET(offset, pptr);
+      GETPLUSOFFSET(offset, pptr);
       name = cb->start_pattern + offset;
 
       /* In the first pass, the names generated in the pre-pass are available,
@@ -6592,12 +6643,6 @@ for (;; pptr++)
         start_pptr[0] = meta;
         start_pptr[1] = ng->number;
 
-        if (meta == META_CAPTURE_NAME)
-          {
-          code += 1 + IMM2_SIZE;
-          break;
-          }
-
         skipunits = 1 + IMM2_SIZE;
         goto GROUP_PROCESS_NOTE_EMPTY;
         }
@@ -6607,12 +6652,6 @@ for (;; pptr++)
 
       start_pptr[0] = meta | 1;
       start_pptr[1] = (uint32_t)(ng - cb->named_groups);
-
-      if (meta == META_CAPTURE_NAME)
-        {
-        code += 1 + 2 * IMM2_SIZE;
-        break;
-        }
 
       /* A duplicated name was found. Note that if an R<digits> name is found
       (META_COND_RNUMBER), it is a reference test, not a recursion test. */
@@ -6639,15 +6678,6 @@ for (;; pptr++)
 
       if (meta_arg == 0)
         {
-        if (meta == META_CAPTURE_NAME)
-          {
-          code[0] = OP_CREF;
-          PUT2(code, 1, pptr[1]);
-          code += 1 + IMM2_SIZE;
-          pptr++;
-          break;
-          }
-
         code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_RREF : OP_CREF;
         PUT2(code, 2 + LINK_SIZE, pptr[1]);
         skipunits = 1 + IMM2_SIZE;
@@ -6662,16 +6692,6 @@ for (;; pptr++)
       /* The failed case is an internal error. */
       if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index,
             &count, errorcodeptr, cb)) return 0;
-
-      if (meta == META_CAPTURE_NAME)
-        {
-        code[0] = OP_DNCREF;
-        PUT2(code, 1, index);
-        PUT2(code, 1 + IMM2_SIZE, count);
-        code += 1 + 2 * IMM2_SIZE;
-        pptr++;
-        break;
-        }
 
       /* A duplicated name was found. Note that if an R<digits> name is found
       (META_COND_RNUMBER), it is a reference test, not a recursion test. */
@@ -6702,12 +6722,8 @@ for (;; pptr++)
     /* Conditional test of a group's being set. */
 
     case META_COND_NUMBER:
-    case META_CAPTURE_NUMBER:
     bravalue = OP_COND;
-    if (meta == META_CAPTURE_NUMBER)
-      offset += meta_arg;
-    else
-      GETPLUSOFFSET(offset, pptr);
+    GETPLUSOFFSET(offset, pptr);
 
     groupnumber = *(++pptr);
     if (groupnumber > cb->bracount)
@@ -6717,14 +6733,6 @@ for (;; pptr++)
       return 0;
       }
     if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
-
-    if (meta == META_CAPTURE_NUMBER)
-      {
-      code[0] = OP_CREF;
-      PUT2(code, 1, groupnumber);
-      code += 1+IMM2_SIZE;
-      break;
-      }
 
     /* Point at initial ( for too many branches error */
     offset -= 2;
