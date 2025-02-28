@@ -11285,6 +11285,7 @@ PCRE2 SAMPLE PROGRAM
 
          ./pcre2demo 'cat|dog' 'the cat sat on the mat'
          ./pcre2demo -g 'cat|dog' 'the dog sat on the cat'
+         ./pcre2demo -i 'cat' 'the dog sat on the CAT'
 
        Note that there is a  much  more  comprehensive  test  program,  called
        pcre2test,  which supports many more facilities for testing regular ex-
