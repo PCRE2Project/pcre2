@@ -75,7 +75,7 @@ PCRE2_SPTR name_table;
 
 int crlf_is_newline;
 int errornumber;
-int find_all;
+int find_all, caseless_match;
 int i;
 int rc;
 int utf8;
@@ -93,16 +93,21 @@ pcre2_match_data *match_data;
 
 
 /**************************************************************************
-* First, sort out the command line. There is only one possible option at  *
-* the moment, "-g" to request repeated matching to find all occurrences,  *
-* like Perl's /g option. We set the variable find_all to a non-zero value *
-* if the -g option is present.                                            *
+* First, sort out the command line. Options:                              *
+* - "-g" to request repeated matching to find all occurrences,            *
+*   like Perl's /g option. We set the variable find_all to a non-zero     *
+*   value if the -g option is present.                                    *
+* - "-i" to request caseless matching, like Perl's /i option.  We set the *
+*   variable caseless_match to PCRE2_CASELESS if the -i option is         *
+*   present.                                                              *
 **************************************************************************/
 
 find_all = 0;
+caseless_match = 0;
 for (i = 1; i < argc; i++)
   {
   if (strcmp(argv[i], "-g") == 0) find_all = 1;
+  else if (strcmp(argv[i], "-i") == 0) caseless_match = PCRE2_CASELESS;
   else if (argv[i][0] == '-')
     {
     printf("Unrecognised option %s\n", argv[i]);
@@ -138,7 +143,7 @@ subject_length = (PCRE2_SIZE)strlen((char *)subject);
 re = pcre2_compile(
   pattern,               /* the pattern */
   PCRE2_ZERO_TERMINATED, /* indicates pattern is zero-terminated */
-  0,                     /* default options */
+  caseless_match,        /* possibly enable caseless */
   &errornumber,          /* for error number */
   &erroroffset,          /* for error offset */
   NULL);                 /* use default compile context */
