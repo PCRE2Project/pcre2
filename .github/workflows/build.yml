@@ -281,6 +281,55 @@ jobs:
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
+  zos:
+    name: z/OS
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    concurrency:
+      group: zos-ssh-build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        env:
+          ZOS_HOST: ${{ secrets.ZOS_HOST }}
+          ZOS_PORT: ${{ secrets.ZOS_PORT }}
+          ZOS_PRIVATE_KEY: ${{ secrets.ZOS_PRIVATE_KEY }}
+          ZOS_KNOWN_HOSTS: ${{ secrets.ZOS_KNOWN_HOSTS }}
+        run: |
+          (umask 0077 && printenv ZOS_PRIVATE_KEY > id_rsa_zos)
+          mkdir -p ~/.ssh
+          printenv ZOS_KNOWN_HOSTS > ~/.ssh/known_hosts
+
+          tar czf ../pcre2-build.tar.gz --exclude=.git .
+          mv ../pcre2-build.tar.gz .
+
+          scp -i id_rsa_zos -P "$ZOS_PORT" pcre2-build.tar.gz "$ZOS_HOST:/data/"
+          ssh -i id_rsa_zos -p "$ZOS_PORT" "$ZOS_HOST" /data/zopen/usr/local/bin/bash -c \
+            'export _BPXK_AUTOCVT=ON;
+            export _CEE_RUNOPTS="FILETAG(AUTOCVT,AUTOTAG) POSIX(ON)";
+            export _TAG_REDIR_ERR=txt;
+            export _TAG_REDIR_IN=txt;
+            export _TAG_REDIR_OUT=txt;
+            . /data/zopen/etc/zopen-config;
+            set -e;
+            set -x;
+            cd /data;
+            rm -rf pcre2-build;
+            mkdir pcre2-build;
+            gtar xzf pcre2-build.tar.gz -C pcre2-build;
+            cd pcre2-build;
+            chtag -R -tc ISO8859-1 .;
+            MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode;
+            gmake;
+            gmake check'
+
   distcheck:
     name: Build & verify distribution
     runs-on: ubuntu-latest
@@ -319,7 +368,7 @@ jobs:
           maint/RunManifestTest tarball-dir maint/manifest-tarball
 
       - name: Upload to GitHub artifacts
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: "Distribution release"
           path: |
@@ -400,14 +449,14 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload report to GitHub artifacts
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: "Coverage report"
           path: './build/coverage-report'
           if-no-files-found: error
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
+        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true

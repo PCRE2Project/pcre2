@@ -3,7 +3,7 @@
 #                   PCRE2 UNICODE PROPERTY SUPPORT
 #                   ------------------------------
 
-# This script generates the pcre2_ucptables.c file, which contains tables for
+# This script generates the pcre2_ucptables_inc.h file, which contains tables for
 # recognizing Unicode property names. It is #included by pcre2_tables.c. In
 # order to reduce the number of relocations when loading the PCRE2 library, the
 # names are held as a single large string, with offsets in the table. This is
@@ -60,7 +60,7 @@ from GenerateCommon import \
 # Open the output file (no return on failure). This call also writes standard
 # header boilerplate.
 
-f = open_output("pcre2_ucptables.c")
+f = open_output("pcre2_ucptables_inc.h")
 
 # The list in bidi_classes contains just the Unicode classes such as AN, LRE,
 # etc., along with comments. We need to add "bidi" in front of each value, in
@@ -195,7 +195,7 @@ const size_t PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
 
 #endif /* SUPPORT_UNICODE */
 
-/* End of pcre2_ucptables.c */
+/* End of pcre2_ucptables_inc.h */
 """)
 
 f.close

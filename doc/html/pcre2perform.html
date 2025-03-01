@@ -20,13 +20,13 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC5" href="#SEC5">AUTHOR</a>
 <li><a name="TOC6" href="#SEC6">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">PCRE2 PERFORMANCE</a><br>
+<h2><a name="SEC1" href="#TOC1">PCRE2 PERFORMANCE</a></h2>
 <p>
 Two aspects of performance are discussed below: memory usage and processing
 time. The way you express your pattern as a regular expression can affect both
 of them.
 </p>
-<br><a name="SEC2" href="#TOC1">COMPILED PATTERN MEMORY USAGE</a><br>
+<h2><a name="SEC2" href="#TOC1">COMPILED PATTERN MEMORY USAGE</a></h2>
 <p>
 Patterns are compiled by PCRE2 into a reasonably efficient interpretive code,
 so that most simple patterns do not use much memory for storing the compiled
@@ -77,7 +77,7 @@ cannot otherwise handle. The matching performance of the two different versions
 of the pattern are roughly the same. (This applies from release 10.30 - things
 were different in earlier releases.)
 </p>
-<br><a name="SEC3" href="#TOC1">STACK AND HEAP USAGE AT RUN TIME</a><br>
+<h2><a name="SEC3" href="#TOC1">STACK AND HEAP USAGE AT RUN TIME</a></h2>
 <p>
 From release 10.30, the interpretive (non-JIT) version of <b>pcre2_match()</b>
 uses very little system stack at run time. In earlier releases recursive
@@ -124,7 +124,7 @@ The "match depth" parameter can be used to limit the depth of function
 recursion, and the "match heap" parameter to limit heap memory in
 <b>pcre2_dfa_match()</b>.
 </p>
-<br><a name="SEC4" href="#TOC1">PROCESSING TIME</a><br>
+<h2><a name="SEC4" href="#TOC1">PROCESSING TIME</a></h2>
 <p>
 Certain items in regular expression patterns are processed more efficiently
 than others. It is more efficient to use a character class like [aeiou] than a
@@ -239,9 +239,9 @@ This example shows that one way of optimizing performance when matching long
 subject strings is to write repeated parenthesized subpatterns to match more
 than one character whenever possible.
 </p>
-<br><b>
+<h3>
 SETTING RESOURCE LIMITS
-</b><br>
+</h3>
 <p>
 You can set limits on the amount of processing that takes place when matching,
 and on the amount of heap memory that is used. The default values of the limits
@@ -260,7 +260,7 @@ The <b>pcre2test</b> test program has a modifier called "find_limits" which, if
 applied to a subject line, causes it to find the smallest limits that allow a
 pattern to match. This is done by repeatedly matching with different limits.
 </p>
-<br><a name="SEC5" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC5" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -269,7 +269,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC6" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC6" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 06 December 2022
 <br>

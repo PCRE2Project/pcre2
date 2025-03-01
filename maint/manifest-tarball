@@ -295,6 +295,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ltversion.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/lt~obsolete.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_visibility.m4
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_zos.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/missing
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/pcre2-config.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/perltest.sh
@@ -326,8 +327,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_intmodedep.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_char_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_compile.c
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_match.c
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_misc.c
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_match_inc.h
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_misc_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_neon_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_simd_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_test.c
@@ -337,7 +338,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_newline.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_ord2utf.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_pattern_info.c
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_printint.c
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_printint_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_script_run.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_serialize.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_string_utils.c
@@ -347,7 +348,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_tables.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_ucd.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_ucp.h
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_ucptables.c
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_ucptables_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_util.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_valid_utf.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_xclass.c

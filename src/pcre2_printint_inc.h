@@ -120,10 +120,10 @@ if (utf)
 if (one_code_unit)
   {
   if (PRINTABLE(c))
-    fprintf(f, "%c", (char)CHAR_OUTPUT(c));
+    fprintf(f, "%c", CHAR_OUTPUT(c));
   else
     {
-    c = CHAR_OUTPUT(c);
+    c = CHAR_OUTPUT_HEX(c);
     if (c < 0x80) fprintf(f, "\\x%02x", c);
     else fprintf(f, "\\x{%02x}", c);
     }
@@ -219,7 +219,7 @@ while (*ptr != '\0')
   {
   uint32_t c = *ptr++;
   if (PRINTABLE(c)) fprintf(f, "%c", CHAR_OUTPUT(c));
-  else fprintf(f, "\\x{%x}", CHAR_OUTPUT(c));
+  else fprintf(f, "\\x{%x}", CHAR_OUTPUT_HEX(c));
   }
 }
 
@@ -230,7 +230,7 @@ for (; len > 0; len--)
   {
   uint32_t c = *ptr++;
   if (PRINTABLE(c)) fprintf(f, "%c", CHAR_OUTPUT(c));
-  else fprintf(f, "\\x{%x}", CHAR_OUTPUT(c));
+  else fprintf(f, "\\x{%x}", CHAR_OUTPUT_HEX(c));
   }
 }
 
@@ -481,22 +481,22 @@ if (negated)
 
 for (input = 0; input < 256; input++)
   {
-  i = CHAR_INPUT(input);
+  i = CHAR_INPUT_HEX(input);
   if ((map[i/8] & (1u << (i&7))) != 0)
     {
     int j, jinput;
     for (jinput = input; jinput+1 < 256; jinput++)
       {
-      j = CHAR_INPUT(jinput+1);
+      j = CHAR_INPUT_HEX(jinput+1);
       if ((map[j/8] & (1u << (j&7))) == 0) break;
       }
-    j = CHAR_INPUT(jinput);
+    j = CHAR_INPUT_HEX(jinput);
     if (i == CHAR_MINUS || i == CHAR_BACKSLASH ||
         i == CHAR_RIGHT_SQUARE_BRACKET ||
         (first && i == CHAR_CIRCUMFLEX_ACCENT))
       fprintf(f, "\\");
     if (PRINTABLE(i)) fprintf(f, "%c", CHAR_OUTPUT(i));
-    else fprintf(f, "\\x%02x", CHAR_OUTPUT(i));
+    else fprintf(f, "\\x%02x", CHAR_OUTPUT_HEX(i));
     first = FALSE;
     if (jinput > input)
       {
@@ -505,7 +505,7 @@ for (input = 0; input < 256; input++)
           j == CHAR_RIGHT_SQUARE_BRACKET)
         fprintf(f, "\\");
       if (PRINTABLE(j)) fprintf(f, "%c", CHAR_OUTPUT(j));
-      else fprintf(f, "\\x%02x", CHAR_OUTPUT(j));
+      else fprintf(f, "\\x%02x", CHAR_OUTPUT_HEX(j));
       }
     input = jinput;
     }
@@ -1125,4 +1125,4 @@ for(;;)
   }
 }
 
-/* End of pcre2_printint.c */
+/* End of pcre2_printint_inc.h */

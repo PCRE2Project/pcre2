@@ -47,7 +47,7 @@ to have access to the hidden structures at all supported widths.
 
 Some of the mode-dependent macros are required at different widths for
 different parts of the pcre2test code (in particular, the included
-pcre2_printint.c file). We undefine them here so that they can be re-defined for
+pcre2_printint_inc.h file). We undefine them here so that they can be re-defined for
 multiple inclusions. Not all of these are used in pcre2test, but it's easier
 just to undefine them all. */
 
@@ -737,17 +737,34 @@ typedef struct named_group {
                                  a singe bit which represents duplication */
 } named_group;
 
+/* Structure for storing compile time data. */
+
+typedef struct compile_data {
+  struct compile_data *next;      /* Next compile data */
+#ifdef PCRE2_DEBUG
+  uint8_t type;                   /* Debug only type of the data */
+#endif
+} compile_data;
+
 /* Structure for caching sorted ranges. This improves the performance
 of translating META code to byte code. */
 
 typedef struct class_ranges {
-  struct class_ranges *next;       /* Next class ranges */
+  compile_data header;             /* Common header */
   size_t char_lists_size;          /* Total size of encoded char lists */
   size_t char_lists_start;         /* Start offset of encoded char lists */
   uint16_t range_list_size;        /* Size of ranges array */
   uint16_t char_lists_types;       /* The XCL_LIST header of char lists */
   /* Followed by the list of ranges (start/end pairs) */
 } class_ranges;
+
+/* Structure for sorted recurse arguments. */
+
+typedef struct recurse_arguments {
+  compile_data header;             /* Common header */
+  size_t size;                     /* Total size */
+  size_t skip_size;                /* Space consumed by arguments */
+} recurse_arguments;
 
 typedef union class_bits_storage {
   uint8_t classbits[32];
@@ -799,9 +816,9 @@ typedef struct compile_block {
   BOOL had_pruneorskip;            /* (*PRUNE) or (*SKIP) encountered */
   BOOL had_recurse;                /* Had a pattern recursion or subroutine call */
   BOOL dupnames;                   /* Duplicate names exist */
+  compile_data *first_data;        /* First item in the compile data list */
+  compile_data *last_data;         /* Last item in the compile data list */
 #ifdef SUPPORT_WIDE_CHARS
-  class_ranges *cranges;           /* First class range. */
-  class_ranges *next_cranges;      /* Next class range. */
   size_t char_lists_size;          /* Current size of character lists */
 #endif
 } compile_block;

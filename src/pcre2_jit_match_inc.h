@@ -197,4 +197,4 @@ return match_data->rc;
 #endif  /* SUPPORT_JIT */
 }
 
-/* End of pcre2_jit_match.c */
+/* End of pcre2_jit_match_inc.h */

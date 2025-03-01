@@ -335,6 +335,10 @@ typedef struct recurse_entry {
   jump_list *backtrack_calls;
   /* Points to the starting opcode. */
   sljit_sw start;
+  /* Start of caller arguments. */
+  PCRE2_SPTR arg_start;
+  /* Size of caller arguments in bytes. */
+  sljit_uw arg_size;
 } recurse_entry;
 
 typedef struct recurse_backtrack {
@@ -1241,6 +1245,11 @@ while (cc < ccend)
     /* Set its value only once. */
     set_recursive_head = TRUE;
     cc += 1 + LINK_SIZE;
+    while (*cc == OP_CREF)
+      {
+      common->optimized_cbracket[GET2(cc, 1)] = 0;
+      cc += 1 + IMM2_SIZE;
+      }
     break;
 
     case OP_CALLOUT:
@@ -2194,6 +2203,11 @@ while (cc < ccend)
       capture_last_found = TRUE;
       }
     cc += 1 + LINK_SIZE;
+    while (*cc == OP_CREF)
+      {
+      length += 3;
+      cc += 1 + IMM2_SIZE;
+      }
     break;
 
     case OP_CBRA:
@@ -2392,6 +2406,19 @@ while (cc < ccend)
       capture_last_found = TRUE;
       }
     cc += 1 + LINK_SIZE;
+    while (*cc == OP_CREF)
+      {
+      offset = (GET2(cc, 1)) << 1;
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), stackpos, SLJIT_IMM, OVECTOR(offset));
+      stackpos -= SSIZE_OF(sw);
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset));
+      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1));
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), stackpos, TMP1, 0);
+      stackpos -= SSIZE_OF(sw);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), stackpos, TMP2, 0);
+      stackpos -= SSIZE_OF(sw);
+      cc += 1 + IMM2_SIZE;
+      }
     break;
 
     case OP_CBRA:
@@ -2534,16 +2561,30 @@ enum get_recurse_flags {
   recurse_flag_setsom_found = (1 << 2),
   recurse_flag_setmark_found = (1 << 3),
   recurse_flag_control_head_found = (1 << 4),
+  recurse_flag_recurse_arg = (1 << 5),
 };
 
 static int get_recurse_data_length(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, uint32_t *result_flags)
 {
 int length = 1;
 int size, offset;
-PCRE2_SPTR alternative;
+PCRE2_SPTR alternative, cref;
 uint32_t recurse_flags = 0;
 
 memset(common->recurse_bitset, 0, common->recurse_bitset_size);
+
+if (common->currententry->arg_size > 0)
+  {
+  cref = common->currententry->arg_start;
+
+  do
+    {
+    offset = GET2(cref, 1);
+    recurse_check_bit(common, OVECTOR(offset << 1));
+    cref += 1 + IMM2_SIZE;
+    }
+  while (*cref == OP_CREF);
+  }
 
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
 SLJIT_ASSERT(common->control_head_ptr != 0);
@@ -2570,6 +2611,8 @@ while (cc < ccend)
     if (common->capture_last_ptr != 0 && recurse_check_bit(common, common->capture_last_ptr))
       length++;
     cc += 1 + LINK_SIZE;
+    if (*cc == OP_CREF)
+      recurse_flags |= recurse_flag_recurse_arg;
     break;
 
     case OP_KET:
@@ -2600,6 +2643,22 @@ while (cc < ccend)
     if (recurse_check_bit(common, PRIVATE_DATA(cc)))
       length++;
     cc += 1 + LINK_SIZE;
+    break;
+
+    case OP_CREF:
+    if ((recurse_flags & recurse_flag_recurse_arg) != 0)
+      {
+      offset = GET2(cc, 1);
+      if (recurse_check_bit(common, OVECTOR(offset << 1)))
+        {
+        SLJIT_ASSERT(recurse_check_bit(common, OVECTOR((offset << 1) + 1)));
+        length += 2;
+        }
+
+      if (cc[1 + IMM2_SIZE] != OP_CREF)
+        recurse_flags &= ~(uint32_t)recurse_flag_recurse_arg;
+      }
+    cc += 1 + IMM2_SIZE;
     break;
 
     case OP_ASSERT_SCS:
@@ -2800,7 +2859,7 @@ static void copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR
   int type, int stackptr, int stacktop, uint32_t recurse_flags)
 {
 delayed_mem_copy_status status;
-PCRE2_SPTR alternative;
+PCRE2_SPTR alternative, cref;
 sljit_sw private_srcw[2];
 sljit_sw shared_srcw[3];
 sljit_sw kept_shared_srcw[2];
@@ -2808,6 +2867,19 @@ int private_count, shared_count, kept_shared_count;
 int from_sp, base_reg, offset, i;
 
 memset(common->recurse_bitset, 0, common->recurse_bitset_size);
+
+if (common->currententry->arg_size > 0)
+  {
+  cref = common->currententry->arg_start;
+
+  do
+    {
+    offset = GET2(cref, 1);
+    recurse_check_bit(common, OVECTOR(offset << 1));
+    cref += 1 + IMM2_SIZE;
+    }
+  while (*cref == OP_CREF);
+  }
 
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
 SLJIT_ASSERT(common->control_head_ptr != 0);
@@ -2921,12 +2993,16 @@ while (cc < ccend)
         kept_shared_count++;
         }
       }
+
     if (common->capture_last_ptr != 0 && recurse_check_bit(common, common->capture_last_ptr))
       {
       shared_srcw[0] = common->capture_last_ptr;
       shared_count = 1;
       }
+
     cc += 1 + LINK_SIZE;
+    if (*cc == OP_CREF)
+      recurse_flags |= recurse_flag_recurse_arg;
     break;
 
     case OP_KET:
@@ -2957,6 +3033,24 @@ while (cc < ccend)
     if (recurse_check_bit(common, private_srcw[0]))
       private_count = 1;
     cc += 1 + LINK_SIZE;
+    break;
+
+    case OP_CREF:
+    if ((recurse_flags & recurse_flag_recurse_arg) != 0)
+      {
+      offset = GET2(cc, 1);
+      shared_srcw[0] = OVECTOR(offset << 1);
+      if (recurse_check_bit(common, shared_srcw[0]))
+        {
+        shared_srcw[1] = shared_srcw[0] + sizeof(sljit_sw);
+        SLJIT_ASSERT(recurse_check_bit(common, shared_srcw[1]));
+        shared_count = 2;
+        }
+
+      if (cc[1 + IMM2_SIZE] != OP_CREF)
+        recurse_flags &= ~(uint32_t)recurse_flag_recurse_arg;
+      }
+    cc += 1 + IMM2_SIZE;
     break;
 
     case OP_ASSERT_SCS:
@@ -8471,11 +8565,18 @@ DEFINE_COMPILER;
 backtrack_common *backtrack;
 recurse_entry *entry = common->entries;
 recurse_entry *prev = NULL;
+PCRE2_SPTR end;
 sljit_sw start = GET(cc, 1);
+sljit_uw arg_size;
 PCRE2_SPTR start_cc;
 BOOL needs_control_head;
 
-PUSH_BACKTRACK(sizeof(recurse_backtrack), cc, NULL);
+end = cc + 1 + LINK_SIZE;
+
+while (*end == OP_CREF)
+  end += 1 + IMM2_SIZE;
+
+PUSH_BACKTRACK(sizeof(recurse_backtrack), cc, end);
 
 /* Inlining simple patterns. */
 if (get_framesize(common, common->start + start, NULL, TRUE, &needs_control_head) == no_stack)
@@ -8483,12 +8584,15 @@ if (get_framesize(common, common->start + start, NULL, TRUE, &needs_control_head
   start_cc = common->start + start;
   compile_matchingpath(common, next_opcode(common, start_cc), bracketend(start_cc) - (1 + LINK_SIZE), backtrack);
   BACKTRACK_AS(recurse_backtrack)->inlined_pattern = TRUE;
-  return cc + 1 + LINK_SIZE;
+  return end;
   }
 
+cc += 1 + LINK_SIZE;
+arg_size = (sljit_uw)IN_UCHARS(end - cc);
 while (entry != NULL)
   {
-  if (entry->start == start)
+  if (entry->start == start && entry->arg_size == arg_size
+      && (arg_size == 0 || memcmp(cc, entry->arg_start, arg_size) == 0))
     break;
   prev = entry;
   entry = entry->next;
@@ -8498,13 +8602,15 @@ if (entry == NULL)
   {
   entry = sljit_alloc_memory(compiler, sizeof(recurse_entry));
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
-    return NULL;
+    return end;
   entry->next = NULL;
   entry->entry_label = NULL;
   entry->backtrack_label = NULL;
   entry->entry_calls = NULL;
   entry->backtrack_calls = NULL;
   entry->start = start;
+  entry->arg_start = cc;
+  entry->arg_size = arg_size;
 
   if (prev != NULL)
     prev->next = entry;
@@ -8521,7 +8627,7 @@ else
 /* Leave if the match is failed. */
 add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0));
 BACKTRACK_AS(recurse_backtrack)->matchingpath = LABEL();
-return cc + 1 + LINK_SIZE;
+return end;
 }
 
 static sljit_s32 SLJIT_FUNC do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
@@ -14129,7 +14235,7 @@ return 0;
 
 #define INCLUDED_FROM_PCRE2_JIT_COMPILE
 
-#include "pcre2_jit_match.c"
-#include "pcre2_jit_misc.c"
+#include "pcre2_jit_match_inc.h"
+#include "pcre2_jit_misc_inc.h"
 
 /* End of pcre2_jit_compile.c */

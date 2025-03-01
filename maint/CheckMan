@@ -31,7 +31,6 @@ while (scalar(@ARGV) > 0)
             ^\.SH\s\S|
             ^\.SS\s\S|
             ^\.TP(?:\s?\d+)?\s*$|
-            ^\.SM\s*$|
             ^\.br\s*$| 
             ^\.rs\s*$| 
             ^\.sp\s*$| 

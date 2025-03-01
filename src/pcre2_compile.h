@@ -51,18 +51,18 @@ pcre2.h.in must be updated - their values are exactly 100 greater than these
 values. */
 
 enum { ERR0 = COMPILE_ERROR_BASE,
-       ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
-       ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
-       ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR28, ERR29, ERR30,
-       ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39, ERR40,
-       ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49, ERR50,
-       ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59, ERR60,
-       ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
-       ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
-       ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100,
-       ERR101,ERR102,ERR103,ERR104,ERR105,ERR106,ERR107,ERR108,ERR109,ERR110,
-       ERR111,ERR112,ERR113,ERR114,ERR115,ERR116 };
+       ERR1,   ERR2,   ERR3,   ERR4,   ERR5,   ERR6,   ERR7,   ERR8,   ERR9,   ERR10,
+       ERR11,  ERR12,  ERR13,  ERR14,  ERR15,  ERR16,  ERR17,  ERR18,  ERR19,  ERR20,
+       ERR21,  ERR22,  ERR23,  ERR24,  ERR25,  ERR26,  ERR27,  ERR28,  ERR29,  ERR30,
+       ERR31,  ERR32,  ERR33,  ERR34,  ERR35,  ERR36,  ERR37,  ERR38,  ERR39,  ERR40,
+       ERR41,  ERR42,  ERR43,  ERR44,  ERR45,  ERR46,  ERR47,  ERR48,  ERR49,  ERR50,
+       ERR51,  ERR52,  ERR53,  ERR54,  ERR55,  ERR56,  ERR57,  ERR58,  ERR59,  ERR60,
+       ERR61,  ERR62,  ERR63,  ERR64,  ERR65,  ERR66,  ERR67,  ERR68,  ERR69,  ERR70,
+       ERR71,  ERR72,  ERR73,  ERR74,  ERR75,  ERR76,  ERR77,  ERR78,  ERR79,  ERR80,
+       ERR81,  ERR82,  ERR83,  ERR84,  ERR85,  ERR86,  ERR87,  ERR88,  ERR89,  ERR90,
+       ERR91,  ERR92,  ERR93,  ERR94,  ERR95,  ERR96,  ERR97,  ERR98,  ERR99,  ERR100,
+       ERR101, ERR102, ERR103, ERR104, ERR105, ERR106, ERR107, ERR108, ERR109, ERR110,
+       ERR111, ERR112, ERR113, ERR114, ERR115, ERR116, ERR117, ERR118 };
 
 /* Code values for parsed patterns, which are stored in a vector of 32-bit
 unsigned ints. Values less than META_END are literal data values. The coding
@@ -186,6 +186,36 @@ therefore no need for it to have a length entry, so use a high value. */
 #define META_DATA(x)   (x & 0x0000ffffu)
 #define META_DIFF(x,y) ((x-y)>>16)
 
+/* Macros to store and retrieve a PCRE2_SIZE value in the parsed pattern, which
+consists of uint32_t elements. Assume that if uint32_t can't hold it, two of
+them will be able to (i.e. assume a 64-bit world). */
+
+#if PCRE2_SIZE_MAX <= UINT32_MAX
+#define PUTOFFSET(s,p) *p++ = s
+#define GETOFFSET(s,p) s = *p++
+#define GETPLUSOFFSET(s,p) s = *(++p)
+#define READPLUSOFFSET(s,p) s = p[1]
+#define SKIPOFFSET(p) p++
+#define SIZEOFFSET 1
+#else
+#define PUTOFFSET(s,p) \
+  { *p++ = (uint32_t)(s >> 32); *p++ = (uint32_t)(s & 0xffffffff); }
+#define GETOFFSET(s,p) \
+  { s = ((PCRE2_SIZE)p[0] << 32) | (PCRE2_SIZE)p[1]; p += 2; }
+#define GETPLUSOFFSET(s,p) \
+  { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; p += 2; }
+#define READPLUSOFFSET(s,p) \
+  { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; }
+#define SKIPOFFSET(p) p += 2
+#define SIZEOFFSET 2
+#endif
+
+#ifdef PCRE2_DEBUG
+/* Compile data types. */
+#define CDATA_RECURSE_ARGS       0 /* Argument list for recurse */
+#define CDATA_CRANGE             1 /* Character range list */
+#endif
+
 /* Extended class management flags. */
 
 #define CLASS_IS_ECLASS 0x1
@@ -244,6 +274,7 @@ typedef struct {
 #define _pcre2_compile_find_named_group        PCRE2_SUFFIX(_pcre2_compile_find_named_group)
 #define _pcre2_compile_find_dupname_details    PCRE2_SUFFIX(_pcre2_compile_find_dupname_details)
 #define _pcre2_compile_add_name_to_table       PCRE2_SUFFIX(_pcre2_compile_add_name_to_table)
+#define _pcre2_compile_parse_recurse_args      PCRE2_SUFFIX(_pcre2_compile_parse_recurse_args)
 
 
 /* Indices of the POSIX classes in posix_names, posix_name_lengths,
@@ -309,6 +340,10 @@ in indexptr and countptr. */
 BOOL PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
   int *indexptr, int *countptr, int *errorcodeptr, compile_block *cb);
 
+/* Parse the arguments of recurse operations. */
+
+BOOL PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
+  PCRE2_SIZE offset, int *errorcodeptr, compile_block *cb);
 
 #endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 

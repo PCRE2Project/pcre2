@@ -235,6 +235,7 @@ lib_LTLIBRARIES =
 # TESTS is for binary unit tests, check_SCRIPTS for script-based tests
 
 TESTS =
+XFAIL_TESTS =
 check_SCRIPTS =
 dist_noinst_SCRIPTS =
 
@@ -403,6 +404,8 @@ COMMON_SOURCES = \
   src/pcre2_intmodedep.h \
   src/pcre2_jit_char_inc.h \
   src/pcre2_jit_compile.c \
+  src/pcre2_jit_match_inc.h \
+  src/pcre2_jit_misc_inc.h \
   src/pcre2_jit_neon_inc.h \
   src/pcre2_jit_simd_inc.h \
   src/pcre2_maketables.c \
@@ -411,6 +414,7 @@ COMMON_SOURCES = \
   src/pcre2_newline.c \
   src/pcre2_ord2utf.c \
   src/pcre2_pattern_info.c \
+  src/pcre2_printint_inc.h \
   src/pcre2_script_run.c \
   src/pcre2_serialize.c \
   src/pcre2_string_utils.c \
@@ -420,13 +424,10 @@ COMMON_SOURCES = \
   src/pcre2_tables.c \
   src/pcre2_ucd.c \
   src/pcre2_ucp.h \
+  src/pcre2_ucptables_inc.h \
   src/pcre2_util.h \
   src/pcre2_valid_utf.c \
   src/pcre2_xclass.c
-
-# The pcre2_ucptables.c file is #included by pcre2_tables.c
-
-EXTRA_DIST += src/pcre2_ucptables.c
 
 if WITH_PCRE2_8
 lib_LTLIBRARIES += libpcre2-8.la
@@ -518,12 +519,6 @@ EXTRA_DIST += \
   deps/sljit/sljit_src/allocator_src/sljitProtExecAllocatorPosix.c \
   deps/sljit/sljit_src/allocator_src/sljitWXExecAllocatorPosix.c \
   deps/sljit/sljit_src/allocator_src/sljitWXExecAllocatorWindows.c
-
-# Some of the JIT sources are also in separate files that are #included.
-
-EXTRA_DIST += \
-  src/pcre2_jit_match.c \
-  src/pcre2_jit_misc.c
 
 if WITH_PCRE2_8
 libpcre2_8_la_LDFLAGS = $(EXTRA_LIBPCRE2_8_LDFLAGS)
@@ -680,12 +675,9 @@ pcre2_jit_test_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
 endif # WITH_JIT
 
-# Build the general pcre2test program. The file src/pcre2_printint.c is
-# #included by pcre2test as many times as needed, at different code unit
-# widths.
+# Build the general pcre2test program.
 
 bin_PROGRAMS += pcre2test
-EXTRA_DIST += src/pcre2_printint.c
 pcre2test_SOURCES = src/pcre2test.c
 pcre2test_CFLAGS = $(AM_CFLAGS)
 pcre2test_LDADD = $(LIBREADLINE)
@@ -725,6 +717,9 @@ if WITH_PCRE2_8
 TESTS += RunGrepTest
 EXTRA_DIST += RunGrepTest.bat
 dist_noinst_SCRIPTS += RunGrepTest
+if WITH_EBCDIC
+XFAIL_TESTS += RunGrepTest
+endif # WITH_EBCDIC
 endif # WITH_PCRE2_8
 
 ## Distribute all the test data files

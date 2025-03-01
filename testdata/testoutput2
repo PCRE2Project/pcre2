@@ -18295,8 +18295,6 @@ No match
     AB\x{85}xxx\x{a0}XYZ
  0: \x85xxx\xa0
 
-#endif
-
 /^\w+/tables=2
     École
  0: \xc3
@@ -18310,6 +18308,8 @@ No match
 /^\w+/tables=3
     École
  0: \xc3
+
+#endif
 
 /"(*MARK:>" 00 "<).."/hex,mark,no_start_optimize
     AB
@@ -18812,10 +18812,10 @@ No match
 # Parse errors first
 
 /(*scs:/
-Failed: error 114 at offset 6: missing closing parenthesis
+Failed: error 218 at offset 6: missing opening parenthesis
 
 /(*scan_substring:(/
-Failed: error 114 at offset 18: missing closing parenthesis
+Failed: error 217 at offset 18: expected capture group number or name
 
 /(*scs:('name'/
 Failed: error 114 at offset 13: missing closing parenthesis
@@ -21877,6 +21877,301 @@ Failed: error -69: error performing replacement case transformation
  1: XqjIJIJIJIJIqIJIJIIJJiijjy
     Xaay\=replace=\Uaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
  1: XBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBy
+
+# --------------
+
+# Tests for recurse with returned captures
+
+# Parse error tests
+
+/(?1:/
+Failed: error 218 at offset 4: missing opening parenthesis
+
+/(?1:1/
+Failed: error 218 at offset 4: missing opening parenthesis
+
+/(?R:(1/
+Failed: error 114 at offset 6: missing closing parenthesis
+
+/(?R:(1,/
+Failed: error 217 at offset 7: expected capture group number or name
+
+/(?R0:(1,2!/
+Failed: error 158 at offset 3: (?R (recursive pattern call) must be followed by a closing parenthesis
+
+/(?1:(1,0))()/
+Failed: error 115 at offset 8: reference to non-existent subpattern
+
+/(?1:(1,+2))()/
+Failed: error 115 at offset 7: reference to non-existent subpattern
+
+/(?1:(<name>))/
+Failed: error 115 at offset 3: reference to non-existent subpattern
+
+# Operation tests
+
+/^(?1:(2))\2(?(DEFINE)(a(.)b(.)c))/B
+------------------------------------------------------------------
+        Bra
+        ^
+        Recurse
+      2 Capture ref
+        \2
+        Cond
+        Cond false
+        CBra 1
+        a
+        CBra 2
+        Any
+        Ket
+        b
+        CBra 3
+        Any
+        Ket
+        c
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+  axbycx
+ 0: axbycx
+ 1: <unset>
+ 2: x
+\= Expect no match
+  axby
+No match
+  axbycy
+No match
+
+/^((.)(?<id>.))(?1:('id'))(.)/B
+------------------------------------------------------------------
+        Bra
+        ^
+        CBra 1
+        CBra 2
+        Any
+        Ket
+        CBra 3
+        Any
+        Ket
+        Ket
+        Recurse
+      3 Capture ref
+        CBra 4
+        Any
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+  abcde
+ 0: abcde
+ 1: ab
+ 2: a
+ 3: d
+ 4: e
+
+/^(?1:(3,2,2,3,2))(?1:(3))(?(DEFINE)(a(.)b(.)c))/B
+------------------------------------------------------------------
+        Bra
+        ^
+        Recurse
+      2 Capture ref
+      3 Capture ref
+        Recurse
+      3 Capture ref
+        Cond
+        Cond false
+        CBra 1
+        a
+        CBra 2
+        Any
+        Ket
+        b
+        CBra 3
+        Any
+        Ket
+        c
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+  a1b2cafbgc
+ 0: a1b2cafbgc
+ 1: <unset>
+ 2: 1
+ 3: g
+
+/(?1:(2))#(?1:(3))#(?1:(4))#(?(DEFINE)((.)\2(.)\3(.)\4))/
+  aabbcc#ddeeff#gghhii!aabbcc#ddeeff#gghhii#
+ 0: aabbcc#ddeeff#gghhii#
+ 1: <unset>
+ 2: a
+ 3: e
+ 4: i
+\= Expect no match
+  aabbcc#ddeeff#gghhii
+No match
+
+/^(?1:(1,2)){2,4}(?(DEFINE)((..)#))xx#/B
+------------------------------------------------------------------
+        Bra
+        ^
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        Brazero
+        Bra
+        Bra
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        Ket
+        Brazero
+        Bra
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        Ket
+        Ket
+        Cond
+        Cond false
+        CBra 1
+        CBra 2
+        Any
+        Any
+        Ket
+        #
+        Ket
+        Ket
+        xx#
+        Ket
+        End
+------------------------------------------------------------------
+  aa#bb#xx#
+ 0: aa#bb#xx#
+ 1: <unset>
+ 2: bb
+  aa#bb#cc#xx#
+ 0: aa#bb#cc#xx#
+ 1: <unset>
+ 2: cc
+  aa#bb#cc#dd#xx#
+ 0: aa#bb#cc#dd#xx#
+ 1: <unset>
+ 2: dd
+\= Expect no match
+  aa#xx#
+No match
+  aa#bb#cc#dd#ee#xx#
+No match
+
+/^(?1:(1,2)){2,}+(?(DEFINE)((..)#))!/B
+------------------------------------------------------------------
+        Bra
+        ^
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        Braposzero
+        SBraPos
+        Recurse
+      1 Capture ref
+      2 Capture ref
+        KetRpos
+        Cond
+        Cond false
+        CBra 1
+        CBra 2
+        Any
+        Any
+        Ket
+        #
+        Ket
+        Ket
+        !
+        Ket
+        End
+------------------------------------------------------------------
+  aa#bb#!
+ 0: aa#bb#!
+ 1: <unset>
+ 2: bb
+  aa#bb#cc#dd#ee#!
+ 0: aa#bb#cc#dd#ee#!
+ 1: <unset>
+ 2: ee
+\= Expect no match
+  aa#!
+No match
+  aa#bb#cc#dd#ee#
+No match
+
+/^(?1)(?(DEFINE)(<(?2:(3,4))><\4\3>)((..)(..)))/
+  <abcd><cdab>
+ 0: <abcd><cdab>
+
+/(?1)#(?(DEFINE)(a(.(*ACCEPT).)b))/
+  #axyb#axax#
+ 0: ax#
+
+/^(?>(?1:(<n>)))!(?(DEFINE)((?<n>..)(?<n>..)))|abcde/dupnames
+  abcd!
+ 0: abcd!
+ 1: <unset>
+ 2: ab
+ 3: cd
+  abcde
+ 0: abcde
+
+/<(?:[^<>]*?(?:(AB)[^<>]*|)(?:|(?R:(1))))+>/
+  <aa<bb>cc<dd>ee>
+ 0: <aa<bb>cc<dd>ee>
+  <aa<bb<cc>dd>ee<ff<gg>hh>ii>
+ 0: <aa<bb<cc>dd>ee<ff<gg>hh>ii>
+  <aa<bb<cc>dd>ee
+ 0: <bb<cc>dd>
+  <aa<bb>cc<dd>AB>
+ 0: <aa<bb>cc<dd>AB>
+ 1: AB
+  <aa<AB>cc<dd>ee>
+ 0: <aa<AB>cc<dd>ee>
+ 1: AB
+  <aa<bbAB<cc>dd>ee
+ 0: <bbAB<cc>dd>
+ 1: AB
+  <aa<bb<ABcc>dd>ee<ff<gg>hh>ii>
+ 0: <aa<bb<ABcc>dd>ee<ff<gg>hh>ii>
+ 1: AB
+  <aa<bb<cc>dd>ee<ff<gg>hABhABh>ii>
+ 0: <aa<bb<cc>dd>ee<ff<gg>hABhABh>ii>
+ 1: AB
+
+/(?:(?1:(<prefix>))#){4}(?(DEFINE)((?(<prefix>)\2)(?<prefix>.{3})))$/
+  abc#abcdef#defghi#ghijkl#
+ 0: abc#abcdef#defghi#ghijkl#
+ 1: <unset>
+ 2: jkl
+  abc#abcdef#defghi#ghijkl#jklmno#
+ 0: def#defghi#ghijkl#jklmno#
+ 1: <unset>
+ 2: mno
+  abc#abcdef#defghi#ghijkl#jklmno#mnopqr#
+ 0: ghi#ghijkl#jklmno#mnopqr#
+ 1: <unset>
+ 2: pqr
+\= Expect no match
+  abc#abcdef#defghi#ghijkl
+No match
+  abc#abcdef#defghi#ghXjkl#
+No match
 
 # --------------
 

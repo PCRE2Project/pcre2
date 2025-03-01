@@ -2,9 +2,10 @@ name: Deploy Pages
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: [ 'Sync doc changes' ]
+    workflows: [ 'Sync' ]
     types:
       - completed
+    branches: [ master ]
   push:
     branches: [ pages ]
   pull_request:

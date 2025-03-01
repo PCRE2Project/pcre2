@@ -20,7 +20,7 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC5" href="#SEC5">AUTHOR</a>
 <li><a name="TOC6" href="#SEC6">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">SAVING AND RE-USING PRECOMPILED PCRE2 PATTERNS</a><br>
+<h2><a name="SEC1" href="#TOC1">SAVING AND RE-USING PRECOMPILED PCRE2 PATTERNS</a></h2>
 <p>
 <b>int32_t pcre2_serialize_decode(pcre2_code **<i>codes</i>,</b>
 <b>  int32_t <i>number_of_codes</i>, const uint8_t *<i>bytes</i>,</b>
@@ -58,7 +58,7 @@ Applications that are not statically linked with a fixed version of PCRE2 must
 be prepared to recompile patterns from their sources, in order to be immune to
 PCRE2 upgrades.
 </p>
-<br><a name="SEC2" href="#TOC1">SECURITY CONCERNS</a><br>
+<h2><a name="SEC2" href="#TOC1">SECURITY CONCERNS</a></h2>
 <p>
 The facility for saving and restoring compiled patterns is intended for use
 within individual applications. As such, the data supplied to
@@ -69,7 +69,7 @@ undefined results. For example, if the length field of a pattern in the
 serialized data is corrupted, the deserializing code may read beyond the end of
 the byte stream that is passed to it.
 </p>
-<br><a name="SEC3" href="#TOC1">SAVING COMPILED PATTERNS</a><br>
+<h2><a name="SEC3" href="#TOC1">SAVING COMPILED PATTERNS</a></h2>
 <p>
 Before compiled patterns can be saved they must be serialized, which in PCRE2
 means converting the pattern to a stream of bytes. A single byte stream may
@@ -133,7 +133,7 @@ stream, it too must be freed by calling <b>pcre2_serialize_free()</b>. If this
 function is called with a NULL argument, it returns immediately without doing
 anything.
 </p>
-<br><a name="SEC4" href="#TOC1">RE-USING PRECOMPILED PATTERNS</a><br>
+<h2><a name="SEC4" href="#TOC1">RE-USING PRECOMPILED PATTERNS</a></h2>
 <p>
 In order to re-use a set of saved patterns you must first make the serialized
 byte stream available in main memory (for example, by reading from a file). The
@@ -192,7 +192,7 @@ serialized, the JIT data is discarded and so is no longer available after a
 save/restore cycle. You can, however, process a restored pattern with
 <b>pcre2_jit_compile()</b> if you wish.
 </p>
-<br><a name="SEC5" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC5" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -201,7 +201,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC6" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC6" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 19 January 2024
 <br>

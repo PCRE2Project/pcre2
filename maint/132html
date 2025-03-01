@@ -154,20 +154,20 @@ while (<STDIN>)
         {
         printf("<li><a name=\"TOC%d\" href=\"#SEC%d\">$title</a>\n",
           $ref, $ref);
-        printf TEMP ("<br><a name=\"SEC%d\" href=\"#TOC1\">$title</a><br>\n",
+        printf TEMP ("<h2><a name=\"SEC%d\" href=\"#TOC1\">$title</a></h2>\n",
           $ref);
         $ref++;
         }
       else
         {
-        print TEMP "<br><b>\n$title\n</b><br>\n";
+        print TEMP "<h2>\n$title\n</h2>\n";
         }
       }
     elsif (/^\.SS\s*("?)(.*)\1/)
       {
       &end_para();
       my($title) = &do_line($2);
-      print TEMP "<br><b>\n$title\n</b><br>\n";
+      print TEMP "<h3>\n$title\n</h3>\n";
       }
     elsif (/^\.B\s*(.*)/)
       {

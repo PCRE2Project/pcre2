@@ -497,6 +497,75 @@ return 0;  /* Match */
 
 
 
+/*************************************************
+*     Restore offsets after a recurse            *
+*************************************************/
+
+/* This function restores the ovector values when
+a recursive block reaches its end, and the triggering
+recurse has and argument list.
+
+Arguments:
+  F           the current backtracking frame pointer
+  P           the previous backtracking frame pointer
+*/
+
+static void
+recurse_update_offsets(heapframe *F, heapframe *P)
+{
+PCRE2_SIZE *dst = F->ovector;
+PCRE2_SIZE *src = P->ovector;
+/* The first bracket has offset 2, because
+offset 0 is reserved for the full match. */
+PCRE2_SIZE offset = 2;
+PCRE2_SIZE offset_top = Foffset_top + 2;
+PCRE2_SIZE diff;
+PCRE2_SPTR ecode = Fecode;
+
+do
+  {
+  diff = (GET2(ecode, 1) << 1) - offset;
+  ecode += 1 + IMM2_SIZE;
+
+  if (offset + diff >= offset_top)
+    {
+    /* Some OP_CREF opcodes are not
+    processed, they must be skipped. */
+    while (*ecode == OP_CREF) ecode += 1 + IMM2_SIZE;
+    break;
+    }
+
+  if (diff == 2)
+    {
+    dst[0] = src[0];
+    dst[1] = src[1];
+    }
+  else if (diff >= 4)
+    memcpy(dst, src, diff * sizeof(PCRE2_SIZE));
+
+  /* Skip the unmodified entry. */
+  diff += 2;
+  offset += diff;
+  dst += diff;
+  src += diff;
+  }
+while (*ecode == OP_CREF);
+
+diff = offset_top - offset;
+if (diff == 2)
+  {
+  dst[0] = src[0];
+  dst[1] = src[1];
+  }
+else if (diff >= 4)
+  memcpy(dst, src, diff * sizeof(PCRE2_SIZE));
+
+Fecode = ecode;
+Foffset_top = (offset <= P->offset_top) ? P->offset_top : (offset - 2);
+}
+
+
+
 /******************************************************************************
 *******************************************************************************
                    "Recursion" in the match() function
@@ -6262,12 +6331,18 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       /* Reinstate the previous set of captures and then carry on after the
       recursion call. */
 
-      memcpy((char *)F + offsetof(heapframe, ovector), P->ovector,
-        Foffset_top * sizeof(PCRE2_SIZE));
-      Foffset_top = P->offset_top;
+      Fecode = P->ecode + 1 + LINK_SIZE;
+
+      if (*Fecode != OP_CREF)
+        {
+        memcpy(F->ovector, P->ovector, Foffset_top * sizeof(PCRE2_SIZE));
+        Foffset_top = P->offset_top;
+        }
+      else
+        recurse_update_offsets(F, P);
+
       Fcapture_last = P->capture_last;
       Fcurrent_recurse = P->current_recurse;
-      Fecode = P->ecode + 1 + LINK_SIZE;
       continue;  /* With next opcode */
 
       case OP_COND:     /* No need to do anything for these */
@@ -6369,12 +6444,18 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       if (Fcurrent_recurse == number)
         {
         P = (heapframe *)((char *)N - frame_size);
-        memcpy((char *)F + offsetof(heapframe, ovector), P->ovector,
-          Foffset_top * sizeof(PCRE2_SIZE));
-        Foffset_top = P->offset_top;
+        Fecode = P->ecode + 1 + LINK_SIZE;
+
+        if (*Fecode != OP_CREF)
+          {
+          memcpy(F->ovector, P->ovector, Foffset_top * sizeof(PCRE2_SIZE));
+          Foffset_top = P->offset_top;
+          }
+        else
+          recurse_update_offsets(F, P);
+
         Fcapture_last = P->capture_last;
         Fcurrent_recurse = P->current_recurse;
-        Fecode = P->ecode + 1 + LINK_SIZE;
         continue;  /* With next opcode */
         }
 

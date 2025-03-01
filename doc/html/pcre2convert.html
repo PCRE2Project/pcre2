@@ -21,14 +21,14 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC6" href="#SEC6">AUTHOR</a>
 <li><a name="TOC7" href="#SEC7">REVISION</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">EXPERIMENTAL PATTERN CONVERSION FUNCTIONS</a><br>
+<h2><a name="SEC1" href="#TOC1">EXPERIMENTAL PATTERN CONVERSION FUNCTIONS</a></h2>
 <p>
 This document describes a set of functions that can be used to convert
 "foreign" patterns into PCRE2 regular expressions. This facility is currently
 experimental, and may be changed in future releases. Two kinds of pattern,
 globs and POSIX patterns, are supported.
 </p>
-<br><a name="SEC2" href="#TOC1">THE CONVERT CONTEXT</a><br>
+<h2><a name="SEC2" href="#TOC1">THE CONVERT CONTEXT</a></h2>
 <p>
 <b>pcre2_convert_context *pcre2_convert_context_create(</b>
 <b>  pcre2_general_context *<i>gcontext</i>);</b>
@@ -68,7 +68,7 @@ slash. It can be set to forward slash, backslash, or dot.
 The two setting functions return zero on success, or PCRE2_ERROR_BADDATA if
 their second argument is invalid.
 </p>
-<br><a name="SEC3" href="#TOC1">THE CONVERSION FUNCTION</a><br>
+<h2><a name="SEC3" href="#TOC1">THE CONVERSION FUNCTION</a></h2>
 <p>
 <b>int pcre2_pattern_convert(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
 <b>  uint32_t <i>options</i>, PCRE2_UCHAR **<i>buffer</i>,</b>
@@ -131,7 +131,7 @@ negative ones; <b>pcre2_convert()</b> uses existing codes of both kinds. A
 textual error message can be obtained by calling
 <b>pcre2_get_error_message()</b>.
 </p>
-<br><a name="SEC4" href="#TOC1">CONVERTING GLOBS</a><br>
+<h2><a name="SEC4" href="#TOC1">CONVERTING GLOBS</a></h2>
 <p>
 Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
@@ -144,7 +144,7 @@ PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
 match separator characters. PCRE2_CONVERT_GLOB_NO_STARSTAR matches globs with
 the double-star feature disabled. These options may be given together.
 </p>
-<br><a name="SEC5" href="#TOC1">CONVERTING POSIX PATTERNS</a><br>
+<h2><a name="SEC5" href="#TOC1">CONVERTING POSIX PATTERNS</a></h2>
 <p>
 POSIX defines two kinds of regular expression pattern: basic and extended.
 These can be processed by setting PCRE2_CONVERT_POSIX_BASIC or
@@ -171,7 +171,7 @@ the first match that is found. An application can use <b>pcre2_dfa_match()</b>
 to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).
 </p>
-<br><a name="SEC6" href="#TOC1">AUTHOR</a><br>
+<h2><a name="SEC6" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -180,7 +180,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<br><a name="SEC7" href="#TOC1">REVISION</a><br>
+<h2><a name="SEC7" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 14 November 2023
 <br>
