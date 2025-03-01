@@ -372,7 +372,7 @@ jobs:
       - name: Prepare
         run: ./autogen.sh
 
-      - uses: uraimo/run-on-arch-action@ac33288c3728ca72563c97b8b88dda5a65a84448 # v2.8.1
+      - uses: uraimo/run-on-arch-action@4141da824ffb5eda88d221d9cf835f6a61ed98d9 # v3.0.0
         name: Configure, build, and test
         with:
           arch: ${{ matrix.arch }}
