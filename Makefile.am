@@ -270,7 +270,10 @@ EXTRA_DIST =
 # These files contain additional m4 macros that are used by autoconf.
 
 EXTRA_DIST += \
-  m4/ax_pthread.m4 m4/pcre2_visibility.m4
+  m4/ax_check_vscript.m4 \
+  m4/ax_pthread.m4 \
+  m4/pcre2_visibility.m4 \
+  m4/pcre2_zos.m4
 
 # These files contain maintenance information
 
@@ -885,6 +888,13 @@ pkgconfig_DATA += libpcre2-32.pc
 endif
 
 
+# Symbol version files for use with GNU and Sun ld.
+
+EXTRA_DIST += \
+  src/libpcre2-8.sym src/libpcre2-16.sym src/libpcre2-32.sym \
+  src/libpcre2-posix.sym
+
+
 # gcov/lcov code coverage reporting
 #
 # Coverage reporting targets:
@@ -992,6 +1002,7 @@ EXTRA_DIST += \
   cmake/FindReadline.cmake \
   cmake/pcre2-config-version.cmake.in \
   cmake/pcre2-config.cmake.in \
+  cmake/PCRE2CheckLinkerFlag.cmake \
   src/config-cmake.h.in \
   CMakeLists.txt
 

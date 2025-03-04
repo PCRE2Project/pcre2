@@ -719,6 +719,8 @@ if test "$enable_pcre2test_libedit" = "yes"; then
   AC_CHECK_LIB([edit], [readline], [LIBEDIT="-ledit"])
 fi
 
+# Set up shared/static library flags
+
 PCRE2_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
   AC_DEFINE([PCRE2_STATIC], [1], [
@@ -729,6 +731,10 @@ AC_SUBST(PCRE2_STATIC_CFLAG)
 
 PCRE2POSIX_CFLAG=""
 if test "x$enable_shared" = "xyes" ; then
+
+  # Check for the availability of -Wl,--version-script (or -Wl,-M on Solaris)
+  AX_CHECK_VSCRIPT
+
   PCRE2POSIX_CFLAG="-DPCRE2POSIX_SHARED"
 fi
 AC_SUBST(PCRE2POSIX_CFLAG)
@@ -998,12 +1004,10 @@ fi
 
 # Platform specific issues
 NO_UNDEFINED=
-EXPORT_ALL_SYMBOLS=
 case $host_os in
   cygwin* | mingw* )
     if test X"$enable_shared" = Xyes; then
       NO_UNDEFINED="-no-undefined"
-      EXPORT_ALL_SYMBOLS="-Wl,--export-all-symbols"
     fi
     ;;
 esac
@@ -1022,6 +1026,22 @@ EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
 
 EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
   $NO_UNDEFINED -version-info libpcre2_posix_version"
+
+# Append each library's version script, if the platform supports it.
+
+if test x$ax_check_vscript_flag != x ; then
+  EXTRA_LIBPCRE2_8_LDFLAGS="$EXTRA_LIBPCRE2_8_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-8.sym"
+
+  EXTRA_LIBPCRE2_16_LDFLAGS="$EXTRA_LIBPCRE2_16_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-16.sym"
+
+  EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-32.sym"
+
+  EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-posix.sym"
+fi
 
 AC_SUBST(EXTRA_LIBPCRE2_8_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRE2_16_LDFLAGS)

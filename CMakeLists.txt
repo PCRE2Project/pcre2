@@ -158,6 +158,7 @@ include(CheckSymbolExists)
 include(CheckIncludeFile)
 include(CheckTypeSize)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
+include(PCRE2CheckLinkerFlag)
 
 check_include_file(assert.h HAVE_ASSERT_H)
 check_include_file(dirent.h HAVE_DIRENT_H)
@@ -621,6 +622,34 @@ if(EBCDIC)
   endif()
 endif()
 
+# Detect support for linker scripts.
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym
+  "PCRE2_10.00 { global: main; };")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym
+  "PCRE2_10.00 { global: main; };  {")
+pcre2_check_linker_flag(C -Wl,--version-script,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
+pcre2_check_linker_flag(C -Wl,-M,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+if(HAVE_VSCRIPT_GNU)
+  set(VSCRIPT_FLAG --version-script)
+  set(HAVE_VSCRIPT TRUE)
+elseif(HAVE_VSCRIPT_SUN)
+  set(VSCRIPT_FLAG -M)
+  set(HAVE_VSCRIPT TRUE)
+endif()
+
+# Perform the same logic as ax_check_vscript.m4, to test whether the linker
+# silently ignores (and overwrites) linker scripts it doesn't understand.
+if(HAVE_VSCRIPT)
+  pcre2_check_linker_flag(C -Wl,${VSCRIPT_FLAG},${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym HAVE_VSCRIPT_BROKEN)
+  if(HAVE_VSCRIPT_BROKEN)
+    set(HAVE_VSCRIPT FALSE)
+  endif()
+endif()
+
+file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym)
+file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym)
+
 # Output files
 
 configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/config.h @ONLY)
@@ -882,6 +911,11 @@ if(PCRE2_BUILD_PCRE2_8)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-8-shared Threads::Threads)
     endif()
+    if(HAVE_VSCRIPT)
+      target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
+      set_target_properties(pcre2-8-shared PROPERTIES
+        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
+    endif()
     set(TARGETS ${TARGETS} pcre2-8-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8.pdb ${DLL_PDB_FILES})
     set(DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8d.pdb ${DLL_PDB_DEBUG_FILES})
@@ -898,6 +932,11 @@ if(PCRE2_BUILD_PCRE2_8)
         SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
         OUTPUT_NAME pcre2-posix
     )
+    if(HAVE_VSCRIPT)
+      target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
+      set_target_properties(pcre2-posix-shared PROPERTIES
+        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
+    endif()
     set(PCRE2POSIX_CFLAG "-DPCRE2POSIX_SHARED")
     target_compile_definitions(pcre2-posix-shared PUBLIC ${PCRE2POSIX_CFLAG})
     target_link_libraries(pcre2-posix-shared pcre2-8-shared)
@@ -971,6 +1010,11 @@ if(PCRE2_BUILD_PCRE2_16)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-16-shared Threads::Threads)
     endif()
+    if(HAVE_VSCRIPT)
+      target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
+      set_target_properties(pcre2-16-shared PROPERTIES
+        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
+    endif()
     set(TARGETS ${TARGETS} pcre2-16-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16.pdb ${DLL_PDB_FILES})
     set(DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16d.pdb ${DLL_PDB_DEBUG_FILES})
@@ -1038,6 +1082,11 @@ if(PCRE2_BUILD_PCRE2_32)
     )
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-32-shared Threads::Threads)
+    endif()
+    if(HAVE_VSCRIPT)
+      target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
+      set_target_properties(pcre2-32-shared PROPERTIES
+        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
     endif()
     set(TARGETS ${TARGETS} pcre2-32-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32.pdb ${DLL_PDB_FILES})
