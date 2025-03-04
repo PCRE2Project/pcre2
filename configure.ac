@@ -85,6 +85,10 @@ AC_SYS_LARGEFILE
 
 PCRE2_VISIBILITY
 
+# Check for the availability of -Wl,--version-script (or -Wl,-M on Solaris)
+
+AX_CHECK_VSCRIPT
+
 # Check for Clang __attribute__((uninitialized)) feature
 
 AC_MSG_CHECKING([for __attribute__((uninitialized))])
@@ -731,10 +735,6 @@ AC_SUBST(PCRE2_STATIC_CFLAG)
 
 PCRE2POSIX_CFLAG=""
 if test "x$enable_shared" = "xyes" ; then
-
-  # Check for the availability of -Wl,--version-script (or -Wl,-M on Solaris)
-  AX_CHECK_VSCRIPT
-
   PCRE2POSIX_CFLAG="-DPCRE2POSIX_SHARED"
 fi
 AC_SUBST(PCRE2POSIX_CFLAG)

@@ -29,7 +29,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/FindReadline.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2-config-version.cmake.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2-config.cmake.in
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2CheckLinkerFlag.cmake
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/compile
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/config.guess
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/config.sub
@@ -305,6 +304,10 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config-cmake.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config.h.generic
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config.h.in
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-16.sym
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-32.sym
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-8.sym
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-posix.sym
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.generic
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_auto_possess.c
@@ -359,13 +362,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2posix.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2posix.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2posix_test.c
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2test.c
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-16.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-32.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-8.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-posix.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2test.c
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2test.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2test.c
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/test-driver
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/testdata

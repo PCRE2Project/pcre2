@@ -108,7 +108,8 @@
 # Applied to all CMake files using:
 #    > pip3 install gersemi
 #    > gersemi --in-place --line-length 120 --indent 2 \
-#          ./CMakeLists.txt ./cmake/*.cmake ./cmake/*.cmake.in
+#          --definitions cmake/*.cmake \
+#          -- ./CMakeLists.txt ./cmake/*.cmake ./cmake/*.cmake.in
 ################################################################################
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
@@ -123,10 +124,12 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 # recently added to CMake for the `cc` compiler (Oracle Developer Studio). The
 # CMake version from OpenCSW and Oracle's package repository is too old and
 # requires this fix.
-if (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND
-    CMAKE_VERSION VERSION_LESS 3.31 AND
-    CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND
-    CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.15)
+if(
+  CMAKE_SYSTEM_NAME STREQUAL "SunOS"
+  AND CMAKE_VERSION VERSION_LESS 3.31
+  AND CMAKE_C_COMPILER_ID STREQUAL "SunPro"
+  AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.15
+)
   set(CMAKE_C_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
 endif()
 
@@ -273,7 +276,12 @@ set(
 
 set(PCRE2_EBCDIC_NL25 OFF CACHE BOOL "Use 0x25 as EBCDIC NL character instead of 0x15; implies EBCDIC.")
 
-set(PCRE2_EBCDIC_IGNORING_COMPILER OFF CACHE BOOL "Force EBCDIC 1047 using numeric literals rather than C character literals; implies EBCDIC.")
+set(
+  PCRE2_EBCDIC_IGNORING_COMPILER
+  OFF
+  CACHE BOOL
+  "Force EBCDIC 1047 using numeric literals rather than C character literals; implies EBCDIC."
+)
 
 option(PCRE2_REBUILD_CHARTABLES "Rebuild char tables" OFF)
 
@@ -624,10 +632,8 @@ endif()
 
 # Detect support for linker scripts.
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym
-  "PCRE2_10.00 { global: main; };")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym
-  "PCRE2_10.00 { global: main; };  {")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
 pcre2_check_linker_flag(C -Wl,--version-script,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
 pcre2_check_linker_flag(C -Wl,-M,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
 if(HAVE_VSCRIPT_GNU)
@@ -637,16 +643,18 @@ elseif(HAVE_VSCRIPT_SUN)
   set(VSCRIPT_FLAG -M)
   set(HAVE_VSCRIPT TRUE)
 endif()
-
-# Perform the same logic as ax_check_vscript.m4, to test whether the linker
-# silently ignores (and overwrites) linker scripts it doesn't understand.
 if(HAVE_VSCRIPT)
-  pcre2_check_linker_flag(C -Wl,${VSCRIPT_FLAG},${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym HAVE_VSCRIPT_BROKEN)
+  # Perform the same logic as ax_check_vscript.m4, to test whether the linker
+  # silently ignores (and overwrites) linker scripts it doesn't understand.
+  pcre2_check_linker_flag(
+    C
+    -Wl,${VSCRIPT_FLAG},${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym
+    HAVE_VSCRIPT_BROKEN
+  )
   if(HAVE_VSCRIPT_BROKEN)
     set(HAVE_VSCRIPT FALSE)
   endif()
 endif()
-
 file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym)
 file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym)
 
@@ -734,9 +742,17 @@ if(REBUILD_CHARTABLES)
 elseif(NOT PCRE2_EBCDIC)
   configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.dist ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
 elseif(PCRE2_EBCDIC_NL25)
-  configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl25 ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
+  configure_file(
+    ${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl25
+    ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+    COPYONLY
+  )
 else()
-  configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl15 ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
+  configure_file(
+    ${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl15
+    ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+    COPYONLY
+  )
 endif()
 
 # Source code
@@ -913,8 +929,7 @@ if(PCRE2_BUILD_PCRE2_8)
     endif()
     if(HAVE_VSCRIPT)
       target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
-      set_target_properties(pcre2-8-shared PROPERTIES
-        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
+      set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
     endif()
     set(TARGETS ${TARGETS} pcre2-8-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8.pdb ${DLL_PDB_FILES})
@@ -934,8 +949,7 @@ if(PCRE2_BUILD_PCRE2_8)
     )
     if(HAVE_VSCRIPT)
       target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
-      set_target_properties(pcre2-posix-shared PROPERTIES
-        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
+      set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
     endif()
     set(PCRE2POSIX_CFLAG "-DPCRE2POSIX_SHARED")
     target_compile_definitions(pcre2-posix-shared PUBLIC ${PCRE2POSIX_CFLAG})
@@ -1012,8 +1026,7 @@ if(PCRE2_BUILD_PCRE2_16)
     endif()
     if(HAVE_VSCRIPT)
       target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
-      set_target_properties(pcre2-16-shared PROPERTIES
-        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
+      set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
     endif()
     set(TARGETS ${TARGETS} pcre2-16-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16.pdb ${DLL_PDB_FILES})
@@ -1085,8 +1098,7 @@ if(PCRE2_BUILD_PCRE2_32)
     endif()
     if(HAVE_VSCRIPT)
       target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
-      set_target_properties(pcre2-32-shared PROPERTIES
-        LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
+      set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
     endif()
     set(TARGETS ${TARGETS} pcre2-32-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32.pdb ${DLL_PDB_FILES})

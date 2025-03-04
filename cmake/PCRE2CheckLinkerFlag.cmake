@@ -4,7 +4,7 @@ include(CheckLinkerFlag OPTIONAL)
 # or higher. Calls to pcre2_check_linker_flag can be changed to the built in
 # check_linker_flag.
 
-if (COMMAND check_linker_flag)
+if(COMMAND check_linker_flag)
   macro(pcre2_check_linker_flag)
     check_linker_flag(${ARGN})
   endmacro()
