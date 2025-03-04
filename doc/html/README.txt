@@ -956,6 +956,10 @@ The distribution should contain the files listed below.
   testdata/testoutput*     expected test results
   testdata/grep*           input and output for pcre2grep tests
   testdata/*               other supporting test files
+  src/libpcre2-8.sym       )
+  src/libpcre2-16.sym      ) symbol version scripts for the GNU and Sun linkers
+  src/libpcre2-32.sym      )
+  src/libpcre2-posix.sym   )
 
 (D) Auxiliary files for CMake support
 
@@ -964,6 +968,7 @@ The distribution should contain the files listed below.
   cmake/FindReadline.cmake
   cmake/pcre2-config-version.cmake.in
   cmake/pcre2-config.cmake.in
+  cmake/PCRE2CheckLinkerFlag.cmake
   src/config-cmake.h.in
   CMakeLists.txt
 
