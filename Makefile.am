@@ -7,6 +7,12 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS="-I$(srcdir)/src"
 
+## Set some variables to accumulate conditionally-set Automake targets.
+
+CLEAN_LOCAL_TARGETS=
+DISTCLEAN_LOCAL_TARGETS=
+PHONY_TARGETS=
+
 ## Specify the documentation files that are distributed.
 
 dist_doc_DATA = \
@@ -851,12 +857,13 @@ CLEANFILES += \
         testtrygrep \
         testNinputgrep
 
-clean-local: testoutput-clean
-.PHONY: testoutput-clean
 testoutput-clean:
 	-rm -rf testoutput8 testoutput8-jit testoutput8-dfa
 	-rm -rf testoutput16 testoutput16-jit testoutput16-dfa
 	-rm -rf testoutput32 testoutput32-jit testoutput32-dfa
+
+CLEAN_LOCAL_TARGETS += testoutput-clean
+PHONY_TARGETS += testoutput-clean
 
 ## ------------ End of testing -------------
 
@@ -964,23 +971,26 @@ coverage-clean: coverage-reset coverage-clean-report coverage-clean-data
 coverage-distclean: coverage-clean
 
 coverage: coverage-reset coverage-baseline coverage-check coverage-report
-clean-local: coverage-clean
-distclean-local: coverage-distclean
 
-.PHONY: coverage coverage-baseline coverage-check coverage-report coverage-reset coverage-clean-report coverage-clean-data coverage-clean coverage-distclean
-
-# Without coverage support, still arrange for 'make distclean' to get rid of
-# any coverage files that may have been left from a different configuration.
+CLEAN_LOCAL_TARGETS += coverage-clean
+DISTCLEAN_LOCAL_TARGETS += coverage-distclean
+PHONY_TARGETS += coverage coverage-baseline coverage-check coverage-report coverage-reset coverage-clean-report coverage-clean-data coverage-clean coverage-distclean
 
 else
 
 coverage:
 	@echo "Configuring with --enable-coverage is required to generate code coverage report."
 
+# Without coverage support, still arrange for 'make distclean' to get rid of
+# any coverage files that may have been left from a different configuration.
+
 DISTCLEANFILES += src/*.gcda src/*.gcno
 
-distclean-local:
+coverage-distclean:
 	rm -rf $(PACKAGE)-$(VERSION)-coverage*
+
+DISTCLEAN_LOCAL_TARGETS += coverage-distclean
+PHONY_TARGETS += coverage-distclean
 
 endif # WITH_GCOV
 
@@ -994,5 +1004,15 @@ EXTRA_DIST += \
   cmake/pcre2-config.cmake.in \
   src/config-cmake.h.in \
   CMakeLists.txt
+
+## Set the special make and Automake targets. We could very easily simply
+## redefine these targets to append prerequisites to them, rather than
+## collecting the prerequisites in variables. However, there is an annoying
+## Automake behaviour where it emits a warning if a target has prerequisites
+## appended in a conditional block.
+
+clean-local: $(CLEAN_LOCAL_TARGETS)
+distclean-local: $(DISTCLEAN_LOCAL_TARGETS)
+.PHONY: $(PHONY_TARGETS)
 
 ## end Makefile.am
