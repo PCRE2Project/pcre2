@@ -85,6 +85,10 @@ AC_SYS_LARGEFILE
 
 PCRE2_VISIBILITY
 
+# Check for the availability of -Wl,--version-script (or -Wl,-M on Solaris)
+
+AX_CHECK_VSCRIPT
+
 # Check for Clang __attribute__((uninitialized)) feature
 
 AC_MSG_CHECKING([for __attribute__((uninitialized))])
@@ -719,6 +723,8 @@ if test "$enable_pcre2test_libedit" = "yes"; then
   AC_CHECK_LIB([edit], [readline], [LIBEDIT="-ledit"])
 fi
 
+# Set up shared/static library flags
+
 PCRE2_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
   AC_DEFINE([PCRE2_STATIC], [1], [
@@ -998,12 +1004,10 @@ fi
 
 # Platform specific issues
 NO_UNDEFINED=
-EXPORT_ALL_SYMBOLS=
 case $host_os in
   cygwin* | mingw* )
     if test X"$enable_shared" = Xyes; then
       NO_UNDEFINED="-no-undefined"
-      EXPORT_ALL_SYMBOLS="-Wl,--export-all-symbols"
     fi
     ;;
 esac
@@ -1022,6 +1026,22 @@ EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
 
 EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
   $NO_UNDEFINED -version-info libpcre2_posix_version"
+
+# Append each library's version script, if the platform supports it.
+
+if test x$ax_check_vscript_flag != x ; then
+  EXTRA_LIBPCRE2_8_LDFLAGS="$EXTRA_LIBPCRE2_8_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-8.sym"
+
+  EXTRA_LIBPCRE2_16_LDFLAGS="$EXTRA_LIBPCRE2_16_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-16.sym"
+
+  EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-32.sym"
+
+  EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
+    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-posix.sym"
+fi
 
 AC_SUBST(EXTRA_LIBPCRE2_8_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRE2_16_LDFLAGS)
@@ -1213,6 +1233,13 @@ elif test "$enable_ebcdic" = "yes"; then
   ebcdic_nl_code=0x15
 fi
 
+with_symbol_versioning=n/a
+if test x$want_symvers != xyes; then
+  with_symbol_versioning=no
+elif test x$ax_check_vscript_flag != x; then
+  with_symbol_versioning=yes
+fi
+
 cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
@@ -1247,8 +1274,9 @@ $PACKAGE-$VERSION configuration summary:
     Match limit ........................ : ${with_match_limit}
     Match depth limit .................. : ${with_match_limit_depth}
     Build shared libs .................. : ${enable_shared}
+        with symbol versioning ......... : ${with_symbol_versioning}
     Build static libs .................. : ${enable_static}
-    Use JIT in pcre2grep ............... : ${enable_pcre2grep_jit}
+    Enable JIT in pcre2grep ............ : ${enable_pcre2grep_jit}
     Enable callouts in pcre2grep ....... : ${enable_pcre2grep_callout}
     Enable fork in pcre2grep callouts .. : ${enable_pcre2grep_callout_fork}
     Initial buffer size for pcre2grep .. : ${with_pcre2grep_bufsize}
@@ -1257,7 +1285,7 @@ $PACKAGE-$VERSION configuration summary:
     Link pcre2grep with libbz2 ......... : ${enable_pcre2grep_libbz2}
     Link pcre2test with libedit ........ : ${enable_pcre2test_libedit}
     Link pcre2test with libreadline .... : ${enable_pcre2test_libreadline}
-    Valgrind support ................... : ${enable_valgrind}
+    Enable Valgrind support ............ : ${enable_valgrind}
     Code coverage ...................... : ${enable_coverage}
     Fuzzer support ..................... : ${enable_fuzz_support}
     Differential fuzzer support ........ : ${enable_diff_fuzz_support}

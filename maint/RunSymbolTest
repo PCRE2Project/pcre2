@@ -8,7 +8,7 @@ LANG=C # Ensure stable ordering of `sort` output
 export LANG
 
 if [ "$1" = "" -o "$2" = "" ] ; then
-    echo "Usage: $0 <so_dir> <manifest_dir>" >&2
+  echo "Usage: $0 <so_dir> <manifest_dir>" >&2
   exit 1
 fi
 
@@ -26,10 +26,17 @@ if [ -f /usr/bin/ggrep ] ; then
 fi
 
 nm="nm -B -D"
-if [ "`uname -s`" = "SunOS" ]; then
+if [ "`uname -s`" = "Linux" ]; then
+  nm="$nm --with-symbol-versions"
+elif [ "`uname -s`" = "SunOS" ]; then
   nm="nm -p -h -D -g"
 elif [ "`uname -s`" = "Darwin" ]; then
   nm="nm -B -g"
+fi
+
+supports_versions=1
+if [ "`uname -s`" = "Darwin" ]; then
+  supports_versions=0
 fi
 
 so_ext=so
@@ -50,23 +57,31 @@ for so_name in "libpcre2-8" "libpcre2-16" "libpcre2-32" "libpcre2-posix"; do
   $nm "$so_file" | \
     $sed -E -e 's/^[0-9a-fA-F]* *//g' | \
     $grep -E -v '^[Uw] ' | \
+    $grep -E -v '^A PCRE2_' | \
     $grep -E -v ' (_init|_fini)$' | \
     $grep -E -v ' (_end|_DYNAMIC|_GLOBAL_OFFSET_TABLE_|_PROCEDURE_LINKAGE_TABLE_|_edata|_etext)$' | \
     so_mangling | \
     sort \
-    > "$base"
+    > "$base.actual"
 
-  if ! diff -u "$expected_file" "$base"; then
-    echo "Shared object contents for $so_file differ from expected" >&2
+  if [ $supports_versions -eq 0 ]; then
+    $sed -E -e 's/@.*$//' "$expected_file" \
+      > "$base.expected"
+  else
+    cp "$expected_file" "$base.expected"
+  fi
 
-    echo "===Actual===" >&2
-    cat "$base" >&2
-    echo "===End===" >&2
+  if ! diff -u "$base.expected" "$base.actual"; then
+    echo "Shared object contents for $so_file differ from expected"
+
+    echo "===Actual==="
+    cat "$base.actual"
+    echo "===End==="
 
     exit 1
   fi
 
   echo "Shared object contents for $so_file match expected"
-  rm -f "$base"
+  rm -f "$base.expected" "$base.actual"
 
 done

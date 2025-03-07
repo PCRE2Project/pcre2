@@ -246,10 +246,13 @@ txt_files=(
   perltest.sh
   cmake/COPYING-CMAKE-SCRIPTS
   cmake/{*.cmake,*.cmake.in}
+  m4/ax_check_vscript.m4
   m4/ax_pthread.m4
   m4/pcre2_visibility.m4
+  m4/pcre2_zos.m4
   doc/p*
   doc/html/*
+  src/libpcre2-*.sym
   )
 
 crlf_files=(
