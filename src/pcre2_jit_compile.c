@@ -10158,7 +10158,7 @@ if (has_alternatives)
     if (i <= 3)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
     else
-      BACKTRACK_AS(bracket_backtrack)->matching_mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+      BACKTRACK_AS(bracket_backtrack)->matching_mov_addr = sljit_emit_op_addr(compiler, SLJIT_MOV_ADDR, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
     }
   if (ket != OP_KETRMAX)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
@@ -12605,7 +12605,7 @@ if (has_alternatives)
       if (alt_max <= 3)
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, alt_count);
       else
-        mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+        mov_addr = sljit_emit_op_addr(compiler, SLJIT_MOV_ADDR, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
       }
 
     if (offset != 0 && ket == OP_KETRMAX && is_optimized_cbracket(common, offset >> 1))
@@ -13275,7 +13275,7 @@ while (1)
   if (alt_max > 1 || (recurse_flags & recurse_flag_accept_found))
     {
     if (alt_max > 3)
-      mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(1));
+      mov_addr = sljit_emit_op_addr(compiler, SLJIT_MOV_ADDR, SLJIT_MEM1(STACK_TOP), STACK(1));
     else
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
     }
