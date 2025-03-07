@@ -38,7 +38,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/LICENSE
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/README
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/README.md
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/allocator_src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/allocator_src/sljitExecAllocatorApple.c

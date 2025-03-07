@@ -485,7 +485,7 @@ CLEANFILES += src/pcre2_chartables.c
 
 EXTRA_DIST += \
   deps/sljit/LICENSE \
-  deps/sljit/README \
+  deps/sljit/README.md \
   deps/sljit/sljit_src/sljitConfig.h \
   deps/sljit/sljit_src/sljitConfigCPU.h \
   deps/sljit/sljit_src/sljitConfigInternal.h \
