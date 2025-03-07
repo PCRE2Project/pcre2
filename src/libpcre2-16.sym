@@ -80,3 +80,5 @@ PCRE2_10.46 {
     pcre2_substring_nametable_scan_16;
     pcre2_substring_number_from_name_16;
 };
+
+# PCRE2_10.47 {} PCRE2_10.46;

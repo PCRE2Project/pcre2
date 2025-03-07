@@ -204,6 +204,12 @@ check_c_source_compiles(
   HAVE_VISIBILITY
 )
 
+if(HAVE_VISIBILITY)
+  set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
+else()
+  set(PCRE2_EXPORT)
+endif()
+
 set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 check_c_source_compiles("int main(void) { __assume(1); return 0; }" HAVE_BUILTIN_ASSUME)
@@ -221,11 +227,33 @@ check_c_source_compiles(
   HAVE_BUILTIN_UNREACHABLE
 )
 
-if(HAVE_VISIBILITY)
-  set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
-else()
-  set(PCRE2_EXPORT)
+# Detect support for linker scripts.
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
+pcre2_check_linker_flag(C -Wl,--version-script,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
+pcre2_check_linker_flag(C -Wl,-M,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+if(HAVE_VSCRIPT_GNU)
+  set(VSCRIPT_FLAG --version-script)
+  set(HAVE_VSCRIPT TRUE)
+elseif(HAVE_VSCRIPT_SUN)
+  set(VSCRIPT_FLAG -M)
+  set(HAVE_VSCRIPT TRUE)
 endif()
+if(HAVE_VSCRIPT)
+  # Perform the same logic as ax_check_vscript.m4, to test whether the linker
+  # silently ignores (and overwrites) linker scripts it doesn't understand.
+  pcre2_check_linker_flag(
+    C
+    -Wl,${VSCRIPT_FLAG},${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym
+    HAVE_VSCRIPT_BROKEN
+  )
+  if(HAVE_VSCRIPT_BROKEN)
+    set(HAVE_VSCRIPT FALSE)
+  endif()
+endif()
+file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym)
+file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym)
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
 # code was written by PH, trying to imitate the logic from the autotools
@@ -395,6 +423,10 @@ endif()
 if(MSVC)
   option(PCRE2_STATIC_RUNTIME "ON=Compile against the static runtime (/MT)." OFF)
   option(INSTALL_MSVC_PDB "ON=Install .pdb files built by MSVC, if generated" OFF)
+endif()
+
+if(HAVE_VSCRIPT)
+  option(PCRE2_SYMVERS "Enable library symbol versioning" ON)
 endif()
 
 # bzip2 lib
@@ -629,34 +661,6 @@ if(EBCDIC)
     message(FATAL_ERROR "EBCDIC support is available only for the 8-bit library")
   endif()
 endif()
-
-# Detect support for linker scripts.
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
-pcre2_check_linker_flag(C -Wl,--version-script,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
-pcre2_check_linker_flag(C -Wl,-M,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
-if(HAVE_VSCRIPT_GNU)
-  set(VSCRIPT_FLAG --version-script)
-  set(HAVE_VSCRIPT TRUE)
-elseif(HAVE_VSCRIPT_SUN)
-  set(VSCRIPT_FLAG -M)
-  set(HAVE_VSCRIPT TRUE)
-endif()
-if(HAVE_VSCRIPT)
-  # Perform the same logic as ax_check_vscript.m4, to test whether the linker
-  # silently ignores (and overwrites) linker scripts it doesn't understand.
-  pcre2_check_linker_flag(
-    C
-    -Wl,${VSCRIPT_FLAG},${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym
-    HAVE_VSCRIPT_BROKEN
-  )
-  if(HAVE_VSCRIPT_BROKEN)
-    set(HAVE_VSCRIPT FALSE)
-  endif()
-endif()
-file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym)
-file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym)
 
 # Output files
 
@@ -927,7 +931,7 @@ if(PCRE2_BUILD_PCRE2_8)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-8-shared Threads::Threads)
     endif()
-    if(HAVE_VSCRIPT)
+    if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
       target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
       set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
     endif()
@@ -947,7 +951,7 @@ if(PCRE2_BUILD_PCRE2_8)
         SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
         OUTPUT_NAME pcre2-posix
     )
-    if(HAVE_VSCRIPT)
+    if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
       target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
       set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
     endif()
@@ -1024,7 +1028,7 @@ if(PCRE2_BUILD_PCRE2_16)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-16-shared Threads::Threads)
     endif()
-    if(HAVE_VSCRIPT)
+    if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
       target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
       set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
     endif()
@@ -1096,7 +1100,7 @@ if(PCRE2_BUILD_PCRE2_32)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-32-shared Threads::Threads)
     endif()
-    if(HAVE_VSCRIPT)
+    if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
       target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
       set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
     endif()
@@ -1433,9 +1437,9 @@ if(PCRE2_SHOW_REPORT)
   else()
     message(STATUS "  Build type ........................ : ${CMAKE_BUILD_TYPE}")
   endif()
-  message(STATUS "  Build 8 bit PCRE2 library ......... : ${PCRE2_BUILD_PCRE2_8}")
-  message(STATUS "  Build 16 bit PCRE2 library ........ : ${PCRE2_BUILD_PCRE2_16}")
-  message(STATUS "  Build 32 bit PCRE2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
+  message(STATUS "  Build 8 bit pcre2 library ......... : ${PCRE2_BUILD_PCRE2_8}")
+  message(STATUS "  Build 16 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_16}")
+  message(STATUS "  Build 32 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
   message(STATUS "  Include debugging code ............ : ${PCRE2_DEBUG}")
   message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
   message(STATUS "  Use SELinux allocator in JIT ...... : ${PCRE2_SUPPORT_JIT_SEALLOC}")
@@ -1458,18 +1462,24 @@ if(PCRE2_SHOW_REPORT)
 
   message(STATUS "  Internal link size ................ : ${PCRE2_LINK_SIZE}")
   message(STATUS "  Maximum variable lookbehind ....... : ${PCRE2_MAX_VARLOOKBEHIND}")
-  message(STATUS "  Parentheses nest limit ............ : ${PCRE2_PARENS_NEST_LIMIT}")
+  message(STATUS "  Nested parentheses limit .......... : ${PCRE2_PARENS_NEST_LIMIT}")
   message(STATUS "  Heap limit ........................ : ${PCRE2_HEAP_LIMIT}")
   message(STATUS "  Match limit ....................... : ${PCRE2_MATCH_LIMIT}")
   message(STATUS "  Match depth limit ................. : ${PCRE2_MATCH_LIMIT_DEPTH}")
   message(STATUS "  Build shared libs ................. : ${BUILD_SHARED_LIBS}")
+  if(NOT HAVE_VSCRIPT)
+    message(STATUS "      with symbol versioning ........ : n/a")
+  else()
+    message(STATUS "      with symbol versioning ........ : ${PCRE2_SYMVERS}")
+  endif()
   message(STATUS "  Build static libs ................. : ${BUILD_STATIC_LIBS}")
-  message(STATUS "     with PIC enabled ............... : ${PCRE2_STATIC_PIC}")
+  message(STATUS "      with PIC enabled .............. : ${PCRE2_STATIC_PIC}")
   message(STATUS "  Build pcre2grep ................... : ${PCRE2_BUILD_PCRE2GREP}")
   message(STATUS "  Enable JIT in pcre2grep ........... : ${PCRE2GREP_SUPPORT_JIT}")
   message(STATUS "  Enable callouts in pcre2grep ...... : ${PCRE2GREP_SUPPORT_CALLOUT}")
   message(STATUS "  Enable callout fork in pcre2grep .. : ${PCRE2GREP_SUPPORT_CALLOUT_FORK}")
-  message(STATUS "  Buffer size for pcre2grep ......... : ${PCRE2GREP_BUFSIZE}")
+  message(STATUS "  Initial buffer size for pcre2grep . : ${PCRE2GREP_BUFSIZE}")
+  message(STATUS "  Maximum buffer size for pcre2grep . : ${PCRE2GREP_MAX_BUFSIZE}")
   message(STATUS "  Build tests (implies pcre2test .... : ${PCRE2_BUILD_TESTS}")
   message(STATUS "               and pcre2grep)")
   if(ZLIB_FOUND)
@@ -1492,7 +1502,7 @@ if(PCRE2_SHOW_REPORT)
   else()
     message(STATUS "  Link pcre2test with libreadline ... : Library not found")
   endif()
-  message(STATUS "  Support Valgrind .................. : ${PCRE2_SUPPORT_VALGRIND}")
+  message(STATUS "  Enable Valgrind support ........... : ${PCRE2_SUPPORT_VALGRIND}")
   if(PCRE2_DISABLE_PERCENT_ZT)
     message(STATUS "  Use %zu and %td ................... : OFF")
   else()

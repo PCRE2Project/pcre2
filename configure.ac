@@ -1233,6 +1233,13 @@ elif test "$enable_ebcdic" = "yes"; then
   ebcdic_nl_code=0x15
 fi
 
+with_symbol_versioning=n/a
+if test x$want_symvers != xyes; then
+  with_symbol_versioning=no
+elif test x$ax_check_vscript_flag != x; then
+  with_symbol_versioning=yes
+fi
+
 cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
@@ -1267,8 +1274,9 @@ $PACKAGE-$VERSION configuration summary:
     Match limit ........................ : ${with_match_limit}
     Match depth limit .................. : ${with_match_limit_depth}
     Build shared libs .................. : ${enable_shared}
+        with symbol versioning ......... : ${with_symbol_versioning}
     Build static libs .................. : ${enable_static}
-    Use JIT in pcre2grep ............... : ${enable_pcre2grep_jit}
+    Enable JIT in pcre2grep ............ : ${enable_pcre2grep_jit}
     Enable callouts in pcre2grep ....... : ${enable_pcre2grep_callout}
     Enable fork in pcre2grep callouts .. : ${enable_pcre2grep_callout_fork}
     Initial buffer size for pcre2grep .. : ${with_pcre2grep_bufsize}
@@ -1277,7 +1285,7 @@ $PACKAGE-$VERSION configuration summary:
     Link pcre2grep with libbz2 ......... : ${enable_pcre2grep_libbz2}
     Link pcre2test with libedit ........ : ${enable_pcre2test_libedit}
     Link pcre2test with libreadline .... : ${enable_pcre2test_libreadline}
-    Valgrind support ................... : ${enable_valgrind}
+    Enable Valgrind support ............ : ${enable_valgrind}
     Code coverage ...................... : ${enable_coverage}
     Fuzzer support ..................... : ${enable_fuzz_support}
     Differential fuzzer support ........ : ${enable_diff_fuzz_support}
