@@ -73,17 +73,13 @@ PCRE2_SPTR pattern;     /* PCRE2_SPTR is a pointer to unsigned code units of */
 PCRE2_SPTR subject;     /* the appropriate width (in this case, 8 bits). */
 PCRE2_SPTR name_table;
 
-int crlf_is_newline;
 int errornumber;
 int find_all, caseless_match;
 int i;
 int rc;
-int utf8;
 
-uint32_t option_bits;
 uint32_t namecount;
 uint32_t name_entry_size;
-uint32_t newline;
 
 PCRE2_SIZE erroroffset;
 PCRE2_SIZE *ovector;
@@ -304,28 +300,15 @@ if (namecount == 0) printf("No named substrings\n"); else
 * to search for additional matches in the subject string, in a similar   *
 * way to the /g option in Perl. This turns out to be trickier than you   *
 * might think because of the possibility of matching an empty string.    *
-* What happens is as follows:                                            *
 *                                                                        *
-* If the previous match was NOT for an empty string, we can just start   *
-* the next match at the end of the previous one.                         *
+* To help with this task, PCRE2 provides a match-iterator API. It is the *
+* responsibility of the client code to call PCRE2's matching function    *
+* repeatedly using the options and starting offset returned by the       *
+* match-iterator, since matching must be attempted several times in      *
+* different ways to test different ways to advance the match offset.     *
 *                                                                        *
-* If the previous match WAS for an empty string, we can't do that, as it *
-* would lead to an infinite loop. Instead, a call of pcre2_match() is    *
-* made with the PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED flags set. The *
-* first of these tells PCRE2 that an empty string at the start of the    *
-* subject is not a valid match; other possibilities must be tried. The   *
-* second flag restricts PCRE2 to one match attempt at the initial string *
-* position. If this match succeeds, an alternative to the empty string   *
-* match has been found, and we can print it and proceed round the loop,  *
-* advancing by the length of whatever was found. If this match does not  *
-* succeed, we still stay in the loop, advancing by just one character.   *
-* In UTF-8 mode, which can be set by (*UTF) in the pattern, this may be  *
-* more than one byte.                                                    *
-*                                                                        *
-* However, there is a complication concerned with newlines. When the     *
-* newline convention is such that CRLF is a valid newline, we must       *
-* advance by two characters rather than one. The newline convention can  *
-* be set in the regex by (*CR), etc.; if not, we must find the default.  *
+* The full details of this are described in the API documentation for    *
+* the match-iterator functions.                                          *
 *************************************************************************/
 
 if (!find_all)     /* Check for -g */
@@ -335,22 +318,33 @@ if (!find_all)     /* Check for -g */
   return 0;                           /* Exit the program. */
   }
 
-/* Before running the loop, check for UTF-8 and whether CRLF is a valid newline
-sequence. First, find the options with which the regex was compiled and extract
-the UTF state. */
-
-(void)pcre2_pattern_info(re, PCRE2_INFO_ALLOPTIONS, &option_bits);
-utf8 = (option_bits & PCRE2_UTF) != 0;
-
-/* Now find the newline convention and see whether CRLF is a valid newline
-sequence. */
-
-(void)pcre2_pattern_info(re, PCRE2_INFO_NEWLINE, &newline);
-crlf_is_newline = newline == PCRE2_NEWLINE_ANY ||
-                  newline == PCRE2_NEWLINE_CRLF ||
-                  newline == PCRE2_NEWLINE_ANYCRLF;
-
 /* Loop for second and subsequent matches */
+
+match_iterator_create(data);
+// XXX reset API?
+
+for (;;)
+  {
+  if (!match_iterator_advance(&start, &options))
+    break;
+
+  rc = pcre2_match();
+  if (rc == NO_MATCH)
+    continue;
+  else if (rc < 0)
+    {
+    // HANDLE ERROR
+    }
+  else
+    {
+    // PRINT RESULT
+    }
+  
+  }
+
+match_iterator_free();
+
+/* XXX OLD CODE */
 
 for (;;)
   {

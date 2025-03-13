@@ -552,6 +552,9 @@ typedef struct pcre2_real_code pcre2_code; \
 struct pcre2_real_match_data; \
 typedef struct pcre2_real_match_data pcre2_match_data; \
 \
+struct pcre2_real_match_iterator; \
+typedef struct pcre2_real_match_iterator pcre2_match_iterator; \
+\
 struct pcre2_real_jit_stack; \
 typedef struct pcre2_real_jit_stack pcre2_jit_stack; \
 \
@@ -743,14 +746,14 @@ PCRE2_EXP_DECL pcre2_match_data *PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL pcre2_match_data *PCRE2_CALL_CONVENTION \
   pcre2_match_data_create_from_pattern(const pcre2_code *, \
     pcre2_general_context *); \
+PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
+  pcre2_match_data_free(pcre2_match_data *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_dfa_match(const pcre2_code *, PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE, \
     uint32_t, pcre2_match_data *, pcre2_match_context *, int *, PCRE2_SIZE); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_match(const pcre2_code *, PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE, \
     uint32_t, pcre2_match_data *, pcre2_match_context *); \
-PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
-  pcre2_match_data_free(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SPTR PCRE2_CALL_CONVENTION \
   pcre2_get_mark(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION \
@@ -762,7 +765,16 @@ PCRE2_EXP_DECL uint32_t PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL PCRE2_SIZE *PCRE2_CALL_CONVENTION \
   pcre2_get_ovector_pointer(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION \
-  pcre2_get_startchar(pcre2_match_data *);
+  pcre2_get_startchar(pcre2_match_data *); \
+PCRE2_EXP_DECL pcre2_match_iterator *PCRE2_CALL_CONVENTION \
+  pcre2_match_iterator_create(pcre2_general_context *); \
+PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
+  pcre2_match_iterator_free(pcre2_match_iterator *); \
+PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
+  pcre2_match_iterator_reset(pcre2_match_iterator *, pcre2_match_data *); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_match_iterator_advance(pcre2_match_iterator *, PCRE2_SIZE *, \
+    uint32_t *);
 
 
 /* Convenience functions for handling matched substrings. */
@@ -887,6 +899,7 @@ pcre2_compile are called by application code. */
 #define pcre2_real_match_context    PCRE2_SUFFIX(pcre2_real_match_context_)
 #define pcre2_real_jit_stack        PCRE2_SUFFIX(pcre2_real_jit_stack_)
 #define pcre2_real_match_data       PCRE2_SUFFIX(pcre2_real_match_data_)
+#define pcre2_real_match_iterator   PCRE2_SUFFIX(pcre2_real_match_iterator_)
 
 
 /* Data blocks */
@@ -899,6 +912,7 @@ pcre2_compile are called by application code. */
 #define pcre2_convert_context          PCRE2_SUFFIX(pcre2_convert_context_)
 #define pcre2_match_context            PCRE2_SUFFIX(pcre2_match_context_)
 #define pcre2_match_data               PCRE2_SUFFIX(pcre2_match_data_)
+#define pcre2_match_iterator           PCRE2_SUFFIX(pcre2_match_iterator_)
 
 
 /* Functions: the complete list in alphabetical order */
@@ -942,6 +956,10 @@ pcre2_compile are called by application code. */
 #define pcre2_match_data_create               PCRE2_SUFFIX(pcre2_match_data_create_)
 #define pcre2_match_data_create_from_pattern  PCRE2_SUFFIX(pcre2_match_data_create_from_pattern_)
 #define pcre2_match_data_free                 PCRE2_SUFFIX(pcre2_match_data_free_)
+#define pcre2_match_iterator_advance          PCRE2_SUFFIX(pcre2_match_iterator_advance_)
+#define pcre2_match_iterator_create           PCRE2_SUFFIX(pcre2_match_iterator_create_)
+#define pcre2_match_iterator_free             PCRE2_SUFFIX(pcre2_match_iterator_free_)
+#define pcre2_match_iterator_reset            PCRE2_SUFFIX(pcre2_match_iterator_reset_)
 #define pcre2_pattern_convert                 PCRE2_SUFFIX(pcre2_pattern_convert_)
 #define pcre2_pattern_info                    PCRE2_SUFFIX(pcre2_pattern_info_)
 #define pcre2_serialize_decode                PCRE2_SUFFIX(pcre2_serialize_decode_)

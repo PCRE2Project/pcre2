@@ -690,6 +690,13 @@ typedef struct pcre2_real_match_data {
   PCRE2_SIZE       ovector[131072];  /* Must be last in the structure */
 } pcre2_real_match_data;
 
+/* The real match iterator structure. */
+
+typedef struct pcre2_real_match_iterator {
+  pcre2_memctl           memctl; /* Memory control fields */
+  pcre2_real_match_data *data;   /* The last-reset match data */
+} pcre2_real_match_iterator;
+
 
 /* ----------------------- PRIVATE STRUCTURES ----------------------------- */
 

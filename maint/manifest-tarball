@@ -335,6 +335,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_maketables.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_match.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_match_data.c
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_match_iterator.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_newline.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_ord2utf.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_pattern_info.c
