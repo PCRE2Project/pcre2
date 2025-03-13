@@ -7620,7 +7620,7 @@ while ((c = *p++) != 0)
       }
 
     replen = CAST8VAR(q) - start_rep;
-    if (replen > (SIZE_MAX - needlen) / i)
+    if (i > 0 && replen > (SIZE_MAX - needlen) / i)
       {
       fprintf(outfile, "** Expanded content too large\n");
       return PR_OK;
