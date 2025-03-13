@@ -680,6 +680,7 @@ typedef struct pcre2_real_match_data {
   struct heapframe *heapframes;      /* Backtracking frames heap memory */
   PCRE2_SIZE       heapframes_size;  /* Malloc-ed size */
   PCRE2_SIZE       subject_length;   /* Subject length */
+  PCRE2_SIZE       start_offset;     /* Offset to start of search */
   PCRE2_SIZE       leftchar;         /* Offset to leftmost code unit */
   PCRE2_SIZE       rightchar;        /* Offset to rightmost code unit */
   PCRE2_SIZE       startchar;        /* Offset to starting code unit */

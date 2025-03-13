@@ -37,6 +37,7 @@ T pcre2_match_context_free_16@@PCRE2_10.46
 T pcre2_match_data_create_16@@PCRE2_10.46
 T pcre2_match_data_create_from_pattern_16@@PCRE2_10.46
 T pcre2_match_data_free_16@@PCRE2_10.46
+T pcre2_next_match_16@@PCRE2_10.46
 T pcre2_pattern_convert_16@@PCRE2_10.46
 T pcre2_pattern_info_16@@PCRE2_10.46
 T pcre2_serialize_decode_16@@PCRE2_10.46

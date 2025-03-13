@@ -120,6 +120,7 @@ example.
        pcre2_maketables.c
        pcre2_match.c
        pcre2_match_data.c
+       pcre2_match_next.c
        pcre2_newline.c
        pcre2_ord2utf.c
        pcre2_pattern_info.c

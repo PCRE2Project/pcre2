@@ -14735,6 +14735,7 @@ Failed: error 125 at offset 1: length of lookbehind assertion is not limited
     aaaaa
  0: a
  0+ aaaa
+global repeat returned the same match as previous
  0: a
  0+ aaa
  0: a

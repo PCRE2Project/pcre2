@@ -87,6 +87,7 @@ drwxr-xr-x install-dir/share/doc/pcre2/html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_match_data_create.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_match_data_create_from_pattern.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_match_data_free.html
+-rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_next_match.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_pattern_convert.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_pattern_info.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_serialize_decode.html
@@ -195,6 +196,7 @@ drwxr-xr-x install-dir/share/man/man3
 -rw-r--r-- install-dir/share/man/man3/pcre2_match_data_create.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_match_data_create_from_pattern.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_match_data_free.3
+-rw-r--r-- install-dir/share/man/man3/pcre2_next_match.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_pattern_convert.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_pattern_info.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_serialize_decode.3

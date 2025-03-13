@@ -82,6 +82,7 @@ d---- .\install-dir\share\doc\pcre2\html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_match_data_create.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_match_data_create_from_pattern.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_match_data_free.html
+-a--- .\install-dir\share\doc\pcre2\html\pcre2_next_match.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_pattern_convert.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_pattern_info.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_serialize_decode.html
@@ -190,6 +191,7 @@ d---- .\install-dir\share\man\man3
 -a--- .\install-dir\share\man\man3\pcre2_match_data_create.3
 -a--- .\install-dir\share\man\man3\pcre2_match_data_create_from_pattern.3
 -a--- .\install-dir\share\man\man3\pcre2_match_data_free.3
+-a--- .\install-dir\share\man\man3\pcre2_next_match.3
 -a--- .\install-dir\share\man\man3\pcre2_pattern_convert.3
 -a--- .\install-dir\share\man\man3\pcre2_pattern_info.3
 -a--- .\install-dir\share\man\man3\pcre2_serialize_decode.3
