@@ -71,16 +71,16 @@ cc_library(
     hdrs = [
         ":pcre2_h_generic",
     ],
+    copts = [
+        "-I%s/src" % (INCLUDE_PREFIX,),
+         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
+    ],
     local_defines = [
         "HAVE_CONFIG_H",
         "HAVE_MEMMOVE",
         "PCRE2_CODE_UNIT_WIDTH=8",
         "PCRE2_STATIC",
         "SUPPORT_UNICODE",
-    ],
-    copts = [
-        "-I%s/src" % (INCLUDE_PREFIX,),
-         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
     ],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
@@ -95,6 +95,9 @@ cc_library(
     hdrs = [
         "src/pcre2posix.h",
     ],
+    copts = [
+         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
+    ],
     local_defines = [
         "HAVE_CONFIG_H",
         "HAVE_MEMMOVE",
@@ -102,7 +105,6 @@ cc_library(
         "PCRE2_STATIC",
         "SUPPORT_UNICODE",
     ],
-    includes = ["src"],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
     deps = [":pcre2"],
@@ -135,6 +137,9 @@ cc_binary(
     srcs = [
         "src/pcre2test.c",
         ":config_h_generic",
+    ],
+    copts = [
+         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
     ],
     local_defines = [
         "HAVE_CONFIG_H",
