@@ -20,12 +20,16 @@ copy_file(
     out = "src/pcre2_chartables.c",
 )
 
-REPO_ROOT = package_relative_label(":BUILD.bazel").workspace_root
-
-INCLUDE_PREFIX = REPO_ROOT if REPO_ROOT else "."
+LOCAL_DEFINES = [
+    "HAVE_CONFIG_H",
+    "HAVE_MEMMOVE",
+    "PCRE2_CODE_UNIT_WIDTH=8",
+    "PCRE2_STATIC",
+    "SUPPORT_UNICODE",
+]
 
 cc_library(
-    name = "pcre2",
+    name = "pcre2_impl",
     srcs = [
         "src/pcre2_auto_possess.c",
         "src/pcre2_chkdint.c",
@@ -40,15 +44,12 @@ cc_library(
         "src/pcre2_extuni.c",
         "src/pcre2_find_bracket.c",
         "src/pcre2_jit_compile.c",
-        "src/pcre2_jit_match_inc.h",
-        "src/pcre2_jit_misc_inc.h",
         "src/pcre2_maketables.c",
         "src/pcre2_match.c",
         "src/pcre2_match_data.c",
         "src/pcre2_newline.c",
         "src/pcre2_ord2utf.c",
         "src/pcre2_pattern_info.c",
-        "src/pcre2_printint_inc.h",
         "src/pcre2_script_run.c",
         "src/pcre2_serialize.c",
         "src/pcre2_string_utils.c",
@@ -60,52 +61,39 @@ cc_library(
         "src/pcre2_valid_utf.c",
         "src/pcre2_xclass.c",
         ":pcre2_chartables_c",
+    ],
+    hdrs = [
         "src/pcre2_compile.h",
         "src/pcre2_internal.h",
         "src/pcre2_intmodedep.h",
+        "src/pcre2_jit_match_inc.h",
+        "src/pcre2_jit_misc_inc.h",
+        "src/pcre2_printint_inc.h",
         "src/pcre2_ucp.h",
         "src/pcre2_ucptables_inc.h",
         "src/pcre2_util.h",
         ":config_h_generic",
-    ],
-    hdrs = [
         ":pcre2_h_generic",
     ],
-    copts = [
-        "-I%s/src" % (INCLUDE_PREFIX,),
-         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
-    ],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "HAVE_MEMMOVE",
-        "PCRE2_CODE_UNIT_WIDTH=8",
-        "PCRE2_STATIC",
-        "SUPPORT_UNICODE",
-    ],
+    local_defines = LOCAL_DEFINES,
     strip_include_prefix = "src",
+    visibility = ["//visibility:private"],
+)
+
+cc_library(
+    name = "pcre2",
+    hdrs = [":pcre2_h_generic"],
+    implementation_deps = [":pcre2_impl"],
+    local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "pcre2-posix",
-    srcs = [
-        "src/pcre2posix.c",
-        ":config_h_generic",
-    ],
-    hdrs = [
-        "src/pcre2posix.h",
-    ],
-    copts = [
-         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
-    ],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "HAVE_MEMMOVE",
-        "PCRE2_CODE_UNIT_WIDTH=8",
-        "PCRE2_STATIC",
-        "SUPPORT_UNICODE",
-    ],
-    strip_include_prefix = "src",
+    srcs = ["src/pcre2posix.c"],
+    hdrs = ["src/pcre2posix.h"],
+    implementation_deps = [":pcre2_impl"],
+    local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":pcre2"],
 )
@@ -128,36 +116,30 @@ cc_library(
         "src/pcre2_ucd.c",
         "src/pcre2_valid_utf.c",
     ],
-    strip_include_prefix = "src",
+    local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:private"],
 )
 
 cc_binary(
     name = "pcre2test",
-    srcs = [
-        "src/pcre2test.c",
-        ":config_h_generic",
-    ],
-    copts = [
-         "-I$(BINDIR)/%s/src" % (INCLUDE_PREFIX,),
-    ],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "HAVE_MEMMOVE",
+    srcs = ["src/pcre2test.c"],
+    linkopts = select({
+        "@platforms//os:windows": ["-STACK:2500000"],
+        "//conditions:default": [],
+    }),
+    local_defines = LOCAL_DEFINES + [
         "HAVE_STRERROR",
-        "PCRE2_STATIC",
-        "SUPPORT_UNICODE",
         "SUPPORT_PCRE2_8",
     ] + select({
         "@platforms//os:windows": [],
         "//conditions:default": ["HAVE_UNISTD_H"],
     }),
-    linkopts = select({
-        "@platforms//os:windows": ["-STACK:2500000"],
-        "//conditions:default": [],
-    }),
     visibility = ["//visibility:public"],
-    deps = [":pcre2test_dotc_headers", ":pcre2", ":pcre2-posix"],
+    deps = [
+        ":pcre2-posix",
+        ":pcre2_impl",
+        ":pcre2test_dotc_headers",
+    ],
 )
 
 filegroup(
@@ -167,6 +149,7 @@ filegroup(
 
 native_test(
     name = "pcre2_test",
+    size = "small",
     src = select({
         "@platforms//os:windows": "RunTest.bat",
         "//conditions:default": "RunTest",
@@ -175,6 +158,8 @@ native_test(
         "@platforms//os:windows": "RunTest.bat",
         "//conditions:default": "RunTest",
     }),
-    data = [":pcre2test", ":testdata"],
-    size = "small",
+    data = [
+        ":pcre2test",
+        ":testdata",
+    ],
 )
