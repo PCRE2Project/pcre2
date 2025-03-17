@@ -5,6 +5,9 @@ PCRE2_10.46 {
     pcre2_regerror;
     pcre2_regexec;
     pcre2_regfree;
+  local:
+    _fini;
+    _init;
 };
 
 # PCRE2_10.47 {} PCRE2_10.46;

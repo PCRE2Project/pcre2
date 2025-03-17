@@ -37,6 +37,13 @@ fi
 supports_versions=1
 if [ "`uname -s`" = "Darwin" ]; then
   supports_versions=0
+elif [ "`uname -s`" = "FreeBSD" ]; then
+  # Highly annoyingly, FreeBSD's nm doesn't show symbol versions, so we just
+  # skip checking it.
+  supports_versions=0
+elif [ "`uname -s`" = "SunOS" ]; then
+  # Similarly for Solaris.
+  supports_versions=0
 fi
 
 so_ext=so
