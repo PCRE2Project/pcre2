@@ -2309,6 +2309,14 @@
     s \x{17f}
     k \x{212a}
 
+/(.) \1 z/Bir
+    s s z
+    s S z
+
+/(?J:(?<DNAME>s)|(?<DNAME>.)) \k<DNAME> z/Bir
+    s s z
+    s S z
+
 /(.) \1/i,utf
     s S
     k K

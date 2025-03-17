@@ -258,6 +258,205 @@ for (;;)
 return TRUE;
 }
 
+
+/* Process the capture list of scan substring and recurse
+operations. Since at least one argument must be present,
+a 0 return value represents error. */
+
+static size_t
+PRIV(compile_process_capture_list)(uint32_t *pptr, PCRE2_SIZE offset,
+  int *errorcodeptr, compile_block *cb)
+{
+size_t i, size = 0;
+named_group *ng;
+PCRE2_SPTR name;
+uint32_t length;
+named_group *end = cb->named_groups + cb->names_found;
+
+while (TRUE)
+  {
+  ++pptr;
+
+  switch (META_CODE(*pptr))
+    {
+    case META_OFFSET:
+    GETPLUSOFFSET(offset, pptr);
+    continue;
+
+    case META_CAPTURE_NAME:
+    offset += META_DATA(*pptr);
+    length = *(++pptr);
+    name = cb->start_pattern + offset;
+
+    ng = PRIV(compile_find_named_group)(name, length, cb);
+
+    if (ng == NULL)
+      {
+      *errorcodeptr = ERR15;
+      cb->erroroffset = offset;
+      return 0;
+      }
+
+    if ((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) == 0)
+      {
+      pptr[-1] = META_CAPTURE_NUMBER;
+      pptr[0] = ng->number;
+      size++;
+      continue;
+      }
+
+    /* Remains only for duplicated names. */
+    pptr[-1] = META_CAPTURE_NAME;
+    pptr[0] = (uint32_t)(ng - cb->named_groups);
+    size++;
+    name = ng->name;
+
+    while (++ng < end)
+      if (ng->name == name) size++;
+    continue;
+
+    case META_CAPTURE_NUMBER:
+    offset += META_DATA(*pptr);
+
+    i = *(++pptr);
+    if (i > cb->bracount)
+      {
+      *errorcodeptr = ERR15;
+      cb->erroroffset = offset;
+      return 0;
+      }
+    if (i > cb->top_backref) cb->top_backref = (uint16_t)i;
+    size++;
+    continue;
+
+    default:
+    break;
+    }
+
+  PCRE2_ASSERT(size > 0);
+  return size;
+  }
+}
+
+
+/*******************************************************
+*   Parse the arguments of scan substring operations   *
+********************************************************/
+
+/* This function parses the arguments of scan substring operations.
+
+Arguments:
+  pptr_start    points to the current parsed pattern pointer
+  offset        argument starting offset in the pattern
+  errorcodeptr  where to put an error code
+  cb            the compile block
+  lengthptr     NULL during the real compile phase
+                points to length accumulator during pre-compile phase
+
+Returns:        TRUE if OK, FALSE if not, error code set
+*/
+
+uint32_t *
+PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
+  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+{
+uint8_t *captures;
+uint8_t *capture_ptr;
+uint8_t bit;
+PCRE2_SPTR name;
+named_group *ng;
+named_group *end = cb->named_groups + cb->names_found;
+BOOL all_found;
+size_t size;
+
+PCRE2_ASSERT(*pptr == META_OFFSET);
+if (PRIV(compile_process_capture_list)(pptr - 1, 0, errorcodeptr, cb) == 0)
+  return NULL;
+
+/* Align to bytes. Since the highest capture can
+be equal to bracount, +1 is added before the aligning. */
+size = (cb->bracount + 1 + 7) >> 3;
+captures = (uint8_t*)cb->cx->memctl.malloc(size, cb->cx->memctl.memory_data);
+if (captures == NULL)
+  {
+  *errorcodeptr = ERR21;
+  READPLUSOFFSET(cb->erroroffset, pptr);
+  return NULL;
+  }
+
+memset(captures, 0, size);
+
+while (TRUE)
+  {
+  switch (META_CODE(*pptr))
+    {
+    case META_OFFSET:
+    pptr++;
+    SKIPOFFSET(pptr);
+    continue;
+
+    case META_CAPTURE_NAME:
+    ng = cb->named_groups + pptr[1];
+    PCRE2_ASSERT((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) != 0);
+    pptr += 2;
+    name = ng->name;
+
+    all_found = TRUE;
+    do
+      {
+      if (ng->name != name) continue;
+
+      capture_ptr = captures + (ng->number >> 3);
+      PCRE2_ASSERT(capture_ptr < captures + size);
+      bit = (uint8_t)(1 << (ng->number & 0x7));
+
+      if ((*capture_ptr & bit) == 0)
+        {
+        *capture_ptr |= bit;
+        all_found = FALSE;
+        }
+      }
+    while (++ng < end);
+
+    if (!all_found)
+      {
+      *lengthptr += 1 + 2 * IMM2_SIZE;
+      continue;
+      }
+
+    pptr[-2] = META_CAPTURE_NUMBER;
+    pptr[-1] = 0;
+    continue;
+
+    case META_CAPTURE_NUMBER:
+    pptr += 2;
+
+    capture_ptr = captures + (pptr[-1] >> 3);
+    PCRE2_ASSERT(capture_ptr < captures + size);
+    bit = (uint8_t)(1 << (pptr[-1] & 0x7));
+
+    if ((*capture_ptr & bit) != 0)
+      {
+      pptr[-1] = 0;
+      continue;
+      }
+
+    *capture_ptr |= bit;
+    *lengthptr += 1 + IMM2_SIZE;
+    continue;
+
+    default:
+    break;
+    }
+
+  break;
+  }
+
+cb->cx->memctl.free(captures, cb->cx->memctl.memory_data);
+return pptr - 1;
+}
+
+
 /* Implement heapsort heapify algorithm. */
 
 static void do_heapify_u16(uint16_t *captures, size_t size, size_t i)
@@ -291,7 +490,7 @@ while (TRUE)
 /* This function parses the arguments of recurse operations.
 
 Arguments:
-  pptrptr       points to the current parsed pattern pointer
+  pptr_start    the current parsed pattern pointer
   offset        argument starting offset in the pattern
   errorcodeptr  where to put an error code
   cb            the compile block
@@ -306,9 +505,8 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
   PCRE2_SIZE offset, int *errorcodeptr, compile_block *cb)
 {
 uint32_t *pptr = pptr_start;
-size_t i, size = 0;
+size_t i, size;
 PCRE2_SPTR name;
-uint32_t length;
 named_group *ng;
 named_group *end = cb->named_groups + cb->names_found;
 recurse_arguments *args;
@@ -319,67 +517,8 @@ uint16_t tmp;
 
 /* Process all arguments, compute the required size. */
 
-while (TRUE)
-  {
-  ++pptr;
-
-  switch (META_CODE(*pptr))
-    {
-    case META_OFFSET:
-    GETPLUSOFFSET(offset, pptr);
-    continue;
-
-    case META_CAPTURE_NAME:
-    offset += META_DATA(*pptr);
-    length = *(++pptr);
-    name = cb->start_pattern + offset;
-
-    ng = PRIV(compile_find_named_group)(name, length, cb);
-
-    if (ng == NULL)
-      {
-      *errorcodeptr = ERR15;
-      cb->erroroffset = offset;
-      return FALSE;
-      }
-
-    if ((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) == 0)
-      {
-      pptr[-1] = META_CAPTURE_NAME;
-      pptr[0] = ng->number;
-      size++;
-      continue;
-      }
-
-    pptr[-1] = META_CAPTURE_NAME | 1;
-    pptr[0] = (uint32_t)(ng - cb->named_groups);
-    size++;
-    name = ng->name;
-
-    while (++ng < end)
-      if (ng->name == name) size++;
-    continue;
-
-    case META_CAPTURE_NUMBER:
-    offset += META_DATA(*pptr);
-
-    i = *(++pptr);
-    if (i > cb->bracount)
-      {
-      *errorcodeptr = ERR15;
-      cb->erroroffset = offset;
-      return FALSE;
-      }
-    if (i > cb->top_backref) cb->top_backref = (uint16_t)i;
-    size++;
-    continue;
-
-    default:
-    break;
-    }
-
-  break;
-  }
+size = PRIV(compile_process_capture_list)(pptr, offset, errorcodeptr, cb);
+if (size == 0) return FALSE;
 
 args = cb->cx->memctl.malloc(
   sizeof(recurse_arguments) + size * sizeof(uint16_t), cb->cx->memctl.memory_data);
@@ -396,7 +535,6 @@ args->header.next = NULL;
 args->header.type = CDATA_RECURSE_ARGS;
 #endif
 args->size = size;
-args->skip_size = (size_t)(pptr - pptr_start) - 1;
 
 /* Caching the pre-processed capture list. */
 if (cb->last_data != NULL)
@@ -409,7 +547,6 @@ cb->last_data = &args->header;
 /* Create the capture list size. */
 
 captures = (uint16_t*)(args + 1);
-pptr = pptr_start;
 
 while (TRUE)
   {
@@ -422,13 +559,8 @@ while (TRUE)
     continue;
 
     case META_CAPTURE_NAME:
-    if ((*pptr & 0x1) == 0)
-      {
-      *captures++ = *(++pptr);
-      continue;
-      }
-
     ng = cb->named_groups + *(++pptr);
+    PCRE2_ASSERT((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) != 0);
     *captures++ = (uint16_t)(ng->number);
 
     name = ng->name;
@@ -449,7 +581,7 @@ while (TRUE)
   }
 
 PCRE2_ASSERT(size == (size_t)(captures - (uint16_t*)(args + 1)));
-PCRE2_ASSERT(args->skip_size == ((size_t)(pptr - pptr_start) - 1));
+args->skip_size = (size_t)(pptr - pptr_start) - 1;
 
 if (size == 1) return TRUE;
 
