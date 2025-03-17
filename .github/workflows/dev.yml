@@ -432,7 +432,7 @@ jobs:
         run: |
           # Zig does something weird with the stack - it uses more space than the
           # equivalent plain C program.
-          ulimit -S -s 16384
+          ulimit -S -s 65536
           srcdir=`pwd` pcre2test=`pwd`/zig-out/bin/pcre2test ./RunTest
 
   bazel:
