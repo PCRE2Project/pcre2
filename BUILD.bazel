@@ -139,7 +139,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":pcre2-posix",
-        # ":pcre2_impl",
+        ":pcre2_impl",
         ":pcre2test_dotc_headers",
     ],
 )
