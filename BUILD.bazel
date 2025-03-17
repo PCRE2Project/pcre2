@@ -23,13 +23,46 @@ copy_file(
 LOCAL_DEFINES = [
     "HAVE_CONFIG_H",
     "HAVE_MEMMOVE",
+    "HAVE_STRERROR",
     "PCRE2_CODE_UNIT_WIDTH=8",
     "PCRE2_STATIC",
+    "SUPPORT_PCRE2_8",
     "SUPPORT_UNICODE",
-]
+] + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": ["HAVE_UNISTD_H"],
+})
+
+# Workaround for a Bazel quirk. It is extremely strict about the #include path
+# used for internal headers. We have our headers inside src/, but we #include
+# them as '#include "pcre2_internal.h"', assuming that src/ is added to the
+# compiler's include path. Unfortunately, that violates the conventions used by
+# Bazel.
+#
+# This is a workaround. Note that we can't use the "include = [...]" property
+# to add the src/ directory, since that pollutes the include path for projects
+# depending on PCRE2 (we must not make our config.h file visible to consumers
+# of PCRE2).
+cc_library(
+    name = "pcre2_internal_headers",
+    hdrs = [
+        "src/pcre2_jit_match_inc.h",
+        "src/pcre2_jit_misc_inc.h",
+        "src/pcre2_printint_inc.h",
+        "src/pcre2_compile.h",
+        "src/pcre2_internal.h",
+        "src/pcre2_intmodedep.h",
+        "src/pcre2_ucp.h",
+        "src/pcre2_ucptables_inc.h",
+        "src/pcre2_util.h",
+        ":config_h_generic",
+    ],
+    strip_include_prefix = "src",
+    visibility = ["//visibility:private"],
+)
 
 cc_library(
-    name = "pcre2_impl",
+    name = "pcre2",
     srcs = [
         "src/pcre2_auto_possess.c",
         "src/pcre2_chkdint.c",
@@ -62,42 +95,22 @@ cc_library(
         "src/pcre2_xclass.c",
         ":pcre2_chartables_c",
     ],
-    hdrs = [
-        "src/pcre2_compile.h",
-        "src/pcre2_internal.h",
-        "src/pcre2_intmodedep.h",
-        "src/pcre2_jit_match_inc.h",
-        "src/pcre2_jit_misc_inc.h",
-        "src/pcre2_printint_inc.h",
-        "src/pcre2_ucp.h",
-        "src/pcre2_ucptables_inc.h",
-        "src/pcre2_util.h",
-        ":config_h_generic",
-        ":pcre2_h_generic",
-    ],
-    local_defines = LOCAL_DEFINES,
-    strip_include_prefix = "src",
-    visibility = ["//visibility:private"],
-)
-
-cc_library(
-    name = "pcre2",
     hdrs = [":pcre2_h_generic"],
-    implementation_deps = [":pcre2_impl"],
     local_defines = LOCAL_DEFINES,
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
+    implementation_deps = [":pcre2_internal_headers"],
 )
 
 cc_library(
     name = "pcre2-posix",
     srcs = ["src/pcre2posix.c"],
     hdrs = ["src/pcre2posix.h"],
-    implementation_deps = [":pcre2_impl"],
     local_defines = LOCAL_DEFINES,
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
     deps = [":pcre2"],
+    implementation_deps = [":pcre2_internal_headers"],
 )
 
 # Totally weird issue in Bazel. It won't let you #include any files unless they
@@ -118,7 +131,7 @@ cc_library(
         "src/pcre2_ucd.c",
         "src/pcre2_valid_utf.c",
     ],
-    local_defines = LOCAL_DEFINES,
+    strip_include_prefix = "src",
     visibility = ["//visibility:private"],
 )
 
@@ -129,18 +142,13 @@ cc_binary(
         "@platforms//os:windows": ["-STACK:2500000"],
         "//conditions:default": [],
     }),
-    local_defines = LOCAL_DEFINES + [
-        "HAVE_STRERROR",
-        "SUPPORT_PCRE2_8",
-    ] + select({
-        "@platforms//os:windows": [],
-        "//conditions:default": ["HAVE_UNISTD_H"],
-    }),
+    local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:public"],
     deps = [
         ":pcre2-posix",
-        ":pcre2_impl",
+        ":pcre2",
         ":pcre2test_dotc_headers",
+        ":pcre2_internal_headers",
     ],
 )
 
