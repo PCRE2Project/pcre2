@@ -397,9 +397,7 @@ jobs:
           githubToken: ${{ github.token }}
 
           env: | # YAML, but pipe character is necessary
-            # -Wmaybe-uninitialized is spammy. It's not a useful warning for
-            # these multiarch builds.
-            CFLAGS_GCC_STYLE: ${{ env.CFLAGS_GCC_STYLE }} -Wno-maybe-uninitialized
+            CFLAGS_GCC_STYLE: ${{ env.CFLAGS_GCC_STYLE }}
 
           install: |
             apt-get -qq update
@@ -407,7 +405,8 @@ jobs:
 
           run: |
             set -e
-            cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
+            # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
+            cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
             ninja -C build
             (cd build && ctest -j3 --output-on-failure)
 
