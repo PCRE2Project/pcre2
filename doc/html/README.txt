@@ -169,6 +169,9 @@ library. They are also documented in the pcre2build man page.
   versions of all the relevant libraries are available for linking. See also
   "Shared libraries" below.
 
+  Shared libraries are compiled with symbol versioning enabled on platforms that
+  support this, but this can be disabled by adding --disable-symvers.
+
 . By default, only the 8-bit library is built. If you add --enable-pcre2-16 to
   the "configure" command, the 16-bit library is also built. If you add
   --enable-pcre2-32 to the "configure" command, the 32-bit library is also
