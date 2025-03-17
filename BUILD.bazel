@@ -46,12 +46,12 @@ LOCAL_DEFINES = [
 cc_library(
     name = "pcre2_internal_headers",
     hdrs = [
-        "src/pcre2_jit_match_inc.h",
-        "src/pcre2_jit_misc_inc.h",
-        "src/pcre2_printint_inc.h",
         "src/pcre2_compile.h",
         "src/pcre2_internal.h",
         "src/pcre2_intmodedep.h",
+        "src/pcre2_jit_match_inc.h",
+        "src/pcre2_jit_misc_inc.h",
+        "src/pcre2_printint_inc.h",
         "src/pcre2_ucp.h",
         "src/pcre2_ucptables_inc.h",
         "src/pcre2_util.h",
@@ -96,21 +96,21 @@ cc_library(
         ":pcre2_chartables_c",
     ],
     hdrs = [":pcre2_h_generic"],
+    implementation_deps = [":pcre2_internal_headers"],
     local_defines = LOCAL_DEFINES,
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
-    implementation_deps = [":pcre2_internal_headers"],
 )
 
 cc_library(
     name = "pcre2-posix",
     srcs = ["src/pcre2posix.c"],
     hdrs = ["src/pcre2posix.h"],
+    implementation_deps = [":pcre2_internal_headers"],
     local_defines = LOCAL_DEFINES,
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
     deps = [":pcre2"],
-    implementation_deps = [":pcre2_internal_headers"],
 )
 
 # Totally weird issue in Bazel. It won't let you #include any files unless they
@@ -145,10 +145,10 @@ cc_binary(
     local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:public"],
     deps = [
-        ":pcre2-posix",
         ":pcre2",
-        ":pcre2test_dotc_headers",
+        ":pcre2-posix",
         ":pcre2_internal_headers",
+        ":pcre2test_dotc_headers",
     ],
 )
 
