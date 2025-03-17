@@ -19,7 +19,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunTest
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/RunTest.bat
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/SECURITY.md
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/WORKSPACE.bazel
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/aclocal.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/ar-lib
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/build.zig
