@@ -235,7 +235,6 @@ txt_files=(
   RunGrepTest
   RunTest
   SECURITY.md
-  WORKSPACE.bazel
   build.zig
   configure.ac
   libpcre2-8.pc.in

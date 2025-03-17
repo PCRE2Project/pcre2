@@ -976,9 +976,8 @@ The distribution should contain the files listed below.
 
 (F) Auxiliary files for building PCRE2 using other build systems
 
-  BUILD.bazel             )
-  MODULE.bazel            ) files used by the Bazel build system
-  WORKSPACE.bazel         )
+  BUILD.bazel             ) files used by the Bazel
+  MODULE.bazel            )   build system
   build.zig               file used by zig's build system
 
 (G) Auxiliary files for building PCRE2 under OpenVMS

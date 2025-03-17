@@ -289,7 +289,6 @@ EXTRA_DIST += \
 EXTRA_DIST += \
   BUILD.bazel \
   MODULE.bazel \
-  WORKSPACE.bazel \
   build.zig
 
 # These are support files for building under VMS
