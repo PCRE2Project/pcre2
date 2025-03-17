@@ -41,7 +41,6 @@ pub fn build(b: *std.Build) !void {
             .PCRE2_MAX_VARLOOKBEHIND = 255,
             .NEWLINE_DEFAULT = 2,
             .PCRE2_PARENS_NEST_LIMIT = 250,
-
             .PCRE2GREP_BUFSIZE = 20480,
             .PCRE2GREP_MAX_BUFSIZE = 1048576,
         },
@@ -49,7 +48,7 @@ pub fn build(b: *std.Build) !void {
 
     // pcre2-8/16/32.so
 
-    const lib_mod = std.Build.Module.create(b, .{
+    const lib_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
@@ -61,10 +60,9 @@ pub fn build(b: *std.Build) !void {
         lib_mod.addCMacro("PCRE2_STATIC", "");
     }
 
-    const lib = std.Build.Step.Compile.create(b, .{
+    const lib = b.addLibrary(.{
         .name = b.fmt("pcre2-{s}", .{@tagName(codeUnitWidth)}),
         .root_module = lib_mod,
-        .kind = .lib,
         .linkage = linkage,
     });
 
@@ -115,14 +113,18 @@ pub fn build(b: *std.Build) !void {
 
     // pcre2test
 
-    const pcre2test_mod = std.Build.Module.create(b, .{
+    const pcre2test_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
-        .imports = &.{std.Build.Module.Import{ .name = b.fmt("pcre2-{s}", .{@tagName(codeUnitWidth)}), .module = lib_mod }},
     });
 
+    pcre2test_mod.addImport(b.fmt("pcre2-{s}", .{@tagName(codeUnitWidth)}), lib_mod);
+
     pcre2test_mod.addCMacro("HAVE_CONFIG_H", "");
+    if (linkage == .static) {
+        pcre2test_mod.addCMacro("PCRE2_STATIC", "");
+    }
 
     const pcre2test = b.addExecutable(.{
         .name = "pcre2test",
@@ -132,7 +134,7 @@ pub fn build(b: *std.Build) !void {
     // pcre2-posix.so
 
     if (codeUnitWidth == CodeUnitWidth.@"8") {
-        const posixLib_mod = std.Build.Module.create(b, .{
+        const posixLib_mod = b.createModule(.{
             .target = target,
             .optimize = optimize,
             .link_libc = true,
@@ -146,10 +148,9 @@ pub fn build(b: *std.Build) !void {
             posixLib_mod.addCMacro("PCRE2_STATIC", "");
         }
 
-        const posixLib = std.Build.Step.Compile.create(b, .{
+        const posixLib = b.addLibrary(.{
             .name = "pcre2-posix",
             .root_module = posixLib_mod,
-            .kind = .lib,
             .linkage = linkage,
         });
 
@@ -176,8 +177,6 @@ pub fn build(b: *std.Build) !void {
     pcre2test.addCSourceFile(.{
         .file = b.path("src/pcre2test.c"),
     });
-
-    pcre2test.linkLibC();
 
     b.installArtifact(pcre2test);
 }
