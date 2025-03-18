@@ -1029,7 +1029,7 @@ for(;;)
         break;
 
         case ECL_XCLASS:
-        print_class(f, OP_XCLASS, ccode+1, (uint8_t*)codestart, utf,
+        print_class(f, OP_XCLASS, ccode+1, (const uint8_t *)codestart, utf,
                     "      xclass: ", "\n");
         ccode += GET(ccode, 1);
         break;
@@ -1051,7 +1051,7 @@ for(;;)
     if (*code == OP_XCLASS)
       extra = GET(code, 1);
 #endif
-    print_class(f, *code, code+1, (uint8_t*)codestart, utf, "    ", "");
+    print_class(f, *code, code+1, (const uint8_t *)codestart, utf, "    ", "");
     ccode = code + OP_lengths[*code] + extra;
 
     /* Handle repeats after a class or a back reference */

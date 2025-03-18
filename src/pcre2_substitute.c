@@ -313,8 +313,8 @@ I believe that this code is technically undefined behaviour, because the two
 pointers input/output are "unrelated" pointers and hence not comparable. Casting
 via char* bypasses some but not all of those technical rules. It is not included
 in release builds, in any case. */
-PCRE2_ASSERT((char *)(input + input_len) <= (char *)output ||
-             (char *)(output + output_cap) <= (char *)input);
+PCRE2_ASSERT((const char *)(input + input_len) <= (const char *)output ||
+             (const char *)(output + output_cap) <= (const char *)input);
 
 #ifdef SUPPORT_UNICODE
 utf = (code->overall_options & PCRE2_UTF) != 0;

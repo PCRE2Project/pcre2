@@ -325,7 +325,7 @@ static omdatastr only_matching_data = { &only_matching, &only_matching_last };
 
 typedef struct fnstr {
   struct fnstr *next;
-  char *name;
+  const char *name;
 } fnstr;
 
 static fnstr *exclude_from = NULL;
@@ -355,7 +355,7 @@ also for include/exclude patterns. */
 
 typedef struct patstr {
   struct patstr *next;
-  char *string;
+  const char *string;
   PCRE2_SIZE length;
   pcre2_code *compiled;
 } patstr;
@@ -698,7 +698,7 @@ Returns:     new pattern block or NULL on error
 */
 
 static patstr *
-add_pattern(char *s, PCRE2_SIZE patlen, patstr *after)
+add_pattern(const char *s, PCRE2_SIZE patlen, patstr *after)
 {
 patstr *p = (patstr *)malloc(sizeof(patstr));
 
@@ -884,7 +884,7 @@ typedef DIR directory_type;
 #define FILESEP '/'
 
 static int
-isdirectory(char *filename)
+isdirectory(const char *filename)
 {
 struct stat statbuf;
 if (stat(filename, &statbuf) < 0)
@@ -893,7 +893,7 @@ return S_ISDIR(statbuf.st_mode);
 }
 
 static directory_type *
-opendirectory(char *filename)
+opendirectory(const char *filename)
 {
 return opendir(filename);
 }
@@ -922,7 +922,7 @@ closedir(dir);
 /************* Test for regular file, Unix-style **********/
 
 static int
-isregfile(char *filename)
+isregfile(const char *filename)
 {
 struct stat statbuf;
 if (stat(filename, &statbuf) < 0)
@@ -1003,7 +1003,7 @@ WIN32_FIND_DATA data;
 #define FILESEP '/'
 
 int
-isdirectory(char *filename)
+isdirectory(const char *filename)
 {
 DWORD attr = GetFileAttributes(filename);
 if (attr == INVALID_FILE_ATTRIBUTES)
@@ -1012,7 +1012,7 @@ return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
 directory_type *
-opendirectory(char *filename)
+opendirectory(const char *filename)
 {
 size_t len;
 char *pattern;
@@ -1080,7 +1080,7 @@ free(dir);
 /* I don't know how to do this, or if it can be done; assume all paths are
 regular if they are not directories. */
 
-int isregfile(char *filename)
+int isregfile(const char *filename)
 {
 return !isdirectory(filename);
 }
@@ -1132,9 +1132,9 @@ if (do_colour)
 #define FILESEP 0
 typedef void directory_type;
 
-int isdirectory(char *filename) { return 0; }
-directory_type * opendirectory(char *filename) { return (directory_type*)0;}
-char *readdirectory(directory_type *dir) { return (char*)0;}
+int isdirectory(const char *filename) { return 0; }
+directory_type *opendirectory(const char *filename) { return NULL;}
+char *readdirectory(directory_type *dir) { return NULL;}
 void closedirectory(directory_type *dir) {}
 
 
@@ -1142,7 +1142,7 @@ void closedirectory(directory_type *dir) {}
 
 /* Assume all files are regular. */
 
-int isregfile(char *filename) { return 1; }
+int isregfile(const char *filename) { return 1; }
 
 
 /************* Test for a terminal when we can't do it **********/
@@ -1305,9 +1305,9 @@ Returns:    TRUE if the path is not excluded
 */
 
 static BOOL
-test_incexc(char *path, patstr *ip, patstr *ep)
+test_incexc(const char *path, patstr *ip, patstr *ep)
 {
-size_t plen = strlen((const char *)path);
+size_t plen = strlen(path);
 
 for (; ep != NULL; ep = ep->next)
   {
@@ -1345,10 +1345,10 @@ Returns:        a long integer
 */
 
 static long int
-decode_number(char *option_data, option_item *op, BOOL longop)
+decode_number(const char *option_data, option_item *op, BOOL longop)
 {
 unsigned long int n = 0;
-char *endptr = option_data;
+const char *endptr = option_data;
 while (*endptr != 0 && isspace((unsigned char)(*endptr))) endptr++;
 while (isdigit((unsigned char)(*endptr)))
   n = n * 10 + (int)(*endptr++ - '0');
@@ -1367,7 +1367,7 @@ if (*endptr != 0)   /* Error */
   {
   if (longop)
     {
-    char *equals = strchr(op->long_name, '=');
+    const char *equals = strchr(op->long_name, '=');
     int nlen = (equals == NULL)? (int)strlen(op->long_name) :
       (int)(equals - op->long_name);
     fprintf(stderr, "pcre2grep: Malformed number \"%s\" after --%.*s\n",
@@ -1505,8 +1505,8 @@ Returns:    pointer after the last byte of the line,
             including the newline byte(s)
 */
 
-static char *
-end_of_line(char *p, char *endptr, int *lenptr)
+static const char *
+end_of_line(const char *p, const char *endptr, int *lenptr)
 {
 switch(endlinetype)
   {
@@ -1590,7 +1590,7 @@ switch(endlinetype)
   while (p < endptr)
     {
     int extra = 0;
-    int c = *((unsigned char *)p);
+    int c = *((const unsigned char *)p);
 
     if (utf && c >= 0xc0)
       {
@@ -1665,8 +1665,8 @@ Arguments:
 Returns:    pointer to the start of the previous line
 */
 
-static char *
-previous_line(char *p, char *startptr)
+static const char *
+previous_line(const char *p, const char *startptr)
 {
 switch(endlinetype)
   {
@@ -1718,13 +1718,13 @@ switch(endlinetype)
   while (p > startptr)
     {
     int c;
-    char *pp = p - 1;
+    const char *pp = p - 1;
 
     if (utf)
       {
       int extra = 0;
       while (pp > startptr && (*pp & 0xc0) == 0x80) pp--;
-      c = *((unsigned char *)pp);
+      c = *((const unsigned char *)pp);
       if (c >= 0xc0)
         {
         int gcii, gcss;
@@ -1743,7 +1743,7 @@ switch(endlinetype)
           }
         }
       }
-    else c = *((unsigned char *)pp);
+    else c = *((const unsigned char *)pp);
 
     switch (c)
       {
@@ -1827,8 +1827,8 @@ Returns:            nothing
 */
 
 static void
-do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart,
-  char *endptr, const char *printname)
+do_after_lines(unsigned long int lastmatchnumber, const char *lastmatchrestart,
+  const char *endptr, const char *printname)
 {
 if (after_context > 0 && lastmatchnumber > 0)
   {
@@ -1836,7 +1836,7 @@ if (after_context > 0 && lastmatchnumber > 0)
   int ellength = 0;
   while (lastmatchrestart < endptr && count < after_context)
     {
-    char *pp = end_of_line(lastmatchrestart, endptr, &ellength);
+    const char *pp = end_of_line(lastmatchrestart, endptr, &ellength);
     if (ellength == 0 && pp == main_buffer + bufsize) break;
     if (printname != NULL) fprintf(stdout, "%s%c", printname, printname_hyphen);
     if (number) fprintf(stdout, "%lu-", lastmatchnumber++);
@@ -2659,7 +2659,7 @@ unsigned long int linenumber = 1;
 unsigned long int lastmatchnumber = 0;
 unsigned long int count = 0;
 long int count_matched_lines = 0;
-char *lastmatchrestart = main_buffer;
+const char *lastmatchrestart = main_buffer;
 char *ptr = main_buffer;
 char *endptr;
 PCRE2_SIZE bufflength;
@@ -2726,7 +2726,7 @@ while (ptr < endptr)
   unsigned int options = 0;
   BOOL match;
   BOOL line_matched = FALSE;
-  char *t = ptr;
+  const char *t = ptr;
   PCRE2_SIZE length, linelength;
   PCRE2_SIZE startoffset = 0;
 
@@ -3007,7 +3007,7 @@ while (ptr < endptr)
         {
         int ellength;
         int linecount = 0;
-        char *p = lastmatchrestart;
+        const char *p = lastmatchrestart;
 
         while (p < ptr && linecount < after_context)
           {
@@ -3021,7 +3021,7 @@ while (ptr < endptr)
 
         while (lastmatchrestart < p)
           {
-          char *pp = lastmatchrestart;
+          const char *pp = lastmatchrestart;
           if (printname != NULL) fprintf(stdout, "%s%c", printname,
             printname_hyphen);
           if (number) fprintf(stdout, "%lu-", lastmatchnumber++);
@@ -3051,7 +3051,7 @@ while (ptr < endptr)
       if (before_context > 0)
         {
         int linecount = 0;
-        char *p = ptr;
+        const char *p = ptr;
 
         while (p > main_buffer &&
                (lastmatchnumber == 0 || p > lastmatchrestart) &&
@@ -3069,7 +3069,7 @@ while (ptr < endptr)
         while (p < ptr)
           {
           int ellength;
-          char *pp = p;
+          const char *pp = p;
           if (printname != NULL) fprintf(stdout, "%s%c", printname,
             printname_hyphen);
           if (number) fprintf(stdout, "%lu-", linenumber - linecount--);
@@ -3224,7 +3224,7 @@ while (ptr < endptr)
   if (multiline && invert && match)
     {
     int ellength;
-    char *endmatch = ptr + offsets[1];
+    const char *endmatch = ptr + offsets[1];
     t = ptr;
     while (t < endmatch)
       {
@@ -3357,12 +3357,12 @@ However, file opening failures are suppressed if "silent" is set.
 */
 
 static int
-grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
+grep_or_recurse(const char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 {
 int rc = 1;
 int frtype;
 void *handle;
-char *lastcomp;
+const char *lastcomp;
 FILE *in = NULL;           /* Ensure initialized */
 
 #ifdef SUPPORT_LIBZ
@@ -3524,25 +3524,27 @@ if (iswild(pathname))
   {
   char buffer[1024];
   char *nextfile;
-  char *name;
+  ptrdiff_t dir_len = strlen(pathname);
+  const char *last_fslash = strrchr(pathname, '/');
+  const char *last_bslash = strrchr(pathname, '\\');
   directory_type *dir = opendirectory(pathname);
 
   if (dir == NULL)
     return 0;
 
-  for (nextfile = name = pathname; *nextfile != 0; nextfile++)
-    if (*nextfile == '/' || *nextfile == '\\')
-      name = nextfile + 1;
-  *name = 0;
+  if (last_fslash != NULL && pathname + dir_len > last_fslash)
+    dir_len = last_fslash - pathname;
+  if (last_bslash != NULL && pathname + dir_len > last_bslash)
+    dir_len = last_bslash - pathname;
 
   while ((nextfile = readdirectory(dir)) != NULL)
     {
     int frc;
     int prc;
-    if (strlen(pathname) + strlen(nextfile) + 1 > sizeof(buffer) ||
-      (prc = snprintf(buffer, sizeof(buffer), "%s%s", pathname,
-                      nextfile)) < 0 ||
-      prc >= (int)sizeof(buffer))
+    if (dir_len + strlen(nextfile) + 1 > sizeof(buffer) ||
+        (prc = snprintf(buffer, sizeof(buffer), "%.*s%s", (int)dir_len,
+                        pathname, nextfile)) < 0 ||
+        prc >= (int)sizeof(buffer))
       {
       /* LCOV_EXCL_START - this is a "never" event */
       fprintf(stderr, "pcre2grep: wildcard filename is too long\n");
@@ -3834,7 +3836,7 @@ static BOOL
 compile_pattern(patstr *p, int options, int fromfile, const char *fromtext,
   int count)
 {
-char *ps;
+const char *ps;
 int errcode;
 PCRE2_SIZE patlen, erroffset;
 PCRE2_UCHAR errmessbuffer[ERRBUFSIZ];
@@ -3846,8 +3848,8 @@ patlen = p->length;
 if ((options & PCRE2_LITERAL) != 0)
   {
   int ellength;
-  char *eop = ps + patlen;
-  char *pe = end_of_line(ps, eop, &ellength);
+  const char *eop = ps + patlen;
+  const char *pe = end_of_line(ps, eop, &ellength);
 
   if (ellength != 0)
     {
@@ -3911,7 +3913,7 @@ Returns:       TRUE if all went well
 */
 
 static BOOL
-read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
+read_pattern_file(const char *name, patstr **patptr, patstr **patlastptr)
 {
 int linenumber = 0;
 PCRE2_SIZE patlen;
@@ -3997,7 +3999,7 @@ return TRUE;
 /* Returns 0 if something matched, 1 if nothing matched, 2 after an error. */
 
 int
-main(int argc, char **argv)
+main(int argc, const char **argv)
 {
 int i, j;
 int rc = 1;
@@ -4026,7 +4028,7 @@ _setmode(_fileno(stdout), _O_BINARY);
 for (i = 1; i < argc; i++)
   {
   option_item *op = NULL;
-  char *option_data = (char *)"";    /* default to keep compiler happy */
+  const char *option_data = "";    /* default to keep compiler happy */
   BOOL longop;
   BOOL longopwasequals = FALSE;
 
@@ -4045,8 +4047,8 @@ for (i = 1; i < argc; i++)
 
   if (argv[i][1] == '-')
     {
-    char *arg = argv[i] + 2;
-    char *argequals = strchr(arg, '=');
+    const char *arg = argv[i] + 2;
+    const char *argequals = strchr(arg, '=');
 
     if (*arg == 0)    /* -- terminates options */
       {
@@ -4065,8 +4067,8 @@ for (i = 1; i < argc; i++)
 
     for (op = optionlist; op->one_char != 0; op++)
       {
-      char *opbra = strchr(op->long_name, '(');
-      char *equals = strchr(op->long_name, '=');
+      const char *opbra = strchr(op->long_name, '(');
+      const char *equals = strchr(op->long_name, '=');
 
       /* Handle options with only one spelling of the name */
 
@@ -4149,7 +4151,7 @@ for (i = 1; i < argc; i++)
 
   else
     {
-    char *s = argv[i] + 1;
+    const char *s = argv[i] + 1;
     longop = FALSE;
 
     while (*s != 0)
@@ -4308,7 +4310,7 @@ for (i = 1; i < argc; i++)
   else if (op->type != OP_NUMBER && op->type != OP_U32NUMBER &&
            op->type != OP_OP_NUMBER && op->type != OP_SIZE)
     {
-    *((char **)op->dataptr) = option_data;
+    *((const char **)op->dataptr) = option_data;
     }
   else
     {
@@ -4437,7 +4439,7 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     }
   if (do_colour)
     {
-    char *cs = getenv("PCRE2GREP_COLOUR");
+    const char *cs = getenv("PCRE2GREP_COLOUR");
     if (cs == NULL) cs = getenv("PCRE2GREP_COLOR");
     if (cs == NULL) cs = getenv("PCREGREP_COLOUR");
     if (cs == NULL) cs = getenv("PCREGREP_COLOR");
@@ -4666,7 +4668,7 @@ for (fn = file_lists; fn != NULL; fn = fn->next)
   while (fgets(buffer, sizeof(buffer), fl) != NULL)
     {
     int frc;
-    char *end = buffer + (int)strlen(buffer);
+    char *end = buffer + strlen(buffer);
     while (end > buffer && isspace((unsigned char)(end[-1]))) end--;
     *end = 0;
     if (*buffer != 0)

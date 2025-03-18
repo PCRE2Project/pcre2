@@ -763,7 +763,7 @@ return 0;
 /* Optional main program.  */
 
 #ifdef STANDALONE
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
 LLVMFuzzerInitialize(&argc, &argv);
 

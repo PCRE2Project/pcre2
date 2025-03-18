@@ -114,13 +114,13 @@ usage(void)
 *                Entry point                     *
 *************************************************/
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
 FILE *f;
 int i;
 int nclass = 0;
 BOOL binary = FALSE;
-char *env = (char *)"C";
+const char *env = "C";
 const uint8_t *tables;
 const uint8_t *base_of_tables;
 int (*charfn_to)(int) = identity;
@@ -130,7 +130,7 @@ int (*charfn_from)(int) = identity;
 
 for (i = 1; i < argc; i++)
   {
-  char *arg = argv[i];
+  const char *arg = argv[i];
   if (*arg != '-') break;
 
   if (strcmp(arg, "-help") == 0 || strcmp(arg, "--help") == 0)

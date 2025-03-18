@@ -151,7 +151,7 @@ static int *results[] = {
 
 /* And here is the program */
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
 regex_t re;
 regmatch_t match[CAPCOUNT];

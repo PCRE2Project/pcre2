@@ -66,7 +66,7 @@ to be modified. */
 * always passing NULL where a context could be given.                     *
 **************************************************************************/
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
 pcre2_code *re;
 PCRE2_SPTR pattern;     /* PCRE2_SPTR is a pointer to unsigned code units of */
