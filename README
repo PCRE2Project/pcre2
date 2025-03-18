@@ -169,6 +169,9 @@ library. They are also documented in the pcre2build man page.
   versions of all the relevant libraries are available for linking. See also
   "Shared libraries" below.
 
+  Shared libraries are compiled with symbol versioning enabled on platforms that
+  support this, but this can be disabled by adding --disable-symvers.
+
 . By default, only the 8-bit library is built. If you add --enable-pcre2-16 to
   the "configure" command, the 16-bit library is also built. If you add
   --enable-pcre2-32 to the "configure" command, the 32-bit library is also
@@ -956,6 +959,10 @@ The distribution should contain the files listed below.
   testdata/testoutput*     expected test results
   testdata/grep*           input and output for pcre2grep tests
   testdata/*               other supporting test files
+  src/libpcre2-8.sym       )
+  src/libpcre2-16.sym      ) symbol version scripts for the GNU and Sun linkers
+  src/libpcre2-32.sym      )
+  src/libpcre2-posix.sym   )
 
 (D) Auxiliary files for CMake support
 
@@ -964,6 +971,7 @@ The distribution should contain the files listed below.
   cmake/FindReadline.cmake
   cmake/pcre2-config-version.cmake.in
   cmake/pcre2-config.cmake.in
+  cmake/PCRE2CheckLinkerFlag.cmake
   src/config-cmake.h.in
   CMakeLists.txt
 

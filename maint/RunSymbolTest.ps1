@@ -37,8 +37,9 @@ foreach ($dllName in $dllNames) {
     $actualOutput = ($actualSymbols -join "`n") + "`n"
     $null = New-Item -Force $base -Value $actualOutput
 
-    $expectedOutput = Get-Content -Path $expectedFile -Raw
-    $actualOutput = Get-Content -Path $base -Raw
+    $expectedSymbols = (Get-Content -Path $expectedFile -Raw).TrimEnd("`n") |
+        ForEach-Object { $_ -replace '@@.*', '' }
+    $expectedOutput = ($expectedSymbols -join "`n") + "`n"
 
     if ($expectedOutput -ne $actualOutput) {
         Write-Host "Shared object contents for $dllFile differ from expected"
