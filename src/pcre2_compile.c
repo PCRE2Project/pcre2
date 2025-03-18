@@ -3833,7 +3833,7 @@ while (ptr < ptrend)
     have been removed. */
 
     *parsed_pattern++ = meta_quantifier;
-    if (c == CHAR_LEFT_CURLY_BRACKET)
+    if (c == CHAR_LEFT_CURLY_BRACKET)  /* XXX ??? meta_quantifier == META_MINMAX? */
       {
       *parsed_pattern++ = min_repeat;
       *parsed_pattern++ = max_repeat;
@@ -7381,6 +7381,7 @@ for (;; pptr++)
 
       if (repeat_min > 0 && (repeat_min != 1 || repeat_max != REPEAT_UNLIMITED))
         {
+        /* XXX ??? bad replication? */
         int replicate = repeat_min;
 
         if (repeat_min == repeat_max) replicate--;
@@ -7551,6 +7552,8 @@ for (;; pptr++)
         times as necessary, and adjust the maximum to the number of subsequent
         copies that we need. */
 
+        /* XXX Evil replication... */
+
         else
           {
           if (repeat_min > 1)
@@ -7624,6 +7627,8 @@ for (;; pptr++)
             }
 
           /* This is compiling for real */
+
+          /* XXX Evil replication... */
 
           else for (uint32_t i = repeat_max; i >= 1; i--)
             {
