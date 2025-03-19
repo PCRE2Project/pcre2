@@ -3346,6 +3346,7 @@ int was_zero_terminated = 0;
 
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 
+PCRE2_UCHAR null_str[1] = { 0xcd };
 PCRE2_SPTR start_match;
 PCRE2_SPTR end_subject;
 PCRE2_SPTR bumpalong_limit;
@@ -3387,7 +3388,7 @@ rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 
 /* Recognize NULL, length 0 as an empty string. */
 
-if (subject == NULL && length == 0) subject = (PCRE2_SPTR)"";
+if (subject == NULL && length == 0) subject = null_str;
 
 /* Plausibility checks */
 
