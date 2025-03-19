@@ -14,20 +14,21 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .SH DESCRIPTION
 .rs
 .sp
-This function can be called after calling one of the matching functions
-(\fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP), by
-providing the same \fImatch_data\fP parameter. It provides the appropriate
-parameters for searching for the next match in the same subject string, and is
-suitable for applications providing "global" matching behaviour (replacing all
-matches in the subject, or splitting the subject on all matches, or simply
-counting the number of matches).
+This function can be called after one of the match functions
+(\fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP), and
+must be provided with the same \fImatch_data\fP parameter. It outputs the
+appropriate parameters for searching for the next match in the same subject
+string, and is suitable for applications providing "global" matching behaviour
+(for example, replacing all matches in the subject, or splitting the subject on
+all matches, or simply counting the number of matches).
 .P
 It returns 0 ("false") if there is no need to make any further match attempts,
 or 1 ("true") if another match should be attempted.
 .P
-The \fIpstart_offset\fP and \fIpoptions\fP are set if the function returns 1.
-The *\fIpoptions\fP should be combined with the application's match options
-using OR.
+The *\fIpstart_offset\fP and *\fIpoptions\fP are set if the function returns 1.
+The *\fIpstart_offset\fP should be passed to the next match attempt directly,
+and the *\fIpoptions\fP should be passed to the next match attempt by combining
+with the application's match options using OR.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

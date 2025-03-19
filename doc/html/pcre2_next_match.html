@@ -26,22 +26,23 @@ SYNOPSIS
 DESCRIPTION
 </h2>
 <p>
-This function can be called after calling one of the matching functions
-(<b>pcre2_match()</b>, <b>pcre2_dfa_match()</b>, or <b>pcre2_jit_match()</b>), by
-providing the same <i>match_data</i> parameter. It provides the appropriate
-parameters for searching for the next match in the same subject string, and is
-suitable for applications providing "global" matching behaviour (replacing all
-matches in the subject, or splitting the subject on all matches, or simply
-counting the number of matches).
+This function can be called after one of the match functions
+(<b>pcre2_match()</b>, <b>pcre2_dfa_match()</b>, or <b>pcre2_jit_match()</b>), and
+must be provided with the same <i>match_data</i> parameter. It outputs the
+appropriate parameters for searching for the next match in the same subject
+string, and is suitable for applications providing "global" matching behaviour
+(for example, replacing all matches in the subject, or splitting the subject on
+all matches, or simply counting the number of matches).
 </p>
 <p>
 It returns 0 ("false") if there is no need to make any further match attempts,
 or 1 ("true") if another match should be attempted.
 </p>
 <p>
-The <i>pstart_offset</i> and <i>poptions</i> are set if the function returns 1.
-The *<i>poptions</i> should be combined with the application's match options
-using OR.
+The *<i>pstart_offset</i> and *<i>poptions</i> are set if the function returns 1.
+The *<i>pstart_offset</i> should be passed to the next match attempt directly,
+and the *<i>poptions</i> should be passed to the next match attempt by combining
+with the application's match options using OR.
 </p>
 <p>
 There is a complete description of the PCRE2 native API in the

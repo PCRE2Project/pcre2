@@ -754,7 +754,7 @@ PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
-PCRE2_SIZE ovecsave[2];
+PCRE2_SIZE ovecsave[2] = { 0, 0 };
 pcre2_substitute_callout_block scb;
 PCRE2_SIZE sub_start_extra_needed;
 PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *,
@@ -947,7 +947,7 @@ for (;;)
 
   if (subs > 0 &&
       !(ovector[1] > ovecsave[1] ||
-        (ovector[1] == ovector[0] && ovecsave[1] != ovecsave[0] &&
+        (ovector[1] == ovector[0] && ovecsave[1] > ovecsave[0] &&
          ovector[1] == ovecsave[1])))
     {
     rc = PCRE2_ERROR_INTERNAL_DUPMATCH;

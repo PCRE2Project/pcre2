@@ -78,6 +78,7 @@ if (utf)
   PCRE2_SPTR next = subject + offset + 1;
   PCRE2_SPTR subject_end = subject + subject_length;
 
+  (void)subject_end; /* Suppress warning; 32-bit FORWARDCHARTEST ignores this */
   FORWARDCHARTEST(next, subject_end);
   return next - subject;
   }

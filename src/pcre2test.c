@@ -7477,7 +7477,7 @@ BOOL utf;
 BOOL subject_literal;
 
 PCRE2_SIZE *ovector;
-uint8_t *ovecsave[2];
+uint8_t *ovecsave[2] = { NULL, NULL };
 uint32_t oveccount;
 
 #ifdef SUPPORT_PCRE2_8

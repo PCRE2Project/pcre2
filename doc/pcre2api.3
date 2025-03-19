@@ -3537,22 +3537,26 @@ function helps with this task by providing the appropriate parameters for the
 next match attempt.
 .P
 First, a match attempt should be made using one of the matching functions
-(\fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP). Then,
-\fBpcre2_next_match()\fP can be called, providing the same \fImatch_data\fP
-parameter.
+(\fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP).
+Then, \fBpcre2_next_match()\fP can be called, providing the same
+\fImatch_data\fP parameter.
 .P
-It returns 0 ("false") if there is no need to make any further match attempts,
-or 1 ("true") if another match should be attempted.
+It returns 0 ("false") if there is no need to make a further match attempt, or
+1 ("true") if another match should be attempted. Returning 1 does not imply that
+there is another match, only that another match should be attempted (which may
+return PCRE2_ERROR_NOMATCH).
 .P
-The \fIpstart_offset\fP and \fIpoptions\fP are set if the function returns 1.
-The *\fIpoptions\fP should be combined with the application's match options
-using OR.
+The *\fIpstart_offset\fP and *\fIpoptions\fP are set if the function returns 1.
+The *\fIpstart_offset\fP should be passed to the next match attempt directly,
+and the *\fIpoptions\fP should be passed to the next match attempt by combining
+with the application's match options using OR.
 .P
 There is some code that demonstrates how to do this in the
 .\" HREF
 \fBpcre2demo\fP
 .\"
 sample program. The general pattern is:
+.sp
 .nf
   uint32_t app_options = ...;
   uint32_t global_options = 0;
@@ -3562,31 +3566,33 @@ sample program. The general pattern is:
     int rc = pcre2_match(re, subject, subject_len, start_offset,
                          app_options | global_options, match_data,
                          match_context);
-.
-    if (rc == PCRE2_ERROR_NOMATCH) break;
+\&
+    if (rc == PCRE2_ERROR_NOMATCH) break; /* no match, and no more attempts */
     if (rc < 0) { ... exit }
-.
+\&
+    ...handle the match
+\&
     if (!pcre2_next_match(match_data, &start_offset, &global_options))
-      break;
+      break; /* no more attempts */
     }
 .fi
 .P
 The guarantees provided by \fBpcre2_next_match()\fP are that the start_offset
-will advance, so the loop will definitely terminate. The condition for progress
-is that either: (a) pcre2_next_match() returns 0 (false); or (b) the returned
-start_offset is strictly greater than the previous start_offset, or (c) if the
-previous match was a successful match of the empty string then the returned
-start_offset is equal to previous start_offset, but poptions will be set to
-PCRE2_NOTEMPTY_ATSTART to prevent another empty match from being returned.
+will advance, so the loop will definitely terminate. The conditions which
+ensure this are that either: (a) pcre2_next_match() returns 0 (false); or
+(b) the returned *\fIpstart_offset\fP is strictly greater than the previous
+start_offset; or (c) if the previous match was a successful match of the empty
+string then the returned *\fIpstart_offset\fP is equal to the previous
+ovector[1], and *\fIpoptions\fP will be set to PCRE2_NOTEMPTY_ATSTART to prevent
+another empty match from being returned.
 .P
-In a loop as shown above, it must terminate, unless there is a bug in PCRE2. As
-a measure of "defensive programming", applications are encouraged to add an
-assertion or check to break their loop if it does not make progress (and report
-the issue as a bug).
+A loop implemented as shown above will always terminate, unless there is a bug
+in PCRE2. As a measure of "defensive programming", applications are encouraged
+to add an assertion or check to break their loop if it does not make progress
+(and report the issue as a bug).
 .P
-Note that we do not guarantee that the matches will always advance: only that
-the start_offset will. If an application does not use the flag
-PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, then matches are "well-behaved" and satisfy:
+If an application does not use the flag PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, then
+each match is "well-behaved" and satisfies:
 .sp
   start_offset <= ovector[0] <= ovector[1].
 .sp
@@ -3594,11 +3600,14 @@ In this case, the matches found by pcre2_match() with pcre2_next_match() will be
 sorted, non-overlapping (possibly touching), and with no duplicates.
 .P
 Otherwise, if PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK is used, then the guarantees are
-considerably weaker. The matches found by pcre2_match() with pcre2_next_match()
-will be a finite sequence (as pcre2_next_match() ensures that start_offset
-advances, so the search will terminate). The matches can however be overlapping,
-not sorted, and contain duplicates. Each match itself can end before it starts
-(ovector[1] < ovector[0]).
+considerably weaker. We do not guarantee that the matches will always advance:
+only that the start_offset will. The matches found by pcre2_match() with
+pcre2_next_match() will be a finite sequence (as pcre2_next_match() ensures that
+start_offset advances, so the search will terminate). The matches can however be
+overlapping, can contain duplicates, and (in truly pathological examples) may
+not even be sorted by ovector[0]. Additionally, each match itself can end before
+it starts (ovector[1] < ovector[0]). We recommend that applications do not set
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.
 .
 .
 .\" HTML <a name="extractbynumber"></a>
