@@ -46,16 +46,17 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC31" href="#SEC31">OTHER INFORMATION ABOUT A MATCH</a>
 <li><a name="TOC32" href="#SEC32">ERROR RETURNS FROM <b>pcre2_match()</b></a>
 <li><a name="TOC33" href="#SEC33">OBTAINING A TEXTUAL ERROR MESSAGE</a>
-<li><a name="TOC34" href="#SEC34">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a>
-<li><a name="TOC35" href="#SEC35">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a>
-<li><a name="TOC36" href="#SEC36">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
-<li><a name="TOC37" href="#SEC37">CREATING A NEW STRING WITH SUBSTITUTIONS</a>
-<li><a name="TOC38" href="#SEC38">DUPLICATE CAPTURE GROUP NAMES</a>
-<li><a name="TOC39" href="#SEC39">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a>
-<li><a name="TOC40" href="#SEC40">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
-<li><a name="TOC41" href="#SEC41">SEE ALSO</a>
-<li><a name="TOC42" href="#SEC42">AUTHOR</a>
-<li><a name="TOC43" href="#SEC43">REVISION</a>
+<li><a name="TOC34" href="#SEC34">ITERATING OVER ALL MATCHES</a>
+<li><a name="TOC35" href="#SEC35">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a>
+<li><a name="TOC36" href="#SEC36">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a>
+<li><a name="TOC37" href="#SEC37">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
+<li><a name="TOC38" href="#SEC38">CREATING A NEW STRING WITH SUBSTITUTIONS</a>
+<li><a name="TOC39" href="#SEC39">DUPLICATE CAPTURE GROUP NAMES</a>
+<li><a name="TOC40" href="#SEC40">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a>
+<li><a name="TOC41" href="#SEC41">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
+<li><a name="TOC42" href="#SEC42">SEE ALSO</a>
+<li><a name="TOC43" href="#SEC43">AUTHOR</a>
+<li><a name="TOC44" href="#SEC44">REVISION</a>
 </ul>
 <p>
 <b>#include &#60;pcre2.h&#62;</b>
@@ -2977,16 +2978,10 @@ letter.
 </p>
 <p>
 Finding all the matches in a subject is tricky when the pattern can match an
-empty string. It is possible to emulate Perl's /g behaviour by first trying the
-match again at the same offset, with the PCRE2_NOTEMPTY_ATSTART and
-PCRE2_ANCHORED options, and then if that fails, advancing the starting offset
-and trying an ordinary match again. There is some code that demonstrates how to
-do this in the
-<a href="pcre2demo.html"><b>pcre2demo</b></a>
-sample program. In the most general case, you have to check to see if the
-newline convention recognizes CRLF as a newline, and if so, and the current
-character is CR followed by LF, advance the starting offset by two characters
-instead of one.
+empty string. PCRE2 includes a helper API to assist with this; see the
+section entitled "Iterating over all matches"
+<a href="#matchiter">below</a>
+for details.
 </p>
 <p>
 If a non-zero starting offset is passed when the pattern is anchored, a single
@@ -3282,10 +3277,10 @@ set. For example, if two substrings have been captured, the returned value is
 match is 1, indicating that just the first pair of offsets has been set.
 </p>
 <p>
-If a pattern uses the \K escape sequence within a positive assertion, the
-reported start of a successful match can be greater than the end of the match.
-For example, if the pattern (?=ab\K) is matched against "ab", the start and
-end offset values for the match are 2 and 0.
+If a pattern uses the \K escape sequence within a positive lookahead assertion,
+the reported start of a successful match can be greater than the end of the
+match. For example, if the pattern (?=ab\K) is matched against "ab", the start
+and end offset values for the match are 2 and 0.
 </p>
 <p>
 If a capture group is matched repeatedly within a single match operation, it is
@@ -3509,9 +3504,89 @@ returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code PCRE2_ERROR_BADDATA is
 returned. If the buffer is too small, the message is truncated (but still with
 a trailing zero), and the negative error code PCRE2_ERROR_NOMEMORY is returned.
-None of the messages are very long; a buffer size of 120 code units is ample.
+None of the messages is very long; a buffer size of 120 code units is ample.
+<a name="matchiter"></a></p>
+<h2><a name="SEC34" href="#TOC1">ITERATING OVER ALL MATCHES</a></h2>
+<p>
+<b>int pcre2_next_match(pcre2_match_data *<i>match_data</i>,</b>
+<b>  PCRE2_SIZE *<i>pstart_offset</i>, uint32_t *<i>poptions</i>);</b>
+</p>
+<p>
+A common task for applications is to implement "global" matching behaviour,
+for example, replacing all matches in the subject; splitting the subject on all
+matches; or simply counting the number of matches. The <b>pcre2_next_match()</b>
+function helps with this task by providing the appropriate parameters for the
+next match attempt.
+</p>
+<p>
+First, a match attempt should be made using one of the matching functions
+(<b>pcre2_match()</b>, <b>pcre2_dfa_match()</b>, or <b>pcre2_jit_match()</b>). Then,
+<b>pcre2_next_match()</b> can be called, providing the same <i>match_data</i>
+parameter.
+</p>
+<p>
+It returns 0 ("false") if there is no need to make any further match attempts,
+or 1 ("true") if another match should be attempted.
+</p>
+<p>
+The <i>pstart_offset</i> and <i>poptions</i> are set if the function returns 1.
+The *<i>poptions</i> should be combined with the application's match options
+using OR.
+</p>
+<p>
+There is some code that demonstrates how to do this in the
+<a href="pcre2demo.html"><b>pcre2demo</b></a>
+sample program. The general pattern is:
+<pre>
+  uint32_t app_options = ...;
+  uint32_t global_options = 0;
+  PCRE2_SIZE start_offset = 0;
+  while (1)
+    {
+    int rc = pcre2_match(re, subject, subject_len, start_offset,
+                         app_options | global_options, match_data,
+                         match_context);
+    if (rc == PCRE2_ERROR_NOMATCH) break;
+    if (rc &#60; 0) { ... exit }
+    if (!pcre2_next_match(match_data, &start_offset, &global_options))
+      break;
+    }
+</pre>
+</p>
+<p>
+The guarantees provided by <b>pcre2_next_match()</b> are that the start_offset
+will advance, so the loop will definitely terminate. The condition for progress
+is that either: (a) pcre2_next_match() returns 0 (false); or (b) the returned
+start_offset is strictly greater than the previous start_offset, or (c) if the
+previous match was a successful match of the empty string then the returned
+start_offset is equal to previous start_offset, but poptions will be set to
+PCRE2_NOTEMPTY_ATSTART to prevent another empty match from being returned.
+</p>
+<p>
+In a loop as shown above, it must terminate, unless there is a bug in PCRE2. As
+a measure of "defensive programming", applications are encouraged to add an
+assertion or check to break their loop if it does not make progress (and report
+the issue as a bug).
+</p>
+<p>
+Note that we do not guarantee that the matches will always advance: only that
+the start_offset will. If an application does not use the flag
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, then matches are "well-behaved" and satisfy:
+<pre>
+  start_offset &#60;= ovector[0] &#60;= ovector[1].
+</pre>
+In this case, the matches found by pcre2_match() with pcre2_next_match() will be
+sorted, non-overlapping (possibly touching), and with no duplicates.
+</p>
+<p>
+Otherwise, if PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK is used, then the guarantees are
+considerably weaker. The matches found by pcre2_match() with pcre2_next_match()
+will be a finite sequence (as pcre2_next_match() ensures that start_offset
+advances, so the search will terminate). The matches can however be overlapping,
+not sorted, and contain duplicates. Each match itself can end before it starts
+(ovector[1] &#60; ovector[0]).
 <a name="extractbynumber"></a></p>
-<h2><a name="SEC34" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a></h2>
+<h2><a name="SEC35" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a></h2>
 <p>
 <b>int pcre2_substring_length_bynumber(pcre2_match_data *<i>match_data</i>,</b>
 <b>  uint32_t <i>number</i>, PCRE2_SIZE *<i>length</i>);</b>
@@ -3546,11 +3621,12 @@ the error PCRE2_ERROR_PARTIAL. The next section describes similar functions for
 extracting captured substrings by name.
 </p>
 <p>
-If a pattern uses the \K escape sequence within a positive assertion, the
-reported start of a successful match can be greater than the end of the match.
-For example, if the pattern (?=ab\K) is matched against "ab", the start and
-end offset values for the match are 2 and 0. In this situation, calling these
-functions with a zero substring number extracts a zero-length empty string.
+If a pattern uses the \K escape sequence within a positive lookahead assertion,
+the reported start of a successful match can be greater than the end of the
+match. For example, if the pattern (?=ab\K) is matched against "ab", the start
+and end offset values for the match are 2 and 0. In this situation, calling
+these functions with a zero substring number extracts a zero-length empty
+string.
 </p>
 <p>
 You can find the length in code units of a captured substring without
@@ -3608,7 +3684,7 @@ The substring did not participate in the match. For example, if the pattern is
 (abc)|(def) and the subject is "def", and the ovector contains at least two
 capturing slots, substring number 1 is unset.
 </p>
-<h2><a name="SEC35" href="#TOC1">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a></h2>
+<h2><a name="SEC36" href="#TOC1">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a></h2>
 <p>
 <b>int pcre2_substring_list_get(pcre2_match_data *<i>match_data</i>,</b>
 <b>"  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
@@ -3647,7 +3723,7 @@ distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the ovector, which contain PCRE2_UNSET for unset
 substrings, or by calling <b>pcre2_substring_length_bynumber()</b>.
 <a name="extractbyname"></a></p>
-<h2><a name="SEC36" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a></h2>
+<h2><a name="SEC37" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a></h2>
 <p>
 <b>int pcre2_substring_number_from_name(const pcre2_code *<i>code</i>,</b>
 <b>  PCRE2_SPTR <i>name</i>);</b>
@@ -3707,7 +3783,7 @@ names are not included in the compiled code. The matching process uses only
 numbers. For this reason, the use of different names for groups with the
 same number causes an error at compile time.
 <a name="substitutions"></a></p>
-<h2><a name="SEC37" href="#TOC1">CREATING A NEW STRING WITH SUBSTITUTIONS</a></h2>
+<h2><a name="SEC38" href="#TOC1">CREATING A NEW STRING WITH SUBSTITUTIONS</a></h2>
 <p>
 <b>int pcre2_substitute(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
@@ -4031,7 +4107,7 @@ replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
 not found), PCRE2_ERROR_BADSUBSTITUTION (syntax error in extended group
 substitution), and PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before
 it started or the match started earlier than the current position in the
-subject, which can happen if \K is used in an assertion).
+subject, which can happen if \K is used in a lookaround assertion).
 </p>
 <p>
 As for all PCRE2 errors, a text message that describes the error can be
@@ -4212,7 +4288,7 @@ second call is not guaranteed to succeed either, if the case callout requires
 more buffer space than expected. The caller must make repeated attempts in a
 loop.
 </p>
-<h2><a name="SEC38" href="#TOC1">DUPLICATE CAPTURE GROUP NAMES</a></h2>
+<h2><a name="SEC39" href="#TOC1">DUPLICATE CAPTURE GROUP NAMES</a></h2>
 <p>
 <b>int pcre2_substring_nametable_scan(const pcre2_code *<i>code</i>,</b>
 <b>  PCRE2_SPTR <i>name</i>, PCRE2_SPTR *<i>first</i>, PCRE2_SPTR *<i>last</i>);</b>
@@ -4258,7 +4334,7 @@ in the section entitled <i>Information about a pattern</i>. Given all the
 relevant entries for the name, you can extract each of their numbers, and hence
 the captured data.
 </p>
-<h2><a name="SEC39" href="#TOC1">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a></h2>
+<h2><a name="SEC40" href="#TOC1">FINDING ALL POSSIBLE MATCHES AT ONE POSITION</a></h2>
 <p>
 The traditional matching function uses a similar algorithm to Perl, which stops
 when it finds the first match at a given point in the subject. If you want to
@@ -4276,7 +4352,7 @@ substring. Then return 1, which forces <b>pcre2_match()</b> to backtrack and try
 other alternatives. Ultimately, when it runs out of matches,
 <b>pcre2_match()</b> will yield PCRE2_ERROR_NOMATCH.
 <a name="dfamatch"></a></p>
-<h2><a name="SEC40" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a></h2>
+<h2><a name="SEC41" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a></h2>
 <p>
 <b>int pcre2_dfa_match(const pcre2_code *<i>code</i>, PCRE2_SPTR <i>subject</i>,</b>
 <b>  PCRE2_SIZE <i>length</i>, PCRE2_SIZE <i>startoffset</i>,</b>
@@ -4469,13 +4545,13 @@ some plausibility checks are made on the contents of the workspace, which
 should contain data about the previous partial match. If any of these checks
 fail, this error is given.
 </p>
-<h2><a name="SEC41" href="#TOC1">SEE ALSO</a></h2>
+<h2><a name="SEC42" href="#TOC1">SEE ALSO</a></h2>
 <p>
 <b>pcre2build</b>(3), <b>pcre2callout</b>(3), <b>pcre2demo(3)</b>,
 <b>pcre2matching</b>(3), <b>pcre2partial</b>(3), <b>pcre2posix</b>(3),
 <b>pcre2sample</b>(3), <b>pcre2unicode</b>(3).
 </p>
-<h2><a name="SEC42" href="#TOC1">AUTHOR</a></h2>
+<h2><a name="SEC43" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -4484,7 +4560,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<h2><a name="SEC43" href="#TOC1">REVISION</a></h2>
+<h2><a name="SEC44" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 26 December 2024
 <br>

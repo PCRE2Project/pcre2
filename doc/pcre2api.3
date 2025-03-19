@@ -3562,10 +3562,10 @@ sample program. The general pattern is:
     int rc = pcre2_match(re, subject, subject_len, start_offset,
                          app_options | global_options, match_data,
                          match_context);
-
+.
     if (rc == PCRE2_ERROR_NOMATCH) break;
     if (rc < 0) { ... exit }
-
+.
     if (!pcre2_next_match(match_data, &start_offset, &global_options))
       break;
     }
