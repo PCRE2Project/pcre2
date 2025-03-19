@@ -3586,9 +3586,19 @@ the issue as a bug).
 .P
 Note that we do not guarantee that the matches will always advance: only that
 the start_offset will. If an application does not use the flag
-PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK... XXX
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, then matches are "well-behaved" and satisfy:
+.sp
+  start_offset <= ovector[0] <= ovector[1].
+.sp
+In this case, the matches found by pcre2_match() with pcre2_next_match() will be
+sorted, non-overlapping (possibly touching), and with no duplicates.
 .P
-XXX
+Otherwise, if PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK is used, then the guarantees are
+considerably weaker. The matches found by pcre2_match() with pcre2_next_match()
+will be a finite sequence (as pcre2_next_match() ensures that start_offset
+advances, so the search will terminate). The matches can however be overlapping,
+not sorted, and contain duplicates. Each match itself can end before it starts
+(ovector[1] < ovector[0]).
 .
 .
 .\" HTML <a name="extractbynumber"></a>
