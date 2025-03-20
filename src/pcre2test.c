@@ -8685,6 +8685,21 @@ for (gmatched = 0;; gmatched++)
       }
     }
 
+  /* Verify that it's safe to call pcre2_next_match with rc < 0. */
+
+  if (capcount < 0 && (dat_datctl.control & CTL_ANYGLOB) != 0)
+    {
+      BOOL rc_nextmatch;
+      PCRE2_SIZE tmp_offset = 0xcd;
+      uint32_t tmp_options = 0xcd;
+      PCRE2_NEXT_MATCH(rc_nextmatch, match_data, &tmp_offset, &tmp_options);
+      if (rc_nextmatch || tmp_offset != 0xcd || tmp_options != 0xcd)
+        {
+        fprintf(outfile, "** unexpected pcre2_next_match() for rc < 0\n");
+        return PR_ABEND;
+        }
+    }
+
   /* The result of the match is now in capcount. First handle a successful
   match. If pp was forced to be NULL (to test NULL handling) it will have been
   treated as an empty string if the length was zero. So re-create that for
