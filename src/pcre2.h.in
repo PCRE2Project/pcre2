@@ -743,14 +743,14 @@ PCRE2_EXP_DECL pcre2_match_data *PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL pcre2_match_data *PCRE2_CALL_CONVENTION \
   pcre2_match_data_create_from_pattern(const pcre2_code *, \
     pcre2_general_context *); \
+PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
+  pcre2_match_data_free(pcre2_match_data *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_dfa_match(const pcre2_code *, PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE, \
     uint32_t, pcre2_match_data *, pcre2_match_context *, int *, PCRE2_SIZE); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_match(const pcre2_code *, PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE, \
     uint32_t, pcre2_match_data *, pcre2_match_context *); \
-PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
-  pcre2_match_data_free(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SPTR PCRE2_CALL_CONVENTION \
   pcre2_get_mark(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION \
@@ -762,7 +762,9 @@ PCRE2_EXP_DECL uint32_t PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL PCRE2_SIZE *PCRE2_CALL_CONVENTION \
   pcre2_get_ovector_pointer(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION \
-  pcre2_get_startchar(pcre2_match_data *);
+  pcre2_get_startchar(pcre2_match_data *); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_next_match(pcre2_match_data *, PCRE2_SIZE *, uint32_t *);
 
 
 /* Convenience functions for handling matched substrings. */
@@ -942,6 +944,7 @@ pcre2_compile are called by application code. */
 #define pcre2_match_data_create               PCRE2_SUFFIX(pcre2_match_data_create_)
 #define pcre2_match_data_create_from_pattern  PCRE2_SUFFIX(pcre2_match_data_create_from_pattern_)
 #define pcre2_match_data_free                 PCRE2_SUFFIX(pcre2_match_data_free_)
+#define pcre2_next_match                      PCRE2_SUFFIX(pcre2_next_match_)
 #define pcre2_pattern_convert                 PCRE2_SUFFIX(pcre2_pattern_convert_)
 #define pcre2_pattern_info                    PCRE2_SUFFIX(pcre2_pattern_info_)
 #define pcre2_serialize_decode                PCRE2_SUFFIX(pcre2_serialize_decode_)

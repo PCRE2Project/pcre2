@@ -73,20 +73,17 @@ PCRE2_SPTR pattern;     /* PCRE2_SPTR is a pointer to unsigned code units of */
 PCRE2_SPTR subject;     /* the appropriate width (in this case, 8 bits). */
 PCRE2_SPTR name_table;
 
-int crlf_is_newline;
 int errornumber;
 int find_all, caseless_match;
 int i;
 int rc;
-int utf8;
 
-uint32_t option_bits;
 uint32_t namecount;
 uint32_t name_entry_size;
-uint32_t newline;
 
 PCRE2_SIZE erroroffset;
 PCRE2_SIZE *ovector;
+PCRE2_SIZE ovector_last[2];
 PCRE2_SIZE subject_length;
 
 pcre2_match_data *match_data;
@@ -223,11 +220,12 @@ if (rc == 0)
   printf("ovector was not big enough for all the captured substrings\n");
 
 /* Since release 10.38 PCRE2 has locked out the use of \K in lookaround
-assertions. However, there is an option to re-enable the old behaviour. If that
-is set, it is possible to run patterns such as /(?=.\K)/ that use \K in an
-assertion to set the start of a match later than its end. In this demonstration
-program, we show how to detect this case, but it shouldn't arise because the
-option is never set. */
+assertions. This is the recommended behaviour. However, the option
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK allows applications to re-enable the old
+behaviour. If that is set, it is possible to run patterns such as /(?=.\K)/ that
+use \K in an assertion to set the start of a match later than its end. In this
+demonstration program, we show how to detect this case, although it cannot arise
+because the option is never set. */
 
 if (ovector[0] > ovector[1])
   {
@@ -266,7 +264,9 @@ we have to extract the count of named parentheses from the pattern. */
   PCRE2_INFO_NAMECOUNT, /* get the number of named substrings */
   &namecount);          /* where to put the answer */
 
-if (namecount == 0) printf("No named substrings\n"); else
+if (namecount == 0)
+  printf("No named substrings\n");
+else
   {
   PCRE2_SPTR tabptr;
   printf("Named substrings\n");
@@ -304,28 +304,8 @@ if (namecount == 0) printf("No named substrings\n"); else
 * to search for additional matches in the subject string, in a similar   *
 * way to the /g option in Perl. This turns out to be trickier than you   *
 * might think because of the possibility of matching an empty string.    *
-* What happens is as follows:                                            *
 *                                                                        *
-* If the previous match was NOT for an empty string, we can just start   *
-* the next match at the end of the previous one.                         *
-*                                                                        *
-* If the previous match WAS for an empty string, we can't do that, as it *
-* would lead to an infinite loop. Instead, a call of pcre2_match() is    *
-* made with the PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED flags set. The *
-* first of these tells PCRE2 that an empty string at the start of the    *
-* subject is not a valid match; other possibilities must be tried. The   *
-* second flag restricts PCRE2 to one match attempt at the initial string *
-* position. If this match succeeds, an alternative to the empty string   *
-* match has been found, and we can print it and proceed round the loop,  *
-* advancing by the length of whatever was found. If this match does not  *
-* succeed, we still stay in the loop, advancing by just one character.   *
-* In UTF-8 mode, which can be set by (*UTF) in the pattern, this may be  *
-* more than one byte.                                                    *
-*                                                                        *
-* However, there is a complication concerned with newlines. When the     *
-* newline convention is such that CRLF is a valid newline, we must       *
-* advance by two characters rather than one. The newline convention can  *
-* be set in the regex by (*CR), etc.; if not, we must find the default.  *
+* To help with this task, PCRE2 provides the pcre2_next_match() helper.  *
 *************************************************************************/
 
 if (!find_all)     /* Check for -g */
@@ -335,60 +315,21 @@ if (!find_all)     /* Check for -g */
   return 0;                           /* Exit the program. */
   }
 
-/* Before running the loop, check for UTF-8 and whether CRLF is a valid newline
-sequence. First, find the options with which the regex was compiled and extract
-the UTF state. */
-
-(void)pcre2_pattern_info(re, PCRE2_INFO_ALLOPTIONS, &option_bits);
-utf8 = (option_bits & PCRE2_UTF) != 0;
-
-/* Now find the newline convention and see whether CRLF is a valid newline
-sequence. */
-
-(void)pcre2_pattern_info(re, PCRE2_INFO_NEWLINE, &newline);
-crlf_is_newline = newline == PCRE2_NEWLINE_ANY ||
-                  newline == PCRE2_NEWLINE_CRLF ||
-                  newline == PCRE2_NEWLINE_ANYCRLF;
-
 /* Loop for second and subsequent matches */
+
+ovector_last[0] = ovector[0];
+ovector_last[1] = ovector[1];
 
 for (;;)
   {
-  uint32_t options = 0;                   /* Normally no options */
-  PCRE2_SIZE start_offset = ovector[1];   /* Start at end of previous match */
+  PCRE2_SIZE start_offset;
+  uint32_t options;
 
-  /* If the previous match was for an empty string, we are finished if we are
-  at the end of the subject. Otherwise, arrange to run another match at the
-  same point to see if a non-empty match can be found. */
+  /* After each successful match, we use pcre2_next_match() to obtain the match
+  parameters for subsequent match attempts. */
 
-  if (ovector[0] == ovector[1])
-    {
-    if (ovector[0] == subject_length) break;
-    options = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
-    }
-
-  /* If the previous match was not an empty string, there is one tricky case to
-  consider. If a pattern contains \K within a lookbehind assertion at the
-  start, the end of the matched string can be at the offset where the match
-  started. Without special action, this leads to a loop that keeps on matching
-  the same substring. We must detect this case and arrange to move the start on
-  by one character. The pcre2_get_startchar() function returns the starting
-  offset that was passed to pcre2_match(). */
-
-  else
-    {
-    PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
-    if (start_offset <= startchar)
-      {
-      if (startchar >= subject_length) break;   /* Reached end of subject.   */
-      start_offset = startchar + 1;             /* Advance by one character. */
-      if (utf8)                                 /* If UTF-8, it may be more  */
-        {                                       /*   than one code unit.     */
-        for (; start_offset < subject_length; start_offset++)
-          if ((subject[start_offset] & 0xc0) != 0x80) break;
-        }
-      }
-    }
+  if (!pcre2_next_match(match_data, &start_offset, &options))
+    break;
 
   /* Run the next matching operation */
 
@@ -401,38 +342,10 @@ for (;;)
     match_data,           /* block for storing the result */
     NULL);                /* use default match context */
 
-  /* This time, a result of NOMATCH isn't an error. If the value in "options"
-  is zero, it just means we have found all possible matches, so the loop ends.
-  Otherwise, it means we have failed to find a non-empty-string match at a
-  point where there was a previous empty-string match. In this case, we do what
-  Perl does: advance the matching position by one character, and continue. We
-  do this by setting the "end of previous match" offset, because that is picked
-  up at the top of the loop as the point at which to start again.
-
-  There are two complications: (a) When CRLF is a valid newline sequence, and
-  the current position is just before it, advance by an extra byte. (b)
-  Otherwise we must ensure that we skip an entire UTF character if we are in
-  UTF mode. */
+  /* If this match attempt fails, exit the loop for subsequent matches. */
 
   if (rc == PCRE2_ERROR_NOMATCH)
-    {
-    if (options == 0) break;                    /* All matches found */
-    ovector[1] = start_offset + 1;              /* Advance one code unit */
-    if (crlf_is_newline &&                      /* If CRLF is a newline & */
-        start_offset < subject_length - 1 &&    /* we are at CRLF, */
-        subject[start_offset] == '\r' &&
-        subject[start_offset + 1] == '\n')
-      ovector[1] += 1;                          /* Advance by one more. */
-    else if (utf8)                              /* Otherwise, ensure we */
-      {                                         /* advance a whole UTF-8 */
-      while (ovector[1] < subject_length)       /* character. */
-        {
-        if ((subject[ovector[1]] & 0xc0) != 0x80) break;
-        ovector[1] += 1;
-        }
-      }
-    continue;    /* Go round the loop again */
-    }
+    break;
 
   /* Other matching errors are not recoverable. */
 
@@ -444,7 +357,33 @@ for (;;)
     return 1;
     }
 
-  /* Match succeeded */
+  /* This demonstration program depends on pcre2_next_match() to ensure that the
+  loop for second and subsequent matches does not run forever. However, it would
+  be robust practice for a production application to verify this. The following
+  block of code shows how to do this. This error case is not reachable unless
+  there is a bug in PCRE2.
+
+  Because this program does not set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK option,
+  the logic is simple. We verify that either ovector[1] has advanced, or that we
+  have an empty match touching the end of a previous non-empty match. See the
+  API documentation for guidance if your application uses
+  PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK and searches for multiple matches. */
+
+  if (!(ovector[1] > ovector_last[1] ||
+        (ovector[1] == ovector[0] && ovector_last[1] > ovector_last[0] &&
+         ovector[1] == ovector_last[1])))
+    {
+    printf("\\K was used in an assertion to yield non-advancing matches.\n");
+    printf("Run abandoned\n");
+    pcre2_match_data_free(match_data);
+    pcre2_code_free(re);
+    return 1;
+    }
+
+  ovector_last[0] = ovector[0];
+  ovector_last[1] = ovector[1];
+
+  /* Match succeeded. */
 
   printf("\nMatch succeeded again at offset %d\n", (int)ovector[0]);
 
@@ -454,9 +393,11 @@ for (;;)
   if (rc == 0)
     printf("ovector was not big enough for all the captured substrings\n");
 
-  /* We must guard against patterns such as /(?=.\K)/ that use \K in an
-  assertion to set the start of a match later than its end. In this
-  demonstration program, we just detect this case and give up. */
+  /* We guard against patterns such as /(?=.\K)/ that use \K in an assertion to
+  set the start of a match later than its end. As explained above, this case
+  should not occur because this demonstration program does not set the
+  PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK option, however, we do include code showing
+  how to detect it. */
 
   if (ovector[0] > ovector[1])
     {
@@ -479,7 +420,9 @@ for (;;)
     printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
     }
 
-  if (namecount == 0) printf("No named substrings\n"); else
+  if (namecount == 0)
+    printf("No named substrings\n");
+  else
     {
     PCRE2_SPTR tabptr = name_table;
     printf("Named substrings\n");
@@ -494,6 +437,7 @@ for (;;)
   }      /* End of loop to find second and subsequent matches */
 
 printf("\n");
+
 pcre2_match_data_free(match_data);
 pcre2_code_free(re);
 return 0;

@@ -186,7 +186,7 @@ variable interpolation, but not general hooks on every match.
 .sp
 (h) The partial matching facility is PCRE2-specific.
 .sp
-(i) The alternative matching function (\fBpcre2_dfa_match()\fP matches in a
+(i) The alternative matching function (\fBpcre2_dfa_match()\fP) matches in a
 different way and is not Perl-compatible.
 .sp
 (j) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
@@ -228,7 +228,7 @@ handled by PCRE2, either by the interpreter or the JIT. An example is
 .P
 23. Both PCRE2 and Perl error when \ex{ escapes are invalid, but Perl tries to
 recover and prints a warning if the problem was that an invalid hexadecimal
-digit was found, since PCRE2 doesn't have warnings it returns an error instead.
+digit was found. Since PCRE2 doesn't have warnings it returns an error instead.
 Additionally, Perl accepts \ex{} and generates NUL unlike PCRE2.
 .P
 24. From release 10.45, PCRE2 gives an error if \ex is not followed by a

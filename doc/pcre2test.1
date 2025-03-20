@@ -1466,13 +1466,9 @@ difference to the matching process if the pattern begins with a lookbehind
 assertion (including \eb or \eB).
 .P
 If an empty string is matched, the next match is done with the
-PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED flags set, in order to search for
-another, non-empty, match at the same point in the subject. If this match
-fails, the start offset is advanced, and the normal match is retried. This
-imitates the way Perl handles such cases when using the \fB/g\fP modifier or
-the \fBsplit()\fP function. Normally, the start offset is advanced by one
-character, but if the newline convention recognizes CRLF as a newline, and the
-current character is CR followed by LF, an advance of two characters occurs.
+PCRE2_NOTEMPTY_ATSTART flag set, in order to search for another, non-empty,
+match at the same point in the subject. This imitates the way Perl handles such
+cases when using the \fB/g\fP modifier or the \fBsplit()\fP function.
 .
 .
 .SS "Testing substring extraction functions"

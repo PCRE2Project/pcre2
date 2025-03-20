@@ -73,6 +73,7 @@ dist_html_DATA = \
   doc/html/pcre2_match_data_create.html \
   doc/html/pcre2_match_data_create_from_pattern.html \
   doc/html/pcre2_match_data_free.html \
+  doc/html/pcre2_next_match.html \
   doc/html/pcre2_pattern_convert.html \
   doc/html/pcre2_pattern_info.html \
   doc/html/pcre2_serialize_decode.html \
@@ -174,6 +175,7 @@ dist_man_MANS = \
   doc/pcre2_match_data_create.3 \
   doc/pcre2_match_data_create_from_pattern.3 \
   doc/pcre2_match_data_free.3 \
+  doc/pcre2_next_match.3 \
   doc/pcre2_pattern_convert.3 \
   doc/pcre2_pattern_info.3 \
   doc/pcre2_serialize_decode.3 \
@@ -419,6 +421,7 @@ COMMON_SOURCES = \
   src/pcre2_maketables.c \
   src/pcre2_match.c \
   src/pcre2_match_data.c \
+  src/pcre2_match_next.c \
   src/pcre2_newline.c \
   src/pcre2_ord2utf.c \
   src/pcre2_pattern_info.c \

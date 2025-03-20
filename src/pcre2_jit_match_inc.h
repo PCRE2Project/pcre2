@@ -178,6 +178,7 @@ if (rc > (int)oveccount)
 match_data->code = re;
 match_data->subject = (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)? subject : NULL;
 match_data->subject_length = length;
+match_data->start_offset = start_offset;
 match_data->rc = rc;
 match_data->startchar = arguments.startchar_ptr - subject;
 match_data->leftchar = 0;

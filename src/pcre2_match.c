@@ -8102,6 +8102,7 @@ if (rc == MATCH_MATCH)
   match_data->rc = ((int)mb->end_offset_top >= 2 * match_data->oveccount)?
     0 : (int)mb->end_offset_top/2 + 1;
   match_data->subject_length = length;
+  match_data->start_offset = start_offset;
   match_data->startchar = start_match - subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
@@ -8139,6 +8140,7 @@ else if (match_partial != NULL)
   {
   match_data->subject = subject;
   match_data->subject_length = length;
+  match_data->start_offset = start_offset;
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;

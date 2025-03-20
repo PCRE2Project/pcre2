@@ -40,6 +40,7 @@ PCRE2_10.46 {
     pcre2_match_data_create_8;
     pcre2_match_data_create_from_pattern_8;
     pcre2_match_data_free_8;
+    pcre2_next_match_8;
     pcre2_pattern_convert_8;
     pcre2_pattern_info_8;
     pcre2_serialize_decode_8;
