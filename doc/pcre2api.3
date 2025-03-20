@@ -3755,7 +3755,8 @@ Matches in which a \eK item in a lookahead in the pattern causes the match to
 end before it starts are not supported, and give rise to an error return. For
 global replacements, matches in which \eK in a lookbehind causes the match to
 start earlier than the point that was reached in the previous iteration are
-also not supported.
+also not supported. (These cases are only possible if the pattern was compiled
+with the backwards-compatibility option PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.)
 .P
 The first seven arguments of \fBpcre2_substitute()\fP are the same as for
 \fBpcre2_match()\fP, except that the partial matching options are not
@@ -3875,6 +3876,17 @@ original subject string (that is, previous replacements do not affect it).
 Iteration is implemented by advancing the \fIstartoffset\fP value for each
 search, which is always passed the entire subject string. If an offset limit is
 set in the match context, searching stops when that limit is reached.
+.P
+Because global substitutions apply the pattern repeatedly to the subject string,
+and always iterate over non-overlapping matches, the substitutions done by
+\fBpcre2_substitute()\fP do not match and substitute text inside the replacement
+strings themselves (no recursive/iterative substitution). However, applications
+can easily implement other alternative replacement strategies, such as
+iteratively replacing, then matching and replacing on the result. The
+replacement loop inside \fBpcre2_substitute()\fP is simple and can be emulated
+in client code by allocating a buffer, searching for matches in a loop, and
+calling \fBpcre2_substitute()\fP with PCRE2_SUBSTITUTE_REPLACEMENT_ONLY an
+PCRE2_SUBSTITUTE_MATCHED, and without PCRE2_SUBSTITUTE_GLOBAL.
 .P
 You can restrict the effect of a global substitution to a portion of the
 subject string by setting either or both of \fIstartoffset\fP and an offset
