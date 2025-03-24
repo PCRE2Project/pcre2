@@ -2900,15 +2900,9 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
        starting point to discover that it is preceded by a letter.
 
        Finding  all  the  matches  in a subject is tricky when the pattern can
-       match an empty string. It is possible to emulate Perl's /g behaviour by
-       first  trying  the  match  again  at  the   same   offset,   with   the
-       PCRE2_NOTEMPTY_ATSTART  and  PCRE2_ANCHORED  options,  and then if that
-       fails, advancing the starting  offset  and  trying  an  ordinary  match
-       again.  There  is  some  code  that  demonstrates how to do this in the
-       pcre2demo sample program. In the most general case, you have  to  check
-       to  see  if the newline convention recognizes CRLF as a newline, and if
-       so, and the current character is CR followed by LF, advance the  start-
-       ing offset by two characters instead of one.
+       match an empty string. PCRE2 includes a helper API to assist with this;
+       see the section entitled "Iterating over all  matches"  below  for  de-
+       tails.
 
        If a non-zero starting offset is passed when the pattern is anchored, a
        single attempt to match at the given offset is made. This can only suc-
@@ -3178,41 +3172,42 @@ HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS
        strings, the return value from a successful match is 1, indicating that
        just the first pair of offsets has been set.
 
-       If  a  pattern uses the \K escape sequence within a positive assertion,
-       the reported start of a successful match can be greater than the end of
-       the match.  For example, if the pattern  (?=ab\K)  is  matched  against
-       "ab", the start and end offset values for the match are 2 and 0.
+       If  a  pattern  uses the \K escape sequence within a positive lookahead
+       assertion, the reported start of a successful match can be greater than
+       the end of the match. For example, if the pattern (?=ab\K)  is  matched
+       against  "ab",  the start and end offset values for the match are 2 and
+       0.
 
-       If  a  capture group is matched repeatedly within a single match opera-
+       If a capture group is matched repeatedly within a single  match  opera-
        tion, it is the last portion of the subject that it matched that is re-
        turned.
 
        If the ovector is too small to hold all the captured substring offsets,
-       as much as possible is filled in, and the function returns a  value  of
-       zero.  If captured substrings are not of interest, pcre2_match() may be
+       as  much  as possible is filled in, and the function returns a value of
+       zero. If captured substrings are not of interest, pcre2_match() may  be
        called with a match data block whose ovector is of minimum length (that
        is, one pair).
 
-       It is possible for capture group number n+1 to match some part  of  the
-       subject  when  group  n  has  not been used at all. For example, if the
+       It  is  possible for capture group number n+1 to match some part of the
+       subject when group n has not been used at  all.  For  example,  if  the
        string "abc" is matched against the pattern (a|(z))(bc) the return from
-       the function is 4, and groups 1 and 3 are matched, but 2 is  not.  When
-       this  happens,  both values in the offset pairs corresponding to unused
+       the  function  is 4, and groups 1 and 3 are matched, but 2 is not. When
+       this happens, both values in the offset pairs corresponding  to  unused
        groups are set to PCRE2_UNSET.
 
-       Offset values that correspond to unused groups at the end  of  the  ex-
-       pression  are also set to PCRE2_UNSET. For example, if the string "abc"
-       is matched against the pattern (abc)(x(yz)?)? groups 2 and  3  are  not
-       matched.  The  return  from the function is 2, because the highest used
+       Offset  values  that  correspond to unused groups at the end of the ex-
+       pression are also set to PCRE2_UNSET. For example, if the string  "abc"
+       is  matched  against  the pattern (abc)(x(yz)?)? groups 2 and 3 are not
+       matched. The return from the function is 2, because  the  highest  used
        capture group number is 1. The offsets for the second and third capture
-       groups (assuming the vector is large enough,  of  course)  are  set  to
+       groups  (assuming  the  vector  is  large enough, of course) are set to
        PCRE2_UNSET.
 
        Elements in the ovector that do not correspond to capturing parentheses
        in the pattern are never changed. That is, if a pattern contains n cap-
        turing parentheses, no more than ovector[0] to ovector[2n+1] are set by
-       pcre2_match().  The  other  elements retain whatever values they previ-
-       ously had. After a failed match attempt, the contents  of  the  ovector
+       pcre2_match(). The other elements retain whatever  values  they  previ-
+       ously  had.  After  a failed match attempt, the contents of the ovector
        are unchanged.
 
 
@@ -3222,69 +3217,69 @@ OTHER INFORMATION ABOUT A MATCH
 
        PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
 
-       As  well as the offsets in the ovector, other information about a match
-       is retained in the match data block and can be retrieved by  the  above
-       functions  in  appropriate  circumstances.  If they are called at other
+       As well as the offsets in the ovector, other information about a  match
+       is  retained  in the match data block and can be retrieved by the above
+       functions in appropriate circumstances. If they  are  called  at  other
        times, the result is undefined.
 
-       After a successful match, a partial match (PCRE2_ERROR_PARTIAL),  or  a
-       failure  to  match (PCRE2_ERROR_NOMATCH), a mark name may be available.
-       The function pcre2_get_mark() can be called to access this name,  which
-       can  be  specified  in  the  pattern by any of the backtracking control
+       After  a  successful match, a partial match (PCRE2_ERROR_PARTIAL), or a
+       failure to match (PCRE2_ERROR_NOMATCH), a mark name may  be  available.
+       The  function pcre2_get_mark() can be called to access this name, which
+       can be specified in the pattern by  any  of  the  backtracking  control
        verbs, not just (*MARK). The same function applies to all the verbs. It
        returns a pointer to the zero-terminated name, which is within the com-
        piled pattern. If no name is available, NULL is returned. The length of
-       the name (excluding the terminating zero) is stored in  the  code  unit
-       that  precedes  the name. You should use this length instead of relying
+       the  name  (excluding  the terminating zero) is stored in the code unit
+       that precedes the name. You should use this length instead  of  relying
        on the terminating zero if the name might contain a binary zero.
 
-       After a successful match, the name that is returned is  the  last  mark
+       After  a  successful  match, the name that is returned is the last mark
        name encountered on the matching path through the pattern. Instances of
-       backtracking  verbs  without  names do not count. Thus, for example, if
+       backtracking verbs without names do not count. Thus,  for  example,  if
        the matching path contains (*MARK:A)(*PRUNE), the name "A" is returned.
        After a "no match" or a partial match, the last encountered name is re-
        turned. For example, consider this pattern:
 
          ^(*MARK:A)((*MARK:B)a|b)c
 
-       When it matches "bc", the returned name is A. The B mark is  "seen"  in
-       the  first  branch of the group, but it is not on the matching path. On
-       the other hand, when this pattern fails to  match  "bx",  the  returned
+       When  it  matches "bc", the returned name is A. The B mark is "seen" in
+       the first branch of the group, but it is not on the matching  path.  On
+       the  other  hand,  when  this pattern fails to match "bx", the returned
        name is B.
 
-       Warning:  By  default, certain start-of-match optimizations are used to
-       give a fast "no match" result in some situations. For example,  if  the
-       anchoring  is removed from the pattern above, there is an initial check
-       for the presence of "c" in the subject before running the matching  en-
+       Warning: By default, certain start-of-match optimizations are  used  to
+       give  a  fast "no match" result in some situations. For example, if the
+       anchoring is removed from the pattern above, there is an initial  check
+       for  the presence of "c" in the subject before running the matching en-
        gine. This check fails for "bx", causing a match failure without seeing
-       any  marks. You can disable the start-of-match optimizations by setting
-       the PCRE2_NO_START_OPTIMIZE option for pcre2_compile() or  by  starting
+       any marks. You can disable the start-of-match optimizations by  setting
+       the  PCRE2_NO_START_OPTIMIZE  option for pcre2_compile() or by starting
        the pattern with (*NO_START_OPT).
 
-       After  a  successful  match, a partial match, or one of the invalid UTF
-       errors (for example, PCRE2_ERROR_UTF8_ERR5), pcre2_get_startchar()  can
+       After a successful match, a partial match, or one of  the  invalid  UTF
+       errors  (for example, PCRE2_ERROR_UTF8_ERR5), pcre2_get_startchar() can
        be called. After a successful or partial match it returns the code unit
-       offset  of  the character at which the match started. For a non-partial
-       match, this can be different to the value of ovector[0] if the  pattern
-       contains  the  \K escape sequence. After a partial match, however, this
-       value is always the same as ovector[0] because \K does not  affect  the
+       offset of the character at which the match started. For  a  non-partial
+       match,  this can be different to the value of ovector[0] if the pattern
+       contains the \K escape sequence. After a partial match,  however,  this
+       value  is  always the same as ovector[0] because \K does not affect the
        result of a partial match.
 
-       After  a UTF check failure, pcre2_get_startchar() can be used to obtain
+       After a UTF check failure, pcre2_get_startchar() can be used to  obtain
        the code unit offset of the invalid UTF character. Details are given in
        the pcre2unicode page.
 
 
 ERROR RETURNS FROM pcre2_match()
 
-       If pcre2_match() fails, it returns a negative number. This can be  con-
-       verted  to a text string by calling the pcre2_get_error_message() func-
-       tion (see "Obtaining a textual error message" below).   Negative  error
-       codes  are  also  returned  by other functions, and are documented with
-       them. The codes are given names in the header file. If UTF checking  is
+       If  pcre2_match() fails, it returns a negative number. This can be con-
+       verted to a text string by calling the pcre2_get_error_message()  func-
+       tion  (see  "Obtaining a textual error message" below).  Negative error
+       codes are also returned by other functions,  and  are  documented  with
+       them.  The codes are given names in the header file. If UTF checking is
        in force and an invalid UTF subject string is detected, one of a number
-       of  UTF-specific negative error codes is returned. Details are given in
-       the pcre2unicode page. The following are the other errors that  may  be
+       of UTF-specific negative error codes is returned. Details are given  in
+       the  pcre2unicode  page. The following are the other errors that may be
        returned by pcre2_match():
 
          PCRE2_ERROR_NOMATCH
@@ -3293,20 +3288,20 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_PARTIAL
 
-       The  subject  string did not match, but it did match partially. See the
+       The subject string did not match, but it did match partially.  See  the
        pcre2partial documentation for details of partial matching.
 
          PCRE2_ERROR_BADMAGIC
 
        PCRE2 stores a 4-byte "magic number" at the start of the compiled code,
-       to catch the case when it is passed a junk pointer. This is  the  error
+       to  catch  the case when it is passed a junk pointer. This is the error
        that is returned when the magic number is not present.
 
          PCRE2_ERROR_BADMODE
 
-       This  error is given when a compiled pattern is passed to a function in
-       a library of a different code unit width, for example, a  pattern  com-
-       piled  by  the  8-bit  library  is passed to a 16-bit or 32-bit library
+       This error is given when a compiled pattern is passed to a function  in
+       a  library  of a different code unit width, for example, a pattern com-
+       piled by the 8-bit library is passed to  a  16-bit  or  32-bit  library
        function.
 
          PCRE2_ERROR_BADOFFSET
@@ -3320,15 +3315,15 @@ ERROR RETURNS FROM pcre2_match()
          PCRE2_ERROR_BADUTFOFFSET
 
        The UTF code unit sequence that was passed as a subject was checked and
-       found to be valid (the PCRE2_NO_UTF_CHECK option was not set), but  the
-       value  of startoffset did not point to the beginning of a UTF character
+       found  to be valid (the PCRE2_NO_UTF_CHECK option was not set), but the
+       value of startoffset did not point to the beginning of a UTF  character
        or the end of the subject.
 
          PCRE2_ERROR_CALLOUT
 
-       This error is never generated by pcre2_match() itself. It  is  provided
-       for  use  by  callout  functions  that  want  to cause pcre2_match() or
-       pcre2_callout_enumerate() to return a distinctive error code.  See  the
+       This  error  is never generated by pcre2_match() itself. It is provided
+       for use by callout  functions  that  want  to  cause  pcre2_match()  or
+       pcre2_callout_enumerate()  to  return a distinctive error code. See the
        pcre2callout documentation for details.
 
          PCRE2_ERROR_DEPTHLIMIT
@@ -3341,14 +3336,14 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_INTERNAL
 
-       An  unexpected  internal error has occurred. This error could be caused
+       An unexpected internal error has occurred. This error could  be  caused
        by a bug in PCRE2 or by overwriting of the compiled pattern.
 
          PCRE2_ERROR_JIT_STACKLIMIT
 
        This error is returned when a pattern that was successfully studied us-
        ing JIT is being matched, but the memory available for the just-in-time
-       processing stack is not large enough. See  the  pcre2jit  documentation
+       processing  stack  is  not large enough. See the pcre2jit documentation
        for more details.
 
          PCRE2_ERROR_MATCHLIMIT
@@ -3357,11 +3352,11 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_NOMEMORY
 
-       Heap  memory  is  used  to  remember backtracking points. This error is
-       given when the memory allocation function (default  or  custom)  fails.
-       Note  that  a  different  error, PCRE2_ERROR_HEAPLIMIT, is given if the
+       Heap memory is used to remember  backtracking  points.  This  error  is
+       given  when  the  memory allocation function (default or custom) fails.
+       Note that a different error, PCRE2_ERROR_HEAPLIMIT,  is  given  if  the
        amount of memory needed exceeds the heap limit. PCRE2_ERROR_NOMEMORY is
-       also returned if PCRE2_COPY_MATCHED_SUBJECT is set and  memory  alloca-
+       also  returned  if PCRE2_COPY_MATCHED_SUBJECT is set and memory alloca-
        tion fails.
 
          PCRE2_ERROR_NULL
@@ -3370,12 +3365,12 @@ ERROR RETURNS FROM pcre2_match()
 
          PCRE2_ERROR_RECURSELOOP
 
-       This  error  is  returned  when  pcre2_match() detects a recursion loop
-       within the pattern. Specifically, it means that either the  whole  pat-
+       This error is returned when  pcre2_match()  detects  a  recursion  loop
+       within  the  pattern. Specifically, it means that either the whole pat-
        tern or a capture group has been called recursively for the second time
-       at  the  same position in the subject string. Some simple patterns that
-       might do this are detected and faulted at compile time, but  more  com-
-       plicated  cases,  in particular mutual recursions between two different
+       at the same position in the subject string. Some simple  patterns  that
+       might  do  this are detected and faulted at compile time, but more com-
+       plicated cases, in particular mutual recursions between  two  different
        groups, cannot be detected until matching is attempted.
 
 
@@ -3384,21 +3379,105 @@ OBTAINING A TEXTUAL ERROR MESSAGE
        int pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer,
          PCRE2_SIZE bufflen);
 
-       A text message for an error code  from  any  PCRE2  function  (compile,
-       match,  or  auxiliary)  can be obtained by calling pcre2_get_error_mes-
-       sage(). The code is passed as the first argument,  with  the  remaining
-       two  arguments  specifying  a  code  unit buffer and its length in code
-       units, into which the text message is placed. The message  is  returned
-       in  code  units  of the appropriate width for the library that is being
+       A  text  message  for  an  error code from any PCRE2 function (compile,
+       match, or auxiliary) can be obtained  by  calling  pcre2_get_error_mes-
+       sage().  The  code  is passed as the first argument, with the remaining
+       two arguments specifying a code unit buffer  and  its  length  in  code
+       units,  into  which the text message is placed. The message is returned
+       in code units of the appropriate width for the library  that  is  being
        used.
 
-       The returned message is terminated with a trailing zero, and the  func-
-       tion  returns  the  number  of  code units used, excluding the trailing
+       The  returned message is terminated with a trailing zero, and the func-
+       tion returns the number of code  units  used,  excluding  the  trailing
        zero. If the error number is unknown, the negative error code PCRE2_ER-
-       ROR_BADDATA is returned. If the buffer is too  small,  the  message  is
+       ROR_BADDATA  is  returned.  If  the buffer is too small, the message is
        truncated (but still with a trailing zero), and the negative error code
-       PCRE2_ERROR_NOMEMORY  is returned.  None of the messages are very long;
-       a buffer size of 120 code units is ample.
+       PCRE2_ERROR_NOMEMORY is returned.  None of the messages is very long; a
+       buffer size of 120 code units is ample.
+
+
+ITERATING OVER ALL MATCHES
+
+       int pcre2_next_match(pcre2_match_data *match_data,
+         PCRE2_SIZE *pstart_offset, uint32_t *poptions);
+
+       A common task for applications is to implement "global" matching behav-
+       iour, for example, replacing all matches in the subject; splitting  the
+       subject  on  all matches; or simply counting the number of matches. The
+       pcre2_next_match() function helps with this task by providing  the  ap-
+       propriate  parameters for the next match attempt (available since PCRE2
+       10.46).
+
+       First, a match attempt should be made using one of the  matching  func-
+       tions  (pcre2_match(), pcre2_dfa_match(), or pcre2_jit_match()).  Then,
+       pcre2_next_match() can be called, providing the same match_data parame-
+       ter.
+
+       It returns 0 ("false") if there is no need to make a further match  at-
+       tempt,  or 1 ("true") if another match should be attempted. Returning 1
+       does not imply that there is another match,  only  that  another  match
+       should be attempted (which may return PCRE2_ERROR_NOMATCH).
+
+       The  *pstart_offset  and  *poptions  are set if the function returns 1.
+       The *pstart_offset should be passed to the next match attempt directly,
+       and the *poptions should be passed to the next match attempt by combin-
+       ing with the application's match options using OR.
+
+       There is some code that demonstrates how to do this  in  the  pcre2demo
+       sample program. The general pattern is:
+
+         uint32_t app_options = ...;
+         uint32_t global_options = 0;
+         PCRE2_SIZE start_offset = 0;
+         while (1)
+           {
+           int rc = pcre2_match(re, subject, subject_len, start_offset,
+                                app_options | global_options, match_data,
+                                match_context);
+
+           if (rc == PCRE2_ERROR_NOMATCH) break; /* no match, and no more attempts */
+           if (rc < 0) { ... exit }
+
+           ...handle the match
+
+           if (!pcre2_next_match(match_data, &start_offset, &global_options))
+             break; /* no more attempts */
+           }
+
+       The guarantees provided by pcre2_next_match() are that the start_offset
+       will  advance,  so  the  loop will definitely terminate. The conditions
+       which ensure this are that either:  (a)  pcre2_next_match()  returns  0
+       (false);  or  (b)  the returned *pstart_offset is strictly greater than
+       the previous start_offset; or (c) if the previous match was a  success-
+       ful match of the empty string then the returned *pstart_offset is equal
+       to   the   previous   ovector[1],   and   *poptions   will  be  set  to
+       PCRE2_NOTEMPTY_ATSTART to prevent another empty match  from  being  re-
+       turned.
+
+       A  loop  implemented as shown above will always terminate, unless there
+       is a bug in PCRE2. As a measure of  "defensive  programming",  applica-
+       tions  are  encouraged to add an assertion or check to break their loop
+       if it does not make progress (and report the issue as a bug).
+
+       If   an   application   does   not   use   the   flag   PCRE2_EXTRA_AL-
+       LOW_LOOKAROUND_BSK, then each match is "well-behaved" and satisfies:
+
+         start_offset <= ovector[0] <= ovector[1].
+
+       In    this    case,   the   matches   found   by   pcre2_match()   with
+       pcre2_next_match() will be sorted, non-overlapping (possibly touching),
+       and with no duplicates.
+
+       Otherwise, if PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK is used, then the  guar-
+       antees  are  considerably  weaker. We do not guarantee that the matches
+       will always advance: only that the start_offset will. The matches found
+       by pcre2_match() with pcre2_next_match() will be a finite sequence  (as
+       pcre2_next_match()  ensures  that  start_offset advances, so the search
+       will terminate). The matches can however be  overlapping,  can  contain
+       duplicates, and (in truly pathological examples) may not even be sorted
+       by ovector[0]. Additionally, each match itself can end before it starts
+       (ovector[1]  <  ovector[0]).  We recommend that applications do not set
+       PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.
 
 
 EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
@@ -3430,12 +3509,12 @@ EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
        other  substring  gives the error PCRE2_ERROR_PARTIAL. The next section
        describes similar functions for extracting captured substrings by name.
 
-       If a pattern uses the \K escape sequence within a  positive  assertion,
-       the reported start of a successful match can be greater than the end of
-       the  match.   For  example,  if the pattern (?=ab\K) is matched against
-       "ab", the start and end offset values for the match are  2  and  0.  In
-       this  situation,  calling  these functions with a zero substring number
-       extracts a zero-length empty string.
+       If a pattern uses the \K escape sequence within  a  positive  lookahead
+       assertion, the reported start of a successful match can be greater than
+       the  end  of the match. For example, if the pattern (?=ab\K) is matched
+       against "ab", the start and end offset values for the match are  2  and
+       0.  In  this  situation,  calling these functions with a zero substring
+       number extracts a zero-length empty string.
 
        You can find the length in code units of a captured  substring  without
        extracting  it  by calling pcre2_substring_length_bynumber(). The first
@@ -3895,7 +3974,7 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        error  in  extended group substitution), and PCRE2_ERROR_BADSUBSPATTERN
        (the pattern match ended before it started or the match started earlier
        than the current position in the subject, which can  happen  if  \K  is
-       used in an assertion).
+       used in a lookaround assertion).
 
        As for all PCRE2 errors, a text message that describes the error can be
        obtained  by  calling  the pcre2_get_error_message() function (see "Ob-
@@ -5580,7 +5659,7 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
 
        (h) The partial matching facility is PCRE2-specific.
 
-       (i)  The  alternative matching function (pcre2_dfa_match() matches in a
+       (i)  The alternative matching function (pcre2_dfa_match()) matches in a
        different way and is not Perl-compatible.
 
        (j) PCRE2 recognizes some special sequences such as (*CR) or  (*NO_JIT)
@@ -5621,7 +5700,7 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
 
        23.  Both  PCRE2  and Perl error when \x{ escapes are invalid, but Perl
        tries to recover and prints a warning if the problem was  that  an  in-
-       valid hexadecimal digit was found, since PCRE2 doesn't have warnings it
+       valid hexadecimal digit was found. Since PCRE2 doesn't have warnings it
        returns  an  error instead.  Additionally, Perl accepts \x{} and gener-
        ates NUL unlike PCRE2.
 

@@ -218,7 +218,7 @@ variable interpolation, but not general hooks on every match.
 (h) The partial matching facility is PCRE2-specific.
 <br>
 <br>
-(i) The alternative matching function (<b>pcre2_dfa_match()</b> matches in a
+(i) The alternative matching function (<b>pcre2_dfa_match()</b>) matches in a
 different way and is not Perl-compatible.
 <br>
 <br>
@@ -266,7 +266,7 @@ handled by PCRE2, either by the interpreter or the JIT. An example is
 <p>
 23. Both PCRE2 and Perl error when \x{ escapes are invalid, but Perl tries to
 recover and prints a warning if the problem was that an invalid hexadecimal
-digit was found, since PCRE2 doesn't have warnings it returns an error instead.
+digit was found. Since PCRE2 doesn't have warnings it returns an error instead.
 Additionally, Perl accepts \x{} and generates NUL unlike PCRE2.
 </p>
 <p>

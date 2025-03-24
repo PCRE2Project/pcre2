@@ -1302,6 +1302,14 @@ are supported. */
   else \
     a = pcre2_get_startchar_32(G(b,32))
 
+#define PCRE2_NEXT_MATCH(a,b,c,d) \
+  if (test_mode == PCRE8_MODE) \
+    a = pcre2_next_match_8(G(b,8),c,d); \
+  else if (test_mode == PCRE16_MODE) \
+    a = pcre2_next_match_16(G(b,16),c,d); \
+  else \
+    a = pcre2_next_match_32(G(b,32),c,d)
+
 #define PCRE2_JIT_COMPILE(r,a,b) \
   if (test_mode == PCRE8_MODE) r = pcre2_jit_compile_8(G(a,8),b); \
   else if (test_mode == PCRE16_MODE) r = pcre2_jit_compile_16(G(a,16),b); \
@@ -1672,11 +1680,6 @@ are supported. */
   else if (test_mode == PCRE16_MODE) G(x,16)->y = z; \
   else G(x,32)->y = z
 
-#define SETFLDVEC(x,y,v,z) \
-  if (test_mode == PCRE8_MODE) G(x,8)->y[v] = z; \
-  else if (test_mode == PCRE16_MODE) G(x,16)->y[v] = z; \
-  else G(x,32)->y[v] = z
-
 #define SETOP(x,y,z) \
   if (test_mode == PCRE8_MODE) G(x,8) z y; \
   else if (test_mode == PCRE16_MODE) G(x,16) z y; \
@@ -1867,6 +1870,12 @@ the three different cases. */
     a = G(pcre2_get_startchar_,BITONE)(G(b,BITONE)); \
   else \
     a = G(pcre2_get_startchar_,BITTWO)(G(b,BITTWO))
+
+#define PCRE2_NEXT_MATCH(a,b,c,d) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    a = G(pcre2_next_match_,BITONE)(G(b,BITONE),c,d); \
+  else \
+    a = G(pcre2_next_match_,BITTWO)(G(b,BITTWO),c,d)
 
 #define PCRE2_JIT_COMPILE(r,a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2173,10 +2182,6 @@ the three different cases. */
   if (test_mode == G(G(PCRE,BITONE),_MODE)) G(x,BITONE)->y = z; \
   else G(x,BITTWO)->y = z
 
-#define SETFLDVEC(x,y,v,z) \
-  if (test_mode == G(G(PCRE,BITONE),_MODE)) G(x,BITONE)->y[v] = z; \
-  else G(x,BITTWO)->y[v] = z
-
 #define SETOP(x,y,z) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) G(x,BITONE) z y; \
   else G(x,BITTWO) z y
@@ -2249,6 +2254,7 @@ the three different cases. */
   r = pcre2_get_match_data_heapframes_size_8(G(a,8))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_8(G(b,8))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_8(G(b,8))
+#define PCRE2_NEXT_MATCH(a,b,c,d) a = pcre2_next_match_8(G(b,8),c,d)
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_8(G(a,8),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_8(G(a,8))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
@@ -2322,7 +2328,6 @@ the three different cases. */
   a = pcre2_substring_number_from_name_8(G(b,8),G(c,8));
 #define PTR(x) (void *)G(x,8)
 #define SETFLD(x,y,z) G(x,8)->y = z
-#define SETFLDVEC(x,y,v,z) G(x,8)->y[v] = z
 #define SETOP(x,y,z) G(x,8) z y
 #define SETCASTPTR(x,y) G(x,8) = (uint8_t *)(y)
 #define STRLEN(p) (int)strlen((char *)p)
@@ -2364,6 +2369,7 @@ the three different cases. */
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_16(G(a,16))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_16(G(b,16))
+#define PCRE2_NEXT_MATCH(a,b,c,d) a = pcre2_next_match_16(G(b,16),c,d)
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_16(G(a,16),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_16(G(a,16))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
@@ -2435,7 +2441,6 @@ the three different cases. */
   a = pcre2_substring_number_from_name_16(G(b,16),G(c,16));
 #define PTR(x) (void *)G(x,16)
 #define SETFLD(x,y,z) G(x,16)->y = z
-#define SETFLDVEC(x,y,v,z) G(x,16)->y[v] = z
 #define SETOP(x,y,z) G(x,16) z y
 #define SETCASTPTR(x,y) G(x,16) = (uint16_t *)(y)
 #define STRLEN(p) (int)strlen16((PCRE2_SPTR16)p)
@@ -2477,6 +2482,7 @@ the three different cases. */
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_32(G(a,32))
 #define PCRE2_GET_STARTCHAR(a,b) a = pcre2_get_startchar_32(G(b,32))
+#define PCRE2_NEXT_MATCH(a,b,c,d) a = pcre2_next_match_32(G(b,32),c,d)
 #define PCRE2_JIT_COMPILE(r,a,b) r = pcre2_jit_compile_32(G(a,32),b)
 #define PCRE2_JIT_FREE_UNUSED_MEMORY(a) pcre2_jit_free_unused_memory_32(G(a,32))
 #define PCRE2_JIT_MATCH(a,b,c,d,e,f,g,h) \
@@ -2548,7 +2554,6 @@ the three different cases. */
   a = pcre2_substring_number_from_name_32(G(b,32),G(c,32));
 #define PTR(x) (void *)G(x,32)
 #define SETFLD(x,y,z) G(x,32)->y = z
-#define SETFLDVEC(x,y,v,z) G(x,32)->y[v] = z
 #define SETOP(x,y,z) G(x,32) z y
 #define SETCASTPTR(x,y) G(x,32) = (uint32_t *)(y)
 #define STRLEN(p) (int)strlen32((PCRE2_SPTR32)p)
@@ -7472,7 +7477,7 @@ BOOL utf;
 BOOL subject_literal;
 
 PCRE2_SIZE *ovector;
-PCRE2_SIZE ovecsave[3];
+uint8_t *ovecsave[2] = { NULL, NULL };
 uint32_t oveccount;
 
 #ifdef SUPPORT_PCRE2_8
@@ -8482,10 +8487,7 @@ if (dat_datctl.replacement[0] != 0)
   }   /* End of substitution handling */
 
 /* When a replacement string is not provided, run a loop for global matching
-with one of the basic matching functions. For altglobal (or first time round
-the loop), set an "unset" value for the previous match info. */
-
-ovecsave[0] = ovecsave[1] = ovecsave[2] = PCRE2_UNSET;
+with one of the basic matching functions. */
 
 for (gmatched = 0;; gmatched++)
   {
@@ -8683,6 +8685,21 @@ for (gmatched = 0;; gmatched++)
       }
     }
 
+  /* Verify that it's safe to call pcre2_next_match with rc < 0. */
+
+  if (capcount < 0 && (dat_datctl.control & CTL_ANYGLOB) != 0)
+    {
+      BOOL rc_nextmatch;
+      PCRE2_SIZE tmp_offset = 0xcd;
+      uint32_t tmp_options = 0xcd;
+      PCRE2_NEXT_MATCH(rc_nextmatch, match_data, &tmp_offset, &tmp_options);
+      if (rc_nextmatch || tmp_offset != 0xcd || tmp_options != 0xcd)
+        {
+        fprintf(outfile, "** unexpected pcre2_next_match() for rc < 0\n");
+        return PR_ABEND;
+        }
+    }
+
   /* The result of the match is now in capcount. First handle a successful
   match. If pp was forced to be NULL (to test NULL handling) it will have been
   treated as an empty string if the length was zero. So re-create that for
@@ -8701,17 +8718,12 @@ for (gmatched = 0;; gmatched++)
       pp[0] = 0;
       }
 
-    if (capcount > (int)oveccount)   /* Check for lunatic return value */
+    if ((unsigned)capcount > oveccount)   /* Check for lunatic return value */
       {
       fprintf(outfile,
         "** PCRE2 error: returned count %d is too big for ovector count %d\n",
         capcount, oveccount);
-      capcount = oveccount;
-      if ((dat_datctl.control & CTL_ANYGLOB) != 0)
-        {
-        fprintf(outfile, "** Global loop abandoned\n");
-        dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
-        }
+      return PR_ABEND;
       }
 
     /* If PCRE2_COPY_MATCHED_SUBJECT was set, check that things are as they
@@ -8734,28 +8746,51 @@ for (gmatched = 0;; gmatched++)
       }
 
     /* If this is not the first time round a global loop, check that the
-    returned string has changed. If it has not, check for an empty string match
-    at different starting offset from the previous match. This is a failed test
-    retry for null-matching patterns that don't match at their starting offset,
-    for example /(?<=\G.)/. A repeated match at the same point is not such a
-    pattern, and must be discarded, and we then proceed to seek a non-null
-    match at the current point. For any other repeated match, there is a bug
-    somewhere and we must break the loop because it will go on for ever. We
-    know that there are always at least two elements in the ovector. */
+    returned string has advanced.
 
-    if (gmatched > 0 && ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
+    There is one known case where this doesn't happen: when you have a
+    "badly-behaved" pattern which uses \K in a lookaround, and breaks the core
+    sanity rule that start_offset <= ovector[0] <= ovector[1]. An example would
+    be /(?<=\Ka)/g matching "aaa".
+      * first attempt, start_offset=0: ovector[0]=0, ovector[1]=1
+      * second attempt, start_offset=1: ovector[0]=0, ovector[1]=1
+
+    You can see that even though we *always* ensure that start_offset advances,
+    this doesn't guarantee to avoid duplicate matches.
+
+    The pcre2test behaviour is to return all the matches found, except in the
+    case where two adjacent matches are an exact duplicate. */
+
+    if (gmatched > 0 &&
+        !(dat_datctl.offset <= ovector[0] && ovector[0] <= ovector[1]) &&
+        pp + code_unit_size * ovector[0] == ovecsave[0] &&
+        pp + code_unit_size * ovector[1] == ovecsave[1])
       {
-      if (ovector[0] == ovector[1] && ovecsave[2] != dat_datctl.offset)
-        {
-        g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
-        ovecsave[2] = dat_datctl.offset;
-        continue;    /* Back to the top of the loop */
-        }
-      fprintf(outfile,
-        "** PCRE2 error: global repeat returned the same string as previous\n");
-      fprintf(outfile, "** Global loop abandoned\n");
-      dat_datctl.control &= ~CTL_ANYGLOB;        /* Break g/G loop */
+      fprintf(outfile, "global repeat returned the same match as previous\n");
+      goto NEXT_MATCH;
       }
+
+    /* Outside of this exceptional case, we check that either we have a
+    "badly-behaved" match (note that not all badly-behaved matches are caught
+    above, only *duplicate* ones); or else in the well-behaved case the match
+    must make progress.
+
+    "Progress" is measured as ovector[1] strictly advancing, or, an empty match
+    after a non-empty match. */
+
+    if (gmatched > 0 &&
+        (dat_datctl.offset <= ovector[0] && ovector[0] <= ovector[1]) &&
+        !(pp + code_unit_size * ovector[1] > ovecsave[1] ||
+          (ovector[1] == ovector[0] && ovecsave[1] != ovecsave[0] &&
+           pp + code_unit_size * ovector[1] == ovecsave[1])))
+      {
+      fprintf(outfile,
+        "** PCRE2 error: global repeat did not make progress\n");
+      return PR_ABEND;
+      }
+
+    ovecsave[0] = pp + code_unit_size * ovector[0];
+    ovecsave[1] = pp + code_unit_size * ovector[1];
 
     /* "allcaptures" requests showing of all captures in the pattern, to check
     unset ones at the end. It may be set on the pattern or the data. Implement
@@ -8975,52 +9010,6 @@ for (gmatched = 0;; gmatched++)
     break;  /* Out of the /g loop */
     }       /* End of handling partial match */
 
-  /* Failed to match. If this is a /g or /G loop, we might previously have
-  set g_notempty (to PCRE2_NOTEMPTY_ATSTART|PCRE2_ANCHORED) after a null match.
-  If that is the case, this is not necessarily the end. We want to advance the
-  start offset, and continue. We won't be at the end of the string - that was
-  checked before setting g_notempty. We achieve the effect by pretending that a
-  single character was matched.
-
-  Complication arises in the case when the newline convention is "any", "crlf",
-  or "anycrlf". If the previous match was at the end of a line terminated by
-  CRLF, an advance of one character just passes the CR, whereas we should
-  prefer the longer newline sequence, as does the code in pcre2_match().
-
-  Otherwise, in the case of UTF-8 or UTF-16 matching, the advance must be one
-  character, not one byte. */
-
-  else if (g_notempty != 0)   /* There was a previous null match */
-    {
-    uint16_t nl = FLD(compiled_code, newline_convention);
-    PCRE2_SIZE start_offset = dat_datctl.offset;    /* Where the match was */
-    PCRE2_SIZE end_offset = start_offset + 1;
-
-    if ((nl == PCRE2_NEWLINE_CRLF || nl == PCRE2_NEWLINE_ANY ||
-         nl == PCRE2_NEWLINE_ANYCRLF) &&
-        start_offset < ulen - 1 &&
-        CODE_UNIT(pp, start_offset) == CHAR_CR &&
-        CODE_UNIT(pp, end_offset) == CHAR_LF)
-      end_offset++;
-
-    else if (utf && test_mode != PCRE32_MODE)
-      {
-      if (test_mode == PCRE8_MODE)
-        {
-        for (; end_offset < ulen; end_offset++)
-          if ((((PCRE2_SPTR8)pp)[end_offset] & 0xc0) != 0x80) break;
-        }
-      else  /* 16-bit mode */
-        {
-        for (; end_offset < ulen; end_offset++)
-          if ((((PCRE2_SPTR16)pp)[end_offset] & 0xfc00) != 0xdc00) break;
-        }
-      }
-
-    SETFLDVEC(match_data, ovector, 0, start_offset);
-    SETFLDVEC(match_data, ovector, 1, end_offset);
-    }  /* End of handling null match in a global loop */
-
   /* A "normal" match failure. There will be a negative error number in
   capcount. */
 
@@ -9070,95 +9059,43 @@ for (gmatched = 0;; gmatched++)
     break;  /* Out of the /g loop */
     }       /* End of failed match handling */
 
-  /* Control reaches here in two circumstances: (a) after a match, and (b)
-  after a non-match that immediately followed a match on an empty string when
-  doing a global search. Such a match is done with PCRE2_NOTEMPTY_ATSTART and
-  PCRE2_ANCHORED set in g_notempty. The code above turns it into a fake match
-  of one character. So effectively we get here only after a match. If we
-  are not doing a global search, we are done. */
+  /* Control reaches here after a match. If we are not doing a global search,
+  we are done. Otherwise, we adjust the parameters for the next match and
+  continue the matching loop. */
 
-  if ((dat_datctl.control & CTL_ANYGLOB) == 0) break; else
+  NEXT_MATCH:
+
+  if ((dat_datctl.control & CTL_ANYGLOB) == 0)
+    break;
+  else
     {
-    PCRE2_SIZE match_offset = FLD(match_data, ovector)[0];
-    PCRE2_SIZE end_offset = FLD(match_data, ovector)[1];
+    PCRE2_SIZE new_start_offset = (PCRE2_SIZE)-1;
+    BOOL rc_nextmatch;
 
-    /* We must now set up for the next iteration of a global search. If we have
-    matched an empty string, first check to see if we are at the end of the
-    subject. If so, the loop is over. Otherwise, mimic what Perl's /g option
-    does. Set PCRE2_NOTEMPTY_ATSTART and PCRE2_ANCHORED and try the match again
-    at the same point. If this fails it will be picked up above, where a fake
-    match is set up so that at this point we advance to the next character.
+    /* Use pcre2_next_match() to safely advance. This guarantees that the start
+    offset will advance, except after an empty match, in which case it sets
+    the PCRE2_NOTEMPTY_ATSTART flag to ensure the next match does not return a
+    duplicate. */
 
-    However, in order to cope with patterns that never match at their starting
-    offset (e.g. /(?<=\G.)/) we don't do this when the match offset is greater
-    than the starting offset. This means there will be a retry with the
-    starting offset at the match offset. If this returns the same match again,
-    it is picked up above and ignored, and the special action is then taken. */
+    PCRE2_NEXT_MATCH(rc_nextmatch, match_data, &new_start_offset, &g_notempty);
+    if (!rc_nextmatch) break;  /* Out of the /g loop */
 
-    if (match_offset == end_offset)
-      {
-      if (end_offset == ulen) break;           /* End of subject */
-      if (match_offset <= dat_datctl.offset)
-        g_notempty = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
-      }
-
-    /* However, even after matching a non-empty string, there is still one
-    tricky case. If a pattern contains \K within a lookbehind assertion at the
-    start, the end of the matched string can be at the offset where the match
-    started. In the case of a normal /g iteration without special action, this
-    leads to a loop that keeps on returning the same substring. The loop would
-    be caught above, but we really want to move on to the next match. */
-
-    else
-      {
-      g_notempty = 0;   /* Set for a "normal" repeat */
-      if ((dat_datctl.control & CTL_GLOBAL) != 0)
-        {
-        PCRE2_SIZE startchar;
-        PCRE2_GET_STARTCHAR(startchar, match_data);
-        if (end_offset <= startchar)
-          {
-          if (startchar >= ulen) break;       /* End of subject */
-          end_offset = startchar + 1;
-          if (utf && test_mode != PCRE32_MODE)
-            {
-            if (test_mode == PCRE8_MODE)
-              {
-              for (; end_offset < ulen; end_offset++)
-                if ((((PCRE2_SPTR8)pp)[end_offset] & 0xc0) != 0x80) break;
-              }
-            else  /* 16-bit mode */
-              {
-              for (; end_offset < ulen; end_offset++)
-                if ((((PCRE2_SPTR16)pp)[end_offset] & 0xfc00) != 0xdc00) break;
-              }
-            }
-          }
-        }
-      }
-
-    /* For a normal global (/g) iteration, save the current ovector[0,1] and
-    the starting offset so that we can check that they do change each time.
-    Otherwise a matching bug that returns the same string causes an infinite
-    loop. It has happened! Then update the start offset, leaving other
-    parameters alone. */
+    /* For a normal global (/g) iteration, update the start offset, leaving
+    other parameters alone. */
 
     if ((dat_datctl.control & CTL_GLOBAL) != 0)
       {
-      ovecsave[0] = ovector[0];
-      ovecsave[1] = ovector[1];
-      ovecsave[2] = dat_datctl.offset;
-      dat_datctl.offset = end_offset;
+      dat_datctl.offset = new_start_offset;
       }
 
     /* For altglobal, just update the pointer and length. */
 
     else
       {
-      pp += end_offset * code_unit_size;
-      len -= end_offset * code_unit_size;
-      ulen -= end_offset;
-      if (arg_ulen != PCRE2_ZERO_TERMINATED) arg_ulen -= end_offset;
+      pp += new_start_offset * code_unit_size;
+      len -= new_start_offset * code_unit_size;
+      ulen -= new_start_offset;
+      if (arg_ulen != PCRE2_ZERO_TERMINATED) arg_ulen -= new_start_offset;
       }
     }
   }  /* End of global loop */

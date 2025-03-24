@@ -4040,12 +4040,13 @@ for (;;)
       match_data->ovector[1] = (PCRE2_SIZE)(end_subject - subject);
       }
     match_data->subject_length = length;
+    match_data->start_offset = start_offset;
     match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
     match_data->rightchar = (PCRE2_SIZE)(mb->last_used_ptr - subject);
     match_data->startchar = (PCRE2_SIZE)(start_match - subject);
     match_data->rc = rc;
 
-    if (rc >= 0 &&(options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+    if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
       length = CU2BYTES(length + was_zero_terminated);
       match_data->subject = match_data->memctl.malloc(length,

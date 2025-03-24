@@ -2957,18 +2957,13 @@ is able to look behind the starting point to discover that it is preceded by a
 letter.
 .P
 Finding all the matches in a subject is tricky when the pattern can match an
-empty string. It is possible to emulate Perl's /g behaviour by first trying the
-match again at the same offset, with the PCRE2_NOTEMPTY_ATSTART and
-PCRE2_ANCHORED options, and then if that fails, advancing the starting offset
-and trying an ordinary match again. There is some code that demonstrates how to
-do this in the
-.\" HREF
-\fBpcre2demo\fP
+empty string. PCRE2 includes a helper API to assist with this; see the
+section entitled "Iterating over all matches"
+.\" HTML <a href="#matchiter">
+.\" </a>
+below
 .\"
-sample program. In the most general case, you have to check to see if the
-newline convention recognizes CRLF as a newline, and if so, and the current
-character is CR followed by LF, advance the starting offset by two characters
-instead of one.
+for details.
 .P
 If a non-zero starting offset is passed when the pattern is anchored, a single
 attempt to match at the given offset is made. This can only succeed if the
@@ -3284,10 +3279,10 @@ set. For example, if two substrings have been captured, the returned value is
 3. If there are no captured substrings, the return value from a successful
 match is 1, indicating that just the first pair of offsets has been set.
 .P
-If a pattern uses the \eK escape sequence within a positive assertion, the
-reported start of a successful match can be greater than the end of the match.
-For example, if the pattern (?=ab\eK) is matched against "ab", the start and
-end offset values for the match are 2 and 0.
+If a pattern uses the \eK escape sequence within a positive lookahead assertion,
+the reported start of a successful match can be greater than the end of the
+match. For example, if the pattern (?=ab\eK) is matched against "ab", the start
+and end offset values for the match are 2 and 0.
 .P
 If a capture group is matched repeatedly within a single match operation, it is
 the last portion of the subject that it matched that is returned.
@@ -3523,7 +3518,96 @@ returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code PCRE2_ERROR_BADDATA is
 returned. If the buffer is too small, the message is truncated (but still with
 a trailing zero), and the negative error code PCRE2_ERROR_NOMEMORY is returned.
-None of the messages are very long; a buffer size of 120 code units is ample.
+None of the messages is very long; a buffer size of 120 code units is ample.
+.
+.
+.\" HTML <a name="matchiter"></a>
+.SH "ITERATING OVER ALL MATCHES"
+.rs
+.sp
+.nf
+.B int pcre2_next_match(pcre2_match_data *\fImatch_data\fP,
+.B "  PCRE2_SIZE *\fIpstart_offset\fP, uint32_t *\fIpoptions\fP);"
+.fi
+.P
+A common task for applications is to implement "global" matching behaviour,
+for example, replacing all matches in the subject; splitting the subject on all
+matches; or simply counting the number of matches. The \fBpcre2_next_match()\fP
+function helps with this task by providing the appropriate parameters for the
+next match attempt (available since PCRE2 10.46).
+.P
+First, a match attempt should be made using one of the matching functions
+(\fBpcre2_match()\fP, \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP).
+Then, \fBpcre2_next_match()\fP can be called, providing the same
+\fImatch_data\fP parameter.
+.P
+It returns 0 ("false") if there is no need to make a further match attempt, or
+1 ("true") if another match should be attempted. Returning 1 does not imply that
+there is another match, only that another match should be attempted (which may
+return PCRE2_ERROR_NOMATCH).
+.P
+The *\fIpstart_offset\fP and *\fIpoptions\fP are set if the function returns 1.
+The *\fIpstart_offset\fP should be passed to the next match attempt directly,
+and the *\fIpoptions\fP should be passed to the next match attempt by combining
+with the application's match options using OR.
+.P
+There is some code that demonstrates how to do this in the
+.\" HREF
+\fBpcre2demo\fP
+.\"
+sample program. The general pattern is:
+.sp
+.nf
+  uint32_t app_options = ...;
+  uint32_t global_options = 0;
+  PCRE2_SIZE start_offset = 0;
+  while (1)
+    {
+    int rc = pcre2_match(re, subject, subject_len, start_offset,
+                         app_options | global_options, match_data,
+                         match_context);
+\&
+    if (rc == PCRE2_ERROR_NOMATCH) break; /* no match, and no more attempts */
+    if (rc < 0) { ... exit }
+\&
+    ...handle the match
+\&
+    if (!pcre2_next_match(match_data, &start_offset, &global_options))
+      break; /* no more attempts */
+    }
+.fi
+.P
+The guarantees provided by \fBpcre2_next_match()\fP are that the start_offset
+will advance, so the loop will definitely terminate. The conditions which
+ensure this are that either: (a) pcre2_next_match() returns 0 (false); or
+(b) the returned *\fIpstart_offset\fP is strictly greater than the previous
+start_offset; or (c) if the previous match was a successful match of the empty
+string then the returned *\fIpstart_offset\fP is equal to the previous
+ovector[1], and *\fIpoptions\fP will be set to PCRE2_NOTEMPTY_ATSTART to prevent
+another empty match from being returned.
+.P
+A loop implemented as shown above will always terminate, unless there is a bug
+in PCRE2. As a measure of "defensive programming", applications are encouraged
+to add an assertion or check to break their loop if it does not make progress
+(and report the issue as a bug).
+.P
+If an application does not use the flag PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, then
+each match is "well-behaved" and satisfies:
+.sp
+  start_offset <= ovector[0] <= ovector[1].
+.sp
+In this case, the matches found by pcre2_match() with pcre2_next_match() will be
+sorted, non-overlapping (possibly touching), and with no duplicates.
+.P
+Otherwise, if PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK is used, then the guarantees are
+considerably weaker. We do not guarantee that the matches will always advance:
+only that the start_offset will. The matches found by pcre2_match() with
+pcre2_next_match() will be a finite sequence (as pcre2_next_match() ensures that
+start_offset advances, so the search will terminate). The matches can however be
+overlapping, can contain duplicates, and (in truly pathological examples) may
+not even be sorted by ovector[0]. Additionally, each match itself can end before
+it starts (ovector[1] < ovector[0]). We recommend that applications do not set
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.
 .
 .
 .\" HTML <a name="extractbynumber"></a>
@@ -3562,11 +3646,12 @@ substring zero is available. An attempt to extract any other substring gives
 the error PCRE2_ERROR_PARTIAL. The next section describes similar functions for
 extracting captured substrings by name.
 .P
-If a pattern uses the \eK escape sequence within a positive assertion, the
-reported start of a successful match can be greater than the end of the match.
-For example, if the pattern (?=ab\eK) is matched against "ab", the start and
-end offset values for the match are 2 and 0. In this situation, calling these
-functions with a zero substring number extracts a zero-length empty string.
+If a pattern uses the \eK escape sequence within a positive lookahead assertion,
+the reported start of a successful match can be greater than the end of the
+match. For example, if the pattern (?=ab\eK) is matched against "ab", the start
+and end offset values for the match are 2 and 0. In this situation, calling
+these functions with a zero substring number extracts a zero-length empty
+string.
 .P
 You can find the length in code units of a captured substring without
 extracting it by calling \fBpcre2_substring_length_bynumber()\fP. The first
@@ -4029,7 +4114,7 @@ replacement string, with more particular errors being PCRE2_ERROR_BADREPESCAPE
 not found), PCRE2_ERROR_BADSUBSTITUTION (syntax error in extended group
 substitution), and PCRE2_ERROR_BADSUBSPATTERN (the pattern match ended before
 it started or the match started earlier than the current position in the
-subject, which can happen if \eK is used in an assertion).
+subject, which can happen if \eK is used in a lookaround assertion).
 .P
 As for all PCRE2 errors, a text message that describes the error can be
 obtained by calling the \fBpcre2_get_error_message()\fP function (see

@@ -220,6 +220,9 @@ in the library.
 <tr><td><a href="pcre2_match_data_free.html">pcre2_match_data_free</a></td>
     <td>Free a match data block</td></tr>
 
+<tr><td><a href="pcre2_next_match.html">pcre2_next_match</a></td>
+    <td>Get the match parameters for the next match</td></tr>
+
 <tr><td><a href="pcre2_pattern_convert.html">pcre2_pattern_convert</a></td>
     <td>Experimental foreign pattern converter</td></tr>
 

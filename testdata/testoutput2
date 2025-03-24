@@ -14731,10 +14731,12 @@ Failed: error 125 at offset 1: length of lookbehind assertion is not limited
 
 # Perl loops on this (PCRE2 used to!)
 
+# duplicate matches
 /(?<=\Ka)/g,aftertext,allow_lookaround_bsk
     aaaaa
  0: a
  0+ aaaa
+global repeat returned the same match as previous
  0: a
  0+ aaa
  0: a
@@ -14756,6 +14758,106 @@ Failed: error 125 at offset 1: length of lookbehind assertion is not limited
  0+ a
  0: a
  0+ 
+
+# overlapping matches
+/(?(?=\Gc)(?<=\Kb)c|(?<=\Kab))/g,aftertext,allow_lookaround_bsk
+    abc
+ 0: ab
+ 0+ c
+ 0: bc
+ 0+ 
+
+# not-sorted matches
+/(?(?=\Gc)(?<=\Kab)|(?<=\Kb))/g,aftertext,allow_lookaround_bsk
+    abc
+ 0: b
+ 0+ c
+ 0: ab
+ 0+ c
+
+# CRLF cases
+
+/(?<=\Kback)|\Gstart/g,aftertext,allow_lookaround_bsk,newline=LF
+    back\rstart back\nstart back\r\nstart back\r
+ 0: back
+ 0+ \x0dstart back\x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0astart back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: back
+ 0+ \x0d
+global repeat returned the same match as previous
+
+/(?<=\Kback)|\Gstart/g,aftertext,allow_lookaround_bsk,newline=CRLF
+    back\rstart back\nstart back\r\nstart back\r
+ 0: back
+ 0+ \x0dstart back\x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0astart back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d
+ 0: back
+ 0+ \x0d
+global repeat returned the same match as previous
+
+/(?<=\Kback)|\Gstart/g,aftertext,allow_lookaround_bsk,newline=ANYCRLF
+    back\rstart back\nstart back\r\nstart back\r
+ 0: back
+ 0+ \x0dstart back\x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0astart back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d
+ 0: back
+ 0+ \x0d
+global repeat returned the same match as previous
+
+/(?<=\Kback)|\Gstart/g,aftertext,allow_lookaround_bsk,newline=ANY
+    back\rstart back\nstart back\r\nstart back\r
+ 0: back
+ 0+ \x0dstart back\x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0astart back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0astart back\x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d\x0astart back\x0d
+ 0: back
+ 0+ \x0d\x0astart back\x0d
+global repeat returned the same match as previous
+ 0: start
+ 0+  back\x0d
+ 0: back
+ 0+ \x0d
+global repeat returned the same match as previous
 
 /((?2){73}(?2))((?1))/info
 Capture group count = 2
