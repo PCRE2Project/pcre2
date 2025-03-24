@@ -251,7 +251,7 @@ The following are followed by a length element, then a number of character code
 values (which should match with the length):
 
 META_MARK             (*MARK:xxxx)
-META_COMMIT_ARG       )*COMMIT:xxxx)
+META_COMMIT_ARG       (*COMMIT:xxxx)
 META_PRUNE_ARG        (*PRUNE:xxx)
 META_SKIP_ARG         (*SKIP:xxxx)
 META_THEN_ARG         (*THEN:xxxx)

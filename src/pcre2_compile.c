@@ -10179,8 +10179,9 @@ pcre2_real_code *re = NULL;           /* What we will return */
 compile_block cb;                     /* "Static" compile-time data */
 const uint8_t *tables;                /* Char tables base pointer */
 
+PCRE2_UCHAR null_str[1] = { 0xcd };   /* Dummy for handling null inputs */
 PCRE2_UCHAR *code;                    /* Current pointer in compiled code */
-PCRE2_UCHAR * codestart;              /* Start of compiled code */
+PCRE2_UCHAR *codestart;               /* Start of compiled code */
 PCRE2_SPTR ptr;                       /* Current pointer in pattern */
 uint32_t *pptr;                       /* Current pointer in parsed pattern */
 
@@ -10235,7 +10236,9 @@ if (errorptr == NULL || erroroffset == NULL) return NULL;
 
 if (pattern == NULL)
   {
-  if (patlen == 0) pattern = (PCRE2_SPTR)""; else
+  if (patlen == 0)
+    pattern = null_str;
+  else
     {
     *errorptr = ERR16;
     return NULL;
