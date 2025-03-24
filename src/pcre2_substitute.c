@@ -749,6 +749,7 @@ BOOL use_existing_match;
 BOOL replacement_only;
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 PCRE2_UCHAR temp[6];
+PCRE2_UCHAR null_str[1] = { 0xcd };
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
@@ -786,7 +787,7 @@ zero length is interpreted as an empty string. */
 if (replacement == NULL)
   {
   if (rlength != 0) return PCRE2_ERROR_NULL;
-  replacement = (PCRE2_SPTR)"";
+  replacement = null_str;
   }
 
 if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
@@ -859,7 +860,7 @@ scb.ovector = ovector;
 if (subject == NULL)
   {
   if (length != 0) return PCRE2_ERROR_NULL;
-  subject = (PCRE2_SPTR)"";
+  subject = null_str;
   }
 
 /* Find length of zero-terminated subject */

@@ -6939,6 +6939,7 @@ PCRE2_UCHAR first_cu2 = 0;
 PCRE2_UCHAR req_cu = 0;
 PCRE2_UCHAR req_cu2 = 0;
 
+PCRE2_UCHAR null_str[1] = { 0xcd };
 PCRE2_SPTR bumpalong_limit;
 PCRE2_SPTR end_subject;
 PCRE2_SPTR true_end_subject;
@@ -6977,7 +6978,7 @@ match_block *mb = &actual_match_block;
 
 /* Recognize NULL, length 0 as an empty string. */
 
-if (subject == NULL && length == 0) subject = (PCRE2_SPTR)"";
+if (subject == NULL && length == 0) subject = null_str;
 
 /* Plausibility checks */
 
