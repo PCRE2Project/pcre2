@@ -293,7 +293,7 @@ UTF support is omitted, we don't even define them. */
 
 #define HAS_EXTRALEN(c) HASUTF8EXTRALEN(c)
 
-/* Returns with the additional number of characters if IS_MULTICHAR(c) is TRUE.
+/* Returns with the additional number of characters if HAS_EXTRALEN(c) is TRUE.
 Otherwise it has an undefined behaviour. */
 
 #define GET_EXTRALEN(c) (PRIV(utf8_table4)[(c) & 0x3fu])
@@ -379,7 +379,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 
 #define HAS_EXTRALEN(c) (((c) & 0xfc00u) == 0xd800u)
 
-/* Returns with the additional number of characters if IS_MULTICHAR(c) is TRUE.
+/* Returns with the additional number of characters if HAS_EXTRALEN(c) is TRUE.
 Otherwise it has an undefined behaviour. */
 
 #define GET_EXTRALEN(c) 1
