@@ -755,7 +755,7 @@ PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
-PCRE2_SIZE ovecsave[3];
+PCRE2_SIZE ovecsave[2] = { 0, 0 };
 pcre2_substitute_callout_block scb;
 PCRE2_SIZE sub_start_extra_needed;
 PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *,
@@ -767,7 +767,6 @@ void *substitute_case_callout_data = NULL;
 buff_offset = 0;
 lengthleft = buff_length = *blength;
 *blength = PCRE2_UNSET;
-ovecsave[0] = ovecsave[1] = ovecsave[2] = PCRE2_UNSET;
 
 if (mcontext != NULL)
   {
@@ -904,7 +903,7 @@ if (!replacement_only) CHECKMEMCPY(subject, start_offset);
 match is taken from the match_data that was passed in. */
 
 subs = 0;
-do
+for (;;)
   {
   PCRE2_SPTR ptrstack[PTR_STACK_SIZE];
   uint32_t ptrstackptr = 0;
@@ -924,54 +923,12 @@ do
   if (utf) options |= PCRE2_NO_UTF_CHECK;  /* Only need to check once */
 #endif
 
-  /* Any error other than no match returns the error code. No match when not
-  doing the special after-empty-match global rematch, or when at the end of the
-  subject, breaks the global loop. Otherwise, advance the starting point by one
-  character, copying it to the output, and try again. */
+  /* Any error other than no match returns the error code. No match breaks the
+  global loop. */
 
-  if (rc < 0)
-    {
-    PCRE2_SIZE save_start;
+  if (rc == PCRE2_ERROR_NOMATCH) break;
 
-    if (rc != PCRE2_ERROR_NOMATCH) goto EXIT;
-    if (goptions == 0 || start_offset >= length) break;
-
-    /* Advance by one code point. Then, if CRLF is a valid newline sequence and
-    we have advanced into the middle of it, advance one more code point. In
-    other words, do not start in the middle of CRLF, even if CR and LF on their
-    own are valid newlines. */
-
-    save_start = start_offset++;
-    if (subject[start_offset-1] == CHAR_CR &&
-        (code->newline_convention == PCRE2_NEWLINE_CRLF ||
-         code->newline_convention == PCRE2_NEWLINE_ANY ||
-         code->newline_convention == PCRE2_NEWLINE_ANYCRLF) &&
-        start_offset < length &&
-        subject[start_offset] == CHAR_LF)
-      start_offset++;
-
-    /* Otherwise, in UTF mode, advance past any secondary code points. */
-
-    else if ((code->overall_options & PCRE2_UTF) != 0)
-      {
-#if PCRE2_CODE_UNIT_WIDTH == 8
-      while (start_offset < length && (subject[start_offset] & 0xc0) == 0x80)
-        start_offset++;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-      while (start_offset < length &&
-            (subject[start_offset] & 0xfc00) == 0xdc00)
-        start_offset++;
-#endif
-      }
-
-    /* Copy what we have advanced past (unless not required), reset the special
-    global options, and continue to the next match. */
-
-    fraglength = start_offset - save_start;
-    if (!replacement_only) CHECKMEMCPY(subject + save_start, fraglength);
-    goptions = 0;
-    continue;
-    }
+  if (rc < 0) goto EXIT;
 
   /* Handle a successful match. Matches that use \K to end before they start
   or start before the current point in the subject are not supported. */
@@ -982,25 +939,24 @@ do
     goto EXIT;
     }
 
-  /* Check for the same match as previous. This is legitimate after matching an
-  empty string that starts after the initial match offset. We have tried again
-  at the match point in case the pattern is one like /(?<=\G.)/ which can never
-  match at its starting point, so running the match achieves the bumpalong. If
-  we do get the same (null) match at the original match point, it isn't such a
-  pattern, so we now do the empty string magic. In all other cases, a repeat
-  match should never occur. */
+  /* Assert that our replacement loop is making progress, checked even in
+  release builds. This should be impossible to hit, however, an infinite loop
+  would be fairly catastrophic.
 
-  if (ovecsave[0] == ovector[0] && ovecsave[1] == ovector[1])
+  "Progress" is measured as ovector[1] strictly advancing, or, an empty match
+  after a non-empty match. */
+
+  if (subs > 0 &&
+      !(ovector[1] > ovecsave[1] ||
+        (ovector[1] == ovector[0] && ovecsave[1] > ovecsave[0] &&
+         ovector[1] == ovecsave[1])))
     {
-    if (ovector[0] == ovector[1] && ovecsave[2] != start_offset)
-      {
-      goptions = PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED;
-      ovecsave[2] = start_offset;
-      continue;    /* Back to the top of the loop */
-      }
     rc = PCRE2_ERROR_INTERNAL_DUPMATCH;
     goto EXIT;
     }
+
+  ovecsave[0] = ovector[0];
+  ovecsave[1] = ovector[1];
 
   /* Count substitutions with a paranoid check for integer overflow; surely no
   real call to this function would ever hit this! */
@@ -1626,19 +1582,25 @@ do
       }
     }
 
-  /* Save the details of this match. See above for how this data is used. If we
-  matched an empty string, do the magic for global matches. Update the start
-  offset to point to the rest of the subject string. If we re-used an existing
-  match for the first match, switch to the internal match data block. */
+  /* Exit the global loop if we are not in global mode, or if pcre2_next_match()
+  indicates we have reached the end of the subject. */
 
-  ovecsave[0] = ovector[0];
-  ovecsave[1] = ovector[1];
-  ovecsave[2] = start_offset;
+  if ((suboptions & PCRE2_SUBSTITUTE_GLOBAL) == 0 ||
+      !pcre2_next_match(match_data, &start_offset, &goptions))
+    {
+    start_offset = ovector[1];
+    break;
+    }
 
-  goptions = (ovector[0] != ovector[1] || ovector[0] > start_offset)? 0 :
-    PCRE2_ANCHORED|PCRE2_NOTEMPTY_ATSTART;
-  start_offset = ovector[1];
-  } while ((suboptions & PCRE2_SUBSTITUTE_GLOBAL) != 0);  /* Repeat "do" loop */
+  /* Verify that pcre2_next_match() has not done a bumpalong (because we have
+  already returned PCRE2_ERROR_BADSUBSPATTERN for \K in lookarounds).
+
+  We would otherwise have to memcpy the fragment spanning from ovector[1] to the
+  new start_offset.*/
+
+  PCRE2_ASSERT(start_offset == ovector[1]);
+
+  }  /* End of global loop */
 
 /* Copy the rest of the subject unless not required, and terminate the output
 with a binary zero. */

@@ -866,6 +866,7 @@ The distribution should contain the files listed below.
   src/pcre2_maketables.c     ) sources for the functions in the library,
   src/pcre2_match.c          )   and some internal functions that they use
   src/pcre2_match_data.c     )
+  src/pcre2_match_next.c     )
   src/pcre2_newline.c        )
   src/pcre2_ord2utf.c        )
   src/pcre2_pattern_info.c   )
