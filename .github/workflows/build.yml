@@ -121,6 +121,26 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
+      - name: Test CMake install interface
+        run: |
+          INSTALL_PREFIX=`pwd`/build/install-dir
+          cd maint/cmake-tests/install-interface
+          cmake -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -B build
+          cd build
+          make
+          ./test_executable
+
+      - name: Test CMake build interface
+        run: |
+          BUILD_DIR=`pwd`
+          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          ln -s "$BUILD_DIR" pcre2
+          cmake -B build
+          cd build
+          make
+          ./test_executable
+
   windows:
     name: Windows
     runs-on: windows-latest
@@ -149,6 +169,24 @@ jobs:
           cmake --install . --config Release --prefix install-dir
           ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
           ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
+
+      - name: Test CMake install interface
+        run: |
+          $INSTALL_PREFIX = (pwd).Path + "\build\install-dir"
+          cd maint/cmake-tests/install-interface
+          cmake -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -B build -A ${{ matrix.arch }}
+          cmake --build build --config Release
+          ./build/Release/test_executable.exe
+
+      - name: Test CMake build interface
+        run: |
+          $BUILD_DIR = (pwd).Path
+          cp -Recurse -Path maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          New-Item -ItemType SymbolicLink -Path "pcre2" -Target "$BUILD_DIR"
+          cmake -B build -A ${{ matrix.arch }}
+          cmake --build build --config Debug
+          ./build/Debug/test_executable.exe
 
   freebsd:
     name: FreeBSD
@@ -191,7 +229,7 @@ jobs:
             echo "== CMake =="
             cd ../build-cmake
 
-            cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+            cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make -j3
             ctest -j3 --output-on-failure
@@ -273,7 +311,7 @@ jobs:
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
 
-            CC="cc -m64" cmake -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+            CC="cc -m64" cmake -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
             ctest -j3 --output-on-failure
