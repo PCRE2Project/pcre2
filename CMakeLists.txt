@@ -102,6 +102,8 @@
 # 2022-12-10 PH added support for pcre2posix_test
 # 2023-01-15 Carlo added C99 as the minimum required
 # 2023-08-06 PH added support for setting variable length lookbehind maximum
+# 2025-03-27 Theodore used standard CMake constructs to export the library's
+#            targets.
 
 ################################################################################
 # We have used `gersemi` for auto-formatting our CMake files.
@@ -160,6 +162,7 @@ include(CheckFunctionExists)
 include(CheckSymbolExists)
 include(CheckIncludeFile)
 include(CheckTypeSize)
+include(CMakePackageConfigHelpers)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
 
@@ -885,7 +888,10 @@ if(PCRE2_BUILD_PCRE2_8)
         SOVERSION ${LIBPCRE2_8_SOVERSION}
     )
     target_compile_definitions(pcre2-8-static PUBLIC PCRE2_STATIC)
-    target_include_directories(pcre2-8-static PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-8-static
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-8-static Threads::Threads)
     endif()
@@ -901,7 +907,12 @@ if(PCRE2_BUILD_PCRE2_8)
         SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
     )
     target_link_libraries(pcre2-posix-static pcre2-8-static)
-    target_include_directories(pcre2-posix-static PUBLIC ${PROJECT_SOURCE_DIR}/src)
+    target_include_directories(
+      pcre2-posix-static
+      PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> # XXX WAS ${PROJECT_SOURCE_DIR}/src
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set(TARGETS ${TARGETS} pcre2-posix-static)
 
     if(MSVC)
@@ -918,7 +929,10 @@ if(PCRE2_BUILD_PCRE2_8)
 
   if(BUILD_SHARED_LIBS)
     add_library(pcre2-8-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-8-shared PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-8-shared
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set_target_properties(
       pcre2-8-shared
       PROPERTIES
@@ -941,7 +955,12 @@ if(PCRE2_BUILD_PCRE2_8)
     set(DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8d.pdb ${DLL_PDB_DEBUG_FILES})
 
     add_library(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
-    target_include_directories(pcre2-posix-shared PUBLIC ${PROJECT_SOURCE_DIR}/src)
+    target_include_directories(
+      pcre2-posix-shared
+      PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> # XXX WAS ${PROJECT_SOURCE_DIR}/src
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set_target_properties(
       pcre2-posix-shared
       PROPERTIES
@@ -987,7 +1006,10 @@ endif()
 if(PCRE2_BUILD_PCRE2_16)
   if(BUILD_STATIC_LIBS)
     add_library(pcre2-16-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-16-static PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-16-static
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set_target_properties(
       pcre2-16-static
       PROPERTIES
@@ -1015,7 +1037,10 @@ if(PCRE2_BUILD_PCRE2_16)
 
   if(BUILD_SHARED_LIBS)
     add_library(pcre2-16-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-16-shared PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-16-shared
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set_target_properties(
       pcre2-16-shared
       PROPERTIES
@@ -1059,7 +1084,10 @@ endif()
 if(PCRE2_BUILD_PCRE2_32)
   if(BUILD_STATIC_LIBS)
     add_library(pcre2-32-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-32-static PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-32-static
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set_target_properties(
       pcre2-32-static
       PROPERTIES
@@ -1087,7 +1115,10 @@ if(PCRE2_BUILD_PCRE2_32)
 
   if(BUILD_SHARED_LIBS)
     add_library(pcre2-32-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-32-shared PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-32-shared
+      PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
     set_target_properties(
       pcre2-32-shared
       PROPERTIES
@@ -1347,12 +1378,16 @@ endif()
 
 set(CMAKE_INSTALL_ALWAYS 1)
 
+# XXX HERE
 install(
   TARGETS ${TARGETS}
-  RUNTIME DESTINATION bin
+  EXPORT pcre2-targets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  # XXX what about the header files - where should they go?
 )
+install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcre2::) # is this the conventional casing for namespaces?
 install(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/pcre2-config"
@@ -1366,11 +1401,14 @@ install(FILES ${PCRE2_HEADERS} ${PCRE2POSIX_HEADERS} DESTINATION include)
 # CMake config files.
 set(PCRE2_CONFIG_IN ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pcre2-config.cmake.in)
 set(PCRE2_CONFIG_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config.cmake)
-configure_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} @ONLY)
-set(PCRE2_CONFIG_VERSION_IN ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pcre2-config-version.cmake.in)
+configure_package_config_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} INSTALL_DESTINATION ${PCRE2_INSTALL_CMAKEDIR})
 set(PCRE2_CONFIG_VERSION_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config-version.cmake)
-configure_file(${PCRE2_CONFIG_VERSION_IN} ${PCRE2_CONFIG_VERSION_OUT} @ONLY)
-install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION "${PCRE2_INSTALL_CMAKEDIR}")
+write_basic_package_version_file(
+  ${PCRE2_CONFIG_VERSION_OUT}
+  VERSION ${PCRE2_MAJOR}.${PCRE2_MINOR}.0
+  COMPATIBILITY SameMajorVersion
+)
+install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION ${PCRE2_INSTALL_CMAKEDIR})
 
 file(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html ${PROJECT_SOURCE_DIR}/doc/html/*.txt)
 file(
