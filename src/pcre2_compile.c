@@ -5162,7 +5162,7 @@ while (ptr < ptrend)
       case CHAR_R:
       i = 0;         /* (?R) == (?R0) */
       ptr++;
-      if (ptr >= ptrend || (*ptr != CHAR_RIGHT_PARENTHESIS && *ptr != CHAR_COLON))
+      if (ptr >= ptrend || (*ptr != CHAR_RIGHT_PARENTHESIS && *ptr != CHAR_LEFT_PARENTHESIS))
         {
         errorcode = ERR58;
         goto FAILED;
@@ -5215,9 +5215,8 @@ while (ptr < ptrend)
       /* Arguments are not supported for \g construct. */
       if (terminator != CHAR_NUL) break;
 
-      if (ptr < ptrend && *ptr == CHAR_COLON)
+      if (ptr < ptrend && *ptr == CHAR_LEFT_PARENTHESIS)
         {
-        ptr++;
         parsed_pattern = parse_capture_list(&ptr, ptrend, utf, parsed_pattern,
                                             offset, &errorcode, cb);
         if (parsed_pattern == NULL) goto FAILED;
