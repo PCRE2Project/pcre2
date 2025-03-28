@@ -543,14 +543,14 @@ This feature is not Perl-compatible.
   (*scan_substring:(grouplist)...)  scan captured substring
   (*scs:(grouplist)...)             scan captured substring
 .sp
-The comma-separated list may identify groups in any of the following ways:
+The comma-separated list "grouplist" may identify groups in any of the
+following ways:
 .sp
   n       absolute reference
   +n      relative reference
   -n      relative reference
   <name>  name
   'name'  name
-.sp
 .
 .
 .SH "SCRIPT RUNS"
@@ -597,6 +597,28 @@ The comma-separated list may identify groups in any of the following ways:
   \eg'+n'          call subroutine by relative number (PCRE2 extension)
   \eg<-n>          call subroutine by relative number (PCRE2 extension)
   \eg'-n'          call subroutine by relative number (PCRE2 extension)
+.sp
+The variants using parentheses (?...) may also specify a list of capture groups
+to return, which shall be retained in the calling subexpression if set during
+the recursion (this feature is not supported by Perl).
+.sp
+  (?R(grouplist))       recurse whole pattern, returning capture groups
+                          (PCRE2 extension)
+  (?n(grouplist))       )
+  (?+n(grouplist))      ) call subroutine, returning capture groups
+  (?-n(grouplist))      )   (PCRE2 extension)
+  (?&name(grouplist))   )
+  (?P>name(grouplist))  )
+.sp
+The comma-separated list "grouplist" uses the same syntax as
+(*scan_substring:(grouplist)...), and may identify groups in any of the
+following ways:
+.sp
+  n       absolute reference
+  +n      relative reference
+  -n      relative reference
+  <name>  name
+  'name'  name
 .
 .
 .SH "CONDITIONAL PATTERNS"

@@ -7951,6 +7951,47 @@ a)"xI
   abc#abcdef#defghi#ghijkl
   abc#abcdef#defghi#ghXjkl#
 
+% # Define the routine "weekendday" which matches Saturday or Sunday, and
+  # returns the Sat/Sun prefix as \k<short>.
+  (?(DEFINE)(?<weekendday>(?|(?<short>Sat)urday|(?<short>Sun)day)))
+  # Call the routine. Matches "Saturday,Sat" or "Sunday,Sun".
+  (?&weekendday(<short>)),\k<short> %x
+  Saturday,Sat
+  Sunday,Sun
+\= Expect no match
+  Saturday,Sun
+
+# Test each syntax used for recursion
+
+/(?(R)(Sat)urday|(?R(1)),\1)/
+    Saturday,Sat
+
+/(?(DEFINE)((Sat)urday))(?1(2)),\2/
+    Saturday,Sat
+
+/(?(DEFINE)((Sat)urday))(?-2(-1)),\2/
+    Saturday,Sat
+
+/(?+1(+2)),\2(?(DEFINE)((Sat)urday))/
+    Saturday,Sat
+
+/(?(DEFINE)(?<fn>(?<ret>Sat)urday))(?&fn('ret')),\k<ret>/
+    Saturday,Sat
+
+/(?(DEFINE)(?<fn>(?<ret>Sat)urday))(?P>fn(<ret>)),\k<ret>/
+    Saturday,Sat
+
+/(?(DEFINE)(?<fn>(?<ret>Sat)urday))\g<fn('ret')>,\k<ret>/
+
+/(?(DEFINE)((Sat)urday))(?1),\2/
+\= Expect no match
+    Saturday,Sat
+
+/(?(DEFINE)((Sat)urday))(?1()),\2/
+
+/(?(DEFINE)((Sat)(urday)))(?1(2,3)),\2,\3/
+    Saturday,Sat,urday
+
 # --------------
 
 # End of testinput2
