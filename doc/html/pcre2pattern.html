@@ -41,14 +41,12 @@ please consult the man page, in case the conversion went wrong.
 <li><a name="TOC26" href="#SEC26">CONDITIONAL GROUPS</a>
 <li><a name="TOC27" href="#SEC27">COMMENTS</a>
 <li><a name="TOC28" href="#SEC28">RECURSIVE PATTERNS</a>
-<li><a name="TOC29" href="#SEC29">GROUPS AS SUBROUTINES</a>
-<li><a name="TOC30" href="#SEC30">ONIGURUMA SUBROUTINE SYNTAX</a>
-<li><a name="TOC31" href="#SEC31">CALLOUTS</a>
-<li><a name="TOC32" href="#SEC32">BACKTRACKING CONTROL</a>
-<li><a name="TOC33" href="#SEC33">EBCDIC ENVIRONMENTS</a>
-<li><a name="TOC34" href="#SEC34">SEE ALSO</a>
-<li><a name="TOC35" href="#SEC35">AUTHOR</a>
-<li><a name="TOC36" href="#SEC36">REVISION</a>
+<li><a name="TOC29" href="#SEC29">CALLOUTS</a>
+<li><a name="TOC30" href="#SEC30">BACKTRACKING CONTROL</a>
+<li><a name="TOC31" href="#SEC31">EBCDIC ENVIRONMENTS</a>
+<li><a name="TOC32" href="#SEC32">SEE ALSO</a>
+<li><a name="TOC33" href="#SEC33">AUTHOR</a>
+<li><a name="TOC34" href="#SEC34">REVISION</a>
 </ul>
 <h2><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION DETAILS</a></h2>
 <p>
@@ -3399,7 +3397,9 @@ alternative matches "a" and then recurses. In the recursion, \1 does now match
 "b" and so the whole match succeeds. This match used to fail in Perl, but in
 later versions (I tried 5.024) it now works.
 <a name="groupsassubroutines"></a></p>
-<h2><a name="SEC29" href="#TOC1">GROUPS AS SUBROUTINES</a></h2>
+<h3>
+Groups as subroutines
+</h3>
 <p>
 If the syntax for a recursive group call (either by number or by name) is used
 outside the parentheses to which it refers, it operates a bit like a subroutine
@@ -3446,8 +3446,60 @@ The behaviour of
 in groups when called as subroutines is described in the section entitled
 <a href="#btsub">"Backtracking verbs in subroutines"</a>
 below.
+</p>
+<h3>
+Recursion and subroutines with returned capture groups
+</h3>
+<p>
+Since PCRE2 10.46, recursion and subroutine calls may also specify a list of
+capture groups to return. This is a PCRE2 syntax extension not supported by
+Perl. The pattern matching recurses into the referenced expression as described
+above, however, when the recursion returns to the calling expression the
+subgroups captured during the recursion can be retained when the calling
+expression's context is restored.
+</p>
+<p>
+When used as a subroutine, this allows the subroutine's capture groups to
+be used as return values.
+</p>
+<p>
+Only the specific capture groups listed by the caller will be retained, using
+the following syntax:
+<pre>
+  (?R(grouplist))       recurse whole pattern, returning capture groups
+  (?n(grouplist))       )
+  (?+n(grouplist))      )
+  (?-n(grouplist))      ) call subroutine, returning capture groups
+  (?&name(grouplist))   )
+  (?P&#62;name(grouplist))  )
+</pre>
+</p>
+<p>
+The list of capture groups "grouplist" is a comma-separated list of (absolute
+or relative) group numbers, and group names enclosed in single quotes or angle
+brackets.
+</p>
+<p>
+Here is an example which first uses the DEFINE condition to create a re-usable
+routine for matching a weekday, then calls that subroutine and retains the
+groups it captures for use later:
+<pre>
+  (?x: # ignore whitespace for clarity
+    # Define the routine "weekendday" which matches Saturday or
+    # Sunday, and returns the Sat/Sun prefix as \k&#60;short&#62;.
+    (?(DEFINE) (?&#60;weekendday&#62;
+        (?|(?&#60;short&#62;Sat)urday|(?&#60;short&#62;Sun)day) ) )
+    # Call the routine. Matches "Saturday,Sat" or "Sunday,Sun".
+    (?&weekendday(&#60;short&#62;)),\k&#60;short&#62; )
+</pre>
+</p>
+<p>
+This feature is not available using the Oniguruma syntax \g&#60;...&#62; or \g'...'
+below.
 <a name="onigurumasubroutines"></a></p>
-<h2><a name="SEC30" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a></h2>
+<h3>
+Oniguruma subroutine syntax
+</h3>
 <p>
 For compatibility with Oniguruma, the non-Perl syntax \g followed by a name or
 a number enclosed either in angle brackets or single quotes, is an alternative
@@ -3465,7 +3517,7 @@ plus or a minus sign it is taken as a relative reference. For example:
 Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>not</i>
 synonymous. The former is a backreference; the latter is a subroutine call.
 </p>
-<h2><a name="SEC31" href="#TOC1">CALLOUTS</a></h2>
+<h2><a name="SEC29" href="#TOC1">CALLOUTS</a></h2>
 <p>
 Perl has a feature whereby using the sequence (?{...}) causes arbitrary Perl
 code to be obeyed in the middle of matching a regular expression. This makes it
@@ -3543,7 +3595,7 @@ example:
 </pre>
 The doubling is removed before the string is passed to the callout function.
 <a name="backtrackcontrol"></a></p>
-<h2><a name="SEC32" href="#TOC1">BACKTRACKING CONTROL</a></h2>
+<h2><a name="SEC30" href="#TOC1">BACKTRACKING CONTROL</a></h2>
 <p>
 There are a number of special "Backtracking Control Verbs" (to use Perl's
 terminology) that modify the behaviour of backtracking during matching. They
@@ -4071,7 +4123,7 @@ enclosing group that has alternatives (its normal behaviour). However, if there
 is no such group within the subroutine's group, the subroutine match fails and
 there is a backtrack at the outer level.
 <a name="ebcdicenvironments"></a></p>
-<h2><a name="SEC33" href="#TOC1">EBCDIC ENVIRONMENTS</a></h2>
+<h2><a name="SEC31" href="#TOC1">EBCDIC ENVIRONMENTS</a></h2>
 <p>
 Differences in the way PCRE behaves when it is running in an EBCDIC environment
 are covered in this section.
@@ -4115,12 +4167,12 @@ though the EBCDIC codes for h and k are 0x88 and 0x92, a range of 11 code
 points. However, if the range is specified numerically, for example,
 [\x88-\x92] or [h-\x92], all code points are included.
 </p>
-<h2><a name="SEC34" href="#TOC1">SEE ALSO</a></h2>
+<h2><a name="SEC32" href="#TOC1">SEE ALSO</a></h2>
 <p>
 <b>pcre2api</b>(3), <b>pcre2callout</b>(3), <b>pcre2matching</b>(3),
 <b>pcre2syntax</b>(3), <b>pcre2</b>(3).
 </p>
-<h2><a name="SEC35" href="#TOC1">AUTHOR</a></h2>
+<h2><a name="SEC33" href="#TOC1">AUTHOR</a></h2>
 <p>
 Philip Hazel
 <br>
@@ -4129,7 +4181,7 @@ Retired from University Computing Service
 Cambridge, England.
 <br>
 </p>
-<h2><a name="SEC36" href="#TOC1">REVISION</a></h2>
+<h2><a name="SEC34" href="#TOC1">REVISION</a></h2>
 <p>
 Last updated: 27 November 2024
 <br>

@@ -566,14 +566,14 @@ This feature is not Perl-compatible.
   (*scan_substring:(grouplist)...)  scan captured substring
   (*scs:(grouplist)...)             scan captured substring
 </pre>
-The comma-separated list may identify groups in any of the following ways:
+The comma-separated list "grouplist" may identify groups in any of the
+following ways:
 <pre>
   n       absolute reference
   +n      relative reference
   -n      relative reference
   &#60;name&#62;  name
   'name'  name
-
 </pre>
 </p>
 <h2><a name="SEC26" href="#TOC1">SCRIPT RUNS</a></h2>
@@ -620,6 +620,28 @@ The comma-separated list may identify groups in any of the following ways:
   \g'+n'          call subroutine by relative number (PCRE2 extension)
   \g&#60;-n&#62;          call subroutine by relative number (PCRE2 extension)
   \g'-n'          call subroutine by relative number (PCRE2 extension)
+</pre>
+The variants using parentheses (?...) may also specify a list of capture groups
+to return, which shall be retained in the calling subexpression if set during
+the recursion (this feature is not supported by Perl).
+<pre>
+  (?R(grouplist))       recurse whole pattern, returning capture groups
+                          (PCRE2 extension)
+  (?n(grouplist))       )
+  (?+n(grouplist))      ) call subroutine, returning capture groups
+  (?-n(grouplist))      )   (PCRE2 extension)
+  (?&name(grouplist))   )
+  (?P&#62;name(grouplist))  )
+</pre>
+The comma-separated list "grouplist" uses the same syntax as
+(*scan_substring:(grouplist)...), and may identify groups in any of the
+following ways:
+<pre>
+  n       absolute reference
+  +n      relative reference
+  -n      relative reference
+  &#60;name&#62;  name
+  'name'  name
 </pre>
 </p>
 <h2><a name="SEC29" href="#TOC1">CONDITIONAL PATTERNS</a></h2>
