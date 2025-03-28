@@ -3442,7 +3442,7 @@ later versions (I tried 5.024) it now works.
 .
 .
 .\" HTML <a name="groupsassubroutines"></a>
-.SH "GROUPS AS SUBROUTINES"
+.SS "Groups as subroutines"
 .rs
 .sp
 If the syntax for a recursive group call (either by number or by name) is used
@@ -3495,8 +3495,51 @@ in groups when called as subroutines is described in the section entitled
 below.
 .
 .
+.SS "Recursion and subroutines with returned capture groups"
+.rs
+.sp
+Since PCRE2 10.46, recursion and subroutine calls may also specify a list of
+capture groups to return. This is a PCRE2 syntax extension not supported by
+Perl. The pattern matching recurses into the referenced expression as described
+above, however, when the recursion returns to the calling expression the
+subgroups captured during the recursion can be retained when the calling
+expression's context is restored.
+.P
+When used as a subroutine, this allows the subroutine's capture groups to
+be used as return values.
+.P
+Only the specific capture groups listed by the caller will be retained, using
+the following syntax:
+.sp
+  (?R(grouplist))       recurse whole pattern, returning capture groups
+  (?n(grouplist))       )
+  (?+n(grouplist))      )
+  (?-n(grouplist))      ) call subroutine, returning capture groups
+  (?&name(grouplist))   )
+  (?P>name(grouplist))  )
+.P
+The list of capture groups "grouplist" is a comma-separated list of (absolute
+or relative) group numbers, and group names enclosed in single quotes or angle
+brackets.
+.P
+Here is an example which first uses the DEFINE condition to create a re-usable
+routine for matching a weekday, then calls that subroutine and retains the
+groups it captures for use later:
+.sp
+  (?x: # ignore whitespace for clarity
+    # Define the routine "weekendday" which matches Saturday or
+    # Sunday, and returns the Sat/Sun prefix as \ek<short>.
+    (?(DEFINE) (?<weekendday>
+        (?|(?<short>Sat)urday|(?<short>Sun)day) ) )
+    # Call the routine. Matches "Saturday,Sat" or "Sunday,Sun".
+    (?&weekendday(<short>)),\ek<short> )
+.P
+This feature is not available using the Oniguruma syntax \eg<...> or \eg'...'
+below.
+.
+.
 .\" HTML <a name="onigurumasubroutines"></a>
-.SH "ONIGURUMA SUBROUTINE SYNTAX"
+.SS "Oniguruma subroutine syntax"
 .rs
 .sp
 For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or
