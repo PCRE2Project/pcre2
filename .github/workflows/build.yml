@@ -164,7 +164,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@848dac7e118679d08e2c2f9d42cd96608d834323 # v1.1.8
+        uses: vmactions/freebsd-vm@8873d98fd1413b5977cb2f7348fe329775159892 # v1.1.9
         with:
           envs: 'CFLAGS_GCC_STYLE'
           usesh: true
@@ -368,7 +368,7 @@ jobs:
           maint/RunManifestTest tarball-dir maint/manifest-tarball
 
       - name: Upload to GitHub artifacts
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: "Distribution release"
           path: |
@@ -378,7 +378,7 @@ jobs:
           if-no-files-found: error
 
       - name: Attest
-        uses: actions/attest-build-provenance@bd77c077858b8d561b7a36cbe48ef4cc642ca39d # v2.2.2
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         if: |
           github.event_name != 'pull_request' &&
           (startsWith(github.ref, 'refs/heads/release/') ||
@@ -449,7 +449,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload report to GitHub artifacts
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: "Coverage report"
           path: './build/coverage-report'
