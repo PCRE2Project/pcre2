@@ -244,6 +244,10 @@ new release.
 * Take a branch off master, named "release/pcre2-10.XX-RC1" or
   "release/pcre2-10.XX".
 
+  All releases should come from master. The final release isn't branched off
+  from the RC branch; the RC branch is a "throwaway" release which can be pruned
+  from the linear history of the trunk of PCRE2's tree.
+
 * In the new branch, remove the "-DEV" prefix from the version number and set
   the release date in configure.ac. Update the release date in the ChangeLog and
   NEWS files.
@@ -312,6 +316,24 @@ new release.
 
 * In the GitHub UI, create a "release" from the tag (which must have been
   already pushed). Add the tarballs and GPG signatures.
+
+* Announce the release on the mailing list.
+
+* Bump the version number on master to the next release, plus -DEV.
+
+* After issuing a final release, merge the release tag back to master with:
+
+  ```
+  git merge -s ours release/pcre2-10.XX
+  ```
+
+  Do not do this for -RC releases, which are not included in the linear history
+  of the PCRE2 development trunk.
+
+  We want users with forks of PCRE2 to be able to update from release to the
+  next by simply doing a `git merge` in their fork. If the release tag is not
+  merged back to master, then users will see unnecessary Git conflicts when
+  trying to fast-forward from one release to the next.
 
 
 Updating version info for libtool
