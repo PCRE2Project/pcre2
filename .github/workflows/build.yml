@@ -129,13 +129,28 @@ jobs:
       matrix:
         arch: ["Win32", "x64"]
     steps:
+      - name: Setup
+        run: |
+          # GitHub Actions Windows images ship with Git for Windows, which is great,
+          # but it also pollutes the PATH with a lot of Unix tools which we don't
+          # want to require as build dependencies. This filters out the Unix tools.
+          # The GitHub images still include an absolute ton of junk in the PATH,
+          # but it seems to be rare for unintended dependencies to be added to our
+          # build scripts, so we can live with it for now.
+          $PATCHED_PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'C:\\Program Files\\Git\\usr\\bin|C:\\Program Files\\Git\\mingw64\\bin' }) -join ';'
+          # We can't seem to use $GITHUB_PATH here because that only allows
+          # appending to the PATH, not replacing it.
+          echo "PATH=$PATCHED_PATH" >> "$env:GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
+        run: |
+          echo "PATH=$env:PATH"
+          cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
 
       - name: Build
         run: cmake --build build --config Release
