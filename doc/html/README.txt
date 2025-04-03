@@ -970,7 +970,6 @@ The distribution should contain the files listed below.
   cmake/COPYING-CMAKE-SCRIPTS
   cmake/FindEditline.cmake
   cmake/FindReadline.cmake
-  cmake/pcre2-config-version.cmake.in
   cmake/pcre2-config.cmake.in
   cmake/PCRE2CheckLinkerFlag.cmake
   src/config-cmake.h.in

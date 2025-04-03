@@ -11,6 +11,8 @@ drwxr-xr-x install-dir/lib/cmake
 drwxr-xr-x install-dir/lib/cmake/pcre2
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-config-version.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-config.cmake
+-rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets-release.cmake
+-rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets.cmake
 -rw-r--r-- install-dir/lib/libpcre2-16.a
 lrwxr-xr-x install-dir/lib/libpcre2-16.so -> libpcre2-16.so.0
 lrwxr-xr-x install-dir/lib/libpcre2-16.so.0 -> libpcre2-16.so.0.14.0

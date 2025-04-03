@@ -9,14 +9,16 @@ LANG=C # Ensure stable ordering of `sort` output
 export LANG
 
 if [ "$1" = "" -o "$2" = "" ] ; then
-  echo "Usage: $0 <dir> <manifest name>" >&2
+  echo "Usage: $0 <dir> <manifest name> [<build type>]" >&2
   exit 1
 fi
 
 input_dir="$1"
 expected_manifest="$2"
+build_type="${3:-release}"
 
-base=`basename $expected_manifest`
+actual_file=`basename $expected_manifest`.actual
+expected_file=`basename $expected_manifest`.expected
 
 sed=sed
 # Helper for Solaris
@@ -29,17 +31,24 @@ find "$input_dir" -print | \
   xargs -n1 -- ls -l -d -n | \
   $sed -E -e 's/ {2,}/ /g' | \
   cut -d' ' -f '1,9-' \
-  > "$base"
+  > "$actual_file"
 
-if ! diff -u "$expected_manifest" "$base"; then
+# The CMake install is a bit annoying now. Its installed files are actually
+# dependent on the build type. So, if the build type is not "release", we need
+# to modify the expected manifest to match the actual one. 
+cat "$expected_manifest" | \
+  sed -E -e "s/pcre2-targets-release.cmake/pcre2-targets-$build_type.cmake/" \
+  > "$expected_file"
+
+if ! diff -u "$expected_file" "$actual_file"; then
   echo "Installed files differ from expected"
 
   echo "===Actual==="
-  cat "$base"
+  cat "$actual_file"
   echo "===End==="
 
   exit 1
 fi
 
 echo "Installed files match expected"
-rm -f "$base"
+rm -f "$actual_file" "$expected_file"

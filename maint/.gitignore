@@ -7,3 +7,5 @@ pcre2_ucd.c
 
 testinput
 testoutput
+
+!build-interface
