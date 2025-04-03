@@ -211,20 +211,19 @@ const uint32_t PRIV(ucp_gbtable)[] = {
 
 #undef ESZ
 
-#ifdef SUPPORT_JIT
 /* This table reverses PRIV(ucp_gentype). We can save the cost
 of a memory load. */
 
 const int PRIV(ucp_typerange)[] = {
-  ucp_Cc, ucp_Cs,
-  ucp_Ll, ucp_Lu,
-  ucp_Mc, ucp_Mn,
-  ucp_Nd, ucp_No,
-  ucp_Pc, ucp_Ps,
-  ucp_Sc, ucp_So,
-  ucp_Zl, ucp_Zs,
+  ucp_Cc,
+  ucp_Ll,
+  ucp_Mc,
+  ucp_Nd,
+  ucp_Pc,
+  ucp_Sc,
+  ucp_Zl,
+  ucp_Zs + 1, /* Terminator, not part of the list. */
 };
-#endif /* SUPPORT_JIT */
 
 /* Finally, include the tables that are auto-generated from the Unicode data
 files. */
