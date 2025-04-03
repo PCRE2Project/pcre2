@@ -200,10 +200,38 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          # Slight hack to trick RunManifestTest to pass with MinSizeRel.
-          mv install-dir/lib/cmake/pcre2/pcre2-targets-minsizerel.cmake install-dir/lib/cmake/pcre2/pcre2-targets-release.cmake
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
+          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux minsizerel
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+      - name: Test CMake install interface
+        run: |
+          INSTALL_PREFIX=`pwd`/build/install-dir
+          cd maint/cmake-tests/install-interface
+
+          for useStaticLibs in ON OFF; do
+            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
+            rm -rf build
+            cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            (cd build; make)
+            ./build/test_executable
+          done
+
+      - name: Test CMake build interface
+        run: |
+          BUILD_DIR=`pwd`
+          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          ln -s "$BUILD_DIR" pcre2
+
+          for buildLibs in "ON;OFF" "OFF;ON"; do
+            static=$(echo $buildLibs | cut -d';' -f1)
+            shared=$(echo $buildLibs | cut -d';' -f2)
+            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
+            rm -rf build
+            cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            (cd build; make)
+            ./build/test_executable
+          done
 
   bat:
     # Tests with: MSVC 32-bit, and a variety of CMake options
