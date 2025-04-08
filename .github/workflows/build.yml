@@ -142,8 +142,8 @@ jobs:
           ln -s "$BUILD_DIR" pcre2
 
           for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=$(echo $buildLibs | cut -d';' -f1)
-            shared=$(echo $buildLibs | cut -d';' -f2)
+            static=`echo $buildLibs | cut -d';' -f1`
+            shared=`echo $buildLibs | cut -d';' -f2`
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
             rm -rf build
             cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
@@ -187,7 +187,7 @@ jobs:
 
           foreach ($useStaticLibs in @("ON", "OFF")) {
             echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -Recurse -Force build
+            if (Test-Path build) { rm -Recurse -Force build }
             cmake -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build -A ${{ matrix.arch }}
             cmake --build build --config Release
             ./build/Release/test_executable.exe
@@ -202,8 +202,8 @@ jobs:
 
           foreach ($buildLibs in @(@{static="ON"; shared="OFF"}, @{static="OFF"; shared="ON"})) {
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$($buildLibs.static) =="
-            rm -Recurse -Force build
-            cmake -DBUILD_STATIC_LIBS=$($buildLibs.static) -DBUILD_SHARED_LIBS=$($buildLibs.shared) -B build -A ${{ matrix.arch }}
+            if (Test-Path build) { rm -Recurse -Force build }
+            cmake "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
             cmake --build build --config Debug
             ./build/Debug/test_executable.exe
           }
