@@ -102,6 +102,8 @@
 # 2022-12-10 PH added support for pcre2posix_test
 # 2023-01-15 Carlo added C99 as the minimum required
 # 2023-08-06 PH added support for setting variable length lookbehind maximum
+# 2025-03-27 Theodore used standard CMake constructs to export the library's
+#            targets.
 
 ################################################################################
 # We have used `gersemi` for auto-formatting our CMake files.
@@ -139,13 +141,11 @@ endif()
 # cmake_policy(SET CMP0026 OLD)
 # cmake_policy(SET CMP0074 NEW)
 
-# For FindReadline.cmake. This was changed to allow setting CMAKE_MODULE_PATH
-# on the command line.
-# SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
+# For FindReadline.cmake. This uses list(APPEND) rather than set() to allow
+# setting CMAKE_MODULE_PATH on the command line.
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
 
 # external packages
 find_package(BZip2)
@@ -160,6 +160,7 @@ include(CheckFunctionExists)
 include(CheckSymbolExists)
 include(CheckIncludeFile)
 include(CheckTypeSize)
+include(CMakePackageConfigHelpers)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
 
@@ -229,10 +230,10 @@ check_c_source_compiles(
 
 # Detect support for linker scripts.
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
-pcre2_check_linker_flag(C -Wl,--version-script,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
-pcre2_check_linker_flag(C -Wl,-M,${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+file(WRITE ${PROJECT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
+file(WRITE ${PROJECT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
+pcre2_check_linker_flag(C -Wl,--version-script,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
+pcre2_check_linker_flag(C -Wl,-M,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
 if(HAVE_VSCRIPT_GNU)
   set(VSCRIPT_FLAG --version-script)
   set(HAVE_VSCRIPT TRUE)
@@ -243,17 +244,13 @@ endif()
 if(HAVE_VSCRIPT)
   # Perform the same logic as ax_check_vscript.m4, to test whether the linker
   # silently ignores (and overwrites) linker scripts it doesn't understand.
-  pcre2_check_linker_flag(
-    C
-    -Wl,${VSCRIPT_FLAG},${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym
-    HAVE_VSCRIPT_BROKEN
-  )
+  pcre2_check_linker_flag(C -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/test-map-file-broken.sym HAVE_VSCRIPT_BROKEN)
   if(HAVE_VSCRIPT_BROKEN)
     set(HAVE_VSCRIPT FALSE)
   endif()
 endif()
-file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file.sym)
-file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test-map-file-broken.sym)
+file(REMOVE ${PROJECT_BINARY_DIR}/test-map-file.sym)
+file(REMOVE ${PROJECT_BINARY_DIR}/test-map-file-broken.sym)
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
 # code was written by PH, trying to imitate the logic from the autotools
@@ -664,7 +661,7 @@ endif()
 
 # Output files
 
-configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/config.h @ONLY)
+configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/src/config.h @ONLY)
 
 # Parse version numbers and date out of configure.ac
 
@@ -723,7 +720,8 @@ parse_lib_version(LIBPCRE2_8)
 parse_lib_version(LIBPCRE2_16)
 parse_lib_version(LIBPCRE2_32)
 
-configure_file(src/pcre2.h.in ${PROJECT_BINARY_DIR}/pcre2.h @ONLY)
+configure_file(src/pcre2.h.in ${PROJECT_BINARY_DIR}/interface/pcre2.h @ONLY)
+configure_file(src/pcre2posix.h ${PROJECT_BINARY_DIR}/interface/pcre2posix.h COPYONLY)
 
 # Make sure to not link debug libs
 # against release libs and vice versa
@@ -736,37 +734,41 @@ endif()
 if(REBUILD_CHARTABLES)
   add_executable(pcre2_dftables src/pcre2_dftables.c)
   add_custom_command(
-    OUTPUT ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+    OUTPUT ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
     COMMAND pcre2_dftables
-    ARGS ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+    ARGS ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
     DEPENDS pcre2_dftables
     COMMENT "Generating character tables (pcre2_chartables.c) for current locale"
     VERBATIM
   )
 elseif(NOT PCRE2_EBCDIC)
-  configure_file(${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.dist ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
+  configure_file(
+    ${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.dist
+    ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
+    COPYONLY
+  )
 elseif(PCRE2_EBCDIC_NL25)
   configure_file(
     ${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl25
-    ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+    ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
     COPYONLY
   )
 else()
   configure_file(
     ${PROJECT_SOURCE_DIR}/src/pcre2_chartables.c.ebcdic-1047-nl15
-    ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+    ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
     COPYONLY
   )
 endif()
 
 # Source code
 
-set(PCRE2_HEADERS ${PROJECT_BINARY_DIR}/pcre2.h)
+set(PCRE2_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2.h)
 
 set(
   PCRE2_SOURCES
   src/pcre2_auto_possess.c
-  ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+  ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
   src/pcre2_chkdint.c
   src/pcre2_compile.c
   src/pcre2_compile_cgroup.c
@@ -798,7 +800,7 @@ set(
   src/pcre2_xclass.c
 )
 
-set(PCRE2POSIX_HEADERS src/pcre2posix.h)
+set(PCRE2POSIX_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2posix.h)
 set(PCRE2POSIX_SOURCES src/pcre2posix.c)
 
 if(MINGW AND BUILD_SHARED_LIBS)
@@ -866,15 +868,13 @@ if(MSVC)
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
-set(CMAKE_INCLUDE_CURRENT_DIR 1)
-
 set(TARGETS)
 
 # 8-bit library
 
 if(PCRE2_BUILD_PCRE2_8)
   if(BUILD_STATIC_LIBS)
-    add_library(pcre2-8-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
+    add_library(pcre2-8-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES})
     set_target_properties(
       pcre2-8-static
       PROPERTIES
@@ -885,7 +885,10 @@ if(PCRE2_BUILD_PCRE2_8)
         SOVERSION ${LIBPCRE2_8_SOVERSION}
     )
     target_compile_definitions(pcre2-8-static PUBLIC PCRE2_STATIC)
-    target_include_directories(pcre2-8-static PUBLIC ${PROJECT_BINARY_DIR})
+    target_include_directories(
+      pcre2-8-static
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-8-static Threads::Threads)
     endif()
@@ -901,7 +904,10 @@ if(PCRE2_BUILD_PCRE2_8)
         SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
     )
     target_link_libraries(pcre2-posix-static pcre2-8-static)
-    target_include_directories(pcre2-posix-static PUBLIC ${PROJECT_SOURCE_DIR}/src)
+    target_include_directories(
+      pcre2-posix-static
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set(TARGETS ${TARGETS} pcre2-posix-static)
 
     if(MSVC)
@@ -917,8 +923,11 @@ if(PCRE2_BUILD_PCRE2_8)
   endif()
 
   if(BUILD_SHARED_LIBS)
-    add_library(pcre2-8-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-8-shared PUBLIC ${PROJECT_BINARY_DIR})
+    add_library(pcre2-8-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    target_include_directories(
+      pcre2-8-shared
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-8-shared
       PROPERTIES
@@ -941,7 +950,10 @@ if(PCRE2_BUILD_PCRE2_8)
     set(DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8d.pdb ${DLL_PDB_DEBUG_FILES})
 
     add_library(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
-    target_include_directories(pcre2-posix-shared PUBLIC ${PROJECT_SOURCE_DIR}/src)
+    target_include_directories(
+      pcre2-posix-shared
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-posix-shared
       PROPERTIES
@@ -956,8 +968,7 @@ if(PCRE2_BUILD_PCRE2_8)
       target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
       set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
     endif()
-    set(PCRE2POSIX_CFLAG "-DPCRE2POSIX_SHARED")
-    target_compile_definitions(pcre2-posix-shared PUBLIC ${PCRE2POSIX_CFLAG})
+    target_compile_definitions(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
     target_link_libraries(pcre2-posix-shared pcre2-8-shared)
     set(TARGETS ${TARGETS} pcre2-posix-shared)
     set(DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-posix-shared>/pcre2-posix.pdb ${DLL_PDB_FILES})
@@ -986,8 +997,11 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_16)
   if(BUILD_STATIC_LIBS)
-    add_library(pcre2-16-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-16-static PUBLIC ${PROJECT_BINARY_DIR})
+    add_library(pcre2-16-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    target_include_directories(
+      pcre2-16-static
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-16-static
       PROPERTIES
@@ -1014,8 +1028,11 @@ if(PCRE2_BUILD_PCRE2_16)
   endif()
 
   if(BUILD_SHARED_LIBS)
-    add_library(pcre2-16-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-16-shared PUBLIC ${PROJECT_BINARY_DIR})
+    add_library(pcre2-16-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    target_include_directories(
+      pcre2-16-shared
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-16-shared
       PROPERTIES
@@ -1058,8 +1075,11 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_32)
   if(BUILD_STATIC_LIBS)
-    add_library(pcre2-32-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-32-static PUBLIC ${PROJECT_BINARY_DIR})
+    add_library(pcre2-32-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    target_include_directories(
+      pcre2-32-static
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-32-static
       PROPERTIES
@@ -1086,8 +1106,11 @@ if(PCRE2_BUILD_PCRE2_32)
   endif()
 
   if(BUILD_SHARED_LIBS)
-    add_library(pcre2-32-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
-    target_include_directories(pcre2-32-shared PUBLIC ${PROJECT_BINARY_DIR})
+    add_library(pcre2-32-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    target_include_directories(
+      pcre2-32-shared
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-32-shared
       PROPERTIES
@@ -1139,9 +1162,9 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_8)
   configure_file(libpcre2-posix.pc.in libpcre2-posix.pc @ONLY)
-  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-posix.pc")
+  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-posix.pc")
   configure_file(libpcre2-8.pc.in libpcre2-8.pc @ONLY)
-  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-8.pc")
+  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-8.pc")
   set(enable_pcre2_8 "yes")
 else()
   set(enable_pcre2_8 "no")
@@ -1149,7 +1172,7 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_16)
   configure_file(libpcre2-16.pc.in libpcre2-16.pc @ONLY)
-  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-16.pc")
+  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-16.pc")
   set(enable_pcre2_16 "yes")
 else()
   set(enable_pcre2_16 "no")
@@ -1157,7 +1180,7 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_32)
   configure_file(libpcre2-32.pc.in libpcre2-32.pc @ONLY)
-  list(APPEND pkg_config_files "${CMAKE_CURRENT_BINARY_DIR}/libpcre2-32.pc")
+  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-32.pc")
   set(enable_pcre2_32 "yes")
 else()
   set(enable_pcre2_32 "no")
@@ -1349,28 +1372,33 @@ set(CMAKE_INSTALL_ALWAYS 1)
 
 install(
   TARGETS ${TARGETS}
-  RUNTIME DESTINATION bin
+  EXPORT pcre2-targets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcre2::)
 install(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/pcre2-config"
-  DESTINATION bin
+  FILES "${PROJECT_BINARY_DIR}/pcre2-config"
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
   # Set 0755 permissions
   PERMISSIONS OWNER_WRITE OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
-install(FILES ${PCRE2_HEADERS} ${PCRE2POSIX_HEADERS} DESTINATION include)
+install(FILES ${PCRE2_HEADERS} ${PCRE2POSIX_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # CMake config files.
-set(PCRE2_CONFIG_IN ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pcre2-config.cmake.in)
-set(PCRE2_CONFIG_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config.cmake)
-configure_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} @ONLY)
-set(PCRE2_CONFIG_VERSION_IN ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pcre2-config-version.cmake.in)
-set(PCRE2_CONFIG_VERSION_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config-version.cmake)
-configure_file(${PCRE2_CONFIG_VERSION_IN} ${PCRE2_CONFIG_VERSION_OUT} @ONLY)
-install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION "${PCRE2_INSTALL_CMAKEDIR}")
+set(PCRE2_CONFIG_IN ${PROJECT_SOURCE_DIR}/cmake/pcre2-config.cmake.in)
+set(PCRE2_CONFIG_OUT ${PROJECT_BINARY_DIR}/cmake/pcre2-config.cmake)
+configure_package_config_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} INSTALL_DESTINATION ${PCRE2_INSTALL_CMAKEDIR})
+set(PCRE2_CONFIG_VERSION_OUT ${PROJECT_BINARY_DIR}/cmake/pcre2-config-version.cmake)
+write_basic_package_version_file(
+  ${PCRE2_CONFIG_VERSION_OUT}
+  VERSION ${PCRE2_MAJOR}.${PCRE2_MINOR}.0
+  COMPATIBILITY SameMajorVersion
+)
+install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION ${PCRE2_INSTALL_CMAKEDIR})
 
 file(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html ${PROJECT_SOURCE_DIR}/doc/html/*.txt)
 file(
@@ -1393,8 +1421,8 @@ install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
 install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(MSVC AND INSTALL_MSVC_PDB)
-  install(FILES ${DLL_PDB_FILES} DESTINATION bin CONFIGURATIONS RelWithDebInfo)
-  install(FILES ${DLL_PDB_DEBUG_FILES} DESTINATION bin CONFIGURATIONS Debug)
+  install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS RelWithDebInfo)
+  install(FILES ${DLL_PDB_DEBUG_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug)
 endif()
 
 # Help, only for nice output

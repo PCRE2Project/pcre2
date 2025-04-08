@@ -92,7 +92,7 @@ jobs:
     # Tests with: GCC, -O3, oldest supported Ubuntu (in non-extended support)
     name: GCC -O3
     runs-on: ubuntu-latest
-    container: ubuntu:20.04
+    container: ubuntu:22.04
     steps:
       - name: Setup
         run: |
@@ -121,11 +121,55 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
+      - name: Test CMake install interface
+        run: |
+          INSTALL_PREFIX=`pwd`/build/install-dir
+          cd maint/cmake-tests/install-interface
+
+          for useStaticLibs in ON OFF; do
+            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
+            rm -rf build
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            (cd build; make)
+            ./build/test_executable
+            ldd ./build/test_executable
+            if [ $useStaticLibs = ON ]; then
+              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
+          done
+
+      - name: Test CMake build interface
+        run: |
+          BUILD_DIR=`pwd`
+          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          ln -s "$BUILD_DIR" pcre2
+
+          for buildLibs in "ON;OFF" "OFF;ON"; do
+            static=`echo $buildLibs | cut -d';' -f1`
+            shared=`echo $buildLibs | cut -d';' -f2`
+            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
+            rm -rf build
+            cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            (cd build; make)
+            ./build/test_executable
+            ldd ./build/test_executable
+            if [ $static = ON ]; then
+              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
+          done
+
   dodo:
     # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
     name: GCC -Os, old Autotools
     runs-on: ubuntu-latest
-    container: ubuntu:20.04
+    container: ubuntu:22.04
     steps:
       - name: Setup
         run: |
@@ -200,7 +244,7 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
+          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux minsizerel
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   bat:
@@ -372,7 +416,7 @@ jobs:
           # Not used by anyone yet, really, but potentially the "next big thing".
           - arch: "riscv64"
             distro: "ubuntu_latest"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write # Necessary for uraimo/run-on-arch-action to use GitHub's Docker repository as a cache

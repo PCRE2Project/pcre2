@@ -14,6 +14,8 @@ d---- .\install-dir\lib\cmake
 d---- .\install-dir\lib\cmake\pcre2
 -a--- .\install-dir\lib\cmake\pcre2\pcre2-config-version.cmake
 -a--- .\install-dir\lib\cmake\pcre2\pcre2-config.cmake
+-a--- .\install-dir\lib\cmake\pcre2\pcre2-targets-release.cmake
+-a--- .\install-dir\lib\cmake\pcre2\pcre2-targets.cmake
 -a--- .\install-dir\lib\pcre2-16-static.lib
 -a--- .\install-dir\lib\pcre2-16.lib
 -a--- .\install-dir\lib\pcre2-32-static.lib
