@@ -121,6 +121,50 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
+      - name: Test CMake install interface
+        run: |
+          INSTALL_PREFIX=`pwd`/build/install-dir
+          cd maint/cmake-tests/install-interface
+
+          for useStaticLibs in ON OFF; do
+            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
+            rm -rf build
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            (cd build; make)
+            ./build/test_executable
+            otool -L ./build/test_executable
+            if [ $useStaticLibs = ON ]; then
+              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in otool output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
+          done
+
+      - name: Test CMake build interface
+        run: |
+          BUILD_DIR=`pwd`
+          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          ln -s "$BUILD_DIR" pcre2
+
+          for buildLibs in "ON;OFF" "OFF;ON"; do
+            static=`echo $buildLibs | cut -d';' -f1`
+            shared=`echo $buildLibs | cut -d';' -f2`
+            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
+            rm -rf build
+            cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            (cd build; make)
+            ./build/test_executable
+            otool -L ./build/test_executable
+            if [ $static = ON ]; then
+              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
+          done
+
   windows:
     name: Windows
     runs-on: windows-latest
@@ -129,13 +173,28 @@ jobs:
       matrix:
         arch: ["Win32", "x64"]
     steps:
+      - name: Setup
+        run: |
+          # GitHub Actions Windows images ship with Git for Windows, which is great,
+          # but it also pollutes the PATH with a lot of Unix tools which we don't
+          # want to require as build dependencies. This filters out the Unix tools.
+          # The GitHub images still include an absolute ton of junk in the PATH,
+          # but it seems to be rare for unintended dependencies to be added to our
+          # build scripts, so we can live with it for now.
+          $PATCHED_PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'C:\\Program Files\\Git\\usr\\bin|C:\\Program Files\\Git\\mingw64\\bin' }) -join ';'
+          # We can't seem to use $GITHUB_PATH here because that only allows
+          # appending to the PATH, not replacing it.
+          echo "PATH=$PATCHED_PATH" >> "$env:GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
+        run: |
+          echo "PATH=$env:PATH"
+          cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
 
       - name: Build
         run: cmake --build build --config Release
@@ -149,6 +208,66 @@ jobs:
           cmake --install . --config Release --prefix install-dir
           ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
           ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
+
+      - name: Test CMake install interface
+        run: |
+          $INSTALL_PREFIX = (pwd).Path + "\build\install-dir"
+          cd maint/cmake-tests/install-interface
+
+          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
+
+          foreach ($useStaticLibs in @("ON", "OFF")) {
+            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
+            if (Test-Path build) { rm -Recurse -Force build }
+            cmake "-DCMAKE_PREFIX_PATH=$INSTALL_PREFIX" "-DPCRE2_USE_STATIC_LIBS=$useStaticLibs" -B build -A ${{ matrix.arch }}
+            cmake --build build --config Release
+            ./build/Release/test_executable.exe
+            & $dumpbin /dependents ./build/Release/test_executable.exe
+            if ($useStaticLibs -eq "ON") {
+                if ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2")) {
+                  Write-Error "Error: PCRE2 found in dumpbin output"
+                  exit 1
+                }
+            } else {
+              # Test that the shared library is actually linked in
+              if (-not ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2-8.dll"))) {
+                Write-Error "Error: Shared library not linked in"
+                exit 1
+              }
+            }
+          }
+
+      - name: Test CMake build interface
+        run: |
+          $BUILD_DIR = (pwd).Path
+          cp -Recurse -Path maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          New-Item -ItemType SymbolicLink -Path "pcre2" -Target "$BUILD_DIR"
+
+          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
+
+          foreach ($buildLibs in @(@{static="ON"; shared="OFF"}, @{static="OFF"; shared="ON"})) {
+            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$($buildLibs.static) =="
+            if (Test-Path build) { rm -Recurse -Force build }
+            cmake "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
+            cmake --build build --config Debug
+            ./build/Debug/test_executable.exe
+            & $dumpbin /dependents ./build/Debug/test_executable.exe
+            if ($buildLibs.static -eq "ON") {
+                if ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2")) {
+                  Write-Error "Error: PCRE2 found in dumpbin output"
+                  exit 1
+                }
+            } else {
+              # Test that the shared library is actually linked in
+              if (-not ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2-8d.dll"))) {
+                Write-Error "Error: Shared library not linked in"
+                exit 1
+              }
+            }
+          }
 
   freebsd:
     name: FreeBSD
@@ -164,7 +283,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@848dac7e118679d08e2c2f9d42cd96608d834323 # v1.1.8
+        uses: vmactions/freebsd-vm@8873d98fd1413b5977cb2f7348fe329775159892 # v1.1.9
         with:
           envs: 'CFLAGS_GCC_STYLE'
           usesh: true
@@ -191,7 +310,7 @@ jobs:
             echo "== CMake =="
             cd ../build-cmake
 
-            cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+            cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make -j3
             ctest -j3 --output-on-failure
@@ -273,7 +392,7 @@ jobs:
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
 
-            CC="cc -m64" cmake -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build
+            CC="cc -m64" cmake -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
             ctest -j3 --output-on-failure
@@ -368,7 +487,7 @@ jobs:
           maint/RunManifestTest tarball-dir maint/manifest-tarball
 
       - name: Upload to GitHub artifacts
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: "Distribution release"
           path: |
@@ -378,7 +497,7 @@ jobs:
           if-no-files-found: error
 
       - name: Attest
-        uses: actions/attest-build-provenance@bd77c077858b8d561b7a36cbe48ef4cc642ca39d # v2.2.2
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         if: |
           github.event_name != 'pull_request' &&
           (startsWith(github.ref, 'refs/heads/release/') ||
@@ -449,7 +568,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload report to GitHub artifacts
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: "Coverage report"
           path: './build/coverage-report'
