@@ -132,6 +132,13 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
             (cd build; make)
             ./build/test_executable
+            ldd ./build/test_executable
+            if [ $useStaticLibs = ON ]; then
+              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
           done
 
       - name: Test CMake build interface
@@ -149,6 +156,13 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
             (cd build; make)
             ./build/test_executable
+            ldd ./build/test_executable
+            if [ $static = ON ]; then
+              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
           done
 
   dodo:

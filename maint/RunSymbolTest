@@ -52,7 +52,7 @@ if [ "`uname -s`" = "Darwin" ]; then
   so_ext=dylib
   so_mangling()
     {
-    sed -E -e 's/_([_0-9a-zA-Z]+)$/\1/g'
+    $sed -E -e 's/_([_0-9a-zA-Z]+)$/\1/g'
     }
 fi
 

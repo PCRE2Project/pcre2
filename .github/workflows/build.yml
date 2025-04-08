@@ -132,6 +132,13 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
             (cd build; make)
             ./build/test_executable
+            otool -L ./build/test_executable
+            if [ $useStaticLibs = ON ]; then
+              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in otool output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
           done
 
       - name: Test CMake build interface
@@ -149,6 +156,13 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
             (cd build; make)
             ./build/test_executable
+            otool -L ./build/test_executable
+            if [ $static = ON ]; then
+              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
           done
 
   windows:
@@ -185,12 +199,28 @@ jobs:
           $INSTALL_PREFIX = (pwd).Path + "\build\install-dir"
           cd maint/cmake-tests/install-interface
 
+          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
+
           foreach ($useStaticLibs in @("ON", "OFF")) {
             echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
             if (Test-Path build) { rm -Recurse -Force build }
-            cmake -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build -A ${{ matrix.arch }}
+            cmake "-DCMAKE_PREFIX_PATH=$INSTALL_PREFIX" "-DPCRE2_USE_STATIC_LIBS=$useStaticLibs" -B build -A ${{ matrix.arch }}
             cmake --build build --config Release
             ./build/Release/test_executable.exe
+            & $dumpbin /dependents ./build/Release/test_executable.exe
+            if ($useStaticLibs -eq "ON") {
+                if ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2")) {
+                  Write-Error "Error: PCRE2 found in dumpbin output"
+                  exit 1
+                }
+            } else {
+              # Test that the shared library is actually linked in
+              if (-not ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2-8.dll"))) {
+                Write-Error "Error: Shared library not linked in"
+                exit 1
+              }
+            }
           }
 
       - name: Test CMake build interface
@@ -200,12 +230,28 @@ jobs:
           cd ../cmake-tests-build-interface
           New-Item -ItemType SymbolicLink -Path "pcre2" -Target "$BUILD_DIR"
 
+          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
+
           foreach ($buildLibs in @(@{static="ON"; shared="OFF"}, @{static="OFF"; shared="ON"})) {
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$($buildLibs.static) =="
             if (Test-Path build) { rm -Recurse -Force build }
             cmake "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
             cmake --build build --config Debug
             ./build/Debug/test_executable.exe
+            & $dumpbin /dependents ./build/Debug/test_executable.exe
+            if ($buildLibs.static -eq "ON") {
+                if ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2")) {
+                  Write-Error "Error: PCRE2 found in dumpbin output"
+                  exit 1
+                }
+            } else {
+              # Test that the shared library is actually linked in
+              if (-not ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2-8d.dll"))) {
+                Write-Error "Error: Shared library not linked in"
+                exit 1
+              }
+            }
           }
 
   freebsd:

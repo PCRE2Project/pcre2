@@ -37,7 +37,7 @@ find "$input_dir" -print | \
 # dependent on the build type. So, if the build type is not "release", we need
 # to modify the expected manifest to match the actual one. 
 cat "$expected_manifest" | \
-  sed -E -e "s/pcre2-targets-release.cmake/pcre2-targets-$build_type.cmake/" \
+  $sed -E -e "s/pcre2-targets-release.cmake/pcre2-targets-$build_type.cmake/" \
   > "$expected_file"
 
 if ! diff -u "$expected_file" "$actual_file"; then

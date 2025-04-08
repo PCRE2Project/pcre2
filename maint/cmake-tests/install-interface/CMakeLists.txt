@@ -10,7 +10,7 @@ find_package(PCRE2 REQUIRED CONFIG)
 add_executable(test_executable main.c)
 target_link_libraries(test_executable PRIVATE PCRE2::8BIT)
 
-if(WIN32 AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.21)
+if(WIN32 AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.21 AND NOT PCRE2_USE_STATIC_LIBS)
   # Ensure that the DLLs are available for the executable to run. Only needed
   # on Windows.
   add_custom_command(TARGET test_executable POST_BUILD
