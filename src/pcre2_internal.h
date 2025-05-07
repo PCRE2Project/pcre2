@@ -415,7 +415,7 @@ PCRE (both APIs) for a long time. */
 #define HSPACE_LIST \
   CHAR_HT, CHAR_SPACE, CHAR_NBSP, \
   0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, \
-  0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202f, 0x205f, 0x3000, \
+  0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000, \
   NOTACHAR
 
 #define HSPACE_MULTIBYTE_CASES \
@@ -431,7 +431,7 @@ PCRE (both APIs) for a long time. */
   case 0x2007:  /* FIGURE SPACE */ \
   case 0x2008:  /* PUNCTUATION SPACE */ \
   case 0x2009:  /* THIN SPACE */ \
-  case 0x200A:  /* HAIR SPACE */ \
+  case 0x200a:  /* HAIR SPACE */ \
   case 0x202f:  /* NARROW NO-BREAK SPACE */ \
   case 0x205f:  /* MEDIUM MATHEMATICAL SPACE */ \
   case 0x3000   /* IDEOGRAPHIC SPACE */

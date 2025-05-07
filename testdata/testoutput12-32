@@ -486,6 +486,7 @@ Subject length lower bound = 2
 
 /^[\QƒÄ\E-\Q≈ê\E/B,utf
 Failed: error 106 at offset 13: missing terminating ] for character class
+        here: ...QƒÄ\E-\Q≈ê\E |<--|
 
 /X/utf
     XX\x{d800}\=no_utf_check
@@ -523,6 +524,7 @@ Failed: error -27: UTF-32 error: code points 0xd800-0xdfff are not defined at of
 
 /(*UTF16)\x{11234}/
 Failed: error 160 at offset 7: (*VERB) not recognized or malformed
+        here: (*UTF16 |<--| )\x{11234}
   abcd\x{11234}pqr
 
 /(*UTF)\x{11234}/I
@@ -536,14 +538,17 @@ Subject length lower bound = 1
 
 /(*UTF-32)\x{11234}/
 Failed: error 160 at offset 5: (*VERB) not recognized or malformed
+        here: (*UTF |<--| -32)\x{112...
   abcd\x{11234}pqr
 
 /(*UTF-32)\x{112}/
 Failed: error 160 at offset 5: (*VERB) not recognized or malformed
+        here: (*UTF |<--| -32)\x{112...
   abcd\x{11234}pqr
 
 /(*CRLF)(*UTF16)(*BSR_UNICODE)a\Rb/I
 Failed: error 160 at offset 14: (*VERB) not recognized or malformed
+        here: ...LF)(*UTF16 |<--| )(*BSR_UNI...
 
 /(*CRLF)(*UTF32)(*BSR_UNICODE)a\Rb/I
 Capture group count = 0
@@ -764,6 +769,7 @@ Failed: error -33: bad offset value
 
 /ÌºÄ/utf
 Failed: error -27 at offset 0: UTF-32 error: code points 0xd800-0xdfff are not defined
+        here: |-->| ÌºÄ
 
 /\w+\x{C4}/B,utf
 ------------------------------------------------------------------
@@ -903,9 +909,17 @@ Failed: error -27 at offset 0: UTF-32 error: code points 0xd800-0xdfff are not d
 
 /(*UTF)abc/never_utf
 Failed: error 174 at offset 6: using UTF is disabled by the application
+        here: (*UTF) |<--| abc
 
 /abc/utf,never_utf
 Failed: error 174 at offset 0: using UTF is disabled by the application
+
+/(*UCP)abc/never_ucp
+Failed: error 175 at offset 6: using UCP is disabled by the application
+        here: (*UCP) |<--| abc
+
+/abc/ucp,never_ucp
+Failed: error 175 at offset 0: using UCP is disabled by the application
 
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/IBi,utf
 ------------------------------------------------------------------
@@ -1014,9 +1028,11 @@ Subject length lower bound = 1
 
 /\x{110000}/utf
 Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too large
+        here: \x{110000 |<--| }
 
 /\o{4200000}/utf
 Failed: error 134 at offset 10: character code point value in \x{} or \o{} is too large
+        here: \o{4200000 |<--| }
 
 /\x{100}*A/IB,utf
 ------------------------------------------------------------------
@@ -1397,6 +1413,14 @@ No match
     \x{7fffffff}
 No match
 
+/\p{  A·à¥}/utf
+Failed: error 146 at offset 7: malformed \P or \p sequence
+        here: \p{  A·à¥ |<--| }
+
+/\p{BC: A·à¥}/utf
+Failed: error 146 at offset 9: malformed \P or \p sequence
+        here: \p{BC: A·à¥ |<--| }
+
 # A special extra option allows excaped surrogate code points in 32-bit mode,
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
@@ -1480,9 +1504,11 @@ No match
 
 /(?(n/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+        here: (?(n |<--|
 
 /(?(√°/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+        here: (?(√° |<--|
 
 # Invalid UTF-16/32 tests.
 

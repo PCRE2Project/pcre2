@@ -4,8 +4,10 @@
 
 /a\Cb/
 Failed: error 185 at offset 3: using \C is disabled in this PCRE2 library
+        here: a\C |<--| b
 
 /a[\C]b/
 Failed: error 107 at offset 3: escape sequence is invalid in character class
+        here: a[\ |-->| C]b
 
 # End of testinput23

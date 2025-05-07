@@ -491,6 +491,7 @@ Subject length lower bound = 2
 
 /^[\QÄ€\E-\QÅ\E/B,utf
 Failed: error 106 at offset 13: missing terminating ] for character class
+        here: ...QÄ€\E-\QÅ\E |<--|
 
 /X/utf
     XX\x{d800}\=no_utf_check
@@ -542,10 +543,12 @@ Subject length lower bound = 1
 
 /(*UTF-32)\x{11234}/
 Failed: error 160 at offset 5: (*VERB) not recognized or malformed
+        here: (*UTF |<--| -32)\x{112...
   abcd\x{11234}pqr
 
 /(*UTF-32)\x{112}/
 Failed: error 160 at offset 5: (*VERB) not recognized or malformed
+        here: (*UTF |<--| -32)\x{112...
   abcd\x{11234}pqr
 
 /(*CRLF)(*UTF16)(*BSR_UNICODE)a\Rb/I
@@ -560,6 +563,7 @@ Subject length lower bound = 3
 
 /(*CRLF)(*UTF32)(*BSR_UNICODE)a\Rb/I
 Failed: error 160 at offset 14: (*VERB) not recognized or malformed
+        here: ...LF)(*UTF32 |<--| )(*BSR_UNI...
 
 /\h/I,utf
 Capture group count = 0
@@ -770,6 +774,7 @@ Failed: error -33: bad offset value
 
 /í¼€/utf
 Failed: error -26 at offset 0: UTF-16 error: isolated low surrogate
+        here: |-->| í¼€
 
 /\w+\x{C4}/B,utf
 ------------------------------------------------------------------
@@ -909,9 +914,17 @@ Failed: error -26 at offset 0: UTF-16 error: isolated low surrogate
 
 /(*UTF)abc/never_utf
 Failed: error 174 at offset 6: using UTF is disabled by the application
+        here: (*UTF) |<--| abc
 
 /abc/utf,never_utf
 Failed: error 174 at offset 0: using UTF is disabled by the application
+
+/(*UCP)abc/never_ucp
+Failed: error 175 at offset 6: using UCP is disabled by the application
+        here: (*UCP) |<--| abc
+
+/abc/ucp,never_ucp
+Failed: error 175 at offset 0: using UCP is disabled by the application
 
 /A\x{391}\x{10427}\x{ff3a}\x{1fb0}/IBi,utf
 ------------------------------------------------------------------
@@ -1020,9 +1033,11 @@ Subject length lower bound = 1
 
 /\x{110000}/utf
 Failed: error 134 at offset 9: character code point value in \x{} or \o{} is too large
+        here: \x{110000 |<--| }
 
 /\o{4200000}/utf
 Failed: error 134 at offset 10: character code point value in \x{} or \o{} is too large
+        here: \o{4200000 |<--| }
 
 /\x{100}*A/IB,utf
 ------------------------------------------------------------------
@@ -1405,6 +1420,14 @@ No match
 ** Truncation will probably give the wrong result.
 No match
 
+/\p{  Aáˆ´}/utf
+Failed: error 146 at offset 7: malformed \P or \p sequence
+        here: \p{  Aáˆ´ |<--| }
+
+/\p{BC: Aáˆ´}/utf
+Failed: error 146 at offset 9: malformed \P or \p sequence
+        here: \p{BC: Aáˆ´ |<--| }
+
 # A special extra option allows excaped surrogate code points in 32-bit mode,
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
@@ -1482,9 +1505,11 @@ Failed: error 191 at offset 0: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowe
 
 /(?(n/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+        here: (?(n |<--|
 
 /(?(Ã¡/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
+        here: (?(Ã¡ |<--|
 
 # Invalid UTF-16/32 tests.
 
@@ -1959,6 +1984,7 @@ No match
 
 /\x{802a0000}*/
 Failed: error 134 at offset 11: character code point value in \x{} or \o{} is too large
+        here: ...x{802a0000 |<--| }*
     \x{802a0000}\x{802a0000}
 
 # UTF matching without UTF, check invalid UTF characters
@@ -1973,6 +1999,7 @@ Failed: error 134 at offset 11: character code point value in \x{} or \o{} is to
 # This used to loop in 32-bit mode; it will fail in 16-bit mode.
 /[\x{ffffffff}]/caseless,ucp
 Failed: error 134 at offset 12: character code point value in \x{} or \o{} is too large
+        here: ...x{ffffffff |<--| }]
     \x{ffffffff}xyz
     
 # These are 32-bit tests for handing 0xffffffff when in UCP caselsss mode. They
@@ -1980,21 +2007,25 @@ Failed: error 134 at offset 12: character code point value in \x{} or \o{} is to
 
 /k*\x{ffffffff}/caseless,ucp
 Failed: error 134 at offset 13: character code point value in \x{} or \o{} is too large
+        here: ...x{ffffffff |<--| }
     \x{ffffffff}
 
 /k+\x{ffffffff}/caseless,ucp,no_start_optimize
 Failed: error 134 at offset 13: character code point value in \x{} or \o{} is too large
+        here: ...x{ffffffff |<--| }
     K\x{ffffffff}
 \= Expect no match     
     \x{ffffffff}\x{ffffffff}
 
 /k{2}\x{ffffffff}/caseless,ucp,no_start_optimize
 Failed: error 134 at offset 15: character code point value in \x{} or \o{} is too large
+        here: ...x{ffffffff |<--| }
 \= Expect no match
     \x{ffffffff}\x{ffffffff}\x{ffffffff}
 
 /k\x{ffffffff}/caseless,ucp,no_start_optimize
 Failed: error 134 at offset 12: character code point value in \x{} or \o{} is too large
+        here: ...x{ffffffff |<--| }
     K\x{ffffffff}
 \= Expect no match
     \x{ffffffff}\x{ffffffff}\x{ffffffff}

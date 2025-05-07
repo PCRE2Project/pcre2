@@ -2217,6 +2217,7 @@ after the final code unit of the escape sequence.
 
 Arguments:
   ptrptr         the pattern position pointer
+  utf            true if the input is UTF-encoded
   negptr         a boolean that is set TRUE for negation else FALSE
   ptypeptr       an unsigned int that is set to the type value
   pdataptr       an unsigned int that is set to the detailed property value
@@ -2227,18 +2228,23 @@ Returns:         TRUE if the type value was found, or FALSE for an invalid type
 */
 
 static BOOL
-get_ucp(PCRE2_SPTR *ptrptr, BOOL *negptr, uint16_t *ptypeptr,
+get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
   uint16_t *pdataptr, int *errorcodeptr, compile_block *cb)
 {
-PCRE2_UCHAR c;
-PCRE2_SIZE i, bot, top;
+uint32_t c;
+ptrdiff_t i;
+PCRE2_SIZE bot, top;
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_UCHAR name[50];
 PCRE2_UCHAR *vptr = NULL;
 uint16_t ptscript = PT_NOTSCRIPT;
 
+#ifndef MAYBE_UTF_MULTI
+(void)utf;  /* Avoid compiler warning */
+#endif
+
 if (ptr >= cb->end_pattern) goto ERROR_RETURN;
-c = *ptr++;
+GETCHARINCTEST(c, ptr);
 *negptr = FALSE;
 
 /* \P or \p can be followed by a name in {}, optionally preceded by ^ for
@@ -2259,15 +2265,14 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
     REDO:
 
     if (ptr >= cb->end_pattern) goto ERROR_RETURN;
-    c = *ptr++;
+    GETCHARINCTEST(c, ptr);
 
     /* Skip ignorable Unicode characters. */
 
-    while (c == CHAR_UNDERSCORE || c == CHAR_MINUS || c == CHAR_SPACE ||
-          (c >= CHAR_HT && c <= CHAR_CR))
+    if (c == CHAR_UNDERSCORE || c == CHAR_MINUS || c == CHAR_SPACE ||
+        (c >= CHAR_HT && c <= CHAR_CR))
       {
-      if (ptr >= cb->end_pattern) goto ERROR_RETURN;
-      c = *ptr++;
+      goto REDO;
       }
 
     /* The first significant character being circumflex negates the meaning of
@@ -3678,7 +3683,7 @@ while (ptr < ptrend)
         {
         BOOL negated;
         uint16_t ptype = 0, pdata = 0;
-        if (!get_ucp(&ptr, &negated, &ptype, &pdata, &errorcode, cb))
+        if (!get_ucp(&ptr, utf, &negated, &ptype, &pdata, &errorcode, cb))
           goto ESCAPE_FAILED;
         if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
         *parsed_pattern++ = META_ESCAPE + escape;
@@ -4491,7 +4496,7 @@ while (ptr < ptrend)
             {
             BOOL negated;
             uint16_t ptype = 0, pdata = 0;
-            if (!get_ucp(&ptr, &negated, &ptype, &pdata, &errorcode, cb))
+            if (!get_ucp(&ptr, utf, &negated, &ptype, &pdata, &errorcode, cb))
               goto FAILED;
 
             /* In caseless matching, particular characteristics Lu, Ll, and Lt
@@ -6095,7 +6100,10 @@ for (;; pptr++)
         *errorcodeptr = ERR52;  /* Over-ran workspace - internal error */
         }
       else
-        *errorcodeptr = ERR86;
+        {
+        *errorcodeptr = ERR86;  /* Pattern too complicated */
+        cb->erroroffset = 0;
+        }
       return 0;
       }
 
@@ -6116,12 +6124,14 @@ for (;; pptr++)
       if (OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
         {
         *errorcodeptr = ERR20;   /* Integer overflow */
+        cb->erroroffset = 0;
         return 0;
         }
       *lengthptr += (PCRE2_SIZE)(code - orig_code);
       if (*lengthptr > MAX_PATTERN_SIZE)
         {
         *errorcodeptr = ERR20;   /* Pattern is too large */
+        cb->erroroffset = 0;
         return 0;
         }
       code = orig_code;
@@ -8498,6 +8508,7 @@ if (cb->cx->stack_guard != NULL &&
     cb->cx->stack_guard(cb->parens_depth, cb->cx->stack_guard_data))
   {
   *errorcodeptr= ERR33;
+  cb->erroroffset = 0;
   return 0;
   }
 
@@ -10429,6 +10440,7 @@ if ((options & PCRE2_LITERAL) == 0)
             {
             errorcode = ERR60;
             ptr += pp;
+            utf = FALSE;  /* Used by HAD_EARLY_ERROR */
             goto HAD_EARLY_ERROR;
             }
           if (p->type == PSO_LIMH) limit_heap = c;
@@ -10720,6 +10732,7 @@ if (length > MAX_PATTERN_SIZE)
 #endif
   {
   errorcode = ERR20;
+  cb.erroroffset = 0;
   goto HAD_CB_ERROR;
   }
 
@@ -10748,6 +10761,7 @@ re_blocksize += CU2BYTES(length);
 if (re_blocksize > ccontext->max_pattern_compiled_length)
   {
   errorcode = ERR101;
+  cb.erroroffset = 0;
   goto HAD_CB_ERROR;
   }
 
@@ -10757,6 +10771,7 @@ re = (pcre2_real_code *)
 if (re == NULL)
   {
   errorcode = ERR21;
+  cb.erroroffset = 0;
   goto HAD_CB_ERROR;
   }
 
@@ -11162,8 +11177,22 @@ HAD_CB_ERROR:
 ptr = pattern + cb.erroroffset;
 
 HAD_EARLY_ERROR:
-PCRE2_ASSERT(ptr >= pattern); /* Ensure we don't return invalid erroroffset */
+/* Ensure we don't return out-of-range erroroffset. */
+PCRE2_ASSERT(ptr >= pattern);
 PCRE2_ASSERT(ptr <= (pattern + patlen));
+/* Ensure that the erroroffset never slices a UTF-encoded character in half.
+If the input is invalid, then we return an offset just before the first invalid
+character, so the text to the left of the offset must always be valid. */
+#if defined PCRE2_DEBUG && defined SUPPORT_UNICODE
+if (ptr > pattern && utf)
+  {
+  PCRE2_SPTR prev = ptr - 1;
+  PCRE2_SIZE dummyoffset;
+  BACKCHAR(prev);
+  PCRE2_ASSERT(prev >= pattern);
+  PCRE2_ASSERT(PRIV(valid_utf)(prev, ptr - prev, &dummyoffset) == 0);
+  }
+#endif
 *erroroffset = ptr - pattern;
 
 HAD_ERROR:
