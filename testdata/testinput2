@@ -7961,6 +7961,9 @@ a)"xI
 \= Expect no match
   Saturday,Sun
 
+/()()()(?2(2,3,2,3,2))/B
+  abc
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/

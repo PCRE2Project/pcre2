@@ -479,6 +479,7 @@ while (TRUE)
   tmp = captures[i];
   captures[i] = captures[max];
   captures[max] = tmp;
+  i = max;
   }
 }
 
