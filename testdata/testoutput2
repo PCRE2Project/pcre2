@@ -22408,6 +22408,27 @@ No match
   Saturday,Sun
 No match
 
+/()()()(?2(2,3,2,3,2))/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        Ket
+        CBra 2
+        Ket
+        CBra 3
+        Ket
+        Recurse
+      2 Capture ref
+      3 Capture ref
+        Ket
+        End
+------------------------------------------------------------------
+  abc
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
