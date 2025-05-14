@@ -3143,6 +3143,8 @@
 
 #endif
 
+/^\c/
+
 /(?P<abn>(?P=abn)xxx)/B
 
 /(a\1z)/B
@@ -6018,6 +6020,16 @@ a)"xI
 /(X{65535})(?<=\1{32770})/
 
 # ---- Non-atomic assertion tests ----
+
+/(*ploo:abc)/
+
+/(*pla:abc/
+
+/(*pla:/
+
+/(*pla/
+
+/(*pla}abc)/
 
 # Expect error: not allowed as a condition
 /(?(*napla:xx)bc)/

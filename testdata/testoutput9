@@ -42,9 +42,11 @@ No match
 
 /\x{100}/I
 Failed: error 134 at offset 6: character code point value in \x{} or \o{} is too large
+        here: \x{100 |<--| }
 
 /\o{400}/I
 Failed: error 134 at offset 6: character code point value in \x{} or \o{} is too large
+        here: \o{400 |<--| }
 
 #if !ebcdic
 
@@ -341,13 +343,16 @@ Subject length lower bound = 1
 
 /\777/I
 Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF-8 mode
+        here: \777 |<--|
 
 /(*:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF)XX/mark
 Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
+        here: ...6789ABCDEF |<--| )XX
     XX
      
 /(*:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF)XX/mark,alt_verbnames
 Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
+        here: ...6789ABCDEF |<--| )XX
     XX
      
 /(*:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDE)XX/mark
@@ -362,9 +367,11 @@ MK: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789AB
 
 /\u0100/alt_bsux,allow_empty_class,match_unset_backref,dupnames
 Failed: error 177 at offset 6: character code point value in \u.... sequence is too large
+        here: \u0100 |<--|
 
 /[\u0100-\u0200]/alt_bsux,allow_empty_class,match_unset_backref,dupnames
 Failed: error 177 at offset 7: character code point value in \u.... sequence is too large
+        here: [\u0100 |<--| -\u0200]
 
 #if !ebcdic
 
@@ -400,12 +407,15 @@ Failed: error 177 at offset 7: character code point value in \u.... sequence is 
 
 /(*MARK:a\x{100}b)z/alt_verbnames 
 Failed: error 134 at offset 14: character code point value in \x{} or \o{} is too large
+        here: ...RK:a\x{100 |<--| }b)z
 
 /(*:*++++++++++++''''''''''''''''''''+''+++'+++x+++++++++++++++++++++++++++++++++++(++++++++++++++++++++:++++++%++:''''''''''''''''''''''''+++++++++++++++++++++++++++++++++++++++++++++++++++++-++++++++k+++++++''''+++'+++++++++++++++++++++++''''++++++++++++':ƿ)/
 Failed: error 176 at offset 259: name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
+        here: ...++++++':ƿ |<--| )
 
 /(?i:A{1,}\6666666666)/
 Failed: error 151 at offset 13: octal value is greater than \377 in 8-bit non-UTF-8 mode
+        here: ...:A{1,}\666 |<--| 6666666)
     A\x{1b6}6666666
 
 # Should cause an error

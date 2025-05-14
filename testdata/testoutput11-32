@@ -547,6 +547,7 @@ MK: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789AB
 
 /\x{100000000}/
 Failed: error 134 at offset 12: character code point value in \x{} or \o{} is too large
+        here: ...{100000000 |<--| }
 
 /\o{17777777777}/
 
@@ -556,6 +557,7 @@ Failed: error 134 at offset 12: character code point value in \x{} or \o{} is to
 
 /\o{40000000000}/
 Failed: error 134 at offset 14: character code point value in \x{} or \o{} is too large
+        here: ...0000000000 |<--| }
 
 /\x{7fffffff}\x{7fffffff}/I
 Capture group count = 0
