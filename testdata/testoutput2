@@ -8877,7 +8877,7 @@ Failed: error 115 at offset 9: reference to non-existent subpattern
         here: (?<a>)(?& |<-->| aaaaaaaaaa...
 
 /(?+-a)/
-Failed: error 129 at offset 2: digit expected after (?+ or (?-
+Failed: error 129 at offset 2: digit expected after (?+
         here: (? |-->| +-a)
 
 /(?-+a)/

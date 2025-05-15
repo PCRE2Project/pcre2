@@ -95,7 +95,7 @@ static const unsigned char compile_error_texts[] =
   "a relative value of zero is not allowed\0"
   "conditional subpattern contains more than two branches\0"
   "atomic assertion expected after (?( or (?(?C)\0"
-  "digit expected after (?+ or (?-\0"
+  "digit expected after (?+\0"
   /* 30 */
   "unknown POSIX class name\0"
   "internal error in pcre2_study(): should not occur\0"
