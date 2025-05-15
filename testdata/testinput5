@@ -1657,6 +1657,10 @@
 
 "(*UTF)(*UCP)(.UTF).+X(\V+;\^(\D|)!999}(?(?C{7(?C')\H*\S*/^\x5\xa\\xd3\x85n?(;\D*(?m).[^mH+((*UCP)(*U:F)})(?!^)(?'"
 
+/(?(?C'')\Qé/utf
+
+/(?(?C'')é/utf
+
 /[\pS#moq]/
     =
 
@@ -2067,6 +2071,12 @@
 /\N{U+}/utf
 
 /\N{U}/
+
+/\N{U+}/utf
+
+/\N{U+1}/
+
+/\N{U+1 }/
 
 # This tests the non-UTF Unicode NEL pattern whitespace character, only
 # recognized by PCRE2 with /x when there is Unicode support.

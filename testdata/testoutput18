@@ -74,7 +74,7 @@ No match: POSIX code 17: match failed
  0: abc
 
 /(abc)\2/
-Failed: POSIX code 15: bad back reference at offset 6
+Failed: POSIX code 15: bad back reference at offset 7
 
 /(abc\1)/
 \= Expect no match
@@ -162,7 +162,7 @@ Failed: POSIX code 4: ? * + invalid at offset 100000
 ** regerror() message truncated
 
 /\[A]{1000000}**/expand,regerror_buffsize=32
-Failed: POSIX code 4: ? * + invalid at offset 1000001
+Failed: POSIX code 4: ? * + invalid at offset 1000002
 
 //posix_nosub
     \=offset=70000

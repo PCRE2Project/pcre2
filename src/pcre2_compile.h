@@ -62,7 +62,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR81,  ERR82,  ERR83,  ERR84,  ERR85,  ERR86,  ERR87,  ERR88,  ERR89,  ERR90,
        ERR91,  ERR92,  ERR93,  ERR94,  ERR95,  ERR96,  ERR97,  ERR98,  ERR99,  ERR100,
        ERR101, ERR102, ERR103, ERR104, ERR105, ERR106, ERR107, ERR108, ERR109, ERR110,
-       ERR111, ERR112, ERR113, ERR114, ERR115, ERR116, ERR117, ERR118 };
+       ERR111, ERR112, ERR113, ERR114, ERR115, ERR116, ERR117, ERR118, ERR119 };
 
 /* Code values for parsed patterns, which are stored in a vector of 32-bit
 unsigned ints. Values less than META_END are literal data values. The coding

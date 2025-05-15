@@ -100,7 +100,7 @@ RC=0
 ./testdata/grepinputx:To pat or not to pat, that is the question.
 RC=0
 ---------------------------- Test 15 -----------------------------
-pcre2grep: Error in command-line regex at offset 4: quantifier does not follow a repeatable item
+pcre2grep: Error in command-line regex at offset 5: quantifier does not follow a repeatable item
 RC=2
 ---------------------------- Test 16 -----------------------------
 pcre2grep: Failed to open ./testdata/nonexistfile: No such file or directory
@@ -435,7 +435,7 @@ RC=0
 597:binary
 RC=0
 ---------------------------- Test 46 ------------------------------
-pcre2grep: Error in 1st command-line regex at offset 8: unmatched closing parenthesis
+pcre2grep: Error in 1st command-line regex at offset 9: unmatched closing parenthesis
 RC=2
 pcre2grep: Error in 2nd command-line regex at offset 9: missing closing parenthesis
 RC=2
@@ -989,7 +989,7 @@ RC=0
 ---------------------------- Test 126 -----------------------------
 ABC XYZ
 RC=0
-pcre2grep: Error in regex in line 2 of testtemp1grep at offset 4: unmatched closing parenthesis
+pcre2grep: Error in regex in line 2 of testtemp1grep at offset 5: unmatched closing parenthesis
 RC=2
 ---------------------------- Test 127 -----------------------------
 pattern

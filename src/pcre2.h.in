@@ -345,6 +345,7 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_PERL_ECLASS_UNEXPECTED_CHAR    216
 #define PCRE2_ERROR_EXPECTED_CAPTURE_GROUP         217
 #define PCRE2_ERROR_MISSING_OPENING_PARENTHESIS    218
+#define PCRE2_ERROR_MISSING_NUMBER_TERMINATOR      219
 
 /* "Expected" matching error codes: no match and partial match. */
 
