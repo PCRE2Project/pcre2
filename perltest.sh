@@ -370,7 +370,14 @@ for (;;)
   eval "\$_ =~ ${pattern}";
   if ($@)
     {
-    printf $outfile "Error: $@";
+    if ($@ =~ /marked by <-- HERE in m\/(.*?) <-- HERE/s)
+      {
+      printf $outfile "Failed: error XXX at offset %d: XXX\n", length($1);
+      }
+    else
+      {
+      printf $outfile "Error: $@";
+      }
     if (! $interact)
       {
       for (;;)
@@ -378,6 +385,7 @@ for (;;)
         last if ! ($_ = <$infile>);
         last if $_ =~ /^\s*$/;
         }
+      printf $outfile "$_";
       }
     next NEXT_RE;
     }
