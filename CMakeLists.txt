@@ -421,7 +421,6 @@ if(MINGW)
 endif()
 
 if(MSVC)
-  option(PCRE2_STATIC_RUNTIME "ON=Compile against the static runtime (/MT)." OFF)
   option(INSTALL_MSVC_PDB "ON=Install .pdb files built by MSVC, if generated" OFF)
 endif()
 
@@ -844,23 +843,6 @@ if(MSVC AND BUILD_SHARED_LIBS)
   if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2posix.rc)
     list(APPEND PCRE2POSIX_SOURCES pcre2posix.rc)
   endif()
-endif()
-
-# Fix static compilation with MSVC: https://bugs.exim.org/show_bug.cgi?id=1681
-# This code was taken from the CMake wiki, not from WebM.
-
-if(MSVC AND PCRE2_STATIC_RUNTIME)
-  message(STATUS "** MSVC and PCRE2_STATIC_RUNTIME: modifying compiler flags to use static runtime library")
-  foreach(
-    flag_var
-    CMAKE_C_FLAGS
-    CMAKE_C_FLAGS_DEBUG
-    CMAKE_C_FLAGS_RELEASE
-    CMAKE_C_FLAGS_MINSIZEREL
-    CMAKE_C_FLAGS_RELWITHDEBINFO
-  )
-    string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-  endforeach()
 endif()
 
 # Build setup
