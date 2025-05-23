@@ -12,6 +12,7 @@ permissions:
 env:
   CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings'
   CFLAGS_MSVC: '/W3'
+  CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
 
 jobs:
 
@@ -106,7 +107,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -129,7 +130,7 @@ jobs:
           for useStaticLibs in ON OFF; do
             echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
             rm -rf build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
             (cd build; make)
             ./build/test_executable
             ldd ./build/test_executable
@@ -153,7 +154,7 @@ jobs:
             shared=`echo $buildLibs | cut -d';' -f2`
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
             rm -rf build
-            cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
             (cd build; make)
             ./build/test_executable
             ldd ./build/test_executable
@@ -221,10 +222,11 @@ jobs:
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
-          path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
+          path: ../cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
 
       - name: Install CMake
         run: |
+          cd ..
           [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
           tar -xz -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz
           realpath "cmake-${CMAKE_VER}-Linux-x86_64/bin" >> "$GITHUB_PATH"
@@ -232,7 +234,7 @@ jobs:
       - name: Configure
         run: |
           cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
-          CC='clang' cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
+          CC='clang' cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=MinSizeRel -B build
 
       - name: Build
         run: ninja -C build
@@ -258,7 +260,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A Win32
+        run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2GREP_SUPPORT_CALLOUT_FORK=OFF -DPCRE2_DEBUG=ON -DPCRE2_NEWLINE=ANYCRLF -DPCRE2_STATIC_PIC=ON -DPCRE2_STATIC_RUNTIME=ON -DPCRE2_SUPPORT_BSR_ANYCRLF=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A Win32
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo
@@ -277,7 +279,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=OFF -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
+        run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=OFF -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A x64
 
       - name: Build
         run: cmake --build build --config Debug
@@ -338,7 +340,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $CFLAGS_UNITY" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake $CMAKE_FLAGS -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $CFLAGS_UNITY" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -379,7 +381,7 @@ jobs:
 
       - name: Configure
         shell: msys2 {0}
-        run: cmake -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake $CMAKE_FLAGS -G Ninja -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         shell: msys2 {0}
@@ -442,6 +444,7 @@ jobs:
 
           env: | # YAML, but pipe character is necessary
             CFLAGS_GCC_STYLE: ${{ env.CFLAGS_GCC_STYLE }}
+            CMAKE_FLAGS: ${{ env.CMAKE_FLAGS }}
 
           install: |
             apt-get -qq update
@@ -450,7 +453,7 @@ jobs:
           run: |
             set -e
             # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
-            cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
+            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
             ninja -C build
             (cd build && ctest -j3 --output-on-failure)
 

@@ -13,6 +13,7 @@ env:
   CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings'
   CFLAGS_MSVC: '/W3'
   CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
+  CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
 
 jobs:
   linux:
@@ -106,7 +107,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -129,7 +130,7 @@ jobs:
           for useStaticLibs in ON OFF; do
             echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
             rm -rf build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
             (cd build; make)
             ./build/test_executable
             otool -L ./build/test_executable
@@ -153,7 +154,7 @@ jobs:
             shared=`echo $buildLibs | cut -d';' -f2`
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
             rm -rf build
-            cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
             (cd build; make)
             ./build/test_executable
             otool -L ./build/test_executable
@@ -194,7 +195,7 @@ jobs:
       - name: Configure
         run: |
           echo "PATH=$env:PATH"
-          cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
+          cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_C_FLAGS="$CFLAGS_MSVC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -B build -A ${{ matrix.arch }}
 
       - name: Build
         run: cmake --build build --config Release
@@ -220,7 +221,7 @@ jobs:
           foreach ($useStaticLibs in @("ON", "OFF")) {
             echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
             if (Test-Path build) { rm -Recurse -Force build }
-            cmake "-DCMAKE_PREFIX_PATH=$INSTALL_PREFIX" "-DPCRE2_USE_STATIC_LIBS=$useStaticLibs" -B build -A ${{ matrix.arch }}
+            cmake $CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=$INSTALL_PREFIX" "-DPCRE2_USE_STATIC_LIBS=$useStaticLibs" -B build -A ${{ matrix.arch }}
             cmake --build build --config Release
             ./build/Release/test_executable.exe
             & $dumpbin /dependents ./build/Release/test_executable.exe
@@ -251,7 +252,7 @@ jobs:
           foreach ($buildLibs in @(@{static="ON"; shared="OFF"}, @{static="OFF"; shared="ON"})) {
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$($buildLibs.static) =="
             if (Test-Path build) { rm -Recurse -Force build }
-            cmake "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
+            cmake $CMAKE_FLAGS "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
             cmake --build build --config Debug
             ./build/Debug/test_executable.exe
             & $dumpbin /dependents ./build/Debug/test_executable.exe
@@ -285,7 +286,7 @@ jobs:
       - name: Build & test
         uses: vmactions/freebsd-vm@c3ae29a132c8ef1924775414107a97cac042aad5 # v1.2.0
         with:
-          envs: 'CFLAGS_GCC_STYLE'
+          envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
           prepare: |
             pkg install -y cmake
@@ -310,7 +311,7 @@ jobs:
             echo "== CMake =="
             cd ../build-cmake
 
-            cmake -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make -j3
             ctest -j3 --output-on-failure
@@ -342,7 +343,7 @@ jobs:
       - name: Build & test
         uses: vmactions/solaris-vm@cc8f82fa1a7cc746153ec3f71bf11f311f16e225 # v1.1.1
         with:
-          envs: 'CFLAGS_SOLARIS_CC'
+          envs: 'CFLAGS_SOLARIS_CC CMAKE_FLAGS'
           usesh: true
           # Seriously! Solaris is the only OS to actually ship without a C
           # compiler, and not even to provide a simple download to get one!
@@ -392,7 +393,7 @@ jobs:
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
 
-            CC="cc -m64" cmake -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            CC="cc -m64" cmake $CMAKE_FLAGS -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
             ctest -j3 --output-on-failure
@@ -520,7 +521,7 @@ jobs:
           submodules: true
 
       - name: Configure
-        run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake -DCMAKE_BUILD_TYPE=Debug -DPCRE2_DEBUG=OFF -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -B build
+        run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DPCRE2_DEBUG=OFF -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -B build
 
       - name: Build
         run: cd build && make -j3
