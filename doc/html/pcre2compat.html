@@ -48,7 +48,11 @@ any kind of quantifier on non-lookaround assertions.
 <p>
 4. If a braced quantifier such as {1,2} appears where there is nothing to
 repeat (for example, at the start of a branch), PCRE2 raises an error whereas
-Perl treats the quantifier characters as literal.
+Perl treats the quantifier characters as literal. When a braced quantifier
+(...){min,max} has min &#62; max, Perl treats it as an item which fails to match
+any portion of the subject (as no number of repetitions can meet the
+condition), and additionally issues a warning when in warning mode. PCRE2 has
+no warning features, so it gives an error in this case.
 </p>
 <p>
 5. Capture groups that occur inside negative lookaround assertions are counted,

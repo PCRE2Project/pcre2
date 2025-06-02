@@ -5510,7 +5510,12 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
 
        4.  If a braced quantifier such as {1,2} appears where there is nothing
        to repeat (for example, at the start of a branch), PCRE2 raises an  er-
-       ror whereas Perl treats the quantifier characters as literal.
+       ror  whereas  Perl  treats the quantifier characters as literal. When a
+       braced quantifier (...){min,max} has min > max, Perl treats  it  as  an
+       item  which  fails to match any portion of the subject (as no number of
+       repetitions can meet the condition), and additionally issues a  warning
+       when in warning mode. PCRE2 has no warning features, so it gives an er-
+       ror in this case.
 
        5.  Capture groups that occur inside negative lookaround assertions are
        counted, but their entries in the offsets vector are set  only  when  a
