@@ -289,6 +289,7 @@ jobs:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
           prepare: |
+            set -e
             pkg install -y cmake
 
           run: |
@@ -350,6 +351,7 @@ jobs:
           # You have to actually register with Oracle to get an X.509
           # certificate before you can even download their compiler. Whatever.
           prepare: |
+            set -e
             cp "$GITHUB_WORKSPACE/pkg.oracle.com.key.pem" /root/pkg.oracle.com.key.pem
             cp "$GITHUB_WORKSPACE/pkg.oracle.com.certificate.pem" /root/pkg.oracle.com.certificate.pem
             sudo pkg set-publisher \
