@@ -1098,6 +1098,11 @@ is cast as needed. For long data lines it grows as necessary. */
 static size_t dbuffer_size = 1u << 14;    /* Initial size, bytes */
 static uint8_t *dbuffer = NULL;
 
+/* We use a separate buffer for reading error messages out of PCRE2. */
+
+static uint8_t errorbuffer[128*4];
+static size_t errorbuffer_size = sizeof(errorbuffer);
+
 
 /* ---------------- Mode-dependent variables -------------------*/
 
@@ -1214,6 +1219,14 @@ are supported. */
   else \
     (void)pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
 
+#define PTRUNCV(p, p_len, offset, left, utf, f) \
+  if (test_mode == PCRE32_MODE) \
+    ptrunc32((PCRE2_SPTR32)(p), p_len, offset, left, utf, f); \
+  else if (test_mode == PCRE16_MODE) \
+    ptrunc16((PCRE2_SPTR16)(p), p_len, offset, left, utf, f); \
+  else \
+    ptrunc8((PCRE2_SPTR8)(p), p_len, offset, left, utf, f)
+
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
   if (test_mode == PCRE8_MODE) \
      a = pcre2_callout_enumerate_8(compiled_code8, \
@@ -1270,13 +1283,13 @@ are supported. */
   else \
     a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h,i,j)
 
-#define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
+#define PCRE2_GET_ERROR_MESSAGE(r,a) \
   if (test_mode == PCRE8_MODE) \
-    r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size)); \
+    r = pcre2_get_error_message_8(a,(PCRE2_UCHAR8 *)errorbuffer,errorbuffer_size); \
   else if (test_mode == PCRE16_MODE) \
-    r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size/2)); \
+    r = pcre2_get_error_message_16(a,(PCRE2_UCHAR16 *)errorbuffer,errorbuffer_size/2); \
   else \
-    r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size/4))
+    r = pcre2_get_error_message_32(a,(PCRE2_UCHAR32 *)errorbuffer,errorbuffer_size/4)
 
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   if (test_mode == PCRE8_MODE) \
@@ -1693,9 +1706,9 @@ are supported. */
   else \
     G(x,32) = (uint32_t *)(y)
 
-#define STRLEN(p) ((test_mode == PCRE8_MODE)? ((int)strlen((char *)p)) : \
-  (test_mode == PCRE16_MODE)? ((int)strlen16((PCRE2_SPTR16)p)) : \
-  ((int)strlen32((PCRE2_SPTR32)p)))
+#define STRLEN(p) ((test_mode == PCRE8_MODE)? strlen((char *)p) : \
+  (test_mode == PCRE16_MODE)? strlen16((PCRE2_SPTR16)p) : \
+  strlen32((PCRE2_SPTR32)p))
 
 #define SUB1(a,b) \
   if (test_mode == PCRE8_MODE) G(a,8)(G(b,8)); \
@@ -1801,6 +1814,12 @@ the three different cases. */
   else \
     (void)G(pchars,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)+offset, len, utf, f)
 
+#define PTRUNCV(p, p_len, offset, left, utf, f) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(ptrunc,BITONE)((G(PCRE2_SPTR,BITONE))(p), p_len, offset, left, utf, f); \
+  else \
+    G(ptrunc,BITTWO)((G(PCRE2_SPTR,BITTWO))(p), p_len, offset, left, utf, f)
+
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
      a = G(pcre2_callout_enumerate,BITONE)(G(compiled_code,BITONE), \
@@ -1847,11 +1866,13 @@ the three different cases. */
     a = G(pcre2_dfa_match_,BITTWO)(G(b,BITTWO),(G(PCRE2_SPTR,BITTWO))c,d,e,f, \
       G(g,BITTWO),h,i,j)
 
-#define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
+#define PCRE2_GET_ERROR_MESSAGE(r,a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
-    r = G(pcre2_get_error_message_,BITONE)(a,G(b,BITONE),G(G(b,BITONE),_size/BYTEONE)); \
+    r = G(pcre2_get_error_message_,BITONE)(a,(G(PCRE2_UCHAR,BITONE) *)errorbuffer, \
+      errorbuffer_size/BYTEONE); \
   else \
-    r = G(pcre2_get_error_message_,BITTWO)(a,G(b,BITTWO),G(G(b,BITTWO),_size/BYTETWO))
+    r = G(pcre2_get_error_message_,BITTWO)(a,(G(PCRE2_UCHAR,BITTWO) *)errorbuffer, \
+      errorbuffer_size/BYTETWO)
 
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2237,6 +2258,8 @@ the three different cases. */
   lv = pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars8((PCRE2_SPTR8)(p)+offset, len, utf, f)
+#define PTRUNCV(p, p_len, offset, left, utf, f) \
+  ptrunc8((PCRE2_SPTR8)(p), p_len, offset, left, utf, f)
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
    a = pcre2_callout_enumerate_8(compiled_code8, \
      (int (*)(struct pcre2_callout_enumerate_block_8 *, void *))b,c)
@@ -2248,8 +2271,8 @@ the three different cases. */
   pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h,i,j)
-#define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
-  r = pcre2_get_error_message_8(a,G(b,8),G(G(b,8),_size))
+#define PCRE2_GET_ERROR_MESSAGE(r,a) \
+  r = pcre2_get_error_message_8(a,(PCRE2_UCHAR8 *)errorbuffer,errorbuffer_size)
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_8(G(a,8))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_8(G(b,8))
@@ -2330,7 +2353,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,8)->y = z
 #define SETOP(x,y,z) G(x,8) z y
 #define SETCASTPTR(x,y) G(x,8) = (uint8_t *)(y)
-#define STRLEN(p) (int)strlen((char *)p)
+#define STRLEN(p) strlen((char *)p)
 #define SUB1(a,b) G(a,8)(G(b,8))
 #define SUB2(a,b,c) G(a,8)(G(b,8),G(c,8))
 #define TEST(x,r,y) (G(x,8) r (y))
@@ -2352,6 +2375,8 @@ the three different cases. */
   lv = pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars16((PCRE2_SPTR16)(p)+offset, len, utf, f)
+#define PTRUNCV(p, p_len, offset, left, utf, f) \
+  ptrunc16((PCRE2_SPTR16)(p), p_len, offset, left, utf, f)
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
    a = pcre2_callout_enumerate_16(compiled_code16, \
      (int (*)(struct pcre2_callout_enumerate_block_16 *, void *))b,c)
@@ -2363,8 +2388,8 @@ the three different cases. */
   pcre2_converted_pattern_free_16((PCRE2_UCHAR16 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h,i,j)
-#define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
-  r = pcre2_get_error_message_16(a,G(b,16),G(G(b,16),_size/2))
+#define PCRE2_GET_ERROR_MESSAGE(r,a) \
+  r = pcre2_get_error_message_16(a,(PCRE2_UCHAR16 *)errorbuffer,errorbuffer_size/2)
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_16(G(b,16))
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_16(G(a,16))
@@ -2443,7 +2468,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,16)->y = z
 #define SETOP(x,y,z) G(x,16) z y
 #define SETCASTPTR(x,y) G(x,16) = (uint16_t *)(y)
-#define STRLEN(p) (int)strlen16((PCRE2_SPTR16)p)
+#define STRLEN(p) strlen16((PCRE2_SPTR16)p)
 #define SUB1(a,b) G(a,16)(G(b,16))
 #define SUB2(a,b,c) G(a,16)(G(b,16),G(c,16))
 #define TEST(x,r,y) (G(x,16) r (y))
@@ -2465,6 +2490,8 @@ the three different cases. */
   lv = pchars32((PCRE2_SPTR32)(p)+offset, len, utf, f)
 #define PCHARSV(p, offset, len, utf, f) \
   (void)pchars32((PCRE2_SPTR32)(p)+offset, len, utf, f)
+#define PTRUNCV(p, p_len, offset, left, utf, f) \
+  ptrunc32((PCRE2_SPTR32)(p), p_len, offset, left, utf, f)
 #define PCRE2_CALLOUT_ENUMERATE(a,b,c) \
    a = pcre2_callout_enumerate_32(compiled_code32, \
      (int (*)(struct pcre2_callout_enumerate_block_32 *, void *))b,c)
@@ -2476,8 +2503,8 @@ the three different cases. */
   pcre2_converted_pattern_free_32((PCRE2_UCHAR32 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h,i,j)
-#define PCRE2_GET_ERROR_MESSAGE(r,a,b) \
-  r = pcre2_get_error_message_32(a,G(b,32),G(G(b,32),_size/4))
+#define PCRE2_GET_ERROR_MESSAGE(r,a) \
+  r = pcre2_get_error_message_32(a,(PCRE2_UCHAR32 *)errorbuffer,errorbuffer_size/4)
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_32(G(b,32))
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_32(G(a,32))
@@ -2556,7 +2583,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,32)->y = z
 #define SETOP(x,y,z) G(x,32) z y
 #define SETCASTPTR(x,y) G(x,32) = (uint32_t *)(y)
-#define STRLEN(p) (int)strlen32((PCRE2_SPTR32)p)
+#define STRLEN(p) strlen32((PCRE2_SPTR32)p)
 #define SUB1(a,b) G(a,32)(G(b,32))
 #define SUB2(a,b,c) G(a,32)(G(b,32),G(c,32))
 #define TEST(x,r,y) (G(x,32) r (y))
@@ -3174,7 +3201,7 @@ Returns:      >  0 => the number of bytes consumed
 */
 
 static int
-utf82ord(PCRE2_SPTR8 utf8bytes, PCRE2_SPTR8 end, uint32_t *vptr)
+utf8_to_ord(PCRE2_SPTR8 utf8bytes, PCRE2_SPTR8 end, uint32_t *vptr)
 {
 uint32_t c = *utf8bytes++;
 uint32_t d = c;
@@ -3214,6 +3241,84 @@ if (j != i) return -(i+1);
 
 *vptr = d;
 return i+1;
+}
+
+
+#ifdef SUPPORT_PCRE2_16
+/*************************************************
+*      Convert UTF-16 character to code point     *
+*************************************************/
+
+/* This function reads one or more UTF-16 code units, and returns the
+codepoint of that character.
+
+Argument:
+  utf16units  a pointer to the units vector
+  end         a pointer to the end of the units vector
+  vptr        a pointer to an int to receive the value
+
+Returns:      > 0  => the number of 16-bit units consumed
+              -1   => malformed UTF-16
+*/
+
+static int
+utf16_to_ord(PCRE2_SPTR16 utf16units, PCRE2_SPTR16 end, uint32_t *vptr)
+{
+uint32_t c = *utf16units++;
+
+if (c >= 0xdc00 && c <= 0xdfff) return -1;
+
+if (c >= 0xd800 && c < 0xdc00)
+  {
+  uint32_t c2;
+
+  if (utf16units >= end) return -1;
+
+  c2 = *utf16units++;
+  if (c2 < 0xdc00 || c2 > 0xdfff) return -1;
+  *vptr = ((c & 0x3ff) << 10) + (c2 & 0x3ff) + 0x10000;
+  return 2;
+  }
+
+*vptr = c;
+return 1;
+}
+#endif  /* SUPPORT_PCRE2_16 */
+
+
+
+/*************************************************
+*       Convert character value to UTF-8         *
+*************************************************/
+
+/* This function takes an integer value in the range 0 - 0x7fffffff
+and encodes it as a UTF-8 character in 0 to 6 bytes. It is needed even when the
+8-bit library is not supported, to generate UTF-8 output for non-ASCII
+characters.
+
+Arguments:
+  cvalue     the character value
+  utf8bytes  pointer to buffer for result - at least 6 bytes long
+
+Returns:     number of characters placed in the buffer
+*/
+
+static int
+ord_to_utf8(uint32_t cvalue, uint8_t *utf8bytes)
+{
+int i, j;
+if (cvalue > 0x7fffffffu)
+  return -1;
+for (i = 0; i < utf8_table1_size; i++)
+  if (cvalue <= (uint32_t)utf8_table1[i]) break;
+utf8bytes += i;
+for (j = i; j > 0; j--)
+ {
+ *utf8bytes-- = 0x80 | (cvalue & 0x3f);
+ cvalue >>= 6;
+ }
+*utf8bytes = utf8_table2[i] | cvalue;
+return i + 1;
 }
 
 
@@ -3320,7 +3425,7 @@ while (length-- > 0)
   {
   if (utf)
     {
-    int rc = utf82ord(p, end, &c);
+    int rc = utf8_to_ord(p, end, &c);
     if (rc > 0 && rc <= length + 1)   /* Mustn't run over the end */
       {
       length -= rc - 1;
@@ -3350,21 +3455,25 @@ without printing. */
 
 static int pchars16(PCRE2_SPTR16 p, ptrdiff_t length, BOOL utf, FILE *f)
 {
+PCRE2_SPTR16 end;
+uint32_t c = 0;
 int yield = 0;
 if (length < 0) length = *p++;
+end = p + length;
 while (length-- > 0)
   {
-  uint32_t c = *p++ & 0xffff;
-  if (utf && c >= 0xD800 && c < 0xDC00 && length > 0)
+  if (utf)
     {
-    int d = *p & 0xffff;
-    if (d >= 0xDC00 && d <= 0xDFFF)
+    int rc = utf16_to_ord(p, end, &c);
+    if (rc > 0 && rc <= length + 1)   /* Mustn't run over the end */
       {
-      c = ((c & 0x3ff) << 10) + (d & 0x3ff) + 0x10000;
-      length--;
-      p++;
+      length -= rc - 1;
+      p += rc;
+      yield += pchar(c, utf, f);
+      continue;
       }
     }
+  c = *p++;
   yield += pchar(c, utf, f);
   }
 return yield;
@@ -3398,41 +3507,151 @@ return yield;
 #endif  /* SUPPORT_PCRE2_32 */
 
 
-
-
+#ifdef SUPPORT_PCRE2_8
 /*************************************************
-*       Convert character value to UTF-8         *
+*     Print truncated 8-bit character string     *
 *************************************************/
 
-/* This function takes an integer value in the range 0 - 0x7fffffff
-and encodes it as a UTF-8 character in 0 to 6 bytes. It is needed even when the
-8-bit library is not supported, to generate UTF-8 output for non-ASCII
-characters.
+/* Must handle UTF-8 strings in utf8 mode. Passed the total input string, and
+the offset to print from/to. If left is true, prints up to the offset,
+truncated; otherwise prints from the offset to the right, truncated. */
 
-Arguments:
-  cvalue     the character value
-  utf8bytes  pointer to buffer for result - at least 6 bytes long
-
-Returns:     number of characters placed in the buffer
-*/
-
-static int
-ord2utf8(uint32_t cvalue, uint8_t *utf8bytes)
+static void ptrunc8(PCRE2_SPTR8 p, size_t p_len, size_t offset, BOOL left,
+  BOOL utf, FILE *f)
 {
-int i, j;
-if (cvalue > 0x7fffffffu)
-  return -1;
-for (i = 0; i < utf8_table1_size; i++)
-  if (cvalue <= (uint32_t)utf8_table1[i]) break;
-utf8bytes += i;
-for (j = i; j > 0; j--)
- {
- *utf8bytes-- = 0x80 | (cvalue & 0x3f);
- cvalue >>= 6;
- }
-*utf8bytes = utf8_table2[i] | cvalue;
-return i + 1;
+PCRE2_SPTR8 start = p + offset;
+PCRE2_SPTR8 end = p + offset;
+size_t printed = 0;
+
+(void)(utf);  /* Avoid compiler warning */
+
+if (left)
+  {
+  while (start > p && printed < 10)
+    {
+    printed++;
+    start--;
+    if (utf)
+      { while(start > p && (*start & 0xc0u) == 0x80u) start--; }
+    }
+  }
+else
+  {
+  while (end < p + p_len && printed < 10)
+    {
+    printed++;
+    end++;
+    if (utf)
+      { while(end < p + p_len && (*end & 0xc0u) == 0x80u) end++; }
+    }
+  }
+
+if (left && start > p) fprintf(f, "...");
+fprintf(f, "%.*s", (int)(end - start), start);
+if (!left && end < p + p_len) fprintf(f, "...");
 }
+#endif
+
+
+#ifdef SUPPORT_PCRE2_16
+/*************************************************
+*     Print truncated 16-bit character string    *
+*************************************************/
+
+/* Must handle UTF-16 strings in utf mode. Passed the total input string, and
+the offset to print from/to. If left is true, prints up to the offset,
+truncated; otherwise prints from the offset to the right, truncated. */
+
+static void ptrunc16(PCRE2_SPTR16 p, size_t p_len, size_t offset, BOOL left,
+  BOOL utf, FILE *f)
+{
+PCRE2_SPTR16 start = p + offset;
+PCRE2_SPTR16 end = p + offset;
+size_t printed = 0;
+
+if (left)
+  {
+  while (start > p && printed < 10)
+    {
+    printed++;
+    start--;
+    if (utf)
+      { while(start > p && (*start & 0xfc00u) == 0xdc00u) start--; }
+    }
+  }
+else
+  {
+  while (end < p + p_len && printed < 10)
+    {
+    printed++;
+    end++;
+    if (utf)
+      { while(end < p + p_len && (*end & 0xfc00u) == 0xdc00u) end++; }
+    }
+  }
+
+if (left && start > p) fprintf(f, "...");
+while (start < end)
+  {
+  uint32_t c;
+  int rc = utf16_to_ord(start, end, &c);
+  if (rc < 0) c = *start++;
+  else start += rc;
+  if (c > 0xff || (utf && c > 0x7f))
+    {
+    uint8_t u8buff[6];
+    int clen = ord_to_utf8(c, u8buff);
+    fprintf(f, "%.*s", clen, u8buff);
+    continue;
+    }
+  fputc((int)c, f);
+  }
+if (!left && end < p + p_len) fprintf(f, "...");
+}
+#endif  /* SUPPORT_PCRE2_16 */
+
+
+#ifdef SUPPORT_PCRE2_32
+/*************************************************
+*     Print truncated 32-bit character string    *
+*************************************************/
+
+/* Must handle UTF-32 strings in utf mode. Passed the total input string, and
+the offset to print from/to. If left is true, prints up to the offset,
+truncated; otherwise prints from the offset to the right, truncated. */
+static void ptrunc32(PCRE2_SPTR32 p, size_t p_len, size_t offset, BOOL left,
+  BOOL utf, FILE *f)
+{
+PCRE2_SPTR32 start = p + offset;
+PCRE2_SPTR32 end = p + offset;
+
+(void)(utf);  /* Avoid compiler warning */
+
+if (left)
+  {
+  start -= (offset > 10)? 10 : offset;
+  }
+else
+  {
+  end += (p + p_len - end > 10)? 10 : p + p_len - end;
+  }
+
+if (left && start > p) fprintf(f, "...");
+while (start < end)
+  {
+  uint32_t c = *start++;
+  if (c > 0xff || (utf && c > 0x7f))
+    {
+    uint8_t u8buff[6];
+    int clen = ord_to_utf8(c, u8buff);
+    fprintf(f, "%.*s", clen, u8buff);
+    continue;
+    }
+  fputc((int)c, f);
+  }
+if (!left && end < p + p_len) fprintf(f, "...");
+}
+#endif  /* SUPPORT_PCRE2_32 */
 
 
 
@@ -3500,7 +3719,7 @@ else while (len > 0)
   {
   uint32_t c;
   const uint8_t *end = p + len;
-  int chlen = utf82ord(p, end, &c);
+  int chlen = utf8_to_ord(p, end, &c);
   if (chlen <= 0) return -1;
   if (!utf && c > 0xffff) return -3;
   if (c > 0x10ffff) return -2;
@@ -3509,8 +3728,8 @@ else while (len > 0)
   if (c < 0x10000) *pp++ = c; else
     {
     c -= 0x10000;
-    *pp++ = 0xD800 | (c >> 10);
-    *pp++ = 0xDC00 | (c & 0x3ff);
+    *pp++ = 0xd800 | (c >> 10);
+    *pp++ = 0xdc00 | (c & 0x3ff);
     }
   }
 
@@ -3598,7 +3817,7 @@ else while (len > 0)
     p++;
     len--;
     }
-  chlen = utf82ord(p, end, &c);
+  chlen = utf8_to_ord(p, end, &c);
   if (chlen <= 0) return -1;
   if (utf && c > 0x10ffff) return -2;
   p += chlen;
@@ -4358,6 +4577,233 @@ return rc;
 
 
 
+/*************************************************
+*     Determine how to print an error offset     *
+*************************************************/
+
+/* Each error code has an associated direction - does it refer
+to the characters to the right or to the left of the offset?
+
+Arguments:
+  rc           the error code associated with the offset
+  erroroffset  the offset in the pattern where the error occurred
+
+Returns:      -1 if the error is unimplemented
+               0 if the offset is to be ignored (should be zero)
+               1 if the error refers to the left of the offset
+               2 if the error refers to the right of the offset
+               3 if the error refers to both sides of the offset
+*/
+
+static int
+error_direction(int rc, PCRE2_SIZE erroroffset)
+{
+switch (rc)
+  {
+  /* These cases are all for things which don't affect a specific part of the
+  pattern, and should always return zero offset. */
+
+  case PCRE2_ERROR_NULL_PATTERN:
+  case PCRE2_ERROR_BAD_OPTIONS:
+  case PCRE2_ERROR_PATTERN_TOO_LARGE:
+  case PCRE2_ERROR_HEAP_FAILED:
+  case PCRE2_ERROR_UNICODE_NOT_SUPPORTED:
+  case PCRE2_ERROR_PARENTHESES_STACK_CHECK:
+  case PCRE2_ERROR_PATTERN_TOO_COMPLICATED:
+  case PCRE2_ERROR_PATTERN_STRING_TOO_LONG:
+  case PCRE2_ERROR_NO_SURROGATES_IN_UTF16:
+  case PCRE2_ERROR_BAD_LITERAL_OPTIONS:
+  case PCRE2_ERROR_PATTERN_COMPILED_SIZE_TOO_BIG:
+  case PCRE2_ERROR_EXTRA_CASING_REQUIRES_UNICODE:
+  case PCRE2_ERROR_TURKISH_CASING_REQUIRES_UTF:
+  case PCRE2_ERROR_EXTRA_CASING_INCOMPATIBLE:
+  return 0;
+
+  /* A few exceptional cases use the errorofset to point rightwards. These are
+  used when indicating an error in a capture group or lookaround parentheses.
+  It is more user-friendly to identify the capture group by its start. */
+
+  case PCRE2_ERROR_INVALID_AFTER_PARENS_QUERY:
+  case PCRE2_ERROR_PARENTHESES_NEST_TOO_DEEP:
+  case PCRE2_ERROR_LOOKBEHIND_NOT_FIXED_LENGTH:
+  case PCRE2_ERROR_TOO_MANY_CONDITION_BRANCHES:
+  case PCRE2_ERROR_LOOKBEHIND_TOO_COMPLICATED:
+  case PCRE2_ERROR_LOOKBEHIND_INVALID_BACKSLASH_C:
+  case PCRE2_ERROR_QUERY_BARJX_NEST_TOO_DEEP:
+  case PCRE2_ERROR_LOOKBEHIND_TOO_LONG:
+  case PCRE2_ERROR_MAX_VAR_LOOKBEHIND_EXCEEDED:
+  return 2;
+
+  /* The standard erroroffset should occur just after the affected portion of
+  the pattern, unless there is a good reason not to do this. Consistency is
+  good, but if there's a specific need then that's more important. */
+
+  case PCRE2_ERROR_END_BACKSLASH:
+  case PCRE2_ERROR_END_BACKSLASH_C:
+  return 1;
+  case PCRE2_ERROR_UNKNOWN_ESCAPE:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_QUANTIFIER_OUT_OF_ORDER:
+  case PCRE2_ERROR_QUANTIFIER_TOO_BIG:
+  case PCRE2_ERROR_MISSING_SQUARE_BRACKET:
+  return 1;
+  case PCRE2_ERROR_ESCAPE_INVALID_IN_CLASS:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_CLASS_RANGE_ORDER:
+  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_QUANTIFIER_INVALID:
+  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_POSIX_CLASS_NOT_IN_CLASS:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_POSIX_NO_SUPPORT_COLLATING:
+  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_MISSING_CLOSING_PARENTHESIS:
+  return 1;
+  case PCRE2_ERROR_BAD_SUBPATTERN_REFERENCE:
+  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_MISSING_COMMENT_CLOSING:
+  return 1;
+  case PCRE2_ERROR_UNMATCHED_CLOSING_PARENTHESIS:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_MISSING_CONDITION_CLOSING:
+  case PCRE2_ERROR_ZERO_RELATIVE_REFERENCE:
+  return 1;
+  case PCRE2_ERROR_CONDITION_ASSERTION_EXPECTED:
+  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_BAD_RELATIVE_REFERENCE:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_UNKNOWN_POSIX_CLASS:
+  case PCRE2_ERROR_CODE_POINT_TOO_BIG:
+  return 1;
+  case PCRE2_ERROR_UNSUPPORTED_ESCAPE_SEQUENCE:
+  return 1; /* Inconsistent; \N{...} not placed same as for others */
+  case PCRE2_ERROR_CALLOUT_NUMBER_TOO_BIG:
+  case PCRE2_ERROR_MISSING_CALLOUT_CLOSING:
+  case PCRE2_ERROR_ESCAPE_INVALID_IN_VERB:
+  return 1;
+  case PCRE2_ERROR_UNRECOGNIZED_AFTER_QUERY_P:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_MISSING_NAME_TERMINATOR:
+  case PCRE2_ERROR_DUPLICATE_SUBPATTERN_NAME:
+  return 1;
+  case PCRE2_ERROR_INVALID_SUBPATTERN_NAME:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_UNICODE_PROPERTIES_UNAVAILABLE:
+  case PCRE2_ERROR_MALFORMED_UNICODE_PROPERTY:
+  case PCRE2_ERROR_UNKNOWN_UNICODE_PROPERTY:
+  case PCRE2_ERROR_SUBPATTERN_NAME_TOO_LONG:
+  case PCRE2_ERROR_TOO_MANY_NAMED_SUBPATTERNS:
+  return 1;
+  case PCRE2_ERROR_CLASS_INVALID_RANGE:
+  return 3; /* Inconsistent; I'd like to fix this */
+  case PCRE2_ERROR_OCTAL_BYTE_TOO_BIG:
+  return 1;
+  case PCRE2_ERROR_DEFINE_TOO_MANY_BRANCHES:
+  return 2; /* Not ideally placed; I'd like to fix this */
+  case PCRE2_ERROR_BACKSLASH_O_MISSING_BRACE:
+  case PCRE2_ERROR_BACKSLASH_G_SYNTAX:
+  return 3; /* For consistency as "braced" items their parse errors should move to the left and indicate to the right*/
+  case PCRE2_ERROR_PARENS_QUERY_R_MISSING_CLOSING:
+  case PCRE2_ERROR_VERB_UNKNOWN:
+  case PCRE2_ERROR_SUBPATTERN_NUMBER_TOO_BIG:
+  return 1;
+  case PCRE2_ERROR_SUBPATTERN_NAME_EXPECTED:
+  return 1; /* For consistency, should move one to the right if there was a non-matching character */
+  case PCRE2_ERROR_INVALID_OCTAL:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_SUBPATTERN_NAMES_MISMATCH:
+  case PCRE2_ERROR_MARK_MISSING_ARGUMENT:
+  return 1;
+  case PCRE2_ERROR_INVALID_HEXADECIMAL:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_BACKSLASH_C_SYNTAX:
+  case PCRE2_ERROR_BACKSLASH_K_SYNTAX:
+  return 3; /* For consistency this should move to the right */
+  case PCRE2_ERROR_BACKSLASH_N_IN_CLASS:
+  case PCRE2_ERROR_CALLOUT_STRING_TOO_LONG:
+  case PCRE2_ERROR_UNICODE_DISALLOWED_CODE_POINT:
+  return 1;
+  case PCRE2_ERROR_UTF_IS_DISABLED:
+  case PCRE2_ERROR_UCP_IS_DISABLED:
+  return (erroroffset > 0)? 1 : 0; /* Tricksy - can be triggered by options or by (*UTF) */
+  case PCRE2_ERROR_VERB_NAME_TOO_LONG:
+  case PCRE2_ERROR_BACKSLASH_U_CODE_POINT_TOO_BIG:
+  case PCRE2_ERROR_MISSING_OCTAL_OR_HEX_DIGITS:
+  return 1;
+  case PCRE2_ERROR_VERSION_CONDITION_SYNTAX:
+  return 3; /* Ideally we'd be more accurate in placing the erroroffset, but it's acceptable. */
+  case PCRE2_ERROR_CALLOUT_NO_STRING_DELIMITER:
+  return 2; /* I'd like to fix this */
+  case PCRE2_ERROR_CALLOUT_BAD_STRING_DELIMITER:
+  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED:
+  case PCRE2_ERROR_BACKSLASH_C_LIBRARY_DISABLED:
+  return 1;
+  case PCRE2_ERROR_SUPPORTED_ONLY_IN_UNICODE:
+  return 3;  /* Inconsistent placement in the middle of \N{} */
+  case PCRE2_ERROR_INVALID_HYPHEN_IN_OPTIONS:
+  return 3;  /* Should be one character to the right */
+  case PCRE2_ERROR_ALPHA_ASSERTION_UNKNOWN:
+  return 1; /* Inconsistency; I'd move it one to the right */
+  case PCRE2_ERROR_SCRIPT_RUN_NOT_AVAILABLE:
+  case PCRE2_ERROR_TOO_MANY_CAPTURES:
+  case PCRE2_ERROR_MISSING_OCTAL_DIGIT:
+  return 1;
+  case PCRE2_ERROR_BACKSLASH_K_IN_LOOKAROUND:
+  return 3; /* No erroroffset implemented yet, sadly */
+  case PCRE2_ERROR_OVERSIZE_PYTHON_OCTAL:
+  return 1;
+  case PCRE2_ERROR_CALLOUT_CALLER_DISABLED:
+  return 1; /* Should be one to the right for consistency */
+  case PCRE2_ERROR_ECLASS_NEST_TOO_DEEP:
+  return 1; /* Should be one to the left and pointing right for consistency */
+  case PCRE2_ERROR_ECLASS_INVALID_OPERATOR:
+  case PCRE2_ERROR_ECLASS_UNEXPECTED_OPERATOR:
+  case PCRE2_ERROR_ECLASS_EXPECTED_OPERAND:
+  case PCRE2_ERROR_ECLASS_MIXED_OPERATORS:
+  case PCRE2_ERROR_ECLASS_HINT_SQUARE_BRACKET:
+  case PCRE2_ERROR_PERL_ECLASS_UNEXPECTED_EXPR:
+  case PCRE2_ERROR_PERL_ECLASS_EMPTY_EXPR:
+  case PCRE2_ERROR_PERL_ECLASS_MISSING_CLOSE:
+  case PCRE2_ERROR_PERL_ECLASS_UNEXPECTED_CHAR:
+  case PCRE2_ERROR_EXPECTED_CAPTURE_GROUP:
+  case PCRE2_ERROR_MISSING_OPENING_PARENTHESIS:
+  return 1;
+
+  case PCRE2_ERROR_UTF8_ERR1:
+  case PCRE2_ERROR_UTF8_ERR2:
+  case PCRE2_ERROR_UTF8_ERR3:
+  case PCRE2_ERROR_UTF8_ERR4:
+  case PCRE2_ERROR_UTF8_ERR5:
+  case PCRE2_ERROR_UTF8_ERR6:
+  case PCRE2_ERROR_UTF8_ERR7:
+  case PCRE2_ERROR_UTF8_ERR8:
+  case PCRE2_ERROR_UTF8_ERR9:
+  case PCRE2_ERROR_UTF8_ERR10:
+  case PCRE2_ERROR_UTF8_ERR11:
+  case PCRE2_ERROR_UTF8_ERR12:
+  case PCRE2_ERROR_UTF8_ERR13:
+  case PCRE2_ERROR_UTF8_ERR14:
+  case PCRE2_ERROR_UTF8_ERR15:
+  case PCRE2_ERROR_UTF8_ERR16:
+  case PCRE2_ERROR_UTF8_ERR17:
+  case PCRE2_ERROR_UTF8_ERR18:
+  case PCRE2_ERROR_UTF8_ERR19:
+  case PCRE2_ERROR_UTF8_ERR20:
+  case PCRE2_ERROR_UTF8_ERR21:
+  case PCRE2_ERROR_UTF16_ERR1:
+  case PCRE2_ERROR_UTF16_ERR2:
+  case PCRE2_ERROR_UTF16_ERR3:
+  case PCRE2_ERROR_UTF32_ERR1:
+  case PCRE2_ERROR_UTF32_ERR2:
+  return 2;
+  }
+
+return -1;
+}
+
+
+
 #ifdef SUPPORT_PCRE2_8
 /*************************************************
 *             Show something in a list           *
@@ -4691,7 +5137,7 @@ static BOOL
 print_error_message(int errorcode, const char *before, const char *after)
 {
 int len;
-PCRE2_GET_ERROR_MESSAGE(len, errorcode, pbuffer);
+PCRE2_GET_ERROR_MESSAGE(len, errorcode);
 if (len < 0)
   {
   fprintf(outfile, "\n** pcre2test internal error: cannot interpret error "
@@ -4700,7 +5146,7 @@ if (len < 0)
 else
   {
   fprintf(outfile, "%s", before);
-  PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, outfile);
+  PCHARSV(errorbuffer, 0, len, FALSE, outfile);
   fprintf(outfile, "%s", after);
   }
 return len >= 0;
@@ -4891,7 +5337,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     for (; namecount > 0; namecount--)
       {
       int imm2_size = test_mode == PCRE8_MODE ? 2 : 1;
-      uint32_t length = (uint32_t)STRLEN(nametable + imm2_size);
+      size_t length = STRLEN(nametable + imm2_size);
       fprintf(outfile, "  ");
 
       /* In UTF mode the name may be a UTF string containing non-ASCII
@@ -4908,7 +5354,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
           while (*nameptr != 0)
             {
             uint8_t u8buff[6];
-            int len = ord2utf8(*nameptr++, u8buff);
+            int len = ord_to_utf8(*nameptr++, u8buff);
             fprintf(outfile, "%.*s", len, u8buff);
             }
           }
@@ -4917,14 +5363,16 @@ if ((pat_patctl.control & CTL_INFO) != 0)
         if (test_mode == PCRE16_MODE)
           {
           PCRE2_SPTR16 nameptr = (PCRE2_SPTR16)nametable + imm2_size;
+          PCRE2_SPTR16 nameptr_end = nameptr + strlen16(nameptr);
           while (*nameptr != 0)
             {
             int len;
             uint8_t u8buff[6];
-            uint32_t c = *nameptr++ & 0xffff;
-            if (c >= 0xD800 && c < 0xDC00)
-              c = ((c & 0x3ff) << 10) + (*nameptr++ & 0x3ff) + 0x10000;
-            len = ord2utf8(c, u8buff);
+            uint32_t c;
+            int ord_rc = utf16_to_ord(nameptr, nameptr_end, &c);
+            if (ord_rc > 0) nameptr += ord_rc;
+            else c = *nameptr++;
+            len = ord_to_utf8(c, u8buff);
             fprintf(outfile, "%.*s", len, u8buff);
             }
           }
@@ -6462,9 +6910,84 @@ if non-interactive. */
 
 if (TEST(compiled_code, ==, NULL))
   {
+  int direction = error_direction(errorcode, erroroffset);
+
   fprintf(outfile, "Failed: error %d at offset %d: ", errorcode,
     (int)erroroffset);
   if (!print_error_message(errorcode, "", "\n")) return PR_ABEND;
+
+  /* It's important that the erroroffset doesn't slice halfway through a UTF-8
+  or UTF-16 character. We can verify this by checking that the input left of the
+  erroroffset is valid. Note that if the input is invalid (which is exercised in
+  some tests) then the offset will be positioned with the valid part to the left
+  of erroroffset. */
+
+#ifdef SUPPORT_PCRE2_8
+  if (test_mode == PCRE8_MODE && utf)
+    {
+    uint32_t cc;
+    int n = 1;
+    for (uint8_t *q = pbuffer8, *q_end = q + erroroffset; q < q_end && n > 0; q += n)
+      n = utf8_to_ord(q, q_end, &cc);
+    if (n <= 0)
+      {
+      fprintf(outfile, "** Erroroffset %d splits a UTF-8 character\n", (int)erroroffset);
+      return PR_ABEND;
+      }
+    }
+#endif
+#ifdef SUPPORT_PCRE2_16
+  if (test_mode == PCRE16_MODE && utf)
+    {
+    uint32_t cc;
+    int n = 1;
+    for (uint16_t *q = pbuffer16, *q_end = q + erroroffset; q < q_end && n > 0; q += n)
+      n = utf16_to_ord(q, q_end, &cc);
+    if (n <= 0)
+      {
+      fprintf(outfile, "** Erroroffset %d splits a UTF-16 character\n", (int)erroroffset);
+      return PR_ABEND;
+      }
+    }
+#endif
+
+  /* Print the surrounding context around the erroroffset. */
+
+  if (direction < 0)
+    {
+    fprintf(outfile, "** Error code %d not implemented in error_direction().\n", errorcode);
+    fprintf(outfile, "   error_direction() is usually return '1' for newly-added errors,\n");
+    fprintf(outfile, "   and the offset should be just to the right of the bad character.\n");
+    return PR_ABEND;
+    }
+
+  else if (direction != 0)
+    {
+    PCRE2_SIZE full_patlen = (patlen != PCRE2_ZERO_TERMINATED)? patlen :
+        STRLEN(CASTVAR(void *, pbuffer));
+
+    fprintf(outfile, "        here: ");
+    if (erroroffset > 0)
+      {
+      PTRUNCV(CASTVAR(void *, pbuffer), full_patlen, erroroffset, TRUE, utf, outfile);
+      fprintf(outfile, " ");
+      }
+    fprintf(outfile, (direction == 1)? "|<--|" : (direction == 2)? "|-->|" : "|<-->|");
+    if (erroroffset < full_patlen)
+      {
+      fprintf(outfile, " ");
+      PTRUNCV(CASTVAR(void *, pbuffer), full_patlen, erroroffset, FALSE, utf, outfile);
+      }
+    fprintf(outfile, "\n");
+    }
+
+  else if (erroroffset != 0)
+    {
+    fprintf(outfile, "** Unexpected non-zero erroroffset %d for error code %d\n",
+      (int)erroroffset, errorcode);
+    return PR_ABEND;
+    }
+
   return PR_SKIP;
   }
 
@@ -7541,7 +8064,7 @@ if (utf)
   int n = 1;
   uint8_t *q_end = p + len;
 
-  for (q = p; n > 0 && *q; q += n) n = utf82ord(q, q_end, &cc);
+  for (q = p; n > 0 && *q; q += n) n = utf8_to_ord(q, q_end, &cc);
   if (n <= 0)
     {
     fprintf(outfile, "** Failed: invalid UTF-8 string cannot be used as input "
@@ -7859,7 +8382,7 @@ while ((c = *p++) != 0)
         fprintf(outfile, "** Warning: character \\N{U+%x} is greater than "
                          "0x%x and should not be encoded as UTF-8\n",
                          c, MAX_UTF_CODE_POINT);
-      q8 += ord2utf8(c, q8);
+      q8 += ord_to_utf8(c, q8);
       }
     }
 #endif
@@ -7892,8 +8415,8 @@ while ((c = *p++) != 0)
       else if (c >= 0x10000u)
         {
         c -= 0x10000u;
-        *q16++ = 0xD800 | (c >> 10);
-        *q16++ = 0xDC00 | (c & 0x3ff);
+        *q16++ = 0xd800 | (c >> 10);
+        *q16++ = 0xdc00 | (c & 0x3ff);
         }
       else
         {
@@ -8373,7 +8896,7 @@ if (dat_datctl.replacement[0] != 0)
     if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
 
 #ifdef SUPPORT_PCRE2_8
-    if (test_mode == PCRE8_MODE) r8 += ord2utf8(c, r8);
+    if (test_mode == PCRE8_MODE) r8 += ord_to_utf8(c, r8);
 #endif
 
 #ifdef SUPPORT_PCRE2_16
@@ -8382,8 +8905,8 @@ if (dat_datctl.replacement[0] != 0)
       if (c >= 0x10000u)
         {
         c-= 0x10000u;
-        *r16++ = 0xD800 | (c >> 10);
-        *r16++ = 0xDC00 | (c & 0x3ff);
+        *r16++ = 0xd800 | (c >> 10);
+        *r16++ = 0xdc00 | (c & 0x3ff);
         }
       else *r16++ = c;
       }
@@ -10145,7 +10668,7 @@ least 128 code units, because it is used for retrieving error messages. */
       }
     errcode = (int)li;
     printf("Error %d: ", errcode);
-    PCRE2_GET_ERROR_MESSAGE(len, errcode, pbuffer);
+    PCRE2_GET_ERROR_MESSAGE(len, errcode);
     if (len < 0)
       {
       switch (len)
@@ -10165,7 +10688,7 @@ least 128 code units, because it is used for retrieving error messages. */
       }
     else
       {
-      PCHARSV(CASTVAR(void *, pbuffer), 0, len, FALSE, stdout);
+      PCHARSV(errorbuffer, 0, len, FALSE, stdout);
       }
     printf("\n");
     if (*endptr == 0) goto EXIT;

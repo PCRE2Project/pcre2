@@ -18,6 +18,7 @@ Subject length lower bound = 2
 
 /(?<=ab\Cde)X/utf
 Failed: error 136 at offset 0: \C is not allowed in a lookbehind assertion in UTF-8 mode
+        here: |-->| (?<=ab\Cde...
     ab!deXYZ
 
 # Autopossessification tests

@@ -3143,6 +3143,8 @@
 
 #endif
 
+/^\c/
+
 /(?P<abn>(?P=abn)xxx)/B
 
 /(a\1z)/B
@@ -6019,6 +6021,16 @@ a)"xI
 
 # ---- Non-atomic assertion tests ----
 
+/(*ploo:abc)/
+
+/(*pla:abc/
+
+/(*pla:/
+
+/(*pla/
+
+/(*pla}abc)/
+
 # Expect error: not allowed as a condition
 /(?(*napla:xx)bc)/
 
@@ -7960,6 +7972,9 @@ a)"xI
   Sunday,Sun
 \= Expect no match
   Saturday,Sun
+
+/()()()(?2(2,3,2,3,2))/B
+  abc
 
 # Test each syntax used for recursion
 

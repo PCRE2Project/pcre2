@@ -212,5 +212,6 @@ No match
 
 /\c&/
 Failed: error 168 at offset 3: \c must be followed by a letter or one of @[\]^_?
+        here: \c& |<-->|
 
 # End
