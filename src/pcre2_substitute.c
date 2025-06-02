@@ -129,7 +129,6 @@ for (; ptr < ptrend; ptr++)
     ptr += 1;  /* Must point after \ */
     erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode,
       code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
-    ptr -= 1;  /* Back to last code unit of escape */
     if (errorcode != 0)
       {
       /* errorcode from check_escape is positive, so must not be returned by
