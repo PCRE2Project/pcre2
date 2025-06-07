@@ -8987,6 +8987,25 @@ if (dat_datctl.replacement[0] != 0)
     if (rc == PCRE2_ERROR_NOMEMORY &&
         (xoptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)
       fprintf(outfile, ": %ld code units are needed", (long int)nsize);
+
+    if (rc != PCRE2_ERROR_NOMEMORY && nsize != PCRE2_UNSET)
+      {
+      PCRE2_SIZE full_rlen = (rlen != PCRE2_ZERO_TERMINATED)? rlen :
+          STRLEN(rbptr);
+
+      fprintf(outfile, "\n        here: ");
+      if (nsize > 0)
+        {
+        PTRUNCV(rbptr, full_rlen, nsize, TRUE, utf, outfile);
+        fprintf(outfile, " ");
+        }
+      fprintf(outfile, "|<--|");
+      if (nsize < full_rlen)
+        {
+        fprintf(outfile, " ");
+        PTRUNCV(rbptr, full_rlen, nsize, FALSE, utf, outfile);
+        }
+      }
     }
   else
     {
