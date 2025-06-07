@@ -14043,26 +14043,32 @@ Failed: error 119 at offset 3: parentheses are too deeply nested
 /abc/replace=a$++
     123abc
 Failed: error -35 at offset 2 in replacement: invalid replacement string
+        here: a$ |<--| ++
 
 /abc/replace=a$bad
     123abc
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: a$bad |<--|
 
 /abc/replace=a${A234567890123456789_123456789012}z
     123abc
 Failed: error -49 at offset 36 in replacement: unknown substring
+        here: ...456789012} |<--| z
 
 /abc/replace=a${A23456789012345678901234567890123}z
     123abc
 Failed: error -49 at offset 37 in replacement: unknown substring
+        here: ...567890123} |<--| z
 
 /abc/replace=a${bcd
     123abc
 Failed: error -58 at offset 6 in replacement: expected closing curly bracket in replacement string
+        here: a${bcd |<--|
 
 /abc/replace=a${b+d}z
     123abc
 Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+        here: a${b |<--| +d}z
 
 /abc/replace=[10]XYZ
     123abc123
@@ -14129,18 +14135,22 @@ Failed: error -34: bad option value
 /(*:pear)apple/g,replace=${*MARKING}
     apple lemon blackberry
 Failed: error -35 at offset 11 in replacement: invalid replacement string
+        here: ...{*MARKING} |<--|
 
 /(*:pear)apple/g,replace=${*MARK-time
     apple lemon blackberry
 Failed: error -58 at offset 7 in replacement: expected closing curly bracket in replacement string
+        here: ${*MARK |<--| -time
 
 /(*:pear)apple/g,replace=${*mark}
     apple lemon blackberry
 Failed: error -35 at offset 8 in replacement: invalid replacement string
+        here: ${*mark} |<--|
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=<$*MARKET>
     apple lemon blackberry
 Failed: error -35 at offset 9 in replacement: invalid replacement string
+        here: <$*MARKET |<--| >
 
 /(*:pear)apple|(*:orange)lemon|(*:strawberry)blackberry/g,replace=[22]${*MARK}
     apple lemon blackberry
@@ -14240,98 +14250,131 @@ Failed: error -48: no more memory: 10 code units are needed
  1: Z>b<Z
     ZabcZ\=replace=>\2<
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: >\2 |<--| <
     ZabcZ\=replace=>\8<
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: >\8 |<--| <
     ZabcZ\=replace=>${1}<
  1: Z>b<Z
     ZabcZ\=replace=>${ 1 }<
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >${ |<--|  1 }<
     ZabcZ\=replace=>${2}<
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: >${2} |<--| <
     ZabcZ\=replace=>${8}<
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: >${8} |<--| <
     ZabcZ\=replace=>$<1><
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: >$<1> |<--| <
     ZabcZ\=replace=>$< 1 ><
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >$< |<--|  1 ><
     ZabcZ\=replace=>$<2><
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: >$<2> |<--| <
     ZabcZ\=replace=>$<8><
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: >$<8> |<--| <
     ZabcZ\=replace=>\g<-1><
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--| -1><
     ZabcZ\=replace=>\g<0><
  1: Z>abc<Z
     ZabcZ\=replace=>\g<1><
  1: Z>b<Z
     ZabcZ\=replace=>\g< 1 ><
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--|  1 ><
     ZabcZ\=replace=>\g<2><
 Failed: error -49 at offset 6 in replacement: unknown substring
+        here: >\g<2> |<--| <
     ZabcZ\=replace=>\g<8><
 Failed: error -49 at offset 6 in replacement: unknown substring
+        here: >\g<8> |<--| <
 
 /(*:pear)apple/substitute_extended
     ZappleZ\=replace=>${*MARK}<
  1: Z>pear<Z
     ZappleZ\=replace=>$<*MARK><
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >$< |<--| *MARK><
     ZappleZ\=replace=>\g<*MARK><
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--| *MARK><
 
 /a(?<named>b)c/substitute_extended
     ZabcZ\=replace=>${named}<
  1: Z>b<Z
     ZabcZ\=replace=>${noexist}<
 Failed: error -49 at offset 11 in replacement: unknown substring
+        here: ...${noexist} |<--| <
     ZabcZ\=replace=>${}<
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >${ |<--| }<
     ZabcZ\=replace=>${ }<
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >${ |<--|  }<
     ZabcZ\=replace=>${ named }<
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >${ |<--|  named }<
     ZabcZ\=replace=>$<named><
  1: Z>b<Z
     ZabcZ\=replace=>$<noexist><
 Failed: error -49 at offset 11 in replacement: unknown substring
+        here: ...$<noexist> |<--| <
     ZabcZ\=replace=>$<><
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >$< |<--| ><
     ZabcZ\=replace=>$< ><
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >$< |<--|  ><
     ZabcZ\=replace=>$< named ><
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >$< |<--|  named ><
     ZabcZ\=replace=>\g<named><
  1: Z>b<Z
     ZabcZ\=replace=>\g<noexist><
 Failed: error -49 at offset 12 in replacement: unknown substring
+        here: ...g<noexist> |<--| <
     ZabcZ\=replace=>\g<><
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--| ><
     ZabcZ\=replace=>\g< ><
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--|  ><
     ZabcZ\=replace=>\g< named ><
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--|  named ><
 
 /a(b)c/substitute_extended
     ZabcZ\=replace=>${1:+ yes : no }
  1: Z> yes Z
     ZabcZ\=replace=>${1:+ \o{Z} : no }
-Failed: error -57 at offset 10 in replacement: bad escape sequence in replacement string
+Failed: error -57 at offset 11 in replacement: bad escape sequence in replacement string
+        here: ...${1:+ \o{Z |<--| } : no }
     ZabcZ\=replace=>${1:+ yes : \o{Z} }
-Failed: error -57 at offset 16 in replacement: bad escape sequence in replacement string
+Failed: error -57 at offset 17 in replacement: bad escape sequence in replacement string
+        here: ...yes : \o{Z |<--| } }
     ZabcZ\=replace=>${1:+ \g<1> : no }
  1: Z> b Z
     ZabcZ\=replace=>${1:+ yes : \g<1> }
  1: Z> yes Z
     ZabcZ\=replace=>${1:+ \g<1 : no }
-Failed: error -57 at offset 10 in replacement: bad escape sequence in replacement string
+Failed: error -57 at offset 11 in replacement: bad escape sequence in replacement string
+        here: ...${1:+ \g<1 |<--|  : no }
     ZabcZ\=replace=>${1:+ yes : \g<1 }
-Failed: error -57 at offset 16 in replacement: bad escape sequence in replacement string
+Failed: error -57 at offset 17 in replacement: bad escape sequence in replacement string
+        here: ...yes : \g<1 |<--|  }
     ZabcZ\=replace=>${1:+ $<1> : no }
 Failed: error -49 at offset 11 in replacement: unknown substring
+        here: ...${1:+ $<1> |<--|  : no }
     ZabcZ\=replace=>${1:+ yes : $<1> }
  1: Z> yes Z
     ZabcZ\=replace=>${1:+ $<1 : no }
 Failed: error -35 at offset 10 in replacement: invalid replacement string
+        here: >${1:+ $<1 |<--|  : no }
     ZabcZ\=replace=>${1:+ yes : $<1 }
  1: Z> yes Z
 
@@ -14346,28 +14389,40 @@ Failed: error -35 at offset 10 in replacement: invalid replacement string
 /a(b)c/substitute_extended
     ZabcZ\=replace=>${
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >${ |<--|
     ZabcZ\=replace=>${1
 Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+        here: >${1 |<--|
     ZabcZ\=replace=>${1Z
 Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+        here: >${1 |<--| Z
     ZabcZ\=replace=>${1;
 Failed: error -58 at offset 4 in replacement: expected closing curly bracket in replacement string
+        here: >${1 |<--| ;
     ZabcZ\=replace=>$<
 Failed: error -35 at offset 3 in replacement: invalid replacement string
+        here: >$< |<--|
     ZabcZ\=replace=>$<1
 Failed: error -35 at offset 4 in replacement: invalid replacement string
+        here: >$<1 |<--|
     ZabcZ\=replace=>$<1Z
 Failed: error -35 at offset 5 in replacement: invalid replacement string
+        here: >$<1Z |<--|
     ZabcZ\=replace=>$<1;
 Failed: error -35 at offset 4 in replacement: invalid replacement string
+        here: >$<1 |<--| ;
     ZabcZ\=replace=>\g<
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: >\g< |<--|
     ZabcZ\=replace=>\g<1
 Failed: error -57 at offset 5 in replacement: bad escape sequence in replacement string
+        here: >\g<1 |<--|
     ZabcZ\=replace=>\g<1Z
 Failed: error -57 at offset 5 in replacement: bad escape sequence in replacement string
+        here: >\g<1 |<--| Z
     ZabcZ\=replace=>\g<1;
 Failed: error -57 at offset 5 in replacement: bad escape sequence in replacement string
+        here: >\g<1 |<--| ;
 
 "((?=(?(?=(?(?=(?(?=()))))))))"
     a
@@ -15644,6 +15699,7 @@ No match
 /abcd/replace=xy\kz,substitute_extended
     abcd
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: xy\k |<--| z
 
 /a(?:(b)|(c))/substitute_extended,replace=X${1:+1:-1}X${2:+2:-2}
     ab
@@ -15676,22 +15732,27 @@ Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement
 /a/substitute_extended,replace=${*MARK:+a:b}
     a
 Failed: error -58 at offset 7 in replacement: expected closing curly bracket in replacement string
+        here: ${*MARK |<--| :+a:b}
 
 /(abcd)/replace=${1:+xy\kz},substitute_extended
     abcd
-Failed: error -57 at offset 8 in replacement: bad escape sequence in replacement string
+Failed: error -57 at offset 9 in replacement: bad escape sequence in replacement string
+        here: ${1:+xy\k |<--| z}
 
 /(abcd)/
     abcd\=replace=${1:+xy\kz},substitute_extended
-Failed: error -57 at offset 8 in replacement: bad escape sequence in replacement string
+Failed: error -57 at offset 9 in replacement: bad escape sequence in replacement string
+        here: ${1:+xy\k |<--| z}
 
 /abcd/substitute_extended,replace=>$1<
     abcd
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: >$1 |<--| <
 
 /abcd/substitute_extended,replace=>xxx${xyz}<<<
     abcd
 Failed: error -49 at offset 10 in replacement: unknown substring
+        here: >xxx${xyz} |<--| <<<
 
 /(?J)(?:(?<A>a)|(?<A>b))/replace=<$A>
     [a]
@@ -15701,11 +15762,13 @@ Failed: error -49 at offset 10 in replacement: unknown substring
 \= Expect error
     (a)\=ovector=1
 Failed: error -54 at offset 3 in replacement: requested value is not available
+        here: <$A |<--| >
 
 /(a)|(b)/replace=<$1>
 \= Expect error
     b
 Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: <$1 |<--| >
 
 /(aa)(BB)/substitute_extended,replace=\U$1\L$2\E$1..\U$1\l$2$1
     aaBB
@@ -15740,6 +15803,7 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 /abc/substitute_extended,replace=>\845<
     abc
 Failed: error -49 at offset 5 in replacement: unknown substring
+        here: >\845 |<--| <
 
 /a(b)(c)/substitute_extended,replace=>\1<
     abc
@@ -15752,6 +15816,7 @@ Failed: error -49 at offset 5 in replacement: unknown substring
 /a(b)(c)/substitute_extended,replace=>\3<
     abc
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: >\3 |<--| <
 
 /a(?<namED_1>b)c/substitute_extended
     abc\=replace=>${namED_1}<
@@ -15795,6 +15860,7 @@ Failed: error 142 at offset 7: syntax error in subpattern name (missing terminat
 /abc/replace=A$3123456789Z
     abc
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: A$3 |<--| 123456789Z
 
 /(?<!a{65535}a{5})x/I
 Failed: error 187 at offset 0: lookbehind assertion is too long
@@ -16187,6 +16253,7 @@ Failed: error 162 at offset 49: subpattern name expected
 /a|(b)c/
     cat\=replace=>$1<
 Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: >$1 |<--| <
     cat\=replace=>$1<,substitute_unset_empty
  1: c><t
     xbcom\=replace=>$1<,substitute_unset_empty
@@ -16195,6 +16262,7 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 /a|(b)c/substitute_extended
     cat\=replace=>${2:-xx}<
 Failed: error -49 at offset 9 in replacement: unknown substring
+        here: >${2:-xx} |<--| <
     cat\=replace=>${2:-xx}<,substitute_unknown_unset
  1: c>xx<t
     cat\=replace=>${X:-xx}<,substitute_unknown_unset
@@ -16209,18 +16277,22 @@ Failed: error -49 at offset 9 in replacement: unknown substring
 /a|(?'X'b)c/replace=>$Y<,substitute_unset_empty
     cat
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: >$Y |<--| <
     cat\=substitute_unknown_unset
  1: c><t
     cat\=substitute_unknown_unset,-substitute_unset_empty
 Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: >$Y |<--| <
 
 /a|(b)c/replace=>$2<,substitute_unset_empty
     cat
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: >$2 |<--| <
     cat\=substitute_unknown_unset
  1: c><t
     cat\=substitute_unknown_unset,-substitute_unset_empty
 Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: >$2 |<--| <
 
 /()()()/use_offset_limit
     \=ovector=11000000000
@@ -16481,6 +16553,7 @@ No match
 /(\x0e00\000000\xc)/replace=\P,substitute_extended
     \x0e00\000000\xc
 Failed: error -57 at offset 2 in replacement: bad escape sequence in replacement string
+        here: \P |<--|
 
 //replace=0
     \=offset=7
@@ -18670,6 +18743,7 @@ Callout 0: last capture = 2
 \= Expect error     
     xyzabcdxyzabcdxyz\=ovector=1
 Failed: error -54 at offset 3 in replacement: requested value is not available
+        here: >$1 |<--| <
 
 /a(..)d/g,replace=>$1<,substitute_matched
     xyzabcdxyzabcdxyz
@@ -18679,8 +18753,10 @@ Failed: error -54 at offset 3 in replacement: requested value is not available
 \= Expect error     
     xyzabcdxyzabcdxyz\=ovector=1
 Failed: error -54 at offset 3 in replacement: requested value is not available
+        here: >$1 |<--| <
     xyzabcdxyzabcdxyz\=ovector=1,substitute_unset_empty
 Failed: error -54 at offset 3 in replacement: requested value is not available
+        here: >$1 |<--| <
 
 /55|a(..)d/g,replace=>$1<,substitute_matched
     xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
@@ -18688,6 +18764,7 @@ Failed: error -54 at offset 3 in replacement: requested value is not available
 \= Expect error     
     xyz55abcdxyzabcdxyz\=ovector=2
 Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: >$1 |<--| <
 
 /55|a(..)d/replace=>$1<,substitute_matched
     xyz55abcdxyzabcdxyz\=ovector=2,substitute_unset_empty
@@ -20382,6 +20459,7 @@ Failed: error 198 at offset 3: octal digit missing after \0 (PCRE2_EXTRA_NO_BS0 
 /abc/substitute_extended,no_bs0
     abc\=replace=a\0b
 Failed: error -57 at offset 3 in replacement: bad escape sequence in replacement string
+        here: a\0 |<--| b
     abc\=replace=b\x00c\00d
  1: b\x00c\x00d
 
@@ -20406,6 +20484,7 @@ Failed: error 115 at offset 2: reference to non-existent subpattern
  1: \x00-\x00-\x01-\x0a-\x0a3-S-S4
     abc\=replace=\1
 Failed: error -49 at offset 2 in replacement: unknown substring
+        here: \1 |<--|
     abc\=replace=\12
  1: \x0a
 
@@ -20426,8 +20505,10 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
  1: \x00-\x00-\x01-\x0a-\x0a3-S-S4
     abc\=replace=\1
 Failed: error -49 at offset 2 in replacement: unknown substring
+        here: \1 |<--|
     abc\=replace=\12
 Failed: error -49 at offset 3 in replacement: unknown substring
+        here: \12 |<--|
 
 #endif
 

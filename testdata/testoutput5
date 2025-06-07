@@ -6137,6 +6137,7 @@ Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (f
 /abc/utf,substitute_extended,python_octal
     abc\=replace=\400
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: \400 |<--|
 
 # Character range merging tests
 

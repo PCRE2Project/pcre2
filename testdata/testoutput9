@@ -422,11 +422,13 @@ Failed: error 151 at offset 13: octal value is greater than \377 in 8-bit non-UT
 /abc/substitute_extended,replace=>\777<
     abc
 Failed: error -57 at offset 5 in replacement: bad escape sequence in replacement string
+        here: >\777 |<--| <
 
 # Should cause an error
 /abc/substitute_extended,replace=>\o{012345}<
     abc
 Failed: error -57 at offset 10 in replacement: bad escape sequence in replacement string
+        here: >\o{012345 |<--| }<
 
 /i/turkish_casing
 Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
