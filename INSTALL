@@ -137,6 +137,10 @@ this:
 may have to build one architecture at a time and combine the results
 using the 'lipo' tool if you have problems.
 
+   For OpenHarmony cross-compile system, you can follow this document 
+(https://gitcode.com/openharmony-sig/tpc_c_cplusplus/blob/master/Cross_
+Compilation_Guide_for_Open_Source_Third_Party_Libraries_in_OpenHarmony_en.md)
+
 Installation Names
 ==================
 
