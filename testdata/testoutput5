@@ -305,8 +305,8 @@ Last code unit = 'b'
 Subject length lower bound = 2
 
 /[\x{200}-\x{100}]/utf
-Failed: error 108 at offset 15: range out of order in character class
-        here: ...00}-\x{100 |<-->| }]
+Failed: error 108 at offset 16: range out of order in character class
+        here: ...0}-\x{100} |<--| ]
 
 /[Ā-Ą]/utf
     \x{100}
@@ -1415,10 +1415,6 @@ Partial match: X
         Ket
         End
 ------------------------------------------------------------------
-
-/^\cģ/utf
-Failed: error 168 at offset 3: \c must be followed by a printable ASCII character
-        here: ^\c |<-->| ģ
 
 /(\R*)(.)/s,utf
     \r\n
@@ -4050,14 +4046,22 @@ global repeat returned the same match as previous
  0+ 
 
 "\xa\xf<(.\pZ*\P{Xwd}+^\xa8\3'3yq.::?(?J:()\xd1+!~:3'(8?:)':(?'d'(?'d'^u]!.+.+\\A\Ah(n+?9){7}+\K;(?'X'u'(?'c'(?'z'(?<y>\xb::\xf0'|\xd3(\xae?'w(z\x8?P>l)\x8?P>a)'\H\R\xd1+!!~:3'(?:h$N{26875}\W+?\\=D{2}\x89(?i:Uy0\N({2\xa(\v\x85*){y*\A(()\p{L}+?\P{^Xan}'+?\xff\+pS\?|).{;y*\A(()\p{L}+?\8}\d?1(|)(/1){7}.+[Lp{Me}].\s\xdcC*?(?(<y>))(?<!^)$C((;*?(R))+(\xbf(R))\x8a\X*?\x8a\xb\xd1^9\3*+(\xc1,\k'R'\xb4)\xcc(z\z(?J)(?'X'\x1b(\xb\xd1^9\?'3*+P{^Xan}+?\xff\+(\xc1.]k+\xb'Pm'\xb4)\xcc4f\xa7'\xd1V(?i:U,{2,2})'(?'X'))?-%--\x95$9*\4'|\xd1(\x9c''%\x94$9)#(?'R')3\x7?('P\xed7'\xa8\xb1^u\xeaw\1\0\0\(|(?1){7}.+[\p{Me}].\s\xdcC*^\x14?(?(<y>))(?<!^)$C((;*?(R*?))+(?(R)\x8a\X*?\x8a\xb\xd1^9\3*+|(\xc1,\k'R'\xb4)\xcc! z)\z(?JJ)(?'X';(\xb\xd1^9\?'3*+(\xc1.]k+\xb'Pm'\xb4))':(?'d')(?'RD'(d')|)|$)'|(?<x>\g{d});\g{x}\x11\g{d}\x81\|$((?'X'\'X'(?'W''\x92()'9'\x83*))\xba*\!?^ <){)':;\xcc4'\xd1'(?'X'28))?-%--\x95$9*\4'|\xd1((''e\x94*$9:)*#(?'R')3)\x7?('P\xed')\\x16:;()\x1e\x10*:(?<y>)\xd1+0!~:(?)'d'E:yD!\s(?'R'\x1e;\x10:U))|'\x9g!\xb0*){)\\x16:;()\x1e\x10\x87*:(?<y>)\xd1+!~:(?)'}'\d'E:yD!\s(?'R'\x1e;\x10:U))|'))|)g!\xb0*R+9{29+)#(?'P'})*?pS\{3,}\x85,{0,}l{*UTF)(\xe{7}){3722,{9,}d{2,?|))|{)\(A?&d}}{\xa,}2}){3,}7,l{)22}(,}l:7{2,4}}29\x19+)#?'P'})*v?))\x5"
-Failed: error 122 at offset 1227: unmatched closing parenthesis
-        here: ...#?'P'})*v? |-->| ))\x5
+Failed: error 122 at offset 1228: unmatched closing parenthesis
+        here: ...?'P'})*v?) |<--| )\x5
 
 /$(&.+[\p{Me}].\s\xdcC*?(?(<y>))(?<!^)$C((;*?(R))+(?(R)){0,6}?|){12\x8a\X*?\x8a\x0b\xd1^9\3*+(\xc1,\k'P'\xb4)\xcc(z\z(?JJ)(?'X'8};(\x0b\xd1^9\?'3*+(\xc1.]k+\x0b'Pm'\xb4\xcc4'\xd1'(?'X'))?-%--\x95$9*\4'|\xd1(''%\x95*$9)#(?'R')3\x07?('P\xed')\\x16:;()\x1e\x10*:(?<y>)\xd1+!~:(?)''(d'E:yD!\s(?'R'\x1e;\x10:U))|')g!\xb0*){29+))#(?'P'})*?/
 
 "(*UTF)(*UCP)(.UTF).+X(\V+;\^(\D|)!999}(?(?C{7(?C')\H*\S*/^\x5\xa\\xd3\x85n?(;\D*(?m).[^mH+((*UCP)(*U:F)})(?!^)(?'"
 Failed: error 162 at offset 113: subpattern name expected
         here: ...})(?!^)(?' |<--|
+
+/(?(?C'')\Qé/utf
+Failed: error 128 at offset 8: atomic assertion expected after (?( or (?(?C)
+        here: (?(?C'') |<--| \Qé
+
+/(?(?C'')é/utf
+Failed: error 128 at offset 8: atomic assertion expected after (?( or (?(?C)
+        here: (?(?C'') |<--| é
 
 /[\pS#moq]/
     =
@@ -4791,16 +4795,28 @@ Callout 0: last capture = 1
  0: \x{1d1aa}
 
 /\N{U+}/
-Failed: error 193 at offset 2: \N{U+dddd} is supported only in Unicode (UTF) mode
-        here: \N |<-->| {U+}
+Failed: error 193 at offset 6: \N{U+dddd} is supported only in Unicode (UTF) mode
+        here: \N{U+} |<--|
 
 /\N{U+}/utf
 Failed: error 178 at offset 5: digits missing after \x or in \x{} or \o{} or \N{U+}
         here: \N{U+ |<--| }
 
 /\N{U}/
-Failed: error 137 at offset 2: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
-        here: \N |<--| {U}
+Failed: error 137 at offset 3: PCRE2 does not support \F, \L, \l, \N{name}, \U, or \u
+        here: \N{ |<--| U}
+
+/\N{U+}/utf
+Failed: error 178 at offset 5: digits missing after \x or in \x{} or \o{} or \N{U+}
+        here: \N{U+ |<--| }
+
+/\N{U+1}/
+Failed: error 193 at offset 7: \N{U+dddd} is supported only in Unicode (UTF) mode
+        here: \N{U+1} |<--|
+
+/\N{U+1 }/
+Failed: error 193 at offset 8: \N{U+dddd} is supported only in Unicode (UTF) mode
+        here: \N{U+1 } |<--|
 
 # This tests the non-UTF Unicode NEL pattern whitespace character, only
 # recognized by PCRE2 with /x when there is Unicode support.
@@ -4962,10 +4978,6 @@ Subject length lower bound = 3
 /(?'AB၌C'...)\g{AB၌C}/utf
 Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator?)
         here: (?'AB |<--| ၌C'...)\g{...
-
-/(?'٠ABC'...)/utf
-Failed: error 144 at offset 3: subpattern name must start with a non-digit
-        here: (?' |-->| ٠ABC'...)
 
 /(?'²ABC'...)/utf
 Failed: error 162 at offset 3: subpattern name expected
@@ -6125,6 +6137,7 @@ Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (f
 /abc/utf,substitute_extended,python_octal
     abc\=replace=\400
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: \400 |<--|
 
 # Character range merging tests
 
@@ -6297,8 +6310,8 @@ No match
 
 # Freeing memory on error test
 /[\x{100}-\x{400}][\x{100}-\x{300}][\x{100}-\x{200}]\8/i,utf
-Failed: error 115 at offset 52: reference to non-existent subpattern
-        here: ...-\x{200}]\ |<-->| 8
+Failed: error 115 at offset 53: reference to non-existent subpattern
+        here: ...\x{200}]\8 |<-->|
 
 # Character list tests
 
@@ -6871,19 +6884,19 @@ No match
 
 /[\p{Lu}-z]/B,alt_extended_class
 Failed: error 150 at offset 8: invalid range in character class
-        here: [\p{Lu}- |<-->| z]
+        here: [\p{Lu}- |<--| z]
 
 /[z-\p{Lu}]/B,alt_extended_class
 Failed: error 150 at offset 9: invalid range in character class
-        here: [z-\p{Lu} |<-->| ]
+        here: [z-\p{Lu} |<--| ]
 
 /[\pL-z]/B,alt_extended_class
 Failed: error 150 at offset 5: invalid range in character class
-        here: [\pL- |<-->| z]
+        here: [\pL- |<--| z]
 
 /[z-\pL]/B,alt_extended_class
 Failed: error 150 at offset 6: invalid range in character class
-        here: [z-\pL |<-->| ]
+        here: [z-\pL |<--| ]
 
 /[\p{Lu}-&&-\pL]/B,alt_extended_class
 ------------------------------------------------------------------
@@ -8226,19 +8239,19 @@ No match
 
 /[z-\p{Lu}]/
 Failed: error 150 at offset 9: invalid range in character class
-        here: [z-\p{Lu} |<-->| ]
+        here: [z-\p{Lu} |<--| ]
 
 /[z-\pL]/
 Failed: error 150 at offset 6: invalid range in character class
-        here: [z-\pL |<-->| ]
+        here: [z-\pL |<--| ]
 
 /[\p{Lu}-z]/
 Failed: error 150 at offset 8: invalid range in character class
-        here: [\p{Lu}- |<-->| z]
+        here: [\p{Lu}- |<--| z]
 
 /[\pL-z]/
 Failed: error 150 at offset 5: invalid range in character class
-        here: [\pL- |<-->| z]
+        here: [\pL- |<--| z]
 
 /[a\x{e1}]/iB
 ------------------------------------------------------------------

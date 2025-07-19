@@ -1638,6 +1638,14 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
 Failed: error 142 at offset 5: syntax error in subpattern name (missing terminator?)
         here: (?(á |<--|
 
+/^\cģ/utf
+Failed: error 168 at offset 5: \c must be followed by a printable ASCII character
+        here: ^\cģ |<--|
+
+/(?'٠ABC'...)/utf
+Failed: error 144 at offset 5: subpattern name must start with a non-digit
+        here: (?'٠ |<--| ABC'...)
+
 # Invalid UTF-8 tests
 
 /.../g,match_invalid_utf
@@ -2000,6 +2008,7 @@ Failed: error 151 at offset 4: octal value is greater than \377 in 8-bit non-UTF
 /abc/substitute_extended
     abc\=replace=\400
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: \400 |<--|
 
 /\400/python_octal
 Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)
@@ -2008,6 +2017,7 @@ Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (f
 /abc/substitute_extended,python_octal
     abc\=replace=\400
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: \400 |<--|
 
 /\400/utf
 
@@ -2022,6 +2032,7 @@ Failed: error 202 at offset 4: octal value given by \ddd is greater than \377 (f
 /abc/utf,substitute_extended,python_octal
     abc\=replace=\400
 Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement string
+        here: \400 |<--|
 
 /[\x00-\x2f\x11-\xff]+/B
 ------------------------------------------------------------------

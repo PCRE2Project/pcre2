@@ -3081,7 +3081,7 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
        case,  if  a  partial match is found, pcre2_match() immediately returns
        PCRE2_ERROR_PARTIAL, without considering  any  other  alternatives.  In
        other words, when PCRE2_PARTIAL_HARD is set, a partial match is consid-
-       ered to be more important that an alternative complete match.
+       ered to be more important than an alternative complete match.
 
        There is a more detailed discussion of partial and multi-segment match-
        ing, with examples, in the pcre2partial documentation.
