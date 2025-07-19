@@ -1511,6 +1511,14 @@ Failed: error 142 at offset 4: syntax error in subpattern name (missing terminat
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
         here: (?(á |<--|
 
+/^\cģ/utf
+Failed: error 168 at offset 4: \c must be followed by a printable ASCII character
+        here: ^\cģ |<--|
+
+/(?'٠ABC'...)/utf
+Failed: error 144 at offset 4: subpattern name must start with a non-digit
+        here: (?'٠ |<--| ABC'...)
+
 # Invalid UTF-16/32 tests.
 
 /.../g,match_invalid_utf

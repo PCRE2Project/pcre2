@@ -502,6 +502,10 @@
 
 /(?(á/utf
 
+/^\cģ/utf
+
+/(?'٠ABC'...)/utf
+
 # Invalid UTF-8 tests
 
 /.../g,match_invalid_utf

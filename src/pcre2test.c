@@ -3547,7 +3547,7 @@ else
   }
 
 if (left && start > p) fprintf(f, "...");
-fprintf(f, "%.*s", (int)(end - start), start);
+for (; start < end; start++) fprintf(f, "%c", CHAR_OUTPUT(*start));
 if (!left && end < p + p_len) fprintf(f, "...");
 }
 #endif
@@ -4623,15 +4623,16 @@ switch (rc)
   used when indicating an error in a capture group or lookaround parentheses.
   It is more user-friendly to identify the capture group by its start. */
 
-  case PCRE2_ERROR_INVALID_AFTER_PARENS_QUERY:
   case PCRE2_ERROR_PARENTHESES_NEST_TOO_DEEP:
   case PCRE2_ERROR_LOOKBEHIND_NOT_FIXED_LENGTH:
   case PCRE2_ERROR_TOO_MANY_CONDITION_BRANCHES:
   case PCRE2_ERROR_LOOKBEHIND_TOO_COMPLICATED:
   case PCRE2_ERROR_LOOKBEHIND_INVALID_BACKSLASH_C:
+  case PCRE2_ERROR_CALLOUT_NO_STRING_DELIMITER:
   case PCRE2_ERROR_QUERY_BARJX_NEST_TOO_DEEP:
   case PCRE2_ERROR_LOOKBEHIND_TOO_LONG:
   case PCRE2_ERROR_MAX_VAR_LOOKBEHIND_EXCEEDED:
+  case PCRE2_ERROR_ECLASS_NEST_TOO_DEEP:
   return 2;
 
   /* The standard erroroffset should occur just after the affected portion of
@@ -4640,123 +4641,80 @@ switch (rc)
 
   case PCRE2_ERROR_END_BACKSLASH:
   case PCRE2_ERROR_END_BACKSLASH_C:
-  return 1;
   case PCRE2_ERROR_UNKNOWN_ESCAPE:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_QUANTIFIER_OUT_OF_ORDER:
   case PCRE2_ERROR_QUANTIFIER_TOO_BIG:
   case PCRE2_ERROR_MISSING_SQUARE_BRACKET:
-  return 1;
   case PCRE2_ERROR_ESCAPE_INVALID_IN_CLASS:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_CLASS_RANGE_ORDER:
-  return 3; /* I'd like to fix this */
   case PCRE2_ERROR_QUANTIFIER_INVALID:
-  return 3; /* I'd like to fix this */
+  case PCRE2_ERROR_INVALID_AFTER_PARENS_QUERY:
   case PCRE2_ERROR_POSIX_CLASS_NOT_IN_CLASS:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_POSIX_NO_SUPPORT_COLLATING:
-  return 3; /* I'd like to fix this */
   case PCRE2_ERROR_MISSING_CLOSING_PARENTHESIS:
   return 1;
   case PCRE2_ERROR_BAD_SUBPATTERN_REFERENCE:
-  return 3; /* I'd like to fix this */
+  return 3; /* TODO I'd like to fix this, but some of the cases are _hard_ */
   case PCRE2_ERROR_MISSING_COMMENT_CLOSING:
-  return 1;
   case PCRE2_ERROR_UNMATCHED_CLOSING_PARENTHESIS:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_MISSING_CONDITION_CLOSING:
   case PCRE2_ERROR_ZERO_RELATIVE_REFERENCE:
-  return 1;
   case PCRE2_ERROR_CONDITION_ASSERTION_EXPECTED:
-  return 3; /* I'd like to fix this */
   case PCRE2_ERROR_BAD_RELATIVE_REFERENCE:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_UNKNOWN_POSIX_CLASS:
   case PCRE2_ERROR_CODE_POINT_TOO_BIG:
-  return 1;
   case PCRE2_ERROR_UNSUPPORTED_ESCAPE_SEQUENCE:
-  return 1; /* Inconsistent; \N{...} not placed same as for others */
   case PCRE2_ERROR_CALLOUT_NUMBER_TOO_BIG:
   case PCRE2_ERROR_MISSING_CALLOUT_CLOSING:
   case PCRE2_ERROR_ESCAPE_INVALID_IN_VERB:
-  return 1;
   case PCRE2_ERROR_UNRECOGNIZED_AFTER_QUERY_P:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_MISSING_NAME_TERMINATOR:
   case PCRE2_ERROR_DUPLICATE_SUBPATTERN_NAME:
-  return 1;
   case PCRE2_ERROR_INVALID_SUBPATTERN_NAME:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_UNICODE_PROPERTIES_UNAVAILABLE:
   case PCRE2_ERROR_MALFORMED_UNICODE_PROPERTY:
   case PCRE2_ERROR_UNKNOWN_UNICODE_PROPERTY:
   case PCRE2_ERROR_SUBPATTERN_NAME_TOO_LONG:
   case PCRE2_ERROR_TOO_MANY_NAMED_SUBPATTERNS:
-  return 1;
   case PCRE2_ERROR_CLASS_INVALID_RANGE:
-  return 3; /* Inconsistent; I'd like to fix this */
   case PCRE2_ERROR_OCTAL_BYTE_TOO_BIG:
   return 1;
   case PCRE2_ERROR_DEFINE_TOO_MANY_BRANCHES:
-  return 2; /* Not ideally placed; I'd like to fix this */
+  return 2; /* TODO Not ideally placed; I'd like to fix this */
   case PCRE2_ERROR_BACKSLASH_O_MISSING_BRACE:
   case PCRE2_ERROR_BACKSLASH_G_SYNTAX:
-  return 3; /* For consistency as "braced" items their parse errors should move to the left and indicate to the right*/
   case PCRE2_ERROR_PARENS_QUERY_R_MISSING_CLOSING:
   case PCRE2_ERROR_VERB_UNKNOWN:
   case PCRE2_ERROR_SUBPATTERN_NUMBER_TOO_BIG:
-  return 1;
   case PCRE2_ERROR_SUBPATTERN_NAME_EXPECTED:
-  return 1; /* For consistency, should move one to the right if there was a non-matching character */
   case PCRE2_ERROR_INVALID_OCTAL:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_SUBPATTERN_NAMES_MISMATCH:
   case PCRE2_ERROR_MARK_MISSING_ARGUMENT:
-  return 1;
   case PCRE2_ERROR_INVALID_HEXADECIMAL:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_BACKSLASH_C_SYNTAX:
   case PCRE2_ERROR_BACKSLASH_K_SYNTAX:
-  return 3; /* For consistency this should move to the right */
   case PCRE2_ERROR_BACKSLASH_N_IN_CLASS:
   case PCRE2_ERROR_CALLOUT_STRING_TOO_LONG:
   case PCRE2_ERROR_UNICODE_DISALLOWED_CODE_POINT:
   return 1;
-  case PCRE2_ERROR_UTF_IS_DISABLED:
-  case PCRE2_ERROR_UCP_IS_DISABLED:
-  return (erroroffset > 0)? 1 : 0; /* Tricksy - can be triggered by options or by (*UTF) */
   case PCRE2_ERROR_VERB_NAME_TOO_LONG:
   case PCRE2_ERROR_BACKSLASH_U_CODE_POINT_TOO_BIG:
   case PCRE2_ERROR_MISSING_OCTAL_OR_HEX_DIGITS:
-  return 1;
   case PCRE2_ERROR_VERSION_CONDITION_SYNTAX:
-  return 3; /* Ideally we'd be more accurate in placing the erroroffset, but it's acceptable. */
-  case PCRE2_ERROR_CALLOUT_NO_STRING_DELIMITER:
-  return 2; /* I'd like to fix this */
   case PCRE2_ERROR_CALLOUT_BAD_STRING_DELIMITER:
-  return 3; /* I'd like to fix this */
   case PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED:
   case PCRE2_ERROR_BACKSLASH_C_LIBRARY_DISABLED:
-  return 1;
   case PCRE2_ERROR_SUPPORTED_ONLY_IN_UNICODE:
-  return 3;  /* Inconsistent placement in the middle of \N{} */
   case PCRE2_ERROR_INVALID_HYPHEN_IN_OPTIONS:
-  return 3;  /* Should be one character to the right */
   case PCRE2_ERROR_ALPHA_ASSERTION_UNKNOWN:
-  return 1; /* Inconsistency; I'd move it one to the right */
   case PCRE2_ERROR_SCRIPT_RUN_NOT_AVAILABLE:
   case PCRE2_ERROR_TOO_MANY_CAPTURES:
   case PCRE2_ERROR_MISSING_OCTAL_DIGIT:
   return 1;
   case PCRE2_ERROR_BACKSLASH_K_IN_LOOKAROUND:
-  return 3; /* No erroroffset implemented yet, sadly */
+  return 3; /* TODO No erroroffset implemented yet, sadly */
   case PCRE2_ERROR_OVERSIZE_PYTHON_OCTAL:
-  return 1;
   case PCRE2_ERROR_CALLOUT_CALLER_DISABLED:
-  return 1; /* Should be one to the right for consistency */
-  case PCRE2_ERROR_ECLASS_NEST_TOO_DEEP:
-  return 1; /* Should be one to the left and pointing right for consistency */
   case PCRE2_ERROR_ECLASS_INVALID_OPERATOR:
   case PCRE2_ERROR_ECLASS_UNEXPECTED_OPERATOR:
   case PCRE2_ERROR_ECLASS_EXPECTED_OPERAND:
@@ -4768,7 +4726,16 @@ switch (rc)
   case PCRE2_ERROR_PERL_ECLASS_UNEXPECTED_CHAR:
   case PCRE2_ERROR_EXPECTED_CAPTURE_GROUP:
   case PCRE2_ERROR_MISSING_OPENING_PARENTHESIS:
+  case PCRE2_ERROR_MISSING_NUMBER_TERMINATOR:
   return 1;
+
+  /* These two are a little fiddly. They can be triggered by passed-in options
+  (when erroroffset is zero), or by text in the pattern "(*UTF)". We only
+  indicate an pattern error in the latter case. */
+
+  case PCRE2_ERROR_UTF_IS_DISABLED:
+  case PCRE2_ERROR_UCP_IS_DISABLED:
+  return (erroroffset > 0)? 1 : 0;
 
   case PCRE2_ERROR_UTF8_ERR1:
   case PCRE2_ERROR_UTF8_ERR2:
@@ -6956,7 +6923,7 @@ if (TEST(compiled_code, ==, NULL))
   if (direction < 0)
     {
     fprintf(outfile, "** Error code %d not implemented in error_direction().\n", errorcode);
-    fprintf(outfile, "   error_direction() is usually return '1' for newly-added errors,\n");
+    fprintf(outfile, "   error_direction() should usually return '1' for newly-added errors,\n");
     fprintf(outfile, "   and the offset should be just to the right of the bad character.\n");
     return PR_ABEND;
     }
@@ -10679,7 +10646,7 @@ least 128 code units, because it is used for retrieving error messages. */
   for (;;)
     {
     li = strtol(arg_error, &endptr, 10);
-    if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != CHAR_COMMA))
+    if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != ','))
       {
       fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;

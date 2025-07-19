@@ -1566,6 +1566,13 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
           goto COME_FROM_NU;
           }
 #endif
+
+        /* Improve error offset. */
+        ptr = p + 2;
+        while (ptr < ptrend && XDIGIT(*ptr) != 0xff) ptr++;
+        while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+        if (ptr < ptrend && *ptr == CHAR_RIGHT_CURLY_BRACKET) ptr++;
+
         *errorcodeptr = ERR93;
         }
 
@@ -1574,6 +1581,7 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
 
       else if (isclass || cb == NULL)
         {
+        ptr++; /* Skip over the opening brace */
         *errorcodeptr = ERR37;
         }
 
@@ -1584,7 +1592,10 @@ else if ((i = escapes[c - ESCAPES_FIRST]) != 0)
         {
         if (!read_repeat_counts(&p, ptrend, NULL, NULL, errorcodeptr) &&
              *errorcodeptr == 0)
+          {
+          ptr++; /* Skip over the opening brace */
           *errorcodeptr = ERR37;
+          }
         }
       }
     }
@@ -1609,7 +1620,7 @@ else
         c != CHAR_x && c != CHAR_g)
       {
       *errorcodeptr = ERR3;
-      return 0;
+      goto EXIT;
       }
     alt_bsux = FALSE;   /* Do not modify \x handling */
     }
@@ -1634,7 +1645,9 @@ else
     because otherwise \u{ 12} (for example) would be treated as u{12}. */
 
     case CHAR_u:
-    if (!alt_bsux) *errorcodeptr = ERR37; else
+    if (!alt_bsux)
+      *errorcodeptr = ERR37;
+    else
       {
       uint32_t xc;
 
@@ -1760,8 +1773,8 @@ else
 
       if (p >= ptrend || *p != CHAR_GREATER_THAN_SIGN)
         {
-        /* not advancing ptr; report error at the \g character */
-        *errorcodeptr = ERR57;
+        ptr = p;
+        *errorcodeptr = ERR119;  /* Missing terminator for number */
         break;
         }
 
@@ -1797,8 +1810,8 @@ else
 
       if (p >= ptrend || *p != CHAR_RIGHT_CURLY_BRACKET)
         {
-        /* not advancing ptr; report error at the \g character */
-        *errorcodeptr = ERR57;
+        ptr = p;
+        *errorcodeptr = ERR119;  /* Missing terminator for number */
         break;
         }
       ptr = p + 1;
@@ -1955,12 +1968,12 @@ else
     with optional spaces or tabs after { and before }. */
 
     case CHAR_o:
-    if (ptr >= ptrend || *ptr++ != CHAR_LEFT_CURLY_BRACKET)
+    if (ptr >= ptrend || *ptr != CHAR_LEFT_CURLY_BRACKET)
       {
-      ptr--;
       *errorcodeptr = ERR55;
       break;
       }
+    ptr++;
 
     while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
     if (ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
@@ -1995,19 +2008,19 @@ else
       while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7) ptr++;
       *errorcodeptr = ERR34;
       }
-    else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
+    else if (utf && c >= 0xd800 && c <= 0xdfff &&
+             (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
       {
-      if (utf && c >= 0xd800 && c <= 0xdfff &&
-          (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
-        {
-        ptr--;
-        *errorcodeptr = ERR73;
-        }
+      *errorcodeptr = ERR73;
+      }
+    else if (ptr < ptrend && *ptr == CHAR_RIGHT_CURLY_BRACKET)
+      {
+      ptr++;
       }
     else
       {
-      ptr--;
       *errorcodeptr = ERR64;
+      goto ESCAPE_FAILED_FORWARD;
       }
     break;
 
@@ -2076,14 +2089,14 @@ else
           while (ptr < ptrend && XDIGIT(*ptr) != 0xff) ptr++;
           *errorcodeptr = ERR34;
           }
-        else if (ptr < ptrend && *ptr++ == CHAR_RIGHT_CURLY_BRACKET)
+        else if (utf && c >= 0xd800 && c <= 0xdfff &&
+                 (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
           {
-          if (utf && c >= 0xd800 && c <= 0xdfff &&
-              (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
-            {
-            ptr--;
-            *errorcodeptr = ERR73;
-            }
+          *errorcodeptr = ERR73;
+          }
+        else if (ptr < ptrend && *ptr == CHAR_RIGHT_CURLY_BRACKET)
+          {
+          ptr++;
           }
 
         /* If the sequence of hex digits (followed by optional space) does not
@@ -2093,8 +2106,8 @@ else
 
         else
           {
-          ptr--;
           *errorcodeptr = ERR67;
+          goto ESCAPE_FAILED_FORWARD;
           }
         }   /* End of \x{} processing */
 
@@ -2161,7 +2174,7 @@ else
     if (c < 32 || c > 126)  /* Excludes all non-printable ASCII */
       {
       *errorcodeptr = ERR68;
-      break;
+      goto ESCAPE_FAILED_FORWARD;
       }
     c ^= 0x40;
 
@@ -2179,7 +2192,13 @@ else
         {
         if (c == ebcdic_escape_c[i]) break;
         }
-      if (i < 32) c = i; else *errorcodeptr = ERR68;
+      if (i < 32)
+        c = i;
+      else
+        {
+        *errorcodeptr = ERR68;
+        goto ESCAPE_FAILED_FORWARD;
+        }
       }
 #endif  /* EBCDIC */
 
@@ -2191,16 +2210,25 @@ else
 
     default:
     *errorcodeptr = ERR3;
-    *ptrptr = ptr - 1;     /* Point to the character at fault */
-    return 0;
+    break;
     }
   }
 
 /* Set the pointer to the next character before returning. */
 
+EXIT:
 *ptrptr = ptr;
 *chptr = c;
 return escape;
+
+/* Some errors need to indicate the next character. */
+
+ESCAPE_FAILED_FORWARD:
+ptr++;
+#ifdef SUPPORT_UNICODE
+if (utf) FORWARDCHARTEST(ptr, ptrend);
+#endif
+goto EXIT;
 }
 
 
@@ -2540,7 +2568,7 @@ return -1;
 the name of a subpattern or a (*VERB) or an (*alpha_assertion). The initial
 pointer must be to the preceding character. If that character is '*' we are
 reading a verb or alpha assertion name. The pointer is updated to point after
-the name, for a VERB or alpha assertion name, or after tha name's terminator
+the name, for a VERB or alpha assertion name, or after the name's terminator
 for a subpattern name. Returning both the offset and the name pointer is
 redundant information, but some callers use one and some the other, so it is
 simplest just to return both. When the name is in braces, spaces and tabs are
@@ -2593,12 +2621,14 @@ by Unicode properties, and underscores, but must not start with a digit. */
 if (utf && is_group)
   {
   uint32_t c, type;
+  PCRE2_SPTR p = ptr;
 
-  GETCHAR(c, ptr);
+  GETCHARINC(c, p);  /* Peek at next character */
   type = UCD_CHARTYPE(c);
 
   if (type == ucp_Nd)
     {
+    ptr = p;
     *errorcodeptr = ERR44;
     goto FAILED;
     }
@@ -2607,10 +2637,9 @@ if (utf && is_group)
     {
     if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
         c != CHAR_UNDERSCORE) break;
-    ptr++;
-    FORWARDCHARTEST(ptr, ptrend);
-    if (ptr >= ptrend) break;
-    GETCHAR(c, ptr);
+    ptr = p;  /* Accept character and peek again */
+    if (p >= ptrend) break;
+    GETCHARINC(c, p);
     type = UCD_CHARTYPE(c);
     }
   }
@@ -2626,6 +2655,7 @@ won't be recognized. */
   {
   if (is_group && IS_DIGIT(*ptr))
     {
+    ++ptr;
     *errorcodeptr = ERR44;
     goto FAILED;
     }
@@ -2638,7 +2668,7 @@ won't be recognized. */
 
 /* Check name length */
 
-if (ptr > *nameptr + MAX_NAME_SIZE)
+if (ptr - *nameptr > MAX_NAME_SIZE)
   {
   *errorcodeptr = ERR48;
   goto FAILED;
@@ -3264,12 +3294,6 @@ while (ptr < ptrend)
       }
     else
       {
-      if (expect_cond_assert > 0)   /* A literal is not allowed if we are */
-        {                           /* expecting a conditional assertion, */
-        ptr--;                      /* but an empty \Q\E sequence is OK.  */
-        errorcode = ERR28;
-        goto FAILED;
-        }
       if (inverbname)
         {                          /* Don't use PARSED_LITERAL() because it */
 #if PCRE2_CODE_UNIT_WIDTH == 32    /* sets okquantifier. */
@@ -3398,6 +3422,15 @@ while (ptr < ptrend)
     {
     if (*ptr == CHAR_Q || *ptr == CHAR_E)
       {
+      /* A literal inside a \Q...\E is not allowed if we are expecting a
+      conditional assertion, but an empty \Q\E sequence is OK. */
+      if (expect_cond_assert > 0 && *ptr == CHAR_Q &&
+          !(ptrend - ptr >= 3 && ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E))
+        {
+        ptr--;
+        errorcode = ERR28;
+        goto FAILED;
+        }
       inescq = *ptr == CHAR_Q;
       ptr++;
       continue;
@@ -3507,9 +3540,9 @@ while (ptr < ptrend)
 
     if (!ok)
       {
-      ptr--;   /* Adjust error offset */
       errorcode = ERR28;
-      goto FAILED;
+      if (expect_cond_assert == 2) goto FAILED;
+      goto FAILED_BACK;
       }
     }
 
@@ -3585,7 +3618,7 @@ while (ptr < ptrend)
 
     else if (escape < 0)
       {
-      offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 1);
+      offset = (PCRE2_SIZE)(ptr - cb->start_pattern);
       escape = -escape - 1;
       *parsed_pattern++ = META_BACKREF | (uint32_t)escape;
       if (escape < 10)
@@ -3725,7 +3758,8 @@ while (ptr < ptrend)
           {
           if (p >= ptrend || *p != terminator)
             {
-            errorcode = ERR57;
+            ptr = p;
+            errorcode = ERR119;  /* Missing terminator for number */
             goto ESCAPE_FAILED;
             }
           ptr = p + 1;
@@ -3809,7 +3843,7 @@ while (ptr < ptrend)
     if (!prev_okquantifier)
       {
       errorcode = ERR9;
-      goto FAILED_BACK;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
+      goto FAILED;
       }
 
     /* Most (*VERB)s are not allowed to be quantified, but an ungreedy
@@ -3898,6 +3932,7 @@ while (ptr < ptrend)
         check_posix_syntax(ptr, ptrend, &tempptr))
       {
       errorcode = (*ptr-- == CHAR_COLON)? ERR12 : ERR13;
+      ptr = tempptr + 2;
       goto FAILED;
       }
 
@@ -4125,8 +4160,9 @@ while (ptr < ptrend)
         /* Validate nesting depth */
         if (class_depth_m1 >= ECLASS_NEST_LIMIT - 1)
           {
-          errorcode = ERR107;
-          goto FAILED;        /* Classes too deeply nested */
+          ptr--;  /* Point rightwards at the paren, same as ERR19. */
+          errorcode = ERR107;  /* Classes too deeply nested */
+          goto FAILED;
           }
 
         /* Process the character class start. If the first character is '^', set
@@ -4241,7 +4277,8 @@ while (ptr < ptrend)
           if (c == CHAR_RIGHT_SQUARE_BRACKET && class_depth_m1 != 0)
             {
             errorcode = ERR14;
-            goto FAILED_BACK;
+            ptr--;  /* Correct the offset */
+            goto FAILED;
             }
           if (c == CHAR_RIGHT_PARENTHESIS && class_depth_m1 < 1)
             {
@@ -4461,7 +4498,6 @@ while (ptr < ptrend)
           case ESC_R:
           case ESC_X:
           errorcode = ERR7;
-          ptr--;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
           goto FAILED;
 
           case ESC_N:     /* Not permitted by Perl either */
@@ -4533,7 +4569,6 @@ while (ptr < ptrend)
           case ESC_K:
           case ESC_C:
           errorcode = ERR7;
-          ptr--;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
           goto FAILED;
           }
 
@@ -4624,7 +4659,7 @@ while (ptr < ptrend)
           else if (parsed_pattern[-2] > c)   /* Check range is in order */
             {
             errorcode = ERR8;
-            goto FAILED_BACK;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
+            goto FAILED;
             }
           else
             {
@@ -4720,10 +4755,11 @@ while (ptr < ptrend)
         vn = alasnames;
         if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen,
           &errorcode, cb)) goto FAILED;
-        if (ptr >= ptrend || *ptr != CHAR_COLON)
+        if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+        if (*ptr != CHAR_COLON)
           {
           errorcode = ERR95;  /* Malformed */
-          goto FAILED;
+          goto FAILED_FORWARD;
           }
 
         /* Scan the table of alpha assertion names */
@@ -5008,7 +5044,6 @@ while (ptr < ptrend)
             if (!hyphenok)
               {
               errorcode = ERR94;
-              ptr--;  /* Correct the offset */
               goto FAILED;
               }
             optset = &unset;
@@ -5082,7 +5117,6 @@ while (ptr < ptrend)
 
             default:
             errorcode = ERR11;
-            ptr--;    /* Correct the offset */
             goto FAILED;
             }
           }
@@ -5151,7 +5185,7 @@ while (ptr < ptrend)
       if (*ptr != CHAR_EQUALS_SIGN)
         {
         errorcode = ERR41;
-        goto FAILED;
+        goto FAILED_FORWARD;
         }
       if (!read_name(&ptr, ptrend, utf, CHAR_RIGHT_PARENTHESIS, &offset, &name,
           &namelen, &errorcode, cb)) goto FAILED;
@@ -5179,10 +5213,16 @@ while (ptr < ptrend)
       case because (?- followed by a non-digit is an options setting. */
 
       case CHAR_PLUS:
-      if (ptrend - ptr < 2 || !IS_DIGIT(ptr[1]))
+      if (ptr + 1 >= ptrend)
+        {
+        ++ptr;
+        goto UNCLOSED_PARENTHESIS;
+        }
+      if (!IS_DIGIT(ptr[1]))
         {
         errorcode = ERR29;   /* Missing number */
-        goto FAILED;
+        ++ptr;
+        goto FAILED_FORWARD;
         }
       /* Fall through */
 
@@ -5238,6 +5278,7 @@ while (ptr < ptrend)
       case CHAR_C:
       if ((xoptions & PCRE2_EXTRA_NEVER_CALLOUT) != 0)
         {
+        ptr++;
         errorcode = ERR103;
         goto FAILED;
         }
@@ -5290,7 +5331,7 @@ while (ptr < ptrend)
         if (delimiter == 0)
           {
           errorcode = ERR82;
-          goto FAILED;
+          goto FAILED_FORWARD;
           }
 
         *parsed_pattern = META_CALLOUT_STRING;
@@ -5434,20 +5475,31 @@ while (ptr < ptrend)
         references its argument twice. */
 
         if (*ptr != CHAR_EQUALS_SIGN || (ptr++, !IS_DIGIT(*ptr)))
-          goto BAD_VERSION_CONDITION;
+          {
+          errorcode = ERR79;
+          if (!ge) goto FAILED_FORWARD;
+          goto FAILED;
+          }
 
         if (!read_number(&ptr, ptrend, -1, 1000, ERR79, &major, &errorcode))
           goto FAILED;
 
-        if (ptr >= ptrend) goto BAD_VERSION_CONDITION;
-        if (*ptr == CHAR_DOT)
+        if (ptr < ptrend && *ptr == CHAR_DOT)
           {
-          if (++ptr >= ptrend || !IS_DIGIT(*ptr)) goto BAD_VERSION_CONDITION;
-          minor = (*ptr++ - CHAR_0) * 10;
-          if (ptr >= ptrend) goto BAD_VERSION_CONDITION;
-          if (IS_DIGIT(*ptr)) minor += *ptr++ - CHAR_0;
-          if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
-            goto BAD_VERSION_CONDITION;
+          if (++ptr >= ptrend || !IS_DIGIT(*ptr))
+            {
+            errorcode = ERR79;
+            if (ptr < ptrend) goto FAILED_FORWARD;
+            goto FAILED;
+            }
+          if (!read_number(&ptr, ptrend, -1, 1000, ERR79, &minor, &errorcode))
+            goto FAILED;
+          }
+        if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
+          {
+          errorcode = ERR79;
+          if (ptr < ptrend) goto FAILED_FORWARD;
+          goto FAILED;
           }
 
         *parsed_pattern++ = META_COND_VERSION;
@@ -5481,6 +5533,7 @@ while (ptr < ptrend)
           terminator = CHAR_RIGHT_PARENTHESIS;
           ptr--;   /* Point to char before name */
           }
+
         if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
             &errorcode, cb)) goto FAILED;
 
@@ -5798,7 +5851,7 @@ while (ptr < ptrend)
     if (nest_depth == 0)    /* Unmatched closing parenthesis */
       {
       errorcode = ERR22;
-      goto FAILED_BACK;  // TODO https://github.com/PCRE2Project/pcre2/issues/549
+      goto FAILED;
       }
     nest_depth--;
     *parsed_pattern++ = META_KET;
@@ -5866,12 +5919,18 @@ return errorcode;
 
 FAILED_BACK:
 ptr--;
+#ifdef SUPPORT_UNICODE
+if (utf) BACKCHAR(ptr);
+#endif
 goto FAILED;
 
-/* This failure happens several times. */
+/* Some errors need to indicate the next character. */
 
-BAD_VERSION_CONDITION:
-errorcode = ERR79;
+FAILED_FORWARD:
+ptr++;
+#ifdef SUPPORT_UNICODE
+if (utf) FORWARDCHARTEST(ptr, ptrend);
+#endif
 goto FAILED;
 }
 

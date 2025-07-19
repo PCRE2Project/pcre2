@@ -93,7 +93,7 @@ Subject length lower bound = 5
  0: X
 
 /[\C]/
-Failed: error 107 at offset 2: escape sequence is invalid in character class
-        here: [\ |-->| C]
+Failed: error 107 at offset 3: escape sequence is invalid in character class
+        here: [\C |<--| ]
 
 # End of testinput21
