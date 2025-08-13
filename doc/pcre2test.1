@@ -563,7 +563,9 @@ part of the file. For example:
   \e[abc]{4}
 .sp
 is converted to "abcabcabcabc". This feature does not support nesting. To
-include a closing square bracket in the characters, code it as \ex5D.
+include a closing square bracket in the characters, code it with \ex followed
+by two hexadecimal digits that represent that letter in the character set used
+(e.g. \ex5D for ASCII or UTF-8).
 .P
 A backslash followed by an equals sign marks the end of the subject string and
 the start of a modifier list. For example:
@@ -1286,7 +1288,7 @@ the subject string. For more detail of REG_STARTEND, see the
 \fBpcre2posix\fP
 .\"
 documentation. If the subject string contains binary zeros (coded as escapes
-such as \ex{00} because \fBpcre2test\fP does not support actual binary zeros in
+such as \ex00 because \fBpcre2test\fP does not support actual binary zeros in
 its input), you must use \fBposix_startend\fP to specify its length.
 .
 .
