@@ -852,6 +852,8 @@ else if (use_existing_match)
     + 2*pairs*sizeof(PCRE2_SIZE));
   internal_match_data->heapframes = NULL;
   internal_match_data->heapframes_size = 0;
+  /* Ensure that the subject is not freed when internal_match_data is */
+  internal_match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
   match_data = internal_match_data;
   }
 

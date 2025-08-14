@@ -23064,6 +23064,13 @@ Failed: error 217 at offset 27: expected capture group number or name
     x\=null_subject
 Failed: error -51: NULL argument passed with non-zero length
 
+# Test that a couple of double frees have been fixed
+/foo/replace=bar,substitute_matched
+    foo\=copy_matched_subject
+ 1: bar
+    foo\=global,copy_matched_subject
+ 1: bar
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
