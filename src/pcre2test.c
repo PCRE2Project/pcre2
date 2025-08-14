@@ -3874,44 +3874,83 @@ return 0;
 }
 #endif /* SUPPORT_PCRE2_32 */
 
+/* A helper to realloc() a buffer to a desired or fallback sizes. */
 
+static void*
+realloc_buffer(void *source, size_t fallback, size_t *size)
+{
+void *p;
+
+p = realloc(source, *size);
+if (p == NULL)
+  {
+  p = realloc(source, fallback);
+  if (p == NULL)
+    {
+    *size = 0;
+    return NULL;
+    }
+  *size = fallback;
+  }
+return p;
+}
 
 /*************************************************
 *           Expand input buffers                 *
 *************************************************/
 
 /* This function doubles the size of the input buffer and the buffer for
-keeping an 8-bit copy of patterns (pbuffer8), and copies the current buffers to
-the new ones.
+keeping an 8-bit copy of patterns (pbuffer8) until it is larger than the
+minimum, or to the minimum if it can't be doubled.
 
-Arguments: none
-Returns:   nothing (aborts if malloc() fails)
+Arguments:
+  minimum    size on bytes expected as a minimum
+Returns:     nothing (aborts if any realloc() fails)
 */
 
 static void
-expand_input_buffers(void)
+expand_input_buffers(size_t minimum)
 {
-size_t new_pbuffer8_size = 2*pbuffer8_size;
-uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
-uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
+size_t buffer_size, allowed_size;
+void *p;
 
-if (new_buffer == NULL || new_pbuffer8 == NULL)
+PCRE2_ASSERT(minimum > pbuffer8_size);
+if (minimum >= SIZE_MAX / 2 || pbuffer8_size >= SIZE_MAX / 2)
+  buffer_size = minimum;
+else
   {
-  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
-          new_pbuffer8_size);
-  exit(1);
+  buffer_size = pbuffer8_size;
+  while (buffer_size < minimum) buffer_size *= 2;
   }
 
-memcpy(new_buffer, buffer, pbuffer8_size);
-memcpy(new_pbuffer8, pbuffer8, pbuffer8_size);
+p = realloc_buffer(buffer, minimum, &buffer_size);
+if (p == NULL) goto DIE;
 
-pbuffer8_size = new_pbuffer8_size;
+allowed_size = buffer_size;
+buffer = p;
 
-free(buffer);
-free(pbuffer8);
+p = realloc_buffer(pbuffer8, minimum, &buffer_size);
+if (p == NULL) goto DIE;
 
-buffer = new_buffer;
-pbuffer8 = new_pbuffer8;
+if (allowed_size != buffer_size)
+  {
+  void *q = realloc(buffer, buffer_size);
+  if (q == NULL)
+    {
+    fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+            buffer_size);
+    exit(1);
+    }
+  buffer = q;
+  }
+else pbuffer8 = p;
+
+pbuffer8_size = buffer_size;
+return;
+DIE:
+fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+        minimum);
+exit(1);
 }
 
 
@@ -3950,7 +3989,7 @@ for (;;)
   size_t dlen;
   size_t rlen = (size_t)(pbuffer8_size - (here - buffer));
 
-  /* If libreadline or libedit support is required, use readline() to read a
+  /* If libreadline or libedit support is available, use readline() to read a
   line if the input is a terminal. Note that readline() removes the trailing
   newline, so we must put it back again, to be compatible with fgets(). */
 
@@ -4011,7 +4050,7 @@ for (;;)
     {
     size_t start_offset = start - buffer;
     size_t here_offset = here - buffer;
-    expand_input_buffers();
+    expand_input_buffers(pbuffer8_size + 1);
     start = buffer + start_offset;
     here = buffer + here_offset;
     }
@@ -6202,6 +6241,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
 else if ((pat_patctl.control & CTL_EXPAND) != 0)
   {
   uint8_t *pp, *pt;
+  size_t needlen = 0;
 
   pt = pbuffer8;
   for (pp = buffer + 1; *pp != 0; pp++)
@@ -6209,7 +6249,6 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
     uint8_t *pc = pp;
     uint32_t count = 1;
     size_t length = 1;
-    size_t m = 1;
 
     /* Check for replication syntax; if not found, the defaults just set will
     prevail and `length` characters will be copied once. */
@@ -6252,7 +6291,7 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
         pc -= 2;
         length = pe - pc;
         }
-      m = length * count;
+      needlen += length * count;
       pp = pe;
 
       /* The main loop increments pp, so if we are already at the end of
@@ -6264,12 +6303,12 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
     expanding buffers always keeps buffer and pbuffer8 in step as far as their
     size goes. */
 
-    while (pt + m > pbuffer8 + pbuffer8_size)
+    if (needlen > pbuffer8_size)
       {
       size_t pc_offset = pc - buffer;
       size_t pp_offset = pp - buffer;
       size_t pt_offset = pt - pbuffer8;
-      expand_input_buffers();
+      expand_input_buffers(needlen);
       pc = buffer + pc_offset;
       pp = buffer + pp_offset;
       pt = pbuffer8 + pt_offset;
@@ -8099,17 +8138,17 @@ if (dbuffer != NULL)
   }
 #endif
 
-/* Allocate a buffer to hold the data line; len+1 is an upper bound on
+/* Allocate a buffer to hold the data line; len + 1 is an upper bound on
 the number of code units that will be needed (though the buffer may have to be
 extended if replication is involved). */
 
-needlen = (len+1) * code_unit_size;
-if (dbuffer == NULL || needlen >= dbuffer_size)
+needlen = (len + 1) * code_unit_size;
+if (dbuffer == NULL || needlen > dbuffer_size)
   {
-  while (needlen >= dbuffer_size)
+  while (needlen > dbuffer_size)
     {
     if (dbuffer_size < SIZE_MAX/2) dbuffer_size *= 2;
-      else dbuffer_size = needlen + 1;
+      else dbuffer_size = needlen;
     }
   dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
   if (dbuffer == NULL)
@@ -8146,7 +8185,7 @@ while ((c = *p++) != 0)
 
     errno = 0;
     li = strtol((const char *)p, &endptr, 10);
-    if (!isdigit(*p) || errno != 0 || li < 1 || S32OVERFLOW(li))
+    if (!isdigit(*p) || li < 1 || S32OVERFLOWE(li))
       {
       fprintf(outfile, "** Replication count missing or invalid (1..INT_MAX)\n");
       return PR_OK;
@@ -8170,22 +8209,26 @@ while ((c = *p++) != 0)
         }
       needlen += replen * i;
 
-      if (needlen >= dbuffer_size)
+      if (needlen > dbuffer_size)
         {
         size_t qoffset = CAST8VAR(q) - dbuffer;
         size_t rep_offset = start_rep - dbuffer;
-        while (needlen >= dbuffer_size)
+        void *tp;
+
+        while (needlen > dbuffer_size)
           {
           if (dbuffer_size < SIZE_MAX / 2) dbuffer_size *= 2;
-            else dbuffer_size = needlen + 1;
+            else dbuffer_size = needlen;
           }
-        dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
-        if (dbuffer == NULL)
+
+        tp = realloc_buffer(dbuffer, needlen, &dbuffer_size);
+        if (tp == NULL)
           {
           fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
-            dbuffer_size);
+            needlen);
           exit(1);
           }
+        dbuffer = (uint8_t *)tp;
         SETCASTPTR(q, dbuffer + qoffset);
         start_rep = dbuffer + rep_offset;
         }
