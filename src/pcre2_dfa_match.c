@@ -3385,15 +3385,16 @@ rws->next = NULL;
 rws->size = RWS_BASE_SIZE;
 rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 
+if (match_data == NULL) return PCRE2_ERROR_NULL;
+
 /* Recognize NULL, length 0 as an empty string. */
 
 if (subject == NULL && length == 0) subject = null_str;
 
 /* Plausibility checks */
 
-if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
-  return PCRE2_ERROR_NULL;
+if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return match_data->rc = PCRE2_ERROR_BADOPTION;
+if (re == NULL || subject == NULL || workspace == NULL) return match_data->rc = PCRE2_ERROR_NULL;
 
 if (length == PCRE2_ZERO_TERMINATED)
   {
@@ -3401,30 +3402,30 @@ if (length == PCRE2_ZERO_TERMINATED)
   was_zero_terminated = 1;
   }
 
-if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
-if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
+if (wscount < 20) return match_data->rc = PCRE2_ERROR_DFA_WSSIZE;
+if (start_offset > length) return match_data->rc = PCRE2_ERROR_BADOFFSET;
 
 /* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
 time. */
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
    ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
-  return PCRE2_ERROR_BADOPTION;
+  return match_data->rc = PCRE2_ERROR_BADOPTION;
 
 /* Invalid UTF support is not available for DFA matching. */
 
 if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
-  return PCRE2_ERROR_DFA_UINVALID_UTF;
+  return match_data->rc = PCRE2_ERROR_DFA_UINVALID_UTF;
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */
 
-if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
+if (re->magic_number != MAGIC_NUMBER) return match_data->rc = PCRE2_ERROR_BADMAGIC;
 
 /* Check the code unit width. */
 
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
-  return PCRE2_ERROR_BADMODE;
+  return match_data->rc = PCRE2_ERROR_BADMODE;
 
 /* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
 options variable for this function. Users of PCRE2 who are not calling the
@@ -3451,7 +3452,7 @@ if ((options & PCRE2_DFA_RESTART) != 0)
   {
   if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 ||
     workspace[1] > (int)((wscount - 2)/INTS_PER_STATEBLOCK))
-      return PCRE2_ERROR_DFA_BADRESTART;
+      return match_data->rc = PCRE2_ERROR_DFA_BADRESTART;
   }
 
 /* Set some local values */
@@ -3499,7 +3500,7 @@ else
   if (mcontext->offset_limit != PCRE2_UNSET)
     {
     if ((re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
-      return PCRE2_ERROR_BADOFFSETLIMIT;
+      return match_data->rc = PCRE2_ERROR_BADOFFSETLIMIT;
     bumpalong_limit = subject + mcontext->offset_limit;
     }
   mb->callout = mcontext->callout;
@@ -3568,7 +3569,7 @@ switch(re->newline_convention)
 
   default:
   PCRE2_DEBUG_UNREACHABLE();
-  return PCRE2_ERROR_INTERNAL;
+  return match_data->rc = PCRE2_ERROR_INTERNAL;
   }
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
@@ -3589,7 +3590,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 #if PCRE2_CODE_UNIT_WIDTH != 32
     unsigned int i;
     if (start_match < end_subject && NOT_FIRSTCU(*start_match))
-      return PCRE2_ERROR_BADUTFOFFSET;
+      return match_data->rc = PCRE2_ERROR_BADUTFOFFSET;
     for (i = re->max_lookbehind; i > 0 && check_subject > subject; i--)
       {
       check_subject--;
@@ -4050,7 +4051,7 @@ for (;;)
       length = CU2BYTES(length + was_zero_terminated);
       match_data->subject = match_data->memctl.malloc(length,
         match_data->memctl.memory_data);
-      if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+      if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
@@ -4100,7 +4101,7 @@ while (rws->next != NULL)
   mb->memctl.free(next, mb->memctl.memory_data);
   }
 
-return rc;
+return match_data->rc = rc;
 }
 
 /* These #undefs are here to enable unity builds with CMake. */
