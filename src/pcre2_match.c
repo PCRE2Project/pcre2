@@ -6976,15 +6976,16 @@ pcre2_callout_block cb;
 match_block actual_match_block;
 match_block *mb = &actual_match_block;
 
+if (match_data == NULL) return PCRE2_ERROR_NULL;
+
 /* Recognize NULL, length 0 as an empty string. */
 
 if (subject == NULL && length == 0) subject = null_str;
 
 /* Plausibility checks */
 
-if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (code == NULL || subject == NULL || match_data == NULL)
-  return PCRE2_ERROR_NULL;
+if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return match_data->rc = PCRE2_ERROR_BADOPTION;
+if (code == NULL || subject == NULL) return match_data->rc = PCRE2_ERROR_NULL;
 
 start_match = subject + start_offset;
 req_cu_ptr = start_match - 1;
@@ -6995,16 +6996,16 @@ if (length == PCRE2_ZERO_TERMINATED)
   }
 true_end_subject = end_subject = subject + length;
 
-if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
+if (start_offset > length) return match_data->rc = PCRE2_ERROR_BADOFFSET;
 
 /* Check that the first field in the block is the magic number. */
 
-if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
+if (re->magic_number != MAGIC_NUMBER) return match_data->rc = PCRE2_ERROR_BADMAGIC;
 
 /* Check the code unit width. */
 
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
-  return PCRE2_ERROR_BADMODE;
+  return match_data->rc = PCRE2_ERROR_BADMODE;
 
 /* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
 options variable for this function. Users of PCRE2 who are not calling the
@@ -7051,14 +7052,14 @@ time. */
 
 if (mb->partial != 0 &&
    ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
-  return PCRE2_ERROR_BADOPTION;
+  return match_data->rc = PCRE2_ERROR_BADOPTION;
 
 /* It is an error to set an offset limit without setting the flag at compile
 time. */
 
 if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
-  return PCRE2_ERROR_BADOFFSETLIMIT;
+  return match_data->rc = PCRE2_ERROR_BADOFFSETLIMIT;
 
 /* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
 free the memory that was obtained. Set the field to NULL for no match cases. */
@@ -7098,11 +7099,11 @@ if (use_jit)
 #if PCRE2_CODE_UNIT_WIDTH != 32
     if (start_match < end_subject && NOT_FIRSTCU(*start_match))
       {
-      if (start_offset > 0) return PCRE2_ERROR_BADUTFOFFSET;
+      if (start_offset > 0) return match_data->rc = PCRE2_ERROR_BADUTFOFFSET;
 #if PCRE2_CODE_UNIT_WIDTH == 8
-      return PCRE2_ERROR_UTF8_ERR20;  /* Isolated 0x80 byte */
+      return match_data->rc = PCRE2_ERROR_UTF8_ERR20;  /* Isolated 0x80 byte */
 #else
-      return PCRE2_ERROR_UTF16_ERR3;  /* Isolated low surrogate */
+      return match_data->rc = PCRE2_ERROR_UTF16_ERR3;  /* Isolated low surrogate */
 #endif
       }
 #endif  /* WIDTH != 32 */
@@ -7162,11 +7163,11 @@ if (use_jit)
       length = CU2BYTES(length + was_zero_terminated);
       match_data->subject = match_data->memctl.malloc(length,
         match_data->memctl.memory_data);
-      if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+      if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
-    return rc;
+    return match_data->rc = rc;
     }
   }
 #endif  /* SUPPORT_JIT */
@@ -7222,11 +7223,11 @@ if (utf &&
     }
   else if (start_match < end_subject && NOT_FIRSTCU(*start_match))
     {
-    if (start_offset > 0) return PCRE2_ERROR_BADUTFOFFSET;
+    if (start_offset > 0) return match_data->rc = PCRE2_ERROR_BADUTFOFFSET;
 #if PCRE2_CODE_UNIT_WIDTH == 8
-    return PCRE2_ERROR_UTF8_ERR20;  /* Isolated 0x80 byte */
+    return match_data->rc = PCRE2_ERROR_UTF8_ERR20;  /* Isolated 0x80 byte */
 #else
-    return PCRE2_ERROR_UTF16_ERR3;  /* Isolated low surrogate */
+    return match_data->rc = PCRE2_ERROR_UTF16_ERR3;  /* Isolated low surrogate */
 #endif
     }
 #endif  /* WIDTH != 32 */
@@ -7401,7 +7402,7 @@ switch(re->newline_convention)
 
   default:
   PCRE2_DEBUG_UNREACHABLE();
-  return PCRE2_ERROR_INTERNAL;
+  return match_data->rc = PCRE2_ERROR_INTERNAL;
   }
 
 /* The backtracking frames have fixed data at the front, and a PCRE2_SIZE
@@ -7443,7 +7444,7 @@ if (heapframes_size < START_FRAMES_SIZE) heapframes_size = START_FRAMES_SIZE;
 if (heapframes_size / 1024 > mb->heap_limit)
   {
   PCRE2_SIZE max_size = 1024 * mb->heap_limit;
-  if (max_size < frame_size) return PCRE2_ERROR_HEAPLIMIT;
+  if (max_size < frame_size) return match_data->rc = PCRE2_ERROR_HEAPLIMIT;
   heapframes_size = max_size;
   }
 
@@ -7459,7 +7460,7 @@ if (match_data->heapframes_size < heapframes_size)
   if (match_data->heapframes == NULL)
     {
     match_data->heapframes_size = 0;
-    return PCRE2_ERROR_NOMEMORY;
+    return match_data->rc = PCRE2_ERROR_NOMEMORY;
     }
   match_data->heapframes_size = heapframes_size;
   }
@@ -8113,7 +8114,7 @@ if (rc == MATCH_MATCH)
     length = CU2BYTES(length + was_zero_terminated);
     match_data->subject = match_data->memctl.malloc(length,
       match_data->memctl.memory_data);
-    if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+    if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
     memcpy((void *)match_data->subject, subject, length);
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }

@@ -99,9 +99,8 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 (void)length;
 (void)start_offset;
 (void)options;
-(void)match_data;
 (void)mcontext;
-return PCRE2_ERROR_JIT_BADOPTION;
+return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 
 #else  /* SUPPORT_JIT */
 
@@ -124,7 +123,7 @@ else if ((options & PCRE2_PARTIAL_SOFT) != 0)
   index = 1;
 
 if (functions == NULL || functions->executable_funcs[index] == NULL)
-  return PCRE2_ERROR_JIT_BADOPTION;
+  return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 
 /* Sanity checks should be handled by pcre2_match. */
 arguments.str = subject + start_offset;
