@@ -8108,4 +8108,9 @@ a)"xI
 /x/replace=r,substitute_matched
     x\=null_subject
 
+# Test that a couple of double frees have been fixed
+/foo/replace=bar,substitute_matched
+    foo\=copy_matched_subject
+    foo\=global,copy_matched_subject
+
 # End of testinput2
