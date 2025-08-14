@@ -4057,7 +4057,7 @@ for (;;)
       }
     else
       {
-      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject;
+      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject == null_str ? NULL : subject;
       }
     goto EXIT;
     }
