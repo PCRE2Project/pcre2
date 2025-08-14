@@ -8218,4 +8218,12 @@ No match
    axb
 Failed: error -42: pattern contains an item that is not supported for DFA matching
 
+# Tests for reading matches from NULL subjects
+/(.?)/
+    \=null_subject,copy=0,get=0,getall
+ 0: 
+ 0C  (0)
+ 0G  (0)
+ 0L 
+
 # End of testinput6

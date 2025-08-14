@@ -5251,4 +5251,8 @@
 /^(?1(2))(?(DEFINE)(a(.)b))/
    axb
 
+# Tests for reading matches from NULL subjects
+/(.?)/
+    \=null_subject,copy=0,get=0,getall
+
 # End of testinput6

@@ -3347,6 +3347,7 @@ int was_zero_terminated = 0;
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 
 PCRE2_UCHAR null_str[1] = { 0xcd };
+PCRE2_SPTR original_subject = subject;
 PCRE2_SPTR start_match;
 PCRE2_SPTR end_subject;
 PCRE2_SPTR bumpalong_limit;
@@ -4059,7 +4060,8 @@ for (;;)
       }
     else
       {
-      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject;
+      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
+        match_data->subject = original_subject;
       }
     goto EXIT;
     }

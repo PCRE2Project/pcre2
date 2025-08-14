@@ -6969,6 +6969,7 @@ PCRE2_UCHAR req_cu = 0;
 PCRE2_UCHAR req_cu2 = 0;
 
 PCRE2_UCHAR null_str[1] = { 0xcd };
+PCRE2_SPTR original_subject = subject;
 PCRE2_SPTR bumpalong_limit;
 PCRE2_SPTR end_subject;
 PCRE2_SPTR true_end_subject;
@@ -7184,7 +7185,6 @@ if (use_jit)
     match_data, mcontext);
   if (rc != PCRE2_ERROR_JIT_BADOPTION)
     {
-    match_data->subject_length = length;
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
       length = CU2BYTES(length + was_zero_terminated);
@@ -7193,6 +7193,12 @@ if (use_jit)
       if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+      }
+    else
+      {
+      /* When pcre2_jit_match sets the subject, it doesn't know what the
+      original passed-in pointer was. */
+      if (match_data->subject != NULL) match_data->subject = original_subject;
       }
     return rc;
     }
@@ -8148,7 +8154,7 @@ if (rc == MATCH_MATCH)
     memcpy((void *)match_data->subject, subject, length);
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
-  else match_data->subject = subject;
+  else match_data->subject = original_subject;
 
   return match_data->rc;
   }
@@ -8170,7 +8176,7 @@ PCRE2_ERROR_PARTIAL. */
 
 else if (match_partial != NULL)
   {
-  match_data->subject = subject;
+  match_data->subject = original_subject;
   match_data->subject_length = length;
   match_data->start_offset = start_offset;
   match_data->ovector[0] = match_partial - subject;
