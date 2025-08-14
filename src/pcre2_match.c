@@ -7153,6 +7153,7 @@ if (use_jit)
 
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext);
+  if (match_data->subject == null_str) match_data->subject = NULL;
   if (rc != PCRE2_ERROR_JIT_BADOPTION)
     {
     match_data->subject_length = length;
@@ -8117,7 +8118,7 @@ if (rc == MATCH_MATCH)
     memcpy((void *)match_data->subject, subject, length);
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
-  else match_data->subject = subject;
+  else match_data->subject = subject == null_str ? NULL : subject;
 
   return match_data->rc;
   }
@@ -8139,7 +8140,7 @@ PCRE2_ERROR_PARTIAL. */
 
 else if (match_partial != NULL)
   {
-  match_data->subject = subject;
+  match_data->subject = subject == null_str ? NULL : subject;
   match_data->subject_length = length;
   match_data->start_offset = start_offset;
   match_data->ovector[0] = match_partial - subject;

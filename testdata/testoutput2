@@ -23071,6 +23071,19 @@ Failed: error -51: NULL argument passed with non-zero length
     foo\=global,copy_matched_subject
  1: bar
 
+# Tests for reading matches from NULL subjects
+//
+    \=null_subject,copy=0,get=0,getall
+ 0: 
+ 0C  (0)
+ 0G  (0)
+ 0L 
+    \=null_subject,copy=0,get=0,getall,dfa
+ 0: 
+ 0C  (0)
+ 0G  (0)
+ 0L 
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
