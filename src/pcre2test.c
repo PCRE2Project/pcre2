@@ -224,6 +224,7 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #define PARENS_NEST_DEFAULT 220   /* Default parentheses nest limit */
 #define PATSTACKSIZE 20           /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
+#define SUBSTITUTE_SUBJECT_MODSIZE 100 /* Field for reading 8-bit subject for substitute */
 #define VERSION_SIZE 64           /* Size of buffer for the version strings */
 #define REPLACE_BUFFSIZE 256      /* Code units for replacement buffer */
 
@@ -646,6 +647,7 @@ typedef struct datctl {        /* Structure for data line modifiers. */
    uint8_t   replacement[REPLACE_MODSIZE];           /* So must this */
   uint32_t   substitute_skip;  /* Must be in same position as patctl */
   uint32_t   substitute_stop;  /* Must be in same position as patctl */
+   uint8_t   substitute_subject[SUBSTITUTE_SUBJECT_MODSIZE];
   uint32_t   startend[2];
   uint32_t   cerror[2];
   uint32_t   cfail[2];
@@ -832,6 +834,7 @@ static modstruct modlist[] = {
   { "substitute_replacement_only", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_REPLACEMENT_ONLY, PO(control2) },
   { "substitute_skip",             MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
   { "substitute_stop",             MOD_PND,  MOD_INT, 0,                          PO(substitute_stop) },
+  { "substitute_subject",          MOD_DAT,  MOD_STR, SUBSTITUTE_SUBJECT_MODSIZE, DO(substitute_subject) },
   { "substitute_unknown_unset",    MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNKNOWN_UNSET, PO(control2) },
   { "substitute_unset_empty",      MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_UNSET_EMPTY, PO(control2) },
   { "tables",                      MOD_PAT,  MOD_INT, 0,                          PO(tables_id) },
