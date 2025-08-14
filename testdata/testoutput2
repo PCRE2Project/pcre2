@@ -23059,6 +23059,11 @@ Failed: error 217 at offset 27: expected capture group number or name
 
 # --------------
 
+# Test that a memory leak has been fixed
+/x/replace=r,substitute_matched
+    x\=null_subject
+Failed: error -51: NULL argument passed with non-zero length
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

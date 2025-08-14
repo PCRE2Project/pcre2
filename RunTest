@@ -307,8 +307,8 @@ while [ $# -gt 0 ] ; do
    malloc|-malloc) malloc=yes;;
    nojit|-nojit) nojit=yes;;
    sim|-sim) shift; sim=$1;;
-   valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all-non-file --error-exitcode=70";;
-   valgrind-log|-valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all-non-file --log-file=report.%p ";;
+   valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --leak-check=yes --errors-for-leak-kinds=all --smc-check=all-non-file --error-exitcode=70";;
+   valgrind-log|-valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=yes --errors-for-leak-kinds=all --error-limit=no --smc-check=all-non-file --log-file=report.%p ";;
    ~*)
      if expr "$1" : '~[0-9][0-9]*$' >/dev/null; then
        skip="$skip `expr "$1" : '~\([0-9]*\)*$'`"

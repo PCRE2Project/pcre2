@@ -8011,4 +8011,8 @@ a)"xI
 
 # --------------
 
+# Test that a memory leak has been fixed
+/x/replace=r,substitute_matched
+    x\=null_subject
+
 # End of testinput2

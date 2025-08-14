@@ -797,6 +797,20 @@ pointer in the match data may be NULL after a no-match. */
 use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
 replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
+
+/* A NULL subject of zero length is treated as an empty string. */
+
+if (subject == NULL)
+  {
+  if (length != 0) return PCRE2_ERROR_NULL;
+  subject = null_str;
+  }
+
+/* Find length of zero-terminated subject */
+
+if (length == PCRE2_ZERO_TERMINATED)
+  length = subject? PRIV(strlen)(subject) : 0;
+
 /* If starting from an existing match, there must be an externally provided
 match data block. We create an internal match_data block in two cases: (a) an
 external one is not supplied (and we are not starting from an existing match);
@@ -852,19 +866,6 @@ scb.version = 0;
 scb.input = subject;
 scb.output = (PCRE2_SPTR)buffer;
 scb.ovector = ovector;
-
-/* A NULL subject of zero length is treated as an empty string. */
-
-if (subject == NULL)
-  {
-  if (length != 0) return PCRE2_ERROR_NULL;
-  subject = null_str;
-  }
-
-/* Find length of zero-terminated subject */
-
-if (length == PCRE2_ZERO_TERMINATED)
-  length = subject? PRIV(strlen)(subject) : 0;
 
 /* Check UTF replacement string if necessary. */
 
