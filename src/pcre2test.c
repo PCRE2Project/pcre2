@@ -3838,37 +3838,36 @@ return 0;
 *************************************************/
 
 /* This function doubles the size of the input buffer and the buffer for
-keeping an 8-bit copy of patterns (pbuffer8), and copies the current buffers to
-the new ones.
+keeping an 8-bit copy of patterns (pbuffer8), or if that is not possible
+to the size provided as a minimum (plus 1 for the terminating NUL).
 
-Arguments: none
-Returns:   nothing (aborts if malloc() fails)
+Arguments:
+  minimum    size on bytes expected as a minimum
+Returns:     nothing (aborts if realloc() fails)
 */
 
 static void
-expand_input_buffers(void)
+expand_input_buffers(size_t minimum)
 {
-size_t new_pbuffer8_size = 2*pbuffer8_size;
-uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
-uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
+size_t buffer_size;
 
-if (new_buffer == NULL || new_pbuffer8 == NULL)
+buffer_size = (pbuffer8_size < SIZE_MAX / 2)? 2 * pbuffer8_size : minimum + 1;
+
+PCRE2_ASSERT(buffer_size > pbuffer8_size);
+
+/* If realloc fails, then the old pointer  address is lost, but
+it will be free with the process exit that follows. */
+buffer = (uint8_t *)realloc(buffer, buffer_size);
+pbuffer8 = (uint8_t *)realloc(pbuffer8, buffer_size);
+
+if (buffer == NULL || pbuffer8 == NULL)
   {
-  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
-          new_pbuffer8_size);
+  fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+          buffer_size);
   exit(1);
   }
 
-memcpy(new_buffer, buffer, pbuffer8_size);
-memcpy(new_pbuffer8, pbuffer8, pbuffer8_size);
-
-pbuffer8_size = new_pbuffer8_size;
-
-free(buffer);
-free(pbuffer8);
-
-buffer = new_buffer;
-pbuffer8 = new_pbuffer8;
+pbuffer8_size = buffer_size;
 }
 
 
@@ -3907,7 +3906,7 @@ for (;;)
   size_t dlen;
   size_t rlen = (size_t)(pbuffer8_size - (here - buffer));
 
-  /* If libreadline or libedit support is required, use readline() to read a
+  /* If libreadline or libedit support is available, use readline() to read a
   line if the input is a terminal. Note that readline() removes the trailing
   newline, so we must put it back again, to be compatible with fgets(). */
 
@@ -3968,7 +3967,7 @@ for (;;)
     {
     size_t start_offset = start - buffer;
     size_t here_offset = here - buffer;
-    expand_input_buffers();
+    expand_input_buffers(pbuffer8_size + 1);
     start = buffer + start_offset;
     here = buffer + here_offset;
     }
@@ -6222,12 +6221,12 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
     expanding buffers always keeps buffer and pbuffer8 in step as far as their
     size goes. */
 
-    while (pt + m > pbuffer8 + pbuffer8_size)
+    while (m > pbuffer8_size)
       {
       size_t pc_offset = pc - buffer;
       size_t pp_offset = pp - buffer;
       size_t pt_offset = pt - pbuffer8;
-      expand_input_buffers();
+      expand_input_buffers(m);
       pc = buffer + pc_offset;
       pp = buffer + pp_offset;
       pt = pbuffer8 + pt_offset;
@@ -8132,18 +8131,29 @@ while ((c = *p++) != 0)
         {
         size_t qoffset = CAST8VAR(q) - dbuffer;
         size_t rep_offset = start_rep - dbuffer;
+        void *tp;
+
         while (needlen >= dbuffer_size)
           {
           if (dbuffer_size < SIZE_MAX / 2) dbuffer_size *= 2;
             else dbuffer_size = needlen + 1;
           }
-        dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
-        if (dbuffer == NULL)
+
+        tp = realloc(dbuffer, dbuffer_size);
+        if (tp == NULL && dbuffer_size > needlen + 1)
           {
-          fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
-            dbuffer_size);
-          exit(1);
+          dbuffer_size = needlen + 1;
+          tp = realloc(dbuffer, dbuffer_size);
+
+          if (tp == NULL)
+            {
+            free(dbuffer);
+            fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+              dbuffer_size);
+            exit(1);
+            }
           }
+        dbuffer = (uint8_t *)tp;
         SETCASTPTR(q, dbuffer + qoffset);
         start_rep = dbuffer + rep_offset;
         }
