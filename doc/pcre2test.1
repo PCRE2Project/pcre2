@@ -563,7 +563,9 @@ part of the file. For example:
   \e[abc]{4}
 .sp
 is converted to "abcabcabcabc". This feature does not support nesting. To
-include a closing square bracket in the characters, code it as \ex5D.
+include a closing square bracket in the characters, code it with \ex followed
+by two hexadecimal digits that represent that letter in the character set used
+(e.g. \ex5D for ASCII or UTF-8).
 .P
 A backslash followed by an equals sign marks the end of the subject string and
 the start of a modifier list. For example:
