@@ -11,6 +11,7 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const linkage = b.option(std.builtin.LinkMode, "linkage", "whether to statically or dynamically link the library") orelse @as(std.builtin.LinkMode, if (target.result.isGnuLibC()) .dynamic else .static);
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
+    const jit = b.option(bool, "JIT", "Enable/disable JIT compiler support") orelse false;
 
     const pcre2_header_dir = b.addWriteFiles();
     const pcre2_header = pcre2_header_dir.addCopyFile(b.path("src/pcre2.h.generic"), "pcre2.h");
@@ -32,6 +33,7 @@ pub fn build(b: *std.Build) !void {
             .SUPPORT_PCRE2_16 = codeUnitWidth == CodeUnitWidth.@"16",
             .SUPPORT_PCRE2_32 = codeUnitWidth == CodeUnitWidth.@"32",
             .SUPPORT_UNICODE = true,
+            .SUPPORT_JIT = jit,
 
             .PCRE2_EXPORT = null,
             .PCRE2_LINK_SIZE = 2,
