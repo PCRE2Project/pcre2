@@ -1,0 +1,276 @@
+# UTF-8 Specific tests
+# (substitute_subject does not support escape sequences, so
+# invalid UTF-8 bytes are given literally,
+# The normal subject however requires you use \x escapes)
+
+# ############
+# Non-UTF mode
+# ############
+
+# (the first subject is a valid UTF string, the second is a truncatated UTF string, and the third has an invalid UTF byte)
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    1234\=substitute_overwrite,substitute_subject=😀
+    <---\=substitute_overwrite,substitute_subject=😀
+    --->\=substitute_overwrite,substitute_subject=😀
+    --34\=substitute_overwrite,substitute_subject=😀
+    ->--\=substitute_overwrite,substitute_subject=😀
+    123---\=substitute_overwrite,substitute_subject=∞�
+    12----\=substitute_overwrite,substitute_subject=∞�
+    ----->\=substitute_overwrite,substitute_subject=∞�
+    <-----\=substitute_overwrite,substitute_subject=∞�
+    12345\=substitute_overwrite,substitute_subject=�😀
+    -1234\=substitute_overwrite,substitute_subject=�😀
+    ---->\=substitute_overwrite,substitute_subject=�😀
+    <----\=substitute_overwrite,substitute_subject=�😀
+
+# Proof that each of the above results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+/^(....)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    😀
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    😀
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    😀
+
+/(..)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    😀
+
+/(?<=^..)()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    😀
+
+/^(...)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ∞�
+
+/^(..)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ∞�
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ∞�
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ∞�
+
+/(.*)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    �😀
+
+/(.{4})$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    �😀
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    �😀
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    �😀
+
+# ##############################
+# The above tests with PCRE2_UTF
+# ##############################
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    1234\=substitute_overwrite,substitute_subject=😀
+    <---\=substitute_overwrite,substitute_subject=😀
+    --->\=substitute_overwrite,substitute_subject=😀
+    --34\=substitute_overwrite,substitute_subject=😀
+    ->--\=substitute_overwrite,substitute_subject=😀
+    123---\=substitute_overwrite,substitute_subject=∞�
+    12----\=substitute_overwrite,substitute_subject=∞�
+    ----->\=substitute_overwrite,substitute_subject=∞�
+    <-----\=substitute_overwrite,substitute_subject=∞�
+    12345\=substitute_overwrite,substitute_subject=�😀
+    -1234\=substitute_overwrite,substitute_subject=�😀
+    ---->\=substitute_overwrite,substitute_subject=�😀
+    <----\=substitute_overwrite,substitute_subject=�😀
+
+# Proof that each of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+
+/(.)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+# #####################################
+# The above tests with PCRE2_UTF and \C
+# #####################################
+
+/(\d+)|(?=<)|(?<=>)|($\C^)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    1234\=substitute_overwrite,substitute_subject=😀
+    <---\=substitute_overwrite,substitute_subject=😀
+    --->\=substitute_overwrite,substitute_subject=😀
+    --34\=substitute_overwrite,substitute_subject=😀
+    ->--\=substitute_overwrite,substitute_subject=😀
+    123---\=substitute_overwrite,substitute_subject=∞�
+    12----\=substitute_overwrite,substitute_subject=∞�
+    ----->\=substitute_overwrite,substitute_subject=∞�
+    <-----\=substitute_overwrite,substitute_subject=∞�
+    12345\=substitute_overwrite,substitute_subject=�😀
+    -1234\=substitute_overwrite,substitute_subject=�😀
+    ---->\=substitute_overwrite,substitute_subject=�😀
+    <----\=substitute_overwrite,substitute_subject=�😀
+
+# Proof that each of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+
+/^(\C\C\C\C)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/(C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/\C\C\K(\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/\C\C\K()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+
+# ############################################
+# The above tests with PCRE2_MATCH_INVALID_UTF
+# ############################################
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=😀
+    <---\=substitute_overwrite,substitute_subject=😀
+    --->\=substitute_overwrite,substitute_subject=😀
+    --34\=substitute_overwrite,substitute_subject=😀
+    ->--\=substitute_overwrite,substitute_subject=😀
+    123---\=substitute_overwrite,substitute_subject=∞�
+    12----\=substitute_overwrite,substitute_subject=∞�
+    ----->\=substitute_overwrite,substitute_subject=∞�
+    <-----\=substitute_overwrite,substitute_subject=∞�
+    12345\=substitute_overwrite,substitute_subject=�😀
+    -1234\=substitute_overwrite,substitute_subject=�😀
+    ---->\=substitute_overwrite,substitute_subject=�😀
+    <----\=substitute_overwrite,substitute_subject=�😀
+
+# Proof that most of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# I believe the ->--\=substitute_overwrite,substitute_subject=😀 case is impossible though
+
+/(.)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    😀
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    😀
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    😀
+
+/^(.)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ∞\xF0\x9F\x98
+
+# This behaves differently with JIT vs. without JIT, so it is commented out
+# /()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+#    ∞\xF0\x9F\x98
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ∞\xF0\x9F\x98
+
+/(.)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0😀
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0😀
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0😀
+
+# ###################################################
+# The above tests with PCRE2_MATCH_INVALID_UTF and \C
+# ###################################################
+
+/(\d+)|(?=<)|(?<=>)|(^\C$)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=😀
+    <---\=substitute_overwrite,substitute_subject=😀
+    --->\=substitute_overwrite,substitute_subject=😀
+    --34\=substitute_overwrite,substitute_subject=😀
+    ->--\=substitute_overwrite,substitute_subject=😀
+    123---\=substitute_overwrite,substitute_subject=∞�
+    12----\=substitute_overwrite,substitute_subject=∞�
+    ----->\=substitute_overwrite,substitute_subject=∞�
+    <-----\=substitute_overwrite,substitute_subject=∞�
+    12345\=substitute_overwrite,substitute_subject=�😀
+    -1234\=substitute_overwrite,substitute_subject=�😀
+    ---->\=substitute_overwrite,substitute_subject=�😀
+    <----\=substitute_overwrite,substitute_subject=�😀
+
+# Proof that each of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+
+/^(\C\C\C\C)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/(C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/\C\C\K(\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/\C\C\K()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    😀
+
+/^(\C\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ∞\xF0\x9F\x98
+
+/^(\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ∞\xF0\x9F\x98
+
+/(\C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ∞\xF0\x9F\x98
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ∞\xF0\x9F\x98
+
+/(\C\C\C\C)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0😀
+
+/(\C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0😀
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0😀
+
+# #############################################
+# The above tests with PCRE2_NO_UTF_CHECK
+# (Excluding cases where the entire subject string isn't valid UTF)
+# #############################################
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf,no_utf_check
+    1234\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    <---\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --->\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --34\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    ->--\=substitute_overwrite,substitute_subject=😀,no_utf_check
+
+/(\d+)|(?=<)|(?<=>)|($\C^)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf,no_utf_check
+    1234\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    <---\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --->\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --34\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    ->--\=substitute_overwrite,substitute_subject=😀,no_utf_check
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    <---\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --->\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --34\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    ->--\=substitute_overwrite,substitute_subject=😀,no_utf_check
+
+
+/(\d+)|(?=<)|(?<=>)|(^\C$)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    <---\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --->\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    --34\=substitute_overwrite,substitute_subject=😀,no_utf_check
+    ->--\=substitute_overwrite,substitute_subject=😀,no_utf_check

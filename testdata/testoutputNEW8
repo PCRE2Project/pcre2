@@ -1,0 +1,444 @@
+# UTF-8 Specific tests
+# (substitute_subject does not support escape sequences, so
+# invalid UTF-8 bytes are given literally,
+# The normal subject however requires you use \x escapes)
+
+# ############
+# Non-UTF mode
+# ############
+
+# (the first subject is a valid UTF string, the second is a truncatated UTF string, and the third has an invalid UTF byte)
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <\xf0\x9f\x98\x80:\xf0\x9f\x98\x80>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <:>\xf0\x9f\x98\x80
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \xf0\x9f\x98\x80<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \xf0\x9f<\x98\x80:\x98\x80>
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \xf0\x9f<:>\x98\x80
+    123---\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <\xe2\x88\x9e:\xe2\x88\x9e>\xf0\x9f\x98
+    12----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <\xe2\x88:\xe2\x88>\x9e\xf0\x9f\x98
+    ----->\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: \xe2\x88\x9e\xf0\x9f\x98<:>
+    <-----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <:>\xe2\x88\x9e\xf0\x9f\x98
+    12345\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: <\xc0\xf0\x9f\x98\x80:\xc0\xf0\x9f\x98\x80>
+    -1234\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: \xc0<\xf0\x9f\x98\x80:\xf0\x9f\x98\x80>
+    ---->\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: \xc0\xf0\x9f\x98\x80<:>
+    <----\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: <:>\xc0\xf0\x9f\x98\x80
+
+# Proof that each of the above results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+/^(....)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ğŸ˜€
+ 1: <\xf0\x9f\x98\x80:\xf0\x9f\x98\x80>
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ğŸ˜€
+ 1: <:>\xf0\x9f\x98\x80
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ğŸ˜€
+ 1: \xf0\x9f\x98\x80<:>
+
+/(..)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ğŸ˜€
+ 1: \xf0\x9f<\x98\x80:\x98\x80>
+
+/(?<=^..)()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ğŸ˜€
+ 1: \xf0\x9f<:>\x98\x80
+
+/^(...)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    âˆğŸ˜
+ 1: <\xe2\x88\x9e:\xe2\x88\x9e>\xf0\x9f\x98
+
+/^(..)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    âˆğŸ˜
+ 1: <\xe2\x88:\xe2\x88>\x9e\xf0\x9f\x98
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    âˆğŸ˜
+ 1: \xe2\x88\x9e\xf0\x9f\x98<:>
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    âˆğŸ˜
+ 1: <:>\xe2\x88\x9e\xf0\x9f\x98
+
+/(.*)/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ÀğŸ˜€
+ 1: <\xc0\xf0\x9f\x98\x80:\xc0\xf0\x9f\x98\x80>
+
+/(.{4})$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ÀğŸ˜€
+ 1: \xc0<\xf0\x9f\x98\x80:\xf0\x9f\x98\x80>
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ÀğŸ˜€
+ 1: \xc0\xf0\x9f\x98\x80<:>
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched
+    ÀğŸ˜€
+ 1: <:>\xc0\xf0\x9f\x98\x80
+
+# ##############################
+# The above tests with PCRE2_UTF
+# ##############################
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€
+Failed: error -74 at offset 2 in subject: capture group is not a valid UTF string
+        here: ğŸ |<--| ˜€
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€
+Failed: error -74 at offset 2 in subject: capture group is not a valid UTF string
+        here: ğŸ |<--| ˜€
+    123---\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    12----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    ----->\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    <-----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    12345\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+    -1234\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+    ---->\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+    <----\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+
+# Proof that each of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+
+/(.)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: <:>\x{1f600}
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{1f600}<:>
+
+# #####################################
+# The above tests with PCRE2_UTF and \C
+# #####################################
+
+/(\d+)|(?=<)|(?<=>)|($\C^)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{f0}\x{9f}<\x{98}\x{80}:\x{98}\x{80}>
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}
+    123---\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    12----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    ----->\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    <-----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -3 at offset 3 in subject or replacement: UTF-8 error: 1 byte missing at end
+        here: âˆ |<--| ğŸ˜
+     or here: <$& |<--| :$1>
+    12345\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+    -1234\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+    ---->\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+    <----\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -8 at offset 0 in subject or replacement: UTF-8 error: byte 2 top bits not 0x80
+        here: |<--| ÀğŸ˜€
+     or here: |<--| <$&:$1>
+
+# Proof that each of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+
+/^(\C\C\C\C)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: <:>\x{1f600}
+
+/(C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{1f600}<:>
+
+/\C\C\K(\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{f0}\x{9f}<\x{98}\x{80}:\x{98}\x{80}>
+
+/\C\C\K()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}
+
+
+# ############################################
+# The above tests with PCRE2_MATCH_INVALID_UTF
+# ############################################
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€
+Failed: error -74 at offset 0 in subject: capture group is not a valid UTF string
+        here: |<--| ğŸ˜€
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}
+    123---\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <\x{221e}:\x{221e}>\x{f0}\x{9f}\x{98}
+    12----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+Failed: error -74 at offset 0 in subject: capture group is not a valid UTF string
+        here: |<--| âˆğŸ˜
+    ----->\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: \x{221e}\x{f0}\x{9f}\x{98}<:>
+    <-----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <:>\x{221e}\x{f0}\x{9f}\x{98}
+    12345\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -74 at offset 0 in subject: capture group is not a valid UTF string
+        here: |<--| ÀğŸ˜€
+    -1234\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: \x{c0}<\x{1f600}:\x{1f600}>
+    ---->\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: \x{c0}\x{1f600}<:>
+    <----\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: <:>\x{c0}\x{1f600}
+
+# Proof that most of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# I believe the ->--\=substitute_overwrite,substitute_subject=ğŸ˜€ case is impossible though
+
+/(.)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ğŸ˜€
+ 1: <:>\x{1f600}
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    ğŸ˜€
+ 1: \x{1f600}<:>
+
+/^(.)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    âˆ\xF0\x9F\x98
+ 1: <\x{221e}:\x{221e}>\x{f0}\x{9f}\x{98}
+
+# This behaves differently with JIT vs. without JIT, so it is commented out
+# /()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+#    âˆ\xF0\x9F\x98
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    âˆ\xF0\x9F\x98
+ 1: <:>\x{221e}\x{f0}\x{9f}\x{98}
+
+/(.)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0ğŸ˜€
+ 1: \x{c0}<\x{1f600}:\x{1f600}>
+
+/()$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0ğŸ˜€
+ 1: \x{c0}\x{1f600}<:>
+
+/^()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0ğŸ˜€
+ 1: <:>\x{c0}\x{1f600}
+
+# ###################################################
+# The above tests with PCRE2_MATCH_INVALID_UTF and \C
+# ###################################################
+
+/(\d+)|(?=<)|(?<=>)|(^\C$)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{f0}\x{9f}<\x{98}\x{80}:\x{98}\x{80}>
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}
+    123---\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <\x{221e}:\x{221e}>\x{f0}\x{9f}\x{98}
+    12----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <\x{e2}\x{88}:\x{e2}\x{88}>\x{9e}\x{f0}\x{9f}\x{98}
+    ----->\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: \x{221e}\x{f0}\x{9f}\x{98}<:>
+    <-----\=substitute_overwrite,substitute_subject=âˆğŸ˜
+ 1: <:>\x{221e}\x{f0}\x{9f}\x{98}
+    12345\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+Failed: error -74 at offset 0 in subject: capture group is not a valid UTF string
+        here: |<--| ÀğŸ˜€
+    -1234\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: \x{c0}<\x{1f600}:\x{1f600}>
+    ---->\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: \x{c0}\x{1f600}<:>
+    <----\=substitute_overwrite,substitute_subject=ÀğŸ˜€
+ 1: <:>\x{c0}\x{1f600}
+
+# Proof that each of the above non-error results can be obtained without using substitute_overwrite/substitute_subject
+# (albeit with different regexes)
+
+/^(\C\C\C\C)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: <\x{1f600}:\x{1f600}>
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: <:>\x{1f600}
+
+/(C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{1f600}<:>
+
+/\C\C\K(\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{f0}\x{9f}<\x{98}\x{80}:\x{98}\x{80}>
+
+/\C\C\K()/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf
+    ğŸ˜€
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}
+
+/^(\C\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    âˆ\xF0\x9F\x98
+ 1: <\x{221e}:\x{221e}>\x{f0}\x{9f}\x{98}
+
+/^(\C\C)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    âˆ\xF0\x9F\x98
+ 1: <\x{e2}\x{88}:\x{e2}\x{88}>\x{9e}\x{f0}\x{9f}\x{98}
+
+/(\C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    âˆ\xF0\x9F\x98
+ 0: \x{221e}\x{f0}\x{9f}\x{98}
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    âˆ\xF0\x9F\x98
+ 1: <:>\x{221e}\x{f0}\x{9f}\x{98}
+
+/(\C\C\C\C)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0ğŸ˜€
+ 1: \x{c0}<\x{1f600}:\x{1f600}>
+
+/(\C??)$/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0ğŸ˜€
+ 1: \x{c0}<\x{1f600}:\x{1f600}>
+
+/^(\C??)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    \xC0ğŸ˜€
+ 1: <:>\x{c0}\x{1f600}
+
+# #############################################
+# The above tests with PCRE2_NO_UTF_CHECK
+# (Excluding cases where the entire subject string isn't valid UTF)
+# #############################################
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf,no_utf_check
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+Failed: error -74 at offset 2 in subject: capture group is not a valid UTF string
+        here: ğŸ |<--| ˜€
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+Failed: error -74 at offset 2 in subject: capture group is not a valid UTF string
+        here: ğŸ |<--| ˜€
+
+/(\d+)|(?=<)|(?<=>)|($\C^)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,utf,no_utf_check
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{f0}\x{9f}<\x{98}\x{80}:\x{98}\x{80}>
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}
+
+/(\d+)|(?=<)|(?<=>)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+Failed: error -74 at offset 2 in subject: capture group is not a valid UTF string
+        here: ğŸ |<--| ˜€
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+Failed: error -74 at offset 2 in subject: capture group is not a valid UTF string
+        here: ğŸ |<--| ˜€
+
+
+/(\d+)|(?=<)|(?<=>)|(^\C$)/replace=<$&:$1>,substitute_unset_empty,substitute_matched,match_invalid_utf
+    1234\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <\x{1f600}:\x{1f600}>
+    <---\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: <:>\x{1f600}
+    --->\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{1f600}<:>
+    --34\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{f0}\x{9f}<\x{98}\x{80}:\x{98}\x{80}>
+    ->--\=substitute_overwrite,substitute_subject=ğŸ˜€,no_utf_check
+ 1: \x{f0}\x{9f}<:>\x{98}\x{80}

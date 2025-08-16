@@ -9247,9 +9247,14 @@ if (dat_datctl.replacement[0] != 0)
 
   if (rc < 0)
     {
+    /* A UTF error may be in the subject, or the replacement string, pcre2_substitute doesn't say which one */
+    BOOL in_either = rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF32_ERR2;
+    BOOL in_subject = rc == PCRE2_ERROR_BADUTFCAPTURE;
+
     cprintf(clr_api_error, "Failed: error %d", rc);
     if (rc != PCRE2_ERROR_NOMEMORY && nsize != PCRE2_UNSET)
-      cprintf(clr_api_error, " at offset %ld in replacement", (long int)nsize);
+      cprintf(clr_api_error, " at offset %ld in %s", (long int)nsize, in_either ? "subject or replacement" : in_subject ? "subject" : "replacement");
+
     cprintf(clr_api_error, ": ");
     if (!print_error_message(rc, "", "")) return PR_ABEND;
     if (rc == PCRE2_ERROR_NOMEMORY &&
@@ -9258,20 +9263,28 @@ if (dat_datctl.replacement[0] != 0)
 
     if (rc != PCRE2_ERROR_NOMEMORY && nsize != PCRE2_UNSET)
       {
-      PCRE2_SIZE full_rlen = (rlen != PCRE2_ZERO_TERMINATED)? rlen :
-          STRLEN(rbptr);
+      for (uint8_t *bptr = sbptr; bptr != NULL; bptr = bptr == sbptr ? rbptr : NULL)
+        {
+        if (bptr == sbptr ? in_subject || in_either : !in_subject || in_either)
+          {
+          PCRE2_SIZE len = bptr == sbptr ? slen : rlen;
 
-      cprintf(clr_api_error, "\n        here: ");
-      if (nsize > 0)
-        {
-        PTRUNCV(clr_api_error, rbptr, full_rlen, nsize, TRUE, utf, outfile);
-        cprintf(clr_api_error, " ");
-        }
-      cprintf(clr_api_error, "|<--|");
-      if (nsize < full_rlen)
-        {
-        cprintf(clr_api_error, " ");
-        PTRUNCV(clr_api_error, rbptr, full_rlen, nsize, FALSE, utf, outfile);
+          PCRE2_SIZE full_len = (len != PCRE2_ZERO_TERMINATED)? len :
+              STRLEN(bptr);
+
+          cprintf(clr_api_error, "\n     %s here: ", bptr == rbptr && in_either ? "or" : "  ");
+          if (nsize > 0)
+            {
+            PTRUNCV(clr_api_error, bptr, full_len, nsize, TRUE, utf, outfile);
+            cprintf(clr_api_error, " ");
+            }
+          cprintf(clr_api_error, "|<--|");
+          if (nsize < full_len)
+            {
+            cprintf(clr_api_error, " ");
+            PTRUNCV(clr_api_error, bptr, full_len, nsize, FALSE, utf, outfile);
+            }
+          }
         }
       }
     }

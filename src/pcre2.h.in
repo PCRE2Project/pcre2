@@ -438,6 +438,7 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_DIFFERENT_SUBJECT (-71)
 #define PCRE2_ERROR_DIFFERENT_LENGTH  (-72)
 #define PCRE2_ERROR_DIFFERENT_OFFSET  (-73)
+#define PCRE2_ERROR_BADUTFCAPTURE     (-74)
 
 
 /* Request types for pcre2_pattern_info() */

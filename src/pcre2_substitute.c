@@ -755,6 +755,7 @@ PCRE2_SIZE extra_needed = 0;
 PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
 PCRE2_SIZE *ovector;
 PCRE2_SIZE ovecsave[2] = { 0, 0 };
+PCRE2_SPTR capture_start, capture_end;
 pcre2_substitute_callout_block scb;
 PCRE2_SIZE sub_start_extra_needed;
 PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *,
@@ -871,6 +872,75 @@ else if (use_existing_match)
     ((pcre2_real_match_context *)mcontext)->memctl;
   pairs = (code->top_bracket + 1 < match_data->oveccount)?
     code->top_bracket + 1 : match_data->oveccount;
+
+  /* Ensure that if the subject has been modified, we won't get any invalid
+  UTF output (If the subject was copied, we assume the copy was not modified). */
+#ifdef SUPPORT_UNICODE
+  if (match_data->rc > PCRE2_ERROR_NOMATCH && utf && (match_data->flags & PCRE2_MD_COPIED_SUBJECT) == 0)
+    {
+    /* although other UTF errors store the offset in match_data->startchar,
+    we can't do that as we promised not to modify match_data, so we
+    store the offset is in blen */
+
+    /* check that the entire subject is valid */
+    if ((options & PCRE2_NO_UTF_CHECK) == 0
+      && (code->overall_options & PCRE2_MATCH_INVALID_UTF) == 0
+      && (rc = PRIV(valid_utf)(subject, length, blength)) != 0)
+      goto EXIT;
+
+    /* check each capture group, and return BADUTFCAPTURE if something went wrong */
+    for (int i = 0; i < pairs; i++)
+      {
+      capture_start = subject + match_data->ovector[2*i];
+      capture_end = subject + match_data->ovector[2*i + 1];
+
+      /* \K can be used to get capture_end < capture_start, but we'll return a
+      PCRE2_ERROR_BADSUBSPATTERN later on anway */
+      if (capture_start == subject + PCRE2_UNSET || capture_end < capture_start) continue;
+
+      /* If PCRE2_MATCH_INVALID_UTF was used, the subject itself can contain
+      invalid UTF, but matches and capture groups are not allowed to */
+      if ((options & PCRE2_NO_UTF_CHECK) == 0 
+        && (code->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
+        {
+
+        /* If \C was used, the capture group may start or end inside a unicode
+        character, so we first enlarge the capture group bounds to include
+        entire characters */
+        if ((code->flags & PCRE2_HASBKC) != 0)
+          {
+          if (capture_start < subject + length) BACKCHARTEST(capture_start, subject);
+          FORWARDCHARTEST(capture_end, subject + length);
+          }
+
+        if (PRIV(valid_utf)(capture_start, capture_end - capture_start, blength) != 0)
+          goto BADUTFCAPTURE;
+        }
+
+      /* otherwise, unless \C was used, we need to check that the start and
+      end of the capture isn't in the middle of a single unicode character
+      (this needs to be checked even if the capture is empty)*/
+      else if ((code->flags & PCRE2_HASBKC) == 0)
+        {
+        /* capture_start < subject + length can only be false if the capture is
+        empty, and is at the end of the subject */
+        if (capture_start < subject + length && NOT_FIRSTCU(*capture_start))
+          {
+          *blength = capture_start - subject;
+          goto BADUTFCAPTURE;
+          }
+        /* capture_end > subject can only be false if the capture is empty
+        and is at the begining of the subject */
+        if (capture_end > subject && HAS_EXTRALEN(*(capture_end - 1)))
+          {
+          *blength = capture_end - subject;
+          goto BADUTFCAPTURE;
+          }
+        }
+      }
+    }
+#endif  /* SUPPORT_UNICODE */
+
   internal_match_data = pcre2_match_data_create(match_data->oveccount,
     &gcontext);
   if (internal_match_data == NULL) return PCRE2_ERROR_NOMEMORY;
@@ -1681,6 +1751,10 @@ goto EXIT;
 
 TOOLARGEREPLACE:
 rc = PCRE2_ERROR_TOOLARGEREPLACE;
+goto EXIT;
+
+BADUTFCAPTURE:
+rc = PCRE2_ERROR_BADUTFCAPTURE;
 goto EXIT;
 
 BAD:
