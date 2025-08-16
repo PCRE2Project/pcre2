@@ -302,6 +302,7 @@ static const unsigned char match_error_texts[] =
   "substitute subject differs from prior pcre2_match call\0"
   "substitute subject length differs from prior pcre2_match call\0"
   "substitute start offset differs from prior pcre2_match call\0"
+  "capture group is not a valid UTF string\0"
   ;
 
 
