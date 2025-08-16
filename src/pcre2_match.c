@@ -6978,6 +6978,16 @@ match_block *mb = &actual_match_block;
 
 if (match_data == NULL) return PCRE2_ERROR_NULL;
 
+/* store data needed by pcre2_substitute */
+match_data->original_subject = subject;
+if (length == PCRE2_ZERO_TERMINATED)
+  {
+  length = PRIV(strlen)(subject);
+  was_zero_terminated = 1;
+  }
+match_data->subject_length = length;
+match_data->start_offset = start_offset;
+
 /* Recognize NULL, length 0 as an empty string. */
 
 if (subject == NULL && length == 0) subject = null_str;
@@ -6989,11 +6999,6 @@ if (code == NULL || subject == NULL) return match_data->rc = PCRE2_ERROR_NULL;
 
 start_match = subject + start_offset;
 req_cu_ptr = start_match - 1;
-if (length == PCRE2_ZERO_TERMINATED)
-  {
-  length = PRIV(strlen)(subject);
-  was_zero_terminated = 1;
-  }
 true_end_subject = end_subject = subject + length;
 
 if (start_offset > length) return match_data->rc = PCRE2_ERROR_BADOFFSET;
@@ -7152,12 +7157,11 @@ if (use_jit)
   /* If JIT returns BADOPTION, which means that the selected complete or
   partial matching mode was not compiled, fall through to the interpreter. */
 
-  rc = pcre2_jit_match(code, subject, length, start_offset, options,
+  rc = pcre2_jit_match(code, match_data->original_subject, length, start_offset, options,
     match_data, mcontext);
   if (match_data->subject == null_str) match_data->subject = NULL;
   if (rc != PCRE2_ERROR_JIT_BADOPTION)
     {
-    match_data->subject_length = length;
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
       length = CU2BYTES(length + was_zero_terminated);
@@ -8103,8 +8107,6 @@ if (rc == MATCH_MATCH)
   {
   match_data->rc = ((int)mb->end_offset_top >= 2 * match_data->oveccount)?
     0 : (int)mb->end_offset_top/2 + 1;
-  match_data->subject_length = length;
-  match_data->start_offset = start_offset;
   match_data->startchar = start_match - subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
@@ -8141,8 +8143,6 @@ PCRE2_ERROR_PARTIAL. */
 else if (match_partial != NULL)
   {
   match_data->subject = subject == null_str ? NULL : subject;
-  match_data->subject_length = length;
-  match_data->start_offset = start_offset;
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;

@@ -795,8 +795,16 @@ repend = replacement + rlength;
 pointer in the match data may be NULL after a no-match. */
 
 use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
+if (use_existing_match && match_data == NULL) return PCRE2_ERROR_NULL;
+
 replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
+if (use_existing_match && match_data->rc < PCRE2_ERROR_NOMATCH)
+  /* Return early, as the rest of the match_data may not have been initialised */
+  return match_data->rc;
+
+if (use_existing_match && match_data->original_subject != subject)
+  return PCRE2_ERROR_DIFFERENT_SUBJECT;
 
 /* A NULL subject of zero length is treated as an empty string. */
 
@@ -810,6 +818,12 @@ if (subject == NULL)
 
 if (length == PCRE2_ZERO_TERMINATED)
   length = subject? PRIV(strlen)(subject) : 0;
+
+if (use_existing_match && match_data->subject_length != length)
+  return PCRE2_ERROR_DIFFERENT_LENGTH;
+
+if (use_existing_match && match_data->start_offset != start_offset)
+  return PCRE2_ERROR_DIFFERENT_OFFSET;
 
 /* If starting from an existing match, there must be an externally provided
 match data block. We create an internal match_data block in two cases: (a) an
@@ -827,7 +841,6 @@ have to be changes below. */
 if (match_data == NULL)
   {
   pcre2_general_context gcontext;
-  if (use_existing_match) return PCRE2_ERROR_NULL;
   gcontext.memctl = (mcontext == NULL)?
     ((pcre2_real_code *)code)->memctl :
     ((pcre2_real_match_context *)mcontext)->memctl;

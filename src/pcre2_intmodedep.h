@@ -667,6 +667,7 @@ typedef struct pcre2_real_match_data {
   pcre2_memctl     memctl;           /* Memory control fields */
   const pcre2_real_code *code;       /* The pattern used for the match */
   PCRE2_SPTR       subject;          /* The subject that was matched */
+  PCRE2_SPTR       original_subject; /* the pointer that was actually passed to pcre2_match */
   PCRE2_SPTR       mark;             /* Pointer to last mark */
   struct heapframe *heapframes;      /* Backtracking frames heap memory */
   PCRE2_SIZE       heapframes_size;  /* Malloc-ed size */
