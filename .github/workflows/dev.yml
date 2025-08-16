@@ -473,14 +473,11 @@ jobs:
           submodules: true
 
       - name: Build
-        run: zig build
+        run: zig build -Dsupport_jit
 
       - name: Test
         run: |
-          # Zig does something weird with the stack - it uses more space than the
-          # equivalent plain C program.
-          ulimit -S -s 65536
-          srcdir=`pwd` pcre2test=`pwd`/zig-out/bin/pcre2test ./RunTest
+          srcdir=`pwd` pcre2test=`pwd`/zig-out/bin/pcre2test ./RunTest -bigstack
 
   bazel:
     # Tests with: Bazel build system
