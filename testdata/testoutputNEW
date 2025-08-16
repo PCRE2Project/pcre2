@@ -64,7 +64,7 @@ Failed: error -73: substitute start offset differs from prior pcre2_match call
     \=substitute_subject=,copy_matched_subject
 Failed: error -71: substitute subject differs from prior pcre2_match call
     \=null_substitute_subject,copy_matched_subject
-Failed: error -71: substitute subject differs from prior pcre2_match call
+ 1: <>
     \=null_subject,substitute_subject=,copy_matched_subject
 Failed: error -71: substitute subject differs from prior pcre2_match call
     foo\=substitute_subject=foo,copy_matched_subject
@@ -104,10 +104,36 @@ Failed: error -72: substitute subject length differs from prior pcre2_match call
 
 # Keeping the length the same, the offset the same, and the pointer the same
 # Is ok, even if the contents DIFFER
+# (also has some fun with copy_matched_subject)
 /\w+|^$/replace=<$&>,global,substitute_matched
     foo|bar\=offset=1,substitute_subject=F|OOBAR,substitute_overwrite,zero_terminate
  2: F<|O><OBAR>
+
+# Using null tells substitute to use the copied match_subject
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,null_substitute_subject,copy_matched_subject
+ 2: f<oo>|<bar>
+    :::\=offset=1,null_substitute_subject,copy_matched_subject
+ 0: :::
+
+# Still need the length to be correct when using null
+# Failed: error -72: substitute subject length differs from prior pcre2_match call
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo\=substitute_subject=x,null_substitute_subject,copy_matched_subject
+Failed: error -72: substitute subject length differs from prior pcre2_match call
+    :::\=substitute_subject=x,null_substitute_subject,copy_matched_subject
+Failed: error -72: substitute subject length differs from prior pcre2_match call
+
+# Can use substitute_zero_terminate with copy_matched_subject
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=x,substitute_overwrite,copy_matched_subject,substitute_zero_terminate
+Failed: error -72: substitute subject length differs from prior pcre2_match call
+    :::\=offset=1,substitute_subject=x,substitute_overwrite,copy_matched_subject,substitute_zero_terminate
+Failed: error -72: substitute subject length differs from prior pcre2_match call
+
+# Can modify text with copy_matched_subject, original text is used
+/\w+|^$/replace=<$&>,global,substitute_matched
     foo|bar\=offset=1,substitute_subject=F|OOBAR,substitute_overwrite,copy_matched_subject
- 2: F<|O><OBAR>
+ 2: f<oo>|<bar>
     :::\=offset=1,substitute_subject=foo,substitute_overwrite,copy_matched_subject
- 0: foo
+ 0: :::

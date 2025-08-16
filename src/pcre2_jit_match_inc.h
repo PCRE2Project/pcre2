@@ -118,7 +118,7 @@ int rc;
 int index = 0;
 
 /* store data needed by pcre2_substitute */
-match_data->original_subject = subject;
+match_data->subject = match_data->original_subject = subject;
 match_data->subject_length = length;
 match_data->start_offset = start_offset;
 
@@ -180,7 +180,6 @@ else
 if (rc > (int)oveccount)
   rc = 0;
 match_data->code = re;
-match_data->subject = (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)? subject : NULL;
 match_data->rc = rc;
 match_data->startchar = arguments.startchar_ptr - subject;
 match_data->leftchar = 0;

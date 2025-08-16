@@ -6966,6 +6966,7 @@ BOOL jit_checked_utf = FALSE;
 #endif
 #endif  /* SUPPORT_UNICODE */
 
+PCRE2_SIZE byte_length;
 PCRE2_SIZE frame_size;
 PCRE2_SIZE heapframes_size;
 
@@ -6978,8 +6979,17 @@ match_block *mb = &actual_match_block;
 
 if (match_data == NULL) return PCRE2_ERROR_NULL;
 
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. Set the field to NULL for no match cases. */
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject,
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }
+
 /* store data needed by pcre2_substitute */
-match_data->original_subject = subject;
+match_data->subject = match_data->original_subject = subject;
 if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
@@ -6996,6 +7006,17 @@ if (subject == NULL && length == 0) subject = null_str;
 
 if ((options & ~PUBLIC_MATCH_OPTIONS) != 0) return match_data->rc = PCRE2_ERROR_BADOPTION;
 if (code == NULL || subject == NULL) return match_data->rc = PCRE2_ERROR_NULL;
+
+/* save a copy of the subject, and use it for all future operations */
+if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+  {
+  byte_length = CU2BYTES(length + was_zero_terminated);
+  match_data->subject = match_data->memctl.malloc(byte_length,
+    match_data->memctl.memory_data);
+  if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
+  subject = memcpy((void *)match_data->subject, subject, byte_length);
+  match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+ }
 
 start_match = subject + start_offset;
 req_cu_ptr = start_match - 1;
@@ -7065,17 +7086,6 @@ time. */
 if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
   return match_data->rc = PCRE2_ERROR_BADOFFSETLIMIT;
-
-/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. Set the field to NULL for no match cases. */
-
-if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
-  {
-  match_data->memctl.free((void *)match_data->subject,
-    match_data->memctl.memory_data);
-  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }
-match_data->subject = NULL;
 
 /* Zero the error offset in case the first code unit is invalid UTF. */
 
@@ -7157,22 +7167,15 @@ if (use_jit)
   /* If JIT returns BADOPTION, which means that the selected complete or
   partial matching mode was not compiled, fall through to the interpreter. */
 
-  rc = pcre2_jit_match(code, match_data->original_subject, length, start_offset, options,
+  /* pcre2_jit_match will set both match_data->subject and 
+  match_data->original_subject to the value we pass it, so do a little
+  juggling to undo this */
+  subject = match_data->original_subject;
+  rc = pcre2_jit_match(code, match_data->subject, length, start_offset, options,
     match_data, mcontext);
-  if (match_data->subject == null_str) match_data->subject = NULL;
-  if (rc != PCRE2_ERROR_JIT_BADOPTION)
-    {
-    if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
-      {
-      length = CU2BYTES(length + was_zero_terminated);
-      match_data->subject = match_data->memctl.malloc(length,
-        match_data->memctl.memory_data);
-      if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
-      memcpy((void *)match_data->subject, subject, length);
-      match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
-      }
-    return match_data->rc = rc;
-    }
+  match_data->original_subject = subject;
+  subject = match_data->subject;
+  if (rc != PCRE2_ERROR_JIT_BADOPTION) return match_data->rc = rc;
   }
 #endif  /* SUPPORT_JIT */
 
@@ -8111,17 +8114,6 @@ if (rc == MATCH_MATCH)
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
     mb->last_used_ptr : mb->end_match_ptr) - subject;
-  if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
-    {
-    length = CU2BYTES(length + was_zero_terminated);
-    match_data->subject = match_data->memctl.malloc(length,
-      match_data->memctl.memory_data);
-    if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
-    memcpy((void *)match_data->subject, subject, length);
-    match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
-    }
-  else match_data->subject = subject == null_str ? NULL : subject;
-
   return match_data->rc;
   }
 
@@ -8142,7 +8134,6 @@ PCRE2_ERROR_PARTIAL. */
 
 else if (match_partial != NULL)
   {
-  match_data->subject = subject == null_str ? NULL : subject;
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;
