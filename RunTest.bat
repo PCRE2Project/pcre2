@@ -1,8 +1,7 @@
 @echo off
 @rem
 @rem MS Windows batch file to run pcre2test on testfiles with the correct
-@rem options. This file must use CRLF linebreaks to function properly,
-@rem and requires both pcre2test and pcre2grep.
+@rem options. This file must use CRLF linebreaks to function properly.
 @rem
 @rem ------------------------ HISTORY ----------------------------------
 @rem This file was originally contributed to PCRE1 by Ralf Junker, and touched
@@ -14,7 +13,7 @@
 @rem
 @rem Sheri Pierce added logic to skip feature dependent tests
 @rem tests 4 5 7 10 12 14 19 22 25 and 26 require Unicode support
-@rem 8 requires Unicode and link size 2
+@rem 8 requires Unicode
 @rem 16 requires absence of jit support
 @rem 17 requires presence of jit support
 @rem Sheri P also added override tests for study and jit testing
@@ -57,8 +56,6 @@ call :conferror
 exit /b 1
 )
 
-%pcre2test% -C linksize >NUL
-set link_size=%ERRORLEVEL%
 %pcre2test% -C pcre2-8 >NUL
 set support8=%ERRORLEVEL%
 %pcre2test% -C pcre2-16 >NUL
@@ -269,9 +266,8 @@ if [%3] == [] (
 )
 
 if %1 == 8 (
-  set bits_link_size=%link_size%
-  if %bits% EQU 16 if %link_size% EQU 3 set bits_link_size=4
-  if %bits% EQU 32 set bits_link_size=4
+  %pcre2test% -%bits% -C linksize >NUL
+  set bits_link_size=!ERRORLEVEL!
   set outnum=%1-%bits%-!bits_link_size!
 ) else if %1 == 11 (
   set outnum=%1-%bits%
@@ -379,10 +375,6 @@ if %unicode% EQU 0 (
   goto :eof
 
 :do8
-if NOT %link_size% EQU 2 (
-  echo Test 8 Skipped because link size is not 2.
-  goto :eof
-)
 if %unicode% EQU 0 (
   echo Test 8 Skipped due to absence of Unicode support.
   goto :eof
