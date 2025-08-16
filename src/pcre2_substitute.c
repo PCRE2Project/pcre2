@@ -807,30 +807,40 @@ if (use_existing_match && match_data->rc < PCRE2_ERROR_NOMATCH)
   /* Return early, as the rest of the match_data may not have been initialised */
   return match_data->rc;
 
-if (use_existing_match && match_data->original_subject != subject)
-  return PCRE2_ERROR_DIFFERENT_SUBJECT;
-
-/* A NULL subject of zero length is treated as an empty string. */
-
-if (subject == NULL)
+/* If we are using PCRE2_SUBSTITUTE_MATCHED and the preceeding call to pcre2_match
+used PCRE2_COPY_MATCHED_SUBJECT, then use the copy that pcre2_match made. */
+if (use_existing_match && ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0))
   {
-  if (length != 0) return PCRE2_ERROR_NULL;
-  subject = null_str;
+  if (subject != NULL && match_data->original_subject != subject)
+    return PCRE2_ERROR_DIFFERENT_SUBJECT;
+
+  /* For convenience, NULL and PCRE2_ZERO_TERMINATED means to just use the saved
+  length. Otherwise, we check that the given length is the same.*/
+  if (subject == NULL && length == PCRE2_ZERO_TERMINATED)
+    length = match_data->subject_length;
+  else if (length == PCRE2_ZERO_TERMINATED && match_data->subject_length != PRIV(strlen)(subject))
+    return PCRE2_ERROR_DIFFERENT_LENGTH;
+  else if (length != PCRE2_ZERO_TERMINATED && match_data->subject_length != length)
+    return PCRE2_ERROR_DIFFERENT_LENGTH;
+
+  subject = match_data->subject;
   }
+else
+ {
+  if (use_existing_match && match_data->original_subject != subject)
+    return PCRE2_ERROR_DIFFERENT_SUBJECT;
 
-if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
+  /* Find length of zero-terminated subject */
 
-/* Check for using a match that has already happened. Note that the subject
-pointer in the match data may be NULL after a no-match. */
+  if (length == PCRE2_ZERO_TERMINATED)
+    length = subject? PRIV(strlen)(subject) : 0;
 
-use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
-replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
+  if (use_existing_match && match_data->subject_length != length)
+    return PCRE2_ERROR_DIFFERENT_LENGTH;
 
-if (use_existing_match && match_data->subject_length != length)
-  return PCRE2_ERROR_DIFFERENT_LENGTH;
-
-if (use_existing_match && match_data->start_offset != start_offset)
-  return PCRE2_ERROR_DIFFERENT_OFFSET;
+  if (use_existing_match && match_data->start_offset != start_offset)
+    return PCRE2_ERROR_DIFFERENT_OFFSET;
+ }
 
 /* If starting from an existing match, there must be an externally provided
 match data block. We create an internal match_data block in two cases: (a) an
@@ -874,6 +884,8 @@ else if (use_existing_match)
   internal_match_data->heapframes_size = 0;
   /* Ensure that the subject is not freed when internal_match_data is */
   internal_match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  /* ensure that pcre2_match doesn't make an unnecessary copy of the subject */
+  options &= ~PCRE2_COPY_MATCHED_SUBJECT;
   match_data = internal_match_data;
   }
 

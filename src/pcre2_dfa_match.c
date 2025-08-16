@@ -3389,8 +3389,17 @@ rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 
 if (match_data == NULL) return PCRE2_ERROR_NULL;
 
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. */
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject,
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }
+
 /* store data needed by pcre2_substitute */
-match_data->original_subject = subject;
+match_data->subject = match_data->original_subject = subject;
 if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
@@ -3681,20 +3690,9 @@ if ((re->flags & PCRE2_LASTSET) != 0)
     }
   }
 
-/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. */
-
-if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
-  {
-  match_data->memctl.free((void *)match_data->subject,
-    match_data->memctl.memory_data);
-  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }
-
 /* Fill in fields that are always returned in the match data. */
 
 match_data->code = re;
-match_data->subject = NULL;  /* Default for no match */
 match_data->mark = NULL;
 match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
 
