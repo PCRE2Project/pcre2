@@ -53,6 +53,7 @@ just to undefine them all. */
 
 #undef ACROSSCHAR
 #undef BACKCHAR
+#undef BACKCHARTEST
 #undef BYTES2CU
 #undef CHMAX_255
 #undef CU2BYTES
@@ -274,6 +275,7 @@ UTF support is omitted, we don't even define them. */
 #define PUTCHAR(c, p) (*p = c, 1)
 /* #define GETCHARLENTEST(c, eptr, len) */
 /* #define BACKCHAR(eptr) */
+/* #define BACKCHARTEST(eptr,start) */
 /* #define FORWARDCHAR(eptr) */
 /* #define FORWARCCHARTEST(eptr,end) */
 /* #define ACROSSCHAR(condition, eptr, action) */
@@ -351,6 +353,7 @@ it is. This is called only in UTF-8 mode - we don't put a test within the macro
 because almost all calls are already within a block of UTF-8 only code. */
 
 #define BACKCHAR(eptr) while((*eptr & 0xc0u) == 0x80u) eptr--
+#define BACKCHARTEST(eptr,start) while(eptr > start && (*eptr & 0xc0u) == 0x80u) eptr--
 
 /* Same as above, just in the other direction. */
 #define FORWARDCHAR(eptr) while((*eptr & 0xc0u) == 0x80u) eptr++
@@ -457,6 +460,7 @@ macro because almost all calls are already within a block of UTF-16 only
 code. */
 
 #define BACKCHAR(eptr) if ((*eptr & 0xfc00u) == 0xdc00u) eptr--
+#define BACKCHARTEST(eptr,start) if (eptr > start && (*eptr & 0xfc00u) == 0xdc00u) eptr--
 
 /* Same as above, just in the other direction. */
 #define FORWARDCHAR(eptr) if ((*eptr & 0xfc00u) == 0xdc00u) eptr++
@@ -530,6 +534,7 @@ code.
 These are all no-ops since all UTF-32 characters fit into one PCRE2_UCHAR. */
 
 #define BACKCHAR(eptr) do { } while (0)
+#define BACKCHARTEST(eptr,start) do { } while (0)
 
 /* Same as above, just in the other direction. */
 
