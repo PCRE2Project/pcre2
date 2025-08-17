@@ -51,7 +51,6 @@ pcre2_printint_inc.h file). We undefine them here so that they can be re-defined
 multiple inclusions. Not all of these are used in pcre2test, but it's easier
 just to undefine them all. */
 
-#undef ACROSSCHAR
 #undef BACKCHAR
 #undef BACKCHARTEST
 #undef BYTES2CU
@@ -278,7 +277,6 @@ UTF support is omitted, we don't even define them. */
 /* #define BACKCHARTEST(eptr,start) */
 /* #define FORWARDCHAR(eptr) */
 /* #define FORWARCCHARTEST(eptr,end) */
-/* #define ACROSSCHAR(condition, eptr, action) */
 
 #else   /* SUPPORT_UNICODE */
 
@@ -358,10 +356,6 @@ because almost all calls are already within a block of UTF-8 only code. */
 /* Same as above, just in the other direction. */
 #define FORWARDCHAR(eptr) while((*eptr & 0xc0u) == 0x80u) eptr++
 #define FORWARDCHARTEST(eptr,end) while(eptr < end && (*eptr & 0xc0u) == 0x80u) eptr++
-
-/* Same as above, but it allows a fully customizable form. */
-#define ACROSSCHAR(condition, eptr, action) \
-  while((condition) && ((*eptr) & 0xc0u) == 0x80u) action
 
 /* Deposit a character into memory, returning the number of code units. */
 
@@ -466,10 +460,6 @@ code. */
 #define FORWARDCHAR(eptr) if ((*eptr & 0xfc00u) == 0xdc00u) eptr++
 #define FORWARDCHARTEST(eptr,end) if (eptr < end && (*eptr & 0xfc00u) == 0xdc00u) eptr++
 
-/* Same as above, but it allows a fully customizable form. */
-#define ACROSSCHAR(condition, eptr, action) \
-  if ((condition) && ((*eptr) & 0xfc00u) == 0xdc00u) action
-
 /* Deposit a character into memory, returning the number of code units. */
 
 #define PUTCHAR(c, p) ((utf && c > MAX_UTF_SINGLE_CU)? \
@@ -540,10 +530,6 @@ These are all no-ops since all UTF-32 characters fit into one PCRE2_UCHAR. */
 
 #define FORWARDCHAR(eptr) do { } while (0)
 #define FORWARDCHARTEST(eptr,end) do { } while (0)
-
-/* Same as above, but it allows a fully customizable form. */
-
-#define ACROSSCHAR(condition, eptr, action) do { } while (0)
 
 /* Deposit a character into memory, returning the number of code units. */
 
