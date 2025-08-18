@@ -60,6 +60,10 @@ GenerateUcpTables.py
   GenerateCommon.py and Unicode data files. The generated file contains tables
   for looking up Unicode property names.
 
+LintMan
+  A Perl script to check and update magic numbers in the documentation that
+  correspond to configurable settings in the codebase.
+
 manifest-*
   Data files used to verify the contents of the distribution tarball and
   `make install` file lists.

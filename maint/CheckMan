@@ -39,6 +39,7 @@ while (scalar(@ARGV) > 0)
             ^\.P\s*$| 
             ^\.PP\s*$| 
             ^\.\\"(?:\ HREF)?\s*$|
+            ^\.\\"\sDEFINE\s\w+$|
             ^\.\\"\sHTML\s<a\shref="[^"]+?">\s*$|
             ^\.\\"\sHTML\s<a\sname="[^"]+?"><\/a>\s*$|
             ^\.\\"\s<\/a>\s*$|

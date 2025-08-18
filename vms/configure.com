@@ -905,7 +905,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PCRE2_EXPORT
 #define LINK_SIZE 2
 #define MAX_NAME_COUNT 10000
-#define MAX_NAME_SIZE 32
+#define MAX_NAME_SIZE 128
 #define MATCH_LIMIT 10000000
 #define HEAP_LIMIT 20000000
 #define NEWLINE_DEFAULT 2
