@@ -6238,8 +6238,10 @@ SIZE AND OTHER LIMITATIONS
        is set to  250.  An  application  can  change  this  limit  by  calling
        pcre2_set_parens_nest_limit() to set the limit in a compile context.
 
-       The  maximum length of name for a named capture group is 32 code units,
-       and the maximum number of such groups is 10000.
+       The maximum length of the name for a named capture group as well as the
+       number of such groups is configurable at build time. The maximum length
+       for the name defaults to 128 code units, and the maximum number of such
+       groups to 10000.
 
        The maximum length of a  name  in  a  (*MARK),  (*PRUNE),  (*SKIP),  or
        (*THEN)  verb  is  255  code units for the 8-bit library and 65535 code
@@ -6262,7 +6264,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 August 2023
+       Last updated: 17 August 2025
        Copyright (c) 1997-2023 University of Cambridge.
 
 
@@ -10747,7 +10749,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 28 March 2025
+       Last updated: 17 August 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
