@@ -25,6 +25,11 @@ pub fn build(b: *std.Build) !void {
             .HAVE_UNISTD_H = (target.result.os.tag != .windows),
             .HAVE_WINDOWS_H = (target.result.os.tag == .windows),
 
+            .HAVE_ATTRIBUTE_UNINITIALIZED = true,
+            .HAVE_BUILTIN_MUL_OVERFLOW = true,
+            .HAVE_BUILTIN_UNREACHABLE = true,
+            .HAVE_VISIBILITY = true,
+
             .HAVE_MEMMOVE = true,
             .HAVE_STRERROR = true,
 
@@ -46,7 +51,7 @@ pub fn build(b: *std.Build) !void {
         },
     );
 
-    // pcre2-8/16/32.so
+    // pcre2-8/16/32 libraries
 
     const lib_mod = b.createModule(.{
         .target = target,
@@ -120,8 +125,6 @@ pub fn build(b: *std.Build) !void {
         .link_libc = true,
     });
 
-    pcre2test_mod.addImport(b.fmt("pcre2-{s}", .{@tagName(codeUnitWidth)}), lib_mod);
-
     pcre2test_mod.addCMacro("HAVE_CONFIG_H", "");
     if (linkage == .static) {
         pcre2test_mod.addCMacro("PCRE2_STATIC", "");
@@ -132,7 +135,7 @@ pub fn build(b: *std.Build) !void {
         .root_module = pcre2test_mod,
     });
 
-    // pcre2-posix.so
+    // pcre2-posix library
 
     if (codeUnitWidth == CodeUnitWidth.@"8") {
         const posixLib_mod = b.createModule(.{
@@ -147,6 +150,8 @@ pub fn build(b: *std.Build) !void {
         posixLib_mod.addCMacro("PCRE2_CODE_UNIT_WIDTH", @tagName(codeUnitWidth));
         if (linkage == .static) {
             posixLib_mod.addCMacro("PCRE2_STATIC", "");
+        } else {
+            posixLib_mod.addCMacro("PCRE2POSIX_DYNAMIC", "");
         }
 
         const posixLib = b.addLibrary(.{
@@ -165,6 +170,8 @@ pub fn build(b: *std.Build) !void {
             },
         });
 
+        posixLib.linkLibrary(lib);
+
         posixLib.installHeader(b.path("src/pcre2posix.h"), "pcre2posix.h");
         b.installArtifact(posixLib);
     }
@@ -178,6 +185,8 @@ pub fn build(b: *std.Build) !void {
     pcre2test.addCSourceFile(.{
         .file = b.path("src/pcre2test.c"),
     });
+
+    pcre2test.linkLibrary(lib);
 
     b.installArtifact(pcre2test);
 }
