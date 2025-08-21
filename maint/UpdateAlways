@@ -32,7 +32,7 @@
 
 # Set the LANG to C, because nroff converts ASCII "HYPHEN-MINUS" to Unicode
 # "HYPHEN" if the system is using a UTF-8 locale (like "C.UTF-8").
-export LANG=C
+export LANG=C LC_ALL=C
 
 # Extract the current release version from configure.ac.
 CURRENT_RELEASE=`grep -E 'm4_define\(pcre2_(major|minor|prerelease)' configure.ac | \
