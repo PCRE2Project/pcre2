@@ -6146,6 +6146,8 @@ a)"xI
 
 /(?(VERSION=10.3)b)((?<=b).*)/B
 
+/(?(VERSION>=10.3)b)((?<=b).*)/B
+
 /[aA]b[cC]/IB
 
 /[cc]abcd/I
