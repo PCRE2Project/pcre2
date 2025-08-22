@@ -247,7 +247,7 @@ Memory allocation - data size : 6
   9     Any
  10     Any
  11     Any
- 12     \1
+ 12     \g{1}
  14     bbb
  20   2 Recurse
  22     d
@@ -731,7 +731,7 @@ Memory allocation - code size : 14
   6  12 CBra 2
   9   7 CBra 3
  12     a
- 14     \2
+ 14     \g{2}
  16   7 Ket
  18  11 Alt
  20   5 CBra 4
@@ -751,7 +751,7 @@ Memory allocation - code size : 14
   2  12 CBra 1
   5   7 Recurse
   7   5 CBra 2
- 10     \1
+ 10     \g{1}
  12   5 Ket
  14  12 Ket
  16  16 Ket
@@ -778,7 +778,7 @@ Memory allocation - code size : 14
   6  19 Recurse
   8   0 Recurse
  10   4 Alt
- 12     \1
+ 12     \g{1}
  14   3 Alt
  16     $
  17  14 Ket
@@ -799,7 +799,7 @@ Memory allocation - code size : 14
  13   3 Ket
  15  10 Recurse
  17   4 Alt
- 19     \1
+ 19     \g{1}
  21   3 Alt
  23     $
  24  21 Ket
@@ -822,7 +822,7 @@ Memory allocation - code size : 14
  21  15 CBra 6
  24  10 CBra 7
  27   5 Once
- 29     \1+
+ 29     \g{1}+
  32   5 Ket
  34  10 Ket
  36  15 Ket

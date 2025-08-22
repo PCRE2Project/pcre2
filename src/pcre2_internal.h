@@ -1988,7 +1988,8 @@ some cases doesn't actually use these names at all). */
   "Cond",                                                         \
   "SBra", "SBraPos", "SCBra", "SCBraPos",                         \
   "SCond",                                                        \
-  "Capture ref", "Capture dnref", "Cond rec", "Cond dnrec",       \
+  "Capture ref", "Capture ref <",                                 \
+  "Cond recurse", "Cond recurse <",                               \
   "Cond false", "Cond true",                                      \
   "Brazero", "Braminzero", "Braposzero",                          \
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
