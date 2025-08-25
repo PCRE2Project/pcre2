@@ -8478,11 +8478,13 @@ the unused start of the buffer unaddressable. If we are using the POSIX
 interface, or testing zero-termination, we must include the terminating zero in
 the usable data. */
 
-c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
-                       (dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1:0);
-pp = memmove(dbuffer + dbuffer_size - len - c, dbuffer, len + c);
+c = code_unit_size * ((((pat_patctl.control & CTL_POSIX) != 0) +
+                       ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0))? 1 : 0);
+pp = memmove(dbuffer + dbuffer_size - len - code_unit_size, dbuffer, len + c);
 #ifdef SUPPORT_VALGRIND
-  VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
+  VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + code_unit_size));
+  if (c == 0)
+    VALGRIND_MAKE_MEM_NOACCESS(dbuffer + dbuffer_size - code_unit_size, code_unit_size);
 #endif
 
 #if defined(EBCDIC) && !EBCDIC_IO
