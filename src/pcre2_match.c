@@ -387,6 +387,7 @@ if (offset >= Foffset_top || Fovector[offset] == PCRE2_UNSET)
 eptr = eptr_start = Feptr;
 p = mb->start_subject + Fovector[offset];
 length = Fovector[offset+1] - Fovector[offset];
+PCRE2_ASSERT(eptr <= mb->end_subject);
 
 if (caseless)
   {
@@ -485,8 +486,8 @@ else
 
   else
     {
-    if ((PCRE2_SIZE)(mb->end_subject - eptr) < length) return 1; /* Partial */
-    if (memcmp(p, eptr, CU2BYTES(length)) != 0) return -1;  /* No match */
+    if ((PCRE2_SIZE)(mb->end_subject - eptr) < length ||
+        memcmp(p, eptr, CU2BYTES(length)) != 0) return -1;  /* No match */
     eptr += length;
     }
   }
