@@ -3,8 +3,10 @@
 # Script to test a directory listing. We use this to verify that the list of
 # files installed by "make install" or "cmake --install" matches what we expect.
 
-LANG=C # Ensure stable ordering of `sort` output
-export LANG
+# Ensure stable ordering of `sort` output
+LANG=C
+LC_ALL=C
+export LANG LC_ALL
 
 if [ "$1" = "" -o "$2" = "" ] ; then
     echo "Usage: $0 <dir> <manifest name>" >&2
