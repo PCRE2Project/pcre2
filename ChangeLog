@@ -10,9 +10,9 @@ listed here.
 Version 10.46 27-August-2025
 ----------------------------
 
-1. (#771) Security fix to prevent a read-past-the-end memory error, of
-arbitrary length. An attacker-controlled regex pattern is required, and it
-cannot be triggered by providing crafted subject (match) text. The
+1. (#771) (CVE-2025-58050) Security fix to prevent a read-past-the-end memory
+error, of arbitrary length. An attacker-controlled regex pattern is required,
+and it cannot be triggered by providing crafted subject (match) text. The
 (*ACCEPT) and (*scs:) pattern features must be used together.
 
 Release 10.44 and earlier are not affected.

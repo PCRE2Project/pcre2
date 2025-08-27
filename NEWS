@@ -4,7 +4,9 @@ News about PCRE2 releases
 Version 10.46 27-August-2025
 ----------------------------
 
-This is a security-only release, with only a minimal code change to prevent a
+This is a security-only release, to address CVE-2025-58050.
+
+Compared to 10.45, this release has only a minimal code change to prevent a
 read-past-the-end memory error, of arbitrary length. An attacker-controlled
 regex pattern is required, and it cannot be triggered by providing crafted
 subject (match) text. The (*ACCEPT) and (*scs:) pattern features must be used
