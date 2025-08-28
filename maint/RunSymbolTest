@@ -4,8 +4,10 @@
 
 set -e
 
-LANG=C # Ensure stable ordering of `sort` output
-export LANG
+# Ensure stable ordering of `sort` output
+LANG=C
+LC_ALL=C
+export LANG LC_ALL
 
 if [ "$1" = "" -o "$2" = "" ] ; then
   echo "Usage: $0 <so_dir> <manifest_dir>" >&2

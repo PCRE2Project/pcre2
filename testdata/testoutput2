@@ -20258,6 +20258,18 @@ No match
  2: 
  3: 
 
+/(a)(*scs:(1)a(*ACCEPT))bbb/
+    abbb
+ 0: abbb
+ 1: a
+
+/(a)(b+)(*scs:(1)a(*ACCEPT))(\2)/
+    abbb
+ 0: abb
+ 1: a
+ 2: b
+ 3: b
+
 # Duplicated capture references
 
 /(a)(b)(c)(d)(*scs:(4,3,1,2,2,1,3,3,4,4)x)/B
