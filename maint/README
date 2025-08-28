@@ -272,7 +272,7 @@ new release.
 
   maint/UpdateRelease.py
   maint/UpdateDates.py
-  maint/UpdateDocs
+  maint/UpdateAlways
   git add -u
   git commit -m"Automatic update of doc files #noupdate"
   ```
