@@ -447,7 +447,7 @@ OpenVMS. They are in the "vms" directory in the distribution tarball. Please
 read the file called vms/openvms_readme.txt. The pcre2test and pcre2grep
 programs contain some VMS-specific code.
 
-==============================
-Last updated: 26 December 2024
-==============================
+===========================
+Last updated: 24 March 2025
+===========================
 

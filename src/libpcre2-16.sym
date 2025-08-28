@@ -1,5 +1,5 @@
 # First version of PCRE2 in which symbols were assigned versions.
-PCRE2_10.46 {
+PCRE2_10.47 {
   global:
     pcre2_callout_enumerate_16;
     pcre2_code_copy_16;
@@ -85,4 +85,4 @@ PCRE2_10.46 {
     _init;
 };
 
-# PCRE2_10.47 {} PCRE2_10.46;
+# PCRE2_10.48 {} PCRE2_10.47;
