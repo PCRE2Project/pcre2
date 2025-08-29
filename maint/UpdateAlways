@@ -56,7 +56,7 @@ echo Processing documentation
 perl ../maint/CheckMan *.1 *.3
 if [ $? != 0 ] ; then exit 1; fi
 
-if [ -f ../src/config.h ] ; then
+if [ -f ../src/config.h.generic ] ; then
   perl ../maint/LintMan -v *.3
   if [ $? != 0 ] ; then exit 1; fi
 fi

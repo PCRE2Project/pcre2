@@ -6,7 +6,7 @@ use Getopt::Long;
 use vars qw /$opt_verbose/;
 
 # A script to scan PCRE2's man pages to check for values that might need to
-# be updatd to match the code.
+# be updated to match the code.
 #
 # It updates numerical values after \" DEFINE <name> or errors if name is
 # not found.
@@ -14,7 +14,7 @@ use vars qw /$opt_verbose/;
 my $file;
 my %defs;
 
-foreach $file ("../src/config.h")
+foreach $file ("../src/config.h.generic")
   {
   open (INCLUDE, $file) or die "Failed to open include $file\n";
 
