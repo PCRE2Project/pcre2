@@ -575,7 +575,7 @@ compiled patterns on disc or elsewhere, and reloading them later.
 <p>
 Finally, there are functions for finding out information about a compiled
 pattern (<b>pcre2_pattern_info()</b>) and about the configuration with which
-PCRE2 was built (<b>pcre2_config()</b>).
+PCRE2 was built (<b>pcre2_config()</b>) and that it is using.
 </p>
 <p>
 Functions with names ending with <b>_free()</b> are used for freeing memory
@@ -1346,6 +1346,13 @@ nested backtracking in <b>pcre2_match()</b> or the depth of nested recursions,
 lookarounds, and atomic groups in <b>pcre2_dfa_match()</b>. Further details are
 given with <b>pcre2_set_depth_limit()</b> above.
 <pre>
+  PCRE2_CONFIG_EFFECTIVE_LINKSIZE
+</pre>
+The output is a uint32_t integer that contains the number of bytes the library
+uses for internal linkage in compiled regular expressions. Its value is derived
+from the value that was provided at build time and that is described below by
+PCRE2_CONFIG_LINKSIZE.
+<pre>
   PCRE2_CONFIG_HEAPLIMIT
 </pre>
 The output is a uint32_t integer that gives, in kibibytes, the default limit
@@ -1378,13 +1385,15 @@ for the terminating zero.
 <pre>
   PCRE2_CONFIG_LINKSIZE
 </pre>
-The output is a uint32_t integer that contains the number of bytes used for
-internal linkage in compiled regular expressions. When PCRE2 is configured, the
-value can be set to 2, 3, or 4, with the default being 2. This is the value
-that is returned by <b>pcre2_config()</b>. However, when the 16-bit library is
-compiled, a value of 3 is rounded up to 4, and when the 32-bit library is
-compiled, internal linkages always use 4 bytes, so the configured value is not
-relevant.
+The output is a uint32_t integer that contains the number of bytes the library
+was instructed to use for internal linkage in compiled regular expressions.
+When PCRE2 is configured, the value can be set to 2, 3, or 4, with the default
+being 2 for most libraries.
+</p>
+<p>
+The actual number of bytes used depends on the size of the code units that the
+library supports and can be higher. See PCRE2_CONFIG_EFFECTIVE_LINKSIZE above
+for details.
 </p>
 <p>
 The default value of 2 for the 8-bit and 16-bit libraries is sufficient for all

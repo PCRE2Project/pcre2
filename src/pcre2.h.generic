@@ -487,6 +487,7 @@ released, the numbers must not be changed. */
 #define PCRE2_CONFIG_NEVER_BACKSLASH_C      13
 #define PCRE2_CONFIG_COMPILED_WIDTHS        14
 #define PCRE2_CONFIG_TABLES_LENGTH          15
+#define PCRE2_CONFIG_EFFECTIVE_LINKSIZE     16
 
 /* Optimization directives for pcre2_set_optimize().
 For binary compatibility, only add to this list; do not renumber. */
