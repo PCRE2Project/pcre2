@@ -129,7 +129,7 @@ in the library.
     <td>Free a compile context</td></tr>
 
 <tr><td><a href="pcre2_config.html">pcre2_config</a></td>
-    <td>Show build-time configuration options</td></tr>
+    <td>Show build-time related configuration options</td></tr>
 
 <tr><td><a href="pcre2_convert_context_copy.html">pcre2_convert_context_copy</a></td>
     <td>Copy a convert context</td></tr>

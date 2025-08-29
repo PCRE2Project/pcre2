@@ -337,19 +337,6 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-# Find which optional facilities are available.
-
-$sim $pcre2test -C linksize >/dev/null
-link_size=$?
-if [ $link_size -lt 2 ] ; then
-  echo "RunTest: Failed to find internal link size"
-  exit 1
-fi
-if [ $link_size -gt 4 ] ; then
-  echo "RunTest: Failed to find internal link size"
-  exit 1
-fi
-
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.
 
@@ -725,12 +712,8 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do8 = yes ] ; then
     echo $title8
-    bits_link_size=$link_size
-    if [ $bits = "16" -a $link_size = "3" ] ; then
-      bits_link_size=4
-    elif [ $bits = "32" ] ; then
-      bits_link_size=4
-    fi
+    $sim $pcre2test -$bits -C linksize >/dev/null
+    bits_link_size=$?
     if [ $utf -eq 0 ] ; then
       echo "  Skipped because UTF-$bits support is not available"
     else

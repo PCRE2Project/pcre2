@@ -413,7 +413,6 @@ modes, so use the form of the first that is available. */
 #if defined SUPPORT_PCRE2_8
 #define DEFAULT_TEST_MODE PCRE8_MODE
 #define VERSION_TYPE PCRE2_UCHAR8
-#define PCRE2_CONFIG pcre2_config_8
 #define PCRE2_JIT_STACK pcre2_jit_stack_8
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_8
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_8
@@ -423,7 +422,6 @@ modes, so use the form of the first that is available. */
 #elif defined SUPPORT_PCRE2_16
 #define DEFAULT_TEST_MODE PCRE16_MODE
 #define VERSION_TYPE PCRE2_UCHAR16
-#define PCRE2_CONFIG pcre2_config_16
 #define PCRE2_JIT_STACK pcre2_jit_stack_16
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_16
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_16
@@ -433,7 +431,6 @@ modes, so use the form of the first that is available. */
 #elif defined SUPPORT_PCRE2_32
 #define DEFAULT_TEST_MODE PCRE32_MODE
 #define VERSION_TYPE PCRE2_UCHAR32
-#define PCRE2_CONFIG pcre2_config_32
 #define PCRE2_JIT_STACK pcre2_jit_stack_32
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_32
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_32
@@ -996,7 +993,7 @@ static coptstruct coptlist[] = {
   { "ebcdic-nl25", CONF_FIX, SUPPORT_EBCDIC_NL25 },
   { "jit",         CONF_INT, PCRE2_CONFIG_JIT },
   { "jitusable",   CONF_JU,  0 },
-  { "linksize",    CONF_INT, PCRE2_CONFIG_LINKSIZE },
+  { "linksize",    CONF_INT, PCRE2_CONFIG_EFFECTIVE_LINKSIZE },
   { "newline",     CONF_NL,  PCRE2_CONFIG_NEWLINE },
   { "pcre2-16",    CONF_FIX, SUPPORT_16 },
   { "pcre2-32",    CONF_FIX, SUPPORT_32 },
@@ -1269,6 +1266,22 @@ are supported. */
     G(a,16) = pcre2_compile_16(b,c,d,e,f,g); \
   else \
     G(a,32) = pcre2_compile_32(b,c,d,e,f,g)
+
+#define PCRE2_CONFIG(lv,a,b) \
+  if (test_mode == PCRE8_MODE) \
+    lv = pcre2_config_8(a,b); \
+  else if (test_mode == PCRE16_MODE) \
+    lv = pcre2_config_16(a,b); \
+  else \
+    lv = pcre2_config_32(a,b)
+
+#define PCRE2_CONFIGV(a,b) \
+  if (test_mode == PCRE8_MODE) \
+    (void)pcre2_config_8(a,b); \
+  else if (test_mode == PCRE16_MODE) \
+    (void)pcre2_config_16(a,b); \
+  else \
+    (void)pcre2_config_32(a,b)
 
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   if (test_mode == PCRE8_MODE) pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a); \
@@ -1852,6 +1865,18 @@ the three different cases. */
   else \
     G(a,BITTWO) = G(pcre2_compile_,BITTWO)(b,c,d,e,f,g)
 
+#define PCRE2_CONFIG(lv,a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    lv = G(pcre2_config_,BITONE)(a,b); \
+  else \
+    lv = G(pcre2_config_,BITTWO)(a,b)
+
+#define PCRE2_CONFIGV(a,b) \
+  if (test_mode == G(G(PCRE,BITONE),_MODE)) \
+    (void)G(pcre2_config_,BITONE)(a,b); \
+  else \
+    (void)G(pcre2_config_,BITTWO)(a,b)
+
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     G(pcre2_converted_pattern_free_,BITONE)((G(PCRE2_UCHAR,BITONE) *)a); \
@@ -2267,6 +2292,8 @@ the three different cases. */
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_8(G(b,8))
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_8(G(b,8))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) G(a,8) = pcre2_compile_8(b,c,d,e,f,g)
+#define PCRE2_CONFIG(lv,a,b) lv = pcre2_config_8(a,b)
+#define PCRE2_CONFIGV(a,b) (void)pcre2_config_8(a,b)
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   pcre2_converted_pattern_free_8((PCRE2_UCHAR8 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -2384,6 +2411,8 @@ the three different cases. */
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_16(G(b,16))
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_16(G(b,16))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) G(a,16) = pcre2_compile_16(b,c,d,e,f,g)
+#define PCRE2_CONFIG(lv,a,b) lv = pcre2_config_16(a,b)
+#define PCRE2_CONFIGV(a,b) (void)pcre2_config_16(a,b)
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   pcre2_converted_pattern_free_16((PCRE2_UCHAR16 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -2499,6 +2528,8 @@ the three different cases. */
 #define PCRE2_CODE_COPY_TO_VOID(a,b) a = (void *)pcre2_code_copy_32(G(b,32))
 #define PCRE2_CODE_COPY_WITH_TABLES_TO_VOID(a,b) a = (void *)pcre2_code_copy_with_tables_32(G(b,32))
 #define PCRE2_COMPILE(a,b,c,d,e,f,g) G(a,32) = pcre2_compile_32(b,c,d,e,f,g)
+#define PCRE2_CONFIG(lv,a,b) lv = pcre2_config_32(a,b)
+#define PCRE2_CONFIGV(a,b) (void)pcre2_config_32(a,b)
 #define PCRE2_CONVERTED_PATTERN_FREE(a) \
   pcre2_converted_pattern_free_32((PCRE2_UCHAR32 *)a)
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
@@ -5881,13 +5912,14 @@ switch(cmd)
 
   if (tables3 == NULL)
     {
-    (void)PCRE2_CONFIG(PCRE2_CONFIG_TABLES_LENGTH, &loadtables_length);
-    tables3 = malloc(loadtables_length);
+    int r;
+    PCRE2_CONFIG(r, PCRE2_CONFIG_TABLES_LENGTH, &loadtables_length);
+    if (r >= 0) tables3 = malloc(loadtables_length);
     }
 
   if (tables3 == NULL)
     {
-    fprintf(outfile, "** Failed: malloc failed for #loadtables\n");
+    fprintf(outfile, "** Failed: malloc/config for #loadtables\n");
     yield = PR_ABEND;
     }
   else if (fread(tables3, 1, loadtables_length, f) != loadtables_length)
@@ -9796,7 +9828,7 @@ if (arg != NULL && arg[0] != '-')
   switch (coptlist[i].type)
     {
     case CONF_BSR:
-    (void)PCRE2_CONFIG(coptlist[i].value, &optval);
+    PCRE2_CONFIGV(coptlist[i].value, &optval);
     printf("%s\n", (optval == PCRE2_BSR_ANYCRLF)? "ANYCRLF" : "ANY");
     break;
 
@@ -9806,12 +9838,12 @@ if (arg != NULL && arg[0] != '-')
     break;
 
     case CONF_INT:
-    (void)PCRE2_CONFIG(coptlist[i].value, &yield);
+    PCRE2_CONFIGV(coptlist[i].value, &yield);
     printf("%d\n", yield);
     break;
 
     case CONF_NL:
-    (void)PCRE2_CONFIG(coptlist[i].value, &optval);
+    PCRE2_CONFIGV(coptlist[i].value, &optval);
     print_newline_config(optval, TRUE);
     break;
 
@@ -9881,7 +9913,7 @@ printf("  Input/output for pcre2test is ASCII, not EBCDIC\n");
 #endif
 #endif
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_COMPILED_WIDTHS, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_COMPILED_WIDTHS, &optval);
 if (optval & 1) printf("  8-bit support\n");
 if (optval & 2) printf("  16-bit support\n");
 if (optval & 4) printf("  32-bit support\n");
@@ -9890,7 +9922,7 @@ if (optval & 4) printf("  32-bit support\n");
 printf("  Valgrind support\n");
 #endif
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_UNICODE, &optval);
 if (optval != 0)
   {
   printf("  UTF and UCP support (");
@@ -9899,7 +9931,7 @@ if (optval != 0)
   }
 else printf("  No Unicode support\n");
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_JIT, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_JIT, &optval);
 if (optval != 0)
   {
   printf("  Just-in-time compiler support\n");
@@ -9932,23 +9964,26 @@ else
   printf("  No just-in-time compiler support\n");
   }
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_NEWLINE, &optval);
 print_newline_config(optval, FALSE);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_BSR, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_BSR, &optval);
 printf("  \\R matches %s\n",
   (optval == PCRE2_BSR_ANYCRLF)? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
-(void)PCRE2_CONFIG(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);
 printf("  \\C is %ssupported\n", optval? "not ":"");
-(void)PCRE2_CONFIG(PCRE2_CONFIG_LINKSIZE, &optval);
-printf("  Internal link size = %d\n", optval);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_PARENSLIMIT, &optval);
+printf("  Internal link size\n");
+PCRE2_CONFIGV(PCRE2_CONFIG_LINKSIZE, &optval);
+printf("    Requested = %d\n", optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_EFFECTIVE_LINKSIZE, &optval);
+printf("    Effective = %d\n", optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_PARENSLIMIT, &optval);
 printf("  Parentheses nest limit = %d\n", optval);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_HEAPLIMIT, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_HEAPLIMIT, &optval);
 printf("  Default heap limit = %d kibibytes\n", optval);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_MATCHLIMIT, &optval);
 printf("  Default match limit = %d\n", optval);
-(void)PCRE2_CONFIG(PCRE2_CONFIG_DEPTHLIMIT, &optval);
+PCRE2_CONFIGV(PCRE2_CONFIG_DEPTHLIMIT, &optval);
 printf("  Default depth limit = %d\n", optval);
 
 #if defined SUPPORT_LIBREADLINE
@@ -10247,6 +10282,7 @@ display_selected_modifiers(FALSE, "SUBJECT");
 int
 main(int argc, char **argv)
 {
+int r1, r2;
 uint32_t temp;
 uint32_t yield = 0;
 uint32_t op = 1;
@@ -10277,17 +10313,33 @@ if (PO(options) != DO(options) || PO(control) != DO(control) ||
 same time checking that a request for the length gives the same answer. Also
 check lengths for non-string items. */
 
-if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) !=
-    PCRE2_CONFIG(PCRE2_CONFIG_VERSION, version) ||
+PCRE2_CONFIG(r1, PCRE2_CONFIG_VERSION, NULL);
+PCRE2_CONFIG(r2, PCRE2_CONFIG_VERSION, version);
+if (r1 != r2)
+  {
+  fprintf(stderr, "** Error in pcre2_config(PCRE2_CONFIG_VERSION): bad length\n");
+  return 1;
+  }
 
-    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, NULL) !=
-    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE_VERSION, uversion) ||
+PCRE2_CONFIG(r1, PCRE2_CONFIG_UNICODE_VERSION, NULL);
+PCRE2_CONFIG(r2, PCRE2_CONFIG_UNICODE_VERSION, uversion);
+if (r1 != r2)
+  {
+  fprintf(stderr, "** Error in pcre2_config(PCRE2_CONFIG_UNICODE_VERSION): bad length\n");
+  return 1;
+  }
 
-    PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, NULL) !=
-    PCRE2_CONFIG(PCRE2_CONFIG_JITTARGET, jittarget) ||
+PCRE2_CONFIG(r1, PCRE2_CONFIG_JITTARGET, NULL);
+PCRE2_CONFIG(r2, PCRE2_CONFIG_JITTARGET, jittarget);
+if (r1 != r2)
+  {
+  fprintf(stderr, "** Error in pcre2_config(PCRE2_CONFIG_JITTARGET): bad length\n");
+  return 1;
+  }
 
-    PCRE2_CONFIG(PCRE2_CONFIG_UNICODE, NULL) != sizeof(uint32_t) ||
-    PCRE2_CONFIG(PCRE2_CONFIG_MATCHLIMIT, NULL) != sizeof(uint32_t))
+PCRE2_CONFIG(r1, PCRE2_CONFIG_UNICODE, NULL);
+PCRE2_CONFIG(r2, PCRE2_CONFIG_MATCHLIMIT, NULL);
+if (r1 != r2 || r1 != sizeof(uint32_t))
   {
   fprintf(stderr, "** Error in pcre2_config(): bad length\n");
   return 1;
@@ -10295,8 +10347,10 @@ if (PCRE2_CONFIG(PCRE2_CONFIG_VERSION, NULL) !=
 
 /* Check that bad options are diagnosed. */
 
-if (PCRE2_CONFIG(999, NULL) != PCRE2_ERROR_BADOPTION ||
-    PCRE2_CONFIG(999, &temp) != PCRE2_ERROR_BADOPTION)
+PCRE2_CONFIG(r1, 999, NULL);
+PCRE2_CONFIG(r2, 999, &temp);
+
+if (r1 != r2 || r2 != PCRE2_ERROR_BADOPTION)
   {
   fprintf(stderr, "** Error in pcre2_config(): bad option not diagnosed\n");
   return 1;
@@ -10305,7 +10359,8 @@ if (PCRE2_CONFIG(999, NULL) != PCRE2_ERROR_BADOPTION ||
 /* This configuration option is now obsolete, but running a quick check ensures
 that its code is covered. */
 
-(void)PCRE2_CONFIG(PCRE2_CONFIG_STACKRECURSE, &temp);
+PCRE2_CONFIGV(PCRE2_CONFIG_STACKRECURSE, &temp);
+PCRE2_CONFIGV(PCRE2_CONFIG_LINKSIZE, &temp);
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-

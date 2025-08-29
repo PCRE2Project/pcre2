@@ -1,4 +1,4 @@
-T pcre2_regcomp@@PCRE2_10.46
-T pcre2_regerror@@PCRE2_10.46
-T pcre2_regexec@@PCRE2_10.46
-T pcre2_regfree@@PCRE2_10.46
+T pcre2_regcomp@@PCRE2_10.47
+T pcre2_regerror@@PCRE2_10.47
+T pcre2_regexec@@PCRE2_10.47
+T pcre2_regfree@@PCRE2_10.47
