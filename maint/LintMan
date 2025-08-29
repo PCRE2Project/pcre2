@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use Getopt::Long;
+use vars qw /$opt_verbose/;
+
+# A script to scan PCRE2's man pages to check for values that might need to
+# be updated to match the code.
+#
+# It updates numerical values after \" DEFINE <name> or errors if name is
+# not found.
+
+my $file;
+my %defs;
+
+foreach $file ("../src/config.h.generic")
+  {
+  open (INCLUDE, $file) or die "Failed to open include $file\n";
+
+  while (<INCLUDE>)
+    {
+    next unless /^#define ([[:upper:]_\d]+)\s+(\d+)/a;
+    $defs{$1} = $2;
+    }
+
+  close(INCLUDE);
+  }
+
+GetOptions("verbose");
+while (scalar(@ARGV) > 0)
+  {
+  $file = shift @ARGV;
+
+  open my $fh, "+<", $file or die "Failed to open $file\n";
+
+  my @lines = <$fh>;
+  my $updated = 0;
+
+  foreach my $index (0 .. $#lines)
+    {
+    if ($lines[$index] =~ /^\.\\"\sDEFINE\s([[:upper:]_\d]+)$/a)
+      {
+      my $l = $index + 1;
+      die "Invalid DEFINE line $l of $file\n" unless defined $lines[$l];
+
+      my $key = $1;
+      die "Bad DEFINE key $key line $l of $file\n" unless exists $defs{$key};
+
+      my $value = $defs{$key};
+      if ($lines[$index + 1] !~ /^$value\b/)
+        {
+        $updated += $lines[$index + 1] =~ s/^\d+/$value/a;
+        print "Updated $key in $file to $value\n" if $opt_verbose;
+        }
+      }
+    }
+
+  if ($updated > 0)
+    {
+    seek($fh, 0, 0);
+    print $fh @lines;
+    truncate($fh, tell($fh));
+    }
+  close($fh);
+  }

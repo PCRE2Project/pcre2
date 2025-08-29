@@ -2015,8 +2015,9 @@ the naming of capture groups. This feature was not added to Perl until release
 using the Python syntax. PCRE2 supports both the Perl and the Python syntax.
 .P
 In PCRE2, a capture group can be named in one of three ways: (?<name>...) or
-(?'name'...) as in Perl, or (?P<name>...) as in Python. Names may be up to 128
-code units long. When PCRE2_UTF is not set, they may contain only ASCII
+(?'name'...) as in Perl, or (?P<name>...) as in Python. Names may be up to
+.\" DEFINE MAX_NAME_SIZE
+128 code units long. When PCRE2_UTF is not set, they may contain only ASCII
 alphanumeric characters and underscores, but must start with a non-digit. When
 PCRE2_UTF is set, the syntax of group names is extended to allow any Unicode
 letter or Unicode decimal digit. In other words, group names must match one of
@@ -4229,6 +4230,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 28 March 2025
+Last updated: 17 August 2025
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
