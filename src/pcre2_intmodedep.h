@@ -754,6 +754,9 @@ typedef struct class_ranges {
   compile_data header;             /* Common header */
   size_t char_lists_size;          /* Total size of encoded char lists */
   size_t char_lists_start;         /* Start offset of encoded char lists */
+#ifdef SUPPORT_UNICODE
+  uint32_t category_list;          /* Bitset of matching unicode categories. */
+#endif
   uint16_t range_list_size;        /* Size of ranges array */
   uint16_t char_lists_types;       /* The XCL_LIST header of char lists */
   /* Followed by the list of ranges (start/end pairs) */
