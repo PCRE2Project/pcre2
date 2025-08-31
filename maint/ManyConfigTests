@@ -40,7 +40,7 @@ usemainvalgrind=1
 usetmp=1
 usetmpjit=1
 useebcdic=1
-usebcdicjit=1
+useebcdicjit=1
 usevalgrind=1
 
 dummy=0

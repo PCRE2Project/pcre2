@@ -3264,7 +3264,7 @@ for (j = 0; j < i; j++)
 
 /* Check that encoding was the correct unique one */
 
-for (j = 0; j < utf8_table1_size; j++)
+for (j = 0; j < (int)utf8_table1_size; j++)
   if (d <= (uint32_t)utf8_table1[j]) break;
 if (j != i) return -(i+1);
 
@@ -3340,7 +3340,7 @@ ord_to_utf8(uint32_t cvalue, uint8_t *utf8bytes)
 int i, j;
 if (cvalue > 0x7fffffffu)
   return -1;
-for (i = 0; i < utf8_table1_size; i++)
+for (i = 0; i < (int)utf8_table1_size; i++)
   if (cvalue <= (uint32_t)utf8_table1[i]) break;
 utf8bytes += i;
 for (j = i; j > 0; j--)
@@ -4026,11 +4026,13 @@ Returns:    < 0, = 0, or > 0, according to the comparison
 static int
 strncmpic(const uint8_t *s, const uint8_t *t, size_t n)
 {
-while (n--)
+if (n > 0) do
   {
   int c = tolower(*s++) - tolower(*t++);
   if (c != 0) return c;
   }
+while (--n > 0);
+
 return 0;
 }
 
