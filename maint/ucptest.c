@@ -82,16 +82,16 @@ characters, the list ends with ...
 The command "list" must be followed by one of property names script, bool,
 type, gbreak or bidi. The defined values for that property are listed. */
 
-#ifndef SUPPORT_UNICODE
-#error "Unicode support not enabled"
-#endif
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../src/pcre2_internal.h"
 #include "../src/pcre2_ucp.h"
+
+#ifndef SUPPORT_UNICODE
+#error "Unicode support not enabled"
+#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
