@@ -7990,12 +7990,12 @@ Returns:    PR_OK     continue processing next line
 static int
 process_data(void)
 {
-PCRE2_SIZE len, ulen, arg_ulen;
+PCRE2_SIZE ulen, arg_ulen;
 uint32_t gmatched;
 uint32_t c, k;
 uint32_t g_notempty = 0;
 uint8_t *p, *pp, *start_rep;
-size_t needlen;
+size_t len, needlen;
 void *use_dat_context;
 BOOL utf;
 BOOL subject_literal;
@@ -8512,11 +8512,11 @@ the unused start of the buffer unaddressable. If we are using the POSIX
 interface, or testing zero-termination, we must include the terminating zero in
 the usable data. */
 
-c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
-                       (dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1:0);
-pp = memmove(dbuffer + dbuffer_size - len - c, dbuffer, len + c);
+c = code_unit_size * ((((pat_patctl.control & CTL_POSIX) != 0) +
+                       ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0))? 1 : 0);
+pp = memmove(dbuffer + dbuffer_size - (len + c), dbuffer, len + c);
 #ifdef SUPPORT_VALGRIND
-  VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
+VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
 #endif
 
 #if defined(EBCDIC) && !EBCDIC_IO

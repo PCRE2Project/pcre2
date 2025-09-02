@@ -387,6 +387,7 @@ if (offset >= Foffset_top || Fovector[offset] == PCRE2_UNSET)
 eptr = eptr_start = Feptr;
 p = mb->start_subject + Fovector[offset];
 length = Fovector[offset+1] - Fovector[offset];
+PCRE2_ASSERT(eptr <= mb->end_subject);
 
 if (caseless)
   {
@@ -406,7 +407,7 @@ if (caseless)
     bytes in UTF-8); a sequence of 3 of the former uses 6 bytes, as does a
     sequence of two of the latter. It is important, therefore, to check the
     length along the reference, not along the subject (earlier code did this
-    wrong). UCP without uses Unicode properties but without UTF encoding. */
+    wrong). UCP uses Unicode properties but without UTF encoding. */
 
     while (p < endptr)
       {
@@ -485,8 +486,8 @@ else
 
   else
     {
-    if ((PCRE2_SIZE)(mb->end_subject - eptr) < length) return 1; /* Partial */
-    if (memcmp(p, eptr, CU2BYTES(length)) != 0) return -1;  /* No match */
+    if ((PCRE2_SIZE)(mb->end_subject - eptr) < length ||
+        memcmp(p, eptr, CU2BYTES(length)) != 0) return -1;  /* No match */
     eptr += length;
     }
   }
