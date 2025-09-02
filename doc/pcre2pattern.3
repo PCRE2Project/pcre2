@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 March 2025" "PCRE2 10.47-DEV"
+.TH PCRE2PATTERN 3 "29 August 2025" "PCRE2 10.47-DEV"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -150,10 +150,11 @@ documentation.
 .rs
 .sp
 If a pattern starts with (*NO_DOTSTAR_ANCHOR), it has the same effect as
-setting the PCRE2_NO_DOTSTAR_ANCHOR option, or calling \fBpcre2_set_optimize()\fP
-with a PCRE2_DOTSTAR_ANCHOR_OFF directive. This disables optimizations that
-apply to patterns whose top-level branches all start with .* (match any number
-of arbitrary characters). For more details, see the
+setting the PCRE2_NO_DOTSTAR_ANCHOR option, or
+calling \fBpcre2_set_optimize()\fP with a PCRE2_DOTSTAR_ANCHOR_OFF directive.
+This disables optimizations that apply to patterns whose top-level branches
+all start with .* (match any number of arbitrary characters). For more details,
+see the
 .\" HREF
 \fBpcre2api\fP
 .\"
@@ -4230,6 +4231,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 August 2025
+Last updated: 29 August 2025
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
