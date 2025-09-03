@@ -60,9 +60,6 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the <assert.h> header file. */
 /* #undef HAVE_ASSERT_H */
 
-/* Define this if your compiler supports __attribute__((fallthrough)) */
-/* #undef HAVE_ATTRIBUTE_FALLTHROUGH */
-
 /* Define this if your compiler supports __attribute__((uninitialized)) */
 /* #undef HAVE_ATTRIBUTE_UNINITIALIZED */
 

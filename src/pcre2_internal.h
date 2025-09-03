@@ -109,14 +109,6 @@ functions, or at the top-level of a file. */
 #include <valgrind/memcheck.h>
 #endif
 
-/* Used to annotate allowed intentional fallthrough between switch labels */
-
-#ifdef HAVE_ATTRIBUTE_FALLTHROUGH
-#define PCRE2_FALLTHROUGH __attribute__((fallthrough))
-#else
-#define PCRE2_FALLTHROUGH
-#endif
-
 /* -ftrivial-auto-var-init support supports initializing all local variables
 to avoid some classes of bug, but this can cause an unacceptable slowdown
 for large on-stack arrays in hot functions. This macro lets us annotate

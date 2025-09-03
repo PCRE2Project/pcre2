@@ -493,9 +493,6 @@ sure both macros are undefined; an emulation function will then be used. */
    LF does in an ASCII/Unicode environment. */
 #undef EBCDIC_NL25
 
-/* Define this if your compiler supports __attribute__((fallthrough)) */
-#undef HAVE_ATTRIBUTE_FALLTHROUGH
-
 /* Define this if your compiler supports __attribute__((uninitialized)) */
 #undef HAVE_ATTRIBUTE_UNINITIALIZED
 
