@@ -4330,7 +4330,7 @@ Subject length lower bound = 4
         Any
         Any
         Any
-        \1
+        \g{1}
         bbb
         Recurse
         d
@@ -10082,7 +10082,7 @@ No match
         Ket
         c
         Cond
-        Capture ref <digit>2
+        Capture dnref<digit>2
         d
         Alt
         e
@@ -10126,7 +10126,7 @@ No match
         Ket
         Ket
         Cond
-        Capture ref <D>2
+        Capture dnref<D>2
         X
         Alt
         Y
@@ -10173,7 +10173,7 @@ No match
         CBra 4
         d
         Cond
-        Cond recurse <A>2
+        Cond dnrec<A>2
         $
         Alt
         Recurse
@@ -10331,7 +10331,7 @@ No match
         ab
         CBra 2
         c
-        \1
+        \g{1}
         Ket
         d
         Alt
@@ -10341,7 +10341,7 @@ No match
         ab
         CBra 2
         c
-        \1
+        \g{1}
         Ket
         d
         Alt
@@ -10754,7 +10754,7 @@ Failed: error 102 at offset 3: \c at end of pattern
 ------------------------------------------------------------------
         Bra
         CBra 1
-        \1
+        \g{1}
         xxx
         Ket
         Ket
@@ -10766,7 +10766,7 @@ Failed: error 102 at offset 3: \c at end of pattern
         Bra
         CBra 1
         a
-        \1
+        \g{1}
         z
         Ket
         Ket
@@ -10785,7 +10785,7 @@ Failed: error 115 at offset 12: reference to non-existent subpattern
 ------------------------------------------------------------------
         Bra
         CBra 1
-        \2
+        \g{2}
         xxx
         Ket
         CBra 2
@@ -11408,7 +11408,7 @@ Matched, but too many substrings
         Bra
         Brazero
         Assert back
-        Reverse
+      3 Reverse
         CBra 1
         abc
         Ket
@@ -11588,7 +11588,7 @@ No match
 ------------------------------------------------------------------
         Bra
         CBra 1
-        \1
+        \g{1}
         xxx
         Ket
         Ket
@@ -11600,7 +11600,7 @@ No match
         Bra
         CBra 1
         a
-        \1
+        \g{1}
         z
         Ket
         Ket
@@ -13662,7 +13662,7 @@ Failed: error 144 at offset 6: subpattern name must start with a non-digit
         CBra 2
         CBra 3
         a
-        \2
+        \g{2}
         Ket
         Alt
         CBra 4
@@ -13688,7 +13688,7 @@ Failed: error 144 at offset 6: subpattern name must start with a non-digit
         red
         \b
         Assert back
-        Reverse
+      1 Reverse
         \w
         Ket
         Ket
@@ -13769,7 +13769,7 @@ Failed: error 133 at offset 0: parentheses are too deeply nested (stack check)
         \s*+
         Ket
         Assert back
-        Reverse
+      1 Reverse
         \w
         Ket
         Ket
@@ -14724,7 +14724,7 @@ Matched, but too many substrings
         CBra 1
         Recurse
         CBra 2
-        \1
+        \g{1}
         Ket
         Ket
         Ket
@@ -15271,7 +15271,7 @@ Subject length lower bound = 1
         Recurse
         Recurse
         Alt
-        \1
+        \g{1}
         Alt
         $
         Ket
@@ -15292,7 +15292,7 @@ Subject length lower bound = 1
         Ket
         Recurse
         Alt
-        \1
+        \g{1}
         Alt
         $
         Ket
@@ -15372,7 +15372,7 @@ Failed: error 162 at offset 10: subpattern name expected
         Braposzero
         SBraPos
         SCond
-        Cond recurse any
+        Cond rec any
         Ket
         KetRpos
         Ket
@@ -15415,7 +15415,7 @@ Failed: error 106 at offset 353: missing terminating ] for character class
         Braposzero
         SBraPos
         SCond
-        Cond recurse any
+        Cond rec any
         0
         Ket
         KetRpos
@@ -16478,7 +16478,7 @@ Failed: error 150 at offset 5: invalid range in character class
         abc
         Ket
         Cond
-        Cond recurse any
+        Cond rec any
         xyz
         Ket
         Ket
@@ -17694,7 +17694,7 @@ No match
 ------------------------------------------------------------------
         Bra
         Assert back
-        Reverse
+      1 Reverse
         Assert
         Any
         Ket
@@ -18362,7 +18362,7 @@ No match
 ------------------------------------------------------------------
         Bra
         Non-atomic assert back
-        Reverse
+      2 Reverse
         ab
         Ket
         Ket
@@ -18537,7 +18537,7 @@ Subject length lower bound = 1
         Ket
         CBra 2
         Assert back
-        Reverse
+      1 Reverse
         b
         Ket
         Any*+
@@ -18555,7 +18555,7 @@ Subject length lower bound = 1
         Ket
         CBra 1
         Assert back
-        Reverse
+      1 Reverse
         b
         Ket
         Any*+
@@ -18568,12 +18568,12 @@ Subject length lower bound = 1
 ------------------------------------------------------------------
         Bra
         Cond
-        Cond recurse 1
+        Cond rec 1
         b
         Ket
         CBra 1
         Assert back
-        Reverse
+      1 Reverse
         b
         Ket
         Any*+
@@ -18591,7 +18591,7 @@ Subject length lower bound = 1
         Ket
         CBra 1
         Assert back
-        Reverse
+      1 Reverse
         b
         Ket
         Any*+
@@ -18609,7 +18609,25 @@ Subject length lower bound = 1
         Ket
         CBra 1
         Assert back
-        Reverse
+      1 Reverse
+        b
+        Ket
+        Any*+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?(VERSION>=10.3)b)((?<=b).*)/B
+------------------------------------------------------------------
+        Bra
+        Cond
+        Cond true
+        b
+        Ket
+        CBra 1
+        Assert back
+      1 Reverse
         b
         Ket
         Any*+
@@ -19303,7 +19321,7 @@ No match
         Bra
         Assert back
         Alt
-        VReverse
+      0 VReverse 1
         b?
         Ket
         Any
@@ -19339,15 +19357,15 @@ No match
 ------------------------------------------------------------------
         Bra
         Assert back
-        Reverse
+      2 Reverse
         xy
         Alt
-        VReverse
+      2 VReverse 3
         a
         Any
         b?
         Alt
-        Reverse
+      2 Reverse
         cd
         Ket
         Ket
@@ -19713,7 +19731,7 @@ No match
         Ket
         $
         Ket
-        \2
+        \g{2}
         Ket
         End
 ------------------------------------------------------------------
@@ -20167,7 +20185,7 @@ No match
         mno
         Ket
         Scan substring
-        Capture ref <MM>2
+        Capture dnref<MM>2
       3 Capture ref
       4 Capture ref
         Any
@@ -20341,7 +20359,7 @@ No match
         Scan substring
       2 Capture ref
       1 Capture ref
-        Capture ref <n>3
+        Capture dnref<n>3
         abc
         Ket
         Ket
@@ -20370,10 +20388,10 @@ No match
         f
         Ket
         Scan substring
-        Capture ref <n>3
+        Capture dnref<n>3
       5 Capture ref
       4 Capture ref
-        Capture ref <m>2
+        Capture dnref<m>2
         abc
         Ket
         Ket
@@ -21166,7 +21184,7 @@ No match
         CBra 1
         [a-mo-z]
         Ket
-        \1
+        \g{1}
         Ket
         End
 ------------------------------------------------------------------
@@ -21190,7 +21208,7 @@ No match
         [a-mo-z]
         y
         Ket
-        \1
+        \g{1}
         Ket
         End
 ------------------------------------------------------------------
@@ -21209,7 +21227,7 @@ No match
         Bra
         Bra
         _
-        \1
+        \g{1}
         Alt
         CBra 1
         [a-mo-z]
@@ -21217,7 +21235,7 @@ No match
         Ket
         Bra
         _
-        \1
+        \g{1}
         Alt
         CBra 1
         [a-mo-z]
@@ -21243,7 +21261,7 @@ No match
         Bra
         Bra
         _
-        \1
+        \g{1}
         Alt
         CBra 1
         [a-mo-z]
@@ -22717,7 +22735,7 @@ Failed: error 115 at offset 3: reference to non-existent subpattern
         ^
         Recurse
       2 Capture ref
-        \2
+        \g{2}
         Cond
         Cond false
         CBra 1

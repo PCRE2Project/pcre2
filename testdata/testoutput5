@@ -1395,7 +1395,7 @@ Partial match: X
 /\g{A}xxx#bXX(?'A'123)(?'A'456)/Bx,newline=any,utf
 ------------------------------------------------------------------
         Bra
-        \1
+        \g{1}
         xxx
         CBra 1
         456
@@ -1407,7 +1407,7 @@ Partial match: X
 /\g{A}xxx#bх(?'A'123)(?'A'456)/Bx,newline=any,utf
 ------------------------------------------------------------------
         Bra
-        \1
+        \g{1}
         xxx
         CBra 1
         456
@@ -4089,7 +4089,7 @@ MK: a\x{12345}b\x{09}(d)c
         Bra
         \b (ucp)
         Assert back
-        Reverse
+      1 Reverse
         prop Xwd
         Ket
         X
@@ -4892,7 +4892,7 @@ MK: ABC
 ------------------------------------------------------------------
         Bra
         Assert back
-        Reverse
+     10 Reverse
         abc
         Assert
         X
@@ -5323,7 +5323,7 @@ No match
         Any
         Ket
      /i  
-     /i \1 0x01
+     /i \g{1} 0x01
      /i  z
         Ket
         End
@@ -7209,7 +7209,7 @@ No match
         CBra 1
         [a-mo-z]
         Ket
-        \1
+        \g{1}
         Ket
         End
 ------------------------------------------------------------------
@@ -7233,7 +7233,7 @@ No match
         [a-mo-z]
         y
         Ket
-        \1
+        \g{1}
         Ket
         End
 ------------------------------------------------------------------
@@ -7252,7 +7252,7 @@ No match
         Bra
         Bra
         _
-        \1
+        \g{1}
         Alt
         CBra 1
         [a-mo-z]
@@ -7260,7 +7260,7 @@ No match
         Ket
         Bra
         _
-        \1
+        \g{1}
         Alt
         CBra 1
         [a-mo-z]
@@ -7286,7 +7286,7 @@ No match
         Bra
         Bra
         _
-        \1
+        \g{1}
         Alt
         CBra 1
         [a-mo-z]
