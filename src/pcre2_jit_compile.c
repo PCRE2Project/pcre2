@@ -1284,7 +1284,7 @@ while (cc < ccend)
     case OP_THEN_ARG:
     common->has_then = TRUE;
     common->control_head_ptr = 1;
-    /* Fall through. */
+    PCRE2_FALLTHROUGH; /* Fall through */
 
     case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
@@ -2268,7 +2268,7 @@ while (cc < ccend)
 
     default:
     stack_restore = TRUE;
-    /* Fall through. */
+    PCRE2_FALLTHROUGH; /* Fall through */
 
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
@@ -6136,7 +6136,7 @@ while (TRUE)
     case OP_NOT:
     case OP_NOTI:
     cc++;
-    /* Fall through. */
+    PCRE2_FALLTHROUGH; /* Fall through */
     case OP_NOT_DIGIT:
     case OP_NOT_WHITESPACE:
     case OP_NOT_WORDCHAR:
