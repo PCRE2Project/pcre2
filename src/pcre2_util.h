@@ -127,7 +127,7 @@ the reason and the actions that should be taken if it ever triggers. */
 #define PCRE2_ASSERT(x) do {} while(0)
 #endif
 
-/* We define this fallthrough macro for suppressing -Wno-implicit-fallthrough warnings.
+/* We define this fallthrough macro for suppressing -Wimplicit-fallthrough warnings.
 Clang only allows this via an attribute, whereas other compilers (eg. GCC) match attributes
 and also specially-formatted comments.
 
