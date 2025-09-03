@@ -131,9 +131,9 @@ the reason and the actions that should be taken if it ever triggers. */
 Clang only allows this via an attribute, whereas other compilers (eg. GCC) match attributes
 and also specially-formatted comments.
 
-For maximum portability, please use this macro together with a fall through C comment:
+For maximum portability, please use this macro together with a fall through C comment, for example: */
 
-  PCRE2_FALLTHROUGH; // Fall through */
+//  PCRE2_FALLTHROUGH; /* Fall through */
 
 #if defined(__has_attribute)
 #if __has_attribute(fallthrough)
