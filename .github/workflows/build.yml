@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings'
+  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough'
   CFLAGS_MSVC: '/W3'
   CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
   CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
