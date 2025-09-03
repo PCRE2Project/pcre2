@@ -135,9 +135,11 @@ For maximum portability, please use this macro together with a fall through C co
 
 //  PCRE2_FALLTHROUGH; /* Fall through */
 
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
 #if defined(__has_c_attribute)
-#if __has_c_attribute(__fallthrough__) && __STDC_VERSION__ >= 202311L
+#if __has_c_attribute(__fallthrough__)
 #define PCRE2_FALLTHROUGH [[__fallthrough__]]
+#endif
 #endif
 #endif
 #if defined(__has_attribute) && !defined(PCRE2_FALLTHROUGH)
