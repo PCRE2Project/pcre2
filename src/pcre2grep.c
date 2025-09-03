@@ -48,6 +48,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #endif
 
+#include "pcre2_util.h"
+
 #include <ctype.h>
 #include <limits.h>
 #include <locale.h>
@@ -2053,7 +2055,7 @@ switch (*(++string))
     break;
     }
 
-  __attribute__((fallthrough));
+  PCRE2_FALLTHROUGH;
 
   /* The maximum capture number is 65535, so any number greater than that will
   always be an unknown capture number. We just stop incrementing, in order to

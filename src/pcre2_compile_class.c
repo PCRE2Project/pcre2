@@ -65,7 +65,7 @@ b) none of the cases here:
 #define CLASS_END_CASES(meta) \
   default: \
   PCRE2_ASSERT((meta) <= META_END); \
-  __attribute__((fallthrough)); \
+  PCRE2_FALLTHROUGH; \
   case META_CLASS: \
   case META_CLASS_NOT: \
   case META_CLASS_EMPTY: \
@@ -2169,7 +2169,7 @@ switch (meta)
     }
 
   ptr++;
-  __attribute__((fallthrough));
+  PCRE2_FALLTHROUGH;
 
   default:
   /* Scan forward characters, ranges, and properties.
