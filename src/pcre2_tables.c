@@ -51,6 +51,8 @@ defined. */
 #endif
 
 
+/* Utility macros */
+#define ARR_SIZE(x) sizeof(x)/sizeof(x[0])
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
 the definition is next to the definition of the opcodes in pcre2_internal.h.
@@ -100,15 +102,15 @@ handling wide characters. */
 character. */
 
 const int PRIV(utf8_table1)[] =
-  { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
+  { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
 
-const int PRIV(utf8_table1_size) = sizeof(PRIV(utf8_table1)) / sizeof(int);
+const unsigned PRIV(utf8_table1_size) = ARR_SIZE(PRIV(utf8_table1));
 
 /* These are the indicator bits and the mask for the data bits to set in the
 first byte of a character, indexed by the number of additional bytes. */
 
-const int PRIV(utf8_table2)[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
-const int PRIV(utf8_table3)[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+const int PRIV(utf8_table2)[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc };
+const int PRIV(utf8_table3)[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
 
 /* Table of the number of extra bytes, indexed by the first byte masked with
 0x3f. The highest number for a valid UTF-8 first byte is in fact 0x3d. */

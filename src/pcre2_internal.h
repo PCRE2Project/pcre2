@@ -2233,7 +2233,7 @@ tables are needed only when compiling the 8-bit library. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 extern const int              PRIV(utf8_table1)[];
-extern const int              PRIV(utf8_table1_size);
+extern const unsigned         PRIV(utf8_table1_size);
 extern const int              PRIV(utf8_table2)[];
 extern const int              PRIV(utf8_table3)[];
 extern const uint8_t          PRIV(utf8_table4)[];

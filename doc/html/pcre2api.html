@@ -167,7 +167,7 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <br>
 <b>int pcre2_set_max_varlookbehind(pcre2_compile_contest *<i>ccontext</i>,</b>
-<b>"  uint32_t <i>value</i>);</b>
+<b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
 <b>int pcre2_set_newline(pcre2_compile_context *<i>ccontext</i>,</b>
@@ -273,7 +273,7 @@ document for an overview of all the PCRE2 documentation.
 <br>
 <br>
 <b>int pcre2_substring_list_get(pcre2_match_data *<i>match_data</i>,</b>
-<b>"  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
+<b>  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
 </p>
 <h2><a name="SEC7" href="#TOC1">PCRE2 NATIVE API STRING SUBSTITUTION FUNCTION</a></h2>
 <p>
@@ -904,7 +904,7 @@ can hold, which is effectively unlimited.
 <br>
 <br>
 <b>int pcre2_set_max_varlookbehind(pcre2_compile_contest *<i>ccontext</i>,</b>
-<b>"  uint32_t <i>value</i>);</b>
+<b>  uint32_t <i>value</i>);</b>
 <br>
 <br>
 This sets a maximum length for the number of characters matched by a
@@ -1999,8 +1999,9 @@ instead.)
 </pre>
 This is an option whose main effect is at matching time. It does not change
 what <b>pcre2_compile()</b> generates, but it does affect the output of the JIT
-compiler. Setting this option is equivalent to calling <b>pcre2_set_optimize()</b>
-with the <i>directive</i> parameter set to PCRE2_START_OPTIMIZE_OFF.
+compiler. Setting this option is equivalent to calling
+<b>pcre2_set_optimize()</b> with the <i>directive</i> parameter set to
+PCRE2_START_OPTIMIZE_OFF.
 </p>
 <p>
 There are a number of optimizations that may occur at the start of a match, in
@@ -2073,9 +2074,9 @@ only if PCRE2 has been compiled with Unicode support (which is the default).
 <p>
 The PCRE2_EXTRA_CASELESS_RESTRICT option (see above) restricts caseless
 matching such that ASCII characters match only ASCII characters and non-ASCII
-characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING option
-(see above) alters the matching of the 'i' characters to follow their behaviour
-in Turkish and Azeri languages. For further details on
+characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING
+option (see above) alters the matching of the 'i' characters to follow their
+behaviour in Turkish and Azeri languages. For further details on
 PCRE2_EXTRA_CASELESS_RESTRICT and PCRE2_EXTRA_TURKISH_CASING, see the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page.
@@ -3708,7 +3709,7 @@ capturing slots, substring number 1 is unset.
 <h2><a name="SEC36" href="#TOC1">EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS</a></h2>
 <p>
 <b>int pcre2_substring_list_get(pcre2_match_data *<i>match_data</i>,</b>
-<b>"  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
+<b>  PCRE2_UCHAR ***<i>listptr</i>, PCRE2_SIZE **<i>lengthsptr</i>);</b>
 <br>
 <br>
 <b>void pcre2_substring_list_free(PCRE2_UCHAR **<i>list</i>);</b>
@@ -3942,8 +3943,8 @@ recognized:
   $_                  insert the entire input string
   $*MARK or ${*MARK}  insert a control verb name
 </pre>
-Either a group number or a group name can be given for <i>n</i>, for example $2 or
-$NAME. Curly brackets are required only if the following character would be
+Either a group number or a group name can be given for <i>n</i>, for example $2
+or $NAME. Curly brackets are required only if the following character would be
 interpreted as part of the number or name. The number may be zero to include
 the entire matched string. For example, if the pattern a(b)c is matched with
 "=abc=" and the replacement string "+$1$0$1+", the result is "=+babcb+=".
@@ -4033,9 +4034,9 @@ in a pattern, which in Perl has some ambiguities. Details are given in the
 page.
 </p>
 <p>
-The Python form \g&#60;n&#62;, where the angle brackets are part of the syntax and <i>n</i>
-is either a group name or number, is recognized as an alternative way of
-inserting the contents of a group, for example \g&#60;3&#62;.
+The Python form \g&#60;n&#62;, where the angle brackets are part of the syntax and
+<i>n</i> is either a group name or number, is recognized as an alternative way
+of inserting the contents of a group, for example \g&#60;3&#62;.
 </p>
 <p>
 There are also four escape sequences for forcing the case of inserted letters.

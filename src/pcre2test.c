@@ -3264,7 +3264,7 @@ for (j = 0; j < i; j++)
 
 /* Check that encoding was the correct unique one */
 
-for (j = 0; j < utf8_table1_size; j++)
+for (j = 0; j < (int)utf8_table1_size; j++)
   if (d <= (uint32_t)utf8_table1[j]) break;
 if (j != i) return -(i+1);
 
@@ -3340,7 +3340,7 @@ ord_to_utf8(uint32_t cvalue, uint8_t *utf8bytes)
 int i, j;
 if (cvalue > 0x7fffffffu)
   return -1;
-for (i = 0; i < utf8_table1_size; i++)
+for (i = 0; i < (int)utf8_table1_size; i++)
   if (cvalue <= (uint32_t)utf8_table1[i]) break;
 utf8bytes += i;
 for (j = i; j > 0; j--)
@@ -4026,11 +4026,13 @@ Returns:    < 0, = 0, or > 0, according to the comparison
 static int
 strncmpic(const uint8_t *s, const uint8_t *t, size_t n)
 {
-while (n--)
+if (n > 0) do
   {
   int c = tolower(*s++) - tolower(*t++);
   if (c != 0) return c;
   }
+while (--n > 0);
+
 return 0;
 }
 
@@ -7988,12 +7990,12 @@ Returns:    PR_OK     continue processing next line
 static int
 process_data(void)
 {
-PCRE2_SIZE len, ulen, arg_ulen;
+PCRE2_SIZE ulen, arg_ulen;
 uint32_t gmatched;
 uint32_t c, k;
 uint32_t g_notempty = 0;
 uint8_t *p, *pp, *start_rep;
-size_t needlen;
+size_t len, needlen;
 void *use_dat_context;
 BOOL utf;
 BOOL subject_literal;
@@ -8510,11 +8512,11 @@ the unused start of the buffer unaddressable. If we are using the POSIX
 interface, or testing zero-termination, we must include the terminating zero in
 the usable data. */
 
-c = code_unit_size * (((pat_patctl.control & CTL_POSIX) +
-                       (dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1:0);
-pp = memmove(dbuffer + dbuffer_size - len - c, dbuffer, len + c);
+c = code_unit_size * ((((pat_patctl.control & CTL_POSIX) != 0) +
+                       ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0))? 1 : 0);
+pp = memmove(dbuffer + dbuffer_size - (len + c), dbuffer, len + c);
 #ifdef SUPPORT_VALGRIND
-  VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
+VALGRIND_MAKE_MEM_NOACCESS(dbuffer, dbuffer_size - (len + c));
 #endif
 
 #if defined(EBCDIC) && !EBCDIC_IO
