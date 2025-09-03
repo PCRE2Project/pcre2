@@ -205,6 +205,12 @@ point. */
 
 #define STDOUT_NL_CODE 0x7fffffffu
 
+/* Used to annotate allowed intentional fallthrough between switch labels */
+#ifdef HAVE_ATTRIBUTE_FALLTHROUGH
+#define PCRE2_FALLTHROUGH __attribute__((fallthrough))
+#else
+#define PCRE2_FALLTHROUGH
+#endif
 
 
 /*************************************************
@@ -2053,7 +2059,7 @@ switch (*(++string))
     break;
     }
 
-  __attribute__((fallthrough));
+  PCRE2_FALLTHROUGH;
 
   /* The maximum capture number is 65535, so any number greater than that will
   always be an unknown capture number. We just stop incrementing, in order to

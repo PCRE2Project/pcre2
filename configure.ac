@@ -89,6 +89,26 @@ PCRE2_VISIBILITY
 
 AX_CHECK_VSCRIPT
 
+# Check for compiler __attribute__((fallthrough)) feature
+
+AC_MSG_CHECKING([for __attribute__((fallthrough))])
+AC_LANG_PUSH([C])
+tmp_CFLAGS=$CFLAGS
+if test $WORKING_WERROR -eq 1; then
+  CFLAGS="$CFLAGS -Werror -Wimplicit-fallthrough"
+fi
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,
+                   [[volatile int x; volatile int y; int main(void) { switch (x) { case 2: if (y > 100) return 1; __attribute__ ((fallthrough)); default: break; } return 0; }]])],
+                   [pcre2_cc_cv_attribute_fallthrough=yes],
+                   [pcre2_cc_cv_attribute_fallthrough=no])
+AC_MSG_RESULT([$pcre2_cc_cv_attribute_fallthrough])
+if test "$pcre2_cc_cv_attribute_fallthrough" = yes; then
+  AC_DEFINE([HAVE_ATTRIBUTE_FALLTHROUGH], 1, [Define this if your compiler
+             supports __attribute__((fallthrough))])
+fi
+CFLAGS=$tmp_CFLAGS
+AC_LANG_POP([C])
+
 # Check for Clang __attribute__((uninitialized)) feature
 
 AC_MSG_CHECKING([for __attribute__((uninitialized))])

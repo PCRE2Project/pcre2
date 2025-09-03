@@ -2328,7 +2328,7 @@ for (;;)
         case 0x2029:
 #endif  /* Not EBCDIC */
         if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
-        __attribute__((fallthrough));
+        PCRE2_FALLTHROUGH;
 
         case CHAR_LF:
         ADD_NEW(state_offset + 1, 0);
@@ -2440,7 +2440,7 @@ for (;;)
       caseless = TRUE;
       codevalue -= OP_STARI - OP_STAR;
 
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
@@ -2484,7 +2484,7 @@ for (;;)
       case OP_NOTPOSQUERYI:
       caseless = TRUE;
       codevalue -= OP_STARI - OP_STAR;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_QUERY:
       case OP_MINQUERY:
       case OP_POSQUERY:
@@ -2525,7 +2525,7 @@ for (;;)
       case OP_NOTPOSSTARI:
       caseless = TRUE;
       codevalue -= OP_STARI - OP_STAR;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_STAR:
       case OP_MINSTAR:
       case OP_POSSTAR:
@@ -2562,7 +2562,7 @@ for (;;)
       case OP_NOTEXACTI:
       caseless = TRUE;
       codevalue -= OP_STARI - OP_STAR;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_EXACT:
       case OP_NOTEXACT:
       count = current_state->count;  /* Number already matched */
@@ -2597,7 +2597,7 @@ for (;;)
       case OP_NOTPOSUPTOI:
       caseless = TRUE;
       codevalue -= OP_STARI - OP_STAR;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_UPTO:
       case OP_MINUPTO:
       case OP_POSUPTO:

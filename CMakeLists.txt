@@ -195,6 +195,26 @@ if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL" AND NOT CMAKE_C_COMPILER_I
 endif()
 
 check_c_source_compiles(
+  [=[
+  volatile int x;
+  volatile int y;
+  int main(void) {
+    switch (x)
+    {
+      case 2:
+      if (y > 100)
+        return 1;
+        __attribute__ ((fallthrough));
+      default:
+        break;
+    }
+    return 0;
+  }
+  ]=]
+  HAVE_ATTRIBUTE_FALLTHROUGH
+)
+
+check_c_source_compiles(
   "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
   HAVE_ATTRIBUTE_UNINITIALIZED
 )

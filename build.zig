@@ -26,6 +26,7 @@ pub fn build(b: *std.Build) !void {
             .HAVE_UNISTD_H = (target.result.os.tag != .windows),
             .HAVE_WINDOWS_H = (target.result.os.tag == .windows),
 
+            .HAVE_ATTRIBUTE_FALLTHROUGH = true,
             .HAVE_ATTRIBUTE_UNINITIALIZED = true,
             .HAVE_BUILTIN_MUL_OVERFLOW = true,
             .HAVE_BUILTIN_UNREACHABLE = true,

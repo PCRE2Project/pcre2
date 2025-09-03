@@ -175,7 +175,7 @@ for (;;)
       cc += 1 + LINK_SIZE;
       break;
       }
-    __attribute__((fallthrough));
+    PCRE2_FALLTHROUGH;
 
     case OP_ONCE:
     case OP_SCRIPT_RUN:
@@ -252,7 +252,7 @@ for (;;)
     case OP_ASSERT_SCS:
     case OP_ASSERTBACK_NA:
     do cc += GET(cc, 1); while (*cc == OP_ALT);
-    __attribute__((fallthrough));
+    PCRE2_FALLTHROUGH;
 
     /* Skip over things that don't match chars */
 
@@ -352,7 +352,7 @@ for (;;)
     case OP_PROP:
     case OP_NOTPROP:
     cc += 2;
-    __attribute__((fallthrough));
+    PCRE2_FALLTHROUGH;
 
     case OP_NOT_DIGIT:
     case OP_DIGIT:
@@ -433,7 +433,7 @@ for (;;)
       case OP_CRMINPLUS:
       case OP_CRPOSPLUS:
       branchlength++;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
 
       case OP_CRSTAR:
       case OP_CRMINSTAR:
@@ -1303,7 +1303,7 @@ do
 
         case OP_PROP:
         if (ncode[1] != PT_CLIST) break;
-        __attribute__((fallthrough));
+        PCRE2_FALLTHROUGH;
         case OP_ANYNL:
         case OP_CHAR:
         case OP_CHARI:
@@ -1327,7 +1327,7 @@ do
         tcode = ncode;
         continue;   /* With the following significant opcode */
         }
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
 
       /* For a group bracket or a positive assertion without an immediately
       following mandatory setting, recurse to set bits from within the
@@ -1455,7 +1455,7 @@ do
 
       case OP_EXACT:
       tcode += IMM2_SIZE;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_CHAR:
       case OP_PLUS:
       case OP_MINPLUS:
@@ -1466,7 +1466,7 @@ do
 
       case OP_EXACTI:
       tcode += IMM2_SIZE;
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
       case OP_CHARI:
       case OP_PLUSI:
       case OP_MINPLUSI:
@@ -1602,7 +1602,7 @@ do
       case OP_TYPEUPTO:
       case OP_TYPEMINUPTO:
       case OP_TYPEPOSUPTO:
-      tcode += IMM2_SIZE;  __attribute__((fallthrough));
+      tcode += IMM2_SIZE;  PCRE2_FALLTHROUGH;
 
       case OP_TYPESTAR:
       case OP_TYPEMINSTAR:
@@ -1783,7 +1783,7 @@ do
       /* It seems that the fall through comment must be outside the #ifdef if
       it is to avoid the gcc compiler warning. */
 
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
 
       /* Enter here for a negative non-XCLASS. In the 8-bit library, if we are
       in UTF mode, any byte with a value >= 0xc4 is a potentially valid starter
@@ -1801,7 +1801,7 @@ do
 #elif PCRE2_CODE_UNIT_WIDTH != 8
       SET_BIT(0xFF);                             /* For characters >= 255 */
 #endif
-      __attribute__((fallthrough));
+      PCRE2_FALLTHROUGH;
 
       /* Enter here for a positive non-XCLASS. If we have fallen through from
       an XCLASS, classmap will already be set; just advance the code pointer.
