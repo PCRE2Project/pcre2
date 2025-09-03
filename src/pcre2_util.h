@@ -131,17 +131,17 @@ the reason and the actions that should be taken if it ever triggers. */
 Clang only allows this via an attribute, whereas other compilers (eg. GCC) match attributes
 and also specially-formatted comments.
 
-For maximum portability, please use this macro as:
+For maximum portability, please use this macro together with a fall through comment:
 
-  PCRE2_FALLTHROUGH // Fall through // */
+  PCRE2_FALLTHROUGH; // Fall through */
 
 #if defined(__has_attribute)
 #if __has_attribute(fallthrough)
-#define PCRE2_FALLTHROUGH __attribute__((fallthrough));
+#define PCRE2_FALLTHROUGH __attribute__((fallthrough))
 #endif
 #endif
 #ifndef PCRE2_FALLTHROUGH
-#define PCRE2_FALLTHROUGH
+#define PCRE2_FALLTHROUGH do {} while(0)
 #endif
 
 #endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */

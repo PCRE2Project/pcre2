@@ -1936,7 +1936,7 @@ else
 
     if (c >= CHAR_8) break;
 
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     /* \0 always starts an octal number, but we may drop through to here with a
     larger first octal digit. The original code used just to take the least
@@ -2908,21 +2908,21 @@ switch(escape)
   {
   case ESC_D:
   prop = ESC_P;
-  PCRE2_FALLTHROUGH;
+  PCRE2_FALLTHROUGH; // Fall through
   case ESC_d:
   ascii_option = PCRE2_EXTRA_ASCII_BSD;
   break;
 
   case ESC_S:
   prop = ESC_P;
-  PCRE2_FALLTHROUGH;
+  PCRE2_FALLTHROUGH; // Fall through
   case ESC_s:
   ascii_option = PCRE2_EXTRA_ASCII_BSS;
   break;
 
   case ESC_W:
   prop = ESC_P;
-  PCRE2_FALLTHROUGH;
+  PCRE2_FALLTHROUGH; // Fall through
   case ESC_w:
   ascii_option = PCRE2_EXTRA_ASCII_BSW;
   break;
@@ -4560,7 +4560,7 @@ while (ptr < ptrend)
 
           default:
           PCRE2_DEBUG_UNREACHABLE();
-          PCRE2_FALLTHROUGH;
+          PCRE2_FALLTHROUGH; // Fall through
 
           case ESC_A:
           case ESC_Z:
@@ -5224,7 +5224,7 @@ while (ptr < ptrend)
         ++ptr;
         goto FAILED_FORWARD;
         }
-      PCRE2_FALLTHROUGH;
+      PCRE2_FALLTHROUGH; // Fall through
 
       case CHAR_0: case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4:
       case CHAR_5: case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
@@ -5974,7 +5974,7 @@ for (;;)
     case OP_UCP_WORD_BOUNDARY:
     case OP_NOT_UCP_WORD_BOUNDARY:
     if (!skipassert) return code;
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     case OP_CALLOUT:
     case OP_CREF:
@@ -6493,7 +6493,7 @@ for (;; pptr++)
     case META_PRUNE:
     case META_SKIP:
     cb->had_pruneorskip = TRUE;
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
     case META_COMMIT:
     case META_FAIL:
     *code++ = verbops[(meta - META_MARK) >> 16];
@@ -6518,7 +6518,7 @@ for (;; pptr++)
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
     cb->had_pruneorskip = TRUE;
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
     case META_MARK:
     case META_COMMIT_ARG:
     VERB_ARG:
@@ -7498,7 +7498,7 @@ for (;; pptr++)
       group_return = -1;  /* Set "may match empty string" */
 
       /* Now treat as a repeated OP_BRA. */
-      PCRE2_FALLTHROUGH;
+      PCRE2_FALLTHROUGH; // Fall through
 
       /* If previous was a bracket group, we may have to replicate it in
       certain cases. Note that at this point we can encounter only the "basic"
@@ -8348,7 +8348,7 @@ for (;; pptr++)
       if ((options & PCRE2_UCP) != 0 && (xoptions & PCRE2_EXTRA_ASCII_BSW) == 0)
         meta_arg = (meta_arg == ESC_B)? OP_NOT_UCP_WORD_BOUNDARY :
           OP_UCP_WORD_BOUNDARY;
-      PCRE2_FALLTHROUGH;
+      PCRE2_FALLTHROUGH; // Fall through
 
       case ESC_A:
       if (cb->max_lookbehind == 0) cb->max_lookbehind = 1;
@@ -9282,7 +9282,7 @@ do {
 
      case OP_EXACT:
      scode += IMM2_SIZE;
-     PCRE2_FALLTHROUGH;
+     PCRE2_FALLTHROUGH; // Fall through
 
      case OP_CHAR:
      case OP_PLUS:
@@ -9295,7 +9295,7 @@ do {
 
      case OP_EXACTI:
      scode += IMM2_SIZE;
-     PCRE2_FALLTHROUGH;
+     PCRE2_FALLTHROUGH; // Fall through
 
      case OP_CHARI:
      case OP_PLUSI:
@@ -9727,7 +9727,7 @@ for (;; pptr++)
     case META_BACKREF_BYNAME:
     if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0)
       goto ISNOTFIXED;
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     case META_RECURSE_BYNAME:
       {
@@ -9776,7 +9776,7 @@ for (;; pptr++)
       goto RECURSE_OR_BACKREF_LENGTH;
       }
 
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
     /* For groups >= 10 - picking up group twice does no harm. */
 
     /* A true recursion implies not fixed length, but a subroutine call may
@@ -9856,7 +9856,7 @@ for (;; pptr++)
 
     case META_CAPTURE:
     group = META_DATA(*pptr);
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     case META_ATOMIC:
     case META_NOCAPTURE:
@@ -9903,7 +9903,7 @@ for (;; pptr++)
         else itemlength = (max - 1) * lastitemlength;
       break;
       }
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     /* Any other item means this branch does not have a fixed length. */
 

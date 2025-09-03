@@ -4445,7 +4445,7 @@ for (;;)
       *((uint32_t *)field) = (uint32_t)(m->value);
       break;
       }
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     case MOD_INT:    /* Unsigned integer */
     if (!isdigit(*pp)) goto INVALID_VALUE;
@@ -7542,7 +7542,7 @@ if ((dat_datctl.control2 & CTL2_CALLOUT_EXTRA) != 0)
 
     case PCRE2_CALLOUT_STARTMATCH|PCRE2_CALLOUT_BACKTRACK:
     fprintf(f, "Backtrack\nNo other matching paths\n");
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
 
     case PCRE2_CALLOUT_STARTMATCH:
     fprintf(f, "New match attempt\n");
@@ -10216,7 +10216,7 @@ for (i = 0; i < MODLISTCOUNT; i++)
     break;
 
     default: printf("** Unknown type for modifier \"%s\"\n", m->name);
-    PCRE2_FALLTHROUGH;
+    PCRE2_FALLTHROUGH; // Fall through
     case MOD_PD:        /* Pattern or subject */
     case MOD_PDP:       /* As PD, OK for Perl-compatible test */
     is_pattern = for_pattern;
