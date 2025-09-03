@@ -2053,7 +2053,7 @@ switch (*(++string))
     break;
     }
 
-  /* Fall through */
+  __attribute__((fallthrough));
 
   /* The maximum capture number is 65535, so any number greater than that will
   always be an unknown capture number. We just stop incrementing, in order to

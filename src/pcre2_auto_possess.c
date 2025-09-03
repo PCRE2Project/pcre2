@@ -804,21 +804,21 @@ for(;;)
 
       case OP_NOT_DIGIT:
       invert_bits = TRUE;
-      /* Fall through */
+      __attribute__((fallthrough));
       case OP_DIGIT:
       set2 = (const uint8_t *)(cb->cbits + cbit_digit);
       break;
 
       case OP_NOT_WHITESPACE:
       invert_bits = TRUE;
-      /* Fall through */
+      __attribute__((fallthrough));
       case OP_WHITESPACE:
       set2 = (const uint8_t *)(cb->cbits + cbit_space);
       break;
 
       case OP_NOT_WORDCHAR:
       invert_bits = TRUE;
-      /* Fall through */
+      __attribute__((fallthrough));
       case OP_WORDCHAR:
       set2 = (const uint8_t *)(cb->cbits + cbit_word);
       break;
@@ -1101,7 +1101,7 @@ for(;;)
 
       case OP_NCLASS:
       if (chr > 255) return FALSE;
-      /* Fall through */
+      __attribute__((fallthrough));
 
       case OP_CLASS:
       if (chr > 255) break;
