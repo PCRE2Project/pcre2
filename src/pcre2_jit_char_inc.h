@@ -570,7 +570,7 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
       break;
       }
     compares++;
-    /* Fall through */
+    PCRE2_FALLTHROUGH; /* Fall through */
 
     case PT_SC:
     status |= XCLASS_HAS_SCRIPT;
@@ -770,7 +770,7 @@ if (status & XCLASS_NEEDS_UCD)
         case PT_SCX:
         if (cc[-1] == XCL_NOTPROP)
           break;
-        /* Fall through */
+        PCRE2_FALLTHROUGH; /* Fall through */
 
         case PT_SC:
         compares--;

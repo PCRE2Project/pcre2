@@ -127,6 +127,30 @@ the reason and the actions that should be taken if it ever triggers. */
 #define PCRE2_ASSERT(x) do {} while(0)
 #endif
 
+/* We define this fallthrough macro for suppressing -Wimplicit-fallthrough warnings.
+Clang only allows this via an attribute, whereas other compilers (eg. GCC) match attributes
+and also specially-formatted comments.
+
+For maximum portability, please use this macro together with a fall through C comment, for example: */
+
+//  PCRE2_FALLTHROUGH; /* Fall through */
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#if defined(__has_c_attribute)
+#if __has_c_attribute(__fallthrough__)
+#define PCRE2_FALLTHROUGH [[__fallthrough__]]
+#endif
+#endif
+#endif
+#if defined(__has_attribute) && !defined(PCRE2_FALLTHROUGH)
+#if __has_attribute(__fallthrough__)
+#define PCRE2_FALLTHROUGH __attribute__((__fallthrough__))
+#endif
+#endif
+#ifndef PCRE2_FALLTHROUGH
+#define PCRE2_FALLTHROUGH do {} while(0)
+#endif
+
 #endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_util.h */
