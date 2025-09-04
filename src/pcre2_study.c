@@ -1799,10 +1799,11 @@ do
         re->start_bitmap[24] |= 0xf0;            /* Bits for 0xc4 - 0xc8 */
         memset(re->start_bitmap+25, 0xff, 7);    /* Bits for 0xc9 - 0xff */
         }
+      PCRE2_FALLTHROUGH; /* Fall through */
 #elif PCRE2_CODE_UNIT_WIDTH != 8
       SET_BIT(0xFF);                             /* For characters >= 255 */
-#endif
       PCRE2_FALLTHROUGH; /* Fall through */
+#endif
 
       /* Enter here for a positive non-XCLASS. If we have fallen through from
       an XCLASS, classmap will already be set; just advance the code pointer.
