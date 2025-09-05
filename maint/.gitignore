@@ -1,11 +1,13 @@
 ucptest
 utf8
+utf8.*
 
 pcre2_ucp.h
 pcre2_ucptables_inc.h
 pcre2_ucd.c
 
 testinput
+testinput11
 testoutput
 
 !build-interface
