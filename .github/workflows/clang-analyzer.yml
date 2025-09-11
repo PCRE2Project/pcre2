@@ -37,7 +37,8 @@ jobs:
           mkdir build
           cd build
 
-          scan-build-py-$LLVM_VER -o clang-sarif-root/ --sarif-html sh -c "cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DCMAKE_BUILD_TYPE=Debug .. && ninja"
+          scan-build-py-$LLVM_VER cmake -G Ninja -DPCRE2_SUPPORT_JIT=ON -DCMAKE_BUILD_TYPE=Debug ..
+          scan-build-py-$LLVM_VER -o clang-sarif-root/ --sarif-html ninja
           rm clang-sarif-root/*/result-*.sarif
           mv clang-sarif-root/* ../clang-report
 
