@@ -583,7 +583,7 @@ if (type == OP_XCLASS)
       {
       case XCL_NOTPROP:
       notch = "^";
-      PCRE2_FALLTHROUGH; /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
       case XCL_PROP:
         {
         unsigned int ptype = *ccode++;
@@ -773,7 +773,7 @@ for(;;)
     case OP_MINQUERYI:
     case OP_POSQUERYI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_STAR:
     case OP_MINSTAR:
     case OP_POSSTAR:
@@ -812,7 +812,7 @@ for(;;)
     case OP_MINUPTOI:
     case OP_POSUPTOI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_EXACT:
     case OP_UPTO:
     case OP_MINUPTO:
@@ -845,7 +845,7 @@ for(;;)
 
     case OP_NOTI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_NOT:
     fprintf(f, " %s [^", flag);
     extra = print_char(f, code + 1, utf);
@@ -862,7 +862,7 @@ for(;;)
     case OP_NOTMINQUERYI:
     case OP_NOTPOSQUERYI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_NOTSTAR:
     case OP_NOTMINSTAR:
@@ -883,7 +883,7 @@ for(;;)
     case OP_NOTMINUPTOI:
     case OP_NOTPOSUPTOI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_NOTEXACT:
     case OP_NOTUPTO:
@@ -908,7 +908,7 @@ for(;;)
 
     case OP_REFI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_REF:
     fprintf(f, " %s \\g{%d}", flag, GET2(code, 1));
     i = (*code == OP_REFI)? code[1 + IMM2_SIZE] : 0;
@@ -918,7 +918,7 @@ for(;;)
 
     case OP_DNREFI:
     flag = "/i";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_DNREF:
       {
       PCRE2_SPTR entry = nametable + (GET2(code, 1) * nesize) + IMM2_SIZE;
@@ -1081,7 +1081,7 @@ for(;;)
     case OP_CIRCM:
     case OP_DOLLM:
     flag = "/m";
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     /* Anything else is just an item with no data, but possibly a flag. */
 

@@ -970,7 +970,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       Fecode += 1 + LINK_SIZE;
       continue;
       }
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     /* OP_END itself can never be reached within a recursion because that is
     picked up when the OP_KET that always precedes OP_END is reached. */
@@ -1054,7 +1054,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       mb->hitend = TRUE;
       if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
       }
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     /* Match any single character whatsoever. */
 
@@ -6062,7 +6062,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
                 assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
           Foffset_top = assert_accept_frame->offset_top;
 
-          PCRE2_FALLTHROUGH; /* Fall through */
+          PCRE2_FALLTHROUGH /* Fall through */
           /* In the case of a match, the captures have already been put into
           the current frame. */
 
@@ -6360,7 +6360,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       case OP_ASSERTBACK_NA:
       if (branch_start[1 + LINK_SIZE] == OP_VREVERSE && Feptr != P->eptr)
         RRETURN(MATCH_NOMATCH);
-      PCRE2_FALLTHROUGH; /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_ASSERT_NA:
       if (Feptr > mb->last_used_ptr) mb->last_used_ptr = Feptr;
@@ -6374,12 +6374,12 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       case OP_ASSERTBACK:
       if (branch_start[1 + LINK_SIZE] == OP_VREVERSE && Feptr != P->eptr)
         RRETURN(MATCH_NOMATCH);
-      PCRE2_FALLTHROUGH; /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_ASSERT:
       if (Feptr > mb->last_used_ptr) mb->last_used_ptr = Feptr;
       Feptr = P->eptr;
-      PCRE2_FALLTHROUGH; /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       /* For an atomic group, discard internal backtracking points. We must
       also ensure that any remaining branches within the top-level of the group
@@ -6403,7 +6403,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       case OP_ASSERTBACK_NOT:
       if (branch_start[1 + LINK_SIZE] == OP_VREVERSE && Feptr != P->eptr)
         RRETURN(MATCH_NOMATCH);
-      PCRE2_FALLTHROUGH; /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_ASSERT_NOT:
       RRETURN(MATCH_MATCH);
@@ -6537,7 +6537,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     if ((mb->moptions & PCRE2_NOTEOL) != 0) RRETURN(MATCH_NOMATCH);
     if ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0) goto ASSERT_NL_OR_EOS;
 
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     /* Unconditional end of subject assertion (\z). */
 
     case OP_EOD:
@@ -7938,7 +7938,7 @@ for(;;)
       new_start_match = mb->verb_skip_ptr;
       break;
       }
-    PCRE2_FALLTHROUGH; /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     /* NOMATCH and PRUNE advance by one character. THEN at this level acts
     exactly like PRUNE. Unset ignore SKIP-with-argument. */
