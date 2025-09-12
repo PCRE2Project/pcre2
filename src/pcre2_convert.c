@@ -226,7 +226,7 @@ while (plength > 0)
           posix++;
           continue;    /* With next character after :] */
           }
-        /* Fall through */
+        PCRE2_FALLTHROUGH /* Fall through */
 
         case POSIX_CLASS_NOT_STARTED:
         if (c == CHAR_LEFT_SQUARE_BRACKET)
@@ -321,7 +321,7 @@ while (plength > 0)
 
     case CHAR_LEFT_PARENTHESIS:
     bracount++;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case CHAR_QUESTION_MARK:
     case CHAR_PLUS:
@@ -329,7 +329,7 @@ while (plength > 0)
     case CHAR_RIGHT_CURLY_BRACKET:
     case CHAR_VERTICAL_LINE:
     if (!extended) goto ESCAPE_LITERAL;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case CHAR_DOT:
     case CHAR_DOLLAR_SIGN:
@@ -358,7 +358,7 @@ while (plength > 0)
       posix_state = POSIX_ANCHORED;
       goto COPY_SPECIAL;
       }
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     default:
     if (c < 255 && strchr(pcre2_escaped_literals, c) != NULL)

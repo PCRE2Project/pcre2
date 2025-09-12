@@ -127,6 +127,45 @@ the reason and the actions that should be taken if it ever triggers. */
 #define PCRE2_ASSERT(x) do {} while(0)
 #endif
 
+/* We define this fallthrough macro for suppressing -Wimplicit-fallthrough warnings.
+Clang only allows this via an attribute, whereas other compilers (eg. GCC) match attributes
+and also specially-formatted comments.
+
+This macro should be used with no following semicolon, and ideally with a comment: */
+
+//  PCRE2_FALLTHROUGH /* Fall through */
+
+#ifndef PCRE2_FALLTHROUGH
+
+#if defined(__cplusplus) && __cplusplus >= 202002L && \
+    defined(__has_cpp_attribute)
+/* Standards-compatible C++ variant. */
+#if __has_cpp_attribute(fallthrough)
+#define PCRE2_FALLTHROUGH [[fallthrough]];
+#endif
+#elif !defined(__cplusplus) && \
+      defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
+      defined(__has_c_attribute)
+/* Standards-compatible C variant. */
+#if __has_c_attribute(fallthrough)
+#define PCRE2_FALLTHROUGH [[fallthrough]];
+#endif
+#elif ((defined(__clang__) && __clang_major__ >= 10) || \
+       (defined(__GNUC__) && __GNUC__ >= 7)) && \
+      defined(__has_attribute)
+/* Clang and GCC syntax. Rule out old versions because apparently Clang at
+   least has a broken implementation of __has_attribute. */
+#if __has_attribute(fallthrough)
+#define PCRE2_FALLTHROUGH __attribute__((fallthrough));
+#endif
+#endif
+
+#endif /* !PCRE2_FALLTHROUGH */
+
+#ifndef PCRE2_FALLTHROUGH
+#define PCRE2_FALLTHROUGH
+#endif
+
 #endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_util.h */

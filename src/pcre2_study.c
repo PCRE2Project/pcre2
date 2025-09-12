@@ -175,7 +175,7 @@ for (;;)
       cc += 1 + LINK_SIZE;
       break;
       }
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_ONCE:
     case OP_SCRIPT_RUN:
@@ -252,7 +252,7 @@ for (;;)
     case OP_ASSERT_SCS:
     case OP_ASSERTBACK_NA:
     do cc += GET(cc, 1); while (*cc == OP_ALT);
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     /* Skip over things that don't match chars */
 
@@ -352,7 +352,7 @@ for (;;)
     case OP_PROP:
     case OP_NOTPROP:
     cc += 2;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_NOT_DIGIT:
     case OP_DIGIT:
@@ -433,7 +433,7 @@ for (;;)
       case OP_CRMINPLUS:
       case OP_CRPOSPLUS:
       branchlength++;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_CRSTAR:
       case OP_CRMINSTAR:
@@ -1303,7 +1303,7 @@ do
 
         case OP_PROP:
         if (ncode[1] != PT_CLIST) break;
-        /* Fall through */
+        PCRE2_FALLTHROUGH /* Fall through */
         case OP_ANYNL:
         case OP_CHAR:
         case OP_CHARI:
@@ -1327,7 +1327,7 @@ do
         tcode = ncode;
         continue;   /* With the following significant opcode */
         }
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       /* For a group bracket or a positive assertion without an immediately
       following mandatory setting, recurse to set bits from within the
@@ -1455,7 +1455,7 @@ do
 
       case OP_EXACT:
       tcode += IMM2_SIZE;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
       case OP_CHAR:
       case OP_PLUS:
       case OP_MINPLUS:
@@ -1466,7 +1466,7 @@ do
 
       case OP_EXACTI:
       tcode += IMM2_SIZE;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
       case OP_CHARI:
       case OP_PLUSI:
       case OP_MINPLUSI:
@@ -1602,7 +1602,8 @@ do
       case OP_TYPEUPTO:
       case OP_TYPEMINUPTO:
       case OP_TYPEPOSUPTO:
-      tcode += IMM2_SIZE;  /* Fall through */
+      tcode += IMM2_SIZE;
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_TYPESTAR:
       case OP_TYPEMINSTAR:
@@ -1783,7 +1784,7 @@ do
       /* It seems that the fall through comment must be outside the #ifdef if
       it is to avoid the gcc compiler warning. */
 
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       /* Enter here for a negative non-XCLASS. In the 8-bit library, if we are
       in UTF mode, any byte with a value >= 0xc4 is a potentially valid starter
@@ -1798,14 +1799,15 @@ do
         re->start_bitmap[24] |= 0xf0;            /* Bits for 0xc4 - 0xc8 */
         memset(re->start_bitmap+25, 0xff, 7);    /* Bits for 0xc9 - 0xff */
         }
+      PCRE2_FALLTHROUGH /* Fall through */
 #elif PCRE2_CODE_UNIT_WIDTH != 8
       SET_BIT(0xFF);                             /* For characters >= 255 */
+      PCRE2_FALLTHROUGH /* Fall through */
 #endif
-      /* Fall through */
 
       /* Enter here for a positive non-XCLASS. If we have fallen through from
       an XCLASS, classmap will already be set; just advance the code pointer.
-      Otherwise, set up classmap for a a non-XCLASS and advance past it. */
+      Otherwise, set up classmap for a non-XCLASS and advance past it. */
 
       case OP_CLASS:
       if (*tcode == OP_XCLASS) tcode += GET(tcode, 1); else
