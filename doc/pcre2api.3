@@ -105,7 +105,7 @@ document for an overview of all the PCRE2 documentation.
 .B "  pcre2_compile_context *\fIccontext\fP, PCRE2_SIZE \fIvalue\fP);"
 .sp
 .B int pcre2_set_max_varlookbehind(pcre2_compile_contest *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);
+.B "  uint32_t \fIvalue\fP);"
 .sp
 .B int pcre2_set_newline(pcre2_compile_context *\fIccontext\fP,
 .B "  uint32_t \fIvalue\fP);"
@@ -196,7 +196,7 @@ document for an overview of all the PCRE2 documentation.
 .B void pcre2_substring_list_free(PCRE2_UCHAR **\fIlist\fP);
 .sp
 .B int pcre2_substring_list_get(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_UCHAR ***\fIlistptr\fP, PCRE2_SIZE **\fIlengthsptr\fP);
+.B "  PCRE2_UCHAR ***\fIlistptr\fP, PCRE2_SIZE **\fIlengthsptr\fP);"
 .fi
 .
 .
@@ -831,7 +831,7 @@ can hold, which is effectively unlimited.
 .sp
 .nf
 .B int pcre2_set_max_varlookbehind(pcre2_compile_contest *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);
+.B "  uint32_t \fIvalue\fP);"
 .fi
 .sp
 This sets a maximum length for the number of characters matched by a
@@ -1933,8 +1933,9 @@ instead.)
 .sp
 This is an option whose main effect is at matching time. It does not change
 what \fBpcre2_compile()\fP generates, but it does affect the output of the JIT
-compiler. Setting this option is equivalent to calling \fBpcre2_set_optimize()\fP
-with the \fIdirective\fP parameter set to PCRE2_START_OPTIMIZE_OFF.
+compiler. Setting this option is equivalent to calling
+\fBpcre2_set_optimize()\fP with the \fIdirective\fP parameter set to
+PCRE2_START_OPTIMIZE_OFF.
 .P
 There are a number of optimizations that may occur at the start of a match, in
 order to speed up the process. For example, if it is known that an unanchored
@@ -2019,9 +2020,9 @@ only if PCRE2 has been compiled with Unicode support (which is the default).
 .P
 The PCRE2_EXTRA_CASELESS_RESTRICT option (see above) restricts caseless
 matching such that ASCII characters match only ASCII characters and non-ASCII
-characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING option
-(see above) alters the matching of the 'i' characters to follow their behaviour
-in Turkish and Azeri languages. For further details on
+characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING
+option (see above) alters the matching of the 'i' characters to follow their
+behaviour in Turkish and Azeri languages. For further details on
 PCRE2_EXTRA_CASELESS_RESTRICT and PCRE2_EXTRA_TURKISH_CASING, see the
 .\" HREF
 \fBpcre2unicode\fP
@@ -3718,7 +3719,7 @@ capturing slots, substring number 1 is unset.
 .sp
 .nf
 .B int pcre2_substring_list_get(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_UCHAR ***\fIlistptr\fP, PCRE2_SIZE **\fIlengthsptr\fP);
+.B "  PCRE2_UCHAR ***\fIlistptr\fP, PCRE2_SIZE **\fIlengthsptr\fP);"
 .sp
 .B void pcre2_substring_list_free(PCRE2_UCHAR **\fIlist\fP);
 .fi
@@ -3942,8 +3943,8 @@ recognized:
   $_                  insert the entire input string
   $*MARK or ${*MARK}  insert a control verb name
 .sp
-Either a group number or a group name can be given for \fIn\fP, for example $2 or
-$NAME. Curly brackets are required only if the following character would be
+Either a group number or a group name can be given for \fIn\fP, for example $2
+or $NAME. Curly brackets are required only if the following character would be
 interpreted as part of the number or name. The number may be zero to include
 the entire matched string. For example, if the pattern a(b)c is matched with
 "=abc=" and the replacement string "+$1$0$1+", the result is "=+babcb+=".
@@ -4025,9 +4026,9 @@ in a pattern, which in Perl has some ambiguities. Details are given in the
 .\"
 page.
 .P
-The Python form \eg<n>, where the angle brackets are part of the syntax and \fIn\fP
-is either a group name or number, is recognized as an alternative way of
-inserting the contents of a group, for example \eg<3>.
+The Python form \eg<n>, where the angle brackets are part of the syntax and
+\fIn\fP is either a group name or number, is recognized as an alternative way
+of inserting the contents of a group, for example \eg<3>.
 .P
 There are also four escape sequences for forcing the case of inserted letters.
 Case forcing applies to all inserted characters, including those from capture

@@ -734,31 +734,22 @@ for(;;)
     fprintf(f, "%s", OP_names[*code]);
     break;
 
-    case OP_REVERSE:
-    if (print_lengths) fprintf(f, "%3d ", GET2(code, 1));
-      else fprintf(f, "    ");
-    fprintf(f, "%s", OP_names[*code]);
-    break;
-
-    case OP_VREVERSE:
-    if (print_lengths) fprintf(f, "%3d %d ", GET2(code, 1),
-      GET2(code, 1 + IMM2_SIZE));
-    else fprintf(f, "    ");
-    fprintf(f, "%s", OP_names[*code]);
-    break;
-
     case OP_CLOSE:
     fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
     break;
 
     case OP_CREF:
-    fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
+    case OP_REVERSE:
+    case OP_VREVERSE:
+    fprintf(f, "%3d %s", GET2(code, 1), OP_names[*code]);
+    if (*code == OP_VREVERSE) fprintf(f, " %d", GET2(code, 1 + IMM2_SIZE));
     break;
 
     case OP_DNCREF:
+    case OP_DNRREF:
       {
       PCRE2_SPTR entry = nametable + (GET2(code, 1) * nesize) + IMM2_SIZE;
-      fprintf(f, " %s Capture ref <", flag);
+      fprintf(f, " %s %s<", flag, OP_names[*code]);
       print_custring(f, entry);
       fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }
@@ -767,26 +758,9 @@ for(;;)
     case OP_RREF:
     c = GET2(code, 1);
     if (c == RREF_ANY)
-      fprintf(f, "    Cond recurse any");
+      fprintf(f, "    %s any", OP_names[*code]);
     else
-      fprintf(f, "    Cond recurse %d", c);
-    break;
-
-    case OP_DNRREF:
-      {
-      PCRE2_SPTR entry = nametable + (GET2(code, 1) * nesize) + IMM2_SIZE;
-      fprintf(f, " %s Cond recurse <", flag);
-      print_custring(f, entry);
-      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
-      }
-    break;
-
-    case OP_FALSE:
-    fprintf(f, "    Cond false");
-    break;
-
-    case OP_TRUE:
-    fprintf(f, "    Cond true");
+      fprintf(f, "    %s %d", OP_names[*code], c);
     break;
 
     case OP_STARI:
@@ -936,7 +910,7 @@ for(;;)
     flag = "/i";
     PCRE2_FALLTHROUGH; /* Fall through */
     case OP_REF:
-    fprintf(f, " %s \\%d", flag, GET2(code,1));
+    fprintf(f, " %s \\g{%d}", flag, GET2(code, 1));
     i = (*code == OP_REFI)? code[1 + IMM2_SIZE] : 0;
     if (i != 0) fprintf(f, " 0x%02x", i);
     ccode = code + OP_lengths[*code];
@@ -1104,10 +1078,6 @@ for(;;)
     extra += code[1];
     break;
 
-    case OP_THEN:
-    fprintf(f, "    %s", OP_names[*code]);
-    break;
-
     case OP_CIRCM:
     case OP_DOLLM:
     flag = "/m";
@@ -1121,7 +1091,7 @@ for(;;)
     }
 
   code += OP_lengths[*code] + extra;
-  fprintf(f, "\n");
+  putc('\n', f);
   }
 }
 

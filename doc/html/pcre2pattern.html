@@ -180,10 +180,11 @@ Disabling automatic anchoring
 </h3>
 <p>
 If a pattern starts with (*NO_DOTSTAR_ANCHOR), it has the same effect as
-setting the PCRE2_NO_DOTSTAR_ANCHOR option, or calling <b>pcre2_set_optimize()</b>
-with a PCRE2_DOTSTAR_ANCHOR_OFF directive. This disables optimizations that
-apply to patterns whose top-level branches all start with .* (match any number
-of arbitrary characters). For more details, see the
+setting the PCRE2_NO_DOTSTAR_ANCHOR option, or
+calling <b>pcre2_set_optimize()</b> with a PCRE2_DOTSTAR_ANCHOR_OFF directive.
+This disables optimizations that apply to patterns whose top-level branches
+all start with .* (match any number of arbitrary characters). For more details,
+see the
 <a href="pcre2api.html"><b>pcre2api</b></a>
 documentation.
 </p>
@@ -3146,8 +3147,7 @@ For example:
   (?(VERSION&#62;=10.4)yes|no)
 </pre>
 This pattern matches "yes" if the PCRE2 version is greater or equal to 10.4, or
-"no" otherwise. The fractional part of the version number may not contain more
-than two digits.
+"no" otherwise. The fractional part of the version number could be ommited.
 </p>
 <h3>
 Assertion conditions
@@ -4183,7 +4183,7 @@ Cambridge, England.
 </p>
 <h2><a name="SEC34" href="#TOC1">REVISION</a></h2>
 <p>
-Last updated: 17 August 2025
+Last updated: 2 September 2025
 <br>
 Copyright &copy; 1997-2024 University of Cambridge.
 <br>

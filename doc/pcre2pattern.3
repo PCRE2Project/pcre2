@@ -1,4 +1,4 @@
-.TH PCRE2PATTERN 3 "28 March 2025" "PCRE2 10.47-DEV"
+.TH PCRE2PATTERN 3 "2 September 2025" "PCRE2 10.47-DEV"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH "PCRE2 REGULAR EXPRESSION DETAILS"
@@ -150,10 +150,11 @@ documentation.
 .rs
 .sp
 If a pattern starts with (*NO_DOTSTAR_ANCHOR), it has the same effect as
-setting the PCRE2_NO_DOTSTAR_ANCHOR option, or calling \fBpcre2_set_optimize()\fP
-with a PCRE2_DOTSTAR_ANCHOR_OFF directive. This disables optimizations that
-apply to patterns whose top-level branches all start with .* (match any number
-of arbitrary characters). For more details, see the
+setting the PCRE2_NO_DOTSTAR_ANCHOR option, or
+calling \fBpcre2_set_optimize()\fP with a PCRE2_DOTSTAR_ANCHOR_OFF directive.
+This disables optimizations that apply to patterns whose top-level branches
+all start with .* (match any number of arbitrary characters). For more details,
+see the
 .\" HREF
 \fBpcre2api\fP
 .\"
@@ -3185,8 +3186,7 @@ For example:
   (?(VERSION>=10.4)yes|no)
 .sp
 This pattern matches "yes" if the PCRE2 version is greater or equal to 10.4, or
-"no" otherwise. The fractional part of the version number may not contain more
-than two digits.
+"no" otherwise. The fractional part of the version number could be ommited.
 .
 .
 .SS "Assertion conditions"
@@ -4230,6 +4230,6 @@ Cambridge, England.
 .rs
 .sp
 .nf
-Last updated: 17 August 2025
+Last updated: 2 September 2025
 Copyright (c) 1997-2024 University of Cambridge.
 .fi
