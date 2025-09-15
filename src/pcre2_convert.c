@@ -1125,7 +1125,11 @@ PCRE2_SIZE use_length = DUMMY_BUFFER_SIZE;
 BOOL utf = (options & PCRE2_CONVERT_UTF) != 0;
 uint32_t pattype = options & TYPE_OPTIONS;
 
-if (pattern == NULL || bufflenptr == NULL) return PCRE2_ERROR_NULL;
+if (pattern == NULL || bufflenptr == NULL)
+  {
+  if (bufflenptr != NULL) *bufflenptr = 0;  /* Error offset */
+  return PCRE2_ERROR_NULL;
+  }
 
 if ((options & ~ALL_OPTIONS) != 0 ||        /* Undefined bit set */
     (pattype & (~pattype+1)) != pattype ||  /* More than one type set */
@@ -1190,8 +1194,13 @@ for (int i = 0; i < 2; i++)
       bufflenptr, dummyrun, ccontext);
     break;
 
+    /* We have already validated pattype. */
+    /* LCOV_EXCL_START */
     default:
-    goto EXIT;
+    PCRE2_DEBUG_UNREACHABLE();
+    *bufflenptr = 0;  /* Error offset */
+    return PCRE2_ERROR_INTERNAL;
+    /* LCOV_EXCL_STOP */
     }
 
   if (rc != 0 ||           /* Error */
@@ -1204,20 +1213,23 @@ for (int i = 0; i < 2; i++)
 
   allocated = PRIV(memctl_malloc)(sizeof(pcre2_memctl) +
     (*bufflenptr + 1)*PCRE2_CODE_UNIT_WIDTH, (pcre2_memctl *)ccontext);
-  if (allocated == NULL) return PCRE2_ERROR_NOMEMORY;
+  if (allocated == NULL)
+    {
+    *bufflenptr = 0;  /* Error offset */
+    return PCRE2_ERROR_NOMEMORY;
+    }
   *buffptr = (PCRE2_UCHAR *)(((char *)allocated) + sizeof(pcre2_memctl));
 
   use_buffer = *buffptr;
   use_length = *bufflenptr + 1;
   }
 
-/* Something went terribly wrong. Trigger an assert and return an error */
+/* Running the loop above ought to have succeeded the second time. */
+/* LCOV_EXCL_START */
 PCRE2_DEBUG_UNREACHABLE();
-
-EXIT:
-
 *bufflenptr = 0;  /* Error offset */
 return PCRE2_ERROR_INTERNAL;
+/* LCOV_EXCL_STOP */
 }
 
 

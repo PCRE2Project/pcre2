@@ -2107,9 +2107,11 @@ switch (op)
     lhs_op_info->bits.classwords[i] ^= rhs_op_info->bits.classwords[i];
   break;
 
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   break;
+  /* LCOV_EXCL_STOP */
   }
 }
 
@@ -2186,11 +2188,13 @@ switch (meta)
   /* We must have a 100% guarantee that ptr increases when
   compile_class_operand() returns, even on Release builds, so that we can
   statically prove our loops terminate. */
+  /* LCOV_EXCL_START */
   if (ptr <= prev_ptr)
     {
     PCRE2_DEBUG_UNREACHABLE();
     return FALSE;
     }
+  /* LCOV_EXCL_STOP */
 
   /* If we fell through above, consume the closing ']'. */
   if (meta == META_CLASS || meta == META_CLASS_NOT)

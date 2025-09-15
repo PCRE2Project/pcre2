@@ -3567,9 +3567,11 @@ switch(re->newline_convention)
   mb->nltype = NLTYPE_ANYCRLF;
   break;
 
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   return PCRE2_ERROR_INTERNAL;
+  /* LCOV_EXCL_STOP */
   }
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
