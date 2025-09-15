@@ -1,0 +1,69 @@
+#! /bin/sh
+
+# Script to run tests with coverage and filter the results.
+#
+# We assume that the source has been configured and built with LLVM's source-based
+# coverage instrumentation.
+#
+# Must be run in the build directory.
+
+set -e
+
+nomalloc=0
+
+while [ $# -gt 0 ] ; do
+  case $1 in
+   nomalloc|-nomalloc) nomalloc=1;;
+   *) echo "Unknown option or test selector '$1'"; exit 1;;
+  esac
+  shift
+done
+
+LLVM_VER=`clang --version | head -n1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1`
+echo "(Using LLVM version $LLVM_VER)"
+echo ""
+
+rm -f coverage-*.profraw coverage.profdata coverage-lcov.info coverage-lcov.filtered.info
+[ -d testdata ] || rm -f ../coverage-*.profraw
+rm -rf coverage-html
+
+echo "== Running all tests with CTest =="
+LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
+echo ""
+
+if [ "$nomalloc" -eq 0 ]; then
+  echo "== Re-running pcre2test with -malloc =="
+  LLVM_PROFILE_FILE="coverage-%m.profraw" srcdir=.. pcre2test=./pcre2test ../RunTest -malloc
+  echo ""
+fi
+
+# Merge the profiles gathered
+echo "== Merging coverage data =="
+PROF_FILES="coverage-*.profraw"
+[ -d testdata ] || PROF_FILES="$PROF_FILES ../coverage-*.profraw"
+llvm-profdata-$LLVM_VER merge -sparse $PROF_FILES -o coverage.profdata
+echo ""
+
+# Output LCOV-compatible output, for downstream tools
+echo "== Generating LCOV report =="
+llvm-cov-$LLVM_VER export \
+  -format=lcov \
+  -instr-profile=coverage.profdata \
+  ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+  -sources ../src/ ./ \
+  > ./coverage-lcov.info
+echo ""
+
+# Filter out lines marked with "LCOV_EXCL_LINE" or "LCOV_EXCL_START"/"LCOV_EXCL_STOP"
+echo "== Filtering LCOV report =="
+python3 ../maint/FilterCoverage.py ./coverage-lcov.info > ./coverage-lcov.filtered.info
+mv ./coverage-lcov.filtered.info ./coverage-lcov.info
+echo ""
+
+# Use genhtml to generate an HTML report from the LCOV data
+echo "== Generating HTML report =="
+mkdir -p coverage-html
+genhtml \
+  --highlight --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
+  -o coverage-html ./coverage-lcov.info
+echo ""
