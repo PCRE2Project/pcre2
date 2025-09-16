@@ -15177,10 +15177,6 @@ No match
  0: abc
  1: abc
 
-/(abc)*/
-    \[abc]{0}
-** Zero or negative repeat not allowed
-
 /^/gm
     \n\n\n
  0: 
@@ -16358,14 +16354,77 @@ Failed: error 122 at offset 11: unmatched closing parenthesis
   0    ^    0
 No match
 
+# Expand tests
+
+/(abc)*/
+    \[abc]{0}
+** Replication count missing or invalid (1..INT_MAX)
+    \[abc]{}
+** Replication count missing or invalid (1..INT_MAX)
+
 /aaa/
-\[abc]{10000000000000000000000000000}
-** Repeat count too large
-\[a]{3}
+    \[X]{-10}
+** Replication count missing or invalid (1..INT_MAX)
+    \[abc]{10000000000000000000000000000}
+** Replication count missing or invalid (1..INT_MAX)
+    \[a]{3}
  0: aaa
 
 /\[AB]{6000000000000000000000}/expand
-** Pattern repeat count too large
+** Invalid replication count (1..UINT_MAX)
+
+/\[AB]{0000000000000000000000}/expand
+** Invalid replication count (1..UINT_MAX)
+
+/a\[b]{-1}/BI,expand
+Expanded: a\[b]{-1}
+------------------------------------------------------------------
+        Bra
+        a[b]{-1}
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+First code unit = 'a'
+Last code unit = '}'
+Subject length lower bound = 8
+
+/a\[b]{/BI,expand
+Expanded: a\[b]{
+------------------------------------------------------------------
+        Bra
+        a[b]{
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+First code unit = 'a'
+Last code unit = '{'
+Subject length lower bound = 5
+
+/a\[/BI,expand
+Expanded: a\[
+------------------------------------------------------------------
+        Bra
+        a[
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+First code unit = 'a'
+Last code unit = '['
+Subject length lower bound = 2
+
+//BI,expand
+Expanded: 
+------------------------------------------------------------------
+        Bra
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+May match empty string
+Subject length lower bound = 0
 
 # Hex uses pattern length, not zero-terminated. This tests for overrunning
 # the given length of a pattern.
@@ -18997,10 +19056,6 @@ Subject length lower bound = 2
     aabcd
  0: aa
 
---
-    \[X]{-10}
-** Zero or negative repeat not allowed
-    
 # Check imposition of maximum by match_data_create().
 
 /abcd/

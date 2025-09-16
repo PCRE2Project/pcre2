@@ -343,10 +343,22 @@ ints. They are defined not to be shorter. */
 #define U32OVERFLOW(x) (x == UINT32_MAX)
 #endif
 
+#if ULONG_MAX > UINT32_MAX
+#define U32OVERFLOWE(x) U32OVERFLOW(x)
+#else
+#define U32OVERFLOWE(x) (errno != 0 && x == UINT32_MAX)
+#endif
+
 #if LONG_MAX > INT32_MAX
-#define S32OVERFLOW(x) (x > INT32_MAX || x < INT32_MIN)
+#define S32OVERFLOW(x) (x > INT32_MAX || INT32_MIN > x)
 #else
 #define S32OVERFLOW(x) (x == INT32_MAX || x == INT32_MIN)
+#endif
+
+#if LONG_MAX > INT32_MAX
+#define S32OVERFLOWE(x) S32OVERFLOW(x)
+#else
+#define S32OVERFLOWE(x) (errno != 0 && (x == INT32_MAX || x == INT32_MIN))
 #endif
 
 /* When PCRE2_CODE_UNIT_WIDTH is zero, pcre2_internal.h does not include
@@ -3862,44 +3874,83 @@ return 0;
 }
 #endif /* SUPPORT_PCRE2_32 */
 
+/* A helper to realloc() a buffer to a desired or fallback sizes. */
 
+static void*
+realloc_buffer(void *source, size_t fallback, size_t *size)
+{
+void *p;
+
+p = realloc(source, *size);
+if (p == NULL)
+  {
+  p = realloc(source, fallback);
+  if (p == NULL)
+    {
+    *size = 0;
+    return NULL;
+    }
+  *size = fallback;
+  }
+return p;
+}
 
 /*************************************************
 *           Expand input buffers                 *
 *************************************************/
 
 /* This function doubles the size of the input buffer and the buffer for
-keeping an 8-bit copy of patterns (pbuffer8), and copies the current buffers to
-the new ones.
+keeping an 8-bit copy of patterns (pbuffer8) until it is larger than the
+minimum, or to the minimum if it can't be doubled.
 
-Arguments: none
-Returns:   nothing (aborts if malloc() fails)
+Arguments:
+  minimum    size on bytes expected as a minimum
+Returns:     nothing (aborts if any realloc() fails)
 */
 
 static void
-expand_input_buffers(void)
+expand_input_buffers(size_t minimum)
 {
-size_t new_pbuffer8_size = 2*pbuffer8_size;
-uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
-uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
+size_t buffer_size, allowed_size;
+void *p;
 
-if (new_buffer == NULL || new_pbuffer8 == NULL)
+PCRE2_ASSERT(minimum > pbuffer8_size);
+if (minimum >= SIZE_MAX / 2 || pbuffer8_size >= SIZE_MAX / 2)
+  buffer_size = minimum;
+else
   {
-  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
-          new_pbuffer8_size);
-  exit(1);
+  buffer_size = pbuffer8_size;
+  while (buffer_size < minimum) buffer_size *= 2;
   }
 
-memcpy(new_buffer, buffer, pbuffer8_size);
-memcpy(new_pbuffer8, pbuffer8, pbuffer8_size);
+p = realloc_buffer(buffer, minimum, &buffer_size);
+if (p == NULL) goto DIE;
 
-pbuffer8_size = new_pbuffer8_size;
+allowed_size = buffer_size;
+buffer = p;
 
-free(buffer);
-free(pbuffer8);
+p = realloc_buffer(pbuffer8, minimum, &buffer_size);
+if (p == NULL) goto DIE;
 
-buffer = new_buffer;
-pbuffer8 = new_pbuffer8;
+if (allowed_size != buffer_size)
+  {
+  void *q = realloc(buffer, buffer_size);
+  if (q == NULL)
+    {
+    fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+            buffer_size);
+    exit(1);
+    }
+  buffer = q;
+  }
+else pbuffer8 = p;
+
+pbuffer8_size = buffer_size;
+return;
+DIE:
+fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+        minimum);
+exit(1);
 }
 
 
@@ -3938,7 +3989,7 @@ for (;;)
   size_t dlen;
   size_t rlen = (size_t)(pbuffer8_size - (here - buffer));
 
-  /* If libreadline or libedit support is required, use readline() to read a
+  /* If libreadline or libedit support is available, use readline() to read a
   line if the input is a terminal. Note that readline() removes the trailing
   newline, so we must put it back again, to be compatible with fgets(). */
 
@@ -3999,7 +4050,7 @@ for (;;)
     {
     size_t start_offset = start - buffer;
     size_t here_offset = here - buffer;
-    expand_input_buffers();
+    expand_input_buffers(pbuffer8_size + 1);
     start = buffer + start_offset;
     here = buffer + here_offset;
     }
@@ -6009,7 +6060,6 @@ static int
 process_pattern(void)
 {
 BOOL utf;
-uint32_t k;
 uint8_t *p = buffer;
 unsigned int delimiter = *p++;
 int errorcode;
@@ -6102,7 +6152,7 @@ if (pat_patctl.convert_type != CONVERT_UNSET &&
 /* Check for mutually exclusive control modifiers. At present, these are all in
 the first control word. */
 
-for (k = 0; k < sizeof(exclusive_pat_controls)/sizeof(uint32_t); k++)
+for (uint32_t k = 0; k < sizeof(exclusive_pat_controls)/sizeof(uint32_t); k++)
   {
   uint32_t c = pat_patctl.control & exclusive_pat_controls[k];
   if (c != 0 && c != (c & (~c+1)))
@@ -6193,6 +6243,7 @@ if ((pat_patctl.control & CTL_HEXPAT) != 0)
 else if ((pat_patctl.control & CTL_EXPAND) != 0)
   {
   uint8_t *pp, *pt;
+  size_t needlen = 0;
 
   pt = pbuffer8;
   for (pp = buffer + 1; *pp != 0; pp++)
@@ -6202,57 +6253,64 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
     size_t length = 1;
 
     /* Check for replication syntax; if not found, the defaults just set will
-    prevail and one character will be copied. */
+    prevail and `length` characters will be copied once. */
 
     if (pp[0] == '\\' && pp[1] == '[')
       {
       uint8_t *pe;
-      for (pe = pp + 2; *pe != 0; pe++)
+
+      /* Start the capture after skipping the prefix. This pointer will need
+      to be rolled back if a syntax problem is found later. */
+      pc += 2;
+      for (pe = pc; *pe != 0; pe++)
         {
-        if (pe[0] == ']' && pe[1] == '{')
+        if (pe[0] == ']' && pe[1] == '{' && isdigit(pe[2]))
           {
-          size_t clen = pe - pc - 2;
-          uint32_t i = 0;
           unsigned long uli;
           char *endptr;
 
-          pe += 2;
-          uli = strtoul((const char *)pe, &endptr, 10);
-          if (U32OVERFLOW(uli))
+          errno = 0;
+          uli = strtoul((const char *)pe + 2, &endptr, 10);
+          if (uli == 0 || U32OVERFLOWE(uli))
             {
-            fprintf(outfile, "** Pattern repeat count too large\n");
+            fprintf(outfile, "** Invalid replication count (1..UINT_MAX)\n");
             return PR_SKIP;
             }
 
-          i = (uint32_t)uli;
-          pe = (uint8_t *)endptr;
-          if (*pe == '}')
+          if (*endptr == '}') count = (uint32_t)uli;
+          length = pe - pc;
+          if (length >= SIZE_MAX/count)
             {
-            if (i == 0)
-              {
-              fprintf(outfile, "** Zero repeat not allowed\n");
-              return PR_SKIP;
-              }
-            pc += 2;
-            count = i;
-            length = clen;
-            pp = pe;
-            break;
+            fprintf(outfile, "** Expanded content too large\n");
+            return PR_SKIP;
             }
+          pe = (uint8_t *)endptr;
+          break;
           }
         }
+      if (*pe != '}')
+        {
+        pc -= 2;
+        length = pe - pc;
+        }
+      needlen += length * count;
+      pp = pe;
+
+      /* The main loop increments pp, so if we are already at the end of
+      the pattern need to backtrack to avoid jumping over the NUL. */
+      if (*pe == 0) pp--;
       }
 
     /* Add to output. If the buffer is too small expand it. The function for
     expanding buffers always keeps buffer and pbuffer8 in step as far as their
     size goes. */
 
-    while (pt + count * length > pbuffer8 + pbuffer8_size)
+    if (needlen > pbuffer8_size)
       {
       size_t pc_offset = pc - buffer;
       size_t pp_offset = pp - buffer;
       size_t pt_offset = pt - pbuffer8;
-      expand_input_buffers();
+      expand_input_buffers(needlen);
       pc = buffer + pc_offset;
       pp = buffer + pp_offset;
       pt = pbuffer8 + pt_offset;
@@ -7992,7 +8050,7 @@ process_data(void)
 {
 PCRE2_SIZE ulen, arg_ulen;
 uint32_t gmatched;
-uint32_t c, k;
+uint32_t c;
 uint32_t g_notempty = 0;
 uint8_t *p, *pp, *start_rep;
 size_t len, needlen;
@@ -8082,17 +8140,17 @@ if (dbuffer != NULL)
   }
 #endif
 
-/* Allocate a buffer to hold the data line; len+1 is an upper bound on
+/* Allocate a buffer to hold the data line; len + 1 is an upper bound on
 the number of code units that will be needed (though the buffer may have to be
 extended if replication is involved). */
 
-needlen = (len+1) * code_unit_size;
-if (dbuffer == NULL || needlen >= dbuffer_size)
+needlen = (len + 1) * code_unit_size;
+if (dbuffer == NULL || needlen > dbuffer_size)
   {
-  while (needlen >= dbuffer_size)
+  while (needlen > dbuffer_size)
     {
     if (dbuffer_size < SIZE_MAX/2) dbuffer_size *= 2;
-      else dbuffer_size = needlen + 1;
+      else dbuffer_size = needlen;
     }
   dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
   if (dbuffer == NULL)
@@ -8123,14 +8181,15 @@ while ((c = *p++) != 0)
 
     if (*p++ != '{')
       {
-      fprintf(outfile, "** Expected '{' after \\[....]\n");
+      fprintf(outfile, "** Expected '{' after \\[...]\n");
       return PR_OK;
       }
 
+    errno = 0;
     li = strtol((const char *)p, &endptr, 10);
-    if (S32OVERFLOW(li))
+    if (!isdigit(*p) || li < 1 || S32OVERFLOWE(li))
       {
-      fprintf(outfile, "** Repeat count too large\n");
+      fprintf(outfile, "** Replication count missing or invalid (1..INT_MAX)\n");
       return PR_OK;
       }
     i = (int)li;
@@ -8142,44 +8201,45 @@ while ((c = *p++) != 0)
       return PR_OK;
       }
 
-    if (i-- <= 0)
+    if (i-- > 1)
       {
-      fprintf(outfile, "** Zero or negative repeat not allowed\n");
-      return PR_OK;
-      }
-
-    replen = CAST8VAR(q) - start_rep;
-    if (i > 0 && replen > (SIZE_MAX - needlen) / i)
-      {
-      fprintf(outfile, "** Expanded content too large\n");
-      return PR_OK;
-      }
-    needlen += replen * i;
-
-    if (needlen >= dbuffer_size)
-      {
-      size_t qoffset = CAST8VAR(q) - dbuffer;
-      size_t rep_offset = start_rep - dbuffer;
-      while (needlen >= dbuffer_size)
+      replen = CAST8VAR(q) - start_rep;
+      if (replen >= (SIZE_MAX - needlen) / i)
         {
-        if (dbuffer_size < SIZE_MAX/2) dbuffer_size *= 2;
-          else dbuffer_size = needlen + 1;
+        fprintf(outfile, "** Expanded content too large\n");
+        return PR_OK;
         }
-      dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
-      if (dbuffer == NULL)
-        {
-        fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
-          dbuffer_size);
-        exit(1);
-        }
-      SETCASTPTR(q, dbuffer + qoffset);
-      start_rep = dbuffer + rep_offset;
-      }
+      needlen += replen * i;
 
-    while (i-- > 0)
-      {
-      memcpy(CAST8VAR(q), start_rep, replen);
-      SETPLUS(q, replen/code_unit_size);
+      if (needlen > dbuffer_size)
+        {
+        size_t qoffset = CAST8VAR(q) - dbuffer;
+        size_t rep_offset = start_rep - dbuffer;
+        void *tp;
+
+        while (needlen > dbuffer_size)
+          {
+          if (dbuffer_size < SIZE_MAX / 2) dbuffer_size *= 2;
+            else dbuffer_size = needlen;
+          }
+
+        tp = realloc_buffer(dbuffer, needlen, &dbuffer_size);
+        if (tp == NULL)
+          {
+          fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
+            needlen);
+          exit(1);
+          }
+        dbuffer = (uint8_t *)tp;
+        SETCASTPTR(q, dbuffer + qoffset);
+        start_rep = dbuffer + rep_offset;
+        }
+
+      while (i-- > 0)
+        {
+        memcpy(CAST8VAR(q), start_rep, replen);
+        SETPLUS(q, replen/code_unit_size);
+        }
       }
 
     start_rep = NULL;
@@ -8465,7 +8525,7 @@ if (dat_datctl.substitute_skip != 0 || dat_datctl.substitute_stop != 0)
 /* Check for mutually exclusive modifiers. At present, these are all in the
 first control word. */
 
-for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
+for (uint32_t k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
   {
   c = dat_datctl.control & exclusive_dat_controls[k];
   if (c != 0 && c != (c & (~c+1)))

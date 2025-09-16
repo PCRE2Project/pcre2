@@ -4589,9 +4589,6 @@
 /(abc)*/
     \[abc]{1}
 
-/(abc)*/
-    \[abc]{0}
-
 /^/gm
     \n\n\n
 
@@ -5136,11 +5133,28 @@ a)"xI
 \= Expect no match
     abc
 
+# Expand tests
+
+/(abc)*/
+    \[abc]{0}
+    \[abc]{}
+
 /aaa/
-\[abc]{10000000000000000000000000000}
-\[a]{3}
+    \[X]{-10}
+    \[abc]{10000000000000000000000000000}
+    \[a]{3}
 
 /\[AB]{6000000000000000000000}/expand
+
+/\[AB]{0000000000000000000000}/expand
+
+/a\[b]{-1}/BI,expand
+
+/a\[b]{/BI,expand
+
+/a\[/BI,expand
+
+//BI,expand
 
 # Hex uses pattern length, not zero-terminated. This tests for overrunning
 # the given length of a pattern.
@@ -6326,9 +6340,6 @@ a)"xI
 /[Aa]{2,3}/BI
     aabcd
 
---
-    \[X]{-10}
-    
 # Check imposition of maximum by match_data_create().
 
 /abcd/
