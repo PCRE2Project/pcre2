@@ -632,7 +632,7 @@ have 16-bit arguments in 8-bit and 16-bit modes, so we need no more than a
 #define CODE_BLOCKSIZE_TYPE PCRE2_SIZE
 
 #undef  LOOKBEHIND_MAX
-#define LOOKBEHIND_MAX UINT16_MAX
+#define LOOKBEHIND_MAX ((int)UINT16_MAX)
 
 typedef struct pcre2_real_code {
   pcre2_memctl memctl;            /* Memory control fields */
