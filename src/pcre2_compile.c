@@ -6168,6 +6168,8 @@ for (;; pptr++)
       {
       PCRE2_DEBUG_UNREACHABLE();
       *errorcodeptr = ERR52;  /* Over-ran workspace - internal error */
+      cb->erroroffset = 0;
+      return 0;
       }
     /* LCOV_EXCL_STOP */
 
@@ -10972,6 +10974,7 @@ if (usedlength > length)
   {
   PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR23;  /* Overflow of code block - internal error */
+  cb.erroroffset = 0;
   goto HAD_CB_ERROR;
   }
 /* LCOV_EXCL_STOP */
@@ -11068,6 +11071,7 @@ if (errorcode == 0 && (optim_flags & PCRE2_OPTIM_AUTO_POSSESS) != 0)
     {
     PCRE2_DEBUG_UNREACHABLE();
     errorcode = ERR80;
+    cb.erroroffset = 0;
     }
   /* LCOV_EXCL_STOP */
   }
@@ -11229,6 +11233,7 @@ if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
     {
     PCRE2_DEBUG_UNREACHABLE();
     errorcode = ERR31;
+    cb.erroroffset = 0;
     goto HAD_CB_ERROR;
     }
   /* LCOV_EXCL_STOP */
