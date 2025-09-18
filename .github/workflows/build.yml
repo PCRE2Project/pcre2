@@ -515,7 +515,7 @@ jobs:
       - name: Setup
         run: |
           sudo apt-get -qq update
-          sudo apt-get -qq install zlib1g-dev libbz2-dev libedit-dev
+          sudo apt-get -qq install zlib1g-dev libbz2-dev libedit-dev lcov
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
