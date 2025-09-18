@@ -320,6 +320,7 @@ c_files=(
   src/pcre2posix.h
   src/pcre2posix_test.c
   src/pcre2test.c
+  src/pcre2test_inc.h
   )
 
 echo Detrailing

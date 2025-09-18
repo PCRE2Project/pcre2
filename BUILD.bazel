@@ -55,6 +55,7 @@ cc_library(
         "src/pcre2_ucp.h",
         "src/pcre2_ucptables_inc.h",
         "src/pcre2_util.h",
+        "src/pcre2test_inc.h",
         ":config_h_generic",
     ],
     strip_include_prefix = "src",

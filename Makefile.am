@@ -689,7 +689,7 @@ endif # WITH_JIT
 # Build the general pcre2test program.
 
 bin_PROGRAMS += pcre2test
-pcre2test_SOURCES = src/pcre2test.c
+pcre2test_SOURCES = src/pcre2test.c src/pcre2test_inc.h
 pcre2test_CFLAGS = $(AM_CFLAGS)
 pcre2test_LDADD = $(LIBREADLINE)
 
