@@ -1168,6 +1168,11 @@ are supported. */
   (test_mode == PCRE16_MODE)? (uint32_t)(((PCRE2_SPTR16)(a))[b]) : \
   (uint32_t)(((PCRE2_SPTR32)(a))[b]))
 
+#define INCSTR(x,offset) ( \
+  (test_mode == PCRE8_MODE)? (void *)((PCRE2_SPTR8)(x)+offset) : \
+  (test_mode == PCRE16_MODE)? (void *)((PCRE2_SPTR16)(x)+offset) : \
+  (void *)((PCRE2_SPTR32)(x)+offset))
+
 #define CONCTXCPY(a,b) \
   if (test_mode == PCRE8_MODE) \
     memcpy(G(a,8),G(b,8),sizeof(pcre2_convert_context_8)); \
@@ -1719,9 +1724,9 @@ are supported. */
   else \
     G(x,32) = (uint32_t *)(y)
 
-#define STRLEN(p) ((test_mode == PCRE8_MODE)? strlen((char *)p) : \
-  (test_mode == PCRE16_MODE)? strlen16((PCRE2_SPTR16)p) : \
-  strlen32((PCRE2_SPTR32)p))
+#define STRLEN(p) ((test_mode == PCRE8_MODE)? strlen((char *)(p)) : \
+  (test_mode == PCRE16_MODE)? strlen16((PCRE2_SPTR16)(p)) : \
+  strlen32((PCRE2_SPTR32)(p)))
 
 #define SUB1(a,b) \
   if (test_mode == PCRE8_MODE) G(a,8)(G(b,8)); \
@@ -1788,6 +1793,11 @@ the three different cases. */
   (test_mode == G(G(PCRE,BITONE),_MODE))? \
   (uint32_t)(((G(PCRE2_SPTR,BITONE))(a))[b]) : \
   (uint32_t)(((G(PCRE2_SPTR,BITTWO))(a))[b]))
+
+#define INCSTR(x,offset) ( \
+  (test_mode == G(G(PCRE,BITONE),_MODE))? \
+  (void *)((G(PCRE2_SPTR,BITONE))(x)+offset) : \
+  (void *)((G(PCRE2_SPTR,BITTWO))(x)+offset))
 
 #define CONCTXCPY(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2239,8 +2249,8 @@ the three different cases. */
     G(x,BITTWO) = (G(G(uint,BITTWO),_t) *)(y)
 
 #define STRLEN(p) ((test_mode == G(G(PCRE,BITONE),_MODE))? \
-  G(strlen,BITONE)((G(PCRE2_SPTR,BITONE))p) : \
-  G(strlen,BITTWO)((G(PCRE2_SPTR,BITTWO))p))
+  G(strlen,BITONE)((G(PCRE2_SPTR,BITONE))(p)) : \
+  G(strlen,BITTWO)((G(PCRE2_SPTR,BITTWO))(p)))
 
 #define SUB1(a,b) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2274,6 +2284,7 @@ the three different cases. */
 #define CASTFLD(t,a,b) (t)(G(a,8)->b)
 #define CASTVAR(t,x) (t)G(x,8)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR8)(a))[b])
+#define INCSTR(x,offset) (void *)((PCRE2_SPTR8)(x)+offset)
 #define CONCTXCPY(a,b) memcpy(G(a,8),G(b,8),sizeof(pcre2_convert_context_8))
 #define CONVERT_COPY(a,b,c) memcpy(G(a,8),(char *)b, c)
 #define DATCTXCPY(a,b) memcpy(G(a,8),G(b,8),sizeof(pcre2_match_context_8))
@@ -2380,7 +2391,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,8)->y = z
 #define SETOP(x,y,z) G(x,8) z y
 #define SETCASTPTR(x,y) G(x,8) = (uint8_t *)(y)
-#define STRLEN(p) strlen((char *)p)
+#define STRLEN(p) strlen((char *)(p))
 #define SUB1(a,b) G(a,8)(G(b,8))
 #define SUB2(a,b,c) G(a,8)(G(b,8),G(c,8))
 #define TEST(x,r,y) (G(x,8) r (y))
@@ -2393,6 +2404,7 @@ the three different cases. */
 #define CASTFLD(t,a,b) (t)(G(a,16)->b)
 #define CASTVAR(t,x) (t)G(x,16)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR16)(a))[b])
+#define INCSTR(x,offset) (void *)((PCRE2_SPTR16)(x)+offset)
 #define CONCTXCPY(a,b) memcpy(G(a,16),G(b,16),sizeof(pcre2_convert_context_16))
 #define CONVERT_COPY(a,b,c) memcpy(G(a,16),(char *)b, (c)*2)
 #define DATCTXCPY(a,b) memcpy(G(a,16),G(b,16),sizeof(pcre2_match_context_16))
@@ -2497,7 +2509,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,16)->y = z
 #define SETOP(x,y,z) G(x,16) z y
 #define SETCASTPTR(x,y) G(x,16) = (uint16_t *)(y)
-#define STRLEN(p) strlen16((PCRE2_SPTR16)p)
+#define STRLEN(p) strlen16((PCRE2_SPTR16)(p))
 #define SUB1(a,b) G(a,16)(G(b,16))
 #define SUB2(a,b,c) G(a,16)(G(b,16),G(c,16))
 #define TEST(x,r,y) (G(x,16) r (y))
@@ -2510,6 +2522,7 @@ the three different cases. */
 #define CASTFLD(t,a,b) (t)(G(a,32)->b)
 #define CASTVAR(t,x) (t)G(x,32)
 #define CODE_UNIT(a,b) (uint32_t)(((PCRE2_SPTR32)(a))[b])
+#define INCSTR(x,offset) (void *)((PCRE2_SPTR32)(x)+offset)
 #define CONCTXCPY(a,b) memcpy(G(a,32),G(b,32),sizeof(pcre2_convert_context_32))
 #define CONVERT_COPY(a,b,c) memcpy(G(a,32),(char *)b, (c)*4)
 #define DATCTXCPY(a,b) memcpy(G(a,32),G(b,32),sizeof(pcre2_match_context_32))
@@ -2614,7 +2627,7 @@ the three different cases. */
 #define SETFLD(x,y,z) G(x,32)->y = z
 #define SETOP(x,y,z) G(x,32) z y
 #define SETCASTPTR(x,y) G(x,32) = (uint32_t *)(y)
-#define STRLEN(p) strlen32((PCRE2_SPTR32)p)
+#define STRLEN(p) strlen32((PCRE2_SPTR32)(p))
 #define SUB1(a,b) G(a,32)(G(b,32))
 #define SUB2(a,b,c) G(a,32)(G(b,32),G(c,32))
 #define TEST(x,r,y) (G(x,32) r (y))
@@ -5337,7 +5350,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     for (; namecount > 0; namecount--)
       {
       int imm2_size = test_mode == PCRE8_MODE ? 2 : 1;
-      size_t length = STRLEN(nametable + imm2_size);
+      size_t length = STRLEN(INCSTR(nametable, imm2_size));
       fprintf(outfile, "  ");
 
       /* In UTF mode the name may be a UTF string containing non-ASCII
@@ -9109,9 +9122,6 @@ for (gmatched = 0;; gmatched++)
 
   if ((dat_datctl.control & (CTL_FINDLIMITS|CTL_FINDLIMITS_NOHEAP)) != 0)
     {
-    capcount = 0;  /* This stops compiler warnings */
-    (void)capcount;
-
     if ((dat_datctl.control & CTL_FINDLIMITS_NOHEAP) == 0 &&
         (FLD(compiled_code, executable_jit) == NULL ||
           (dat_datctl.options & PCRE2_NO_JIT) != 0))
@@ -9250,9 +9260,9 @@ for (gmatched = 0;; gmatched++)
 
   /* The result of the match is now in capcount. First handle a successful
   match. If pp was forced to be NULL (to test NULL handling) it will have been
-  treated as an empty string if the length was zero. So re-create that for
-  outputting. Don't just point to "" because that leads to a "loss of const"
-  warning. */
+  treated as an empty string if the length was zero. So, re-create that for
+  outputting, preserving the invariant that pp is a valid pointer to a region
+  of length len followed by a null. */
 
   if (capcount >= 0)
     {
@@ -9260,10 +9270,10 @@ for (gmatched = 0;; gmatched++)
       {
 #ifdef SUPPORT_VALGRIND
       /* Mark the start of dbuffer addressable again. */
-      VALGRIND_MAKE_MEM_UNDEFINED(dbuffer, 1);
+      VALGRIND_MAKE_MEM_UNDEFINED(dbuffer, code_unit_size);
 #endif
       pp = dbuffer;
-      pp[0] = 0;
+      memset(pp, 0, code_unit_size);
       }
 
     if ((unsigned)capcount > oveccount)   /* Check for lunatic return value */
