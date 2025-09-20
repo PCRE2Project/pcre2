@@ -3186,12 +3186,15 @@ if ((options & PCRE2_LITERAL) != 0)
   {
   while (ptr < ptrend)
     {
+    /* LCOV_EXCL_START */
     if (parsed_pattern >= parsed_pattern_end)
       {
       PCRE2_DEBUG_UNREACHABLE();
       errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
       goto FAILED;
       }
+    /* LCOV_EXCL_STOP */
+
     thisptr = ptr;
     GETCHARINCTEST(c, ptr);
     if (auto_callout)
@@ -3257,6 +3260,7 @@ while (ptr < ptrend)
   ptr_check = ptr;
 #endif
 
+  /* LCOV_EXCL_START */
   if (parsed_pattern >= parsed_pattern_end)
     {
     /* Weak pre-write check; only ensures parsed_pattern[0] is writeable
@@ -3265,6 +3269,7 @@ while (ptr < ptrend)
     errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
     goto FAILED;
     }
+  /* LCOV_EXCL_STOP */
 
   /* If the last time round this loop something was added, parsed_pattern will
   no longer be equal to this_parsed_item. Remember where the previous item
@@ -4558,9 +4563,11 @@ while (ptr < ptrend)
 
           /* All others are not allowed in a class */
 
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           PCRE2_FALLTHROUGH /* Fall through */
+          /* LCOV_EXCL_STOP */
 
           case ESC_A:
           case ESC_Z:
@@ -4794,10 +4801,12 @@ while (ptr < ptrend)
 
         switch(meta)
           {
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           errorcode = ERR89;  /* Unknown code; should never occur because */
           goto FAILED;        /* the meta values come from a table above. */
+          /* LCOV_EXCL_STOP */
 
           case META_ATOMIC:
           goto ATOMIC_GROUP;
@@ -5896,12 +5905,14 @@ else if ((xoptions & PCRE2_EXTRA_MATCH_WORD) != 0)
 /* Terminate the parsed pattern, then return success if all groups are closed.
 Otherwise we have unclosed parentheses. */
 
+/* LCOV_EXCL_START */
 if (parsed_pattern >= parsed_pattern_end)
   {
   PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR63;  /* Internal error (parsed pattern overflow) */
   goto FAILED;
   }
+/* LCOV_EXCL_STOP */
 
 *parsed_pattern = META_END;
 if (nest_depth == 0) return 0;
@@ -6015,7 +6026,9 @@ for (;;)
     }
   }
 
+/* LCOV_EXCL_START */
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -6150,19 +6163,21 @@ for (;; pptr++)
 
   if (lengthptr != NULL)
     {
+    /* LCOV_EXCL_START */
+    if (code >= cb->start_workspace + cb->workspace_size)
+      {
+      PCRE2_DEBUG_UNREACHABLE();
+      *errorcodeptr = ERR52;  /* Over-ran workspace - internal error */
+      cb->erroroffset = 0;
+      return 0;
+      }
+    /* LCOV_EXCL_STOP */
+
     if (code > cb->start_workspace + cb->workspace_size -
         WORK_SIZE_SAFETY_MARGIN)                       /* Check for overrun */
       {
-      if (code >= cb->start_workspace + cb->workspace_size)
-        {
-        PCRE2_DEBUG_UNREACHABLE();
-        *errorcodeptr = ERR52;  /* Over-ran workspace - internal error */
-        }
-      else
-        {
-        *errorcodeptr = ERR86;  /* Pattern too complicated */
-        cb->erroroffset = 0;
-        }
+      *errorcodeptr = ERR86;  /* Pattern too complicated */
+      cb->erroroffset = 0;
       return 0;
       }
 
@@ -7838,13 +7853,16 @@ for (;; pptr++)
       here because it just makes it horribly messy. */
 
       default:
+
+      /* LCOV_EXCL_START */
       if (op_previous >= OP_EODN || op_previous <= OP_WORD_BOUNDARY)
         {
         PCRE2_DEBUG_UNREACHABLE();
         *errorcodeptr = ERR10;  /* Not a character type - internal error */
         return 0;
         }
-      else
+      /* LCOV_EXCL_STOP */
+
         {
         int prop_type, prop_value;
         PCRE2_UCHAR *oldcode;
@@ -8364,12 +8382,14 @@ for (;; pptr++)
     META_END is a literal. Otherwise we have a problem. */
 
     default:
+    /* LCOV_EXCL_START */
     if (meta >= META_END)
       {
       PCRE2_DEBUG_UNREACHABLE();
       *errorcodeptr = ERR89;  /* Internal error - unrecognized. */
       return 0;
       }
+    /* LCOV_EXCL_STOP */
 
     /* Handle a literal character. We come here by goto in the case of a
     32-bit, non-UTF character whose value is greater than META_END. */
@@ -8501,8 +8521,10 @@ for (;; pptr++)
     }         /* End of big switch */
   }           /* End of big loop */
 
+/* LCOV_EXCL_START */
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 return 0;                  /* Avoid compiler warnings */
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -8809,8 +8831,10 @@ for (;;)
   pptr++;
   }
 
+/* LCOV_EXCL_START */
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 return 0;                  /* Avoid compiler warnings */
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -9371,13 +9395,14 @@ for (;; pptr++)
     if (meta < META_END) continue;  /* Literal */
     break;
 
-    case META_END:
-
     /* The parsed regex is malformed; we have reached the end and did
     not find the end of the construct which we are skipping over. */
 
+    /* LCOV_EXCL_START */
+    case META_END:
     PCRE2_DEBUG_UNREACHABLE();
     return NULL;
+    /* LCOV_EXCL_STOP */
 
     /* The data for these items is variable in length. */
 
@@ -9442,7 +9467,9 @@ for (;; pptr++)
   pptr += meta_extra_lengths[meta];
   }
 
+/* LCOV_EXCL_START */
 PCRE2_UNREACHABLE(); /* Control never reaches here */
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -9938,10 +9965,12 @@ EXIT:
 *minptr = branchminlength;
 return branchlength;
 
+/* LCOV_EXCL_START */
 PARSED_SKIP_FAILED:
 PCRE2_DEBUG_UNREACHABLE();
 *errcodeptr = ERR90;  /* Unhandled META code - internal error */
 return -1;
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -10077,15 +10106,16 @@ for (; *pptr != META_END; pptr++)
 
   switch (META_CODE(*pptr))
     {
-    default:
-
     /* The following erroroffset is a bogus but safe value. This branch should
     be avoided by providing a proper implementation for all supported cases
     below. */
 
+    /* LCOV_EXCL_START */
+    default:
     PCRE2_DEBUG_UNREACHABLE();
     cb->erroroffset = 0;
     return ERR70;  /* Unrecognized meta code */
+    /* LCOV_EXCL_STOP */
 
     case META_ESCAPE:
     if (*pptr - META_ESCAPE == ESC_P || *pptr - META_ESCAPE == ESC_p)
@@ -10532,11 +10562,13 @@ if ((options & PCRE2_LITERAL) == 0)
 
           break;
 
+          /* LCOV_EXCL_START */
           default:
           /* All values in the enum need an explicit entry for this switch
           but until a better way to prevent coding mistakes is invented keep
           a catch all that triggers a debug build assert as a failsafe */
           PCRE2_DEBUG_UNREACHABLE();
+          /* LCOV_EXCL_STOP */
           }
         break;   /* Out of the table scan loop */
         }
@@ -10659,10 +10691,12 @@ switch(newline)
   cb.nltype = NLTYPE_ANYCRLF;
   break;
 
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR56;
   goto HAD_EARLY_ERROR;
+  /* LCOV_EXCL_STOP */
   }
 
 /* Pre-scan the pattern to do two things: (1) Discover the named groups and
@@ -10935,18 +10969,20 @@ memory as unaddressable, so that any out-of-bound reads can be detected. */
 
 *code++ = OP_END;
 usedlength = code - codestart;
+/* LCOV_EXCL_START */
 if (usedlength > length)
   {
   PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR23;  /* Overflow of code block - internal error */
+  cb.erroroffset = 0;
+  goto HAD_CB_ERROR;
   }
-else
-  {
-  re->blocksize -= CU2BYTES(length - usedlength);
+/* LCOV_EXCL_STOP */
+
+re->blocksize -= CU2BYTES(length - usedlength);
 #ifdef SUPPORT_VALGRIND
-  VALGRIND_MAKE_MEM_NOACCESS(code, CU2BYTES(length - usedlength));
+VALGRIND_MAKE_MEM_NOACCESS(code, CU2BYTES(length - usedlength));
 #endif
-  }
 
 /* Scan the pattern for recursion/subroutine calls and convert the group
 numbers into offsets. Maintain a small cache so that repeated groups containing
@@ -10991,12 +11027,15 @@ if (errorcode == 0 && cb.had_recurse)
       if (rgroup == NULL)
         {
         rgroup = PRIV(find_bracket)(search_from, utf, groupnumber);
+        /* LCOV_EXCL_START */
         if (rgroup == NULL)
           {
           PCRE2_DEBUG_UNREACHABLE();
           errorcode = ERR53;
           break;
           }
+        /* LCOV_EXCL_STOP */
+
         if (--start < 0) start = RSCAN_CACHE_SIZE - 1;
         rc[start].groupnumber = groupnumber;
         rc[start].group = rgroup;
@@ -11026,11 +11065,15 @@ function call. */
 if (errorcode == 0 && (optim_flags & PCRE2_OPTIM_AUTO_POSSESS) != 0)
   {
   PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;
-  if (PRIV(auto_possessify)(temp, &cb) != 0)
+  int possessify_rc = PRIV(auto_possessify)(temp, &cb);
+  /* LCOV_EXCL_START */
+  if (possessify_rc != 0)
     {
     PCRE2_DEBUG_UNREACHABLE();
     errorcode = ERR80;
+    cb.erroroffset = 0;
     }
+  /* LCOV_EXCL_STOP */
   }
 
 /* Failed to compile, or error while post-processing. */
@@ -11060,6 +11103,7 @@ unit. */
 if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
   {
   int minminlength = 0;  /* For minimal minlength from first/required CU */
+  int study_rc;
 
   /* If we do not have a first code unit, see if there is one that is asserted
   (these are not saved during the compile because they can cause conflicts with
@@ -11183,12 +11227,16 @@ if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
   /* Study the compiled pattern to set up information such as a bitmap of
   starting code units and a minimum matching length. */
 
-  if (PRIV(study)(re) != 0)
+  study_rc = PRIV(study)(re);
+  /* LCOV_EXCL_START */
+  if (study_rc != 0)
     {
     PCRE2_DEBUG_UNREACHABLE();
     errorcode = ERR31;
+    cb.erroroffset = 0;
     goto HAD_CB_ERROR;
     }
+  /* LCOV_EXCL_STOP */
 
   /* If study() set a bitmap of starting code units, it implies a minimum
   length of at least one. */

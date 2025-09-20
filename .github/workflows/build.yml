@@ -531,7 +531,7 @@ jobs:
       - name: Setup
         run: |
           sudo apt-get -qq update
-          sudo apt-get -qq install zlib1g-dev libbz2-dev libedit-dev
+          sudo apt-get -qq install zlib1g-dev libbz2-dev libedit-dev lcov
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -547,50 +547,13 @@ jobs:
       - name: Test
         run: |
           cd build
-          echo "== Running all tests with CTest =="
-          LLVM_PROFILE_FILE="coverage-%m.profraw" ctest -j1 --output-on-failure
-          echo ""
-          echo "== Re-running pcre2test with -malloc =="
-          LLVM_PROFILE_FILE="coverage-%m.profraw" srcdir=.. pcre2test=./pcre2test ../RunTest -malloc
-
-      - name: Report
-        run: |
-          LLVM_VER=`clang --version | head -n1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1`
-          echo "Using LLVM version $LLVM_VER"
-
-          # Merge the profiles gathered
-          cd build
-          llvm-profdata-$LLVM_VER merge -sparse coverage-*.profraw -o coverage.profdata
-
-          # Output HTML, for archiving and browsing later
-          llvm-cov-$LLVM_VER show \
-            -format=html -output-dir=coverage-report -show-line-counts-or-regions -show-branches=percent \
-            -instr-profile=coverage.profdata \
-            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
-            ../src/ ./
-
-          # Output LCOV-compatible output, for downstream tools
-          llvm-cov-$LLVM_VER export \
-            -format=lcov \
-            -instr-profile=coverage.profdata \
-            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
-            ../src/ ./ \
-            > ./coverage-lcov.info
-
-          # Output text summary to build log
-          echo '```' > "$GITHUB_STEP_SUMMARY"
-          llvm-cov-$LLVM_VER report \
-            -instr-profile=coverage.profdata \
-            ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
-            ../src/ ./ \
-            >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          ../maint/RunCoverage
 
       - name: Upload report to GitHub artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: "Coverage report"
-          path: './build/coverage-report'
+          path: './build/coverage-html'
           if-no-files-found: error
 
       - name: Upload report to Codecov

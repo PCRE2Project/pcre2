@@ -262,8 +262,10 @@ switch(ptype)
     if (c < *p) return !negated;
     if (c == *p++) return negated;
     }
+  /* LCOV_EXCL_START */
   PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
   break;
+  /* LCOV_EXCL_STOP */
 
   /* Haven't yet thought these through. */
 
@@ -1139,8 +1141,10 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
+/* LCOV_EXCL_START */
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 return FALSE;              /* Avoid compiler warnings */
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -1179,11 +1183,13 @@ for (;;)
   {
   c = *code;
 
+  /* LCOV_EXCL_START */
   if (c >= OP_TABLE_LENGTH)
     {
     PCRE2_DEBUG_UNREACHABLE();
     return -1;   /* Something gone wrong */
     }
+  /* LCOV_EXCL_STOP */
 
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {

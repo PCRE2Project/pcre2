@@ -324,9 +324,11 @@ if (input_len == 0) return 0;
 
 switch (state->to_case)
   {
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   return 0;
+  /* LCOV_EXCL_STOP */
 
   case PCRE2_SUBSTITUTE_CASE_LOWER: // Can be single_char TRUE or FALSE
   case PCRE2_SUBSTITUTE_CASE_UPPER: // Can only be single_char FALSE
@@ -462,9 +464,11 @@ PCRE2_ASSERT(input_len != 0);
 
 switch (state->to_case)
   {
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   return 0;
+  /* LCOV_EXCL_STOP */
 
   case PCRE2_SUBSTITUTE_CASE_LOWER: // Can be single_char TRUE or FALSE
   case PCRE2_SUBSTITUTE_CASE_UPPER: // Can only be single_char FALSE

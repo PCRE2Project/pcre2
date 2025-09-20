@@ -228,6 +228,7 @@ for (i = 0; i < cb->names_found; i++)
 /* This should not occur, because this function is called only when we know we
 have duplicate names. Give an internal error. */
 
+/* LCOV_EXCL_START */
 if (i >= cb->names_found)
   {
   PCRE2_DEBUG_UNREACHABLE();
@@ -235,6 +236,7 @@ if (i >= cb->names_found)
   cb->erroroffset = name - cb->start_pattern;
   return FALSE;
   }
+/* LCOV_EXCL_STOP */
 
 /* Record the index and then see how many duplicates there are, updating the
 backref map and maximum back reference as we do. */

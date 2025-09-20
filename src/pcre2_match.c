@@ -2851,9 +2851,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
         /* This should never occur */
 
+        /* LCOV_EXCL_START */
         default:
         PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
+        /* LCOV_EXCL_STOP */
         }
 
       Fecode += 3;
@@ -3202,9 +3204,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
           /* This should not occur */
 
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
+          /* LCOV_EXCL_STOP */
           }
         }
 
@@ -3478,9 +3482,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           }
         break;
 
+        /* LCOV_EXCL_START */
         default:
         PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
+        /* LCOV_EXCL_STOP */
         }  /* End switch(Lctype) */
 
       else
@@ -3731,9 +3737,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           }
         break;
 
+        /* LCOV_EXCL_START */
         default:
         PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
+        /* LCOV_EXCL_STOP */
         }
       }
 
@@ -4017,9 +4025,12 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           PCRE2_UNREACHABLE(); /* Control never reaches here */
 
           /* This should never occur */
+
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
+          /* LCOV_EXCL_STOP */
           }
         }
 
@@ -4172,9 +4183,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               RRETURN(MATCH_NOMATCH);
             break;
 
+            /* LCOV_EXCL_START */
             default:
             PCRE2_DEBUG_UNREACHABLE();
             return PCRE2_ERROR_INTERNAL;
+            /* LCOV_EXCL_STOP */
             }
           }
         }
@@ -4317,9 +4330,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               RRETURN(MATCH_NOMATCH);
             break;
 
+            /* LCOV_EXCL_START */
             default:
             PCRE2_DEBUG_UNREACHABLE();
             return PCRE2_ERROR_INTERNAL;
+            /* LCOV_EXCL_STOP */
             }
           }
         }
@@ -4586,9 +4601,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           break;
 
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
+          /* LCOV_EXCL_STOP */
           }
 
         /* Feptr is now past the end of the maximum run */
@@ -4905,9 +4922,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           break;
 
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
+          /* LCOV_EXCL_STOP */
           }
 
         if (reptype == REPTYPE_POS) continue;    /* No backtracking */
@@ -5163,9 +5182,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           break;
 
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
+          /* LCOV_EXCL_STOP */
           }
 
         if (reptype == REPTYPE_POS) continue;    /* No backtracking */
@@ -6835,9 +6856,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     /* There's been some horrible disaster. Arrival here can only mean there is
     something seriously wrong in the code above or the OP_xxx definitions. */
 
+    /* LCOV_EXCL_START */
     default:
     PCRE2_DEBUG_UNREACHABLE();
     return PCRE2_ERROR_INTERNAL;
+    /* LCOV_EXCL_STOP */
     }
 
   /* Do not insert any code in here without much thought; it is assumed
@@ -6885,9 +6908,11 @@ switch (Freturn_id)
   LBL(221) LBL(222) LBL(223) LBL(224)
 #endif
 
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   return PCRE2_ERROR_INTERNAL;
+  /* LCOV_EXCL_STOP */
   }
 #undef LBL
 }
@@ -7402,9 +7427,11 @@ switch(re->newline_convention)
   mb->nltype = NLTYPE_ANYCRLF;
   break;
 
+  /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
   return PCRE2_ERROR_INTERNAL;
+  /* LCOV_EXCL_STOP */
   }
 
 /* The backtracking frames have fixed data at the front, and a PCRE2_SIZE
