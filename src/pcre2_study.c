@@ -138,7 +138,7 @@ for (;;)
   PCRE2_UCHAR op;
   PCRE2_SPTR cs, ce;
 
-  if (branchlength >= UINT16_MAX)
+  if (branchlength >= (int)UINT16_MAX)
     {
     branchlength = UINT16_MAX;
     cc = nextbranch;
@@ -627,11 +627,11 @@ for (;;)
       break;
       }
 
-     /* Take care not to overflow: (1) min and d are ints, so check that their
-     product is not greater than INT_MAX. (2) branchlength is limited to
-     UINT16_MAX (checked at the top of the loop). */
+    /* Take care not to overflow: (1) min and d are ints, so check that their
+    product is not greater than INT_MAX. (2) branchlength is limited to
+    UINT16_MAX (checked at the top of the loop). */
 
-    if ((d > 0 && (INT_MAX/d) < min) || UINT16_MAX - branchlength < min*d)
+    if ((d > 0 && (INT_MAX/d) < min) || (int)UINT16_MAX - branchlength < min*d)
       branchlength = UINT16_MAX;
     else branchlength += min * d;
     break;
@@ -2063,7 +2063,7 @@ if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
     return 3; /* unrecognized opcode */
 
     default:
-    re->minlength = (min > UINT16_MAX)? UINT16_MAX : min;
+    re->minlength = (min > (int)UINT16_MAX)? (int)UINT16_MAX : min;
     break;
     }
   }

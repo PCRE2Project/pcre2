@@ -972,6 +972,7 @@ The distribution should contain the files listed below.
   cmake/FindReadline.cmake
   cmake/pcre2-config.cmake.in
   cmake/PCRE2CheckLinkerFlag.cmake
+  cmake/PCRE2UseSystemExtensions.cmake
   src/config-cmake.h.in
   CMakeLists.txt
 

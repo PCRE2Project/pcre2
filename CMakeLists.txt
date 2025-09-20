@@ -163,6 +163,7 @@ include(CheckTypeSize)
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
+include(PCRE2UseSystemExtensions)
 
 check_include_file(assert.h HAVE_ASSERT_H)
 check_include_file(dirent.h HAVE_DIRENT_H)
@@ -272,6 +273,11 @@ check_c_source_compiles(
 if(INTEL_CET_ENABLED)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
 endif()
+
+# Check whether any system-wide extensions need to be enabled, in order for
+# OS functionality to be exposed.
+
+pcre2_use_system_extensions()
 
 # User-configurable options
 #
@@ -1311,6 +1317,14 @@ if test \"$?\" != \"0\"; then exit 1; fi
 
     if(UNIX)
       add_test(pcre2_grep_test sh ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
+
+      if(PCRE2_EBCDIC)
+        # The grep tests currently fail in EBCDIC mode because the test data
+        # files are in ASCII. This could be fixed properly, but for now, we
+        # have very few EBCDIC users and the pcre2grep utility is hardly even
+        # part of the official project artifacts.
+        set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
+      endif()
     endif()
   endif()
 
