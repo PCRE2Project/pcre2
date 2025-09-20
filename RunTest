@@ -540,9 +540,14 @@ for bmode in "$test8" "$test16" "$test32"; do
     saverc=0
     checkspecial '-C' || saverc=$?
     checkspecial '--help' || saverc=$?
+    checkspecial "$bmode testSinput" || saverc=$?
+    checkspecial "$bmode $testdata/testinputheap" || saverc=$?
     if [ $support_setstack -eq 0 ] ; then
-      checkspecial '-S 1 -t 10 testSinput' || saverc=$?
+      checkspecial "$bmode -S 1 -t 10 testSinput" || saverc=$?
     fi
+    checkspecial -LM || saverc=$?
+    checkspecial -LP || saverc=$?
+    checkspecial -LS || saverc=$?
     if [ $saverc -eq 0 ] ; then
       echo "  OK"
     fi

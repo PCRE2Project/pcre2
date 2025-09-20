@@ -752,14 +752,18 @@ for (;;)
     /* This should not occur: we list all opcodes explicitly so that when
     new ones get added they are properly considered. */
 
+    /* LCOV_EXCL_START */
     default:
     PCRE2_DEBUG_UNREACHABLE();
     return -3;
+    /* LCOV_EXCL_STOP */
     }
   }
 
+/* LCOV_EXCL_START */
 PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 return -3;                 /* Avoid compiler warnings */
+/* LCOV_EXCL_STOP */
 }
 
 
@@ -1773,9 +1777,11 @@ do
           case XCL_END:
           goto HANDLE_CLASSMAP;
 
+          /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return SSB_UNKNOWN;   /* Internal error, should not occur */
+          /* LCOV_EXCL_STOP */
           }
         }
 #endif  /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8 */
@@ -1925,11 +1931,13 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
   int depth = 0;
   int rc = set_start_bits(re, code, utf, ucp, &depth);
+  /* LCOV_EXCL_START */
   if (rc == SSB_UNKNOWN)
     {
     PCRE2_DEBUG_UNREACHABLE();
     return 1;
     }
+  /* LCOV_EXCL_STOP */
 
   /* If a list of starting code units was set up, scan the list to see if only
   one or two were listed. Having only one listed is rare because usually a
@@ -2054,13 +2062,17 @@ if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
     case -1:  /* \C in UTF mode or over-complex regex */
     break;    /* Leave minlength unchanged (will be zero) */
 
+    /* LCOV_EXCL_START */
     case -2:
     PCRE2_DEBUG_UNREACHABLE();
     return 2; /* missing capturing bracket */
+    /* LCOV_EXCL_STOP */
 
+    /* LCOV_EXCL_START */
     case -3:
     PCRE2_DEBUG_UNREACHABLE();
     return 3; /* unrecognized opcode */
+    /* LCOV_EXCL_STOP */
 
     default:
     re->minlength = (min > (int)UINT16_MAX)? (int)UINT16_MAX : min;

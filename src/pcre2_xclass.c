@@ -250,9 +250,11 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
       /* This should never occur, but compilers may mutter if there is no
       default. */
 
+      /* LCOV_EXCL_START */
       default:
       PCRE2_DEBUG_UNREACHABLE();
       return FALSE;
+      /* LCOV_EXCL_STOP */
       }
 
     data += 2;
@@ -527,9 +529,11 @@ while (ptr < data_end)
     /* This should never occur, but compilers may mutter if there is no
     default. */
 
+    /* LCOV_EXCL_START */
     default:
     PCRE2_DEBUG_UNREACHABLE();
     return FALSE;
+    /* LCOV_EXCL_STOP */
     }
   }
 

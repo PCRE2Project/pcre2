@@ -1089,6 +1089,9 @@ call :checkspecial "--line-buffered --colour=auto abc nul" 1 || exit /b 1
 call :checkspecial "--line-buffered --color abc nul" 1 || exit /b 1
 call :checkspecial "-dskip abc ." 1 || exit /b 1
 call :checkspecial "-Dread -Dskip abc nul" 1 || exit /b 1
+call :checkspecial "-f %srcdir%\testdata\greplistBad nul" 2 || exit /b 1
+call :checkspecial "(unpaired nul" 2 || exit /b 1
+call :checkspecial "-e (unpaired1 -e (unpaired2 nul" 2 || exit /b 1
 
 
 :: Clean up local working files

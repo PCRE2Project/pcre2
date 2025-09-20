@@ -177,12 +177,9 @@ for (int i = 0; i < count; i++)
 
   if (rc != 0)
     {
-    if (v)
-      {
-      char buffer[256];
-      (void)regerror(rc, &re, buffer, sizeof(buffer));
-      PRINTF("Compile error %d: %s (expected)\n", rc, buffer);
-      }
+    char buffer[256];
+    (void)regerror(rc, &re, buffer, sizeof(buffer));
+    PRINTF("Compile error %d: %s (expected)\n", rc, buffer);
     continue;
     }
 
@@ -222,7 +219,7 @@ for (int i = 0; i < count; i++)
         }
       }
 
-    else if (v)
+    else
       {
       char buffer[256];
       (void)regerror(rc, &re, buffer, sizeof(buffer));

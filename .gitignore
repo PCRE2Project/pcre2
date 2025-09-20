@@ -6,6 +6,7 @@ build-*/
 *.a
 *.gcda
 *.gcno
+*.profraw
 *.lo
 *.la
 *.pc

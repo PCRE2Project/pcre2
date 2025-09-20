@@ -60,6 +60,9 @@ GenerateUcpTables.py
   GenerateCommon.py and Unicode data files. The generated file contains tables
   for looking up Unicode property names.
 
+FilterCoverage.py
+  A small helper used by the RunCoverage script.
+
 LintMan
   A Perl script to check and update magic numbers in the documentation that
   correspond to configurable settings in the codebase.
@@ -94,6 +97,10 @@ pcre2_chartables.c.non-standard
 
 README
   This file.
+
+RunCoverage
+  A script used to generate the coverage report using Clang. It is called by
+  the GitHub CI actions, and can also be run by a developer locally.
 
 RunManifestTest
 RunManifestTest.ps1

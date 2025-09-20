@@ -1148,6 +1148,9 @@ checkspecial '--line-buffered --colour=auto abc /dev/null' 1
 checkspecial '--line-buffered --color abc /dev/null' 1
 checkspecial '-dskip abc .' 1
 checkspecial '-Dread -Dskip abc /dev/null' 1
+checkspecial "-f $srcdir/testdata/greplistBad /dev/null" 2
+checkspecial "(unpaired /dev/null" 2
+checkspecial "-e (unpaired1 -e (unpaired2 /dev/null" 2
 
 # Clean up local working files
 rm -f testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
