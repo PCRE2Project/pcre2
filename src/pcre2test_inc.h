@@ -3687,7 +3687,7 @@ uint32_t oveccount;
 
 PCRE2_UCHAR *q = NULL;   /* Typed pointer within dbuffer */
 PCRE2_UCHAR *start_rep;  /* Position within dbuffer; stashed value of q */
-const PCRE2_UCHAR *pp;   /* Subject pointer within dbuffer */
+PCRE2_UCHAR *pp;         /* Subject pointer within dbuffer */
 
 subject_literal = (pat_patctl.control2 & CTL2_SUBJECT_LITERAL) != 0;
 
