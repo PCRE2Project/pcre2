@@ -906,6 +906,7 @@ The distribution should contain the files listed below.
   src/pcre2demo.c          simple demonstration of coding calls to PCRE2
   src/pcre2grep.c          source of a grep utility that uses PCRE2
   src/pcre2test.c          comprehensive test program
+  src/pcre2test_inc.h      header used by pcre2test
   src/pcre2_jit_test.c     JIT test program
   src/pcre2posix_test.c    POSIX wrapper API test program
 
