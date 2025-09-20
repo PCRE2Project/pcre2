@@ -2905,6 +2905,11 @@ static void free_globals(void)
 DISPATCH(, free_globals_, ());
 }
 
+static void unittest(void)
+{
+DISPATCH(, unittest_, ());
+}
+
 #undef DISPATCH
 #undef BITONE
 #undef BITTWO
@@ -3569,37 +3574,6 @@ if (PO(options) != DO(options) || PO(control) != DO(control) ||
   return 1;
   }
 
-// XXX vvv COVER stuff, lift to a better location
-
-// r1 = pcre2_config(PCRE2_CONFIG_UNICODE, NULL);
-// r2 = pcre2_config(PCRE2_CONFIG_MATCHLIMIT, NULL);
-// if (r1 != r2 || r1 != sizeof(uint32_t))
-//   {
-//   fprintf(stderr, "** Error in pcre2_config(): bad length\n");
-//   return 1;
-//   }
-
-/* Check that bad options are diagnosed. */
-
-// XXX COVER stuff, lift to a better location
-
-// r1 = pcre2_config(999, NULL);
-// r2 = pcre2_config(999, &temp);
-
-// if (r1 != r2 || r2 != PCRE2_ERROR_BADOPTION)
-//   {
-//   fprintf(stderr, "** Error in pcre2_config(): bad option not diagnosed\n");
-//   return 1;
-//   }
-
-/* This configuration option is now obsolete, but running a quick check ensures
-that its code is covered. */
-
-// XXX COVER
-
-// (void)pcre2_config(PCRE2_CONFIG_STACKRECURSE, &temp);
-// (void)pcre2_config(PCRE2_CONFIG_LINKSIZE, &temp);
-
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
 and 32-bit buffers (pbuffer16, pbuffer32) are obtained only if needed. */
@@ -3671,20 +3645,12 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     goto EXIT;
     }
 
-  /* Select operating mode. Ensure that pcre2_config() is called in 16-bit
-  and 32-bit modes because that won't happen naturally when 8-bit is also
-  configured. Also call some other functions that are not otherwise used. This
-  means that a coverage report won't claim there are uncalled functions. */
-
-  // XXX COVER ^^^ the scattered coverage-related code, and consolidate it into one place
+  /* Select operating mode. */
 
   if (strcmp(arg, "-8") == 0)
     {
 #ifdef SUPPORT_PCRE2_8
     test_mode = PCRE2TEST_MODE_8;
-    // XXX COVER
-    // (void)pcre2_set_bsr_8(pat_context8, 999);
-    // (void)pcre2_set_newline_8(pat_context8, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 8-bit support\n");
@@ -3696,10 +3662,6 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     {
 #ifdef SUPPORT_PCRE2_16
     test_mode = PCRE2TEST_MODE_16;
-    // XXX COVER
-    // (void)pcre2_config_16(PCRE2_CONFIG_VERSION, NULL);
-    // (void)pcre2_set_bsr_16(pat_context16, 999);
-    // (void)pcre2_set_newline_16(pat_context16, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 16-bit support\n");
@@ -3711,10 +3673,6 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     {
 #ifdef SUPPORT_PCRE2_32
     test_mode = PCRE2TEST_MODE_32;
-    // XXX COVER
-    // (void)pcre2_config_32(PCRE2_CONFIG_VERSION, NULL);
-    // (void)pcre2_set_bsr_32(pat_context32, 999);
-    // (void)pcre2_set_newline_32(pat_context32, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 32-bit support\n");
@@ -3927,25 +3885,19 @@ if (arg_error != NULL)
   }  /* End of -error handling */
 
 /* Initialize things that cannot be done until we know which test mode we are
-running in. Exercise the general context copying and match data size functions,
-which are not otherwise used. */
-
-// XXX COVER ^^^ comment
+running in. */
 
 max_oveccount = DEFAULT_OVECCOUNT;
-
-  // XXX COVER
-// #define CONTEXTTESTS
-//   (void)G(pcre2_set_compile_extra_options_,BITS)(G(pat_context,BITS), 0);
-//   (void)G(pcre2_set_max_pattern_length_,BITS)(G(pat_context,BITS), 0);
-//   (void)G(pcre2_set_max_pattern_compiled_length_,BITS)(G(pat_context,BITS), 0);
-//   (void)G(pcre2_set_max_varlookbehind_,BITS)(G(pat_context,BITS), 0);
-//   (void)G(pcre2_set_offset_limit_,BITS)(G(dat_context,BITS), 0);
-//   (void)G(pcre2_get_match_data_size_,BITS)(G(match_data,BITS))
 
 /* Initialise the globals for the current mode. */
 
 init_globals();
+
+/* Perform additional edge-case and error-handling tests of public API
+functions, which wouldn't otherwise be covered by the standard use of the API
+in pcre2test. */
+
+unittest();
 
 /* Handle command line modifier settings, sending any error messages to
 stderr. We need to know the mode before modifying the context, and it is tidier

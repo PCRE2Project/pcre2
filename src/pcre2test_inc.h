@@ -97,6 +97,7 @@ library. */
 #define process_data                      PCRE2_SUFFIX(process_data_)
 #define init_globals                      PCRE2_SUFFIX(init_globals_)
 #define free_globals                      PCRE2_SUFFIX(free_globals_)
+#define unittest                          PCRE2_SUFFIX(unittest_)
 
 
 /* ---------------------- Mode-dependent variables ------------------------- */
@@ -1237,12 +1238,6 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     hasbackslashc, hascrorlf, jchanged, last_ctype, last_cunit, match_empty,
     depth_limit, heap_limit, match_limit, minlength, nameentrysize, namecount,
     newline_convention;
-
-  /* Exercise the error route. */
-
-  // XXX COVER ^^^ and vvv
-
-  pcre2_pattern_info(compiled_code, 999, NULL);
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
@@ -5363,6 +5358,138 @@ pcre2_convert_context_free(con_context);
 }
 
 
+
+/*************************************************
+*            Specific function tests             *
+*************************************************/
+
+/* These are tests of the public API functions in PCRE2, which wouldn't
+otherwise be covered by pcre2test. This usually implies they are error cases,
+or edge cases that are hard to hit in the standard flow of compile-match or
+compile-substitute.
+
+I think of them as perhaps more like unit tests, although they are still testing
+the public API, rather than internal modules.
+
+Inside pcre2test, which can be dynamically linked to lib-pcreX.so, we don't
+have access to any non-exported functions. */
+
+static void
+unittest(void)
+{
+int rc;
+uint32_t uval;
+PCRE2_SIZE sizeval;
+const char *failure = NULL;
+pcre2_compile_context *test_pat_context = NULL;
+pcre2_match_context *test_dat_context = NULL;
+pcre2_match_data *test_match_data = NULL;
+pcre2_code *test_compiled_code = NULL;
+PCRE2_UCHAR pattern[] = { 'a','b','c',0 };
+int errorcode;
+PCRE2_SIZE erroroffset;
+
+/* -------------------------- pcre2_config --------------------------------- */
+
+rc = pcre2_config(PCRE2_CONFIG_UNICODE, NULL);
+if (rc != (int)sizeof(uint32_t)) failure = "pcre2_config(PCRE2_CONFIG_UNICODE)";
+
+rc = pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &uval);
+if (rc != 0) failure = "pcre2_config(PCRE2_CONFIG_MATCHLIMIT)";
+
+rc = pcre2_config(999, NULL);
+if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_config(bad option)";
+
+rc = pcre2_config(999, &uval);
+if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_config(bad option)";
+
+
+rc = pcre2_config(PCRE2_CONFIG_STACKRECURSE, &uval);
+if (rc != 0) failure = "pcre2_config(PCRE2_CONFIG_STACKRECURSE)";
+
+rc = pcre2_config(PCRE2_CONFIG_LINKSIZE, &uval);
+if (rc != 0) failure = "pcre2_config(PCRE2_CONFIG_LINKSIZE)";
+
+/* ------------------------ Context functions ------------------------------ */
+
+test_pat_context = pcre2_compile_context_create(NULL);
+test_dat_context = pcre2_match_context_create(NULL);
+test_match_data = pcre2_match_data_create(10, NULL);
+
+if (test_pat_context == NULL || test_dat_context == NULL ||
+    test_match_data == NULL)
+  {
+  failure = "context or match_data creation";
+  goto EXIT;
+  }
+
+rc = pcre2_set_compile_extra_options(test_pat_context, 0);
+if (rc != 0) failure = "pcre2_set_compile_extra_options()";
+
+rc = pcre2_set_max_pattern_length(test_pat_context, 10);
+if (rc != 0) failure = "pcre2_set_max_pattern_length()";
+
+rc = pcre2_set_max_pattern_compiled_length(test_pat_context, 256);
+if (rc != 0) failure = "pcre2_set_max_pattern_compiled_length()";
+
+rc = pcre2_set_max_varlookbehind(test_pat_context, 0);
+if (rc != 0) failure = "pcre2_set_max_varlookbehind()";
+
+rc = pcre2_set_offset_limit(test_dat_context, 0);
+if (rc != 0) failure = "pcre2_set_offset_limit()";
+
+sizeval = pcre2_get_match_data_size(test_match_data);
+if (sizeval < 2) failure = "pcre2_get_match_data_size()";
+
+rc = pcre2_set_bsr(test_pat_context, 999);
+if (rc != PCRE2_ERROR_BADDATA) failure = "pcre2_set_bsr()";
+
+rc = pcre2_set_newline(test_pat_context, 999);
+if (rc != PCRE2_ERROR_BADDATA) failure = "pcre2_set_newline()";
+
+/* ----------------------- pcre2_pattern_info ------------------------------ */
+
+test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
+  0, NULL, &erroroffset, test_pat_context);
+if (test_compiled_code != NULL) failure = "test pattern compilation";
+
+test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, NULL, test_pat_context);
+if (test_compiled_code != NULL) failure = "test pattern compilation";
+
+test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, &erroroffset, test_pat_context);
+if (test_compiled_code == NULL)
+  {
+  failure = "test pattern compilation";
+  goto EXIT;
+  }
+
+rc = pcre2_pattern_info(NULL, PCRE2_INFO_NEWLINE, &uval);
+if (rc != PCRE2_ERROR_NULL) failure = "pcre2_pattern_info(null)";
+
+rc = pcre2_pattern_info(test_compiled_code, 999, NULL);
+if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_pattern_info(bad option)";
+
+rc = pcre2_pattern_info(test_compiled_code, 999, &uval);
+if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_pattern_info(bad option)";
+
+
+EXIT:
+
+if (test_compiled_code != NULL) pcre2_code_free(test_compiled_code);
+if (test_pat_context != NULL) pcre2_compile_context_free(test_pat_context);
+if (test_dat_context != NULL) pcre2_match_context_free(test_dat_context);
+if (test_match_data != NULL) pcre2_match_data_free(test_match_data);
+
+if (failure != NULL)
+  {
+  fprintf(stderr, "pcre2test: Unit test error in %s\n", failure);
+  exit(1);
+  }
+}
+
+
 /* -------------------- Undo the macro definitions --------------------------*/
 
 #undef pbuffer
@@ -5413,6 +5540,7 @@ pcre2_convert_context_free(con_context);
 #undef process_data
 #undef init_globals
 #undef free_globals
+#undef unittest
 
 
 
