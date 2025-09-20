@@ -27,6 +27,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/FindEditline.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/FindReadline.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2CheckLinkerFlag.cmake
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2UseSystemExtensions.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2-config.cmake.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/compile
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/config.guess

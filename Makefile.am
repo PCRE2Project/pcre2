@@ -1014,6 +1014,7 @@ EXTRA_DIST += \
   cmake/FindReadline.cmake \
   cmake/pcre2-config.cmake.in \
   cmake/PCRE2CheckLinkerFlag.cmake \
+  cmake/PCRE2UseSystemExtensions.cmake \
   src/config-cmake.h.in \
   CMakeLists.txt
 

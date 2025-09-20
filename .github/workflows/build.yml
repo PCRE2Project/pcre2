@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings'
+  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough'
   CFLAGS_MSVC: '/W3'
   CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
   CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
@@ -439,10 +439,13 @@ jobs:
             export _TAG_REDIR_ERR=txt;
             export _TAG_REDIR_IN=txt;
             export _TAG_REDIR_OUT=txt;
+            export PATH="/data/zopen/usr/local/bin:/data/zopen/usr/bin:/data/zopen/bin:/data/zopen/boot:/bin:/usr/lpp/IBM/cnw/v2r1/openxl/bin";
             . /data/zopen/etc/zopen-config;
             set -e;
             set -x;
             cd /data;
+
+            echo "== Autoconf, XLC compiler ==";
             rm -rf pcre2-build;
             mkdir pcre2-build;
             gtar xzf pcre2-build.tar.gz -C pcre2-build;
@@ -450,7 +453,20 @@ jobs:
             chtag -R -tc ISO8859-1 .;
             MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode;
             gmake;
-            gmake check'
+            gmake check;
+
+            echo "== CMake, IBM-Clang -m64 compiler ==";
+            cd ..;
+            rm -rf pcre2-build;
+            mkdir pcre2-build;
+            gtar xzf pcre2-build.tar.gz -C pcre2-build;
+            cd pcre2-build;
+            chtag -R -tc ISO8859-1 .;
+            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cd build;
+            ninja;
+            ctest -j3 --output-on-failure;
+            '
 
   distcheck:
     name: Build & verify distribution

@@ -3746,6 +3746,7 @@ if (!utf && (pat_patctl.control & CTL_UTF8_INPUT) == 0)
   {
   for (; len > 0; len--) *pp++ = *p++;
   }
+
 else while (len > 0)
   {
   uint32_t c;
@@ -3830,7 +3831,6 @@ if (pbuffer32_size < 4*len + 4)
   }
 
 pp = pbuffer32;
-
 if (!utf && (pat_patctl.control & CTL_UTF8_INPUT) == 0)
   {
   for (; len > 0; len--) *pp++ = *p++;
@@ -4445,7 +4445,7 @@ for (;;)
       *((uint32_t *)field) = (uint32_t)(m->value);
       break;
       }
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case MOD_INT:    /* Unsigned integer */
     if (!isdigit(*pp)) goto INVALID_VALUE;
@@ -7542,7 +7542,7 @@ if ((dat_datctl.control2 & CTL2_CALLOUT_EXTRA) != 0)
 
     case PCRE2_CALLOUT_STARTMATCH|PCRE2_CALLOUT_BACKTRACK:
     fprintf(f, "Backtrack\nNo other matching paths\n");
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case PCRE2_CALLOUT_STARTMATCH:
     fprintf(f, "New match attempt\n");
@@ -8192,13 +8192,18 @@ while ((c = *p++) != 0)
   if (c != '\\' || subject_literal)
     {
     uint32_t topbit = 0;
+#ifdef SUPPORT_PCRE2_32
     if (test_mode == PCRE32_MODE && c == 0xff && *p != 0)
       {
       topbit = 0x80000000;
       c = *p++;
       }
+#endif
     if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) &&
-      HASUTF8EXTRALEN(c)) { GETUTF8INC(c, p); }
+        HASUTF8EXTRALEN(c))
+      {
+      GETUTF8INC(c, p);
+      }
     c |= topbit;
     }
 
@@ -10216,7 +10221,7 @@ for (i = 0; i < MODLISTCOUNT; i++)
     break;
 
     default: printf("** Unknown type for modifier \"%s\"\n", m->name);
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case MOD_PD:        /* Pattern or subject */
     case MOD_PDP:       /* As PD, OK for Perl-compatible test */
     is_pattern = for_pattern;

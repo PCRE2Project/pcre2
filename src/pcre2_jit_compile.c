@@ -1245,7 +1245,7 @@ while (cc < ccend)
     case OP_DNREFI:
     case OP_DNREF:
     locals_size = ref_update_local_size(common, cc, locals_size);
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_DNCREF:
     count = GET2(cc, 1 + IMM2_SIZE);
     slot = common->name_table + GET2(cc, 1) * common->name_entry_size;
@@ -1284,7 +1284,7 @@ while (cc < ccend)
     case OP_THEN_ARG:
     common->has_then = TRUE;
     common->control_head_ptr = 1;
-    /* Fall through. */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
@@ -1334,7 +1334,7 @@ while (cc < ccend)
     if (common->utf && locals_size <= 3 * SSIZE_OF(sw))
       locals_size = 3 * SSIZE_OF(sw);
 #endif
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     default:
     cc = next_opcode(common, cc);
     if (cc == NULL)
@@ -1483,7 +1483,7 @@ do
       case OP_TYPEMINPLUS:
       if (count == 2)
         count = 3;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_TYPESTAR:
       case OP_TYPEPLUS:
@@ -1512,7 +1512,7 @@ do
       case OP_TYPEMINUPTO:
       case OP_TYPEPOSUPTO:
       cc += IMM2_SIZE;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_TYPEQUERY:
       case OP_TYPEMINQUERY:
@@ -1533,7 +1533,7 @@ do
       case OP_NOTMINPLUSI:
       if (count == 2)
         count = 3;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_STAR:
       case OP_PLUS:
@@ -1586,7 +1586,7 @@ do
       case OP_NOTEXACTI:
       case OP_NOTPOSUPTOI:
       cc += IMM2_SIZE;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_QUERY:
       case OP_MINQUERY:
@@ -1626,7 +1626,7 @@ do
         case OP_CRMINPLUS:
         if (count == 2)
           count = 3;
-        /* Fall through */
+        PCRE2_FALLTHROUGH /* Fall through */
 
         case OP_CRSTAR:
         case OP_CRPLUS:
@@ -1648,7 +1648,7 @@ do
           }
 
         cc += 2 * IMM2_SIZE;
-        /* Fall through */
+        PCRE2_FALLTHROUGH /* Fall through */
         case OP_CRQUERY:
         case OP_CRMINQUERY:
         case OP_CRPOSQUERY:
@@ -2268,7 +2268,7 @@ while (cc < ccend)
 
     default:
     stack_restore = TRUE;
-    /* Fall through. */
+    PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
@@ -5947,7 +5947,7 @@ while (TRUE)
     {
     case OP_CHARI:
     caseless = TRUE;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_CHAR:
     last = FALSE;
     cc++;
@@ -5984,7 +5984,7 @@ while (TRUE)
     case OP_MINPLUSI:
     case OP_POSPLUSI:
     caseless = TRUE;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -5993,7 +5993,7 @@ while (TRUE)
 
     case OP_EXACTI:
     caseless = TRUE;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_EXACT:
     repeat = GET2(cc, 1);
     last = FALSE;
@@ -6004,7 +6004,7 @@ while (TRUE)
     case OP_MINQUERYI:
     case OP_POSQUERYI:
     caseless = TRUE;
-    /* Fall through */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_QUERY:
     case OP_MINQUERY:
     case OP_POSQUERY:
@@ -6136,7 +6136,7 @@ while (TRUE)
     case OP_NOT:
     case OP_NOTI:
     cc++;
-    /* Fall through. */
+    PCRE2_FALLTHROUGH /* Fall through */
     case OP_NOT_DIGIT:
     case OP_NOT_WHITESPACE:
     case OP_NOT_WORDCHAR:
@@ -6219,7 +6219,7 @@ while (TRUE)
       case OP_CRMINQUERY:
       case OP_CRPOSQUERY:
       last = FALSE;
-      /* Fall through */
+      PCRE2_FALLTHROUGH /* Fall through */
       case OP_CRSTAR:
       case OP_CRMINSTAR:
       case OP_CRPOSSTAR:
