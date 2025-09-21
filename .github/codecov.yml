@@ -32,7 +32,7 @@ component_management:
     - component_id: library
       name: "Core library"
       paths:
-        - '!src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c'
+        - '!src/((pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c|pcre2test_inc\.h)'
       statuses:
         - type: project
           target: auto
@@ -41,7 +41,7 @@ component_management:
     - component_id: test_binaries
       name: "Test binaries"
       paths:
-        - 'src/(pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c'
+        - 'src/((pcre2test|pcre2grep|pcre2_jit_test|pcre2posix_test|pcre2_printint)\.c|pcre2test_inc\.h)'
       statuses:
         - type: project
           target: auto
