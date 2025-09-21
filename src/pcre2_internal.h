@@ -74,7 +74,6 @@ there will be many irrelevant consequential errors. */
      PCRE2_CODE_UNIT_WIDTH != 16 &&      \
      PCRE2_CODE_UNIT_WIDTH != 32))
 #error PCRE2_CODE_UNIT_WIDTH must be defined as 8, 16, or 32.
-#include <AbandonCompile>
 #endif
 
 
