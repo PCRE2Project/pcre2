@@ -197,7 +197,7 @@ checkresult()
 
 checkspecial()
   {
-  $sim $valgrind $vjs $pcre2test -q $1 >>testSoutput
+  $sim $valgrind $vjs $pcre2test $1 >>testSoutput
   if [ $? -ne 0 ] ; then
     echo "** pcre2test $1 failed - check testSoutput"
     yield=1
