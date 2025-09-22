@@ -539,6 +539,8 @@ jobs:
           submodules: true
 
       - name: Configure
+        # We use DEBUG=OFF here in order to suppress the coverage misses due to
+        # assertions, which obviously always pass.
         run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DPCRE2_DEBUG=OFF -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -B build
 
       - name: Build

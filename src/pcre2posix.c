@@ -331,10 +331,8 @@ preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
 
 if (preg->re_match_data == NULL)
   {
-  /* LCOV_EXCL_START */
   pcre2_code_free(preg->re_pcre2_code);
   return REG_ESPACE;
-  /* LCOV_EXCL_STOP */
   }
 
 return 0;

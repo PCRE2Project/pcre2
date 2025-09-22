@@ -502,10 +502,7 @@ return 0;
 }
 
 /* These functions became obsolete at release 10.30. The first is kept as a
-synonym for backwards compatibility. The second now does nothing. Exclude both
-from coverage reports. */
-
-/* LCOV_EXCL_START */
+synonym for backwards compatibility. The second now does nothing. */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_recursion_limit(pcre2_match_context *mcontext, uint32_t limit)
@@ -524,8 +521,6 @@ pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
 (void)mydata;
 return 0;
 }
-
-/* LCOV_EXCL_STOP */
 
 
 /* ------------ Convert context ------------ */

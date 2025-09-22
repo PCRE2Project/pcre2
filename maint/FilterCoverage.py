@@ -27,6 +27,17 @@ def scan_exclusions(srcpath):
             continue
         if in_block:
             excl.add(i)
+
+        # If line matches '^\s*#(if|endif|else|elif)\b', exclude it.
+        # For some reason, Clang likes to output coverage for these lines,
+        # even though they have no executable code.
+        if re.match(r'^\s*#(if|endif|else|elif|ifdef|ifndef)\b', line):
+            excl.add(i)
+
+        # Similarly, Clang seems to generate DA entries for "}" lines inside
+        # switch statements. Exclude these too.
+        if re.match(r'^\s*}\s*(/\*.*?\*/)?$', line):
+            excl.add(i)
     return excl
 
 DA_RE = re.compile(r'^\s*DA:(\d+),(\d+)(,.*)?\s*$')

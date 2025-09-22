@@ -71,6 +71,8 @@ side-effects. */
 } while(0)
 #endif
 
+/* LCOV_EXCL_START */
+
 /* PCRE2_UNREACHABLE() can be used to mark locations on the code that
 shouldn't be reached. In non debug builds is defined as a hint for
 the compiler to eliminate any code after it, so it is useful also for
@@ -107,7 +109,15 @@ the reason and the actions that should be taken if it ever triggers. */
 
 #define PCRE2_DEBUG_UNREACHABLE() PCRE2_UNREACHABLE()
 
+/* LCOV_EXCL_STOP */
+
 #endif /* PCRE2_DEBUG */
+
+#ifndef PCRE2_ASSERT
+#define PCRE2_ASSERT(x) do {} while(0)
+#endif
+
+/* LCOV_EXCL_START */
 
 #ifndef PCRE2_DEBUG_UNREACHABLE
 #define PCRE2_DEBUG_UNREACHABLE() do {} while(0)
@@ -123,9 +133,7 @@ the reason and the actions that should be taken if it ever triggers. */
 #endif
 #endif /* !PCRE2_UNREACHABLE */
 
-#ifndef PCRE2_ASSERT
-#define PCRE2_ASSERT(x) do {} while(0)
-#endif
+/* LCOV_EXCL_STOP */
 
 /* We define this fallthrough macro for suppressing -Wimplicit-fallthrough warnings.
 Clang only allows this via an attribute, whereas other compilers (eg. GCC) match attributes
