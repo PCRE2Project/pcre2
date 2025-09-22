@@ -5664,14 +5664,15 @@ rc = pcre2_pattern_info((pcre2_code *)bitother_code, PCRE2_INFO_NEWLINE, &uval);
 if (rc != PCRE2_ERROR_BADMODE) failure = "pcre2_pattern_info(bitmode mismatch)";
 #endif
 
-rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &uval);
-if (rc != 0 || uval != 0) failure = "pcre2_pattern_info(JIT)";
+sizeval = 0xcdcdcdcd;
+rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &sizeval);
+if (rc != 0 || sizeval != 0) failure = "pcre2_pattern_info(JIT)";
 
 #ifdef SUPPORT_JIT
 if (pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0)
   {
-  rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &uval);
-  if (rc != 0 || uval <= 0) failure = "pcre2_pattern_info(JIT after compile)";
+  rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &sizeval);
+  if (rc != 0 || sizeval <= 0) failure = "pcre2_pattern_info(JIT after compile)";
   }
 #endif
 
