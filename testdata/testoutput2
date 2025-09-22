@@ -7671,6 +7671,8 @@ No match
 \= Expect no match
     a\rb
 No match
+    a\r\nb
+No match
 
 /^a.b/newline=any
 \= Expect no match
@@ -7678,7 +7680,113 @@ No match
 No match
     a\rb
 No match
+    a\r\nb
+No match
     a\x85b
+No match
+
+/^a.b/newline=nul
+    a\nb
+ 0: a\x0ab
+\= Expect no match
+    a\x{00}b
+No match
+
+/^a./newline=lf
+    a\r
+ 0: a\x0d
+\= Expect no match
+    a\n
+No match
+
+/^a./newline=cr
+    a\n
+ 0: a\x0a
+\= Expect no match
+    a\r
+No match
+
+/^a./newline=anycrlf
+    a\x85
+ 0: a\x85
+\= Expect no match
+    a\r
+No match
+    a\n
+No match
+    a\r\n
+No match
+
+/^a./newline=any
+\= Expect no match
+    a\n
+No match
+    a\r
+No match
+    a\r\n
+No match
+    a\x85
+No match
+
+/^a./newline=nul
+    a\n
+ 0: a\x0a
+\= Expect no match
+    a\x{00}
+No match
+
+/^b/m,newline=lf
+    a\nb
+ 0: b
+\= Expect no match
+    a\rb
+No match
+
+/^b/m,newline=cr
+    a\rb
+ 0: b
+\= Expect no match
+    a\nb
+No match
+
+/^b/m,newline=anycrlf
+    a\rb
+ 0: b
+    a\nb
+ 0: b
+    a\r\nb
+ 0: b
+    \nb
+ 0: b
+    \rb
+ 0: b
+    \r\nb
+ 0: b
+\= Expect no match
+    a\x85b
+No match
+
+/^b/m,newline=any
+    a\nb
+ 0: b
+    a\rb
+ 0: b
+    a\r\nb
+ 0: b
+    a\x85b
+ 0: b
+    \nb
+ 0: b
+    \rb
+ 0: b
+    \r\nb
+ 0: b
+
+/^b/m,newline=nul
+    a\x{00}b
+ 0: b
+\= Expect no match
+    a\nb
 No match
 
 /^abc./gmx,newline=any
@@ -15568,6 +15676,31 @@ No match
 \= Expect no match
     aacb
 No match
+
+/(^aa(*MARK:X)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+ 0: ab
+ 1: ab
+
+/(^aa(*MARK:X)a(*SKIP:Y)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
+
+/(^aa(*MARK:Y)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
+
+/(^aa(*MARK:X)a(*SKIP:XX)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
+
+/(^aa(*MARK:XX)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
 
 /(*MARK:a\zb)z/alt_verbnames
 Failed: error 140 at offset 10: invalid escape sequence in (*VERB) name

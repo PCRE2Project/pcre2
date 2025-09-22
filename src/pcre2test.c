@@ -781,7 +781,7 @@ static modstruct modlist[] = {
   { "never_callout",               MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NEVER_CALLOUT,  CO(extra_options) },
   { "never_ucp",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UCP,            PO(options) },
   { "never_utf",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UTF,            PO(options) },
-  { "newline",                     MOD_CTC,  MOD_NL,  0,                          CO(newline_convention) },
+  { "newline",                     MOD_CTC,  MOD_NL,  0,                          0 },
   { "no_auto_capture",             MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,      PO(options) },
   { "no_auto_possess",             MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,      PO(options) },
   { "no_bs0",                      MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NO_BS0,         CO(extra_options) },

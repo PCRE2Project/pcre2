@@ -70,6 +70,7 @@ library. */
 #define patstacknext          PCRE2_SUFFIX(patstacknext_)
 
 #define jit_callback                      PCRE2_SUFFIX(jit_callback_)
+#define pcre2_strcmp_c8                   PCRE2_SUFFIX(pcre2_strcmp_c8_)
 #define pcre2_strlen                      PCRE2_SUFFIX(pcre2_strlen_)
 #define pchars                            PCRE2_SUFFIX(pchars_)
 #define ptrunc                            PCRE2_SUFFIX(ptrunc_)
@@ -131,18 +132,34 @@ return (pcre2_jit_stack *)arg;
 
 
 /*************************************************
-*    Find length of 0-terminated 16-bit string   *
+*  Compare zero-terminated PCRE2 & 8-bit strings *
 *************************************************/
 
-static size_t pcre2_strlen(PCRE2_SPTR p)
+static int
+pcre2_strcmp_c8(PCRE2_SPTR str1, const char *str2)
 {
-#if PCRE2_CODE_UNIT_WIDTH == 8
-return strlen((const char *)p);
-#else
-PCRE2_SPTR pp = p;
-while (*pp != 0) pp++;
-return pp - p;
-#endif /* PCRE_CODE_UNIT_WIDTH == 8 */
+PCRE2_UCHAR c1, c2;
+while (*str1 != '\0' || *str2 != '\0')
+  {
+  c1 = *str1++;
+  c2 = *str2++;
+  if (c1 != c2) return ((c1 > c2) << 1) - 1;
+  }
+return 0;
+}
+
+
+
+/*************************************************
+*        Find the length of a PCRE2 string       *
+*************************************************/
+
+static size_t
+pcre2_strlen(PCRE2_SPTR str)
+{
+size_t c = 0;
+while (*str++ != 0) c++;
+return c;
 }
 
 
@@ -752,7 +769,7 @@ for (;;)
         *((uint32_t *)field) |= modlist[index].value;
       }
 
-    continue;    /* With tne next (fullname) modifier */
+    continue;    /* With the next (fullname) modifier */
     }
 
   /* We have a match on a full-name modifier. Check for the existence of data
@@ -915,13 +932,13 @@ for (;;)
     if (i >= sizeof(newlines)/sizeof(char *)) goto INVALID_VALUE;
     if (i == 0)
       {
-      *((uint16_t *)field) = NEWLINE_DEFAULT;
+      pcre2_set_newline(field, NEWLINE_DEFAULT);
       if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_NL_SET;
         else dctl->control2 &= ~CTL2_NL_SET;
       }
     else
       {
-      *((uint16_t *)field) = i;
+      pcre2_set_newline(field, i);
       if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_NL_SET;
         else dctl->control2 |= CTL2_NL_SET;
       }
@@ -2607,7 +2624,7 @@ use this if there is no explicit newline modifier. */
 
 if ((pat_patctl.control2 & CTL2_NL_SET) == 0 && local_newline_default != 0)
   {
-  pat_context->newline_convention = local_newline_default;
+  pcre2_set_newline(pat_context, local_newline_default);
   }
 
 /* The null_context modifier is used to test calling pcre2_compile() with a
@@ -4905,7 +4922,7 @@ for (gmatched = 0;; gmatched++)
       VALGRIND_MAKE_MEM_UNDEFINED(dbuffer, CU2BYTES(1));
 #endif
       pp = (PCRE2_UCHAR *)dbuffer;
-      *(PCRE2_UCHAR *)pp = 0;
+      *pp = 0;
       }
 
     if ((unsigned)capcount > oveccount)   /* Check for lunatic return value */
@@ -5363,6 +5380,23 @@ pcre2_convert_context_free(con_context);
 *            Specific function tests             *
 *************************************************/
 
+/* For tests exercising a mismatched bitmode, identify a suitable API. */
+
+#if (defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + \
+     defined(SUPPORT_PCRE2_32)) >= 2
+
+#if defined(SUPPORT_PCRE2_8) && PCRE2_CODE_UNIT_WIDTH != 8
+#define BITOTHER 8
+#elif defined(SUPPORT_PCRE2_16) && PCRE2_CODE_UNIT_WIDTH != 16
+#define BITOTHER 16
+#elif defined(SUPPORT_PCRE2_32) && PCRE2_CODE_UNIT_WIDTH != 32
+#define BITOTHER 32
+#else
+#error "One other bit width must be supported"
+#endif
+
+#endif
+
 /* These are tests of the public API functions in PCRE2, which wouldn't
 otherwise be covered by pcre2test. This usually implies they are error cases,
 or edge cases that are hard to hit in the standard flow of compile-match or
@@ -5381,13 +5415,24 @@ int rc;
 uint32_t uval;
 PCRE2_SIZE sizeval;
 const char *failure = NULL;
-pcre2_compile_context *test_pat_context = NULL;
-pcre2_match_context *test_dat_context = NULL;
+pcre2_general_context *test_gen_context = NULL, *test_gen_context_copy = NULL;
+pcre2_compile_context *test_pat_context = NULL, *test_pat_context_copy = NULL;
+pcre2_match_context *test_dat_context = NULL, *test_dat_context_copy = NULL;
+pcre2_convert_context *test_con_context = NULL, *test_con_context_copy = NULL;
 pcre2_match_data *test_match_data = NULL;
 pcre2_code *test_compiled_code = NULL;
 PCRE2_UCHAR pattern[] = { 'a','b','c',0 };
+#ifdef BITOTHER
+G(pcre2_code_,BITOTHER) *bitother_code = NULL;
+G(PCRE2_,G(UCHAR,BITOTHER)) bitother_pattern[] = { 'a','b','c',0 };
+#endif
 int errorcode;
 PCRE2_SIZE erroroffset;
+PCRE2_UCHAR errorbuffer[256];
+#if PCRE2_CODE_UNIT_WIDTH == 8
+char errorbuffer8[256];
+#endif
+void *invalid_code;
 
 /* -------------------------- pcre2_config --------------------------------- */
 
@@ -5412,16 +5457,62 @@ if (rc != 0) failure = "pcre2_config(PCRE2_CONFIG_LINKSIZE)";
 
 /* ------------------------ Context functions ------------------------------ */
 
-test_pat_context = pcre2_compile_context_create(NULL);
-test_dat_context = pcre2_match_context_create(NULL);
-test_match_data = pcre2_match_data_create(10, NULL);
+test_gen_context = pcre2_general_context_create(NULL, NULL, NULL);
+if (test_gen_context == NULL) failure = "pcre2_general_context_create(null)";
+pcre2_general_context_free(test_gen_context);
 
-if (test_pat_context == NULL || test_dat_context == NULL ||
-    test_match_data == NULL)
-  {
-  failure = "context or match_data creation";
-  goto EXIT;
-  }
+mallocs_until_failure = 0;
+test_gen_context = pcre2_general_context_create(&my_malloc, &my_free, NULL);
+if (test_gen_context != NULL) failure = "pcre2_general_context_create(malloc)";
+
+mallocs_until_failure = 1;
+test_gen_context = pcre2_general_context_create(&my_malloc, &my_free, NULL);
+if (test_gen_context == NULL) failure = "pcre2_general_context_create(malloc)";
+
+test_pat_context = pcre2_compile_context_create(test_gen_context);
+if (test_pat_context != NULL) failure = "pcre2_compile_context_create()";
+test_dat_context = pcre2_match_context_create(test_gen_context);
+if (test_dat_context != NULL) failure = "pcre2_match_context_create()";
+test_con_context = pcre2_convert_context_create(test_gen_context);
+if (test_con_context != NULL) failure = "pcre2_convert_context_create()";
+
+test_pat_context = pcre2_compile_context_create(NULL);
+if (test_pat_context == NULL) failure = "pcre2_compile_context_create(null)";
+pcre2_compile_context_free(test_pat_context);
+test_dat_context = pcre2_match_context_create(NULL);
+if (test_dat_context == NULL) failure = "pcre2_match_context_create(null)";
+pcre2_match_context_free(test_dat_context);
+test_con_context = pcre2_convert_context_create(NULL);
+if (test_con_context == NULL) failure = "pcre2_convert_context_create(null)";
+pcre2_convert_context_free(test_con_context);
+
+mallocs_until_failure = INT_MAX;
+test_pat_context = pcre2_compile_context_create(test_gen_context);
+if (test_pat_context == NULL) failure = "pcre2_compile_context_create()";
+test_dat_context = pcre2_match_context_create(test_gen_context);
+if (test_dat_context == NULL) failure = "pcre2_match_context_create()";
+test_con_context = pcre2_convert_context_create(test_gen_context);
+if (test_con_context == NULL) failure = "pcre2_convert_context_create()";
+
+mallocs_until_failure = 0;
+test_gen_context_copy = pcre2_general_context_copy(test_gen_context);
+if (test_gen_context_copy != NULL) failure = "pcre2_general_context_copy()";
+test_pat_context_copy = pcre2_compile_context_copy(test_pat_context);
+if (test_pat_context_copy != NULL) failure = "pcre2_compile_context_copy()";
+test_dat_context_copy = pcre2_match_context_copy(test_dat_context);
+if (test_dat_context_copy != NULL) failure = "pcre2_match_context_copy()";
+test_con_context_copy = pcre2_convert_context_copy(test_con_context);
+if (test_con_context_copy != NULL) failure = "pcre2_convert_context_copy()";
+
+mallocs_until_failure = INT_MAX;
+test_gen_context_copy = pcre2_general_context_copy(test_gen_context);
+if (test_gen_context_copy == NULL) failure = "pcre2_general_context_copy()";
+test_pat_context_copy = pcre2_compile_context_copy(test_pat_context);
+if (test_pat_context_copy == NULL) failure = "pcre2_compile_context_copy()";
+test_dat_context_copy = pcre2_match_context_copy(test_dat_context);
+if (test_dat_context_copy == NULL) failure = "pcre2_match_context_copy()";
+test_con_context_copy = pcre2_convert_context_copy(test_con_context);
+if (test_con_context_copy == NULL) failure = "pcre2_convert_context_copy()";
 
 rc = pcre2_set_compile_extra_options(test_pat_context, 0);
 if (rc != 0) failure = "pcre2_set_compile_extra_options()";
@@ -5438,16 +5529,37 @@ if (rc != 0) failure = "pcre2_set_max_varlookbehind()";
 rc = pcre2_set_offset_limit(test_dat_context, 0);
 if (rc != 0) failure = "pcre2_set_offset_limit()";
 
-sizeval = pcre2_get_match_data_size(test_match_data);
-if (sizeval < 2) failure = "pcre2_get_match_data_size()";
-
 rc = pcre2_set_bsr(test_pat_context, 999);
 if (rc != PCRE2_ERROR_BADDATA) failure = "pcre2_set_bsr()";
 
 rc = pcre2_set_newline(test_pat_context, 999);
 if (rc != PCRE2_ERROR_BADDATA) failure = "pcre2_set_newline()";
 
-/* ----------------------- pcre2_pattern_info ------------------------------ */
+rc = pcre2_set_recursion_limit(test_dat_context, 10);
+if (rc != 0) failure = "pcre2_set_recursion_limit()";
+
+rc = pcre2_set_recursion_memory_management(test_dat_context, NULL, NULL, NULL);
+if (rc != 0) failure = "pcre2_set_recursion_memory_management()";
+
+rc = pcre2_set_optimize(NULL, PCRE2_OPTIMIZATION_NONE);
+if (rc != PCRE2_ERROR_NULL) failure = "pcre2_set_optimize(null)";
+
+rc = pcre2_set_optimize(test_pat_context, PCRE2_AUTO_POSSESS - 1);
+if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_set_optimize(bad option)";
+
+rc = pcre2_set_optimize(test_pat_context, PCRE2_START_OPTIMIZE_OFF + 1);
+if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_set_optimize(bad option)";
+
+rc = pcre2_set_glob_escape(test_con_context, 0);
+if (rc != 0) failure = "pcre2_set_glob_escape(0)";
+
+rc = pcre2_set_glob_escape(test_con_context, 1);
+if (rc != PCRE2_ERROR_BADDATA) failure = "pcre2_set_glob_escape(1)";
+
+rc = pcre2_set_glob_escape(test_con_context, 256);
+if (rc != PCRE2_ERROR_BADDATA) failure = "pcre2_set_glob_escape(256)";
+
+/* ----------------------- pcre2_compile ----------------------------------- */
 
 test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
   0, NULL, &erroroffset, test_pat_context);
@@ -5465,6 +5577,68 @@ if (test_compiled_code == NULL)
   goto EXIT;
   }
 
+#ifdef BITOTHER
+bitother_code = G(pcre2_compile_,BITOTHER)(bitother_pattern,
+  PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);
+if (bitother_code == NULL)
+  {
+  failure = "bitmode mismatch compile";
+  goto EXIT;
+  }
+#endif
+
+/* ---------------------- Match data functions ----------------------------- */
+
+mallocs_until_failure = 0;
+test_match_data = pcre2_match_data_create(10, test_gen_context);
+if (test_match_data != NULL) failure = "pcre2_match_data_create()";
+
+test_match_data = pcre2_match_data_create(10, NULL);
+if (test_match_data == NULL) failure = "pcre2_match_data_create()";
+if (pcre2_get_ovector_count(test_match_data) != 10)
+  failure = "pcre2_get_ovector_count()";
+
+sizeval = pcre2_get_match_data_size(test_match_data);
+if (sizeval < 2) failure = "pcre2_get_match_data_size()";
+
+mallocs_until_failure = INT_MAX;
+
+pcre2_match_data_free(test_match_data);
+test_match_data = pcre2_match_data_create(0, test_gen_context);
+if (test_match_data == NULL) failure = "pcre2_match_data_create()";
+if (pcre2_get_ovector_count(test_match_data) != 1)
+  failure = "pcre2_get_ovector_count()";
+
+pcre2_match_data_free(test_match_data);
+test_match_data = pcre2_match_data_create_from_pattern(NULL, NULL);
+if (test_match_data != NULL) failure = "pcre2_match_data_create_from_pattern(null)";
+
+test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code, NULL);
+if (test_match_data == NULL) failure = "pcre2_match_data_create_from_pattern()";
+if (pcre2_get_ovector_count(test_match_data) != 1)
+  failure = "pcre2_get_ovector_count()";
+
+mallocs_until_failure = 0;
+pcre2_match_data_free(test_match_data);
+test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code,
+  test_gen_context);
+if (test_match_data != NULL) failure = "pcre2_match_data_create_from_pattern()";
+
+mallocs_until_failure = INT_MAX;
+pcre2_match_data_free(test_match_data);
+test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code,
+  test_gen_context);
+if (test_match_data == NULL) failure = "pcre2_match_data_create_from_pattern()";
+
+rc = pcre2_match(test_compiled_code, pattern, PCRE2_ZERO_TERMINATED, 0,
+  PCRE2_COPY_MATCHED_SUBJECT, test_match_data, NULL);
+if (rc != 1) failure = "pcre2_match()";
+
+pcre2_match_data_free(test_match_data);
+test_match_data = NULL;
+
+/* ----------------------- pcre2_pattern_info ------------------------------ */
+
 rc = pcre2_pattern_info(NULL, PCRE2_INFO_NEWLINE, &uval);
 if (rc != PCRE2_ERROR_NULL) failure = "pcre2_pattern_info(null)";
 
@@ -5474,13 +5648,93 @@ if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_pattern_info(bad option)";
 rc = pcre2_pattern_info(test_compiled_code, 999, &uval);
 if (rc != PCRE2_ERROR_BADOPTION) failure = "pcre2_pattern_info(bad option)";
 
+invalid_code = malloc(1024);
+if (invalid_code == NULL)
+  {
+  failure = "malloc()";
+  goto EXIT;
+  }
+memset(invalid_code, 0, 1024);
+rc = pcre2_pattern_info(invalid_code, PCRE2_INFO_NEWLINE, &uval);
+if (rc != PCRE2_ERROR_BADMAGIC) failure = "pcre2_pattern_info(bad magic)";
+free(invalid_code);
+
+#ifdef BITOTHER
+rc = pcre2_pattern_info((pcre2_code *)bitother_code, PCRE2_INFO_NEWLINE, &uval);
+if (rc != PCRE2_ERROR_BADMODE) failure = "pcre2_pattern_info(bitmode mismatch)";
+#endif
+
+rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &uval);
+if (rc != 0 || uval != 0) failure = "pcre2_pattern_info(JIT)";
+
+#ifdef SUPPORT_JIT
+if (pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0)
+  {
+  rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &uval);
+  if (rc != 0 || uval <= 0) failure = "pcre2_pattern_info(JIT after compile)";
+  }
+#endif
+
+/* ----------------------- POSIX functions --------------------------------- */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+rc = regerror(REG_ASSERT, NULL, errorbuffer8, sizeof(errorbuffer8));
+if (rc <= 0 || rc > (int)sizeof(errorbuffer8) || rc != (int)strlen(errorbuffer8) + 1)
+  failure = "regerror()";
+
+rc = regerror(REG_NOMATCH, NULL, errorbuffer8, sizeof(errorbuffer8));
+if (rc <= 0 || rc > (int)sizeof(errorbuffer8) || rc != (int)strlen(errorbuffer8) + 1)
+  failure = "regerror()";
+
+rc = regerror(REG_ASSERT-1, NULL, errorbuffer8, sizeof(errorbuffer8));
+if (rc != (int)strlen("unknown error code")+1 || strcmp(errorbuffer8, "unknown error code") != 0)
+  failure = "regerror(bad error code)";
+
+rc = regerror(REG_NOMATCH+1, NULL, errorbuffer8, sizeof(errorbuffer8));
+if (rc != (int)strlen("unknown error code")+1 || strcmp(errorbuffer8, "unknown error code") != 0)
+  failure = "regerror(bad error code)";
+#endif
+
+/* -------------------- pcre2_get_error_message ---------------------------- */
+
+rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, NULL, 0);
+if (rc != PCRE2_ERROR_NOMEMORY) failure = "pcre2_get_error_message(null)";
+
+rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 0);
+if (rc != PCRE2_ERROR_NOMEMORY) failure = "pcre2_get_error_message(null)";
+
+rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 4);
+if (rc != PCRE2_ERROR_NOMEMORY || pcre2_strcmp_c8(errorbuffer, "bad") != 0)
+  failure = "pcre2_get_error_message(null)";
+
+rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 14);
+if (rc != PCRE2_ERROR_NOMEMORY || pcre2_strcmp_c8(errorbuffer, "bad data valu") != 0)
+  failure = "pcre2_get_error_message(null)";
+
+rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 15);
+if (rc != 14 || pcre2_strcmp_c8(errorbuffer, "bad data value") != 0)
+  failure = "pcre2_get_error_message(null)";
+
 
 EXIT:
 
+mallocs_until_failure = INT_MAX;
+
 if (test_compiled_code != NULL) pcre2_code_free(test_compiled_code);
-if (test_pat_context != NULL) pcre2_compile_context_free(test_pat_context);
-if (test_dat_context != NULL) pcre2_match_context_free(test_dat_context);
+#ifdef BITOTHER
+if (bitother_code != NULL) G(pcre2_code_free_,BITOTHER)(bitother_code);
+#endif
+
 if (test_match_data != NULL) pcre2_match_data_free(test_match_data);
+
+if (test_con_context_copy != NULL) pcre2_convert_context_free(test_con_context_copy);
+if (test_dat_context_copy != NULL) pcre2_match_context_free(test_dat_context_copy);
+if (test_pat_context_copy != NULL) pcre2_compile_context_free(test_pat_context_copy);
+if (test_gen_context_copy != NULL) pcre2_general_context_free(test_gen_context_copy);
+if (test_con_context != NULL) pcre2_convert_context_free(test_con_context);
+if (test_dat_context != NULL) pcre2_match_context_free(test_dat_context);
+if (test_pat_context != NULL) pcre2_compile_context_free(test_pat_context);
+if (test_gen_context != NULL) pcre2_general_context_free(test_gen_context);
 
 if (failure != NULL)
   {
@@ -5488,6 +5742,8 @@ if (failure != NULL)
   exit(1);
   }
 }
+
+#undef BITOTHER
 
 
 /* -------------------- Undo the macro definitions --------------------------*/
@@ -5513,6 +5769,7 @@ if (failure != NULL)
 #undef patstacknext
 
 #undef jit_callback
+#undef pcre2_strcmp_c8
 #undef pcre2_strlen
 #undef pchars
 #undef ptrunc
