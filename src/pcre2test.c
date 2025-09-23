@@ -3043,6 +3043,7 @@ printf("  -jitverify    set default pattern modifier 'jitverify'\n");
 printf("  -LM           list pattern and subject modifiers, then exit\n");
 printf("  -LP           list non-script properties, then exit\n");
 printf("  -LS           list supported scripts, then exit\n");
+printf("  -malloc       exercise malloc() failures\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern modifier fields\n");
 printf("  -subject <s>  set default subject modifier fields\n");
@@ -3051,7 +3052,7 @@ printf("  -t [<n>]      time compilation and execution, repeating <n> times\n");
 printf("  -tm [<n>]     time execution (matching) only, repeating <n> times\n");
 printf("  -T            same as -t, but show total times at the end\n");
 printf("  -TM           same as -tm, but show total time at the end\n");
-printf("  -malloc       exercise malloc() failures\n");
+printf("  -unittest     run unit tests, then exit\n");
 printf("  -v|--version  show PCRE2 version and exit\n");
 }
 
@@ -3637,6 +3638,16 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     goto EXIT;
     }
 
+  /* Perform additional edge-case and error-handling tests of public API
+  functions, which wouldn't otherwise be covered by the standard use of the API
+  in pcre2test. */
+
+  if (strcmp(arg, "-unittest") == 0)
+    {
+    unittest();
+    goto EXIT;
+    }
+
   /* Display and/or set return code for configuration options. */
 
   if (strcmp(arg, "-C") == 0)
@@ -3892,12 +3903,6 @@ max_oveccount = DEFAULT_OVECCOUNT;
 /* Initialise the globals for the current mode. */
 
 init_globals();
-
-/* Perform additional edge-case and error-handling tests of public API
-functions, which wouldn't otherwise be covered by the standard use of the API
-in pcre2test. */
-
-unittest();
 
 /* Handle command line modifier settings, sending any error messages to
 stderr. We need to know the mode before modifying the context, and it is tidier
