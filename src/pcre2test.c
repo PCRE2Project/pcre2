@@ -326,6 +326,7 @@ static BOOL printable(uint32_t c);
 #endif
 #if defined(EBCDIC) && !EBCDIC_IO
 static void ascii_to_ebcdic_str(uint8_t *buf, size_t len);
+static void ebcdic_to_ascii_str(uint8_t *buf, size_t len);
 #endif
 #if defined(EBCDIC)
 static uint32_t ascii_to_ebcdic(uint32_t c);
@@ -1648,6 +1649,13 @@ ascii_to_ebcdic_str(uint8_t *buf, size_t len)
 {
 for (size_t i = 0; i < len; ++i)
   buf[i] = ascii_to_ebcdic_1047[buf[i]];
+}
+
+static void
+ebcdic_to_ascii_str(uint8_t *buf, size_t len)
+{
+for (size_t i = 0; i < len; ++i)
+  buf[i] = ebcdic_1047_to_ascii[buf[i]];
 }
 #endif
 

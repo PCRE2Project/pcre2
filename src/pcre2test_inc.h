@@ -5711,39 +5711,63 @@ if (pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0)
 /* ----------------------- POSIX functions --------------------------------- */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
+
+#if defined(EBCDIC) && !EBCDIC_IO
+#define BUFFER_OUTPUT ebcdic_to_ascii_str((uint8_t *)errorbuffer8, sizeof(errorbuffer8));
+#else
+#define BUFFER_OUTPUT
+#endif
+
+memset(errorbuffer8, 0, sizeof(errorbuffer8));
 rc = regerror(REG_ASSERT, NULL, errorbuffer8, sizeof(errorbuffer8));
+BUFFER_OUTPUT
 ASSERT(rc > 0 && rc <= (int)sizeof(errorbuffer8) && rc == (int)strlen(errorbuffer8) + 1, "regerror()");
 
 rc = regerror(REG_NOMATCH, NULL, errorbuffer8, sizeof(errorbuffer8));
+BUFFER_OUTPUT
 ASSERT(rc > 0 && rc <= (int)sizeof(errorbuffer8) && rc == (int)strlen(errorbuffer8) + 1, "regerror()");
 
-#if !defined(EBCDIC) || EBCDIC_IO
 rc = regerror(REG_ASSERT-1, NULL, errorbuffer8, sizeof(errorbuffer8));
+BUFFER_OUTPUT
 ASSERT(rc == (int)strlen("unknown error code")+1 && strcmp(errorbuffer8, "unknown error code") == 0, "regerror(bad error code)");
 
 rc = regerror(REG_NOMATCH+1, NULL, errorbuffer8, sizeof(errorbuffer8));
+BUFFER_OUTPUT
 ASSERT(rc == (int)strlen("unknown error code")+1 && strcmp(errorbuffer8, "unknown error code") == 0, "regerror(bad error code)");
-#endif /* !EBCDIC || EBCDIC_IO */
+
+#undef BUFFER_OUTPUT
+
 #endif
 
 /* -------------------- pcre2_get_error_message ---------------------------- */
 
+#if defined(EBCDIC) && !EBCDIC_IO
+#define BUFFER_OUTPUT ebcdic_to_ascii_str(errorbuffer, sizeof(errorbuffer));
+#else
+#define BUFFER_OUTPUT
+#endif
+
 rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, NULL, 0);
 ASSERT(rc == PCRE2_ERROR_NOMEMORY, "pcre2_get_error_message(null)");
 
+memset(errorbuffer, 0, sizeof(errorbuffer));
 rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 0);
+BUFFER_OUTPUT
 ASSERT(rc == PCRE2_ERROR_NOMEMORY, "pcre2_get_error_message(null)");
 
-#if !defined(EBCDIC) || EBCDIC_IO
 rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 4);
+BUFFER_OUTPUT
 ASSERT(rc == PCRE2_ERROR_NOMEMORY && pcre2_strcmp_c8(errorbuffer, "bad") == 0, "pcre2_get_error_message(null)");
 
 rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 14);
+BUFFER_OUTPUT
 ASSERT(rc == PCRE2_ERROR_NOMEMORY && pcre2_strcmp_c8(errorbuffer, "bad data valu") == 0, "pcre2_get_error_message(null)");
 
 rc = pcre2_get_error_message(PCRE2_ERROR_BADDATA, errorbuffer, 15);
+BUFFER_OUTPUT
 ASSERT(rc == 14 && pcre2_strcmp_c8(errorbuffer, "bad data value") == 0, "pcre2_get_error_message(null)");
-#endif /* !EBCDIC || EBCDIC_IO */
+
+#undef BUFFER_OUTPUT
 
 /* ----------------------- pcre2_maketables -------------------------------- */
 
