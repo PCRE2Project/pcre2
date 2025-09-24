@@ -84,6 +84,8 @@ library. */
 #define print_error_message_file          PCRE2_SUFFIX(print_error_message_file_)
 #define print_error_message               PCRE2_SUFFIX(print_error_message_)
 #define callout_enumerate_function        PCRE2_SUFFIX(callout_enumerate_function_)
+#define callout_enumerate_function_void   PCRE2_SUFFIX(callout_enumerate_function_void_)
+#define callout_enumerate_function_fail   PCRE2_SUFFIX(callout_enumerate_function_fail_)
 #define show_pattern_info                 PCRE2_SUFFIX(show_pattern_info_)
 #define serial_error                      PCRE2_SUFFIX(serial_error_)
 #define process_command                   PCRE2_SUFFIX(process_command_)
@@ -534,17 +536,17 @@ static void
 config_str(uint32_t what, char *where)
 {
 int r1, r2;
-PCRE2_UCHAR buff[VERSION_SIZE];
+PCRE2_UCHAR buf[VERSION_SIZE];
 
 r1 = pcre2_config(what, NULL);
-r2 = pcre2_config(what, buff);
+r2 = pcre2_config(what, buf);
 if (r1 < 0 || r1 != r2 || r1 >= VERSION_SIZE)
   {
   fprintf(stderr, "pcre2test: Error in pcre2_config(%d)\n", what);
   exit(1);
   }
 
-while (r1-- > 0) where[r1] = (char)buff[r1];
+while (r1-- > 0) where[r1] = (char)buf[r1];
 }
 
 
@@ -1154,6 +1156,11 @@ else if (len < 0)
   fprintf(file, "\n** pcre2test internal error: cannot interpret error "
     "number\n** Unexpected return (%d) from pcre2_get_error_message()\n", len);
   }
+else if ((unsigned)len != pcre2_strlen(buf))
+  {
+  fprintf(file, "\n** pcre2test: unexpected length %d from pcre2_get_error_message()\n", len);
+  return FALSE;
+  }
 else
   {
   fprintf(file, "%s", before);
@@ -1215,6 +1222,21 @@ pchars(pattern_string+cb->pattern_position, next_item_length, utf, outfile);
 fprintf(outfile, "\n");
 
 return 0;
+}
+
+static int callout_enumerate_function_void(pcre2_callout_enumerate_block *cb,
+  void *callout_data)
+{
+(void)cb;
+(void)callout_data;
+return 0;
+}
+
+static int callout_enumerate_function_fail(pcre2_callout_enumerate_block *cb,
+  void *callout_data)
+{
+(void)cb;
+return *(int *)callout_data;
 }
 
 
@@ -2374,29 +2396,30 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
   if (rc != 0)
     {
-    size_t bsize, usize;
-    int psize;
+    char *regbuffer;
+    size_t bsize, usize, strsize;
 
     preg.re_pcre2_code = NULL;     /* In case something was left in there */
     preg.re_match_data = NULL;
 
-    bsize = (pat_patctl.regerror_buffsize != 0)?
-      pat_patctl.regerror_buffsize : pbuffer8_size;
-    if (bsize + 8 < pbuffer8_size)
-      memcpy(pbuffer8 + bsize, "DEADBEEF", 8);
-    usize = regerror(rc, &preg, (char *)pbuffer8, bsize);
+    bsize = (pat_patctl.regerror_buffsize >= 0 &&
+             (unsigned)pat_patctl.regerror_buffsize <= pbuffer8_size)?
+      (unsigned)pat_patctl.regerror_buffsize : pbuffer8_size;
+    regbuffer = (char *)pbuffer8 + (pbuffer8_size - bsize);
+    usize = regerror(rc, &preg, regbuffer, bsize);
+    strsize = ((usize > bsize)? bsize : usize) - 1;
 
-    /* Inside regerror(), snprintf() is used. If the buffer is too small, some
-    versions of snprintf() put a zero byte at the end, but others do not.
-    Therefore, we print a maximum of one less than the size of the buffer. */
-
-    psize = (int)bsize - 1;
-    fprintf(outfile, "Failed: POSIX code %d: %.*s\n", rc, psize, pbuffer8);
+    fprintf(outfile, "Failed: POSIX code %d: ", rc);
+    if (bsize > 0) pchars((PCRE2_SPTR8)regbuffer, strsize, utf, outfile);
+    fputs("\n", outfile);
     if (usize > bsize)
       {
       fprintf(outfile, "** regerror() message truncated\n");
-      if (memcmp(pbuffer8 + bsize, "DEADBEEF", 8) != 0)
-        fprintf(outfile, "** regerror() buffer overflow\n");
+      }
+    if (bsize > 0 && strlen(regbuffer) != strsize)
+      {
+      fprintf(outfile, "** regerror() strlen incorrect\n");
+      return PR_ABEND;
       }
     return PR_SKIP;
     }
@@ -4222,6 +4245,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   int rc;
   int eflags = 0;
   regmatch_t *pmatch = NULL;
+  regmatch_t startend_buf;
   const char *msg = "** Ignored with POSIX interface:";
 
   if (dat_datctl.cerror[0] != CFORE_UNSET || dat_datctl.cerror[1] != CFORE_UNSET)
@@ -4265,6 +4289,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
   if (dat_datctl.startend[0] != CFORE_UNSET)
     {
+    if (pmatch == NULL) pmatch = &startend_buf;
     pmatch[0].rm_so = (regoff_t)dat_datctl.startend[0];
     pmatch[0].rm_eo = (dat_datctl.startend[1] != 0)?
       (regoff_t)dat_datctl.startend[1] : (regoff_t)len;
@@ -4278,8 +4303,10 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
   rc = regexec(&preg, (const char *)pp, dat_datctl.oveccount, pmatch, eflags);
   if (rc != 0)
     {
-    (void)regerror(rc, &preg, (char *)pbuffer8, pbuffer8_size);
-    fprintf(outfile, "No match: POSIX code %d: %s\n", rc, pbuffer8);
+    size_t usize = regerror(rc, &preg, (char *)pbuffer8, pbuffer8_size);
+    fprintf(outfile, "No match: POSIX code %d: ", rc);
+    pchars((PCRE2_SPTR8)pbuffer8, usize - 1, utf, outfile);
+    fputs("\n", outfile);
     }
   else if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0)
     fprintf(outfile, "Matched with REG_NOSUB\n");
@@ -4321,7 +4348,7 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
         }
       }
     }
-  free(pmatch);
+  if (pmatch != &startend_buf) free(pmatch);
   return PR_OK;
   }
 #endif  /* PCRE2_CODE_UNIT_WIDTH == 8 */
@@ -5422,6 +5449,11 @@ pcre2_convert_context *test_con_context = NULL, *test_con_context_copy = NULL;
 pcre2_match_data *test_match_data = NULL;
 pcre2_code *test_compiled_code = NULL;
 PCRE2_UCHAR pattern[] = { CHAR_A, CHAR_B, CHAR_C, 0 };
+PCRE2_UCHAR callout_int_pattern[] = {
+  CHAR_LEFT_PARENTHESIS, CHAR_QUESTION_MARK, CHAR_C, CHAR_RIGHT_PARENTHESIS, 0 };
+PCRE2_UCHAR callout_str_pattern[] = {
+  CHAR_LEFT_PARENTHESIS, CHAR_QUESTION_MARK, CHAR_C, CHAR_QUOTATION_MARK,
+  CHAR_Z, CHAR_QUOTATION_MARK, CHAR_RIGHT_PARENTHESIS, 0 };
 #ifdef BITOTHER
 G(pcre2_code_,BITOTHER) *bitother_code = NULL;
 G(PCRE2_,G(UCHAR,BITOTHER)) bitother_pattern[] = { CHAR_A, CHAR_B, CHAR_C, 0 };
@@ -5431,9 +5463,14 @@ PCRE2_SIZE erroroffset;
 PCRE2_UCHAR errorbuffer[256];
 #if PCRE2_CODE_UNIT_WIDTH == 8
 char errorbuffer8[256];
+regex_t test_preg;
 #endif
-void *invalid_code;
+void *invalid_code = NULL;
 const uint8_t *test_tables = NULL;
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+memset(&test_preg, 0, sizeof(test_preg));
+#endif
 
 #if defined PCRE2_DEBUG && !defined NDEBUG
 #define ASSERT(cond, msg) \
@@ -5614,11 +5651,11 @@ ASSERT(test_compiled_code == NULL, "test pattern compilation");
 
 test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
   0, &errorcode, NULL, test_pat_context);
-ASSERT(test_compiled_code == NULL, "test pattern compilation");
+ASSERT(test_compiled_code == NULL && errorcode == PCRE2_ERROR_NULL_ERROROFFSET, "test pattern compilation");
 
 test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
   0, &errorcode, &erroroffset, test_pat_context);
-ASSERT(test_compiled_code != NULL, "test pattern compilation");
+ASSERT(test_compiled_code != NULL && errorcode == 100 && erroroffset == 0, "test pattern compilation");
 
 #ifdef BITOTHER
 bitother_code = G(pcre2_compile_,BITOTHER)(bitother_pattern,
@@ -5689,7 +5726,6 @@ ASSERT(invalid_code != NULL, "malloc()");
 memset(invalid_code, 0, 1024);
 rc = pcre2_pattern_info(invalid_code, PCRE2_INFO_NEWLINE, &uval);
 ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_pattern_info(bad magic)");
-free(invalid_code);
 
 #ifdef BITOTHER
 rc = pcre2_pattern_info((pcre2_code *)bitother_code, PCRE2_INFO_NEWLINE, &uval);
@@ -5717,6 +5753,15 @@ if (pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0)
 #else
 #define BUFFER_OUTPUT
 #endif
+
+rc = pcre2_regcomp(&test_preg, "abc", 0);
+ASSERT(rc == 0, "pcre2_regcomp()");
+
+rc = pcre2_regexec(&test_preg, "zabcz", 0, NULL, 0);
+ASSERT(rc == 0, "pcre2_regexec(0)");
+
+rc = pcre2_regexec(&test_preg, "zabcz", 0, NULL, REG_STARTEND);
+ASSERT(rc == REG_INVARG, "pcre2_regexec(REG_STARTEND)");
 
 memset(errorbuffer8, 0, sizeof(errorbuffer8));
 rc = regerror(REG_ASSERT, NULL, errorbuffer8, sizeof(errorbuffer8));
@@ -5785,12 +5830,50 @@ ASSERT(test_tables == NULL, "pcre2_maketables()");
 
 mallocs_until_failure = INT_MAX;
 
+/* -------------------- pcre2_callout_enumerate ---------------------------- */
+
+rc = pcre2_callout_enumerate(NULL, callout_enumerate_function_void, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_callout_enumerate(null)");
+
+rc = pcre2_callout_enumerate(invalid_code, callout_enumerate_function_void, NULL);
+ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_callout_enumerate(invalid)");
+
+#ifdef BITOTHER
+rc = pcre2_callout_enumerate((pcre2_code *)bitother_code, callout_enumerate_function_void, NULL);
+ASSERT(rc == PCRE2_ERROR_BADMODE, "pcre2_callout_enumerate(bitmode mismatch)");
+#endif
+
+pcre2_code_free(test_compiled_code);
+test_compiled_code = pcre2_compile(callout_int_pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, &erroroffset, NULL);
+ASSERT(test_compiled_code != NULL, "test pattern compilation");
+
+rc = pcre2_callout_enumerate(test_compiled_code, callout_enumerate_function_void, &errorcode);
+ASSERT(rc == 0, "pcre2_callout_enumerate(void)");
+
+errorcode = -12;
+rc = pcre2_callout_enumerate(test_compiled_code, callout_enumerate_function_fail, &errorcode);
+ASSERT(rc == -12, "pcre2_callout_enumerate(fail)");
+
+pcre2_code_free(test_compiled_code);
+test_compiled_code = pcre2_compile(callout_str_pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, &erroroffset, NULL);
+ASSERT(test_compiled_code != NULL, "test pattern compilation");
+
+errorcode = -123;
+rc = pcre2_callout_enumerate(test_compiled_code, callout_enumerate_function_fail, &errorcode);
+ASSERT(rc == -123, "pcre2_callout_enumerate(fail)");
+
 /* ------------------------------------------------------------------------- */
 
 #undef ASSERT
 EXIT:
 
 mallocs_until_failure = INT_MAX;
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+pcre2_regfree(&test_preg);
+#endif
 
 if (test_compiled_code != NULL) pcre2_code_free(test_compiled_code);
 #ifdef BITOTHER
@@ -5807,6 +5890,8 @@ if (test_con_context != NULL) pcre2_convert_context_free(test_con_context);
 if (test_dat_context != NULL) pcre2_match_context_free(test_dat_context);
 if (test_pat_context != NULL) pcre2_compile_context_free(test_pat_context);
 if (test_gen_context != NULL) pcre2_general_context_free(test_gen_context);
+
+free(invalid_code);
 
 if (failure != NULL)
   {
@@ -5855,6 +5940,8 @@ if (failure != NULL)
 #undef print_error_message_file
 #undef print_error_message
 #undef callout_enumerate_function
+#undef callout_enumerate_function_void
+#undef callout_enumerate_function_fail
 #undef show_pattern_info
 #undef serial_error
 #undef process_command

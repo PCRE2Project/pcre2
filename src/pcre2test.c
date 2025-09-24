@@ -632,7 +632,7 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  convert_length;
   uint32_t  convert_glob_escape;
   uint32_t  convert_glob_separator;
-  uint32_t  regerror_buffsize;
+   int32_t  regerror_buffsize;
    uint8_t  locale[LOCALESIZE];
 } patctl;
 
@@ -816,7 +816,7 @@ static modstruct modlist[] = {
   { "pushtablescopy",              MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
   { "python_octal",                MOD_CTC,  MOD_OPT, PCRE2_EXTRA_PYTHON_OCTAL,   CO(extra_options) },
   { "recursion_limit",             MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
-  { "regerror_buffsize",           MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
+  { "regerror_buffsize",           MOD_PAT,  MOD_INS, 0,                          PO(regerror_buffsize) },
   { "replace",                     MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
   { "stackguard",                  MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
   { "start_optimize",              MOD_CTC,  MOD_OPTMZ, PCRE2_START_OPTIMIZE,     0 },
@@ -2931,9 +2931,9 @@ DISPATCH(, unittest_, ());
 static void
 print_version(FILE *f, BOOL include_mode)
 {
-char buff[VERSION_SIZE];
-config_str(PCRE2_CONFIG_VERSION, buff);
-fprintf(f, "PCRE2 version %s", buff);
+char buf[VERSION_SIZE];
+config_str(PCRE2_CONFIG_VERSION, buf);
+fprintf(f, "PCRE2 version %s", buf);
 if (include_mode)
   {
   fprintf(f, " (%d-bit)", test_mode);
@@ -2950,9 +2950,9 @@ fprintf(f, "\n");
 static void
 print_unicode_version(FILE *f)
 {
-char buff[VERSION_SIZE];
-config_str(PCRE2_CONFIG_UNICODE_VERSION, buff);
-fprintf(f, "Unicode version %s", buff);
+char buf[VERSION_SIZE];
+config_str(PCRE2_CONFIG_UNICODE_VERSION, buf);
+fprintf(f, "Unicode version %s", buf);
 }
 
 
@@ -2964,9 +2964,9 @@ fprintf(f, "Unicode version %s", buff);
 static void
 print_jit_target(FILE *f)
 {
-char buff[VERSION_SIZE];
-config_str(PCRE2_CONFIG_JITTARGET, buff);
-fputs(buff, f);
+char buf[VERSION_SIZE];
+config_str(PCRE2_CONFIG_JITTARGET, buf);
+fputs(buf, f);
 }
 
 
@@ -3605,6 +3605,7 @@ locale_name[0] = 0;
 
 memset(&def_patctl, 0, sizeof(patctl));
 def_patctl.convert_type = CONVERT_UNSET;
+def_patctl.regerror_buffsize = -1;
 
 memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;

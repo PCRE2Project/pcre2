@@ -209,6 +209,8 @@ static const unsigned char compile_error_texts[] =
   "expected capture group number or name\0"
   "missing opening parenthesis\0"
   "syntax error in subpattern number (missing terminator?)\0"
+  /* 120 */
+  "erroroffset passed as NULL\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
@@ -347,7 +349,7 @@ else                                /* Invalid error number */
 
 for (; n > 0; n--)
   {
-  while (*message++ != CHAR_NUL) {};
+  while (*message++ != CHAR_NUL) {}
   if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
   }
 
