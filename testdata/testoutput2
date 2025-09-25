@@ -1007,6 +1007,7 @@ Subject length lower bound = 4
  1: a
  2: d
 Copy substring 5 failed (-49): unknown substring
+Get substring 5 length failed (-49): unknown substring
 
 /(.{20})/I
 Capture group count = 1
@@ -4594,6 +4595,7 @@ Subject length lower bound = 8
  2: gh
 Number not found for group "three"
 Copy substring "three" failed (-49): unknown substring
+Get substring "three" length failed (-49): unknown substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -5977,6 +5979,7 @@ Subject length lower bound = 2
  2: a1
 Number not found for group "Z"
 Copy substring "Z" failed (-49): unknown substring
+Get substring "Z" length failed (-49): unknown substring
   C a1 (2) A (non-unique)
 
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
@@ -6020,6 +6023,7 @@ Subject length lower bound = 2
     cd\=copy=A
  0: cd
 Copy substring "A" failed (-55): requested value is not set
+Get substring "A" length failed (-55): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capture group count = 4
@@ -14574,6 +14578,7 @@ Start of matched string is beyond its end - displaying from end to start.
 Matched, but too many substrings
  0: a
 Copy substring "A" failed (-54): requested value is not available
+Get substring "A" length failed (-54): requested value is not available
 Get substring 2 failed (-54): requested value is not available
 Get substring "A" failed (-54): requested value is not available
     a\=ovector=2,copy=A,get=A,get=2
@@ -14587,6 +14592,7 @@ Matched, but too many substrings
  0: b
  1: <unset>
 Copy substring "A" failed (-55): requested value is not set
+Get substring "A" length failed (-55): requested value is not set
 Get substring 2 failed (-54): requested value is not available
 Get substring "A" failed (-55): requested value is not set
 
@@ -14595,6 +14601,7 @@ Get substring "A" failed (-55): requested value is not set
 Partial match: abc
  0C abc (3)
 Copy substring 1 failed (-2): partial match
+Get substring 1 length failed (-2): partial match
 get substring list failed (-2): partial match
 
 /^abc/info

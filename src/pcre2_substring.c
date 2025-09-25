@@ -255,7 +255,7 @@ permits duplicate names, the first substring that is set is chosen.
 Arguments:
   match_data      pointer to match data
   stringname      the name of the required substring
-  sizeptr         where to put the length
+  sizeptr         where to put the length, if not NULL
 
 Returns:          0 if successful, else a negative error number
 */
@@ -338,8 +338,15 @@ else  /* Matched using pcre2_dfa_match() */
 
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
+/* LCOV_EXCL_START - this appears to be unreachable, as the ovector and
+subject_length should always be set consistently, no matter what misbehaviour
+the caller has committed. */
 if (left > match_data->subject_length || right > match_data->subject_length)
+  {
+  PCRE2_DEBUG_UNREACHABLE();
   return PCRE2_ERROR_INVALIDOFFSET;
+  }
+/* LCOV_EXCL_STOP */
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
 return 0;
 }

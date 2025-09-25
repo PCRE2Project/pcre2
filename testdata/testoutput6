@@ -7502,6 +7502,7 @@ Get substring "A" failed (-41): function is not supported for DFA matching
     aa\=copy=A 
  0: aa
 Copy substring "A" failed (-41): function is not supported for DFA matching
+Get substring "A" length failed (-41): function is not supported for DFA matching
 
 /a+/no_auto_possess
     a\=ovector=2,get=1,get=2,getall
@@ -7523,6 +7524,7 @@ Get substring 2 failed (-54): requested value is not available
 Partial match: abc
  0C abc (3)
 Copy substring 1 failed (-2): partial match
+Get substring 1 length failed (-2): partial match
 get substring list failed (-2): partial match
 
 /ab(?C" any text with spaces ")cde/B

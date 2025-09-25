@@ -3493,7 +3493,7 @@ uint8_t *nptr;
 
 for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
   {
-  int rc;
+  int rc, rc2;
   PCRE2_SIZE length, length2;
   PCRE2_UCHAR copybuffer[256];
   uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
@@ -3506,20 +3506,20 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
     }
   else
     {
-    rc = pcre2_substring_length_bynumber(match_data, n, &length2);
-    if (rc < 0)
-      {
-      fprintf(outfile, "Get substring %d length failed (%d): ", n, rc);
-      if (!print_error_message(rc, "", "\n")) return FALSE;
-      }
-    else if (length2 != length)
-      {
-      fprintf(outfile, "Mismatched substring lengths: %"
-        SIZ_FORM " %" SIZ_FORM "\n", length, length2);
-      }
     fprintf(outfile, "%2dC ", n);
     pchars(copybuffer, length, utf, outfile);
     fprintf(outfile, " (%" SIZ_FORM ")\n", length);
+    }
+  rc2 = pcre2_substring_length_bynumber(match_data, n, &length2);
+  if (rc2 < 0)
+    {
+    fprintf(outfile, "Get substring %d length failed (%d): ", n, rc2);
+    if (!print_error_message(rc2, "", "\n")) return FALSE;
+    }
+  else if (rc >= 0 && length2 != length)
+    {
+    fprintf(outfile, "Mismatched substring lengths: %"
+      SIZ_FORM " %" SIZ_FORM "\n", length, length2);
     }
   }
 
@@ -3528,7 +3528,7 @@ for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
 nptr = dat_datctl.copy_names;
 for (;;)
   {
-  int rc;
+  int rc, rc2;
   int groupnumber;
   PCRE2_SIZE length, length2;
   PCRE2_UCHAR copybuffer[256];
@@ -3564,22 +3564,22 @@ for (;;)
     }
   else
     {
-    rc = pcre2_substring_length_byname(match_data, pbuffer, &length2);
-    if (rc < 0)
-      {
-      fprintf(outfile, "Get substring \"%s\" length failed (%d): ", nptr, rc);
-      if (!print_error_message(rc, "", "\n")) return FALSE;
-      }
-    else if (length2 != length)
-      {
-      fprintf(outfile, "Mismatched substring lengths: %"
-        SIZ_FORM " %" SIZ_FORM "\n", length, length2);
-      }
     fprintf(outfile, "  C ");
     pchars(copybuffer, length, utf, outfile);
     fprintf(outfile, " (%" SIZ_FORM ") %s", length, nptr);
     if (groupnumber >= 0) fprintf(outfile, " (group %d)\n", groupnumber);
       else fprintf(outfile, " (non-unique)\n");
+    }
+  rc2 = pcre2_substring_length_byname(match_data, pbuffer, &length2);
+  if (rc2 < 0)
+    {
+    fprintf(outfile, "Get substring \"%s\" length failed (%d): ", nptr, rc2);
+    if (!print_error_message(rc2, "", "\n")) return FALSE;
+    }
+  else if (rc >= 0 && length2 != length)
+    {
+    fprintf(outfile, "Mismatched substring lengths: %"
+      SIZ_FORM " %" SIZ_FORM "\n", length, length2);
     }
   nptr += namelen + 1;
   }
@@ -5441,6 +5441,7 @@ unittest(void)
 int rc;
 uint32_t uval;
 PCRE2_SIZE sizeval;
+PCRE2_UCHAR *sptrval;
 const char *failure = NULL;
 pcre2_general_context *test_gen_context = NULL, *test_gen_context_copy = NULL;
 pcre2_compile_context *test_pat_context = NULL, *test_pat_context_copy = NULL;
@@ -5454,6 +5455,13 @@ PCRE2_UCHAR callout_int_pattern[] = {
 PCRE2_UCHAR callout_str_pattern[] = {
   CHAR_LEFT_PARENTHESIS, CHAR_QUESTION_MARK, CHAR_C, CHAR_QUOTATION_MARK,
   CHAR_Z, CHAR_QUOTATION_MARK, CHAR_RIGHT_PARENTHESIS, 0 };
+PCRE2_UCHAR capture_pattern[] = {
+  CHAR_A, CHAR_LEFT_PARENTHESIS, CHAR_QUESTION_MARK, CHAR_LESS_THAN_SIGN,
+  CHAR_N, CHAR_GREATER_THAN_SIGN, CHAR_DOT, CHAR_ASTERISK,
+  CHAR_RIGHT_PARENTHESIS, CHAR_Z, 0 };
+PCRE2_UCHAR subject_abcz[] = {
+  CHAR_A, CHAR_B, CHAR_C, CHAR_Z, 0 };
+PCRE2_UCHAR name_n[] = { CHAR_N, 0 };
 #ifdef BITOTHER
 G(pcre2_code_,BITOTHER) *bitother_code = NULL;
 G(PCRE2_,G(UCHAR,BITOTHER)) bitother_pattern[] = { CHAR_A, CHAR_B, CHAR_C, 0 };
@@ -5467,6 +5475,9 @@ regex_t test_preg;
 #endif
 void *invalid_code = NULL;
 const uint8_t *test_tables = NULL;
+PCRE2_UCHAR copy_buf[64];
+PCRE2_UCHAR **stringlist;
+PCRE2_SIZE *lengthslist;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 memset(&test_preg, 0, sizeof(test_preg));
@@ -5863,6 +5874,109 @@ ASSERT(test_compiled_code != NULL, "test pattern compilation");
 errorcode = -123;
 rc = pcre2_callout_enumerate(test_compiled_code, callout_enumerate_function_fail, &errorcode);
 ASSERT(rc == -123, "pcre2_callout_enumerate(fail)");
+
+/* ---------------------- Substring functions ------------------------------ */
+
+/* Must handle NULL without crashing. */
+pcre2_substring_free(NULL);
+pcre2_substring_list_free(NULL);
+
+pcre2_code_free(test_compiled_code);
+test_compiled_code = pcre2_compile(capture_pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, &erroroffset, NULL);
+ASSERT(test_compiled_code != NULL, "test pattern compilation");
+
+pcre2_match_data_free(test_match_data);
+test_match_data = pcre2_match_data_create_from_pattern(
+  test_compiled_code, test_gen_context);
+ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
+
+rc = pcre2_match(test_compiled_code, subject_abcz, PCRE2_ZERO_TERMINATED, 0,
+  0, test_match_data, NULL);
+ASSERT(rc == 2, "pcre2_match()");
+
+/* Test the functions with insufficient buffer size. It hardly seems worth
+adding controls to the pcre2test input file format to exercise this case. */
+
+sizeval = 2;
+rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMEMORY && sizeval == 2, "pcre2_substring_copy_byname(small buffer)");
+sizeval = 3;
+rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+ASSERT(rc == 0 && sizeval == 2, "pcre2_substring_copy_byname(small buffer)");
+sizeval = 4;
+rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+ASSERT(rc == 0 && sizeval == 2, "pcre2_substring_copy_byname(small buffer)");
+
+sizeval = 2;
+rc = pcre2_substring_copy_bynumber(test_match_data, 1, copy_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMEMORY && sizeval == 2, "pcre2_substring_copy_bynumber(small buffer)");
+sizeval = 3;
+rc = pcre2_substring_copy_bynumber(test_match_data, 1, copy_buf, &sizeval);
+ASSERT(rc == 0 && sizeval == 2, "pcre2_substring_copy_bynumber(small buffer)");
+
+mallocs_until_failure = 0;
+
+sizeval = 0;
+sptrval = NULL;
+rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMEMORY && sptrval == NULL, "pcre2_substring_get_byname(small buffer)");
+
+sizeval = 0;
+rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMEMORY && sptrval == NULL, "pcre2_substring_get_bynumber(small buffer)");
+
+mallocs_until_failure = INT_MAX;
+
+/* Test some unusual conditions, for which again it doesn't seem worth adding
+pcre2test controls. */
+
+sizeval = 0;
+rc = pcre2_substring_length_bynumber(test_match_data, 1, &sizeval);
+ASSERT(rc == 0 && sizeval == 2, "pcre2_substring_length_bynumber()");
+rc = pcre2_substring_length_bynumber(test_match_data, 1, NULL);
+ASSERT(rc == 0, "pcre2_substring_length_bynumber()");
+
+sizeval = 0;
+rc = pcre2_substring_length_byname(test_match_data, name_n, &sizeval);
+ASSERT(rc == 0 && sizeval == 2, "pcre2_substring_length_byname()");
+rc = pcre2_substring_length_byname(test_match_data, name_n, NULL);
+ASSERT(rc == 0, "pcre2_substring_length_byname()");
+
+/* Test pcre2_substring_list_get() with some NULL inputs. */
+
+rc = pcre2_substring_list_get(test_match_data, &stringlist, &lengthslist);
+ASSERT(rc == 0 && stringlist != NULL && lengthslist != NULL, "pcre2_substring_list_get()");
+pcre2_substring_list_free(stringlist);
+
+stringlist = NULL;
+rc = pcre2_substring_list_get(test_match_data, &stringlist, NULL);
+ASSERT(rc == 0 && stringlist != NULL, "pcre2_substring_list_get()");
+pcre2_substring_list_free(stringlist);
+
+mallocs_until_failure = 0;
+
+stringlist = NULL;
+rc = pcre2_substring_list_get(test_match_data, &stringlist, &lengthslist);
+ASSERT(rc == PCRE2_ERROR_NOMEMORY && stringlist == NULL, "pcre2_substring_list_get()");
+
+mallocs_until_failure = INT_MAX;
+
+/* Test after an unsuccessful match. */
+
+rc = pcre2_match(test_compiled_code, subject_abcz, PCRE2_ZERO_TERMINATED, 2,
+  0, test_match_data, NULL);
+ASSERT(rc == PCRE2_ERROR_NOMATCH, "pcre2_match()");
+
+sizeval = 4;
+rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMATCH, "pcre2_substring_copy_byname(no match)");
+rc = pcre2_substring_copy_bynumber(test_match_data, 1, copy_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMATCH, "pcre2_substring_copy_bynumber(no match)");
+rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_byname(no match)");
+rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_bynumber(no match)");
 
 /* ------------------------------------------------------------------------- */
 
