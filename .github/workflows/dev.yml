@@ -23,8 +23,9 @@ jobs:
     steps:
       - name: Setup
         run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
           sudo apt-get -qq update
-          sudo apt-get -qq install libedit-dev
+          sudo apt-get -qq install -y libedit-dev
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -97,6 +98,7 @@ jobs:
     steps:
       - name: Setup
         run: |
+          echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
           export DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
           apt-get -qq update
           apt-get -qq install -y git build-essential cmake
@@ -174,6 +176,7 @@ jobs:
     steps:
       - name: Setup
         run: |
+          echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
           export DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
           apt-get -qq update
           apt-get -qq install -y git build-essential autoconf automake libtool
@@ -210,8 +213,9 @@ jobs:
     steps:
       - name: Setup
         run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
           sudo apt-get -qq update
-          sudo apt-get -qq install language-pack-fr ninja-build libreadline-dev
+          sudo apt-get -qq install -y language-pack-fr ninja-build libreadline-dev
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -294,6 +298,7 @@ jobs:
     steps:
       - name: Setup
         run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
           sudo apt-get -qq update
           sudo apt-get -qq install -y valgrind
 
@@ -447,6 +452,7 @@ jobs:
             CMAKE_FLAGS: ${{ env.CMAKE_FLAGS }}
 
           install: |
+            echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
             apt-get -qq update
             apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev
 
