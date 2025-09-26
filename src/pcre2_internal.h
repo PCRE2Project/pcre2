@@ -209,28 +209,6 @@ code that a non-static object is being referenced. */
 #define PRIV(name) _pcre2_##name
 #endif
 
-/* When compiling for use with the Virtual Pascal compiler, these functions
-need to have their names changed. PCRE2 must be compiled with the -DVPCOMPAT
-option on the command line. */
-
-#ifdef VPCOMPAT
-#define strlen(s)        _strlen(s)
-#define strncmp(s1,s2,m) _strncmp(s1,s2,m)
-#define memcmp(s,c,n)    _memcmp(s,c,n)
-#define memcpy(d,s,n)    _memcpy(d,s,n)
-#define memmove(d,s,n)   _memmove(d,s,n)
-#define memset(s,c,n)    _memset(s,c,n)
-#else  /* VPCOMPAT */
-
-/* Otherwise, to cope with SunOS4 and other systems that lack memmove(), define
-a macro that calls an emulating function. */
-
-#ifndef HAVE_MEMMOVE
-#undef  memmove          /* Some systems may have a macro */
-#define memmove(a, b, c) PRIV(memmove)(a, b, c)
-#endif   /* not HAVE_MEMMOVE */
-#endif   /* not VPCOMPAT */
-
 /* This is an unsigned int value that no UTF character can ever have, as
 Unicode doesn't go beyond 0x0010ffff. */
 
@@ -2379,13 +2357,6 @@ extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
 extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, const uint8_t *, BOOL);
 extern BOOL         _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR,
                       const uint8_t *, BOOL);
-
-/* This function is needed only when memmove() is not available. */
-
-#if !defined(VPCOMPAT) && !defined(HAVE_MEMMOVE)
-#define _pcre2_memmove               PCRE2_SUFFIX(_pcre2_memmove)
-extern void *       _pcre2_memmove(void *, const void *, size_t);
-#endif
 
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
 

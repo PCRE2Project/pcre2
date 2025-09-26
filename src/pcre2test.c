@@ -1421,45 +1421,6 @@ static const uint8_t tables2[] = {
 
 
 
-#if !defined(VPCOMPAT) && !defined(HAVE_MEMMOVE)
-/*************************************************
-*    Emulated memmove() for systems without it   *
-*************************************************/
-
-/* This function can make use of bcopy() if it is available. Otherwise do it by
-steam, as there are some non-Unix environments that lack both memmove() and
-bcopy(). */
-
-static void *
-emulated_memmove(void *d, const void *s, size_t n)
-{
-#ifdef HAVE_BCOPY
-bcopy(s, d, n);
-return d;
-#else
-size_t i;
-unsigned char *dest = (unsigned char *)d;
-const unsigned char *src = (const unsigned char *)s;
-if (dest > src)
-  {
-  dest += n;
-  src += n;
-  for (i = 0; i < n; ++i) *(--dest) = *(--src);
-  return (void *)dest;
-  }
-else
-  {
-  for (i = 0; i < n; ++i) *dest++ = *src++;
-  return (void *)(dest - n);
-  }
-#endif   /* not HAVE_BCOPY */
-}
-#undef memmove
-#define memmove(d,s,n) emulated_memmove(d,s,n)
-#endif   /* not VPCOMPAT && not HAVE_MEMMOVE */
-
-
-
 #ifndef HAVE_STRERROR
 /*************************************************
 *     Provide strerror() for non-ANSI libraries  *

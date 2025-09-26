@@ -172,9 +172,7 @@ check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(unistd.h HAVE_UNISTD_H)
 check_include_file(windows.h HAVE_WINDOWS_H)
 
-check_symbol_exists(bcopy "strings.h" HAVE_BCOPY)
 check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE)
-check_symbol_exists(memmove "string.h" HAVE_MEMMOVE)
 check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
 check_symbol_exists(strerror "string.h" HAVE_STRERROR)
 
