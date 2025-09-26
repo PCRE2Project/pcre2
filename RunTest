@@ -197,8 +197,9 @@ checkresult()
 
 checkspecial()
   {
+  expect=${2:-0}
   $sim $valgrind $vjs $pcre2test $1 >>testSoutput
-  if [ $? -ne 0 ] ; then
+  if [ $? -ne "$expect" ] ; then
     echo "** pcre2test $1 failed - check testSoutput"
     yield=1
     return 1
@@ -538,16 +539,23 @@ for bmode in "$test8" "$test16" "$test32"; do
     echo '   abc' >>testSinput
     echo '' >testSoutput
     saverc=0
-    checkspecial '-C' || saverc=$?
+    checkspecial "$bmode -C" || saverc=$?
     checkspecial '--help' || saverc=$?
     checkspecial "$bmode testSinput" || saverc=$?
     checkspecial "$bmode $testdata/testinputheap" || saverc=$?
     if [ $support_setstack -eq 0 ] ; then
       checkspecial "$bmode -S 1 -t 10 testSinput" || saverc=$?
     fi
+    checkspecial "$bmode reallydoesnotexist" 1 || saverc=$?
+    checkspecial "$bmode testSinput reallydoesnotexist/outfile" 1 || saverc=$?
+    checkspecial "$bmode -pattern debug testSinput" || saverc=$?
+    checkspecial "$bmode -pattern INVALID testSinput" 1 2>/dev/null || saverc=$?
+    checkspecial "$bmode -subject notempty testSinput" || saverc=$?
+    checkspecial "$bmode -subject INVALID testSinput" 1 2>/dev/null || saverc=$?
     checkspecial -LM || saverc=$?
     checkspecial -LP || saverc=$?
     checkspecial -LS || saverc=$?
+    checkspecial "$bmode -unittest" || saverc=$?
     if [ $saverc -eq 0 ] ; then
       echo "  OK"
     fi

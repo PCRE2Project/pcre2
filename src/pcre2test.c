@@ -326,6 +326,7 @@ static BOOL printable(uint32_t c);
 #endif
 #if defined(EBCDIC) && !EBCDIC_IO
 static void ascii_to_ebcdic_str(uint8_t *buf, size_t len);
+static void ebcdic_to_ascii_str(uint8_t *buf, size_t len);
 #endif
 #if defined(EBCDIC)
 static uint32_t ascii_to_ebcdic(uint32_t c);
@@ -630,7 +631,7 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  convert_length;
   uint32_t  convert_glob_escape;
   uint32_t  convert_glob_separator;
-  uint32_t  regerror_buffsize;
+   int32_t  regerror_buffsize;
    uint8_t  locale[LOCALESIZE];
 } patctl;
 
@@ -780,7 +781,7 @@ static modstruct modlist[] = {
   { "never_callout",               MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NEVER_CALLOUT,  CO(extra_options) },
   { "never_ucp",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UCP,            PO(options) },
   { "never_utf",                   MOD_PAT,  MOD_OPT, PCRE2_NEVER_UTF,            PO(options) },
-  { "newline",                     MOD_CTC,  MOD_NL,  0,                          CO(newline_convention) },
+  { "newline",                     MOD_CTC,  MOD_NL,  0,                          0 },
   { "no_auto_capture",             MOD_PAT,  MOD_OPT, PCRE2_NO_AUTO_CAPTURE,      PO(options) },
   { "no_auto_possess",             MOD_PATP, MOD_OPT, PCRE2_NO_AUTO_POSSESS,      PO(options) },
   { "no_bs0",                      MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NO_BS0,         CO(extra_options) },
@@ -814,7 +815,7 @@ static modstruct modlist[] = {
   { "pushtablescopy",              MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
   { "python_octal",                MOD_CTC,  MOD_OPT, PCRE2_EXTRA_PYTHON_OCTAL,   CO(extra_options) },
   { "recursion_limit",             MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
-  { "regerror_buffsize",           MOD_PAT,  MOD_INT, 0,                          PO(regerror_buffsize) },
+  { "regerror_buffsize",           MOD_PAT,  MOD_INS, 0,                          PO(regerror_buffsize) },
   { "replace",                     MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
   { "stackguard",                  MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
   { "start_optimize",              MOD_CTC,  MOD_OPTMZ, PCRE2_START_OPTIMIZE,     0 },
@@ -1647,6 +1648,13 @@ ascii_to_ebcdic_str(uint8_t *buf, size_t len)
 {
 for (size_t i = 0; i < len; ++i)
   buf[i] = ascii_to_ebcdic_1047[buf[i]];
+}
+
+static void
+ebcdic_to_ascii_str(uint8_t *buf, size_t len)
+{
+for (size_t i = 0; i < len; ++i)
+  buf[i] = ebcdic_1047_to_ascii[buf[i]];
 }
 #endif
 
@@ -2922,9 +2930,9 @@ DISPATCH(, unittest_, ());
 static void
 print_version(FILE *f, BOOL include_mode)
 {
-char buff[VERSION_SIZE];
-config_str(PCRE2_CONFIG_VERSION, buff);
-fprintf(f, "PCRE2 version %s", buff);
+char buf[VERSION_SIZE];
+config_str(PCRE2_CONFIG_VERSION, buf);
+fprintf(f, "PCRE2 version %s", buf);
 if (include_mode)
   {
   fprintf(f, " (%d-bit)", test_mode);
@@ -2941,9 +2949,9 @@ fprintf(f, "\n");
 static void
 print_unicode_version(FILE *f)
 {
-char buff[VERSION_SIZE];
-config_str(PCRE2_CONFIG_UNICODE_VERSION, buff);
-fprintf(f, "Unicode version %s", buff);
+char buf[VERSION_SIZE];
+config_str(PCRE2_CONFIG_UNICODE_VERSION, buf);
+fprintf(f, "Unicode version %s", buf);
 }
 
 
@@ -2955,9 +2963,9 @@ fprintf(f, "Unicode version %s", buff);
 static void
 print_jit_target(FILE *f)
 {
-char buff[VERSION_SIZE];
-config_str(PCRE2_CONFIG_JITTARGET, buff);
-fputs(buff, f);
+char buf[VERSION_SIZE];
+config_str(PCRE2_CONFIG_JITTARGET, buf);
+fputs(buf, f);
 }
 
 
@@ -3042,6 +3050,7 @@ printf("  -jitverify    set default pattern modifier 'jitverify'\n");
 printf("  -LM           list pattern and subject modifiers, then exit\n");
 printf("  -LP           list non-script properties, then exit\n");
 printf("  -LS           list supported scripts, then exit\n");
+printf("  -malloc       exercise malloc() failures\n");
 printf("  -q            quiet: do not output PCRE2 version number at start\n");
 printf("  -pattern <s>  set default pattern modifier fields\n");
 printf("  -subject <s>  set default subject modifier fields\n");
@@ -3050,7 +3059,7 @@ printf("  -t [<n>]      time compilation and execution, repeating <n> times\n");
 printf("  -tm [<n>]     time execution (matching) only, repeating <n> times\n");
 printf("  -T            same as -t, but show total times at the end\n");
 printf("  -TM           same as -tm, but show total time at the end\n");
-printf("  -malloc       exercise malloc() failures\n");
+printf("  -unittest     run unit tests, then exit\n");
 printf("  -v|--version  show PCRE2 version and exit\n");
 }
 
@@ -3595,6 +3604,7 @@ locale_name[0] = 0;
 
 memset(&def_patctl, 0, sizeof(patctl));
 def_patctl.convert_type = CONVERT_UNSET;
+def_patctl.regerror_buffsize = -1;
 
 memset(&def_datctl, 0, sizeof(datctl));
 def_datctl.oveccount = DEFAULT_OVECCOUNT;
@@ -3633,6 +3643,16 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   if (strcmp(arg, "-LS") == 0)
     {
     display_properties(TRUE);
+    goto EXIT;
+    }
+
+  /* Perform additional edge-case and error-handling tests of public API
+  functions, which wouldn't otherwise be covered by the standard use of the API
+  in pcre2test. */
+
+  if (strcmp(arg, "-unittest") == 0)
+    {
+    unittest();
     goto EXIT;
     }
 
@@ -3891,12 +3911,6 @@ max_oveccount = DEFAULT_OVECCOUNT;
 /* Initialise the globals for the current mode. */
 
 init_globals();
-
-/* Perform additional edge-case and error-handling tests of public API
-functions, which wouldn't otherwise be covered by the standard use of the API
-in pcre2test. */
-
-unittest();
 
 /* Handle command line modifier settings, sending any error messages to
 stderr. We need to know the mode before modifying the context, and it is tidier

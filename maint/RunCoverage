@@ -9,11 +9,13 @@
 
 set -e
 
+clang_report=0
 nomalloc=0
 
 while [ $# -gt 0 ] ; do
   case $1 in
    nomalloc|-nomalloc) nomalloc=1;;
+   clang|-clang|clang-report|-clang-report) clang_report=1;;
    *) echo "Unknown option or test selector '$1'"; exit 1;;
   esac
   shift
@@ -44,26 +46,40 @@ PROF_FILES="coverage-*.profraw"
 llvm-profdata-$LLVM_VER merge -sparse $PROF_FILES -o coverage.profdata
 echo ""
 
-# Output LCOV-compatible output, for downstream tools
-echo "== Generating LCOV report =="
-llvm-cov-$LLVM_VER export \
-  -format=lcov \
-  -instr-profile=coverage.profdata \
-  ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
-  -sources ../src/ ./ \
-  > ./coverage-lcov.info
-echo ""
+if [ "$clang_report" -eq 1 ]; then
+  echo "== Generating Clang coverage report =="
+  llvm-cov-$LLVM_VER show \
+    -format=html \
+    -show-line-counts-or-regions -show-branches=percent \
+    -instr-profile=coverage.profdata \
+    ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+    -sources ../src/ ./ \
+    -output-dir=coverage-html
+  echo ""
 
-# Filter out lines marked with "LCOV_EXCL_LINE" or "LCOV_EXCL_START"/"LCOV_EXCL_STOP"
-echo "== Filtering LCOV report =="
-python3 ../maint/FilterCoverage.py ./coverage-lcov.info > ./coverage-lcov.filtered.info
-mv ./coverage-lcov.filtered.info ./coverage-lcov.info
-echo ""
+else
+  # Output LCOV-compatible output, for downstream tools
+  echo "== Generating LCOV report =="
+  llvm-cov-$LLVM_VER export \
+    -format=lcov \
+    -instr-profile=coverage.profdata \
+    ./pcre2test -object ./pcre2grep -object ./pcre2posix_test -object ./pcre2_jit_test \
+    -sources ../src/ ./ \
+    > ./coverage-lcov.info
+  echo ""
 
-# Use genhtml to generate an HTML report from the LCOV data
-echo "== Generating HTML report =="
-mkdir -p coverage-html
-genhtml \
-  --highlight --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
-  -o coverage-html ./coverage-lcov.info
-echo ""
+  # Filter out lines marked with "LCOV_EXCL_LINE" or "LCOV_EXCL_START"/"LCOV_EXCL_STOP"
+  echo "== Filtering LCOV report =="
+  python3 ../maint/FilterCoverage.py ./coverage-lcov.info > ./coverage-lcov.filtered.info
+  mv ./coverage-lcov.filtered.info ./coverage-lcov.info
+  echo ""
+
+  # Use genhtml to generate an HTML report from the LCOV data
+  echo "== Generating HTML report =="
+  mkdir -p coverage-html
+  genhtml \
+    --highlight --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
+    -o coverage-html ./coverage-lcov.info
+  echo ""
+
+fi
