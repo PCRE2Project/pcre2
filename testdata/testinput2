@@ -1926,12 +1926,82 @@
     a\x85b
 \= Expect no match
     a\rb
+    a\r\nb
 
 /^a.b/newline=any
 \= Expect no match
     a\nb
     a\rb
+    a\r\nb
     a\x85b
+
+/^a.b/newline=nul
+    a\nb
+\= Expect no match
+    a\x{00}b
+
+/^a./newline=lf
+    a\r
+\= Expect no match
+    a\n
+
+/^a./newline=cr
+    a\n
+\= Expect no match
+    a\r
+
+/^a./newline=anycrlf
+    a\x85
+\= Expect no match
+    a\r
+    a\n
+    a\r\n
+
+/^a./newline=any
+\= Expect no match
+    a\n
+    a\r
+    a\r\n
+    a\x85
+
+/^a./newline=nul
+    a\n
+\= Expect no match
+    a\x{00}
+
+/^b/m,newline=lf
+    a\nb
+\= Expect no match
+    a\rb
+
+/^b/m,newline=cr
+    a\rb
+\= Expect no match
+    a\nb
+
+/^b/m,newline=anycrlf
+    a\rb
+    a\nb
+    a\r\nb
+    \nb
+    \rb
+    \r\nb
+\= Expect no match
+    a\x85b
+
+/^b/m,newline=any
+    a\nb
+    a\rb
+    a\r\nb
+    a\x85b
+    \nb
+    \rb
+    \r\nb
+
+/^b/m,newline=nul
+    a\x{00}b
+\= Expect no match
+    a\nb
 
 /^abc./gmx,newline=any
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
@@ -4743,6 +4813,21 @@
 /((*MARK:A))++a(*SKIP:B)b/
 \= Expect no match
     aacb
+
+/(^aa(*MARK:X)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+
+/(^aa(*MARK:X)a(*SKIP:Y)c|(?!^)a+b)/g
+    aaab
+
+/(^aa(*MARK:Y)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+
+/(^aa(*MARK:X)a(*SKIP:XX)c|(?!^)a+b)/g
+    aaab
+
+/(^aa(*MARK:XX)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
 
 /(*MARK:a\zb)z/alt_verbnames
 

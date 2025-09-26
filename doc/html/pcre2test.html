@@ -282,6 +282,12 @@ output, then exit with zero exit code. All other options are ignored. If both
 -C and any -Lx options are present, whichever is first is recognized.
 </p>
 <p>
+<b>-malloc</b>
+Exercise malloc() failures, by first counting the number of calls made to malloc
+during pattern compilation and matching, then re-running the compilation and
+matching that many times, exercising a failure of each malloc() call.
+</p>
+<p>
 <b>-pattern</b> <i>modifier-list</i>
 Behave as if each pattern line contains the given modifiers.
 </p>
@@ -318,10 +324,9 @@ These behave like <b>-t</b> and <b>-tm</b>, but in addition, at the end of a run
 the total times for all compiles and matches are output.
 </p>
 <p>
-<b>-malloc</b>
-Exercise malloc() failures, by first counting the number of calls made to malloc
-during pattern compilation and matching, then re-running the compilation and
-matching that many times, exercising a failure of each malloc() call.
+<b>-unittest</b>
+Run a fixed set of additional tests of the PCRE2 API which are not driven by
+the test input files, and then exit.
 </p>
 <p>
 <b>-version</b>

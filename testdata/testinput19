@@ -22,4 +22,6 @@
 \= Expect UTF error
     A\xabB
 
+/ AB /hex,utf
+
 # End of testdata/testinput19

@@ -27,4 +27,7 @@ No match: POSIX code 17: match failed
     A\xabB
 No match: POSIX code 16: bad argument
 
+/ AB /hex,utf
+Failed: POSIX code 3: pattern error at offset 0
+
 # End of testdata/testinput19

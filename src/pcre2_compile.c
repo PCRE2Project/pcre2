@@ -10327,7 +10327,16 @@ PCRE2_UCHAR *cworkspace = (PCRE2_UCHAR *)c16workspace;
 
 /* There must be error code and offset pointers. */
 
-if (errorptr == NULL || erroroffset == NULL) return NULL;
+if (errorptr == NULL)
+  {
+  if (erroroffset != NULL) *erroroffset = 0;
+  return NULL;
+  }
+if (erroroffset == NULL)
+  {
+  if (errorptr != NULL) *errorptr = ERR120;
+  return NULL;
+  }
 *errorptr = ERR0;
 *erroroffset = 0;
 

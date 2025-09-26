@@ -78,7 +78,6 @@ MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
-#define BROKEN_SNPRINTF
 #endif
 
 
@@ -102,6 +101,13 @@ changed. This #define is a copy of the one in pcre2_internal.h. */
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_util.h"
+
+/* For pcre2_tables.c */
+#define PCRE2_PCRE2POSIX
+/* For pcre2_tables.c */
+#define PRIV(name) name
+
+#include "pcre2_tables.c"
 
 /* Table to translate PCRE2 compile time error codes into POSIX error codes.
 Only a few PCRE2 errors with a value greater than 23 turn into special POSIX
@@ -174,14 +180,6 @@ static const char *const pstring[] = {
   "match failed"                     /* NOMATCH    */
 };
 
-static int message_len(const char *message, int offset)
-{
-char buf[12];
-
-/* 11 magic number comes from the format below */
-return (int)strlen(message) + 11 + snprintf(buf, sizeof(buf), "%d", offset);
-}
-
 /*************************************************
 *          Translate error code to string        *
 *************************************************/
@@ -190,66 +188,50 @@ PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_regerror(int errcode, const regex_t *preg, char *errbuf,
   size_t errbuf_size)
 {
-int ret;
 const char *message;
-size_t len = 0; /* keeps 0 if snprintf is used */
+char offset_buf[11+12]; /* big enough for " at offset -2147483648" */
+int snprintf_rc, have_offset = 0;
+PCRE2_SIZE i;
 
 message = (errcode <= 0 || errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
   "unknown error code" : pstring[errcode];
 
-if (preg != NULL && (int)preg->re_erroffset != -1)
+if (preg != NULL && preg->re_erroffset != (size_t)(-1)
+    /* LCOV_EXCL_START - snprintf failures here are essentially unreachable */
+    && (snprintf_rc = snprintf(offset_buf, sizeof(offset_buf), " at offset %d",
+                               (int)preg->re_erroffset)) > 0
+    && snprintf_rc < (int)sizeof(offset_buf))
+    /* LCOV_EXCL_STOP */
   {
-  /* no need to deal with UB in snprintf */
-  if (errbuf_size > INT_MAX) errbuf_size = INT_MAX;
-
-  /* there are 11 characters between message and offset;
-     update message_len() if changed */
-  ret = snprintf(errbuf, errbuf_size, "%s at offset %d", message,
-                 (int)preg->re_erroffset);
-  }
-else
-  {
-  len = strlen(message);
-  if (errbuf_size != 0)
-    {
-    strncpy(errbuf, message, errbuf_size);
-    if (errbuf_size <= len) errbuf[errbuf_size - 1] = '\0';
-    }
-  ret = (int)len;
+  have_offset = 1;
+  offset_buf[sizeof(offset_buf) - 1] = 0; /* Paranoia for very old snprintf */
   }
 
-PCRE2_ASSERT(len > 0 || preg != NULL);
+for (i = 0; *message != 0; i++, message++)
+  if (i + 1 < errbuf_size) errbuf[i] = *message;
 
-do {
-  if (ret < 0)
-    {
-#ifdef BROKEN_SNPRINTF
-    /* _snprintf returns -1 on overflow and doesn't zero terminate */
-    if (!len)
-      {
-      if (ret == -1 && errbuf_size != 0) errbuf[errbuf_size - 1] = '\0';
+if (have_offset)
+  {
+  for (message = offset_buf; *message != 0; i++, message++)
+    if (i + 1 < errbuf_size) errbuf[i] = *message;
+  }
 
-      ret = message_len(message, (int)preg->re_erroffset);
-      break;
-      }
+#if defined EBCDIC && 'a' != 0x81
+/* If compiling for EBCDIC, but the compiler's string literals are not EBCDIC,
+then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
+here to translate the error strings on the fly, rather than require the string
+literals above to be written out arduously using the "STR_XYZ" macros. */
+for (PCRE2_SIZE j = 0; j < i && j < errbuf_size; ++j)
+  errbuf[j] = PRIV(ascii_to_ebcdic_1047)[(uint8_t)errbuf[j]];
 #endif
-    /* snprintf failed, will use a 14 char long message if possible */
-    ret = 14;
-    if (errbuf_size != 0)
-      {
-      strncpy(errbuf, "internal error", errbuf_size);
-      if ((int)errbuf_size <= ret) errbuf[errbuf_size - 1] = '\0';
-      }
-    }
-  else if (ret == (int)errbuf_size && !len)
-    {
-      /* pre C99 snprintf returns used, so redo ret to fix that */
 
-      ret = message_len(message, (int)preg->re_erroffset);
-    }
-} while (0);
+/* Terminate message, even if truncated. */
 
-return ret + 1;
+if (errbuf_size > 0)
+  errbuf[(i < errbuf_size)? i : errbuf_size - 1] = 0;
+i++;
+
+return (int)i;
 }
 
 
@@ -289,6 +271,9 @@ PCRE2_SIZE patlen;
 int errorcode;
 int options = 0;
 int re_nsub = 0;
+
+preg->re_match_data = NULL;
+preg->re_pcre2_code = NULL;
 
 patlen = ((cflags & REG_PEND) != 0)? (PCRE2_SIZE)(preg->re_endp - pattern) :
   PCRE2_ZERO_TERMINATED;
@@ -331,10 +316,14 @@ preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
 
 if (preg->re_match_data == NULL)
   {
-  /* LCOV_EXCL_START */
+  /* There is no facility for passing a custom allocator to the POSIX API, so
+  our test code cannot force a malloc failure here. If there were an API to
+  customize the default (global) PCRE2 allocator, we could test it. Since the
+  code is nonetheless reachable, I prefer not to exclude it from coverage
+  reporting. */
   pcre2_code_free(preg->re_pcre2_code);
+  preg->re_pcre2_code = NULL;
   return REG_ESPACE;
-  /* LCOV_EXCL_STOP */
   }
 
 return 0;

@@ -1007,6 +1007,7 @@ Subject length lower bound = 4
  1: a
  2: d
 Copy substring 5 failed (-49): unknown substring
+Get substring 5 length failed (-49): unknown substring
 
 /(.{20})/I
 Capture group count = 1
@@ -4594,6 +4595,7 @@ Subject length lower bound = 8
  2: gh
 Number not found for group "three"
 Copy substring "three" failed (-49): unknown substring
+Get substring "three" length failed (-49): unknown substring
 
 /(?P<Tes>)(?P<Test>)/IB
 ------------------------------------------------------------------
@@ -5977,6 +5979,7 @@ Subject length lower bound = 2
  2: a1
 Number not found for group "Z"
 Copy substring "Z" failed (-49): unknown substring
+Get substring "Z" length failed (-49): unknown substring
   C a1 (2) A (non-unique)
 
 /(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/I,dupnames
@@ -6020,6 +6023,7 @@ Subject length lower bound = 2
     cd\=copy=A
  0: cd
 Copy substring "A" failed (-55): requested value is not set
+Get substring "A" length failed (-55): requested value is not set
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/I,dupnames
 Capture group count = 4
@@ -7671,6 +7675,8 @@ No match
 \= Expect no match
     a\rb
 No match
+    a\r\nb
+No match
 
 /^a.b/newline=any
 \= Expect no match
@@ -7678,7 +7684,113 @@ No match
 No match
     a\rb
 No match
+    a\r\nb
+No match
     a\x85b
+No match
+
+/^a.b/newline=nul
+    a\nb
+ 0: a\x0ab
+\= Expect no match
+    a\x{00}b
+No match
+
+/^a./newline=lf
+    a\r
+ 0: a\x0d
+\= Expect no match
+    a\n
+No match
+
+/^a./newline=cr
+    a\n
+ 0: a\x0a
+\= Expect no match
+    a\r
+No match
+
+/^a./newline=anycrlf
+    a\x85
+ 0: a\x85
+\= Expect no match
+    a\r
+No match
+    a\n
+No match
+    a\r\n
+No match
+
+/^a./newline=any
+\= Expect no match
+    a\n
+No match
+    a\r
+No match
+    a\r\n
+No match
+    a\x85
+No match
+
+/^a./newline=nul
+    a\n
+ 0: a\x0a
+\= Expect no match
+    a\x{00}
+No match
+
+/^b/m,newline=lf
+    a\nb
+ 0: b
+\= Expect no match
+    a\rb
+No match
+
+/^b/m,newline=cr
+    a\rb
+ 0: b
+\= Expect no match
+    a\nb
+No match
+
+/^b/m,newline=anycrlf
+    a\rb
+ 0: b
+    a\nb
+ 0: b
+    a\r\nb
+ 0: b
+    \nb
+ 0: b
+    \rb
+ 0: b
+    \r\nb
+ 0: b
+\= Expect no match
+    a\x85b
+No match
+
+/^b/m,newline=any
+    a\nb
+ 0: b
+    a\rb
+ 0: b
+    a\r\nb
+ 0: b
+    a\x85b
+ 0: b
+    \nb
+ 0: b
+    \rb
+ 0: b
+    \r\nb
+ 0: b
+
+/^b/m,newline=nul
+    a\x{00}b
+ 0: b
+\= Expect no match
+    a\nb
 No match
 
 /^abc./gmx,newline=any
@@ -14466,6 +14578,7 @@ Start of matched string is beyond its end - displaying from end to start.
 Matched, but too many substrings
  0: a
 Copy substring "A" failed (-54): requested value is not available
+Get substring "A" length failed (-54): requested value is not available
 Get substring 2 failed (-54): requested value is not available
 Get substring "A" failed (-54): requested value is not available
     a\=ovector=2,copy=A,get=A,get=2
@@ -14479,6 +14592,7 @@ Matched, but too many substrings
  0: b
  1: <unset>
 Copy substring "A" failed (-55): requested value is not set
+Get substring "A" length failed (-55): requested value is not set
 Get substring 2 failed (-54): requested value is not available
 Get substring "A" failed (-55): requested value is not set
 
@@ -14487,6 +14601,7 @@ Get substring "A" failed (-55): requested value is not set
 Partial match: abc
  0C abc (3)
 Copy substring 1 failed (-2): partial match
+Get substring 1 length failed (-2): partial match
 get substring list failed (-2): partial match
 
 /^abc/info
@@ -15568,6 +15683,31 @@ No match
 \= Expect no match
     aacb
 No match
+
+/(^aa(*MARK:X)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+ 0: ab
+ 1: ab
+
+/(^aa(*MARK:X)a(*SKIP:Y)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
+
+/(^aa(*MARK:Y)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
+
+/(^aa(*MARK:X)a(*SKIP:XX)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
+
+/(^aa(*MARK:XX)a(*SKIP:X)c|(?!^)a+b)/g
+    aaab
+ 0: aab
+ 1: aab
 
 /(*MARK:a\zb)z/alt_verbnames
 Failed: error 140 at offset 10: invalid escape sequence in (*VERB) name

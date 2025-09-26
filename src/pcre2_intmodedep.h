@@ -47,9 +47,16 @@ to have access to the hidden structures at all supported widths.
 
 Some of the mode-dependent macros are required at different widths for
 different parts of the pcre2test code (in particular, the included
-pcre2_printint_inc.h file). We undefine them here so that they can be re-defined for
-multiple inclusions. Not all of these are used in pcre2test, but it's easier
-just to undefine them all. */
+pcre2_printint_inc.h file). We undefine them here so that they can be re-defined
+for multiple inclusions. Not all of these are used in pcre2test, but it's easier
+just to undefine them all.
+
+You can also include pcre2_intmodedep.h with PCRE2_CODE_UNIT_WIDTH defined to
+zero in order to simply clear the previous macros. */
+
+#ifndef PCRE2_CODE_UNIT_WIDTH
+#error PCRE2_CODE_UNIT_WIDTH must be defined
+#endif
 
 #undef ACROSSCHAR
 #undef BACKCHAR
@@ -81,9 +88,14 @@ just to undefine them all. */
 #undef PUTINC
 #undef TABLE_GET
 
+/*************************************************
+*                    MACROS                      *
+*************************************************/
 
+/* Macros may be undefined and re-defined if the same file handles multiple
+bit-widths. */
 
-/* -------------------------- MACROS ----------------------------- */
+#if PCRE2_CODE_UNIT_WIDTH != 0
 
 /* PCRE keeps offsets in its compiled code as at least 16-bit quantities
 (always stored in big-endian order in 8-bit mode) by default. These are used,
@@ -202,7 +214,7 @@ arithmetic results in a signed value. Hence the cast. */
 #define GET2(a,n) (unsigned int)(((a)[n] << 8) | (a)[(n)+1])
 #define PUT2(a,n,d) a[n] = (d) >> 8, a[(n)+1] = (d) & 255
 
-#else  /* Code units are 16 or 32 bits */
+#elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #define IMM2_SIZE 1
 #define GET2(a,n) a[n]
 #define PUT2(a,n,d) a[n] = d
@@ -227,7 +239,7 @@ check is needed before accessing these tables. */
 #define CHMAX_255(c) TRUE
 #endif  /* SUPPORT_UNICODE */
 
-#else  /* Code units are 16 or 32 bits */
+#elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #define CHMAX_255(c) ((c) <= 255u)
 #define MAX_255(c) ((c) <= 255u)
 #define MAX_MARK ((1u << 16) - 1)
@@ -474,7 +486,7 @@ code. */
 
 /* ------------------- 32-bit support  ------------------ */
 
-#else
+#elif PCRE2_CODE_UNIT_WIDTH == 32
 
 /* These are trivial for the 32-bit library, since all UTF-32 characters fit
 into one PCRE2_UCHAR unit. */
@@ -555,6 +567,32 @@ These are all no-ops since all UTF-32 characters fit into one PCRE2_UCHAR. */
 #define PUTINC(a,n,d)   PUT(a,n,d), a += LINK_SIZE
 #define PUT2INC(a,n,d)  PUT2(a,n,d), a += IMM2_SIZE
 
+#endif /* PCRE2_CODE_UNIT_WIDTH != 0 */
+
+
+
+/*************************************************
+*                 STRUCTURES                     *
+*************************************************/
+
+/* We need a more complex include guard than usual, because the file can be
+included once for each bit-width to define the various structures. */
+
+#if PCRE2_CODE_UNIT_WIDTH == 8 && !defined PCRE2_INTMODEDEP_IDEMPOTENT_GUARD_8
+#define PCRE2_INTMODEDEP_IDEMPOTENT_GUARD_8
+#define PCRE2_INTMODEDEP_CAN_DEFINE
+#endif
+#if PCRE2_CODE_UNIT_WIDTH == 16 && !defined PCRE2_INTMODEDEP_IDEMPOTENT_GUARD_16
+#define PCRE2_INTMODEDEP_IDEMPOTENT_GUARD_16
+#define PCRE2_INTMODEDEP_CAN_DEFINE
+#endif
+#if PCRE2_CODE_UNIT_WIDTH == 32 && !defined PCRE2_INTMODEDEP_IDEMPOTENT_GUARD_32
+#define PCRE2_INTMODEDEP_IDEMPOTENT_GUARD_32
+#define PCRE2_INTMODEDEP_CAN_DEFINE
+#endif
+
+#ifdef PCRE2_INTMODEDEP_CAN_DEFINE
+#undef PCRE2_INTMODEDEP_CAN_DEFINE
 
 /* ----------------------- HIDDEN STRUCTURES ----------------------------- */
 
@@ -997,5 +1035,7 @@ typedef struct dfa_match_block {
 } dfa_match_block;
 
 #endif  /* PCRE2_PCRE2TEST */
+
+#endif /* PCRE2_INTMODEDEP_CAN_DEFINE */
 
 /* End of pcre2_intmodedep.h */
