@@ -174,7 +174,6 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 
 check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE)
 check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
-check_symbol_exists(strerror "string.h" HAVE_STRERROR)
 
 check_c_source_compiles(
   [=[

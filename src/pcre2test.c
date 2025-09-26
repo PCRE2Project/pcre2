@@ -1421,28 +1421,6 @@ static const uint8_t tables2[] = {
 
 
 
-#ifndef HAVE_STRERROR
-/*************************************************
-*     Provide strerror() for non-ANSI libraries  *
-*************************************************/
-
-/* Some old-fashioned systems (e.g. SunOS4) didn't have strerror() in their
-libraries. They may no longer be around, but just in case, we can try to
-provide the same facility by this simple alternative function. */
-
-extern int   sys_nerr;
-extern char *sys_errlist[];
-
-char *
-strerror(int n)
-{
-if (n < 0 || n >= sys_nerr) return "unknown error number";
-return sys_errlist[n];
-}
-#endif /* HAVE_STRERROR */
-
-
-
 /*************************************************
 *            Local memory functions              *
 *************************************************/

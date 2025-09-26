@@ -623,7 +623,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(memfd_create mkostemp secure_getenv strerror)
+AC_CHECK_FUNCS(memfd_create mkostemp secure_getenv)
 AC_MSG_CHECKING([for realpath])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <stdlib.h>
