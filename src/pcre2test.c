@@ -512,7 +512,6 @@ so many of them that they are split into two fields. */
 /* Combinations */
 
 #define CTL_DEBUG            (CTL_FULLBINCODE|CTL_INFO)  /* For setting */
-#define CTL_ANYINFO          (CTL_DEBUG|CTL_BINCODE|CTL_CALLOUT_INFO)
 #define CTL_ANYGLOB          (CTL_ALTGLOBAL|CTL_GLOBAL)
 
 /* Second control word */
@@ -4652,6 +4651,16 @@ fprintf(outfile, "%.*s\n",
 return 0;
 }
 
+/* Backport from 10.47 */
+
+static int callout_enumerate_function_void(pcre2_callout_enumerate_block_8 *cb,
+  void *callout_data)
+{
+(void)cb;
+(void)callout_data;
+return 0;
+}
+
 
 
 /*************************************************
@@ -4671,8 +4680,15 @@ Returns:    PR_OK     continue processing next line
 static int
 show_pattern_info(void)
 {
+int rc;
 uint32_t compile_options, overall_options, extra_options;
 BOOL utf = (FLD(compiled_code, overall_options) & PCRE2_UTF) != 0;
+
+if ((pat_patctl.control & CTL_MEMORY) != 0)
+  show_memory_info();
+
+if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0)
+  show_framesize();
 
 if ((pat_patctl.control & (CTL_BINCODE|CTL_FULLBINCODE)) != 0)
   {
@@ -5016,17 +5032,17 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     }
   }
 
-if ((pat_patctl.control & CTL_CALLOUT_INFO) != 0)
+PCRE2_CALLOUT_ENUMERATE(rc,
+  (((pat_patctl.control & CTL_CALLOUT_INFO) != 0)? callout_callback :
+  /* Exercise the callout enumeration code with a dummy callback to make sure
+  it works. */
+  callout_enumerate_function_void), 0);
+if (rc != 0)
   {
-  int errorcode;
-  PCRE2_CALLOUT_ENUMERATE(errorcode, callout_callback, 0);
-  if (errorcode != 0)
-    {
-    fprintf(outfile, "Callout enumerate failed: error %d: ", errorcode);
-    if (errorcode < 0 && !print_error_message(errorcode, "", "\n"))
-      return PR_ABEND;
-    return PR_SKIP;
-    }
+  fprintf(outfile, "Callout enumerate failed: error %d: ", rc);
+  if (rc < 0 && !print_error_message(rc, "", "\n"))
+    return PR_ABEND;
+  return PR_SKIP;
   }
 
 return PR_OK;
@@ -5230,13 +5246,9 @@ switch(cmd)
     {
     PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
     }
-  if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
-  if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
-  if ((pat_patctl.control & CTL_ANYINFO) != 0)
-    {
-    rc = show_pattern_info();
-    if (rc != PR_OK) return rc;
-    }
+
+  rc = show_pattern_info();
+  if (rc != PR_OK) return rc;
   break;
 
   /* Save the stack of compiled patterns to a file, then empty the stack. */
@@ -5395,7 +5407,7 @@ BOOL utf;
 uint32_t k;
 uint8_t *p = buffer;
 unsigned int delimiter = *p++;
-int errorcode;
+int rc, errorcode;
 void *use_pat_context;
 void *use_pbuffer = NULL;
 uint32_t use_forbid_utf = forbid_utf;
@@ -5724,7 +5736,6 @@ local character tables. Neither does it have 16-bit or 32-bit support. */
 if ((pat_patctl.control & CTL_POSIX) != 0)
   {
 #ifdef SUPPORT_PCRE2_8
-  int rc;
   int cflags = 0;
   const char *msg = "** Ignored with POSIX interface:";
 #endif
@@ -5931,7 +5942,6 @@ ends up back in the usual place. */
 
 if (pat_patctl.convert_type != CONVERT_UNSET)
   {
-  int rc;
   int convert_return = PR_OK;
   uint32_t convert_options = pat_patctl.convert_type;
   void *converted_pattern;
@@ -6246,13 +6256,8 @@ if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
 
 /* Output code size and other information if requested. */
 
-if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
-if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
-if ((pat_patctl.control & CTL_ANYINFO) != 0)
-  {
-  int rc = show_pattern_info();
-  if (rc != PR_OK) return rc;
-  }
+rc = show_pattern_info();
+if (rc != PR_OK) return rc;
 
 /* The "push" control requests that the compiled pattern be remembered on a
 stack. This is mainly for testing the serialization functionality. */
