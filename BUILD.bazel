@@ -24,7 +24,6 @@ LOCAL_DEFINES = [
     "HAVE_CONFIG_H",
     "HAVE_MEMMOVE",
     "HAVE_STRERROR",
-    "PCRE2_CODE_UNIT_WIDTH=8",
     "PCRE2_STATIC",
     "SUPPORT_PCRE2_8",
     "SUPPORT_UNICODE",
@@ -99,9 +98,23 @@ cc_library(
     ],
     hdrs = [":pcre2_h_generic"],
     implementation_deps = [":pcre2_internal_headers"],
-    local_defines = LOCAL_DEFINES,
+    local_defines = LOCAL_DEFINES + [
+        "PCRE2_CODE_UNIT_WIDTH=8",
+    ],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
+)
+
+# See below for explanation of why we need this.
+#
+# https://github.com/bazelbuild/bazel/issues/680
+cc_library(
+    name = "pcre2posix_dotc_headers",
+    hdrs = [
+        "src/pcre2_tables.c",
+    ],
+    strip_include_prefix = "src",
+    visibility = ["//visibility:private"],
 )
 
 cc_library(
@@ -109,10 +122,15 @@ cc_library(
     srcs = ["src/pcre2posix.c"],
     hdrs = ["src/pcre2posix.h"],
     implementation_deps = [":pcre2_internal_headers"],
-    local_defines = LOCAL_DEFINES,
+    local_defines = LOCAL_DEFINES + [
+        "PCRE2_CODE_UNIT_WIDTH=8",
+    ],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
-    deps = [":pcre2"],
+    deps = [
+        ":pcre2",
+        ":pcre2posix_dotc_headers",
+    ],
 )
 
 # Totally weird issue in Bazel. It won't let you #include any files unless they
