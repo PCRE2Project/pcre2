@@ -95,6 +95,16 @@ Matched without capture
  0: aaaabbbbzz
  1: bbbb
 
+/(a)(b)/
+    ab\=posix_startend=0:2,ovector=1
+ 0: ab
+    ab\=posix_startend=0:2,ovector=0
+Matched without capture
+    ab\=posix_startend=1:2,ovector=1
+No match: POSIX code 17: match failed
+    ab\=posix_startend=1:2,ovector=0
+No match: POSIX code 17: match failed
+
 /(*ANY)ab.cd/
     ab-cd
  0: ab-cd
@@ -163,6 +173,37 @@ Failed: POSIX code 4: ? * + invalid at offset 100000
 
 /\[A]{1000000}**/expand,regerror_buffsize=32
 Failed: POSIX code 4: ? * + invalid at offset 1000002
+
+/a(b/regerror_buffsize=0
+Failed: POSIX code 11: 
+** regerror() message truncated
+
+/a(b/regerror_buffsize=1
+Failed: POSIX code 11: 
+** regerror() message truncated
+
+/a(b/regerror_buffsize=12
+Failed: POSIX code 11: unbalanced 
+** regerror() message truncated
+
+/a(b/regerror_buffsize=13
+Failed: POSIX code 11: unbalanced (
+** regerror() message truncated
+
+/a(b/regerror_buffsize=14
+Failed: POSIX code 11: unbalanced ()
+** regerror() message truncated
+
+/a(b/regerror_buffsize=15
+Failed: POSIX code 11: unbalanced () 
+** regerror() message truncated
+
+/a(b/regerror_buffsize=25
+Failed: POSIX code 11: unbalanced () at offset 
+** regerror() message truncated
+
+/a(b/regerror_buffsize=26
+Failed: POSIX code 11: unbalanced () at offset 3
 
 //posix_nosub
     \=offset=70000

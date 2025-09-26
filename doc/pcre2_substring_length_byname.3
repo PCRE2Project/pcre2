@@ -19,9 +19,11 @@ The arguments are:
 .sp
   \fImatch_data\fP   The match data block for the match
   \fIname\fP         The substring name
-  \fIlength\fP       Where to return the length
+  \fIlength\fP       Where to return the length, or NULL
 .sp
-The yield is zero on success, or an error code if the substring is not found.
+The third argument may be NULL if all you want to know is whether or not a
+substring is set. The yield is zero on success, or a negative error code
+otherwise.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF
