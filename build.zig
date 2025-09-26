@@ -31,9 +31,6 @@ pub fn build(b: *std.Build) !void {
             .HAVE_BUILTIN_UNREACHABLE = true,
             .HAVE_VISIBILITY = true,
 
-            .HAVE_MEMMOVE = true,
-            .HAVE_STRERROR = true,
-
             .SUPPORT_PCRE2_8 = codeUnitWidth == CodeUnitWidth.@"8",
             .SUPPORT_PCRE2_16 = codeUnitWidth == CodeUnitWidth.@"16",
             .SUPPORT_PCRE2_32 = codeUnitWidth == CodeUnitWidth.@"32",

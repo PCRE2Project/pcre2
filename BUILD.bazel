@@ -22,8 +22,6 @@ copy_file(
 
 LOCAL_DEFINES = [
     "HAVE_CONFIG_H",
-    "HAVE_MEMMOVE",
-    "HAVE_STRERROR",
     "PCRE2_STATIC",
     "SUPPORT_PCRE2_8",
     "SUPPORT_UNICODE",
