@@ -8179,8 +8179,8 @@ while (isspace(*p))
   len--;
   }
 
-/* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
-invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
+/* Check that the data (but not the modifiers) is well-formed UTF-8 if we're in UTF mode.
+To create invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
 
 if (utf)
   {
@@ -8189,7 +8189,9 @@ if (utf)
   int n = 1;
   uint8_t *q_end = p + len;
 
-  for (q = p; n > 0 && *q; q += n) n = utf8_to_ord(q, q_end, &cc);
+  for (q = p; n > 0 && *q && !(*q == '\\' && *(q + 1) == '='); q += n)
+    n = utf8_to_ord(q, q_end, &cc);
+
   if (n <= 0)
     {
     cprintf(clr_test_error, "** Failed: invalid UTF-8 string cannot be used as input "
