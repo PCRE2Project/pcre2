@@ -438,6 +438,7 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_TOOLARGEREPLACE   (-70)
 #define PCRE2_ERROR_DIFFSUBSSUBJECT   (-71)
 #define PCRE2_ERROR_DIFFSUBSOFFSET    (-72)
+#define PCRE2_ERROR_DIFFSUBSOPTIONS   (-73)
 
 
 /* Request types for pcre2_pattern_info() */

@@ -846,7 +846,8 @@ if (use_existing_match)
   if (start_offset != match_data->start_offset)
     return PCRE2_ERROR_DIFFSUBSOFFSET;
 
-  // XXX TODO Add check for different match options
+  if ((options & ~SUBSTITUTE_OPTIONS) != match_data->options)
+    return PCRE2_ERROR_DIFFSUBSOPTIONS;
   }
 
 /* If starting from an existing match, there must be an externally provided

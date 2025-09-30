@@ -185,6 +185,7 @@ match_data->leftchar = 0;
 match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
 match_data->matchedby = PCRE2_MATCHEDBY_JIT;
+match_data->options = options;
 
 #if defined(__has_feature)
 #if __has_feature(memory_sanitizer)

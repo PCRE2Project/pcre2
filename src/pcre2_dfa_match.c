@@ -3345,6 +3345,7 @@ int rc;
 int was_zero_terminated = 0;
 
 const pcre2_real_code *re = (const pcre2_real_code *)code;
+uint32_t original_options = options;
 
 PCRE2_UCHAR null_str[1] = { 0xcd };
 PCRE2_SPTR original_subject = subject;
@@ -3690,6 +3691,7 @@ match_data->code = re;
 match_data->subject = NULL;  /* Default for match error */
 match_data->mark = NULL;
 match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
+match_data->options = original_options;
 
 /* Call the main matching function, looping for a non-anchored regex after a
 failed match. If not restarting, perform certain optimizations at the start of
