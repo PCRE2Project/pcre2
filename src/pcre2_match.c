@@ -6996,7 +6996,6 @@ BOOL jit_checked_utf = FALSE;
 #endif
 #endif  /* SUPPORT_UNICODE */
 
-PCRE2_SIZE byte_length;
 PCRE2_SIZE frame_size;
 PCRE2_SIZE heapframes_size;
 
@@ -7006,27 +7005,6 @@ macro is used below, and it expects NLBLOCK to be defined as a pointer. */
 pcre2_callout_block cb;
 match_block actual_match_block;
 match_block *mb = &actual_match_block;
-
-if (match_data == NULL) return PCRE2_ERROR_NULL;
-
-/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. Set the field to NULL for no match cases. */
-if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
-  {
-  match_data->memctl.free((void *)match_data->subject,
-    match_data->memctl.memory_data);
-  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }
-
-/* store data needed by pcre2_substitute */
-match_data->subject = match_data->original_subject = subject;
-if (length == PCRE2_ZERO_TERMINATED)
-  {
-  length = PRIV(strlen)(subject);
-  was_zero_terminated = 1;
-  }
-match_data->subject_length = length;
-match_data->start_offset = start_offset;
 
 /* Recognize NULL, length 0 as an empty string. */
 
@@ -7040,19 +7018,13 @@ if (code == NULL || subject == NULL)
 if ((options & ~PUBLIC_MATCH_OPTIONS) != 0)
   return match_data->rc = PCRE2_ERROR_BADOPTION;
 
-/* save a copy of the subject, and use it for all future operations */
-if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
-  {
-  byte_length = CU2BYTES(length + was_zero_terminated);
-  match_data->subject = match_data->memctl.malloc(byte_length,
-    match_data->memctl.memory_data);
-  if (match_data->subject == NULL) return match_data->rc = PCRE2_ERROR_NOMEMORY;
-  subject = memcpy((void *)match_data->subject, subject, byte_length);
-  match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
- }
-
 start_match = subject + start_offset;
 req_cu_ptr = start_match - 1;
+if (length == PCRE2_ZERO_TERMINATED)
+  {
+  length = PRIV(strlen)(subject);
+  was_zero_terminated = 1;
+  }
 true_end_subject = end_subject = subject + length;
 
 if (start_offset > length) return match_data->rc = PCRE2_ERROR_BADOFFSET;
@@ -7120,6 +7092,18 @@ time. */
 if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
      (re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
   return match_data->rc = PCRE2_ERROR_BADOFFSETLIMIT;
+
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. Set the field to NULL for match error
+cases. */
+
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject,
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }
+match_data->subject = NULL;
 
 /* Zero the error offset in case the first code unit is invalid UTF. */
 
@@ -7201,15 +7185,28 @@ if (use_jit)
   /* If JIT returns BADOPTION, which means that the selected complete or
   partial matching mode was not compiled, fall through to the interpreter. */
 
-  /* pcre2_jit_match will set both match_data->subject and 
-  match_data->original_subject to the value we pass it, so do a little
-  juggling to undo this */
-  subject = match_data->original_subject;
-  rc = pcre2_jit_match(code, match_data->subject, length, start_offset, options,
+  rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext);
-  match_data->original_subject = subject;
-  subject = match_data->subject;
-  if (rc != PCRE2_ERROR_JIT_BADOPTION) return match_data->rc = rc;
+  if (rc != PCRE2_ERROR_JIT_BADOPTION)
+    {
+    if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+      {
+      length = CU2BYTES(length + was_zero_terminated);
+      match_data->subject = match_data->memctl.malloc(length,
+        match_data->memctl.memory_data);
+      if (match_data->subject == NULL)
+        return match_data->rc = PCRE2_ERROR_NOMEMORY;
+      memcpy((void *)match_data->subject, subject, length);
+      match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+      }
+    else
+      {
+      /* When pcre2_jit_match sets the subject, it doesn't know what the
+      original passed-in pointer was. */
+      if (match_data->subject != NULL) match_data->subject = original_subject;
+      }
+    return rc;
+    }
   }
 #endif  /* SUPPORT_JIT */
 
@@ -8147,10 +8144,24 @@ if (rc == MATCH_MATCH)
   {
   match_data->rc = ((int)mb->end_offset_top >= 2 * match_data->oveccount)?
     0 : (int)mb->end_offset_top/2 + 1;
+  match_data->subject_length = length;
+  match_data->start_offset = start_offset;
   match_data->startchar = start_match - subject;
   match_data->leftchar = mb->start_used_ptr - subject;
   match_data->rightchar = ((mb->last_used_ptr > mb->end_match_ptr)?
     mb->last_used_ptr : mb->end_match_ptr) - subject;
+  if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+    {
+    length = CU2BYTES(length + was_zero_terminated);
+    match_data->subject = match_data->memctl.malloc(length,
+      match_data->memctl.memory_data);
+    if (match_data->subject == NULL)
+      return match_data->rc = PCRE2_ERROR_NOMEMORY;
+    memcpy((void *)match_data->subject, subject, length);
+    match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
+    }
+  else match_data->subject = original_subject;
+
   return match_data->rc;
   }
 
@@ -8171,6 +8182,9 @@ PCRE2_ERROR_PARTIAL. */
 
 else if (match_partial != NULL)
   {
+  match_data->subject = original_subject;
+  match_data->subject_length = length;
+  match_data->start_offset = start_offset;
   match_data->ovector[0] = match_partial - subject;
   match_data->ovector[1] = end_subject - subject;
   match_data->startchar = match_partial - subject;
@@ -8181,7 +8195,13 @@ else if (match_partial != NULL)
 
 /* Else this is the classic nomatch case. */
 
-else match_data->rc = PCRE2_ERROR_NOMATCH;
+else
+  {
+  match_data->subject = original_subject;
+  match_data->subject_length = length;
+  match_data->start_offset = start_offset;
+  match_data->rc = PCRE2_ERROR_NOMATCH;
+  }
 
 return match_data->rc;
 }

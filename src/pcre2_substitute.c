@@ -795,52 +795,59 @@ if (replacement == NULL)
 if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
 repend = replacement + rlength;
 
+/* A NULL subject of zero length is treated as an empty string. */
+
+if (subject == NULL)
+  {
+  if (length != 0) return PCRE2_ERROR_NULL;
+  subject = null_str;
+  }
+
+if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
+
 /* Check for using a match that has already happened. Note that the subject
 pointer in the match data may be NULL after a no-match. */
 
 use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
-if (use_existing_match && match_data == NULL) return PCRE2_ERROR_NULL;
-
 replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
-if (use_existing_match && match_data->rc < PCRE2_ERROR_NOMATCH)
-  /* Return early, as the rest of the match_data may not have been initialised */
-  return match_data->rc;
+if (use_existing_match && match_data == NULL) return PCRE2_ERROR_NULL;
 
-/* If we are using PCRE2_SUBSTITUTE_MATCHED and the preceeding call to pcre2_match
-used PCRE2_COPY_MATCHED_SUBJECT, then use the copy that pcre2_match made. */
-if (use_existing_match && ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0))
+/* If an existing match is being passed in, we should check that it matches
+the passed-in subject pointer, length, and match options. We don't currently
+have a use-case for someone to match on one subject, then try and use that
+match data on a different subject. In a UTF-encoded string, a simple change
+like replacing one character for another won't preserve the code unit offsets,
+so it's hard to see, in the general case, how it would be safe or useful to
+support swapping or mutating the subject string.
+
+Similarly, using different match options between the first (external) and
+subsequent (internal, global) matches is hard to justify. */
+
+if (use_existing_match)
   {
-  if (subject != NULL && match_data->original_subject != subject)
-    return PCRE2_ERROR_DIFFERENT_SUBJECT;
+  /* Return early, as the rest of the match_data may not have been
+  initialised. This duplicates and must be in sync with the check below that
+  aborts substitution on any result other than success or no-match. */
+  if (match_data->rc < 0 && match_data->rc != PCRE2_ERROR_NOMATCH)
+    return match_data->rc;
 
-  /* For convenience, NULL and PCRE2_ZERO_TERMINATED means to just use the saved
-  length. Otherwise, we check that the given length is the same.*/
-  if (subject == NULL && length == PCRE2_ZERO_TERMINATED)
-    length = match_data->subject_length;
-  else if (length == PCRE2_ZERO_TERMINATED && match_data->subject_length != PRIV(strlen)(subject))
-    return PCRE2_ERROR_DIFFERENT_LENGTH;
-  else if (length != PCRE2_ZERO_TERMINATED && match_data->subject_length != length)
-    return PCRE2_ERROR_DIFFERENT_LENGTH;
+  /* We want the effective subject strings to match. This implies the effective
+  length must match, and either: the pointers are equal; the length is zero; or
+  the special case of PCRE2_COPY_MATCHED_SUBJECT where we cannot compare
+  pointers but we can verify the contents. */
+  if (length != match_data->subject_length ||
+      !(subject == match_data->subject ||
+        length == 0 ||
+        ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0 &&
+         memcmp(subject, match_data->subject, CU2BYTES(length)) == 0)))
+    return PCRE2_ERROR_DIFFSUBSSUBJECT;
 
-  subject = match_data->subject;
+  if (start_offset != match_data->start_offset)
+    return PCRE2_ERROR_DIFFSUBSOFFSET;
+
+  // XXX TODO Add check for different match options
   }
-else
- {
-  if (use_existing_match && match_data->original_subject != subject)
-    return PCRE2_ERROR_DIFFERENT_SUBJECT;
-
-  /* Find length of zero-terminated subject */
-
-  if (length == PCRE2_ZERO_TERMINATED)
-    length = subject? PRIV(strlen)(subject) : 0;
-
-  if (use_existing_match && match_data->subject_length != length)
-    return PCRE2_ERROR_DIFFERENT_LENGTH;
-
-  if (use_existing_match && match_data->start_offset != start_offset)
-    return PCRE2_ERROR_DIFFERENT_OFFSET;
- }
 
 /* If starting from an existing match, there must be an externally provided
 match data block. We create an internal match_data block in two cases: (a) an
@@ -884,10 +891,12 @@ else if (use_existing_match)
   internal_match_data->heapframes_size = 0;
   /* Ensure that the subject is not freed when internal_match_data is */
   internal_match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  /* ensure that pcre2_match doesn't make an unnecessary copy of the subject */
-  options &= ~PCRE2_COPY_MATCHED_SUBJECT;
   match_data = internal_match_data;
   }
+
+/* If using an internal match data, there's no need to copy the subject. */
+
+if (internal_match_data != NULL) options &= ~PCRE2_COPY_MATCHED_SUBJECT;
 
 /* Remember ovector details */
 

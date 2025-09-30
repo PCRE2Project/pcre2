@@ -3387,28 +3387,6 @@ rws->next = NULL;
 rws->size = RWS_BASE_SIZE;
 rws->free = RWS_BASE_SIZE - RWS_ANCHOR_SIZE;
 
-if (match_data == NULL) return PCRE2_ERROR_NULL;
-
-/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. */
-if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
-  {
-  match_data->memctl.free((void *)match_data->subject,
-    match_data->memctl.memory_data);
-  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }
-
-/* store data needed by pcre2_substitute */
-match_data->subject = match_data->original_subject = subject;
-if (length == PCRE2_ZERO_TERMINATED)
-  {
-  length = PRIV(strlen)(subject);
-  was_zero_terminated = 1;
-  }
-match_data->subject_length = length;
-match_data->start_offset = start_offset;
-
-
 /* Recognize NULL, length 0 as an empty string. */
 
 if (subject == NULL && length == 0) subject = null_str;
@@ -3421,8 +3399,14 @@ if (re == NULL || subject == NULL || workspace == NULL)
 if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0)
   { rc = PCRE2_ERROR_BADOPTION; goto EXIT; }
 
-if (wscount < 20) return match_data->rc = PCRE2_ERROR_DFA_WSSIZE;
-if (start_offset > length) return match_data->rc = PCRE2_ERROR_BADOFFSET;
+if (length == PCRE2_ZERO_TERMINATED)
+  {
+  length = PRIV(strlen)(subject);
+  was_zero_terminated = 1;
+  }
+
+if (wscount < 20) { rc = PCRE2_ERROR_DFA_WSSIZE; goto EXIT; }
+if (start_offset > length) { rc = PCRE2_ERROR_BADOFFSET; goto EXIT; }
 
 /* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
 time. */
@@ -3690,9 +3674,20 @@ if ((re->flags & PCRE2_LASTSET) != 0)
     }
   }
 
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. */
+
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject,
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }
+
 /* Fill in fields that are always returned in the match data. */
 
 match_data->code = re;
+match_data->subject = NULL;  /* Default for match error */
 match_data->mark = NULL;
 match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
 
@@ -4046,14 +4041,22 @@ for (;;)
 
   if (rc != PCRE2_ERROR_NOMATCH || anchored)
     {
+    if (rc == PCRE2_ERROR_NOMATCH) goto NOMATCH_EXIT;
+
     if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)
       {
       match_data->ovector[0] = (PCRE2_SIZE)(start_match - subject);
       match_data->ovector[1] = (PCRE2_SIZE)(end_subject - subject);
       }
-    match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
-    match_data->rightchar = (PCRE2_SIZE)(mb->last_used_ptr - subject);
-    match_data->startchar = (PCRE2_SIZE)(start_match - subject);
+
+    if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
+      {
+      match_data->subject_length = length;
+      match_data->start_offset = start_offset;
+      match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
+      match_data->rightchar = (PCRE2_SIZE)(mb->last_used_ptr - subject);
+      match_data->startchar = (PCRE2_SIZE)(start_match - subject);
+      }
 
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
@@ -4064,10 +4067,9 @@ for (;;)
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
-    else
+    else if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
       {
-      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
-        match_data->subject = original_subject;
+      match_data->subject = original_subject;
       }
     goto EXIT;
     }
@@ -4101,6 +4103,9 @@ for (;;)
   }   /* "Bumpalong" loop */
 
 NOMATCH_EXIT:
+match_data->subject = original_subject;
+match_data->subject_length = length;
+match_data->start_offset = start_offset;
 rc = PCRE2_ERROR_NOMATCH;
 
 EXIT:
