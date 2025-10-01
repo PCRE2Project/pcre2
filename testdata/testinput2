@@ -8117,4 +8117,51 @@ a)"xI
 /(.?)/
     \=null_subject,copy=0,copy=1,get=0,get=1,getall
 
+# --------------
+# A batch of additional tests of pcre2_substitute error cases
+# --------------
+
+# Some baseline tests of the NULL-handling cases
+
+/\w+|^$/replace=<$&>,global
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+/\w+|^$/replace=<$&>,global,substitute_matched
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+/\w+|^$/replace=<$&>,global,substitute_null_match_data
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+/\w+|^$/replace=<$&>,global,substitute_matched,substitute_null_match_data
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+# Now some NULL context tests
+
+/\w+|^$/replace=<$&>,global,null_context
+    :::
+    foo
+    :::\=substitute_null_match_data
+    foo\=substitute_null_match_data
+    :::\=substitute_matched
+    foo\=substitute_matched
+    :::\=substitute_null_match_data,substitute_matched
+    foo\=substitute_null_match_data,substitute_matched
+
+
 # End of testinput2

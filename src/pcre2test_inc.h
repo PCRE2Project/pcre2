@@ -4547,9 +4547,13 @@ oveccount = pcre2_get_ovector_count(match_data);
      } \
   while (0)
 
-/* Replacement processing is ignored for DFA matching. */
+/* Replacement processing is ignored for DFA matching. Allow this for
+replacements with PCRE2_SUBSTITUTE_MATCHED, even though it won't work, in order
+to exercise the error condition. */
 
-if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
+if (dat_datctl.replacement[0] != 0 &&
+    (dat_datctl.control & CTL_DFA) != 0 &&
+    (dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)
   {
   fprintf(outfile, "** Ignored for DFA matching: replace\n");
   dat_datctl.replacement[0] = 0;
@@ -4572,6 +4576,7 @@ if (dat_datctl.replacement[0] != 0)
   uint32_t xoptions;
   uint32_t emoption;  /* External match option */
   PCRE2_SIZE j, rlen, nsize, nsize_input, slen;
+  pcre2_match_data *smatch_data;
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be (relevant only when "allvector" is specified). */
@@ -4692,7 +4697,10 @@ if (dat_datctl.replacement[0] != 0)
       slen = PCRE2_ZERO_TERMINATED;
     }
 
-  /* Set up the required callouts, and call pcre2_substitute(). */
+  /* Set up the required callouts and context, and call pcre2_substitute(). */
+
+  smatch_data = ((CTL2_SUBSTITUTE_NULL_MATCH_DATA & dat_datctl.control2) == 0)?
+    match_data : NULL;
 
   if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0)
     {
@@ -4716,7 +4724,7 @@ if (dat_datctl.replacement[0] != 0)
   mallocs_called = 0;
   nsize_input = nsize;
   rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
-    dat_datctl.options|xoptions, match_data, use_dat_context,
+    dat_datctl.options|xoptions, smatch_data, use_dat_context,
     rbptr, rlen, nbuffer, &nsize);
 
   /* For malloc testing, we repeat the substitution. */
@@ -4730,7 +4738,7 @@ if (dat_datctl.replacement[0] != 0)
       mallocs_until_failure = i;
       nsize = nsize_input;
       rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
-        dat_datctl.options|xoptions, match_data, use_dat_context,
+        dat_datctl.options|xoptions, smatch_data, use_dat_context,
         rbptr, rlen, nbuffer, &nsize);
       mallocs_until_failure = INT_MAX;
 

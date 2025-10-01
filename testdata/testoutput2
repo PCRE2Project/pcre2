@@ -23253,6 +23253,81 @@ Failed: error -51: NULL argument passed with non-zero length
  0L 
  1L 
 
+# --------------
+# A batch of additional tests of pcre2_substitute error cases
+# --------------
+
+# Some baseline tests of the NULL-handling cases
+
+/\w+|^$/replace=<$&>,global
+    :::
+ 0: :::
+    \=null_subject
+ 1: <>
+    foo\=zero_terminate
+ 1: <foo>
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+ 2: f<oo>|<bar>
+
+/\w+|^$/replace=<$&>,global,substitute_matched
+    :::
+ 0: :::
+    \=null_subject
+ 1: <>
+    foo\=zero_terminate
+ 1: <foo>
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+ 2: f<oo>|<bar>
+
+/\w+|^$/replace=<$&>,global,substitute_null_match_data
+    :::
+ 0: :::
+    \=null_subject
+ 1: <>
+    foo\=zero_terminate
+ 1: <foo>
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+ 2: f<oo>|<bar>
+
+/\w+|^$/replace=<$&>,global,substitute_matched,substitute_null_match_data
+    :::
+Failed: error -51: NULL argument passed with non-zero length
+    \=null_subject
+Failed: error -51: NULL argument passed with non-zero length
+    foo\=zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+Failed: error -51: NULL argument passed with non-zero length
+
+# Now some NULL context tests
+
+/\w+|^$/replace=<$&>,global,null_context
+    :::
+ 0: :::
+    foo
+ 1: <foo>
+    :::\=substitute_null_match_data
+ 0: :::
+    foo\=substitute_null_match_data
+ 1: <foo>
+    :::\=substitute_matched
+ 0: :::
+    foo\=substitute_matched
+ 1: <foo>
+    :::\=substitute_null_match_data,substitute_matched
+Failed: error -51: NULL argument passed with non-zero length
+    foo\=substitute_null_match_data,substitute_matched
+Failed: error -51: NULL argument passed with non-zero length
+
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

@@ -832,6 +832,10 @@ if (use_existing_match)
   if (match_data->rc < 0 && match_data->rc != PCRE2_ERROR_NOMATCH)
     return match_data->rc;
 
+  /* Not supported if the passed-in match was from the DFA interpreter. */
+  if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
+    return PCRE2_ERROR_DFA_UFUNC;
+
   /* We want the effective subject strings to match. This implies the effective
   length must match, and either: the pointers are equal; the length is zero; or
   the special case of PCRE2_COPY_MATCHED_SUBJECT where we cannot compare

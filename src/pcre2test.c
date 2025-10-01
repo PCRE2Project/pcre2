@@ -580,6 +580,7 @@ so many of them that they are split into two fields. */
 #define CTL2_NULL_REPLACEMENT            0x00004000u
 #define CTL2_FRAMESIZE                   0x00008000u
 #define CTL2_SUBSTITUTE_CASE_CALLOUT     0x00010000u
+#define CTL2_SUBSTITUTE_NULL_MATCH_DATA  0x00020000u
 
 #define CTL2_HEAPFRAMES_SIZE             0x20000000u  /* Informational */
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
@@ -610,6 +611,7 @@ different things in the two cases. */
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
                     CTL2_ALLVECTOR|\
                     CTL2_SUBSTITUTE_CASE_CALLOUT|\
+                    CTL2_SUBSTITUTE_NULL_MATCH_DATA|\
                     CTL2_HEAPFRAMES_SIZE)
 
 /* Structures for holding modifier information for patterns and subject strings
@@ -830,6 +832,7 @@ static modstruct modlist[] = {
   { "substitute_extended",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_literal",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_LITERAL,    PO(control2) },
   { "substitute_matched",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_MATCHED,    PO(control2) },
+  { "substitute_null_match_data",  MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_NULL_MATCH_DATA, PO(control2) },
   { "substitute_overflow_length",  MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
   { "substitute_replacement_only", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_REPLACEMENT_ONLY, PO(control2) },
   { "substitute_skip",             MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
@@ -2257,7 +2260,7 @@ Returns:      nothing
 static void
 show_controls(uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -2302,6 +2305,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_LITERAL) != 0)? " substitute_literal" : "",
   ((controls2 & CTL2_SUBSTITUTE_MATCHED) != 0)? " substitute_matched" : "",
+  ((controls2 & CTL2_SUBSTITUTE_NULL_MATCH_DATA) != 0)? " substitute_null_match_data" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
   ((controls2 & CTL2_SUBSTITUTE_REPLACEMENT_ONLY) != 0)? " substitute_replacement_only" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
