@@ -3042,6 +3042,8 @@ for (;;)
 
   /* Do the appropriate match */
 
+  reset_callout_state();
+
   if ((dat_datctl.control & CTL_DFA) != 0)
     {
     stack_start = DFA_START_RWS_SIZE/1024;
@@ -4589,6 +4591,18 @@ if (dat_datctl.replacement[0] != 0)
   if ((dat_datctl.control & CTL_ALTGLOBAL) != 0)
     fprintf(outfile, "** Altglobal is not supported with replace: ignored\n");
 
+  /* Set up the match callout. */
+
+  if ((dat_datctl.control & CTL_CALLOUT_NONE) == 0)
+    {
+    pcre2_set_callout(dat_context, callout_function,
+      (void *)(&dat_datctl.callout_data));
+    }
+  else
+    {
+    pcre2_set_callout(dat_context, NULL, NULL);  /* No callout */
+    }
+
   /* Check for a test that does substitution after an initial external match.
   If this is set, we run the external match, but leave the interpretation of
   its output to pcre2_substitute(). */
@@ -4598,7 +4612,17 @@ if (dat_datctl.replacement[0] != 0)
 
   if (emoption != 0)
     {
-    if ((pat_patctl.control & CTL_JITFAST) != 0)
+    reset_callout_state();
+    if ((dat_datctl.control & CTL_DFA) != 0)
+      {
+      if (dfa_workspace == NULL)
+        dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
+      dfa_workspace[0] = -1;
+      rc = pcre2_dfa_match(compiled_code, pp, arg_ulen,
+        dat_datctl.offset, dat_datctl.options, match_data,
+        use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
+      }
+    else if ((pat_patctl.control & CTL_JITFAST) != 0)
       {
       rc = pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
         dat_datctl.options, match_data, use_dat_context);
@@ -4699,7 +4723,7 @@ if (dat_datctl.replacement[0] != 0)
 
   /* Set up the required callouts and context, and call pcre2_substitute(). */
 
-  smatch_data = ((CTL2_SUBSTITUTE_NULL_MATCH_DATA & dat_datctl.control2) == 0)?
+  smatch_data = ((CTL2_NULL_SUBSTITUTE_MATCH_DATA & dat_datctl.control2) == 0)?
     match_data : NULL;
 
   if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0)
@@ -4721,7 +4745,7 @@ if (dat_datctl.replacement[0] != 0)
     }
 
   if (malloc_testing) CLEAR_HEAP_FRAMES();
-  mallocs_called = 0;
+  reset_callout_state();
   nsize_input = nsize;
   rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
     dat_datctl.options|xoptions, smatch_data, use_dat_context,
@@ -4734,7 +4758,7 @@ if (dat_datctl.replacement[0] != 0)
     for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
       {
       CLEAR_HEAP_FRAMES();
-
+      reset_callout_state();
       mallocs_until_failure = i;
       nsize = nsize_input;
       rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
@@ -4915,9 +4939,6 @@ for (gmatched = 0;; gmatched++)
       {
       pcre2_set_callout(dat_context, callout_function,
         (void *)(&dat_datctl.callout_data));
-      first_callout = TRUE;
-      last_callout_mark = NULL;
-      callout_count = 0;
       }
     else
       {
@@ -4927,7 +4948,7 @@ for (gmatched = 0;; gmatched++)
     /* Run a single DFA or NFA match. */
 
     if (malloc_testing) CLEAR_HEAP_FRAMES();
-    mallocs_called = 0;
+    reset_callout_state();
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
       if (dfa_workspace == NULL)
@@ -4965,6 +4986,7 @@ for (gmatched = 0;; gmatched++)
       for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
         {
         CLEAR_HEAP_FRAMES();
+        reset_callout_state();
 
         mallocs_until_failure = i;
 

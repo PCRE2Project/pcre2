@@ -8226,4 +8226,15 @@ Failed: error -42: pattern contains an item that is not supported for DFA matchi
  0G  (0)
  0L 
 
+# --------------
+
+# Verify pcre2_substitute is blocked for DFA
+
+/abc/
+    abc\=replace=xyz
+** Ignored for DFA matching: replace
+ 0: abc
+    abc\=replace=xyz,substitute_matched
+Failed: error -41: function is not supported for DFA matching
+
 # End of testinput6

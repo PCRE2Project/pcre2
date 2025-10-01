@@ -23283,7 +23283,7 @@ Failed: error -51: NULL argument passed with non-zero length
     foo|bar\=offset=1
  2: f<oo>|<bar>
 
-/\w+|^$/replace=<$&>,global,substitute_null_match_data
+/\w+|^$/replace=<$&>,global,null_substitute_match_data
     :::
  0: :::
     \=null_subject
@@ -23295,7 +23295,7 @@ Failed: error -51: NULL argument passed with non-zero length
     foo|bar\=offset=1
  2: f<oo>|<bar>
 
-/\w+|^$/replace=<$&>,global,substitute_matched,substitute_null_match_data
+/\w+|^$/replace=<$&>,global,substitute_matched,null_substitute_match_data
     :::
 Failed: error -51: NULL argument passed with non-zero length
     \=null_subject
@@ -23309,23 +23309,47 @@ Failed: error -51: NULL argument passed with non-zero length
 
 # Now some NULL context tests
 
-/\w+|^$/replace=<$&>,global,null_context
-    :::
+/\w+|^$/replace=<$&>,global
+    :::\=null_context
  0: :::
-    foo
+    foo\=null_context
  1: <foo>
-    :::\=substitute_null_match_data
+    :::\=null_context,null_substitute_match_data
  0: :::
-    foo\=substitute_null_match_data
+    foo\=null_context,null_substitute_match_data
  1: <foo>
-    :::\=substitute_matched
+    :::\=null_context,substitute_matched
  0: :::
-    foo\=substitute_matched
+    foo\=null_context,substitute_matched
  1: <foo>
-    :::\=substitute_null_match_data,substitute_matched
+    :::\=null_context,null_substitute_match_data,substitute_matched
 Failed: error -51: NULL argument passed with non-zero length
-    foo\=substitute_null_match_data,substitute_matched
+    foo\=null_context,null_substitute_match_data,substitute_matched
 Failed: error -51: NULL argument passed with non-zero length
+
+# Failed matches: no-match; partial; other failure (callout-triggered)
+
+/abc/replace=yy
+    zABCz
+ 0: zABCz
+    zABCz\=substitute_matched
+ 0: zABCz
+
+/abc/
+    ab\=replace=yy,partial_hard
+Failed: error -34: bad option value
+    ab\=replace=yy,partial_hard,substitute_matched
+Failed: error -34: bad option value
+
+/(?C1)abc/replace=yy
+    zabcz\=callout_error=1
+--->zabcz
+  1  ^        a
+Failed: error -37: callout error code
+    zabcz\=callout_error=1,substitute_matched
+--->zabcz
+  1  ^        a
+Failed: error -37: callout error code
 
 
 # End of testinput2

@@ -571,4 +571,34 @@ Failed: error -47: match limit exceeded
  2: xyz
  2G xyz (3)
 
+# Check the JIT sets all the correct match state for pcre2_substitute
+
+/abc/jitfast,replace=yy
+    zabcz
+ 1: zyyz
+    zabcz\=substitute_matched
+ 1: zyyz
+
+/abc/jitfast,replace=yy
+    zABCz
+ 0: zABCz
+    zABCz\=substitute_matched
+ 0: zABCz
+
+/abc/jitfast
+    ab\=replace=yy,partial_hard
+Failed: error -34: bad option value
+    ab\=replace=yy,partial_hard,substitute_matched
+Failed: error -34: bad option value
+
+/(?C1)abc/jitfast,replace=yy
+    zabcz\=callout_error=1
+--->zabcz
+  1  ^        a
+Failed: error -37: callout error code
+    zabcz\=callout_error=1,substitute_matched
+--->zabcz
+  1  ^        a
+Failed: error -37: callout error code
+
 # End of testinput17

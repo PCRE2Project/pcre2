@@ -837,14 +837,17 @@ if (use_existing_match)
     return PCRE2_ERROR_DFA_UFUNC;
 
   /* We want the effective subject strings to match. This implies the effective
-  length must match, and either: the pointers are equal; the length is zero; or
-  the special case of PCRE2_COPY_MATCHED_SUBJECT where we cannot compare
-  pointers but we can verify the contents. */
+  length must match, and either: the pointers are equal; the length is zero and
+  one or other pointer is NULL (let's be strict for two non-equal and non-NULL
+  zero-length pointers); or finally, the special case of
+  PCRE2_COPY_MATCHED_SUBJECT where we cannot compare pointers but we can verify
+  the contents. */
   if (length != match_data->subject_length ||
       !(subject == match_data->subject ||
-        length == 0 ||
+        (length == 0 && (subject == NULL || match_data->subject == NULL)) ||
         ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0 &&
-         memcmp(subject, match_data->subject, CU2BYTES(length)) == 0)))
+         (length == 0 ||
+          memcmp(subject, match_data->subject, CU2BYTES(length)) == 0))))
     return PCRE2_ERROR_DIFFSUBSSUBJECT;
 
   if (start_offset != match_data->start_offset)
@@ -994,14 +997,17 @@ for (;;)
   "Progress" is measured as ovector[1] strictly advancing, or, an empty match
   after a non-empty match. */
 
+  /* LCOV_EXCL_START */
   if (subs > 0 &&
       !(ovector[1] > ovecsave[1] ||
         (ovector[1] == ovector[0] && ovecsave[1] > ovecsave[0] &&
          ovector[1] == ovecsave[1])))
     {
+    PCRE2_DEBUG_UNREACHABLE();
     rc = PCRE2_ERROR_INTERNAL_DUPMATCH;
     goto EXIT;
     }
+  /* LCOV_EXCL_STOP */
 
   ovecsave[0] = ovector[0];
   ovecsave[1] = ovector[1];

@@ -8137,14 +8137,14 @@ a)"xI
     \=null_subject,zero_terminate
     foo|bar\=offset=1
 
-/\w+|^$/replace=<$&>,global,substitute_null_match_data
+/\w+|^$/replace=<$&>,global,null_substitute_match_data
     :::
     \=null_subject
     foo\=zero_terminate
     \=null_subject,zero_terminate
     foo|bar\=offset=1
 
-/\w+|^$/replace=<$&>,global,substitute_matched,substitute_null_match_data
+/\w+|^$/replace=<$&>,global,substitute_matched,null_substitute_match_data
     :::
     \=null_subject
     foo\=zero_terminate
@@ -8153,15 +8153,29 @@ a)"xI
 
 # Now some NULL context tests
 
-/\w+|^$/replace=<$&>,global,null_context
-    :::
-    foo
-    :::\=substitute_null_match_data
-    foo\=substitute_null_match_data
-    :::\=substitute_matched
-    foo\=substitute_matched
-    :::\=substitute_null_match_data,substitute_matched
-    foo\=substitute_null_match_data,substitute_matched
+/\w+|^$/replace=<$&>,global
+    :::\=null_context
+    foo\=null_context
+    :::\=null_context,null_substitute_match_data
+    foo\=null_context,null_substitute_match_data
+    :::\=null_context,substitute_matched
+    foo\=null_context,substitute_matched
+    :::\=null_context,null_substitute_match_data,substitute_matched
+    foo\=null_context,null_substitute_match_data,substitute_matched
+
+# Failed matches: no-match; partial; other failure (callout-triggered)
+
+/abc/replace=yy
+    zABCz
+    zABCz\=substitute_matched
+
+/abc/
+    ab\=replace=yy,partial_hard
+    ab\=replace=yy,partial_hard,substitute_matched
+
+/(?C1)abc/replace=yy
+    zabcz\=callout_error=1
+    zabcz\=callout_error=1,substitute_matched
 
 
 # End of testinput2

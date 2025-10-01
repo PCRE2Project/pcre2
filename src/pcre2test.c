@@ -580,7 +580,7 @@ so many of them that they are split into two fields. */
 #define CTL2_NULL_REPLACEMENT            0x00004000u
 #define CTL2_FRAMESIZE                   0x00008000u
 #define CTL2_SUBSTITUTE_CASE_CALLOUT     0x00010000u
-#define CTL2_SUBSTITUTE_NULL_MATCH_DATA  0x00020000u
+#define CTL2_NULL_SUBSTITUTE_MATCH_DATA  0x00020000u
 
 #define CTL2_HEAPFRAMES_SIZE             0x20000000u  /* Informational */
 #define CTL2_NL_SET                      0x40000000u  /* Informational */
@@ -611,7 +611,7 @@ different things in the two cases. */
                     CTL2_SUBSTITUTE_UNSET_EMPTY|\
                     CTL2_ALLVECTOR|\
                     CTL2_SUBSTITUTE_CASE_CALLOUT|\
-                    CTL2_SUBSTITUTE_NULL_MATCH_DATA|\
+                    CTL2_NULL_SUBSTITUTE_MATCH_DATA|\
                     CTL2_HEAPFRAMES_SIZE)
 
 /* Structures for holding modifier information for patterns and subject strings
@@ -801,6 +801,7 @@ static modstruct modlist[] = {
   { "null_pattern",                MOD_PAT,  MOD_CTL, CTL2_NULL_PATTERN,          PO(control2) },
   { "null_replacement",            MOD_DAT,  MOD_CTL, CTL2_NULL_REPLACEMENT,      DO(control2) },
   { "null_subject",                MOD_DAT,  MOD_CTL, CTL2_NULL_SUBJECT,          DO(control2) },
+  { "null_substitute_match_data",  MOD_PND,  MOD_CTL, CTL2_NULL_SUBSTITUTE_MATCH_DATA, PO(control2) },
   { "offset",                      MOD_DAT,  MOD_SIZ, 0,                          DO(offset) },
   { "offset_limit",                MOD_CTM,  MOD_SIZ, 0,                          MO(offset_limit)},
   { "optimization_full",           MOD_CTC,  MOD_OPTMZ, PCRE2_OPTIMIZATION_FULL,  0 },
@@ -832,7 +833,6 @@ static modstruct modlist[] = {
   { "substitute_extended",         MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_EXTENDED,   PO(control2) },
   { "substitute_literal",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_LITERAL,    PO(control2) },
   { "substitute_matched",          MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_MATCHED,    PO(control2) },
-  { "substitute_null_match_data",  MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_NULL_MATCH_DATA, PO(control2) },
   { "substitute_overflow_length",  MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_OVERFLOW_LENGTH, PO(control2) },
   { "substitute_replacement_only", MOD_PND,  MOD_CTL, CTL2_SUBSTITUTE_REPLACEMENT_ONLY, PO(control2) },
   { "substitute_skip",             MOD_PND,  MOD_INT, 0,                          PO(substitute_skip) },
@@ -1042,6 +1042,8 @@ static BOOL malloc_testing = FALSE;
 static int jitrc;                             /* Return from JIT compile */
 static int timeit = 0;
 static int timeitm = 0;
+static int mallocs_until_failure = INT_MAX;
+static int mallocs_called = 0;
 
 static clock_t total_compile_time = 0;
 static clock_t total_jit_compile_time = 0;
@@ -1428,11 +1430,27 @@ static const uint8_t tables2[] = {
 
 
 /*************************************************
-*            Local memory functions              *
+*              Callout state reset               *
 *************************************************/
 
-static int mallocs_until_failure = INT_MAX;
-static int mallocs_called = 0;
+/* Several callout functions use global state to track progress. For convenience
+this function resets all relevant state variables, for all the different
+callouts. This ensures consistent execution when repeating a match. */
+
+static void
+reset_callout_state(void)
+{
+mallocs_called = 0;
+first_callout = TRUE;
+last_callout_mark = NULL;
+callout_count = 0;
+}
+
+
+
+/*************************************************
+*            Local memory functions              *
+*************************************************/
 
 /* Alternative memory functions, to test functionality. */
 
@@ -2294,6 +2312,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls & CTL_NULLCONTEXT) != 0)? " null_context" : "",
   ((controls2 & CTL2_NULL_REPLACEMENT) != 0)? " null_replacement" : "",
   ((controls2 & CTL2_NULL_SUBJECT) != 0)? " null_subject" : "",
+  ((controls2 & CTL2_NULL_SUBSTITUTE_MATCH_DATA) != 0)? " null_substitute_match_data" : "",
   ((controls & CTL_POSIX) != 0)? " posix" : "",
   ((controls & CTL_POSIX_NOSUB) != 0)? " posix_nosub" : "",
   ((controls & CTL_PUSH) != 0)? " push" : "",
@@ -2305,7 +2324,6 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
   ((controls2 & CTL2_SUBSTITUTE_EXTENDED) != 0)? " substitute_extended" : "",
   ((controls2 & CTL2_SUBSTITUTE_LITERAL) != 0)? " substitute_literal" : "",
   ((controls2 & CTL2_SUBSTITUTE_MATCHED) != 0)? " substitute_matched" : "",
-  ((controls2 & CTL2_SUBSTITUTE_NULL_MATCH_DATA) != 0)? " substitute_null_match_data" : "",
   ((controls2 & CTL2_SUBSTITUTE_OVERFLOW_LENGTH) != 0)? " substitute_overflow_length" : "",
   ((controls2 & CTL2_SUBSTITUTE_REPLACEMENT_ONLY) != 0)? " substitute_replacement_only" : "",
   ((controls2 & CTL2_SUBSTITUTE_UNKNOWN_UNSET) != 0)? " substitute_unknown_unset" : "",
