@@ -3869,11 +3869,15 @@ As well as the usual options for \fBpcre2_match()\fP, a number of additional
 options can be set in the \fIoptions\fP argument of \fBpcre2_substitute()\fP.
 One such option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
 \fImatch_data\fP block must be provided, and it must have already been used for
-an external call to \fBpcre2_match()\fP with the same pattern and subject
-arguments. The data in the \fImatch_data\fP block (return code, offset vector)
-is then used for the first substitution instead of calling \fBpcre2_match()\fP
-from within \fBpcre2_substitute()\fP. This allows an application to check for a
-match before choosing to substitute, without having to repeat the match.
+an external call to \fBpcre2_match()\fP (or \fBpcre2_jit_match()\fP) with the
+same pattern, subject, effective subject length, start offset, and match option
+arguments (substitute-specific options can be added to the \fIoptions\fP
+argument). If any of these parameters is changed, \fBpcre2_substitute()\fP
+returns an error. The data in the \fImatch_data\fP block (return code, offset
+vector) is used for the first substitution instead of calling
+\fBpcre2_match()\fP from within \fBpcre2_substitute()\fP. This allows an
+application to check for a match before choosing to substitute, without having
+to repeat the match.
 .P
 The contents of the externally supplied match data block are not changed when
 PCRE2_SUBSTITUTE_MATCHED is set. If PCRE2_SUBSTITUTE_GLOBAL is also set,
@@ -3885,6 +3889,17 @@ The \fIcode\fP argument is not used for matching before the first substitution
 when PCRE2_SUBSTITUTE_MATCHED is set, but it must be provided, even when
 PCRE2_SUBSTITUTE_GLOBAL is not set, because it contains information such as the
 UTF setting and the number of capturing parentheses in the pattern.
+.P
+When using PCRE2_SUBSTITUTE_MATCHED, you should not modify the subject string
+in between the prior call to \fBpcre2_match()\fP and \fBpcre2_substitute()\fP,
+as the substitution assumes that the passed-in ovector is compatible with the
+subject string. Although PCRE2 does verify that the subject is a pointer to the
+same buffer, it cannot in general verify whether the contents of the buffer have
+changed. For example, if the subject buffer is mutated from one valid UTF-8
+string to another valid string, of the same length in code units, the ovector
+offsets are no longer guaranteed to point to the start of a character. Beware
+that with PCRE2_SUBSTITUTE_MATCHED in UTF mode, the subject string is not
+re-scanned for UTF validity when \fBpcre2_substitute()\fP first uses it.
 .P
 The default action of \fBpcre2_substitute()\fP is to return a copy of the
 subject string with matched substrings replaced. However, if

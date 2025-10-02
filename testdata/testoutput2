@@ -23351,6 +23351,52 @@ Failed: error -37: callout error code
   1  ^        a
 Failed: error -37: callout error code
 
+# Exercise PCRE2_ERROR_DIFFSUBSSUBJECT branches
+
+# Changing the length is always an error
+# (using PCRE2_ZERO_TERMINATED but with different length strings also counts)
+# Using PCRE2_ZERO_TERMINATED vs a concrete length doesn't count as changing the length
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo\=substitute_subject=foo
+ 1: <foo>
+    foo\=substitute_subject=foo,copy_matched_subject
+ 1: <foo>
+    foo\=substitute_subject=foo,zero_terminate
+ 1: <foo>
+    foo\=substitute_subject=f
+Failed: error -72: substitute subject differs from prior match call
+    foo\=substitute_subject=f,copy_matched_subject
+Failed: error -72: substitute subject differs from prior match call
+    foo\=substitute_subject=f,zero_terminate
+Failed: error -72: substitute subject differs from prior match call
+    \
+ 1: <>
+    \=copy_matched_subject
+ 1: <>
+    \=zero_terminate
+ 1: <>
+    \=null_subject
+ 1: <>
+    \=null_subject,copy_matched_subject
+ 1: <>
+
+# Keeping the length the same, the offset the same, and the pointer the same
+# Is ok, even if the contents DIFFER
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=F|OOBAR
+ 2: F<|O><OBAR>
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,zero_terminate
+ 2: F<|O><OBAR>
+
+# With copy_matched_subject however we are able to detect the mismatch
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=foo|bar,copy_matched_subject
+ 2: f<oo>|<bar>
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject
+Failed: error -72: substitute subject differs from prior match call
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject,zero_terminate
+Failed: error -72: substitute subject differs from prior match call
+
 
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)

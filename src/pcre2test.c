@@ -1465,7 +1465,7 @@ if (mallocs_until_failure != INT_MAX && mallocs_until_failure-- <= 0)
   return NULL;
 
 block = malloc(size);
-if (show_memory)
+if (show_memory && outfile != NULL)
   {
   if (block == NULL)
     {
@@ -1493,7 +1493,8 @@ return block;
 static void my_free(void *block, void *data)
 {
 (void)data;
-if (show_memory && block != NULL)
+
+if (show_memory && outfile != NULL && block != NULL)
   {
   uint32_t i, j;
   BOOL found = FALSE;

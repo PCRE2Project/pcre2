@@ -753,6 +753,7 @@ BOOL replacement_only;
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 PCRE2_UCHAR temp[6];
 PCRE2_UCHAR null_str[1] = { 0xcd };
+PCRE2_SPTR original_subject = subject;
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
@@ -836,15 +837,15 @@ if (use_existing_match)
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
 
-  /* We want the effective subject strings to match. This implies the effective
-  length must match, and either: the pointers are equal; the length is zero and
-  one or other pointer is NULL (let's be strict for two non-equal and non-NULL
-  zero-length pointers); or finally, the special case of
-  PCRE2_COPY_MATCHED_SUBJECT where we cannot compare pointers but we can verify
-  the contents. */
+  if (code != match_data->code)
+    return PCRE2_ERROR_DIFFSUBSPATTERN;
+
+  /* We want the passed-in subject strings to match. This implies the effective
+  length must match, and either: the pointers are equal (with strict matching
+  of NULL against NULL); or, the special case of PCRE2_COPY_MATCHED_SUBJECT
+  where we cannot compare pointers but we can verify the contents. */
   if (length != match_data->subject_length ||
-      !(subject == match_data->subject ||
-        (length == 0 && (subject == NULL || match_data->subject == NULL)) ||
+      !(original_subject == match_data->subject ||
         ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0 &&
          (length == 0 ||
           memcmp(subject, match_data->subject, CU2BYTES(length)) == 0))))
