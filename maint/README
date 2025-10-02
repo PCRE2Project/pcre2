@@ -236,7 +236,14 @@ new release.
     the long term things do change.
 
 * Ensure the AUTHORS file is up-to-date with any new contributors since the
-  last release.
+  last release. I use this simple command:
+
+  ```sh
+  git log $GIT_TAG..HEAD --format='RealAuthor: %aN <%aE>%n%w(80,4,4)%b' | \
+    grep -E '^RealAuthor: .*|Co-authored-by:' | \
+    sed -E -e 's/RealAuthor: |.*Co-authored-by:\s*//' | \
+    sort -u
+  ```
 
 * Ensure the ChangeLog and NEWS files are updated with everything that you want
   to announce in the new release.
