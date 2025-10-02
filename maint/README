@@ -248,6 +248,13 @@ new release.
 * Ensure the ChangeLog and NEWS files are updated with everything that you want
   to announce in the new release.
 
+  This command helps dump the Git commits:
+
+  ```sh
+  git log --reverse -p -U10 --invert-grep --grep='#noupdate' $GIT_TAG..HEAD \
+    -- ':!doc/*.txt' ':!doc/html'
+  ```
+
 * Update the library version numbers in configure.ac according to the rules
   given below.
 
