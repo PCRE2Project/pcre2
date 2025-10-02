@@ -1058,7 +1058,7 @@ static int
 pattern_info(int what, void *where, BOOL unsetok)
 {
 int rc;
-rc = pcre2_pattern_info(compiled_code, what, NULL);  /* Exercise the code */
+(void)pcre2_pattern_info(compiled_code, what, NULL);  /* Exercise the code */
 rc = pcre2_pattern_info(compiled_code, what, where);
 if (rc >= 0) return 0;
 if (rc != PCRE2_ERROR_UNSET || !unsetok)
@@ -4756,7 +4756,7 @@ for (gmatched = 0;; gmatched++)
       start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
-        capcount = pcre2_dfa_match(compiled_code, pp, arg_ulen,
+        (void)pcre2_dfa_match(compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
         }
@@ -4767,7 +4767,7 @@ for (gmatched = 0;; gmatched++)
       start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
-        capcount = pcre2_jit_match(compiled_code, pp, arg_ulen,
+        (void)pcre2_jit_match(compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context);
         }
@@ -4778,7 +4778,7 @@ for (gmatched = 0;; gmatched++)
       start_time = clock();
       for (i = 0; i < timeitm; i++)
         {
-        capcount = pcre2_match(compiled_code, pp, arg_ulen,
+        (void)pcre2_match(compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context);
         }
