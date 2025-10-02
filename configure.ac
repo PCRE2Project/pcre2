@@ -578,11 +578,7 @@ Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE2_8 should either be
 defined (conventionally to 1) for TRUE, and not defined at all for FALSE. All
 such macros are listed as a commented #undef in config.h.generic. Macros such
 as MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
-surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
-
-PCRE2 uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
-HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
-sure both macros are undefined; an emulation function will then be used. */])
+surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */])
 
 # Checks for header files.
 AC_CHECK_HEADERS(assert.h limits.h sys/types.h sys/stat.h dirent.h)
@@ -627,7 +623,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memfd_create memmove mkostemp secure_getenv strerror)
+AC_CHECK_FUNCS(memfd_create mkostemp secure_getenv)
 AC_MSG_CHECKING([for realpath])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <stdlib.h>

@@ -3347,6 +3347,7 @@ int was_zero_terminated = 0;
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 
 PCRE2_UCHAR null_str[1] = { 0xcd };
+PCRE2_SPTR original_subject = subject;
 PCRE2_SPTR start_match;
 PCRE2_SPTR end_subject;
 PCRE2_SPTR bumpalong_limit;
@@ -3392,9 +3393,11 @@ if (subject == NULL && length == 0) subject = null_str;
 
 /* Plausibility checks */
 
-if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0) return PCRE2_ERROR_BADOPTION;
-if (re == NULL || subject == NULL || workspace == NULL || match_data == NULL)
-  return PCRE2_ERROR_NULL;
+if (match_data == NULL) return PCRE2_ERROR_NULL;
+if (re == NULL || subject == NULL || workspace == NULL)
+  { rc = PCRE2_ERROR_NULL; goto EXIT; }
+if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0)
+  { rc = PCRE2_ERROR_BADOPTION; goto EXIT; }
 
 if (length == PCRE2_ZERO_TERMINATED)
   {
@@ -3402,30 +3405,31 @@ if (length == PCRE2_ZERO_TERMINATED)
   was_zero_terminated = 1;
   }
 
-if (wscount < 20) return PCRE2_ERROR_DFA_WSSIZE;
-if (start_offset > length) return PCRE2_ERROR_BADOFFSET;
+if (wscount < 20) { rc = PCRE2_ERROR_DFA_WSSIZE; goto EXIT; }
+if (start_offset > length) { rc = PCRE2_ERROR_BADOFFSET; goto EXIT; }
 
 /* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
 time. */
 
 if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
    ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
-  return PCRE2_ERROR_BADOPTION;
+  { rc = PCRE2_ERROR_BADOPTION; goto EXIT; }
 
 /* Invalid UTF support is not available for DFA matching. */
 
 if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
-  return PCRE2_ERROR_DFA_UINVALID_UTF;
+  { rc = PCRE2_ERROR_DFA_UINVALID_UTF; goto EXIT; }
 
 /* Check that the first field in the block is the magic number. If it is not,
 return with PCRE2_ERROR_BADMAGIC. */
 
-if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
+if (re->magic_number != MAGIC_NUMBER)
+  { rc = PCRE2_ERROR_BADMAGIC; goto EXIT; }
 
 /* Check the code unit width. */
 
 if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
-  return PCRE2_ERROR_BADMODE;
+  { rc = PCRE2_ERROR_BADMODE; goto EXIT; }
 
 /* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
 options variable for this function. Users of PCRE2 who are not calling the
@@ -3451,8 +3455,8 @@ of the workspace. */
 if ((options & PCRE2_DFA_RESTART) != 0)
   {
   if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 ||
-    workspace[1] > (int)((wscount - 2)/INTS_PER_STATEBLOCK))
-      return PCRE2_ERROR_DFA_BADRESTART;
+      workspace[1] > (int)((wscount - 2)/INTS_PER_STATEBLOCK))
+    { rc = PCRE2_ERROR_DFA_BADRESTART; goto EXIT; }
   }
 
 /* Set some local values */
@@ -3500,7 +3504,7 @@ else
   if (mcontext->offset_limit != PCRE2_UNSET)
     {
     if ((re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
-      return PCRE2_ERROR_BADOFFSETLIMIT;
+      { rc = PCRE2_ERROR_BADOFFSETLIMIT; goto EXIT; }
     bumpalong_limit = subject + mcontext->offset_limit;
     }
   mb->callout = mcontext->callout;
@@ -3570,7 +3574,8 @@ switch(re->newline_convention)
   /* LCOV_EXCL_START */
   default:
   PCRE2_DEBUG_UNREACHABLE();
-  return PCRE2_ERROR_INTERNAL;
+  rc = PCRE2_ERROR_INTERNAL;
+  goto EXIT;
   /* LCOV_EXCL_STOP */
   }
 
@@ -3592,7 +3597,7 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
 #if PCRE2_CODE_UNIT_WIDTH != 32
     unsigned int i;
     if (start_match < end_subject && NOT_FIRSTCU(*start_match))
-      return PCRE2_ERROR_BADUTFOFFSET;
+      { rc = PCRE2_ERROR_BADUTFOFFSET; goto EXIT; }
     for (i = re->max_lookbehind; i > 0 && check_subject > subject; i--)
       {
       check_subject--;
@@ -3613,12 +3618,12 @@ if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   /* Validate the relevant portion of the subject. After an error, adjust the
   offset to be an absolute offset in the whole string. */
 
-  match_data->rc = PRIV(valid_utf)(check_subject,
+  rc = PRIV(valid_utf)(check_subject,
     length - (PCRE2_SIZE)(check_subject - subject), &(match_data->startchar));
-  if (match_data->rc != 0)
+  if (rc != 0)
     {
     match_data->startchar += (PCRE2_SIZE)(check_subject - subject);
-    return match_data->rc;
+    goto EXIT;
     }
   }
 #endif  /* SUPPORT_UNICODE */
@@ -4046,20 +4051,20 @@ for (;;)
     match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
     match_data->rightchar = (PCRE2_SIZE)(mb->last_used_ptr - subject);
     match_data->startchar = (PCRE2_SIZE)(start_match - subject);
-    match_data->rc = rc;
 
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
       length = CU2BYTES(length + was_zero_terminated);
       match_data->subject = match_data->memctl.malloc(length,
         match_data->memctl.memory_data);
-      if (match_data->subject == NULL) return PCRE2_ERROR_NOMEMORY;
+      if (match_data->subject == NULL) { rc = PCRE2_ERROR_NOMEMORY; goto EXIT; }
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
     else
       {
-      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL) match_data->subject = subject;
+      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
+        match_data->subject = original_subject;
       }
     goto EXIT;
     }
@@ -4103,6 +4108,7 @@ while (rws->next != NULL)
   mb->memctl.free(next, mb->memctl.memory_data);
   }
 
+match_data->rc = rc;
 return rc;
 }
 

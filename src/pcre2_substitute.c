@@ -795,6 +795,16 @@ if (replacement == NULL)
 if (rlength == PCRE2_ZERO_TERMINATED) rlength = PRIV(strlen)(replacement);
 repend = replacement + rlength;
 
+/* A NULL subject of zero length is treated as an empty string. */
+
+if (subject == NULL)
+  {
+  if (length != 0) return PCRE2_ERROR_NULL;
+  subject = null_str;
+  }
+
+if (length == PCRE2_ZERO_TERMINATED) length = PRIV(strlen)(subject);
+
 /* Check for using a match that has already happened. Note that the subject
 pointer in the match data may be NULL after a no-match. */
 
@@ -842,6 +852,8 @@ else if (use_existing_match)
     + 2*pairs*sizeof(PCRE2_SIZE));
   internal_match_data->heapframes = NULL;
   internal_match_data->heapframes_size = 0;
+  /* Ensure that the subject is not freed when internal_match_data is */
+  internal_match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
   match_data = internal_match_data;
   }
 
@@ -856,19 +868,6 @@ scb.version = 0;
 scb.input = subject;
 scb.output = (PCRE2_SPTR)buffer;
 scb.ovector = ovector;
-
-/* A NULL subject of zero length is treated as an empty string. */
-
-if (subject == NULL)
-  {
-  if (length != 0) return PCRE2_ERROR_NULL;
-  subject = null_str;
-  }
-
-/* Find length of zero-terminated subject */
-
-if (length == PCRE2_ZERO_TERMINATED)
-  length = subject? PRIV(strlen)(subject) : 0;
 
 /* Check UTF replacement string if necessary. */
 

@@ -10,6 +10,76 @@ listed here.
 Version 10.47 xx-xxx-2025
 -------------------------
 
+1. (#660, #655, #663) Expanded platforms tested by CI: FreeBSD, Solaris,
+MSYS (Cygwin), S390x, PPC64le, ARMv7, AARCH64, RiscV.
+
+2. (#655) Made build clean of `/W3` warnings on MSVC. Further suppression of
+minor build warnings on other platforms (various commits).
+
+3. (#651) Added `--enable-Werror` flag to `./configure` to treat warnings as
+errors (or `--enable-errwarn` for Solaris cc). Previously, you had to hackily
+override the CPPFLAGS when calling make since you can't pass `-Werror` as a
+CFLAG into `./configure` (it breaks compiler feature detection).
+
+4. (#682) Added AM_MAINTAINER_MODE for Git tag releases. Users building with
+the `./configure` script can check out the release tag using Git, which assigns
+the current time as the modification time to each checked-out file. This caused
+Autoconf to attempt to regenerate the configure script.
+
+5. (#692) Add LICENSE file for sljit to the tarball release, to clarify that the
+sljit code is governed separately by the 2-clause BSD license.
+
+6. (#656, #695) Add full support for z/OS and native EBCDIC support. The z/OS
+support is tested nightly using the XLC and IBM-Clang compilers, with Autoconf
+and CMake. In addition, for test purposes, the EBCDIC support can now be enabled
+on any platform using the new Autoconf `--enable-ebcdic-ignoring-compiler` and
+CMake `-DPCRE2_EBCDIC_IGNORING_COMPILER` options.
+
+7. (#700) Faster lookup of named capture groups during pattern compilation using
+a hash table.
+
+8. (#697, #756, #778) Improvements to pcre2test to increase code coverage:
+-malloc argument; more detailed test assertions.
+
+9. (#705, #710, #737, #738) Powerful new feature: pattern recursion of
+the form "(?1(GROUP_NAME_OR_NUM,...))" acts as a subroutine call which
+additionally returns the listed capturing groups to the calling context.
+
+10. (#721) Add linker scripts to enable symbol version for the PCRE2 dynamic
+libraries. Downstream Linux distributions may make use of this, or disable it
+with the new Autoconf `--disable-symvers` and CMake `-DPCRE2_SYMVERS` options.
+Currently, Linux, Solaris, and FreeBSD are tested and supported.
+
+11. (#733) New API function: pcre2_next_match(). This function makes it both
+simpler and safer for clients to iterate over all matches in a subject. The
+documentation in `pcre2api` also provides improved guidance in the section
+"Iterating over all matches".
+
+12. (#739, #744, #753) Modernize the CMake build files, to use standard
+commands to export the PCRE2 targets. This makes use of the
+"$<BUILD_INTERFACE:...>" and "$<INSTALL_INTERFACE:...>" expressions alongside
+the built-in "install(EXPORT...)" command. This brings the CMake files in line
+with the patches used by vcpkg to distribute PCRE2. The minimum CMake version
+remains 3.15.
+
+13. (#756) Improved error offsets and diagnostics for syntax errors during
+pattern compilation.
+
+14. (#708, #729, #724, #731, #777) Various updates to Bazel and Zig
+build support.
+
+15. (#775) Added PCRE2_CONFIG_EFFECTIVE_LINKSIZE option to pcre2_config(), to
+report the actual number of code units used in compiled patterns for recording
+string lengths and offsets.
+
+16. (#801) Significant bugfix: Fix a crash in pcre2_callout_enumerate() which is
+easily reachable on any pattern that contains a Unicode character class. If your
+application uses this function, please read the details for this change and
+evaluate its severity for your application.
+
+17. (#806, #807) Improved input validation for pcre2_substitute() used with
+PCRE2_SUBSTITUTE_MATCHED.
+
 
 Version 10.46 27-August-2025
 ----------------------------

@@ -463,11 +463,7 @@ Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE2_8 should either be
 defined (conventionally to 1) for TRUE, and not defined at all for FALSE. All
 such macros are listed as a commented #undef in config.h.generic. Macros such
 as MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
-surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
-
-PCRE2 uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
-HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
-sure both macros are undefined; an emulation function will then be used. */
+surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 
 /* By default, the \R escape sequence matches any Unicode line ending
    character or sequence of characters. If BSR_ANYCRLF is defined (to any
@@ -499,9 +495,6 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
 
-/* Define to 1 if you have the 'bcopy' function. */
-#define HAVE_BCOPY 1
-
 /* Define this if your compiler provides __builtin_mul_overflow() */
 #undef HAVE_BUILTIN_MUL_OVERFLOW
 
@@ -528,9 +521,6 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* Define to 1 if you have the 'memfd_create' function. */
 #undef HAVE_MEMFD_CREATE
-
-/* Define to 1 if you have the 'memmove' function. */
-#define HAVE_MEMMOVE 1
 
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
@@ -567,9 +557,6 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
-
-/* Define to 1 if you have the 'strerror' function. */
-#define HAVE_STRERROR 1
 
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1

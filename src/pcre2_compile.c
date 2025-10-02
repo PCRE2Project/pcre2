@@ -7135,7 +7135,6 @@ for (;; pptr++)
       generated in the pre-pass in order to get a number and whether or not
       this name is duplicated. */
 
-      groupnumber = 0;
       ng = PRIV(compile_find_named_group)(name, length, cb);
 
       if (ng == NULL)
