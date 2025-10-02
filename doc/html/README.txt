@@ -88,15 +88,17 @@ Building PCRE2 on non-Unix-like systems
 
 For a non-Unix-like system, please read the file NON-AUTOTOOLS-BUILD, though if
 your system supports the use of "configure" and "make" you may be able to build
-PCRE2 using autotools in the same way as for many Unix-like systems.
+PCRE2 using autotools in the same way as for many Unix-like systems. This file
+also contains useful information on building for some unusual Unix environments
+(such as EBCDIC mainframes).
 
 PCRE2 can also be configured using CMake, which can be run in various ways
 (command line, GUI, etc). This creates Makefiles, solution files, etc. The file
 NON-AUTOTOOLS-BUILD has information about CMake.
 
 PCRE2 has been compiled on many different operating systems. It should be
-straightforward to build PCRE2 on any system that has a Standard C compiler and
-library, because it uses only Standard C functions.
+straightforward to build PCRE2 on any system that has a C99 or later compiler
+and library.
 
 
 Building PCRE2 without using autotools
