@@ -3342,7 +3342,6 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext, int *workspace, PCRE2_SIZE wscount)
 {
 int rc;
-int was_zero_terminated = 0;
 
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 uint32_t original_options = options;
@@ -3403,7 +3402,6 @@ if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0)
 if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
-  was_zero_terminated = 1;
   }
 
 if (wscount < 20) { rc = PCRE2_ERROR_DFA_WSSIZE; goto EXIT; }
@@ -4062,11 +4060,16 @@ for (;;)
 
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
-      length = CU2BYTES(length + was_zero_terminated);
-      match_data->subject = match_data->memctl.malloc(length,
-        match_data->memctl.memory_data);
-      if (match_data->subject == NULL) { rc = PCRE2_ERROR_NOMEMORY; goto EXIT; }
-      memcpy((void *)match_data->subject, subject, length);
+      if (length != 0)
+        {
+        match_data->subject = match_data->memctl.malloc(CU2BYTES(length),
+          match_data->memctl.memory_data);
+        if (match_data->subject == NULL)
+          { rc = PCRE2_ERROR_NOMEMORY; goto EXIT; }
+        memcpy((void *)match_data->subject, subject, CU2BYTES(length));
+        }
+      else
+        match_data->subject = NULL;
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
     else if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
