@@ -1537,13 +1537,13 @@ if (show_memory && outfile != NULL)
   {
   if (block == NULL)
     {
-    fprintf(outfile, "** malloc() failed for %" SIZ_FORM "\n", size);
+    cprintf(clr_test_error, "** malloc() failed for %" SIZ_FORM "\n", size);
     }
   else
     {
-    fprintf(outfile, "malloc  %5" SIZ_FORM, size);
+    cprintf(clr_profiling, "malloc  %5" SIZ_FORM, size);
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-    fprintf(outfile, " %p", block);   /* Not portable */
+    cprintf(clr_profiling, " %p", block);   /* Not portable */
 #endif
     if (malloclistptr < MALLOCLISTSIZE)
       {
@@ -1551,8 +1551,8 @@ if (show_memory && outfile != NULL)
       malloclistlength[malloclistptr++] = size;
       }
     else
-      fprintf(outfile, " (not remembered)");
-    fprintf(outfile, "\n");
+      cprintf(clr_test_error, " (not remembered)");
+    cprintf(clr_profiling, "\n");
     }
   }
 return block;
@@ -1567,12 +1567,12 @@ if (show_memory && outfile != NULL && block != NULL)
   uint32_t i, j;
   BOOL found = FALSE;
 
-  fprintf(outfile, "free");
+  cprintf(clr_profiling, "free");
   for (i = 0; i < malloclistptr; i++)
     {
     if (block == malloclist[i])
       {
-      fprintf(outfile, "    %5" SIZ_FORM, malloclistlength[i]);
+      cprintf(clr_profiling, "    %5" SIZ_FORM, malloclistlength[i]);
       malloclistptr--;
       for (j = i; j < malloclistptr; j++)
         {
@@ -1583,11 +1583,11 @@ if (show_memory && outfile != NULL && block != NULL)
       break;
       }
     }
-  if (!found) fprintf(outfile, " unremembered block");
+  if (!found) cprintf(clr_profiling, " unremembered block");
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-  fprintf(outfile, " %p", block);  /* Not portable */
+  cprintf(clr_profiling, " %p", block);  /* Not portable */
 #endif
-  fprintf(outfile, "\n");
+  cprintf(clr_profiling, "\n");
   }
 free(block);
 }
@@ -1933,7 +1933,7 @@ uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
 
 if (new_buffer == NULL || new_pbuffer8 == NULL)
   {
-  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
+  fatal_printf("pcre2test: malloc(%" SIZ_FORM ") failed\n",
           new_pbuffer8_size);
   exit(1);
   }
@@ -1998,7 +1998,7 @@ for (;;)
     dlen = strlen(s);
     if (dlen > rlen - 2)
       {
-      fprintf(outfile, "** Interactive input exceeds buffer space\n");
+      cprintf(clr_test_error, "** Interactive input exceeds buffer space\n");
       exit(1);
       }
     if (dlen > 0) add_history(s);
@@ -2016,7 +2016,7 @@ for (;;)
 
     /* Read the next line by normal means, prompting if the file is a tty. */
 
-    if (INTERACTIVE(f)) printf("%s", prompt);
+    if (INTERACTIVE(f)) cprintf(clr_profiling, "%s", prompt);
     if (fgets((char *)here, rlen_trunc, f) == NULL)
       return (here == start)? NULL : start;
 
@@ -2037,8 +2037,8 @@ for (;;)
 
     if (dlen < (unsigned)rlen_trunc - 1 && !feof(f))
       {
-      fprintf(outfile, "** Binary zero encountered in input\n");
-      fprintf(outfile, "** pcre2test run abandoned\n");
+      cprintf(clr_test_error, "** Binary zero encountered in input\n");
+      cprintf(clr_test_error, "** pcre2test run abandoned\n");
       exit(1);
       }
     }
@@ -2330,7 +2330,7 @@ when 8-bit mode is supported. */
 static void
 prmsg(const char **msg, const char *s)
 {
-fprintf(outfile, "%s %s", *msg, s);
+cprintf(clr_test_error, "%s %s", *msg, s);
 *msg = "";
 }
 #endif  /* SUPPORT_PCRE2_8 */
@@ -2594,7 +2594,7 @@ while (endf > filename && isspace((unsigned char)endf[-1])) endf--;
 
 if (endf == filename)
   {
-  fprintf(outfile, "** File name expected after %s\n", name);
+  cprintf(clr_test_error, "** File name expected after %s\n", name);
   return PR_ABEND;
   }
 
@@ -2602,7 +2602,7 @@ if (endf == filename)
 *fptr = fopen((const char *)filename, mode);
 if (*fptr == NULL)
   {
-  fprintf(outfile, "** Failed to open \"%s\": %s\n", filename, strerror(errno));
+  cprintf(clr_test_error, "** Failed to open \"%s\": %s\n", filename, strerror(errno));
   return PR_ABEND;
   }
 
@@ -2766,13 +2766,13 @@ for (i = 0; i < 2*oveccount; i += 2)
   PCRE2_SIZE start = ovector[i];
   PCRE2_SIZE end = ovector[i+1];
 
-  fprintf(outfile, "%2d: ", i/2);
+  cprintf(clr_output, "%2d: ", i/2);
   if (start == PCRE2_UNSET && end == PCRE2_UNSET)
-    fprintf(outfile, "<unset>\n");
+    cprintf(clr_api_error, "<unset>\n");
   else if (start == JUNK_OFFSET && end == JUNK_OFFSET)
-    fprintf(outfile, "<unchanged>\n");
+    cprintf(clr_output, "<unchanged>\n");
   else
-    fprintf(outfile, "%ld %ld\n", (unsigned long int)start,
+    cprintf(clr_output, "%ld %ld\n", (unsigned long int)start,
       (unsigned long int)end);
   }
 }
@@ -3027,11 +3027,11 @@ Returns:     nothing
 static void
 print_newline_config(uint32_t optval, BOOL isc)
 {
-if (!isc) printf("  Default newline sequence is ");
+if (!isc) cprintf(clr_output, "  Default newline sequence is ");
 if (optval < sizeof(newlines)/sizeof(char *))
-  printf("%s\n", newlines[optval]);
+  cprintf(clr_output, "%s\n", newlines[optval]);
 else
-  printf("a non-standard value: %d\n", optval);
+  cprintf(clr_test_error, "a non-standard value: %d\n", optval);
 }
 
 
@@ -3136,7 +3136,7 @@ if (arg != NULL && arg[0] != '-')
 
   if (i >= COPTLISTCOUNT)
     {
-    fprintf(stderr, "** Unknown -C option \"%s\"\n", arg);
+    fatal_printf("** Unknown -C option \"%s\"\n", arg);
     return 0;
     }
 
@@ -3144,17 +3144,17 @@ if (arg != NULL && arg[0] != '-')
     {
     case CONF_BSR:
     (void)pcre2_config(coptlist[i].value, &optval);
-    printf("%s\n", (optval == PCRE2_BSR_ANYCRLF)? "ANYCRLF" : "ANY");
+    cprintf(clr_output, "%s\n", (optval == PCRE2_BSR_ANYCRLF)? "ANYCRLF" : "ANY");
     break;
 
     case CONF_FIX:
     yield = coptlist[i].value;
-    printf("%d\n", yield);
+    cprintf(clr_output, "%d\n", yield);
     break;
 
     case CONF_INT:
     (void)pcre2_config(coptlist[i].value, &yield);
-    printf("%d\n", yield);
+    cprintf(clr_output, "%d\n", yield);
     break;
 
     case CONF_NL:
@@ -3171,7 +3171,7 @@ if (arg != NULL && arg[0] != '-')
       case PCRE2_ERROR_JIT_UNSUPPORTED: yield = 2; break;
       default: yield = 3; break;
       }
-    printf("%d\n", yield);
+    cprintf(clr_output, "%d\n", yield);
     break;
     }
 
@@ -3228,9 +3228,9 @@ printf("  Input/output for pcre2test is ASCII, not EBCDIC\n");
 #endif
 
 (void)pcre2_config(PCRE2_CONFIG_COMPILED_WIDTHS, &optval);
-if (optval & 1) printf("  8-bit support\n");
-if (optval & 2) printf("  16-bit support\n");
-if (optval & 4) printf("  32-bit support\n");
+if (optval & 1) cprintf(clr_output, "  8-bit support\n");
+if (optval & 2) cprintf(clr_output, "  16-bit support\n");
+if (optval & 4) cprintf(clr_output, "  32-bit support\n");
 
 #ifdef SUPPORT_VALGRIND
 printf("  Valgrind support\n");
@@ -3239,43 +3239,43 @@ printf("  Valgrind support\n");
 (void)pcre2_config(PCRE2_CONFIG_UNICODE, &optval);
 if (optval != 0)
   {
-  printf("  UTF and UCP support (");
-  print_unicode_version(stdout);
-  printf(")\n");
+  cprintf(clr_output, "  UTF and UCP support (");
+  print_unicode_version();
+  cprintf(clr_output, ")\n");
   }
-else printf("  No Unicode support\n");
+else cprintf(clr_api_error, "  No Unicode support\n");
 
 (void)pcre2_config(PCRE2_CONFIG_JIT, &optval);
 if (optval != 0)
   {
-  printf("  Just-in-time compiler support\n");
-  printf("    Architecture: ");
+  cprintf(clr_output, "  Just-in-time compiler support\n");
+  cprintf(clr_output, "    Architecture: ");
   print_jit_target();
-  printf("\n");
+  cprintf(clr_output, "\n");
 
-  printf("    Can allocate executable memory: ");
+  cprintf(clr_output, "    Can allocate executable memory: ");
   rc = jit_compile_test();
   switch(rc)
     {
     case 0:
-    printf("Yes\n");
+    cprintf(clr_output, "Yes\n");
     break;
 
     case PCRE2_ERROR_NOMEMORY:
-    printf("No (so cannot work)\n");
+    cprintf(clr_api_error, "No (so cannot work)\n");
     break;
 
     default:
-    printf("\n** Unexpected return %d from "
+    cprintf(clr_test_error, "\n** Unexpected return %d from "
       "pcre2_jit_compile(NULL, PCRE2_JIT_TEST_ALLOC)\n", rc);
-    printf("** Should not occur\n");
+    cprintf(clr_test_error, "** Should not occur\n");
     yield = 1;
     break;
     }
   }
 else
   {
-  printf("  No just-in-time compiler support\n");
+  cprintf(clr_api_error, "  No just-in-time compiler support\n");
   }
 
 (void)pcre2_config(PCRE2_CONFIG_NEWLINE, &optval);
@@ -3424,7 +3424,7 @@ for (size_t i = 0; i < PRIV(utt_size); i++)
     const ucp_type_table *tt = PRIV(utt) + j;
     if (tt->type != t->type || tt->value != value) continue;
     if (m >= MAX_SYNONYMS)
-      printf("** Too many synonyms: %s ignored\n",
+      cprintf(clr_test_error, "** Too many synonyms: %s ignored\n",
         PRIV(utt_names) + tt->name_offset);
     else fv[m++] = tt->name_offset;
     }
@@ -3432,10 +3432,10 @@ for (size_t i = 0; i < PRIV(utt_size); i++)
   fv[m] = -1;
   }
 
-printf("-------------------------- SUPPORTED %s --------------------------\n\n",
+cprintf(clr_output, "-------------------------- SUPPORTED %s --------------------------\n\n",
   wantscripts? "SCRIPTS" : "PROPERTIES");
 
-if (!wantscripts) printf(
+if (!wantscripts) cprintf(clr_output,
 "This release of PCRE2 supports Unicode's general category properties such\n"
 "as Lu (upper case letter), bi-directional properties such as Bidi_Class,\n"
 "and the following binary (yes/no) properties:\n\n");
@@ -3452,9 +3452,9 @@ for (int k = 0; k < (n+1)/2; k++)
   if (x < n) format_list_item(found[x], buff2, wantscripts);
     else buff2[0] = 0;
 
-  x = printf("%s", buff1);
-  while (x++ < colwidth) printf(" ");
-  printf("%s\n", buff2);
+  x = cprintf(clr_output, "%s", buff1);
+  while (x++ < colwidth) cprintf(clr_output, " ");
+  cprintf(clr_output, "%s\n", buff2);
   }
 
 #endif  /* SUPPORT_UNICODE */
@@ -3471,11 +3471,11 @@ display_one_modifier(modstruct *m, BOOL for_pattern)
 {
 uint32_t c = (!for_pattern && (m->which == MOD_PND || m->which == MOD_PNDP))?
   '*' : ' ';
-printf("%c%s", c, m->name);
+cprintf(clr_output, "%c%s", c, m->name);
 for (size_t i = 0; i < C1MODLISTCOUNT; i++)
   {
   if (strcmp(m->name, c1modlist[i].fullname) == 0)
-    printf(" (%c)", c1modlist[i].onechar);
+    cprintf(clr_output, " (%c)", c1modlist[i].onechar);
   }
 }
 
@@ -3527,7 +3527,7 @@ for (i = 0; i < MODLISTCOUNT; i++)
     is_pattern = FALSE;
     break;
 
-    default: printf("** Unknown type for modifier \"%s\"\n", m->name);
+    default: cprintf_file(stdout, clr_test_error, "** Unknown type for modifier \"%s\"\n", m->name);
     PCRE2_FALLTHROUGH /* Fall through */
     case MOD_PD:        /* Pattern or subject */
     case MOD_PDP:       /* As PD, OK for Perl-compatible test */
@@ -3561,10 +3561,10 @@ for (i = 0, j = (n+1)/2; i < (n+1)/2; i++, j++)
   if (j < n)
     {
     size_t k = 27 - strlen(m->name) - extra[i];
-    while (k-- > 0) printf(" ");
+    while (k-- > 0) cprintf(clr_output, " ");
     display_one_modifier(modlist + list[j], for_pattern);
     }
-  printf("\n");
+  cprintf(clr_output, "\n");
   }
 }
 
@@ -3633,7 +3633,7 @@ preprocessor. */
 if (PO(options) != DO(options) || PO(control) != DO(control) ||
     PO(control2) != DO(control2))
   {
-  fprintf(stderr, "** Coding error: "
+  fatal_printf("** Coding error: "
     "options and control offsets for pattern and data must be the same.\n");
   return 1;
   }
@@ -3727,7 +3727,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_8
     test_mode = PCRE2TEST_MODE_8;
 #else
-    fprintf(stderr,
+    fatal_printf(
       "** This version of PCRE2 was built without 8-bit support\n");
     exit(1);
 #endif
@@ -3738,7 +3738,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_16
     test_mode = PCRE2TEST_MODE_16;
 #else
-    fprintf(stderr,
+    fatal_printf(
       "** This version of PCRE2 was built without 16-bit support\n");
     exit(1);
 #endif
@@ -3749,7 +3749,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_32
     test_mode = PCRE2TEST_MODE_32;
 #else
-    fprintf(stderr,
+    fatal_printf(
       "** This version of PCRE2 was built without 32-bit support\n");
     exit(1);
 #endif
@@ -3769,7 +3769,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       ((uli = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
     {
 #if defined(_WIN32) || defined(WIN32) || defined(__HAIKU__) || defined(NATIVE_ZOS) || defined(__VMS)
-    fprintf(stderr, "pcre2test: -S is not supported on this OS\n");
+    fatal_printf("pcre2test: -S is not supported on this OS\n");
     exit(1);
 #else
     int rc = 0;
@@ -3777,7 +3777,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     struct rlimit rlim, rlim_old;
     if (uli > INT32_MAX / (1024 * 1024))
       {
-      fprintf(stderr, "** Argument for -S is too big\n");
+      fatal_printf("** Argument for -S is too big\n");
       exit(1);
       }
     stack_size = (uint32_t)uli;
@@ -3786,15 +3786,15 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     rlim.rlim_cur = stack_size * 1024 * 1024;
     if (rlim.rlim_max != RLIM_INFINITY && rlim.rlim_cur > rlim.rlim_max)
       {
-      fprintf(stderr,
+      fatal_printf(
         "pcre2test: requested stack size %luMiB is greater than hard limit ",
           (unsigned long int)stack_size);
       if (rlim.rlim_max % (1024*1024) == 0)
-        fprintf(stderr, "%luMiB\n", (unsigned long)(rlim.rlim_max/(1024*1024)));
+        fatal_printf("%luMiB\n", (unsigned long)(rlim.rlim_max/(1024*1024)));
       else if (rlim.rlim_max % 1024 == 0)
-        fprintf(stderr, "%luKiB\n", (unsigned long)(rlim.rlim_max/1024));
+        fatal_printf("%luKiB\n", (unsigned long)(rlim.rlim_max/1024));
       else
-        fprintf(stderr, "%lu bytes\n", (unsigned long)(rlim.rlim_max));
+        fatal_printf("%lu bytes\n", (unsigned long)(rlim.rlim_max));
       exit(1);
       }
     if (rlim_old.rlim_cur != RLIM_INFINITY && rlim_old.rlim_cur <= INT32_MAX &&
@@ -3802,7 +3802,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
-      fprintf(stderr, "pcre2test: setting stack size %luMiB failed: %s\n",
+      fatal_printf("pcre2test: setting stack size %luMiB failed: %s\n",
         (unsigned long int)stack_size, strerror(errno));
       exit(1);
       }
@@ -3831,7 +3831,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       else if (arg[4] == 'f') def_patctl.control |= CTL_JITFAST;
     def_patctl.jit = JIT_DEFAULT;  /* full & partial */
 #ifndef SUPPORT_JIT
-    fprintf(stderr, "** Warning: JIT support is not available: "
+    fatal_printf("** Warning: JIT support is not available: "
                     "-jit[fast|verify] calls functions that do nothing.\n");
 #endif
     }
@@ -3847,12 +3847,12 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       {
       if (uli == 0)
         {
-        fprintf(stderr, "** Argument for %s must not be zero\n", arg);
+        fatal_printf("** Argument for %s must not be zero\n", arg);
         exit(1);
         }
       if (U32OVERFLOW(uli))
         {
-        fprintf(stderr, "** Argument for %s is too big\n", arg);
+        fatal_printf("** Argument for %s is too big\n", arg);
         exit(1);
         }
       timeitm = (int)uli;
@@ -3909,7 +3909,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     CHECK_VALUE_EXISTS:
     if (argc <= 2)
       {
-      fprintf(stderr, "** Missing value for %s\n", arg);
+      fatal_printf("** Missing value for %s\n", arg);
       yield = 1;
       goto EXIT;
       }
@@ -3921,7 +3921,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 
   else
     {
-    fprintf(stderr, "** Unknown or malformed option \"%s\"\n", arg);
+    fatal_printf("** Unknown or malformed option \"%s\"\n", arg);
     usage();
     yield = 1;
     goto EXIT;
@@ -3946,12 +3946,12 @@ if (arg_error != NULL)
     li = strtol(arg_error, &endptr, 10);
     if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != ','))
       {
-      fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
+      fatal_printf("** \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;
       goto EXIT;
       }
     errcode = (int)li;
-    printf("Error %d: ", errcode);
+    cprintf_file(stdout, clr_api_error, "Error %d: ", errcode);
     print_error_message_file(stdout, errcode, "", "\n", TRUE);
     if (*endptr == 0) goto EXIT;
     arg_error = endptr + 1;
@@ -3993,7 +3993,7 @@ if (argc > 1 && strcmp(argv[op], "-") != 0)
   infile = fopen(argv[op], INPUT_MODE);
   if (infile == NULL)
     {
-    printf("** Failed to open \"%s\": %s\n", argv[op], strerror(errno));
+    fatal_printf("** Failed to open \"%s\": %s\n", argv[op], strerror(errno));
     yield = 1;
     goto EXIT;
     }
@@ -4008,7 +4008,7 @@ if (argc > 2)
   outfile = fopen(argv[op+1], OUTPUT_MODE);
   if (outfile == NULL)
     {
-    printf("** Failed to open \"%s\": %s\n", argv[op+1], strerror(errno));
+    fatal_printf("** Failed to open \"%s\": %s\n", argv[op+1], strerror(errno));
     yield = 1;
     goto EXIT;
     }
@@ -4109,7 +4109,7 @@ while (notdone)
     while (isspace(*p)) p++;
     if (*p != 0)
       {
-      fprintf(outfile, "** Invalid pattern delimiter '%c' (x%x).\n", *buffer,
+      cprintf(clr_test_error, "** Invalid pattern delimiter '%c' (x%x).\n", *buffer,
         *buffer);
       rc = PR_SKIP;
       }
@@ -4119,7 +4119,7 @@ while (notdone)
   else if (rc == PR_ENDIF) skipping_endif = TRUE;
   else if (rc == PR_ABEND)
     {
-    fprintf(outfile, "** pcre2test run abandoned\n");
+    cprintf(clr_test_error, "** pcre2test run abandoned\n");
     yield = 1;
     goto EXIT;
     }
@@ -4129,28 +4129,28 @@ while (notdone)
 
 if (skipping_endif)
   {
-  fprintf(outfile, "** Expected #endif\n");
+  cprintf(clr_test_error, "** Expected #endif\n");
   yield = 1;
   goto EXIT;
   }
 
-if (INTERACTIVE(infile)) fprintf(outfile, "\n");
+if (INTERACTIVE(infile)) cprintf(clr_output, "\n");
 
 if (showtotaltimes)
   {
   const char *pad = "";
-  fprintf(outfile, "--------------------------------------\n");
+  cprintf(clr_profiling, "--------------------------------------\n");
   if (timeit > 0)
     {
-    fprintf(outfile, "Total compile time %8.2f microseconds\n",
+    cprintf(clr_profiling, "Total compile time %8.2f microseconds\n",
       ((1000000 / CLOCKS_PER_SEC) * (double)total_compile_time) / timeit);
     if (total_jit_compile_time > 0)
-      fprintf(outfile, "Total JIT compile  %8.2f microseconds\n",
+      cprintf(clr_profiling, "Total JIT compile  %8.2f microseconds\n",
         ((1000000 / CLOCKS_PER_SEC) * (double)total_jit_compile_time) / \
         timeit);
     pad = "  ";
     }
-  fprintf(outfile, "Total match time %s%8.2f microseconds\n", pad,
+  cprintf(clr_profiling, "Total match time %s%8.2f microseconds\n", pad,
     ((1000000 / CLOCKS_PER_SEC) * (double)total_match_time) / timeitm);
   }
 
