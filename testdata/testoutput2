@@ -23253,6 +23253,151 @@ Failed: error -51: NULL argument passed with non-zero length
  0L 
  1L 
 
+# --------------
+# A batch of additional tests of pcre2_substitute error cases
+# --------------
+
+# Some baseline tests of the NULL-handling cases
+
+/\w+|^$/replace=<$&>,global
+    :::
+ 0: :::
+    \=null_subject
+ 1: <>
+    foo\=zero_terminate
+ 1: <foo>
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+ 2: f<oo>|<bar>
+
+/\w+|^$/replace=<$&>,global,substitute_matched
+    :::
+ 0: :::
+    \=null_subject
+ 1: <>
+    foo\=zero_terminate
+ 1: <foo>
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+ 2: f<oo>|<bar>
+
+/\w+|^$/replace=<$&>,global,null_substitute_match_data
+    :::
+ 0: :::
+    \=null_subject
+ 1: <>
+    foo\=zero_terminate
+ 1: <foo>
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+ 2: f<oo>|<bar>
+
+/\w+|^$/replace=<$&>,global,substitute_matched,null_substitute_match_data
+    :::
+Failed: error -51: NULL argument passed with non-zero length
+    \=null_subject
+Failed: error -51: NULL argument passed with non-zero length
+    foo\=zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    \=null_subject,zero_terminate
+Failed: error -51: NULL argument passed with non-zero length
+    foo|bar\=offset=1
+Failed: error -51: NULL argument passed with non-zero length
+
+# Now some NULL context tests
+
+/\w+|^$/replace=<$&>,global
+    :::\=null_context
+ 0: :::
+    foo\=null_context
+ 1: <foo>
+    :::\=null_context,null_substitute_match_data
+ 0: :::
+    foo\=null_context,null_substitute_match_data
+ 1: <foo>
+    :::\=null_context,substitute_matched
+ 0: :::
+    foo\=null_context,substitute_matched
+ 1: <foo>
+    :::\=null_context,null_substitute_match_data,substitute_matched
+Failed: error -51: NULL argument passed with non-zero length
+    foo\=null_context,null_substitute_match_data,substitute_matched
+Failed: error -51: NULL argument passed with non-zero length
+
+# Failed matches: no-match; partial; other failure (callout-triggered)
+
+/abc/replace=yy
+    zABCz
+ 0: zABCz
+    zABCz\=substitute_matched
+ 0: zABCz
+
+/abc/
+    ab\=replace=yy,partial_hard
+Failed: error -34: bad option value
+    ab\=replace=yy,partial_hard,substitute_matched
+Failed: error -34: bad option value
+
+/(?C1)abc/replace=yy
+    zabcz\=callout_error=1
+--->zabcz
+  1  ^        a
+Failed: error -37: callout error code
+    zabcz\=callout_error=1,substitute_matched
+--->zabcz
+  1  ^        a
+Failed: error -37: callout error code
+
+# Exercise PCRE2_ERROR_DIFFSUBSSUBJECT branches
+
+# Changing the length is always an error
+# (using PCRE2_ZERO_TERMINATED but with different length strings also counts)
+# Using PCRE2_ZERO_TERMINATED vs a concrete length doesn't count as changing the length
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo\=substitute_subject=foo
+ 1: <foo>
+    foo\=substitute_subject=foo,copy_matched_subject
+ 1: <foo>
+    foo\=substitute_subject=foo,zero_terminate
+ 1: <foo>
+    foo\=substitute_subject=f
+Failed: error -72: substitute subject differs from prior match call
+    foo\=substitute_subject=f,copy_matched_subject
+Failed: error -72: substitute subject differs from prior match call
+    foo\=substitute_subject=f,zero_terminate
+Failed: error -72: substitute subject differs from prior match call
+    \
+ 1: <>
+    \=copy_matched_subject
+ 1: <>
+    \=zero_terminate
+ 1: <>
+    \=null_subject
+ 1: <>
+    \=null_subject,copy_matched_subject
+ 1: <>
+
+# Keeping the length the same, the offset the same, and the pointer the same
+# Is ok, even if the contents DIFFER
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=F|OOBAR
+ 2: F<|O><OBAR>
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,zero_terminate
+ 2: F<|O><OBAR>
+
+# With copy_matched_subject however we are able to detect the mismatch
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=foo|bar,copy_matched_subject
+ 2: f<oo>|<bar>
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject
+Failed: error -72: substitute subject differs from prior match call
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject,zero_terminate
+Failed: error -72: substitute subject differs from prior match call
+
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

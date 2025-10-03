@@ -175,7 +175,8 @@ else
 if (rc > (int)oveccount)
   rc = 0;
 match_data->code = re;
-match_data->subject = (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)? subject : NULL;
+match_data->subject =
+  (rc >= 0 || rc == PCRE2_ERROR_NOMATCH || rc == PCRE2_ERROR_PARTIAL)? subject : NULL;
 match_data->subject_length = length;
 match_data->start_offset = start_offset;
 match_data->rc = rc;
@@ -184,6 +185,7 @@ match_data->leftchar = 0;
 match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
 match_data->matchedby = PCRE2_MATCHEDBY_JIT;
+match_data->options = options;
 
 #if defined(__has_feature)
 #if __has_feature(memory_sanitizer)

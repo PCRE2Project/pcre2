@@ -8117,4 +8117,95 @@ a)"xI
 /(.?)/
     \=null_subject,copy=0,copy=1,get=0,get=1,getall
 
+# --------------
+# A batch of additional tests of pcre2_substitute error cases
+# --------------
+
+# Some baseline tests of the NULL-handling cases
+
+/\w+|^$/replace=<$&>,global
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+/\w+|^$/replace=<$&>,global,substitute_matched
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+/\w+|^$/replace=<$&>,global,null_substitute_match_data
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+/\w+|^$/replace=<$&>,global,substitute_matched,null_substitute_match_data
+    :::
+    \=null_subject
+    foo\=zero_terminate
+    \=null_subject,zero_terminate
+    foo|bar\=offset=1
+
+# Now some NULL context tests
+
+/\w+|^$/replace=<$&>,global
+    :::\=null_context
+    foo\=null_context
+    :::\=null_context,null_substitute_match_data
+    foo\=null_context,null_substitute_match_data
+    :::\=null_context,substitute_matched
+    foo\=null_context,substitute_matched
+    :::\=null_context,null_substitute_match_data,substitute_matched
+    foo\=null_context,null_substitute_match_data,substitute_matched
+
+# Failed matches: no-match; partial; other failure (callout-triggered)
+
+/abc/replace=yy
+    zABCz
+    zABCz\=substitute_matched
+
+/abc/
+    ab\=replace=yy,partial_hard
+    ab\=replace=yy,partial_hard,substitute_matched
+
+/(?C1)abc/replace=yy
+    zabcz\=callout_error=1
+    zabcz\=callout_error=1,substitute_matched
+
+# Exercise PCRE2_ERROR_DIFFSUBSSUBJECT branches
+
+# Changing the length is always an error
+# (using PCRE2_ZERO_TERMINATED but with different length strings also counts)
+# Using PCRE2_ZERO_TERMINATED vs a concrete length doesn't count as changing the length
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo\=substitute_subject=foo
+    foo\=substitute_subject=foo,copy_matched_subject
+    foo\=substitute_subject=foo,zero_terminate
+    foo\=substitute_subject=f
+    foo\=substitute_subject=f,copy_matched_subject
+    foo\=substitute_subject=f,zero_terminate
+    \
+    \=copy_matched_subject
+    \=zero_terminate
+    \=null_subject
+    \=null_subject,copy_matched_subject
+
+# Keeping the length the same, the offset the same, and the pointer the same
+# Is ok, even if the contents DIFFER
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=F|OOBAR
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,zero_terminate
+
+# With copy_matched_subject however we are able to detect the mismatch
+/\w+|^$/replace=<$&>,global,substitute_matched
+    foo|bar\=offset=1,substitute_subject=foo|bar,copy_matched_subject
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject
+    foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject,zero_terminate
+
+
 # End of testinput2

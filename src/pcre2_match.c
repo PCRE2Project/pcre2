@@ -6951,6 +6951,7 @@ int rc;
 int was_zero_terminated = 0;
 const uint8_t *start_bits = NULL;
 const pcre2_real_code *re = (const pcre2_real_code *)code;
+uint32_t original_options = options;
 
 BOOL anchored;
 BOOL firstline;
@@ -7094,7 +7095,8 @@ if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
   return match_data->rc = PCRE2_ERROR_BADOFFSETLIMIT;
 
 /* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. Set the field to NULL for no match cases. */
+free the memory that was obtained. Set the field to NULL for match error
+cases. */
 
 if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {
@@ -7188,6 +7190,7 @@ if (use_jit)
     match_data, mcontext);
   if (rc != PCRE2_ERROR_JIT_BADOPTION)
     {
+    match_data->options = original_options;
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
       length = CU2BYTES(length + was_zero_terminated);
@@ -8133,6 +8136,7 @@ if (utf && end_subject != true_end_subject &&
 match_data->code = re;
 match_data->mark = mb->mark;
 match_data->matchedby = PCRE2_MATCHEDBY_INTERPRETER;
+match_data->options = original_options;
 
 /* Handle a fully successful match. Set the return code to the number of
 captured strings, or 0 if there were too many to fit into the ovector, and then
@@ -8194,7 +8198,13 @@ else if (match_partial != NULL)
 
 /* Else this is the classic nomatch case. */
 
-else match_data->rc = PCRE2_ERROR_NOMATCH;
+else
+  {
+  match_data->subject = original_subject;
+  match_data->subject_length = length;
+  match_data->start_offset = start_offset;
+  match_data->rc = PCRE2_ERROR_NOMATCH;
+  }
 
 return match_data->rc;
 }

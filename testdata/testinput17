@@ -317,4 +317,22 @@
 /(...)-(...)/jitfast
     abc-xyz\=get=2
 
+# Check the JIT sets all the correct match state for pcre2_substitute
+
+/abc/jitfast,replace=yy
+    zabcz
+    zabcz\=substitute_matched
+
+/abc/jitfast,replace=yy
+    zABCz
+    zABCz\=substitute_matched
+
+/abc/jitfast
+    ab\=replace=yy,partial_hard
+    ab\=replace=yy,partial_hard,substitute_matched
+
+/(?C1)abc/jitfast,replace=yy
+    zabcz\=callout_error=1
+    zabcz\=callout_error=1,substitute_matched
+
 # End of testinput17

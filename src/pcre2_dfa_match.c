@@ -3345,6 +3345,7 @@ int rc;
 int was_zero_terminated = 0;
 
 const pcre2_real_code *re = (const pcre2_real_code *)code;
+uint32_t original_options = options;
 
 PCRE2_UCHAR null_str[1] = { 0xcd };
 PCRE2_SPTR original_subject = subject;
@@ -3687,9 +3688,10 @@ if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
 /* Fill in fields that are always returned in the match data. */
 
 match_data->code = re;
-match_data->subject = NULL;  /* Default for no match */
+match_data->subject = NULL;  /* Default for match error */
 match_data->mark = NULL;
 match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
+match_data->options = original_options;
 
 /* Call the main matching function, looping for a non-anchored regex after a
 failed match. If not restarting, perform certain optimizations at the start of
@@ -4041,16 +4043,22 @@ for (;;)
 
   if (rc != PCRE2_ERROR_NOMATCH || anchored)
     {
+    if (rc == PCRE2_ERROR_NOMATCH) goto NOMATCH_EXIT;
+
     if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)
       {
       match_data->ovector[0] = (PCRE2_SIZE)(start_match - subject);
       match_data->ovector[1] = (PCRE2_SIZE)(end_subject - subject);
       }
-    match_data->subject_length = length;
-    match_data->start_offset = start_offset;
-    match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
-    match_data->rightchar = (PCRE2_SIZE)(mb->last_used_ptr - subject);
-    match_data->startchar = (PCRE2_SIZE)(start_match - subject);
+
+    if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
+      {
+      match_data->subject_length = length;
+      match_data->start_offset = start_offset;
+      match_data->leftchar = (PCRE2_SIZE)(mb->start_used_ptr - subject);
+      match_data->rightchar = (PCRE2_SIZE)(mb->last_used_ptr - subject);
+      match_data->startchar = (PCRE2_SIZE)(start_match - subject);
+      }
 
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
@@ -4061,10 +4069,9 @@ for (;;)
       memcpy((void *)match_data->subject, subject, length);
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
-    else
+    else if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
       {
-      if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
-        match_data->subject = original_subject;
+      match_data->subject = original_subject;
       }
     goto EXIT;
     }
@@ -4098,6 +4105,9 @@ for (;;)
   }   /* "Bumpalong" loop */
 
 NOMATCH_EXIT:
+match_data->subject = original_subject;
+match_data->subject_length = length;
+match_data->start_offset = start_offset;
 rc = PCRE2_ERROR_NOMATCH;
 
 EXIT:

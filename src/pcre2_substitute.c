@@ -753,6 +753,7 @@ BOOL replacement_only;
 BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 PCRE2_UCHAR temp[6];
 PCRE2_UCHAR null_str[1] = { 0xcd };
+PCRE2_SPTR original_subject = subject;
 PCRE2_SPTR ptr;
 PCRE2_SPTR repend = NULL;
 PCRE2_SIZE extra_needed = 0;
@@ -811,6 +812,52 @@ pointer in the match data may be NULL after a no-match. */
 use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
 replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
+if (use_existing_match && match_data == NULL) return PCRE2_ERROR_NULL;
+
+/* If an existing match is being passed in, we should check that it matches
+the passed-in subject pointer, length, and match options. We don't currently
+have a use-case for someone to match on one subject, then try and use that
+match data on a different subject. In a UTF-encoded string, a simple change
+like replacing one character for another won't preserve the code unit offsets,
+so it's hard to see, in the general case, how it would be safe or useful to
+support swapping or mutating the subject string.
+
+Similarly, using different match options between the first (external) and
+subsequent (internal, global) matches is hard to justify. */
+
+if (use_existing_match)
+  {
+  /* Return early, as the rest of the match_data may not have been
+  initialised. This duplicates and must be in sync with the check below that
+  aborts substitution on any result other than success or no-match. */
+  if (match_data->rc < 0 && match_data->rc != PCRE2_ERROR_NOMATCH)
+    return match_data->rc;
+
+  /* Not supported if the passed-in match was from the DFA interpreter. */
+  if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
+    return PCRE2_ERROR_DFA_UFUNC;
+
+  if (code != match_data->code)
+    return PCRE2_ERROR_DIFFSUBSPATTERN;
+
+  /* We want the passed-in subject strings to match. This implies the effective
+  length must match, and either: the pointers are equal (with strict matching
+  of NULL against NULL); or, the special case of PCRE2_COPY_MATCHED_SUBJECT
+  where we cannot compare pointers but we can verify the contents. */
+  if (length != match_data->subject_length ||
+      !(original_subject == match_data->subject ||
+        ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0 &&
+         (length == 0 ||
+          memcmp(subject, match_data->subject, CU2BYTES(length)) == 0))))
+    return PCRE2_ERROR_DIFFSUBSSUBJECT;
+
+  if (start_offset != match_data->start_offset)
+    return PCRE2_ERROR_DIFFSUBSOFFSET;
+
+  if ((options & ~SUBSTITUTE_OPTIONS) != match_data->options)
+    return PCRE2_ERROR_DIFFSUBSOPTIONS;
+  }
+
 /* If starting from an existing match, there must be an externally provided
 match data block. We create an internal match_data block in two cases: (a) an
 external one is not supplied (and we are not starting from an existing match);
@@ -827,7 +874,6 @@ have to be changes below. */
 if (match_data == NULL)
   {
   pcre2_general_context gcontext;
-  if (use_existing_match) return PCRE2_ERROR_NULL;
   gcontext.memctl = (mcontext == NULL)?
     ((pcre2_real_code *)code)->memctl :
     ((pcre2_real_match_context *)mcontext)->memctl;
@@ -856,6 +902,10 @@ else if (use_existing_match)
   internal_match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
   match_data = internal_match_data;
   }
+
+/* If using an internal match data, there's no need to copy the subject. */
+
+if (internal_match_data != NULL) options &= ~PCRE2_COPY_MATCHED_SUBJECT;
 
 /* Remember ovector details */
 
@@ -948,14 +998,17 @@ for (;;)
   "Progress" is measured as ovector[1] strictly advancing, or, an empty match
   after a non-empty match. */
 
+  /* LCOV_EXCL_START */
   if (subs > 0 &&
       !(ovector[1] > ovecsave[1] ||
         (ovector[1] == ovector[0] && ovecsave[1] > ovecsave[0] &&
          ovector[1] == ovecsave[1])))
     {
+    PCRE2_DEBUG_UNREACHABLE();
     rc = PCRE2_ERROR_INTERNAL_DUPMATCH;
     goto EXIT;
     }
+  /* LCOV_EXCL_STOP */
 
   ovecsave[0] = ovector[0];
   ovecsave[1] = ovector[1];
