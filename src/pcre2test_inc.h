@@ -74,6 +74,7 @@ library. */
 #define pcre2_strlen                      PCRE2_SUFFIX(pcre2_strlen_)
 #define pchars                            PCRE2_SUFFIX(pchars_)
 #define ptrunc                            PCRE2_SUFFIX(ptrunc_)
+#define pcre2_printint_clr                PCRE2_SUFFIX(pcre2_printint_clr_)
 #define config_str                        PCRE2_SUFFIX(config_str_)
 #define check_modifier                    PCRE2_SUFFIX(check_modifier_)
 #define decode_modifiers                  PCRE2_SUFFIX(decode_modifiers_)
@@ -176,12 +177,13 @@ For printing *MARK strings, a negative length is given, indicating that the
 length is in the first code unit. If handed a NULL file, this function just
 counts chars without printing (because pchar() does that). */
 
-static int pchars(PCRE2_SPTR p, ptrdiff_t length, BOOL utf, FILE *f)
+static int pchars(int clr, PCRE2_SPTR p, ptrdiff_t length, BOOL utf, FILE *f)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16
 PCRE2_SPTR end;
 uint32_t c = 0;
 int yield = 0;
+colour_begin(clr, f);
 if (length < 0) length = *p++;
 end = p + length;
 while (length-- > 0)
@@ -193,24 +195,28 @@ while (length-- > 0)
       {
       length -= rc - 1;
       p += rc;
-      yield += pchar(c, utf, f);
+      yield += pchar_raw(c, utf, f);
       continue;
       }
     }
   c = *p++;
-  yield += pchar(c, utf, f);
+  yield += pchar_raw(c, utf, f);
   }
 
+colour_end(f);
 return yield;
 
 #else
 int yield = 0;
+colour_begin(clr, f);
 if (length < 0) length = *p++;
 while (length-- > 0)
   {
   uint32_t c = *p++;
-  yield += pchar(c, utf, f);
+  yield += pchar_raw(c, utf, f);
   }
+
+colour_end(f);
 return yield;
 
 #endif
@@ -227,12 +233,14 @@ the offset to print from/to. If left is true, prints up to the offset,
 truncated; otherwise prints from the offset to the right, truncated. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-static void ptrunc_8(PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left,
+static void ptrunc_8(int clr, PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left,
   BOOL utf, FILE *f)
 {
 PCRE2_SPTR start = p + offset;
 PCRE2_SPTR end = p + offset;
 size_t printed = 0;
+
+colour_begin(clr, f);
 
 if (left)
   {
@@ -258,15 +266,19 @@ else
 if (left && start > p) fprintf(f, "...");
 for (; start < end; start++) fprintf(f, "%c", CHAR_OUTPUT(*start));
 if (!left && end < p + p_len) fprintf(f, "...");
+
+colour_end(f);
 }
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-static void ptrunc_16(PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left,
+static void ptrunc_16(int clr, PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left,
   BOOL utf, FILE *f)
 {
 PCRE2_SPTR start = p + offset;
 PCRE2_SPTR end = p + offset;
 size_t printed = 0;
+
+colour_begin(clr, f);
 
 if (left)
   {
@@ -306,14 +318,18 @@ while (start < end)
   fputc((int)c, f);
   }
 if (!left && end < p + p_len) fprintf(f, "...");
+
+colour_end(f);
 }
 
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-static void ptrunc_32(PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left,
+static void ptrunc_32(int clr, PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left,
   BOOL utf, FILE *f)
 {
 PCRE2_SPTR start = p + offset;
 PCRE2_SPTR end = p + offset;
+
+colour_begin(clr, f);
 
 if (left)
   {
@@ -338,10 +354,22 @@ while (start < end)
   fputc((int)c, f);
   }
 if (!left && end < p + p_len) fprintf(f, "...");
+
+colour_end(f);
 }
 #endif
 
+/*************************************************
+*    Print 8-bit compiled pattern (in colour)    *
+*************************************************/
 
+static void
+pcre2_printint_clr(int clr, pcre2_code *re, FILE *f, BOOL print_lengths)
+{
+  colour_begin(clr, f);
+  pcre2_printint(re, f, print_lengths);
+  colour_end(f);
+}
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
 /*************************************************

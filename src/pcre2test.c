@@ -1100,7 +1100,75 @@ is cast as needed. For long data lines it grows as necessary. */
 static size_t dbuffer_size = 1u << 14;    /* Initial size, bytes */
 static uint8_t *dbuffer = NULL;
 
+/* ------------------ Colour highlighting definitions -------------------- */
 
+/* Input text that was a comment, when echoing back to the terminal */
+static int const clr_comment = 37; /* grey */
+/* Other input text that is echoed back to the terminal */
+static int const clr_input = 32; /* green */
+/* Colour of output that represents a pcre2api error */
+static int const clr_api_error = 35; /* magenta */
+/* Colour of error messages for the test script itself
+(i.e. pcr2test error, not a pcre2api error) */
+static int const clr_test_error = 31; /* red */
+/* Colour for profiling information, which doesn't have a "right" answer */
+static int const clr_profiling = 34; /* blue */
+/* Colour of normal output */
+static int const clr_output = 39; /* default foreground colour */
+/* Colour for anything not printed with an explicit colour
+(such as a valgrind errors) */
+static int const clr_unexpected = 33; /* yellow */
+
+static BOOL colour_on;
+
+/* start a block of colour (but only if colour_on) */
+static void
+colour_begin(int clr, FILE* f)
+{
+if(f != NULL && colour_on) fprintf(f, "\x1b[%dm", clr);
+}
+
+/* end a block of colour (but only if colour_on) */
+static void
+colour_end(FILE* f)
+{
+colour_begin(clr_unexpected, f);
+}
+
+/* wraps a string ltieral in blue */
+#define PROMPT(literal) (colour_on ? "\x1b[34m" literal "\x1b[m" : literal)
+
+#include <stdarg.h>
+
+/* this is the body of a variadic function that does a fprintf to the given file
+wrapped in the given colour, rerturning the result of the inner fprintf. */
+#define COLOUR_PRINTF_BODY(colour, file, fmt) \
+  { \
+  va_list args;  \
+  int ret; \
+  colour_begin(colour, file); \
+  va_start(args, fmt);  \
+  ret = vfprintf(file, fmt, args);  \
+  va_end(args);  \
+  colour_end(file);  \
+  return ret;  \
+  }
+
+/* cprintf is like printf, but it takes a colour and writes to outfile */
+static int
+cprintf(int colour, const char* fmt, ...) COLOUR_PRINTF_BODY(colour, outfile, fmt)
+
+/* cprintf_file is like cprintf but it takes a specific file */
+static int
+cprintf_file(FILE *file, int colour, const char* fmt, ...) COLOUR_PRINTF_BODY(colour, file, fmt)
+
+/* fatal_printf is like printf, but for printing fatal errors to stdout*/
+static int
+fatal_printf(const char* fmt, ...) COLOUR_PRINTF_BODY(clr_test_error, stderr, fmt)
+
+#undef COLOUR_PRINTF_BODY
+
+/* ---------------- End of colour highlighting definitions ------------------- */
 
 /*************************************************
 *         Alternate character tables             *
@@ -1799,7 +1867,7 @@ Returns:       number of characters written
 */
 
 static int
-pchar(uint32_t c, BOOL utf, FILE *f)
+pchar_raw(uint32_t c, BOOL utf, FILE *f)
 {
 int n = 0;
 char tempbuffer[16];
@@ -1833,7 +1901,16 @@ if (f != NULL) n = fprintf(f, "\\x{%02x}", c);
 return n >= 0 ? n : 0;
 }
 
-
+/* like pchar but in colour */
+static int
+pchar(int clr, uint32_t c, BOOL utf, FILE *f)
+{
+int res;
+colour_begin(clr, f);
+res = pchar_raw(c, utf, f);
+colour_end(f);
+return res;
+}
 
 /*************************************************
 *           Expand input buffers                 *
@@ -2277,9 +2354,9 @@ Returns:      nothing
 */
 
 static void
-show_controls(uint32_t controls, uint32_t controls2, const char *before)
+show_controls(int clr, uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+cprintf(clr, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -2351,10 +2428,10 @@ Returns:      nothing
 */
 
 static void
-show_compile_options(uint32_t options, const char *before, const char *after)
+show_compile_options(int clr, uint32_t options, const char *before, const char *after)
 {
-if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+if (options == 0) cprintf(clr, "%s <none>%s", before, after);
+else cprintf(clr, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -2406,11 +2483,11 @@ Returns:      nothing
 */
 
 static void
-show_compile_extra_options(uint32_t options, const char *before,
+show_compile_extra_options(int clr, uint32_t options, const char *before,
   const char *after)
 {
-if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+if (options == 0) cprintf(clr, "%s <none>%s", before, after);
+else cprintf(clr, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) != 0) ? " allow_lookaround_bsk" : "",
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
@@ -2449,8 +2526,8 @@ Returns:      nothing
 static void
 show_optimize_flags(uint32_t flags, const char *before, const char *after)
 {
-if (flags == 0) fprintf(outfile, "%s<none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s",
+if (flags == 0) cprintf(clr_output, "%s<none>%s", before, after);
+else cprintf(clr_output, "%s%s%s%s%s%s%s",
   before,
   ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0) ? "auto_possess" : "",
   ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0 && (flags >> 1) != 0) ? "," : "",
@@ -2469,9 +2546,9 @@ else fprintf(outfile, "%s%s%s%s%s%s%s",
 /* Called for unsupported POSIX options. */
 
 static void
-show_match_options(uint32_t options)
+show_match_options(int clr, uint32_t options)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+cprintf(clr, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)? " copy_matched_subject" : "",
   ((options & PCRE2_DFA_RESTART) != 0)? " dfa_restart" : "",
@@ -2893,16 +2970,16 @@ DISPATCH(, unittest_, ());
 *************************************************/
 
 static void
-print_version(FILE *f, BOOL include_mode)
+print_version(BOOL include_mode)
 {
 char buf[VERSION_SIZE];
 config_str(PCRE2_CONFIG_VERSION, buf);
-fprintf(f, "PCRE2 version %s", buf);
+cprintf_file(stdout, clr_output, "PCRE2 version %s", buf);
 if (include_mode)
   {
-  fprintf(f, " (%d-bit)", test_mode);
+  cprintf_file(stdout, clr_output, " (%d-bit)", test_mode);
   }
-fprintf(f, "\n");
+cprintf_file(stdout, clr_output, "\n");
 }
 
 
@@ -2912,11 +2989,11 @@ fprintf(f, "\n");
 *************************************************/
 
 static void
-print_unicode_version(FILE *f)
+print_unicode_version(void)
 {
 char buf[VERSION_SIZE];
 config_str(PCRE2_CONFIG_UNICODE_VERSION, buf);
-fprintf(f, "Unicode version %s", buf);
+cprintf(clr_output, "Unicode version %s", buf);
 }
 
 
@@ -2926,11 +3003,11 @@ fprintf(f, "Unicode version %s", buf);
 *************************************************/
 
 static void
-print_jit_target(FILE *f)
+print_jit_target(void)
 {
 char buf[VERSION_SIZE];
 config_str(PCRE2_CONFIG_JITTARGET, buf);
-fputs(buf, f);
+cprintf(clr_output, "%s", buf);
 }
 
 
@@ -2986,6 +3063,7 @@ printf("  -32           use the 32-bit library\n");
 printf("  -ac           set default pattern modifier PCRE2_AUTO_CALLOUT\n");
 printf("  -AC           as -ac, but also set subject 'callout_extra' modifier\n");
 printf("  -b            set default pattern modifier 'fullbincode'\n");
+printf("  -c            show output in colour\n");
 printf("  -C            show PCRE2 compile-time options and exit\n");
 printf("  -C arg        show a specific compile-time option and exit with its\n");
 printf("                  value if numeric (else 0). The arg can be:\n");
@@ -3134,7 +3212,7 @@ is contributed code which the PCRE2 developers have no means of testing. */
 
 /* No argument for -C: output all configuration information. */
 
-print_version(stdout, FALSE);
+print_version(FALSE);
 printf("Compiled with\n");
 
 #ifdef EBCDIC
@@ -3172,7 +3250,7 @@ if (optval != 0)
   {
   printf("  Just-in-time compiler support\n");
   printf("    Architecture: ");
-  print_jit_target(stdout);
+  print_jit_target();
   printf("\n");
 
   printf("    Can allocate executable memory: ");
@@ -3528,6 +3606,19 @@ BOOL skipping_endif = FALSE;
 char *arg_subject = NULL;
 char *arg_pattern = NULL;
 char *arg_error = NULL;
+outfile = stdout;
+
+/* Before printing anything, check if we are being asked to print in colour */
+
+for (int i = 1; i < argc && argv[i][0] == '-' && argv[i][1] != 0; i++)
+  {
+    if (strcmp(argv[i], "-c") == 0)
+      {
+      colour_on = TRUE;
+      colour_end(stdout);
+      }
+  }
+
 
 /* The offsets to the options and control bits fields of the pattern and data
 control blocks must be the same so that common options and controls such as
@@ -3729,6 +3820,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     }
   else if (strcmp(arg, "-ac") == 0)  def_patctl.options |= PCRE2_AUTO_CALLOUT;
   else if (strcmp(arg, "-b") == 0)   def_patctl.control |= CTL_FULLBINCODE;
+  else if (strcmp(arg, "-c") == 0)   /* handled above */;
   else if (strcmp(arg, "-d") == 0)   def_patctl.control |= CTL_DEBUG;
   else if (strcmp(arg, "-dfa") == 0) def_datctl.control |= CTL_DFA;
   else if (strcmp(arg, "-i") == 0)   def_patctl.control |= CTL_INFO;
@@ -3792,7 +3884,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (memcmp(arg, "-v", 2) == 0 ||
            strcmp(arg, "--version") == 0)
     {
-    print_version(stdout, FALSE);
+    print_version(FALSE);
     goto EXIT;
     }
 
@@ -3924,7 +4016,7 @@ if (argc > 2)
 
 /* Output a heading line unless quiet, then process input lines. */
 
-if (!quiet) print_version(outfile, TRUE);
+if (!quiet) print_version(TRUE);
 
 #ifdef SUPPORT_PCRE2_8
 preg.re_pcre2_code = NULL;
@@ -3936,11 +4028,12 @@ while (notdone)
   const uint8_t *p;
   int rc = PR_OK;
   BOOL expectdata = have_active_pattern();
+  BOOL is_comment;
 #ifdef SUPPORT_PCRE2_8
   expectdata |= preg.re_pcre2_code != NULL;
 #endif
 
-  if (extend_inputline(infile, buffer, expectdata? "data> " : "  re> ") == NULL)
+  if (extend_inputline(infile, buffer, expectdata? PROMPT("data> ") : PROMPT("  re> ")) == NULL)
     break;
 
   /* Pre-process input lines with #if...#endif. */
@@ -3955,9 +4048,10 @@ while (notdone)
 
   /* Begin processing the line. */
 
-  if (!INTERACTIVE(infile)) fprintf(outfile, "%s", (char *)buffer);
-  fflush(outfile);
   p = buffer;
+  is_comment = p[0] == '#' && (isspace(p[1]) || p[1] == '!' || p[1] == 0);
+  if (!INTERACTIVE(infile)) cprintf(is_comment ? clr_comment : clr_input, "%s", (char *)buffer);
+  fflush(outfile);
 
   if (preprocess_only && *p != '#') continue;
 
@@ -4000,7 +4094,7 @@ while (notdone)
 
   else if (*p == '#')
     {
-    if (isspace(p[1]) || p[1] == '!' || p[1] == 0) continue;
+    if (is_comment) continue;
     rc = process_command();
     }
 
