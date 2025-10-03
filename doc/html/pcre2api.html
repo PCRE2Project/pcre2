@@ -3863,11 +3863,15 @@ As well as the usual options for <b>pcre2_match()</b>, a number of additional
 options can be set in the <i>options</i> argument of <b>pcre2_substitute()</b>.
 One such option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
 <i>match_data</i> block must be provided, and it must have already been used for
-an external call to <b>pcre2_match()</b> with the same pattern and subject
-arguments. The data in the <i>match_data</i> block (return code, offset vector)
-is then used for the first substitution instead of calling <b>pcre2_match()</b>
-from within <b>pcre2_substitute()</b>. This allows an application to check for a
-match before choosing to substitute, without having to repeat the match.
+an external call to <b>pcre2_match()</b> (or <b>pcre2_jit_match()</b>) with the
+same pattern, subject, effective subject length, start offset, and match option
+arguments (substitute-specific options can be added to the <i>options</i>
+argument). If any of these parameters is changed, <b>pcre2_substitute()</b>
+returns an error. The data in the <i>match_data</i> block (return code, offset
+vector) is used for the first substitution instead of calling
+<b>pcre2_match()</b> from within <b>pcre2_substitute()</b>. This allows an
+application to check for a match before choosing to substitute, without having
+to repeat the match.
 </p>
 <p>
 The contents of the externally supplied match data block are not changed when
@@ -3881,6 +3885,18 @@ The <i>code</i> argument is not used for matching before the first substitution
 when PCRE2_SUBSTITUTE_MATCHED is set, but it must be provided, even when
 PCRE2_SUBSTITUTE_GLOBAL is not set, because it contains information such as the
 UTF setting and the number of capturing parentheses in the pattern.
+</p>
+<p>
+When using PCRE2_SUBSTITUTE_MATCHED, you should not modify the subject string
+in between the prior call to <b>pcre2_match()</b> and <b>pcre2_substitute()</b>,
+as the substitution assumes that the passed-in ovector is compatible with the
+subject string. Although PCRE2 does verify that the subject is a pointer to the
+same buffer, it cannot in general verify whether the contents of the buffer have
+changed. For example, if the subject buffer is mutated from one valid UTF-8
+string to another valid string, of the same length in code units, the ovector
+offsets are no longer guaranteed to point to the start of a character. Beware
+that with PCRE2_SUBSTITUTE_MATCHED in UTF mode, the subject string is not
+re-scanned for UTF validity when <b>pcre2_substitute()</b> first uses it.
 </p>
 <p>
 The default action of <b>pcre2_substitute()</b> is to return a copy of the

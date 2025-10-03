@@ -97,6 +97,7 @@ library. */
 #define substitute_case_callout_function  PCRE2_SUFFIX(substitute_case_callout_function_)
 #define callout_function                  PCRE2_SUFFIX(callout_function_)
 #define copy_and_get                      PCRE2_SUFFIX(copy_and_get_)
+#define copy_substitute_string            PCRE2_SUFFIX(copy_substitute_string_)
 #define process_data                      PCRE2_SUFFIX(process_data_)
 #define init_globals                      PCRE2_SUFFIX(init_globals_)
 #define free_globals                      PCRE2_SUFFIX(free_globals_)
@@ -3006,6 +3007,7 @@ int capcount;
 uint32_t min = 0;
 uint32_t mid = 64;
 uint32_t max = UINT32_MAX;
+FILE *saved_outfile = outfile;
 
 pcre2_set_match_limit(dat_context, max);
 pcre2_set_depth_limit(dat_context, max);
@@ -3041,6 +3043,9 @@ for (;;)
 
   /* Do the appropriate match */
 
+  reset_callout_state();
+  outfile = NULL;  /* Suppress callout output during the repeated search */
+
   if ((dat_datctl.control & CTL_DFA) != 0)
     {
     stack_start = DFA_START_RWS_SIZE/1024;
@@ -3062,6 +3067,8 @@ for (;;)
     capcount = pcre2_match(compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, dat_context);
     }
+
+  outfile = saved_outfile;
 
   if (capcount == errnumber)
     {
@@ -3128,6 +3135,8 @@ int yield = 0;
 BOOL utf = (compiled_code->overall_options & PCRE2_UTF) != 0;
 (void)data_ptr;   /* Not used */
 
+if (outfile == NULL) goto YIELD;
+
 fprintf(outfile, "%2d(%d) Old %" SIZ_FORM " %" SIZ_FORM " \"",
   scb->subscount, scb->oveccount,
   scb->ovector[0], scb->ovector[1]);
@@ -3141,18 +3150,20 @@ fprintf(outfile, "\" New %" SIZ_FORM " %" SIZ_FORM " \"",
 pchars(scb->output + scb->output_offsets[0],
   scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
 
+YIELD:
+
 if (scb->subscount == dat_datctl.substitute_stop)
   {
   yield = -1;
-  fprintf(outfile, " STOPPED");
+  if (outfile != NULL) fprintf(outfile, " STOPPED");
   }
 else if (scb->subscount == dat_datctl.substitute_skip)
   {
   yield = +1;
-  fprintf(outfile, " SKIPPED");
+  if (outfile != NULL) fprintf(outfile, " SKIPPED");
   }
 
-fprintf(outfile, "\"\n");
+if (outfile != NULL) fprintf(outfile, "\"\n");
 return yield;
 }
 
@@ -3272,6 +3283,8 @@ PCRE2_SIZE current_position;
 BOOL utf = (compiled_code->overall_options & PCRE2_UTF) != 0;
 BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
 BOOL callout_where = (dat_datctl.control2 & CTL2_CALLOUT_NO_WHERE) == 0;
+
+if (outfile == NULL) goto YIELD;
 
 /* The FILE f is used for echoing the subject string if it is non-NULL. This
 happens only once in simple cases, but we want to repeat after any additional
@@ -3419,8 +3432,6 @@ if (callout_where)
   fprintf(outfile, "\n");
   }
 
-first_callout = FALSE;
-
 /* Show any mark info */
 
 if (cb->mark != last_callout_mark)
@@ -3433,24 +3444,30 @@ if (cb->mark != last_callout_mark)
     pchars(cb->mark - 1, -1, utf, outfile);
     putc('\n', outfile);
     }
-  last_callout_mark = cb->mark;
   }
 
-/* Show callout data */
+YIELD:
+
+/* Keep count */
+
+first_callout = FALSE;
+last_callout_mark = cb->mark;
+callout_count++;
+
+/* Show callout data if that determines the return code */
 
 if (callout_data_ptr != NULL)
   {
   int callout_data = *((int32_t *)callout_data_ptr);
   if (callout_data != 0)
     {
-    fprintf(outfile, "Callout data = %d\n", callout_data);
+    if (outfile != NULL) fprintf(outfile, "Callout data = %d\n", callout_data);
     return callout_data;
     }
   }
 
-/* Keep count and give the appropriate return code */
-
-callout_count++;
+/* Otherwise, the callout_error and callout_fail settings provide the return
+code. */
 
 if (cb->callout_number == dat_datctl.cerror[0] &&
     callout_count >= dat_datctl.cerror[1])
@@ -3681,6 +3698,75 @@ if ((dat_datctl.control & CTL_GETALL) != 0)
   }
 
 return TRUE;
+}
+
+
+
+/*************************************************
+*          Copy a substitution string            *
+*************************************************/
+
+/* Copy one of the string arguments to pcre2_substitute() from its uint8_t
+test input to the appropriate width buffer.
+*/
+
+static void
+copy_substitute_string(BOOL utf, uint8_t *input, PCRE2_UCHAR *output,
+  PCRE2_SIZE *outlen)
+{
+uint32_t c;
+PCRE2_UCHAR *output_start = output;
+PCRE2_SIZE erroroffset;
+BOOL badutf = FALSE;
+
+/* When copying the replacement string to a buffer of the appropriate width, no
+escape processing is done.
+
+In UTF mode, check for an invalid UTF-8 input string, and if it is invalid, just
+copy its code units without UTF interpretation. This provides a means of
+checking that an invalid string is detected. Otherwise, UTF-8 can be used to
+include wide characters in a replacement. */
+
+if (utf) badutf = valid_utf(input, strlen((const char *)input), &erroroffset);
+
+/* Not UTF or invalid UTF-8: just copy the code units. */
+
+if (!utf || badutf)
+  {
+  while ((c = *input++) != 0)
+    {
+#if defined(EBCDIC) && !EBCDIC_IO
+    c = ascii_to_ebcdic(c);
+#endif
+    *output++ = c;
+    }
+  }
+
+/* Valid UTF-8 replacement string */
+
+else while ((c = *input++) != 0)
+  {
+  if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, input); }
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+  output += ord_to_utf8(c, output);
+
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+  if (c >= 0x10000u)
+    {
+    c-= 0x10000u;
+    *output++ = 0xd800 | (c >> 10);
+    *output++ = 0xdc00 | (c & 0x3ff);
+    }
+  else *output++ = c;
+
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+  *output++ = c;
+#endif
+  }
+
+*output = 0;
+*outlen = output - output_start;
 }
 
 
@@ -4192,6 +4278,22 @@ if (dat_datctl.replacement[0] != 0)
 
   if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
     fprintf(outfile, "** Ignored with replacement text: allcaptures\n");
+
+  if (dat_datctl.substitute_subject[0] != 0 &&
+      (dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)
+    {
+    fprintf(outfile, "** substitute_subject requires substitute_matched.\n");
+    return PR_OK;
+    }
+  }
+
+else
+  {
+  if (dat_datctl.substitute_subject[0] != 0)
+    {
+    fprintf(outfile, "** substitute_subject requires replacement text.\n");
+    return PR_OK;
+    }
   }
 
 /* Warn for modifiers that are ignored for DFA. */
@@ -4417,6 +4519,19 @@ if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_stack == NULL)
    pcre2_jit_stack_assign(dat_context, jit_callback, NULL);
    }
 
+/* Set up the match callout. The pattern remains in pbuffer8/16/32 after
+compilation, for use by the callout. */
+
+if ((dat_datctl.control & CTL_CALLOUT_NONE) == 0)
+  {
+  pcre2_set_callout(dat_context, callout_function,
+    (void *)(&dat_datctl.callout_data));
+  }
+else
+  {
+  pcre2_set_callout(dat_context, NULL, NULL);  /* No callout */
+  }
+
 /* Adjust match_data according to size of offsets required. A size of zero
 causes a new match data block to be obtained that exactly fits the pattern. */
 
@@ -4461,9 +4576,13 @@ oveccount = pcre2_get_ovector_count(match_data);
      } \
   while (0)
 
-/* Replacement processing is ignored for DFA matching. */
+/* Replacement processing is ignored for DFA matching. Allow this for
+replacements with PCRE2_SUBSTITUTE_MATCHED, even though it won't work, in order
+to exercise the error condition. */
 
-if (dat_datctl.replacement[0] != 0 && (dat_datctl.control & CTL_DFA) != 0)
+if (dat_datctl.replacement[0] != 0 &&
+    (dat_datctl.control & CTL_DFA) != 0 &&
+    (dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)
   {
   fprintf(outfile, "** Ignored for DFA matching: replace\n");
   dat_datctl.replacement[0] = 0;
@@ -4477,15 +4596,16 @@ if (dat_datctl.replacement[0] != 0)
   {
   int rc;
   uint8_t *pr;
-  // TODO Move these buffers to the heap and use Valgrind macros to ensure no overread
+  // TODO Move these first two buffers to the heap and use Valgrind macros to ensure no overread
   PCRE2_UCHAR rbuffer[REPLACE_BUFFSIZE];
   PCRE2_UCHAR nbuffer[REPLACE_BUFFSIZE];
+  PCRE2_UCHAR sbuffer[SUBSTITUTE_SUBJECT_MODSIZE]; /* Staging, not seen by pcre2_substitute() */
   PCRE2_UCHAR *rbptr;
-  PCRE2_UCHAR *r;
+  PCRE2_UCHAR *sbptr;
   uint32_t xoptions;
   uint32_t emoption;  /* External match option */
-  PCRE2_SIZE j, rlen, nsize, nsize_input, erroroffset;
-  BOOL badutf = FALSE;
+  PCRE2_SIZE j, rlen, nsize, nsize_input, slen;
+  pcre2_match_data *smatch_data;
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be (relevant only when "allvector" is specified). */
@@ -4507,14 +4627,24 @@ if (dat_datctl.replacement[0] != 0)
 
   if (emoption != 0)
     {
-    if ((pat_patctl.control & CTL_JITFAST) != 0)
+    reset_callout_state();
+    if ((dat_datctl.control & CTL_DFA) != 0)
       {
-      rc = pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
+      if (dfa_workspace == NULL)
+        dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
+      dfa_workspace[0] = -1;
+      (void)pcre2_dfa_match(compiled_code, pp, arg_ulen,
+        dat_datctl.offset, dat_datctl.options, match_data,
+        use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
+      }
+    else if ((pat_patctl.control & CTL_JITFAST) != 0)
+      {
+      (void)pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
         dat_datctl.options, match_data, use_dat_context);
       }
     else
       {
-      rc = pcre2_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
+      (void)pcre2_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
         dat_datctl.options, match_data, use_dat_context);
       }
     }
@@ -4535,7 +4665,6 @@ if (dat_datctl.replacement[0] != 0)
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_UNSET_EMPTY) == 0)? 0 :
                 PCRE2_SUBSTITUTE_UNSET_EMPTY);
 
-  r = rbuffer;
   pr = dat_datctl.replacement;
 
   /* If the replacement starts with '[<number>]' we interpret that as length
@@ -4560,56 +4689,58 @@ if (dat_datctl.replacement[0] != 0)
     nsize = n;
     }
 
-  /* Now copy the replacement string to a buffer of the appropriate width. No
-  escape processing is done for replacements. In UTF mode, check for an invalid
-  UTF-8 input string, and if it is invalid, just copy its code units without
-  UTF interpretation. This provides a means of checking that an invalid string
-  is detected. Otherwise, UTF-8 can be used to include wide characters in a
-  replacement. */
+  /* Now copy the rest of the replacement string to the buffer. */
 
-  if (utf) badutf = valid_utf(pr, strlen((const char *)pr), &erroroffset);
-
-  /* Not UTF or invalid UTF-8: just copy the code units. */
-
-  if (!utf || badutf)
-    {
-    while ((c = *pr++) != 0)
-      {
-#if defined(EBCDIC) && !EBCDIC_IO
-      c = ascii_to_ebcdic(c);
-#endif
-      *r++ = c;
-      }
-    }
-
-  /* Valid UTF-8 replacement string */
-
-  else while ((c = *pr++) != 0)
-    {
-    if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, pr); }
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-    r += ord_to_utf8(c, r);
-
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-    if (c >= 0x10000u)
-      {
-      c-= 0x10000u;
-      *r++ = 0xd800 | (c >> 10);
-      *r++ = 0xdc00 | (c & 0x3ff);
-      }
-    else *r++ = c;
-
-#elif PCRE2_CODE_UNIT_WIDTH == 32
-    *r++ = c;
-#endif
-    }
-
-  *r = 0;
+  copy_substitute_string(utf, pr, rbuffer, &rlen);
   if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
     rlen = PCRE2_ZERO_TERMINATED;
-  else
-    rlen = r - rbuffer;
+  rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
+
+  /* If the substitute_subject modifier is set, then we will modify the
+  subject in between the call to pcre2_match and pcre2_substitute. */
+
+  sbptr = pp;
+  slen = arg_ulen;
+
+  if (dat_datctl.substitute_subject[0] != 0)
+    {
+    copy_substitute_string(utf, dat_datctl.substitute_subject,
+      sbuffer, &slen);
+
+    /* The buffer pointed to by pp has exactly the correct length (butted up
+    against the end of the memory allocation) so it would be possible but
+    awkward to extend the subject. However, since pcre2_substitute() won't allow
+    changing the length of the subject, and also early-exits if the subject
+    pointer changes, we can test all the branches just by supporting shrinking
+    the subject. */
+    if (slen > ulen)
+      {
+      fprintf(outfile, "** substitute_subject is longer than match subject buffer\n");
+      return PR_OK;
+      }
+
+    /* In the null-subject case, there's no need to copy. */
+    if (pp != NULL)
+      {
+      memcpy(pp, sbuffer, CU2BYTES(slen));
+      if (slen < ulen) ((PCRE2_UCHAR *)pp)[slen] = 0;
+
+      /* If we shrank the subject, adjust the Valgrind readable area. */
+#ifdef SUPPORT_VALGRIND
+      c = ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1 : 0;
+      VALGRIND_MAKE_MEM_NOACCESS((uint8_t *)pp + CU2BYTES(slen+c),
+        (dbuffer + dbuffer_size) - ((uint8_t *)pp + CU2BYTES(slen+c)));
+#endif
+      }
+
+    if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
+      slen = PCRE2_ZERO_TERMINATED;
+    }
+
+  /* Set up the required callouts and context, and call pcre2_substitute(). */
+
+  smatch_data = ((CTL2_NULL_SUBSTITUTE_MATCH_DATA & dat_datctl.control2) == 0)?
+    match_data : NULL;
 
   if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0)
     {
@@ -4629,16 +4760,11 @@ if (dat_datctl.replacement[0] != 0)
     pcre2_set_substitute_case_callout(dat_context, NULL, NULL);  /* No callout */
     }
 
-  /* There is a special option to set the replacement to NULL in order to test
-  that case. */
-
-  rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
-
   if (malloc_testing) CLEAR_HEAP_FRAMES();
-  mallocs_called = 0;
+  reset_callout_state();
   nsize_input = nsize;
-  rc = pcre2_substitute(compiled_code, pp, arg_ulen, dat_datctl.offset,
-    dat_datctl.options|xoptions, match_data, use_dat_context,
+  rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
+    dat_datctl.options|xoptions, smatch_data, use_dat_context,
     rbptr, rlen, nbuffer, &nsize);
 
   /* For malloc testing, we repeat the substitution. */
@@ -4647,14 +4773,17 @@ if (dat_datctl.replacement[0] != 0)
     {
     for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
       {
+      FILE *saved_outfile = outfile;
       CLEAR_HEAP_FRAMES();
-
+      reset_callout_state();
       mallocs_until_failure = i;
+      outfile = NULL;  /* Suppress callout output during the malloc repetitions */
       nsize = nsize_input;
-      rc = pcre2_substitute(compiled_code, pp, arg_ulen, dat_datctl.offset,
-        dat_datctl.options|xoptions, match_data, use_dat_context,
+      rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
+        dat_datctl.options|xoptions, smatch_data, use_dat_context,
         rbptr, rlen, nbuffer, &nsize);
       mallocs_until_failure = INT_MAX;
+      outfile = saved_outfile;
 
       if (i < target_mallocs && rc != PCRE2_ERROR_NOMEMORY)
         {
@@ -4743,11 +4872,15 @@ for (gmatched = 0;; gmatched++)
     {
     int i;
     clock_t start_time, time_taken;
+    FILE *saved_outfile = outfile;
+
+    outfile = NULL;  /* Suppress callout output during the timing repetitions */
 
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
       if ((dat_datctl.options & PCRE2_DFA_RESTART) != 0)
         {
+        outfile = saved_outfile;
         fprintf(outfile, "** Timing DFA restarts is not supported\n");
         return PR_ABEND;
         }
@@ -4784,6 +4917,8 @@ for (gmatched = 0;; gmatched++)
         }
       }
     total_match_time += (time_taken = clock() - start_time);
+
+    outfile = saved_outfile;
     fprintf(outfile, "Match time %7.4f microseconds\n",
       ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeitm);
     }
@@ -4819,29 +4954,14 @@ for (gmatched = 0;; gmatched++)
       }
     }
 
-  /* Otherwise just run a single match, setting up a callout if required (the
-  default). The pattern remains in pbuffer8/16/32 after compilation, for use
-  by callouts. */
+  /* Otherwise just run a single match. */
 
   else
     {
-    if ((dat_datctl.control & CTL_CALLOUT_NONE) == 0)
-      {
-      pcre2_set_callout(dat_context, callout_function,
-        (void *)(&dat_datctl.callout_data));
-      first_callout = TRUE;
-      last_callout_mark = NULL;
-      callout_count = 0;
-      }
-    else
-      {
-      pcre2_set_callout(dat_context, NULL, NULL);  /* No callout */
-      }
-
     /* Run a single DFA or NFA match. */
 
     if (malloc_testing) CLEAR_HEAP_FRAMES();
-    mallocs_called = 0;
+    reset_callout_state();
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
       if (dfa_workspace == NULL)
@@ -4878,9 +4998,13 @@ for (gmatched = 0;; gmatched++)
       {
       for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
         {
+        FILE *saved_outfile = outfile;
+
         CLEAR_HEAP_FRAMES();
+        reset_callout_state();
 
         mallocs_until_failure = i;
+        outfile = NULL;  /* Suppress callout output during the malloc repetitions */
 
         if ((dat_datctl.control & CTL_DFA) != 0)
           {
@@ -4901,6 +5025,7 @@ for (gmatched = 0;; gmatched++)
           }
 
         mallocs_until_failure = INT_MAX;
+        outfile = saved_outfile;
 
         if (capcount == 0)
           capcount = dat_datctl.oveccount;
@@ -5457,6 +5582,7 @@ PCRE2_UCHAR capture_pattern[] = {
   CHAR_RIGHT_PARENTHESIS, CHAR_Z, 0 };
 PCRE2_UCHAR subject_abcz[] = {
   CHAR_A, CHAR_B, CHAR_C, CHAR_Z, 0 };
+PCRE2_UCHAR substitute_subject[6];
 PCRE2_UCHAR name_n[] = { CHAR_N, 0 };
 #ifdef BITOTHER
 G(pcre2_code_,BITOTHER) *bitother_code = NULL;
@@ -5474,6 +5600,8 @@ const uint8_t *test_tables = NULL;
 PCRE2_UCHAR copy_buf[64];
 PCRE2_UCHAR **stringlist;
 PCRE2_SIZE *lengthslist;
+PCRE2_UCHAR replace_buf[64];
+pcre2_code *subs_other_code = NULL;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 memset(&test_preg, 0, sizeof(test_preg));
@@ -5974,6 +6102,82 @@ ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_byname
 rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
 ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_bynumber(no match)");
 
+/* ------------- pcre2_substitute with PCRE2_SUBSTITUTE_MATCHED ------------ */
+
+/* There are some specific edge cases here that would be a pain to exercise via
+the standard pcre2test modifiers. The documentation is clear that when you do
+a match externally and pass it in with PCRE2_SUBSTITUTE_MATCHED, you must also
+pass the same match options. Here we test what happens when you don't. */
+
+pcre2_code_free(test_compiled_code);
+test_compiled_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, &erroroffset, NULL);
+ASSERT(test_compiled_code != NULL, "test pattern compilation");
+
+subs_other_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
+  0, &errorcode, &erroroffset, NULL);
+ASSERT(subs_other_code != NULL, "test pattern compilation");
+
+pcre2_match_data_free(test_match_data);
+test_match_data = pcre2_match_data_create_from_pattern(
+  test_compiled_code, NULL);
+ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
+
+memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+rc = pcre2_match(test_compiled_code, substitute_subject, PCRE2_ZERO_TERMINATED,
+  0, 0, test_match_data, NULL);
+ASSERT(rc == 1, "pcre2_match()");
+
+/* Baseline, should succeed */
+memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+sizeval = sizeof(replace_buf)/sizeof(*replace_buf);
+rc = pcre2_substitute(test_compiled_code, substitute_subject,
+  PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+  NULL, 0, replace_buf, &sizeval);
+ASSERT(rc == 1, "pcre2_substitute(baseline)");
+
+/* Move the subject pointer, but keep the contents and length the same */
+memcpy(substitute_subject+1, subject_abcz, sizeof(subject_abcz));
+sizeval = sizeof(replace_buf)/sizeof(*replace_buf);
+rc = pcre2_substitute(test_compiled_code, substitute_subject+1,
+  PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+  NULL, 0, replace_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_DIFFSUBSSUBJECT, "pcre2_substitute(moved)");
+
+/* Keep the subject pointer the same but extend its length */
+memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+substitute_subject[4] = CHAR_Y;
+substitute_subject[5] = 0;
+sizeval = sizeof(replace_buf)/sizeof(*replace_buf);
+rc = pcre2_substitute(test_compiled_code, substitute_subject,
+  PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+  NULL, 0, replace_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_DIFFSUBSSUBJECT, "pcre2_substitute(extended)");
+
+/* Change the offset */
+memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+sizeval = sizeof(replace_buf)/sizeof(*replace_buf);
+rc = pcre2_substitute(test_compiled_code, substitute_subject,
+  PCRE2_ZERO_TERMINATED, 1, PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+  NULL, 0, replace_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_DIFFSUBSOFFSET, "pcre2_substitute(offset)");
+
+/* Change the options */
+memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+sizeval = sizeof(replace_buf)/sizeof(*replace_buf);
+rc = pcre2_substitute(test_compiled_code, substitute_subject,
+  PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED | PCRE2_NOTEMPTY,
+  test_match_data, NULL, NULL, 0, replace_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_DIFFSUBSOPTIONS, "pcre2_substitute(options)");
+
+/* Change the pattern */
+memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+sizeval = sizeof(replace_buf)/sizeof(*replace_buf);
+rc = pcre2_substitute(subs_other_code, substitute_subject,
+  PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+  NULL, 0, replace_buf, &sizeval);
+ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
+
 /* ------------------------------------------------------------------------- */
 
 #undef ASSERT
@@ -5989,6 +6193,7 @@ if (test_compiled_code != NULL) pcre2_code_free(test_compiled_code);
 #ifdef BITOTHER
 if (bitother_code != NULL) G(pcre2_code_free_,BITOTHER)(bitother_code);
 #endif
+if (subs_other_code != NULL) pcre2_code_free(subs_other_code);
 
 if (test_match_data != NULL) pcre2_match_data_free(test_match_data);
 
@@ -6063,6 +6268,7 @@ if (failure != NULL)
 #undef substitute_case_callout_function
 #undef callout_function
 #undef copy_and_get
+#undef copy_substitute_string
 #undef process_data
 #undef init_globals
 #undef free_globals

@@ -1194,7 +1194,8 @@ process.
       heapframes_size             show match data heapframes size
       jitstack=&#60;n&#62;                set size of JIT stack
       mark                        show mark values
-      replace=&#60;string&#62;            specify a replacement string
+      null_substitute_match_data  substitute with NULL match data
+      replace=&#60;str&#62;               specify a replacement string
       startchar                   show starting character when relevant
       substitute_callout          use substitution callouts
       substitute_case_callout     use substitution case callouts
@@ -1369,11 +1370,12 @@ pattern, but can be overridden by modifiers on the subject.
       null_context               match with a NULL context
       null_replacement           substitute with NULL replacement
       null_subject               match with NULL subject
+      null_substitute_match_data substitute with NULL match data
       offset=&#60;n&#62;                 set starting offset
       offset_limit=&#60;n&#62;           set offset limit
       ovector=&#60;n&#62;                set size of output vector
       recursion_limit=&#60;n&#62;        obsolete synonym for depth_limit
-      replace=&#60;string&#62;           specify a replacement string
+      replace=&#60;str&#62;              specify a replacement string
       startchar                  show startchar when relevant
       startoffset=&#60;n&#62;            same as offset=&#60;n&#62;
       substitute_callout         use substitution callouts
@@ -1385,6 +1387,7 @@ pattern, but can be overridden by modifiers on the subject.
       substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
       substitute_skip=&#60;n&#62;        skip substitution number n
       substitute_stop=&#60;n&#62;        skip substitution number n and greater
+      substitute_subject=&#60;str&#62;   specify a different subject for substitution
       substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
       substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
       zero_terminate             pass the subject as zero-terminated
@@ -1615,6 +1618,13 @@ for the trailing zero) as part of the error message. For example:
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
 <b>pcre2_substitute()</b>.
+<br>
+<br>
+The <b>substitute_subject</b> modifier may be used to test the use of the PCRE2
+API, in which a client calls <b>pcre2_match()</b> followed by <b>pcre2_substitute()</b>
+with PCRE2_SUBSTITUTE_MATCHED, but the client performs an unexpected and
+unsupported modification of the subject buffer in-place, in between the match
+and substitution.
 </p>
 <h3>
 Testing substitute callouts

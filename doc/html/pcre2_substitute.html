@@ -91,8 +91,9 @@ PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
 </p>
 <p>
 If PCRE2_SUBSTITUTE_MATCHED is set, <i>match_data</i> must be non-NULL; its
-contents must be the result of a call to <b>pcre2_match()</b> using the same
-pattern and subject.
+contents must be the result of a call to <b>pcre2_match()</b> (or
+<b>pcre2_jit_match()</b>) using the same pattern, subject pointer, effective
+subject length, start offset, and match options.
 </p>
 <p>
 The function returns the number of substitutions, which may be zero if there

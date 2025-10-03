@@ -5255,4 +5255,12 @@
 /(.?)/
     \=null_subject,copy=0,get=0,getall
 
+# --------------
+
+# Verify pcre2_substitute is blocked for DFA
+
+/abc/
+    abc\=replace=xyz
+    abc\=replace=xyz,substitute_matched
+
 # End of testinput6
