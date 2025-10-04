@@ -2533,6 +2533,7 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
 
   // TODO No valgrind guards for out-of-bounds read in pcre2_pattern_convert(),
   // nor do we appear to have a facility for testing zero-terminated patterns here.
+  // Can we use something other than zero as a sentinel to allow testing empty inputs?
 
   if (pat_patctl.convert_length != 0)
     {
