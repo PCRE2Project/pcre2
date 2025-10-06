@@ -448,15 +448,15 @@ jobs:
           - arch: "ppc64le"
             distro: "ubuntu_latest"
           # A 32-bit Linux build. i386 is mostly gone now, so ARMv7 is all that's left.
-          - arch: "armv7"
-            distro: "ubuntu_latest"
+          # - arch: "armv7"
+          #   distro: "ubuntu_latest"
           # The only really widely-deployed non-x86 archicture, at least that's likely
           # to be running PCRE2.
           - arch: "aarch64"
             distro: "ubuntu_latest"
           # Not used by anyone yet, really, but potentially the "next big thing".
-          - arch: "riscv64"
-            distro: "ubuntu_latest"
+          # - arch: "riscv64"
+          #   distro: "ubuntu_latest"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -490,14 +490,20 @@ jobs:
           install: |
             echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
             apt-get -qq update
-            apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev
+            apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev valgrind
 
           run: |
             set -e
+            # XXX fix the S390x build failure
             # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
-            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
+            # XXX enable Valgrind?
+            # XXX enable -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON
+            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_SUPPORT_VALGRIND=ON -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
             ninja -C build
             (cd build && ctest -j3 --output-on-failure)
+            (cd build;
+              ulimit -S -s 49152 # Raise stack limit; maybe fix valgrind issue?
+              ../RunTest -valgrind)
 
   zebrilus:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".

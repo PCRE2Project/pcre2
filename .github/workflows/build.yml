@@ -14,6 +14,8 @@ on:
         - macos
         - windows
         - freebsd
+        - openbsd
+        - omnios
         - solaris
         - zos
         - distcheck
@@ -343,6 +345,127 @@ jobs:
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
+  # XXX get rid of : strcpy, strcat, sprintf
+  # XXX merge with FreeBSD block above
+  openbsd:
+    name: OpenBSD
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'openbsd')) ||
+      github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        uses: vmactions/openbsd-vm@1e7cc4fa7727646d3cf5921289b1f5c9d1a88f3c # v1.2.0
+        with:
+          envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
+          usesh: true
+          prepare: |
+            set -e
+            pkg_add cmake || true # XXX just testing
+
+          run: |
+            set -e
+
+            echo "== env =="
+            env # XXX see what malloc options we have
+
+            # XXX see what vm.malloc_conf we have
+            echo "== vm.malloc_conf =="
+            sysctl vm.malloc_conf
+
+            export MALLOC_OPTIONS="USRJGFC>>" # XXX just testing
+
+            cp -rp . ../build-autoconf
+            cp -rp . ../build-cmake
+
+            echo "== Autoconf =="
+            cd ../build-autoconf
+
+            # XXX removed: --enable-jit
+            ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
+            make -j3
+            make check || (cat ./test-suite.log; false)
+
+            make install "DESTDIR=`pwd`/install-dir"
+            maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd || true # XXX just testing
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/ || true # XXX just testing
+
+            echo "== CMake =="
+            cd ../build-cmake
+
+            # XXX removed: -DPCRE2_SUPPORT_JIT=ON
+            cmake $CMAKE_FLAGS -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cd build
+            make -j3
+            ctest -j3 --output-on-failure
+            cmake --install . --prefix install-dir
+            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd || true # XXX just testing
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/ || true # XXX just testing
+
+  # XXX one-off testing, delete
+  omnios:
+    name: OmniOS
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'omnios')) ||
+      github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        uses: vmactions/omnios-vm@c31844c7abe722cd7c97df82cab1f1fab1e5339f # v1.1.1
+        with:
+          envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
+          usesh: true
+          prepare: |
+            set -e
+            pkg install build-essential developer/cmake
+
+          run: |
+            set -e
+
+            cp -rp . ../build-autoconf
+            cp -rp . ../build-cmake
+
+            # echo "== Autoconf =="
+            # cd ../build-autoconf
+
+            # ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
+            # make
+            # make check || (cat ./test-suite.log; false)
+
+            # make install "DESTDIR=`pwd`/install-dir"
+            # maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris || true # XXX just testing
+            # maint/RunSymbolTest install-dir/usr/local/lib/ maint/ || true # XXX just testing
+
+            echo "== CMake =="
+            cd ../build-cmake
+
+            cmake $CMAKE_FLAGS --debug-trycompile -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cd build
+            ls -lR CMakeFiles/
+            for i in `find CMakeFiles/CMakeScratch -type f`; do echo "---- $i ----"; cat $i; done
+            echo "== end of try compile files =="
+            make
+            ctest -j3 --output-on-failure
+            cmake --install . --prefix install-dir
+            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris || true # XXX just testing
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/ || true # XXX just testing
+
   solaris:
     name: Solaris
     runs-on: ubuntu-latest
@@ -420,7 +543,7 @@ jobs:
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
 
-            CC="cc -m64" cmake $CMAKE_FLAGS -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            CC="cc -m64" cmake $CMAKE_FLAGS -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
             ctest -j3 --output-on-failure
