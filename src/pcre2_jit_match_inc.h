@@ -107,6 +107,7 @@ return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 pcre2_real_code *re = (pcre2_real_code *)code;
 executable_functions *functions = (executable_functions *)re->executable_jit;
 pcre2_jit_stack *jit_stack;
+PCRE2_SIZE *ovector = match_data->ovector;
 uint32_t oveccount = match_data->oveccount;
 uint32_t max_oveccount;
 union {
@@ -171,6 +172,17 @@ if (jit_stack != NULL)
   }
 else
   rc = jit_machine_stack_exec(&arguments, convert_executable_func.call_executable_func);
+
+/* XXXXXXXXXX HACK
+Surely there's a better place to put this? I've just stuffed it in here, badly
+I guess it should go into the epilogue of the JIT-generated code somehow,
+conditionally on PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK? */
+if (rc >= 0 &&
+    (ovector[0] < start_offset || ovector[0] > ovector[1]) &&
+    (re->extra_options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) == 0)
+  {
+  rc = PCRE2_ERROR_BAD_BACKSLASH_K;
+  }
 
 if (rc > (int)oveccount)
   rc = 0;

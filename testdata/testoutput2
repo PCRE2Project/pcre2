@@ -19062,7 +19062,51 @@ Failed: error 199 at offset 14: \K is not allowed in lookarounds (but see PCRE2_
 /^abc(?<!b\Kq)d/,allow_lookaround_bsk
     abcd
  0: abcd
-    
+
+# PCRE2 now also rejects sneaky cases where the \K is inside a lookaround... but
+# it's not always easy to detect this syntactically at compile-time (indeed,
+# a conditional expression could dynamically invoke \K via a subroutine, based
+# on the subject contents).
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/g,allow_lookaround_bsk
+    ab
+Start of matched string is beyond its end - displaying from end to start.
+ 0: b
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/g
+    ab
+Failed: error -75: disallowed use of \K in lookaround
+    zz
+No match
+
+/a|(?(DEFINE)(?<sneaky>\Ka))(?<=(?&sneaky))b/g,allow_lookaround_bsk
+    ab
+ 0: a
+ 0: ab
+
+/a|(?(DEFINE)(?<sneaky>\Ka))(?<=(?&sneaky))b/g
+    ab
+ 0: a
+Failed: error -75: disallowed use of \K in lookaround
+    zz
+No match
+
+/(?=.{10}(?1))x(\K){0}/
+    x1234567890
+Failed: error -75: disallowed use of \K in lookaround
+
+/(?=.{10}(.))(*scs:(1)(?2))x(\K){0}/
+    x1234567890
+Failed: error -75: disallowed use of \K in lookaround
+
+/(?=.{5}(?1))\d*(\K){0}/
+\= Totally fine - pattern does nothing bad even though \K is reachable
+    1234567890
+ 0: 67890
+\= Not fine - the subject now causes the \K to misbehave
+    abcdefgh
+Failed: error -75: disallowed use of \K in lookaround
+
 # --------- 
 
 # Tests for zero-length NULL to be treated as an empty string.

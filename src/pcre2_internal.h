@@ -538,6 +538,7 @@ bytes in a code unit in that mode. */
 #define PCRE2_DUPCAPUSED    0x00200000u /* contains (?| */
 #define PCRE2_HASBKC        0x00400000u /* contains \C */
 #define PCRE2_HASACCEPT     0x00800000u /* contains (*ACCEPT) */
+#define PCRE2_HASBSK        0x01000000u /* contains \K */
 
 #define PCRE2_MODE_MASK     (PCRE2_MODE8 | PCRE2_MODE16 | PCRE2_MODE32)
 
