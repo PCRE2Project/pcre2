@@ -177,8 +177,21 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 # OS functionality to be exposed.
 pcre2_use_system_extensions()
 
-check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE)
-check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
+cmake_push_check_state(RESET)
+# Somewhat awkward code to propagate the _GNU_SOURCE definition (added to
+# COMPILE_DEFINITIONS by pcre2_use_system_extensions()).
+get_directory_property(_pcre2_compile_definitions COMPILE_DEFINITIONS)
+if(DEFINED _pcre2_compile_definitions)
+  set(CMAKE_REQUIRED_DEFINITIONS "")
+  foreach(_def IN LISTS _pcre2_compile_definitions)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D${_def}")
+  endforeach()
+endif()
+
+check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP) # glibc 2.7
+check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
+check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
+cmake_pop_check_state()
 
 check_c_source_compiles(
   [=[
