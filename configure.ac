@@ -724,13 +724,24 @@ fi
 PCRE2_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
   AC_DEFINE([PCRE2_STATIC], [1], [
-    Define to any value if linking statically (TODO: make nice with Libtool)])
+    Define to any value if linking statically. Ideally, if both static and
+    shared libraries are being built, then PCRE2_STATIC would be defined only
+    for the static build. Indeed, this is a requirement on Windows. With
+    Autoconf and libtool however, it is idiomatic to compile the sources once
+    to create both the static and shared library, so in this case, PCRE2_STATIC
+    should only be defined if no shared library is being built.])
   PCRE2_STATIC_CFLAG="-DPCRE2_STATIC"
 fi
 AC_SUBST(PCRE2_STATIC_CFLAG)
 
 PCRE2POSIX_CFLAG=""
 if test "x$enable_shared" = "xyes" ; then
+  # PCRE2_STATIC_CFLAG is not added to the CFLAGS used for compilation; that
+  # flag is passed in config.h instead. However, we have chosen not to include
+  # PCRE2POSIX_CFLAG in the config.h, and instead it is passed to the compiler
+  # when building the library.
+  # Both flags are used to populate the pkg-config files, so the definitions
+  # are available to library clients.
   PCRE2POSIX_CFLAG="-DPCRE2POSIX_SHARED"
 fi
 AC_SUBST(PCRE2POSIX_CFLAG)
