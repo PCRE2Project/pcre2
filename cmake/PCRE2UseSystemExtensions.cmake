@@ -10,18 +10,25 @@
 # So far, we know that we require:
 #   - _ALL_SOURCE on IBM systems (z/OS, probably AIX) in order to call
 #     getrlimit() in pcre2test.
+#   - _GNU_SOURCE on Linux in order to call mkostemp() in some (non-default)
+#     configurations of the JIT.
 #
 # Autoconf enables this unconditionally. However, our CMake script potentially
 # supports *more* platforms than Autoconf, so we use a feature check.
 
 function(pcre2_use_system_extensions)
-  if (WIN32)
+  if(WIN32)
     return()
   endif()
 
+  include(CheckSymbolExists)
   include(CheckCSourceCompiles)
+  include(CMakePushCheckState)
 
-  set(_pcre2_test_src "
+  cmake_push_check_state(RESET)
+  set(
+    _pcre2_test_src
+    "
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -30,18 +37,34 @@ int main(void) {
     getrlimit(RLIMIT_STACK, &rlim);
     return 0;
 }
-")
-
+"
+  )
   check_c_source_compiles("${_pcre2_test_src}" HAVE_GETRLIMIT)
 
-  if (NOT HAVE_GETRLIMIT)
+  if(NOT HAVE_GETRLIMIT)
     # Try again with _ALL_SOURCE
+    cmake_reset_check_state()
     set(CMAKE_REQUIRED_DEFINITIONS "-D_ALL_SOURCE")
     check_c_source_compiles("${_pcre2_test_src}" HAVE_GETRLIMIT_ALLSOURCE)
-    unset(CMAKE_REQUIRED_DEFINITIONS)
 
-    if (HAVE_GETRLIMIT_ALLSOURCE)
+    if(HAVE_GETRLIMIT_ALLSOURCE)
       add_compile_definitions(_ALL_SOURCE)
     endif()
   endif()
+
+  cmake_reset_check_state()
+  check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP)
+
+  if(NOT HAVE_MKOSTEMP)
+    # Try again with _GNU_SOURCE
+    cmake_reset_check_state()
+    set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
+    check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP_GNUSOURCE)
+
+    if(HAVE_MKOSTEMP_GNUSOURCE)
+      add_compile_definitions(_GNU_SOURCE)
+    endif()
+  endif()
+
+  cmake_pop_check_state()
 endfunction()
