@@ -46,18 +46,18 @@ functions, so any program that includes it and uses the POSIX names will call
 the PCRE2 implementations instead. */
 
 
-/* This module doesn't use pcre2_internal.h, because we want to be able to
-customize the value of PCRE2_STATIC inside this module, based on
-PCRE2POSIX_SHARED. This is unusual, and justifies a (rare) direct inclusion of
-config.h. */
+/* This module doesn't use pcre2_internal.h, because the pcre2posix dynamic
+library has an "internal" view of some macros, but is an "external" client of
+the pcre2-8 dynamic library. This is unusual, and justifies a (rare) direct
+inclusion of config.h. */
+
+#if defined HAVE_EXPORT_H
+#include "export.h"
+#endif
 
 #if defined HAVE_CONFIG_H && !defined PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #define PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #include "config.h"
-#endif
-
-#ifdef PCRE2POSIX_SHARED
-#undef PCRE2_STATIC
 #endif
 
 
@@ -67,9 +67,24 @@ compiling these functions. This must come before including pcre2posix.h, where
 they are set for an application (using these functions) if they have not
 previously been set. */
 
-#if defined(_WIN32) && (defined(PCRE2POSIX_SHARED) || !defined(PCRE2_STATIC))
-#  define PCRE2POSIX_EXP_DECL extern __declspec(dllexport)
-#  define PCRE2POSIX_EXP_DEFN __declspec(dllexport)
+#ifndef PCRE2POSIX_EXP_DECL
+#  if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
+#    define PCRE2POSIX_EXP_DECL  extern __declspec(dllexport)
+#  elif defined __cplusplus
+#    define PCRE2POSIX_EXP_DECL  extern "C" PCRE2_EXPORT
+#  else
+#    define PCRE2POSIX_EXP_DECL  extern PCRE2_EXPORT
+#  endif
+#endif
+
+#ifndef PCRE2POSIX_EXP_DEFN
+#  if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
+#    define PCRE2POSIX_EXP_DEFN  __declspec(dllexport)
+#  elif defined __cplusplus
+#    define PCRE2POSIX_EXP_DEFN  extern "C" PCRE2_EXPORT
+#  else
+#    define PCRE2POSIX_EXP_DEFN  PCRE2_EXPORT
+#  endif
 #endif
 
 /* Older versions of MSVC lack snprintf(). This define allows for

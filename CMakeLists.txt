@@ -162,6 +162,7 @@ include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CMakePackageConfigHelpers)
 include(CMakePushCheckState)
+include(GenerateExportHeader)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
 include(PCRE2UseSystemExtensions)
@@ -209,29 +210,11 @@ endif()
 if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL" AND NOT CMAKE_C_COMPILER_ID STREQUAL "SunPro")
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
 endif()
-
 check_c_source_compiles(
   "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
-
-# TODO Consider switching to modern "GenerateExportHeader"
-check_c_source_compiles(
-  [=[
-  extern __attribute__ ((visibility ("default"))) int f(void);
-  int main(void) { return f(); }
-  int f(void) { return 42; }
-  ]=]
-  HAVE_VISIBILITY
-)
-
 cmake_pop_check_state()
-
-if(HAVE_VISIBILITY)
-  set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
-else()
-  set(PCRE2_EXPORT)
-endif()
 
 check_c_source_compiles("int main(void) { __assume(1); return 0; }" HAVE_BUILTIN_ASSUME)
 
@@ -1166,6 +1149,61 @@ if(PCRE2_BUILD_PCRE2_32)
   else()
     add_library(pcre2-32 ALIAS pcre2-32-shared)
   endif()
+endif()
+
+# Only after creating the targets can we ask CMake to generate the file which
+# contains the magic for exporting symbols in shared libraries.
+
+if(BUILD_SHARED_LIBS)
+  set(PCRE2_EXPORT_HEADER_CONTENT "
+/* This file is included when building shared libraries. It is the only way
+to extract the magic from CMake for how to export symbols in shared libraries.
+We only include this file for the shared library build. When it is included,
+PCRE2_EXPORT should always be set, and PCRE2_STATIC_DEFINE_DO_NOT_USE should
+never be set. */
+
+#ifdef PCRE2_STATIC_DEFINE_DO_NOT_USE
+#error PCRE2_STATIC_DEFINE_DO_NOT_USE is not expected to be set
+#endif
+#ifndef PCRE2_EXPORT
+#error PCRE2_EXPORT is expected to be set
+#endif
+
+/* Our headers on Windows do their own handling of dllexport and dllimport,
+because we want our pcre2.h header to be self-contained and usable on Windows
+without requiring the CMake-supplied header. So, it must already have the
+necessary definitions, and since they are there, we should avoid any risk of
+mismatch by disabling CMake's handling here. */
+#ifdef _WIN32
+#undef PCRE2_EXPORT
+#endif
+")
+
+  set(shared_targets)
+  if(PCRE2_BUILD_PCRE2_8)
+    list(APPEND shared_targets pcre2-8-shared pcre2-posix-shared)
+  endif()
+  if(PCRE2_BUILD_PCRE2_16)
+    list(APPEND shared_targets pcre2-16-shared)
+  endif()
+  if(PCRE2_BUILD_PCRE2_32)
+    list(APPEND shared_targets pcre2-32-shared)
+  endif()
+
+  foreach(shared_target IN LISTS shared_targets)
+    set_target_properties(${shared_target} PROPERTIES DEFINE_SYMBOL PCRE2_EXPORTS)
+    target_compile_definitions(${shared_target} PRIVATE HAVE_EXPORT_H)
+  endforeach()
+
+  list(GET shared_targets 0 first_shared_target)
+  generate_export_header(
+    ${first_shared_target}
+    BASE_NAME pcre2
+    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/src/export.h
+    STATIC_DEFINE PCRE2_STATIC_DEFINE_DO_NOT_USE
+    EXPORT_MACRO_NAME PCRE2_EXPORT
+    CUSTOM_CONTENT_FROM_VARIABLE PCRE2_EXPORT_HEADER_CONTENT
+  )
 endif()
 
 # Generate pkg-config files
