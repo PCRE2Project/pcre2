@@ -679,6 +679,10 @@ endif()
 # Output files
 
 configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/src/config.h @ONLY)
+# Remove the Autotools-generated copy of config.h. I sometimes switch between
+# Autoconf and CMake, and the conflicting copies of config.h generate some very
+# unintuitive build errors.
+file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
 
 # Parse version numbers and date out of configure.ac
 
