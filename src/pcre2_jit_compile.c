@@ -13772,6 +13772,52 @@ common->accept_label = LABEL();
 if (common->accept != NULL)
   set_jumps(common->accept, common->accept_label);
 
+/* Fail if we detect that the start position was moved to be either after
+the end position (\K in lookahead) or before the start offset (\K in
+lookbehind). */
+
+if (common->has_set_som &&
+    (common->re->extra_options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) == 0)
+  {
+  struct sljit_jump *bad_som_behind;
+  struct sljit_jump *bad_som_ahead;
+  struct sljit_jump *fallthrough;
+
+  // XXX I want to emit code equivalent to the following:
+  // if (OVECTOR(0) < jit_arguments->str || // I believe jit_arguments->str is the start_offset of the match?
+  //     OVECTOR(0) > OVECTOR(1)))
+  //   {
+  //     return PCRE2_ERROR_BAD_BACKSLASH_K;
+  //   }
+
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(1));
+  if (HAS_VIRTUAL_REGISTERS)
+    {
+    OP1(SLJIT_MOV, TMP3, 0, ARGUMENTS, 0);
+    OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(TMP3), SLJIT_OFFSETOF(jit_arguments, str));
+    }
+  else
+    {
+    OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, str));
+    }
+
+  // Compare if OVECTOR(0) < jit_arguments->str
+  bad_som_behind = CMP(SLJIT_LESS, TMP1, 0, TMP3, 0);
+  // Compare if OVECTOR(0) > OVECTOR(1)
+  bad_som_ahead = CMP(SLJIT_GREATER, TMP1, 0, TMP2, 0);
+
+  fallthrough = JUMP(SLJIT_JUMP);
+
+  // If either comparison is true, return error and jump to abort
+  JUMPHERE(bad_som_behind);
+  JUMPHERE(bad_som_ahead);
+  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_BAD_BACKSLASH_K);
+  add_jump(compiler, &common->abort, JUMP(SLJIT_JUMP));
+
+  JUMPHERE(fallthrough);
+  }
+
 /* This means we have a match. Update the ovector. */
 copy_ovector(common, re->top_bracket + 1);
 common->quit_label = common->abort_label = LABEL();
