@@ -175,19 +175,6 @@ property values. This must follow the setting of PCRE2_EXP_DECL above. */
 #include "pcre2.h"
 #include "pcre2_ucp.h"
 
-/* When PCRE2 is compiled as a C++ library, the subject pointer can be replaced
-with a custom type. This makes it possible, for example, to allow pcre2_match()
-to process subject strings that are discontinuous by using a smart pointer
-class. It must always be possible to inspect all of the subject string in
-pcre2_match() because of the way it backtracks. */
-
-/* WARNING: This is as yet untested for PCRE2. */
-
-#ifdef CUSTOM_SUBJECT_PTR
-#undef PCRE2_SPTR
-#define PCRE2_SPTR CUSTOM_SUBJECT_PTR
-#endif
-
 /* When checking for integer overflow, we need to handle large integers.
 If a 64-bit integer type is available, we can use that.
 Otherwise we have to cast to double, which of course requires floating point
