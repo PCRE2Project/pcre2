@@ -28,29 +28,34 @@ function(pcre2_use_system_extensions)
   cmake_push_check_state(RESET)
   set(
     _pcre2_test_src
-    "
-#include <sys/time.h>
-#include <sys/resource.h>
+    [=[
+    #include <sys/time.h>
+    #include <sys/resource.h>
 
-int main(void) {
-    struct rlimit rlim;
-    getrlimit(RLIMIT_STACK, &rlim);
-    return 0;
-}
-"
+    int main(void) {
+        struct rlimit rlim;
+        getrlimit(RLIMIT_STACK, &rlim);
+        return 0;
+    }
+    ]=]
   )
   set(CMAKE_REQUIRED_QUIET TRUE)
   check_c_source_compiles("${_pcre2_test_src}" _HAVE_GETRLIMIT_NAKED)
 
   if(NOT _HAVE_GETRLIMIT_NAKED)
     # Try again with _ALL_SOURCE
+    if(NOT _HAVE_GETRLIMIT_ALLSOURCE)
+      set(_allsource_first_run TRUE)
+    endif()
     set(CMAKE_REQUIRED_DEFINITIONS "-D_ALL_SOURCE")
     check_c_source_compiles("${_pcre2_test_src}" _HAVE_GETRLIMIT_ALLSOURCE)
     unset(CMAKE_REQUIRED_DEFINITIONS)
 
     if(_HAVE_GETRLIMIT_ALLSOURCE)
-      message(STATUS "Detected platform feature gate _ALL_SOURCE")
       add_compile_definitions(_ALL_SOURCE)
+      if(_allsource_first_run)
+        message(STATUS "Detected platform feature gate _ALL_SOURCE")
+      endif()
     endif()
   endif()
 
@@ -58,13 +63,18 @@ int main(void) {
 
   if(NOT _HAVE_MKOSTEMP_NAKED)
     # Try again with _GNU_SOURCE
+    if(NOT _HAVE_MKOSTEMP_GNUSOURCE)
+      set(_gnusource_first_run TRUE)
+    endif()
     set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
     check_symbol_exists(mkostemp stdlib.h _HAVE_MKOSTEMP_GNUSOURCE)
     unset(CMAKE_REQUIRED_DEFINITIONS)
 
     if(_HAVE_MKOSTEMP_GNUSOURCE)
-      message(STATUS "Detected platform feature gate _GNU_SOURCE")
       add_compile_definitions(_GNU_SOURCE)
+      if(_gnusource_first_run)
+        message(STATUS "Detected platform feature gate _GNU_SOURCE")
+      endif()
     endif()
   endif()
 
