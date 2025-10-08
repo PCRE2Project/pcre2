@@ -677,7 +677,7 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 AC_MSG_RESULT([no]))
 LIBS="$OLD_LIBS"
 
-# Check for the availabiity of libreadline
+# Check for the availability of libreadline
 
 if test "$enable_pcre2test_libreadline" = "yes"; then
  AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
