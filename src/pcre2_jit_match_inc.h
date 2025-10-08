@@ -107,7 +107,6 @@ return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 pcre2_real_code *re = (pcre2_real_code *)code;
 executable_functions *functions = (executable_functions *)re->executable_jit;
 pcre2_jit_stack *jit_stack;
-PCRE2_SIZE *ovector = match_data->ovector;
 uint32_t oveccount = match_data->oveccount;
 uint32_t max_oveccount;
 union {

@@ -13783,15 +13783,8 @@ if (common->has_set_som &&
   struct sljit_jump *bad_som_ahead;
   struct sljit_jump *fallthrough;
 
-  // XXX I want to emit code equivalent to the following:
-  // if (OVECTOR(0) < jit_arguments->str || // I believe jit_arguments->str is the start_offset of the match?
-  //     OVECTOR(0) > OVECTOR(1)))
-  //   {
-  //     return PCRE2_ERROR_BAD_BACKSLASH_K;
-  //   }
-
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(1));
+  OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);  /* STR_PTR, since OVECTOR(1) hasn't been populated yet */
   if (HAS_VIRTUAL_REGISTERS)
     {
     OP1(SLJIT_MOV, TMP3, 0, ARGUMENTS, 0);
@@ -13802,14 +13795,10 @@ if (common->has_set_som &&
     OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, str));
     }
 
-  // Compare if OVECTOR(0) < jit_arguments->str
-  bad_som_behind = CMP(SLJIT_LESS, TMP1, 0, TMP3, 0);
-  // Compare if OVECTOR(0) > OVECTOR(1)
-  bad_som_ahead = CMP(SLJIT_GREATER, TMP1, 0, TMP2, 0);
-
+  bad_som_behind = CMP(SLJIT_LESS, TMP1, 0, TMP3, 0);  /* (ovector[0] < jit_arguments->str)? */
+  bad_som_ahead = CMP(SLJIT_GREATER, TMP1, 0, TMP2, 0);  /* (ovector[0] > ovector[1])? */
   fallthrough = JUMP(SLJIT_JUMP);
 
-  // If either comparison is true, return error and jump to abort
   JUMPHERE(bad_som_behind);
   JUMPHERE(bad_som_ahead);
   OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_BAD_BACKSLASH_K);

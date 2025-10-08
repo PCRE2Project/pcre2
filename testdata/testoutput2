@@ -19091,6 +19091,12 @@ Failed: error -75: disallowed use of \K in lookaround
     zz
 No match
 
+/a|(?(DEFINE)(?<sneaky>\K\Ga))(?<=(?&sneaky))b/g
+    ab
+ 0: a
+    zz
+No match
+
 /(?=.{10}(?1))x(\K){0}/
     x1234567890
 Failed: error -75: disallowed use of \K in lookaround
