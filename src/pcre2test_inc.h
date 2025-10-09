@@ -68,6 +68,10 @@ library. */
 #define jit_stack_size        PCRE2_SUFFIX(jit_stack_size_)
 #define patstack              PCRE2_SUFFIX(patstack_)
 #define patstacknext          PCRE2_SUFFIX(patstacknext_)
+#define rep_in_buffer         PCRE2_SUFFIX(rep_in_buffer_)
+#define rep_in_buffer_size    PCRE2_SUFFIX(rep_in_buffer_size_)
+#define rep_out_buffer        PCRE2_SUFFIX(rep_out_buffer_)
+#define rep_out_buffer_size   PCRE2_SUFFIX(rep_out_buffer_size_)
 
 #define jit_callback                      PCRE2_SUFFIX(jit_callback_)
 #define pcre2_strcmp_c8                   PCRE2_SUFFIX(pcre2_strcmp_c8_)
@@ -118,6 +122,11 @@ static size_t           jit_stack_size = 0;
 
 static pcre2_code *patstack[PATSTACKSIZE];
 static int         patstacknext = 0;
+
+static PCRE2_UCHAR *rep_in_buffer = NULL;
+static size_t       rep_in_buffer_size = REPLACE_MODSIZE;    /* Code units */
+static PCRE2_UCHAR *rep_out_buffer = NULL;
+static size_t       rep_out_buffer_size = REPLACE_BUFFSIZE;  /* Code units */
 
 
 
@@ -1006,8 +1015,9 @@ for (;;)
         m->name, m->value - 1);
       return FALSE;
       }
-    memcpy(field, pp, len);
-    ((uint8_t *)field)[len] = 0;
+    ((uint8_t *)field)[0] = len;
+    memcpy(((uint8_t *)field)+1, pp, len);
+    ((uint8_t *)field)[len+1] = 0;
     pp = ep;
     break;
     }
@@ -1023,7 +1033,7 @@ for (;;)
   if (ctx == CTX_POPPAT &&
      (pctl->options != 0 ||
       pctl->tables_id != 0 ||
-      pctl->locale[0] != 0 ||
+      pctl->locale[0] != MOD_STR_UNSET ||
       (pctl->control & NOTPOP_CONTROLS) != 0))
     {
     fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
@@ -1754,7 +1764,7 @@ switch(cmd)
     fprintf(outfile, "** Can't pop off an empty stack\n");
     return PR_SKIP;
     }
-  memset(&pat_patctl, 0, sizeof(patctl));   /* Completely unset */
+  patctl_zero(&pat_patctl);  /* Completely unset */
   if (!decode_modifiers(argptr, CTX_POPPAT, &pat_patctl, NULL))
     return PR_SKIP;
 
@@ -1985,9 +1995,9 @@ uint8_t *p = buffer;
 unsigned int delimiter = *p++;
 int rc, errorcode;
 pcre2_compile_context *use_pat_context;
-PCRE2_SPTR use_pbuffer = NULL;
+PCRE2_SPTR use_pbuffer;
 uint32_t use_forbid_utf = forbid_utf;
-PCRE2_SIZE patlen;
+PCRE2_SIZE patlen, full_patlen;
 PCRE2_SIZE valgrind_access_length;
 PCRE2_SIZE erroroffset;
 
@@ -2252,21 +2262,21 @@ else
 
 /* Sort out character tables */
 
-if (pat_patctl.locale[0] != 0)
+if (pat_patctl.locale[0] != MOD_STR_UNSET)
   {
   if (pat_patctl.tables_id != 0)
     {
     fprintf(outfile, "** 'Locale' and 'tables' must not both be set\n");
     return PR_SKIP;
     }
-  if (setlocale(LC_CTYPE, (const char *)pat_patctl.locale) == NULL)
+  if (setlocale(LC_CTYPE, (const char *)pat_patctl.locale+1) == NULL)
     {
-    fprintf(outfile, "** Failed to set locale \"%s\"\n", pat_patctl.locale);
+    fprintf(outfile, "** Failed to set locale \"%s\"\n", pat_patctl.locale+1);
     return PR_SKIP;
     }
-  if (strcmp((const char *)pat_patctl.locale, (const char *)locale_name) != 0)
+  if (strcmp((const char *)pat_patctl.locale+1, (const char *)locale_name) != 0)
     {
-    snprintf((char *)locale_name, sizeof(locale_name), "%s", (char *)pat_patctl.locale);
+    snprintf((char *)locale_name, sizeof(locale_name), "%s", (char *)pat_patctl.locale + 1);
     if (locale_tables != NULL)
       {
       pcre2_maketables_free(general_context, locale_tables);
@@ -2322,8 +2332,8 @@ if ((pat_patctl.control & CTL_POSIX) != 0)
 
   /* Check for features that the POSIX interface does not support. */
 
-  if (pat_patctl.locale[0] != 0) prmsg(&msg, "locale");
-  if (pat_patctl.replacement[0] != 0) prmsg(&msg, "replace");
+  if (pat_patctl.locale[0] != MOD_STR_UNSET) prmsg(&msg, "locale");
+  if (pat_patctl.replacement[0] != MOD_STR_UNSET) prmsg(&msg, "replace");
   if (pat_patctl.tables_id != 0) prmsg(&msg, "tables");
   if (pat_patctl.stackguard_test != 0) prmsg(&msg, "stackguard");
   if (timeit > 0) prmsg(&msg, "timing");
@@ -2458,7 +2468,7 @@ ignored with "push". Replacements are locked out. */
 
 if ((pat_patctl.control & (CTL_PUSH|CTL_PUSHCOPY|CTL_PUSHTABLESCOPY)) != 0)
   {
-  if (pat_patctl.replacement[0] != 0)
+  if (pat_patctl.replacement[0] != MOD_STR_UNSET)
     {
     fprintf(outfile, "** Replacement text is not supported with 'push'.\n");
     return PR_OK;
@@ -2529,20 +2539,17 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
   int convert_return = PR_OK;
   uint32_t convert_options = pat_patctl.convert_type;
   PCRE2_UCHAR *converted_pattern;
-  PCRE2_SIZE converted_length;
+  PCRE2_SIZE converted_length = JUNK_OFFSET;
+  BOOL zero_terminate;
 
-  // TODO No valgrind guards for out-of-bounds read in pcre2_pattern_convert(),
-  // nor do we appear to have a facility for testing zero-terminated patterns here.
-  // Can we use something other than zero as a sentinel to allow testing empty inputs?
-
-  if (pat_patctl.convert_length != 0)
+  if (pat_patctl.convert_length != CONVERT_UNSET)
     {
     converted_length = pat_patctl.convert_length;
-    converted_pattern = malloc(CU2BYTES(converted_length));
+    converted_pattern = malloc(converted_length? CU2BYTES(converted_length) : 1);
     if (converted_pattern == NULL)
       {
       fprintf(outfile, "** Failed: malloc failed for converted pattern\n");
-      return PR_SKIP;
+      return PR_ABEND;
       }
     }
   else converted_pattern = NULL;  /* Let the library allocate */
@@ -2580,8 +2587,24 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
       }
     }
 
-  rc = pcre2_pattern_convert(pbuffer, patlen, convert_options,
+  /* Set up the input buffer in the same way as for pcre2_compile() below. */
+
+  zero_terminate = (pat_patctl.control & (CTL_HEXPAT|CTL_USE_LENGTH)) == 0;
+
+#ifdef SUPPORT_VALGRIND
+  VALGRIND_MAKE_MEM_NOACCESS(pbuffer + CU2BYTES(patlen + zero_terminate),
+    pbuffer_size - CU2BYTES(patlen + zero_terminate));
+#endif
+
+  if (zero_terminate) patlen = PCRE2_ZERO_TERMINATED;
+  use_pbuffer = ((pat_patctl.control2 & CTL2_NULL_PATTERN) == 0)? pbuffer : NULL;
+
+  rc = pcre2_pattern_convert(use_pbuffer, patlen, convert_options,
     &converted_pattern, &converted_length, con_context);
+
+#ifdef SUPPORT_VALGRIND
+  VALGRIND_MAKE_MEM_UNDEFINED(pbuffer, pbuffer_size);
+#endif
 
   if (rc != 0)
     {
@@ -2615,7 +2638,7 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
   /* Free the converted pattern. */
 
   CONVERT_FINISH:
-  if (pat_patctl.convert_length != 0)
+  if (pat_patctl.convert_length != CONVERT_UNSET)
     free(converted_pattern);
   else
     pcre2_converted_pattern_free(converted_pattern);
@@ -2630,6 +2653,7 @@ if (pat_patctl.convert_type != CONVERT_UNSET)
 zeros). When valgrind is supported, arrange for the unused part of the buffer
 to be marked as no-access. */
 
+full_patlen = patlen;
 valgrind_access_length = patlen;
 if ((pat_patctl.control & (CTL_HEXPAT|CTL_USE_LENGTH)) == 0)
   {
@@ -2664,12 +2688,9 @@ and PCRE2_NEVER_UCP are invalid with it. */
 
 if ((pat_patctl.options & PCRE2_LITERAL) != 0) use_forbid_utf = 0;
 
-/* Set use_pbuffer to the input buffer, or leave it as NULL if requested. */
+/* Set use_pbuffer to the input buffer or NULL as requested. */
 
-if ((pat_patctl.control2 & CTL2_NULL_PATTERN) == 0)
-  {
-  use_pbuffer = pbuffer;
-  }
+use_pbuffer = ((pat_patctl.control2 & CTL2_NULL_PATTERN) == 0)? pbuffer : NULL;
 
 /* Compile many times when timing. */
 
@@ -2859,9 +2880,6 @@ if (compiled_code == NULL)
 
   else if (direction != 0)
     {
-    PCRE2_SIZE full_patlen = (patlen != PCRE2_ZERO_TERMINATED)? patlen :
-        pcre2_strlen(pbuffer);
-
     fprintf(outfile, "        here: ");
     if (erroroffset > 0)
       {
@@ -3712,10 +3730,11 @@ test input to the appropriate width buffer.
 */
 
 static void
-copy_substitute_string(BOOL utf, uint8_t *input, PCRE2_UCHAR *output,
-  PCRE2_SIZE *outlen)
+copy_substitute_string(BOOL utf, uint8_t *input, PCRE2_SIZE inlen,
+  PCRE2_UCHAR *output, PCRE2_SIZE *outlen)
 {
 uint32_t c;
+uint8_t *input_end = input + inlen;
 PCRE2_UCHAR *output_start = output;
 PCRE2_SIZE erroroffset;
 BOOL badutf = FALSE;
@@ -3728,14 +3747,15 @@ copy its code units without UTF interpretation. This provides a means of
 checking that an invalid string is detected. Otherwise, UTF-8 can be used to
 include wide characters in a replacement. */
 
-if (utf) badutf = valid_utf(input, strlen((const char *)input), &erroroffset);
+if (utf) badutf = valid_utf(input, inlen, &erroroffset);
 
 /* Not UTF or invalid UTF-8: just copy the code units. */
 
 if (!utf || badutf)
   {
-  while ((c = *input++) != 0)
+  while (input < input_end)
     {
+    c = *input++;
 #if defined(EBCDIC) && !EBCDIC_IO
     c = ascii_to_ebcdic(c);
 #endif
@@ -3745,8 +3765,9 @@ if (!utf || badutf)
 
 /* Valid UTF-8 replacement string */
 
-else while ((c = *input++) != 0)
+else while (input < input_end)
   {
+  c = *input++;
   if (HASUTF8EXTRALEN(c)) { GETUTF8INC(c, input); }
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -3819,7 +3840,10 @@ memcpy(dat_context, default_dat_context, sizeof(pcre2_match_context));
 memcpy(&dat_datctl, &def_datctl, sizeof(datctl));
 dat_datctl.control |= (pat_patctl.control & CTL_ALLPD);
 dat_datctl.control2 |= (pat_patctl.control2 & CTL2_ALLPD);
-strcpy((char *)dat_datctl.replacement, (char *)pat_patctl.replacement);
+dat_datctl.replacement[0] = pat_patctl.replacement[0];
+if (pat_patctl.replacement[0] != MOD_STR_UNSET)
+  memcpy(dat_datctl.replacement + 1, pat_patctl.replacement + 1,
+    pat_patctl.replacement[0] + 1);
 if (dat_datctl.jitstack == 0) dat_datctl.jitstack = pat_patctl.jitstack;
 
 if (dat_datctl.substitute_skip == 0)
@@ -4261,7 +4285,7 @@ for (k = 0; k < sizeof(exclusive_dat_controls)/sizeof(uint32_t); k++)
     }
   }
 
-if (dat_datctl.replacement[0] != 0)
+if (dat_datctl.replacement[0] != MOD_STR_UNSET)
   {
   if ((dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) != 0 &&
       (dat_datctl.control & CTL_NULLCONTEXT) != 0)
@@ -4280,7 +4304,7 @@ if (dat_datctl.replacement[0] != 0)
   if ((dat_datctl.control & CTL_ALLCAPTURES) != 0)
     fprintf(outfile, "** Ignored with replacement text: allcaptures\n");
 
-  if (dat_datctl.substitute_subject[0] != 0 &&
+  if (dat_datctl.substitute_subject[0] != MOD_STR_UNSET &&
       (dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)
     {
     fprintf(outfile, "** substitute_subject requires substitute_matched.\n");
@@ -4290,7 +4314,7 @@ if (dat_datctl.replacement[0] != 0)
 
 else
   {
-  if (dat_datctl.substitute_subject[0] != 0)
+  if (dat_datctl.substitute_subject[0] != MOD_STR_UNSET)
     {
     fprintf(outfile, "** substitute_subject requires replacement text.\n");
     return PR_OK;
@@ -4581,31 +4605,28 @@ oveccount = pcre2_get_ovector_count(match_data);
 replacements with PCRE2_SUBSTITUTE_MATCHED, even though it won't work, in order
 to exercise the error condition. */
 
-if (dat_datctl.replacement[0] != 0 &&
+if (dat_datctl.replacement[0] != MOD_STR_UNSET &&
     (dat_datctl.control & CTL_DFA) != 0 &&
     (dat_datctl.control2 & CTL2_SUBSTITUTE_MATCHED) == 0)
   {
   fprintf(outfile, "** Ignored for DFA matching: replace\n");
-  dat_datctl.replacement[0] = 0;
+  dat_datctl.replacement[0] = MOD_STR_UNSET;
   }
 
 /* If a replacement string is provided, call pcre2_substitute() instead of or
 after one of the matching functions. First we have to convert the replacement
 string to the appropriate width. */
 
-if (dat_datctl.replacement[0] != 0)
+if (dat_datctl.replacement[0] != MOD_STR_UNSET)
   {
   int rc;
-  uint8_t *pr;
-  // TODO Move these first two buffers to the heap and use Valgrind macros to ensure no overread
-  PCRE2_UCHAR rbuffer[REPLACE_BUFFSIZE];
-  PCRE2_UCHAR nbuffer[REPLACE_BUFFSIZE];
+  uint8_t *pr, *prend;
   PCRE2_UCHAR sbuffer[SUBSTITUTE_SUBJECT_MODSIZE]; /* Staging, not seen by pcre2_substitute() */
   PCRE2_UCHAR *rbptr;
   PCRE2_UCHAR *sbptr;
   uint32_t xoptions;
   uint32_t emoption;  /* External match option */
-  PCRE2_SIZE j, rlen, nsize, nsize_input, slen;
+  PCRE2_SIZE j, rlen, full_rlen, nsize, nsize_input, slen;
   pcre2_match_data *smatch_data;
 
   /* Fill the ovector with junk to detect elements that do not get set
@@ -4666,21 +4687,25 @@ if (dat_datctl.replacement[0] != 0)
              (((dat_datctl.control2 & CTL2_SUBSTITUTE_UNSET_EMPTY) == 0)? 0 :
                 PCRE2_SUBSTITUTE_UNSET_EMPTY);
 
-  pr = dat_datctl.replacement;
+  pr = dat_datctl.replacement+1;
+  prend = pr + dat_datctl.replacement[0];
 
   /* If the replacement starts with '[<number>]' we interpret that as length
   value for the replacement buffer. */
 
-  nsize = sizeof(nbuffer)/sizeof(*nbuffer);
-  if (*pr == '[')
+  nsize = rep_out_buffer_size;
+  if (pr < prend && *pr == '[')
     {
     PCRE2_SIZE n = 0;
-    while ((c = *(++pr)) >= '0' && c <= '9') n = n * 10 + (c - '0');
-    if (*pr++ != ']')
+    ++pr;
+    for (; pr < prend && (c = *pr) >= '0' && c <= '9'; ++pr)
+      n = n * 10 + (c - '0');
+    if (pr >= prend || *pr != ']')
       {
       fprintf(outfile, "** Bad buffer size in replacement string\n");
       return PR_OK;
       }
+    ++pr;
     if (n > nsize)
       {
       fprintf(outfile, "** Replacement buffer setting (%" SIZ_FORM ") is too "
@@ -4690,12 +4715,30 @@ if (dat_datctl.replacement[0] != 0)
     nsize = n;
     }
 
+#ifdef SUPPORT_VALGRIND
+  VALGRIND_MAKE_MEM_UNDEFINED(rep_out_buffer, CU2BYTES(nsize));
+  VALGRIND_MAKE_MEM_NOACCESS(rep_out_buffer + nsize,
+    CU2BYTES(rep_out_buffer_size - nsize));
+#endif
+
   /* Now copy the rest of the replacement string to the buffer. */
 
-  copy_substitute_string(utf, pr, rbuffer, &rlen);
+#ifdef SUPPORT_VALGRIND
+  VALGRIND_MAKE_MEM_UNDEFINED(rep_in_buffer, CU2BYTES(rep_in_buffer_size));
+#endif
+
+  copy_substitute_string(utf, pr, prend-pr, rep_in_buffer, &rlen);
+
+#ifdef SUPPORT_VALGRIND
+  c = ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)? 1 : 0;
+  VALGRIND_MAKE_MEM_NOACCESS(rep_in_buffer + rlen + c,
+    CU2BYTES(rep_in_buffer_size - rlen + c));
+#endif
+
+  full_rlen = rlen;
   if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
     rlen = PCRE2_ZERO_TERMINATED;
-  rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
+  rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rep_in_buffer : NULL;
 
   /* If the substitute_subject modifier is set, then we will modify the
   subject in between the call to pcre2_match and pcre2_substitute. */
@@ -4703,10 +4746,10 @@ if (dat_datctl.replacement[0] != 0)
   sbptr = pp;
   slen = arg_ulen;
 
-  if (dat_datctl.substitute_subject[0] != 0)
+  if (dat_datctl.substitute_subject[0] != MOD_STR_UNSET)
     {
-    copy_substitute_string(utf, dat_datctl.substitute_subject,
-      sbuffer, &slen);
+    copy_substitute_string(utf, dat_datctl.substitute_subject+1,
+      dat_datctl.substitute_subject[0], sbuffer, &slen);
 
     /* The buffer pointed to by pp has exactly the correct length (butted up
     against the end of the memory allocation) so it would be possible but
@@ -4766,7 +4809,7 @@ if (dat_datctl.replacement[0] != 0)
   nsize_input = nsize;
   rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
     dat_datctl.options|xoptions, smatch_data, use_dat_context,
-    rbptr, rlen, nbuffer, &nsize);
+    rbptr, rlen, rep_out_buffer, &nsize);
 
   /* For malloc testing, we repeat the substitution. */
 
@@ -4782,7 +4825,7 @@ if (dat_datctl.replacement[0] != 0)
       nsize = nsize_input;
       rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
         dat_datctl.options|xoptions, smatch_data, use_dat_context,
-        rbptr, rlen, nbuffer, &nsize);
+        rbptr, rlen, rep_out_buffer, &nsize);
       mallocs_until_failure = INT_MAX;
       outfile = saved_outfile;
 
@@ -4808,12 +4851,6 @@ if (dat_datctl.replacement[0] != 0)
 
     if (rc != PCRE2_ERROR_NOMEMORY && nsize != PCRE2_UNSET)
       {
-      // TODO This is delicate here, and in the other places where we do this.
-      // Instead of re-measuring the length when the input is zero-terminated,
-      // we should save the original length somewhere.
-      PCRE2_SIZE full_rlen = (rlen != PCRE2_ZERO_TERMINATED)? rlen :
-          pcre2_strlen(rbptr);
-
       fprintf(outfile, "\n        here: ");
       if (nsize > 0)
         {
@@ -4831,7 +4868,7 @@ if (dat_datctl.replacement[0] != 0)
   else
     {
     fprintf(outfile, "%2d: ", rc);
-    pchars(nbuffer, nsize, utf, outfile);
+    pchars(rep_out_buffer, nsize, utf, outfile);
     }
 
   fprintf(outfile, "\n");
@@ -5485,6 +5522,8 @@ dat_context = pcre2_match_context_copy(default_dat_context);
 default_con_context = pcre2_convert_context_create(general_context);
 con_context = pcre2_convert_context_copy(default_con_context);
 match_data = pcre2_match_data_create(max_oveccount, general_context);
+rep_in_buffer = malloc(sizeof(PCRE2_UCHAR) * rep_in_buffer_size);
+rep_out_buffer = malloc(sizeof(PCRE2_UCHAR) * rep_out_buffer_size);
 
 /* Set a default parentheses nest limit that is large enough to run the
 standard tests (this also exercises the function). */
@@ -5521,6 +5560,8 @@ pcre2_match_context_free(dat_context);
 pcre2_match_context_free(default_dat_context);
 pcre2_convert_context_free(default_con_context);
 pcre2_convert_context_free(con_context);
+free(rep_in_buffer);
+free(rep_out_buffer);
 }
 
 
@@ -6240,6 +6281,10 @@ if (failure != NULL)
 #undef jit_stack_size
 #undef patstack
 #undef patstacknext
+#undef rep_in_buffer
+#undef rep_in_buffer_size
+#undef rep_out_buffer
+#undef rep_out_buffer_size
 
 #undef jit_callback
 #undef pcre2_strcmp_c8

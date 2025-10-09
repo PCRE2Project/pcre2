@@ -214,7 +214,8 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #endif
 
 #define CFORE_UNSET UINT32_MAX    /* Unset value for startend/cfail/cerror fields */
-#define CONVERT_UNSET UINT32_MAX  /* Unset value for convert_type field */
+#define CONVERT_UNSET UINT32_MAX  /* Unset value for convert_type/convert_length fields */
+#define MOD_STR_UNSET UINT8_MAX   /* Sentinel length for unset string options */
 #define DFA_WS_DIMENSION 1000     /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15      /* Default ovector count */
 #define JUNK_OFFSET 0xdeadbeef    /* For initializing ovector */
@@ -517,7 +518,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_OPT,    /* Is an option bit */
        MOD_OPTMZ,  /* Is an optimization directive */
        MOD_SIZ,    /* Is a PCRE2_SIZE value */
-       MOD_STR };  /* Is a string */
+       MOD_STR };  /* Is a string; Pascal-encoded with length in first byte */
 
 /* Control bits. Some apply to compiling, some to matching, but some can be set
 either on a pattern or a data line, so they must all be distinct. There are now
@@ -616,15 +617,15 @@ different things in the two cases. */
 
 /* Structures for holding modifier information for patterns and subject strings
 (data). Fields containing modifiers that can be set either for a pattern or a
-subject must be at the start and in the same order in both cases so that the
-same offset in the big table below works for both. */
+subject (MOD_PD[P]/MOD_PND) must be at the start and in the same order in both
+structures so that the same offset in the big table below works for both. */
 
 typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  options;          /* Must be in same position as datctl */
   uint32_t  control;          /* Must be in same position as datctl */
   uint32_t  control2;         /* Must be in same position as datctl */
   uint32_t  jitstack;         /* Must be in same position as datctl */
-   uint8_t  replacement[REPLACE_MODSIZE];           /* So must this */
+   uint8_t  replacement[1+REPLACE_MODSIZE];         /* So must this */
   uint32_t  substitute_skip;  /* Must be in same position as datctl */
   uint32_t  substitute_stop;  /* Must be in same position as datctl */
   uint32_t  jit;
@@ -635,7 +636,7 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  convert_glob_escape;
   uint32_t  convert_glob_separator;
    int32_t  regerror_buffsize;
-   uint8_t  locale[LOCALESIZE];
+   uint8_t  locale[1+LOCALESIZE];
 } patctl;
 
 #define MAXCPYGET 10
@@ -646,10 +647,10 @@ typedef struct datctl {        /* Structure for data line modifiers. */
   uint32_t   control;          /* Must be in same position as patctl */
   uint32_t   control2;         /* Must be in same position as patctl */
   uint32_t   jitstack;         /* Must be in same position as patctl */
-   uint8_t   replacement[REPLACE_MODSIZE];           /* So must this */
+   uint8_t   replacement[1+REPLACE_MODSIZE];         /* So must this */
   uint32_t   substitute_skip;  /* Must be in same position as patctl */
   uint32_t   substitute_stop;  /* Must be in same position as patctl */
-   uint8_t   substitute_subject[SUBSTITUTE_SUBJECT_MODSIZE];
+   uint8_t   substitute_subject[1+SUBSTITUTE_SUBJECT_MODSIZE];
   uint32_t   startend[2];
   uint32_t   cerror[2];
   uint32_t   cfail[2];
@@ -661,6 +662,31 @@ typedef struct datctl {        /* Structure for data line modifiers. */
   uint8_t    copy_names[LENCPYGET];
   uint8_t    get_names[LENCPYGET];
 } datctl;
+
+/* Helper functions to zero out the structures. */
+
+static void patctl_zero(patctl *p)
+{
+memset(p, 0, sizeof(patctl));
+p->replacement[0] = MOD_STR_UNSET;
+p->convert_type = CONVERT_UNSET;
+p->convert_length = CONVERT_UNSET;
+p->regerror_buffsize = -1;
+p->locale[0] = MOD_STR_UNSET;
+}
+
+static void datctl_zero(datctl *d)
+{
+memset(d, 0, sizeof(datctl));
+d->replacement[0] = MOD_STR_UNSET;
+d->substitute_subject[0] = MOD_STR_UNSET;
+d->oveccount = DEFAULT_OVECCOUNT;
+d->copy_numbers[0] = -1;
+d->get_numbers[0] = -1;
+d->startend[0] = d->startend[1] = CFORE_UNSET;
+d->cerror[0] = d->cerror[1] = CFORE_UNSET;
+d->cfail[0] = d->cfail[1] = CFORE_UNSET;
+}
 
 /* Ids for which context to modify. */
 
@@ -675,8 +701,17 @@ enum { CTX_PAT,            /* Active pattern context */
 #define CO(name) offsetof(PCRE2_REAL_COMPILE_CONTEXT, name)
 #define MO(name) offsetof(PCRE2_REAL_MATCH_CONTEXT, name)
 #define PO(name) offsetof(patctl, name)
-#define PD(name) PO(name)
 #define DO(name) offsetof(datctl, name)
+
+/* Validate that the offsets for the shared fields do indeed match. */
+
+STATIC_ASSERT(PO(options) == DO(options), options_mismatch);
+STATIC_ASSERT(PO(control) == DO(control), control_mismatch);
+STATIC_ASSERT(PO(control2) == DO(control2), control2_mismatch);
+STATIC_ASSERT(PO(jitstack) == DO(jitstack), jitstack_mismatch);
+STATIC_ASSERT(PO(replacement) == DO(replacement), replacement_mismatch);
+STATIC_ASSERT(PO(substitute_skip) == DO(substitute_skip), substitute_skip_mismatch);
+STATIC_ASSERT(PO(substitute_stop) == DO(substitute_stop), substitute_stop_mismatch);
 
 /* Table of all long-form modifiers. Must be in collating sequence of modifier
 name because it is searched by binary chop. */
@@ -706,7 +741,7 @@ static modstruct modlist[] = {
   { "alt_extended_class",          MOD_PAT,  MOD_OPT, PCRE2_ALT_EXTENDED_CLASS,   PO(options) },
   { "alt_verbnames",               MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
   { "altglobal",                   MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
-  { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
+  { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PO(options) },
   { "ascii_all",                   MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_ALL,      CO(extra_options) },
   { "ascii_bsd",                   MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_BSD,      CO(extra_options) },
   { "ascii_bss",                   MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_BSS,      CO(extra_options) },
@@ -746,7 +781,7 @@ static modstruct modlist[] = {
   { "dotstar_anchor",              MOD_CTC,  MOD_OPTMZ, PCRE2_DOTSTAR_ANCHOR,     0 },
   { "dotstar_anchor_off",          MOD_CTC,  MOD_OPTMZ, PCRE2_DOTSTAR_ANCHOR_OFF, 0 },
   { "dupnames",                    MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
-  { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
+  { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PO(options) },
   { "escaped_cr_is_lf",            MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ESCAPED_CR_IS_LF, CO(extra_options) },
   { "expand",                      MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
   { "extended",                    MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
@@ -779,7 +814,7 @@ static modstruct modlist[] = {
   { "max_pattern_compiled_length", MOD_CTC,  MOD_SIZ, 0,                          CO(max_pattern_compiled_length) },
   { "max_pattern_length",          MOD_CTC,  MOD_SIZ, 0,                          CO(max_pattern_length) },
   { "max_varlookbehind",           MOD_CTC,  MOD_INT, 0,                          CO(max_varlookbehind) },
-  { "memory",                      MOD_PD,   MOD_CTL, CTL_MEMORY,                 PD(control) },
+  { "memory",                      MOD_PD,   MOD_CTL, CTL_MEMORY,                 PO(control) },
   { "multiline",                   MOD_PATP, MOD_OPT, PCRE2_MULTILINE,            PO(options) },
   { "never_backslash_c",           MOD_PAT,  MOD_OPT, PCRE2_NEVER_BACKSLASH_C,    PO(options) },
   { "never_callout",               MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NEVER_CALLOUT,  CO(extra_options) },
@@ -792,7 +827,7 @@ static modstruct modlist[] = {
   { "no_dotstar_anchor",           MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,    PO(options) },
   { "no_jit",                      MOD_DATP, MOD_OPT, PCRE2_NO_JIT,               DO(options) },
   { "no_start_optimize",           MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,    PO(options) },
-  { "no_utf_check",                MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PD(options) },
+  { "no_utf_check",                MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PO(options) },
   { "notbol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTBOL,               DO(options) },
   { "notempty",                    MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY,             DO(options) },
   { "notempty_atstart",            MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,     DO(options) },
@@ -3529,24 +3564,6 @@ char *arg_subject = NULL;
 char *arg_pattern = NULL;
 char *arg_error = NULL;
 
-/* The offsets to the options and control bits fields of the pattern and data
-control blocks must be the same so that common options and controls such as
-"anchored" or "memory" can work for either of them from a single table entry.
-We cannot test this till runtime because "offsetof" does not work in the
-preprocessor. */
-
-// TODO This comment above is not correct: we can test it at compile time,
-// although it is true that it's not possible using the preprocessor. Use our
-// new STATIC_ASSERT macro.
-
-if (PO(options) != DO(options) || PO(control) != DO(control) ||
-    PO(control2) != DO(control2))
-  {
-  fprintf(stderr, "** Coding error: "
-    "options and control offsets for pattern and data must be the same.\n");
-  return 1;
-  }
-
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
 and 32-bit buffers (pbuffer16, pbuffer32) are obtained only if needed. */
@@ -3567,17 +3584,8 @@ _setmode( _fileno( stdout ), _O_BINARY );
 
 locale_name[0] = 0;
 
-memset(&def_patctl, 0, sizeof(patctl));
-def_patctl.convert_type = CONVERT_UNSET;
-def_patctl.regerror_buffsize = -1;
-
-memset(&def_datctl, 0, sizeof(datctl));
-def_datctl.oveccount = DEFAULT_OVECCOUNT;
-def_datctl.copy_numbers[0] = -1;
-def_datctl.get_numbers[0] = -1;
-def_datctl.startend[0] = def_datctl.startend[1] = CFORE_UNSET;
-def_datctl.cerror[0] = def_datctl.cerror[1] = CFORE_UNSET;
-def_datctl.cfail[0] = def_datctl.cfail[1] = CFORE_UNSET;
+patctl_zero(&def_patctl);
+datctl_zero(&def_datctl);
 
 /* Scan command line options. */
 
