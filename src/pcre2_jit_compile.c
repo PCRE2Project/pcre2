@@ -13781,20 +13781,23 @@ if (common->has_set_som &&
   {
   if (HAS_VIRTUAL_REGISTERS)
     {
-    OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, str));
+    OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
     }
   else
     {
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, str));
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, str));
     }
-  OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
 
-  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_BAD_BACKSLASH_K);
   /* (ovector[0] < jit_arguments->str)? */
-  add_jump(compiler, &common->abort, CMP(SLJIT_LESS, TMP3, 0, TMP2, 0));
+  OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP2, 0, TMP1, 0);
+  /* Unconditionally set R0 (aka TMP1), in between the comparison that needs to
+  use TMP1, but before the jump. */
+  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_BAD_BACKSLASH_K);
+  add_jump(compiler, &common->abort, JUMP(SLJIT_LESS));
   /* (ovector[0] > STR_PTR)?  NB. ovector[1] hasn't yet been set to STR_PTR. */
-  add_jump(compiler, &common->abort, CMP(SLJIT_GREATER, TMP3, 0, STR_PTR, 0));
+  add_jump(compiler, &common->abort, CMP(SLJIT_GREATER, TMP2, 0, STR_PTR, 0));
   }
 
 /* This means we have a match. Update the ovector. */
