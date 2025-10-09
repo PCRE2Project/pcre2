@@ -31,6 +31,10 @@
 
 # Length check
 
+/abc/convert_length=0
+
+/abc/convert_length=1
+
 /abc/convert_length=11
 
 /abc/convert_length=12
@@ -339,6 +343,26 @@
 
 /a`*b/convert_glob_escape=x
 
+# Tests of null and empty inputs
+
+/a*b/use_length
+
+//use_length
+
+# Error
+/a*b/null_pattern
+
+# Error
+//null_pattern
+
+# Error
+/a*b/use_length,null_pattern
+
+# Kind-of error... pattern conversion succeeds, but it converts to a non-empty
+# pattern, and null_pattern applies to the regex parse afterwards too, which
+# fails.
+//use_length,null_pattern
+
 # -------- Tests of extended POSIX conversion --------
 
 #pattern convert=unset:posix_extended
@@ -375,6 +399,12 @@
 
 /a***b/
 
+# Tests of empty inputs
+
+/a*b/use_length
+
+//use_length
+
 # -------- Tests of basic POSIX conversion --------
 
 #pattern convert=unset:posix_basic
@@ -408,5 +438,11 @@
 /^b\(c^d\)\(^e^f\)/
 
 /a***b/
+
+# Tests of empty inputs
+
+/a*b/use_length
+
+//use_length
 
 # End of testinput24

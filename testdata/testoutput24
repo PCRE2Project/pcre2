@@ -36,6 +36,12 @@
 
 # Length check
 
+/abc/convert_length=0
+** Pattern conversion error at offset 3: no more memory
+
+/abc/convert_length=1
+** Pattern conversion error at offset 3: no more memory
+
 /abc/convert_length=11
 ** Pattern conversion error at offset 3: no more memory
 
@@ -524,6 +530,33 @@ No match
 /a`*b/convert_glob_escape=x
 ** Invalid glob escape 'x'
 
+# Tests of null and empty inputs
+
+/a*b/use_length
+(?s)\Aa(*COMMIT)[^/]*?b\z
+
+//use_length
+(?s)\A\z
+
+# Error
+/a*b/null_pattern
+** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+
+# Error
+//null_pattern
+** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+
+# Error
+/a*b/use_length,null_pattern
+** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+
+# Kind-of error... pattern conversion succeeds, but it converts to a non-empty
+# pattern, and null_pattern applies to the regex parse afterwards too, which
+# fails.
+//use_length,null_pattern
+(?s)\A\z
+Failed: error 116 at offset 0: pattern passed as NULL with non-zero length
+
 # -------- Tests of extended POSIX conversion --------
 
 #pattern convert=unset:posix_extended
@@ -584,6 +617,14 @@ No match
 /a***b/
 (*NUL)a*b
 
+# Tests of empty inputs
+
+/a*b/use_length
+(*NUL)a*b
+
+//use_length
+(*NUL)
+
 # -------- Tests of basic POSIX conversion --------
 
 #pattern convert=unset:posix_basic
@@ -636,5 +677,13 @@ No match
 
 /a***b/
 (*NUL)a*b
+
+# Tests of empty inputs
+
+/a*b/use_length
+(*NUL)a*b
+
+//use_length
+(*NUL)
 
 # End of testinput24

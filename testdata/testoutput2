@@ -18938,9 +18938,9 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     
 /abc/replace=,caseless
     XabcY
- 0: abc
+ 1: XY
     XABCY 
- 0: ABC
+ 1: XY
 
 /abc/replace=[4],caseless
     XabcY
@@ -18954,7 +18954,7 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     XABCY
  1: X*Y
     XabcY\=replace=  
- 0: abc
+ 1: XY
 
 /abc/replace=\U$0,substitute_extended,substitute_case_callout
     XabcY
@@ -19081,6 +19081,10 @@ Failed: error -51: NULL argument passed with non-zero length
  1: 
     \=null_replacement
  1: 
+
+/abc/replace=
+    XabcY\=null_replacement
+ 1: XY
 
 /X*/g,replace=xy
 \= Expect error

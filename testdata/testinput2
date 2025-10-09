@@ -6393,6 +6393,9 @@ a)"xI
     \=null_subject
     \=null_replacement
 
+/abc/replace=
+    XabcY\=null_replacement
+
 /X*/g,replace=xy
 \= Expect error
     >X<\=null_replacement

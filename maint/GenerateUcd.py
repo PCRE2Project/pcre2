@@ -695,7 +695,6 @@ for c in range(MAX_UNICODE):
           found = 1
 
       # Add new characters to an existing set
-      # TODO: make sure the data doesn't overflow a list[]
 
       if found:
         found = 0

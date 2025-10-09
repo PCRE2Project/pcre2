@@ -1119,11 +1119,15 @@ pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength, uint32_t options,
   pcre2_convert_context *ccontext)
 {
 int rc;
+PCRE2_UCHAR null_str[1] = { 0xcd };
 PCRE2_UCHAR dummy_buffer[DUMMY_BUFFER_SIZE];
 PCRE2_UCHAR *use_buffer = dummy_buffer;
 PCRE2_SIZE use_length = DUMMY_BUFFER_SIZE;
 BOOL utf = (options & PCRE2_CONVERT_UTF) != 0;
 uint32_t pattype = options & TYPE_OPTIONS;
+
+if (pattern == NULL && plength == 0)
+  pattern = null_str;
 
 if (pattern == NULL || bufflenptr == NULL)
   {
