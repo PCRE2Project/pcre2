@@ -1865,21 +1865,18 @@ typedef sljit_ins sljit_u32;
 #define IMM_UI2(imm)    (((sljit_ins)(imm) << 10) & UI2_IMM_MASK)
 
 // LSX OPCODES:
-#define VLD           0x2c000000
-#define VOR_V         0x71268000
-#define VAND_V        0x71260000
 #define VBSLL_V       0x728e0000
 #define VMSKLTZ_B     0x729c4000
 #define VPICKVE2GR_WU 0x72f3e000
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-#define VREPLGR2VR  0x729f0000
+#define VREPLGR2VR_X  0x729f0000
 #define VSEQ        0x70000000
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-#define VREPLGR2VR  0x729f0400
+#define VREPLGR2VR_X  0x729f0400
 #define VSEQ        0x70008000
 #else
-#define VREPLGR2VR  0x729f0800
+#define VREPLGR2VR_X  0x729f0800
 #define VSEQ        0x70010000
 #endif
 
@@ -1956,14 +1953,14 @@ if (common->mode == PCRE2_JIT_COMPLETE)
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1 | bit);
 
 /* VREPLGR2VR.B/H/W vd, rj */
-push_inst(compiler, VREPLGR2VR | VD(cmp1_ind) | RJ_V(tmp1_reg_ind));
+push_inst(compiler, VREPLGR2VR_X | VD(cmp1_ind) | RJ_V(tmp1_reg_ind));
 
 if (char1 != char2)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, bit != 0 ? bit : char2);
 
   /* VREPLGR2VR.B/H/W vd, rj */
-  push_inst(compiler, VREPLGR2VR | VD(cmp2_ind) | RJ_V(tmp1_reg_ind));
+  push_inst(compiler, VREPLGR2VR_X | VD(cmp2_ind) | RJ_V(tmp1_reg_ind));
   }
 
 OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
@@ -2086,14 +2083,14 @@ OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1 | bit);
 
-/* VREPLGR2VR vd, rj */
-push_inst(compiler, VREPLGR2VR | VD(cmp1_ind) | RJ_V(tmp1_reg_ind));
+/* VREPLGR2VR.B/H/W vd, rj */
+push_inst(compiler, VREPLGR2VR_X | VD(cmp1_ind) | RJ_V(tmp1_reg_ind));
 
 if (char1 != char2)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, bit != 0 ? bit : char2);
-  /* VREPLGR2VR vd, rj */
-  push_inst(compiler, VREPLGR2VR | VD(cmp2_ind) | RJ_V(tmp1_reg_ind));
+  /* VREPLGR2VR.B/H/W vd, rj */
+  push_inst(compiler, VREPLGR2VR_X | VD(cmp2_ind) | RJ_V(tmp1_reg_ind));
   }
 
 OP1(SLJIT_MOV, STR_PTR, 0, TMP2, 0);
@@ -2213,13 +2210,13 @@ else
     }
   }
 
-/* VREPLGR2VR vd, rj */
-push_inst(compiler, VREPLGR2VR | VD(cmp1a_ind) | RJ_V(tmp1_reg_ind));
+/* VREPLGR2VR.B/H/W vd, rj */
+push_inst(compiler, VREPLGR2VR_X | VD(cmp1a_ind) | RJ_V(tmp1_reg_ind));
 
 if (char1a != char1b)
   {
-  /* VREPLGR2VR vd, rj */
-  push_inst(compiler, VREPLGR2VR | VD(cmp1b_ind) | RJ_V(tmp2_reg_ind));
+  /* VREPLGR2VR.B/H/W vd, rj */
+  push_inst(compiler, VREPLGR2VR_X | VD(cmp1b_ind) | RJ_V(tmp2_reg_ind));
   }
 
 if (char2a == char2b)
@@ -2242,13 +2239,13 @@ else
     }
   }
 
-/* VREPLGR2VR vd, rj */
-push_inst(compiler, VREPLGR2VR | VD(cmp2a_ind) | RJ_V(tmp1_reg_ind));
+/* VREPLGR2VR.B/H/W vd, rj */
+push_inst(compiler, VREPLGR2VR_X | VD(cmp2a_ind) | RJ_V(tmp1_reg_ind));
 
 if (char2a != char2b)
   {
-  /* VREPLGR2VR vd, rj */
-  push_inst(compiler, VREPLGR2VR | VD(cmp2b_ind) | RJ_V(tmp2_reg_ind));
+  /* VREPLGR2VR.B/H/W vd, rj */
+  push_inst(compiler, VREPLGR2VR_X | VD(cmp2b_ind) | RJ_V(tmp2_reg_ind));
   }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
