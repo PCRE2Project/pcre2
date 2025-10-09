@@ -1010,9 +1010,26 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         }
 
 #ifdef DEBUG_SHOW_OPS
-      fprintf(stderr, "++ Failed ACCEPT not at end (endanchnored set)\n");
+      fprintf(stderr, "++ Failed ACCEPT not at end (endanchored set)\n");
 #endif
       return MATCH_NOMATCH;   /* (*ACCEPT) */
+      }
+
+    /* Fail if we detect that the start position was moved to be either after
+    the end position (\K in lookahead) or before the start offset (\K in
+    lookbehind). If this occurs, the pattern must have used \K in a somewhat
+    sneaky way (e.g. by pattern recursion), because if the \K is actually
+    syntactically inside the lookaround, it's blocked at compile-time. */
+
+    if (Fstart_match < mb->start_subject + mb->start_offset ||
+        Fstart_match > Feptr)
+      {
+      /* The \K expression is fairly rare. We assert it was used so that we
+      catch any unexpected invalid data in start_match. */
+      PCRE2_ASSERT(mb->hasbsk);
+
+      if (!mb->allowlookaroundbsk)
+        return PCRE2_ERROR_BAD_BACKSLASH_K;
       }
 
     /* We have a successful match of the whole pattern. Record the result and
@@ -7393,8 +7410,11 @@ mb->start_offset = start_offset;
 mb->end_subject = end_subject;
 mb->true_end_subject = true_end_subject;
 mb->hasthen = (re->flags & PCRE2_HASTHEN) != 0;
+mb->hasbsk = (re->flags & PCRE2_HASBSK) != 0;
 mb->allowemptypartial = (re->max_lookbehind > 0) ||
     (re->flags & PCRE2_MATCH_EMPTY) != 0;
+mb->allowlookaroundbsk =
+  (re->extra_options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) != 0;
 mb->poptions = re->overall_options;          /* Pattern options */
 mb->ignore_skip_arg = 0;
 mb->mark = mb->nomatch_mark = NULL;          /* In case never set */
