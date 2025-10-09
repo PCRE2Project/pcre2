@@ -2276,7 +2276,8 @@ if (pat_patctl.locale[0] != MOD_STR_UNSET)
     }
   if (strcmp((const char *)pat_patctl.locale+1, (const char *)locale_name) != 0)
     {
-    snprintf((char *)locale_name, sizeof(locale_name), "%s", (char *)pat_patctl.locale + 1);
+    strncpy((char *)locale_name, (char *)pat_patctl.locale + 1, sizeof(locale_name));
+    locale_name[sizeof(locale_name) - 1] = '\0';
     if (locale_tables != NULL)
       {
       pcre2_maketables_free(general_context, locale_tables);
