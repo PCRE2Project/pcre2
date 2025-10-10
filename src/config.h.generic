@@ -286,7 +286,7 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to any value to include debugging code. */
 /* #undef PCRE2_DEBUG */
 
-/* to make a symbol visible */
+/* Define to the annotation for making a symbol visible. */
 #define PCRE2_EXPORT
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -301,7 +301,12 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
    in the C sense, but which are internal to the library. */
 /* #undef PCRE2_EXP_DEFN */
 
-/* Define to any value if linking statically (TODO: make nice with Libtool) */
+/* Define to any value if linking statically. Ideally, if both static and
+   shared libraries are being built, then PCRE2_STATIC would be defined only
+   for the static build. Indeed, this is a requirement on Windows. With
+   Autoconf and libtool however, it is idiomatic to compile the sources once
+   to create both the static and shared library, so in this case, PCRE2_STATIC
+   should only be defined if no shared library is being built. */
 /* #undef PCRE2_STATIC */
 
 /* Define to necessary symbol if this constant uses a non-standard name on

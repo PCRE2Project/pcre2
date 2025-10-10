@@ -46,21 +46,17 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE2_PRERELEASE      @PCRE2_PRERELEASE@
 #define PCRE2_DATE            @PCRE2_DATE@
 
-/* When an application links to a PCRE DLL in Windows, the symbols that are
+/* When an application links to a PCRE2 DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
-export setting is defined in pcre2_internal.h, which includes this file. So we
-don't change existing definitions of PCRE2_EXP_DECL. */
+export setting is defined in pcre2_internal.h, which includes this file. So, we
+don't change existing definitions of PCRE2_EXP_DECL.
 
-#if defined(_WIN32) && !defined(PCRE2_STATIC)
-#  ifndef PCRE2_EXP_DECL
-#    define PCRE2_EXP_DECL  extern __declspec(dllimport)
-#  endif
-#endif
-
-/* By default, we use the standard "extern" declarations. */
+By default, we use the standard "extern" declarations. */
 
 #ifndef PCRE2_EXP_DECL
-#  ifdef __cplusplus
+#  if defined(_WIN32) && !defined(PCRE2_STATIC)
+#    define PCRE2_EXP_DECL  extern __declspec(dllimport)
+#  elif defined __cplusplus
 #    define PCRE2_EXP_DECL  extern "C"
 #  else
 #    define PCRE2_EXP_DECL  extern
@@ -68,14 +64,15 @@ don't change existing definitions of PCRE2_EXP_DECL. */
 #endif
 
 /* When compiling with the MSVC compiler, it is sometimes necessary to include
-a "calling convention" before exported function names. (This is secondhand
-information; I know nothing about MSVC myself). For example, something like
+a "calling convention" before exported function names. For example:
 
   void __cdecl function(....)
 
 might be needed. In order so make this easy, all the exported functions have
-PCRE2_CALL_CONVENTION just before their names. It is rarely needed; if not
-set, we ensure here that it has no effect. */
+PCRE2_CALL_CONVENTION just before their names.
+
+PCRE2 normally uses the platform's standard calling convention, so this should
+not be set unless you know you need it. */
 
 #ifndef PCRE2_CALL_CONVENTION
 #define PCRE2_CALL_CONVENTION
