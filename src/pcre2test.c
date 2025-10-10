@@ -1124,13 +1124,12 @@ static int colour_setting = COLOUR_AUTO;
 static int colour_last_fd = -1;
 static BOOL colour_fd_interactive = FALSE;
 
-/* Starts a block of colour (but only if colour is enabled). */
-static void
-colour_begin(int clr, FILE* f)
+static BOOL
+should_print_colour(int clr, FILE* f)
 {
-if (f == NULL) return;
-if (clr == clr_none) return;
-if (colour_setting == COLOUR_NEVER) return;
+if (f == NULL) return FALSE;
+if (clr == clr_none) return FALSE;
+if (colour_setting == COLOUR_NEVER) return FALSE;
 if (colour_setting == COLOUR_AUTO)
   {
   if (fileno(f) != colour_last_fd)
@@ -1138,9 +1137,17 @@ if (colour_setting == COLOUR_AUTO)
     colour_last_fd = fileno(f);
     colour_fd_interactive = INTERACTIVE(f);
     }
-  if (!colour_fd_interactive) return;
+  if (!colour_fd_interactive) return FALSE;
   }
-fprintf(f, "\x1b[%dm", clr);
+return TRUE;
+}
+
+/* Starts a block of colour (but only if colour is enabled). */
+static void
+colour_begin(int clr, FILE* f)
+{
+if (should_print_colour(clr, f))
+  fprintf(f, "\x1b[%dm", clr);
 }
 
 /* Ends a block of colour (but only if colour is enabled). */
@@ -1980,7 +1987,15 @@ for (;;)
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
   if (INTERACTIVE(f))
     {
-    char *s = readline(prompt);
+    char promptbuf[80];
+    int snprintf_rc;
+    char *s;
+    if (should_print_colour(clr_prompt, stdout) &&
+        (snprintf_rc = snprintf(promptbuf, sizeof(promptbuf), "\x1b[%dm%s\x1b[0m", clr_prompt, prompt)) > 0 &&
+        snprintf_rc < (int)sizeof(promptbuf))
+      s = readline(promptbuf);
+    else
+      s = readline(prompt);
     if (s == NULL) return (here == start)? NULL : start;
     dlen = strlen(s);
     if (dlen > rlen - 2)
@@ -2003,7 +2018,7 @@ for (;;)
 
     /* Read the next line by normal means, prompting if the file is a tty. */
 
-    if (INTERACTIVE(f)) cfprintf(clr_prompt, outfile, "%s", prompt);
+    if (INTERACTIVE(f)) cfprintf(clr_prompt, stdout, "%s", prompt);
     if (fgets((char *)here, rlen_trunc, f) == NULL)
       return (here == start)? NULL : start;
 
@@ -4027,9 +4042,11 @@ preg.re_match_data = NULL;
 while (notdone)
   {
   const uint8_t *p;
+  const uint8_t *p_notsp;
   int rc = PR_OK;
   BOOL expectdata = have_active_pattern();
-  BOOL is_comment;
+  BOOL is_pattern_comment;
+  BOOL is_data_comment;
 #ifdef SUPPORT_PCRE2_8
   expectdata |= preg.re_pcre2_code != NULL;
 #endif
@@ -4049,10 +4066,17 @@ while (notdone)
 
   /* Begin processing the line. */
 
-  p = buffer;
-  is_comment = p[0] == '#' && (isspace(p[1]) || p[1] == '!' || p[1] == 0);
+  p = p_notsp = buffer;
+  while (isspace(*p_notsp)) p_notsp++;
+
+  is_pattern_comment = p[0] == '#' &&
+    (isspace(p[1]) || p[1] == '!' || p[1] == 0);
+  is_data_comment = expectdata && p_notsp[0] == '\\' && p_notsp[1] == '=' &&
+    (isspace(p_notsp[2]) || p_notsp[2] == 0);
+
   if (!INTERACTIVE(infile))
-    cfprintf(is_comment ? clr_comment : clr_input, outfile, "%s", (char *)buffer);
+    cfprintf((is_pattern_comment || is_data_comment)? clr_comment : clr_input,
+      outfile, "%s", (char *)buffer);
   fflush(outfile);
 
   if (preprocess_only && *p != '#') continue;
@@ -4062,8 +4086,7 @@ while (notdone)
 
   if (expectdata || skipping)
     {
-    while (isspace(*p)) p++;
-    if (*p == 0)
+    if (*p_notsp == 0)
       {
 #ifdef SUPPORT_PCRE2_8
       if (preg.re_pcre2_code != NULL)
@@ -4081,7 +4104,7 @@ while (notdone)
     /* Otherwise, if we are not skipping, and the line is not a data comment
     line starting with "\=", process a data line. */
 
-    else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2])))
+    else if (!skipping && !is_data_comment)
       {
       rc = process_data();
       }
@@ -4096,7 +4119,7 @@ while (notdone)
 
   else if (*p == '#')
     {
-    if (is_comment) continue;
+    if (is_pattern_comment) continue;
     rc = process_command();
     }
 
@@ -4108,8 +4131,7 @@ while (notdone)
 
   else
     {
-    while (isspace(*p)) p++;
-    if (*p != 0)
+    if (*p_notsp != 0)
       {
       cfprintf(clr_test_error, outfile, "** Invalid pattern delimiter '%c' (x%x).\n", *buffer,
         *buffer);
