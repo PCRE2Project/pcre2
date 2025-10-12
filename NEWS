@@ -4,6 +4,38 @@ News about PCRE2 releases
 Version 10.47 xx-xxx-2025
 --------------------------
 
+This is a regular semi-annual release, incorporating a few new features and
+several maintenance and build improvements.
+
+Only changes to behaviour, changes to the API, and other significant changes
+are described here. Please see the ChangeLog and Git log for further details.
+
+* (Powerful new feature) Pattern recursion of the form
+"(?1(GROUP_NAME_OR_NUM,...))" acts as a subroutine call which additionally
+returns the listed capturing groups to the calling context.
+
+* (Significant bugfix) Fixed a crash in pcre2_callout_enumerate() which is
+easily reachable on any pattern that contains a Unicode character class. If your
+application uses this function, please read the details for this change and
+evaluate its severity for your application.
+
+* (Build change) There are now linker scripts to enable symbol version for the
+PCRE2 dynamic libraries. Downstream Linux distributions may make use of this, or
+disable it with the new Autoconf `--disable-symvers` and CMake `-DPCRE2_SYMVERS`
+options. Linux, Solaris, and FreeBSD are tested and supported.
+
+* (New API function) Added pcre2_next_match(). This function makes it both
+simpler and safer for clients to iterate over all matches in a subject. The
+documentation in `pcre2api` also provides improved guidance in the section
+"Iterating over all matches".
+
+* (Minor API addition) Added the PCRE2_CONFIG_EFFECTIVE_LINKSIZE option to
+pcre2_config().
+
+* (Build change) Modernize the CMake build files, to use the
+"$<BUILD_INTERFACE:...>", "$<INSTALL_INTERFACE:...>" and "install(EXPORT...)"
+expressions to export the PCRE2 targets.
+
 
 Version 10.46 27-August-2025
 ----------------------------

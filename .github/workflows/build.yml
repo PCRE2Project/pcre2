@@ -1,6 +1,23 @@
 name: Build
 on:
   workflow_dispatch:
+    inputs:
+      job_id:
+        type: choice
+        description: Specific job to run
+        default: all
+        required: true
+        options:
+        - all
+        - linux
+        - alpine
+        - macos
+        - windows
+        - freebsd
+        - solaris
+        - zos
+        - distcheck
+        - coverage
   push:
     branches: [ master, "release/**" ]
   pull_request:
@@ -19,6 +36,7 @@ jobs:
   linux:
     name: Linux
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'linux')
     steps:
       - name: Setup
         run: |
@@ -61,6 +79,7 @@ jobs:
     name: alpine
     runs-on: ubuntu-latest
     container: alpine
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'alpine')
     steps:
       - name: Setup
         run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev
@@ -100,6 +119,7 @@ jobs:
   macos:
     name: macOS universal
     runs-on: macos-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'macos')
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -169,6 +189,7 @@ jobs:
   windows:
     name: Windows
     runs-on: windows-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'windows')
     strategy:
       fail-fast: false
       matrix:
@@ -273,7 +294,9 @@ jobs:
   freebsd:
     name: FreeBSD
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'freebsd')) ||
+      github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -323,7 +346,9 @@ jobs:
   solaris:
     name: Solaris
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'solaris')) ||
+      github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -395,7 +420,7 @@ jobs:
             echo "== CMake, 64-bit =="
             cd ../build-cmake-64
 
-            CC="cc -m64" cmake $CMAKE_FLAGS -DNCURSES_LIBRARY=termcap -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            CC="cc -m64" cmake $CMAKE_FLAGS -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
             ctest -j3 --output-on-failure
@@ -406,7 +431,9 @@ jobs:
   zos:
     name: z/OS
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zos')) ||
+      github.event_name == 'push'
     concurrency:
       group: zos-ssh-build
     steps:
@@ -471,6 +498,7 @@ jobs:
   distcheck:
     name: Build & verify distribution
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'distcheck')
     permissions:
       id-token: write # Needed to make calls to the Sigstore service
       attestations: write # Needed to write the attestation to GitHub's database
@@ -527,6 +555,7 @@ jobs:
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'coverage')
     steps:
       - name: Setup
         run: |

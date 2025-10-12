@@ -6948,7 +6948,6 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   pcre2_match_context *mcontext)
 {
 int rc;
-int was_zero_terminated = 0;
 const uint8_t *start_bits = NULL;
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 uint32_t original_options = options;
@@ -7024,7 +7023,6 @@ req_cu_ptr = start_match - 1;
 if (length == PCRE2_ZERO_TERMINATED)
   {
   length = PRIV(strlen)(subject);
-  was_zero_terminated = 1;
   }
 true_end_subject = end_subject = subject + length;
 
@@ -7193,12 +7191,16 @@ if (use_jit)
     match_data->options = original_options;
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
-      length = CU2BYTES(length + was_zero_terminated);
-      match_data->subject = match_data->memctl.malloc(length,
-        match_data->memctl.memory_data);
-      if (match_data->subject == NULL)
-        return match_data->rc = PCRE2_ERROR_NOMEMORY;
-      memcpy((void *)match_data->subject, subject, length);
+      if (length != 0)
+        {
+        match_data->subject = match_data->memctl.malloc(CU2BYTES(length),
+          match_data->memctl.memory_data);
+        if (match_data->subject == NULL)
+          return match_data->rc = PCRE2_ERROR_NOMEMORY;
+        memcpy((void *)match_data->subject, subject, CU2BYTES(length));
+        }
+      else
+        match_data->subject = NULL;
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
     else
@@ -8155,12 +8157,16 @@ if (rc == MATCH_MATCH)
     mb->last_used_ptr : mb->end_match_ptr) - subject;
   if ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
     {
-    length = CU2BYTES(length + was_zero_terminated);
-    match_data->subject = match_data->memctl.malloc(length,
-      match_data->memctl.memory_data);
-    if (match_data->subject == NULL)
-      return match_data->rc = PCRE2_ERROR_NOMEMORY;
-    memcpy((void *)match_data->subject, subject, length);
+    if (length != 0)
+      {
+      match_data->subject = match_data->memctl.malloc(CU2BYTES(length),
+        match_data->memctl.memory_data);
+      if (match_data->subject == NULL)
+        return match_data->rc = PCRE2_ERROR_NOMEMORY;
+      memcpy((void *)match_data->subject, subject, CU2BYTES(length));
+      }
+    else
+      match_data->subject = NULL;
     match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
   else match_data->subject = original_subject;

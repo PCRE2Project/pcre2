@@ -1,6 +1,28 @@
 name: Dev
 on:
   workflow_dispatch:
+    inputs:
+      job_id:
+        type: choice
+        description: Specific job to run
+        default: all
+        required: true
+        options:
+        - all
+        - canary
+        - dragon
+        - greatawk
+        - dodo
+        - wasp
+        - bat
+        - pterodactyl
+        - bigbird
+        - camel
+        - chaffinch
+        - fruitbat
+        - ptarmigan
+        - zebrilus
+        - bee
   push:
     branches: [ master, "release/**" ]
   pull_request:
@@ -20,6 +42,7 @@ jobs:
     # Tests with: Debug & assertions; link-size=4; libedit
     name: GCC -O0
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'canary')
     steps:
       - name: Setup
         run: |
@@ -54,9 +77,10 @@ jobs:
         run: ./pcre2posix_test -v
 
   dragon:
-    # Tests with: clang AB/UB; link-size=3
+    # Tests with: clang AB/UB; link-size=3. Clang's logo is a dragon.
     name: Clang
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'dragon')
     strategy:
       fail-fast: false
       matrix:
@@ -95,6 +119,7 @@ jobs:
     name: GCC -O3
     runs-on: ubuntu-latest
     container: ubuntu:22.04
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'greatawk')
     steps:
       - name: Setup
         run: |
@@ -173,6 +198,7 @@ jobs:
     name: GCC -Os, old Autotools
     runs-on: ubuntu-latest
     container: ubuntu:22.04
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'dodo')
     steps:
       - name: Setup
         run: |
@@ -208,6 +234,7 @@ jobs:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
     name: GCC -Os, CMake+ninja, no JIT
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'wasp')
     env:
       CMAKE_VER: "3.15.7"
     steps:
@@ -254,9 +281,10 @@ jobs:
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   bat:
-    # Tests with: MSVC 32-bit, and a variety of CMake options
+    # Tests with: MSVC 32-bit, and a variety of CMake options. Windows has "bat" files.
     name: Windows (Win32)
     runs-on: windows-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'bat')
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -276,6 +304,7 @@ jobs:
     # Tests with: MSVC 64-bit, Debug, shared libraries
     name: Windows (x64)
     runs-on: windows-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'pterodactyl')
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -295,6 +324,7 @@ jobs:
     # Job to execute ManyConfigTests
     name: manyconfig
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'bigbird')
     steps:
       - name: Setup
         run: |
@@ -313,10 +343,11 @@ jobs:
           ./maint/ManyConfigTests
 
   camel:
-    # Job to execute RunPerlTest
+    # Job to execute RunPerlTest. "Camel bird" is another name for an ostrich (and it's Perl's logo).
     name: perl
     runs-on: ubuntu-latest
     container: perl:devel
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'camel')
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -334,6 +365,7 @@ jobs:
     # functions or macros which collide.
     name: CMake unity build
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'chaffinch')
     env:
       # Disallowing shadowing would be very spammy for unity builds, because the
       # same variable name can be used in multiple files.
@@ -353,11 +385,13 @@ jobs:
       - name: Test
         run: cd build && ctest -j3 --output-on-failure
 
-  msys2:
+  fruitbat:
     # Tests with: MSYS2 unix-on-Windows environment
     name: MSYS2
     runs-on: windows-latest
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'fruitbat')) ||
+      github.event_name == 'push'
     strategy:
       fail-fast: false
       matrix:
@@ -427,7 +461,9 @@ jobs:
     permissions:
       contents: read
       packages: write # Necessary for uraimo/run-on-arch-action to use GitHub's Docker repository as a cache
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'ptarmigan')) ||
+      github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -464,10 +500,12 @@ jobs:
             (cd build && ctest -j3 --output-on-failure)
 
   zebrilus:
-    # Tests with: Zig compiler
+    # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".
     name: Zig
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zebrilus')) ||
+      github.event_name == 'push'
     steps:
       - name: Setup
         run: |
@@ -485,15 +523,17 @@ jobs:
         run: |
           srcdir=`pwd` pcre2test=`pwd`/zig-out/bin/pcre2test ./RunTest -bigstack
 
-  bazel:
-    # Tests with: Bazel build system
+  bee:
+    # Tests with: Bazel build system. A bee goes "buzz buzz buzz(el)".
     name: Bazel
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
     runs-on: ${{ matrix.os }}
-    if: github.event_name != 'pull_request'
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'bee')) ||
+      github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0

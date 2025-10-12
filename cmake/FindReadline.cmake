@@ -3,25 +3,53 @@
 # --> BSD licensed
 #
 # GNU Readline library finder
-if(READLINE_INCLUDE_DIR AND READLINE_LIBRARY AND NCURSES_LIBRARY)
-  set(READLINE_FOUND TRUE)
-else()
-  find_path(READLINE_INCLUDE_DIR readline/readline.h /usr/include/readline)
 
-  # 2008-04-22 The next clause used to read like this:
-  #
-  #  FIND_LIBRARY(READLINE_LIBRARY NAMES readline)
-  #        FIND_LIBRARY(NCURSES_LIBRARY NAMES ncurses )
-  #        include(FindPackageHandleStandardArgs)
-  #        FIND_PACKAGE_HANDLE_STANDARD_ARGS(Readline DEFAULT_MSG NCURSES_LIBRARY READLINE_INCLUDE_DIR READLINE_LIBRARY )
-  #
-  # I was advised to modify it such that it will find an ncurses library if
-  # required, but not if one was explicitly given, that is, it allows the
-  # default to be overridden. PH
+find_path(READLINE_INCLUDE_DIR readline/readline.h PATH_SUFFIXES include)
+mark_as_advanced(READLINE_INCLUDE_DIR)
 
-  find_library(READLINE_LIBRARY NAMES readline)
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Readline DEFAULT_MSG READLINE_INCLUDE_DIR READLINE_LIBRARY)
+find_library(READLINE_LIBRARY NAMES readline)
+mark_as_advanced(READLINE_LIBRARY)
 
-  mark_as_advanced(READLINE_INCLUDE_DIR READLINE_LIBRARY)
+if(READLINE_INCLUDE_DIR AND READLINE_LIBRARY)
+  # Check if we need to link to ncurses as well
+
+  include(CheckSymbolExists)
+  include(CMakePushCheckState)
+
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_LIBRARIES "${READLINE_LIBRARY}")
+  set(CMAKE_REQUIRED_INCLUDES "${READLINE_INCLUDE_DIR}")
+  check_symbol_exists("readline" "stdio.h;readline/readline.h" HAVE_READLINE_FUNC)
+
+  if(NOT HAVE_READLINE_FUNC)
+    foreach(
+      lib IN ITEMS
+      tinfo
+      curses
+      ncurses
+      ncursesw
+      termcap
+    )
+      find_library(NCURSES_LIBRARY_${lib} NAMES ${lib})
+      mark_as_advanced(NCURSES_LIBRARY_${lib})
+      if(NCURSES_LIBRARY_${lib})
+        cmake_reset_check_state()
+        set(CMAKE_REQUIRED_LIBRARIES "${READLINE_LIBRARY}" "${NCURSES_LIBRARY_${lib}}")
+        set(CMAKE_REQUIRED_INCLUDES "${READLINE_INCLUDE_DIR}")
+        check_symbol_exists("readline" "stdio.h;readline/readline.h" HAVE_READLINE_FUNC_${lib})
+
+        if(HAVE_READLINE_FUNC_${lib})
+          message(STATUS "Looking for readline - readline needs ${lib}")
+          set(NCURSES_LIBRARY "${NCURSES_LIBRARY_${lib}}" CACHE FILEPATH "Path to the ncurses library")
+          mark_as_advanced(NCURSES_LIBRARY)
+          break()
+        endif()
+      endif()
+    endforeach()
+  endif()
+
+  cmake_pop_check_state()
 endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Readline DEFAULT_MSG READLINE_LIBRARY READLINE_INCLUDE_DIR)

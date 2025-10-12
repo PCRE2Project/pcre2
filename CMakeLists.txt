@@ -161,6 +161,7 @@ include(CheckSymbolExists)
 include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CMakePackageConfigHelpers)
+include(CMakePushCheckState)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
 include(PCRE2UseSystemExtensions)
@@ -172,8 +173,25 @@ check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(unistd.h HAVE_UNISTD_H)
 check_include_file(windows.h HAVE_WINDOWS_H)
 
-check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE)
-check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
+# Check whether any system-wide extensions need to be enabled, in order for
+# OS functionality to be exposed.
+pcre2_use_system_extensions()
+
+cmake_push_check_state(RESET)
+# Somewhat awkward code to propagate the _GNU_SOURCE definition (added to
+# COMPILE_DEFINITIONS by pcre2_use_system_extensions()).
+get_directory_property(_pcre2_compile_definitions COMPILE_DEFINITIONS)
+if(DEFINED _pcre2_compile_definitions)
+  set(CMAKE_REQUIRED_DEFINITIONS "")
+  foreach(_def IN LISTS _pcre2_compile_definitions)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D${_def}")
+  endforeach()
+endif()
+
+check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP) # glibc 2.7
+check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
+check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
+cmake_pop_check_state()
 
 check_c_source_compiles(
   [=[
@@ -184,10 +202,10 @@ check_c_source_compiles(
   HAVE_REALPATH
 )
 
+cmake_push_check_state()
 if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
   set(CMAKE_REQUIRED_FLAGS "")
 endif()
-set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL" AND NOT CMAKE_C_COMPILER_ID STREQUAL "SunPro")
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
 endif()
@@ -197,6 +215,7 @@ check_c_source_compiles(
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
 
+# TODO Consider switching to modern "GenerateExportHeader"
 check_c_source_compiles(
   [=[
   extern __attribute__ ((visibility ("default"))) int f(void);
@@ -206,13 +225,13 @@ check_c_source_compiles(
   HAVE_VISIBILITY
 )
 
+cmake_pop_check_state()
+
 if(HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
 else()
   set(PCRE2_EXPORT)
 endif()
-
-set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 check_c_source_compiles("int main(void) { __assume(1); return 0; }" HAVE_BUILTIN_ASSUME)
 
@@ -270,11 +289,6 @@ check_c_source_compiles(
 if(INTEL_CET_ENABLED)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
 endif()
-
-# Check whether any system-wide extensions need to be enabled, in order for
-# OS functionality to be exposed.
-
-pcre2_use_system_extensions()
 
 # User-configurable options
 #
@@ -436,7 +450,15 @@ if(BZIP2_FOUND)
   option(PCRE2_SUPPORT_LIBBZ2 "Enable support for linking pcre2grep with libbz2." ON)
 endif()
 if(PCRE2_SUPPORT_LIBBZ2)
-  include_directories(${BZIP2_INCLUDE_DIR})
+  if(BZIP2_FOUND)
+    include_directories(${BZIP2_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " libbz2 not found. Set BZIP2_INCLUDE_DIR to a compatible header\n"
+      " or set BZip2_ROOT to a full bzip2 installed tree, as needed."
+    )
+  endif()
 endif()
 
 # zlib
@@ -444,24 +466,29 @@ if(ZLIB_FOUND)
   option(PCRE2_SUPPORT_LIBZ "Enable support for linking pcre2grep with libz." ON)
 endif()
 if(PCRE2_SUPPORT_LIBZ)
-  include_directories(${ZLIB_INCLUDE_DIR})
+  if(ZLIB_FOUND)
+    include_directories(${ZLIB_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " zlib not found. Set ZLIB_INCLUDE_DIR to a compatible header\n"
+      " or set ZLIB_ROOT to a full zlib installed tree, as needed."
+    )
+  endif()
 endif()
 
 # editline lib
 if(EDITLINE_FOUND)
   option(PCRE2_SUPPORT_LIBEDIT "Enable support for linking pcre2test with libedit." OFF)
 endif()
-if(EDITLINE_FOUND)
-  if(PCRE2_SUPPORT_LIBEDIT)
+if(PCRE2_SUPPORT_LIBEDIT)
+  if(EDITLINE_FOUND)
     include_directories(${EDITLINE_INCLUDE_DIR})
-  endif()
-else()
-  if(PCRE2_SUPPORT_LIBEDIT)
+  else()
     message(
       FATAL_ERROR
-      " libedit not found, set EDITLINE_INCLUDE_DIR to a compatible header\n"
-      " or set Editline_ROOT to a full libedit installed tree, as needed\n"
-      " Might need to enable policy CMP0074 in CMakeLists.txt"
+      " libedit not found. Set EDITLINE_INCLUDE_DIR to a compatible header\n"
+      " or set Editline_ROOT to a full libedit installed tree, as needed."
     )
   endif()
 endif()
@@ -471,7 +498,15 @@ if(READLINE_FOUND)
   option(PCRE2_SUPPORT_LIBREADLINE "Enable support for linking pcre2test with libreadline." ON)
 endif()
 if(PCRE2_SUPPORT_LIBREADLINE)
-  include_directories(${READLINE_INCLUDE_DIR})
+  if(READLINE_FOUND)
+    include_directories(${READLINE_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " libreadline not found. Set READLINE_INCLUDE_DIR to a compatible header\n"
+      " or set Readline_ROOT to a full libreadline installed tree, as needed."
+    )
+  endif()
 endif()
 
 # Prepare build configuration
@@ -537,19 +572,7 @@ if(PCRE2_SUPPORT_JIT)
 endif()
 
 if(PCRE2_SUPPORT_JIT_SEALLOC)
-  set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
-  check_symbol_exists(mkostemp stdlib.h REQUIRED)
-  unset(CMAKE_REQUIRED_DEFINITIONS)
-  if(${REQUIRED})
-    if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
-      add_compile_definitions(_GNU_SOURCE)
-      set(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
-    else()
-      message(FATAL_ERROR "Your configuration is not supported")
-    endif()
-  else()
-    set(PCRE2_SUPPORT_JIT_SEALLOC OFF)
-  endif()
+  set(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
 endif()
 
 if(PCRE2GREP_SUPPORT_JIT)
@@ -1491,7 +1514,12 @@ if(PCRE2_SHOW_REPORT)
     endforeach()
   else()
     string(TOUPPER "${CMAKE_BUILD_TYPE}" buildtype)
-    message(STATUS "  C compiler flags .................. : ${CMAKE_C_FLAGS}${CFSP}${CMAKE_C_FLAGS_${buildtype}}")
+    if(buildtype STREQUAL "")
+      set(CFBLD "")
+    else()
+      set(CFBLD "${CMAKE_C_FLAGS_${buildtype}}")
+    endif()
+    message(STATUS "  C compiler flags .................. : ${CMAKE_C_FLAGS}${CFSP}${CFBLD}")
   endif()
 
   message(STATUS "")
