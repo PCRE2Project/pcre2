@@ -219,23 +219,26 @@ check_c_source_compiles(
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
 
-check_c_source_compiles(
-  [=[
-  extern __attribute__ ((visibility ("default"))) int f(void);
-  int main(void) { return f(); }
-  int f(void) { return 42; }
-  ]=]
-  HAVE_VISIBILITY
-)
-if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
-  # Hmm. We don't know of any way to set a symbol to have default visibility, other
-  # than the common "__attribute__((visibility("default")))". But CMake thinks that
-  # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
-  # generate a usable shared library.
-  message(
-    FATAL_ERROR
-    "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
+  check_c_source_compiles(
+    [=[
+    extern __attribute__ ((visibility ("default"))) int f(void);
+    int main(void) { return f(); }
+    int f(void) { return 42; }
+    ]=]
+    HAVE_VISIBILITY
   )
+
+  if(NOT HAVE_VISIBILITY)
+    # Hmm. We don't know of any way to set a symbol to have default visibility, other
+    # than the common "__attribute__((visibility("default")))". But CMake thinks that
+    # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
+    # generate a usable shared library.
+    message(
+      FATAL_ERROR
+      "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+    )
+  endif()
 endif()
 if(HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
@@ -263,8 +266,10 @@ check_c_source_compiles(
 
 file(WRITE ${PROJECT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
 file(WRITE ${PROJECT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
-pcre2_check_linker_flag(C -Wl,--version-script,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
-pcre2_check_linker_flag(C -Wl,-M,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+if(NOT MSVC)
+  pcre2_check_linker_flag(C -Wl,--version-script,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
+  pcre2_check_linker_flag(C -Wl,-M,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+endif()
 if(HAVE_VSCRIPT_GNU)
   set(VSCRIPT_FLAG --version-script)
   set(HAVE_VSCRIPT TRUE)
