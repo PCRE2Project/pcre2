@@ -128,13 +128,12 @@ MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
 #endif
 
 /* When compiling a DLL for Windows, the exported symbols have to be declared
-using some MS magic. I found some useful information on this web page:
-http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
-information there, using __declspec(dllexport) without "extern" we have a
-definition; with "extern" we have a declaration. The settings here override the
-setting in pcre2.h (which is included below); it defines only PCRE2_EXP_DECL,
-which is all that is needed for applications (they just import the symbols). We
-use:
+using some MS magic, as documented here:
+https://learn.microsoft.com/en-us/cpp/build/exporting-from-a-dll-using-declspec-dllexport
+
+In pcre2.h (which is included below), we define only PCRE2_EXP_DECL,
+which is all that is needed for applications (they just import the symbols). To
+compile the library, we use:
 
   PCRE2_EXP_DECL    for declarations
   PCRE2_EXP_DEFN    for definitions
@@ -162,9 +161,9 @@ only if it is not already set. */
 
 #ifndef PCRE2_EXP_DEFN
 #  if defined(_WIN32) && !defined(PCRE2_STATIC)
-#    define PCRE2_EXP_DEFN  __declspec(dllexport)
+#    define PCRE2_EXP_DEFN  extern __declspec(dllexport)
 #  else
-#    define PCRE2_EXP_DEFN  PCRE2_EXPORT
+#    define PCRE2_EXP_DEFN  extern PCRE2_EXPORT
 #  endif
 #endif
 
