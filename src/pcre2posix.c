@@ -51,10 +51,6 @@ library has an "internal" view of some macros, but is an "external" client of
 the pcre2-8 dynamic library. This is unusual, and justifies a (rare) direct
 inclusion of config.h. */
 
-#if defined HAVE_EXPORT_H
-#include "export.h"
-#endif
-
 #if defined HAVE_CONFIG_H && !defined PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #define PCRE2_CONFIG_H_IDEMPOTENT_GUARD
 #include "config.h"
@@ -67,11 +63,13 @@ compiling these functions. This must come before including pcre2posix.h, where
 they are set for an application (using these functions) if they have not
 previously been set. */
 
+#if defined __cplusplus
+#error This project uses C99. C++ is not supported.
+#endif
+
 #ifndef PCRE2POSIX_EXP_DECL
 #  if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
 #    define PCRE2POSIX_EXP_DECL  extern __declspec(dllexport)
-#  elif defined __cplusplus
-#    define PCRE2POSIX_EXP_DECL  extern "C" PCRE2_EXPORT
 #  else
 #    define PCRE2POSIX_EXP_DECL  extern PCRE2_EXPORT
 #  endif
@@ -80,8 +78,6 @@ previously been set. */
 #ifndef PCRE2POSIX_EXP_DEFN
 #  if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
 #    define PCRE2POSIX_EXP_DEFN  __declspec(dllexport)
-#  elif defined __cplusplus
-#    define PCRE2POSIX_EXP_DEFN  extern "C" PCRE2_EXPORT
 #  else
 #    define PCRE2POSIX_EXP_DEFN  PCRE2_EXPORT
 #  endif

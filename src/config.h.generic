@@ -283,6 +283,18 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 #define PCRE2GREP_MAX_BUFSIZE 1048576
 #endif
 
+/* Define to any value if linking libpcre2-posix dynamically. Ideally, if both
+   static and shared libraries are being built, then PCRE2POSIX_SHARED would
+   be defined only for the shared build. Indeed, this is a requirement on
+   Windows. However, when building with Autoconf and libtool, we compile the
+   sources once only to create both the static and shared library, so in this
+   case, PCRE2POSIX_SHARED should only be defined if the shared library is
+   being built, regardless of whether or not the static library is also being
+   built. */
+#ifndef PCRE2POSIX_SHARED
+#define PCRE2POSIX_SHARED 1
+#endif
+
 /* Define to any value to include debugging code. */
 /* #undef PCRE2_DEBUG */
 

@@ -41,12 +41,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PCRE2_INTERNAL_H_IDEMPOTENT_GUARD
 #define PCRE2_INTERNAL_H_IDEMPOTENT_GUARD
 
-/* Support CMake's mechanism to populate PCRE2_EXPORT via a generated header. */
-
-#if defined HAVE_EXPORT_H
-#include "export.h"
-#endif
-
 /* We do not assume that the config.h file has an idempotent include guard,
 since it may well be written by clients. The standard Autoheader config.h does
 not have an include guard (although we could customise that). */
@@ -154,11 +148,13 @@ special-purpose environments) might want to stick other stuff in front of
 exported symbols. That's why, in the non-Windows case, we set PCRE2_EXP_DEFN
 only if it is not already set. */
 
+#if defined __cplusplus
+#error This project uses C99. C++ is not supported.
+#endif
+
 #ifndef PCRE2_EXP_DECL
 #  if defined(_WIN32) && !defined(PCRE2_STATIC)
 #    define PCRE2_EXP_DECL  extern __declspec(dllexport)
-#  elif defined __cplusplus
-#    define PCRE2_EXP_DECL  extern "C" PCRE2_EXPORT
 #  else
 #    define PCRE2_EXP_DECL  extern PCRE2_EXPORT
 #  endif
@@ -167,8 +163,6 @@ only if it is not already set. */
 #ifndef PCRE2_EXP_DEFN
 #  if defined(_WIN32) && !defined(PCRE2_STATIC)
 #    define PCRE2_EXP_DEFN  __declspec(dllexport)
-#  elif defined __cplusplus
-#    define PCRE2_EXP_DEFN  extern "C" PCRE2_EXPORT
 #  else
 #    define PCRE2_EXP_DEFN  PCRE2_EXPORT
 #  endif

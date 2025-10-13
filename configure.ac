@@ -736,12 +736,14 @@ AC_SUBST(PCRE2_STATIC_CFLAG)
 
 PCRE2POSIX_CFLAG=""
 if test "x$enable_shared" = "xyes" ; then
-  # PCRE2_STATIC_CFLAG is not added to the CFLAGS used for compilation; that
-  # flag is passed in config.h instead. However, we have chosen not to include
-  # PCRE2POSIX_CFLAG in the config.h, and instead it is passed to the compiler
-  # when building the library.
-  # Both flags are used to populate the pkg-config files, so the definitions
-  # are available to library clients.
+  AC_DEFINE([PCRE2POSIX_SHARED], [1], [
+    Define to any value if linking libpcre2-posix dynamically. Ideally, if both
+    static and shared libraries are being built, then PCRE2POSIX_SHARED would be
+    defined only for the shared build. Indeed, this is a requirement on Windows.
+    However, when building with Autoconf and libtool, we compile the sources once
+    only to create both the static and shared library, so in this case,
+    PCRE2POSIX_SHARED should only be defined if the shared library is being built,
+    regardless of whether or not the static library is also being built.])
   PCRE2POSIX_CFLAG="-DPCRE2POSIX_SHARED"
 fi
 AC_SUBST(PCRE2POSIX_CFLAG)
