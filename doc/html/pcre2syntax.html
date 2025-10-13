@@ -722,6 +722,7 @@ special character is the dollar character in one of the following forms:
   $`                  insert the substring that precedes the match
   $'                  insert the substring that follows the match
   $_                  insert the entire input string
+  $+                  insert the highest-numbered capture group which matched
   $*MARK or ${*MARK}  insert a control verb name
 </pre>
 For ${n}, n can be a name or a number. If PCRE2_SUBSTITUTE_EXTENDED is set,

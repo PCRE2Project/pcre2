@@ -5010,6 +5010,34 @@ B)x/alt_verbnames,mark
     LabcR\=replace=>$'<
     LabcR\=replace=>$_<
 
+/A(.)|B(.)/
+    AMZ\=replace=>$+<
+    BMZ\=replace=>$+<
+    AMZ\=replace=>$+
+    AMZ\=replace=>$+{name}
+    BMZ\=ovector=2
+    BMZ\=ovector=3
+    BMZ\=ovector=2,replace=>$+<
+    BMZ\=ovector=3,replace=>$+<
+    BMZ\=ovector=2,substitute_matched,replace=>$+<
+    BMZ\=ovector=3,substitute_matched,replace=>$+<
+
+/A|(B)/
+    B\=replace=>$1<
+    A\=replace=>$1<
+    B\=substitute_unset_empty,replace=>$1<
+    A\=substitute_unset_empty,replace=>$1<
+    B\=replace=>$+<
+    A\=replace=>$+<
+    B\=substitute_unset_empty,replace=>$+<
+    A\=substitute_unset_empty,replace=>$+<
+
+/ABC/
+    ABC\=replace=$+z
+    ABC\=substitute_unknown_unset,replace=$+z
+    ABC\=substitute_unset_empty,replace=$+z
+    ABC\=substitute_unknown_unset,substitute_unset_empty,replace=$+z
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
 /((p(?'K/

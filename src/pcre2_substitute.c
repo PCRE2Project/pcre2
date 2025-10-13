@@ -1143,6 +1143,44 @@ for (;;)
         subptrend = subject + length;
         goto SUBPTR_SUBSTITUTE;
         }
+      else if (next == CHAR_PLUS &&
+               !(ptr+1 < repend && ptr[1] == CHAR_LEFT_CURLY_BRACKET))
+        {
+        /* Perl supports $+ for "highest captured group" (not the same as $^N
+        which is mainly only useful inside Perl's match callbacks). We also
+        don't accept "$+{..." since that's Perl syntax for our ${name}. */
+        ++ptr;
+        if (code->top_bracket == 0)
+          {
+          /* Treat either as "no such group" or "all groups unset" based on the
+          PCRE2_SUBSTITUTE_UNKNOWN_UNSET option. */
+          if ((suboptions & PCRE2_SUBSTITUTE_UNKNOWN_UNSET) == 0)
+            {
+            rc = PCRE2_ERROR_NOSUBSTRING;
+            goto PTREXIT;
+            }
+          group = 0;
+          }
+        else
+          {
+          /* If we have any capture groups, then the ovector needs to be large
+          enough for all of them, or the result won't be accurate. */
+          if (match_data->oveccount < code->top_bracket + 1)
+            {
+            rc = PCRE2_ERROR_UNAVAILABLE;
+            goto PTREXIT;
+            }
+          for (group = code->top_bracket; group > 0; group--)
+            if (ovector[2*group] != PCRE2_UNSET) break;
+          }
+        if (group == 0)
+          {
+          if ((suboptions & PCRE2_SUBSTITUTE_UNSET_EMPTY) != 0) continue;
+          rc = PCRE2_ERROR_UNSET;
+          goto PTREXIT;
+          }
+        goto GROUP_SUBSTITUTE;
+        }
 
       if (next == CHAR_LEFT_CURLY_BRACKET)
         {
