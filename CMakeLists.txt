@@ -230,7 +230,10 @@ if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
   # than the common "__attribute__((visibility("default")))". But CMake thinks that
   # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
   # generate a usable shared library.
-  message(FATAL_ERROR "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility.")
+  message(
+    FATAL_ERROR
+    "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+  )
 endif()
 if(HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])

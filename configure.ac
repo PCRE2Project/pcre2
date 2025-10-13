@@ -982,6 +982,11 @@ AH_VERBATIM([PCRE2_EXP_DEFN], [
    in the C sense, but which are internal to the library. */
 #undef PCRE2_EXP_DEFN])
 
+AH_VERBATIM([PCRE2POSIX_EXP_DEFN], [
+/* See PCRE2_EXP_DEFN; but this is applied to functions in the libpcre2-posix
+   library. */
+#undef PCRE2POSIX_EXP_DEFN])
+
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [
     If you are compiling for a system that uses EBCDIC instead of ASCII

@@ -283,6 +283,10 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 #define PCRE2GREP_MAX_BUFSIZE 1048576
 #endif
 
+/* See PCRE2_EXP_DEFN; but this is applied to functions in the libpcre2-posix
+   library. */
+/* #undef PCRE2POSIX_EXP_DEFN */
+
 /* Define to any value if linking libpcre2-posix dynamically. Ideally, if both
    static and shared libraries are being built, then PCRE2POSIX_SHARED would
    be defined only for the shared build. Indeed, this is a requirement on
