@@ -68,7 +68,7 @@ a "calling convention" before exported function names. For example:
 
   void __cdecl function(....)
 
-might be needed. In order so make this easy, all the exported functions have
+might be needed. In order to make this easy, all the exported functions have
 PCRE2_CALL_CONVENTION just before their names.
 
 PCRE2 normally uses the platform's standard calling convention, so this should

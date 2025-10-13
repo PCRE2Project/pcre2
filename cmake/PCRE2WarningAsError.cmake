@@ -11,7 +11,6 @@ function(pcre2_warning_as_error out_var)
     if(DEFINED CMAKE_C_COMPILE_OPTIONS_WARNING_AS_ERROR)
       set(${out_var} "${CMAKE_C_COMPILE_OPTIONS_WARNING_AS_ERROR}" PARENT_SCOPE)
     endif()
-
   else()
     # The fallback probes for support, trying a few common flags.
 
@@ -34,5 +33,4 @@ function(pcre2_warning_as_error out_var)
       cmake_pop_check_state()
     endif()
   endif()
-
 endfunction()
