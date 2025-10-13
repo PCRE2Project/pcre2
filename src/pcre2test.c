@@ -65,6 +65,7 @@ it references only the enabled library functions. */
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
@@ -214,7 +215,8 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #endif
 
 #define CFORE_UNSET UINT32_MAX    /* Unset value for startend/cfail/cerror fields */
-#define CONVERT_UNSET UINT32_MAX  /* Unset value for convert_type field */
+#define CONVERT_UNSET UINT32_MAX  /* Unset value for convert_type/convert_length fields */
+#define MOD_STR_UNSET UINT8_MAX   /* Sentinel length for unset string options */
 #define DFA_WS_DIMENSION 1000     /* Size of DFA workspace */
 #define DEFAULT_OVECCOUNT 15      /* Default ovector count */
 #define JUNK_OFFSET 0xdeadbeef    /* For initializing ovector */
@@ -517,7 +519,7 @@ enum { MOD_CTC,    /* Applies to a compile context */
        MOD_OPT,    /* Is an option bit */
        MOD_OPTMZ,  /* Is an optimization directive */
        MOD_SIZ,    /* Is a PCRE2_SIZE value */
-       MOD_STR };  /* Is a string */
+       MOD_STR };  /* Is a string; Pascal-encoded with length in first byte */
 
 /* Control bits. Some apply to compiling, some to matching, but some can be set
 either on a pattern or a data line, so they must all be distinct. There are now
@@ -616,15 +618,15 @@ different things in the two cases. */
 
 /* Structures for holding modifier information for patterns and subject strings
 (data). Fields containing modifiers that can be set either for a pattern or a
-subject must be at the start and in the same order in both cases so that the
-same offset in the big table below works for both. */
+subject (MOD_PD[P]/MOD_PND) must be at the start and in the same order in both
+structures so that the same offset in the big table below works for both. */
 
 typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  options;          /* Must be in same position as datctl */
   uint32_t  control;          /* Must be in same position as datctl */
   uint32_t  control2;         /* Must be in same position as datctl */
   uint32_t  jitstack;         /* Must be in same position as datctl */
-   uint8_t  replacement[REPLACE_MODSIZE];           /* So must this */
+   uint8_t  replacement[1+REPLACE_MODSIZE];         /* So must this */
   uint32_t  substitute_skip;  /* Must be in same position as datctl */
   uint32_t  substitute_stop;  /* Must be in same position as datctl */
   uint32_t  jit;
@@ -635,7 +637,7 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
   uint32_t  convert_glob_escape;
   uint32_t  convert_glob_separator;
    int32_t  regerror_buffsize;
-   uint8_t  locale[LOCALESIZE];
+   uint8_t  locale[1+LOCALESIZE];
 } patctl;
 
 #define MAXCPYGET 10
@@ -646,10 +648,10 @@ typedef struct datctl {        /* Structure for data line modifiers. */
   uint32_t   control;          /* Must be in same position as patctl */
   uint32_t   control2;         /* Must be in same position as patctl */
   uint32_t   jitstack;         /* Must be in same position as patctl */
-   uint8_t   replacement[REPLACE_MODSIZE];           /* So must this */
+   uint8_t   replacement[1+REPLACE_MODSIZE];         /* So must this */
   uint32_t   substitute_skip;  /* Must be in same position as patctl */
   uint32_t   substitute_stop;  /* Must be in same position as patctl */
-   uint8_t   substitute_subject[SUBSTITUTE_SUBJECT_MODSIZE];
+   uint8_t   substitute_subject[1+SUBSTITUTE_SUBJECT_MODSIZE];
   uint32_t   startend[2];
   uint32_t   cerror[2];
   uint32_t   cfail[2];
@@ -661,6 +663,31 @@ typedef struct datctl {        /* Structure for data line modifiers. */
   uint8_t    copy_names[LENCPYGET];
   uint8_t    get_names[LENCPYGET];
 } datctl;
+
+/* Helper functions to zero out the structures. */
+
+static void patctl_zero(patctl *p)
+{
+memset(p, 0, sizeof(patctl));
+p->replacement[0] = MOD_STR_UNSET;
+p->convert_type = CONVERT_UNSET;
+p->convert_length = CONVERT_UNSET;
+p->regerror_buffsize = -1;
+p->locale[0] = MOD_STR_UNSET;
+}
+
+static void datctl_zero(datctl *d)
+{
+memset(d, 0, sizeof(datctl));
+d->replacement[0] = MOD_STR_UNSET;
+d->substitute_subject[0] = MOD_STR_UNSET;
+d->oveccount = DEFAULT_OVECCOUNT;
+d->copy_numbers[0] = -1;
+d->get_numbers[0] = -1;
+d->startend[0] = d->startend[1] = CFORE_UNSET;
+d->cerror[0] = d->cerror[1] = CFORE_UNSET;
+d->cfail[0] = d->cfail[1] = CFORE_UNSET;
+}
 
 /* Ids for which context to modify. */
 
@@ -675,8 +702,17 @@ enum { CTX_PAT,            /* Active pattern context */
 #define CO(name) offsetof(PCRE2_REAL_COMPILE_CONTEXT, name)
 #define MO(name) offsetof(PCRE2_REAL_MATCH_CONTEXT, name)
 #define PO(name) offsetof(patctl, name)
-#define PD(name) PO(name)
 #define DO(name) offsetof(datctl, name)
+
+/* Validate that the offsets for the shared fields do indeed match. */
+
+STATIC_ASSERT(PO(options) == DO(options), options_mismatch);
+STATIC_ASSERT(PO(control) == DO(control), control_mismatch);
+STATIC_ASSERT(PO(control2) == DO(control2), control2_mismatch);
+STATIC_ASSERT(PO(jitstack) == DO(jitstack), jitstack_mismatch);
+STATIC_ASSERT(PO(replacement) == DO(replacement), replacement_mismatch);
+STATIC_ASSERT(PO(substitute_skip) == DO(substitute_skip), substitute_skip_mismatch);
+STATIC_ASSERT(PO(substitute_stop) == DO(substitute_stop), substitute_stop_mismatch);
 
 /* Table of all long-form modifiers. Must be in collating sequence of modifier
 name because it is searched by binary chop. */
@@ -706,7 +742,7 @@ static modstruct modlist[] = {
   { "alt_extended_class",          MOD_PAT,  MOD_OPT, PCRE2_ALT_EXTENDED_CLASS,   PO(options) },
   { "alt_verbnames",               MOD_PAT,  MOD_OPT, PCRE2_ALT_VERBNAMES,        PO(options) },
   { "altglobal",                   MOD_PND,  MOD_CTL, CTL_ALTGLOBAL,              PO(control) },
-  { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PD(options) },
+  { "anchored",                    MOD_PD,   MOD_OPT, PCRE2_ANCHORED,             PO(options) },
   { "ascii_all",                   MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_ALL,      CO(extra_options) },
   { "ascii_bsd",                   MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_BSD,      CO(extra_options) },
   { "ascii_bss",                   MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ASCII_BSS,      CO(extra_options) },
@@ -746,7 +782,7 @@ static modstruct modlist[] = {
   { "dotstar_anchor",              MOD_CTC,  MOD_OPTMZ, PCRE2_DOTSTAR_ANCHOR,     0 },
   { "dotstar_anchor_off",          MOD_CTC,  MOD_OPTMZ, PCRE2_DOTSTAR_ANCHOR_OFF, 0 },
   { "dupnames",                    MOD_PATP, MOD_OPT, PCRE2_DUPNAMES,             PO(options) },
-  { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PD(options) },
+  { "endanchored",                 MOD_PD,   MOD_OPT, PCRE2_ENDANCHORED,          PO(options) },
   { "escaped_cr_is_lf",            MOD_CTC,  MOD_OPT, PCRE2_EXTRA_ESCAPED_CR_IS_LF, CO(extra_options) },
   { "expand",                      MOD_PAT,  MOD_CTL, CTL_EXPAND,                 PO(control) },
   { "extended",                    MOD_PATP, MOD_OPT, PCRE2_EXTENDED,             PO(options) },
@@ -779,7 +815,7 @@ static modstruct modlist[] = {
   { "max_pattern_compiled_length", MOD_CTC,  MOD_SIZ, 0,                          CO(max_pattern_compiled_length) },
   { "max_pattern_length",          MOD_CTC,  MOD_SIZ, 0,                          CO(max_pattern_length) },
   { "max_varlookbehind",           MOD_CTC,  MOD_INT, 0,                          CO(max_varlookbehind) },
-  { "memory",                      MOD_PD,   MOD_CTL, CTL_MEMORY,                 PD(control) },
+  { "memory",                      MOD_PD,   MOD_CTL, CTL_MEMORY,                 PO(control) },
   { "multiline",                   MOD_PATP, MOD_OPT, PCRE2_MULTILINE,            PO(options) },
   { "never_backslash_c",           MOD_PAT,  MOD_OPT, PCRE2_NEVER_BACKSLASH_C,    PO(options) },
   { "never_callout",               MOD_CTC,  MOD_OPT, PCRE2_EXTRA_NEVER_CALLOUT,  CO(extra_options) },
@@ -792,7 +828,7 @@ static modstruct modlist[] = {
   { "no_dotstar_anchor",           MOD_PAT,  MOD_OPT, PCRE2_NO_DOTSTAR_ANCHOR,    PO(options) },
   { "no_jit",                      MOD_DATP, MOD_OPT, PCRE2_NO_JIT,               DO(options) },
   { "no_start_optimize",           MOD_PATP, MOD_OPT, PCRE2_NO_START_OPTIMIZE,    PO(options) },
-  { "no_utf_check",                MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PD(options) },
+  { "no_utf_check",                MOD_PD,   MOD_OPT, PCRE2_NO_UTF_CHECK,         PO(options) },
   { "notbol",                      MOD_DAT,  MOD_OPT, PCRE2_NOTBOL,               DO(options) },
   { "notempty",                    MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY,             DO(options) },
   { "notempty_atstart",            MOD_DAT,  MOD_OPT, PCRE2_NOTEMPTY_ATSTART,     DO(options) },
@@ -1099,6 +1135,76 @@ is cast as needed. For long data lines it grows as necessary. */
 
 static size_t dbuffer_size = 1u << 14;    /* Initial size, bytes */
 static uint8_t *dbuffer = NULL;
+
+/* ------------------ Colour highlighting definitions -------------------- */
+
+/* Colour of input text that was a comment, when echoing back to the terminal */
+static const int clr_comment = 37; /* grey */
+/* Colour of other input text that is echoed back to the terminal */
+static const int clr_input = 32; /* green */
+/* Colour of prompt output */
+static const int clr_prompt = 34; /* blue */
+/* Colour of output that represents a PCRE2 API error */
+static const int clr_api_error = 35; /* magenta */
+/* Colour of error messages for the test script itself
+(i.e. an error in the testing tool, not an API error) */
+static const int clr_test_error = 31; /* red */
+/* Colour of profiling information, which doesn't have a "right" answer */
+static const int clr_profiling = 36; /* cyan */
+/* No colour, for APIs that take a colour value */
+static const int clr_none = -1;
+
+enum { COLOUR_NEVER, COLOUR_ALWAYS, COLOUR_AUTO };
+static int colour_setting = COLOUR_AUTO;
+static int colour_last_fd = -1;
+static BOOL colour_fd_interactive = FALSE;
+
+static BOOL
+should_print_colour(int clr, FILE* f)
+{
+if (f == NULL) return FALSE;
+if (clr == clr_none) return FALSE;
+if (colour_setting == COLOUR_NEVER) return FALSE;
+if (colour_setting == COLOUR_AUTO)
+  {
+  if (fileno(f) != colour_last_fd)
+    {
+    colour_last_fd = fileno(f);
+    colour_fd_interactive = INTERACTIVE(f);
+    }
+  if (!colour_fd_interactive) return FALSE;
+  }
+return TRUE;
+}
+
+/* Starts a block of colour (but only if colour is enabled). */
+static void
+colour_begin(int clr, FILE* f)
+{
+if (should_print_colour(clr, f))
+  fprintf(f, "\x1b[%dm", clr);
+}
+
+/* Ends a block of colour (but only if colour is enabled). */
+static void
+colour_end(FILE* f)
+{
+colour_begin(0, f);
+}
+
+/* cfprintf is like fprintf but takes a colour to wrap its output. */
+static int
+cfprintf(int clr, FILE *file, const char* fmt, ...)
+{
+va_list args;
+int ret;
+va_start(args, fmt);
+colour_begin(clr, file);
+ret = vfprintf(file, fmt, args);
+va_end(args);
+colour_end(file);
+return ret;
+}
 
 
 
@@ -1469,13 +1575,13 @@ if (show_memory && outfile != NULL)
   {
   if (block == NULL)
     {
-    fprintf(outfile, "** malloc() failed for %" SIZ_FORM "\n", size);
+    cfprintf(clr_test_error, outfile, "** malloc() failed for %" SIZ_FORM "\n", size);
     }
   else
     {
-    fprintf(outfile, "malloc  %5" SIZ_FORM, size);
+    cfprintf(clr_profiling, outfile, "malloc  %5" SIZ_FORM, size);
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-    fprintf(outfile, " %p", block);   /* Not portable */
+    cfprintf(clr_profiling, outfile, " %p", block);   /* Not portable */
 #endif
     if (malloclistptr < MALLOCLISTSIZE)
       {
@@ -1483,7 +1589,7 @@ if (show_memory && outfile != NULL)
       malloclistlength[malloclistptr++] = size;
       }
     else
-      fprintf(outfile, " (not remembered)");
+      cfprintf(clr_profiling, outfile, " (not remembered)");
     fprintf(outfile, "\n");
     }
   }
@@ -1499,12 +1605,12 @@ if (show_memory && outfile != NULL && block != NULL)
   uint32_t i, j;
   BOOL found = FALSE;
 
-  fprintf(outfile, "free");
+  cfprintf(clr_profiling, outfile, "free");
   for (i = 0; i < malloclistptr; i++)
     {
     if (block == malloclist[i])
       {
-      fprintf(outfile, "    %5" SIZ_FORM, malloclistlength[i]);
+      cfprintf(clr_profiling, outfile, "    %5" SIZ_FORM, malloclistlength[i]);
       malloclistptr--;
       for (j = i; j < malloclistptr; j++)
         {
@@ -1515,9 +1621,9 @@ if (show_memory && outfile != NULL && block != NULL)
       break;
       }
     }
-  if (!found) fprintf(outfile, " unremembered block");
+  if (!found) cfprintf(clr_profiling, outfile, " unremembered block");
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-  fprintf(outfile, " %p", block);  /* Not portable */
+  cfprintf(clr_profiling, outfile, " %p", block);  /* Not portable */
 #endif
   fprintf(outfile, "\n");
   }
@@ -1856,7 +1962,7 @@ uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
 
 if (new_buffer == NULL || new_pbuffer8 == NULL)
   {
-  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
+  cfprintf(clr_test_error, stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
           new_pbuffer8_size);
   exit(1);
   }
@@ -1916,12 +2022,20 @@ for (;;)
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
   if (INTERACTIVE(f))
     {
-    char *s = readline(prompt);
+    char promptbuf[80];
+    int snprintf_rc;
+    char *s;
+    if (should_print_colour(clr_prompt, stdout) &&
+        (snprintf_rc = snprintf(promptbuf, sizeof(promptbuf), "\x1b[%dm%s\x1b[0m", clr_prompt, prompt)) > 0 &&
+        snprintf_rc < (int)sizeof(promptbuf))
+      s = readline(promptbuf);
+    else
+      s = readline(prompt);
     if (s == NULL) return (here == start)? NULL : start;
     dlen = strlen(s);
     if (dlen > rlen - 2)
       {
-      fprintf(outfile, "** Interactive input exceeds buffer space\n");
+      cfprintf(clr_test_error, outfile, "** Interactive input exceeds buffer space\n");
       exit(1);
       }
     if (dlen > 0) add_history(s);
@@ -1939,7 +2053,7 @@ for (;;)
 
     /* Read the next line by normal means, prompting if the file is a tty. */
 
-    if (INTERACTIVE(f)) printf("%s", prompt);
+    if (INTERACTIVE(f)) cfprintf(clr_prompt, stdout, "%s", prompt);
     if (fgets((char *)here, rlen_trunc, f) == NULL)
       return (here == start)? NULL : start;
 
@@ -1960,8 +2074,8 @@ for (;;)
 
     if (dlen < (unsigned)rlen_trunc - 1 && !feof(f))
       {
-      fprintf(outfile, "** Binary zero encountered in input\n");
-      fprintf(outfile, "** pcre2test run abandoned\n");
+      cfprintf(clr_test_error, outfile, "** Binary zero encountered in input\n");
+      cfprintf(clr_test_error, outfile, "** pcre2test run abandoned\n");
       exit(1);
       }
     }
@@ -2253,7 +2367,7 @@ when 8-bit mode is supported. */
 static void
 prmsg(const char **msg, const char *s)
 {
-fprintf(outfile, "%s %s", *msg, s);
+cfprintf(clr_test_error, outfile, "%s %s", *msg, s);
 *msg = "";
 }
 #endif  /* SUPPORT_PCRE2_8 */
@@ -2269,6 +2383,7 @@ Because the bits are unique, this can be used for both pattern and data control
 words.
 
 Arguments:
+  clr         colour for output
   controls    control bits
   controls2   more control bits
   before      text to print before
@@ -2277,9 +2392,9 @@ Returns:      nothing
 */
 
 static void
-show_controls(uint32_t controls, uint32_t controls2, const char *before)
+show_controls(int clr, uint32_t controls, uint32_t controls2, const char *before)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+cfprintf(clr, outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((controls & CTL_AFTERTEXT) != 0)? " aftertext" : "",
   ((controls & CTL_ALLAFTERTEXT) != 0)? " allaftertext" : "",
@@ -2343,6 +2458,7 @@ fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s
 /* Called from show_pattern_info() and for unsupported POSIX options.
 
 Arguments:
+  clr         colour for output
   options     an options word
   before      text to print before
   after       text to print after
@@ -2351,10 +2467,10 @@ Returns:      nothing
 */
 
 static void
-show_compile_options(uint32_t options, const char *before, const char *after)
+show_compile_options(int clr, uint32_t options, const char *before, const char *after)
 {
-if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+if (options == 0) cfprintf(clr, outfile, "%s <none>%s", before, after);
+else cfprintf(clr, outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
   ((options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
@@ -2398,6 +2514,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%
 /* Called from show_pattern_info() and for unsupported POSIX options.
 
 Arguments:
+  clr         colour for output
   options     an options word
   before      text to print before
   after       text to print after
@@ -2406,11 +2523,11 @@ Returns:      nothing
 */
 
 static void
-show_compile_extra_options(uint32_t options, const char *before,
+show_compile_extra_options(int clr, uint32_t options, const char *before,
   const char *after)
 {
-if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+if (options == 0) cfprintf(clr, outfile, "%s <none>%s", before, after);
+else cfprintf(clr, outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   before,
   ((options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) != 0) ? " allow_lookaround_bsk" : "",
   ((options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)? " allow_surrogate_escapes" : "",
@@ -2439,6 +2556,7 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 
 /*
 Arguments:
+  clr         colour for output
   flags       an options word
   before      text to print before
   after       text to print after
@@ -2447,10 +2565,10 @@ Returns:      nothing
 */
 
 static void
-show_optimize_flags(uint32_t flags, const char *before, const char *after)
+show_optimize_flags(int clr, uint32_t flags, const char *before, const char *after)
 {
-if (flags == 0) fprintf(outfile, "%s<none>%s", before, after);
-else fprintf(outfile, "%s%s%s%s%s%s%s",
+if (flags == 0) cfprintf(clr, outfile, "%s<none>%s", before, after);
+else cfprintf(clr, outfile, "%s%s%s%s%s%s%s",
   before,
   ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0) ? "auto_possess" : "",
   ((flags & PCRE2_OPTIM_AUTO_POSSESS) != 0 && (flags >> 1) != 0) ? "," : "",
@@ -2469,9 +2587,9 @@ else fprintf(outfile, "%s%s%s%s%s%s%s",
 /* Called for unsupported POSIX options. */
 
 static void
-show_match_options(uint32_t options)
+show_match_options(int clr, uint32_t options)
 {
-fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+cfprintf(clr, outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
   ((options & PCRE2_ANCHORED) != 0)? " anchored" : "",
   ((options & PCRE2_COPY_MATCHED_SUBJECT) != 0)? " copy_matched_subject" : "",
   ((options & PCRE2_DFA_RESTART) != 0)? " dfa_restart" : "",
@@ -2517,7 +2635,7 @@ while (endf > filename && isspace((unsigned char)endf[-1])) endf--;
 
 if (endf == filename)
   {
-  fprintf(outfile, "** File name expected after %s\n", name);
+  cfprintf(clr_test_error, outfile, "** File name expected after %s\n", name);
   return PR_ABEND;
   }
 
@@ -2525,7 +2643,7 @@ if (endf == filename)
 *fptr = fopen((const char *)filename, mode);
 if (*fptr == NULL)
   {
-  fprintf(outfile, "** Failed to open \"%s\": %s\n", filename, strerror(errno));
+  cfprintf(clr_test_error, outfile, "** Failed to open \"%s\": %s\n", filename, strerror(errno));
   return PR_ABEND;
   }
 
@@ -3003,6 +3121,8 @@ printf("     pcre2-8        8 bit library support enabled [0, 1]\n");
 printf("     pcre2-16       16 bit library support enabled [0, 1]\n");
 printf("     pcre2-32       32 bit library support enabled [0, 1]\n");
 printf("     unicode        Unicode and UTF support enabled [0, 1]\n");
+printf("  --colo[u]r[=<always,auto,never>]\n");
+printf("                show output in colour\n");
 printf("  -d            set default pattern modifier 'debug'\n");
 printf("  -dfa          set default subject modifier 'dfa'\n");
 printf("  -E            preprocess input only (#if ... #endif)\n");
@@ -3058,7 +3178,7 @@ if (arg != NULL && arg[0] != '-')
 
   if (i >= COPTLISTCOUNT)
     {
-    fprintf(stderr, "** Unknown -C option \"%s\"\n", arg);
+    cfprintf(clr_test_error, stderr, "pcre2test: Unknown -C option \"%s\"\n", arg);
     return 0;
     }
 
@@ -3188,9 +3308,9 @@ if (optval != 0)
     break;
 
     default:
-    printf("\n** Unexpected return %d from "
+    cfprintf(clr_test_error, stdout, "\n** Unexpected return %d from "
       "pcre2_jit_compile(NULL, PCRE2_JIT_TEST_ALLOC)\n", rc);
-    printf("** Should not occur\n");
+    cfprintf(clr_test_error, stdout, "** Should not occur\n");
     yield = 1;
     break;
     }
@@ -3346,7 +3466,7 @@ for (size_t i = 0; i < PRIV(utt_size); i++)
     const ucp_type_table *tt = PRIV(utt) + j;
     if (tt->type != t->type || tt->value != value) continue;
     if (m >= MAX_SYNONYMS)
-      printf("** Too many synonyms: %s ignored\n",
+      cfprintf(clr_test_error, stdout, "** Too many synonyms: %s ignored\n",
         PRIV(utt_names) + tt->name_offset);
     else fv[m++] = tt->name_offset;
     }
@@ -3449,12 +3569,15 @@ for (i = 0; i < MODLISTCOUNT; i++)
     is_pattern = FALSE;
     break;
 
-    default: printf("** Unknown type for modifier \"%s\"\n", m->name);
-    PCRE2_FALLTHROUGH /* Fall through */
     case MOD_PD:        /* Pattern or subject */
     case MOD_PDP:       /* As PD, OK for Perl-compatible test */
     is_pattern = for_pattern;
     break;
+
+    default:
+    printf("** Unknown type for modifier \"%s\"\n", m->name);
+    PCRE2_DEBUG_UNREACHABLE();
+    exit(1);
     }
 
   if (for_pattern == is_pattern)
@@ -3529,24 +3652,6 @@ char *arg_subject = NULL;
 char *arg_pattern = NULL;
 char *arg_error = NULL;
 
-/* The offsets to the options and control bits fields of the pattern and data
-control blocks must be the same so that common options and controls such as
-"anchored" or "memory" can work for either of them from a single table entry.
-We cannot test this till runtime because "offsetof" does not work in the
-preprocessor. */
-
-// TODO This comment above is not correct: we can test it at compile time,
-// although it is true that it's not possible using the preprocessor. Use our
-// new STATIC_ASSERT macro.
-
-if (PO(options) != DO(options) || PO(control) != DO(control) ||
-    PO(control2) != DO(control2))
-  {
-  fprintf(stderr, "** Coding error: "
-    "options and control offsets for pattern and data must be the same.\n");
-  return 1;
-  }
-
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
 and 32-bit buffers (pbuffer16, pbuffer32) are obtained only if needed. */
@@ -3567,17 +3672,8 @@ _setmode( _fileno( stdout ), _O_BINARY );
 
 locale_name[0] = 0;
 
-memset(&def_patctl, 0, sizeof(patctl));
-def_patctl.convert_type = CONVERT_UNSET;
-def_patctl.regerror_buffsize = -1;
-
-memset(&def_datctl, 0, sizeof(datctl));
-def_datctl.oveccount = DEFAULT_OVECCOUNT;
-def_datctl.copy_numbers[0] = -1;
-def_datctl.get_numbers[0] = -1;
-def_datctl.startend[0] = def_datctl.startend[1] = CFORE_UNSET;
-def_datctl.cerror[0] = def_datctl.cerror[1] = CFORE_UNSET;
-def_datctl.cfail[0] = def_datctl.cfail[1] = CFORE_UNSET;
+patctl_zero(&def_patctl);
+datctl_zero(&def_datctl);
 
 /* Scan command line options. */
 
@@ -3636,8 +3732,8 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_8
     test_mode = PCRE2TEST_MODE_8;
 #else
-    fprintf(stderr,
-      "** This version of PCRE2 was built without 8-bit support\n");
+    cfprintf(clr_test_error, stderr,
+      "pcre2test: This version of PCRE2 was built without 8-bit support\n");
     exit(1);
 #endif
     }
@@ -3647,8 +3743,8 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_16
     test_mode = PCRE2TEST_MODE_16;
 #else
-    fprintf(stderr,
-      "** This version of PCRE2 was built without 16-bit support\n");
+    cfprintf(clr_test_error, stderr,
+      "pcre2test: This version of PCRE2 was built without 16-bit support\n");
     exit(1);
 #endif
     }
@@ -3658,8 +3754,8 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_32
     test_mode = PCRE2TEST_MODE_32;
 #else
-    fprintf(stderr,
-      "** This version of PCRE2 was built without 32-bit support\n");
+    cfprintf(clr_test_error, stderr,
+      "pcre2test: This version of PCRE2 was built without 32-bit support\n");
     exit(1);
 #endif
     }
@@ -3678,7 +3774,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       ((uli = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
     {
 #if defined(_WIN32) || defined(WIN32) || defined(__HAIKU__) || defined(NATIVE_ZOS) || defined(__VMS)
-    fprintf(stderr, "pcre2test: -S is not supported on this OS\n");
+    cfprintf(clr_test_error, stderr, "pcre2test: -S is not supported on this OS\n");
     exit(1);
 #else
     int rc = 0;
@@ -3686,7 +3782,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     struct rlimit rlim, rlim_old;
     if (uli > INT32_MAX / (1024 * 1024))
       {
-      fprintf(stderr, "** Argument for -S is too big\n");
+      cfprintf(clr_test_error, stderr, "pcre2test: Argument for -S is too big\n");
       exit(1);
       }
     stack_size = (uint32_t)uli;
@@ -3695,15 +3791,15 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     rlim.rlim_cur = stack_size * 1024 * 1024;
     if (rlim.rlim_max != RLIM_INFINITY && rlim.rlim_cur > rlim.rlim_max)
       {
-      fprintf(stderr,
+      cfprintf(clr_test_error, stderr,
         "pcre2test: requested stack size %luMiB is greater than hard limit ",
           (unsigned long int)stack_size);
       if (rlim.rlim_max % (1024*1024) == 0)
-        fprintf(stderr, "%luMiB\n", (unsigned long)(rlim.rlim_max/(1024*1024)));
+        cfprintf(clr_test_error, stderr, "%luMiB\n", (unsigned long)(rlim.rlim_max/(1024*1024)));
       else if (rlim.rlim_max % 1024 == 0)
-        fprintf(stderr, "%luKiB\n", (unsigned long)(rlim.rlim_max/1024));
+        cfprintf(clr_test_error, stderr, "%luKiB\n", (unsigned long)(rlim.rlim_max/1024));
       else
-        fprintf(stderr, "%lu bytes\n", (unsigned long)(rlim.rlim_max));
+        cfprintf(clr_test_error, stderr, "%lu bytes\n", (unsigned long)(rlim.rlim_max));
       exit(1);
       }
     if (rlim_old.rlim_cur != RLIM_INFINITY && rlim_old.rlim_cur <= INT32_MAX &&
@@ -3711,7 +3807,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       rc = setrlimit(RLIMIT_STACK, &rlim);
     if (rc != 0)
       {
-      fprintf(stderr, "pcre2test: setting stack size %luMiB failed: %s\n",
+      cfprintf(clr_test_error, stderr, "pcre2test: setting stack size %luMiB failed: %s\n",
         (unsigned long int)stack_size, strerror(errno));
       exit(1);
       }
@@ -3739,7 +3835,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       else if (arg[4] == 'f') def_patctl.control |= CTL_JITFAST;
     def_patctl.jit = JIT_DEFAULT;  /* full & partial */
 #ifndef SUPPORT_JIT
-    fprintf(stderr, "** Warning: JIT support is not available: "
+    cfprintf(clr_test_error, stderr, "pcre2test: Warning: JIT support is not available: "
                     "-jit[fast|verify] calls functions that do nothing.\n");
 #endif
     }
@@ -3755,12 +3851,12 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
       {
       if (uli == 0)
         {
-        fprintf(stderr, "** Argument for %s must not be zero\n", arg);
+        cfprintf(clr_test_error, stderr, "pcre2test: Argument for %s must not be zero\n", arg);
         exit(1);
         }
       if (U32OVERFLOW(uli))
         {
-        fprintf(stderr, "** Argument for %s is too big\n", arg);
+        cfprintf(clr_test_error, stderr, "pcre2test: Argument for %s is too big\n", arg);
         exit(1);
         }
       timeitm = (int)uli;
@@ -3817,7 +3913,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     CHECK_VALUE_EXISTS:
     if (argc <= 2)
       {
-      fprintf(stderr, "** Missing value for %s\n", arg);
+      cfprintf(clr_test_error, stderr, "pcre2test: Missing value for %s\n", arg);
       yield = 1;
       goto EXIT;
       }
@@ -3825,11 +3921,31 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     argc--;
     }
 
+  else if (strcmp(arg, "--color") == 0 || strcmp(arg, "--colour") == 0)
+    {
+    colour_setting = COLOUR_ALWAYS;
+    }
+
+  else if (strstr(arg, "--color=") == arg || strstr(arg, "--colour=") == arg)
+    {
+    char *val = strchr(arg, '=') + 1;
+    if (strcmp(val, "always") == 0) colour_setting = COLOUR_ALWAYS;
+    else if (strcmp(val, "never") == 0) colour_setting = COLOUR_NEVER;
+    else if (strcmp(val, "auto") == 0) colour_setting = COLOUR_AUTO;
+    else
+      {
+      cfprintf(clr_test_error, stderr,
+        "pcre2test: Invalid value for \"%.*s\"\n", (int)(val - 1 - arg), arg);
+      yield = 1;
+      goto EXIT;
+      }
+    }
+
   /* Unrecognized option */
 
   else
     {
-    fprintf(stderr, "** Unknown or malformed option \"%s\"\n", arg);
+    cfprintf(clr_test_error, stderr, "pcre2test: Unknown or malformed option \"%s\"\n", arg);
     usage();
     yield = 1;
     goto EXIT;
@@ -3854,7 +3970,7 @@ if (arg_error != NULL)
     li = strtol(arg_error, &endptr, 10);
     if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != ','))
       {
-      fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
+      cfprintf(clr_test_error, stderr, "pcre2test: \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;
       goto EXIT;
       }
@@ -3901,7 +4017,7 @@ if (argc > 1 && strcmp(argv[op], "-") != 0)
   infile = fopen(argv[op], INPUT_MODE);
   if (infile == NULL)
     {
-    printf("** Failed to open \"%s\": %s\n", argv[op], strerror(errno));
+    cfprintf(clr_test_error, stderr, "pcre2test: Failed to open \"%s\": %s\n", argv[op], strerror(errno));
     yield = 1;
     goto EXIT;
     }
@@ -3916,7 +4032,7 @@ if (argc > 2)
   outfile = fopen(argv[op+1], OUTPUT_MODE);
   if (outfile == NULL)
     {
-    printf("** Failed to open \"%s\": %s\n", argv[op+1], strerror(errno));
+    cfprintf(clr_test_error, stderr, "pcre2test: Failed to open \"%s\": %s\n", argv[op+1], strerror(errno));
     yield = 1;
     goto EXIT;
     }
@@ -3934,8 +4050,11 @@ preg.re_match_data = NULL;
 while (notdone)
   {
   const uint8_t *p;
+  const uint8_t *p_notsp;
   int rc = PR_OK;
   BOOL expectdata = have_active_pattern();
+  BOOL is_pattern_comment;
+  BOOL is_data_comment;
 #ifdef SUPPORT_PCRE2_8
   expectdata |= preg.re_pcre2_code != NULL;
 #endif
@@ -3955,9 +4074,18 @@ while (notdone)
 
   /* Begin processing the line. */
 
-  if (!INTERACTIVE(infile)) fprintf(outfile, "%s", (char *)buffer);
+  p = p_notsp = buffer;
+  while (isspace(*p_notsp)) p_notsp++;
+
+  is_pattern_comment = p[0] == '#' &&
+    (isspace(p[1]) || p[1] == '!' || p[1] == 0);
+  is_data_comment = expectdata && p_notsp[0] == '\\' && p_notsp[1] == '=' &&
+    (isspace(p_notsp[2]) || p_notsp[2] == 0);
+
+  if (!INTERACTIVE(infile))
+    cfprintf((is_pattern_comment || is_data_comment)? clr_comment : clr_input,
+      outfile, "%s", (char *)buffer);
   fflush(outfile);
-  p = buffer;
 
   if (preprocess_only && *p != '#') continue;
 
@@ -3966,8 +4094,7 @@ while (notdone)
 
   if (expectdata || skipping)
     {
-    while (isspace(*p)) p++;
-    if (*p == 0)
+    if (*p_notsp == 0)
       {
 #ifdef SUPPORT_PCRE2_8
       if (preg.re_pcre2_code != NULL)
@@ -3985,7 +4112,7 @@ while (notdone)
     /* Otherwise, if we are not skipping, and the line is not a data comment
     line starting with "\=", process a data line. */
 
-    else if (!skipping && !(p[0] == '\\' && p[1] == '=' && isspace(p[2])))
+    else if (!skipping && !is_data_comment)
       {
       rc = process_data();
       }
@@ -4000,7 +4127,7 @@ while (notdone)
 
   else if (*p == '#')
     {
-    if (isspace(p[1]) || p[1] == '!' || p[1] == 0) continue;
+    if (is_pattern_comment) continue;
     rc = process_command();
     }
 
@@ -4012,10 +4139,9 @@ while (notdone)
 
   else
     {
-    while (isspace(*p)) p++;
-    if (*p != 0)
+    if (*p_notsp != 0)
       {
-      fprintf(outfile, "** Invalid pattern delimiter '%c' (x%x).\n", *buffer,
+      cfprintf(clr_test_error, outfile, "** Invalid pattern delimiter '%c' (x%x).\n", *buffer,
         *buffer);
       rc = PR_SKIP;
       }
@@ -4025,7 +4151,7 @@ while (notdone)
   else if (rc == PR_ENDIF) skipping_endif = TRUE;
   else if (rc == PR_ABEND)
     {
-    fprintf(outfile, "** pcre2test run abandoned\n");
+    cfprintf(clr_test_error, outfile, "** pcre2test run abandoned\n");
     yield = 1;
     goto EXIT;
     }
@@ -4035,7 +4161,7 @@ while (notdone)
 
 if (skipping_endif)
   {
-  fprintf(outfile, "** Expected #endif\n");
+  cfprintf(clr_test_error, outfile, "** Expected #endif\n");
   yield = 1;
   goto EXIT;
   }
@@ -4045,18 +4171,18 @@ if (INTERACTIVE(infile)) fprintf(outfile, "\n");
 if (showtotaltimes)
   {
   const char *pad = "";
-  fprintf(outfile, "--------------------------------------\n");
+  cfprintf(clr_profiling, outfile, "--------------------------------------\n");
   if (timeit > 0)
     {
-    fprintf(outfile, "Total compile time %8.2f microseconds\n",
+    cfprintf(clr_profiling, outfile, "Total compile time %8.2f microseconds\n",
       ((1000000 / CLOCKS_PER_SEC) * (double)total_compile_time) / timeit);
     if (total_jit_compile_time > 0)
-      fprintf(outfile, "Total JIT compile  %8.2f microseconds\n",
+      cfprintf(clr_profiling, outfile, "Total JIT compile  %8.2f microseconds\n",
         ((1000000 / CLOCKS_PER_SEC) * (double)total_jit_compile_time) / \
         timeit);
     pad = "  ";
     }
-  fprintf(outfile, "Total match time %s%8.2f microseconds\n", pad,
+  cfprintf(clr_profiling, outfile, "Total match time %s%8.2f microseconds\n", pad,
     ((1000000 / CLOCKS_PER_SEC) * (double)total_match_time) / timeitm);
   }
 
