@@ -165,6 +165,7 @@ include(CMakePushCheckState)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
 include(PCRE2UseSystemExtensions)
+include(PCRE2WarningAsError)
 
 check_include_file(assert.h HAVE_ASSERT_H)
 check_include_file(dirent.h HAVE_DIRENT_H)
@@ -210,7 +211,8 @@ cmake_push_check_state()
 if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
   set(CMAKE_REQUIRED_FLAGS "")
 endif()
-set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${CMAKE_C_COMPILE_OPTIONS_WARNING_AS_ERROR}")
+pcre2_warning_as_error(WARNING_AS_ERROR_FLAGS)
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${WARNING_AS_ERROR_FLAGS}")
 
 check_c_source_compiles(
   "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
