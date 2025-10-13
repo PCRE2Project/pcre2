@@ -1483,7 +1483,6 @@ contain characters with values greater than 255. */
 #define XCL_MAP      0x02  /* Flag: a 32-byte map is present */
 #define XCL_HASPROP  0x04  /* Flag: property checks are present. */
 
-#define XCL_END      0     /* Marks end of individual items */
 #define XCL_SINGLE   1     /* Single item (one multibyte char) follows */
 #define XCL_RANGE    2     /* A range (two multibyte chars) follows */
 #define XCL_PROP     3     /* Unicode property (2-byte property code follows) */
@@ -2341,7 +2340,8 @@ extern int          _pcre2_study(pcre2_real_code *);
 extern int          _pcre2_valid_utf(PCRE2_SPTR, PCRE2_SIZE, PCRE2_SIZE *);
 extern BOOL         _pcre2_was_newline(PCRE2_SPTR, uint32_t, PCRE2_SPTR,
                       uint32_t *, BOOL);
-extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, const uint8_t *, BOOL);
+extern BOOL         _pcre2_xclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR,
+                      const uint8_t *, BOOL);
 extern BOOL         _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR,
                       const uint8_t *, BOOL);
 

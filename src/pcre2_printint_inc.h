@@ -568,10 +568,12 @@ if (printmap)
 if (type == OP_XCLASS)
   {
   PCRE2_UCHAR ch;
+  PCRE2_SPTR end = code + (GET(code, 0) - 1);
 
-  while ((ch = *ccode++) != XCL_END)
+  while (ccode < end)
     {
     const char *notch = "";
+    ch = *ccode++;
 
     if (ch >= XCL_LIST)
       {

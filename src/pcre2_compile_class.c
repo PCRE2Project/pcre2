@@ -1702,8 +1702,6 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
   {
   PCRE2_UCHAR *previous = code;
 
-  if ((xclass_props & XCLASS_HAS_CHAR_LISTS) == 0)
-    *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
   *code++ = OP_XCLASS;
   code += LINK_SIZE;
   *code = negate_class? XCL_NOT:0;

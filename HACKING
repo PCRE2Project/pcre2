@@ -619,7 +619,6 @@ XCL_NOT indicates that this is a negative class, and XCL_MAP indicates that a
 bit map is present. There follows the bit map, if XCL_MAP is set, and then a
 sequence of items coded as follows:
 
-  XCL_END      marks the end of the list
   XCL_SINGLE   one character follows
   XCL_RANGE    two characters follow
   XCL_PROP     a Unicode property (type, value) follows

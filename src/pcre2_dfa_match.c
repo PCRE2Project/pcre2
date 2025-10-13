@@ -2657,7 +2657,7 @@ for (;;)
          {
          ecode = code + GET(code, 1);
          if (clen > 0)
-           isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE,
+           isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE, ecode,
              (const uint8_t*)mb->start_code, utf);
          }
 

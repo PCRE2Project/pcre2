@@ -1114,8 +1114,10 @@ for(;;)
 
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
-      if (PRIV(xclass)(chr, (list_ptr == list ? code : base_end) -
-          list_ptr[2] + LINK_SIZE, (const uint8_t*)cb->start_code, utf))
+      if (PRIV(xclass)(chr,
+          (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE,
+          (list_ptr == list ? code : base_end) - list_ptr[3],
+          (const uint8_t*)cb->start_code, utf))
         return FALSE;
       break;
 

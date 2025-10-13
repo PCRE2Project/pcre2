@@ -58,13 +58,15 @@ might contain codepoints above 255 and/or Unicode properties.
 Arguments:
   c           the character
   data        points to the flag code unit of the XCLASS data
+  data_end    points to the end of the XCLASS data
   utf         TRUE if in UTF mode
 
 Returns:      TRUE if character matches, else FALSE
 */
 
 BOOL
-PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL utf)
+PRIV(xclass)(uint32_t c, PCRE2_SPTR data, PCRE2_SPTR data_end,
+  const uint8_t *char_lists_end, BOOL utf)
 {
 /* Update PRIV(update_classbits) when this function is changed. */
 PCRE2_UCHAR t;
@@ -268,9 +270,10 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
 /* Match against large chars or ranges that end with a large char. */
 if (*data < XCL_LIST)
   {
-  while ((t = *data++) != XCL_END)
+  while (data < data_end)
     {
     uint32_t x, y;
+    t = *data++;
 
 #ifdef SUPPORT_UNICODE
     if (utf)
@@ -518,9 +521,10 @@ while (ptr < data_end)
 
     case ECL_XCLASS:
       {
-      uint32_t matched = PRIV(xclass)(c, ptr + 1 + LINK_SIZE, char_lists_end, utf);
+      PCRE2_SPTR xcl_end = ptr + GET(ptr, 0);
+      uint32_t matched = PRIV(xclass)(c, ptr + 1 + LINK_SIZE, xcl_end, char_lists_end, utf);
 
-      ptr += GET(ptr, 1);
+      ptr = xcl_end;
       stack = (stack << 1) | matched;
       ++stack_depth;
       break;

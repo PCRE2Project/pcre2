@@ -2268,6 +2268,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #define Lstart_eptr  F->temp_sptr[0]
 #define Lxclass_data F->temp_sptr[1]
+#define Lxclass_len  F->temp_size
 #define Lmin         F->temp_32[0]
 #define Lmax         F->temp_32[1]
 
@@ -2276,6 +2277,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       {
       Lxclass_data = Fecode + 1 + LINK_SIZE;  /* Save for matching */
       Fecode += GET(Fecode, 1);               /* Advance past the item */
+      Lxclass_len = (PCRE2_SIZE)(Fecode - Lxclass_data);  /* Also save length*/
 
       switch (*Fecode)
         {
@@ -2319,7 +2321,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           RRETURN(MATCH_NOMATCH);
           }
         GETCHARINCTEST(fc, Feptr);
-        if (!PRIV(xclass)(fc, Lxclass_data,
+        if (!PRIV(xclass)(fc, Lxclass_data, Lxclass_len,
             (const uint8_t*)mb->start_code, utf))
           RRETURN(MATCH_NOMATCH);
         }
@@ -2344,7 +2346,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINCTEST(fc, Feptr);
-          if (!PRIV(xclass)(fc, Lxclass_data,
+          if (!PRIV(xclass)(fc, Lxclass_data, Lxclass_len,
               (const uint8_t*)mb->start_code, utf))
             RRETURN(MATCH_NOMATCH);
           }
@@ -2369,7 +2371,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #else
           fc = *Feptr;
 #endif
-          if (!PRIV(xclass)(fc, Lxclass_data,
+          if (!PRIV(xclass)(fc, Lxclass_data, Lxclass_len,
               (const uint8_t*)mb->start_code, utf)) break;
           Feptr += len;
           }
@@ -2398,6 +2400,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #undef Lstart_eptr
 #undef Lxclass_data
+#undef Lxclass_len
 #undef Lmin
 #undef Lmax
 

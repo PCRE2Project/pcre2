@@ -1757,7 +1757,7 @@ do
           goto HANDLE_CLASSMAP;
           }
 
-        for (;;) switch (*p++)
+        while (p < tcode) switch (*p++)
           {
           case XCL_SINGLE:
           b = *p++;
@@ -1774,15 +1774,14 @@ do
             re->start_bitmap[b/8] |= (1u << (b&7));
           break;
 
-          case XCL_END:
-          goto HANDLE_CLASSMAP;
-
           /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
           return SSB_UNKNOWN;   /* Internal error, should not occur */
           /* LCOV_EXCL_STOP */
           }
+
+        goto HANDLE_CLASSMAP;
         }
 #endif  /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8 */
 #endif  /* SUPPORT_WIDE_CHARS */
