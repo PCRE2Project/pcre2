@@ -13772,6 +13772,34 @@ common->accept_label = LABEL();
 if (common->accept != NULL)
   set_jumps(common->accept, common->accept_label);
 
+/* Fail if we detect that the start position was moved to be either after
+the end position (\K in lookahead) or before the start offset (\K in
+lookbehind). */
+
+if (common->has_set_som &&
+    (common->re->extra_options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) == 0)
+  {
+  if (HAS_VIRTUAL_REGISTERS)
+    {
+    OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
+    }
+  else
+    {
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, str));
+    }
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), OVECTOR(0));
+
+  /* (ovector[0] < jit_arguments->str)? */
+  OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP2, 0, TMP1, 0);
+  /* Unconditionally set R0 (aka TMP1), in between the comparison that needs to
+  use TMP1, but before the jump. */
+  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_BAD_BACKSLASH_K);
+  add_jump(compiler, &common->abort, JUMP(SLJIT_LESS));
+  /* (ovector[0] > STR_PTR)?  NB. ovector[1] hasn't yet been set to STR_PTR. */
+  add_jump(compiler, &common->abort, CMP(SLJIT_GREATER, TMP2, 0, STR_PTR, 0));
+  }
+
 /* This means we have a match. Update the ovector. */
 copy_ovector(common, re->top_bracket + 1);
 common->quit_label = common->abort_label = LABEL();

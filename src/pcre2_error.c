@@ -305,6 +305,7 @@ static const unsigned char match_error_texts[] =
   "substitute subject differs from prior match call\0"
   "substitute start offset differs from prior match call\0"
   "substitute options differ from prior match call\0"
+  "disallowed use of \\K in lookaround\0"
   ;
 
 

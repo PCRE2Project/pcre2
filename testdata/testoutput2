@@ -14154,8 +14154,8 @@ Failed: error 119 at offset 3: parentheses are too deeply nested
 
 /abc/replace=a$++
     123abc
-Failed: error -35 at offset 2 in replacement: invalid replacement string
-        here: a$ |<--| ++
+Failed: error -49 at offset 3 in replacement: unknown substring
+        here: a$+ |<--| +
 
 /abc/replace=a$bad
     123abc
@@ -15979,6 +15979,68 @@ Failed: error -49 at offset 3 in replacement: unknown substring
  1: L>R<R
     LabcR\=replace=>$_<
  1: L>LabcR<R
+
+/A(.)|B(.)/
+    AMZ\=replace=>$+<
+ 1: >M<Z
+    BMZ\=replace=>$+<
+ 1: >M<Z
+    AMZ\=replace=>$+
+ 1: >MZ
+    AMZ\=replace=>$+{name}
+Failed: error -35 at offset 2 in replacement: invalid replacement string
+        here: >$ |<--| +{name}
+    BMZ\=ovector=2
+Matched, but too many substrings
+ 0: BM
+ 1: <unset>
+    BMZ\=ovector=3
+ 0: BM
+ 1: <unset>
+ 2: M
+    BMZ\=ovector=2,replace=>$+<
+Failed: error -54 at offset 3 in replacement: requested value is not available
+        here: >$+ |<--| <
+    BMZ\=ovector=3,replace=>$+<
+ 1: >M<Z
+    BMZ\=ovector=2,substitute_matched,replace=>$+<
+Failed: error -54 at offset 3 in replacement: requested value is not available
+        here: >$+ |<--| <
+    BMZ\=ovector=3,substitute_matched,replace=>$+<
+ 1: >M<Z
+
+/A|(B)/
+    B\=replace=>$1<
+ 1: >B<
+    A\=replace=>$1<
+Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: >$1 |<--| <
+    B\=substitute_unset_empty,replace=>$1<
+ 1: >B<
+    A\=substitute_unset_empty,replace=>$1<
+ 1: ><
+    B\=replace=>$+<
+ 1: >B<
+    A\=replace=>$+<
+Failed: error -55 at offset 3 in replacement: requested value is not set
+        here: >$+ |<--| <
+    B\=substitute_unset_empty,replace=>$+<
+ 1: >B<
+    A\=substitute_unset_empty,replace=>$+<
+ 1: ><
+
+/ABC/
+    ABC\=replace=$+z
+Failed: error -49 at offset 2 in replacement: unknown substring
+        here: $+ |<--| z
+    ABC\=substitute_unknown_unset,replace=$+z
+Failed: error -55 at offset 2 in replacement: requested value is not set
+        here: $+ |<--| z
+    ABC\=substitute_unset_empty,replace=$+z
+Failed: error -49 at offset 2 in replacement: unknown substring
+        here: $+ |<--| z
+    ABC\=substitute_unknown_unset,substitute_unset_empty,replace=$+z
+ 1: z
 
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 Capture group count = 2
@@ -18938,9 +19000,9 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     
 /abc/replace=,caseless
     XabcY
- 0: abc
+ 1: XY
     XABCY 
- 0: ABC
+ 1: XY
 
 /abc/replace=[4],caseless
     XabcY
@@ -18954,7 +19016,7 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
     XABCY
  1: X*Y
     XabcY\=replace=  
- 0: abc
+ 1: XY
 
 /abc/replace=\U$0,substitute_extended,substitute_case_callout
     XabcY
@@ -19062,7 +19124,57 @@ Failed: error 199 at offset 14: \K is not allowed in lookarounds (but see PCRE2_
 /^abc(?<!b\Kq)d/,allow_lookaround_bsk
     abcd
  0: abcd
-    
+
+# PCRE2 now also rejects sneaky cases where the \K is inside a lookaround... but
+# it's not always easy to detect this syntactically at compile-time (indeed,
+# a conditional expression could dynamically invoke \K via a subroutine, based
+# on the subject contents).
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/g,allow_lookaround_bsk
+    ab
+Start of matched string is beyond its end - displaying from end to start.
+ 0: b
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/g
+    ab
+Failed: error -75: disallowed use of \K in lookaround
+    zz
+No match
+
+/a|(?(DEFINE)(?<sneaky>\Ka))(?<=(?&sneaky))b/g,allow_lookaround_bsk
+    ab
+ 0: a
+ 0: ab
+
+/a|(?(DEFINE)(?<sneaky>\Ka))(?<=(?&sneaky))b/g
+    ab
+ 0: a
+Failed: error -75: disallowed use of \K in lookaround
+    zz
+No match
+
+/a|(?(DEFINE)(?<sneaky>\K\Ga))(?<=(?&sneaky))b/g
+    ab
+ 0: a
+    zz
+No match
+
+/(?=.{10}(?1))x(\K){0}/
+    x1234567890
+Failed: error -75: disallowed use of \K in lookaround
+
+/(?=.{10}(.))(*scs:(1)(?2))x(\K){0}/
+    x1234567890
+Failed: error -75: disallowed use of \K in lookaround
+
+/(?=.{5}(?1))\d*(\K){0}/
+\= Totally fine - pattern does nothing bad even though \K is reachable
+    1234567890
+ 0: 67890
+\= Not fine - the subject now causes the \K to misbehave
+    abcdefgh
+Failed: error -75: disallowed use of \K in lookaround
+
 # --------- 
 
 # Tests for zero-length NULL to be treated as an empty string.
@@ -19081,6 +19193,10 @@ Failed: error -51: NULL argument passed with non-zero length
  1: 
     \=null_replacement
  1: 
+
+/abc/replace=
+    XabcY\=null_replacement
+ 1: XY
 
 /X*/g,replace=xy
 \= Expect error

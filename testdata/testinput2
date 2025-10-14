@@ -5010,6 +5010,34 @@ B)x/alt_verbnames,mark
     LabcR\=replace=>$'<
     LabcR\=replace=>$_<
 
+/A(.)|B(.)/
+    AMZ\=replace=>$+<
+    BMZ\=replace=>$+<
+    AMZ\=replace=>$+
+    AMZ\=replace=>$+{name}
+    BMZ\=ovector=2
+    BMZ\=ovector=3
+    BMZ\=ovector=2,replace=>$+<
+    BMZ\=ovector=3,replace=>$+<
+    BMZ\=ovector=2,substitute_matched,replace=>$+<
+    BMZ\=ovector=3,substitute_matched,replace=>$+<
+
+/A|(B)/
+    B\=replace=>$1<
+    A\=replace=>$1<
+    B\=substitute_unset_empty,replace=>$1<
+    A\=substitute_unset_empty,replace=>$1<
+    B\=replace=>$+<
+    A\=replace=>$+<
+    B\=substitute_unset_empty,replace=>$+<
+    A\=substitute_unset_empty,replace=>$+<
+
+/ABC/
+    ABC\=replace=$+z
+    ABC\=substitute_unknown_unset,replace=$+z
+    ABC\=substitute_unset_empty,replace=$+z
+    ABC\=substitute_unknown_unset,substitute_unset_empty,replace=$+z
+
 /^(o(\1{72}{\"{\\{00000059079}\d*){74}}){19}/I
 
 /((p(?'K/
@@ -6378,7 +6406,42 @@ a)"xI
 
 /^abc(?<!b\Kq)d/,allow_lookaround_bsk
     abcd
-    
+
+# PCRE2 now also rejects sneaky cases where the \K is inside a lookaround... but
+# it's not always easy to detect this syntactically at compile-time (indeed,
+# a conditional expression could dynamically invoke \K via a subroutine, based
+# on the subject contents).
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/g,allow_lookaround_bsk
+    ab
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/g
+    ab
+    zz
+
+/a|(?(DEFINE)(?<sneaky>\Ka))(?<=(?&sneaky))b/g,allow_lookaround_bsk
+    ab
+
+/a|(?(DEFINE)(?<sneaky>\Ka))(?<=(?&sneaky))b/g
+    ab
+    zz
+
+/a|(?(DEFINE)(?<sneaky>\K\Ga))(?<=(?&sneaky))b/g
+    ab
+    zz
+
+/(?=.{10}(?1))x(\K){0}/
+    x1234567890
+
+/(?=.{10}(.))(*scs:(1)(?2))x(\K){0}/
+    x1234567890
+
+/(?=.{5}(?1))\d*(\K){0}/
+\= Totally fine - pattern does nothing bad even though \K is reachable
+    1234567890
+\= Not fine - the subject now causes the \K to misbehave
+    abcdefgh
+
 # --------- 
 
 # Tests for zero-length NULL to be treated as an empty string.
@@ -6392,6 +6455,9 @@ a)"xI
     abc\=null_replacement
     \=null_subject
     \=null_replacement
+
+/abc/replace=
+    XabcY\=null_replacement
 
 /X*/g,replace=xy
 \= Expect error
