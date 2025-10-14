@@ -20,7 +20,6 @@ function(pcre2_warning_as_error out_var)
 
       cmake_push_check_state(RESET)
       check_c_compiler_flag("-Werror" HAVE_WERROR)
-
       if(HAVE_WERROR)
         set(${out_var} "-Werror" PARENT_SCOPE)
       else()

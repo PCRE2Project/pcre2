@@ -219,7 +219,7 @@ check_c_source_compiles(
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
 
-if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
+if(NOT MSVC)
   check_c_source_compiles(
     [=[
     extern __attribute__ ((visibility ("default"))) int f(void);
@@ -228,17 +228,23 @@ if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
     ]=]
     HAVE_VISIBILITY
   )
-
-  if(NOT HAVE_VISIBILITY)
-    # Hmm. We don't know of any way to set a symbol to have default visibility, other
-    # than the common "__attribute__((visibility("default")))". But CMake thinks that
-    # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
-    # generate a usable shared library.
-    message(
-      FATAL_ERROR
-      "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
-    )
-  endif()
+endif()
+if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
+  # Hmm. We don't know of any way to set a symbol to have default visibility, other
+  # than the common "__attribute__((visibility("default")))". But CMake thinks that
+  # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
+  # generate a usable shared library.
+  message(
+    WARNING
+    "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+  )
+elseif(HAVE_VISIBILITY AND NOT CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
+  # Here, the build may well work, but it's possible that CMake isn't correctly
+  # suppressing the visibility of private symbols.
+  message(
+    WARNING
+    "C compiler appears to support __attribute__((visibility(\"default\"))). However, CMake is not using a visibility flag. The visibility of private symbols may not be correct."
+  )
 endif()
 if(HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
