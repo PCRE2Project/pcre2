@@ -8370,6 +8370,10 @@ for (;; pptr++)
       case ESC_A:
       if (cb->max_lookbehind == 0) cb->max_lookbehind = 1;
       break;
+
+      case ESC_K:
+      cb->external_flags |= PCRE2_HASBSK;  /* Record */
+      break;
       }
 
     *code++ = meta_arg;
