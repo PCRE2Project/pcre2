@@ -416,7 +416,6 @@ COMMON_SOURCES = \
   src/pcre2_jit_compile.c \
   src/pcre2_jit_match_inc.h \
   src/pcre2_jit_misc_inc.h \
-  src/pcre2_jit_neon_inc.h \
   src/pcre2_jit_simd_inc.h \
   src/pcre2_maketables.c \
   src/pcre2_match.c \

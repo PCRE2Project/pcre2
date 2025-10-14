@@ -336,7 +336,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_compile.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_match_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_misc_inc.h
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_neon_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_simd_inc.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_jit_test.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_maketables.c
