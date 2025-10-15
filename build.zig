@@ -29,7 +29,6 @@ pub fn build(b: *std.Build) !void {
             .HAVE_ATTRIBUTE_UNINITIALIZED = true,
             .HAVE_BUILTIN_MUL_OVERFLOW = true,
             .HAVE_BUILTIN_UNREACHABLE = true,
-            .HAVE_VISIBILITY = true,
 
             .SUPPORT_PCRE2_8 = codeUnitWidth == CodeUnitWidth.@"8",
             .SUPPORT_PCRE2_16 = codeUnitWidth == CodeUnitWidth.@"16",
