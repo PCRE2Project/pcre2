@@ -295,9 +295,7 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
    case, PCRE2POSIX_SHARED should only be defined if the shared library is
    being built, regardless of whether or not the static library is also being
    built. */
-#ifndef PCRE2POSIX_SHARED
-#define PCRE2POSIX_SHARED 1
-#endif
+/* #undef PCRE2POSIX_SHARED */
 
 /* Define to any value to include debugging code. */
 /* #undef PCRE2_DEBUG */
