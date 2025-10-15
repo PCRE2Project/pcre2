@@ -165,6 +165,7 @@ include(CMakePushCheckState)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
 include(PCRE2CheckLinkerFlag)
 include(PCRE2UseSystemExtensions)
+include(PCRE2WarningAsError)
 
 check_include_file(assert.h HAVE_ASSERT_H)
 check_include_file(dirent.h HAVE_DIRENT_H)
@@ -202,36 +203,55 @@ check_c_source_compiles(
   HAVE_REALPATH
 )
 
+# Many CMake tests use highly-dubious C source code which generates warnings
+# (for example, calling a function with the wrong signature just to see whether
+# the linker can find it). These couple of tests here though need to be compiled
+# with -Werror to be effective.
 cmake_push_check_state()
 if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
   set(CMAKE_REQUIRED_FLAGS "")
 endif()
-if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "XL" AND NOT CMAKE_C_COMPILER_ID STREQUAL "SunPro")
-  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
-endif()
+pcre2_warning_as_error(WARNING_AS_ERROR_FLAGS)
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${WARNING_AS_ERROR_FLAGS}")
 
 check_c_source_compiles(
   "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
 
-# TODO Consider switching to modern "GenerateExportHeader"
-check_c_source_compiles(
-  [=[
-  extern __attribute__ ((visibility ("default"))) int f(void);
-  int main(void) { return f(); }
-  int f(void) { return 42; }
-  ]=]
-  HAVE_VISIBILITY
-)
-
-cmake_pop_check_state()
-
+if(NOT MSVC)
+  check_c_source_compiles(
+    [=[
+    extern __attribute__ ((visibility ("default"))) int f(void);
+    int main(void) { return f(); }
+    int f(void) { return 42; }
+    ]=]
+    HAVE_VISIBILITY
+  )
+endif()
+if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
+  # Hmm. We don't know of any way to set a symbol to have default visibility, other
+  # than the common "__attribute__((visibility("default")))". But CMake thinks that
+  # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
+  # generate a usable shared library.
+  message(
+    WARNING
+    "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+  )
+elseif(HAVE_VISIBILITY AND NOT CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
+  # Here, the build may well work, but it's possible that CMake isn't correctly
+  # suppressing the visibility of private symbols.
+  message(
+    WARNING
+    "C compiler appears to support __attribute__((visibility(\"default\"))). However, CMake is not using a visibility flag. The visibility of private symbols may not be correct."
+  )
+endif()
 if(HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
 else()
   set(PCRE2_EXPORT)
 endif()
+cmake_pop_check_state()
 
 check_c_source_compiles("int main(void) { __assume(1); return 0; }" HAVE_BUILTIN_ASSUME)
 
@@ -252,8 +272,10 @@ check_c_source_compiles(
 
 file(WRITE ${PROJECT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
 file(WRITE ${PROJECT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
-pcre2_check_linker_flag(C -Wl,--version-script,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
-pcre2_check_linker_flag(C -Wl,-M,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+if(NOT MSVC)
+  pcre2_check_linker_flag(C -Wl,--version-script,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
+  pcre2_check_linker_flag(C -Wl,-M,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
+endif()
 if(HAVE_VSCRIPT_GNU)
   set(VSCRIPT_FLAG --version-script)
   set(HAVE_VSCRIPT TRUE)
@@ -384,6 +406,7 @@ set(
 set(PCRE2_NEWLINE "LF" CACHE STRING "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF, NUL).")
 
 set(PCRE2_HEAP_MATCH_RECURSE OFF CACHE BOOL "Obsolete option: do not use")
+mark_as_advanced(PCRE2_HEAP_MATCH_RECURSE)
 
 set(PCRE2_SUPPORT_JIT OFF CACHE BOOL "Enable support for Just-in-time compiling.")
 
@@ -692,6 +715,12 @@ if(EBCDIC)
     message(FATAL_ERROR "EBCDIC support is available only for the 8-bit library")
   endif()
 endif()
+
+# Remove the Autotools-generated copy of config.h and pcre2.h. I sometimes switch
+# between Autoconf and CMake, and the conflicting copies of config.h generate some
+# very unintuitive build errors.
+file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
+file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 
 # Output files
 

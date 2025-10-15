@@ -36,7 +36,6 @@
 #cmakedefine EBCDIC 1
 #cmakedefine EBCDIC_NL25 1
 #cmakedefine EBCDIC_IGNORING_COMPILER 1
-#cmakedefine HEAP_MATCH_RECURSE 1
 #cmakedefine NEVER_BACKSLASH_C 1
 
 #define PCRE2_EXPORT            @PCRE2_EXPORT@

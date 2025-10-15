@@ -22,7 +22,6 @@ copy_file(
 
 LOCAL_DEFINES = [
     "HAVE_CONFIG_H",
-    "PCRE2_STATIC",
     "SUPPORT_PCRE2_8",
     "SUPPORT_UNICODE",
 ] + select({
@@ -96,10 +95,14 @@ cc_library(
     ],
     hdrs = [":pcre2_h_generic"],
     implementation_deps = [":pcre2_internal_headers"],
+    defines = [
+        "PCRE2_STATIC",
+    ],
     local_defines = LOCAL_DEFINES + [
         "PCRE2_CODE_UNIT_WIDTH=8",
     ],
     strip_include_prefix = "src",
+    linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
@@ -119,15 +122,18 @@ cc_library(
     name = "pcre2-posix",
     srcs = ["src/pcre2posix.c"],
     hdrs = ["src/pcre2posix.h"],
-    implementation_deps = [":pcre2_internal_headers"],
+    implementation_deps = [
+        ":pcre2_internal_headers",
+        ":pcre2posix_dotc_headers",
+    ],
     local_defines = LOCAL_DEFINES + [
         "PCRE2_CODE_UNIT_WIDTH=8",
     ],
     strip_include_prefix = "src",
+    linkstatic = True,
     visibility = ["//visibility:public"],
     deps = [
         ":pcre2",
-        ":pcre2posix_dotc_headers",
     ],
 )
 

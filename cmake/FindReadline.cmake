@@ -23,12 +23,9 @@ if(READLINE_INCLUDE_DIR AND READLINE_LIBRARY)
 
   if(NOT HAVE_READLINE_FUNC)
     foreach(
-      lib IN ITEMS
-      tinfo
-      curses
-      ncurses
-      ncursesw
-      termcap
+      lib
+      IN
+      ITEMS tinfo curses ncurses ncursesw termcap
     )
       find_library(NCURSES_LIBRARY_${lib} NAMES ${lib})
       mark_as_advanced(NCURSES_LIBRARY_${lib})

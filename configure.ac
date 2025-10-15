@@ -724,13 +724,26 @@ fi
 PCRE2_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
   AC_DEFINE([PCRE2_STATIC], [1], [
-    Define to any value if linking statically (TODO: make nice with Libtool)])
+    Define to any value if linking statically. Ideally, if both static and
+    shared libraries are being built, then PCRE2_STATIC would be defined only
+    for the static build. Indeed, this is a requirement on Windows. With
+    Autoconf and libtool however, it is idiomatic to compile the sources once
+    to create both the static and shared library, so in this case, PCRE2_STATIC
+    should only be defined if no shared library is being built.])
   PCRE2_STATIC_CFLAG="-DPCRE2_STATIC"
 fi
 AC_SUBST(PCRE2_STATIC_CFLAG)
 
 PCRE2POSIX_CFLAG=""
 if test "x$enable_shared" = "xyes" ; then
+  AC_DEFINE([PCRE2POSIX_SHARED], [1], [
+    Define to any value if linking libpcre2-posix dynamically. Ideally, if both
+    static and shared libraries are being built, then PCRE2POSIX_SHARED would be
+    defined only for the shared build. Indeed, this is a requirement on Windows.
+    However, when building with Autoconf and libtool, we compile the sources once
+    only to create both the static and shared library, so in this case,
+    PCRE2POSIX_SHARED should only be defined if the shared library is being built,
+    regardless of whether or not the static library is also being built.])
   PCRE2POSIX_CFLAG="-DPCRE2POSIX_SHARED"
 fi
 AC_SUBST(PCRE2POSIX_CFLAG)
@@ -968,6 +981,11 @@ AH_VERBATIM([PCRE2_EXP_DEFN], [
    of the external API. It does not appear on functions that are "external"
    in the C sense, but which are internal to the library. */
 #undef PCRE2_EXP_DEFN])
+
+AH_VERBATIM([PCRE2POSIX_EXP_DEFN], [
+/* See PCRE2_EXP_DEFN; but this is applied to functions in the libpcre2-posix
+   library. */
+#undef PCRE2POSIX_EXP_DEFN])
 
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [

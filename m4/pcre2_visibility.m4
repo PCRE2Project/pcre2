@@ -74,9 +74,9 @@ AC_DEFUN([PCRE2_VISIBILITY],
   then
     VISIBILITY_CFLAGS="-fvisibility=hidden"
     HAVE_VISIBILITY=1
-    AC_DEFINE(PCRE2_EXPORT, [__attribute__ ((visibility ("default")))], [to make a symbol visible])
+    AC_DEFINE(PCRE2_EXPORT, [__attribute__ ((visibility ("default")))], [Define to the annotation for making a symbol visible.])
   else
-    AC_DEFINE(PCRE2_EXPORT, [], [to make a symbol visible])
+    AC_DEFINE(PCRE2_EXPORT, [], [Define to the annotation for making a symbol visible.])
   fi
   AC_SUBST([VISIBILITY_CFLAGS])
   AC_SUBST([HAVE_VISIBILITY])
