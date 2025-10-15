@@ -26,7 +26,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/COPYING-CMAKE-SCRIPTS
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/FindEditline.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/FindReadline.cmake
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2CheckLinkerFlag.cmake
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2CheckVscript.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2UseSystemExtensions.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2WarningAsError.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2-config.cmake.in

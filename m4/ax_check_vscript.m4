@@ -57,7 +57,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 2
+#serial 2.99 PCRE2
 
 # _AX_CHECK_VSCRIPT(flag, global-sym, action-if-link-succeeds, [junk-file=no])
 AC_DEFUN([_AX_CHECK_VSCRIPT], [
@@ -91,6 +91,17 @@ AC_DEFUN([AX_CHECK_VSCRIPT], [
       ax_cv_check_vscript_flag=unsupported
       _AX_CHECK_VSCRIPT([--version-script], [show], [
         ax_cv_check_vscript_flag=--version-script
+      ])
+      AS_IF([test x$ax_cv_check_vscript_flag = xunsupported], [
+        # PCRE2: Support for FreeBSD. Rather annoyingly, AC_LINK_IFELSE will
+        # only test linking executables, and in turn, on FreeBSD the main
+        # entrypoint will fail to link if you use "local: *" to hide the
+        # visibility of various shared symbols injected from /usr/lib/crt1.o.
+        # It's not at all pretty to hardcode those symbol names here, but I
+        # can't think of an obvious way to improve on this.
+        _AX_CHECK_VSCRIPT([--version-script], [show;environ;__progname], [
+          ax_cv_check_vscript_flag=--version-script
+        ])
       ])
       AS_IF([test x$ax_cv_check_vscript_flag = xunsupported], [
         _AX_CHECK_VSCRIPT([-M], [show], [ax_cv_check_vscript_flag=-M])

@@ -429,8 +429,14 @@ applications can be supported through UNIX System Services.
 The PCRE2 codebase compiles and runs with native EBCDIC support on modern z/OS
 systems, using the pre-installed tools (/bin/sh, ./configure, and the XLC or
 IBM-Clang compilers). PCRE2 supports z/OS using both Autoconf (./configure) and
-CMake (which IBM distributes via "zopen install cmake"). Any EBCDIC codepage
-should work (PCRE2 does not assume or require IBM-1047).
+CMake (which IBM distributes via "zopen install cmake").
+
+Note that as of the time of writing, IBM's port of CMake to z/OS has only
+partial support for EBCDIC. It is recommended to build PCRE2 using the
+./configure script, if you require an EBCDIC build.
+
+Any EBCDIC codepage should work (PCRE2 does not assume or require IBM-1047), or
+PCRE2 can compiled for ASCII/Latin-1/Unicode.
 
 After unpacking the PCRE2 tarball, you must subsequently tag the files as ASCII
 in order for the z/OS shell and compiler to interpret them correctly:
