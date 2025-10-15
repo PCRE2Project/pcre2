@@ -894,7 +894,6 @@ The distribution should contain the files listed below.
   src/pcre2_jit_char_inc.h header used by JIT
   src/pcre2_jit_match_inc.h header used by JIT
   src/pcre2_jit_misc_inc.h header used by JIT
-  src/pcre2_jit_neon_inc.h header used by JIT
   src/pcre2_jit_simd_inc.h header used by JIT
   src/pcre2_printint_inc.h debugging function that is used by pcre2test
   src/pcre2_ucp.h          header for Unicode property handling
