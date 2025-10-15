@@ -30,21 +30,40 @@ fi
 nm="nm -B -D"
 if [ "`uname -s`" = "Linux" ]; then
   nm="$nm --with-symbol-versions"
+elif [ "`uname -s`" = "FreeBSD" ]; then
+  # Use llvm-nm to get symbol version information
+  nm="llvm-nm -B -D"
 elif [ "`uname -s`" = "SunOS" ]; then
-  nm="nm -p -h -D -g"
+  # Highly annoyingly, Solaris' nm doesn't show symbol versions, so here is a
+  # laborious way to reformat the output of elfdump to be as we require.
+  #nm="nm -p -h -D -g"
+  nm=emulated_nm
+  emulated_nm()
+    {
+    # Grab the versions from the version table, and convert into a sed script.
+    VERSUB=`elfdump -v "$1" | \
+      $grep -E '^\s*\[[0-9]+\]' | \
+      $sed -E -e 's/\s+/,/g' | \
+      tr -d '\[\]' | \
+      cut -d',' -f 2,3 | \
+      $sed -E -e 's/([0-9]+),(.*)/s\/@@\1\/@@\2\/;/'`
+
+    # Then grab the symbols and heavily reformat the output to match nm.
+    elfdump -T SHT_DYNSYM "$1" | \
+      $grep -E '^\s*\[[0-9]+\]' | \
+      $sed -E -e 's/\s+/ /g' | \
+      cut -d' ' -f 3,8,9,10 | \
+      $sed -E -e 's/^0x//;s/([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*)/\1 \3 \4@@\2/;' | \
+      $sed -E -e 's/^([^ ]*) .text /\1 T /' | \
+      $sed -E -e 's/^([^ ]*) ([UA])(NDEF|BS) /\1 \2 /' | \
+      $sed -E -e "$VERSUB"
+    }
 elif [ "`uname -s`" = "Darwin" ]; then
   nm="nm -B -g"
 fi
 
 supports_versions=1
 if [ "`uname -s`" = "Darwin" ]; then
-  supports_versions=0
-elif [ "`uname -s`" = "FreeBSD" ]; then
-  # Highly annoyingly, FreeBSD's nm doesn't show symbol versions, so we just
-  # skip checking it.
-  supports_versions=0
-elif [ "`uname -s`" = "SunOS" ]; then
-  # Similarly for Solaris.
   supports_versions=0
 fi
 
@@ -67,8 +86,8 @@ for so_name in "libpcre2-8" "libpcre2-16" "libpcre2-32" "libpcre2-posix"; do
     $sed -E -e 's/^[0-9a-fA-F]* *//g' | \
     $grep -E -v '^[Uw] ' | \
     $grep -E -v '^A PCRE2_' | \
-    $grep -E -v ' (_init|_fini)$' | \
-    $grep -E -v ' (_end|_DYNAMIC|_GLOBAL_OFFSET_TABLE_|_PROCEDURE_LINKAGE_TABLE_|_edata|_etext)$' | \
+    $grep -E -v ' (_init|_fini)($|@)' | \
+    $grep -E -v ' (_end|_DYNAMIC|_GLOBAL_OFFSET_TABLE_|_PROCEDURE_LINKAGE_TABLE_|_edata|_etext)($|@)' | \
     so_mangling | \
     sort \
     > "$base.actual"

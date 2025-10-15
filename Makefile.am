@@ -1013,7 +1013,7 @@ EXTRA_DIST += \
   cmake/FindEditline.cmake \
   cmake/FindReadline.cmake \
   cmake/pcre2-config.cmake.in \
-  cmake/PCRE2CheckLinkerFlag.cmake \
+  cmake/PCRE2CheckVscript.cmake \
   cmake/PCRE2UseSystemExtensions.cmake \
   cmake/PCRE2WarningAsError.cmake \
   src/config-cmake.h.in \

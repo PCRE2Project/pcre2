@@ -114,12 +114,13 @@
 #          -- ./CMakeLists.txt ./cmake/*.cmake ./cmake/*.cmake.in
 ################################################################################
 
+message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
+
 # Increased minimum to 3.15 to allow use of string(REPEAT).
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(PCRE2 C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
-
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
 # Solaris-specific fix for "CMAKE_C_VISIBILITY_PRESET": this feature was only
@@ -141,11 +142,9 @@ endif()
 # cmake_policy(SET CMP0026 OLD)
 # cmake_policy(SET CMP0074 NEW)
 
-# For FindReadline.cmake. This uses list(APPEND) rather than set() to allow
+# For our modules in cmake/. This uses list(APPEND) rather than set() to allow
 # setting CMAKE_MODULE_PATH on the command line.
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-include_directories(${PROJECT_BINARY_DIR}/interface ${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
 
 # external packages
 find_package(BZip2)
@@ -163,7 +162,7 @@ include(CheckTypeSize)
 include(CMakePackageConfigHelpers)
 include(CMakePushCheckState)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
-include(PCRE2CheckLinkerFlag)
+include(PCRE2CheckVscript)
 include(PCRE2UseSystemExtensions)
 include(PCRE2WarningAsError)
 
@@ -270,29 +269,7 @@ check_c_source_compiles(
 
 # Detect support for linker scripts.
 
-file(WRITE ${PROJECT_BINARY_DIR}/test-map-file.sym "PCRE2_10.00 { global: main; };")
-file(WRITE ${PROJECT_BINARY_DIR}/test-map-file-broken.sym "PCRE2_10.00 { global: main; };  {")
-if(NOT MSVC)
-  pcre2_check_linker_flag(C -Wl,--version-script,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_GNU)
-  pcre2_check_linker_flag(C -Wl,-M,${PROJECT_BINARY_DIR}/test-map-file.sym HAVE_VSCRIPT_SUN)
-endif()
-if(HAVE_VSCRIPT_GNU)
-  set(VSCRIPT_FLAG --version-script)
-  set(HAVE_VSCRIPT TRUE)
-elseif(HAVE_VSCRIPT_SUN)
-  set(VSCRIPT_FLAG -M)
-  set(HAVE_VSCRIPT TRUE)
-endif()
-if(HAVE_VSCRIPT)
-  # Perform the same logic as ax_check_vscript.m4, to test whether the linker
-  # silently ignores (and overwrites) linker scripts it doesn't understand.
-  pcre2_check_linker_flag(C -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/test-map-file-broken.sym HAVE_VSCRIPT_BROKEN)
-  if(HAVE_VSCRIPT_BROKEN)
-    set(HAVE_VSCRIPT FALSE)
-  endif()
-endif()
-file(REMOVE ${PROJECT_BINARY_DIR}/test-map-file.sym)
-file(REMOVE ${PROJECT_BINARY_DIR}/test-map-file-broken.sym)
+pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG)
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
 # code was written by PH, trying to imitate the logic from the autotools
@@ -472,67 +449,25 @@ endif()
 if(BZIP2_FOUND)
   option(PCRE2_SUPPORT_LIBBZ2 "Enable support for linking pcre2grep with libbz2." ON)
 endif()
-if(PCRE2_SUPPORT_LIBBZ2)
-  if(BZIP2_FOUND)
-    include_directories(${BZIP2_INCLUDE_DIR})
-  else()
-    message(
-      FATAL_ERROR
-      " libbz2 not found. Set BZIP2_INCLUDE_DIR to a compatible header\n"
-      " or set BZip2_ROOT to a full bzip2 installed tree, as needed."
-    )
-  endif()
-endif()
 
 # zlib
 if(ZLIB_FOUND)
   option(PCRE2_SUPPORT_LIBZ "Enable support for linking pcre2grep with libz." ON)
-endif()
-if(PCRE2_SUPPORT_LIBZ)
-  if(ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIR})
-  else()
-    message(
-      FATAL_ERROR
-      " zlib not found. Set ZLIB_INCLUDE_DIR to a compatible header\n"
-      " or set ZLIB_ROOT to a full zlib installed tree, as needed."
-    )
-  endif()
 endif()
 
 # editline lib
 if(EDITLINE_FOUND)
   option(PCRE2_SUPPORT_LIBEDIT "Enable support for linking pcre2test with libedit." OFF)
 endif()
-if(PCRE2_SUPPORT_LIBEDIT)
-  if(EDITLINE_FOUND)
-    include_directories(${EDITLINE_INCLUDE_DIR})
-  else()
-    message(
-      FATAL_ERROR
-      " libedit not found. Set EDITLINE_INCLUDE_DIR to a compatible header\n"
-      " or set Editline_ROOT to a full libedit installed tree, as needed."
-    )
-  endif()
-endif()
 
 # readline lib
 if(READLINE_FOUND)
   option(PCRE2_SUPPORT_LIBREADLINE "Enable support for linking pcre2test with libreadline." ON)
 endif()
-if(PCRE2_SUPPORT_LIBREADLINE)
-  if(READLINE_FOUND)
-    include_directories(${READLINE_INCLUDE_DIR})
-  else()
-    message(
-      FATAL_ERROR
-      " libreadline not found. Set READLINE_INCLUDE_DIR to a compatible header\n"
-      " or set Readline_ROOT to a full libreadline installed tree, as needed."
-    )
-  endif()
-endif()
 
 # Prepare build configuration
+
+include_directories(${PROJECT_BINARY_DIR}/interface ${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
 
 if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
   message(FATAL_ERROR "At least one of BUILD_SHARED_LIBS or BUILD_STATIC_LIBS must be enabled.")
@@ -560,6 +495,54 @@ endif()
 if(PCRE2_BUILD_PCRE2GREP AND NOT PCRE2_BUILD_PCRE2_8)
   message(STATUS "** PCRE2_BUILD_PCRE2_8 must be enabled for the pcre2grep program")
   set(PCRE2_BUILD_PCRE2GREP OFF)
+endif()
+
+if(PCRE2_SUPPORT_LIBBZ2)
+  if(BZIP2_FOUND)
+    include_directories(${BZIP2_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " libbz2 not found. Set BZIP2_INCLUDE_DIR to a compatible header\n"
+      " or set BZip2_ROOT to a full bzip2 installed tree, as needed."
+    )
+  endif()
+endif()
+
+if(PCRE2_SUPPORT_LIBZ)
+  if(ZLIB_FOUND)
+    include_directories(${ZLIB_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " zlib not found. Set ZLIB_INCLUDE_DIR to a compatible header\n"
+      " or set ZLIB_ROOT to a full zlib installed tree, as needed."
+    )
+  endif()
+endif()
+
+if(PCRE2_SUPPORT_LIBEDIT)
+  if(EDITLINE_FOUND)
+    include_directories(${EDITLINE_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " libedit not found. Set EDITLINE_INCLUDE_DIR to a compatible header\n"
+      " or set Editline_ROOT to a full libedit installed tree, as needed."
+    )
+  endif()
+endif()
+
+if(PCRE2_SUPPORT_LIBREADLINE)
+  if(READLINE_FOUND)
+    include_directories(${READLINE_INCLUDE_DIR})
+  else()
+    message(
+      FATAL_ERROR
+      " libreadline not found. Set READLINE_INCLUDE_DIR to a compatible header\n"
+      " or set Readline_ROOT to a full libreadline installed tree, as needed."
+    )
+  endif()
 endif()
 
 if(PCRE2_SUPPORT_LIBREADLINE AND PCRE2_SUPPORT_LIBEDIT)
