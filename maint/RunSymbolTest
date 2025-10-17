@@ -87,7 +87,7 @@ for so_name in "libpcre2-8" "libpcre2-16" "libpcre2-32" "libpcre2-posix"; do
     $grep -E -v '^[Uw] ' | \
     $grep -E -v '^A PCRE2_' | \
     $grep -E -v ' (_init|_fini)($|@)' | \
-    $grep -E -v ' (_end|_DYNAMIC|_GLOBAL_OFFSET_TABLE_|_PROCEDURE_LINKAGE_TABLE_|_edata|_etext)($|@)' | \
+    $grep -E -v ' (__bss_start|_end|_DYNAMIC|_GLOBAL_OFFSET_TABLE_|_PROCEDURE_LINKAGE_TABLE_|_edata|_etext)($|@)' | \
     so_mangling | \
     sort \
     > "$base.actual"
