@@ -140,7 +140,7 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -222,7 +222,7 @@ jobs:
         run: make -j3
 
       - name: Test
-        run: make check || (cat ./test-suite.log; false)
+        run: (make check; rc=$?; cat ./test-suite.log; exit $rc)
 
       - name: Install
         run: |
@@ -271,7 +271,7 @@ jobs:
         run: ninja -C build
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -298,7 +298,7 @@ jobs:
         run: cmake --build build --config RelWithDebInfo
 
       - name: Test
-        run: cd build && ctest -C RelWithDebInfo -j3 --output-on-failure
+        run: cd build && ctest -C RelWithDebInfo -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   pterodactyl:
     # Tests with: MSVC 64-bit, Debug, shared libraries
@@ -318,7 +318,7 @@ jobs:
         run: cmake --build build --config Debug
 
       - name: Test
-        run: cd build && ctest -C Debug -j3 --output-on-failure
+        run: cd build && ctest -C Debug -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   bigbird:
     # Job to execute ManyConfigTests
@@ -383,7 +383,7 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   fruitbat:
     # Tests with: MSYS2 unix-on-Windows environment
@@ -428,7 +428,7 @@ jobs:
 
       - name: Test
         shell: msys2 {0}
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   ptarmigan:
     # Tests with various unusual processor architectures
@@ -496,8 +496,9 @@ jobs:
             set -e
             # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
             cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
-            ninja -C build
-            (cd build && ctest -j3 --output-on-failure)
+            cd build
+            ninja
+            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   zebrilus:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".
