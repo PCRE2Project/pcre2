@@ -1364,7 +1364,7 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_JITTARGET
 
-       The  where  argument  should point to a buffer that is at least 48 code
+       The  where  argument  should point to a buffer that is at least 64 code
        units long.  (The  exact  length  required  can  be  found  by  calling
        pcre2_config()  with  where  set  to NULL.) The buffer is filled with a
        string that contains the name of the architecture  for  which  the  JIT
@@ -4410,11 +4410,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 19 July 2025
+       Last updated: 05 October 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.47-DEV                  19 July 2025                      PCRE2API(3)
+PCRE2 10.47-DEV                 05 October 2025                    PCRE2API(3)
 ------------------------------------------------------------------------------
 
 
@@ -4538,8 +4538,8 @@ UNICODE AND UTF SUPPORT
        0x10ffff in the strings that they handle. Unicode  support  also  gives
        access  to  the Unicode properties of characters, using pattern escapes
        such as \P, \p, and \X. Only the general category properties such as Lu
-       and Nd, script names, and some bi-directional properties are supported.
-       Details are given in the pcre2pattern documentation.
+       and Nd, script names, and some bi-directional and binary properties are
+       supported.  Details are given in the pcre2pattern documentation.
 
        Pattern escapes such as \d and \w do not by default make use of Unicode
        properties. The application can request that they  do  by  setting  the
@@ -4906,7 +4906,7 @@ PCRE2TEST OPTION FOR LIBREADLINE SUPPORT
        If your environment has not been set up so that an appropriate  library
        is automatically included, you may need to add something like
 
-         LIBS="-ncurses"
+         LIBS="-lncurses"
 
        immediately before the configure command.
 
