@@ -171,7 +171,7 @@ example.
      src/config.h) . Compile src/pcre2test.c; don't forget -DHAVE_CONFIG_H if
      necessary, but do NOT define PCRE2_CODE_UNIT_WIDTH. Then link with the
      appropriate library/ies. If you compiled an 8-bit library, pcre2test also
-     needs the pcre2posix wrapper library.
+     needs the pcre2posix wrapper library when linking.
 
  (9) Run pcre2test on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. There are
