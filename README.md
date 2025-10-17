@@ -202,6 +202,7 @@ The main ways of building PCRE2 are:
 
     ```
     cd pcre2/
+    ./autogen.sh
     ./configure
     make
     ```
