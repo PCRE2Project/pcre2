@@ -157,8 +157,8 @@ UTF support allows the libraries to process character code points up to
 0x10ffff in the strings that they handle. Unicode support also gives access to
 the Unicode properties of characters, using pattern escapes such as \P, \p,
 and \X. Only the general category properties such as <i>Lu</i> and <i>Nd</i>,
-script names, and some bi-directional properties are supported. Details are
-given in the
+script names, and some bi-directional and binary properties are supported.
+Details are given in the
 <a href="pcre2pattern.html"><b>pcre2pattern</b></a>
 documentation.
 </p>
@@ -172,8 +172,8 @@ request this by starting with (*UCP).
 <p>
 The \C escape sequence, which matches a single code unit, even in a UTF mode,
 can cause unpredictable behaviour because it may leave the current matching
-point in the middle of a multi-code-unit character. The application can lock it
-out by setting the PCRE2_NEVER_BACKSLASH_C option when calling
+point in the middle of a multi-code-unit character. The application can lock
+it out by setting the PCRE2_NEVER_BACKSLASH_C option when calling
 <b>pcre2_compile()</b>. There is also a build-time option
 <pre>
   --enable-never-backslash-C
@@ -516,7 +516,7 @@ use), some extra configuration may be necessary. The INSTALL file for
 If your environment has not been set up so that an appropriate library is
 automatically included, you may need to add something like
 <pre>
-  LIBS="-ncurses"
+  LIBS="-lncurses"
 </pre>
 immediately before the <b>configure</b> command.
 </p>

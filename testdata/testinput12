@@ -368,7 +368,7 @@
 
 /\p{BC: Aሴ}/utf
 
-# A special extra option allows excaped surrogate code points in 32-bit mode,
+# A special extra option allows escaped surrogate code points in 32-bit mode,
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
 

@@ -1428,7 +1428,7 @@ Failed: error 146 at offset 7: malformed \P or \p sequence
 Failed: error 146 at offset 9: malformed \P or \p sequence
         here: \p{BC: Aሴ |<--| }
 
-# A special extra option allows excaped surrogate code points in 32-bit mode,
+# A special extra option allows escaped surrogate code points in 32-bit mode,
 # but subjects containing them must not be UTF-checked. These patterns give
 # errors in 16-bit mode.
 
