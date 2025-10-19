@@ -3854,7 +3854,8 @@ allocate memory for the compiled code.
 <p>
 If <i>match_data</i> is not NULL and PCRE2_SUBSTITUTE_MATCHED is not set, the
 provided block is used for all calls to <b>pcre2_match()</b>, and its contents
-afterwards are the result of the final call. For global changes, this will
+afterwards are the result of the final call made internally by
+<b>pcre2_substitute()</b> to the matching function. For global changes, this will
 always be a no-match error. The contents of the ovector within the match data
 block may or may not have been changed.
 </p>
@@ -3864,8 +3865,8 @@ options can be set in the <i>options</i> argument of <b>pcre2_substitute()</b>.
 One such option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
 <i>match_data</i> block must be provided, and it must have already been used for
 an external call to <b>pcre2_match()</b> (or <b>pcre2_jit_match()</b>) with the
-same pattern, subject, effective subject length, start offset, and match option
-arguments (substitute-specific options can be added to the <i>options</i>
+same pattern, subject pointer, effective subject length, start offset, and match
+option arguments (substitute-specific options can be added to the <i>options</i>
 argument). If any of these parameters is changed, <b>pcre2_substitute()</b>
 returns an error. The data in the <i>match_data</i> block (return code, offset
 vector) is used for the first substitution instead of calling
@@ -3874,11 +3875,19 @@ application to check for a match before choosing to substitute, without having
 to repeat the match.
 </p>
 <p>
+If the contents of the subject buffer are mutated in between <b>pcre2_match()</b>
+and a call to <b>pcre2_substitute()</b> with PCRE2_SUBSTITUTE_MATCHED, the
+behaviour is unsafe; in particular, in this case, PCRE2 is unable to ensure that
+the offsets in the ovector point to the start of characters (with UTF-encoded
+input).
+</p>
+<p>
 The contents of the externally supplied match data block are not changed when
-PCRE2_SUBSTITUTE_MATCHED is set. If PCRE2_SUBSTITUTE_GLOBAL is also set,
-<b>pcre2_match()</b> is called after the first substitution to check for further
-matches, but this is done using an internally obtained match data block, thus
-always leaving the external block unchanged.
+PCRE2_SUBSTITUTE_MATCHED is set, and so the match block is permitted for use in
+another call using PCRE2_SUBSTITUTE_MATCHED. If PCRE2_SUBSTITUTE_GLOBAL is also
+set, <b>pcre2_match()</b> is called after the first substitution to check for
+furthe matches, but this is done using an internally obtained match data block,
+thus always leaving the external block unchanged.
 </p>
 <p>
 The <i>code</i> argument is not used for matching before the first substitution

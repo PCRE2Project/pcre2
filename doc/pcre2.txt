@@ -3711,30 +3711,38 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
 
        If  match_data is not NULL and PCRE2_SUBSTITUTE_MATCHED is not set, the
        provided block is used for all calls to pcre2_match(), and its contents
-       afterwards are the result of the final call. For global  changes,  this
+       afterwards are  the  result  of  the  final  call  made  internally  by
+       pcre2_substitute()  to  the matching function. For global changes, this
        will always be a no-match error. The contents of the ovector within the
        match data block may or may not have been changed.
 
-       As  well as the usual options for pcre2_match(), a number of additional
-       options can be set in the options argument of pcre2_substitute().   One
-       such  option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an external
-       match_data block must be provided, and it must have already  been  used
-       for  an  external call to pcre2_match() (or pcre2_jit_match()) with the
-       same pattern, subject, effective  subject  length,  start  offset,  and
-       match option arguments (substitute-specific options can be added to the
-       options argument). If any of these parameters is changed, pcre2_substi-
-       tute() returns an error. The data in the match_data block (return code,
-       offset  vector)  is  used for the first substitution instead of calling
-       pcre2_match() from within pcre2_substitute(). This allows  an  applica-
-       tion to check for a match before choosing to substitute, without having
-       to repeat the match.
+       As well as the usual options for pcre2_match(), a number of  additional
+       options  can be set in the options argument of pcre2_substitute().  One
+       such option is PCRE2_SUBSTITUTE_MATCHED. When this is set, an  external
+       match_data  block  must be provided, and it must have already been used
+       for an external call to pcre2_match() (or pcre2_jit_match())  with  the
+       same  pattern, subject pointer, effective subject length, start offset,
+       and match option arguments (substitute-specific options can be added to
+       the  options  argument).  If  any  of  these  parameters  is   changed,
+       pcre2_substitute()  returns  an error. The data in the match_data block
+       (return code, offset vector) is used for the first substitution instead
+       of calling pcre2_match() from within pcre2_substitute(). This allows an
+       application to check for a match before choosing to substitute, without
+       having to repeat the match.
 
-       The  contents  of  the  externally  supplied  match  data block are not
-       changed  when  PCRE2_SUBSTITUTE_MATCHED  is   set.   If   PCRE2_SUBSTI-
-       TUTE_GLOBAL  is  also set, pcre2_match() is called after the first sub-
-       stitution to check for further matches, but this is done using  an  in-
-       ternally  obtained  match  data block, thus always leaving the external
-       block unchanged.
+       If  the  contents  of  the  subject  buffer  are  mutated  in   between
+       pcre2_match()  and  a  call  to  pcre2_substitute()  with PCRE2_SUBSTI-
+       TUTE_MATCHED, the behaviour is unsafe; in  particular,  in  this  case,
+       PCRE2  is unable to ensure that the offsets in the ovector point to the
+       start of characters (with UTF-encoded input).
+
+       The contents of the  externally  supplied  match  data  block  are  not
+       changed when PCRE2_SUBSTITUTE_MATCHED is set, and so the match block is
+       permitted  for  use  in another call using PCRE2_SUBSTITUTE_MATCHED. If
+       PCRE2_SUBSTITUTE_GLOBAL is also set, pcre2_match() is called after  the
+       first  substitution to check for furthe matches, but this is done using
+       an internally obtained match data block, thus always leaving the exter-
+       nal block unchanged.
 
        The code argument is not used for matching before the  first  substitu-
        tion  when  PCRE2_SUBSTITUTE_MATCHED  is  set, but it must be provided,
