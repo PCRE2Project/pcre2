@@ -133,7 +133,7 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -222,7 +222,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Test
-        run: cd build && ctest -C Release -j3 --output-on-failure
+        run: cd build && ctest -C Release -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -326,7 +326,7 @@ jobs:
 
             ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
             make -j3
-            make check || (cat ./test-suite.log; false)
+            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
@@ -338,7 +338,7 @@ jobs:
             cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make -j3
-            ctest -j3 --output-on-failure
+            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
@@ -400,7 +400,7 @@ jobs:
 
             ./configure CC="cc -m32" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
             make
-            make check || (cat ./test-suite.log; false)
+            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
@@ -411,7 +411,7 @@ jobs:
 
             ./configure CC="cc -m64" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
             make
-            make check || (cat ./test-suite.log; false)
+            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
             maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
@@ -423,7 +423,7 @@ jobs:
             CC="cc -m64" cmake $CMAKE_FLAGS -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
-            ctest -j3 --output-on-failure
+            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
@@ -480,7 +480,7 @@ jobs:
             chtag -R -tc ISO8859-1 .;
             MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode;
             gmake;
-            gmake check;
+            (gmake check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc);
 
             echo "== CMake, IBM-Clang -m64 compiler ==";
             cd ..;
@@ -492,7 +492,7 @@ jobs:
             cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build;
             ninja;
-            ctest -j3 --output-on-failure;
+            ctest -j3 --output-on-failure; && (cat ./Testing/Temporary/LastTest.log || true)
             '
 
   distcheck:
