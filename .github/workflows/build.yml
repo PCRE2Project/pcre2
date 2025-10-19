@@ -375,6 +375,7 @@ jobs:
             set -e
 
             export MALLOC_OPTIONS="USRJGFC>>" # XXX I have no idea - should I set this?
+            EXTRA_CFLAGS="-DSLJIT_WX_EXECUTABLE_ALLOCATOR"
 
             cp -rp . ../build-autoconf
             cp -rp . ../build-cmake
@@ -382,7 +383,7 @@ jobs:
             echo "== Autoconf =="
             cd ../build-autoconf
 
-            ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
+            ./configure CFLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
             make -j3
             (make check; rc=$?; cat ./test-suite.log; exit $rc)
 
@@ -393,7 +394,7 @@ jobs:
             echo "== CMake =="
             cd ../build-cmake
 
-            cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make -j3
             ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
