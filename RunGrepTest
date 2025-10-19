@@ -859,8 +859,13 @@ if [ $? -ne 0 ]; then
   echo "RC=2" >>testtrygrep
 else
 
-  (cd $srcdir; unset LC_ALL; LC_CTYPE=locale.bad $valgrind $vjs $pcre2grep abc /dev/null) >>testtrygrep 2>&1
+  (cd $srcdir; unset LC_ALL; LC_CTYPE=locale.bad; export LC_CTYPE; $valgrind $vjs $pcre2grep abc /dev/null >>$builddir/testtrygrep 2>&1) >testtemp1grep 2>&1
   echo "RC=$?" >>testtrygrep
+  shell_errors=`cat testtemp1grep`
+  if [ x"$shell_errors" != x ] ; then
+    printf "shell errors during locale test: "
+    echo "$shell_errors"
+  fi
 fi
 
 echo "---------------------------- Test 151 -----------------------------" >>testtrygrep

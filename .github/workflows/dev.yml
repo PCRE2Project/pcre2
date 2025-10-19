@@ -13,6 +13,7 @@ on:
         - dragon
         - greatawk
         - dodo
+        - passenger
         - wasp
         - bat
         - pterodactyl
@@ -176,7 +177,7 @@ jobs:
           done
 
   dodo:
-    # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
+    # Tests with: Autoconf on oldest supported Ubuntu (in non-extended support)
     name: GCC -Os, old Autotools
     runs-on: ubuntu-latest
     container: ubuntu:22.04
@@ -205,6 +206,44 @@ jobs:
 
       - name: Test
         run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
+      - name: Install
+        run: |
+          make install "DESTDIR=`pwd`/install-dir"
+          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+
+  passenger:
+    # Tests with: Autoconf on oldest RHEL (in extended support).
+    # That's the absolute limit to how old a Linux version I'll tolerate regular testing on.
+    name: GCC, very old Autotools
+    runs-on: ubuntu-latest
+    container: redhat/ubi8:8.6
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'passenger')
+    steps:
+      - name: Setup
+        run: |
+          yum -q makecache
+          yum -q install -y gcc git make automake autoconf libtool diffutils file glibc-langpack-en
+          yum -q update -y glibc-common
+
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Configure
+        run: ./configure CFLAGS="-O0 $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror
+
+      - name: Build
+        run: make -j3
+
+      - name: Test
+        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
 
       - name: Install
         run: |
