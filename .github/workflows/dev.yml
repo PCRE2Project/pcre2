@@ -260,7 +260,8 @@ jobs:
         run: make -j3
 
       - name: Test
-        run: (make check; rc=$?; cat ./test-suite.log; exit $rc)
+        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
 
       - name: Install
         run: |
