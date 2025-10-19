@@ -10,8 +10,8 @@ listed here.
 Version 10.47 xx-xxx-2025
 -------------------------
 
-1. (#660, #655, #663) Expanded platforms tested by CI: FreeBSD, Solaris,
-MSYS (Cygwin), S390x, PPC64le, ARMv7, AARCH64, RiscV.
+1. (#660, #655, #663) Expanded platforms tested by CI: FreeBSD, OpenBSD,
+Solaris, MSYS (Cygwin), S390x, PPC64le, ARMv7, AARCH64, RiscV.
 
 2. (#655) Made build clean of `/W3` warnings on MSVC. Further suppression of
 minor build warnings on other platforms (various commits).
@@ -45,10 +45,11 @@ a hash table.
 the form "(?1(GROUP_NAME_OR_NUM,...))" acts as a subroutine call which
 additionally returns the listed capturing groups to the calling context.
 
-10. (#721) Add linker scripts to enable symbol version for the PCRE2 dynamic
+10. (#721) Add linker scripts to enable symbol versioning for the PCRE2 dynamic
 libraries. Downstream Linux distributions may make use of this, or disable it
 with the new Autoconf `--disable-symvers` and CMake `-DPCRE2_SYMVERS` options.
-Currently, Linux, Solaris, and FreeBSD are tested and supported.
+Currently, Linux, Solaris, and FreeBSD (GNU ld, LLVM lld, and Solaris ld) are
+tested and supported.
 
 11. (#733) New API function: pcre2_next_match(). This function makes it both
 simpler and safer for clients to iterate over all matches in a subject. The
@@ -79,6 +80,10 @@ evaluate its severity for your application.
 
 17. (#806, #807) Improved input validation for pcre2_substitute() used with
 PCRE2_SUBSTITUTE_MATCHED.
+
+18. (#817) Add support for $+ replacement to pcre2_substitute().
+
+19. (#818) New SIMD code generation in the JIT for AArch64.
 
 
 Version 10.46 27-August-2025
