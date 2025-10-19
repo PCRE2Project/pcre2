@@ -13,6 +13,7 @@ on:
         - dragon
         - greatawk
         - dodo
+        - passenger
         - wasp
         - bat
         - pterodactyl
@@ -64,17 +65,8 @@ jobs:
       - name: Build
         run: make -j3
 
-      - name: Test (main test script)
-        run: ./RunTest
-
-      - name: Test (JIT test program)
-        run: ./pcre2_jit_test
-
-      - name: Test (pcre2grep test script)
-        run: ./RunGrepTest
-
-      - name: Test (pcre2posix program)
-        run: ./pcre2posix_test -v
+      - name: Test
+        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
   dragon:
     # Tests with: clang AB/UB; link-size=3. Clang's logo is a dragon.
@@ -100,19 +92,10 @@ jobs:
       - name: Build
         run: make -j3
 
-      - name: Test (main test script)
+      - name: Test
         run: |
           ulimit -S -s 49152 # Raise stack limit; ASAN with -O0 is very stack-hungry
-          ./RunTest
-
-      - name: Test (JIT test program)
-        run: ./pcre2_jit_test
-
-      - name: Test (pcre2grep test script)
-        run: ./RunGrepTest
-
-      - name: Test (pcre2posix program)
-        run: ./pcre2posix_test -v
+          (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
   greatawk:
     # Tests with: GCC, -O3, oldest supported Ubuntu (in non-extended support)
@@ -140,7 +123,7 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -194,7 +177,7 @@ jobs:
           done
 
   dodo:
-    # Tests with: Autconf on oldest supported Ubuntu (in non-extended support)
+    # Tests with: Autoconf on oldest supported Ubuntu (in non-extended support)
     name: GCC -Os, old Autotools
     runs-on: ubuntu-latest
     container: ubuntu:22.04
@@ -222,7 +205,45 @@ jobs:
         run: make -j3
 
       - name: Test
-        run: make check || (cat ./test-suite.log; false)
+        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
+      - name: Install
+        run: |
+          make install "DESTDIR=`pwd`/install-dir"
+          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+
+  passenger:
+    # Tests with: Autoconf on oldest RHEL (in extended support).
+    # That's the absolute limit to how old a Linux version I'll tolerate regular testing on.
+    name: GCC, very old Autotools
+    runs-on: ubuntu-latest
+    container: redhat/ubi8:8.6
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'passenger')
+    steps:
+      - name: Setup
+        run: |
+          yum -q makecache
+          yum -q install -y gcc git make automake autoconf libtool diffutils file glibc-langpack-en
+          yum -q update -y glibc-common
+
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Configure
+        run: ./configure CFLAGS="-O0 $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror
+
+      - name: Build
+        run: make -j3
+
+      - name: Test
+        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
 
       - name: Install
         run: |
@@ -271,7 +292,7 @@ jobs:
         run: ninja -C build
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -298,7 +319,7 @@ jobs:
         run: cmake --build build --config RelWithDebInfo
 
       - name: Test
-        run: cd build && ctest -C RelWithDebInfo -j3 --output-on-failure
+        run: cd build && ctest -C RelWithDebInfo -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   pterodactyl:
     # Tests with: MSVC 64-bit, Debug, shared libraries
@@ -318,7 +339,7 @@ jobs:
         run: cmake --build build --config Debug
 
       - name: Test
-        run: cd build && ctest -C Debug -j3 --output-on-failure
+        run: cd build && ctest -C Debug -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   bigbird:
     # Job to execute ManyConfigTests
@@ -383,7 +404,7 @@ jobs:
         run: cd build && make -j3
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   fruitbat:
     # Tests with: MSYS2 unix-on-Windows environment
@@ -428,7 +449,7 @@ jobs:
 
       - name: Test
         shell: msys2 {0}
-        run: cd build && ctest -j3 --output-on-failure
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   ptarmigan:
     # Tests with various unusual processor architectures
@@ -496,8 +517,9 @@ jobs:
             set -e
             # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
             cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
-            ninja -C build
-            (cd build && ctest -j3 --output-on-failure)
+            cd build
+            ninja
+            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   zebrilus:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".

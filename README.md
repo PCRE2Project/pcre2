@@ -53,7 +53,7 @@ https://pcre2project.github.io/pcre2/
 </tr>
 <tr>
 <th align="left">Platforms</th>
-<td>Tested continuously on Linux, Windows, macOS, FreeBSD, Solaris, z/OS;<br />
+<td>Tested continuously on Linux, Windows, macOS, FreeBSD, OpenBSD, Solaris, z/OS;<br />
 x86, ARM, RISC-V, POWER, S390X; others known to work
 </td>
 </tr>
@@ -238,7 +238,7 @@ PCRE2 is portable C code, and is likely to work on any system with a C99 compile
 <dl>
 <dt>Operating systems</dt>
 <dd>
-Our continuous integration tests on <strong>Linux</strong> (GCC and Clang, glibc and musl), <strong>Windows</strong> (MSVC and MinGW-x64), and <strong>macOS</strong> (Clang), as well as <strong>FreeBSD</strong>, <strong>Solaris</strong> (Oracle Studio <code>cc</code>), and <strong>z/OS</strong> (<code>xlc</code> and <code>ibm-clang</code>).
+Our continuous integration tests on <strong>Linux</strong> (GCC and Clang, glibc and musl), <strong>Windows</strong> (MSVC and MinGW-x64), and <strong>macOS</strong> (Clang), as well as <strong>FreeBSD</strong>, <strong>OpenBSD</strong>, <strong>Solaris</strong> (Oracle Studio <code>cc</code>), and <strong>z/OS</strong> (<code>xlc</code> and <code>ibm-clang</code>).
 </dd>
 <dt>Processors</dt>
 <dd>
