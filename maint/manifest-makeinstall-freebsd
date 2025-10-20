@@ -11,24 +11,24 @@ drwxr-xr-x install-dir/usr/local/include
 drwxr-xr-x install-dir/usr/local/lib
 -rw-r--r-- install-dir/usr/local/lib/libpcre2-16.a
 -rwxr-xr-x install-dir/usr/local/lib/libpcre2-16.la
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-16.so -> libpcre2-16.so.0.14.0
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-16.so.0 -> libpcre2-16.so.0.14.0
--rwxr-xr-x install-dir/usr/local/lib/libpcre2-16.so.0.14.0
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-16.so -> libpcre2-16.so.0.15.0
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-16.so.0 -> libpcre2-16.so.0.15.0
+-rwxr-xr-x install-dir/usr/local/lib/libpcre2-16.so.0.15.0
 -rw-r--r-- install-dir/usr/local/lib/libpcre2-32.a
 -rwxr-xr-x install-dir/usr/local/lib/libpcre2-32.la
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-32.so -> libpcre2-32.so.0.14.0
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-32.so.0 -> libpcre2-32.so.0.14.0
--rwxr-xr-x install-dir/usr/local/lib/libpcre2-32.so.0.14.0
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-32.so -> libpcre2-32.so.0.15.0
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-32.so.0 -> libpcre2-32.so.0.15.0
+-rwxr-xr-x install-dir/usr/local/lib/libpcre2-32.so.0.15.0
 -rw-r--r-- install-dir/usr/local/lib/libpcre2-8.a
 -rwxr-xr-x install-dir/usr/local/lib/libpcre2-8.la
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-8.so -> libpcre2-8.so.0.14.0
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-8.so.0 -> libpcre2-8.so.0.14.0
--rwxr-xr-x install-dir/usr/local/lib/libpcre2-8.so.0.14.0
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-8.so -> libpcre2-8.so.0.15.0
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-8.so.0 -> libpcre2-8.so.0.15.0
+-rwxr-xr-x install-dir/usr/local/lib/libpcre2-8.so.0.15.0
 -rw-r--r-- install-dir/usr/local/lib/libpcre2-posix.a
 -rwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.la
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.so -> libpcre2-posix.so.3.0.6
-lrwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.so.3 -> libpcre2-posix.so.3.0.6
--rwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.so.3.0.6
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.so -> libpcre2-posix.so.3.0.7
+lrwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.so.3 -> libpcre2-posix.so.3.0.7
+-rwxr-xr-x install-dir/usr/local/lib/libpcre2-posix.so.3.0.7
 drwxr-xr-x install-dir/usr/local/lib/pkgconfig
 -rw-r--r-- install-dir/usr/local/lib/pkgconfig/libpcre2-16.pc
 -rw-r--r-- install-dir/usr/local/lib/pkgconfig/libpcre2-32.pc

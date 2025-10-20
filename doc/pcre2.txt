@@ -4418,11 +4418,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 05 October 2025
+       Last updated: 19 October 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.47-DEV                 05 October 2025                    PCRE2API(3)
+PCRE2 10.47-DEV                 19 October 2025                    PCRE2API(3)
 ------------------------------------------------------------------------------
 
 
@@ -5065,11 +5065,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 19 February 2025
+       Last updated: 17 October 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.47-DEV                19 February 2025                  PCRE2BUILD(3)
+PCRE2 10.47-DEV                 17 October 2025                  PCRE2BUILD(3)
 ------------------------------------------------------------------------------
 
 
@@ -6297,11 +6297,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 August 2025
+       Last updated: 03 September 2025
        Copyright (c) 1997-2023 University of Cambridge.
 
 
-PCRE2 10.47-DEV                 29 August 2025                  PCRE2LIMITS(3)
+PCRE2 10.47-DEV                03 September 2025                PCRE2LIMITS(3)
 ------------------------------------------------------------------------------
 
 
@@ -10782,11 +10782,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 2 September 2025
+       Last updated: 03 September 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.47-DEV                2 September 2025                PCRE2PATTERN(3)
+PCRE2 10.47-DEV                03 September 2025               PCRE2PATTERN(3)
 ------------------------------------------------------------------------------
 
 
@@ -12412,11 +12412,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 2 September 2025
+       Last updated: 14 October 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.47-DEV                2 September 2025                 PCRE2SYNTAX(3)
+PCRE2 10.47-DEV                 14 October 2025                 PCRE2SYNTAX(3)
 ------------------------------------------------------------------------------
 
 

@@ -13,20 +13,20 @@ drwxr-xr-x install-dir/lib/cmake/pcre2
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-config.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets-release.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets.cmake
--rwxr-xr-x install-dir/lib/libpcre2-16.0.14.0.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-16.0.dylib -> libpcre2-16.0.14.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-16.0.15.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-16.0.dylib -> libpcre2-16.0.15.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-16.a
 lrwxr-xr-x install-dir/lib/libpcre2-16.dylib -> libpcre2-16.0.dylib
--rwxr-xr-x install-dir/lib/libpcre2-32.0.14.0.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-32.0.dylib -> libpcre2-32.0.14.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-32.0.15.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-32.0.dylib -> libpcre2-32.0.15.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-32.a
 lrwxr-xr-x install-dir/lib/libpcre2-32.dylib -> libpcre2-32.0.dylib
--rwxr-xr-x install-dir/lib/libpcre2-8.0.14.0.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-8.0.dylib -> libpcre2-8.0.14.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-8.0.15.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-8.0.dylib -> libpcre2-8.0.15.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-8.a
 lrwxr-xr-x install-dir/lib/libpcre2-8.dylib -> libpcre2-8.0.dylib
--rwxr-xr-x install-dir/lib/libpcre2-posix.3.0.6.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-posix.3.dylib -> libpcre2-posix.3.0.6.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-posix.3.0.7.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-posix.3.dylib -> libpcre2-posix.3.0.7.dylib
 -rw-r--r-- install-dir/lib/libpcre2-posix.a
 lrwxr-xr-x install-dir/lib/libpcre2-posix.dylib -> libpcre2-posix.3.dylib
 drwxr-xr-x install-dir/lib/pkgconfig
