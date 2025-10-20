@@ -15,20 +15,20 @@ drwxr-xr-x install-dir/lib/cmake/pcre2
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets.cmake
 -rw-r--r-- install-dir/lib/libpcre2-16.a
 lrwxrwxrwx install-dir/lib/libpcre2-16.so -> libpcre2-16.so.0
-lrwxrwxrwx install-dir/lib/libpcre2-16.so.0 -> libpcre2-16.so.0.14.0
--rw-r--r-- install-dir/lib/libpcre2-16.so.0.14.0
+lrwxrwxrwx install-dir/lib/libpcre2-16.so.0 -> libpcre2-16.so.0.15.0
+-rw-r--r-- install-dir/lib/libpcre2-16.so.0.15.0
 -rw-r--r-- install-dir/lib/libpcre2-32.a
 lrwxrwxrwx install-dir/lib/libpcre2-32.so -> libpcre2-32.so.0
-lrwxrwxrwx install-dir/lib/libpcre2-32.so.0 -> libpcre2-32.so.0.14.0
--rw-r--r-- install-dir/lib/libpcre2-32.so.0.14.0
+lrwxrwxrwx install-dir/lib/libpcre2-32.so.0 -> libpcre2-32.so.0.15.0
+-rw-r--r-- install-dir/lib/libpcre2-32.so.0.15.0
 -rw-r--r-- install-dir/lib/libpcre2-8.a
 lrwxrwxrwx install-dir/lib/libpcre2-8.so -> libpcre2-8.so.0
-lrwxrwxrwx install-dir/lib/libpcre2-8.so.0 -> libpcre2-8.so.0.14.0
--rw-r--r-- install-dir/lib/libpcre2-8.so.0.14.0
+lrwxrwxrwx install-dir/lib/libpcre2-8.so.0 -> libpcre2-8.so.0.15.0
+-rw-r--r-- install-dir/lib/libpcre2-8.so.0.15.0
 -rw-r--r-- install-dir/lib/libpcre2-posix.a
 lrwxrwxrwx install-dir/lib/libpcre2-posix.so -> libpcre2-posix.so.3
-lrwxrwxrwx install-dir/lib/libpcre2-posix.so.3 -> libpcre2-posix.so.3.0.6
--rw-r--r-- install-dir/lib/libpcre2-posix.so.3.0.6
+lrwxrwxrwx install-dir/lib/libpcre2-posix.so.3 -> libpcre2-posix.so.3.0.7
+-rw-r--r-- install-dir/lib/libpcre2-posix.so.3.0.7
 drwxr-xr-x install-dir/lib/pkgconfig
 -rw-r--r-- install-dir/lib/pkgconfig/libpcre2-16.pc
 -rw-r--r-- install-dir/lib/pkgconfig/libpcre2-32.pc

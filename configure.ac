@@ -14,10 +14,10 @@ m4_define(pcre2_prerelease, [-DEV])
 m4_define(pcre2_date, [2025-10-21])
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre2_8_version,     [14:0:14])
-m4_define(libpcre2_16_version,    [14:0:14])
-m4_define(libpcre2_32_version,    [14:0:14])
-m4_define(libpcre2_posix_version, [3:6:0])
+m4_define(libpcre2_8_version,     [15:0:15])
+m4_define(libpcre2_16_version,    [15:0:15])
+m4_define(libpcre2_32_version,    [15:0:15])
+m4_define(libpcre2_posix_version, [3:7:0])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
