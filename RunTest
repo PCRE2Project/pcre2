@@ -163,7 +163,7 @@ yield=0
 # Note: must define using name(), not "function name", for Solaris.
 
 checkresult()
-  {
+{
   if [ $1 -ne 0 ] ; then
     echo "** pcre2test failed - check testoutput$bits$3/testoutput$2"
     yield=1
@@ -190,13 +190,13 @@ checkresult()
     return
   fi
   echo "  OK$with"
-  }
+}
 
 
 # ------ Function to run and check a special pcre2test arguments test -------
 
 checkspecial()
-  {
+{
   expect=${2:-0}
   $sim $valgrind $vjs $pcre2test $1 >>testSoutput 2>&1
   if [ $? -ne "$expect" ] ; then
@@ -205,7 +205,7 @@ checkspecial()
     return 1
   fi
   return 0
-  }
+}
 
 
 # ------ Test setup ------
