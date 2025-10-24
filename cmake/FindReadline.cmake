@@ -50,3 +50,11 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Readline DEFAULT_MSG READLINE_LIBRARY READLINE_INCLUDE_DIR)
+
+if(Readline_FOUND)
+  set(READLINE_LIBRARIES "${READLINE_LIBRARY}")
+  if(DEFINED NCURSES_LIBRARY)
+    list(APPEND READLINE_LIBRARIES "${NCURSES_LIBRARY}")
+  endif()
+  set(READLINE_INCLUDE_DIRS "${READLINE_INCLUDE_DIR}")
+endif()

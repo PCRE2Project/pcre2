@@ -152,6 +152,20 @@ find_package(ZLIB)
 find_package(Readline)
 find_package(Editline)
 
+# XXX DON'T MERGE - just for testing CI
+message(STATUS "XXX === Dumping CMake variables ===")
+function(dump_cmake_variables)
+  get_cmake_property(_variableNames VARIABLES)
+  list (SORT _variableNames)
+  foreach (_variableName ${_variableNames})
+    if (_variableName MATCHES "^(BZip2|BZIP2|ZLIB|Readline|READLINE|Editline|EDITLINE)_")
+      message(STATUS "${_variableName}=${${_variableName}}")
+    endif()
+  endforeach()
+endfunction()
+dump_cmake_variables()
+message(STATUS "XXX === End of CMake variable dump ===")
+
 # Configuration checks
 
 include(CheckCSourceCompiles)
@@ -446,7 +460,7 @@ if(HAVE_VSCRIPT)
 endif()
 
 # bzip2 lib
-if(BZIP2_FOUND)
+if(BZip2_FOUND)
   option(PCRE2_SUPPORT_LIBBZ2 "Enable support for linking pcre2grep with libbz2." ON)
 endif()
 
@@ -456,12 +470,12 @@ if(ZLIB_FOUND)
 endif()
 
 # editline lib
-if(EDITLINE_FOUND)
+if(Editline_FOUND)
   option(PCRE2_SUPPORT_LIBEDIT "Enable support for linking pcre2test with libedit." OFF)
 endif()
 
 # readline lib
-if(READLINE_FOUND)
+if(Readline_FOUND)
   option(PCRE2_SUPPORT_LIBREADLINE "Enable support for linking pcre2test with libreadline." ON)
 endif()
 
@@ -498,12 +512,12 @@ if(PCRE2_BUILD_PCRE2GREP AND NOT PCRE2_BUILD_PCRE2_8)
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)
-  if(BZIP2_FOUND)
-    include_directories(${BZIP2_INCLUDE_DIR})
+  if(BZip2_FOUND)
+    include_directories(${BZIP2_INCLUDE_DIRS})
   else()
     message(
       FATAL_ERROR
-      " libbz2 not found. Set BZIP2_INCLUDE_DIR to a compatible header\n"
+      " libbz2 not found. Set BZIP2_INCLUDE_DIRS to a compatible header\n"
       " or set BZip2_ROOT to a full bzip2 installed tree, as needed."
     )
   endif()
@@ -511,42 +525,42 @@ endif()
 
 if(PCRE2_SUPPORT_LIBZ)
   if(ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIR})
+    include_directories(${ZLIB_INCLUDE_DIRS})
   else()
     message(
       FATAL_ERROR
-      " zlib not found. Set ZLIB_INCLUDE_DIR to a compatible header\n"
+      " zlib not found. Set ZLIB_INCLUDE_DIRS to a compatible header\n"
       " or set ZLIB_ROOT to a full zlib installed tree, as needed."
     )
   endif()
 endif()
 
 if(PCRE2_SUPPORT_LIBEDIT)
-  if(EDITLINE_FOUND)
-    include_directories(${EDITLINE_INCLUDE_DIR})
+  if(Editline_FOUND)
+    include_directories(${EDITLINE_INCLUDE_DIRS})
   else()
     message(
       FATAL_ERROR
-      " libedit not found. Set EDITLINE_INCLUDE_DIR to a compatible header\n"
+      " libedit not found. Set EDITLINE_INCLUDE_DIRS to a compatible header\n"
       " or set Editline_ROOT to a full libedit installed tree, as needed."
     )
   endif()
 endif()
 
 if(PCRE2_SUPPORT_LIBREADLINE)
-  if(READLINE_FOUND)
-    include_directories(${READLINE_INCLUDE_DIR})
+  if(Readline_FOUND)
+    include_directories(${READLINE_INCLUDE_DIRS})
   else()
     message(
       FATAL_ERROR
-      " libreadline not found. Set READLINE_INCLUDE_DIR to a compatible header\n"
+      " libreadline not found. Set READLINE_INCLUDE_DIRS to a compatible header\n"
       " or set Readline_ROOT to a full libreadline installed tree, as needed."
     )
   endif()
 endif()
 
 if(PCRE2_SUPPORT_LIBREADLINE AND PCRE2_SUPPORT_LIBEDIT)
-  if(READLINE_FOUND)
+  if(Readline_FOUND)
     message(
       FATAL_ERROR
       " Only one of the readline compatible libraries can be enabled.\n"
@@ -603,24 +617,16 @@ endif()
 set(PCRE2TEST_LIBS)
 set(PCRE2GREP_LIBS)
 
-# This next one used to reference ${READLINE_LIBRARY})
-# but I was advised to add the NCURSES test as well, along with
-# some modifications to cmake/FindReadline.cmake which should
-# make it possible to override the default if necessary. PH
-
 if(PCRE2_SUPPORT_LIBREADLINE)
   set(SUPPORT_LIBREADLINE 1)
-  list(APPEND PCRE2TEST_LIBS ${READLINE_LIBRARY})
-  if(DEFINED NCURSES_LIBRARY)
-    list(APPEND PCRE2TEST_LIBS ${NCURSES_LIBRARY})
-  endif()
+  list(APPEND PCRE2TEST_LIBS ${READLINE_LIBRARIES})
 endif()
 
 # libedit is a plug-compatible alternative to libreadline
 
 if(PCRE2_SUPPORT_LIBEDIT)
   set(SUPPORT_LIBEDIT 1)
-  list(APPEND PCRE2TEST_LIBS ${EDITLINE_LIBRARY})
+  list(APPEND PCRE2TEST_LIBS ${EDITLINE_LIBRARIES})
 endif()
 
 if(PCRE2_SUPPORT_LIBZ)
@@ -1590,17 +1596,17 @@ if(PCRE2_SHOW_REPORT)
   else()
     message(STATUS "  Link pcre2grep with libz .......... : Library not found")
   endif()
-  if(BZIP2_FOUND)
+  if(BZip2_FOUND)
     message(STATUS "  Link pcre2grep with libbz2 ........ : ${PCRE2_SUPPORT_LIBBZ2}")
   else()
     message(STATUS "  Link pcre2grep with libbz2 ........ : Library not found")
   endif()
-  if(EDITLINE_FOUND)
+  if(Editline_FOUND)
     message(STATUS "  Link pcre2test with libeditline ... : ${PCRE2_SUPPORT_LIBEDIT}")
   else()
     message(STATUS "  Link pcre2test with libeditline ... : Library not found")
   endif()
-  if(READLINE_FOUND)
+  if(Readline_FOUND)
     message(STATUS "  Link pcre2test with libreadline ... : ${PCRE2_SUPPORT_LIBREADLINE}")
   else()
     message(STATUS "  Link pcre2test with libreadline ... : Library not found")
