@@ -8,3 +8,8 @@ mark_as_advanced(EDITLINE_LIBRARY)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Editline DEFAULT_MSG EDITLINE_LIBRARY EDITLINE_INCLUDE_DIR)
+
+if(Editline_FOUND)
+  set(EDITLINE_LIBRARIES "${EDITLINE_LIBRARY}")
+  set(EDITLINE_INCLUDE_DIRS "${EDITLINE_INCLUDE_DIR}")
+endif()
