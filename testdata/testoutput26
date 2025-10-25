@@ -3271,7 +3271,7 @@ No match
 
 # Character not in script
 /^\p{Tangut}/utf
-    \x{18d09}
+    \x{18d20}
 No match
 
 # Base script check

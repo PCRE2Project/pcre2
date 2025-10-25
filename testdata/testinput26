@@ -2562,7 +2562,7 @@
 
 # Character not in script
 /^\p{Tangut}/utf
-    \x{18d09}
+    \x{18d20}
 
 # Base script check
 /^\p{sc=Nushu}/utf
