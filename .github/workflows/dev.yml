@@ -11,9 +11,10 @@ on:
         - all
         - canary
         - dragon
-        - greatawk
+        - puffin
         - dodo
         - passenger
+        - greatawk
         - wasp
         - bat
         - pterodactyl
@@ -97,27 +98,52 @@ jobs:
           ulimit -S -s 49152 # Raise stack limit; ASAN with -O0 is very stack-hungry
           (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
-  greatawk:
-    # Tests with: GCC, -O3, oldest supported Ubuntu (in non-extended support)
-    name: GCC -O3
+  puffin:
+    # Tests with: GCC, -O3, very latest CMake, libedit
+    name: GCC -O3, CMake
     runs-on: ubuntu-latest
-    container: ubuntu:22.04
-    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'greatawk')
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'puffin')
     steps:
       - name: Setup
         run: |
-          echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
-          export DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
-          apt-get -qq update
-          apt-get -qq install -y git build-essential cmake
+          echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libedit-dev
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: true
 
+      - name: Check latest CMake
+        id: get-cmake-ver
+        run: |
+          CMAKE_VER=$(curl -s https://api.github.com/repos/Kitware/CMake/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          if ! echo "$CMAKE_VER" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' ; then
+            echo "Extracted CMake version: '$CMAKE_VER'" >&2
+            echo "This does not match the expected version format" >&2
+            exit 1
+          fi
+          echo "CMAKE_VER=$CMAKE_VER" >> $GITHUB_OUTPUT
+          echo "CMAKE_VER=$CMAKE_VER" >> $GITHUB_ENV
+          echo "Latest CMake version is $CMAKE_VER"
+
+      - name: Cache CMake
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          key: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64
+          path: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64.tar.gz
+
+      - name: Install CMake
+        run: |
+          [ -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-linux-x86_64.tar.gz"
+          tar -xz -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz -C "$RUNNER_TEMP"
+          realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-linux-x86_64/bin" >> "$GITHUB_PATH"
+
       - name: Configure
-        run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+        run: |
+          cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
+          cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKE_VER -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
         run: cd build && make -j3
@@ -251,9 +277,88 @@ jobs:
           maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
+  greatawk:
+    # Tests with: GCC, -O2, oldest supported Ubuntu (in non-extended support)
+    name: GCC -O2, old CMake
+    runs-on: ubuntu-latest
+    container: ubuntu:22.04
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'greatawk')
+    steps:
+      - name: Setup
+        run: |
+          echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
+          export DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+          apt-get -qq update
+          apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libreadline-dev
+
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: true
+
+      - name: Configure
+        run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
+
+      - name: Build
+        run: cd build && make -j3
+
+      - name: Test
+        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+
+      - name: Install
+        run: |
+          cd build
+          cmake --install . --prefix install-dir
+          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux relwithdebinfo
+          ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+      - name: Test CMake install interface
+        run: |
+          INSTALL_PREFIX=`pwd`/build/install-dir
+          cd maint/cmake-tests/install-interface
+
+          for useStaticLibs in ON OFF; do
+            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
+            rm -rf build
+            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            (cd build; make)
+            ./build/test_executable
+            ldd ./build/test_executable
+            if [ $useStaticLibs = ON ]; then
+              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
+          done
+
+      - name: Test CMake build interface
+        run: |
+          BUILD_DIR=`pwd`
+          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
+          cd ../cmake-tests-build-interface
+          ln -s "$BUILD_DIR" pcre2
+
+          for buildLibs in "ON;OFF" "OFF;ON"; do
+            static=`echo $buildLibs | cut -d';' -f1`
+            shared=`echo $buildLibs | cut -d';' -f2`
+            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
+            rm -rf build
+            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            (cd build; make)
+            ./build/test_executable
+            ldd ./build/test_executable
+            if [ $static = ON ]; then
+              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
+            else
+              # Test that the shared library is actually linked in
+              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
+            fi
+          done
+
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
-    name: GCC -Os, CMake+ninja, no JIT
+    name: GCC -Os, very old CMake, ninja, no JIT
     runs-on: ubuntu-latest
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'wasp')
     env:
@@ -263,7 +368,7 @@ jobs:
         run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
           sudo apt-get -qq update
-          sudo apt-get -qq install -y language-pack-fr ninja-build libreadline-dev
+          sudo apt-get -qq install -y language-pack-fr ninja-build zlib1g-dev libbz2-dev libreadline-dev
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -274,14 +379,13 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
-          path: ../cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
+          path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
 
       - name: Install CMake
         run: |
-          cd ..
           [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
-          tar -xz -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz
-          realpath "cmake-${CMAKE_VER}-Linux-x86_64/bin" >> "$GITHUB_PATH"
+          tar -xz -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz -C "$RUNNER_TEMP"
+          realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-Linux-x86_64/bin" >> "$GITHUB_PATH"
 
       - name: Configure
         run: |
@@ -511,7 +615,7 @@ jobs:
           install: |
             echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
             apt-get -qq update
-            apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev
+            apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev libreadline-dev
 
           run: |
             set -e
