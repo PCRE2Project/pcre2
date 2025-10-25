@@ -2019,6 +2019,9 @@ uint32_t use_forbid_utf = forbid_utf;
 PCRE2_SIZE patlen, full_patlen;
 PCRE2_SIZE valgrind_access_length;
 PCRE2_SIZE erroroffset;
+int32_t serialize_rc;
+uint8_t *serialized_bytes;
+PCRE2_SIZE serialized_size;
 
 /* The perltest.sh script supports only / as a delimiter. */
 
@@ -2965,6 +2968,28 @@ if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
 
 rc = show_pattern_info();
 if (rc != PR_OK) return rc;
+
+/* Verify that the compiled structure can be serialized without generating
+memory errors. */
+
+serialize_rc = pcre2_serialize_encode((const pcre2_code **)&compiled_code, 1,
+  &serialized_bytes, &serialized_size, general_context);
+if (serialize_rc != 1)
+  {
+  cfprintf(clr_test_error, outfile, "** pcre2_serialize_encode() returned %d instead of 1\n",
+    serialize_rc);
+  return PR_ABEND;
+  }
+
+#if defined SUPPORT_VALGRIND
+if (VALGRIND_CHECK_MEM_IS_DEFINED(serialized_bytes, serialized_size) != 0)
+  {
+  cfprintf(clr_test_error, outfile, "** pcre2_serialize_encode() returned undefined data\n");
+  return PR_ABEND;
+  }
+#endif
+
+pcre2_serialize_free(serialized_bytes);
 
 /* The "push" control requests that the compiled pattern be remembered on a
 stack. This is mainly for testing the serialization functionality. */
