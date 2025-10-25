@@ -1809,7 +1809,12 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
       uninitialized memory that may contain sensitive information. */
 
       if ((char_lists_size & 0x2) != 0)
+        {
         ((uint16_t*)data)[-1] = 0xdead;
+#ifdef SUPPORT_VALGRIND
+        VALGRIND_MAKE_MEM_NOACCESS(data - 2, 2);
+#endif
+        }
 
       cb->char_lists_size =
         CLIST_ALIGN_TO(char_lists_size, sizeof(uint32_t));
