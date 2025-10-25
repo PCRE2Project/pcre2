@@ -3414,7 +3414,7 @@ ITERATING OVER ALL MATCHES
        subject on all matches; or simply counting the number of  matches.  The
        pcre2_next_match()  function  helps with this task by providing the ap-
        propriate parameters for the next match attempt (available since  PCRE2
-       10.46).
+       10.47).
 
        First,  a  match attempt should be made using one of the matching func-
        tions (pcre2_match(), pcre2_dfa_match(), or pcre2_jit_match()).   Then,
@@ -10105,7 +10105,7 @@ RECURSIVE PATTERNS
 
    Recursion and subroutines with returned capture groups
 
-       Since  PCRE2  10.46,  recursion and subroutine calls may also specify a
+       Since  PCRE2  10.47,  recursion and subroutine calls may also specify a
        list of capture groups to return. This is a PCRE2 syntax extension  not
        supported  by  Perl.  The pattern matching recurses into the referenced
        expression as described above, however, when the recursion  returns  to
