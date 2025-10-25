@@ -146,25 +146,11 @@ endif()
 # setting CMAKE_MODULE_PATH on the command line.
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-# external packages
+# External packages
 find_package(BZip2)
 find_package(ZLIB)
 find_package(Readline)
 find_package(Editline)
-
-# XXX DON'T MERGE - just for testing CI
-message(STATUS "XXX === Dumping CMake variables ===")
-function(dump_cmake_variables)
-  get_cmake_property(_variableNames VARIABLES)
-  list (SORT _variableNames)
-  foreach (_variableName ${_variableNames})
-    if (_variableName MATCHES "^(BZip2|BZIP2|ZLIB|Readline|READLINE|Editline|EDITLINE)_")
-      message(STATUS "${_variableName}=${${_variableName}}")
-    endif()
-  endforeach()
-endfunction()
-dump_cmake_variables()
-message(STATUS "XXX === End of CMake variable dump ===")
 
 # Configuration checks
 
