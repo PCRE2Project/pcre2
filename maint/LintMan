@@ -14,7 +14,7 @@ use vars qw /$opt_verbose/;
 my $file;
 my %defs;
 
-foreach $file ("../src/config.h.generic")
+foreach $file ("../src/config.h.generic", "../src/pcre2_api_internal.h")
   {
   open (INCLUDE, $file) or die "Failed to open include $file\n";
 

@@ -314,6 +314,7 @@ needs to be when compiling one of the libraries). */
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
+#include "pcre2_api_internal.h"
 
 /* We need access to some of the data tables that PCRE2 uses. The previous
 definition of PCRE2_PCRE2TEST makes some minor changes in the files. The
@@ -3046,7 +3047,7 @@ fprintf(f, "Unicode version %s", buf);
 static void
 print_jit_target(FILE *f)
 {
-char buf[VERSION_SIZE];
+char buf[PCRE2_JITTARGET_BUFFSIZE_LIMIT];
 config_str(PCRE2_CONFIG_JITTARGET, buf);
 fputs(buf, f);
 }

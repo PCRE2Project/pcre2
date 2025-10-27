@@ -19,7 +19,8 @@
 
 # Detrail     A Perl script that removes trailing spaces from files.
 
-# LintMan     A Perl script that lints man pages looking for inconsistencies.
+# LintMan     A Perl script that lints man pages looking for inconsistencies
+#             in numerical configuration or API values.
 
 # doc/index.html.src
 #             A file that is copied as index.html into the doc/html directory

@@ -51,6 +51,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE2_CODE_UNIT_WIDTH 0
 #include "pcre2.h"
+#include "pcre2_api_internal.h"
 
 /*
  Letter characters:
@@ -1228,11 +1229,11 @@ static int regression_tests(void)
 #endif
 
 #if defined SUPPORT_PCRE2_8
-	PCRE2_UCHAR8 cpu_info[128];
+	PCRE2_UCHAR8 cpu_info[PCRE2_JITTARGET_BUFFSIZE_LIMIT];
 #elif defined SUPPORT_PCRE2_16
-	PCRE2_UCHAR16 cpu_info[128];
+	PCRE2_UCHAR16 cpu_info[PCRE2_JITTARGET_BUFFSIZE_LIMIT];
 #elif defined SUPPORT_PCRE2_32
-	PCRE2_UCHAR32 cpu_info[128];
+	PCRE2_UCHAR32 cpu_info[PCRE2_JITTARGET_BUFFSIZE_LIMIT];
 #endif
 #if defined SUPPORT_UNICODE && ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
 	int return_value;
