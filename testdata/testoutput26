@@ -771,7 +771,7 @@ No match
 
 # Character not in script
 /^\p{Han}/utf
-    \x{323b0}
+    \x{3347a}
 No match
 
 # Base script check
