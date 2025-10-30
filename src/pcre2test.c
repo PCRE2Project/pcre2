@@ -2942,9 +2942,9 @@ static int pcre2_config(uint32_t what, void *where)
 DISPATCH(return, pcre2_config_, (what, where));
 }
 
-static void config_str(uint32_t what, char *where)
+static char *config_str(uint32_t what, char *where, int size)
 {
-DISPATCH(, config_str_, (what, where));
+DISPATCH(return, config_str_, (what, where, size));
 }
 
 static BOOL decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
@@ -3014,7 +3014,7 @@ static void
 print_version(FILE *f, BOOL include_mode)
 {
 char buf[VERSION_SIZE];
-config_str(PCRE2_CONFIG_VERSION, buf);
+config_str(PCRE2_CONFIG_VERSION, buf, sizeof(buf));
 fprintf(f, "PCRE2 version %s", buf);
 if (include_mode)
   {
@@ -3033,7 +3033,7 @@ static void
 print_unicode_version(FILE *f)
 {
 char buf[VERSION_SIZE];
-config_str(PCRE2_CONFIG_UNICODE_VERSION, buf);
+config_str(PCRE2_CONFIG_UNICODE_VERSION, buf, sizeof(buf));
 fprintf(f, "Unicode version %s", buf);
 }
 
@@ -3046,9 +3046,9 @@ fprintf(f, "Unicode version %s", buf);
 static void
 print_jit_target(FILE *f)
 {
-char buf[VERSION_SIZE];
-config_str(PCRE2_CONFIG_JITTARGET, buf);
+char *buf = config_str(PCRE2_CONFIG_JITTARGET, NULL, 0);
 fputs(buf, f);
+free(buf);
 }
 
 
