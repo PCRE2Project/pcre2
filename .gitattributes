@@ -1,2 +1,7 @@
 testdata/*        -text
 maint/manifest-*  -text
+maint/ucptestdata -text
+*.sh              text eol=lf
+pcre2-config.in   text eol=lf
+RunTest           text eol=lf
+RunGrepTest       text eol=lf

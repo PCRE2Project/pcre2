@@ -2,7 +2,7 @@
 # data, do not edit unless that data has changed and they are reflecting
 # a previous version.
 
-# Unicode Script Extension tests for version 16.0.0
+# Unicode Script Extension tests for version 17.0.0
 
 #perltest
 
@@ -972,8 +972,8 @@ No match
  0: \x{2e80}
 
 /^\p{Script=Hani}/utf
-    \x{323af}
- 0: \x{323af}
+    \x{33479}
+ 0: \x{33479}
 
 # Script extension check
 /^\p{Han}/utf
@@ -995,7 +995,7 @@ No match
 
 # Character not in script
 /^\p{Han}/utf
-    \x{323b0}
+    \x{3347a}
 No match
 
 # Base script check
@@ -1461,8 +1461,8 @@ No match
  0: \x{302}
 
 /^\p{Script_Extensions=Tfng}/utf
-    \x{309}
- 0: \x{309}
+    \x{323}
+ 0: \x{323}
 
 # Script extension only character
 /^\p{Tifinagh}/utf
@@ -1996,8 +1996,8 @@ No match
  0: \x{11180}
 
 /^\p{Script=Shrd}/utf
-    \x{111df}
- 0: \x{111df}
+    \x{11b67}
+ 0: \x{11b67}
 
 # Script extension check
 /^\p{Sharada}/utf
@@ -2019,7 +2019,7 @@ No match
 
 # Character not in script
 /^\p{Sharada}/utf
-    \x{111e0}
+    \x{11b68}
 No match
 
 # Base script check
@@ -2567,6 +2567,38 @@ No match
 No match
 
 # Base script check
+/^\p{sc=Newa}/utf
+    \x{11400}
+ 0: \x{11400}
+
+/^\p{Script=Newa}/utf
+    \x{11461}
+ 0: \x{11461}
+
+# Script extension check
+/^\p{Newa}/utf
+    \x{951}
+ 0: \x{951}
+
+/^\p{scx=Newa}/utf
+    \x{1ced}
+ 0: \x{1ced}
+
+# Script extension only character
+/^\p{Newa}/utf
+    \x{951}
+ 0: \x{951}
+
+/^\p{sc=Newa}/utf
+    \x{951}
+No match
+
+# Character not in script
+/^\p{Newa}/utf
+    \x{11462}
+No match
+
+# Base script check
 /^\p{sc=Osage}/utf
     \x{104b0}
  0: \x{104b0}
@@ -2580,7 +2612,7 @@ No match
     \x{301}
  0: \x{301}
 
-/^\p{scx=Osge}/utf
+/^\p{Script_Extensions=Osge}/utf
     \x{358}
  0: \x{358}
 
@@ -2604,15 +2636,15 @@ No match
  0: \x{16fe0}
 
 /^\p{Script=Tang}/utf
-    \x{18d08}
- 0: \x{18d08}
+    \x{18df2}
+ 0: \x{18df2}
 
 # Script extension check
 /^\p{Tangut}/utf
     \x{2ff0}
  0: \x{2ff0}
 
-/^\p{Script_Extensions=Tang}/utf
+/^\p{scx=Tang}/utf
     \x{31ef}
  0: \x{31ef}
 
@@ -2627,7 +2659,7 @@ No match
 
 # Character not in script
 /^\p{Tangut}/utf
-    \x{18d09}
+    \x{18df3}
 No match
 
 # Base script check
@@ -2644,7 +2676,7 @@ No match
     \x{964}
  0: \x{964}
 
-/^\p{scx=Gonm}/utf
+/^\p{Script_Extensions=Gonm}/utf
     \x{965}
  0: \x{965}
 
@@ -2676,7 +2708,7 @@ No match
     \x{964}
  0: \x{964}
 
-/^\p{Script_Extensions=Dogr}/utf
+/^\p{scx=Dogr}/utf
     \x{a839}
  0: \x{a839}
 
@@ -2708,7 +2740,7 @@ No match
     \x{b7}
  0: \x{b7}
 
-/^\p{scx=Gong}/utf
+/^\p{Script_Extensions=Gong}/utf
     \x{965}
  0: \x{965}
 
@@ -2740,7 +2772,7 @@ No match
     \x{60c}
  0: \x{60c}
 
-/^\p{Script_Extensions=Rohg}/utf
+/^\p{scx=Rohg}/utf
     \x{6d4}
  0: \x{6d4}
 
@@ -2772,7 +2804,7 @@ No match
     \x{640}
  0: \x{640}
 
-/^\p{scx=Sogd}/utf
+/^\p{Script_Extensions=Sogd}/utf
     \x{640}
  0: \x{640}
 
@@ -2801,20 +2833,20 @@ No match
 
 # Script extension check
 /^\p{Nandinagari}/utf
-    \x{964}
- 0: \x{964}
+    \x{951}
+ 0: \x{951}
 
-/^\p{Script_Extensions=Nand}/utf
+/^\p{scx=Nand}/utf
     \x{a835}
  0: \x{a835}
 
 # Script extension only character
 /^\p{Nandinagari}/utf
-    \x{964}
- 0: \x{964}
+    \x{951}
+ 0: \x{951}
 
 /^\p{sc=Nandinagari}/utf
-    \x{964}
+    \x{951}
 No match
 
 # Character not in script
@@ -2836,7 +2868,7 @@ No match
     \x{60c}
  0: \x{60c}
 
-/^\p{scx=Yezi}/utf
+/^\p{Script_Extensions=Yezi}/utf
     \x{669}
  0: \x{669}
 
@@ -2868,7 +2900,7 @@ No match
     \x{10100}
  0: \x{10100}
 
-/^\p{Script_Extensions=Cpmn}/utf
+/^\p{scx=Cpmn}/utf
     \x{10101}
  0: \x{10101}
 
@@ -2900,7 +2932,7 @@ No match
     \x{640}
  0: \x{640}
 
-/^\p{scx=Ougr}/utf
+/^\p{Script_Extensions=Ougr}/utf
     \x{10af2}
  0: \x{10af2}
 
@@ -2932,7 +2964,7 @@ No match
     \x{2bc}
  0: \x{2bc}
 
-/^\p{Script_Extensions=Toto}/utf
+/^\p{scx=Toto}/utf
     \x{2bc}
  0: \x{2bc}
 
@@ -2964,7 +2996,7 @@ No match
     \x{60c}
  0: \x{60c}
 
-/^\p{scx=Gara}/utf
+/^\p{Script_Extensions=Gara}/utf
     \x{61f}
  0: \x{61f}
 
@@ -2996,7 +3028,7 @@ No match
     \x{965}
  0: \x{965}
 
-/^\p{Script_Extensions=Gukh}/utf
+/^\p{scx=Gukh}/utf
     \x{965}
  0: \x{965}
 
@@ -3028,7 +3060,7 @@ No match
     \x{964}
  0: \x{964}
 
-/^\p{scx=Onao}/utf
+/^\p{Script_Extensions=Onao}/utf
     \x{965}
  0: \x{965}
 
@@ -3060,7 +3092,7 @@ No match
     \x{300}
  0: \x{300}
 
-/^\p{Script_Extensions=Sunu}/utf
+/^\p{scx=Sunu}/utf
     \x{331}
  0: \x{331}
 
@@ -3092,7 +3124,7 @@ No match
     \x{301}
  0: \x{301}
 
-/^\p{scx=Todr}/utf
+/^\p{Script_Extensions=Todr}/utf
     \x{35e}
  0: \x{35e}
 
@@ -3124,7 +3156,7 @@ No match
     \x{ce6}
  0: \x{ce6}
 
-/^\p{Script_Extensions=Tutg}/utf
+/^\p{scx=Tutg}/utf
     \x{a8f1}
  0: \x{a8f1}
 
@@ -3899,20 +3931,6 @@ No match
 No match
 
 # Base script check
-/^\p{sc=Newa}/utf
-    \x{11400}
- 0: \x{11400}
-
-/^\p{Script=Newa}/utf
-    \x{11461}
- 0: \x{11461}
-
-# Character not in script
-/^\p{Newa}/utf
-    \x{11462}
-No match
-
-# Base script check
 /^\p{sc=Nushu}/utf
     \x{16fe1}
  0: \x{16fe1}
@@ -4148,6 +4166,62 @@ No match
 # Character not in script
 /^\p{Kirat_Rai}/utf
     \x{16d7a}
+No match
+
+# Base script check
+/^\p{sc=Sidetic}/utf
+    \x{10940}
+ 0: \x{10940}
+
+/^\p{Script=Sidt}/utf
+    \x{10959}
+ 0: \x{10959}
+
+# Character not in script
+/^\p{Sidetic}/utf
+    \x{1095a}
+No match
+
+# Base script check
+/^\p{sc=Tai_Yo}/utf
+    \x{1e6c0}
+ 0: \x{1e6c0}
+
+/^\p{Script=Tayo}/utf
+    \x{1e6ff}
+ 0: \x{1e6ff}
+
+# Character not in script
+/^\p{Tai_Yo}/utf
+    \x{1e700}
+No match
+
+# Base script check
+/^\p{sc=Tolong_Siki}/utf
+    \x{11db0}
+ 0: \x{11db0}
+
+/^\p{Script=Tols}/utf
+    \x{11de9}
+ 0: \x{11de9}
+
+# Character not in script
+/^\p{Tolong_Siki}/utf
+    \x{11dea}
+No match
+
+# Base script check
+/^\p{sc=Beria_Erfe}/utf
+    \x{16ea0}
+ 0: \x{16ea0}
+
+/^\p{Script=Berf}/utf
+    \x{16ed3}
+ 0: \x{16ed3}
+
+# Character not in script
+/^\p{Beria_Erfe}/utf
+    \x{16ed4}
 No match
 
 # End of test

@@ -401,7 +401,7 @@ findprop 32ff
 U+32FF L   Symbol: Other symbol, common, Other, [han], [graphemebase]
 
 findprop 1f16d
-U+1F16D ON  Symbol: Other symbol, common, Extended Pictographic, [extendedpictographic, graphemebase]
+U+1F16D ON  Symbol: Other symbol, common, Other, [graphemebase]
 
 findprop U+10e93 U+10eaa
 U+10E93 R   Letter: Other letter, yezidi, Other, [alphabetic, graphemebase, idcontinue, idstart, xidcontinue, xidstart]
@@ -428,3 +428,5 @@ findprop 1CC4E
 U+1CC4E ON  Symbol: Other symbol, common, Other, [graphemebase]
 findprop U+1FAE9
 U+1FAE9 ON  Symbol: Other symbol, common, Extended Pictographic, [emoji, emojipresentation, extendedpictographic, graphemebase]
+findprop U+20C1
+U+20C1 ET  Symbol: Currency symbol, common, Other, [graphemebase]
