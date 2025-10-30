@@ -771,7 +771,7 @@ No match
 
 # Character not in script
 /^\p{Han}/utf
-    \x{323b0}
+    \x{3347a}
 No match
 
 # Base script check
@@ -3271,7 +3271,7 @@ No match
 
 # Character not in script
 /^\p{Tangut}/utf
-    \x{18d09}
+    \x{18d20}
 No match
 
 # Base script check

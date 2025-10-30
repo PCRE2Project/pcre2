@@ -60,6 +60,10 @@ GenerateUcpTables.py
   GenerateCommon.py and Unicode data files. The generated file contains tables
   for looking up Unicode property names.
 
+FetchUcd.sh
+  A shell script to download the UCD data from the Unicode website into
+  the Unicode.tables directory.
+
 FilterCoverage.py
   A small helper used by the RunCoverage script.
 
@@ -141,10 +145,11 @@ Updating to a new Unicode release
 =================================
 
 When there is a new release of Unicode, the files in Unicode.tables must be
-refreshed from the Unicode web site. Once that is done, the four Python scripts
-that generate files from the Unicode data can be run from within the "maint"
-directory. Note that the format used for those files is not stable, and
-therefore changes to the scripts might be needed to support new versions.
+refreshed from the Unicode web site, which can be done with the script
+FetchUcd.sh. Once that is done, the four Python scripts that generate files from
+the Unicode data can be run from within the "maint" directory. Note that the
+format used for those files is not stable, and therefore changes to the scripts
+might be needed to support new versions.
 
 Note: Previously, it was necessary to update lists of scripts and their
 abbreviations by hand before running the Python scripts. This is no longer
