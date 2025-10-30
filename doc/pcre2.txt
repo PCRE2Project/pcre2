@@ -1364,14 +1364,16 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_JITTARGET
 
-       The  where  argument  should point to a buffer that is at least 64 code
-       units long.  (The  exact  length  required  can  be  found  by  calling
-       pcre2_config()  with  where  set  to NULL.) The buffer is filled with a
-       string that contains the name of the architecture  for  which  the  JIT
-       compiler  is  configured,  for  example "x86 32bit (little endian + un-
-       aligned)". If JIT support is not  available,  PCRE2_ERROR_BADOPTION  is
-       returned,  otherwise the number of code units used is returned. This is
-       the length of the string, plus one unit for the terminating zero.
+       The  where  argument  should point to a buffer that is suitably aligned
+       and wide enough to hold the full string. The exact length  required  is
+       returned  when calling pcre2_config() with where set to NULL first. The
+       buffer is filled with a string that contains the name of the  architec-
+       ture  for which the JIT compiler is configured at build time, for exam-
+       ple, a 64-bit ARM  CPU  that  supports  the  Armv8.1  extension  writes
+       "ARM-64  (LSE)  64bit  (little endian + unaligned)".  If JIT support is
+       not available, PCRE2_ERROR_BADOPTION is returned, otherwise the  number
+       of  code units used is returned. This is the length of the string, plus
+       one code unit for the NUL character.
 
          PCRE2_CONFIG_LINKSIZE
 
@@ -4418,11 +4420,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 19 October 2025
+       Last updated: 29 October 2025
        Copyright (c) 1997-2024 University of Cambridge.
 
 
-PCRE2 10.48-DEV                 19 October 2025                    PCRE2API(3)
+PCRE2 10.48-DEV                 29 October 2025                    PCRE2API(3)
 ------------------------------------------------------------------------------
 
 
