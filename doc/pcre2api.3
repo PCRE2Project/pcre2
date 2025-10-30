@@ -1296,15 +1296,18 @@ documentation for more details.
 .sp
   PCRE2_CONFIG_JITTARGET
 .sp
-The \fIwhere\fP argument should point to a buffer that is suitably aligned and
-wide enough to hold the full string. The exact length required is returned when
-calling \fBpcre2_config()\fP with \fBwhere\fP set to NULL first. The buffer is
-filled with a string that contains the name of the architecture for which the JIT
-compiler is configured at build time, for example, a 64-bit ARM CPU that supports
-the Armv8.1 extension writes "ARM-64 (LSE) 64bit (little endian + unaligned)".
-If JIT support is not available, PCRE2_ERROR_BADOPTION is returned, otherwise
-the number of code units used is returned. This is the length of the string,
-plus one code unit for the NUL character.
+The \fIwhere\fP argument should point to a PCRE2_UCHAR-aligned buffer. All
+previous versions of PCRE2 have required no more than 128 code units of buffer
+capacity. However, this requirement is not guaranteed to be maintained, so
+applications should call \fBpcre2_config()\fP with \fBwhere\fP set to NULL to
+receive the required buffer size, then assert or allocate a suitably-size buffer
+for a second call to \fBpcre2_config()\fP. The buffer is filled with a string
+that contains the name of the architecture for which the JIT compiler is
+configured at build time, for example, a 64-bit ARM CPU that supports the
+Armv8.1 extension writes "ARM-64 (LSE) 64bit (little endian + unaligned)". If
+JIT support is not available, PCRE2_ERROR_BADOPTION is returned; otherwise the
+number of code units used is returned. This is the length of the string plus one
+unit for the terminating zero.
 .sp
   PCRE2_CONFIG_LINKSIZE
 .sp
@@ -1374,13 +1377,15 @@ below.
 .sp
   PCRE2_CONFIG_UNICODE_VERSION
 .sp
-The \fIwhere\fP argument should point to a buffer that is at least 24 code
-units long. (The exact length required can be found by calling
-\fBpcre2_config()\fP with \fBwhere\fP set to NULL.) If PCRE2 has been compiled
-without Unicode support, the buffer is filled with the text "Unicode not
-supported". Otherwise, the Unicode version string (for example, "8.0.0") is
-inserted. The number of code units used is returned. This is the length of the
-string plus one unit for the terminating zero.
+The \fIwhere\fP argument should point to a PCRE2_UCHAR-aligned buffer. All
+previous versions of PCRE2 have required no more than 24 code units of buffer
+capacity. However, applications should call \fBpcre2_config()\fP with
+\fBwhere\fP set to NULL to receive the required buffer size, then assert or
+allocate a suitably-size buffer for a second call to \fBpcre2_config()\fP. If
+PCRE2 has been compiled without Unicode support, the buffer is filled with the
+text "Unicode not supported". Otherwise, the Unicode version string (for
+example, "8.0.0") is written. The number of code units used is returned. This is
+the length of the string plus one unit for the terminating zero.
 .sp
   PCRE2_CONFIG_UNICODE
 .sp
@@ -1389,12 +1394,14 @@ available; otherwise it is set to zero. Unicode support implies UTF support.
 .sp
   PCRE2_CONFIG_VERSION
 .sp
-The \fIwhere\fP argument should point to a buffer that is at least 24 code
-units long. (The exact length required can be found by calling
-\fBpcre2_config()\fP with \fBwhere\fP set to NULL.) The buffer is filled with
-the PCRE2 version string, zero-terminated. The number of code units used is
-returned. This is the length of the string plus one unit for the terminating
-zero.
+The \fIwhere\fP argument should point to a PCRE2_UCHAR-aligned buffer. All
+previous versions of PCRE2 have required no more than 24 code units of buffer
+capacity. However, applications should call \fBpcre2_config()\fP with
+\fBwhere\fP set to NULL to receive the required buffer size, then assert or
+allocate a suitably-size buffer for a second call to \fBpcre2_config()\fP. The
+buffer is filled with the PCRE2 version string, zero-terminated. The number of
+code units used is returned. This is the length of the string plus one unit for
+the terminating zero.
 .
 .
 .\" HTML <a name="compiling"></a>
