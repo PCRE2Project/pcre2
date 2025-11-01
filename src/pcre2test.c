@@ -227,7 +227,6 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #define PATSTACKSIZE 20           /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
 #define SUBSTITUTE_SUBJECT_MODSIZE 100 /* Field for reading 8-bit subject for substitute */
-#define VERSION_SIZE 64           /* Size of buffer for the version strings */
 #define REPLACE_BUFFSIZE 256      /* Code units for replacement buffer */
 
 /* Default JIT compile options */
@@ -2942,9 +2941,9 @@ static int pcre2_config(uint32_t what, void *where)
 DISPATCH(return, pcre2_config_, (what, where));
 }
 
-static char *config_str(uint32_t what, char *where, int size)
+static char *config_str(uint32_t what)
 {
-DISPATCH(return, config_str_, (what, where, size));
+DISPATCH(return, config_str_, (what));
 }
 
 static BOOL decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
@@ -3013,14 +3012,14 @@ DISPATCH(, unittest_, ());
 static void
 print_version(FILE *f, BOOL include_mode)
 {
-char buf[VERSION_SIZE];
-config_str(PCRE2_CONFIG_VERSION, buf, sizeof(buf));
+char *buf = config_str(PCRE2_CONFIG_VERSION);
 fprintf(f, "PCRE2 version %s", buf);
 if (include_mode)
   {
   fprintf(f, " (%d-bit)", test_mode);
   }
 fprintf(f, "\n");
+free(buf);
 }
 
 
@@ -3032,9 +3031,9 @@ fprintf(f, "\n");
 static void
 print_unicode_version(FILE *f)
 {
-char buf[VERSION_SIZE];
-config_str(PCRE2_CONFIG_UNICODE_VERSION, buf, sizeof(buf));
+char *buf = config_str(PCRE2_CONFIG_UNICODE_VERSION);
 fprintf(f, "Unicode version %s", buf);
+free(buf);
 }
 
 
@@ -3046,7 +3045,7 @@ fprintf(f, "Unicode version %s", buf);
 static void
 print_jit_target(FILE *f)
 {
-char *buf = config_str(PCRE2_CONFIG_JITTARGET, NULL, 0);
+char *buf = config_str(PCRE2_CONFIG_JITTARGET);
 fputs(buf, f);
 free(buf);
 }

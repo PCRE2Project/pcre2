@@ -558,17 +558,17 @@ return 0;
 
 Arguments:
   what       the item to read
-  where      the 8-bit buffer to receive the string (NULLABLE)
-  size       sizeof(where) or 0 to ask for the buffer to be allocated
 
-Returns:     the string where the data was written
+Returns:     a buffer which must be freed by the caller, where the string has
+             been written
 */
 
 static char *
-config_str(uint32_t what, char *where, int size)
+config_str(uint32_t what)
 {
 int r2;
 PCRE2_UCHAR *buf;
+char *buf8;
 int needed_len;
 
 needed_len = pcre2_config(what, NULL);
@@ -577,22 +577,28 @@ if (needed_len <= 0)
   cfprintf(clr_test_error, stderr, "pcre2test: Error in pcre2_config(%d)\n", what);
   exit(1);
   }
-else if (size != 0 && needed_len > size)
+
+buf = malloc((unsigned)needed_len * sizeof(PCRE2_UCHAR));
+buf8 = malloc((unsigned)needed_len);
+if (buf == NULL || buf8 == NULL)
   {
-  cfprintf(clr_test_error, stderr,
-    "pcre2test: Static buffer provided to pcre2_config(%d) too small\n", what);
+  cfprintf(clr_test_error, stderr, "pcre2test: malloc failed in config_str()\n");
   exit(1);
   }
 
-buf = malloc(needed_len * sizeof(PCRE2_UCHAR));
 r2 = pcre2_config(what, buf);
-PCRE2_ASSERT(r2 == needed_len);
+if (r2 != needed_len)
+  {
+  cfprintf(clr_test_error, stderr,
+    "pcre2test: pcre2_config(%d) returned %d, expected %d\n",
+    what, r2, needed_len);
+  exit(1);
+  }
 
-if (where == NULL) where = malloc(needed_len);
-while (r2-- > 0) where[r2] = (char)buf[r2];
+while (r2-- > 0) buf8[r2] = (char)buf[r2];
 free(buf);
 
-return where;
+return buf8;
 }
 
 
