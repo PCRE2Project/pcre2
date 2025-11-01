@@ -1374,7 +1374,7 @@ documentation for more details.
 <pre>
   PCRE2_CONFIG_JITTARGET
 </pre>
-The <i>where</i> argument should point to a PCRE2_UCHAR-aligned buffer. All
+The <i>where</i> argument should point to a code-unit-aligned buffer. All
 previous versions of PCRE2 have required no more than 128 code units of buffer
 capacity. However, this requirement is not guaranteed to be maintained, so
 applications should call <b>pcre2_config()</b> with <b>where</b> set to NULL to
@@ -1454,7 +1454,7 @@ below.
 <pre>
   PCRE2_CONFIG_UNICODE_VERSION
 </pre>
-The <i>where</i> argument should point to a PCRE2_UCHAR-aligned buffer. All
+The <i>where</i> argument should point to a code-unit-aligned buffer. All
 previous versions of PCRE2 have required no more than 24 code units of buffer
 capacity. However, applications should call <b>pcre2_config()</b> with
 <b>where</b> set to NULL to receive the required buffer size, then assert or
@@ -1471,7 +1471,7 @@ available; otherwise it is set to zero. Unicode support implies UTF support.
 <pre>
   PCRE2_CONFIG_VERSION
 </pre>
-The <i>where</i> argument should point to a PCRE2_UCHAR-aligned buffer. All
+The <i>where</i> argument should point to a code-unit-aligned buffer. All
 previous versions of PCRE2 have required no more than 24 code units of buffer
 capacity. However, applications should call <b>pcre2_config()</b> with
 <b>where</b> set to NULL to receive the required buffer size, then assert or

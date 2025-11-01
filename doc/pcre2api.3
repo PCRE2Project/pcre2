@@ -1296,7 +1296,7 @@ documentation for more details.
 .sp
   PCRE2_CONFIG_JITTARGET
 .sp
-The \fIwhere\fP argument should point to a PCRE2_UCHAR-aligned buffer. All
+The \fIwhere\fP argument should point to a code-unit-aligned buffer. All
 previous versions of PCRE2 have required no more than 128 code units of buffer
 capacity. However, this requirement is not guaranteed to be maintained, so
 applications should call \fBpcre2_config()\fP with \fBwhere\fP set to NULL to
@@ -1377,7 +1377,7 @@ below.
 .sp
   PCRE2_CONFIG_UNICODE_VERSION
 .sp
-The \fIwhere\fP argument should point to a PCRE2_UCHAR-aligned buffer. All
+The \fIwhere\fP argument should point to a code-unit-aligned buffer. All
 previous versions of PCRE2 have required no more than 24 code units of buffer
 capacity. However, applications should call \fBpcre2_config()\fP with
 \fBwhere\fP set to NULL to receive the required buffer size, then assert or
@@ -1394,7 +1394,7 @@ available; otherwise it is set to zero. Unicode support implies UTF support.
 .sp
   PCRE2_CONFIG_VERSION
 .sp
-The \fIwhere\fP argument should point to a PCRE2_UCHAR-aligned buffer. All
+The \fIwhere\fP argument should point to a code-unit-aligned buffer. All
 previous versions of PCRE2 have required no more than 24 code units of buffer
 capacity. However, applications should call \fBpcre2_config()\fP with
 \fBwhere\fP set to NULL to receive the required buffer size, then assert or

@@ -559,7 +559,8 @@ return 0;
 Arguments:
   what       the item to read
 
-Returns:     a buffer which must be freed by the caller
+Returns:     a buffer which must be freed by the caller, where the string has
+             been written
 */
 
 static char *

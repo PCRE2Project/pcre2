@@ -1364,8 +1364,8 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_JITTARGET
 
-       The  where  argument  should point to a PCRE2_UCHAR-aligned buffer. All
-       previous versions of PCRE2 have required no more than 128 code units of
+       The where argument should point to a code-unit-aligned buffer. All pre-
+       vious  versions  of  PCRE2 have required no more than 128 code units of
        buffer capacity. However, this requirement  is  not  guaranteed  to  be
        maintained,  so  applications should call pcre2_config() with where set
        to NULL to receive the required buffer size, then assert or allocate  a
@@ -1446,27 +1446,27 @@ CHECKING BUILD-TIME OPTIONS
 
          PCRE2_CONFIG_UNICODE_VERSION
 
-       The  where  argument  should point to a PCRE2_UCHAR-aligned buffer. All
-       previous versions of PCRE2 have required no more than 24 code units  of
-       buffer  capacity. However, applications should call pcre2_config() with
-       where set to NULL to receive the required buffer size, then  assert  or
+       The where argument should point to a code-unit-aligned buffer. All pre-
+       vious  versions  of  PCRE2  have required no more than 24 code units of
+       buffer capacity. However, applications should call pcre2_config()  with
+       where  set  to NULL to receive the required buffer size, then assert or
        allocate a suitably-size buffer for a second call to pcre2_config(). If
-       PCRE2  has  been compiled without Unicode support, the buffer is filled
-       with the text "Unicode not supported". Otherwise, the  Unicode  version
+       PCRE2 has been compiled without Unicode support, the buffer  is  filled
+       with  the  text "Unicode not supported". Otherwise, the Unicode version
        string (for example, "8.0.0") is written. The number of code units used
-       is  returned.  This  is  the length of the string plus one unit for the
+       is returned. This is the length of the string plus  one  unit  for  the
        terminating zero.
 
          PCRE2_CONFIG_UNICODE
 
-       The output is a uint32_t integer that is set to one if Unicode  support
-       is  available; otherwise it is set to zero. Unicode support implies UTF
+       The  output is a uint32_t integer that is set to one if Unicode support
+       is available; otherwise it is set to zero. Unicode support implies  UTF
        support.
 
          PCRE2_CONFIG_VERSION
 
-       The where argument should point to a  PCRE2_UCHAR-aligned  buffer.  All
-       previous  versions of PCRE2 have required no more than 24 code units of
+       The where argument should point to a code-unit-aligned buffer. All pre-
+       vious  versions  of  PCRE2  have required no more than 24 code units of
        buffer capacity. However, applications should call pcre2_config()  with
        where  set  to NULL to receive the required buffer size, then assert or
        allocate a suitably-size buffer for a second  call  to  pcre2_config().
