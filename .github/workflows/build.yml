@@ -360,7 +360,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/openbsd-vm@1e7cc4fa7727646d3cf5921289b1f5c9d1a88f3c # v1.2.0
+        uses: vmactions/openbsd-vm@bed57f753a75c9c49ab5c1880d274861b2103dd4 # v1.2.1
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
@@ -592,7 +592,7 @@ jobs:
           maint/RunManifestTest tarball-dir maint/manifest-tarball
 
       - name: Upload to GitHub artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: "Distribution release"
           path: |
@@ -639,7 +639,7 @@ jobs:
           ../maint/RunCoverage
 
       - name: Upload report to GitHub artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: "Coverage report"
           path: './build/coverage-html'
