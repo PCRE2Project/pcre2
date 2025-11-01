@@ -360,7 +360,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/openbsd-vm@1e7cc4fa7727646d3cf5921289b1f5c9d1a88f3c # v1.2.0
+        uses: vmactions/openbsd-vm@bed57f753a75c9c49ab5c1880d274861b2103dd4 # v1.2.1
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
