@@ -2,7 +2,7 @@ name: CIFuzz
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 permissions:
   contents: read
