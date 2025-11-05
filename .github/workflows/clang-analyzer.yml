@@ -2,9 +2,9 @@ name: Clang Static Analyzer
 on:
   workflow_dispatch:
   push:
-    branches: [ master, "release/**" ]
+    branches: [ main, "release/**" ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 permissions:
   contents: read

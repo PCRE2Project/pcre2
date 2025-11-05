@@ -32,7 +32,7 @@ https://pcre2project.github.io/pcre2/
 <td>
 
 [![GitHub Release](https://img.shields.io/github/v/release/PCRE2Project/pcre2?display_name=release&style=flat-square&label=Latest%20release&color=006094)](https://github.com/PCRE2Project/pcre2/releases)&nbsp;
-[![BSD licence](https://img.shields.io/badge/Licence-BSD%203--clause-006094?style=flat-square)](https://github.com/PCRE2Project/pcre2/blob/master/LICENCE.md)
+[![BSD licence](https://img.shields.io/badge/Licence-BSD%203--clause-006094?style=flat-square)](https://github.com/PCRE2Project/pcre2/blob/main/LICENCE.md)
 
 </tr>
 </tr>

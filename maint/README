@@ -211,7 +211,7 @@ Preparing for a PCRE2 release
 This section contains a checklist of things that I (NCW) do before building a
 new release.
 
-* First of all, make sure that the master branch is in good condition.
+* First of all, make sure that the main branch is in good condition.
 
   - Basically, test it. The CI jobs should all be passing. This ensures that
     pcre2tests are passing, that the build is warning-free, and that all our
@@ -266,12 +266,12 @@ new release.
 * Add the new library version to the src/libpcre2-*.sym files (even if no new
   symbols have been added since the last release).
 
-* Push all these changes to master.
+* Push all these changes to main.
 
-* Take a branch off master, named "release/pcre2-10.XX-RC1" or
+* Take a branch off main, named "release/pcre2-10.XX-RC1" or
   "release/pcre2-10.XX".
 
-  All releases should come from master. The final release isn't branched off
+  All releases should come from main. The final release isn't branched off
   from the RC branch; the RC branch is a "throwaway" release which can be pruned
   from the linear history of the trunk of PCRE2's tree.
 
@@ -346,9 +346,9 @@ new release.
 
 * Announce the release on the mailing list.
 
-* Bump the version number on master to the next release, plus -DEV.
+* Bump the version number on main to the next release, plus -DEV.
 
-* After issuing a final release, merge the release tag back to master with:
+* After issuing a final release, merge the release tag back to main with:
 
   ```
   git merge -s ours release/pcre2-10.XX
@@ -359,7 +359,7 @@ new release.
 
   We want users with forks of PCRE2 to be able to update from release to the
   next by simply doing a `git merge` in their fork. If the release tag is not
-  merged back to master, then users will see unnecessary Git conflicts when
+  merged back to main, then users will see unnecessary Git conflicts when
   trying to fast-forward from one release to the next.
 
 

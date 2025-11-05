@@ -20,9 +20,9 @@ on:
         - distcheck
         - coverage
   push:
-    branches: [ master, "release/**" ]
+    branches: [ main, "release/**" ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 permissions:
   contents: read
