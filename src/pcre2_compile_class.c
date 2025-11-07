@@ -721,9 +721,13 @@ while (TRUE)
   else
     cranges->char_lists_types |= tmp1 << tmp2;
 
-  if (range_start < XCL_CHAR_LIST_LOW_16_START) break;
+  if (range_end < XCL_CHAR_LIST_LOW_16_START || tmp2 == 0)
+    {
+    PCRE2_ASSERT(range_start < XCL_CHAR_LIST_LOW_16_START);
+    break;
+    }
 
-  PCRE2_ASSERT(tmp2 >= XCL_TYPE_BIT_LEN);
+  PCRE2_ASSERT((tmp2 % XCL_TYPE_BIT_LEN) == 0);
   char_list_end = char_list_start - 1;
   char_list_start = *char_list_next++;
   tmp1 = 0;
