@@ -854,7 +854,8 @@ if (use_existing_match)
   if (start_offset != match_data->start_offset)
     return PCRE2_ERROR_DIFFSUBSOFFSET;
 
-  if ((options & ~SUBSTITUTE_OPTIONS) != match_data->options)
+  if ((options & ~(SUBSTITUTE_OPTIONS|PCRE2_NO_UTF_CHECK)) !=
+      (match_data->options & ~PCRE2_NO_UTF_CHECK))
     return PCRE2_ERROR_DIFFSUBSOPTIONS;
   }
 
