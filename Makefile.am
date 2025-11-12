@@ -23,6 +23,7 @@ dist_doc_DATA = \
   NEWS \
   README \
   SECURITY.md \
+  SUPPORT-LIFECYCLE.md \
   doc/pcre2.txt \
   doc/pcre2-config.txt \
   doc/pcre2grep.txt \
@@ -288,6 +289,20 @@ EXTRA_DIST += \
 EXTRA_DIST += \
   NON-AUTOTOOLS-BUILD \
   HACKING
+
+# These are patches containing backports for older versions of PCRE2
+
+EXTRA_DIST += \
+  patches/pcre2-10.37-Remove-real-POSIX.patch \
+  patches/pcre2-10.39-Fix-incorrect-detection.patch \
+  patches/pcre2-10.40-A-Fixed-a-unicode.patch \
+  patches/pcre2-10.40-B-Fixed-an-issue-affecting.patch \
+  patches/pcre2-10.43-Avoid-LIMIT_HEAP-integer.patch \
+  patches/pcre2-10.43-Fix-heapframe-overflow.patch \
+  patches/pcre2-10.44-Fix-incorrect-compiling.patch \
+  patches/pcre2-10.44-Fix-locking-region.patch \
+  patches/pcre2-10.45-Memory-reports-only-compiled.patch \
+  patches/pcre2-10.47-Fix-for-callback.patch
 
 # These are support files for building with Bazel or Zig
 

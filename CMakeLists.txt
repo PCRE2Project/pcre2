@@ -1470,6 +1470,7 @@ file(
   NEWS
   README
   SECURITY.md
+  SUPPORT-LIFECYCLE.md
 )
 file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
 file(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/*.3)
