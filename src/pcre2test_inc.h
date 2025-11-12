@@ -1051,13 +1051,18 @@ for (;;)
     break;
 
     case MOD_STR:
+    if (m->value > (uint32_t)(UINT8_MAX) + 1)
+      {
+      cfprintf(clr_test_error, stderr, "pcre2test: mod %s size > 256 \n", m->name);
+      exit(1);
+      }
     if (len + 1 > m->value)
       {
       cfprintf(clr_test_error, outfile, "** Overlong value for \"%s\" (max %d code units)\n",
         m->name, m->value - 1);
       return FALSE;
       }
-    ((uint8_t *)field)[0] = len;
+    ((uint8_t *)field)[0] = (uint8_t)len;  /* len <= m->value - 1 <= UINT8_MAX */
     memcpy(((uint8_t *)field)+1, pp, len);
     ((uint8_t *)field)[len+1] = 0;
     pp = ep;
