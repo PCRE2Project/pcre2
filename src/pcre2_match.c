@@ -169,9 +169,9 @@ enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
 /* Define short names for general fields in the current backtrack frame, which
 is always pointed to by the F variable. Occasional references to fields in
 other frames are written out explicitly. There are also some fields in the
-current frame whose names start with "temp" that are used for short-term,
-localised backtracking memory. These are #defined with Lxxx names at the point
-of use and undefined afterwards. */
+current frame that are used for short-term, localised backtracking memory.
+These are members of the fields union and #defined with Lxxx names at the
+point of use and undefined afterwards. */
 
 #define Fback_frame        F->back_frame
 #define Fcapture_last      F->capture_last
@@ -180,7 +180,6 @@ of use and undefined afterwards. */
 #define Feptr              F->eptr
 #define Fgroup_frame_type  F->group_frame_type
 #define Flast_group_offset F->last_group_offset
-#define Flength            F->length
 #define Fmark              F->mark
 #define Frdepth            F->rdepth
 #define Fstart_match       F->start_match
@@ -697,7 +696,7 @@ heapframe *frames_top;  /* End of frames vector */
 heapframe *assert_accept_frame = NULL;  /* For passing back a frame with captures */
 PCRE2_SIZE frame_copy_size;   /* Amount to copy when creating a new frame */
 
-/* Local variables that do not need to be preserved over calls to RRMATCH(). */
+/* Local variables that do not need to be preserved over calls to RMATCH(). */
 
 PCRE2_SPTR branch_end = NULL;
 PCRE2_SPTR branch_start;
@@ -1112,15 +1111,15 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      Flength = 1;
+      length = 1;
       Fecode++;
-      GETCHARLEN(fc, Fecode, Flength);
-      if (Flength > (PCRE2_SIZE)(mb->end_subject - Feptr))
+      GETCHARLEN(fc, Fecode, length);
+      if (length > (PCRE2_SIZE)(mb->end_subject - Feptr))
         {
         CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
         RRETURN(MATCH_NOMATCH);
         }
-      for (; Flength > 0; Flength--)
+      for (; length > 0; length--)
         {
         if (*Fecode++ != UCHAR21INC(Feptr)) RRETURN(MATCH_NOMATCH);
         }
@@ -1157,9 +1156,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      Flength = 1;
+      length = 1;
       Fecode++;
-      GETCHARLEN(fc, Fecode, Flength);
+      GETCHARLEN(fc, Fecode, length);
 
       /* If the pattern character's value is < 128, we know that its other case
       (if any) is also < 128 (and therefore only one code unit long in all
@@ -1176,14 +1175,14 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       /* Otherwise we must pick up the subject character and use Unicode
       property support to test its other case. Note that we cannot use the
-      value of "Flength" to check for sufficient bytes left, because the other
+      value of "length" to check for sufficient bytes left, because the other
       case of the character may have more or fewer code units. */
 
       else
         {
         uint32_t dc;
         GETCHARINC(dc, Feptr);
-        Fecode += Flength;
+        Fecode += length;
         if (dc != fc && dc != UCD_OTHERCASE(fc)) RRETURN(MATCH_NOMATCH);
         }
       }
@@ -1293,13 +1292,14 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     /* ===================================================================== */
     /* Match a single character repeatedly. */
 
-#define Loclength    F->temp_size
-#define Lstart_eptr  F->temp_sptr[0]
-#define Lcharptr     F->temp_sptr[1]
-#define Lmin         F->temp_32[0]
-#define Lmax         F->temp_32[1]
-#define Lc           F->temp_32[2]
-#define Loc          F->temp_32[3]
+#define Llength      F->fields.char_repeat.length
+#define Loclength    F->fields.char_repeat.oclength
+#define Lstart_eptr  F->fields.char_repeat.start_eptr
+#define Lcharptr     F->fields.char_repeat.charptr
+#define Lmin         F->fields.char_repeat.min
+#define Lmax         F->fields.char_repeat.max
+#define Lc           F->fields.char_repeat.c
+#define Loc          F->fields.char_repeat.oc
 
     case OP_EXACT:
     case OP_EXACTI:
@@ -1393,14 +1393,14 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      Flength = 1;
+      Llength = 1;
       Lcharptr = Fecode;
-      GETCHARLEN(fc, Fecode, Flength);
-      Fecode += Flength;
+      GETCHARLEN(fc, Fecode, Llength);
+      Fecode += Llength;
 
       /* Handle multi-code-unit character matching, caseful and caseless. */
 
-      if (Flength > 1)
+      if (Llength > 1)
         {
         uint32_t othercase;
 
@@ -1411,8 +1411,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
         for (i = 1; i <= Lmin; i++)
           {
-          if (Feptr <= mb->end_subject - Flength &&
-            memcmp(Feptr, Lcharptr, CU2BYTES(Flength)) == 0) Feptr += Flength;
+          if (Feptr <= mb->end_subject - Llength &&
+            memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0) Feptr += Llength;
           else if (Loclength > 0 &&
                    Feptr <= mb->end_subject - Loclength &&
                    memcmp(Feptr, Foccu, CU2BYTES(Loclength)) == 0)
@@ -1433,8 +1433,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RMATCH(Fecode, RM202);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (Lmin++ >= Lmax) RRETURN(MATCH_NOMATCH);
-            if (Feptr <= mb->end_subject - Flength &&
-              memcmp(Feptr, Lcharptr, CU2BYTES(Flength)) == 0) Feptr += Flength;
+            if (Feptr <= mb->end_subject - Llength &&
+              memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0) Feptr += Llength;
             else if (Loclength > 0 &&
                      Feptr <= mb->end_subject - Loclength &&
                      memcmp(Feptr, Foccu, CU2BYTES(Loclength)) == 0)
@@ -1453,9 +1453,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           Lstart_eptr = Feptr;
           for (i = Lmin; i < Lmax; i++)
             {
-            if (Feptr <= mb->end_subject - Flength &&
-                memcmp(Feptr, Lcharptr, CU2BYTES(Flength)) == 0)
-              Feptr += Flength;
+            if (Feptr <= mb->end_subject - Llength &&
+                memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0)
+              Feptr += Llength;
             else if (Loclength > 0 &&
                      Feptr <= mb->end_subject - Loclength &&
                      memcmp(Feptr, Foccu, CU2BYTES(Loclength)) == 0)
@@ -1632,6 +1632,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     break;
 
+#undef Llength
 #undef Loclength
 #undef Lstart_eptr
 #undef Lcharptr
@@ -1649,11 +1650,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     very much to the time taken, but character matching *is* what this is all
     about... */
 
-#define Lstart_eptr  F->temp_sptr[0]
-#define Lmin         F->temp_32[0]
-#define Lmax         F->temp_32[1]
-#define Lc           F->temp_32[2]
-#define Loc          F->temp_32[3]
+#define Lstart_eptr  F->fields.charnot_repeat.start_eptr
+#define Lmin         F->fields.charnot_repeat.min
+#define Lmax         F->fields.charnot_repeat.max
+#define Lc           F->fields.charnot_repeat.c
+#define Loc          F->fields.charnot_repeat.oc
 
     case OP_NOTEXACT:
     case OP_NOTEXACTI:
@@ -2040,11 +2041,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     OP_CLASS and OP_NCLASS occurs when a data character outside the range is
     encountered. */
 
-#define Lmin               F->temp_32[0]
-#define Lmax               F->temp_32[1]
-#define Lstart_eptr        F->temp_sptr[0]
-#define Lbyte_map_address  F->temp_sptr[1]
+#define Lbyte_map_address  F->fields.class_repeat.byte_map_address
 #define Lbyte_map          ((const unsigned char *)Lbyte_map_address)
+#define Lstart_eptr        F->fields.class_repeat.start_eptr
+#define Lmin               F->fields.class_repeat.min
+#define Lmax               F->fields.class_repeat.max
 
     case OP_NCLASS:
     case OP_CLASS:
@@ -2283,10 +2284,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     32-bit libraries, codepoints greater than 255 may be encountered even when
     UTF is not supported. */
 
-#define Lstart_eptr  F->temp_sptr[0]
-#define Lxclass_data F->temp_sptr[1]
-#define Lmin         F->temp_32[0]
-#define Lmax         F->temp_32[1]
+#define Lstart_eptr  F->fields.xclass_repeat.start_eptr
+#define Lxclass_data F->fields.xclass_repeat.xclass_data
+#define Lmin         F->fields.xclass_repeat.min
+#define Lmax         F->fields.xclass_repeat.max
 
 #ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
@@ -2424,11 +2425,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     there is complex nesting or logical operations within the character
     class. */
 
-#define Lstart_eptr  F->temp_sptr[0]
-#define Leclass_data F->temp_sptr[1]
-#define Leclass_len  F->temp_size
-#define Lmin         F->temp_32[0]
-#define Lmax         F->temp_32[1]
+#define Lstart_eptr  F->fields.eclass_repeat.start_eptr
+#define Leclass_data F->fields.eclass_repeat.eclass_data
+#define Leclass_len  F->fields.eclass_repeat.eclass_len
+#define Lmin         F->fields.eclass_repeat.min
+#define Lmax         F->fields.eclass_repeat.max
 
 #ifdef SUPPORT_WIDE_CHARS
     case OP_ECLASS:
@@ -2908,11 +2909,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     does not need to be in a stack frame as it is not used within an RMATCH()
     loop. */
 
-#define Lstart_eptr  F->temp_sptr[0]
-#define Lmin         F->temp_32[0]
-#define Lmax         F->temp_32[1]
-#define Lctype       F->temp_32[2]
-#define Lpropvalue   F->temp_32[3]
+#define Lstart_eptr  F->fields.type_repeat.start_eptr
+#define Lmin         F->fields.type_repeat.min
+#define Lmax         F->fields.type_repeat.max
+#define Lctype       F->fields.type_repeat.ctype
+#define Lpropvalue   F->fields.type_repeat.propvalue
 
     case OP_TYPEEXACT:
     Lmin = Lmax = GET2(Fecode, 1);
@@ -5236,12 +5237,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     OP_DNREFI are used. In this case we must scan the list of groups to which
     the name refers, and use the first one that is set. */
 
-#define Lmin      F->temp_32[0]
-#define Lmax      F->temp_32[1]
-#define Lcaseless F->temp_32[2]
-#define Lcaseopts F->temp_32[3]
-#define Lstart    F->temp_sptr[0]
-#define Loffset   F->temp_size
+#define Lstart    F->fields.ref_repeat.start
+#define Loffset   F->fields.ref_repeat.offset
+#define Llength   F->fields.ref_repeat.length
+#define Lmin      F->fields.ref_repeat.min
+#define Lmax      F->fields.ref_repeat.max
+#define Lcaseless F->fields.ref_repeat.caseless
+#define Lcaseopts F->fields.ref_repeat.caseopts
 
     case OP_DNREF:
     case OP_DNREFI:
@@ -5376,7 +5378,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       {
       BOOL samelengths = TRUE;
       Lstart = Feptr;     /* Starting position */
-      Flength = Fovector[Loffset+1] - Fovector[Loffset];
+      Llength = Fovector[Loffset+1] - Fovector[Loffset];
 
       for (i = Lmin; i < Lmax; i++)
         {
@@ -5396,7 +5398,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           break;
           }
 
-        if (slength != Flength) samelengths = FALSE;
+        if (slength != Llength) samelengths = FALSE;
         Feptr += slength;
         }
 
@@ -5412,7 +5414,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           {
           RMATCH(Fecode, RM21);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          Feptr -= Flength;
+          Feptr -= Llength;
           }
         }
 
@@ -5443,12 +5445,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 
-#undef Lcaseless
-#undef Lmin
-#undef Lmax
 #undef Lstart
 #undef Loffset
-
+#undef Llength
+#undef Lmin
+#undef Lmax
+#undef Lcaseless
+#undef Lcaseopts
 
 
 /* ========================================================================= */
@@ -5475,7 +5478,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     number of copies, with the optional ones preceded by BRAZERO or BRAMINZERO.
     Possessive groups with possible zero repeats are preceded by BRAPOSZERO. */
 
-#define Lnext_ecode F->temp_sptr[0]
+#define Lnext_ecode F->fields.op_brazero.next_ecode
 
     case OP_BRAZERO:
     Lnext_ecode = Fecode + 1;
@@ -5507,11 +5510,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     brackets will always be OP_KETRPOS, which returns MATCH_KETRPOS without
     going further in the pattern. */
 
-#define Lframe_type    F->temp_32[0]
-#define Lmatched_once  F->temp_32[1]
-#define Lzero_allowed  F->temp_32[2]
-#define Lstart_eptr    F->temp_sptr[0]
-#define Lstart_group   F->temp_sptr[1]
+#define Lstart_eptr    F->fields.op_brapos.start_eptr
+#define Lstart_group   F->fields.op_brapos.start_group
+#define Lframe_type    F->fields.op_brapos.frame_type
+#define Lmatched_once  F->fields.op_brapos.matched_once
+#define Lzero_allowed  F->fields.op_brapos.zero_allowed
 
     case OP_BRAPOSZERO:
     Lzero_allowed = TRUE;                /* Zero repeat is allowed */
@@ -5583,11 +5586,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     RRETURN(MATCH_NOMATCH);
 
-#undef Lmatched_once
-#undef Lzero_allowed
-#undef Lframe_type
 #undef Lstart_eptr
 #undef Lstart_group
+#undef Lframe_type
+#undef Lmatched_once
+#undef Lzero_allowed
 
 
     /* ===================================================================== */
@@ -5599,8 +5602,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     however, because that would make handling assertions and once-only brackets
     messier when there is nothing to go back to. */
 
-#define Lframe_type F->temp_32[0]     /* Set for all that use GROUPLOOP */
-#define Lnext_branch F->temp_sptr[0]  /* Used only in OP_BRA handling */
+#define Lnext_branch   F->fields.op_bra.next_branch
+#define Lframe_type    F->fields.op_bra.frame_type
 
     case OP_BRA:
     if (mb->hasthen || Frdepth == 0)
@@ -5627,7 +5630,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     Fecode += PRIV(OP_lengths)[*Fecode];
     break;
 
-#undef Lnext_branch
 
 
     /* ===================================================================== */
@@ -5667,6 +5669,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     PCRE2_UNREACHABLE(); /* Control never reaches here */
 
+#undef Lnext_branch
 #undef Lframe_type
 
 
@@ -5677,8 +5680,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     subpatterns. For a whole-pattern recursion, we have to infer the number
     zero. */
 
-#define Lframe_type F->temp_32[0]
-#define Lstart_branch F->temp_sptr[0]
+#define Lstart_branch  F->fields.op_recurse.start_branch
+#define Lframe_type    F->fields.op_recurse.frame_type
 
     case OP_RECURSE:
     bracode = mb->start_code + GET(Fecode, 1);
@@ -5752,8 +5755,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     PCRE2_UNREACHABLE(); /* Control never reaches here */
 
-#undef Lframe_type
 #undef Lstart_branch
+#undef Lframe_type
 
 
     /* ===================================================================== */
@@ -5762,7 +5765,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     treated as NOMATCH. (*ACCEPT) is treated as successful assertion, with its
     captures and mark retained. Any other return is an error. */
 
-#define Lframe_type  F->temp_32[0]
+#define Lframe_type  F->fields.op_assert.frame_type
 
     case OP_ASSERT:
     case OP_ASSERTBACK:
@@ -5791,14 +5794,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     Fecode += 1 + LINK_SIZE;
     break;
 
-#undef Lframe_type
 
 
     /* ===================================================================== */
     /* Handle negative assertions. Loop for each non-matching branch as for
     positive assertions. */
-
-#define Lframe_type  F->temp_32[0]
 
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
@@ -5841,15 +5841,16 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #undef Lframe_type
 
+
     /* ===================================================================== */
     /* Handle scan substring operation. */
 
-#define Lframe_type          F->temp_32[0]
-#define Lextra_size          F->temp_32[1]
-#define Lsaved_moptions      F->temp_32[2]
-#define Lsaved_end_subject   F->temp_sptr[0]
-#define Lsaved_eptr          F->temp_sptr[1]
-#define Ltrue_end_extra      F->temp_size
+#define Lsaved_end_subject   F->fields.op_assert_scs.saved_end_subject
+#define Lsaved_eptr          F->fields.op_assert_scs.saved_eptr
+#define Ltrue_end_extra      F->fields.op_assert_scs.true_end_extra
+#define Lframe_type          F->fields.op_assert_scs.frame_type
+#define Lextra_size          F->fields.op_assert_scs.extra_size
+#define Lsaved_moptions      F->fields.op_assert_scs.saved_moptions
 
     case OP_ASSERT_SCS:
       {
@@ -5964,12 +5965,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     Feptr = Lsaved_eptr;
     break;
 
-#undef Lframe_type
-#undef Lextra_size
 #undef Lsaved_end_subject
 #undef Lsaved_eptr
 #undef Ltrue_end_extra
+#undef Lframe_type
+#undef Lextra_size
 #undef Lsave_moptions
+
 
     /* ===================================================================== */
     /* The callout item calls an external function, if one is provided, passing
@@ -5991,18 +5993,22 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     past the end of the item if there is only one branch, but that's exactly
     what we want. */
 
+#define Lstart_branch  F->fields.op_cond.start_branch
+#define Llength        F->fields.op_cond.length
+#define Lpositive      F->fields.op_cond.positive
+
     case OP_COND:
     case OP_SCOND:
 
-    /* The variable Flength will be added to Fecode when the condition is
+    /* The variable Llength will be added to Fecode when the condition is
     false, to get to the second branch. Setting it to the offset to the ALT or
     KET, then incrementing Fecode achieves this effect. However, if the second
     branch is non-existent, we must point to the KET so that the end of the
     group is correctly processed. We now have Fecode pointing to the condition
     or callout. */
 
-    Flength = GET(Fecode, 1);    /* Offset to the second branch */
-    if (Fecode[Flength] != OP_ALT) Flength -= 1 + LINK_SIZE;
+    Llength = GET(Fecode, 1);    /* Offset to the second branch */
+    if (Fecode[Llength] != OP_ALT) Llength -= 1 + LINK_SIZE;
     Fecode += 1 + LINK_SIZE;     /* From this opcode */
 
     /* Because of the way auto-callout works during compile, a callout item is
@@ -6016,10 +6022,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       if (rrc < 0) RRETURN(rrc);
 
       /* Advance Fecode past the callout, so it now points to the condition. We
-      must adjust Flength so that the value of Fecode+Flength is unchanged. */
+      must adjust Llength so that the value of Fecode+Llength is unchanged. */
 
       Fecode += length;
-      Flength -= length;
+      Llength -= length;
       }
 
     /* Test the various possible conditions */
@@ -6080,8 +6086,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       /* The condition is an assertion. Run code similar to the assertion code
       above. */
 
-#define Lpositive      F->temp_32[0]
-#define Lstart_branch  F->temp_sptr[0]
 
       default:
       Lpositive = (*Fecode == OP_ASSERT || *Fecode == OP_ASSERTBACK);
@@ -6142,12 +6146,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       break;  /* End of assertion condition */
       }
 
-#undef Lpositive
-#undef Lstart_branch
-
     /* Choose branch according to the condition. */
 
-    Fecode += condition? PRIV(OP_lengths)[*Fecode] : Flength;
+    Fecode += condition? PRIV(OP_lengths)[*Fecode] : Llength;
 
     /* If the opcode is OP_SCOND it means we are at a repeated conditional
     group that might match an empty string. We must therefore descend a level
@@ -6162,6 +6163,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     break;
 
+#undef Lstart_branch
+#undef Llength
+#undef Lpositive
 
 
 /* ========================================================================= */
@@ -6215,9 +6219,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     the start to move back even the minimum amount, fail. When working with
     UTF-8 we move back a number of characters, not bytes. */
 
-#define Lmin F->temp_32[0]
-#define Lmax F->temp_32[1]
-#define Leptr F->temp_sptr[0]
+#define Leptr   F->fields.op_vreverse.eptr
+#define Lmin    F->fields.op_vreverse.min
+#define Lmax    F->fields.op_vreverse.max
 
     case OP_VREVERSE:
     Lmin = GET2(Fecode, 1);
@@ -6271,9 +6275,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     PCRE2_UNREACHABLE(); /* Control never reaches here */
 
+#undef Leptr
 #undef Lmin
 #undef Lmax
-#undef Leptr
+
 
     /* ===================================================================== */
     /* An alternation is the end of a branch; scan along to find the end of the
@@ -6451,14 +6456,14 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       pattern. */
 
       case OP_ASSERT_SCS:
-      F->temp_sptr[0] = mb->end_subject;
-      mb->end_subject = P->temp_sptr[0];
-      mb->true_end_subject = mb->end_subject + P->temp_size;
-      Feptr = P->temp_sptr[1];
+      F->fields.op_assert_scs.saved_end_subject = mb->end_subject;
+      mb->end_subject = P->fields.op_assert_scs.saved_end_subject;
+      mb->true_end_subject = mb->end_subject + P->fields.op_assert_scs.true_end_extra;
+      Feptr = P->fields.op_assert_scs.saved_eptr;
 
       RMATCH(Fecode + 1 + LINK_SIZE, RM39);
 
-      mb->end_subject = F->temp_sptr[0];
+      mb->end_subject = F->fields.op_assert_scs.saved_end_subject;
       mb->true_end_subject = mb->end_subject;
       RRETURN(rrc);
       break;
