@@ -891,16 +891,12 @@ we don't generate any code when all is well. */
 typedef struct heapframe {
 
   /* The first set of fields are variables that have to be preserved over calls
-  to RRMATCH(), but which do not need to be copied to new frames. */
+  to RMATCH(), but which do not need to be copied to new frames. */
 
   PCRE2_SPTR ecode;          /* The current position in the pattern */
-  PCRE2_SPTR temp_sptr[2];   /* Used for short-term PCRE2_SPTR values */
-  PCRE2_SIZE length;         /* Used for character, string, or code lengths */
   PCRE2_SIZE back_frame;     /* Amount to subtract on RRETURN */
-  PCRE2_SIZE temp_size;      /* Used for short-term PCRE2_SIZE values */
   uint32_t rdepth;           /* Function "recursion" depth within pcre2_match() */
   uint32_t group_frame_type; /* Type information for group frames */
-  uint32_t temp_32[4];       /* Used for short-term 32-bit or BOOL values */
   uint8_t return_id;         /* Where to go on in internal "return" */
   uint8_t op;                /* Processing opcode */
 
@@ -923,6 +919,117 @@ typedef struct heapframe {
   uint8_t unused[2];         /* Ensure 32-bit alignment (see above) */
   PCRE2_UCHAR occu[1];       /* Used for other case code units */
 #endif
+
+  union {
+    /* Fields for storing localized data, which
+    is preserved by RMATCH() calls. */
+
+    struct {
+      PCRE2_SIZE length;
+      PCRE2_SIZE oclength;
+      PCRE2_SPTR start_eptr;
+      PCRE2_SPTR charptr;
+      uint32_t min;
+      uint32_t max;
+      uint32_t c;
+      uint32_t oc;
+    } char_repeat;
+
+    struct {
+      PCRE2_SPTR start_eptr;
+      uint32_t min;
+      uint32_t max;
+      uint32_t c;
+      uint32_t oc;
+    } charnot_repeat;
+
+    struct {
+      PCRE2_SPTR start_eptr;
+      PCRE2_SPTR byte_map_address;
+      uint32_t min;
+      uint32_t max;
+    } class_repeat;
+
+    struct {
+      PCRE2_SPTR start_eptr;
+      PCRE2_SPTR xclass_data;
+      uint32_t min;
+      uint32_t max;
+    } xclass_repeat;
+
+    struct {
+      PCRE2_SPTR start_eptr;
+      PCRE2_SPTR eclass_data;
+      PCRE2_SIZE eclass_len;
+      uint32_t min;
+      uint32_t max;
+    } eclass_repeat;
+
+    struct {
+      PCRE2_SPTR start_eptr;
+      uint32_t min;
+      uint32_t max;
+      uint32_t ctype;
+      uint32_t propvalue;
+    } type_repeat;
+
+    struct {
+      PCRE2_SPTR start;
+      PCRE2_SIZE offset;
+      PCRE2_SIZE length;
+      uint32_t min;
+      uint32_t max;
+      uint32_t caseless;
+      uint32_t caseopts;
+    } ref_repeat;
+
+    struct {
+      PCRE2_SPTR next_branch; /* Used only in OP_BRA handling */
+      uint32_t frame_type;    /* Set for all that use GROUPLOOP */
+    } op_bra;
+
+    struct {
+      PCRE2_SPTR next_ecode;
+    } op_brazero;
+
+    struct {
+      PCRE2_SPTR start_eptr;
+      PCRE2_SPTR start_group;
+      uint32_t frame_type;
+      uint32_t matched_once;
+      uint32_t zero_allowed;
+    } op_brapos;
+
+    struct {
+      PCRE2_SPTR start_branch;
+      uint32_t frame_type;
+    } op_recurse;
+
+    struct {
+      uint32_t frame_type;
+    } op_assert;
+
+    struct {
+      PCRE2_SPTR saved_end_subject;
+      PCRE2_SPTR saved_eptr;
+      PCRE2_SIZE true_end_extra;
+      uint32_t frame_type;
+      uint32_t extra_size;
+      uint32_t saved_moptions;
+    } op_assert_scs;
+
+    struct {
+      PCRE2_SPTR start_branch;
+      PCRE2_SIZE length;
+      uint32_t positive;
+    } op_cond;
+
+    struct {
+      PCRE2_SPTR eptr;
+      uint32_t min;
+      uint32_t max;
+    } op_vreverse;
+  } fields;
 
   /* The rest have to be copied from the previous frame whenever a new frame
   becomes current. The final field is specified as a large vector so that
