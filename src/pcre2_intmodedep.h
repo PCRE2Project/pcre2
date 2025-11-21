@@ -899,40 +899,37 @@ typedef struct heapframe {
   uint32_t group_frame_type; /* Type information for group frames */
   uint8_t return_id;         /* Where to go on in internal "return" */
   uint8_t op;                /* Processing opcode */
+  uint8_t byte1;             /* A temporary byte to store anything */
+  uint8_t byte2;             /* A temporary byte to store anything */
 
-  /* At this point, the structure is 16-bit aligned. On most architectures
+  /* At this point, the structure is 32-bit aligned. On most architectures
   the alignment requirement for a pointer will ensure that the eptr field below
   is 32-bit or 64-bit aligned. However, on m68k it is fine to have a pointer
-  that is 16-bit aligned. We must therefore ensure that what comes between here
-  and eptr is an odd multiple of 16 bits so as to get back into 32-bit
-  alignment. This happens naturally when PCRE2_UCHAR is 8 bits wide, but needs
-  fudges in the other cases. In the 32-bit case the padding comes first so that
-  the occu field itself is 32-bit aligned. Without the padding, this structure
-  is no longer a multiple of PCRE2_SIZE on m68k, and the check below fails. */
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
-  PCRE2_UCHAR occu[6];       /* Used for other case code units */
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-  PCRE2_UCHAR occu[2];       /* Used for other case code units */
-  uint8_t unused[2];         /* Ensure 32-bit alignment (see above) */
-#else
-  uint8_t unused[2];         /* Ensure 32-bit alignment (see above) */
-  PCRE2_UCHAR occu[1];       /* Used for other case code units */
-#endif
+  that is 16-bit aligned, so all uint8_t members above are required for a 32
+  bit alignment. */
 
   union {
     /* Fields for storing localized data, which
     is preserved by RMATCH() calls. */
 
     struct {
-      PCRE2_SIZE length;
-      PCRE2_SIZE oclength;
       PCRE2_SPTR start_eptr;
       PCRE2_SPTR charptr;
       uint32_t min;
       uint32_t max;
       uint32_t c;
-      uint32_t oc;
+      union {
+        uint32_t oc;
+        /* Buffer for other case code units. The size of
+        the buffer is enough to store the longest character. */
+#if PCRE2_CODE_UNIT_WIDTH == 8
+        PCRE2_UCHAR occu[4];
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+        PCRE2_UCHAR occu[2];
+#else
+        PCRE2_UCHAR occu[1];
+#endif
+      } oc;
     } char_repeat;
 
     struct {
@@ -979,25 +976,16 @@ typedef struct heapframe {
       PCRE2_SIZE length;
       uint32_t min;
       uint32_t max;
-      uint32_t caseless;
-      uint32_t caseopts;
     } ref_repeat;
 
     struct {
-      PCRE2_SPTR next_branch; /* Used only in OP_BRA handling */
       uint32_t frame_type;    /* Set for all that use GROUPLOOP */
     } op_bra;
-
-    struct {
-      PCRE2_SPTR next_ecode;
-    } op_brazero;
 
     struct {
       PCRE2_SPTR start_eptr;
       PCRE2_SPTR start_group;
       uint32_t frame_type;
-      uint32_t matched_once;
-      uint32_t zero_allowed;
     } op_brapos;
 
     struct {
@@ -1006,26 +994,18 @@ typedef struct heapframe {
     } op_recurse;
 
     struct {
-      uint32_t frame_type;
-    } op_assert;
-
-    struct {
       PCRE2_SPTR saved_end_subject;
       PCRE2_SPTR saved_eptr;
       PCRE2_SIZE true_end_extra;
-      uint32_t frame_type;
-      uint32_t extra_size;
       uint32_t saved_moptions;
     } op_assert_scs;
 
     struct {
       PCRE2_SPTR start_branch;
       PCRE2_SIZE length;
-      uint32_t positive;
     } op_cond;
 
     struct {
-      PCRE2_SPTR eptr;
       uint32_t min;
       uint32_t max;
     } op_vreverse;
