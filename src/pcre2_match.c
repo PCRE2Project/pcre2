@@ -5284,6 +5284,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       case OP_CRMINPLUS:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSPLUS:
+      case OP_CRPOSQUERY:
       fc = *Fecode++ - OP_CRSTAR;
       Lmin = rep_min[fc];
       Lmax = rep_max[fc];
@@ -5292,6 +5295,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       Lmin = GET2(Fecode, 1);
       Lmax = GET2(Fecode, 1 + IMM2_SIZE);
       reptype = rep_typ[*Fecode - OP_CRSTAR];
@@ -5402,6 +5406,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         if (slength != Llength) samelengths = FALSE;
         Feptr += slength;
         }
+
+      /* No recursion if the repeat type is possessive. */
+      if (reptype == REPTYPE_POS) break;
 
       /* If the length matched for each repetition is the same as the length of
       the captured group, we can easily work backwards. This is the normal

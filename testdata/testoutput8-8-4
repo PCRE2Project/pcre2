@@ -811,29 +811,27 @@ Memory allocation - code size : 14
 
 /(?1)()((((((\1++))\x85)+)|))/
 ------------------------------------------------------------------
-  0 115 Bra
+  0 105 Bra
   5  10 Recurse
  10   7 CBra 1
  17   7 Ket
- 22  88 CBra 2
- 29  71 CBra 3
- 36  59 CBra 4
- 43  47 CBra 5
- 50  33 CBra 6
- 57  21 CBra 7
- 64   9 Once
- 69     \g{1}+
- 73   9 Ket
- 78  21 Ket
- 83  33 Ket
- 88     \x{85}
- 90  47 KetRmax
- 95  59 Ket
-100   5 Alt
-105  76 Ket
-110  88 Ket
-115 115 Ket
-120     End
+ 22  78 CBra 2
+ 29  61 CBra 3
+ 36  49 CBra 4
+ 43  37 CBra 5
+ 50  23 CBra 6
+ 57  11 CBra 7
+ 64     \g{1}++
+ 68  11 Ket
+ 73  23 Ket
+ 78     \x{85}
+ 80  37 KetRmax
+ 85  49 Ket
+ 90   5 Alt
+ 95  66 Ket
+100  78 Ket
+105 105 Ket
+110     End
 ------------------------------------------------------------------
 
 # Check the absolute limit on nesting (?| etc. This varies with code unit

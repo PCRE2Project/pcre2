@@ -7640,6 +7640,47 @@ a)"xI
 
 # --------------
 
+# Test backreferences with possessive repeats
+
+/(..)\1*+/B
+  ab
+  abc
+  abababc
+
+/(..)\1++/B
+  abc
+  ababc
+  aababab
+  aabababc
+
+/(..)\1?+/B
+  aa
+  aac
+  ababab
+
+# The + is intentionally missing,
+# exact repeat is always possessive
+/(..)\1{3}/B
+  abababac
+  abababab
+  ababababc
+
+/(..)\1{2,}+/B
+  ababac
+  ababab
+  abababab
+  ababababab
+  abababababc
+
+/(..)\1{3,5}+/B
+  abababac
+  abababab
+  ababababab
+  abababababab
+  ababababababab
+
+# --------------
+
 # Attempt at full coverage of the substitution buffer-management code - not
 # just covering each line in each macro, but covering each instantiation of each
 # line in those macros.
