@@ -184,7 +184,6 @@ point of use and undefined afterwards. */
 #define Frdepth            F->rdepth
 #define Fstart_match       F->start_match
 #define Foffset_top        F->offset_top
-#define Foccu              F->occu
 #define Fop                F->op
 #define Fovector           F->ovector
 #define Freturn_id         F->return_id
@@ -815,11 +814,11 @@ if (group_frame_type != 0)
     break;
 
     case GF_NOCAPTURE:
-    fprintf(stderr, "nocapture op=%d", GF_DATAMASK(group_frame_type));
+    fprintf(stderr, "nocapture op=%d", Fop);
     break;
 
     case GF_CONDASSERT:
-    fprintf(stderr, "condassert op=%d", GF_DATAMASK(group_frame_type));
+    fprintf(stderr, "condassert op=%d", Fop);
     break;
 
     case GF_RECURSE:
@@ -1292,14 +1291,15 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     /* ===================================================================== */
     /* Match a single character repeatedly. */
 
-#define Llength      F->fields.char_repeat.length
-#define Loclength    F->fields.char_repeat.oclength
+#define Llength      F->byte1
+#define Loclength    F->byte2
 #define Lstart_eptr  F->fields.char_repeat.start_eptr
 #define Lcharptr     F->fields.char_repeat.charptr
 #define Lmin         F->fields.char_repeat.min
 #define Lmax         F->fields.char_repeat.max
 #define Lc           F->fields.char_repeat.c
-#define Loc          F->fields.char_repeat.oc
+#define Loc          F->fields.char_repeat.oc.oc
+#define Loccu        F->fields.char_repeat.oc.occu
 
     case OP_EXACT:
     case OP_EXACTI:
@@ -1393,29 +1393,30 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      Llength = 1;
+      length = 1;
       Lcharptr = Fecode;
-      GETCHARLEN(fc, Fecode, Llength);
-      Fecode += Llength;
+      GETCHARLEN(fc, Fecode, length);
+      Fecode += length;
+      Llength = (uint8_t)length;
 
       /* Handle multi-code-unit character matching, caseful and caseless. */
 
-      if (Llength > 1)
+      if (length > 1)
         {
         uint32_t othercase;
 
         if (Fop >= OP_STARI &&     /* Caseless */
             (othercase = UCD_OTHERCASE(fc)) != fc)
-          Loclength = PRIV(ord2utf)(othercase, Foccu);
+          Loclength = (uint8_t)PRIV(ord2utf)(othercase, Loccu);
         else Loclength = 0;
 
         for (i = 1; i <= Lmin; i++)
           {
-          if (Feptr <= mb->end_subject - Llength &&
-            memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0) Feptr += Llength;
+          if (Feptr <= mb->end_subject - length &&
+            memcmp(Feptr, Lcharptr, CU2BYTES(length)) == 0) Feptr += length;
           else if (Loclength > 0 &&
                    Feptr <= mb->end_subject - Loclength &&
-                   memcmp(Feptr, Foccu, CU2BYTES(Loclength)) == 0)
+                   memcmp(Feptr, Loccu, CU2BYTES(Loclength)) == 0)
             Feptr += Loclength;
           else
             {
@@ -1437,7 +1438,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0) Feptr += Llength;
             else if (Loclength > 0 &&
                      Feptr <= mb->end_subject - Loclength &&
-                     memcmp(Feptr, Foccu, CU2BYTES(Loclength)) == 0)
+                     memcmp(Feptr, Loccu, CU2BYTES(Loclength)) == 0)
               Feptr += Loclength;
             else
               {
@@ -1447,7 +1448,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           PCRE2_UNREACHABLE(); /* Control never reaches here */
           }
-
         else  /* Maximize */
           {
           Lstart_eptr = Feptr;
@@ -1458,7 +1458,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               Feptr += Llength;
             else if (Loclength > 0 &&
                      Feptr <= mb->end_subject - Loclength &&
-                     memcmp(Feptr, Foccu, CU2BYTES(Loclength)) == 0)
+                     memcmp(Feptr, Loccu, CU2BYTES(Loclength)) == 0)
               Feptr += Loclength;
             else
               {
@@ -1640,6 +1640,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #undef Lmax
 #undef Lc
 #undef Loc
+#undef Loccu
 
 
     /* ===================================================================== */
@@ -5242,13 +5243,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Llength   F->fields.ref_repeat.length
 #define Lmin      F->fields.ref_repeat.min
 #define Lmax      F->fields.ref_repeat.max
-#define Lcaseless F->fields.ref_repeat.caseless
-#define Lcaseopts F->fields.ref_repeat.caseopts
+#define Lcaseless F->byte1
+#define Lcaseopts F->byte2
 
     case OP_DNREF:
     case OP_DNREFI:
-    Lcaseless = (Fop == OP_DNREFI);
-    Lcaseopts = (Fop == OP_DNREFI)? Fecode[1 + 2*IMM2_SIZE] : 0;
+    Lcaseless = (uint8_t)(Fop == OP_DNREFI);
+    Lcaseopts = (uint8_t)((Fop == OP_DNREFI)? Fecode[1 + 2*IMM2_SIZE] : 0);
       {
       int count = GET2(Fecode, 1+IMM2_SIZE);
       PCRE2_SPTR slot = mb->name_table + GET2(Fecode, 1) * mb->name_entry_size;
@@ -5478,30 +5479,37 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     number of copies, with the optional ones preceded by BRAZERO or BRAMINZERO.
     Possessive groups with possible zero repeats are preceded by BRAPOSZERO. */
 
-#define Lnext_ecode F->fields.op_brazero.next_ecode
-
     case OP_BRAZERO:
-    Lnext_ecode = Fecode + 1;
-    RMATCH(Lnext_ecode, RM9);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    do Lnext_ecode += GET(Lnext_ecode, 1); while (*Lnext_ecode == OP_ALT);
-    Fecode = Lnext_ecode + 1 + LINK_SIZE;
+      {
+      PCRE2_SPTR next_ecode;
+
+      Fecode++;
+      RMATCH(Fecode, RM9);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      next_ecode = Fecode;
+      do next_ecode += GET(next_ecode, 1); while (*next_ecode == OP_ALT);
+      Fecode = next_ecode + 1 + LINK_SIZE;
+      }
     break;
 
     case OP_BRAMINZERO:
-    Lnext_ecode = Fecode + 1;
-    do Lnext_ecode += GET(Lnext_ecode, 1); while (*Lnext_ecode == OP_ALT);
-    RMATCH(Lnext_ecode + 1 + LINK_SIZE, RM10);
-    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    Fecode++;
+      {
+      PCRE2_SPTR next_ecode;
+
+      Fecode++;
+      next_ecode = Fecode;
+      do next_ecode += GET(next_ecode, 1); while (*next_ecode == OP_ALT);
+      RMATCH(next_ecode + 1 + LINK_SIZE, RM10);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      }
     break;
 
-#undef Lnext_ecode
-
     case OP_SKIPZERO:
-    Fecode++;
-    do Fecode += GET(Fecode,1); while (*Fecode == OP_ALT);
-    Fecode += 1 + LINK_SIZE;
+      {
+      PCRE2_SPTR next_ecode = Fecode + 1;
+      do next_ecode += GET(next_ecode, 1); while (*next_ecode == OP_ALT);
+      Fecode = next_ecode + 1 + LINK_SIZE;
+      }
     break;
 
 
@@ -5513,8 +5521,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Lstart_eptr    F->fields.op_brapos.start_eptr
 #define Lstart_group   F->fields.op_brapos.start_group
 #define Lframe_type    F->fields.op_brapos.frame_type
-#define Lmatched_once  F->fields.op_brapos.matched_once
-#define Lzero_allowed  F->fields.op_brapos.zero_allowed
+#define Lmatched_once  F->byte1
+#define Lzero_allowed  F->byte2
 
     case OP_BRAPOSZERO:
     Lzero_allowed = TRUE;                /* Zero repeat is allowed */
@@ -5602,7 +5610,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     however, because that would make handling assertions and once-only brackets
     messier when there is nothing to go back to. */
 
-#define Lnext_branch   F->fields.op_bra.next_branch
 #define Lframe_type    F->fields.op_bra.frame_type
 
     case OP_BRA:
@@ -5614,22 +5621,30 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     for (;;)
       {
-      Lnext_branch = Fecode + GET(Fecode, 1);
-      if (*Lnext_branch != OP_ALT) break;
+      PCRE2_SPTR current_branch = Fecode;
+      PCRE2_SPTR next_branch = current_branch + GET(current_branch, 1);
+
+      if (*next_branch != OP_ALT) break;
 
       /* This is never the final branch. We do not need to test for MATCH_THEN
       here because this code is not used when there is a THEN in the pattern. */
 
-      RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM1);
+      Fecode = next_branch;
+      PCRE2_ASSERT((*current_branch == OP_BRA || *current_branch == OP_ALT) &&
+                   PRIV(OP_lengths)[OP_BRA] == 1 + LINK_SIZE &&
+                   PRIV(OP_lengths)[OP_ALT] == 1 + LINK_SIZE);
+
+      RMATCH(current_branch + 1 + LINK_SIZE, RM1);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-      Fecode = Lnext_branch;
       }
 
     /* Hit the start of the final branch. Continue at this level. */
 
-    Fecode += PRIV(OP_lengths)[*Fecode];
+    PCRE2_ASSERT((*Fecode == OP_BRA || *Fecode == OP_ALT) &&
+                 PRIV(OP_lengths)[OP_BRA] == 1 + LINK_SIZE &&
+                 PRIV(OP_lengths)[OP_ALT] == 1 + LINK_SIZE);
+    Fecode += 1 + LINK_SIZE;
     break;
-
 
 
     /* ===================================================================== */
@@ -5649,7 +5664,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_SBRA:
-    Lframe_type = GF_NOCAPTURE | Fop;
+    Lframe_type = GF_NOCAPTURE;
 
     GROUPLOOP:
     for (;;)
@@ -5669,7 +5684,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     PCRE2_UNREACHABLE(); /* Control never reaches here */
 
-#undef Lnext_branch
 #undef Lframe_type
 
 
@@ -5765,16 +5779,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     treated as NOMATCH. (*ACCEPT) is treated as successful assertion, with its
     captures and mark retained. Any other return is an error. */
 
-#define Lframe_type  F->fields.op_assert.frame_type
-
     case OP_ASSERT:
     case OP_ASSERTBACK:
     case OP_ASSERT_NA:
     case OP_ASSERTBACK_NA:
-    Lframe_type = GF_NOCAPTURE | Fop;
     for (;;)
       {
-      group_frame_type = Lframe_type;
+      group_frame_type = GF_NOCAPTURE;
       RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM3);
       if (rrc == MATCH_ACCEPT)
         {
@@ -5795,18 +5806,15 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     break;
 
 
-
     /* ===================================================================== */
     /* Handle negative assertions. Loop for each non-matching branch as for
     positive assertions. */
 
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
-    Lframe_type  = GF_NOCAPTURE | Fop;
-
     for (;;)
       {
-      group_frame_type = Lframe_type;
+      group_frame_type = GF_NOCAPTURE;
       RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM4);
       switch(rrc)
         {
@@ -5839,8 +5847,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     Fecode += 1 + LINK_SIZE;
     break;
 
-#undef Lframe_type
-
 
     /* ===================================================================== */
     /* Handle scan substring operation. */
@@ -5848,14 +5854,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #define Lsaved_end_subject   F->fields.op_assert_scs.saved_end_subject
 #define Lsaved_eptr          F->fields.op_assert_scs.saved_eptr
 #define Ltrue_end_extra      F->fields.op_assert_scs.true_end_extra
-#define Lframe_type          F->fields.op_assert_scs.frame_type
 #define Lextra_size          F->fields.op_assert_scs.extra_size
 #define Lsaved_moptions      F->fields.op_assert_scs.saved_moptions
 
     case OP_ASSERT_SCS:
+    length = 0;
       {
       PCRE2_SPTR ecode = Fecode + 1 + LINK_SIZE;
-      uint32_t extra_size = 0;
       int count;
       PCRE2_SPTR slot;
 
@@ -5867,7 +5872,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         if (*ecode == OP_CREF)
           {
-          extra_size += 1+IMM2_SIZE;
+          length += 1+IMM2_SIZE;
           offset = (GET2(ecode, 1) << 1) - 2;
           ecode += 1+IMM2_SIZE;
           if (offset < Foffset_top && Fovector[offset] != PCRE2_UNSET)
@@ -5879,7 +5884,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
         count = GET2(ecode, 1 + IMM2_SIZE);
         slot = mb->name_table + GET2(ecode, 1) * mb->name_entry_size;
-        extra_size += 1+2*IMM2_SIZE;
+        length += 1+2*IMM2_SIZE;
         ecode += 1+2*IMM2_SIZE;
 
         while (count > 0)
@@ -5899,18 +5904,16 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         if (*ecode == OP_CREF)
           {
-          extra_size += 1+IMM2_SIZE;
+          length += 1+IMM2_SIZE;
           ecode += 1+IMM2_SIZE;
           }
         else if (*ecode == OP_DNCREF)
           {
-          extra_size += 1+2*IMM2_SIZE;
+          length += 1+2*IMM2_SIZE;
           ecode += 1+2*IMM2_SIZE;
           }
         else break;
         }
-
-      Lextra_size = extra_size;
       }
 
     Lsaved_end_subject = mb->end_subject;
@@ -5923,11 +5926,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       mb->start_subject + Fovector[offset + 1];
     mb->moptions &= ~PCRE2_NOTEOL;
 
-    Lframe_type = GF_NOCAPTURE | Fop;
     for (;;)
       {
-      group_frame_type = Lframe_type;
-      RMATCH(Fecode + 1 + LINK_SIZE + Lextra_size, RM38);
+      group_frame_type = GF_NOCAPTURE;
+      RMATCH(Fecode + 1 + LINK_SIZE + length, RM38);
       if (rrc == MATCH_ACCEPT)
         {
         memcpy(Fovector,
@@ -5957,7 +5959,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         mb->moptions = Lsaved_moptions;
         RRETURN(MATCH_NOMATCH);
         }
-      Lextra_size = 0;
+      length = 0;
       }
 
     do Fecode += GET(Fecode, 1); while (*Fecode == OP_ALT);
@@ -5968,7 +5970,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #undef Lsaved_end_subject
 #undef Lsaved_eptr
 #undef Ltrue_end_extra
-#undef Lframe_type
 #undef Lextra_size
 #undef Lsave_moptions
 
@@ -5995,7 +5996,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 #define Lstart_branch  F->fields.op_cond.start_branch
 #define Llength        F->fields.op_cond.length
-#define Lpositive      F->fields.op_cond.positive
+#define Lpositive      F->byte1
 
     case OP_COND:
     case OP_SCOND:
@@ -6088,12 +6089,12 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
 
       default:
-      Lpositive = (*Fecode == OP_ASSERT || *Fecode == OP_ASSERTBACK);
+      Lpositive = (uint8_t)(*Fecode == OP_ASSERT || *Fecode == OP_ASSERTBACK);
       Lstart_branch = Fecode;
 
       for (;;)
         {
-        group_frame_type = GF_CONDASSERT | *Fecode;
+        group_frame_type = GF_CONDASSERT;
         RMATCH(Lstart_branch + PRIV(OP_lengths)[*Lstart_branch], RM5);
 
         switch(rrc)
@@ -6157,7 +6158,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     if (Fop == OP_SCOND)
       {
-      group_frame_type  = GF_NOCAPTURE | Fop;
+      group_frame_type = GF_NOCAPTURE;
       RMATCH(Fecode, RM35);
       RRETURN(rrc);
       }
@@ -6219,14 +6220,12 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     the start to move back even the minimum amount, fail. When working with
     UTF-8 we move back a number of characters, not bytes. */
 
-#define Leptr   F->fields.op_vreverse.eptr
 #define Lmin    F->fields.op_vreverse.min
 #define Lmax    F->fields.op_vreverse.max
 
     case OP_VREVERSE:
     Lmin = GET2(Fecode, 1);
     Lmax = GET2(Fecode, 1 + IMM2_SIZE);
-    Leptr = Feptr;
 
     /* Move back by the maximum branch length and then work forwards. This
     ensures that items such as \d{3,5} get the maximum length, which is
@@ -6275,7 +6274,6 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     PCRE2_UNREACHABLE(); /* Control never reaches here */
 
-#undef Leptr
 #undef Lmin
 #undef Lmax
 
@@ -6333,7 +6331,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       N so that they are set on return. Doing this for all assertions, both
       positive and negative, seems to match what Perl does. */
 
-      if (GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
+      if (N->group_frame_type == GF_CONDASSERT)
         {
         if ((*bracode == OP_ASSERTBACK || *bracode == OP_ASSERTBACK_NOT) &&
             branch_start[1 + LINK_SIZE] == OP_VREVERSE && Feptr != P->eptr)
