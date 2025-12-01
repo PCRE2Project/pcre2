@@ -8273,5 +8273,12 @@ a)"xI
     foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject
     foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject,zero_terminate
 
+# --------------
+# Some more tests for a substitution regression
+# --------------
+
+/foo(?<Bar>BAR)?/substitute_extended,replace=X${Bar:+\:\:text}Y
+    foo
+    fooBAR
 
 # End of testinput2
