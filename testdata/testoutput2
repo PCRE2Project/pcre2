@@ -23656,6 +23656,15 @@ Failed: error -72: substitute subject differs from prior match call
     foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject,zero_terminate
 Failed: error -72: substitute subject differs from prior match call
 
+# --------------
+# Some more tests for a substitution regression
+# --------------
+
+/foo(?<Bar>BAR)?/substitute_extended,replace=X${Bar:+\:\:text}Y
+    foo
+ 1: XY
+    fooBAR
+ 1: X::textY
 
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
