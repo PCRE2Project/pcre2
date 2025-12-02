@@ -115,6 +115,7 @@ for (; ptr < ptrend; ptr++)
     int erc;
     int errorcode;
     uint32_t ch;
+    PCRE2_SPTR esc_end_ptr;
 
     if (ptr < ptrend - 1) switch (ptr[1])
       {
@@ -136,6 +137,9 @@ for (; ptr < ptrend; ptr++)
       rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
       }
+
+    esc_end_ptr = ptr;
+    ptr -= 1;  /* Rewind by one, because the for-loop will increment it */
 
     switch(erc)
       {
@@ -160,7 +164,8 @@ for (; ptr < ptrend; ptr++)
 
       default:
       if (erc < 0)
-          break;  /* capture group reference */
+        break;  /* capture group reference */
+      ptr = esc_end_ptr;
       rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
       }
