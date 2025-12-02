@@ -8066,6 +8066,13 @@ for (;; pptr++)
         tempcode += GET(tempcode, 1);
         break;
 #endif
+
+        case OP_REF:
+        case OP_REFI:
+        case OP_DNREF:
+        case OP_DNREFI:
+        tempcode += PRIV(OP_lengths)[*tempcode];
+        break;
         }
 
       /* If tempcode is equal to code (which points to the end of the repeated
