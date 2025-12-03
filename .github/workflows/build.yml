@@ -489,9 +489,9 @@ jobs:
   zos:
     name: z/OS
     runs-on: ubuntu-latest
+    # No longer running on push events, due to flaky z/OS runner
     if: |
-      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zos')) ||
-      github.event_name == 'push'
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zos'))
     concurrency:
       group: zos-ssh-build
     steps:
