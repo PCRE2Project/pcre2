@@ -8322,4 +8322,25 @@ a)"xI
     foo
     fooBAR
 
+# --------------
+# Tests for substitution with partial
+# --------------
+
+/(a)b+/
+    ab\=ph,replace=FOO
+    ab\=ph,substitute_replacement_only,replace=FOO
+    abc\=ph,substitute_replacement_only,replace=FOO
+    zabc\=ph,substitute_replacement_only,replace=>$&|$1|$`<
+    abc\=ph,substitute_replacement_only,replace=>$_<
+    abc\=ph,substitute_replacement_only,replace=>$'<
+
+/(a)b+/
+    ab\=ps,replace=FOO
+    ab\=ps,substitute_replacement_only,replace=FOO
+    a\=ps,substitute_replacement_only,replace=FOO
+    abc\=ps,substitute_replacement_only,replace=FOO
+    zabc\=ps,substitute_replacement_only,replace=>$&|$1|$`<
+    abc\=ps,substitute_replacement_only,replace=>$_<
+    abc\=ps,substitute_replacement_only,replace=>$'<
+
 # End of testinput2

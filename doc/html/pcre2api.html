@@ -3925,6 +3925,15 @@ output buffer. Substitution callouts (see
 can be used to separate them if necessary.
 </p>
 <p>
+Partial matching is supported, with limitations: if matching succeeds but with a
+partial match, then pcre2_substitute returns PCRE2_ERROR_PARTIAL. When
+partial-matching (either of PCRE2_PARTIAL_HARD or PCRE2_PARTIAL_SOFT is passed),
+then PCRE2_SUBSTITUTE_REPLACEMENT_ONLY must also be set, or else
+PCRE2_ERROR_BADOPTION is returned. Similarly, certain replacement items
+($' and $_) cause PCRE2_ERROR_PARTIALSUBS to be returned when partial-matching,
+even if a complete match is found.
+</p>
+<p>
 The <i>outlengthptr</i> argument of <b>pcre2_substitute()</b> must point to a
 variable that contains the length, in code units, of the output buffer. If the
 function is successful, the value is updated to contain the length in code
