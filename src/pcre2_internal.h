@@ -477,8 +477,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
-     UCHAR21TEST(p) == NLBLOCK->nl[0] && \
-     (NLBLOCK->nllen == 1 || UCHAR21TEST(p+1) == NLBLOCK->nl[1])       \
+     *p == NLBLOCK->nl[0] && \
+     (NLBLOCK->nllen == 1 || p[1] == NLBLOCK->nl[1])       \
     ) \
   )
 
@@ -491,8 +491,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
-     UCHAR21TEST(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
-     (NLBLOCK->nllen == 1 || UCHAR21TEST(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
+     *(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
+     (NLBLOCK->nllen == 1 || *(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
     ) \
   )
 

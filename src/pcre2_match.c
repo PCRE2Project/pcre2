@@ -455,8 +455,8 @@ if (caseless)
       {
       uint32_t cc, cp;
       if (eptr >= mb->end_subject) return 1;   /* Partial match */
-      cc = UCHAR21TEST(eptr);
-      cp = UCHAR21TEST(p);
+      cc = *eptr;
+      cp = *p;
       if (TABLE_GET(cp, mb->lcc, cp) != TABLE_GET(cc, mb->lcc, cc))
         return -1;  /* No match */
       p++;
@@ -476,7 +476,7 @@ else
     for (; length > 0; length--)
       {
       if (eptr >= mb->end_subject) return 1;   /* Partial match */
-      if (UCHAR21INCTEST(p) != UCHAR21INCTEST(eptr)) return -1;  /* No match */
+      if (*p++ != *eptr++) return -1;  /* No match */
       }
     }
 
@@ -1064,7 +1064,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         Feptr == mb->end_subject - 1 &&
         NLBLOCK->nltype == NLTYPE_FIXED &&
         NLBLOCK->nllen == 2 &&
-        UCHAR21TEST(Feptr) == NLBLOCK->nl[0])
+        *Feptr == NLBLOCK->nl[0])
       {
       mb->hitend = TRUE;
       if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
@@ -1120,7 +1120,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         }
       for (; length > 0; length--)
         {
-        if (*Fecode++ != UCHAR21INC(Feptr)) RRETURN(MATCH_NOMATCH);
+        if (*Fecode++ != *Feptr++) RRETURN(MATCH_NOMATCH);
         }
       }
     else
@@ -1166,7 +1166,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       if (fc < 128)
         {
-        uint32_t cc = UCHAR21(Feptr);
+        uint32_t cc = *Feptr;
         if (mb->lcc[fc] != TABLE_GET(cc, mb->lcc, cc)) RRETURN(MATCH_NOMATCH);
         Fecode++;
         Feptr++;
@@ -1191,7 +1191,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
     else if (ucp)
       {
-      uint32_t cc = UCHAR21(Feptr);
+      uint32_t cc = *Feptr;
       fc = Fecode[1];
       if (fc < 128)
         {
@@ -1255,7 +1255,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     else if (ucp)
       {
       uint32_t ch;
-      fc = UCHAR21INC(Feptr);
+      fc = *Feptr++;
       ch = Fecode[1];
       Fecode += 2;
 
@@ -1280,7 +1280,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       {
       uint32_t ch = Fecode[1];
-      fc = UCHAR21INC(Feptr);
+      fc = *Feptr++;
       if (ch == fc || (Fop == OP_NOTI && TABLE_GET(ch, mb->fcc, ch) == fc))
         RRETURN(MATCH_NOMATCH);
       Fecode += 2;
@@ -1523,7 +1523,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        cc = UCHAR21TEST(Feptr);
+        cc = *Feptr;
         if (Lc != cc && Loc != cc) RRETURN(MATCH_NOMATCH);
         Feptr++;
         }
@@ -1542,7 +1542,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = UCHAR21TEST(Feptr);
+          cc = *Feptr;
           if (Lc != cc && Loc != cc) RRETURN(MATCH_NOMATCH);
           Feptr++;
           }
@@ -1560,7 +1560,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             break;
             }
-          cc = UCHAR21TEST(Feptr);
+          cc = *Feptr;
           if (Lc != cc && Loc != cc) break;
           Feptr++;
           }
@@ -1585,7 +1585,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        if (Lc != UCHAR21INCTEST(Feptr)) RRETURN(MATCH_NOMATCH);
+        if (Lc != *Feptr++) RRETURN(MATCH_NOMATCH);
         }
 
       if (Lmin == Lmax) continue;
@@ -1602,7 +1602,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (Lc != UCHAR21INCTEST(Feptr)) RRETURN(MATCH_NOMATCH);
+          if (Lc != *Feptr++) RRETURN(MATCH_NOMATCH);
           }
         PCRE2_UNREACHABLE(); /* Control never reaches here */
         }
@@ -1617,7 +1617,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
             }
 
-          if (Lc != UCHAR21TEST(Feptr)) break;
+          if (Lc != *Feptr) break;
           Feptr++;
           }
 
@@ -2659,7 +2659,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         {
         SCHECK_PARTIAL();
         }
-      else if (UCHAR21TEST(Feptr) == CHAR_LF) Feptr++;
+      else if (*Feptr == CHAR_LF) Feptr++;
       break;
 
       case CHAR_LF:
@@ -3273,7 +3273,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               Feptr + 1 >= mb->end_subject &&
               NLBLOCK->nltype == NLTYPE_FIXED &&
               NLBLOCK->nllen == 2 &&
-              UCHAR21(Feptr) == NLBLOCK->nl[0])
+              *Feptr == NLBLOCK->nl[0])
             {
             mb->hitend = TRUE;
             if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
@@ -3315,7 +3315,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             default: RRETURN(MATCH_NOMATCH);
 
             case CHAR_CR:
-            if (Feptr < mb->end_subject && UCHAR21(Feptr) == CHAR_LF) Feptr++;
+            if (Feptr < mb->end_subject && *Feptr == CHAR_LF) Feptr++;
             break;
 
             case CHAR_LF:
@@ -3425,7 +3425,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = UCHAR21(Feptr);
+          cc = *Feptr;
           if (cc >= 128 || (mb->ctypes[cc] & ctype_digit) == 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
@@ -3442,7 +3442,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = UCHAR21(Feptr);
+          cc = *Feptr;
           if (cc < 128 && (mb->ctypes[cc] & ctype_space) != 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
@@ -3459,7 +3459,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = UCHAR21(Feptr);
+          cc = *Feptr;
           if (cc >= 128 || (mb->ctypes[cc] & ctype_space) == 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
@@ -3476,7 +3476,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = UCHAR21(Feptr);
+          cc = *Feptr;
           if (cc < 128 && (mb->ctypes[cc] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
@@ -3493,7 +3493,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = UCHAR21(Feptr);
+          cc = *Feptr;
           if (cc >= 128 || (mb->ctypes[cc] & ctype_word) == 0)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
@@ -4121,7 +4121,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               default: RRETURN(MATCH_NOMATCH);
 
               case CHAR_CR:
-              if (Feptr < mb->end_subject && UCHAR21(Feptr) == CHAR_LF) Feptr++;
+              if (Feptr < mb->end_subject && *Feptr == CHAR_LF) Feptr++;
               break;
 
               case CHAR_LF:
@@ -4734,7 +4734,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
                 Feptr + 1 >= mb->end_subject &&
                 NLBLOCK->nltype == NLTYPE_FIXED &&
                 NLBLOCK->nllen == 2 &&
-                UCHAR21(Feptr) == NLBLOCK->nl[0])
+                *Feptr == NLBLOCK->nl[0])
               {
               mb->hitend = TRUE;
               if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
@@ -4790,7 +4790,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             if (fc == CHAR_CR)
               {
               if (++Feptr >= mb->end_subject) break;
-              if (UCHAR21(Feptr) == CHAR_LF) Feptr++;
+              if (*Feptr == CHAR_LF) Feptr++;
               }
             else
               {
@@ -4962,7 +4962,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           Feptr--;
           BACKCHAR(Feptr);
           if (Lctype == OP_ANYNL && Feptr > Lstart_eptr &&
-              UCHAR21(Feptr) == CHAR_NL && UCHAR21(Feptr - 1) == CHAR_CR)
+              *Feptr == CHAR_NL && Feptr[-1] == CHAR_CR)
             Feptr--;
           }
         }
@@ -6609,7 +6609,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           Feptr + 1 >= mb->end_subject &&
           NLBLOCK->nltype == NLTYPE_FIXED &&
           NLBLOCK->nllen == 2 &&
-          UCHAR21TEST(Feptr) == NLBLOCK->nl[0])
+          *Feptr == NLBLOCK->nl[0])
         {
         mb->hitend = TRUE;
         if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
@@ -6657,7 +6657,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             Feptr + 1 >= mb->end_subject &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
             NLBLOCK->nllen == 2 &&
-            UCHAR21TEST(Feptr) == NLBLOCK->nl[0])
+            *Feptr == NLBLOCK->nl[0])
           {
           mb->hitend = TRUE;
           if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
@@ -7659,7 +7659,7 @@ for(;;)
         BOOL ok = start_match < end_subject;
         if (ok)
           {
-          PCRE2_UCHAR c = UCHAR21TEST(start_match);
+          PCRE2_UCHAR c = *start_match;
           ok = has_first_cu && (c == first_cu || c == first_cu2);
           if (!ok && start_bits != NULL)
             {
@@ -7691,7 +7691,7 @@ for(;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
           PCRE2_UCHAR smc;
           while (start_match < end_subject &&
-                (smc = UCHAR21TEST(start_match)) != first_cu &&
+                (smc = *start_match) != first_cu &&
                  smc != first_cu2)
             start_match++;
 #else
@@ -7751,7 +7751,7 @@ for(;;)
         else
           {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-          while (start_match < end_subject && UCHAR21TEST(start_match) !=
+          while (start_match < end_subject && *start_match !=
                  first_cu)
             start_match++;
 #else
@@ -7806,7 +7806,7 @@ for(;;)
           if (start_match[-1] == CHAR_CR &&
                (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF) &&
                start_match < end_subject &&
-               UCHAR21TEST(start_match) == CHAR_NL)
+               *start_match == CHAR_NL)
             start_match++;
           }
         }
@@ -7820,7 +7820,7 @@ for(;;)
         {
         while (start_match < end_subject)
           {
-          uint32_t c = UCHAR21TEST(start_match);
+          uint32_t c = *start_match;
 #if PCRE2_CODE_UNIT_WIDTH != 8
           if (c > 255) c = 255;
 #endif
@@ -7894,7 +7894,7 @@ for(;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
             while (p < end_subject)
               {
-              uint32_t pp = UCHAR21INCTEST(p);
+              uint32_t pp = *p++;
               if (pp == req_cu || pp == req_cu2) { p--; break; }
               }
 #else  /* 8-bit code units */
@@ -7915,7 +7915,7 @@ for(;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
             while (p < end_subject)
               {
-              if (UCHAR21INCTEST(p) == req_cu) { p--; break; }
+              if (*p++ == req_cu) { p--; break; }
               }
 
 #else  /* 8-bit code units */
