@@ -23666,6 +23666,52 @@ Failed: error -72: substitute subject differs from prior match call
     fooBAR
  1: X::textY
 
+# --------------
+# Tests for substitution with partial
+# --------------
+
+/(a)b+/
+\= Expect to fail with "bad option"
+    ab\=ph,replace=FOO
+Failed: error -34: bad option value
+\= Expect to fail with "partial match"
+    ab\=ph,substitute_replacement_only,replace=FOO
+Failed: error -2: partial match
+\= Expect success
+    abc\=ph,substitute_replacement_only,replace=FOO
+ 1: FOO
+    zabc\=ph,substitute_replacement_only,replace=>$&|$1|$`<
+ 1: >ab|a|z<
+\= Expect to fail with PCRE2_ERROR_PARTIALSUBS
+    abc\=ph,substitute_replacement_only,replace=>$_<
+Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
+        here: >$_ |<--| <
+    abc\=ph,substitute_replacement_only,replace=>$'<
+Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
+        here: >$' |<--| <
+
+/(a)b+/
+\= Expect to fail with "bad option"
+    ab\=ps,replace=FOO
+Failed: error -34: bad option value
+\= Expect to fail with "partial match"
+    a\=ps,substitute_replacement_only,replace=FOO
+Failed: error -2: partial match
+\= Expect success
+    ab\=ps,substitute_replacement_only,replace=FOO
+ 1: FOO
+    abc\=ps,substitute_replacement_only,replace=FOO
+ 1: FOO
+    zabc\=ps,substitute_replacement_only,replace=>$&|$1|$`<
+ 1: >ab|a|z<
+\= Expect to fail with PCRE2_ERROR_PARTIALSUBS
+    abc\=ps,substitute_replacement_only,replace=>$_<
+Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
+        here: >$_ |<--| <
+    abc\=ps,substitute_replacement_only,replace=>$'<
+Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
+        here: >$' |<--| <
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
