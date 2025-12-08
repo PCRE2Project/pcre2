@@ -7640,6 +7640,47 @@ a)"xI
 
 # --------------
 
+# Test backreferences with possessive repeats
+
+/(..)\1*+/B
+  ab
+  abc
+  abababc
+
+/(..)\1++/B
+  abc
+  ababc
+  aababab
+  aabababc
+
+/(..)\1?+/B
+  aa
+  aac
+  ababab
+
+# The + is intentionally missing,
+# exact repeat is always possessive
+/(..)\1{3}/B
+  abababac
+  abababab
+  ababababc
+
+/(..)\1{2,}+/B
+  ababac
+  ababab
+  abababab
+  ababababab
+  abababababc
+
+/(..)\1{3,5}+/B
+  abababac
+  abababab
+  ababababab
+  abababababab
+  ababababababab
+
+# --------------
+
 # Attempt at full coverage of the substitution buffer-management code - not
 # just covering each line in each macro, but covering each instantiation of each
 # line in those macros.
@@ -8273,5 +8314,41 @@ a)"xI
     foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject
     foo|bar\=offset=1,substitute_subject=F|OOBAR,copy_matched_subject,zero_terminate
 
+# --------------
+# Some more tests for a substitution regression
+# --------------
+
+/foo(?<Bar>BAR)?/substitute_extended,replace=X${Bar:+\:\:text}Y
+    foo
+    fooBAR
+
+# --------------
+# Tests for substitution with partial
+# --------------
+
+/(a)b+/
+\= Expect to fail with "bad option"
+    ab\=ph,replace=FOO
+\= Expect to fail with "partial match"
+    ab\=ph,substitute_replacement_only,replace=FOO
+\= Expect success
+    abc\=ph,substitute_replacement_only,replace=FOO
+    zabc\=ph,substitute_replacement_only,replace=>$&|$1|$`<
+\= Expect to fail with PCRE2_ERROR_PARTIALSUBS
+    abc\=ph,substitute_replacement_only,replace=>$_<
+    abc\=ph,substitute_replacement_only,replace=>$'<
+
+/(a)b+/
+\= Expect to fail with "bad option"
+    ab\=ps,replace=FOO
+\= Expect to fail with "partial match"
+    a\=ps,substitute_replacement_only,replace=FOO
+\= Expect success
+    ab\=ps,substitute_replacement_only,replace=FOO
+    abc\=ps,substitute_replacement_only,replace=FOO
+    zabc\=ps,substitute_replacement_only,replace=>$&|$1|$`<
+\= Expect to fail with PCRE2_ERROR_PARTIALSUBS
+    abc\=ps,substitute_replacement_only,replace=>$_<
+    abc\=ps,substitute_replacement_only,replace=>$'<
 
 # End of testinput2
