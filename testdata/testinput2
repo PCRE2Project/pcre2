@@ -8327,19 +8327,27 @@ a)"xI
 # --------------
 
 /(a)b+/
+\= Expect to fail with "bad option"
     ab\=ph,replace=FOO
+\= Expect to fail with "partial match"
     ab\=ph,substitute_replacement_only,replace=FOO
+\= Expect success
     abc\=ph,substitute_replacement_only,replace=FOO
     zabc\=ph,substitute_replacement_only,replace=>$&|$1|$`<
+\= Expect to fail with PCRE2_ERROR_PARTIALSUBS
     abc\=ph,substitute_replacement_only,replace=>$_<
     abc\=ph,substitute_replacement_only,replace=>$'<
 
 /(a)b+/
+\= Expect to fail with "bad option"
     ab\=ps,replace=FOO
-    ab\=ps,substitute_replacement_only,replace=FOO
+\= Expect to fail with "partial match"
     a\=ps,substitute_replacement_only,replace=FOO
+\= Expect success
+    ab\=ps,substitute_replacement_only,replace=FOO
     abc\=ps,substitute_replacement_only,replace=FOO
     zabc\=ps,substitute_replacement_only,replace=>$&|$1|$`<
+\= Expect to fail with PCRE2_ERROR_PARTIALSUBS
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
 
