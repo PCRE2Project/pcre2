@@ -1601,7 +1601,7 @@ for (;;)
           goto ANYNL01;
 
           case CHAR_CR:
-          if (ptr + 1 < end_subject && UCHAR21TEST(ptr + 1) == CHAR_LF) ncount = 1;
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL01:
@@ -1879,7 +1879,7 @@ for (;;)
           goto ANYNL02;
 
           case CHAR_CR:
-          if (ptr + 1 < end_subject && UCHAR21TEST(ptr + 1) == CHAR_LF) ncount = 1;
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL02:
@@ -2160,7 +2160,7 @@ for (;;)
           goto ANYNL03;
 
           case CHAR_CR:
-          if (ptr + 1 < end_subject && UCHAR21TEST(ptr + 1) == CHAR_LF) ncount = 1;
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL03:
@@ -2341,7 +2341,7 @@ for (;;)
           if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
           }
-        else if (UCHAR21TEST(ptr + 1) == CHAR_LF)
+        else if (ptr[1] == CHAR_LF)
           {
           ADD_NEW_DATA(-(state_offset + 1), 0, 1);
           }
@@ -3745,7 +3745,7 @@ for (;;)
         BOOL ok = start_match < end_subject;
         if (ok)
           {
-          PCRE2_UCHAR c = UCHAR21TEST(start_match);
+          PCRE2_UCHAR c = *start_match;
           ok = has_first_cu && (c == first_cu || c == first_cu2);
           if (!ok && start_bits != NULL)
             {
@@ -3773,7 +3773,7 @@ for (;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
           PCRE2_UCHAR smc;
           while (start_match < end_subject &&
-                (smc = UCHAR21TEST(start_match)) != first_cu &&
+                (smc = *start_match) != first_cu &&
                  smc != first_cu2)
             start_match++;
 #else
@@ -3833,7 +3833,7 @@ for (;;)
         else
           {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-          while (start_match < end_subject && UCHAR21TEST(start_match) !=
+          while (start_match < end_subject && *start_match !=
                  first_cu)
             start_match++;
 #else  /* 8-bit code units */
@@ -3885,7 +3885,7 @@ for (;;)
           if (start_match[-1] == CHAR_CR &&
                (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF) &&
                start_match < end_subject &&
-               UCHAR21TEST(start_match) == CHAR_NL)
+               *start_match == CHAR_NL)
             start_match++;
           }
         }
@@ -3899,7 +3899,7 @@ for (;;)
         {
         while (start_match < end_subject)
           {
-          uint32_t c = UCHAR21TEST(start_match);
+          uint32_t c = *start_match;
 #if PCRE2_CODE_UNIT_WIDTH != 8
           if (c > 255) c = 255;
 #endif
@@ -3967,7 +3967,7 @@ for (;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
             while (p < end_subject)
               {
-              uint32_t pp = UCHAR21INCTEST(p);
+              uint32_t pp = *p++;
               if (pp == req_cu || pp == req_cu2) { p--; break; }
               }
 #else  /* 8-bit code units */
@@ -3988,7 +3988,7 @@ for (;;)
 #if PCRE2_CODE_UNIT_WIDTH != 8
             while (p < end_subject)
               {
-              if (UCHAR21INCTEST(p) == req_cu) { p--; break; }
+              if (*p++ == req_cu) { p--; break; }
               }
 
 #else  /* 8-bit code units */
@@ -4096,9 +4096,9 @@ for (;;)
   not contain any explicit matches for \r or \n, and the newline option is CRLF
   or ANY or ANYCRLF, advance the match position by one more character. */
 
-  if (UCHAR21TEST(start_match - 1) == CHAR_CR &&
+  if (start_match[-1] == CHAR_CR &&
       start_match < end_subject &&
-      UCHAR21TEST(start_match) == CHAR_NL &&
+      *start_match == CHAR_NL &&
       (re->flags & PCRE2_HASCRORLF) == 0 &&
         (mb->nltype == NLTYPE_ANY ||
          mb->nltype == NLTYPE_ANYCRLF ||
