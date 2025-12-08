@@ -7471,6 +7471,8 @@ for (;; pptr++)
         just adjust the length as if we had. Do some paranoid checks for
         potential integer overflow. */
 
+        // XXX replication
+
         if (lengthptr != NULL)
           {
           PCRE2_SIZE delta;
@@ -7484,6 +7486,7 @@ for (;; pptr++)
           }
         else for (int i = 0; i < replicate; i++)
           {
+          // XXX actual replication loop
           memcpy(code, previous, CU2BYTES(length_prevgroup));
           previous = code;
           code += length_prevgroup;
@@ -7520,6 +7523,8 @@ for (;; pptr++)
       converted into the more special varieties such as BRAPOS and SBRA.
       Originally, PCRE did not allow repetition of assertions, but now it does,
       for Perl compatibility. */
+
+      // XXX more replication
 
       case OP_ASSERT:
       case OP_ASSERT_NOT:
@@ -7667,6 +7672,7 @@ for (;; pptr++)
                 }
               for (uint32_t i = 1; i < repeat_min; i++)
                 {
+                // XXX actual replication loop
                 memcpy(code, previous, CU2BYTES(len));
                 code += len;
                 }
@@ -7723,6 +7729,7 @@ for (;; pptr++)
               PUTINC(code, 0, linkoffset);
               }
 
+            // XXX actual replication loop
             memcpy(code, previous, CU2BYTES(len));
             code += len;
             }
@@ -7928,6 +7935,7 @@ for (;; pptr++)
           else
             {
             code = oldcode;  /* Leave previous item in place */
+            // XXX urp, replication; but "small"
             if (repeat_max == 1) goto END_REPEAT;
             *code++ = OP_UPTO + repeat_type;
             PUT2INC(code, 0, repeat_max - 1);
