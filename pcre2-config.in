@@ -39,8 +39,13 @@ esac
 
 libS=
 case "@libdir@" in
-  /usr/lib|/usr/lib32|/usr/lib64|/usr/lib/*-gnu*|/lib|/lib32|/lib64|/lib/*-gnu*)
-  # system locations, no -L needed
+  # system locations on Linux, no -L needed
+  /usr/lib|/usr/lib32|/usr/lib64|/usr/lib/*-gnu*)
+  ;;
+  /lib|/lib32|/lib64|/lib/*-gnu*)
+  ;;
+  # system locations on AIX and Solaris, no -L needed
+  /usr/lib/64|/usr/lib/amd*|/usr/lib/sparc*|/usr/lib/ppc*)
   ;;
   *)
   libS="-L@libdir@"
