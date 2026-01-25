@@ -6249,6 +6249,7 @@ while (TRUE)
       repeat = GET2(cc, 1);
       if (repeat <= 0)
         {
+        repeat = 1;
         chars_end = chars;
         continue;
         }
