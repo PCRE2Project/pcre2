@@ -385,7 +385,35 @@ set(PCRE2_NEWLINE "LF" CACHE STRING "What to recognize as a newline (one of CR, 
 set(PCRE2_HEAP_MATCH_RECURSE OFF CACHE BOOL "Obsolete option: do not use")
 mark_as_advanced(PCRE2_HEAP_MATCH_RECURSE)
 
-set(PCRE2_SUPPORT_JIT OFF CACHE BOOL "Enable support for Just-in-time compiling.")
+set(PCRE2_SUPPORT_JIT "OFF" CACHE STRING "Enable support for Just-in-time compiling (OFF, ON, or AUTO).")
+set_property(CACHE PCRE2_SUPPORT_JIT PROPERTY STRINGS "OFF" "ON" "AUTO")
+
+# Handle JIT auto-detection
+if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
+  # Try to compile a test that checks if SLJIT supports this CPU
+  include(CheckCSourceCompiles)
+  set(_jit_test_source "
+    #define SLJIT_CONFIG_AUTO 1
+    #include \"${PROJECT_SOURCE_DIR}/deps/sljit/sljit_src/sljitConfigCPU.h\"
+    #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+    #error unsupported
+    #endif
+    int main(void) { return 0; }
+  ")
+  check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
+  if(SLJIT_SUPPORTS_THIS_CPU)
+    message(STATUS "JIT auto-detection: supported on this CPU")
+    set(PCRE2_SUPPORT_JIT_DETECTED ON)
+  else()
+    message(STATUS "JIT auto-detection: not supported on this CPU")
+    set(PCRE2_SUPPORT_JIT_DETECTED OFF)
+  endif()
+  unset(_jit_test_source)
+elseif(PCRE2_SUPPORT_JIT)
+  set(PCRE2_SUPPORT_JIT_DETECTED ON)
+else()
+  set(PCRE2_SUPPORT_JIT_DETECTED OFF)
+endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
   set(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL "Enable SELinux compatible execmem allocator in JIT (experimental).")
@@ -411,6 +439,9 @@ set(
 set(PCRE2_NEVER_BACKSLASH_C OFF CACHE BOOL "If ON, backslash-C (upper case C) is locked out.")
 
 set(PCRE2_SUPPORT_VALGRIND OFF CACHE BOOL "Enable Valgrind support.")
+
+option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support" OFF)
+option(PCRE2_DIFF_FUZZ_SUPPORT "Enable differential fuzzer support (requires fuzz support and JIT)" OFF)
 
 option(PCRE2_SHOW_REPORT "Show the final configuration report" ON)
 option(PCRE2_BUILD_PCRE2GREP "Build pcre2grep" ON)
@@ -567,7 +598,7 @@ if(PCRE2_SUPPORT_UNICODE)
   set(SUPPORT_UNICODE 1)
 endif()
 
-if(PCRE2_SUPPORT_JIT)
+if(PCRE2_SUPPORT_JIT_DETECTED)
   set(SUPPORT_JIT 1)
   if(UNIX)
     find_package(Threads REQUIRED)
@@ -594,6 +625,23 @@ endif()
 
 if(PCRE2_SUPPORT_VALGRIND)
   set(SUPPORT_VALGRIND 1)
+endif()
+
+# Fuzz support validation
+if(PCRE2_FUZZ_SUPPORT)
+  if(NOT PCRE2_BUILD_PCRE2_8)
+    message(FATAL_ERROR "Fuzzer support requires the 8-bit library (PCRE2_BUILD_PCRE2_8)")
+  endif()
+endif()
+
+if(PCRE2_DIFF_FUZZ_SUPPORT)
+  if(NOT PCRE2_FUZZ_SUPPORT)
+    message(FATAL_ERROR "Differential fuzzing support requires fuzzing support (PCRE2_FUZZ_SUPPORT)")
+  endif()
+  if(NOT PCRE2_SUPPORT_JIT_DETECTED)
+    message(FATAL_ERROR "Differential fuzzing support requires JIT support (PCRE2_SUPPORT_JIT)")
+  endif()
+  set(SUPPORT_DIFF_FUZZ 1)
 endif()
 
 if(PCRE2_DISABLE_PERCENT_ZT)
@@ -1275,7 +1323,7 @@ if(PCRE2_BUILD_TESTS)
     target_link_libraries(pcre2posix_test pcre2-posix pcre2-8)
   endif()
 
-  if(PCRE2_SUPPORT_JIT)
+  if(PCRE2_SUPPORT_JIT_DETECTED)
     add_executable(pcre2_jit_test src/pcre2_jit_test.c)
     set(PCRE2_JIT_TEST_LIBS)
     if(PCRE2_BUILD_PCRE2_8)
@@ -1288,6 +1336,25 @@ if(PCRE2_BUILD_TESTS)
       list(APPEND PCRE2_JIT_TEST_LIBS pcre2-32)
     endif()
     target_link_libraries(pcre2_jit_test ${PCRE2_JIT_TEST_LIBS})
+  endif()
+
+  # Fuzzer support: build pcre2fuzzcheck binaries
+  if(PCRE2_FUZZ_SUPPORT)
+    if(PCRE2_BUILD_PCRE2_8)
+      add_executable(pcre2fuzzcheck src/pcre2_fuzzsupport.c)
+      target_compile_definitions(pcre2fuzzcheck PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=8)
+      target_link_libraries(pcre2fuzzcheck pcre2-8)
+    endif()
+    if(PCRE2_BUILD_PCRE2_16)
+      add_executable(pcre2fuzzcheck-16 src/pcre2_fuzzsupport.c)
+      target_compile_definitions(pcre2fuzzcheck-16 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=16)
+      target_link_libraries(pcre2fuzzcheck-16 pcre2-16)
+    endif()
+    if(PCRE2_BUILD_PCRE2_32)
+      add_executable(pcre2fuzzcheck-32 src/pcre2_fuzzsupport.c)
+      target_compile_definitions(pcre2fuzzcheck-32 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=32)
+      target_link_libraries(pcre2fuzzcheck-32 pcre2-32)
+    endif()
   endif()
 
   # =================================================
@@ -1535,7 +1602,11 @@ if(PCRE2_SHOW_REPORT)
   message(STATUS "  Build 16 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_16}")
   message(STATUS "  Build 32 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
   message(STATUS "  Include debugging code ............ : ${PCRE2_DEBUG}")
-  message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
+  if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
+    message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT} (detected: ${PCRE2_SUPPORT_JIT_DETECTED})")
+  else()
+    message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
+  endif()
   message(STATUS "  Use SELinux allocator in JIT ...... : ${PCRE2_SUPPORT_JIT_SEALLOC}")
   message(STATUS "  Enable Unicode support ............ : ${PCRE2_SUPPORT_UNICODE}")
   message(STATUS "  Newline char/sequence ............. : ${PCRE2_NEWLINE}")
@@ -1597,6 +1668,8 @@ if(PCRE2_SHOW_REPORT)
     message(STATUS "  Link pcre2test with libreadline ... : Library not found")
   endif()
   message(STATUS "  Enable Valgrind support ........... : ${PCRE2_SUPPORT_VALGRIND}")
+  message(STATUS "  Fuzzer support .................... : ${PCRE2_FUZZ_SUPPORT}")
+  message(STATUS "  Differential fuzzer support ....... : ${PCRE2_DIFF_FUZZ_SUPPORT}")
   if(PCRE2_DISABLE_PERCENT_ZT)
     message(STATUS "  Use %zu and %td ................... : OFF")
   else()

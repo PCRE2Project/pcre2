@@ -31,6 +31,7 @@
 #cmakedefine SUPPORT_PCRE2GREP_CALLOUT_FORK 1
 #cmakedefine SUPPORT_UNICODE 1
 #cmakedefine SUPPORT_VALGRIND 1
+#cmakedefine SUPPORT_DIFF_FUZZ 1
 
 #cmakedefine BSR_ANYCRLF 1
 #cmakedefine EBCDIC 1
