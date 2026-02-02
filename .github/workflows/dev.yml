@@ -53,7 +53,7 @@ jobs:
           sudo apt-get -qq install -y libedit-dev
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -80,7 +80,7 @@ jobs:
         opt: ["-O0", "-O2"]
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -111,7 +111,7 @@ jobs:
           sudo apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libedit-dev
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -129,7 +129,7 @@ jobs:
           echo "Latest CMake version is $CMAKE_VER"
 
       - name: Cache CMake
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           key: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64
           path: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64.tar.gz
@@ -217,7 +217,7 @@ jobs:
           apt-get -qq install -y git build-essential autoconf automake libtool
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -254,7 +254,7 @@ jobs:
           yum -q update -y glibc-common
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -292,7 +292,7 @@ jobs:
           apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libreadline-dev
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -371,12 +371,12 @@ jobs:
           sudo apt-get -qq install -y language-pack-fr ninja-build zlib1g-dev libbz2-dev libreadline-dev
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
       - name: Cache CMake
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
           path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
@@ -412,7 +412,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'bat')
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -432,7 +432,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'pterodactyl')
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -458,7 +458,7 @@ jobs:
           sudo apt-get -qq install -y valgrind
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -475,7 +475,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'camel')
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: yes
 
@@ -497,7 +497,7 @@ jobs:
       CFLAGS_UNITY: "-Wno-shadow"
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -532,7 +532,7 @@ jobs:
         run: git config --global core.autocrlf input
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -591,7 +591,7 @@ jobs:
       github.event_name == 'push'
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -638,7 +638,7 @@ jobs:
           sudo snap install zig --classic --beta
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
@@ -662,7 +662,7 @@ jobs:
       github.event_name == 'push'
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
 
