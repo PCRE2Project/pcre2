@@ -593,7 +593,7 @@ static char *
 parse_grep_colors(const char *gc)
 {
 static char seq[16];
-char *col;
+const char *col;
 uint32_t len;
 if (gc == NULL) return NULL;
 col = strstr(gc, "ms=");
@@ -1309,7 +1309,7 @@ if (*endptr != 0)   /* Error */
   {
   if (longop)
     {
-    char *equals = strchr(op->long_name, '=');
+    const char *equals = strchr(op->long_name, '=');
     int nlen = (equals == NULL)? (int)strlen(op->long_name) :
       (int)(equals - op->long_name);
     fprintf(stderr, "pcre2grep: Malformed number \"%s\" after --%.*s\n",
@@ -4007,8 +4007,8 @@ for (i = 1; i < argc; i++)
 
     for (op = optionlist; op->one_char != 0; op++)
       {
-      char *opbra = strchr(op->long_name, '(');
-      char *equals = strchr(op->long_name, '=');
+      const char *opbra = strchr(op->long_name, '(');
+      const char *equals = strchr(op->long_name, '=');
 
       /* Handle options with only one spelling of the name */
 
