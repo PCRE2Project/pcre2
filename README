@@ -519,13 +519,14 @@ system. The following are installed (file names are all relative to the
     *.html (lots more pages, hyperlinked from index.html)
 
   Text file documentation (share/doc/pcre2):
-    AUTHORS
+    AUTHORS.md
     COPYING
     ChangeLog
-    LICENCE
+    LICENCE.md
     NEWS
     README
-    SECURITY
+    SECURITY.md
+    SUPPORT-LIFECYCLE.md
     pcre2.txt         (a concatenation of the man(3) pages)
     pcre2test.txt     the pcre2test man page
     pcre2grep.txt     the pcre2grep man page
@@ -920,6 +921,7 @@ The distribution should contain the files listed below.
   LICENCE.md               conditions for the use of PCRE2
   COPYING                  the same, using GNU's standard name
   SECURITY.md              information on reporting vulnerabilities
+  SUPPORT-LIFECYCLE.md     information on the support policy
   Makefile.in              ) template for Unix Makefile, which is built by
                            )   "configure"
   Makefile.am              ) the automake input that was used to create
