@@ -331,6 +331,7 @@ pcre2_compile_context *compile_context = NULL;
 pcre2_match_context *match_context = NULL;
 size_t match_size;
 int dfa_workspace[DFA_WORKSPACE_COUNT];
+uint32_t callout_count;
 
 if (size < sizeof(random_options)) return -1;
 
@@ -492,7 +493,6 @@ likewise do the match with and without the options. */
 
 for (int i = 0; i < 2; i++)
   {
-  uint32_t callout_count;
   int errorcode;
 #ifdef SUPPORT_JIT
   int errorcode_jit;
