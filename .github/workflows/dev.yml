@@ -26,9 +26,9 @@ on:
         - zebrilus
         - bee
   push:
-    branches: [ master, "release/**" ]
+    branches: [ main, "release/**" ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 permissions:
   contents: read
