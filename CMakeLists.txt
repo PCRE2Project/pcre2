@@ -178,14 +178,19 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 pcre2_use_system_extensions()
 
 cmake_push_check_state(RESET)
-# Somewhat awkward code to propagate the _GNU_SOURCE definition (added to
-# COMPILE_DEFINITIONS by pcre2_use_system_extensions()).
+# Propagate the _GNU_SOURCE definition (added to COMPILE_DEFINITIONS by
+# pcre2_use_system_extensions()) so that these check_symbol_exists() calls
+# can find symbols only exposed with _GNU_SOURCE.
+# We only pass through known plain-text definitions (like _GNU_SOURCE) and
+# skip anything else (e.g. generator expressions inherited from a parent
+# project), because try_compile() cannot handle generator expressions.
 get_directory_property(_pcre2_compile_definitions COMPILE_DEFINITIONS)
 if(DEFINED _pcre2_compile_definitions)
   set(CMAKE_REQUIRED_DEFINITIONS "")
-  foreach(_def IN LISTS _pcre2_compile_definitions)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D${_def}")
-  endforeach()
+  list(FIND _pcre2_compile_definitions "_GNU_SOURCE" _idx)
+  if(_idx GREATER -1)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
+  endif()
 endif()
 
 check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP) # glibc 2.7
