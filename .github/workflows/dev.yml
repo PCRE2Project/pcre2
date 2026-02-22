@@ -108,7 +108,8 @@ jobs:
         run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
           sudo apt-get -qq update
-          sudo apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libedit-dev
+          sudo apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libedit-dev ninja-build
+
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -166,8 +167,8 @@ jobs:
           for useStaticLibs in ON OFF; do
             echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
             rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; make)
+            cmake -GNinja $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
+            (cd build; ninja)
             ./build/test_executable
             ldd ./build/test_executable
             if [ $useStaticLibs = ON ]; then
@@ -190,8 +191,8 @@ jobs:
             shared=`echo $buildLibs | cut -d';' -f2`
             echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
             rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; make)
+            cmake -GNinja $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
+            (cd build; ninja)
             ./build/test_executable
             ldd ./build/test_executable
             if [ $static = ON ]; then
