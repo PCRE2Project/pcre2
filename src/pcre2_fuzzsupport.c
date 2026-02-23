@@ -273,17 +273,6 @@ abort();
 #endif  /* SUPPORT_DIFF_FUZZ */
 #endif  /* SUPPORT_JIT */
 
-/* This is the callout function. Its only purpose is to halt matching if there
-are more than 100 callouts, as one way of stopping too much time being spent on
-fruitless matches. The callout data is a pointer to the counter. */
-
-static int callout_function(pcre2_callout_block *cb, void *callout_data)
-{
-(void)cb;  /* Avoid unused parameter warning */
-*((uint32_t *)callout_data) += 1;
-return (*((uint32_t *)callout_data) > 100)? PCRE2_ERROR_CALLOUT : 0;
-}
-
 /* Putting in this apparently unnecessary prototype prevents gcc from giving a
 "no previous prototype" warning when compiling at high warning level. */
 
@@ -492,7 +481,6 @@ likewise do the match with and without the options. */
 
 for (int i = 0; i < 2; i++)
   {
-  uint32_t callout_count;
   int errorcode;
 #ifdef SUPPORT_JIT
   int errorcode_jit;
@@ -576,7 +564,6 @@ for (int i = 0; i < 2; i++)
         }
       (void)pcre2_set_match_limit(match_context, 100);
       (void)pcre2_set_depth_limit(match_context, 100);
-      (void)pcre2_set_callout(match_context, callout_function, &callout_count);
       }
 
     /* Match twice, with and without options. */
@@ -590,7 +577,6 @@ for (int i = 0; i < 2; i++)
       print_match_options(stdout, match_options);
 #endif
 
-      callout_count = 0;
       errorcode = pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0,
         match_options, match_data, match_context);
 
@@ -608,7 +594,6 @@ with the interpreter. */
 #ifdef STANDALONE
         printf("Matching with JIT\n");
 #endif
-        callout_count = 0;
         errorcode_jit = pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0,
           match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
@@ -631,8 +616,9 @@ with the interpreter. */
         if (errorcode_jit != errorcode)
           {
           if (!(errorcode < 0 && errorcode_jit < 0) &&
-                errorcode != PCRE2_ERROR_MATCHLIMIT && errorcode != PCRE2_ERROR_CALLOUT &&
-                errorcode_jit != PCRE2_ERROR_MATCHLIMIT && errorcode_jit != PCRE2_ERROR_JIT_STACKLIMIT && errorcode_jit != PCRE2_ERROR_CALLOUT)
+                errorcode != PCRE2_ERROR_MATCHLIMIT &&
+                errorcode_jit != PCRE2_ERROR_MATCHLIMIT &&
+                errorcode_jit != PCRE2_ERROR_JIT_STACKLIMIT)
             {
             describe_failure("match errorcode comparison", wdata, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit);
             }
@@ -711,7 +697,6 @@ with the interpreter. */
         ((match_options & PCRE2_PARTIAL_SOFT) != 0)? " partial_soft" : "");
 #endif
 
-      callout_count = 0;
       errorcode = pcre2_dfa_match(code, (PCRE2_SPTR)wdata,
         (PCRE2_SIZE)match_size, 0, match_options, match_data,
         match_context, dfa_workspace, DFA_WORKSPACE_COUNT);
