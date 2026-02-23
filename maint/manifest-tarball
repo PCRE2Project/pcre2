@@ -307,10 +307,10 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config-cmake.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config.h.generic
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config.h.in
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-16.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-32.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-8.sym
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-posix.sym
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-16.sym.in
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-32.sym.in
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-8.sym.in
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-posix.sym.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.generic
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_auto_possess.c

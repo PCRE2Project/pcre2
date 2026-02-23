@@ -255,7 +255,7 @@ txt_files=(
   m4/pcre2_zos.m4
   doc/p*
   doc/html/*
-  src/libpcre2-*.sym
+  src/libpcre2-*.sym.in
   )
 
 crlf_files=(

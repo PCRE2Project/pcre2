@@ -897,11 +897,11 @@ pkgconfig_DATA += libpcre2-32.pc
 endif
 
 
-# Symbol version files for use with GNU and Sun ld.
+# Symbol version template files for use with GNU and Sun ld.
 
 EXTRA_DIST += \
-  src/libpcre2-8.sym src/libpcre2-16.sym src/libpcre2-32.sym \
-  src/libpcre2-posix.sym
+  src/libpcre2-8.sym.in src/libpcre2-16.sym.in src/libpcre2-32.sym.in \
+  src/libpcre2-posix.sym.in
 
 
 # gcov/lcov code coverage reporting

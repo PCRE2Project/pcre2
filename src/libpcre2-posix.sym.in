@@ -8,7 +8,6 @@ PCRE2_10.47 {
   local:
     _fini;
     _init;
-    _lib_version;
-};
+@PCRE2_EXTRA_LOCAL_SYMS@};
 
 # PCRE2_10.48 {} PCRE2_10.47;

@@ -89,6 +89,26 @@ PCRE2_VISIBILITY
 
 AX_CHECK_VSCRIPT
 
+# On some platforms (e.g. Solaris SPARC), _lib_version is a symbol provided by
+# a platform library. When using linker version scripts, all symbols must have
+# a defined version, so _lib_version must be listed in the script. However, on
+# platforms that do not provide this symbol (e.g. FreeBSD, non-SPARC Solaris),
+# the linker will error out if it is listed. Detect whether it is available.
+
+AS_IF([test x$ax_check_vscript_flag != x],
+  [AC_MSG_CHECKING([whether _lib_version symbol is provided by the platform])
+   AC_LINK_IFELSE(
+     [AC_LANG_PROGRAM([extern int _lib_version;], [return _lib_version;])],
+     [pcre2_have_lib_version=yes],
+     [pcre2_have_lib_version=no])
+   AC_MSG_RESULT([$pcre2_have_lib_version])
+   AS_IF([test "x$pcre2_have_lib_version" = xyes],
+     [PCRE2_EXTRA_LOCAL_SYMS="    _lib_version;"],
+     [PCRE2_EXTRA_LOCAL_SYMS=""])
+  ],
+  [PCRE2_EXTRA_LOCAL_SYMS=""])
+AC_SUBST([PCRE2_EXTRA_LOCAL_SYMS])
+
 # Check for Clang __attribute__((uninitialized)) feature
 
 AC_MSG_CHECKING([for __attribute__((uninitialized))])
@@ -1045,16 +1065,16 @@ EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
 
 if test x$ax_check_vscript_flag != x ; then
   EXTRA_LIBPCRE2_8_LDFLAGS="$EXTRA_LIBPCRE2_8_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-8.sym"
+    -Wl,$ax_check_vscript_flag,\$(builddir)/src/libpcre2-8.sym"
 
   EXTRA_LIBPCRE2_16_LDFLAGS="$EXTRA_LIBPCRE2_16_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-16.sym"
+    -Wl,$ax_check_vscript_flag,\$(builddir)/src/libpcre2-16.sym"
 
   EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-32.sym"
+    -Wl,$ax_check_vscript_flag,\$(builddir)/src/libpcre2-32.sym"
 
   EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-posix.sym"
+    -Wl,$ax_check_vscript_flag,\$(builddir)/src/libpcre2-posix.sym"
 fi
 
 AC_SUBST(EXTRA_LIBPCRE2_8_LDFLAGS)
@@ -1208,6 +1228,10 @@ AC_CONFIG_FILES(
 	libpcre2-posix.pc
 	pcre2-config
 	src/pcre2.h
+	src/libpcre2-8.sym
+	src/libpcre2-16.sym
+	src/libpcre2-32.sym
+	src/libpcre2-posix.sym
 )
 
 # Make the generated script files executable.
