@@ -274,18 +274,7 @@ check_c_source_compiles(
 
 # Detect support for linker scripts.
 
-pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG)
-
-# On some platforms (e.g. Solaris SPARC), _lib_version is a symbol provided by
-# a platform library. When using linker version scripts, all symbols must have
-# a defined version, so _lib_version must be listed in the script. However, on
-# platforms that do not provide this symbol (e.g. FreeBSD, non-SPARC Solaris),
-# the linker will error out if it is listed. Detect whether it is available.
-
-check_c_source_compiles(
-  "extern int _lib_version; int main(void) { return _lib_version; }"
-  HAVE_PLATFORM_LIB_VERSION
-)
+pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG HAVE_VSCRIPT_NO_STAR)
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
 # code was written by PH, trying to imitate the logic from the autotools
@@ -779,10 +768,10 @@ configure_file(src/pcre2posix.h ${PROJECT_BINARY_DIR}/interface/pcre2posix.h COP
 # Configure the version script files.
 
 if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-  if(HAVE_PLATFORM_LIB_VERSION)
-    set(PCRE2_EXTRA_LOCAL_SYMS "    _lib_version;\n")
-  else()
+  if(HAVE_VSCRIPT_NO_STAR)
     set(PCRE2_EXTRA_LOCAL_SYMS "")
+  else()
+    set(PCRE2_EXTRA_LOCAL_SYMS "  local: *;")
   endif()
 
   configure_file(src/libpcre2-8.sym.in ${PROJECT_BINARY_DIR}/src/libpcre2-8.sym @ONLY)

@@ -278,8 +278,8 @@ EXTRA_DIST =
 # These files contain additional m4 macros that are used by autoconf.
 
 EXTRA_DIST += \
-  m4/ax_check_vscript.m4 \
   m4/ax_pthread.m4 \
+  m4/pcre2_check_vscript.m4 \
   m4/pcre2_visibility.m4 \
   m4/pcre2_zos.m4
 

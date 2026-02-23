@@ -36,6 +36,7 @@ config.guess
 config.log
 config.status
 config.sub
+config.lt
 configure
 depcomp
 install-sh

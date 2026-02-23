@@ -291,13 +291,13 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/libpcre2-posix.pc.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/ltmain.sh
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/m4
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ax_check_vscript.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ax_pthread.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/libtool.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ltoptions.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ltsugar.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/ltversion.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/lt~obsolete.m4
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_check_vscript.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_visibility.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_zos.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/missing
