@@ -265,6 +265,8 @@ Join the community by reporting issues or asking questions via [GitHub issues](h
 
 Contributions ranging from bug fixes to feature requests are welcome, and can be made via GitHub pull requests.
 
+Our support lifecycle is to backport security and high-severity bug fixes for at least five years. See [SUPPORT-LIFECYCLE](./SUPPORT-LIFECYCLE.md) for how to package older versions of PCRE2.
+
 Please review our [SECURITY](./SECURITY.md) policy for information on reporting security issues.
 
 Release announcements will be made via the [pcre2-dev@googlegroups.com](https://groups.google.com/g/pcre2-dev) mailing list, where you can also start discussions about PCRE2 issues and development. You can browse the [list archives](https://groups.google.com/g/pcre2-dev).

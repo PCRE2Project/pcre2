@@ -239,6 +239,7 @@ txt_files=(
   RunGrepTest
   RunTest
   SECURITY.md
+  SUPPORT-LIFECYCLE.md
   build.zig
   configure.ac
   libpcre2-8.pc.in

@@ -260,6 +260,24 @@ new release.
     -- ':!doc/*.txt' ':!doc/html'
   ```
 
+* Inspect the ChangeLog and Git log for any changes eligible for backporting to
+  older PCRE2 releases. Any crashes, memory errors, or serious match-correctness
+  errors may be backported.
+
+  - Check that a CVE has been assigned, if there are security implications.
+
+  - Examine the change and determine the earliest version of PCRE2 it applies
+    to.
+
+  - Extract the patch file (with a test case) in the patches/ directory.
+
+  - Ensure the patch applies cleanly, and the test passes, for each old version
+    of PCRE2 where we recommend the patch to be applied.
+
+  - Include the patch in the tarball in Makefile.am.
+
+  - Announce the patch in SUPPORT-LIFECYCLE.md.
+
 * Update the library version numbers in configure.ac according to the rules
   given below.
 
