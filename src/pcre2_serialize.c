@@ -206,7 +206,15 @@ for (i = 0; i < number_of_codes; i++)
   memcpy(&blocksize, src_bytes + offsetof(pcre2_real_code, blocksize),
     sizeof(CODE_BLOCKSIZE_TYPE));
   if (blocksize <= sizeof(pcre2_real_code))
+    {
+    memctl->free(tables, memctl->memory_data);
+    for (j = 0; j < i; j++)
+      {
+      memctl->free(codes[j], memctl->memory_data);
+      codes[j] = NULL;
+      }
     return PCRE2_ERROR_BADSERIALIZEDDATA;
+    }
 
   /* The allocator provided by gcontext replaces the original one. */
 
