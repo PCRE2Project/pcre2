@@ -6297,6 +6297,68 @@ rc = pcre2_substitute(subs_other_code, substitute_subject,
   NULL, 0, replace_buf, &sizeval);
 ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
 
+/* -------------- pcre2_serialize_decode: three goto cleanup branches -------- */
+
+{
+  pcre2_code *serialize_code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED,
+    0, &errorcode, &erroroffset, NULL);
+  uint8_t *serialized_bytes = NULL;
+  PCRE2_SIZE serialized_size = 0;
+  pcre2_code *decode_codes[1] = { NULL };
+
+  ASSERT(serialize_code != NULL, "serialize setup");
+  rc = pcre2_serialize_encode((const pcre2_code **)&serialize_code, 1,
+    &serialized_bytes, &serialized_size, NULL);
+  pcre2_code_free(serialize_code);
+  ASSERT(rc == 1 && serialized_bytes != NULL, "serialize setup");
+
+  /* goto 1: blocksize <= sizeof(pcre2_real_code) */
+  {
+    size_t blocksize_offset = sizeof(pcre2_serialized_data) + TABLES_LENGTH +
+      offsetof(pcre2_real_code, blocksize);
+    uint8_t saved_blocksize[sizeof(PCRE2_SIZE)];
+    memcpy(saved_blocksize, serialized_bytes + blocksize_offset,
+      sizeof(saved_blocksize));
+    memset(serialized_bytes + blocksize_offset, 0, sizeof(PCRE2_SIZE));
+
+    rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes, NULL);
+    ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA &&
+      decode_codes[0] == NULL, "pcre2_serialize_decode(bad blocksize)");
+
+    memcpy(serialized_bytes + blocksize_offset, saved_blocksize,
+      sizeof(saved_blocksize));
+  }
+
+  /* goto 2: dst_re malloc failure */
+  mallocs_until_failure = 2;
+  test_gen_context = pcre2_general_context_create(&my_malloc, &my_free, NULL);
+  ASSERT(test_gen_context != NULL, "general_context for serialize test");
+  rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes,
+    test_gen_context);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && decode_codes[0] == NULL,
+    "pcre2_serialize_decode(malloc failure)");
+  mallocs_until_failure = INT_MAX;
+  pcre2_general_context_free(test_gen_context);
+  test_gen_context = NULL;
+
+  /* goto 3: magic_number / name_entry_size / name_count validation */
+  {
+    size_t off = sizeof(pcre2_serialized_data) + TABLES_LENGTH +
+      offsetof(pcre2_real_code, magic_number);
+    uint8_t saved[4];
+    memcpy(saved, serialized_bytes + off, 4);
+    memset(serialized_bytes + off, 0, 4);
+
+    decode_codes[0] = NULL;
+    rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes, NULL);
+    memcpy(serialized_bytes + off, saved, 4);
+    ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA &&
+      decode_codes[0] == NULL, "pcre2_serialize_decode(goto 3)");
+  }
+
+  pcre2_serialize_free(serialized_bytes);
+}
+
 /* ------------------------------------------------------------------------- */
 
 #undef ASSERT
