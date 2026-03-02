@@ -6331,15 +6331,17 @@ ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
 
   /* goto 2: dst_re malloc failure */
   mallocs_until_failure = 2;
-  test_gen_context = pcre2_general_context_create(&my_malloc, &my_free, NULL);
-  ASSERT(test_gen_context != NULL, "general_context for serialize test");
-  rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes,
-    test_gen_context);
-  ASSERT(rc == PCRE2_ERROR_NOMEMORY && decode_codes[0] == NULL,
-    "pcre2_serialize_decode(malloc failure)");
-  mallocs_until_failure = INT_MAX;
-  pcre2_general_context_free(test_gen_context);
-  test_gen_context = NULL;
+  {
+    pcre2_general_context *serialize_test_context =
+      pcre2_general_context_create(&my_malloc, &my_free, NULL);
+    ASSERT(serialize_test_context != NULL, "general_context for serialize test");
+    rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes,
+      serialize_test_context);
+    ASSERT(rc == PCRE2_ERROR_NOMEMORY && decode_codes[0] == NULL,
+      "pcre2_serialize_decode(malloc failure)");
+    mallocs_until_failure = INT_MAX;
+    pcre2_general_context_free(serialize_test_context);
+  }
 
   /* goto 3: magic_number / name_entry_size / name_count validation */
   {
