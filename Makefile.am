@@ -278,8 +278,8 @@ EXTRA_DIST =
 # These files contain additional m4 macros that are used by autoconf.
 
 EXTRA_DIST += \
-  m4/ax_check_vscript.m4 \
   m4/ax_pthread.m4 \
+  m4/pcre2_check_vscript.m4 \
   m4/pcre2_visibility.m4 \
   m4/pcre2_zos.m4
 
@@ -897,11 +897,11 @@ pkgconfig_DATA += libpcre2-32.pc
 endif
 
 
-# Symbol version files for use with GNU and Sun ld.
+# Symbol version template files for use with GNU and Sun ld.
 
 EXTRA_DIST += \
-  src/libpcre2-8.sym src/libpcre2-16.sym src/libpcre2-32.sym \
-  src/libpcre2-posix.sym
+  src/libpcre2-8.sym.in src/libpcre2-16.sym.in src/libpcre2-32.sym.in \
+  src/libpcre2-posix.sym.in
 
 
 # gcov/lcov code coverage reporting

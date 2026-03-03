@@ -962,10 +962,10 @@ The distribution should contain the files listed below.
   testdata/testoutput*     expected test results
   testdata/grep*           input and output for pcre2grep tests
   testdata/*               other supporting test files
-  src/libpcre2-8.sym       )
-  src/libpcre2-16.sym      ) symbol version scripts for the GNU and Sun linkers
-  src/libpcre2-32.sym      )
-  src/libpcre2-posix.sym   )
+  src/libpcre2-8.sym.in     )
+  src/libpcre2-16.sym.in    ) symbol version script templates for the
+  src/libpcre2-32.sym.in    ) GNU, BSD and Sun linkers
+  src/libpcre2-posix.sym.in )
 
 (D) Auxiliary files for CMake support
 
