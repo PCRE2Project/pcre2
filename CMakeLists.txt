@@ -178,14 +178,19 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 pcre2_use_system_extensions()
 
 cmake_push_check_state(RESET)
-# Somewhat awkward code to propagate the _GNU_SOURCE definition (added to
-# COMPILE_DEFINITIONS by pcre2_use_system_extensions()).
+# Propagate the _GNU_SOURCE definition (added to COMPILE_DEFINITIONS by
+# pcre2_use_system_extensions()) so that these check_symbol_exists() calls
+# can find symbols only exposed with _GNU_SOURCE.
+# We only pass through known plain-text definitions (like _GNU_SOURCE) and
+# skip anything else (e.g. generator expressions inherited from a parent
+# project), because try_compile() cannot handle generator expressions.
 get_directory_property(_pcre2_compile_definitions COMPILE_DEFINITIONS)
 if(DEFINED _pcre2_compile_definitions)
   set(CMAKE_REQUIRED_DEFINITIONS "")
-  foreach(_def IN LISTS _pcre2_compile_definitions)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D${_def}")
-  endforeach()
+  list(FIND _pcre2_compile_definitions "_GNU_SOURCE" _idx)
+  if(_idx GREATER -1)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
+  endif()
 endif()
 
 check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP) # glibc 2.7
@@ -269,7 +274,7 @@ check_c_source_compiles(
 
 # Detect support for linker scripts.
 
-pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG)
+pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG HAVE_VSCRIPT_NO_STAR)
 
 # Check whether Intel CET is enabled, and if so, adjust compiler flags. This
 # code was written by PH, trying to imitate the logic from the autotools
@@ -697,10 +702,6 @@ endif()
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 
-# Output files
-
-configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/src/config.h @ONLY)
-
 # Parse version numbers and date out of configure.ac
 
 file(
@@ -757,13 +758,26 @@ parse_lib_version(LIBPCRE2_8)
 parse_lib_version(LIBPCRE2_16)
 parse_lib_version(LIBPCRE2_32)
 
+# Output files
+
+configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/src/config.h @ONLY)
+
 configure_file(src/pcre2.h.in ${PROJECT_BINARY_DIR}/interface/pcre2.h @ONLY)
 configure_file(src/pcre2posix.h ${PROJECT_BINARY_DIR}/interface/pcre2posix.h COPYONLY)
 
-# Make sure to not link debug libs
-# against release libs and vice versa
-if(WIN32)
-  set(CMAKE_DEBUG_POSTFIX "d")
+# Configure the version script files.
+
+if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
+  if(HAVE_VSCRIPT_NO_STAR)
+    set(PCRE2_EXTRA_LOCAL_SYMS "")
+  else()
+    set(PCRE2_EXTRA_LOCAL_SYMS "  local: *;")
+  endif()
+
+  configure_file(src/libpcre2-8.sym.in ${PROJECT_BINARY_DIR}/src/libpcre2-8.sym @ONLY)
+  configure_file(src/libpcre2-16.sym.in ${PROJECT_BINARY_DIR}/src/libpcre2-16.sym @ONLY)
+  configure_file(src/libpcre2-32.sym.in ${PROJECT_BINARY_DIR}/src/libpcre2-32.sym @ONLY)
+  configure_file(src/libpcre2-posix.sym.in ${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym @ONLY)
 endif()
 
 # Character table generation
@@ -888,6 +902,11 @@ if(MSVC)
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
+# Make sure to not link debug libs against release libs and vice versa.
+if(WIN32)
+  set(CMAKE_DEBUG_POSTFIX "d")
+endif()
+
 set(TARGETS)
 set(DLL_PDB_FILES)
 set(DLL_PDB_DEBUG_FILES)
@@ -964,8 +983,8 @@ if(PCRE2_BUILD_PCRE2_8)
       target_link_libraries(pcre2-8-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
-      set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-8.sym)
+      target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
+      set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
     endif()
     list(APPEND TARGETS pcre2-8-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8.pdb)
@@ -987,8 +1006,8 @@ if(PCRE2_BUILD_PCRE2_8)
         OUTPUT_NAME pcre2-posix
     )
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
-      set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-posix.sym)
+      target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
+      set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
     endif()
     target_compile_definitions(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
     target_link_libraries(pcre2-posix-shared pcre2-8-shared)
@@ -1069,8 +1088,8 @@ if(PCRE2_BUILD_PCRE2_16)
       target_link_libraries(pcre2-16-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
-      set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-16.sym)
+      target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
+      set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
     endif()
     list(APPEND TARGETS pcre2-16-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16.pdb)
@@ -1147,8 +1166,8 @@ if(PCRE2_BUILD_PCRE2_32)
       target_link_libraries(pcre2-32-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
-      set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_SOURCE_DIR}/src/libpcre2-32.sym)
+      target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
+      set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
     endif()
     list(APPEND TARGETS pcre2-32-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32.pdb)

@@ -36,6 +36,7 @@ config.guess
 config.log
 config.status
 config.sub
+config.lt
 configure
 depcomp
 install-sh
@@ -106,6 +107,10 @@ src/config.h
 src/config.h.in
 src/pcre2.h
 src/pcre2_chartables.c
+src/libpcre2-8.sym
+src/libpcre2-16.sym
+src/libpcre2-32.sym
+src/libpcre2-posix.sym
 src/stamp-h1
 
 /bazel-*

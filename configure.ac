@@ -76,8 +76,12 @@ AC_TYPE_INT64_T
 PCRE2_ZOS_FIXES
 
 AC_PROG_INSTALL
-LT_INIT([win32-dll])
 AC_PROG_LN_S
+
+# As well as LT_INIT, we use LT_OUTPUT so that PCRE2_CHECK_VSCRIPT can invoke
+# libtool to test version scripts correctly.
+LT_INIT([win32-dll])
+LT_OUTPUT
 
 AC_SYS_LARGEFILE
 
@@ -87,7 +91,7 @@ PCRE2_VISIBILITY
 
 # Check for the availability of -Wl,--version-script (or -Wl,-M on Solaris)
 
-AX_CHECK_VSCRIPT
+PCRE2_CHECK_VSCRIPT
 
 # Check for Clang __attribute__((uninitialized)) feature
 
@@ -1043,18 +1047,18 @@ EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
 
 # Append each library's version script, if the platform supports it.
 
-if test x$ax_check_vscript_flag != x ; then
+if test x$pcre2_check_vscript_flag != x ; then
   EXTRA_LIBPCRE2_8_LDFLAGS="$EXTRA_LIBPCRE2_8_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-8.sym"
+    -Wl,$pcre2_check_vscript_flag,\$(builddir)/src/libpcre2-8.sym"
 
   EXTRA_LIBPCRE2_16_LDFLAGS="$EXTRA_LIBPCRE2_16_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-16.sym"
+    -Wl,$pcre2_check_vscript_flag,\$(builddir)/src/libpcre2-16.sym"
 
   EXTRA_LIBPCRE2_32_LDFLAGS="$EXTRA_LIBPCRE2_32_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-32.sym"
+    -Wl,$pcre2_check_vscript_flag,\$(builddir)/src/libpcre2-32.sym"
 
   EXTRA_LIBPCRE2_POSIX_LDFLAGS="$EXTRA_LIBPCRE2_POSIX_LDFLAGS \
-    -Wl,$ax_check_vscript_flag,\$(srcdir)/src/libpcre2-posix.sym"
+    -Wl,$pcre2_check_vscript_flag,\$(builddir)/src/libpcre2-posix.sym"
 fi
 
 AC_SUBST(EXTRA_LIBPCRE2_8_LDFLAGS)
@@ -1198,6 +1202,15 @@ AC_LANG_POP([C])
 # Pass empty LIB_POSTFIX to *.pc files and pcre2-config here.
 AC_SUBST(LIB_POSTFIX)
 
+# Set the extra "local: *" symbol section conditionally for Solaris (effectively).
+
+if test x$pcre2_check_vscript_flag != x && test x$pcre2_check_vscript_no_star = xno; then
+  PCRE2_EXTRA_LOCAL_SYMS="  local: *;"
+else
+  PCRE2_EXTRA_LOCAL_SYMS=""
+fi
+AC_SUBST([PCRE2_EXTRA_LOCAL_SYMS])
+
 # Produce these files, in addition to config.h.
 
 AC_CONFIG_FILES(
@@ -1208,6 +1221,10 @@ AC_CONFIG_FILES(
 	libpcre2-posix.pc
 	pcre2-config
 	src/pcre2.h
+	src/libpcre2-8.sym
+	src/libpcre2-16.sym
+	src/libpcre2-32.sym
+	src/libpcre2-posix.sym
 )
 
 # Make the generated script files executable.
@@ -1250,7 +1267,7 @@ fi
 with_symbol_versioning=n/a
 if test x$want_symvers != xyes; then
   with_symbol_versioning=no
-elif test x$ax_check_vscript_flag != x; then
+elif test x$pcre2_check_vscript_flag != x; then
   with_symbol_versioning=yes
 fi
 

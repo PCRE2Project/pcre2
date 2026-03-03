@@ -263,7 +263,7 @@ new release.
 * Update the library version numbers in configure.ac according to the rules
   given below.
 
-* Add the new library version to the src/libpcre2-*.sym files (even if no new
+* Add the new library version to the src/libpcre2-*.sym.in files (even if no new
   symbols have been added since the last release).
 
 * Push all these changes to main.
