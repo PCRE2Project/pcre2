@@ -241,6 +241,7 @@ for (i = 0; i < number_of_codes; i++)
   dst_re->flags |= PCRE2_DEREF_TABLES;
 
   codes[i] = dst_re;
+  dst_re = NULL;
   src_bytes += blocksize;
   }
 

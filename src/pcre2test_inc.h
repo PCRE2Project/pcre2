@@ -6358,6 +6358,54 @@ ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
       decode_codes[0] == NULL, "pcre2_serialize_decode(goto 3)");
   }
 
+  /* Regression: avoid stale dst_re double free on later iteration failure. */
+  {
+    pcre2_code *multi_codes[2];
+    pcre2_code *multi_decode_codes[2] = { NULL, NULL };
+    uint8_t *multi_serialized_bytes = NULL;
+    PCRE2_SIZE multi_serialized_size = 0;
+    CODE_BLOCKSIZE_TYPE first_blocksize;
+    size_t first_blocksize_offset = sizeof(pcre2_serialized_data) +
+      TABLES_LENGTH + offsetof(pcre2_real_code, blocksize);
+    size_t second_blocksize_offset;
+    uint8_t saved_second_blocksize[sizeof(CODE_BLOCKSIZE_TYPE)];
+
+    multi_codes[0] = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
+      &errorcode, &erroroffset, NULL);
+    multi_codes[1] = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
+      &errorcode, &erroroffset, NULL);
+    ASSERT(multi_codes[0] != NULL && multi_codes[1] != NULL,
+      "serialize setup (multi-code compile)");
+
+    rc = pcre2_serialize_encode((const pcre2_code **)multi_codes, 2,
+      &multi_serialized_bytes, &multi_serialized_size, NULL);
+    pcre2_code_free(multi_codes[0]);
+    pcre2_code_free(multi_codes[1]);
+    ASSERT(rc == 2 && multi_serialized_bytes != NULL,
+      "serialize setup (multi-code encode)");
+
+    memcpy(&first_blocksize, multi_serialized_bytes + first_blocksize_offset,
+      sizeof(first_blocksize));
+    second_blocksize_offset = sizeof(pcre2_serialized_data) + TABLES_LENGTH +
+      first_blocksize + offsetof(pcre2_real_code, blocksize);
+
+    memcpy(saved_second_blocksize,
+      multi_serialized_bytes + second_blocksize_offset,
+      sizeof(saved_second_blocksize));
+    memset(multi_serialized_bytes + second_blocksize_offset, 0,
+      sizeof(saved_second_blocksize));
+
+    rc = pcre2_serialize_decode(multi_decode_codes, 2, multi_serialized_bytes,
+      NULL);
+    memcpy(multi_serialized_bytes + second_blocksize_offset,
+      saved_second_blocksize, sizeof(saved_second_blocksize));
+    ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA &&
+      multi_decode_codes[0] == NULL && multi_decode_codes[1] == NULL,
+      "pcre2_serialize_decode(regression stale dst_re)");
+
+    pcre2_serialize_free(multi_serialized_bytes);
+  }
+
   pcre2_serialize_free(serialized_bytes);
 }
 
