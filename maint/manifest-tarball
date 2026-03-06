@@ -19,6 +19,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunTest
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/RunTest.bat
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/SECURITY.md
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/SUPPORT-LIFECYCLE.md
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/aclocal.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/ar-lib
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/build.zig
@@ -301,6 +302,17 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_visibility.m4
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/m4/pcre2_zos.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/missing
+drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/patches
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.37-Remove-real-POSIX.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.39-Fix-incorrect-detection.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.40-A-Fixed-a-unicode.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.40-B-Fixed-an-issue-affecting.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.43-Avoid-LIMIT_HEAP-integer.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.43-Fix-heapframe-overflow.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.44-Fix-incorrect-compiling.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.44-Fix-locking-region.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.45-Memory-reports-only-compiled.patch
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.47-Fix-for-callback.patch
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/pcre2-config.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/perltest.sh
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
