@@ -12,6 +12,7 @@ pub fn build(b: *std.Build) !void {
     const rt = target.result;
 
     const linkage = b.option(std.builtin.LinkMode, "linkage", "whether to statically or dynamically link the library") orelse @as(std.builtin.LinkMode, if (rt.isGnuLibC()) .dynamic else .static);
+    const sanitize_c = b.option(std.zig.SanitizeC, "sanitize_c", "whether to build with undefined behaviour sanitizer enabled") orelse .off;
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
     const jit = b.option(bool, "support_jit", "Enable/disable JIT compiler support") orelse false;
 
@@ -39,18 +40,16 @@ pub fn build(b: *std.Build) !void {
             .HAVE_SYS_TYPES_H = true,
             .HAVE_UNISTD_H = is_unix or is_mingw,
             .HAVE_WINDOWS_H = rt.os.tag == .windows,
-            .HAVE_MKOSTEMP = is_unix,
+
             .HAVE_MEMFD_CREATE = is_musl or is_glibc or is_freebsd,
             .HAVE_SECURE_GETENV = is_musl or is_glibc or is_freebsd,
-            .HAVE_REALPATH = is_unix,
 
             // all compilation is using the Zig bundled c compiler
-            .HAVE_ATTRIBUTE_UNINITIALIZED = true,
-            .HAVE_VISIBILITY = true,
             .HAVE_BUILTIN_ASSUME = null,
             .HAVE_BUILTIN_MUL_OVERFLOW = true,
             .HAVE_BUILTIN_UNREACHABLE = true,
-            .INTEL_CET_ENABLED = null,
+            .HAVE_ATTRIBUTE_UNINITIALIZED = true,
+            .HAVE_VISIBILITY = true,
 
             .SUPPORT_PCRE2_8 = codeUnitWidth == .@"8",
             .SUPPORT_PCRE2_16 = codeUnitWidth == .@"16",
@@ -78,6 +77,7 @@ pub fn build(b: *std.Build) !void {
     const lib_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
+        .sanitize_c = sanitize_c,
         .link_libc = true,
     });
 
@@ -126,6 +126,9 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_ucd.c",
             "src/pcre2_valid_utf.c",
             "src/pcre2_xclass.c",
+        },
+        .flags = &.{
+            "-fvisibility=hidden",
         },
     });
 
@@ -203,6 +206,7 @@ pub fn build(b: *std.Build) !void {
 
         pcre2test_mod.linkLibrary(posixLib);
 
+        b.addNamedLazyPath("pcre2posix.h", b.path("src/pcre2posix.h"));
         posixLib.installHeader(b.path("src/pcre2posix.h"), "pcre2posix.h");
         b.installArtifact(posixLib);
     }
