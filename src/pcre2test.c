@@ -150,8 +150,10 @@ patterns. */
 /* Not Windows */
 
 #else
+#ifdef HAVE_SETRLIMIT
 #include <sys/time.h>          /* These two includes are needed */
 #include <sys/resource.h>      /* for setrlimit(). */
+#endif
 #if defined NATIVE_ZOS         /* z/OS uses non-binary I/O */
 #define INPUT_MODE   "r"
 #define OUTPUT_MODE  "w"
@@ -3772,7 +3774,12 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   else if (strcmp(arg, "-S") == 0 && argc > 2 &&
       ((uli = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
     {
-#if defined(_WIN32) || defined(WIN32) || defined(__HAIKU__) || defined(NATIVE_ZOS) || defined(__VMS)
+    /* On Win32, we exclude setrlimit() regardless of whether it may have been detected
+    due to some Unix emulation environment. On Haiku and z/OS, setrlimit() is reported
+    to be detected (with the function linking successfully and RLIMIT_STACK defined in
+    the headers), but it does not actually work, so we exclude it as well. */
+#if defined(_WIN32) || defined(WIN32) || !defined(HAVE_SETRLIMIT) || \
+  defined(__HAIKU__) || defined(NATIVE_ZOS)
     cfprintf(clr_test_error, stderr, "pcre2test: -S is not supported on this OS\n");
     exit(1);
 #else
