@@ -130,7 +130,7 @@ jobs:
           echo "Latest CMake version is $CMAKE_VER"
 
       - name: Cache CMake
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64
           path: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64.tar.gz
@@ -377,7 +377,7 @@ jobs:
           submodules: true
 
       - name: Cache CMake
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
           path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
@@ -538,7 +538,7 @@ jobs:
           submodules: true
 
       - name: Setup
-        uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+        uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
         with:
           msystem: ${{ matrix.msystem }}
           update: true
