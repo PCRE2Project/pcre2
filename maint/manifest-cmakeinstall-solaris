@@ -44,6 +44,7 @@ drwxr-xr-x install-dir/share/doc/pcre2
 -rw-r--r-- install-dir/share/doc/pcre2/NEWS
 -rw-r--r-- install-dir/share/doc/pcre2/README
 -rw-r--r-- install-dir/share/doc/pcre2/SECURITY.md
+-rw-r--r-- install-dir/share/doc/pcre2/SUPPORT-LIFECYCLE.md
 drwxr-xr-x install-dir/share/doc/pcre2/html
 -rw-r--r-- install-dir/share/doc/pcre2/html/NON-AUTOTOOLS-BUILD.txt
 -rw-r--r-- install-dir/share/doc/pcre2/html/README.txt
