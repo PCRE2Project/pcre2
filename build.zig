@@ -26,6 +26,10 @@ pub fn build(b: *std.Build) !void {
     const is_glibc = rt.isGnuLibC();
     const is_freebsd = rt.isFreeBSDLibC();
 
+    const cflags = &.{
+        "-fvisibility=hidden",
+    };
+
     const config_h = b.addConfigHeader(
         .{
             .style = .{
@@ -33,6 +37,10 @@ pub fn build(b: *std.Build) !void {
             },
             .include_path = "config.h",
         },
+        // These options should be kept in-sync with those in config-cmake.h.in, and
+        // should be the same set of options (no more needed). It is permitted to
+        // specify fewer options here than in config-cmake.h.in, if an option is
+        // disabled in all zig build configurations.
         .{
             .HAVE_ASSERT_H = true,
             .HAVE_DIRENT_H = is_unix or is_mingw,
@@ -49,7 +57,6 @@ pub fn build(b: *std.Build) !void {
             .HAVE_BUILTIN_MUL_OVERFLOW = true,
             .HAVE_BUILTIN_UNREACHABLE = true,
             .HAVE_ATTRIBUTE_UNINITIALIZED = true,
-            .HAVE_VISIBILITY = true,
 
             .SUPPORT_PCRE2_8 = codeUnitWidth == .@"8",
             .SUPPORT_PCRE2_16 = codeUnitWidth == .@"16",
@@ -57,10 +64,11 @@ pub fn build(b: *std.Build) !void {
             .SUPPORT_UNICODE = true,
             .SUPPORT_JIT = jit,
 
-            .PCRE2_EXPORT = switch (linkage) {
-                .dynamic => "__attribute__ ((visibility (\"default\")))",
-                else => null,
-            },
+            // As for CMake builds, use visibilty attributes for both shared and static
+            // builds. Internal symbols should be hidden even in static builds, because
+            // the user could be statically linking PCRE2 into their own shared library.
+            .PCRE2_EXPORT = "__attribute__ ((visibility (\"default\")))",
+
             .PCRE2_LINK_SIZE = 2,
             .PCRE2_PARENS_NEST_LIMIT = 250,
             .PCRE2_HEAP_LIMIT = 20000000,
@@ -93,6 +101,7 @@ pub fn build(b: *std.Build) !void {
 
     lib_mod.addCSourceFile(.{
         .file = b.addWriteFiles().addCopyFile(b.path("src/pcre2_chartables.c.dist"), "pcre2_chartables.c"),
+        .flags = cflags,
     });
     lib_mod.addCSourceFiles(.{
         .files = &.{
@@ -127,9 +136,7 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_valid_utf.c",
             "src/pcre2_xclass.c",
         },
-        .flags = &.{
-            "-fvisibility=hidden",
-        },
+        .flags = cflags,
     });
 
     const lib = b.addLibrary(.{
@@ -145,11 +152,18 @@ pub fn build(b: *std.Build) !void {
     const pcre2test_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
+        .sanitize_c = sanitize_c,
         .link_libc = true,
     });
 
     pcre2test_mod.addCMacro("HAVE_CONFIG_H", "");
 
+    // Note: On Windows, consumers linking against the static library should
+    // probably define PCRE2_STATIC themselves (e.g. via
+    // addCMacro("PCRE2_STATIC", "")).
+    // As far as I know, Zig's build system does not currently have a mechanism
+    // to propagate compile definitions to downstream consumers (like CMake's
+    // PUBLIC target_compile_definitions). On non-Windows targets this is a no-op.
     switch (linkage) {
         .static => pcre2test_mod.addCMacro("PCRE2_STATIC", ""),
         .dynamic => pcre2test_mod.addCMacro("PCRE2POSIX_SHARED", ""),
@@ -165,6 +179,7 @@ pub fn build(b: *std.Build) !void {
 
     pcre2test_mod.addCSourceFile(.{
         .file = b.path("src/pcre2test.c"),
+        .flags = cflags,
     });
 
     pcre2test_mod.linkLibrary(lib);
@@ -175,6 +190,7 @@ pub fn build(b: *std.Build) !void {
         const posixLib_mod = b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .sanitize_c = sanitize_c,
             .link_libc = true,
         });
 
@@ -194,6 +210,7 @@ pub fn build(b: *std.Build) !void {
             .files = &.{
                 "src/pcre2posix.c",
             },
+            .flags = cflags,
         });
 
         posixLib_mod.linkLibrary(lib);
