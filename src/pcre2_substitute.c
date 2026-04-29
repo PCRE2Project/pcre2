@@ -510,6 +510,7 @@ switch (state->to_case)
   PCRE2_SPTR ch_end = input;
   uint32_t ch;
 
+  if (utf && UTF8CLENTOOLONG(ch_end, input + input_len)) return 0;
   GETCHARINCTEST(ch, ch_end);
   (void) ch;
   PCRE2_ASSERT(ch_end <= input + input_len && ch_end - input <= 6);
@@ -1620,6 +1621,7 @@ for (;;)
 
       LOADLITERAL:
       ch_start = ptr;
+      if (utf && UTF8CLENTOOLONG(ptr, repend)) goto BAD;
       GETCHARINCTEST(ch, ptr);    /* Get character value, increment pointer */
       (void) ch;
 

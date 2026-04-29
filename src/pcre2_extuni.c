@@ -94,13 +94,20 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR start_subject,
   PCRE2_SPTR end_subject, BOOL utf, int *xcount)
 {
 BOOL was_ep_ZWJ = FALSE;
-int lgb = UCD_GRAPHBREAK(c);
+int lgb;
+if (c > 0x10ffffu) return eptr;
+lgb = UCD_GRAPHBREAK(c);
 
 while (eptr < end_subject)
   {
   int rgb;
   int len = 1;
-  if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+  if (!utf) c = *eptr; else
+    {
+    if (UTF8CLENTOOLONG(eptr, end_subject)) break;
+    GETCHARLEN(c, eptr, len);
+    if (c > 0x10ffffu) break;
+    }
   rgb = UCD_GRAPHBREAK(c);
   if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
 
@@ -126,8 +133,10 @@ while (eptr < end_subject)
       bptr--;
       if (utf)
         {
-        BACKCHAR(bptr);
+        while (bptr > start_subject && (*bptr & 0xc0u) == 0x80u) bptr--;
+        if (UTF8CLENTOOLONG(bptr, end_subject)) break;
         GETCHAR(c, bptr);
+        if (c > 0x10ffffu) break;
         }
       else
       c = *bptr;

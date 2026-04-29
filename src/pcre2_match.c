@@ -1180,6 +1180,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       else
         {
         uint32_t dc;
+        if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+          { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
         GETCHARINC(dc, Feptr);
         Fecode += length;
         if (dc != fc && dc != UCD_OTHERCASE(fc)) RRETURN(MATCH_NOMATCH);
@@ -1235,6 +1237,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       uint32_t ch;
       Fecode++;
       GETCHARINC(ch, Fecode);
+      if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+        { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
       GETCHARINC(fc, Feptr);
       if (ch == fc)
         {
@@ -1762,6 +1766,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(d, Feptr);
           if (Lc == d || Loc == d) RRETURN(MATCH_NOMATCH);
           }
@@ -1801,6 +1807,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINC(d, Feptr);
             if (Lc == d || Loc == d) RRETURN(MATCH_NOMATCH);
             }
@@ -1845,6 +1853,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(d, Feptr, len);
             if (Lc == d || Loc == d) break;
             Feptr += len;
@@ -1904,6 +1914,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(d, Feptr);
           if (Lc == d) RRETURN(MATCH_NOMATCH);
           }
@@ -1941,6 +1953,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINC(d, Feptr);
             if (Lc == d) RRETURN(MATCH_NOMATCH);
             }
@@ -1983,6 +1997,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(d, Feptr, len);
             if (Lc == d) break;
             Feptr += len;
@@ -2101,6 +2117,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           if (fc > 255)
             {
@@ -2155,6 +2173,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINC(fc, Feptr);
             if (fc > 255)
               {
@@ -2209,6 +2229,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc > 255)
               {
@@ -2337,6 +2359,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
+        if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+          { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
         GETCHARINCTEST(fc, Feptr);
         if (!PRIV(xclass)(fc, Lxclass_data,
             (const uint8_t*)mb->start_code, utf))
@@ -2362,6 +2386,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINCTEST(fc, Feptr);
           if (!PRIV(xclass)(fc, Lxclass_data,
               (const uint8_t*)mb->start_code, utf))
@@ -2384,6 +2410,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
             }
 #ifdef SUPPORT_UNICODE
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); break; }
           GETCHARLENTEST(fc, Feptr, len);
 #else
           fc = *Feptr;
@@ -2480,6 +2508,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
+        if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+          { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
         GETCHARINCTEST(fc, Feptr);
         if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
                           (const uint8_t*)mb->start_code, utf))
@@ -2505,6 +2535,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINCTEST(fc, Feptr);
           if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
                             (const uint8_t*)mb->start_code, utf))
@@ -2527,6 +2559,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
             }
 #ifdef SUPPORT_UNICODE
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); break; }
           GETCHARLENTEST(fc, Feptr, len);
 #else
           fc = *Feptr;
@@ -2577,6 +2611,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     if (CHMAX_255(fc) && (mb->ctypes[fc] & ctype_digit) != 0)
       RRETURN(MATCH_NOMATCH);
@@ -2589,6 +2625,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     if (!CHMAX_255(fc) || (mb->ctypes[fc] & ctype_digit) == 0)
       RRETURN(MATCH_NOMATCH);
@@ -2601,6 +2639,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     if (CHMAX_255(fc) && (mb->ctypes[fc] & ctype_space) != 0)
       RRETURN(MATCH_NOMATCH);
@@ -2613,6 +2653,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     if (!CHMAX_255(fc) || (mb->ctypes[fc] & ctype_space) == 0)
       RRETURN(MATCH_NOMATCH);
@@ -2625,6 +2667,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     if (CHMAX_255(fc) && (mb->ctypes[fc] & ctype_word) != 0)
       RRETURN(MATCH_NOMATCH);
@@ -2637,6 +2681,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     if (!CHMAX_255(fc) || (mb->ctypes[fc] & ctype_word) == 0)
       RRETURN(MATCH_NOMATCH);
@@ -2649,6 +2695,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     switch(fc)
       {
@@ -2684,6 +2732,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     switch(fc)
       {
@@ -2699,6 +2749,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     switch(fc)
       {
@@ -2714,6 +2766,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     switch(fc)
       {
@@ -2729,6 +2783,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
     switch(fc)
       {
@@ -2752,7 +2808,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
+    if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+      { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
     GETCHARINCTEST(fc, Feptr);
+    if (fc > 0x10ffffu) { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
       {
       const uint32_t *cp;
       uint32_t chartype;
@@ -2894,6 +2953,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       }
     else
       {
+      if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+        { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
       GETCHARINCTEST(fc, Feptr);
       Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject, utf,
         NULL);
@@ -3005,7 +3066,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             chartype = UCD_CHARTYPE(fc);
             if ((chartype == ucp_Lu ||
                  chartype == ucp_Ll ||
@@ -3022,7 +3086,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_CATEGORY(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3036,7 +3103,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_CHARTYPE(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3050,7 +3120,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3066,7 +3139,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu) { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             prop = GET_UCD(fc);
             ok = (prop->script == Lpropvalue ||
                   MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), Lpropvalue) != 0);
@@ -3084,7 +3160,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             category = UCD_CATEGORY(fc);
             if ((category == ucp_L || category == ucp_N) == notmatch)
               RRETURN(MATCH_NOMATCH);
@@ -3104,7 +3183,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             switch(fc)
               {
               HSPACE_CASES:
@@ -3129,7 +3211,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             chartype = UCD_CHARTYPE(fc);
             category = PRIV(ucp_gentype)[chartype];
             if ((category == ucp_L || category == ucp_N ||
@@ -3147,6 +3232,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
 #if PCRE2_CODE_UNIT_WIDTH == 32
             if (fc > MAX_UTF_CODE_POINT)
@@ -3180,6 +3267,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
             if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
                  fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
@@ -3196,7 +3285,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3212,7 +3304,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu) { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             prop = GET_UCD(fc);
             ok = MAPBIT(PRIV(ucd_boolprop_sets) +
               UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
@@ -3245,6 +3340,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           else
             {
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
             Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject,
               mb->end_subject, utf, NULL);
@@ -3309,6 +3406,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           switch(fc)
             {
@@ -3342,6 +3441,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           switch(fc)
             {
@@ -3359,6 +3460,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           switch(fc)
             {
@@ -3376,6 +3479,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           switch(fc)
             {
@@ -3393,6 +3498,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           switch(fc)
             {
@@ -3410,6 +3517,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           if (fc < 128 && (mb->ctypes[fc] & ctype_digit) != 0)
             RRETURN(MATCH_NOMATCH);
@@ -3792,7 +3901,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             chartype = UCD_CHARTYPE(fc);
             if ((chartype == ucp_Lu ||
                  chartype == ucp_Ll ||
@@ -3812,7 +3924,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_CATEGORY(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
@@ -3829,7 +3944,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_CHARTYPE(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
@@ -3846,7 +3964,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_SCRIPT(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
@@ -3865,7 +3986,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu) { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             prop = GET_UCD(fc);
             ok = (prop->script == Lpropvalue
                   || MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), Lpropvalue) != 0);
@@ -3886,7 +4010,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             category = UCD_CATEGORY(fc);
             if ((category == ucp_L || category == ucp_N) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
@@ -3909,7 +4036,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             switch(fc)
               {
               HSPACE_CASES:
@@ -3937,7 +4067,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             chartype = UCD_CHARTYPE(fc);
             category = PRIV(ucp_gentype)[chartype];
             if ((category == ucp_L ||
@@ -3960,6 +4093,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
 #if PCRE2_CODE_UNIT_WIDTH == 32
             if (fc > MAX_UTF_CODE_POINT)
@@ -3996,6 +4131,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
             if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
                  fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
@@ -4015,7 +4152,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
               RRETURN(MATCH_NOMATCH);
             }
@@ -4034,7 +4174,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
+            if (fc > 0x10ffffu) { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             prop = GET_UCD(fc);
             ok = MAPBIT(PRIV(ucd_boolprop_sets) +
               UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
@@ -4070,6 +4213,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           else
             {
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHARINCTEST(fc, Feptr);
             Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
               utf, NULL);
@@ -4096,6 +4241,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           if (Lctype == OP_ANY && IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
+          if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+            { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
           GETCHARINC(fc, Feptr);
           switch(Lctype)
             {
@@ -4386,7 +4533,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             chartype = UCD_CHARTYPE(fc);
             if ((chartype == ucp_Lu ||
                  chartype == ucp_Ll ||
@@ -4405,7 +4555,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             if ((UCD_CATEGORY(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
@@ -4420,7 +4573,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             if ((UCD_CHARTYPE(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
@@ -4435,7 +4591,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
@@ -4452,7 +4611,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             prop = GET_UCD(fc);
             ok = (prop->script == Lpropvalue ||
                   MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), Lpropvalue) != 0);
@@ -4471,7 +4633,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             category = UCD_CATEGORY(fc);
             if ((category == ucp_L || category == ucp_N) == notmatch)
               break;
@@ -4493,7 +4658,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             switch(fc)
               {
               HSPACE_CASES:
@@ -4521,7 +4689,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             chartype = UCD_CHARTYPE(fc);
             category = PRIV(ucp_gentype)[chartype];
             if ((category == ucp_L ||
@@ -4543,6 +4714,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
 #if PCRE2_CODE_UNIT_WIDTH == 32
             if (fc > MAX_UTF_CODE_POINT)
@@ -4576,6 +4749,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
             if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT ||
                  fc == CHAR_GRAVE_ACCENT || (fc >= 0xa0 && fc <= 0xd7ff) ||
@@ -4594,7 +4769,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch) break;
             Feptr+= len;
             }
@@ -4611,7 +4789,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLENTEST(fc, Feptr, len);
+            if (fc > 0x10ffffu) break;
             prop = GET_UCD(fc);
             ok = MAPBIT(PRIV(ucd_boolprop_sets) +
               UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
@@ -4659,6 +4840,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           else
             {
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARINCTEST(fc, Feptr);
             Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
               utf, NULL);
@@ -4692,7 +4875,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           if (!utf) fc = *Feptr; else
             {
             BACKCHAR(Feptr);
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             GETCHAR(fc, Feptr);
+            if (fc > 0x10ffffu)              { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
             }
           rgb = UCD_GRAPHBREAK(fc);
 
@@ -4703,7 +4889,9 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             if (!utf) fc = *fptr; else
               {
               BACKCHAR(fptr);
+              if (UTF8CLENTOOLONG(fptr, mb->end_subject)) break;
               GETCHAR(fc, fptr);
+              if (fc > 0x10ffffu) break;
               }
             lgb = UCD_GRAPHBREAK(fc);
             if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0) break;
@@ -4786,6 +4974,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc == CHAR_CR)
               {
@@ -4818,6 +5008,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             switch(fc)
               {
@@ -4840,6 +5032,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             switch(fc)
               {
@@ -4860,6 +5054,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc < 256 && (mb->ctypes[fc] & ctype_digit) != 0) break;
             Feptr+= len;
@@ -4875,6 +5071,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc >= 256 ||(mb->ctypes[fc] & ctype_digit) == 0) break;
             Feptr+= len;
@@ -4890,6 +5088,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc < 256 && (mb->ctypes[fc] & ctype_space) != 0) break;
             Feptr+= len;
@@ -4905,6 +5105,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc >= 256 ||(mb->ctypes[fc] & ctype_space) == 0) break;
             Feptr+= len;
@@ -4920,6 +5122,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc < 256 && (mb->ctypes[fc] & ctype_word) != 0) break;
             Feptr+= len;
@@ -4935,6 +5139,8 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
+            if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+              { SCHECK_PARTIAL(); break; }
             GETCHARLEN(fc, Feptr, len);
             if (fc >= 256 || (mb->ctypes[fc] & ctype_word) == 0) break;
             Feptr+= len;
@@ -6709,8 +6915,14 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
       if (utf)
         {
-        BACKCHAR(lastptr);
+        while (lastptr > mb->start_subject && (*lastptr & 0xc0u) == 0x80u)
+          lastptr--;
+        if (lastptr < mb->start_subject ||
+            UTF8CLENTOOLONG(lastptr, mb->end_subject))
+          { prev_is_word = FALSE; goto GOT_PREV_WORD; }
         GETCHAR(fc, lastptr);
+        if (fc > 0x10ffffu)
+          { prev_is_word = FALSE; goto GOT_PREV_WORD; }
         }
       else
 #endif  /* SUPPORT_UNICODE */
@@ -6729,6 +6941,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       prev_is_word = CHMAX_255(fc) && (mb->ctypes[fc] & ctype_word) != 0;
       }
 
+    GOT_PREV_WORD:
     /* Get status of next character */
 
     if (Feptr >= mb->end_subject)
@@ -6743,7 +6956,10 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       if (utf)
         {
         FORWARDCHARTEST(nextptr, mb->end_subject);
+        if (utf && UTF8CLENTOOLONG(Feptr, mb->end_subject))
+          { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
         GETCHAR(fc, Feptr);
+        if (fc > 0x10ffffu)          { SCHECK_PARTIAL(); RRETURN(MATCH_NOMATCH); }
         }
       else
 #endif  /* SUPPORT_UNICODE */

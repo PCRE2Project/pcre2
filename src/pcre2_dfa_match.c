@@ -732,7 +732,16 @@ for (;;)
     {
     clen = 1;        /* Number of data items in the character */
 #ifdef SUPPORT_UNICODE
-    GETCHARLENTEST(c, ptr, clen);
+    if (utf && UTF8CLENTOOLONG(ptr, end_subject))
+      {
+      clen = 0;
+      c = NOTACHAR;
+      }
+    else
+      {
+      GETCHARLENTEST(c, ptr, clen);
+      if (c > 0x10ffffu) { clen = 0; c = NOTACHAR; }
+      }
 #else
     c = *ptr;
 #endif  /* SUPPORT_UNICODE */
@@ -1104,21 +1113,34 @@ for (;;)
           PCRE2_SPTR temp = ptr - 1;
           if (temp < mb->start_used_ptr) mb->start_used_ptr = temp;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-          if (utf) { BACKCHAR(temp); }
-#endif
-          GETCHARTEST(d, temp);
-#ifdef SUPPORT_UNICODE
-          if (codevalue == OP_UCP_WORD_BOUNDARY ||
-              codevalue == OP_NOT_UCP_WORD_BOUNDARY)
+          if (utf)
             {
-            int chartype = UCD_CHARTYPE(d);
-            int category = PRIV(ucp_gentype)[chartype];
-            left_word = (category == ucp_L || category == ucp_N ||
-              chartype == ucp_Mn || chartype == ucp_Pc);
+            while (temp > start_subject && (*temp & 0xc0u) == 0x80u) temp--;
             }
-          else
 #endif
-          left_word = d < 256 && (ctypes[d] & ctype_word) != 0;
+          if (utf && UTF8CLENTOOLONG(temp, end_subject))
+            left_word = FALSE;
+          else
+            {
+            GETCHARTEST(d, temp);
+            if (d > 0x10ffffu)
+              left_word = FALSE;
+            else
+              {
+#ifdef SUPPORT_UNICODE
+              if (codevalue == OP_UCP_WORD_BOUNDARY ||
+                  codevalue == OP_NOT_UCP_WORD_BOUNDARY)
+                {
+                int chartype = UCD_CHARTYPE(d);
+                int category = PRIV(ucp_gentype)[chartype];
+                left_word = (category == ucp_L || category == ucp_N ||
+                  chartype == ucp_Mn || chartype == ucp_Pc);
+                }
+              else
+#endif
+              left_word = d < 256 && (ctypes[d] & ctype_word) != 0;
+              }
+            }
           }
         else left_word = FALSE;
 

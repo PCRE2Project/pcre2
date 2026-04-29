@@ -248,6 +248,14 @@ is not supported. */
 
 #define HASUTF8EXTRALEN(c) ((c) >= 0xc0)
 
+/* Check that a multi-byte UTF-8 character starting at eptr fits within the
+buffer ending at end. Returns TRUE if the sequence is truncated (would read past
+end). The lead byte at *eptr must be >= 0xc0. */
+
+#define UTF8CLENTOOLONG(eptr, end) \
+  (*(eptr) >= 0xc0u && \
+   (eptr) + 1 + PRIV(utf8_table4)[*(eptr) & 0x3fu] > (end))
+
 /* The following macros were originally written in the form of loops that used
 data from the tables whose names start with PRIV(utf8_table). They were
 rewritten by a user so as not to use loops, because in some environments this

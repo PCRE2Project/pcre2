@@ -97,7 +97,9 @@ uint32_t c;
 /* Any string containing fewer than 2 characters is a valid script run. */
 
 if (ptr >= endptr) return TRUE;
+if (utf && UTF8CLENTOOLONG(ptr, endptr)) return FALSE;
 GETCHARINCTEST(c, ptr);
+if (c > 0x10ffffu) return FALSE;
 if (ptr >= endptr) return TRUE;
 
 /* Initialize the require map. This is a full-size bitmap that has a bit for
@@ -329,7 +331,9 @@ for (;;)
   /* If we haven't yet got to the end, pick up the next character. */
 
   if (ptr >= endptr) return TRUE;
+  if (utf && UTF8CLENTOOLONG(ptr, endptr)) return FALSE;
   GETCHARINCTEST(c, ptr);
+  if (c > 0x10ffffu) return FALSE;
   }  /* End checking loop */
 
 #else   /* NOT SUPPORT_UNICODE */

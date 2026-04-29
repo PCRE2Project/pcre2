@@ -93,7 +93,9 @@ encounter XCL_PROP or XCL_NOTPROP when UTF support is not compiled. */
 if (*data == XCL_PROP || *data == XCL_NOTPROP)
   {
   /* The UCD record is the same for all properties. */
-  const ucd_record *prop = GET_UCD(c);
+  const ucd_record *prop;
+  if (c > 0x10ffffu) return !not_negated;
+  prop = GET_UCD(c);
 
   do
     {
