@@ -192,6 +192,11 @@ while (plength > 0)
   c = *posix;
 #else
   GETCHARLENTEST(c, posix, clength);
+  if ((PCRE2_SIZE)clength > plength)
+    {
+    *bufflenptr = plength;
+    return PCRE2_ERROR_UTF8_ERR1;
+    }
 #endif
   posix += clength;
   plength -= clength;
@@ -704,6 +709,12 @@ while (pattern < pattern_end)
   char_start = pattern;
   GETCHARINCTEST(c, pattern);
 
+  if (pattern > pattern_end)
+    {
+    *from = pattern_end;
+    return PCRE2_ERROR_UTF8_ERR1;
+    }
+
   if (c == CHAR_RIGHT_SQUARE_BRACKET)
     {
     convert_glob_write(out, c);
@@ -752,12 +763,24 @@ while (pattern < pattern_end)
     char_start = pattern;
     GETCHARINCTEST(c, pattern);
 
+    if (pattern > pattern_end)
+      {
+      *from = pattern_end;
+      return PCRE2_ERROR_UTF8_ERR1;
+      }
+
     if (pattern >= pattern_end) break;
 
     if (escape != 0 && c == escape)
       {
       char_start = pattern;
       GETCHARINCTEST(c, pattern);
+
+      if (pattern > pattern_end)
+        {
+        *from = pattern_end;
+        return PCRE2_ERROR_UTF8_ERR1;
+        }
       }
     else if (c == CHAR_LEFT_SQUARE_BRACKET && *pattern == CHAR_COLON)
       {
@@ -782,6 +805,12 @@ while (pattern < pattern_end)
       {
       char_start = pattern;
       GETCHARINCTEST(c, pattern);
+
+      if (pattern > pattern_end)
+        {
+        *from = pattern_end;
+        return PCRE2_ERROR_UTF8_ERR1;
+        }
 
       if (pattern >= pattern_end) break;
       }
