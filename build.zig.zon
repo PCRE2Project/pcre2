@@ -1,0 +1,14 @@
+.{
+    .name = .pcre2,
+    .version = "10.48.0-DEV",
+    .fingerprint = 0x914b3d63ebab9e21, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",  "build.zig.zon",
+        "src/",       "doc/",
+        "HACKING",    "INSTALL",
+        "README.md",  "LICENCE.md",
+        "AUTHORS.md", "SECURITY.md",
+    },
+}
