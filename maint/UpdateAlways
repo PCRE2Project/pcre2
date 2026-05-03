@@ -240,6 +240,7 @@ txt_files=(
   RunTest
   SECURITY.md
   build.zig
+  build.zig.zon
   configure.ac
   libpcre2-8.pc.in
   libpcre2-16.pc.in

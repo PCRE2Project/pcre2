@@ -991,6 +991,7 @@ The distribution should contain the files listed below.
   BUILD.bazel             ) files used by the Bazel
   MODULE.bazel            )   build system
   build.zig               file used by zig's build system
+  build.zig.zon           file used by zig's package manager
 
 (G) Auxiliary files for building PCRE2 under OpenVMS
 
