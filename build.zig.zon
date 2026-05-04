@@ -9,10 +9,11 @@
     .minimum_zig_version = "0.15.2",
     .dependencies = .{},
     .paths = .{
-        "build.zig",  "build.zig.zon",
-        "src/",       "doc/",
-        "HACKING",    "INSTALL",
-        "README.md",  "LICENCE.md",
-        "AUTHORS.md", "SECURITY.md",
+        "build.zig",   "build.zig.zon",
+        "src/",        "doc/",
+        "deps/",       "HACKING",
+        "INSTALL",     "README.md",
+        "LICENCE.md",  "AUTHORS.md",
+        "SECURITY.md",
     },
 }
