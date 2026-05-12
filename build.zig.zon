@@ -1,0 +1,19 @@
+.{
+    .name = .pcre2,
+    .version = "10.48.0-DEV",
+
+    // Do NOT change this for new releases.
+    // DO change this if making a fork of PCRE2 which is used by any Zig clients.
+    .fingerprint = 0x914b3d63ebab9e21,
+
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",   "build.zig.zon",
+        "src/",        "doc/",
+        "deps/",       "HACKING",
+        "INSTALL",     "README.md",
+        "LICENCE.md",  "AUTHORS.md",
+        "SECURITY.md",
+    },
+}

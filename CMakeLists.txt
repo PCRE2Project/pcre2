@@ -196,6 +196,7 @@ endif()
 check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP) # glibc 2.7
 check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
 check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
+check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
 cmake_pop_check_state()
 
 check_c_source_compiles(

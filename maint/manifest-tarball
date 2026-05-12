@@ -22,6 +22,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/aclocal.m4
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/ar-lib
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/build.zig
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/build.zig.zon
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/COPYING-CMAKE-SCRIPTS
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/FindEditline.cmake

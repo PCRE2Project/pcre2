@@ -116,6 +116,7 @@ src/stamp-h1
 /bazel-*
 *.bazel.lock
 
+zig-pkg/
 zig-out/
 zig-cache/
 .zig-cache/

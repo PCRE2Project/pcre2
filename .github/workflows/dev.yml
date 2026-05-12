@@ -130,7 +130,7 @@ jobs:
           echo "Latest CMake version is $CMAKE_VER"
 
       - name: Cache CMake
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           key: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64
           path: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64.tar.gz
@@ -377,7 +377,7 @@ jobs:
           submodules: true
 
       - name: Cache CMake
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
           path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
@@ -538,7 +538,7 @@ jobs:
           submodules: true
 
       - name: Setup
-        uses: msys2/setup-msys2@4f806de0a5a7294ffabaff804b38a9b435a73bda # v2.30.0
+        uses: msys2/setup-msys2@e9898307ac31d1a803454791be09ab9973336e1c # v2.31.1
         with:
           msystem: ${{ matrix.msystem }}
           update: true
@@ -599,7 +599,7 @@ jobs:
       - name: Prepare
         run: ./autogen.sh
 
-      - uses: uraimo/run-on-arch-action@d94c13912ea685de38fccc1109385b83fd79427d # v3.0.1
+      - uses: uraimo/run-on-arch-action@f9b26e3a1a408d5fd530d20c17b9f3f4428ff8d9 # v3.1.0
         name: Configure, build, and test
         with:
           arch: ${{ matrix.arch }}
@@ -634,9 +634,9 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zebrilus')) ||
       github.event_name == 'push'
     steps:
-      - name: Setup
-        run: |
-          sudo snap install zig --classic --beta
+      # The zig version from minimum_zig_version in build.zig.zon will be installed.
+      - name: Install zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
