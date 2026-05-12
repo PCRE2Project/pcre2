@@ -549,7 +549,7 @@ cranges->header.next = NULL;
 #ifdef PCRE2_DEBUG
 cranges->header.type = CDATA_CRANGE;
 #endif
-cranges->range_list_size = (uint16_t)range_list_size;
+cranges->range_list_size = range_list_size;
 cranges->char_lists_types = 0;
 cranges->char_lists_size = 0;
 cranges->char_lists_start = 0;
@@ -618,7 +618,7 @@ ptr = buffer;
 while (ptr < dst && ptr[1] < 0x100) ptr += 2;
 if (dst - ptr < (2 * (6 - 1)))
   {
-  cranges->range_list_size = (uint16_t)(dst + 2 - buffer);
+  cranges->range_list_size = (size_t)(dst + 2 - buffer);
   return cranges;
   }
 
@@ -740,7 +740,7 @@ PCRE2_ASSERT((uint16_t*)dst <= next_char);
 cranges->char_lists_size =
   (size_t)((uint8_t*)(buffer + total_size) - (uint8_t*)next_char);
 cranges->char_lists_start = (size_t)((uint8_t*)next_char - (uint8_t*)buffer);
-cranges->range_list_size = (uint16_t)(dst - buffer);
+cranges->range_list_size = (size_t)(dst - buffer);
 return cranges;
 }
 
