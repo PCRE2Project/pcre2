@@ -13134,6 +13134,8 @@ if (offset != 0)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1), TMP2, 0);
     }
   }
+else if (SLJIT_UNLIKELY(opcode == OP_ASSERTBACK_NA) && PRIVATE_DATA(ccbegin + 1))
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
 
 if (SLJIT_UNLIKELY(opcode == OP_ONCE))
   {
