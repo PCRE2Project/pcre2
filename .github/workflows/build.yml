@@ -308,7 +308,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@d1e65811565151536c0c894fff74f06351ed26e6 # v1.4.5
+        uses: vmactions/freebsd-vm@a6de9343ef5747433d9c25784c90e84998b9d69a # v1.4.6
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
@@ -360,7 +360,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/openbsd-vm@d7d892b7b9ba97ed2747b0fc201be65037d64c3e # v1.4.0
+        uses: vmactions/openbsd-vm@6fac4962055fe9952d29930942445739e509fecd # v1.4.2
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
@@ -425,7 +425,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/solaris-vm@c20562b2c69737b06be9e828915761703e487373 # v1.3.3
+        uses: vmactions/solaris-vm@3702ccf20b84c7f7c0a9bb68894aba7623f8301d # v1.3.6
         with:
           envs: 'CFLAGS_SOLARIS_CC CMAKE_FLAGS'
           usesh: true
@@ -647,7 +647,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
