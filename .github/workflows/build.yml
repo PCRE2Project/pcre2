@@ -308,7 +308,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@d1e65811565151536c0c894fff74f06351ed26e6 # v1.4.5
+        uses: vmactions/freebsd-vm@5a72679103d223925653750faa878a143340fbd0 # v1.5.0
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
@@ -360,7 +360,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/openbsd-vm@d7d892b7b9ba97ed2747b0fc201be65037d64c3e # v1.4.0
+        uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
@@ -425,7 +425,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/solaris-vm@c20562b2c69737b06be9e828915761703e487373 # v1.3.3
+        uses: vmactions/solaris-vm@d30dd6c228c8661ade859e36ead7660b9a62efcc # v1.3.7
         with:
           envs: 'CFLAGS_SOLARIS_CC CMAKE_FLAGS'
           usesh: true
@@ -603,7 +603,7 @@ jobs:
           if-no-files-found: error
 
       - name: Attest
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         if: |
           github.event_name != 'pull_request' &&
           (startsWith(github.ref, 'refs/heads/release/') ||
