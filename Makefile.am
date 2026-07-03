@@ -503,6 +503,7 @@ EXTRA_DIST += \
   deps/sljit/sljit_src/sljitConfigInternal.h \
   deps/sljit/sljit_src/sljitLir.c \
   deps/sljit/sljit_src/sljitLir.h \
+  deps/sljit/sljit_src/sljitNativeALPHA_64.c \
   deps/sljit/sljit_src/sljitNativeARM_32.c \
   deps/sljit/sljit_src/sljitNativeARM_64.c \
   deps/sljit/sljit_src/sljitNativeARM_T2_32.c \
