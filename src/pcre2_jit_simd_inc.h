@@ -2646,6 +2646,7 @@ struct sljit_label *restart;
 #endif
 struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
+struct sljit_jump *no_prefetch;
 vector_compare_type compare_type = vector_compare_match1;
 sljit_u32 bit = 0;
 
@@ -2699,6 +2700,9 @@ quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
 
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
+/* Prefetch threshold: only prefetch when more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
 /* Main loop (aligned). */
 start = LABEL();
 
@@ -2707,6 +2711,10 @@ OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
 partial_quit[1] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 if (common->mode == PCRE2_JIT_COMPLETE)
   add_jump(compiler, &common->failed_match, partial_quit[1]);
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 fast_forward_char_pair_alpha_compare(compiler, compare_type, TMP1, TMP1, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
@@ -2760,6 +2768,7 @@ static jump_list *fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR 
 DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
+struct sljit_jump *no_prefetch;
 jump_list *not_found = NULL;
 vector_compare_type compare_type = vector_compare_match1;
 sljit_u32 bit = 0;
@@ -2804,12 +2813,19 @@ quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
 
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
+/* Prefetch threshold: only prefetch when more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
 /* Main loop. */
 start = LABEL();
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
 
 add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 fast_forward_char_pair_alpha_compare(compiler, compare_type, TMP1, TMP1, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
@@ -2847,6 +2863,7 @@ struct sljit_label *start;
 struct sljit_label *restart;
 #endif
 struct sljit_jump *jump[2];
+struct sljit_jump *no_prefetch;
 
 SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offs1 > offs2);
 SLJIT_ASSERT(diff <= (unsigned)IN_UCHARS(max_fast_forward_char_pair_offset()));
@@ -2954,11 +2971,18 @@ jump[0] = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
 
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
+/* Prefetch threshold: only prefetch when more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
 /* Main loop. */
 start = LABEL();
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
 add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
 
 /* Load data1 and construct unaligned data2. */
 OP1(SLJIT_MOV, SLJIT_R9, 0, SLJIT_MEM1(STR_PTR), 0);
