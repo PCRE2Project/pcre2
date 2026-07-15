@@ -2668,6 +2668,63 @@ partial_quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 if (common->mode == PCRE2_JIT_COMPLETE)
   add_jump(compiler, &common->failed_match, partial_quit[0]);
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
+if (compare_type == vector_compare_match1)
+  {
+  /* Use memchr() for exact single-character scanning. glibc's Alpha memchr
+     uses CMPBGE with prefetching and software pipelining. */
+
+  /* The call clobbers every scratch register, so TMP3 must be preserved: the
+     callers keep the unclamped STR_END there while match_end_ptr is set. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, TMP3, 0);
+
+#if defined SUPPORT_UNICODE
+  restart = LABEL();
+#endif
+
+  /* STR_PTR is SLJIT_R1, which is also the second argument register, so the
+     length and the start pointer must be read before it is overwritten. */
+  OP2(SLJIT_SUB, SLJIT_R2, 0, STR_END, 0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, char1);
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(W, W, 32, W),
+    SLJIT_IMM, SLJIT_FUNC_ADDR(memchr));
+  OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
+
+  if (common->mode == PCRE2_JIT_COMPLETE)
+    {
+    add_jump(compiler, &common->failed_match,
+      CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
+
+#if defined SUPPORT_UNICODE
+    if (common->utf && offset > 0)
+      {
+      OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+      quit = jump_if_utf_char_start(compiler, TMP1);
+      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+      add_jump(compiler, &common->failed_match,
+        CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+      JUMPTO(SLJIT_JUMP, restart);
+      JUMPHERE(quit);
+      }
+#endif
+    }
+  else
+    {
+    /* Partial mode: found → STR_PTR = result, not found → STR_PTR = STR_END. */
+    quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
+    partial_quit[1] = JUMP(SLJIT_JUMP);
+    JUMPHERE(quit);
+    JUMPHERE(partial_quit[0]);
+    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
+    JUMPHERE(partial_quit[1]);
+    }
+  return;
+  }
+#endif
+
 /* Load replicated character constants into dedicated registers. */
 OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1 | bit));
 
@@ -2786,6 +2843,25 @@ if (char1 != char2)
   }
 
 add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0));
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+if (compare_type == vector_compare_match1)
+  {
+  /* Use memchr() to check if the required character exists.
+     Save STR_PTR across the icall since it clobbers all scratch registers. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, TMP1, 0);
+  OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, char1);
+  OP2(SLJIT_SUB, SLJIT_R2, 0, STR_END, 0, TMP1, 0);
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(W, W, 32, W),
+    SLJIT_IMM, SLJIT_FUNC_ADDR(memchr));
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
+  add_jump(compiler, &not_found,
+    CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+  return not_found;
+  }
+#endif
+
 OP1(SLJIT_MOV, TMP2, 0, TMP1, 0);
 OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
 
