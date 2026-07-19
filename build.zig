@@ -16,6 +16,24 @@ pub fn build(b: *std.Build) !void {
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
     const jit = b.option(bool, "support_jit", "Enable/disable JIT compiler support") orelse false;
 
+    const jit_source = if (jit) blk: {
+        const sljit = b.lazyDependency("sljit", .{}) orelse
+            return error.MissingDependency;
+
+        const files = b.addWriteFiles();
+
+        _ = files.addCopyDirectory(
+            sljit.path("sljit_src"),
+            "deps/sljit/sljit_src",
+            .{},
+        );
+
+        break :blk files.addCopyFile(
+            b.path("src/pcre2_jit_compile.c"),
+            "src/pcre2_jit_compile.c",
+        );
+    } else b.path("src/pcre2_jit_compile.c");
+
     const pcre2_h_dir = b.addWriteFiles();
     const pcre2_h = pcre2_h_dir.addCopyFile(b.path("src/pcre2.h.generic"), "pcre2.h");
     b.addNamedLazyPath("pcre2.h", pcre2_h);
@@ -118,7 +136,6 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_error.c",
             "src/pcre2_extuni.c",
             "src/pcre2_find_bracket.c",
-            "src/pcre2_jit_compile.c",
             "src/pcre2_maketables.c",
             "src/pcre2_match.c",
             "src/pcre2_match_data.c",
@@ -137,6 +154,11 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_valid_utf.c",
             "src/pcre2_xclass.c",
         },
+        .flags = cflags,
+    });
+
+    lib_mod.addCSourceFile(.{
+        .file = jit_source,
         .flags = cflags,
     });
 

@@ -7,7 +7,12 @@
     .fingerprint = 0x914b3d63ebab9e21,
 
     .minimum_zig_version = "0.15.2",
-    .dependencies = .{},
+    .dependencies = .{
+        .sljit = .{
+            .url = "git+https://github.com/zherczeg/sljit.git#45f910b78c6605ebf5b53d3ec7cb00f2312fe417",
+            .hash = "N-V-__8AAIUFRABdZku3bW_1S5GOC4iaFh17LsRurEDR1lvv",
+        },
+    },
     .paths = .{
         "build.zig",   "build.zig.zon",
         "src/",        "doc/",

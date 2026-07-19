@@ -37,6 +37,10 @@ jobs:
            startsWith(github.ref, 'refs/tags/pcre2-'))
         run: maint/UpdateDates.py
 
+      # The zig version from minimum_zig_version in build.zig.zon will be installed.
+      - name: Install zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
+
       - name: UpdateAlways
         run: maint/UpdateAlways
 

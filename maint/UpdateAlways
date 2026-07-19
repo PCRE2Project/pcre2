@@ -332,6 +332,15 @@ perl maint/CheckTxt "${txt_files[@]}"
 perl maint/CheckTxt -ascii "${c_files[@]}"
 perl maint/CheckTxt -crlf "${crlf_files[@]}"
 
+SLJIT_COMMIT=`git ls-tree HEAD deps/sljit | awk '{print $3}'`
+if [ -z "$SLJIT_COMMIT" ] ; then
+  echo "Warning: could not find deps/sljit in the tree; not updating build.zig.zon"
+elif ! grep -q "sljit.git#$SLJIT_COMMIT" build.zig.zon ; then
+  echo "Updating SLJIT pin in build.zig.zon to $SLJIT_COMMIT"
+  zig fetch --save=sljit "git+https://github.com/zherczeg/sljit.git#$SLJIT_COMMIT"
+  if [ $? != 0 ] ; then exit 1; fi
+fi
+
 # Verify the version number in the Bazel file
 if ! grep -E "version = \"$CURRENT_RELEASE\"" MODULE.bazel >/dev/null ; then
   echo "Version number in MODULE.bazel does not match current release"
