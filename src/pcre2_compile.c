@@ -10295,7 +10295,7 @@ PCRE2_SPTR ptr;                       /* Current pointer in pattern */
 uint32_t *pptr;                       /* Current pointer in parsed pattern */
 
 PCRE2_SIZE length = 1;                /* Allow for final END opcode */
-PCRE2_SIZE usedlength;                /* Actual length used */
+INT64_OR_DOUBLE usedlength;           /* Actual length used */
 PCRE2_SIZE re_blocksize;              /* Size of memory block */
 PCRE2_SIZE parsed_size_needed;        /* Needed for parsed pattern */
 
@@ -10853,8 +10853,7 @@ block for storing the compiled pattern and names table. Integer overflow should
 no longer be possible because nowadays we limit the maximum value of
 cb.names_found and cb.name_entry_size. */
 
-re_blocksize =
-  CU2BYTES((PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
+usedlength = CU2BYTES((size_t)cb.names_found * cb.name_entry_size);
 
 #if defined SUPPORT_WIDE_CHARS
 if (cb.char_lists_size != 0)
@@ -10862,21 +10861,31 @@ if (cb.char_lists_size != 0)
 #if PCRE2_CODE_UNIT_WIDTH != 32
   /* Align to 32 bit first. This ensures the
   allocated area will also be 32 bit aligned. */
-  re_blocksize = (PCRE2_SIZE)CLIST_ALIGN_TO(re_blocksize, sizeof(uint32_t));
+  usedlength = CLIST_ALIGN_TO(usedlength, sizeof(uint32_t));
 #endif
-  re_blocksize += cb.char_lists_size;
+  usedlength += cb.char_lists_size;
   }
 #endif
 
-re_blocksize += CU2BYTES(length);
-
-if (re_blocksize > ccontext->max_pattern_compiled_length)
+if (BYTES2CU(ccontext->max_pattern_compiled_length) < length)
   {
   errorcode = ERR101;
   cb.erroroffset = 0;
   goto HAD_CB_ERROR;
   }
 
+usedlength += CU2BYTES(length);
+
+if (sizeof(size_t) == 4 &&
+    (usedlength > (INT64_OR_DOUBLE)ccontext->max_pattern_compiled_length ||
+     usedlength > (INT64_OR_DOUBLE)(SIZE_MAX - sizeof(pcre2_real_code))))
+  {
+  errorcode = ERR101;
+  cb.erroroffset = 0;
+  goto HAD_CB_ERROR;
+  }
+
+re_blocksize = usedlength;
 re_blocksize += sizeof(pcre2_real_code);
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
@@ -10989,7 +10998,7 @@ memory as unaddressable, so that any out-of-bound reads can be detected. */
 *code++ = OP_END;
 usedlength = code - codestart;
 /* LCOV_EXCL_START */
-if (usedlength > length)
+if (usedlength > (INT64_OR_DOUBLE)length)
   {
   PCRE2_DEBUG_UNREACHABLE();
   errorcode = ERR23;  /* Overflow of code block - internal error */
@@ -11071,7 +11080,7 @@ at this stage. */
 
 #ifdef DEBUG_CALL_PRINTINT
 pcre2_printint(re, stderr, TRUE);
-fprintf(stderr, "Length=%lu Used=%lu\n", length, usedlength);
+fprintf(stderr, "Length=%lu Used=%" PRId64 "\n", length, usedlength);
 #endif
 
 /* Unless disabled, check whether any single character iterators can be

@@ -246,7 +246,7 @@ them will be able to (i.e. assume a 64-bit world). */
 
 /* Macro for aligning data. */
 #define CLIST_ALIGN_TO(base, align) \
-  ((base + ((size_t)(align) - 1)) & ~((size_t)(align) - 1))
+  ((((size_t)base + align - 1) / align) * align)
 
 /* Structure for holding information about an OP_ECLASS internal operand.
 An "operand" here could be just a single OP_[X]CLASS, or it could be some
