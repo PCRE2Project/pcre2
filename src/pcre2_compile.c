@@ -10963,6 +10963,16 @@ if (cb.names_found > 0)
 error, errorcode will be set non-zero, so we don't need to look at the result
 of the function here. */
 
+/* Zero-initialize the code area before the second compilation pass.
+When PCRE2 is used as a non-MSan-instrumented shared library, bytes written to
+the compiled code via direct assignment (e.g. OP_CHAR character data) are not
+tracked in MSan's shadow memory. The JIT compiler's detect_repeat() then calls
+memcmp() over compiled bytecode blocks, and MSan's memcmp interceptor reports
+a use-of-uninitialized-value error for those char bytes. Zeroing the area here
+ensures all code bytes are initialized in the sanitizer shadow before the
+compiler overwrites them with the actual bytecode values. */
+memset((void *)codestart, 0, re_blocksize - re->code_start);
+
 pptr = cb.parsed_pattern;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
