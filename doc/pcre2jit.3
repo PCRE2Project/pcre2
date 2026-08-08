@@ -444,10 +444,11 @@ processed by \fBpcre2_jit_compile()\fP).
 The fast path function is called \fBpcre2_jit_match()\fP, and it takes exactly
 the same arguments as \fBpcre2_match()\fP. However, the subject string must be
 specified with a length; PCRE2_ZERO_TERMINATED is not supported. Unsupported
-option bits (for example, PCRE2_ANCHORED and PCRE2_ENDANCHORED) are ignored, as
-is the PCRE2_NO_JIT option. The return values are also the same as for
-\fBpcre2_match()\fP, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial
-or complete) is requested that was not compiled.
+option bits (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED, and
+PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the PCRE2_NO_JIT option. The
+return values are also the same as for \fBpcre2_match()\fP, plus
+PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+that was not compiled.
 .P
 When you call \fBpcre2_match()\fP, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if

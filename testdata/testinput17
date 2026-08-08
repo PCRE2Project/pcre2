@@ -298,6 +298,7 @@
     
 /abc/jitfast
     abc
+    abc\=copy_matched_subject
     abc\=no_jit 
     
 # ---- 
