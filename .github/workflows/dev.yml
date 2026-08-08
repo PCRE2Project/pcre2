@@ -23,6 +23,7 @@ on:
         - chaffinch
         - fruitbat
         - ptarmigan
+        - coelacanth
         - zebrilus
         - bee
   push:
@@ -625,6 +626,100 @@ jobs:
             cd build
             ninja
             ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+
+  coelacanth:
+    # Tests with: cross-compilation and qemu-user, for the JIT backends that no
+    # other job covers. A coelacanth is a fish that was thought to be extinct.
+    name: QEMU ${{ matrix.config.name }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.config.container }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          # "libc" is the Debian architecture name. It is needed because the
+          # cross compilers do not depend on the target's libc headers, and it
+          # cannot always be derived from the triple.
+          #
+          # Ubuntu armhf defaults to Thumb-2, so ARM mode needs asking for.
+          - { name: arm,         triple: arm-linux-gnueabihf,         qemu: arm,         libc: armhf,      container: "ubuntu:26.04", cflags: -marm }
+          - { name: arm-thumb2,  triple: arm-linux-gnueabihf,         qemu: arm,         libc: armhf,      container: "ubuntu:26.04", cflags: -mthumb }
+          - { name: loongarch64, triple: loongarch64-linux-gnu,       qemu: loongarch64, libc: loong64,    container: "ubuntu:26.04" }
+          # PowerPC big-endian; ptarmigan covers ppc64le, which is a different
+          # ABI to ppc64.
+          - { name: powerpc,     triple: powerpc-linux-gnu,           qemu: ppc,         libc: powerpc,    container: "ubuntu:26.04" }
+          - { name: powerpc64,   triple: powerpc64-linux-gnu,         qemu: ppc64,       libc: ppc64,      container: "ubuntu:26.04" }
+          # The MIPS cross compilers are no longer built for Ubuntu 26.04,
+          # hence the older container.
+          - { name: mips,        triple: mips-linux-gnu,              qemu: mips,        libc: mips,       container: "ubuntu:24.04" }
+          - { name: mipsel,      triple: mipsel-linux-gnu,            qemu: mipsel,      libc: mipsel,     container: "ubuntu:24.04" }
+          - { name: mips64,      triple: mips64-linux-gnuabi64,       qemu: mips64,      libc: mips64,     container: "ubuntu:24.04" }
+          - { name: mips64el,    triple: mips64el-linux-gnuabi64,     qemu: mips64el,    libc: mips64el,   container: "ubuntu:24.04" }
+          # MIPS release 6 is a different instruction set to the earlier
+          # releases, and SLJIT_MIPS_REV >= 6 selects different code. There is
+          # no separate qemu-user binary for it; the emulated CPU has to be
+          # named instead, because the defaults predate release 6.
+          - { name: mips32r6el,  triple: mipsisa32r6el-linux-gnu,     qemu: mipsel,      libc: mipsr6el,   container: "ubuntu:24.04", qemu_cpu: mips32r6-generic }
+          - { name: mips64r6el,  triple: mipsisa64r6el-linux-gnuabi64, qemu: mips64el,   libc: mips64r6el, container: "ubuntu:24.04", qemu_cpu: I6400 }
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'coelacanth')) ||
+      github.event_name == 'push'
+    env:
+      # Where qemu-user looks for the target's shared libraries.
+      QEMU_LD_PREFIX: /usr/${{ matrix.config.triple }}
+    steps:
+      - name: Setup
+        run: |
+          apt-get -qq update
+          apt-get -qq install -y git autoconf automake libtool make \
+                                 gcc-14-${{ matrix.config.triple }} \
+                                 libc6-dev-${{ matrix.config.libc }}-cross \
+                                 qemu-user
+
+          # Not set unconditionally: an empty QEMU_CPU makes qemu fail to find
+          # a CPU definition.
+          if [ -n "${{ matrix.config.qemu_cpu }}" ]; then
+            echo "QEMU_CPU=${{ matrix.config.qemu_cpu }}" >> "$GITHUB_ENV"
+          fi
+        env:
+          DEBIAN_FRONTEND: noninteractive
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Configure
+        # Shared libraries are disabled so that the test programs are real
+        # executables rather than libtool wrapper scripts, which qemu-user
+        # cannot run.
+        run: |
+          ./configure \
+            --build=`./config.guess` \
+            --host=${{ matrix.config.triple }} \
+            CC=${{ matrix.config.triple }}-gcc-14 \
+            CFLAGS="${{ matrix.config.cflags }} $CFLAGS_GCC_STYLE" \
+            --disable-shared \
+            --enable-jit \
+            --enable-pcre2-16 \
+            --enable-pcre2-32
+
+      - name: Build
+        run: make -j$(nproc)
+
+      - name: Test (main test script)
+        run: ./RunTest -sim qemu-${{ matrix.config.qemu }}
+
+      - name: Test (JIT test program)
+        run: qemu-${{ matrix.config.qemu }} ./pcre2_jit_test
+
+      - name: Test (pcre2posix program)
+        run: qemu-${{ matrix.config.qemu }} ./pcre2posix_test -v
 
   zebrilus:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".
