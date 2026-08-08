@@ -543,9 +543,17 @@ Failed: error -47: match limit exceeded
 /abc/jitfast
     abc
  0: abc (JIT)
+    abc\=copy_matched_subject
+ 0: abc (JIT)
     abc\=no_jit 
  0: abc (JIT)
-    
+
+/abc/jitfast
+    abc\=copy_matched_subject,no_jit
+ 0: abc (JIT)
+    abc
+ 0: abc (JIT)
+
 # ---- 
 
 /[aC]/mg,firstline,newline=lf

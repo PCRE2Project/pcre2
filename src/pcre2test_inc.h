@@ -3126,7 +3126,8 @@ for (;;)
       dat_context, dfa_workspace, DFA_WS_DIMENSION);
     }
 
-  else if ((pat_patctl.control & CTL_JITFAST) != 0)
+  else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+           (dat_datctl.options & PCRE2_NO_JIT) == 0)
     capcount = pcre2_jit_match(compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, dat_context);
 
@@ -4708,7 +4709,8 @@ if (dat_datctl.replacement[0] != MOD_STR_UNSET)
         dat_datctl.offset, dat_datctl.options, match_data,
         use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
       }
-    else if ((pat_patctl.control & CTL_JITFAST) != 0)
+    else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+             (dat_datctl.options & PCRE2_NO_JIT) == 0)
       {
       (void)pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
         dat_datctl.options, match_data, use_dat_context);
@@ -4982,7 +4984,8 @@ for (gmatched = 0;; gmatched++)
         }
       }
 
-    else if ((pat_patctl.control & CTL_JITFAST) != 0)
+    else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+             (dat_datctl.options & PCRE2_NO_JIT) == 0)
       {
       start_time = clock();
       for (i = 0; i < timeitm; i++)
@@ -5066,7 +5069,8 @@ for (gmatched = 0;; gmatched++)
       }
     else
       {
-      if ((pat_patctl.control & CTL_JITFAST) != 0)
+      if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+          (dat_datctl.options & PCRE2_NO_JIT) == 0)
         capcount = pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, use_dat_context);
       else
@@ -5103,7 +5107,8 @@ for (gmatched = 0;; gmatched++)
           }
         else
           {
-          if ((pat_patctl.control & CTL_JITFAST) != 0)
+          if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+              (dat_datctl.options & PCRE2_NO_JIT) == 0)
             capcount = pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
               dat_datctl.options | g_notempty, match_data, use_dat_context);
           else
@@ -5171,20 +5176,29 @@ for (gmatched = 0;; gmatched++)
     /* If PCRE2_COPY_MATCHED_SUBJECT was set, check that things are as they
     should be, but not for fast JIT, where it isn't supported. */
 
-    if ((dat_datctl.options & PCRE2_COPY_MATCHED_SUBJECT) != 0 &&
-        (pat_patctl.control & CTL_JITFAST) == 0)
+    if ((dat_datctl.options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
-      if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) == 0)
-        cfprintf(clr_test_error, outfile,
-          "** PCRE2 error: flag not set after copy_matched_subject\n");
+      if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+          (dat_datctl.options & PCRE2_NO_JIT) == 0)
+        {
+        if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+          cfprintf(clr_test_error, outfile,
+            "** PCRE2 error: flag set after unsupported copy_matched_subject\n");
+        }
+      else
+        {
+        if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) == 0)
+          cfprintf(clr_test_error, outfile,
+            "** PCRE2 error: flag not set after copy_matched_subject\n");
 
-      if (match_data->subject == pp)
-        cfprintf(clr_test_error, outfile,
-          "** PCRE2 error: copy_matched_subject has not copied\n");
+        if (match_data->subject == pp)
+          cfprintf(clr_test_error, outfile,
+            "** PCRE2 error: copy_matched_subject has not copied\n");
 
-      if (memcmp(match_data->subject, pp, ulen) != 0)
-        cfprintf(clr_test_error, outfile,
-          "** PCRE2 error: copy_matched_subject mismatch\n");
+        if (memcmp(match_data->subject, pp, ulen) != 0)
+          cfprintf(clr_test_error, outfile,
+            "** PCRE2 error: copy_matched_subject mismatch\n");
+        }
       }
 
     /* If this is not the first time round a global loop, check that the
@@ -5661,6 +5675,9 @@ pcre2_match_context *test_dat_context = NULL, *test_dat_context_copy = NULL;
 pcre2_convert_context *test_con_context = NULL, *test_con_context_copy = NULL;
 pcre2_match_data *test_match_data = NULL;
 pcre2_code *test_compiled_code = NULL;
+#ifdef SUPPORT_JIT
+BOOL test_compiled_with_jit = FALSE;
+#endif
 PCRE2_UCHAR pattern[] = { CHAR_A, CHAR_B, CHAR_C, 0 };
 PCRE2_UCHAR callout_int_pattern[] = {
   CHAR_LEFT_PARENTHESIS, CHAR_QUESTION_MARK, CHAR_C, CHAR_RIGHT_PARENTHESIS, 0 };
@@ -5965,9 +5982,36 @@ ASSERT(rc == 0 && sizeval == 0, "pcre2_pattern_info(JIT)");
 
 if (pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0)
   {
+  test_compiled_with_jit = TRUE;
+
   rc = pcre2_pattern_info(test_compiled_code, PCRE2_INFO_JITSIZE, &sizeval);
   ASSERT(rc == 0 && sizeval > 0, "pcre2_pattern_info(JIT after compile)");
   }
+#endif
+
+/* ----------------------- Matching functions ------------------------------ */
+
+#ifdef SUPPORT_JIT
+
+/* Check that fast JIT releases a copied subject when reusing match data. */
+if (test_compiled_with_jit)
+  {
+  test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code,
+    test_gen_context);
+  ASSERT(test_match_data != NULL, "pcre2_match_data_create_from_pattern(JIT)");
+
+  rc = pcre2_match(test_compiled_code, pattern, 3, 0,
+    PCRE2_COPY_MATCHED_SUBJECT, test_match_data, NULL);
+  ASSERT(rc == 1, "pcre2_match(COPY_MATCHED_SUBJECT)");
+
+  rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, 0,
+    test_match_data, NULL);
+  ASSERT(rc == 1, "pcre2_jit_match(reused match data)");
+
+  pcre2_match_data_free(test_match_data);
+  test_match_data = NULL;
+  }
+
 #endif
 
 /* ----------------------- POSIX functions --------------------------------- */
