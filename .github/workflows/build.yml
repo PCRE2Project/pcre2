@@ -452,6 +452,8 @@ jobs:
             PATH=/opt/developerstudio12.6/bin:"$PATH"
             export PATH
 
+            NPROC=`getconf NPROCESSORS_ONLN`
+
             cp -rp . ../build-autoconf-32
             cp -rp . ../build-autoconf-64
             cp -rp . ../build-cmake-64
@@ -484,7 +486,7 @@ jobs:
             CC="cc -m64" cmake $CMAKE_FLAGS -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
-            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+            ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
