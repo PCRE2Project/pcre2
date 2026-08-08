@@ -39,6 +39,7 @@ d---- .\install-dir\share\doc\pcre2
 -a--- .\install-dir\share\doc\pcre2\NEWS
 -a--- .\install-dir\share\doc\pcre2\README
 -a--- .\install-dir\share\doc\pcre2\SECURITY.md
+-a--- .\install-dir\share\doc\pcre2\SUPPORT-LIFECYCLE.md
 d---- .\install-dir\share\doc\pcre2\html
 -a--- .\install-dir\share\doc\pcre2\html\NON-AUTOTOOLS-BUILD.txt
 -a--- .\install-dir\share\doc\pcre2\html\README.txt

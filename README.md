@@ -228,7 +228,7 @@ For third-party documentation, see further:
 
 - A curated summary of changes for each PCRE release, and some excellent tutorials on PCRE2 on the
   [RexEgg website](http://www.rexegg.com/pcre-documentation.html).
-- Jan Goyvaerts' popular Regular-Expressions.info site includes [information about PCRE2](https://www.regular-expressions.info/pcre.html) as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.
+- Jan Goyvaerts' popular Regular-Expressions.info site includes [information about PCRE2](https://www.regular-expressions.info/pcre2.html) as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.
 - Jeffrey Friedl's book [_Mastering Regular Expressions_](https://regex.info/book.html) includes chapters on Perl and PCRE, and is available in print and online via O'Reilly Media.
 
 ## Platforms
@@ -264,6 +264,8 @@ PCRE2 is released under the **BSD 3-clause licence** with a PCRE2 Exception. It 
 Join the community by reporting issues or asking questions via [GitHub issues](https://github.com/PCRE2Project/pcre2/issues). We welcome feedback and proposals.
 
 Contributions ranging from bug fixes to feature requests are welcome, and can be made via GitHub pull requests.
+
+Our support lifecycle is to backport security and high-severity bug fixes for at least five years. See [SUPPORT-LIFECYCLE](./SUPPORT-LIFECYCLE.md) for how to package older versions of PCRE2.
 
 Please review our [SECURITY](./SECURITY.md) policy for information on reporting security issues.
 
