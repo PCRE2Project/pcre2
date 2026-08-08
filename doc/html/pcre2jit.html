@@ -460,10 +460,11 @@ processed by <b>pcre2_jit_compile()</b>).
 The fast path function is called <b>pcre2_jit_match()</b>, and it takes exactly
 the same arguments as <b>pcre2_match()</b>. However, the subject string must be
 specified with a length; PCRE2_ZERO_TERMINATED is not supported. Unsupported
-option bits (for example, PCRE2_ANCHORED and PCRE2_ENDANCHORED) are ignored, as
-is the PCRE2_NO_JIT option. The return values are also the same as for
-<b>pcre2_match()</b>, plus PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial
-or complete) is requested that was not compiled.
+option bits (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED, and
+PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the PCRE2_NO_JIT option. The
+return values are also the same as for <b>pcre2_match()</b>, plus
+PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+that was not compiled.
 </p>
 <p>
 When you call <b>pcre2_match()</b>, as well as testing for invalid options, a
