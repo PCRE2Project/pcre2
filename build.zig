@@ -14,25 +14,41 @@ pub fn build(b: *std.Build) !void {
     const linkage = b.option(std.builtin.LinkMode, "linkage", "whether to statically or dynamically link the library") orelse @as(std.builtin.LinkMode, if (rt.isGnuLibC()) .dynamic else .static);
     const sanitize_c = b.option(std.zig.SanitizeC, "sanitize_c", "whether to build with undefined behaviour sanitizer enabled") orelse .off;
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
-    const jit = b.option(bool, "support_jit", "Enable/disable JIT compiler support") orelse false;
+    const support_jit = b.option(bool, "support_jit", "Enable/disable JIT compiler support") orelse false;
 
-    const jit_source = if (jit) blk: {
+    const sljit_is_checked_out = if (!support_jit)
+        false
+    else if (b.build_root.handle.access(
+        b.graph.io,
+        "deps/sljit/sljit_src/sljitLir.c",
+        .{},
+    )) |_| true else |err| switch (err) {
+        error.FileNotFound => false,
+        else => return err,
+    };
+
+    // We don't know how the sljit dependency is being provided. Either it
+    // comes via a git submodule, or it may be fetched by zig itself.
+    const sljit_include_path = if (!support_jit)
+        null
+    else if (sljit_is_checked_out)
+        null
+    else blk: {
         const sljit = b.lazyDependency("sljit", .{}) orelse
-            return error.MissingDependency;
+            break :blk null;
 
         const files = b.addWriteFiles();
 
+        // Recreate the layout used by pcre2_jit_compile.c's relative include.
         _ = files.addCopyDirectory(
             sljit.path("sljit_src"),
             "deps/sljit/sljit_src",
             .{},
         );
+        _ = files.add("src/.empty", "");
 
-        break :blk files.addCopyFile(
-            b.path("src/pcre2_jit_compile.c"),
-            "src/pcre2_jit_compile.c",
-        );
-    } else b.path("src/pcre2_jit_compile.c");
+        break :blk files.getDirectory().path(b, "src");
+    };
 
     const pcre2_h_dir = b.addWriteFiles();
     const pcre2_h = pcre2_h_dir.addCopyFile(b.path("src/pcre2.h.generic"), "pcre2.h");
@@ -81,7 +97,7 @@ pub fn build(b: *std.Build) !void {
             .SUPPORT_PCRE2_16 = codeUnitWidth == .@"16",
             .SUPPORT_PCRE2_32 = codeUnitWidth == .@"32",
             .SUPPORT_UNICODE = true,
-            .SUPPORT_JIT = jit,
+            .SUPPORT_JIT = support_jit,
 
             // As for CMake builds, use visibilty attributes for both shared and static
             // builds. Internal symbols should be hidden even in static builds, because
@@ -117,6 +133,9 @@ pub fn build(b: *std.Build) !void {
     lib_mod.addConfigHeader(config_h);
     lib_mod.addIncludePath(pcre2_h_dir.getDirectory());
     lib_mod.addIncludePath(b.path("src"));
+    if (sljit_include_path) |include_path| {
+        lib_mod.addIncludePath(include_path);
+    }
 
     lib_mod.addCSourceFile(.{
         .file = b.addWriteFiles().addCopyFile(b.path("src/pcre2_chartables.c.dist"), "pcre2_chartables.c"),
@@ -136,6 +155,7 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_error.c",
             "src/pcre2_extuni.c",
             "src/pcre2_find_bracket.c",
+            "src/pcre2_jit_compile.c",
             "src/pcre2_maketables.c",
             "src/pcre2_match.c",
             "src/pcre2_match_data.c",
@@ -154,11 +174,6 @@ pub fn build(b: *std.Build) !void {
             "src/pcre2_valid_utf.c",
             "src/pcre2_xclass.c",
         },
-        .flags = cflags,
-    });
-
-    lib_mod.addCSourceFile(.{
-        .file = jit_source,
         .flags = cflags,
     });
 
