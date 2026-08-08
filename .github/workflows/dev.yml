@@ -130,7 +130,7 @@ jobs:
           echo "Latest CMake version is $CMAKE_VER"
 
       - name: Cache CMake
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64
           path: cmake-${{ steps.get-cmake-ver.outputs.CMAKE_VER }}-linux-x86_64.tar.gz
@@ -377,7 +377,7 @@ jobs:
           submodules: true
 
       - name: Cache CMake
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: cmake-${{ env.CMAKE_VER }}-Linux-x86_64
           path: cmake-${{ env.CMAKE_VER }}-Linux-x86_64.tar.gz
