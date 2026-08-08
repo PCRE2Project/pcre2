@@ -308,7 +308,7 @@ jobs:
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@77ed28d336d03fe19a3f4f7266c1d2c4714dd79d # v1.5.2
+        uses: vmactions/freebsd-vm@83b151f58c6047089f4c80eb5ba2039d158ce093 # v1.5.3
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
@@ -603,7 +603,7 @@ jobs:
           if-no-files-found: error
 
       - name: Attest
-        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         if: |
           github.event_name != 'pull_request' &&
           (startsWith(github.ref, 'refs/heads/release/') ||
