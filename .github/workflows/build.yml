@@ -319,6 +319,8 @@ jobs:
           run: |
             set -e
 
+            NPROC=`sysctl -n hw.ncpu`
+
             cp -rp . ../build-autoconf
             cp -rp . ../build-cmake
 
@@ -326,7 +328,7 @@ jobs:
             cd ../build-autoconf
 
             ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
-            make -j3
+            make -j$NPROC
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
@@ -338,8 +340,8 @@ jobs:
 
             cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
-            make -j3
-            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+            make -j$NPROC
+            ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
             ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
@@ -373,6 +375,7 @@ jobs:
 
             export MALLOC_OPTIONS="USRJGFC>>"
             EXTRA_CFLAGS="-DSLJIT_WX_EXECUTABLE_ALLOCATOR"
+            NPROC=`sysctl -n hw.ncpu`
 
             cp -rp . ../build-autoconf
             cp -rp . ../build-cmake
@@ -381,7 +384,7 @@ jobs:
             cd ../build-autoconf
 
             ./configure CFLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
-            make -j3
+            make -j$NPROC
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
@@ -395,8 +398,8 @@ jobs:
 
             cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
-            make -j3
-            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+            make -j$NPROC
+            ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
             # ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-openbsd
             # ../maint/RunSymbolTest install-dir/lib/ ../maint/
