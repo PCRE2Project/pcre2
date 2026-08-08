@@ -294,8 +294,13 @@
     
 /abc/jitfast
     abc
+    abc\=copy_matched_subject
     abc\=no_jit 
-    
+
+/abc/jitfast
+    abc\=copy_matched_subject,no_jit
+    abc
+
 # ---- 
 
 /[aC]/mg,firstline,newline=lf
