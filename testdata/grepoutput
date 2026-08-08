@@ -1205,6 +1205,15 @@ RC=2
 ---------------------------- Test 147 -----------------------------
 pcre2grep: Failed to open -nonfile: No such file or directory
 RC=2
+C123D
+RC=0
+testtemp1grep:A123B
+-testtemp1grep:C123D
+RC=0
+A123B
+RC=0
+E123F
+RC=0
 ---------------------------- Test 148 -----------------------------
 pcre2grep: Unknown option --nonexist
 Usage: pcre2grep [-AaBCcDdEeFfHhIilLMmNnOoPqrstuUVvwxZ] [long options] [pattern] [files]
