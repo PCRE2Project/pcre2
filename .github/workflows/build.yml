@@ -555,7 +555,7 @@ jobs:
             cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build;
             ninja;
-            ctest -j3 --output-on-failure; && (cat ./Testing/Temporary/LastTest.log || true)
+            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             '
 
   distcheck:
