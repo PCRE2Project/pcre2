@@ -6046,7 +6046,8 @@ for (;;)
       PTR(dat_context), dfa_workspace, DFA_WS_DIMENSION);
     }
 
-  else if ((pat_patctl.control & CTL_JITFAST) != 0)
+  else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+           (dat_datctl.options & PCRE2_NO_JIT) == 0)
     PCRE2_JIT_MATCH(capcount, compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, PTR(dat_context));
 
@@ -7547,7 +7548,8 @@ for (gmatched = 0;; gmatched++)
         }
       }
 
-    else if ((pat_patctl.control & CTL_JITFAST) != 0)
+    else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+             (dat_datctl.options & PCRE2_NO_JIT) == 0)
       {
       start_time = clock();
       for (i = 0; i < timeitm; i++)
@@ -7643,7 +7645,8 @@ for (gmatched = 0;; gmatched++)
       }
     else
       {
-      if ((pat_patctl.control & CTL_JITFAST) != 0)
+      if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+          (dat_datctl.options & PCRE2_NO_JIT) == 0)
         PCRE2_JIT_MATCH(capcount, compiled_code, pp, arg_ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, use_dat_context);
       else
@@ -7684,20 +7687,29 @@ for (gmatched = 0;; gmatched++)
     /* If PCRE2_COPY_MATCHED_SUBJECT was set, check that things are as they
     should be, but not for fast JIT, where it isn't supported. */
 
-    if ((dat_datctl.options & PCRE2_COPY_MATCHED_SUBJECT) != 0 &&
-        (pat_patctl.control & CTL_JITFAST) == 0)
+    if ((dat_datctl.options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
-      if ((FLD(match_data, flags) & PCRE2_MD_COPIED_SUBJECT) == 0)
-        fprintf(outfile,
-          "** PCRE2 error: flag not set after copy_matched_subject\n");
+      if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+          (dat_datctl.options & PCRE2_NO_JIT) == 0)
+        {
+        if ((FLD(match_data, flags) & PCRE2_MD_COPIED_SUBJECT) != 0)
+          fprintf(outfile,
+            "** PCRE2 error: flag set after unsupported copy_matched_subject\n");
+        }
+      else
+        {
+        if ((FLD(match_data, flags) & PCRE2_MD_COPIED_SUBJECT) == 0)
+          fprintf(outfile,
+            "** PCRE2 error: flag not set after copy_matched_subject\n");
 
-      if (CASTFLD(void *, match_data, subject) == pp)
-        fprintf(outfile,
-          "** PCRE2 error: copy_matched_subject has not copied\n");
+        if (CASTFLD(void *, match_data, subject) == pp)
+          fprintf(outfile,
+            "** PCRE2 error: copy_matched_subject has not copied\n");
 
-      if (memcmp(CASTFLD(void *, match_data, subject), pp, ulen) != 0)
-        fprintf(outfile,
-          "** PCRE2 error: copy_matched_subject mismatch\n");
+        if (memcmp(CASTFLD(void *, match_data, subject), pp, ulen) != 0)
+          fprintf(outfile,
+            "** PCRE2 error: copy_matched_subject mismatch\n");
+        }
       }
 
     /* If this is not the first time round a global loop, check that the
