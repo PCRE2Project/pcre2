@@ -4272,6 +4272,7 @@ if (!options_terminated)
     {
     if (strcmp(argv[j], "--") == 0)
       {
+      /* Move the (argc - j - 1) remaining arguments and the terminating NULL */
       memmove(argv + j, argv + j + 1, (argc - j) * sizeof(*argv));
       argc--;
       break;
