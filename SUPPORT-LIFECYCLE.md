@@ -53,7 +53,7 @@ requirements:
   required, such as a CVE that requires fixing for compliance reasons. The
   "stable" and "oldstable" releases actively accumulate backported fixes.
 
-  Packages: https://salsa.debian.org/debian/pcre2
+  Packages: https://tracker.debian.org/pkg/pcre2
 
 - Ubuntu: Five year LTS. I believe most customers update fairly promptly every
   two years, and few if any non-security backports are made to LTS releases
