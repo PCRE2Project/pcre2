@@ -228,7 +228,7 @@ For third-party documentation, see further:
 
 - A curated summary of changes for each PCRE release, and some excellent tutorials on PCRE2 on the
   [RexEgg website](http://www.rexegg.com/pcre-documentation.html).
-- Jan Goyvaerts' popular Regular-Expressions.info site includes [information about PCRE2](https://www.regular-expressions.info/pcre.html) as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.
+- Jan Goyvaerts' popular Regular-Expressions.info site includes [information about PCRE2](https://www.regular-expressions.info/pcre2.html) as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.
 - Jeffrey Friedl's book [_Mastering Regular Expressions_](https://regex.info/book.html) includes chapters on Perl and PCRE, and is available in print and online via O'Reilly Media.
 
 ## Platforms
