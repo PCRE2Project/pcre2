@@ -56,7 +56,7 @@ jobs:
         run: ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --enable-Werror
 
       - name: Build
-        run: make -j3
+        run: make -j$(nproc)
 
       - name: Test (main test script)
         run: ./RunTest
@@ -97,7 +97,7 @@ jobs:
         run: ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --enable-Werror
 
       - name: Build
-        run: make -j3
+        run: make -j$(nproc)
 
       - name: Test (main test script)
         run: ./RunTest
@@ -581,7 +581,7 @@ jobs:
         run: ./configure
 
       - name: Distcheck
-        run: make distcheck -j3
+        run: make distcheck -j$(nproc)
 
       - name: Manifest
         run: |
@@ -632,7 +632,7 @@ jobs:
         run: CC="clang -fprofile-instr-generate -fcoverage-mapping" cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DPCRE2_DEBUG=OFF -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_SUPPORT_LIBZ=ON -DPCRE2_SUPPORT_LIBBZ2=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -B build
 
       - name: Build
-        run: cd build && make -j3
+        run: cd build && make -j$(nproc)
 
       - name: Test
         run: |

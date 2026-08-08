@@ -64,7 +64,7 @@ jobs:
         run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS="-O0 $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror --enable-pcre2test-libedit --with-link-size=4
 
       - name: Build
-        run: make -j3
+        run: make -j$(nproc)
 
       - name: Test
         run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
@@ -91,7 +91,7 @@ jobs:
         run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function' CFLAGS="${{ matrix.opt }} $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror --with-link-size=3
 
       - name: Build
-        run: make -j3
+        run: make -j$(nproc)
 
       - name: Test
         run: |
@@ -147,10 +147,10 @@ jobs:
           cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_POLICY_VERSION_MINIMUM=$CMAKE_VER -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
-        run: cd build && make -j3
+        run: cd build && make -j$(nproc)
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -229,7 +229,7 @@ jobs:
         run: ./configure CFLAGS="-Os $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror
 
       - name: Build
-        run: make -j3
+        run: make -j$(nproc)
 
       - name: Test
         run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
@@ -266,7 +266,7 @@ jobs:
         run: ./configure CFLAGS="-O0 $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror
 
       - name: Build
-        run: make -j3
+        run: make -j$(nproc)
 
       - name: Test
         run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
@@ -301,10 +301,10 @@ jobs:
         run: cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
 
       - name: Build
-        run: cd build && make -j3
+        run: cd build && make -j$(nproc)
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -397,7 +397,7 @@ jobs:
         run: ninja -C build
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |
@@ -506,10 +506,10 @@ jobs:
         run: cmake $CMAKE_FLAGS -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $CFLAGS_UNITY" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
 
       - name: Build
-        run: cd build && make -j3
+        run: cd build && make -j$(nproc)
 
       - name: Test
-        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   fruitbat:
     # Tests with: MSYS2 unix-on-Windows environment
@@ -554,7 +554,7 @@ jobs:
 
       - name: Test
         shell: msys2 {0}
-        run: cd build && ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   ptarmigan:
     # Tests with various unusual processor architectures
@@ -624,7 +624,7 @@ jobs:
             cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
             cd build
             ninja
-            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+            ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   zebrilus:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".
