@@ -223,7 +223,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Test
-        run: cd build && ctest -C Release -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -C Release -j $env:NUMBER_OF_PROCESSORS --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
       - name: Install
         run: |

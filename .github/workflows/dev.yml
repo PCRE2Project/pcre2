@@ -424,7 +424,7 @@ jobs:
         run: cmake --build build --config RelWithDebInfo
 
       - name: Test
-        run: cd build && ctest -C RelWithDebInfo -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -C RelWithDebInfo -j $env:NUMBER_OF_PROCESSORS --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   pterodactyl:
     # Tests with: MSVC 64-bit, Debug, shared libraries
@@ -444,7 +444,7 @@ jobs:
         run: cmake --build build --config Debug
 
       - name: Test
-        run: cd build && ctest -C Debug -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+        run: cd build && ctest -C Debug -j $env:NUMBER_OF_PROCESSORS --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   bigbird:
     # Job to execute ManyConfigTests
