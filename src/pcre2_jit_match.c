@@ -118,6 +118,7 @@ jit_arguments arguments;
 int rc;
 int index = 0;
 
+/* The same check is performed by jit_check_exec(). */
 if ((options & PCRE2_PARTIAL_HARD) != 0)
   index = 2;
 else if ((options & PCRE2_PARTIAL_SOFT) != 0)
