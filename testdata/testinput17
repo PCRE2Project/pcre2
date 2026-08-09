@@ -318,4 +318,12 @@
 /(...)-(...)/jitfast
     abc-xyz\=get=2
 
+# Commented-out test; please re-enable and run manually on Unicode builds
+# #if unicode
+#
+# /\b/B,utf,ucp,jit=1
+#     \xff\x00\x00\=offset=2,ps
+#
+# #endif
+
 # End of testinput17
