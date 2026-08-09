@@ -452,7 +452,7 @@ jobs:
             PATH=/opt/developerstudio12.6/bin:"$PATH"
             export PATH
 
-            NPROC=`getconf NPROCESSORS_ONLN`
+            NPROC=`nproc 2>/dev/null || echo 2`
 
             cp -rp . ../build-autoconf-32
             cp -rp . ../build-autoconf-64
