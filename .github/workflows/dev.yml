@@ -634,14 +634,14 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zebrilus')) ||
       github.event_name == 'push'
     steps:
-      # The zig version from minimum_zig_version in build.zig.zon will be installed.
-      - name: Install zig
-        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
-
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: true
+          submodules: false
+
+      # The zig version from minimum_zig_version in build.zig.zon will be installed.
+      - name: Install zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
 
       - name: Build
         run: zig build -Dsupport_jit
