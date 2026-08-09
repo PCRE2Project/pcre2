@@ -630,9 +630,7 @@ jobs:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".
     name: Zig
     runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'zebrilus')) ||
-      github.event_name == 'push'
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'zebrilus')
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -658,9 +656,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
     runs-on: ${{ matrix.os }}
-    if: |
-      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'bee')) ||
-      github.event_name == 'push'
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'bee')
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
