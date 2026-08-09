@@ -643,6 +643,9 @@ jobs:
           # cross compilers do not depend on the target's libc headers, and it
           # cannot always be derived from the triple.
           #
+          # Alpha's libc package is libc6.1-dev-alpha-cross, which provides the
+          # libc6-dev-alpha-cross name used here.
+          - { name: alpha,       triple: alpha-linux-gnu,             qemu: alpha,       libc: alpha,      container: "ubuntu:26.04" }
           # Ubuntu armhf defaults to Thumb-2, so ARM mode needs asking for.
           - { name: arm,         triple: arm-linux-gnueabihf,         qemu: arm,         libc: armhf,      container: "ubuntu:26.04", cflags: -marm }
           - { name: arm-thumb2,  triple: arm-linux-gnueabihf,         qemu: arm,         libc: armhf,      container: "ubuntu:26.04", cflags: -mthumb }
