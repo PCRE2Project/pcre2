@@ -609,7 +609,9 @@ typedef struct compare_context {
 
 /* Number of scratch registers the generated code may use. The Alpha CMPBGE
    scanning loops keep up to five replicated character constants live across a
-   loop, so they use scratch registers above RETURN_ADDR and must declare them. */
+   loop, so they use scratch registers above RETURN_ADDR and must declare them.
+   Registers above SLJIT_NUMBER_OF_TEMPORARY_REGISTERS are callee-saved, so
+   every JIT function pays to spill them: keep this as small as it can be. */
 #if (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
 #define SCRATCH_REGISTERS 10
 #else
@@ -6977,6 +6979,16 @@ if (common->match_end_ptr != 0)
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_END, 0, TMP1, 0);
   SELECT(SLJIT_GREATER, STR_END, TMP1, 0, STR_END);
   }
+
+#ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
+if (JIT_HAS_FAST_FORWARD_START_BITS_SIMD && common->mode == PCRE2_JIT_COMPLETE
+    && fast_forward_start_bits_simd(common, start_bits))
+  {
+  if (common->match_end_ptr != 0)
+    OP1(SLJIT_MOV, STR_END, 0, RETURN_ADDR, 0);
+  return;
+  }
+#endif
 
 start = LABEL();
 

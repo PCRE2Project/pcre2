@@ -3108,6 +3108,209 @@ if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 }
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
+
+#define JIT_HAS_FAST_FORWARD_START_BITS_SIMD 1
+
+/* Number of replicated constants the start-bits scanning loop can keep live in
+   scratch registers. A range costs two of them, one per bound; a single
+   character costs one; and a range that reaches 0 or 255 costs one, because
+   that bound needs no test. Bitmaps that need more fall back to the
+   byte-at-a-time bitmap scan.
+
+   Three is what fits alongside the accumulated mask and the per-range mask
+   without raising SCRATCH_REGISTERS, and raising it is not free: the registers
+   above RETURN_ADDR are callee-saved, so widening the budget would add a spill
+   and a reload to the prologue of every JIT function, whether it scans a
+   character class or not. */
+#define ALPHA_START_BITS_MAX_CONSTS 3
+
+/* Emit the CMPBGE match mask for one range into dst, reloading the data word
+   into TMP1 first. Bits 0-7 of dst end up set for the bytes of the word that
+   fall inside [low, high]. TMP1 is clobbered. */
+static void emit_alpha_class_range(struct sljit_compiler *compiler,
+  sljit_s32 dst, sljit_u32 low, sljit_u32 high, sljit_s32 low_reg, sljit_s32 high_reg)
+{
+sljit_s32 dst_ind = sljit_get_register_index(SLJIT_GP_REGISTER, dst);
+sljit_s32 tmp1_ind = sljit_get_register_index(SLJIT_GP_REGISTER, TMP1);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+
+if (low == high)
+  {
+  /* Single character: bits set where the XOR leaves a zero byte. */
+  OP2(SLJIT_XOR, TMP1, 0, TMP1, 0, low_reg, 0);
+  emit_alpha_cmpbge(compiler, 31, tmp1_ind, dst_ind);
+  return;
+  }
+
+if (high == 255)
+  {
+  /* No upper bound to test. */
+  emit_alpha_cmpbge(compiler, tmp1_ind, sljit_get_register_index(SLJIT_GP_REGISTER, low_reg), dst_ind);
+  return;
+  }
+
+if (low == 0)
+  {
+  /* No lower bound to test; complement "greater than high" within 8 bits. */
+  emit_alpha_cmpbge(compiler, tmp1_ind, sljit_get_register_index(SLJIT_GP_REGISTER, high_reg), dst_ind);
+  OP2(SLJIT_XOR, dst, 0, dst, 0, SLJIT_IMM, 0xff);
+  return;
+  }
+
+/* Both bounds: (byte >= low) & ~(byte >= high + 1). */
+emit_alpha_cmpbge(compiler, tmp1_ind, sljit_get_register_index(SLJIT_GP_REGISTER, low_reg), dst_ind);
+emit_alpha_cmpbge(compiler, tmp1_ind, sljit_get_register_index(SLJIT_GP_REGISTER, high_reg), tmp1_ind);
+OP2(SLJIT_XOR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xff);
+OP2(SLJIT_AND, dst, 0, dst, 0, TMP1, 0);
+}
+
+/* Scan for the first code unit whose start bit is set, eight bytes at a time.
+   Returns FALSE without emitting anything if the bitmap does not reduce to few
+   enough ranges, in which case the caller emits its own scan. */
+static BOOL fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+struct sljit_jump *quit;
+struct sljit_jump *no_prefetch;
+sljit_u32 low[ALPHA_START_BITS_MAX_CONSTS];
+sljit_u32 high[ALPHA_START_BITS_MAX_CONSTS];
+sljit_s32 low_reg[ALPHA_START_BITS_MAX_CONSTS];
+sljit_s32 high_reg[ALPHA_START_BITS_MAX_CONSTS];
+sljit_s32 acc, mask_reg;
+int count = 0;
+int consts = 0;
+int next = 5;
+int i, k;
+
+/* Split the bitmap into inclusive ranges, costing the constants as we go. */
+i = 0;
+while (i < 256)
+  {
+  if ((start_bits[i >> 3] & (1 << (i & 0x7))) == 0)
+    {
+    i++;
+    continue;
+    }
+
+  if (count >= ALPHA_START_BITS_MAX_CONSTS)
+    return FALSE;
+
+  low[count] = (sljit_u32)i;
+  while (i < 256 && (start_bits[i >> 3] & (1 << (i & 0x7))) != 0)
+    i++;
+  high[count] = (sljit_u32)(i - 1);
+
+  if (low[count] == high[count] || low[count] == 0 || high[count] == 255)
+    consts += 1;
+  else
+    consts += 2;
+
+  if (consts > ALPHA_START_BITS_MAX_CONSTS)
+    return FALSE;
+  count++;
+  }
+
+/* Nothing to match, or everything matches: leave both to the scalar path. */
+if (count == 0 || (count == 1 && low[0] == 0 && high[0] == 255))
+  return FALSE;
+
+/* Assign a scratch register to each constant, then one for the accumulated
+   mask and one for the per-range mask. RETURN_ADDR is not available: the
+   caller keeps the unclamped STR_END there while match_end_ptr is set. */
+for (k = 0; k < count; k++)
+  {
+  low_reg[k] = 0;
+  high_reg[k] = 0;
+
+  if (low[k] == high[k])
+    low_reg[k] = SLJIT_R(next++);
+  else
+    {
+    if (low[k] != 0)
+      low_reg[k] = SLJIT_R(next++);
+    if (high[k] != 255)
+      high_reg[k] = SLJIT_R(next++);
+    }
+  }
+
+acc = SLJIT_R(next);
+mask_reg = (count > 1) ? SLJIT_R(next + 1) : acc;
+
+for (k = 0; k < count; k++)
+  {
+  if (low_reg[k] != 0)
+    OP1(SLJIT_MOV, low_reg[k], 0, SLJIT_IMM, replicate_char_alpha((PCRE2_UCHAR)low[k]));
+  if (high_reg[k] != 0)
+    OP1(SLJIT_MOV, high_reg[k], 0, SLJIT_IMM, replicate_char_alpha((PCRE2_UCHAR)(high[k] + 1)));
+  }
+
+/* Align STR_PTR down to an 8-byte boundary; keep the misalignment in TMP2. */
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x7);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+emit_alpha_class_range(compiler, acc, low[0], high[0], low_reg[0], high_reg[0]);
+for (k = 1; k < count; k++)
+  {
+  emit_alpha_class_range(compiler, mask_reg, low[k], high[k], low_reg[k], high_reg[k]);
+  OP2(SLJIT_OR, acc, 0, acc, 0, mask_reg, 0);
+  }
+
+/* Restore STR_PTR and drop the bits for bytes before the starting position. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, acc, 0, acc, 0, TMP2, 0);
+
+quit = CMP(SLJIT_NOT_ZERO, acc, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Prefetch threshold: only prefetch while more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
+
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
+
+emit_alpha_class_range(compiler, acc, low[0], high[0], low_reg[0], high_reg[0]);
+for (k = 1; k < count; k++)
+  {
+  emit_alpha_class_range(compiler, mask_reg, low[k], high[k], low_reg[k], high_reg[k]);
+  OP2(SLJIT_OR, acc, 0, acc, 0, mask_reg, 0);
+  }
+
+CMPTO(SLJIT_ZERO, acc, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(quit);
+
+/* Both paths arrive with the mask in acc and STR_PTR at the byte that bit 0
+   of the mask describes. The constants are dead from here on, so R5 is free to
+   borrow: emit_alpha_ctz8() clobbers RETURN_ADDR, which is where the caller
+   keeps the unclamped STR_END while match_end_ptr is set. */
+if (common->match_end_ptr != 0)
+  OP1(SLJIT_MOV, SLJIT_R5, 0, RETURN_ADDR, 0);
+
+OP1(SLJIT_MOV, TMP1, 0, acc, 0);
+emit_alpha_ctz8(compiler);
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+if (common->match_end_ptr != 0)
+  OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_R5, 0);
+
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+return TRUE;
+}
+
+#endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
+
 #endif /* SLJIT_CONFIG_ALPHA */
 
 #endif /* !SUPPORT_VALGRIND */
