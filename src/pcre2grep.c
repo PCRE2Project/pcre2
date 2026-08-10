@@ -2912,14 +2912,15 @@ while (ptr < endptr)
           {
           if (startoffset >= length) goto END_ONE_MATCH;  /* Were at end */
           startoffset = oldstartoffset + 1;
-          if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+          if (utf) while (startoffset < length &&
+                          (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
           }
 
         /* If the current match ended past the end of the line (only possible
         in multiline mode), we must move on to the line in which it did end
         before searching for more matches. */
 
-        while (startoffset > linelength)
+        while (startoffset > linelength && linelength + endlinelength != 0)
           {
           ptr += linelength + endlinelength;
           filepos += (int)(linelength + endlinelength);
@@ -2929,6 +2930,11 @@ while (ptr < endptr)
           linelength = t - ptr - endlinelength;
           length = (PCRE2_SIZE)(endptr - ptr);
           }
+
+        /* If we bumped past the end of the subject (a subject ending in
+        continuation bytes), there is nothing more to match on this line. */
+
+        if (startoffset > linelength) goto END_ONE_MATCH;
 
         goto ONLY_MATCHING_RESTART;
         }
@@ -3081,7 +3087,8 @@ while (ptr < endptr)
           if (startoffset <= oldstartoffset)
             {
             startoffset = oldstartoffset + 1;
-            if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+            if (utf) while (startoffset < length &&
+                            (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
             }
 
           /* If the current match ended past the end of the line (only possible
@@ -3090,7 +3097,8 @@ while (ptr < endptr)
           is set, the start of the match will always be before the first
           newline sequence. */
 
-          while (startoffset > linelength + endlinelength)
+          while (startoffset > linelength + endlinelength &&
+                 linelength + endlinelength != 0)
             {
             ptr += linelength + endlinelength;
             filepos += (int)(linelength + endlinelength);
@@ -3102,11 +3110,11 @@ while (ptr < endptr)
             length = (PCRE2_SIZE)(endptr - ptr);
             }
 
-          /* If startoffset is at the exact end of the line it means this
-          complete line was the final part of the match, so there is nothing
-          more to do. */
+          /* If startoffset is at (or, for a subject ending in continuation
+          bytes, past) the end of the line it means this complete line was the
+          final part of the match, so there is nothing more to do. */
 
-          if (startoffset == linelength + endlinelength) break;
+          if (startoffset >= linelength + endlinelength) break;
 
           /* Otherwise, run a match from within the final line, and if found,
           loop for any that may follow. */
