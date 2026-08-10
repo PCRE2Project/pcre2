@@ -180,9 +180,10 @@ information. It returns one of the following values:
 If an unknown option is given, an error message is output; the exit code is 0.
 .TP 10
 \fB--colo[u]r[=<always,auto,never>]\fP
-By default, the output is coloured if the output file is a terminal (\fBauto\fP).
-Force or suppress output of ANSI colour escapes with \fBalways\fP and \fBnever\fP
-respectively.
+By default, the output is coloured if the output is a terminal (\fBauto\fP)
+and there is no NO_COLOR variable defined in the environment.
+Force or suppress output of ANSI colour escapes with \fBalways\fP and
+\fBnever\fP respectively.
 .TP 10
 \fB-d\fP
 Behave as if each pattern has the \fBdebug\fP modifier; the internal
