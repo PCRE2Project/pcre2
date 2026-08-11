@@ -339,7 +339,11 @@
 # Check UTF validation when falling back from a partially-compiled JIT pattern
 # to the interpreter
 
+#if unicode
+
 /\b/B,utf,ucp,jit=1
     \xff\x00\x00\=offset=2,ps
+
+#endif
 
 # End of testinput17

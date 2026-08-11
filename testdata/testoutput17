@@ -606,6 +606,8 @@ Failed: error -37: callout error code
 # Check UTF validation when falling back from a partially-compiled JIT pattern
 # to the interpreter
 
+#if unicode
+
 /\b/B,utf,ucp,jit=1
 ------------------------------------------------------------------
         Bra
@@ -615,5 +617,7 @@ Failed: error -37: callout error code
 ------------------------------------------------------------------
     \xff\x00\x00\=offset=2,ps
 Partial match: 
+
+#endif
 
 # End of testinput17
