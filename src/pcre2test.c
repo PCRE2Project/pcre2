@@ -3663,6 +3663,7 @@ BOOL skipping_endif = FALSE;
 char *arg_subject = NULL;
 char *arg_pattern = NULL;
 char *arg_error = NULL;
+char *env_no_color = getenv("NO_COLOR");
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
@@ -3687,7 +3688,7 @@ locale_name[0] = 0;
 patctl_zero(&def_patctl);
 datctl_zero(&def_datctl);
 
-if (getenv("NO_COLOR") != NULL && strlen(getenv("NO_COLOR")) > 0)
+if (env_no_color != NULL && strlen(env_no_color) > 0)
   colour_setting = COLOUR_NEVER;
 
 /* Scan command line options. */
