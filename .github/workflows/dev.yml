@@ -559,7 +559,7 @@ jobs:
 
   ptarmigan:
     # Tests with various unusual processor architectures
-    name: Multiarch
+    name: Multiarch container ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
@@ -617,12 +617,19 @@ jobs:
           install: |
             echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
             apt-get -qq update
-            apt-get -qq install -y gcc cmake ninja-build zlib1g-dev libbz2-dev libreadline-dev
+            apt-get -qq install -y gcc cmake patch ninja-build zlib1g-dev libbz2-dev libreadline-dev
 
           run: |
             set -e
-            # TODO: Set -DCMAKE_COMPILE_WARNING_AS_ERROR=ON (there's currently a build failure on S390x)
-            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
+
+            # XXX TMP
+            (cd deps/sljit && patch -p1 < ../../monkey.patch)
+
+            (cd deps/sljit
+            make all
+            ./bin/sljit_test -v)
+
+            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build
             cd build
             ninja
             ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
@@ -630,7 +637,7 @@ jobs:
   coelacanth:
     # Tests with: cross-compilation and qemu-user, for the JIT backends that no
     # other job covers. A coelacanth is a fish that was thought to be extinct.
-    name: QEMU ${{ matrix.config.name }}
+    name: Multiarch cross ${{ matrix.config.name }}
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.config.container }}
@@ -693,6 +700,30 @@ jobs:
         with:
           submodules: true
 
+      - name: XXX Test sljit
+        run: |
+
+          # XXX TMP
+          (cd deps/sljit && patch -p1 < ../../monkey.patch)
+
+          cd deps/sljit
+          CC=${{ matrix.config.triple }}-gcc
+          export CC
+          EXTRA_LDFLAGS=-static
+          export EXTRA_LDFLAGS
+          make all
+          # capture return code to $?, then tail the log, then exit with the return code
+          # NB set -e has been used...
+          if ! qemu-${{ matrix.config.qemu }} \
+            -d in_asm,exec,nochain,guest_errors,unimp \
+            -D ./qemu-log \
+            -strace \
+            ./bin/sljit_test -v; then
+            ret=$?
+            tail -n 1000 ./qemu-log
+            exit $ret
+          fi
+
       - name: Prepare
         run: ./autogen.sh
 
@@ -701,6 +732,12 @@ jobs:
         # executables rather than libtool wrapper scripts, which qemu-user
         # cannot run.
         run: |
+          # XXX should this be needed... or not?
+          # CFLAGS_GCC_STYLE="${CFLAGS_GCC_STYLE} -Wno-error=unused-function"
+
+          # XXX TMP
+          #(cd deps/sljit && patch -p1 < ../../monkey.patch)
+
           ./configure \
             --build=`./config.guess` \
             --host=${{ matrix.config.triple }} \
