@@ -352,6 +352,16 @@ as described for \fBpcre2_match()\fP above. Another possibility is to work with
 two buffers. If a partial match at offset \fIn\fP in the first buffer is
 followed by "no match" when PCRE2_DFA_RESTART is used on the second buffer, you
 can then try a new match starting at offset \fIn+1\fP in the first buffer.
+.P
+Note that PCRE2_DFA_RESTART does not remove the need to keep earlier subject
+data. A lookbehind assertion still refers to characters that PCRE2 no longer
+holds, so the amount that must be retained is bounded in the same way as for
+\fBpcre2_match()\fP, described above; see PCRE2_INFO_MAXLOOKBEHIND. Together
+with the inability to retry at a new starting point, this makes the restart
+facility awkward for matching a stream. Retaining a bounded amount of earlier
+text and running a fresh match over it, as described for \fBpcre2_match()\fP
+above, achieves the same results as searching the whole subject at once, and is
+easier to reason about.
 .
 .
 .SH AUTHOR
