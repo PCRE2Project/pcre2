@@ -2003,6 +2003,7 @@ switch(cmd)
     {
     (void)pcre2_config(coptlist[i].value, &config_value);
     }
+
   if ((config_value != 0) == if_inverted)
     {
     /* Condition FALSE - skip this line and everything until #endif. */
