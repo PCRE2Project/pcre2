@@ -509,16 +509,24 @@ if (count > 1)
   emit_vector_op(compiler, reg_type, 0xeb, data_ind, data_ind, acc_ind);
 }
 
-/* Scan for the first code unit whose start bit is set, 16 bytes at a time.
-   Returns FALSE without emitting anything if the bitmap does not reduce to few
-   enough ranges, or accepts too many code units, in which case the caller
-   emits its own scan. */
-static BOOL fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits)
+/* Scan for the first code unit whose start bit is set, 16 bytes at a time. The
+   bitmap describes the code unit at offset from the start of the match, and
+   STR_PTR is left pointing at that start. When bit_255_above is TRUE, as for
+   the start bitmap built by pcre2_study(), bit 255 stands for every code unit
+   from 255 upwards; otherwise, as for a positive class, no code unit above 255
+   is accepted. Returns FALSE without emitting anything if the bitmap does not
+   reduce to few enough ranges, or accepts too many code units, in which case
+   the caller emits its own scan. */
+static BOOL fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits, sljit_s32 offset,
+  BOOL bit_255_above)
 {
 DEFINE_COMPILER;
 sljit_u8 instruction[4];
 sljit_s32 reg_type = SLJIT_SIMD_REG_128;
 struct sljit_label *start;
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
 struct sljit_jump *quit;
 start_bits_range ranges[X86_START_BITS_MAX_RANGES];
 sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_GP_REGISTER, TMP1);
@@ -540,18 +548,20 @@ int count, k;
 SLJIT_COMPILE_ASSERT(3 + X86_START_BITS_MAX_RANGES * 2 <= SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS,
   not_enough_vector_registers);
 
-SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
+SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offset >= 0);
 
 count = extract_start_bits_ranges(start_bits, ranges, X86_START_BITS_MAX_RANGES, X86_START_BITS_MAX_COVERED);
 if (count <= 0)
   return FALSE;
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
-/* Code units above the bitmap are accepted when its highest bit is set, as in
-   fast_forward_start_bits(), so the range reaching it runs on to the largest
+/* Where bit 255 stands for the code units above it too, as it does in
+   fast_forward_start_bits(), the range reaching it runs on to the largest
    code unit. */
-if (ranges[count - 1].high == 255)
+if (bit_255_above && ranges[count - 1].high == 255)
   ranges[count - 1].high = max_unit;
+#else
+SLJIT_UNUSED_ARG(bit_255_above);
 #endif
 
 /* Initialize. */
@@ -559,10 +569,20 @@ if (common->match_end_ptr != 0)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
-  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(1));
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
 
   OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
   SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
+  }
+
+/* At offset zero the block the first load reads from is known to hold at least
+   one code unit of the subject, so the load cannot cross into an unmapped page
+   and the end of the subject is checked only once a candidate is found. That no
+   longer holds once STR_PTR is moved forward. */
+if (offset > 0)
+  {
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
   }
 
 /* Load the constants of every range, two registers apiece from VR3 upwards,
@@ -595,6 +615,10 @@ for (k = 0; k < count; k++)
     limit_ind[k] = sljit_get_register_index(reg_type, limit_reg);
     }
   }
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
 
 OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
 
@@ -638,6 +662,25 @@ sljit_emit_op_custom(compiler, instruction, 3);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
 
 add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf && offset > 0)
+  {
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, restart);
+
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_JUMP));
+
+  JUMPHERE(quit);
+  }
+#endif
+
+if (offset > 0)
+  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
 
 if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
