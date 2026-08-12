@@ -122,22 +122,54 @@ return (sljit_s32)(value);
 #endif
 }
 
-static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
-  sljit_s32 reg_type, int step, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
-{
-sljit_u8 instruction[4];
+/* Emit dst = src1 <opcode> src2 as a two operand SSE2 instruction when reg_type
+   is SLJIT_SIMD_REG_128, and as a three operand AVX2 one when it is
+   SLJIT_SIMD_REG_256. SSE2 has no separate first source operand, so src1 must
+   be the same register as dst there. Instructions which have no first source
+   operand at all, such as MOVDQA, pass -1 for src1_ind.
 
-if (reg_type == SLJIT_SIMD_REG_128)
+   A REX prefix is emitted for xmm8 and above, which the start-bits scan below
+   reaches as soon as it holds the bounds of more than two ranges. The two byte
+   VEX prefix cannot encode those registers, so the AVX2 form is limited to the
+   first eight. */
+
+static void emit_vector_op(struct sljit_compiler *compiler, sljit_s32 reg_type,
+  sljit_u8 opcode, sljit_s32 dst_ind, sljit_s32 src1_ind, sljit_s32 src2_ind)
+{
+sljit_u8 instruction[5];
+int size = 0;
+
+if (reg_type == SLJIT_SIMD_REG_256)
   {
-  instruction[0] = 0x66;
-  instruction[1] = 0x0f;
+  SLJIT_ASSERT(dst_ind < 8 && src1_ind < 8 && src2_ind < 8);
+
+  /* Two byte VEX prefix. The 0x0f opcode map is implied, vvvv holds the first
+     source operand inverted, and it is all ones when there is none. */
+  instruction[size++] = 0xc5;
+  instruction[size++] = (sljit_u8)(0xfd ^ ((src1_ind >= 0) ? (src1_ind << 3) : 0));
   }
 else
   {
-  /* Two byte VEX prefix. */
-  instruction[0] = 0xc5;
-  instruction[1] = 0xfd;
+  SLJIT_ASSERT(src1_ind < 0 || src1_ind == dst_ind);
+
+  instruction[size++] = 0x66;
+
+  if (dst_ind >= 8 || src2_ind >= 8)
+    instruction[size++] = (sljit_u8)(0x40 | ((dst_ind >= 8) ? 0x4 : 0) | ((src2_ind >= 8) ? 0x1 : 0));
+
+  instruction[size++] = 0x0f;
   }
+
+instruction[size++] = opcode;
+instruction[size++] = (sljit_u8)(0xc0 | ((dst_ind & 0x7) << 3) | (src2_ind & 0x7));
+sljit_emit_op_custom(compiler, instruction, size);
+}
+
+static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
+  sljit_s32 reg_type, int step, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
+{
+/* PCMPEQB/W/D xmm1, xmm2/m128 */
+const sljit_u8 pcmpeq = (sljit_u8)(0x74 + SIMD_COMPARE_TYPE_INDEX);
 
 SLJIT_ASSERT(step >= 0 && step <= 3);
 
@@ -146,30 +178,13 @@ if (compare_type != vector_compare_match2)
   if (step == 0)
     {
     if (compare_type == vector_compare_match1i)
-      {
       /* POR xmm1, xmm2/m128 */
-      if (reg_type == SLJIT_SIMD_REG_256)
-        instruction[1] ^= (dst_ind << 3);
-
-      /* Prefix is filled. */
-      instruction[2] = 0xeb;
-      instruction[3] = 0xc0 | (dst_ind << 3) | cmp2_ind;
-      sljit_emit_op_custom(compiler, instruction, 4);
-      }
+      emit_vector_op(compiler, reg_type, 0xeb, dst_ind, dst_ind, cmp2_ind);
     return;
     }
 
-  if (step != 2)
-    return;
-
-  /* PCMPEQB/W/D xmm1, xmm2/m128 */
-  if (reg_type == SLJIT_SIMD_REG_256)
-    instruction[1] ^= (dst_ind << 3);
-
-  /* Prefix is filled. */
-  instruction[2] = 0x74 + SIMD_COMPARE_TYPE_INDEX;
-  instruction[3] = 0xc0 | (dst_ind << 3) | cmp1_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  if (step == 2)
+    emit_vector_op(compiler, reg_type, pcmpeq, dst_ind, dst_ind, cmp1_ind);
   return;
   }
 
@@ -178,10 +193,12 @@ if (reg_type == SLJIT_SIMD_REG_256)
   if (step == 2)
     return;
 
+  /* The three operand form writes the result of the comparison to a register
+     of its own, so it does the work of steps 0 and 2 in one instruction. */
   if (step == 0)
     {
-    step = 2;
-    instruction[1] ^= (dst_ind << 3);
+    emit_vector_op(compiler, reg_type, pcmpeq, tmp_ind, dst_ind, cmp2_ind);
+    return;
     }
   }
 
@@ -191,40 +208,19 @@ switch (step)
   SLJIT_ASSERT(reg_type == SLJIT_SIMD_REG_128);
 
   /* MOVDQA xmm1, xmm2/m128 */
-  /* Prefix is filled. */
-  instruction[2] = 0x6f;
-  instruction[3] = 0xc0 | (tmp_ind << 3) | dst_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, 0x6f, tmp_ind, -1, dst_ind);
   return;
 
   case 1:
-  /* PCMPEQB/W/D xmm1, xmm2/m128 */
-  if (reg_type == SLJIT_SIMD_REG_256)
-    instruction[1] ^= (dst_ind << 3);
-
-  /* Prefix is filled. */
-  instruction[2] = 0x74 + SIMD_COMPARE_TYPE_INDEX;
-  instruction[3] = 0xc0 | (dst_ind << 3) | cmp1_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, pcmpeq, dst_ind, dst_ind, cmp1_ind);
   return;
 
   case 2:
-  /* PCMPEQB/W/D xmm1, xmm2/m128 */
-  /* Prefix is filled. */
-  instruction[2] = 0x74 + SIMD_COMPARE_TYPE_INDEX;
-  instruction[3] = 0xc0 | (tmp_ind << 3) | cmp2_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, pcmpeq, tmp_ind, tmp_ind, cmp2_ind);
   return;
 
   case 3:
-  /* POR xmm1, xmm2/m128 */
-  if (reg_type == SLJIT_SIMD_REG_256)
-    instruction[1] ^= (dst_ind << 3);
-
-  /* Prefix is filled. */
-  instruction[2] = 0xeb;
-  instruction[3] = 0xc0 | (dst_ind << 3) | tmp_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, 0xeb, dst_ind, dst_ind, tmp_ind);
   return;
   }
 }
