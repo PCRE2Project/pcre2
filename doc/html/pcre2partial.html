@@ -389,15 +389,18 @@ followed by "no match" when PCRE2_DFA_RESTART is used on the second buffer, you
 can then try a new match starting at offset <i>n+1</i> in the first buffer.
 </p>
 <p>
-Note that PCRE2_DFA_RESTART does not remove the need to keep earlier subject
-data. A lookbehind assertion still refers to characters that PCRE2 no longer
-holds, so the amount that must be retained is bounded in the same way as for
-<b>pcre2_match()</b>, described above; see PCRE2_INFO_MAXLOOKBEHIND. Together
-with the inability to retry at a new starting point, this makes the restart
-facility awkward for matching a stream. Retaining a bounded amount of earlier
-text and running a fresh match over it, as described for <b>pcre2_match()</b>
-above, achieves the same results as searching the whole subject at once, and is
-easier to reason about.
+Therefore, PCRE2_DFA_RESTART does not remove the need to keep earlier subject
+data. In order to perform a bumpalong and continue matching at the next
+character, all subject data from the current match start must be retained,
+together with enough preceding data to satisfy the requirements of lookbehind
+assertions (remembering as above that PCRE2_INFO_MAXLOOKBEHIND only describes
+the buffer requirement of a single lookbehind, and nested lookbehinds can read
+back further from the match start). This makes streaming match processing
+using PCRE2_DFA_RESTART challenging, and the application cannot easily set a
+bound on the number of chunks to buffer. For multi-segment searching that is
+intended to produce the same result as searching the whole subject, it is
+usually simpler to avoid PCRE2_DFA_RESTART and run a fresh match, using either
+matching function, over the retained text.
 </p>
 <h2><a name="SEC7" href="#TOC1">AUTHOR</a></h2>
 <p>
