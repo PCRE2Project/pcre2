@@ -2026,12 +2026,23 @@ for (;;)
     char promptbuf[80];
     int snprintf_rc;
     char *s;
-    if (should_print_colour(clr_prompt, stdout) &&
-        (snprintf_rc = snprintf(promptbuf, sizeof(promptbuf), "\x1b[%dm%s\x1b[0m", clr_prompt, prompt)) > 0 &&
-        snprintf_rc < (int)sizeof(promptbuf))
-      s = readline(promptbuf);
+    if (should_print_colour(clr_prompt, stdout))
+      /* libedit cannot handle ANSI escapes as the final character of a prompt,
+      so we ensure a trailing space comes after the last escape. */
+      snprintf_rc = snprintf(promptbuf, sizeof(promptbuf),
+                             "%c\x1b[%dm%c%s%c\x1b[0m%c ",
+                             RL_PROMPT_START_IGNORE, clr_prompt,
+                             RL_PROMPT_END_IGNORE, prompt,
+                             RL_PROMPT_START_IGNORE,
+                             RL_PROMPT_END_IGNORE);
     else
-      s = readline(prompt);
+      snprintf_rc = snprintf(promptbuf, sizeof(promptbuf), "%s ", prompt);
+    if (snprintf_rc <= 0 || snprintf_rc >= (int)sizeof(promptbuf))
+      {
+      cfprintf(clr_test_error, outfile, "** Interactive prompt exceeds buffer space\n");
+      exit(1);
+      }
+    s = readline(promptbuf);
     if (s == NULL) return (here == start)? NULL : start;
     dlen = strlen(s);
     if (dlen > rlen - 2)
@@ -3652,6 +3663,7 @@ BOOL skipping_endif = FALSE;
 char *arg_subject = NULL;
 char *arg_pattern = NULL;
 char *arg_error = NULL;
+char *env_no_color = getenv("NO_COLOR");
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
@@ -3675,6 +3687,9 @@ locale_name[0] = 0;
 
 patctl_zero(&def_patctl);
 datctl_zero(&def_datctl);
+
+if (env_no_color != NULL && strlen(env_no_color) > 0)
+  colour_setting = COLOUR_NEVER;
 
 /* Scan command line options. */
 
@@ -4065,7 +4080,7 @@ while (notdone)
   expectdata |= preg.re_pcre2_code != NULL;
 #endif
 
-  if (extend_inputline(infile, buffer, expectdata? "data> " : "  re> ") == NULL)
+  if (extend_inputline(infile, buffer, expectdata? "data>" : "  re>") == NULL)
     break;
 
   /* Pre-process input lines with #if...#endif. */

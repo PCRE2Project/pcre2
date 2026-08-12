@@ -332,6 +332,19 @@ perl maint/CheckTxt "${txt_files[@]}"
 perl maint/CheckTxt -ascii "${c_files[@]}"
 perl maint/CheckTxt -crlf "${crlf_files[@]}"
 
+SLJIT_COMMIT=$(git rev-parse HEAD:deps/sljit 2>/dev/null)
+if [ -z "$SLJIT_COMMIT" ] ; then
+  echo "Warning: could not find deps/sljit in the tree; not updating build.zig.zon"
+elif grep -q "sljit.git#$SLJIT_COMMIT" build.zig.zon ; then
+  echo "SLJIT pinned in build.zig.zon to $SLJIT_COMMIT"
+elif ! command -v zig >/dev/null 2>&1 ; then
+  echo "Warning: zig is not executable; not updating build.zig.zon"
+else
+  echo "Updating SLJIT pin in build.zig.zon to $SLJIT_COMMIT"
+  zig fetch --save=sljit "git+https://github.com/zherczeg/sljit.git#$SLJIT_COMMIT"
+  if [ $? != 0 ] ; then exit 1; fi
+fi
+
 # Verify the version number in the Bazel file
 if ! grep -E "version = \"$CURRENT_RELEASE\"" MODULE.bazel >/dev/null ; then
   echo "Version number in MODULE.bazel does not match current release"

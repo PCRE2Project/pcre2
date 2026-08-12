@@ -173,9 +173,11 @@ COMMAND LINE OPTIONS
                  the exit code is 0.
 
        --colo[u]r[=<always,auto,never>]
-                 By default, the output is coloured if the output  file  is  a
-                 terminal (auto).  Force or suppress output of ANSI colour es-
-                 capes with always and never respectively.
+                 With auto, the output is coloured if the output is to a  ter-
+                 minal.  Force  or suppress output of ANSI colour escapes with
+                 always (or no specifier provided) and never respectively.  If
+                 no colour option is provided, the default is auto, unless the
+                 NO_COLOR environment variable is defined and non-empty.
 
        -d        Behave  as if each pattern has the debug modifier; the inter-
                  nal form and information about the compiled pattern is output

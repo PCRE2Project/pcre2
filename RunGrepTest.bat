@@ -778,6 +778,17 @@ echo RC=^%ERRORLEVEL%>>testtrygrep
 echo ---------------------------- Test 147 ----------------------------->>testtrygrep
 %pcre2grep% -e "123|fox" -- -nonfile >>testtrygrep 2>&1
 echo RC=^%ERRORLEVEL%>>testtrygrep
+%printf% "A123B" >testtemp1grep
+%printf% "C123D" >.\-testtemp1grep
+%pcre2grep% "123" -- -testtemp1grep >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% "123" testtemp1grep -- -testtemp1grep >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% "123" -- <testtemp1grep >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%printf% "E123F" >.\--
+%pcre2grep% -- "123" -- >>testtrygrep 2>&1
+echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test 148 ----------------------------->>testtrygrep
 %pcre2grep% --nonexist >>testtrygrep 2>&1
@@ -1095,7 +1106,7 @@ call :checkspecial "-e (unpaired1 -e (unpaired2 nul" 2 || exit /b 1
 
 
 :: Clean up local working files
-del testcf printf.js trnull.js testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
+del testcf printf.js trnull.js testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep -testtemp1grep --
 
 exit /b 0
 

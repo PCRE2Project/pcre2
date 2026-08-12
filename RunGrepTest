@@ -811,6 +811,17 @@ echo "RC=$?" >>testtrygrep
 echo "---------------------------- Test 147 -----------------------------" >>testtrygrep
 $valgrind $vjs $pcre2grep -e '123|fox' -- -nonfile >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
+printf 'A123B' >testtemp1grep
+printf 'C123D' > ./-testtemp1grep
+$valgrind $vjs $pcre2grep '123' -- -testtemp1grep >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep '123' testtemp1grep -- -testtemp1grep >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep '123' -- <testtemp1grep >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+printf 'E123F' > ./--
+$valgrind $vjs $pcre2grep -- '123' -- >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
 
 echo "---------------------------- Test 148 -----------------------------" >>testtrygrep
 $valgrind $vjs $pcre2grep --nonexist >>testtrygrep 2>&1
@@ -1159,6 +1170,7 @@ checkspecial "-e (unpaired1 -e (unpaired2 /dev/null" 2
 
 # Clean up local working files
 rm -f testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep
+rm -f ./-testtemp1grep ./--
 
 exit 0
 

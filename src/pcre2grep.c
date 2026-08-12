@@ -3944,6 +3944,7 @@ main(int argc, char **argv)
 int i, j;
 int rc = 1;
 BOOL only_one_at_top;
+BOOL options_terminated = FALSE;
 patstr *cp;
 fnstr *fn;
 omstr *om;
@@ -3992,6 +3993,7 @@ for (i = 1; i < argc; i++)
 
     if (*arg == 0)    /* -- terminates options */
       {
+      options_terminated = TRUE;
       i++;
       break;                /* out of the options-handling loop */
       }
@@ -4258,6 +4260,23 @@ for (i = 1; i < argc; i++)
     if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = (uint32_t)n;
       else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n;
       else *((int *)op->dataptr) = (int)n;
+    }
+  }
+
+/* GNU grep also recognizes -- after positional arguments. If option parsing
+has not already been terminated, remove the first such delimiter. */
+
+if (!options_terminated)
+  {
+  for (j = i; j < argc; j++)
+    {
+    if (strcmp(argv[j], "--") == 0)
+      {
+      /* Move the (argc - j - 1) remaining arguments and the terminating NULL */
+      memmove(argv + j, argv + j + 1, (argc - j) * sizeof(*argv));
+      argc--;
+      break;
+      }
     }
   }
 
