@@ -6998,6 +6998,12 @@ struct sljit_jump *found = NULL;
 #endif
 jump_list *matches = NULL;
 
+#ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
+if (JIT_HAS_FAST_FORWARD_START_BITS_SIMD && common->mode == PCRE2_JIT_COMPLETE
+    && fast_forward_start_bits_simd(common, start_bits))
+  return;
+#endif
+
 if (common->match_end_ptr != 0)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
