@@ -8351,4 +8351,11 @@ a)"xI
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
 
+# An unterminated \x{ or \o{ escape at the end of the pattern must report an
+# error offset that lies within the pattern.
+
+/\x{2/
+
+/\o{7/
+
 # End of testinput2

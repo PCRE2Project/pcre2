@@ -2224,7 +2224,10 @@ return escape;
 /* Some errors need to indicate the next character. */
 
 ESCAPE_FAILED_FORWARD:
-ptr++;
+/* Point past the offending character, but not past the end of the pattern. The
+\x{ and \o{ scanners can reach here with ptr at ptrend, and the reported error
+offset must stay within the pattern. */
+if (ptr < ptrend) ptr++;
 #ifdef SUPPORT_UNICODE
 if (utf) FORWARDCHARTEST(ptr, ptrend);
 #endif
