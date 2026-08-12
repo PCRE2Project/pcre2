@@ -2020,7 +2020,7 @@ else
     else
       {
       *errorcodeptr = ERR64;
-      goto ESCAPE_FAILED_FORWARD;
+      if (ptr < ptrend) goto ESCAPE_FAILED_FORWARD;
       }
     break;
 
@@ -2107,7 +2107,7 @@ else
         else
           {
           *errorcodeptr = ERR67;
-          goto ESCAPE_FAILED_FORWARD;
+          if (ptr < ptrend) goto ESCAPE_FAILED_FORWARD;
           }
         }   /* End of \x{} processing */
 
@@ -2224,10 +2224,7 @@ return escape;
 /* Some errors need to indicate the next character. */
 
 ESCAPE_FAILED_FORWARD:
-/* Point past the offending character, but not past the end of the pattern. The
-\x{ and \o{ scanners can reach here with ptr at ptrend, and the reported error
-offset must stay within the pattern. */
-if (ptr < ptrend) ptr++;
+ptr++;
 #ifdef SUPPORT_UNICODE
 if (utf) FORWARDCHARTEST(ptr, ptrend);
 #endif
