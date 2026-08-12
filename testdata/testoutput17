@@ -539,15 +539,38 @@ Failed: error -47: match limit exceeded
  0: abc (JIT)
     abc\=no_jit 
  0: abc
-    
+
+/(*NO_JIT)abc/
+    abc
+ 0: abc
+
 /abc/jitfast
     abc
  0: abc (JIT)
+    abc\=no_jit 
+ 0: abc
+
+/(*NO_JIT)abc/jitfast
+\= Expect error
+    abc
+Failed: error -45: bad JIT option
+
+# Do not leak a previously copied subject with jitfast (#920)
+
+/abc/jitfast
+    abc\=copy_matched_subject,no_jit
+ 0: abc
+    abc
+ 0: abc (JIT)
+
+/abc/jitfast
     abc\=copy_matched_subject
  0: abc (JIT)
-    abc\=no_jit 
+    abc\=null_context
  0: abc (JIT)
-    
+    abc\=null_context,no_jit
+ 0: abc
+
 # ---- 
 
 /[aC]/mg,firstline,newline=lf
