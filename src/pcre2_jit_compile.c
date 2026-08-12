@@ -6387,6 +6387,46 @@ CMPTO(SLJIT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00, label);
 }
 #endif
 
+/* Splits a 256 bit class bitmap into the code unit values at which membership
+of the class changes: entry n is the first code unit whose membership differs
+from that of entry n-1, and the membership below the first entry is given by
+bit zero of the bitmap. An empty or a full bitmap therefore has no entries.
+Returns the number of entries, or -1 when there are more than max_ranges of
+them. */
+
+static int extract_class_ranges(const sljit_u8 *bits, int *ranges, int max_ranges)
+{
+sljit_u8 bit, cbit, all;
+int i, byte, length = 0;
+
+bit = bits[0] & 0x1;
+/* All bits will be zero or one (since bit is zero or one). */
+all = (sljit_u8)-bit;
+
+for (i = 0; i < 256; )
+  {
+  byte = i >> 3;
+  if ((i & 0x7) == 0 && bits[byte] == all)
+    i += 8;
+  else
+    {
+    cbit = (bits[byte] >> (i & 0x7)) & 0x1;
+    if (cbit != bit)
+      {
+      if (length >= max_ranges)
+        return -1;
+      ranges[length] = i;
+      length++;
+      bit = cbit;
+      all = (sljit_u8)-cbit; /* sign extend bit into byte */
+      }
+    i++;
+    }
+  }
+
+return length;
+}
+
 #include "pcre2_jit_simd_inc.h"
 
 #ifdef JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD
@@ -7315,33 +7355,15 @@ static BOOL optimize_class_ranges(compiler_common *common, const sljit_u8 *bits,
 /* May destroy TMP1. */
 DEFINE_COMPILER;
 int ranges[MAX_CLASS_RANGE_SIZE];
-sljit_u8 bit, cbit, all;
-int i, byte, length = 0;
+sljit_u8 bit;
+int i, length;
 
-bit = bits[0] & 0x1;
-/* All bits will be zero or one (since bit is zero or one). */
-all = (sljit_u8)-bit;
+length = extract_class_ranges(bits, ranges, MAX_CLASS_RANGE_SIZE);
+if (length < 0)
+  return FALSE;
 
-for (i = 0; i < 256; )
-  {
-  byte = i >> 3;
-  if ((i & 0x7) == 0 && bits[byte] == all)
-    i += 8;
-  else
-    {
-    cbit = (bits[byte] >> (i & 0x7)) & 0x1;
-    if (cbit != bit)
-      {
-      if (length >= MAX_CLASS_RANGE_SIZE)
-        return FALSE;
-      ranges[length] = i;
-      length++;
-      bit = cbit;
-      all = (sljit_u8)-cbit; /* sign extend bit into byte */
-      }
-    i++;
-    }
-  }
+/* Membership of the highest code unit in the bitmap. */
+bit = (bits[31] >> 7) & 0x1;
 
 if (((bit == 0) && nclass) || ((bit == 1) && !nclass))
   {
@@ -7350,9 +7372,6 @@ if (((bit == 0) && nclass) || ((bit == 1) && !nclass))
   ranges[length] = 256;
   length++;
   }
-
-if (length < 0 || length > 4)
-  return FALSE;
 
 bit = bits[0] & 0x1;
 if (invert) bit ^= 0x1;
