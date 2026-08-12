@@ -381,6 +381,13 @@ typedef struct fast_forward_char_data {
   sljit_u8 count;
   /* Number of last UTF-8 characters in the chars array. */
   sljit_u8 last_count;
+  /* TRUE when something other than the class in class_bits also reaches this
+     position, which makes class_bits unusable. */
+  sljit_u8 mixed;
+  /* Bitmap of the characters accepted in the current position, when the only
+     thing reaching it is a single class. NULL otherwise. Unlike the chars
+     array this is not limited to MAX_DIFF_CHARS characters. */
+  const sljit_u8 *class_bits;
   /* Available characters in the current position. */
   PCRE2_UCHAR chars[MAX_DIFF_CHARS];
 } fast_forward_char_data;
@@ -5857,6 +5864,23 @@ if (last)
   chars->last_count++;
 }
 
+/* Records that the characters accepted in the current position come from the
+class bitmap in bits, or from something which is not a class when bits is NULL.
+A position keeps its bitmap only while one and the same class reaches it. */
+
+static SLJIT_INLINE void set_prefix_class_bits(fast_forward_char_data *chars, const sljit_u8 *bits)
+{
+if (bits != NULL && !chars->mixed
+    && (chars->class_bits != NULL ? chars->class_bits == bits : chars->count == 0))
+  {
+  chars->class_bits = bits;
+  return;
+  }
+
+chars->class_bits = NULL;
+chars->mixed = TRUE;
+}
+
 /* Value can be increased if needed. Patterns
 such as /(a|){33}b/ can exhaust the stack.
 
@@ -5891,6 +5915,7 @@ BOOL last, any, class, caseless;
 int stack_ptr, step_count, repeat, len, len_save;
 sljit_u32 chr; /* Any unicode character. */
 sljit_u8 *bytes, *bytes_end, byte;
+const sljit_u8 *class_start;
 PCRE2_SPTR alternative, cc_save, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
 PCRE2_UCHAR othercase[4];
@@ -6201,6 +6226,7 @@ while (TRUE)
     do
       {
       chars->count = 255;
+      set_prefix_class_bits(chars, NULL);
       chars++;
       }
     while (--repeat > 0 && chars < chars_end);
@@ -6212,6 +6238,9 @@ while (TRUE)
   if (class)
     {
     bytes = (sljit_u8*) (cc + 1);
+    /* When the highest bit is set, code units above the bitmap are accepted as
+    well, so the bitmap does not describe the class on its own. */
+    class_start = (bytes[31] & 0x80) ? NULL : bytes;
     cc += 1 + 32 / sizeof(PCRE2_UCHAR);
 
     SLJIT_ASSERT(last == TRUE && repeat == 1);
@@ -6261,6 +6290,8 @@ while (TRUE)
 
     do
       {
+      set_prefix_class_bits(chars, class_start);
+
       if (bytes[31] & 0x80)
         chars->count = 255;
       else if (chars->count != 255)
@@ -6348,6 +6379,7 @@ while (TRUE)
       len--;
 
       chr = *cc;
+      set_prefix_class_bits(chars, NULL);
       add_prefix_char(*cc, chars, len == 0);
 
       if (caseless)
@@ -6479,6 +6511,58 @@ return TRUE;
 
 #endif /* JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD */
 
+#ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
+
+/* Counts the code units a class bitmap accepts. */
+
+static int count_class_bits(const sljit_u8 *bits)
+{
+int i, count = 0;
+
+for (i = 0; i < 32; i++)
+  {
+  sljit_u8 byte = bits[i];
+
+  while (byte != 0)
+    {
+    count += byte & 0x1;
+    byte >>= 1;
+    }
+  }
+
+return count;
+}
+
+static BOOL check_fast_forward_start_bits_simd(compiler_common *common, fast_forward_char_data *chars, int max)
+{
+int i, count, best_i = -1, best_count = 0;
+
+/* The scan tests a whole block of code units before it can stop, so the
+sparser the class the more it gains over testing them one at a time, and the
+sparsest position is the one to pick. Positions holding one or two characters
+are left to the scans which specialize in those. */
+for (i = 0; i < max; i++)
+  {
+  if (chars[i].class_bits == NULL || chars[i].count <= 2)
+    continue;
+
+  count = count_class_bits(chars[i].class_bits);
+
+  if (best_i < 0 || count < best_count)
+    {
+    best_i = i;
+    best_count = count;
+    }
+  }
+
+if (best_i < 0)
+  return FALSE;
+
+return fast_forward_start_bits_simd(common, chars[best_i].class_bits, best_i);
+}
+
+#endif /* JIT_HAS_FAST_FORWARD_START_BITS_SIMD */
+
 static void fast_forward_first_char2(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
 {
 DEFINE_COMPILER;
@@ -6583,6 +6667,8 @@ for (i = 0; i < MAX_N_CHARS; i++)
   {
   chars[i].count = 0;
   chars[i].last_count = 0;
+  chars[i].mixed = FALSE;
+  chars[i].class_bits = NULL;
   }
 
 max = scan_prefix(common, common->start, chars);
@@ -6697,7 +6783,16 @@ SLJIT_ASSERT(offset == -1 || (chars[offset].count >= 1 && chars[offset].count <=
 if (range_right < 0)
   {
   if (offset < 0)
+    {
+    /* No position holds few enough characters to be worth searching for one at
+    a time, but a position may still hold a class sparse enough to vectorize. */
+#ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
+    if (JIT_HAS_FAST_FORWARD_START_BITS_SIMD && common->mode == PCRE2_JIT_COMPLETE
+        && check_fast_forward_start_bits_simd(common, chars, max))
+      return TRUE;
+#endif
     return FALSE;
+    }
   /* Works regardless the value is 1 or 2. */
   fast_forward_first_char2(common, chars[offset].chars[0], chars[offset].chars[1], offset);
   return TRUE;
@@ -7000,7 +7095,7 @@ jump_list *matches = NULL;
 
 #ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
 if (JIT_HAS_FAST_FORWARD_START_BITS_SIMD && common->mode == PCRE2_JIT_COMPLETE
-    && fast_forward_start_bits_simd(common, start_bits))
+    && fast_forward_start_bits_simd(common, start_bits, 0))
   return;
 #endif
 
