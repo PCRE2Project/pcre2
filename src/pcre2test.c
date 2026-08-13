@@ -3647,6 +3647,218 @@ display_selected_modifiers(FALSE, "SUBJECT");
 
 
 /*************************************************
+*        Helpers for the grep test scripts       *
+*************************************************/
+
+/* RunGrepTest and RunGrepTest.bat have to create input files that contain
+exact byte sequences, including bytes that cannot start a UTF-8 character, and
+they also have to filter a stream, changing one byte value into another. On
+Unix-like systems printf(1) and tr(1) do this, but Windows has no dependable
+equivalent: the obvious candidates all translate what they write according to
+the current code page, which mangles any byte greater than 0x7f. As both
+scripts are checked against the same expected output, they need the same
+facilities, so these options provide just enough of printf and tr for
+RunGrepTest.bat to produce exactly the same bytes as RunGrepTest does.
+
+They are needed only by RunGrepTest.bat, so they are built only on Windows.
+They are deliberately undocumented, are not part of pcre2test's interface, and
+may change whenever the test scripts need something different. */
+
+#if defined(_WIN32) || defined(WIN32)
+
+/* Standard input and output are put into binary mode, because the Windows
+default is to turn every LF that passes through into CRLF. */
+
+static void
+helper_binary_io(void)
+{
+_setmode(_fileno(stdin), _O_BINARY);
+_setmode(_fileno(stdout), _O_BINARY);
+}
+
+
+/* Decode an argument that represents a single byte, either as itself or as a
+backslash followed by up to three octal digits. The result is the byte value,
+or -1 if the argument is not one of those things. */
+
+static int
+helper_byte(const char *s)
+{
+if (s[0] == '\\' && s[1] >= '0' && s[1] <= '7')
+  {
+  int value = 0;
+  int i = 0;
+  int n = 0;
+  while (n < 3 && s[i+1] >= '0' && s[i+1] <= '7')
+    {
+    value = value * 8 + (s[++i] - '0');
+    n++;
+    }
+  return (s[i+1] == 0 && value <= 255)? value : -1;
+  }
+
+return (s[0] != 0 && s[1] == 0)? (unsigned char)s[0] : -1;
+}
+
+
+/* Write the format argument to the standard output, interpreting the escape
+sequences that the test scripts use, and replacing every occurrence of %s with
+the second argument. The escapes are \n, \r, \\ and an octal escape of up to
+three digits. Anything else is written out unchanged, backslash and all, but
+the scripts should not rely on that: a literal backslash, as in a Windows file
+name, is written as \\ so that the format does not depend on which escapes
+happen to be implemented here. */
+
+static int
+helper_printf(int argc, char **argv)
+{
+const char *fmt;
+const char *arg;
+size_t i;
+
+if (argc < 1)
+  {
+  fprintf(stderr, "pcre2test: -printf needs a format argument\n");
+  return 1;
+  }
+
+fmt = argv[0];
+arg = (argc > 1)? argv[1] : "";
+
+helper_binary_io();
+
+for (i = 0; fmt[i] != 0; i++)
+  {
+  if (fmt[i] == '%' && fmt[i+1] == 's')
+    {
+    fputs(arg, stdout);
+    i++;
+    }
+
+  /* An octal escape of up to three digits, so that \0 gives a binary zero and
+  \200 gives a byte that cannot start a UTF-8 character. */
+
+  else if (fmt[i] == '\\' && fmt[i+1] >= '0' && fmt[i+1] <= '7')
+    {
+    int value = 0;
+    int n = 0;
+    while (n < 3 && fmt[i+1] >= '0' && fmt[i+1] <= '7')
+      {
+      value = value * 8 + (fmt[++i] - '0');
+      n++;
+      }
+    if (value > 255)
+      {
+      fprintf(stderr, "pcre2test: -printf octal escape is greater than \\377\n");
+      return 1;
+      }
+    fputc(value, stdout);
+    }
+
+  else if (fmt[i] == '\\' && fmt[i+1] == 'n') { fputc('\n', stdout); i++; }
+  else if (fmt[i] == '\\' && fmt[i+1] == 'r') { fputc('\r', stdout); i++; }
+  else if (fmt[i] == '\\' && fmt[i+1] == '\\') { fputc('\\', stdout); i++; }
+  else fputc(fmt[i], stdout);
+  }
+
+if (fflush(stdout) != 0)
+  {
+  fprintf(stderr, "pcre2test: -printf write failed: %s\n", strerror(errno));
+  return 1;
+  }
+
+return 0;
+}
+
+
+/* Copy the standard input to the standard output, changing every occurrence of
+one byte value into another. Both bytes are given in the form that helper_byte()
+accepts. */
+
+static int
+helper_tr(int argc, char **argv)
+{
+int from, to, c;
+
+if (argc < 2)
+  {
+  fprintf(stderr, "pcre2test: -tr needs two arguments\n");
+  return 1;
+  }
+
+from = helper_byte(argv[0]);
+to = helper_byte(argv[1]);
+
+if (from < 0 || to < 0)
+  {
+  fprintf(stderr, "pcre2test: -tr arguments must each be a single byte\n");
+  return 1;
+  }
+
+helper_binary_io();
+
+while ((c = getchar()) != EOF) putchar((c == from)? to : c);
+
+if (ferror(stdin) || fflush(stdout) != 0)
+  {
+  fprintf(stderr, "pcre2test: -tr copy failed: %s\n", strerror(errno));
+  return 1;
+  }
+
+return 0;
+}
+
+
+
+/* Copy the standard input to the standard output, changing every occurrence of
+the three bytes CR, CR, LF into the two bytes CR, LF.
+
+pcre2grep ends each line that it writes with STDOUT_NL, which is CRLF on
+Windows but LF elsewhere, so a line whose own text ends with CR comes out as
+CR CR LF on Windows and as CR LF everywhere else. Comparison normally copes
+with the difference between the two line endings, but not with the extra CR
+that this case produces. Both test scripts are checked against the same
+expected output, so RunGrepTest.bat passes the output of the few tests that
+match a CR at the end of a line through this, and leaves everything else alone.
+A run of CRs that is not at the end of a line is not touched, so a CR that the
+pattern matched in the middle of a line still shows up. */
+
+static int
+helper_fixcrlf(void)
+{
+unsigned long crcount = 0;
+int c;
+
+helper_binary_io();
+
+while ((c = getchar()) != EOF)
+  {
+  if (c == '\r') { crcount++; continue; }
+
+  /* A run of CRs that ends the line has one CR removed; any other run is
+  written out unchanged. */
+
+  if (c == '\n' && crcount >= 2) crcount--;
+  while (crcount > 0) { putchar('\r'); crcount--; }
+  putchar(c);
+  }
+
+while (crcount > 0) { putchar('\r'); crcount--; }
+
+if (ferror(stdin) || fflush(stdout) != 0)
+  {
+  fprintf(stderr, "pcre2test: -fixcrlf copy failed: %s\n", strerror(errno));
+  return 1;
+  }
+
+return 0;
+}
+
+#endif  /* Windows */
+
+
+
+/*************************************************
 *                Main Program                    *
 *************************************************/
 
@@ -3664,6 +3876,18 @@ char *arg_subject = NULL;
 char *arg_pattern = NULL;
 char *arg_error = NULL;
 char *env_no_color = getenv("NO_COLOR");
+
+/* The undocumented helpers for the grep test scripts do none of the work that
+follows, so deal with them before anything is set up. */
+
+#if defined(_WIN32) || defined(WIN32)
+if (argc > 2 && strcmp(argv[1], "-printf") == 0)
+  return helper_printf(argc - 2, argv + 2);
+if (argc > 2 && strcmp(argv[1], "-tr") == 0)
+  return helper_tr(argc - 2, argv + 2);
+if (argc == 2 && strcmp(argv[1], "-fixcrlf") == 0)
+  return helper_fixcrlf();
+#endif
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
