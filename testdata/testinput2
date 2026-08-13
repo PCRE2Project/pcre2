@@ -3987,6 +3987,10 @@
 
 /^A\x{/
 
+/\x{2/
+
+/\o{7/
+
 /[ab]++/B,no_auto_possess
 
 /[^ab]*+/B,no_auto_possess
@@ -8350,12 +8354,5 @@ a)"xI
 \= Expect to fail with PCRE2_ERROR_PARTIALSUBS
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
-
-# An unterminated \x{ or \o{ escape at the end of the pattern must report an
-# error offset that lies within the pattern.
-
-/\x{2/
-
-/\o{7/
 
 # End of testinput2
