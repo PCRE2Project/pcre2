@@ -966,7 +966,7 @@ WIN32_FIND_DATA data;
 
 #define FILESEP '/'
 
-int
+static int
 isdirectory(char *filename)
 {
 DWORD attr = GetFileAttributes(filename);
@@ -975,7 +975,7 @@ if (attr == INVALID_FILE_ATTRIBUTES)
 return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
-directory_type *
+static directory_type *
 opendirectory(char *filename)
 {
 size_t len;
@@ -1009,7 +1009,7 @@ errno = (err == ERROR_ACCESS_DENIED) ? EACCES : ENOENT;
 return NULL;
 }
 
-char *
+static char *
 readdirectory(directory_type *dir)
 {
 for (;;)
@@ -1031,7 +1031,7 @@ return NULL;   /* Keep compiler happy; never executed */
 #endif
 }
 
-void
+static void
 closedirectory(directory_type *dir)
 {
 FindClose(dir->handle);
@@ -1044,7 +1044,7 @@ free(dir);
 /* I don't know how to do this, or if it can be done; assume all paths are
 regular if they are not directories. */
 
-int isregfile(char *filename)
+static int isregfile(char *filename)
 {
 return !isdirectory(filename);
 }
@@ -1096,17 +1096,17 @@ if (do_colour)
 #define FILESEP 0
 typedef void directory_type;
 
-int isdirectory(char *filename) { return 0; }
-directory_type * opendirectory(char *filename) { return (directory_type*)0;}
-char *readdirectory(directory_type *dir) { return (char*)0;}
-void closedirectory(directory_type *dir) {}
+static int isdirectory(char *filename) { return 0; }
+static directory_type * opendirectory(char *filename) { return (directory_type*)0;}
+static char *readdirectory(directory_type *dir) { return (char*)0;}
+static void closedirectory(directory_type *dir) {}
 
 
 /************* Test for regular file when we can't do it **********/
 
 /* Assume all files are regular. */
 
-int isregfile(char *filename) { return 1; }
+static int isregfile(char *filename) { return 1; }
 
 
 /************* Test for a terminal when we can't do it **********/
