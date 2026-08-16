@@ -2020,7 +2020,7 @@ else
     else
       {
       *errorcodeptr = ERR64;
-      goto ESCAPE_FAILED_FORWARD;
+      if (ptr < ptrend) goto ESCAPE_FAILED_FORWARD;
       }
     break;
 
@@ -2107,7 +2107,7 @@ else
         else
           {
           *errorcodeptr = ERR67;
-          goto ESCAPE_FAILED_FORWARD;
+          if (ptr < ptrend) goto ESCAPE_FAILED_FORWARD;
           }
         }   /* End of \x{} processing */
 

@@ -3987,6 +3987,10 @@
 
 /^A\x{/
 
+/\x{2/
+
+/\o{7/
+
 /[ab]++/B,no_auto_possess
 
 /[^ab]*+/B,no_auto_possess
