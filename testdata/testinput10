@@ -585,6 +585,14 @@
     AAA\x80BXYZ 
     AAA\x80BBXYZ 
 
+/(?<=(.))/utf,match_invalid_utf
+    x\x80
+    \x{10000}\x80
+
+/\b./utf,match_invalid_utf
+    \x{10000}s
+    \xf0s
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I

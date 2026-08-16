@@ -352,6 +352,19 @@ as described for \fBpcre2_match()\fP above. Another possibility is to work with
 two buffers. If a partial match at offset \fIn\fP in the first buffer is
 followed by "no match" when PCRE2_DFA_RESTART is used on the second buffer, you
 can then try a new match starting at offset \fIn+1\fP in the first buffer.
+.P
+Therefore, PCRE2_DFA_RESTART does not remove the need to keep earlier subject
+data. In order to perform a bumpalong and continue matching at the next
+character, all subject data from the current match start must be retained,
+together with enough preceding data to satisfy the requirements of lookbehind
+assertions (remembering as above that PCRE2_INFO_MAXLOOKBEHIND only describes
+the buffer requirement of a single lookbehind, and nested lookbehinds can read
+back further from the match start). This makes streaming match processing
+using PCRE2_DFA_RESTART challenging, and the application cannot easily set a
+bound on the number of chunks to buffer. For multi-segment searching that is
+intended to produce the same result as searching the whole subject, it is
+usually simpler to avoid PCRE2_DFA_RESTART and run a fresh match, using either
+matching function, over the retained text.
 .
 .
 .SH AUTHOR

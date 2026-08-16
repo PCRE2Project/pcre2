@@ -175,9 +175,12 @@ checkresult()
     *)    with="";;
   esac
   cf_out="$testdata/testoutput$2"
-  if [ $ebcdic -eq 1 ] ; then
-    # We currently only use the #if ... #endif support in pcre2test for EBCDIC
-    # testing. Run in "preprocess-only" mode (-E) on the testoutput file to trim
+  if [ $ebcdic -eq 1 ] || [ $utf -eq 0 ]; then
+    # We currently only use the #if ... #endif support in pcre2test for tests
+    # which are excluded in certain builds:
+    #   - EBCDIC
+    #   - No-UTF
+    # Run in "preprocess-only" mode (-E) on the testoutput file to trim
     # the output lines matching the input lines which are discarded.
     $sim $pcre2test -q -E "$cf_out" >testoutput$bits$3/testoutput$2-expected
     cf_out=testoutput$bits$3/testoutput$2-expected

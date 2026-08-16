@@ -498,6 +498,15 @@
 /(..)(*scs:(1)ab$)/match_invalid_utf
     ab\x{df00}cde         
 
+/(?<=(.))/utf,match_invalid_utf
+    x\x{d800}
+    \x{10000}\x{dc00}
+
+/\b./utf,match_invalid_utf
+    \x{10000}s
+    \x{d800}s
+    \x{dc00}s
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I

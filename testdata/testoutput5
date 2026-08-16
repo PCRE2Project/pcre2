@@ -8335,4 +8335,11 @@ Failed: error 150 at offset 5: invalid range in character class
     \x{c1}
  0: \x{c1}
 
+# An unterminated \N{U+ escape at the end of the pattern must
+# report an error offset that lies within the pattern.
+
+/(*UTF)\N{U+2/
+Failed: error 167 at offset 12: non-hex character in \x{} (closing brace missing?)
+        here: ...UTF)\N{U+2 |<--|
+
 # End of testinput5

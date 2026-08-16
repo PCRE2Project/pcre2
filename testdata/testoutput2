@@ -13630,6 +13630,14 @@ Failed: error 167 at offset 8: non-hex character in \x{} (closing brace missing?
 Failed: error 178 at offset 5: digits missing after \x or in \x{} or \o{} or \N{U+}
         here: ^A\x{ |<--|
 
+/\x{2/
+Failed: error 167 at offset 4: non-hex character in \x{} (closing brace missing?)
+        here: \x{2 |<--|
+
+/\o{7/
+Failed: error 164 at offset 4: non-octal character in \o{} (closing brace missing?)
+        here: \o{7 |<--|
+
 /[ab]++/B,no_auto_possess
 ------------------------------------------------------------------
         Bra

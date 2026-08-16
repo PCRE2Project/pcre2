@@ -81,16 +81,32 @@ if NOT "%nl%" == "LF" if NOT "%nl%" == "ANY" if NOT "%nl%" == "ANYCRLF" (
   echo Default newline setting forced to LF
 )
 
-:: Create a simple printf via cscript/JScript (an actual printf may translate
-:: LF to CRLF, which this one does not).  We only support the barebones we need:
-:: \r, \n, \0, and %s (but only once).
+:: Provide "printf" and "tr" via pcre2test. Windows has no dependable version
+:: of either: the obvious candidates translate what they write according to the
+:: current code page, which mangles any byte greater than 0x7f, and an actual
+:: printf may turn LF into CRLF. pcre2test has undocumented options that do just
+:: as much as these tests need, so that this script can produce exactly the same
+:: bytes as RunGrepTest does with the real printf and tr.
+::
+:: %printf% supports \r, \n, \\, an octal escape such as \0 or \200, and one
+:: %%s substitution; any other escape is left alone, so a literal backslash
+:: has to be written as \\. %tr% changes one byte value into another as it
+:: copies its input.
 
-echo WScript.StdOut.Write(WScript.Arguments(0).replace(/\\r/g, "\r").replace(/\\n/g, "\n").replace(/\\0/g, "\x00").replace(/%%s/g, function() { return WScript.Arguments(1) })) >printf.js
-set printf=cscript //nologo printf.js
+set printf=%pcre2test% -printf
+set tr=%pcre2test% -tr
 
-:: Create a simple 'tr' via cscript/JScript.
-echo WScript.StdOut.Write(WScript.StdIn.ReadAll().replace(/\x00/g, "@")) >trnull.js
-set trnull=cscript //nologo trnull.js
+:: pcre2grep ends the lines it writes with CRLF on Windows and with LF
+:: elsewhere, which comparison copes with, but a line whose own text ends with
+:: CR then comes out with one CR too many. %fixcrlf% removes it, for tests that
+:: match a CR at the end of a line.
+
+set fixcrlf=%pcre2test% -fixcrlf
+
+:: The script callout tests run printf as a callout, where the program name
+:: cannot be quoted, so keep an unquoted version of the path for them.
+
+set pcre2test_unquoted=%pcre2test:"=%
 
 :: ------ Normal tests ------
 
@@ -707,11 +723,11 @@ echo ---------------------------- Test 134 ----------------------------->>testtr
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test 135 ----------------------------->>testtrygrep
-(pushd %srcdir% & %pcre2grep% -HZ "word" ./testdata/grepinputv & popd) | %trnull% >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -HZ "word" ./testdata/grepinputv & popd) | %tr% \0 @ >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
-(pushd %srcdir% & %pcre2grep% -lZ "word" ./testdata/grepinputv ./testdata/grepinputv & popd) | %trnull% >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -lZ "word" ./testdata/grepinputv ./testdata/grepinputv & popd) | %tr% \0 @ >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
-(pushd %srcdir% & %pcre2grep% -A 1 -B 1 -HZ "word" ./testdata/grepinputv & popd) | %trnull% >>testtrygrep
+(pushd %srcdir% & %pcre2grep% -A 1 -B 1 -HZ "word" ./testdata/grepinputv & popd) | %tr% \0 @ >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 (pushd %srcdir% & %pcre2grep% -MHZn "start[\s]+end" testdata/grepinputM & popd) >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
@@ -741,7 +757,7 @@ echo ---------------------------- Test 140 ----------------------------->>testtr
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test 141 ----------------------------->>testtrygrep
-%printf% "%%s\testdata\grepinputv\n-\n" "%srcdir%" >testtemp1grep
+%printf% "%%s\\testdata\\grepinputv\n-\n" "%srcdir%" >testtemp1grep
 %printf% "This is a line from stdin." >testtemp2grep
 %pcre2grep% --file-list testtemp1grep "line from stdin" <testtemp2grep >>testtrygrep 2>&1
 echo RC=^%ERRORLEVEL%>>testtrygrep
@@ -962,7 +978,11 @@ echo RC=^%ERRORLEVEL%>>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N3 ------------------------------>>testtrygrep
-for /f %%a in ('%printf% "def\rjkl"') do set pattern=%%a
+@REM The pattern contains a CR, which for /f keeps, but the command has to be
+@REM read from a file: %printf% starts with a quoted path, and cmd mangles the
+@REM quoting of a command given directly to for /f.
+%printf% "def\rjkl" >testtemp1grep
+for /f %%a in (testtemp1grep) do set pattern=%%a
 %pcre2grep% -n --newline=cr -F "!pattern!" testNinputgrep >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
@@ -984,9 +1004,9 @@ echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N7 ------------------------------>>testtrygrep
 %printf% "xyz\0abc\0def" >testNinputgrep
-%pcre2grep% -na --newline=nul "^(abc|def)" testNinputgrep | %trnull% >>testtrygrep
+%pcre2grep% -na --newline=nul "^(abc|def)" testNinputgrep | %tr% \0 @ >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
-%pcre2grep% -B1 -na --newline=nul "^(abc|def)" testNinputgrep | %trnull% >>testtrygrep
+%pcre2grep% -B1 -na --newline=nul "^(abc|def)" testNinputgrep | %tr% \0 @ >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
 echo ---------------------------- Test N8 ------------------------------>>testtrygrep
@@ -1041,7 +1061,7 @@ if %ERRORLEVEL% equ 0 (
   %pcre2grep% "(T)(?C'|$0:$1$n')" %srcdir%\testdata\grepinputv >>testtrygrep
   echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 4 --->>testtrygrep
-  %pcre2grep% "(T)(?C'cscript|//nologo|printf.js|%%s\r\n|$0:$1$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+  %pcre2grep% "(T)(?C'%pcre2test_unquoted%|-printf|%%s\r\n|$0:$1$n')" %srcdir%\testdata\grepinputv >>testtrygrep
   echo RC=^!ERRORLEVEL!>>testtrygrep
   echo --- Test 5 --->>testtrygrep
   %pcre2grep% "(T)(?C'|$1$n')(*F)" %srcdir%\testdata\grepinputv >>testtrygrep
@@ -1069,7 +1089,7 @@ if %ERRORLEVEL% equ 0 (
     %pcre2grep% -u "(T)(?C'|$0:$x{a6}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
     echo RC=^!ERRORLEVEL!>>testtrygrep
     echo --- Test 2 --->>testtrygrep
-    %pcre2grep% -u "(T)(?C'cscript|//nologo|printf.js|%%s\r\n|$0:$x{a6}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
+    %pcre2grep% -u "(T)(?C'%pcre2test_unquoted%|-printf|%%s\r\n|$0:$x{a6}$n')" %srcdir%\testdata\grepinputv >>testtrygrep
     echo RC=^!ERRORLEVEL!>>testtrygrep
 
     if ^!nonfork! equ 1 (
@@ -1106,7 +1126,7 @@ call :checkspecial "-e (unpaired1 -e (unpaired2 nul" 2 || exit /b 1
 
 
 :: Clean up local working files
-del testcf printf.js trnull.js testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep -testtemp1grep --
+del testcf testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep -testtemp1grep --
 
 exit /b 0
 

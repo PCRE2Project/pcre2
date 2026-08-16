@@ -5418,15 +5418,15 @@ OP_SRC(SLJIT_FAST_RETURN, RETURN_ADDR, 0);
 static void do_utfreadchar_invalid(compiler_common *common)
 {
 /* Slow decoding a UTF-16 character. TMP1 contains the first half
-of the character (>= 0xd800). Return char value in TMP1. STR_PTR is
-undefined for invalid characters. */
+of the character (>= 0xd800). TMP2 contains TMP1 - 0xd800. Return
+char value in TMP1. STR_PTR is unchanged for invalid characters. */
 DEFINE_COMPILER;
 struct sljit_jump *exit_invalid[3];
 
 sljit_emit_op_dst(compiler, SLJIT_FAST_ENTER, RETURN_ADDR, 0);
 
 /* TMP2 contains the high surrogate. */
-exit_invalid[0] = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00);
+exit_invalid[0] = CMP(SLJIT_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0x400);
 exit_invalid[1] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
@@ -5440,9 +5440,10 @@ exit_invalid[2] = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 0x400);
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
 OP_SRC(SLJIT_FAST_RETURN, RETURN_ADDR, 0);
 
+JUMPHERE(exit_invalid[2]);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 JUMPHERE(exit_invalid[0]);
 JUMPHERE(exit_invalid[1]);
-JUMPHERE(exit_invalid[2]);
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR);
 OP_SRC(SLJIT_FAST_RETURN, RETURN_ADDR, 0);
 }
@@ -5640,7 +5641,6 @@ struct sljit_jump *start;
 struct sljit_jump *end = NULL;
 struct sljit_jump *end2 = NULL;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-struct sljit_label *loop;
 struct sljit_jump *jump;
 #endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32 */
 jump_list *newline = NULL;
@@ -5746,7 +5746,7 @@ mainloop = LABEL();
 
 /* Increasing the STR_PTR here requires one less jump in the most common case. */
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-if (common->utf && !common->invalid_utf) readuchar = TRUE;
+if (common->utf) readuchar = TRUE;
 #endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32 */
 if (newlinecheck) readuchar = TRUE;
 
@@ -5762,13 +5762,11 @@ OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 if (common->invalid_utf)
   {
   /* Skip continuation code units. */
-  loop = LABEL();
-  jump = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x80);
-  CMPTO(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0x40, loop);
-  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  jump = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
+  OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+  add_jump(compiler, &common->utfreadchar_invalid, JUMP(SLJIT_FAST_CALL));
+  OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR);
+  SELECT(SLJIT_EQUAL, STR_PTR, TMP3, 0, STR_PTR);
   JUMPHERE(jump);
   }
 else if (common->utf)
@@ -5782,13 +5780,9 @@ else if (common->utf)
 if (common->invalid_utf)
   {
   /* Skip continuation code units. */
-  loop = LABEL();
-  jump = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xdc00);
-  CMPTO(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0x400, loop);
-  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
+  jump = CMP(SLJIT_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 0xe000 - 0xd800);
+  add_jump(compiler, &common->utfreadchar_invalid, JUMP(SLJIT_FAST_CALL));
   JUMPHERE(jump);
   }
 else if (common->utf)
