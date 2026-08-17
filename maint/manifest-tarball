@@ -58,6 +58,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/allocator_src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitConfigInternal.h
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitLir.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitLir.h
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitNativeALPHA_64.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitNativeARM_32.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitNativeARM_64.c
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/deps/sljit/sljit_src/sljitNativeARM_T2_32.c
