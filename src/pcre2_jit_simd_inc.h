@@ -52,6 +52,68 @@ typedef enum {
   vector_compare_match2,
 } vector_compare_type;
 
+/* The vectorized start-bits scan holds the bounds of every range in a vector
+   register of its own, which needs more of them than the Win64 ABI leaves as
+   scratch registers, so it is limited to the other x86-64 ABIs, as the
+   character pair scan further down is. */
+#if defined(SLJIT_CONFIG_X86_64) && SLJIT_CONFIG_X86_64 && !(defined _WIN64) && PCRE2_CODE_UNIT_WIDTH == 8
+
+/* Largest number of ranges a start bitmap may be split into before the
+   vectorized scans give up on it. */
+#define MAX_START_BITS_RANGES 8
+
+typedef struct {
+  sljit_u32 low;
+  sljit_u32 high;
+} start_bits_range;
+
+/* Split a start bitmap into inclusive ranges of set bits, for the vectorized
+   start-bits scans below. Returns the number of ranges, or -1 if there are more
+   than max_ranges of them, in which case the caller must fall back to testing
+   the bitmap one code unit at a time. */
+
+static int extract_start_bits_ranges(const sljit_u8 *bits, start_bits_range *ranges, int max_ranges)
+{
+/* A range ends at a transition, except for the last one when it runs to the
+   end of the bitmap, so twice max_ranges transitions is always enough. */
+int transitions[MAX_START_BITS_RANGES * 2];
+int count = 0;
+int i, length;
+
+SLJIT_ASSERT(max_ranges <= MAX_START_BITS_RANGES);
+
+length = extract_class_ranges(bits, transitions, max_ranges * 2);
+if (length < 0)
+  return -1;
+
+/* Membership below the first transition is given by bit zero of the bitmap, so
+   the transitions which start a range are the even ones when code unit zero is
+   not in the class, and the odd ones when it is. */
+i = 0;
+if ((bits[0] & 0x1) != 0)
+  {
+  ranges[0].low = 0;
+  ranges[0].high = (sljit_u32)((length > 0) ? transitions[0] - 1 : 255);
+  count = 1;
+  i = 1;
+  }
+
+while (i < length)
+  {
+  if (count >= max_ranges)
+    return -1;
+
+  ranges[count].low = (sljit_u32)transitions[i];
+  ranges[count].high = (sljit_u32)((i + 1 < length) ? transitions[i + 1] - 1 : 255);
+  count++;
+  i += 2;
+  }
+
+return count;
+}
+
+#endif /* SLJIT_CONFIG_X86_64 && !_WIN64 && PCRE2_CODE_UNIT_WIDTH == 8 */
+
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 static SLJIT_INLINE sljit_s32 max_fast_forward_char_pair_offset(void)
 {
@@ -122,22 +184,54 @@ return (sljit_s32)(value);
 #endif
 }
 
-static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
-  sljit_s32 reg_type, int step, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
-{
-sljit_u8 instruction[4];
+/* Emit dst = src1 <opcode> src2 as a two operand SSE2 instruction when reg_type
+   is SLJIT_SIMD_REG_128, and as a three operand AVX2 one when it is
+   SLJIT_SIMD_REG_256. SSE2 has no separate first source operand, so src1 must
+   be the same register as dst there. Instructions which have no first source
+   operand at all, such as MOVDQA, pass -1 for src1_ind.
 
-if (reg_type == SLJIT_SIMD_REG_128)
+   A REX prefix is emitted for xmm8 and above, which the start-bits scan below
+   reaches as soon as it holds the bounds of more than two ranges. The two byte
+   VEX prefix cannot encode those registers, so the AVX2 form is limited to the
+   first eight. */
+
+static void emit_vector_op(struct sljit_compiler *compiler, sljit_s32 reg_type,
+  sljit_u8 opcode, sljit_s32 dst_ind, sljit_s32 src1_ind, sljit_s32 src2_ind)
+{
+sljit_u8 instruction[5];
+int size = 0;
+
+if (reg_type == SLJIT_SIMD_REG_256)
   {
-  instruction[0] = 0x66;
-  instruction[1] = 0x0f;
+  SLJIT_ASSERT(dst_ind < 8 && src1_ind < 8 && src2_ind < 8);
+
+  /* Two byte VEX prefix. The 0x0f opcode map is implied, vvvv holds the first
+     source operand inverted, and it is all ones when there is none. */
+  instruction[size++] = 0xc5;
+  instruction[size++] = (sljit_u8)(0xfd ^ ((src1_ind >= 0) ? (src1_ind << 3) : 0));
   }
 else
   {
-  /* Two byte VEX prefix. */
-  instruction[0] = 0xc5;
-  instruction[1] = 0xfd;
+  SLJIT_ASSERT(src1_ind < 0 || src1_ind == dst_ind);
+
+  instruction[size++] = 0x66;
+
+  if (dst_ind >= 8 || src2_ind >= 8)
+    instruction[size++] = (sljit_u8)(0x40 | ((dst_ind >= 8) ? 0x4 : 0) | ((src2_ind >= 8) ? 0x1 : 0));
+
+  instruction[size++] = 0x0f;
   }
+
+instruction[size++] = opcode;
+instruction[size++] = (sljit_u8)(0xc0 | ((dst_ind & 0x7) << 3) | (src2_ind & 0x7));
+sljit_emit_op_custom(compiler, instruction, size);
+}
+
+static void fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler, vector_compare_type compare_type,
+  sljit_s32 reg_type, int step, sljit_s32 dst_ind, sljit_s32 cmp1_ind, sljit_s32 cmp2_ind, sljit_s32 tmp_ind)
+{
+/* PCMPEQB/W/D xmm1, xmm2/m128 */
+const sljit_u8 pcmpeq = (sljit_u8)(0x74 + SIMD_COMPARE_TYPE_INDEX);
 
 SLJIT_ASSERT(step >= 0 && step <= 3);
 
@@ -146,30 +240,13 @@ if (compare_type != vector_compare_match2)
   if (step == 0)
     {
     if (compare_type == vector_compare_match1i)
-      {
       /* POR xmm1, xmm2/m128 */
-      if (reg_type == SLJIT_SIMD_REG_256)
-        instruction[1] ^= (dst_ind << 3);
-
-      /* Prefix is filled. */
-      instruction[2] = 0xeb;
-      instruction[3] = 0xc0 | (dst_ind << 3) | cmp2_ind;
-      sljit_emit_op_custom(compiler, instruction, 4);
-      }
+      emit_vector_op(compiler, reg_type, 0xeb, dst_ind, dst_ind, cmp2_ind);
     return;
     }
 
-  if (step != 2)
-    return;
-
-  /* PCMPEQB/W/D xmm1, xmm2/m128 */
-  if (reg_type == SLJIT_SIMD_REG_256)
-    instruction[1] ^= (dst_ind << 3);
-
-  /* Prefix is filled. */
-  instruction[2] = 0x74 + SIMD_COMPARE_TYPE_INDEX;
-  instruction[3] = 0xc0 | (dst_ind << 3) | cmp1_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  if (step == 2)
+    emit_vector_op(compiler, reg_type, pcmpeq, dst_ind, dst_ind, cmp1_ind);
   return;
   }
 
@@ -178,10 +255,12 @@ if (reg_type == SLJIT_SIMD_REG_256)
   if (step == 2)
     return;
 
+  /* The three operand form writes the result of the comparison to a register
+     of its own, so it does the work of steps 0 and 2 in one instruction. */
   if (step == 0)
     {
-    step = 2;
-    instruction[1] ^= (dst_ind << 3);
+    emit_vector_op(compiler, reg_type, pcmpeq, tmp_ind, dst_ind, cmp2_ind);
+    return;
     }
   }
 
@@ -191,40 +270,19 @@ switch (step)
   SLJIT_ASSERT(reg_type == SLJIT_SIMD_REG_128);
 
   /* MOVDQA xmm1, xmm2/m128 */
-  /* Prefix is filled. */
-  instruction[2] = 0x6f;
-  instruction[3] = 0xc0 | (tmp_ind << 3) | dst_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, 0x6f, tmp_ind, -1, dst_ind);
   return;
 
   case 1:
-  /* PCMPEQB/W/D xmm1, xmm2/m128 */
-  if (reg_type == SLJIT_SIMD_REG_256)
-    instruction[1] ^= (dst_ind << 3);
-
-  /* Prefix is filled. */
-  instruction[2] = 0x74 + SIMD_COMPARE_TYPE_INDEX;
-  instruction[3] = 0xc0 | (dst_ind << 3) | cmp1_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, pcmpeq, dst_ind, dst_ind, cmp1_ind);
   return;
 
   case 2:
-  /* PCMPEQB/W/D xmm1, xmm2/m128 */
-  /* Prefix is filled. */
-  instruction[2] = 0x74 + SIMD_COMPARE_TYPE_INDEX;
-  instruction[3] = 0xc0 | (tmp_ind << 3) | cmp2_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, pcmpeq, tmp_ind, tmp_ind, cmp2_ind);
   return;
 
   case 3:
-  /* POR xmm1, xmm2/m128 */
-  if (reg_type == SLJIT_SIMD_REG_256)
-    instruction[1] ^= (dst_ind << 3);
-
-  /* Prefix is filled. */
-  instruction[2] = 0xeb;
-  instruction[3] = 0xc0 | (dst_ind << 3) | tmp_ind;
-  sljit_emit_op_custom(compiler, instruction, 4);
+  emit_vector_op(compiler, reg_type, 0xeb, dst_ind, dst_ind, tmp_ind);
   return;
   }
 }
@@ -372,6 +430,236 @@ if (common->utf && offset > 0)
   }
 #endif
 }
+
+#if defined(SLJIT_CONFIG_X86_64) && SLJIT_CONFIG_X86_64 && !(defined _WIN64) && PCRE2_CODE_UNIT_WIDTH == 8
+
+#define JIT_HAS_FAST_FORWARD_START_BITS_SIMD 1
+
+/* Number of ranges the vectorized start-bits scan will handle. Each one costs
+   two vector registers for its bounds; beyond this the byte-at-a-time bitmap
+   scan is likely to be the better option anyway, since every extra range adds
+   three instructions to each loop iteration. */
+#define X86_START_BITS_MAX_RANGES 4
+
+/* Largest number of accepted code units before the class counts as dense and
+   the byte-at-a-time scan is left to do the job. */
+#define X86_START_BITS_MAX_COVERED 48
+
+/* Emit the byte mask for one range into dst, given the data in src.
+   For a single character this is one PCMPEQB. For a range it is the standard
+   unsigned-range idiom: subtract the low bound so the range starts at zero,
+   then a saturating subtract of the span leaves zero exactly for the bytes
+   inside it. Values below the low bound wrap to something larger than the span,
+   so they saturate to non-zero and are correctly excluded. */
+static void emit_x86_class_range(struct sljit_compiler *compiler, sljit_s32 dst_ind,
+  sljit_s32 src_ind, sljit_s32 zero_ind, sljit_s32 low_ind, sljit_s32 span_ind, BOOL single)
+{
+const sljit_s32 reg_type = SLJIT_SIMD_REG_128;
+
+/* MOVDQA dst, src */
+emit_vector_op(compiler, reg_type, 0x6f, dst_ind, -1, src_ind);
+
+if (single)
+  {
+  /* PCMPEQB dst, low */
+  emit_vector_op(compiler, reg_type, 0x74, dst_ind, dst_ind, low_ind);
+  return;
+  }
+
+/* PSUBB dst, low */
+emit_vector_op(compiler, reg_type, 0xf8, dst_ind, dst_ind, low_ind);
+/* PSUBUSB dst, span */
+emit_vector_op(compiler, reg_type, 0xd8, dst_ind, dst_ind, span_ind);
+/* PCMPEQB dst, zero */
+emit_vector_op(compiler, reg_type, 0x74, dst_ind, dst_ind, zero_ind);
+}
+
+/* Scan for the first code unit whose start bit is set, 16 bytes at a time. The
+   bitmap describes the code unit at offset from the start of the match, and
+   STR_PTR is left pointing at that start. Returns FALSE without emitting
+   anything if the bitmap does not reduce to few enough ranges, in which case
+   the caller emits its own scan. */
+static BOOL fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits, sljit_s32 offset)
+{
+DEFINE_COMPILER;
+sljit_u8 instruction[4];
+sljit_s32 reg_type = SLJIT_SIMD_REG_128;
+struct sljit_label *start;
+#if defined SUPPORT_UNICODE
+struct sljit_label *restart;
+#endif
+struct sljit_jump *quit;
+start_bits_range ranges[X86_START_BITS_MAX_RANGES];
+sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_GP_REGISTER, TMP1);
+sljit_s32 data_ind = sljit_get_register_index(reg_type, SLJIT_VR0);
+sljit_s32 zero_ind = sljit_get_register_index(reg_type, SLJIT_VR1);
+sljit_s32 acc_ind = sljit_get_register_index(reg_type, SLJIT_VR2);
+sljit_s32 tmp_ind = sljit_get_register_index(reg_type, SLJIT_VR3);
+sljit_s32 low_ind[X86_START_BITS_MAX_RANGES];
+sljit_s32 span_ind[X86_START_BITS_MAX_RANGES];
+BOOL single[X86_START_BITS_MAX_RANGES];
+sljit_s32 value;
+int count, covered, k;
+
+/* Four registers for the scan itself, and two more for the bounds of every
+   range it may be asked to handle. */
+SLJIT_COMPILE_ASSERT(4 + X86_START_BITS_MAX_RANGES * 2 <= SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS,
+  not_enough_vector_registers);
+
+SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offset >= 0);
+
+count = extract_start_bits_ranges(start_bits, ranges, X86_START_BITS_MAX_RANGES);
+if (count <= 0)
+  return FALSE;
+
+/* A vector scan only pays when it gets to scan. The byte-at-a-time loop stops
+   at the first code unit in the class, so for a dense class it usually stops
+   immediately, while this loop has already tested a whole block. Count the
+   code units the class accepts and leave the dense ones alone: \w covers 63 of
+   them and is common enough in real subjects to matter. */
+covered = 0;
+for (k = 0; k < count; k++)
+  covered += (int)(ranges[k].high - ranges[k].low) + 1;
+
+if (covered > X86_START_BITS_MAX_COVERED)
+  return FALSE;
+
+/* Initialize. */
+if (common->match_end_ptr != 0)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+  OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
+
+  OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
+  SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
+  }
+
+/* At offset zero the block the first load reads from is known to hold at least
+   one code unit of the subject, so the load cannot cross into an unmapped page
+   and the end of the subject is checked only once a candidate is found. That no
+   longer holds once STR_PTR is moved forward. */
+if (offset > 0)
+  {
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
+
+/* Load the bounds. A single character needs only one register, so pack the
+   pairs from VR4 upwards and record what each range got. */
+value = SLJIT_SIMD_REG_128 | SLJIT_SIMD_ELEM_32 | SLJIT_SIMD_LANE_ZERO;
+
+for (k = 0; k < count; k++)
+  {
+  sljit_s32 low_reg = SLJIT_VR4 + (k * 2);
+  sljit_s32 span_reg = SLJIT_VR4 + (k * 2) + 1;
+
+  single[k] = (ranges[k].low == ranges[k].high);
+
+  sljit_emit_simd_lane_mov(compiler, value, low_reg, 0, SLJIT_IMM,
+    character_to_int32((PCRE2_UCHAR)ranges[k].low));
+  sljit_emit_simd_lane_replicate(compiler, reg_type | SLJIT_SIMD_ELEM_32, low_reg, low_reg, 0);
+  low_ind[k] = sljit_get_register_index(reg_type, low_reg);
+
+  span_ind[k] = low_ind[k];
+  if (!single[k])
+    {
+    sljit_emit_simd_lane_mov(compiler, value, span_reg, 0, SLJIT_IMM,
+      character_to_int32((PCRE2_UCHAR)(ranges[k].high - ranges[k].low)));
+    sljit_emit_simd_lane_replicate(compiler, reg_type | SLJIT_SIMD_ELEM_32, span_reg, span_reg, 0);
+    span_ind[k] = sljit_get_register_index(reg_type, span_reg);
+    }
+  }
+
+/* PXOR zero, zero */
+emit_vector_op(compiler, reg_type, 0xef, zero_ind, zero_ind, zero_ind);
+
+#if defined SUPPORT_UNICODE
+restart = LABEL();
+#endif
+
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+
+/* First part (unaligned start). */
+OP2(SLJIT_AND, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, ~0xf);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xf);
+
+sljit_emit_simd_mov(compiler, reg_type | SLJIT_SIMD_MEM_ALIGNED_128, SLJIT_VR0, SLJIT_MEM1(STR_PTR), 0);
+
+emit_x86_class_range(compiler, acc_ind, data_ind, zero_ind, low_ind[0], span_ind[0], single[0]);
+for (k = 1; k < count; k++)
+  {
+  emit_x86_class_range(compiler, tmp_ind, data_ind, zero_ind, low_ind[k], span_ind[k], single[k]);
+  /* POR acc, tmp */
+  emit_vector_op(compiler, reg_type, 0xeb, acc_ind, acc_ind, tmp_ind);
+  }
+
+sljit_emit_simd_sign(compiler, SLJIT_SIMD_STORE | reg_type | SLJIT_SIMD_ELEM_8, SLJIT_VR2, TMP1, 0);
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Second part (aligned). */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 16);
+
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+sljit_emit_simd_mov(compiler, reg_type | SLJIT_SIMD_MEM_ALIGNED_128, SLJIT_VR0, SLJIT_MEM1(STR_PTR), 0);
+
+emit_x86_class_range(compiler, acc_ind, data_ind, zero_ind, low_ind[0], span_ind[0], single[0]);
+for (k = 1; k < count; k++)
+  {
+  emit_x86_class_range(compiler, tmp_ind, data_ind, zero_ind, low_ind[k], span_ind[k], single[k]);
+  emit_vector_op(compiler, reg_type, 0xeb, acc_ind, acc_ind, tmp_ind);
+  }
+
+sljit_emit_simd_sign(compiler, SLJIT_SIMD_STORE | reg_type | SLJIT_SIMD_ELEM_8, SLJIT_VR2, TMP1, 0);
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(quit);
+
+SLJIT_ASSERT(tmp1_reg_ind < 8);
+/* BSF r32, r/m32 */
+instruction[0] = 0x0f;
+instruction[1] = 0xbc;
+instruction[2] = 0xc0 | (tmp1_reg_ind << 3) | tmp1_reg_ind;
+sljit_emit_op_custom(compiler, instruction, 3);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE
+if (common->utf && offset > 0)
+  {
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, restart);
+
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_JUMP));
+
+  JUMPHERE(quit);
+  }
+#endif
+
+if (offset > 0)
+  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+
+if (common->match_end_ptr != 0)
+  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+
+return TRUE;
+}
+
+#endif /* SLJIT_CONFIG_X86_64 && !_WIN64 && PCRE2_CODE_UNIT_WIDTH == 8 */
 
 /* The AVX2 code path is currently disabled.
 #define JIT_HAS_FAST_REQUESTED_CHAR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_SIMD))
