@@ -927,6 +927,13 @@ echo "RC=$?" >>testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep -n -B4 -A2 '^(ert|dfg)' ./testdata/grepinput) >>testtrygrep
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 161 -----------------------------" >>testtrygrep
+printf 'XfooY\n' >testNinputgrep
+$valgrind $vjs $pcre2grep --allow-lookaround-bsk -o '(?=foo\K)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep --allow-lookaround-bsk --output '$0' '(?=foo\K)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+
 
 # Now compare the results.
 

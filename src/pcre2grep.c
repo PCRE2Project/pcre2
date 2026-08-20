@@ -2210,7 +2210,10 @@ for (; *string != 0; string++)
         {
         PCRE2_SIZE capturesize;
         value *= 2;
-        capturesize = ovector[value + 1] - ovector[value];
+        /* The use of \K may make the end offset earlier than the start; treat
+        such a capture as empty rather than letting the length underflow. */
+        capturesize = (ovector[value + 1] > ovector[value])?
+          ovector[value + 1] - ovector[value] : 0;
         if (capturesize > 0)
           {
           print_match(subject + ovector[value], capturesize);
@@ -2881,7 +2884,11 @@ while (ptr < endptr)
             int n = om->groupnum;
             if (n == 0 || n < mrc)
               {
-              size_t plen = offsets[2*n + 1] - offsets[2*n];
+              /* The use of \K may make the end offset earlier than the start;
+              treat such a match as empty rather than letting the length
+              underflow. */
+              size_t plen = (offsets[2*n + 1] > offsets[2*n])?
+                offsets[2*n + 1] - offsets[2*n] : 0;
               if (plen > 0)
                 {
                 if (printed && om_separator != NULL)
