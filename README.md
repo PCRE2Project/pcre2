@@ -224,7 +224,7 @@ As well as the PCRE2 API, the library also offers a POSIX-compatible `<regex.h>`
 
 See the [full library and API documentation](https://pcre2project.github.io/pcre2/doc/) for further details.
 
-For third-party documentation, see further:
+For third-party documentation, see:
 
 - A curated summary of changes for each PCRE release, and some excellent tutorials on PCRE2 on the
   [RexEgg website](http://www.rexegg.com/pcre-documentation.html).
