@@ -933,6 +933,10 @@ $valgrind $vjs $pcre2grep --allow-lookaround-bsk -o '(?=foo\K)' testNinputgrep >
 echo "RC=$?" >>testtrygrep
 $valgrind $vjs $pcre2grep --allow-lookaround-bsk --output '$0' '(?=foo\K)' testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep --allow-lookaround-bsk --line-offsets '(?=foo\K)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
+$valgrind $vjs $pcre2grep --allow-lookaround-bsk --file-offsets '(?=foo\K)' testNinputgrep >>testtrygrep
+echo "RC=$?" >>testtrygrep
 
 
 # Now compare the results.
