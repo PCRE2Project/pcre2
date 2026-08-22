@@ -607,6 +607,15 @@ typedef struct compare_context {
 #define ARGUMENTS     SLJIT_S4
 #define RETURN_ADDR   SLJIT_R4
 
+/* Number of scratch registers the generated code may use. The Alpha CMPBGE
+   scanning loops keep up to five replicated character constants live across a
+   loop, so they use scratch registers above RETURN_ADDR and must declare them. */
+#if (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
+#define SCRATCH_REGISTERS 10
+#else
+#define SCRATCH_REGISTERS 5
+#endif
+
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 #define HAS_VIRTUAL_REGISTERS 1
 #else
@@ -13778,7 +13787,7 @@ common->compiler = compiler;
 
 /* Main pcre2_jit_exec entry. */
 SLJIT_ASSERT((private_data_size & (sizeof(sljit_sw) - 1)) == 0);
-sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), 5 | SLJIT_ENTER_VECTOR(SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS), 5, private_data_size);
+sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), SCRATCH_REGISTERS | SLJIT_ENTER_VECTOR(SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS), 5, private_data_size);
 
 /* Register init. */
 reset_ovector(common, (re->top_bracket + 1) * 2);

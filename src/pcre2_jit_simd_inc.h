@@ -44,7 +44,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #if ((defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
      || (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64) \
      || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
-     || (defined SLJIT_CONFIG_LOONGARCH_64 && SLJIT_CONFIG_LOONGARCH_64))
+     || (defined SLJIT_CONFIG_LOONGARCH_64 && SLJIT_CONFIG_LOONGARCH_64) \
+     || (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA))
 
 typedef enum {
   vector_compare_match1,
@@ -71,7 +72,20 @@ return 3;
 #error "Unsupported unit width"
 #endif
 }
-#else /* !SLJIT_CONFIG_X86 */
+#elif (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
+static SLJIT_INLINE sljit_s32 max_fast_forward_char_pair_offset(void)
+{
+#if PCRE2_CODE_UNIT_WIDTH == 8
+return 7;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+return 3;
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+return 1;
+#else
+#error "Unsupported unit width"
+#endif
+}
+#else /* !SLJIT_CONFIG_X86, !SLJIT_CONFIG_ALPHA */
 static SLJIT_INLINE sljit_s32 max_fast_forward_char_pair_offset(void)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -101,7 +115,7 @@ return CMP(SLJIT_NOT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00);
 }
 #endif
 
-#endif /* SLJIT_CONFIG_X86 || SLJIT_CONFIG_ARM_64 || SLJIT_CONFIG_S390X || SLJIT_CONFIG_LOONGARCH_64 */
+#endif /* SLJIT_CONFIG_X86 || SLJIT_CONFIG_ARM_64 || SLJIT_CONFIG_S390X || SLJIT_CONFIG_LOONGARCH_64 || SLJIT_CONFIG_ALPHA */
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 
@@ -2502,5 +2516,598 @@ if (common->match_end_ptr != 0)
 }
 
 #endif /* SLJIT_CONFIG_LOONGARCH_64 */
+
+#if (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
+
+/* Alpha CMPBGE-based pseudo-SIMD: 8-byte-at-a-time character scanning in GPRs.
+   Works on all Alpha CPUs; no CIX extension required. */
+
+/* Replicate a code unit to fill all positions in a 64-bit register.
+   Computed at JIT compile time and emitted as an immediate load. */
+static SLJIT_INLINE sljit_sw replicate_char_alpha(PCRE2_UCHAR c)
+{
+sljit_uw r = c;
+#if PCRE2_CODE_UNIT_WIDTH == 8
+r |= r << 8;
+r |= r << 16;
+r |= r << 32;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+r |= r << 16;
+r |= r << 32;
+#else /* 32 */
+r |= r << 32;
+#endif
+return (sljit_sw)r;
+}
+
+/* Emit CMPBGE Ra, Rb, Rc: for each byte i, bit i of Rc is set if
+   byte i of Ra >= byte i of Rb. Uses hardware register indices. */
+static SLJIT_INLINE void emit_alpha_cmpbge(struct sljit_compiler *compiler,
+  sljit_s32 ra_ind, sljit_s32 rb_ind, sljit_s32 rc_ind)
+{
+sljit_ins ins = CMPBGE | ((sljit_ins)ra_ind << 21) | ((sljit_ins)rb_ind << 16) | (sljit_ins)rc_ind;
+sljit_emit_op_custom(compiler, &ins, sizeof(ins));
+}
+
+/* Compare helper: produces CMPBGE byte-match mask in dst (a GPR).
+   For match1:  mask = cmpbge(0, data ^ cmp1)
+   For match1i: mask = cmpbge(0, (data | cmp2) ^ cmp1)
+   For match2:  mask = cmpbge(0, data ^ cmp1) | cmpbge(0, data ^ cmp2)
+
+   data may alias dst for match1/match1i.
+   For match2, data must NOT alias tmp (tmp is clobbered). */
+static void fast_forward_char_pair_alpha_compare(struct sljit_compiler *compiler,
+  vector_compare_type compare_type, sljit_s32 dst, sljit_s32 data,
+  sljit_s32 cmp1, sljit_s32 cmp2, sljit_s32 tmp)
+{
+sljit_s32 dst_ind = sljit_get_register_index(SLJIT_GP_REGISTER, dst);
+sljit_s32 tmp_ind;
+
+if (compare_type != vector_compare_match2)
+  {
+  if (compare_type == vector_compare_match1i)
+    {
+    OP2(SLJIT_OR, dst, 0, data, 0, cmp2, 0);
+    OP2(SLJIT_XOR, dst, 0, dst, 0, cmp1, 0);
+    }
+  else
+    OP2(SLJIT_XOR, dst, 0, data, 0, cmp1, 0);
+
+  /* CMPBGE $31, dst, dst — bits set where XOR byte is zero (match). */
+  emit_alpha_cmpbge(compiler, 31, dst_ind, dst_ind);
+  return;
+  }
+
+/* match2: compare against both chars, OR the masks. */
+tmp_ind = sljit_get_register_index(SLJIT_GP_REGISTER, tmp);
+
+OP2(SLJIT_XOR, tmp, 0, data, 0, cmp2, 0);
+emit_alpha_cmpbge(compiler, 31, tmp_ind, tmp_ind);
+
+OP2(SLJIT_XOR, dst, 0, data, 0, cmp1, 0);
+emit_alpha_cmpbge(compiler, 31, dst_ind, dst_ind);
+
+OP2(SLJIT_OR, dst, 0, dst, 0, tmp, 0);
+}
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+/* For 16/32-bit code units, CMPBGE produces per-byte bits but we need
+   per-code-unit matching. Compact the mask so only positions where ALL
+   bytes of a code unit matched remain set. */
+static SLJIT_INLINE void compact_cmpbge_mask(struct sljit_compiler *compiler,
+  sljit_s32 mask, sljit_s32 tmp)
+{
+#if PCRE2_CODE_UNIT_WIDTH == 16
+OP2(SLJIT_LSHR, tmp, 0, mask, 0, SLJIT_IMM, 1);
+OP2(SLJIT_AND, mask, 0, mask, 0, tmp, 0);
+OP2(SLJIT_AND, mask, 0, mask, 0, SLJIT_IMM, 0x55);
+#else /* 32 */
+OP2(SLJIT_LSHR, tmp, 0, mask, 0, SLJIT_IMM, 1);
+OP2(SLJIT_AND, mask, 0, mask, 0, tmp, 0);
+OP2(SLJIT_LSHR, tmp, 0, mask, 0, SLJIT_IMM, 2);
+OP2(SLJIT_AND, mask, 0, mask, 0, tmp, 0);
+OP2(SLJIT_AND, mask, 0, mask, 0, SLJIT_IMM, 0x11);
+#endif
+}
+#endif
+
+/* Find the position of the lowest set bit in an 8-bit CMPBGE mask held in
+   TMP1; replace TMP1 with that bit index (0-7). TMP2 and RETURN_ADDR are
+   clobbered. Uses base-ISA NEGQ+AND to isolate the bit, then a binary search
+   via three AND+SELECT pairs — identical to glibc's Alpha strchr approach. */
+static SLJIT_INLINE void emit_alpha_ctz8(struct sljit_compiler *compiler)
+{
+OP2(SLJIT_SUB, TMP2, 0, SLJIT_IMM, 0, TMP1, 0);       /* TMP2 = -TMP1          */
+OP2(SLJIT_AND, TMP1, 0, TMP1, 0, TMP2, 0);              /* TMP1 = lowest set bit */
+
+OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
+OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0xf0);
+SELECT(SLJIT_NOT_ZERO, TMP2, SLJIT_IMM, 4, TMP2);       /* TMP2 = 4 or 0         */
+
+OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, 0);
+OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0xcc);
+SELECT(SLJIT_NOT_ZERO, RETURN_ADDR, SLJIT_IMM, 2, RETURN_ADDR);  /* RA = 2 or 0  */
+OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, RETURN_ADDR, 0);
+
+OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, 0);
+OP2U(SLJIT_AND | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, 0xaa);
+SELECT(SLJIT_NOT_ZERO, RETURN_ADDR, SLJIT_IMM, 1, RETURN_ADDR);  /* RA = 1 or 0  */
+OP2(SLJIT_ADD, TMP1, 0, TMP2, 0, RETURN_ADDR, 0);
+}
+
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
+
+static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
+struct sljit_jump *quit;
+struct sljit_jump *partial_quit[2];
+struct sljit_jump *no_prefetch;
+vector_compare_type compare_type = vector_compare_match1;
+sljit_u32 bit = 0;
+
+SLJIT_UNUSED_ARG(offset);
+
+if (char1 != char2)
+  {
+  bit = char1 ^ char2;
+  compare_type = vector_compare_match1i;
+
+  if (!is_powerof2(bit))
+    {
+    bit = 0;
+    compare_type = vector_compare_match2;
+    }
+  }
+
+partial_quit[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[0]);
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+if (compare_type == vector_compare_match1)
+  {
+  /* Use memchr() for exact single-character scanning. glibc's Alpha memchr
+     uses CMPBGE with prefetching and software pipelining. */
+
+  /* The call clobbers every scratch register, so TMP3 must be preserved: the
+     callers keep the unclamped STR_END there while match_end_ptr is set. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, TMP3, 0);
+
+#if defined SUPPORT_UNICODE
+  restart = LABEL();
+#endif
+
+  /* STR_PTR is SLJIT_R1, which is also the second argument register, so the
+     length and the start pointer must be read before it is overwritten. */
+  OP2(SLJIT_SUB, SLJIT_R2, 0, STR_END, 0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, char1);
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(W, W, 32, W),
+    SLJIT_IMM, SLJIT_FUNC_ADDR(memchr));
+  OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
+
+  if (common->mode == PCRE2_JIT_COMPLETE)
+    {
+    add_jump(compiler, &common->failed_match,
+      CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
+
+#if defined SUPPORT_UNICODE
+    if (common->utf && offset > 0)
+      {
+      OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+      quit = jump_if_utf_char_start(compiler, TMP1);
+      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+      add_jump(compiler, &common->failed_match,
+        CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+      JUMPTO(SLJIT_JUMP, restart);
+      JUMPHERE(quit);
+      }
+#endif
+    }
+  else
+    {
+    /* Partial mode: found → STR_PTR = result, not found → STR_PTR = STR_END. */
+    quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
+    partial_quit[1] = JUMP(SLJIT_JUMP);
+    JUMPHERE(quit);
+    JUMPHERE(partial_quit[0]);
+    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
+    JUMPHERE(partial_quit[1]);
+    }
+  return;
+  }
+#endif
+
+/* Load replicated character constants into dedicated registers. */
+OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1 | bit));
+
+if (char1 != char2)
+  OP1(SLJIT_MOV, SLJIT_R6, 0, SLJIT_IMM, replicate_char_alpha(bit != 0 ? bit : char2));
+
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
+
+/* Align STR_PTR down to 8-byte boundary; save misalignment in TMP2. */
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x7);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Load 8 aligned bytes, compare, produce CMPBGE mask. */
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+fast_forward_char_pair_alpha_compare(compiler, compare_type, TMP1, TMP1, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+compact_cmpbge_mask(compiler, TMP1, RETURN_ADDR);
+#endif
+
+/* Restore STR_PTR, shift mask to ignore bytes before original position. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Prefetch threshold: only prefetch when more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
+/* Main loop (aligned). */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
+
+partial_quit[1] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+if (common->mode == PCRE2_JIT_COMPLETE)
+  add_jump(compiler, &common->failed_match, partial_quit[1]);
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+fast_forward_char_pair_alpha_compare(compiler, compare_type, TMP1, TMP1, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+compact_cmpbge_mask(compiler, TMP1, RETURN_ADDR);
+#endif
+
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(quit);
+
+/* Find position of first match. */
+emit_alpha_ctz8(compiler);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+if (common->mode != PCRE2_JIT_COMPLETE)
+  {
+  JUMPHERE(partial_quit[0]);
+  JUMPHERE(partial_quit[1]);
+  OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_PTR, 0, STR_END, 0);
+  SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
+  }
+else
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf && offset > 0)
+  {
+  SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE);
+
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+  JUMPTO(SLJIT_JUMP, restart);
+
+  JUMPHERE(quit);
+  }
+#endif
+}
+
+#define JIT_HAS_FAST_REQUESTED_CHAR_SIMD 1
+
+static jump_list *fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+struct sljit_jump *quit;
+struct sljit_jump *no_prefetch;
+jump_list *not_found = NULL;
+vector_compare_type compare_type = vector_compare_match1;
+sljit_u32 bit = 0;
+
+if (char1 != char2)
+  {
+  bit = char1 ^ char2;
+  compare_type = vector_compare_match1i;
+
+  if (!is_powerof2(bit))
+    {
+    bit = 0;
+    compare_type = vector_compare_match2;
+    }
+  }
+
+add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0));
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+if (compare_type == vector_compare_match1)
+  {
+  /* Use memchr() to check if the required character exists.
+     Save STR_PTR across the icall since it clobbers all scratch registers. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, TMP1, 0);
+  OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_IMM, char1);
+  OP2(SLJIT_SUB, SLJIT_R2, 0, STR_END, 0, TMP1, 0);
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(W, W, 32, W),
+    SLJIT_IMM, SLJIT_FUNC_ADDR(memchr));
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
+  add_jump(compiler, &not_found,
+    CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+  return not_found;
+  }
+#endif
+
+OP1(SLJIT_MOV, TMP2, 0, TMP1, 0);
+OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+
+/* Load replicated character constants. */
+OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1 | bit));
+
+if (char1 != char2)
+  OP1(SLJIT_MOV, SLJIT_R6, 0, SLJIT_IMM, replicate_char_alpha(bit != 0 ? bit : char2));
+
+OP1(SLJIT_MOV, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x7);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+fast_forward_char_pair_alpha_compare(compiler, compare_type, TMP1, TMP1, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+compact_cmpbge_mask(compiler, TMP1, RETURN_ADDR);
+#endif
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+quit = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Prefetch threshold: only prefetch when more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
+/* Main loop. */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
+
+add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+fast_forward_char_pair_alpha_compare(compiler, compare_type, TMP1, TMP1, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+compact_cmpbge_mask(compiler, TMP1, RETURN_ADDR);
+#endif
+
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(quit);
+
+emit_alpha_ctz8(compiler);
+
+OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, STR_PTR, 0);
+add_jump(compiler, &not_found, CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_END, 0));
+
+OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+return not_found;
+}
+
+#define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD 1
+
+static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1,
+  PCRE2_UCHAR char1a, PCRE2_UCHAR char1b, sljit_s32 offs2, PCRE2_UCHAR char2a, PCRE2_UCHAR char2b)
+{
+DEFINE_COMPILER;
+vector_compare_type compare1_type = vector_compare_match1;
+vector_compare_type compare2_type = vector_compare_match1;
+sljit_u32 bit1 = 0;
+sljit_u32 bit2 = 0;
+sljit_u32 diff = IN_UCHARS(offs1 - offs2);
+struct sljit_label *start;
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+struct sljit_label *restart;
+#endif
+struct sljit_jump *jump[2];
+struct sljit_jump *no_prefetch;
+
+SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offs1 > offs2);
+SLJIT_ASSERT(diff <= (unsigned)IN_UCHARS(max_fast_forward_char_pair_offset()));
+
+/* Initialize. */
+if (common->match_end_ptr != 0)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offs1 + 1));
+  OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
+
+  OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
+  SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
+  }
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offs1));
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+/* Set up replicated character constants. */
+if (char1a == char1b)
+  OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1a));
+else
+  {
+  bit1 = char1a ^ char1b;
+  if (is_powerof2(bit1))
+    {
+    compare1_type = vector_compare_match1i;
+    OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1a | bit1));
+    OP1(SLJIT_MOV, SLJIT_R6, 0, SLJIT_IMM, replicate_char_alpha(bit1));
+    }
+  else
+    {
+    compare1_type = vector_compare_match2;
+    bit1 = 0;
+    OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1a));
+    OP1(SLJIT_MOV, SLJIT_R6, 0, SLJIT_IMM, replicate_char_alpha(char1b));
+    }
+  }
+
+if (char2a == char2b)
+  OP1(SLJIT_MOV, SLJIT_R7, 0, SLJIT_IMM, replicate_char_alpha(char2a));
+else
+  {
+  bit2 = char2a ^ char2b;
+  if (is_powerof2(bit2))
+    {
+    compare2_type = vector_compare_match1i;
+    OP1(SLJIT_MOV, SLJIT_R7, 0, SLJIT_IMM, replicate_char_alpha(char2a | bit2));
+    OP1(SLJIT_MOV, SLJIT_R8, 0, SLJIT_IMM, replicate_char_alpha(bit2));
+    }
+  else
+    {
+    compare2_type = vector_compare_match2;
+    bit2 = 0;
+    OP1(SLJIT_MOV, SLJIT_R7, 0, SLJIT_IMM, replicate_char_alpha(char2a));
+    OP1(SLJIT_MOV, SLJIT_R8, 0, SLJIT_IMM, replicate_char_alpha(char2b));
+    }
+  }
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+restart = LABEL();
+#endif
+
+OP2(SLJIT_SUB, TMP1, 0, STR_PTR, 0, SLJIT_IMM, diff);
+OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x7);
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Load data1 (for char1 comparison). */
+OP1(SLJIT_MOV, SLJIT_R9, 0, SLJIT_MEM1(STR_PTR), 0);
+
+/* Construct data2 (for char2 comparison). If the second load address
+   falls before our aligned load, synthesize data2 by shifting data1
+   left, filling the low bytes with zeros (they will be masked off by
+   the alignment shift and never produce false matches). */
+jump[0] = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, STR_PTR, 0);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), -8);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, (8 - diff) * 8);
+OP2(SLJIT_SHL, RETURN_ADDR, 0, SLJIT_R9, 0, SLJIT_IMM, diff * 8);
+OP2(SLJIT_OR, TMP1, 0, TMP1, 0, RETURN_ADDR, 0);
+jump[1] = JUMP(SLJIT_JUMP);
+
+JUMPHERE(jump[0]);
+
+OP2(SLJIT_SHL, TMP1, 0, SLJIT_R9, 0, SLJIT_IMM, diff * 8);
+
+JUMPHERE(jump[1]);
+
+/* Compare both data words. */
+fast_forward_char_pair_alpha_compare(compiler, compare2_type, TMP1, TMP1, SLJIT_R7, SLJIT_R8, RETURN_ADDR);
+fast_forward_char_pair_alpha_compare(compiler, compare1_type, SLJIT_R9, SLJIT_R9, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
+
+OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_R9, 0);
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+compact_cmpbge_mask(compiler, TMP1, RETURN_ADDR);
+#endif
+
+/* Ignore matches before the original STR_PTR. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+jump[0] = CMP(SLJIT_NOT_ZERO, TMP1, 0, SLJIT_IMM, 0);
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+
+/* Prefetch threshold: only prefetch when more than 192 bytes remain. */
+OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, SLJIT_IMM, 192);
+
+/* Main loop. */
+start = LABEL();
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 8);
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+no_prefetch = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, TMP2, 0);
+OP_SRC(SLJIT_PREFETCH_L1, SLJIT_MEM1(STR_PTR), 192);
+JUMPHERE(no_prefetch);
+
+/* Load data1 and construct unaligned data2. */
+OP1(SLJIT_MOV, SLJIT_R9, 0, SLJIT_MEM1(STR_PTR), 0);
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STR_PTR), -8);
+OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, (8 - diff) * 8);
+OP2(SLJIT_SHL, RETURN_ADDR, 0, SLJIT_R9, 0, SLJIT_IMM, diff * 8);
+OP2(SLJIT_OR, TMP1, 0, TMP1, 0, RETURN_ADDR, 0);
+
+fast_forward_char_pair_alpha_compare(compiler, compare1_type, SLJIT_R9, SLJIT_R9, SLJIT_R5, SLJIT_R6, RETURN_ADDR);
+fast_forward_char_pair_alpha_compare(compiler, compare2_type, TMP1, TMP1, SLJIT_R7, SLJIT_R8, RETURN_ADDR);
+
+OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_R9, 0);
+
+#if PCRE2_CODE_UNIT_WIDTH != 8
+compact_cmpbge_mask(compiler, TMP1, RETURN_ADDR);
+#endif
+
+CMPTO(SLJIT_ZERO, TMP1, 0, SLJIT_IMM, 0, start);
+
+JUMPHERE(jump[0]);
+
+emit_alpha_ctz8(compiler);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+if (common->utf)
+  {
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offs1));
+
+  jump[0] = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, restart);
+
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_JUMP));
+
+  JUMPHERE(jump[0]);
+  }
+#endif
+
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offs1));
+
+if (common->match_end_ptr != 0)
+  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+}
+
+#endif /* SLJIT_CONFIG_ALPHA */
 
 #endif /* !SUPPORT_VALGRIND */
