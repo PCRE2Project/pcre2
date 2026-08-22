@@ -2208,12 +2208,25 @@ for (; *string != 0; string++)
       case DDE_CAPTURE:
       if (value < capture_top)
         {
-        PCRE2_SIZE capturesize;
+        PCRE2_SIZE capturesize, start, end;
         value *= 2;
-        capturesize = ovector[value + 1] - ovector[value];
+        start = ovector[value];
+        end = ovector[value + 1];
+
+        /* The use of \K may make the end offset earlier than the start. In
+        this situation, swap them round. */
+
+        if (start > end)
+          {
+          PCRE2_SIZE temp = start;
+          start = end;
+          end = temp;
+          }
+
+        capturesize = end - start;
         if (capturesize > 0)
           {
-          print_match(subject + ovector[value], capturesize);
+          print_match(subject + start, capturesize);
           printed = TRUE;
           }
         }
@@ -2353,7 +2366,12 @@ while (length > 0)
       if (value < capture_top)
         {
         value *= 2;
-        argslen += ovector[value + 1] - ovector[value];
+
+        /* The use of \K may make the end offset earlier than the start. */
+
+        argslen += (ovector[value + 1] > ovector[value])?
+          ovector[value + 1] - ovector[value] :
+          ovector[value] - ovector[value + 1];
         }
       argslen--;   /* Negate the effect of argslen++ below. */
       break;
@@ -2419,10 +2437,23 @@ while (length > 0)
       case DDE_CAPTURE:
       if (value < capture_top)
         {
-        PCRE2_SIZE capturesize;
+        PCRE2_SIZE capturesize, start, end;
         value *= 2;
-        capturesize = ovector[value + 1] - ovector[value];
-        memcpy(argsptr, subject + ovector[value], capturesize);
+        start = ovector[value];
+        end = ovector[value + 1];
+
+        /* The use of \K may make the end offset earlier than the start. In
+        this situation, swap them round. */
+
+        if (start > end)
+          {
+          PCRE2_SIZE temp = start;
+          start = end;
+          end = temp;
+          }
+
+        capturesize = end - start;
+        memcpy(argsptr, subject + start, capturesize);
         argsptr += capturesize;
         }
       break;
@@ -2847,18 +2878,28 @@ while (ptr < endptr)
           printname_colon);
         if (number) fprintf(stdout, "%lu:", linenumber);
 
-        /* Handle --line-offsets */
+        /* Handle --line-offsets and --file-offsets. The use of \K may make
+        the end offset earlier than the start. In this situation, swap them
+        round. */
 
-        if (line_offsets)
-          fprintf(stdout, "%d,%d" STDOUT_NL, (int)(ptr + offsets[0] - ptr),
-            (int)(offsets[1] - offsets[0]));
+        if (line_offsets || file_offsets)
+          {
+          PCRE2_SIZE start = offsets[0];
+          PCRE2_SIZE end = offsets[1];
 
-        /* Handle --file-offsets */
+          if (start > end)
+            {
+            PCRE2_SIZE temp = start;
+            start = end;
+            end = temp;
+            }
 
-        else if (file_offsets)
-          fprintf(stdout, "%d,%d" STDOUT_NL,
-            (int)(filepos + ptr + offsets[0] - ptr),
-            (int)(offsets[1] - offsets[0]));
+          if (line_offsets)
+            fprintf(stdout, "%d,%d" STDOUT_NL, (int)start, (int)(end - start));
+          else
+            fprintf(stdout, "%d,%d" STDOUT_NL, (int)(filepos + start),
+              (int)(end - start));
+          }
 
         /* Handle --output (which has already been syntax checked) */
 
@@ -2881,12 +2922,26 @@ while (ptr < endptr)
             int n = om->groupnum;
             if (n == 0 || n < mrc)
               {
-              size_t plen = offsets[2*n + 1] - offsets[2*n];
+              PCRE2_SIZE start = offsets[2*n];
+              PCRE2_SIZE end = offsets[2*n + 1];
+              size_t plen;
+
+              /* The use of \K may make the end offset earlier than the start.
+              In this situation, swap them round. */
+
+              if (start > end)
+                {
+                PCRE2_SIZE temp = start;
+                start = end;
+                end = temp;
+                }
+
+              plen = end - start;
               if (plen > 0)
                 {
                 if (printed && om_separator != NULL)
                   fprintf(stdout, "%s", om_separator);
-                print_match(ptr + offsets[n*2], plen);
+                print_match(ptr + start, plen);
                 printed = TRUE;
                 }
               }
@@ -2910,16 +2965,18 @@ while (ptr < endptr)
         oldstartoffset = pcre2_get_startchar(match_data);
         if (startoffset <= oldstartoffset)
           {
-          if (startoffset >= length) goto END_ONE_MATCH;  /* Were at end */
+          if (oldstartoffset >= length) goto END_ONE_MATCH;  /* We're at end */
           startoffset = oldstartoffset + 1;
-          if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+          if (utf) while (startoffset < length &&
+                          (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
           }
 
         /* If the current match ended past the end of the line (only possible
         in multiline mode), we must move on to the line in which it did end
-        before searching for more matches. */
+        before searching for more matches. An offset that is within a line's
+        terminating CRLF sequence still belongs to that line. */
 
-        while (startoffset > linelength)
+        while (endlinelength != 0 && startoffset >= linelength + endlinelength)
           {
           ptr += linelength + endlinelength;
           filepos += (int)(linelength + endlinelength);
@@ -3080,8 +3137,10 @@ while (ptr < endptr)
 
           if (startoffset <= oldstartoffset)
             {
+            if (oldstartoffset >= length) break;  /* We're at end */
             startoffset = oldstartoffset + 1;
-            if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+            if (utf) while (startoffset < length &&
+                            (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
             }
 
           /* If the current match ended past the end of the line (only possible

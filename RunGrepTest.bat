@@ -897,6 +897,17 @@ echo RC=^%ERRORLEVEL%>>testtrygrep
 (pushd %srcdir% & %pcre2grep% -n -B4 -A2 "^(ert|dfg)" ./testdata/grepinput & popd) >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
+echo ---------------------------- Test 161 ----------------------------->>testtrygrep
+%printf% "XfooY\n" >testNinputgrep
+%pcre2grep% --allow-lookaround-bsk -o "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% --allow-lookaround-bsk --output "$0" "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% --allow-lookaround-bsk --line-offsets "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% --allow-lookaround-bsk --file-offsets "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+
 :: Now compare the results.
 
 %cf% %srcdir%\testdata\grepoutput testtrygrep %cfout%
@@ -947,6 +958,190 @@ if %utf8% neq 0 (
   echo ---------------------------- Test U10 ------------------------------>>testtrygrep
   (pushd %srcdir% & %pcre2grep% -u --posix-digit --colour=always "A\d" ./testdata/grepinput8 & popd) >>testtrygrep
   echo RC=^!ERRORLEVEL!>>testtrygrep
+
+  echo ---------------------------- Test U11 ------------------------------>>testtrygrep
+  %printf% "................................................" | %tr% . \200 >testtemp1grep
+  %printf% "x\n" >>testtemp1grep
+  %pcre2grep% --no-jit --buffer-size=16 -U --allow-lookaround-bsk -o "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo only-matching RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% --no-jit --buffer-size=16 -U --allow-lookaround-bsk -M "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo multiline RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% --no-jit --buffer-size=16 -U --allow-lookaround-bsk --colour=always "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo colour RC=^!ERRORLEVEL!>>testtrygrep
+
+  echo ---------------------------- Test U12 ------------------------------>>testtrygrep
+  @REM Colouring only, so the subject is a single line. An empty match at the end
+  @REM of the subject, then one that matches before retrying at the end.
+  %printf% "abc\n" >testtemp1grep
+  %pcre2grep% -n --colour=always -u "$" testtemp1grep >>testtrygrep 2>&1
+  echo colour-empty-at-end RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n --colour=always -u ".?" testtemp1grep >>testtrygrep 2>&1
+  echo colour-nonempty-then-empty RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n --colour=always -u "^" testtemp1grep >>testtrygrep 2>&1
+  echo colour-empty-at-start RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM An empty line, so the first match is empty with nothing following it, and a
+  @REM final line with no newline, so a restart can reach the end of the line.
+  %printf% "\nabc\n" >testtemp1grep
+  %pcre2grep% -n --colour=always -u ".?" testtemp1grep >>testtrygrep 2>&1
+  echo colour-empty-line RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "abc" >testtemp1grep
+  %pcre2grep% -n --colour=always -u ".?" testtemp1grep >>testtrygrep 2>&1
+  echo colour-no-final-newline RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM Multiline, where a restart may have to move on to a following line.
+  %printf% "a\nb\n" >testtemp1grep
+  %pcre2grep% -n -M -u "$" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-empty-at-line-end RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -u "^" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-empty-at-line-start RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -u ".?" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-nonempty-then-empty RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM A match that spans several lines, so that the restart has to skip over more
+  @REM than one line before looking for the next match.
+  %printf% "a\nb\nc\nd\n" >testtemp1grep
+  %pcre2grep% -n -M -u "(?s)a.*c" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-spanning RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -u "(?s)a.*c|$" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-spanning-then-empty RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M --colour=always -u "(?s)a.*c|$" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-colour-spanning RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM Invalid UTF-8 after an empty match, which is when the scan over
+  @REM continuation bytes that follow the restart point can run. Here the scan
+  @REM stops at the start of the next character.
+  %printf% "x\200\200y\n" >testtemp1grep
+  %pcre2grep% -n --colour=always -U "^" testtemp1grep >>testtrygrep 2>&1
+  echo colour-utf-scan-to-char RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -U "^" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-utf-scan-to-char RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM The continuation bytes run up to the newline, and then up to the end of the
+  @REM subject, when there is no newline to stop the scan.
+  %printf% "x\200\200\n" >testtemp1grep
+  %pcre2grep% -n --colour=always -U "^" testtemp1grep >>testtrygrep 2>&1
+  echo colour-utf-scan-to-newline RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -U "^" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-utf-scan-to-newline RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "x\200\200" >testtemp1grep
+  %pcre2grep% -n --colour=always -U "^" testtemp1grep >>testtrygrep 2>&1
+  echo colour-utf-scan-to-end RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -U "^" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-utf-scan-to-end RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM A subject that is nothing but continuation bytes, so the very first match
+  @REM is empty and the scan immediately reaches the end.
+  %printf% "\200\200" >testtemp1grep
+  %pcre2grep% -n --colour=always -U ".?" testtemp1grep >>testtrygrep 2>&1
+  echo colour-utf-only-continuations RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -U ".?" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-utf-only-continuations RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM Continuation bytes at the end of a multi-line subject, reached after an
+  @REM empty match on an earlier line, and after a match that spans lines.
+  %printf% "a\nb\n\n\200\200" >testtemp1grep
+  %pcre2grep% -n -M -U ".?" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-utf-trailing RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M -U "$" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-utf-trailing-empty RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -M --colour=always -U "(?s)a.*b|$" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-colour-utf-trailing-spanning RC=^!ERRORLEVEL!>>testtrygrep
+
+  echo ---------------------------- Test U13 ------------------------------>>testtrygrep
+  @REM The same restart, but reached by \K rather than by an empty match.
+  %printf% "abc\n" >testtemp1grep
+  %pcre2grep% -n --colour=always -u --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo colour-bsk RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "a\nb\n" >testtemp1grep
+  %pcre2grep% -n -M -u --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-bsk RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM The same, but with the restart landing on invalid UTF-8.
+  %printf% "x\200\200y\n" >testtemp1grep
+  %pcre2grep% --no-jit -n --colour=always -U --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo colour-bsk-utf-scan-to-char RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "x\200\200" >testtemp1grep
+  %pcre2grep% --no-jit -n -M -U --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-bsk-utf-scan-to-end RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "a\nx\200\200" >testtemp1grep
+  %pcre2grep% --no-jit -n -M --colour=always -U --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-colour-bsk-utf-trailing RC=^!ERRORLEVEL!>>testtrygrep
+
+  echo ---------------------------- Test U14 ------------------------------>>testtrygrep
+
+  @REM A pattern that keeps making progress, so the restart is the ordinary one
+  @REM and the line is never advanced. This is the path the other U14 tests build on.
+  %printf% "abcabc\n" >testtemp1grep
+  %pcre2grep% -n -o -u "a." testtemp1grep >>testtrygrep 2>&1
+  echo control-progress RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM An empty match, which is the case the restart exists for. "$" matches only
+  @REM at the end of the subject, so the restart is immediately at the end; "^"
+  @REM matches at the start, so it has to step forward by one character first.
+  %pcre2grep% -n -o -u "$" testtemp1grep >>testtrygrep 2>&1
+  echo empty-at-end RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -o -u "^" testtemp1grep >>testtrygrep 2>&1
+  echo empty-at-start RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM \K in a lookbehind reports a non-empty match that ends no later than the
+  @REM offset it was started from. PCRE2_NOTEMPTY is set once a match has been
+  @REM found, so this, unlike an empty match, can stop the loop making progress on
+  @REM every iteration and not just the first.
+  %pcre2grep% -n -o -u --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo bsk-restart RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM The step forward lands on invalid UTF-8, so the scan over continuation
+  @REM bytes runs. Here it stops at the start of the next character, and then at
+  @REM the newline, both of which are within the subject.
+  %printf% "x\200\200y\n" >testtemp1grep
+  %pcre2grep% --no-jit -n -o -U --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo bsk-utf-scan-to-char RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "x\200\200\n" >testtemp1grep
+  %pcre2grep% --no-jit -n -o -U --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo bsk-utf-scan-to-newline RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM The same, but with no newline to stop the scan, so it runs to the end of
+  @REM the subject and then looks at the byte after it.
+  %printf% "x\200\200" >testtemp1grep
+  %pcre2grep% --no-jit -n -o -U --allow-lookaround-bsk "(?<=\K.)" testtemp1grep >>testtrygrep 2>&1
+  echo bsk-utf-scan-to-end RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM Moving on to another line, which only happens in multiline mode. The first
+  @REM match ends exactly at the start of the next line, so the line is advanced
+  @REM and the line number with it; the second ends two lines further on.
+  %printf% "ab\ncd\n" >testtemp1grep
+  %pcre2grep% -n -o -M -u "ab\n" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-line-boundary RC=^!ERRORLEVEL!>>testtrygrep
+  %printf% "ab\ncd\nef\n" >testtemp1grep
+  %pcre2grep% -n -o -M -u "(?s)ab.*ef" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-spanning RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM An empty match in multiline mode, where the step forward is what takes the
+  @REM restart past the end of the line.
+  %printf% "a\nb\n" >testtemp1grep
+  %pcre2grep% -n -o -M -u "$" testtemp1grep >>testtrygrep 2>&1
+  echo multiline-empty RC=^!ERRORLEVEL!>>testtrygrep
+
+  @REM A match that ends between the CR and the LF of a CRLF line ending, so the
+  @REM restart is past the text of the line but short of the start of the next
+  @REM one. Without -M the line is never advanced, so that is the control.
+  @REM These match a CR at the end of a line, which pcre2grep then follows with
+  @REM STDOUT_NL, so the CR has to be unpicked from the line ending to match
+  @REM what RunGrepTest produces. See the -fixcrlf helper in pcre2test.
+  %printf% "ab\r\ncd\r\n" >testtemp1grep
+  %pcre2grep% -n -o -N CRLF "\r" testtemp1grep >>testtrygrep 2>&1
+  echo crlf-not-multiline RC=^!ERRORLEVEL!>>testtrygrep
+  %pcre2grep% -n -o -M -N CRLF "\r" testtemp1grep >testtemp2grep 2>&1
+  set rc=^!ERRORLEVEL!
+  %fixcrlf% <testtemp2grep >>testtrygrep
+  echo crlf-mid-terminator RC=^!rc!>>testtrygrep
+  %pcre2grep% -n -o -M -N ANY "\r" testtemp1grep >testtemp2grep 2>&1
+  set rc=^!ERRORLEVEL!
+  %fixcrlf% <testtemp2grep >>testtrygrep
+  echo any-mid-terminator RC=^!rc!>>testtrygrep
+  %pcre2grep% -M -N CRLF --line-offsets "\r" testtemp1grep >>testtrygrep 2>&1
+  echo crlf-mid-terminator-line-offsets RC=^!ERRORLEVEL!>>testtrygrep
 
   %cf% %srcdir%\testdata\grepoutput8 testtrygrep %cfout%
   if ERRORLEVEL 1 exit /b 1
