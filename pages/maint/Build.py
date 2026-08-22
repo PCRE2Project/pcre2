@@ -15,9 +15,10 @@ print(f"Building site for release {CURRENT_RELEASE}")
 # Helper function to take a document and extract its title
 
 def extract_title(doc_str):
-    # The title is formatted as ".*\n=+\n\n"
-    title = re.search(r'(.*)\n=+\n\n', doc_str)
-    return (title[1], doc_str[title.end():])
+    title = re.match(r'(?:# ([^\n]+)\n+|([^\n]+)\n=+\n+)', doc_str)
+    if title is None:
+        raise ValueError("Document does not start with a Markdown title")
+    return (title[1] or title[2], doc_str[title.end():])
 
 # Change directory to the `pages` directory
 
@@ -106,7 +107,8 @@ first.
 # Import the project pages
 
 os.makedirs(f'content/project', exist_ok=True)
-for file in ['AUTHORS.md', 'LICENCE.md', 'SECURITY.md']:
+project_pages = ['AUTHORS.md', 'LICENCE.md', 'SECURITY.md', 'SUPPORT-LIFECYCLE.md']
+for file in project_pages:
     with open(f'../{file}', 'r') as infile, open(f'content/project/{file}', 'w') as outfile:
         (title, content) = extract_title(infile.read())
 
@@ -117,7 +119,7 @@ for file in ['AUTHORS.md', 'LICENCE.md', 'SECURITY.md']:
             try_match = re.match(r'^(https?://|#)', href)
             if try_match:
                 return existing
-            try_match = re.match(r'^./(LICENCE|SECURITY).md$', href)
+            try_match = re.match(r'^\./(AUTHORS|LICENCE|SECURITY|SUPPORT-LIFECYCLE)\.md$', href)
             if try_match:
                 return f'(../{try_match[1].lower()}/)'
             raise Exception(f"Could not adjust link {href}")
