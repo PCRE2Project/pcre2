@@ -897,6 +897,17 @@ echo RC=^%ERRORLEVEL%>>testtrygrep
 (pushd %srcdir% & %pcre2grep% -n -B4 -A2 "^(ert|dfg)" ./testdata/grepinput & popd) >>testtrygrep
 echo RC=^%ERRORLEVEL%>>testtrygrep
 
+echo ---------------------------- Test 161 ----------------------------->>testtrygrep
+%printf% "XfooY\n" >testNinputgrep
+%pcre2grep% --allow-lookaround-bsk -o "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% --allow-lookaround-bsk --output "$0" "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% --allow-lookaround-bsk --line-offsets "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+%pcre2grep% --allow-lookaround-bsk --file-offsets "(?=foo\K)" testNinputgrep >>testtrygrep
+echo RC=^%ERRORLEVEL%>>testtrygrep
+
 :: Now compare the results.
 
 %cf% %srcdir%\testdata\grepoutput testtrygrep %cfout%
