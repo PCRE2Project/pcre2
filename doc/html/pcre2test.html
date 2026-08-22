@@ -214,9 +214,11 @@ If an unknown option is given, an error message is output; the exit code is 0.
 </p>
 <p>
 <b>--colo[u]r[=&#60;always,auto,never&#62;]</b>
-By default, the output is coloured if the output file is a terminal (<b>auto</b>).
-Force or suppress output of ANSI colour escapes with <b>always</b> and <b>never</b>
-respectively.
+With <b>auto</b>, the output is coloured if the output is to a terminal. Force or
+suppress output of ANSI colour escapes with <b>always</b> (or no specifier
+provided) and <b>never</b> respectively. If no colour option is provided, the
+default is <b>auto</b>, unless the NO_COLOR environment variable is defined and
+non-empty.
 </p>
 <p>
 <b>-d</b>

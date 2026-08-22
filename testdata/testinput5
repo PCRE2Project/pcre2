@@ -3616,4 +3616,9 @@
     \x{e1}
     \x{c1}
 
+# An unterminated \N{U+ escape at the end of the pattern must
+# report an error offset that lies within the pattern.
+
+/(*UTF)\N{U+2/
+
 # End of testinput5

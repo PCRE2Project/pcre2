@@ -1712,7 +1712,7 @@ process_command(void)
 FILE *f;
 PCRE2_SIZE serial_size;
 size_t i;
-int rc, cmd, yield;
+int rc, cmd, yield, config_value;
 uint16_t first_listed_newline;
 const char *cmdname;
 size_t cmdlen;
@@ -1980,7 +1980,7 @@ switch(cmd)
     {
     size_t optlen = strlen(coptlist[i].name);
     const uint8_t *argptr_trail;
-    if (coptlist[i].type != CONF_FIX)
+    if (coptlist[i].type != CONF_FIX && coptlist[i].type != CONF_INT)
       continue;
     if (strncmp((const char*)argptr, coptlist[i].name, optlen) != 0)
       continue;
@@ -1995,9 +1995,20 @@ switch(cmd)
     return PR_ABEND;
     }
 
-  /* Condition FALSE - skip this line and everything until #endif. */
-  if ((coptlist[i].value != 0) == if_inverted)
+  if (coptlist[i].type == CONF_FIX)
+    {
+    config_value = coptlist[i].value;
+    }
+  else /* if (coptlist[i].type == CONF_INT) */
+    {
+    (void)pcre2_config(coptlist[i].value, &config_value);
+    }
+
+  if ((config_value != 0) == if_inverted)
+    {
+    /* Condition FALSE - skip this line and everything until #endif. */
     yield = PR_ENDIF;
+    }
 
   inside_if = TRUE;
   break;
