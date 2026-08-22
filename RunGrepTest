@@ -990,6 +990,184 @@ if [ $utf8 -ne 0 ] ; then
   (cd $srcdir; $valgrind $vjs $pcre2grep -u --posix-digit --colour=always 'A\d' ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
 
+  echo "---------------------------- Test U11 ------------------------------" >>testtrygrep
+  printf '................................................' | tr '.' '\200' >testtemp1grep
+  printf 'x\n' >>testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit --buffer-size=16 -U --allow-lookaround-bsk -o '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "only-matching RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep --no-jit --buffer-size=16 -U --allow-lookaround-bsk -M '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep --no-jit --buffer-size=16 -U --allow-lookaround-bsk --colour=always '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "colour RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U12 ------------------------------" >>testtrygrep
+  # Colouring only, so the subject is a single line. An empty match at the end
+  # of the subject, then one that matches before retrying at the end.
+  printf 'abc\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -u '$' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-empty-at-end RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n --colour=always -u '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-nonempty-then-empty RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n --colour=always -u '^' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-empty-at-start RC=$?" >>testtrygrep
+
+  # An empty line, so the first match is empty with nothing following it, and a
+  # final line with no newline, so a restart can reach the end of the line.
+  printf '\nabc\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -u '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-empty-line RC=$?" >>testtrygrep
+  printf 'abc' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -u '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-no-final-newline RC=$?" >>testtrygrep
+
+  # Multiline, where a restart may have to move on to a following line.
+  printf 'a\nb\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -M -u '$' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-empty-at-line-end RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -u '^' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-empty-at-line-start RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -u '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-nonempty-then-empty RC=$?" >>testtrygrep
+
+  # A match that spans several lines, so that the restart has to skip over more
+  # than one line before looking for the next match.
+  printf 'a\nb\nc\nd\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -M -u '(?s)a.*c' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-spanning RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -u '(?s)a.*c|$' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-spanning-then-empty RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M --colour=always -u '(?s)a.*c|$' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-colour-spanning RC=$?" >>testtrygrep
+
+  # Invalid UTF-8 after an empty match, which is when the scan over
+  # continuation bytes that follow the restart point can run. Here the scan
+  # stops at the start of the next character.
+  printf 'x\200\200y\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -U '^' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-utf-scan-to-char RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -U '^' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-utf-scan-to-char RC=$?" >>testtrygrep
+
+  # The continuation bytes run up to the newline, and then up to the end of the
+  # subject, when there is no newline to stop the scan.
+  printf 'x\200\200\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -U '^' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-utf-scan-to-newline RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -U '^' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-utf-scan-to-newline RC=$?" >>testtrygrep
+  printf 'x\200\200' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -U '^' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-utf-scan-to-end RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -U '^' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-utf-scan-to-end RC=$?" >>testtrygrep
+
+  # A subject that is nothing but continuation bytes, so the very first match
+  # is empty and the scan immediately reaches the end.
+  printf '\200\200' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -U '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-utf-only-continuations RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -U '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-utf-only-continuations RC=$?" >>testtrygrep
+
+  # Continuation bytes at the end of a multi-line subject, reached after an
+  # empty match on an earlier line, and after a match that spans lines.
+  printf 'a\nb\n\n\200\200' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -M -U '.?' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-utf-trailing RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M -U '$' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-utf-trailing-empty RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -M --colour=always -U '(?s)a.*b|$' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-colour-utf-trailing-spanning RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U13 ------------------------------" >>testtrygrep
+  # The same restart, but reached by \K rather than by an empty match.
+  printf 'abc\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n --colour=always -u --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-bsk RC=$?" >>testtrygrep
+  printf 'a\nb\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -M -u --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-bsk RC=$?" >>testtrygrep
+
+  # The same, but with the restart landing on invalid UTF-8.
+  printf 'x\200\200y\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit -n --colour=always -U --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "colour-bsk-utf-scan-to-char RC=$?" >>testtrygrep
+  printf 'x\200\200' >testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit -n -M -U --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-bsk-utf-scan-to-end RC=$?" >>testtrygrep
+  printf 'a\nx\200\200' >testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit -n -M --colour=always -U --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-colour-bsk-utf-trailing RC=$?" >>testtrygrep
+
+
+  echo "---------------------------- Test U14 ------------------------------" >>testtrygrep
+
+  # A pattern that keeps making progress, so the restart is the ordinary one
+  # and the line is never advanced. This is the path the other U14 tests build on.
+  printf 'abcabc\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -o -u 'a.' testtemp1grep >>testtrygrep 2>&1
+  echo "control-progress RC=$?" >>testtrygrep
+
+  # An empty match, which is the case the restart exists for. "$" matches only
+  # at the end of the subject, so the restart is immediately at the end; "^"
+  # matches at the start, so it has to step forward by one character first.
+  $valgrind $vjs $pcre2grep -n -o -u '$' testtemp1grep >>testtrygrep 2>&1
+  echo "empty-at-end RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -o -u '^' testtemp1grep >>testtrygrep 2>&1
+  echo "empty-at-start RC=$?" >>testtrygrep
+
+  # \K in a lookbehind reports a non-empty match that ends no later than the
+  # offset it was started from. PCRE2_NOTEMPTY is set once a match has been
+  # found, so this, unlike an empty match, can stop the loop making progress on
+  # every iteration and not just the first.
+  $valgrind $vjs $pcre2grep -n -o -u --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "bsk-restart RC=$?" >>testtrygrep
+
+  # The step forward lands on invalid UTF-8, so the scan over continuation
+  # bytes runs. Here it stops at the start of the next character, and then at
+  # the newline, both of which are within the subject.
+  printf 'x\200\200y\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit -n -o -U --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "bsk-utf-scan-to-char RC=$?" >>testtrygrep
+  printf 'x\200\200\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit -n -o -U --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "bsk-utf-scan-to-newline RC=$?" >>testtrygrep
+
+  # The same, but with no newline to stop the scan, so it runs to the end of
+  # the subject and then looks at the byte after it.
+  printf 'x\200\200' >testtemp1grep
+  $valgrind $vjs $pcre2grep --no-jit -n -o -U --allow-lookaround-bsk '(?<=\K.)' testtemp1grep >>testtrygrep 2>&1
+  echo "bsk-utf-scan-to-end RC=$?" >>testtrygrep
+
+  # Moving on to another line, which only happens in multiline mode. The first
+  # match ends exactly at the start of the next line, so the line is advanced
+  # and the line number with it; the second ends two lines further on.
+  printf 'ab\ncd\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -o -M -u 'ab\n' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-line-boundary RC=$?" >>testtrygrep
+  printf 'ab\ncd\nef\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -o -M -u '(?s)ab.*ef' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-spanning RC=$?" >>testtrygrep
+
+  # An empty match in multiline mode, where the step forward is what takes the
+  # restart past the end of the line.
+  printf 'a\nb\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -o -M -u '$' testtemp1grep >>testtrygrep 2>&1
+  echo "multiline-empty RC=$?" >>testtrygrep
+
+  # A match that ends between the CR and the LF of a CRLF line ending, so the
+  # restart is past the text of the line but short of the start of the next
+  # one. Without -M the line is never advanced, so that is the control.
+  printf 'ab\r\ncd\r\n' >testtemp1grep
+  $valgrind $vjs $pcre2grep -n -o -N CRLF '\r' testtemp1grep >>testtrygrep 2>&1
+  echo "crlf-not-multiline RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -o -M -N CRLF '\r' testtemp1grep >>testtrygrep 2>&1
+  echo "crlf-mid-terminator RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -n -o -M -N ANY '\r' testtemp1grep >>testtrygrep 2>&1
+  echo "any-mid-terminator RC=$?" >>testtrygrep
+  $valgrind $vjs $pcre2grep -M -N CRLF --line-offsets '\r' testtemp1grep >>testtrygrep 2>&1
+  echo "crlf-mid-terminator-line-offsets RC=$?" >>testtrygrep
+
   $cf $srcdir/testdata/grepoutput8 testtrygrep
   if [ $? != 0 ] ; then exit 1; fi
 

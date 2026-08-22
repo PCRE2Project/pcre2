@@ -2965,16 +2965,18 @@ while (ptr < endptr)
         oldstartoffset = pcre2_get_startchar(match_data);
         if (startoffset <= oldstartoffset)
           {
-          if (startoffset >= length) goto END_ONE_MATCH;  /* Were at end */
+          if (oldstartoffset >= length) goto END_ONE_MATCH;  /* We're at end */
           startoffset = oldstartoffset + 1;
-          if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+          if (utf) while (startoffset < length &&
+                          (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
           }
 
         /* If the current match ended past the end of the line (only possible
         in multiline mode), we must move on to the line in which it did end
-        before searching for more matches. */
+        before searching for more matches. An offset that is within a line's
+        terminating CRLF sequence still belongs to that line. */
 
-        while (startoffset > linelength)
+        while (endlinelength != 0 && startoffset >= linelength + endlinelength)
           {
           ptr += linelength + endlinelength;
           filepos += (int)(linelength + endlinelength);
@@ -3135,8 +3137,10 @@ while (ptr < endptr)
 
           if (startoffset <= oldstartoffset)
             {
+            if (oldstartoffset >= length) break;  /* We're at end */
             startoffset = oldstartoffset + 1;
-            if (utf) while ((ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+            if (utf) while (startoffset < length &&
+                            (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
             }
 
           /* If the current match ended past the end of the line (only possible
