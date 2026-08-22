@@ -787,7 +787,7 @@ PATTERN MODIFIERS
        used by pcre2_match() for handling backtracking. The  size  depends  on
        the  number  of capturing parentheses in the pattern. A vector of these
        frames is used at matching time; its overall size  is  shown  when  the
-       heaframes_size subject modifier is set.
+       heapframes_size subject modifier is set.
 
        The  callout_info  modifier requests information about all the callouts
        in the pattern. A list of them is output at the end of any other infor-

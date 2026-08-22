@@ -295,12 +295,29 @@
 /abc/
     abc
     abc\=no_jit 
-    
+
+/(*NO_JIT)abc/
+    abc
+
 /abc/jitfast
     abc
-    abc\=copy_matched_subject
     abc\=no_jit 
-    
+
+/(*NO_JIT)abc/jitfast
+\= Expect error
+    abc
+
+# Do not leak a previously copied subject with jitfast (#920)
+
+/abc/jitfast
+    abc\=copy_matched_subject,no_jit
+    abc
+
+/abc/jitfast
+    abc\=copy_matched_subject
+    abc\=null_context
+    abc\=null_context,no_jit
+
 # ---- 
 
 /[aC]/mg,firstline,newline=lf

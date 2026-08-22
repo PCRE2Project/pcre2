@@ -3165,7 +3165,8 @@ for (;;)
       dat_context, dfa_workspace, DFA_WS_DIMENSION);
     }
 
-  else if ((pat_patctl.control & CTL_JITFAST) != 0)
+  else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+           (dat_datctl.options & PCRE2_NO_JIT) == 0)
     capcount = pcre2_jit_match(compiled_code, pp, ulen, dat_datctl.offset,
       dat_datctl.options, match_data, dat_context);
 
@@ -4747,7 +4748,8 @@ if (dat_datctl.replacement[0] != MOD_STR_UNSET)
         dat_datctl.offset, dat_datctl.options, match_data,
         use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
       }
-    else if ((pat_patctl.control & CTL_JITFAST) != 0)
+    else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+             (dat_datctl.options & PCRE2_NO_JIT) == 0)
       {
       (void)pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
         dat_datctl.options, match_data, use_dat_context);
@@ -4990,7 +4992,7 @@ for (gmatched = 0;; gmatched++)
   /* When matching is via pcre2_match(), we will detect the use of JIT via the
   stack callback function. */
 
-  jit_was_used = (pat_patctl.control & CTL_JITFAST) != 0;
+  jit_was_used = FALSE;
 
   /* Do timing if required. */
 
@@ -5021,7 +5023,8 @@ for (gmatched = 0;; gmatched++)
         }
       }
 
-    else if ((pat_patctl.control & CTL_JITFAST) != 0)
+    else if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+             (dat_datctl.options & PCRE2_NO_JIT) == 0)
       {
       start_time = clock();
       for (i = 0; i < timeitm; i++)
@@ -5105,9 +5108,11 @@ for (gmatched = 0;; gmatched++)
       }
     else
       {
-      if ((pat_patctl.control & CTL_JITFAST) != 0)
-        capcount = pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
-          dat_datctl.options | g_notempty, match_data, use_dat_context);
+      if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+          (dat_datctl.options & PCRE2_NO_JIT) == 0)
+        capcount = pcre2_jit_match(compiled_code, pp, arg_ulen,
+          dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
+          use_dat_context);
       else
         capcount = pcre2_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, use_dat_context);
@@ -5142,12 +5147,15 @@ for (gmatched = 0;; gmatched++)
           }
         else
           {
-          if ((pat_patctl.control & CTL_JITFAST) != 0)
-            capcount = pcre2_jit_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
-              dat_datctl.options | g_notempty, match_data, use_dat_context);
+          if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+              (dat_datctl.options & PCRE2_NO_JIT) == 0)
+            capcount = pcre2_jit_match(compiled_code, pp, arg_ulen,
+              dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
+              use_dat_context);
           else
-            capcount = pcre2_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
-              dat_datctl.options | g_notempty, match_data, use_dat_context);
+            capcount = pcre2_match(compiled_code, pp, arg_ulen,
+              dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
+              use_dat_context);
           }
 
         mallocs_until_failure = INT_MAX;
@@ -5207,12 +5215,20 @@ for (gmatched = 0;; gmatched++)
       return PR_ABEND;
       }
 
+    /* tracking JIT with jitverify needs a context, but in cases where one
+    wasn't available, can fallback to the match_data status */
+
+    if ((dat_datctl.control & CTL_NULLCONTEXT) != 0 &&
+        (pat_patctl.control & CTL_JITVERIFY) != 0)
+      jit_was_used = match_data->matchedby == PCRE2_MATCHEDBY_JIT;
+
     /* If PCRE2_COPY_MATCHED_SUBJECT was set, check that things are as they
     should be, but not for fast JIT, where it isn't supported. */
 
     if ((dat_datctl.options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
-      if ((pat_patctl.control & CTL_JITFAST) != 0)
+      if ((pat_patctl.control & CTL_JITFAST) != 0 &&
+          (dat_datctl.options & PCRE2_NO_JIT) == 0)
         {
         if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
           cfprintf(clr_test_error, outfile,
@@ -6026,9 +6042,11 @@ if (pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0)
 
 #ifdef SUPPORT_JIT
 
-/* Check that fast JIT releases a copied subject when reusing match data. */
 if (test_compiled_with_jit)
   {
+
+/* Check that fast JIT releases a copied subject when reusing match data. */
+
   test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code,
     test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create_from_pattern(JIT)");
@@ -6043,6 +6061,22 @@ if (test_compiled_with_jit)
 
   pcre2_match_data_free(test_match_data);
   test_match_data = NULL;
+
+/* Check that fast JIT ignores PCRE2_NO_JIT */
+
+  test_match_data = pcre2_match_data_create(100000, test_gen_context);
+  ASSERT(test_match_data != NULL, "pcre2_match_data_create(100000)");
+  ASSERT(pcre2_get_ovector_count(test_match_data) == 65535,
+    "pcre2_get_ovector_count(UINT32_MAX) <= UINT16_MAX)");
+
+  rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, PCRE2_NO_JIT,
+    test_match_data, NULL);
+  ASSERT(rc == 1 && (test_match_data->matchedby == PCRE2_MATCHEDBY_JIT),
+    "pcre2_jit_match(ignore PCRE2_NO_JIT");
+
+  pcre2_match_data_free(test_match_data);
+  test_match_data = NULL;
+
   }
 
 #endif
