@@ -45,3 +45,130 @@ RC=0
 ---------------------------- Test U10 ------------------------------
 [1;31mA1[0m
 RC=0
+---------------------------- Test U11 ------------------------------
+x
+only-matching RC=0
+€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€x
+multiline RC=0
+€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€[1;31mx[0m
+colour RC=0
+---------------------------- Test U12 ------------------------------
+1:abc
+colour-empty-at-end RC=0
+1:[1;31ma[0m[1;31mb[0m[1;31mc[0m
+colour-nonempty-then-empty RC=0
+1:abc
+colour-empty-at-start RC=0
+1:
+2:[1;31ma[0m[1;31mb[0m[1;31mc[0m
+colour-empty-line RC=0
+1:[1;31ma[0m[1;31mb[0m[1;31mc[0m
+colour-no-final-newline RC=0
+1:a
+2:b
+multiline-empty-at-line-end RC=0
+1:a
+2:b
+multiline-empty-at-line-start RC=0
+1:a
+2:b
+multiline-nonempty-then-empty RC=0
+1:a
+b
+c
+multiline-spanning RC=0
+1:a
+b
+c
+4:d
+multiline-spanning-then-empty RC=0
+1:[1;31ma
+b
+c[0m
+4:d
+multiline-colour-spanning RC=0
+1:x€€y
+colour-utf-scan-to-char RC=0
+1:x€€y
+multiline-utf-scan-to-char RC=0
+1:x€€
+colour-utf-scan-to-newline RC=0
+1:x€€
+multiline-utf-scan-to-newline RC=0
+1:x€€
+colour-utf-scan-to-end RC=0
+1:x€€
+multiline-utf-scan-to-end RC=0
+1:€€
+colour-utf-only-continuations RC=0
+1:€€
+multiline-utf-only-continuations RC=0
+1:a
+2:b
+3:
+€€
+multiline-utf-trailing RC=0
+1:a
+2:b
+3:
+€€
+multiline-utf-trailing-empty RC=0
+1:[1;31ma
+b[0m
+3:
+€€
+multiline-colour-utf-trailing-spanning RC=0
+---------------------------- Test U13 ------------------------------
+1:[1;31ma[0m[1;31mb[0m[1;31mc[0m
+colour-bsk RC=0
+1:a
+2:b
+multiline-bsk RC=0
+1:[1;31mx[0m€€[1;31my[0m
+colour-bsk-utf-scan-to-char RC=0
+1:x€€
+multiline-bsk-utf-scan-to-end RC=0
+1:[1;31ma[0m
+2:[1;31mx[0m€€
+multiline-colour-bsk-utf-trailing RC=0
+---------------------------- Test U14 ------------------------------
+1:ab
+1:ab
+control-progress RC=0
+1:
+empty-at-end RC=0
+1:
+empty-at-start RC=0
+1:a
+1:b
+1:c
+1:a
+1:b
+1:c
+bsk-restart RC=0
+1:x
+1:y
+bsk-utf-scan-to-char RC=0
+1:x
+bsk-utf-scan-to-newline RC=0
+1:x
+bsk-utf-scan-to-end RC=0
+1:ab
+
+multiline-line-boundary RC=0
+1:ab
+cd
+ef
+multiline-spanning RC=0
+1:
+multiline-empty RC=0
+crlf-not-multiline RC=1
+1:
+1:
+crlf-mid-terminator RC=0
+1:
+2:
+any-mid-terminator RC=0
+1:2,1
+1:6,1
+crlf-mid-terminator-line-offsets RC=0
