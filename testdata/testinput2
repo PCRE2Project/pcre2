@@ -7407,6 +7407,18 @@ a)"xI
 /[^[[^]~~[^]]]/B,alt_extended_class,allow_empty_class
     a
 
+/[\d--1].(?<!x)/alt_extended_class
+    0a
+    90
+\= Expect no match
+    1
+    2
+    a
+    1a
+    0x
+    aa
+    xa
+
 # --------------
 
 # EXTENDED CHARACTER CLASSES (Perl)
@@ -7518,6 +7530,13 @@ a)"xI
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
 
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
+
+/(?[\d-[1]]).(?<!x)/
+    0a
+    90
+\= Expect no match
+    1a
+    0x
 
 # --------------
 

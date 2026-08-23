@@ -10167,6 +10167,11 @@ for (; *pptr != META_END; pptr++)
     case META_COMMIT:
     case META_DOLLAR:
     case META_DOT:
+    case META_ECLASS_AND:
+    case META_ECLASS_NOT:
+    case META_ECLASS_OR:
+    case META_ECLASS_SUB:
+    case META_ECLASS_XOR:
     case META_FAIL:
     case META_PLUS:
     case META_PLUS_PLUS:
