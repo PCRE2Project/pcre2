@@ -9370,10 +9370,10 @@ return c;
 
 /* This function is called to skip parts of the parsed pattern when finding the
 length of a lookbehind branch. It is called after (*ACCEPT) and (*FAIL) to find
-the end of the branch, it is called to skip over an internal lookaround or
-(DEFINE) group, and it is also called to skip to the end of a class, during
-which it will never encounter nested groups (but there's no need to have
-special code for that).
+the end of the branch; it is called to skip over an internal lookaround or
+(DEFINE) group; and it is also called to skip to the end of a class, during
+which it will never encounter nested groups (however extended classes can
+themselves be nested, with their own class-nesting level).
 
 When called to find the end of a branch or group, pptr must point to the first
 meta code inside the branch, not the branch-starting code. In other cases it
@@ -9394,6 +9394,7 @@ static uint32_t *
 parsed_skip(uint32_t *pptr, uint32_t skiptype)
 {
 uint32_t nestlevel = 0;
+uint32_t class_nestlevel = 0;
 
 for (;; pptr++)
   {
@@ -9433,11 +9434,18 @@ for (;; pptr++)
     pptr += pptr[1];
     break;
 
-    /* These are the "active" items in this loop. */
+    /* These are the active items for tracking class nesting. */
+
+    case META_CLASS:
+    case META_CLASS_NOT:
+    if (skiptype == PSKIP_CLASS) class_nestlevel++;
+    break;
 
     case META_CLASS_END:
-    if (skiptype == PSKIP_CLASS) return pptr;
+    if (skiptype == PSKIP_CLASS && --class_nestlevel == 0) return pptr;
     break;
+
+    /* These are the "active" items for tracking ALT/KET nesting. */
 
     case META_ATOMIC:
     case META_CAPTURE:
