@@ -21773,6 +21773,23 @@ Failed: error 207 at offset 117: extended character class nesting is too deep
 Failed: error 106 at offset 3: missing terminating ] for character class
         here: [z& |<--|
 
+/(?<=[12[34]])/alt_extended_class
+    1
+ 0: 
+    2
+ 0: 
+    3
+ 0: 
+    4
+ 0: 
+    1]
+ 0: 
+\= Expect no match
+    5
+No match
+    []
+No match
+
 /[[^]~~[^]]/B,alt_extended_class,allow_empty_class
 ------------------------------------------------------------------
         Bra
