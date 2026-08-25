@@ -21773,6 +21773,23 @@ Failed: error 207 at offset 117: extended character class nesting is too deep
 Failed: error 106 at offset 3: missing terminating ] for character class
         here: [z& |<--|
 
+/(?<=[12[34]])/alt_extended_class
+    1
+ 0: 
+    2
+ 0: 
+    3
+ 0: 
+    4
+ 0: 
+    1]
+ 0: 
+\= Expect no match
+    5
+No match
+    []
+No match
+
 /[[^]~~[^]]/B,alt_extended_class,allow_empty_class
 ------------------------------------------------------------------
         Bra
@@ -21793,6 +21810,27 @@ No match
 ------------------------------------------------------------------
     a
  0: a
+
+/[\d--1].(?<!x)/alt_extended_class
+    0a
+ 0: 0a
+    90
+ 0: 90
+\= Expect no match
+    1
+No match
+    2
+No match
+    a
+No match
+    1a
+No match
+    0x
+No match
+    aa
+No match
+    xa
+No match
 
 # --------------
 
@@ -22005,6 +22043,17 @@ Failed: error 207 at offset 160: extended character class nesting is too deep
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
 Failed: error 207 at offset 157: extended character class nesting is too deep
         here: ...n+[a]&\n+( |-->| (\n)&\n)))...
+
+/(?[\d-[1]]).(?<!x)/
+    0a
+ 0: 0a
+    90
+ 0: 90
+\= Expect no match
+    1a
+No match
+    0x
+No match
 
 # --------------
 

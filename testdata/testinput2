@@ -7400,12 +7400,34 @@ a)"xI
 
 /[z&/alt_extended_class
 
+/(?<=[12[34]])/alt_extended_class
+    1
+    2
+    3
+    4
+    1]
+\= Expect no match
+    5
+    []
+
 /[[^]~~[^]]/B,alt_extended_class,allow_empty_class
 \= Expect no match
     a
 
 /[^[[^]~~[^]]]/B,alt_extended_class,allow_empty_class
     a
+
+/[\d--1].(?<!x)/alt_extended_class
+    0a
+    90
+\= Expect no match
+    1
+    2
+    a
+    1a
+    0x
+    aa
+    xa
 
 # --------------
 
@@ -7518,6 +7540,13 @@ a)"xI
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
 
 /(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
+
+/(?[\d-[1]]).(?<!x)/
+    0a
+    90
+\= Expect no match
+    1a
+    0x
 
 # --------------
 

@@ -256,3 +256,7 @@ Patches introduced:
 * There is a new and rewritten JIT implementation for the AArch64 SIMD code,
   fixing crashes and out-of-bounds memory reads in the previous, legacy AArch64
   JIT. This is probably not possible to backport.
+
+### PCRE2 10.48 27-August-2026
+
+**To be confirmed.**

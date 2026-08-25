@@ -3151,11 +3151,20 @@ while (ptr < endptr)
 
           while (startoffset > linelength + endlinelength)
             {
-            ptr += linelength + endlinelength;
-            filepos += (int)(linelength + endlinelength);
+            PCRE2_SIZE lineadvance = linelength + endlinelength;
+
+            if (endprevious < lineadvance)
+              {
+              FWRITE_IGNORE(ptr + endprevious, 1,
+                lineadvance - endprevious, stdout);
+              endprevious = 0;
+              }
+            else endprevious -= lineadvance;
+
+            ptr += lineadvance;
+            filepos += (int)lineadvance;
             linenumber++;
-            startoffset -= (int)(linelength + endlinelength);
-            endprevious -= (int)(linelength + endlinelength);
+            startoffset -= lineadvance;
             t = end_of_line(ptr, endptr, &endlinelength);
             linelength = t - ptr - endlinelength;
             length = (PCRE2_SIZE)(endptr - ptr);

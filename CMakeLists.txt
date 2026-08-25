@@ -910,7 +910,6 @@ endif()
 
 set(TARGETS)
 set(DLL_PDB_FILES)
-set(DLL_PDB_DEBUG_FILES)
 
 # 8-bit library
 
@@ -988,8 +987,7 @@ if(PCRE2_BUILD_PCRE2_8)
       set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
     endif()
     list(APPEND TARGETS pcre2-8-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8.pdb)
-    list(APPEND DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-8-shared>/pcre2-8d.pdb)
+    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-8-shared>)
 
     add_library(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
     target_include_directories(
@@ -1013,8 +1011,7 @@ if(PCRE2_BUILD_PCRE2_8)
     target_compile_definitions(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
     target_link_libraries(pcre2-posix-shared pcre2-8-shared)
     list(APPEND TARGETS pcre2-posix-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-posix-shared>/pcre2-posix.pdb)
-    list(APPEND DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-posix-shared>/pcre2-posixd.pdb)
+    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-posix-shared>)
 
     if(MINGW)
       if(NON_STANDARD_LIB_PREFIX)
@@ -1093,8 +1090,7 @@ if(PCRE2_BUILD_PCRE2_16)
       set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
     endif()
     list(APPEND TARGETS pcre2-16-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16.pdb)
-    list(APPEND DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>/pcre2-16d.pdb)
+    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-16-shared>)
 
     if(MINGW)
       if(NON_STANDARD_LIB_PREFIX)
@@ -1171,8 +1167,7 @@ if(PCRE2_BUILD_PCRE2_32)
       set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
     endif()
     list(APPEND TARGETS pcre2-32-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32.pdb)
-    list(APPEND DLL_PDB_DEBUG_FILES $<TARGET_PDB_FILE_DIR:pcre2-32-shared>/pcre2-32d.pdb)
+    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE_DIR:pcre2-32-shared>)
 
     if(MINGW)
       if(NON_STANDARD_LIB_PREFIX)
@@ -1501,8 +1496,11 @@ install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
 install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(MSVC AND INSTALL_MSVC_PDB)
-  install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS RelWithDebInfo)
-  install(FILES ${DLL_PDB_DEBUG_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug)
+  install(
+    FILES ${DLL_PDB_FILES}
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    CONFIGURATIONS Debug RelWithDebInfo
+  )
 endif()
 
 # Help, only for nice output
