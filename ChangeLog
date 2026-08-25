@@ -7,10 +7,136 @@ there is also the log of commit messages.
 Internal changes which are not visible to clients of the library are mostly not
 listed here.
 
-Version 10.48 xx-xxx-2026
--------------------------
 
-...
+Version 10.48 27-August-2026
+----------------------------
+
+1. (#826) [GHSA-q7rw-r7qq-2hx6] Initialized alignment padding in serialized
+character lists so that pcre2_serialize_encode() does not expose two
+uninitialised bytes from malloc().
+
+2. (#825) Fixed the casing of CMake package variables and corrected
+Readline/ncurses linkage.
+
+3. (#830) Updated Unicode support to Unicode 17.0, including new scripts,
+characters, properties, case mappings, and emoji data.
+
+4. (a9d4a748) Renamed the default development branch from master to main.
+
+5. (574f5683) Allowed PCRE2_NO_UTF_CHECK to differ between an existing match
+and pcre2_substitute() with PCRE2_SUBSTITUTE_MATCHED, instead of returning
+PCRE2_ERROR_DIFFSUBSOPTIONS.
+
+6. (#841) Fixed incorrect compilation and matching of character classes that
+combine characters from multiple internal ranges, including characters at or
+below U+00FF together with characters at U+0100 and U+8000 or above.
+
+7. (#849) Reduced the memory used by each pcre2_match() heap frame by shrinking
+temporary fields.
+
+8. (#852) Added interpreter and JIT support for possessive repeats of
+backreferences.
+
+9. (#857) Fixed a regression in pcre2_substitute() that mishandled repeated
+backslash escapes in extended replacement strings.
+
+10. (#858) Added improvements to pcre2_substitute(). Support for partial matches
+with PCRE2_SUBSTITUTE_REPLACEMENT_ONLY added, and added
+PCRE2_ERROR_PARTIALSUBS for replacements containing $' or $_ which cannot be
+expanded for partial matches.
+
+11. (#859, 30c9faa4) Expanded pcre2-config's recognition of system library
+directories on Linux (multilib and multiarch), and AIX and Solaris, avoiding
+unnecessary -L options.
+
+12. (#875) Fixed a stale repeat value while constructing JIT scan prefixes,
+which could cause missed matches when a prefix was followed by a bounded
+character-class repeat with a zero minimum.
+
+13. (#879) Fixed build warnings in pcre2grep with C23 and glibc 2.43, by retaining
+const qualifiers from strstr() and strchr().
+
+14. (#883) Prevented generator expressions inherited from a parent CMake
+project from entering CMAKE_REQUIRED_DEFINITIONS during configuration checks.
+
+15. (#884, #880) Made symbol-version scripts platform-specific, fixing Solaris SPARC
+symbol versioning.
+
+16. (#888) Fixed memory leaks and stale-pointer double frees when
+pcre2_deserialize_decode() rejects an invalid block size.
+
+17. (#894) Updated Zig's build.zig, including exported headers, hidden symbol
+visibility, and sanitizer support.
+
+18. (#893) Changed pcre2test builds to detect setrlimit() instead of relying on
+a hard-coded platform list.
+
+19. (#907) Added support for installing PCRE2 directly with `zig fetch`,
+including a Zig package manifest and release integration.
+
+20. (#912) Fixed a JIT-specific bug in variable-length lookbehinds which caused
+incorrect match results during backtracking.
+
+21. (#863) Added a five-year support lifecycle policy and publication of backport
+patches for security and high-severity fixes in older releases.
+
+22. (#937) Fixed a leak and later invalid free when calling the fast-path
+pcre2_jit_match() function with a match data object previously used with
+pcre2_match() and PCRE2_COPY_MATCHED_SUBJECT. No security advisory, as this is
+considered unlikely to affect applications.
+
+23. (#936) Made pcre2grep recognize -- during positional argument processing,
+for improved compatibility with GNU grep.
+
+24. (#922) Added support for Zig JIT builds to fetch SLJIT through the Zig
+package manager when the Git submodule is absent. The minimum Zig version
+is raised to 0.16.0.
+
+25. (#926) [GHSA-2p8c-ff85-vh9x] If pcre2_jit_compile() is called with options
+for some match modes, and then pcre2_match() is used to perform a match for a
+different match mode, an out-of-bounds read can occur if the match is attempted
+against invalid UTF input. The interpreter fallback now performs its own UTF
+validation correctly when some JIT match modes have been compiled, but not the
+requested mode.
+
+26. (#909) [GHSA-q8g2-wprr-34m9] If pcre2_convert() is called on untrusted input
+on platforms with 32-bit size_t, an out-of-bounds heap write can occur.
+Additionally, the allocation made was larger than required in common cases.
+Added overflow checks for allocations in pattern conversion and substring APIs.
+
+27. (#945) Fixed JIT character advancement with PCRE2_MATCH_INVALID_UTF in
+UTF-8 and UTF-16 modes. Valid multi-code-unit characters are now advanced as a
+unit, while invalid characters advance by one code unit, preventing adjacent
+characters from being skipped.
+
+28. (#948) Fixed one-past-the-end compile error offsets for incomplete \x{,
+\o{, and \N{U+ escapes at the end of a pattern.
+
+29. (#947) Clarified documentation for PCRE2_DFA_RESTART, which does not remove
+the requirement to retain previously supplied subject data, including sufficient
+history for nested lookbehinds.
+
+30. (#942, #954) Fixed pcre2grep handling for \K matches whose end offset precedes
+their start offset. Such ranges could previously cause an unsigned match-length
+underflow.
+
+31. (#956) Fixed an integer overflow in pcre2grep when advancing multiline
+output state, and preserved pending output when crossing lines.
+
+32. (#957) Updated bundled SLJIT with architecture-specific code-generation and
+portability fixes.
+
+33. (#958) Fixed CMake installation of MSVC PDB files when
+CMAKE_SHARED_LIBRARY_PREFIX_C is customized.
+
+34. (#961, #962) Fixed two compilation issues preventing use of extended
+(Boolean) character classes before a lookbehind, or inside a lookaround.
+
+35. [GHSA-fmgr-6ggq-9859] Withheld
+
+36. [GHSA-9qww-pwc4-77qq] Withheld
+
+37. [GHSA-3r4p-g7gg-ppmf] Withheld
 
 
 Version 10.47 21-October-2025
