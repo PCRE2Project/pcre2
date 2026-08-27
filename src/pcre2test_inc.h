@@ -2289,7 +2289,7 @@ else if ((pat_patctl.control & CTL_EXPAND) != 0)
     expanding buffers always keeps buffer and pbuffer8 in step as far as their
     size goes. */
 
-    while (pt + count * length > pbuffer8 + pbuffer8_size)
+    while (pt + count * length >= pbuffer8 + pbuffer8_size)
       {
       size_t pc_offset = pc - buffer;
       size_t pp_offset = pp - buffer;
