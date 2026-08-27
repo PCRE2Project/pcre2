@@ -498,6 +498,16 @@
 /(..)(*scs:(1)ab$)/match_invalid_utf
     ab\x{df00}cde         
 
+# Backward scans must not enter the invalid prefix before check_subject.
+
+/(?<=a{1,2})X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}X
+
+/\X\X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}\x{1f1e6}\x{1f1e7}
+
 /(?<=(.))/utf,match_invalid_utf
     x\x{d800}
     \x{10000}\x{dc00}

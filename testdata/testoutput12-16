@@ -1659,6 +1659,18 @@ No match
  0: ab
  1: ab
 
+# Backward scans must not enter the invalid prefix before check_subject.
+
+/(?<=a{1,2})X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}X
+No match
+
+/\X\X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}\x{1f1e6}\x{1f1e7}
+No match
+
 /(?<=(.))/utf,match_invalid_utf
     x\x{d800}
  0: 
