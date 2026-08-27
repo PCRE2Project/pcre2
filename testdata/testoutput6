@@ -7920,4 +7920,12 @@ Partial match:
  3: a
  4: 
 
+# --------------
+
+# Test workspace resizing and workspace re-use
+
+/(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R)))))))./
+    a\=dfa
+Failed: error -63: heap limit exceeded
+
 # End of testinput6
