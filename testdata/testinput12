@@ -468,6 +468,16 @@
 /A\z/utf,match_invalid_utf
     A\x{df00}\n
 
+# Backward scans must not enter the invalid prefix before check_subject.
+
+/(?<=a{1,2})X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}X
+
+/\X\X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}\x{1f1e6}\x{1f1e7}
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I
