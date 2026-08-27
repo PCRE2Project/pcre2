@@ -8237,4 +8237,12 @@ Failed: error -42: pattern contains an item that is not supported for DFA matchi
     abc\=replace=xyz,substitute_matched
 Failed: error -41: function is not supported for DFA matching
 
+# --------------
+
+# Test workspace resizing and workspace re-use
+
+/(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R)))))))./
+    a\=dfa
+Failed: error -63: heap limit exceeded
+
 # End of testinput6
