@@ -555,6 +555,12 @@
     AAA\x80BXYZ 
     AAA\x80BBXYZ 
 
+# Backward scans must not enter the invalid prefix before check_subject.
+
+/\X\X/utf,match_invalid_utf
+\= Expect no match
+    \x80\x{1f1e6}\x{1f1e7}
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I
