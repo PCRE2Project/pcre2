@@ -5263,4 +5263,11 @@
     abc\=replace=xyz
     abc\=replace=xyz,substitute_matched
 
+# --------------
+
+# Test workspace resizing and workspace re-use
+
+/(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R)))))))./
+    a\=dfa
+
 # End of testinput6
