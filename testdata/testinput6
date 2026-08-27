@@ -5026,4 +5026,11 @@
 /c*+/
     ab\=ph,offset=2
 
+# --------------
+
+# Test workspace resizing and workspace re-use
+
+/(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R)))))))./
+    a\=dfa
+
 # End of testinput6
