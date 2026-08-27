@@ -1586,6 +1586,13 @@ No match
     \x{d800}aa
  0: aa
 
+# Backward scans must not enter the invalid prefix before check_subject.
+
+/\X\X/utf,match_invalid_utf
+\= Expect no match
+    \x{dc00}\x{1f1e6}\x{1f1e7}
+No match
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I
