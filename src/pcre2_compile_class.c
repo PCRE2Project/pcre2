@@ -498,7 +498,7 @@ static const uint32_t char_list_starts[] = {
 
 static class_ranges *
 compile_optimize_class(uint32_t *start_ptr, uint32_t options,
-  uint32_t xoptions, compile_block *cb)
+  uint32_t xoptions, int *errorcodeptr, compile_block *cb)
 {
 class_ranges* cranges;
 uint32_t *ptr;
@@ -538,12 +538,23 @@ PCRE2_ASSERT((range_list_size & 0x1) == 0);
 
 total_size = range_list_size +
    ((range_list_size >= 2) ? CHAR_LIST_EXTRA_SIZE : 0);
+if (total_size > (PCRE2_SIZE_MAX - sizeof(class_ranges)) / sizeof(uint32_t))
+  {
+  *errorcodeptr = ERR20;
+  cb->erroroffset = 0;
+  return NULL;
+  }
 
 cranges = cb->cx->memctl.malloc(
   sizeof(class_ranges) + total_size * sizeof(uint32_t),
   cb->cx->memctl.memory_data);
 
-if (cranges == NULL) return NULL;
+if (cranges == NULL)
+  {
+  *errorcodeptr = ERR21;
+  cb->erroroffset = 0;
+  return NULL;
+  }
 
 cranges->header.next = NULL;
 #ifdef PCRE2_DEBUG
@@ -1120,13 +1131,10 @@ if (utf)
   {
   if (lengthptr != NULL)
     {
-    cranges = compile_optimize_class(pptr, options, xoptions, cb);
+    cranges = compile_optimize_class(pptr, options, xoptions, errorcodeptr, cb);
 
     if (cranges == NULL)
-      {
-      *errorcodeptr = ERR21;
       return NULL;
-      }
 
     /* Caching the pre-processed character ranges. */
     if (cb->last_data != NULL)
@@ -1759,18 +1767,17 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
       *lengthptr += 1 + LINK_SIZE;
 #endif
 
-      cb->char_lists_size += char_lists_size;
+      PCRE2_ASSERT(BYTES2CU(cb->char_lists_size) <= MAX_PATTERN_SIZE);
 
-      char_lists_size /= sizeof(PCRE2_UCHAR);
-
-      /* Storage space for character lists is included
-      in the maximum pattern size. */
-      if (*lengthptr > MAX_PATTERN_SIZE ||
-          MAX_PATTERN_SIZE - *lengthptr < char_lists_size)
+      if (char_lists_size > PCRE2_SIZE_MAX - cb->char_lists_size ||
+          BYTES2CU(char_lists_size) > MAX_PATTERN_SIZE ||
+          BYTES2CU(cb->char_lists_size) > MAX_PATTERN_SIZE - BYTES2CU(char_lists_size))
         {
         *errorcodeptr = ERR20;   /* Pattern is too large */
         return NULL;
         }
+
+      cb->char_lists_size += char_lists_size;
       }
     else
       {
@@ -1792,6 +1799,8 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
       lists using the byte code start stored in match blocks.
       Each list is aligned to 32 bit with an optional unused
       16 bit value at the beginning of the character list. */
+
+      PCRE2_ASSERT(char_lists_size <= PCRE2_SIZE_MAX - cb->char_lists_size);
 
       cb->char_lists_size += char_lists_size;
       data = (uint8_t*)cb->start_code - cb->char_lists_size;

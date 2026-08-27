@@ -6195,7 +6195,8 @@ for (;; pptr++)
 
     if (meta < META_ASTERISK || meta > META_MINMAX_QUERY)
       {
-      if (OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
+      if (*lengthptr > OFLOW_MAX ||
+          OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
         {
         *errorcodeptr = ERR20;   /* Integer overflow */
         cb->erroroffset = 0;
@@ -8802,7 +8803,8 @@ for (;;)
     *reqcuflagsptr = reqcuflags;
     if (lengthptr != NULL)
       {
-      if (OFLOW_MAX - *lengthptr < length)
+      if (*lengthptr > MAX_PATTERN_SIZE ||
+          MAX_PATTERN_SIZE - *lengthptr < length)
         {
         *errorcodeptr = ERR20;
         return 0;
@@ -8825,6 +8827,19 @@ for (;;)
     {
     code = *codeptr + 1 + LINK_SIZE + skipunits;
     length += 1 + LINK_SIZE;
+
+    /* Move the accumulated length into *lengthptr, providing the next call to
+    compile_branch with as much space in &length and &code as the first did. */
+
+    if (*lengthptr > MAX_PATTERN_SIZE ||
+        MAX_PATTERN_SIZE - *lengthptr < length)
+      {
+      *errorcodeptr = ERR20;
+      cb->erroroffset = 0;
+      return 0;
+      }
+    *lengthptr += length;
+    length = 0;
     }
   else
     {
@@ -10851,7 +10866,8 @@ if (errorcode != 0) goto HAD_CB_ERROR;  /* Offset is in cb.erroroffset */
 #if defined SUPPORT_WIDE_CHARS
 PCRE2_ASSERT((cb.char_lists_size & 0x3) == 0);
 if (length > MAX_PATTERN_SIZE ||
-    MAX_PATTERN_SIZE - length < (cb.char_lists_size / sizeof(PCRE2_UCHAR)))
+    BYTES2CU(cb.char_lists_size) > MAX_PATTERN_SIZE ||
+    MAX_PATTERN_SIZE - length < BYTES2CU(cb.char_lists_size))
 #else
 if (length > MAX_PATTERN_SIZE)
 #endif
@@ -10876,10 +10892,35 @@ if (cb.char_lists_size != 0)
   /* Align to 32 bit first. This ensures the
   allocated area will also be 32 bit aligned. */
   re_blocksize = (PCRE2_SIZE)CLIST_ALIGN_TO(re_blocksize, sizeof(uint32_t));
+#else
+  /* Already 32 bit aligned. */
 #endif
+
+  /* We have bounded the length and BYTES2CU(char_lists_size) to
+  MAX_PATTERN_SIZE units, however (with 32-bit code units) char_lists_size
+  in bytes could still be extremely close to (or greater than) SIZE_MAX, so
+  we require another overflow check. */
+
+  if (cb.char_lists_size > PCRE2_SIZE_MAX - re_blocksize)
+    {
+    errorcode = ERR20;
+    cb.erroroffset = 0;
+    goto HAD_CB_ERROR;
+    }
+
   re_blocksize += cb.char_lists_size;
   }
 #endif
+
+if (length > BYTES2CU(PCRE2_SIZE_MAX - re_blocksize))
+  {
+  /* Given the current value of 2^30 for MAX_PATTERN_SIZE, this block is only
+  reachable when both PCRE2_CODE_UNIT_WIDTH >= 16 and sizeof(size_t) is
+  32 bits. */
+  errorcode = ERR20;
+  cb.erroroffset = 0;
+  goto HAD_CB_ERROR;
+  }
 
 re_blocksize += CU2BYTES(length);
 
@@ -10890,7 +10931,15 @@ if (re_blocksize > ccontext->max_pattern_compiled_length)
   goto HAD_CB_ERROR;
   }
 
+if (sizeof(pcre2_real_code) > PCRE2_SIZE_MAX - re_blocksize)
+  {
+  errorcode = ERR20;
+  cb.erroroffset = 0;
+  goto HAD_CB_ERROR;
+  }
+
 re_blocksize += sizeof(pcre2_real_code);
+
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
 if (re == NULL)
