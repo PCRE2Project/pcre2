@@ -5042,4 +5042,11 @@
 /|a(?0)/endanchored
     aaaa
 
+# --------------
+
+# Test workspace resizing and workspace re-use
+
+/(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R)))))))./
+    a\=dfa
+
 # End of testinput6
