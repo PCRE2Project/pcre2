@@ -1,7 +1,7 @@
 News about PCRE2 releases
 -------------------------
 
-Version 10.48 27-August-2026
+Version 10.48 31-August-2026
 ----------------------------
 
 This is a regular release, incorporating security fixes along with small
@@ -9,6 +9,10 @@ improvements and fixes to library behaviour.
 
 Only changes to behaviour, changes to the API, and other significant changes
 are described here. Please see the ChangeLog and Git log for further details.
+
+As well as the tarball and Git tag for this release, there are detailed
+instructions for backporting security and correctness fixes, for the last
+five years of releases.
 
 * (Git change) Renamed the default development branch from master to main.
 
@@ -25,11 +29,17 @@ out-of-bounds read can occur if the match is attempted against invalid UTF input
 is called on untrusted input on platforms with 32-bit size_t, an out-of-bounds
 heap write can occur.
 
-* (Security fix, GHSA-fmgr-6ggq-9859) Withheld
+* (Security fix, GHSA-3r4p-g7gg-ppmf) Fixed an out-of-bounds write in DFA
+matching when using a heap limit; also fixed possible integer overflows which
+could cause under-allocation of the workspace.
 
-* (Security fix, GHSA-9qww-pwc4-77qq) Withheld
+* (Security fix, GHSA-fmgr-6ggq-9859) Added bounds checks for several integer
+overflows while compiling patterns on 32-bit CPUs, which could cause
+under-allocation followed by out-of-bounds writes.
 
-* (Security fix, GHSA-3r4p-g7gg-ppmf) Withheld
+* (Security fix, GHSA-9qww-pwc4-77qq) Applied lower buffer bound to prevent
+two out-of-bounds reads while scanning backwards through invalid UTF data with
+PCRE2_MATCH_INVALID_UTF.
 
 * (Matching correctness) Fixed several matching issues:
   - A JIT-specific matching bug affecting prefix scanning on patterns with

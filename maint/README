@@ -9,6 +9,7 @@ and also contains some notes for maintainers. Its contents are:
   Files in the maint directory
   Updating to a new Unicode release
   Preparing for a PCRE2 release
+  Managing backports to old releases
   Updating version info for libtool
   Long-term ideas (wish list)
 
@@ -260,23 +261,11 @@ new release.
     -- ':!doc/*.txt' ':!doc/html'
   ```
 
-* Inspect the ChangeLog and Git log for any changes eligible for backporting to
-  older PCRE2 releases. Any crashes, memory errors, or serious match-correctness
-  errors may be backported.
-
-  - Check that a CVE has been assigned, if there are security implications.
-
-  - Examine the change and determine the earliest version of PCRE2 it applies
-    to.
-
-  - Extract the patch file (with a test case) in the patches/ directory.
-
-  - Ensure the patch applies cleanly, and the test passes, for each old version
-    of PCRE2 where we recommend the patch to be applied.
-
-  - Include the patch in the tarball in Makefile.am.
-
-  - Announce the patch in SUPPORT-LIFECYCLE.md.
+* Review the ChangeLog and Git log for security fixes, crashes, memory errors,
+  and serious match-correctness errors that should be backported. Update the
+  old release branches, canonical patch dumps, `Makefile.am`, and
+  `SUPPORT-LIFECYCLE.md` as described in "Managing backports to old releases"
+  below.
 
 * Update the library version numbers in configure.ac according to the rules
   given below.
@@ -379,6 +368,63 @@ new release.
   next by simply doing a `git merge` in their fork. If the release tag is not
   merged back to main, then users will see unnecessary Git conflicts when
   trying to fast-forward from one release to the next.
+
+
+Managing backports to old releases
+==================================
+
+`SUPPORT-LIFECYCLE.md` describes the public backports. This section describes
+how to maintain them. Do not rebase or reset a published release branch; add
+further backport commits to it.
+
+Read the existing entry for each target release before changing it. An explicit
+"do not use" or "not recommending patches" instruction takes precedence: do not
+add a "Backports to apply" recommendation merely because a fix can be ported.
+
+First determine which releases contain the bug. Start with the newest affected
+release and continue backwards. Inspect the older code and run the regression
+case when the boundary is uncertain: a failed cherry-pick does not prove that a
+release is unaffected. Stop when the relevant feature or faulty code is absent,
+or when the older code already gives the correct result. Justify and verify the
+recorded 'versions affected' list in the `SUPPORT-LIFECYCLE.md` documentation.
+
+The release brances `release/pcre2-10.XX` will always be ahead of the release
+tags `pcre2-10.XX`. The additional commits represent each backported fix.
+
+Cherry-pick fixes in upstream commit order, using `-x` to keep a record of
+the origin of each commit.
+
+The filename in "Patches introduced" names a canonical flat dump of the source
+commit. Generate it on `main` with `git log -p`; do not adapt this file for an
+old release:
+
+```sh
+git log -p -1 COMMIT > patches/pcre2-10.YY-Fix-name.patch
+```
+
+For a single fix made from several commits, name each commit explicitly and
+write them to one file:
+
+```sh
+git log -p --no-walk=unsorted COMMIT1 COMMIT2 \
+  > patches/pcre2-10.YY-Fix-name.patch
+```
+
+Resolve conflicts by adapting the same change and its tests to the older file
+layout, then continue the cherry-pick. Do not apply patch files separately or
+recreate the change as an unrelated commit. If the fix is already present,
+verify it and do not add a duplicate.
+
+Build and test after every commit. Testing each step makes a bad conflict
+resolution easy to identify. Ideally, where a test is present, apply the
+hunks for the test first (without the fix); build and reproduce the failure;
+then apply the fix and build and verify the change.
+
+On `main`, ensure the backport is recorded in `SUPPORT-LIFECYCLE.md` under
+"Patches introduced" for the first release incorporating the fix, with a
+list of versions affected. In each one of those versions, it is to be listed
+under "Backports to apply". Also list each patch file in `Makefile.am` for
+tarball users, and `maint/manifest-tarball`.
 
 
 Updating version info for libtool

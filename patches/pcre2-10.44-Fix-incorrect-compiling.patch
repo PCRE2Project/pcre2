@@ -1,22 +1,35 @@
-From 0d7159ca52771daa8b5cafc422b6c140aa7a11d7 Mon Sep 17 00:00:00 2001
-From: Philip Hazel <Philip.Hazel@gmail.com>
-Date: Fri, 1 Mar 2024 17:23:34 +0000
-Subject: [PATCH] Fix incorrect compiling when variable-length lookbehind's
- first branch was not the shortest and there was a backreference to a
- groupwithin the lookbehind.
+commit 4a6a8b056f39079d5e958eac84c2ad173f4680bc
+Author: Philip Hazel <Philip.Hazel@gmail.com>
+Date:   Fri Mar 1 17:23:34 2024 +0000
 
-Cherry-picked from 4a6a8b056f39079d5e958eac84c2ad173f4680bc.
----
- src/pcre2_compile.c  |  2 +-
- testdata/testinput2  |  4 ++++
- testdata/testoutput2 | 10 ++++++++++
- 3 files changed, 15 insertions(+), 1 deletion(-)
+    Fix incorrect compiling when variable-length lookbehind's first branch was not the shortest and there was a backreference to a groupwithin the lookbehind.
 
+diff --git a/ChangeLog b/ChangeLog
+index 0568108a..6b78659e 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -4,6 +4,16 @@ Change Log for PCRE2
+ Before the move to GitHub, this was the only record of changes to PCRE2. Now
+ there is often more detail in the pull requests.
+ 
++Version 10.44 xx-xxx-2024
++-------------------------
++
++1. If a pattern contained a variable-length lookbehind in which the first 
++branch was not the one with the shortest minimym length, and the lookbehind 
++contained a capturing group, and elsewhere in the pattern there was another 
++lookbehind that referenced that group, the pattern was incorrectly compiled, 
++leading to unpredictable results, including crashes in JIT compiling. An 
++example pattern is: /(((?<=123?456456|ABC)))(?<=\2)/
++
+ 
+ Version 10.43 16-February-2024
+ ------------------------------
 diff --git a/src/pcre2_compile.c b/src/pcre2_compile.c
-index 8b364977..71c2dbca 100644
+index 95c97710..e66e40f6 100644
 --- a/src/pcre2_compile.c
 +++ b/src/pcre2_compile.c
-@@ -9908,7 +9908,7 @@ do
+@@ -9909,7 +9909,7 @@ do
    *bptr |= branchlength;  /* branchlength never more than 65535 */
    bptr = *pptrptr;
    }
@@ -59,6 +72,3 @@ index ee1f70b0..30c5a83e 100644
  # End of testinput2
  Error -70: PCRE2_ERROR_BADDATA (unknown error number)
  Error -62: bad serialized data
--- 
-2.51.2.vfs.0.0
-

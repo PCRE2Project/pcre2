@@ -1,17 +1,27 @@
-From ba0a3ff395d99ab2fe7ee76f96c97736294298c6 Mon Sep 17 00:00:00 2001
-From: Philip Hazel <Philip.Hazel@gmail.com>
-Date: Fri, 18 Aug 2023 17:40:16 +0100
-Subject: [PATCH 2/2] Fix issue #275
+commit 803a64f6151a2d43a44a2377956ae36408c96986
+Author: Philip Hazel <Philip.Hazel@gmail.com>
+Date:   Fri Aug 18 17:40:16 2023 +0100
 
-Cherry-picked from 803a64f6151a2d43a44a2377956ae36408c96986.
----
- src/pcre2_match.c     | 32 +++++++++++++++-----------------
- testdata/testinput15  |  7 ++++++-
- testdata/testoutput15 |  8 +++++++-
- 3 files changed, 28 insertions(+), 19 deletions(-)
+    Fix issue #275
 
+diff --git a/ChangeLog b/ChangeLog
+index e2885418..3d594cd1 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -101,6 +101,11 @@ source-tree CMake build testing.
+ 
+ 26. Add support for LoongArch in JIT.
+ 
++27. Fixed a bug in pcre2_match() in the code for handling the vector of
++backtracking frames on the heap, which caused a heap overflow if *LIMIT_HEAP
++restricted an attempt to extend to less than the frame size. Generally tidy up
++the code for extending the heap frames vector. This fixes GitHub issue #275.
++
+ 
+ Version 10.42 11-December-2022
+ ------------------------------
 diff --git a/src/pcre2_match.c b/src/pcre2_match.c
-index fa49e64a..8d3c796e 100644
+index f69ec0db..5ce17926 100644
 --- a/src/pcre2_match.c
 +++ b/src/pcre2_match.c
 @@ -597,7 +597,6 @@ heapframe *P = NULL;
@@ -22,7 +32,7 @@ index fa49e64a..8d3c796e 100644
  PCRE2_SIZE frame_copy_size;   /* Amount to copy when creating a new frame */
  
  /* Local variables that do not need to be preserved over calls to RRMATCH(). */
-@@ -635,13 +634,10 @@ copied when a new frame is created. */
+@@ -637,13 +636,10 @@ copied when a new frame is created. */
  
  frame_copy_size = frame_size - offsetof(heapframe, eptr);
  
@@ -38,7 +48,7 @@ index fa49e64a..8d3c796e 100644
  
  Frdepth = 0;                        /* "Recursion" depth */
  Fcapture_last = 0;                  /* Number of most recent capture */
-@@ -662,10 +658,11 @@ MATCH_RECURSE:
+@@ -664,10 +660,11 @@ MATCH_RECURSE:
  doubling the size, but constrained by the heap limit (which is in KiB). */
  
  N = (heapframe *)((char *)F + frame_size);
@@ -51,7 +61,7 @@ index fa49e64a..8d3c796e 100644
  
    if (match_data->heapframes_size >= PCRE2_SIZE_MAX / 2)
      {
-@@ -679,7 +676,8 @@ if (N >= frames_top)
+@@ -681,7 +678,8 @@ if (N >= frames_top)
    if (newsize / 1024 >= mb->heap_limit)
      {
      PCRE2_SIZE old_size = match_data->heapframes_size / 1024;
@@ -61,7 +71,7 @@ index fa49e64a..8d3c796e 100644
      else
        {
        PCRE2_SIZE max_delta = 1024 * (mb->heap_limit - old_size);
-@@ -689,19 +687,21 @@ if (N >= frames_top)
+@@ -691,19 +689,21 @@ if (N >= frames_top)
        }
      }
  
@@ -89,7 +99,7 @@ index fa49e64a..8d3c796e 100644
    }
  
  #ifdef DEBUG_SHOW_RMATCH
-@@ -6842,8 +6842,7 @@ mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
+@@ -6935,8 +6935,7 @@ mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
  /* If a pattern has very many capturing parentheses, the frame size may be very
  large. Set the initial frame vector size to ensure that there are at least 10
  available frames, but enforce a minimum of START_FRAMES_SIZE. If this is
@@ -99,7 +109,7 @@ index fa49e64a..8d3c796e 100644
  
  heapframes_size = frame_size * 10;
  if (heapframes_size < START_FRAMES_SIZE) heapframes_size = START_FRAMES_SIZE;
-@@ -7301,7 +7300,6 @@ for(;;)
+@@ -7394,7 +7393,6 @@ for(;;)
    mb->match_call_count = 0;
    mb->end_offset_top = 0;
    mb->skip_arg_count = 0;
@@ -155,6 +165,3 @@ index af0d7c2a..be7afd0f 100644
  /(a+)*zz/I
  Capture group count = 1
  Starting code units: a z 
--- 
-2.51.2.vfs.0.0
-

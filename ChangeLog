@@ -8,7 +8,7 @@ Internal changes which are not visible to clients of the library are mostly not
 listed here.
 
 
-Version 10.48 27-August-2026
+Version 10.48 31-August-2026
 ----------------------------
 
 1. (#826) [GHSA-q7rw-r7qq-2hx6] Initialized alignment padding in serialized
@@ -132,11 +132,17 @@ CMAKE_SHARED_LIBRARY_PREFIX_C is customized.
 34. (#961, #962) Fixed two compilation issues preventing use of extended
 (Boolean) character classes before a lookbehind, or inside a lookaround.
 
-35. [GHSA-fmgr-6ggq-9859] Withheld
+35. (GHSA-3r4p-g7gg-ppmf) Fixed an out-of-bounds write in DFA matching when
+using a heap limit; also fixed possible integer overflows which could cause
+under-allocation of the workspace.
 
-36. [GHSA-9qww-pwc4-77qq] Withheld
+36. (GHSA-fmgr-6ggq-9859) Added bounds checks for several integer overflows
+while compiling patterns on 32-bit CPUs, which could cause under-allocation
+followed by out-of-bounds writes.
 
-37. [GHSA-3r4p-g7gg-ppmf] Withheld
+37. (GHSA-9qww-pwc4-77qq) Applied lower buffer bound to prevent two
+out-of-bounds reads while scanning backwards through invalid UTF data with
+PCRE2_MATCH_INVALID_UTF.
 
 
 Version 10.47 21-October-2025

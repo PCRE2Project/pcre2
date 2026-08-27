@@ -302,7 +302,19 @@ EXTRA_DIST += \
   patches/pcre2-10.44-Fix-incorrect-compiling.patch \
   patches/pcre2-10.44-Fix-locking-region.patch \
   patches/pcre2-10.45-Memory-reports-only-compiled.patch \
-  patches/pcre2-10.47-Fix-for-callback.patch
+  patches/pcre2-10.47-Fix-for-callback.patch \
+  patches/pcre2-10.48-Check-JIT-mode-before-validation.patch \
+  patches/pcre2-10.48-Fix-DFA-workspace-overflows.patch \
+  patches/pcre2-10.48-Fix-JIT-STR_END.patch \
+  patches/pcre2-10.48-Fix-JIT-match-context-reuse.patch \
+  patches/pcre2-10.48-Fix-allocation-byte-sizing.patch \
+  patches/pcre2-10.48-Fix-character-list-generator.patch \
+  patches/pcre2-10.48-Fix-compiler-integer-overflows.patch \
+  patches/pcre2-10.48-Fix-invalid-UTF-backwards-scans.patch \
+  patches/pcre2-10.48-Fix-repeated-substitute-escapes.patch \
+  patches/pcre2-10.48-Fix-scan-prefix-repeat-reset.patch \
+  patches/pcre2-10.48-Keep-escape-error-offset-in-pattern.patch \
+  patches/pcre2-10.48-Write-serialization-padding.patch
 
 # These are support files for building with Bazel or Zig
 
