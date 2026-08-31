@@ -4,11 +4,26 @@ Date:   Thu Mar 24 05:34:42 2022 +0000
 
     Fix incorrect value reading in JIT.
 
+diff --git a/src/pcre2_jit_compile.c b/src/pcre2_jit_compile.c
+index 94f6a588..7fcdac86 100644
+--- a/src/pcre2_jit_compile.c
++++ b/src/pcre2_jit_compile.c
+@@ -7489,7 +7489,7 @@ while (*cc != XCL_END)
+     {
+     SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
+     cc++;
+-    if (*cc == PT_CLIST && *cc == XCL_PROP)
++    if (*cc == PT_CLIST && cc[-1] == XCL_PROP)
+       {
+       other_cases = PRIV(ucd_caseless_sets) + cc[1];
+       while (*other_cases != NOTACHAR)
+
 commit 50a51cb7e67268e6ad417eb07c9de9bfea5cc55a
 Author: Zoltan Herczeg <hzmester@freemail.hu>
 Date:   Wed Mar 23 07:53:25 2022 +0000
 
     Fixed a unicode properrty matching issue in JIT
+
 diff --git a/ChangeLog b/ChangeLog
 index f0eab7ba..ffb08805 100644
 --- a/ChangeLog
@@ -24,7 +39,7 @@ index f0eab7ba..ffb08805 100644
  Version 10.39 29-October-2021
  -----------------------------
 diff --git a/src/pcre2_jit_compile.c b/src/pcre2_jit_compile.c
-index e7dd26c5..7fcdac86 100644
+index e7dd26c5..94f6a588 100644
 --- a/src/pcre2_jit_compile.c
 +++ b/src/pcre2_jit_compile.c
 @@ -7489,7 +7489,7 @@ while (*cc != XCL_END)
@@ -32,7 +47,7 @@ index e7dd26c5..7fcdac86 100644
      SLJIT_ASSERT(*cc == XCL_PROP || *cc == XCL_NOTPROP);
      cc++;
 -    if (*cc == PT_CLIST)
-+    if (*cc == PT_CLIST && cc[-1] == XCL_PROP)
++    if (*cc == PT_CLIST && *cc == XCL_PROP)
        {
        other_cases = PRIV(ucd_caseless_sets) + cc[1];
        while (*other_cases != NOTACHAR)

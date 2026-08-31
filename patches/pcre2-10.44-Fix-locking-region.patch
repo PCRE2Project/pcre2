@@ -1,19 +1,17 @@
-From c0fdb5f7013ecc10292ed9e697b3fe901e38cd77 Mon Sep 17 00:00:00 2001
-From: lbonn <lbonn@users.noreply.github.com>
-Date: Tue, 2 Apr 2024 12:55:33 +0200
-Subject: [PATCH] Fix locking region in sjlit_malloc_exec
+commit c0fdb5f7013ecc10292ed9e697b3fe901e38cd77
+Author: lbonn <lbonn@users.noreply.github.com>
+Date:   Tue Apr 2 12:55:33 2024 +0200
 
-Cherry-picked from ad89dd8ecd25589d236bd20b36f2abf69f938fd1
-(https://github.com/zherczeg/sljit.git)
-
-The locked section needs to extend until we are done modifying internal
-block offsets and sizes, otherwise we risk running into data corruption
-in a multi-threaded context.
-
-This bug was introduced in 7de0fee9a7376b33e31a3903487cd9933da3a606
----
- src/sljit/allocator_src/sljitExecAllocatorCore.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+    Fix locking region in sjlit_malloc_exec
+    
+    Cherry-picked from ad89dd8ecd25589d236bd20b36f2abf69f938fd1
+    (https://github.com/zherczeg/sljit.git)
+    
+    The locked section needs to extend until we are done modifying internal
+    block offsets and sizes, otherwise we risk running into data corruption
+    in a multi-threaded context.
+    
+    This bug was introduced in 7de0fee9a7376b33e31a3903487cd9933da3a606
 
 diff --git a/src/sljit/allocator_src/sljitExecAllocatorCore.c b/src/sljit/allocator_src/sljitExecAllocatorCore.c
 index 6cd39110..4ef39c17 100644
@@ -33,6 +31,3 @@ index 6cd39110..4ef39c17 100644
  	return MEM_START(header);
  }
  
--- 
-2.51.2.vfs.0.0
-

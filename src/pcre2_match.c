@@ -2895,7 +2895,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     else
       {
       GETCHARINCTEST(fc, Feptr);
-      Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject, utf,
+      Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf,
         NULL);
       }
     CHECK_PARTIAL();
@@ -3246,7 +3246,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject,
               mb->end_subject, utf, NULL);
             }
           CHECK_PARTIAL();
@@ -4071,7 +4071,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject,
               utf, NULL);
             }
           CHECK_PARTIAL();
@@ -4660,7 +4660,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject,
               utf, NULL);
             }
           CHECK_PARTIAL();
@@ -6243,7 +6243,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       {
       for (i = 0; i < Lmax; i++)
         {
-        if (Feptr == mb->start_subject)
+        if (Feptr <= mb->check_subject)
           {
           if (i < Lmin) RRETURN(MATCH_NOMATCH);
           Lmax = i;

@@ -1,38 +1,32 @@
-From bfb55a6bd406ae711444915bba957b933aaa10ca Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Carlo=20Marcelo=20Arenas=20Bel=C3=B3n?= <carenas@gmail.com>
-Date: Tue, 17 Jan 2023 06:55:53 -0800
-Subject: [PATCH 1/2] avoid LIMIT_HEAP integer multiplication wrap around
- (#184)
+commit 4d66adc387baa2d29f91f0cadfaf8d8e77e13bb3
+Author: Carlo Marcelo Arenas Belón <carenas@gmail.com>
+Date:   Tue Jan 17 06:55:53 2023 -0800
 
-Cherry-picked from 4d66adc387baa2d29f91f0cadfaf8d8e77e13bb3.
-
-If a LIMIT_HEAP value once converted to bytes is larger than UINT_MAX
-would result in a bogus setting that could trigger a matching failure
-as shown by the following:
-
-  PCRE2 version 10.42 2022-12-11
-    re> /(*LIMIT_HEAP=4194304)a/
-  data> a
-  Failed: error -63: heap limit exceeded
-
-Remove the multiplication and instead keep track of the maximum heap
-allowed in KB as was done originally.
-
-Aditionally, add a check to avoid overflowing a PCRE2_SIZE while
-doubling the heap used and that could result in a crash (only on
-systems with a 32-bit PCRE2_SIZE and using non standard settings).
-
-Unlike the original, this code avoids rounding the heapframes_size
-to the frame_size at the allocation time, which simplifies the logic
-and wasn't really needed.
-
-Fixes: d90fb23 (Refactor match_data() to always use the heap instead
-       of having an initial frames vector on the stack..., 2022-07-27)
-Closes: #183
----
- src/pcre2_intmodedep.h |  4 ++--
- src/pcre2_match.c      | 38 +++++++++++++++++++++++++++-----------
- 2 files changed, 29 insertions(+), 13 deletions(-)
+    avoid LIMIT_HEAP integer multiplication wrap around (#184)
+    
+    If a LIMIT_HEAP value once converted to bytes is larger than UINT_MAX
+    would result in a bogus setting that could trigger a matching failure
+    as shown by the following:
+    
+      PCRE2 version 10.42 2022-12-11
+        re> /(*LIMIT_HEAP=4194304)a/
+      data> a
+      Failed: error -63: heap limit exceeded
+    
+    Remove the multiplication and instead keep track of the maximum heap
+    allowed in KB as was done originally.
+    
+    Aditionally, add a check to avoid overflowing a PCRE2_SIZE while
+    doubling the heap used and that could result in a crash (only on
+    systems with a 32-bit PCRE2_SIZE and using non standard settings).
+    
+    Unlike the original, this code avoids rounding the heapframes_size
+    to the frame_size at the allocation time, which simplifies the logic
+    and wasn't really needed.
+    
+    Fixes: d90fb23 (Refactor match_data() to always use the heap instead
+           of having an initial frames vector on the stack..., 2022-07-27)
+    Closes: #183
 
 diff --git a/src/pcre2_intmodedep.h b/src/pcre2_intmodedep.h
 index 390e737a..8f6487e9 100644
@@ -132,6 +126,3 @@ index 168b9fad..fa49e64a 100644
  
  if (match_data->heapframes_size < heapframes_size)
    {
--- 
-2.51.2.vfs.0.0
-

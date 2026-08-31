@@ -1,39 +1,23 @@
-From e669b61ecf6ae3af2a4f0c714c6723ccc073ecd5 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Carlo=20Marcelo=20Arenas=20Bel=C3=B3n?= <carenas@gmail.com>
-Date: Sun, 9 Jun 2024 08:22:15 -0700
-Subject: [PATCH] pcre2test: memory reports only compiled memory usage for
- code/data (#418)
+commit 57906628d7babd27c01eb1c085d3e0cdd512189a
+Author: Carlo Marcelo Arenas Belón <carenas@gmail.com>
+Date:   Sun Jun 9 08:22:15 2024 -0700
 
-Cherry-pick of 57906628d7babd27c01eb1c085d3e0cdd512189a.
-
-Since 05aafb2 (Implement pcre2_set_max_pattern_compiled_length() and set
-this limit in the fuzzer, 2024-04-24), the memory modifier has reported
-the full size of the allocated "code" returned by `pcre2_compile`.
-
-Problem is that the size of the structure used to hold that in memory also
-depends on the platform ABI and even alignment by the compiler, and has
-been therefore fragile to compare.
-
-Revert to reporting only the additional memory that `pcre2_compile()` will
-use for the compiled pattern (including any data tables) and make sure
-that the limit provided with `pcre2_set_max_pattern_compiled_length()`
-also avoid the internal struct overhead.
-
-Fixes: #415
----
- doc/pcre2_set_max_pattern_compiled_length.3 |   8 +-
- src/pcre2_compile.c                         |   4 +-
- src/pcre2test.c                             |  17 +-
- testdata/testoutput8-16-2                   | 171 +++++++-------------
- testdata/testoutput8-16-3                   | 171 +++++++-------------
- testdata/testoutput8-16-4                   | 171 +++++++-------------
- testdata/testoutput8-32-2                   | 171 +++++++-------------
- testdata/testoutput8-32-3                   | 171 +++++++-------------
- testdata/testoutput8-32-4                   | 171 +++++++-------------
- testdata/testoutput8-8-2                    | 171 +++++++-------------
- testdata/testoutput8-8-3                    | 171 +++++++-------------
- testdata/testoutput8-8-4                    | 171 +++++++-------------
- 12 files changed, 546 insertions(+), 1022 deletions(-)
+    pcre2test: memory reports only compiled memory usage for code/data (#418)
+    
+    Since 05aafb2 (Implement pcre2_set_max_pattern_compiled_length() and set
+    this limit in the fuzzer, 2024-04-24), the memory modifier has reported
+    the full size of the allocated "code" returned by `pcre2_compile`.
+    
+    Problem is that the size of the structure used to hold that in memory also
+    depends on the platform ABI and even alignment by the compiler, and has
+    been therefore fragile to compare.
+    
+    Revert to reporting only the additional memory that `pcre2_compile()` will
+    use for the compiled pattern (including any data tables) and make sure
+    that the limit provided with `pcre2_set_max_pattern_compiled_length()`
+    also avoid the internal struct overhead.
+    
+    Fixes: #415
 
 diff --git a/doc/pcre2_set_max_pattern_compiled_length.3 b/doc/pcre2_set_max_pattern_compiled_length.3
 index 472a7bbd..679c12c2 100644
@@ -5223,6 +5207,3 @@ index 81cf0f76..8bfac41a 100644
  ------------------------------------------------------------------
    0   8 Bra
    5     [^\x{aa}]
--- 
-2.51.2.vfs.0.0
-

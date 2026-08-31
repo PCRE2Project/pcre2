@@ -61,8 +61,17 @@ vulnerability publicly, where advance notification is possible.
 Previous vulnerabilities
 ------------------------
 
-* CVE-2025-58050 (August 2025). Affects 10.45 only (not earlier), and is fixed
-  in 10.46.
+* GHSA-2p8c-ff85-vh9x (July 2026). Affects 10.47 and earlier, and is fixed
+  in 10.48.
+* GHSA-3r4p-g7gg-ppmf (July 2026). Affects 10.32-10.47, and is fixed in 10.48.
+* GHSA-q8g2-wprr-34m9 (May 2026). Affects 10.30-10.47, and is fixed in 10.48.
+* GHSA-9qww-pwc4-77qq (May 2026). Affects 10.34-10.47, and is fixed in 10.48.
+* GHSA-fmgr-6ggq-9859 (January 2026). Affects 10.47 and earlier, and is fixed
+  in 10.48.
+* GHSA-q7rw-r7qq-2hx6 (October 2025). Affects 10.45 and later, and is fixed in
+  10.48.
+* CVE-2025-58050 [GHSA-c2gv-xgf5-5cc2] (August 2025). Affects 10.45 only (not
+  earlier), and is fixed in 10.46.
 * CVE-2022-41409 (July 2023). Only affects test code; no expected impact. Fixed
   in 10.41.
 * CVE-2022-1587 and CVE-2022-1586 (May 2020). Affect versions before 10.40, and
