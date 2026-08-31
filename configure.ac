@@ -9,9 +9,9 @@ dnl The PCRE2_PRERELEASE feature is for identifying release candidates. It might
 dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre2_major, [10])
-m4_define(pcre2_minor, [48])
+m4_define(pcre2_minor, [49])
 m4_define(pcre2_prerelease, [-DEV])
-m4_define(pcre2_date, [2025-10-21])
+m4_define(pcre2_date, [2026-11-31])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre2_8_version,     [16:0:16])
