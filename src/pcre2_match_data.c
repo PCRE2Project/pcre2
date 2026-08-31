@@ -181,4 +181,16 @@ pcre2_get_match_data_heapframes_size(pcre2_match_data *match_data)
 return match_data->heapframes_size;
 }
 
+
+
+/*************************************************
+*             Get subject                        *
+*************************************************/
+
+PCRE2_EXP_DEFN PCRE2_SPTR PCRE2_CALL_CONVENTION
+pcre2_get_subject(pcre2_match_data *match_data)
+{
+return match_data->subject;
+}
+
 /* End of pcre2_match_data.c */
