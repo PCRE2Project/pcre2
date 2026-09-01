@@ -2233,7 +2233,9 @@ for (; *string != 0; string++)
       continue;
 
       /* LCOV_EXCL_START */
+      case DDE_ERROR:
       default:  /* Should not occur */
+      abort();
       break;
       /* LCOV_EXCL_STOP */
       }
@@ -2381,9 +2383,12 @@ while (length > 0)
         else if (utf && value > 127) argslen += ord2utf8(value) - 1;
       break;
 
+      case DDE_ERROR:  /* Invalid syntax; silently ignore */
+      return 0;
+
       /* LCOV_EXCL_START */
       default:         /* Should not occur */
-      case DDE_ERROR:
+      abort();
       return 0;
       /* LCOV_EXCL_STOP */
       }
@@ -2477,10 +2482,10 @@ while (length > 0)
       break;
 
       /* LCOV_EXCL_START */
+      case DDE_ERROR:
       default:
       /* Even though this should not occur, the string having been checked above,
        * we need to include the free() calls so that source checkers do not complain. */
-      case DDE_ERROR:
       free(args);
       free(argsvector);
       abort();
