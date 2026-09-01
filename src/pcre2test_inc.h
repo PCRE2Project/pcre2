@@ -1885,7 +1885,24 @@ switch(cmd)
   if (rc != PR_OK) return rc;
 
   serial_size = 0;
-  for (i = 0; i < 4; i++) serial_size |= fgetc(f) << (i*8);
+  for (i = 0; i < 4; i++)
+    {
+    int c = fgetc(f);
+    if (c == EOF)
+      {
+      cfprintf(clr_test_error, outfile, "** Unexpected end of file in #load\n");
+      fclose(f);
+      return PR_ABEND;
+      }
+    serial_size |= (PCRE2_SIZE)c << (i*8);
+    }
+
+  if (serial_size > (PCRE2_SIZE)1024 * 1024 * 1024)
+    {
+    cfprintf(clr_test_error, outfile, "** Serialized data is too large for #load\n");
+    fclose(f);
+    return PR_ABEND;
+    }
 
   serial = malloc(serial_size);
   if (serial == NULL)
