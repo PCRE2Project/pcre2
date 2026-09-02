@@ -192,12 +192,11 @@ handled by using STDOUT_NL as the newline string. We also use a normal double
 quote for the example, as single quotes aren't usually available. */
 
 #ifdef WIN32
-#define STDOUT_NL     "\r\n"
-#define STDOUT_NL_LEN  2
+#define DEFAULT_STDOUT_IS_CRLF
+#define DEFAULT_STDOUT_NL     "\r\n"
 #define QUOT          "\""
 #else
-#define STDOUT_NL      "\n"
-#define STDOUT_NL_LEN  1
+#define DEFAULT_STDOUT_NL     "\n"
 #define QUOT           "'"
 #endif
 
@@ -226,7 +225,8 @@ static const char *output_text = NULL;
 
 static char *main_buffer = NULL;
 
-static const char *printname_nl = STDOUT_NL;  /* Changed to NULL for -Z */
+static const char *stdout_nl = DEFAULT_STDOUT_NL;
+static const char *printname_nl = DEFAULT_STDOUT_NL;  /* Changed to NULL for -Z */
 static int printname_colon = ':';             /* Changed to 0 for -Z */
 static int printname_hyphen = '-';            /* Changed to 0 for -Z */
 
@@ -438,6 +438,7 @@ used to identify them. */
 #define N_GROUP_SEPARATOR (-27)
 #define N_NO_GROUP_SEPARATOR (-28)
 #define N_POSIX_PATFILE (-29)
+#define N_LF           (-30)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -471,6 +472,11 @@ static option_item optionlist[] = {
   { OP_NODATA,     'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,     N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
   { OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
+#ifdef DEFAULT_STDOUT_IS_CRLF
+  { OP_NODATA,     N_LF,     NULL,              "lf",            "use LF line endings in output" },
+#else
+  { OP_NODATA,     N_LF,     NULL,              "lf",            "ignored: this pcre2grep always use LF line endings" },
+#endif
   { OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
   { OP_U32NUMBER,  N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kibibytes)" },
@@ -1167,38 +1173,38 @@ help(void)
 {
 option_item *op;
 
-printf("Usage: pcre2grep [OPTION]... [PATTERN] [FILE1 FILE2 ...]" STDOUT_NL);
-printf("Search for PATTERN in each FILE or standard input." STDOUT_NL);
-printf("PATTERN must be present if neither -e nor -f is used." STDOUT_NL);
+printf("Usage: pcre2grep [OPTION]... [PATTERN] [FILE1 FILE2 ...]%s", stdout_nl);
+printf("Search for PATTERN in each FILE or standard input.%s", stdout_nl);
+printf("PATTERN must be present if neither -e nor -f is used.%s", stdout_nl);
 
 #ifdef SUPPORT_PCRE2GREP_CALLOUT
 #ifdef SUPPORT_PCRE2GREP_CALLOUT_FORK
-printf("All callout scripts in patterns are supported." STDOUT_NL);
+printf("All callout scripts in patterns are supported.%s", stdout_nl);
 #else
-printf("Non-fork callout scripts in patterns are supported." STDOUT_NL);
+printf("Non-fork callout scripts in patterns are supported.%s", stdout_nl);
 #endif
 #else
-printf("Callout scripts are not supported in this pcre2grep." STDOUT_NL);
+printf("Callout scripts are not supported in this pcre2grep.%s", stdout_nl);
 #endif
 
-printf("\"-\" can be used as a file name to mean STDIN." STDOUT_NL);
+printf("\"-\" can be used as a file name to mean STDIN.%s", stdout_nl);
 
 #ifdef SUPPORT_LIBZ
-printf("Files whose names end in .gz are read using zlib." STDOUT_NL);
+printf("Files whose names end in .gz are read using zlib.%s", stdout_nl);
 #endif
 
 #ifdef SUPPORT_LIBBZ2
-printf("Files whose names end in .bz2 are read using bzlib2." STDOUT_NL);
+printf("Files whose names end in .bz2 are read using bzlib2.%s", stdout_nl);
 #endif
 
 #if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
-printf("Other files and the standard input are read as plain files." STDOUT_NL STDOUT_NL);
+printf("Other files and the standard input are read as plain files.%s%s", stdout_nl, stdout_nl);
 #else
-printf("All files are read as plain files, without any interpretation." STDOUT_NL STDOUT_NL);
+printf("All files are read as plain files, without any interpretation.%s%s", stdout_nl, stdout_nl);
 #endif
 
-printf("Example: pcre2grep -i " QUOT "hello.*world" QUOT " menu.h main.c" STDOUT_NL STDOUT_NL);
-printf("Options:" STDOUT_NL);
+printf("Example: pcre2grep -i " QUOT "hello.*world" QUOT " menu.h main.c%s%s", stdout_nl, stdout_nl);
+printf("Options:%s", stdout_nl);
 
 for (op = optionlist; op->one_char != 0; op++)
   {
@@ -1215,18 +1221,18 @@ for (op = optionlist; op->one_char != 0; op++)
     }
 
   if (n < 1) n = 1;
-  printf("%.*s%s" STDOUT_NL, n, "                           ", op->help_text);
+  printf("%.*s%s%s", n, "                           ", op->help_text, stdout_nl);
   }
 
-printf(STDOUT_NL "Numbers may be followed by K or M, e.g. --max-buffer-size=100K." STDOUT_NL);
-printf("The default value for --buffer-size is %d." STDOUT_NL, PCRE2GREP_BUFSIZE);
-printf("The default value for --max-buffer-size is %d." STDOUT_NL, PCRE2GREP_MAX_BUFSIZE);
-printf("When reading patterns or file names from a file, trailing white" STDOUT_NL);
-printf("space is removed and blank lines are ignored." STDOUT_NL);
-printf("The maximum size of any pattern is %d bytes." STDOUT_NL, MAXPATLEN);
+printf("%sNumbers may be followed by K or M, e.g. --max-buffer-size=100K.%s", stdout_nl, stdout_nl);
+printf("The default value for --buffer-size is %d.%s", PCRE2GREP_BUFSIZE, stdout_nl);
+printf("The default value for --max-buffer-size is %d.%s", PCRE2GREP_MAX_BUFSIZE, stdout_nl);
+printf("When reading patterns or file names from a file, trailing white%s", stdout_nl);
+printf("space is removed and blank lines are ignored.%s", stdout_nl);
+printf("The maximum size of any pattern is %d bytes.%s", MAXPATLEN, stdout_nl);
 
-printf(STDOUT_NL "With no FILEs, read standard input. If fewer than two FILEs given, assume -h." STDOUT_NL);
-printf("Exit status is 0 if any matches, 1 if no matches, and 2 if trouble." STDOUT_NL);
+printf("%sWith no FILEs, read standard input. If fewer than two FILEs given, assume -h.%s", stdout_nl, stdout_nl);
+printf("Exit status is 0 if any matches, 1 if no matches, and 2 if trouble.%s", stdout_nl);
 }
 
 
@@ -2199,7 +2205,7 @@ for (; *string != 0; string++)
       case DDE_CHAR:
       if (value == STDOUT_NL_CODE)
         {
-        fprintf(stdout, STDOUT_NL);
+        fprintf(stdout, "%s", stdout_nl);
         printed = FALSE;
         continue;
         }
@@ -2379,7 +2385,7 @@ while (length > 0)
       break;
 
       case DDE_CHAR:
-      if (value == STDOUT_NL_CODE) argslen += STDOUT_NL_LEN - 1;
+      if (value == STDOUT_NL_CODE) argslen += strlen(stdout_nl) - 1;
         else if (utf && value > 127) argslen += ord2utf8(value) - 1;
       break;
 
@@ -2466,8 +2472,8 @@ while (length > 0)
       case DDE_CHAR:
       if (value == STDOUT_NL_CODE)
         {
-        memcpy(argsptr, STDOUT_NL, STDOUT_NL_LEN);
-        argsptr += STDOUT_NL_LEN;
+        memcpy(argsptr, stdout_nl, strlen(stdout_nl));
+        argsptr += strlen(stdout_nl);
         }
       else if (utf && value > 127)
         {
@@ -2849,7 +2855,7 @@ while (ptr < endptr)
 
     else if (binary)
       {
-      fprintf(stdout, "Binary file %s matches" STDOUT_NL, filename);
+      fprintf(stdout, "Binary file %s matches%s", filename, stdout_nl);
       return 0;
       }
 
@@ -2900,10 +2906,10 @@ while (ptr < endptr)
             }
 
           if (line_offsets)
-            fprintf(stdout, "%d,%d" STDOUT_NL, (int)start, (int)(end - start));
+            fprintf(stdout, "%d,%d%s", (int)start, (int)(end - start), stdout_nl);
           else
-            fprintf(stdout, "%d,%d" STDOUT_NL, (int)(filepos + start),
-              (int)(end - start));
+            fprintf(stdout, "%d,%d%s", (int)(filepos + start),
+              (int)(end - start), stdout_nl);
           }
 
         /* Handle --output (which has already been syntax checked) */
@@ -2912,7 +2918,7 @@ while (ptr < endptr)
           {
           (void)display_output_text((PCRE2_SPTR)output_text, FALSE,
               (PCRE2_SPTR)ptr, offsets, mrc);
-          fprintf(stdout, STDOUT_NL);
+          fprintf(stdout, "%s", stdout_nl);
           }
 
         /* Handle --only-matching, which may occur many times */
@@ -2952,7 +2958,7 @@ while (ptr < endptr)
               }
             }
           if (printed || printname != NULL || number)
-            fprintf(stdout, STDOUT_NL);
+            fprintf(stdout, "%s", stdout_nl);
           }
 
         /* Prepare to repeat to find the next match in the line. */
@@ -3044,7 +3050,7 @@ while (ptr < endptr)
       else if (hyphenpending)
         {
         if (group_separator != NULL)
-          fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
+          fprintf(stdout, "%s%s", group_separator, stdout_nl);
         hyphenpending = FALSE;
         hyphenprinted = TRUE;
         }
@@ -3067,7 +3073,7 @@ while (ptr < endptr)
 
         if (lastmatchnumber > 0 && p > lastmatchrestart && !hyphenprinted &&
             group_separator != NULL)
-          fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
+          fprintf(stdout, "%s%s", group_separator, stdout_nl);
         hyphenpending = FALSE;
 
         while (p < ptr)
@@ -3089,7 +3095,7 @@ while (ptr < endptr)
       else if (hyphenpending)
         {
         if (group_separator != NULL)
-          fprintf(stdout, "%s%s", group_separator, STDOUT_NL);
+          fprintf(stdout, "%s%s", group_separator, stdout_nl);
         hyphenpending = FALSE;
         }
 
@@ -3340,7 +3346,7 @@ if (count_only && !quiet)
     {
     if (printname != NULL && filenames != FN_NONE)
       fprintf(stdout, "%s%c", printname, printname_colon);
-    fprintf(stdout, "%lu" STDOUT_NL, count);
+    fprintf(stdout, "%lu%s", count, stdout_nl);
     counts_printed++;
     }
   }
@@ -3735,6 +3741,7 @@ switch(letter)
   case N_FOFFSETS: file_offsets = TRUE; break;
   case N_HELP: help(); pcre2grep_exit(0); break; /* Stops compiler warning */
   case N_LBUFFER: line_buffered = TRUE; break;
+  case N_LF: stdout_nl = "\n"; printname_nl = stdout_nl; break;
   case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_NOJIT: use_jit = FALSE; break;
   case N_ALLABSK: extra_options |= PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK; break;
@@ -3773,7 +3780,7 @@ switch(letter)
     {
     unsigned char buffer[128];
     (void)pcre2_config(PCRE2_CONFIG_VERSION, buffer);
-    fprintf(stdout, "pcre2grep version %s" STDOUT_NL, buffer);
+    fprintf(stdout, "pcre2grep version %s%s", buffer, stdout_nl);
     }
   pcre2grep_exit(0);
   break;  /* LCOV_EXCL_LINE - statement kept to avoid compiler warning */
@@ -4027,14 +4034,13 @@ const char *locale_from = "--locale";
 pcre2_jit_stack *jit_stack = NULL;
 #endif
 
-/* In Windows, stdout is set up as a text stream, which means that \n is
-converted to \r\n. This causes output lines that are copied from the input to
-change from ....\r\n to ....\r\r\n, which is not right. We therefore ensure
-that stdout is a binary stream. Note that this means all other output to stdout
-must use STDOUT_NL to terminate lines. */
+/* In Windows, text streams convert \n to \r\n. Use binary streams so copied
+input lines are not changed. Output on stdout uses stdout_nl explicitly. */
 
 #ifdef WIN32
+_setmode(_fileno(stdin), _O_BINARY);
 _setmode(_fileno(stdout), _O_BINARY);
+_setmode(_fileno(stderr), _O_BINARY);
 #endif
 
 /* Process the options */
@@ -4734,7 +4740,7 @@ if (show_total_count && counts_printed != 1 && filenames != FN_NOMATCH_ONLY)
   {
   if (counts_printed != 0 && filenames >= FN_DEFAULT)
     fprintf(stdout, "TOTAL:");
-  fprintf(stdout, "%lu" STDOUT_NL, total_count);
+  fprintf(stdout, "%lu%s", total_count, stdout_nl);
   }
 
 EXIT:

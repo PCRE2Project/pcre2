@@ -507,6 +507,10 @@ OPTIONS
                  when file names are being output. If not supplied, "(standard
                  input)" is used. There is no short form for this option.
 
+       --lf      Use LF as the line ending for standard output. This has no
+                 effect except on Windows, where CRLF is the default. There is
+                 no short form for this option.
+
        --line-buffered
                  When  this  option is given, non-compressed input is read and
                  processed line by line, and the output is flushed after  each
@@ -927,7 +931,7 @@ OPTIONS COMPATIBILITY WITH GNU GREP
        terminology)  is  also  available  as  --xxx-regex (PCRE2 terminology).
        However, the --case-restrict, --depth-limit, -E,  --file-list,  --file-
        offsets,   --heap-limit,   --include-dir,   --line-offsets,   --locale,
-       --match-limit, -M, --multiline, -N, --newline,  --no-ucp,  --om-separa-
+       --lf, --match-limit, -M, --multiline, -N, --newline,  --no-ucp,  --om-separa-
        tor,  --output,  -P, -u, --utf, -U, and --utf-allow-invalid options are
        specific to pcre2grep, as is the use of the --only-matching option with
        a capturing parentheses number.

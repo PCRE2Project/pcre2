@@ -136,6 +136,15 @@ cf="diff"
 gdiff /dev/null /dev/null 2>/dev/null && cf="gdiff"
 $cf -u /dev/null /dev/null 2>/dev/null && cf="$cf -u"
 
+# Set up a suitable path for the null device. Paths interpreted by shell tools
+# should still use /dev/null, but this is the correct path for passing to native
+# pcre2test.exe.
+
+null=/dev/null
+case "$pcre2test" in
+  *.exe|*.EXE) null=NUL;;
+esac
+
 # Find the test data
 
 if [ -n "$srcdir" -a -d "$srcdir" ] ; then
@@ -231,7 +240,7 @@ globalopts="-q"
 # This is in case the caller has set aliases (as I do - PH)
 unset cp ls mv rm
 
-if [ ! -x $pcre2test ] ; then
+if ! command -v "$pcre2test" >/dev/null 2>&1 ; then
   echo "** $pcre2test does not exist or is not executable."
   exit 1
 fi
@@ -344,7 +353,7 @@ done
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.
 
-$sim $pcre2test -S 32 /dev/null /dev/null >/dev/null 2>&1
+$sim $pcre2test -S 32 $null $null >/dev/null 2>&1
 support_setstack=$?
 if [ $support_setstack -eq 0 -a "$bigstack" != "" ] ; then
   globalopts="$globalopts -S 32"
@@ -511,7 +520,7 @@ for i in $skip; do eval do$i=no; done
 
 echo ""
 echo PCRE2 C library tests using test data from $testdata
-$sim $pcre2test /dev/null
+$sim $pcre2test $null
 echo ""
 
 
@@ -592,50 +601,51 @@ for bmode in "$test8" "$test16" "$test32"; do
     done
   fi
 
-  # Locale-specific tests, provided that either the "fr_FR", "fr_CA", "french"
-  # or "fr" locale is available. The first two are Unix-like standards; the
-  # last two are for Windows. Unfortunately, different versions of the French
+  # Locale-specific tests. Unfortunately, different versions of the French
   # locale give different outputs for some items. This test passes if the
   # output matches any one of the alternative output files.
 
   if [ $do3 = yes ] ; then
     locale=
 
+    locales='french fr_FR fr fr_CA'
+
     # In some environments locales that are listed by the "locale -a"
     # command do not seem to work with setlocale(). Therefore, we do
     # a preliminary test to see if pcre2test can set one before going
     # on to use it.
 
-    for loc in 'fr_FR' 'french' 'fr' 'fr_CA'; do
-      locale -a | grep "^$loc\$" >/dev/null
-      if [ $? -eq 0 ] ; then
-        echo "/a/locale=$loc" | \
-          $sim $valgrind $pcre2test -q $bmode | \
-            grep "Failed to set locale" >/dev/null
-        if [ $? -ne 0 ] ; then
-          locale=$loc
-          if [ "$locale" = "fr_FR" ] ; then
-            infile=$testdata/testinput3
-            outfile=$testdata/testoutput3
-            outfile2=$testdata/testoutput3A
-            outfile3=$testdata/testoutput3B
-            outfile4=$testdata/testoutput3C
-          else
-            infile=test3input
-            outfile=test3output
-            outfile2=test3outputA
-            outfile3=test3outputB
-            outfile4=test3outputC
-            sed "s/fr_FR/$loc/" $testdata/testinput3 >test3input
-            sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
-            sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
-            sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
-            sed "s/fr_FR/$loc/" $testdata/testoutput3C >test3outputC
-          fi
-          break
-        fi
+    for loc in $locales; do
+      case "$pcre2test" in
+      *.exe) ;;
+      *)
+        locale -a | grep "^$loc\$" >/dev/null
+        if [ $? -ne 0 ] ; then continue; fi
+        ;;
+      esac
+
+      echo "/a/locale=$loc" | \
+        $sim $valgrind $pcre2test -q $bmode | \
+          grep "Failed to set locale" >/dev/null
+      if [ $? -ne 0 ] ; then
+        locale=$loc
+        infile=test3input
+        outfile=test3output
+        outfile2=test3outputA
+        outfile3=test3outputB
+        outfile4=test3outputC
+        outfile5=test3outputD
+        sed "s/fr_FR/$loc/" $testdata/testinput3 >test3input
+        sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
+        sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
+        sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
+        sed "s/fr_FR/$loc/" $testdata/testoutput3C >test3outputC
+        sed "s/fr_FR/$loc/" $testdata/testoutput3D >test3outputD
+        break
       fi
     done
+
+    unset locales
 
     if [ "$locale" != "" ] ; then
       echo $title3 "(using '$locale' locale)"
@@ -649,14 +659,15 @@ for bmode in "$test8" "$test16" "$test32"; do
           if $cf $outfile testoutput$bits/testoutput3 >teststdout || \
              $cf $outfile2 testoutput$bits/testoutput3 >>teststdout || \
              $cf $outfile3 testoutput$bits/testoutput3 >>teststdout || \
-             $cf $outfile4 testoutput$bits/testoutput3 >>teststdout
+             $cf $outfile4 testoutput$bits/testoutput3 >>teststdout || \
+             $cf $outfile5 testoutput$bits/testoutput3 >>teststdout
           then
             echo "  OK$with"
           else
             cat teststdout
             echo ""
             echo "** Locale test did not run successfully$with. The output did not match"
-            echo "   $outfile, $outfile2, $outfile3 or $outfile4."
+            echo "   $outfile, $outfile2, $outfile3, $outfile4 or $outfile5."
             echo "   This may mean that there is a problem with the locale settings rather"
             echo "   than a bug in PCRE2."
             yield=1
@@ -667,9 +678,8 @@ for bmode in "$test8" "$test16" "$test32"; do
         fi
       done
     else
-      echo "Cannot test locale-specific features - none of the 'fr_FR', 'fr_CA',"
-      echo "'fr' or 'french' locales can be set, or the \"locale\" command is"
-      echo "not available to check for them."
+      echo "Cannot test locale-specific features - none of the French locales"
+      echo "($locales) could be set."
       echo " "
     fi
   fi

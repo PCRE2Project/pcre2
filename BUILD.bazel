@@ -150,7 +150,6 @@ cc_library(
 cc_library(
     name = "pcre2test_dotc_headers",
     hdrs = [
-        "src/pcre2_chkdint.c",
         "src/pcre2_tables.c",
         "src/pcre2_ucd.c",
         "src/pcre2_valid_utf.c",
@@ -184,8 +183,12 @@ filegroup(
 native_test(
     name = "pcre2_test",
     size = "small",
+    # On Linux/Unix, we simply call RunTest, which is a shell script.
+    # On Windows, we call the RunShell.bat wrapper with RUNSHELL_SCRIPT set to
+    # RunTest, instructing it to locate an actual bash shell on Windows and
+    # delegate to the actual RunTest script.
     src = select({
-        "@platforms//os:windows": "RunTest.bat",
+        "@platforms//os:windows": "RunShell.bat",
         "//conditions:default": "RunTest",
     }),
     out = select({
@@ -195,5 +198,17 @@ native_test(
     data = [
         ":pcre2test",
         ":testdata",
-    ],
+    ] + select({
+        "@platforms//os:windows": ["RunTest"],
+        "//conditions:default": [],
+    }),
+    env = select({
+        "@platforms//os:windows": {
+            "RUNSHELL_SCRIPT": "RunTest",
+            "WSLENV": "pcre2test:srcdir",
+            "pcre2test": "./pcre2test.exe",
+            "srcdir": ".",
+        },
+        "//conditions:default": {},
+    }),
 )
