@@ -186,4 +186,9 @@
 
 /\[()]{65535}/expand
 
+# This expansion fills pbuffer8 to exactly its default size, checking that the
+# growth loop leaves room for the terminating zero written after it.
+
+/\[a]{50000}/expand
+
 # End of testinput8
