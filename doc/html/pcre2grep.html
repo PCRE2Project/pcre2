@@ -532,6 +532,11 @@ are being output. If not supplied, "(standard input)" is used. There is no
 short form for this option.
 </p>
 <p>
+<b>--lf</b>
+Use LF as the line ending for standard output. This has no effect except on
+Windows, where CRLF is the default. There is no short form for this option.
+</p>
+<p>
 <b>--line-buffered</b>
 When this option is given, non-compressed input is read and processed line by
 line, and the output is flushed after each write. By default, input is read in
@@ -949,7 +954,7 @@ in the GNU <b>grep</b> program. Any long option of the form <b>--xxx-regexp</b>
 (GNU terminology) is also available as <b>--xxx-regex</b> (PCRE2 terminology).
 However, the <b>--case-restrict</b>, <b>--depth-limit</b>, <b>-E</b>,
 <b>--file-list</b>, <b>--file-offsets</b>, <b>--heap-limit</b>,
-<b>--include-dir</b>, <b>--line-offsets</b>, <b>--locale</b>, <b>--match-limit</b>,
+<b>--include-dir</b>, <b>--lf</b>, <b>--line-offsets</b>, <b>--locale</b>, <b>--match-limit</b>,
 <b>-M</b>, <b>--multiline</b>, <b>-N</b>, <b>--newline</b>, <b>--no-ucp</b>,
 <b>--om-separator</b>, <b>--output</b>, <b>-P</b>, <b>-u</b>, <b>--utf</b>,
 <b>-U</b>, and <b>--utf-allow-invalid</b> options are specific to
