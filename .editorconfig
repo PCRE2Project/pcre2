@@ -19,5 +19,5 @@ end_of_line = crlf
 insert_final_newline = false
 trim_trailing_whitespace = false
 
-[testdata/test{input,output}{1,2,3,3A,3B,3C,6,28,29}]
+[testdata/test{input,output}{1,2,3,3A,3B,3C,3D,6,28,29}]
 charset = latin1

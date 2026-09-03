@@ -1381,43 +1381,39 @@ MESSAGE(\" \")
 "
   )
 
-  file(
-    WRITE
-    ${PROJECT_BINARY_DIR}/pcre2_test.sh
-    "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcre2test=${PROJECT_BINARY_DIR}/pcre2test
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2test=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2test
-. ${PROJECT_SOURCE_DIR}/RunTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-"
+  if(WIN32)
+    set(TEST_EXE_EXTENSION ".exe")
+    set(TEST_SHELL ${CMAKE_COMMAND} -E env "CMAKE_CONFIG_TYPE=$<CONFIG>" "WSLENV=CMAKE_CONFIG_TYPE" ${PROJECT_SOURCE_DIR}/RunShell.bat)
+    set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}")
+  elseif(UNIX)
+    set(TEST_EXE_EXTENSION "")
+    set(TEST_SHELL "sh")
+    set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}")
+  endif()
+
+  file(RELATIVE_PATH TEST_SOURCE_DIR "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}")
+
+  configure_file(
+    cmake/pcre2_test.sh.in
+    pcre2_test.sh
+    @ONLY
+    NEWLINE_STYLE LF
   )
 
-  if(UNIX)
-    add_test(pcre2_test sh ${PROJECT_BINARY_DIR}/pcre2_test.sh)
+  if(WIN32 OR UNIX)
+    add_test(NAME pcre2_test COMMAND ${TEST_SHELL} "${TEST_BINARY_DIR}/pcre2_test.sh" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
   endif()
 
   if(PCRE2_BUILD_PCRE2GREP)
-    file(
-      WRITE
-      ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh
-      "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcre2grep=${PROJECT_BINARY_DIR}/pcre2grep
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2grep=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2grep
-pcre2test=${PROJECT_BINARY_DIR}/pcre2test
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2test=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2test
-. ${PROJECT_SOURCE_DIR}/RunGrepTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-"
+    configure_file(
+      cmake/pcre2_grep_test.sh.in
+      pcre2_grep_test.sh
+      @ONLY
+      NEWLINE_STYLE LF
     )
 
-    if(UNIX)
-      add_test(pcre2_grep_test sh ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
+    if(WIN32 OR UNIX)
+      add_test(NAME pcre2_grep_test COMMAND ${TEST_SHELL} "${TEST_BINARY_DIR}/pcre2_grep_test.sh" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
 
       if(PCRE2_EBCDIC)
         # The grep tests currently fail in EBCDIC mode because the test data
@@ -1428,71 +1424,6 @@ if test \"$?\" != \"0\"; then exit 1; fi
       endif()
     endif()
   endif()
-
-  if(WIN32)
-    # Provide environment for executing the bat file version of RunTest
-    file(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR} winsrc)
-    file(TO_NATIVE_PATH ${PROJECT_BINARY_DIR} winbin)
-
-    file(
-      WRITE
-      ${PROJECT_BINARY_DIR}/pcre2_test.bat
-      "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winbin}\\pcre2test.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
-call %srcdir%\\RunTest.bat
-if errorlevel 1 exit /b 1
-echo RunTest.bat tests successfully completed
-"
-    )
-
-    add_test(NAME pcre2_test_bat COMMAND pcre2_test.bat)
-    set_tests_properties(pcre2_test_bat PROPERTIES PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
-
-    if(PCRE2_BUILD_PCRE2GREP)
-      file(
-        WRITE
-        ${PROJECT_BINARY_DIR}/pcre2_grep_test.bat
-        "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winbin}\\pcre2test.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
-SET pcre2grep=\"${winbin}\\pcre2grep.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2grep=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2grep.exe\"
-call %srcdir%\\RunGrepTest.bat
-if errorlevel 1 exit /b 1
-echo RunGrepTest.bat tests successfully completed
-"
-      )
-
-      add_test(NAME pcre2_grep_test_bat COMMAND pcre2_grep_test.bat)
-      set_tests_properties(
-        pcre2_grep_test_bat
-        PROPERTIES PASS_REGULAR_EXPRESSION "RunGrepTest\\.bat tests successfully completed"
-      )
-    endif()
-
-    if(DEFINED ENV{OSTYPE})
-      if("$ENV{OSTYPE}" STREQUAL "msys")
-        set(MSYS2 TRUE)
-      endif()
-    endif()
-    if(MSYS2)
-      # Both the sh and bat file versions of RunTest are run if make test is used
-      # in msys
-      add_test(pcre2_test_sh sh.exe ${PROJECT_BINARY_DIR}/pcre2_test.sh)
-      if(PCRE2_BUILD_PCRE2GREP)
-        add_test(pcre2_grep_test sh.exe ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
-      endif()
-    endif()
-  endif()
-
-  # Changed to accommodate testing whichever location was just built
 
   if(PCRE2_SUPPORT_JIT_DETECTED)
     add_test(pcre2_jit_test pcre2_jit_test)

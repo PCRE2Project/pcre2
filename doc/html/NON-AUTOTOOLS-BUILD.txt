@@ -11,7 +11,7 @@ This document contains the following sections:
   Comments about Win32 builds
   Building PCRE2 on Windows with CMake
   Building PCRE2 on Windows with Visual Studio
-  Testing with RunTest.bat
+  Testing on Windows
   Building PCRE2 on z/OS and z/VM
   Building PCRE2 under VMS
 
@@ -384,37 +384,12 @@ alternative:
 Just rename it and drop it into the top level of the build tree.
 
 
-Testing with RunTest.bat
-------------------------
+Testing on Windows
+------------------
 
-If configured with CMake, building the test project ("make test" or building
-ALL_TESTS in Visual Studio) creates (and runs) pcre2_test.bat (and depending
-on your configuration options, possibly other test programs) in the build
-directory. The pcre2_test.bat script runs RunTest.bat with correct source and
-exe paths.
-
-For manual testing with RunTest.bat, provided the build dir is a subdirectory
-of the source directory: Open command shell window. Chdir to the location
-of your pcre2test.exe and pcre2grep.exe programs. Call RunTest.bat with
-"..\RunTest.Bat" or "..\..\RunTest.bat" as appropriate.
-
-To run only a particular test with RunTest.Bat provide a test number argument.
-
-Otherwise:
-
-1. Copy RunTest.bat into the directory where pcre2test.exe and pcre2grep.exe
-   have been created.
-
-2. Edit RunTest.bat to identify the full or relative location of
-   the pcre2 source (wherein which the testdata folder resides), e.g.:
-
-   set srcdir=C:\pcre2\pcre2-10.00
-
-3. In a Windows command environment, chdir to the location of your bat and
-   exe programs.
-
-4. Run RunTest.bat. Test outputs will automatically be compared to expected
-   results, and discrepancies will be identified in the console output.
+Windows testing requires WSL or Git for Windows Bash. CMake uses WSL Bash when
+available, otherwise Git for Windows Bash, and runs the shared RunTest script
+with the correct source and executable paths.
 
 To independently test the just-in-time compiler, run pcre2_jit_test.exe.
 

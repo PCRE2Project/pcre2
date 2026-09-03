@@ -461,6 +461,10 @@ This option supplies a name to be used for the standard input when file names
 are being output. If not supplied, "(standard input)" is used. There is no
 short form for this option.
 .TP
+\fB--lf\fP
+Use LF as the line ending for standard output. This has no effect except on
+Windows, where CRLF is the default. There is no short form for this option.
+.TP
 \fB--line-buffered\fP
 When this option is given, non-compressed input is read and processed line by
 line, and the output is flushed after each write. By default, input is read in
@@ -836,7 +840,7 @@ in the GNU \fBgrep\fP program. Any long option of the form \fB--xxx-regexp\fP
 (GNU terminology) is also available as \fB--xxx-regex\fP (PCRE2 terminology).
 However, the \fB--case-restrict\fP, \fB--depth-limit\fP, \fB-E\fP,
 \fB--file-list\fP, \fB--file-offsets\fP, \fB--heap-limit\fP,
-\fB--include-dir\fP, \fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP,
+\fB--include-dir\fP, \fB--lf\fP, \fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP,
 \fB-M\fP, \fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--no-ucp\fP,
 \fB--om-separator\fP, \fB--output\fP, \fB-P\fP, \fB-u\fP, \fB--utf\fP,
 \fB-U\fP, and \fB--utf-allow-invalid\fP options are specific to

@@ -1,0 +1,10 @@
+#! /bin/sh
+# This is a generated file.
+srcdir='@TEST_SOURCE_DIR@'
+pcre2grep='./pcre2grep@TEST_EXE_EXTENSION@'
+test -z "$CMAKE_CONFIG_TYPE" || pcre2grep='./'"$CMAKE_CONFIG_TYPE"'/pcre2grep@TEST_EXE_EXTENSION@'
+pcre2test='./pcre2test@TEST_EXE_EXTENSION@'
+test -z "$CMAKE_CONFIG_TYPE" || pcre2test='./'"$CMAKE_CONFIG_TYPE"'/pcre2test@TEST_EXE_EXTENSION@'
+. '@TEST_SOURCE_DIR@/RunGrepTest'
+if test "$?" != "0"; then exit 1; fi
+# End

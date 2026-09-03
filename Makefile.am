@@ -744,17 +744,15 @@ endif # WITH_GCOV
 
 ## The main library tests. Each test is a binary plus a script that runs that
 ## binary in various ways. We install these test binaries in case folks find it
-## helpful. The two .bat files are for running the tests under Windows.
+## helpful.
 
 TESTS += RunTest
-EXTRA_DIST += RunTest.bat
 dist_noinst_SCRIPTS += RunTest
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
 TESTS += RunGrepTest
-EXTRA_DIST += RunGrepTest.bat
 dist_noinst_SCRIPTS += RunGrepTest
 if WITH_EBCDIC
 XFAIL_TESTS += RunGrepTest
@@ -826,6 +824,8 @@ EXTRA_DIST += \
   testdata/testoutput3 \
   testdata/testoutput3A \
   testdata/testoutput3B \
+  testdata/testoutput3C \
+  testdata/testoutput3D \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
@@ -867,8 +867,6 @@ EXTRA_DIST += \
   testdata/testoutputheap-32 \
   testdata/testoutputheap-8 \
   testdata/valgrind-jit.supp \
-  testdata/wintestinput3 \
-  testdata/wintestoutput3 \
   perltest.sh
 
 # RunTest and RunGrepTest should clean up after themselves, but just in case
@@ -1037,10 +1035,13 @@ endif # WITH_GCOV
 ## CMake support
 
 EXTRA_DIST += \
+  RunShell.bat \
   cmake/COPYING-CMAKE-SCRIPTS \
   cmake/FindEditline.cmake \
   cmake/FindReadline.cmake \
   cmake/pcre2-config.cmake.in \
+  cmake/pcre2_grep_test.sh.in \
+  cmake/pcre2_test.sh.in \
   cmake/PCRE2CheckVscript.cmake \
   cmake/PCRE2UseSystemExtensions.cmake \
   cmake/PCRE2WarningAsError.cmake \
