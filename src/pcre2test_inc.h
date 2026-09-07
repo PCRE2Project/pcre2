@@ -3810,14 +3810,16 @@ if ((dat_datctl.control & CTL_GETALL) != 0)
     }
   else
     {
-    for (i = 0; i < capcount; i++)
+    /* The list is sized from the match return, and terminated by a NULL. Walk
+    it to that terminator rather than to capcount, which allcaptures/allvector
+    may have raised above the number of pairs the match actually returned. */
+
+    for (i = 0; stringlist[i] != NULL; i++)
       {
       fprintf(outfile, "%2dL ", i);
       pchars(clr_none, stringlist[i], lengths[i], utf, outfile);
       putc('\n', outfile);
       }
-    if (stringlist[i] != NULL)
-      cfprintf(clr_test_error, outfile, "** string list not terminated by NULL\n");
     pcre2_substring_list_free(stringlist);
     }
   }
