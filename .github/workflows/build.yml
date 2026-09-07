@@ -15,7 +15,9 @@ on:
         - windows
         - freebsd
         - openbsd
+        - haiku
         - solaris
+        - openindiana
         - zos
         - distcheck
         - coverage
@@ -404,6 +406,79 @@ jobs:
             # ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-openbsd
             # ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
+  haiku:
+    name: Haiku
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'haiku')) ||
+      github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        uses: vmactions/haiku-vm@6a07e023ed05895c09aa73843b58cfa671f34594 # v1.1.5
+        with:
+          envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
+          prepare: |
+            set -e
+            echo "== Haiku package setup =="
+            uname -a
+            pkgman install -y cmake make
+
+          run: |
+            set -e
+
+            echo "== Haiku build environment =="
+            uname -a
+            pwd
+            echo "CFLAGS_GCC_STYLE=$CFLAGS_GCC_STYLE"
+            echo "CMAKE_FLAGS=$CMAKE_FLAGS"
+            cc --version || gcc --version
+            cmake --version
+            make --version
+
+            EXTRA_CFLAGS="-DSLJIT_WX_EXECUTABLE_ALLOCATOR"
+            NPROC=$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+            echo "NPROC=$NPROC"
+
+            cp -rp . ../build-autoconf
+            cp -rp . ../build-cmake
+
+            echo "== Autoconf =="
+            cd ../build-autoconf
+
+            ./configure CFLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
+            make -j$NPROC
+            # XXX (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+            ./RunTest
+            ./RunGrepTest
+
+            make install "DESTDIR=`pwd`/install-dir"
+            # Validate Haiku's installed shared-library layout once it is known in CI.
+            echo "listing"
+            ls -lR install-dir
+            # maint/RunManifestTest install-dir maint/manifest-makeinstall-haiku
+            # maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+
+            echo "== CMake =="
+            cd ../build-cmake
+
+            cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cd build
+            make -j$NPROC
+            ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+            cmake --install . --prefix install-dir
+            echo "listing"
+            ls -lR install-dir
+            # ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-haiku
+            # ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
   solaris:
     name: Solaris
     runs-on: ubuntu-latest
@@ -484,6 +559,67 @@ jobs:
             cd ../build-cmake-64
 
             CC="cc -m64" cmake $CMAKE_FLAGS -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_SOLARIS_CC" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+            cd build
+            make
+            ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+            cmake --install . --prefix install-dir
+            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
+            ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+  openindiana:
+    name: OpenIndiana
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'openindiana')) ||
+      github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Prepare
+        run: ./autogen.sh
+
+      - name: Build & test
+        uses: vmactions/openindiana-vm@21e57a45fc8dbfc8b20804ba707c1dad6c271b4f # v1.1.6
+        with:
+          envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
+          prepare: |
+            set -e
+            pkg install developer/gcc-14 developer/build/cmake developer/build/make
+
+          run: |
+            set -e
+
+            echo "== OpenIndiana build environment =="
+            uname -a
+            pwd
+            gcc --version
+            cmake --version
+            make --version
+
+            NPROC=$(nproc 2>/dev/null || echo 2)
+            echo "NPROC=$NPROC"
+
+            cp -rp . ../build-autoconf
+            cp -rp . ../build-cmake
+
+            echo "== Autoconf, 64-bit =="
+            cd ../build-autoconf
+
+            ./configure CC=gcc CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
+            make
+            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
+            make install "DESTDIR=`pwd`/install-dir"
+            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+
+            echo "== CMake, 64-bit =="
+            cd ../build-cmake
+
+            CC=gcc cmake $CMAKE_FLAGS -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DPCRE2_DEBUG=ON -DCMAKE_C_FLAGS="$CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
             cd build
             make
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
