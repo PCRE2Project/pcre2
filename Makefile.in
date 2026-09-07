@@ -1450,6 +1450,7 @@ EXTRA_DIST = m4/ax_pthread.m4 m4/pcre2_check_vscript.m4 \
 	testdata/testinputheap testdata/testoutput1 \
 	testdata/testoutput2 testdata/testoutput3 \
 	testdata/testoutput3A testdata/testoutput3B \
+	testdata/testoutput3D \
 	testdata/testoutput4 testdata/testoutput5 testdata/testoutput6 \
 	testdata/testoutput7 testdata/testoutput8-16-2 \
 	testdata/testoutput8-16-4 testdata/testoutput8-32-4 \
