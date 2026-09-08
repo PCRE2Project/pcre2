@@ -1035,7 +1035,6 @@ endif # WITH_GCOV
 ## CMake support
 
 EXTRA_DIST += \
-  RunShell.bat \
   cmake/COPYING-CMAKE-SCRIPTS \
   cmake/FindEditline.cmake \
   cmake/FindReadline.cmake \

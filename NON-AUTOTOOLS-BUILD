@@ -387,6 +387,8 @@ Just rename it and drop it into the top level of the build tree.
 Testing on Windows
 ------------------
 
+# XXX NONSENSE REWRITE
+
 Windows testing requires WSL or Git for Windows Bash. CMake uses WSL Bash when
 available, otherwise Git for Windows Bash, and runs the shared RunTest script
 with the correct source and executable paths.

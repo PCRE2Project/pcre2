@@ -1381,47 +1381,61 @@ MESSAGE(\" \")
 "
   )
 
-  if(WIN32)
-    set(TEST_EXE_EXTENSION ".exe")
-    set(TEST_SHELL ${CMAKE_COMMAND} -E env "CMAKE_CONFIG_TYPE=$<CONFIG>" "WSLENV=CMAKE_CONFIG_TYPE" ${PROJECT_SOURCE_DIR}/RunShell.bat)
-    set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}")
+  # XXX revert this nonsense - switching approach!
+  # if(WIN32)
+  #   set(TEST_EXE_EXTENSION ".exe")
+  #   set(TEST_SHELL ${CMAKE_COMMAND} -E env "CMAKE_CONFIG_TYPE=$<CONFIG>" "WSLENV=CMAKE_CONFIG_TYPE" ${PROJECT_SOURCE_DIR}/RunShell.bat)
+  #   set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}")
+  # elseif(UNIX)
+  #   set(TEST_EXE_EXTENSION "")
+  #   set(TEST_SHELL "sh")
+  #   set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}")
+  # endif()
+
+  # file(RELATIVE_PATH TEST_SOURCE_DIR "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}")
+
+  if(XXX_HAVE_PYTHON)
+    # XXX call the Python script
+    # use generator expressions to pass the relevant paths
   elseif(UNIX)
-    set(TEST_EXE_EXTENSION "")
-    set(TEST_SHELL "sh")
-    set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}")
-  endif()
-
-  file(RELATIVE_PATH TEST_SOURCE_DIR "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}")
-
-  configure_file(
-    cmake/pcre2_test.sh.in
-    pcre2_test.sh
-    @ONLY
-    NEWLINE_STYLE LF
-  )
-
-  if(WIN32 OR UNIX)
-    add_test(NAME pcre2_test COMMAND ${TEST_SHELL} "${TEST_BINARY_DIR}/pcre2_test.sh" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
-  endif()
-
-  if(PCRE2_BUILD_PCRE2GREP)
+    # XXX get rid of this configure_file, and its source!
+    # XXX instead teach RunTest to accept commandline args and use a generator
+    #     expression to pass in the relevant paths
     configure_file(
-      cmake/pcre2_grep_test.sh.in
-      pcre2_grep_test.sh
+      cmake/pcre2_test.sh.in
+      pcre2_test.sh
       @ONLY
       NEWLINE_STYLE LF
     )
+    add_test(NAME pcre2_test COMMAND ${TEST_SHELL} "${TEST_BINARY_DIR}/pcre2_test.sh" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+  else()
+    message(WARNING "Neither Python nor shell support found, skipping pcre2_test")
+  endif()
 
-    if(WIN32 OR UNIX)
+  if(PCRE2_BUILD_PCRE2GREP)
+    if(XXX_HAVE_PYTHON)
+      # XXX as above
+    elseif(UNIX)
+      # XXX get rid of this configure_file, and its source!
+      # XXX instead teach RunTest to accept commandline args and use a generator
+      #     expression to pass in the relevant paths
+      configure_file(
+        cmake/pcre2_grep_test.sh.in
+        pcre2_grep_test.sh
+        @ONLY
+        NEWLINE_STYLE LF
+      )
       add_test(NAME pcre2_grep_test COMMAND ${TEST_SHELL} "${TEST_BINARY_DIR}/pcre2_grep_test.sh" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+    else()
+      message(WARNING "Neither Python nor shell support found, skipping pcre2_grep_test")
+    endif()
 
-      if(PCRE2_EBCDIC)
-        # The grep tests currently fail in EBCDIC mode because the test data
-        # files are in ASCII. This could be fixed properly, but for now, we
-        # have very few EBCDIC users and the pcre2grep utility is hardly even
-        # part of the official project artifacts.
-        set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
-      endif()
+    if(PCRE2_EBCDIC AND XXX_MADE_THE_TEST)
+      # The grep tests currently fail in EBCDIC mode because the test data
+      # files are in ASCII. This could be fixed properly, but for now, we
+      # have very few EBCDIC users and the pcre2grep utility is hardly even
+      # part of the official project artifacts.
+      set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
     endif()
   endif()
 

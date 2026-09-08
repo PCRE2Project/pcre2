@@ -136,15 +136,6 @@ cf="diff"
 gdiff /dev/null /dev/null 2>/dev/null && cf="gdiff"
 $cf -u /dev/null /dev/null 2>/dev/null && cf="$cf -u"
 
-# Set up a suitable path for the null device. Paths interpreted by shell tools
-# should still use /dev/null, but this is the correct path for passing to native
-# pcre2test.exe.
-
-null=/dev/null
-case "$pcre2test" in
-  *.exe|*.EXE) null=NUL;;
-esac
-
 # Find the test data
 
 if [ -n "$srcdir" -a -d "$srcdir" ] ; then
@@ -240,7 +231,7 @@ globalopts="-q"
 # This is in case the caller has set aliases (as I do - PH)
 unset cp ls mv rm
 
-if ! command -v "$pcre2test" >/dev/null 2>&1 ; then
+if [ ! -x $pcre2test ] ; then
   echo "** $pcre2test does not exist or is not executable."
   exit 1
 fi
@@ -353,7 +344,7 @@ done
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.
 
-$sim $pcre2test -S 32 $null $null >/dev/null 2>&1
+$sim $pcre2test -S 32 /dev/null /dev/null >/dev/null 2>&1
 support_setstack=$?
 if [ $support_setstack -eq 0 -a "$bigstack" != "" ] ; then
   globalopts="$globalopts -S 32"
@@ -520,7 +511,7 @@ for i in $skip; do eval do$i=no; done
 
 echo ""
 echo PCRE2 C library tests using test data from $testdata
-$sim $pcre2test $null
+$sim $pcre2test /dev/null
 echo ""
 
 
@@ -616,33 +607,30 @@ for bmode in "$test8" "$test16" "$test32"; do
     # on to use it.
 
     for loc in $locales; do
-      case "$pcre2test" in
-      *.exe) ;;
-      *)
-        locale -a | grep "^$loc\$" >/dev/null
-        if [ $? -ne 0 ] ; then continue; fi
-        ;;
-      esac
-
-      echo "/a/locale=$loc" | \
-        $sim $valgrind $pcre2test -q $bmode | \
-          grep "Failed to set locale" >/dev/null
-      if [ $? -ne 0 ] ; then
-        locale=$loc
-        infile=test3input
-        outfile=test3output
-        outfile2=test3outputA
-        outfile3=test3outputB
-        outfile4=test3outputC
-        outfile5=test3outputD
-        sed "s/fr_FR/$loc/" $testdata/testinput3 >test3input
-        sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
-        sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
-        sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
-        sed "s/fr_FR/$loc/" $testdata/testoutput3C >test3outputC
-        sed "s/fr_FR/$loc/" $testdata/testoutput3D >test3outputD
-        break
+      if ! (locale -a | grep "^$loc\$" >/dev/null); then
+        continue
       fi
+
+      if ! (echo "/a/locale=$loc" | \
+            $sim $valgrind $pcre2test -q $bmode | \
+              grep "Failed to set locale" >/dev/null); then
+        continue
+      fi
+
+      locale=$loc
+      infile=test3input
+      outfile=test3output
+      outfile2=test3outputA
+      outfile3=test3outputB
+      outfile4=test3outputC
+      outfile5=test3outputD
+      sed "s/fr_FR/$loc/" $testdata/testinput3 >test3input
+      sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
+      sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
+      sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
+      sed "s/fr_FR/$loc/" $testdata/testoutput3C >test3outputC
+      sed "s/fr_FR/$loc/" $testdata/testoutput3D >test3outputD
+      break
     done
 
     unset locales
