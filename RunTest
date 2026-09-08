@@ -201,13 +201,18 @@ checkresult()
 checkspecial()
   {
   expect=${2:-0}
-  $sim $valgrind $vjs $pcre2test $1 >>testSoutput 2>&1
+  $sim $valgrind $3 $pcre2test $1 >>testSoutput 2>&1
   if [ $? -ne "$expect" ] ; then
     echo "** pcre2test $1 failed - check testSoutput"
     yield=1
     return 1
   fi
   return 0
+  }
+
+set_vjs_for_opt()
+  {
+  if [ "$1" = "-jit" ]; then optvjs="$vjs"; else optvjs=; fi
   }
 
 
@@ -544,21 +549,21 @@ for bmode in "$test8" "$test16" "$test32"; do
     saverc=0
     checkspecial "$bmode -C" || saverc=$?
     checkspecial '--help' || saverc=$?
-    checkspecial "$bmode testSinput" || saverc=$?
+    checkspecial "$bmode testSinput" 0 "$vjs" || saverc=$?
     checkspecial "$bmode $testdata/testinputheap" || saverc=$?
     if [ $support_setstack -eq 0 ] ; then
-      checkspecial "$bmode -S 1 -t 10 testSinput" || saverc=$?
+      checkspecial "$bmode -S 1 -t 10 testSinput" 0 "$vjs" || saverc=$?
     fi
     checkspecial "$bmode reallydoesnotexist" 1 || saverc=$?
-    checkspecial "$bmode testSinput reallydoesnotexist/outfile" 1 || saverc=$?
-    checkspecial "$bmode -pattern debug testSinput" || saverc=$?
+    checkspecial "$bmode testSinput reallydoesnotexist/outfile" 1 "$vjs" || saverc=$?
+    checkspecial "$bmode -pattern debug testSinput" 0 "$vjs" || saverc=$?
     checkspecial "$bmode -pattern INVALID testSinput" 1 2>/dev/null || saverc=$?
-    checkspecial "$bmode -subject notempty testSinput" || saverc=$?
+    checkspecial "$bmode -subject notempty testSinput" 0 "$vjs" || saverc=$?
     checkspecial "$bmode -subject INVALID testSinput" 1 2>/dev/null || saverc=$?
     checkspecial -LM || saverc=$?
     checkspecial -LP || saverc=$?
     checkspecial -LS || saverc=$?
-    checkspecial "$bmode -unittest" || saverc=$?
+    checkspecial "$bmode -unittest" 0 "$vjs" || saverc=$?
     if [ $saverc -eq 0 ] ; then
       echo "  OK"
     fi
@@ -569,7 +574,8 @@ for bmode in "$test8" "$test16" "$test32"; do
   if [ $do1 = yes ] ; then
     echo $title1
     for opt in "" $jitopt; do
-      $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput1 testoutput$bits$opt/testoutput1
+      set_vjs_for_opt "$opt"
+      $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput1 testoutput$bits$opt/testoutput1
       checkresult $? 1 "$opt"
     done
   fi
@@ -581,10 +587,11 @@ for bmode in "$test8" "$test16" "$test32"; do
     echo $title2 "(excluding UTF-$bits)"
     cp $testdata/testbtables .
     for opt in "" $jitopt; do
-      $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput2 testoutput$bits$opt/testoutput2
+      set_vjs_for_opt "$opt"
+      $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput2 testoutput$bits$opt/testoutput2
       saverc=$?
       if [ $saverc = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testoutput$bits$opt/testoutput2
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testoutput$bits$opt/testoutput2
         checkresult $? 2 "$opt"
       else
         checkresult $saverc 2 "$opt"
@@ -610,7 +617,7 @@ for bmode in "$test8" "$test16" "$test32"; do
         continue
       fi
 
-      if ! (echo "/a/locale=$loc" | \
+      if (echo "/a/locale=$loc" | \
             $sim $valgrind $pcre2test -q $bmode | \
               grep "Failed to set locale" >/dev/null); then
         continue
@@ -635,7 +642,8 @@ for bmode in "$test8" "$test16" "$test32"; do
     if [ "$locale" != "" ] ; then
       echo $title3 "(using '$locale' locale)"
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $infile testoutput$bits/testoutput3
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $infile testoutput$bits/testoutput3
         if [ $? = 0 ] ; then
           case "$opt" in
             -jit) with=" with JIT";;
@@ -680,7 +688,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput4 testoutput$bits$opt/testoutput4
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput4 testoutput$bits$opt/testoutput4
         checkresult $? 4 "$opt"
       done
     fi
@@ -692,7 +701,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput5 testoutput$bits$opt/testoutput5
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput5 testoutput$bits$opt/testoutput5
         checkresult $? 5 "$opt"
       done
     fi
@@ -744,7 +754,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped when running 16/32-bit tests"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput9 testoutput$bits$opt/testoutput9
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput9 testoutput$bits$opt/testoutput9
         checkresult $? 9 "$opt"
       done
     fi
@@ -760,7 +771,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput10 testoutput$bits$opt/testoutput10
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput10 testoutput$bits$opt/testoutput10
         checkresult $? 10 "$opt"
       done
     fi
@@ -774,7 +786,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped when running 8-bit tests"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput11 testoutput$bits$opt/testoutput11-$bits
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput11 testoutput$bits$opt/testoutput11-$bits
         checkresult $? 11-$bits "$opt"
       done
     fi
@@ -791,7 +804,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput12 testoutput$bits$opt/testoutput12-$bits
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput12 testoutput$bits$opt/testoutput12-$bits
         checkresult $? 12-$bits "$opt"
       done
     fi
@@ -895,7 +909,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because \C is disabled"
     else
       for opt in "" $jitopt -dfa; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput21 testoutput$bits$opt/testoutput21
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput21 testoutput$bits$opt/testoutput21
         checkresult $? 21 "$opt"
       done
     fi
@@ -911,7 +926,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput22 testoutput$bits$opt/testoutput22-$bits
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput22 testoutput$bits$opt/testoutput22-$bits
         checkresult $? 22-$bits "$opt"
       done
     fi
@@ -957,7 +973,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput26 testoutput$bits$opt/testoutput26
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput26 testoutput$bits$opt/testoutput26
         checkresult $? 26 "$opt"
       done
     fi
@@ -971,7 +988,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because UTF-$bits support is not available"
     else
       for opt in "" $jitopt; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput27 testoutput$bits$opt/testoutput27
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput27 testoutput$bits$opt/testoutput27
         checkresult $? 27 "$opt"
       done
     fi
@@ -985,7 +1003,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped when not targetting EBCDIC"
     else
       for opt in "" $jitopt "-dfa"; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput28 testoutput$bits$opt/testoutput28
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput28 testoutput$bits$opt/testoutput28
         checkresult $? 28 "$opt"
       done
     fi
@@ -1001,7 +1020,8 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "  Skipped because EBCDIC newline is not 0x25"
     else
       for opt in "" $jitopt "-dfa"; do
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput29 testoutput$bits$opt/testoutput29
+        set_vjs_for_opt "$opt"
+        $sim $valgrind $optvjs $pcre2test $globalopts $bmode $opt $testdata/testinput29 testoutput$bits$opt/testoutput29
         checkresult $? 29 "$opt"
       done
     fi
@@ -1025,7 +1045,7 @@ if [ $yield -eq 0 ] ; then
   echo "All tests passed."
 
   # Clean up local working files
-  rm -f testbtables testSinput testSoutput test3input test3output test3outputA test3outputB testsaved1 testsaved2 teststdout teststderr
+  rm -f testbtables testSinput testSoutput test3input test3output test3outputA test3outputB test3outputC test3outputD testsaved1 testsaved2 teststdout teststderr
   rm -rf testoutput8 testoutput8-jit testoutput8-dfa \
          testoutput16 testoutput16-jit testoutput16-dfa \
          testoutput32 testoutput32-jit testoutput32-dfa

@@ -17,6 +17,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.stdout.reconfigure(line_buffering=True)
+
 # Set the C locale, so that sort(1) behaves predictably.
 
 os.environ["LC_ALL"]="C"
@@ -45,18 +47,21 @@ for argument in sys.argv[1:]:
   if argument in ("valgrind", "-valgrind"): valgrind=["valgrind", "-q", "--leak-check=no", "--smc-check=all-non-file", "--error-exitcode=70"]
   else: print(f"RunGrepTest: Unknown argument {argument}"); sys.exit(1)
 
-def invoke(*args, cwd=None, stdin=None, stdout=None, stderr=None, valgrind_args=True):
+def invoke(*args, cwd=None, stdin=None, stdout=None, stderr=None, valgrind_args=True, vjs_args=False):
   command=[str(argument) for argument in args]
-  if valgrind and valgrind_args: command=valgrind + command
+  if valgrind and valgrind_args: command=valgrind + (vjs if vjs_args else []) + command
   return subprocess.run(command, cwd=cwd, stdin=stdin, stdout=stdout, stderr=stderr, check=False).returncode
 
-def output(arguments, cwd=builddir, stdin=None, stderr=subprocess.STDOUT, transform=None, write_returncode=True, vjs_args=True):
+def output(arguments, cwd=builddir, stdin=None, stderr=None, transform=None, write_returncode=True, vjs_args=True):
   with open("testtrygrep", "ab") as stream:
     process=subprocess.run(valgrind + (vjs if vjs_args else []) + [str(argument) for argument in arguments], cwd=cwd, input=stdin if isinstance(stdin, bytes) else None, stdin=stdin if hasattr(stdin, "read") else None, stdout=subprocess.PIPE, stderr=stderr, check=False)
     data=process.stdout if transform is None else transform(process.stdout)
     stream.write(data)
-    if write_returncode: stream.write(f"RC={process.returncode}\n".encode())
+    if write_returncode: stream.write(f"RC={process.returncode}\n".encode("latin-1"))
   return process.returncode
+
+def output_both(arguments, **kwargs):
+  return output(arguments, stderr=subprocess.STDOUT, **kwargs)
 
 def compare(expected, actual):
   try:
@@ -65,8 +70,25 @@ def compare(expected, actual):
   except OSError: pass
   return False
 
-pcre2grep_version=subprocess.run([pcre2grep, "-V"], stdout=subprocess.PIPE, check=False).stdout.decode().strip()
+pcre2grep_version=subprocess.run([pcre2grep, "-V"], stdout=subprocess.PIPE, check=False).stdout.decode("latin-1").strip()
 print(f"Testing {pcre2grep_version}" + (" using valgrind" if valgrind else ""))
+
+# Set up a suitable "diff" command for comparison. Some systems have a diff
+# that lacks a -u option. Try to deal with this; better do the test for the -b
+# option as well.
+
+# Add a -a (always treat as text) if available. This was added in an attempt
+# to get more detail from an Alpine Linux test failure on GitHub.
+
+# Some tests involve NUL characters. It seems impossible to handle them easily
+# in many operating systems. An earlier version of this script used sed to
+# translate NUL into the string ZERO, but this didn't work on Solaris (aka
+# SunOS), where the version of sed explicitly doesn't like them, and also MacOS
+# (Darwin), OpenBSD, FreeBSD, NetBSD, and some Linux distributions like Alpine,
+# even when using GNU sed. A user suggested using tr instead, which
+# necessitates translating to a single character. However, on (some versions
+# of?) Solaris, the normal "tr" cannot handle binary zeros, but if
+# /usr/xpg4/bin/tr is available, it can do so, so test for that.
 
 # If this test is being run from "make check", $srcdir will be set. If not, set
 # it to the current or parent directory, whichever one contains the test data.
@@ -82,8 +104,9 @@ if not (srcdir / "testdata").is_dir():
 # Set up the path to the valgrind JIT suppressions
 
 vjs=[]
-with open(os.devnull, "wb") as null: jit=invoke(pcre2test, "-C", "jit", stdout=null, valgrind_args=False)
-if valgrind and jit != 0: vjs=[f"--suppressions={(srcdir.resolve() / 'testdata' / 'valgrind-jit.supp')}" ]
+if valgrind:
+  with open(os.devnull, "wb") as null: jit=invoke(pcre2test, "-C", "jit", stdout=null, valgrind_args=False)
+  if jit != 0: vjs=[f"--suppressions={(srcdir.resolve() / 'testdata' / 'valgrind-jit.supp')}" ]
 
 # Check for the availability of UTF-8 support
 
@@ -91,7 +114,7 @@ with open(os.devnull, "wb") as null: utf8=invoke(pcre2test, "-C", "unicode", std
 
 # Check default newline convention. If it does not include LF, force LF.
 
-nl=subprocess.run([pcre2test, "-C", "newline"], stdout=subprocess.PIPE, check=False).stdout.decode().strip()
+nl=subprocess.run([pcre2test, "-C", "newline"], stdout=subprocess.PIPE, check=False).stdout.decode("latin-1").strip()
 if nl not in ("LF", "ANY", "ANYCRLF"):
   pcre2grep_args=[pcre2grep, "-N", "LF"]
   print("Default newline setting forced to LF")
@@ -113,7 +136,7 @@ def checkspecial(arguments, expected):
 print("Testing pcre2grep main features")
 
 def header(number):
-  with open("testtrygrep", "wb" if number == 1 else "ab") as stream: stream.write(f"---------------------------- Test {number} {'-' * (33 - len(str(number)) if number in (100, 101, 108, 120) else 32 - len(str(number)) if number >= 100 or 38 <= number <= 54 or 64 <= number <= 68 else 31 - len(str(number)))}\n".encode())
+  with open("testtrygrep", "wb" if number == 1 else "ab") as stream: stream.write(f"---------------------------- Test {number} {'-' * (33 - len(str(number)) if number in (100, 101, 108, 120) else 32 - len(str(number)) if number >= 100 or 38 <= number <= 54 or 64 <= number <= 68 else 31 - len(str(number)))}\n".encode("latin-1"))
 
 header(1)
 output([*pcre2grep_args, "PATTERN", "./testdata/grepinput"], cwd=srcdir)
@@ -140,14 +163,14 @@ output([*pcre2grep_args, "-vn", "pattern", "./testdata/grepinputx"], cwd=srcdir)
 header(12)
 output([*pcre2grep_args, "-ix", "pattern", "./testdata/grepinputx"], cwd=srcdir)
 header(13)
-Path("testtemp1grep").write_text("seventeen\n")
+Path("testtemp1grep").write_bytes(b"seventeen\n")
 output([*pcre2grep_args, "-f./testdata/greplist", "-f", builddir / "testtemp1grep", "./testdata/grepinputx"], cwd=srcdir)
 header(14)
 output([*pcre2grep_args, "-w", "pat", "./testdata/grepinput", "./testdata/grepinputx"], cwd=srcdir)
 header(15)
-output([*pcre2grep_args, "abc^*", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "abc^*", "./testdata/grepinput"], cwd=srcdir)
 header(16)
-output([*pcre2grep_args, "abc", "./testdata/grepinput", "./testdata/nonexistfile"], cwd=srcdir)
+output_both([*pcre2grep_args, "abc", "./testdata/grepinput", "./testdata/nonexistfile"], cwd=srcdir)
 header(17)
 output([*pcre2grep_args, "-M", r"the\noutput", "./testdata/grepinput"], cwd=srcdir)
 header(18)
@@ -181,9 +204,9 @@ output([*pcre2grep_args, "-inA3", "pattern", "./testdata/grepinput", "./testdata
 header(32)
 output([*pcre2grep_args, "-L", "fox", "./testdata/grepinput", "./testdata/grepinputx"], cwd=srcdir)
 header(33)
-output([*pcre2grep_args, "fox", "./testdata/grepnonexist"], cwd=srcdir)
+output_both([*pcre2grep_args, "fox", "./testdata/grepnonexist"], cwd=srcdir)
 header(34)
-output([*pcre2grep_args, "-s", "fox", "./testdata/grepnonexist"], cwd=srcdir)
+output_both([*pcre2grep_args, "-s", "fox", "./testdata/grepnonexist"], cwd=srcdir)
 header(35)
 output([*pcre2grep_args, "-L", "-r", "--include=grepinputx", "--include", "grepinput8", "--exclude-dir=^\\.", "fox", "./testdata"], cwd=srcdir, transform=lambda data: b"".join(sorted(data.splitlines(keepends=True))))
 header(36)
@@ -211,10 +234,10 @@ output([*pcre2grep_args, "-on", "-e", "before", "-ezero", "-e", "after", "./test
 header(45)
 output([*pcre2grep_args, "-on", "-f", "./testdata/greplist", "-e", "binary", "./testdata/grepinput"], cwd=srcdir)
 header(46)
-output([*pcre2grep_args, "-e", "unopened)", "-e", "abc", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "-eabc", "-e", "(unclosed", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "-eabc", "-e", "xyz", "-e", "[unclosed", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "--regex=123", "-eabc", "-e", "xyz", "-e", "[unclosed", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-e", "unopened)", "-e", "abc", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-eabc", "-e", "(unclosed", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-eabc", "-e", "xyz", "-e", "[unclosed", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--regex=123", "-eabc", "-e", "xyz", "-e", "[unclosed", "./testdata/grepinput"], cwd=srcdir)
 header(47)
 output([*pcre2grep_args, "-Fx", "AB.VE\nelephant", "./testdata/grepinput"], cwd=srcdir)
 header(48)
@@ -246,9 +269,9 @@ output([*pcre2grep_args, "--regex", "PATTERN", "./testdata/grepinput"], cwd=srcd
 header(61)
 output([*pcre2grep_args, "--regexp", "PATTERN", "./testdata/grepinput"], cwd=srcdir)
 header(62)
-output([*pcre2grep_args, "--match-limit=1000", "--no-jit", "-M", r"This is a file(.|\R)*file.", "./testdata/grepinput"], cwd=srcdir, vjs_args=False)
+output_both([*pcre2grep_args, "--match-limit=1000", "--no-jit", "-M", r"This is a file(.|\R)*file.", "./testdata/grepinput"], cwd=srcdir, vjs_args=False)
 header(63)
-output([*pcre2grep_args, "--recursion-limit=1K", "--no-jit", "-M", r"This is a file(.|\R)*file.", "./testdata/grepinput"], cwd=srcdir, vjs_args=False)
+output_both([*pcre2grep_args, "--recursion-limit=1K", "--no-jit", "-M", r"This is a file(.|\R)*file.", "./testdata/grepinput"], cwd=srcdir, vjs_args=False)
 header(64)
 output([*pcre2grep_args, "-o1", "(?<=PAT)TERN (ap(pear)s)", "./testdata/grepinput"], cwd=srcdir)
 header(65)
@@ -291,61 +314,61 @@ output([*pcre2grep_args, "--color=always", r"\b01|\b02", "./testdata/grepinput"]
 header(82)
 output([*pcre2grep_args, "-o", "--colour=always", r"\b01|\b02", "./testdata/grepinput"], cwd=srcdir)
 header(83)
-output([*pcre2grep_args, "--buffer-size=10", "--max-buffer-size=100", "^a", "./testdata/grepinput3"], cwd=srcdir)
+output_both([*pcre2grep_args, "--buffer-size=10", "--max-buffer-size=100", "^a", "./testdata/grepinput3"], cwd=srcdir)
 header(84)
-Path("testtemp1grep").write_text("testdata/grepinput3\n")
-output([*pcre2grep_args, "--file-list", "./testdata/grepfilelist", "--file-list", builddir / "testtemp1grep", "fox|complete|t7"], cwd=srcdir)
+Path("testtemp1grep").write_bytes(b"testdata/grepinput3\n")
+output_both([*pcre2grep_args, "--file-list", "./testdata/grepfilelist", "--file-list", builddir / "testtemp1grep", "fox|complete|t7"], cwd=srcdir)
 header(85)
-output([*pcre2grep_args, "--file-list=./testdata/grepfilelist", "dolor", "./testdata/grepinput3"], cwd=srcdir)
+output_both([*pcre2grep_args, "--file-list=./testdata/grepfilelist", "dolor", "./testdata/grepinput3"], cwd=srcdir)
 header(86)
-output([*pcre2grep_args, "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "dog", "./testdata/grepbinary"], cwd=srcdir)
 header(87)
-output([*pcre2grep_args, "cat", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "cat", "./testdata/grepbinary"], cwd=srcdir)
 header(88)
-output([*pcre2grep_args, "-v", "cat", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "-v", "cat", "./testdata/grepbinary"], cwd=srcdir)
 header(89)
-output([*pcre2grep_args, "-I", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "-I", "dog", "./testdata/grepbinary"], cwd=srcdir)
 header(90)
-output([*pcre2grep_args, "--binary-files=without-match", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "--binary-files=without-match", "dog", "./testdata/grepbinary"], cwd=srcdir)
 header(91)
-output([*pcre2grep_args, "-a", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "-a", "dog", "./testdata/grepbinary"], cwd=srcdir)
 header(92)
-output([*pcre2grep_args, "--binary-files=text", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "--binary-files=text", "dog", "./testdata/grepbinary"], cwd=srcdir)
 header(93)
-output([*pcre2grep_args, "--text", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "--text", "dog", "./testdata/grepbinary"], cwd=srcdir)
 header(94)
 output([*pcre2grep_args, "-L", "-r", "--include=grepinputx", "--include", "grepinput8", "fox", *[f"./testdata/{path.name}" for path in sorted((srcdir / "testdata").glob("grepinput*"))]], cwd=srcdir, transform=lambda data: b"".join(sorted(data.splitlines(keepends=True))))
 header(95)
-output([*pcre2grep_args, "--file-list", "./testdata/grepfilelist", "--exclude", "grepinputv", "fox|complete"], cwd=srcdir)
+output_both([*pcre2grep_args, "--file-list", "./testdata/grepfilelist", "--exclude", "grepinputv", "fox|complete"], cwd=srcdir)
 header(96)
 output([*pcre2grep_args, "-L", "-r", "--include-dir=testdata", "--exclude", "^(?!grepinput)", "--exclude=grepinput[MCU]", "fox", *[f"./{path.name}" for path in sorted(srcdir.glob("test*"))]], cwd=srcdir, transform=lambda data: b"".join(sorted(data.splitlines(keepends=True))))
 header(97)
-Path("testtemp1grep").write_text("grepinput$\ngrepinput8\ngrepinputBad8\n")
+Path("testtemp1grep").write_bytes(b"grepinput$\ngrepinput8\ngrepinputBad8\n")
 output([*pcre2grep_args, "-L", "-r", "--include=grepinput", "--exclude=grepinput[MCU]", "--exclude-from", builddir / "testtemp1grep", "--exclude-dir=^\\.", "fox", "./testdata"], cwd=srcdir, transform=lambda data: b"".join(sorted(data.splitlines(keepends=True))))
 header(98)
-Path("testtemp1grep").write_text("grepinput$\ngrepinput8\ngrepinputBad8\n")
+Path("testtemp1grep").write_bytes(b"grepinput$\ngrepinput8\ngrepinputBad8\n")
 output([*pcre2grep_args, "-L", "-r", "--exclude=grepinput3", "--exclude=grepinput[MCU]", "--include=grepinput", "--exclude-from", builddir / "testtemp1grep", "--exclude-dir=^\\.", "fox", "./testdata"], cwd=srcdir, transform=lambda data: b"".join(sorted(data.splitlines(keepends=True))))
 header(99)
-Path("testtemp1grep").write_text("grepinput$\ngrepinputBad8\n")
-Path("testtemp2grep").write_text("grepinput8\n")
+Path("testtemp1grep").write_bytes(b"grepinput$\ngrepinputBad8\n")
+Path("testtemp2grep").write_bytes(b"grepinput8\n")
 output([*pcre2grep_args, "-L", "-r", "--include", "grepinput", "--exclude=grepinput[MCU]", "--exclude-from", builddir / "testtemp1grep", f"--exclude-from={builddir / 'testtemp2grep'}", "--exclude-dir=^\\.", "fox", "./testdata"], cwd=srcdir, transform=lambda data: b"".join(sorted(data.splitlines(keepends=True))))
 header(100)
 output([*pcre2grep_args, "-Ho2", "--only-matching=1", "-o3", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
 header(101)
 output([*pcre2grep_args, "-o3", "-Ho2", "-o12", "--only-matching=1", "-o3", "--colour=always", "--om-separator=|", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
 header(102)
-output([*pcre2grep_args, "-n", "^$", "./testdata/grepinput3"], cwd=srcdir)
+output_both([*pcre2grep_args, "-n", "^$", "./testdata/grepinput3"], cwd=srcdir)
 header(103)
-output([*pcre2grep_args, "--only-matching", "^$", "./testdata/grepinput3"], cwd=srcdir)
+output_both([*pcre2grep_args, "--only-matching", "^$", "./testdata/grepinput3"], cwd=srcdir)
 header(104)
-output([*pcre2grep_args, "-n", "--only-matching", "^$", "./testdata/grepinput3"], cwd=srcdir)
+output_both([*pcre2grep_args, "-n", "--only-matching", "^$", "./testdata/grepinput3"], cwd=srcdir)
 header(105)
-output([*pcre2grep_args, "--colour=always", "ipsum|", "./testdata/grepinput3"], cwd=srcdir)
+output_both([*pcre2grep_args, "--colour=always", "ipsum|", "./testdata/grepinput3"], cwd=srcdir)
 header(106)
-output([*pcre2grep_args, "-M", "|a"], cwd=srcdir, stdin=b"a\n")
+output_both([*pcre2grep_args, "-M", "|a"], cwd=srcdir, stdin=b"a\n")
 header(107)
-Path("testtemp1grep").write_text("a\naaaaa\n")
-output([*pcre2grep_args, "--line-offsets", "--allow-lookaround-bsk", r"(?<=\Ka)", builddir / "testtemp1grep"], cwd=srcdir)
+Path("testtemp1grep").write_bytes(b"a\naaaaa\n")
+output_both([*pcre2grep_args, "--line-offsets", "--allow-lookaround-bsk", r"(?<=\Ka)", builddir / "testtemp1grep"], cwd=srcdir)
 header(108)
 output([*pcre2grep_args, "-lq", "PATTERN", "./testdata/grepinput", "./testdata/grepinputx"], cwd=srcdir)
 header(109)
@@ -375,11 +398,11 @@ header(120)
 output([*pcre2grep_args, "-HO", "$0:$2$1$3", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
 output([*pcre2grep_args, "-HO", "$&:$2$1$3", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
 output([*pcre2grep_args, "-m", "1", "-O", "$0:$a$b$e$f$r$t$v", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "-HO", "${X}", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "-HO", "XX$", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "-O", "$x{12345678}", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "-O", "$x{123Z", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "--output", "$x{1234}", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-HO", "${X}", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-HO", "XX$", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-O", "$x{12345678}", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-O", "$x{123Z", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--output", "$x{1234}", r"(\w+) binary (\w+)(\.)?", "./testdata/grepinput"], cwd=srcdir)
 header(121)
 output([*pcre2grep_args, "-F", r"\E and (regex)", "testdata/grepinputv"], cwd=srcdir)
 header(122)
@@ -401,101 +424,101 @@ environment=os.environ.copy()
 environment["GREP_COLORS"]="ms=1;20"
 with open("testtrygrep", "ab") as output_file:
   process=subprocess.run(valgrind + vjs + [*pcre2grep_args, "--colour=always", "--allow-lookaround-bsk", r"(?=[ac]\K)", "testNinputgrep"], stdout=output_file, stderr=subprocess.STDOUT, env=environment, check=False)
-  output_file.write(f"RC={process.returncode}\n".encode())
+  output_file.write(f"RC={process.returncode}\n".encode("latin-1"))
 header(126)
 Path("testtemp1grep").write_bytes(b"Next line pattern has binary zero\nABC\0XYZ\n")
 Path("testtemp2grep").write_bytes(b"ABC\0XYZ\nABCDEF\nDEFABC\n")
 output([*pcre2grep_args, "-a", "-f", "testtemp1grep", "testtemp2grep"])
 Path("testtemp1grep").write_bytes(b"Next line pattern is erroneous.\n^abc)(xy")
-output([*pcre2grep_args, "-a", "-f", "testtemp1grep", "testtemp2grep"])
+output_both([*pcre2grep_args, "-a", "-f", "testtemp1grep", "testtemp2grep"])
 header(127)
 output([*pcre2grep_args, "-o", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
 header(128)
-output([*pcre2grep_args, "-m1M", "-o1", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-m1M", "-o1", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
 header(129)
-output([*pcre2grep_args, "-m", "2", "fox", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-m", "2", "fox", "testdata/grepinput"], cwd=srcdir)
 header(130)
-output([*pcre2grep_args, "-o", "-m2", "fox", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-o", "-m2", "fox", "testdata/grepinput"], cwd=srcdir)
 header(131)
-output([*pcre2grep_args, "-oc", "-m2", "fox", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-oc", "-m2", "fox", "testdata/grepinput"], cwd=srcdir)
 header(132)
 with open(srcdir / "testdata" / "grepinput", "rb") as stream:
-  output([*pcre2grep_args, "-m1", "-A3", "^match"], cwd=srcdir, stdin=stream, write_returncode=False)
+  output_both([*pcre2grep_args, "-m1", "-A3", "^match"], cwd=srcdir, stdin=stream, write_returncode=False)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---\n")
-  returncode=output([*pcre2grep_args, "-m1", ".*"], cwd=srcdir, stdin=stream, write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-m1", ".*"], cwd=srcdir, stdin=stream, write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode("latin-1"))
 header(133)
 with open(srcdir / "testdata" / "grepinput", "rb") as stream:
-  output([*pcre2grep_args, "-m1", "-A3", "^match"], cwd=srcdir, stdin=stream, write_returncode=False)
+  output_both([*pcre2grep_args, "-m1", "-A3", "^match"], cwd=srcdir, stdin=stream, write_returncode=False)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---\n")
-  returncode=output([*pcre2grep_args, "-m1", "-A3", "^match"], cwd=srcdir, stdin=stream, write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-m1", "-A3", "^match"], cwd=srcdir, stdin=stream, write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode("latin-1"))
 header(134)
-output([*pcre2grep_args, "--max-count=1", "-nH", "-O", "=$x{41}$x423$o{103}$o1045=", "fox", "-"], cwd=srcdir, stdin=(srcdir / "testdata" / "grepinputv").read_bytes())
+output_both([*pcre2grep_args, "--max-count=1", "-nH", "-O", "=$x{41}$x423$o{103}$o1045=", "fox", "-"], cwd=srcdir, stdin=(srcdir / "testdata" / "grepinputv").read_bytes())
 header(135)
 output([*pcre2grep_args, "-HZ", "word", "./testdata/grepinputv"], cwd=srcdir, transform=lambda data: data.replace(b"\0", b"@"))
 output([*pcre2grep_args, "-lZ", "word", "./testdata/grepinputv", "./testdata/grepinputv"], cwd=srcdir, transform=lambda data: data.replace(b"\0", b"@"))
 output([*pcre2grep_args, "-A", "1", "-B", "1", "-HZ", "word", "./testdata/grepinputv"], cwd=srcdir, transform=lambda data: data.replace(b"\0", b"@"))
 output([*pcre2grep_args, "-MHZn", r"start[\s]+end", "testdata/grepinputM"], cwd=srcdir)
 header(136)
-output([*pcre2grep_args, "-m1MK", "-o1", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
-output([*pcre2grep_args, "--max-count=1MK", "-o1", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-m1MK", "-o1", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--max-count=1MK", "-o1", "--om-capture=0", "pattern()()()()", "testdata/grepinput"], cwd=srcdir)
 header(137)
 Path("testtemp1grep").write_bytes(b"Last line\nhas no newline")
 output([*pcre2grep_args, "-A1", "Last", "testtemp1grep"])
 header(138)
 Path("testtemp1grep").write_bytes(b"AbC\n" * 24)
-output([*pcre2grep_args, "--no-jit", "--heap-limit=0", "b", "testtemp1grep"])
+output_both([*pcre2grep_args, "--no-jit", "--heap-limit=0", "b", "testtemp1grep"])
 header(139)
 output([*pcre2grep_args, "--line-buffered", "fox", "testdata/grepinputv"], cwd=srcdir)
 header(140)
 output([*pcre2grep_args, "--buffer-size=10", "-A1", "brown", "testdata/grepinputv"], cwd=srcdir)
 header(141)
-Path("testtemp1grep").write_text(f"{srcdir}/testdata/grepinputv\n-\n")
-Path("testtemp2grep").write_text("This is a line from stdin.")
-output([*pcre2grep_args, "--file-list", "testtemp1grep", "line from stdin"], stdin=Path("testtemp2grep").read_bytes())
+Path("testtemp1grep").write_bytes(f"{srcdir}/testdata/grepinputv\n-\n".encode("latin-1"))
+Path("testtemp2grep").write_bytes(b"This is a line from stdin.")
+output_both([*pcre2grep_args, "--file-list", "testtemp1grep", "line from stdin"], stdin=Path("testtemp2grep").read_bytes())
 header(142)
-Path("testtemp1grep").write_text("/does/not/exist\n")
-output([*pcre2grep_args, "--file-list", "testtemp1grep", "line from stdin"])
+Path("testtemp1grep").write_bytes(b"/does/not/exist\n")
+output_both([*pcre2grep_args, "--file-list", "testtemp1grep", "line from stdin"])
 header(143)
-Path("testtemp1grep").write_text("fox|cat")
-output([*pcre2grep_args, "-f", "-", srcdir / "testdata" / "grepinputv"], stdin=Path("testtemp1grep").read_bytes())
+Path("testtemp1grep").write_bytes(b"fox|cat")
+output_both([*pcre2grep_args, "-f", "-", srcdir / "testdata" / "grepinputv"], stdin=Path("testtemp1grep").read_bytes())
 header(144)
-output([*pcre2grep_args, "-f", "/non/exist", srcdir / "testdata" / "grepinputv"])
+output_both([*pcre2grep_args, "-f", "/non/exist", srcdir / "testdata" / "grepinputv"])
 header(145)
 Path("testtemp1grep").write_bytes(b"*meta*\rdog.")
-output([*pcre2grep_args, "-Ncr", "-F", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
+output_both([*pcre2grep_args, "-Ncr", "-F", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
 header(146)
 Path("testtemp1grep").write_bytes(b"A123B")
-output([*pcre2grep_args, "-H", "-e", "123|fox", "-"], stdin=Path("testtemp1grep").read_bytes())
-output([*pcre2grep_args, "-h", "-e", "123|fox", "-", srcdir / "testdata" / "grepinputv"], stdin=Path("testtemp1grep").read_bytes())
-output([*pcre2grep_args, "-", srcdir / "testdata" / "grepinputv"], stdin=Path("testtemp1grep").read_bytes())
+output_both([*pcre2grep_args, "-H", "-e", "123|fox", "-"], stdin=Path("testtemp1grep").read_bytes())
+output_both([*pcre2grep_args, "-h", "-e", "123|fox", "-", srcdir / "testdata" / "grepinputv"], stdin=Path("testtemp1grep").read_bytes())
+output_both([*pcre2grep_args, "-", srcdir / "testdata" / "grepinputv"], stdin=Path("testtemp1grep").read_bytes())
 header(147)
-output([*pcre2grep_args, "-e", "123|fox", "--", "-nonfile"])
+output_both([*pcre2grep_args, "-e", "123|fox", "--", "-nonfile"])
 Path("testtemp1grep").write_bytes(b"A123B")
 Path("-testtemp1grep").write_bytes(b"C123D")
-output([*pcre2grep_args, "123", "--", "-testtemp1grep"])
-output([*pcre2grep_args, "123", "testtemp1grep", "--", "-testtemp1grep"])
-output([*pcre2grep_args, "123", "--"], stdin=Path("testtemp1grep").read_bytes())
+output_both([*pcre2grep_args, "123", "--", "-testtemp1grep"])
+output_both([*pcre2grep_args, "123", "testtemp1grep", "--", "-testtemp1grep"])
+output_both([*pcre2grep_args, "123", "--"], stdin=Path("testtemp1grep").read_bytes())
 Path("--").write_bytes(b"E123F")
-output([*pcre2grep_args, "--", "123", "--"])
+output_both([*pcre2grep_args, "--", "123", "--"])
 header(148)
-output([*pcre2grep_args, "--nonexist"])
-output([*pcre2grep_args, "-n-n-bad"])
-output([*pcre2grep_args, "--context"])
-output([*pcre2grep_args, "--only-matching", "--output=xx"])
-output([*pcre2grep_args, "--colour=badvalue"])
-output([*pcre2grep_args, "--newline=badvalue"])
-output([*pcre2grep_args, "-d", "badvalue"])
-output([*pcre2grep_args, "-D", "badvalue"])
-output([*pcre2grep_args, "--buffer-size=0"])
-output([*pcre2grep_args, "--exclude", "(badpat", "abc", os.devnull])
-output([*pcre2grep_args, "--exclude-from", "/non/exist", "abc", os.devnull])
-output([*pcre2grep_args, "--include-from", "/non/exist", "abc", os.devnull])
-output([*pcre2grep_args, "--file-list=/non/exist", "abc", os.devnull])
+output_both([*pcre2grep_args, "--nonexist"])
+output_both([*pcre2grep_args, "-n-n-bad"])
+output_both([*pcre2grep_args, "--context"])
+output_both([*pcre2grep_args, "--only-matching", "--output=xx"])
+output_both([*pcre2grep_args, "--colour=badvalue"])
+output_both([*pcre2grep_args, "--newline=badvalue"])
+output_both([*pcre2grep_args, "-d", "badvalue"])
+output_both([*pcre2grep_args, "-D", "badvalue"])
+output_both([*pcre2grep_args, "--buffer-size=0"])
+output_both([*pcre2grep_args, "--exclude", "(badpat", "abc", os.devnull])
+output_both([*pcre2grep_args, "--exclude-from", "/non/exist", "abc", os.devnull])
+output_both([*pcre2grep_args, "--include-from", "/non/exist", "abc", os.devnull])
+output_both([*pcre2grep_args, "--file-list=/non/exist", "abc", os.devnull])
 header(149)
-output([*pcre2grep_args, "--binary-files=binary", "dog", "./testdata/grepbinary"], cwd=srcdir)
-output([*pcre2grep_args, "--binary-files=wrong", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "--binary-files=binary", "dog", "./testdata/grepbinary"], cwd=srcdir)
+output_both([*pcre2grep_args, "--binary-files=wrong", "dog", "./testdata/grepbinary"], cwd=srcdir)
 
 # This test runs the code that tests locale support. However, on some systems
 # (e.g. Alpine Linux) there is no locale support and running this test just
@@ -511,8 +534,8 @@ else:
   environment.pop("LC_ALL", None)
   environment["LC_CTYPE"]="locale.bad"
   with open("testtrygrep", "ab") as stream:
-    process=subprocess.run(valgrind + [*pcre2grep_args, "abc", os.devnull], cwd=srcdir, stdout=stream, stderr=subprocess.STDOUT, env=environment, check=False)
-    stream.write(f"RC={process.returncode}\n".encode())
+    process=subprocess.run(valgrind + vjs + [*pcre2grep_args, "abc", os.devnull], cwd=srcdir, stdout=stream, stderr=subprocess.STDOUT, env=environment, check=False)
+    stream.write(f"RC={process.returncode}\n".encode("latin-1"))
 header(151)
 output([*pcre2grep_args, "--colour=always", "-e", "this", "-e", "The", "-e", "The wo", "testdata/grepinputv"], cwd=srcdir)
 header(152)
@@ -523,19 +546,19 @@ header(154)
 Path("testtemp1grep").write_bytes(b"")
 output([*pcre2grep_args, "-f", builddir / "testtemp1grep", "./testdata/grepinputv"], cwd=srcdir)
 header(155)
-Path("testtemp1grep").write_text("\n")
+Path("testtemp1grep").write_bytes(b"\n")
 output([*pcre2grep_args, "-f", builddir / "testtemp1grep", "./testdata/grepinputv"], cwd=srcdir)
 header(156)
-Path("testtemp1grep").write_text("\n")
+Path("testtemp1grep").write_bytes(b"\n")
 output([*pcre2grep_args, "--posix-pattern-file", "--file", builddir / "testtemp1grep", "./testdata/grepinputv"], cwd=srcdir)
 header(157)
-Path("testtemp1grep").write_text("spaces \n")
+Path("testtemp1grep").write_bytes(b"spaces \n")
 with open(builddir / "testtemp2grep", "wb") as stream: process=subprocess.run(valgrind + vjs + [*pcre2grep_args, "-o", "--posix-pattern-file", f"--file={builddir / 'testtemp1grep'}", "./testdata/grepinputv"], cwd=srcdir, stdout=stream, check=False)
 if process.returncode == 0: output([*pcre2grep_args, "-q", "s ", builddir / "testtemp2grep"], cwd=srcdir)
 else:
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={process.returncode}\n".encode())
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={process.returncode}\n".encode("latin-1"))
 header(158)
-Path("testtemp1grep").write_text("spaces.\n")
+Path("testtemp1grep").write_bytes(b"spaces.\n")
 output([*pcre2grep_args, "-f", builddir / "testtemp1grep", "./testdata/grepinputv"], cwd=srcdir)
 header(159)
 Path("testtemp1grep").write_bytes(b"spaces.\r\n")
@@ -565,11 +588,11 @@ if utf8 != 0:
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U3 ------------------------------\n")
   output([*pcre2grep_args, "--line-offsets", "-u", "--newline=any", "--allow-lookaround-bsk", r"(?<=\K\x{17f})", "./testdata/grepinput8"], cwd=srcdir)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U4 ------------------------------\n")
-  output([*pcre2grep_args, "-u", "-o", "....", "./testdata/grepinputBad8"], cwd=srcdir)
+  output_both([*pcre2grep_args, "-u", "-o", "....", "./testdata/grepinputBad8"], cwd=srcdir)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U5 ------------------------------\n")
   output([*pcre2grep_args, "-U", "-o", "....", "./testdata/grepinputBad8"], cwd=srcdir)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U6 -----------------------------\n")
-  output([*pcre2grep_args, "-u", "-m1", "-O", "=$x{1d3}$o{744}=", "fox"], cwd=srcdir, stdin=(srcdir / "testdata" / "grepinputv").read_bytes())
+  output_both([*pcre2grep_args, "-u", "-m1", "-O", "=$x{1d3}$o{744}=", "fox"], cwd=srcdir, stdin=(srcdir / "testdata" / "grepinputv").read_bytes())
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U7 ------------------------------\n")
   output([*pcre2grep_args, "-ui", "--colour=always", r"k+|\babc\b", "./testdata/grepinput8"], cwd=srcdir)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U8 ------------------------------\n")
@@ -580,176 +603,176 @@ if utf8 != 0:
   output([*pcre2grep_args, "-u", "--posix-digit", "--colour=always", r"A\d", "./testdata/grepinput8"], cwd=srcdir)
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U11 ------------------------------\n")
   Path("testtemp1grep").write_bytes(b"\200" * 48 + b"x\n")
-  returncode=output([*pcre2grep_args, "--no-jit", "--buffer-size=16", "-U", "--allow-lookaround-bsk", "-o", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"only-matching RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "--no-jit", "--buffer-size=16", "-U", "--allow-lookaround-bsk", "-M", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "--no-jit", "--buffer-size=16", "-U", "--allow-lookaround-bsk", "--colour=always", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "--buffer-size=16", "-U", "--allow-lookaround-bsk", "-o", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"only-matching RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "--no-jit", "--buffer-size=16", "-U", "--allow-lookaround-bsk", "-M", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "--no-jit", "--buffer-size=16", "-U", "--allow-lookaround-bsk", "--colour=always", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour RC={returncode}\n".encode("latin-1"))
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U12 ------------------------------\n")
   # Colouring only, so the subject is a single line. An empty match at the end
   # of the subject, then one that matches before retrying at the end.
   Path("testtemp1grep").write_bytes(b"abc\n")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-u", "$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-empty-at-end RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-u", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-nonempty-then-empty RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-u", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-empty-at-start RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-u", "$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-empty-at-end RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-u", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-nonempty-then-empty RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-u", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-empty-at-start RC={returncode}\n".encode("latin-1"))
 
   # An empty line, so the first match is empty with nothing following it, and a
   # final line with no newline, so a restart can reach the end of the line.
   Path("testtemp1grep").write_bytes(b"\nabc\n")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-u", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-empty-line RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-u", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-empty-line RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"abc")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-u", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-no-final-newline RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-u", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-no-final-newline RC={returncode}\n".encode("latin-1"))
 
   # Multiline, where a restart may have to move on to a following line.
   Path("testtemp1grep").write_bytes(b"a\nb\n")
-  returncode=output([*pcre2grep_args, "-n", "-M", "-u", "$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-empty-at-line-end RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-u", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-empty-at-line-start RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-u", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-nonempty-then-empty RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-u", "$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-empty-at-line-end RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-u", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-empty-at-line-start RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-u", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-nonempty-then-empty RC={returncode}\n".encode("latin-1"))
 
   # A match that spans several lines, so that the restart has to skip over more
   # than one line before looking for the next match.
   Path("testtemp1grep").write_bytes(b"a\nb\nc\nd\n")
-  returncode=output([*pcre2grep_args, "-n", "-M", "-u", "(?s)a.*c", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-spanning RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-u", "(?s)a.*c|$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-spanning-then-empty RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "--colour=always", "-u", "(?s)a.*c|$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-colour-spanning RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-u", "(?s)a.*c", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-spanning RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-u", "(?s)a.*c|$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-spanning-then-empty RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "--colour=always", "-u", "(?s)a.*c|$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-colour-spanning RC={returncode}\n".encode("latin-1"))
 
   # Invalid UTF-8 after an empty match, which is when the scan over
   # continuation bytes that follow the restart point can run. Here the scan
   # stops at the start of the next character.
   Path("testtemp1grep").write_bytes(b"x\200\200y\n")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-U", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-scan-to-char RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-U", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-scan-to-char RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-U", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-scan-to-char RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-U", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-scan-to-char RC={returncode}\n".encode("latin-1"))
 
   # The continuation bytes run up to the newline, and then up to the end of the
   # subject, when there is no newline to stop the scan.
   Path("testtemp1grep").write_bytes(b"x\200\200\n")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-U", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-scan-to-newline RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-U", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-scan-to-newline RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-U", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-scan-to-newline RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-U", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-scan-to-newline RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"x\200\200")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-U", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-scan-to-end RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-U", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-scan-to-end RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-U", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-scan-to-end RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-U", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-scan-to-end RC={returncode}\n".encode("latin-1"))
 
   # A subject that is nothing but continuation bytes, so the very first match
   # is empty and the scan immediately reaches the end.
   Path("testtemp1grep").write_bytes(b"\200\200")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-U", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-only-continuations RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-U", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-only-continuations RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-U", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-utf-only-continuations RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-U", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-only-continuations RC={returncode}\n".encode("latin-1"))
 
   # Continuation bytes at the end of a multi-line subject, reached after an
   # empty match on an earlier line, and after a match that spans lines.
   Path("testtemp1grep").write_bytes(b"a\nb\n\n\200\200")
-  returncode=output([*pcre2grep_args, "-n", "-M", "-U", ".?", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-trailing RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "-U", "$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-trailing-empty RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-M", "--colour=always", "-U", "(?s)a.*b|$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-colour-utf-trailing-spanning RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-U", ".?", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-trailing RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-U", "$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-utf-trailing-empty RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "--colour=always", "-U", "(?s)a.*b|$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-colour-utf-trailing-spanning RC={returncode}\n".encode("latin-1"))
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U13 ------------------------------\n")
   # The same restart, but reached by \K rather than by an empty match.
   Path("testtemp1grep").write_bytes(b"abc\n")
-  returncode=output([*pcre2grep_args, "-n", "--colour=always", "-u", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-bsk RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "--colour=always", "-u", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-bsk RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"a\nb\n")
-  returncode=output([*pcre2grep_args, "-n", "-M", "-u", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-bsk RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-M", "-u", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-bsk RC={returncode}\n".encode("latin-1"))
 
   # The same, but with the restart landing on invalid UTF-8.
   Path("testtemp1grep").write_bytes(b"x\200\200y\n")
-  returncode=output([*pcre2grep_args, "--no-jit", "-n", "--colour=always", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-bsk-utf-scan-to-char RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "-n", "--colour=always", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"colour-bsk-utf-scan-to-char RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"x\200\200")
-  returncode=output([*pcre2grep_args, "--no-jit", "-n", "-M", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-bsk-utf-scan-to-end RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "-n", "-M", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-bsk-utf-scan-to-end RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"a\nx\200\200")
-  returncode=output([*pcre2grep_args, "--no-jit", "-n", "-M", "--colour=always", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-colour-bsk-utf-trailing RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "-n", "-M", "--colour=always", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-colour-bsk-utf-trailing RC={returncode}\n".encode("latin-1"))
   with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test U14 ------------------------------\n")
 
   # A pattern that keeps making progress, so the restart is the ordinary one
   # and the line is never advanced. This is the path the other U14 tests build on.
   Path("testtemp1grep").write_bytes(b"abcabc\n")
-  returncode=output([*pcre2grep_args, "-n", "-o", "-u", "a.", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"control-progress RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-u", "a.", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"control-progress RC={returncode}\n".encode("latin-1"))
 
   # An empty match, which is the case the restart exists for. "$" matches only
   # at the end of the subject, so the restart is immediately at the end; "^"
   # matches at the start, so it has to step forward by one character first.
-  returncode=output([*pcre2grep_args, "-n", "-o", "-u", "$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"empty-at-end RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-o", "-u", "^", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"empty-at-start RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-u", "$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"empty-at-end RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-u", "^", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"empty-at-start RC={returncode}\n".encode("latin-1"))
 
   # \K in a lookbehind reports a non-empty match that ends no later than the
   # offset it was started from. PCRE2_NOTEMPTY is set once a match has been
   # found, so this, unlike an empty match, can stop the loop making progress on
   # every iteration and not just the first.
-  returncode=output([*pcre2grep_args, "-n", "-o", "-u", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-restart RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-u", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-restart RC={returncode}\n".encode("latin-1"))
 
   # The step forward lands on invalid UTF-8, so the scan over continuation
   # bytes runs. Here it stops at the start of the next character, and then at
   # the newline, both of which are within the subject.
   Path("testtemp1grep").write_bytes(b"x\200\200y\n")
-  returncode=output([*pcre2grep_args, "--no-jit", "-n", "-o", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-utf-scan-to-char RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "-n", "-o", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-utf-scan-to-char RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"x\200\200\n")
-  returncode=output([*pcre2grep_args, "--no-jit", "-n", "-o", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-utf-scan-to-newline RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "-n", "-o", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-utf-scan-to-newline RC={returncode}\n".encode("latin-1"))
 
   # The same, but with no newline to stop the scan, so it runs to the end of
   # the subject and then looks at the byte after it.
   Path("testtemp1grep").write_bytes(b"x\200\200")
-  returncode=output([*pcre2grep_args, "--no-jit", "-n", "-o", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-utf-scan-to-end RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "--no-jit", "-n", "-o", "-U", "--allow-lookaround-bsk", r"(?<=\K.)", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"bsk-utf-scan-to-end RC={returncode}\n".encode("latin-1"))
 
   # Moving on to another line, which only happens in multiline mode. The first
   # match ends exactly at the start of the next line, so the line is advanced
   # and the line number with it; the second ends two lines further on.
   Path("testtemp1grep").write_bytes(b"ab\ncd\n")
-  returncode=output([*pcre2grep_args, "-n", "-o", "-M", "-u", r"ab\n", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-line-boundary RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-M", "-u", r"ab\n", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-line-boundary RC={returncode}\n".encode("latin-1"))
   Path("testtemp1grep").write_bytes(b"ab\ncd\nef\n")
-  returncode=output([*pcre2grep_args, "-n", "-o", "-M", "-u", "(?s)ab.*ef", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-spanning RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-M", "-u", "(?s)ab.*ef", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-spanning RC={returncode}\n".encode("latin-1"))
 
   # An empty match in multiline mode, where the step forward is what takes the
   # restart past the end of the line.
   Path("testtemp1grep").write_bytes(b"a\nb\n")
-  returncode=output([*pcre2grep_args, "-n", "-o", "-M", "-u", "$", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-empty RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-M", "-u", "$", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"multiline-empty RC={returncode}\n".encode("latin-1"))
 
   # A match that ends between the CR and the LF of a CRLF line ending, so the
   # restart is past the text of the line but short of the start of the next
   # one. Without -M the line is never advanced, so that is the control.
   Path("testtemp1grep").write_bytes(b"ab\r\ncd\r\n")
-  returncode=output([*pcre2grep_args, "-n", "-o", "-N", "CRLF", r"\r", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"crlf-not-multiline RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-o", "-M", "-N", "CRLF", r"\r", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"crlf-mid-terminator RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-n", "-o", "-M", "-N", "ANY", r"\r", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"any-mid-terminator RC={returncode}\n".encode())
-  returncode=output([*pcre2grep_args, "-M", "-N", "CRLF", "--line-offsets", r"\r", "testtemp1grep"], write_returncode=False)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"crlf-mid-terminator-line-offsets RC={returncode}\n".encode())
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-N", "CRLF", r"\r", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"crlf-not-multiline RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-M", "-N", "CRLF", r"\r", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"crlf-mid-terminator RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-n", "-o", "-M", "-N", "ANY", r"\r", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"any-mid-terminator RC={returncode}\n".encode("latin-1"))
+  returncode=output_both([*pcre2grep_args, "-M", "-N", "CRLF", "--line-offsets", r"\r", "testtemp1grep"], write_returncode=False)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"crlf-mid-terminator-line-offsets RC={returncode}\n".encode("latin-1"))
 
   if not compare(srcdir / "testdata" / "grepoutput8", "testtrygrep"): sys.exit(1)
 else:
@@ -795,7 +818,7 @@ if utf8 != 0:
   print("Testing pcre2grep newline settings with UTF-8 features")
   with open("testtrygrep", "wb") as output_file: output_file.write(b"---------------------------- Test UN1 ------------------------------\r\n")
   output([*pcre2grep_args, "-nau", "--newline=anycrlf", "^(abc|def)", srcdir / "testdata" / "grepinputUN"])
-  with open("testtrygrep", "wb") as output_file: output_file.write(b"---------------------------- Test UN2 ------------------------------\r\n")
+  with open("testtrygrep", "ab") as output_file: output_file.write(b"---------------------------- Test UN2 ------------------------------\r\n")
   output([*pcre2grep_args, "-nauU", "--newline=anycrlf", "^a", srcdir / "testdata" / "grepinputBad8_Trail"])
   with open("testtrygrep", "ab") as output_file: output_file.write(b"\n")
   if not compare(srcdir / "testdata" / "grepoutputUN", "testtrygrep"): sys.exit(1)
@@ -840,16 +863,16 @@ else:
 
 if supports(r"\.gz are read using zlib"):
   print("Testing reading .gz file")
-  with open("testtrygrep", "wb") as output_file: returncode=invoke(*pcre2grep_args, "one|two", srcdir / "testdata" / "grepinputC.gz", stdout=output_file)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode())
+  with open("testtrygrep", "wb") as output_file: returncode=invoke(*pcre2grep_args, "one|two", srcdir / "testdata" / "grepinputC.gz", stdout=output_file, vjs_args=True)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode("latin-1"))
   if not compare(srcdir / "testdata" / "grepoutputCgz", "testtrygrep"): sys.exit(1)
 
 if supports(r"\.bz2 are read using bzlib2"):
   print("Testing reading .bz2 file")
-  with open("testtrygrep", "wb") as output_file: returncode=invoke(*pcre2grep_args, "one|two", srcdir / "testdata" / "grepinputC.bz2", stdout=output_file)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode())
-  with open("testtrygrep", "ab") as output_file: returncode=invoke(*pcre2grep_args, "one|two", srcdir / "testdata" / "grepnot.bz2", stdout=output_file)
-  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode())
+  with open("testtrygrep", "wb") as output_file: returncode=invoke(*pcre2grep_args, "one|two", srcdir / "testdata" / "grepinputC.bz2", stdout=output_file, vjs_args=True)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode("latin-1"))
+  with open("testtrygrep", "ab") as output_file: returncode=invoke(*pcre2grep_args, "one|two", srcdir / "testdata" / "grepnot.bz2", stdout=output_file, vjs_args=True)
+  with open("testtrygrep", "ab") as output_file: output_file.write(f"RC={returncode}\n".encode("latin-1"))
   if not compare(srcdir / "testdata" / "grepoutputCbz2", "testtrygrep"): sys.exit(1)
 
 # Finally, some tests to exercise code that is not tested above, just to be
@@ -857,7 +880,7 @@ if supports(r"\.bz2 are read using bzlib2"):
 # is not checked.
 
 print("Testing miscellaneous pcre2grep arguments (unchecked)")
-Path("testtrygrep").write_text("\n")
+Path("testtrygrep").write_bytes(b"\n")
 checkspecial(("-xxxxx",), 2)
 checkspecial(("--help",), 0)
 checkspecial(("--line-buffered", "--colour=auto", "abc", os.devnull), 1)
