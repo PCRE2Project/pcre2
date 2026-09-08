@@ -598,7 +598,6 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do3 = yes ] ; then
     locale=
-
     locales='french fr_FR fr fr_CA'
 
     # In some environments locales that are listed by the "locale -a"
@@ -632,8 +631,6 @@ for bmode in "$test8" "$test16" "$test32"; do
       sed "s/fr_FR/$loc/" $testdata/testoutput3D >test3outputD
       break
     done
-
-    unset locales
 
     if [ "$locale" != "" ] ; then
       echo $title3 "(using '$locale' locale)"
@@ -670,6 +667,9 @@ for bmode in "$test8" "$test16" "$test32"; do
       echo "($locales) could be set."
       echo " "
     fi
+
+    unset locale
+    unset locales
   fi
 
   # Tests for UTF and Unicode property support

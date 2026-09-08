@@ -181,6 +181,8 @@ filegroup(
 )
 
 # XXX How to launch a Python process??? Think!
+# Should be just "py_test" in Bazel or something, avoiding all the shell delicate
+# behaviour (Bazel is so fussy)
 native_test(
     name = "pcre2_test",
     size = "small",

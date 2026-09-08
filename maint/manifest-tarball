@@ -30,8 +30,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2UseSystemExtensions.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/PCRE2WarningAsError.cmake
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2-config.cmake.in
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2_grep_test.sh.in
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/cmake/pcre2_test.sh.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/compile
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/config.guess
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/config.sub

@@ -115,19 +115,11 @@ utf8=$?
 
 # Check default newline convention. If it does not include LF, force LF.
 
-# XXX remove
-# pcre2grep_exe="$pcre2grep" # Save before modifying
-
 nl=`$pcre2test -C newline`
 if [ "$nl" != "LF" -a "$nl" != "ANY" -a "$nl" != "ANYCRLF" ]; then
   pcre2grep="$pcre2grep -N LF"
   echo "Default newline setting forced to LF"
 fi
-
-# XXX The python port will need to do this; but not in the Shell script
-# case "$pcre2grep_exe" in
-#   *.exe|*.EXE) pcre2grep="$pcre2grep --lf";;
-# esac
 
 # ------ Function to run and check a special pcre2grep arguments test -------
 
@@ -144,6 +136,7 @@ checkspecial()
 
 echo "Testing pcre2grep main features"
 
+rm -f testtrygrep
 echo "---------------------------- Test 1 ------------------------------" >testtrygrep
 (cd $srcdir; $valgrind $vjs $pcre2grep PATTERN ./testdata/grepinput) >>testtrygrep
 echo "RC=$?" >>testtrygrep
@@ -955,6 +948,7 @@ if [ $? != 0 ] ; then exit 1; fi
 if [ $utf8 -ne 0 ] ; then
   echo "Testing pcre2grep UTF-8 features"
 
+  rm -f testtrygrep
   echo "---------------------------- Test U1 ------------------------------" >testtrygrep
   (cd $srcdir; $valgrind $vjs $pcre2grep -n -u --newline=any "^X" ./testdata/grepinput8) >>testtrygrep
   echo "RC=$?" >>testtrygrep
@@ -1191,6 +1185,7 @@ fi
 echo "Testing pcre2grep newline settings"
 printf 'abc\rdef\r\nghi\njkl' >testNinputgrep
 
+rm -f testtrygrep
 printf '%c--------------------------- Test N1 ------------------------------\r\n' - >testtrygrep
 $valgrind $vjs $pcre2grep -n -N CR "^(abc|def|ghi|jkl)" testNinputgrep >>testtrygrep
 echo "RC=$?" >>testtrygrep
@@ -1246,6 +1241,7 @@ if [ $? != 0 ] ; then exit 1; fi
 if [ $utf8 -ne 0 ] ; then
   echo "Testing pcre2grep newline settings with UTF-8 features"
 
+  rm -f testtrygrep
   printf '%c--------------------------- Test UN1 ------------------------------\r\n' - >testtrygrep
   $valgrind $vjs $pcre2grep -nau --newline=anycrlf "^(abc|def)" $srcdir/testdata/grepinputUN >>testtrygrep
   echo "RC=$?" >>testtrygrep
@@ -1270,11 +1266,7 @@ fi
 
 if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q 'callout scripts in patterns are supported'; then
   echo "Testing pcre2grep script callouts"
-  # XXX The python script will need this!
-  # callout_echo=/bin/echo
-  # case "$pcre2grep_exe" in
-  #   *.exe|*.EXE) callout_echo="$pcre2test|-echo";;
-  # esac
+  rm -f testtrygrep
   echo "--- Test 1 ---" >testtrygrep
   $valgrind $vjs $pcre2grep '(T)(..(.))(?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4) ($14) ($0)")()' $srcdir/testdata/grepinputv >>testtrygrep
   echo "RC=$?" >>testtrygrep
@@ -1307,6 +1299,7 @@ if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q 'callout scri
 
   if [ $utf8 -ne 0 ] ; then
     echo "Testing pcre2grep script callout with UTF-8 features"
+    rm -f testtrygrep
     echo "--- Test 1 ---" >testtrygrep
     $valgrind $vjs $pcre2grep -u '(T)(?C"|$0:$x{a6}$n")' $srcdir/testdata/grepinputv >>testtrygrep
     echo "RC=$?" >>testtrygrep
@@ -1334,6 +1327,7 @@ fi
 
 if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q '\.gz are read using zlib'; then
   echo "Testing reading .gz file"
+  rm -f testtrygrep
   $valgrind $vjs $pcre2grep 'one|two' $srcdir/testdata/grepinputC.gz >testtrygrep
   echo "RC=$?" >>testtrygrep
   $cf $srcdir/testdata/grepoutputCgz testtrygrep
@@ -1342,6 +1336,7 @@ fi
 
 if $valgrind $vjs $pcre2grep --help | $valgrind $vjs $pcre2grep -q '\.bz2 are read using bzlib2'; then
   echo "Testing reading .bz2 file"
+  rm -f testtrygrep
   $valgrind $vjs $pcre2grep 'one|two' $srcdir/testdata/grepinputC.bz2 >testtrygrep
   echo "RC=$?" >>testtrygrep
   $valgrind $vjs $pcre2grep 'one|two' $srcdir/testdata/grepnot.bz2 >>testtrygrep
@@ -1356,6 +1351,7 @@ fi
 # is not checked.
 
 echo "Testing miscellaneous pcre2grep arguments (unchecked)"
+rm -f testtrygrep
 echo '' >testtrygrep
 checkspecial '-xxxxx' 2
 checkspecial '--help' 0
