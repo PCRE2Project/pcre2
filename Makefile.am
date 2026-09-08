@@ -747,13 +747,13 @@ endif # WITH_GCOV
 ## helpful.
 
 TESTS += RunTest
-dist_noinst_SCRIPTS += RunTest
+dist_noinst_SCRIPTS += RunTest RunTest.py
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
 TESTS += RunGrepTest
-dist_noinst_SCRIPTS += RunGrepTest
+dist_noinst_SCRIPTS += RunGrepTest RunGrepTest.py
 if WITH_EBCDIC
 XFAIL_TESTS += RunGrepTest
 endif # WITH_EBCDIC

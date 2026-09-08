@@ -236,7 +236,9 @@ txt_files=(
   NON-AUTOTOOLS-BUILD
   README
   RunGrepTest
+  RunGrepTest.py
   RunTest
+  RunTest.py
   SECURITY.md
   SUPPORT-LIFECYCLE.md
   build.zig

@@ -103,14 +103,6 @@ if len(sys.argv) == 2 and sys.argv[1] == "list":
   print(); print(titleheap); print(); print("Numbered tests are automatically run if nothing selected."); print("Named tests must be explicitly selected.")
   sys.exit(0)
 
-# Find the test data
-
-srcdir=os.environ.get("srcdir", "")
-if srcdir and Path(srcdir).is_dir(): testdata=Path(srcdir) / "testdata"
-elif Path("testdata").is_dir(): testdata=Path("testdata")
-elif Path("../testdata").is_dir(): testdata=Path("../testdata")
-else: print("Cannot find the testdata directory"); sys.exit(1)
-
 yield_=0
 
 # ------ Function to check results of a test -------
@@ -168,7 +160,7 @@ arg8=arg16=arg32=nojit=bigstack=malloc=False
 sim=[]; skip=[]; valgrind=[]; vjs=[]; globalopts=["-q"]
 pcre2test=os.environ.get("pcre2test", "./pcre2test")
 if os.name == "nt" and pcre2test == "./pcre2test" and Path("./pcre2test.exe").is_file(): pcre2test="./pcre2test.exe"
-if not Path(pcre2test).is_file() or not os.access(pcre2test, os.X_OK): print(f"** {pcre2test} does not exist or is not executable."); sys.exit(1)
+srcdir=os.environ.get("srcdir", "")
 
 do=[False] * 30; doheap=False; arguments=iter(sys.argv[1:])
 for argument in arguments:
@@ -183,6 +175,12 @@ for argument in arguments:
   elif argument in ("sim", "-sim"):
     try: sim=shlex.split(next(arguments))
     except StopIteration: print(f"Missing argument after '{argument}'"); sys.exit(1)
+  elif argument == "--srcdir":
+    try: srcdir=next(arguments)
+    except StopIteration: print("Missing argument after '--srcdir'"); sys.exit(1)
+  elif argument == "--pcre2test":
+    try: pcre2test=next(arguments)
+    except StopIteration: print("Missing argument after '--pcre2test'"); sys.exit(1)
   elif argument in ("valgrind", "-valgrind"): valgrind=["valgrind", "--tool=memcheck", "-q", "--leak-check=yes", "--errors-for-leak-kinds=all", "--smc-check=all-non-file", "--error-exitcode=70"]
   elif argument in ("valgrind-log", "-valgrind-log"): valgrind=["valgrind", "--tool=memcheck", "--num-callers=30", "--leak-check=yes", "--errors-for-leak-kinds=all", "--error-limit=no", "--smc-check=all-non-file", "--log-file=report.%p"]
   elif re.fullmatch(r"~[0-9]+", argument): skip.append(int(argument[1:]))
@@ -191,6 +189,15 @@ for argument in arguments:
     if first > maxtest or last > maxtest: print(f"Invalid test range '{argument}'"); sys.exit(1)
     for number in range(first, last + 1): do[number]=True
   else: print(f"Unknown option or test selector '{argument}'"); sys.exit(1)
+
+# Find the test data
+
+if srcdir and Path(srcdir).is_dir(): testdata=Path(srcdir) / "testdata"
+elif Path("testdata").is_dir(): testdata=Path("testdata")
+elif Path("../testdata").is_dir(): testdata=Path("../testdata")
+else: print("Cannot find the testdata directory"); sys.exit(1)
+
+if not Path(pcre2test).is_file() or not os.access(pcre2test, os.X_OK): print(f"** {pcre2test} does not exist or is not executable."); sys.exit(1)
 
 def capability(name):
   with open(os.devnull, "wb") as null: return invoke(*sim, pcre2test, "-C", name, stdout=null, stderr=null, use_valgrind=False)

@@ -1384,35 +1384,47 @@ MESSAGE(\" \")
   find_package(Python3 COMPONENTS Interpreter)
 
   if(Python3_FOUND)
-    # XXX use generator expressions to pass the relevant paths
-    add_test(NAME pcre2_test COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunTest.py" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+    add_test(
+      NAME pcre2_test
+      COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunTest.py"
+        --srcdir "${PROJECT_SOURCE_DIR}"
+        --pcre2test "$<TARGET_FILE:pcre2test>"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
   elseif(UNIX)
-    # XXX teach RunTest to accept commandline args and use a generator
-    #     expression to pass in the relevant paths
-    # XXX Add arguments to RunTest: --srcdir=... --pcre2test=...
-    #     These args shall cause the script to use the given paths rather than sniff from the
-    #     CWD or environment
-    #     Use generator expressions to pass in the actual srcdir, and target binary path (correct for the CMake configuration)
-    add_test(NAME pcre2_test COMMAND sh "${PROJECT_SOURCE_DIR}/RunTest" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+    add_test(
+      NAME pcre2_test
+      COMMAND sh "${PROJECT_SOURCE_DIR}/RunTest"
+        --srcdir "${PROJECT_SOURCE_DIR}"
+        --pcre2test "$<TARGET_FILE:pcre2test>"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
   else()
-    message(WARNING "Neither Python nor shell support found, skipping pcre2_test")
+    message(FATAL_ERROR "Neither Python nor shell support found for pcre2_test")
   endif()
 
   if(PCRE2_BUILD_PCRE2GREP)
     set(added_test TRUE)
     if(Python3_FOUND)
-      # XXX as above
-      add_test(NAME pcre2_grep_test COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunGrepTest.py" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+      add_test(
+        NAME pcre2_grep_test
+        COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunGrepTest.py"
+          --srcdir "${PROJECT_SOURCE_DIR}"
+          --pcre2test "$<TARGET_FILE:pcre2test>"
+          --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      )
     elseif(UNIX)
-      # XXX teach RunTest to accept commandline args and use a generator
-      #     expression to pass in the relevant paths
-      # XXX Add arguments to RunGrepTest: --srcdir=... --pcre2test=... --pcre2grep=...
-      #     These args shall cause the script to use the given paths rather than sniff from the
-      #     CWD or environment
-      #     Use generator expressions to pass in the actual srcdir, and target binary path (correct for the CMake configuration)
-      add_test(NAME pcre2_grep_test COMMAND sh "${PROJECT_SOURCE_DIR}/RunGrepTest" WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+      add_test(
+        NAME pcre2_grep_test
+        COMMAND sh "${PROJECT_SOURCE_DIR}/RunGrepTest"
+          --srcdir "${PROJECT_SOURCE_DIR}"
+          --pcre2test "$<TARGET_FILE:pcre2test>"
+          --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      )
     else()
-      message(WARNING "Neither Python nor shell support found, skipping pcre2_grep_test")
+      message(FATAL_ERROR "Neither Python nor shell support found for pcre2_grep_test")
       set(added_test FALSE)
     endif()
 

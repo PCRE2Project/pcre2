@@ -15,7 +15,9 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/NON-AUTOTOOLS-BUILD
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/README
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunGrepTest
+-rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunGrepTest.py
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunTest
+-rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunTest.py
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/SECURITY.md
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/SUPPORT-LIFECYCLE.md
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/aclocal.m4

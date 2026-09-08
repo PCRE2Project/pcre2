@@ -28,24 +28,27 @@ builddir=`pwd`
 : ${pcre2grep:=$builddir/pcre2grep}
 : ${pcre2test:=$builddir/pcre2test}
 
-if [ ! -x $pcre2grep ] ; then
-  echo "** $pcre2grep does not exist or is not executable."
-  exit 1
-fi
-
-if [ ! -x $pcre2test ] ; then
-  echo "** $pcre2test does not exist or is not executable."
-  exit 1
-fi
-
 valgrind=
 while [ $# -gt 0 ] ; do
   case $1 in
     valgrind|-valgrind) valgrind="valgrind -q --leak-check=no --smc-check=all-non-file --error-exitcode=70";;
+    --srcdir) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; srcdir=$1;;
+    --pcre2test) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; pcre2test=$1;;
+    --pcre2grep) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; pcre2grep=$1;;
     *) echo "RunGrepTest: Unknown argument $1"; exit 1;;
   esac
   shift
 done
+
+if [ ! -x "$pcre2grep" ] ; then
+  echo "** $pcre2grep does not exist or is not executable."
+  exit 1
+fi
+
+if [ ! -x "$pcre2test" ] ; then
+  echo "** $pcre2test does not exist or is not executable."
+  exit 1
+fi
 
 pcre2grep_version=`$pcre2grep -V`
 if [ "$valgrind" = "" ] ; then

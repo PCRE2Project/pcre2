@@ -1,6 +1,6 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@bazel_skylib//rules:native_binary.bzl", "native_test")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_python//python:defs.bzl", "py_test")
 
 copy_file(
     name = "config_h_generic",
@@ -180,24 +180,17 @@ filegroup(
     srcs = glob(["testdata/*"]),
 )
 
-# XXX How to launch a Python process??? Think!
-# Should be just "py_test" in Bazel or something, avoiding all the shell delicate
-# behaviour (Bazel is so fussy)
-native_test(
+py_test(
     name = "pcre2_test",
     size = "small",
-    # On Linux/Unix, we simply call RunTest, which is a shell script.
-    # On Windows, we do ???? something to launch the RunTest.py script instead.
-    # In fact... how easy is it to invoke Python in general from Bazel - can
-    # we just use it always?!?
-    src = select({
-        "@platforms//os:windows": "XXXX?????",
-        "//conditions:default": "RunTest",
-    }),
-    out = select({
-        "@platforms//os:windows": "XXXX?????",
-        "//conditions:default": "RunTest",
-    }),
+    srcs = ["RunTest.py"],
+    main = "RunTest.py",
+    args = [
+        "--srcdir",
+        ".",
+        "--pcre2test",
+        "$(rootpath :pcre2test)",
+    ],
     data = [
         ":pcre2test",
         ":testdata",

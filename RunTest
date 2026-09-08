@@ -136,19 +136,6 @@ cf="diff"
 gdiff /dev/null /dev/null 2>/dev/null && cf="gdiff"
 $cf -u /dev/null /dev/null 2>/dev/null && cf="$cf -u"
 
-# Find the test data
-
-if [ -n "$srcdir" -a -d "$srcdir" ] ; then
-  testdata="$srcdir/testdata"
-elif [ -d "./testdata" ] ; then
-  testdata=./testdata
-elif [ -d "../testdata" ] ; then
-  testdata=../testdata
-else
-  echo "Cannot find the testdata directory"
-  exit 1
-fi
-
 yield=0
 
 
@@ -236,11 +223,6 @@ globalopts="-q"
 # This is in case the caller has set aliases (as I do - PH)
 unset cp ls mv rm
 
-if [ ! -x $pcre2test ] ; then
-  echo "** $pcre2test does not exist or is not executable."
-  exit 1
-fi
-
 # Process options and select which tests to run; for those that are explicitly
 # requested, check that the necessary optional facilities are available.
 
@@ -315,7 +297,9 @@ while [ $# -gt 0 ] ; do
    bigstack|-bigstack) bigstack=yes;;
    malloc|-malloc) malloc=yes;;
    nojit|-nojit) nojit=yes;;
-   sim|-sim) shift; sim=$1;;
+  sim|-sim) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; sim=$1;;
+  --srcdir) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; srcdir=$1;;
+  --pcre2test) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; pcre2test=$1;;
    valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --leak-check=yes --errors-for-leak-kinds=all --smc-check=all-non-file --error-exitcode=70";;
    valgrind-log|-valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=yes --errors-for-leak-kinds=all --error-limit=no --smc-check=all-non-file --log-file=report.%p ";;
    ~*)
@@ -345,6 +329,24 @@ while [ $# -gt 0 ] ; do
   esac
   shift
 done
+
+# Find the test data
+
+if [ -n "$srcdir" -a -d "$srcdir" ] ; then
+  testdata="$srcdir/testdata"
+elif [ -d "./testdata" ] ; then
+  testdata=./testdata
+elif [ -d "../testdata" ] ; then
+  testdata=../testdata
+else
+  echo "Cannot find the testdata directory"
+  exit 1
+fi
+
+if [ ! -x "$pcre2test" ] ; then
+  echo "** $pcre2test does not exist or is not executable."
+  exit 1
+fi
 
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.

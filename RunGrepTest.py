@@ -39,13 +39,24 @@ if os.name == "nt":
   if pcre2test == str(builddir / "pcre2test") and Path(f"{pcre2test}.exe").is_file(): pcre2test=f"{pcre2test}.exe"
 pcre2grep_is_exe=pcre2grep.lower().endswith(".exe")
 
+valgrind=[]
+srcdir=os.environ.get("srcdir", "")
+arguments=iter(sys.argv[1:])
+for argument in arguments:
+  if argument in ("valgrind", "-valgrind"): valgrind=["valgrind", "-q", "--leak-check=no", "--smc-check=all-non-file", "--error-exitcode=70"]
+  elif argument == "--srcdir":
+    try: srcdir=next(arguments)
+    except StopIteration: print("Missing argument after '--srcdir'"); sys.exit(1)
+  elif argument == "--pcre2test":
+    try: pcre2test=next(arguments)
+    except StopIteration: print("Missing argument after '--pcre2test'"); sys.exit(1)
+  elif argument == "--pcre2grep":
+    try: pcre2grep=next(arguments)
+    except StopIteration: print("Missing argument after '--pcre2grep'"); sys.exit(1)
+  else: print(f"RunGrepTest: Unknown argument {argument}"); sys.exit(1)
+
 if not Path(pcre2grep).is_file() or not os.access(pcre2grep, os.X_OK): print(f"** {pcre2grep} does not exist or is not executable."); sys.exit(1)
 if not Path(pcre2test).is_file() or not os.access(pcre2test, os.X_OK): print(f"** {pcre2test} does not exist or is not executable."); sys.exit(1)
-
-valgrind=[]
-for argument in sys.argv[1:]:
-  if argument in ("valgrind", "-valgrind"): valgrind=["valgrind", "-q", "--leak-check=no", "--smc-check=all-non-file", "--error-exitcode=70"]
-  else: print(f"RunGrepTest: Unknown argument {argument}"); sys.exit(1)
 
 def invoke(*args, cwd=None, stdin=None, stdout=None, stderr=None, valgrind_args=True, vjs_args=False):
   command=[str(argument) for argument in args]
@@ -95,7 +106,7 @@ print(f"Testing {pcre2grep_version}" + (" using valgrind" if valgrind else ""))
 # Subsequently, we run most of the pcre2grep tests in the source directory so
 # that the file names in the output are always the same.
 
-srcdir=Path(os.environ.get("srcdir", ""))
+srcdir=Path(srcdir)
 if not (srcdir / "testdata").is_dir():
   if Path("testdata").is_dir(): srcdir=Path(".")
   elif Path("../testdata").is_dir(): srcdir=Path("..")

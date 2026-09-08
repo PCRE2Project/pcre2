@@ -183,18 +183,19 @@ example.
      Some tests are relevant only when certain build-time options are selected.
      For example, test 4 is for Unicode support, and will not run if you have
      built PCRE2 without it. See the comments at the start of each testinput
-     file. If you have a suitable Unix-like shell, the RunTest script will run
-     the appropriate tests for you. The command "RunTest list" will output a
-     list of all the tests.
+      file. The Python 3 script RunTest.py will run the appropriate tests on
+      Unix-like systems and Windows. A legacy Unix shell version is available
+      as RunTest. The command "python3 RunTest.py list" (or "RunTest list" for
+      the shell version) will output a list of all the tests.
 
      Note that the supplied files are in Unix format, with just LF characters
      as line terminators. You may need to edit them to change this if your
      system uses a different convention.
 
 (10) If you have built PCRE2 with SUPPORT_JIT, the JIT features can be tested
-     by running pcre2test with the -jit option. This is done automatically by
-     the RunTest script. You might also like to build and run the freestanding
-     JIT test program, src/pcre2_jit_test.c.
+      by running pcre2test with the -jit option. This is done automatically by
+      RunTest.py and RunTest. You might also like to build and run the
+      freestanding JIT test program, src/pcre2_jit_test.c.
 
 (11) The pcre2test program tests the POSIX wrapper library, but there is also a
      freestanding test program in src/pcre2posix_test.c. It must be linked with
@@ -387,11 +388,21 @@ Just rename it and drop it into the top level of the build tree.
 Testing on Windows
 ------------------
 
-# XXX NONSENSE REWRITE
+The CMake build uses Python 3 to run RunTest.py and RunGrepTest.py natively.
+After building, run CTest in the usual way, specifying the configuration for a
+multi-configuration generator. For example:
 
-Windows testing requires WSL or Git for Windows Bash. CMake uses WSL Bash when
-available, otherwise Git for Windows Bash, and runs the shared RunTest script
-with the correct source and executable paths.
+  cmake --build build --config Release
+  ctest --test-dir build -C Release --output-on-failure
+
+The scripts can also be run directly from the build directory. If the source
+and executable paths cannot be inferred from that directory, pass them
+explicitly. For example:
+
+  py -3 ..\RunTest.py --srcdir .. --pcre2test .\Release\pcre2test.exe
+  py -3 ..\RunGrepTest.py --srcdir .. ^
+    --pcre2test .\Release\pcre2test.exe ^
+    --pcre2grep .\Release\pcre2grep.exe
 
 To independently test the just-in-time compiler, run pcre2_jit_test.exe.
 
