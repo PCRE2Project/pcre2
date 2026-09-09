@@ -534,8 +534,8 @@ for bmode in (test8, test16, test32):
       if b"Failed to set locale" in probe.stdout:
         continue
       selected_locale = loc
-      for name in ("test3input", "test3output", "test3outputA", "test3outputB", "test3outputC", "test3outputD"):
-        Path(name).write_bytes((testdata / name).read_bytes().replace(b"fr_FR", loc.encode("latin-1")))
+      for name_in, name_out in (("testinput3", "test3input"), ("testoutput3", "test3output"), ("testoutput3A", "test3outputA"), ("testoutput3B", "test3outputB"), ("testoutput3C", "test3outputC"), ("testoutput3D", "test3outputD")):
+        Path(name_out).write_bytes((testdata / name_in).read_bytes().replace(b"fr_FR", loc.encode("latin-1")))
       break
     if selected_locale:
       print(f"{title3} (using '{selected_locale}' locale)")
@@ -558,7 +558,7 @@ for bmode in (test8, test16, test32):
         else:
           print()
           print(f"** Locale test did not run successfully{with_message}. The output did not match")
-          print("   test3output, test3outputA, test3outputB, test3outputC, or test3outputD.")
+          print("   testoutput3, testoutput3A, testoutput3B, testoutput3C, or testoutput3D.")
           print("   This may mean that there is a problem with the locale settings rather")
           print("   than a bug in PCRE2.")
           failed = True
