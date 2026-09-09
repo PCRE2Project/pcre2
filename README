@@ -633,7 +633,7 @@ Testing PCRE2
 -------------
 
 To test the basic PCRE2 library on a Unix-like system, run the RunTest shell
-script. A portable Python 3 version is available as RunTest.py. There are
+script. A portable Python version is available as RunTest.py. There are
 corresponding RunGrepTest and RunGrepTest.py scripts that test the pcre2grep
 command. Run the scripts from the build directory; for example:
 
@@ -643,13 +643,13 @@ command. Run the scripts from the build directory; for example:
 When the 8-bit library is built, a test program for the POSIX wrapper, called
 pcre2posix_test, is compiled, and when JIT support is enabled, a test program
 called pcre2_jit_test is built. The scripts and the program tests are all run
-when you obey "make check". For other environments, see the instructions in
+when you run "make check". For other environments, see the instructions in
 NON-AUTOTOOLS-BUILD.
 
-The RunTest script runs the pcre2test test program (which is documented in its
-own man page) on each of the relevant testinput files in the testdata
-directory, and compares the output with the contents of the corresponding
-testoutput files. RunTest places its output in directories
+The RunTest (and RunTest.py) scripts run the pcre2test test program (which is
+documented in its own man page) on each of the relevant testinput files in the
+testdata directory, and compare the output with the contents of the
+corresponding testoutput files. The output is placed in directories
 testoutput{8,16,32}{,-jit,-dfa}. Other files whose names begin with "test" are
 used as working files in some tests.
 

@@ -1,21 +1,21 @@
----------------------------- Test 1 ------------------------------
+---------------------------- Test 1 -----------------------------
 PATTERN at the start of a line.
 In the middle of a line, PATTERN appears.
 Check up on PATTERN near the end.
 RC=0
----------------------------- Test 2 ------------------------------
+---------------------------- Test 2 -----------------------------
 PATTERN at the start of a line.
 RC=0
----------------------------- Test 3 ------------------------------
+---------------------------- Test 3 -----------------------------
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
 642:Check up on PATTERN near the end.
 RC=0
----------------------------- Test 4 ------------------------------
+---------------------------- Test 4 -----------------------------
 4
 RC=0
----------------------------- Test 5 ------------------------------
+---------------------------- Test 5 -----------------------------
 ./testdata/grepinput:7:PATTERN at the start of a line.
 ./testdata/grepinput:8:In the middle of a line, PATTERN appears.
 ./testdata/grepinput:10:This pattern is in lower case.
@@ -24,7 +24,7 @@ RC=0
 ./testdata/grepinputx:5:Pattern
 ./testdata/grepinputx:42:This line contains pattern not on a line by itself.
 RC=0
----------------------------- Test 6 ------------------------------
+---------------------------- Test 6 -----------------------------
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
 10:This pattern is in lower case.
@@ -33,14 +33,14 @@ RC=0
 5:Pattern
 42:This line contains pattern not on a line by itself.
 RC=0
----------------------------- Test 7 ------------------------------
+---------------------------- Test 7 -----------------------------
 ./testdata/grepinput
 ./testdata/grepinputx
 RC=0
----------------------------- Test 8 ------------------------------
+---------------------------- Test 8 -----------------------------
 ./testdata/grepinput
 RC=0
----------------------------- Test 9 ------------------------------
+---------------------------- Test 9 -----------------------------
 RC=0
 ---------------------------- Test 10 -----------------------------
 RC=1
@@ -395,46 +395,46 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
----------------------------- Test 38 ------------------------------
+---------------------------- Test 38 -----------------------------
 This line contains a binary zero here > < for testing.
 RC=0
----------------------------- Test 39 ------------------------------
+---------------------------- Test 39 -----------------------------
 This is a line before the binary zero.
 This line contains a binary zero here > < for testing.
 RC=0
----------------------------- Test 40 ------------------------------
+---------------------------- Test 40 -----------------------------
 This line contains a binary zero here > < for testing.
 This is a line after the binary zero.
 RC=0
----------------------------- Test 41 ------------------------------
+---------------------------- Test 41 -----------------------------
 before the binary zero
 after the binary zero
 RC=0
----------------------------- Test 42 ------------------------------
+---------------------------- Test 42 -----------------------------
 ./testdata/grepinput:595:before the binary zero
 ./testdata/grepinput:597:after the binary zero
 RC=0
----------------------------- Test 43 ------------------------------
+---------------------------- Test 43 -----------------------------
 595:before
 595:zero
 596:zero
 597:after
 597:zero
 RC=0
----------------------------- Test 44 ------------------------------
+---------------------------- Test 44 -----------------------------
 595:before
 595:zero
 596:zero
 597:after
 597:zero
 RC=0
----------------------------- Test 45 ------------------------------
+---------------------------- Test 45 -----------------------------
 10:pattern
 595:binary
 596:binary
 597:binary
 RC=0
----------------------------- Test 46 ------------------------------
+---------------------------- Test 46 -----------------------------
 pcre2grep: Error in 1st command-line regex at offset 9: unmatched closing parenthesis
 RC=2
 pcre2grep: Error in 2nd command-line regex at offset 9: missing closing parenthesis
@@ -443,23 +443,23 @@ pcre2grep: Error in 3rd command-line regex at offset 9: missing terminating ] fo
 RC=2
 pcre2grep: Error in 4th command-line regex at offset 9: missing terminating ] for character class
 RC=2
----------------------------- Test 47 ------------------------------
+---------------------------- Test 47 -----------------------------
 AB.VE
 RC=0
----------------------------- Test 48 ------------------------------
+---------------------------- Test 48 -----------------------------
 ABOVE the elephant 
 AB.VE
 AB.VE the turtle
 RC=0
----------------------------- Test 49 ------------------------------
+---------------------------- Test 49 -----------------------------
 ABOVE the elephant 
 AB.VE
 AB.VE the turtle
 PUT NEW DATA ABOVE THIS LINE.
 RC=0
----------------------------- Test 50 ------------------------------
+---------------------------- Test 50 -----------------------------
 RC=1
----------------------------- Test 51 ------------------------------
+---------------------------- Test 51 -----------------------------
 over the lazy dog.
 This time it jumps and jumps and jumps.
 This line contains \E and (regex) *meta* [characters].
@@ -469,18 +469,18 @@ The snowcat is not an animal
 A buried feline in the syndicate
 trailing spaces 
 RC=0
----------------------------- Test 52 ------------------------------
+---------------------------- Test 52 -----------------------------
 fox [1;31mjumps[0m
 This time it [1;31mjumps[0m and [1;31mjumps[0m and [1;31mjumps[0m.
 RC=0
----------------------------- Test 53 ------------------------------
+---------------------------- Test 53 -----------------------------
 36976,6
 36994,4
 37028,4
 37070,5
 37087,4
 RC=0
----------------------------- Test 54 ------------------------------
+---------------------------- Test 54 -----------------------------
 595:15,6
 595:33,4
 596:28,4
@@ -547,17 +547,17 @@ that the pcregrep command is working correctly. The file must be more than
 pcre2grep: Error -46, -47, -53 or -63 means that a resource limit was exceeded.
 pcre2grep: Check your regex for nested unlimited loops.
 RC=1
----------------------------- Test 64 ------------------------------
+---------------------------- Test 64 -----------------------------
 appears
 RC=0
----------------------------- Test 65 ------------------------------
+---------------------------- Test 65 -----------------------------
 pear
 RC=0
----------------------------- Test 66 ------------------------------
+---------------------------- Test 66 -----------------------------
 RC=0
----------------------------- Test 67 ------------------------------
+---------------------------- Test 67 -----------------------------
 RC=0
----------------------------- Test 68 ------------------------------
+---------------------------- Test 68 -----------------------------
 pear
 RC=0
 ---------------------------- Test 69 -----------------------------
@@ -743,12 +743,12 @@ RC=0
 ./testdata/grepinput3
 ./testdata/grepinputx
 RC=0
----------------------------- Test 100 ------------------------------
+---------------------------- Test 100 -----------------------------
 ./testdata/grepinput:zerothe.
 ./testdata/grepinput:zeroa
 ./testdata/grepinput:zerothe.
 RC=0
----------------------------- Test 101 ------------------------------
+---------------------------- Test 101 -----------------------------
 ./testdata/grepinput:[1;31m.[0m|[1;31mzero[0m|[1;31mthe[0m|[1;31m.[0m
 ./testdata/grepinput:[1;31mzero[0m|[1;31ma[0m
 ./testdata/grepinput:[1;31m.[0m|[1;31mzero[0m|[1;31mthe[0m|[1;31m.[0m
@@ -799,7 +799,7 @@ RC=0
 2:3,1
 2:4,1
 RC=0
----------------------------- Test 108 ------------------------------
+---------------------------- Test 108 -----------------------------
 RC=0
 ---------------------------- Test 109 -----------------------------
 RC=0
@@ -888,7 +888,7 @@ def
 xyz
 ---
 RC=0
----------------------------- Test 120 ------------------------------
+---------------------------- Test 120 -----------------------------
 ./testdata/grepinput:the binary zero.:zerothe.
 ./testdata/grepinput:a binary zero:zeroa
 ./testdata/grepinput:the binary zero.:zerothe.
@@ -1016,6 +1016,7 @@ match 1:
  a
 match 2:
  b
+RC=0
 ---
  a
 RC=0
@@ -1024,6 +1025,7 @@ match 1:
  a
 match 2:
  b
+RC=0
 ---
 match 2:
  b

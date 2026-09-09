@@ -1,10 +1,16 @@
 module(
     name = "pcre2",
     version = "10.49-DEV",
+    # Newer versions of Bazel complain about this setting. The change to ignore
+    # compatibility_level was backported to Bazel 8.6 and Bazel 9.1, but not
+    # Bazel 7. Removing it would therefore be equivalent to changing the
+    # level to zero on older Bazel versions, which is a breaking change.
+    # Please don't remove this just to silence a warning, until all the old
+    # versions have dropped out of use.
     compatibility_level = 1,
 )
 
-bazel_dep(name = "rules_cc", version = "0.2.8")
+bazel_dep(name = "rules_cc", version = "0.2.18")
 bazel_dep(name = "rules_python", version = "1.7.0")
-bazel_dep(name = "bazel_skylib", version = "1.8.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")

@@ -31,6 +31,8 @@ env:
   CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough'
   CFLAGS_MSVC: '/W3'
   CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
+  # For CMake 4.4 we could use (stronger): -Werror=author -Werror=uninitialized -Werror=unused-cli
+  # It's not available in the CI runners yet.
   CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
 
 jobs:
@@ -67,13 +69,14 @@ jobs:
       - name: Test (pcre2grep test script)
         run: ./RunGrepTest
 
-      - name: Run tests via Python
-        run: |
-          python3 ./RunTest.py --srcdir . --pcre2test ./pcre2test
-          python3 ./RunGrepTest.py --srcdir . --pcre2test ./pcre2test --pcre2grep ./pcre2grep
-
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
+
+      - name: Test (Python main test script)
+        run: python3 ./RunTest.py
+
+      - name: Test (Python pcre2grep test script)
+        run: python3 ./RunGrepTest.py
 
       - name: Install
         run: |
@@ -116,6 +119,12 @@ jobs:
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
 
+      - name: Test (Python main test script)
+        run: python3 ./RunTest.py
+
+      - name: Test (Python pcre2grep test script)
+        run: python3 ./RunGrepTest.py
+
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
@@ -141,11 +150,11 @@ jobs:
       - name: Test
         run: cd build && ctest -j$(sysctl -n hw.ncpu) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
-      - name: Run tests via shell
+      - name: Test (shell scripts)
         run: |
           cd build
-          ../RunTest --srcdir .. --pcre2test "$PWD/pcre2test"
-          ../RunGrepTest --srcdir .. --pcre2test "$PWD/pcre2test" --pcre2grep "$PWD/pcre2grep"
+          ../RunTest --srcdir .. --pcre2test "`pwd`/pcre2test"
+          ../RunGrepTest --srcdir .. --pcre2test "`pwd`/pcre2test" --pcre2grep "`pwd`/pcre2grep"
 
       - name: Install
         run: |

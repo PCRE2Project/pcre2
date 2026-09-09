@@ -646,7 +646,7 @@ jobs:
 
       - name: Test
         run: |
-          srcdir=`pwd` pcre2test=`pwd`/zig-out/bin/pcre2test ./RunTest -bigstack
+          ./RunTest --bigstack --srcdir "`pwd`" --pcre2test "`pwd`/zig-out/bin/pcre2test"
 
   bee:
     # Tests with: Bazel build system. A bee goes "buzz buzz buzz(el)".
@@ -664,7 +664,7 @@ jobs:
           submodules: true
 
       - name: Build
-        run: bazelisk build //... --enable_runfiles --incompatible_strict_action_env
+        run: bazelisk build //...
 
       - name: Test
-        run: bazelisk test //... --enable_runfiles --incompatible_strict_action_env --test_output=all
+        run: bazelisk test //... --test_output=all

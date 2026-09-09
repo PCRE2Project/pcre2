@@ -11,7 +11,7 @@ This document contains the following sections:
   Comments about Win32 builds
   Building PCRE2 on Windows with CMake
   Building PCRE2 on Windows with Visual Studio
-  Testing on Windows
+  Testing with Python
   Building PCRE2 on z/OS and z/VM
   Building PCRE2 under VMS
 
@@ -183,19 +183,18 @@ example.
      Some tests are relevant only when certain build-time options are selected.
      For example, test 4 is for Unicode support, and will not run if you have
      built PCRE2 without it. See the comments at the start of each testinput
-      file. The Python 3 script RunTest.py will run the appropriate tests on
-      Unix-like systems and Windows. A legacy Unix shell version is available
-      as RunTest. The command "python3 RunTest.py list" (or "RunTest list" for
-      the shell version) will output a list of all the tests.
+     file. The Python script RunTest.py will run the appropriate tests on
+     Unix-like systems and Windows. A Unix shell version is also available
+     as RunTest. The command "python3 RunTest.py list" (or "RunTest list" for
+     the shell version) will output a list of all the tests.
 
      Note that the supplied files are in Unix format, with just LF characters
-     as line terminators. You may need to edit them to change this if your
-     system uses a different convention.
+     as line terminators.
 
 (10) If you have built PCRE2 with SUPPORT_JIT, the JIT features can be tested
-      by running pcre2test with the -jit option. This is done automatically by
-      RunTest.py and RunTest. You might also like to build and run the
-      freestanding JIT test program, src/pcre2_jit_test.c.
+     by running pcre2test with the -jit option. This is done automatically by
+     RunTest.py and RunTest. You might also like to build and run the
+     freestanding JIT test program, src/pcre2_jit_test.c.
 
 (11) The pcre2test program tests the POSIX wrapper library, but there is also a
      freestanding test program in src/pcre2posix_test.c. It must be linked with
@@ -372,23 +371,27 @@ be deleted.
    Regardless of build system used, `ctest` will run the tests.
 
 
-Building PCRE2 on Windows with Visual Studio
---------------------------------------------
+Testing with Python
+-------------------
 
-The code currently cannot be compiled without an inttypes.h header, which is
-available only with Visual Studio 2013 or newer. However, this portable and
-permissively-licensed implementation of the stdint.h header could be used as an
-alternative:
+The autotools build uses `make check` to run the test suites using the `RunTest`
+and `RunGrepTest` shell (bash) scripts. The test suite is also available for
+non-Unix platforms using the equivalent `RunTest.py` and `RunGrepTest.py` Python
+scripts instead.
 
-  http://www.azillionmonkeys.com/qed/pstdint.h
+These Python scripts can be used with any build system, and should work on
+supported PCRE2 platforms.
 
-Just rename it and drop it into the top level of the build tree.
+The autotools build only uses the shell scripts.
 
+The CMake build tests for a Python 3 installation, and defaults to registering
+the Python scripts with CTest. If Python 3 is not found, CMake registers the
+shell scripts on Unix, or fails otherwise.
 
-Testing on Windows
-------------------
+On Windows, the requirement for a Python installation to run the test suite can
+be avoided by passing `-DPCRE2_BUILD_TESTS=OFF`, although releasing untested
+builds is not recommended.
 
-The CMake build uses Python 3 to run RunTest.py and RunGrepTest.py natively.
 After building, run CTest in the usual way, specifying the configuration for a
 multi-configuration generator. For example:
 
@@ -399,12 +402,17 @@ The scripts can also be run directly from the build directory. If the source
 and executable paths cannot be inferred from that directory, pass them
 explicitly. For example:
 
-  py -3 ..\RunTest.py --srcdir .. --pcre2test .\Release\pcre2test.exe
-  py -3 ..\RunGrepTest.py --srcdir .. ^
-    --pcre2test .\Release\pcre2test.exe ^
-    --pcre2grep .\Release\pcre2grep.exe
+  python3 ../RunTest.py --srcdir .. --pcre2test ./Release/pcre2test.exe
+  python3 ../RunGrepTest.py --srcdir .. ^
+    --pcre2test ./Release/pcre2test.exe ^
+    --pcre2grep ./Release/pcre2grep.exe
 
-To independently test the just-in-time compiler, run pcre2_jit_test.exe.
+The runner scripts (shell and Python) support out-of-tree builds by accepting
+commandline arguments specifying the location of the srcdir (the directory
+containing the `testdata/` directory); of `pcre2test[.exe]`; and for
+`RunGrepTest` and `RunGrepTest.py`, `pcre2grep[.exe]`. Alternatively,
+environment variables can be used to pass the paths; and if none are provided
+the working directory is used.
 
 
 Building PCRE2 on z/OS and z/VM

@@ -1404,7 +1404,6 @@ MESSAGE(\" \")
   endif()
 
   if(PCRE2_BUILD_PCRE2GREP)
-    set(added_test TRUE)
     if(Python3_FOUND)
       add_test(
         NAME pcre2_grep_test
@@ -1425,18 +1424,15 @@ MESSAGE(\" \")
       )
     else()
       message(FATAL_ERROR "Neither Python nor shell support found for pcre2_grep_test")
-      set(added_test FALSE)
     endif()
 
-    if(PCRE2_EBCDIC AND added_test)
+    if(PCRE2_EBCDIC)
       # The grep tests currently fail in EBCDIC mode because the test data
       # files are in ASCII. This could be fixed properly, but for now, we
       # have very few EBCDIC users and the pcre2grep utility is hardly even
       # part of the official project artifacts.
       set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
     endif()
-
-    unset(added_test)
   endif()
 
   if(PCRE2_SUPPORT_JIT_DETECTED)

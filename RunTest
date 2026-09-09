@@ -77,9 +77,9 @@ title17="Test 17: JIT-specific features when JIT is available"
 title18="Test 18: Tests of the POSIX interface, excluding UTF/UCP"
 title19="Test 19: Tests of the POSIX interface with UTF/UCP"
 title20="Test 20: Serialization and code copy tests"
-title21="Test 21: \C tests without UTF (supported for DFA matching)"
-title22="Test 22: \C tests with UTF (not supported for DFA matching)"
-title23="Test 23: \C disabled test"
+title21="Test 21: \\C tests without UTF (supported for DFA matching)"
+title22="Test 22: \\C tests with UTF (not supported for DFA matching)"
+title23="Test 23: \\C disabled test"
 title24="Test 24: Non-UTF pattern conversion tests"
 title25="Test 25: UTF pattern conversion tests"
 title26="Test 26: Unicode property tests (compatible with Perl >= 5.38)"
@@ -89,7 +89,7 @@ title29="Test 29: EBCDIC-specific tests (for NL=0x25)"
 maxtest=29
 titleheap="Test 'heap': Environment-specific heap tests"
 
-if [ $# -eq 1 -a "$1" = "list" ]; then
+if [ $# -eq 1 ] && [ "$1" = "list" -o "$1" = "-list" -o "$1" = "--list" ] ; then
   echo $title0
   echo $title1
   echo $title2 "(not UTF or UCP)"
@@ -128,6 +128,10 @@ if [ $# -eq 1 -a "$1" = "list" ]; then
   exit 0
 fi
 
+
+yield=0
+
+
 # Set up a suitable "diff" command for comparison. Some systems
 # have a diff that lacks a -u option. Try to deal with this.
 # Use gdiff if available.
@@ -135,8 +139,6 @@ fi
 cf="diff"
 gdiff /dev/null /dev/null 2>/dev/null && cf="gdiff"
 $cf -u /dev/null /dev/null 2>/dev/null && cf="$cf -u"
-
-yield=0
 
 
 # ------ Function to check results of a test -------
@@ -185,12 +187,12 @@ checkresult()
 
 # ------ Function to run and check a special pcre2test arguments test -------
 
-run_checkspecial()
+checkspecial()
   {
-  checkspecial_use_vjs=$1
-  expect=$2
+  expect=$1
+  checkspecial_use_vjs=$2
   shift 2
-  if [ "$checkspecial_use_vjs" = yes ]; then
+  if [ "$checkspecial_use_vjs" = use_vjs ]; then
     $sim $valgrind $vjs "$pcre2test" "$@" >>testSoutput 2>&1
   else
     $sim $valgrind "$pcre2test" "$@" >>testSoutput 2>&1
@@ -201,16 +203,6 @@ run_checkspecial()
     return 1
   fi
   return 0
-  }
-
-checkspecial()
-  {
-  run_checkspecial no "$@"
-  }
-
-checkspecial_jit()
-  {
-  run_checkspecial yes "$@"
   }
 
 set_vjs_for_opt()
@@ -310,14 +302,14 @@ while [ $# -gt 0 ] ; do
   -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
-   bigstack|-bigstack) bigstack=yes;;
-   malloc|-malloc) malloc=yes;;
-   nojit|-nojit) nojit=yes;;
-  sim|-sim) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; sim=$1;;
-  --srcdir) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; srcdir=$1;;
-  --pcre2test) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; pcre2test=$1;;
-   valgrind|-valgrind) valgrind="valgrind --tool=memcheck -q --leak-check=yes --errors-for-leak-kinds=all --smc-check=all-non-file --error-exitcode=70";;
-   valgrind-log|-valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=yes --errors-for-leak-kinds=all --error-limit=no --smc-check=all-non-file --log-file=report.%p ";;
+   bigstack|-bigstack|--bigstack) bigstack=yes;;
+   malloc|-malloc|--malloc) malloc=yes;;
+   nojit|-nojit|--nojit) nojit=yes;;
+   sim|-sim|--sim) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; sim="$1";;
+   srcdir|-srcdir|--srcdir) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; srcdir="$1";;
+   pcre2test|-pcre2test|--pcre2test) if [ $# -lt 2 ]; then echo "Missing argument after '$1'"; exit 1; fi; shift; pcre2test="$1";;
+   valgrind|-valgrind|--valgrind) valgrind="valgrind --tool=memcheck -q --leak-check=yes --errors-for-leak-kinds=all --smc-check=all-non-file --error-exitcode=70";;
+   valgrind-log|-valgrind-log|--valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=yes --errors-for-leak-kinds=all --error-limit=no --smc-check=all-non-file --log-file=report.%p ";;
    ~*)
      if expr "$1" : '~[0-9][0-9]*$' >/dev/null; then
        skip="$skip `expr "$1" : '~\([0-9]*\)*$'`"
@@ -346,22 +338,32 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-# Find the test data
-
-if [ -n "$srcdir" -a -d "$srcdir" ] ; then
-  testdata="$srcdir/testdata"
-elif [ -d "./testdata" ] ; then
-  testdata=./testdata
-elif [ -d "../testdata" ] ; then
-  testdata=../testdata
-else
-  echo "Cannot find the testdata directory"
-  exit 1
-fi
-
 if [ ! -x "$pcre2test" ] ; then
   echo "** $pcre2test does not exist or is not executable."
   exit 1
+fi
+
+# Find the test data
+
+if [ -z "$srcdir" ] ; then
+  if [ -d "./testdata" ] ; then
+    testdata=./testdata
+  elif [ -d "../testdata" ] ; then
+    testdata=../testdata
+  else
+    echo "Cannot find the testdata directory"
+    exit 1
+  fi
+else
+  if [ ! -d "$srcdir/testdata" ] ; then
+    echo "The specified srcdir '$srcdir' does not contain a testdata directory"
+    exit 1
+  fi
+
+  case "$srcdir" in
+    */) testdata="${srcdir}testdata";;
+    *) testdata="${srcdir}/testdata";;
+  esac
 fi
 
 # If it is possible to set the system stack size and -bigstack was given,
@@ -565,23 +567,23 @@ for bmode in "$test8" "$test16" "$test32"; do
     echo '   abc' >>testSinput
     echo '' >testSoutput
     saverc=0
-    checkspecial 0 "$bmode" -C || saverc=$?
-    checkspecial 0 --help || saverc=$?
-    checkspecial_jit 0 "$bmode" testSinput || saverc=$?
-    checkspecial 0 "$bmode" "$testdata/testinputheap" || saverc=$?
+    checkspecial 0  no_vjs "$bmode" -C || saverc=$?
+    checkspecial 0  no_vjs --help || saverc=$?
+    checkspecial 0 use_vjs "$bmode" testSinput || saverc=$?
+    checkspecial 0  no_vjs "$bmode" "$testdata/testinputheap" || saverc=$?
     if [ $support_setstack -eq 0 ] ; then
-      checkspecial_jit 0 "$bmode" -S 1 -t 10 testSinput || saverc=$?
+      checkspecial 0 use_vjs "$bmode" -S 1 -t 10 testSinput || saverc=$?
     fi
-    checkspecial 1 "$bmode" reallydoesnotexist || saverc=$?
-    checkspecial 1 "$bmode" testSinput reallydoesnotexist/outfile || saverc=$?
-    checkspecial_jit 0 "$bmode" -pattern debug testSinput || saverc=$?
-    checkspecial 1 "$bmode" -pattern INVALID testSinput 2>/dev/null || saverc=$?
-    checkspecial_jit 0 "$bmode" -subject notempty testSinput || saverc=$?
-    checkspecial 1 "$bmode" -subject INVALID testSinput 2>/dev/null || saverc=$?
-    checkspecial 0 -LM || saverc=$?
-    checkspecial 0 -LP || saverc=$?
-    checkspecial 0 -LS || saverc=$?
-    checkspecial_jit 0 "$bmode" -unittest || saverc=$?
+    checkspecial 1  no_vjs "$bmode" reallydoesnotexist || saverc=$?
+    checkspecial 1  no_vjs "$bmode" testSinput reallydoesnotexist/outfile || saverc=$?
+    checkspecial 0 use_vjs "$bmode" -pattern debug testSinput || saverc=$?
+    checkspecial 1  no_vjs "$bmode" -pattern INVALID testSinput 2>/dev/null || saverc=$?
+    checkspecial 0 use_vjs "$bmode" -subject notempty testSinput || saverc=$?
+    checkspecial 1  no_vjs "$bmode" -subject INVALID testSinput 2>/dev/null || saverc=$?
+    checkspecial 0  no_vjs -LM || saverc=$?
+    checkspecial 0  no_vjs -LP || saverc=$?
+    checkspecial 0  no_vjs -LS || saverc=$?
+    checkspecial 0 use_vjs "$bmode" -unittest || saverc=$?
     if [ $saverc -eq 0 ] ; then
       echo "  OK"
     fi
@@ -631,6 +633,10 @@ for bmode in "$test8" "$test16" "$test32"; do
     # on to use it.
 
     for loc in $locales; do
+      if ! command -v locale >/dev/null 2>&1; then
+        continue
+      fi
+
       if ! (locale -a | grep "^$loc\$" >/dev/null); then
         continue
       fi
@@ -1046,7 +1052,7 @@ for bmode in "$test8" "$test16" "$test32"; do
   fi
 
   # Manually selected heap tests - output may vary in different environments,
-  # which is why that are not automatically run.
+  # which is why they are not automatically run.
 
   if [ $doheap = yes ] ; then
     echo $titleheap

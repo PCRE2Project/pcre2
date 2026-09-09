@@ -1,9 +1,13 @@
+# Rather than forcing everything to check out with 'correct' (LF) line-endings
+# on Windows, we currently take the approach of forcing only the files which
+# are binary-like and positively do not work if incorrectly converted.
+
 testdata/*        -text
 maint/manifest-*  -text
 maint/ucptestdata -text
+*.patch           -text
 *.sh              text eol=lf
 *.bat             text eol=crlf
-*.patch           text eol=lf
 pcre2-config.in   text eol=lf
 RunTest           text eol=lf
 RunGrepTest       text eol=lf

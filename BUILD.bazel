@@ -94,15 +94,15 @@ cc_library(
         ":pcre2_chartables_c",
     ],
     hdrs = [":pcre2_h_generic"],
-    implementation_deps = [":pcre2_internal_headers"],
     defines = [
         "PCRE2_STATIC",
     ],
+    implementation_deps = [":pcre2_internal_headers"],
+    linkstatic = True,
     local_defines = LOCAL_DEFINES + [
         "PCRE2_CODE_UNIT_WIDTH=8",
     ],
     strip_include_prefix = "src",
-    linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
@@ -126,11 +126,11 @@ cc_library(
         ":pcre2_internal_headers",
         ":pcre2posix_dotc_headers",
     ],
+    linkstatic = True,
     local_defines = LOCAL_DEFINES + [
         "PCRE2_CODE_UNIT_WIDTH=8",
     ],
     strip_include_prefix = "src",
-    linkstatic = True,
     visibility = ["//visibility:public"],
     deps = [
         ":pcre2",
@@ -184,15 +184,19 @@ py_test(
     name = "pcre2_test",
     size = "small",
     srcs = ["RunTest.py"],
-    main = "RunTest.py",
     args = [
         "--srcdir",
         ".",
         "--pcre2test",
+        # TODO Apparently this may not work on Windows... could consider adding
+        #      support by changing this to pass rlocationpath, and add a
+        #      deps=[...] to load the Python runfiles lib, and use that in the
+        #      Py script to resolve the Bazel runfiles syntax
         "$(rootpath :pcre2test)",
     ],
     data = [
         ":pcre2test",
         ":testdata",
     ],
+    main = "RunTest.py",
 )
