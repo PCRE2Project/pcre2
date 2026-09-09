@@ -139,7 +139,7 @@ def supports(text):
 # ------ Function to run and check a special pcre2grep arguments test -------
 
 def checkspecial(arguments, expected):
-  with open("testtrygrep", "ab") as stream: returncode=invoke(*pcre2grep_args, *arguments, stdout=stream, stderr=subprocess.STDOUT)
+  with open("testtrygrep", "ab") as stream: returncode=invoke(*pcre2grep_args, *arguments, stdout=stream, stderr=subprocess.STDOUT, vjs_args=True)
   if returncode != expected: print(f"** pcre2grep {' '.join(arguments)} failed - check testtrygrep"); sys.exit(1)
 
 # ------ Normal tests ------

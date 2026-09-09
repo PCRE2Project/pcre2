@@ -406,16 +406,16 @@ if WITH_EBCDIC
 if WITH_EBCDIC_NL25
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25 $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25" "$(abs_builddir)/src/pcre2_chartables.c"
 else # WITH_EBCDIC_NL25
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15 $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15" "$(abs_builddir)/src/pcre2_chartables.c"
 endif # WITH_EBCDIC_NL25
 else # WITH_EBCDIC
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.dist
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.dist $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.dist" "$(abs_builddir)/src/pcre2_chartables.c"
 endif # WITH_EBCDIC
 endif # WITH_REBUILD_CHARTABLES
 

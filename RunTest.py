@@ -250,26 +250,30 @@ for bmode in (test8, test16, test32):
     Path("testSinput").write_bytes(b"/abc/jit,memory,framesize\n   abc\n")
     Path("testSoutput").write_bytes(b"\n")
     saverc=0
-    def checkspecial(arguments, expect=0, stderr=subprocess.STDOUT, use_vjs=False):
+    def run_checkspecial(arguments, expect, stderr, use_vjs):
       global yield_
       with open("testSoutput", "ab") as stream: returncode=invoke(*sim, pcre2test, *arguments, stdout=stream, stderr=stderr, use_vjs=use_vjs)
       if returncode != expect: print(f"** pcre2test {' '.join(arguments)} failed - check testSoutput"); yield_=1; return 1
       return 0
+    def checkspecial(arguments, expect=0, stderr=subprocess.STDOUT):
+      return run_checkspecial(arguments, expect, stderr, False)
+    def checkspecial_jit(arguments, expect=0, stderr=subprocess.STDOUT):
+      return run_checkspecial(arguments, expect, stderr, True)
     saverc=checkspecial((bmode, "-C")) or saverc
     saverc=checkspecial(("--help",)) or saverc
-    saverc=checkspecial((bmode, "testSinput"), use_vjs=True) or saverc
+    saverc=checkspecial_jit((bmode, "testSinput")) or saverc
     saverc=checkspecial((bmode, str(testdata / "testinputheap"))) or saverc
-    if support_setstack == 0: saverc=checkspecial((bmode, "-S", "1", "-t", "10", "testSinput"), use_vjs=True) or saverc
+    if support_setstack == 0: saverc=checkspecial_jit((bmode, "-S", "1", "-t", "10", "testSinput")) or saverc
     saverc=checkspecial((bmode, "reallydoesnotexist"), 1) or saverc
-    saverc=checkspecial((bmode, "testSinput", "reallydoesnotexist/outfile"), 1, use_vjs=True) or saverc
-    saverc=checkspecial((bmode, "-pattern", "debug", "testSinput"), use_vjs=True) or saverc
+    saverc=checkspecial((bmode, "testSinput", "reallydoesnotexist/outfile"), 1) or saverc
+    saverc=checkspecial_jit((bmode, "-pattern", "debug", "testSinput")) or saverc
     saverc=checkspecial((bmode, "-pattern", "INVALID", "testSinput"), 1, subprocess.DEVNULL) or saverc
-    saverc=checkspecial((bmode, "-subject", "notempty", "testSinput"), use_vjs=True) or saverc
+    saverc=checkspecial_jit((bmode, "-subject", "notempty", "testSinput")) or saverc
     saverc=checkspecial((bmode, "-subject", "INVALID", "testSinput"), 1, subprocess.DEVNULL) or saverc
     saverc=checkspecial(("-LM",)) or saverc
     saverc=checkspecial(("-LP",)) or saverc
     saverc=checkspecial(("-LS",)) or saverc
-    saverc=checkspecial((bmode, "-unittest"), use_vjs=True) or saverc
+    saverc=checkspecial_jit((bmode, "-unittest")) or saverc
     if saverc == 0: print("  OK")
 
   # Primary non-UTF test, compatible with JIT and all versions of Perl >= 5.8
