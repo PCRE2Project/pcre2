@@ -50,6 +50,11 @@
 #     output, but none of them are run.
 ###############################################################################
 
+# We use `yapf` for auto-formatting our Python files.
+# Applied to both Python test runners using:
+#    > pip3 install yapf
+#    > yapf --in-place --style maint/formatting.yapf RunTest.py RunGrepTest.py
+
 import difflib
 import os
 import re
@@ -98,7 +103,10 @@ maxtest = 29
 titleheap = "Test 'heap': Environment-specific heap tests"
 
 if len(sys.argv) == 2 and sys.argv[1] in ("list", "-list", "--list"):
-  for title in (title0, title1, title2 + " (not UTF or UCP)", title3, title4A + title4B, title5A + title5B, title6, title7A + title7B, title8, title9, title10, title11, title12, title13, title14, title15, title16, title17, title18, title19, title20, title21, title22, title23, title24, title25, title26, title27, title28, title29):
+  for title in (title0, title1, title2 + " (not UTF or UCP)", title3, title4A + title4B, title5A + title5B, title6,
+                title7A + title7B, title8, title9, title10, title11, title12, title13, title14, title15, title16,
+                title17, title18, title19, title20, title21, title22, title23, title24, title25, title26, title27,
+                title28, title29):
     print(title)
   print()
   print(titleheap)
@@ -118,12 +126,14 @@ failed = False
 #  opts        the pcre2test option arguments (empty, -jit, or -dfa)
 #  bits        the library code unit width
 
+
 def invoke(*args, stdin=None, stdout=None, stderr=None, use_valgrind=True, use_vjs=False):
   command = [str(arg) for arg in args]
   if valgrind and use_valgrind:
     command = [*valgrind, *(vjs if use_vjs else []), *command]
   command = [*sim, *command]
   return subprocess.run(command, stdin=stdin, stdout=stdout, stderr=stderr, check=False).returncode
+
 
 def compare(first, second):
   try:
@@ -138,6 +148,7 @@ def compare(first, second):
   except OSError:
     return False
 
+
 # ------ Function to check results of a test -------
 
 # This function is called with four parameters:
@@ -146,6 +157,7 @@ def compare(first, second):
 #  suffix      the suffix of the output file to compare with
 #  opts        the pcre2test option arguments ([], [-jit], or [-dfa])
 #  bits        the library code unit width
+
 
 def checkresult(returncode, suffix, opts, bits):
   global failed
@@ -170,11 +182,12 @@ def checkresult(returncode, suffix, opts, bits):
     expected = expected_output
   if not compare(expected, output):
     try:
-      print("".join(difflib.unified_diff(
-        expected.read_bytes().decode("latin-1").splitlines(keepends=True),
-        output.read_bytes().decode("latin-1").splitlines(keepends=True),
-        fromfile=str(expected),
-        tofile=str(output))), end="")
+      print("".join(
+          difflib.unified_diff(expected.read_bytes().decode("latin-1").splitlines(keepends=True),
+                               output.read_bytes().decode("latin-1").splitlines(keepends=True),
+                               fromfile=str(expected),
+                               tofile=str(output))),
+            end="")
     except OSError:
       pass
     print()
@@ -182,6 +195,7 @@ def checkresult(returncode, suffix, opts, bits):
     failed = True
     return
   print(f"  OK{with_message}")
+
 
 # ------ Test setup ------
 
@@ -239,9 +253,15 @@ for argument in arguments:
       print(f"Missing argument after '{argument}'")
       sys.exit(1)
   elif argument in ("valgrind", "-valgrind", "--valgrind"):
-    valgrind = ["valgrind", "--tool=memcheck", "-q", "--leak-check=yes", "--errors-for-leak-kinds=all", "--smc-check=all-non-file", "--error-exitcode=70"]
+    valgrind = [
+        "valgrind", "--tool=memcheck", "-q", "--leak-check=yes", "--errors-for-leak-kinds=all",
+        "--smc-check=all-non-file", "--error-exitcode=70"
+    ]
   elif argument in ("valgrind-log", "-valgrind-log", "--valgrind-log"):
-    valgrind = ["valgrind", "--tool=memcheck", "--num-callers=30", "--leak-check=yes", "--errors-for-leak-kinds=all", "--error-limit=no", "--smc-check=all-non-file", "--log-file=report.%p"]
+    valgrind = [
+        "valgrind", "--tool=memcheck", "--num-callers=30", "--leak-check=yes", "--errors-for-leak-kinds=all",
+        "--error-limit=no", "--smc-check=all-non-file", "--log-file=report.%p"
+    ]
   elif re.fullmatch(r"~[0-9]+", argument):
     skip.append(int(argument[1:]))
   elif match := re.fullmatch(r"([0-9]+)-([0-9]*)", argument):
@@ -279,15 +299,24 @@ else:
     sys.exit(1)
   testdata_display = os.path.join(srcdir, "testdata")
 
+
 def has_capability(name):
   with open(os.devnull, "wb") as null:
     return invoke(pcre2test, "-C", name, stdout=null, stderr=null, use_valgrind=False) != 0
+
 
 # If it is possible to set the system stack size and -bigstack was given,
 # set up a large stack.
 
 with open(os.devnull, "wb") as null:
-  supports_setstack = invoke(pcre2test, "-S", "32", os.devnull, os.devnull, stdout=null, stderr=null, use_valgrind=False) == 0
+  supports_setstack = invoke(pcre2test,
+                             "-S",
+                             "32",
+                             os.devnull,
+                             os.devnull,
+                             stdout=null,
+                             stderr=null,
+                             use_valgrind=False) == 0
 if supports_setstack and bigstack:
   globalopts.extend(("-S", "32"))
 
@@ -417,7 +446,7 @@ for bmode in (test8, test16, test32):
       return True
 
     special_tests_passed &= checkspecial((bmode, "-C"))
-    special_tests_passed &= checkspecial(("--help",))
+    special_tests_passed &= checkspecial(("--help", ))
     special_tests_passed &= checkspecial((bmode, "testSinput"), use_vjs=True)
     special_tests_passed &= checkspecial((bmode, str(testdata / "testinputheap")))
     if supports_setstack:
@@ -425,12 +454,16 @@ for bmode in (test8, test16, test32):
     special_tests_passed &= checkspecial((bmode, "reallydoesnotexist"), expect=1)
     special_tests_passed &= checkspecial((bmode, "testSinput", "reallydoesnotexist/outfile"), expect=1)
     special_tests_passed &= checkspecial((bmode, "-pattern", "debug", "testSinput"), use_vjs=True)
-    special_tests_passed &= checkspecial((bmode, "-pattern", "INVALID", "testSinput"), expect=1, stderr=subprocess.DEVNULL)
+    special_tests_passed &= checkspecial((bmode, "-pattern", "INVALID", "testSinput"),
+                                         expect=1,
+                                         stderr=subprocess.DEVNULL)
     special_tests_passed &= checkspecial((bmode, "-subject", "notempty", "testSinput"), use_vjs=True)
-    special_tests_passed &= checkspecial((bmode, "-subject", "INVALID", "testSinput"), expect=1, stderr=subprocess.DEVNULL)
-    special_tests_passed &= checkspecial(("-LM",))
-    special_tests_passed &= checkspecial(("-LP",))
-    special_tests_passed &= checkspecial(("-LS",))
+    special_tests_passed &= checkspecial((bmode, "-subject", "INVALID", "testSinput"),
+                                         expect=1,
+                                         stderr=subprocess.DEVNULL)
+    special_tests_passed &= checkspecial(("-LM", ))
+    special_tests_passed &= checkspecial(("-LP", ))
+    special_tests_passed &= checkspecial(("-LS", ))
     special_tests_passed &= checkspecial((bmode, "-unittest"), use_vjs=True)
     if special_tests_passed:
       print("  OK")
@@ -441,7 +474,9 @@ for bmode in (test8, test16, test32):
     print(title1)
     for opts in [[], *jitopts]:
       output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput1"
-      checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput1", output, use_vjs=opts == ["-jit"]), "1", opts, bits)
+      checkresult(
+          invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput1", output, use_vjs=opts == ["-jit"]), "1",
+          opts, bits)
 
   # PCRE2 tests that are not Perl-compatible: API, errors, internals. We copy
   # the testbtables file to the current directory for use by this test.
@@ -451,10 +486,23 @@ for bmode in (test8, test16, test32):
     shutil.copyfile(testdata / "testbtables", "testbtables")
     for opts in [[], *jitopts]:
       output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput2"
-      returncode = invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput2", output, use_vjs=opts == ["-jit"])
+      returncode = invoke(pcre2test,
+                          *globalopts,
+                          bmode,
+                          *opts,
+                          testdata / "testinput2",
+                          output,
+                          use_vjs=opts == ["-jit"])
       if returncode == 0:
         with open(output, "ab") as stream:
-          returncode = invoke(pcre2test, *globalopts, bmode, *opts, "-error", "-80,-62,-2,-1,0,100,101,191,300", stdout=stream, use_vjs=opts == ["-jit"])
+          returncode = invoke(pcre2test,
+                              *globalopts,
+                              bmode,
+                              *opts,
+                              "-error",
+                              "-80,-62,-2,-1,0,100,101,191,300",
+                              stdout=stream,
+                              use_vjs=opts == ["-jit"])
       checkresult(returncode, "2", opts, bits)
 
   # Locale-specific tests. Unfortunately, different versions of the French
@@ -468,28 +516,26 @@ for bmode in (test8, test16, test32):
       available_locales = []
     else:
       available_locales = subprocess.run(
-        ["locale", "-a"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        check=False,
+          ["locale", "-a"],
+          stdout=subprocess.PIPE,
+          stderr=subprocess.DEVNULL,
+          check=False,
       ).stdout.decode("latin-1").splitlines()
     for loc in locales:
       if loc not in available_locales:
         continue
       probe = subprocess.run(
-        [*sim, *valgrind, pcre2test, "-q", bmode],
-        input=f"/a/locale={loc}\n".encode("latin-1"),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        check=False,
+          [*sim, *valgrind, pcre2test, "-q", bmode],
+          input=f"/a/locale={loc}\n".encode("latin-1"),
+          stdout=subprocess.PIPE,
+          stderr=subprocess.DEVNULL,
+          check=False,
       )
       if b"Failed to set locale" in probe.stdout:
         continue
       selected_locale = loc
       for name in ("test3input", "test3output", "test3outputA", "test3outputB", "test3outputC", "test3outputD"):
-        Path(name).write_bytes(
-          (testdata / name).read_bytes().replace(b"fr_FR", loc.encode("latin-1"))
-        )
+        Path(name).write_bytes((testdata / name).read_bytes().replace(b"fr_FR", loc.encode("latin-1")))
       break
     if selected_locale:
       print(f"{title3} (using '{selected_locale}' locale)")
@@ -498,11 +544,11 @@ for bmode in (test8, test16, test32):
         returncode = invoke(pcre2test, *globalopts, bmode, *opts, "test3input", output, use_vjs=opts == ["-jit"])
         with_message = " with JIT" if opts == ["-jit"] else ""
         expected_outputs = (
-          Path("test3output"),
-          Path("test3outputA"),
-          Path("test3outputB"),
-          Path("test3outputC"),
-          Path("test3outputD"),
+            Path("test3output"),
+            Path("test3outputA"),
+            Path("test3outputB"),
+            Path("test3outputC"),
+            Path("test3outputD"),
         )
         if returncode != 0:
           print(f"** pcre2test failed - check {output}")
@@ -530,7 +576,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput4"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput4", output, use_vjs=opts == ["-jit"]), "4", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput4", output, use_vjs=opts == ["-jit"]),
+            "4", opts, bits)
 
   if do[5]:
     print(f"{title5A}-{bits}{title5B}")
@@ -539,7 +587,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput5"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput5", output, use_vjs=opts == ["-jit"]), "5", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput5", output, use_vjs=opts == ["-jit"]),
+            "5", opts, bits)
 
   # Tests for DFA matching support
 
@@ -581,7 +631,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput9"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput9", output, use_vjs=opts == ["-jit"]), "9", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput9", output, use_vjs=opts == ["-jit"]),
+            "9", opts, bits)
 
   # Tests for UTF-8 and UCP 8-bit-specific features
 
@@ -594,7 +646,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput10"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput10", output, use_vjs=opts == ["-jit"]), "10", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput10", output, use_vjs=opts == ["-jit"]),
+            "10", opts, bits)
 
   # Tests for 16-bit and 32-bit features. Output is different for the two widths.
 
@@ -606,7 +660,9 @@ for bmode in (test8, test16, test32):
       for opts in [[], *jitopts]:
         suffix = f"11-{bits}"
         output = Path(f"testoutput{bits}{''.join(opts)}") / f"testoutput{suffix}"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput11", output, use_vjs=opts == ["-jit"]), suffix, opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput11", output, use_vjs=opts == ["-jit"]),
+            suffix, opts, bits)
 
   # Tests for 16-bit and 32-bit features with UTF-16/32 and UCP support. Output
   # is different for the two widths.
@@ -621,7 +677,9 @@ for bmode in (test8, test16, test32):
       for opts in [[], *jitopts]:
         suffix = f"12-{bits}"
         output = Path(f"testoutput{bits}{''.join(opts)}") / f"testoutput{suffix}"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput12", output, use_vjs=opts == ["-jit"]), suffix, opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput12", output, use_vjs=opts == ["-jit"]),
+            suffix, opts, bits)
 
   # Tests for 16/32-bit-specific features in DFA non-UTF modes
 
@@ -709,7 +767,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts, ["-dfa"]]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput21"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput21", output, use_vjs=opts == ["-jit"]), "21", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput21", output, use_vjs=opts == ["-jit"]),
+            "21", opts, bits)
 
   # \C tests with UTF - DFA matching is not supported for \C in UTF mode
 
@@ -723,7 +783,9 @@ for bmode in (test8, test16, test32):
       for opts in [[], *jitopts]:
         suffix = f"22-{bits}"
         output = Path(f"testoutput{bits}{''.join(opts)}") / f"testoutput{suffix}"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput22", output, use_vjs=opts == ["-jit"]), suffix, opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput22", output, use_vjs=opts == ["-jit"]),
+            suffix, opts, bits)
 
   # Test when \C is disabled
 
@@ -761,7 +823,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput26"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput26", output, use_vjs=opts == ["-jit"]), "26", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput26", output, use_vjs=opts == ["-jit"]),
+            "26", opts, bits)
 
   # Auto-generated Unicode property tests
 
@@ -772,7 +836,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput27"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput27", output, use_vjs=opts == ["-jit"]), "27", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput27", output, use_vjs=opts == ["-jit"]),
+            "27", opts, bits)
 
   # EBCDIC tests
 
@@ -783,7 +849,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts, ["-dfa"]]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput28"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput28", output, use_vjs=opts == ["-jit"]), "28", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput28", output, use_vjs=opts == ["-jit"]),
+            "28", opts, bits)
 
   # EBCDIC tests (for NL=0x25)
 
@@ -796,7 +864,9 @@ for bmode in (test8, test16, test32):
     else:
       for opts in [[], *jitopts, ["-dfa"]]:
         output = Path(f"testoutput{bits}{''.join(opts)}") / "testoutput29"
-        checkresult(invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput29", output, use_vjs=opts == ["-jit"]), "29", opts, bits)
+        checkresult(
+            invoke(pcre2test, *globalopts, bmode, *opts, testdata / "testinput29", output, use_vjs=opts == ["-jit"]),
+            "29", opts, bits)
 
   # Manually selected heap tests - output may vary in different environments,
   # which is why they are not automatically run.
@@ -810,7 +880,8 @@ for bmode in (test8, test16, test32):
 if not failed:
   print()
   print("All tests passed.")
-  for name in ("testbtables", "testSinput", "testSoutput", "test3input", "test3output", "test3outputA", "test3outputB", "test3outputC", "test3outputD", "testsaved1", "testsaved2", "teststdout", "teststderr"):
+  for name in ("testbtables", "testSinput", "testSoutput", "test3input", "test3output", "test3outputA", "test3outputB",
+               "test3outputC", "test3outputD", "testsaved1", "testsaved2", "teststdout", "teststderr"):
     Path(name).unlink(missing_ok=True)
   for cleanup_bits in ("8", "16", "32"):
     shutil.rmtree(f"testoutput{cleanup_bits}", ignore_errors=True)

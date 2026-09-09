@@ -2,6 +2,10 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_python//python:defs.bzl", "py_test")
 
+# We use `buildifier` for auto-formatting our Bazel files.
+# Applied to all Bazel files using:
+#    > buildifier --lint=warn *.bazel
+
 copy_file(
     name = "config_h_generic",
     src = "src/config.h.generic",

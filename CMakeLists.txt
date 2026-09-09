@@ -106,7 +106,7 @@
 #            targets.
 
 ################################################################################
-# We have used `gersemi` for auto-formatting our CMake files.
+# We use `gersemi` for auto-formatting our CMake files.
 # Applied to all CMake files using:
 #    > pip3 install gersemi
 #    > gersemi --in-place --line-length 120 --indent 2 \
@@ -405,14 +405,17 @@ if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
 
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
-  set(_jit_test_source "
+  set(
+    _jit_test_source
+    "
     #define SLJIT_CONFIG_AUTO 1
     #include \"./sljit_src/sljitConfigCPU.h\"
     #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
     #error unsupported
     #endif
     int main(void) { return 0; }
-  ")
+  "
+  )
   check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
   cmake_pop_check_state()
 
@@ -769,11 +772,9 @@ file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 # Parse version numbers and date out of configure.ac
 
 file(
-  STRINGS
-  ${PROJECT_SOURCE_DIR}/configure.ac
+  STRINGS ${PROJECT_SOURCE_DIR}/configure.ac
   configure_lines
-  LIMIT_COUNT
-    50 # Read only the first 50 lines of the file
+  LIMIT_COUNT 50 # Read only the first 50 lines of the file
 )
 
 set(
@@ -1372,8 +1373,7 @@ if(PCRE2_BUILD_TESTS)
   # Write out a CTest configuration file
   #
   file(
-    WRITE
-    ${PROJECT_BINARY_DIR}/CTestCustom.ctest
+    WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
     "# This is a generated file.
 MESSAGE(\"When testing is complete, review test output in the
 \\\"${PROJECT_BINARY_DIR}/Testing/Temporary\\\" folder.\")
@@ -1386,17 +1386,15 @@ MESSAGE(\" \")
   if(Python3_FOUND)
     add_test(
       NAME pcre2_test
-      COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunTest.py"
-        --srcdir "${PROJECT_SOURCE_DIR}"
-        --pcre2test "$<TARGET_FILE:pcre2test>"
+      COMMAND
+        Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunTest.py" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test
+        "$<TARGET_FILE:pcre2test>"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     )
   elseif(UNIX)
     add_test(
       NAME pcre2_test
-      COMMAND sh "${PROJECT_SOURCE_DIR}/RunTest"
-        --srcdir "${PROJECT_SOURCE_DIR}"
-        --pcre2test "$<TARGET_FILE:pcre2test>"
+      COMMAND sh "${PROJECT_SOURCE_DIR}/RunTest" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test "$<TARGET_FILE:pcre2test>"
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     )
   else()
@@ -1407,18 +1405,16 @@ MESSAGE(\" \")
     if(Python3_FOUND)
       add_test(
         NAME pcre2_grep_test
-        COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunGrepTest.py"
-          --srcdir "${PROJECT_SOURCE_DIR}"
-          --pcre2test "$<TARGET_FILE:pcre2test>"
-          --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        COMMAND
+          Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunGrepTest.py" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test
+          "$<TARGET_FILE:pcre2test>" --pcre2grep "$<TARGET_FILE:pcre2grep>"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
       )
     elseif(UNIX)
       add_test(
         NAME pcre2_grep_test
-        COMMAND sh "${PROJECT_SOURCE_DIR}/RunGrepTest"
-          --srcdir "${PROJECT_SOURCE_DIR}"
-          --pcre2test "$<TARGET_FILE:pcre2test>"
+        COMMAND
+          sh "${PROJECT_SOURCE_DIR}/RunGrepTest" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test "$<TARGET_FILE:pcre2test>"
           --pcre2grep "$<TARGET_FILE:pcre2grep>"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
       )
@@ -1530,11 +1526,7 @@ install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
 install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(MSVC AND INSTALL_MSVC_PDB)
-  install(
-    FILES ${DLL_PDB_FILES}
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    CONFIGURATIONS Debug RelWithDebInfo
-  )
+  install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
 endif()
 
 # Help, only for nice output
@@ -1589,7 +1581,10 @@ if(PCRE2_SHOW_REPORT)
   message(STATUS "  Build 32 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
   message(STATUS "  Include debugging code ............ : ${PCRE2_DEBUG}")
   if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
-    message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT} (detected: ${PCRE2_SUPPORT_JIT_DETECTED})")
+    message(
+      STATUS
+      "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT} (detected: ${PCRE2_SUPPORT_JIT_DETECTED})"
+    )
   else()
     message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
   endif()
