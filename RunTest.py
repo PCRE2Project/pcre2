@@ -577,7 +577,7 @@ for bmode in (test8, test16, test32):
       if b"Failed to set locale" in probe.stdout:
         continue
       selected_locale = loc
-      for name_in, name_out in (("testinput3", "test3input"), ("testoutput3", "test3output"), ("testoutput3A", "test3outputA"), ("testoutput3B", "test3outputB"), ("testoutput3C", "test3outputC"), ("testoutput3D", "test3outputD")):
+      for name_in, name_out in (("testinput3", "test3input"), ("testoutput3", "test3output"), ("testoutput3A", "test3outputA"), ("testoutput3B", "test3outputB"), ("testoutput3C", "test3outputC"), ("testoutput3D", "test3outputD"), ("testoutput3E", "test3outputE")):
         Path(name_out).write_bytes((testdata / name_in).read_bytes().replace(b"fr_FR", loc.encode("latin-1")))
       break
     if selected_locale:
@@ -592,6 +592,7 @@ for bmode in (test8, test16, test32):
             Path("test3outputB"),
             Path("test3outputC"),
             Path("test3outputD"),
+            Path("test3outputE"),
         )
         if returncode != 0:
           print(f"** pcre2test failed - check {output}")
@@ -601,7 +602,7 @@ for bmode in (test8, test16, test32):
         else:
           print()
           print(f"** Locale test did not run successfully{with_message}. The output did not match")
-          print("   testoutput3, testoutput3A, testoutput3B, testoutput3C, or testoutput3D.")
+          print("   testoutput3, testoutput3A, testoutput3B, testoutput3C, testoutput3D, or testoutput3E.")
           print("   This may mean that there is a problem with the locale settings rather")
           print("   than a bug in PCRE2.")
           failed = True
@@ -924,7 +925,7 @@ if not failed:
   print()
   print("All tests passed.")
   for name in ("testbtables", "testSinput", "testSoutput", "test3input", "test3output", "test3outputA", "test3outputB",
-               "test3outputC", "test3outputD", "testsaved1", "testsaved2", "teststdout", "teststderr"):
+               "test3outputC", "test3outputD", "test3outputE", "testsaved1", "testsaved2", "teststdout", "teststderr"):
     try:
       Path(name).unlink()
     except FileNotFoundError:

@@ -826,6 +826,7 @@ EXTRA_DIST += \
   testdata/testoutput3B \
   testdata/testoutput3C \
   testdata/testoutput3D \
+  testdata/testoutput3E \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
