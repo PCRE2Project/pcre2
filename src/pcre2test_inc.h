@@ -4999,9 +4999,7 @@ with one of the basic matching functions. */
 for (gmatched = 0;; gmatched++)
   {
   PCRE2_SIZE j;
-  int match_rc;          /* Return code from the match function */
-  int capcount_rc;       /* Number of capture pairs held in the ovector */
-  int capcount_display;  /* Number of capture pairs to display */
+  int match_rc;  /* Return code from the match function */
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be. */
@@ -5204,6 +5202,9 @@ for (gmatched = 0;; gmatched++)
 
   if (match_rc >= 0)
     {
+    int capcount_rc;       /* Number of capture pairs held in the ovector */
+    int capcount_display;  /* Number of capture pairs to display */
+
     if (pp == NULL)
       {
 #ifdef SUPPORT_VALGRIND
