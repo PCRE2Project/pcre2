@@ -10,7 +10,7 @@
 # * Use \0 for binary zero in printf, not \x0, for the benefit of older
 #     versions (and use octal for other special values).
 
-# Set the C locale, so that sort(1) behaves predictably.
+# Set the C locale, so that sort(1) and pcre2grep itself behave predictably.
 
 LC_ALL=C
 export LC_ALL
@@ -40,6 +40,8 @@ while [ $# -gt 0 ] ; do
   esac
   shift
 done
+
+# Validate paths after argument processing
 
 if [ ! -x "$pcre2grep" ] ; then
   echo "** $pcre2grep does not exist or is not executable."
@@ -104,7 +106,12 @@ fi
 # Subsequently, we run most of the pcre2grep tests in the source directory so
 # that the file names in the output are always the same.
 
-if [ -z "$srcdir" ] ; then
+if [ -n "$srcdir" ] ; then
+  if [ ! -d "$srcdir/testdata" ] ; then
+    echo "The specified srcdir '$srcdir' does not contain a testdata directory"
+    exit 1
+  fi
+else
   if [ -d "./testdata" ] ; then
     srcdir=.
   elif [ -d "../testdata" ] ; then
@@ -113,9 +120,6 @@ if [ -z "$srcdir" ] ; then
     echo "Cannot find the testdata directory"
     exit 1
   fi
-elif [ ! -d "$srcdir/testdata" ] ; then
-  echo "The specified srcdir '$srcdir' does not contain a testdata directory"
-  exit 1
 fi
 
 # Set up the path to the valgrind JIT suppressions
@@ -158,9 +162,9 @@ checkspecial()
 
 run_sorted()
   {
-  "$@" >teststdout
+  "$@" >"$builddir/teststdout"
   grep_rc=$?
-  sort teststdout
+  sort "$builddir/teststdout"
   # Technique to pipe output to `sort`, while returning the exit code of the
   # first process in the pipe. Use a file instead.
   return $grep_rc
@@ -168,9 +172,9 @@ run_sorted()
 
 run_null_translated()
   {
-  "$@" >teststdout
+  "$@" >"$builddir/teststdout"
   grep_rc=$?
-  $tr '\000' '@' <teststdout
+  $tr '\000' '@' <"$builddir/teststdout"
   return $grep_rc
   }
 

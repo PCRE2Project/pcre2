@@ -1381,7 +1381,7 @@ MESSAGE(\" \")
 "
   )
 
-  find_package(Python3 COMPONENTS Interpreter)
+  find_package(Python3 3.7 COMPONENTS Interpreter)
 
   if(Python3_FOUND)
     add_test(

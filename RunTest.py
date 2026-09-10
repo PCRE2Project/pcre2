@@ -63,6 +63,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Ensure that Python does not hold onto output, to make it clear where it got
+# to on failure.
+
+sys.stdout.reconfigure(line_buffering=True)
+
 # Define test titles in variables so that they can be output as a list. Some
 # of them are modified (e.g. with -8 or -16) when used in the actual tests.
 
@@ -206,6 +211,8 @@ valgrind = []
 globalopts = ["-q"]
 pcre2test = os.environ.get("pcre2test", None) or ("./pcre2test.exe" if os.name == "nt" else "./pcre2test")
 srcdir = os.environ.get("srcdir", "")
+testdatatar = os.environ.get("testdatatar", "")
+bazel_runfiles = False
 
 # Process options and select which tests to run; for those that are explicitly
 # requested, check that the necessary optional facilities are available.
@@ -215,6 +222,7 @@ doheap = False
 
 arguments = iter(sys.argv[1:])
 for argument in arguments:
+  range_match = re.fullmatch(r"([0-9]+)-([0-9]*)", argument)
   if argument.isascii() and argument.isdecimal() and int(argument) <= maxtest:
     do[int(argument)] = True
   elif argument == "heap":
@@ -252,6 +260,12 @@ for argument in arguments:
     except StopIteration:
       print(f"Missing argument after '{argument}'")
       sys.exit(1)
+  elif argument in ("testdatatar", "-testdatatar", "--testdatatar"):
+    try:
+      testdatatar = next(arguments)
+    except StopIteration:
+      print(f"Missing argument after '{argument}'")
+      sys.exit(1)
   elif argument in ("valgrind", "-valgrind", "--valgrind"):
     valgrind = [
         "valgrind", "--tool=memcheck", "-q", "--leak-check=yes", "--errors-for-leak-kinds=all",
@@ -262,11 +276,13 @@ for argument in arguments:
         "valgrind", "--tool=memcheck", "--num-callers=30", "--leak-check=yes", "--errors-for-leak-kinds=all",
         "--error-limit=no", "--smc-check=all-non-file", "--log-file=report.%p"
     ]
+  elif argument in ("bazel-runfiles", "-bazel-runfiles", "--bazel-runfiles"):
+    bazel_runfiles = True
   elif re.fullmatch(r"~[0-9]+", argument):
     skip.append(int(argument[1:]))
-  elif match := re.fullmatch(r"([0-9]+)-([0-9]*)", argument):
-    first = int(match.group(1))
-    last = int(match.group(2) or maxtest)
+  elif range_match:
+    first = int(range_match.group(1))
+    last = int(range_match.group(2) or maxtest)
     if first > maxtest or last > maxtest:
       print(f"Invalid test range '{argument}'")
       sys.exit(1)
@@ -276,13 +292,46 @@ for argument in arguments:
     print(f"Unknown option or test selector '{argument}'")
     sys.exit(1)
 
+# For some reason that's hard to understand, Bazel struggles to pass actual,
+# honest file paths within its build sandbox, so we have support for its
+# pseudo-paths, which are handles to file paths within a manifest somewhere.
+
+if bazel_runfiles:
+  from python.runfiles import runfiles
+
+  r = runfiles.Create()
+  if pcre2test:
+    pcre2test = str(r.Rlocation(pcre2test))
+  if srcdir:
+    srcdir = str(r.Rlocation(srcdir))
+  if testdatatar:
+    testdatatar = str(r.Rlocation(testdatatar))
+
+# Validate paths after argument processing
+
 if not Path(pcre2test).is_file() or not os.access(pcre2test, os.X_OK):
   print(f"** {pcre2test} does not exist or is not executable.")
   sys.exit(1)
 
 # Find the test data
 
-if not srcdir:
+if testdatatar:
+  import tarfile
+  with tarfile.open(testdatatar) as tar:
+    tar.extractall(path=".")
+
+  testdata = Path("testdata")
+  testdata_display = "./testdata"
+  if not testdata.is_dir():
+    print(f"The specified testdata tarball '{testdatatar}' does not contain a testdata directory.")
+    sys.exit(1)
+elif srcdir:
+  testdata = Path(srcdir) / "testdata"
+  if not testdata.is_dir():
+    print(f"The specified srcdir '{srcdir}' does not contain a testdata directory")
+    sys.exit(1)
+  testdata_display = os.path.join(srcdir, "testdata")
+else:
   if Path("testdata").is_dir():
     testdata = Path("testdata")
     testdata_display = "./testdata"
@@ -292,12 +341,6 @@ if not srcdir:
   else:
     print("Cannot find the testdata directory")
     sys.exit(1)
-else:
-  testdata = Path(srcdir) / "testdata"
-  if not testdata.is_dir():
-    print(f"The specified srcdir '{srcdir}' does not contain a testdata directory")
-    sys.exit(1)
-  testdata_display = os.path.join(srcdir, "testdata")
 
 
 def has_capability(name):
@@ -882,7 +925,10 @@ if not failed:
   print("All tests passed.")
   for name in ("testbtables", "testSinput", "testSoutput", "test3input", "test3output", "test3outputA", "test3outputB",
                "test3outputC", "test3outputD", "testsaved1", "testsaved2", "teststdout", "teststderr"):
-    Path(name).unlink(missing_ok=True)
+    try:
+      Path(name).unlink()
+    except FileNotFoundError:
+      pass
   for cleanup_bits in ("8", "16", "32"):
     shutil.rmtree(f"testoutput{cleanup_bits}", ignore_errors=True)
     shutil.rmtree(f"testoutput{cleanup_bits}-jit", ignore_errors=True)

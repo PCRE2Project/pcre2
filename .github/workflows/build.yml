@@ -91,7 +91,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'alpine')
     steps:
       - name: Setup
-        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev
+        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev python3
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

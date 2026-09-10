@@ -1,6 +1,7 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_python//python:defs.bzl", "py_test")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 # We use `buildifier` for auto-formatting our Bazel files.
 # Applied to all Bazel files using:
@@ -179,9 +180,10 @@ cc_binary(
     ],
 )
 
-filegroup(
-    name = "testdata",
+pkg_tar(
+    name = "testdata_tar",
     srcs = glob(["testdata/*"]),
+    strip_prefix = ".",
 )
 
 py_test(
@@ -189,18 +191,16 @@ py_test(
     size = "small",
     srcs = ["RunTest.py"],
     args = [
-        "--srcdir",
-        ".",
+        "--bazel-runfiles",
+        "--testdatatar",
+        "$(rlocationpath :testdata_tar)",
         "--pcre2test",
-        # TODO Apparently this may not work on Windows... could consider adding
-        #      support by changing this to pass rlocationpath, and add a
-        #      deps=[...] to load the Python runfiles lib, and use that in the
-        #      Py script to resolve the Bazel runfiles syntax
-        "$(rootpath :pcre2test)",
+        "$(rlocationpath :pcre2test)",
     ],
     data = [
         ":pcre2test",
-        ":testdata",
+        ":testdata_tar",
     ],
+    deps = ["@bazel_tools//tools/python/runfiles"],
     main = "RunTest.py",
 )

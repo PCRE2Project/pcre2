@@ -338,6 +338,8 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
+# Validate paths after argument processing
+
 if [ ! -x "$pcre2test" ] ; then
   echo "** $pcre2test does not exist or is not executable."
   exit 1
@@ -345,16 +347,7 @@ fi
 
 # Find the test data
 
-if [ -z "$srcdir" ] ; then
-  if [ -d "./testdata" ] ; then
-    testdata=./testdata
-  elif [ -d "../testdata" ] ; then
-    testdata=../testdata
-  else
-    echo "Cannot find the testdata directory"
-    exit 1
-  fi
-else
+if [ -n "$srcdir" ] ; then
   if [ ! -d "$srcdir/testdata" ] ; then
     echo "The specified srcdir '$srcdir' does not contain a testdata directory"
     exit 1
@@ -364,6 +357,15 @@ else
     */) testdata="${srcdir}testdata";;
     *) testdata="${srcdir}/testdata";;
   esac
+else
+  if [ -d "./testdata" ] ; then
+    testdata=./testdata
+  elif [ -d "../testdata" ] ; then
+    testdata=../testdata
+  else
+    echo "Cannot find the testdata directory"
+    exit 1
+  fi
 fi
 
 # If it is possible to set the system stack size and -bigstack was given,

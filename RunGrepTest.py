@@ -17,6 +17,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Set the C locale, so that sort(1) and pcre2grep itself behave predictably.
+
+os.environ["LC_ALL"] = "C"
+
+# Ensure that Python does not hold onto output, to make it clear where it got
+# to on failure.
+
 sys.stdout.reconfigure(line_buffering=True)
 
 # Remove any non-default colouring and aliases that the caller may have set.
@@ -65,6 +72,8 @@ for argument in arguments:
   else:
     print(f"RunGrepTest.py: Unknown argument {argument}")
     sys.exit(1)
+
+# Validate paths after argument processing
 
 if not Path(pcre2grep).is_file() or not os.access(pcre2grep, os.X_OK):
   print(f"** {pcre2grep} does not exist or is not executable.")
@@ -149,7 +158,12 @@ print(f"Testing {pcre2grep_version}" + (" using valgrind" if valgrind else ""))
 # contains the test data. Subsequently, we run most of the pcre2grep tests in
 # the source directory so that the file names in the output are always the same.
 
-if not srcdir:
+if srcdir:
+  if not (Path(srcdir) / "testdata").is_dir():
+    print(f"The specified srcdir '{srcdir}' does not contain a testdata directory")
+    sys.exit(1)
+  srcdir = Path(srcdir)
+else:
   if Path("testdata").is_dir():
     srcdir = Path(".")
   elif Path("../testdata").is_dir():
@@ -157,11 +171,6 @@ if not srcdir:
   else:
     print("Cannot find the testdata directory")
     sys.exit(1)
-else:
-  if not (Path(srcdir) / "testdata").is_dir():
-    print(f"The specified srcdir '{srcdir}' does not contain a testdata directory")
-    sys.exit(1)
-  srcdir = Path(srcdir)
 
 # Set up the path to the valgrind JIT suppressions
 
@@ -716,9 +725,9 @@ output([*pcre2grep_args, "--colour=always", "--allow-lookaround-bsk", r"(?<=\K.)
 output([*pcre2grep_args, "--colour=always", "--allow-lookaround-bsk", r"(?=.\K)", "testNinputgrep"])
 output([*pcre2grep_args, "--colour=always", "--allow-lookaround-bsk", r"(?<=\K[ac])", "testNinputgrep"])
 output([*pcre2grep_args, "--colour=always", "--allow-lookaround-bsk", r"(?=[ac]\K)", "testNinputgrep"])
-environment = os.environ.copy()
-environment["GREP_COLORS"] = "ms=1;20"
 with open("testtrygrep", "ab") as output_file:
+  environment = os.environ.copy()
+  environment["GREP_COLORS"] = "ms=1;20"
   process = subprocess.run(
       valgrind + vjs + [*pcre2grep_args, "--colour=always", "--allow-lookaround-bsk", r"(?=[ac]\K)", "testNinputgrep"],
       stdout=output_file,
@@ -1373,6 +1382,9 @@ checkspecial(("-e", "(unpaired1", "-e", "(unpaired2", os.devnull), 2)
 # Clean up local working files
 for filename in ("testNinputgrep", "teststderrgrep", "testtrygrep", "testtemp1grep", "testtemp2grep", "-testtemp1grep",
                  "--"):
-  Path(filename).unlink(missing_ok=True)
+  try:
+    Path(filename).unlink()
+  except FileNotFoundError:
+    pass
 
 sys.exit(0)
