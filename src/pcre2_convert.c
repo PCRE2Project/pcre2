@@ -679,9 +679,10 @@ if (*pattern == CHAR_EXCLAMATION_MARK
       len++;
       }
     out->out_str[len] = (uint8_t) separator;
+    len++;
     }
 
-  convert_glob_write_str(out, len + 1);
+  convert_glob_write_str(out, len);
   }
 else
   convert_glob_write(out, CHAR_LEFT_SQUARE_BRACKET);
