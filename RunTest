@@ -657,6 +657,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       outfile4=test3outputC
       outfile5=test3outputD
       outfile6=test3outputE
+      outfile7=test3outputF
       sed "s/fr_FR/$loc/" "$testdata/testinput3" >test3input
       sed "s/fr_FR/$loc/" "$testdata/testoutput3" >test3output
       sed "s/fr_FR/$loc/" "$testdata/testoutput3A" >test3outputA
@@ -664,6 +665,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       sed "s/fr_FR/$loc/" "$testdata/testoutput3C" >test3outputC
       sed "s/fr_FR/$loc/" "$testdata/testoutput3D" >test3outputD
       sed "s/fr_FR/$loc/" "$testdata/testoutput3E" >test3outputE
+      sed "s/fr_FR/$loc/" "$testdata/testoutput3F" >test3outputF
       break
     done
 
@@ -682,14 +684,15 @@ for bmode in "$test8" "$test16" "$test32"; do
              $cf $outfile3 testoutput$bits/testoutput3 >>teststdout || \
              $cf $outfile4 testoutput$bits/testoutput3 >>teststdout || \
              $cf $outfile5 testoutput$bits/testoutput3 >>teststdout || \
-             $cf $outfile6 testoutput$bits/testoutput3 >>teststdout
+             $cf $outfile6 testoutput$bits/testoutput3 >>teststdout || \
+             $cf $outfile7 testoutput$bits/testoutput3 >>teststdout
           then
             echo "  OK$with"
           else
             cat teststdout
             echo ""
             echo "** Locale test did not run successfully$with. The output did not match"
-            echo "   $outfile, $outfile2, $outfile3, $outfile4, $outfile5 or $outfile6."
+            echo "   $outfile, $outfile2, $outfile3, $outfile4, $outfile5, $outfile6 or $outfile7."
             echo "   This may mean that there is a problem with the locale settings rather"
             echo "   than a bug in PCRE2."
             yield=1
@@ -1074,7 +1077,9 @@ if [ $yield -eq 0 ] ; then
   echo "All tests passed."
 
   # Clean up local working files
-  rm -f testbtables testSinput testSoutput test3input test3output test3outputA test3outputB test3outputC test3outputD test3outputE testsaved1 testsaved2 teststdout teststderr
+  rm -f testbtables testSinput testSoutput test3input \
+        test3output test3outputA test3outputB test3outputC test3outputD test3outputE test3outputF \
+        testsaved1 testsaved2 teststdout teststderr
   rm -rf testoutput8 testoutput8-jit testoutput8-dfa \
          testoutput16 testoutput16-jit testoutput16-dfa \
          testoutput32 testoutput32-jit testoutput32-dfa

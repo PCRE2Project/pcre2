@@ -827,6 +827,7 @@ EXTRA_DIST += \
   testdata/testoutput3C \
   testdata/testoutput3D \
   testdata/testoutput3E \
+  testdata/testoutput3F \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
@@ -880,6 +881,10 @@ CLEANFILES += \
   test3output \
   test3outputA \
   test3outputB \
+  test3outputC \
+  test3outputD \
+  test3outputE \
+  test3outputF \
   testtry \
   teststdout \
   teststderr \
