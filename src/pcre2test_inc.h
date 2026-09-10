@@ -3616,7 +3616,7 @@ tests for substring extraction.
 
 Arguments:
   utf       TRUE for utf
-  capcount  return from pcre2_match()
+  capcount  number of captured substrings held in the match data
 
 Returns:    FALSE if print_error_message() fails
 */
@@ -4999,7 +4999,7 @@ with one of the basic matching functions. */
 for (gmatched = 0;; gmatched++)
   {
   PCRE2_SIZE j;
-  int capcount;
+  int match_rc;  /* Return code from the match function */
 
   /* Fill the ovector with junk to detect elements that do not get set
   when they should be. */
@@ -5082,22 +5082,19 @@ for (gmatched = 0;; gmatched++)
       (void)check_match_limit(pp, arg_ulen, PCRE2_ERROR_HEAPLIMIT, "heap");
       }
 
-    capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT,
+    match_rc = check_match_limit(pp, arg_ulen, PCRE2_ERROR_MATCHLIMIT,
       "match");
 
     if (compiled_code->executable_jit == NULL ||
         (dat_datctl.options & PCRE2_NO_JIT) != 0 ||
         (dat_datctl.control & CTL_DFA) != 0)
       {
-      capcount = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
+      match_rc = check_match_limit(pp, arg_ulen, PCRE2_ERROR_DEPTHLIMIT,
         "depth");
       }
 
-    if (capcount == 0)
-      {
+    if (match_rc == 0)
       cfprintf(clr_api_error, outfile, "Matched, but offsets vector is too small to show all matches\n");
-      capcount = dat_datctl.oveccount;
-      }
     }
 
   /* Otherwise just run a single match. */
@@ -5114,30 +5111,24 @@ for (gmatched = 0;; gmatched++)
         dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
       if (dfa_matched++ == 0)
         dfa_workspace[0] = -1;  /* To catch bad restart */
-      capcount = pcre2_dfa_match(compiled_code, pp, arg_ulen,
+      match_rc = pcre2_dfa_match(compiled_code, pp, arg_ulen,
         dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
         use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
-      if (capcount == 0)
-        {
+      if (match_rc == 0)
         cfprintf(clr_api_error, outfile, "Matched, but offsets vector is too small to show all matches\n");
-        capcount = dat_datctl.oveccount;
-        }
       }
     else
       {
       if ((pat_patctl.control & CTL_JITFAST) != 0 &&
           (dat_datctl.options & PCRE2_NO_JIT) == 0)
-        capcount = pcre2_jit_match(compiled_code, pp, arg_ulen,
+        match_rc = pcre2_jit_match(compiled_code, pp, arg_ulen,
           dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
           use_dat_context);
       else
-        capcount = pcre2_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
+        match_rc = pcre2_match(compiled_code, pp, arg_ulen, dat_datctl.offset,
           dat_datctl.options | g_notempty, match_data, use_dat_context);
-      if (capcount == 0)
-        {
+      if (match_rc == 0)
         cfprintf(clr_api_error, outfile, "Matched, but too many substrings\n");
-        capcount = dat_datctl.oveccount;
-        }
       }
 
     /* For malloc testing, we repeat the matching. */
@@ -5158,7 +5149,7 @@ for (gmatched = 0;; gmatched++)
           {
           if (dfa_matched++ == 0)
             dfa_workspace[0] = -1;  /* To catch bad restart */
-          capcount = pcre2_dfa_match(compiled_code, pp, arg_ulen,
+          match_rc = pcre2_dfa_match(compiled_code, pp, arg_ulen,
             dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
             use_dat_context, dfa_workspace, DFA_WS_DIMENSION);
           }
@@ -5166,11 +5157,11 @@ for (gmatched = 0;; gmatched++)
           {
           if ((pat_patctl.control & CTL_JITFAST) != 0 &&
               (dat_datctl.options & PCRE2_NO_JIT) == 0)
-            capcount = pcre2_jit_match(compiled_code, pp, arg_ulen,
+            match_rc = pcre2_jit_match(compiled_code, pp, arg_ulen,
               dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
               use_dat_context);
           else
-            capcount = pcre2_match(compiled_code, pp, arg_ulen,
+            match_rc = pcre2_match(compiled_code, pp, arg_ulen,
               dat_datctl.offset, dat_datctl.options | g_notempty, match_data,
               use_dat_context);
           }
@@ -5178,13 +5169,10 @@ for (gmatched = 0;; gmatched++)
         mallocs_until_failure = INT_MAX;
         outfile = saved_outfile;
 
-        if (capcount == 0)
-          capcount = dat_datctl.oveccount;
-
-        if (i < target_mallocs && capcount != PCRE2_ERROR_NOMEMORY)
+        if (i < target_mallocs && match_rc != PCRE2_ERROR_NOMEMORY)
           {
           cfprintf(clr_test_error, outfile, "** malloc() match test did not fail as expected (%d)\n",
-                  capcount);
+                  match_rc);
           return PR_ABEND;
           }
         }
@@ -5193,7 +5181,7 @@ for (gmatched = 0;; gmatched++)
 
   /* Verify that it's safe to call pcre2_next_match with rc < 0. */
 
-  if (capcount < 0 && (dat_datctl.control & CTL_ANYGLOB) != 0)
+  if (match_rc < 0 && (dat_datctl.control & CTL_ANYGLOB) != 0)
     {
       BOOL rc_nextmatch;
       PCRE2_SIZE tmp_offset = 0xcd;
@@ -5206,14 +5194,17 @@ for (gmatched = 0;; gmatched++)
         }
     }
 
-  /* The result of the match is now in capcount. First handle a successful
+  /* The result of the match is now in match_rc. First handle a successful
   match. If pp was forced to be NULL (to test NULL handling) it will have been
   treated as an empty string if the length was zero. So, re-create that for
   outputting, preserving the invariant that pp is a valid pointer to a region
   of length len followed by a null. */
 
-  if (capcount >= 0)
+  if (match_rc >= 0)
     {
+    int capcount_rc;       /* Number of capture pairs held in the ovector */
+    int capcount_display;  /* Number of capture pairs to display */
+
     if (pp == NULL)
       {
 #ifdef SUPPORT_VALGRIND
@@ -5224,11 +5215,17 @@ for (gmatched = 0;; gmatched++)
       *pp = 0;
       }
 
-    if ((unsigned)capcount > oveccount)   /* Check for lunatic return value */
+    /* A return of zero means the ovector was too small, in which case every
+    pair in it has been set. Keep the raw return code separate from the number
+    of pairs held. */
+
+    capcount_rc = (match_rc == 0)? (int)oveccount : match_rc;
+
+    if ((unsigned)capcount_rc > oveccount) /* Check for lunatic return value */
       {
       cfprintf(clr_test_error, outfile,
         "** PCRE2 error: returned count %d is too big for ovector count %d\n",
-        capcount, oveccount);
+        capcount_rc, oveccount);
       return PR_ABEND;
       }
 
@@ -5315,23 +5312,26 @@ for (gmatched = 0;; gmatched++)
 
     /* "allcaptures" requests showing of all captures in the pattern, to check
     unset ones at the end. It may be set on the pattern or the data. Implement
-    by setting capcount to the maximum. This is not relevant for DFA matching,
-    so ignore it (warning given above). */
+    by setting capcount_display to the maximum. This is not relevant for DFA
+    matching, so ignore it (warning given above). */
+
+    capcount_display = capcount_rc;
 
     if ((dat_datctl.control & (CTL_ALLCAPTURES|CTL_DFA)) == CTL_ALLCAPTURES)
       {
-      capcount = maxcapcount + 1;   /* Allow for full match */
-      if ((unsigned)capcount > oveccount) capcount = oveccount;
+      capcount_display = maxcapcount + 1;   /* Allow for full match */
+      if ((unsigned)capcount_display > oveccount) capcount_display = oveccount;
       }
 
     /* "allvector" request showing the entire ovector. */
 
-    if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0) capcount = oveccount;
+    if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
+      capcount_display = oveccount;
 
     /* Output the captured substrings. Note that, for the matched string,
     the use of \K in an assertion can make the start later than the end. */
 
-    for (int i = 0; i < 2*capcount; i += 2)
+    for (int i = 0; i < 2*capcount_display; i += 2)
       {
       PCRE2_SIZE lleft, lmiddle, lright;
       PCRE2_SIZE start = ovector[i];
@@ -5468,7 +5468,7 @@ for (gmatched = 0;; gmatched++)
 
     /* Process copy/get strings */
 
-    if (!copy_and_get(utf, capcount)) return PR_ABEND;
+    if (!copy_and_get(utf, capcount_rc)) return PR_ABEND;
 
     }    /* End of handling a successful match */
 
@@ -5477,7 +5477,7 @@ for (gmatched = 0;; gmatched++)
   not in use, "allusedtext" may be set, in which case we indicate the leftmost
   consulted character. */
 
-  else if (capcount == PCRE2_ERROR_PARTIAL)
+  else if (match_rc == PCRE2_ERROR_PARTIAL)
     {
     PCRE2_SIZE leftchar;
     int backlength;
@@ -5531,11 +5531,11 @@ for (gmatched = 0;; gmatched++)
     }       /* End of handling partial match */
 
   /* A "normal" match failure. There will be a negative error number in
-  capcount. */
+  match_rc. */
 
   else
     {
-    switch(capcount)
+    switch(match_rc)
       {
       case PCRE2_ERROR_NOMATCH:
       if (gmatched == 0)
@@ -5560,14 +5560,14 @@ for (gmatched = 0;; gmatched++)
 
       case PCRE2_ERROR_BADUTFOFFSET:
       cfprintf(clr_api_error, outfile, "Error %d (bad UTF-" STR(PCRE2_CODE_UNIT_WIDTH)
-        " offset)\n", capcount);
+        " offset)\n", match_rc);
       break;
 
       default:
-      cfprintf(clr_api_error, outfile, "Failed: error %d: ", capcount);
-      if (!print_error_message(capcount, "", "")) return PR_ABEND;
-      if (capcount <= PCRE2_ERROR_UTF8_ERR1 &&
-          capcount >= PCRE2_ERROR_UTF32_ERR2)
+      cfprintf(clr_api_error, outfile, "Failed: error %d: ", match_rc);
+      if (!print_error_message(match_rc, "", "")) return PR_ABEND;
+      if (match_rc <= PCRE2_ERROR_UTF8_ERR1 &&
+          match_rc >= PCRE2_ERROR_UTF32_ERR2)
         {
         PCRE2_SIZE startchar;
         startchar = pcre2_get_startchar(match_data);
