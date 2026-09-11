@@ -5998,6 +5998,42 @@ ASSERT(rc == 0, "pcre2_get_parens_nest_limit()");
 ASSERT(uval == 250, "pcre2_get_parens_nest_limit()");
 
 
+/* test setting max_pattern_length */
+rc = pcre2_set_max_pattern_length(test_pat_context, 12345);
+ASSERT(rc == 0, "pcre2_set_max_pattern_length()");
+
+sizeval = 123;
+rc = pcre2_get_max_pattern_length(test_pat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_max_pattern_length()");
+ASSERT(sizeval == 12345, "pcre2_get_max_pattern_length()");
+
+rc = pcre2_set_max_pattern_length(test_pat_context, PCRE2_UNSET);
+ASSERT(rc == 0, "pcre2_set_max_pattern_length()");
+
+sizeval = 123;
+rc = pcre2_get_max_pattern_length(test_pat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_max_pattern_length()");
+ASSERT(sizeval == PCRE2_UNSET, "pcre2_get_max_pattern_length()");
+
+
+/* test setting depth_limit */
+rc = pcre2_set_depth_limit(test_dat_context, 123456);
+ASSERT(rc == 0, "pcre2_set_depth_limit()");
+
+uval = 123;
+rc = pcre2_get_depth_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_depth_limit()");
+ASSERT(uval == 123456, "pcre2_get_depth_limit()");
+
+rc = pcre2_set_depth_limit(test_dat_context, MATCH_LIMIT);
+ASSERT(rc == 0, "pcre2_set_depth_limit()");
+
+uval = 123;
+rc = pcre2_get_depth_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_depth_limit()");
+ASSERT(uval == MATCH_LIMIT, "pcre2_get_depth_limit()");
+
+
 rc = pcre2_set_recursion_limit(test_dat_context, 10);
 ASSERT(rc == 0, "pcre2_set_recursion_limit()");
 
