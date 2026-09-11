@@ -6034,6 +6034,42 @@ ASSERT(rc == 0, "pcre2_get_depth_limit()");
 ASSERT(uval == MATCH_LIMIT, "pcre2_get_depth_limit()");
 
 
+/* test setting heap_limit */
+rc = pcre2_set_heap_limit(test_dat_context, 123456);
+ASSERT(rc == 0, "pcre2_set_heap_limit()");
+
+uval = 123;
+rc = pcre2_get_heap_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_heap_limit()");
+ASSERT(uval == 123456, "pcre2_get_heap_limit()");
+
+rc = pcre2_set_heap_limit(test_dat_context, HEAP_LIMIT);
+ASSERT(rc == 0, "pcre2_set_heap_limit()");
+
+uval = 123;
+rc = pcre2_get_heap_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_heap_limit()");
+ASSERT(uval == HEAP_LIMIT, "pcre2_get_heap_limit()");
+
+
+/* test setting match_limit */
+rc = pcre2_set_match_limit(test_dat_context, 123456);
+ASSERT(rc == 0, "pcre2_set_match_limit()");
+
+uval = 123;
+rc = pcre2_get_match_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_match_limit()");
+ASSERT(uval == 123456, "pcre2_get_match_limit()");
+
+rc = pcre2_set_match_limit(test_dat_context, MATCH_LIMIT);
+ASSERT(rc == 0, "pcre2_set_match_limit()");
+
+uval = 123;
+rc = pcre2_get_match_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_match_limit()");
+ASSERT(uval == MATCH_LIMIT, "pcre2_get_match_limit()");
+
+
 rc = pcre2_set_recursion_limit(test_dat_context, 10);
 ASSERT(rc == 0, "pcre2_set_recursion_limit()");
 
