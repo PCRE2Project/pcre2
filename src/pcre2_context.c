@@ -346,8 +346,31 @@ switch(value)
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length)
+{
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*length = ccontext->bsr_convention;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE *length)
+{
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*length = ccontext->max_pattern_length;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
 {
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 ccontext->max_pattern_length = length;
 return 0;
 }
@@ -355,6 +378,9 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_pattern_compiled_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
 {
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 ccontext->max_pattern_compiled_length = length;
 return 0;
 }
@@ -379,6 +405,16 @@ switch(newline)
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_newline(pcre2_compile_context *ccontext, uint32_t *length)
+{
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*length = ccontext->newline_convention;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext, uint32_t limit)
 {
 ccontext->max_varlookbehind = limit;
@@ -386,8 +422,21 @@ return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t *limit)
+{
+if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*limit = ccontext->parens_nest_limit;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t limit)
 {
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 ccontext->parens_nest_limit = limit;
 return 0;
 }
@@ -395,6 +444,9 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_compile_extra_options(pcre2_compile_context *ccontext, uint32_t options)
 {
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 ccontext->extra_options = options;
 return 0;
 }
@@ -476,6 +528,9 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_heap_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 mcontext->heap_limit = limit;
 return 0;
 }
@@ -483,6 +538,9 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_match_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 mcontext->match_limit = limit;
 return 0;
 }
@@ -490,6 +548,9 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_depth_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 mcontext->depth_limit = limit;
 return 0;
 }
@@ -497,7 +558,50 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
 {
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
 mcontext->offset_limit = limit;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_heap_limit(pcre2_match_context *mcontext, uint32_t *limit)
+{
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*limit = mcontext->heap_limit;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_match_limit(pcre2_match_context *mcontext, uint32_t *limit)
+{
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*limit = mcontext->match_limit;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_depth_limit(pcre2_match_context *mcontext, uint32_t *limit)
+{
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*limit = mcontext->depth_limit;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_get_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE *limit)
+{
+if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+*limit = mcontext->offset_limit;
 return 0;
 }
 
