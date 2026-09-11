@@ -330,6 +330,12 @@
 
 /??a??/
 
+/[!a]/
+
+/[^xy]/
+
+/a*[!b]/
+
 #pattern convert=unset
 #pattern convert=glob,convert_glob_escape=0
 

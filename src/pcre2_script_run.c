@@ -69,13 +69,14 @@ Returns:    TRUE if this is a valid script run
 
 /* These are states in the checking process. */
 
-enum { SCRIPT_UNSET,          /* Requirement as yet unknown */
-       SCRIPT_MAP,            /* Bitmap contains acceptable scripts */
-       SCRIPT_HANPENDING,     /* Have had only Han characters */
-       SCRIPT_HANHIRAKATA,    /* Expect Han or Hirikata */
-       SCRIPT_HANBOPOMOFO,    /* Expect Han or Bopomofo */
-       SCRIPT_HANHANGUL       /* Expect Han or Hangul */
-       };
+enum {
+  SCRIPT_UNSET,        // Requirement as yet unknown
+  SCRIPT_MAP,          // Bitmap contains acceptable scripts
+  SCRIPT_HANPENDING,   // Have had only Han characters
+  SCRIPT_HANHIRAKATA,  // Expect Han or Hirikata
+  SCRIPT_HANBOPOMOFO,  // Expect Han or Bopomofo
+  SCRIPT_HANHANGUL     // Expect Han or Hangul
+};
 
 #define UCD_MAPSIZE (ucp_Unknown/32 + 1)
 #define FULL_MAPSIZE (ucp_Script_Count/32 + 1)
@@ -91,7 +92,7 @@ uint32_t require_digitset = 0;
 uint32_t c;
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
-(void)utf;    /* Avoid compiler warning */
+(void)utf;    // Avoid compiler warning
 #endif
 
 /* Any string containing fewer than 2 characters is a valid script run. */
@@ -151,13 +152,13 @@ for (;;)
 
     /* Handle the different checking states */
 
-    switch(require_state)
+    switch (require_state)
       {
       /* First significant character - it might follow Common or Inherited
       characters that do not have any script extensions. */
 
       case SCRIPT_UNSET:
-      switch(script)
+      switch (script)
         {
         case ucp_Han:
         require_state = SCRIPT_HANPENDING;
@@ -201,7 +202,7 @@ for (;;)
 #define FOUND_HANGUL   8
 
       case SCRIPT_HANPENDING:
-      if (script != ucp_Han)   /* Another Han does nothing */
+      if (script != ucp_Han)   // Another Han does nothing
         {
         uint32_t chspecial = 0;
 
@@ -210,7 +211,7 @@ for (;;)
         if (MAPBIT(map, ucp_Katakana) != 0) chspecial |= FOUND_KATAKANA;
         if (MAPBIT(map, ucp_Hangul) != 0)   chspecial |= FOUND_HANGUL;
 
-        if (chspecial == 0) return FALSE;   /* Not allowed with Han */
+        if (chspecial == 0) return FALSE;   // Not allowed with Han
 
         if (chspecial == FOUND_BOPOMOFO)
           require_state = SCRIPT_HANBOPOMOFO;
@@ -258,7 +259,7 @@ for (;;)
       /* The rest of the string must be in this script, but we have to
       allow for the Han complications. */
 
-      switch(script)
+      switch (script)
         {
         case ucp_Han:
         require_state = SCRIPT_HANPENDING;
@@ -287,7 +288,7 @@ for (;;)
 
       break;
       }
-    }   /* End checking character's script and extensions. */
+    }   // End checking character's script and extensions.
 
   /* The character is in an acceptable script. We must now ensure that all
   decimal digits in the string come from the same set. Some scripts (e.g.
@@ -310,7 +311,7 @@ for (;;)
       int top = PRIV(ucd_digit_sets)[0];
       for (;;)
         {
-        if (top <= bot + 1)    /* <= rather than == is paranoia */
+        if (top <= bot + 1)    // <= rather than == is paranoia
           {
           digitset = top;
           break;
@@ -324,13 +325,13 @@ for (;;)
 
     if (require_digitset == 0) require_digitset = digitset;
       else if (digitset != require_digitset) return FALSE;
-    }   /* End digit handling */
+    }   // End digit handling
 
   /* If we haven't yet got to the end, pick up the next character. */
 
   if (ptr >= endptr) return TRUE;
   GETCHARINCTEST(c, ptr);
-  }  /* End checking loop */
+  }  // End checking loop
 
 #else   /* NOT SUPPORT_UNICODE */
 (void)ptr;

@@ -84,7 +84,7 @@ if (utf) { GETCHAR(c, ptr); } else c = *ptr;
 c = *ptr;
 #endif  /* SUPPORT_UNICODE */
 
-if (type == NLTYPE_ANYCRLF) switch(c)
+if (type == NLTYPE_ANYCRLF) switch (c)
   {
   case CHAR_LF:
   *lenptr = 1;
@@ -100,7 +100,7 @@ if (type == NLTYPE_ANYCRLF) switch(c)
 
 /* NLTYPE_ANY */
 
-else switch(c)
+else switch (c)
   {
 #ifdef EBCDIC
   case CHAR_NEL:
@@ -121,15 +121,15 @@ else switch(c)
   *lenptr = utf? 2 : 1;
   return TRUE;
 
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 3;
   return TRUE;
 
 #else  /* 16-bit or 32-bit code units */
   case CHAR_NEL:
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 1;
   return TRUE;
 #endif
@@ -180,7 +180,7 @@ else c = *ptr;
 c = *ptr;
 #endif  /* SUPPORT_UNICODE */
 
-if (type == NLTYPE_ANYCRLF) switch(c)
+if (type == NLTYPE_ANYCRLF) switch (c)
   {
   case CHAR_LF:
   *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
@@ -196,7 +196,7 @@ if (type == NLTYPE_ANYCRLF) switch(c)
 
 /* NLTYPE_ANY */
 
-else switch(c)
+else switch (c)
   {
   case CHAR_LF:
   *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
@@ -217,15 +217,15 @@ else switch(c)
   *lenptr = utf? 2 : 1;
   return TRUE;
 
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 3;
   return TRUE;
 
 #else /* 16-bit or 32-bit code units */
   case CHAR_NEL:
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 1;
   return TRUE;
 #endif

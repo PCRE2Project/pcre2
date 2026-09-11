@@ -286,7 +286,7 @@ static struct regression_test_case regression_test_cases[] = {
 	/* Greedy and non-greedy ? operators. */
 	{ MU, A, 0, 0, "(?:a)?a", "laab" },
 	{ CMU, A, 0, 0, "(A)?A", "llaab" },
-	{ MU, A, 0, 0, "(a)?\?a", "aab" }, /* ?? is the prefix of trygraphs in GCC. */
+	{ MU, A, 0, 0, "(a)?\?a", "aab" }, // ?? is the prefix of trigraphs in GCC.
 	{ MU, A, 0, 0, "(a)?a", "manm" },
 	{ CMU, A, 0, 0, "(a|b)?\?d((?:e)?)", "ABABdx" },
 	{ MU, A, 0, 0, "(a|b)?\?d((?:e)?)", "abcde" },

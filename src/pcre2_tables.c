@@ -143,6 +143,7 @@ a Python script from Unicode data files. */
 /* Table to translate from particular type value to the general value. */
 
 const uint32_t PRIV(ucp_gentype)[] = {
+  // clang-format off
   ucp_C, ucp_C, ucp_C, ucp_C, ucp_C,  /* Cc, Cf, Cn, Co, Cs */
   ucp_L, ucp_L, ucp_L, ucp_L, ucp_L,  /* Ll, Lu, Lm, Lo, Lt */
   ucp_M, ucp_M, ucp_M,                /* Mc, Me, Mn */
@@ -150,7 +151,8 @@ const uint32_t PRIV(ucp_gentype)[] = {
   ucp_P, ucp_P, ucp_P, ucp_P, ucp_P,  /* Pc, Pd, Pe, Pf, Pi */
   ucp_P, ucp_P,                       /* Ps, Po */
   ucp_S, ucp_S, ucp_S, ucp_S,         /* Sc, Sk, Sm, So */
-  ucp_Z, ucp_Z, ucp_Z                 /* Zl, Zp, Zs */
+  ucp_Z, ucp_Z, ucp_Z,                /* Zl, Zp, Zs */
+  // clang-format on
 };
 
 /* This table encodes the rules for finding the end of an extended grapheme
@@ -201,25 +203,27 @@ are implementing).
 #define ESZ (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbZWJ)
 
 const uint32_t PRIV(ucp_gbtable)[] = {
-   (1u<<ucp_gbLF),                                      /*  0 CR */
-   0,                                                   /*  1 LF */
-   0,                                                   /*  2 Control */
-   ESZ,                                                 /*  3 Extend */
-   ESZ|(1u<<ucp_gbPrepend)|                             /*  4 Prepend */
-       (1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbT)|
-       (1u<<ucp_gbLV)|(1u<<ucp_gbLVT)|(1u<<ucp_gbOther)|
-       (1u<<ucp_gbRegional_Indicator),
-   ESZ,                                                 /*  5 SpacingMark */
-   ESZ|(1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbLV)|      /*  6 L */
-       (1u<<ucp_gbLVT),
-   ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  7 V */
-   ESZ|(1u<<ucp_gbT),                                   /*  8 T */
-   ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  9 LV */
-   ESZ|(1u<<ucp_gbT),                                   /* 10 LVT */
-   (1u<<ucp_gbRegional_Indicator),                      /* 11 Regional Indicator */
-   ESZ,                                                 /* 12 Other */
-   ESZ|(1u<<ucp_gbExtended_Pictographic),               /* 13 ZWJ */
-   ESZ                                                  /* 14 Extended Pictographic */
+  // clang-format off
+  (1u<<ucp_gbLF),                                      /*  0 CR */
+  0,                                                   /*  1 LF */
+  0,                                                   /*  2 Control */
+  ESZ,                                                 /*  3 Extend */
+  ESZ|(1u<<ucp_gbPrepend)|                             /*  4 Prepend */
+      (1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbT)|
+      (1u<<ucp_gbLV)|(1u<<ucp_gbLVT)|(1u<<ucp_gbOther)|
+      (1u<<ucp_gbRegional_Indicator),
+  ESZ,                                                 /*  5 SpacingMark */
+  ESZ|(1u<<ucp_gbL)|(1u<<ucp_gbV)|(1u<<ucp_gbLV)|      /*  6 L */
+      (1u<<ucp_gbLVT),
+  ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  7 V */
+  ESZ|(1u<<ucp_gbT),                                   /*  8 T */
+  ESZ|(1u<<ucp_gbV)|(1u<<ucp_gbT),                     /*  9 LV */
+  ESZ|(1u<<ucp_gbT),                                   /* 10 LVT */
+  (1u<<ucp_gbRegional_Indicator),                      /* 11 Regional Indicator */
+  ESZ,                                                 /* 12 Other */
+  ESZ|(1u<<ucp_gbExtended_Pictographic),               /* 13 ZWJ */
+  ESZ,                                                 /* 14 Extended Pictographic */
+  // clang-format on
 };
 
 #undef ESZ
@@ -229,6 +233,7 @@ const uint32_t PRIV(ucp_gbtable)[] = {
 of a memory load. */
 
 const int PRIV(ucp_typerange)[] = {
+  // clang-format off
   ucp_Cc, ucp_Cs,
   ucp_Ll, ucp_Lu,
   ucp_Mc, ucp_Mn,
@@ -236,6 +241,7 @@ const int PRIV(ucp_typerange)[] = {
   ucp_Pc, ucp_Ps,
   ucp_Sc, ucp_So,
   ucp_Zl, ucp_Zs,
+  // clang-format on
 };
 #endif /* SUPPORT_JIT */
 
@@ -255,6 +261,7 @@ files. */
   (defined(PCRE2_PCRE2TEST) || defined(PCRE2_DFTABLES) || 'a' != 0x81)
 
 const uint8_t PRIV(ebcdic_1047_to_ascii)[256] = {
+  // clang-format off
   0x00,0x01,0x02,0x03,0x9c,0x09,0x86,0x7f,0x97,0x8d,0x8e,0x0b,0x0c,0x0d,0x0e,0x0f,
 #ifdef EBCDIC_NL25
   0x10,0x11,0x12,0x13,0x9d,0x85,0x08,0x87,0x18,0x19,0x92,0x8f,0x1c,0x1d,0x1e,0x1f,
@@ -276,9 +283,11 @@ const uint8_t PRIV(ebcdic_1047_to_ascii)[256] = {
   0x7d,0x4a,0x4b,0x4c,0x4d,0x4e,0x4f,0x50,0x51,0x52,0xb9,0xfb,0xfc,0xf9,0xfa,0xff,
   0x5c,0xf7,0x53,0x54,0x55,0x56,0x57,0x58,0x59,0x5a,0xb2,0xd4,0xd6,0xd2,0xd3,0xd5,
   0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0xb3,0xdb,0xdc,0xd9,0xda,0x9f,
+  // clang-format on
 };
 
 const uint8_t PRIV(ascii_to_ebcdic_1047)[256] = {
+  // clang-format off
 #ifdef EBCDIC_NL25
   0x00,0x01,0x02,0x03,0x37,0x2d,0x2e,0x2f,0x16,0x05,0x25,0x0b,0x0c,0x0d,0x0e,0x0f,
 #else
@@ -303,6 +312,7 @@ const uint8_t PRIV(ascii_to_ebcdic_1047)[256] = {
   0xac,0x69,0xed,0xee,0xeb,0xef,0xec,0xbf,0x80,0xfd,0xfe,0xfb,0xfc,0xba,0xae,0x59,
   0x44,0x45,0x42,0x46,0x43,0x47,0x9c,0x48,0x54,0x51,0x52,0x53,0x58,0x55,0x56,0x57,
   0x8c,0x49,0xcd,0xce,0xcb,0xcf,0xcc,0xe1,0x70,0xdd,0xde,0xdb,0xdc,0x8d,0x8e,0xdf,
+  // clang-format on
 };
 
 #endif /* EBCDIC support needed */

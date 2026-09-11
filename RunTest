@@ -620,17 +620,20 @@ for bmode in "$test8" "$test16" "$test32"; do
             outfile2=$testdata/testoutput3A
             outfile3=$testdata/testoutput3B
             outfile4=$testdata/testoutput3C
+            outfile5=$testdata/testoutput3D
           else
             infile=test3input
             outfile=test3output
             outfile2=test3outputA
             outfile3=test3outputB
             outfile4=test3outputC
+            outfile5=test3outputD
             sed "s/fr_FR/$loc/" $testdata/testinput3 >test3input
             sed "s/fr_FR/$loc/" $testdata/testoutput3 >test3output
             sed "s/fr_FR/$loc/" $testdata/testoutput3A >test3outputA
             sed "s/fr_FR/$loc/" $testdata/testoutput3B >test3outputB
             sed "s/fr_FR/$loc/" $testdata/testoutput3C >test3outputC
+            sed "s/fr_FR/$loc/" $testdata/testoutput3D >test3outputD
           fi
           break
         fi
@@ -649,14 +652,15 @@ for bmode in "$test8" "$test16" "$test32"; do
           if $cf $outfile testoutput$bits/testoutput3 >teststdout || \
              $cf $outfile2 testoutput$bits/testoutput3 >>teststdout || \
              $cf $outfile3 testoutput$bits/testoutput3 >>teststdout || \
-             $cf $outfile4 testoutput$bits/testoutput3 >>teststdout
+             $cf $outfile4 testoutput$bits/testoutput3 >>teststdout || \
+             $cf $outfile5 testoutput$bits/testoutput3 >>teststdout
           then
             echo "  OK$with"
           else
             cat teststdout
             echo ""
             echo "** Locale test did not run successfully$with. The output did not match"
-            echo "   $outfile, $outfile2, $outfile3 or $outfile4."
+            echo "   $outfile, $outfile2, $outfile3, $outfile4 or $outfile5."
             echo "   This may mean that there is a problem with the locale settings rather"
             echo "   than a bug in PCRE2."
             yield=1

@@ -226,9 +226,9 @@ static const char *output_text = NULL;
 
 static char *main_buffer = NULL;
 
-static const char *printname_nl = STDOUT_NL;  /* Changed to NULL for -Z */
-static int printname_colon = ':';             /* Changed to 0 for -Z */
-static int printname_hyphen = '-';            /* Changed to 0 for -Z */
+static const char *printname_nl = STDOUT_NL;  // Changed to NULL for -Z
+static int printname_colon = ':';             // Changed to 0 for -Z
+static int printname_hyphen = '-';            // Changed to 0 for -Z
 
 static int after_context = 0;
 static int before_context = 0;
@@ -236,7 +236,7 @@ static int binary_files = BIN_BINARY;
 static int both_context = 0;
 static int endlinetype;
 
-static int count_limit = -1;  /* Not long, so that it works with OP_NUMBER */
+static int count_limit = -1;  // Not long, so that it works with OP_NUMBER
 static unsigned long int counts_printed = 0;
 static unsigned long int total_count = 0;
 
@@ -852,7 +852,7 @@ isdirectory(char *filename)
 {
 struct stat statbuf;
 if (stat(filename, &statbuf) < 0)
-  return 0;        /* In the expectation that opening as a file will fail */
+  return 0;        // In the expectation that opening as a file will fail
 return S_ISDIR(statbuf.st_mode);
 }
 
@@ -890,7 +890,7 @@ isregfile(char *filename)
 {
 struct stat statbuf;
 if (stat(filename, &statbuf) < 0)
-  return 1;        /* In the expectation that opening as a file will fail */
+  return 1;        // In the expectation that opening as a file will fail
 return S_ISREG(statbuf.st_mode);
 }
 
@@ -1027,7 +1027,7 @@ for (;;)
     return dir->data.cFileName;
   }
 #ifndef _MSC_VER
-return NULL;   /* Keep compiler happy; never executed */
+return NULL;   // Keep compiler happy; never executed
 #endif
 }
 
@@ -1305,7 +1305,7 @@ else if (toupper(*endptr) == 'M')
   endptr++;
   }
 
-if (*endptr != 0)   /* Error */
+if (*endptr != 0)   // Error
   {
   if (longop)
     {
@@ -1450,9 +1450,9 @@ Returns:    pointer after the last byte of the line,
 static char *
 end_of_line(char *p, char *endptr, int *lenptr)
 {
-switch(endlinetype)
+switch (endlinetype)
   {
-  default:      /* Just in case */
+  default:      // Just in case
   case PCRE2_NEWLINE_LF:
   while (p < endptr && *p != '\n') p++;
   if (p < endptr)
@@ -1523,9 +1523,9 @@ switch(endlinetype)
       }
 
     p++;
-    }   /* End of loop for ANYCRLF case */
+    }   // End of loop for ANYCRLF case
 
-  *lenptr = 0;  /* Must have hit the end */
+  *lenptr = 0;  // Must have hit the end
   return endptr;
 
   case PCRE2_NEWLINE_ANY:
@@ -1537,10 +1537,10 @@ switch(endlinetype)
     if (utf && c >= 0xc0)
       {
       int gcii, gcss;
-      extra = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+      extra = utf8_table4[c & 0x3f];  // Number of additional bytes
       if (endptr - p < 1 + extra)
         {
-        *lenptr = 0;  /* Hit the end, halfway through a character */
+        *lenptr = 0;  // Hit the end, halfway through a character
         return endptr;
         }
       gcss = 6*extra;
@@ -1556,13 +1556,13 @@ switch(endlinetype)
 
     switch (c)
       {
-      case '\n':    /* LF */
-      case '\v':    /* VT */
-      case '\f':    /* FF */
+      case '\n':    // LF
+      case '\v':    // VT
+      case '\f':    // FF
       *lenptr = 1 + extra;
       return p;
 
-      case '\r':    /* CR */
+      case '\r':    // CR
       if (extra == 0 && p < endptr && *p == '\n')
         {
         *lenptr = 2;
@@ -1572,12 +1572,12 @@ switch(endlinetype)
       return p;
 
 #ifndef EBCDIC
-      case 0x85:    /* Unicode NEL */
+      case 0x85:    // Unicode NEL
       *lenptr = 1 + extra;
       return p;
 
-      case 0x2028:  /* Unicode LS */
-      case 0x2029:  /* Unicode PS */
+      case 0x2028:  // Unicode LS
+      case 0x2029:  // Unicode PS
       *lenptr = 1 + extra;
       return p;
 #endif  /* Not EBCDIC */
@@ -1585,11 +1585,11 @@ switch(endlinetype)
       default:
       break;
       }
-    }   /* End of loop for ANY case */
+    }   // End of loop for ANY case
 
-  *lenptr = 0;  /* Must have hit the end */
+  *lenptr = 0;  // Must have hit the end
   return endptr;
-  }     /* End of overall switch */
+  }     // End of overall switch
 }
 
 
@@ -1610,9 +1610,9 @@ Returns:    pointer to the start of the previous line
 static char *
 previous_line(char *p, char *startptr)
 {
-switch(endlinetype)
+switch (endlinetype)
   {
-  default:      /* Just in case */
+  default:      // Just in case
   case PCRE2_NEWLINE_LF:
   p--;
   while (p > startptr && p[-1] != '\n') p--;
@@ -1670,10 +1670,10 @@ switch(endlinetype)
       if (c >= 0xc0)
         {
         int gcii, gcss;
-        extra = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+        extra = utf8_table4[c & 0x3f];  // Number of additional bytes
         if (p - pp < 1 + extra)
           {
-          p = pp;  /* Rewind over the broken character */
+          p = pp;  // Rewind over the broken character
           continue;
           }
         gcss = 6*extra;
@@ -1689,14 +1689,14 @@ switch(endlinetype)
 
     switch (c)
       {
-      case '\n':    /* LF */
-      case '\v':    /* VT */
-      case '\f':    /* FF */
-      case '\r':    /* CR */
+      case '\n':    // LF
+      case '\v':    // VT
+      case '\f':    // FF
+      case '\r':    // CR
 #ifndef EBCDIC
-      case 0x85:    /* Unicode NEL */
-      case 0x2028:  /* Unicode LS */
-      case 0x2029:  /* Unicode PS */
+      case 0x85:    // Unicode NEL
+      case 0x2028:  // Unicode LS
+      case 0x2029:  // Unicode PS
 #endif  /* Not EBCDIC */
       return p;
 
@@ -1704,11 +1704,11 @@ switch(endlinetype)
       break;
       }
 
-    p = pp;  /* Back one character */
-    }        /* End of loop for ANY case */
+    p = pp;  // Back one character
+    }        // End of loop for ANY case
 
   return p;
-  }     /* End of overall switch */
+  }     // End of overall switch
 }
 
 
@@ -1727,9 +1727,9 @@ Returns:    nothing
 static void
 write_final_newline(void)
 {
-switch(endlinetype)
+switch (endlinetype)
   {
-  default:      /* Just in case */
+  default:      // Just in case
   case PCRE2_NEWLINE_LF:
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
@@ -1874,7 +1874,7 @@ for (int i = 1; p != NULL; p = p->next, i++)
   fprintf(stderr, "pcre2grep: pcre2_match() gave error %d while matching ", rc);
   if (patterns->next != NULL) fprintf(stderr, "pattern number %d to ", i);
   fprintf(stderr, "%s", msg);
-  FWRITE_IGNORE(matchptr, 1, slen, stderr);   /* In case binary zero included */
+  FWRITE_IGNORE(matchptr, 1, slen, stderr);   // In case binary zero included
   fprintf(stderr, "\n\n");
   if (rc <= PCRE2_ERROR_UTF8_ERR1 &&
       rc >= PCRE2_ERROR_UTF8_ERR21)
@@ -1892,7 +1892,7 @@ for (int i = 1; p != NULL; p = p->next, i++)
     fprintf(stderr, "pcre2grep: Too many errors - abandoned.\n");
     pcre2grep_exit(2);
     }
-  return invert;    /* No more matching; don't show the line again */
+  return invert;    // No more matching; don't show the line again
   }
 
 /* We get here when all patterns have been tried. If all_matches is false,
@@ -1964,7 +1964,7 @@ BOOL brace = FALSE;
 
 switch (*(++string))
   {
-  case 0:   /* Syntax error: a character must be present after $. */
+  case 0:   // Syntax error: a character must be present after $.
   if (!callout)
     fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
       (int)(string - begin), "no character after $");
@@ -1986,8 +1986,9 @@ switch (*(++string))
   case '{':
   brace = TRUE;
   string++;
-  if (!isdigit((unsigned char)(*string)))  /* Syntax error:              */
-    {                                      /* a decimal number required. */
+  if (!isdigit((unsigned char)(*string)))
+    {
+    /* Syntax error: a decimal number required. */
     if (!callout)
       fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
         (int)(string - begin), "decimal number expected");
@@ -2009,7 +2010,7 @@ switch (*(++string))
     string++;
     }
   while (*string >= '0' && *string <= '9');
-  string--;  /* Point to last digit */
+  string--;  // Point to last digit
 
   /* In a callout, capture number 0 is not available. No error can be given,
   so just return the character '0'. */
@@ -2044,7 +2045,7 @@ switch (*(++string))
     c = c * 8 + (*string++ - '0');
     }
   *value = c;
-  string--;  /* Point to last digit */
+  string--;  // Point to last digit
   break;
 
   /* Limit hex numbers to 2 digits without braces, or up to 6 with braces,
@@ -2069,7 +2070,7 @@ switch (*(++string))
       c = c * 16 + ((*string++ | 0x20) - 'a') + 10;
     }
   *value = c;
-  string--;  /* Point to last digit */
+  string--;  // Point to last digit
   break;
 
   case 'a': *value = '\a'; break;
@@ -2194,7 +2195,7 @@ for (; *string != 0; string++)
   {
   if (*string == '$')
     {
-    switch(decode_dollar_escape(begin, string, callout, &value, &string))
+    switch (decode_dollar_escape(begin, string, callout, &value, &string))
       {
       case DDE_CHAR:
       if (value == STDOUT_NL_CODE)
@@ -2203,7 +2204,7 @@ for (; *string != 0; string++)
         printed = FALSE;
         continue;
         }
-      break;  /* Will print value */
+      break;  // Will print value
 
       case DDE_CAPTURE:
       if (value < capture_top)
@@ -2233,13 +2234,15 @@ for (; *string != 0; string++)
       continue;
 
       /* LCOV_EXCL_START */
-      default:  /* Should not occur */
+      case DDE_ERROR:
+      default:  // Should not occur
+      abort();
       break;
       /* LCOV_EXCL_STOP */
       }
     }
 
-  else value = *string;  /* Not a $ escape */
+  else value = *string;  // Not a $ escape
 
   if (!utf || value <= 127) fprintf(stdout, "%c", value); else
     {
@@ -2324,7 +2327,7 @@ pid_t pid;
 int result = 0;
 #endif  /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
 
-(void)unused;   /* Avoid compiler warning */
+(void)unused;   // Avoid compiler warning
 
 /* Only callouts with strings are supported. */
 
@@ -2352,7 +2355,7 @@ while (length > 0)
   if (*string == '|')
     {
     argsvectorlen++;
-    if (argsvectorlen > 10000) return 0;  /* Too many args */
+    if (argsvectorlen > 10000) return 0;  // Too many args
     }
 
   else if (*string == '$')
@@ -2373,7 +2376,7 @@ while (length > 0)
           ovector[value + 1] - ovector[value] :
           ovector[value] - ovector[value + 1];
         }
-      argslen--;   /* Negate the effect of argslen++ below. */
+      argslen--;   // Negate the effect of argslen++ below.
       break;
 
       case DDE_CHAR:
@@ -2381,9 +2384,12 @@ while (length > 0)
         else if (utf && value > 127) argslen += ord2utf8(value) - 1;
       break;
 
+      case DDE_ERROR:  // Invalid syntax; silently ignore
+      return 0;
+
       /* LCOV_EXCL_START */
-      default:         /* Should not occur */
-      case DDE_ERROR:
+      default:         // Should not occur
+      abort();
       return 0;
       /* LCOV_EXCL_STOP */
       }
@@ -2477,10 +2483,10 @@ while (length > 0)
       break;
 
       /* LCOV_EXCL_START */
+      case DDE_ERROR:
       default:
       /* Even though this should not occur, the string having been checked above,
        * we need to include the free() calls so that source checkers do not complain. */
-      case DDE_ERROR:
       free(args);
       free(argsvector);
       abort();
@@ -2566,7 +2572,7 @@ fill_buffer(void *handle, int frtype, char *buffer, PCRE2_SIZE length,
   BOOL input_line_buffered)
 {
 PCRE2_SIZE nread;
-(void)frtype;  /* Avoid warning when not used */
+(void)frtype;  // Avoid warning when not used
 
 #ifdef SUPPORT_LIBZ
 if (frtype == FR_LIBZ)
@@ -2641,8 +2647,8 @@ BOOL binary = FALSE;
 BOOL endhyphenpending = FALSE;
 BOOL lines_printed = FALSE;
 BOOL input_line_buffered = line_buffered;
-FILE *in = NULL;                    /* Ensure initialized */
-long stream_start = -1;             /* Only non-negative if relevant */
+FILE *in = NULL;                    // Ensure initialized
+long stream_start = -1;             // Only non-negative if relevant
 
 /* Do the first read into the start of the buffer and set up the pointer to end
 of what we have. In the case of libz, a non-zipped .gz file will be read as a
@@ -2954,18 +2960,18 @@ while (ptr < endptr)
 
         //match = FALSE;
         if (line_buffered) fflush(stdout);
-        rc = 0;                      /* Had some success */
+        rc = 0;                      // Had some success
 
         /* If the pattern contained a lookbehind that included \K, it is
         possible that the end of the match might be at or before the actual
         starting offset we have just used. In this case, start one character
         further on. */
 
-        startoffset = offsets[1];    /* Restart after the match */
+        startoffset = offsets[1];    // Restart after the match
         oldstartoffset = pcre2_get_startchar(match_data);
         if (startoffset <= oldstartoffset)
           {
-          if (oldstartoffset >= length) goto END_ONE_MATCH;  /* We're at end */
+          if (oldstartoffset >= length) goto END_ONE_MATCH;  // We're at end
           startoffset = oldstartoffset + 1;
           if (utf) while (startoffset < length &&
                           (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
@@ -3128,7 +3134,7 @@ while (ptr < endptr)
           PCRE2_SIZE oldstartoffset = pcre2_get_startchar(match_data);
 
           endprevious = offsets[1];
-          startoffset = endprevious;  /* Advance after previous match. */
+          startoffset = endprevious;  // Advance after previous match.
 
           /* If the pattern contained a lookbehind that included \K, it is
           possible that the end of the match might be at or before the actual
@@ -3137,7 +3143,7 @@ while (ptr < endptr)
 
           if (startoffset <= oldstartoffset)
             {
-            if (oldstartoffset >= length) break;  /* We're at end */
+            if (oldstartoffset >= length) break;  // We're at end
             startoffset = oldstartoffset + 1;
             if (utf) while (startoffset < length &&
                             (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
@@ -3212,7 +3218,7 @@ while (ptr < endptr)
     given, flush the output. */
 
     if (line_buffered) fflush(stdout);
-    rc = 0;    /* Had some success */
+    rc = 0;    // Had some success
 
     /* Remember where the last match happened for after_context. We remember
     where we are about to restart, and that line's number. */
@@ -3280,7 +3286,7 @@ while (ptr < endptr)
         lastmatchrestart < main_buffer + bufthird)
       {
       do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
-      lastmatchnumber = 0;  /* Indicates no after lines pending */
+      lastmatchnumber = 0;  // Indicates no after lines pending
       }
 
     /* Now do the shuffle */
@@ -3305,7 +3311,7 @@ while (ptr < endptr)
 
     if (lastmatchnumber > 0) lastmatchrestart -= bufthird;
     }
-  }     /* Loop through the whole file */
+  }     // Loop through the whole file
 
 /* End of file; print final "after" lines if wanted; do_after_lines sets
 hyphenpending if it prints something. */
@@ -3340,7 +3346,7 @@ if (count_only && !quiet)
     }
   }
 
-total_count += count;   /* Can be set without count_only */
+total_count += count;   // Can be set without count_only
 return rc;
 }
 
@@ -3373,7 +3379,7 @@ int rc = 1;
 int frtype;
 void *handle;
 char *lastcomp;
-FILE *in = NULL;           /* Ensure initialized */
+FILE *in = NULL;           // Ensure initialized
 
 #ifdef SUPPORT_LIBZ
 gzFile ingz = NULL;
@@ -3504,17 +3510,17 @@ if (isdirectory(pathname))
       size_t rlen;
       if (realpath(childpath, resolvedpath) == NULL)
         /* LCOV_EXCL_START - this is a "never" event */
-        continue;     /* This path is invalid - we can skip processing this */
+        continue;     // This path is invalid - we can skip processing this
         /* LCOV_EXCL_STOP */
       isSame = strcmp(pathname, resolvedpath) == 0;
-      if (isSame) continue;    /* We have a recursion */
+      if (isSame) continue;    // We have a recursion
       rlen = strlen(resolvedpath);
       if (rlen++ < sizeof(resolvedpath) - 3)
         {
         BOOL contained;
         strcat(resolvedpath, "/");
         contained = strncmp(pathname, resolvedpath, rlen) == 0;
-        if (contained) continue;    /* We have a recursion */
+        if (contained) continue;    // We have a recursion
         }
       }
 #endif  /* HAVE_REALPATH */
@@ -3586,7 +3592,7 @@ else if (
         (!isregfile(pathname) && DEE_action == DEE_SKIP) ||
 #endif
         !test_incexc(lastcomp, include_patterns, exclude_patterns))
-  return -1;  /* File skipped */
+  return -1;  // File skipped
 
 /* Control reaches here if we have a regular file, or if we have a directory
 and recursion or skipping was not requested, or if we have anything else and
@@ -3670,7 +3676,7 @@ if (frtype == FR_LIBZ)
     if (!silent)
       fprintf(stderr, "pcre2grep: Failed to read %s using zlib: %s\n",
         pathname, err);
-    rc = 2;    /* The normal "something went wrong" code */
+    rc = 2;    // The normal "something went wrong" code
     }
   gzclose(ingz);
   }
@@ -3697,7 +3703,7 @@ if (frtype == FR_LIBBZ2)
     else if (!silent)
       fprintf(stderr, "pcre2grep: Failed to read %s using bzlib: %s\n",
         pathname, err);
-    rc = 2;    /* The normal "something went wrong" code */
+    rc = 2;    // The normal "something went wrong" code
     /* LCOV_EXCL_STOP */
     }
   BZ2_bzclose(inbz2);
@@ -3725,10 +3731,10 @@ return rc;
 static int
 handle_option(int letter, int options)
 {
-switch(letter)
+switch (letter)
   {
   case N_FOFFSETS: file_offsets = TRUE; break;
-  case N_HELP: help(); pcre2grep_exit(0); break; /* Stops compiler warning */
+  case N_HELP: help(); pcre2grep_exit(0); break; // Stops compiler warning
   case N_LBUFFER: line_buffered = TRUE; break;
   case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_NOJIT: use_jit = FALSE; break;
@@ -3771,7 +3777,7 @@ switch(letter)
     fprintf(stdout, "pcre2grep version %s" STDOUT_NL, buffer);
     }
   pcre2grep_exit(0);
-  break;  /* LCOV_EXCL_LINE - statement kept to avoid compiler warning */
+  break;  // LCOV_EXCL_LINE - statement kept to avoid compiler warning
 
   case 'w': extra_options |= PCRE2_EXTRA_MATCH_WORD; break;
   case 'x': extra_options |= PCRE2_EXTRA_MATCH_LINE; break;
@@ -3957,7 +3963,7 @@ while (TRUE)
    }
 
   linenumber++;
-  if (!posix_pattern_file && patlen == 0) continue; /* Skip blank lines */
+  if (!posix_pattern_file && patlen == 0) continue; // Skip blank lines
 
   /* Note: this call to add_pattern() puts a pointer to the local variable
   "buffer" into the pattern chain. However, that pointer is used only when
@@ -3980,7 +3986,7 @@ while (TRUE)
   However, the -N option can be used to give pcre2grep a different newline
   setting. */
 
-  for(;;)
+  for (;;)
     {
     if (!compile_pattern(*patlastptr, pcre2_options, TRUE, filename,
         linenumber))
@@ -3988,7 +3994,7 @@ while (TRUE)
       if (f != stdin) fclose(f);
       return FALSE;
       }
-    (*patlastptr)->string = NULL;            /* Insurance */
+    (*patlastptr)->string = NULL;            // Insurance
     if ((*patlastptr)->next == NULL) break;
     *patlastptr = (*patlastptr)->next;
     }
@@ -4037,7 +4043,7 @@ _setmode(_fileno(stdout), _O_BINARY);
 for (i = 1; i < argc; i++)
   {
   option_item *op = NULL;
-  char *option_data = (char *)"";    /* default to keep compiler happy */
+  char *option_data = (char *)"";    // default to keep compiler happy
   BOOL longop;
   BOOL longopwasequals = FALSE;
 
@@ -4059,11 +4065,11 @@ for (i = 1; i < argc; i++)
     char *arg = argv[i] + 2;
     char *argequals = strchr(arg, '=');
 
-    if (*arg == 0)    /* -- terminates options */
+    if (*arg == 0)    // -- terminates options
       {
       options_terminated = TRUE;
       i++;
-      break;                /* out of the options-handling loop */
+      break;                // out of the options-handling loop
       }
 
     longop = TRUE;
@@ -4082,13 +4088,13 @@ for (i = 1; i < argc; i++)
 
       /* Handle options with only one spelling of the name */
 
-      if (opbra == NULL)     /* Does not contain '(' */
+      if (opbra == NULL)     // Does not contain '('
         {
-        if (equals == NULL)  /* Not thing=data case */
+        if (equals == NULL)  // Not thing=data case
           {
           if (strcmp(arg, op->long_name) == 0) break;
           }
-        else                 /* Special case xxx=data */
+        else                 // Special case xxx=data
           {
           int oplen = (int)(equals - op->long_name);
           int arglen = (argequals == NULL)?
@@ -4193,7 +4199,7 @@ for (i = 1; i < argc; i++)
         {
         if (isdigit((unsigned char)(s[1]))) break;
         }
-      else   /* Check for an option with data */
+      else   // Check for an option with data
         {
         if (op->type != OP_NODATA) break;
         }

@@ -61,7 +61,7 @@ sequence. */
 if (subject[offset] == CHAR_CR && offset + 1 < subject_length &&
     subject[offset + 1] == CHAR_LF)
   {
-  switch(match_data->code->newline_convention)
+  switch (match_data->code->newline_convention)
     {
     case PCRE2_NEWLINE_CRLF:
     case PCRE2_NEWLINE_ANY:
@@ -78,7 +78,7 @@ if (utf)
   PCRE2_SPTR next = subject + offset + 1;
   PCRE2_SPTR subject_end = subject + subject_length;
 
-  (void)subject_end; /* Suppress warning; 32-bit FORWARDCHARTEST ignores this */
+  (void)subject_end; // Suppress warning; 32-bit FORWARDCHARTEST ignores this
   FORWARDCHARTEST(next, subject_end);
   return next - subject;
   }

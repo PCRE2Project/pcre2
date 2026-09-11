@@ -107,7 +107,7 @@ PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 {
 #ifndef SUPPORT_JIT
-(void)gcontext;     /* Suppress warning */
+(void)gcontext;     // Suppress warning
 #else  /* SUPPORT_JIT */
 SLJIT_UNUSED_ARG(gcontext);
 #if (defined SLJIT_EXECUTABLE_ALLOCATOR && SLJIT_EXECUTABLE_ALLOCATOR)
