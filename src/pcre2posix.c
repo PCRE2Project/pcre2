@@ -127,6 +127,7 @@ don't, even though some of them cannot currently be provoked from within the
 POSIX wrapper. */
 
 static const int eint1[] = {
+  // clang-format off
   0,           /* No error */
   REG_EESCAPE, /* \ at end of pattern */
   REG_EESCAPE, /* \c at end of pattern */
@@ -154,23 +155,27 @@ static const int eint1[] = {
   REG_ESIZE,   /* regular expression too large */
   REG_ESPACE,  /* failed to get memory */
   REG_EPAREN,  /* unmatched closing parenthesis */
-  REG_ASSERT   /* internal error: code overflow */
-  };
+  REG_ASSERT,  /* internal error: code overflow */
+  // clang-format on
+};
 
 static const int eint2[] = {
-  30, REG_ECTYPE,  /* unknown POSIX class name */
-  32, REG_INVARG,  /* this version of PCRE2 does not have Unicode support */
-  37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N{name}, \U, or \u */
-  56, REG_INVARG,  /* internal error: unknown newline setting */
-  92, REG_INVARG,  /* invalid option bits with PCRE2_LITERAL */
-  98, REG_EESCAPE, /* missing digit after \0 in NO_BS0 mode */
-  99, REG_EESCAPE, /* \K in lookaround */
- 102, REG_EESCAPE  /* \ddd octal > \377 in PYTHON_OCTAL mode */
+  // clang-format off
+   30, REG_ECTYPE,  /* unknown POSIX class name */
+   32, REG_INVARG,  /* this version of PCRE2 does not have Unicode support */
+   37, REG_EESCAPE, /* PCRE2 does not support \L, \l, \N{name}, \U, or \u */
+   56, REG_INVARG,  /* internal error: unknown newline setting */
+   92, REG_INVARG,  /* invalid option bits with PCRE2_LITERAL */
+   98, REG_EESCAPE, /* missing digit after \0 in NO_BS0 mode */
+   99, REG_EESCAPE, /* \K in lookaround */
+  102, REG_EESCAPE, /* \ddd octal > \377 in PYTHON_OCTAL mode */
+  // clang-format on
 };
 
 /* Table of texts corresponding to POSIX error codes */
 
 static const char *const pstring[] = {
+  // clang-format off
   "",                                /* Dummy for value 0 */
   "internal error",                  /* REG_ASSERT */
   "invalid repeat counts in {}",     /* BADBR      */
@@ -188,7 +193,8 @@ static const char *const pstring[] = {
   "failed to get memory",            /* ESPACE     */
   "bad back reference",              /* ESUBREG    */
   "bad argument",                    /* INVARG     */
-  "match failed"                     /* NOMATCH    */
+  "match failed",                    /* NOMATCH    */
+  // clang-format on
 };
 
 /*************************************************
@@ -200,7 +206,7 @@ pcre2_regerror(int errcode, const regex_t *preg, char *errbuf,
   size_t errbuf_size)
 {
 const char *message;
-char offset_buf[11+12]; /* big enough for " at offset -2147483648" */
+char offset_buf[11+12]; // big enough for " at offset -2147483648"
 int snprintf_rc, have_offset = 0;
 PCRE2_SIZE i;
 
@@ -215,7 +221,7 @@ if (preg != NULL && preg->re_erroffset != (size_t)(-1)
     /* LCOV_EXCL_STOP */
   {
   have_offset = 1;
-  offset_buf[sizeof(offset_buf) - 1] = 0; /* Paranoia for very old snprintf */
+  offset_buf[sizeof(offset_buf) - 1] = 0; // Paranoia for very old snprintf
   }
 
 for (i = 0; *message != 0; i++, message++)
@@ -323,7 +329,7 @@ if (preg->re_pcre2_code == NULL)
   PCRE2_INFO_CAPTURECOUNT, &re_nsub);
 preg->re_nsub = (size_t)re_nsub;
 preg->re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
-preg->re_erroffset = (size_t)(-1);  /* No meaning after successful compile */
+preg->re_erroffset = (size_t)(-1);  // No meaning after successful compile
 
 if (preg->re_match_data == NULL)
   {
@@ -417,7 +423,7 @@ if (rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF8_ERR21)
 /* Most of these are events that won't occur during testing, so exclude them
 from coverage. */
 
-switch(rc)
+switch (rc)
   {
   case PCRE2_ERROR_HEAPLIMIT: return REG_ESPACE;
   case PCRE2_ERROR_NOMATCH: return REG_NOMATCH;

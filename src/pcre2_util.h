@@ -68,7 +68,7 @@ side-effects. */
   fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); \
   abort();                                                            \
   }                                                                   \
-} while(0)
+} while (0)
 #endif
 
 /* LCOV_EXCL_START */
@@ -96,7 +96,7 @@ assert(((void)"Execution reached unexpected point", 0))
 fprintf(stderr, "Execution reached unexpected point at " __FILE__   \
                 ":%d\n", __LINE__);                                 \
 abort();                                                            \
-} while(0)
+} while (0)
 #endif
 
 /* PCRE2_DEBUG_UNREACHABLE() is a debug only version of the previous
@@ -114,13 +114,13 @@ the reason and the actions that should be taken if it ever triggers. */
 #endif /* PCRE2_DEBUG */
 
 #ifndef PCRE2_ASSERT
-#define PCRE2_ASSERT(x) do {} while(0)
+#define PCRE2_ASSERT(x) do {} while (0)
 #endif
 
 /* LCOV_EXCL_START */
 
 #ifndef PCRE2_DEBUG_UNREACHABLE
-#define PCRE2_DEBUG_UNREACHABLE() do {} while(0)
+#define PCRE2_DEBUG_UNREACHABLE() do {} while (0)
 #endif
 
 #ifndef PCRE2_UNREACHABLE
@@ -129,7 +129,7 @@ the reason and the actions that should be taken if it ever triggers. */
 #elif defined(HAVE_BUILTIN_ASSUME)
 #define PCRE2_UNREACHABLE() __assume(0)
 #else
-#define PCRE2_UNREACHABLE() do {} while(0)
+#define PCRE2_UNREACHABLE() do {} while (0)
 #endif
 #endif /* !PCRE2_UNREACHABLE */
 

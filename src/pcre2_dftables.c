@@ -66,11 +66,10 @@ given, they are written in binary. */
 #include "pcre2_tables.c"
 
 
-static const char *classlist[] =
-  {
+static const char *classlist[] = {
   "space", "xdigit", "digit", "upper", "lower",
   "word", "graph", "print", "punct", "cntrl"
-  };
+};
 
 static int identity(int c) { return c; }
 

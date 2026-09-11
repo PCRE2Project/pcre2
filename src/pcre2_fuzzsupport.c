@@ -279,7 +279,7 @@ fruitless matches. The callout data is a pointer to the counter. */
 
 static int callout_function(pcre2_callout_block *cb, void *callout_data)
 {
-(void)cb;  /* Avoid unused parameter warning */
+(void)cb;  // Avoid unused parameter warning
 *((uint32_t *)callout_data) += 1;
 return (*((uint32_t *)callout_data) > 100)? PCRE2_ERROR_CALLOUT : 0;
 }
@@ -309,7 +309,7 @@ if (rc != 0)
   _exit(1);
   }
 
-(void)argc;  /* Avoid "unused parameter" warnings */
+(void)argc;  // Avoid "unused parameter" warnings
 (void)argv;
 return 0;
 }
@@ -368,7 +368,7 @@ if (size > 3)
     if ((wdata[i] != ')' && wdata[i] != ']') || wdata[i-1] == '\\' ||
          wdata[i+1] != '{')
       continue;
-    i++;  /* Points to '{' */
+    i++;  // Points to '{'
 
     /* Loop for two values in a quantifier. Offset i points to brace or comma
     at the start of the loop. */
@@ -377,7 +377,7 @@ if (size > 3)
       {
       int q = 0;
 
-      if (i >= size - 1) goto END_QSCAN;  /* Can happen for , */
+      if (i >= size - 1) goto END_QSCAN;  // Can happen for ,
 
       /* Ignore leading spaces. */
 
@@ -412,13 +412,14 @@ if (size > 3)
 
         if (wdata[j] < '0' || wdata[j] > '9')
           {
-          j--;               /* Ensure this character is checked next. The */
-          goto OUTERLOOP;    /* string might be (e.g.) "){9){234}" */
+          /* Ensure this character is checked next. The string might be (e.g.) "){9){234}" */
+          j--;
+          goto OUTERLOOP;
           }
         q = q * 10 + (wdata[j] - '0');
         }
 
-      if (j >= size) goto END_QSCAN;  /* End of data */
+      if (j >= size) goto END_QSCAN;  // End of data
 
       /* Hit ',' or '}' or read 6 digits. Six digits is a number > 65536 which
       is the maximum quantifier. Leave such numbers alone. */
@@ -619,7 +620,7 @@ with the interpreter. */
           print_error(stdout, errorcode_jit, "JIT match failed: error %d: ",
             errorcode_jit);
 #else
-        (void)errorcode_jit;   /* Avoid compiler warning */
+        (void)errorcode_jit;   // Avoid compiler warning
 #endif  /* STANDALONE */
 
 /* With differential matching enabled, compare with interpreter. */
@@ -682,8 +683,8 @@ with the interpreter. */
         }
 #endif  /* SUPPORT_JIT */
 
-      if (match_options == BASE_MATCH_OPTIONS) break;  /* Don't do same twice */
-      match_options = BASE_MATCH_OPTIONS;              /* For second time */
+      if (match_options == BASE_MATCH_OPTIONS) break;  // Don't do same twice
+      match_options = BASE_MATCH_OPTIONS;              // For second time
       }
 
     /* Match with DFA twice, with and without options, but remove options that
@@ -723,11 +724,11 @@ with the interpreter. */
         print_error(stdout, errorcode, "DFA match failed: error %d: ", errorcode);
 #endif
 
-      if (match_options == 0) break;  /* No point doing same twice */
-      match_options = 0;              /* For second time */
+      if (match_options == 0) break;  // No point doing same twice
+      match_options = 0;              // For second time
       }
 
-    match_options = save_match_options;  /* Reset for the second compile */
+    match_options = save_match_options;  // Reset for the second compile
     pcre2_code_free(code);
     }
 
@@ -743,8 +744,8 @@ with the interpreter. */
 #endif
     }
 
-  if (compile_options == PCRE2_NEVER_BACKSLASH_C) break;  /* Avoid same twice */
-  compile_options = PCRE2_NEVER_BACKSLASH_C;              /* For second time */
+  if (compile_options == PCRE2_NEVER_BACKSLASH_C) break;  // Avoid same twice
+  compile_options = PCRE2_NEVER_BACKSLASH_C;              // For second time
   }
 
 /* Tidy up before exiting */

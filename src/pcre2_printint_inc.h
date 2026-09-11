@@ -145,20 +145,20 @@ Rather than swallow random bytes, just stop if we hit a bad one. Print it with
 #if PCRE2_CODE_UNIT_WIDTH == 8
 if ((c & 0xc0) != 0xc0)
   {
-  fprintf(f, "\\X{%x}", c);       /* Invalid starting byte */
+  fprintf(f, "\\X{%x}", c);       // Invalid starting byte
   return 0;
   }
 else
   {
   int i;
-  int a = PRIV(utf8_table4)[c & 0x3f];  /* Number of additional bytes */
+  int a = PRIV(utf8_table4)[c & 0x3f];  // Number of additional bytes
   int s = 6*a;
   c = (c & PRIV(utf8_table3)[a]) << s;
   for (i = 1; i <= a; i++)
     {
     if ((ptr[i] & 0xc0) != 0x80)
       {
-      fprintf(f, "\\X{%x}", c);   /* Invalid secondary byte */
+      fprintf(f, "\\X{%x}", c);   // Invalid secondary byte
       return i - 1;
       }
     s -= 6;
@@ -548,7 +548,7 @@ if (type == OP_XCLASS)
   negated = (*ccode & XCL_NOT) != 0;
   ccode++;
   }
-else  /* CLASS or NCLASS */
+else  // CLASS or NCLASS
   {
   printmap = TRUE;
   negated = type == OP_NCLASS;
@@ -579,7 +579,7 @@ if (type == OP_XCLASS)
       break;
       }
 
-    switch(ch)
+    switch (ch)
       {
       case XCL_NOTPROP:
       notch = "^";
@@ -589,7 +589,7 @@ if (type == OP_XCLASS)
         unsigned int ptype = *ccode++;
         unsigned int pvalue = *ccode++;
         const char *s;
-        switch(ptype)
+        switch (ptype)
           {
           case PT_PXGRAPH:
           fprintf(f, "[:%sgraph:]", notch);
@@ -658,7 +658,7 @@ BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
 code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
-for(;;)
+for (;;)
   {
   PCRE2_SPTR ccode;
   uint32_t c;
@@ -671,7 +671,7 @@ for(;;)
   else
     fprintf(f, "    ");
 
-  switch(*code)
+  switch (*code)
     {
     case OP_END:
     fprintf(f, "    %s\n", OP_names[*code]);
@@ -1031,7 +1031,7 @@ for(;;)
     /* Handle repeats after a class or a back reference */
 
     CLASS_REF_REPEAT:
-    switch(*ccode)
+    switch (*ccode)
       {
       unsigned int min, max;
 

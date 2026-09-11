@@ -69,8 +69,10 @@ to be modified. */
 int main(int argc, char **argv)
 {
 pcre2_code *re;
-PCRE2_SPTR pattern;     /* PCRE2_SPTR is a pointer to unsigned code units of */
-PCRE2_SPTR subject;     /* the appropriate width (in this case, 8 bits). */
+/* PCRE2_SPTR is a pointer to unsigned code units of the appropriate width
+(in this case, 8 bits). */
+PCRE2_SPTR pattern;
+PCRE2_SPTR subject;
 PCRE2_SPTR name_table;
 
 int errornumber;
@@ -138,12 +140,12 @@ subject_length = (PCRE2_SIZE)strlen((char *)subject);
 *************************************************************************/
 
 re = pcre2_compile(
-  pattern,               /* the pattern */
-  PCRE2_ZERO_TERMINATED, /* indicates pattern is zero-terminated */
-  caseless_match,        /* possibly enable caseless */
-  &errornumber,          /* for error number */
-  &erroroffset,          /* for error offset */
-  NULL);                 /* use default compile context */
+  pattern,               // the pattern
+  PCRE2_ZERO_TERMINATED, // indicates pattern is zero-terminated
+  caseless_match,        // possibly enable caseless
+  &errornumber,          // for error number
+  &erroroffset,          // for error offset
+  NULL);                 // use default compile context
 
 /* Compilation failed: print the error message and exit. */
 
@@ -175,19 +177,19 @@ match_data = pcre2_match_data_create_from_pattern(re, NULL);
 /* Now run the match. */
 
 rc = pcre2_match(
-  re,                   /* the compiled pattern */
-  subject,              /* the subject string */
-  subject_length,       /* the length of the subject */
-  0,                    /* start at offset 0 in the subject */
-  0,                    /* default options */
-  match_data,           /* block for storing the result */
-  NULL);                /* use default match context */
+  re,                   // the compiled pattern
+  subject,              // the subject string
+  subject_length,       // the length of the subject
+  0,                    // start at offset 0 in the subject
+  0,                    // default options
+  match_data,           // block for storing the result
+  NULL);                // use default match context
 
 /* Matching failed: handle error cases */
 
 if (rc < 0)
   {
-  switch(rc)
+  switch (rc)
     {
     case PCRE2_ERROR_NOMATCH: printf("No match\n"); break;
     /*
@@ -195,8 +197,9 @@ if (rc < 0)
     */
     default: printf("Matching error %d\n", rc); break;
     }
-  pcre2_match_data_free(match_data);   /* Release memory used for the match */
-  pcre2_code_free(re);                 /*   data and the compiled pattern. */
+  /* Release memory used for the match data and the compiled pattern. */
+  pcre2_match_data_free(match_data);
+  pcre2_code_free(re);
   return 1;
   }
 
@@ -260,9 +263,9 @@ for (i = 0; i < rc; i++)
 we have to extract the count of named parentheses from the pattern. */
 
 (void)pcre2_pattern_info(
-  re,                   /* the compiled pattern */
-  PCRE2_INFO_NAMECOUNT, /* get the number of named substrings */
-  &namecount);          /* where to put the answer */
+  re,                   // the compiled pattern
+  PCRE2_INFO_NAMECOUNT, // get the number of named substrings
+  &namecount);          // where to put the answer
 
 if (namecount == 0)
   printf("No named substrings\n");
@@ -275,14 +278,14 @@ else
   translating names to numbers, and the size of each entry in the table. */
 
   (void)pcre2_pattern_info(
-    re,                       /* the compiled pattern */
-    PCRE2_INFO_NAMETABLE,     /* address of the table */
-    &name_table);             /* where to put the answer */
+    re,                       // the compiled pattern
+    PCRE2_INFO_NAMETABLE,     // address of the table
+    &name_table);             // where to put the answer
 
   (void)pcre2_pattern_info(
-    re,                       /* the compiled pattern */
-    PCRE2_INFO_NAMEENTRYSIZE, /* size of each entry in the table */
-    &name_entry_size);        /* where to put the answer */
+    re,                       // the compiled pattern
+    PCRE2_INFO_NAMEENTRYSIZE, // size of each entry in the table
+    &name_entry_size);        // where to put the answer
 
   /* Now we can scan the table and, for each entry, print the number, the name,
   and the substring itself. In the 8-bit library the number is held in two
@@ -308,11 +311,12 @@ else
 * To help with this task, PCRE2 provides the pcre2_next_match() helper.  *
 *************************************************************************/
 
-if (!find_all)     /* Check for -g */
+if (!find_all)     // Check for -g
   {
-  pcre2_match_data_free(match_data);  /* Release the memory that was used */
-  pcre2_code_free(re);                /* for the match data and the pattern. */
-  return 0;                           /* Exit the program. */
+  /* Release the memory that was used for the match data and the pattern. */
+  pcre2_match_data_free(match_data);
+  pcre2_code_free(re);
+  return 0;  // Exit the program.
   }
 
 /* Loop for second and subsequent matches */
@@ -334,13 +338,13 @@ for (;;)
   /* Run the next matching operation */
 
   rc = pcre2_match(
-    re,                   /* the compiled pattern */
-    subject,              /* the subject string */
-    subject_length,       /* the length of the subject */
-    start_offset,         /* starting offset in the subject */
-    options,              /* options */
-    match_data,           /* block for storing the result */
-    NULL);                /* use default match context */
+    re,                   // the compiled pattern
+    subject,              // the subject string
+    subject_length,       // the length of the subject
+    start_offset,         // starting offset in the subject
+    options,              // options
+    match_data,           // block for storing the result
+    NULL);                // use default match context
 
   /* If this match attempt fails, exit the loop for subsequent matches. */
 
@@ -434,7 +438,7 @@ for (;;)
       tabptr += name_entry_size;
       }
     }
-  }      /* End of loop to find second and subsequent matches */
+  }      // End of loop to find second and subsequent matches
 
 printf("\n");
 

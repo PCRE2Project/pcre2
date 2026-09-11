@@ -320,7 +320,7 @@ if (count == PCRE2_ERROR_PARTIAL)
   if (stringnumber > 0) return PCRE2_ERROR_PARTIAL;
   count = 0;
   }
-else if (count < 0) return count;            /* Match failed */
+else if (count < 0) return count;            // Match failed
 
 if (match_data->matchedby != PCRE2_MATCHEDBY_DFA_INTERPRETER)
   {
@@ -331,7 +331,7 @@ if (match_data->matchedby != PCRE2_MATCHEDBY_DFA_INTERPRETER)
   if (match_data->ovector[stringnumber*2] == PCRE2_UNSET)
     return PCRE2_ERROR_UNSET;
   }
-else  /* Matched using pcre2_dfa_match() */
+else  // Matched using pcre2_dfa_match()
   {
   if (stringnumber >= match_data->oveccount) return PCRE2_ERROR_UNAVAILABLE;
   if (count != 0 && stringnumber >= (uint32_t)count) return PCRE2_ERROR_UNSET;
@@ -387,13 +387,13 @@ PCRE2_UCHAR **listp;
 PCRE2_UCHAR *sp;
 PCRE2_SIZE *ovector;
 
-if ((count = match_data->rc) < 0) return count;   /* Match failed */
-if (count == 0) count = match_data->oveccount;    /* Ovector too small */
+if ((count = match_data->rc) < 0) return count;   // Match failed
+if (count == 0) count = match_data->oveccount;    // Ovector too small
 
 count2 = 2*count;
 ovector = match_data->ovector;
-size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *);      /* For final NULL */
-if (lengthsptr != NULL) size += sizeof(PCRE2_SIZE) * count;  /* For lengths */
+size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *);      // For final NULL
+if (lengthsptr != NULL) size += sizeof(PCRE2_SIZE) * count;  // For lengths
 
 for (i = 0; i < count2; i += 2)
   {
