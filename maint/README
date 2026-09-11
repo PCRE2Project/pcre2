@@ -100,8 +100,20 @@ pcre2_chartables.c.non-standard
   characters greater than 128 that are set as spaces, amongst other things. I
   kept it so that it can be used for testing from time to time.
 
+pcre2bench.c
+  A benchmark driver that measures match throughput over a generated
+  pseudo-text corpus, for a set of patterns chosen to exercise the JIT's
+  start-of-match fast-forward paths. It is useful when comparing two builds of
+  the library, for example when adding a SIMD fast-forward implementation for
+  a new architecture. It is not built by any of the PCRE2 build systems; use
+  RunBenchmark, which compiles it. See the comments at the start of the file.
+
 README
   This file.
+
+RunBenchmark
+  A script that compiles pcre2bench.c against an existing build tree and runs
+  it, writing TSV to stdout.
 
 RunCoverage
   A script used to generate the coverage report using Clang. It is called by
