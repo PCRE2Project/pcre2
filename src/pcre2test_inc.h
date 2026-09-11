@@ -5980,6 +5980,24 @@ ASSERT(rc == 0, "pcre2_get_newline()");
 ASSERT(uval == PCRE2_NEWLINE_ANYCRLF, "pcre2_get_newline()");
 
 
+/* test setting parens_nest_limit */
+rc = pcre2_set_parens_nest_limit(test_pat_context, 100);
+ASSERT(rc == 0, "pcre2_set_parens_nest_limit()");
+
+uval = 123;
+rc = pcre2_get_parens_nest_limit(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_parens_nest_limit()");
+ASSERT(uval == 100, "pcre2_get_parens_nest_limit()");
+
+rc = pcre2_set_parens_nest_limit(test_pat_context, 250);
+ASSERT(rc == 0, "pcre2_set_parens_nest_limit()");
+
+uval = 123;
+rc = pcre2_get_parens_nest_limit(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_parens_nest_limit()");
+ASSERT(uval == 250, "pcre2_get_parens_nest_limit()");
+
+
 rc = pcre2_set_recursion_limit(test_dat_context, 10);
 ASSERT(rc == 0, "pcre2_set_recursion_limit()");
 
