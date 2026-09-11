@@ -73,24 +73,26 @@ rows for them. Note that OP_DIGIT etc. are generated only when PCRE2_UCP is
 #define APTCOLS (LAST_AUTOTAB_RIGHT_OP - FIRST_AUTOTAB_OP + 1)
 
 static const uint8_t autoposstab[APTROWS][APTCOLS] = {
-/* \D \d \S \s \W \w  . .+ \C \P \p \R \H \h \V \v \X \Z \z  $ $M */
-  { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \D */
-  { 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \d */
-  { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \S */
-  { 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \s */
-  { 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \W */
-  { 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \w */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* .  */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* .+ */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \C */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* \P */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* \p */
-  { 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },  /* \R */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },  /* \H */
-  { 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0 },  /* \h */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0 },  /* \V */
-  { 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0 },  /* \v */
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }   /* \X */
+  // clang-format off
+  /* \D \d \S \s \W \w  . .+ \C \P \p \R \H \h \V \v \X \Z \z  $ $M */
+  {   0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \D */
+  {   1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \d */
+  {   0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \S */
+  {   0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \s */
+  {   0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \W */
+  {   0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \w */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* .  */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* .+ */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \C */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* \P */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* \p */
+  {   0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },  /* \R */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },  /* \H */
+  {   0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0 },  /* \h */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0 },  /* \V */
+  {   0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0 },  /* \v */
+  {   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \X */
+  // clang-format on
 };
 
 #ifdef SUPPORT_UNICODE
@@ -125,21 +127,23 @@ opcode is used to select the column. The values are as follows:
 */
 
 static const uint8_t propposstab[PT_TABSIZE][PT_TABSIZE] = {
-/* LAMP GC  PC  SC  SCX ALNUM SPACE PXSPACE WORD CLIST UCNC BIDICL BOOL */
-  { 3,  0,  0,  0,   0,    3,    1,      1,   0,    0,   0,    0,    0 },  /* PT_LAMP */
-  { 0,  2,  4,  0,   0,    9,   10,     10,  11,    0,   0,    0,    0 },  /* PT_GC */
-  { 0,  5,  2,  0,   0,   15,   16,     16,  17,    0,   0,    0,    0 },  /* PT_PC */
-  { 0,  0,  0,  2,   2,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_SC */
-  { 0,  0,  0,  2,   2,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_SCX */
-  { 3,  6, 12,  0,   0,    3,    1,      1,   0,    0,   0,    0,    0 },  /* PT_ALNUM */
-  { 1,  7, 13,  0,   0,    1,    3,      3,   1,    0,   0,    0,    0 },  /* PT_SPACE */
-  { 1,  7, 13,  0,   0,    1,    3,      3,   1,    0,   0,    0,    0 },  /* PT_PXSPACE */
-  { 0,  8, 14,  0,   0,    0,    1,      1,   3,    0,   0,    0,    0 },  /* PT_WORD */
-  { 0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_CLIST */
-  { 0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   3,    0,    0 },  /* PT_UCNC */
-  { 0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 },  /* PT_BIDICL */
-  { 0,  0,  0,  0,   0,    0,    0,      0,   0,    0,   0,    0,    0 }   /* PT_BOOL */
+  // clang-format off
+  /* LAMP GC  PC  SC  SCX ALNUM SPACE PXSPACE WORD CLIST UCNC BIDICL BOOL */
+  {     3, 0,  0,  0,   0,    3,    1,      1,   0,    0,   0,     0,   0 },  /* PT_LAMP */
+  {     0, 2,  4,  0,   0,    9,   10,     10,  11,    0,   0,     0,   0 },  /* PT_GC */
+  {     0, 5,  2,  0,   0,   15,   16,     16,  17,    0,   0,     0,   0 },  /* PT_PC */
+  {     0, 0,  0,  2,   2,    0,    0,      0,   0,    0,   0,     0,   0 },  /* PT_SC */
+  {     0, 0,  0,  2,   2,    0,    0,      0,   0,    0,   0,     0,   0 },  /* PT_SCX */
+  {     3, 6, 12,  0,   0,    3,    1,      1,   0,    0,   0,     0,   0 },  /* PT_ALNUM */
+  {     1, 7, 13,  0,   0,    1,    3,      3,   1,    0,   0,     0,   0 },  /* PT_SPACE */
+  {     1, 7, 13,  0,   0,    1,    3,      3,   1,    0,   0,     0,   0 },  /* PT_PXSPACE */
+  {     0, 8, 14,  0,   0,    0,    1,      1,   3,    0,   0,     0,   0 },  /* PT_WORD */
+  {     0, 0,  0,  0,   0,    0,    0,      0,   0,    0,   0,     0,   0 },  /* PT_CLIST */
+  {     0, 0,  0,  0,   0,    0,    0,      0,   0,    0,   3,     0,   0 },  /* PT_UCNC */
+  {     0, 0,  0,  0,   0,    0,    0,      0,   0,    0,   0,     0,   0 },  /* PT_BIDICL */
+  {     0, 0,  0,  0,   0,    0,    0,      0,   0,    0,   0,     0,   0 },  /* PT_BOOL */
   /* PT_ANY does not need a record. */
+  // clang-format on
 };
 
 /* This table is used to check whether auto-possessification is possible
@@ -150,14 +154,16 @@ category. The value is 1 if the particular category is not part of the general
 category. */
 
 static const uint8_t catposstab[7][30] = {
-/* Cc Cf Cn Co Cs Ll Lm Lo Lt Lu Mc Me Mn Nd Nl No Pc Pd Pe Pf Pi Po Ps Sc Sk Sm So Zl Zp Zs */
-  { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* C */
-  { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* L */
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* M */
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* N */
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 },  /* P */
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1 },  /* S */
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 }   /* Z */
+  // clang-format off
+  /* Cc Cf Cn Co Cs Ll Lm Lo Lt Lu Mc Me Mn Nd Nl No Pc Pd Pe Pf Pi Po Ps Sc Sk Sm So Zl Zp Zs */
+  {   0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* C */
+  {   1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* L */
+  {   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* M */
+  {   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* N */
+  {   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 },  /* P */
+  {   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1 },  /* S */
+  {   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },  /* Z */
+  // clang-format on
 };
 
 /* This table is used when checking ALNUM, (PX)SPACE, SPACE, and WORD against
@@ -172,9 +178,11 @@ Note: SPACE and PXSPACE used to be different because Perl excluded VT from
 same here. */
 
 static const uint8_t posspropstab[3][4] = {
+  // clang-format off
   { ucp_L, ucp_N, ucp_N, ucp_Nl },  /* ALNUM, 3rd and 4th values redundant */
   { ucp_Z, ucp_Z, ucp_C, ucp_Cc },  /* SPACE and PXSPACE, 2nd value redundant */
-  { ucp_L, ucp_N, ucp_P, ucp_Po }   /* WORD */
+  { ucp_L, ucp_N, ucp_P, ucp_Po },  /* WORD */
+  // clang-format on
 };
 #endif  /* SUPPORT_UNICODE */
 
@@ -236,8 +244,8 @@ switch(ptype)
   means that Perl space and POSIX space are now identical. PCRE was changed
   at release 8.34. */
 
-  case PT_SPACE:    /* Perl space */
-  case PT_PXSPACE:  /* POSIX space */
+  case PT_SPACE:    // Perl space
+  case PT_PXSPACE:  // POSIX space
   switch(c)
     {
     HSPACE_CASES:
@@ -263,7 +271,7 @@ switch(ptype)
     if (c == *p++) return negated;
     }
   /* LCOV_EXCL_START */
-  PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
+  PCRE2_DEBUG_UNREACHABLE(); // Control should never reach here
   break;
   /* LCOV_EXCL_STOP */
 
@@ -341,7 +349,7 @@ uint32_t chr;
 uint32_t *clist_dest;
 const uint32_t *clist_src;
 #else
-(void)utf;    /* Suppress "unused parameter" compiler warnings */
+(void)utf;    // Suppress "unused parameter" compiler warnings
 (void)ucp;
 #endif
 
@@ -462,7 +470,7 @@ switch(c)
        /* Early return if there is not enough space. GenerateUcd.py
        generated a list with more than 5 characters and something
        must be done about that going forward. */
-       PCRE2_DEBUG_UNREACHABLE();   /* Remove if it ever triggers */
+       PCRE2_DEBUG_UNREACHABLE();   // Remove if it ever triggers
        list[2] = code[0];
        list[3] = code[1];
        return code;
@@ -520,7 +528,7 @@ switch(c)
   return end;
   }
 
-return NULL;    /* Opcode not accepted */
+return NULL;    // Opcode not accepted
 }
 
 
@@ -563,7 +571,7 @@ uint32_t chr;
 BOOL accepted, invert_bits;
 BOOL entered_a_group = FALSE;
 
-if (--(*rec_limit) <= 0) return FALSE;  /* Recursion has gone too deep */
+if (--(*rec_limit) <= 0) return FALSE;  // Recursion has gone too deep
 
 /* Note: the base_list[1] contains whether the current opcode has a greedy
 (represented by a non-zero value) quantifier. This is a different from
@@ -668,11 +676,11 @@ for(;;)
       case OP_ASSERTBACK_NOT:
       do
         {
-        if (bracode[1+LINK_SIZE] == OP_VREVERSE) return FALSE;  /* Variable */
+        if (bracode[1+LINK_SIZE] == OP_VREVERSE) return FALSE;  // Variable
         bracode += GET(bracode, 1);
         }
       while (*bracode == OP_ALT);
-      return !entered_a_group;  /* Not variable length */
+      return !entered_a_group;  // Not variable length
 
       /* Non-atomic assertions - don't possessify last iterator. This needs
       more thought. */
@@ -739,7 +747,7 @@ for(;;)
   for a supported opcode, and load its properties. */
 
   code = get_chr_property_list(code, utf, ucp, cb->fcc, list);
-  if (code == NULL) return FALSE;    /* Unsupported */
+  if (code == NULL) return FALSE;    // Unsupported
 
   /* If either opcode is a small character list, set pointers for comparing
   characters from that list with another list, or with a property. */
@@ -866,7 +874,7 @@ for(;;)
     rightop = list[0];
 
 #ifdef SUPPORT_UNICODE
-    accepted = FALSE; /* Always set in non-unicode case. */
+    accepted = FALSE; // Always set in non-unicode case.
     if (leftop == OP_PROP || leftop == OP_NOTPROP)
       {
       if (rightop == OP_EOD)
@@ -897,11 +905,11 @@ for(;;)
           case 2: accepted = (base_list[3] == list[3]) != same; break;
           case 3: accepted = !same; break;
 
-          case 4:  /* Left general category, right particular category */
+          case 4:  // Left general category, right particular category
           accepted = risprop && catposstab[base_list[3]][list[3]] == same;
           break;
 
-          case 5:  /* Right general category, left particular category */
+          case 5:  // Right general category, left particular category
           accepted = lisprop && catposstab[list[3]][base_list[3]] == same;
           break;
 
@@ -924,9 +932,9 @@ for(;;)
           Example: the row for WORD contains ucp_L, ucp_N, ucp_P, ucp_Po.
           Underscore is covered by ucp_P or ucp_Po. */
 
-          case 6:  /* Left alphanum vs right general category */
-          case 7:  /* Left space vs right general category */
-          case 8:  /* Left word vs right general category */
+          case 6:  // Left alphanum vs right general category
+          case 7:  // Left space vs right general category
+          case 8:  // Left word vs right general category
           p = posspropstab[n-6];
           accepted = risprop && lisprop ==
             (list[3] != p[0] &&
@@ -934,9 +942,9 @@ for(;;)
             (list[3] != p[2] || !lisprop));
           break;
 
-          case 9:   /* Right alphanum vs left general category */
-          case 10:  /* Right space vs left general category */
-          case 11:  /* Right word vs left general category */
+          case 9:   // Right alphanum vs left general category
+          case 10:  // Right space vs left general category
+          case 11:  // Right word vs left general category
           p = posspropstab[n-9];
           accepted = lisprop && risprop ==
             (base_list[3] != p[0] &&
@@ -944,9 +952,9 @@ for(;;)
             (base_list[3] != p[2] || !risprop));
           break;
 
-          case 12:  /* Left alphanum vs right particular category */
-          case 13:  /* Left space vs right particular category */
-          case 14:  /* Left word vs right particular category */
+          case 12:  // Left alphanum vs right particular category
+          case 13:  // Left space vs right particular category
+          case 14:  // Left word vs right particular category
           p = posspropstab[n-12];
           accepted = risprop && lisprop ==
             (catposstab[p[0]][list[3]] &&
@@ -954,9 +962,9 @@ for(;;)
             (list[3] != p[3] || !lisprop));
           break;
 
-          case 15:  /* Right alphanum vs left particular category */
-          case 16:  /* Right space vs left particular category */
-          case 17:  /* Right word vs left particular category */
+          case 15:  // Right alphanum vs left particular category
+          case 16:  // Right space vs left particular category
+          case 17:  // Right word vs left particular category
           p = posspropstab[n-15];
           accepted = lisprop && risprop ==
             (catposstab[p[0]][base_list[3]] &&
@@ -1009,7 +1017,7 @@ for(;;)
         ochr_ptr++;
         }
       while(*ochr_ptr != NOTACHAR);
-      if (*ochr_ptr == NOTACHAR) return FALSE;   /* Not found */
+      if (*ochr_ptr == NOTACHAR) return FALSE;   // Not found
       break;
 
       /* Note that OP_DIGIT etc. are generated only when PCRE2_UCP is *not*
@@ -1089,7 +1097,7 @@ for(;;)
         }
       break;
 
-      case OP_EOD:    /* Can always possessify before \z */
+      case OP_EOD:    // Can always possessify before \z
       break;
 
 #ifdef SUPPORT_UNICODE
@@ -1142,8 +1150,8 @@ for(;;)
   }
 
 /* LCOV_EXCL_START */
-PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
-return FALSE;              /* Avoid compiler warnings */
+PCRE2_DEBUG_UNREACHABLE(); // Control should never reach here
+return FALSE;              // Avoid compiler warnings
 /* LCOV_EXCL_STOP */
 }
 
@@ -1175,7 +1183,7 @@ PCRE2_UCHAR c;
 PCRE2_SPTR end;
 PCRE2_UCHAR *repeat_opcode;
 uint32_t list[MAX_LIST];
-int rec_limit = 1000;  /* Was 10,000 but clang+ASAN uses a lot of stack. */
+int rec_limit = 1000;  // Was 10,000 but clang+ASAN uses a lot of stack.
 BOOL utf = (cb->external_options & PCRE2_UTF) != 0;
 BOOL ucp = (cb->external_options & PCRE2_UCP) != 0;
 
@@ -1187,7 +1195,7 @@ for (;;)
   if (c >= OP_TABLE_LENGTH)
     {
     PCRE2_DEBUG_UNREACHABLE();
-    return -1;   /* Something gone wrong */
+    return -1;   // Something gone wrong
     }
   /* LCOV_EXCL_STOP */
 
@@ -1408,7 +1416,7 @@ for (;;)
     break;
     }
 #else
-  (void)(utf);  /* Keep compiler happy by referencing function argument */
+  (void)(utf);  // Keep compiler happy by referencing function argument
 #endif  /* SUPPORT_WIDE_CHARS */
   }
 }

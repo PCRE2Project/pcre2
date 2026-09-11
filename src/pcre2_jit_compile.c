@@ -5883,7 +5883,7 @@ fast_forward_char_data *chars_stack[SCAN_PREFIX_STACK_END];
 sljit_u8 next_alternative_stack[SCAN_PREFIX_STACK_END];
 BOOL last, any, class, caseless;
 int stack_ptr, step_count, repeat, len, len_save;
-sljit_u32 chr; /* Any unicode character. */
+sljit_u32 chr; // Any unicode character.
 sljit_u8 *bytes, *bytes_end, byte;
 PCRE2_SPTR alternative, cc_save, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
@@ -6329,7 +6329,7 @@ while (TRUE)
   else
     {
     caseless = FALSE;
-    othercase[0] = 0; /* Stops compiler warning - PH */
+    othercase[0] = 0; // Stops compiler warning - PH
     }
 
   len_save = len;
@@ -7331,7 +7331,7 @@ for (i = 0; i < 256; )
       ranges[length] = i;
       length++;
       bit = cbit;
-      all = (sljit_u8)-cbit; /* sign extend bit into byte */
+      all = (sljit_u8)-cbit; // sign extend bit into byte
       }
     i++;
     }
@@ -7510,7 +7510,7 @@ for (i = 0; i < 32; i++)
     }
   }
 
-if (len == 0) return FALSE;  /* Should never occur, but stops analyzers complaining. */
+if (len == 0) return FALSE;  // Should never occur, but stops analyzers complaining.
 
 i = 0;
 j = 0;
@@ -8843,7 +8843,7 @@ unsigned int callout_length = (*cc == OP_CALLOUT)
 sljit_sw value1;
 sljit_sw value2;
 sljit_sw value3;
-sljit_s32 callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw); /* top_bracket is uint16 so maximum is 1MiB */
+sljit_s32 callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw); // top_bracket is uint16 so maximum is 1MiB
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
@@ -10400,7 +10400,7 @@ int stacksize;
 int offset = 0;
 BOOL zero = FALSE;
 PCRE2_SPTR ccbegin = NULL;
-int stack; /* Also contains the offset of control head. */
+int stack; // Also contains the offset of control head.
 struct sljit_label *loop = NULL;
 struct jump_list *emptymatch = NULL;
 
@@ -10655,7 +10655,7 @@ if (!zero)
   {
   if (framesize < 0)
     add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(stacksize - 1), SLJIT_IMM, 0));
-  else /* TMP2 is set to [private_data_ptr] above. */
+  else // TMP2 is set to [private_data_ptr] above.
     add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(TMP2), STACK(-stacksize), SLJIT_IMM, 0));
   }
 

@@ -503,7 +503,7 @@ for (;;)
           dd = 0;
           if (!dupcapused || PRIV(find_bracket)(ce, utf, recno) == NULL)
             {
-            if (cc > cs && cc < ce)    /* Simple recursion */
+            if (cc > cs && cc < ce)    // Simple recursion
               {
               had_recurse = TRUE;
               }
@@ -512,13 +512,13 @@ for (;;)
               recurse_check *r = recurses;
               for (r = recurses; r != NULL; r = r->prev)
                 if (r->group == cs) break;
-              if (r != NULL)           /* Mutual recursion */
+              if (r != NULL)           // Mutual recursion
                 {
                 had_recurse = TRUE;
                 }
               else
                 {
-                this_recurse.prev = recurses;  /* No recursion */
+                this_recurse.prev = recurses;  // No recursion
                 this_recurse.group = cs;
                 dd = find_minlength(re, cs, startcode, utf, &this_recurse,
                   countptr, backref_cache);
@@ -533,7 +533,7 @@ for (;;)
           }
 
         if (dd < d) d = dd;
-        if (d <= 0) break;    /* No point looking at any more */
+        if (d <= 0) break;    // No point looking at any more
         slot += re->name_entry_size;
         }
       }
@@ -562,7 +562,7 @@ for (;;)
 
         if (!dupcapused || PRIV(find_bracket)(ce, utf, recno) == NULL)
           {
-          if (cc > cs && cc < ce)    /* Simple recursion */
+          if (cc > cs && cc < ce)    // Simple recursion
             {
             had_recurse = TRUE;
             }
@@ -570,11 +570,11 @@ for (;;)
             {
             recurse_check *r = recurses;
             for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
-            if (r != NULL)           /* Mutual recursion */
+            if (r != NULL)           // Mutual recursion
               {
               had_recurse = TRUE;
               }
-            else                     /* No recursion */
+            else                     // No recursion
               {
               this_recurse.prev = recurses;
               this_recurse.group = cs;
@@ -650,13 +650,13 @@ for (;;)
     else
       {
       do ce += GET(ce, 1); while (*ce == OP_ALT);
-      if (cc > cs && cc < ce)    /* Simple recursion */
+      if (cc > cs && cc < ce)    // Simple recursion
         had_recurse = TRUE;
       else
         {
         recurse_check *r = recurses;
         for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
-        if (r != NULL)          /* Mutual recursion */
+        if (r != NULL)          // Mutual recursion
           had_recurse = TRUE;
         else
           {
@@ -761,8 +761,8 @@ for (;;)
   }
 
 /* LCOV_EXCL_START */
-PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
-return -3;                 /* Avoid compiler warnings */
+PCRE2_DEBUG_UNREACHABLE(); // Control should never reach here
+return -3;                 // Avoid compiler warnings
 /* LCOV_EXCL_STOP */
 }
 
@@ -789,9 +789,9 @@ static PCRE2_SPTR
 set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf,
   BOOL ucp)
 {
-uint32_t c = *p++;   /* First code unit */
+uint32_t c = *p++;   // First code unit
 
-(void)utf;           /* Stop compiler warnings when UTF not supported */
+(void)utf;           // Stop compiler warnings when UTF not supported
 (void)ucp;
 
 /* In 16-bit and 32-bit modes, code units greater than 0xff set the bit for
@@ -1113,7 +1113,7 @@ do
   if (*code == OP_CBRA || *code == OP_SCBRA ||
       *code == OP_CBRAPOS || *code == OP_SCBRAPOS) tcode += IMM2_SIZE;
 
-  while (try_next)    /* Loop for items in this branch */
+  while (try_next)    // Loop for items in this branch
     {
     int rc;
     PCRE2_SPTR ncode;
@@ -1329,7 +1329,7 @@ do
         case OP_WHITESPACE:
         case OP_NOT_WHITESPACE:
         tcode = ncode;
-        continue;   /* With the following significant opcode */
+        continue;   // With the following significant opcode
         }
       PCRE2_FALLTHROUGH /* Fall through */
 
@@ -1359,7 +1359,7 @@ do
         do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
         tcode += 1 + LINK_SIZE;
         }
-      else return rc;   /* FAIL, UNKNOWN, or TOODEEP */
+      else return rc;   // FAIL, UNKNOWN, or TOODEEP
       break;
 
       /* If we hit ALT or KET, it means we haven't found anything mandatory in
@@ -1502,10 +1502,10 @@ do
 #ifdef SUPPORT_UNICODE
       if (utf)
         {
-        SET_BIT(0xC2);  /* For U+00A0 */
-        SET_BIT(0xE1);  /* For U+1680, U+180E */
-        SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
-        SET_BIT(0xE3);  /* For U+3000 */
+        SET_BIT(0xC2);  // For U+00A0
+        SET_BIT(0xE1);  // For U+1680, U+180E
+        SET_BIT(0xE2);  // For U+2000 - U+200A, U+202F, U+205F
+        SET_BIT(0xE3);  // For U+3000
         }
       else
 #endif
@@ -1538,8 +1538,8 @@ do
 #ifdef SUPPORT_UNICODE
       if (utf)
         {
-        SET_BIT(0xC2);  /* For U+0085 (NEL) */
-        SET_BIT(0xE2);  /* For U+2028, U+2029 */
+        SET_BIT(0xC2);  // For U+0085 (NEL)
+        SET_BIT(0xE2);  // For U+2028, U+2029
         }
       else
 #endif
@@ -1639,10 +1639,10 @@ do
 #ifdef SUPPORT_UNICODE
         if (utf)
           {
-          SET_BIT(0xC2);  /* For U+00A0 */
-          SET_BIT(0xE1);  /* For U+1680, U+180E */
-          SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
-          SET_BIT(0xE3);  /* For U+3000 */
+          SET_BIT(0xC2);  // For U+00A0
+          SET_BIT(0xE1);  // For U+1680, U+180E
+          SET_BIT(0xE2);  // For U+2000 - U+200A, U+202F, U+205F
+          SET_BIT(0xE3);  // For U+3000
           }
         else
 #endif
@@ -1673,8 +1673,8 @@ do
 #ifdef SUPPORT_UNICODE
         if (utf)
           {
-          SET_BIT(0xC2);  /* For U+0085 (NEL) */
-          SET_BIT(0xE2);  /* For U+2028, U+2029 */
+          SET_BIT(0xC2);  // For U+0085 (NEL)
+          SET_BIT(0xE2);  // For U+2028, U+2029
           }
         else
 #endif
@@ -1780,7 +1780,7 @@ do
           /* LCOV_EXCL_START */
           default:
           PCRE2_DEBUG_UNREACHABLE();
-          return SSB_UNKNOWN;   /* Internal error, should not occur */
+          return SSB_UNKNOWN;   // Internal error, should not occur
           /* LCOV_EXCL_STOP */
           }
         }
@@ -1802,12 +1802,12 @@ do
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
       if (utf)
         {
-        re->start_bitmap[24] |= 0xf0;            /* Bits for 0xc4 - 0xc8 */
-        memset(re->start_bitmap+25, 0xff, 7);    /* Bits for 0xc9 - 0xff */
+        re->start_bitmap[24] |= 0xf0;            // Bits for 0xc4 - 0xc8
+        memset(re->start_bitmap+25, 0xff, 7);    // Bits for 0xc9 - 0xff
         }
       PCRE2_FALLTHROUGH /* Fall through */
 #elif PCRE2_CODE_UNIT_WIDTH != 8
-      SET_BIT(0xFF);                             /* For characters >= 255 */
+      SET_BIT(0xFF);                             // For characters >= 255
       PCRE2_FALLTHROUGH /* Fall through */
 #endif
 
@@ -1842,9 +1842,11 @@ do
             {
             if ((classmap[c/8] & (1u << (c&7))) != 0)
               {
-              int d = (c >> 6) | 0xc0;                 /* Set bit for this starter */
-              re->start_bitmap[d/8] |= (1u << (d&7));  /* and then skip on to the */
-              c = (c & 0xc0) + 0x40 - 1;               /* next relevant character. */
+              /* Set bit for this starter */
+              int d = (c >> 6) | 0xc0;
+              re->start_bitmap[d/8] |= (1u << (d&7));
+              /* Then, skip on to the next relevant character */
+              c = (c & 0xc0) + 0x40 - 1;
               }
             }
           }
@@ -1882,11 +1884,11 @@ do
         try_next = FALSE;
         break;
         }
-      break; /* End of class handling case */
-      }      /* End of switch for opcodes */
-    }        /* End of try_next loop */
+      break; // End of class handling case
+      }      // End of switch for opcodes
+    }        // End of try_next loop
 
-  code += GET(code, 1);   /* Advance to next branch */
+  code += GET(code, 1);   // Advance to next branch
   }
 while (*code == OP_ALT);
 
@@ -1961,8 +1963,8 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
       if (x != 0)
         {
         int c;
-        uint8_t y = x & (~x + 1);   /* Least significant bit */
-        if (y != x) goto DONE;      /* More than one bit set */
+        uint8_t y = x & (~x + 1);   // Least significant bit
+        if (y != x) goto DONE;      // More than one bit set
 
         /* In the 16-bit and 32-bit libraries, the bit for 0xff means "0xff and
         all wide characters", so we cannot use it here. */
@@ -1990,21 +1992,21 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
 #if PCRE2_CODE_UNIT_WIDTH == 8
         if (utf && c > 127) goto DONE;
 #endif
-        if (a < 0) a = c;   /* First one found, save in a */
-        else if (b < 0)     /* Second one found */
+        if (a < 0) a = c;   // First one found, save in a
+        else if (b < 0)     // Second one found
           {
           int d = TABLE_GET((unsigned int)c, re->tables + fcc_offset, c);
 
 #ifdef SUPPORT_UNICODE
           if (utf || ucp)
             {
-            if (UCD_CASESET(c) != 0) goto DONE;     /* Multiple case set */
+            if (UCD_CASESET(c) != 0) goto DONE;     // Multiple case set
             if (c > 127) d = UCD_OTHERCASE(c);
             }
 #endif  /* SUPPORT_UNICODE */
 
-          if (d != a) goto DONE;   /* Not the other case of a */
-          b = c;                   /* Save second in b */
+          if (d != a) goto DONE;   // Not the other case of a
+          b = c;                   // Save second in b
 
 #ifdef EBCDIC
           /* To match ASCII (which puts the uppercase one in a), swap a & b
@@ -2016,7 +2018,7 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
             }
 #endif
           }
-        else goto DONE;   /* More than two characters found */
+        else goto DONE;   // More than two characters found
         }
       }
 
@@ -2055,23 +2057,23 @@ if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
   {
   int min;
   int backref_cache[MAX_CACHE_BACKREF+1];
-  backref_cache[0] = 0;    /* Highest one that is set */
+  backref_cache[0] = 0;    // Highest one that is set
   min = find_minlength(re, code, code, utf, NULL, &count, backref_cache);
   switch(min)
     {
-    case -1:  /* \C in UTF mode or over-complex regex */
-    break;    /* Leave minlength unchanged (will be zero) */
+    case -1:  // \C in UTF mode or over-complex regex
+    break;    // Leave minlength unchanged (will be zero)
 
     /* LCOV_EXCL_START */
     case -2:
     PCRE2_DEBUG_UNREACHABLE();
-    return 2; /* missing capturing bracket */
+    return 2; // missing capturing bracket
     /* LCOV_EXCL_STOP */
 
     /* LCOV_EXCL_START */
     case -3:
     PCRE2_DEBUG_UNREACHABLE();
-    return 3; /* unrecognized opcode */
+    return 3; // unrecognized opcode
     /* LCOV_EXCL_STOP */
 
     default:

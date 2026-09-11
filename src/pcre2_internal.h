@@ -529,9 +529,11 @@ bytes in a code unit in that mode. */
 
 /* Values for the matchedby field in a match data block. */
 
-enum { PCRE2_MATCHEDBY_INTERPRETER,     /* pcre2_match() */
-       PCRE2_MATCHEDBY_DFA_INTERPRETER, /* pcre2_dfa_match() */
-       PCRE2_MATCHEDBY_JIT };           /* pcre2_jit_match() */
+enum {
+  PCRE2_MATCHEDBY_INTERPRETER,      // pcre2_match()
+  PCRE2_MATCHEDBY_DFA_INTERPRETER,  // pcre2_dfa_match()
+  PCRE2_MATCHEDBY_JIT               // pcre2_jit_match()
+};
 
 /* Values for the flags field in a match data block. */
 
@@ -1636,6 +1638,8 @@ auto-possessified. */
 #define LAST_AUTOTAB_RIGHT_OP  OP_DOLLM
 
 enum {
+  // clang-format off
+
   OP_END,            /* 0 End of pattern */
 
   /* Values corresponding to backslashed metacharacters */
@@ -1905,8 +1909,9 @@ enum {
   are the correct length, in order to catch updating errors - there have been
   some in the past. */
 
-  OP_TABLE_LENGTH
+  OP_TABLE_LENGTH,
 
+  // clang-format on
 };
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
@@ -2089,9 +2094,9 @@ compiling, so that instructions to close them can be compiled when (*ACCEPT) is
 encountered. */
 
 typedef struct open_capitem {
-  struct open_capitem *next;    /* Chain link */
-  uint16_t number;              /* Capture number */
-  uint16_t assert_depth;        /* Assertion depth when opened */
+  struct open_capitem *next;    // Chain link
+  uint16_t number;              // Capture number
+  uint16_t assert_depth;        // Assertion depth when opened
 } open_capitem;
 
 /* Layout of the UCP type table that translates property names into types and
@@ -2108,13 +2113,13 @@ typedef struct {
 /* Unicode character database (UCD) record format */
 
 typedef struct {
-  uint8_t script;     /* ucp_Arabic, etc. */
-  uint8_t chartype;   /* ucp_Cc, etc. (general categories) */
-  uint8_t gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
-  uint8_t caseset;    /* offset to multichar other cases or zero */
-  int32_t other_case; /* offset to other case, or zero if none */
-  uint16_t scriptx_bidiclass; /* script extension (11 bit) and bidi class (5 bit) values */
-  uint16_t bprops;    /* binary properties offset */
+  uint8_t script;     // ucp_Arabic, etc.
+  uint8_t chartype;   // ucp_Cc, etc. (general categories)
+  uint8_t gbprop;     // ucp_gbControl, etc. (grapheme break property)
+  uint8_t caseset;    // offset to multichar other cases or zero
+  int32_t other_case; // offset to other case, or zero if none
+  uint16_t scriptx_bidiclass; // script extension (11 bit) and bidi class (5 bit) values
+  uint16_t bprops;    // binary properties offset
 } ucd_record;
 
 /* UCD access macros */

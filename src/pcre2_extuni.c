@@ -134,7 +134,7 @@ while (eptr < end_subject)
       if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator) break;
       ricount++;
       }
-    if ((ricount & 1) != 0) break;  /* Grapheme break required */
+    if ((ricount & 1) != 0) break;  // Grapheme break required
     }
 
   /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in

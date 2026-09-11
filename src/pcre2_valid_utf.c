@@ -137,22 +137,22 @@ for (p = string; length > 0; p++)
   c = *p;
   length--;
 
-  if (c < 128) continue;                /* ASCII character */
+  if (c < 128) continue;                // ASCII character
 
-  if (c < 0xc0)                         /* Isolated 10xx xxxx byte */
+  if (c < 0xc0)                         // Isolated 10xx xxxx byte
     {
     *erroroffset = (PCRE2_SIZE)(p - string);
     return PCRE2_ERROR_UTF8_ERR20;
     }
 
-  if (c >= 0xfe)                        /* Invalid 0xfe or 0xff bytes */
+  if (c >= 0xfe)                        // Invalid 0xfe or 0xff bytes
     {
     *erroroffset = (PCRE2_SIZE)(p - string);
     return PCRE2_ERROR_UTF8_ERR21;
     }
 
-  ab = PRIV(utf8_table4)[c & 0x3f];     /* Number of additional bytes (1-5) */
-  if (length < ab)                      /* Missing bytes */
+  ab = PRIV(utf8_table4)[c & 0x3f];     // Number of additional bytes (1-5)
+  if (length < ab)                      // Missing bytes
     {
     *erroroffset = (PCRE2_SIZE)(p - string);
     switch(ab - length)
@@ -164,7 +164,7 @@ for (p = string; length > 0; p++)
       case 5: return PCRE2_ERROR_UTF8_ERR5;
       }
     }
-  length -= ab;                         /* Length remaining */
+  length -= ab;                         // Length remaining
 
   /* Check top bits in the second byte */
 
@@ -195,7 +195,7 @@ for (p = string; length > 0; p++)
           1110 1101, 1010 xxxx (0xd800 - 0xdfff) */
 
     case 2:
-    if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Third byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 2;
       return PCRE2_ERROR_UTF8_ERR7;
@@ -217,12 +217,12 @@ for (p = string; length > 0; p++)
        character greater than 0x0010ffff (f4 8f bf bf) */
 
     case 3:
-    if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Third byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 2;
       return PCRE2_ERROR_UTF8_ERR7;
       }
-    if ((*(++p) & 0xc0) != 0x80)     /* Fourth byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Fourth byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 3;
       return PCRE2_ERROR_UTF8_ERR8;
@@ -248,17 +248,17 @@ for (p = string; length > 0; p++)
     1111 1000, xx00 0xxx */
 
     case 4:
-    if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Third byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 2;
       return PCRE2_ERROR_UTF8_ERR7;
       }
-    if ((*(++p) & 0xc0) != 0x80)     /* Fourth byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Fourth byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 3;
       return PCRE2_ERROR_UTF8_ERR8;
       }
-    if ((*(++p) & 0xc0) != 0x80)     /* Fifth byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Fifth byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 4;
       return PCRE2_ERROR_UTF8_ERR9;
@@ -274,22 +274,22 @@ for (p = string; length > 0; p++)
     1111 1100, xx00 00xx. */
 
     case 5:
-    if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Third byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 2;
       return PCRE2_ERROR_UTF8_ERR7;
       }
-    if ((*(++p) & 0xc0) != 0x80)     /* Fourth byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Fourth byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 3;
       return PCRE2_ERROR_UTF8_ERR8;
       }
-    if ((*(++p) & 0xc0) != 0x80)     /* Fifth byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Fifth byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 4;
       return PCRE2_ERROR_UTF8_ERR9;
       }
-    if ((*(++p) & 0xc0) != 0x80)     /* Sixth byte */
+    if ((*(++p) & 0xc0) != 0x80)     // Sixth byte
       {
       *erroroffset = (PCRE2_SIZE)(p - string) - 5;
       return PCRE2_ERROR_UTF8_ERR10;

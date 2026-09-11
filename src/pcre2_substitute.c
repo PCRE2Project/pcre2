@@ -127,7 +127,7 @@ for (; ptr < ptrend; ptr++)
       continue;
       }
 
-    ptr += 1;  /* Must point after \ */
+    ptr += 1;  // Must point after \ (backslash)
     erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode,
       code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
     if (errorcode != 0)
@@ -139,14 +139,14 @@ for (; ptr < ptrend; ptr++)
       }
 
     esc_end_ptr = ptr;
-    ptr -= 1;  /* Rewind by one, because the for-loop will increment it */
+    ptr -= 1;  // Rewind by one, because the for-loop will increment it
 
     switch(erc)
       {
-      case 0:      /* Data character */
-      case ESC_b:  /* Data character */
-      case ESC_v:  /* Data character */
-      case ESC_E:  /* Isolated \E is ignored */
+      case 0:      // Data character
+      case ESC_b:  // Data character
+      case ESC_v:  // Data character
+      case ESC_E:  // Isolated \E is ignored
       break;
 
       case ESC_Q:
@@ -164,7 +164,7 @@ for (; ptr < ptrend; ptr++)
 
       default:
       if (erc < 0)
-        break;  /* capture group reference */
+        break;  // capture group reference
       ptr = esc_end_ptr;
       rc = PCRE2_ERROR_BADREPESCAPE;
       goto EXIT;
@@ -172,7 +172,7 @@ for (; ptr < ptrend; ptr++)
     }
   }
 
-rc = PCRE2_ERROR_REPMISSINGBRACE;   /* Terminator not found */
+rc = PCRE2_ERROR_REPMISSINGBRACE;   // Terminator not found
 
 EXIT:
 *ptrptr = ptr;
@@ -205,7 +205,7 @@ read_name_subst(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf,
 PCRE2_SPTR ptr = *ptrptr;
 PCRE2_SPTR nameptr = ptr;
 
-if (ptr >= ptrend)                 /* No characters in name */
+if (ptr >= ptrend)                 // No characters in name
   goto FAILED;
 
 /* We do not need to check whether the name starts with a non-digit.
@@ -231,7 +231,7 @@ if (utf)
   }
 else
 #else
-(void)utf;  /* Avoid compiler warning */
+(void)utf;  // Avoid compiler warning
 #endif      /* SUPPORT_UNICODE */
 
 /* Handle group names in non-UTF modes. */
@@ -266,11 +266,11 @@ return FALSE;
 *************************************************/
 
 #define PCRE2_SUBSTITUTE_CASE_NONE                 0
-// 1, 2, 3 are PCRE2_SUBSTITUTE_CASE_LOWER, UPPER, TITLE_FIRST.
+/* 1, 2, 3 are PCRE2_SUBSTITUTE_CASE_LOWER, UPPER, TITLE_FIRST. */
 #define PCRE2_SUBSTITUTE_CASE_REVERSE_TITLE_FIRST  4
 
 typedef struct {
-  int to_case; /* One of PCRE2_SUBSTITUTE_CASE_xyz */
+  int to_case; // One of PCRE2_SUBSTITUTE_CASE_xyz
   BOOL single_char;
 } case_state;
 
@@ -407,7 +407,7 @@ while (input < input_end)
     overflow = TRUE;
     }
 
-  if (chlen > ~(PCRE2_SIZE)0 - written)  /* Integer overflow */
+  if (chlen > ~(PCRE2_SIZE)0 - written)  // Integer overflow
     return ~(PCRE2_SIZE)0;
   written += chlen;
 
@@ -422,7 +422,7 @@ while (input < input_end)
     if (!overflow && rest_len <= output_cap)
       memcpy(output, input, CU2BYTES(rest_len));
 
-    if (rest_len > ~(PCRE2_SIZE)0 - written)  /* Integer overflow */
+    if (rest_len > ~(PCRE2_SIZE)0 - written)  // Integer overflow
       return ~(PCRE2_SIZE)0;
     written += rest_len;
 
@@ -462,7 +462,7 @@ BOOL ch1_overflow = FALSE;
 BOOL rest_overflow = FALSE;
 
 #if PCRE2_CODE_UNIT_WIDTH == 32 || !defined(SUPPORT_UNICODE)
-(void)utf; /* Avoid compiler warning. */
+(void)utf; // Avoid compiler warning.
 #endif
 
 PCRE2_ASSERT(input_len != 0);
@@ -530,7 +530,7 @@ exact same input! */
   PCRE2_SIZE ch1_cap;
   PCRE2_SIZE max_ch1_cap;
 
-  ch1_cap = ch1_len;  /* First attempt uses the space vacated by ch1. */
+  ch1_cap = ch1_len;  // First attempt uses the space vacated by ch1.
   PCRE2_ASSERT(output_cap >= input_len && input_len >= rest_len);
   max_ch1_cap = output_cap - rest_len;
 
@@ -595,7 +595,7 @@ else
   state->to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
   }
 
-if (rc2 > ~(PCRE2_SIZE)0 - rc)  /* Integer overflow */
+if (rc2 > ~(PCRE2_SIZE)0 - rc)  // Integer overflow
   return ~(PCRE2_SIZE)0;
 
 PCRE2_ASSERT(!(ch1_overflow || rest_overflow) || rc + rc2 > output_cap);
@@ -985,7 +985,7 @@ for (;;)
     match_data, mcontext);
 
 #ifdef SUPPORT_UNICODE
-  if (utf) options |= PCRE2_NO_UTF_CHECK;  /* Only need to check once */
+  if (utf) options |= PCRE2_NO_UTF_CHECK;  // Only need to check once
 #endif
 
   /* Any error other than no match returns the error code. No match breaks the
@@ -1077,7 +1077,7 @@ for (;;)
 
     if (ptr >= repend)
       {
-      if (ptrstackptr == 0) break;       /* End of replacement string */
+      if (ptrstackptr == 0) break;       // End of replacement string
       repend = ptrstack[--ptrstackptr];
       ptr = ptrstack[--ptrstackptr];
       continue;
@@ -1279,7 +1279,7 @@ for (;;)
         name[name_len] = 0;
         }
 
-      next = 0; /* not used or updated after this point */
+      next = 0; // not used or updated after this point
       (void)next;
 
       /* In extended mode we recognize ${name:+set text:unset text} and
@@ -1381,10 +1381,10 @@ for (;;)
               uint32_t ng = GET2(entry, 0);
               if (ng < ovector_count)
                 {
-                if (group < 0) group = ng;          /* First in ovector */
+                if (group < 0) group = ng;          // First in ovector
                 if (ovector[ng*2] != PCRE2_UNSET)
                   {
-                  group = ng;                       /* First that is set */
+                  group = ng;                       // First that is set
                   break;
                   }
                 }
@@ -1409,11 +1409,11 @@ for (;;)
             {
             rc = PCRE2_ERROR_UNSET;
             }
-          if (rc != PCRE2_ERROR_UNSET) goto PTREXIT;  /* Non-unset errors */
-          if (special == 0)                           /* Plain substitution */
+          if (rc != PCRE2_ERROR_UNSET) goto PTREXIT;  // Non-unset errors
+          if (special == 0)                           // Plain substitution
             {
             if ((suboptions & PCRE2_SUBSTITUTE_UNSET_EMPTY) != 0) continue;
-            goto PTREXIT;                             /* Else error */
+            goto PTREXIT;                             // Else error
             }
           }
 
@@ -1462,7 +1462,7 @@ for (;;)
         else
           CHECKMEMCPY(subptr, subptrend - subptr);
         }
-      }   /* End of $ processing */
+      }   // End of $ processing
 
     /* Handle an escape sequence in extended mode. We can use check_escape()
     to process \Q, \E, \c, \o, \x and \ followed by non-alphanumerics, but
@@ -1539,7 +1539,7 @@ for (;;)
         continue;
         }
 
-      ptr++;  /* Point after \ */
+      ptr++;  // Point after \ (backslash)
       rc = PRIV(check_escape)(&ptr, repend, &ch, &errorcode,
         code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
       if (errorcode != 0) goto BADESCAPE;
@@ -1553,9 +1553,9 @@ for (;;)
         escaped_literal = TRUE;
         continue;
 
-        case 0:      /* Data character */
-        case ESC_b:  /* \b is backspace in a substitution */
-        case ESC_v:  /* \v is vertical tab in a substitution */
+        case 0:      // Data character
+        case ESC_b:  // \b is backspace in a substitution
+        case ESC_v:  // \v is vertical tab in a substitution
 
         if (rc == ESC_b) ch = CHAR_BS;
         if (rc == ESC_v) ch = CHAR_VT;
@@ -1610,7 +1610,7 @@ for (;;)
           }
         goto BADESCAPE;
         }
-      }   /* End of backslash processing */
+      }   // End of backslash processing
 
     /* Handle a literal code unit */
 
@@ -1620,7 +1620,7 @@ for (;;)
 
       LOADLITERAL:
       ch_start = ptr;
-      GETCHARINCTEST(ch, ptr);    /* Get character value, increment pointer */
+      GETCHARINCTEST(ch, ptr);    // Get character value, increment pointer
       (void) ch;
 
       if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
@@ -1628,8 +1628,8 @@ for (;;)
         CHECKCASECPY_DEFAULT(ch_start, ptr - ch_start);
       else
         CHECKMEMCPY(ch_start, ptr - ch_start);
-      } /* End handling a literal code unit */
-    }   /* End of loop for scanning the replacement. */
+      } // End handling a literal code unit
+    }   // End of loop for scanning the replacement.
 
   /* If the substitute_case_callout is unset, our case-forcing is done
   immediately. If there is a callout however, then its action is delayed
@@ -1688,8 +1688,8 @@ for (;;)
       PCRE2_SIZE newlength_buf = buff_offset - scb.output_offsets[0];
       PCRE2_SIZE newlength_extra = extra_needed - sub_start_extra_needed;
       PCRE2_SIZE newlength =
-        (newlength_extra > ~(PCRE2_SIZE)0 - newlength_buf)?  /* Integer overflow */
-        ~(PCRE2_SIZE)0 : newlength_buf + newlength_extra;    /* Cap the addition */
+        (newlength_extra > ~(PCRE2_SIZE)0 - newlength_buf)?  // Integer overflow
+        ~(PCRE2_SIZE)0 : newlength_buf + newlength_extra;    // Cap the addition
       PCRE2_SIZE oldlength = ovector[1] - ovector[0];
 
       /* Be pessimistic: request whichever buffer size is larger out of
@@ -1698,7 +1698,7 @@ for (;;)
       if (oldlength > newlength)
         {
         PCRE2_SIZE additional = oldlength - newlength;
-        if (additional > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */
+        if (additional > ~(PCRE2_SIZE)0 - extra_needed)  // Integer overflow
           goto TOOLARGEREPLACE;
         extra_needed += additional;
         }
@@ -1727,7 +1727,7 @@ for (;;)
 
   PCRE2_ASSERT(start_offset == ovector[1]);
 
-  }  /* End of global loop */
+  }  // End of global loop
 
 /* Copy the rest of the subject unless not required, and terminate the output
 with a binary zero. */
@@ -1749,7 +1749,7 @@ if (overflowed)
   {
   rc = PCRE2_ERROR_NOMEMORY;
 
-  if (extra_needed > ~(PCRE2_SIZE)0 - buff_length)  /* Integer overflow */
+  if (extra_needed > ~(PCRE2_SIZE)0 - buff_length)  // Integer overflow
     goto TOOLARGEREPLACE;
   *blength = buff_length + extra_needed;
   }

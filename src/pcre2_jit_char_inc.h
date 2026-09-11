@@ -520,7 +520,7 @@ sljit_u32 category_list = 0;
 sljit_u32 items;
 int typereg = TMP1;
 #else
-(void)c; /* Avoid compiler warning. */
+(void)c; // Avoid compiler warning.
 #endif /* SUPPORT_UNICODE */
 
 SLJIT_ASSERT(common->locals_size >= SSIZE_OF(sw));
@@ -1537,7 +1537,7 @@ do
       ricount++;
       }
 
-    if ((ricount & 1) != 0) break;  /* Grapheme break required */
+    if ((ricount & 1) != 0) break;  // Grapheme break required
     }
 
   /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
@@ -1619,7 +1619,7 @@ do
       }
 
     if ((ricount & 1) != 0)
-      break;  /* Grapheme break required */
+      break;  // Grapheme break required
     }
 
   /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
@@ -1706,7 +1706,7 @@ while (cc < end_subject)
       }
 
     if ((ricount & 1) != 0)
-      break;  /* Grapheme break required */
+      break;  // Grapheme break required
     }
 
   /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in

@@ -497,30 +497,32 @@ static convertstruct convertlist[] = {
 
 /* Modifier types and applicability */
 
-enum { MOD_CTC,    /* Applies to a compile context */
-       MOD_CTM,    /* Applies to a match context */
-       MOD_PAT,    /* Applies to a pattern */
-       MOD_PATP,   /* Ditto, OK for Perl test */
-       MOD_DAT,    /* Applies to a data line */
-       MOD_DATP,   /* Ditto, OK for Perl test */
-       MOD_PD,     /* Applies to a pattern or a data line */
-       MOD_PDP,    /* As MOD_PD, OK for Perl test */
-       MOD_PND,    /* As MOD_PD, but not for a default pattern */
-       MOD_PNDP,   /* As MOD_PND, OK for Perl test */
-       MOD_CHR,    /* Is a single character */
-       MOD_CON,    /* Is a "convert" type/options list */
-       MOD_CTL,    /* Is a control bit */
-       MOD_BSR,    /* Is a BSR value */
-       MOD_IN2,    /* Is one or two unsigned integers */
-       MOD_INS,    /* Is a signed integer */
-       MOD_INT,    /* Is an unsigned integer */
-       MOD_IND,    /* Is an unsigned integer, but no value => default */
-       MOD_NL,     /* Is a newline value */
-       MOD_NN,     /* Is a number or a name; more than one may occur */
-       MOD_OPT,    /* Is an option bit */
-       MOD_OPTMZ,  /* Is an optimization directive */
-       MOD_SIZ,    /* Is a PCRE2_SIZE value */
-       MOD_STR };  /* Is a string; Pascal-encoded with length in first byte */
+enum {
+  MOD_CTC,    // Applies to a compile context
+  MOD_CTM,    // Applies to a match context
+  MOD_PAT,    // Applies to a pattern
+  MOD_PATP,   // Ditto, OK for Perl test
+  MOD_DAT,    // Applies to a data line
+  MOD_DATP,   // Ditto, OK for Perl test
+  MOD_PD,     // Applies to a pattern or a data line
+  MOD_PDP,    // As MOD_PD, OK for Perl test
+  MOD_PND,    // As MOD_PD, but not for a default pattern
+  MOD_PNDP,   // As MOD_PND, OK for Perl test
+  MOD_CHR,    // Is a single character
+  MOD_CON,    // Is a "convert" type/options list
+  MOD_CTL,    // Is a control bit
+  MOD_BSR,    // Is a BSR value
+  MOD_IN2,    // Is one or two unsigned integers
+  MOD_INS,    // Is a signed integer
+  MOD_INT,    // Is an unsigned integer
+  MOD_IND,    // Is an unsigned integer, but no value => default
+  MOD_NL,     // Is a newline value
+  MOD_NN,     // Is a number or a name; more than one may occur
+  MOD_OPT,    // Is an option bit
+  MOD_OPTMZ,  // Is an optimization directive
+  MOD_SIZ,    // Is a PCRE2_SIZE value
+  MOD_STR     // Is a string; Pascal-encoded with length in first byte
+};
 
 /* Control bits. Some apply to compiling, some to matching, but some can be set
 either on a pattern or a data line, so they must all be distinct. There are now
@@ -622,14 +624,14 @@ different things in the two cases. */
 subject (MOD_PD[P]/MOD_PND) must be at the start and in the same order in both
 structures so that the same offset in the big table below works for both. */
 
-typedef struct patctl {       /* Structure for pattern modifiers. */
-  uint32_t  options;          /* Must be in same position as datctl */
-  uint32_t  control;          /* Must be in same position as datctl */
-  uint32_t  control2;         /* Must be in same position as datctl */
-  uint32_t  jitstack;         /* Must be in same position as datctl */
-   uint8_t  replacement[1+REPLACE_MODSIZE];         /* So must this */
-  uint32_t  substitute_skip;  /* Must be in same position as datctl */
-  uint32_t  substitute_stop;  /* Must be in same position as datctl */
+typedef struct patctl {       // Structure for pattern modifiers.
+  uint32_t  options;          // Must be in same position as datctl
+  uint32_t  control;          // Must be in same position as datctl
+  uint32_t  control2;         // Must be in same position as datctl
+  uint32_t  jitstack;         // Must be in same position as datctl
+   uint8_t  replacement[1+REPLACE_MODSIZE];         // So must this
+  uint32_t  substitute_skip;  // Must be in same position as datctl
+  uint32_t  substitute_stop;  // Must be in same position as datctl
   uint32_t  jit;
   uint32_t  stackguard_test;
   uint32_t  tables_id;
@@ -644,14 +646,14 @@ typedef struct patctl {       /* Structure for pattern modifiers. */
 #define MAXCPYGET 10
 #define LENCPYGET 64
 
-typedef struct datctl {        /* Structure for data line modifiers. */
-  uint32_t   options;          /* Must be in same position as patctl */
-  uint32_t   control;          /* Must be in same position as patctl */
-  uint32_t   control2;         /* Must be in same position as patctl */
-  uint32_t   jitstack;         /* Must be in same position as patctl */
-   uint8_t   replacement[1+REPLACE_MODSIZE];         /* So must this */
-  uint32_t   substitute_skip;  /* Must be in same position as patctl */
-  uint32_t   substitute_stop;  /* Must be in same position as patctl */
+typedef struct datctl {        // Structure for data line modifiers.
+  uint32_t   options;          // Must be in same position as patctl
+  uint32_t   control;          // Must be in same position as patctl
+  uint32_t   control2;         // Must be in same position as patctl
+  uint32_t   jitstack;         // Must be in same position as patctl
+   uint8_t   replacement[1+REPLACE_MODSIZE];         // So must this
+  uint32_t   substitute_skip;  // Must be in same position as patctl
+  uint32_t   substitute_stop;  // Must be in same position as patctl
    uint8_t   substitute_subject[1+SUBSTITUTE_SUBJECT_MODSIZE];
   uint32_t   startend[2];
   uint32_t   cerror[2];
@@ -692,11 +694,13 @@ d->cfail[0] = d->cfail[1] = CFORE_UNSET;
 
 /* Ids for which context to modify. */
 
-enum { CTX_PAT,            /* Active pattern context */
-       CTX_POPPAT,         /* Ditto, for a popped pattern */
-       CTX_DEFPAT,         /* Default pattern context */
-       CTX_DAT,            /* Active data (match) context */
-       CTX_DEFDAT };       /* Default data (match) context */
+enum {
+  CTX_PAT,     // Active pattern context
+  CTX_POPPAT,  // Ditto, for a popped pattern
+  CTX_DEFPAT,  // Default pattern context
+  CTX_DAT,     // Active data (match) context
+  CTX_DEFDAT   // Default data (match) context
+};
 
 /* Macros to simplify the big table below. */
 
@@ -856,7 +860,7 @@ static modstruct modlist[] = {
   { "pushcopy",                    MOD_PAT,  MOD_CTL, CTL_PUSHCOPY,               PO(control) },
   { "pushtablescopy",              MOD_PAT,  MOD_CTL, CTL_PUSHTABLESCOPY,         PO(control) },
   { "python_octal",                MOD_CTC,  MOD_OPT, PCRE2_EXTRA_PYTHON_OCTAL,   CO(extra_options) },
-  { "recursion_limit",             MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  /* Obsolete synonym */
+  { "recursion_limit",             MOD_CTM,  MOD_INT, 0,                          MO(depth_limit) },  // Obsolete synonym
   { "regerror_buffsize",           MOD_PAT,  MOD_INS, 0,                          PO(regerror_buffsize) },
   { "replace",                     MOD_PND,  MOD_STR, REPLACE_MODSIZE,            PO(replacement) },
   { "stackguard",                  MOD_PAT,  MOD_INT, 0,                          PO(stackguard_test) },
@@ -1056,9 +1060,9 @@ static coptstruct coptlist[] = {
 /* Types for the parser, to be used in process_data() */
 
 enum force_encoding {
-  FORCE_NONE,         /* No preference, follow utf modifier */
-  FORCE_RAW,          /* Encode as a code point or error if too wide */
-  FORCE_UTF           /* Encode as a character or error if too wide */
+  FORCE_NONE,         // No preference, follow utf modifier
+  FORCE_RAW,          // Encode as a code point or error if too wide
+  FORCE_UTF           // Encode as a character or error if too wide
 };
 
 /* ----------------------- Static variables ------------------------ */
@@ -1076,7 +1080,7 @@ static BOOL preprocess_only = FALSE;
 static BOOL inside_if = FALSE;
 static BOOL malloc_testing = FALSE;
 
-static int jitrc;                             /* Return from JIT compile */
+static int jitrc;                             // Return from JIT compile
 static int timeit = 0;
 static int timeitm = 0;
 static int mallocs_until_failure = INT_MAX;
@@ -1112,21 +1116,21 @@ static int *dfa_workspace = NULL;
 static const uint8_t *locale_tables = NULL;
 static const uint8_t *use_tables = NULL;
 static uint8_t locale_name[LOCALESIZE];
-static uint8_t *tables3 = NULL;         /* For binary-loaded tables */
+static uint8_t *tables3 = NULL;         // For binary-loaded tables
 static uint32_t loadtables_length = 0;
 
 /* We need buffers for building 16/32-bit strings; 8-bit strings don't need
 rebuilding, but set up the same naming scheme for use in macros. The "buffer"
 buffer is where all input lines are read. Its size is the same as pbuffer8. */
 
-static size_t    pbuffer8_size  = 50000;        /* Initial size, bytes */
+static size_t    pbuffer8_size  = 50000;        // Initial size, bytes
 static uint8_t  *pbuffer8 = NULL;
 #ifdef SUPPORT_PCRE2_16
-static size_t    pbuffer16_size = 0;   /* Size, bytes! Set only when needed */
+static size_t    pbuffer16_size = 0;   // Size, bytes! Set only when needed
 static uint16_t *pbuffer16 = NULL;
 #endif
 #ifdef SUPPORT_PCRE2_32
-static size_t    pbuffer32_size = 0;   /* Size, bytes! Set only when needed */
+static size_t    pbuffer32_size = 0;   // Size, bytes! Set only when needed
 static uint32_t *pbuffer32 = NULL;
 #endif
 static uint8_t  *buffer = NULL;
@@ -1134,24 +1138,24 @@ static uint8_t  *buffer = NULL;
 /* The dbuffer is where all processed data lines are put. In non-8-bit modes it
 is cast as needed. For long data lines it grows as necessary. */
 
-static size_t dbuffer_size = 1u << 14;    /* Initial size, bytes */
+static size_t dbuffer_size = 1u << 14;    // Initial size, bytes
 static uint8_t *dbuffer = NULL;
 
 /* ------------------ Colour highlighting definitions -------------------- */
 
 /* Colour of input text that was a comment, when echoing back to the terminal */
-static const int clr_comment = 37; /* grey */
+static const int clr_comment = 37; // grey
 /* Colour of other input text that is echoed back to the terminal */
-static const int clr_input = 32; /* green */
+static const int clr_input = 32; // green
 /* Colour of prompt output */
-static const int clr_prompt = 34; /* blue */
+static const int clr_prompt = 34; // blue
 /* Colour of output that represents a PCRE2 API error */
-static const int clr_api_error = 35; /* magenta */
+static const int clr_api_error = 35; // magenta
 /* Colour of error messages for the test script itself
 (i.e. an error in the testing tool, not an API error) */
-static const int clr_test_error = 31; /* red */
+static const int clr_test_error = 31; // red
 /* Colour of profiling information, which doesn't have a "right" answer */
-static const int clr_profiling = 36; /* cyan */
+static const int clr_profiling = 36; // cyan
 /* No colour, for APIs that take a colour value */
 static const int clr_none = -1;
 
@@ -1223,6 +1227,7 @@ adjusts the tables. */
 only ASCII characters. */
 
 static const uint8_t tables1[] = {
+  // clang-format off
 
 /* This table is a lower casing table. */
 
@@ -1358,180 +1363,184 @@ graph, print, punct, and cntrl. Other classes are built from combinations. */
   0x80   regular expression metacharacter or binary zero
 */
 
-  0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*   0-  7 */
-  0x00,0x01,0x01,0x01,0x01,0x01,0x00,0x00, /*   8- 15 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  16- 23 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  24- 31 */
-  0x01,0x00,0x00,0x00,0x80,0x00,0x00,0x00, /*    - '  */
-  0x80,0x80,0x80,0x80,0x00,0x00,0x80,0x00, /*  ( - /  */
-  0x1c,0x1c,0x1c,0x1c,0x1c,0x1c,0x1c,0x1c, /*  0 - 7  */
-  0x1c,0x1c,0x00,0x00,0x00,0x00,0x00,0x80, /*  8 - ?  */
-  0x00,0x1a,0x1a,0x1a,0x1a,0x1a,0x1a,0x12, /*  @ - G  */
-  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, /*  H - O  */
-  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, /*  P - W  */
-  0x12,0x12,0x12,0x80,0x80,0x00,0x80,0x10, /*  X - _  */
-  0x00,0x1a,0x1a,0x1a,0x1a,0x1a,0x1a,0x12, /*  ` - g  */
-  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, /*  h - o  */
-  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, /*  p - w  */
-  0x12,0x12,0x12,0x80,0x80,0x00,0x00,0x00, /*  x -127 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 128-135 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 136-143 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 144-151 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 152-159 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 160-167 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 168-175 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 176-183 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 184-191 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 192-199 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 200-207 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 208-215 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 216-223 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 224-231 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 232-239 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 240-247 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};/* 248-255 */
+  0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //   0-  7
+  0x00,0x01,0x01,0x01,0x01,0x01,0x00,0x00, //   8- 15
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //  16- 23
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //  24- 31
+  0x01,0x00,0x00,0x00,0x80,0x00,0x00,0x00, //    - '
+  0x80,0x80,0x80,0x80,0x00,0x00,0x80,0x00, //  ( - /
+  0x1c,0x1c,0x1c,0x1c,0x1c,0x1c,0x1c,0x1c, //  0 - 7
+  0x1c,0x1c,0x00,0x00,0x00,0x00,0x00,0x80, //  8 - ?
+  0x00,0x1a,0x1a,0x1a,0x1a,0x1a,0x1a,0x12, //  @ - G
+  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, //  H - O
+  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, //  P - W
+  0x12,0x12,0x12,0x80,0x80,0x00,0x80,0x10, //  X - _
+  0x00,0x1a,0x1a,0x1a,0x1a,0x1a,0x1a,0x12, //  ` - g
+  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, //  h - o
+  0x12,0x12,0x12,0x12,0x12,0x12,0x12,0x12, //  p - w
+  0x12,0x12,0x12,0x80,0x80,0x00,0x00,0x00, //  x -127
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 128-135
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 136-143
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 144-151
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 152-159
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 160-167
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 168-175
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 176-183
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 184-191
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 192-199
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 200-207
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 208-215
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 216-223
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 224-231
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 232-239
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 240-247
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 248-255
+  // clang-format on
+};
 
 /* This is a set of tables that came originally from a Windows user. It seems
 to be at least an approximation of ISO 8859. In particular, there are
 characters greater than 128 that are marked as spaces, letters, etc. */
 
 static const uint8_t tables2[] = {
-0,1,2,3,4,5,6,7,
-8,9,10,11,12,13,14,15,
-16,17,18,19,20,21,22,23,
-24,25,26,27,28,29,30,31,
-32,33,34,35,36,37,38,39,
-40,41,42,43,44,45,46,47,
-48,49,50,51,52,53,54,55,
-56,57,58,59,60,61,62,63,
-64,97,98,99,100,101,102,103,
-104,105,106,107,108,109,110,111,
-112,113,114,115,116,117,118,119,
-120,121,122,91,92,93,94,95,
-96,97,98,99,100,101,102,103,
-104,105,106,107,108,109,110,111,
-112,113,114,115,116,117,118,119,
-120,121,122,123,124,125,126,127,
-128,129,130,131,132,133,134,135,
-136,137,138,139,140,141,142,143,
-144,145,146,147,148,149,150,151,
-152,153,154,155,156,157,158,159,
-160,161,162,163,164,165,166,167,
-168,169,170,171,172,173,174,175,
-176,177,178,179,180,181,182,183,
-184,185,186,187,188,189,190,191,
-224,225,226,227,228,229,230,231,
-232,233,234,235,236,237,238,239,
-240,241,242,243,244,245,246,215,
-248,249,250,251,252,253,254,223,
-224,225,226,227,228,229,230,231,
-232,233,234,235,236,237,238,239,
-240,241,242,243,244,245,246,247,
-248,249,250,251,252,253,254,255,
-0,1,2,3,4,5,6,7,
-8,9,10,11,12,13,14,15,
-16,17,18,19,20,21,22,23,
-24,25,26,27,28,29,30,31,
-32,33,34,35,36,37,38,39,
-40,41,42,43,44,45,46,47,
-48,49,50,51,52,53,54,55,
-56,57,58,59,60,61,62,63,
-64,97,98,99,100,101,102,103,
-104,105,106,107,108,109,110,111,
-112,113,114,115,116,117,118,119,
-120,121,122,91,92,93,94,95,
-96,65,66,67,68,69,70,71,
-72,73,74,75,76,77,78,79,
-80,81,82,83,84,85,86,87,
-88,89,90,123,124,125,126,127,
-128,129,130,131,132,133,134,135,
-136,137,138,139,140,141,142,143,
-144,145,146,147,148,149,150,151,
-152,153,154,155,156,157,158,159,
-160,161,162,163,164,165,166,167,
-168,169,170,171,172,173,174,175,
-176,177,178,179,180,181,182,183,
-184,185,186,187,188,189,190,191,
-224,225,226,227,228,229,230,231,
-232,233,234,235,236,237,238,239,
-240,241,242,243,244,245,246,215,
-248,249,250,251,252,253,254,223,
-192,193,194,195,196,197,198,199,
-200,201,202,203,204,205,206,207,
-208,209,210,211,212,213,214,247,
-216,217,218,219,220,221,222,255,
-0,62,0,0,1,0,0,0,
-0,0,0,0,0,0,0,0,
-32,0,0,0,1,0,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,255,3,
-126,0,0,0,126,0,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,255,3,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,12,2,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,
-254,255,255,7,0,0,0,0,
-0,0,0,0,0,0,0,0,
-255,255,127,127,0,0,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,254,255,255,7,
-0,0,0,0,0,4,32,4,
-0,0,0,128,255,255,127,255,
-0,0,0,0,0,0,255,3,
-254,255,255,135,254,255,255,7,
-0,0,0,0,0,4,44,6,
-255,255,127,255,255,255,127,255,
-0,0,0,0,254,255,255,255,
-255,255,255,255,255,255,255,127,
-0,0,0,0,254,255,255,255,
-255,255,255,255,255,255,255,255,
-0,2,0,0,255,255,255,255,
-255,255,255,255,255,255,255,127,
-0,0,0,0,255,255,255,255,
-255,255,255,255,255,255,255,255,
-0,0,0,0,254,255,0,252,
-1,0,0,248,1,0,0,120,
-0,0,0,0,254,255,255,255,
-0,0,128,0,0,0,128,0,
-255,255,255,255,0,0,0,0,
-0,0,0,0,0,0,0,128,
-255,255,255,255,0,0,0,0,
-0,0,0,0,0,0,0,0,
-128,0,0,0,0,0,0,0,
-0,1,1,0,1,1,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,
-1,0,0,0,128,0,0,0,
-128,128,128,128,0,0,128,0,
-28,28,28,28,28,28,28,28,
-28,28,0,0,0,0,0,128,
-0,26,26,26,26,26,26,18,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,18,
-18,18,18,128,128,0,128,16,
-0,26,26,26,26,26,26,18,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,18,
-18,18,18,128,128,0,0,0,
-0,0,0,0,0,1,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,
-1,0,0,0,0,0,0,0,
-0,0,18,0,0,0,0,0,
-0,0,20,20,0,18,0,0,
-0,20,18,0,0,0,0,0,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,0,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,18,
-18,18,18,18,18,18,18,0,
-18,18,18,18,18,18,18,18
+  // clang-format off
+  0,1,2,3,4,5,6,7,
+  8,9,10,11,12,13,14,15,
+  16,17,18,19,20,21,22,23,
+  24,25,26,27,28,29,30,31,
+  32,33,34,35,36,37,38,39,
+  40,41,42,43,44,45,46,47,
+  48,49,50,51,52,53,54,55,
+  56,57,58,59,60,61,62,63,
+  64,97,98,99,100,101,102,103,
+  104,105,106,107,108,109,110,111,
+  112,113,114,115,116,117,118,119,
+  120,121,122,91,92,93,94,95,
+  96,97,98,99,100,101,102,103,
+  104,105,106,107,108,109,110,111,
+  112,113,114,115,116,117,118,119,
+  120,121,122,123,124,125,126,127,
+  128,129,130,131,132,133,134,135,
+  136,137,138,139,140,141,142,143,
+  144,145,146,147,148,149,150,151,
+  152,153,154,155,156,157,158,159,
+  160,161,162,163,164,165,166,167,
+  168,169,170,171,172,173,174,175,
+  176,177,178,179,180,181,182,183,
+  184,185,186,187,188,189,190,191,
+  224,225,226,227,228,229,230,231,
+  232,233,234,235,236,237,238,239,
+  240,241,242,243,244,245,246,215,
+  248,249,250,251,252,253,254,223,
+  224,225,226,227,228,229,230,231,
+  232,233,234,235,236,237,238,239,
+  240,241,242,243,244,245,246,247,
+  248,249,250,251,252,253,254,255,
+  0,1,2,3,4,5,6,7,
+  8,9,10,11,12,13,14,15,
+  16,17,18,19,20,21,22,23,
+  24,25,26,27,28,29,30,31,
+  32,33,34,35,36,37,38,39,
+  40,41,42,43,44,45,46,47,
+  48,49,50,51,52,53,54,55,
+  56,57,58,59,60,61,62,63,
+  64,97,98,99,100,101,102,103,
+  104,105,106,107,108,109,110,111,
+  112,113,114,115,116,117,118,119,
+  120,121,122,91,92,93,94,95,
+  96,65,66,67,68,69,70,71,
+  72,73,74,75,76,77,78,79,
+  80,81,82,83,84,85,86,87,
+  88,89,90,123,124,125,126,127,
+  128,129,130,131,132,133,134,135,
+  136,137,138,139,140,141,142,143,
+  144,145,146,147,148,149,150,151,
+  152,153,154,155,156,157,158,159,
+  160,161,162,163,164,165,166,167,
+  168,169,170,171,172,173,174,175,
+  176,177,178,179,180,181,182,183,
+  184,185,186,187,188,189,190,191,
+  224,225,226,227,228,229,230,231,
+  232,233,234,235,236,237,238,239,
+  240,241,242,243,244,245,246,215,
+  248,249,250,251,252,253,254,223,
+  192,193,194,195,196,197,198,199,
+  200,201,202,203,204,205,206,207,
+  208,209,210,211,212,213,214,247,
+  216,217,218,219,220,221,222,255,
+  0,62,0,0,1,0,0,0,
+  0,0,0,0,0,0,0,0,
+  32,0,0,0,1,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,255,3,
+  126,0,0,0,126,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,255,3,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,12,2,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  254,255,255,7,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  255,255,127,127,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,254,255,255,7,
+  0,0,0,0,0,4,32,4,
+  0,0,0,128,255,255,127,255,
+  0,0,0,0,0,0,255,3,
+  254,255,255,135,254,255,255,7,
+  0,0,0,0,0,4,44,6,
+  255,255,127,255,255,255,127,255,
+  0,0,0,0,254,255,255,255,
+  255,255,255,255,255,255,255,127,
+  0,0,0,0,254,255,255,255,
+  255,255,255,255,255,255,255,255,
+  0,2,0,0,255,255,255,255,
+  255,255,255,255,255,255,255,127,
+  0,0,0,0,255,255,255,255,
+  255,255,255,255,255,255,255,255,
+  0,0,0,0,254,255,0,252,
+  1,0,0,248,1,0,0,120,
+  0,0,0,0,254,255,255,255,
+  0,0,128,0,0,0,128,0,
+  255,255,255,255,0,0,0,0,
+  0,0,0,0,0,0,0,128,
+  255,255,255,255,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  128,0,0,0,0,0,0,0,
+  0,1,1,0,1,1,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  1,0,0,0,128,0,0,0,
+  128,128,128,128,0,0,128,0,
+  28,28,28,28,28,28,28,28,
+  28,28,0,0,0,0,0,128,
+  0,26,26,26,26,26,26,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,128,128,0,128,16,
+  0,26,26,26,26,26,26,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,128,128,0,0,0,
+  0,0,0,0,0,1,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,
+  1,0,0,0,0,0,0,0,
+  0,0,18,0,0,0,0,0,
+  0,0,20,20,0,18,0,0,
+  0,20,18,0,0,0,0,0,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,0,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,18,
+  18,18,18,18,18,18,18,0,
+  18,18,18,18,18,18,18,18,
+  // clang-format on
 };
 
 
@@ -1582,7 +1591,7 @@ if (show_memory && outfile != NULL)
     {
     cfprintf(clr_profiling, outfile, "malloc  %5" SIZ_FORM, size);
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-    cfprintf(clr_profiling, outfile, " %p", block);   /* Not portable */
+    cfprintf(clr_profiling, outfile, " %p", block);   // Not portable
 #endif
     if (malloclistptr < MALLOCLISTSIZE)
       {
@@ -1624,7 +1633,7 @@ if (show_memory && outfile != NULL && block != NULL)
     }
   if (!found) cfprintf(clr_profiling, outfile, " unremembered block");
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-  cfprintf(clr_profiling, outfile, " %p", block);  /* Not portable */
+  cfprintf(clr_profiling, outfile, " %p", block);  // Not portable
 #endif
   fprintf(outfile, "\n");
   }
@@ -1773,14 +1782,14 @@ uint32_t c = *utf8bytes++;
 uint32_t d = c;
 int i, j, s;
 
-for (i = -1; i < 6; i++)               /* i is number of additional bytes */
+for (i = -1; i < 6; i++)               // i is number of additional bytes
   {
   if ((d & 0x80) == 0) break;
   d <<= 1;
   }
 
-if (i == -1) { *vptr = c; return 1; }  /* ascii character */
-if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
+if (i == -1) { *vptr = c; return 1; }  // ascii character
+if (i == 0 || i == 6) return 0;        // invalid UTF-8
 
 /* i now has a value in the range 1-5 */
 
@@ -2102,7 +2111,7 @@ for (;;)
     }
   }
 
-PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); // Control never reaches here
 }
 
 
@@ -2249,7 +2258,7 @@ switch (rc)
   case PCRE2_ERROR_MISSING_CLOSING_PARENTHESIS:
   return 1;
   case PCRE2_ERROR_BAD_SUBPATTERN_REFERENCE:
-  return 3; /* TODO I'd like to fix this, but some of the cases are _hard_ */
+  return 3; // TODO I'd like to fix this, but some of the cases are _hard_
   case PCRE2_ERROR_MISSING_COMMENT_CLOSING:
   case PCRE2_ERROR_UNMATCHED_CLOSING_PARENTHESIS:
   case PCRE2_ERROR_MISSING_CONDITION_CLOSING:
@@ -2275,7 +2284,7 @@ switch (rc)
   case PCRE2_ERROR_OCTAL_BYTE_TOO_BIG:
   return 1;
   case PCRE2_ERROR_DEFINE_TOO_MANY_BRANCHES:
-  return 2; /* TODO Not ideally placed; I'd like to fix this */
+  return 2; // TODO Not ideally placed; I'd like to fix this
   case PCRE2_ERROR_BACKSLASH_O_MISSING_BRACE:
   case PCRE2_ERROR_BACKSLASH_G_SYNTAX:
   case PCRE2_ERROR_PARENS_QUERY_R_MISSING_CLOSING:
@@ -2307,7 +2316,7 @@ switch (rc)
   case PCRE2_ERROR_MISSING_OCTAL_DIGIT:
   return 1;
   case PCRE2_ERROR_BACKSLASH_K_IN_LOOKAROUND:
-  return 3; /* TODO No erroroffset implemented yet, sadly */
+  return 3; // TODO No erroroffset implemented yet, sadly
   case PCRE2_ERROR_OVERSIZE_PYTHON_OCTAL:
   case PCRE2_ERROR_CALLOUT_CALLER_DISABLED:
   case PCRE2_ERROR_ECLASS_INVALID_OPERATOR:
@@ -3564,25 +3573,25 @@ for (i = 0; i < MODLISTCOUNT; i++)
 
   switch (m->which)
     {
-    case MOD_CTC:       /* Compile context */
-    case MOD_PAT:       /* Pattern */
-    case MOD_PATP:      /* Pattern, OK for Perl-compatible test */
+    case MOD_CTC:       // Compile context
+    case MOD_PAT:       // Pattern
+    case MOD_PATP:      // Pattern, OK for Perl-compatible test
     break;
 
     /* The MOD_PND and MOD_PNDP modifiers are precisely those that affect
     subjects, but can be given with a pattern. We list them as subject
     modifiers, but marked with an asterisk.*/
 
-    case MOD_CTM:       /* Match context */
-    case MOD_DAT:       /* Subject line */
-    case MOD_DATP:      /* Subject line, OK for Perl-compatible test */
-    case MOD_PND:       /* As PD, but not default pattern */
-    case MOD_PNDP:      /* As PND, OK for Perl-compatible test */
+    case MOD_CTM:       // Match context
+    case MOD_DAT:       // Subject line
+    case MOD_DATP:      // Subject line, OK for Perl-compatible test
+    case MOD_PND:       // As PD, but not default pattern
+    case MOD_PNDP:      // As PND, OK for Perl-compatible test
     is_pattern = FALSE;
     break;
 
-    case MOD_PD:        /* Pattern or subject */
-    case MOD_PDP:       /* As PD, OK for Perl-compatible test */
+    case MOD_PD:        // Pattern or subject
+    case MOD_PDP:       // As PD, OK for Perl-compatible test
     is_pattern = for_pattern;
     break;
 
@@ -4078,7 +4087,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     {
     if (arg[4] == 'v') def_patctl.control |= CTL_JITVERIFY;
       else if (arg[4] == 'f') def_patctl.control |= CTL_JITFAST;
-    def_patctl.jit = JIT_DEFAULT;  /* full & partial */
+    def_patctl.jit = JIT_DEFAULT;  // full & partial
 #ifndef SUPPORT_JIT
     cfprintf(clr_test_error, stderr, "pcre2test: Warning: JIT support is not available: "
                     "-jit[fast|verify] calls functions that do nothing.\n");
@@ -4226,8 +4235,8 @@ if (arg_error != NULL)
     arg_error = endptr + 1;
     }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
-  }  /* End of -error handling */
+  PCRE2_UNREACHABLE(); // Control never reaches here
+  }  // End of -error handling
 
 /* Initialize things that cannot be done until we know which test mode we are
 running in. */
@@ -4459,7 +4468,7 @@ free(tables3);
 free_globals();
 
 #if defined(__VMS)
-  yield = SS$_NORMAL;  /* Return values via DCL symbols */
+  yield = SS$_NORMAL;  // Return values via DCL symbols
 #endif
 
 return yield;

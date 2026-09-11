@@ -63,7 +63,7 @@ pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
 {
 const pcre2_real_code *re = (const pcre2_real_code *)code;
 
-if (where == NULL)   /* Requests field length */
+if (where == NULL)   // Requests field length
   {
   switch(what)
     {

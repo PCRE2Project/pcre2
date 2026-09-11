@@ -139,8 +139,8 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
       which means that Perl space and POSIX space are now identical. PCRE
       was changed at release 8.34. */
 
-      case PT_SPACE:    /* Perl space */
-      case PT_PXSPACE:  /* POSIX space */
+      case PT_SPACE:    // Perl space
+      case PT_PXSPACE:  // POSIX space
       switch(c)
         {
         HSPACE_CASES:
@@ -241,8 +241,8 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
       if (((c >= CHAR_0 && c <= CHAR_9) ||
            (c >= CHAR_A && c <= CHAR_F) ||
            (c >= CHAR_a && c <= CHAR_f) ||
-           (c >= 0xff10 && c <= 0xff19) ||  /* Fullwidth digits */
-           (c >= 0xff21 && c <= 0xff26) ||  /* Fullwidth letters */
+           (c >= 0xff10 && c <= 0xff19) ||  // Fullwidth digits
+           (c >= 0xff21 && c <= 0xff26) ||  // Fullwidth letters
            (c >= 0xff41 && c <= 0xff46)) == isprop)
         return not_negated;
       break;
@@ -262,7 +262,7 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
   while (*data == XCL_PROP || *data == XCL_NOTPROP);
   }
 #else
-  (void)utf;  /* Avoid compiler warning */
+  (void)utf;  // Avoid compiler warning
 #endif  /* SUPPORT_UNICODE */
 
 /* Match against large chars or ranges that end with a large char. */
@@ -275,7 +275,7 @@ if (*data < XCL_LIST)
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      GETCHARINC(x, data); /* macro generates multiple statements */
+      GETCHARINC(x, data); // macro generates multiple statements
       }
     else
 #endif
@@ -293,7 +293,7 @@ if (*data < XCL_LIST)
 #ifdef SUPPORT_UNICODE
     if (utf)
       {
-      GETCHARINC(y, data); /* macro generates multiple statements */
+      GETCHARINC(y, data); // macro generates multiple statements
       }
     else
 #endif
@@ -304,7 +304,7 @@ if (*data < XCL_LIST)
     if (c <= y) return (c >= x) ? not_negated : !not_negated;
     }
 
-  return !not_negated;   /* char did not match */
+  return !not_negated;   // char did not match
   }
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -538,7 +538,7 @@ while (ptr < data_end)
   }
 
 PCRE2_ASSERT(stack_depth == 1);
-(void)stack_depth;  /* Ignore unused variable, if assertions are disabled. */
+(void)stack_depth;  // Ignore unused variable, if assertions are disabled.
 
 /* The final bit left on the stack now holds the match result. */
 return (stack & 1u) != 0;

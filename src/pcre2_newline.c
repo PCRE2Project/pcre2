@@ -121,15 +121,15 @@ else switch(c)
   *lenptr = utf? 2 : 1;
   return TRUE;
 
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 3;
   return TRUE;
 
 #else  /* 16-bit or 32-bit code units */
   case CHAR_NEL:
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 1;
   return TRUE;
 #endif
@@ -217,15 +217,15 @@ else switch(c)
   *lenptr = utf? 2 : 1;
   return TRUE;
 
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 3;
   return TRUE;
 
 #else /* 16-bit or 32-bit code units */
   case CHAR_NEL:
-  case 0x2028:   /* LS */
-  case 0x2029:   /* PS */
+  case 0x2028:   // LS
+  case 0x2029:   // PS
   *lenptr = 1;
   return TRUE;
 #endif

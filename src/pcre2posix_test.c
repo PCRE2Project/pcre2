@@ -65,21 +65,21 @@ to stdout. */
 /* This vector contains compiler flags for each pattern that is tested. */
 
 static int cflags[] = {
-  0,           /* Test 0 */
-  REG_ICASE,   /* Test 1 */
-  0,           /* Test 2 */
-  REG_NEWLINE, /* Test 3 */
-  0            /* Test 4 */
+  0,           // Test 0
+  REG_ICASE,   // Test 1
+  0,           // Test 2
+  REG_NEWLINE, // Test 3
+  0            // Test 4
 };
 
 /* This vector contains match flags for each pattern that is tested. */
 
 static int mflags[] = {
-  0,           /* Test 0 */
-  0,           /* Test 1 */
-  0,           /* Test 2 */
-  REG_NOTBOL,  /* Test 3 */
-  0            /* Test 4 */
+  0,           // Test 0
+  0,           // Test 1
+  0,           // Test 2
+  REG_NOTBOL,  // Test 3
+  0            // Test 4
 };
 
 /* Automate the number of patterns */
@@ -110,33 +110,43 @@ optionally followed, for each subject string, by a match return code and, for a
 successful match, up to CAPCOUNT pairs of returned match data. */
 
 static int results0[] = {
-  0,             /* Compiler rc */
-  0, 6, 11,      /* 1st match */
-  REG_NOMATCH    /* 2nd match */
+  // clang-format off
+  0,             // Compiler rc
+  0, 6, 11,      // 1st match
+  REG_NOMATCH,   // 2nd match
+  // clang-format on
 };
 
 static int results1[] = {
-  0,             /* Compiler rc */
-  0, 6, 11,      /* 1st match */
-  0, 6, 11       /* 2nd match */
+  // clang-format off
+  0,             // Compiler rc
+  0, 6, 11,      // 1st match
+  0, 6, 11,      // 2nd match
+  // clang-format on
 };
 
 static int results2[] = {
-  0,             /* Compiler rc */
-  0, 0, 3, 0, 3, /* 1st match */
-  0, 0, 3, 0, 3, /* 2nd match */
-  REG_NOMATCH    /* 3rd match */
+  // clang-format off
+  0,             // Compiler rc
+  0, 0, 3, 0, 3, // 1st match
+  0, 0, 3, 0, 3, // 2nd match
+  REG_NOMATCH,   // 3rd match
+  // clang-format on
 };
 
 static int results3[] = {
-  0,                 /* Compiler rc */
-  0, 13, 16, 13, 16, /* 1st match */
-  REG_NOMATCH,       /* 2nd match */
-  REG_NOMATCH        /* 3rd match */
+  // clang-format off
+  0,                 // Compiler rc
+  0, 13, 16, 13, 16, // 1st match
+  REG_NOMATCH,       // 2nd match
+  REG_NOMATCH,       // 3rd match
+  // clang-format on
 };
 
 static int results4[] = {
-  REG_BADRPT         /* Compiler rc */
+  // clang-format off
+  REG_BADRPT,        // Compiler rc
+  // clang-format on
 };
 
 /* Index the result vectors */

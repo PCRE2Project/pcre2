@@ -208,7 +208,7 @@ for (;;)
       break;
       }
 #else
-    (void)(utf);  /* Keep compiler happy by referencing function argument */
+    (void)(utf);  // Keep compiler happy by referencing function argument
 #endif  /* MAYBE_UTF_MULTI */
     }
   }

@@ -194,7 +194,7 @@ while (c <= end)
            (options & PARSE_CLASS_RESTRICTED_UTF) != 0 &&
            PRIV(ucd_caseless_sets)[co] < 128)
     {
-    co = 0;  /* Ignore the caseless set if it's restricted. */
+    co = 0;  // Ignore the caseless set if it's restricted.
     }
 
   if (co != 0)
@@ -294,7 +294,7 @@ while (*p != NOTACHAR)
 static uint32_t
 get_highest_char(uint32_t options)
 {
-(void)options; /* Avoid compiler warning. */
+(void)options; // Avoid compiler warning.
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 return MAX_UTF_CODE_POINT;
@@ -525,8 +525,8 @@ if (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT)
 if (xoptions & PCRE2_EXTRA_TURKISH_CASING)
   class_options |= PARSE_CLASS_TURKISH_UTF;
 #else
-(void)options;   /* Avoid compiler warning. */
-(void)xoptions;  /* Avoid compiler warning. */
+(void)options;   // Avoid compiler warning.
+(void)xoptions;  // Avoid compiler warning.
 #endif
 
 /* Compute required space for the range. */
@@ -809,8 +809,8 @@ for (c = 0; c < 256; c++)
     set_bit = (gentype == ucp_L || gentype == ucp_N);
     break;
 
-    case PT_SPACE:    /* Perl space */
-    case PT_PXSPACE:  /* POSIX space */
+    case PT_SPACE:    // Perl space
+    case PT_PXSPACE:  // POSIX space
     switch(c)
       {
       HSPACE_BYTE_CASES:
@@ -926,7 +926,7 @@ uint32_t c, byte_start, byte_end;
 uint32_t classbits_end = (end <= 0xff ? end : 0xff);
 
 #ifndef SUPPORT_UNICODE
-(void)xoptions; /* Avoid compiler warning. */
+(void)xoptions; // Avoid compiler warning.
 #endif
 
 /* If caseless matching is required, scan the range and process alternate
@@ -1105,9 +1105,9 @@ uint32_t xclass_props;
 PCRE2_UCHAR *class_uchardata;
 class_ranges* cranges;
 #else
-(void)has_bitmap;    /* Avoid compiler warning. */
-(void)errorcodeptr;  /* Avoid compiler warning. */
-(void)lengthptr;     /* Avoid compiler warning. */
+(void)has_bitmap;    // Avoid compiler warning.
+(void)errorcodeptr;  // Avoid compiler warning.
+(void)lengthptr;     // Avoid compiler warning.
 #endif
 
 /* If an XClass contains a negative special such as \S, we need to flip the
@@ -1165,7 +1165,7 @@ if (utf)
     }
   }
 
-class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
+class_uchardata = code + LINK_SIZE + 2;   // For XCLASS items
 #endif /* SUPPORT_WIDE_CHARS */
 
 /* Initialize the 256-bit (32-byte) bit map to all zeros. We build the map
@@ -1195,7 +1195,7 @@ while (TRUE)
     local_negate = (meta == META_POSIX_NEG);
     posix_class = *(pptr++);
 
-    if (local_negate) should_flip_negation = TRUE;  /* Note negative special */
+    if (local_negate) should_flip_negation = TRUE;  // Note negative special
 
     /* If matching is caseless, upper and lower are converted to alpha.
     This relies on the fact that the class table starts with alpha,
@@ -1331,7 +1331,7 @@ while (TRUE)
     /* Every class contains at least one < 256 character. */
     xclass_props |= XCLASS_HAS_8BIT_CHARS;
 #endif
-    continue;               /* End of POSIX handling */
+    continue;               // End of POSIX handling
 
     /* Other than POSIX classes, the only items we should encounter are
     \d-type escapes and literal characters (possibly as ranges). */
@@ -1562,7 +1562,7 @@ while (TRUE)
     PCRE2_ASSERT(cranges != NULL);
 #endif
     continue;
-    }  /* End of range handling */
+    }  // End of range handling
 
   /* Character ranges are ignored when class_ranges is present. */
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -1576,7 +1576,7 @@ while (TRUE)
 #else
   PCRE2_ASSERT(cranges != NULL);
 #endif
-  }   /* End of main class-processing loop */
+  }   // End of main class-processing loop
 
 END_PROCESSING:
 
@@ -1715,7 +1715,7 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
   PCRE2_UCHAR *previous = code;
 
   if ((xclass_props & XCLASS_HAS_CHAR_LISTS) == 0)
-    *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
+    *class_uchardata++ = XCL_END;    // Marks the end of extra data
   *code++ = OP_XCLASS;
   code += LINK_SIZE;
   *code = negate_class? XCL_NOT:0;
@@ -1773,7 +1773,7 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
           BYTES2CU(char_lists_size) > MAX_PATTERN_SIZE ||
           BYTES2CU(cb->char_lists_size) > MAX_PATTERN_SIZE - BYTES2CU(char_lists_size))
         {
-        *errorcodeptr = ERR20;   /* Pattern is too large */
+        *errorcodeptr = ERR20;   // Pattern is too large
         return NULL;
         }
 
@@ -1834,7 +1834,7 @@ if ((xclass_props & XCLASS_REQUIRED) != 0)
   /* Now fill in the complete length of the item */
 
   PUT(previous, 1, (int)(code - previous));
-  goto DONE;   /* End of class handling */
+  goto DONE;   // End of class handling
   }
 #endif  /* SUPPORT_WIDE_CHARS */
 
@@ -1863,7 +1863,7 @@ if ((SELECT_VALUE8(!utf, 0) || negate_class != should_flip_negation) &&
   if (i == 8)
     {
     *code++ = OP_ALLANY;
-    goto DONE;   /* End of class handling */
+    goto DONE;   // End of class handling
     }
   }
 
@@ -2276,7 +2276,7 @@ switch (meta)
     }
 
   break;
-  }  /* End of switch(meta) */
+  }  // End of switch(meta)
 
 pop_info->code_start = (lengthptr == NULL)? code_start : NULL;
 
@@ -2598,7 +2598,7 @@ context.cb = cb;
 previous = code;
 *code++ = OP_ECLASS;
 code += LINK_SIZE;
-*code++ = 0;  /* Flags, currently zero. */
+*code++ = 0;  // Flags, currently zero.
 if (!compile_eclass_nested(&context, FALSE, pptr, &code, &op_info, lengthptr))
   return FALSE;
 
