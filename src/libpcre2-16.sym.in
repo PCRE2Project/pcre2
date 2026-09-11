@@ -24,6 +24,7 @@ PCRE2_10.47 {
     pcre2_get_match_data_size_16;
     pcre2_get_ovector_count_16;
     pcre2_get_ovector_pointer_16;
+    pcre2_get_startchar_16;
     pcre2_jit_compile_16;
     pcre2_jit_free_unused_memory_16;
     pcre2_jit_match_16;
