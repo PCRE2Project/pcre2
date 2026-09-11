@@ -446,7 +446,7 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t limit)
 {
-if (mcontext == NULL)
+if (ccontext == NULL)
   return PCRE2_ERROR_NULL;
 
 ccontext->parens_nest_limit = limit;
@@ -456,7 +456,7 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_compile_extra_options(pcre2_compile_context *ccontext, uint32_t options)
 {
-if (mcontext == NULL)
+if (ccontext == NULL)
   return PCRE2_ERROR_NULL;
 
 ccontext->extra_options = options;
