@@ -351,6 +351,9 @@ pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length)
 if (ccontext == NULL)
   return PCRE2_ERROR_NULL;
 
+if (length == NULL)
+  return PCRE2_ERROR_NULL;
+
 *length = ccontext->bsr_convention;
 return 0;
 }
@@ -359,6 +362,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE *length)
 {
 if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+if (length == NULL)
   return PCRE2_ERROR_NULL;
 
 *length = ccontext->max_pattern_length;
@@ -405,12 +411,15 @@ switch(newline)
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_newline(pcre2_compile_context *ccontext, uint32_t *length)
+pcre2_get_newline(pcre2_compile_context *ccontext, uint32_t *newline)
 {
 if (ccontext == NULL)
   return PCRE2_ERROR_NULL;
 
-*length = ccontext->newline_convention;
+if (newline == NULL)
+  return PCRE2_ERROR_NULL;
+
+*newline = ccontext->newline_convention;
 return 0;
 }
 
@@ -425,6 +434,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t *limit)
 {
 if (ccontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+if (limit == NULL)
   return PCRE2_ERROR_NULL;
 
 *limit = ccontext->parens_nest_limit;
@@ -571,6 +583,9 @@ pcre2_get_heap_limit(pcre2_match_context *mcontext, uint32_t *limit)
 if (mcontext == NULL)
   return PCRE2_ERROR_NULL;
 
+if (limit == NULL)
+  return PCRE2_ERROR_NULL;
+
 *limit = mcontext->heap_limit;
 return 0;
 }
@@ -579,6 +594,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_match_limit(pcre2_match_context *mcontext, uint32_t *limit)
 {
 if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+if (limit == NULL)
   return PCRE2_ERROR_NULL;
 
 *limit = mcontext->match_limit;
@@ -591,6 +609,9 @@ pcre2_get_depth_limit(pcre2_match_context *mcontext, uint32_t *limit)
 if (mcontext == NULL)
   return PCRE2_ERROR_NULL;
 
+if (limit == NULL)
+  return PCRE2_ERROR_NULL;
+
 *limit = mcontext->depth_limit;
 return 0;
 }
@@ -599,6 +620,9 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE *limit)
 {
 if (mcontext == NULL)
+  return PCRE2_ERROR_NULL;
+
+if (limit == NULL)
   return PCRE2_ERROR_NULL;
 
 *limit = mcontext->offset_limit;
