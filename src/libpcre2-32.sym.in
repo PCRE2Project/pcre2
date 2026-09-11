@@ -18,20 +18,12 @@ PCRE2_10.47 {
     pcre2_general_context_copy_32;
     pcre2_general_context_create_32;
     pcre2_general_context_free_32;
-    pcre2_get_bsr_32;
-    pcre2_get_depth_limit_32;
     pcre2_get_error_message_32;
-    pcre2_get_heap_limit_32;
     pcre2_get_mark_32;
     pcre2_get_match_data_heapframes_size_32;
     pcre2_get_match_data_size_32;
-    pcre2_get_match_limit_32;
-    pcre2_get_max_pattern_length_32;
-    pcre2_get_newline_32;
-    pcre2_get_offset_limit_32;
     pcre2_get_ovector_count_32;
     pcre2_get_ovector_pointer_32;
-    pcre2_get_parens_nest_limit_32;
     pcre2_get_startchar_32;
     pcre2_jit_compile_32;
     pcre2_jit_free_unused_memory_32;
@@ -93,3 +85,18 @@ PCRE2_10.47 {
 };
 
 PCRE2_10.48 { } PCRE2_10.47;
+
+PCRE2_10.49 {
+  global:
+    pcre2_get_bsr_32;
+    pcre2_get_depth_limit_32;
+    pcre2_get_heap_limit_32;
+    pcre2_get_match_limit_32;
+    pcre2_get_max_pattern_length_32;
+    pcre2_get_newline_32;
+    pcre2_get_offset_limit_32;
+    pcre2_get_parens_nest_limit_32;
+
+@PCRE2_EXTRA_LOCAL_SYMS@
+} PCRE2_10.48;
+
