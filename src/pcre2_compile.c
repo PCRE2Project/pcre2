@@ -868,265 +868,268 @@ for (;;)
     pptr++;
     }
 
-  else switch (META_CODE(*pptr++))
+  else
     {
-    default:
-    fprintf(stderr, "**** OOPS - unknown META value - giving up ****\n");
-    return;
+    switch (META_CODE(*pptr++))
+      {
+      default:
+      fprintf(stderr, "**** OOPS - unknown META value - giving up ****\n");
+      return;
 
-    case META_END:
-    fprintf(stderr, "META_END\n");
-    return;
+      case META_END:
+      fprintf(stderr, "META_END\n");
+      return;
 
-    case META_CAPTURE:
-    fprintf(stderr, "META_CAPTURE %d", meta_arg);
-    break;
+      case META_CAPTURE:
+      fprintf(stderr, "META_CAPTURE %d", meta_arg);
+      break;
 
-    case META_RECURSE:
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "META_RECURSE %d %zd", meta_arg, offset);
-    break;
-
-    case META_BACKREF:
-    if (meta_arg < 10)
-      offset = cb->small_ref_offset[meta_arg];
-    else
+      case META_RECURSE:
       GETOFFSET(offset, pptr);
-    fprintf(stderr, "META_BACKREF %d %zd", meta_arg, offset);
-    break;
+      fprintf(stderr, "META_RECURSE %d %zd", meta_arg, offset);
+      break;
 
-    case META_ESCAPE:
-    if (meta_arg == ESC_P || meta_arg == ESC_p)
-      {
-      uint32_t ptype = *pptr >> 16;
-      uint32_t pvalue = *pptr++ & 0xffff;
-      fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P)? CHAR_P:CHAR_p,
-        ptype, pvalue);
-      }
-    else
-      {
-      uint32_t cc;
-      /* There's just one escape we might have here that isn't negated in the
-      escapes table. */
-      if (meta_arg == ESC_g) cc = CHAR_g;
-      else for (cc = ESCAPES_FIRST; cc <= ESCAPES_LAST; cc++)
+      case META_BACKREF:
+      if (meta_arg < 10)
+        offset = cb->small_ref_offset[meta_arg];
+      else
+        GETOFFSET(offset, pptr);
+      fprintf(stderr, "META_BACKREF %d %zd", meta_arg, offset);
+      break;
+
+      case META_ESCAPE:
+      if (meta_arg == ESC_P || meta_arg == ESC_p)
         {
-        if (meta_arg == (uint32_t)(-escapes[cc - ESCAPES_FIRST])) break;
+        uint32_t ptype = *pptr >> 16;
+        uint32_t pvalue = *pptr++ & 0xffff;
+        fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P)? CHAR_P:CHAR_p,
+          ptype, pvalue);
         }
-      if (cc > ESCAPES_LAST) cc = CHAR_QUESTION_MARK;
-      fprintf(stderr, "META \\%c", cc);
-      }
-    break;
+      else
+        {
+        uint32_t cc;
+        /* There's just one escape we might have here that isn't negated in the
+        escapes table. */
+        if (meta_arg == ESC_g) cc = CHAR_g;
+        else for (cc = ESCAPES_FIRST; cc <= ESCAPES_LAST; cc++)
+          {
+          if (meta_arg == (uint32_t)(-escapes[cc - ESCAPES_FIRST])) break;
+          }
+        if (cc > ESCAPES_LAST) cc = CHAR_QUESTION_MARK;
+        fprintf(stderr, "META \\%c", cc);
+        }
+      break;
 
-    case META_MINMAX:
-    min = *pptr++;
-    max = *pptr++;
-    if (max != REPEAT_UNLIMITED)
-      fprintf(stderr, "META {%d,%d}", min, max);
-    else
-      fprintf(stderr, "META {%d,}", min);
-    break;
+      case META_MINMAX:
+      min = *pptr++;
+      max = *pptr++;
+      if (max != REPEAT_UNLIMITED)
+        fprintf(stderr, "META {%d,%d}", min, max);
+      else
+        fprintf(stderr, "META {%d,}", min);
+      break;
 
-    case META_MINMAX_QUERY:
-    min = *pptr++;
-    max = *pptr++;
-    if (max != REPEAT_UNLIMITED)
-      fprintf(stderr, "META {%d,%d}?", min, max);
-    else
-      fprintf(stderr, "META {%d,}?", min);
-    break;
+      case META_MINMAX_QUERY:
+      min = *pptr++;
+      max = *pptr++;
+      if (max != REPEAT_UNLIMITED)
+        fprintf(stderr, "META {%d,%d}?", min, max);
+      else
+        fprintf(stderr, "META {%d,}?", min);
+      break;
 
-    case META_MINMAX_PLUS:
-    min = *pptr++;
-    max = *pptr++;
-    if (max != REPEAT_UNLIMITED)
-      fprintf(stderr, "META {%d,%d}+", min, max);
-    else
-      fprintf(stderr, "META {%d,}+", min);
-    break;
+      case META_MINMAX_PLUS:
+      min = *pptr++;
+      max = *pptr++;
+      if (max != REPEAT_UNLIMITED)
+        fprintf(stderr, "META {%d,%d}+", min, max);
+      else
+        fprintf(stderr, "META {%d,}+", min);
+      break;
 
-    case META_BIGVALUE: fprintf(stderr, "META_BIGVALUE %.8x", *pptr++); break;
-    case META_CIRCUMFLEX: fprintf(stderr, "META_CIRCUMFLEX"); break;
-    case META_COND_ASSERT: fprintf(stderr, "META_COND_ASSERT"); break;
-    case META_DOLLAR: fprintf(stderr, "META_DOLLAR"); break;
-    case META_DOT: fprintf(stderr, "META_DOT"); break;
-    case META_ASTERISK: fprintf(stderr, "META *"); break;
-    case META_ASTERISK_QUERY: fprintf(stderr, "META *?"); break;
-    case META_ASTERISK_PLUS: fprintf(stderr, "META *+"); break;
-    case META_PLUS: fprintf(stderr, "META +"); break;
-    case META_PLUS_QUERY: fprintf(stderr, "META +?"); break;
-    case META_PLUS_PLUS: fprintf(stderr, "META ++"); break;
-    case META_QUERY: fprintf(stderr, "META ?"); break;
-    case META_QUERY_QUERY: fprintf(stderr, "META ??"); break;
-    case META_QUERY_PLUS: fprintf(stderr, "META ?+"); break;
+      case META_BIGVALUE: fprintf(stderr, "META_BIGVALUE %.8x", *pptr++); break;
+      case META_CIRCUMFLEX: fprintf(stderr, "META_CIRCUMFLEX"); break;
+      case META_COND_ASSERT: fprintf(stderr, "META_COND_ASSERT"); break;
+      case META_DOLLAR: fprintf(stderr, "META_DOLLAR"); break;
+      case META_DOT: fprintf(stderr, "META_DOT"); break;
+      case META_ASTERISK: fprintf(stderr, "META *"); break;
+      case META_ASTERISK_QUERY: fprintf(stderr, "META *?"); break;
+      case META_ASTERISK_PLUS: fprintf(stderr, "META *+"); break;
+      case META_PLUS: fprintf(stderr, "META +"); break;
+      case META_PLUS_QUERY: fprintf(stderr, "META +?"); break;
+      case META_PLUS_PLUS: fprintf(stderr, "META ++"); break;
+      case META_QUERY: fprintf(stderr, "META ?"); break;
+      case META_QUERY_QUERY: fprintf(stderr, "META ??"); break;
+      case META_QUERY_PLUS: fprintf(stderr, "META ?+"); break;
 
-    case META_ATOMIC: fprintf(stderr, "META (?>"); break;
-    case META_NOCAPTURE: fprintf(stderr, "META (?:"); break;
-    case META_LOOKAHEAD: fprintf(stderr, "META (?="); break;
-    case META_LOOKAHEADNOT: fprintf(stderr, "META (?!"); break;
-    case META_LOOKAHEAD_NA: fprintf(stderr, "META (*napla:"); break;
-    case META_SCRIPT_RUN: fprintf(stderr, "META (*sr:"); break;
-    case META_KET: fprintf(stderr, "META )"); break;
-    case META_ALT: fprintf(stderr, "META | %d", meta_arg); break;
+      case META_ATOMIC: fprintf(stderr, "META (?>"); break;
+      case META_NOCAPTURE: fprintf(stderr, "META (?:"); break;
+      case META_LOOKAHEAD: fprintf(stderr, "META (?="); break;
+      case META_LOOKAHEADNOT: fprintf(stderr, "META (?!"); break;
+      case META_LOOKAHEAD_NA: fprintf(stderr, "META (*napla:"); break;
+      case META_SCRIPT_RUN: fprintf(stderr, "META (*sr:"); break;
+      case META_KET: fprintf(stderr, "META )"); break;
+      case META_ALT: fprintf(stderr, "META | %d", meta_arg); break;
 
-    case META_CLASS: fprintf(stderr, "META ["); break;
-    case META_CLASS_NOT: fprintf(stderr, "META [^"); break;
-    case META_CLASS_END: fprintf(stderr, "META ]"); break;
-    case META_CLASS_EMPTY: fprintf(stderr, "META []"); break;
-    case META_CLASS_EMPTY_NOT: fprintf(stderr, "META [^]"); break;
+      case META_CLASS: fprintf(stderr, "META ["); break;
+      case META_CLASS_NOT: fprintf(stderr, "META [^"); break;
+      case META_CLASS_END: fprintf(stderr, "META ]"); break;
+      case META_CLASS_EMPTY: fprintf(stderr, "META []"); break;
+      case META_CLASS_EMPTY_NOT: fprintf(stderr, "META [^]"); break;
 
-    case META_RANGE_LITERAL: fprintf(stderr, "META - (literal)"); break;
-    case META_RANGE_ESCAPED: fprintf(stderr, "META - (escaped)"); break;
+      case META_RANGE_LITERAL: fprintf(stderr, "META - (literal)"); break;
+      case META_RANGE_ESCAPED: fprintf(stderr, "META - (escaped)"); break;
 
-    case META_POSIX: fprintf(stderr, "META_POSIX %d", *pptr++); break;
-    case META_POSIX_NEG: fprintf(stderr, "META_POSIX_NEG %d", *pptr++); break;
+      case META_POSIX: fprintf(stderr, "META_POSIX %d", *pptr++); break;
+      case META_POSIX_NEG: fprintf(stderr, "META_POSIX_NEG %d", *pptr++); break;
 
-    case META_ACCEPT: fprintf(stderr, "META (*ACCEPT)"); break;
-    case META_FAIL: fprintf(stderr, "META (*FAIL)"); break;
-    case META_COMMIT: fprintf(stderr, "META (*COMMIT)"); break;
-    case META_PRUNE: fprintf(stderr, "META (*PRUNE)"); break;
-    case META_SKIP: fprintf(stderr, "META (*SKIP)"); break;
-    case META_THEN: fprintf(stderr, "META (*THEN)"); break;
+      case META_ACCEPT: fprintf(stderr, "META (*ACCEPT)"); break;
+      case META_FAIL: fprintf(stderr, "META (*FAIL)"); break;
+      case META_COMMIT: fprintf(stderr, "META (*COMMIT)"); break;
+      case META_PRUNE: fprintf(stderr, "META (*PRUNE)"); break;
+      case META_SKIP: fprintf(stderr, "META (*SKIP)"); break;
+      case META_THEN: fprintf(stderr, "META (*THEN)"); break;
 
-    case META_OPTIONS:
-    fprintf(stderr, "META_OPTIONS 0x%08x 0x%08x", pptr[0], pptr[1]);
-    pptr += 2;
-    break;
+      case META_OPTIONS:
+      fprintf(stderr, "META_OPTIONS 0x%08x 0x%08x", pptr[0], pptr[1]);
+      pptr += 2;
+      break;
 
-    case META_LOOKBEHIND:
-    fprintf(stderr, "META (?<= %d %d", meta_arg, *pptr);
-    pptr += 2;
-    break;
+      case META_LOOKBEHIND:
+      fprintf(stderr, "META (?<= %d %d", meta_arg, *pptr);
+      pptr += 2;
+      break;
 
-    case META_LOOKBEHIND_NA:
-    fprintf(stderr, "META (*naplb: %d %d", meta_arg, *pptr);
-    pptr += 2;
-    break;
+      case META_LOOKBEHIND_NA:
+      fprintf(stderr, "META (*naplb: %d %d", meta_arg, *pptr);
+      pptr += 2;
+      break;
 
-    case META_LOOKBEHINDNOT:
-    fprintf(stderr, "META (?<! %d %d", meta_arg, *pptr);
-    pptr += 2;
-    break;
+      case META_LOOKBEHINDNOT:
+      fprintf(stderr, "META (?<! %d %d", meta_arg, *pptr);
+      pptr += 2;
+      break;
 
-    case META_CALLOUT_NUMBER:
-    fprintf(stderr, "META (?C%d) next=%d/%d", pptr[2], pptr[0],
-       pptr[1]);
-    pptr += 3;
-    break;
+      case META_CALLOUT_NUMBER:
+      fprintf(stderr, "META (?C%d) next=%d/%d", pptr[2], pptr[0],
+        pptr[1]);
+      pptr += 3;
+      break;
 
-    case META_CALLOUT_STRING:
-      {
-      uint32_t patoffset = *pptr++;    // Offset of next pattern item
-      uint32_t patlength = *pptr++;    // Length of next pattern item
-      fprintf(stderr, "META (?Cstring) length=%d offset=", *pptr++);
+      case META_CALLOUT_STRING:
+        {
+        uint32_t patoffset = *pptr++;    // Offset of next pattern item
+        uint32_t patlength = *pptr++;    // Length of next pattern item
+        fprintf(stderr, "META (?Cstring) length=%d offset=", *pptr++);
+        GETOFFSET(offset, pptr);
+        fprintf(stderr, "%zd next=%d/%d", offset, patoffset, patlength);
+        }
+      break;
+
+      case META_RECURSE_BYNAME:
+      fprintf(stderr, "META (?(&name) length=%d offset=", *pptr++);
       GETOFFSET(offset, pptr);
-      fprintf(stderr, "%zd next=%d/%d", offset, patoffset, patlength);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      case META_BACKREF_BYNAME:
+      fprintf(stderr, "META_BACKREF_BYNAME length=%d offset=", *pptr++);
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      case META_COND_NUMBER:
+      fprintf(stderr, "META_COND_NUMBER %d offset=", pptr[SIZEOFFSET]);
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      pptr++;
+      break;
+
+      case META_COND_DEFINE:
+      fprintf(stderr, "META (?(DEFINE) offset=");
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      case META_COND_VERSION:
+      fprintf(stderr, "META (?(VERSION%s", (*pptr++ == 0)? "=" : ">=");
+      fprintf(stderr, "%d.", *pptr++);
+      fprintf(stderr, "%d)", *pptr++);
+      break;
+
+      case META_COND_NAME:
+      fprintf(stderr, "META (?(<name>) length=%d offset=", *pptr++);
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      case META_COND_RNAME:
+      fprintf(stderr, "META (?(R&name) length=%d offset=", *pptr++);
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      /* This is kept as a name, because it might be. */
+
+      case META_COND_RNUMBER:
+      fprintf(stderr, "META (?(Rnumber) length=%d offset=", *pptr++);
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      case META_OFFSET:
+      fprintf(stderr, "META_OFFSET offset=");
+      GETOFFSET(offset, pptr);
+      fprintf(stderr, "%zd", offset);
+      break;
+
+      case META_SCS:
+      fprintf(stderr, "META (*scan_substring:");
+      break;
+
+      case META_CAPTURE_NAME:
+      fprintf(stderr, "META_CAPTURE_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
+      break;
+
+      case META_CAPTURE_NUMBER:
+      fprintf(stderr, "META_CAPTURE_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
+      break;
+
+      case META_MARK:
+      fprintf(stderr, "META (*MARK:");
+      goto SHOWARG;
+
+      case META_COMMIT_ARG:
+      fprintf(stderr, "META (*COMMIT:");
+      goto SHOWARG;
+
+      case META_PRUNE_ARG:
+      fprintf(stderr, "META (*PRUNE:");
+      goto SHOWARG;
+
+      case META_SKIP_ARG:
+      fprintf(stderr, "META (*SKIP:");
+      goto SHOWARG;
+
+      case META_THEN_ARG:
+      fprintf(stderr, "META (*THEN:");
+      SHOWARG:
+      length = *pptr++;
+      for (i = 0; i < length; i++)
+        {
+        uint32_t cc = *pptr++;
+        if (cc > 32 && cc < 128) fprintf(stderr, "%c", cc);
+          else fprintf(stderr, "\\x{%x}", cc);
+        }
+      fprintf(stderr, ") length=%u", length);
+      break;
+
+      case META_ECLASS_AND: fprintf(stderr, "META_ECLASS_AND"); break;
+      case META_ECLASS_OR: fprintf(stderr, "META_ECLASS_OR"); break;
+      case META_ECLASS_SUB: fprintf(stderr, "META_ECLASS_SUB"); break;
+      case META_ECLASS_XOR: fprintf(stderr, "META_ECLASS_XOR"); break;
+      case META_ECLASS_NOT: fprintf(stderr, "META_ECLASS_NOT"); break;
       }
-    break;
-
-    case META_RECURSE_BYNAME:
-    fprintf(stderr, "META (?(&name) length=%d offset=", *pptr++);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_BACKREF_BYNAME:
-    fprintf(stderr, "META_BACKREF_BYNAME length=%d offset=", *pptr++);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_COND_NUMBER:
-    fprintf(stderr, "META_COND_NUMBER %d offset=", pptr[SIZEOFFSET]);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    pptr++;
-    break;
-
-    case META_COND_DEFINE:
-    fprintf(stderr, "META (?(DEFINE) offset=");
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_COND_VERSION:
-    fprintf(stderr, "META (?(VERSION%s", (*pptr++ == 0)? "=" : ">=");
-    fprintf(stderr, "%d.", *pptr++);
-    fprintf(stderr, "%d)", *pptr++);
-    break;
-
-    case META_COND_NAME:
-    fprintf(stderr, "META (?(<name>) length=%d offset=", *pptr++);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_COND_RNAME:
-    fprintf(stderr, "META (?(R&name) length=%d offset=", *pptr++);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    /* This is kept as a name, because it might be. */
-
-    case META_COND_RNUMBER:
-    fprintf(stderr, "META (?(Rnumber) length=%d offset=", *pptr++);
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_OFFSET:
-    fprintf(stderr, "META_OFFSET offset=");
-    GETOFFSET(offset, pptr);
-    fprintf(stderr, "%zd", offset);
-    break;
-
-    case META_SCS:
-    fprintf(stderr, "META (*scan_substring:");
-    break;
-
-    case META_CAPTURE_NAME:
-    fprintf(stderr, "META_CAPTURE_NAME length=%d relative_offset=%d", *pptr++, (int)meta_arg);
-    break;
-
-    case META_CAPTURE_NUMBER:
-    fprintf(stderr, "META_CAPTURE_NUMBER %d relative_offset=%d", *pptr++, (int)meta_arg);
-    break;
-
-    case META_MARK:
-    fprintf(stderr, "META (*MARK:");
-    goto SHOWARG;
-
-    case META_COMMIT_ARG:
-    fprintf(stderr, "META (*COMMIT:");
-    goto SHOWARG;
-
-    case META_PRUNE_ARG:
-    fprintf(stderr, "META (*PRUNE:");
-    goto SHOWARG;
-
-    case META_SKIP_ARG:
-    fprintf(stderr, "META (*SKIP:");
-    goto SHOWARG;
-
-    case META_THEN_ARG:
-    fprintf(stderr, "META (*THEN:");
-    SHOWARG:
-    length = *pptr++;
-    for (i = 0; i < length; i++)
-      {
-      uint32_t cc = *pptr++;
-      if (cc > 32 && cc < 128) fprintf(stderr, "%c", cc);
-        else fprintf(stderr, "\\x{%x}", cc);
-      }
-    fprintf(stderr, ") length=%u", length);
-    break;
-
-    case META_ECLASS_AND: fprintf(stderr, "META_ECLASS_AND"); break;
-    case META_ECLASS_OR: fprintf(stderr, "META_ECLASS_OR"); break;
-    case META_ECLASS_SUB: fprintf(stderr, "META_ECLASS_SUB"); break;
-    case META_ECLASS_XOR: fprintf(stderr, "META_ECLASS_XOR"); break;
-    case META_ECLASS_NOT: fprintf(stderr, "META_ECLASS_NOT"); break;
     }
   fprintf(stderr, "\n");
   }
@@ -3545,22 +3548,25 @@ while (ptr < ptrend)
         {
         ok = MAX_255(ptr[1]) && (cb->ctypes[ptr[1]] & ctype_lcletter) != 0;
         }
-      else switch (ptr[1])  // Traditional symbolic format
+      else
         {
-        case CHAR_C:
-        ok = expect_cond_assert == 2;
-        break;
+        switch (ptr[1])  // Traditional symbolic format
+          {
+          case CHAR_C:
+          ok = expect_cond_assert == 2;
+          break;
 
-        case CHAR_EQUALS_SIGN:
-        case CHAR_EXCLAMATION_MARK:
-        break;
+          case CHAR_EQUALS_SIGN:
+          case CHAR_EXCLAMATION_MARK:
+          break;
 
-        case CHAR_LESS_THAN_SIGN:
-        ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
-        break;
+          case CHAR_LESS_THAN_SIGN:
+          ok = ptr[2] == CHAR_EQUALS_SIGN || ptr[2] == CHAR_EXCLAMATION_MARK;
+          break;
 
-        default:
-        ok = FALSE;
+          default:
+          ok = FALSE;
+          }
         }
       }
 
@@ -3675,142 +3681,145 @@ while (ptr < ptrend)
     and returned as a negative value (handled above). A name is coded as an
     offset into the pattern and a length. */
 
-    else switch (escape)
+    else
       {
-      case ESC_C:
+      switch (escape)
+        {
+        case ESC_C:
 #ifdef NEVER_BACKSLASH_C
-      errorcode = ERR85;
-      goto ESCAPE_FAILED;
-#else
-      if ((options & PCRE2_NEVER_BACKSLASH_C) != 0)
-        {
-        errorcode = ERR83;
+        errorcode = ERR85;
         goto ESCAPE_FAILED;
-        }
-#endif
-      okquantifier = TRUE;
-      *parsed_pattern++ = META_ESCAPE + escape;
-      break;
-
-      /* This is a special return that happens only in EXTRA_ALT_BSUX mode,
-      when \u{ is not followed by hex digits and }. It requests two literal
-      characters, u and { and we need this, as otherwise \u{ 12} (for example)
-      would be treated as u{12} now that spaces are allowed in quantifiers. */
-
-      case ESC_ub:
-      *parsed_pattern++ = CHAR_u;
-      PARSED_LITERAL(CHAR_LEFT_CURLY_BRACKET, parsed_pattern);
-      break;
-
-      case ESC_X:
-#ifndef SUPPORT_UNICODE
-      errorcode = ERR45;   // Supported only with Unicode support
-      goto ESCAPE_FAILED;
-#endif
-      case ESC_H:
-      case ESC_h:
-      case ESC_N:
-      case ESC_R:
-      case ESC_V:
-      case ESC_v:
-      okquantifier = TRUE;
-      *parsed_pattern++ = META_ESCAPE + escape;
-      break;
-
-      default:  // \A, \B, \b, \G, \K, \Z, \z cannot be quantified.
-      *parsed_pattern++ = META_ESCAPE + escape;
-      break;
-
-      /* Escapes that may change in UCP mode. */
-
-      case ESC_d:
-      case ESC_D:
-      case ESC_s:
-      case ESC_S:
-      case ESC_w:
-      case ESC_W:
-      okquantifier = TRUE;
-      parsed_pattern = handle_escdsw(escape, parsed_pattern, options,
-        xoptions);
-      break;
-
-      /* Unicode property matching */
-
-      case ESC_P:
-      case ESC_p:
-#ifdef SUPPORT_UNICODE
-        {
-        BOOL negated;
-        uint16_t ptype = 0, pdata = 0;
-        if (!get_ucp(&ptr, utf, &negated, &ptype, &pdata, &errorcode, cb))
-          goto ESCAPE_FAILED;
-        if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
-        *parsed_pattern++ = META_ESCAPE + escape;
-        *parsed_pattern++ = (ptype << 16) | pdata;
-        okquantifier = TRUE;
-        }
 #else
-      errorcode = ERR45;
-      goto ESCAPE_FAILED;
-#endif
-      break;  // End \P and \p
-
-      /* When \g is used with quotes or angle brackets as delimiters, it is a
-      numerical or named subroutine call, and control comes here. When used
-      with brace delimiters it is a numerical back reference and does not come
-      here because check_escape() returns it directly as a reference. \k is
-      always a named back reference. */
-
-      case ESC_g:
-      case ESC_k:
-      if (ptr >= ptrend || (*ptr != CHAR_LEFT_CURLY_BRACKET &&
-          *ptr != CHAR_LESS_THAN_SIGN && *ptr != CHAR_APOSTROPHE))
-        {
-        errorcode = (escape == ESC_g)? ERR57 : ERR69;
-        goto ESCAPE_FAILED;
-        }
-      terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
-        CHAR_GREATER_THAN_SIGN : (*ptr == CHAR_APOSTROPHE)?
-        CHAR_APOSTROPHE : CHAR_RIGHT_CURLY_BRACKET;
-
-      /* For a non-braced \g, check for a numerical recursion. */
-
-      if (escape == ESC_g && terminator != CHAR_RIGHT_CURLY_BRACKET)
-        {
-        PCRE2_SPTR p = ptr + 1;
-
-        if (read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i,
-            &errorcode))
+        if ((options & PCRE2_NEVER_BACKSLASH_C) != 0)
           {
-          if (p >= ptrend || *p != terminator)
-            {
-            ptr = p;
-            errorcode = ERR119;  // Missing terminator for number
-            goto ESCAPE_FAILED;
-            }
-          ptr = p + 1;
-          goto SET_RECURSION;
+          errorcode = ERR83;
+          goto ESCAPE_FAILED;
           }
-        if (errorcode != 0) goto ESCAPE_FAILED;
+#endif
+        okquantifier = TRUE;
+        *parsed_pattern++ = META_ESCAPE + escape;
+        break;
+
+        /* This is a special return that happens only in EXTRA_ALT_BSUX mode,
+        when \u{ is not followed by hex digits and }. It requests two literal
+        characters, u and { and we need this, as otherwise \u{ 12} (for example)
+        would be treated as u{12} now that spaces are allowed in quantifiers. */
+
+        case ESC_ub:
+        *parsed_pattern++ = CHAR_u;
+        PARSED_LITERAL(CHAR_LEFT_CURLY_BRACKET, parsed_pattern);
+        break;
+
+        case ESC_X:
+#ifndef SUPPORT_UNICODE
+        errorcode = ERR45;   // Supported only with Unicode support
+        goto ESCAPE_FAILED;
+#endif
+        case ESC_H:
+        case ESC_h:
+        case ESC_N:
+        case ESC_R:
+        case ESC_V:
+        case ESC_v:
+        okquantifier = TRUE;
+        *parsed_pattern++ = META_ESCAPE + escape;
+        break;
+
+        default:  // \A, \B, \b, \G, \K, \Z, \z cannot be quantified.
+        *parsed_pattern++ = META_ESCAPE + escape;
+        break;
+
+        /* Escapes that may change in UCP mode. */
+
+        case ESC_d:
+        case ESC_D:
+        case ESC_s:
+        case ESC_S:
+        case ESC_w:
+        case ESC_W:
+        okquantifier = TRUE;
+        parsed_pattern = handle_escdsw(escape, parsed_pattern, options,
+          xoptions);
+        break;
+
+        /* Unicode property matching */
+
+        case ESC_P:
+        case ESC_p:
+#ifdef SUPPORT_UNICODE
+          {
+          BOOL negated;
+          uint16_t ptype = 0, pdata = 0;
+          if (!get_ucp(&ptr, utf, &negated, &ptype, &pdata, &errorcode, cb))
+            goto ESCAPE_FAILED;
+          if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
+          *parsed_pattern++ = META_ESCAPE + escape;
+          *parsed_pattern++ = (ptype << 16) | pdata;
+          okquantifier = TRUE;
+          }
+#else
+        errorcode = ERR45;
+        goto ESCAPE_FAILED;
+#endif
+        break;  // End \P and \p
+
+        /* When \g is used with quotes or angle brackets as delimiters, it is a
+        numerical or named subroutine call, and control comes here. When used
+        with brace delimiters it is a numerical back reference and does not come
+        here because check_escape() returns it directly as a reference. \k is
+        always a named back reference. */
+
+        case ESC_g:
+        case ESC_k:
+        if (ptr >= ptrend || (*ptr != CHAR_LEFT_CURLY_BRACKET &&
+            *ptr != CHAR_LESS_THAN_SIGN && *ptr != CHAR_APOSTROPHE))
+          {
+          errorcode = (escape == ESC_g)? ERR57 : ERR69;
+          goto ESCAPE_FAILED;
+          }
+        terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
+          CHAR_GREATER_THAN_SIGN : (*ptr == CHAR_APOSTROPHE)?
+          CHAR_APOSTROPHE : CHAR_RIGHT_CURLY_BRACKET;
+
+        /* For a non-braced \g, check for a numerical recursion. */
+
+        if (escape == ESC_g && terminator != CHAR_RIGHT_CURLY_BRACKET)
+          {
+          PCRE2_SPTR p = ptr + 1;
+
+          if (read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i,
+              &errorcode))
+            {
+            if (p >= ptrend || *p != terminator)
+              {
+              ptr = p;
+              errorcode = ERR119;  // Missing terminator for number
+              goto ESCAPE_FAILED;
+              }
+            ptr = p + 1;
+            goto SET_RECURSION;
+            }
+          if (errorcode != 0) goto ESCAPE_FAILED;
+          }
+
+        /* Not a numerical recursion. Perl allows spaces and tabs after { and
+        before } but not for other delimiters. */
+
+        if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
+            &errorcode, cb)) goto ESCAPE_FAILED;
+
+        /* \k and \g when used with braces are back references, whereas \g used
+        with quotes or angle brackets is a recursion */
+
+        *parsed_pattern++ =
+          (escape == ESC_k || terminator == CHAR_RIGHT_CURLY_BRACKET)?
+            META_BACKREF_BYNAME : META_RECURSE_BYNAME;
+        *parsed_pattern++ = namelen;
+
+        PUTOFFSET(offset, parsed_pattern);
+        okquantifier = TRUE;
+        break;  // End special escape processing
         }
-
-      /* Not a numerical recursion. Perl allows spaces and tabs after { and
-      before } but not for other delimiters. */
-
-      if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
-          &errorcode, cb)) goto ESCAPE_FAILED;
-
-      /* \k and \g when used with braces are back references, whereas \g used
-      with quotes or angle brackets is a recursion */
-
-      *parsed_pattern++ =
-        (escape == ESC_k || terminator == CHAR_RIGHT_CURLY_BRACKET)?
-          META_BACKREF_BYNAME : META_RECURSE_BYNAME;
-      *parsed_pattern++ = namelen;
-
-      PUTOFFSET(offset, parsed_pattern);
-      okquantifier = TRUE;
-      break;  // End special escape processing
       }
     break;    // End escape sequence processing
 
@@ -6998,10 +7007,11 @@ for (;; pptr++)
       PCRE2_UCHAR *tc = code;
       int condcount = 0;
 
-      do {
-         condcount++;
-         tc += GET(tc,1);
-         }
+      do
+        {
+        condcount++;
+        tc += GET(tc,1);
+        }
       while (*tc != OP_KET);
 
       /* A DEFINE group is never obeyed inline (the "condition" is always
@@ -8935,75 +8945,76 @@ static BOOL
 is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb,
   int atomcount, BOOL inassert, BOOL dotstar_anchor)
 {
-do {
-   PCRE2_SPTR scode = first_significant_code(
-     code + PRIV(OP_lengths)[*code], FALSE);
-   int op = *scode;
+do
+  {
+  PCRE2_SPTR scode = first_significant_code(
+    code + PRIV(OP_lengths)[*code], FALSE);
+  int op = *scode;
 
-   /* Non-capturing brackets */
+  /* Non-capturing brackets */
 
-   if (op == OP_BRA  || op == OP_BRAPOS ||
-       op == OP_SBRA || op == OP_SBRAPOS)
-     {
-     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
-       return FALSE;
-     }
+  if (op == OP_BRA  || op == OP_BRAPOS ||
+      op == OP_SBRA || op == OP_SBRAPOS)
+    {
+    if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* Capturing brackets */
+  /* Capturing brackets */
 
-   else if (op == OP_CBRA  || op == OP_CBRAPOS ||
-            op == OP_SCBRA || op == OP_SCBRAPOS)
-     {
-     int n = GET2(scode, 1+LINK_SIZE);
-     uint32_t new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-     if (!is_anchored(scode, new_map, cb, atomcount, inassert, dotstar_anchor)) return FALSE;
-     }
+  else if (op == OP_CBRA  || op == OP_CBRAPOS ||
+          op == OP_SCBRA || op == OP_SCBRAPOS)
+    {
+    int n = GET2(scode, 1+LINK_SIZE);
+    uint32_t new_map = bracket_map | ((n < 32)? (1u << n) : 1);
+    if (!is_anchored(scode, new_map, cb, atomcount, inassert, dotstar_anchor)) return FALSE;
+    }
 
-   /* Positive forward assertion */
+  /* Positive forward assertion */
 
-   else if (op == OP_ASSERT || op == OP_ASSERT_NA)
-     {
-     if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor)) return FALSE;
-     }
+  else if (op == OP_ASSERT || op == OP_ASSERT_NA)
+    {
+    if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor)) return FALSE;
+    }
 
-   /* Condition. If there is no second branch, it can't be anchored. */
+  /* Condition. If there is no second branch, it can't be anchored. */
 
-   else if (op == OP_COND || op == OP_SCOND)
-     {
-     if (scode[GET(scode,1)] != OP_ALT) return FALSE;
-     if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
-       return FALSE;
-     }
+  else if (op == OP_COND || op == OP_SCOND)
+    {
+    if (scode[GET(scode,1)] != OP_ALT) return FALSE;
+    if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* Atomic groups */
+  /* Atomic groups */
 
-   else if (op == OP_ONCE)
-     {
-     if (!is_anchored(scode, bracket_map, cb, atomcount + 1, inassert, dotstar_anchor))
-       return FALSE;
-     }
+  else if (op == OP_ONCE)
+    {
+    if (!is_anchored(scode, bracket_map, cb, atomcount + 1, inassert, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
-   it isn't in brackets that are or may be referenced or inside an atomic
-   group or an assertion. Also the pattern must not contain *PRUNE or *SKIP,
-   because these break the feature. Consider, for example, /(?s).*?(*PRUNE)b/
-   with the subject "aab", which matches "b", i.e. not at the start of a line.
-   There is also an option that disables auto-anchoring. */
+  /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
+  it isn't in brackets that are or may be referenced or inside an atomic
+  group or an assertion. Also the pattern must not contain *PRUNE or *SKIP,
+  because these break the feature. Consider, for example, /(?s).*?(*PRUNE)b/
+  with the subject "aab", which matches "b", i.e. not at the start of a line.
+  There is also an option that disables auto-anchoring. */
 
-   else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
-             op == OP_TYPEPOSSTAR))
-     {
-     if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
-       return FALSE;
-     }
+  else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
+            op == OP_TYPEPOSSTAR))
+    {
+    if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 ||
+        atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
+      return FALSE;
+    }
 
-   /* Check for explicit anchoring */
+  /* Check for explicit anchoring */
 
-   else if (op != OP_SOD && op != OP_SOM && op != OP_CIRC) return FALSE;
+  else if (op != OP_SOD && op != OP_SOM && op != OP_CIRC) return FALSE;
 
-   code += GET(code, 1);
-   }
+  code += GET(code, 1);
+  }
 while (*code == OP_ALT);   // Loop for each alternative
 return TRUE;
 }
@@ -9040,105 +9051,106 @@ static BOOL
 is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
   int atomcount, BOOL inassert, BOOL dotstar_anchor)
 {
-do {
-   PCRE2_SPTR scode = first_significant_code(
-     code + PRIV(OP_lengths)[*code], FALSE);
-   int op = *scode;
+do
+  {
+  PCRE2_SPTR scode = first_significant_code(
+    code + PRIV(OP_lengths)[*code], FALSE);
+  int op = *scode;
 
-   /* If we are at the start of a conditional assertion group, *both* the
-   conditional assertion *and* what follows the condition must satisfy the test
-   for start of line. Other kinds of condition fail. Note that there may be an
-   auto-callout at the start of a condition. */
+  /* If we are at the start of a conditional assertion group, *both* the
+  conditional assertion *and* what follows the condition must satisfy the test
+  for start of line. Other kinds of condition fail. Note that there may be an
+  auto-callout at the start of a condition. */
 
-   if (op == OP_COND)
-     {
-     scode += 1 + LINK_SIZE;
+  if (op == OP_COND)
+    {
+    scode += 1 + LINK_SIZE;
 
-     if (*scode == OP_CALLOUT) scode += PRIV(OP_lengths)[OP_CALLOUT];
-       else if (*scode == OP_CALLOUT_STR) scode += GET(scode, 1 + 2*LINK_SIZE);
+    if (*scode == OP_CALLOUT) scode += PRIV(OP_lengths)[OP_CALLOUT];
+      else if (*scode == OP_CALLOUT_STR) scode += GET(scode, 1 + 2*LINK_SIZE);
 
-     switch (*scode)
-       {
-       case OP_CREF:
-       case OP_DNCREF:
-       case OP_RREF:
-       case OP_DNRREF:
-       case OP_FAIL:
-       case OP_FALSE:
-       case OP_TRUE:
-       return FALSE;
+    switch (*scode)
+      {
+      case OP_CREF:
+      case OP_DNCREF:
+      case OP_RREF:
+      case OP_DNRREF:
+      case OP_FAIL:
+      case OP_FALSE:
+      case OP_TRUE:
+      return FALSE;
 
-       default:     // Assertion
-       if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
-         return FALSE;
-       do scode += GET(scode, 1); while (*scode == OP_ALT);
-       scode += 1 + LINK_SIZE;
-       break;
-       }
-     scode = first_significant_code(scode, FALSE);
-     op = *scode;
-     }
+      default:     // Assertion
+      if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
+        return FALSE;
+      do scode += GET(scode, 1); while (*scode == OP_ALT);
+      scode += 1 + LINK_SIZE;
+      break;
+      }
+    scode = first_significant_code(scode, FALSE);
+    op = *scode;
+    }
 
-   /* Non-capturing brackets */
+  /* Non-capturing brackets */
 
-   if (op == OP_BRA  || op == OP_BRAPOS ||
-       op == OP_SBRA || op == OP_SBRAPOS)
-     {
-     if (!is_startline(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
-       return FALSE;
-     }
+  if (op == OP_BRA  || op == OP_BRAPOS ||
+      op == OP_SBRA || op == OP_SBRAPOS)
+    {
+    if (!is_startline(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* Capturing brackets */
+  /* Capturing brackets */
 
-   else if (op == OP_CBRA  || op == OP_CBRAPOS ||
-            op == OP_SCBRA || op == OP_SCBRAPOS)
-     {
-     int n = GET2(scode, 1+LINK_SIZE);
-     unsigned int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-     if (!is_startline(scode, new_map, cb, atomcount, inassert, dotstar_anchor))
-       return FALSE;
-     }
+  else if (op == OP_CBRA  || op == OP_CBRAPOS ||
+          op == OP_SCBRA || op == OP_SCBRAPOS)
+    {
+    int n = GET2(scode, 1+LINK_SIZE);
+    unsigned int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
+    if (!is_startline(scode, new_map, cb, atomcount, inassert, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* Positive forward assertions */
+  /* Positive forward assertions */
 
-   else if (op == OP_ASSERT || op == OP_ASSERT_NA)
-     {
-     if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
-       return FALSE;
-     }
+  else if (op == OP_ASSERT || op == OP_ASSERT_NA)
+    {
+    if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* Atomic brackets */
+  /* Atomic brackets */
 
-   else if (op == OP_ONCE)
-     {
-     if (!is_startline(scode, bracket_map, cb, atomcount + 1, inassert, dotstar_anchor))
-       return FALSE;
-     }
+  else if (op == OP_ONCE)
+    {
+    if (!is_startline(scode, bracket_map, cb, atomcount + 1, inassert, dotstar_anchor))
+      return FALSE;
+    }
 
-   /* .* means "start at start or after \n" if it isn't in atomic brackets or
-   brackets that may be referenced or an assertion, and as long as the pattern
-   does not contain *PRUNE or *SKIP, because these break the feature. Consider,
-   for example, /.*?a(*PRUNE)b/ with the subject "aab", which matches "ab",
-   i.e. not at the start of a line. There is also an option that disables this
-   optimization. */
+  /* .* means "start at start or after \n" if it isn't in atomic brackets or
+  brackets that may be referenced or an assertion, and as long as the pattern
+  does not contain *PRUNE or *SKIP, because these break the feature. Consider,
+  for example, /.*?a(*PRUNE)b/ with the subject "aab", which matches "ab",
+  i.e. not at the start of a line. There is also an option that disables this
+  optimization. */
 
-   else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
-     {
-     if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 ||
-         atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
-       return FALSE;
-     }
+  else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
+    {
+    if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 ||
+        atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
+      return FALSE;
+    }
 
-   /* Check for explicit circumflex; anything else gives a FALSE result. Note
-   in particular that this includes atomic brackets OP_ONCE because the number
-   of characters matched by .* cannot be adjusted inside them. */
+  /* Check for explicit circumflex; anything else gives a FALSE result. Note
+  in particular that this includes atomic brackets OP_ONCE because the number
+  of characters matched by .* cannot be adjusted inside them. */
 
-   else if (op != OP_CIRC && op != OP_CIRCM) return FALSE;
+  else if (op != OP_CIRC && op != OP_CIRCM) return FALSE;
 
-   /* Move on to the next alternative */
+  /* Move on to the next alternative */
 
-   code += GET(code, 1);
-   }
+  code += GET(code, 1);
+  }
 while (*code == OP_ALT);  // Loop for each alternative
 return TRUE;
 }
@@ -9224,66 +9236,69 @@ for (;;)
     minimum, so we have to arrange to skip the extra units. */
 
 #ifdef MAYBE_UTF_MULTI
-    if (utf) switch (c)
+    if (utf)
       {
-      case OP_CHAR:
-      case OP_CHARI:
-      case OP_NOT:
-      case OP_NOTI:
-      case OP_EXACT:
-      case OP_EXACTI:
-      case OP_NOTEXACT:
-      case OP_NOTEXACTI:
-      case OP_UPTO:
-      case OP_UPTOI:
-      case OP_NOTUPTO:
-      case OP_NOTUPTOI:
-      case OP_MINUPTO:
-      case OP_MINUPTOI:
-      case OP_NOTMINUPTO:
-      case OP_NOTMINUPTOI:
-      case OP_POSUPTO:
-      case OP_POSUPTOI:
-      case OP_NOTPOSUPTO:
-      case OP_NOTPOSUPTOI:
-      case OP_STAR:
-      case OP_STARI:
-      case OP_NOTSTAR:
-      case OP_NOTSTARI:
-      case OP_MINSTAR:
-      case OP_MINSTARI:
-      case OP_NOTMINSTAR:
-      case OP_NOTMINSTARI:
-      case OP_POSSTAR:
-      case OP_POSSTARI:
-      case OP_NOTPOSSTAR:
-      case OP_NOTPOSSTARI:
-      case OP_PLUS:
-      case OP_PLUSI:
-      case OP_NOTPLUS:
-      case OP_NOTPLUSI:
-      case OP_MINPLUS:
-      case OP_MINPLUSI:
-      case OP_NOTMINPLUS:
-      case OP_NOTMINPLUSI:
-      case OP_POSPLUS:
-      case OP_POSPLUSI:
-      case OP_NOTPOSPLUS:
-      case OP_NOTPOSPLUSI:
-      case OP_QUERY:
-      case OP_QUERYI:
-      case OP_NOTQUERY:
-      case OP_NOTQUERYI:
-      case OP_MINQUERY:
-      case OP_MINQUERYI:
-      case OP_NOTMINQUERY:
-      case OP_NOTMINQUERYI:
-      case OP_POSQUERY:
-      case OP_POSQUERYI:
-      case OP_NOTPOSQUERY:
-      case OP_NOTPOSQUERYI:
-      if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
-      break;
+      switch (c)
+        {
+        case OP_CHAR:
+        case OP_CHARI:
+        case OP_NOT:
+        case OP_NOTI:
+        case OP_EXACT:
+        case OP_EXACTI:
+        case OP_NOTEXACT:
+        case OP_NOTEXACTI:
+        case OP_UPTO:
+        case OP_UPTOI:
+        case OP_NOTUPTO:
+        case OP_NOTUPTOI:
+        case OP_MINUPTO:
+        case OP_MINUPTOI:
+        case OP_NOTMINUPTO:
+        case OP_NOTMINUPTOI:
+        case OP_POSUPTO:
+        case OP_POSUPTOI:
+        case OP_NOTPOSUPTO:
+        case OP_NOTPOSUPTOI:
+        case OP_STAR:
+        case OP_STARI:
+        case OP_NOTSTAR:
+        case OP_NOTSTARI:
+        case OP_MINSTAR:
+        case OP_MINSTARI:
+        case OP_NOTMINSTAR:
+        case OP_NOTMINSTARI:
+        case OP_POSSTAR:
+        case OP_POSSTARI:
+        case OP_NOTPOSSTAR:
+        case OP_NOTPOSSTARI:
+        case OP_PLUS:
+        case OP_PLUSI:
+        case OP_NOTPLUS:
+        case OP_NOTPLUSI:
+        case OP_MINPLUS:
+        case OP_MINPLUSI:
+        case OP_NOTMINPLUS:
+        case OP_NOTMINPLUSI:
+        case OP_POSPLUS:
+        case OP_POSPLUSI:
+        case OP_NOTPOSPLUS:
+        case OP_NOTPOSPLUSI:
+        case OP_QUERY:
+        case OP_QUERYI:
+        case OP_NOTQUERY:
+        case OP_NOTQUERYI:
+        case OP_MINQUERY:
+        case OP_MINQUERYI:
+        case OP_NOTMINQUERY:
+        case OP_NOTMINQUERYI:
+        case OP_POSQUERY:
+        case OP_POSQUERYI:
+        case OP_NOTPOSQUERY:
+        case OP_NOTPOSQUERYI:
+        if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
+        break;
+        }
       }
 #else
     (void)(utf);  // Keep compiler happy by referencing function argument
@@ -9323,78 +9338,79 @@ uint32_t c = 0;
 uint32_t cflags = REQ_NONE;
 
 *flags = REQ_NONE;
-do {
-   uint32_t d;
-   uint32_t dflags;
-   int xl = (*code == OP_CBRA || *code == OP_SCBRA ||
-             *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? IMM2_SIZE:0;
-   PCRE2_SPTR scode = first_significant_code(code + 1+LINK_SIZE + xl, TRUE);
-   PCRE2_UCHAR op = *scode;
+do
+  {
+  uint32_t d;
+  uint32_t dflags;
+  int xl = (*code == OP_CBRA || *code == OP_SCBRA ||
+            *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? IMM2_SIZE:0;
+  PCRE2_SPTR scode = first_significant_code(code + 1+LINK_SIZE + xl, TRUE);
+  PCRE2_UCHAR op = *scode;
 
-   switch (op)
-     {
-     default:
-     return 0;
+  switch (op)
+    {
+    default:
+    return 0;
 
-     case OP_BRA:
-     case OP_BRAPOS:
-     case OP_CBRA:
-     case OP_SCBRA:
-     case OP_CBRAPOS:
-     case OP_SCBRAPOS:
-     case OP_ASSERT:
-     case OP_ASSERT_NA:
-     case OP_ONCE:
-     case OP_SCRIPT_RUN:
-     d = find_firstassertedcu(scode, &dflags, inassert +
-       ((op == OP_ASSERT || op == OP_ASSERT_NA)?1:0));
-     if (dflags >= REQ_NONE) return 0;
-     if (cflags >= REQ_NONE) { c = d; cflags = dflags; }
-       else if (c != d || cflags != dflags) return 0;
-     break;
+    case OP_BRA:
+    case OP_BRAPOS:
+    case OP_CBRA:
+    case OP_SCBRA:
+    case OP_CBRAPOS:
+    case OP_SCBRAPOS:
+    case OP_ASSERT:
+    case OP_ASSERT_NA:
+    case OP_ONCE:
+    case OP_SCRIPT_RUN:
+    d = find_firstassertedcu(scode, &dflags, inassert +
+      ((op == OP_ASSERT || op == OP_ASSERT_NA)?1:0));
+    if (dflags >= REQ_NONE) return 0;
+    if (cflags >= REQ_NONE) { c = d; cflags = dflags; }
+      else if (c != d || cflags != dflags) return 0;
+    break;
 
-     case OP_EXACT:
-     scode += IMM2_SIZE;
-     PCRE2_FALLTHROUGH /* Fall through */
+    case OP_EXACT:
+    scode += IMM2_SIZE;
+    PCRE2_FALLTHROUGH /* Fall through */
 
-     case OP_CHAR:
-     case OP_PLUS:
-     case OP_MINPLUS:
-     case OP_POSPLUS:
-     if (inassert == 0) return 0;
-     if (cflags >= REQ_NONE) { c = scode[1]; cflags = 0; }
-       else if (c != scode[1]) return 0;
-     break;
+    case OP_CHAR:
+    case OP_PLUS:
+    case OP_MINPLUS:
+    case OP_POSPLUS:
+    if (inassert == 0) return 0;
+    if (cflags >= REQ_NONE) { c = scode[1]; cflags = 0; }
+      else if (c != scode[1]) return 0;
+    break;
 
-     case OP_EXACTI:
-     scode += IMM2_SIZE;
-     PCRE2_FALLTHROUGH /* Fall through */
+    case OP_EXACTI:
+    scode += IMM2_SIZE;
+    PCRE2_FALLTHROUGH /* Fall through */
 
-     case OP_CHARI:
-     case OP_PLUSI:
-     case OP_MINPLUSI:
-     case OP_POSPLUSI:
-     if (inassert == 0) return 0;
+    case OP_CHARI:
+    case OP_PLUSI:
+    case OP_MINPLUSI:
+    case OP_POSPLUSI:
+    if (inassert == 0) return 0;
 
-     /* If the character is more than one code unit long, we cannot set its
-     first code unit when matching caselessly. Later scanning may pick up
-     multiple code units. */
+    /* If the character is more than one code unit long, we cannot set its
+    first code unit when matching caselessly. Later scanning may pick up
+    multiple code units. */
 
 #ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
-     if (scode[1] >= 0x80) return 0;
+    if (scode[1] >= 0x80) return 0;
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-     if (scode[1] >= 0xd800 && scode[1] <= 0xdfff) return 0;
+    if (scode[1] >= 0xd800 && scode[1] <= 0xdfff) return 0;
 #endif
 #endif
 
-     if (cflags >= REQ_NONE) { c = scode[1]; cflags = REQ_CASELESS; }
-       else if (c != scode[1]) return 0;
-     break;
-     }
+    if (cflags >= REQ_NONE) { c = scode[1]; cflags = REQ_CASELESS; }
+      else if (c != scode[1]) return 0;
+    break;
+    }
 
-   code += GET(code, 1);
-   }
+  code += GET(code, 1);
+  }
 while (*code == OP_ALT);
 
 *flags = cflags;
@@ -9667,334 +9683,337 @@ for (;; pptr++)
     itemlength = itemminlength = 1;
     }
 
-  else switch (META_CODE(*pptr))
+  else
     {
-    case META_KET:
-    case META_ALT:
-    goto EXIT;
-
-    /* (*ACCEPT) and (*FAIL) terminate the branch, but we must skip to the
-    actual termination. */
-
-    case META_ACCEPT:
-    case META_FAIL:
-    pptr = parsed_skip(pptr, PSKIP_ALT);
-    if (pptr == NULL) goto PARSED_SKIP_FAILED;
-    goto EXIT;
-
-    case META_MARK:
-    case META_COMMIT_ARG:
-    case META_PRUNE_ARG:
-    case META_SKIP_ARG:
-    case META_THEN_ARG:
-    pptr += pptr[1] + 1;
-    break;
-
-    case META_CIRCUMFLEX:
-    case META_COMMIT:
-    case META_DOLLAR:
-    case META_PRUNE:
-    case META_SKIP:
-    case META_THEN:
-    break;
-
-    case META_OPTIONS:
-    pptr += 2;
-    break;
-
-    case META_BIGVALUE:
-    itemlength = itemminlength = 1;
-    pptr += 1;
-    break;
-
-    case META_CLASS:
-    case META_CLASS_NOT:
-    itemlength = itemminlength = 1;
-    pptr = parsed_skip(pptr, PSKIP_CLASS);
-    if (pptr == NULL) goto PARSED_SKIP_FAILED;
-    break;
-
-    case META_CLASS_EMPTY_NOT:
-    case META_DOT:
-    itemlength = itemminlength = 1;
-    break;
-
-    case META_CALLOUT_NUMBER:
-    pptr += 3;
-    break;
-
-    case META_CALLOUT_STRING:
-    pptr += 3 + SIZEOFFSET;
-    break;
-
-    /* Only some escapes consume a character. Of those, \R can match one or two
-    characters, but \X is never allowed because it matches an unknown number of
-    characters. \C is allowed only in 32-bit and non-UTF 8/16-bit modes. */
-
-    case META_ESCAPE:
-    escape = META_DATA(*pptr);
-    if (escape == ESC_X) return -1;
-    if (escape == ESC_R)
+    switch (META_CODE(*pptr))
       {
-      itemminlength = 1;
-      itemlength = 2;
-      }
-    else if (escape > ESC_b && escape < ESC_Z)
-      {
-#if PCRE2_CODE_UNIT_WIDTH != 32
-      if ((cb->external_options & PCRE2_UTF) != 0 && escape == ESC_C)
+      case META_KET:
+      case META_ALT:
+      goto EXIT;
+
+      /* (*ACCEPT) and (*FAIL) terminate the branch, but we must skip to the
+      actual termination. */
+
+      case META_ACCEPT:
+      case META_FAIL:
+      pptr = parsed_skip(pptr, PSKIP_ALT);
+      if (pptr == NULL) goto PARSED_SKIP_FAILED;
+      goto EXIT;
+
+      case META_MARK:
+      case META_COMMIT_ARG:
+      case META_PRUNE_ARG:
+      case META_SKIP_ARG:
+      case META_THEN_ARG:
+      pptr += pptr[1] + 1;
+      break;
+
+      case META_CIRCUMFLEX:
+      case META_COMMIT:
+      case META_DOLLAR:
+      case META_PRUNE:
+      case META_SKIP:
+      case META_THEN:
+      break;
+
+      case META_OPTIONS:
+      pptr += 2;
+      break;
+
+      case META_BIGVALUE:
+      itemlength = itemminlength = 1;
+      pptr += 1;
+      break;
+
+      case META_CLASS:
+      case META_CLASS_NOT:
+      itemlength = itemminlength = 1;
+      pptr = parsed_skip(pptr, PSKIP_CLASS);
+      if (pptr == NULL) goto PARSED_SKIP_FAILED;
+      break;
+
+      case META_CLASS_EMPTY_NOT:
+      case META_DOT:
+      itemlength = itemminlength = 1;
+      break;
+
+      case META_CALLOUT_NUMBER:
+      pptr += 3;
+      break;
+
+      case META_CALLOUT_STRING:
+      pptr += 3 + SIZEOFFSET;
+      break;
+
+      /* Only some escapes consume a character. Of those, \R can match one or two
+      characters, but \X is never allowed because it matches an unknown number of
+      characters. \C is allowed only in 32-bit and non-UTF 8/16-bit modes. */
+
+      case META_ESCAPE:
+      escape = META_DATA(*pptr);
+      if (escape == ESC_X) return -1;
+      if (escape == ESC_R)
         {
-        *errcodeptr = ERR36;
+        itemminlength = 1;
+        itemlength = 2;
+        }
+      else if (escape > ESC_b && escape < ESC_Z)
+        {
+#if PCRE2_CODE_UNIT_WIDTH != 32
+        if ((cb->external_options & PCRE2_UTF) != 0 && escape == ESC_C)
+          {
+          *errcodeptr = ERR36;
+          return -1;
+          }
+#endif
+        itemlength = itemminlength = 1;
+        if (escape == ESC_p || escape == ESC_P) pptr++;  // Skip prop data
+        }
+      break;
+
+      /* Lookaheads do not contribute to the length of this branch, but they may
+      contain lookbehinds within them whose lengths need to be set. */
+
+      case META_LOOKAHEAD:
+      case META_LOOKAHEADNOT:
+      case META_LOOKAHEAD_NA:
+      case META_SCS:
+      *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb, lcptr);
+      if (*errcodeptr != 0) return -1;
+
+      /* Ignore any qualifiers that follow a lookahead assertion. */
+
+      switch (pptr[1])
+        {
+        case META_ASTERISK:
+        case META_ASTERISK_PLUS:
+        case META_ASTERISK_QUERY:
+        case META_PLUS:
+        case META_PLUS_PLUS:
+        case META_PLUS_QUERY:
+        case META_QUERY:
+        case META_QUERY_PLUS:
+        case META_QUERY_QUERY:
+        pptr++;
+        break;
+
+        case META_MINMAX:
+        case META_MINMAX_PLUS:
+        case META_MINMAX_QUERY:
+        pptr += 3;
+        break;
+
+        default:
+        break;
+        }
+      break;
+
+      /* A nested lookbehind does not contribute any length to this lookbehind,
+      but must itself be checked and have its lengths set. Note that
+      set_lookbehind_lengths() updates pptr, leaving it pointing to the final ket
+      of the group, so no need to update it here. */
+
+      case META_LOOKBEHIND:
+      case META_LOOKBEHINDNOT:
+      case META_LOOKBEHIND_NA:
+      if (!set_lookbehind_lengths(&pptr, errcodeptr, lcptr, recurses, cb))
+        return -1;
+      break;
+
+      /* Back references and recursions are handled by very similar code. At this
+      stage, the names generated in the parsing pass are available, but the main
+      name table has not yet been created. So for the named varieties, scan the
+      list of names in order to get the number of the first one in the pattern,
+      and whether or not this name is duplicated. */
+
+      case META_BACKREF_BYNAME:
+      if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0)
+        goto ISNOTFIXED;
+      PCRE2_FALLTHROUGH /* Fall through */
+
+      case META_RECURSE_BYNAME:
+        {
+        PCRE2_SPTR name;
+        BOOL is_dupname = FALSE;
+        named_group *ng;
+        uint32_t meta_code = META_CODE(*pptr);
+        uint32_t length = *(++pptr);
+
+        GETPLUSOFFSET(offset, pptr);
+        name = cb->start_pattern + offset;
+        ng = PRIV(compile_find_named_group)(name, length, cb);
+
+        if (ng == NULL)
+          {
+          *errcodeptr = ERR15;  // Non-existent subpattern
+          cb->erroroffset = offset;
+          return -1;
+          }
+
+        group = ng->number;
+        is_dupname = (ng->hash_dup & NAMED_GROUP_IS_DUPNAME) != 0;
+
+        /* A numerical back reference can be fixed length if duplicate capturing
+        groups are not being used. A non-duplicate named back reference can also
+        be handled. */
+
+        if (meta_code == META_RECURSE_BYNAME ||
+            (!is_dupname && (cb->external_flags & PCRE2_DUPCAPUSED) == 0))
+          goto RECURSE_OR_BACKREF_LENGTH;  // Handle as a numbered version.
+        }
+      goto ISNOTFIXED;                     // Duplicate name or number
+
+      /* The offset values for back references < 10 are in a separate vector
+      because otherwise they would use more than two parsed pattern elements on
+      64-bit systems. */
+
+      case META_BACKREF:
+      if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0 ||
+          (cb->external_flags & PCRE2_DUPCAPUSED) != 0)
+        goto ISNOTFIXED;
+      group = META_DATA(*pptr);
+      if (group < 10)
+        {
+        offset = cb->small_ref_offset[group];
+        goto RECURSE_OR_BACKREF_LENGTH;
+        }
+
+      PCRE2_FALLTHROUGH /* Fall through */
+      /* For groups >= 10 - picking up group twice does no harm. */
+
+      /* A true recursion implies not fixed length, but a subroutine call may
+      be OK. Back reference "recursions" are also failed. */
+
+      case META_RECURSE:
+      group = META_DATA(*pptr);
+      GETPLUSOFFSET(offset, pptr);
+
+      RECURSE_OR_BACKREF_LENGTH:
+      if (group > cb->bracount)
+        {
+        cb->erroroffset = offset;
+        *errcodeptr = ERR15;  // Non-existent subpattern
         return -1;
         }
-#endif
-      itemlength = itemminlength = 1;
-      if (escape == ESC_p || escape == ESC_P) pptr++;  // Skip prop data
-      }
-    break;
+      if (group == 0) goto ISNOTFIXED;  // Local recursion
+      for (gptr = cb->parsed_pattern; *gptr != META_END; gptr++)
+        {
+        if (META_CODE(*gptr) == META_BIGVALUE) gptr++;
+          else if (*gptr == (META_CAPTURE | group)) break;
+        }
 
-    /* Lookaheads do not contribute to the length of this branch, but they may
-    contain lookbehinds within them whose lengths need to be set. */
+      /* We must start the search for the end of the group at the first meta code
+      inside the group. Otherwise it will be treated as an enclosed group. */
 
-    case META_LOOKAHEAD:
-    case META_LOOKAHEADNOT:
-    case META_LOOKAHEAD_NA:
-    case META_SCS:
-    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb, lcptr);
-    if (*errcodeptr != 0) return -1;
+      gptrend = parsed_skip(gptr + 1, PSKIP_KET);
+      if (gptrend == NULL) goto PARSED_SKIP_FAILED;
+      if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  // Local recursion
+      for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;
+      if (r != NULL) goto ISNOTFIXED;   // Mutual recursion
+      this_recurse.prev = recurses;
+      this_recurse.groupptr = gptr;
 
-    /* Ignore any qualifiers that follow a lookahead assertion. */
+      /* We do not need to know the position of the end of the group, that is,
+      gptr is not used after the call to get_grouplength(). Setting the second
+      argument FALSE stops it scanning for the end when the length can be found
+      in the cache. */
 
-    switch (pptr[1])
-      {
-      case META_ASTERISK:
-      case META_ASTERISK_PLUS:
-      case META_ASTERISK_QUERY:
-      case META_PLUS:
-      case META_PLUS_PLUS:
-      case META_PLUS_QUERY:
+      gptr++;
+      grouplength = get_grouplength(&gptr, &groupminlength, FALSE, errcodeptr,
+        lcptr, group, &this_recurse, cb);
+      if (grouplength < 0)
+        {
+        if (*errcodeptr == 0) goto ISNOTFIXED;
+        return -1;  // Error already set
+        }
+      itemlength = grouplength;
+      itemminlength = groupminlength;
+      break;
+
+      /* A (DEFINE) group is never obeyed inline and so it does not contribute to
+      the length of this branch. Skip from the following item to the next
+      unpaired ket. */
+
+      case META_COND_DEFINE:
+      pptr = parsed_skip(pptr + 1, PSKIP_KET);
+      break;
+
+      /* Check other nested groups - advance past the initial data for each type
+      and then seek a fixed length with get_grouplength(). */
+
+      case META_COND_NAME:
+      case META_COND_NUMBER:
+      case META_COND_RNAME:
+      case META_COND_RNUMBER:
+      pptr += 2 + SIZEOFFSET;
+      goto CHECK_GROUP;
+
+      case META_COND_ASSERT:
+      pptr += 1;
+      goto CHECK_GROUP;
+
+      case META_COND_VERSION:
+      pptr += 4;
+      goto CHECK_GROUP;
+
+      case META_CAPTURE:
+      group = META_DATA(*pptr);
+      PCRE2_FALLTHROUGH /* Fall through */
+
+      case META_ATOMIC:
+      case META_NOCAPTURE:
+      case META_SCRIPT_RUN:
+      pptr++;
+      CHECK_GROUP:
+      grouplength = get_grouplength(&pptr, &groupminlength, TRUE, errcodeptr,
+        lcptr, group, recurses, cb);
+      if (grouplength < 0) return -1;
+      itemlength = grouplength;
+      itemminlength = groupminlength;
+      break;
+
       case META_QUERY:
       case META_QUERY_PLUS:
       case META_QUERY_QUERY:
-      pptr++;
-      break;
+      min = 0;
+      max = 1;
+      goto REPETITION;
+
+      /* Exact repetition is OK; variable repetition is not. A repetition of zero
+      must subtract the length that has already been added. */
 
       case META_MINMAX:
       case META_MINMAX_PLUS:
       case META_MINMAX_QUERY:
-      pptr += 3;
-      break;
+      min = pptr[1];
+      max = pptr[2];
+      pptr += 2;
+
+      REPETITION:
+      if (max != REPEAT_UNLIMITED)
+        {
+        if (lastitemlength != 0 &&  // Should not occur, but just in case
+            max != 0 &&
+            (INT_MAX - branchlength)/lastitemlength < max - 1)
+          {
+          *errcodeptr = ERR87;  // Integer overflow; lookbehind too big
+          return -1;
+          }
+        if (min == 0) branchminlength -= lastitemminlength;
+          else itemminlength = (min - 1) * lastitemminlength;
+        if (max == 0) branchlength -= lastitemlength;
+          else itemlength = (max - 1) * lastitemlength;
+        break;
+        }
+      PCRE2_FALLTHROUGH /* Fall through */
+
+      /* Any other item means this branch does not have a fixed length. */
 
       default:
-      break;
-      }
-    break;
-
-    /* A nested lookbehind does not contribute any length to this lookbehind,
-    but must itself be checked and have its lengths set. Note that
-    set_lookbehind_lengths() updates pptr, leaving it pointing to the final ket
-    of the group, so no need to update it here. */
-
-    case META_LOOKBEHIND:
-    case META_LOOKBEHINDNOT:
-    case META_LOOKBEHIND_NA:
-    if (!set_lookbehind_lengths(&pptr, errcodeptr, lcptr, recurses, cb))
-      return -1;
-    break;
-
-    /* Back references and recursions are handled by very similar code. At this
-    stage, the names generated in the parsing pass are available, but the main
-    name table has not yet been created. So for the named varieties, scan the
-    list of names in order to get the number of the first one in the pattern,
-    and whether or not this name is duplicated. */
-
-    case META_BACKREF_BYNAME:
-    if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0)
-      goto ISNOTFIXED;
-    PCRE2_FALLTHROUGH /* Fall through */
-
-    case META_RECURSE_BYNAME:
-      {
-      PCRE2_SPTR name;
-      BOOL is_dupname = FALSE;
-      named_group *ng;
-      uint32_t meta_code = META_CODE(*pptr);
-      uint32_t length = *(++pptr);
-
-      GETPLUSOFFSET(offset, pptr);
-      name = cb->start_pattern + offset;
-      ng = PRIV(compile_find_named_group)(name, length, cb);
-
-      if (ng == NULL)
-        {
-        *errcodeptr = ERR15;  // Non-existent subpattern
-        cb->erroroffset = offset;
-        return -1;
-        }
-
-      group = ng->number;
-      is_dupname = (ng->hash_dup & NAMED_GROUP_IS_DUPNAME) != 0;
-
-      /* A numerical back reference can be fixed length if duplicate capturing
-      groups are not being used. A non-duplicate named back reference can also
-      be handled. */
-
-      if (meta_code == META_RECURSE_BYNAME ||
-          (!is_dupname && (cb->external_flags & PCRE2_DUPCAPUSED) == 0))
-        goto RECURSE_OR_BACKREF_LENGTH;  // Handle as a numbered version.
-      }
-    goto ISNOTFIXED;                     // Duplicate name or number
-
-    /* The offset values for back references < 10 are in a separate vector
-    because otherwise they would use more than two parsed pattern elements on
-    64-bit systems. */
-
-    case META_BACKREF:
-    if ((cb->external_options & PCRE2_MATCH_UNSET_BACKREF) != 0 ||
-        (cb->external_flags & PCRE2_DUPCAPUSED) != 0)
-      goto ISNOTFIXED;
-    group = META_DATA(*pptr);
-    if (group < 10)
-      {
-      offset = cb->small_ref_offset[group];
-      goto RECURSE_OR_BACKREF_LENGTH;
-      }
-
-    PCRE2_FALLTHROUGH /* Fall through */
-    /* For groups >= 10 - picking up group twice does no harm. */
-
-    /* A true recursion implies not fixed length, but a subroutine call may
-    be OK. Back reference "recursions" are also failed. */
-
-    case META_RECURSE:
-    group = META_DATA(*pptr);
-    GETPLUSOFFSET(offset, pptr);
-
-    RECURSE_OR_BACKREF_LENGTH:
-    if (group > cb->bracount)
-      {
-      cb->erroroffset = offset;
-      *errcodeptr = ERR15;  // Non-existent subpattern
+      ISNOTFIXED:
+      *errcodeptr = ERR25;   // Not fixed length
       return -1;
       }
-    if (group == 0) goto ISNOTFIXED;  // Local recursion
-    for (gptr = cb->parsed_pattern; *gptr != META_END; gptr++)
-      {
-      if (META_CODE(*gptr) == META_BIGVALUE) gptr++;
-        else if (*gptr == (META_CAPTURE | group)) break;
-      }
-
-    /* We must start the search for the end of the group at the first meta code
-    inside the group. Otherwise it will be treated as an enclosed group. */
-
-    gptrend = parsed_skip(gptr + 1, PSKIP_KET);
-    if (gptrend == NULL) goto PARSED_SKIP_FAILED;
-    if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  // Local recursion
-    for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;
-    if (r != NULL) goto ISNOTFIXED;   // Mutual recursion
-    this_recurse.prev = recurses;
-    this_recurse.groupptr = gptr;
-
-    /* We do not need to know the position of the end of the group, that is,
-    gptr is not used after the call to get_grouplength(). Setting the second
-    argument FALSE stops it scanning for the end when the length can be found
-    in the cache. */
-
-    gptr++;
-    grouplength = get_grouplength(&gptr, &groupminlength, FALSE, errcodeptr,
-      lcptr, group, &this_recurse, cb);
-    if (grouplength < 0)
-      {
-      if (*errcodeptr == 0) goto ISNOTFIXED;
-      return -1;  // Error already set
-      }
-    itemlength = grouplength;
-    itemminlength = groupminlength;
-    break;
-
-    /* A (DEFINE) group is never obeyed inline and so it does not contribute to
-    the length of this branch. Skip from the following item to the next
-    unpaired ket. */
-
-    case META_COND_DEFINE:
-    pptr = parsed_skip(pptr + 1, PSKIP_KET);
-    break;
-
-    /* Check other nested groups - advance past the initial data for each type
-    and then seek a fixed length with get_grouplength(). */
-
-    case META_COND_NAME:
-    case META_COND_NUMBER:
-    case META_COND_RNAME:
-    case META_COND_RNUMBER:
-    pptr += 2 + SIZEOFFSET;
-    goto CHECK_GROUP;
-
-    case META_COND_ASSERT:
-    pptr += 1;
-    goto CHECK_GROUP;
-
-    case META_COND_VERSION:
-    pptr += 4;
-    goto CHECK_GROUP;
-
-    case META_CAPTURE:
-    group = META_DATA(*pptr);
-    PCRE2_FALLTHROUGH /* Fall through */
-
-    case META_ATOMIC:
-    case META_NOCAPTURE:
-    case META_SCRIPT_RUN:
-    pptr++;
-    CHECK_GROUP:
-    grouplength = get_grouplength(&pptr, &groupminlength, TRUE, errcodeptr,
-      lcptr, group, recurses, cb);
-    if (grouplength < 0) return -1;
-    itemlength = grouplength;
-    itemminlength = groupminlength;
-    break;
-
-    case META_QUERY:
-    case META_QUERY_PLUS:
-    case META_QUERY_QUERY:
-    min = 0;
-    max = 1;
-    goto REPETITION;
-
-    /* Exact repetition is OK; variable repetition is not. A repetition of zero
-    must subtract the length that has already been added. */
-
-    case META_MINMAX:
-    case META_MINMAX_PLUS:
-    case META_MINMAX_QUERY:
-    min = pptr[1];
-    max = pptr[2];
-    pptr += 2;
-
-    REPETITION:
-    if (max != REPEAT_UNLIMITED)
-      {
-      if (lastitemlength != 0 &&  // Should not occur, but just in case
-          max != 0 &&
-          (INT_MAX - branchlength)/lastitemlength < max - 1)
-        {
-        *errcodeptr = ERR87;  // Integer overflow; lookbehind too big
-        return -1;
-        }
-      if (min == 0) branchminlength -= lastitemminlength;
-        else itemminlength = (min - 1) * lastitemminlength;
-      if (max == 0) branchlength -= lastitemlength;
-        else itemlength = (max - 1) * lastitemlength;
-      break;
-      }
-    PCRE2_FALLTHROUGH /* Fall through */
-
-    /* Any other item means this branch does not have a fixed length. */
-
-    default:
-    ISNOTFIXED:
-    *errcodeptr = ERR25;   // Not fixed length
-    return -1;
     }
 
   /* Add the item length to the branchlength, checking for integer overflow and

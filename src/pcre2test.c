@@ -2132,12 +2132,15 @@ Returns:    < 0, = 0, or > 0, according to the comparison
 static int
 strncmpic(const uint8_t *s, const uint8_t *t, size_t n)
 {
-if (n > 0) do
+if (n > 0)
   {
-  int c = tolower(*s++) - tolower(*t++);
-  if (c != 0) return c;
+  do
+    {
+    int c = tolower(*s++) - tolower(*t++);
+    if (c != 0) return c;
+    }
+  while (--n > 0);
   }
-while (--n > 0);
 
 return 0;
 }

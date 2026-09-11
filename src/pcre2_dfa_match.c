@@ -2352,90 +2352,105 @@ for (;;)
       state to wait for one character to pass before continuing. */
 
       case OP_ANYNL:
-      if (clen > 0) switch (c)
+      if (clen > 0)
         {
-        case CHAR_VT:
-        case CHAR_FF:
-        case CHAR_NEL:
+        switch (c)
+          {
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_NEL:
 #ifndef EBCDIC
-        case 0x2028:
-        case 0x2029:
+          case 0x2028:
+          case 0x2029:
 #endif  /* Not EBCDIC */
-        if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
-        PCRE2_FALLTHROUGH /* Fall through */
+          if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
+          PCRE2_FALLTHROUGH /* Fall through */
 
-        case CHAR_LF:
-        ADD_NEW(state_offset + 1, 0);
-        break;
+          case CHAR_LF:
+          ADD_NEW(state_offset + 1, 0);
+          break;
 
-        case CHAR_CR:
-        if (ptr + 1 >= end_subject)
-          {
-          ADD_NEW(state_offset + 1, 0);
-          if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
-            reset_could_continue = TRUE;
+          case CHAR_CR:
+          if (ptr + 1 >= end_subject)
+            {
+            ADD_NEW(state_offset + 1, 0);
+            if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
+              reset_could_continue = TRUE;
+            }
+          else if (ptr[1] == CHAR_LF)
+            {
+            ADD_NEW_DATA(-(state_offset + 1), 0, 1);
+            }
+          else
+            {
+            ADD_NEW(state_offset + 1, 0);
+            }
+          break;
           }
-        else if (ptr[1] == CHAR_LF)
-          {
-          ADD_NEW_DATA(-(state_offset + 1), 0, 1);
-          }
-        else
-          {
-          ADD_NEW(state_offset + 1, 0);
-          }
-        break;
         }
       break;
 
       /*-----------------------------------------------------------------*/
       case OP_NOT_VSPACE:
-      if (clen > 0) switch (c)
+      if (clen > 0)
         {
-        VSPACE_CASES:
-        break;
+        switch (c)
+          {
+          VSPACE_CASES:
+          break;
 
-        default:
-        ADD_NEW(state_offset + 1, 0);
-        break;
+          default:
+          ADD_NEW(state_offset + 1, 0);
+          break;
+          }
         }
       break;
 
       /*-----------------------------------------------------------------*/
       case OP_VSPACE:
-      if (clen > 0) switch (c)
+      if (clen > 0)
         {
-        VSPACE_CASES:
-        ADD_NEW(state_offset + 1, 0);
-        break;
+        switch (c)
+          {
+          VSPACE_CASES:
+          ADD_NEW(state_offset + 1, 0);
+          break;
 
-        default:
-        break;
+          default:
+          break;
+          }
         }
       break;
 
       /*-----------------------------------------------------------------*/
       case OP_NOT_HSPACE:
-      if (clen > 0) switch (c)
+      if (clen > 0)
         {
-        HSPACE_CASES:
-        break;
+        switch (c)
+          {
+          HSPACE_CASES:
+          break;
 
-        default:
-        ADD_NEW(state_offset + 1, 0);
-        break;
+          default:
+          ADD_NEW(state_offset + 1, 0);
+          break;
+          }
         }
       break;
 
       /*-----------------------------------------------------------------*/
       case OP_HSPACE:
-      if (clen > 0) switch (c)
+      if (clen > 0)
         {
-        HSPACE_CASES:
-        ADD_NEW(state_offset + 1, 0);
-        break;
+        switch (c)
+          {
+          HSPACE_CASES:
+          ADD_NEW(state_offset + 1, 0);
+          break;
 
-        default:
-        break;
+          default:
+          break;
+          }
         }
       break;
 
@@ -3162,7 +3177,14 @@ for (;;)
             PCRE2_SPTR pp = local_ptr;
             charcount = (PCRE2_SIZE)(pp - p);
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-            if (utf) while (p < pp) if (NOT_FIRSTCU(*p++)) charcount--;
+            if (utf)
+              {
+              while (p < pp)
+                {
+                if (NOT_FIRSTCU(*p++))
+                  charcount--;
+                }
+              }
 #endif
             ADD_NEW_DATA(-next_state_offset, 0, (int)(charcount - 1));
             }

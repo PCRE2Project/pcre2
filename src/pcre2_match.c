@@ -621,23 +621,25 @@ carrying on means that a complete match on the current subject will be sought.
 A partial match is returned only if no complete match can be found. */
 
 #define CHECK_PARTIAL() \
-  do { \
-     if (Feptr >= mb->end_subject) \
-       { \
-       SCHECK_PARTIAL(); \
-       } \
-     } \
+  do \
+    { \
+    if (Feptr >= mb->end_subject) \
+      { \
+      SCHECK_PARTIAL(); \
+      } \
+    } \
   while (0)
 
 #define SCHECK_PARTIAL() \
-  do { \
-     if (mb->partial != 0 && \
-         (Feptr > mb->start_used_ptr || mb->allowemptypartial)) \
-       { \
-       mb->hitend = TRUE; \
-       if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
-       } \
-     } \
+  do \
+    { \
+    if (mb->partial != 0 && \
+        (Feptr > mb->start_used_ptr || mb->allowemptypartial)) \
+      { \
+      mb->hitend = TRUE; \
+      if (mb->partial > 1) return PCRE2_ERROR_PARTIAL; \
+      } \
+    } \
   while (0)
 
 
@@ -646,19 +648,21 @@ call to the match() function by means of a local vector of frames which
 remember the backtracking points. */
 
 #define RMATCH(ra,rb) \
-  do { \
-     start_ecode = ra; \
-     Freturn_id = rb; \
-     goto MATCH_RECURSE; \
-     L_##rb:; \
-     } \
+  do \
+    { \
+    start_ecode = ra; \
+    Freturn_id = rb; \
+    goto MATCH_RECURSE; \
+    L_##rb:; \
+    } \
   while (0)
 
 #define RRETURN(ra) \
-  do { \
-     rrc = ra; \
-     goto RETURN_SWITCH; \
-     } \
+  do \
+    { \
+    rrc = ra; \
+    goto RETURN_SWITCH; \
+    } \
   while (0)
 
 
@@ -3269,255 +3273,258 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 /* Handle all other cases in UTF mode */
 
 #ifdef SUPPORT_UNICODE
-      if (utf) switch (Lctype)
+      if (utf)
         {
-        case OP_ANY:
-        for (i = 1; i <= Lmin; i++)
+        switch (Lctype)
           {
-          if (Feptr >= mb->end_subject)
+          case OP_ANY:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            if (IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
+            if (mb->partial != 0 &&
+                Feptr + 1 >= mb->end_subject &&
+                NLBLOCK->nltype == NLTYPE_FIXED &&
+                NLBLOCK->nllen == 2 &&
+                *Feptr == NLBLOCK->nl[0])
+              {
+              mb->hitend = TRUE;
+              if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
+              }
+            Feptr++;
+            ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
-          if (IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
-          if (mb->partial != 0 &&
-              Feptr + 1 >= mb->end_subject &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              *Feptr == NLBLOCK->nl[0])
+          break;
+
+          case OP_ALLANY:
+          for (i = 1; i <= Lmin; i++)
             {
-            mb->hitend = TRUE;
-            if (mb->partial > 1) return PCRE2_ERROR_PARTIAL;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            Feptr++;
+            ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
-          Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
-          }
-        break;
+          break;
 
-        case OP_ALLANY:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
+          case OP_ANYBYTE:
+          if (Feptr > mb->end_subject - Lmin) RRETURN(MATCH_NOMATCH);
+          Feptr += Lmin;
+          break;
+
+          case OP_ANYNL:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
-          Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
-          }
-        break;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINC(fc, Feptr);
+            switch (fc)
+              {
+              default: RRETURN(MATCH_NOMATCH);
 
-        case OP_ANYBYTE:
-        if (Feptr > mb->end_subject - Lmin) RRETURN(MATCH_NOMATCH);
-        Feptr += Lmin;
-        break;
+              case CHAR_CR:
+              if (Feptr < mb->end_subject && *Feptr == CHAR_LF) Feptr++;
+              break;
 
-        case OP_ANYNL:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
-            {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
-          GETCHARINC(fc, Feptr);
-          switch (fc)
-            {
-            default: RRETURN(MATCH_NOMATCH);
+              case CHAR_LF:
+              break;
 
-            case CHAR_CR:
-            if (Feptr < mb->end_subject && *Feptr == CHAR_LF) Feptr++;
-            break;
-
-            case CHAR_LF:
-            break;
-
-            case CHAR_VT:
-            case CHAR_FF:
-            case CHAR_NEL:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_NEL:
 #ifndef EBCDIC
-            case 0x2028:
-            case 0x2029:
+              case 0x2028:
+              case 0x2029:
 #endif  /* Not EBCDIC */
-            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) RRETURN(MATCH_NOMATCH);
-            break;
+              if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) RRETURN(MATCH_NOMATCH);
+              break;
+              }
             }
-          }
-        break;
+          break;
 
-        case OP_NOT_HSPACE:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
+          case OP_NOT_HSPACE:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINC(fc, Feptr);
+            switch (fc)
+              {
+              HSPACE_CASES: RRETURN(MATCH_NOMATCH);
+              default: break;
+              }
             }
-          GETCHARINC(fc, Feptr);
-          switch (fc)
-            {
-            HSPACE_CASES: RRETURN(MATCH_NOMATCH);
-            default: break;
-            }
-          }
-        break;
+          break;
 
-        case OP_HSPACE:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
+          case OP_HSPACE:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINC(fc, Feptr);
+            switch (fc)
+              {
+              HSPACE_CASES: break;
+              default: RRETURN(MATCH_NOMATCH);
+              }
             }
-          GETCHARINC(fc, Feptr);
-          switch (fc)
-            {
-            HSPACE_CASES: break;
-            default: RRETURN(MATCH_NOMATCH);
-            }
-          }
-        break;
+          break;
 
-        case OP_NOT_VSPACE:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
+          case OP_NOT_VSPACE:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINC(fc, Feptr);
+            switch (fc)
+              {
+              VSPACE_CASES: RRETURN(MATCH_NOMATCH);
+              default: break;
+              }
             }
-          GETCHARINC(fc, Feptr);
-          switch (fc)
-            {
-            VSPACE_CASES: RRETURN(MATCH_NOMATCH);
-            default: break;
-            }
-          }
-        break;
+          break;
 
-        case OP_VSPACE:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
+          case OP_VSPACE:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINC(fc, Feptr);
+            switch (fc)
+              {
+              VSPACE_CASES: break;
+              default: RRETURN(MATCH_NOMATCH);
+              }
             }
-          GETCHARINC(fc, Feptr);
-          switch (fc)
-            {
-            VSPACE_CASES: break;
-            default: RRETURN(MATCH_NOMATCH);
-            }
-          }
-        break;
+          break;
 
-        case OP_NOT_DIGIT:
-        for (i = 1; i <= Lmin; i++)
-          {
-          if (Feptr >= mb->end_subject)
+          case OP_NOT_DIGIT:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINC(fc, Feptr);
+            if (fc < 128 && (mb->ctypes[fc] & ctype_digit) != 0)
+              RRETURN(MATCH_NOMATCH);
             }
-          GETCHARINC(fc, Feptr);
-          if (fc < 128 && (mb->ctypes[fc] & ctype_digit) != 0)
-            RRETURN(MATCH_NOMATCH);
-          }
-        break;
+          break;
 
-        case OP_DIGIT:
-        for (i = 1; i <= Lmin; i++)
-          {
-          uint32_t cc;
-          if (Feptr >= mb->end_subject)
+          case OP_DIGIT:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            uint32_t cc;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            cc = *Feptr;
+            if (cc >= 128 || (mb->ctypes[cc] & ctype_digit) == 0)
+              RRETURN(MATCH_NOMATCH);
+            Feptr++;
+            /* No need to skip more code units - we know it has only one. */
             }
-          cc = *Feptr;
-          if (cc >= 128 || (mb->ctypes[cc] & ctype_digit) == 0)
-            RRETURN(MATCH_NOMATCH);
-          Feptr++;
-          /* No need to skip more code units - we know it has only one. */
-          }
-        break;
+          break;
 
-        case OP_NOT_WHITESPACE:
-        for (i = 1; i <= Lmin; i++)
-          {
-          uint32_t cc;
-          if (Feptr >= mb->end_subject)
+          case OP_NOT_WHITESPACE:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            uint32_t cc;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            cc = *Feptr;
+            if (cc < 128 && (mb->ctypes[cc] & ctype_space) != 0)
+              RRETURN(MATCH_NOMATCH);
+            Feptr++;
+            ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
-          cc = *Feptr;
-          if (cc < 128 && (mb->ctypes[cc] & ctype_space) != 0)
-            RRETURN(MATCH_NOMATCH);
-          Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
-          }
-        break;
+          break;
 
-        case OP_WHITESPACE:
-        for (i = 1; i <= Lmin; i++)
-          {
-          uint32_t cc;
-          if (Feptr >= mb->end_subject)
+          case OP_WHITESPACE:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            uint32_t cc;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            cc = *Feptr;
+            if (cc >= 128 || (mb->ctypes[cc] & ctype_space) == 0)
+              RRETURN(MATCH_NOMATCH);
+            Feptr++;
+            /* No need to skip more code units - we know it has only one. */
             }
-          cc = *Feptr;
-          if (cc >= 128 || (mb->ctypes[cc] & ctype_space) == 0)
-            RRETURN(MATCH_NOMATCH);
-          Feptr++;
-          /* No need to skip more code units - we know it has only one. */
-          }
-        break;
+          break;
 
-        case OP_NOT_WORDCHAR:
-        for (i = 1; i <= Lmin; i++)
-          {
-          uint32_t cc;
-          if (Feptr >= mb->end_subject)
+          case OP_NOT_WORDCHAR:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            uint32_t cc;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            cc = *Feptr;
+            if (cc < 128 && (mb->ctypes[cc] & ctype_word) != 0)
+              RRETURN(MATCH_NOMATCH);
+            Feptr++;
+            ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
-          cc = *Feptr;
-          if (cc < 128 && (mb->ctypes[cc] & ctype_word) != 0)
-            RRETURN(MATCH_NOMATCH);
-          Feptr++;
-          ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
-          }
-        break;
+          break;
 
-        case OP_WORDCHAR:
-        for (i = 1; i <= Lmin; i++)
-          {
-          uint32_t cc;
-          if (Feptr >= mb->end_subject)
+          case OP_WORDCHAR:
+          for (i = 1; i <= Lmin; i++)
             {
-            SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
+            uint32_t cc;
+            if (Feptr >= mb->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            cc = *Feptr;
+            if (cc >= 128 || (mb->ctypes[cc] & ctype_word) == 0)
+              RRETURN(MATCH_NOMATCH);
+            Feptr++;
+            /* No need to skip more code units - we know it has only one. */
             }
-          cc = *Feptr;
-          if (cc >= 128 || (mb->ctypes[cc] & ctype_word) == 0)
-            RRETURN(MATCH_NOMATCH);
-          Feptr++;
-          /* No need to skip more code units - we know it has only one. */
-          }
-        break;
+          break;
 
-        /* LCOV_EXCL_START */
-        default:
-        PCRE2_DEBUG_UNREACHABLE();
-        return PCRE2_ERROR_INTERNAL;
-        /* LCOV_EXCL_STOP */
-        }  // End switch (Lctype)
+          /* LCOV_EXCL_START */
+          default:
+          PCRE2_DEBUG_UNREACHABLE();
+          return PCRE2_ERROR_INTERNAL;
+          /* LCOV_EXCL_STOP */
+          }  // End switch (Lctype)
+        }
 
       else
 #endif     /* SUPPORT_UNICODE */

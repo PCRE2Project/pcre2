@@ -464,19 +464,20 @@ switch (c)
   clist_dest = list + 2;
   code += 2;
 
-  do {
-     if (clist_dest >= list + MAX_LIST)
-       {
-       /* Early return if there is not enough space. GenerateUcd.py
-       generated a list with more than 5 characters and something
-       must be done about that going forward. */
-       PCRE2_DEBUG_UNREACHABLE();   // Remove if it ever triggers
-       list[2] = code[0];
-       list[3] = code[1];
-       return code;
-       }
-     *clist_dest++ = *clist_src;
-     }
+  do
+    {
+    if (clist_dest >= list + MAX_LIST)
+      {
+      /* Early return if there is not enough space. GenerateUcd.py
+      generated a list with more than 5 characters and something
+      must be done about that going forward. */
+      PCRE2_DEBUG_UNREACHABLE();   // Remove if it ever triggers
+      list[2] = code[0];
+      list[3] = code[1];
+      return code;
+      }
+    *clist_dest++ = *clist_src;
+    }
   while (*clist_src++ != NOTACHAR);
 
   /* All characters are stored. The terminating NOTACHAR is copied from the
@@ -1354,66 +1355,69 @@ for (;;)
   we have to arrange to skip the extra code units. */
 
 #ifdef MAYBE_UTF_MULTI
-  if (utf) switch (c)
+  if (utf)
     {
-    case OP_CHAR:
-    case OP_CHARI:
-    case OP_NOT:
-    case OP_NOTI:
-    case OP_STAR:
-    case OP_MINSTAR:
-    case OP_PLUS:
-    case OP_MINPLUS:
-    case OP_QUERY:
-    case OP_MINQUERY:
-    case OP_UPTO:
-    case OP_MINUPTO:
-    case OP_EXACT:
-    case OP_POSSTAR:
-    case OP_POSPLUS:
-    case OP_POSQUERY:
-    case OP_POSUPTO:
-    case OP_STARI:
-    case OP_MINSTARI:
-    case OP_PLUSI:
-    case OP_MINPLUSI:
-    case OP_QUERYI:
-    case OP_MINQUERYI:
-    case OP_UPTOI:
-    case OP_MINUPTOI:
-    case OP_EXACTI:
-    case OP_POSSTARI:
-    case OP_POSPLUSI:
-    case OP_POSQUERYI:
-    case OP_POSUPTOI:
-    case OP_NOTSTAR:
-    case OP_NOTMINSTAR:
-    case OP_NOTPLUS:
-    case OP_NOTMINPLUS:
-    case OP_NOTQUERY:
-    case OP_NOTMINQUERY:
-    case OP_NOTUPTO:
-    case OP_NOTMINUPTO:
-    case OP_NOTEXACT:
-    case OP_NOTPOSSTAR:
-    case OP_NOTPOSPLUS:
-    case OP_NOTPOSQUERY:
-    case OP_NOTPOSUPTO:
-    case OP_NOTSTARI:
-    case OP_NOTMINSTARI:
-    case OP_NOTPLUSI:
-    case OP_NOTMINPLUSI:
-    case OP_NOTQUERYI:
-    case OP_NOTMINQUERYI:
-    case OP_NOTUPTOI:
-    case OP_NOTMINUPTOI:
-    case OP_NOTEXACTI:
-    case OP_NOTPOSSTARI:
-    case OP_NOTPOSPLUSI:
-    case OP_NOTPOSQUERYI:
-    case OP_NOTPOSUPTOI:
-    if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
-    break;
+    switch (c)
+      {
+      case OP_CHAR:
+      case OP_CHARI:
+      case OP_NOT:
+      case OP_NOTI:
+      case OP_STAR:
+      case OP_MINSTAR:
+      case OP_PLUS:
+      case OP_MINPLUS:
+      case OP_QUERY:
+      case OP_MINQUERY:
+      case OP_UPTO:
+      case OP_MINUPTO:
+      case OP_EXACT:
+      case OP_POSSTAR:
+      case OP_POSPLUS:
+      case OP_POSQUERY:
+      case OP_POSUPTO:
+      case OP_STARI:
+      case OP_MINSTARI:
+      case OP_PLUSI:
+      case OP_MINPLUSI:
+      case OP_QUERYI:
+      case OP_MINQUERYI:
+      case OP_UPTOI:
+      case OP_MINUPTOI:
+      case OP_EXACTI:
+      case OP_POSSTARI:
+      case OP_POSPLUSI:
+      case OP_POSQUERYI:
+      case OP_POSUPTOI:
+      case OP_NOTSTAR:
+      case OP_NOTMINSTAR:
+      case OP_NOTPLUS:
+      case OP_NOTMINPLUS:
+      case OP_NOTQUERY:
+      case OP_NOTMINQUERY:
+      case OP_NOTUPTO:
+      case OP_NOTMINUPTO:
+      case OP_NOTEXACT:
+      case OP_NOTPOSSTAR:
+      case OP_NOTPOSPLUS:
+      case OP_NOTPOSQUERY:
+      case OP_NOTPOSUPTO:
+      case OP_NOTSTARI:
+      case OP_NOTMINSTARI:
+      case OP_NOTPLUSI:
+      case OP_NOTMINPLUSI:
+      case OP_NOTQUERYI:
+      case OP_NOTMINQUERYI:
+      case OP_NOTUPTOI:
+      case OP_NOTMINUPTOI:
+      case OP_NOTEXACTI:
+      case OP_NOTPOSSTARI:
+      case OP_NOTPOSPLUSI:
+      case OP_NOTPOSQUERYI:
+      case OP_NOTPOSUPTOI:
+      if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
+      break;
+      }
     }
 #else
   (void)(utf);  // Keep compiler happy by referencing function argument
