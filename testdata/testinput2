@@ -8384,4 +8384,12 @@ a)"xI
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
 
+# 'getall' must not walk the substring list past its NULL terminator when
+# 'allcaptures' or 'allvector' has widened the reported capture count beyond the
+# number of pairs the match actually returned.
+
+/(a)|(b)/
+    a\=getall,allcaptures
+    a\=getall,allvector,ovector=4
+
 # End of testinput2
