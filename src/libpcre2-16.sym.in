@@ -98,5 +98,5 @@ PCRE2_10.49 {
     pcre2_get_newline_16;
     pcre2_get_offset_limit_16;
     pcre2_get_parens_nest_limit_16;
-};
+} PCRE2_10.48;
 
