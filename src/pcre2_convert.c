@@ -247,7 +247,7 @@ while (plength > 0)
 
   /* Handle a character not within a class. */
 
-  else switch(sc)
+  else switch (sc)
     {
     case CHAR_LEFT_SQUARE_BRACKET:
     PUTCHARS(STR_LEFT_SQUARE_BRACKET);
@@ -1186,7 +1186,7 @@ for (int i = 0; i < 2; i++)
   PCRE2_UCHAR *allocated;
   BOOL dummyrun = buffptr == NULL || *buffptr == NULL;
 
-  switch(pattype)
+  switch (pattype)
     {
     case PCRE2_CONVERT_GLOB:
     rc = convert_glob(options & ~PCRE2_CONVERT_GLOB, pattern, plength, utf,

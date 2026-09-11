@@ -61,7 +61,7 @@ sequence. */
 if (subject[offset] == CHAR_CR && offset + 1 < subject_length &&
     subject[offset + 1] == CHAR_LF)
   {
-  switch(match_data->code->newline_convention)
+  switch (match_data->code->newline_convention)
     {
     case PCRE2_NEWLINE_CRLF:
     case PCRE2_NEWLINE_ANY:

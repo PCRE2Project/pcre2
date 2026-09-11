@@ -155,7 +155,7 @@ for (p = string; length > 0; p++)
   if (length < ab)                      // Missing bytes
     {
     *erroroffset = (PCRE2_SIZE)(p - string);
-    switch(ab - length)
+    switch (ab - length)
       {
       case 1: return PCRE2_ERROR_UTF8_ERR1;
       case 2: return PCRE2_ERROR_UTF8_ERR2;

@@ -141,7 +141,7 @@ for (; ptr < ptrend; ptr++)
     esc_end_ptr = ptr;
     ptr -= 1;  // Rewind by one, because the for-loop will increment it
 
-    switch(erc)
+    switch (erc)
       {
       case 0:      // Data character
       case ESC_b:  // Data character
@@ -1544,7 +1544,7 @@ for (;;)
         code->overall_options, code->extra_options, code->top_bracket, FALSE, NULL);
       if (errorcode != 0) goto BADESCAPE;
 
-      switch(rc)
+      switch (rc)
         {
         case ESC_E:
         goto SETFORCECASE;

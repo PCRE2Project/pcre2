@@ -1961,7 +1961,7 @@ else
 
     case CHAR_0:
     c -= CHAR_0;
-    while(i++ < 2 && ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
+    while (i++ < 2 && ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
         c = c * 8 + *ptr++ - CHAR_0;
     if (c > 0xff)
       {
@@ -2649,7 +2649,7 @@ if (utf && is_group)
     goto FAILED;
     }
 
-  for(;;)
+  for (;;)
     {
     if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
         c != CHAR_UNDERSCORE) break;
@@ -2920,7 +2920,7 @@ handle_escdsw(int escape, uint32_t *parsed_pattern, uint32_t options,
 uint32_t ascii_option = 0;
 uint32_t prop = ESC_p;
 
-switch(escape)
+switch (escape)
   {
   case ESC_D:
   prop = ESC_P;
@@ -2951,7 +2951,7 @@ if ((options & PCRE2_UCP) == 0 || (xoptions & ascii_option) != 0)
 else
   {
   *parsed_pattern++ = META_ESCAPE + prop;
-  switch(escape)
+  switch (escape)
     {
     case ESC_d:
     case ESC_D:
@@ -3364,7 +3364,7 @@ while (ptr < ptrend)
     {
     PCRE2_SIZE verbnamelength;
 
-    switch(c)
+    switch (c)
       {
       default:
       /* Don't use PARSED_LITERAL() because it sets okquantifier. */
@@ -3407,7 +3407,7 @@ while (ptr < ptrend)
         }
       else escape = 0;   // Treat all as literal
 
-      switch(escape)
+      switch (escape)
         {
         case 0:
         /* Don't use PARSED_LITERAL() because it sets okquantifier. */
@@ -3545,7 +3545,7 @@ while (ptr < ptrend)
         {
         ok = MAX_255(ptr[1]) && (cb->ctypes[ptr[1]] & ctype_lcletter) != 0;
         }
-      else switch(ptr[1])  // Traditional symbolic format
+      else switch (ptr[1])  // Traditional symbolic format
         {
         case CHAR_C:
         ok = expect_cond_assert == 2;
@@ -3602,7 +3602,7 @@ while (ptr < ptrend)
 
   /* Process the next item in the main part of a pattern. */
 
-  switch(c)
+  switch (c)
     {
     default:              // Non-special character
     PARSED_LITERAL(c, parsed_pattern);
@@ -4497,7 +4497,7 @@ while (ptr < ptrend)
           escape = 0;                 // Treat as literal character
           }
 
-        switch(escape)
+        switch (escape)
           {
           case 0:  // Escaped character code point is in c
           char_is_literal = FALSE;
@@ -4820,7 +4820,7 @@ while (ptr < ptrend)
         /* The lookaround alphabetic synonyms can mostly be handled by jumping
         to the code that handles the traditional symbolic forms. */
 
-        switch(meta)
+        switch (meta)
           {
           /* LCOV_EXCL_START */
           default:
@@ -5007,7 +5007,7 @@ while (ptr < ptrend)
 
     if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
 
-    switch(*ptr)
+    switch (*ptr)
       {
       default:
       if (*ptr == CHAR_MINUS && ptrend - ptr > 1 && IS_DIGIT(ptr[1]))
@@ -6257,7 +6257,7 @@ for (;; pptr++)
   note_group_empty = FALSE;
   skipunits = 0;         // Default value for most subgroups
 
-  switch(meta)
+  switch (meta)
     {
     /* ===================================================================*/
     /* The branch terminates at pattern end or | or ) */
@@ -8052,7 +8052,7 @@ for (;; pptr++)
       remains is greater than zero, there's a further opcode that can be
       handled. If not, do nothing, leaving the EXACT alone. */
 
-      switch(*tempcode)
+      switch (*tempcode)
         {
         case OP_TYPEEXACT:
         tempcode += PRIV(OP_lengths)[*tempcode] +
@@ -8380,7 +8380,7 @@ for (;; pptr++)
     Note that \b and \B do a one-character lookbehind, and \A also behaves as
     if it does. */
 
-    switch(meta_arg)
+    switch (meta_arg)
       {
       case ESC_C:
       cb->external_flags |= PCRE2_HASBKC;  // Record
@@ -9184,7 +9184,7 @@ for (;;)
 
   else
     {
-    switch(c)
+    switch (c)
       {
       case OP_TYPESTAR:
       case OP_TYPEMINSTAR:
@@ -9224,7 +9224,7 @@ for (;;)
     minimum, so we have to arrange to skip the extra units. */
 
 #ifdef MAYBE_UTF_MULTI
-    if (utf) switch(c)
+    if (utf) switch (c)
       {
       case OP_CHAR:
       case OP_CHARI:
@@ -9331,7 +9331,7 @@ do {
    PCRE2_SPTR scode = first_significant_code(code + 1+LINK_SIZE + xl, TRUE);
    PCRE2_UCHAR op = *scode;
 
-   switch(op)
+   switch (op)
      {
      default:
      return 0;
@@ -9439,7 +9439,7 @@ for (;; pptr++)
   {
   uint32_t meta = META_CODE(*pptr);
 
-  switch(meta)
+  switch (meta)
     {
     default:  // Just skip over most items
     if (meta < META_END) continue;  // Literal
@@ -9581,7 +9581,7 @@ if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
 
 /* Scan the group. In this case we find the end pointer of necessity. */
 
-for(;;)
+for (;;)
   {
   branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr,
     recurses, cb);
@@ -10562,7 +10562,7 @@ if ((options & PCRE2_LITERAL) == 0)
         uint32_t c, pp;
 
         skipatstart += p->length + 2;
-        switch(p->type)
+        switch (p->type)
           {
           case PSO_OPT:
           cb.external_options |= p->value;
@@ -10616,7 +10616,7 @@ if ((options & PCRE2_LITERAL) == 0)
           optimizations need to also update the corresponding bit in the
           external options. */
 
-          switch(p->value)
+          switch (p->value)
             {
             case PCRE2_OPTIM_AUTO_POSSESS:
             cb.external_options |= PCRE2_NO_AUTO_POSSESS;
@@ -10731,7 +10731,7 @@ if (bsr == 0) bsr = ccontext->bsr_convention;
 
 if (newline == 0) newline = ccontext->newline_convention;
 cb.nltype = NLTYPE_FIXED;
-switch(newline)
+switch (newline)
   {
   case PCRE2_NEWLINE_CR:
   cb.nllen = 1;

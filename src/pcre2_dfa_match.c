@@ -853,7 +853,7 @@ for (;;)
       d = code[coptable[codevalue]];
       if (codevalue >= OP_TYPESTAR)
         {
-        switch(d)
+        switch (d)
           {
           case OP_ANYBYTE: return PCRE2_ERROR_DFA_UITEM;
           case OP_NOTPROP:
@@ -1203,7 +1203,7 @@ for (;;)
         int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
-        switch(code[1])
+        switch (code[1])
           {
           case PT_LAMP:
           chartype = prop->chartype;
@@ -1242,7 +1242,7 @@ for (;;)
 
           case PT_SPACE:    // Perl space
           case PT_PXSPACE:  // POSIX space
-          switch(c)
+          switch (c)
             {
             HSPACE_CASES:
             VSPACE_CASES:
@@ -1482,7 +1482,7 @@ for (;;)
         int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
-        switch(code[2])
+        switch (code[2])
           {
           case PT_LAMP:
           chartype = prop->chartype;
@@ -1520,7 +1520,7 @@ for (;;)
 
           case PT_SPACE:    // Perl space
           case PT_PXSPACE:  // POSIX space
-          switch(c)
+          switch (c)
             {
             HSPACE_CASES:
             VSPACE_CASES:
@@ -1743,7 +1743,7 @@ for (;;)
         int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
-        switch(code[2])
+        switch (code[2])
           {
           case PT_LAMP:
           chartype = prop->chartype;
@@ -1781,7 +1781,7 @@ for (;;)
 
           case PT_SPACE:    // Perl space
           case PT_PXSPACE:  // POSIX space
-          switch(c)
+          switch (c)
             {
             HSPACE_CASES:
             VSPACE_CASES:
@@ -2029,7 +2029,7 @@ for (;;)
         int chartype;
         const uint32_t *cp;
         const ucd_record * prop = GET_UCD(c);
-        switch(code[1 + IMM2_SIZE + 1])
+        switch (code[1 + IMM2_SIZE + 1])
           {
           case PT_LAMP:
           chartype = prop->chartype;
@@ -2068,7 +2068,7 @@ for (;;)
 
           case PT_SPACE:    // Perl space
           case PT_PXSPACE:  // POSIX space
-          switch(c)
+          switch (c)
             {
             HSPACE_CASES:
             VSPACE_CASES:
@@ -2352,7 +2352,7 @@ for (;;)
       state to wait for one character to pass before continuing. */
 
       case OP_ANYNL:
-      if (clen > 0) switch(c)
+      if (clen > 0) switch (c)
         {
         case CHAR_VT:
         case CHAR_FF:
@@ -2389,7 +2389,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_NOT_VSPACE:
-      if (clen > 0) switch(c)
+      if (clen > 0) switch (c)
         {
         VSPACE_CASES:
         break;
@@ -2402,7 +2402,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_VSPACE:
-      if (clen > 0) switch(c)
+      if (clen > 0) switch (c)
         {
         VSPACE_CASES:
         ADD_NEW(state_offset + 1, 0);
@@ -2415,7 +2415,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_NOT_HSPACE:
-      if (clen > 0) switch(c)
+      if (clen > 0) switch (c)
         {
         HSPACE_CASES:
         break;
@@ -2428,7 +2428,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_HSPACE:
-      if (clen > 0) switch(c)
+      if (clen > 0) switch (c)
         {
         HSPACE_CASES:
         ADD_NEW(state_offset + 1, 0);
@@ -3578,7 +3578,7 @@ mb->heap_used = 0;
 
 mb->bsr_convention = re->bsr_convention;
 mb->nltype = NLTYPE_FIXED;
-switch(re->newline_convention)
+switch (re->newline_convention)
   {
   case PCRE2_NEWLINE_CR:
   mb->nllen = 1;

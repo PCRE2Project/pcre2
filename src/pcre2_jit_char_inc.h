@@ -540,7 +540,7 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
 
   items = 0;
 
-  switch(*cc)
+  switch (*cc)
     {
     case PT_LAMP:
     items = UCPCAT3(ucp_Lu, ucp_Ll, ucp_Lt);
@@ -880,7 +880,7 @@ while (*cc == XCL_PROP || *cc == XCL_NOTPROP)
   if (*cc == XCL_NOTPROP)
     invertcmp ^= 0x1;
   cc++;
-  switch(*cc)
+  switch (*cc)
     {
     case PT_LAMP:
     case PT_GC:
@@ -1417,7 +1417,7 @@ do
 #endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
     context->sourcereg = context->sourcereg == TMP1 ? TMP2 : TMP1;
 
-    switch(context->ucharptr)
+    switch (context->ucharptr)
       {
       case 4 / sizeof(PCRE2_UCHAR):
       if (context->oc.asint != 0)
@@ -1825,7 +1825,7 @@ jump_list *end_list;
 PCRE2_UCHAR propdata[5];
 #endif /* SUPPORT_UNICODE */
 
-switch(type)
+switch (type)
   {
   case OP_NOT_DIGIT:
   case OP_DIGIT:

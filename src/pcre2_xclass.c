@@ -101,7 +101,7 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
     BOOL isprop = (*data++) == XCL_PROP;
     BOOL ok;
 
-    switch(*data)
+    switch (*data)
       {
       case PT_LAMP:
       chartype = prop->chartype;
@@ -141,7 +141,7 @@ if (*data == XCL_PROP || *data == XCL_NOTPROP)
 
       case PT_SPACE:    // Perl space
       case PT_PXSPACE:  // POSIX space
-      switch(c)
+      switch (c)
         {
         HSPACE_CASES:
         VSPACE_CASES:

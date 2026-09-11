@@ -333,7 +333,7 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value)
 {
-switch(value)
+switch (value)
   {
   case PCRE2_BSR_ANYCRLF:
   case PCRE2_BSR_UNICODE:
@@ -362,7 +362,7 @@ return 0;
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_newline(pcre2_compile_context *ccontext, uint32_t newline)
 {
-switch(newline)
+switch (newline)
   {
   case PCRE2_NEWLINE_CR:
   case PCRE2_NEWLINE_LF:

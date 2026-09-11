@@ -423,7 +423,7 @@ if (rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF8_ERR21)
 /* Most of these are events that won't occur during testing, so exclude them
 from coverage. */
 
-switch(rc)
+switch (rc)
   {
   case PCRE2_ERROR_HEAPLIMIT: return REG_ESPACE;
   case PCRE2_ERROR_NOMATCH: return REG_NOMATCH;

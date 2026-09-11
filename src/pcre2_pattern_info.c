@@ -65,7 +65,7 @@ const pcre2_real_code *re = (const pcre2_real_code *)code;
 
 if (where == NULL)   // Requests field length
   {
-  switch(what)
+  switch (what)
     {
     case PCRE2_INFO_ALLOPTIONS:
     case PCRE2_INFO_ARGOPTIONS:
@@ -115,7 +115,7 @@ if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
 
 if ((re->flags & (PCRE2_CODE_UNIT_WIDTH/8)) == 0) return PCRE2_ERROR_BADMODE;
 
-switch(what)
+switch (what)
   {
   case PCRE2_INFO_ALLOPTIONS:
   *((uint32_t *)where) = re->overall_options;

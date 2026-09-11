@@ -189,7 +189,7 @@ rc = pcre2_match(
 
 if (rc < 0)
   {
-  switch(rc)
+  switch (rc)
     {
     case PCRE2_ERROR_NOMATCH: printf("No match\n"); break;
     /*

@@ -106,7 +106,7 @@ for (;;)
 
   else
     {
-    switch(c)
+    switch (c)
       {
       case OP_TYPESTAR:
       case OP_TYPEMINSTAR:
@@ -146,7 +146,7 @@ for (;;)
   we have to arrange to skip the extra bytes. */
 
 #ifdef MAYBE_UTF_MULTI
-    if (utf) switch(c)
+    if (utf) switch (c)
       {
       case OP_CHAR:
       case OP_CHARI:

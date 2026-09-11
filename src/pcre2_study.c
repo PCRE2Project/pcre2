@@ -1122,7 +1122,7 @@ do
     PCRE2_UCHAR xclassflags;
 #endif
 
-    switch(*tcode)
+    switch (*tcode)
       {
       /* If we reach something we don't understand, it means a new opcode has
       been created that hasn't been added to this function. Hopefully this
@@ -1300,7 +1300,7 @@ do
 
       /* Now check the next significant item. */
 
-      switch(*ncode)
+      switch (*ncode)
         {
         default:
         break;
@@ -1615,7 +1615,7 @@ do
       case OP_TYPEQUERY:
       case OP_TYPEMINQUERY:
       case OP_TYPEPOSQUERY:
-      switch(tcode[1])
+      switch (tcode[1])
         {
         default:
         case OP_ANY:
@@ -2059,7 +2059,7 @@ if ((re->flags & (PCRE2_MATCH_EMPTY|PCRE2_HASACCEPT)) == 0 &&
   int backref_cache[MAX_CACHE_BACKREF+1];
   backref_cache[0] = 0;    // Highest one that is set
   min = find_minlength(re, code, code, utf, NULL, &count, backref_cache);
-  switch(min)
+  switch (min)
     {
     case -1:  // \C in UTF mode or over-complex regex
     break;    // Leave minlength unchanged (will be zero)

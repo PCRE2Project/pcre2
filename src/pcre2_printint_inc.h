@@ -579,7 +579,7 @@ if (type == OP_XCLASS)
       break;
       }
 
-    switch(ch)
+    switch (ch)
       {
       case XCL_NOTPROP:
       notch = "^";
@@ -589,7 +589,7 @@ if (type == OP_XCLASS)
         unsigned int ptype = *ccode++;
         unsigned int pvalue = *ccode++;
         const char *s;
-        switch(ptype)
+        switch (ptype)
           {
           case PT_PXGRAPH:
           fprintf(f, "[:%sgraph:]", notch);
@@ -658,7 +658,7 @@ BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
 code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
-for(;;)
+for (;;)
   {
   PCRE2_SPTR ccode;
   uint32_t c;
@@ -671,7 +671,7 @@ for(;;)
   else
     fprintf(f, "    ");
 
-  switch(*code)
+  switch (*code)
     {
     case OP_END:
     fprintf(f, "    %s\n", OP_names[*code]);
@@ -1031,7 +1031,7 @@ for(;;)
     /* Handle repeats after a class or a back reference */
 
     CLASS_REF_REPEAT:
-    switch(*ccode)
+    switch (*ccode)
       {
       unsigned int min, max;
 

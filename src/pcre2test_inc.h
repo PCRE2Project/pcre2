@@ -261,7 +261,7 @@ if (left)
     printed++;
     start--;
     if (utf)
-      { while(start > p && (*start & 0xc0u) == 0x80u) start--; }
+      { while (start > p && (*start & 0xc0u) == 0x80u) start--; }
     }
   }
 else
@@ -271,7 +271,7 @@ else
     printed++;
     end++;
     if (utf)
-      { while(end < p + p_len && (*end & 0xc0u) == 0x80u) end++; }
+      { while (end < p + p_len && (*end & 0xc0u) == 0x80u) end++; }
     }
   }
 
@@ -299,7 +299,7 @@ if (left)
     printed++;
     start--;
     if (utf)
-      { while(start > p && (*start & 0xfc00u) == 0xdc00u) start--; }
+      { while (start > p && (*start & 0xfc00u) == 0xdc00u) start--; }
     }
   }
 else
@@ -309,7 +309,7 @@ else
     printed++;
     end++;
     if (utf)
-      { while(end < p + p_len && (*end & 0xfc00u) == 0xdc00u) end++; }
+      { while (end < p + p_len && (*end & 0xfc00u) == 0xdc00u) end++; }
     }
   }
 
@@ -630,7 +630,7 @@ check_modifier(modstruct *m, int ctx, patctl *pctl, datctl *dctl, uint32_t c)
 void *field = NULL;
 PCRE2_SIZE offset = m->offset;
 
-if (restrict_for_perl_test) switch(m->which)
+if (restrict_for_perl_test) switch (m->which)
   {
   case MOD_PNDP:
   case MOD_PATP:
@@ -1345,7 +1345,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
 
   /* These info requests may return PCRE2_ERROR_UNSET. */
 
-  switch(pattern_info(PCRE2_INFO_HEAPLIMIT, &heap_limit, TRUE))
+  switch (pattern_info(PCRE2_INFO_HEAPLIMIT, &heap_limit, TRUE))
     {
     case 0:
     heap_limit_set = TRUE;
@@ -1359,7 +1359,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     return PR_ABEND;
     }
 
-  switch(pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit, TRUE))
+  switch (pattern_info(PCRE2_INFO_MATCHLIMIT, &match_limit, TRUE))
     {
     case 0:
     match_limit_set = TRUE;
@@ -1373,7 +1373,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
     return PR_ABEND;
     }
 
-  switch(pattern_info(PCRE2_INFO_DEPTHLIMIT, &depth_limit, TRUE))
+  switch (pattern_info(PCRE2_INFO_DEPTHLIMIT, &depth_limit, TRUE))
     {
     case 0:
     depth_limit_set = TRUE;
@@ -1747,7 +1747,7 @@ if (restrict_for_perl_test && cmd != CMD_PATTERN && cmd != CMD_SUBJECT &&
   return PR_ABEND;
   }
 
-switch(cmd)
+switch (cmd)
   {
   case CMD_UNKNOWN:
   cfprintf(clr_test_error, outfile, "** Unknown command: %s", buffer);
@@ -1870,7 +1870,7 @@ switch(cmd)
 
   fclose(f);
   pcre2_serialize_free(serial);
-  while(patstacknext > 0)
+  while (patstacknext > 0)
     {
     compiled_code = patstack[--patstacknext];
     pcre2_code_free(compiled_code);
@@ -2095,7 +2095,7 @@ memcpy(&pat_patctl, &def_patctl, sizeof(patctl));
 
 /* Find the end of the pattern, reading more lines if necessary. */
 
-for(;;)
+for (;;)
   {
   while (*p != 0)
     {
@@ -2584,7 +2584,7 @@ ascii_to_ebcdic_str(pbuffer8, patlen);
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
 errorcode = G(to,PCRE2_CODE_UNIT_WIDTH)(pbuffer8, utf, &patlen);
-switch(errorcode)
+switch (errorcode)
   {
   case -1:
   cfprintf(clr_test_error, outfile, "** Failed: invalid UTF-8 string cannot be "
@@ -5535,7 +5535,7 @@ for (gmatched = 0;; gmatched++)
 
   else
     {
-    switch(match_rc)
+    switch (match_rc)
       {
       case PCRE2_ERROR_NOMATCH:
       if (gmatched == 0)
@@ -5669,7 +5669,7 @@ pcre2_maketables_free(general_context, locale_tables);
 pcre2_match_data_free(match_data);
 pcre2_code_free(compiled_code);
 
-while(patstacknext-- > 0)
+while (patstacknext-- > 0)
   {
   compiled_code = patstack[patstacknext];
   pcre2_code_free(compiled_code);

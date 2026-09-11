@@ -3227,7 +3227,7 @@ if (arg != NULL && arg[0] != '-')
 
     case CONF_JU:
     rc = jit_compile_test();
-    switch(rc)
+    switch (rc)
       {
       case 0: yield = 0; break;
       case PCRE2_ERROR_NOMEMORY: yield = 1; break;
@@ -3318,7 +3318,7 @@ if (optval != 0)
 
   printf("    Can allocate executable memory: ");
   rc = jit_compile_test();
-  switch(rc)
+  switch (rc)
     {
     case 0:
     printf("Yes\n");

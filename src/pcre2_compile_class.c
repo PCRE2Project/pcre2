@@ -811,7 +811,7 @@ for (c = 0; c < 256; c++)
 
     case PT_SPACE:    // Perl space
     case PT_PXSPACE:  // POSIX space
-    switch(c)
+    switch (c)
       {
       HSPACE_BYTE_CASES:
       VSPACE_BYTE_CASES:
@@ -1030,7 +1030,7 @@ while (p[0] < 256)
   {
   unsigned int n = 0;
 
-  while(p[n+1] == p[0] + n + 1) n++;
+  while (p[n+1] == p[0] + n + 1) n++;
   add_to_class(options, xoptions, cb, p[0], p[n]);
 
   p += n + 1;
@@ -1218,7 +1218,7 @@ while (TRUE)
       {
       uint32_t ptype;
 
-      switch(posix_class)
+      switch (posix_class)
         {
         case PC_GRAPH:
         case PC_PRINT:
@@ -1342,7 +1342,7 @@ while (TRUE)
     case META_ESCAPE:
     escape = META_DATA(meta);
 
-    switch(escape)
+    switch (escape)
       {
       case ESC_d:
       for (int i = 0; i < 32; i++) classbits[i] |= cbits[i+cbit_digit];
@@ -2276,7 +2276,7 @@ switch (meta)
     }
 
   break;
-  }  // End of switch(meta)
+  }  // End of switch (meta)
 
 pop_info->code_start = (lengthptr == NULL)? code_start : NULL;
 

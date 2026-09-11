@@ -152,13 +152,13 @@ for (;;)
 
     /* Handle the different checking states */
 
-    switch(require_state)
+    switch (require_state)
       {
       /* First significant character - it might follow Common or Inherited
       characters that do not have any script extensions. */
 
       case SCRIPT_UNSET:
-      switch(script)
+      switch (script)
         {
         case ucp_Han:
         require_state = SCRIPT_HANPENDING;
@@ -259,7 +259,7 @@ for (;;)
       /* The rest of the string must be in this script, but we have to
       allow for the Han complications. */
 
-      switch(script)
+      switch (script)
         {
         case ucp_Han:
         require_state = SCRIPT_HANPENDING;

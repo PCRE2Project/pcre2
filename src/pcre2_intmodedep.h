@@ -347,15 +347,15 @@ do not know if we are in UTF-8 mode. */
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
 because almost all calls are already within a block of UTF-8 only code. */
 
-#define BACKCHAR(eptr) while((*eptr & 0xc0u) == 0x80u) eptr--
+#define BACKCHAR(eptr) while ((*eptr & 0xc0u) == 0x80u) eptr--
 
 /* Same as above, just in the other direction. */
-#define FORWARDCHAR(eptr) while((*eptr & 0xc0u) == 0x80u) eptr++
-#define FORWARDCHARTEST(eptr,end) while(eptr < end && (*eptr & 0xc0u) == 0x80u) eptr++
+#define FORWARDCHAR(eptr) while ((*eptr & 0xc0u) == 0x80u) eptr++
+#define FORWARDCHARTEST(eptr,end) while (eptr < end && (*eptr & 0xc0u) == 0x80u) eptr++
 
 /* Same as above, but it allows a fully customizable form. */
 #define ACROSSCHAR(condition, eptr, action) \
-  while((condition) && ((*eptr) & 0xc0u) == 0x80u) action
+  while ((condition) && ((*eptr) & 0xc0u) == 0x80u) action
 
 /* Deposit a character into memory, returning the number of code units. */
 

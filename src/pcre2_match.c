@@ -895,7 +895,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #endif
 
   Fop = (uint8_t)(*Fecode);  // Cast needed for 16-bit and 32-bit modes
-  switch(Fop)
+  switch (Fop)
     {
     /* ===================================================================== */
     /* Before OP_ACCEPT there may be any number of OP_CLOSE opcodes, to close
@@ -911,7 +911,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       {
       number = GET2(Fecode, 1);
       offset = Flast_group_offset;
-      for(;;)
+      for (;;)
         {
         /* Corrupted heapframes?. Trigger an assert and return an error */
         PCRE2_ASSERT(offset != PCRE2_UNSET);
@@ -953,7 +953,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       fprintf(stderr, "++ Accept within recursion\n");
 #endif
       offset = Flast_group_offset;
-      for(;;)
+      for (;;)
         {
         /* Corrupted heapframes?. Trigger an assert and return an error */
         PCRE2_ASSERT(offset != PCRE2_UNSET);
@@ -1482,7 +1482,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
           go too far. */
 
-          if (reptype != REPTYPE_POS) for(;;)
+          if (reptype != REPTYPE_POS) for (;;)
             {
             if (Feptr <= Lstart_eptr) break;
             RMATCH(Fecode, RM203);
@@ -1865,7 +1865,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
           go too far. */
 
-          if (reptype != REPTYPE_POS) for(;;)
+          if (reptype != REPTYPE_POS) for (;;)
             {
             if (Feptr <= Lstart_eptr) break;
             RMATCH(Fecode, RM205);
@@ -2003,7 +2003,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
           go too far. */
 
-          if (reptype != REPTYPE_POS) for(;;)
+          if (reptype != REPTYPE_POS) for (;;)
             {
             if (Feptr <= Lstart_eptr) break;
             RMATCH(Fecode, RM207);
@@ -2410,7 +2410,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
         go too far. */
 
-        for(;;)
+        for (;;)
           {
           RMATCH(Fecode, RM101);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -2554,7 +2554,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
         go too far. */
 
-        for(;;)
+        for (;;)
           {
           RMATCH(Fecode, RM103);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -2661,7 +2661,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
       }
     GETCHARINCTEST(fc, Feptr);
-    switch(fc)
+    switch (fc)
       {
       default: RRETURN(MATCH_NOMATCH);
 
@@ -2696,7 +2696,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
       }
     GETCHARINCTEST(fc, Feptr);
-    switch(fc)
+    switch (fc)
       {
       HSPACE_CASES: RRETURN(MATCH_NOMATCH);  // Byte and multibyte cases
       default: break;
@@ -2711,7 +2711,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
       }
     GETCHARINCTEST(fc, Feptr);
-    switch(fc)
+    switch (fc)
       {
       HSPACE_CASES: break;  // Byte and multibyte cases
       default: RRETURN(MATCH_NOMATCH);
@@ -2726,7 +2726,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
       }
     GETCHARINCTEST(fc, Feptr);
-    switch(fc)
+    switch (fc)
       {
       VSPACE_CASES: RRETURN(MATCH_NOMATCH);
       default: break;
@@ -2741,7 +2741,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
       }
     GETCHARINCTEST(fc, Feptr);
-    switch(fc)
+    switch (fc)
       {
       VSPACE_CASES: break;
       default: RRETURN(MATCH_NOMATCH);
@@ -2770,7 +2770,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       const ucd_record *prop = GET_UCD(fc);
       BOOL notmatch = Fop == OP_NOTPROP;
 
-      switch(Fecode[1])
+      switch (Fecode[1])
         {
         case PT_LAMP:
         chartype = prop->chartype;
@@ -2818,7 +2818,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
         case PT_SPACE:    // Perl space
         case PT_PXSPACE:  // POSIX space
-        switch(fc)
+        switch (fc)
           {
           HSPACE_CASES:
           VSPACE_CASES:
@@ -3005,7 +3005,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       if (proptype >= 0)  // Property tests in all modes
         {
         BOOL notmatch = Lctype == OP_NOTPROP;
-        switch(proptype)
+        switch (proptype)
           {
           case PT_LAMP:
           for (i = 1; i <= Lmin; i++)
@@ -3116,7 +3116,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            switch(fc)
+            switch (fc)
               {
               HSPACE_CASES:
               VSPACE_CASES:
@@ -3269,7 +3269,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 /* Handle all other cases in UTF mode */
 
 #ifdef SUPPORT_UNICODE
-      if (utf) switch(Lctype)
+      if (utf) switch (Lctype)
         {
         case OP_ANY:
         for (i = 1; i <= Lmin; i++)
@@ -3321,7 +3321,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(fc, Feptr);
-          switch(fc)
+          switch (fc)
             {
             default: RRETURN(MATCH_NOMATCH);
 
@@ -3354,7 +3354,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(fc, Feptr);
-          switch(fc)
+          switch (fc)
             {
             HSPACE_CASES: RRETURN(MATCH_NOMATCH);
             default: break;
@@ -3371,7 +3371,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(fc, Feptr);
-          switch(fc)
+          switch (fc)
             {
             HSPACE_CASES: break;
             default: RRETURN(MATCH_NOMATCH);
@@ -3388,7 +3388,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(fc, Feptr);
-          switch(fc)
+          switch (fc)
             {
             VSPACE_CASES: RRETURN(MATCH_NOMATCH);
             default: break;
@@ -3405,7 +3405,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(fc, Feptr);
-          switch(fc)
+          switch (fc)
             {
             VSPACE_CASES: break;
             default: RRETURN(MATCH_NOMATCH);
@@ -3517,7 +3517,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
         /* LCOV_EXCL_STOP */
-        }  // End switch(Lctype)
+        }  // End switch (Lctype)
 
       else
 #endif     /* SUPPORT_UNICODE */
@@ -3525,7 +3525,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       /* Code for the non-UTF case for minimum matching of operators other
       than OP_PROP and OP_NOTPROP. */
 
-      switch(Lctype)
+      switch (Lctype)
         {
         case OP_ANY:
         for (i = 1; i <= Lmin; i++)
@@ -3579,7 +3579,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          switch(*Feptr++)
+          switch (*Feptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
 
@@ -3611,7 +3611,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          switch(*Feptr++)
+          switch (*Feptr++)
             {
             default: break;
             HSPACE_BYTE_CASES:
@@ -3631,7 +3631,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          switch(*Feptr++)
+          switch (*Feptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
             HSPACE_BYTE_CASES:
@@ -3651,7 +3651,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          switch(*Feptr++)
+          switch (*Feptr++)
             {
             VSPACE_BYTE_CASES:
 #if PCRE2_CODE_UNIT_WIDTH != 8
@@ -3671,7 +3671,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          switch(*Feptr++)
+          switch (*Feptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
             VSPACE_BYTE_CASES:
@@ -3789,7 +3789,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
       if (proptype >= 0)
         {
-        switch(proptype)
+        switch (proptype)
           {
           case PT_LAMP:
           for (;;)
@@ -3921,7 +3921,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(fc, Feptr);
-            switch(fc)
+            switch (fc)
               {
               HSPACE_CASES:
               VSPACE_CASES:
@@ -4108,7 +4108,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             }
           if (Lctype == OP_ANY && IS_NEWLINE(Feptr)) RRETURN(MATCH_NOMATCH);
           GETCHARINC(fc, Feptr);
-          switch(Lctype)
+          switch (Lctype)
             {
             case OP_ANY:               // This is the non-NL case
             if (mb->partial != 0 &&    // Take care with CRLF partial
@@ -4127,7 +4127,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_ANYNL:
-            switch(fc)
+            switch (fc)
               {
               default: RRETURN(MATCH_NOMATCH);
 
@@ -4152,7 +4152,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_NOT_HSPACE:
-            switch(fc)
+            switch (fc)
               {
               HSPACE_CASES: RRETURN(MATCH_NOMATCH);
               default: break;
@@ -4160,7 +4160,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_HSPACE:
-            switch(fc)
+            switch (fc)
               {
               HSPACE_CASES: break;
               default: RRETURN(MATCH_NOMATCH);
@@ -4168,7 +4168,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_NOT_VSPACE:
-            switch(fc)
+            switch (fc)
               {
               VSPACE_CASES: RRETURN(MATCH_NOMATCH);
               default: break;
@@ -4176,7 +4176,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_VSPACE:
-            switch(fc)
+            switch (fc)
               {
               VSPACE_CASES: break;
               default: RRETURN(MATCH_NOMATCH);
@@ -4239,7 +4239,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           if (Lctype == OP_ANY && IS_NEWLINE(Feptr))
             RRETURN(MATCH_NOMATCH);
           fc = *Feptr++;
-          switch(Lctype)
+          switch (Lctype)
             {
             case OP_ANY:               // This is the non-NL case
             if (mb->partial != 0 &&    // Take care with CRLF partial
@@ -4258,7 +4258,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_ANYNL:
-            switch(fc)
+            switch (fc)
               {
               default: RRETURN(MATCH_NOMATCH);
 
@@ -4283,7 +4283,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_NOT_HSPACE:
-            switch(fc)
+            switch (fc)
               {
               default: break;
               HSPACE_BYTE_CASES:
@@ -4295,7 +4295,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_HSPACE:
-            switch(fc)
+            switch (fc)
               {
               default: RRETURN(MATCH_NOMATCH);
               HSPACE_BYTE_CASES:
@@ -4307,7 +4307,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_NOT_VSPACE:
-            switch(fc)
+            switch (fc)
               {
               default: break;
               VSPACE_BYTE_CASES:
@@ -4319,7 +4319,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             case OP_VSPACE:
-            switch(fc)
+            switch (fc)
               {
               default: RRETURN(MATCH_NOMATCH);
               VSPACE_BYTE_CASES:
@@ -4385,7 +4385,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       if (proptype >= 0)
         {
         BOOL notmatch = Lctype == OP_NOTPROP;
-        switch(proptype)
+        switch (proptype)
           {
           case PT_LAMP:
           for (i = Lmin; i < Lmax; i++)
@@ -4505,7 +4505,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               break;
               }
             GETCHARLENTEST(fc, Feptr, len);
-            switch(fc)
+            switch (fc)
               {
               HSPACE_CASES:
               VSPACE_CASES:
@@ -4646,7 +4646,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't
         go too far. */
 
-        for(;;)
+        for (;;)
           {
           if (Feptr <= Lstart_eptr) break;
           RMATCH(Fecode, RM221);
@@ -4686,7 +4686,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         cause BACKCHAR to move back past Lstart_eptr. This is just palliative;
         the use of \C in UTF mode is fraught with danger. */
 
-        for(;;)
+        for (;;)
           {
           int lgb, rgb;
           PCRE2_SPTR fptr;
@@ -4730,7 +4730,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 #ifdef SUPPORT_UNICODE
       if (utf)
         {
-        switch(Lctype)
+        switch (Lctype)
           {
           case OP_ANY:
           for (i = Lmin; i < Lmax; i++)
@@ -4830,7 +4830,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               break;
               }
             GETCHARLEN(fc, Feptr, len);
-            switch(fc)
+            switch (fc)
               {
               HSPACE_CASES: gotspace = TRUE; break;
               default: gotspace = FALSE; break;
@@ -4852,7 +4852,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               break;
               }
             GETCHARLEN(fc, Feptr, len);
-            switch(fc)
+            switch (fc)
               {
               VSPACE_CASES: gotspace = TRUE; break;
               default: gotspace = FALSE; break;
@@ -4965,7 +4965,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         Unicode character. Use <= Lstart_eptr to ensure backtracking doesn't go
         too far. */
 
-        for(;;)
+        for (;;)
           {
           if (Feptr <= Lstart_eptr) break;
           RMATCH(Fecode, RM220);
@@ -4982,7 +4982,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       /* Not UTF mode */
         {
-        switch(Lctype)
+        switch (Lctype)
           {
           case OP_ANY:
           for (i = Lmin; i < Lmax; i++)
@@ -5052,7 +5052,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
-            switch(*Feptr)
+            switch (*Feptr)
               {
               default: Feptr++; break;
               HSPACE_BYTE_CASES:
@@ -5073,7 +5073,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
-            switch(*Feptr)
+            switch (*Feptr)
               {
               default: goto ENDLOOP01;
               HSPACE_BYTE_CASES:
@@ -5094,7 +5094,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
-            switch(*Feptr)
+            switch (*Feptr)
               {
               default: Feptr++; break;
               VSPACE_BYTE_CASES:
@@ -5115,7 +5115,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
               SCHECK_PARTIAL();
               break;
               }
-            switch(*Feptr)
+            switch (*Feptr)
               {
               default: goto ENDLOOP03;
               VSPACE_BYTE_CASES:
@@ -5834,7 +5834,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       {
       group_frame_type = GF_NOCAPTURE;
       RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM4);
-      switch(rrc)
+      switch (rrc)
         {
         case MATCH_ACCEPT:   // Assertion matched, therefore it fails.
         case MATCH_MATCH:
@@ -6050,7 +6050,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     /* Test the various possible conditions */
 
     condition = FALSE;
-    switch(*Fecode)
+    switch (*Fecode)
       {
       case OP_RREF:                  // Group recursion test
       if (Fcurrent_recurse != RECURSE_UNSET)
@@ -6115,7 +6115,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         group_frame_type = GF_CONDASSERT;
         RMATCH(Lstart_branch + PRIV(OP_lengths)[*Lstart_branch], RM5);
 
-        switch(rrc)
+        switch (rrc)
           {
           case MATCH_ACCEPT:  // Save captures
           memcpy(Fovector,
@@ -7429,7 +7429,7 @@ mb->start_code = (PCRE2_SPTR)((const uint8_t *)re + re->code_start);
 
 mb->bsr_convention = re->bsr_convention;
 mb->nltype = NLTYPE_FIXED;
-switch(re->newline_convention)
+switch (re->newline_convention)
   {
   case PCRE2_NEWLINE_CR:
   mb->nllen = 1;
@@ -7599,7 +7599,7 @@ memchr_found_first_cu = NULL;
 memchr_found_first_cu2 = NULL;
 #endif
 
-for(;;)
+for (;;)
   {
   PCRE2_SPTR new_start_match;
 
@@ -7975,7 +7975,7 @@ for(;;)
     match_partial = start_match;
     }
 
-  switch(rc)
+  switch (rc)
     {
     /* If MATCH_SKIP_ARG reaches this level it means that a MARK that matched
     the SKIP's arg was not found. In this circumstance, Perl ignores the SKIP
@@ -8065,7 +8065,7 @@ for(;;)
     start_match++;
 
   mb->mark = NULL;   // Reset for start of next match attempt
-  }                  // End of for(;;) "bumpalong" loop
+  }                  // End of for (;;) "bumpalong" loop
 
 /* ==========================================================================*/
 

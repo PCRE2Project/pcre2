@@ -1450,7 +1450,7 @@ Returns:    pointer after the last byte of the line,
 static char *
 end_of_line(char *p, char *endptr, int *lenptr)
 {
-switch(endlinetype)
+switch (endlinetype)
   {
   default:      // Just in case
   case PCRE2_NEWLINE_LF:
@@ -1610,7 +1610,7 @@ Returns:    pointer to the start of the previous line
 static char *
 previous_line(char *p, char *startptr)
 {
-switch(endlinetype)
+switch (endlinetype)
   {
   default:      // Just in case
   case PCRE2_NEWLINE_LF:
@@ -1727,7 +1727,7 @@ Returns:    nothing
 static void
 write_final_newline(void)
 {
-switch(endlinetype)
+switch (endlinetype)
   {
   default:      // Just in case
   case PCRE2_NEWLINE_LF:
@@ -2195,7 +2195,7 @@ for (; *string != 0; string++)
   {
   if (*string == '$')
     {
-    switch(decode_dollar_escape(begin, string, callout, &value, &string))
+    switch (decode_dollar_escape(begin, string, callout, &value, &string))
       {
       case DDE_CHAR:
       if (value == STDOUT_NL_CODE)
@@ -3731,7 +3731,7 @@ return rc;
 static int
 handle_option(int letter, int options)
 {
-switch(letter)
+switch (letter)
   {
   case N_FOFFSETS: file_offsets = TRUE; break;
   case N_HELP: help(); pcre2grep_exit(0); break; // Stops compiler warning
@@ -3986,7 +3986,7 @@ while (TRUE)
   However, the -N option can be used to give pcre2grep a different newline
   setting. */
 
-  for(;;)
+  for (;;)
     {
     if (!compile_pattern(*patlastptr, pcre2_options, TRUE, filename,
         linenumber))

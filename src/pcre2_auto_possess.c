@@ -213,7 +213,7 @@ BOOL ok, rc;
 const uint32_t *p;
 const ucd_record *prop = GET_UCD(c);
 
-switch(ptype)
+switch (ptype)
   {
   case PT_LAMP:
   return (prop->chartype == ucp_Lu ||
@@ -246,7 +246,7 @@ switch(ptype)
 
   case PT_SPACE:    // Perl space
   case PT_PXSPACE:  // POSIX space
-  switch(c)
+  switch (c)
     {
     HSPACE_CASES:
     VSPACE_CASES:
@@ -368,7 +368,7 @@ if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
   list[1] = (c != OP_PLUS && c != OP_MINPLUS && c != OP_EXACT &&
              c != OP_POSPLUS);
 
-  switch(base)
+  switch (base)
     {
     case OP_STAR:
     list[0] = OP_CHAR;
@@ -394,7 +394,7 @@ if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
   c = list[0];
   }
 
-switch(c)
+switch (c)
   {
   case OP_NOT_DIGIT:
   case OP_DIGIT:
@@ -477,7 +477,7 @@ switch(c)
        }
      *clist_dest++ = *clist_src;
      }
-  while(*clist_src++ != NOTACHAR);
+  while (*clist_src++ != NOTACHAR);
 
   /* All characters are stored. The terminating NOTACHAR is copied from the
   clist itself. */
@@ -498,7 +498,7 @@ switch(c)
     end = code + 32 / sizeof(PCRE2_UCHAR);
   class_end = end;
 
-  switch(*end)
+  switch (*end)
     {
     case OP_CRSTAR:
     case OP_CRMINSTAR:
@@ -578,7 +578,7 @@ if (--(*rec_limit) <= 0) return FALSE;  // Recursion has gone too deep
 other character type lists, which store here that the character iterator
 matches to an empty string (also represented by a non-zero value). */
 
-for(;;)
+for (;;)
   {
   PCRE2_SPTR bracode;
 
@@ -611,7 +611,7 @@ for(;;)
 
   /* Inspect the next opcode. */
 
-  switch(c)
+  switch (c)
     {
     /* We can always possessify a greedy iterator at the end of the pattern,
     which is reached after skipping over the final OP_KET. A non-greedy
@@ -640,7 +640,7 @@ for(;;)
     are called by recursion.) */
 
     bracode = code - GET(code, 1);
-    switch(*bracode)
+    switch (*bracode)
       {
       case OP_CBRA:
       case OP_SCBRA:
@@ -788,7 +788,7 @@ for(;;)
       }
 
     invert_bits = FALSE;
-    switch(list_ptr[0])
+    switch (list_ptr[0])
       {
       case OP_CLASS:
       case OP_NCLASS:
@@ -898,7 +898,7 @@ for(;;)
         */
 
         n = propposstab[base_list[2]][list[2]];
-        switch(n)
+        switch (n)
           {
           case 0: break;
           case 1: accepted = bothprop; break;
@@ -996,7 +996,7 @@ for(;;)
     {
     chr = *chr_ptr;
 
-    switch(list_ptr[0])
+    switch (list_ptr[0])
       {
       case OP_CHAR:
       ochr_ptr = list_ptr + 2;
@@ -1005,7 +1005,7 @@ for(;;)
         if (chr == *ochr_ptr) return FALSE;
         ochr_ptr++;
         }
-      while(*ochr_ptr != NOTACHAR);
+      while (*ochr_ptr != NOTACHAR);
       break;
 
       case OP_NOT:
@@ -1016,7 +1016,7 @@ for(;;)
           break;
         ochr_ptr++;
         }
-      while(*ochr_ptr != NOTACHAR);
+      while (*ochr_ptr != NOTACHAR);
       if (*ochr_ptr == NOTACHAR) return FALSE;   // Not found
       break;
 
@@ -1048,7 +1048,7 @@ for(;;)
       break;
 
       case OP_HSPACE:
-      switch(chr)
+      switch (chr)
         {
         HSPACE_CASES: return FALSE;
         default: break;
@@ -1056,7 +1056,7 @@ for(;;)
       break;
 
       case OP_NOT_HSPACE:
-      switch(chr)
+      switch (chr)
         {
         HSPACE_CASES: break;
         default: return FALSE;
@@ -1065,7 +1065,7 @@ for(;;)
 
       case OP_ANYNL:
       case OP_VSPACE:
-      switch(chr)
+      switch (chr)
         {
         VSPACE_CASES: return FALSE;
         default: break;
@@ -1073,7 +1073,7 @@ for(;;)
       break;
 
       case OP_NOT_VSPACE:
-      switch(chr)
+      switch (chr)
         {
         VSPACE_CASES: break;
         default: return FALSE;
@@ -1142,7 +1142,7 @@ for(;;)
 
     chr_ptr++;
     }
-  while(*chr_ptr != NOTACHAR);
+  while (*chr_ptr != NOTACHAR);
 
   /* At least one character must be matched from this opcode. */
 
@@ -1209,7 +1209,7 @@ for (;;)
     if (end != NULL && compare_opcodes(end, utf, ucp, cb, list, end,
         &rec_limit))
       {
-      switch(c)
+      switch (c)
         {
         case OP_STAR:
         *code += OP_POSSTAR - OP_STAR;
@@ -1300,7 +1300,7 @@ for (;;)
     c = *code;
     }
 
-  switch(c)
+  switch (c)
     {
     case OP_END:
     return 0;
@@ -1354,7 +1354,7 @@ for (;;)
   we have to arrange to skip the extra code units. */
 
 #ifdef MAYBE_UTF_MULTI
-  if (utf) switch(c)
+  if (utf) switch (c)
     {
     case OP_CHAR:
     case OP_CHARI:
