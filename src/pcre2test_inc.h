@@ -5919,14 +5919,66 @@ ASSERT(rc == 0, "pcre2_set_max_pattern_compiled_length()");
 rc = pcre2_set_max_varlookbehind(test_pat_context, 0);
 ASSERT(rc == 0, "pcre2_set_max_varlookbehind()");
 
+
+/* test setting offset limit */
+rc = pcre2_set_offset_limit(test_dat_context, 999);
+ASSERT(rc == 0, "pcre2_set_offset_limit()");
+
+sizeval = 123;
+rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_offset_limit()");
+ASSERT(sizeval == 999, "pcre2_get_offset_limit()");
+
 rc = pcre2_set_offset_limit(test_dat_context, 0);
 ASSERT(rc == 0, "pcre2_set_offset_limit()");
 
+sizeval = 123;
+rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_offset_limit()");
+ASSERT(sizeval == 0, "pcre2_get_offset_limit()");
+
+
+/* test setting bsr */
 rc = pcre2_set_bsr(test_pat_context, 999);
 ASSERT(rc == PCRE2_ERROR_BADDATA, "pcre2_set_bsr()");
 
+rc = pcre2_set_bsr(test_pat_context, PCRE2_BSR_UNICODE);
+ASSERT(rc == 0, "pcre2_set_bsr()");
+
+uval = 123;
+rc = pcre2_get_bsr(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_bsr()");
+ASSERT(uval == PCRE2_BSR_UNICODE, "pcre2_get_bsr()");
+
+rc = pcre2_set_bsr(test_pat_context, PCRE2_BSR_ANYCRLF);
+ASSERT(rc == 0, "pcre2_set_bsr()");
+
+uval = 123;
+rc = pcre2_get_bsr(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_bsr()");
+ASSERT(uval == PCRE2_BSR_ANYCRLF, "pcre2_get_bsr()");
+
+
+/* test setting newline */
 rc = pcre2_set_newline(test_pat_context, 999);
 ASSERT(rc == PCRE2_ERROR_BADDATA, "pcre2_set_newline()");
+
+rc = pcre2_set_newline(test_pat_context, PCRE2_NEWLINE_CR);
+ASSERT(rc == 0, "pcre2_set_newline()");
+
+uval = 123;
+rc = pcre2_get_newline(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_newline()");
+ASSERT(uval == PCRE2_NEWLINE_CR, "pcre2_get_newline()");
+
+rc = pcre2_set_newline(test_pat_context, PCRE2_NEWLINE_ANYCRLF);
+ASSERT(rc == 0, "pcre2_set_newline()");
+
+uval = 123;
+rc = pcre2_get_newline(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_newline()");
+ASSERT(uval == PCRE2_NEWLINE_ANYCRLF, "pcre2_get_newline()");
+
 
 rc = pcre2_set_recursion_limit(test_dat_context, 10);
 ASSERT(rc == 0, "pcre2_set_recursion_limit()");
