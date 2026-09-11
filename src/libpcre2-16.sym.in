@@ -88,8 +88,6 @@ PCRE2_10.48 { } PCRE2_10.47;
 
 PCRE2_10.49 {
   global:
-
-@PCRE2_EXTRA_LOCAL_SYMS@
     pcre2_get_bsr_16;
     pcre2_get_depth_limit_16;
     pcre2_get_heap_limit_16;
