@@ -91,22 +91,27 @@ enum { POSIX_START_REGEX, POSIX_ANCHORED, POSIX_NOT_BRACKET,
 
 /* Literals that must be escaped: \ ? * + | . ^ $ { } [ ] ( ) */
 
+// clang-format off
 static const char *pcre2_escaped_literals =
   STR_BACKSLASH STR_QUESTION_MARK STR_ASTERISK STR_PLUS
   STR_VERTICAL_LINE STR_DOT STR_CIRCUMFLEX_ACCENT STR_DOLLAR_SIGN
   STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET
   STR_LEFT_SQUARE_BRACKET STR_RIGHT_SQUARE_BRACKET
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS;
+// clang-format on
 
 /* Recognized escaped metacharacters in POSIX basic patterns. */
 
+// clang-format off
 static const char *posix_meta_escapes =
   STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS
   STR_LEFT_CURLY_BRACKET STR_RIGHT_CURLY_BRACKET
   STR_1 STR_2 STR_3 STR_4 STR_5 STR_6 STR_7 STR_8 STR_9;
+// clang-format on
 
 /* Recognized POSIX classes, colon-separated. */
 
+// clang-format off
 static const char *posix_classes =
   STR_a STR_l STR_p STR_h STR_a STR_COLON
   STR_l STR_o STR_w STR_e STR_r STR_COLON
@@ -122,6 +127,7 @@ static const char *posix_classes =
   STR_s STR_p STR_a STR_c STR_e STR_COLON
   STR_w STR_o STR_r STR_d STR_COLON
   STR_x STR_d STR_i STR_g STR_i STR_t STR_COLON;
+// clang-format on
 
 
 

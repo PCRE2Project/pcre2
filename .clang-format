@@ -1,0 +1,70 @@
+---
+BasedOnStyle: Microsoft
+ContinuationIndentWidth: 4
+IndentWidth: 2
+ColumnLimit: 100
+MaxEmptyLinesToKeep: 3
+UseTab: Never
+
+AlignArrayOfStructures: None
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveMacros:
+  Enabled: true
+AlignEscapedNewlines: Left
+AlignOperands: DontAlign
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AttributeMacros : ['PCRE2_CALL_CONVENTION']
+BinPackArguments: true
+BinPackParameters: BinPack
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: false
+  AfterControlStatement: Always
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeWhile: true # Future: set to 'false' please
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
+BreakAfterReturnType: TopLevelDefinitions
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+Cpp11BracedListStyle: false
+IndentCaseBlocks: true
+IndentCaseLabels: false
+# Future - please set to - IndentPPDirectives: AfterHash
+InsertBraces: false
+InsertNewlineAtEOF: true
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+Macros:
+  - 'PCRE2_SUFFIX(x)=x'
+PointerAlignment: Right
+QualifierAlignment: Left
+ReflowComments: Never
+SeparateDefinitionBlocks: Leave
+SortIncludes: Never
+SpacesBeforeTrailingComments: 2
+SpacesInLineCommentPrefix:
+  Maximum: -1
+  Minimum: 1
+StatementMacros: ['PCRE2_FALLTHROUGH']

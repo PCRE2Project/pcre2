@@ -50,19 +50,23 @@ added to compile_error_texts in pcre2_error.c. Also, the error codes in
 pcre2.h.in must be updated - their values are exactly 100 greater than these
 values. */
 
-enum { ERR0 = COMPILE_ERROR_BASE,
-       ERR1,   ERR2,   ERR3,   ERR4,   ERR5,   ERR6,   ERR7,   ERR8,   ERR9,   ERR10,
-       ERR11,  ERR12,  ERR13,  ERR14,  ERR15,  ERR16,  ERR17,  ERR18,  ERR19,  ERR20,
-       ERR21,  ERR22,  ERR23,  ERR24,  ERR25,  ERR26,  ERR27,  ERR28,  ERR29,  ERR30,
-       ERR31,  ERR32,  ERR33,  ERR34,  ERR35,  ERR36,  ERR37,  ERR38,  ERR39,  ERR40,
-       ERR41,  ERR42,  ERR43,  ERR44,  ERR45,  ERR46,  ERR47,  ERR48,  ERR49,  ERR50,
-       ERR51,  ERR52,  ERR53,  ERR54,  ERR55,  ERR56,  ERR57,  ERR58,  ERR59,  ERR60,
-       ERR61,  ERR62,  ERR63,  ERR64,  ERR65,  ERR66,  ERR67,  ERR68,  ERR69,  ERR70,
-       ERR71,  ERR72,  ERR73,  ERR74,  ERR75,  ERR76,  ERR77,  ERR78,  ERR79,  ERR80,
-       ERR81,  ERR82,  ERR83,  ERR84,  ERR85,  ERR86,  ERR87,  ERR88,  ERR89,  ERR90,
-       ERR91,  ERR92,  ERR93,  ERR94,  ERR95,  ERR96,  ERR97,  ERR98,  ERR99,  ERR100,
-       ERR101, ERR102, ERR103, ERR104, ERR105, ERR106, ERR107, ERR108, ERR109, ERR110,
-       ERR111, ERR112, ERR113, ERR114, ERR115, ERR116, ERR117, ERR118, ERR119, ERR120 };
+enum {
+  // clang-format off
+  ERR0 = COMPILE_ERROR_BASE,
+  ERR1,   ERR2,   ERR3,   ERR4,   ERR5,   ERR6,   ERR7,   ERR8,   ERR9,   ERR10,
+  ERR11,  ERR12,  ERR13,  ERR14,  ERR15,  ERR16,  ERR17,  ERR18,  ERR19,  ERR20,
+  ERR21,  ERR22,  ERR23,  ERR24,  ERR25,  ERR26,  ERR27,  ERR28,  ERR29,  ERR30,
+  ERR31,  ERR32,  ERR33,  ERR34,  ERR35,  ERR36,  ERR37,  ERR38,  ERR39,  ERR40,
+  ERR41,  ERR42,  ERR43,  ERR44,  ERR45,  ERR46,  ERR47,  ERR48,  ERR49,  ERR50,
+  ERR51,  ERR52,  ERR53,  ERR54,  ERR55,  ERR56,  ERR57,  ERR58,  ERR59,  ERR60,
+  ERR61,  ERR62,  ERR63,  ERR64,  ERR65,  ERR66,  ERR67,  ERR68,  ERR69,  ERR70,
+  ERR71,  ERR72,  ERR73,  ERR74,  ERR75,  ERR76,  ERR77,  ERR78,  ERR79,  ERR80,
+  ERR81,  ERR82,  ERR83,  ERR84,  ERR85,  ERR86,  ERR87,  ERR88,  ERR89,  ERR90,
+  ERR91,  ERR92,  ERR93,  ERR94,  ERR95,  ERR96,  ERR97,  ERR98,  ERR99,  ERR100,
+  ERR101, ERR102, ERR103, ERR104, ERR105, ERR106, ERR107, ERR108, ERR109, ERR110,
+  ERR111, ERR112, ERR113, ERR114, ERR115, ERR116, ERR117, ERR118, ERR119, ERR120,
+  // clang-format on
+};
 
 /* Code values for parsed patterns, which are stored in a vector of 32-bit
 unsigned ints. Values less than META_END are literal data values. The coding
@@ -96,8 +100,7 @@ code (meta_extra_lengths) must be updated to remain in step. */
 #define META_COND_RNAME       0x80130000u  /* (?(R&name)... */
 #define META_COND_RNUMBER     0x80140000u  /* (?(Rdigits)... */
 #define META_COND_VERSION     0x80150000u  /* (?(VERSION<op>x.y)... */
-#define META_OFFSET           0x80160000u  /* Setting offset for various META
-                                              codes (e.g. META_CAPTURE_NAME) */
+#define META_OFFSET           0x80160000u  /* Position within subject */
 #define META_SCS              0x80170000u  /* (*scan_substring:... */
 #define META_CAPTURE_NAME     0x80180000u  /* Next <name> in capture lists */
 #define META_CAPTURE_NUMBER   0x80190000u  /* Next digits in capture lists */

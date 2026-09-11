@@ -395,8 +395,12 @@ static const char *incexname[4] = { "--include", "--exclude",
 
 /* Structure for options and list of them */
 
-enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER, OP_SIZE,
-       OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES };
+enum {
+  // clang-format off
+  OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER, OP_SIZE,
+  OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES,
+  // clang-format on
+};
 
 typedef struct option_item {
   int type;
@@ -3457,14 +3461,17 @@ if (zos_type == __ZOS_PDS || zos_type == __ZOS_PDSE)
 
 /* Handle a z/OS directory using common code. */
 
-else if (zos_type == __ZOS_HFS)
- {
 #endif  /* NATIVE_ZOS */
 
 
 /* Handle directories: common code for all OS */
 
-if (isdirectory(pathname))
+if (
+#if defined NATIVE_ZOS
+    zos_type == __ZOS_HFS &&
+#endif
+    isdirectory(pathname)
+  )
   {
   if (dee_action == dee_SKIP ||
       !test_incexc(lastcomp, include_dir_patterns, exclude_dir_patterns))
@@ -3510,25 +3517,25 @@ if (isdirectory(pathname))
       because that affects the output from pcre2grep. */
 
 #ifdef HAVE_REALPATH
-      {
-      char resolvedpath[PATH_MAX];
-      BOOL isSame;
-      size_t rlen;
-      if (realpath(childpath, resolvedpath) == NULL)
-        /* LCOV_EXCL_START - this is a "never" event */
-        continue;     // This path is invalid - we can skip processing this
-        /* LCOV_EXCL_STOP */
-      isSame = strcmp(pathname, resolvedpath) == 0;
-      if (isSame) continue;    // We have a recursion
-      rlen = strlen(resolvedpath);
-      if (rlen++ < sizeof(resolvedpath) - 3)
         {
-        BOOL contained;
-        strcat(resolvedpath, "/");
-        contained = strncmp(pathname, resolvedpath, rlen) == 0;
-        if (contained) continue;    // We have a recursion
+        char resolvedpath[PATH_MAX];
+        BOOL isSame;
+        size_t rlen;
+        if (realpath(childpath, resolvedpath) == NULL)
+          /* LCOV_EXCL_START - this is a "never" event */
+          continue;     // This path is invalid - we can skip processing this
+          /* LCOV_EXCL_STOP */
+        isSame = strcmp(pathname, resolvedpath) == 0;
+        if (isSame) continue;    // We have a recursion
+        rlen = strlen(resolvedpath);
+        if (rlen++ < sizeof(resolvedpath) - 3)
+          {
+          BOOL contained;
+          strcat(resolvedpath, "/");
+          contained = strncmp(pathname, resolvedpath, rlen) == 0;
+          if (contained) continue;    // We have a recursion
+          }
         }
-      }
 #endif  /* HAVE_REALPATH */
 
       frc = grep_or_recurse(childpath, dir_recurse, FALSE);
@@ -3542,7 +3549,7 @@ if (isdirectory(pathname))
   }
 
 #ifdef WIN32
-if (iswild(pathname))
+else if (iswild(pathname))
   {
   char buffer[1024];
   char *nextfile;
@@ -3581,10 +3588,6 @@ if (iswild(pathname))
   closedirectory(dir);
   return rc;
   }
-#endif
-
-#if defined NATIVE_ZOS
- }
 #endif
 
 /* If the file is not a directory, check for a regular file, and if it is not,

@@ -59,8 +59,14 @@ to stdout. */
 #include <string.h>
 #include <pcre2posix.h>
 
-#define CAPCOUNT 5               /* Number of captures supported */
-#define PRINTF if (v) printf     /* Shorthand for testing output */
+#define CAPCOUNT    5 /* Number of captures supported */
+#define PRINTF(...)   /* Shorthand for testing output */ \
+  do                                                     \
+  {                                                      \
+    if (v)                                               \
+      printf(__VA_ARGS__);                               \
+  }                                                      \
+  while (0)
 
 /* This vector contains compiler flags for each pattern that is tested. */
 
@@ -69,7 +75,7 @@ static int cflags[] = {
   REG_ICASE,   // Test 1
   0,           // Test 2
   REG_NEWLINE, // Test 3
-  0            // Test 4
+  0,           // Test 4
 };
 
 /* This vector contains match flags for each pattern that is tested. */
@@ -79,7 +85,7 @@ static int mflags[] = {
   0,           // Test 1
   0,           // Test 2
   REG_NOTBOL,  // Test 3
-  0            // Test 4
+  0,           // Test 4
 };
 
 /* Automate the number of patterns */
@@ -98,11 +104,13 @@ static const char *data4[] = { "*badpattern", NULL };
 /* Index the data strings */
 
 static char **data[] = {
+  // clang-format off
   (char **)(&data0_1),
   (char **)(&data0_1),
   (char **)(&data2_3),
   (char **)(&data2_3),
-  (char **)(&data4)
+  (char **)(&data4),
+  // clang-format on
 };
 
 /* The expected results for each pattern consist of a compiler return code,
@@ -152,11 +160,13 @@ static int results4[] = {
 /* Index the result vectors */
 
 static int *results[] = {
+  // clang-format off
   (int *)(&results0),
   (int *)(&results1),
   (int *)(&results2),
   (int *)(&results3),
-  (int *)(&results4)
+  (int *)(&results4),
+  // clang-format on
 };
 
 /* And here is the program */

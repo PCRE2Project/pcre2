@@ -1,0 +1,49 @@
+#! /usr/bin/env bash
+
+COMMIT=1b011400
+
+git reset src
+git checkout $COMMIT src
+
+files=`echo src/*.{h,c}` # `src/{pcre2_chkdint.c,pcre2_ord2utf.c,pcre2_config.c}`
+
+for file in $files; do
+  python3 maint/IndentBraces.py $file
+done
+
+git add -u src
+
+clang-format-20 --style=file:.clang-format -i $files
+
+# for file in $files; do
+#   python3 maint/DeindentBraces.py $file
+# done
+
+git checkout src/pcre2_uc* src/pcre2_jit_test.c
+git diff -U5 src/
+
+# git -c user.gpgsign=false -c user.name='github-actions[bot]' -c user.email='<41898282+github-actions[bot]@users.noreply.github.com>' commit -m'Bulk reformat: control keyword spacing'
+
+
+
+# THINGS TO CHECK, after it all lands:
+#
+# else-for statements (in general: if/else/while with bodies longer than one line)
+#   ```
+#   // It's not beautiful, but I think this is OK:
+#   if (a)
+#     if (a)
+#       c();
+#
+#   // This feels wrong though; if you contain braces, you need them too
+#   if (a)
+#     if (a)
+#     {
+#       c();
+#     }
+#   ```
+#
+# last scan for array initializations
+# enums as well!
+#
+# Totally splat pcre2_jit_test (Remove all tabs...)

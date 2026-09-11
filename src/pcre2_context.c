@@ -127,19 +127,19 @@ return gcontext;
 when no context is supplied to the compile function. */
 
 pcre2_compile_context PRIV(default_compile_context) = {
-  { default_malloc, default_free, NULL },    // Default memory handling
-  NULL,                                      // Stack guard
-  NULL,                                      // Stack guard data
-  PRIV(default_tables),                      // Character tables
-  PCRE2_UNSET,                               // Max pattern length
-  PCRE2_UNSET,                               // Max pattern compiled length
-  BSR_DEFAULT,                               // Backslash R default
-  NEWLINE_DEFAULT,                           // Newline convention
-  PARENS_NEST_LIMIT,                         // As it says
-  0,                                         // Extra options
-  MAX_VARLOOKBEHIND,                         // As it says
-  PCRE2_OPTIMIZATION_ALL                     // All optimizations enabled
-  };
+  { default_malloc, default_free, NULL },  // Default memory handling
+  NULL,                                    // Stack guard
+  NULL,                                    // Stack guard data
+  PRIV(default_tables),                    // Character tables
+  PCRE2_UNSET,                             // Max pattern length
+  PCRE2_UNSET,                             // Max pattern compiled length
+  BSR_DEFAULT,                             // Backslash R default
+  NEWLINE_DEFAULT,                         // Newline convention
+  PARENS_NEST_LIMIT,                       // As it says
+  0,                                       // Extra options
+  MAX_VARLOOKBEHIND,                       // As it says
+  PCRE2_OPTIMIZATION_ALL,                  // All optimizations enabled
+};
 
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */
@@ -175,7 +175,8 @@ pcre2_match_context PRIV(default_match_context) = {
   PCRE2_UNSET,   // Offset limit
   HEAP_LIMIT,
   MATCH_LIMIT,
-  MATCH_LIMIT_DEPTH };
+  MATCH_LIMIT_DEPTH,
+};
 
 /* The create function copies the default into the new memory, but must
 override the default memory handling functions if a gcontext was provided. */
@@ -200,10 +201,10 @@ pcre2_convert_context PRIV(default_convert_context) = {
   { default_malloc, default_free, NULL },    // Default memory handling
 #ifdef _WIN32
   CHAR_BACKSLASH,                            // Default path separator
-  CHAR_GRAVE_ACCENT                          // Default escape character
+  CHAR_GRAVE_ACCENT,                         // Default escape character
 #else  /* Not Windows */
   CHAR_SLASH,                                // Default path separator
-  CHAR_BACKSLASH                             // Default escape character
+  CHAR_BACKSLASH,                            // Default escape character
 #endif
   };
 
