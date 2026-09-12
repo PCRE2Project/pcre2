@@ -14,8 +14,9 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .SH DESCRIPTION
 .rs
 .sp
-This function gets the offset limit field in a match context. The result is
-zero in case of success and PCRE2_ERROR_NULL in case of a null pointer.
+This function gets the offset limit from a match context. The result is zero
+for success or PCRE2_ERROR_NULL if either argument is NULL. The largest value a
+PCRE2_SIZE variable can hold indicates that no offset limit is set.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

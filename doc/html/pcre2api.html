@@ -878,8 +878,10 @@ be changed by calling the following functions, which return 0 on success, or
 PCRE2_ERROR_BADDATA if invalid data is detected.
 </p>
 <p>
-The following functions get the values of the compile context parameters. They
-return 0 on success or PCRE2_ERROR_NULL if either argument is NULL.
+The following functions get, respectively, the convention for processing \R,
+the maximum pattern length, the newline convention, and the maximum depth of
+nested parentheses. They return 0 on success or PCRE2_ERROR_NULL if either
+argument is NULL.
 <br>
 <br>
 <b>int pcre2_get_bsr(pcre2_compile_context *<i>ccontext</i>,</b>
@@ -896,6 +898,11 @@ return 0 on success or PCRE2_ERROR_NULL if either argument is NULL.
 <br>
 <b>int pcre2_get_parens_nest_limit(pcre2_compile_context *<i>ccontext</i>,</b>
 <b>  uint32_t *<i>value</i>);</b>
+<br>
+<br>
+The value returned by <b>pcre2_get_max_pattern_length()</b> is the largest
+value a PCRE2_SIZE variable can hold when the limit is unlimited. Passing this
+value to <b>pcre2_set_max_pattern_length()</b> makes the limit unlimited.
 <br>
 <br>
 <b>int pcre2_set_bsr(pcre2_compile_context *<i>ccontext</i>,</b>
@@ -1158,8 +1165,9 @@ be changed by calling the following functions, which return 0 on success, or
 PCRE2_ERROR_BADDATA if invalid data is detected.
 </p>
 <p>
-The following functions get the values of the match context parameters. They
-return 0 on success or PCRE2_ERROR_NULL if either argument is NULL.
+The following functions get, respectively, the backtracking heap limit, match
+limit, depth limit, and offset limit. They return 0 on success or
+PCRE2_ERROR_NULL if either argument is NULL.
 <br>
 <br>
 <b>int pcre2_get_heap_limit(pcre2_match_context *<i>mcontext</i>,</b>
@@ -1176,6 +1184,11 @@ return 0 on success or PCRE2_ERROR_NULL if either argument is NULL.
 <br>
 <b>int pcre2_get_offset_limit(pcre2_match_context *<i>mcontext</i>,</b>
 <b>  PCRE2_SIZE *<i>value</i>);</b>
+<br>
+<br>
+The value returned by <b>pcre2_get_offset_limit()</b> is the largest value a
+PCRE2_SIZE variable can hold when there is no offset limit. Passing this value
+to <b>pcre2_set_offset_limit()</b> removes the offset limit.
 <br>
 <br>
 <b>int pcre2_set_callout(pcre2_match_context *<i>mcontext</i>,</b>

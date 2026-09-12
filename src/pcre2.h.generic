@@ -650,6 +650,14 @@ PCRE2_EXP_DECL pcre2_compile_context *PCRE2_CALL_CONVENTION \
   pcre2_compile_context_copy(pcre2_compile_context *); \
 PCRE2_EXP_DECL pcre2_compile_context *PCRE2_CALL_CONVENTION \
   pcre2_compile_context_create(pcre2_general_context *);\
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_bsr(pcre2_compile_context *, uint32_t*); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_max_pattern_length(pcre2_compile_context *, PCRE2_SIZE*); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_newline(pcre2_compile_context *, uint32_t*); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_parens_nest_limit(pcre2_compile_context *, uint32_t*); \
 PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
   pcre2_compile_context_free(pcre2_compile_context *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
@@ -675,6 +683,14 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_optimize(pcre2_compile_context *, uint32_t);
 
 #define PCRE2_MATCH_CONTEXT_FUNCTIONS \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_depth_limit(pcre2_match_context *, uint32_t*); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_heap_limit(pcre2_match_context *, uint32_t*); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_match_limit(pcre2_match_context *, uint32_t*); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_get_offset_limit(pcre2_match_context *, PCRE2_SIZE*); \
 PCRE2_EXP_DECL pcre2_match_context *PCRE2_CALL_CONVENTION \
   pcre2_match_context_copy(pcre2_match_context *); \
 PCRE2_EXP_DECL pcre2_match_context *PCRE2_CALL_CONVENTION \
@@ -930,16 +946,24 @@ pcre2_compile are called by application code. */
 #define pcre2_general_context_copy            PCRE2_SUFFIX(pcre2_general_context_copy_)
 #define pcre2_general_context_create          PCRE2_SUFFIX(pcre2_general_context_create_)
 #define pcre2_general_context_free            PCRE2_SUFFIX(pcre2_general_context_free_)
+#define pcre2_get_bsr                         PCRE2_SUFFIX(pcre2_get_bsr_)
+#define pcre2_get_depth_limit                 PCRE2_SUFFIX(pcre2_get_depth_limit_)
 #define pcre2_get_error_message               PCRE2_SUFFIX(pcre2_get_error_message_)
+#define pcre2_get_heap_limit                  PCRE2_SUFFIX(pcre2_get_heap_limit_)
 #define pcre2_get_mark                        PCRE2_SUFFIX(pcre2_get_mark_)
 #define pcre2_get_match_data_heapframes_size  PCRE2_SUFFIX(pcre2_get_match_data_heapframes_size_)
 #define pcre2_get_match_data_size             PCRE2_SUFFIX(pcre2_get_match_data_size_)
-#define pcre2_get_ovector_pointer             PCRE2_SUFFIX(pcre2_get_ovector_pointer_)
+#define pcre2_get_match_limit                 PCRE2_SUFFIX(pcre2_get_match_limit_)
+#define pcre2_get_max_pattern_length          PCRE2_SUFFIX(pcre2_get_max_pattern_length_)
+#define pcre2_get_newline                     PCRE2_SUFFIX(pcre2_get_newline_)
+#define pcre2_get_offset_limit                PCRE2_SUFFIX(pcre2_get_offset_limit_)
 #define pcre2_get_ovector_count               PCRE2_SUFFIX(pcre2_get_ovector_count_)
+#define pcre2_get_ovector_pointer             PCRE2_SUFFIX(pcre2_get_ovector_pointer_)
+#define pcre2_get_parens_nest_limit           PCRE2_SUFFIX(pcre2_get_parens_nest_limit_)
 #define pcre2_get_startchar                   PCRE2_SUFFIX(pcre2_get_startchar_)
 #define pcre2_jit_compile                     PCRE2_SUFFIX(pcre2_jit_compile_)
-#define pcre2_jit_match                       PCRE2_SUFFIX(pcre2_jit_match_)
 #define pcre2_jit_free_unused_memory          PCRE2_SUFFIX(pcre2_jit_free_unused_memory_)
+#define pcre2_jit_match                       PCRE2_SUFFIX(pcre2_jit_match_)
 #define pcre2_jit_stack_assign                PCRE2_SUFFIX(pcre2_jit_stack_assign_)
 #define pcre2_jit_stack_create                PCRE2_SUFFIX(pcre2_jit_stack_create_)
 #define pcre2_jit_stack_free                  PCRE2_SUFFIX(pcre2_jit_stack_free_)
@@ -969,13 +993,13 @@ pcre2_compile are called by application code. */
 #define pcre2_set_glob_separator              PCRE2_SUFFIX(pcre2_set_glob_separator_)
 #define pcre2_set_heap_limit                  PCRE2_SUFFIX(pcre2_set_heap_limit_)
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
-#define pcre2_set_max_varlookbehind           PCRE2_SUFFIX(pcre2_set_max_varlookbehind_)
-#define pcre2_set_max_pattern_length          PCRE2_SUFFIX(pcre2_set_max_pattern_length_)
 #define pcre2_set_max_pattern_compiled_length PCRE2_SUFFIX(pcre2_set_max_pattern_compiled_length_)
+#define pcre2_set_max_pattern_length          PCRE2_SUFFIX(pcre2_set_max_pattern_length_)
+#define pcre2_set_max_varlookbehind           PCRE2_SUFFIX(pcre2_set_max_varlookbehind_)
 #define pcre2_set_newline                     PCRE2_SUFFIX(pcre2_set_newline_)
-#define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
 #define pcre2_set_offset_limit                PCRE2_SUFFIX(pcre2_set_offset_limit_)
 #define pcre2_set_optimize                    PCRE2_SUFFIX(pcre2_set_optimize_)
+#define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
 #define pcre2_set_substitute_callout          PCRE2_SUFFIX(pcre2_set_substitute_callout_)
 #define pcre2_set_substitute_case_callout     PCRE2_SUFFIX(pcre2_set_substitute_case_callout_)
 #define pcre2_substitute                      PCRE2_SUFFIX(pcre2_substitute_)
@@ -986,8 +1010,8 @@ pcre2_compile are called by application code. */
 #define pcre2_substring_get_bynumber          PCRE2_SUFFIX(pcre2_substring_get_bynumber_)
 #define pcre2_substring_length_byname         PCRE2_SUFFIX(pcre2_substring_length_byname_)
 #define pcre2_substring_length_bynumber       PCRE2_SUFFIX(pcre2_substring_length_bynumber_)
-#define pcre2_substring_list_get              PCRE2_SUFFIX(pcre2_substring_list_get_)
 #define pcre2_substring_list_free             PCRE2_SUFFIX(pcre2_substring_list_free_)
+#define pcre2_substring_list_get              PCRE2_SUFFIX(pcre2_substring_list_get_)
 #define pcre2_substring_nametable_scan        PCRE2_SUFFIX(pcre2_substring_nametable_scan_)
 #define pcre2_substring_number_from_name      PCRE2_SUFFIX(pcre2_substring_number_from_name_)
 

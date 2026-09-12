@@ -18,7 +18,7 @@ This function sets, in a compile context, the maximum text length (in code
 units) of the pattern that can be compiled. The result is always zero. If a
 longer pattern is passed to \fBpcre2_compile()\fP there is an immediate error
 return. The default is effectively unlimited, being the largest value a
-PCRE2_SIZE variable can hold.
+PCRE2_SIZE variable can hold. Setting this value makes the limit unlimited.
 .P
 There is a complete description of the PCRE2 native API in the
 .\" HREF

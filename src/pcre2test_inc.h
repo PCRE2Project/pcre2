@@ -5948,6 +5948,46 @@ rc = pcre2_get_match_limit(test_dat_context, &uval);
 ASSERT(rc == 0, "pcre2_get_match_limit()");
 ASSERT(uval == MATCH_LIMIT, "pcre2_get_match_limit()");
 
+rc = pcre2_get_bsr(NULL, &uval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_bsr(null context)");
+rc = pcre2_get_bsr(test_pat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_bsr(null value)");
+
+rc = pcre2_get_max_pattern_length(NULL, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_max_pattern_length(null context)");
+rc = pcre2_get_max_pattern_length(test_pat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_max_pattern_length(null value)");
+
+rc = pcre2_get_newline(NULL, &uval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_newline(null context)");
+rc = pcre2_get_newline(test_pat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_newline(null value)");
+
+rc = pcre2_get_parens_nest_limit(NULL, &uval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_parens_nest_limit(null context)");
+rc = pcre2_get_parens_nest_limit(test_pat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_parens_nest_limit(null value)");
+
+rc = pcre2_get_offset_limit(NULL, &sizeval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_offset_limit(null context)");
+rc = pcre2_get_offset_limit(test_dat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_offset_limit(null value)");
+
+rc = pcre2_get_depth_limit(NULL, &uval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_depth_limit(null context)");
+rc = pcre2_get_depth_limit(test_dat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_depth_limit(null value)");
+
+rc = pcre2_get_heap_limit(NULL, &uval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_heap_limit(null context)");
+rc = pcre2_get_heap_limit(test_dat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_heap_limit(null value)");
+
+rc = pcre2_get_match_limit(NULL, &uval);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_match_limit(null context)");
+rc = pcre2_get_match_limit(test_dat_context, NULL);
+ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_match_limit(null value)");
+
 rc = pcre2_set_compile_extra_options(test_pat_context, 0);
 ASSERT(rc == 0, "pcre2_set_compile_extra_options()");
 
@@ -5977,6 +6017,14 @@ sizeval = 123;
 rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
 ASSERT(rc == 0, "pcre2_get_offset_limit()");
 ASSERT(sizeval == 0, "pcre2_get_offset_limit()");
+
+rc = pcre2_set_offset_limit(test_dat_context, PCRE2_UNSET);
+ASSERT(rc == 0, "pcre2_set_offset_limit()");
+
+sizeval = 123;
+rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_offset_limit()");
+ASSERT(sizeval == PCRE2_UNSET, "pcre2_get_offset_limit()");
 
 
 /* test setting bsr */
