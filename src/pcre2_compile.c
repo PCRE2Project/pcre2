@@ -510,11 +510,13 @@ static const short int escapes[] = {
 environment for characters 0-31. */
 
 static unsigned char ebcdic_escape_c[] = {
+  // clang-format off
   CHAR_COMMERCIAL_AT, CHAR_A, CHAR_B, CHAR_C, CHAR_D, CHAR_E, CHAR_F, CHAR_G,
   CHAR_H, CHAR_I, CHAR_J, CHAR_K, CHAR_L, CHAR_M, CHAR_N, CHAR_O, CHAR_P,
   CHAR_Q, CHAR_R, CHAR_S, CHAR_T, CHAR_U, CHAR_V, CHAR_W, CHAR_X, CHAR_Y,
   CHAR_Z, CHAR_LEFT_SQUARE_BRACKET, CHAR_BACKSLASH, CHAR_RIGHT_SQUARE_BRACKET,
   CHAR_CIRCUMFLEX_ACCENT, CHAR_UNDERSCORE
+  // clang-format on
 };
 
 #endif   /* EBCDIC */
@@ -532,6 +534,7 @@ typedef struct verbitem {
   int has_arg;               // Argument requirement
 } verbitem;
 
+// clang-format off
 static const char verbnames[] =
   "\0"                       // Empty name is a shorthand for MARK
   STRING_MARK0
@@ -542,8 +545,10 @@ static const char verbnames[] =
   STRING_PRUNE0
   STRING_SKIP0
   STRING_THEN;
+// clang-format on
 
 static const verbitem verbs[] = {
+  // clang-format off
   { 0, META_MARK,   +1 },  /* > 0 => must have an argument */
   { 4, META_MARK,   +1 },
   { 6, META_ACCEPT, -1 },  /* < 0 => Optional argument, convert to pre-MARK */
@@ -552,7 +557,8 @@ static const verbitem verbs[] = {
   { 6, META_COMMIT,  0 },
   { 5, META_PRUNE,   0 },  /* Optional argument; bump META code if found */
   { 4, META_SKIP,    0 },
-  { 4, META_THEN,    0 }
+  { 4, META_THEN,    0 },
+  // clang-format on
 };
 
 static const int verbcount = sizeof(verbs)/sizeof(verbitem);
@@ -560,8 +566,11 @@ static const int verbcount = sizeof(verbs)/sizeof(verbitem);
 /* Verb opcodes, indexed by their META code offset from META_MARK. */
 
 static const uint32_t verbops[] = {
+  // clang-format off
   OP_MARK, OP_ACCEPT, OP_FAIL, OP_COMMIT, OP_COMMIT_ARG, OP_PRUNE,
-  OP_PRUNE_ARG, OP_SKIP, OP_SKIP_ARG, OP_THEN, OP_THEN_ARG };
+  OP_PRUNE_ARG, OP_SKIP, OP_SKIP_ARG, OP_THEN, OP_THEN_ARG,
+  // clang-format on
+};
 
 /* Table of "alpha assertions" like (*pla:...), similar to the (*VERB) table. */
 
@@ -570,6 +579,7 @@ typedef struct alasitem {
   uint32_t meta;             // Base META_ code
 } alasitem;
 
+// clang-format off
 static const char alasnames[] =
   STRING_pla0
   STRING_plb0
@@ -590,8 +600,10 @@ static const char alasnames[] =
   STRING_asr0
   STRING_script_run0
   STRING_atomic_script_run;
+// clang-format on
 
 static const alasitem alasmeta[] = {
+  // clang-format off
   {  3, META_LOOKAHEAD         },
   {  3, META_LOOKBEHIND        },
   {  5, META_LOOKAHEAD_NA      },
@@ -610,7 +622,8 @@ static const alasitem alasmeta[] = {
   {  2, META_SCRIPT_RUN        },  /* sr = script run */
   {  3, META_ATOMIC_SCRIPT_RUN },  /* asr = atomic script run */
   { 10, META_SCRIPT_RUN        },  /* script run */
-  { 17, META_ATOMIC_SCRIPT_RUN }   /* atomic script run */
+  { 17, META_ATOMIC_SCRIPT_RUN },  /* atomic script run */
+  // clang-format on
 };
 
 static const int alascount = sizeof(alasmeta)/sizeof(alasitem);
@@ -618,8 +631,11 @@ static const int alascount = sizeof(alasmeta)/sizeof(alasitem);
 /* Offsets from OP_STAR for case-independent and negative repeat opcodes. */
 
 static uint32_t chartypeoffset[] = {
-  OP_STAR - OP_STAR,    OP_STARI - OP_STAR,
-  OP_NOTSTAR - OP_STAR, OP_NOTSTARI - OP_STAR };
+  OP_STAR - OP_STAR,
+  OP_STARI - OP_STAR,
+  OP_NOTSTAR - OP_STAR,
+  OP_NOTSTARI - OP_STAR,
+};
 
 /* Tables of names of POSIX character classes and their lengths. The names are
 now all in a single string, to reduce the number of relocations when a shared
@@ -631,11 +647,13 @@ The indices for several classes are stored in pcre2_compile.h - these must
 be kept in sync with posix_names, posix_name_lengths, posix_class_maps,
 and posix_substitutes. */
 
+// clang-format off
 static const char posix_names[] =
   STRING_alpha0 STRING_lower0 STRING_upper0 STRING_alnum0
   STRING_ascii0 STRING_blank0 STRING_cntrl0 STRING_digit0
   STRING_graph0 STRING_print0 STRING_punct0 STRING_space0
   STRING_word0  STRING_xdigit;
+// clang-format on
 
 static const uint8_t posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
@@ -751,29 +769,31 @@ typedef struct pso {
 /* NB: STRING_UTFn_RIGHTPAR contains the length as well */
 
 static const pso pso_list[] = {
-  { STRING_UTFn_RIGHTPAR,                  PSO_OPT, PCRE2_UTF },
-  { STRING_UTF_RIGHTPAR,                4, PSO_OPT, PCRE2_UTF },
-  { STRING_UCP_RIGHTPAR,                4, PSO_OPT, PCRE2_UCP },
-  { STRING_NOTEMPTY_RIGHTPAR,           9, PSO_FLG, PCRE2_NOTEMPTY_SET },
-  { STRING_NOTEMPTY_ATSTART_RIGHTPAR,  17, PSO_FLG, PCRE2_NE_ATST_SET },
-  { STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPTMZ, PCRE2_OPTIM_AUTO_POSSESS },
-  { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPTMZ, PCRE2_OPTIM_DOTSTAR_ANCHOR },
-  { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
-  { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPTMZ, PCRE2_OPTIM_START_OPTIMIZE },
-  { STRING_CASELESS_RESTRICT_RIGHTPAR, 18, PSO_XOPT, PCRE2_EXTRA_CASELESS_RESTRICT },
-  { STRING_TURKISH_CASING_RIGHTPAR,    15, PSO_XOPT, PCRE2_EXTRA_TURKISH_CASING },
-  { STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
-  { STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
-  { STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
-  { STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMD, 0 },
-  { STRING_CR_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_CR },
-  { STRING_LF_RIGHTPAR,                 3, PSO_NL,  PCRE2_NEWLINE_LF },
-  { STRING_CRLF_RIGHTPAR,               5, PSO_NL,  PCRE2_NEWLINE_CRLF },
-  { STRING_ANY_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_ANY },
-  { STRING_NUL_RIGHTPAR,                4, PSO_NL,  PCRE2_NEWLINE_NUL },
-  { STRING_ANYCRLF_RIGHTPAR,            8, PSO_NL,  PCRE2_NEWLINE_ANYCRLF },
-  { STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_ANYCRLF },
-  { STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR, PCRE2_BSR_UNICODE }
+  // clang-format off
+  { STRING_UTFn_RIGHTPAR,                  PSO_OPT,   PCRE2_UTF                     },
+  { STRING_UTF_RIGHTPAR,                4, PSO_OPT,   PCRE2_UTF                     },
+  { STRING_UCP_RIGHTPAR,                4, PSO_OPT,   PCRE2_UCP                     },
+  { STRING_NOTEMPTY_RIGHTPAR,           9, PSO_FLG,   PCRE2_NOTEMPTY_SET            },
+  { STRING_NOTEMPTY_ATSTART_RIGHTPAR,  17, PSO_FLG,   PCRE2_NE_ATST_SET             },
+  { STRING_NO_AUTO_POSSESS_RIGHTPAR,   16, PSO_OPTMZ, PCRE2_OPTIM_AUTO_POSSESS      },
+  { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPTMZ, PCRE2_OPTIM_DOTSTAR_ANCHOR    },
+  { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG,   PCRE2_NOJIT                   },
+  { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPTMZ, PCRE2_OPTIM_START_OPTIMIZE    },
+  { STRING_CASELESS_RESTRICT_RIGHTPAR, 18, PSO_XOPT,  PCRE2_EXTRA_CASELESS_RESTRICT },
+  { STRING_TURKISH_CASING_RIGHTPAR,    15, PSO_XOPT,  PCRE2_EXTRA_TURKISH_CASING    },
+  { STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH,  0                             },
+  { STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM,  0                             },
+  { STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD,  0                             },
+  { STRING_LIMIT_RECURSION_EQ,         16, PSO_LIMD,  0                             },
+  { STRING_CR_RIGHTPAR,                 3, PSO_NL,    PCRE2_NEWLINE_CR              },
+  { STRING_LF_RIGHTPAR,                 3, PSO_NL,    PCRE2_NEWLINE_LF              },
+  { STRING_CRLF_RIGHTPAR,               5, PSO_NL,    PCRE2_NEWLINE_CRLF            },
+  { STRING_ANY_RIGHTPAR,                4, PSO_NL,    PCRE2_NEWLINE_ANY             },
+  { STRING_NUL_RIGHTPAR,                4, PSO_NL,    PCRE2_NEWLINE_NUL             },
+  { STRING_ANYCRLF_RIGHTPAR,            8, PSO_NL,    PCRE2_NEWLINE_ANYCRLF         },
+  { STRING_BSR_ANYCRLF_RIGHTPAR,       12, PSO_BSR,   PCRE2_BSR_ANYCRLF             },
+  { STRING_BSR_UNICODE_RIGHTPAR,       12, PSO_BSR,   PCRE2_BSR_UNICODE             },
+  // clang-format on
 };
 
 /* This table is used when converting repeating opcodes into possessified
