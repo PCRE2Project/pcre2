@@ -106,7 +106,7 @@
 #            targets.
 
 ################################################################################
-# We have used `gersemi` for auto-formatting our CMake files.
+# We use `gersemi` for auto-formatting our CMake files.
 # Applied to all CMake files using:
 #    > pip3 install gersemi
 #    > gersemi --in-place --line-length 120 --indent 2 \
@@ -405,14 +405,17 @@ if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
 
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
-  set(_jit_test_source "
+  set(
+    _jit_test_source
+    "
     #define SLJIT_CONFIG_AUTO 1
     #include \"./sljit_src/sljitConfigCPU.h\"
     #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
     #error unsupported
     #endif
     int main(void) { return 0; }
-  ")
+  "
+  )
   check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
   cmake_pop_check_state()
 
@@ -769,11 +772,9 @@ file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 # Parse version numbers and date out of configure.ac
 
 file(
-  STRINGS
-  ${PROJECT_SOURCE_DIR}/configure.ac
+  STRINGS ${PROJECT_SOURCE_DIR}/configure.ac
   configure_lines
-  LIMIT_COUNT
-    50 # Read only the first 50 lines of the file
+  LIMIT_COUNT 50 # Read only the first 50 lines of the file
 )
 
 set(
@@ -1372,8 +1373,7 @@ if(PCRE2_BUILD_TESTS)
   # Write out a CTest configuration file
   #
   file(
-    WRITE
-    ${PROJECT_BINARY_DIR}/CTestCustom.ctest
+    WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
     "# This is a generated file.
 MESSAGE(\"When testing is complete, review test output in the
 \\\"${PROJECT_BINARY_DIR}/Testing/Temporary\\\" folder.\")
@@ -1381,118 +1381,55 @@ MESSAGE(\" \")
 "
   )
 
-  file(
-    WRITE
-    ${PROJECT_BINARY_DIR}/pcre2_test.sh
-    "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcre2test=${PROJECT_BINARY_DIR}/pcre2test
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2test=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2test
-. ${PROJECT_SOURCE_DIR}/RunTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-"
-  )
+  find_package(Python3 3.7 COMPONENTS Interpreter)
 
-  if(UNIX)
-    add_test(pcre2_test sh ${PROJECT_BINARY_DIR}/pcre2_test.sh)
+  if(Python3_FOUND)
+    add_test(
+      NAME pcre2_test
+      COMMAND
+        Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunTest.py" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test
+        "$<TARGET_FILE:pcre2test>"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
+  elseif(UNIX)
+    add_test(
+      NAME pcre2_test
+      COMMAND sh "${PROJECT_SOURCE_DIR}/RunTest" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test "$<TARGET_FILE:pcre2test>"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
+  else()
+    message(FATAL_ERROR "Neither Python nor shell support found for pcre2_test")
   endif()
 
   if(PCRE2_BUILD_PCRE2GREP)
-    file(
-      WRITE
-      ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh
-      "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcre2grep=${PROJECT_BINARY_DIR}/pcre2grep
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2grep=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2grep
-pcre2test=${PROJECT_BINARY_DIR}/pcre2test
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2test=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2test
-. ${PROJECT_SOURCE_DIR}/RunGrepTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-"
-    )
+    if(Python3_FOUND)
+      add_test(
+        NAME pcre2_grep_test
+        COMMAND
+          Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunGrepTest.py" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test
+          "$<TARGET_FILE:pcre2test>" --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      )
+    elseif(UNIX)
+      add_test(
+        NAME pcre2_grep_test
+        COMMAND
+          sh "${PROJECT_SOURCE_DIR}/RunGrepTest" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test "$<TARGET_FILE:pcre2test>"
+          --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      )
+    else()
+      message(FATAL_ERROR "Neither Python nor shell support found for pcre2_grep_test")
+    endif()
 
-    if(UNIX)
-      add_test(pcre2_grep_test sh ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
-
-      if(PCRE2_EBCDIC)
-        # The grep tests currently fail in EBCDIC mode because the test data
-        # files are in ASCII. This could be fixed properly, but for now, we
-        # have very few EBCDIC users and the pcre2grep utility is hardly even
-        # part of the official project artifacts.
-        set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
-      endif()
+    if(PCRE2_EBCDIC)
+      # The grep tests currently fail in EBCDIC mode because the test data
+      # files are in ASCII. This could be fixed properly, but for now, we
+      # have very few EBCDIC users and the pcre2grep utility is hardly even
+      # part of the official project artifacts.
+      set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
     endif()
   endif()
-
-  if(WIN32)
-    # Provide environment for executing the bat file version of RunTest
-    file(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR} winsrc)
-    file(TO_NATIVE_PATH ${PROJECT_BINARY_DIR} winbin)
-
-    file(
-      WRITE
-      ${PROJECT_BINARY_DIR}/pcre2_test.bat
-      "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winbin}\\pcre2test.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
-call %srcdir%\\RunTest.bat
-if errorlevel 1 exit /b 1
-echo RunTest.bat tests successfully completed
-"
-    )
-
-    add_test(NAME pcre2_test_bat COMMAND pcre2_test.bat)
-    set_tests_properties(pcre2_test_bat PROPERTIES PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
-
-    if(PCRE2_BUILD_PCRE2GREP)
-      file(
-        WRITE
-        ${PROJECT_BINARY_DIR}/pcre2_grep_test.bat
-        "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winbin}\\pcre2test.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
-SET pcre2grep=\"${winbin}\\pcre2grep.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2grep=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2grep.exe\"
-call %srcdir%\\RunGrepTest.bat
-if errorlevel 1 exit /b 1
-echo RunGrepTest.bat tests successfully completed
-"
-      )
-
-      add_test(NAME pcre2_grep_test_bat COMMAND pcre2_grep_test.bat)
-      set_tests_properties(
-        pcre2_grep_test_bat
-        PROPERTIES PASS_REGULAR_EXPRESSION "RunGrepTest\\.bat tests successfully completed"
-      )
-    endif()
-
-    if(DEFINED ENV{OSTYPE})
-      if("$ENV{OSTYPE}" STREQUAL "msys")
-        set(MSYS2 TRUE)
-      endif()
-    endif()
-    if(MSYS2)
-      # Both the sh and bat file versions of RunTest are run if make test is used
-      # in msys
-      add_test(pcre2_test_sh sh.exe ${PROJECT_BINARY_DIR}/pcre2_test.sh)
-      if(PCRE2_BUILD_PCRE2GREP)
-        add_test(pcre2_grep_test sh.exe ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
-      endif()
-    endif()
-  endif()
-
-  # Changed to accommodate testing whichever location was just built
 
   if(PCRE2_SUPPORT_JIT_DETECTED)
     add_test(pcre2_jit_test pcre2_jit_test)
@@ -1589,11 +1526,7 @@ install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
 install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(MSVC AND INSTALL_MSVC_PDB)
-  install(
-    FILES ${DLL_PDB_FILES}
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    CONFIGURATIONS Debug RelWithDebInfo
-  )
+  install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
 endif()
 
 # Help, only for nice output
@@ -1648,7 +1581,10 @@ if(PCRE2_SHOW_REPORT)
   message(STATUS "  Build 32 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
   message(STATUS "  Include debugging code ............ : ${PCRE2_DEBUG}")
   if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
-    message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT} (detected: ${PCRE2_SUPPORT_JIT_DETECTED})")
+    message(
+      STATUS
+      "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT} (detected: ${PCRE2_SUPPORT_JIT_DETECTED})"
+    )
   else()
     message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
   endif()

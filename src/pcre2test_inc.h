@@ -630,18 +630,21 @@ check_modifier(modstruct *m, int ctx, patctl *pctl, datctl *dctl, uint32_t c)
 void *field = NULL;
 PCRE2_SIZE offset = m->offset;
 
-if (restrict_for_perl_test) switch (m->which)
+if (restrict_for_perl_test)
   {
-  case MOD_PNDP:
-  case MOD_PATP:
-  case MOD_DATP:
-  case MOD_PDP:
-  break;
+  switch (m->which)
+    {
+    case MOD_PNDP:
+    case MOD_PATP:
+    case MOD_DATP:
+    case MOD_PDP:
+    break;
 
-  default:
-  cfprintf(clr_test_error, outfile, "** \"%s\" is not allowed in a Perl-compatible test\n",
-    m->name);
-  return NULL;
+    default:
+    cfprintf(clr_test_error, outfile, "** \"%s\" is not allowed in a Perl-compatible test\n",
+      m->name);
+    return NULL;
+    }
   }
 
 switch (m->which)
@@ -2365,25 +2368,28 @@ if (pat_patctl.locale[0] != MOD_STR_UNSET)
   use_tables = locale_tables;
   }
 
-else switch (pat_patctl.tables_id)
+else
   {
-  case 0: use_tables = NULL; break;
-  case 1: use_tables = tables1; break;
-  case 2: use_tables = tables2; break;
-
-  case 3:
-  if (tables3 == NULL)
+  switch (pat_patctl.tables_id)
     {
-    cfprintf(clr_test_error, outfile, "** 'Tables = 3' is invalid: binary tables have not "
-      "been loaded\n");
+    case 0: use_tables = NULL; break;
+    case 1: use_tables = tables1; break;
+    case 2: use_tables = tables2; break;
+
+    case 3:
+    if (tables3 == NULL)
+      {
+      cfprintf(clr_test_error, outfile, "** 'Tables = 3' is invalid: binary tables have not "
+        "been loaded\n");
+      return PR_SKIP;
+      }
+    use_tables = tables3;
+    break;
+
+    default:
+    cfprintf(clr_test_error, outfile, "** 'Tables' must specify 0, 1, 2, or 3.\n");
     return PR_SKIP;
     }
-  use_tables = tables3;
-  break;
-
-  default:
-  cfprintf(clr_test_error, outfile, "** 'Tables' must specify 0, 1, 2, or 3.\n");
-  return PR_SKIP;
   }
 
 pcre2_set_character_tables(pat_context, use_tables);
@@ -4133,152 +4139,155 @@ while ((c = *p++) != 0)
 
   /* Handle backslash escapes */
 
-  else switch ((c = *p++))
+  else
     {
-    case '\\': break;
-    case 'a': c = '\a'; break;
-    case 'b': c = '\b'; break;
-#if defined(EBCDIC) && !EBCDIC_IO
-    /* \e is the odd one out since it's not defined in the C standard,
-    precisely because of EBCDIC (apparently EBCDIC 'ESC' character isn't
-    an exact match to Latin-1 'ESC', hence '\e' isn't necessarily
-    supported by EBCDIC compilers). */
-    case 'e': c = '\x1b'; break;
-#else
-    case 'e': c = CHAR_ESC; break;
-#endif
-    case 'f': c = '\f'; break;
-    case 'n': c = '\n'; break;
-    case 'r': c = '\r'; break;
-    case 't': c = '\t'; break;
-    case 'v': c = '\v'; break;
-
-    case '0': case '1': case '2': case '3':
-    case '4': case '5': case '6': case '7':
-    c -= '0';
-    while (i++ < 2 && *p >= '0' && *p < '8')
-      c = c * 8 + (*p++ - '0');
-    c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
-
-    encoding = (utf && c > 255)? FORCE_UTF : FORCE_RAW;
-    break;
-
-    case 'o':
-    if (*p == '{')
+    switch ((c = *p++))
       {
-      uint8_t *pt = p;
-      c = 0;
-      for (pt++; isdigit(*pt) && *pt < '8'; ++i, pt++)
+      case '\\': break;
+      case 'a': c = '\a'; break;
+      case 'b': c = '\b'; break;
+#if defined(EBCDIC) && !EBCDIC_IO
+      /* \e is the odd one out since it's not defined in the C standard,
+      precisely because of EBCDIC (apparently EBCDIC 'ESC' character isn't
+      an exact match to Latin-1 'ESC', hence '\e' isn't necessarily
+      supported by EBCDIC compilers). */
+      case 'e': c = '\x1b'; break;
+#else
+      case 'e': c = CHAR_ESC; break;
+#endif
+      case 'f': c = '\f'; break;
+      case 'n': c = '\n'; break;
+      case 'r': c = '\r'; break;
+      case 't': c = '\t'; break;
+      case 'v': c = '\v'; break;
+
+      case '0': case '1': case '2': case '3':
+      case '4': case '5': case '6': case '7':
+      c -= '0';
+      while (i++ < 2 && *p >= '0' && *p < '8')
+        c = c * 8 + (*p++ - '0');
+      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
+
+      encoding = (utf && c > 255)? FORCE_UTF : FORCE_RAW;
+      break;
+
+      case 'o':
+      if (*p == '{')
         {
-        if (c >= 0x20000000u)
+        uint8_t *pt = p;
+        c = 0;
+        for (pt++; isdigit(*pt) && *pt < '8'; ++i, pt++)
           {
-          cfprintf(clr_test_error, outfile, "** \\o{ escape too large\n");
+          if (c >= 0x20000000u)
+            {
+            cfprintf(clr_test_error, outfile, "** \\o{ escape too large\n");
+            return PR_OK;
+            }
+          else c = c * 8 + (*pt - '0');
+          }
+        c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
+        if (i == 0 || *pt != '}')
+          {
+          cfprintf(clr_test_error, outfile, "** Malformed \\o{ escape\n");
           return PR_OK;
           }
-        else c = c * 8 + (*pt - '0');
+        else p = pt + 1;
         }
-      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
-      if (i == 0 || *pt != '}')
+      break;
+
+      case 'x':
+      c = 0;
+      if (*p == '{')
         {
-        cfprintf(clr_test_error, outfile, "** Malformed \\o{ escape\n");
-        return PR_OK;
-        }
-      else p = pt + 1;
-      }
-    break;
+        uint8_t *pt = p;
 
-    case 'x':
-    c = 0;
-    if (*p == '{')
-      {
-      uint8_t *pt = p;
+        /* We used to have "while (isxdigit(*(++pt)))" here, but it fails
+        when isxdigit() is a macro that refers to its argument more than
+        once. This is banned by the C Standard, but apparently happens in at
+        least one macOS environment. */
 
-      /* We used to have "while (isxdigit(*(++pt)))" here, but it fails
-      when isxdigit() is a macro that refers to its argument more than
-      once. This is banned by the C Standard, but apparently happens in at
-      least one macOS environment. */
-
-      for (pt++; isxdigit(*pt); pt++)
-        {
-        if (++i == 9)
+        for (pt++; isxdigit(*pt); pt++)
           {
-          cfprintf(clr_test_error, outfile, "** Too many hex digits in \\x{...} item; "
-                           "using only the first eight.\n");
-          while (isxdigit(*pt)) pt++;
+          if (++i == 9)
+            {
+            cfprintf(clr_test_error, outfile, "** Too many hex digits in \\x{...} item; "
+                            "using only the first eight.\n");
+            while (isxdigit(*pt)) pt++;
+            break;
+            }
+          else c = c * 16 + (tolower(*pt) - (isdigit(*pt)? '0' : 'a' - 10));
+          }
+        c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
+        if (i == 0 || *pt != '}')
+          {
+          cfprintf(clr_test_error, outfile, "** Malformed \\x{ escape\n");
+          return PR_OK;
+          }
+        else p = pt + 1;
+        }
+      else
+        {
+        /* \x without {} always defines just one byte in 8-bit mode. This
+        allows UTF-8 characters to be constructed byte by byte, and also allows
+        invalid UTF-8 sequences to be made. Just copy the byte in UTF-8 mode.
+        Otherwise, pass it down as data. */
+
+        while (i++ < 2 && isxdigit(*p))
+          {
+          c = c * 16 + (tolower(*p) - (isdigit(*p)? '0' : 'a' - 10));
+          p++;
+          }
+        c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
+#if PCRE2_CODE_UNIT_WIDTH == 8
+        if (utf) encoding = FORCE_RAW;
+#endif
+        }
+      break;
+
+      case 'N':
+#ifndef EBCDIC
+      if (memcmp(p, "{U+", 3) == 0 && isxdigit(p[3]))
+        {
+        char *endptr;
+        unsigned long uli;
+
+        p += 3;
+        errno = 0;
+        uli = strtoul((const char *)p, &endptr, 16);
+        if (errno == 0 && *endptr == '}' && uli <= UINT32_MAX)
+          {
+          c = (uint32_t)uli;
+          p = (uint8_t *)endptr + 1;
+          encoding = FORCE_UTF;
           break;
           }
-        else c = c * 16 + (tolower(*pt) - (isdigit(*pt)? '0' : 'a' - 10));
         }
-      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
-      if (i == 0 || *pt != '}')
+#endif
+      cfprintf(clr_test_error, outfile, "** Malformed \\N{U+ escape\n");
+      return PR_OK;
+
+      case 0:     // \ followed by EOF allows for an empty line
+      p--;
+      continue;
+
+      case '=':   // \= terminates the data, starts modifiers
+      goto ENDSTRING;
+
+      case '[':   // \[ introduces a replicated character sequence
+      if (start_rep != NULL)
         {
-        cfprintf(clr_test_error, outfile, "** Malformed \\x{ escape\n");
+        cfprintf(clr_test_error, outfile, "** Nested replication is not supported\n");
         return PR_OK;
         }
-      else p = pt + 1;
-      }
-    else
-      {
-      /* \x without {} always defines just one byte in 8-bit mode. This
-      allows UTF-8 characters to be constructed byte by byte, and also allows
-      invalid UTF-8 sequences to be made. Just copy the byte in UTF-8 mode.
-      Otherwise, pass it down as data. */
+      start_rep = q;
+      continue;
 
-      while (i++ < 2 && isxdigit(*p))
+      default:
+      if (isalnum(c))
         {
-        c = c * 16 + (tolower(*p) - (isdigit(*p)? '0' : 'a' - 10));
-        p++;
+        cfprintf(clr_test_error, outfile, "** Unrecognized escape sequence \"\\%c\"\n", c);
+        return PR_OK;
         }
-      c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
-#if PCRE2_CODE_UNIT_WIDTH == 8
-      if (utf) encoding = FORCE_RAW;
-#endif
-      }
-    break;
-
-    case 'N':
-#ifndef EBCDIC
-    if (memcmp(p, "{U+", 3) == 0 && isxdigit(p[3]))
-      {
-      char *endptr;
-      unsigned long uli;
-
-      p += 3;
-      errno = 0;
-      uli = strtoul((const char *)p, &endptr, 16);
-      if (errno == 0 && *endptr == '}' && uli <= UINT32_MAX)
-        {
-        c = (uint32_t)uli;
-        p = (uint8_t *)endptr + 1;
-        encoding = FORCE_UTF;
-        break;
-        }
-      }
-#endif
-    cfprintf(clr_test_error, outfile, "** Malformed \\N{U+ escape\n");
-    return PR_OK;
-
-    case 0:     // \ followed by EOF allows for an empty line
-    p--;
-    continue;
-
-    case '=':   // \= terminates the data, starts modifiers
-    goto ENDSTRING;
-
-    case '[':   // \[ introduces a replicated character sequence
-    if (start_rep != NULL)
-      {
-      cfprintf(clr_test_error, outfile, "** Nested replication is not supported\n");
-      return PR_OK;
-      }
-    start_rep = q;
-    continue;
-
-    default:
-    if (isalnum(c))
-      {
-      cfprintf(clr_test_error, outfile, "** Unrecognized escape sequence \"\\%c\"\n", c);
-      return PR_OK;
       }
     }
 
@@ -4698,13 +4707,14 @@ oveccount = pcre2_get_ovector_count(match_data);
 /* Helper to clear any cached heap frames from the match_data. */
 
 #define CLEAR_HEAP_FRAMES() \
-  do { \
-     void *heapframes = (void *)(match_data->heapframes); \
-     void *memory_data = match_data->memctl.memory_data; \
-     match_data->memctl.free(heapframes, memory_data); \
-     match_data->heapframes = NULL; \
-     match_data->heapframes_size = 0; \
-     } \
+  do \
+    { \
+    void *heapframes = (void *)(match_data->heapframes); \
+    void *memory_data = match_data->memctl.memory_data; \
+    match_data->memctl.free(heapframes, memory_data); \
+    match_data->heapframes = NULL; \
+    match_data->heapframes_size = 0; \
+    } \
   while (0)
 
 /* Replacement processing is ignored for DFA matching. Allow this for
@@ -5783,14 +5793,18 @@ memset(&test_preg, 0, sizeof(test_preg));
 
 #if defined PCRE2_DEBUG && !defined NDEBUG
 #define ASSERT(cond, msg) \
-  do { \
+  do \
+    { \
     if (!(cond)) { failure = msg " at " __FILE__ ":" STR(__LINE__); goto EXIT; } \
-  } while (0)
+    } \
+  while (0)
 #else
 #define ASSERT(cond, msg) \
-  do { \
+  do \
+    { \
     if (!(cond)) { failure = msg; goto EXIT; } \
-  } while (0)
+    } \
+  while (0)
 #endif
 
 /* -------------------------- pcre2_config --------------------------------- */

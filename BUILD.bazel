@@ -1,6 +1,11 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@bazel_skylib//rules:native_binary.bzl", "native_test")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_python//python:defs.bzl", "py_test")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+# We use `buildifier` for auto-formatting our Bazel files.
+# Applied to all Bazel files using:
+#    > buildifier --lint=warn *.bazel
 
 copy_file(
     name = "config_h_generic",
@@ -94,15 +99,15 @@ cc_library(
         ":pcre2_chartables_c",
     ],
     hdrs = [":pcre2_h_generic"],
-    implementation_deps = [":pcre2_internal_headers"],
     defines = [
         "PCRE2_STATIC",
     ],
+    implementation_deps = [":pcre2_internal_headers"],
+    linkstatic = True,
     local_defines = LOCAL_DEFINES + [
         "PCRE2_CODE_UNIT_WIDTH=8",
     ],
     strip_include_prefix = "src",
-    linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
@@ -126,11 +131,11 @@ cc_library(
         ":pcre2_internal_headers",
         ":pcre2posix_dotc_headers",
     ],
+    linkstatic = True,
     local_defines = LOCAL_DEFINES + [
         "PCRE2_CODE_UNIT_WIDTH=8",
     ],
     strip_include_prefix = "src",
-    linkstatic = True,
     visibility = ["//visibility:public"],
     deps = [
         ":pcre2",
@@ -150,7 +155,6 @@ cc_library(
 cc_library(
     name = "pcre2test_dotc_headers",
     hdrs = [
-        "src/pcre2_chkdint.c",
         "src/pcre2_tables.c",
         "src/pcre2_ucd.c",
         "src/pcre2_valid_utf.c",
@@ -176,24 +180,27 @@ cc_binary(
     ],
 )
 
-filegroup(
-    name = "testdata",
+pkg_tar(
+    name = "testdata_tar",
     srcs = glob(["testdata/*"]),
+    strip_prefix = ".",
 )
 
-native_test(
+py_test(
     name = "pcre2_test",
     size = "small",
-    src = select({
-        "@platforms//os:windows": "RunTest.bat",
-        "//conditions:default": "RunTest",
-    }),
-    out = select({
-        "@platforms//os:windows": "RunTest.bat",
-        "//conditions:default": "RunTest",
-    }),
+    srcs = ["RunTest.py"],
+    args = [
+        "--bazel-runfiles",
+        "--testdatatar",
+        "$(rlocationpath :testdata_tar)",
+        "--pcre2test",
+        "$(rlocationpath :pcre2test)",
+    ],
     data = [
         ":pcre2test",
-        ":testdata",
+        ":testdata_tar",
     ],
+    deps = ["@bazel_tools//tools/python/runfiles"],
+    main = "RunTest.py",
 )

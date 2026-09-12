@@ -406,16 +406,16 @@ if WITH_EBCDIC
 if WITH_EBCDIC_NL25
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25 $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25" "$(abs_builddir)/src/pcre2_chartables.c"
 else # WITH_EBCDIC_NL25
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15 $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15" "$(abs_builddir)/src/pcre2_chartables.c"
 endif # WITH_EBCDIC_NL25
 else # WITH_EBCDIC
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.dist
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.dist $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.dist" "$(abs_builddir)/src/pcre2_chartables.c"
 endif # WITH_EBCDIC
 endif # WITH_REBUILD_CHARTABLES
 
@@ -744,18 +744,16 @@ endif # WITH_GCOV
 
 ## The main library tests. Each test is a binary plus a script that runs that
 ## binary in various ways. We install these test binaries in case folks find it
-## helpful. The two .bat files are for running the tests under Windows.
+## helpful.
 
 TESTS += RunTest
-EXTRA_DIST += RunTest.bat
-dist_noinst_SCRIPTS += RunTest
+dist_noinst_SCRIPTS += RunTest RunTest.py
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
 TESTS += RunGrepTest
-EXTRA_DIST += RunGrepTest.bat
-dist_noinst_SCRIPTS += RunGrepTest
+dist_noinst_SCRIPTS += RunGrepTest RunGrepTest.py
 if WITH_EBCDIC
 XFAIL_TESTS += RunGrepTest
 endif # WITH_EBCDIC
@@ -826,7 +824,10 @@ EXTRA_DIST += \
   testdata/testoutput3 \
   testdata/testoutput3A \
   testdata/testoutput3B \
+  testdata/testoutput3C \
   testdata/testoutput3D \
+  testdata/testoutput3E \
+  testdata/testoutput3F \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
@@ -868,8 +869,6 @@ EXTRA_DIST += \
   testdata/testoutputheap-32 \
   testdata/testoutputheap-8 \
   testdata/valgrind-jit.supp \
-  testdata/wintestinput3 \
-  testdata/wintestoutput3 \
   perltest.sh
 
 # RunTest and RunGrepTest should clean up after themselves, but just in case
@@ -882,6 +881,10 @@ CLEANFILES += \
   test3output \
   test3outputA \
   test3outputB \
+  test3outputC \
+  test3outputD \
+  test3outputE \
+  test3outputF \
   testtry \
   teststdout \
   teststderr \

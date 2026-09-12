@@ -10270,21 +10270,24 @@ if (offset != 0 && is_optimized_cbracket(common, offset >> 1))
   SLJIT_ASSERT(private_data_ptr == OVECTOR(offset + 0));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1), STR_PTR, 0);
   }
-else switch (opcode)
+else
   {
-  case OP_ASSERT_NA:
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-    break;
-  case OP_ASSERT_SCS:
-    OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-    OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw));
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), TMP1, 0);
+  switch (opcode)
+    {
+    case OP_ASSERT_NA:
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+      break;
+    case OP_ASSERT_SCS:
+      OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+      OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw));
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), TMP1, 0);
 
-    /* Nested scs blocks will not update this variable. */
-    if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
-      common->restore_end_ptr = 0;
-    break;
+      /* Nested scs blocks will not update this variable. */
+      if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
+        common->restore_end_ptr = 0;
+      break;
+    }
   }
 
 if (ket == OP_KETRMAX)

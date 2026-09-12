@@ -117,14 +117,17 @@ for (; ptr < ptrend; ptr++)
     uint32_t ch;
     PCRE2_SPTR esc_end_ptr;
 
-    if (ptr < ptrend - 1) switch (ptr[1])
+    if (ptr < ptrend - 1)
       {
-      case CHAR_L:
-      case CHAR_l:
-      case CHAR_U:
-      case CHAR_u:
-      ptr += 1;
-      continue;
+      switch (ptr[1])
+        {
+        case CHAR_L:
+        case CHAR_l:
+        case CHAR_U:
+        case CHAR_u:
+        ptr += 1;
+        continue;
+        }
       }
 
     ptr += 1;  // Must point after \ (backslash)
@@ -636,27 +639,28 @@ overflow, either give an error immediately, or keep on, accumulating the
 length. */
 
 #define CHECKMEMCPY(from, length_) \
-  do {    \
-     PCRE2_SIZE chkmc_length = length_; \
-     if (overflowed) \
-       {  \
-       if (chkmc_length > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
-         goto TOOLARGEREPLACE; \
-       extra_needed += chkmc_length; \
-       }  \
-     else if (lengthleft < chkmc_length) \
-       {  \
-       if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
-       overflowed = TRUE; \
-       extra_needed = chkmc_length - lengthleft; \
-       }  \
-     else \
-       {  \
-       memcpy(buffer + buff_offset, from, CU2BYTES(chkmc_length)); \
-       buff_offset += chkmc_length; \
-       lengthleft -= chkmc_length; \
-       }  \
-     }    \
+  do \
+    {    \
+    PCRE2_SIZE chkmc_length = length_; \
+    if (overflowed) \
+      {  \
+      if (chkmc_length > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
+        goto TOOLARGEREPLACE; \
+      extra_needed += chkmc_length; \
+      }  \
+    else if (lengthleft < chkmc_length) \
+      {  \
+      if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
+      overflowed = TRUE; \
+      extra_needed = chkmc_length - lengthleft; \
+      }  \
+    else \
+      {  \
+      memcpy(buffer + buff_offset, from, CU2BYTES(chkmc_length)); \
+      buff_offset += chkmc_length; \
+      lengthleft -= chkmc_length; \
+      }  \
+    }    \
   while (0)
 
 /* This macro checks for space and copies characters with casing modifications.
@@ -666,22 +670,23 @@ When substitute_case_callout is NULL, the source and destination buffers must
 not overlap, because our default handler does not support this. */
 
 #define CHECKCASECPY_BASE(length_, do_call) \
-  do {    \
-     PCRE2_SIZE chkcc_length = (PCRE2_SIZE)(length_); \
-     PCRE2_SIZE chkcc_rc; \
-     do_call \
-     if (lengthleft < chkcc_rc) \
-       {  \
-       if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
-       overflowed = TRUE; \
-       extra_needed = chkcc_rc - lengthleft; \
-       }  \
-     else \
-       {  \
-       buff_offset += chkcc_rc; \
-       lengthleft -= chkcc_rc; \
-       }  \
-     }    \
+  do \
+    {    \
+    PCRE2_SIZE chkcc_length = (PCRE2_SIZE)(length_); \
+    PCRE2_SIZE chkcc_rc; \
+    do_call \
+    if (lengthleft < chkcc_rc) \
+      {  \
+      if ((suboptions & PCRE2_SUBSTITUTE_OVERFLOW_LENGTH) == 0) goto NOROOM; \
+      overflowed = TRUE; \
+      extra_needed = chkcc_rc - lengthleft; \
+      }  \
+    else \
+      {  \
+      buff_offset += chkcc_rc; \
+      lengthleft -= chkcc_rc; \
+      }  \
+    }    \
   while (0)
 
 #define CHECKCASECPY_DEFAULT(from, length_) \
@@ -712,28 +717,29 @@ not overlap, because our default handler does not support this. */
 a case-forcing callout. */
 
 #define DELAYEDFORCECASE() \
-  do {      \
-     PCRE2_SIZE chars_outstanding = (buff_offset - casestart_offset) + \
-            (extra_needed - casestart_extra_needed); \
-     if (chars_outstanding > 0) \
-       {    \
-       if (overflowed) \
-         {  \
-         PCRE2_SIZE guess = pessimistic_case_inflation(chars_outstanding); \
-         if (guess > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
-           goto TOOLARGEREPLACE; \
-         extra_needed += guess; \
-         }  \
-       else \
-         {  \
-         /* Rewind the buffer */ \
-         lengthleft += (buff_offset - casestart_offset); \
-         buff_offset = casestart_offset; \
-         /* Care! In-place case transformation */ \
-         CHECKCASECPY_CALLOUT(chars_outstanding); \
-         }  \
-       }    \
-     }      \
+  do \
+    {      \
+    PCRE2_SIZE chars_outstanding = (buff_offset - casestart_offset) + \
+           (extra_needed - casestart_extra_needed); \
+    if (chars_outstanding > 0) \
+      {    \
+      if (overflowed) \
+        {  \
+        PCRE2_SIZE guess = pessimistic_case_inflation(chars_outstanding); \
+        if (guess > ~(PCRE2_SIZE)0 - extra_needed)  /* Integer overflow */ \
+          goto TOOLARGEREPLACE; \
+        extra_needed += guess; \
+        }  \
+      else \
+        {  \
+        /* Rewind the buffer */ \
+        lengthleft += (buff_offset - casestart_offset); \
+        buff_offset = casestart_offset; \
+        /* Care! In-place case transformation */ \
+        CHECKCASECPY_CALLOUT(chars_outstanding); \
+        }  \
+      }    \
+    }      \
   while (0)
 
 
@@ -1475,48 +1481,51 @@ for (;;)
       int errorcode;
       case_state new_forcecase = { PCRE2_SUBSTITUTE_CASE_NONE, FALSE };
 
-      if (ptr < repend - 1) switch (ptr[1])
+      if (ptr < repend - 1)
         {
-        case CHAR_L:
-        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
-        new_forcecase.single_char = FALSE;
-        ptr += 2;
-        break;
-
-        case CHAR_l:
-        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
-        new_forcecase.single_char = TRUE;
-        ptr += 2;
-        if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_U)
+        switch (ptr[1])
           {
-          /* Perl reverse-title-casing feature for \l\U */
-          new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_REVERSE_TITLE_FIRST;
+          case CHAR_L:
+          new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
           new_forcecase.single_char = FALSE;
           ptr += 2;
-          }
-        break;
+          break;
 
-        case CHAR_U:
-        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
-        new_forcecase.single_char = FALSE;
-        ptr += 2;
-        break;
+          case CHAR_l:
+          new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
+          new_forcecase.single_char = TRUE;
+          ptr += 2;
+          if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_U)
+            {
+            /* Perl reverse-title-casing feature for \l\U */
+            new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_REVERSE_TITLE_FIRST;
+            new_forcecase.single_char = FALSE;
+            ptr += 2;
+            }
+          break;
 
-        case CHAR_u:
-        new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_TITLE_FIRST;
-        new_forcecase.single_char = TRUE;
-        ptr += 2;
-        if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_L)
-          {
-          /* Perl title-casing feature for \u\L */
+          case CHAR_U:
+          new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_UPPER;
+          new_forcecase.single_char = FALSE;
+          ptr += 2;
+          break;
+
+          case CHAR_u:
           new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_TITLE_FIRST;
-          new_forcecase.single_char = FALSE;
+          new_forcecase.single_char = TRUE;
           ptr += 2;
-          }
-        break;
+          if (ptr + 2 < repend && ptr[0] == CHAR_BACKSLASH && ptr[1] == CHAR_L)
+            {
+            /* Perl title-casing feature for \u\L */
+            new_forcecase.to_case = PCRE2_SUBSTITUTE_CASE_TITLE_FIRST;
+            new_forcecase.single_char = FALSE;
+            ptr += 2;
+            }
+          break;
 
-        default:
-        break;
+          default:
+          break;
+          }
         }
 
       if (new_forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE)
