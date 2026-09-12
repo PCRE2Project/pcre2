@@ -61,6 +61,7 @@ substring, so that the whole string ends with \0\0, which can be detected when
 counting through. */
 
 static const unsigned char compile_error_texts[] =
+  // clang-format off
   "no error\0"
   "\\ at end of pattern\0"
   "\\c at end of pattern\0"
@@ -132,7 +133,7 @@ static const unsigned char compile_error_texts[] =
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "(?R (recursive pattern call) must be followed by a closing parenthesis\0"
   /* "an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)\0" */
-  "obsolete error (should not occur)\0"  /* Was the above */
+  "obsolete error (should not occur)\0"  // Was the above
   /* 60 */
   "(*VERB) not recognized or malformed\0"
   "subpattern number is too big\0"
@@ -211,11 +212,13 @@ static const unsigned char compile_error_texts[] =
   "syntax error in subpattern number (missing terminator?)\0"
   /* 120 */
   "erroroffset passed as NULL\0"
+  // clang-format on
   ;
 
 /* Match-time and UTF error texts are in the same format. */
 
 static const unsigned char match_error_texts[] =
+  // clang-format off
   "no error\0"
   "no match\0"
   "partial match\0"
@@ -260,7 +263,7 @@ static const unsigned char match_error_texts[] =
   /* 35 */
   "invalid replacement string\0"
   "bad offset into UTF string\0"
-  "callout error code\0"              /* Never returned by PCRE2 itself */
+  "callout error code\0"              // Never returned by PCRE2 itself
   "invalid data in workspace for DFA restart\0"
   "too much recursion for DFA matching\0"
   /* 40 */
@@ -308,6 +311,7 @@ static const unsigned char match_error_texts[] =
   /* 75 */
   "disallowed use of \\K in lookaround\0"
   "replacement $' or $_ not supported with partial match\0"
+  // clang-format on
   ;
 
 
@@ -338,19 +342,19 @@ int n, rc = 0;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
 
-if (enumber >= COMPILE_ERROR_BASE)  /* Compile error */
+if (enumber >= COMPILE_ERROR_BASE)  // Compile error
   {
   message = compile_error_texts;
   n = enumber - COMPILE_ERROR_BASE;
   }
-else if (enumber < 0)               /* Match or UTF error */
+else if (enumber < 0)               // Match or UTF error
   {
   message = match_error_texts;
   n = -enumber;
   }
-else                                /* Invalid error number */
+else                                // Invalid error number
   {
-  message = (const unsigned char *)"\0";  /* Empty message list */
+  message = (const unsigned char *)"\0";  // Empty message list
   n = 1;
   }
 
@@ -379,7 +383,7 @@ for (PCRE2_SIZE j = 0; j < i; ++j)
   buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
 #endif
 
-buffer[i] = 0;     /* Terminate message, even if truncated. */
+buffer[i] = 0;     // Terminate message, even if truncated.
 return rc? rc : (int)i;
 }
 

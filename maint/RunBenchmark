@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# Compile maint/pcre2bench.c, which no PCRE2 build system builds, against an
+# already-built PCRE2 tree and run it.
+#
+# Usage: maint/RunBenchmark [-8|-16|-32] <build-dir> [label] [nojit] [short]
+#
+# <build-dir> is a directory in which the library has been built, by CMake or
+# by autotools; both layouts are recognized. -8, -16 and -32 select the code
+# unit width to benchmark, defaulting to 8; that library must have been built.
+# The remaining arguments are passed to the driver, and are described at the
+# start of pcre2bench.c. If no label is given, the build directory name is
+# used.
+#
+# Output is TSV on stdout, so a comparison between two builds is
+#
+#   maint/RunBenchmark build-before before > before.tsv
+#   maint/RunBenchmark build-after  after  > after.tsv
+#
+# CC and CFLAGS are honored; CFLAGS defaults to -O2.
+
+set -eu
+
+CC=${CC:-cc}
+CFLAGS=${CFLAGS:--O2}
+
+width=8
+
+usage()
+{
+  echo "usage: $0 [-8|-16|-32] <build-dir> [label] [nojit] [short]" >&2
+  exit 2
+}
+
+while [ $# -ge 1 ]; do
+  case $1 in
+    -8|-16|-32) width=${1#-}; shift;;
+    -*) usage;;
+    *) break;;
+  esac
+done
+
+[ $# -ge 1 ] || usage
+
+build=$1
+shift
+[ -d "$build" ] || { echo "$0: no such directory: $build" >&2; exit 1; }
+build=$(cd "$build" && pwd)
+label=$(basename "$build")
+
+here=$(cd "$(dirname "$0")" && pwd)
+driver=$here/pcre2bench.c
+[ -f "$driver" ] || { echo "$0: cannot find $driver" >&2; exit 1; }
+
+# pcre2.h is generated, so it lives in the build tree, not in src.
+
+header=$(find "$build" -name pcre2.h -print 2>/dev/null | head -1)
+[ -n "$header" ] || {
+  echo "$0: no generated pcre2.h under $build; is it a build tree?" >&2
+  exit 1
+}
+
+# Autotools puts the libraries in .libs, CMake in the top of the build tree.
+
+lib=$(find "$build" \( -name "libpcre2-$width.a" -o -name "libpcre2-$width.so" \
+  -o -name "libpcre2-$width.dylib" -o -name "pcre2-$width.lib" \) \
+  -print 2>/dev/null | head -1)
+[ -n "$lib" ] || {
+  echo "$0: no $width-bit library under $build; has it been built?" >&2
+  exit 1
+}
+
+incdir=$(dirname "$header")
+libdir=$(dirname "$lib")
+binary=$build/pcre2bench-$width
+
+$CC $CFLAGS -DPCRE2_CODE_UNIT_WIDTH="$width" -o "$binary" "$driver" \
+  -I"$incdir" -L"$libdir" "-lpcre2-$width" -Wl,-rpath,"$libdir"
+
+# The driver takes the label as its first argument, so supply the build
+# directory name unless the caller passed something that is not an option.
+
+labelled=no
+for arg in "$@"; do
+  case $arg in
+    nojit|short) ;;
+    *) labelled=yes ;;
+  esac
+done
+[ $labelled = yes ] || set -- "$label" "$@"
+
+exec "$binary" "$@"
+
+# End of RunBenchmark

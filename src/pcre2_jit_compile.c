@@ -924,7 +924,7 @@ static BOOL find_vreverse(PCRE2_SPTR cc)
 static PCRE2_SPTR next_opcode(compiler_common *common, PCRE2_SPTR cc)
 {
 SLJIT_UNUSED_ARG(common);
-switch(*cc)
+switch (*cc)
   {
   case OP_SOD:
   case OP_SOM:
@@ -1178,7 +1178,7 @@ BOOL set_mark = FALSE;
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
   {
-  switch(*cc)
+  switch (*cc)
     {
     case OP_SET_SOM:
     common->has_set_som = TRUE;
@@ -1421,7 +1421,7 @@ do
     {
     accelerated_start = NULL;
 
-    switch(*cc)
+    switch (*cc)
       {
       case OP_SOD:
       case OP_SOM:
@@ -1774,7 +1774,7 @@ static int get_class_iterator_size(PCRE2_SPTR cc)
 {
 sljit_u32 min;
 sljit_u32 max;
-switch(*cc)
+switch (*cc)
   {
   case OP_CRSTAR:
   case OP_CRPLUS:
@@ -1971,7 +1971,7 @@ while (cc < ccend)
     }
   repeat_check = TRUE;
 
-  switch(*cc)
+  switch (*cc)
     {
     case OP_KET:
     if (common->private_data_ptrs[cc + 1 - common->start] != 0)
@@ -2190,7 +2190,7 @@ if (ccend == NULL)
 
 SLJIT_ASSERT(cc != NULL);
 while (cc < ccend)
-  switch(*cc)
+  switch (*cc)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
@@ -2386,7 +2386,7 @@ if (ccend == NULL)
 /* The data is restored by do_revertframes(). */
 SLJIT_ASSERT(cc != NULL);
 while (cc < ccend)
-  switch(*cc)
+  switch (*cc)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
@@ -2646,7 +2646,7 @@ recurse_flags |= recurse_flag_control_head_found;
 while (cc < ccend)
   {
   size = 0;
-  switch(*cc)
+  switch (*cc)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
@@ -3018,7 +3018,7 @@ while (cc < ccend)
   shared_count = 0;
   kept_shared_count = 0;
 
-  switch(*cc)
+  switch (*cc)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
@@ -3261,7 +3261,7 @@ while (cc < ccend)
       {
       private_count = 1;
       private_srcw[0] = PRIVATE_DATA(cc);
-      switch(get_class_iterator_size(cc + i))
+      switch (get_class_iterator_size(cc + i))
         {
         case 1:
         break;
@@ -5883,7 +5883,7 @@ fast_forward_char_data *chars_stack[SCAN_PREFIX_STACK_END];
 sljit_u8 next_alternative_stack[SCAN_PREFIX_STACK_END];
 BOOL last, any, class, caseless;
 int stack_ptr, step_count, repeat, len, len_save;
-sljit_u32 chr; /* Any unicode character. */
+sljit_u32 chr; // Any unicode character.
 sljit_u8 *bytes, *bytes_end, byte;
 PCRE2_SPTR alternative, cc_save, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
@@ -6329,7 +6329,7 @@ while (TRUE)
   else
     {
     caseless = FALSE;
-    othercase[0] = 0; /* Stops compiler warning - PH */
+    othercase[0] = 0; // Stops compiler warning - PH
     }
 
   len_save = len;
@@ -7331,7 +7331,7 @@ for (i = 0; i < 256; )
       ranges[length] = i;
       length++;
       bit = cbit;
-      all = (sljit_u8)-cbit; /* sign extend bit into byte */
+      all = (sljit_u8)-cbit; // sign extend bit into byte
       }
     i++;
     }
@@ -7355,7 +7355,7 @@ if (invert) bit ^= 0x1;
 if (length == 0 && bit == 0)
   add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
 
-switch(length)
+switch (length)
   {
   case 0:
   /* When bit != 0, all characters are accepted. */
@@ -7510,7 +7510,7 @@ for (i = 0; i < 32; i++)
     }
   }
 
-if (len == 0) return FALSE;  /* Should never occur, but stops analyzers complaining. */
+if (len == 0) return FALSE;  // Should never occur, but stops analyzers complaining.
 
 i = 0;
 j = 0;
@@ -7872,7 +7872,7 @@ static PCRE2_SPTR compile_simple_assertion_matchingpath(compiler_common *common,
 DEFINE_COMPILER;
 struct sljit_jump *jump[4];
 
-switch(type)
+switch (type)
   {
   case OP_SOD:
   if (HAS_VIRTUAL_REGISTERS)
@@ -8418,7 +8418,7 @@ SLJIT_COMPILE_ASSERT((OP_CRSTAR & 0x1) == 0, crstar_opcode_must_be_even);
 SLJIT_ASSERT(local_start + 2 * SSIZE_OF(sw) <= (int)LOCAL0 + common->locals_size);
 minimize = FALSE;
 exact = FALSE;
-switch(type)
+switch (type)
   {
   case OP_CRMINSTAR:
   minimize = TRUE;
@@ -8843,7 +8843,7 @@ unsigned int callout_length = (*cc == OP_CALLOUT)
 sljit_sw value1;
 sljit_sw value2;
 sljit_sw value3;
-sljit_s32 callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw); /* top_bracket is uint16 so maximum is 1MiB */
+sljit_s32 callout_arg_size = (common->re->top_bracket + 1) * 2 * SSIZE_OF(sw); // top_bracket is uint16 so maximum is 1MiB
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
@@ -10270,21 +10270,24 @@ if (offset != 0 && is_optimized_cbracket(common, offset >> 1))
   SLJIT_ASSERT(private_data_ptr == OVECTOR(offset + 0));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset + 1), STR_PTR, 0);
   }
-else switch (opcode)
+else
   {
-  case OP_ASSERT_NA:
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-    break;
-  case OP_ASSERT_SCS:
-    OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-    OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw));
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), TMP1, 0);
+  switch (opcode)
+    {
+    case OP_ASSERT_NA:
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+      break;
+    case OP_ASSERT_SCS:
+      OP1(SLJIT_MOV, TMP1, 0, STR_END, 0);
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+      OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw));
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), TMP1, 0);
 
-    /* Nested scs blocks will not update this variable. */
-    if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
-      common->restore_end_ptr = 0;
-    break;
+      /* Nested scs blocks will not update this variable. */
+      if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
+        common->restore_end_ptr = 0;
+      break;
+    }
   }
 
 if (ket == OP_KETRMAX)
@@ -10400,7 +10403,7 @@ int stacksize;
 int offset = 0;
 BOOL zero = FALSE;
 PCRE2_SPTR ccbegin = NULL;
-int stack; /* Also contains the offset of control head. */
+int stack; // Also contains the offset of control head.
 struct sljit_label *loop = NULL;
 struct jump_list *emptymatch = NULL;
 
@@ -10415,7 +10418,7 @@ opcode = *cc;
 private_data_ptr = PRIVATE_DATA(cc);
 SLJIT_ASSERT(private_data_ptr != 0);
 BACKTRACK_AS(bracketpos_backtrack)->private_data_ptr = private_data_ptr;
-switch(opcode)
+switch (opcode)
   {
   case OP_BRAPOS:
   case OP_SBRAPOS:
@@ -10655,7 +10658,7 @@ if (!zero)
   {
   if (framesize < 0)
     add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(stacksize - 1), SLJIT_IMM, 0));
-  else /* TMP2 is set to [private_data_ptr] above. */
+  else // TMP2 is set to [private_data_ptr] above.
     add_jump(compiler, &backtrack->own_backtracks, CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(TMP2), STACK(-stacksize), SLJIT_IMM, 0));
   }
 
@@ -10770,7 +10773,7 @@ else
   return cc;
   }
 
-switch(*opcode)
+switch (*opcode)
   {
   case OP_EXACT:
   *exact = GET2(cc, 0);
@@ -10919,7 +10922,7 @@ if (early_fail_type == type_fail_range)
 if (opcode < OP_EXACT)
   PUSH_BACKTRACK(sizeof(char_iterator_backtrack), begin, NULL);
 
-switch(opcode)
+switch (opcode)
   {
   case OP_STAR:
   case OP_UPTO:
@@ -11710,7 +11713,7 @@ if (common->has_then && common->then_offsets[cc - common->start] != 0)
 
 while (cc < ccend)
   {
-  switch(*cc)
+  switch (*cc)
     {
     case OP_SOD:
     case OP_SOM:
@@ -12067,7 +12070,7 @@ int offset1 = (private_data_ptr == 0) ? STACK(1) : private_data_ptr + SSIZE_OF(s
 
 cc = get_iterator_parameters(common, cc, &opcode, &type, &max, &exact, &end);
 
-switch(opcode)
+switch (opcode)
   {
   case OP_STAR:
   case OP_UPTO:
@@ -13112,7 +13115,7 @@ while (current)
   {
   if (current->simple_backtracks != NULL)
     set_jumps(current->simple_backtracks, LABEL());
-  switch(*current->cc)
+  switch (*current->cc)
     {
     case OP_SET_SOM:
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
@@ -13576,7 +13579,7 @@ common->mode = mode;
 common->might_be_empty = (re->minlength == 0) || (re->flags & PCRE2_MATCH_EMPTY);
 common->allow_empty_partial = (re->max_lookbehind > 0) || (re->flags & PCRE2_MATCH_EMPTY);
 common->nltype = NLTYPE_FIXED;
-switch(re->newline_convention)
+switch (re->newline_convention)
   {
   case PCRE2_NEWLINE_CR: common->newline = CHAR_CR; break;
   case PCRE2_NEWLINE_LF: common->newline = CHAR_NL; break;

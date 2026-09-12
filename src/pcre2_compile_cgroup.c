@@ -141,7 +141,7 @@ for (i = 0; i < tablecount; i++)
   {
   int crc = memcmp(name, slot + IMM2_SIZE, CU2BYTES(length));
   if (crc == 0 && slot[IMM2_SIZE + length] != 0)
-    crc = -1; /* Current name is a substring */
+    crc = -1; // Current name is a substring
 
   /* Make space in the table and break the loop for an earlier name. For a
   duplicate or later name, carry on. We do this for duplicates so that in the

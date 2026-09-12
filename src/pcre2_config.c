@@ -70,7 +70,7 @@ Returns:           0 if a numerical value is returned
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_config(uint32_t what, void *where)
 {
-if (where == NULL)  /* Requests a length */
+if (where == NULL)  // Requests a length
   {
   switch (what)
     {
@@ -88,7 +88,7 @@ if (where == NULL)  /* Requests a length */
     case PCRE2_CONFIG_NEVER_BACKSLASH_C:
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
-    case PCRE2_CONFIG_STACKRECURSE:    /* Obsolete */
+    case PCRE2_CONFIG_STACKRECURSE:    // Obsolete
     case PCRE2_CONFIG_TABLES_LENGTH:
     case PCRE2_CONFIG_UNICODE:
     return sizeof(uint32_t);

@@ -77,23 +77,23 @@ to slot PCRE2 into existing programs that make POSIX calls. */
 /* Error values. Not all these are relevant or used by the wrapper. */
 
 enum {
-  REG_ASSERT = 1,  /* internal error ? */
-  REG_BADBR,       /* invalid repeat counts in {} */
-  REG_BADPAT,      /* pattern error */
-  REG_BADRPT,      /* ? * + invalid */
-  REG_EBRACE,      /* unbalanced {} */
-  REG_EBRACK,      /* unbalanced [] */
-  REG_ECOLLATE,    /* collation error - not relevant */
-  REG_ECTYPE,      /* bad class */
-  REG_EESCAPE,     /* bad escape sequence */
-  REG_EMPTY,       /* empty expression */
-  REG_EPAREN,      /* unbalanced () */
-  REG_ERANGE,      /* bad range inside [] */
-  REG_ESIZE,       /* expression too big */
-  REG_ESPACE,      /* failed to get memory */
-  REG_ESUBREG,     /* bad back reference */
-  REG_INVARG,      /* bad argument */
-  REG_NOMATCH      /* match failed */
+  REG_ASSERT = 1,  // internal error ?
+  REG_BADBR,       // invalid repeat counts in {}
+  REG_BADPAT,      // pattern error
+  REG_BADRPT,      // ? * + invalid
+  REG_EBRACE,      // unbalanced {}
+  REG_EBRACK,      // unbalanced []
+  REG_ECOLLATE,    // collation error - not relevant
+  REG_ECTYPE,      // bad class
+  REG_EESCAPE,     // bad escape sequence
+  REG_EMPTY,       // empty expression
+  REG_EPAREN,      // unbalanced ()
+  REG_ERANGE,      // bad range inside []
+  REG_ESIZE,       // expression too big
+  REG_ESPACE,      // failed to get memory
+  REG_ESUBREG,     // bad back reference
+  REG_INVARG,      // bad argument
+  REG_NOMATCH      // match failed
 };
 
 
@@ -176,7 +176,7 @@ them having to maintain their own patch, but are not documented by PCRE2. */
 #define PCRE2regfree  pcre2_regfree
 
 #ifdef __cplusplus
-}   /* extern "C" */
+}   // extern "C"
 #endif
 
 #endif /* PCRE2POSIX_H_IDEMPOTENT_GUARD */
