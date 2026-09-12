@@ -85,3 +85,16 @@ PCRE2_10.47 {
 };
 
 PCRE2_10.48 { } PCRE2_10.47;
+
+PCRE2_10.49 {
+  global:
+    pcre2_get_bsr_8;
+    pcre2_get_depth_limit_8;
+    pcre2_get_heap_limit_8;
+    pcre2_get_match_limit_8;
+    pcre2_get_max_pattern_length_8;
+    pcre2_get_newline_8;
+    pcre2_get_offset_limit_8;
+    pcre2_get_parens_nest_limit_8;
+} PCRE2_10.48;
+
