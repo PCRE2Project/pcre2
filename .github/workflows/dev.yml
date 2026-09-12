@@ -642,6 +642,11 @@ jobs:
           # cross compilers do not depend on the target's libc headers, and it
           # cannot always be derived from the triple.
           #
+          # Alpha's libc package is libc6.1-dev-alpha-cross, because Alpha uses
+          # libc6.1 rather than libc6, but it provides the libc6-dev-alpha-cross
+          # name built from the "libc" field. Only gcc-14 is packaged for it.
+          - { name: alpha,       triple: alpha-linux-gnu,             qemu: alpha,       libc: alpha,      container: "ubuntu:26.04", gcc_suffix: "-14" }
+          #
           # Ubuntu armhf defaults to Thumb-2, so ARM mode needs asking for.
           - { name: arm,         triple: arm-linux-gnueabihf,         qemu: arm,         libc: armhf,      container: "ubuntu:26.04", cflags: -marm }
           - { name: arm-thumb2,  triple: arm-linux-gnueabihf,         qemu: arm,         libc: armhf,      container: "ubuntu:26.04", cflags: -mthumb }
@@ -675,7 +680,7 @@ jobs:
         run: |
           apt-get -qq update
           apt-get -qq install -y git autoconf automake libtool make \
-                                 gcc-${{ matrix.config.triple }} \
+                                 gcc${{ matrix.config.gcc_suffix }}-${{ matrix.config.triple }} \
                                  libc6-dev-${{ matrix.config.libc }}-cross \
                                  qemu-user
 
@@ -703,7 +708,7 @@ jobs:
           ./configure \
             --build=`./config.guess` \
             --host=${{ matrix.config.triple }} \
-            CC=${{ matrix.config.triple }}-gcc \
+            CC=${{ matrix.config.triple }}-gcc${{ matrix.config.gcc_suffix }} \
             CFLAGS="${{ matrix.config.cflags }} $CFLAGS_GCC_STYLE" \
             --disable-shared \
             --enable-jit \

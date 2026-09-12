@@ -607,6 +607,17 @@ typedef struct compare_context {
 #define ARGUMENTS     SLJIT_S4
 #define RETURN_ADDR   SLJIT_R4
 
+/* Number of scratch registers the generated code may use. The Alpha CMPBGE
+   scanning loops keep up to five replicated character constants live across a
+   loop, so they use scratch registers above RETURN_ADDR and must declare them.
+   Registers above SLJIT_NUMBER_OF_TEMPORARY_REGISTERS are callee-saved, so
+   every JIT function pays to spill them: keep this as small as it can be. */
+#if (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
+#define SCRATCH_REGISTERS 10
+#else
+#define SCRATCH_REGISTERS 5
+#endif
+
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 #define HAS_VIRTUAL_REGISTERS 1
 #else
@@ -6968,6 +6979,16 @@ if (common->match_end_ptr != 0)
   OP2U(SLJIT_SUB | SLJIT_SET_GREATER, STR_END, 0, TMP1, 0);
   SELECT(SLJIT_GREATER, STR_END, TMP1, 0, STR_END);
   }
+
+#ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
+if (JIT_HAS_FAST_FORWARD_START_BITS_SIMD && common->mode == PCRE2_JIT_COMPLETE
+    && fast_forward_start_bits_simd(common, start_bits))
+  {
+  if (common->match_end_ptr != 0)
+    OP1(SLJIT_MOV, STR_END, 0, RETURN_ADDR, 0);
+  return;
+  }
+#endif
 
 start = LABEL();
 
@@ -13789,7 +13810,7 @@ common->compiler = compiler;
 
 /* Main pcre2_jit_exec entry. */
 SLJIT_ASSERT((private_data_size & (sizeof(sljit_sw) - 1)) == 0);
-sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), 5 | SLJIT_ENTER_VECTOR(SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS), 5, private_data_size);
+sljit_emit_enter(compiler, 0, SLJIT_ARGS1(W, W), SCRATCH_REGISTERS | SLJIT_ENTER_VECTOR(SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS), 5, private_data_size);
 
 /* Register init. */
 reset_ovector(common, (re->top_bracket + 1) * 2);
