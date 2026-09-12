@@ -5907,6 +5907,47 @@ ASSERT(test_dat_context_copy != NULL, "pcre2_match_context_copy()");
 test_con_context_copy = pcre2_convert_context_copy(test_con_context);
 ASSERT(test_con_context_copy != NULL, "pcre2_convert_context_copy()");
 
+/* Test default context values. */
+uval = 123;
+rc = pcre2_get_bsr(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_bsr()");
+ASSERT(uval == BSR_DEFAULT, "pcre2_get_bsr()");
+
+sizeval = 123;
+rc = pcre2_get_max_pattern_length(test_pat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_max_pattern_length()");
+ASSERT(sizeval == PCRE2_UNSET, "pcre2_get_max_pattern_length()");
+
+uval = 123;
+rc = pcre2_get_newline(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_newline()");
+ASSERT(uval == NEWLINE_DEFAULT, "pcre2_get_newline()");
+
+uval = 123;
+rc = pcre2_get_parens_nest_limit(test_pat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_parens_nest_limit()");
+ASSERT(uval == PARENS_NEST_LIMIT, "pcre2_get_parens_nest_limit()");
+
+sizeval = 123;
+rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
+ASSERT(rc == 0, "pcre2_get_offset_limit()");
+ASSERT(sizeval == PCRE2_UNSET, "pcre2_get_offset_limit()");
+
+uval = 123;
+rc = pcre2_get_depth_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_depth_limit()");
+ASSERT(uval == MATCH_LIMIT_DEPTH, "pcre2_get_depth_limit()");
+
+uval = 123;
+rc = pcre2_get_heap_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_heap_limit()");
+ASSERT(uval == HEAP_LIMIT, "pcre2_get_heap_limit()");
+
+uval = 123;
+rc = pcre2_get_match_limit(test_dat_context, &uval);
+ASSERT(rc == 0, "pcre2_get_match_limit()");
+ASSERT(uval == MATCH_LIMIT, "pcre2_get_match_limit()");
+
 rc = pcre2_set_compile_extra_options(test_pat_context, 0);
 ASSERT(rc == 0, "pcre2_set_compile_extra_options()");
 
