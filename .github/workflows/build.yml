@@ -31,6 +31,8 @@ env:
   CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough'
   CFLAGS_MSVC: '/W3'
   CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
+  # For CMake 4.4 we could use (stronger): -Werror=author -Werror=uninitialized -Werror=unused-cli
+  # It's not available in the CI runners yet.
   CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
 
 jobs:
@@ -70,6 +72,12 @@ jobs:
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
 
+      - name: Test (Python main test script)
+        run: python3 ./RunTest.py
+
+      - name: Test (Python pcre2grep test script)
+        run: python3 ./RunGrepTest.py
+
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
@@ -83,7 +91,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'alpine')
     steps:
       - name: Setup
-        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev
+        run: apk add --no-cache automake autoconf gcc libtool make musl-dev git zlib zlib-dev bzip2 bzip2-dev python3
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -111,6 +119,12 @@ jobs:
       - name: Test (pcre2posix program)
         run: ./pcre2posix_test -v
 
+      - name: Test (Python main test script)
+        run: python3 ./RunTest.py
+
+      - name: Test (Python pcre2grep test script)
+        run: python3 ./RunGrepTest.py
+
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
@@ -135,6 +149,12 @@ jobs:
 
       - name: Test
         run: cd build && ctest -j$(sysctl -n hw.ncpu) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+
+      - name: Test (shell scripts)
+        run: |
+          cd build
+          ../RunTest --srcdir .. --pcre2test "`pwd`/pcre2test"
+          ../RunGrepTest --srcdir .. --pcre2test "`pwd`/pcre2test" --pcre2grep "`pwd`/pcre2grep"
 
       - name: Install
         run: |

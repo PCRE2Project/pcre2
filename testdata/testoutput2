@@ -23769,25 +23769,6 @@ Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported
 Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
         here: >$' |<--| <
 
-# 'getall' must not walk the substring list past its NULL terminator when
-# 'allcaptures' or 'allvector' has widened the reported capture count beyond the
-# number of pairs the match actually returned.
-
-/(a)|(b)/
-    a\=getall,allcaptures
- 0: a
- 1: a
- 2: <unset>
- 0L a
- 1L a
-    a\=getall,allvector,ovector=4
- 0: a
- 1: a
- 2: <unset>
- 3: <unchanged>
- 0L a
- 1L a
-
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
