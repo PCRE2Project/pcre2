@@ -159,20 +159,32 @@ static const uint32_t rep_typ[] = {
 /* Numbers for RMATCH calls at backtracking points. When these lists are
 changed, the code at RETURN_SWITCH below must be updated in sync.  */
 
-enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
-       RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
-       RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
-       RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39 };
+enum {
+  // clang-format off
+  RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
+  RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
+  RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
+  RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39,
+  // clang-format on
+};
 
 #ifdef SUPPORT_WIDE_CHARS
-enum { RM100=100, RM101, RM102, RM103 };
+enum {
+  // clang-format off
+  RM100=100, RM101, RM102, RM103,
+  // clang-format on
+};
 #endif
 
 #ifdef SUPPORT_UNICODE
-enum { RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
-       RM208,     RM209, RM210, RM211, RM212, RM213, RM214, RM215,
-       RM216,     RM217, RM218, RM219, RM220, RM221, RM222, RM223,
-       RM224 };
+enum {
+  // clang-format off
+  RM200=200, RM201, RM202, RM203, RM204, RM205, RM206, RM207,
+  RM208,     RM209, RM210, RM211, RM212, RM213, RM214, RM215,
+  RM216,     RM217, RM218, RM219, RM220, RM221, RM222, RM223,
+  RM224,
+  // clang-format on
+};
 #endif
 
 /* Define short names for general fields in the current backtrack frame, which

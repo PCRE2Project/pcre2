@@ -374,11 +374,13 @@ spaces in the Unicode file PropList.txt, and Perl does not recognize it as a
 space. However, in many other sources it is listed as a space and has been in
 PCRE (both APIs) for a long time. */
 
+// clang-format off
 #define HSPACE_LIST \
   CHAR_HT, CHAR_SPACE, CHAR_NBSP, \
   0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, \
   0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000, \
   NOTACHAR
+// clang-format on
 
 #define HSPACE_MULTIBYTE_CASES \
   case 0x1680:  /* OGHAM SPACE MARK */ \
@@ -1351,6 +1353,7 @@ only. */
 
 #endif  /* SUPPORT_UNICODE */
 
+// clang-format off
 
 #define STRING_ACCEPT0               STR_A STR_C STR_C STR_E STR_P STR_T "\0"
 #define STRING_COMMIT0               STR_C STR_O STR_M STR_M STR_I STR_T "\0"
@@ -1435,6 +1438,8 @@ only. */
 #define STRING_scriptextensions           STR_s STR_c STR_r STR_i STR_p STR_t STR_e STR_x STR_t STR_e STR_n STR_s STR_i STR_o STR_n STR_s
 #define STRING_scx                        STR_s STR_c STR_x
 
+// clang-format on
+
 
 /* -------------------- End of character and string names -------------------*/
 
@@ -1457,8 +1462,10 @@ match. */
 #define PT_UCNC      10    /* Universal Character nameable character */
 #define PT_BIDICL    11    /* Specified bidi class */
 #define PT_BOOL      12    /* Boolean property */
-#define PT_ANY       13    /* Must be the last entry!
-                              Any property - matches all chars */
+#define PT_ANY       13    /* Any property - matches all chars */
+
+/* PT_ANY must be the last entry! */
+
 #define PT_TABSIZE PT_ANY  /* Size of square table for autopossessify tests */
 
 /* The following special properties are used only in XCLASS items, when POSIX
@@ -1606,10 +1613,14 @@ and less than ESC_Z to detect the types that may be repeated. These are the
 types that consume characters. If any new escapes are put in between that don't
 consume a character, that code will have to change. */
 
-enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
-       ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
-       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z,
-       ESC_E, ESC_Q, ESC_g, ESC_k, ESC_ub };
+enum {
+  // clang-format off
+  ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
+  ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
+  ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z,
+  ESC_E, ESC_Q, ESC_g, ESC_k, ESC_ub,
+  // clang-format on
+};
 
 
 /********************** Opcode definitions ******************/
@@ -1925,6 +1936,7 @@ for debugging, and some of them are only partial names. The macro is referenced
 only in pcre2_printint_inc.h, which fills out the full names in many cases (and in
 some cases doesn't actually use these names at all). */
 
+// clang-format off
 #define OP_NAME_LIST \
   "End", "\\A", "\\G", "\\K", "\\B", "\\b", "\\D", "\\d",         \
   "\\S", "\\s", "\\W", "\\w", "Any", "AllAny", "Anybyte",         \
@@ -1968,6 +1980,7 @@ some cases doesn't actually use these names at all). */
   "*THEN", "*THEN", "*COMMIT", "*COMMIT", "*FAIL",                \
   "*ACCEPT", "*ASSERT_ACCEPT",                                    \
   "Close", "Skip zero", "Define", "\\B (ucp)", "\\b (ucp)"
+// clang-format on
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1979,6 +1992,7 @@ As things have been extended, some of these are no longer fixed lenths, but are
 minima instead. For example, the length of a single-character repeat may vary
 in UTF-8 mode. The code that uses this table must know about such things. */
 
+// clang-format off
 #define OP_LENGTHS \
   1,                             /* End                                    */ \
   1, 1, 1, 1, 1,                 /* \A, \G, \K, \B, \b                     */ \
@@ -2068,6 +2082,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+IMM2_SIZE, 1,                /* CLOSE, SKIPZERO                        */ \
   1,                             /* DEFINE                                 */ \
   1, 1                           /* \B and \b in UCP mode                  */
+// clang-format on
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
 

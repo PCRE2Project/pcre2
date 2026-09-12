@@ -395,8 +395,12 @@ static const char *incexname[4] = { "--include", "--exclude",
 
 /* Structure for options and list of them */
 
-enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER, OP_SIZE,
-       OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES };
+enum {
+  // clang-format off
+  OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER, OP_SIZE,
+  OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES,
+  // clang-format on
+};
 
 typedef struct option_item {
   int type;
@@ -3510,25 +3514,25 @@ if (isdirectory(pathname))
       because that affects the output from pcre2grep. */
 
 #ifdef HAVE_REALPATH
-      {
-      char resolvedpath[PATH_MAX];
-      BOOL isSame;
-      size_t rlen;
-      if (realpath(childpath, resolvedpath) == NULL)
-        /* LCOV_EXCL_START - this is a "never" event */
-        continue;     // This path is invalid - we can skip processing this
-        /* LCOV_EXCL_STOP */
-      isSame = strcmp(pathname, resolvedpath) == 0;
-      if (isSame) continue;    // We have a recursion
-      rlen = strlen(resolvedpath);
-      if (rlen++ < sizeof(resolvedpath) - 3)
         {
-        BOOL contained;
-        strcat(resolvedpath, "/");
-        contained = strncmp(pathname, resolvedpath, rlen) == 0;
-        if (contained) continue;    // We have a recursion
+        char resolvedpath[PATH_MAX];
+        BOOL isSame;
+        size_t rlen;
+        if (realpath(childpath, resolvedpath) == NULL)
+          /* LCOV_EXCL_START - this is a "never" event */
+          continue;     // This path is invalid - we can skip processing this
+          /* LCOV_EXCL_STOP */
+        isSame = strcmp(pathname, resolvedpath) == 0;
+        if (isSame) continue;    // We have a recursion
+        rlen = strlen(resolvedpath);
+        if (rlen++ < sizeof(resolvedpath) - 3)
+          {
+          BOOL contained;
+          strcat(resolvedpath, "/");
+          contained = strncmp(pathname, resolvedpath, rlen) == 0;
+          if (contained) continue;    // We have a recursion
+          }
         }
-      }
 #endif  /* HAVE_REALPATH */
 
       frc = grep_or_recurse(childpath, dir_recurse, FALSE);
