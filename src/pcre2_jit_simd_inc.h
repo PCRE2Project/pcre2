@@ -3484,12 +3484,18 @@ OP2(SLJIT_AND, dst, 0, dst, 0, TMP1, 0);
 }
 
 /* Scan for the first code unit whose start bit is set, eight bytes at a time.
-   Returns FALSE without emitting anything if the bitmap does not reduce to few
-   enough ranges, in which case the caller emits its own scan. */
-static BOOL fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits)
+   The bitmap describes the code unit at offset from the start of the match, and
+   STR_PTR is left pointing at that start. Returns FALSE without emitting
+   anything if the bitmap does not reduce to few enough ranges, in which case
+   the caller emits its own scan. */
+static BOOL fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits, sljit_s32 offset,
+  BOOL bit_255_above)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
+#if defined SUPPORT_UNICODE
+struct sljit_label *restart;
+#endif
 struct sljit_jump *quit;
 struct sljit_jump *no_prefetch;
 sljit_u32 low[ALPHA_START_BITS_MAX_CONSTS];
@@ -3501,6 +3507,11 @@ int count = 0;
 int consts = 0;
 int next = 5;
 int i, k;
+
+/* At 8 bits there is nothing above code unit 255 for bit 255 to stand for. */
+SLJIT_UNUSED_ARG(bit_255_above);
+
+SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offset >= 0);
 
 /* Split the bitmap into inclusive ranges, costing the constants as we go. */
 i = 0;
@@ -3535,8 +3546,7 @@ if (count == 0 || (count == 1 && low[0] == 0 && high[0] == 255))
   return FALSE;
 
 /* Assign a scratch register to each constant, then one for the accumulated
-   mask and one for the per-range mask. RETURN_ADDR is not available: the
-   caller keeps the unclamped STR_END there while match_end_ptr is set. */
+   mask and one for the per-range mask. */
 for (k = 0; k < count; k++)
   {
   low_reg[k] = 0;
@@ -3563,6 +3573,30 @@ for (k = 0; k < count; k++)
   if (high_reg[k] != 0)
     OP1(SLJIT_MOV, high_reg[k], 0, SLJIT_IMM, replicate_char_alpha((PCRE2_UCHAR)(high[k] + 1)));
   }
+
+if (common->match_end_ptr != 0)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+  OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(offset + 1));
+
+  OP2U(SLJIT_SUB | SLJIT_SET_LESS, TMP1, 0, STR_END, 0);
+  SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
+  }
+
+/* At offset zero the quadword the first load reads from is known to hold at
+   least one code unit of the subject, so the load cannot cross into an
+   unmapped page and the end of the subject is checked only once a candidate is
+   found. That no longer holds once STR_PTR is moved forward. */
+if (offset > 0)
+  {
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
+
+#if defined SUPPORT_UNICODE
+restart = LABEL();
+#endif
 
 /* Align STR_PTR down to an 8-byte boundary; keep the misalignment in TMP2. */
 OP1(SLJIT_MOV, TMP2, 0, STR_PTR, 0);
@@ -3609,20 +3643,35 @@ CMPTO(SLJIT_ZERO, acc, 0, SLJIT_IMM, 0, start);
 JUMPHERE(quit);
 
 /* Both paths arrive with the mask in acc and STR_PTR at the byte that bit 0
-   of the mask describes. The constants are dead from here on, so R5 is free to
-   borrow: emit_alpha_ctz8() clobbers RETURN_ADDR, which is where the caller
-   keeps the unclamped STR_END while match_end_ptr is set. */
-if (common->match_end_ptr != 0)
-  OP1(SLJIT_MOV, SLJIT_R5, 0, RETURN_ADDR, 0);
-
+   of the mask describes. */
 OP1(SLJIT_MOV, TMP1, 0, acc, 0);
 emit_alpha_ctz8(compiler);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
 
-if (common->match_end_ptr != 0)
-  OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_R5, 0);
-
 add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+
+#if defined SUPPORT_UNICODE
+if (common->utf && offset > 0)
+  {
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-offset));
+
+  quit = jump_if_utf_char_start(compiler, TMP1);
+
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, restart);
+
+  add_jump(compiler, &common->failed_match, JUMP(SLJIT_JUMP));
+
+  JUMPHERE(quit);
+  }
+#endif
+
+if (offset > 0)
+  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
+
+if (common->match_end_ptr != 0)
+  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+
 return TRUE;
 }
 

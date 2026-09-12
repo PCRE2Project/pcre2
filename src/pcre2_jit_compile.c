@@ -7129,16 +7129,6 @@ if (common->match_end_ptr != 0)
   SELECT(SLJIT_GREATER, STR_END, TMP1, 0, STR_END);
   }
 
-#ifdef JIT_HAS_FAST_FORWARD_START_BITS_SIMD
-if (JIT_HAS_FAST_FORWARD_START_BITS_SIMD && common->mode == PCRE2_JIT_COMPLETE
-    && fast_forward_start_bits_simd(common, start_bits))
-  {
-  if (common->match_end_ptr != 0)
-    OP1(SLJIT_MOV, STR_END, 0, RETURN_ADDR, 0);
-  return;
-  }
-#endif
-
 start = LABEL();
 
 partial_quit = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
