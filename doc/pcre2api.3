@@ -89,6 +89,18 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .B void pcre2_compile_context_free(pcre2_compile_context *\fIccontext\fP);
 .sp
+.B int pcre2_get_bsr(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
+.B "  PCRE2_SIZE *\fIvalue\fP);"
+.sp
+.B int pcre2_get_newline(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
 .B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP,
 .B "  uint32_t \fIvalue\fP);"
 .sp
@@ -132,6 +144,18 @@ document for an overview of all the PCRE2 documentation.
 .B "  pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_match_context_free(pcre2_match_context *\fImcontext\fP);
+.sp
+.B int pcre2_get_heap_limit(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_match_limit(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_depth_limit(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_offset_limit(pcre2_match_context *\fImcontext\fP,
+.B "  PCRE2_SIZE *\fIvalue\fP);"
 .sp
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
 .B "  int (*\fIcallout_function\fP)(pcre2_callout_block *, void *),"
@@ -768,6 +792,23 @@ A compile context is created, copied, and freed by the following functions:
 A compile context is created with default values for its parameters. These can
 be changed by calling the following functions, which return 0 on success, or
 PCRE2_ERROR_BADDATA if invalid data is detected.
+.P
+The following functions get the values of the compile context parameters. They
+return 0 on success or PCRE2_ERROR_NULL if either argument is NULL.
+.sp
+.nf
+.B int pcre2_get_bsr(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
+.B "  PCRE2_SIZE *\fIvalue\fP);"
+.sp
+.B int pcre2_get_newline(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.fi
 .sp
 .nf
 .B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP,
@@ -1023,6 +1064,23 @@ A match context is created, copied, and freed by the following functions:
 A match context is created with default values for its parameters. These can
 be changed by calling the following functions, which return 0 on success, or
 PCRE2_ERROR_BADDATA if invalid data is detected.
+.P
+The following functions get the values of the match context parameters. They
+return 0 on success or PCRE2_ERROR_NULL if either argument is NULL.
+.sp
+.nf
+.B int pcre2_get_heap_limit(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_match_limit(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_depth_limit(pcre2_match_context *\fImcontext\fP,
+.B "  uint32_t *\fIvalue\fP);"
+.sp
+.B int pcre2_get_offset_limit(pcre2_match_context *\fImcontext\fP,
+.B "  PCRE2_SIZE *\fIvalue\fP);"
+.fi
 .sp
 .nf
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
