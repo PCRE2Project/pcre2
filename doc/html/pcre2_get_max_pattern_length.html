@@ -1,9 +1,9 @@
 <html>
 <head>
-<title>pcre2_set_offset_limit specification</title>
+<title>pcre2_get_max_pattern_length specification</title>
 </head>
 <body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-<h1>pcre2_set_offset_limit man page</h1>
+<h1>pcre2_get_max_pattern_length man page</h1>
 <p>
 Return to the <a href="index.html">PCRE2 index page</a>.
 </p>
@@ -19,16 +19,17 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>int pcre2_set_offset_limit(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  PCRE2_SIZE <i>value</i>);</b>
+<b>int pcre2_get_max_pattern_length(pcre2_compile_context *<i>ccontext</i>,</b>
+<b>  PCRE2_SIZE *<i>value</i>);</b>
 </p>
 <h2>
 DESCRIPTION
 </h2>
 <p>
-This function sets the offset limit field in a match context. The result is
-always zero. The largest value a PCRE2_SIZE variable can hold removes the
-offset limit.
+This function gets, from a compile context, the maximum text length (in code
+units) of the pattern that can be compiled. The result is zero for success or
+PCRE2_ERROR_NULL if either argument is NULL. The largest value a PCRE2_SIZE
+variable can hold indicates an unlimited limit.
 </p>
 <p>
 There is a complete description of the PCRE2 native API in the

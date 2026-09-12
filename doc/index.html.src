@@ -156,8 +156,17 @@ in the library.
 <tr><td><a href="pcre2_general_context_free.html">pcre2_general_context_free</a></td>
     <td>Free a general context</td></tr>
 
+<tr><td><a href="pcre2_get_bsr.html">pcre2_get_bsr</a></td>
+    <td>Get the \R convention</td></tr>
+
+<tr><td><a href="pcre2_get_depth_limit.html">pcre2_get_depth_limit</a></td>
+    <td>Get the match backtracking depth limit</td></tr>
+
 <tr><td><a href="pcre2_get_error_message.html">pcre2_get_error_message</a></td>
     <td>Get textual error message for error number</td></tr>
+
+<tr><td><a href="pcre2_get_heap_limit.html">pcre2_get_heap_limit</a></td>
+    <td>Get the match backtracking heap limit</td></tr>
 
 <tr><td><a href="pcre2_get_mark.html">pcre2_get_mark</a></td>
     <td>Get a (*MARK) name</td></tr>
@@ -165,11 +174,26 @@ in the library.
 <tr><td><a href="pcre2_get_match_data_size.html">pcre2_get_match_data_size</a></td>
     <td>Get the size of a match data block</td></tr>
 
+<tr><td><a href="pcre2_get_match_limit.html">pcre2_get_match_limit</a></td>
+    <td>Get the match limit</td></tr>
+
+<tr><td><a href="pcre2_get_max_pattern_length.html">pcre2_get_max_pattern_length</a></td>
+    <td>Get the maximum length of a pattern</td></tr>
+
+<tr><td><a href="pcre2_get_newline.html">pcre2_get_newline</a></td>
+    <td>Get the newline convention</td></tr>
+
+<tr><td><a href="pcre2_get_offset_limit.html">pcre2_get_offset_limit</a></td>
+    <td>Get the offset limit</td></tr>
+
 <tr><td><a href="pcre2_get_ovector_count.html">pcre2_get_ovector_count</a></td>
     <td>Get the ovector count</td></tr>
 
 <tr><td><a href="pcre2_get_ovector_pointer.html">pcre2_get_ovector_pointer</a></td>
     <td>Get a pointer to the ovector</td></tr>
+
+<tr><td><a href="pcre2_get_parens_nest_limit.html">pcre2_get_parens_nest_limit</a></td>
+    <td>Get the parentheses nesting limit</td></tr>
 
 <tr><td><a href="pcre2_get_startchar.html">pcre2_get_startchar</a></td>
     <td>Get the starting character offset</td></tr>

@@ -272,6 +272,18 @@ PCRE2 NATIVE API COMPILE CONTEXT FUNCTIONS
 
        void pcre2_compile_context_free(pcre2_compile_context *ccontext);
 
+       int pcre2_get_bsr(pcre2_compile_context *ccontext,
+         uint32_t *value);
+
+       int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
+         PCRE2_SIZE *value);
+
+       int pcre2_get_newline(pcre2_compile_context *ccontext,
+         uint32_t *value);
+
+       int pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext,
+         uint32_t *value);
+
        int pcre2_set_bsr(pcre2_compile_context *ccontext,
          uint32_t value);
 
@@ -312,6 +324,18 @@ PCRE2 NATIVE API MATCH CONTEXT FUNCTIONS
          pcre2_match_context *mcontext);
 
        void pcre2_match_context_free(pcre2_match_context *mcontext);
+
+       int pcre2_get_heap_limit(pcre2_match_context *mcontext,
+         uint32_t *value);
+
+       int pcre2_get_match_limit(pcre2_match_context *mcontext,
+         uint32_t *value);
+
+       int pcre2_get_depth_limit(pcre2_match_context *mcontext,
+         uint32_t *value);
+
+       int pcre2_get_offset_limit(pcre2_match_context *mcontext,
+         PCRE2_SIZE *value);
 
        int pcre2_set_callout(pcre2_match_context *mcontext,
          int (*callout_function)(pcre2_callout_block *, void *),
@@ -889,6 +913,28 @@ PCRE2 CONTEXTS
        These can be changed by calling the following functions, which return 0
        on success, or PCRE2_ERROR_BADDATA if invalid data is detected.
 
+       The  following functions get, respectively, the convention for process-
+       ing \R, the maximum pattern length, the  newline  convention,  and  the
+       maximum  depth  of  nested  parentheses.  They  return  0 on success or
+       PCRE2_ERROR_NULL if either argument is NULL.
+
+       int pcre2_get_bsr(pcre2_compile_context *ccontext,
+         uint32_t *value);
+
+       int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
+         PCRE2_SIZE *value);
+
+       int pcre2_get_newline(pcre2_compile_context *ccontext,
+         uint32_t *value);
+
+       int pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext,
+         uint32_t *value);
+
+       The value returned by  pcre2_get_max_pattern_length()  is  the  largest
+       value a PCRE2_SIZE variable can hold when the limit is unlimited. Pass-
+       ing this value to pcre2_set_max_pattern_length() makes the limit unlim-
+       ited.
+
        int pcre2_set_bsr(pcre2_compile_context *ccontext,
          uint32_t value);
 
@@ -1123,6 +1169,26 @@ PCRE2 CONTEXTS
        A match context is created with  default  values  for  its  parameters.
        These can be changed by calling the following functions, which return 0
        on success, or PCRE2_ERROR_BADDATA if invalid data is detected.
+
+       The following functions get, respectively, the backtracking heap limit,
+       match limit, depth limit, and offset limit. They return 0 on success or
+       PCRE2_ERROR_NULL if either argument is NULL.
+
+       int pcre2_get_heap_limit(pcre2_match_context *mcontext,
+         uint32_t *value);
+
+       int pcre2_get_match_limit(pcre2_match_context *mcontext,
+         uint32_t *value);
+
+       int pcre2_get_depth_limit(pcre2_match_context *mcontext,
+         uint32_t *value);
+
+       int pcre2_get_offset_limit(pcre2_match_context *mcontext,
+         PCRE2_SIZE *value);
+
+       The  value  returned by pcre2_get_offset_limit() is the largest value a
+       PCRE2_SIZE variable can hold when there is  no  offset  limit.  Passing
+       this value to pcre2_set_offset_limit() removes the offset limit.
 
        int pcre2_set_callout(pcre2_match_context *mcontext,
          int (*callout_function)(pcre2_callout_block *, void *),
