@@ -3461,14 +3461,17 @@ if (zos_type == __ZOS_PDS || zos_type == __ZOS_PDSE)
 
 /* Handle a z/OS directory using common code. */
 
-else if (zos_type == __ZOS_HFS)
- {
 #endif  /* NATIVE_ZOS */
 
 
 /* Handle directories: common code for all OS */
 
-if (isdirectory(pathname))
+if (
+#if defined NATIVE_ZOS
+    zos_type == __ZOS_HFS &&
+#endif
+    isdirectory(pathname)
+  )
   {
   if (dee_action == dee_SKIP ||
       !test_incexc(lastcomp, include_dir_patterns, exclude_dir_patterns))
@@ -3546,7 +3549,7 @@ if (isdirectory(pathname))
   }
 
 #ifdef WIN32
-if (iswild(pathname))
+else if (iswild(pathname))
   {
   char buffer[1024];
   char *nextfile;
@@ -3585,10 +3588,6 @@ if (iswild(pathname))
   closedirectory(dir);
   return rc;
   }
-#endif
-
-#if defined NATIVE_ZOS
- }
 #endif
 
 /* If the file is not a directory, check for a regular file, and if it is not,
