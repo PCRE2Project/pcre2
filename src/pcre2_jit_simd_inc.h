@@ -589,15 +589,12 @@ if (common->match_end_ptr != 0)
   SELECT(SLJIT_LESS, STR_END, TMP1, 0, STR_END);
   }
 
-/* At offset zero the block the first load reads from is known to hold at least
-   one code unit of the subject, so the load cannot cross into an unmapped page
-   and the end of the subject is checked only once a candidate is found. That no
-   longer holds once STR_PTR is moved forward. */
 if (offset > 0)
-  {
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
-  add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-  }
+
+/* STR_PTR may equal STR_END, and the block the first load reads could then be
+   in an unmapped page. */
+add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
 /* Load the constants of every range, two registers apiece from VR3 upwards,
    of which a single character needs only the first. */
