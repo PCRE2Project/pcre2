@@ -5881,7 +5881,7 @@ fast_forward_char_data *chars_end = chars + MAX_N_CHARS;
 PCRE2_SPTR cc_stack[SCAN_PREFIX_STACK_END];
 fast_forward_char_data *chars_stack[SCAN_PREFIX_STACK_END];
 sljit_u8 next_alternative_stack[SCAN_PREFIX_STACK_END];
-BOOL last, any, class, caseless;
+BOOL last, any, class, caseless, accept_above;
 int stack_ptr, step_count, repeat, len, len_save;
 sljit_u32 chr; // Any unicode character.
 sljit_u8 *bytes, *bytes_end, byte;
@@ -6206,6 +6206,14 @@ while (TRUE)
   if (class)
     {
     bytes = (sljit_u8*) (cc + 1);
+    /* The bitmap covers the first 256 code units. Whatever it says about 255,
+    a negated class accepts every code unit above them and a positive class
+    none, and the 8-bit library has none to accept. */
+#if PCRE2_CODE_UNIT_WIDTH != 8
+    accept_above = (*cc == OP_NCLASS);
+#else
+    accept_above = FALSE;
+#endif
     cc += 1 + 32 / sizeof(PCRE2_UCHAR);
 
     SLJIT_ASSERT(last == TRUE && repeat == 1);
@@ -6255,7 +6263,7 @@ while (TRUE)
 
     do
       {
-      if (bytes[31] & 0x80)
+      if (accept_above)
         chars->count = 255;
       else if (chars->count != 255)
         {
