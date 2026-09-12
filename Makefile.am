@@ -52,12 +52,20 @@ dist_html_DATA = \
   doc/html/pcre2_general_context_copy.html \
   doc/html/pcre2_general_context_create.html \
   doc/html/pcre2_general_context_free.html \
+  doc/html/pcre2_get_bsr.html \
+  doc/html/pcre2_get_depth_limit.html \
   doc/html/pcre2_get_error_message.html \
+  doc/html/pcre2_get_heap_limit.html \
   doc/html/pcre2_get_mark.html \
   doc/html/pcre2_get_match_data_heapframes_size.html \
   doc/html/pcre2_get_match_data_size.html \
+  doc/html/pcre2_get_match_limit.html \
+  doc/html/pcre2_get_max_pattern_length.html \
+  doc/html/pcre2_get_newline.html \
+  doc/html/pcre2_get_offset_limit.html \
   doc/html/pcre2_get_ovector_count.html \
   doc/html/pcre2_get_ovector_pointer.html \
+  doc/html/pcre2_get_parens_nest_limit.html \
   doc/html/pcre2_get_startchar.html \
   doc/html/pcre2_jit_compile.html \
   doc/html/pcre2_jit_free_unused_memory.html \
@@ -94,9 +102,9 @@ dist_html_DATA = \
   doc/html/pcre2_set_max_pattern_compiled_length.html \
   doc/html/pcre2_set_max_pattern_length.html \
   doc/html/pcre2_set_max_varlookbehind.html \
+  doc/html/pcre2_set_newline.html \
   doc/html/pcre2_set_offset_limit.html \
   doc/html/pcre2_set_optimize.html \
-  doc/html/pcre2_set_newline.html \
   doc/html/pcre2_set_parens_nest_limit.html \
   doc/html/pcre2_set_recursion_limit.html \
   doc/html/pcre2_set_recursion_memory_management.html \
@@ -154,12 +162,20 @@ dist_man_MANS = \
   doc/pcre2_general_context_copy.3 \
   doc/pcre2_general_context_create.3 \
   doc/pcre2_general_context_free.3 \
+  doc/pcre2_get_bsr.3 \
+  doc/pcre2_get_depth_limit.3 \
   doc/pcre2_get_error_message.3 \
+  doc/pcre2_get_heap_limit.3 \
   doc/pcre2_get_mark.3 \
   doc/pcre2_get_match_data_heapframes_size.3 \
   doc/pcre2_get_match_data_size.3 \
+  doc/pcre2_get_match_limit.3 \
+  doc/pcre2_get_max_pattern_length.3 \
+  doc/pcre2_get_newline.3 \
+  doc/pcre2_get_offset_limit.3 \
   doc/pcre2_get_ovector_count.3 \
   doc/pcre2_get_ovector_pointer.3 \
+  doc/pcre2_get_parens_nest_limit.3 \
   doc/pcre2_get_startchar.3 \
   doc/pcre2_jit_compile.3 \
   doc/pcre2_jit_free_unused_memory.3 \
@@ -196,9 +212,9 @@ dist_man_MANS = \
   doc/pcre2_set_max_pattern_compiled_length.3 \
   doc/pcre2_set_max_pattern_length.3 \
   doc/pcre2_set_max_varlookbehind.3 \
+  doc/pcre2_set_newline.3 \
   doc/pcre2_set_offset_limit.3 \
   doc/pcre2_set_optimize.3 \
-  doc/pcre2_set_newline.3 \
   doc/pcre2_set_parens_nest_limit.3 \
   doc/pcre2_set_recursion_limit.3 \
   doc/pcre2_set_recursion_memory_management.3 \
