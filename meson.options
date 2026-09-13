@@ -71,6 +71,8 @@ option('PCRE2_BUILD_PCRE2GREP', type: 'boolean', value: true,
   description: 'Build pcre2grep')
 option('PCRE2_BUILD_TESTS', type: 'boolean', value: true,
   description: 'Build the tests')
+option('PCRE2_INSTALL_CMAKEDIR', type: 'string', value: '',
+  description: 'Install path for PCRE2 CMake config files; defaults to libdir/cmake/pcre2.')
 option('PCRE2_SYMVERS', type: 'boolean', value: true,
   description: 'Enable library symbol versioning')
 option('PCRE2_SUPPORT_LIBBZ2', type: 'feature', value: 'auto',
@@ -81,4 +83,3 @@ option('PCRE2_SUPPORT_LIBEDIT', type: 'feature', value: 'disabled',
   description: 'Enable support for linking pcre2test with libedit.')
 option('PCRE2_SUPPORT_LIBREADLINE', type: 'feature', value: 'auto',
   description: 'Enable support for linking pcre2test with libreadline.')
-
