@@ -60,8 +60,8 @@ Each substring ends with \0 to insert a null character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
 counting through. */
 
+// clang-format off
 static const unsigned char compile_error_texts[] =
-  // clang-format off
   "no error\0"
   "\\ at end of pattern\0"
   "\\c at end of pattern\0"
@@ -212,13 +212,13 @@ static const unsigned char compile_error_texts[] =
   "syntax error in subpattern number (missing terminator?)\0"
   /* 120 */
   "erroroffset passed as NULL\0"
-  // clang-format on
   ;
+// clang-format on
 
 /* Match-time and UTF error texts are in the same format. */
 
+// clang-format off
 static const unsigned char match_error_texts[] =
-  // clang-format off
   "no error\0"
   "no match\0"
   "partial match\0"
@@ -311,8 +311,8 @@ static const unsigned char match_error_texts[] =
   /* 75 */
   "disallowed use of \\K in lookaround\0"
   "replacement $' or $_ not supported with partial match\0"
-  // clang-format on
   ;
+// clang-format on
 
 
 /*************************************************

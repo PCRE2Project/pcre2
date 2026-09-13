@@ -6946,6 +6946,7 @@ mb->cb->callout_flags |= PCRE2_CALLOUT_BACKTRACK; // Note for callouts
 fprintf(stderr, "++ RETURN %d to RM%d\n", rrc, Freturn_id);
 #endif
 
+// clang-format off
 switch (Freturn_id)
   {
   LBL( 1) LBL( 2) LBL( 3) LBL( 4) LBL( 5) LBL( 6) LBL( 7) LBL( 8)
@@ -6967,10 +6968,11 @@ switch (Freturn_id)
 
   /* LCOV_EXCL_START */
   default:
-  PCRE2_DEBUG_UNREACHABLE();
-  return PCRE2_ERROR_INTERNAL;
+    PCRE2_DEBUG_UNREACHABLE();
+    return PCRE2_ERROR_INTERNAL;
   /* LCOV_EXCL_STOP */
   }
+// clang-format on
 #undef LBL
 }
 
