@@ -1,0 +1,50 @@
+#! /usr/bin/env bash
+
+COMMIT=60f6074aa69d803319262f1c279a79f28f76e059
+
+git reset --hard $COMMIT
+
+files=`echo src/*.{h,c}` # `src/{pcre2_chkdint.c,pcre2_ord2utf.c,pcre2_config.c}`
+
+for file in $files; do
+  python3 maint/IndentBraces.py $file
+done
+
+git checkout src/pcre2_uc* src/pcre2_jit_test.c
+git add -u src
+
+git -c user.gpgsign=false -c user.name='github-actions[bot]' \
+  -c user.email='<41898282+github-actions[bot]@users.noreply.github.com>' \
+  commit -m'Bulk reformat: function indentation +2, brace indentation -2'
+
+clang-format-20 --style=file:maint/formatting.clang -i $files
+
+# for file in $files; do
+#   python3 maint/DeindentBraces.py $file
+# done
+
+git checkout src/pcre2_uc*
+git add -u src
+
+git -c user.gpgsign=false -c user.name='github-actions[bot]' \
+  -c user.email='<41898282+github-actions[bot]@users.noreply.github.com>' \
+  commit -m'Bulk reformat: regularise formatting with clang-format'
+
+
+# THINGS TO CHECK, after it all lands:
+#
+# else-for statements (in general: if/else/while with bodies longer than one line)
+#   ```
+#   // It's not beautiful, but I think this is OK:
+#   if (a)
+#     if (a)
+#       c();
+#
+#   // This feels wrong though; if you contain braces, you need them too
+#   if (a)
+#     if (a)
+#     {
+#       c();
+#     }
+#   ```
+#
