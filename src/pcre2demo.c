@@ -66,7 +66,8 @@ to be modified. */
 * always passing NULL where a context could be given.                     *
 **************************************************************************/
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   pcre2_code *re;
   /* PCRE2_SPTR is a pointer to unsigned code units of the appropriate width
@@ -105,14 +106,17 @@ int main(int argc, char **argv)
   caseless_match = 0;
   for (i = 1; i < argc; i++)
   {
-    if (strcmp(argv[i], "-g") == 0) find_all = 1;
-    else if (strcmp(argv[i], "-i") == 0) caseless_match = PCRE2_CASELESS;
+    if (strcmp(argv[i], "-g") == 0)
+      find_all = 1;
+    else if (strcmp(argv[i], "-i") == 0)
+      caseless_match = PCRE2_CASELESS;
     else if (argv[i][0] == '-')
     {
       printf("Unrecognised option %s\n", argv[i]);
       return 1;
     }
-    else break;
+    else
+      break;
   }
 
   /* After the options, we require exactly two arguments, which are the pattern,
@@ -130,7 +134,7 @@ int main(int argc, char **argv)
   defined to be size_t. */
 
   pattern = (PCRE2_SPTR)argv[i];
-  subject = (PCRE2_SPTR)argv[i+1];
+  subject = (PCRE2_SPTR)argv[i + 1];
   subject_length = (PCRE2_SIZE)strlen((char *)subject);
 
 
@@ -139,13 +143,12 @@ int main(int argc, char **argv)
   * any errors that are detected.                                          *
   *************************************************************************/
 
-  re = pcre2_compile(
-    pattern,               // the pattern
-    PCRE2_ZERO_TERMINATED, // indicates pattern is zero-terminated
-    caseless_match,        // possibly enable caseless
-    &errornumber,          // for error number
-    &erroroffset,          // for error offset
-    NULL);                 // use default compile context
+  re = pcre2_compile(pattern,               // the pattern
+                     PCRE2_ZERO_TERMINATED, // indicates pattern is zero-terminated
+                     caseless_match,        // possibly enable caseless
+                     &errornumber,          // for error number
+                     &erroroffset,          // for error offset
+                     NULL);                 // use default compile context
 
   /* Compilation failed: print the error message and exit. */
 
@@ -153,8 +156,7 @@ int main(int argc, char **argv)
   {
     PCRE2_UCHAR buffer[256];
     pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
-    printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset,
-      buffer);
+    printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset, buffer);
     return 1;
   }
 
@@ -176,14 +178,13 @@ int main(int argc, char **argv)
 
   /* Now run the match. */
 
-  rc = pcre2_match(
-    re,                   // the compiled pattern
-    subject,              // the subject string
-    subject_length,       // the length of the subject
-    0,                    // start at offset 0 in the subject
-    0,                    // default options
-    match_data,           // block for storing the result
-    NULL);                // use default match context
+  rc = pcre2_match(re,             // the compiled pattern
+                   subject,        // the subject string
+                   subject_length, // the length of the subject
+                   0,              // start at offset 0 in the subject
+                   0,              // default options
+                   match_data,     // block for storing the result
+                   NULL);          // use default match context
 
   /* Matching failed: handle error cases */
 
@@ -191,11 +192,15 @@ int main(int argc, char **argv)
   {
     switch (rc)
     {
-    case PCRE2_ERROR_NOMATCH:   printf("No match\n"); break;
+    case PCRE2_ERROR_NOMATCH:
+      printf("No match\n");
+      break;
       /*
       Handle other special cases if you like
       */
-    default:   printf("Matching error %d\n", rc); break;
+    default:
+      printf("Matching error %d\n", rc);
+      break;
     }
     /* Release memory used for the match data and the compiled pattern. */
     pcre2_match_data_free(match_data);
@@ -233,8 +238,8 @@ int main(int argc, char **argv)
   if (ovector[0] > ovector[1])
   {
     printf("\\K was used in an assertion to set the match start after its end.\n"
-      "From end to start the match was: %.*s\n", (int)(ovector[0] - ovector[1]),
-        (char *)(subject + ovector[1]));
+           "From end to start the match was: %.*s\n",
+           (int)(ovector[0] - ovector[1]), (char *)(subject + ovector[1]));
     printf("Run abandoned\n");
     pcre2_match_data_free(match_data);
     pcre2_code_free(re);
@@ -246,8 +251,8 @@ int main(int argc, char **argv)
 
   for (i = 0; i < rc; i++)
   {
-    PCRE2_SPTR substring_start = subject + ovector[2*i];
-    PCRE2_SIZE substring_length = ovector[2*i+1] - ovector[2*i];
+    PCRE2_SPTR substring_start = subject + ovector[2 * i];
+    PCRE2_SIZE substring_length = ovector[2 * i + 1] - ovector[2 * i];
     printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
   }
 
@@ -262,10 +267,9 @@ int main(int argc, char **argv)
   /* See if there are any named substrings, and if so, show them by name. First
   we have to extract the count of named parentheses from the pattern. */
 
-  (void)pcre2_pattern_info(
-    re,                   // the compiled pattern
-    PCRE2_INFO_NAMECOUNT, // get the number of named substrings
-    &namecount);          // where to put the answer
+  (void)pcre2_pattern_info(re,                   // the compiled pattern
+                           PCRE2_INFO_NAMECOUNT, // get the number of named substrings
+                           &namecount);          // where to put the answer
 
   if (namecount == 0)
     printf("No named substrings\n");
@@ -277,15 +281,13 @@ int main(int argc, char **argv)
     /* Before we can access the substrings, we must extract the table for
     translating names to numbers, and the size of each entry in the table. */
 
-    (void)pcre2_pattern_info(
-      re,                       // the compiled pattern
-      PCRE2_INFO_NAMETABLE,     // address of the table
-      &name_table);             // where to put the answer
+    (void)pcre2_pattern_info(re,                   // the compiled pattern
+                             PCRE2_INFO_NAMETABLE, // address of the table
+                             &name_table);         // where to put the answer
 
-    (void)pcre2_pattern_info(
-      re,                       // the compiled pattern
-      PCRE2_INFO_NAMEENTRYSIZE, // size of each entry in the table
-      &name_entry_size);        // where to put the answer
+    (void)pcre2_pattern_info(re,                       // the compiled pattern
+                             PCRE2_INFO_NAMEENTRYSIZE, // size of each entry in the table
+                             &name_entry_size);        // where to put the answer
 
     /* Now we can scan the table and, for each entry, print the number, the name,
     and the substring itself. In the 8-bit library the number is held in two
@@ -296,7 +298,7 @@ int main(int argc, char **argv)
     {
       int n = (tabptr[0] << 8) | tabptr[1];
       printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
-        (int)(ovector[2*n+1] - ovector[2*n]), subject + ovector[2*n]);
+             (int)(ovector[2 * n + 1] - ovector[2 * n]), subject + ovector[2 * n]);
       tabptr += name_entry_size;
     }
   }
@@ -311,12 +313,12 @@ int main(int argc, char **argv)
   * To help with this task, PCRE2 provides the pcre2_next_match() helper.  *
   *************************************************************************/
 
-  if (!find_all)     // Check for -g
+  if (!find_all) // Check for -g
   {
     /* Release the memory that was used for the match data and the pattern. */
     pcre2_match_data_free(match_data);
     pcre2_code_free(re);
-    return 0;  // Exit the program.
+    return 0; // Exit the program.
   }
 
   /* Loop for second and subsequent matches */
@@ -337,14 +339,13 @@ int main(int argc, char **argv)
 
     /* Run the next matching operation */
 
-    rc = pcre2_match(
-      re,                   // the compiled pattern
-      subject,              // the subject string
-      subject_length,       // the length of the subject
-      start_offset,         // starting offset in the subject
-      options,              // options
-      match_data,           // block for storing the result
-      NULL);                // use default match context
+    rc = pcre2_match(re,             // the compiled pattern
+                     subject,        // the subject string
+                     subject_length, // the length of the subject
+                     start_offset,   // starting offset in the subject
+                     options,        // options
+                     match_data,     // block for storing the result
+                     NULL);          // use default match context
 
     /* If this match attempt fails, exit the loop for subsequent matches. */
 
@@ -406,8 +407,8 @@ int main(int argc, char **argv)
     if (ovector[0] > ovector[1])
     {
       printf("\\K was used in an assertion to set the match start after its end.\n"
-        "From end to start the match was: %.*s\n", (int)(ovector[0] - ovector[1]),
-          (char *)(subject + ovector[1]));
+             "From end to start the match was: %.*s\n",
+             (int)(ovector[0] - ovector[1]), (char *)(subject + ovector[1]));
       printf("Run abandoned\n");
       pcre2_match_data_free(match_data);
       pcre2_code_free(re);
@@ -419,8 +420,8 @@ int main(int argc, char **argv)
 
     for (i = 0; i < rc; i++)
     {
-      PCRE2_SPTR substring_start = subject + ovector[2*i];
-      size_t substring_length = ovector[2*i+1] - ovector[2*i];
+      PCRE2_SPTR substring_start = subject + ovector[2 * i];
+      size_t substring_length = ovector[2 * i + 1] - ovector[2 * i];
       printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
     }
 
@@ -434,11 +435,11 @@ int main(int argc, char **argv)
       {
         int n = (tabptr[0] << 8) | tabptr[1];
         printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
-          (int)(ovector[2*n+1] - ovector[2*n]), subject + ovector[2*n]);
+               (int)(ovector[2 * n + 1] - ovector[2 * n]), subject + ovector[2 * n]);
         tabptr += name_entry_size;
       }
     }
-  }        // End of loop to find second and subsequent matches
+  } // End of loop to find second and subsequent matches
 
   printf("\n");
 

@@ -46,7 +46,7 @@ pcre2_dftables.c as a freestanding program, in which case the macro
 PCRE2_DFTABLES is defined. */
 
 
-#ifndef PCRE2_DFTABLES    /* Compiling the library */
+#ifndef PCRE2_DFTABLES /* Compiling the library */
 #include "pcre2_internal.h"
 #endif
 
@@ -71,27 +71,30 @@ Returns:     pointer to the contiguous block of data;
                else NULL if memory allocation failed
 */
 
-#ifdef PCRE2_DFTABLES  /* Included in freestanding pcre2_dftables program */
-static const uint8_t *maketables(int (*charfn_to)(int), int (*charfn_from)(int))
+#ifdef PCRE2_DFTABLES /* Included in freestanding pcre2_dftables program */
+static const uint8_t *
+maketables(int (*charfn_to)(int), int (*charfn_from)(int))
 {
   uint8_t *yield = (uint8_t *)malloc(TABLES_LENGTH);
 
-#else  /* Not PCRE2_DFTABLES, that is, compiling the library */
-  PCRE2_EXP_DEFN const uint8_t * PCRE2_CALL_CONVENTION
-  pcre2_maketables(pcre2_general_context *gcontext)
+#else /* Not PCRE2_DFTABLES, that is, compiling the library */
+PCRE2_EXP_DEFN const uint8_t *PCRE2_CALL_CONVENTION
+pcre2_maketables(pcre2_general_context *gcontext)
 {
-  uint8_t *yield = (uint8_t *)((gcontext != NULL)?
-    gcontext->memctl.malloc(TABLES_LENGTH, gcontext->memctl.memory_data) :
-    malloc(TABLES_LENGTH));
+  uint8_t *yield =
+      (uint8_t *)((gcontext != NULL)
+                      ? gcontext->memctl.malloc(TABLES_LENGTH, gcontext->memctl.memory_data)
+                      : malloc(TABLES_LENGTH));
 
-#define charfn_to(c)    (c)
-#define charfn_from(c)  (c)
-#endif  /* PCRE2_DFTABLES */
+#define charfn_to(c)   (c)
+#define charfn_from(c) (c)
+#endif /* PCRE2_DFTABLES */
 
   int i;
   uint8_t *p;
 
-  if (yield == NULL) return NULL;
+  if (yield == NULL)
+    return NULL;
   p = yield;
 
   /* First comes the lower casing table */
@@ -99,16 +102,15 @@ static const uint8_t *maketables(int (*charfn_to)(int), int (*charfn_from)(int))
   for (i = 0; i < 256; i++)
   {
     int c = charfn_from(tolower(charfn_to(i)));
-    *p++ = (c < 256)? c : i;
+    *p++ = (c < 256) ? c : i;
   }
 
   /* Next the case-flipping table */
 
   for (i = 0; i < 256; i++)
   {
-    int c = charfn_from(islower(charfn_to(i))? toupper(charfn_to(i))
-                                             : tolower(charfn_to(i)));
-    *p++ = (c < 256)? c : i;
+    int c = charfn_from(islower(charfn_to(i)) ? toupper(charfn_to(i)) : tolower(charfn_to(i)));
+    *p++ = (c < 256) ? c : i;
   }
 
   /* Then the character class tables. Don't try to be clever and save effort on
@@ -127,17 +129,28 @@ static const uint8_t *maketables(int (*charfn_to)(int), int (*charfn_from)(int))
   memset(p, 0, cbit_length);
   for (i = 0; i < 256; i++)
   {
-    if (isdigit(charfn_to(i)))  p[cbit_digit  + i/8] |= 1u << (i&7);
-    if (isupper(charfn_to(i)))  p[cbit_upper  + i/8] |= 1u << (i&7);
-    if (islower(charfn_to(i)))  p[cbit_lower  + i/8] |= 1u << (i&7);
-    if (isalnum(charfn_to(i)))  p[cbit_word   + i/8] |= 1u << (i&7);
-    if (i == CHAR_UNDERSCORE)   p[cbit_word   + i/8] |= 1u << (i&7);
-    if (isspace(charfn_to(i)))  p[cbit_space  + i/8] |= 1u << (i&7);
-    if (isxdigit(charfn_to(i))) p[cbit_xdigit + i/8] |= 1u << (i&7);
-    if (isgraph(charfn_to(i)))  p[cbit_graph  + i/8] |= 1u << (i&7);
-    if (isprint(charfn_to(i)))  p[cbit_print  + i/8] |= 1u << (i&7);
-    if (ispunct(charfn_to(i)))  p[cbit_punct  + i/8] |= 1u << (i&7);
-    if (iscntrl(charfn_to(i)))  p[cbit_cntrl  + i/8] |= 1u << (i&7);
+    if (isdigit(charfn_to(i)))
+      p[cbit_digit + i / 8] |= 1u << (i & 7);
+    if (isupper(charfn_to(i)))
+      p[cbit_upper + i / 8] |= 1u << (i & 7);
+    if (islower(charfn_to(i)))
+      p[cbit_lower + i / 8] |= 1u << (i & 7);
+    if (isalnum(charfn_to(i)))
+      p[cbit_word + i / 8] |= 1u << (i & 7);
+    if (i == CHAR_UNDERSCORE)
+      p[cbit_word + i / 8] |= 1u << (i & 7);
+    if (isspace(charfn_to(i)))
+      p[cbit_space + i / 8] |= 1u << (i & 7);
+    if (isxdigit(charfn_to(i)))
+      p[cbit_xdigit + i / 8] |= 1u << (i & 7);
+    if (isgraph(charfn_to(i)))
+      p[cbit_graph + i / 8] |= 1u << (i & 7);
+    if (isprint(charfn_to(i)))
+      p[cbit_print + i / 8] |= 1u << (i & 7);
+    if (ispunct(charfn_to(i)))
+      p[cbit_punct + i / 8] |= 1u << (i & 7);
+    if (iscntrl(charfn_to(i)))
+      p[cbit_cntrl + i / 8] |= 1u << (i & 7);
   }
   p += cbit_length;
 
@@ -149,18 +162,23 @@ static const uint8_t *maketables(int (*charfn_to)(int), int (*charfn_from)(int))
   for (i = 0; i < 256; i++)
   {
     int x = 0;
-    if (isspace(charfn_to(i))) x += ctype_space;
-    if (isalpha(charfn_to(i))) x += ctype_letter;
-    if (islower(charfn_to(i))) x += ctype_lcletter;
-    if (isdigit(charfn_to(i))) x += ctype_digit;
-    if (isalnum(charfn_to(i)) || i == CHAR_UNDERSCORE) x += ctype_word;
+    if (isspace(charfn_to(i)))
+      x += ctype_space;
+    if (isalpha(charfn_to(i)))
+      x += ctype_letter;
+    if (islower(charfn_to(i)))
+      x += ctype_lcletter;
+    if (isdigit(charfn_to(i)))
+      x += ctype_digit;
+    if (isalnum(charfn_to(i)) || i == CHAR_UNDERSCORE)
+      x += ctype_word;
     *p++ = x;
   }
 
   return yield;
 }
 
-#ifndef PCRE2_DFTABLES   /* Compiling the library */
+#ifndef PCRE2_DFTABLES /* Compiling the library */
 #undef charfn_to
 #undef charfn_from
 

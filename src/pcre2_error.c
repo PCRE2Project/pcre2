@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#define STRING(a)  # a
+#define STRING(a)  #a
 #define XSTRING(s) STRING(s)
 
 /* The texts of compile-time error messages. Compile-time error numbers start
@@ -340,28 +340,31 @@ pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
   PCRE2_SIZE i;
   int n, rc = 0;
 
-  if (size == 0) return PCRE2_ERROR_NOMEMORY;
+  if (size == 0)
+    return PCRE2_ERROR_NOMEMORY;
 
-  if (enumber >= COMPILE_ERROR_BASE)  // Compile error
+  if (enumber >= COMPILE_ERROR_BASE) // Compile error
   {
     message = compile_error_texts;
     n = enumber - COMPILE_ERROR_BASE;
   }
-  else if (enumber < 0)               // Match or UTF error
+  else if (enumber < 0) // Match or UTF error
   {
     message = match_error_texts;
     n = -enumber;
   }
-  else                                // Invalid error number
+  else // Invalid error number
   {
-    message = (const unsigned char *)"\0";  // Empty message list
+    message = (const unsigned char *)"\0"; // Empty message list
     n = 1;
   }
 
   for (; n > 0; n--)
   {
-    while (*message++ != CHAR_NUL) {}
-    if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
+    while (*message++ != CHAR_NUL)
+    {}
+    if (*message == CHAR_NUL)
+      return PCRE2_ERROR_BADDATA;
   }
 
   for (i = 0; *message != 0; i++)
@@ -383,8 +386,8 @@ pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
     buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
 #endif
 
-  buffer[i] = 0;     // Terminate message, even if truncated.
-  return rc? rc : (int)i;
+  buffer[i] = 0; // Terminate message, even if truncated.
+  return rc ? rc : (int)i;
 }
 
 /* End of pcre2_error.c */

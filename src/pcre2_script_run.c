@@ -70,16 +70,16 @@ Returns:    TRUE if this is a valid script run
 /* These are states in the checking process. */
 
 enum {
-  SCRIPT_UNSET,        // Requirement as yet unknown
-  SCRIPT_MAP,          // Bitmap contains acceptable scripts
-  SCRIPT_HANPENDING,   // Have had only Han characters
-  SCRIPT_HANHIRAKATA,  // Expect Han or Hirikata
-  SCRIPT_HANBOPOMOFO,  // Expect Han or Bopomofo
-  SCRIPT_HANHANGUL     // Expect Han or Hangul
+  SCRIPT_UNSET,       // Requirement as yet unknown
+  SCRIPT_MAP,         // Bitmap contains acceptable scripts
+  SCRIPT_HANPENDING,  // Have had only Han characters
+  SCRIPT_HANHIRAKATA, // Expect Han or Hirikata
+  SCRIPT_HANBOPOMOFO, // Expect Han or Bopomofo
+  SCRIPT_HANHANGUL    // Expect Han or Hangul
 };
 
-#define UCD_MAPSIZE (ucp_Unknown/32 + 1)
-#define FULL_MAPSIZE (ucp_Script_Count/32 + 1)
+#define UCD_MAPSIZE  (ucp_Unknown / 32 + 1)
+#define FULL_MAPSIZE (ucp_Script_Count / 32 + 1)
 
 BOOL
 PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
@@ -92,21 +92,24 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
   uint32_t c;
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
-  (void)utf;    // Avoid compiler warning
+  (void)utf; // Avoid compiler warning
 #endif
 
   /* Any string containing fewer than 2 characters is a valid script run. */
 
-  if (ptr >= endptr) return TRUE;
+  if (ptr >= endptr)
+    return TRUE;
   GETCHARINCTEST(c, ptr);
-  if (ptr >= endptr) return TRUE;
+  if (ptr >= endptr)
+    return TRUE;
 
   /* Initialize the require map. This is a full-size bitmap that has a bit for
   every script, as opposed to the maps in ucd_script_sets, which only have bits
   for scripts less than ucp_Unknown - those that appear in script extension
   lists. */
 
-  for (int i = 0; i < FULL_MAPSIZE; i++) require_map[i] = 0;
+  for (int i = 0; i < FULL_MAPSIZE; i++)
+    require_map[i] = 0;
 
   /* Scan strings of two or more characters, checking the Unicode characteristics
   of each code point. There is special code for scripts that can be combined with
@@ -130,7 +133,8 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
     /* If the script is Unknown, the string is not a valid script run. Such
     characters can only form script runs of length one (see test above). */
 
-    if (script == ucp_Unknown) return FALSE;
+    if (script == ucp_Unknown)
+      return FALSE;
 
     /* A character without any script extensions whose script is Inherited or
     Common is always accepted with any script. If there are extensions, the
@@ -148,7 +152,8 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
 
       memcpy(map, PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(ucd), UCD_MAPSIZE * sizeof(uint32_t));
       memset(map + UCD_MAPSIZE, 0, (FULL_MAPSIZE - UCD_MAPSIZE) * sizeof(uint32_t));
-      if (script != ucp_Common && script != ucp_Inherited) MAPSET(map, script);
+      if (script != ucp_Common && script != ucp_Inherited)
+        MAPSET(map, script);
 
       /* Handle the different checking states */
 
@@ -202,20 +207,25 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
 #define FOUND_HANGUL   8
 
       case SCRIPT_HANPENDING:
-        if (script != ucp_Han)   // Another Han does nothing
+        if (script != ucp_Han) // Another Han does nothing
         {
           uint32_t chspecial = 0;
 
-          if (MAPBIT(map, ucp_Bopomofo) != 0) chspecial |= FOUND_BOPOMOFO;
-          if (MAPBIT(map, ucp_Hiragana) != 0) chspecial |= FOUND_HIRAGANA;
-          if (MAPBIT(map, ucp_Katakana) != 0) chspecial |= FOUND_KATAKANA;
-          if (MAPBIT(map, ucp_Hangul) != 0)   chspecial |= FOUND_HANGUL;
+          if (MAPBIT(map, ucp_Bopomofo) != 0)
+            chspecial |= FOUND_BOPOMOFO;
+          if (MAPBIT(map, ucp_Hiragana) != 0)
+            chspecial |= FOUND_HIRAGANA;
+          if (MAPBIT(map, ucp_Katakana) != 0)
+            chspecial |= FOUND_KATAKANA;
+          if (MAPBIT(map, ucp_Hangul) != 0)
+            chspecial |= FOUND_HANGUL;
 
-          if (chspecial == 0) return FALSE;   // Not allowed with Han
+          if (chspecial == 0)
+            return FALSE; // Not allowed with Han
 
           if (chspecial == FOUND_BOPOMOFO)
             require_state = SCRIPT_HANBOPOMOFO;
-          else if (chspecial == (FOUND_HIRAGANA|FOUND_KATAKANA))
+          else if (chspecial == (FOUND_HIRAGANA | FOUND_KATAKANA))
             require_state = SCRIPT_HANHIRAKATA;
 
           /* Otherwise this character must be allowed with all of them, so remain
@@ -227,16 +237,18 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
         this character is appropriate. */
 
       case SCRIPT_HANHIRAKATA:
-        if (MAPBIT(map, ucp_Han) + MAPBIT(map, ucp_Hiragana) +
-            MAPBIT(map, ucp_Katakana) == 0) return FALSE;
+        if (MAPBIT(map, ucp_Han) + MAPBIT(map, ucp_Hiragana) + MAPBIT(map, ucp_Katakana) == 0)
+          return FALSE;
         break;
 
       case SCRIPT_HANBOPOMOFO:
-        if (MAPBIT(map, ucp_Han) + MAPBIT(map, ucp_Bopomofo) == 0) return FALSE;
+        if (MAPBIT(map, ucp_Han) + MAPBIT(map, ucp_Bopomofo) == 0)
+          return FALSE;
         break;
 
       case SCRIPT_HANHANGUL:
-        if (MAPBIT(map, ucp_Han) + MAPBIT(map, ucp_Hangul) == 0) return FALSE;
+        if (MAPBIT(map, ucp_Han) + MAPBIT(map, ucp_Hangul) == 0)
+          return FALSE;
         break;
 
         /* Previously encountered one or more characters that are allowed with a
@@ -254,7 +266,8 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
           }
         }
 
-        if (!OK) return FALSE;
+        if (!OK)
+          return FALSE;
 
         /* The rest of the string must be in this script, but we have to
         allow for the Han complications. */
@@ -282,13 +295,14 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
           allowed scripts for this character. */
 
         default:
-          for (int i = 0; i < FULL_MAPSIZE; i++) require_map[i] &= map[i];
+          for (int i = 0; i < FULL_MAPSIZE; i++)
+            require_map[i] &= map[i];
           break;
         }
 
         break;
       }
-    }     // End checking character's script and extensions.
+    } // End checking character's script and extensions.
 
     /* The character is in an acceptable script. We must now ensure that all
     decimal digits in the string come from the same set. Some scripts (e.g.
@@ -304,41 +318,49 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
     {
       uint32_t digitset;
 
-      if (c <= PRIV(ucd_digit_sets)[1]) digitset = 1; else
+      if (c <= PRIV(ucd_digit_sets)[1])
+        digitset = 1;
+      else
       {
         int mid;
         int bot = 1;
         int top = PRIV(ucd_digit_sets)[0];
         for (;;)
         {
-          if (top <= bot + 1)    // <= rather than == is paranoia
+          if (top <= bot + 1) // <= rather than == is paranoia
           {
             digitset = top;
             break;
           }
           mid = (top + bot) / 2;
-          if (c <= PRIV(ucd_digit_sets)[mid]) top = mid; else bot = mid;
+          if (c <= PRIV(ucd_digit_sets)[mid])
+            top = mid;
+          else
+            bot = mid;
         }
       }
 
       /* A required value of 0 means "unset". */
 
-      if (require_digitset == 0) require_digitset = digitset;
-        else if (digitset != require_digitset) return FALSE;
-    }     // End digit handling
+      if (require_digitset == 0)
+        require_digitset = digitset;
+      else if (digitset != require_digitset)
+        return FALSE;
+    } // End digit handling
 
     /* If we haven't yet got to the end, pick up the next character. */
 
-    if (ptr >= endptr) return TRUE;
+    if (ptr >= endptr)
+      return TRUE;
     GETCHARINCTEST(c, ptr);
-  }    // End checking loop
+  } // End checking loop
 
-#else   /* NOT SUPPORT_UNICODE */
+#else  /* NOT SUPPORT_UNICODE */
   (void)ptr;
   (void)endptr;
   (void)utf;
   return TRUE;
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 }
 
 /* End of pcre2_script_run.c */

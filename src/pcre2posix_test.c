@@ -62,11 +62,10 @@ to stdout. */
 #define CAPCOUNT    5 /* Number of captures supported */
 #define PRINTF(...)   /* Shorthand for testing output */ \
   do                                                     \
-{                                                        \
+  {                                                      \
     if (v)                                               \
       printf(__VA_ARGS__);                               \
-}                                                        \
-  while (0)
+  } while (0)
 
 /* This vector contains compiler flags for each pattern that is tested. */
 
@@ -81,24 +80,24 @@ static int cflags[] = {
 /* This vector contains match flags for each pattern that is tested. */
 
 static int mflags[] = {
-  0,           // Test 0
-  0,           // Test 1
-  0,           // Test 2
-  REG_NOTBOL,  // Test 3
-  0,           // Test 4
+  0,          // Test 0
+  0,          // Test 1
+  0,          // Test 2
+  REG_NOTBOL, // Test 3
+  0,          // Test 4
 };
 
 /* Automate the number of patterns */
 
-#define count (int)(sizeof(cflags)/sizeof(int))
+#define count (int)(sizeof(cflags) / sizeof(int))
 
 /* The data for each pattern consists of a pattern string, followed by any
 number of subject strings, terminated by NULL. Some tests share data, but use
 different flags. */
 
 static const char *data0_1[] = { "posix", "lower posix", "upper POSIX", NULL };
-static const char *data2_3[] = { "(*LF)^(cat|dog)", "catastrophic\ncataclysm",
-  "dogfight", "no animals", NULL };
+static const char *data2_3[] = { "(*LF)^(cat|dog)", "catastrophic\ncataclysm", "dogfight",
+                                 "no animals", NULL };
 static const char *data4[] = { "*badpattern", NULL };
 
 /* Index the data strings */
@@ -171,7 +170,8 @@ static int *results[] = {
 
 /* And here is the program */
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   regex_t re;
   regmatch_t match[CAPCOUNT];
@@ -224,15 +224,16 @@ int main(int argc, char **argv)
         for (int j = 0; j < CAPCOUNT; j++)
         {
           regmatch_t *m = match + j;
-          if (m->rm_so < 0) continue;
+          if (m->rm_so < 0)
+            continue;
           if (m->rm_so != *(++rd) || m->rm_eo != *(++rd))
           {
             PRINTF("\n");
             fprintf(stderr, "Mismatched results for successful match\n");
             fprintf(stderr, "Pattern is: %s\n", pattern);
             fprintf(stderr, "Subject is: %s\n", *subjects);
-            fprintf(stderr, "Result %d: expected %d %d received %d %d\n",
-              j, rd[-1], rd[0], m->rm_so, m->rm_eo);
+            fprintf(stderr, "Result %d: expected %d %d received %d %d\n", j, rd[-1], rd[0],
+                    m->rm_so, m->rm_eo);
             return 1;
           }
           PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);

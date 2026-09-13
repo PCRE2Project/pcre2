@@ -84,8 +84,7 @@ Returns:       pointer to the descriptor when found,
  */
 
 named_group *
-PRIV(compile_find_named_group)(PCRE2_SPTR name,
-  uint32_t length, compile_block *cb)
+PRIV(compile_find_named_group)(PCRE2_SPTR name, uint32_t length, compile_block *cb)
 {
   uint16_t hash = PRIV(compile_get_hash_from_name)(name, length);
   named_group *ng;
@@ -93,7 +92,8 @@ PRIV(compile_find_named_group)(PCRE2_SPTR name,
 
   for (ng = cb->named_groups; ng < end; ng++)
     if (length == ng->length && hash == NAMED_GROUP_GET_HASH(ng) &&
-        PRIV(strncmp)(name, ng->name, length) == 0) return ng;
+        PRIV(strncmp)(name, ng->name, length) == 0)
+      return ng;
 
   return NULL;
 }
@@ -116,8 +116,7 @@ Returns:       new tablecount
 */
 
 uint32_t
-PRIV(compile_add_name_to_table)(compile_block *cb,
-  named_group *ng, uint32_t tablecount)
+PRIV(compile_add_name_to_table)(compile_block *cb, named_group *ng, uint32_t tablecount)
 {
   uint32_t i;
   PCRE2_SPTR name = ng->name;
@@ -134,7 +133,8 @@ PRIV(compile_add_name_to_table)(compile_block *cb,
     named_group *end = cb->named_groups + cb->names_found;
 
     for (ng_it = ng + 1; ng_it < end; ng_it++)
-      if (ng_it->name == name) duplicate_count++;
+      if (ng_it->name == name)
+        duplicate_count++;
   }
 
   for (i = 0; i < tablecount; i++)
@@ -151,7 +151,7 @@ PRIV(compile_add_name_to_table)(compile_block *cb,
     if (crc < 0)
     {
       (void)memmove(slot + cb->name_entry_size * duplicate_count, slot,
-        CU2BYTES((tablecount - i) * cb->name_entry_size));
+                    CU2BYTES((tablecount - i) * cb->name_entry_size));
       break;
     }
 
@@ -171,15 +171,16 @@ PRIV(compile_add_name_to_table)(compile_block *cb,
     the memory is all initialized. Otherwise valgrind moans about uninitialized
     memory when saving serialized compiled patterns. */
 
-    memset(slot + IMM2_SIZE + length, 0,
-      CU2BYTES(cb->name_entry_size - length - IMM2_SIZE));
+    memset(slot + IMM2_SIZE + length, 0, CU2BYTES(cb->name_entry_size - length - IMM2_SIZE));
 
-    if (--duplicate_count == 0) break;
+    if (--duplicate_count == 0)
+      break;
 
     while (TRUE)
     {
       ++ng;
-      if (ng->name == name) break;
+      if (ng->name == name)
+        break;
     }
 
     slot += cb->name_entry_size;
@@ -209,8 +210,8 @@ Returns:        TRUE if OK, FALSE if not, error code set
 */
 
 BOOL
-PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
-  int *indexptr, int *countptr, int *errorcodeptr, compile_block *cb)
+PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length, int *indexptr, int *countptr,
+                                   int *errorcodeptr, compile_block *cb)
 {
   uint32_t i, groupnumber;
   int count;
@@ -220,8 +221,8 @@ PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
 
   for (i = 0; i < cb->names_found; i++)
   {
-    if (PRIV(strncmp)(name, slot + IMM2_SIZE, length) == 0 &&
-        slot[IMM2_SIZE + length] == 0) break;
+    if (PRIV(strncmp)(name, slot + IMM2_SIZE, length) == 0 && slot[IMM2_SIZE + length] == 0)
+      break;
     slot += cb->name_entry_size;
   }
 
@@ -248,12 +249,14 @@ PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
   {
     count++;
     groupnumber = GET2(slot, 0);
-    cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
-    if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
-    if (++i >= cb->names_found) break;
+    cb->backref_map |= (groupnumber < 32) ? (1u << groupnumber) : 1;
+    if (groupnumber > cb->top_backref)
+      cb->top_backref = groupnumber;
+    if (++i >= cb->names_found)
+      break;
     slot += cb->name_entry_size;
-    if (PRIV(strncmp)(name, slot + IMM2_SIZE, length) != 0 ||
-      (slot + IMM2_SIZE)[length] != 0) break;
+    if (PRIV(strncmp)(name, slot + IMM2_SIZE, length) != 0 || (slot + IMM2_SIZE)[length] != 0)
+      break;
   }
 
   *countptr = count;
@@ -266,8 +269,8 @@ operations. Since at least one argument must be present,
 a 0 return value represents error. */
 
 static size_t
-PRIV(compile_process_capture_list)(uint32_t *pptr, PCRE2_SIZE offset,
-  int *errorcodeptr, compile_block *cb)
+PRIV(compile_process_capture_list)(uint32_t *pptr, PCRE2_SIZE offset, int *errorcodeptr,
+                                   compile_block *cb)
 {
   size_t i, size = 0;
   named_group *ng;
@@ -314,7 +317,8 @@ PRIV(compile_process_capture_list)(uint32_t *pptr, PCRE2_SIZE offset,
       name = ng->name;
 
       while (++ng < end)
-        if (ng->name == name) size++;
+        if (ng->name == name)
+          size++;
       continue;
 
     case META_CAPTURE_NUMBER:
@@ -327,7 +331,8 @@ PRIV(compile_process_capture_list)(uint32_t *pptr, PCRE2_SIZE offset,
         cb->erroroffset = offset;
         return 0;
       }
-      if (i > cb->top_backref) cb->top_backref = (uint16_t)i;
+      if (i > cb->top_backref)
+        cb->top_backref = (uint16_t)i;
       size++;
       continue;
 
@@ -359,8 +364,8 @@ Returns:        TRUE if OK, FALSE if not, error code set
 */
 
 uint32_t *
-PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr)
+PRIV(compile_parse_scan_substr_args)(uint32_t *pptr, int *errorcodeptr, compile_block *cb,
+                                     PCRE2_SIZE *lengthptr)
 {
   uint8_t *captures;
   uint8_t *capture_ptr;
@@ -378,7 +383,7 @@ PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
   /* Align to bytes. Since the highest capture can
   be equal to bracount, +1 is added before the aligning. */
   size = (cb->bracount + 1 + 7) >> 3;
-  captures = (uint8_t*)cb->cx->memctl.malloc(size, cb->cx->memctl.memory_data);
+  captures = (uint8_t *)cb->cx->memctl.malloc(size, cb->cx->memctl.memory_data);
   if (captures == NULL)
   {
     *errorcodeptr = ERR21;
@@ -406,7 +411,8 @@ PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
       all_found = TRUE;
       do
       {
-        if (ng->name != name) continue;
+        if (ng->name != name)
+          continue;
 
         capture_ptr = captures + (ng->number >> 3);
         PCRE2_ASSERT(capture_ptr < captures + size);
@@ -417,8 +423,7 @@ PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
           *capture_ptr |= bit;
           all_found = FALSE;
         }
-      }
-      while (++ng < end);
+      } while (++ng < end);
 
       if (!all_found)
       {
@@ -461,7 +466,8 @@ PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
 
 /* Implement heapsort heapify algorithm. */
 
-static void do_heapify_u16(uint16_t *captures, size_t size, size_t i)
+static void
+do_heapify_u16(uint16_t *captures, size_t size, size_t i)
 {
   size_t max;
   size_t left;
@@ -474,9 +480,12 @@ static void do_heapify_u16(uint16_t *captures, size_t size, size_t i)
     left = (i << 1) + 1;
     right = left + 1;
 
-    if (left < size && captures[left] > captures[max]) max = left;
-    if (right < size && captures[right] > captures[max]) max = right;
-    if (i == max) return;
+    if (left < size && captures[left] > captures[max])
+      max = left;
+    if (right < size && captures[right] > captures[max])
+      max = right;
+    if (i == max)
+      return;
 
     tmp = captures[i];
     captures[i] = captures[max];
@@ -504,8 +513,8 @@ Returns:        TRUE if OK, FALSE if not, error code set
 */
 
 BOOL
-PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
-  PCRE2_SIZE offset, int *errorcodeptr, compile_block *cb)
+PRIV(compile_parse_recurse_args)(uint32_t *pptr_start, PCRE2_SIZE offset, int *errorcodeptr,
+                                 compile_block *cb)
 {
   uint32_t *pptr = pptr_start;
   size_t i, size;
@@ -521,10 +530,11 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
   /* Process all arguments, compute the required size. */
 
   size = PRIV(compile_process_capture_list)(pptr, offset, errorcodeptr, cb);
-  if (size == 0) return FALSE;
+  if (size == 0)
+    return FALSE;
 
-  args = cb->cx->memctl.malloc(
-    sizeof(recurse_arguments) + size * sizeof(uint16_t), cb->cx->memctl.memory_data);
+  args = cb->cx->memctl.malloc(sizeof(recurse_arguments) + size * sizeof(uint16_t),
+                               cb->cx->memctl.memory_data);
 
   if (args == NULL)
   {
@@ -549,7 +559,7 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
 
   /* Create the capture list size. */
 
-  captures = (uint16_t*)(args + 1);
+  captures = (uint16_t *)(args + 1);
 
   while (TRUE)
   {
@@ -569,7 +579,8 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
       name = ng->name;
 
       while (++ng < end)
-        if (ng->name == name) *captures++ = (uint16_t)(ng->number);
+        if (ng->name == name)
+          *captures++ = (uint16_t)(ng->number);
       continue;
 
     case META_CAPTURE_NUMBER:
@@ -583,19 +594,21 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
     break;
   }
 
-  PCRE2_ASSERT(size == (size_t)(captures - (uint16_t*)(args + 1)));
+  PCRE2_ASSERT(size == (size_t)(captures - (uint16_t *)(args + 1)));
   args->skip_size = (size_t)(pptr - pptr_start) - 1;
 
-  if (size == 1) return TRUE;
+  if (size == 1)
+    return TRUE;
 
   /* Sort captures. */
 
-  captures = (uint16_t*)(args + 1);
+  captures = (uint16_t *)(args + 1);
   i = (size >> 1) - 1;
   while (TRUE)
   {
     do_heapify_u16(captures, size, i);
-    if (i == 0) break;
+    if (i == 0)
+      break;
     i--;
   }
 
@@ -625,7 +638,7 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
     current++;
   }
 
-  args->size = (size_t)(captures - (uint16_t*)(args + 1));
+  args->size = (size_t)(captures - (uint16_t *)(args + 1));
   return TRUE;
 }
 

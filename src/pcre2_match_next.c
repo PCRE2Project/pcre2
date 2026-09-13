@@ -46,8 +46,8 @@ POSSIBILITY OF SUCH DAMAGE.
 /* Advance the offset by one code unit, and return the new value.
 It is only called when the offset is not at the end of the subject. */
 
-static PCRE2_SIZE do_bumpalong(pcre2_match_data *match_data,
-  PCRE2_SIZE offset)
+static PCRE2_SIZE
+do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
 {
   PCRE2_SPTR subject = match_data->subject;
   PCRE2_SIZE subject_length = match_data->subject_length;
@@ -58,8 +58,7 @@ static PCRE2_SIZE do_bumpalong(pcre2_match_data *match_data,
   /* Skip over CRLF as an atomic sequence, if CRLF is configured as a newline
   sequence. */
 
-  if (subject[offset] == CHAR_CR && offset + 1 < subject_length &&
-      subject[offset + 1] == CHAR_LF)
+  if (subject[offset] == CHAR_CR && offset + 1 < subject_length && subject[offset + 1] == CHAR_LF)
   {
     switch (match_data->code->newline_convention)
     {
@@ -94,8 +93,7 @@ static PCRE2_SIZE do_bumpalong(pcre2_match_data *match_data,
 *************************************************/
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset,
-  uint32_t *poptions)
+pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32_t *poptions)
 {
   int rc = match_data->rc;
   PCRE2_SIZE start_offset = match_data->start_offset;

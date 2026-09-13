@@ -76,15 +76,14 @@ in others, so I abandoned this code. */
 
 
 
-#define NLBLOCK mb             /* Block containing newline information */
-#define PSSTART start_subject  /* Field containing processed string start */
-#define PSEND   end_subject    /* Field containing processed string end */
+#define NLBLOCK mb            /* Block containing newline information */
+#define PSSTART start_subject /* Field containing processed string start */
+#define PSEND   end_subject   /* Field containing processed string end */
 
-#define PUBLIC_DFA_MATCH_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
-   PCRE2_NOTEMPTY_ATSTART|PCRE2_NO_UTF_CHECK|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT|PCRE2_DFA_SHORTEST|PCRE2_DFA_RESTART| \
-   PCRE2_COPY_MATCHED_SUBJECT)
+#define PUBLIC_DFA_MATCH_OPTIONS                                                           \
+  (PCRE2_ANCHORED | PCRE2_ENDANCHORED | PCRE2_NOTBOL | PCRE2_NOTEOL | PCRE2_NOTEMPTY |     \
+   PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_UTF_CHECK | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT | \
+   PCRE2_DFA_SHORTEST | PCRE2_DFA_RESTART | PCRE2_COPY_MATCHED_SUBJECT)
 
 
 /*************************************************
@@ -96,11 +95,11 @@ into others, under special conditions. A gap of 20 between the blocks should be
 enough. The resulting opcodes don't have to be less than 256 because they are
 never stored, so we push them well clear of the normal opcodes. */
 
-#define OP_PROP_EXTRA       300
-#define OP_EXTUNI_EXTRA     320
-#define OP_ANYNL_EXTRA      340
-#define OP_HSPACE_EXTRA     360
-#define OP_VSPACE_EXTRA     380
+#define OP_PROP_EXTRA   300
+#define OP_EXTUNI_EXTRA 320
+#define OP_ANYNL_EXTRA  340
+#define OP_HSPACE_EXTRA 360
+#define OP_VSPACE_EXTRA 380
 
 
 /* This table identifies those opcodes that are followed immediately by a
@@ -309,12 +308,12 @@ entirely of ints because the working vector we are passed, and which we put
 these structures in, is a vector of ints. */
 
 typedef struct stateblock {
-  int offset;                     // Offset to opcode (-ve has meaning)
-  int count;                      // Count for repeats
-  int data;                       // Some use extra data
+  int offset; // Offset to opcode (-ve has meaning)
+  int count;  // Count for repeats
+  int data;   // Some use extra data
 } stateblock;
 
-#define INTS_PER_STATEBLOCK  (int)(sizeof(stateblock)/sizeof(int))
+#define INTS_PER_STATEBLOCK (int)(sizeof(stateblock) / sizeof(int))
 
 
 /* Before version 10.32 the recursive calls of internal_dfa_match() were passed
@@ -328,22 +327,22 @@ The size of the starting stack vector, DFA_START_RWS_SIZE, is in bytes, and is
 defined in pcre2_internal.h so as to be available to pcre2test when it is
 finding the minimum heap requirement for a match. */
 
-#define OVEC_UNIT  (sizeof(PCRE2_SIZE)/sizeof(int))
+#define OVEC_UNIT (sizeof(PCRE2_SIZE) / sizeof(int))
 
-#define RWS_BASE_SIZE   (DFA_START_RWS_SIZE/sizeof(int))  /* Stack vector */
-#define RWS_RSIZE       1000                    /* Work size for recursion */
-#define RWS_OVEC_RSIZE  (1000*OVEC_UNIT)        /* Ovector for recursion */
-#define RWS_OVEC_OSIZE  (2*OVEC_UNIT)           /* Ovector in other cases */
+#define RWS_BASE_SIZE  (DFA_START_RWS_SIZE / sizeof(int)) /* Stack vector */
+#define RWS_RSIZE      1000                               /* Work size for recursion */
+#define RWS_OVEC_RSIZE (1000 * OVEC_UNIT)                 /* Ovector for recursion */
+#define RWS_OVEC_OSIZE (2 * OVEC_UNIT)                    /* Ovector in other cases */
 
 /* This structure is at the start of each workspace block. */
 
 typedef struct RWS_anchor {
   struct RWS_anchor *next;
-  uint32_t size;  // Number of ints
-  uint32_t free;  // Number of ints
+  uint32_t size; // Number of ints
+  uint32_t free; // Number of ints
 } RWS_anchor;
 
-#define RWS_ANCHOR_SIZE (sizeof(RWS_anchor)/sizeof(int))
+#define RWS_ANCHOR_SIZE (sizeof(RWS_anchor) / sizeof(int))
 
 
 
@@ -366,30 +365,30 @@ Returns:            the return from the callout
 */
 
 static int
-do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
-  PCRE2_SPTR ptr, dfa_match_block *mb, PCRE2_SIZE extracode,
-  PCRE2_SIZE *lengthptr)
+do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject, PCRE2_SPTR ptr,
+               dfa_match_block *mb, PCRE2_SIZE extracode, PCRE2_SIZE *lengthptr)
 {
   pcre2_callout_block *cb = mb->cb;
 
-  *lengthptr = (code[extracode] == OP_CALLOUT)?
-    (PCRE2_SIZE)PRIV(OP_lengths)[OP_CALLOUT] :
-    (PCRE2_SIZE)GET(code, 1 + 2*LINK_SIZE + extracode);
+  *lengthptr = (code[extracode] == OP_CALLOUT)
+                   ? (PCRE2_SIZE)PRIV(OP_lengths)[OP_CALLOUT]
+                   : (PCRE2_SIZE)GET(code, 1 + 2 * LINK_SIZE + extracode);
 
-  if (mb->callout == NULL) return 0;    // No callout provided
+  if (mb->callout == NULL)
+    return 0; // No callout provided
 
   /* Fixed fields in the callout block are set once and for all at the start of
   matching. */
 
-  cb->offset_vector    = offsets;
-  cb->start_match      = (PCRE2_SIZE)(current_subject - mb->start_subject);
+  cb->offset_vector = offsets;
+  cb->start_match = (PCRE2_SIZE)(current_subject - mb->start_subject);
   cb->current_position = (PCRE2_SIZE)(ptr - mb->start_subject);
   cb->pattern_position = GET(code, 1 + extracode);
   cb->next_item_length = GET(code, 1 + LINK_SIZE + extracode);
 
   if (code[extracode] == OP_CALLOUT)
   {
-    cb->callout_number = code[1 + 2*LINK_SIZE + extracode];
+    cb->callout_number = code[1 + 2 * LINK_SIZE + extracode];
     cb->callout_string_offset = 0;
     cb->callout_string = NULL;
     cb->callout_string_length = 0;
@@ -397,9 +396,9 @@ do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
   else
   {
     cb->callout_number = 0;
-    cb->callout_string_offset = GET(code, 1 + 3*LINK_SIZE + extracode);
-    cb->callout_string = code + (1 + 4*LINK_SIZE + extracode) + 1;
-    cb->callout_string_length = *lengthptr - (1 + 4*LINK_SIZE) - 2;
+    cb->callout_string_offset = GET(code, 1 + 3 * LINK_SIZE + extracode);
+    cb->callout_string = code + (1 + 4 * LINK_SIZE + extracode) + 1;
+    cb->callout_string_length = *lengthptr - (1 + 4 * LINK_SIZE) - 2;
   }
 
   return (mb->callout)(cb, mb->callout_data);
@@ -451,9 +450,9 @@ more_workspace(RWS_anchor **rwsptr, unsigned int ovecsize, dfa_match_block *mb)
 
   else
   {
-    uint32_t newsize = (rws->size >= (UINT32_MAX/sizeof(int))/2)?
-      UINT32_MAX/sizeof(int) : rws->size * 2;
-    uint32_t newsizeK = newsize/(1024/sizeof(int));
+    uint32_t newsize =
+        (rws->size >= (UINT32_MAX / sizeof(int)) / 2) ? UINT32_MAX / sizeof(int) : rws->size * 2;
+    uint32_t newsizeK = newsize / (1024 / sizeof(int));
 
     /* Clamp the allocation to the remaining heap allowance with care for overflows */
 
@@ -469,15 +468,16 @@ more_workspace(RWS_anchor **rwsptr, unsigned int ovecsize, dfa_match_block *mb)
       and - if availableK is smaller - then multiplication to form newsize is safe */
       if (newsizeK > availableK)
       {
-        newsize = (uint32_t)(availableK*(1024/sizeof(int)));
+        newsize = (uint32_t)(availableK * (1024 / sizeof(int)));
         newsizeK = availableK;
       }
     }
 
     if (newsize < requested)
       return PCRE2_ERROR_HEAPLIMIT;
-    new = mb->memctl.malloc(newsize*sizeof(int), mb->memctl.memory_data);
-    if (new == NULL) return PCRE2_ERROR_NOMEMORY;
+    new = mb->memctl.malloc(newsize * sizeof(int), mb->memctl.memory_data);
+    if (new == NULL)
+      return PCRE2_ERROR_NOMEMORY;
     mb->heap_used += newsizeK;
     new->next = NULL;
     new->size = newsize;
@@ -519,58 +519,54 @@ Returns:            > 0 => number of match offset pairs placed in offsets
 The following macros are used for adding states to the two state vectors (one
 for the current character, one for the following character). */
 
-#define ADD_ACTIVE(x,y) \
-  if (active_count++ < wscount) \
-  {   \
+#define ADD_ACTIVE(x, y)             \
+  if (active_count++ < wscount)      \
+  {                                  \
     next_active_state->offset = (x); \
-    next_active_state->count  = (y); \
-    next_active_state++; \
-  }   \
-  else return PCRE2_ERROR_DFA_WSSIZE
+    next_active_state->count = (y);  \
+    next_active_state++;             \
+  }                                  \
+  else                               \
+    return PCRE2_ERROR_DFA_WSSIZE
 
-#define ADD_ACTIVE_DATA(x,y,z) \
-  if (active_count++ < wscount) \
-  {   \
+#define ADD_ACTIVE_DATA(x, y, z)     \
+  if (active_count++ < wscount)      \
+  {                                  \
     next_active_state->offset = (x); \
-    next_active_state->count  = (y); \
-    next_active_state->data   = (z); \
-    next_active_state++; \
-  }   \
-  else return PCRE2_ERROR_DFA_WSSIZE
+    next_active_state->count = (y);  \
+    next_active_state->data = (z);   \
+    next_active_state++;             \
+  }                                  \
+  else                               \
+    return PCRE2_ERROR_DFA_WSSIZE
 
-#define ADD_NEW(x,y) \
-  if (new_count++ < wscount) \
-  {   \
+#define ADD_NEW(x, y)             \
+  if (new_count++ < wscount)      \
+  {                               \
     next_new_state->offset = (x); \
-    next_new_state->count  = (y); \
-    next_new_state++; \
-  }   \
-  else return PCRE2_ERROR_DFA_WSSIZE
+    next_new_state->count = (y);  \
+    next_new_state++;             \
+  }                               \
+  else                            \
+    return PCRE2_ERROR_DFA_WSSIZE
 
-#define ADD_NEW_DATA(x,y,z) \
-  if (new_count++ < wscount) \
-  {   \
+#define ADD_NEW_DATA(x, y, z)     \
+  if (new_count++ < wscount)      \
+  {                               \
     next_new_state->offset = (x); \
-    next_new_state->count  = (y); \
-    next_new_state->data   = (z); \
-    next_new_state++; \
-  }   \
-  else return PCRE2_ERROR_DFA_WSSIZE
+    next_new_state->count = (y);  \
+    next_new_state->data = (z);   \
+    next_new_state++;             \
+  }                               \
+  else                            \
+    return PCRE2_ERROR_DFA_WSSIZE
 
 /* And now, here is the code */
 
 static int
-internal_dfa_match(
-  dfa_match_block *mb,
-  PCRE2_SPTR this_start_code,
-  PCRE2_SPTR current_subject,
-  PCRE2_SIZE start_offset,
-  PCRE2_SIZE *offsets,
-  uint32_t offsetcount,
-  int *workspace,
-  int wscount,
-  uint32_t rlevel,
-  int *RWS)
+internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR current_subject,
+                   PCRE2_SIZE start_offset, PCRE2_SIZE *offsets, uint32_t offsetcount,
+                   int *workspace, int wscount, uint32_t rlevel, int *RWS)
 {
   stateblock *active_states, *new_states, *temp_states;
   stateblock *next_active_state, *next_new_state;
@@ -596,19 +592,20 @@ internal_dfa_match(
 
   BOOL reset_could_continue = FALSE;
 
-  if (mb->match_call_count++ >= mb->match_limit) return PCRE2_ERROR_MATCHLIMIT;
-  if (rlevel++ > mb->match_limit_depth) return PCRE2_ERROR_DEPTHLIMIT;
-  offsetcount &= (uint32_t)(-2);  // Round down
+  if (mb->match_call_count++ >= mb->match_limit)
+    return PCRE2_ERROR_MATCHLIMIT;
+  if (rlevel++ > mb->match_limit_depth)
+    return PCRE2_ERROR_DEPTHLIMIT;
+  offsetcount &= (uint32_t)(-2); // Round down
 
   wscount -= 2;
-  wscount = (wscount - (wscount % (INTS_PER_STATEBLOCK * 2))) /
-            (2 * INTS_PER_STATEBLOCK);
+  wscount = (wscount - (wscount % (INTS_PER_STATEBLOCK * 2))) / (2 * INTS_PER_STATEBLOCK);
 
   ctypes = mb->tables + ctypes_offset;
   lcc = mb->tables + lcc_offset;
   fcc = mb->tables + fcc_offset;
 
-  match_count = PCRE2_ERROR_NOMATCH;   // A negative number
+  match_count = PCRE2_ERROR_NOMATCH; // A negative number
 
   active_states = (stateblock *)(workspace + 2);
   next_new_state = new_states = active_states + wscount;
@@ -630,11 +627,11 @@ internal_dfa_match(
     end_code = this_start_code;
     do
     {
-      size_t back = (size_t)GET2(end_code, 2+LINK_SIZE);
-      if (back > max_back) max_back = back;
+      size_t back = (size_t)GET2(end_code, 2 + LINK_SIZE);
+      if (back > max_back)
+        max_back = back;
       end_code += GET(end_code, 1);
-    }
-    while (*end_code == OP_ALT);
+    } while (*end_code == OP_ALT);
 
     /* If we can't go back the amount required for the longest lookbehind
     pattern, go back as far as we can; some alternatives may still be viable. */
@@ -646,10 +643,10 @@ internal_dfa_match(
     {
       for (gone_back = 0; gone_back < max_back; gone_back++)
       {
-        if (current_subject <= start_subject) break;
+        if (current_subject <= start_subject)
+          break;
         current_subject--;
-        ACROSSCHAR(current_subject > start_subject, current_subject,
-          current_subject--);
+        ACROSSCHAR(current_subject > start_subject, current_subject, current_subject--);
       }
     }
     else
@@ -659,7 +656,7 @@ internal_dfa_match(
 
     {
       size_t current_offset = (size_t)(current_subject - start_subject);
-      gone_back = (current_offset < max_back)? current_offset : max_back;
+      gone_back = (current_offset < max_back) ? current_offset : max_back;
       current_subject -= gone_back;
     }
 
@@ -674,17 +671,16 @@ internal_dfa_match(
     end_code = this_start_code;
     do
     {
-      uint32_t revlen = (end_code[1+LINK_SIZE] == OP_REVERSE)? 1 + IMM2_SIZE : 0;
-      size_t back = (revlen == 0)? 0 : (size_t)GET2(end_code, 2+LINK_SIZE);
+      uint32_t revlen = (end_code[1 + LINK_SIZE] == OP_REVERSE) ? 1 + IMM2_SIZE : 0;
+      size_t back = (revlen == 0) ? 0 : (size_t)GET2(end_code, 2 + LINK_SIZE);
       if (back <= gone_back)
       {
         int bstate = (int)(end_code - start_code + 1 + LINK_SIZE + revlen);
         ADD_NEW_DATA(-bstate, 0, (int)(gone_back - back));
       }
       end_code += GET(end_code, 1);
-    }
-    while (*end_code == OP_ALT);
- }
+    } while (*end_code == OP_ALT);
+  }
 
   /* This is the code for a "normal" subpattern (not a backward assertion). The
   start of a whole pattern is always one of these. If we are at the top level,
@@ -700,7 +696,10 @@ internal_dfa_match(
 
     if (rlevel == 1 && (mb->moptions & PCRE2_DFA_RESTART) != 0)
     {
-      do { end_code += GET(end_code, 1); } while (*end_code == OP_ALT);
+      do
+      {
+        end_code += GET(end_code, 1);
+      } while (*end_code == OP_ALT);
       new_count = workspace[1];
       if (!workspace[0])
         memcpy(new_states, active_states, (size_t)new_count * sizeof(stateblock));
@@ -711,20 +710,20 @@ internal_dfa_match(
     else
     {
       int length = 1 + LINK_SIZE +
-        ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA ||
-          *this_start_code == OP_CBRAPOS || *this_start_code == OP_SCBRAPOS)
-          ? IMM2_SIZE:0);
+                   ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA ||
+                     *this_start_code == OP_CBRAPOS || *this_start_code == OP_SCBRAPOS)
+                        ? IMM2_SIZE
+                        : 0);
       do
       {
         ADD_NEW((int)(end_code - start_code + length), 0);
         end_code += GET(end_code, 1);
         length = 1 + LINK_SIZE;
-      }
-      while (*end_code == OP_ALT);
+      } while (*end_code == OP_ALT);
     }
   }
 
-  workspace[0] = 0;    // Bit indicating which vector is current
+  workspace[0] = 0; // Bit indicating which vector is current
 
   /* Loop for scanning the subject */
 
@@ -738,7 +737,8 @@ internal_dfa_match(
     BOOL could_continue = reset_could_continue;
     reset_could_continue = FALSE;
 
-    if (ptr > mb->last_used_ptr) mb->last_used_ptr = ptr;
+    if (ptr > mb->last_used_ptr)
+      mb->last_used_ptr = ptr;
 
     /* Make the new state list into the active state list and empty the
     new state list. */
@@ -749,7 +749,7 @@ internal_dfa_match(
     active_count = new_count;
     new_count = 0;
 
-    workspace[0] ^= 1;              // Remember for the restarting feature
+    workspace[0] ^= 1; // Remember for the restarting feature
     workspace[1] = active_count;
 
     /* Set the pointers for adding new states */
@@ -763,17 +763,17 @@ internal_dfa_match(
 
     if (ptr < end_subject)
     {
-      clen = 1;        // Number of data items in the character
+      clen = 1; // Number of data items in the character
 #ifdef SUPPORT_UNICODE
       GETCHARLENTEST(c, ptr, clen);
 #else
       c = *ptr;
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
     }
     else
     {
-      clen = 0;        // This indicates the end of the subject
-      c = NOTACHAR;    // This value should never actually be used
+      clen = 0;     // This indicates the end of the subject
+      c = NOTACHAR; // This value should never actually be used
     }
 
     /* Scan up the active states and act on each one. The result of an action
@@ -800,9 +800,9 @@ internal_dfa_match(
       {
         if (current_state->data > 0)
         {
-          ADD_NEW_DATA(state_offset, current_state->count,
-            current_state->data - 1);
-          if (could_continue) reset_could_continue = TRUE;
+          ADD_NEW_DATA(state_offset, current_state->count, current_state->data - 1);
+          if (could_continue)
+            reset_could_continue = TRUE;
           continue;
         }
         else
@@ -848,23 +848,39 @@ internal_dfa_match(
       {
         dlen = 1;
 #ifdef SUPPORT_UNICODE
-        if (utf) { GETCHARLEN(d, (code + coptable[codevalue]), dlen); } else
-#endif  /* SUPPORT_UNICODE */
-        d = code[coptable[codevalue]];
+        if (utf)
+        {
+          GETCHARLEN(d, (code + coptable[codevalue]), dlen);
+        }
+        else
+#endif /* SUPPORT_UNICODE */
+          d = code[coptable[codevalue]];
         if (codevalue >= OP_TYPESTAR)
         {
           switch (d)
           {
-          case OP_ANYBYTE:   return PCRE2_ERROR_DFA_UITEM;
+          case OP_ANYBYTE:
+            return PCRE2_ERROR_DFA_UITEM;
           case OP_NOTPROP:
-          case OP_PROP:   codevalue += OP_PROP_EXTRA; break;
-          case OP_ANYNL:   codevalue += OP_ANYNL_EXTRA; break;
-          case OP_EXTUNI:   codevalue += OP_EXTUNI_EXTRA; break;
+          case OP_PROP:
+            codevalue += OP_PROP_EXTRA;
+            break;
+          case OP_ANYNL:
+            codevalue += OP_ANYNL_EXTRA;
+            break;
+          case OP_EXTUNI:
+            codevalue += OP_EXTUNI_EXTRA;
+            break;
           case OP_NOT_HSPACE:
-          case OP_HSPACE:   codevalue += OP_HSPACE_EXTRA; break;
+          case OP_HSPACE:
+            codevalue += OP_HSPACE_EXTRA;
+            break;
           case OP_NOT_VSPACE:
-          case OP_VSPACE:   codevalue += OP_VSPACE_EXTRA; break;
-          default:   break;
+          case OP_VSPACE:
+            codevalue += OP_VSPACE_EXTRA;
+            break;
+          default:
+            break;
           }
         }
       }
@@ -880,7 +896,7 @@ internal_dfa_match(
 
       switch (codevalue)
       {
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* Reached a closing bracket. If not at the end of the pattern, carry
         on with the next opcode. For repeating opcodes, also add the repeat
         state. Note that KETRPOS will always be encountered at the end of the
@@ -906,34 +922,38 @@ internal_dfa_match(
         }
         else
         {
-          if (ptr > current_subject ||
-              ((mb->moptions & PCRE2_NOTEMPTY) == 0 &&
-                ((mb->moptions & PCRE2_NOTEMPTY_ATSTART) == 0 ||
-                  current_subject > start_subject + mb->start_offset)))
+          if (ptr > current_subject || ((mb->moptions & PCRE2_NOTEMPTY) == 0 &&
+                                        ((mb->moptions & PCRE2_NOTEMPTY_ATSTART) == 0 ||
+                                         current_subject > start_subject + mb->start_offset)))
           {
-            if (match_count < 0) match_count = (offsetcount >= 2)? 1 : 0;
-              else if (match_count > 0 && ++match_count * 2 > (int)offsetcount)
-                match_count = 0;
-            count = ((match_count == 0)? (int)offsetcount : match_count * 2) - 2;
-            if (count > 0) (void)memmove(offsets + 2, offsets,
-              (size_t)count * sizeof(PCRE2_SIZE));
+            if (match_count < 0)
+              match_count = (offsetcount >= 2) ? 1 : 0;
+            else if (match_count > 0 && ++match_count * 2 > (int)offsetcount)
+              match_count = 0;
+            count = ((match_count == 0) ? (int)offsetcount : match_count * 2) - 2;
+            if (count > 0)
+              (void)memmove(offsets + 2, offsets, (size_t)count * sizeof(PCRE2_SIZE));
             if (offsetcount >= 2)
             {
               offsets[0] = (PCRE2_SIZE)(current_subject - start_subject);
               offsets[1] = (PCRE2_SIZE)(ptr - start_subject);
             }
-            if ((mb->moptions & PCRE2_DFA_SHORTEST) != 0) return match_count;
+            if ((mb->moptions & PCRE2_DFA_SHORTEST) != 0)
+              return match_count;
           }
         }
         break;
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These opcodes add to the current list of states without looking
         at the current character. */
 
         /*-----------------------------------------------------------------*/
       case OP_ALT:
-        do { code += GET(code, 1); } while (*code == OP_ALT);
+        do
+        {
+          code += GET(code, 1);
+        } while (*code == OP_ALT);
         ADD_ACTIVE((int)(code - start_code), 0);
         break;
 
@@ -944,18 +964,17 @@ internal_dfa_match(
         {
           ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE), 0);
           code += GET(code, 1);
-        }
-        while (*code == OP_ALT);
+        } while (*code == OP_ALT);
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_CBRA:
       case OP_SCBRA:
-        ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE + IMM2_SIZE),  0);
+        ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE + IMM2_SIZE), 0);
         code += GET(code, 1);
         while (*code == OP_ALT)
         {
-          ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE),  0);
+          ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE), 0);
           code += GET(code, 1);
         }
         break;
@@ -965,29 +984,35 @@ internal_dfa_match(
       case OP_BRAMINZERO:
         ADD_ACTIVE(state_offset + 1, 0);
         code += 1 + GET(code, 2);
-        while (*code == OP_ALT) code += GET(code, 1);
+        while (*code == OP_ALT)
+          code += GET(code, 1);
         ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE), 0);
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_SKIPZERO:
         code += 1 + GET(code, 2);
-        while (*code == OP_ALT) code += GET(code, 1);
+        while (*code == OP_ALT)
+          code += GET(code, 1);
         ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE), 0);
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_CIRC:
         if (ptr == start_subject && (mb->moptions & PCRE2_NOTBOL) == 0)
-        {   ADD_ACTIVE(state_offset + 1, 0); }
+        {
+          ADD_ACTIVE(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_CIRCM:
         if ((ptr == start_subject && (mb->moptions & PCRE2_NOTBOL) == 0) ||
-            ((ptr != end_subject || (mb->poptions & PCRE2_ALT_CIRCUMFLEX) != 0 )
-              && WAS_NEWLINE(ptr)))
-        {   ADD_ACTIVE(state_offset + 1, 0); }
+            ((ptr != end_subject || (mb->poptions & PCRE2_ALT_CIRCUMFLEX) != 0) &&
+             WAS_NEWLINE(ptr)))
+        {
+          ADD_ACTIVE(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
@@ -996,22 +1021,31 @@ internal_dfa_match(
         {
           if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             return PCRE2_ERROR_PARTIAL;
-          else { ADD_ACTIVE(state_offset + 1, 0); }
+          else
+          {
+            ADD_ACTIVE(state_offset + 1, 0);
+          }
         }
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_SOD:
-        if (ptr == start_subject) { ADD_ACTIVE(state_offset + 1, 0); }
+        if (ptr == start_subject)
+        {
+          ADD_ACTIVE(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_SOM:
-        if (ptr == start_subject + start_offset) { ADD_ACTIVE(state_offset + 1, 0); }
+        if (ptr == start_subject + start_offset)
+        {
+          ADD_ACTIVE(state_offset + 1, 0);
+        }
         break;
 
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These opcodes inspect the next subject character, and sometimes
         the previous one as well, but do not have an argument. The variable
         clen contains the length of the current character and is zero if we are
@@ -1021,11 +1055,8 @@ internal_dfa_match(
       case OP_ANY:
         if (clen > 0 && !IS_NEWLINE(ptr))
         {
-          if (ptr + 1 >= mb->end_subject &&
-              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              c == NLBLOCK->nl[0])
+          if (ptr + 1 >= mb->end_subject && (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
+              NLBLOCK->nltype == NLTYPE_FIXED && NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             could_continue = partial_newline = TRUE;
           }
@@ -1039,7 +1070,9 @@ internal_dfa_match(
         /*-----------------------------------------------------------------*/
       case OP_ALLANY:
         if (clen > 0)
-        {   ADD_NEW(state_offset + 1, 0); }
+        {
+          ADD_NEW(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1058,23 +1091,22 @@ internal_dfa_match(
         {
           if (clen == 0 && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             could_continue = TRUE;
-          else if (clen == 0 ||
-              ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr) &&
-                 (ptr == end_subject - mb->nllen)
-              ))
-          {   ADD_ACTIVE(state_offset + 1, 0); }
+          else if (clen == 0 || ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr) &&
+                                 (ptr == end_subject - mb->nllen)))
+          {
+            ADD_ACTIVE(state_offset + 1, 0);
+          }
           else if (ptr + 1 >= mb->end_subject &&
-                   (mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
-                   NLBLOCK->nltype == NLTYPE_FIXED &&
-                   NLBLOCK->nllen == 2 &&
-                   c == NLBLOCK->nl[0])
+                   (mb->moptions & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0 &&
+                   NLBLOCK->nltype == NLTYPE_FIXED && NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             {
               reset_could_continue = TRUE;
               ADD_NEW_DATA(-(state_offset + 1), 0, 1);
             }
-            else could_continue = partial_newline = TRUE;
+            else
+              could_continue = partial_newline = TRUE;
           }
         }
         break;
@@ -1085,25 +1117,27 @@ internal_dfa_match(
         {
           if (clen == 0 && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             could_continue = TRUE;
-          else if (clen == 0 ||
-              ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr)))
-          {   ADD_ACTIVE(state_offset + 1, 0); }
+          else if (clen == 0 || ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr)))
+          {
+            ADD_ACTIVE(state_offset + 1, 0);
+          }
           else if (ptr + 1 >= mb->end_subject &&
-                   (mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
-                   NLBLOCK->nltype == NLTYPE_FIXED &&
-                   NLBLOCK->nllen == 2 &&
-                   c == NLBLOCK->nl[0])
+                   (mb->moptions & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0 &&
+                   NLBLOCK->nltype == NLTYPE_FIXED && NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             {
               reset_could_continue = TRUE;
               ADD_NEW_DATA(-(state_offset + 1), 0, 1);
             }
-            else could_continue = partial_newline = TRUE;
+            else
+              could_continue = partial_newline = TRUE;
           }
         }
         else if (IS_NEWLINE(ptr))
-        {   ADD_ACTIVE(state_offset + 1, 0); }
+        {
+          ADD_ACTIVE(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1111,18 +1145,21 @@ internal_dfa_match(
       case OP_DIGIT:
       case OP_WHITESPACE:
       case OP_WORDCHAR:
-        if (clen > 0 && c < 256 &&
-              ((ctypes[c] & toptable1[codevalue]) ^ toptable2[codevalue]) != 0)
-        {   ADD_NEW(state_offset + 1, 0); }
+        if (clen > 0 && c < 256 && ((ctypes[c] & toptable1[codevalue]) ^ toptable2[codevalue]) != 0)
+        {
+          ADD_NEW(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_NOT_DIGIT:
       case OP_NOT_WHITESPACE:
       case OP_NOT_WORDCHAR:
-        if (clen > 0 && (c >= 256 ||
-              ((ctypes[c] & toptable1[codevalue]) ^ toptable2[codevalue]) != 0))
-        {   ADD_NEW(state_offset + 1, 0); }
+        if (clen > 0 &&
+            (c >= 256 || ((ctypes[c] & toptable1[codevalue]) ^ toptable2[codevalue]) != 0))
+        {
+          ADD_NEW(state_offset + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1136,25 +1173,29 @@ internal_dfa_match(
           if (ptr > start_subject)
           {
             PCRE2_SPTR temp = ptr - 1;
-            if (temp < mb->start_used_ptr) mb->start_used_ptr = temp;
+            if (temp < mb->start_used_ptr)
+              mb->start_used_ptr = temp;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-            if (utf) { BACKCHAR(temp); }
+            if (utf)
+            {
+              BACKCHAR(temp);
+            }
 #endif
             GETCHARTEST(d, temp);
 #ifdef SUPPORT_UNICODE
-            if (codevalue == OP_UCP_WORD_BOUNDARY ||
-                codevalue == OP_NOT_UCP_WORD_BOUNDARY)
+            if (codevalue == OP_UCP_WORD_BOUNDARY || codevalue == OP_NOT_UCP_WORD_BOUNDARY)
             {
               int chartype = UCD_CHARTYPE(d);
               int category = PRIV(ucp_gentype)[chartype];
-              left_word = (category == ucp_L || category == ucp_N ||
-                chartype == ucp_Mn || chartype == ucp_Pc);
+              left_word = (category == ucp_L || category == ucp_N || chartype == ucp_Mn ||
+                           chartype == ucp_Pc);
             }
             else
 #endif
-            left_word = d < 256 && (ctypes[d] & ctype_word) != 0;
+              left_word = d < 256 && (ctypes[d] & ctype_word) != 0;
           }
-          else left_word = FALSE;
+          else
+            left_word = FALSE;
 
           if (clen > 0)
           {
@@ -1162,29 +1203,33 @@ internal_dfa_match(
             {
               PCRE2_SPTR temp = ptr + 1;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
-              if (utf) { FORWARDCHARTEST(temp, mb->end_subject); }
+              if (utf)
+              {
+                FORWARDCHARTEST(temp, mb->end_subject);
+              }
 #endif
               mb->last_used_ptr = temp;
             }
 #ifdef SUPPORT_UNICODE
-            if (codevalue == OP_UCP_WORD_BOUNDARY ||
-                codevalue == OP_NOT_UCP_WORD_BOUNDARY)
+            if (codevalue == OP_UCP_WORD_BOUNDARY || codevalue == OP_NOT_UCP_WORD_BOUNDARY)
             {
               int chartype = UCD_CHARTYPE(c);
               int category = PRIV(ucp_gentype)[chartype];
-              right_word = (category == ucp_L || category == ucp_N ||
-                chartype == ucp_Mn || chartype == ucp_Pc);
+              right_word = (category == ucp_L || category == ucp_N || chartype == ucp_Mn ||
+                            chartype == ucp_Pc);
             }
             else
 #endif
-            right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
+              right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
           }
-          else right_word = FALSE;
+          else
+            right_word = FALSE;
 
           if ((left_word == right_word) ==
-              (codevalue == OP_NOT_WORD_BOUNDARY ||
-               codevalue == OP_NOT_UCP_WORD_BOUNDARY))
-          {   ADD_ACTIVE(state_offset + 1, 0); }
+              (codevalue == OP_NOT_WORD_BOUNDARY || codevalue == OP_NOT_UCP_WORD_BOUNDARY))
+          {
+            ADD_ACTIVE(state_offset + 1, 0);
+          }
         }
         break;
 
@@ -1202,13 +1247,12 @@ internal_dfa_match(
           BOOL OK;
           int chartype;
           const uint32_t *cp;
-          const ucd_record * prop = GET_UCD(c);
+          const ucd_record *prop = GET_UCD(c);
           switch (code[1])
           {
           case PT_LAMP:
             chartype = prop->chartype;
-            OK = chartype == ucp_Lu || chartype == ucp_Ll ||
-                 chartype == ucp_Lt;
+            OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
             break;
 
           case PT_GC:
@@ -1232,16 +1276,15 @@ internal_dfa_match(
 
           case PT_ALNUM:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N;
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N;
             break;
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
             which means that Perl space and POSIX space are now identical. PCRE
             was changed at release 8.34. */
 
-          case PT_SPACE:      // Perl space
-          case PT_PXSPACE:    // POSIX space
+          case PT_SPACE:   // Perl space
+          case PT_PXSPACE: // POSIX space
             switch (c)
             {
             HSPACE_CASES:
@@ -1257,8 +1300,7 @@ internal_dfa_match(
 
           case PT_WORD:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N ||
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N ||
                  chartype == ucp_Mn || chartype == ucp_Pc;
             break;
 
@@ -1273,15 +1315,22 @@ internal_dfa_match(
             cp = PRIV(ucd_caseless_sets) + code[2];
             for (;;)
             {
-              if (c < *cp) { OK = FALSE; break; }
-              if (c == *cp++) { OK = TRUE; break; }
+              if (c < *cp)
+              {
+                OK = FALSE;
+                break;
+              }
+              if (c == *cp++)
+              {
+                OK = TRUE;
+                break;
+              }
             }
             break;
 
           case PT_UCNC:
-            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
-                 c >= 0xe000;
+            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT || c == CHAR_GRAVE_ACCENT ||
+                 (c >= 0xa0 && c <= 0xd7ff) || c >= 0xe000;
             break;
 
           case PT_BIDICL:
@@ -1289,8 +1338,7 @@ internal_dfa_match(
             break;
 
           case PT_BOOL:
-            OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-              UCD_BPROPS_PROP(prop), code[2]) != 0;
+            OK = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), code[2]) != 0;
             break;
 
             /* Should never occur, but keep compilers from grumbling. */
@@ -1300,14 +1348,17 @@ internal_dfa_match(
             break;
           }
 
-          if (OK == (codevalue == OP_PROP)) { ADD_NEW(state_offset + 3, 0); }
+          if (OK == (codevalue == OP_PROP))
+          {
+            ADD_NEW(state_offset + 3, 0);
+          }
         }
         break;
 #endif
 
 
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These opcodes likewise inspect the subject character, but have an
         argument that is not a data character. It is one of these opcodes:
         OP_ANY, OP_ALLANY, OP_DIGIT, OP_NOT_DIGIT, OP_WHITESPACE, OP_NOT_SPACE,
@@ -1316,26 +1367,26 @@ internal_dfa_match(
       case OP_TYPEPLUS:
       case OP_TYPEMINPLUS:
       case OP_TYPEPOSPLUS:
-        count = current_state->count;  // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + 2, 0);
+        }
         if (clen > 0)
         {
           if (d == OP_ANY && ptr + 1 >= mb->end_subject &&
-              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              c == NLBLOCK->nl[0])
+              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 && NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             could_continue = partial_newline = TRUE;
           }
           else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
-              (c < 256 &&
-                (d != OP_ANY || !IS_NEWLINE(ptr)) &&
-                ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
+                   (c < 256 && (d != OP_ANY || !IS_NEWLINE(ptr)) &&
+                    ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
             if (count > 0 && codevalue == OP_TYPEPOSPLUS)
             {
-              active_count--;            // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             count++;
@@ -1352,21 +1403,18 @@ internal_dfa_match(
         if (clen > 0)
         {
           if (d == OP_ANY && ptr + 1 >= mb->end_subject &&
-              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              c == NLBLOCK->nl[0])
+              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 && NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             could_continue = partial_newline = TRUE;
           }
           else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
-              (c < 256 &&
-                (d != OP_ANY || !IS_NEWLINE(ptr)) &&
-                ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
+                   (c < 256 && (d != OP_ANY || !IS_NEWLINE(ptr)) &&
+                    ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
             if (codevalue == OP_TYPEPOSQUERY)
             {
-              active_count--;            // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW(state_offset + 2, 0);
@@ -1382,21 +1430,18 @@ internal_dfa_match(
         if (clen > 0)
         {
           if (d == OP_ANY && ptr + 1 >= mb->end_subject &&
-              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              c == NLBLOCK->nl[0])
+              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 && NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             could_continue = partial_newline = TRUE;
           }
           else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
-              (c < 256 &&
-                (d != OP_ANY || !IS_NEWLINE(ptr)) &&
-                ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
+                   (c < 256 && (d != OP_ANY || !IS_NEWLINE(ptr)) &&
+                    ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
             if (codevalue == OP_TYPEPOSSTAR)
             {
-              active_count--;            // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW(state_offset, 0);
@@ -1406,26 +1451,27 @@ internal_dfa_match(
 
         /*-----------------------------------------------------------------*/
       case OP_TYPEEXACT:
-        count = current_state->count;  // Number already matched
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           if (d == OP_ANY && ptr + 1 >= mb->end_subject &&
-              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              c == NLBLOCK->nl[0])
+              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 && NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             could_continue = partial_newline = TRUE;
           }
           else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
-              (c < 256 &&
-                (d != OP_ANY || !IS_NEWLINE(ptr)) &&
-                ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
+                   (c < 256 && (d != OP_ANY || !IS_NEWLINE(ptr)) &&
+                    ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW(state_offset + 1 + IMM2_SIZE + 1, 0); }
+            {
+              ADD_NEW(state_offset + 1 + IMM2_SIZE + 1, 0);
+            }
             else
-            {   ADD_NEW(state_offset, count); }
+            {
+              ADD_NEW(state_offset, count);
+            }
           }
         }
         break;
@@ -1435,36 +1481,37 @@ internal_dfa_match(
       case OP_TYPEMINUPTO:
       case OP_TYPEPOSUPTO:
         ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
-        count = current_state->count;  // Number already matched
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           if (d == OP_ANY && ptr + 1 >= mb->end_subject &&
-              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 &&
-              NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 &&
-              c == NLBLOCK->nl[0])
+              (mb->moptions & (PCRE2_PARTIAL_HARD)) != 0 && NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && c == NLBLOCK->nl[0])
           {
             could_continue = partial_newline = TRUE;
           }
           else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
-              (c < 256 &&
-                (d != OP_ANY || !IS_NEWLINE(ptr)) &&
-                ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
+                   (c < 256 && (d != OP_ANY || !IS_NEWLINE(ptr)) &&
+                    ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
             if (codevalue == OP_TYPEPOSUPTO)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW(state_offset + 2 + IMM2_SIZE, 0); }
+            {
+              ADD_NEW(state_offset + 2 + IMM2_SIZE, 0);
+            }
             else
-            {   ADD_NEW(state_offset, count); }
+            {
+              ADD_NEW(state_offset, count);
+            }
           }
         }
         break;
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These are virtual opcodes that are used when something like
         OP_TYPEPLUS has OP_PROP, OP_NOTPROP, OP_ANYNL, or OP_EXTUNI as its
         argument. It keeps the code above fast for the other cases. The argument
@@ -1474,14 +1521,17 @@ internal_dfa_match(
       case OP_PROP_EXTRA + OP_TYPEPLUS:
       case OP_PROP_EXTRA + OP_TYPEMINPLUS:
       case OP_PROP_EXTRA + OP_TYPEPOSPLUS:
-        count = current_state->count;           // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + 4, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + 4, 0);
+        }
         if (clen > 0)
         {
           BOOL OK;
           int chartype;
           const uint32_t *cp;
-          const ucd_record * prop = GET_UCD(c);
+          const ucd_record *prop = GET_UCD(c);
           switch (code[2])
           {
           case PT_LAMP:
@@ -1510,16 +1560,15 @@ internal_dfa_match(
 
           case PT_ALNUM:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N;
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N;
             break;
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
             which means that Perl space and POSIX space are now identical. PCRE
             was changed at release 8.34. */
 
-          case PT_SPACE:      // Perl space
-          case PT_PXSPACE:    // POSIX space
+          case PT_SPACE:   // Perl space
+          case PT_PXSPACE: // POSIX space
             switch (c)
             {
             HSPACE_CASES:
@@ -1535,8 +1584,7 @@ internal_dfa_match(
 
           case PT_WORD:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N ||
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N ||
                  chartype == ucp_Mn || chartype == ucp_Pc;
             break;
 
@@ -1551,15 +1599,22 @@ internal_dfa_match(
             cp = PRIV(ucd_caseless_sets) + code[3];
             for (;;)
             {
-              if (c < *cp) { OK = FALSE; break; }
-              if (c == *cp++) { OK = TRUE; break; }
+              if (c < *cp)
+              {
+                OK = FALSE;
+                break;
+              }
+              if (c == *cp++)
+              {
+                OK = TRUE;
+                break;
+              }
             }
             break;
 
           case PT_UCNC:
-            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
-                 c >= 0xe000;
+            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT || c == CHAR_GRAVE_ACCENT ||
+                 (c >= 0xa0 && c <= 0xd7ff) || c >= 0xe000;
             break;
 
           case PT_BIDICL:
@@ -1567,8 +1622,7 @@ internal_dfa_match(
             break;
 
           case PT_BOOL:
-            OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-              UCD_BPROPS_PROP(prop), code[3]) != 0;
+            OK = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), code[3]) != 0;
             break;
 
             /* Should never occur, but keep compilers from grumbling. */
@@ -1582,7 +1636,7 @@ internal_dfa_match(
           {
             if (count > 0 && codevalue == OP_PROP_EXTRA + OP_TYPEPOSPLUS)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             count++;
@@ -1595,18 +1649,20 @@ internal_dfa_match(
       case OP_EXTUNI_EXTRA + OP_TYPEPLUS:
       case OP_EXTUNI_EXTRA + OP_TYPEMINPLUS:
       case OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS:
-        count = current_state->count;  // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + 2, 0);
+        }
         if (clen > 0)
         {
           int ncount = 0;
           if (count > 0 && codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS)
           {
-            active_count--;           // Remove non-match possibility
+            active_count--; // Remove non-match possibility
             next_active_state--;
           }
-          (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf,
-            &ncount);
+          (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           count++;
           ADD_NEW_DATA(-state_offset, count, ncount);
         }
@@ -1617,8 +1673,11 @@ internal_dfa_match(
       case OP_ANYNL_EXTRA + OP_TYPEPLUS:
       case OP_ANYNL_EXTRA + OP_TYPEMINPLUS:
       case OP_ANYNL_EXTRA + OP_TYPEPOSPLUS:
-        count = current_state->count;  // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + 2, 0);
+        }
         if (clen > 0)
         {
           int ncount = 0;
@@ -1630,19 +1689,21 @@ internal_dfa_match(
 #ifndef EBCDIC
           case 0x2028:
           case 0x2029:
-#endif  /* Not EBCDIC */
-            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
+#endif /* Not EBCDIC */
+            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF)
+              break;
             goto ANYNL01;
 
           case CHAR_CR:
-            if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
+            if (ptr + 1 < end_subject && ptr[1] == CHAR_LF)
+              ncount = 1;
             /* Fall through */
 
-            ANYNL01:
+          ANYNL01:
           case CHAR_LF:
             if (count > 0 && codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSPLUS)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             count++;
@@ -1659,8 +1720,11 @@ internal_dfa_match(
       case OP_VSPACE_EXTRA + OP_TYPEPLUS:
       case OP_VSPACE_EXTRA + OP_TYPEMINPLUS:
       case OP_VSPACE_EXTRA + OP_TYPEPOSPLUS:
-        count = current_state->count;  // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + 2, 0);
+        }
         if (clen > 0)
         {
           BOOL OK;
@@ -1679,7 +1743,7 @@ internal_dfa_match(
           {
             if (count > 0 && codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSPLUS)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             count++;
@@ -1692,8 +1756,11 @@ internal_dfa_match(
       case OP_HSPACE_EXTRA + OP_TYPEPLUS:
       case OP_HSPACE_EXTRA + OP_TYPEMINPLUS:
       case OP_HSPACE_EXTRA + OP_TYPEPOSPLUS:
-        count = current_state->count;  // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + 2, 0);
+        }
         if (clen > 0)
         {
           BOOL OK;
@@ -1712,7 +1779,7 @@ internal_dfa_match(
           {
             if (count > 0 && codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSPLUS)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             count++;
@@ -1734,7 +1801,7 @@ internal_dfa_match(
       case OP_PROP_EXTRA + OP_TYPEPOSSTAR:
         count = 0;
 
-        QS1:
+      QS1:
 
         ADD_ACTIVE(state_offset + 4, 0);
         if (clen > 0)
@@ -1742,7 +1809,7 @@ internal_dfa_match(
           BOOL OK;
           int chartype;
           const uint32_t *cp;
-          const ucd_record * prop = GET_UCD(c);
+          const ucd_record *prop = GET_UCD(c);
           switch (code[2])
           {
           case PT_LAMP:
@@ -1771,16 +1838,15 @@ internal_dfa_match(
 
           case PT_ALNUM:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N;
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N;
             break;
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
             which means that Perl space and POSIX space are now identical. PCRE
             was changed at release 8.34. */
 
-          case PT_SPACE:      // Perl space
-          case PT_PXSPACE:    // POSIX space
+          case PT_SPACE:   // Perl space
+          case PT_PXSPACE: // POSIX space
             switch (c)
             {
             HSPACE_CASES:
@@ -1796,8 +1862,7 @@ internal_dfa_match(
 
           case PT_WORD:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N ||
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N ||
                  chartype == ucp_Mn || chartype == ucp_Pc;
             break;
 
@@ -1812,15 +1877,22 @@ internal_dfa_match(
             cp = PRIV(ucd_caseless_sets) + code[3];
             for (;;)
             {
-              if (c < *cp) { OK = FALSE; break; }
-              if (c == *cp++) { OK = TRUE; break; }
+              if (c < *cp)
+              {
+                OK = FALSE;
+                break;
+              }
+              if (c == *cp++)
+              {
+                OK = TRUE;
+                break;
+              }
             }
             break;
 
           case PT_UCNC:
-            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
-                 c >= 0xe000;
+            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT || c == CHAR_GRAVE_ACCENT ||
+                 (c >= 0xa0 && c <= 0xd7ff) || c >= 0xe000;
             break;
 
           case PT_BIDICL:
@@ -1828,8 +1900,7 @@ internal_dfa_match(
             break;
 
           case PT_BOOL:
-            OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-              UCD_BPROPS_PROP(prop), code[3]) != 0;
+            OK = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), code[3]) != 0;
             break;
 
             /* Should never occur, but keep compilers from grumbling. */
@@ -1844,7 +1915,7 @@ internal_dfa_match(
             if (codevalue == OP_PROP_EXTRA + OP_TYPEPOSSTAR ||
                 codevalue == OP_PROP_EXTRA + OP_TYPEPOSQUERY)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW(state_offset + count, 0);
@@ -1864,7 +1935,7 @@ internal_dfa_match(
       case OP_EXTUNI_EXTRA + OP_TYPEPOSSTAR:
         count = 0;
 
-        QS2:
+      QS2:
 
         ADD_ACTIVE(state_offset + 2, 0);
         if (clen > 0)
@@ -1873,11 +1944,10 @@ internal_dfa_match(
           if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSSTAR ||
               codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSQUERY)
           {
-            active_count--;           // Remove non-match possibility
+            active_count--; // Remove non-match possibility
             next_active_state--;
           }
-          (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf,
-            &ncount);
+          (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           ADD_NEW_DATA(-(state_offset + count), 0, ncount);
         }
         break;
@@ -1895,7 +1965,7 @@ internal_dfa_match(
       case OP_ANYNL_EXTRA + OP_TYPEPOSSTAR:
         count = 0;
 
-        QS3:
+      QS3:
         ADD_ACTIVE(state_offset + 2, 0);
         if (clen > 0)
         {
@@ -1908,20 +1978,22 @@ internal_dfa_match(
 #ifndef EBCDIC
           case 0x2028:
           case 0x2029:
-#endif  /* Not EBCDIC */
-            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
+#endif /* Not EBCDIC */
+            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF)
+              break;
             goto ANYNL02;
 
           case CHAR_CR:
-            if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
+            if (ptr + 1 < end_subject && ptr[1] == CHAR_LF)
+              ncount = 1;
             /* Fall through */
 
-            ANYNL02:
+          ANYNL02:
           case CHAR_LF:
             if (codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSSTAR ||
                 codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSQUERY)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW_DATA(-(state_offset + (int)count), 0, ncount);
@@ -1945,7 +2017,7 @@ internal_dfa_match(
       case OP_VSPACE_EXTRA + OP_TYPEPOSSTAR:
         count = 0;
 
-        QS4:
+      QS4:
         ADD_ACTIVE(state_offset + 2, 0);
         if (clen > 0)
         {
@@ -1965,7 +2037,7 @@ internal_dfa_match(
             if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSSTAR ||
                 codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSQUERY)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW_DATA(-(state_offset + (int)count), 0, 0);
@@ -1985,7 +2057,7 @@ internal_dfa_match(
       case OP_HSPACE_EXTRA + OP_TYPEPOSSTAR:
         count = 0;
 
-        QS5:
+      QS5:
         ADD_ACTIVE(state_offset + 2, 0);
         if (clen > 0)
         {
@@ -2006,7 +2078,7 @@ internal_dfa_match(
             if (codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSSTAR ||
                 codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSQUERY)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW_DATA(-(state_offset + (int)count), 0, 0);
@@ -2021,14 +2093,16 @@ internal_dfa_match(
       case OP_PROP_EXTRA + OP_TYPEMINUPTO:
       case OP_PROP_EXTRA + OP_TYPEPOSUPTO:
         if (codevalue != OP_PROP_EXTRA + OP_TYPEEXACT)
-        {   ADD_ACTIVE(state_offset + 1 + IMM2_SIZE + 3, 0); }
-        count = current_state->count;  // Number already matched
+        {
+          ADD_ACTIVE(state_offset + 1 + IMM2_SIZE + 3, 0);
+        }
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           BOOL OK;
           int chartype;
           const uint32_t *cp;
-          const ucd_record * prop = GET_UCD(c);
+          const ucd_record *prop = GET_UCD(c);
           switch (code[1 + IMM2_SIZE + 1])
           {
           case PT_LAMP:
@@ -2050,24 +2124,23 @@ internal_dfa_match(
 
           case PT_SCX:
             OK = (prop->script == code[1 + IMM2_SIZE + 2] ||
-                  MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop),
-                    code[1 + IMM2_SIZE + 2]) != 0);
+                  MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), code[1 + IMM2_SIZE + 2]) !=
+                      0);
             break;
 
             /* These are specials for combination cases. */
 
           case PT_ALNUM:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N;
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N;
             break;
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
             which means that Perl space and POSIX space are now identical. PCRE
             was changed at release 8.34. */
 
-          case PT_SPACE:      // Perl space
-          case PT_PXSPACE:    // POSIX space
+          case PT_SPACE:   // Perl space
+          case PT_PXSPACE: // POSIX space
             switch (c)
             {
             HSPACE_CASES:
@@ -2083,8 +2156,7 @@ internal_dfa_match(
 
           case PT_WORD:
             chartype = prop->chartype;
-            OK = PRIV(ucp_gentype)[chartype] == ucp_L ||
-                 PRIV(ucp_gentype)[chartype] == ucp_N ||
+            OK = PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N ||
                  chartype == ucp_Mn || chartype == ucp_Pc;
             break;
 
@@ -2099,15 +2171,22 @@ internal_dfa_match(
             cp = PRIV(ucd_caseless_sets) + code[1 + IMM2_SIZE + 2];
             for (;;)
             {
-              if (c < *cp) { OK = FALSE; break; }
-              if (c == *cp++) { OK = TRUE; break; }
+              if (c < *cp)
+              {
+                OK = FALSE;
+                break;
+              }
+              if (c == *cp++)
+              {
+                OK = TRUE;
+                break;
+              }
             }
             break;
 
           case PT_UCNC:
-            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
-                 c >= 0xe000;
+            OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT || c == CHAR_GRAVE_ACCENT ||
+                 (c >= 0xa0 && c <= 0xd7ff) || c >= 0xe000;
             break;
 
           case PT_BIDICL:
@@ -2115,8 +2194,8 @@ internal_dfa_match(
             break;
 
           case PT_BOOL:
-            OK = MAPBIT(PRIV(ucd_boolprop_sets) +
-              UCD_BPROPS_PROP(prop), code[1 + IMM2_SIZE + 2]) != 0;
+            OK = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), code[1 + IMM2_SIZE + 2]) !=
+                 0;
             break;
 
             /* Should never occur, but keep compilers from grumbling. */
@@ -2130,13 +2209,17 @@ internal_dfa_match(
           {
             if (codevalue == OP_PROP_EXTRA + OP_TYPEPOSUPTO)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW(state_offset + 1 + IMM2_SIZE + 3, 0); }
+            {
+              ADD_NEW(state_offset + 1 + IMM2_SIZE + 3, 0);
+            }
             else
-            {   ADD_NEW(state_offset, count); }
+            {
+              ADD_NEW(state_offset, count);
+            }
           }
         }
         break;
@@ -2147,25 +2230,30 @@ internal_dfa_match(
       case OP_EXTUNI_EXTRA + OP_TYPEMINUPTO:
       case OP_EXTUNI_EXTRA + OP_TYPEPOSUPTO:
         if (codevalue != OP_EXTUNI_EXTRA + OP_TYPEEXACT)
-        {   ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0); }
-        count = current_state->count;  // Number already matched
+        {
+          ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
+        }
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           PCRE2_SPTR nptr;
           int ncount = 0;
           if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSUPTO)
           {
-            active_count--;           // Remove non-match possibility
+            active_count--; // Remove non-match possibility
             next_active_state--;
           }
-          nptr = PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf,
-            &ncount);
+          nptr = PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
-              reset_could_continue = TRUE;
+            reset_could_continue = TRUE;
           if (++count >= (int)GET2(code, 1))
-          {   ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount); }
+          {
+            ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount);
+          }
           else
-          {   ADD_NEW_DATA(-state_offset, count, ncount); }
+          {
+            ADD_NEW_DATA(-state_offset, count, ncount);
+          }
         }
         break;
 #endif
@@ -2176,8 +2264,10 @@ internal_dfa_match(
       case OP_ANYNL_EXTRA + OP_TYPEMINUPTO:
       case OP_ANYNL_EXTRA + OP_TYPEPOSUPTO:
         if (codevalue != OP_ANYNL_EXTRA + OP_TYPEEXACT)
-        {   ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0); }
-        count = current_state->count;  // Number already matched
+        {
+          ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
+        }
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           int ncount = 0;
@@ -2189,25 +2279,31 @@ internal_dfa_match(
 #ifndef EBCDIC
           case 0x2028:
           case 0x2029:
-#endif  /* Not EBCDIC */
-            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
+#endif /* Not EBCDIC */
+            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF)
+              break;
             goto ANYNL03;
 
           case CHAR_CR:
-            if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
+            if (ptr + 1 < end_subject && ptr[1] == CHAR_LF)
+              ncount = 1;
             /* Fall through */
 
-            ANYNL03:
+          ANYNL03:
           case CHAR_LF:
             if (codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSUPTO)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount); }
+            {
+              ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount);
+            }
             else
-            {   ADD_NEW_DATA(-state_offset, count, ncount); }
+            {
+              ADD_NEW_DATA(-state_offset, count, ncount);
+            }
             break;
 
           default:
@@ -2222,8 +2318,10 @@ internal_dfa_match(
       case OP_VSPACE_EXTRA + OP_TYPEMINUPTO:
       case OP_VSPACE_EXTRA + OP_TYPEPOSUPTO:
         if (codevalue != OP_VSPACE_EXTRA + OP_TYPEEXACT)
-        {   ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0); }
-        count = current_state->count;  // Number already matched
+        {
+          ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
+        }
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           BOOL OK;
@@ -2241,13 +2339,17 @@ internal_dfa_match(
           {
             if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSUPTO)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0); }
+            {
+              ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0);
+            }
             else
-            {   ADD_NEW_DATA(-state_offset, count, 0); }
+            {
+              ADD_NEW_DATA(-state_offset, count, 0);
+            }
           }
         }
         break;
@@ -2258,8 +2360,10 @@ internal_dfa_match(
       case OP_HSPACE_EXTRA + OP_TYPEMINUPTO:
       case OP_HSPACE_EXTRA + OP_TYPEPOSUPTO:
         if (codevalue != OP_HSPACE_EXTRA + OP_TYPEEXACT)
-        {   ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0); }
-        count = current_state->count;  // Number already matched
+        {
+          ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
+        }
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           BOOL OK;
@@ -2278,18 +2382,22 @@ internal_dfa_match(
           {
             if (codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSUPTO)
             {
-              active_count--;           // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0); }
+            {
+              ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0);
+            }
             else
-            {   ADD_NEW_DATA(-state_offset, count, 0); }
+            {
+              ADD_NEW_DATA(-state_offset, count, 0);
+            }
           }
         }
         break;
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These opcodes are followed by a character that is usually compared
         to the current subject character; it is loaded into d. We still get
         here even if there is no subject character, because in some cases zero
@@ -2297,32 +2405,45 @@ internal_dfa_match(
 
         /*-----------------------------------------------------------------*/
       case OP_CHAR:
-        if (clen > 0 && c == d) { ADD_NEW(state_offset + dlen + 1, 0); }
+        if (clen > 0 && c == d)
+        {
+          ADD_NEW(state_offset + dlen + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
       case OP_CHARI:
-        if (clen == 0) break;
+        if (clen == 0)
+          break;
 
 #ifdef SUPPORT_UNICODE
         if (utf_or_ucp)
         {
-          if (c == d) { ADD_NEW(state_offset + dlen + 1, 0); } else
+          if (c == d)
+          {
+            ADD_NEW(state_offset + dlen + 1, 0);
+          }
+          else
           {
             unsigned int othercase;
             if (c < 128)
               othercase = fcc[c];
             else
               othercase = UCD_OTHERCASE(c);
-            if (d == othercase) { ADD_NEW(state_offset + dlen + 1, 0); }
+            if (d == othercase)
+            {
+              ADD_NEW(state_offset + dlen + 1, 0);
+            }
           }
         }
         else
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
         /* Not UTF or UCP mode */
         {
           if (TABLE_GET(c, lcc, c) == TABLE_GET(d, lcc, d))
-          {   ADD_NEW(state_offset + 2, 0); }
+          {
+            ADD_NEW(state_offset + 2, 0);
+          }
         }
         break;
 
@@ -2337,10 +2458,10 @@ internal_dfa_match(
         if (clen > 0)
         {
           int ncount = 0;
-          PCRE2_SPTR nptr = PRIV(extuni)(c, ptr + clen, mb->start_subject,
-            end_subject, utf, &ncount);
+          PCRE2_SPTR nptr =
+              PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
-              reset_could_continue = TRUE;
+            reset_could_continue = TRUE;
           ADD_NEW_DATA(-(state_offset + 1), 0, ncount);
         }
         break;
@@ -2362,8 +2483,9 @@ internal_dfa_match(
 #ifndef EBCDIC
           case 0x2028:
           case 0x2029:
-#endif  /* Not EBCDIC */
-            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF) break;
+#endif /* Not EBCDIC */
+            if (mb->bsr_convention == PCRE2_BSR_ANYCRLF)
+              break;
             PCRE2_FALLTHROUGH /* Fall through */
 
           case CHAR_LF:
@@ -2458,7 +2580,10 @@ internal_dfa_match(
         /* Match a negated single character casefully. */
 
       case OP_NOT:
-        if (clen > 0 && c != d) { ADD_NEW(state_offset + dlen + 1, 0); }
+        if (clen > 0 && c != d)
+        {
+          ADD_NEW(state_offset + dlen + 1, 0);
+        }
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2472,10 +2597,12 @@ internal_dfa_match(
           if (utf_or_ucp && d >= 128)
             otherd = UCD_OTHERCASE(d);
           else
-#endif  /* SUPPORT_UNICODE */
-          otherd = TABLE_GET(d, fcc, d);
+#endif /* SUPPORT_UNICODE */
+            otherd = TABLE_GET(d, fcc, d);
           if (c != d && c != otherd)
-          {   ADD_NEW(state_offset + dlen + 1, 0); }
+          {
+            ADD_NEW(state_offset + dlen + 1, 0);
+          }
         }
         break;
 
@@ -2496,8 +2623,11 @@ internal_dfa_match(
       case OP_NOTPLUS:
       case OP_NOTMINPLUS:
       case OP_NOTPOSPLUS:
-        count = current_state->count;  // Already matched
-        if (count > 0) { ADD_ACTIVE(state_offset + dlen + 1, 0); }
+        count = current_state->count; // Already matched
+        if (count > 0)
+        {
+          ADD_ACTIVE(state_offset + dlen + 1, 0);
+        }
         if (clen > 0)
         {
           uint32_t otherd = NOTACHAR;
@@ -2507,15 +2637,14 @@ internal_dfa_match(
             if (utf_or_ucp && d >= 128)
               otherd = UCD_OTHERCASE(d);
             else
-#endif  /* SUPPORT_UNICODE */
-            otherd = TABLE_GET(d, fcc, d);
+#endif /* SUPPORT_UNICODE */
+              otherd = TABLE_GET(d, fcc, d);
           }
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
-            if (count > 0 &&
-                (codevalue == OP_POSPLUS || codevalue == OP_NOTPOSPLUS))
+            if (count > 0 && (codevalue == OP_POSPLUS || codevalue == OP_NOTPOSPLUS))
             {
-              active_count--;             // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             count++;
@@ -2550,14 +2679,14 @@ internal_dfa_match(
             if (utf_or_ucp && d >= 128)
               otherd = UCD_OTHERCASE(d);
             else
-#endif  /* SUPPORT_UNICODE */
-            otherd = TABLE_GET(d, fcc, d);
+#endif /* SUPPORT_UNICODE */
+              otherd = TABLE_GET(d, fcc, d);
           }
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (codevalue == OP_POSQUERY || codevalue == OP_NOTPOSQUERY)
             {
-              active_count--;            // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW(state_offset + dlen + 1, 0);
@@ -2591,14 +2720,14 @@ internal_dfa_match(
             if (utf_or_ucp && d >= 128)
               otherd = UCD_OTHERCASE(d);
             else
-#endif  /* SUPPORT_UNICODE */
-            otherd = TABLE_GET(d, fcc, d);
+#endif /* SUPPORT_UNICODE */
+              otherd = TABLE_GET(d, fcc, d);
           }
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (codevalue == OP_POSSTAR || codevalue == OP_NOTPOSSTAR)
             {
-              active_count--;            // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             ADD_NEW(state_offset, 0);
@@ -2614,7 +2743,7 @@ internal_dfa_match(
         PCRE2_FALLTHROUGH /* Fall through */
       case OP_EXACT:
       case OP_NOTEXACT:
-        count = current_state->count;  // Number already matched
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           uint32_t otherd = NOTACHAR;
@@ -2624,15 +2753,19 @@ internal_dfa_match(
             if (utf_or_ucp && d >= 128)
               otherd = UCD_OTHERCASE(d);
             else
-#endif  /* SUPPORT_UNICODE */
-            otherd = TABLE_GET(d, fcc, d);
+#endif /* SUPPORT_UNICODE */
+              otherd = TABLE_GET(d, fcc, d);
           }
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0); }
+            {
+              ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0);
+            }
             else
-            {   ADD_NEW(state_offset, count); }
+            {
+              ADD_NEW(state_offset, count);
+            }
           }
         }
         break;
@@ -2654,7 +2787,7 @@ internal_dfa_match(
       case OP_NOTMINUPTO:
       case OP_NOTPOSUPTO:
         ADD_ACTIVE(state_offset + dlen + 1 + IMM2_SIZE, 0);
-        count = current_state->count;  // Number already matched
+        count = current_state->count; // Number already matched
         if (clen > 0)
         {
           uint32_t otherd = NOTACHAR;
@@ -2664,26 +2797,30 @@ internal_dfa_match(
             if (utf_or_ucp && d >= 128)
               otherd = UCD_OTHERCASE(d);
             else
-#endif  /* SUPPORT_UNICODE */
-            otherd = TABLE_GET(d, fcc, d);
+#endif /* SUPPORT_UNICODE */
+              otherd = TABLE_GET(d, fcc, d);
           }
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (codevalue == OP_POSUPTO || codevalue == OP_NOTPOSUPTO)
             {
-              active_count--;             // Remove non-match possibility
+              active_count--; // Remove non-match possibility
               next_active_state--;
             }
             if (++count >= (int)GET2(code, 1))
-            {   ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0); }
+            {
+              ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0);
+            }
             else
-            {   ADD_NEW(state_offset, count); }
+            {
+              ADD_NEW(state_offset, count);
+            }
           }
         }
         break;
 
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These are the class-handling opcodes */
 
       case OP_CLASS:
@@ -2703,23 +2840,23 @@ internal_dfa_match(
           function that sorts all this out. */
 
           if (codevalue == OP_XCLASS)
-         {
-           ecode = code + GET(code, 1);
-           if (clen > 0)
-             isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE,
-               (const uint8_t*)mb->start_code, utf);
-         }
+          {
+            ecode = code + GET(code, 1);
+            if (clen > 0)
+              isinclass =
+                  PRIV(xclass)(c, code + 1 + LINK_SIZE, (const uint8_t *)mb->start_code, utf);
+          }
 
           /* A nested set-based class has internal opcodes for performing
           set operations. */
 
           else if (codevalue == OP_ECLASS)
-         {
-           ecode = code + GET(code, 1);
-           if (clen > 0)
-             isinclass = PRIV(eclass)(c, code + 1 + LINK_SIZE, ecode,
-               (const uint8_t*)mb->start_code, utf);
-         }
+          {
+            ecode = code + GET(code, 1);
+            if (clen > 0)
+              isinclass = PRIV(eclass)(c, code + 1 + LINK_SIZE, ecode,
+                                       (const uint8_t *)mb->start_code, utf);
+          }
 
           else
 #endif /* SUPPORT_WIDE_CHARS */
@@ -2731,8 +2868,9 @@ internal_dfa_match(
             ecode = code + 1 + (32 / sizeof(PCRE2_UCHAR));
             if (clen > 0)
             {
-              isinclass = (c > 255)? (codevalue == OP_NCLASS) :
-                ((((const uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
+              isinclass = (c > 255)
+                              ? (codevalue == OP_NCLASS)
+                              : ((((const uint8_t *)(code + 1))[c / 8] & (1u << (c & 7))) != 0);
             }
           }
 
@@ -2752,7 +2890,7 @@ internal_dfa_match(
             {
               if (*ecode == OP_CRPOSSTAR)
               {
-                active_count--;           // Remove non-match possibility
+                active_count--; // Remove non-match possibility
                 next_active_state--;
               }
               ADD_NEW(state_offset, 0);
@@ -2762,13 +2900,16 @@ internal_dfa_match(
           case OP_CRPLUS:
           case OP_CRMINPLUS:
           case OP_CRPOSPLUS:
-            count = current_state->count;  // Already matched
-            if (count > 0) { ADD_ACTIVE(next_state_offset + 1, 0); }
+            count = current_state->count; // Already matched
+            if (count > 0)
+            {
+              ADD_ACTIVE(next_state_offset + 1, 0);
+            }
             if (isinclass)
             {
               if (count > 0 && *ecode == OP_CRPOSPLUS)
               {
-                active_count--;           // Remove non-match possibility
+                active_count--; // Remove non-match possibility
                 next_active_state--;
               }
               count++;
@@ -2784,7 +2925,7 @@ internal_dfa_match(
             {
               if (*ecode == OP_CRPOSQUERY)
               {
-                active_count--;           // Remove non-match possibility
+                active_count--; // Remove non-match possibility
                 next_active_state--;
               }
               ADD_NEW(next_state_offset + 1, 0);
@@ -2794,34 +2935,43 @@ internal_dfa_match(
           case OP_CRRANGE:
           case OP_CRMINRANGE:
           case OP_CRPOSRANGE:
-            count = current_state->count;  // Already matched
+            count = current_state->count; // Already matched
             if (count >= (int)GET2(ecode, 1))
-            {   ADD_ACTIVE(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
+            {
+              ADD_ACTIVE(next_state_offset + 1 + 2 * IMM2_SIZE, 0);
+            }
             if (isinclass)
             {
               int max = (int)GET2(ecode, 1 + IMM2_SIZE);
 
               if (*ecode == OP_CRPOSRANGE && count >= (int)GET2(ecode, 1))
               {
-                active_count--;           // Remove non-match possibility
+                active_count--; // Remove non-match possibility
                 next_active_state--;
               }
 
-              if (++count >= max && max != 0)   // Max 0 => no limit
-              {   ADD_NEW(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
+              if (++count >= max && max != 0) // Max 0 => no limit
+              {
+                ADD_NEW(next_state_offset + 1 + 2 * IMM2_SIZE, 0);
+              }
               else
-              {   ADD_NEW(state_offset, count); }
+              {
+                ADD_NEW(state_offset, count);
+              }
             }
             break;
 
           default:
-            if (isinclass) { ADD_NEW(next_state_offset, 0); }
+            if (isinclass)
+            {
+              ADD_NEW(next_state_offset, 0);
+            }
             break;
           }
         }
         break;
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* These are the opcodes for fancy brackets of various kinds. We have
         to use recursion in order to handle them. The "always failing" assertion
         (?!) is optimised to OP_FAIL when compiling, so we have to support that,
@@ -2844,7 +2994,8 @@ internal_dfa_match(
           if (rws->free < RWS_RSIZE + RWS_OVEC_OSIZE)
           {
             rc = more_workspace(&rws, RWS_OVEC_OSIZE, mb);
-            if (rc != 0) return rc;
+            if (rc != 0)
+              return rc;
             RWS = (int *)rws;
           }
 
@@ -2853,25 +3004,28 @@ internal_dfa_match(
           PCRE2_ASSERT(rws->free >= RWS_RSIZE + RWS_OVEC_OSIZE);
           rws->free -= RWS_RSIZE + RWS_OVEC_OSIZE;
 
-          while (*endasscode == OP_ALT) endasscode += GET(endasscode, 1);
+          while (*endasscode == OP_ALT)
+            endasscode += GET(endasscode, 1);
 
-          rc = internal_dfa_match(
-            mb,                                   // static match data
-            code,                                 // this subexpression's code
-            ptr,                                  // where we currently are
-            (PCRE2_SIZE)(ptr - start_subject),    // start offset
-            local_offsets,                        // offset vector
-            RWS_OVEC_OSIZE/OVEC_UNIT,             // size of same
-            local_workspace,                      // workspace vector
-            RWS_RSIZE,                            // size of same
-            rlevel,                               // function recursion level
-            RWS);                                 // recursion workspace
+          rc = internal_dfa_match(mb,                                // static match data
+                                  code,                              // this subexpression's code
+                                  ptr,                               // where we currently are
+                                  (PCRE2_SIZE)(ptr - start_subject), // start offset
+                                  local_offsets,                     // offset vector
+                                  RWS_OVEC_OSIZE / OVEC_UNIT,        // size of same
+                                  local_workspace,                   // workspace vector
+                                  RWS_RSIZE,                         // size of same
+                                  rlevel,                            // function recursion level
+                                  RWS);                              // recursion workspace
 
           rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
-          if (rc < 0 && rc != PCRE2_ERROR_NOMATCH) return rc;
+          if (rc < 0 && rc != PCRE2_ERROR_NOMATCH)
+            return rc;
           if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
-            {   ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0); }
+          {
+            ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0);
+          }
         }
         break;
 
@@ -2886,36 +3040,40 @@ internal_dfa_match(
           is inserted between OP_COND and an assertion condition. This does not
           happen for the other conditions. */
 
-          if (code[LINK_SIZE + 1] == OP_CALLOUT
-              || code[LINK_SIZE + 1] == OP_CALLOUT_STR)
+          if (code[LINK_SIZE + 1] == OP_CALLOUT || code[LINK_SIZE + 1] == OP_CALLOUT_STR)
           {
             PCRE2_SIZE callout_length;
-            rrc = do_callout_dfa(code, offsets, current_subject, ptr, mb,
-              1 + LINK_SIZE, &callout_length);
-            if (rrc < 0) return rrc;                 // Abandon
-            if (rrc > 0) break;                      // Fail this thread
-            code += callout_length;                  // Skip callout data
+            rrc = do_callout_dfa(code, offsets, current_subject, ptr, mb, 1 + LINK_SIZE,
+                                 &callout_length);
+            if (rrc < 0)
+              return rrc; // Abandon
+            if (rrc > 0)
+              break;                // Fail this thread
+            code += callout_length; // Skip callout data
           }
 
-          condcode = code[LINK_SIZE+1];
+          condcode = code[LINK_SIZE + 1];
 
           /* Back reference conditions and duplicate named recursion conditions
           are not supported */
 
-          if (condcode == OP_CREF || condcode == OP_DNCREF ||
-              condcode == OP_DNRREF)
+          if (condcode == OP_CREF || condcode == OP_DNCREF || condcode == OP_DNRREF)
             return PCRE2_ERROR_DFA_UCOND;
 
           /* The DEFINE condition is always false, and the assertion (?!) is
           converted to OP_FAIL. */
 
           if (condcode == OP_FALSE || condcode == OP_FAIL)
-          {   ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
+          {
+            ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0);
+          }
 
           /* There is also an always-true condition */
 
           else if (condcode == OP_TRUE)
-          {   ADD_ACTIVE(state_offset + LINK_SIZE + 2, 0); }
+          {
+            ADD_ACTIVE(state_offset + LINK_SIZE + 2, 0);
+          }
 
           /* The only supported version of OP_RREF is for the value RREF_ANY,
           which means "test if in any recursion". We can't test for specifically
@@ -2924,10 +3082,16 @@ internal_dfa_match(
           else if (condcode == OP_RREF)
           {
             unsigned int value = GET2(code, LINK_SIZE + 2);
-            if (value != RREF_ANY) return PCRE2_ERROR_DFA_UCOND;
+            if (value != RREF_ANY)
+              return PCRE2_ERROR_DFA_UCOND;
             if (mb->recursive != NULL)
-            {   ADD_ACTIVE(state_offset + LINK_SIZE + 2 + IMM2_SIZE, 0); }
-            else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
+            {
+              ADD_ACTIVE(state_offset + LINK_SIZE + 2 + IMM2_SIZE, 0);
+            }
+            else
+            {
+              ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0);
+            }
           }
 
           /* Otherwise, the condition is an assertion */
@@ -2944,7 +3108,8 @@ internal_dfa_match(
             if (rws->free < RWS_RSIZE + RWS_OVEC_OSIZE)
             {
               rc = more_workspace(&rws, RWS_OVEC_OSIZE, mb);
-              if (rc != 0) return rc;
+              if (rc != 0)
+                return rc;
               RWS = (int *)rws;
             }
 
@@ -2953,28 +3118,32 @@ internal_dfa_match(
             PCRE2_ASSERT(rws->free >= RWS_RSIZE + RWS_OVEC_OSIZE);
             rws->free -= RWS_RSIZE + RWS_OVEC_OSIZE;
 
-            while (*endasscode == OP_ALT) endasscode += GET(endasscode, 1);
+            while (*endasscode == OP_ALT)
+              endasscode += GET(endasscode, 1);
 
-            rc = internal_dfa_match(
-              mb,                                   // fixed match data
-              asscode,                              // this subexpression's code
-              ptr,                                  // where we currently are
-              (PCRE2_SIZE)(ptr - start_subject),    // start offset
-              local_offsets,                        // offset vector
-              RWS_OVEC_OSIZE/OVEC_UNIT,             // size of same
-              local_workspace,                      // workspace vector
-              RWS_RSIZE,                            // size of same
-              rlevel,                               // function recursion level
-              RWS);                                 // recursion workspace
+            rc = internal_dfa_match(mb,                                // fixed match data
+                                    asscode,                           // this subexpression's code
+                                    ptr,                               // where we currently are
+                                    (PCRE2_SIZE)(ptr - start_subject), // start offset
+                                    local_offsets,                     // offset vector
+                                    RWS_OVEC_OSIZE / OVEC_UNIT,        // size of same
+                                    local_workspace,                   // workspace vector
+                                    RWS_RSIZE,                         // size of same
+                                    rlevel,                            // function recursion level
+                                    RWS);                              // recursion workspace
 
             rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
-            if (rc < 0 && rc != PCRE2_ERROR_NOMATCH) return rc;
-            if ((rc >= 0) ==
-                  (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
-            {   ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0); }
+            if (rc < 0 && rc != PCRE2_ERROR_NOMATCH)
+              return rc;
+            if ((rc >= 0) == (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
+            {
+              ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0);
+            }
             else
-            {   ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
+            {
+              ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0);
+            }
           }
         }
         break;
@@ -2987,16 +3156,17 @@ internal_dfa_match(
           PCRE2_SIZE *local_offsets;
           RWS_anchor *rws = (RWS_anchor *)RWS;
           PCRE2_SPTR callpat = start_code + GET(code, 1);
-          uint32_t recno = (callpat == mb->start_code)? 0 :
-            GET2(callpat, 1 + LINK_SIZE);
+          uint32_t recno = (callpat == mb->start_code) ? 0 : GET2(callpat, 1 + LINK_SIZE);
 
           /* Argument list has not been supported yet. */
-          if (code[1 + LINK_SIZE] == OP_CREF) return PCRE2_ERROR_DFA_UITEM;
+          if (code[1 + LINK_SIZE] == OP_CREF)
+            return PCRE2_ERROR_DFA_UITEM;
 
           if (rws->free < RWS_RSIZE + RWS_OVEC_RSIZE)
           {
             rc = more_workspace(&rws, RWS_OVEC_RSIZE, mb);
-            if (rc != 0) return rc;
+            if (rc != 0)
+              return rc;
             RWS = (int *)rws;
           }
 
@@ -3009,9 +3179,7 @@ internal_dfa_match(
           pointer or last used character. This should catch convoluted mutual
           recursions. (Some simple cases are caught at compile time.) */
 
-          for (dfa_recursion_info *ri = mb->recursive;
-               ri != NULL;
-               ri = ri->prevrec)
+          for (dfa_recursion_info *ri = mb->recursive; ri != NULL; ri = ri->prevrec)
           {
             if (recno == ri->group_num && ptr == ri->subject_position &&
                 mb->last_used_ptr == ri->last_used_ptr)
@@ -3027,24 +3195,24 @@ internal_dfa_match(
           new_recursive.prevrec = mb->recursive;
           mb->recursive = &new_recursive;
 
-          rc = internal_dfa_match(
-            mb,                                   // fixed match data
-            callpat,                              // this subexpression's code
-            ptr,                                  // where we currently are
-            (PCRE2_SIZE)(ptr - start_subject),    // start offset
-            local_offsets,                        // offset vector
-            RWS_OVEC_RSIZE/OVEC_UNIT,             // size of same
-            local_workspace,                      // workspace vector
-            RWS_RSIZE,                            // size of same
-            rlevel,                               // function recursion level
-            RWS);                                 // recursion workspace
+          rc = internal_dfa_match(mb,                                // fixed match data
+                                  callpat,                           // this subexpression's code
+                                  ptr,                               // where we currently are
+                                  (PCRE2_SIZE)(ptr - start_subject), // start offset
+                                  local_offsets,                     // offset vector
+                                  RWS_OVEC_RSIZE / OVEC_UNIT,        // size of same
+                                  local_workspace,                   // workspace vector
+                                  RWS_RSIZE,                         // size of same
+                                  rlevel,                            // function recursion level
+                                  RWS);                              // recursion workspace
 
           rws->free += RWS_RSIZE + RWS_OVEC_RSIZE;
-          mb->recursive = new_recursive.prevrec;  // Done this recursion
+          mb->recursive = new_recursive.prevrec; // Done this recursion
 
           /* Ran out of internal offsets */
 
-          if (rc == 0) return PCRE2_ERROR_DFA_RECURSE;
+          if (rc == 0)
+            return PCRE2_ERROR_DFA_RECURSE;
 
           /* For each successful matched substring, set up the next state with a
           count of characters to skip before trying it. Note that the count is in
@@ -3052,21 +3220,22 @@ internal_dfa_match(
 
           if (rc > 0)
           {
-            for (rc = rc*2 - 2; rc >= 0; rc -= 2)
+            for (rc = rc * 2 - 2; rc >= 0; rc -= 2)
             {
-              PCRE2_SIZE charcount = local_offsets[rc+1] - local_offsets[rc];
+              PCRE2_SIZE charcount = local_offsets[rc + 1] - local_offsets[rc];
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
               if (utf)
               {
                 PCRE2_SPTR p = start_subject + local_offsets[rc];
-                PCRE2_SPTR pp = start_subject + local_offsets[rc+1];
-                while (p < pp) if (NOT_FIRSTCU(*p++)) charcount--;
+                PCRE2_SPTR pp = start_subject + local_offsets[rc + 1];
+                while (p < pp)
+                  if (NOT_FIRSTCU(*p++))
+                    charcount--;
               }
 #endif
               if (charcount > 0)
               {
-                ADD_NEW_DATA(-(state_offset + LINK_SIZE + 1), 0,
-                  (int)(charcount - 1));
+                ADD_NEW_DATA(-(state_offset + LINK_SIZE + 1), 0, (int)(charcount - 1));
               }
               else
               {
@@ -3074,7 +3243,8 @@ internal_dfa_match(
               }
             }
           }
-          else if (rc != PCRE2_ERROR_NOMATCH) return rc;
+          else if (rc != PCRE2_ERROR_NOMATCH)
+            return rc;
         }
         break;
 
@@ -3096,7 +3266,8 @@ internal_dfa_match(
           if (rws->free < RWS_RSIZE + RWS_OVEC_OSIZE)
           {
             rc = more_workspace(&rws, RWS_OVEC_OSIZE, mb);
-            if (rc != 0) return rc;
+            if (rc != 0)
+              return rc;
             RWS = (int *)rws;
           }
 
@@ -3108,40 +3279,42 @@ internal_dfa_match(
           if (codevalue == OP_BRAPOSZERO)
           {
             allow_zero = TRUE;
-            ++code;  // The following opcode will be one of the above BRAs
+            ++code; // The following opcode will be one of the above BRAs
           }
-          else allow_zero = FALSE;
+          else
+            allow_zero = FALSE;
 
           /* Loop to match the subpattern as many times as possible as if it were
           a complete pattern. */
 
           for (matched_count = 0;; matched_count++)
           {
-            rc = internal_dfa_match(
-              mb,                                   // fixed match data
-              code,                                 // this subexpression's code
-              local_ptr,                            // where we currently are
-              (PCRE2_SIZE)(ptr - start_subject),    // start offset
-              local_offsets,                        // offset vector
-              RWS_OVEC_OSIZE/OVEC_UNIT,             // size of same
-              local_workspace,                      // workspace vector
-              RWS_RSIZE,                            // size of same
-              rlevel,                               // function recursion level
-              RWS);                                 // recursion workspace
+            rc = internal_dfa_match(mb,                                // fixed match data
+                                    code,                              // this subexpression's code
+                                    local_ptr,                         // where we currently are
+                                    (PCRE2_SIZE)(ptr - start_subject), // start offset
+                                    local_offsets,                     // offset vector
+                                    RWS_OVEC_OSIZE / OVEC_UNIT,        // size of same
+                                    local_workspace,                   // workspace vector
+                                    RWS_RSIZE,                         // size of same
+                                    rlevel,                            // function recursion level
+                                    RWS);                              // recursion workspace
 
             /* Failed to match */
 
             if (rc < 0)
             {
-              if (rc != PCRE2_ERROR_NOMATCH) return rc;
+              if (rc != PCRE2_ERROR_NOMATCH)
+                return rc;
               break;
             }
 
             /* Matched: break the loop if zero characters matched. */
 
             charcount = local_offsets[1] - local_offsets[0];
-            if (charcount == 0) break;
-            local_ptr += charcount;    // Advance temporary position ptr
+            if (charcount == 0)
+              break;
+            local_ptr += charcount; // Advance temporary position ptr
           }
 
           rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
@@ -3155,10 +3328,11 @@ internal_dfa_match(
             PCRE2_SPTR end_subpattern = code;
             int next_state_offset;
 
-            do { end_subpattern += GET(end_subpattern, 1); }
-              while (*end_subpattern == OP_ALT);
-            next_state_offset =
-              (int)(end_subpattern - start_code + LINK_SIZE + 1);
+            do
+            {
+              end_subpattern += GET(end_subpattern, 1);
+            } while (*end_subpattern == OP_ALT);
+            next_state_offset = (int)(end_subpattern - start_code + LINK_SIZE + 1);
 
             /* Optimization: if there are no more active states, and there
             are no new states yet set up, then skip over the subject string
@@ -3203,7 +3377,8 @@ internal_dfa_match(
           if (rws->free < RWS_RSIZE + RWS_OVEC_OSIZE)
           {
             rc = more_workspace(&rws, RWS_OVEC_OSIZE, mb);
-            if (rc != 0) return rc;
+            if (rc != 0)
+              return rc;
             RWS = (int *)rws;
           }
 
@@ -3212,17 +3387,16 @@ internal_dfa_match(
           PCRE2_ASSERT(rws->free >= RWS_RSIZE + RWS_OVEC_OSIZE);
           rws->free -= RWS_RSIZE + RWS_OVEC_OSIZE;
 
-          rc = internal_dfa_match(
-            mb,                                   // fixed match data
-            code,                                 // this subexpression's code
-            ptr,                                  // where we currently are
-            (PCRE2_SIZE)(ptr - start_subject),    // start offset
-            local_offsets,                        // offset vector
-            RWS_OVEC_OSIZE/OVEC_UNIT,             // size of same
-            local_workspace,                      // workspace vector
-            RWS_RSIZE,                            // size of same
-            rlevel,                               // function recursion level
-            RWS);                                 // recursion workspace
+          rc = internal_dfa_match(mb,                                // fixed match data
+                                  code,                              // this subexpression's code
+                                  ptr,                               // where we currently are
+                                  (PCRE2_SIZE)(ptr - start_subject), // start offset
+                                  local_offsets,                     // offset vector
+                                  RWS_OVEC_OSIZE / OVEC_UNIT,        // size of same
+                                  local_workspace,                   // workspace vector
+                                  RWS_RSIZE,                         // size of same
+                                  rlevel,                            // function recursion level
+                                  RWS);                              // recursion workspace
 
           rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
@@ -3232,18 +3406,19 @@ internal_dfa_match(
             PCRE2_SIZE charcount = local_offsets[1] - local_offsets[0];
             int next_state_offset, repeat_state_offset;
 
-            do { end_subpattern += GET(end_subpattern, 1); }
-              while (*end_subpattern == OP_ALT);
-            next_state_offset =
-              (int)(end_subpattern - start_code + LINK_SIZE + 1);
+            do
+            {
+              end_subpattern += GET(end_subpattern, 1);
+            } while (*end_subpattern == OP_ALT);
+            next_state_offset = (int)(end_subpattern - start_code + LINK_SIZE + 1);
 
             /* If the end of this subpattern is KETRMAX or KETRMIN, we must
             arrange for the repeat state also to be added to the relevant list.
             Calculate the offset, or set -1 for no repeat. */
 
-            repeat_state_offset = (*end_subpattern == OP_KETRMAX ||
-                                   *end_subpattern == OP_KETRMIN)?
-              (int)(end_subpattern - start_code - GET(end_subpattern, 1)) : -1;
+            repeat_state_offset = (*end_subpattern == OP_KETRMAX || *end_subpattern == OP_KETRMIN)
+                                      ? (int)(end_subpattern - start_code - GET(end_subpattern, 1))
+                                      : -1;
 
             /* If we have matched an empty string, add the next state at the
             current character pointer. This is important so that the duplicate
@@ -3286,43 +3461,51 @@ internal_dfa_match(
               {
                 PCRE2_SPTR p = start_subject + local_offsets[0];
                 PCRE2_SPTR pp = start_subject + local_offsets[1];
-                while (p < pp) if (NOT_FIRSTCU(*p++)) charcount--;
+                while (p < pp)
+                  if (NOT_FIRSTCU(*p++))
+                    charcount--;
               }
 #endif
               ADD_NEW_DATA(-next_state_offset, 0, (int)(charcount - 1));
               if (repeat_state_offset >= 0)
-              {   ADD_NEW_DATA(-repeat_state_offset, 0, (int)(charcount - 1)); }
+              {
+                ADD_NEW_DATA(-repeat_state_offset, 0, (int)(charcount - 1));
+              }
             }
           }
-          else if (rc != PCRE2_ERROR_NOMATCH) return rc;
+          else if (rc != PCRE2_ERROR_NOMATCH)
+            return rc;
         }
         break;
 
 
-  /* ========================================================================== */
+        /* ========================================================================== */
         /* Handle callouts */
 
       case OP_CALLOUT:
       case OP_CALLOUT_STR:
         {
           PCRE2_SIZE callout_length;
-          rrc = do_callout_dfa(code, offsets, current_subject, ptr, mb, 0,
-            &callout_length);
-          if (rrc < 0) return rrc;   // Abandon
+          rrc = do_callout_dfa(code, offsets, current_subject, ptr, mb, 0, &callout_length);
+          if (rrc < 0)
+            return rrc; // Abandon
           if (rrc == 0)
-          {   ADD_ACTIVE(state_offset + (int)callout_length, 0); }
+          {
+            ADD_ACTIVE(state_offset + (int)callout_length, 0);
+          }
         }
         break;
 
 
-  /* ========================================================================== */
-      default:          // Unsupported opcode
+        /* ========================================================================== */
+      default: // Unsupported opcode
         return PCRE2_ERROR_DFA_UITEM;
       }
 
-      NEXT_ACTIVE_STATE: continue;
+    NEXT_ACTIVE_STATE:
+      continue;
 
-    }        // End of loop scanning active states
+    } // End of loop scanning active states
 
     /* We have finished the processing at the current subject character. If no
     new states have been set for the next character, we have found all the
@@ -3334,37 +3517,34 @@ internal_dfa_match(
 
     if (new_count <= 0)
     {
-      if (could_continue &&                             // Some could go on, and
-          (                                             // either...
-          (mb->moptions & PCRE2_PARTIAL_HARD) != 0      //   Hard partial
-          ||                                            // or...
-          ((mb->moptions & PCRE2_PARTIAL_SOFT) != 0 &&  //   Soft partial and
-           match_count < 0)                             //   no matches
-          ) &&                                          // And...
-          (
-          partial_newline ||                   // Either partial NL
-            (                                  // or ...
-            ptr >= end_subject &&              // End of subject and
-              (                                //   either
-              ptr > mb->start_used_ptr ||      //   Inspected non-empty string
-              mb->allowemptypartial            //   or pattern has lookbehind
-              )                                //   or could match empty
-            )
-          ))
+      if (could_continue &&                                // Some could go on, and
+          (                                                // either...
+              (mb->moptions & PCRE2_PARTIAL_HARD) != 0     //   Hard partial
+              ||                                           // or...
+              ((mb->moptions & PCRE2_PARTIAL_SOFT) != 0 && //   Soft partial and
+               match_count < 0)                            //   no matches
+              ) &&                                         // And...
+          (partial_newline ||                              // Either partial NL
+           (                                               // or ...
+               ptr >= end_subject &&                       // End of subject and
+               (                                           //   either
+                   ptr > mb->start_used_ptr ||             //   Inspected non-empty string
+                   mb->allowemptypartial                   //   or pattern has lookbehind
+                   )                                       //   or could match empty
+               )))
         match_count = PCRE2_ERROR_PARTIAL;
-      break;  // Exit from loop along the subject string
+      break; // Exit from loop along the subject string
     }
 
     /* One or more states are active for the next character. */
 
-    ptr += clen;    // Advance to next subject character
-  }                 // Loop to move along the subject string
+    ptr += clen; // Advance to next subject character
+  } // Loop to move along the subject string
 
   /* Control gets here from "break" a few lines above. If we have a match and
   PCRE2_ENDANCHORED is set, the match fails. */
 
-  if (match_count >= 0 &&
-      ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0 &&
+  if (match_count >= 0 && ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0 &&
       ptr < end_subject)
     match_count = PCRE2_ERROR_NOMATCH;
 
@@ -3399,8 +3579,8 @@ Returns:        > 0 => number of match offset pairs placed in offsets
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
-  PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
-  pcre2_match_context *mcontext, int *workspace, PCRE2_SIZE wscount)
+                PCRE2_SIZE start_offset, uint32_t options, pcre2_match_data *match_data,
+                pcre2_match_context *mcontext, int *workspace, PCRE2_SIZE wscount)
 {
   int rc;
 
@@ -3450,46 +3630,74 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   /* Recognize NULL, length 0 as an empty string. */
 
-  if (subject == NULL && length == 0) subject = null_str;
+  if (subject == NULL && length == 0)
+    subject = null_str;
 
   /* Plausibility checks */
 
-  if (match_data == NULL) return PCRE2_ERROR_NULL;
+  if (match_data == NULL)
+    return PCRE2_ERROR_NULL;
   if (re == NULL || subject == NULL || workspace == NULL)
-  {   rc = PCRE2_ERROR_NULL; goto EXIT; }
+  {
+    rc = PCRE2_ERROR_NULL;
+    goto EXIT;
+  }
   if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0)
-  {   rc = PCRE2_ERROR_BADOPTION; goto EXIT; }
+  {
+    rc = PCRE2_ERROR_BADOPTION;
+    goto EXIT;
+  }
 
   if (length == PCRE2_ZERO_TERMINATED)
   {
     length = PRIV(strlen)(subject);
   }
 
-  if (wscount < 20) { rc = PCRE2_ERROR_DFA_WSSIZE; goto EXIT; }
-  if (start_offset > length) { rc = PCRE2_ERROR_BADOFFSET; goto EXIT; }
+  if (wscount < 20)
+  {
+    rc = PCRE2_ERROR_DFA_WSSIZE;
+    goto EXIT;
+  }
+  if (start_offset > length)
+  {
+    rc = PCRE2_ERROR_BADOFFSET;
+    goto EXIT;
+  }
 
   /* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
   time. */
 
-  if ((options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) != 0 &&
-     ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
-  {   rc = PCRE2_ERROR_BADOPTION; goto EXIT; }
+  if ((options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0 &&
+      ((re->overall_options | options) & PCRE2_ENDANCHORED) != 0)
+  {
+    rc = PCRE2_ERROR_BADOPTION;
+    goto EXIT;
+  }
 
   /* Invalid UTF support is not available for DFA matching. */
 
   if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
-  {   rc = PCRE2_ERROR_DFA_UINVALID_UTF; goto EXIT; }
+  {
+    rc = PCRE2_ERROR_DFA_UINVALID_UTF;
+    goto EXIT;
+  }
 
   /* Check that the first field in the block is the magic number. If it is not,
   return with PCRE2_ERROR_BADMAGIC. */
 
   if (re->magic_number != MAGIC_NUMBER)
-  {   rc = PCRE2_ERROR_BADMAGIC; goto EXIT; }
+  {
+    rc = PCRE2_ERROR_BADMAGIC;
+    goto EXIT;
+  }
 
   /* Check the code unit width. */
 
-  if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
-  {   rc = PCRE2_ERROR_BADMODE; goto EXIT; }
+  if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH / 8)
+  {
+    rc = PCRE2_ERROR_BADMODE;
+    goto EXIT;
+  }
 
   /* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
   options variable for this function. Users of PCRE2 who are not calling the
@@ -3503,9 +3711,9 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   accident this is not the case, a compile-time division by zero error will
   occur. */
 
-#define FF (PCRE2_NOTEMPTY_SET|PCRE2_NE_ATST_SET)
-#define OO (PCRE2_NOTEMPTY|PCRE2_NOTEMPTY_ATSTART)
-  options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
+#define FF (PCRE2_NOTEMPTY_SET | PCRE2_NE_ATST_SET)
+#define OO (PCRE2_NOTEMPTY | PCRE2_NOTEMPTY_ATSTART)
+  options |= (re->flags & FF) / ((FF & (~FF + 1)) / (OO & (~OO + 1)));
 #undef FF
 #undef OO
 
@@ -3515,8 +3723,11 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   if ((options & PCRE2_DFA_RESTART) != 0)
   {
     if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 ||
-        workspace[1] > (int)((wscount - 2)/INTS_PER_STATEBLOCK))
-    {   rc = PCRE2_ERROR_DFA_BADRESTART; goto EXIT; }
+        workspace[1] > (int)((wscount - 2) / INTS_PER_STATEBLOCK))
+    {
+      rc = PCRE2_ERROR_DFA_BADRESTART;
+      goto EXIT;
+    }
   }
 
   /* Set some local values */
@@ -3525,8 +3736,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   start_match = subject + start_offset;
   end_subject = subject + length;
   req_cu_ptr = start_match - 1;
-  anchored = (options & (PCRE2_ANCHORED|PCRE2_DFA_RESTART)) != 0 ||
-    (re->overall_options & PCRE2_ANCHORED) != 0;
+  anchored = (options & (PCRE2_ANCHORED | PCRE2_DFA_RESTART)) != 0 ||
+             (re->overall_options & PCRE2_ANCHORED) != 0;
 
   /* The "must be at the start of a line" flags are used in a loop when finding
   where to start. */
@@ -3543,9 +3754,9 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   cb.subject = subject;
   cb.subject_length = (PCRE2_SIZE)(end_subject - subject);
   cb.callout_flags = 0;
-  cb.capture_top      = 1;      // No capture support
-  cb.capture_last     = 0;
-  cb.mark             = NULL;   // No (*MARK) support
+  cb.capture_top = 1; // No capture support
+  cb.capture_last = 0;
+  cb.mark = NULL; // No (*MARK) support
 
   /* Get data from the match context, if present, and fill in the remaining
   fields in the match block. It is an error to set an offset limit without
@@ -3564,7 +3775,10 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     if (mcontext->offset_limit != PCRE2_UNSET)
     {
       if ((re->overall_options & PCRE2_USE_OFFSET_LIMIT) == 0)
-      {   rc = PCRE2_ERROR_BADOFFSETLIMIT; goto EXIT; }
+      {
+        rc = PCRE2_ERROR_BADOFFSETLIMIT;
+        goto EXIT;
+      }
       bumpalong_limit = subject + mcontext->offset_limit;
     }
     mb->callout = mcontext->callout;
@@ -3589,8 +3803,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   mb->start_subject = subject;
   mb->end_subject = end_subject;
   mb->start_offset = start_offset;
-  mb->allowemptypartial = (re->max_lookbehind > 0) ||
-    (re->flags & PCRE2_MATCH_EMPTY) != 0;
+  mb->allowemptypartial = (re->max_lookbehind > 0) || (re->flags & PCRE2_MATCH_EMPTY) != 0;
   mb->moptions = options;
   mb->poptions = re->overall_options;
   mb->match_call_count = 0;
@@ -3650,43 +3863,47 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #ifdef SUPPORT_UNICODE
   if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-    PCRE2_SPTR check_subject = start_match;  // start_match includes offset
+    PCRE2_SPTR check_subject = start_match; // start_match includes offset
 
     if (start_offset > 0)
     {
 #if PCRE2_CODE_UNIT_WIDTH != 32
       unsigned int i;
       if (start_match < end_subject && NOT_FIRSTCU(*start_match))
-      {   rc = PCRE2_ERROR_BADUTFOFFSET; goto EXIT; }
+      {
+        rc = PCRE2_ERROR_BADUTFOFFSET;
+        goto EXIT;
+      }
       for (i = re->max_lookbehind; i > 0 && check_subject > subject; i--)
       {
         check_subject--;
         while (check_subject > subject &&
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        (*check_subject & 0xc0) == 0x80)
+               (*check_subject & 0xc0) == 0x80)
 #else  /* 16-bit */
-        (*check_subject & 0xfc00) == 0xdc00)
+               (*check_subject & 0xfc00) == 0xdc00)
 #endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
           check_subject--;
       }
-#else   /* In the 32-bit library, one code unit equals one character. */
+#else  /* In the 32-bit library, one code unit equals one character. */
       check_subject -= re->max_lookbehind;
-      if (check_subject < subject) check_subject = subject;
-#endif  /* PCRE2_CODE_UNIT_WIDTH != 32 */
+      if (check_subject < subject)
+        check_subject = subject;
+#endif /* PCRE2_CODE_UNIT_WIDTH != 32 */
     }
 
     /* Validate the relevant portion of the subject. After an error, adjust the
     offset to be an absolute offset in the whole string. */
 
-    rc = PRIV(valid_utf)(check_subject,
-      length - (PCRE2_SIZE)(check_subject - subject), &(match_data->startchar));
+    rc = PRIV(valid_utf)(check_subject, length - (PCRE2_SIZE)(check_subject - subject),
+                         &(match_data->startchar));
     if (rc != 0)
     {
       match_data->startchar += (PCRE2_SIZE)(check_subject - subject);
       goto EXIT;
     }
   }
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
   /* Set up the first code unit to match, if available. If there's no first code
   unit there may be a bitmap of possible first characters. */
@@ -3706,12 +3923,11 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       if (first_cu > 127 && (utf || (re->overall_options & PCRE2_UCP) != 0))
         first_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(first_cu);
 #endif
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
     }
   }
-  else
-    if (!startline && (re->flags & PCRE2_FIRSTMAPSET) != 0)
-      start_bits = re->start_bitmap;
+  else if (!startline && (re->flags & PCRE2_FIRSTMAPSET) != 0)
+    start_bits = re->start_bitmap;
 
   /* There may be a "last known required code unit" set. */
 
@@ -3730,7 +3946,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       if (req_cu > 127 && (utf || (re->overall_options & PCRE2_UCP) != 0))
         req_cu2 = (PCRE2_UCHAR)UCD_OTHERCASE(req_cu);
 #endif
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
     }
   }
 
@@ -3739,15 +3955,14 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {
-    match_data->memctl.free((void *)match_data->subject,
-      match_data->memctl.memory_data);
+    match_data->memctl.free((void *)match_data->subject, match_data->memctl.memory_data);
     match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
   }
 
   /* Fill in fields that are always returned in the match data. */
 
   match_data->code = re;
-  match_data->subject = NULL;  // Default for match error
+  match_data->subject = NULL; // Default for match error
   match_data->mark = NULL;
   match_data->matchedby = PCRE2_MATCHEDBY_DFA_INTERPRETER;
   match_data->options = original_options;
@@ -3791,7 +4006,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
         }
         else
 #endif
-        while (t < end_subject && !IS_NEWLINE(t)) t++;
+          while (t < end_subject && !IS_NEWLINE(t))
+            t++;
         end_subject = t;
       }
 
@@ -3811,12 +4027,14 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             if (!ok && start_bits != NULL)
             {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-              if (c > 255) c = 255;
+              if (c > 255)
+                c = 255;
 #endif
-              ok = (start_bits[c/8] & (1u << (c&7))) != 0;
+              ok = (start_bits[c / 8] & (1u << (c & 7))) != 0;
             }
           }
-          if (!ok) break;
+          if (!ok)
+            break;
         }
       }
 
@@ -3826,15 +4044,14 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       {
         if (has_first_cu)
         {
-          if (first_cu != first_cu2)  // Caseless
+          if (first_cu != first_cu2) // Caseless
           {
             /* In 16-bit and 32_bit modes we have to do our own search, so can
             look for both cases at once. */
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
             PCRE2_UCHAR smc;
-            while (start_match < end_subject &&
-                  (smc = *start_match) != first_cu &&
+            while (start_match < end_subject && (smc = *start_match) != first_cu &&
                    smc != first_cu2)
               start_match++;
 #else
@@ -3853,40 +4070,38 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             the current starting position is later, we need to do a search. If
             the code unit is not found, set it to the end. */
 
-            if (memchr_found_first_cu == NULL ||
-                start_match > memchr_found_first_cu)
+            if (memchr_found_first_cu == NULL || start_match > memchr_found_first_cu)
             {
               pp1 = memchr(start_match, first_cu, searchlength);
-              memchr_found_first_cu = (pp1 == NULL)? end_subject : pp1;
+              memchr_found_first_cu = (pp1 == NULL) ? end_subject : pp1;
             }
 
             /* If the start is before a previously found position, use the
             previous position, or NULL if a previous search failed. */
 
-            else pp1 = (memchr_found_first_cu == end_subject)? NULL :
-              memchr_found_first_cu;
+            else
+              pp1 = (memchr_found_first_cu == end_subject) ? NULL : memchr_found_first_cu;
 
             /* Do the same thing for the other case. */
 
-            if (memchr_found_first_cu2 == NULL ||
-                start_match > memchr_found_first_cu2)
+            if (memchr_found_first_cu2 == NULL || start_match > memchr_found_first_cu2)
             {
               pp2 = memchr(start_match, first_cu2, searchlength);
-              memchr_found_first_cu2 = (pp2 == NULL)? end_subject : pp2;
+              memchr_found_first_cu2 = (pp2 == NULL) ? end_subject : pp2;
             }
 
-            else pp2 = (memchr_found_first_cu2 == end_subject)? NULL :
-              memchr_found_first_cu2;
+            else
+              pp2 = (memchr_found_first_cu2 == end_subject) ? NULL : memchr_found_first_cu2;
 
             /* Set the start to the end of the subject if neither case was found.
             Otherwise, use the earlier found point. */
 
             if (pp1 == NULL)
-              start_match = (pp2 == NULL)? end_subject : pp2;
+              start_match = (pp2 == NULL) ? end_subject : pp2;
             else
-              start_match = (pp2 == NULL || pp1 < pp2)? pp1 : pp2;
+              start_match = (pp2 == NULL || pp1 < pp2) ? pp1 : pp2;
 
-#endif  /* 8-bit handling */
+#endif /* 8-bit handling */
           }
 
           /* The caseful case is much simpler. */
@@ -3894,12 +4109,12 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           else
           {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-            while (start_match < end_subject && *start_match !=
-                   first_cu)
+            while (start_match < end_subject && *start_match != first_cu)
               start_match++;
-#else  /* 8-bit code units */
+#else /* 8-bit code units */
             start_match = memchr(start_match, first_cu, end_subject - start_match);
-            if (start_match == NULL) start_match = end_subject;
+            if (start_match == NULL)
+              start_match = end_subject;
 #endif
           }
 
@@ -3913,7 +4128,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           we also let the cycle run, because the matching string is legitimately
           allowed to start with the first code unit of a newline. */
 
-          if ((mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) == 0 &&
+          if ((mb->moptions & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) == 0 &&
               start_match >= mb->end_subject)
             break;
         }
@@ -3936,17 +4151,16 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             }
             else
 #endif
-            while (start_match < end_subject && !WAS_NEWLINE(start_match))
-              start_match++;
+              while (start_match < end_subject && !WAS_NEWLINE(start_match))
+                start_match++;
 
             /* If we have just passed a CR and the newline option is ANY or
             ANYCRLF, and we are now at a LF, advance the match position by one
             more code unit. */
 
             if (start_match[-1] == CHAR_CR &&
-                 (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF) &&
-                 start_match < end_subject &&
-                 *start_match == CHAR_NL)
+                (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF) &&
+                start_match < end_subject && *start_match == CHAR_NL)
               start_match++;
           }
         }
@@ -3962,19 +4176,21 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           {
             uint32_t c = *start_match;
 #if PCRE2_CODE_UNIT_WIDTH != 8
-            if (c > 255) c = 255;
+            if (c > 255)
+              c = 255;
 #endif
-            if ((start_bits[c/8] & (1u << (c&7))) != 0) break;
+            if ((start_bits[c / 8] & (1u << (c & 7))) != 0)
+              break;
             start_match++;
           }
 
           /* See comment above in first_cu checking about the next line. */
 
-          if ((mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) == 0 &&
+          if ((mb->moptions & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) == 0 &&
               start_match >= mb->end_subject)
             break;
         }
-      }    // End of first code unit handling
+      } // End of first code unit handling
 
       /* Restore fudged end_subject */
 
@@ -3982,7 +4198,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
       /* The following two optimizations are disabled for partial matching. */
 
-      if ((mb->moptions & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) == 0)
+      if ((mb->moptions & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) == 0)
       {
         PCRE2_SPTR p;
 
@@ -3991,7 +4207,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
         in characters, we treat it as code units to avoid spending too much time
         in this optimization. */
 
-        if (end_subject - start_match < re->minlength) goto NOMATCH_EXIT;
+        if (end_subject - start_match < re->minlength)
+          goto NOMATCH_EXIT;
 
         /* If req_cu is set, we know that that code unit must appear in the
         subject for the match to succeed. If the first code unit is set, req_cu
@@ -4015,21 +4232,24 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
         sufficiently long, but it's worth searching a lot more for unanchored
         patterns. */
 
-        p = start_match + (has_first_cu? 1:0);
+        p = start_match + (has_first_cu ? 1 : 0);
         if (has_req_cu && p > req_cu_ptr)
         {
           PCRE2_SIZE check_length = end_subject - start_match;
 
-          if (check_length < REQ_CU_MAX ||
-                (!anchored && check_length < REQ_CU_MAX * 1000))
+          if (check_length < REQ_CU_MAX || (!anchored && check_length < REQ_CU_MAX * 1000))
           {
-            if (req_cu != req_cu2)  // Caseless
+            if (req_cu != req_cu2) // Caseless
             {
 #if PCRE2_CODE_UNIT_WIDTH != 8
               while (p < end_subject)
               {
                 uint32_t pp = *p++;
-                if (pp == req_cu || pp == req_cu2) { p--; break; }
+                if (pp == req_cu || pp == req_cu2)
+                {
+                  p--;
+                  break;
+                }
               }
 #else  /* 8-bit code units */
               PCRE2_SPTR pp = p;
@@ -4037,7 +4257,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               if (p == NULL)
               {
                 p = memchr(pp, req_cu2, end_subject - pp);
-                if (p == NULL) p = end_subject;
+                if (p == NULL)
+                  p = end_subject;
               }
 #endif /* PCRE2_CODE_UNIT_WIDTH != 8 */
             }
@@ -4049,19 +4270,25 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #if PCRE2_CODE_UNIT_WIDTH != 8
               while (p < end_subject)
               {
-                if (*p++ == req_cu) { p--; break; }
+                if (*p++ == req_cu)
+                {
+                  p--;
+                  break;
+                }
               }
 
-#else  /* 8-bit code units */
+#else /* 8-bit code units */
               p = memchr(p, req_cu, end_subject - p);
-              if (p == NULL) p = end_subject;
+              if (p == NULL)
+                p = end_subject;
 #endif
             }
 
             /* If we can't find the required code unit, break the matching loop,
             forcing a match failure. */
 
-            if (p >= end_subject) break;
+            if (p >= end_subject)
+              break;
 
             /* If we have found the required code unit, save the point where we
             found it, so that we don't search again next time round the loop if
@@ -4077,7 +4304,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
     /* Give no match if we have passed the bumpalong limit. */
 
-    if (start_match > bumpalong_limit) break;
+    if (start_match > bumpalong_limit)
+      break;
 
     /* OK, now we can do the business */
 
@@ -4085,24 +4313,24 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     mb->last_used_ptr = start_match;
     mb->recursive = NULL;
 
-    rc = internal_dfa_match(
-      mb,                           // fixed match data
-      mb->start_code,               // this subexpression's code
-      start_match,                  // where we currently are
-      start_offset,                 // start offset in subject
-      match_data->ovector,          // offset vector
-      (uint32_t)match_data->oveccount * 2,  // actual size of same
-      workspace,                    // workspace vector
-      (int)wscount,                 // size of same
-      0,                            // function recurse level
-      base_recursion_workspace);    // initial workspace for recursion
+    rc = internal_dfa_match(mb,                                  // fixed match data
+                            mb->start_code,                      // this subexpression's code
+                            start_match,                         // where we currently are
+                            start_offset,                        // start offset in subject
+                            match_data->ovector,                 // offset vector
+                            (uint32_t)match_data->oveccount * 2, // actual size of same
+                            workspace,                           // workspace vector
+                            (int)wscount,                        // size of same
+                            0,                                   // function recurse level
+                            base_recursion_workspace);           // initial workspace for recursion
 
     /* Anything other than "no match" means we are done, always; otherwise, carry
     on only if not anchored. */
 
     if (rc != PCRE2_ERROR_NOMATCH || anchored)
     {
-      if (rc == PCRE2_ERROR_NOMATCH) goto NOMATCH_EXIT;
+      if (rc == PCRE2_ERROR_NOMATCH)
+        goto NOMATCH_EXIT;
 
       if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)
       {
@@ -4123,10 +4351,13 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       {
         if (length != 0)
         {
-          match_data->subject = match_data->memctl.malloc(CU2BYTES(length),
-            match_data->memctl.memory_data);
+          match_data->subject =
+              match_data->memctl.malloc(CU2BYTES(length), match_data->memctl.memory_data);
           if (match_data->subject == NULL)
-          {   rc = PCRE2_ERROR_NOMEMORY; goto EXIT; }
+          {
+            rc = PCRE2_ERROR_NOMEMORY;
+            goto EXIT;
+          }
           memcpy((void *)match_data->subject, subject, CU2BYTES(length));
         }
         else
@@ -4143,7 +4374,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     /* Advance to the next subject character unless we are at the end of a line
     and firstline is set. */
 
-    if (firstline && IS_NEWLINE(start_match)) break;
+    if (firstline && IS_NEWLINE(start_match))
+      break;
     start_match++;
 #ifdef SUPPORT_UNICODE
     if (utf)
@@ -4151,30 +4383,27 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       ACROSSCHAR(start_match < end_subject, start_match, start_match++);
     }
 #endif
-    if (start_match > end_subject) break;
+    if (start_match > end_subject)
+      break;
 
     /* If we have just passed a CR and we are now at a LF, and the pattern does
     not contain any explicit matches for \r or \n, and the newline option is CRLF
     or ANY or ANYCRLF, advance the match position by one more character. */
 
-    if (start_match[-1] == CHAR_CR &&
-        start_match < end_subject &&
-        *start_match == CHAR_NL &&
+    if (start_match[-1] == CHAR_CR && start_match < end_subject && *start_match == CHAR_NL &&
         (re->flags & PCRE2_HASCRORLF) == 0 &&
-          (mb->nltype == NLTYPE_ANY ||
-           mb->nltype == NLTYPE_ANYCRLF ||
-           mb->nllen == 2))
+        (mb->nltype == NLTYPE_ANY || mb->nltype == NLTYPE_ANYCRLF || mb->nllen == 2))
       start_match++;
 
-  }     // "Bumpalong" loop
+  } // "Bumpalong" loop
 
-  NOMATCH_EXIT:
+NOMATCH_EXIT:
   match_data->subject = original_subject;
   match_data->subject_length = length;
   match_data->start_offset = start_offset;
   rc = PCRE2_ERROR_NOMATCH;
 
-  EXIT:
+EXIT:
   while (rws->next != NULL)
   {
     RWS_anchor *next = rws->next;

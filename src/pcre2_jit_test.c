@@ -101,7 +101,8 @@ static int invalid_utf8_regression_tests(void);
 static int invalid_utf16_regression_tests(void);
 static int invalid_utf32_regression_tests(void);
 
-int main(void)
+int
+main(void)
 {
   int jit = 0;
 #if defined SUPPORT_PCRE2_8
@@ -111,14 +112,13 @@ int main(void)
 #elif defined SUPPORT_PCRE2_32
   pcre2_config_32(PCRE2_CONFIG_JIT, &jit);
 #endif
-  if (!jit) {
+  if (!jit)
+  {
     printf("JIT must be enabled to run pcre2_jit_test\n");
     return 1;
   }
-  return regression_tests()
-    | invalid_utf8_regression_tests()
-    | invalid_utf16_regression_tests()
-    | invalid_utf32_regression_tests();
+  return regression_tests() | invalid_utf8_regression_tests() | invalid_utf16_regression_tests() |
+         invalid_utf32_regression_tests();
 }
 
 /* --------------------------------------------------------------------------------------- */
@@ -127,28 +127,28 @@ int main(void)
 #error SUPPORT_PCRE2_8 or SUPPORT_PCRE2_16 or SUPPORT_PCRE2_32 must be defined
 #endif
 
-#define MU  (PCRE2_MULTILINE | PCRE2_UTF)
+#define MU   (PCRE2_MULTILINE | PCRE2_UTF)
 #define MUP  (PCRE2_MULTILINE | PCRE2_UTF | PCRE2_UCP)
 #define CMU  (PCRE2_CASELESS | PCRE2_MULTILINE | PCRE2_UTF)
-#define CMUP  (PCRE2_CASELESS | PCRE2_MULTILINE | PCRE2_UTF | PCRE2_UCP)
-#define M  (PCRE2_MULTILINE)
-#define MP  (PCRE2_MULTILINE | PCRE2_UCP)
-#define U  (PCRE2_UTF)
-#define CM  (PCRE2_CASELESS | PCRE2_MULTILINE)
+#define CMUP (PCRE2_CASELESS | PCRE2_MULTILINE | PCRE2_UTF | PCRE2_UCP)
+#define M    (PCRE2_MULTILINE)
+#define MP   (PCRE2_MULTILINE | PCRE2_UCP)
+#define U    (PCRE2_UTF)
+#define CM   (PCRE2_CASELESS | PCRE2_MULTILINE)
 
-#define BSR(x)  ((x) << 16)
-#define A  PCRE2_NEWLINE_ANYCRLF
+#define BSR(x) ((x) << 16)
+#define A      PCRE2_NEWLINE_ANYCRLF
 
-#define GET_NEWLINE(x)  ((x) & 0xffff)
-#define GET_BSR(x)  ((x) >> 16)
+#define GET_NEWLINE(x) ((x) & 0xffff)
+#define GET_BSR(x)     ((x) >> 16)
 
-#define OFFSET_MASK  0x00ffff
-#define F_NO8    0x010000
-#define F_NO16    0x020000
-#define F_NO32    0x020000
-#define F_NOMATCH  0x040000
-#define F_DIFF    0x080000
-#define F_FORCECONV  0x100000
+#define OFFSET_MASK 0x00ffff
+#define F_NO8       0x010000
+#define F_NO16      0x020000
+#define F_NO32      0x020000
+#define F_NOMATCH   0x040000
+#define F_DIFF      0x080000
+#define F_FORCECONV 0x100000
 #define F_PROPERTY  0x200000
 
 struct regression_test_case {
@@ -949,21 +949,24 @@ static struct regression_test_case regression_test_cases[] = {
 };
 
 #ifdef SUPPORT_PCRE2_8
-static pcre2_jit_stack_8* callback8(void *arg)
+static pcre2_jit_stack_8 *
+callback8(void *arg)
 {
   return (pcre2_jit_stack_8 *)arg;
 }
 #endif
 
 #ifdef SUPPORT_PCRE2_16
-static pcre2_jit_stack_16* callback16(void *arg)
+static pcre2_jit_stack_16 *
+callback16(void *arg)
 {
   return (pcre2_jit_stack_16 *)arg;
 }
 #endif
 
 #ifdef SUPPORT_PCRE2_32
-static pcre2_jit_stack_32* callback32(void *arg)
+static pcre2_jit_stack_32 *
+callback32(void *arg)
 {
   return (pcre2_jit_stack_32 *)arg;
 }
@@ -972,16 +975,19 @@ static pcre2_jit_stack_32* callback32(void *arg)
 #ifdef SUPPORT_PCRE2_8
 static pcre2_jit_stack_8 *stack8;
 
-static pcre2_jit_stack_8 *getstack8(void)
+static pcre2_jit_stack_8 *
+getstack8(void)
 {
   if (!stack8)
     stack8 = pcre2_jit_stack_create_8(1, 1024 * 1024, NULL);
   return stack8;
 }
 
-static void setstack8(pcre2_match_context_8 *mcontext)
+static void
+setstack8(pcre2_match_context_8 *mcontext)
 {
-  if (!mcontext) {
+  if (!mcontext)
+  {
     if (stack8)
       pcre2_jit_stack_free_8(stack8);
     stack8 = NULL;
@@ -995,16 +1001,19 @@ static void setstack8(pcre2_match_context_8 *mcontext)
 #ifdef SUPPORT_PCRE2_16
 static pcre2_jit_stack_16 *stack16;
 
-static pcre2_jit_stack_16 *getstack16(void)
+static pcre2_jit_stack_16 *
+getstack16(void)
 {
   if (!stack16)
     stack16 = pcre2_jit_stack_create_16(1, 1024 * 1024, NULL);
   return stack16;
 }
 
-static void setstack16(pcre2_match_context_16 *mcontext)
+static void
+setstack16(pcre2_match_context_16 *mcontext)
 {
-  if (!mcontext) {
+  if (!mcontext)
+  {
     if (stack16)
       pcre2_jit_stack_free_16(stack16);
     stack16 = NULL;
@@ -1018,16 +1027,19 @@ static void setstack16(pcre2_match_context_16 *mcontext)
 #ifdef SUPPORT_PCRE2_32
 static pcre2_jit_stack_32 *stack32;
 
-static pcre2_jit_stack_32 *getstack32(void)
+static pcre2_jit_stack_32 *
+getstack32(void)
 {
   if (!stack32)
     stack32 = pcre2_jit_stack_create_32(1, 1024 * 1024, NULL);
   return stack32;
 }
 
-static void setstack32(pcre2_match_context_32 *mcontext)
+static void
+setstack32(pcre2_match_context_32 *mcontext)
 {
-  if (!mcontext) {
+  if (!mcontext)
+  {
     if (stack32)
       pcre2_jit_stack_free_32(stack32);
     stack32 = NULL;
@@ -1040,7 +1052,8 @@ static void setstack32(pcre2_match_context_32 *mcontext)
 
 #ifdef SUPPORT_PCRE2_16
 
-static int convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *offsetmap, int max_length)
+static int
+convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *offsetmap, int max_length)
 {
   PCRE2_SPTR8 iptr = input;
   PCRE2_UCHAR16 *optr = output;
@@ -1049,31 +1062,43 @@ static int convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *
   if (max_length == 0)
     return 0;
 
-  while (*iptr && max_length > 1) {
+  while (*iptr && max_length > 1)
+  {
     c = 0;
     if (offsetmap)
-      *offsetmap++ = (int)(iptr - (unsigned char*)input);
+      *offsetmap++ = (int)(iptr - (unsigned char *)input);
 
     if (*iptr < 0xc0)
       c = *iptr++;
-    else if (!(*iptr & 0x20)) {
+    else if (!(*iptr & 0x20))
+    {
       c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
       iptr += 2;
-    } else if (!(*iptr & 0x10)) {
+    }
+    else if (!(*iptr & 0x10))
+    {
       c = ((iptr[0] & 0x0f) << 12) | ((iptr[1] & 0x3f) << 6) | (iptr[2] & 0x3f);
       iptr += 3;
-    } else if (!(*iptr & 0x08)) {
-      c = ((iptr[0] & 0x07) << 18) | ((iptr[1] & 0x3f) << 12) | ((iptr[2] & 0x3f) << 6) | (iptr[3] & 0x3f);
+    }
+    else if (!(*iptr & 0x08))
+    {
+      c = ((iptr[0] & 0x07) << 18) | ((iptr[1] & 0x3f) << 12) | ((iptr[2] & 0x3f) << 6) |
+          (iptr[3] & 0x3f);
       iptr += 4;
     }
 
-    if (c < 65536) {
+    if (c < 65536)
+    {
       *optr++ = c;
       max_length--;
-    } else if (max_length <= 2) {
+    }
+    else if (max_length <= 2)
+    {
       *optr = '\0';
       return (int)(optr - output);
-    } else {
+    }
+    else
+    {
       c -= 0x10000;
       *optr++ = 0xd800 | ((c >> 10) & 0x3ff);
       *optr++ = 0xdc00 | (c & 0x3ff);
@@ -1083,12 +1108,13 @@ static int convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *
     }
   }
   if (offsetmap)
-    *offsetmap = (int)(iptr - (unsigned char*)input);
+    *offsetmap = (int)(iptr - (unsigned char *)input);
   *optr = '\0';
   return (int)(optr - output);
 }
 
-static int copy_char8_to_char16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int max_length)
+static int
+copy_char8_to_char16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int max_length)
 {
   PCRE2_SPTR8 iptr = input;
   PCRE2_UCHAR16 *optr = output;
@@ -1096,7 +1122,8 @@ static int copy_char8_to_char16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int ma
   if (max_length == 0)
     return 0;
 
-  while (*iptr && max_length > 1) {
+  while (*iptr && max_length > 1)
+  {
     *optr++ = *iptr++;
     max_length--;
   }
@@ -1112,7 +1139,8 @@ static int regtest_offsetmap16[REGTEST_MAX_LENGTH16];
 
 #ifdef SUPPORT_PCRE2_32
 
-static int convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *offsetmap, int max_length)
+static int
+convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *offsetmap, int max_length)
 {
   PCRE2_SPTR8 iptr = input;
   PCRE2_UCHAR32 *optr = output;
@@ -1121,21 +1149,28 @@ static int convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *
   if (max_length == 0)
     return 0;
 
-  while (*iptr && max_length > 1) {
+  while (*iptr && max_length > 1)
+  {
     c = 0;
     if (offsetmap)
-      *offsetmap++ = (int)(iptr - (unsigned char*)input);
+      *offsetmap++ = (int)(iptr - (unsigned char *)input);
 
     if (*iptr < 0xc0)
       c = *iptr++;
-    else if (!(*iptr & 0x20)) {
+    else if (!(*iptr & 0x20))
+    {
       c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
       iptr += 2;
-    } else if (!(*iptr & 0x10)) {
+    }
+    else if (!(*iptr & 0x10))
+    {
       c = ((iptr[0] & 0x0f) << 12) | ((iptr[1] & 0x3f) << 6) | (iptr[2] & 0x3f);
       iptr += 3;
-    } else if (!(*iptr & 0x08)) {
-      c = ((iptr[0] & 0x07) << 18) | ((iptr[1] & 0x3f) << 12) | ((iptr[2] & 0x3f) << 6) | (iptr[3] & 0x3f);
+    }
+    else if (!(*iptr & 0x08))
+    {
+      c = ((iptr[0] & 0x07) << 18) | ((iptr[1] & 0x3f) << 12) | ((iptr[2] & 0x3f) << 6) |
+          (iptr[3] & 0x3f);
       iptr += 4;
     }
 
@@ -1143,12 +1178,13 @@ static int convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *
     max_length--;
   }
   if (offsetmap)
-    *offsetmap = (int)(iptr - (unsigned char*)input);
+    *offsetmap = (int)(iptr - (unsigned char *)input);
   *optr = 0;
   return (int)(optr - output);
 }
 
-static int copy_char8_to_char32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int max_length)
+static int
+copy_char8_to_char32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int max_length)
 {
   PCRE2_SPTR8 iptr = input;
   PCRE2_UCHAR32 *optr = output;
@@ -1156,7 +1192,8 @@ static int copy_char8_to_char32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int ma
   if (max_length == 0)
     return 0;
 
-  while (*iptr && max_length > 1) {
+  while (*iptr && max_length > 1)
+  {
     *optr++ = *iptr++;
     max_length--;
   }
@@ -1170,10 +1207,12 @@ static int regtest_offsetmap32[REGTEST_MAX_LENGTH32];
 
 #endif /* SUPPORT_PCRE2_32 */
 
-static int check_ascii(const char *input)
+static int
+check_ascii(const char *input)
 {
   const unsigned char *ptr = (unsigned char *)input;
-  while (*ptr) {
+  while (*ptr)
+  {
     if (*ptr > 127)
       return 0;
     ptr++;
@@ -1183,7 +1222,8 @@ static int check_ascii(const char *input)
 
 #define OVECTOR_SIZE 15
 
-static int regression_tests(void)
+static int
+regression_tests(void)
 {
   struct regression_test_case *current = regression_test_cases;
   int error;
@@ -1238,7 +1278,8 @@ static int regression_tests(void)
 #elif defined SUPPORT_PCRE2_32
   PCRE2_UCHAR32 cpu_info[128];
 #endif
-#if defined SUPPORT_UNICODE && ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
+#if defined SUPPORT_UNICODE && \
+    ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
   int return_value;
 #endif
 
@@ -1280,7 +1321,8 @@ static int regression_tests(void)
   printf("  in 32 bit mode with UTF-32 %s:\n", utf ? "enabled" : "disabled");
 #endif
 
-  while (current->pattern) {
+  while (current->pattern)
+  {
     /* printf("\nPattern: %s :\n", current->pattern); */
     total++;
     is_ascii = 0;
@@ -1297,16 +1339,18 @@ static int regression_tests(void)
 #ifdef SUPPORT_PCRE2_8
     re8 = NULL;
     ccontext8 = pcre2_compile_context_create_8(NULL);
-    if (ccontext8) {
+    if (ccontext8)
+    {
       if (GET_NEWLINE(current->newline))
         pcre2_set_newline_8(ccontext8, GET_NEWLINE(current->newline));
       if (GET_BSR(current->newline))
         pcre2_set_bsr_8(ccontext8, GET_BSR(current->newline));
 
-      if (!(current->start_offset & F_NO8)) {
+      if (!(current->start_offset & F_NO8))
+      {
         re8 = pcre2_compile_8((PCRE2_SPTR8)current->pattern, PCRE2_ZERO_TERMINATED,
-          current->compile_options & ~disabled_options,
-          &error, &err_offs, ccontext8);
+                              current->compile_options & ~disabled_options, &error, &err_offs,
+                              ccontext8);
 
         if (!re8 && (utf || is_ascii))
           printf("\n8 bit: Cannot compile pattern \"%s\": %d\n", current->pattern, error);
@@ -1318,22 +1362,25 @@ static int regression_tests(void)
 #endif
 #ifdef SUPPORT_PCRE2_16
     if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
-      convert_utf8_to_utf16((PCRE2_SPTR8)current->pattern, regtest_buf16, NULL, REGTEST_MAX_LENGTH16);
+      convert_utf8_to_utf16((PCRE2_SPTR8)current->pattern, regtest_buf16, NULL,
+                            REGTEST_MAX_LENGTH16);
     else
       copy_char8_to_char16((PCRE2_SPTR8)current->pattern, regtest_buf16, REGTEST_MAX_LENGTH16);
 
     re16 = NULL;
     ccontext16 = pcre2_compile_context_create_16(NULL);
-    if (ccontext16) {
+    if (ccontext16)
+    {
       if (GET_NEWLINE(current->newline))
         pcre2_set_newline_16(ccontext16, GET_NEWLINE(current->newline));
       if (GET_BSR(current->newline))
         pcre2_set_bsr_16(ccontext16, GET_BSR(current->newline));
 
-      if (!(current->start_offset & F_NO16)) {
+      if (!(current->start_offset & F_NO16))
+      {
         re16 = pcre2_compile_16(regtest_buf16, PCRE2_ZERO_TERMINATED,
-          current->compile_options & ~disabled_options,
-          &error, &err_offs, ccontext16);
+                                current->compile_options & ~disabled_options, &error, &err_offs,
+                                ccontext16);
 
         if (!re16 && (utf || is_ascii))
           printf("\n16 bit: Cannot compile pattern \"%s\": %d\n", current->pattern, error);
@@ -1345,22 +1392,25 @@ static int regression_tests(void)
 #endif
 #ifdef SUPPORT_PCRE2_32
     if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
-      convert_utf8_to_utf32((PCRE2_SPTR8)current->pattern, regtest_buf32, NULL, REGTEST_MAX_LENGTH32);
+      convert_utf8_to_utf32((PCRE2_SPTR8)current->pattern, regtest_buf32, NULL,
+                            REGTEST_MAX_LENGTH32);
     else
       copy_char8_to_char32((PCRE2_SPTR8)current->pattern, regtest_buf32, REGTEST_MAX_LENGTH32);
 
     re32 = NULL;
     ccontext32 = pcre2_compile_context_create_32(NULL);
-    if (ccontext32) {
+    if (ccontext32)
+    {
       if (GET_NEWLINE(current->newline))
         pcre2_set_newline_32(ccontext32, GET_NEWLINE(current->newline));
       if (GET_BSR(current->newline))
         pcre2_set_bsr_32(ccontext32, GET_BSR(current->newline));
 
-      if (!(current->start_offset & F_NO32)) {
+      if (!(current->start_offset & F_NO32))
+      {
         re32 = pcre2_compile_32(regtest_buf32, PCRE2_ZERO_TERMINATED,
-          current->compile_options & ~disabled_options,
-          &error, &err_offs, ccontext32);
+                                current->compile_options & ~disabled_options, &error, &err_offs,
+                                ccontext32);
 
         if (!re32 && (utf || is_ascii))
           printf("\n32 bit: Cannot compile pattern \"%s\": %d\n", current->pattern, error);
@@ -1372,7 +1422,8 @@ static int regression_tests(void)
 #endif
 
     counter++;
-    if ((counter & 0x3) != 0) {
+    if ((counter & 0x3) != 0)
+    {
 #ifdef SUPPORT_PCRE2_8
       setstack8(NULL);
 #endif
@@ -1390,14 +1441,17 @@ static int regression_tests(void)
     mdata8_1 = pcre2_match_data_create_8(OVECTOR_SIZE, NULL);
     mdata8_2 = pcre2_match_data_create_8(OVECTOR_SIZE, NULL);
     mcontext8 = pcre2_match_context_create_8(NULL);
-    if (!mdata8_1 || !mdata8_2 || !mcontext8) {
+    if (!mdata8_1 || !mdata8_2 || !mcontext8)
+    {
       printf("\n8 bit: Cannot allocate match data\n");
       pcre2_match_data_free_8(mdata8_1);
       pcre2_match_data_free_8(mdata8_2);
       pcre2_match_context_free_8(mcontext8);
       pcre2_code_free_8(re8);
       re8 = NULL;
-    } else {
+    }
+    else
+    {
       ovector8_1 = pcre2_get_ovector_pointer_8(mdata8_1);
       ovector8_2 = pcre2_get_ovector_pointer_8(mdata8_2);
       for (i = 0; i < OVECTOR_SIZE * 2; ++i)
@@ -1406,20 +1460,29 @@ static int regression_tests(void)
         ovector8_2[i] = (PCRE2_SIZE)(-2);
       pcre2_set_match_limit_8(mcontext8, 10000000);
     }
-    if (re8) {
+    if (re8)
+    {
       return_value8[1] = pcre2_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
-        current->start_offset & OFFSET_MASK, current->match_options, mdata8_2, mcontext8);
+                                       current->start_offset & OFFSET_MASK, current->match_options,
+                                       mdata8_2, mcontext8);
 
-      if (pcre2_jit_compile_8(re8, jit_compile_mode)) {
+      if (pcre2_jit_compile_8(re8, jit_compile_mode))
+      {
         printf("\n8 bit: JIT compiler does not support \"%s\"\n", current->pattern);
-      } else if ((counter & 0x1) != 0) {
+      }
+      else if ((counter & 0x1) != 0)
+      {
         setstack8(mcontext8);
         return_value8[0] = pcre2_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
-          current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8);
-      } else {
+                                         current->start_offset & OFFSET_MASK,
+                                         current->match_options, mdata8_1, mcontext8);
+      }
+      else
+      {
         pcre2_jit_stack_assign_8(mcontext8, NULL, getstack8());
-        return_value8[0] = pcre2_jit_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
-          current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8);
+        return_value8[0] = pcre2_jit_match_8(
+            re8, (PCRE2_SPTR8)current->input, strlen(current->input),
+            current->start_offset & OFFSET_MASK, current->match_options, mdata8_1, mcontext8);
       }
     }
 #endif
@@ -1430,14 +1493,17 @@ static int regression_tests(void)
     mdata16_1 = pcre2_match_data_create_16(OVECTOR_SIZE, NULL);
     mdata16_2 = pcre2_match_data_create_16(OVECTOR_SIZE, NULL);
     mcontext16 = pcre2_match_context_create_16(NULL);
-    if (!mdata16_1 || !mdata16_2 || !mcontext16) {
+    if (!mdata16_1 || !mdata16_2 || !mcontext16)
+    {
       printf("\n16 bit: Cannot allocate match data\n");
       pcre2_match_data_free_16(mdata16_1);
       pcre2_match_data_free_16(mdata16_2);
       pcre2_match_context_free_16(mcontext16);
       pcre2_code_free_16(re16);
       re16 = NULL;
-    } else {
+    }
+    else
+    {
       ovector16_1 = pcre2_get_ovector_pointer_16(mdata16_1);
       ovector16_2 = pcre2_get_ovector_pointer_16(mdata16_2);
       for (i = 0; i < OVECTOR_SIZE * 2; ++i)
@@ -1446,25 +1512,36 @@ static int regression_tests(void)
         ovector16_2[i] = (PCRE2_SIZE)(-2);
       pcre2_set_match_limit_16(mcontext16, 10000000);
     }
-    if (re16) {
+    if (re16)
+    {
       if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
-        length16 = convert_utf8_to_utf16((PCRE2_SPTR8)current->input, regtest_buf16, regtest_offsetmap16, REGTEST_MAX_LENGTH16);
+        length16 = convert_utf8_to_utf16((PCRE2_SPTR8)current->input, regtest_buf16,
+                                         regtest_offsetmap16, REGTEST_MAX_LENGTH16);
       else
-        length16 = copy_char8_to_char16((PCRE2_SPTR8)current->input, regtest_buf16, REGTEST_MAX_LENGTH16);
+        length16 =
+            copy_char8_to_char16((PCRE2_SPTR8)current->input, regtest_buf16, REGTEST_MAX_LENGTH16);
 
-      return_value16[1] = pcre2_match_16(re16, regtest_buf16, length16,
-        current->start_offset & OFFSET_MASK, current->match_options, mdata16_2, mcontext16);
+      return_value16[1] =
+          pcre2_match_16(re16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
+                         current->match_options, mdata16_2, mcontext16);
 
-      if (pcre2_jit_compile_16(re16, jit_compile_mode)) {
+      if (pcre2_jit_compile_16(re16, jit_compile_mode))
+      {
         printf("\n16 bit: JIT compiler does not support \"%s\"\n", current->pattern);
-      } else if ((counter & 0x1) != 0) {
+      }
+      else if ((counter & 0x1) != 0)
+      {
         setstack16(mcontext16);
-        return_value16[0] = pcre2_match_16(re16, regtest_buf16, length16,
-          current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16);
-      } else {
+        return_value16[0] =
+            pcre2_match_16(re16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
+                           current->match_options, mdata16_1, mcontext16);
+      }
+      else
+      {
         pcre2_jit_stack_assign_16(mcontext16, NULL, getstack16());
-        return_value16[0] = pcre2_jit_match_16(re16, regtest_buf16, length16,
-          current->start_offset & OFFSET_MASK, current->match_options, mdata16_1, mcontext16);
+        return_value16[0] =
+            pcre2_jit_match_16(re16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
+                               current->match_options, mdata16_1, mcontext16);
       }
     }
 #endif
@@ -1475,14 +1552,17 @@ static int regression_tests(void)
     mdata32_1 = pcre2_match_data_create_32(OVECTOR_SIZE, NULL);
     mdata32_2 = pcre2_match_data_create_32(OVECTOR_SIZE, NULL);
     mcontext32 = pcre2_match_context_create_32(NULL);
-    if (!mdata32_1 || !mdata32_2 || !mcontext32) {
+    if (!mdata32_1 || !mdata32_2 || !mcontext32)
+    {
       printf("\n32 bit: Cannot allocate match data\n");
       pcre2_match_data_free_32(mdata32_1);
       pcre2_match_data_free_32(mdata32_2);
       pcre2_match_context_free_32(mcontext32);
       pcre2_code_free_32(re32);
       re32 = NULL;
-    } else {
+    }
+    else
+    {
       ovector32_1 = pcre2_get_ovector_pointer_32(mdata32_1);
       ovector32_2 = pcre2_get_ovector_pointer_32(mdata32_2);
       for (i = 0; i < OVECTOR_SIZE * 2; ++i)
@@ -1491,25 +1571,36 @@ static int regression_tests(void)
         ovector32_2[i] = (PCRE2_SIZE)(-2);
       pcre2_set_match_limit_32(mcontext32, 10000000);
     }
-    if (re32) {
+    if (re32)
+    {
       if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
-        length32 = convert_utf8_to_utf32((PCRE2_SPTR8)current->input, regtest_buf32, regtest_offsetmap32, REGTEST_MAX_LENGTH32);
+        length32 = convert_utf8_to_utf32((PCRE2_SPTR8)current->input, regtest_buf32,
+                                         regtest_offsetmap32, REGTEST_MAX_LENGTH32);
       else
-        length32 = copy_char8_to_char32((PCRE2_SPTR8)current->input, regtest_buf32, REGTEST_MAX_LENGTH32);
+        length32 =
+            copy_char8_to_char32((PCRE2_SPTR8)current->input, regtest_buf32, REGTEST_MAX_LENGTH32);
 
-      return_value32[1] = pcre2_match_32(re32, regtest_buf32, length32,
-        current->start_offset & OFFSET_MASK, current->match_options, mdata32_2, mcontext32);
+      return_value32[1] =
+          pcre2_match_32(re32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+                         current->match_options, mdata32_2, mcontext32);
 
-      if (pcre2_jit_compile_32(re32, jit_compile_mode)) {
+      if (pcre2_jit_compile_32(re32, jit_compile_mode))
+      {
         printf("\n32 bit: JIT compiler does not support \"%s\"\n", current->pattern);
-      } else if ((counter & 0x1) != 0) {
+      }
+      else if ((counter & 0x1) != 0)
+      {
         setstack32(mcontext32);
-        return_value32[0] = pcre2_match_32(re32, regtest_buf32, length32,
-          current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32);
-      } else {
+        return_value32[0] =
+            pcre2_match_32(re32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+                           current->match_options, mdata32_1, mcontext32);
+      }
+      else
+      {
         pcre2_jit_stack_assign_32(mcontext32, NULL, getstack32());
-        return_value32[0] = pcre2_jit_match_32(re32, regtest_buf32, length32,
-          current->start_offset & OFFSET_MASK, current->match_options, mdata32_1, mcontext32);
+        return_value32[0] =
+            pcre2_jit_match_32(re32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+                               current->match_options, mdata32_1, mcontext32);
       }
     }
 #endif
@@ -1525,60 +1616,76 @@ static int regression_tests(void)
     Segfaults can still be captured. */
 
     is_successful = 1;
-    if (!(current->start_offset & F_DIFF)) {
-#if defined SUPPORT_UNICODE && ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
-      if (!(current->start_offset & F_FORCECONV)) {
+    if (!(current->start_offset & F_DIFF))
+    {
+#if defined SUPPORT_UNICODE && \
+    ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
+      if (!(current->start_offset & F_FORCECONV))
+      {
 
         /* All results must be the same. */
 #ifdef SUPPORT_PCRE2_8
-        if ((return_value = return_value8[0]) != return_value8[1]) {
-          printf("\n8 bit: Return value differs(J8:%d,I8:%d): [%d] '%s' @ '%s'\n",
-            return_value8[0], return_value8[1], total, current->pattern, current->input);
+        if ((return_value = return_value8[0]) != return_value8[1])
+        {
+          printf("\n8 bit: Return value differs(J8:%d,I8:%d): [%d] '%s' @ '%s'\n", return_value8[0],
+                 return_value8[1], total, current->pattern, current->input);
           is_successful = 0;
-        } else
+        }
+        else
 #endif
 #ifdef SUPPORT_PCRE2_16
-        if ((return_value = return_value16[0]) != return_value16[1]) {
+            if ((return_value = return_value16[0]) != return_value16[1])
+        {
           printf("\n16 bit: Return value differs(J16:%d,I16:%d): [%d] '%s' @ '%s'\n",
-            return_value16[0], return_value16[1], total, current->pattern, current->input);
+                 return_value16[0], return_value16[1], total, current->pattern, current->input);
           is_successful = 0;
-        } else
+        }
+        else
 #endif
 #ifdef SUPPORT_PCRE2_32
-        if ((return_value = return_value32[0]) != return_value32[1]) {
+            if ((return_value = return_value32[0]) != return_value32[1])
+        {
           printf("\n32 bit: Return value differs(J32:%d,I32:%d): [%d] '%s' @ '%s'\n",
-            return_value32[0], return_value32[1], total, current->pattern, current->input);
+                 return_value32[0], return_value32[1], total, current->pattern, current->input);
           is_successful = 0;
-        } else
+        }
+        else
 #endif
 #if defined SUPPORT_PCRE2_8 && defined SUPPORT_PCRE2_16
-        if (return_value8[0] != return_value16[0]) {
+            if (return_value8[0] != return_value16[0])
+        {
           printf("\n8 and 16 bit: Return value differs(J8:%d,J16:%d): [%d] '%s' @ '%s'\n",
-            return_value8[0], return_value16[0],
-            total, current->pattern, current->input);
+                 return_value8[0], return_value16[0], total, current->pattern, current->input);
           is_successful = 0;
-        } else
+        }
+        else
 #endif
 #if defined SUPPORT_PCRE2_8 && defined SUPPORT_PCRE2_32
-        if (return_value8[0] != return_value32[0]) {
+            if (return_value8[0] != return_value32[0])
+        {
           printf("\n8 and 32 bit: Return value differs(J8:%d,J32:%d): [%d] '%s' @ '%s'\n",
-            return_value8[0], return_value32[0],
-            total, current->pattern, current->input);
+                 return_value8[0], return_value32[0], total, current->pattern, current->input);
           is_successful = 0;
-        } else
+        }
+        else
 #endif
 #if defined SUPPORT_PCRE2_16 && defined SUPPORT_PCRE2_32
-        if (return_value16[0] != return_value32[0]) {
+            if (return_value16[0] != return_value32[0])
+        {
           printf("\n16 and 32 bit: Return value differs(J16:%d,J32:%d): [%d] '%s' @ '%s'\n",
-            return_value16[0], return_value32[0],
-            total, current->pattern, current->input);
+                 return_value16[0], return_value32[0], total, current->pattern, current->input);
           is_successful = 0;
-        } else
+        }
+        else
 #endif
-        if (return_value >= 0 || return_value == PCRE2_ERROR_PARTIAL) {
-          if (return_value == PCRE2_ERROR_PARTIAL) {
+            if (return_value >= 0 || return_value == PCRE2_ERROR_PARTIAL)
+        {
+          if (return_value == PCRE2_ERROR_PARTIAL)
+          {
             return_value = 2;
-          } else {
+          }
+          else
+          {
             return_value *= 2;
           }
 #ifdef SUPPORT_PCRE2_8
@@ -1591,9 +1698,11 @@ static int regression_tests(void)
           return_value32[0] = return_value;
 #endif
           /* Transform back the results. */
-          if (current->compile_options & PCRE2_UTF) {
+          if (current->compile_options & PCRE2_UTF)
+          {
 #ifdef SUPPORT_PCRE2_16
-            for (i = 0; i < return_value; ++i) {
+            for (i = 0; i < return_value; ++i)
+            {
               if (ovector16_1[i] != PCRE2_UNSET)
                 ovector16_1[i] = regtest_offsetmap16[ovector16_1[i]];
               if (ovector16_2[i] != PCRE2_UNSET)
@@ -1601,7 +1710,8 @@ static int regression_tests(void)
             }
 #endif
 #ifdef SUPPORT_PCRE2_32
-            for (i = 0; i < return_value; ++i) {
+            for (i = 0; i < return_value; ++i)
+            {
               if (ovector32_1[i] != PCRE2_UNSET)
                 ovector32_1[i] = regtest_offsetmap32[ovector32_1[i]];
               if (ovector32_2[i] != PCRE2_UNSET)
@@ -1610,91 +1720,117 @@ static int regression_tests(void)
 #endif
           }
 
-          for (i = 0; i < return_value; ++i) {
+          for (i = 0; i < return_value; ++i)
+          {
 #if defined SUPPORT_PCRE2_8 && defined SUPPORT_PCRE2_16
-            if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector16_1[i] || ovector8_1[i] != ovector16_2[i]) {
-              printf("\n8 and 16 bit: Ovector[%d] value differs(J8:%d,I8:%d,J16:%d,I16:%d): [%d] '%s' @ '%s' \n",
-                i, (int)ovector8_1[i], (int)ovector8_2[i], (int)ovector16_1[i], (int)ovector16_2[i],
-                total, current->pattern, current->input);
+            if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector16_1[i] ||
+                ovector8_1[i] != ovector16_2[i])
+            {
+              printf("\n8 and 16 bit: Ovector[%d] value differs(J8:%d,I8:%d,J16:%d,I16:%d): [%d] "
+                     "'%s' @ '%s' \n",
+                     i, (int)ovector8_1[i], (int)ovector8_2[i], (int)ovector16_1[i],
+                     (int)ovector16_2[i], total, current->pattern, current->input);
               is_successful = 0;
             }
 #endif
 #if defined SUPPORT_PCRE2_8 && defined SUPPORT_PCRE2_32
-            if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector32_1[i] || ovector8_1[i] != ovector32_2[i]) {
-              printf("\n8 and 32 bit: Ovector[%d] value differs(J8:%d,I8:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
-                i, (int)ovector8_1[i], (int)ovector8_2[i], (int)ovector32_1[i], (int)ovector32_2[i],
-                total, current->pattern, current->input);
+            if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector32_1[i] ||
+                ovector8_1[i] != ovector32_2[i])
+            {
+              printf("\n8 and 32 bit: Ovector[%d] value differs(J8:%d,I8:%d,J32:%d,I32:%d): [%d] "
+                     "'%s' @ '%s' \n",
+                     i, (int)ovector8_1[i], (int)ovector8_2[i], (int)ovector32_1[i],
+                     (int)ovector32_2[i], total, current->pattern, current->input);
               is_successful = 0;
             }
 #endif
 #if defined SUPPORT_PCRE2_16 && defined SUPPORT_PCRE2_32
-            if (ovector16_1[i] != ovector16_2[i] || ovector16_1[i] != ovector32_1[i] || ovector16_1[i] != ovector32_2[i]) {
-              printf("\n16 and 32 bit: Ovector[%d] value differs(J16:%d,I16:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
-                i, (int)ovector16_1[i], (int)ovector16_2[i], (int)ovector32_1[i], (int)ovector32_2[i],
-                total, current->pattern, current->input);
+            if (ovector16_1[i] != ovector16_2[i] || ovector16_1[i] != ovector32_1[i] ||
+                ovector16_1[i] != ovector32_2[i])
+            {
+              printf("\n16 and 32 bit: Ovector[%d] value differs(J16:%d,I16:%d,J32:%d,I32:%d): "
+                     "[%d] '%s' @ '%s' \n",
+                     i, (int)ovector16_1[i], (int)ovector16_2[i], (int)ovector32_1[i],
+                     (int)ovector32_2[i], total, current->pattern, current->input);
               is_successful = 0;
             }
 #endif
           }
         }
-      } else
+      }
+      else
 #endif /* more than one of SUPPORT_PCRE2_8, SUPPORT_PCRE2_16 and SUPPORT_PCRE2_32 */
       {
 #ifdef SUPPORT_PCRE2_8
-        if (return_value8[0] != return_value8[1]) {
-          printf("\n8 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
-            return_value8[0], return_value8[1], total, current->pattern, current->input);
+        if (return_value8[0] != return_value8[1])
+        {
+          printf("\n8 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n", return_value8[0],
+                 return_value8[1], total, current->pattern, current->input);
           is_successful = 0;
-        } else if (return_value8[0] >= 0 || return_value8[0] == PCRE2_ERROR_PARTIAL) {
+        }
+        else if (return_value8[0] >= 0 || return_value8[0] == PCRE2_ERROR_PARTIAL)
+        {
           if (return_value8[0] == PCRE2_ERROR_PARTIAL)
             return_value8[0] = 2;
           else
             return_value8[0] *= 2;
 
           for (i = 0; i < return_value8[0]; ++i)
-            if (ovector8_1[i] != ovector8_2[i]) {
-              printf("\n8 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
-                i, (int)ovector8_1[i], (int)ovector8_2[i], total, current->pattern, current->input);
+            if (ovector8_1[i] != ovector8_2[i])
+            {
+              printf("\n8 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
+                     (int)ovector8_1[i], (int)ovector8_2[i], total, current->pattern,
+                     current->input);
               is_successful = 0;
             }
         }
 #endif
 
 #ifdef SUPPORT_PCRE2_16
-        if (return_value16[0] != return_value16[1]) {
-          printf("\n16 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
-            return_value16[0], return_value16[1], total, current->pattern, current->input);
+        if (return_value16[0] != return_value16[1])
+        {
+          printf("\n16 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n", return_value16[0],
+                 return_value16[1], total, current->pattern, current->input);
           is_successful = 0;
-        } else if (return_value16[0] >= 0 || return_value16[0] == PCRE2_ERROR_PARTIAL) {
+        }
+        else if (return_value16[0] >= 0 || return_value16[0] == PCRE2_ERROR_PARTIAL)
+        {
           if (return_value16[0] == PCRE2_ERROR_PARTIAL)
             return_value16[0] = 2;
           else
             return_value16[0] *= 2;
 
           for (i = 0; i < return_value16[0]; ++i)
-            if (ovector16_1[i] != ovector16_2[i]) {
-              printf("\n16 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
-                i, (int)ovector16_1[i], (int)ovector16_2[i], total, current->pattern, current->input);
+            if (ovector16_1[i] != ovector16_2[i])
+            {
+              printf("\n16 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
+                     (int)ovector16_1[i], (int)ovector16_2[i], total, current->pattern,
+                     current->input);
               is_successful = 0;
             }
         }
 #endif
 
 #ifdef SUPPORT_PCRE2_32
-        if (return_value32[0] != return_value32[1]) {
-          printf("\n32 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
-            return_value32[0], return_value32[1], total, current->pattern, current->input);
+        if (return_value32[0] != return_value32[1])
+        {
+          printf("\n32 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n", return_value32[0],
+                 return_value32[1], total, current->pattern, current->input);
           is_successful = 0;
-        } else if (return_value32[0] >= 0 || return_value32[0] == PCRE2_ERROR_PARTIAL) {
+        }
+        else if (return_value32[0] >= 0 || return_value32[0] == PCRE2_ERROR_PARTIAL)
+        {
           if (return_value32[0] == PCRE2_ERROR_PARTIAL)
             return_value32[0] = 2;
           else
             return_value32[0] *= 2;
 
           for (i = 0; i < return_value32[0]; ++i)
-            if (ovector32_1[i] != ovector32_2[i]) {
-              printf("\n32 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
-                i, (int)ovector32_1[i], (int)ovector32_2[i], total, current->pattern, current->input);
+            if (ovector32_1[i] != ovector32_2[i])
+            {
+              printf("\n32 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
+                     (int)ovector32_1[i], (int)ovector32_2[i], total, current->pattern,
+                     current->input);
               is_successful = 0;
             }
         }
@@ -1702,73 +1838,90 @@ static int regression_tests(void)
       }
     }
 
-    if (is_successful) {
+    if (is_successful)
+    {
 #ifdef SUPPORT_PCRE2_8
-      if (!(current->start_offset & F_NO8) && (utf || is_ascii)) {
-        if (return_value8[0] < 0 && !(current->start_offset & F_NOMATCH)) {
-          printf("8 bit: Test should match: [%d] '%s' @ '%s'\n",
-            total, current->pattern, current->input);
+      if (!(current->start_offset & F_NO8) && (utf || is_ascii))
+      {
+        if (return_value8[0] < 0 && !(current->start_offset & F_NOMATCH))
+        {
+          printf("8 bit: Test should match: [%d] '%s' @ '%s'\n", total, current->pattern,
+                 current->input);
           is_successful = 0;
         }
 
-        if (return_value8[0] >= 0 && (current->start_offset & F_NOMATCH)) {
-          printf("8 bit: Test should not match: [%d] '%s' @ '%s'\n",
-            total, current->pattern, current->input);
+        if (return_value8[0] >= 0 && (current->start_offset & F_NOMATCH))
+        {
+          printf("8 bit: Test should not match: [%d] '%s' @ '%s'\n", total, current->pattern,
+                 current->input);
           is_successful = 0;
         }
       }
 #endif
 #ifdef SUPPORT_PCRE2_16
-      if (!(current->start_offset & F_NO16) && (utf || is_ascii)) {
-        if (return_value16[0] < 0 && !(current->start_offset & F_NOMATCH)) {
-          printf("16 bit: Test should match: [%d] '%s' @ '%s'\n",
-            total, current->pattern, current->input);
+      if (!(current->start_offset & F_NO16) && (utf || is_ascii))
+      {
+        if (return_value16[0] < 0 && !(current->start_offset & F_NOMATCH))
+        {
+          printf("16 bit: Test should match: [%d] '%s' @ '%s'\n", total, current->pattern,
+                 current->input);
           is_successful = 0;
         }
 
-        if (return_value16[0] >= 0 && (current->start_offset & F_NOMATCH)) {
-          printf("16 bit: Test should not match: [%d] '%s' @ '%s'\n",
-            total, current->pattern, current->input);
+        if (return_value16[0] >= 0 && (current->start_offset & F_NOMATCH))
+        {
+          printf("16 bit: Test should not match: [%d] '%s' @ '%s'\n", total, current->pattern,
+                 current->input);
           is_successful = 0;
         }
       }
 #endif
 #ifdef SUPPORT_PCRE2_32
-      if (!(current->start_offset & F_NO32) && (utf || is_ascii)) {
-        if (return_value32[0] < 0 && !(current->start_offset & F_NOMATCH)) {
-          printf("32 bit: Test should match: [%d] '%s' @ '%s'\n",
-            total, current->pattern, current->input);
+      if (!(current->start_offset & F_NO32) && (utf || is_ascii))
+      {
+        if (return_value32[0] < 0 && !(current->start_offset & F_NOMATCH))
+        {
+          printf("32 bit: Test should match: [%d] '%s' @ '%s'\n", total, current->pattern,
+                 current->input);
           is_successful = 0;
         }
 
-        if (return_value32[0] >= 0 && (current->start_offset & F_NOMATCH)) {
-          printf("32 bit: Test should not match: [%d] '%s' @ '%s'\n",
-            total, current->pattern, current->input);
+        if (return_value32[0] >= 0 && (current->start_offset & F_NOMATCH))
+        {
+          printf("32 bit: Test should not match: [%d] '%s' @ '%s'\n", total, current->pattern,
+                 current->input);
           is_successful = 0;
         }
       }
 #endif
     }
 
-    if (is_successful) {
+    if (is_successful)
+    {
 #ifdef SUPPORT_PCRE2_8
-      if (re8 && !(current->start_offset & F_NO8) && pcre2_get_mark_8(mdata8_1) != pcre2_get_mark_8(mdata8_2)) {
-        printf("8 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
-          total, current->pattern, current->input);
+      if (re8 && !(current->start_offset & F_NO8) &&
+          pcre2_get_mark_8(mdata8_1) != pcre2_get_mark_8(mdata8_2))
+      {
+        printf("8 bit: Mark value mismatch: [%d] '%s' @ '%s'\n", total, current->pattern,
+               current->input);
         is_successful = 0;
       }
 #endif
 #ifdef SUPPORT_PCRE2_16
-      if (re16 && !(current->start_offset & F_NO16) && pcre2_get_mark_16(mdata16_1) != pcre2_get_mark_16(mdata16_2)) {
-        printf("16 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
-          total, current->pattern, current->input);
+      if (re16 && !(current->start_offset & F_NO16) &&
+          pcre2_get_mark_16(mdata16_1) != pcre2_get_mark_16(mdata16_2))
+      {
+        printf("16 bit: Mark value mismatch: [%d] '%s' @ '%s'\n", total, current->pattern,
+               current->input);
         is_successful = 0;
       }
 #endif
 #ifdef SUPPORT_PCRE2_32
-      if (re32 && !(current->start_offset & F_NO32) && pcre2_get_mark_32(mdata32_1) != pcre2_get_mark_32(mdata32_2)) {
-        printf("32 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
-          total, current->pattern, current->input);
+      if (re32 && !(current->start_offset & F_NO32) &&
+          pcre2_get_mark_32(mdata32_1) != pcre2_get_mark_32(mdata32_2))
+      {
+        printf("32 bit: Mark value mismatch: [%d] '%s' @ '%s'\n", total, current->pattern,
+               current->input);
         is_successful = 0;
       }
 #endif
@@ -1793,15 +1946,18 @@ static int regression_tests(void)
     pcre2_match_context_free_32(mcontext32);
 #endif
 
-    if (is_successful) {
+    if (is_successful)
+    {
       successful++;
       successful_row++;
       printf(".");
-      if (successful_row >= 60) {
+      if (successful_row >= 60)
+      {
         successful_row = 0;
         printf("\n");
       }
-    } else
+    }
+    else
       successful_row = 0;
 
     fflush(stdout);
@@ -1817,42 +1973,52 @@ static int regression_tests(void)
   setstack32(NULL);
 #endif
 
-  if (total == successful) {
+  if (total == successful)
+  {
     printf("\nAll JIT regression tests are successfully passed.\n");
     return 0;
-  } else {
-    printf("\nSuccessful test ratio: %d%% (%d failed)\n", successful * 100 / total, total - successful);
+  }
+  else
+  {
+    printf("\nSuccessful test ratio: %d%% (%d failed)\n", successful * 100 / total,
+           total - successful);
     return 1;
   }
 }
 
 #if defined SUPPORT_UNICODE
 
-static int check_invalid_utf_result(int pattern_index, const char *type, int result,
-  int match_start, int match_end, PCRE2_SIZE *ovector)
+static int
+check_invalid_utf_result(int pattern_index, const char *type, int result, int match_start,
+                         int match_end, PCRE2_SIZE *ovector)
 {
-  if (match_start < 0) {
-    if (result != -1) {
+  if (match_start < 0)
+  {
+    if (result != -1)
+    {
       printf("Pattern[%d] %s result is not -1.\n", pattern_index, type);
       return 1;
     }
     return 0;
   }
 
-  if (result <= 0) {
+  if (result <= 0)
+  {
     printf("Pattern[%d] %s result (%d) is not greater than 0.\n", pattern_index, type, result);
     return 1;
   }
 
-  if (ovector[0] != (PCRE2_SIZE)match_start) {
-    printf("Pattern[%d] %s ovector[0] is unexpected (%d instead of %d)\n",
-      pattern_index, type, (int)ovector[0], match_start);
+  if (ovector[0] != (PCRE2_SIZE)match_start)
+  {
+    printf("Pattern[%d] %s ovector[0] is unexpected (%d instead of %d)\n", pattern_index, type,
+           (int)ovector[0], match_start);
     return 1;
   }
 
-  if (ovector[1] != (PCRE2_SIZE)match_end) {
-    printf("Pattern[%d] %s ovector[1] is unexpected (%d instead of %d)\n",
-      pattern_index, type, (int)ovector[1], match_end);
+  if (ovector[1] != (PCRE2_SIZE)match_end)
+  {
+    printf("Pattern[%d] %s ovector[1] is unexpected (%d instead of %d)\n", pattern_index, type,
+           (int)ovector[1], match_end);
     return 1;
   }
 
@@ -1864,7 +2030,7 @@ static int check_invalid_utf_result(int pattern_index, const char *type, int res
 #if defined SUPPORT_UNICODE && defined SUPPORT_PCRE2_8
 
 #define UDA (PCRE2_UTF | PCRE2_DOTALL | PCRE2_ANCHORED)
-#define CI (PCRE2_JIT_COMPLETE | PCRE2_JIT_INVALID_UTF)
+#define CI  (PCRE2_JIT_COMPLETE | PCRE2_JIT_INVALID_UTF)
 #define CPI (PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_INVALID_UTF)
 
 struct invalid_utf8_regression_test_case {
@@ -1976,8 +2142,24 @@ static const struct invalid_utf8_regression_test_case invalid_utf8_regression_te
   { UDA | PCRE2_CASELESS, CPI, 0, 0, 0, -1, -1, { "(.)\\1", NULL }, "\xc2\x80\x80" },
   { UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 6, { "(.)\\1", NULL }, "\xe1\xbd\xb8\xe1\xbf\xb8" },
   { UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, -1, { "(.)\\1", NULL }, "\xe1\xbd\xb8\xe1\xbf\xb8" },
-  { UDA | PCRE2_CASELESS, CPI, 0, 0, 0, 0, 8, { "(.)\\1", NULL }, "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
-  { UDA | PCRE2_CASELESS, CPI, 0, 0, 1, -1, -1, { "(.)\\1", NULL }, "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
+  { UDA | PCRE2_CASELESS,
+    CPI,
+    0,
+    0,
+    0,
+    0,
+    8,
+    { "(.)\\1", NULL },
+    "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
+  { UDA | PCRE2_CASELESS,
+    CPI,
+    0,
+    0,
+    1,
+    -1,
+    -1,
+    { "(.)\\1", NULL },
+    "\xf0\x90\x90\x80\xf0\x90\x90\xa8" },
 
   { UDA, CPI, 0, 0, 0, 0, 1, { "\\X", NULL }, "A" },
   { UDA, CPI, 0, 0, 0, -1, -1, { "\\X", NULL }, "\xff" },
@@ -1994,27 +2176,59 @@ static const struct invalid_utf8_regression_test_case invalid_utf8_regression_te
   { UDA, CPI, 0, 0, 0, -1, -1, { "[^#]", NULL }, "\xf4\x90\x80\x80" },
   { UDA, CPI, 0, 0, 0, -1, -1, { "[^#]", NULL }, "\xc1\x80" },
 
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 2, 3, { "^\\W", NULL }, " \x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 14, 15, { "^\\W", NULL }, " \xc0\x8a#\xe0\x80\x8a#\xf0\x80\x80\x8a#\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xf8\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xc3\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xf1\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xf2\xbf\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \xf2\xbf\xbf\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xef\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xef\xbf\x0a#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \x85#\xc2\x85#"},
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 7, 8, { "^\\W", NULL }, " \xe2\x80\xf8\xe2\x80\xa8#"},
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 2, 3, { "^\\W", NULL }, " \x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE,
+    CI,
+    1,
+    0,
+    0,
+    14,
+    15,
+    { "^\\W", NULL },
+    " \xc0\x8a#\xe0\x80\x8a#\xf0\x80\x80\x8a#\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xf8\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xc3\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xf1\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xf2\xbf\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \xf2\xbf\xbf\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 3, 4, { "^\\W", NULL }, " \xef\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 4, 5, { "^\\W", NULL }, " \xef\xbf\x0a#" },
+  { PCRE2_UTF | PCRE2_MULTILINE, CI, 1, 0, 0, 5, 6, { "^\\W", NULL }, " \x85#\xc2\x85#" },
+  { PCRE2_UTF | PCRE2_MULTILINE,
+    CI,
+    1,
+    0,
+    0,
+    7,
+    8,
+    { "^\\W", NULL },
+    " \xe2\x80\xf8\xe2\x80\xa8#" },
 
-  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xe2\x80\xf8\xe2\x80\xa8#"},
-  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 3, 4, { "#", NULL }, "\xe2\x80\xf8#\xe2\x80\xa8#"},
-  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "abcd\xc2\x85#"},
-  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 1, 2, { "#", NULL }, "\x85#\xc2\x85#"},
-  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 5, 6, { "#", NULL }, "\xef,\x80,\xf8#\x0a"},
-  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xef,\x80,\xf8\x0a#"},
+  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xe2\x80\xf8\xe2\x80\xa8#" },
+  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 3, 4, { "#", NULL }, "\xe2\x80\xf8#\xe2\x80\xa8#" },
+  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "abcd\xc2\x85#" },
+  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 1, 2, { "#", NULL }, "\x85#\xc2\x85#" },
+  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, 5, 6, { "#", NULL }, "\xef,\x80,\xf8#\x0a" },
+  { PCRE2_UTF | PCRE2_FIRSTLINE, CI, 0, 0, 0, -1, -1, { "#", NULL }, "\xef,\x80,\xf8\x0a#" },
 
-  { PCRE2_UTF | PCRE2_NO_START_OPTIMIZE, CI, 0, 0, 0, 4, 8, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7#\xc7\x85#" },
-  { PCRE2_UTF | PCRE2_NO_START_OPTIMIZE, CI, 0, 0, 0, 7, 11, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7\x80\x80\x80#\xc7\x85#" },
+  { PCRE2_UTF | PCRE2_NO_START_OPTIMIZE,
+    CI,
+    0,
+    0,
+    0,
+    4,
+    8,
+    { "#\xc7\x85#", NULL },
+    "\x80\x80#\xc7#\xc7\x85#" },
+  { PCRE2_UTF | PCRE2_NO_START_OPTIMIZE,
+    CI,
+    0,
+    0,
+    0,
+    7,
+    11,
+    { "#\xc7\x85#", NULL },
+    "\x80\x80#\xc7\x80\x80\x80#\xc7\x85#" },
   { PCRE2_UTF, CI, 0, 0, 0, 4, 8, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7#\xc7\x85#" },
   { PCRE2_UTF, CI, 0, 0, 0, 7, 11, { "#\xc7\x85#", NULL }, "\x80\x80#\xc7\x80\x80\x80#\xc7\x85#" },
 
@@ -2027,7 +2241,15 @@ static const struct invalid_utf8_regression_test_case invalid_utf8_regression_te
   { 0, PCRE2_JIT_COMPLETE, 0, 0, 1, -1, -1, { "\\X{2}", NULL }, "\r\n\n" },
   { 0, PCRE2_JIT_COMPLETE, 0, 0, 1, -1, -1, { "\\R{2}", NULL }, "\r\n\n" },
 
-  { PCRE2_UTF | PCRE2_MULTILINE, CI, 0, 0, 0, -1, -1, { "^.a", &invalid_utf8_newline_cr }, "\xc3\xa7#a" },
+  { PCRE2_UTF | PCRE2_MULTILINE,
+    CI,
+    0,
+    0,
+    0,
+    -1,
+    -1,
+    { "^.a", &invalid_utf8_newline_cr },
+    "\xc3\xa7#a" },
 
   { 0, 0, 0, 0, 0, 0, 0, { NULL, NULL }, NULL }
 };
@@ -2036,8 +2258,9 @@ static const struct invalid_utf8_regression_test_case invalid_utf8_regression_te
 #undef CI
 #undef CPI
 
-static int run_invalid_utf8_test(const struct invalid_utf8_regression_test_case *current,
-  int pattern_index, int i, pcre2_compile_context_8 *ccontext, pcre2_match_data_8 *mdata)
+static int
+run_invalid_utf8_test(const struct invalid_utf8_regression_test_case *current, int pattern_index,
+                      int i, pcre2_compile_context_8 *ccontext, pcre2_match_data_8 *mdata)
 {
   pcre2_code_8 *code;
   int result, errorcode;
@@ -2047,15 +2270,17 @@ static int run_invalid_utf8_test(const struct invalid_utf8_regression_test_case 
   if (current->pattern[i] == NULL)
     return 1;
 
-  code = pcre2_compile_8((PCRE2_UCHAR8*)current->pattern[i], PCRE2_ZERO_TERMINATED,
-    current->compile_options, &errorcode, &erroroffset, ccontext);
+  code = pcre2_compile_8((PCRE2_UCHAR8 *)current->pattern[i], PCRE2_ZERO_TERMINATED,
+                         current->compile_options, &errorcode, &erroroffset, ccontext);
 
-  if (!code) {
+  if (!code)
+  {
     printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
     return 0;
   }
 
-  if (pcre2_jit_compile_8(code, current->jit_compile_options) != 0) {
+  if (pcre2_jit_compile_8(code, current->jit_compile_options) != 0)
+  {
     printf("Pattern[%d:0] cannot be compiled by the JIT compiler.\n", pattern_index);
     pcre2_code_free_8(code);
     return 0;
@@ -2063,21 +2288,28 @@ static int run_invalid_utf8_test(const struct invalid_utf8_regression_test_case 
 
   length = (PCRE2_SIZE)(strlen(current->input) - current->skip_left - current->skip_right);
 
-  if (current->jit_compile_options & PCRE2_JIT_COMPLETE) {
-    result = pcre2_jit_match_8(code, (PCRE2_UCHAR8*)(current->input + current->skip_left),
-      length, current->start_offset - current->skip_left, 0, mdata, NULL);
+  if (current->jit_compile_options & PCRE2_JIT_COMPLETE)
+  {
+    result = pcre2_jit_match_8(code, (PCRE2_UCHAR8 *)(current->input + current->skip_left), length,
+                               current->start_offset - current->skip_left, 0, mdata, NULL);
 
-    if (check_invalid_utf_result(pattern_index, "match", result, current->match_start, current->match_end, ovector)) {
+    if (check_invalid_utf_result(pattern_index, "match", result, current->match_start,
+                                 current->match_end, ovector))
+    {
       pcre2_code_free_8(code);
       return 0;
     }
   }
 
-  if (current->jit_compile_options & PCRE2_JIT_PARTIAL_SOFT) {
-    result = pcre2_jit_match_8(code, (PCRE2_UCHAR8*)(current->input + current->skip_left),
-      length, current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT, mdata, NULL);
+  if (current->jit_compile_options & PCRE2_JIT_PARTIAL_SOFT)
+  {
+    result = pcre2_jit_match_8(code, (PCRE2_UCHAR8 *)(current->input + current->skip_left), length,
+                               current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT,
+                               mdata, NULL);
 
-    if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start, current->match_end, ovector)) {
+    if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start,
+                                 current->match_end, ovector))
+    {
       pcre2_code_free_8(code);
       return 0;
     }
@@ -2087,7 +2319,8 @@ static int run_invalid_utf8_test(const struct invalid_utf8_regression_test_case 
   return 1;
 }
 
-static int invalid_utf8_regression_tests(void)
+static int
+invalid_utf8_regression_tests(void)
 {
   const struct invalid_utf8_regression_test_case *current;
   pcre2_compile_context_8 *ccontext;
@@ -2101,7 +2334,8 @@ static int invalid_utf8_regression_tests(void)
   pcre2_set_newline_8(ccontext, PCRE2_NEWLINE_ANY);
   mdata = pcre2_match_data_create_8(4, NULL);
 
-  for (current = invalid_utf8_regression_test_cases; current->pattern[0]; current++) {
+  for (current = invalid_utf8_regression_test_cases; current->pattern[0]; current++)
+  {
     /* printf("\nPattern: %s :\n", current->pattern); */
     total++;
 
@@ -2112,14 +2346,17 @@ static int invalid_utf8_regression_tests(void)
         result = 0;
       if (!run_invalid_utf8_test(current, total - 1, 1, ccontext, mdata))
         result = 0;
-    } else {
+    }
+    else
+    {
       pcre2_set_newline_8(ccontext, PCRE2_NEWLINE_CR);
       if (!run_invalid_utf8_test(current, total - 1, 0, ccontext, mdata))
         result = 0;
       pcre2_set_newline_8(ccontext, PCRE2_NEWLINE_ANY);
     }
 
-    if (result) {
+    if (result)
+    {
       successful++;
     }
 
@@ -2134,18 +2371,23 @@ static int invalid_utf8_regression_tests(void)
   pcre2_match_data_free_8(mdata);
   pcre2_compile_context_free_8(ccontext);
 
-  if (total == successful) {
+  if (total == successful)
+  {
     printf("\nAll invalid UTF8 JIT regression tests are successfully passed.\n");
     return 0;
-  } else {
-    printf("\nInvalid UTF8 successful test ratio: %d%% (%d failed)\n", successful * 100 / total, total - successful);
+  }
+  else
+  {
+    printf("\nInvalid UTF8 successful test ratio: %d%% (%d failed)\n", successful * 100 / total,
+           total - successful);
     return 1;
   }
 }
 
 #else /* !SUPPORT_UNICODE || !SUPPORT_PCRE2_8 */
 
-static int invalid_utf8_regression_tests(void)
+static int
+invalid_utf8_regression_tests(void)
 {
   return 0;
 }
@@ -2155,7 +2397,7 @@ static int invalid_utf8_regression_tests(void)
 #if defined SUPPORT_UNICODE && defined SUPPORT_PCRE2_16
 
 #define UDA (PCRE2_UTF | PCRE2_DOTALL | PCRE2_ANCHORED)
-#define CI (PCRE2_JIT_COMPLETE | PCRE2_JIT_INVALID_UTF)
+#define CI  (PCRE2_JIT_COMPLETE | PCRE2_JIT_INVALID_UTF)
 #define CPI (PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_INVALID_UTF)
 
 struct invalid_utf16_regression_test_case {
@@ -2188,8 +2430,10 @@ static PCRE2_UCHAR16 test16_7[] = { 0xd801, 0xdc00, 0xd801, 0xdc28, 0 };
 static PCRE2_UCHAR16 test16_8[] = { '#', 0xd800, 0xdc00, 0 };
 static PCRE2_UCHAR16 test16_9[] = { ' ', 0x2028, '#', 0 };
 static PCRE2_UCHAR16 test16_10[] = { ' ', 0xdc00, 0xd800, 0x2028, '#', 0 };
-static PCRE2_UCHAR16 test16_11[] = { 0xdc00, 0xdc00, 0xd800, 0xdc00, 0xdc00, '#', 0xd800, 0xdc00, '#', 0 };
-static PCRE2_UCHAR16 test16_12[] = { '#', 0xd800, 0xdc00, 0xd800, '#', 0xd800, 0xdc00, 0xdc00, 0xdc00, '#', 0xd800, 0xdc00, '#', 0 };
+static PCRE2_UCHAR16 test16_11[] = { 0xdc00, 0xdc00, 0xd800, 0xdc00, 0xdc00,
+                                     '#',    0xd800, 0xdc00, '#',    0 };
+static PCRE2_UCHAR16 test16_12[] = { '#',    0xd800, 0xdc00, 0xd800, '#',    0xd800, 0xdc00,
+                                     0xdc00, 0xdc00, '#',    0xd800, 0xdc00, '#',    0 };
 
 static const struct invalid_utf16_regression_test_case invalid_utf16_regression_test_cases[] = {
   { UDA, CI, 0, 0, 0, 0, 1, { allany16, NULL }, test16_1 },
@@ -2245,8 +2489,9 @@ static const struct invalid_utf16_regression_test_case invalid_utf16_regression_
 #undef CI
 #undef CPI
 
-static int run_invalid_utf16_test(const struct invalid_utf16_regression_test_case *current,
-  int pattern_index, int i, pcre2_compile_context_16 *ccontext, pcre2_match_data_16 *mdata)
+static int
+run_invalid_utf16_test(const struct invalid_utf16_regression_test_case *current, int pattern_index,
+                       int i, pcre2_compile_context_16 *ccontext, pcre2_match_data_16 *mdata)
 {
   pcre2_code_16 *code;
   int result, errorcode;
@@ -2257,15 +2502,17 @@ static int run_invalid_utf16_test(const struct invalid_utf16_regression_test_cas
   if (current->pattern[i] == NULL)
     return 1;
 
-  code = pcre2_compile_16(current->pattern[i], PCRE2_ZERO_TERMINATED,
-    current->compile_options, &errorcode, &erroroffset, ccontext);
+  code = pcre2_compile_16(current->pattern[i], PCRE2_ZERO_TERMINATED, current->compile_options,
+                          &errorcode, &erroroffset, ccontext);
 
-  if (!code) {
+  if (!code)
+  {
     printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
     return 0;
   }
 
-  if (pcre2_jit_compile_16(code, current->jit_compile_options) != 0) {
+  if (pcre2_jit_compile_16(code, current->jit_compile_options) != 0)
+  {
     printf("Pattern[%d:0] cannot be compiled by the JIT compiler.\n", pattern_index);
     pcre2_code_free_16(code);
     return 0;
@@ -2279,21 +2526,28 @@ static int run_invalid_utf16_test(const struct invalid_utf16_regression_test_cas
 
   length -= current->skip_left + current->skip_right;
 
-  if (current->jit_compile_options & PCRE2_JIT_COMPLETE) {
-    result = pcre2_jit_match_16(code, (current->input + current->skip_left),
-      length, current->start_offset - current->skip_left, 0, mdata, NULL);
+  if (current->jit_compile_options & PCRE2_JIT_COMPLETE)
+  {
+    result = pcre2_jit_match_16(code, (current->input + current->skip_left), length,
+                                current->start_offset - current->skip_left, 0, mdata, NULL);
 
-    if (check_invalid_utf_result(pattern_index, "match", result, current->match_start, current->match_end, ovector)) {
+    if (check_invalid_utf_result(pattern_index, "match", result, current->match_start,
+                                 current->match_end, ovector))
+    {
       pcre2_code_free_16(code);
       return 0;
     }
   }
 
-  if (current->jit_compile_options & PCRE2_JIT_PARTIAL_SOFT) {
-    result = pcre2_jit_match_16(code, (current->input + current->skip_left),
-      length, current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT, mdata, NULL);
+  if (current->jit_compile_options & PCRE2_JIT_PARTIAL_SOFT)
+  {
+    result = pcre2_jit_match_16(code, (current->input + current->skip_left), length,
+                                current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT,
+                                mdata, NULL);
 
-    if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start, current->match_end, ovector)) {
+    if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start,
+                                 current->match_end, ovector))
+    {
       pcre2_code_free_16(code);
       return 0;
     }
@@ -2303,7 +2557,8 @@ static int run_invalid_utf16_test(const struct invalid_utf16_regression_test_cas
   return 1;
 }
 
-static int invalid_utf16_regression_tests(void)
+static int
+invalid_utf16_regression_tests(void)
 {
   const struct invalid_utf16_regression_test_case *current;
   pcre2_compile_context_16 *ccontext;
@@ -2317,7 +2572,8 @@ static int invalid_utf16_regression_tests(void)
   pcre2_set_newline_16(ccontext, PCRE2_NEWLINE_ANY);
   mdata = pcre2_match_data_create_16(4, NULL);
 
-  for (current = invalid_utf16_regression_test_cases; current->pattern[0]; current++) {
+  for (current = invalid_utf16_regression_test_cases; current->pattern[0]; current++)
+  {
     /* printf("\nPattern: %s :\n", current->pattern); */
     total++;
 
@@ -2327,7 +2583,8 @@ static int invalid_utf16_regression_tests(void)
     if (!run_invalid_utf16_test(current, total - 1, 1, ccontext, mdata))
       result = 0;
 
-    if (result) {
+    if (result)
+    {
       successful++;
     }
 
@@ -2342,18 +2599,23 @@ static int invalid_utf16_regression_tests(void)
   pcre2_match_data_free_16(mdata);
   pcre2_compile_context_free_16(ccontext);
 
-  if (total == successful) {
+  if (total == successful)
+  {
     printf("\nAll invalid UTF16 JIT regression tests are successfully passed.\n");
     return 0;
-  } else {
-    printf("\nInvalid UTF16 successful test ratio: %d%% (%d failed)\n", successful * 100 / total, total - successful);
+  }
+  else
+  {
+    printf("\nInvalid UTF16 successful test ratio: %d%% (%d failed)\n", successful * 100 / total,
+           total - successful);
     return 1;
   }
 }
 
 #else /* !SUPPORT_UNICODE || !SUPPORT_PCRE2_16 */
 
-static int invalid_utf16_regression_tests(void)
+static int
+invalid_utf16_regression_tests(void)
 {
   return 0;
 }
@@ -2363,7 +2625,7 @@ static int invalid_utf16_regression_tests(void)
 #if defined SUPPORT_UNICODE && defined SUPPORT_PCRE2_32
 
 #define UDA (PCRE2_UTF | PCRE2_DOTALL | PCRE2_ANCHORED)
-#define CI (PCRE2_JIT_COMPLETE | PCRE2_JIT_INVALID_UTF)
+#define CI  (PCRE2_JIT_COMPLETE | PCRE2_JIT_INVALID_UTF)
 #define CPI (PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_INVALID_UTF)
 
 struct invalid_utf32_regression_test_case {
@@ -2432,8 +2694,9 @@ static const struct invalid_utf32_regression_test_case invalid_utf32_regression_
 #undef CI
 #undef CPI
 
-static int run_invalid_utf32_test(const struct invalid_utf32_regression_test_case *current,
-  int pattern_index, int i, pcre2_compile_context_32 *ccontext, pcre2_match_data_32 *mdata)
+static int
+run_invalid_utf32_test(const struct invalid_utf32_regression_test_case *current, int pattern_index,
+                       int i, pcre2_compile_context_32 *ccontext, pcre2_match_data_32 *mdata)
 {
   pcre2_code_32 *code;
   int result, errorcode;
@@ -2444,15 +2707,17 @@ static int run_invalid_utf32_test(const struct invalid_utf32_regression_test_cas
   if (current->pattern[i] == NULL)
     return 1;
 
-  code = pcre2_compile_32(current->pattern[i], PCRE2_ZERO_TERMINATED,
-    current->compile_options, &errorcode, &erroroffset, ccontext);
+  code = pcre2_compile_32(current->pattern[i], PCRE2_ZERO_TERMINATED, current->compile_options,
+                          &errorcode, &erroroffset, ccontext);
 
-  if (!code) {
+  if (!code)
+  {
     printf("Pattern[%d:0] cannot be compiled. Error offset: %d\n", pattern_index, (int)erroroffset);
     return 0;
   }
 
-  if (pcre2_jit_compile_32(code, current->jit_compile_options) != 0) {
+  if (pcre2_jit_compile_32(code, current->jit_compile_options) != 0)
+  {
     printf("Pattern[%d:0] cannot be compiled by the JIT compiler.\n", pattern_index);
     pcre2_code_free_32(code);
     return 0;
@@ -2466,21 +2731,28 @@ static int run_invalid_utf32_test(const struct invalid_utf32_regression_test_cas
 
   length -= current->skip_left + current->skip_right;
 
-  if (current->jit_compile_options & PCRE2_JIT_COMPLETE) {
-    result = pcre2_jit_match_32(code, (current->input + current->skip_left),
-      length, current->start_offset - current->skip_left, 0, mdata, NULL);
+  if (current->jit_compile_options & PCRE2_JIT_COMPLETE)
+  {
+    result = pcre2_jit_match_32(code, (current->input + current->skip_left), length,
+                                current->start_offset - current->skip_left, 0, mdata, NULL);
 
-    if (check_invalid_utf_result(pattern_index, "match", result, current->match_start, current->match_end, ovector)) {
+    if (check_invalid_utf_result(pattern_index, "match", result, current->match_start,
+                                 current->match_end, ovector))
+    {
       pcre2_code_free_32(code);
       return 0;
     }
   }
 
-  if (current->jit_compile_options & PCRE2_JIT_PARTIAL_SOFT) {
-    result = pcre2_jit_match_32(code, (current->input + current->skip_left),
-      length, current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT, mdata, NULL);
+  if (current->jit_compile_options & PCRE2_JIT_PARTIAL_SOFT)
+  {
+    result = pcre2_jit_match_32(code, (current->input + current->skip_left), length,
+                                current->start_offset - current->skip_left, PCRE2_PARTIAL_SOFT,
+                                mdata, NULL);
 
-    if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start, current->match_end, ovector)) {
+    if (check_invalid_utf_result(pattern_index, "partial match", result, current->match_start,
+                                 current->match_end, ovector))
+    {
       pcre2_code_free_32(code);
       return 0;
     }
@@ -2490,7 +2762,8 @@ static int run_invalid_utf32_test(const struct invalid_utf32_regression_test_cas
   return 1;
 }
 
-static int invalid_utf32_regression_tests(void)
+static int
+invalid_utf32_regression_tests(void)
 {
   const struct invalid_utf32_regression_test_case *current;
   pcre2_compile_context_32 *ccontext;
@@ -2504,7 +2777,8 @@ static int invalid_utf32_regression_tests(void)
   pcre2_set_newline_32(ccontext, PCRE2_NEWLINE_ANY);
   mdata = pcre2_match_data_create_32(4, NULL);
 
-  for (current = invalid_utf32_regression_test_cases; current->pattern[0]; current++) {
+  for (current = invalid_utf32_regression_test_cases; current->pattern[0]; current++)
+  {
     /* printf("\nPattern: %s :\n", current->pattern); */
     total++;
 
@@ -2514,7 +2788,8 @@ static int invalid_utf32_regression_tests(void)
     if (!run_invalid_utf32_test(current, total - 1, 1, ccontext, mdata))
       result = 0;
 
-    if (result) {
+    if (result)
+    {
       successful++;
     }
 
@@ -2529,18 +2804,23 @@ static int invalid_utf32_regression_tests(void)
   pcre2_match_data_free_32(mdata);
   pcre2_compile_context_free_32(ccontext);
 
-  if (total == successful) {
+  if (total == successful)
+  {
     printf("\nAll invalid UTF32 JIT regression tests are successfully passed.\n");
     return 0;
-  } else {
-    printf("\nInvalid UTF32 successful test ratio: %d%% (%d failed)\n", successful * 100 / total, total - successful);
+  }
+  else
+  {
+    printf("\nInvalid UTF32 successful test ratio: %d%% (%d failed)\n", successful * 100 / total,
+           total - successful);
     return 1;
   }
 }
 
 #else /* !SUPPORT_UNICODE || !SUPPORT_PCRE2_32 */
 
-static int invalid_utf32_regression_tests(void)
+static int
+invalid_utf32_regression_tests(void)
 {
   return 0;
 }

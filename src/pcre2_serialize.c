@@ -54,11 +54,10 @@ a sequence of compiled codes. */
 /* Deserialization is limited to the current PCRE version and
 character width. */
 
-#define SERIALIZED_DATA_VERSION \
-  ((PCRE2_MAJOR) | ((PCRE2_MINOR) << 16))
+#define SERIALIZED_DATA_VERSION ((PCRE2_MAJOR) | ((PCRE2_MINOR) << 16))
 
 #define SERIALIZED_DATA_CONFIG \
-  (sizeof(PCRE2_UCHAR) | ((sizeof(void*)) << 8) | ((sizeof(PCRE2_SIZE)) << 16))
+  (sizeof(PCRE2_UCHAR) | ((sizeof(void *)) << 8) | ((sizeof(PCRE2_SIZE)) << 16))
 
 
 
@@ -68,8 +67,8 @@ character width. */
 
 PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
-   uint8_t **serialized_bytes, PCRE2_SIZE *serialized_size,
-   pcre2_general_context *gcontext)
+                       uint8_t **serialized_bytes, PCRE2_SIZE *serialized_size,
+                       pcre2_general_context *gcontext)
 {
   uint8_t *bytes;
   uint8_t *dst_bytes;
@@ -79,13 +78,14 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
   const uint8_t *tables;
   pcre2_serialized_data *data;
 
-  const pcre2_memctl *memctl = (gcontext != NULL) ?
-    &gcontext->memctl : &PRIV(default_compile_context).memctl;
+  const pcre2_memctl *memctl =
+      (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
   if (codes == NULL || serialized_bytes == NULL || serialized_size == NULL)
     return PCRE2_ERROR_NULL;
 
-  if (number_of_codes <= 0) return PCRE2_ERROR_BADDATA;
+  if (number_of_codes <= 0)
+    return PCRE2_ERROR_BADDATA;
 
   /* Compute total size. */
   total_size = sizeof(pcre2_serialized_data) + TABLES_LENGTH;
@@ -93,9 +93,11 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
 
   for (i = 0; i < number_of_codes; i++)
   {
-    if (codes[i] == NULL) return PCRE2_ERROR_NULL;
+    if (codes[i] == NULL)
+      return PCRE2_ERROR_NULL;
     re = (const pcre2_real_code *)(codes[i]);
-    if (re->magic_number != MAGIC_NUMBER) return PCRE2_ERROR_BADMAGIC;
+    if (re->magic_number != MAGIC_NUMBER)
+      return PCRE2_ERROR_BADMAGIC;
     if (tables == NULL)
       tables = re->tables;
     else if (tables != re->tables)
@@ -105,7 +107,8 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
 
   /* Initialize the byte stream. */
   bytes = memctl->malloc(total_size + sizeof(pcre2_memctl), memctl->memory_data);
-  if (bytes == NULL) return PCRE2_ERROR_NOMEMORY;
+  if (bytes == NULL)
+    return PCRE2_ERROR_NOMEMORY;
 
   /* The controller is stored as a hidden parameter. */
   memcpy(bytes, memctl, sizeof(pcre2_memctl));
@@ -137,12 +140,9 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
     pointer to uint8_t. Casting the first argument to (void *) can stop this, but
     it didn't stop Coverity giving the same complaint. */
 
-    (void)memset(dst_bytes + offsetof(pcre2_real_code, memctl), 0,
-      sizeof(pcre2_memctl));
-    (void)memset(dst_bytes + offsetof(pcre2_real_code, tables), 0,
-      sizeof(void *));
-    (void)memset(dst_bytes + offsetof(pcre2_real_code, executable_jit), 0,
-      sizeof(void *));
+    (void)memset(dst_bytes + offsetof(pcre2_real_code, memctl), 0, sizeof(pcre2_memctl));
+    (void)memset(dst_bytes + offsetof(pcre2_real_code, tables), 0, sizeof(void *));
+    (void)memset(dst_bytes + offsetof(pcre2_real_code, executable_jit), 0, sizeof(void *));
 
     dst_bytes += re->blocksize;
   }
@@ -158,12 +158,12 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
 *************************************************/
 
 PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
-pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
-   const uint8_t *bytes, pcre2_general_context *gcontext)
+pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes, const uint8_t *bytes,
+                       pcre2_general_context *gcontext)
 {
   const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
-  const pcre2_memctl *memctl = (gcontext != NULL) ?
-    &gcontext->memctl : &PRIV(default_compile_context).memctl;
+  const pcre2_memctl *memctl =
+      (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
   const uint8_t *src_bytes;
   pcre2_real_code *dst_re = NULL;
@@ -173,12 +173,18 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
 
   /* Sanity checks. */
 
-  if (data == NULL || codes == NULL) return PCRE2_ERROR_NULL;
-  if (number_of_codes <= 0) return PCRE2_ERROR_BADDATA;
-  if (data->number_of_codes <= 0) return PCRE2_ERROR_BADSERIALIZEDDATA;
-  if (data->magic != SERIALIZED_DATA_MAGIC) return PCRE2_ERROR_BADMAGIC;
-  if (data->version != SERIALIZED_DATA_VERSION) return PCRE2_ERROR_BADMODE;
-  if (data->config != SERIALIZED_DATA_CONFIG) return PCRE2_ERROR_BADMODE;
+  if (data == NULL || codes == NULL)
+    return PCRE2_ERROR_NULL;
+  if (number_of_codes <= 0)
+    return PCRE2_ERROR_BADDATA;
+  if (data->number_of_codes <= 0)
+    return PCRE2_ERROR_BADSERIALIZEDDATA;
+  if (data->magic != SERIALIZED_DATA_MAGIC)
+    return PCRE2_ERROR_BADMAGIC;
+  if (data->version != SERIALIZED_DATA_VERSION)
+    return PCRE2_ERROR_BADMODE;
+  if (data->config != SERIALIZED_DATA_CONFIG)
+    return PCRE2_ERROR_BADMODE;
 
   if (number_of_codes > data->number_of_codes)
     number_of_codes = data->number_of_codes;
@@ -189,7 +195,8 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
   following them. */
 
   tables = memctl->malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), memctl->memory_data);
-  if (tables == NULL) return PCRE2_ERROR_NOMEMORY;
+  if (tables == NULL)
+    return PCRE2_ERROR_NOMEMORY;
 
   memcpy(tables, src_bytes, TABLES_LENGTH);
   *(PCRE2_SIZE *)(tables + TABLES_LENGTH) = number_of_codes;
@@ -205,7 +212,7 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
   {
     CODE_BLOCKSIZE_TYPE blocksize;
     memcpy(&blocksize, src_bytes + offsetof(pcre2_real_code, blocksize),
-      sizeof(CODE_BLOCKSIZE_TYPE));
+           sizeof(CODE_BLOCKSIZE_TYPE));
     if (blocksize <= sizeof(pcre2_real_code))
     {
       error = PCRE2_ERROR_BADSERIALIZEDDATA;
@@ -214,8 +221,7 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
 
     /* The allocator provided by gcontext replaces the original one. */
 
-    dst_re = (pcre2_real_code *)PRIV(memctl_malloc)(blocksize,
-      (pcre2_memctl *)gcontext);
+    dst_re = (pcre2_real_code *)PRIV(memctl_malloc)(blocksize, (pcre2_memctl *)gcontext);
     if (dst_re == NULL)
     {
       error = PCRE2_ERROR_NOMEMORY;
@@ -224,15 +230,15 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
 
     /* The new allocator must be preserved. */
 
-    memcpy(((uint8_t *)dst_re) + sizeof(pcre2_memctl),
-      src_bytes + sizeof(pcre2_memctl), blocksize - sizeof(pcre2_memctl));
+    memcpy(((uint8_t *)dst_re) + sizeof(pcre2_memctl), src_bytes + sizeof(pcre2_memctl),
+           blocksize - sizeof(pcre2_memctl));
     if (dst_re->magic_number != MAGIC_NUMBER ||
         dst_re->name_entry_size > MAX_NAME_SIZE + IMM2_SIZE + 1 ||
         dst_re->name_count > MAX_NAME_COUNT)
-      {
-          error = PCRE2_ERROR_BADSERIALIZEDDATA;
-          goto cleanup;
-      }
+    {
+      error = PCRE2_ERROR_BADSERIALIZEDDATA;
+      goto cleanup;
+    }
 
     /* At the moment only one table is supported. */
 
@@ -247,7 +253,7 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes,
 
   return number_of_codes;
 
-  cleanup:
+cleanup:
   if (dst_re != NULL)
     memctl->free(dst_re, memctl->memory_data);
   memctl->free(tables, memctl->memory_data);
@@ -269,10 +275,14 @@ pcre2_serialize_get_number_of_codes(const uint8_t *bytes)
 {
   const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
 
-  if (data == NULL) return PCRE2_ERROR_NULL;
-  if (data->magic != SERIALIZED_DATA_MAGIC) return PCRE2_ERROR_BADMAGIC;
-  if (data->version != SERIALIZED_DATA_VERSION) return PCRE2_ERROR_BADMODE;
-  if (data->config != SERIALIZED_DATA_CONFIG) return PCRE2_ERROR_BADMODE;
+  if (data == NULL)
+    return PCRE2_ERROR_NULL;
+  if (data->magic != SERIALIZED_DATA_MAGIC)
+    return PCRE2_ERROR_BADMAGIC;
+  if (data->version != SERIALIZED_DATA_VERSION)
+    return PCRE2_ERROR_BADMODE;
+  if (data->config != SERIALIZED_DATA_CONFIG)
+    return PCRE2_ERROR_BADMODE;
 
   return data->number_of_codes;
 }

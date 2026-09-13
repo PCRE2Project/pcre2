@@ -64,7 +64,7 @@ Further updates March/April/May 2024 by PH
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#define STACK_SIZE_MB 256
+#define STACK_SIZE_MB  256
 #define JIT_SIZE_LIMIT (200 * 1024)
 
 #ifndef PCRE2_CODE_UNIT_WIDTH
@@ -80,89 +80,88 @@ Further updates March/April/May 2024 by PH
 /* When adding new compile or match options, remember to update the functions
 below that output them. */
 
-#define ALLOWED_COMPILE_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
-   PCRE2_ALT_EXTENDED_CLASS|PCRE2_ALT_VERBNAMES|PCRE2_AUTO_CALLOUT| \
-   PCRE2_CASELESS|PCRE2_DOLLAR_ENDONLY| \
-   PCRE2_DOTALL|PCRE2_DUPNAMES|PCRE2_ENDANCHORED|PCRE2_EXTENDED| \
-   PCRE2_EXTENDED_MORE|PCRE2_FIRSTLINE| \
-   PCRE2_MATCH_UNSET_BACKREF|PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C| \
-   PCRE2_NO_AUTO_CAPTURE| \
-   PCRE2_NO_AUTO_POSSESS|PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_NO_START_OPTIMIZE| \
-   PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_USE_OFFSET_LIMIT| \
-   PCRE2_UTF)
+#define ALLOWED_COMPILE_OPTIONS                                                                \
+  (PCRE2_ANCHORED | PCRE2_ALLOW_EMPTY_CLASS | PCRE2_ALT_BSUX | PCRE2_ALT_CIRCUMFLEX |          \
+   PCRE2_ALT_EXTENDED_CLASS | PCRE2_ALT_VERBNAMES | PCRE2_AUTO_CALLOUT | PCRE2_CASELESS |      \
+   PCRE2_DOLLAR_ENDONLY | PCRE2_DOTALL | PCRE2_DUPNAMES | PCRE2_ENDANCHORED | PCRE2_EXTENDED | \
+   PCRE2_EXTENDED_MORE | PCRE2_FIRSTLINE | PCRE2_MATCH_UNSET_BACKREF | PCRE2_MULTILINE |       \
+   PCRE2_NEVER_BACKSLASH_C | PCRE2_NO_AUTO_CAPTURE | PCRE2_NO_AUTO_POSSESS |                   \
+   PCRE2_NO_DOTSTAR_ANCHOR | PCRE2_NO_START_OPTIMIZE | PCRE2_UCP | PCRE2_UNGREEDY |            \
+   PCRE2_USE_OFFSET_LIMIT | PCRE2_UTF)
 
-#define ALLOWED_MATCH_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_ENDANCHORED|PCRE2_NOTBOL|PCRE2_NOTEOL|PCRE2_NOTEMPTY| \
-   PCRE2_NOTEMPTY_ATSTART|PCRE2_PARTIAL_HARD| \
-   PCRE2_PARTIAL_SOFT)
+#define ALLOWED_MATCH_OPTIONS                                                          \
+  (PCRE2_ANCHORED | PCRE2_ENDANCHORED | PCRE2_NOTBOL | PCRE2_NOTEOL | PCRE2_NOTEMPTY | \
+   PCRE2_NOTEMPTY_ATSTART | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)
 
-#define BASE_MATCH_OPTIONS \
-  (PCRE2_NO_JIT|PCRE2_DISABLE_RECURSELOOP_CHECK)
+#define BASE_MATCH_OPTIONS (PCRE2_NO_JIT | PCRE2_DISABLE_RECURSELOOP_CHECK)
 
 
 #if defined(SUPPORT_DIFF_FUZZ) || defined(STANDALONE)
-static void print_compile_options(FILE *stream, uint32_t compile_options)
+static void
+print_compile_options(FILE *stream, uint32_t compile_options)
 {
-  fprintf(stream, "Compile options %s%.8x =",
-    (compile_options == PCRE2_NEVER_BACKSLASH_C)? "(base) " : "",
-    compile_options);
+  fprintf(stream,
+          "Compile options %s%.8x =", (compile_options == PCRE2_NEVER_BACKSLASH_C) ? "(base) " : "",
+          compile_options);
 
   fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-    ((compile_options & PCRE2_ALT_BSUX) != 0)? " alt_bsux" : "",
-    ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0)? " alt_circumflex" : "",
-    ((compile_options & PCRE2_ALT_EXTENDED_CLASS) != 0)? "alt_extended_class" : "",
-    ((compile_options & PCRE2_ALT_VERBNAMES) != 0)? " alt_verbnames" : "",
-    ((compile_options & PCRE2_ALLOW_EMPTY_CLASS) != 0)? " allow_empty_class" : "",
-    ((compile_options & PCRE2_ANCHORED) != 0)? " anchored" : "",
-    ((compile_options & PCRE2_AUTO_CALLOUT) != 0)? " auto_callout" : "",
-    ((compile_options & PCRE2_CASELESS) != 0)? " caseless" : "",
-    ((compile_options & PCRE2_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
-    ((compile_options & PCRE2_DOTALL) != 0)? " dotall" : "",
-    ((compile_options & PCRE2_DUPNAMES) != 0)? " dupnames" : "",
-    ((compile_options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
-    ((compile_options & PCRE2_EXTENDED) != 0)? " extended" : "",
-    ((compile_options & PCRE2_EXTENDED_MORE) != 0)? " extended_more" : "",
-    ((compile_options & PCRE2_FIRSTLINE) != 0)? " firstline" : "",
-    ((compile_options & PCRE2_MATCH_UNSET_BACKREF) != 0)? " match_unset_backref" : "",
-    ((compile_options & PCRE2_MULTILINE) != 0)? " multiline" : "",
-    ((compile_options & PCRE2_NEVER_BACKSLASH_C) != 0)? " never_backslash_c" : "",
-    ((compile_options & PCRE2_NEVER_UCP) != 0)? " never_ucp" : "",
-    ((compile_options & PCRE2_NEVER_UTF) != 0)? " never_utf" : "",
-    ((compile_options & PCRE2_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
-    ((compile_options & PCRE2_NO_AUTO_POSSESS) != 0)? " no_auto_possess" : "",
-    ((compile_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0)? " no_dotstar_anchor" : "",
-    ((compile_options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
-    ((compile_options & PCRE2_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
-    ((compile_options & PCRE2_UCP) != 0)? " ucp" : "",
-    ((compile_options & PCRE2_UNGREEDY) != 0)? " ungreedy" : "",
-    ((compile_options & PCRE2_USE_OFFSET_LIMIT) != 0)? " use_offset_limit" : "",
-    ((compile_options & PCRE2_UTF) != 0)? " utf" : "");
+          ((compile_options & PCRE2_ALT_BSUX) != 0) ? " alt_bsux" : "",
+          ((compile_options & PCRE2_ALT_CIRCUMFLEX) != 0) ? " alt_circumflex" : "",
+          ((compile_options & PCRE2_ALT_EXTENDED_CLASS) != 0) ? "alt_extended_class" : "",
+          ((compile_options & PCRE2_ALT_VERBNAMES) != 0) ? " alt_verbnames" : "",
+          ((compile_options & PCRE2_ALLOW_EMPTY_CLASS) != 0) ? " allow_empty_class" : "",
+          ((compile_options & PCRE2_ANCHORED) != 0) ? " anchored" : "",
+          ((compile_options & PCRE2_AUTO_CALLOUT) != 0) ? " auto_callout" : "",
+          ((compile_options & PCRE2_CASELESS) != 0) ? " caseless" : "",
+          ((compile_options & PCRE2_DOLLAR_ENDONLY) != 0) ? " dollar_endonly" : "",
+          ((compile_options & PCRE2_DOTALL) != 0) ? " dotall" : "",
+          ((compile_options & PCRE2_DUPNAMES) != 0) ? " dupnames" : "",
+          ((compile_options & PCRE2_ENDANCHORED) != 0) ? " endanchored" : "",
+          ((compile_options & PCRE2_EXTENDED) != 0) ? " extended" : "",
+          ((compile_options & PCRE2_EXTENDED_MORE) != 0) ? " extended_more" : "",
+          ((compile_options & PCRE2_FIRSTLINE) != 0) ? " firstline" : "",
+          ((compile_options & PCRE2_MATCH_UNSET_BACKREF) != 0) ? " match_unset_backref" : "",
+          ((compile_options & PCRE2_MULTILINE) != 0) ? " multiline" : "",
+          ((compile_options & PCRE2_NEVER_BACKSLASH_C) != 0) ? " never_backslash_c" : "",
+          ((compile_options & PCRE2_NEVER_UCP) != 0) ? " never_ucp" : "",
+          ((compile_options & PCRE2_NEVER_UTF) != 0) ? " never_utf" : "",
+          ((compile_options & PCRE2_NO_AUTO_CAPTURE) != 0) ? " no_auto_capture" : "",
+          ((compile_options & PCRE2_NO_AUTO_POSSESS) != 0) ? " no_auto_possess" : "",
+          ((compile_options & PCRE2_NO_DOTSTAR_ANCHOR) != 0) ? " no_dotstar_anchor" : "",
+          ((compile_options & PCRE2_NO_UTF_CHECK) != 0) ? " no_utf_check" : "",
+          ((compile_options & PCRE2_NO_START_OPTIMIZE) != 0) ? " no_start_optimize" : "",
+          ((compile_options & PCRE2_UCP) != 0) ? " ucp" : "",
+          ((compile_options & PCRE2_UNGREEDY) != 0) ? " ungreedy" : "",
+          ((compile_options & PCRE2_USE_OFFSET_LIMIT) != 0) ? " use_offset_limit" : "",
+          ((compile_options & PCRE2_UTF) != 0) ? " utf" : "");
 }
 
-static void print_match_options(FILE *stream, uint32_t match_options)
+static void
+print_match_options(FILE *stream, uint32_t match_options)
 {
-  fprintf(stream, "Match options %s%.8x =",
-    (match_options == BASE_MATCH_OPTIONS)? "(base) " : "", match_options);
+  fprintf(stream, "Match options %s%.8x =", (match_options == BASE_MATCH_OPTIONS) ? "(base) " : "",
+          match_options);
 
   fprintf(stream, "%s%s%s%s%s%s%s%s%s%s%s\n",
-    ((match_options & PCRE2_ANCHORED) != 0)? " anchored" : "",
-    ((match_options & PCRE2_DISABLE_RECURSELOOP_CHECK) != 0)? " disable_recurseloop_check" : "",
-    ((match_options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
-    ((match_options & PCRE2_NO_JIT) != 0)? " no_jit" : "",
-    ((match_options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
-    ((match_options & PCRE2_NOTBOL) != 0)? " notbol" : "",
-    ((match_options & PCRE2_NOTEMPTY) != 0)? " notempty" : "",
-    ((match_options & PCRE2_NOTEMPTY_ATSTART) != 0)? " notempty_atstart" : "",
-    ((match_options & PCRE2_NOTEOL) != 0)? " noteol" : "",
-    ((match_options & PCRE2_PARTIAL_HARD) != 0)? " partial_hard" : "",
-    ((match_options & PCRE2_PARTIAL_SOFT) != 0)? " partial_soft" : "");
+          ((match_options & PCRE2_ANCHORED) != 0) ? " anchored" : "",
+          ((match_options & PCRE2_DISABLE_RECURSELOOP_CHECK) != 0) ? " disable_recurseloop_check"
+                                                                   : "",
+          ((match_options & PCRE2_ENDANCHORED) != 0) ? " endanchored" : "",
+          ((match_options & PCRE2_NO_JIT) != 0) ? " no_jit" : "",
+          ((match_options & PCRE2_NO_UTF_CHECK) != 0) ? " no_utf_check" : "",
+          ((match_options & PCRE2_NOTBOL) != 0) ? " notbol" : "",
+          ((match_options & PCRE2_NOTEMPTY) != 0) ? " notempty" : "",
+          ((match_options & PCRE2_NOTEMPTY_ATSTART) != 0) ? " notempty_atstart" : "",
+          ((match_options & PCRE2_NOTEOL) != 0) ? " noteol" : "",
+          ((match_options & PCRE2_PARTIAL_HARD) != 0) ? " partial_hard" : "",
+          ((match_options & PCRE2_PARTIAL_SOFT) != 0) ? " partial_soft" : "");
 }
 
 
 /* This function can print an error message at all code unit widths. */
 
-static void print_error(FILE *f, int errorcode, const char *text, ...)
+static void
+print_error(FILE *f, int errorcode, const char *text, ...)
 {
   PCRE2_UCHAR buffer[256];
   PCRE2_UCHAR *p = buffer;
@@ -171,7 +170,8 @@ static void print_error(FILE *f, int errorcode, const char *text, ...)
   vfprintf(f, text, ap);
   va_end(ap);
   pcre2_get_error_message(errorcode, buffer, 256);
-  while (*p != 0) fprintf(f, "%c", *p++);
+  while (*p != 0)
+    fprintf(f, "%c", *p++);
   printf("\n");
 }
 #endif /* defined(SUPPORT_DIFF_FUZZ || defined(STANDALONE) */
@@ -179,7 +179,8 @@ static void print_error(FILE *f, int errorcode, const char *text, ...)
 
 #ifdef SUPPORT_JIT
 #ifdef SUPPORT_DIFF_FUZZ
-static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
+static void
+dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
 {
   int errorcode;
 
@@ -188,8 +189,7 @@ static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
     PCRE2_UCHAR *bufferptr = NULL;
     PCRE2_SIZE bufflen = 0;
 
-    errorcode = pcre2_substring_get_bynumber(match_data, index, &bufferptr,
-      &bufflen);
+    errorcode = pcre2_substring_get_bynumber(match_data, index, &bufferptr, &bufflen);
 
     if (errorcode >= 0)
     {
@@ -209,79 +209,72 @@ static void dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
 
 /* This function describes the current test case being evaluated, then aborts */
 
-static void describe_failure(
-  const char *task,
-  const PCRE2_UCHAR *data,
-  PCRE2_SIZE size,
-  uint32_t compile_options,
-  uint32_t match_options,
-  int errorcode,
-  int errorcode_jit,
-  int matches,
-  int matches_jit,
-  pcre2_match_data *match_data,
-  pcre2_match_data *match_data_jit
-) {
-
-fprintf(stderr, "Encountered failure while performing %s; context:\n", task);
-
-fprintf(stderr, "Pattern/sample string (hex encoded): ");
-for (size_t i = 0; i < size; i++)
+static void
+describe_failure(const char *task, const PCRE2_UCHAR *data, PCRE2_SIZE size,
+                 uint32_t compile_options, uint32_t match_options, int errorcode, int errorcode_jit,
+                 int matches, int matches_jit, pcre2_match_data *match_data,
+                 pcre2_match_data *match_data_jit)
 {
-  fprintf(stderr, "%02x", data[i]);
-}
-fprintf(stderr, "\n");
 
-print_compile_options(stderr, compile_options);
-print_match_options(stderr, match_options);
+  fprintf(stderr, "Encountered failure while performing %s; context:\n", task);
 
-if (errorcode < 0)
-{
-  print_error(stderr, errorcode, "Non-JIT'd operation emitted an error: ");
-}
-
-if (matches >= 0)
-{
-  fprintf(stderr, "Non-JIT'd operation did not emit an error.\n");
-  if (match_data != NULL)
+  fprintf(stderr, "Pattern/sample string (hex encoded): ");
+  for (size_t i = 0; i < size; i++)
   {
-    fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", matches);
-    dump_matches(stderr, matches, match_data);
-    fprintf(stderr, "\n");
+    fprintf(stderr, "%02x", data[i]);
   }
-}
+  fprintf(stderr, "\n");
 
-if (errorcode_jit < 0)
-{
-  print_error(stderr, errorcode_jit, "JIT'd operation emitted error %d:",
-    errorcode_jit);
-}
+  print_compile_options(stderr, compile_options);
+  print_match_options(stderr, match_options);
 
-if (matches_jit >= 0)
-{
-  fprintf(stderr, "JIT'd operation did not emit an error.\n");
-  if (match_data_jit != NULL)
+  if (errorcode < 0)
   {
-    fprintf(stderr, "%d matches discovered by JIT'd regex:\n", matches_jit);
-    dump_matches(stderr, matches_jit, match_data_jit);
-    fprintf(stderr, "\n");
+    print_error(stderr, errorcode, "Non-JIT'd operation emitted an error: ");
   }
-}
 
-abort();
+  if (matches >= 0)
+  {
+    fprintf(stderr, "Non-JIT'd operation did not emit an error.\n");
+    if (match_data != NULL)
+    {
+      fprintf(stderr, "%d matches discovered by non-JIT'd regex:\n", matches);
+      dump_matches(stderr, matches, match_data);
+      fprintf(stderr, "\n");
+    }
+  }
+
+  if (errorcode_jit < 0)
+  {
+    print_error(stderr, errorcode_jit, "JIT'd operation emitted error %d:", errorcode_jit);
+  }
+
+  if (matches_jit >= 0)
+  {
+    fprintf(stderr, "JIT'd operation did not emit an error.\n");
+    if (match_data_jit != NULL)
+    {
+      fprintf(stderr, "%d matches discovered by JIT'd regex:\n", matches_jit);
+      dump_matches(stderr, matches_jit, match_data_jit);
+      fprintf(stderr, "\n");
+    }
+  }
+
+  abort();
 }
-#endif  /* SUPPORT_DIFF_FUZZ */
-#endif  /* SUPPORT_JIT */
+#endif /* SUPPORT_DIFF_FUZZ */
+#endif /* SUPPORT_JIT */
 
 /* This is the callout function. Its only purpose is to halt matching if there
 are more than 100 callouts, as one way of stopping too much time being spent on
 fruitless matches. The callout data is a pointer to the counter. */
 
-static int callout_function(pcre2_callout_block *cb, void *callout_data)
+static int
+callout_function(pcre2_callout_block *cb, void *callout_data)
 {
-  (void)cb;  // Avoid unused parameter warning
+  (void)cb; // Avoid unused parameter warning
   *((uint32_t *)callout_data) += 1;
-  return (*((uint32_t *)callout_data) > 100)? PCRE2_ERROR_CALLOUT : 0;
+  return (*((uint32_t *)callout_data) > 100) ? PCRE2_ERROR_CALLOUT : 0;
 }
 
 /* Putting in this apparently unnecessary prototype prevents gcc from giving a
@@ -291,7 +284,8 @@ int LLVMFuzzerInitialize(int *, char ***);
 
 int LLVMFuzzerTestOneInput(unsigned char *, size_t);
 
-int LLVMFuzzerInitialize(int *argc, char ***argv)
+int
+LLVMFuzzerInitialize(int *argc, char ***argv)
 {
   int rc;
   struct rlimit rlim;
@@ -309,14 +303,15 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     _exit(1);
   }
 
-  (void)argc;  // Avoid "unused parameter" warnings
+  (void)argc; // Avoid "unused parameter" warnings
   (void)argv;
   return 0;
 }
 
 /* Here's the driving function. */
 
-int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
+int
+LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 {
   PCRE2_UCHAR *wdata;
   PCRE2_UCHAR *newwdata = NULL;
@@ -332,7 +327,8 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
   size_t match_size;
   int dfa_workspace[DFA_WORKSPACE_COUNT];
 
-  if (size < sizeof(random_options)) return -1;
+  if (size < sizeof(random_options))
+    return -1;
 
   random_options = *(uint64_t *)(data);
   data += sizeof(random_options);
@@ -365,10 +361,9 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
     {
       size_t j;
 
-      if ((wdata[i] != ')' && wdata[i] != ']') || wdata[i-1] == '\\' ||
-           wdata[i+1] != '{')
+      if ((wdata[i] != ')' && wdata[i] != ']') || wdata[i - 1] == '\\' || wdata[i + 1] != '{')
         continue;
-      i++;  // Points to '{'
+      i++; // Points to '{'
 
       /* Loop for two values in a quantifier. Offset i points to brace or comma
       at the start of the loop. */
@@ -377,23 +372,25 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
       {
         int q = 0;
 
-        if (i >= size - 1) goto END_QSCAN;  // Can happen for ,
+        if (i >= size - 1)
+          goto END_QSCAN; // Can happen for ,
 
         /* Ignore leading spaces. */
 
-        while (wdata[i+1] == ' ' || wdata[i+1] == '\t')
+        while (wdata[i + 1] == ' ' || wdata[i + 1] == '\t')
         {
           i++;
-          if (i >= size - 1) goto END_QSCAN;
+          if (i >= size - 1)
+            goto END_QSCAN;
         }
 
         /* Ignore non-significant leading zeros. */
 
-        while (wdata[i+1] == '0' && i+2 < size && wdata[i+2] >= '0' &&
-               wdata[i+2] <= '9')
+        while (wdata[i + 1] == '0' && i + 2 < size && wdata[i + 2] >= '0' && wdata[i + 2] <= '9')
         {
           i++;
-          if (i >= size - 1) goto END_QSCAN;
+          if (i >= size - 1)
+            goto END_QSCAN;
         }
 
         /* Scan for a number ending in brace, or comma in the first iteration,
@@ -404,11 +401,15 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
           if (wdata[j] == ' ' || wdata[j] == '\t')
           {
             j++;
-            while (j < size && (wdata[j] == ' ' || wdata[j] == '\t')) j++;
-            if (j >= size) goto OUTERLOOP;
-            if (wdata[j] != '}' && wdata[j] != ',') goto OUTERLOOP;
+            while (j < size && (wdata[j] == ' ' || wdata[j] == '\t'))
+              j++;
+            if (j >= size)
+              goto OUTERLOOP;
+            if (wdata[j] != '}' && wdata[j] != ',')
+              goto OUTERLOOP;
           }
-          if (wdata[j] == '}' || (ii == 0 && wdata[j] == ',')) break;
+          if (wdata[j] == '}' || (ii == 0 && wdata[j] == ','))
+            break;
 
           if (wdata[j] < '0' || wdata[j] > '9')
           {
@@ -419,12 +420,14 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
           q = q * 10 + (wdata[j] - '0');
         }
 
-        if (j >= size) goto END_QSCAN;  // End of data
+        if (j >= size)
+          goto END_QSCAN; // End of data
 
         /* Hit ',' or '}' or read 6 digits. Six digits is a number > 65536 which
         is the maximum quantifier. Leave such numbers alone. */
 
-        if (j >= i + 7 || q > 65535) goto OUTERLOOP;
+        if (j >= i + 7 || q > 65535)
+          goto OUTERLOOP;
 
         /* Limit the quantifier size to 10 */
 
@@ -433,7 +436,8 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 #ifdef STANDALONE
           printf("Reduced quantifier value %d to 10.\n", q);
 #endif
-          for (size_t k = i + 1; k < j; k++) wdata[k] = '0';
+          for (size_t k = i + 1; k < j; k++)
+            wdata[k] = '0';
           wdata[j - 2] = '1';
         }
 
@@ -441,22 +445,23 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
         after comma, which is only valid in the first time round this loop). */
 
         i = j;
-        if (wdata[i] == '}') break;
+        if (wdata[i] == '}')
+          break;
       }
 
       /* Continue along the data string */
 
-      OUTERLOOP:
+    OUTERLOOP:
       i = j;
       continue;
     }
   }
-  END_QSCAN:
+END_QSCAN:
 
   /* Limiting the length of the subject for matching stops fruitless searches
   in large trees taking too much time. */
 
-  match_size = (size > MAX_MATCH_SIZE)? MAX_MATCH_SIZE : size;
+  match_size = (size > MAX_MATCH_SIZE) ? MAX_MATCH_SIZE : size;
 
   /* Create a compile context, and set a limit on the size of the compiled
   pattern. This stops the fuzzer using vast amounts of memory. */
@@ -469,7 +474,7 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 #endif
     abort();
   }
-  pcre2_set_max_pattern_compiled_length(compile_context, 10*1024*1024);
+  pcre2_set_max_pattern_compiled_length(compile_context, 10 * 1024 * 1024);
 
   /* Ensure that all undefined option bits are zero (waste of time trying them)
   and also that PCRE2_NO_UTF_CHECK is unset, as there is no guarantee that the
@@ -477,16 +482,14 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
   no reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set
   because \C in random patterns is highly likely to cause a crash. */
 
-  compile_options = ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) |
-    PCRE2_NEVER_BACKSLASH_C;
-  match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) |
-    BASE_MATCH_OPTIONS;
+  compile_options = ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) | PCRE2_NEVER_BACKSLASH_C;
+  match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) | BASE_MATCH_OPTIONS;
 
   /* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
   allowed together and just give an immediate error return. */
 
-  if (((compile_options|match_options) & PCRE2_ENDANCHORED) != 0)
-    match_options &= ~(PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT);
+  if (((compile_options | match_options) & PCRE2_ENDANCHORED) != 0)
+    match_options &= ~(PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT);
 
   /* Do the compile with and without the options, and after a successful compile,
   likewise do the match with and without the options. */
@@ -510,8 +513,8 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
     print_compile_options(stdout, compile_options);
 #endif
 
-    code = pcre2_compile((PCRE2_SPTR)wdata, (PCRE2_SIZE)size, compile_options,
-      &errorcode, &erroroffset, compile_context);
+    code = pcre2_compile((PCRE2_SPTR)wdata, (PCRE2_SIZE)size, compile_options, &errorcode,
+                         &erroroffset, compile_context);
 
     /* Compilation succeeded */
 
@@ -531,18 +534,19 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 #endif
         jit_ret = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
 #ifdef STANDALONE
-        if (jit_ret < 0) printf("JIT compile error %d\n", jit_ret);
+        if (jit_ret < 0)
+          printf("JIT compile error %d\n", jit_ret);
 #endif
       }
       else
       {
 #ifdef STANDALONE
         printf("Not calling JIT: compiled pattern is too long "
-          "(%ld bytes; limit=%d)\n",
-          ((struct pcre2_real_code *)code)->blocksize, JIT_SIZE_LIMIT);
+               "(%ld bytes; limit=%d)\n",
+               ((struct pcre2_real_code *)code)->blocksize, JIT_SIZE_LIMIT);
 #endif
       }
-#endif  /* SUPPORT_JIT */
+#endif /* SUPPORT_JIT */
 
       /* Create match data and context blocks only when we first need them. Set
       low match and depth limits to avoid wasting too much searching large
@@ -592,15 +596,17 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 #endif
 
         callout_count = 0;
-        errorcode = pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0,
-          match_options, match_data, match_context);
+        errorcode = pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0, match_options,
+                                match_data, match_context);
 
 #ifdef STANDALONE
-        if (errorcode >= 0) printf("Match returned %d\n", errorcode); else
+        if (errorcode >= 0)
+          printf("Match returned %d\n", errorcode);
+        else
           print_error(stdout, errorcode, "Match failed: error %d: ", errorcode);
 #endif
 
-  /* If JIT is enabled, do a JIT match and, if appropriately compiled, compare
+        /* If JIT is enabled, do a JIT match and, if appropriately compiled, compare
   with the interpreter. */
 
 #ifdef SUPPORT_JIT
@@ -611,19 +617,18 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 #endif
           callout_count = 0;
           errorcode_jit = pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0,
-            match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
+                                      match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
 #ifdef STANDALONE
           if (errorcode_jit >= 0)
             printf("Match returned %d\n", errorcode_jit);
           else
-            print_error(stdout, errorcode_jit, "JIT match failed: error %d: ",
-              errorcode_jit);
+            print_error(stdout, errorcode_jit, "JIT match failed: error %d: ", errorcode_jit);
 #else
-          (void)errorcode_jit;   // Avoid compiler warning
-#endif  /* STANDALONE */
+          (void)errorcode_jit; // Avoid compiler warning
+#endif /* STANDALONE */
 
-  /* With differential matching enabled, compare with interpreter. */
+          /* With differential matching enabled, compare with interpreter. */
 
 #ifdef SUPPORT_DIFF_FUZZ
           matches = errorcode;
@@ -631,11 +636,13 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 
           if (errorcode_jit != errorcode)
           {
-            if (!(errorcode < 0 && errorcode_jit < 0) &&
-                  errorcode != PCRE2_ERROR_MATCHLIMIT && errorcode != PCRE2_ERROR_CALLOUT &&
-                  errorcode_jit != PCRE2_ERROR_MATCHLIMIT && errorcode_jit != PCRE2_ERROR_JIT_STACKLIMIT && errorcode_jit != PCRE2_ERROR_CALLOUT)
+            if (!(errorcode < 0 && errorcode_jit < 0) && errorcode != PCRE2_ERROR_MATCHLIMIT &&
+                errorcode != PCRE2_ERROR_CALLOUT && errorcode_jit != PCRE2_ERROR_MATCHLIMIT &&
+                errorcode_jit != PCRE2_ERROR_JIT_STACKLIMIT && errorcode_jit != PCRE2_ERROR_CALLOUT)
             {
-              describe_failure("match errorcode comparison", wdata, size, compile_options, match_options, errorcode, errorcode_jit, matches, matches_jit, match_data, match_data_jit);
+              describe_failure("match errorcode comparison", wdata, size, compile_options,
+                               match_options, errorcode, errorcode_jit, matches, matches_jit,
+                               match_data, match_data_jit);
             }
           }
           else
@@ -648,43 +655,46 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
               bufferptr = bufferptr_jit = NULL;
               bufflen = bufflen_jit = 0;
 
-              errorcode = pcre2_substring_get_bynumber(match_data, (uint32_t) index, &bufferptr, &bufflen);
-              errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, (uint32_t) index, &bufferptr_jit, &bufflen_jit);
+              errorcode =
+                  pcre2_substring_get_bynumber(match_data, (uint32_t)index, &bufferptr, &bufflen);
+              errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, (uint32_t)index,
+                                                           &bufferptr_jit, &bufflen_jit);
 
               if (errorcode != errorcode_jit)
               {
-                describe_failure("match entry errorcode comparison", wdata, size,
-                  compile_options, match_options, errorcode, errorcode_jit,
-                  matches, matches_jit, match_data, match_data_jit);
+                describe_failure("match entry errorcode comparison", wdata, size, compile_options,
+                                 match_options, errorcode, errorcode_jit, matches, matches_jit,
+                                 match_data, match_data_jit);
               }
 
               if (errorcode >= 0)
               {
                 if (bufflen != bufflen_jit)
                 {
-                  describe_failure("match entry length comparison", wdata, size,
-                    compile_options, match_options, errorcode, errorcode_jit,
-                    matches, matches_jit, match_data, match_data_jit);
+                  describe_failure("match entry length comparison", wdata, size, compile_options,
+                                   match_options, errorcode, errorcode_jit, matches, matches_jit,
+                                   match_data, match_data_jit);
                 }
 
                 if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
                 {
-                  describe_failure("match entry content comparison", wdata, size,
-                    compile_options, match_options, errorcode, errorcode_jit,
-                    matches, matches_jit, match_data, match_data_jit);
+                  describe_failure("match entry content comparison", wdata, size, compile_options,
+                                   match_options, errorcode, errorcode_jit, matches, matches_jit,
+                                   match_data, match_data_jit);
                 }
               }
 
-                pcre2_substring_free(bufferptr);
-                pcre2_substring_free(bufferptr_jit);
+              pcre2_substring_free(bufferptr);
+              pcre2_substring_free(bufferptr_jit);
             }
           }
-#endif  /* SUPPORT_DIFF_FUZZ */
+#endif /* SUPPORT_DIFF_FUZZ */
         }
-#endif  /* SUPPORT_JIT */
+#endif /* SUPPORT_JIT */
 
-        if (match_options == BASE_MATCH_OPTIONS) break;  // Don't do same twice
-        match_options = BASE_MATCH_OPTIONS;              // For second time
+        if (match_options == BASE_MATCH_OPTIONS)
+          break;                            // Don't do same twice
+        match_options = BASE_MATCH_OPTIONS; // For second time
       }
 
       /* Match with DFA twice, with and without options, but remove options that
@@ -700,22 +710,21 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
       {
 #ifdef STANDALONE
         printf("DFA match options %.8x =", match_options);
-        printf("%s%s%s%s%s%s%s%s%s\n",
-          ((match_options & PCRE2_ANCHORED) != 0)? " anchored" : "",
-          ((match_options & PCRE2_ENDANCHORED) != 0)? " endanchored" : "",
-          ((match_options & PCRE2_NO_UTF_CHECK) != 0)? " no_utf_check" : "",
-          ((match_options & PCRE2_NOTBOL) != 0)? " notbol" : "",
-          ((match_options & PCRE2_NOTEMPTY) != 0)? " notempty" : "",
-          ((match_options & PCRE2_NOTEMPTY_ATSTART) != 0)? " notempty_atstart" : "",
-          ((match_options & PCRE2_NOTEOL) != 0)? " noteol" : "",
-          ((match_options & PCRE2_PARTIAL_HARD) != 0)? " partial_hard" : "",
-          ((match_options & PCRE2_PARTIAL_SOFT) != 0)? " partial_soft" : "");
+        printf("%s%s%s%s%s%s%s%s%s\n", ((match_options & PCRE2_ANCHORED) != 0) ? " anchored" : "",
+               ((match_options & PCRE2_ENDANCHORED) != 0) ? " endanchored" : "",
+               ((match_options & PCRE2_NO_UTF_CHECK) != 0) ? " no_utf_check" : "",
+               ((match_options & PCRE2_NOTBOL) != 0) ? " notbol" : "",
+               ((match_options & PCRE2_NOTEMPTY) != 0) ? " notempty" : "",
+               ((match_options & PCRE2_NOTEMPTY_ATSTART) != 0) ? " notempty_atstart" : "",
+               ((match_options & PCRE2_NOTEOL) != 0) ? " noteol" : "",
+               ((match_options & PCRE2_PARTIAL_HARD) != 0) ? " partial_hard" : "",
+               ((match_options & PCRE2_PARTIAL_SOFT) != 0) ? " partial_soft" : "");
 #endif
 
         callout_count = 0;
-        errorcode = pcre2_dfa_match(code, (PCRE2_SPTR)wdata,
-          (PCRE2_SIZE)match_size, 0, match_options, match_data,
-          match_context, dfa_workspace, DFA_WORKSPACE_COUNT);
+        errorcode =
+            pcre2_dfa_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0, match_options,
+                            match_data, match_context, dfa_workspace, DFA_WORKSPACE_COUNT);
 
 #ifdef STANDALONE
         if (errorcode >= 0)
@@ -724,11 +733,12 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
           print_error(stdout, errorcode, "DFA match failed: error %d: ", errorcode);
 #endif
 
-        if (match_options == 0) break;  // No point doing same twice
-        match_options = 0;              // For second time
+        if (match_options == 0)
+          break;           // No point doing same twice
+        match_options = 0; // For second time
       }
 
-      match_options = save_match_options;  // Reset for the second compile
+      match_options = save_match_options; // Reset for the second compile
       pcre2_code_free(code);
     }
 
@@ -737,26 +747,31 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
     else
     {
 #ifdef STANDALONE
-      print_error(stdout, errorcode, "Error %d at offset %lu: ", errorcode,
-        erroroffset);
+      print_error(stdout, errorcode, "Error %d at offset %lu: ", errorcode, erroroffset);
 #else
-      if (errorcode == PCRE2_ERROR_INTERNAL) abort();
+      if (errorcode == PCRE2_ERROR_INTERNAL)
+        abort();
 #endif
     }
 
-    if (compile_options == PCRE2_NEVER_BACKSLASH_C) break;  // Avoid same twice
-    compile_options = PCRE2_NEVER_BACKSLASH_C;              // For second time
+    if (compile_options == PCRE2_NEVER_BACKSLASH_C)
+      break;                                   // Avoid same twice
+    compile_options = PCRE2_NEVER_BACKSLASH_C; // For second time
   }
 
   /* Tidy up before exiting */
 
-  if (match_data != NULL) pcre2_match_data_free(match_data);
+  if (match_data != NULL)
+    pcre2_match_data_free(match_data);
 #ifdef SUPPORT_JIT
-  if (match_data_jit != NULL) pcre2_match_data_free(match_data_jit);
+  if (match_data_jit != NULL)
+    pcre2_match_data_free(match_data_jit);
 #endif
   free(newwdata);
-  if (match_context != NULL) pcre2_match_context_free(match_context);
-  if (compile_context != NULL) pcre2_compile_context_free(compile_context);
+  if (match_context != NULL)
+    pcre2_match_context_free(match_context);
+  if (compile_context != NULL)
+    pcre2_compile_context_free(compile_context);
   return 0;
 }
 
@@ -764,7 +779,8 @@ int LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 /* Optional main program.  */
 
 #ifdef STANDALONE
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   LLVMFuzzerInitialize(&argc, &argv);
 
@@ -789,13 +805,13 @@ int main(int argc, char **argv)
       readsize = strlen(argv[i]) - 1;
       printf("------ <Literal> ------\n");
       printf("Length = %lu\n", readsize);
-      printf("%.*s\n", (int)readsize, argv[i]+1);
+      printf("%.*s\n", (int)readsize, argv[i] + 1);
       buffer = (unsigned char *)malloc(readsize);
       if (buffer == NULL)
         printf("** Failed to allocate %lu bytes of memory\n", readsize);
       else
       {
-        memcpy(buffer, argv[i]+1, readsize);
+        memcpy(buffer, argv[i] + 1, readsize);
         LLVMFuzzerTestOneInput(buffer, readsize);
         free(buffer);
       }
@@ -840,6 +856,6 @@ int main(int argc, char **argv)
 
   return 0;
 }
-#endif  /* STANDALONE */
+#endif /* STANDALONE */
 
 /* End */

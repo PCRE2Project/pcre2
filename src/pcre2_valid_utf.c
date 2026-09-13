@@ -45,7 +45,7 @@ macros to change names from _pcre2_xxx to xxxx, thereby avoiding name clashes
 with the library. In this case, PCRE2_PCRE2TEST is defined. */
 
 
-#ifndef PCRE2_PCRE2TEST           /* We're compiling the library */
+#ifndef PCRE2_PCRE2TEST /* We're compiling the library */
 #include "pcre2_internal.h"
 #endif /* PCRE2_PCRE2TEST */
 
@@ -66,7 +66,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
   (void)erroroffset;
   return 0;
 }
-#else  /* UTF is supported */
+#else /* UTF is supported */
 
 
 
@@ -137,34 +137,40 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
     c = *p;
     length--;
 
-    if (c < 128) continue;                // ASCII character
+    if (c < 128)
+      continue; // ASCII character
 
-    if (c < 0xc0)                         // Isolated 10xx xxxx byte
+    if (c < 0xc0) // Isolated 10xx xxxx byte
     {
       *erroroffset = (PCRE2_SIZE)(p - string);
       return PCRE2_ERROR_UTF8_ERR20;
     }
 
-    if (c >= 0xfe)                        // Invalid 0xfe or 0xff bytes
+    if (c >= 0xfe) // Invalid 0xfe or 0xff bytes
     {
       *erroroffset = (PCRE2_SIZE)(p - string);
       return PCRE2_ERROR_UTF8_ERR21;
     }
 
-    ab = PRIV(utf8_table4)[c & 0x3f];     // Number of additional bytes (1-5)
-    if (length < ab)                      // Missing bytes
+    ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-5)
+    if (length < ab)                  // Missing bytes
     {
       *erroroffset = (PCRE2_SIZE)(p - string);
       switch (ab - length)
       {
-      case 1:   return PCRE2_ERROR_UTF8_ERR1;
-      case 2:   return PCRE2_ERROR_UTF8_ERR2;
-      case 3:   return PCRE2_ERROR_UTF8_ERR3;
-      case 4:   return PCRE2_ERROR_UTF8_ERR4;
-      case 5:   return PCRE2_ERROR_UTF8_ERR5;
+      case 1:
+        return PCRE2_ERROR_UTF8_ERR1;
+      case 2:
+        return PCRE2_ERROR_UTF8_ERR2;
+      case 3:
+        return PCRE2_ERROR_UTF8_ERR3;
+      case 4:
+        return PCRE2_ERROR_UTF8_ERR4;
+      case 5:
+        return PCRE2_ERROR_UTF8_ERR5;
       }
     }
-    length -= ab;                         // Length remaining
+    length -= ab; // Length remaining
 
     /* Check top bits in the second byte */
 
@@ -183,7 +189,8 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       /* 2-byte character. No further bytes to check for 0x80. Check first byte
       for for xx00 000x (overlong sequence). */
 
-    case 1:   if ((c & 0x3e) == 0)
+    case 1:
+      if ((c & 0x3e) == 0)
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 1;
         return PCRE2_ERROR_UTF8_ERR15;
@@ -195,7 +202,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
             1110 1101, 1010 xxxx (0xd800 - 0xdfff) */
 
     case 2:
-      if ((*(++p) & 0xc0) != 0x80)     // Third byte
+      if ((*(++p) & 0xc0) != 0x80) // Third byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
@@ -217,12 +224,12 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
          character greater than 0x0010ffff (f4 8f bf bf) */
 
     case 3:
-      if ((*(++p) & 0xc0) != 0x80)     // Third byte
+      if ((*(++p) & 0xc0) != 0x80) // Third byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
-      if ((*(++p) & 0xc0) != 0x80)     // Fourth byte
+      if ((*(++p) & 0xc0) != 0x80) // Fourth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR8;
@@ -248,17 +255,17 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       1111 1000, xx00 0xxx */
 
     case 4:
-      if ((*(++p) & 0xc0) != 0x80)     // Third byte
+      if ((*(++p) & 0xc0) != 0x80) // Third byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
-      if ((*(++p) & 0xc0) != 0x80)     // Fourth byte
+      if ((*(++p) & 0xc0) != 0x80) // Fourth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR8;
       }
-      if ((*(++p) & 0xc0) != 0x80)     // Fifth byte
+      if ((*(++p) & 0xc0) != 0x80) // Fifth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 4;
         return PCRE2_ERROR_UTF8_ERR9;
@@ -274,22 +281,22 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       1111 1100, xx00 00xx. */
 
     case 5:
-      if ((*(++p) & 0xc0) != 0x80)     // Third byte
+      if ((*(++p) & 0xc0) != 0x80) // Third byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
-      if ((*(++p) & 0xc0) != 0x80)     // Fourth byte
+      if ((*(++p) & 0xc0) != 0x80) // Fourth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR8;
       }
-      if ((*(++p) & 0xc0) != 0x80)     // Fifth byte
+      if ((*(++p) & 0xc0) != 0x80) // Fifth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 4;
         return PCRE2_ERROR_UTF8_ERR9;
       }
-      if ((*(++p) & 0xc0) != 0x80)     // Sixth byte
+      if ((*(++p) & 0xc0) != 0x80) // Sixth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 5;
         return PCRE2_ERROR_UTF8_ERR10;
@@ -309,7 +316,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
     if (ab > 3)
     {
       *erroroffset = (PCRE2_SIZE)(p - string) - ab;
-      return (ab == 4)? PCRE2_ERROR_UTF8_ERR11 : PCRE2_ERROR_UTF8_ERR12;
+      return (ab == 4) ? PCRE2_ERROR_UTF8_ERR11 : PCRE2_ERROR_UTF8_ERR12;
     }
   }
   return 0;
@@ -390,8 +397,8 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
     }
   }
   return 0;
-#endif  /* CODE_UNIT_WIDTH */
+#endif /* CODE_UNIT_WIDTH */
 }
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
 /* End of pcre2_valid_utf.c */

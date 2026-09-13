@@ -77,99 +77,99 @@ macros are used to manipulate parsed pattern elements.
 NOTE: When these definitions are changed, the table of extra lengths for each
 code (meta_extra_lengths) must be updated to remain in step. */
 
-#define META_END              0x80000000u  /* End of pattern */
+#define META_END 0x80000000u /* End of pattern */
 
-#define META_ALT              0x80010000u  /* alternation */
-#define META_ATOMIC           0x80020000u  /* atomic group */
-#define META_BACKREF          0x80030000u  /* Back ref */
-#define META_BACKREF_BYNAME   0x80040000u  /* \k'name' */
-#define META_BIGVALUE         0x80050000u  /* Next is a literal > META_END */
-#define META_CALLOUT_NUMBER   0x80060000u  /* (?C with numerical argument */
-#define META_CALLOUT_STRING   0x80070000u  /* (?C with string argument */
-#define META_CAPTURE          0x80080000u  /* Capturing parenthesis */
-#define META_CIRCUMFLEX       0x80090000u  /* ^ metacharacter */
-#define META_CLASS            0x800a0000u  /* start non-empty class */
-#define META_CLASS_EMPTY      0x800b0000u  /* empty class */
-#define META_CLASS_EMPTY_NOT  0x800c0000u  /* negative empty class */
-#define META_CLASS_END        0x800d0000u  /* end of non-empty class */
-#define META_CLASS_NOT        0x800e0000u  /* start non-empty negative class */
-#define META_COND_ASSERT      0x800f0000u  /* (?(?assertion)... */
-#define META_COND_DEFINE      0x80100000u  /* (?(DEFINE)... */
-#define META_COND_NAME        0x80110000u  /* (?(<name>)... */
-#define META_COND_NUMBER      0x80120000u  /* (?(digits)... */
-#define META_COND_RNAME       0x80130000u  /* (?(R&name)... */
-#define META_COND_RNUMBER     0x80140000u  /* (?(Rdigits)... */
-#define META_COND_VERSION     0x80150000u  /* (?(VERSION<op>x.y)... */
-#define META_OFFSET           0x80160000u  /* Position within subject */
-#define META_SCS              0x80170000u  /* (*scan_substring:... */
-#define META_CAPTURE_NAME     0x80180000u  /* Next <name> in capture lists */
-#define META_CAPTURE_NUMBER   0x80190000u  /* Next digits in capture lists */
-#define META_DOLLAR           0x801a0000u  /* $ metacharacter */
-#define META_DOT              0x801b0000u  /* . metacharacter */
-#define META_ESCAPE           0x801c0000u  /* \d and friends */
-#define META_KET              0x801d0000u  /* closing parenthesis */
-#define META_NOCAPTURE        0x801e0000u  /* no capture parens */
-#define META_OPTIONS          0x801f0000u  /* (?i) and friends */
-#define META_POSIX            0x80200000u  /* POSIX class item */
-#define META_POSIX_NEG        0x80210000u  /* negative POSIX class item */
-#define META_RANGE_ESCAPED    0x80220000u  /* range with at least one escape */
-#define META_RANGE_LITERAL    0x80230000u  /* range defined literally */
-#define META_RECURSE          0x80240000u  /* Recursion */
-#define META_RECURSE_BYNAME   0x80250000u  /* (?&name) */
-#define META_SCRIPT_RUN       0x80260000u  /* (*script_run:...) */
+#define META_ALT             0x80010000u /* alternation */
+#define META_ATOMIC          0x80020000u /* atomic group */
+#define META_BACKREF         0x80030000u /* Back ref */
+#define META_BACKREF_BYNAME  0x80040000u /* \k'name' */
+#define META_BIGVALUE        0x80050000u /* Next is a literal > META_END */
+#define META_CALLOUT_NUMBER  0x80060000u /* (?C with numerical argument */
+#define META_CALLOUT_STRING  0x80070000u /* (?C with string argument */
+#define META_CAPTURE         0x80080000u /* Capturing parenthesis */
+#define META_CIRCUMFLEX      0x80090000u /* ^ metacharacter */
+#define META_CLASS           0x800a0000u /* start non-empty class */
+#define META_CLASS_EMPTY     0x800b0000u /* empty class */
+#define META_CLASS_EMPTY_NOT 0x800c0000u /* negative empty class */
+#define META_CLASS_END       0x800d0000u /* end of non-empty class */
+#define META_CLASS_NOT       0x800e0000u /* start non-empty negative class */
+#define META_COND_ASSERT     0x800f0000u /* (?(?assertion)... */
+#define META_COND_DEFINE     0x80100000u /* (?(DEFINE)... */
+#define META_COND_NAME       0x80110000u /* (?(<name>)... */
+#define META_COND_NUMBER     0x80120000u /* (?(digits)... */
+#define META_COND_RNAME      0x80130000u /* (?(R&name)... */
+#define META_COND_RNUMBER    0x80140000u /* (?(Rdigits)... */
+#define META_COND_VERSION    0x80150000u /* (?(VERSION<op>x.y)... */
+#define META_OFFSET          0x80160000u /* Position within subject */
+#define META_SCS             0x80170000u /* (*scan_substring:... */
+#define META_CAPTURE_NAME    0x80180000u /* Next <name> in capture lists */
+#define META_CAPTURE_NUMBER  0x80190000u /* Next digits in capture lists */
+#define META_DOLLAR          0x801a0000u /* $ metacharacter */
+#define META_DOT             0x801b0000u /* . metacharacter */
+#define META_ESCAPE          0x801c0000u /* \d and friends */
+#define META_KET             0x801d0000u /* closing parenthesis */
+#define META_NOCAPTURE       0x801e0000u /* no capture parens */
+#define META_OPTIONS         0x801f0000u /* (?i) and friends */
+#define META_POSIX           0x80200000u /* POSIX class item */
+#define META_POSIX_NEG       0x80210000u /* negative POSIX class item */
+#define META_RANGE_ESCAPED   0x80220000u /* range with at least one escape */
+#define META_RANGE_LITERAL   0x80230000u /* range defined literally */
+#define META_RECURSE         0x80240000u /* Recursion */
+#define META_RECURSE_BYNAME  0x80250000u /* (?&name) */
+#define META_SCRIPT_RUN      0x80260000u /* (*script_run:...) */
 
 /* These must be kept together to make it easy to check that an assertion
 is present where expected in a conditional group. */
 
-#define META_LOOKAHEAD        0x80270000u  /* (?= */
-#define META_LOOKAHEADNOT     0x80280000u  /* (?! */
-#define META_LOOKBEHIND       0x80290000u  /* (?<= */
-#define META_LOOKBEHINDNOT    0x802a0000u  /* (?<! */
+#define META_LOOKAHEAD     0x80270000u /* (?= */
+#define META_LOOKAHEADNOT  0x80280000u /* (?! */
+#define META_LOOKBEHIND    0x80290000u /* (?<= */
+#define META_LOOKBEHINDNOT 0x802a0000u /* (?<! */
 
 /* These cannot be conditions */
 
-#define META_LOOKAHEAD_NA     0x802b0000u  /* (*napla: */
-#define META_LOOKBEHIND_NA    0x802c0000u  /* (*naplb: */
+#define META_LOOKAHEAD_NA  0x802b0000u /* (*napla: */
+#define META_LOOKBEHIND_NA 0x802c0000u /* (*naplb: */
 
 /* These must be kept in this order, with consecutive values, and the _ARG
 versions of COMMIT, PRUNE, SKIP, and THEN immediately after their non-argument
 versions. */
 
-#define META_MARK             0x802d0000u  /* (*MARK) */
-#define META_ACCEPT           0x802e0000u  /* (*ACCEPT) */
-#define META_FAIL             0x802f0000u  /* (*FAIL) */
-#define META_COMMIT           0x80300000u  /* These               */
-#define META_COMMIT_ARG       0x80310000u  /*   pairs             */
-#define META_PRUNE            0x80320000u  /*     must            */
-#define META_PRUNE_ARG        0x80330000u  /*       be            */
-#define META_SKIP             0x80340000u  /*         kept        */
-#define META_SKIP_ARG         0x80350000u  /*           in        */
-#define META_THEN             0x80360000u  /*             this    */
-#define META_THEN_ARG         0x80370000u  /*               order */
+#define META_MARK       0x802d0000u /* (*MARK) */
+#define META_ACCEPT     0x802e0000u /* (*ACCEPT) */
+#define META_FAIL       0x802f0000u /* (*FAIL) */
+#define META_COMMIT     0x80300000u /* These               */
+#define META_COMMIT_ARG 0x80310000u /*   pairs             */
+#define META_PRUNE      0x80320000u /*     must            */
+#define META_PRUNE_ARG  0x80330000u /*       be            */
+#define META_SKIP       0x80340000u /*         kept        */
+#define META_SKIP_ARG   0x80350000u /*           in        */
+#define META_THEN       0x80360000u /*             this    */
+#define META_THEN_ARG   0x80370000u /*               order */
 
 /* These must be kept in groups of adjacent 3 values, and all together. */
 
-#define META_ASTERISK         0x80380000u  /* *  */
-#define META_ASTERISK_PLUS    0x80390000u  /* *+ */
-#define META_ASTERISK_QUERY   0x803a0000u  /* *? */
-#define META_PLUS             0x803b0000u  /* +  */
-#define META_PLUS_PLUS        0x803c0000u  /* ++ */
-#define META_PLUS_QUERY       0x803d0000u  /* +? */
-#define META_QUERY            0x803e0000u  /* ?  */
-#define META_QUERY_PLUS       0x803f0000u  /* ?+ */
-#define META_QUERY_QUERY      0x80400000u  /* ?? */
-#define META_MINMAX           0x80410000u  /* {n,m}  repeat */
-#define META_MINMAX_PLUS      0x80420000u  /* {n,m}+ repeat */
-#define META_MINMAX_QUERY     0x80430000u  /* {n,m}? repeat */
+#define META_ASTERISK       0x80380000u /* *  */
+#define META_ASTERISK_PLUS  0x80390000u /* *+ */
+#define META_ASTERISK_QUERY 0x803a0000u /* *? */
+#define META_PLUS           0x803b0000u /* +  */
+#define META_PLUS_PLUS      0x803c0000u /* ++ */
+#define META_PLUS_QUERY     0x803d0000u /* +? */
+#define META_QUERY          0x803e0000u /* ?  */
+#define META_QUERY_PLUS     0x803f0000u /* ?+ */
+#define META_QUERY_QUERY    0x80400000u /* ?? */
+#define META_MINMAX         0x80410000u /* {n,m}  repeat */
+#define META_MINMAX_PLUS    0x80420000u /* {n,m}+ repeat */
+#define META_MINMAX_QUERY   0x80430000u /* {n,m}? repeat */
 
 /* These meta codes must be kept in a group, with the OR/SUB/XOR in
 this order, and AND/NOT at the start/end. */
 
-#define META_ECLASS_AND       0x80440000u  /* && (or &) in a class */
-#define META_ECLASS_OR        0x80450000u  /* || (or |, +) in a class */
-#define META_ECLASS_SUB       0x80460000u  /* -- (or -) in a class */
-#define META_ECLASS_XOR       0x80470000u  /* ~~ (or ^) in a class */
-#define META_ECLASS_NOT       0x80480000u  /* ! in a class */
+#define META_ECLASS_AND 0x80440000u /* && (or &) in a class */
+#define META_ECLASS_OR  0x80450000u /* || (or |, +) in a class */
+#define META_ECLASS_SUB 0x80460000u /* -- (or -) in a class */
+#define META_ECLASS_XOR 0x80470000u /* ~~ (or ^) in a class */
+#define META_ECLASS_NOT 0x80480000u /* ! in a class */
 
 /* Convenience aliases. */
 
@@ -185,38 +185,49 @@ therefore no need for it to have a length entry, so use a high value. */
 
 /* Macros for manipulating elements of the parsed pattern vector. */
 
-#define META_CODE(x)   (x & 0xffff0000u)
-#define META_DATA(x)   (x & 0x0000ffffu)
-#define META_DIFF(x,y) ((x-y)>>16)
+#define META_CODE(x)    (x & 0xffff0000u)
+#define META_DATA(x)    (x & 0x0000ffffu)
+#define META_DIFF(x, y) ((x - y) >> 16)
 
 /* Macros to store and retrieve a PCRE2_SIZE value in the parsed pattern, which
 consists of uint32_t elements. Assume that if uint32_t can't hold it, two of
 them will be able to (i.e. assume a 64-bit world). */
 
 #if PCRE2_SIZE_MAX <= UINT32_MAX
-#define PUTOFFSET(s,p) *p++ = s
-#define GETOFFSET(s,p) s = *p++
-#define GETPLUSOFFSET(s,p) s = *(++p)
-#define READPLUSOFFSET(s,p) s = p[1]
-#define SKIPOFFSET(p) p++
-#define SIZEOFFSET 1
+#define PUTOFFSET(s, p)      *p++ = s
+#define GETOFFSET(s, p)      s = *p++
+#define GETPLUSOFFSET(s, p)  s = *(++p)
+#define READPLUSOFFSET(s, p) s = p[1]
+#define SKIPOFFSET(p)        p++
+#define SIZEOFFSET           1
 #else
-#define PUTOFFSET(s,p) \
-{   *p++ = (uint32_t)(s >> 32); *p++ = (uint32_t)(s & 0xffffffff); }
-#define GETOFFSET(s,p) \
-{   s = ((PCRE2_SIZE)p[0] << 32) | (PCRE2_SIZE)p[1]; p += 2; }
-#define GETPLUSOFFSET(s,p) \
-{   s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; p += 2; }
-#define READPLUSOFFSET(s,p) \
-{   s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; }
+#define PUTOFFSET(s, p)                \
+  {                                    \
+    *p++ = (uint32_t)(s >> 32);        \
+    *p++ = (uint32_t)(s & 0xffffffff); \
+  }
+#define GETOFFSET(s, p)                              \
+  {                                                  \
+    s = ((PCRE2_SIZE)p[0] << 32) | (PCRE2_SIZE)p[1]; \
+    p += 2;                                          \
+  }
+#define GETPLUSOFFSET(s, p)                          \
+  {                                                  \
+    s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; \
+    p += 2;                                          \
+  }
+#define READPLUSOFFSET(s, p)                         \
+  {                                                  \
+    s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; \
+  }
 #define SKIPOFFSET(p) p += 2
-#define SIZEOFFSET 2
+#define SIZEOFFSET    2
 #endif
 
 #ifdef PCRE2_DEBUG
 /* Compile data types. */
-#define CDATA_RECURSE_ARGS       0 /* Argument list for recurse */
-#define CDATA_CRANGE             1 /* Character range list */
+#define CDATA_RECURSE_ARGS 0 /* Argument list for recurse */
+#define CDATA_CRANGE       1 /* Character range list */
 #endif
 
 /* Extended class management flags. */
@@ -233,12 +244,11 @@ them will be able to (i.e. assume a 64-bit world). */
 #define MAX_UCHAR_VALUE 0xffffffffu
 #endif
 
-#define GET_MAX_CHAR_VALUE(utf) \
-  ((utf) ? MAX_UTF_CODE_POINT : MAX_UCHAR_VALUE)
+#define GET_MAX_CHAR_VALUE(utf) ((utf) ? MAX_UTF_CODE_POINT : MAX_UCHAR_VALUE)
 
 /* Macro for setting individual bits in class bitmaps. */
 
-#define SETBIT(a,b) a[(b) >> 3] |= (uint8_t)(1u << ((b) & 0x7))
+#define SETBIT(a, b) a[(b) >> 3] |= (uint8_t)(1u << ((b) & 0x7))
 
 /* Macro for 8 bit specific checks. */
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -248,8 +258,7 @@ them will be able to (i.e. assume a 64-bit world). */
 #endif
 
 /* Macro for aligning data. */
-#define CLIST_ALIGN_TO(base, align) \
-  ((base + ((size_t)(align) - 1)) & ~((size_t)(align) - 1))
+#define CLIST_ALIGN_TO(base, align) ((base + ((size_t)(align) - 1)) & ~((size_t)(align) - 1))
 
 /* Structure for holding information about an OP_ECLASS internal operand.
 An "operand" here could be just a single OP_[X]CLASS, or it could be some
@@ -269,24 +278,24 @@ typedef struct {
 
 /* Macros for the definitions below, to prevent name collisions. */
 
-#define _pcre2_posix_class_maps                PCRE2_SUFFIX(_pcre2_posix_class_maps)
-#define _pcre2_update_classbits                PCRE2_SUFFIX(_pcre2_update_classbits_)
-#define _pcre2_compile_class_nested            PCRE2_SUFFIX(_pcre2_compile_class_nested_)
-#define _pcre2_compile_class_not_nested        PCRE2_SUFFIX(_pcre2_compile_class_not_nested_)
-#define _pcre2_compile_get_hash_from_name      PCRE2_SUFFIX(_pcre2_compile_get_hash_from_name)
-#define _pcre2_compile_find_named_group        PCRE2_SUFFIX(_pcre2_compile_find_named_group)
-#define _pcre2_compile_find_dupname_details    PCRE2_SUFFIX(_pcre2_compile_find_dupname_details)
-#define _pcre2_compile_add_name_to_table       PCRE2_SUFFIX(_pcre2_compile_add_name_to_table)
-#define _pcre2_compile_parse_scan_substr_args  PCRE2_SUFFIX(_pcre2_compile_parse_scan_substr_args)
-#define _pcre2_compile_parse_recurse_args      PCRE2_SUFFIX(_pcre2_compile_parse_recurse_args)
+#define _pcre2_posix_class_maps               PCRE2_SUFFIX(_pcre2_posix_class_maps)
+#define _pcre2_update_classbits               PCRE2_SUFFIX(_pcre2_update_classbits_)
+#define _pcre2_compile_class_nested           PCRE2_SUFFIX(_pcre2_compile_class_nested_)
+#define _pcre2_compile_class_not_nested       PCRE2_SUFFIX(_pcre2_compile_class_not_nested_)
+#define _pcre2_compile_get_hash_from_name     PCRE2_SUFFIX(_pcre2_compile_get_hash_from_name)
+#define _pcre2_compile_find_named_group       PCRE2_SUFFIX(_pcre2_compile_find_named_group)
+#define _pcre2_compile_find_dupname_details   PCRE2_SUFFIX(_pcre2_compile_find_dupname_details)
+#define _pcre2_compile_add_name_to_table      PCRE2_SUFFIX(_pcre2_compile_add_name_to_table)
+#define _pcre2_compile_parse_scan_substr_args PCRE2_SUFFIX(_pcre2_compile_parse_scan_substr_args)
+#define _pcre2_compile_parse_recurse_args     PCRE2_SUFFIX(_pcre2_compile_parse_recurse_args)
 
 
 /* Indices of the POSIX classes in posix_names, posix_name_lengths,
 posix_class_maps, and posix_substitutes. They must be kept in sync. */
 
-#define PC_DIGIT   7
-#define PC_GRAPH   8
-#define PC_PRINT   9
+#define PC_DIGIT  7
+#define PC_GRAPH  8
+#define PC_PRINT  9
 #define PC_PUNCT  10
 #define PC_XDIGIT 13
 
@@ -294,33 +303,33 @@ extern const int PRIV(posix_class_maps)[];
 
 /* Defines for hash_dup member in named_group structure. */
 
-#define NAMED_GROUP_HASH_MASK      ((uint16_t)0x7fff)
-#define NAMED_GROUP_IS_DUPNAME     ((uint16_t)0x8000)
+#define NAMED_GROUP_HASH_MASK  ((uint16_t)0x7fff)
+#define NAMED_GROUP_IS_DUPNAME ((uint16_t)0x8000)
 
-#define NAMED_GROUP_GET_HASH(ng)   ((ng)->hash_dup & NAMED_GROUP_HASH_MASK)
+#define NAMED_GROUP_GET_HASH(ng) ((ng)->hash_dup & NAMED_GROUP_HASH_MASK)
 
 /* Exported functions from pcre2_compile_class.c file: */
 
 /* Set bits in classbits according to the property type */
 
-void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated,
-  uint8_t *classbits);
+void PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated, uint8_t *classbits);
 
 /* Compile the META codes from start_ptr...end_ptr, writing a single OP_CLASS
 OP_CLASS, OP_NCLASS, OP_XCLASS, or OP_ALLANY into pcode. */
 
-uint32_t *PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t *start_ptr, PCRE2_UCHAR **pcode, BOOL negate_class, BOOL* has_bitmap,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
+uint32_t *PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *start_ptr,
+                                         PCRE2_UCHAR **pcode, BOOL negate_class, BOOL *has_bitmap,
+                                         int *errorcodeptr, compile_block *cb,
+                                         PCRE2_SIZE *lengthptr);
 
 /* Compile the META codes in pptr into opcodes written to pcode. The pptr must
 start at a META_CLASS or META_CLASS_NOT.
 
 The pptr will be left pointing at the matching META_CLASS_END. */
 
-BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions,
-  uint32_t **pptr, PCRE2_UCHAR **pcode, int *errorcodeptr,
-  compile_block *cb, PCRE2_SIZE *lengthptr);
+BOOL PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
+                                PCRE2_UCHAR **pcode, int *errorcodeptr, compile_block *cb,
+                                PCRE2_SIZE *lengthptr);
 
 /* Exported functions from pcre2_compile_cgroup.c file: */
 
@@ -330,30 +339,28 @@ uint16_t PRIV(compile_get_hash_from_name)(PCRE2_SPTR name, uint32_t length);
 
 /* Get the descriptor of a known named capture. */
 
-named_group *PRIV(compile_find_named_group)(PCRE2_SPTR name,
-  uint32_t length, compile_block *cb);
+named_group *PRIV(compile_find_named_group)(PCRE2_SPTR name, uint32_t length, compile_block *cb);
 
 /* Add entires to name table in alphabetical order. */
 
-uint32_t PRIV(compile_add_name_to_table)(compile_block *cb,
-  named_group *ng, uint32_t tablecount);
+uint32_t PRIV(compile_add_name_to_table)(compile_block *cb, named_group *ng, uint32_t tablecount);
 
 /* Searches the properties of duplicated names, and returns them
 in indexptr and countptr. */
 
-BOOL PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length,
-  int *indexptr, int *countptr, int *errorcodeptr, compile_block *cb);
+BOOL PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length, int *indexptr,
+                                        int *countptr, int *errorcodeptr, compile_block *cb);
 
 /* Parse the arguments of recurse operations. */
 
-uint32_t * PRIV(compile_parse_scan_substr_args)(uint32_t *pptr,
-  int *errorcodeptr, compile_block *cb, PCRE2_SIZE *lengthptr);
+uint32_t *PRIV(compile_parse_scan_substr_args)(uint32_t *pptr, int *errorcodeptr, compile_block *cb,
+                                               PCRE2_SIZE *lengthptr);
 
 /* Parse the arguments of recurse operations. */
 
-BOOL PRIV(compile_parse_recurse_args)(uint32_t *pptr_start,
-  PCRE2_SIZE offset, int *errorcodeptr, compile_block *cb);
+BOOL PRIV(compile_parse_recurse_args)(uint32_t *pptr_start, PCRE2_SIZE offset, int *errorcodeptr,
+                                      compile_block *cb);
 
-#endif  /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
+#endif /* PCRE2_COMPILE_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_compile.h */

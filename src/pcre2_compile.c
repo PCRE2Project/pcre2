@@ -43,9 +43,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#define NLBLOCK cb             /* Block containing newline information */
-#define PSSTART start_pattern  /* Field containing processed string start */
-#define PSEND   end_pattern    /* Field containing processed string end */
+#define NLBLOCK cb            /* Block containing newline information */
+#define PSSTART start_pattern /* Field containing processed string start */
+#define PSEND   end_pattern   /* Field containing processed string end */
 
 /* In rare error cases debugging might require calling pcre2_printint(). */
 
@@ -55,10 +55,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
-#define CHAR_OUTPUT(c)      (c)
-#define CHAR_OUTPUT_HEX(c)  (c)
-#define CHAR_INPUT(c)       (c)
-#define CHAR_INPUT_HEX(c)   (c)
+#define CHAR_OUTPUT(c)     (c)
+#define CHAR_OUTPUT_HEX(c) (c)
+#define CHAR_INPUT(c)      (c)
+#define CHAR_INPUT_HEX(c)  (c)
 #include "pcre2_printint_inc.h"
 #undef PRINTABLE
 #undef CHAR_OUTPUT
@@ -76,47 +76,43 @@ POSSIBILITY OF SUCH DAMAGE.
 by defining macros in order to minimize #if usage. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-#define STRING_UTFn_RIGHTPAR     STRING_UTF8_RIGHTPAR, 5
-#define XDIGIT(c)                xdigitab[c]
+#define STRING_UTFn_RIGHTPAR STRING_UTF8_RIGHTPAR, 5
+#define XDIGIT(c)            xdigitab[c]
 
-#else  /* Either 16-bit or 32-bit */
-#define XDIGIT(c)                (MAX_255(c)? xdigitab[c] : 0xff)
+#else /* Either 16-bit or 32-bit */
+#define XDIGIT(c) (MAX_255(c) ? xdigitab[c] : 0xff)
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
-#define STRING_UTFn_RIGHTPAR     STRING_UTF16_RIGHTPAR, 6
+#define STRING_UTFn_RIGHTPAR STRING_UTF16_RIGHTPAR, 6
 
-#else  /* 32-bit */
-#define STRING_UTFn_RIGHTPAR     STRING_UTF32_RIGHTPAR, 6
+#else /* 32-bit */
+#define STRING_UTFn_RIGHTPAR STRING_UTF32_RIGHTPAR, 6
 #endif
 #endif
 
 /* Function definitions to allow mutual recursion */
 
-static int
-  compile_regex(uint32_t, uint32_t, PCRE2_UCHAR **, uint32_t **, int *,
-    uint32_t, uint32_t *, uint32_t *, uint32_t *, uint32_t *, branch_chain *,
-    open_capitem *, compile_block *, PCRE2_SIZE *);
+static int compile_regex(uint32_t, uint32_t, PCRE2_UCHAR **, uint32_t **, int *, uint32_t,
+                         uint32_t *, uint32_t *, uint32_t *, uint32_t *, branch_chain *,
+                         open_capitem *, compile_block *, PCRE2_SIZE *);
 
-static int
-  get_branchlength(uint32_t **, int *, int *, int *, parsed_recurse_check *,
-    compile_block *);
+static int get_branchlength(uint32_t **, int *, int *, int *, parsed_recurse_check *,
+                            compile_block *);
 
-static BOOL
-  set_lookbehind_lengths(uint32_t **, int *, int *, parsed_recurse_check *,
-    compile_block *);
+static BOOL set_lookbehind_lengths(uint32_t **, int *, int *, parsed_recurse_check *,
+                                   compile_block *);
 
-static int
-  check_lookbehinds(uint32_t *, uint32_t **, parsed_recurse_check *,
-    compile_block *, int *);
+static int check_lookbehinds(uint32_t *, uint32_t **, parsed_recurse_check *, compile_block *,
+                             int *);
 
 
 /*************************************************
 *      Code parameters and static tables         *
 *************************************************/
 
-#define MAX_GROUP_NUMBER   65535u
-#define MAX_REPEAT_COUNT   65535u
-#define REPEAT_UNLIMITED   (MAX_REPEAT_COUNT+1)
+#define MAX_GROUP_NUMBER 65535u
+#define MAX_REPEAT_COUNT 65535u
+#define REPEAT_UNLIMITED (MAX_REPEAT_COUNT + 1)
 
 /* COMPILE_WORK_SIZE specifies the size of stack workspace, which is used in
 different ways in the different pattern scans. The parsing and group-
@@ -133,10 +129,9 @@ the length of compiled items varies with this.
 
 In the real compile phase, this workspace is not currently used. */
 
-#define COMPILE_WORK_SIZE (3000*LINK_SIZE)   /* Size in code units */
+#define COMPILE_WORK_SIZE (3000 * LINK_SIZE) /* Size in code units */
 
-#define C16_WORK_SIZE \
-  ((COMPILE_WORK_SIZE * sizeof(PCRE2_UCHAR))/sizeof(uint16_t))
+#define C16_WORK_SIZE ((COMPILE_WORK_SIZE * sizeof(PCRE2_UCHAR)) / sizeof(uint16_t))
 
 /* A uint32_t vector is used for caching information about the size of
 capturing groups, to improve performance. A default is created on the stack of
@@ -154,7 +149,7 @@ remembering named groups during the pre-compile. It is allocated on the stack,
 but if it is too small, it is expanded, in a similar way to the workspace. The
 value is the number of slots in the list. */
 
-#define NAMED_GROUP_LIST_SIZE  20
+#define NAMED_GROUP_LIST_SIZE 20
 
 /* The pre-compiling pass over the pattern creates a parsed pattern in a vector
 of uint32_t. For short patterns this lives on the stack, with this size. Heap
@@ -174,79 +169,79 @@ the definitions above. For some items these values are a basic length to which
 a variable amount has to be added. */
 
 static unsigned char meta_extra_lengths[] = {
-  0,             // META_END
-  0,             // META_ALT
-  0,             // META_ATOMIC
-  0,             // META_BACKREF - more if group is >= 10
-  1+SIZEOFFSET,  // META_BACKREF_BYNAME
-  1,             // META_BIGVALUE
-  3,             // META_CALLOUT_NUMBER
-  3+SIZEOFFSET,  // META_CALLOUT_STRING
-  0,             // META_CAPTURE
-  0,             // META_CIRCUMFLEX
-  0,             // META_CLASS
-  0,             // META_CLASS_EMPTY
-  0,             // META_CLASS_EMPTY_NOT
-  0,             // META_CLASS_END
-  0,             // META_CLASS_NOT
-  0,             // META_COND_ASSERT
-  SIZEOFFSET,    // META_COND_DEFINE
-  1+SIZEOFFSET,  // META_COND_NAME
-  1+SIZEOFFSET,  // META_COND_NUMBER
-  1+SIZEOFFSET,  // META_COND_RNAME
-  1+SIZEOFFSET,  // META_COND_RNUMBER
-  3,             // META_COND_VERSION
-  SIZEOFFSET,    // META_OFFSET
-  0,             // META_SCS
-  1,             // META_CAPTURE_NAME
-  1,             // META_CAPTURE_NUMBER
-  0,             // META_DOLLAR
-  0,             // META_DOT
-  0,             // META_ESCAPE - one more for ESC_P and ESC_p
-  0,             // META_KET
-  0,             // META_NOCAPTURE
-  2,             // META_OPTIONS
-  1,             // META_POSIX
-  1,             // META_POSIX_NEG
-  0,             // META_RANGE_ESCAPED
-  0,             // META_RANGE_LITERAL
-  SIZEOFFSET,    // META_RECURSE
-  1+SIZEOFFSET,  // META_RECURSE_BYNAME
-  0,             // META_SCRIPT_RUN
-  0,             // META_LOOKAHEAD
-  0,             // META_LOOKAHEADNOT
-  SIZEOFFSET,    // META_LOOKBEHIND
-  SIZEOFFSET,    // META_LOOKBEHINDNOT
-  0,             // META_LOOKAHEAD_NA
-  SIZEOFFSET,    // META_LOOKBEHIND_NA
-  1,             // META_MARK - plus the string length
-  0,             // META_ACCEPT
-  0,             // META_FAIL
-  0,             // META_COMMIT
-  1,             // META_COMMIT_ARG - plus the string length
-  0,             // META_PRUNE
-  1,             // META_PRUNE_ARG - plus the string length
-  0,             // META_SKIP
-  1,             // META_SKIP_ARG - plus the string length
-  0,             // META_THEN
-  1,             // META_THEN_ARG - plus the string length
-  0,             // META_ASTERISK
-  0,             // META_ASTERISK_PLUS
-  0,             // META_ASTERISK_QUERY
-  0,             // META_PLUS
-  0,             // META_PLUS_PLUS
-  0,             // META_PLUS_QUERY
-  0,             // META_QUERY
-  0,             // META_QUERY_PLUS
-  0,             // META_QUERY_QUERY
-  2,             // META_MINMAX
-  2,             // META_MINMAX_PLUS
-  2,             // META_MINMAX_QUERY
-  0,             // META_ECLASS_AND
-  0,             // META_ECLASS_OR
-  0,             // META_ECLASS_SUB
-  0,             // META_ECLASS_XOR
-  0              // META_ECLASS_NOT
+  0,              // META_END
+  0,              // META_ALT
+  0,              // META_ATOMIC
+  0,              // META_BACKREF - more if group is >= 10
+  1 + SIZEOFFSET, // META_BACKREF_BYNAME
+  1,              // META_BIGVALUE
+  3,              // META_CALLOUT_NUMBER
+  3 + SIZEOFFSET, // META_CALLOUT_STRING
+  0,              // META_CAPTURE
+  0,              // META_CIRCUMFLEX
+  0,              // META_CLASS
+  0,              // META_CLASS_EMPTY
+  0,              // META_CLASS_EMPTY_NOT
+  0,              // META_CLASS_END
+  0,              // META_CLASS_NOT
+  0,              // META_COND_ASSERT
+  SIZEOFFSET,     // META_COND_DEFINE
+  1 + SIZEOFFSET, // META_COND_NAME
+  1 + SIZEOFFSET, // META_COND_NUMBER
+  1 + SIZEOFFSET, // META_COND_RNAME
+  1 + SIZEOFFSET, // META_COND_RNUMBER
+  3,              // META_COND_VERSION
+  SIZEOFFSET,     // META_OFFSET
+  0,              // META_SCS
+  1,              // META_CAPTURE_NAME
+  1,              // META_CAPTURE_NUMBER
+  0,              // META_DOLLAR
+  0,              // META_DOT
+  0,              // META_ESCAPE - one more for ESC_P and ESC_p
+  0,              // META_KET
+  0,              // META_NOCAPTURE
+  2,              // META_OPTIONS
+  1,              // META_POSIX
+  1,              // META_POSIX_NEG
+  0,              // META_RANGE_ESCAPED
+  0,              // META_RANGE_LITERAL
+  SIZEOFFSET,     // META_RECURSE
+  1 + SIZEOFFSET, // META_RECURSE_BYNAME
+  0,              // META_SCRIPT_RUN
+  0,              // META_LOOKAHEAD
+  0,              // META_LOOKAHEADNOT
+  SIZEOFFSET,     // META_LOOKBEHIND
+  SIZEOFFSET,     // META_LOOKBEHINDNOT
+  0,              // META_LOOKAHEAD_NA
+  SIZEOFFSET,     // META_LOOKBEHIND_NA
+  1,              // META_MARK - plus the string length
+  0,              // META_ACCEPT
+  0,              // META_FAIL
+  0,              // META_COMMIT
+  1,              // META_COMMIT_ARG - plus the string length
+  0,              // META_PRUNE
+  1,              // META_PRUNE_ARG - plus the string length
+  0,              // META_SKIP
+  1,              // META_SKIP_ARG - plus the string length
+  0,              // META_THEN
+  1,              // META_THEN_ARG - plus the string length
+  0,              // META_ASTERISK
+  0,              // META_ASTERISK_PLUS
+  0,              // META_ASTERISK_QUERY
+  0,              // META_PLUS
+  0,              // META_PLUS_PLUS
+  0,              // META_PLUS_QUERY
+  0,              // META_QUERY
+  0,              // META_QUERY_PLUS
+  0,              // META_QUERY_QUERY
+  2,              // META_MINMAX
+  2,              // META_MINMAX_PLUS
+  2,              // META_MINMAX_QUERY
+  0,              // META_ECLASS_AND
+  0,              // META_ECLASS_OR
+  0,              // META_ECLASS_SUB
+  0,              // META_ECLASS_XOR
+  0               // META_ECLASS_NOT
 };
 
 /* Types for skipping parts of a parsed pattern. */
@@ -258,16 +253,16 @@ variables, which are concerned with first and required code units. A value
 greater than or equal to REQ_NONE means "no code unit set"; otherwise the
 matching xxcu variable is set, and the low valued bits are relevant. */
 
-#define REQ_UNSET     0xffffffffu  /* Not yet found anything */
-#define REQ_NONE      0xfffffffeu  /* Found not fixed character */
-#define REQ_CASELESS  0x00000001u  /* Code unit in xxcu is caseless */
-#define REQ_VARY      0x00000002u  /* Code unit is followed by non-literal */
+#define REQ_UNSET    0xffffffffu /* Not yet found anything */
+#define REQ_NONE     0xfffffffeu /* Found not fixed character */
+#define REQ_CASELESS 0x00000001u /* Code unit in xxcu is caseless */
+#define REQ_VARY     0x00000002u /* Code unit is followed by non-literal */
 
 /* These flags are used in the groupinfo vector. */
 
-#define GI_SET_FIXED_LENGTH    0x80000000u
-#define GI_NOT_FIXED_LENGTH    0x40000000u
-#define GI_FIXED_LENGTH_MASK   0x0000ffffu
+#define GI_SET_FIXED_LENGTH  0x80000000u
+#define GI_NOT_FIXED_LENGTH  0x40000000u
+#define GI_FIXED_LENGTH_MASK 0x0000ffffu
 
 /* This simple test for a decimal digit works for both ASCII/Unicode and EBCDIC
 and is fast (a good compiler can turn it into a subtraction and unsigned
@@ -364,7 +359,7 @@ static const uint8_t xdigitab[] = {
   0x08,0x09,0xff,0xff,0xff,0xff,0xff,0xff, /*  8 -255    */
   // clang-format on
 };
-#endif  /* EBCDIC */
+#endif /* EBCDIC */
 
 
 /* Table for handling alphanumeric escaped characters. Positive returns are
@@ -376,9 +371,9 @@ invalid. */
 in UTF-8 mode. It runs from '0' to 'z'. */
 
 #ifndef EBCDIC
-#define ESCAPES_FIRST       CHAR_0
-#define ESCAPES_LAST        CHAR_z
-#define UPPER_CASE(c)       (c-32)
+#define ESCAPES_FIRST CHAR_0
+#define ESCAPES_LAST  CHAR_z
+#define UPPER_CASE(c) (c - 32)
 
 static const short int escapes[] = {
   // clang-format off
@@ -436,9 +431,9 @@ Our EBCDIC support can also be provided via numeric literals instead of
 character literals, so either way, 'CHAR_a' will be 0x81 when PCRE2 is compiled
 in EBCDIC mode. */
 
-#define ESCAPES_FIRST       CHAR_a
-#define ESCAPES_LAST        CHAR_9
-#define UPPER_CASE(c)       (c+64)
+#define ESCAPES_FIRST CHAR_a
+#define ESCAPES_LAST  CHAR_9
+#define UPPER_CASE(c) (c + 64)
 
 static const short int escapes[] = {
   // clang-format off
@@ -519,7 +514,7 @@ static unsigned char ebcdic_escape_c[] = {
   // clang-format on
 };
 
-#endif   /* EBCDIC */
+#endif /* EBCDIC */
 
 
 /* Table of special "verbs" like (*PRUNE). This is a short table, so it is
@@ -529,9 +524,9 @@ string is built from string macros so that it works in UTF-8 mode on EBCDIC
 platforms. */
 
 typedef struct verbitem {
-  unsigned int len;          // Length of verb name
-  uint32_t meta;             // Base META_ code
-  int has_arg;               // Argument requirement
+  unsigned int len; // Length of verb name
+  uint32_t meta;    // Base META_ code
+  int has_arg;      // Argument requirement
 } verbitem;
 
 // clang-format off
@@ -561,7 +556,7 @@ static const verbitem verbs[] = {
   // clang-format on
 };
 
-static const int verbcount = sizeof(verbs)/sizeof(verbitem);
+static const int verbcount = sizeof(verbs) / sizeof(verbitem);
 
 /* Verb opcodes, indexed by their META code offset from META_MARK. */
 
@@ -575,8 +570,8 @@ static const uint32_t verbops[] = {
 /* Table of "alpha assertions" like (*pla:...), similar to the (*VERB) table. */
 
 typedef struct alasitem {
-  unsigned int len;          // Length of name
-  uint32_t meta;             // Base META_ code
+  unsigned int len; // Length of name
+  uint32_t meta;    // Base META_ code
 } alasitem;
 
 // clang-format off
@@ -626,7 +621,7 @@ static const alasitem alasmeta[] = {
   // clang-format on
 };
 
-static const int alascount = sizeof(alasmeta)/sizeof(alasitem);
+static const int alascount = sizeof(alasmeta) / sizeof(alasitem);
 
 /* Offsets from OP_STAR for case-independent and negative repeat opcodes. */
 
@@ -655,8 +650,7 @@ static const char posix_names[] =
   STRING_word0  STRING_xdigit;
 // clang-format on
 
-static const uint8_t posix_name_lengths[] = {
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
+static const uint8_t posix_name_lengths[] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
 
 /* Table of class bit maps for each POSIX class. Each class is formed from a
 base map, with an optional addition or removal of another map. Then, for some
@@ -710,37 +704,34 @@ static int posix_substitutes[] = {
   PT_PXXDIGIT, 0,   /* xdigit    - Perl has additional hex digits */
   // clang-format on
 };
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
 /* Masks for checking option settings. When PCRE2_LITERAL is set, only a subset
 are allowed. */
 
-#define PUBLIC_LITERAL_COMPILE_OPTIONS \
-  (PCRE2_ANCHORED|PCRE2_AUTO_CALLOUT|PCRE2_CASELESS|PCRE2_ENDANCHORED| \
-   PCRE2_FIRSTLINE|PCRE2_LITERAL|PCRE2_MATCH_INVALID_UTF| \
-   PCRE2_NO_START_OPTIMIZE|PCRE2_NO_UTF_CHECK|PCRE2_USE_OFFSET_LIMIT|PCRE2_UTF)
+#define PUBLIC_LITERAL_COMPILE_OPTIONS                                                          \
+  (PCRE2_ANCHORED | PCRE2_AUTO_CALLOUT | PCRE2_CASELESS | PCRE2_ENDANCHORED | PCRE2_FIRSTLINE | \
+   PCRE2_LITERAL | PCRE2_MATCH_INVALID_UTF | PCRE2_NO_START_OPTIMIZE | PCRE2_NO_UTF_CHECK |     \
+   PCRE2_USE_OFFSET_LIMIT | PCRE2_UTF)
 
-#define PUBLIC_COMPILE_OPTIONS \
-  (PUBLIC_LITERAL_COMPILE_OPTIONS| \
-   PCRE2_ALLOW_EMPTY_CLASS|PCRE2_ALT_BSUX|PCRE2_ALT_CIRCUMFLEX| \
-   PCRE2_ALT_VERBNAMES|PCRE2_DOLLAR_ENDONLY|PCRE2_DOTALL|PCRE2_DUPNAMES| \
-   PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MATCH_UNSET_BACKREF| \
-   PCRE2_MULTILINE|PCRE2_NEVER_BACKSLASH_C|PCRE2_NEVER_UCP| \
-   PCRE2_NEVER_UTF|PCRE2_NO_AUTO_CAPTURE|PCRE2_NO_AUTO_POSSESS| \
-   PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY|PCRE2_ALT_EXTENDED_CLASS)
+#define PUBLIC_COMPILE_OPTIONS                                                           \
+  (PUBLIC_LITERAL_COMPILE_OPTIONS | PCRE2_ALLOW_EMPTY_CLASS | PCRE2_ALT_BSUX |           \
+   PCRE2_ALT_CIRCUMFLEX | PCRE2_ALT_VERBNAMES | PCRE2_DOLLAR_ENDONLY | PCRE2_DOTALL |    \
+   PCRE2_DUPNAMES | PCRE2_EXTENDED | PCRE2_EXTENDED_MORE | PCRE2_MATCH_UNSET_BACKREF |   \
+   PCRE2_MULTILINE | PCRE2_NEVER_BACKSLASH_C | PCRE2_NEVER_UCP | PCRE2_NEVER_UTF |       \
+   PCRE2_NO_AUTO_CAPTURE | PCRE2_NO_AUTO_POSSESS | PCRE2_NO_DOTSTAR_ANCHOR | PCRE2_UCP | \
+   PCRE2_UNGREEDY | PCRE2_ALT_EXTENDED_CLASS)
 
-#define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
-   (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD| \
-    PCRE2_EXTRA_CASELESS_RESTRICT|PCRE2_EXTRA_TURKISH_CASING)
+#define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS                                         \
+  (PCRE2_EXTRA_MATCH_LINE | PCRE2_EXTRA_MATCH_WORD | PCRE2_EXTRA_CASELESS_RESTRICT | \
+   PCRE2_EXTRA_TURKISH_CASING)
 
-#define PUBLIC_COMPILE_EXTRA_OPTIONS \
-   (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
-    PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
-    PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
-    PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK|PCRE2_EXTRA_ASCII_BSD| \
-    PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW|PCRE2_EXTRA_ASCII_POSIX| \
-    PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_PYTHON_OCTAL|PCRE2_EXTRA_NO_BS0| \
-    PCRE2_EXTRA_NEVER_CALLOUT)
+#define PUBLIC_COMPILE_EXTRA_OPTIONS                                                         \
+  (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS | PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES |              \
+   PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL | PCRE2_EXTRA_ESCAPED_CR_IS_LF | PCRE2_EXTRA_ALT_BSUX | \
+   PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK | PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_BSS |        \
+   PCRE2_EXTRA_ASCII_BSW | PCRE2_EXTRA_ASCII_POSIX | PCRE2_EXTRA_ASCII_DIGIT |               \
+   PCRE2_EXTRA_PYTHON_OCTAL | PCRE2_EXTRA_NO_BS0 | PCRE2_EXTRA_NEVER_CALLOUT)
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -748,15 +739,15 @@ compatibility, (*UTFn) is supported in the relevant libraries, but (*UTF) is
 generic and always supported. */
 
 enum {
-  PSO_OPT,   // Value is an option bit
-  PSO_XOPT,  // Value is an xoption bit
-  PSO_FLG,   // Value is a flag bit
-  PSO_NL,    // Value is a newline type
-  PSO_BSR,   // Value is a \R type
-  PSO_LIMH,  // Read integer value for heap limit
-  PSO_LIMM,  // Read integer value for match limit
-  PSO_LIMD,  // Read integer value for depth limit
-  PSO_OPTMZ  // Value is an optimization bit
+  PSO_OPT,  // Value is an option bit
+  PSO_XOPT, // Value is an xoption bit
+  PSO_FLG,  // Value is a flag bit
+  PSO_NL,   // Value is a newline type
+  PSO_BSR,  // Value is a \R type
+  PSO_LIMH, // Read integer value for heap limit
+  PSO_LIMM, // Read integer value for match limit
+  PSO_LIMD, // Read integer value for depth limit
+  PSO_OPTMZ // Value is an optimization bit
 };
 
 typedef struct pso {
@@ -857,7 +848,7 @@ static const uint8_t opcode_possessify[] = {
 };
 
 /* Compile-time check that the table has the correct size. */
-STATIC_ASSERT(sizeof(opcode_possessify) == OP_CALLOUT+1, opcode_possessify);
+STATIC_ASSERT(sizeof(opcode_possessify) == OP_CALLOUT + 1, opcode_possessify);
 
 
 #ifdef DEBUG_SHOW_PARSED
@@ -868,7 +859,8 @@ STATIC_ASSERT(sizeof(opcode_possessify) == OP_CALLOUT+1, opcode_possessify);
 /* For debugging the pre-scan, this code, which outputs the parsed data vector,
 can be enabled. */
 
-static void show_parsed(compile_block *cb)
+static void
+show_parsed(compile_block *cb)
 {
   uint32_t *pptr = cb->parsed_pattern;
 
@@ -884,7 +876,8 @@ static void show_parsed(compile_block *cb)
 
     if (*pptr < META_END)
     {
-      if (*pptr > 32 && *pptr < 128) fprintf(stderr, "%c", *pptr);
+      if (*pptr > 32 && *pptr < 128)
+        fprintf(stderr, "%c", *pptr);
       pptr++;
     }
 
@@ -922,20 +915,23 @@ static void show_parsed(compile_block *cb)
         {
           uint32_t ptype = *pptr >> 16;
           uint32_t pvalue = *pptr++ & 0xffff;
-          fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P)? CHAR_P:CHAR_p,
-            ptype, pvalue);
+          fprintf(stderr, "META \\%c %d %d", (meta_arg == ESC_P) ? CHAR_P : CHAR_p, ptype, pvalue);
         }
         else
         {
           uint32_t cc;
           /* There's just one escape we might have here that isn't negated in the
           escapes table. */
-          if (meta_arg == ESC_g) cc = CHAR_g;
-          else for (cc = ESCAPES_FIRST; cc <= ESCAPES_LAST; cc++)
-          {
-            if (meta_arg == (uint32_t)(-escapes[cc - ESCAPES_FIRST])) break;
-          }
-          if (cc > ESCAPES_LAST) cc = CHAR_QUESTION_MARK;
+          if (meta_arg == ESC_g)
+            cc = CHAR_g;
+          else
+            for (cc = ESCAPES_FIRST; cc <= ESCAPES_LAST; cc++)
+            {
+              if (meta_arg == (uint32_t)(-escapes[cc - ESCAPES_FIRST]))
+                break;
+            }
+          if (cc > ESCAPES_LAST)
+            cc = CHAR_QUESTION_MARK;
           fprintf(stderr, "META \\%c", cc);
         }
         break;
@@ -967,48 +963,122 @@ static void show_parsed(compile_block *cb)
           fprintf(stderr, "META {%d,}+", min);
         break;
 
-      case META_BIGVALUE:   fprintf(stderr, "META_BIGVALUE %.8x", *pptr++); break;
-      case META_CIRCUMFLEX:   fprintf(stderr, "META_CIRCUMFLEX"); break;
-      case META_COND_ASSERT:   fprintf(stderr, "META_COND_ASSERT"); break;
-      case META_DOLLAR:   fprintf(stderr, "META_DOLLAR"); break;
-      case META_DOT:   fprintf(stderr, "META_DOT"); break;
-      case META_ASTERISK:   fprintf(stderr, "META *"); break;
-      case META_ASTERISK_QUERY:   fprintf(stderr, "META *?"); break;
-      case META_ASTERISK_PLUS:   fprintf(stderr, "META *+"); break;
-      case META_PLUS:   fprintf(stderr, "META +"); break;
-      case META_PLUS_QUERY:   fprintf(stderr, "META +?"); break;
-      case META_PLUS_PLUS:   fprintf(stderr, "META ++"); break;
-      case META_QUERY:   fprintf(stderr, "META ?"); break;
-      case META_QUERY_QUERY:   fprintf(stderr, "META ??"); break;
-      case META_QUERY_PLUS:   fprintf(stderr, "META ?+"); break;
+      case META_BIGVALUE:
+        fprintf(stderr, "META_BIGVALUE %.8x", *pptr++);
+        break;
+      case META_CIRCUMFLEX:
+        fprintf(stderr, "META_CIRCUMFLEX");
+        break;
+      case META_COND_ASSERT:
+        fprintf(stderr, "META_COND_ASSERT");
+        break;
+      case META_DOLLAR:
+        fprintf(stderr, "META_DOLLAR");
+        break;
+      case META_DOT:
+        fprintf(stderr, "META_DOT");
+        break;
+      case META_ASTERISK:
+        fprintf(stderr, "META *");
+        break;
+      case META_ASTERISK_QUERY:
+        fprintf(stderr, "META *?");
+        break;
+      case META_ASTERISK_PLUS:
+        fprintf(stderr, "META *+");
+        break;
+      case META_PLUS:
+        fprintf(stderr, "META +");
+        break;
+      case META_PLUS_QUERY:
+        fprintf(stderr, "META +?");
+        break;
+      case META_PLUS_PLUS:
+        fprintf(stderr, "META ++");
+        break;
+      case META_QUERY:
+        fprintf(stderr, "META ?");
+        break;
+      case META_QUERY_QUERY:
+        fprintf(stderr, "META ??");
+        break;
+      case META_QUERY_PLUS:
+        fprintf(stderr, "META ?+");
+        break;
 
-      case META_ATOMIC:   fprintf(stderr, "META (?>"); break;
-      case META_NOCAPTURE: fprintf(stderr, "META (?:  "); break;
-      case META_LOOKAHEAD:   fprintf(stderr, "META (?="); break;
-      case META_LOOKAHEADNOT:   fprintf(stderr, "META (?!"); break;
-      case META_LOOKAHEAD_NA: fprintf(stderr, "META (*napla:  "); break;
-      case META_SCRIPT_RUN: fprintf(stderr, "META (*sr:  "); break;
-      case META_KET:   fprintf(stderr, "META )"); break;
-      case META_ALT:   fprintf(stderr, "META | %d", meta_arg); break;
+      case META_ATOMIC:
+        fprintf(stderr, "META (?>");
+        break;
+      case META_NOCAPTURE:
+        fprintf(stderr, "META (?:  ");
+        break;
+      case META_LOOKAHEAD:
+        fprintf(stderr, "META (?=");
+        break;
+      case META_LOOKAHEADNOT:
+        fprintf(stderr, "META (?!");
+        break;
+      case META_LOOKAHEAD_NA:
+        fprintf(stderr, "META (*napla:  ");
+        break;
+      case META_SCRIPT_RUN:
+        fprintf(stderr, "META (*sr:  ");
+        break;
+      case META_KET:
+        fprintf(stderr, "META )");
+        break;
+      case META_ALT:
+        fprintf(stderr, "META | %d", meta_arg);
+        break;
 
-      case META_CLASS:   fprintf(stderr, "META ["); break;
-      case META_CLASS_NOT:   fprintf(stderr, "META [^"); break;
-      case META_CLASS_END:   fprintf(stderr, "META ]"); break;
-      case META_CLASS_EMPTY:   fprintf(stderr, "META []"); break;
-      case META_CLASS_EMPTY_NOT:   fprintf(stderr, "META [^]"); break;
+      case META_CLASS:
+        fprintf(stderr, "META [");
+        break;
+      case META_CLASS_NOT:
+        fprintf(stderr, "META [^");
+        break;
+      case META_CLASS_END:
+        fprintf(stderr, "META ]");
+        break;
+      case META_CLASS_EMPTY:
+        fprintf(stderr, "META []");
+        break;
+      case META_CLASS_EMPTY_NOT:
+        fprintf(stderr, "META [^]");
+        break;
 
-      case META_RANGE_LITERAL:   fprintf(stderr, "META - (literal)"); break;
-      case META_RANGE_ESCAPED:   fprintf(stderr, "META - (escaped)"); break;
+      case META_RANGE_LITERAL:
+        fprintf(stderr, "META - (literal)");
+        break;
+      case META_RANGE_ESCAPED:
+        fprintf(stderr, "META - (escaped)");
+        break;
 
-      case META_POSIX:   fprintf(stderr, "META_POSIX %d", *pptr++); break;
-      case META_POSIX_NEG:   fprintf(stderr, "META_POSIX_NEG %d", *pptr++); break;
+      case META_POSIX:
+        fprintf(stderr, "META_POSIX %d", *pptr++);
+        break;
+      case META_POSIX_NEG:
+        fprintf(stderr, "META_POSIX_NEG %d", *pptr++);
+        break;
 
-      case META_ACCEPT:   fprintf(stderr, "META (*ACCEPT)"); break;
-      case META_FAIL:   fprintf(stderr, "META (*FAIL)"); break;
-      case META_COMMIT:   fprintf(stderr, "META (*COMMIT)"); break;
-      case META_PRUNE:   fprintf(stderr, "META (*PRUNE)"); break;
-      case META_SKIP:   fprintf(stderr, "META (*SKIP)"); break;
-      case META_THEN:   fprintf(stderr, "META (*THEN)"); break;
+      case META_ACCEPT:
+        fprintf(stderr, "META (*ACCEPT)");
+        break;
+      case META_FAIL:
+        fprintf(stderr, "META (*FAIL)");
+        break;
+      case META_COMMIT:
+        fprintf(stderr, "META (*COMMIT)");
+        break;
+      case META_PRUNE:
+        fprintf(stderr, "META (*PRUNE)");
+        break;
+      case META_SKIP:
+        fprintf(stderr, "META (*SKIP)");
+        break;
+      case META_THEN:
+        fprintf(stderr, "META (*THEN)");
+        break;
 
       case META_OPTIONS:
         fprintf(stderr, "META_OPTIONS 0x%08x 0x%08x", pptr[0], pptr[1]);
@@ -1031,15 +1101,14 @@ static void show_parsed(compile_block *cb)
         break;
 
       case META_CALLOUT_NUMBER:
-        fprintf(stderr, "META (?C%d) next=%d/%d", pptr[2], pptr[0],
-          pptr[1]);
+        fprintf(stderr, "META (?C%d) next=%d/%d", pptr[2], pptr[0], pptr[1]);
         pptr += 3;
         break;
 
       case META_CALLOUT_STRING:
         {
-          uint32_t patoffset = *pptr++;    // Offset of next pattern item
-          uint32_t patlength = *pptr++;    // Length of next pattern item
+          uint32_t patoffset = *pptr++; // Offset of next pattern item
+          uint32_t patlength = *pptr++; // Length of next pattern item
           fprintf(stderr, "META (?Cstring) length=%d offset=", *pptr++);
           GETOFFSET(offset, pptr);
           fprintf(stderr, "%zd next=%d/%d", offset, patoffset, patlength);
@@ -1072,7 +1141,7 @@ static void show_parsed(compile_block *cb)
         break;
 
       case META_COND_VERSION:
-        fprintf(stderr, "META (?(VERSION%s", (*pptr++ == 0)? "=" : ">=");
+        fprintf(stderr, "META (?(VERSION%s", (*pptr++ == 0) ? "=" : ">=");
         fprintf(stderr, "%d.", *pptr++);
         fprintf(stderr, "%d)", *pptr++);
         break;
@@ -1133,29 +1202,41 @@ static void show_parsed(compile_block *cb)
 
       case META_THEN_ARG:
         fprintf(stderr, "META (*THEN:");
-        SHOWARG:
+      SHOWARG:
         length = *pptr++;
         for (i = 0; i < length; i++)
         {
           uint32_t cc = *pptr++;
-          if (cc > 32 && cc < 128) fprintf(stderr, "%c", cc);
-            else fprintf(stderr, "\\x{%x}", cc);
+          if (cc > 32 && cc < 128)
+            fprintf(stderr, "%c", cc);
+          else
+            fprintf(stderr, "\\x{%x}", cc);
         }
         fprintf(stderr, ") length=%u", length);
         break;
 
-      case META_ECLASS_AND:   fprintf(stderr, "META_ECLASS_AND"); break;
-      case META_ECLASS_OR:   fprintf(stderr, "META_ECLASS_OR"); break;
-      case META_ECLASS_SUB:   fprintf(stderr, "META_ECLASS_SUB"); break;
-      case META_ECLASS_XOR:   fprintf(stderr, "META_ECLASS_XOR"); break;
-      case META_ECLASS_NOT:   fprintf(stderr, "META_ECLASS_NOT"); break;
+      case META_ECLASS_AND:
+        fprintf(stderr, "META_ECLASS_AND");
+        break;
+      case META_ECLASS_OR:
+        fprintf(stderr, "META_ECLASS_OR");
+        break;
+      case META_ECLASS_SUB:
+        fprintf(stderr, "META_ECLASS_SUB");
+        break;
+      case META_ECLASS_XOR:
+        fprintf(stderr, "META_ECLASS_XOR");
+        break;
+      case META_ECLASS_NOT:
+        fprintf(stderr, "META_ECLASS_NOT");
+        break;
       }
     }
     fprintf(stderr, "\n");
   }
   return;
 }
-#endif  /* DEBUG_SHOW_PARSED */
+#endif /* DEBUG_SHOW_PARSED */
 
 
 
@@ -1166,15 +1247,17 @@ static void show_parsed(compile_block *cb)
 /* Compiled JIT code cannot be copied, so the new compiled block has no
 associated JIT data. */
 
-PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN pcre2_code *PCRE2_CALL_CONVENTION
 pcre2_code_copy(const pcre2_code *code)
 {
   PCRE2_SIZE *ref_count;
   pcre2_code *newcode;
 
-  if (code == NULL) return NULL;
+  if (code == NULL)
+    return NULL;
   newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
-  if (newcode == NULL) return NULL;
+  if (newcode == NULL)
+    return NULL;
   memcpy(newcode, code, code->blocksize);
   newcode->executable_jit = NULL;
 
@@ -1200,21 +1283,22 @@ pcre2_code_copy(const pcre2_code *code)
 associated JIT data. This version of code_copy also makes a separate copy of
 the character tables. */
 
-PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
+PCRE2_EXP_DEFN pcre2_code *PCRE2_CALL_CONVENTION
 pcre2_code_copy_with_tables(const pcre2_code *code)
 {
-  PCRE2_SIZE* ref_count;
+  PCRE2_SIZE *ref_count;
   pcre2_code *newcode;
   uint8_t *newtables;
 
-  if (code == NULL) return NULL;
+  if (code == NULL)
+    return NULL;
   newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
-  if (newcode == NULL) return NULL;
+  if (newcode == NULL)
+    return NULL;
   memcpy(newcode, code, code->blocksize);
   newcode->executable_jit = NULL;
 
-  newtables = code->memctl.malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE),
-    code->memctl.memory_data);
+  newtables = code->memctl.malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), code->memctl.memory_data);
   if (newtables == NULL)
   {
     code->memctl.free((void *)newcode, code->memctl.memory_data);
@@ -1238,7 +1322,7 @@ pcre2_code_copy_with_tables(const pcre2_code *code)
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_code_free(pcre2_code *code)
 {
-  PCRE2_SIZE* ref_count;
+  PCRE2_SIZE *ref_count;
 
   if (code != NULL)
   {
@@ -1295,15 +1379,15 @@ Returns:      TRUE  - a number was read
 */
 
 static BOOL
-read_number(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, int32_t allow_sign,
-  uint32_t max_value, uint32_t max_error, int *intptr, int *errorcodeptr)
+read_number(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, int32_t allow_sign, uint32_t max_value,
+            uint32_t max_error, int *intptr, int *errorcodeptr)
 {
   int sign = 0;
   uint32_t n = 0;
   PCRE2_SPTR ptr = *ptrptr;
   BOOL yield = FALSE;
 
-  PCRE2_ASSERT(max_value <= INT_MAX/10 - 1);
+  PCRE2_ASSERT(max_value <= INT_MAX / 10 - 1);
 
   *errorcodeptr = 0;
 
@@ -1322,14 +1406,16 @@ read_number(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, int32_t allow_sign,
     }
   }
 
-  if (ptr >= ptrend || !IS_DIGIT(*ptr)) return FALSE;
+  if (ptr >= ptrend || !IS_DIGIT(*ptr))
+    return FALSE;
   while (ptr < ptrend && IS_DIGIT(*ptr))
   {
     n = n * 10 + (*ptr++ - CHAR_0);
     if (n > max_value)
     {
       *errorcodeptr = max_error;
-      while (ptr < ptrend && IS_DIGIT(*ptr)) ptr++;
+      while (ptr < ptrend && IS_DIGIT(*ptr))
+        ptr++;
       goto EXIT;
     }
   }
@@ -1338,22 +1424,24 @@ read_number(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, int32_t allow_sign,
   {
     if (n == 0)
     {
-      *errorcodeptr = ERR26;  // +0 and -0 are not allowed
+      *errorcodeptr = ERR26; // +0 and -0 are not allowed
       goto EXIT;
     }
 
-    if (sign > 0) n += allow_sign;
+    if (sign > 0)
+      n += allow_sign;
     else if (n > (uint32_t)allow_sign)
     {
-      *errorcodeptr = ERR15;  // Non-existent subpattern
+      *errorcodeptr = ERR15; // Non-existent subpattern
       goto EXIT;
     }
-    else n = allow_sign + 1 - n;
+    else
+      n = allow_sign + 1 - n;
   }
 
   yield = TRUE;
 
-  EXIT:
+EXIT:
   *intptr = n;
   *ptrptr = ptr;
   return yield;
@@ -1385,8 +1473,8 @@ Returns:         FALSE if not a repeat quantifier, errorcode set zero
 */
 
 static BOOL
-read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
-  uint32_t *maxp, int *errorcodeptr)
+read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp, uint32_t *maxp,
+                   int *errorcodeptr)
 {
   PCRE2_SPTR p = *ptrptr;
   PCRE2_SPTR pp;
@@ -1396,7 +1484,8 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
   int32_t max = REPEAT_UNLIMITED; // This value is larger than MAX_REPEAT_COUNT
 
   *errorcodeptr = 0;
-  while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+  while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+    p++;
 
   /* Check the syntax before interpreting. Otherwise, a non-quantifier sequence
   such as "X{123456ABC" would incorrectly give a "number too big in quantifier"
@@ -1406,28 +1495,39 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
   if (pp < ptrend && IS_DIGIT(*pp))
   {
     had_minimum = TRUE;
-    while (++pp < ptrend && IS_DIGIT(*pp)) {}
+    while (++pp < ptrend && IS_DIGIT(*pp))
+    {}
   }
 
-  while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT)) pp++;
-  if (pp >= ptrend) return FALSE;
+  while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT))
+    pp++;
+  if (pp >= ptrend)
+    return FALSE;
 
   if (*pp == CHAR_RIGHT_CURLY_BRACKET)
   {
-    if (!had_minimum) return FALSE;
+    if (!had_minimum)
+      return FALSE;
   }
   else
   {
-    if (*pp++ != CHAR_COMMA) return FALSE;
-    while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT)) pp++;
-    if (pp >= ptrend) return FALSE;
+    if (*pp++ != CHAR_COMMA)
+      return FALSE;
+    while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT))
+      pp++;
+    if (pp >= ptrend)
+      return FALSE;
     if (IS_DIGIT(*pp))
     {
-      while (++pp < ptrend && IS_DIGIT(*pp)) {}
+      while (++pp < ptrend && IS_DIGIT(*pp))
+      {}
     }
-    else if (!had_minimum) return FALSE;
-    while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT)) pp++;
-    if (pp >= ptrend || *pp != CHAR_RIGHT_CURLY_BRACKET) return FALSE;
+    else if (!had_minimum)
+      return FALSE;
+    while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT))
+      pp++;
+    if (pp >= ptrend || *pp != CHAR_RIGHT_CURLY_BRACKET)
+      return FALSE;
   }
 
   /* Now process the quantifier for real. We know it must be {n} or {n,} or {,m}
@@ -1439,12 +1539,15 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
 
   if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &min, errorcodeptr))
   {
-    if (*errorcodeptr != 0) goto EXIT;    // n too big
-    p++;  // Skip comma and subsequent spaces
-    while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+    if (*errorcodeptr != 0)
+      goto EXIT; // n too big
+    p++;         // Skip comma and subsequent spaces
+    while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+      p++;
     if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max, errorcodeptr))
     {
-      if (*errorcodeptr != 0) goto EXIT;  // m too big
+      if (*errorcodeptr != 0)
+        goto EXIT; // m too big
     }
   }
 
@@ -1452,18 +1555,21 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
 
   else
   {
-    while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+    while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+      p++;
     if (*p == CHAR_RIGHT_CURLY_BRACKET)
     {
       max = min;
     }
-    else   // Handle {n,} or {n,m}
+    else // Handle {n,} or {n,m}
     {
-      p++;    // Skip comma and subsequent spaces
-      while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+      p++; // Skip comma and subsequent spaces
+      while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+        p++;
       if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max, errorcodeptr))
       {
-        if (*errorcodeptr != 0) goto EXIT;   // m too big
+        if (*errorcodeptr != 0)
+          goto EXIT; // m too big
       }
 
       if (max < min)
@@ -1476,15 +1582,18 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
 
   /* Valid quantifier exists */
 
-  while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+  while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+    p++;
   p++;
   yield = TRUE;
-  if (minp != NULL) *minp = (uint32_t)min;
-  if (maxp != NULL) *maxp = (uint32_t)max;
+  if (minp != NULL)
+    *minp = (uint32_t)min;
+  if (maxp != NULL)
+    *maxp = (uint32_t)max;
 
   /* Update the pattern pointer */
 
-  EXIT:
+EXIT:
   *ptrptr = p;
   return yield;
 }
@@ -1525,13 +1634,12 @@ Returns:         zero => a data character
 */
 
 int
-PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
-  int *errorcodeptr, uint32_t options, uint32_t xoptions, uint32_t bracount,
-  BOOL isclass, compile_block *cb)
+PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *errorcodeptr,
+                   uint32_t options, uint32_t xoptions, uint32_t bracount, BOOL isclass,
+                   compile_block *cb)
 {
   BOOL utf = (options & PCRE2_UTF) != 0;
-  BOOL alt_bsux =
-    ((options & PCRE2_ALT_BSUX) | (xoptions & PCRE2_EXTRA_ALT_BSUX)) != 0;
+  BOOL alt_bsux = ((options & PCRE2_ALT_BSUX) | (xoptions & PCRE2_EXTRA_ALT_BSUX)) != 0;
   PCRE2_SPTR ptr = *ptrptr;
   uint32_t c, cc;
   int escape = 0;
@@ -1545,14 +1653,15 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
     return 0;
   }
 
-  GETCHARINCTEST(c, ptr);         // Get character value, increment pointer
-  *errorcodeptr = 0;              // Be optimistic
+  GETCHARINCTEST(c, ptr); // Get character value, increment pointer
+  *errorcodeptr = 0;      // Be optimistic
 
   /* Non-alphanumerics are literals, so we just leave the value in c. An initial
   value test saves a memory lookup for code points outside the alphanumeric
   range. */
 
-  if (c < ESCAPES_FIRST || c > ESCAPES_LAST) {}  // Definitely literal
+  if (c < ESCAPES_FIRST || c > ESCAPES_LAST)
+  {} // Definitely literal
 
   /* Otherwise, do a table lookup. Non-zero values need little processing here. A
   positive value is a literal value for something like \n. A negative value is
@@ -1568,11 +1677,11 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       if (c == CHAR_CR && (xoptions & PCRE2_EXTRA_ESCAPED_CR_IS_LF) != 0)
         c = CHAR_LF;
     }
-    else  // Negative table entry
+    else // Negative table entry
     {
-      escape = -i;                    // Else return a special escape
+      escape = -i; // Else return a special escape
       if (cb != NULL && (escape == ESC_P || escape == ESC_p || escape == ESC_X))
-        cb->external_flags |= PCRE2_HASBKPORX;   // Note \P, \p, or \X
+        cb->external_flags |= PCRE2_HASBKPORX; // Note \P, \p, or \X
 
       /* Perl supports \N{name} for character names and \N{U+dddd} for numerical
       Unicode code points, as well as plain \N for "not newline". PCRE does not
@@ -1585,7 +1694,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
         /* Perl ignores spaces and tabs after { */
 
-        while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+        while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+          p++;
 
         /* \N{U+ can be handled by the \x{ code. However, this construction is
         not valid in EBCDIC environments because it specifies a Unicode
@@ -1600,16 +1710,19 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
           if (utf)
           {
             ptr = p + 2;
-            escape = 0;   // Not a fancy escape after all
+            escape = 0; // Not a fancy escape after all
             goto COME_FROM_NU;
           }
 #endif
 
           /* Improve error offset. */
           ptr = p + 2;
-          while (ptr < ptrend && XDIGIT(*ptr) != 0xff) ptr++;
-          while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
-          if (ptr < ptrend && *ptr == CHAR_RIGHT_CURLY_BRACKET) ptr++;
+          while (ptr < ptrend && XDIGIT(*ptr) != 0xff)
+            ptr++;
+          while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+            ptr++;
+          if (ptr < ptrend && *ptr == CHAR_RIGHT_CURLY_BRACKET)
+            ptr++;
 
           *errorcodeptr = ERR93;
         }
@@ -1628,8 +1741,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
         else
         {
-          if (!read_repeat_counts(&p, ptrend, NULL, NULL, errorcodeptr) &&
-               *errorcodeptr == 0)
+          if (!read_repeat_counts(&p, ptrend, NULL, NULL, errorcodeptr) && *errorcodeptr == 0)
           {
             ptr++; // Skip over the opening brace
             *errorcodeptr = ERR37;
@@ -1654,13 +1766,12 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
     if (cb == NULL)
     {
-      if (!(c >= CHAR_0 && c <= CHAR_9) && c != CHAR_c && c != CHAR_o &&
-          c != CHAR_x && c != CHAR_g)
+      if (!(c >= CHAR_0 && c <= CHAR_9) && c != CHAR_c && c != CHAR_o && c != CHAR_x && c != CHAR_g)
       {
         *errorcodeptr = ERR3;
         goto EXIT;
       }
-      alt_bsux = FALSE;   // Do not modify \x handling
+      alt_bsux = FALSE; // Do not modify \x handling
     }
 
     switch (c)
@@ -1689,61 +1800,68 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       {
         uint32_t xc;
 
-        if (ptr >= ptrend) break;
-        if (*ptr == CHAR_LEFT_CURLY_BRACKET &&
-            (xoptions & PCRE2_EXTRA_ALT_BSUX) != 0)
+        if (ptr >= ptrend)
+          break;
+        if (*ptr == CHAR_LEFT_CURLY_BRACKET && (xoptions & PCRE2_EXTRA_ALT_BSUX) != 0)
         {
           PCRE2_SPTR hptr = ptr + 1;
 
           cc = 0;
           while (hptr < ptrend && (xc = XDIGIT(*hptr)) != 0xff)
           {
-            if ((cc & 0xf0000000) != 0)  // Test for 32-bit overflow
+            if ((cc & 0xf0000000) != 0) // Test for 32-bit overflow
             {
               *errorcodeptr = ERR77;
-              ptr = hptr;   // Show where *hptr != } will cause another break below
+              ptr = hptr; // Show where *hptr != } will cause another break below
               break;
             }
             cc = (cc << 4) | xc;
             hptr++;
           }
 
-          if (hptr == ptr + 1 ||   // No hex digits
-              hptr >= ptrend ||    // Hit end of input
-              *hptr != CHAR_RIGHT_CURLY_BRACKET)  // No } terminator
+          if (hptr == ptr + 1 ||                 // No hex digits
+              hptr >= ptrend ||                  // Hit end of input
+              *hptr != CHAR_RIGHT_CURLY_BRACKET) // No } terminator
           {
-            if (isclass) break; // In a class, just treat as '\u' literal
-            escape = ESC_ub;    // Special return
-            ptr++;              // Skip {
-            break;              // Hex escape not recognized
+            if (isclass)
+              break;         // In a class, just treat as '\u' literal
+            escape = ESC_ub; // Special return
+            ptr++;           // Skip {
+            break;           // Hex escape not recognized
           }
 
-          c = cc;          // Accept the code point
+          c = cc; // Accept the code point
           ptr = hptr + 1;
         }
 
-        else  // Must be exactly 4 hex digits
+        else // Must be exactly 4 hex digits
         {
-          if (ptrend - ptr < 4) break;               // Less than 4 chars
-          if ((cc = XDIGIT(ptr[0])) == 0xff) break;  // Not a hex digit
-          if ((xc = XDIGIT(ptr[1])) == 0xff) break;  // Not a hex digit
+          if (ptrend - ptr < 4)
+            break; // Less than 4 chars
+          if ((cc = XDIGIT(ptr[0])) == 0xff)
+            break; // Not a hex digit
+          if ((xc = XDIGIT(ptr[1])) == 0xff)
+            break; // Not a hex digit
           cc = (cc << 4) | xc;
-          if ((xc = XDIGIT(ptr[2])) == 0xff) break;  // Not a hex digit
+          if ((xc = XDIGIT(ptr[2])) == 0xff)
+            break; // Not a hex digit
           cc = (cc << 4) | xc;
-          if ((xc = XDIGIT(ptr[3])) == 0xff) break;  // Not a hex digit
+          if ((xc = XDIGIT(ptr[3])) == 0xff)
+            break; // Not a hex digit
           c = (cc << 4) | xc;
           ptr += 4;
         }
 
         if (utf)
         {
-          if (c > 0x10ffffU) *errorcodeptr = ERR77;
-          else
-            if (c >= 0xd800 && c <= 0xdfff &&
-                (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
-                  *errorcodeptr = ERR73;
+          if (c > 0x10ffffU)
+            *errorcodeptr = ERR77;
+          else if (c >= 0xd800 && c <= 0xdfff &&
+                   (xoptions & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) == 0)
+            *errorcodeptr = ERR73;
         }
-        else if (c > MAX_NON_UTF_CHAR) *errorcodeptr = ERR77;
+        else if (c > MAX_NON_UTF_CHAR)
+          *errorcodeptr = ERR77;
       }
       break;
 
@@ -1751,7 +1869,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       in which case it is an upper case letter. */
 
     case CHAR_U:
-      if (!alt_bsux) *errorcodeptr = ERR37;
+      if (!alt_bsux)
+        *errorcodeptr = ERR37;
       break;
 
       /* In a character class, \g is just a literal "g". Outside a character
@@ -1782,7 +1901,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       */
 
     case CHAR_g:
-      if (isclass) break;
+      if (isclass)
+        break;
 
       if (ptr >= ptrend)
       {
@@ -1802,17 +1922,17 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
         p = ptr + 1;
 
-        if (!read_number(&p, ptrend, -1, MAX_GROUP_NUMBER, ERR61, &s,
-            errorcodeptr))
+        if (!read_number(&p, ptrend, -1, MAX_GROUP_NUMBER, ERR61, &s, errorcodeptr))
         {
-          if (*errorcodeptr == 0) escape = ESC_g;  // No number found
+          if (*errorcodeptr == 0)
+            escape = ESC_g; // No number found
           break;
         }
 
         if (p >= ptrend || *p != CHAR_GREATER_THAN_SIGN)
         {
           ptr = p;
-          *errorcodeptr = ERR119;  // Missing terminator for number
+          *errorcodeptr = ERR119; // Missing terminator for number
           break;
         }
 
@@ -1820,7 +1940,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
         than just -s. In a pattern, \0 is not a back reference, but \g<0> is
         valid in a substitution string, so this must be representable. */
         ptr = p + 1;
-        escape = -(s+1);
+        escape = -(s + 1);
         break;
       }
 
@@ -1837,19 +1957,21 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       {
         PCRE2_SPTR p = ptr + 1;
 
-        while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
-        if (!read_number(&p, ptrend, bracount, MAX_GROUP_NUMBER, ERR61, &s,
-            errorcodeptr))
+        while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+          p++;
+        if (!read_number(&p, ptrend, bracount, MAX_GROUP_NUMBER, ERR61, &s, errorcodeptr))
         {
-          if (*errorcodeptr == 0) escape = ESC_k;  // No number found
+          if (*errorcodeptr == 0)
+            escape = ESC_k; // No number found
           break;
         }
-        while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT)) p++;
+        while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
+          p++;
 
         if (p >= ptrend || *p != CHAR_RIGHT_CURLY_BRACKET)
         {
           ptr = p;
-          *errorcodeptr = ERR119;  // Missing terminator for number
+          *errorcodeptr = ERR119; // Missing terminator for number
           break;
         }
         ptr = p + 1;
@@ -1859,10 +1981,10 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
       else
       {
-        if (!read_number(&ptr, ptrend, bracount, MAX_GROUP_NUMBER, ERR61, &s,
-            errorcodeptr))
+        if (!read_number(&ptr, ptrend, bracount, MAX_GROUP_NUMBER, ERR61, &s, errorcodeptr))
         {
-          if (*errorcodeptr == 0) *errorcodeptr = ERR57;  // No number found
+          if (*errorcodeptr == 0)
+            *errorcodeptr = ERR57; // No number found
           break;
         }
       }
@@ -1873,7 +1995,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
         break;
       }
 
-      escape = -(s+1);
+      escape = -(s + 1);
       break;
 
       /* The handling of escape sequences consisting of a string of digits
@@ -1899,8 +2021,15 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       Inside a character class, \ followed by a digit is always either a literal
       8 or 9 or an octal number. */
 
-    case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4: case CHAR_5:
-    case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
+    case CHAR_1:
+    case CHAR_2:
+    case CHAR_3:
+    case CHAR_4:
+    case CHAR_5:
+    case CHAR_6:
+    case CHAR_7:
+    case CHAR_8:
+    case CHAR_9:
 
       if (isclass)
       {
@@ -1909,8 +2038,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       else if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0)
       {
         /* Python-style disambiguation. */
-        if (ptr[-1] <= CHAR_7 && ptr + 1 < ptrend && ptr[0] >= CHAR_0 &&
-            ptr[0] <= CHAR_7 && ptr[1] >= CHAR_0 && ptr[1] <= CHAR_7)
+        if (ptr[-1] <= CHAR_7 && ptr + 1 < ptrend && ptr[0] >= CHAR_0 && ptr[0] <= CHAR_7 &&
+            ptr[1] >= CHAR_0 && ptr[1] <= CHAR_7)
         {
           /* We peeked a three-digit octal, so fall through */
         }
@@ -1918,7 +2047,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
         {
           /* We are at a digit, so the only possible error from read_number() is
           a number that is too large. */
-          ptr--;   // Back to the digit
+          ptr--; // Back to the digit
 
           if (!read_number(&ptr, ptrend, -1, MAX_GROUP_NUMBER, 0, &s, errorcodeptr))
           {
@@ -1926,7 +2055,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
             break;
           }
 
-          escape = -(s+1);
+          escape = -(s + 1);
           break;
         }
       }
@@ -1934,7 +2063,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       {
         /* Perl-style disambiguation. */
         oldptr = ptr;
-        ptr--;   // Back to the digit
+        ptr--; // Back to the digit
 
         /* As we know we are at a digit, the only possible error from
         read_number() is a number that is too large to be a group number. Because
@@ -1960,11 +2089,12 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
             PCRE2_ASSERT(s == INT_MAX);
             *errorcodeptr = ERR61;
           }
-          else escape = -(s+1);     // Indicates a back reference
+          else
+            escape = -(s + 1); // Indicates a back reference
           break;
         }
 
-        ptr = oldptr;      // Put the pointer back and fall through
+        ptr = oldptr; // Put the pointer back and fall through
       }
 
       /* Handle a digit following \ when the number is not a back reference, or
@@ -1972,7 +2102,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       generate a binary zero and then treat the digit as a following literal. At
       least by Perl 5.18 this changed so as not to insert the binary zero. */
 
-      if (c >= CHAR_8) break;
+      if (c >= CHAR_8)
+        break;
 
       PCRE2_FALLTHROUGH /* Fall through */
 
@@ -1985,12 +2116,14 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
     case CHAR_0:
       c -= CHAR_0;
       while (i++ < 2 && ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
-          c = c * 8 + *ptr++ - CHAR_0;
+        c = c * 8 + *ptr++ - CHAR_0;
       if (c > 0xff)
       {
-        if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0) *errorcodeptr = ERR102;
+        if ((xoptions & PCRE2_EXTRA_PYTHON_OCTAL) != 0)
+          *errorcodeptr = ERR102;
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        else if (!utf) *errorcodeptr = ERR51;
+        else if (!utf)
+          *errorcodeptr = ERR51;
 #endif
       }
 
@@ -1998,7 +2131,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       two- or three-character octal escapes \00 and \000, nor \x00. */
 
       if ((xoptions & PCRE2_EXTRA_NO_BS0) != 0 && c == 0 && i == 1)
-          *errorcodeptr = ERR98;
+        *errorcodeptr = ERR98;
       break;
 
       /* \o is a relatively new Perl feature, supporting a more general way of
@@ -2013,7 +2146,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       }
       ptr++;
 
-      while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+      while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+        ptr++;
       if (ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
       {
         *errorcodeptr = ERR78;
@@ -2025,25 +2159,44 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
       {
         cc = *ptr++;
-        if (c == 0 && cc == CHAR_0) continue;     // Leading zeroes
+        if (c == 0 && cc == CHAR_0)
+          continue; // Leading zeroes
 #if PCRE2_CODE_UNIT_WIDTH == 32
-        if (c >= 0x20000000u) { overflow = TRUE; break; }
+        if (c >= 0x20000000u)
+        {
+          overflow = TRUE;
+          break;
+        }
 #endif
         c = (c << 3) + (cc - CHAR_0);
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
+        if (c > (utf ? 0x10ffffU : 0xffU))
+        {
+          overflow = TRUE;
+          break;
+        }
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-        if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
+        if (c > (utf ? 0x10ffffU : 0xffffU))
+        {
+          overflow = TRUE;
+          break;
+        }
 #elif PCRE2_CODE_UNIT_WIDTH == 32
-        if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
+        if (utf && c > 0x10ffffU)
+        {
+          overflow = TRUE;
+          break;
+        }
 #endif
       }
 
-      while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+      while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+        ptr++;
 
       if (overflow)
       {
-        while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7) ptr++;
+        while (ptr < ptrend && *ptr >= CHAR_0 && *ptr <= CHAR_7)
+          ptr++;
         *errorcodeptr = ERR34;
       }
       else if (utf && c >= 0xd800 && c <= 0xdfff &&
@@ -2058,7 +2211,8 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       else
       {
         *errorcodeptr = ERR64;
-        if (ptr < ptrend) goto ESCAPE_FAILED_FORWARD;
+        if (ptr < ptrend)
+          goto ESCAPE_FAILED_FORWARD;
       }
       break;
 
@@ -2069,9 +2223,12 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
       if (alt_bsux)
       {
         uint32_t xc;
-        if (ptrend - ptr < 2) break;               // Less than 2 characters
-        if ((cc = XDIGIT(ptr[0])) == 0xff) break;  // Not a hex digit
-        if ((xc = XDIGIT(ptr[1])) == 0xff) break;  // Not a hex digit
+        if (ptrend - ptr < 2)
+          break; // Less than 2 characters
+        if ((cc = XDIGIT(ptr[0])) == 0xff)
+          break; // Not a hex digit
+        if ((xc = XDIGIT(ptr[1])) == 0xff)
+          break; // Not a hex digit
         c = (cc << 4) | xc;
         ptr += 2;
       }
@@ -2088,10 +2245,11 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
         if (ptr < ptrend && *ptr == CHAR_LEFT_CURLY_BRACKET)
         {
           ptr++;
-          while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+          while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+            ptr++;
 
 #ifndef EBCDIC
-          COME_FROM_NU:
+        COME_FROM_NU:
 #endif
           if (ptr >= ptrend || *ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
@@ -2104,9 +2262,14 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
           while (ptr < ptrend && (cc = XDIGIT(*ptr)) != 0xff)
           {
             ptr++;
-            if (c == 0 && cc == 0) continue;   // Leading zeroes
+            if (c == 0 && cc == 0)
+              continue; // Leading zeroes
 #if PCRE2_CODE_UNIT_WIDTH == 32
-            if (c >= 0x10000000l) { overflow = TRUE; break; }
+            if (c >= 0x10000000l)
+            {
+              overflow = TRUE;
+              break;
+            }
 #endif
             c = (c << 4) | cc;
             if ((utf && c > 0x10ffffU) || (!utf && c > MAX_NON_UTF_CHAR))
@@ -2118,13 +2281,15 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
           /* Perl ignores spaces and tabs before } */
 
-          while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+          while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+            ptr++;
 
           /* On overflow, skip remaining hex digits */
 
           if (overflow)
           {
-            while (ptr < ptrend && XDIGIT(*ptr) != 0xff) ptr++;
+            while (ptr < ptrend && XDIGIT(*ptr) != 0xff)
+              ptr++;
             *errorcodeptr = ERR34;
           }
           else if (utf && c >= 0xd800 && c <= 0xdfff &&
@@ -2145,9 +2310,10 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
           else
           {
             *errorcodeptr = ERR67;
-            if (ptr < ptrend) goto ESCAPE_FAILED_FORWARD;
+            if (ptr < ptrend)
+              goto ESCAPE_FAILED_FORWARD;
           }
-        }     // End of \x{} processing
+        } // End of \x{} processing
 
         /* Read a up to two hex digits after \x */
 
@@ -2176,11 +2342,12 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
             - Java allows 1 or 2 hex digits. Error if 0 digits. No error if >2 digits
             - .NET requires 2 hex digits. Error if 0, 1 digits. No error if >2 digits.
           */
-          if (ptr >= ptrend || (cc = XDIGIT(*ptr)) == 0xff) break;  // Not a hex digit
+          if (ptr >= ptrend || (cc = XDIGIT(*ptr)) == 0xff)
+            break; // Not a hex digit
           ptr++;
           c = (c << 4) | cc;
-        }       // End of \xdd handling
-      }         // End of Perl-style \x handling
+        } // End of \xdd handling
+      } // End of Perl-style \x handling
       break;
 
       /* The handling of \c is different in ASCII and EBCDIC environments. In an
@@ -2204,12 +2371,13 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
         break;
       }
       c = *ptr;
-      if (c >= CHAR_a && c <= CHAR_z) c = UPPER_CASE(c);
+      if (c >= CHAR_a && c <= CHAR_z)
+        c = UPPER_CASE(c);
 
       /* Handle \c in an ASCII/Unicode environment. */
 
-#ifndef EBCDIC    /* ASCII/UTF-8 coding */
-      if (c < 32 || c > 126)  // Excludes all non-printable ASCII
+#ifndef EBCDIC               /* ASCII/UTF-8 coding */
+      if (c < 32 || c > 126) // Excludes all non-printable ASCII
       {
         *errorcodeptr = ERR68;
         goto ESCAPE_FAILED_FORWARD;
@@ -2223,12 +2391,13 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
 #else
       if (c == CHAR_QUESTION_MARK)
-        c = (CHAR_BACKSLASH == 188 && CHAR_GRAVE_ACCENT == 74)? 0x5f : 0xff;
+        c = (CHAR_BACKSLASH == 188 && CHAR_GRAVE_ACCENT == 74) ? 0x5f : 0xff;
       else
       {
         for (i = 0; i < 32; i++)
         {
-          if (c == ebcdic_escape_c[i]) break;
+          if (c == ebcdic_escape_c[i])
+            break;
         }
         if (i < 32)
           c = i;
@@ -2238,7 +2407,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
           goto ESCAPE_FAILED_FORWARD;
         }
       }
-#endif  /* EBCDIC */
+#endif /* EBCDIC */
 
       ptr++;
       break;
@@ -2254,17 +2423,18 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr,
 
   /* Set the pointer to the next character before returning. */
 
-  EXIT:
+EXIT:
   *ptrptr = ptr;
   *chptr = c;
   return escape;
 
   /* Some errors need to indicate the next character. */
 
-  ESCAPE_FAILED_FORWARD:
+ESCAPE_FAILED_FORWARD:
   ptr++;
 #ifdef SUPPORT_UNICODE
-  if (utf) FORWARDCHARTEST(ptr, ptrend);
+  if (utf)
+    FORWARDCHARTEST(ptr, ptrend);
 #endif
   goto EXIT;
 }
@@ -2294,8 +2464,8 @@ Returns:         TRUE if the type value was found, or FALSE for an invalid type
 */
 
 static BOOL
-get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
-  uint16_t *pdataptr, int *errorcodeptr, compile_block *cb)
+get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr, uint16_t *pdataptr,
+        int *errorcodeptr, compile_block *cb)
 {
   uint32_t c;
   ptrdiff_t i;
@@ -2306,10 +2476,11 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
   uint16_t ptscript = PT_NOTSCRIPT;
 
 #ifndef MAYBE_UTF_MULTI
-  (void)utf;  // Avoid compiler warning
+  (void)utf; // Avoid compiler warning
 #endif
 
-  if (ptr >= cb->end_pattern) goto ERROR_RETURN;
+  if (ptr >= cb->end_pattern)
+    goto ERROR_RETURN;
   GETCHARINCTEST(c, ptr);
   *negptr = FALSE;
 
@@ -2324,13 +2495,15 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
 
   if (c == CHAR_LEFT_CURLY_BRACKET)
   {
-    if (ptr >= cb->end_pattern) goto ERROR_RETURN;
+    if (ptr >= cb->end_pattern)
+      goto ERROR_RETURN;
 
     for (i = 0; i < (int)(sizeof(name) / sizeof(PCRE2_UCHAR)) - 1; i++)
     {
-      REDO:
+    REDO:
 
-      if (ptr >= cb->end_pattern) goto ERROR_RETURN;
+      if (ptr >= cb->end_pattern)
+        goto ERROR_RETURN;
       GETCHARINCTEST(c, ptr);
 
       /* Skip ignorable Unicode characters. */
@@ -2350,19 +2523,22 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
         goto REDO;
       }
 
-      if (c == CHAR_RIGHT_CURLY_BRACKET) break;
+      if (c == CHAR_RIGHT_CURLY_BRACKET)
+        break;
 
       /* Names consist of ASCII letters and digits, but equals and colon may also
       occur as a name/value separator. We must also allow for \p{L&}. A simple
       check for a value between '&' and 'z' suffices because anything else in a
       name or value will cause an "unknown property" error anyway. */
 
-      if (c < CHAR_AMPERSAND || c > CHAR_z) goto ERROR_RETURN;
+      if (c < CHAR_AMPERSAND || c > CHAR_z)
+        goto ERROR_RETURN;
 
       /* Lower case a capital letter or remember where the name/value separator
       is. */
 
-      if (c >= CHAR_A && c <= CHAR_Z) c |= 0x20;
+      if (c >= CHAR_A && c <= CHAR_Z)
+        c |= 0x20;
       else if ((c == CHAR_COLON || c == CHAR_EQUALS_SIGN) && vptr == NULL)
         vptr = name + i;
 
@@ -2372,7 +2548,8 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
     /* Error if the loop didn't end with '}' - either we hit the end of the
     pattern or the name was longer than any legal property name. */
 
-    if (c != CHAR_RIGHT_CURLY_BRACKET) goto ERROR_RETURN;
+    if (c != CHAR_RIGHT_CURLY_BRACKET)
+      goto ERROR_RETURN;
     name[i] = 0;
   }
 
@@ -2381,7 +2558,7 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
 
   else if (c >= CHAR_A && c <= CHAR_Z)
   {
-    name[0] = c | 0x20;  // Lower case
+    name[0] = c | 0x20; // Lower case
     name[1] = 0;
   }
   else if (c >= CHAR_a && c <= CHAR_z)
@@ -2389,9 +2566,10 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
     name[0] = c;
     name[1] = 0;
   }
-  else goto ERROR_RETURN;
+  else
+    goto ERROR_RETURN;
 
-  *ptrptr = ptr;   // Update pattern pointer
+  *ptrptr = ptr; // Update pattern pointer
 
   /* If the property contains ':' or '=' we have class name and value separately
   specified. The following are supported:
@@ -2412,19 +2590,17 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
     int offset = 0;
     PCRE2_UCHAR sname[8];
 
-    *vptr = 0;   // Terminate property name
-    if (PRIV(strcmp_c8)(name, STRING_bidiclass) == 0 ||
-        PRIV(strcmp_c8)(name, STRING_bc) == 0)
+    *vptr = 0; // Terminate property name
+    if (PRIV(strcmp_c8)(name, STRING_bidiclass) == 0 || PRIV(strcmp_c8)(name, STRING_bc) == 0)
     {
       offset = 4;
       sname[0] = CHAR_b;
-      sname[1] = CHAR_i;  // There is no strcpy_c8 function
+      sname[1] = CHAR_i; // There is no strcpy_c8 function
       sname[2] = CHAR_d;
       sname[3] = CHAR_i;
     }
 
-    else if (PRIV(strcmp_c8)(name, STRING_script) == 0 ||
-             PRIV(strcmp_c8)(name, STRING_sc) == 0)
+    else if (PRIV(strcmp_c8)(name, STRING_script) == 0 || PRIV(strcmp_c8)(name, STRING_sc) == 0)
       ptscript = PT_SC;
 
     else if (PRIV(strcmp_c8)(name, STRING_scriptextensions) == 0 ||
@@ -2439,8 +2615,9 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
 
     /* Adjust the string in name[] as needed */
 
-    memmove(name + offset, vptr + 1, (name + i - vptr)*sizeof(PCRE2_UCHAR));
-    if (offset != 0) memmove(name, sname, offset*sizeof(PCRE2_UCHAR));
+    memmove(name + offset, vptr + 1, (name + i - vptr) * sizeof(PCRE2_UCHAR));
+    if (offset != 0)
+      memmove(name, sname, offset * sizeof(PCRE2_UCHAR));
   }
 
   /* Search for a recognized property using binary chop. */
@@ -2477,16 +2654,19 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr,
         return TRUE;
       }
 
-      break;  // Non-script found
+      break; // Non-script found
     }
 
-    if (r > 0) bot = i + 1; else top = i;
+    if (r > 0)
+      bot = i + 1;
+    else
+      top = i;
   }
 
-  *errorcodeptr = ERR47;   // Unrecognized property
+  *errorcodeptr = ERR47; // Unrecognized property
   return FALSE;
 
-  ERROR_RETURN:            // Malformed \P or \p
+ERROR_RETURN: // Malformed \P or \p
   *errorcodeptr = ERR46;
   *ptrptr = ptr;
   return FALSE;
@@ -2549,12 +2729,12 @@ check_posix_syntax(PCRE2_SPTR ptr, PCRE2_SPTR ptrend, PCRE2_SPTR *endptr)
 
   for (; ptrend - ptr >= 2; ptr++)
   {
-    if (*ptr == CHAR_BACKSLASH &&
-        (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET || ptr[1] == CHAR_BACKSLASH))
+    if (*ptr == CHAR_BACKSLASH && (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET || ptr[1] == CHAR_BACKSLASH))
       ptr++;
 
     else if ((*ptr == CHAR_LEFT_SQUARE_BRACKET && ptr[1] == terminator) ||
-              *ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
+             *ptr == CHAR_RIGHT_SQUARE_BRACKET)
+      return FALSE;
 
     else if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
     {
@@ -2589,8 +2769,8 @@ check_posix_name(PCRE2_SPTR ptr, int len)
   int yield = 0;
   while (posix_name_lengths[yield] != 0)
   {
-    if (len == posix_name_lengths[yield] &&
-      PRIV(strncmp_c8)(ptr, pn, (unsigned int)len) == 0) return yield;
+    if (len == posix_name_lengths[yield] && PRIV(strncmp_c8)(ptr, pn, (unsigned int)len) == 0)
+      return yield;
     pn += posix_name_lengths[yield] + 1;
     yield++;
   }
@@ -2630,20 +2810,21 @@ Returns:    TRUE if a name was read
 
 static BOOL
 read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
-  PCRE2_SIZE *offsetptr, PCRE2_SPTR *nameptr, uint32_t *namelenptr,
-  int *errorcodeptr, compile_block *cb)
+          PCRE2_SIZE *offsetptr, PCRE2_SPTR *nameptr, uint32_t *namelenptr, int *errorcodeptr,
+          compile_block *cb)
 {
   PCRE2_SPTR ptr = *ptrptr;
   BOOL is_group = (*ptr++ != CHAR_ASTERISK);
   BOOL is_braced = terminator == CHAR_RIGHT_CURLY_BRACKET;
 
   if (is_braced)
-    while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+    while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+      ptr++;
 
-  if (ptr >= ptrend)                 // No characters in name
+  if (ptr >= ptrend) // No characters in name
   {
-    *errorcodeptr = is_group? ERR62: // Subpattern name expected
-                              ERR60; // Verb not recognized or malformed
+    *errorcodeptr = is_group ? ERR62 : // Subpattern name expected
+                        ERR60;         // Verb not recognized or malformed
     goto FAILED;
   }
 
@@ -2662,7 +2843,7 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
     uint32_t c, type;
     PCRE2_SPTR p = ptr;
 
-    GETCHARINC(c, p);  // Peek at next character
+    GETCHARINC(c, p); // Peek at next character
     type = UCD_CHARTYPE(c);
 
     if (type == ucp_Nd)
@@ -2674,18 +2855,19 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
 
     for (;;)
     {
-      if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L &&
-          c != CHAR_UNDERSCORE) break;
-      ptr = p;  // Accept character and peek again
-      if (p >= ptrend) break;
+      if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L && c != CHAR_UNDERSCORE)
+        break;
+      ptr = p; // Accept character and peek again
+      if (p >= ptrend)
+        break;
       GETCHARINC(c, p);
       type = UCD_CHARTYPE(c);
     }
   }
   else
 #else
-  (void)utf;  // Avoid compiler warning
-#endif      /* SUPPORT_UNICODE */
+  (void)utf; // Avoid compiler warning
+#endif /* SUPPORT_UNICODE */
 
   /* Handle non-group names and group names in non-UTF modes. A group name must
   not start with a digit. If either of the others start with a digit it just
@@ -2721,11 +2903,12 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
   {
     if (ptr == *nameptr)
     {
-      *errorcodeptr = ERR62;   // Subpattern name expected
+      *errorcodeptr = ERR62; // Subpattern name expected
       goto FAILED;
     }
     if (is_braced)
-      while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT)) ptr++;
+      while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
+        ptr++;
     if (terminator != 0)
     {
       if (ptr >= ptrend || *ptr != (PCRE2_UCHAR)terminator)
@@ -2740,7 +2923,7 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
   *ptrptr = ptr;
   return TRUE;
 
-  FAILED:
+FAILED:
   *ptrptr = ptr;
   return FALSE;
 }
@@ -2768,9 +2951,8 @@ Returns: updated parsed_pattern pointer on success
 */
 
 static uint32_t *
-parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend,
-  BOOL utf, uint32_t *parsed_pattern, PCRE2_SIZE offset,
-  int *errorcodeptr, compile_block *cb)
+parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t *parsed_pattern,
+                   PCRE2_SIZE offset, int *errorcodeptr, compile_block *cb)
 {
   PCRE2_SIZE next_offset;
   PCRE2_SPTR ptr = *ptrptr;
@@ -2797,8 +2979,7 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend,
     }
 
     /* Handle [+-]number cases */
-    if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61,
-        &i, errorcodeptr))
+    if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i, errorcodeptr))
     {
       PCRE2_ASSERT(i >= 0);
       if (i <= 0)
@@ -2809,7 +2990,8 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend,
       meta = META_CAPTURE_NUMBER;
       namelen = (uint32_t)i;
     }
-    else if (*errorcodeptr != 0) goto FAILED; // Number too big
+    else if (*errorcodeptr != 0)
+      goto FAILED; // Number too big
     else
     {
       /* Handle 'name' or <name> cases. */
@@ -2823,8 +3005,9 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend,
         goto FAILED;
       }
 
-      if (!read_name(&ptr, ptrend, utf, terminator, &next_offset,
-          &name, &namelen, errorcodeptr, cb)) goto FAILED;
+      if (!read_name(&ptr, ptrend, utf, terminator, &next_offset, &name, &namelen, errorcodeptr,
+                     cb))
+        goto FAILED;
 
       meta = META_CAPTURE_NAME;
     }
@@ -2845,9 +3028,11 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend,
     *parsed_pattern++ = namelen;
     offset = next_offset;
 
-    if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+    if (ptr >= ptrend)
+      goto UNCLOSED_PARENTHESIS;
 
-    if (*ptr == CHAR_RIGHT_PARENTHESIS) break;
+    if (*ptr == CHAR_RIGHT_PARENTHESIS)
+      break;
 
     if (*ptr != CHAR_COMMA)
     {
@@ -2859,10 +3044,10 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend,
   *ptrptr = ptr + 1;
   return parsed_pattern;
 
-  UNCLOSED_PARENTHESIS:
+UNCLOSED_PARENTHESIS:
   *errorcodeptr = ERR14;
 
-  FAILED:
+FAILED:
   *ptrptr = ptr;
   return NULL;
 }
@@ -2890,21 +3075,22 @@ Returns: possibly updated parsed_pattern pointer.
 */
 
 static uint32_t *
-manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout,
-  uint32_t *parsed_pattern, compile_block *cb)
+manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout, uint32_t *parsed_pattern,
+                compile_block *cb)
 {
   uint32_t *previous_callout = *pcalloutptr;
 
-  if (previous_callout != NULL) previous_callout[2] = (uint32_t)(ptr -
-    cb->start_pattern - (PCRE2_SIZE)previous_callout[1]);
+  if (previous_callout != NULL)
+    previous_callout[2] = (uint32_t)(ptr - cb->start_pattern - (PCRE2_SIZE)previous_callout[1]);
 
-  if (!auto_callout) previous_callout = NULL; else
+  if (!auto_callout)
+    previous_callout = NULL;
+  else
   {
-    if (previous_callout == NULL ||
-        previous_callout != parsed_pattern - 4 ||
+    if (previous_callout == NULL || previous_callout != parsed_pattern - 4 ||
         previous_callout[3] != 255)
     {
-      previous_callout = parsed_pattern;  // Set up new automatic callout
+      previous_callout = parsed_pattern; // Set up new automatic callout
       parsed_pattern += 4;
       previous_callout[0] = META_CALLOUT_NUMBER;
       previous_callout[2] = 0;
@@ -2937,8 +3123,7 @@ Arguments:
 Returns:          updated value of parsed_pattern
 */
 static uint32_t *
-handle_escdsw(int escape, uint32_t *parsed_pattern, uint32_t options,
-  uint32_t xoptions)
+handle_escdsw(int escape, uint32_t *parsed_pattern, uint32_t options, uint32_t xoptions)
 {
   uint32_t ascii_option = 0;
   uint32_t prop = ESC_p;
@@ -3015,8 +3200,7 @@ Arguments:
 Returns:          the number of uint32_t units for parsed_pattern
 */
 static ptrdiff_t
-max_parsed_pattern(PCRE2_SPTR ptr, PCRE2_SPTR ptrend, BOOL utf,
-  uint32_t options)
+max_parsed_pattern(PCRE2_SPTR ptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t options)
 {
   PCRE2_SIZE big32count = 0;
   ptrdiff_t parsed_size_needed;
@@ -3032,10 +3216,12 @@ max_parsed_pattern(PCRE2_SPTR ptr, PCRE2_SPTR ptrend, BOOL utf,
   if (!utf)
   {
     PCRE2_SPTR p;
-    for (p = ptr; p < ptrend; p++) if (*p >= META_END) big32count++;
+    for (p = ptr; p < ptrend; p++)
+      if (*p >= META_END)
+        big32count++;
   }
 #else
-  (void)utf;  // Avoid compiler warning
+  (void)utf; // Avoid compiler warning
 #endif
 
   parsed_size_needed = (ptrend - ptr) + big32count;
@@ -3075,48 +3261,48 @@ Returns:   zero on success or a non-zero error code, with the
 /* A structure and some flags for dealing with nested groups. */
 
 typedef struct nest_save {
-  uint16_t  nest_depth;
-  uint16_t  reset_group;
-  uint16_t  max_group;
-  uint16_t  flags;
-  uint32_t  options;
-  uint32_t  xoptions;
+  uint16_t nest_depth;
+  uint16_t reset_group;
+  uint16_t max_group;
+  uint16_t flags;
+  uint32_t options;
+  uint32_t xoptions;
 } nest_save;
 
-#define NSF_RESET          0x0001u
-#define NSF_CONDASSERT     0x0002u
-#define NSF_ATOMICSR       0x0004u
+#define NSF_RESET      0x0001u
+#define NSF_CONDASSERT 0x0002u
+#define NSF_ATOMICSR   0x0004u
 
 /* Options that are changeable within the pattern must be tracked during
 parsing. Some (e.g. PCRE2_EXTENDED) are implemented entirely during parsing,
 but all must be tracked so that META_OPTIONS items set the correct values for
 the main compiling phase. */
 
-#define PARSE_TRACKED_OPTIONS (PCRE2_CASELESS|PCRE2_DOTALL|PCRE2_DUPNAMES| \
-  PCRE2_EXTENDED|PCRE2_EXTENDED_MORE|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE| \
-  PCRE2_UNGREEDY)
+#define PARSE_TRACKED_OPTIONS                                                              \
+  (PCRE2_CASELESS | PCRE2_DOTALL | PCRE2_DUPNAMES | PCRE2_EXTENDED | PCRE2_EXTENDED_MORE | \
+   PCRE2_MULTILINE | PCRE2_NO_AUTO_CAPTURE | PCRE2_UNGREEDY)
 
-#define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT| \
-  PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW| \
-  PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX)
+#define PARSE_TRACKED_EXTRA_OPTIONS                                                \
+  (PCRE2_EXTRA_CASELESS_RESTRICT | PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_BSS | \
+   PCRE2_EXTRA_ASCII_BSW | PCRE2_EXTRA_ASCII_DIGIT | PCRE2_EXTRA_ASCII_POSIX)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
 
 enum {
-  RANGE_NO, // State after '[' (initial), or '[a-z'; hyphen is literal
-  RANGE_STARTED, // State after '[1-'; last-emitted code is META_RANGE_XYZ
-  RANGE_FORBID_NO, // State after '[\d'; '-]' is allowed but not '-1]'
+  RANGE_NO,             // State after '[' (initial), or '[a-z'; hyphen is literal
+  RANGE_STARTED,        // State after '[1-'; last-emitted code is META_RANGE_XYZ
+  RANGE_FORBID_NO,      // State after '[\d'; '-]' is allowed but not '-1]'
   RANGE_FORBID_STARTED, // State after '[\d-'
-  RANGE_OK_ESCAPED, // State after '[\1'; hyphen may be a range
-  RANGE_OK_LITERAL // State after '[1'; hyphen may be a range
+  RANGE_OK_ESCAPED,     // State after '[\1'; hyphen may be a range
+  RANGE_OK_LITERAL      // State after '[1'; hyphen may be a range
 };
 
 /* States used for analyzing operators and operands in extended character
 classes. */
 
 enum {
-  CLASS_OP_EMPTY, // At start of an expression; empty previous contents
+  CLASS_OP_EMPTY,   // At start of an expression; empty previous contents
   CLASS_OP_OPERAND, // Have preceding operand; after "z" a "--" can follow
   CLASS_OP_OPERATOR // Have preceding operator; after "--" operand must follow
 };
@@ -3125,9 +3311,9 @@ enum {
 PERL_EXT values must be last. */
 
 enum {
-  CLASS_MODE_NORMAL, // Ordinary PCRE2 '[...]' class.
-  CLASS_MODE_ALT_EXT, // UTS#18-style extended '[...]' class.
-  CLASS_MODE_PERL_EXT, // Perl extended '(?[...])' class.
+  CLASS_MODE_NORMAL,       // Ordinary PCRE2 '[...]' class.
+  CLASS_MODE_ALT_EXT,      // UTS#18-style extended '[...]' class.
+  CLASS_MODE_PERL_EXT,     // Perl extended '(?[...])' class.
   CLASS_MODE_PERL_EXT_LEAF // Leaf within extended '(?[ [...] ])' class.
 };
 
@@ -3137,19 +3323,23 @@ be quantified. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
 #define PARSED_LITERAL(c, p) \
-{   \
-  if (c >= META_END) *p++ = META_BIGVALUE; \
-  *p++ = c; \
-  okquantifier = TRUE; \
-}
+  {                          \
+    if (c >= META_END)       \
+      *p++ = META_BIGVALUE;  \
+    *p++ = c;                \
+    okquantifier = TRUE;     \
+  }
 #else
-#define PARSED_LITERAL(c, p) *p++ = c; okquantifier = TRUE;
+#define PARSED_LITERAL(c, p) \
+  *p++ = c;                  \
+  okquantifier = TRUE;
 #endif
 
 /* Here's the actual function. */
 
-static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
-  BOOL *has_lookbehind, compile_block *cb)
+static int
+parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookbehind,
+            compile_block *cb)
 {
   uint32_t c;
   uint32_t delimiter;
@@ -3158,7 +3348,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
   uint32_t class_op_state;
   uint32_t class_mode_state;
   uint32_t *class_start;
-  uint32_t *verblengthptr = NULL;     // Value avoids compiler warning
+  uint32_t *verblengthptr = NULL; // Value avoids compiler warning
   uint32_t *verbstartptr = NULL;
   uint32_t *previous_callout = NULL;
   uint32_t *parsed_pattern = cb->parsed_pattern;
@@ -3186,7 +3376,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
   PCRE2_SPTR thisptr;
   PCRE2_SPTR name;
   PCRE2_SPTR ptrend = cb->end_pattern;
-  PCRE2_SPTR verbnamestart = NULL;    // Value avoids compiler warning
+  PCRE2_SPTR verbnamestart = NULL; // Value avoids compiler warning
   PCRE2_SPTR class_range_forbid_ptr = NULL;
   named_group *ng;
   nest_save *top_nest, *end_nests;
@@ -3229,7 +3419,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       if (parsed_pattern >= parsed_pattern_end)
       {
         PCRE2_DEBUG_UNREACHABLE();
-        errorcode = ERR63;  // Internal error (parsed pattern overflow)
+        errorcode = ERR63; // Internal error (parsed pattern overflow)
         goto FAILED;
       }
       /* LCOV_EXCL_STOP */
@@ -3237,8 +3427,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       thisptr = ptr;
       GETCHARINCTEST(c, ptr);
       if (auto_callout)
-        parsed_pattern = manage_callouts(thisptr, &previous_callout,
-          auto_callout, parsed_pattern, cb);
+        parsed_pattern =
+            manage_callouts(thisptr, &previous_callout, auto_callout, parsed_pattern, cb);
       PARSED_LITERAL(c, parsed_pattern);
     }
     goto PARSED_END;
@@ -3254,11 +3444,12 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
   creating a nest_save that spans the end of the workspace. */
 
   end_nests = (nest_save *)((char *)end_nests -
-    ((cb->workspace_size * sizeof(PCRE2_UCHAR)) % sizeof(nest_save)));
+                            ((cb->workspace_size * sizeof(PCRE2_UCHAR)) % sizeof(nest_save)));
 
   /* PCRE2_EXTENDED_MORE implies PCRE2_EXTENDED */
 
-  if ((options & PCRE2_EXTENDED_MORE) != 0) options |= PCRE2_EXTENDED;
+  if ((options & PCRE2_EXTENDED_MORE) != 0)
+    options |= PCRE2_EXTENDED;
 
   /* Now scan the pattern */
 
@@ -3277,7 +3468,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
     if (nest_depth > cb->cx->parens_nest_limit)
     {
       errorcode = ERR19;
-      goto FAILED;        // Parentheses too deeply nested
+      goto FAILED; // Parentheses too deeply nested
     }
 
     /* Check that we haven't emitted too much into parsed_pattern. We allocate
@@ -3292,8 +3483,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
     the write has already occurred so it's too late. However, should stop us
     committing unsafe code. */
     PCRE2_ASSERT((parsed_pattern - parsed_pattern_check) +
-                 (parsed_pattern_extra - parsed_pattern_extra_check) <=
-                   max_parsed_pattern(ptr_check, ptr, utf, options));
+                     (parsed_pattern_extra - parsed_pattern_extra_check) <=
+                 max_parsed_pattern(ptr_check, ptr, utf, options));
     parsed_pattern_check = parsed_pattern;
     parsed_pattern_extra_check = parsed_pattern_extra;
     ptr_check = ptr;
@@ -3305,7 +3496,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       /* Weak pre-write check; only ensures parsed_pattern[0] is writeable
       (but the code below can write many chars). Better than nothing. */
       PCRE2_DEBUG_UNREACHABLE();
-      errorcode = ERR63;  // Internal error (parsed pattern overflow)
+      errorcode = ERR63; // Internal error (parsed pattern overflow)
       goto FAILED;
     }
     /* LCOV_EXCL_STOP */
@@ -3334,7 +3525,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       if (c == CHAR_BACKSLASH && ptr < ptrend && *ptr == CHAR_E)
       {
         inescq = FALSE;
-        ptr++;   // Skip E
+        ptr++; // Skip E
       }
       else
       {
@@ -3342,20 +3533,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         {
           /* Don't use PARSED_LITERAL() because it sets okquantifier. */
 #if PCRE2_CODE_UNIT_WIDTH == 32
-          if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
+          if (c >= META_END)
+            *parsed_pattern++ = META_BIGVALUE;
 #endif
           *parsed_pattern++ = c;
         }
         else
         {
           if (after_manual_callout-- <= 0)
-            parsed_pattern = manage_callouts(thisptr, &previous_callout,
-              auto_callout, parsed_pattern, cb);
+            parsed_pattern =
+                manage_callouts(thisptr, &previous_callout, auto_callout, parsed_pattern, cb);
           PARSED_LITERAL(c, parsed_pattern);
         }
         meta_quantifier = 0;
       }
-      continue;  // Next character
+      continue; // Next character
     }
 
     /* If we are processing the "name" part of a (*VERB:NAME) item, all
@@ -3368,22 +3560,22 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
     use MAX_255 to test its size because MAX_255 tests code units and is assumed
     TRUE in 8-bit mode. */
 
-    if (inverbname &&
-         (
-          /* EITHER: not both options set */
-          ((options & (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) !=
-                      (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) ||
+    if (inverbname && (
+                          /* EITHER: not both options set */
+                          ((options & (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) !=
+                           (PCRE2_EXTENDED | PCRE2_ALT_VERBNAMES)) ||
 #ifdef SUPPORT_UNICODE
-          /* OR: character > 255 AND not Unicode Pattern White Space */
-          (c > 255 && (c|1) != 0x200f && (c|1) != 0x2029) ||
+                          /* OR: character > 255 AND not Unicode Pattern White Space */
+                          (c > 255 && (c | 1) != 0x200f && (c | 1) != 0x2029) ||
 #endif
-          /* OR: not a # comment or isspace() white space */
-          (c < 256 && c != CHAR_NUMBER_SIGN && (cb->ctypes[c] & ctype_space) == 0
+                          /* OR: not a # comment or isspace() white space */
+                          (c < 256 && c != CHAR_NUMBER_SIGN &&
+                           (cb->ctypes[c] & ctype_space) == 0
 #ifdef SUPPORT_UNICODE
-          /* and not CHAR_NEL when Unicode is supported */
-            && c != CHAR_NEL
+                           /* and not CHAR_NEL when Unicode is supported */
+                           && c != CHAR_NEL
 #endif
-         )))
+                           )))
     {
       PCRE2_SIZE verbnamelength;
 
@@ -3392,7 +3584,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       default:
         /* Don't use PARSED_LITERAL() because it sets okquantifier. */
 #if PCRE2_CODE_UNIT_WIDTH == 32
-        if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
+        if (c >= META_END)
+          *parsed_pattern++ = META_BIGVALUE;
 #endif
         *parsed_pattern++ = c;
         break;
@@ -3424,18 +3617,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       case CHAR_BACKSLASH:
         if ((options & PCRE2_ALT_VERBNAMES) != 0)
         {
-          escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-            xoptions, cb->bracount, FALSE, cb);
-          if (errorcode != 0) goto FAILED;
+          escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options, xoptions, cb->bracount,
+                                      FALSE, cb);
+          if (errorcode != 0)
+            goto FAILED;
         }
-        else escape = 0;   // Treat all as literal
+        else
+          escape = 0; // Treat all as literal
 
         switch (escape)
         {
         case 0:
           /* Don't use PARSED_LITERAL() because it sets okquantifier. */
 #if PCRE2_CODE_UNIT_WIDTH == 32
-          if (c >= META_END) *parsed_pattern++ = META_BIGVALUE;
+          if (c >= META_END)
+            *parsed_pattern++ = META_BIGVALUE;
 #endif
           *parsed_pattern++ = c;
           break;
@@ -3449,15 +3645,15 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           inescq = TRUE;
           break;
 
-        case ESC_E:             // Ignore
+        case ESC_E: // Ignore
           break;
 
         default:
-          errorcode = ERR40;    // Invalid in verb name
+          errorcode = ERR40; // Invalid in verb name
           goto FAILED;
         }
       }
-      continue;   // Next character in pattern
+      continue; // Next character in pattern
     }
 
     /* Not a verb name character. At this point we must process everything that
@@ -3494,9 +3690,11 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
     if ((options & PCRE2_EXTENDED) != 0)
     {
-      if (c < 256 && (cb->ctypes[c] & ctype_space) != 0) continue;
+      if (c < 256 && (cb->ctypes[c] & ctype_space) != 0)
+        continue;
 #ifdef SUPPORT_UNICODE
-      if (c == CHAR_NEL || (c|1) == 0x200f || (c|1) == 0x2029) continue;
+      if (c == CHAR_NEL || (c | 1) == 0x200f || (c | 1) == 0x2029)
+        continue;
 #endif
       if (c == CHAR_NUMBER_SIGN)
       {
@@ -3510,19 +3708,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           }
           ptr++;
 #ifdef SUPPORT_UNICODE
-          if (utf) FORWARDCHARTEST(ptr, ptrend);
+          if (utf)
+            FORWARDCHARTEST(ptr, ptrend);
 #endif
         }
-        continue;  // Next character in pattern
+        continue; // Next character in pattern
       }
     }
 
     /* Skip over bracketed comments */
 
-    if (c == CHAR_LEFT_PARENTHESIS && ptrend - ptr >= 2 &&
-        ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)
+    if (c == CHAR_LEFT_PARENTHESIS && ptrend - ptr >= 2 && ptr[0] == CHAR_QUESTION_MARK &&
+        ptr[1] == CHAR_NUMBER_SIGN)
     {
-      while (++ptr < ptrend && *ptr != CHAR_RIGHT_PARENTHESIS);
+      while (++ptr < ptrend && *ptr != CHAR_RIGHT_PARENTHESIS)
+        ;
       if (ptr >= ptrend)
       {
         /* A special error for missing ) in a comment to make it easier to debug. */
@@ -3530,22 +3730,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         goto FAILED;
       }
       ptr++;
-      continue;  // Next character in pattern
+      continue; // Next character in pattern
     }
 
     /* If the next item is not a quantifier, fill in length of any previous
     callout and create an auto callout if required. */
 
     if (c != CHAR_ASTERISK && c != CHAR_PLUS && c != CHAR_QUESTION_MARK &&
-         (c != CHAR_LEFT_CURLY_BRACKET ||
-           (tempptr = ptr,
-           !read_repeat_counts(&tempptr, ptrend, NULL, NULL, &errorcode))))
+        (c != CHAR_LEFT_CURLY_BRACKET ||
+         (tempptr = ptr, !read_repeat_counts(&tempptr, ptrend, NULL, NULL, &errorcode))))
     {
       if (after_manual_callout-- <= 0)
       {
-        parsed_pattern = manage_callouts(thisptr, &previous_callout, auto_callout,
-          parsed_pattern, cb);
-        this_parsed_item = parsed_pattern;  // New start for current item
+        parsed_pattern =
+            manage_callouts(thisptr, &previous_callout, auto_callout, parsed_pattern, cb);
+        this_parsed_item = parsed_pattern; // New start for current item
       }
     }
 
@@ -3564,13 +3763,13 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
                 (ptr[0] == CHAR_QUESTION_MARK || ptr[0] == CHAR_ASTERISK);
       if (ok)
       {
-        if (ptr[0] == CHAR_ASTERISK)  // New alpha assertion format, possibly
+        if (ptr[0] == CHAR_ASTERISK) // New alpha assertion format, possibly
         {
           ok = MAX_255(ptr[1]) && (cb->ctypes[ptr[1]] & ctype_lcletter) != 0;
         }
         else
         {
-          switch (ptr[1])  // Traditional symbolic format
+          switch (ptr[1]) // Traditional symbolic format
           {
           case CHAR_C:
             ok = expect_cond_assert == 2;
@@ -3593,7 +3792,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       if (!ok)
       {
         errorcode = ERR28;
-        if (expect_cond_assert == 2) goto FAILED;
+        if (expect_cond_assert == 2)
+          goto FAILED;
         goto FAILED_BACK;
       }
     }
@@ -3620,17 +3820,16 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
     if (prev_meta_quantifier != 0 && (c == CHAR_QUESTION_MARK || c == CHAR_PLUS))
     {
-      parsed_pattern[(prev_meta_quantifier == META_MINMAX)? -3 : -1] =
-        prev_meta_quantifier + ((c == CHAR_QUESTION_MARK)?
-          0x00020000u : 0x00010000u);
-      continue;  // Next character in pattern
+      parsed_pattern[(prev_meta_quantifier == META_MINMAX) ? -3 : -1] =
+          prev_meta_quantifier + ((c == CHAR_QUESTION_MARK) ? 0x00020000u : 0x00010000u);
+      continue; // Next character in pattern
     }
 
     /* Process the next item in the main part of a pattern. */
 
     switch (c)
     {
-    default:                // Non-special character
+    default: // Non-special character
       PARSED_LITERAL(c, parsed_pattern);
       break;
 
@@ -3639,19 +3838,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
     case CHAR_BACKSLASH:
       tempptr = ptr;
-      escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-        xoptions, cb->bracount, FALSE, cb);
+      escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options, xoptions, cb->bracount,
+                                  FALSE, cb);
       if (errorcode != 0)
       {
-        ESCAPE_FAILED:
+      ESCAPE_FAILED:
         if ((xoptions & PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL) == 0)
           goto FAILED;
         ptr = tempptr;
-        if (ptr >= ptrend) c = CHAR_BACKSLASH; else
+        if (ptr >= ptrend)
+          c = CHAR_BACKSLASH;
+        else
         {
-          GETCHARINCTEST(c, ptr);   // Get character value, increment pointer
+          GETCHARINCTEST(c, ptr); // Get character value, increment pointer
         }
-        escape = 0;                 // Treat as literal character
+        escape = 0; // Treat as literal character
       }
 
       /* The escape was a data escape or literal character. */
@@ -3732,7 +3933,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
         case ESC_X:
 #ifndef SUPPORT_UNICODE
-          errorcode = ERR45;   // Supported only with Unicode support
+          errorcode = ERR45; // Supported only with Unicode support
           goto ESCAPE_FAILED;
 #endif
         case ESC_H:
@@ -3745,7 +3946,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           *parsed_pattern++ = META_ESCAPE + escape;
           break;
 
-        default:    // \A, \B, \b, \G, \K, \Z, \z cannot be quantified.
+        default: // \A, \B, \b, \G, \K, \Z, \z cannot be quantified.
           *parsed_pattern++ = META_ESCAPE + escape;
           break;
 
@@ -3758,8 +3959,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         case ESC_w:
         case ESC_W:
           okquantifier = TRUE;
-          parsed_pattern = handle_escdsw(escape, parsed_pattern, options,
-            xoptions);
+          parsed_pattern = handle_escdsw(escape, parsed_pattern, options, xoptions);
           break;
 
           /* Unicode property matching */
@@ -3772,7 +3972,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             uint16_t ptype = 0, pdata = 0;
             if (!get_ucp(&ptr, utf, &negated, &ptype, &pdata, &errorcode, cb))
               goto ESCAPE_FAILED;
-            if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
+            if (negated)
+              escape = (escape == ESC_P) ? ESC_p : ESC_P;
             *parsed_pattern++ = META_ESCAPE + escape;
             *parsed_pattern++ = (ptype << 16) | pdata;
             okquantifier = TRUE;
@@ -3781,7 +3982,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           errorcode = ERR45;
           goto ESCAPE_FAILED;
 #endif
-          break;  // End \P and \p
+          break; // End \P and \p
 
           /* When \g is used with quotes or angle brackets as delimiters, it is a
           numerical or named subroutine call, and control comes here. When used
@@ -3791,15 +3992,15 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
         case ESC_g:
         case ESC_k:
-          if (ptr >= ptrend || (*ptr != CHAR_LEFT_CURLY_BRACKET &&
-              *ptr != CHAR_LESS_THAN_SIGN && *ptr != CHAR_APOSTROPHE))
+          if (ptr >= ptrend || (*ptr != CHAR_LEFT_CURLY_BRACKET && *ptr != CHAR_LESS_THAN_SIGN &&
+                                *ptr != CHAR_APOSTROPHE))
           {
-            errorcode = (escape == ESC_g)? ERR57 : ERR69;
+            errorcode = (escape == ESC_g) ? ERR57 : ERR69;
             goto ESCAPE_FAILED;
           }
-          terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
-            CHAR_GREATER_THAN_SIGN : (*ptr == CHAR_APOSTROPHE)?
-            CHAR_APOSTROPHE : CHAR_RIGHT_CURLY_BRACKET;
+          terminator = (*ptr == CHAR_LESS_THAN_SIGN) ? CHAR_GREATER_THAN_SIGN
+                       : (*ptr == CHAR_APOSTROPHE)   ? CHAR_APOSTROPHE
+                                                     : CHAR_RIGHT_CURLY_BRACKET;
 
           /* For a non-braced \g, check for a numerical recursion. */
 
@@ -3807,41 +4008,41 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           {
             PCRE2_SPTR p = ptr + 1;
 
-            if (read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i,
-                &errorcode))
+            if (read_number(&p, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i, &errorcode))
             {
               if (p >= ptrend || *p != terminator)
               {
                 ptr = p;
-                errorcode = ERR119;  // Missing terminator for number
+                errorcode = ERR119; // Missing terminator for number
                 goto ESCAPE_FAILED;
               }
               ptr = p + 1;
               goto SET_RECURSION;
             }
-            if (errorcode != 0) goto ESCAPE_FAILED;
+            if (errorcode != 0)
+              goto ESCAPE_FAILED;
           }
 
           /* Not a numerical recursion. Perl allows spaces and tabs after { and
           before } but not for other delimiters. */
 
-          if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
-              &errorcode, cb)) goto ESCAPE_FAILED;
+          if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen, &errorcode, cb))
+            goto ESCAPE_FAILED;
 
           /* \k and \g when used with braces are back references, whereas \g used
           with quotes or angle brackets is a recursion */
 
-          *parsed_pattern++ =
-            (escape == ESC_k || terminator == CHAR_RIGHT_CURLY_BRACKET)?
-              META_BACKREF_BYNAME : META_RECURSE_BYNAME;
+          *parsed_pattern++ = (escape == ESC_k || terminator == CHAR_RIGHT_CURLY_BRACKET)
+                                  ? META_BACKREF_BYNAME
+                                  : META_RECURSE_BYNAME;
           *parsed_pattern++ = namelen;
 
           PUTOFFSET(offset, parsed_pattern);
           okquantifier = TRUE;
-          break;  // End special escape processing
+          break; // End special escape processing
         }
       }
-      break;    // End escape sequence processing
+      break; // End escape sequence processing
 
 
       /* ---- Single-character special items ---- */
@@ -3878,12 +4079,12 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       /* ---- Potential {n,m} quantifier ---- */
 
     case CHAR_LEFT_CURLY_BRACKET:
-      if (!read_repeat_counts(&ptr, ptrend, &min_repeat, &max_repeat,
-          &errorcode))
+      if (!read_repeat_counts(&ptr, ptrend, &min_repeat, &max_repeat, &errorcode))
       {
-        if (errorcode != 0) goto FAILED;     // Error in quantifier.
-        PARSED_LITERAL(c, parsed_pattern);   // Not a quantifier
-        break;                               // No more quantifier processing
+        if (errorcode != 0)
+          goto FAILED;                     // Error in quantifier.
+        PARSED_LITERAL(c, parsed_pattern); // Not a quantifier
+        break;                             // No more quantifier processing
       }
       meta_quantifier = META_MINMAX;
       /* Fall through */
@@ -3894,7 +4095,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       /* Check that a quantifier is allowed after the previous item. This
       guarantees that there is a previous item. */
 
-      CHECK_QUANTIFIER:
+    CHECK_QUANTIFIER:
       if (!prev_okquantifier)
       {
         errorcode = ERR9;
@@ -3910,7 +4111,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       if (*prev_parsed_item == META_ACCEPT)
       {
         uint32_t *p;
-        for (p = parsed_pattern - 1; p >= verbstartptr; p--) p[1] = p[0];
+        for (p = parsed_pattern - 1; p >= verbstartptr; p--)
+          p[1] = p[0];
         *verbstartptr = META_NOCAPTURE;
         parsed_pattern[1] = META_KET;
         parsed_pattern += 2;
@@ -3945,9 +4147,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       by \b(?=\w) and \b(?<=\w) respectively. Sequences like [a[:<:]] are
       erroneous and are handled by the normal code below. */
 
-      if (ptrend - ptr >= 6 &&
-           (PRIV(strncmp_c8)(ptr, STRING_WEIRD_STARTWORD, 6) == 0 ||
-            PRIV(strncmp_c8)(ptr, STRING_WEIRD_ENDWORD, 6) == 0))
+      if (ptrend - ptr >= 6 && (PRIV(strncmp_c8)(ptr, STRING_WEIRD_STARTWORD, 6) == 0 ||
+                                PRIV(strncmp_c8)(ptr, STRING_WEIRD_ENDWORD, 6) == 0))
       {
         *parsed_pattern++ = META_ESCAPE + ESC_b;
 
@@ -3982,22 +4183,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       /* PCRE supports POSIX class stuff inside a class. Perl gives an error if
       they are encountered at the top level, so we'll do that too. */
 
-      if (ptr < ptrend && (*ptr == CHAR_COLON || *ptr == CHAR_DOT ||
-           *ptr == CHAR_EQUALS_SIGN) &&
+      if (ptr < ptrend && (*ptr == CHAR_COLON || *ptr == CHAR_DOT || *ptr == CHAR_EQUALS_SIGN) &&
           check_posix_syntax(ptr, ptrend, &tempptr))
       {
-        errorcode = (*ptr-- == CHAR_COLON)? ERR12 : ERR13;
+        errorcode = (*ptr-- == CHAR_COLON) ? ERR12 : ERR13;
         ptr = tempptr + 2;
         goto FAILED;
       }
 
-      class_mode_state = ((options & PCRE2_ALT_EXTENDED_CLASS) != 0)?
-          CLASS_MODE_ALT_EXT : CLASS_MODE_NORMAL;
+      class_mode_state =
+          ((options & PCRE2_ALT_EXTENDED_CLASS) != 0) ? CLASS_MODE_ALT_EXT : CLASS_MODE_NORMAL;
 
       /* Jump here from '(?[...])'. That jump must initialize class_mode_state,
       set c to the '[' character, and ptr to just after the '['. */
 
-      FROM_PERL_EXTENDED_CLASS:
+    FROM_PERL_EXTENDED_CLASS:
       okquantifier = TRUE;
 
       /* In an EBCDIC environment, Perl treats alphabetic ranges specially
@@ -4029,8 +4229,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         {
           if (c == CHAR_BACKSLASH && ptr < ptrend && *ptr == CHAR_E)
           {
-            inescq = FALSE;                   // Reset literal state
-            ptr++;                            // Skip the 'E'
+            inescq = FALSE; // Reset literal state
+            ptr++;          // Skip the 'E'
             goto CLASS_CONTINUE;
           }
 
@@ -4051,8 +4251,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         inside a Perl extended class (which implies /xx). */
 
         if ((c == CHAR_SPACE || c == CHAR_HT) &&
-            ((options & PCRE2_EXTENDED_MORE) != 0 ||
-             class_mode_state >= CLASS_MODE_PERL_EXT))
+            ((options & PCRE2_EXTENDED_MORE) != 0 || class_mode_state >= CLASS_MODE_PERL_EXT))
           goto CLASS_CONTINUE;
 
         /* Handle POSIX class names. Perl allows a negation extension of the
@@ -4061,11 +4260,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         [.ch.] and [=ch=] ("collating elements") and fault them, as Perl
         5.6 and 5.8 do. */
 
-        if (class_depth_m1 >= 0 &&
-            c == CHAR_LEFT_SQUARE_BRACKET &&
-            ptrend - ptr >= 3 &&
-            (*ptr == CHAR_COLON || *ptr == CHAR_DOT ||
-             *ptr == CHAR_EQUALS_SIGN) &&
+        if (class_depth_m1 >= 0 && c == CHAR_LEFT_SQUARE_BRACKET && ptrend - ptr >= 3 &&
+            (*ptr == CHAR_COLON || *ptr == CHAR_DOT || *ptr == CHAR_EQUALS_SIGN) &&
             check_posix_syntax(ptr, ptrend, &tempptr))
         {
           BOOL posix_negate = FALSE;
@@ -4100,8 +4296,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           /* Disallow implicit union in Perl extended classes. */
 
-          if (class_op_state == CLASS_OP_OPERAND &&
-              class_mode_state == CLASS_MODE_PERL_EXT)
+          if (class_op_state == CLASS_OP_OPERAND && class_mode_state == CLASS_MODE_PERL_EXT)
           {
             ptr = tempptr + 2;
             errorcode = ERR113;
@@ -4146,34 +4341,33 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           some classes. */
 
 #ifdef SUPPORT_UNICODE
-          if ((options & PCRE2_UCP) != 0 &&
-              (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0 &&
+          if ((options & PCRE2_UCP) != 0 && (xoptions & PCRE2_EXTRA_ASCII_POSIX) == 0 &&
               !((xoptions & PCRE2_EXTRA_ASCII_DIGIT) != 0 &&
                 (posix_class == PC_DIGIT || posix_class == PC_XDIGIT)))
           {
-            int ptype = posix_substitutes[2*posix_class];
-            int pvalue = posix_substitutes[2*posix_class + 1];
+            int ptype = posix_substitutes[2 * posix_class];
+            int pvalue = posix_substitutes[2 * posix_class + 1];
 
             if (ptype >= 0)
             {
-              *parsed_pattern++ = META_ESCAPE + (posix_negate? ESC_P : ESC_p);
+              *parsed_pattern++ = META_ESCAPE + (posix_negate ? ESC_P : ESC_p);
               *parsed_pattern++ = (ptype << 16) | pvalue;
               goto CLASS_CONTINUE;
             }
 
             if (pvalue != 0)
             {
-              *parsed_pattern++ = META_ESCAPE + (posix_negate? ESC_H : ESC_h);
+              *parsed_pattern++ = META_ESCAPE + (posix_negate ? ESC_H : ESC_h);
               goto CLASS_CONTINUE;
             }
 
             /* Fall through */
           }
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
           /* Non-UCP POSIX class */
 
-          *parsed_pattern++ = posix_negate? META_POSIX_NEG : META_POSIX;
+          *parsed_pattern++ = posix_negate ? META_POSIX_NEG : META_POSIX;
           *parsed_pattern++ = posix_class;
         }
 
@@ -4182,8 +4376,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         else if ((c == CHAR_LEFT_SQUARE_BRACKET &&
                   (class_depth_m1 < 0 || class_mode_state == CLASS_MODE_ALT_EXT ||
                    class_mode_state == CLASS_MODE_PERL_EXT)) ||
-                 (c == CHAR_LEFT_PARENTHESIS &&
-                  class_mode_state == CLASS_MODE_PERL_EXT))
+                 (c == CHAR_LEFT_PARENTHESIS && class_mode_state == CLASS_MODE_PERL_EXT))
         {
           uint32_t start_c = c;
           uint32_t new_class_mode_state;
@@ -4191,8 +4384,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           /* Update the class mode, if moving into a 'leaf' inside a Perl extended
           class. */
 
-          if (start_c == CHAR_LEFT_SQUARE_BRACKET &&
-              class_mode_state == CLASS_MODE_PERL_EXT && class_depth_m1 >= 0)
+          if (start_c == CHAR_LEFT_SQUARE_BRACKET && class_mode_state == CLASS_MODE_PERL_EXT &&
+              class_depth_m1 >= 0)
             new_class_mode_state = CLASS_MODE_PERL_EXT_LEAF;
           else
             new_class_mode_state = class_mode_state;
@@ -4205,8 +4398,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           /* Disallow implicit union in Perl extended classes. */
 
-          if (class_op_state == CLASS_OP_OPERAND &&
-              class_mode_state == CLASS_MODE_PERL_EXT)
+          if (class_op_state == CLASS_OP_OPERAND && class_mode_state == CLASS_MODE_PERL_EXT)
           {
             errorcode = ERR113;
             goto FAILED;
@@ -4215,8 +4407,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           /* Validate nesting depth */
           if (class_depth_m1 >= ECLASS_NEST_LIMIT - 1)
           {
-            ptr--;  // Point rightwards at the paren, same as ERR19.
-            errorcode = ERR107;  // Classes too deeply nested
+            ptr--;              // Point rightwards at the paren, same as ERR19.
+            errorcode = ERR107; // Classes too deeply nested
             goto FAILED;
           }
 
@@ -4231,30 +4423,33 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             if (ptr >= ptrend)
             {
               if (start_c == CHAR_LEFT_PARENTHESIS)
-                errorcode = ERR14;  // Missing terminating ')'
+                errorcode = ERR14; // Missing terminating ')'
               else
-                errorcode = ERR6;   // Missing terminating ']'
+                errorcode = ERR6; // Missing terminating ']'
               goto FAILED;
             }
 
             GETCHARINCTEST(c, ptr);
-            if (new_class_mode_state == CLASS_MODE_PERL_EXT) break;
+            if (new_class_mode_state == CLASS_MODE_PERL_EXT)
+              break;
             else if (c == CHAR_BACKSLASH)
             {
-              if (ptr < ptrend && *ptr == CHAR_E) ptr++;
+              if (ptr < ptrend && *ptr == CHAR_E)
+                ptr++;
               else if (ptrend - ptr >= 3 &&
-                  PRIV(strncmp_c8)(ptr, STR_Q STR_BACKSLASH STR_E, 3) == 0)
+                       PRIV(strncmp_c8)(ptr, STR_Q STR_BACKSLASH STR_E, 3) == 0)
                 ptr += 3;
               else
                 break;
             }
-            else if ((c == CHAR_SPACE || c == CHAR_HT) &&  // Note: just these two
+            else if ((c == CHAR_SPACE || c == CHAR_HT) && // Note: just these two
                      ((options & PCRE2_EXTENDED_MORE) != 0 ||
                       new_class_mode_state >= CLASS_MODE_PERL_EXT))
               continue;
             else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
               negate_class = TRUE;
-            else break;
+            else
+              break;
           }
 
           /* Now the real contents of the class; c has the first "real" character.
@@ -4275,11 +4470,12 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
               class_start = NULL;
             }
 
-            *parsed_pattern++ = negate_class? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
+            *parsed_pattern++ = negate_class ? META_CLASS_EMPTY_NOT : META_CLASS_EMPTY;
 
             /* Leave nesting depth unchanged; but check for zero depth to handle the
             very first (top-level) class being empty. */
-            if (class_depth_m1 < 0) break;
+            if (class_depth_m1 < 0)
+              break;
 
             class_range_state = RANGE_NO; // for processing the containing class
             class_op_state = CLASS_OP_OPERAND;
@@ -4297,7 +4493,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           }
 
           class_start = parsed_pattern;
-          *parsed_pattern++ = negate_class? META_CLASS_NOT : META_CLASS;
+          *parsed_pattern++ = negate_class ? META_CLASS_NOT : META_CLASS;
           class_range_state = RANGE_NO;
           class_op_state = CLASS_OP_EMPTY;
           class_mode_state = new_class_mode_state;
@@ -4308,8 +4504,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           cb->class_op_used[class_depth_m1] = 0;
 
           /* Implement the special start-of-class literal meaning of ']'. */
-          if (c == CHAR_RIGHT_SQUARE_BRACKET &&
-              new_class_mode_state != CLASS_MODE_PERL_EXT)
+          if (c == CHAR_RIGHT_SQUARE_BRACKET && new_class_mode_state != CLASS_MODE_PERL_EXT)
           {
             class_range_state = RANGE_OK_LITERAL;
             class_op_state = CLASS_OP_OPERAND;
@@ -4317,7 +4512,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             goto CLASS_CONTINUE;
           }
 
-          continue;  // We have already loaded c with the next character
+          continue; // We have already loaded c with the next character
         }
 
         /* Check for the end of the class. */
@@ -4332,7 +4527,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             if (c == CHAR_RIGHT_SQUARE_BRACKET && class_depth_m1 != 0)
             {
               errorcode = ERR14;
-              ptr--;  // Correct the offset
+              ptr--; // Correct the offset
               goto FAILED;
             }
             if (c == CHAR_RIGHT_PARENTHESIS && class_depth_m1 < 1)
@@ -4350,8 +4545,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           }
 
           /* Check no empty expression for Perl extended expressions. */
-          if (class_mode_state == CLASS_MODE_PERL_EXT &&
-              class_op_state == CLASS_OP_EMPTY)
+          if (class_mode_state == CLASS_MODE_PERL_EXT && class_op_state == CLASS_OP_EMPTY)
           {
             errorcode = ERR114;
             goto FAILED;
@@ -4414,19 +4608,18 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           PCRE2_ASSERT(class_range_state != RANGE_STARTED &&
                        class_range_state != RANGE_FORBID_STARTED);
 
-          *parsed_pattern++ = c == CHAR_PLUS? META_ECLASS_OR :
-                              c == CHAR_VERTICAL_LINE? META_ECLASS_OR :
-                              c == CHAR_MINUS? META_ECLASS_SUB :
-                              c == CHAR_AMPERSAND? META_ECLASS_AND :
-                              META_ECLASS_XOR;
+          *parsed_pattern++ = c == CHAR_PLUS            ? META_ECLASS_OR
+                              : c == CHAR_VERTICAL_LINE ? META_ECLASS_OR
+                              : c == CHAR_MINUS         ? META_ECLASS_SUB
+                              : c == CHAR_AMPERSAND     ? META_ECLASS_AND
+                                                        : META_ECLASS_XOR;
           class_range_state = RANGE_NO;
           class_op_state = CLASS_OP_OPERATOR;
         }
 
         /* Handle a Perl set unary operator */
 
-        else if (class_mode_state == CLASS_MODE_PERL_EXT &&
-                 c == CHAR_EXCLAMATION_MARK)
+        else if (class_mode_state == CLASS_MODE_PERL_EXT && c == CHAR_EXCLAMATION_MARK)
         {
           /* Check that the "!" has not got a preceding operand (i.e. it's the
           start of the class, or follows an operator). */
@@ -4455,8 +4648,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         /* Handle a UTS#18 set operator */
 
         else if (class_mode_state == CLASS_MODE_ALT_EXT &&
-                 (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS ||
-                  c == CHAR_AMPERSAND || c == CHAR_TILDE) &&
+                 (c == CHAR_VERTICAL_LINE || c == CHAR_MINUS || c == CHAR_AMPERSAND ||
+                  c == CHAR_TILDE) &&
                  ptr < ptrend && *ptr == c)
         {
           ++ptr;
@@ -4464,7 +4657,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           /* Check there isn't a triple-repetition. */
           if (ptr < ptrend && *ptr == c)
           {
-            while (ptr < ptrend && *ptr == c) ++ptr;  // Improve error offset.
+            while (ptr < ptrend && *ptr == c)
+              ++ptr; // Improve error offset.
             errorcode = ERR108;
             goto FAILED;
           }
@@ -4496,10 +4690,10 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           if (class_range_state == RANGE_STARTED)
             parsed_pattern[-1] = CHAR_MINUS;
 
-          *parsed_pattern++ = c == CHAR_VERTICAL_LINE? META_ECLASS_OR :
-                              c == CHAR_MINUS? META_ECLASS_SUB :
-                              c == CHAR_AMPERSAND? META_ECLASS_AND :
-                              META_ECLASS_XOR;
+          *parsed_pattern++ = c == CHAR_VERTICAL_LINE ? META_ECLASS_OR
+                              : c == CHAR_MINUS       ? META_ECLASS_SUB
+                              : c == CHAR_AMPERSAND   ? META_ECLASS_AND
+                                                      : META_ECLASS_XOR;
           class_range_state = RANGE_NO;
           class_op_state = CLASS_OP_OPERATOR;
           cb->class_op_used[class_depth_m1] = (uint8_t)c;
@@ -4510,8 +4704,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         else if (c == CHAR_BACKSLASH)
         {
           tempptr = ptr;
-          escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options,
-            xoptions, cb->bracount, TRUE, cb);
+          escape = PRIV(check_escape)(&ptr, ptrend, &c, &errorcode, options, xoptions, cb->bracount,
+                                      TRUE, cb);
 
           if (errorcode != 0)
           {
@@ -4519,43 +4713,45 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
                 class_mode_state >= CLASS_MODE_PERL_EXT)
               goto FAILED;
             ptr = tempptr;
-            if (ptr >= ptrend) c = CHAR_BACKSLASH; else
+            if (ptr >= ptrend)
+              c = CHAR_BACKSLASH;
+            else
             {
-              GETCHARINCTEST(c, ptr);   // Get character value, increment pointer
+              GETCHARINCTEST(c, ptr); // Get character value, increment pointer
             }
-            escape = 0;                 // Treat as literal character
+            escape = 0; // Treat as literal character
           }
 
           switch (escape)
           {
-          case 0:    // Escaped character code point is in c
+          case 0: // Escaped character code point is in c
             char_is_literal = FALSE;
-            goto CLASS_LITERAL;      // (a few lines above)
+            goto CLASS_LITERAL; // (a few lines above)
 
           case ESC_b:
-            c = CHAR_BS;    // \b is backspace in a class
+            c = CHAR_BS; // \b is backspace in a class
             char_is_literal = FALSE;
             goto CLASS_LITERAL;
 
           case ESC_k:
-            c = CHAR_k;     // \k is not special in a class, just like \g
+            c = CHAR_k; // \k is not special in a class, just like \g
             char_is_literal = FALSE;
             goto CLASS_LITERAL;
 
           case ESC_Q:
-            inescq = TRUE;  // Enter literal mode
+            inescq = TRUE; // Enter literal mode
             goto CLASS_CONTINUE;
 
-          case ESC_E:       // Ignore orphan \E
+          case ESC_E: // Ignore orphan \E
             goto CLASS_CONTINUE;
 
-          case ESC_B:       // Always an error in a class
+          case ESC_B: // Always an error in a class
           case ESC_R:
           case ESC_X:
             errorcode = ERR7;
             goto FAILED;
 
-          case ESC_N:       // Not permitted by Perl either
+          case ESC_N: // Not permitted by Perl either
             errorcode = ERR71;
             goto FAILED;
 
@@ -4575,8 +4771,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           case ESC_S:
           case ESC_w:
           case ESC_W:
-            parsed_pattern = handle_escdsw(escape, parsed_pattern, options,
-              xoptions);
+            parsed_pattern = handle_escdsw(escape, parsed_pattern, options, xoptions);
             break;
 
             /* Explicit Unicode property matching */
@@ -4601,7 +4796,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
                 pdata = 0;
               }
 
-              if (negated) escape = (escape == ESC_P)? ESC_p : ESC_P;
+              if (negated)
+                escape = (escape == ESC_P) ? ESC_p : ESC_P;
               *parsed_pattern++ = META_ESCAPE + escape;
               *parsed_pattern++ = (ptype << 16) | pdata;
             }
@@ -4609,7 +4805,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             errorcode = ERR45;
             goto FAILED;
 #endif
-            break;  // End \P and \p
+            break; // End \P and \p
 
             /* All others are not allowed in a class */
 
@@ -4656,8 +4852,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           /* Disallow implicit union in Perl extended classes. */
 
-          if (class_op_state == CLASS_OP_OPERAND &&
-              class_mode_state == CLASS_MODE_PERL_EXT)
+          if (class_op_state == CLASS_OP_OPERAND && class_mode_state == CLASS_MODE_PERL_EXT)
           {
             errorcode = ERR113;
             goto FAILED;
@@ -4680,8 +4875,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
         else if (c == CHAR_MINUS && class_range_state >= RANGE_OK_ESCAPED)
         {
-          *parsed_pattern++ = (class_range_state == RANGE_OK_LITERAL)?
-            META_RANGE_LITERAL : META_RANGE_ESCAPED;
+          *parsed_pattern++ =
+              (class_range_state == RANGE_OK_LITERAL) ? META_RANGE_LITERAL : META_RANGE_ESCAPED;
           class_range_state = RANGE_STARTED;
         }
 
@@ -4698,12 +4893,11 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
         else
         {
-          CLASS_LITERAL:
+        CLASS_LITERAL:
 
           /* Disallow implicit union in Perl extended classes. */
 
-          if (class_op_state == CLASS_OP_OPERAND &&
-              class_mode_state == CLASS_MODE_PERL_EXT)
+          if (class_op_state == CLASS_OP_OPERAND && class_mode_state == CLASS_MODE_PERL_EXT)
           {
             errorcode = ERR113;
             goto FAILED;
@@ -4711,9 +4905,9 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           if (class_range_state == RANGE_STARTED)
           {
-            if (c == parsed_pattern[-2])       // Optimize one-char range
+            if (c == parsed_pattern[-2]) // Optimize one-char range
               parsed_pattern--;
-            else if (parsed_pattern[-2] > c)   // Check range is in order
+            else if (parsed_pattern[-2] > c) // Check range is in order
             {
               errorcode = ERR8;
               goto FAILED;
@@ -4733,10 +4927,9 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             errorcode = ERR50;
             goto FAILED;
           }
-          else  // Potential start of range
+          else // Potential start of range
           {
-            class_range_state = char_is_literal?
-              RANGE_OK_LITERAL : RANGE_OK_ESCAPED;
+            class_range_state = char_is_literal ? RANGE_OK_LITERAL : RANGE_OK_ESCAPED;
             class_op_state = CLASS_OP_OPERAND;
             PARSED_LITERAL(c, parsed_pattern);
           }
@@ -4744,28 +4937,29 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
         /* Proceed to next thing in the class. */
 
-        CLASS_CONTINUE:
+      CLASS_CONTINUE:
         if (ptr >= ptrend)
         {
           if (class_mode_state == CLASS_MODE_PERL_EXT && class_depth_m1 > 0)
-            errorcode = ERR14;   // Missing terminating ')'
-          if (class_mode_state == CLASS_MODE_ALT_EXT &&
-              class_depth_m1 == 0 && class_maxdepth_m1 == 1)
-            errorcode = ERR112;  // Missing terminating ']', but we saw '[ [ ]...'
+            errorcode = ERR14; // Missing terminating ')'
+          if (class_mode_state == CLASS_MODE_ALT_EXT && class_depth_m1 == 0 &&
+              class_maxdepth_m1 == 1)
+            errorcode = ERR112; // Missing terminating ']', but we saw '[ [ ]...'
           else
-            errorcode = ERR6;    // Missing terminating ']'
+            errorcode = ERR6; // Missing terminating ']'
           goto FAILED;
         }
         GETCHARINCTEST(c, ptr);
-      }       // End of class-processing loop
+      } // End of class-processing loop
 
-      break;  // End of character class
+      break; // End of character class
 
 
       /* ---- Opening parenthesis ---- */
 
     case CHAR_LEFT_PARENTHESIS:
-      if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+      if (ptr >= ptrend)
+        goto UNCLOSED_PARENTHESIS;
 
       /* If ( is not followed by ? it is either a capture or a special verb or an
       alpha assertion or a positive non-atomic lookahead. */
@@ -4790,7 +4984,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             cb->bracount++;
             *parsed_pattern++ = META_CAPTURE | cb->bracount;
           }
-          else *parsed_pattern++ = META_NOCAPTURE;
+          else
+            *parsed_pattern++ = META_NOCAPTURE;
         }
 
         /* Do nothing for (* followed by end of pattern or ) so it gives a "bad
@@ -4810,12 +5005,13 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           uint32_t meta;
 
           vn = alasnames;
-          if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen,
-            &errorcode, cb)) goto FAILED;
-          if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+          if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen, &errorcode, cb))
+            goto FAILED;
+          if (ptr >= ptrend)
+            goto UNCLOSED_PARENTHESIS;
           if (*ptr != CHAR_COLON)
           {
-            errorcode = ERR95;  // Malformed
+            errorcode = ERR95; // Malformed
             goto FAILED_FORWARD;
           }
 
@@ -4823,15 +5019,14 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           for (i = 0; i < alascount; i++)
           {
-            if (namelen == alasmeta[i].len &&
-                PRIV(strncmp_c8)(name, vn, namelen) == 0)
+            if (namelen == alasmeta[i].len && PRIV(strncmp_c8)(name, vn, namelen) == 0)
               break;
             vn += alasmeta[i].len + 1;
           }
 
           if (i >= alascount)
           {
-            errorcode = ERR95;  // Alpha assertion not recognized
+            errorcode = ERR95; // Alpha assertion not recognized
             goto FAILED;
           }
 
@@ -4839,10 +5034,9 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           lookaround assertions are valid. */
 
           meta = alasmeta[i].meta;
-          if (prev_expect_cond_assert > 0 &&
-              (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
+          if (prev_expect_cond_assert > 0 && (meta < META_LOOKAHEAD || meta > META_LOOKBEHINDNOT))
           {
-            errorcode = ERR28;  // Atomic assertion expected
+            errorcode = ERR28; // Atomic assertion expected
             goto FAILED;
           }
 
@@ -4876,9 +5070,10 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             ptr++;
             *parsed_pattern++ = META_SCS;
 
-            parsed_pattern = parse_capture_list(&ptr, ptrend, utf, parsed_pattern,
-                                                0, &errorcode, cb);
-            if (parsed_pattern == NULL) goto FAILED;
+            parsed_pattern =
+                parse_capture_list(&ptr, ptrend, utf, parsed_pattern, 0, &errorcode, cb);
+            if (parsed_pattern == NULL)
+              goto FAILED;
             goto POST_ASSERTION;
 
           case META_LOOKBEHIND:
@@ -4902,7 +5097,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             if (meta == META_ATOMIC_SCRIPT_RUN)
             {
               *parsed_pattern++ = META_ATOMIC;
-              if (top_nest == NULL) top_nest = (nest_save *)(cb->start_workspace);
+              if (top_nest == NULL)
+                top_nest = (nest_save *)(cb->start_workspace);
               else if (++top_nest >= end_nests)
               {
                 errorcode = ERR84;
@@ -4920,7 +5116,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 #endif
             }
             break;
-#else  /* SUPPORT_UNICODE */
+#else /* SUPPORT_UNICODE */
             errorcode = ERR96;
             goto FAILED;
 #endif
@@ -4933,12 +5129,11 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         else
         {
           vn = verbnames;
-          if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen,
-            &errorcode, cb)) goto FAILED;
-          if (ptr >= ptrend || (*ptr != CHAR_COLON &&
-                                *ptr != CHAR_RIGHT_PARENTHESIS))
+          if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen, &errorcode, cb))
+            goto FAILED;
+          if (ptr >= ptrend || (*ptr != CHAR_COLON && *ptr != CHAR_RIGHT_PARENTHESIS))
           {
-            errorcode = ERR60;  // Malformed
+            errorcode = ERR60; // Malformed
             goto FAILED;
           }
 
@@ -4946,23 +5141,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           for (i = 0; i < verbcount; i++)
           {
-            if (namelen == verbs[i].len &&
-                PRIV(strncmp_c8)(name, vn, namelen) == 0)
+            if (namelen == verbs[i].len && PRIV(strncmp_c8)(name, vn, namelen) == 0)
               break;
             vn += verbs[i].len + 1;
           }
 
           if (i >= verbcount)
           {
-            errorcode = ERR60;  // Verb not recognized
+            errorcode = ERR60; // Verb not recognized
             goto FAILED;
           }
 
           /* An empty argument is treated as no argument. */
 
-          if (*ptr == CHAR_COLON && ptr + 1 < ptrend &&
-               ptr[1] == CHAR_RIGHT_PARENTHESIS)
-            ptr++;    // Advance to the closing parens
+          if (*ptr == CHAR_COLON && ptr + 1 < ptrend && ptr[1] == CHAR_RIGHT_PARENTHESIS)
+            ptr++; // Advance to the closing parens
 
           /* Check for mandatory non-empty argument; this is (*MARK) */
 
@@ -4980,7 +5173,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 #ifdef PCRE2_DEBUG
           /* Reserve space in our bounds check for optionally wrapping the (*ACCEPT)
           with a non-capturing bracket, if there is a following quantifier. */
-          if (okquantifier) parsed_pattern_extra += 2;
+          if (okquantifier)
+            parsed_pattern_extra += 2;
 #endif
 
           /* It appears that Perl allows any characters whatsoever, other than a
@@ -4992,7 +5186,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           main loop take care of this so that escape and \x processing is done by
           the main code above. */
 
-          if (*ptr++ == CHAR_COLON)   // Skip past : or )
+          if (*ptr++ == CHAR_COLON) // Skip past : or )
           {
             /* Some optional arguments can be treated as a preceding (*MARK) */
 
@@ -5007,8 +5201,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
             else
             {
-              *parsed_pattern++ = verbs[i].meta +
-                ((verbs[i].meta != META_MARK)? 0x00010000u:0);
+              *parsed_pattern++ = verbs[i].meta + ((verbs[i].meta != META_MARK) ? 0x00010000u : 0);
             }
 
             /* Set up for reading the name in the main loop. */
@@ -5017,13 +5210,13 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             verbnamestart = ptr;
             inverbname = TRUE;
           }
-          else  // No verb "name" argument
+          else // No verb "name" argument
           {
             *parsed_pattern++ = verbs[i].meta;
           }
-        }       // End of (*VERB) handling
-        break;  // Done with this parenthesis
-      }         // End of groups that don't start with (?
+        } // End of (*VERB) handling
+        break; // Done with this parenthesis
+      } // End of groups that don't start with (?
 
 
       /* ---- Items starting (? ---- */
@@ -5034,19 +5227,21 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       ambiguity about the sequence (?- because if a digit follows it's a relative
       recursion or subroutine call whereas otherwise it's an option unsetting. */
 
-      if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+      if (++ptr >= ptrend)
+        goto UNCLOSED_PARENTHESIS;
 
       switch (*ptr)
       {
       default:
         if (*ptr == CHAR_MINUS && ptrend - ptr > 1 && IS_DIGIT(ptr[1]))
-          goto RECURSION_BYNUMBER;  // The + case is handled by CHAR_PLUS
+          goto RECURSION_BYNUMBER; // The + case is handled by CHAR_PLUS
 
         /* We now have either (?| or a (possibly empty) option setting,
         optionally followed by a non-capturing group. */
 
         nest_depth++;
-        if (top_nest == NULL) top_nest = (nest_save *)(cb->start_workspace);
+        if (top_nest == NULL)
+          top_nest = (nest_save *)(cb->start_workspace);
         else if (++top_nest >= end_nests)
         {
           errorcode = ERR84;
@@ -5089,15 +5284,14 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
           if (ptr < ptrend && *ptr == CHAR_CIRCUMFLEX_ACCENT)
           {
-            options &= ~(PCRE2_CASELESS|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE|
-                         PCRE2_DOTALL|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE);
+            options &= ~(PCRE2_CASELESS | PCRE2_MULTILINE | PCRE2_NO_AUTO_CAPTURE | PCRE2_DOTALL |
+                         PCRE2_EXTENDED | PCRE2_EXTENDED_MORE);
             xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT);
             hyphenok = FALSE;
             ptr++;
           }
 
-          while (ptr < ptrend && *ptr != CHAR_RIGHT_PARENTHESIS &&
-                                 *ptr != CHAR_COLON)
+          while (ptr < ptrend && *ptr != CHAR_RIGHT_PARENTHESIS && *ptr != CHAR_COLON)
           {
             switch (*ptr++)
             {
@@ -5125,7 +5319,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
                 }
                 if (*ptr == CHAR_P)
                 {
-                  *xoptset |= (PCRE2_EXTRA_ASCII_POSIX|PCRE2_EXTRA_ASCII_DIGIT);
+                  *xoptset |= (PCRE2_EXTRA_ASCII_POSIX | PCRE2_EXTRA_ASCII_DIGIT);
                   ptr++;
                   break;
                 }
@@ -5148,22 +5342,33 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
                   break;
                 }
               }
-              *xoptset |= PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|
-                          PCRE2_EXTRA_ASCII_BSW|
-                          PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX;
+              *xoptset |= PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_BSS | PCRE2_EXTRA_ASCII_BSW |
+                          PCRE2_EXTRA_ASCII_DIGIT | PCRE2_EXTRA_ASCII_POSIX;
               break;
 
-            case CHAR_J:    // Record that it changed in the external options
+            case CHAR_J: // Record that it changed in the external options
               *optset |= PCRE2_DUPNAMES;
               cb->external_flags |= PCRE2_JCHANGED;
               break;
 
-            case CHAR_i:   *optset |= PCRE2_CASELESS; break;
-            case CHAR_m:   *optset |= PCRE2_MULTILINE; break;
-            case CHAR_n:   *optset |= PCRE2_NO_AUTO_CAPTURE; break;
-            case CHAR_r:   *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT; break;
-            case CHAR_s:   *optset |= PCRE2_DOTALL; break;
-            case CHAR_U:   *optset |= PCRE2_UNGREEDY; break;
+            case CHAR_i:
+              *optset |= PCRE2_CASELESS;
+              break;
+            case CHAR_m:
+              *optset |= PCRE2_MULTILINE;
+              break;
+            case CHAR_n:
+              *optset |= PCRE2_NO_AUTO_CAPTURE;
+              break;
+            case CHAR_r:
+              *xoptset |= PCRE2_EXTRA_CASELESS_RESTRICT;
+              break;
+            case CHAR_s:
+              *optset |= PCRE2_DOTALL;
+              break;
+            case CHAR_U:
+              *optset |= PCRE2_UNGREEDY;
+              break;
 
               /* If x appears twice it sets the extended extended option. */
 
@@ -5186,7 +5391,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           existing extended-more gets unset. Also, unsetting extended must also
           unset extended-more. */
 
-          if ((set & (PCRE2_EXTENDED|PCRE2_EXTENDED_MORE)) == PCRE2_EXTENDED ||
+          if ((set & (PCRE2_EXTENDED | PCRE2_EXTENDED_MORE)) == PCRE2_EXTENDED ||
               (unset & PCRE2_EXTENDED) != 0)
             unset |= PCRE2_EXTENDED_MORE;
 
@@ -5200,15 +5405,19 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           If the options ended with ':' we are starting a non-capturing group,
           possibly with an options setting. */
 
-          if (ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+          if (ptr >= ptrend)
+            goto UNCLOSED_PARENTHESIS;
           if (*ptr++ == CHAR_RIGHT_PARENTHESIS)
           {
-            nest_depth--;  // This is not a nested group after all.
+            nest_depth--; // This is not a nested group after all.
             if (top_nest > (nest_save *)(cb->start_workspace) &&
-                (top_nest-1)->nest_depth == nest_depth) top_nest--;
-            else top_nest->nest_depth = nest_depth;
+                (top_nest - 1)->nest_depth == nest_depth)
+              top_nest--;
+            else
+              top_nest->nest_depth = nest_depth;
           }
-          else *parsed_pattern++ = META_NOCAPTURE;
+          else
+            *parsed_pattern++ = META_NOCAPTURE;
 
           /* If nothing changed, no need to record. */
 
@@ -5218,14 +5427,15 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             *parsed_pattern++ = options;
             *parsed_pattern++ = xoptions;
           }
-        }       // End options processing
-        break;  // End default case after (?
+        } // End options processing
+        break; // End default case after (?
 
 
         /* ---- Python syntax support ---- */
 
       case CHAR_P:
-        if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+        if (++ptr >= ptrend)
+          goto UNCLOSED_PARENTHESIS;
 
         /* (?P<name> is the same as (?<name>, which defines a named group. */
 
@@ -5238,7 +5448,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         /* (?P>name) is the same as (?&name), which is a recursion or subroutine
         call. */
 
-        if (*ptr == CHAR_GREATER_THAN_SIGN) goto RECURSE_BY_NAME;
+        if (*ptr == CHAR_GREATER_THAN_SIGN)
+          goto RECURSE_BY_NAME;
 
         /* (?P=name) is the same as \k<name>, a back reference by name. Anything
         else after (?P is an error. */
@@ -5248,19 +5459,20 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           errorcode = ERR41;
           goto FAILED_FORWARD;
         }
-        if (!read_name(&ptr, ptrend, utf, CHAR_RIGHT_PARENTHESIS, &offset, &name,
-            &namelen, &errorcode, cb)) goto FAILED;
+        if (!read_name(&ptr, ptrend, utf, CHAR_RIGHT_PARENTHESIS, &offset, &name, &namelen,
+                       &errorcode, cb))
+          goto FAILED;
         *parsed_pattern++ = META_BACKREF_BYNAME;
         *parsed_pattern++ = namelen;
         PUTOFFSET(offset, parsed_pattern);
         okquantifier = TRUE;
-        break;   // End of (?P processing
+        break; // End of (?P processing
 
 
         /* ---- Recursion/subroutine calls by number ---- */
 
       case CHAR_R:
-        i = 0;         // (?R) == (?R0)
+        i = 0; // (?R) == (?R0)
         ptr++;
         if (ptr >= ptrend || (*ptr != CHAR_RIGHT_PARENTHESIS && *ptr != CHAR_LEFT_PARENTHESIS))
         {
@@ -5281,23 +5493,31 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         }
         if (!IS_DIGIT(ptr[1]))
         {
-          errorcode = ERR29;   // Missing number
+          errorcode = ERR29; // Missing number
           ++ptr;
           goto FAILED_FORWARD;
         }
         PCRE2_FALLTHROUGH /* Fall through */
 
-      case CHAR_0: case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4:
-      case CHAR_5: case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
-        RECURSION_BYNUMBER:
+      case CHAR_0:
+      case CHAR_1:
+      case CHAR_2:
+      case CHAR_3:
+      case CHAR_4:
+      case CHAR_5:
+      case CHAR_6:
+      case CHAR_7:
+      case CHAR_8:
+      case CHAR_9:
+      RECURSION_BYNUMBER:
         if (!read_number(&ptr, ptrend,
-            (IS_DIGIT(*ptr))? -1:(int)(cb->bracount), // + and - are relative
-            MAX_GROUP_NUMBER, ERR61,
-            &i, &errorcode)) goto FAILED;
-        PCRE2_ASSERT(i >= 0);  // NB (?0) is permitted, represented by i=0
+                         (IS_DIGIT(*ptr)) ? -1 : (int)(cb->bracount), // + and - are relative
+                         MAX_GROUP_NUMBER, ERR61, &i, &errorcode))
+          goto FAILED;
+        PCRE2_ASSERT(i >= 0); // NB (?0) is permitted, represented by i=0
         terminator = CHAR_NUL;
 
-        SET_RECURSION:
+      SET_RECURSION:
         *parsed_pattern++ = META_RECURSE | (uint32_t)i;
         offset = (PCRE2_SIZE)(ptr - cb->start_pattern);
         /* End of recursive call by number handling */
@@ -5307,25 +5527,27 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         /* ---- Recursion/subroutine calls by name ---- */
 
       case CHAR_AMPERSAND:
-        RECURSE_BY_NAME:
-        if (!read_name(&ptr, ptrend, utf, 0, &offset, &name,
-            &namelen, &errorcode, cb)) goto FAILED;
+      RECURSE_BY_NAME:
+        if (!read_name(&ptr, ptrend, utf, 0, &offset, &name, &namelen, &errorcode, cb))
+          goto FAILED;
         *parsed_pattern++ = META_RECURSE_BYNAME;
         *parsed_pattern++ = namelen;
         terminator = CHAR_NUL;
 
-        READ_RECURSION_ARGUMENTS:
+      READ_RECURSION_ARGUMENTS:
         PUTOFFSET(offset, parsed_pattern);
         okquantifier = TRUE;
 
         /* Arguments are not supported for \g construct. */
-        if (terminator != CHAR_NUL) break;
+        if (terminator != CHAR_NUL)
+          break;
 
         if (ptr < ptrend && *ptr == CHAR_LEFT_PARENTHESIS)
         {
-          parsed_pattern = parse_capture_list(&ptr, ptrend, utf, parsed_pattern,
-                                              offset, &errorcode, cb);
-          if (parsed_pattern == NULL) goto FAILED;
+          parsed_pattern =
+              parse_capture_list(&ptr, ptrend, utf, parsed_pattern, offset, &errorcode, cb);
+          if (parsed_pattern == NULL)
+            goto FAILED;
         }
 
         if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
@@ -5344,7 +5566,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           goto FAILED;
         }
 
-        if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+        if (++ptr >= ptrend)
+          goto UNCLOSED_PARENTHESIS;
 
         /* If the previous item was a condition starting (?(? an assertion,
         optionally preceded by a callout, is expected. This is checked later on,
@@ -5363,8 +5586,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         callout, abolish it. */
 
         if (previous_callout != NULL && (options & PCRE2_AUTO_CALLOUT) != 0 &&
-            previous_callout == parsed_pattern - 4 &&
-            parsed_pattern[-1] == 255)
+            previous_callout == parsed_pattern - 4 && parsed_pattern[-1] == 255)
           parsed_pattern = previous_callout;
 
         /* Save for updating next pattern item length, and skip one item before
@@ -5396,14 +5618,14 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           }
 
           *parsed_pattern = META_CALLOUT_STRING;
-          parsed_pattern += 3;   // Skip pattern info
+          parsed_pattern += 3; // Skip pattern info
 
           for (;;)
           {
             if (++ptr >= ptrend)
             {
               errorcode = ERR81;
-              ptr = startptr;   // To give a more useful message
+              ptr = startptr; // To give a more useful message
               goto FAILED;
             }
             if (*ptr == delimiter && (++ptr >= ptrend || *ptr != delimiter))
@@ -5427,8 +5649,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         else
         {
           int n = 0;
-          *parsed_pattern = META_CALLOUT_NUMBER;     // Numerical callout
-          parsed_pattern += 3;                       // Skip pattern info
+          *parsed_pattern = META_CALLOUT_NUMBER; // Numerical callout
+          parsed_pattern += 3;                   // Skip pattern info
           while (ptr < ptrend && IS_DIGIT(*ptr))
           {
             n = n * 10 + (*ptr++ - CHAR_0);
@@ -5455,7 +5677,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 
         previous_callout[1] = (uint32_t)(ptr - cb->start_pattern);
         previous_callout[2] = 0;
-        break;                  // End callout
+        break; // End callout
 
 
         /* ---- Conditional group ---- */
@@ -5478,7 +5700,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         before a condition that is an assertion. */
 
       case CHAR_LEFT_PARENTHESIS:
-        if (++ptr >= ptrend) goto UNCLOSED_PARENTHESIS;
+        if (++ptr >= ptrend)
+          goto UNCLOSED_PARENTHESIS;
         nest_depth++;
 
         /* If the next character is ? or * there must be an assertion next
@@ -5492,15 +5715,14 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         if (*ptr == CHAR_QUESTION_MARK || *ptr == CHAR_ASTERISK)
         {
           *parsed_pattern++ = META_COND_ASSERT;
-          ptr--;   // Pull pointer back to the opening parenthesis.
+          ptr--; // Pull pointer back to the opening parenthesis.
           expect_cond_assert = 2;
-          break;  // End of conditional
+          break; // End of conditional
         }
 
         /* Handle (?([+-]number)... */
 
-        if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i,
-            &errorcode))
+        if (read_number(&ptr, ptrend, cb->bracount, MAX_GROUP_NUMBER, ERR61, &i, &errorcode))
         {
           PCRE2_ASSERT(i >= 0);
           if (i <= 0)
@@ -5513,12 +5735,12 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           PUTOFFSET(offset, parsed_pattern);
           *parsed_pattern++ = i;
         }
-        else if (errorcode != 0) goto FAILED;   // Number too big
+        else if (errorcode != 0)
+          goto FAILED; // Number too big
 
         /* No number found. Handle the special case (?(VERSION[>]=n.m)... */
 
-        else if (ptrend - ptr >= 10 &&
-                 PRIV(strncmp_c8)(ptr, STRING_VERSION, 7) == 0 &&
+        else if (ptrend - ptr >= 10 && PRIV(strncmp_c8)(ptr, STRING_VERSION, 7) == 0 &&
                  ptr[7] != CHAR_RIGHT_PARENTHESIS)
         {
           uint32_t ge = 0;
@@ -5538,7 +5760,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           if (*ptr != CHAR_EQUALS_SIGN || (ptr++, !IS_DIGIT(*ptr)))
           {
             errorcode = ERR79;
-            if (!ge) goto FAILED_FORWARD;
+            if (!ge)
+              goto FAILED_FORWARD;
             goto FAILED;
           }
 
@@ -5550,7 +5773,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             if (++ptr >= ptrend || !IS_DIGIT(*ptr))
             {
               errorcode = ERR79;
-              if (ptr < ptrend) goto FAILED_FORWARD;
+              if (ptr < ptrend)
+                goto FAILED_FORWARD;
               goto FAILED;
             }
             if (!read_number(&ptr, ptrend, -1, 1000, ERR79, &minor, &errorcode))
@@ -5559,7 +5783,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
           {
             errorcode = ERR79;
-            if (ptr < ptrend) goto FAILED_FORWARD;
+            if (ptr < ptrend)
+              goto FAILED_FORWARD;
             goto FAILED;
           }
 
@@ -5592,18 +5817,18 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           else
           {
             terminator = CHAR_RIGHT_PARENTHESIS;
-            ptr--;   // Point to char before name
+            ptr--; // Point to char before name
           }
 
-          if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
-              &errorcode, cb)) goto FAILED;
+          if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen, &errorcode, cb))
+            goto FAILED;
 
           /* Handle (?(R&name) */
 
           if (was_r_ampersand)
           {
             *parsed_pattern = META_COND_RNAME;
-            ptr--;   // Back to closing parens
+            ptr--; // Back to closing parens
           }
 
           /* Handle (?(name). If the name is "DEFINE" we identify it with a
@@ -5617,23 +5842,26 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             else
             {
               for (i = 1; i < (int)namelen; i++)
-                if (!IS_DIGIT(name[i])) break;
-              *parsed_pattern = (*name == CHAR_R && i >= (int)namelen)?
-                META_COND_RNUMBER : META_COND_NAME;
+                if (!IS_DIGIT(name[i]))
+                  break;
+              *parsed_pattern =
+                  (*name == CHAR_R && i >= (int)namelen) ? META_COND_RNUMBER : META_COND_NAME;
             }
-            ptr--;   // Back to closing parens
+            ptr--; // Back to closing parens
           }
 
           /* Handle (?('name') or (?(<name>) */
 
-          else *parsed_pattern = META_COND_NAME;
+          else
+            *parsed_pattern = META_COND_NAME;
 
           /* All these cases except DEFINE end with the name length and offset;
           DEFINE just has an offset (for the "too many branches" error). */
 
-          if (*parsed_pattern++ != META_COND_DEFINE) *parsed_pattern++ = namelen;
+          if (*parsed_pattern++ != META_COND_DEFINE)
+            *parsed_pattern++ = namelen;
           PUTOFFSET(offset, parsed_pattern);
-        }    // End cases that read a name
+        } // End cases that read a name
 
         /* Check the closing parenthesis of the condition */
 
@@ -5643,13 +5871,13 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           goto FAILED;
         }
         ptr++;
-        break;  // End of condition processing
+        break; // End of condition processing
 
 
         /* ---- Atomic group ---- */
 
       case CHAR_GREATER_THAN_SIGN:
-        ATOMIC_GROUP:                          // Come from (*atomic:
+      ATOMIC_GROUP: // Come from (*atomic:
         *parsed_pattern++ = META_ATOMIC;
         nest_depth++;
         ptr++;
@@ -5659,19 +5887,19 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         /* ---- Lookahead assertions ---- */
 
       case CHAR_EQUALS_SIGN:
-        POSITIVE_LOOK_AHEAD:                   // Come from (*pla:
+      POSITIVE_LOOK_AHEAD: // Come from (*pla:
         *parsed_pattern++ = META_LOOKAHEAD;
         ptr++;
         goto POST_ASSERTION;
 
       case CHAR_ASTERISK:
-        POSITIVE_NONATOMIC_LOOK_AHEAD:         // Come from (*napla:
+      POSITIVE_NONATOMIC_LOOK_AHEAD: // Come from (*napla:
         *parsed_pattern++ = META_LOOKAHEAD_NA;
         ptr++;
         goto POST_ASSERTION;
 
       case CHAR_EXCLAMATION_MARK:
-        NEGATIVE_LOOK_AHEAD:                   // Come from (*nla:
+      NEGATIVE_LOOK_AHEAD: // Come from (*nla:
         *parsed_pattern++ = META_LOOKAHEADNOT;
         ptr++;
         goto POST_ASSERTION;
@@ -5683,19 +5911,17 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         is the start of the name of a capturing group. */
 
       case CHAR_LESS_THAN_SIGN:
-        if (ptrend - ptr <= 1 ||
-           (ptr[1] != CHAR_EQUALS_SIGN &&
-            ptr[1] != CHAR_EXCLAMATION_MARK &&
-            ptr[1] != CHAR_ASTERISK))
+        if (ptrend - ptr <= 1 || (ptr[1] != CHAR_EQUALS_SIGN && ptr[1] != CHAR_EXCLAMATION_MARK &&
+                                  ptr[1] != CHAR_ASTERISK))
         {
           terminator = CHAR_GREATER_THAN_SIGN;
           goto DEFINE_NAME;
         }
-        *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)?
-          META_LOOKBEHIND : (ptr[1] == CHAR_EXCLAMATION_MARK)?
-          META_LOOKBEHINDNOT : META_LOOKBEHIND_NA;
+        *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)        ? META_LOOKBEHIND
+                            : (ptr[1] == CHAR_EXCLAMATION_MARK) ? META_LOOKBEHINDNOT
+                                                                : META_LOOKBEHIND_NA;
 
-        POST_LOOKBEHIND:           // Come from (*plb: (*naplb: and (*nlb:
+      POST_LOOKBEHIND: // Come from (*plb: (*naplb: and (*nlb:
         *has_lookbehind = TRUE;
         offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
         PUTOFFSET(offset, parsed_pattern);
@@ -5711,11 +5937,12 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         assertion. Multiple callouts or any other items will make it zero or
         less, which doesn't matter because they will cause an error later. */
 
-        POST_ASSERTION:
+      POST_ASSERTION:
         nest_depth++;
         if (prev_expect_cond_assert > 0)
         {
-          if (top_nest == NULL) top_nest = (nest_save *)(cb->start_workspace);
+          if (top_nest == NULL)
+            top_nest = (nest_save *)(cb->start_workspace);
           else if (++top_nest >= end_nests)
           {
             errorcode = ERR84;
@@ -5736,11 +5963,11 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         terminator set to '>'. */
 
       case CHAR_APOSTROPHE:
-        terminator = CHAR_APOSTROPHE;    // Terminator
+        terminator = CHAR_APOSTROPHE; // Terminator
 
-        DEFINE_NAME:
-        if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen,
-            &errorcode, cb)) goto FAILED;
+      DEFINE_NAME:
+        if (!read_name(&ptr, ptrend, utf, terminator, &offset, &name, &namelen, &errorcode, cb))
+          goto FAILED;
 
         /* We have a name for this capturing group. It is also assigned a number,
         which is its primary means of identification. */
@@ -5784,7 +6011,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
           {
             /* When a bracket is referenced by the same name multiple
             times, is not considered as a duplicate and ignored. */
-            if (ng->number == cb->bracount) break;
+            if (ng->number == cb->bracount)
+              break;
             if ((options & PCRE2_DUPNAMES) == 0)
             {
               errorcode = ERR43;
@@ -5792,8 +6020,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
             }
 
             ng->hash_dup |= NAMED_GROUP_IS_DUPNAME;
-            is_dupname = TRUE;                // Mark as a duplicate
-            cb->dupnames = TRUE;              // Duplicate names exist
+            is_dupname = TRUE;   // Mark as a duplicate
+            cb->dupnames = TRUE; // Duplicate names exist
 
             /* The entry represents a duplicate. */
             name = ng->name;
@@ -5814,7 +6042,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         }
 
         /* Ignore duplicate with same number. */
-        if (i < cb->names_found) break;
+        if (i < cb->names_found)
+          break;
 
         /* Increase the list size if necessary */
 
@@ -5822,19 +6051,16 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         {
           uint32_t newsize = cb->named_group_list_size * 2;
           named_group *newspace =
-            cb->cx->memctl.malloc(newsize * sizeof(named_group),
-            cb->cx->memctl.memory_data);
+              cb->cx->memctl.malloc(newsize * sizeof(named_group), cb->cx->memctl.memory_data);
           if (newspace == NULL)
           {
             errorcode = ERR21;
             goto FAILED;
           }
 
-          memcpy(newspace, cb->named_groups,
-            cb->named_group_list_size * sizeof(named_group));
+          memcpy(newspace, cb->named_groups, cb->named_group_list_size * sizeof(named_group));
           if (cb->named_group_list_size > NAMED_GROUP_LIST_SIZE)
-            cb->cx->memctl.free((void *)cb->named_groups,
-            cb->cx->memctl.memory_data);
+            cb->cx->memctl.free((void *)cb->named_groups, cb->cx->memctl.memory_data);
           cb->named_groups = newspace;
           cb->named_group_list_size = newsize;
         }
@@ -5861,8 +6087,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
         class_mode_state = CLASS_MODE_PERL_EXT;
         c = *ptr++;
         goto FROM_PERL_EXTENDED_CLASS;
-      }          // End of (? switch
-      break;     // End of ( handling
+      } // End of (? switch
+      break; // End of ( handling
 
 
       /* ---- Branch terminators ---- */
@@ -5890,8 +6116,7 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       {
         options = (options & ~PARSE_TRACKED_OPTIONS) | top_nest->options;
         xoptions = (xoptions & ~PARSE_TRACKED_EXTRA_OPTIONS) | top_nest->xoptions;
-        if ((top_nest->flags & NSF_RESET) != 0 &&
-            top_nest->max_group > cb->bracount)
+        if ((top_nest->flags & NSF_RESET) != 0 && top_nest->max_group > cb->bracount)
           cb->bracount = top_nest->max_group;
         if ((top_nest->flags & NSF_CONDASSERT) != 0)
           okquantifier = FALSE;
@@ -5906,10 +6131,12 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
 #endif
         }
 
-        if (top_nest == (nest_save *)(cb->start_workspace)) top_nest = NULL;
-          else top_nest--;
+        if (top_nest == (nest_save *)(cb->start_workspace))
+          top_nest = NULL;
+        else
+          top_nest--;
       }
-      if (nest_depth == 0)    // Unmatched closing parenthesis
+      if (nest_depth == 0) // Unmatched closing parenthesis
       {
         errorcode = ERR22;
         goto FAILED;
@@ -5917,8 +6144,8 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
       nest_depth--;
       *parsed_pattern++ = META_KET;
       break;
-    }    // End of switch on pattern character
-  }      // End of main character scan loop
+    } // End of switch on pattern character
+  } // End of main character scan loop
 
   /* End of pattern reached. Check for missing ) at the end of a verb name. */
 
@@ -5929,16 +6156,15 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
   }
 
 
-  PARSED_END:
+PARSED_END:
 
   PCRE2_ASSERT((parsed_pattern - parsed_pattern_check) +
-               (parsed_pattern_extra - parsed_pattern_extra_check) <=
-                 max_parsed_pattern(ptr_check, ptr, utf, options));
+                   (parsed_pattern_extra - parsed_pattern_extra_check) <=
+               max_parsed_pattern(ptr_check, ptr, utf, options));
 
   /* Manage callout for the final item */
 
-  parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout,
-    parsed_pattern, cb);
+  parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout, parsed_pattern, cb);
 
   /* Insert trailing items for word and line matching (features provided for the
   benefit of pcre2grep). */
@@ -5961,38 +6187,41 @@ static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
   if (parsed_pattern >= parsed_pattern_end)
   {
     PCRE2_DEBUG_UNREACHABLE();
-    errorcode = ERR63;  // Internal error (parsed pattern overflow)
+    errorcode = ERR63; // Internal error (parsed pattern overflow)
     goto FAILED;
   }
   /* LCOV_EXCL_STOP */
 
   *parsed_pattern = META_END;
-  if (nest_depth == 0) return 0;
+  if (nest_depth == 0)
+    return 0;
 
-  UNCLOSED_PARENTHESIS:
+UNCLOSED_PARENTHESIS:
   errorcode = ERR14;
 
   /* Come here for all failures. */
 
-  FAILED:
+FAILED:
   cb->erroroffset = (PCRE2_SIZE)(ptr - cb->start_pattern);
   return errorcode;
 
   /* Some errors need to indicate the previous character. */
 
-  FAILED_BACK:
+FAILED_BACK:
   ptr--;
 #ifdef SUPPORT_UNICODE
-  if (utf) BACKCHAR(ptr);
+  if (utf)
+    BACKCHAR(ptr);
 #endif
   goto FAILED;
 
   /* Some errors need to indicate the next character. */
 
-  FAILED_FORWARD:
+FAILED_FORWARD:
   ptr++;
 #ifdef SUPPORT_UNICODE
-  if (utf) FORWARDCHARTEST(ptr, ptrend);
+  if (utf)
+    FORWARDCHARTEST(ptr, ptrend);
 #endif
   goto FAILED;
 }
@@ -6016,7 +6245,7 @@ Arguments:
 Returns:       pointer to the first significant opcode
 */
 
-static const PCRE2_UCHAR*
+static const PCRE2_UCHAR *
 first_significant_code(PCRE2_SPTR code, BOOL skipassert)
 {
   for (;;)
@@ -6027,8 +6256,11 @@ first_significant_code(PCRE2_SPTR code, BOOL skipassert)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ASSERTBACK_NA:
-      if (!skipassert) return code;
-      do code += GET(code, 1); while (*code == OP_ALT);
+      if (!skipassert)
+        return code;
+      do
+        code += GET(code, 1);
+      while (*code == OP_ALT);
       code += PRIV(OP_lengths)[*code];
       break;
 
@@ -6036,7 +6268,8 @@ first_significant_code(PCRE2_SPTR code, BOOL skipassert)
     case OP_NOT_WORD_BOUNDARY:
     case OP_UCP_WORD_BOUNDARY:
     case OP_NOT_UCP_WORD_BOUNDARY:
-      if (!skipassert) return code;
+      if (!skipassert)
+        return code;
       PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_CALLOUT:
@@ -6050,7 +6283,7 @@ first_significant_code(PCRE2_SPTR code, BOOL skipassert)
       break;
 
     case OP_CALLOUT_STR:
-      code += GET(code, 1 + 2*LINK_SIZE);
+      code += GET(code, 1 + 2 * LINK_SIZE);
       break;
 
     case OP_SKIPZERO:
@@ -6059,7 +6292,7 @@ first_significant_code(PCRE2_SPTR code, BOOL skipassert)
 
     case OP_COND:
     case OP_SCOND:
-      if (code[1+LINK_SIZE] != OP_FALSE ||   // Not DEFINE
+      if (code[1 + LINK_SIZE] != OP_FALSE || // Not DEFINE
           code[GET(code, 1)] != OP_KET)      // More than one branch
         return code;
       code += GET(code, 1) + 1 + LINK_SIZE;
@@ -6117,20 +6350,20 @@ Returns:            0 There's been an error, *errorcodeptr is non-zero
 */
 
 static int
-compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
-  PCRE2_UCHAR **codeptr, uint32_t **pptrptr, int *errorcodeptr,
-  uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr,
-  uint32_t *reqcuflagsptr, branch_chain *bcptr, open_capitem *open_caps,
-  compile_block *cb, PCRE2_SIZE *lengthptr)
+compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codeptr,
+               uint32_t **pptrptr, int *errorcodeptr, uint32_t *firstcuptr,
+               uint32_t *firstcuflagsptr, uint32_t *reqcuptr, uint32_t *reqcuflagsptr,
+               branch_chain *bcptr, open_capitem *open_caps, compile_block *cb,
+               PCRE2_SIZE *lengthptr)
 {
   int bravalue = 0;
   int okreturn = -1;
   int group_return = 0;
-  uint32_t repeat_min = 0, repeat_max = 0;      // To please picky compilers
+  uint32_t repeat_min = 0, repeat_max = 0; // To please picky compilers
   uint32_t greedy_default, greedy_non_default;
   uint32_t repeat_type, op_type;
-  uint32_t options = *optionsptr;               // May change dynamically
-  uint32_t xoptions = *xoptionsptr;             // May change dynamically
+  uint32_t options = *optionsptr;   // May change dynamically
+  uint32_t xoptions = *xoptionsptr; // May change dynamically
   uint32_t firstcu, reqcu;
   uint32_t zeroreqcu, zerofirstcu;
   uint32_t *pptr = *pptrptr;
@@ -6161,7 +6394,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 #ifdef SUPPORT_UNICODE
   BOOL utf = (options & PCRE2_UTF) != 0;
   BOOL ucp = (options & PCRE2_UCP) != 0;
-#else  /* No Unicode support */
+#else /* No Unicode support */
   BOOL utf = FALSE;
 #endif
 
@@ -6188,7 +6421,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
   to record the case status of the value. This is used only for ASCII characters.
   */
 
-  req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS : 0;
+  req_caseopt = ((options & PCRE2_CASELESS) != 0) ? REQ_CASELESS : 0;
 
   /* Switch on next META item until the end of the branch */
 
@@ -6219,16 +6452,16 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       if (code >= cb->start_workspace + cb->workspace_size)
       {
         PCRE2_DEBUG_UNREACHABLE();
-        *errorcodeptr = ERR52;  // Over-ran workspace - internal error
+        *errorcodeptr = ERR52; // Over-ran workspace - internal error
         cb->erroroffset = 0;
         return 0;
       }
       /* LCOV_EXCL_STOP */
 
-      if (code > cb->start_workspace + cb->workspace_size -
-          WORK_SIZE_SAFETY_MARGIN)                       // Check for overrun
+      if (code >
+          cb->start_workspace + cb->workspace_size - WORK_SIZE_SAFETY_MARGIN) // Check for overrun
       {
-        *errorcodeptr = ERR86;  // Pattern too complicated
+        *errorcodeptr = ERR86; // Pattern too complicated
         cb->erroroffset = 0;
         return 0;
       }
@@ -6239,7 +6472,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       so we have to allow memory for it. Therefore, don't ever reduce the length
       at this point. */
 
-      if (code < last_code) code = last_code;
+      if (code < last_code)
+        code = last_code;
 
       /* If the next thing is not a quantifier, we add the length of the previous
       item into the total, and reset the code pointer to the start of the
@@ -6247,17 +6481,16 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
       if (meta < META_ASTERISK || meta > META_MINMAX_QUERY)
       {
-        if (*lengthptr > OFLOW_MAX ||
-            OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
+        if (*lengthptr > OFLOW_MAX || OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
         {
-          *errorcodeptr = ERR20;   // Integer overflow
+          *errorcodeptr = ERR20; // Integer overflow
           cb->erroroffset = 0;
           return 0;
         }
         *lengthptr += (PCRE2_SIZE)(code - orig_code);
         if (*lengthptr > MAX_PATTERN_SIZE)
         {
-          *errorcodeptr = ERR20;   // Pattern is too large
+          *errorcodeptr = ERR20; // Pattern is too large
           cb->erroroffset = 0;
           return 0;
         }
@@ -6278,13 +6511,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
     if (meta < META_ASTERISK || meta > META_MINMAX_QUERY)
     {
       previous = code;
-      if (matched_char && !had_accept) okreturn = 1;
+      if (matched_char && !had_accept)
+        okreturn = 1;
     }
 
     previous_matched_char = matched_char;
     matched_char = FALSE;
     note_group_empty = FALSE;
-    skipunits = 0;         // Default value for most subgroups
+    skipunits = 0; // Default value for most subgroups
 
     switch (meta)
     {
@@ -6314,11 +6548,12 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           zerofirstcuflags = firstcuflags = REQ_NONE;
         *code++ = OP_CIRCM;
       }
-      else *code++ = OP_CIRC;
+      else
+        *code++ = OP_CIRC;
       break;
 
     case META_DOLLAR:
-      *code++ = ((options & PCRE2_MULTILINE) != 0)? OP_DOLLM : OP_DOLL;
+      *code++ = ((options & PCRE2_MULTILINE) != 0) ? OP_DOLLM : OP_DOLL;
       break;
 
       /* There can never be a first char if '.' is first, whatever happens about
@@ -6326,12 +6561,13 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
     case META_DOT:
       matched_char = TRUE;
-      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      if (firstcuflags == REQ_UNSET)
+        firstcuflags = REQ_NONE;
       zerofirstcu = firstcu;
       zerofirstcuflags = firstcuflags;
       zeroreqcu = reqcu;
       zeroreqcuflags = reqcuflags;
-      *code++ = ((options & PCRE2_DOTALL) != 0)? OP_ALLANY: OP_ANY;
+      *code++ = ((options & PCRE2_DOTALL) != 0) ? OP_ALLANY : OP_ANY;
       break;
 
 
@@ -6348,7 +6584,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
     case META_CLASS_EMPTY:
     case META_CLASS_EMPTY_NOT:
       matched_char = TRUE;
-      if (meta == META_CLASS_EMPTY_NOT) *code++ = OP_ALLANY;
+      if (meta == META_CLASS_EMPTY_NOT)
+        *code++ = OP_ALLANY;
       else
       {
         *code++ = OP_CLASS;
@@ -6356,7 +6593,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         code += 32 / sizeof(PCRE2_UCHAR);
       }
 
-      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      if (firstcuflags == REQ_UNSET)
+        firstcuflags = REQ_NONE;
       zerofirstcu = firstcu;
       zerofirstcuflags = firstcuflags;
       break;
@@ -6383,8 +6621,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
       if ((*pptr & CLASS_IS_ECLASS) != 0)
       {
-        if (!PRIV(compile_class_nested)(options, xoptions, &pptr, &code,
-                                        errorcodeptr, cb, lengthptr))
+        if (!PRIV(compile_class_nested)(options, xoptions, &pptr, &code, errorcodeptr, cb,
+                                        lengthptr))
           return 0;
         goto CLASS_END_PROCESSING;
       }
@@ -6402,11 +6640,11 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       {
         uint32_t c = pptr[1];
 
-        pptr += 2;                 // Move on to class end
+        pptr += 2; // Move on to class end
         if (meta == META_CLASS)
         {
           /* A positive one-char class can be handled as a normal literal character. */
-          meta = c;                // Set up the character
+          meta = c; // Set up the character
           goto NORMAL_CHAR_SET;
         }
 
@@ -6414,7 +6652,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
         zeroreqcu = reqcu;
         zeroreqcuflags = reqcuflags;
-        if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+        if (firstcuflags == REQ_UNSET)
+          firstcuflags = REQ_NONE;
         zerofirstcu = firstcu;
         zerofirstcuflags = firstcuflags;
 
@@ -6426,21 +6665,21 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         characters using a caseset. */
 
 #ifdef SUPPORT_UNICODE
-        if ((utf||ucp) && (options & PCRE2_CASELESS) != 0)
+        if ((utf || ucp) && (options & PCRE2_CASELESS) != 0)
         {
           uint32_t caseset;
 
-          if ((xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
-                PCRE2_EXTRA_TURKISH_CASING &&
+          if ((xoptions & (PCRE2_EXTRA_TURKISH_CASING | PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+                  PCRE2_EXTRA_TURKISH_CASING &&
               UCD_ANY_I(c))
           {
-            caseset = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(c)? 0 : 3);
+            caseset = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(c) ? 0 : 3);
           }
           else if ((caseset = UCD_CASESET(c)) != 0 &&
                    (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
                    PRIV(ucd_caseless_sets)[caseset] < 128)
           {
-            caseset = 0;  // Ignore the caseless set if it's restricted.
+            caseset = 0; // Ignore the caseless set if it's restricted.
           }
 
           if (caseset != 0)
@@ -6448,16 +6687,16 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             *code++ = OP_NOTPROP;
             *code++ = PT_CLIST;
             *code++ = caseset;
-            break;   // We are finished with this class
+            break; // We are finished with this class
           }
         }
 #endif
         /* Char has only one other (usable) case, or UCP not available */
 
-        *code++ = ((options & PCRE2_CASELESS) != 0)? OP_NOTI: OP_NOT;
+        *code++ = ((options & PCRE2_CASELESS) != 0) ? OP_NOTI : OP_NOT;
         code += PUTCHAR(c, code);
-        break;   // We are finished with this class
-      }          // End of 1-char optimization
+        break; // We are finished with this class
+      } // End of 1-char optimization
 
       /* Handle character classes that contain more than just one literal
       character. If there are exactly two characters in a positive class, see if
@@ -6474,28 +6713,31 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
 #ifdef SUPPORT_UNICODE
         if ((UCD_CASESET(c) == 0 ||
-             ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
-              c < 128 && pptr[2] < 128)) &&
-            !((xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
-                PCRE2_EXTRA_TURKISH_CASING &&
+             ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 && c < 128 && pptr[2] < 128)) &&
+            !((xoptions & (PCRE2_EXTRA_TURKISH_CASING | PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+                  PCRE2_EXTRA_TURKISH_CASING &&
               UCD_ANY_I(c)))
 #endif
         {
           uint32_t d;
 
 #ifdef SUPPORT_UNICODE
-          if ((utf || ucp) && c > 127) d = UCD_OTHERCASE(c); else
+          if ((utf || ucp) && c > 127)
+            d = UCD_OTHERCASE(c);
+          else
 #endif
           {
 #if PCRE2_CODE_UNIT_WIDTH != 8
-            if (c > 255) d = c; else
+            if (c > 255)
+              d = c;
+            else
 #endif
-            d = TABLE_GET(c, cb->fcc, c);
+              d = TABLE_GET(c, cb->fcc, c);
           }
 
           if (c != d && pptr[2] == d)
           {
-            pptr += 3;                 // Move on to class end
+            pptr += 3; // Move on to class end
             meta = c;
             if ((options & PCRE2_CASELESS) == 0)
             {
@@ -6510,24 +6752,26 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
       /* Now emit the OP_CLASS/OP_NCLASS/OP_XCLASS/OP_ALLANY opcode. */
 
-      pptr = PRIV(compile_class_not_nested)(options, xoptions, pptr + 1,
-                                            &code, meta == META_CLASS_NOT, NULL,
-                                            errorcodeptr, cb, lengthptr);
-      if (pptr == NULL) return 0;
+      pptr =
+          PRIV(compile_class_not_nested)(options, xoptions, pptr + 1, &code, meta == META_CLASS_NOT,
+                                         NULL, errorcodeptr, cb, lengthptr);
+      if (pptr == NULL)
+        return 0;
       PCRE2_ASSERT(*pptr == META_CLASS_END);
 
-      CLASS_END_PROCESSING:
+    CLASS_END_PROCESSING:
 
       /* If this class is the first thing in the branch, there can be no first
       char setting, whatever the repeat count. Any reqcu setting must remain
       unchanged after any kind of repeat. */
 
-      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      if (firstcuflags == REQ_UNSET)
+        firstcuflags = REQ_NONE;
       zerofirstcu = firstcu;
       zerofirstcuflags = firstcuflags;
       zeroreqcu = reqcu;
       zeroreqcuflags = reqcuflags;
-      break;  // End of class processing
+      break; // End of class processing
 
 
       /* ===================================================================*/
@@ -6541,9 +6785,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
     case META_ACCEPT:
       cb->had_accept = had_accept = TRUE;
-      for (oc = open_caps;
-           oc != NULL && oc->assert_depth >= cb->assert_depth;
-           oc = oc->next)
+      for (oc = open_caps; oc != NULL && oc->assert_depth >= cb->assert_depth; oc = oc->next)
       {
         if (lengthptr != NULL)
         {
@@ -6555,8 +6797,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           PUT2INC(code, 0, oc->number);
         }
       }
-      *code++ = (cb->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
-      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      *code++ = (cb->assert_depth > 0) ? OP_ASSERT_ACCEPT : OP_ACCEPT;
+      if (firstcuflags == REQ_UNSET)
+        firstcuflags = REQ_NONE;
       break;
 
     case META_PRUNE:
@@ -6590,7 +6833,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       PCRE2_FALLTHROUGH /* Fall through */
     case META_MARK:
     case META_COMMIT_ARG:
-      VERB_ARG:
+    VERB_ARG:
       *code++ = verbops[(meta - META_MARK) >> 16];
       /* The length is in characters. */
       verbarglen = *(++pptr);
@@ -6600,13 +6843,17 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       {
         meta = *(++pptr);
 #ifdef SUPPORT_UNICODE
-        if (utf) mclength = PRIV(ord2utf)(meta, mcbuffer); else
+        if (utf)
+          mclength = PRIV(ord2utf)(meta, mcbuffer);
+        else
 #endif
         {
           mclength = 1;
           mcbuffer[0] = meta;
         }
-        if (lengthptr != NULL) *lengthptr += mclength; else
+        if (lengthptr != NULL)
+          *lengthptr += mclength;
+        else
         {
           memcpy(code, mcbuffer, CU2BYTES(mclength));
           code += mclength;
@@ -6614,8 +6861,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         }
       }
 
-      *tempcode = verbculen;   // Fill in the code unit length
-      *code++ = 0;             // Terminating zero
+      *tempcode = verbculen; // Fill in the code unit length
+      *code++ = 0;           // Terminating zero
       break;
 
 
@@ -6629,7 +6876,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       *xoptionsptr = xoptions = *(++pptr);
       greedy_default = ((options & PCRE2_UNGREEDY) != 0);
       greedy_non_default = greedy_default ^ 1;
-      req_caseopt = ((options & PCRE2_CASELESS) != 0)? REQ_CASELESS : 0;
+      req_caseopt = ((options & PCRE2_CASELESS) != 0) ? REQ_CASELESS : 0;
       break;
 
       /* ===================================================================*/
@@ -6664,8 +6911,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           count = 0;
           index = 0;
 
-          if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index,
-            &count, errorcodeptr, cb)) return 0;
+          if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index, &count,
+                                                  errorcodeptr, cb))
+            return 0;
 
           code[0] = OP_DNCREF;
           PUT2(code, 1, index);
@@ -6675,7 +6923,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
         case META_CAPTURE_NUMBER:
           pptr += 2;
-          if (pptr[-1] == 0) continue;
+          if (pptr[-1] == 0)
+            continue;
 
           code[0] = OP_CREF;
           PUT2(code, 1, pptr[-1]);
@@ -6704,9 +6953,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       we can handle it either way. We first try for a name; if not found, process
       the number. */
 
-    case META_COND_RNUMBER:     // (?(Rdigits)
-    case META_COND_NAME:        // (?(name) or (?'name') or ?(<name>)
-    case META_COND_RNAME:       // (?(R&name) - test for recursion
+    case META_COND_RNUMBER: // (?(Rdigits)
+    case META_COND_NAME:    // (?(name) or (?'name') or ?(<name>)
+    case META_COND_RNAME:   // (?(R&name) - test for recursion
       bravalue = OP_COND;
 
       if (lengthptr != NULL)
@@ -6760,22 +7009,25 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           zero (which is the result of both (?R) and (?R0)) means "any", and is
           translated into RREF_ANY (which is 0xffff). */
 
-          if (groupnumber == 0) groupnumber = RREF_ANY;
+          if (groupnumber == 0)
+            groupnumber = RREF_ANY;
           PCRE2_ASSERT(start_pptr[0] == META_COND_RNUMBER);
           start_pptr[1] = groupnumber;
-          skipunits = 1+IMM2_SIZE;
+          skipunits = 1 + IMM2_SIZE;
           goto GROUP_PROCESS_NOTE_EMPTY;
         }
 
         /* From here on, we know we have a name (not a number),
         so treat META_COND_RNUMBER the same as META_COND_NAME. */
-        if (meta == META_COND_RNUMBER) meta = META_COND_NAME;
+        if (meta == META_COND_RNUMBER)
+          meta = META_COND_NAME;
 
         if ((ng->hash_dup & NAMED_GROUP_IS_DUPNAME) == 0)
         {
           /* Found a non-duplicated name. Since it is a global,
           it is enough to update it in the pre-processing phase. */
-          if (ng->number > cb->top_backref) cb->top_backref = ng->number;
+          if (ng->number > cb->top_backref)
+            cb->top_backref = ng->number;
 
           start_pptr[0] = meta;
           start_pptr[1] = ng->number;
@@ -6806,7 +7058,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
         if (meta == META_COND_RNUMBER)
         {
-          code[1+LINK_SIZE] = OP_RREF;
+          code[1 + LINK_SIZE] = OP_RREF;
           PUT2(code, 2 + LINK_SIZE, pptr[1]);
           skipunits = 1 + IMM2_SIZE;
           pptr += 1 + SIZEOFFSET;
@@ -6815,7 +7067,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
         if (meta_arg == 0)
         {
-          code[1+LINK_SIZE] = (meta == META_COND_RNAME)? OP_RREF : OP_CREF;
+          code[1 + LINK_SIZE] = (meta == META_COND_RNAME) ? OP_RREF : OP_CREF;
           PUT2(code, 2 + LINK_SIZE, pptr[1]);
           skipunits = 1 + IMM2_SIZE;
           pptr += 1 + SIZEOFFSET;
@@ -6823,17 +7075,18 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         }
 
         ng = cb->named_groups + pptr[1];
-        count = 0;  // Values for first pass (avoids compiler warning)
+        count = 0; // Values for first pass (avoids compiler warning)
         index = 0;
 
         /* The failed case is an internal error. */
-        if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index,
-              &count, errorcodeptr, cb)) return 0;
+        if (!PRIV(compile_find_dupname_details)(ng->name, ng->length, &index, &count, errorcodeptr,
+                                                cb))
+          return 0;
 
         /* A duplicated name was found. Note that if an R<digits> name is found
         (META_COND_RNUMBER), it is a reference test, not a recursion test. */
 
-        code[1 + LINK_SIZE] = (meta == META_COND_RNAME)? OP_DNRREF : OP_DNCREF;
+        code[1 + LINK_SIZE] = (meta == META_COND_RNAME) ? OP_DNRREF : OP_DNCREF;
 
         /* Insert appropriate data values. */
         PUT2(code, 2 + LINK_SIZE, index);
@@ -6852,7 +7105,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
     case META_COND_DEFINE:
       bravalue = OP_COND;
       GETPLUSOFFSET(offset, pptr);
-      code[1+LINK_SIZE] = OP_DEFINE;
+      code[1 + LINK_SIZE] = OP_DEFINE;
       skipunits = 1;
       goto GROUP_PROCESS;
 
@@ -6869,13 +7122,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         cb->erroroffset = offset;
         return 0;
       }
-      if (groupnumber > cb->top_backref) cb->top_backref = groupnumber;
+      if (groupnumber > cb->top_backref)
+        cb->top_backref = groupnumber;
 
       /* Point at initial ( for too many branches error */
       offset -= 2;
-      code[1+LINK_SIZE] = OP_CREF;
-      skipunits = 1+IMM2_SIZE;
-      PUT2(code, 2+LINK_SIZE, groupnumber);
+      code[1 + LINK_SIZE] = OP_CREF;
+      skipunits = 1 + IMM2_SIZE;
+      PUT2(code, 2 + LINK_SIZE, groupnumber);
       goto GROUP_PROCESS_NOTE_EMPTY;
 
       /* Test for the PCRE2 version. */
@@ -6883,12 +7137,13 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
     case META_COND_VERSION:
       bravalue = OP_COND;
       if (pptr[1] > 0)
-        code[1+LINK_SIZE] = ((PCRE2_MAJOR > pptr[2]) ||
-          (PCRE2_MAJOR == pptr[2] && PCRE2_MINOR >= pptr[3]))?
-            OP_TRUE : OP_FALSE;
+        code[1 + LINK_SIZE] =
+            ((PCRE2_MAJOR > pptr[2]) || (PCRE2_MAJOR == pptr[2] && PCRE2_MINOR >= pptr[3]))
+                ? OP_TRUE
+                : OP_FALSE;
       else
-        code[1+LINK_SIZE] = (PCRE2_MAJOR == pptr[2] && PCRE2_MINOR == pptr[3])?
-          OP_TRUE : OP_FALSE;
+        code[1 + LINK_SIZE] =
+            (PCRE2_MAJOR == pptr[2] && PCRE2_MINOR == pptr[3]) ? OP_TRUE : OP_FALSE;
       skipunits = 1;
       pptr += 3;
       goto GROUP_PROCESS_NOTE_EMPTY;
@@ -6921,8 +7176,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       it for uniformity. */
 
     case META_LOOKAHEADNOT:
-      if (pptr[1] == META_KET &&
-           (pptr[2] < META_ASTERISK || pptr[2] > META_MINMAX_QUERY))
+      if (pptr[1] == META_KET && (pptr[2] < META_ASTERISK || pptr[2] > META_MINMAX_QUERY))
       {
         *code++ = OP_FAIL;
         pptr++;
@@ -6968,36 +7222,34 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       others come to GROUP_PROCESS_NOTE_EMPTY, to indicate that we need to take
       note of whether or not they may match an empty string. */
 
-      GROUP_PROCESS_NOTE_EMPTY:
+    GROUP_PROCESS_NOTE_EMPTY:
       note_group_empty = TRUE;
 
-      GROUP_PROCESS:
+    GROUP_PROCESS:
       cb->parens_depth += 1;
       *code = bravalue;
       pptr++;
       tempcode = code;
-      tempreqvary = cb->req_varyopt;        // Save value before group
-      length_prevgroup = 0;                 // Initialize for pre-compile phase
+      tempreqvary = cb->req_varyopt; // Save value before group
+      length_prevgroup = 0;          // Initialize for pre-compile phase
 
-      if ((group_return =
-           compile_regex(
-           options,                         // The options state
-           xoptions,                        // The extra options state
-           &tempcode,                       // Where to put code (updated)
-           &pptr,                           // Input pointer (updated)
-           errorcodeptr,                    // Where to put an error message
-           skipunits,                       // Skip over bracket number
-           &subfirstcu,                     // For possible first char
-           &subfirstcuflags,
-           &subreqcu,                       // For possible last char
-           &subreqcuflags,
-           bcptr,                           // Current branch chain
-           open_caps,                       // Pointer to capture stack
-           cb,                              // Compile data block
-           (lengthptr == NULL)? NULL :      // Actual compile phase
-             &length_prevgroup              // Pre-compile phase
-           )) == 0)
-        return 0;  // Error
+      if ((group_return = compile_regex(options,      // The options state
+                                        xoptions,     // The extra options state
+                                        &tempcode,    // Where to put code (updated)
+                                        &pptr,        // Input pointer (updated)
+                                        errorcodeptr, // Where to put an error message
+                                        skipunits,    // Skip over bracket number
+                                        &subfirstcu,  // For possible first char
+                                        &subfirstcuflags,
+                                        &subreqcu, // For possible last char
+                                        &subreqcuflags,
+                                        bcptr,                       // Current branch chain
+                                        open_caps,                   // Pointer to capture stack
+                                        cb,                          // Compile data block
+                                        (lengthptr == NULL) ? NULL : // Actual compile phase
+                                            &length_prevgroup        // Pre-compile phase
+                                        )) == 0)
+        return 0; // Error
 
       cb->parens_depth -= 1;
 
@@ -7030,15 +7282,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         do
         {
           condcount++;
-          tc += GET(tc,1);
-        }
-        while (*tc != OP_KET);
+          tc += GET(tc, 1);
+        } while (*tc != OP_KET);
 
         /* A DEFINE group is never obeyed inline (the "condition" is always
         false). It must have only one branch. Having checked this, change the
         opcode to OP_FALSE. */
 
-        if (code[LINK_SIZE+1] == OP_DEFINE)
+        if (code[LINK_SIZE + 1] == OP_DEFINE)
         {
           if (condcount > 1)
           {
@@ -7046,8 +7297,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             *errorcodeptr = ERR54;
             return 0;
           }
-          code[LINK_SIZE+1] = OP_FALSE;
-          bravalue = OP_DEFINE;   // A flag to suppress char handling below
+          code[LINK_SIZE + 1] = OP_FALSE;
+          bravalue = OP_DEFINE; // A flag to suppress char handling below
         }
 
         /* A "normal" conditional group. If there is just one branch, we must not
@@ -7063,8 +7314,10 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             *errorcodeptr = ERR27;
             return 0;
           }
-          if (condcount == 1) subfirstcuflags = subreqcuflags = REQ_NONE;
-            else if (group_return > 0) matched_char = TRUE;
+          if (condcount == 1)
+            subfirstcuflags = subreqcuflags = REQ_NONE;
+          else if (group_return > 0)
+            matched_char = TRUE;
         }
       }
 
@@ -7075,17 +7328,17 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
       if (lengthptr != NULL)
       {
-        if (OFLOW_MAX - *lengthptr < length_prevgroup - 2 - 2*LINK_SIZE)
+        if (OFLOW_MAX - *lengthptr < length_prevgroup - 2 - 2 * LINK_SIZE)
         {
           *errorcodeptr = ERR20;
           return 0;
         }
-        *lengthptr += length_prevgroup - 2 - 2*LINK_SIZE;
-        code++;   // This already contains bravalue
+        *lengthptr += length_prevgroup - 2 - 2 * LINK_SIZE;
+        code++; // This already contains bravalue
         PUTINC(code, 0, 1 + LINK_SIZE);
         *code++ = OP_KET;
         PUTINC(code, 0, 1 + LINK_SIZE);
-        break;    // No need to waste time with special character handling
+        break; // No need to waste time with special character handling
       }
 
       /* Otherwise update the main code pointer to the end of the group. */
@@ -7095,7 +7348,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       /* For a DEFINE group, required and first character settings are not
       relevant. */
 
-      if (bravalue == OP_DEFINE) break;
+      if (bravalue == OP_DEFINE)
+        break;
 
       /* Handle updating of the required and first code units for other types of
       group. Update for normal brackets of all kinds, and conditions with two
@@ -7110,7 +7364,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       zerofirstcuflags = firstcuflags;
       groupsetfirstcu = FALSE;
 
-      if (bravalue >= OP_ONCE)  // Not an assertion
+      if (bravalue >= OP_ONCE) // Not an assertion
       {
         /* If we have not yet set a firstcu in this branch, take it from the
         subpattern, remembering that it was set here so that a repeat of more
@@ -7126,7 +7380,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             firstcuflags = subfirstcuflags;
             groupsetfirstcu = TRUE;
           }
-          else firstcuflags = REQ_NONE;
+          else
+            firstcuflags = REQ_NONE;
           zerofirstcuflags = REQ_NONE;
         }
 
@@ -7161,14 +7416,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       we must only take the reqcu when the group also set a firstcu. Otherwise,
       in that example, 'X' ends up set for both. */
 
-      else if ((bravalue == OP_ASSERT || bravalue == OP_ASSERT_NA) &&
-               subreqcuflags < REQ_NONE && subfirstcuflags < REQ_NONE)
+      else if ((bravalue == OP_ASSERT || bravalue == OP_ASSERT_NA) && subreqcuflags < REQ_NONE &&
+               subfirstcuflags < REQ_NONE)
       {
         reqcu = subreqcu;
         reqcuflags = subreqcuflags;
       }
 
-      break;  // End of nested group handling
+      break; // End of nested group handling
 
 
       /* ===================================================================*/
@@ -7215,7 +7470,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         /* For a back reference, update the back reference map and the
         maximum back reference. */
 
-        cb->backref_map |= (groupnumber < 32)? (1u << groupnumber) : 1;
+        cb->backref_map |= (groupnumber < 32) ? (1u << groupnumber) : 1;
         if (groupnumber > cb->top_backref)
           cb->top_backref = groupnumber;
 
@@ -7232,20 +7487,21 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         opcode to a numerical back reference. In the second pass we must
         search for the index and count in the final name table. */
 
-        count = 0;  // Values for first pass (avoids compiler warning)
+        count = 0; // Values for first pass (avoids compiler warning)
         index = 0;
-        if (lengthptr == NULL && !PRIV(compile_find_dupname_details)(name, length,
-              &index, &count, errorcodeptr, cb)) return 0;
+        if (lengthptr == NULL &&
+            !PRIV(compile_find_dupname_details)(name, length, &index, &count, errorcodeptr, cb))
+          return 0;
 
-        if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
-        *code++ = ((options & PCRE2_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
+        if (firstcuflags == REQ_UNSET)
+          firstcuflags = REQ_NONE;
+        *code++ = ((options & PCRE2_CASELESS) != 0) ? OP_DNREFI : OP_DNREF;
         PUT2INC(code, 0, index);
         PUT2INC(code, 0, count);
         if ((options & PCRE2_CASELESS) != 0)
-          *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
-                     REFI_FLAG_CASELESS_RESTRICT : 0) |
-                    (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)?
-                     REFI_FLAG_TURKISH_CASING : 0);
+          *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0) ? REFI_FLAG_CASELESS_RESTRICT
+                                                                       : 0) |
+                    (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0) ? REFI_FLAG_TURKISH_CASING : 0);
       }
       break;
 
@@ -7255,9 +7511,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
     case META_CALLOUT_NUMBER:
       code[0] = OP_CALLOUT;
-      PUT(code, 1, pptr[1]);               // Offset to next pattern item
-      PUT(code, 1 + LINK_SIZE, pptr[2]);   // Length of next pattern item
-      code[1 + 2*LINK_SIZE] = pptr[3];
+      PUT(code, 1, pptr[1]);             // Offset to next pattern item
+      PUT(code, 1 + LINK_SIZE, pptr[2]); // Length of next pattern item
+      code[1 + 2 * LINK_SIZE] = pptr[3];
       pptr += 3;
       code += PRIV(OP_lengths)[OP_CALLOUT];
       break;
@@ -7273,7 +7529,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
     case META_CALLOUT_STRING:
       if (lengthptr != NULL)
       {
-        *lengthptr += pptr[3] + (1 + 4*LINK_SIZE);
+        *lengthptr += pptr[3] + (1 + 4 * LINK_SIZE);
         pptr += 3;
         SKIPOFFSET(pptr);
       }
@@ -7287,19 +7543,19 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         PCRE2_SPTR pp;
         uint32_t delimiter;
         uint32_t length = pptr[3];
-        PCRE2_UCHAR *callout_string = code + (1 + 4*LINK_SIZE);
+        PCRE2_UCHAR *callout_string = code + (1 + 4 * LINK_SIZE);
 
         code[0] = OP_CALLOUT_STR;
-        PUT(code, 1, pptr[1]);               // Offset to next pattern item
-        PUT(code, 1 + LINK_SIZE, pptr[2]);   // Length of next pattern item
+        PUT(code, 1, pptr[1]);             // Offset to next pattern item
+        PUT(code, 1 + LINK_SIZE, pptr[2]); // Length of next pattern item
 
         pptr += 3;
-        GETPLUSOFFSET(offset, pptr);         // Offset to string in pattern
+        GETPLUSOFFSET(offset, pptr); // Offset to string in pattern
         pp = cb->start_pattern + offset;
         delimiter = *callout_string++ = *pp++;
         if (delimiter == CHAR_LEFT_CURLY_BRACKET)
           delimiter = CHAR_RIGHT_CURLY_BRACKET;
-        PUT(code, 1 + 3*LINK_SIZE, (int)(offset + 1));  // One after delimiter
+        PUT(code, 1 + 3 * LINK_SIZE, (int)(offset + 1)); // One after delimiter
 
         /* The syntax of the pattern was checked in the parsing scan. The length
         includes both delimiters, but we have passed the opening one just above,
@@ -7315,13 +7571,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             pp += 2;
             length--;
           }
-          else *callout_string++ = *pp++;
+          else
+            *callout_string++ = *pp++;
         }
         *callout_string++ = CHAR_NUL;
 
         /* Set the length of the entire item, the advance to its end. */
 
-        PUT(code, 1 + 2*LINK_SIZE, (int)(callout_string - code));
+        PUT(code, 1 + 2 * LINK_SIZE, (int)(callout_string - code));
         code = callout_string;
       }
       break;
@@ -7358,13 +7615,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       repeat_min = 0;
       repeat_max = 1;
 
-      REPEAT:
-      if (previous_matched_char && repeat_min > 0) matched_char = TRUE;
+    REPEAT:
+      if (previous_matched_char && repeat_min > 0)
+        matched_char = TRUE;
 
       /* Remember whether this is a variable length repeat, and default to
       single-char opcodes. */
 
-      reqvary = (repeat_min == repeat_max)? 0 : REQ_VARY;
+      reqvary = (repeat_min == repeat_max) ? 0 : REQ_VARY;
 
       /* Adjust first and required code units for a zero repeat. */
 
@@ -7384,7 +7642,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       case META_ASTERISK_PLUS:
       case META_PLUS_PLUS:
       case META_QUERY_PLUS:
-        repeat_type = 0;                  // Force greedy
+        repeat_type = 0; // Force greedy
         possessive_quantifier = TRUE;
         break;
 
@@ -7426,7 +7684,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       case OP_CHARI:
       case OP_NOT:
       case OP_NOTI:
-        if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
+        if (repeat_max == 1 && repeat_min == 1)
+          goto END_REPEAT;
         op_type = chartypeoffset[op_previous - OP_CHAR];
 
         /* Deal with UTF characters that take up more than one code unit. */
@@ -7436,11 +7695,11 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         {
           PCRE2_UCHAR *lastchar = code - 1;
           BACKCHAR(lastchar);
-          mclength = (uint32_t)(code - lastchar);   // Length of UTF character
-          memcpy(mcbuffer, lastchar, CU2BYTES(mclength));  // Save the char
+          mclength = (uint32_t)(code - lastchar);         // Length of UTF character
+          memcpy(mcbuffer, lastchar, CU2BYTES(mclength)); // Save the char
         }
         else
-#endif  /* MAYBE_UTF_MULTI */
+#endif /* MAYBE_UTF_MULTI */
 
         /* Handle the case of a single code unit - either with no UTF support, or
         with UTF disabled, or for a single-code-unit UTF character. In the latter
@@ -7455,10 +7714,11 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           {
             reqcu = mcbuffer[0];
             reqcuflags = cb->req_varyopt;
-            if (op_previous == OP_CHARI) reqcuflags |= REQ_CASELESS;
+            if (op_previous == OP_CHARI)
+              reqcuflags |= REQ_CASELESS;
           }
         }
-        goto OUTPUT_SINGLE_REPEAT;  // Code shared with single character types
+        goto OUTPUT_SINGLE_REPEAT; // Code shared with single character types
 
         /* If previous was a character class or a back reference, we put the
         repeat stuff after it, but just skip the item if the repeat was {0,0}. */
@@ -7479,7 +7739,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           code = previous;
           goto END_REPEAT;
         }
-        if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
+        if (repeat_max == 1 && repeat_min == 1)
+          goto END_REPEAT;
 
         if (repeat_min == 0 && repeat_max == REPEAT_UNLIMITED)
           *code++ = OP_CRSTAR + repeat_type;
@@ -7491,7 +7752,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         {
           *code++ = OP_CRRANGE + repeat_type;
           PUT2INC(code, 0, repeat_min);
-          if (repeat_max == REPEAT_UNLIMITED) repeat_max = 0;  // 2-byte encoding for max
+          if (repeat_max == REPEAT_UNLIMITED)
+            repeat_max = 0; // 2-byte encoding for max
           PUT2INC(code, 0, repeat_max);
         }
         break;
@@ -7520,7 +7782,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         {
           int replicate = repeat_min;
 
-          if (repeat_min == repeat_max) replicate--;
+          if (repeat_min == repeat_max)
+            replicate--;
 
           /* In the pre-compile phase, we don't actually do the replication. We
           just adjust the length as if we had. Do some paranoid checks for
@@ -7537,18 +7800,21 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             }
             *lengthptr += delta;
           }
-          else for (int i = 0; i < replicate; i++)
-          {
-            memcpy(code, previous, CU2BYTES(length_prevgroup));
-            previous = code;
-            code += length_prevgroup;
-          }
+          else
+            for (int i = 0; i < replicate; i++)
+            {
+              memcpy(code, previous, CU2BYTES(length_prevgroup));
+              previous = code;
+              code += length_prevgroup;
+            }
 
           /* If the number of repeats is fixed, we are done. Otherwise, adjust
           the counts and fall through. */
 
-          if (repeat_min == repeat_max) break;
-          if (repeat_max != REPEAT_UNLIMITED) repeat_max -= repeat_min;
+          if (repeat_min == repeat_max)
+            break;
+          if (repeat_max != REPEAT_UNLIMITED)
+            repeat_max -= repeat_min;
           repeat_min = 0;
         }
 
@@ -7564,7 +7830,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         }
         code += 2 + 2 * LINK_SIZE;
         length_prevgroup += 2 + 2 * LINK_SIZE;
-        group_return = -1;  // Set "may match empty string"
+        group_return = -1; // Set "may match empty string"
 
         /* Now treat as a repeated OP_BRA. */
         PCRE2_FALLTHROUGH /* Fall through */
@@ -7600,7 +7866,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           FALSE and there is only one branch) is pointless, but Perl allows the
           syntax, so we just ignore the repeat. */
 
-          if (op_previous == OP_COND && previous[LINK_SIZE+1] == OP_FALSE &&
+          if (op_previous == OP_COND && previous[LINK_SIZE + 1] == OP_FALSE &&
               previous[GET(previous, 1)] != OP_ALT)
             goto END_REPEAT;
 
@@ -7613,9 +7879,10 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           permitted, but if the maximum is unlimited it is set to one more than
           the minimum. */
 
-          if (op_previous < OP_ONCE)    // Assertion
+          if (op_previous < OP_ONCE) // Assertion
           {
-            if (repeat_max == REPEAT_UNLIMITED) repeat_max = repeat_min + 1;
+            if (repeat_max == REPEAT_UNLIMITED)
+              repeat_max = repeat_min + 1;
           }
 
           /* The case of a zero minimum is special because of the need to stick
@@ -7654,7 +7921,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
                 *previous++ = OP_SKIPZERO;
                 goto END_REPEAT;
               }
-              brazeroptr = previous;    // Save for possessive optimizing
+              brazeroptr = previous; // Save for possessive optimizing
               *previous++ = OP_BRAZERO + repeat_type;
             }
 
@@ -7676,12 +7943,13 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
               /* We chain together the bracket link offset fields that have to be
               filled in later when the ends of the brackets are reached. */
 
-              linkoffset = (bralink == NULL)? 0 : (int)(previous - bralink);
+              linkoffset = (bralink == NULL) ? 0 : (int)(previous - bralink);
               bralink = previous;
               PUTINC(previous, 0, linkoffset);
             }
 
-            if (repeat_max != REPEAT_UNLIMITED) repeat_max--;
+            if (repeat_max != REPEAT_UNLIMITED)
+              repeat_max--;
           }
 
           /* If the minimum is greater than zero, replicate the group as many
@@ -7699,8 +7967,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
               if (lengthptr != NULL)
               {
                 PCRE2_SIZE delta;
-                if (PRIV(ckd_smul)(&delta, repeat_min - 1,
-                                   (int)length_prevgroup) ||
+                if (PRIV(ckd_smul)(&delta, repeat_min - 1, (int)length_prevgroup) ||
                     OFLOW_MAX - *lengthptr < delta)
                 {
                   *errorcodeptr = ERR20;
@@ -7728,7 +7995,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
               }
             }
 
-            if (repeat_max != REPEAT_UNLIMITED) repeat_max -= repeat_min;
+            if (repeat_max != REPEAT_UNLIMITED)
+              repeat_max -= repeat_min;
           }
 
           /* This code is common to both the zero and non-zero minimum cases. If
@@ -7750,37 +8018,38 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             {
               PCRE2_SIZE delta;
               if (PRIV(ckd_smul)(&delta, repeat_max,
-                                 (int)length_prevgroup + 1 + 2 + 2*LINK_SIZE) ||
-                  OFLOW_MAX + (2 + 2*LINK_SIZE) - *lengthptr < delta)
+                                 (int)length_prevgroup + 1 + 2 + 2 * LINK_SIZE) ||
+                  OFLOW_MAX + (2 + 2 * LINK_SIZE) - *lengthptr < delta)
               {
                 *errorcodeptr = ERR20;
                 return 0;
               }
-              delta -= (2 + 2*LINK_SIZE);   // Last one doesn't nest
+              delta -= (2 + 2 * LINK_SIZE); // Last one doesn't nest
               *lengthptr += delta;
             }
 
             /* This is compiling for real */
 
-            else for (uint32_t i = repeat_max; i >= 1; i--)
-            {
-              *code++ = OP_BRAZERO + repeat_type;
+            else
+              for (uint32_t i = repeat_max; i >= 1; i--)
+              {
+                *code++ = OP_BRAZERO + repeat_type;
 
-              /* All but the final copy start a new nesting, maintaining the
+                /* All but the final copy start a new nesting, maintaining the
               chain of brackets outstanding. */
 
-              if (i != 1)
-              {
-                int linkoffset;
-                *code++ = OP_BRA;
-                linkoffset = (bralink == NULL)? 0 : (int)(code - bralink);
-                bralink = code;
-                PUTINC(code, 0, linkoffset);
-              }
+                if (i != 1)
+                {
+                  int linkoffset;
+                  *code++ = OP_BRA;
+                  linkoffset = (bralink == NULL) ? 0 : (int)(code - bralink);
+                  bralink = code;
+                  PUTINC(code, 0, linkoffset);
+                }
 
-              memcpy(code, previous, CU2BYTES(len));
-              code += len;
-            }
+                memcpy(code, previous, CU2BYTES(len));
+                code += len;
+              }
 
             /* Now chain through the pending brackets, and fill in their length
             fields (which are holding the chain links pro tem). */
@@ -7791,7 +8060,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
               int linkoffset = (int)(code - bralink + 1);
               PCRE2_UCHAR *bra = code - linkoffset;
               oldlinkoffset = GET(bra, 1);
-              bralink = (oldlinkoffset == 0)? NULL : bralink - oldlinkoffset;
+              bralink = (oldlinkoffset == 0) ? NULL : bralink - oldlinkoffset;
               *code++ = OP_KET;
               PUTINC(code, 0, linkoffset);
               PUT(bra, 1, linkoffset);
@@ -7831,7 +8100,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
             /* Convert possessive ONCE brackets to non-capturing */
 
-            if (*bracode == OP_ONCE && possessive_quantifier) *bracode = OP_BRA;
+            if (*bracode == OP_ONCE && possessive_quantifier)
+              *bracode = OP_BRA;
 
             /* For non-possessive ONCE and for SCRIPT_RUN brackets, all we need
             to do is to set the KET. */
@@ -7851,8 +8121,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
               if (lengthptr == NULL)
               {
-                if (group_return < 0) *bracode += OP_SBRA - OP_BRA;
-                if (*bracode == OP_COND && bracode[GET(bracode,1)] != OP_ALT)
+                if (group_return < 0)
+                  *bracode += OP_SBRA - OP_BRA;
+                if (*bracode == OP_COND && bracode[GET(bracode, 1)] != OP_ALT)
                   *bracode = OP_SCOND;
               }
 
@@ -7870,7 +8141,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
                   (void)memmove(bracode + 1 + LINK_SIZE, bracode, CU2BYTES(nlen));
                   code += 1 + LINK_SIZE;
                   nlen += 1 + LINK_SIZE;
-                  *bracode = (*bracode == OP_COND)? OP_BRAPOS : OP_SBRAPOS;
+                  *bracode = (*bracode == OP_COND) ? OP_BRAPOS : OP_SBRAPOS;
                   *code++ = OP_KETRPOS;
                   PUTINC(code, 0, nlen);
                   PUT(bracode, 1, nlen);
@@ -7880,20 +8151,23 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
                 else
                 {
-                  *bracode += 1;              // Switch to xxxPOS opcodes
+                  *bracode += 1; // Switch to xxxPOS opcodes
                   *ketcode = OP_KETRPOS;
                 }
 
                 /* If the minimum is zero, mark it as possessive, then unset the
                 possessive flag when the minimum is 0 or 1. */
 
-                if (brazeroptr != NULL) *brazeroptr = OP_BRAPOSZERO;
-                if (repeat_min < 2) possessive_quantifier = FALSE;
+                if (brazeroptr != NULL)
+                  *brazeroptr = OP_BRAPOSZERO;
+                if (repeat_min < 2)
+                  possessive_quantifier = FALSE;
               }
 
               /* Non-possessive quantifier */
 
-              else *ketcode = OP_KETRMAX + repeat_type;
+              else
+                *ketcode = OP_KETRMAX + repeat_type;
             }
           }
         }
@@ -7912,7 +8186,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         if (op_previous >= OP_EODN || op_previous <= OP_WORD_BOUNDARY)
         {
           PCRE2_DEBUG_UNREACHABLE();
-          *errorcodeptr = ERR10;  // Not a character type - internal error
+          *errorcodeptr = ERR10; // Not a character type - internal error
           return 0;
         }
         /* LCOV_EXCL_STOP */
@@ -7921,10 +8195,11 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           int prop_type, prop_value;
           PCRE2_UCHAR *oldcode;
 
-          if (repeat_max == 1 && repeat_min == 1) goto END_REPEAT;
+          if (repeat_max == 1 && repeat_min == 1)
+            goto END_REPEAT;
 
-          op_type = OP_TYPESTAR - OP_STAR;      // Use type opcodes
-          mclength = 0;                         // Not a character
+          op_type = OP_TYPESTAR - OP_STAR; // Use type opcodes
+          mclength = 0;                    // Not a character
 
           if (op_previous == OP_PROP || op_previous == OP_NOTPROP)
           {
@@ -7933,9 +8208,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           }
           else
           {
-            /* Come here from just above with a character in mcbuffer/mclength.
+          /* Come here from just above with a character in mcbuffer/mclength.
             You must also set op_type before the jump. */
-            OUTPUT_SINGLE_REPEAT:
+          OUTPUT_SINGLE_REPEAT:
             prop_type = prop_value = -1;
           }
 
@@ -7945,13 +8220,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           op_previous. If prop_type/value are not negative, we have a property
           character type in op_previous. */
 
-          oldcode = code;                   // Save where we were
-          code = previous;                  // Usually overwrite previous item
+          oldcode = code;  // Save where we were
+          code = previous; // Usually overwrite previous item
 
           /* If the maximum is zero then the minimum must also be zero; Perl allows
           this case, so we do too - by simply omitting the item altogether. */
 
-          if (repeat_max == 0) goto END_REPEAT;
+          if (repeat_max == 0)
+            goto END_REPEAT;
 
           /* Combine the op_type with the repeat_type */
 
@@ -7962,8 +8238,10 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
           if (repeat_min == 0)
           {
-            if (repeat_max == REPEAT_UNLIMITED) *code++ = OP_STAR + repeat_type;
-              else if (repeat_max == 1) *code++ = OP_QUERY + repeat_type;
+            if (repeat_max == REPEAT_UNLIMITED)
+              *code++ = OP_STAR + repeat_type;
+            else if (repeat_max == 1)
+              *code++ = OP_QUERY + repeat_type;
             else
             {
               *code++ = OP_UPTO + repeat_type;
@@ -7982,8 +8260,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
               *code++ = OP_PLUS + repeat_type;
             else
             {
-              code = oldcode;  // Leave previous item in place
-              if (repeat_max == 1) goto END_REPEAT;
+              code = oldcode; // Leave previous item in place
+              if (repeat_max == 1)
+                goto END_REPEAT;
               *code++ = OP_UPTO + repeat_type;
               PUT2INC(code, 0, repeat_max - 1);
             }
@@ -7994,7 +8273,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
           else
           {
-            *code++ = OP_EXACT + op_type;  // NB EXACT doesn't have repeat_type
+            *code++ = OP_EXACT + op_type; // NB EXACT doesn't have repeat_type
             PUT2INC(code, 0, repeat_min);
 
             /* Unless repeat_max equals repeat_min, fill in the data for EXACT,
@@ -8057,7 +8336,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           }
         }
         break;
-      }    // End of switch on different op_previous values
+      } // End of switch on different op_previous values
 
 
       /* If the character following a repeat is '+', possessive_quantifier is
@@ -8085,9 +8364,10 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         switch (*tempcode)
         {
         case OP_TYPEEXACT:
-          tempcode += PRIV(OP_lengths)[*tempcode] +
-            ((tempcode[1 + IMM2_SIZE] == OP_PROP
-            || tempcode[1 + IMM2_SIZE] == OP_NOTPROP)? 2 : 0);
+          tempcode +=
+              PRIV(OP_lengths)[*tempcode] +
+              ((tempcode[1 + IMM2_SIZE] == OP_PROP || tempcode[1 + IMM2_SIZE] == OP_NOTPROP) ? 2
+                                                                                             : 0);
           break;
 
           /* CHAR opcodes are used for exacts whose count is 1. */
@@ -8112,7 +8392,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
         case OP_CLASS:
         case OP_NCLASS:
-          tempcode += 1 + 32/sizeof(PCRE2_UCHAR);
+          tempcode += 1 + 32 / sizeof(PCRE2_UCHAR);
           break;
 
 #ifdef SUPPORT_WIDE_CHARS
@@ -8168,7 +8448,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       reqcus if it isn't already set and we have just passed a varying length
       item. */
 
-      END_REPEAT:
+    END_REPEAT:
       cb->req_varyopt |= reqvary;
       break;
 
@@ -8189,13 +8469,15 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       because if that doesn't fail, subsequent ones will also be OK. */
 
     case META_BACKREF:
-      if (meta_arg < 10) offset = cb->small_ref_offset[meta_arg];
-        else GETPLUSOFFSET(offset, pptr);
+      if (meta_arg < 10)
+        offset = cb->small_ref_offset[meta_arg];
+      else
+        GETPLUSOFFSET(offset, pptr);
 
       if (meta_arg > cb->bracount)
       {
         cb->erroroffset = offset;
-        *errorcodeptr = ERR15;  // Non-existent subpattern
+        *errorcodeptr = ERR15; // Non-existent subpattern
         return 0;
       }
 
@@ -8205,23 +8487,24 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       set, to cope with cases like (?=(\w+))\1: which would otherwise set ':'
       later. */
 
-      HANDLE_SINGLE_REFERENCE:
-      if (firstcuflags == REQ_UNSET) zerofirstcuflags = firstcuflags = REQ_NONE;
-      *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
+    HANDLE_SINGLE_REFERENCE:
+      if (firstcuflags == REQ_UNSET)
+        zerofirstcuflags = firstcuflags = REQ_NONE;
+      *code++ = ((options & PCRE2_CASELESS) != 0) ? OP_REFI : OP_REF;
       PUT2INC(code, 0, meta_arg);
       if ((options & PCRE2_CASELESS) != 0)
-        *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
-                   REFI_FLAG_CASELESS_RESTRICT : 0) |
-                  (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)?
-                   REFI_FLAG_TURKISH_CASING : 0);
+        *code++ =
+            (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0) ? REFI_FLAG_CASELESS_RESTRICT : 0) |
+            (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0) ? REFI_FLAG_TURKISH_CASING : 0);
 
       /* Update the map of back references, and keep the highest one. We
       could do this in parse_regex() for numerical back references, but not
       for named back references, because we don't know the numbers to which
       named back references refer. So we do it all in this function. */
 
-      cb->backref_map |= (meta_arg < 32)? (1u << meta_arg) : 1;
-      if (meta_arg > cb->top_backref) cb->top_backref = meta_arg;
+      cb->backref_map |= (meta_arg < 32) ? (1u << meta_arg) : 1;
+      if (meta_arg > cb->top_backref)
+        cb->top_backref = meta_arg;
       break;
 
 
@@ -8239,10 +8522,10 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       if (meta_arg > cb->bracount)
       {
         cb->erroroffset = offset;
-        *errorcodeptr = ERR15;  // Non-existent subpattern
+        *errorcodeptr = ERR15; // Non-existent subpattern
         return 0;
       }
-      HANDLE_NUMERICAL_RECURSION:
+    HANDLE_NUMERICAL_RECURSION:
       *code = OP_RECURSE;
       PUT(code, 1, meta_arg);
       code += 1 + LINK_SIZE;
@@ -8250,8 +8533,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       determine the real length in pre-compile phase. */
       length_prevgroup = 1 + LINK_SIZE;
 
-      if (META_CODE(pptr[1]) == META_OFFSET ||
-          META_CODE(pptr[1]) == META_CAPTURE_NAME ||
+      if (META_CODE(pptr[1]) == META_OFFSET || META_CODE(pptr[1]) == META_CAPTURE_NAME ||
           META_CODE(pptr[1]) == META_CAPTURE_NUMBER)
       {
         recurse_arguments *args;
@@ -8261,7 +8543,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           if (!PRIV(compile_parse_recurse_args)(pptr, offset, errorcodeptr, cb))
             return 0;
 
-          args = (recurse_arguments*)cb->last_data;
+          args = (recurse_arguments *)cb->last_data;
           length_prevgroup += (args->size * (1 + IMM2_SIZE));
           *lengthptr += (args->size * (1 + IMM2_SIZE));
           pptr += args->skip_size;
@@ -8270,10 +8552,10 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         {
           uint16_t *current, *end;
 
-          args = (recurse_arguments*)cb->first_data;
+          args = (recurse_arguments *)cb->first_data;
           PCRE2_ASSERT(args != NULL && args->header.type == CDATA_RECURSE_ARGS);
 
-          current = (uint16_t*)(args + 1);
+          current = (uint16_t *)(args + 1);
           end = current + args->size;
           PCRE2_ASSERT(end > current);
 
@@ -8282,8 +8564,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             code[0] = OP_CREF;
             PUT2(code, 1, *current);
             code += 1 + IMM2_SIZE;
-          }
-          while (++current < end);
+          } while (++current < end);
 
           length_prevgroup += (args->size * (1 + IMM2_SIZE));
           pptr += args->skip_size;
@@ -8294,7 +8575,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
       groupsetfirstcu = FALSE;
       cb->had_recurse = TRUE;
-      if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+      if (firstcuflags == REQ_UNSET)
+        firstcuflags = REQ_NONE;
       zerofirstcu = firstcu;
       zerofirstcuflags = firstcuflags;
       break;
@@ -8306,7 +8588,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
     case META_CAPTURE:
       bravalue = OP_CBRA;
       skipunits = IMM2_SIZE;
-      PUT2(code, 1+LINK_SIZE, meta_arg);
+      PUT2(code, 1 + LINK_SIZE, meta_arg);
       cb->lastcapture = meta_arg;
       goto GROUP_PROCESS_NOTE_EMPTY;
 
@@ -8333,7 +8615,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       if (meta_arg > ESC_b && meta_arg < ESC_Z)
       {
         matched_char = TRUE;
-        if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+        if (firstcuflags == REQ_UNSET)
+          firstcuflags = REQ_NONE;
       }
 
       /* Set values to reset to if this is followed by a zero repeat. */
@@ -8379,11 +8662,11 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         }
         else
         {
-          *code++ = (meta_arg == ESC_p)? OP_PROP : OP_NOTPROP;
+          *code++ = (meta_arg == ESC_p) ? OP_PROP : OP_NOTPROP;
           *code++ = ptype;
           *code++ = pdata;
         }
-        break;  // End META_ESCAPE
+        break; // End META_ESCAPE
       }
 #endif
 
@@ -8413,33 +8696,34 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       switch (meta_arg)
       {
       case ESC_C:
-        cb->external_flags |= PCRE2_HASBKC;  // Record
+        cb->external_flags |= PCRE2_HASBKC; // Record
 #if PCRE2_CODE_UNIT_WIDTH == 32
         meta_arg = OP_ALLANY;
         (void)utf; // Avoid compiler warning.
 #else
-        if (!utf) meta_arg = OP_ALLANY;
+        if (!utf)
+          meta_arg = OP_ALLANY;
 #endif
         break;
 
       case ESC_B:
       case ESC_b:
         if ((options & PCRE2_UCP) != 0 && (xoptions & PCRE2_EXTRA_ASCII_BSW) == 0)
-          meta_arg = (meta_arg == ESC_B)? OP_NOT_UCP_WORD_BOUNDARY :
-            OP_UCP_WORD_BOUNDARY;
+          meta_arg = (meta_arg == ESC_B) ? OP_NOT_UCP_WORD_BOUNDARY : OP_UCP_WORD_BOUNDARY;
         PCRE2_FALLTHROUGH /* Fall through */
 
       case ESC_A:
-        if (cb->max_lookbehind == 0) cb->max_lookbehind = 1;
+        if (cb->max_lookbehind == 0)
+          cb->max_lookbehind = 1;
         break;
 
       case ESC_K:
-        cb->external_flags |= PCRE2_HASBSK;  // Record
+        cb->external_flags |= PCRE2_HASBSK; // Record
         break;
       }
 
       *code++ = meta_arg;
-      break;  // End META_ESCAPE
+      break; // End META_ESCAPE
 
 
       /* ===================================================================*/
@@ -8451,7 +8735,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       if (meta >= META_END)
       {
         PCRE2_DEBUG_UNREACHABLE();
-        *errorcodeptr = ERR89;  // Internal error - unrecognized.
+        *errorcodeptr = ERR89; // Internal error - unrecognized.
         return 0;
       }
       /* LCOV_EXCL_STOP */
@@ -8459,9 +8743,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       /* Handle a literal character. We come here by goto in the case of a
       32-bit, non-UTF character whose value is greater than META_END. */
 
-      NORMAL_CHAR:
-      meta = *pptr;     // Get the full 32 bits
-      NORMAL_CHAR_SET:  // Character is already in meta
+    NORMAL_CHAR:
+      meta = *pptr;  // Get the full 32 bits
+    NORMAL_CHAR_SET: // Character is already in meta
       matched_char = TRUE;
 
       /* For caseless UTF or UCP mode, check whether this character has more than
@@ -8471,21 +8755,21 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       hardcode the matching characters using a caseset. */
 
 #ifdef SUPPORT_UNICODE
-      if ((utf||ucp) && (options & PCRE2_CASELESS) != 0)
+      if ((utf || ucp) && (options & PCRE2_CASELESS) != 0)
       {
         uint32_t caseset;
 
-        if ((xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
-              PCRE2_EXTRA_TURKISH_CASING &&
+        if ((xoptions & (PCRE2_EXTRA_TURKISH_CASING | PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+                PCRE2_EXTRA_TURKISH_CASING &&
             UCD_ANY_I(meta))
         {
-          caseset = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(meta)? 0 : 3);
+          caseset = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(meta) ? 0 : 3);
         }
         else if ((caseset = UCD_CASESET(meta)) != 0 &&
                  (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
                  PRIV(ucd_caseless_sets)[caseset] < 128)
         {
-          caseset = 0;  // Ignore the caseless set if it's restricted.
+          caseset = 0; // Ignore the caseless set if it's restricted.
         }
 
         if (caseset != 0)
@@ -8495,7 +8779,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
           *code++ = caseset;
           if (firstcuflags == REQ_UNSET)
             firstcuflags = zerofirstcuflags = REQ_NONE;
-          break;  // End handling this meta item
+          break; // End handling this meta item
         }
       }
 #endif
@@ -8505,13 +8789,15 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
       case-partners of a character with just two cases; matched_char has already
       been set TRUE and options fudged if necessary. */
 
-      CLASS_CASELESS_CHAR:
+    CLASS_CASELESS_CHAR:
 
       /* Get the character's code units into mcbuffer, with the length in
       mclength. When not in UTF mode, the length is always 1. */
 
 #ifdef SUPPORT_UNICODE
-      if (utf) mclength = PRIV(ord2utf)(meta, mcbuffer); else
+      if (utf)
+        mclength = PRIV(ord2utf)(meta, mcbuffer);
+      else
 #endif
       {
         mclength = 1;
@@ -8520,7 +8806,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
 
       /* Generate the appropriate code */
 
-      *code++ = ((options & PCRE2_CASELESS) != 0)? OP_CHARI : OP_CHAR;
+      *code++ = ((options & PCRE2_CASELESS) != 0) ? OP_CHARI : OP_CHAR;
       memcpy(code, mcbuffer, CU2BYTES(mclength));
       code += mclength;
 
@@ -8554,7 +8840,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
             reqcuflags = cb->req_varyopt;
           }
         }
-        else firstcuflags = reqcuflags = REQ_NONE;
+        else
+          firstcuflags = reqcuflags = REQ_NONE;
       }
 
       /* firstcu was previously set; we can set reqcu only if the length is
@@ -8582,9 +8869,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr,
         reset_caseful = FALSE;
       }
 
-      break;    // End literal character handling
-    }           // End of big switch
-  }             // End of big loop
+      break; // End literal character handling
+    } // End of big switch
+  } // End of big loop
 
   /* LCOV_EXCL_START */
   PCRE2_DEBUG_UNREACHABLE(); // Control should never reach here
@@ -8627,11 +8914,11 @@ Returns:            0 There has been an error
 */
 
 static int
-compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
-  uint32_t **pptrptr, int *errorcodeptr, uint32_t skipunits,
-  uint32_t *firstcuptr, uint32_t *firstcuflagsptr, uint32_t *reqcuptr,
-  uint32_t *reqcuflagsptr, branch_chain *bcptr, open_capitem *open_caps,
-  compile_block *cb, PCRE2_SIZE *lengthptr)
+compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, uint32_t **pptrptr,
+              int *errorcodeptr, uint32_t skipunits, uint32_t *firstcuptr,
+              uint32_t *firstcuflagsptr, uint32_t *reqcuptr, uint32_t *reqcuflagsptr,
+              branch_chain *bcptr, open_capitem *open_caps, compile_block *cb,
+              PCRE2_SIZE *lengthptr)
 {
   PCRE2_UCHAR *code = *codeptr;
   PCRE2_UCHAR *last_branch = code;
@@ -8653,7 +8940,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
   if (cb->cx->stack_guard != NULL &&
       cb->cx->stack_guard(cb->parens_depth, cb->cx->stack_guard_data))
   {
-    *errorcodeptr= ERR33;
+    *errorcodeptr = ERR33;
     cb->erroroffset = 0;
     return 0;
   }
@@ -8673,14 +8960,12 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
   start and end of each alternative, because compiled items are discarded during
   the pre-compile phase so that the workspace is not exceeded. */
 
-  length = 2 + 2*LINK_SIZE + skipunits;
+  length = 2 + 2 * LINK_SIZE + skipunits;
 
   /* Remember if this is a lookbehind assertion, and if it is, save its length
   and skip over the pattern offset. */
 
-  lookbehind = *code == OP_ASSERTBACK ||
-               *code == OP_ASSERTBACK_NOT ||
-               *code == OP_ASSERTBACK_NA;
+  lookbehind = *code == OP_ASSERTBACK || *code == OP_ASSERTBACK_NOT || *code == OP_ASSERTBACK_NA;
 
   if (lookbehind)
   {
@@ -8688,7 +8973,8 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
     lookbehindminlength = *pptr;
     pptr += SIZEOFFSET;
   }
-  else lookbehindlength = lookbehindminlength = 0;
+  else
+    lookbehindlength = lookbehindminlength = 0;
 
   /* If this is a capturing subpattern, add to the chain of open capturing items
   so that we can detect them if (*ACCEPT) is encountered. Note that only OP_CBRA
@@ -8727,8 +9013,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
 
     if (lookbehind && lookbehindlength > 0)
     {
-      if (lookbehindminlength == LOOKBEHIND_MAX ||
-          lookbehindminlength == lookbehindlength)
+      if (lookbehindminlength == LOOKBEHIND_MAX || lookbehindminlength == lookbehindlength)
       {
         *code++ = OP_REVERSE;
         PUT2INC(code, 0, lookbehindlength);
@@ -8739,7 +9024,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
         *code++ = OP_VREVERSE;
         PUT2INC(code, 0, lookbehindminlength);
         PUT2INC(code, 0, lookbehindlength);
-        length += 1 + 2*IMM2_SIZE;
+        length += 1 + 2 * IMM2_SIZE;
       }
     }
 
@@ -8747,14 +9032,15 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
     into the length. */
 
     if ((branch_return =
-          compile_branch(&options, &xoptions, &code, &pptr, errorcodeptr,
-            &branchfirstcu, &branchfirstcuflags, &branchreqcu, &branchreqcuflags,
-            &bc, open_caps, cb, (lengthptr == NULL)? NULL : &length)) == 0)
+             compile_branch(&options, &xoptions, &code, &pptr, errorcodeptr, &branchfirstcu,
+                            &branchfirstcuflags, &branchreqcu, &branchreqcuflags, &bc, open_caps,
+                            cb, (lengthptr == NULL) ? NULL : &length)) == 0)
       return 0;
 
     /* If a branch can match an empty string, so can the whole group. */
 
-    if (branch_return < 0) okreturn = -1;
+    if (branch_return < 0)
+      okreturn = -1;
 
     /* In the real compile phase, there is some post-processing to be done. */
 
@@ -8807,8 +9093,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
 
         /* Now ensure that the reqcus match */
 
-        if (((reqcuflags & ~REQ_VARY) != (branchreqcuflags & ~REQ_VARY)) ||
-            reqcu != branchreqcu)
+        if (((reqcuflags & ~REQ_VARY) != (branchreqcuflags & ~REQ_VARY)) || reqcu != branchreqcu)
           reqcuflags = REQ_NONE;
         else
         {
@@ -8837,8 +9122,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
           PUT(last_branch, 1, branch_length);
           branch_length = prev_length;
           last_branch -= branch_length;
-        }
-        while (branch_length > 0);
+        } while (branch_length > 0);
       }
 
       /* Fill in the ket */
@@ -8857,8 +9141,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
       *reqcuflagsptr = reqcuflags;
       if (lengthptr != NULL)
       {
-        if (*lengthptr > MAX_PATTERN_SIZE ||
-            MAX_PATTERN_SIZE - *lengthptr < length)
+        if (*lengthptr > MAX_PATTERN_SIZE || MAX_PATTERN_SIZE - *lengthptr < length)
         {
           *errorcodeptr = ERR20;
           return 0;
@@ -8885,8 +9168,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr,
       /* Move the accumulated length into *lengthptr, providing the next call to
       compile_branch with as much space in &length and &code as the first did. */
 
-      if (*lengthptr > MAX_PATTERN_SIZE ||
-          MAX_PATTERN_SIZE - *lengthptr < length)
+      if (*lengthptr > MAX_PATTERN_SIZE || MAX_PATTERN_SIZE - *lengthptr < length)
       {
         *errorcodeptr = ERR20;
         cb->erroroffset = 0;
@@ -8962,19 +9244,17 @@ Returns:     TRUE or FALSE
 */
 
 static BOOL
-is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb,
-  int atomcount, BOOL inassert, BOOL dotstar_anchor)
+is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb, int atomcount, BOOL inassert,
+            BOOL dotstar_anchor)
 {
   do
   {
-    PCRE2_SPTR scode = first_significant_code(
-      code + PRIV(OP_lengths)[*code], FALSE);
+    PCRE2_SPTR scode = first_significant_code(code + PRIV(OP_lengths)[*code], FALSE);
     int op = *scode;
 
     /* Non-capturing brackets */
 
-    if (op == OP_BRA  || op == OP_BRAPOS ||
-        op == OP_SBRA || op == OP_SBRAPOS)
+    if (op == OP_BRA || op == OP_BRAPOS || op == OP_SBRA || op == OP_SBRAPOS)
     {
       if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
         return FALSE;
@@ -8982,26 +9262,28 @@ is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb,
 
     /* Capturing brackets */
 
-    else if (op == OP_CBRA  || op == OP_CBRAPOS ||
-            op == OP_SCBRA || op == OP_SCBRAPOS)
+    else if (op == OP_CBRA || op == OP_CBRAPOS || op == OP_SCBRA || op == OP_SCBRAPOS)
     {
-      int n = GET2(scode, 1+LINK_SIZE);
-      uint32_t new_map = bracket_map | ((n < 32)? (1u << n) : 1);
-      if (!is_anchored(scode, new_map, cb, atomcount, inassert, dotstar_anchor)) return FALSE;
+      int n = GET2(scode, 1 + LINK_SIZE);
+      uint32_t new_map = bracket_map | ((n < 32) ? (1u << n) : 1);
+      if (!is_anchored(scode, new_map, cb, atomcount, inassert, dotstar_anchor))
+        return FALSE;
     }
 
     /* Positive forward assertion */
 
     else if (op == OP_ASSERT || op == OP_ASSERT_NA)
     {
-      if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor)) return FALSE;
+      if (!is_anchored(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
+        return FALSE;
     }
 
     /* Condition. If there is no second branch, it can't be anchored. */
 
     else if (op == OP_COND || op == OP_SCOND)
     {
-      if (scode[GET(scode,1)] != OP_ALT) return FALSE;
+      if (scode[GET(scode, 1)] != OP_ALT)
+        return FALSE;
       if (!is_anchored(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
         return FALSE;
     }
@@ -9021,21 +9303,20 @@ is_anchored(PCRE2_SPTR code, uint32_t bracket_map, compile_block *cb,
     with the subject "aab", which matches "b", i.e. not at the start of a line.
     There is also an option that disables auto-anchoring. */
 
-    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
-              op == OP_TYPEPOSSTAR))
+    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR))
     {
-      if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 ||
-          atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
+      if (scode[1] != OP_ALLANY || (bracket_map & cb->backref_map) != 0 || atomcount > 0 ||
+          cb->had_pruneorskip || inassert || !dotstar_anchor)
         return FALSE;
     }
 
     /* Check for explicit anchoring */
 
-    else if (op != OP_SOD && op != OP_SOM && op != OP_CIRC) return FALSE;
+    else if (op != OP_SOD && op != OP_SOM && op != OP_CIRC)
+      return FALSE;
 
     code += GET(code, 1);
-  }
-  while (*code == OP_ALT);   // Loop for each alternative
+  } while (*code == OP_ALT); // Loop for each alternative
   return TRUE;
 }
 
@@ -9068,13 +9349,12 @@ Returns:         TRUE or FALSE
 */
 
 static BOOL
-is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
-  int atomcount, BOOL inassert, BOOL dotstar_anchor)
+is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb, int atomcount,
+             BOOL inassert, BOOL dotstar_anchor)
 {
   do
   {
-    PCRE2_SPTR scode = first_significant_code(
-      code + PRIV(OP_lengths)[*code], FALSE);
+    PCRE2_SPTR scode = first_significant_code(code + PRIV(OP_lengths)[*code], FALSE);
     int op = *scode;
 
     /* If we are at the start of a conditional assertion group, *both* the
@@ -9086,8 +9366,10 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
     {
       scode += 1 + LINK_SIZE;
 
-      if (*scode == OP_CALLOUT) scode += PRIV(OP_lengths)[OP_CALLOUT];
-        else if (*scode == OP_CALLOUT_STR) scode += GET(scode, 1 + 2*LINK_SIZE);
+      if (*scode == OP_CALLOUT)
+        scode += PRIV(OP_lengths)[OP_CALLOUT];
+      else if (*scode == OP_CALLOUT_STR)
+        scode += GET(scode, 1 + 2 * LINK_SIZE);
 
       switch (*scode)
       {
@@ -9100,10 +9382,12 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
       case OP_TRUE:
         return FALSE;
 
-      default:       // Assertion
+      default: // Assertion
         if (!is_startline(scode, bracket_map, cb, atomcount, TRUE, dotstar_anchor))
           return FALSE;
-        do scode += GET(scode, 1); while (*scode == OP_ALT);
+        do
+          scode += GET(scode, 1);
+        while (*scode == OP_ALT);
         scode += 1 + LINK_SIZE;
         break;
       }
@@ -9113,8 +9397,7 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
 
     /* Non-capturing brackets */
 
-    if (op == OP_BRA  || op == OP_BRAPOS ||
-        op == OP_SBRA || op == OP_SBRAPOS)
+    if (op == OP_BRA || op == OP_BRAPOS || op == OP_SBRA || op == OP_SBRAPOS)
     {
       if (!is_startline(scode, bracket_map, cb, atomcount, inassert, dotstar_anchor))
         return FALSE;
@@ -9122,11 +9405,10 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
 
     /* Capturing brackets */
 
-    else if (op == OP_CBRA  || op == OP_CBRAPOS ||
-            op == OP_SCBRA || op == OP_SCBRAPOS)
+    else if (op == OP_CBRA || op == OP_CBRAPOS || op == OP_SCBRA || op == OP_SCBRAPOS)
     {
-      int n = GET2(scode, 1+LINK_SIZE);
-      unsigned int new_map = bracket_map | ((n < 32)? (1u << n) : 1);
+      int n = GET2(scode, 1 + LINK_SIZE);
+      unsigned int new_map = bracket_map | ((n < 32) ? (1u << n) : 1);
       if (!is_startline(scode, new_map, cb, atomcount, inassert, dotstar_anchor))
         return FALSE;
     }
@@ -9156,8 +9438,8 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
 
     else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
     {
-      if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 ||
-          atomcount > 0 || cb->had_pruneorskip || inassert || !dotstar_anchor)
+      if (scode[1] != OP_ANY || (bracket_map & cb->backref_map) != 0 || atomcount > 0 ||
+          cb->had_pruneorskip || inassert || !dotstar_anchor)
         return FALSE;
     }
 
@@ -9165,13 +9447,13 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb,
     in particular that this includes atomic brackets OP_ONCE because the number
     of characters matched by .* cannot be adjusted inside them. */
 
-    else if (op != OP_CIRC && op != OP_CIRCM) return FALSE;
+    else if (op != OP_CIRC && op != OP_CIRCM)
+      return FALSE;
 
     /* Move on to the next alternative */
 
     code += GET(code, 1);
-  }
-  while (*code == OP_ALT);  // Loop for each alternative
+  } while (*code == OP_ALT); // Loop for each alternative
   return TRUE;
 }
 
@@ -9197,8 +9479,10 @@ find_recurse(PCRE2_UCHAR *code, BOOL utf)
   for (;;)
   {
     PCRE2_UCHAR c = *code;
-    if (c == OP_END) return NULL;
-    if (c == OP_RECURSE) return code;
+    if (c == OP_END)
+      return NULL;
+    if (c == OP_RECURSE)
+      return code;
 
     /* XCLASS is used for classes that cannot be represented just by a bit map.
     This includes negated single high-valued characters. ECLASS is used for
@@ -9206,8 +9490,10 @@ find_recurse(PCRE2_UCHAR *code, BOOL utf)
     callouts with string arguments. In each case the length in the table is
     zero; the actual length is stored in the compiled code. */
 
-    if (c == OP_XCLASS || c == OP_ECLASS) code += GET(code, 1);
-    else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
+    if (c == OP_XCLASS || c == OP_ECLASS)
+      code += GET(code, 1);
+    else if (c == OP_CALLOUT_STR)
+      code += GET(code, 1 + 2 * LINK_SIZE);
 
     /* Otherwise, we can get the item's length from the table, except that for
     repeated character types, we have to test for \p and \P, which have an extra
@@ -9227,7 +9513,8 @@ find_recurse(PCRE2_UCHAR *code, BOOL utf)
       case OP_TYPEPOSSTAR:
       case OP_TYPEPOSPLUS:
       case OP_TYPEPOSQUERY:
-        if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+        if (code[1] == OP_PROP || code[1] == OP_NOTPROP)
+          code += 2;
         break;
 
       case OP_TYPEPOSUPTO:
@@ -9316,13 +9603,14 @@ find_recurse(PCRE2_UCHAR *code, BOOL utf)
         case OP_POSQUERYI:
         case OP_NOTPOSQUERY:
         case OP_NOTPOSQUERYI:
-          if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
+          if (HAS_EXTRALEN(code[-1]))
+            code += GET_EXTRALEN(code[-1]);
           break;
         }
       }
 #else
-      (void)(utf);  // Keep compiler happy by referencing function argument
-#endif  /* MAYBE_UTF_MULTI */
+      (void)(utf); // Keep compiler happy by referencing function argument
+#endif /* MAYBE_UTF_MULTI */
     }
   }
 }
@@ -9362,9 +9650,10 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
   {
     uint32_t d;
     uint32_t dflags;
-    int xl = (*code == OP_CBRA || *code == OP_SCBRA ||
-              *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? IMM2_SIZE:0;
-    PCRE2_SPTR scode = first_significant_code(code + 1+LINK_SIZE + xl, TRUE);
+    int xl = (*code == OP_CBRA || *code == OP_SCBRA || *code == OP_CBRAPOS || *code == OP_SCBRAPOS)
+                 ? IMM2_SIZE
+                 : 0;
+    PCRE2_SPTR scode = first_significant_code(code + 1 + LINK_SIZE + xl, TRUE);
     PCRE2_UCHAR op = *scode;
 
     switch (op)
@@ -9382,11 +9671,17 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
     case OP_ASSERT_NA:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
-      d = find_firstassertedcu(scode, &dflags, inassert +
-        ((op == OP_ASSERT || op == OP_ASSERT_NA)?1:0));
-      if (dflags >= REQ_NONE) return 0;
-      if (cflags >= REQ_NONE) { c = d; cflags = dflags; }
-        else if (c != d || cflags != dflags) return 0;
+      d = find_firstassertedcu(scode, &dflags,
+                               inassert + ((op == OP_ASSERT || op == OP_ASSERT_NA) ? 1 : 0));
+      if (dflags >= REQ_NONE)
+        return 0;
+      if (cflags >= REQ_NONE)
+      {
+        c = d;
+        cflags = dflags;
+      }
+      else if (c != d || cflags != dflags)
+        return 0;
       break;
 
     case OP_EXACT:
@@ -9397,9 +9692,15 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
-      if (inassert == 0) return 0;
-      if (cflags >= REQ_NONE) { c = scode[1]; cflags = 0; }
-        else if (c != scode[1]) return 0;
+      if (inassert == 0)
+        return 0;
+      if (cflags >= REQ_NONE)
+      {
+        c = scode[1];
+        cflags = 0;
+      }
+      else if (c != scode[1])
+        return 0;
       break;
 
     case OP_EXACTI:
@@ -9410,7 +9711,8 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
     case OP_PLUSI:
     case OP_MINPLUSI:
     case OP_POSPLUSI:
-      if (inassert == 0) return 0;
+      if (inassert == 0)
+        return 0;
 
       /* If the character is more than one code unit long, we cannot set its
       first code unit when matching caselessly. Later scanning may pick up
@@ -9418,20 +9720,26 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
 
 #ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
-      if (scode[1] >= 0x80) return 0;
+      if (scode[1] >= 0x80)
+        return 0;
 #elif PCRE2_CODE_UNIT_WIDTH == 16
-      if (scode[1] >= 0xd800 && scode[1] <= 0xdfff) return 0;
+      if (scode[1] >= 0xd800 && scode[1] <= 0xdfff)
+        return 0;
 #endif
 #endif
 
-      if (cflags >= REQ_NONE) { c = scode[1]; cflags = REQ_CASELESS; }
-        else if (c != scode[1]) return 0;
+      if (cflags >= REQ_NONE)
+      {
+        c = scode[1];
+        cflags = REQ_CASELESS;
+      }
+      else if (c != scode[1])
+        return 0;
       break;
     }
 
     code += GET(code, 1);
-  }
-  while (*code == OP_ALT);
+  } while (*code == OP_ALT);
 
   *flags = cflags;
   return c;
@@ -9477,8 +9785,9 @@ parsed_skip(uint32_t *pptr, uint32_t skiptype)
 
     switch (meta)
     {
-    default:    // Just skip over most items
-      if (meta < META_END) continue;  // Literal
+    default: // Just skip over most items
+      if (meta < META_END)
+        continue; // Literal
       break;
 
       /* The parsed regex is malformed; we have reached the end and did
@@ -9492,16 +9801,17 @@ parsed_skip(uint32_t *pptr, uint32_t skiptype)
 
       /* The data for these items is variable in length. */
 
-    case META_BACKREF:    // Offset is present only if group >= 10
-      if (META_DATA(*pptr) >= 10) pptr += SIZEOFFSET;
+    case META_BACKREF: // Offset is present only if group >= 10
+      if (META_DATA(*pptr) >= 10)
+        pptr += SIZEOFFSET;
       break;
 
     case META_ESCAPE:
       if (*pptr - META_ESCAPE == ESC_P || *pptr - META_ESCAPE == ESC_p)
-        pptr += 1;     // Skip prop data
+        pptr += 1; // Skip prop data
       break;
 
-    case META_MARK:       // Add the length of the name.
+    case META_MARK: // Add the length of the name.
     case META_COMMIT_ARG:
     case META_PRUNE_ARG:
     case META_SKIP_ARG:
@@ -9513,11 +9823,13 @@ parsed_skip(uint32_t *pptr, uint32_t skiptype)
 
     case META_CLASS:
     case META_CLASS_NOT:
-      if (skiptype == PSKIP_CLASS) class_nestlevel++;
+      if (skiptype == PSKIP_CLASS)
+        class_nestlevel++;
       break;
 
     case META_CLASS_END:
-      if (skiptype == PSKIP_CLASS && --class_nestlevel == 0) return pptr;
+      if (skiptype == PSKIP_CLASS && --class_nestlevel == 0)
+        return pptr;
       break;
 
       /* These are the "active" items for tracking ALT/KET nesting. */
@@ -9544,11 +9856,13 @@ parsed_skip(uint32_t *pptr, uint32_t skiptype)
       break;
 
     case META_ALT:
-      if (nestlevel == 0 && skiptype == PSKIP_ALT) return pptr;
+      if (nestlevel == 0 && skiptype == PSKIP_ALT)
+        return pptr;
       break;
 
     case META_KET:
-      if (nestlevel == 0) return pptr;
+      if (nestlevel == 0)
+        return pptr;
       nestlevel--;
       break;
     }
@@ -9556,7 +9870,8 @@ parsed_skip(uint32_t *pptr, uint32_t skiptype)
     /* The extra data item length for each meta is in a table. */
 
     meta = (meta >> 16) & 0x7fff;
-    if (meta >= sizeof(meta_extra_lengths)) return NULL;
+    if (meta >= sizeof(meta_extra_lengths))
+      return NULL;
     pptr += meta_extra_lengths[meta];
   }
 
@@ -9590,8 +9905,8 @@ Returns:      the maximum group length or a negative number
 */
 
 static int
-get_grouplength(uint32_t **pptrptr, int *minptr, BOOL isinline, int *errcodeptr,
-  int *lcptr, int group, parsed_recurse_check *recurses, compile_block *cb)
+get_grouplength(uint32_t **pptrptr, int *minptr, BOOL isinline, int *errcodeptr, int *lcptr,
+                int group, parsed_recurse_check *recurses, compile_block *cb)
 {
   uint32_t *gi = cb->groupinfo + 2 * group;
   int branchlength, branchminlength;
@@ -9606,10 +9921,12 @@ get_grouplength(uint32_t **pptrptr, int *minptr, BOOL isinline, int *errcodeptr,
   if (group > 0 && (cb->external_flags & PCRE2_DUPCAPUSED) == 0)
   {
     uint32_t groupinfo = gi[0];
-    if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0) return -1;
+    if ((groupinfo & GI_NOT_FIXED_LENGTH) != 0)
+      return -1;
     if ((groupinfo & GI_SET_FIXED_LENGTH) != 0)
     {
-      if (isinline) *pptrptr = parsed_skip(*pptrptr, PSKIP_KET);
+      if (isinline)
+        *pptrptr = parsed_skip(*pptrptr, PSKIP_KET);
       *minptr = gi[1];
       return groupinfo & GI_FIXED_LENGTH_MASK;
     }
@@ -9619,13 +9936,16 @@ get_grouplength(uint32_t **pptrptr, int *minptr, BOOL isinline, int *errcodeptr,
 
   for (;;)
   {
-    branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr,
-      recurses, cb);
-    if (branchlength < 0) goto ISNOTFIXED;
-    if (branchlength > grouplength) grouplength = branchlength;
-    if (branchminlength < groupminlength) groupminlength = branchminlength;
-    if (**pptrptr == META_KET) break;
-    *pptrptr += 1;   // Skip META_ALT
+    branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr, recurses, cb);
+    if (branchlength < 0)
+      goto ISNOTFIXED;
+    if (branchlength > grouplength)
+      grouplength = branchlength;
+    if (branchminlength < groupminlength)
+      groupminlength = branchminlength;
+    if (**pptrptr == META_KET)
+      break;
+    *pptrptr += 1; // Skip META_ALT
   }
 
   if (group > 0)
@@ -9637,8 +9957,9 @@ get_grouplength(uint32_t **pptrptr, int *minptr, BOOL isinline, int *errcodeptr,
   *minptr = groupminlength;
   return grouplength;
 
-  ISNOTFIXED:
-  if (group > 0) gi[0] |= GI_NOT_FIXED_LENGTH;
+ISNOTFIXED:
+  if (group > 0)
+    gi[0] |= GI_NOT_FIXED_LENGTH;
   return -1;
 }
 
@@ -9665,7 +9986,7 @@ Returns:      the maximum length, or a negative value on error
 
 static int
 get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
-  parsed_recurse_check *recurses, compile_block *cb)
+                 parsed_recurse_check *recurses, compile_block *cb)
 {
   int branchlength = 0;
   int branchminlength = 0;
@@ -9682,7 +10003,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
 
   if ((*lcptr)++ > 2000)
   {
-    *errcodeptr = ERR35;  // Lookbehind is too complicated
+    *errcodeptr = ERR35; // Lookbehind is too complicated
     return -1;
   }
 
@@ -9717,7 +10038,8 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
       case META_ACCEPT:
       case META_FAIL:
         pptr = parsed_skip(pptr, PSKIP_ALT);
-        if (pptr == NULL) goto PARSED_SKIP_FAILED;
+        if (pptr == NULL)
+          goto PARSED_SKIP_FAILED;
         goto EXIT;
 
       case META_MARK:
@@ -9749,7 +10071,8 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
       case META_CLASS_NOT:
         itemlength = itemminlength = 1;
         pptr = parsed_skip(pptr, PSKIP_CLASS);
-        if (pptr == NULL) goto PARSED_SKIP_FAILED;
+        if (pptr == NULL)
+          goto PARSED_SKIP_FAILED;
         break;
 
       case META_CLASS_EMPTY_NOT:
@@ -9771,7 +10094,8 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
 
       case META_ESCAPE:
         escape = META_DATA(*pptr);
-        if (escape == ESC_X) return -1;
+        if (escape == ESC_X)
+          return -1;
         if (escape == ESC_R)
         {
           itemminlength = 1;
@@ -9787,7 +10111,8 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
           }
 #endif
           itemlength = itemminlength = 1;
-          if (escape == ESC_p || escape == ESC_P) pptr++;  // Skip prop data
+          if (escape == ESC_p || escape == ESC_P)
+            pptr++; // Skip prop data
         }
         break;
 
@@ -9799,7 +10124,8 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
       case META_LOOKAHEAD_NA:
       case META_SCS:
         *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb, lcptr);
-        if (*errcodeptr != 0) return -1;
+        if (*errcodeptr != 0)
+          return -1;
 
         /* Ignore any qualifiers that follow a lookahead assertion. */
 
@@ -9865,7 +10191,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
 
           if (ng == NULL)
           {
-            *errcodeptr = ERR15;  // Non-existent subpattern
+            *errcodeptr = ERR15; // Non-existent subpattern
             cb->erroroffset = offset;
             return -1;
           }
@@ -9879,9 +10205,9 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
 
           if (meta_code == META_RECURSE_BYNAME ||
               (!is_dupname && (cb->external_flags & PCRE2_DUPCAPUSED) == 0))
-            goto RECURSE_OR_BACKREF_LENGTH;  // Handle as a numbered version.
+            goto RECURSE_OR_BACKREF_LENGTH; // Handle as a numbered version.
         }
-        goto ISNOTFIXED;                     // Duplicate name or number
+        goto ISNOTFIXED; // Duplicate name or number
 
         /* The offset values for back references < 10 are in a separate vector
         because otherwise they would use more than two parsed pattern elements on
@@ -9908,28 +10234,36 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
         group = META_DATA(*pptr);
         GETPLUSOFFSET(offset, pptr);
 
-        RECURSE_OR_BACKREF_LENGTH:
+      RECURSE_OR_BACKREF_LENGTH:
         if (group > cb->bracount)
         {
           cb->erroroffset = offset;
-          *errcodeptr = ERR15;  // Non-existent subpattern
+          *errcodeptr = ERR15; // Non-existent subpattern
           return -1;
         }
-        if (group == 0) goto ISNOTFIXED;  // Local recursion
+        if (group == 0)
+          goto ISNOTFIXED; // Local recursion
         for (gptr = cb->parsed_pattern; *gptr != META_END; gptr++)
         {
-          if (META_CODE(*gptr) == META_BIGVALUE) gptr++;
-            else if (*gptr == (META_CAPTURE | group)) break;
+          if (META_CODE(*gptr) == META_BIGVALUE)
+            gptr++;
+          else if (*gptr == (META_CAPTURE | group))
+            break;
         }
 
         /* We must start the search for the end of the group at the first meta code
         inside the group. Otherwise it will be treated as an enclosed group. */
 
         gptrend = parsed_skip(gptr + 1, PSKIP_KET);
-        if (gptrend == NULL) goto PARSED_SKIP_FAILED;
-        if (pptr > gptr && pptr < gptrend) goto ISNOTFIXED;  // Local recursion
-        for (r = recurses; r != NULL; r = r->prev) if (r->groupptr == gptr) break;
-        if (r != NULL) goto ISNOTFIXED;   // Mutual recursion
+        if (gptrend == NULL)
+          goto PARSED_SKIP_FAILED;
+        if (pptr > gptr && pptr < gptrend)
+          goto ISNOTFIXED; // Local recursion
+        for (r = recurses; r != NULL; r = r->prev)
+          if (r->groupptr == gptr)
+            break;
+        if (r != NULL)
+          goto ISNOTFIXED; // Mutual recursion
         this_recurse.prev = recurses;
         this_recurse.groupptr = gptr;
 
@@ -9939,12 +10273,13 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
         in the cache. */
 
         gptr++;
-        grouplength = get_grouplength(&gptr, &groupminlength, FALSE, errcodeptr,
-          lcptr, group, &this_recurse, cb);
+        grouplength = get_grouplength(&gptr, &groupminlength, FALSE, errcodeptr, lcptr, group,
+                                      &this_recurse, cb);
         if (grouplength < 0)
         {
-          if (*errcodeptr == 0) goto ISNOTFIXED;
-          return -1;  // Error already set
+          if (*errcodeptr == 0)
+            goto ISNOTFIXED;
+          return -1; // Error already set
         }
         itemlength = grouplength;
         itemminlength = groupminlength;
@@ -9984,10 +10319,11 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
       case META_NOCAPTURE:
       case META_SCRIPT_RUN:
         pptr++;
-        CHECK_GROUP:
-        grouplength = get_grouplength(&pptr, &groupminlength, TRUE, errcodeptr,
-          lcptr, group, recurses, cb);
-        if (grouplength < 0) return -1;
+      CHECK_GROUP:
+        grouplength =
+            get_grouplength(&pptr, &groupminlength, TRUE, errcodeptr, lcptr, group, recurses, cb);
+        if (grouplength < 0)
+          return -1;
         itemlength = grouplength;
         itemminlength = groupminlength;
         break;
@@ -10009,20 +10345,23 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
         max = pptr[2];
         pptr += 2;
 
-        REPETITION:
+      REPETITION:
         if (max != REPEAT_UNLIMITED)
         {
-          if (lastitemlength != 0 &&  // Should not occur, but just in case
-              max != 0 &&
-              (INT_MAX - branchlength)/lastitemlength < max - 1)
+          if (lastitemlength != 0 && // Should not occur, but just in case
+              max != 0 && (INT_MAX - branchlength) / lastitemlength < max - 1)
           {
-            *errcodeptr = ERR87;  // Integer overflow; lookbehind too big
+            *errcodeptr = ERR87; // Integer overflow; lookbehind too big
             return -1;
           }
-          if (min == 0) branchminlength -= lastitemminlength;
-            else itemminlength = (min - 1) * lastitemminlength;
-          if (max == 0) branchlength -= lastitemlength;
-            else itemlength = (max - 1) * lastitemlength;
+          if (min == 0)
+            branchminlength -= lastitemminlength;
+          else
+            itemminlength = (min - 1) * lastitemminlength;
+          if (max == 0)
+            branchlength -= lastitemlength;
+          else
+            itemlength = (max - 1) * lastitemlength;
           break;
         }
         PCRE2_FALLTHROUGH /* Fall through */
@@ -10030,8 +10369,8 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
         /* Any other item means this branch does not have a fixed length. */
 
       default:
-        ISNOTFIXED:
-        *errcodeptr = ERR25;   // Not fixed length
+      ISNOTFIXED:
+        *errcodeptr = ERR25; // Not fixed length
         return -1;
       }
     }
@@ -10041,8 +10380,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
     least one variable-length branch in the group, there is a test for the
     (smaller) variable-length branch length limit. */
 
-    if (INT_MAX - branchlength < (int)itemlength ||
-        (branchlength += itemlength) > LOOKBEHIND_MAX)
+    if (INT_MAX - branchlength < (int)itemlength || (branchlength += itemlength) > LOOKBEHIND_MAX)
     {
       *errcodeptr = ERR87;
       return -1;
@@ -10056,15 +10394,15 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
     lastitemminlength = itemminlength;
   }
 
-  EXIT:
+EXIT:
   *pptrptr = pptr;
   *minptr = branchminlength;
   return branchlength;
 
-  /* LCOV_EXCL_START */
-  PARSED_SKIP_FAILED:
+/* LCOV_EXCL_START */
+PARSED_SKIP_FAILED:
   PCRE2_DEBUG_UNREACHABLE();
-  *errcodeptr = ERR90;  // Unhandled META code - internal error
+  *errcodeptr = ERR90; // Unhandled META code - internal error
   return -1;
   /* LCOV_EXCL_STOP */
 }
@@ -10098,7 +10436,7 @@ Returns:      TRUE if all is well
 
 static BOOL
 set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
-  parsed_recurse_check *recurses, compile_block *cb)
+                       parsed_recurse_check *recurses, compile_block *cb)
 {
   PCRE2_SIZE offset;
   uint32_t *bptr = *pptrptr;
@@ -10107,7 +10445,7 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
   int minlength = INT_MAX;
   BOOL variable = FALSE;
 
-  READPLUSOFFSET(offset, bptr);  // Offset for error messages
+  READPLUSOFFSET(offset, bptr); // Offset for error messages
   *pptrptr += SIZEOFFSET;
 
   /* Each branch can have a different maximum length, but we can keep only a
@@ -10119,25 +10457,29 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
     int branchlength, branchminlength;
 
     *pptrptr += 1;
-    branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr,
-      recurses, cb);
+    branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr, recurses, cb);
 
     if (branchlength < 0)
     {
       /* The errorcode and offset may already be set from a nested lookbehind. */
-      if (*errcodeptr == 0) *errcodeptr = ERR25;
-      if (cb->erroroffset == PCRE2_UNSET) cb->erroroffset = offset;
+      if (*errcodeptr == 0)
+        *errcodeptr = ERR25;
+      if (cb->erroroffset == PCRE2_UNSET)
+        cb->erroroffset = offset;
       return FALSE;
     }
 
-    if (branchlength != branchminlength) variable = TRUE;
-    if (branchminlength < minlength) minlength = branchminlength;
-    if (branchlength > maxlength) maxlength = branchlength;
-    if (branchlength > cb->max_lookbehind) cb->max_lookbehind = branchlength;
-    *bptr |= branchlength;  // branchlength never more than 65535
+    if (branchlength != branchminlength)
+      variable = TRUE;
+    if (branchminlength < minlength)
+      minlength = branchminlength;
+    if (branchlength > maxlength)
+      maxlength = branchlength;
+    if (branchlength > cb->max_lookbehind)
+      cb->max_lookbehind = branchlength;
+    *bptr |= branchlength; // branchlength never more than 65535
     bptr = *pptrptr;
-  }
-  while (META_CODE(*bptr) == META_ALT);
+  } while (META_CODE(*bptr) == META_ALT);
 
   /* If any branch is of variable length, the whole lookbehind is of variable
   length. If the maximum length of any branch exceeds the maximum for variable
@@ -10156,7 +10498,8 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
       return FALSE;
     }
   }
-  else gbptr[1] = LOOKBEHIND_MAX;
+  else
+    gbptr[1] = LOOKBEHIND_MAX;
 
   return TRUE;
 }
@@ -10188,8 +10531,8 @@ Returns:    0 on success, or an errorcode (cb->erroroffset will be set)
 */
 
 static int
-check_lookbehinds(uint32_t *pptr, uint32_t **retptr,
-  parsed_recurse_check *recurses, compile_block *cb, int *lcptr)
+check_lookbehinds(uint32_t *pptr, uint32_t **retptr, parsed_recurse_check *recurses,
+                  compile_block *cb, int *lcptr)
 {
   int errorcode = 0;
   int nestlevel = 0;
@@ -10198,7 +10541,8 @@ check_lookbehinds(uint32_t *pptr, uint32_t **retptr,
 
   for (; *pptr != META_END; pptr++)
   {
-    if (*pptr < META_END) continue;  // Literal
+    if (*pptr < META_END)
+      continue; // Literal
 
     switch (META_CODE(*pptr))
     {
@@ -10210,18 +10554,19 @@ check_lookbehinds(uint32_t *pptr, uint32_t **retptr,
     default:
       PCRE2_DEBUG_UNREACHABLE();
       cb->erroroffset = 0;
-      return ERR70;  // Unrecognized meta code
+      return ERR70; // Unrecognized meta code
       /* LCOV_EXCL_STOP */
 
     case META_ESCAPE:
       if (*pptr - META_ESCAPE == ESC_P || *pptr - META_ESCAPE == ESC_p)
-        pptr += 1;    // Skip prop data
+        pptr += 1; // Skip prop data
       break;
 
     case META_KET:
       if (--nestlevel < 0)
       {
-        if (retptr != NULL) *retptr = pptr;
+        if (retptr != NULL)
+          *retptr = pptr;
         return 0;
       }
       break;
@@ -10367,49 +10712,48 @@ Returns:        pointer to compiled data block, or NULL on error,
                 with errorcode and erroroffset set
 */
 
-PCRE2_EXP_DEFN pcre2_code * PCRE2_CALL_CONVENTION
-pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
-   int *errorptr, PCRE2_SIZE *erroroffset, pcre2_compile_context *ccontext)
+PCRE2_EXP_DEFN pcre2_code *PCRE2_CALL_CONVENTION
+pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *errorptr,
+              PCRE2_SIZE *erroroffset, pcre2_compile_context *ccontext)
 {
-  BOOL utf;                             // Set TRUE for UTF mode
-  BOOL ucp;                             // Set TRUE for UCP mode
-  BOOL has_lookbehind = FALSE;          // Set TRUE if a lookbehind is found
-  BOOL zero_terminated;                 // Set TRUE for zero-terminated pattern
-  pcre2_real_code *re = NULL;           // What we will return
-  compile_block cb;                     // "Static" compile-time data
-  const uint8_t *tables;                // Char tables base pointer
+  BOOL utf;                    // Set TRUE for UTF mode
+  BOOL ucp;                    // Set TRUE for UCP mode
+  BOOL has_lookbehind = FALSE; // Set TRUE if a lookbehind is found
+  BOOL zero_terminated;        // Set TRUE for zero-terminated pattern
+  pcre2_real_code *re = NULL;  // What we will return
+  compile_block cb;            // "Static" compile-time data
+  const uint8_t *tables;       // Char tables base pointer
 
-  PCRE2_UCHAR null_str[1] = { 0xcd };   // Dummy for handling null inputs
-  PCRE2_UCHAR *code;                    // Current pointer in compiled code
-  PCRE2_UCHAR *codestart;               // Start of compiled code
-  PCRE2_SPTR ptr;                       // Current pointer in pattern
-  uint32_t *pptr;                       // Current pointer in parsed pattern
+  PCRE2_UCHAR null_str[1] = { 0xcd }; // Dummy for handling null inputs
+  PCRE2_UCHAR *code;                  // Current pointer in compiled code
+  PCRE2_UCHAR *codestart;             // Start of compiled code
+  PCRE2_SPTR ptr;                     // Current pointer in pattern
+  uint32_t *pptr;                     // Current pointer in parsed pattern
 
-  PCRE2_SIZE length = 1;                // Allow for final END opcode
-  PCRE2_SIZE usedlength;                // Actual length used
-  PCRE2_SIZE re_blocksize;              // Size of memory block
-  PCRE2_SIZE parsed_size_needed;        // Needed for parsed pattern
+  PCRE2_SIZE length = 1;         // Allow for final END opcode
+  PCRE2_SIZE usedlength;         // Actual length used
+  PCRE2_SIZE re_blocksize;       // Size of memory block
+  PCRE2_SIZE parsed_size_needed; // Needed for parsed pattern
 
-  uint32_t firstcuflags, reqcuflags;    // Type of first/req code unit
-  uint32_t firstcu, reqcu;              // Value of first/req code unit
-  uint32_t setflags = 0;                // NL and BSR set flags
-  uint32_t xoptions;                    // Flags from context, modified
+  uint32_t firstcuflags, reqcuflags; // Type of first/req code unit
+  uint32_t firstcu, reqcu;           // Value of first/req code unit
+  uint32_t setflags = 0;             // NL and BSR set flags
+  uint32_t xoptions;                 // Flags from context, modified
 
-  uint32_t skipatstart;                 // When checking (*UTF) etc
-  uint32_t limit_heap  = UINT32_MAX;
-  uint32_t limit_match = UINT32_MAX;    // Unset match limits
+  uint32_t skipatstart; // When checking (*UTF) etc
+  uint32_t limit_heap = UINT32_MAX;
+  uint32_t limit_match = UINT32_MAX; // Unset match limits
   uint32_t limit_depth = UINT32_MAX;
 
-  int newline = 0;                      // Unset; can be set by the pattern
-  int bsr = 0;                          // Unset; can be set by the pattern
-  int errorcode = 0;                    // Initialize to avoid compiler warn
-  int regexrc;                          // Return from compile
+  int newline = 0;   // Unset; can be set by the pattern
+  int bsr = 0;       // Unset; can be set by the pattern
+  int errorcode = 0; // Initialize to avoid compiler warn
+  int regexrc;       // Return from compile
 
-  uint32_t i;                           // Local loop counter
+  uint32_t i; // Local loop counter
 
   /* Enable all optimizations by default. */
-  uint32_t optim_flags = ccontext != NULL ? ccontext->optimization_flags :
-                                            PCRE2_OPTIMIZATION_ALL;
+  uint32_t optim_flags = ccontext != NULL ? ccontext->optimization_flags : PCRE2_OPTIMIZATION_ALL;
 
   /* Comments at the head of this file explain about these variables. */
 
@@ -10430,12 +10774,14 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   if (errorptr == NULL)
   {
-    if (erroroffset != NULL) *erroroffset = 0;
+    if (erroroffset != NULL)
+      *erroroffset = 0;
     return NULL;
   }
   if (erroroffset == NULL)
   {
-    if (errorptr != NULL) *errorptr = ERR120;
+    if (errorptr != NULL)
+      *errorptr = ERR120;
     return NULL;
   }
   *errorptr = ERR0;
@@ -10461,7 +10807,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   /* PCRE2_MATCH_INVALID_UTF implies UTF */
 
-  if ((options & PCRE2_MATCH_INVALID_UTF) != 0) options |= PCRE2_UTF;
+  if ((options & PCRE2_MATCH_INVALID_UTF) != 0)
+    options |= PCRE2_UTF;
 
   /* Check that all undefined public option bits are zero. */
 
@@ -10511,11 +10858,11 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   /* ------------ Initialize the "static" compile data -------------- */
 
-  tables = (ccontext->tables != NULL)? ccontext->tables : PRIV(default_tables);
+  tables = (ccontext->tables != NULL) ? ccontext->tables : PRIV(default_tables);
 
-  cb.lcc = tables + lcc_offset;          // Individual
-  cb.fcc = tables + fcc_offset;          //   character
-  cb.cbits = tables + cbits_offset;      //      tables
+  cb.lcc = tables + lcc_offset;     // Individual
+  cb.fcc = tables + fcc_offset;     //   character
+  cb.cbits = tables + cbits_offset; //      tables
   cb.ctypes = tables + ctypes_offset;
 
   cb.assert_depth = 0;
@@ -10529,8 +10876,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   cb.groupinfo = stack_groupinfo;
   cb.had_recurse = FALSE;
   cb.lastcapture = 0;
-  cb.max_lookbehind = 0;                               // Max encountered
-  cb.max_varlookbehind = ccontext->max_varlookbehind;  // Limit
+  cb.max_lookbehind = 0;                              // Max encountered
+  cb.max_varlookbehind = ccontext->max_varlookbehind; // Limit
   cb.name_entry_size = 0;
   cb.name_table = NULL;
   cb.named_groups = named_groups;
@@ -10566,7 +10913,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   references have enough space for the offset to be put into the parsed pattern.
   */
 
-  for (i = 0; i < 10; i++) cb.small_ref_offset[i] = PCRE2_UNSET;
+  for (i = 0; i < 10; i++)
+    cb.small_ref_offset[i] = PCRE2_UNSET;
 
 
   /* --------------- Start looking at the pattern --------------- */
@@ -10578,7 +10926,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   non-zero-terminated patterns. */
 
 #ifdef SUPPORT_VALGRIND
-  if (zero_terminated) VALGRIND_MAKE_MEM_NOACCESS(pattern + patlen, CU2BYTES(1));
+  if (zero_terminated)
+    VALGRIND_MAKE_MEM_NOACCESS(pattern + patlen, CU2BYTES(1));
 #endif
 
   xoptions = ccontext->extra_options;
@@ -10587,11 +10936,10 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   if ((options & PCRE2_LITERAL) == 0)
   {
-    while (patlen - skipatstart >= 2 &&
-           ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
-           ptr[skipatstart+1] == CHAR_ASTERISK)
+    while (patlen - skipatstart >= 2 && ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
+           ptr[skipatstart + 1] == CHAR_ASTERISK)
     {
-      for (i = 0; i < sizeof(pso_list)/sizeof(pso); i++)
+      for (i = 0; i < sizeof(pso_list) / sizeof(pso); i++)
       {
         const pso *p = pso_list + i;
 
@@ -10632,19 +10980,23 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
             pp = skipatstart;
             while (pp < patlen && IS_DIGIT(ptr[pp]))
             {
-              if (c > UINT32_MAX / 10 - 1) break;   // Integer overflow
-              c = c*10 + (ptr[pp++] - CHAR_0);
+              if (c > UINT32_MAX / 10 - 1)
+                break; // Integer overflow
+              c = c * 10 + (ptr[pp++] - CHAR_0);
             }
             if (pp >= patlen || pp == skipatstart || ptr[pp] != CHAR_RIGHT_PARENTHESIS)
             {
               errorcode = ERR60;
               ptr += pp;
-              utf = FALSE;  // Used by HAD_EARLY_ERROR
+              utf = FALSE; // Used by HAD_EARLY_ERROR
               goto HAD_EARLY_ERROR;
             }
-            if (p->type == PSO_LIMH) limit_heap = c;
-              else if (p->type == PSO_LIMM) limit_match = c;
-              else limit_depth = c;
+            if (p->type == PSO_LIMH)
+              limit_heap = c;
+            else if (p->type == PSO_LIMM)
+              limit_match = c;
+            else
+              limit_depth = c;
             skipatstart = ++pp;
             break;
 
@@ -10680,12 +11032,13 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
             PCRE2_DEBUG_UNREACHABLE();
             /* LCOV_EXCL_STOP */
           }
-          break;   // Out of the table scan loop
+          break; // Out of the table scan loop
         }
       }
-      if (i >= sizeof(pso_list)/sizeof(pso)) break;   // Out of pso loop
+      if (i >= sizeof(pso_list) / sizeof(pso))
+        break; // Out of pso loop
     }
-      PCRE2_ASSERT(skipatstart <= patlen);
+    PCRE2_ASSERT(skipatstart <= patlen);
   }
 
   /* End of pattern-start options; advance to start of real regex. */
@@ -10695,7 +11048,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   /* Can't support UTF or UCP if PCRE2 was built without Unicode support. */
 
 #ifndef SUPPORT_UNICODE
-  if ((cb.external_options & (PCRE2_UTF|PCRE2_UCP)) != 0)
+  if ((cb.external_options & (PCRE2_UTF | PCRE2_UCP)) != 0)
   {
     errorcode = ERR32;
     goto HAD_EARLY_ERROR;
@@ -10716,8 +11069,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
       goto HAD_EARLY_ERROR;
     }
     if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
-         (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
-      goto HAD_ERROR;  // Offset was set by valid_utf()
+        (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
+      goto HAD_ERROR; // Offset was set by valid_utf()
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
     if ((ccontext->extra_options & PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES) != 0)
@@ -10764,11 +11117,13 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   /* Process the BSR setting. */
 
-  if (bsr == 0) bsr = ccontext->bsr_convention;
+  if (bsr == 0)
+    bsr = ccontext->bsr_convention;
 
   /* Process the newline setting. */
 
-  if (newline == 0) newline = ccontext->newline_convention;
+  if (newline == 0)
+    newline = ccontext->newline_convention;
   cb.nltype = NLTYPE_FIXED;
   switch (newline)
   {
@@ -10823,8 +11178,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   /* Allow for 2x uint32_t at the start and 2 at the end, for
   PCRE2_EXTRA_MATCH_WORD or PCRE2_EXTRA_MATCH_LINE (which are exclusive). */
 
-  if ((ccontext->extra_options &
-       (PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_MATCH_LINE)) != 0)
+  if ((ccontext->extra_options & (PCRE2_EXTRA_MATCH_WORD | PCRE2_EXTRA_MATCH_LINE)) != 0)
     parsed_size_needed += 4;
 
   /* When PCRE2_AUTO_CALLOUT is set we allow for one callout at the end. */
@@ -10832,12 +11186,12 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   if ((options & PCRE2_AUTO_CALLOUT) != 0)
     parsed_size_needed += 4;
 
-  parsed_size_needed += 1;  // For the final META_END
+  parsed_size_needed += 1; // For the final META_END
 
   if (parsed_size_needed > PARSED_PATTERN_DEFAULT_SIZE)
   {
-    uint32_t *heap_parsed_pattern = ccontext->memctl.malloc(
-      parsed_size_needed * sizeof(uint32_t), ccontext->memctl.memory_data);
+    uint32_t *heap_parsed_pattern = ccontext->memctl.malloc(parsed_size_needed * sizeof(uint32_t),
+                                                            ccontext->memctl.memory_data);
     if (heap_parsed_pattern == NULL)
     {
       *errorptr = ERR21;
@@ -10850,7 +11204,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   /* Do the parsing scan. */
 
   errorcode = parse_regex(ptr, cb.external_options, xoptions, &has_lookbehind, &cb);
-  if (errorcode != 0) goto HAD_CB_ERROR;
+  if (errorcode != 0)
+    goto HAD_CB_ERROR;
 
   /* If there are any lookbehinds, scan the parsed pattern to figure out their
   lengths. Workspace is needed to remember whether numbered groups are or are not
@@ -10865,10 +11220,10 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   if (has_lookbehind)
   {
     int loopcount = 0;
-    if (cb.bracount >= GROUPINFO_DEFAULT_SIZE/2)
+    if (cb.bracount >= GROUPINFO_DEFAULT_SIZE / 2)
     {
-      cb.groupinfo = ccontext->memctl.malloc(
-        (2 * (cb.bracount + 1))*sizeof(uint32_t), ccontext->memctl.memory_data);
+      cb.groupinfo = ccontext->memctl.malloc((2 * (cb.bracount + 1)) * sizeof(uint32_t),
+                                             ccontext->memctl.memory_data);
       if (cb.groupinfo == NULL)
       {
         errorcode = ERR21;
@@ -10878,7 +11233,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
     }
     memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));
     errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
-    if (errorcode != 0) goto HAD_CB_ERROR;
+    if (errorcode != 0)
+      goto HAD_CB_ERROR;
   }
 
   /* For debugging, there is a function that shows the parsed pattern vector. */
@@ -10913,23 +11269,22 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   but we still have to pass a separate options variable (the first argument)
   because the options may change as the pattern is processed. */
 
-  cb.erroroffset = patlen;   // For any subsequent errors that do not set it
+  cb.erroroffset = patlen; // For any subsequent errors that do not set it
   pptr = cb.parsed_pattern;
   code = cworkspace;
   *code = OP_BRA;
 
-  (void)compile_regex(cb.external_options, xoptions, &code, &pptr,
-     &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, NULL,
-     &cb, &length);
+  (void)compile_regex(cb.external_options, xoptions, &code, &pptr, &errorcode, 0, &firstcu,
+                      &firstcuflags, &reqcu, &reqcuflags, NULL, NULL, &cb, &length);
 
-  if (errorcode != 0) goto HAD_CB_ERROR;  // Offset is in cb.erroroffset
+  if (errorcode != 0)
+    goto HAD_CB_ERROR; // Offset is in cb.erroroffset
 
   /* This should be caught in compile_regex(), but just in case... */
 
 #if defined SUPPORT_WIDE_CHARS
   PCRE2_ASSERT((cb.char_lists_size & 0x3) == 0);
-  if (length > MAX_PATTERN_SIZE ||
-      BYTES2CU(cb.char_lists_size) > MAX_PATTERN_SIZE ||
+  if (length > MAX_PATTERN_SIZE || BYTES2CU(cb.char_lists_size) > MAX_PATTERN_SIZE ||
       MAX_PATTERN_SIZE - length < BYTES2CU(cb.char_lists_size))
 #else
   if (length > MAX_PATTERN_SIZE)
@@ -10945,8 +11300,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   no longer be possible because nowadays we limit the maximum value of
   cb.names_found and cb.name_entry_size. */
 
-  re_blocksize =
-    CU2BYTES((PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
+  re_blocksize = CU2BYTES((PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
 
 #if defined SUPPORT_WIDE_CHARS
   if (cb.char_lists_size != 0)
@@ -11003,8 +11357,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   re_blocksize += sizeof(pcre2_real_code);
 
-  re = (pcre2_real_code *)
-    ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
+  re = (pcre2_real_code *)ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
   if (re == NULL)
   {
     errorcode = ERR21;
@@ -11029,7 +11382,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   re->compile_options = options;
   re->overall_options = cb.external_options;
   re->extra_options = xoptions;
-  re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
+  re->flags = PCRE2_CODE_UNIT_WIDTH / 8 | cb.external_flags | setflags;
   re->limit_heap = limit_heap;
   re->limit_match = limit_match;
   re->limit_depth = limit_depth;
@@ -11091,19 +11444,19 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   pptr = cb.parsed_pattern;
   code = (PCRE2_UCHAR *)codestart;
   *code = OP_BRA;
-  regexrc = compile_regex(re->overall_options, re->extra_options, &code,
-    &pptr, &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL,
-    NULL, &cb, NULL);
-  if (regexrc < 0) re->flags |= PCRE2_MATCH_EMPTY;
+  regexrc = compile_regex(re->overall_options, re->extra_options, &code, &pptr, &errorcode, 0,
+                          &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, NULL, &cb, NULL);
+  if (regexrc < 0)
+    re->flags |= PCRE2_MATCH_EMPTY;
   re->top_bracket = cb.bracount;
   re->top_backref = cb.top_backref;
   re->max_lookbehind = cb.max_lookbehind;
 
   if (cb.had_accept)
   {
-    reqcu = 0;                     // Must disable after (*ACCEPT)
+    reqcu = 0; // Must disable after (*ACCEPT)
     reqcuflags = REQ_NONE;
-    re->flags |= PCRE2_HASACCEPT;  // Disables minimum length
+    re->flags |= PCRE2_HASACCEPT; // Disables minimum length
   }
 
   /* Fill in the final opcode and check for disastrous overflow. If no overflow,
@@ -11117,7 +11470,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   if (usedlength > length)
   {
     PCRE2_DEBUG_UNREACHABLE();
-    errorcode = ERR23;  // Overflow of code block - internal error
+    errorcode = ERR23; // Overflow of code block - internal error
     cb.erroroffset = 0;
     goto HAD_CB_ERROR;
   }
@@ -11142,14 +11495,15 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
     int start = RSCAN_CACHE_SIZE;
     recurse_cache rc[RSCAN_CACHE_SIZE];
 
-    for (rcode = find_recurse(codestart, utf);
-         rcode != NULL;
+    for (rcode = find_recurse(codestart, utf); rcode != NULL;
          rcode = find_recurse(rcode + 1 + LINK_SIZE, utf))
     {
       int p, groupnumber;
 
       groupnumber = (int)GET(rcode, 1);
-      if (groupnumber == 0) rgroup = codestart; else
+      if (groupnumber == 0)
+        rgroup = codestart;
+      else
       {
         PCRE2_SPTR search_from = codestart;
         rgroup = NULL;
@@ -11165,7 +11519,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
           search time below when the new group number is greater than any of the
           previously found groups. */
 
-          if (groupnumber > rc[p].groupnumber) search_from = rc[p].group;
+          if (groupnumber > rc[p].groupnumber)
+            search_from = rc[p].group;
         }
 
         if (rgroup == NULL)
@@ -11180,10 +11535,12 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
           }
           /* LCOV_EXCL_STOP */
 
-          if (--start < 0) start = RSCAN_CACHE_SIZE - 1;
+          if (--start < 0)
+            start = RSCAN_CACHE_SIZE - 1;
           rc[start].groupnumber = groupnumber;
           rc[start].group = rgroup;
-          if (ccount < RSCAN_CACHE_SIZE) ccount++;
+          if (ccount < RSCAN_CACHE_SIZE)
+            ccount++;
         }
       }
 
@@ -11222,7 +11579,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   /* Failed to compile, or error while post-processing. */
 
-  if (errorcode != 0) goto HAD_CB_ERROR;
+  if (errorcode != 0)
+    goto HAD_CB_ERROR;
 
   /* Successful compile. If the anchored option was not passed, set it if
   we can determine that the pattern is anchored by virtue of ^ characters or \A
@@ -11246,14 +11604,15 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 
   if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
   {
-    int minminlength = 0;  // For minimal minlength from first/required CU
+    int minminlength = 0; // For minimal minlength from first/required CU
     int study_rc;
 
     /* If we do not have a first code unit, see if there is one that is asserted
     (these are not saved during the compile because they can cause conflicts with
     actual literals that follow). */
 
-    if (firstcuflags >= REQ_NONE) {
+    if (firstcuflags >= REQ_NONE)
+    {
       uint32_t assertedcuflags = 0;
       uint32_t assertedcu = find_firstassertedcu(codestart, &assertedcuflags, 0);
       /* It would be wrong to use the asserted first code unit as `firstcu` for
@@ -11261,11 +11620,12 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
        * For that example, if we set both firstcu and reqcu to 'a', it would mean
        * the subject string needs to be at least 2 characters long, which is wrong.
        * With more analysis, we would be able to set firstcu in more cases. */
-      if (assertedcuflags < REQ_NONE && assertedcu != reqcu) {
+      if (assertedcuflags < REQ_NONE && assertedcu != reqcu)
+      {
         firstcu = assertedcu;
         firstcuflags = assertedcuflags;
+      }
     }
-  }
 
     /* Save the data for a first code unit. The existence of one means the
     minimum length must be at least 1. */
@@ -11282,7 +11642,8 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
       {
         if (firstcu < 128 || (!utf && !ucp && firstcu < 255))
         {
-          if (cb.fcc[firstcu] != firstcu) re->flags |= PCRE2_FIRSTCASELESS;
+          if (cb.fcc[firstcu] != firstcu)
+            re->flags |= PCRE2_FIRSTCASELESS;
         }
 
         /* The first code unit is > 128 in UTF or UCP mode, or > 255 otherwise.
@@ -11294,11 +11655,10 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
         else if (ucp && !utf && UCD_OTHERCASE(firstcu) != firstcu)
           re->flags |= PCRE2_FIRSTCASELESS;
 #else
-        else if ((utf || ucp) && firstcu <= MAX_UTF_CODE_POINT &&
-                 UCD_OTHERCASE(firstcu) != firstcu)
+        else if ((utf || ucp) && firstcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(firstcu) != firstcu)
           re->flags |= PCRE2_FIRSTCASELESS;
 #endif
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
       }
     }
 
@@ -11323,15 +11683,15 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
     if (reqcuflags < REQ_NONE)
     {
 #if PCRE2_CODE_UNIT_WIDTH == 16
-      if ((re->overall_options & PCRE2_UTF) == 0 ||   // Not UTF
-          firstcuflags >= REQ_NONE ||                 // First not set
-          (firstcu & 0xf800) != 0xd800 ||             // First not surrogate
-          (reqcu & 0xfc00) != 0xdc00)                 // Req not low surrogate
+      if ((re->overall_options & PCRE2_UTF) == 0 || // Not UTF
+          firstcuflags >= REQ_NONE ||               // First not set
+          (firstcu & 0xf800) != 0xd800 ||           // First not surrogate
+          (reqcu & 0xfc00) != 0xdc00)               // Req not low surrogate
 #elif PCRE2_CODE_UNIT_WIDTH == 8
-      if ((re->overall_options & PCRE2_UTF) == 0 ||   // Not UTF
-          firstcuflags >= REQ_NONE ||                 // First not set
-          (firstcu & 0x80) == 0 ||                    // First is ASCII
-          (reqcu & 0x80) == 0)                        // Req is ASCII
+      if ((re->overall_options & PCRE2_UTF) == 0 || // Not UTF
+          firstcuflags >= REQ_NONE ||               // First not set
+          (firstcu & 0x80) == 0 ||                  // First is ASCII
+          (reqcu & 0x80) == 0)                      // Req is ASCII
 #endif
       {
         minminlength++;
@@ -11340,8 +11700,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
       /* In the case of an anchored pattern, set up the value only if it follows
       a variable length item in the pattern. */
 
-      if ((re->overall_options & PCRE2_ANCHORED) == 0 ||
-          (reqcuflags & REQ_VARY) != 0)
+      if ((re->overall_options & PCRE2_ANCHORED) == 0 || (reqcuflags & REQ_VARY) != 0)
       {
         re->last_codeunit = reqcu;
         re->flags |= PCRE2_LASTSET;
@@ -11352,18 +11711,18 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
         {
           if (reqcu < 128 || (!utf && !ucp && reqcu < 255))
           {
-            if (cb.fcc[reqcu] != reqcu) re->flags |= PCRE2_LASTCASELESS;
+            if (cb.fcc[reqcu] != reqcu)
+              re->flags |= PCRE2_LASTCASELESS;
           }
 #ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        else if (ucp && !utf && UCD_OTHERCASE(reqcu) != reqcu)
-          re->flags |= PCRE2_LASTCASELESS;
+          else if (ucp && !utf && UCD_OTHERCASE(reqcu) != reqcu)
+            re->flags |= PCRE2_LASTCASELESS;
 #else
-        else if ((utf || ucp) && reqcu <= MAX_UTF_CODE_POINT &&
-                 UCD_OTHERCASE(reqcu) != reqcu)
-          re->flags |= PCRE2_LASTCASELESS;
+          else if ((utf || ucp) && reqcu <= MAX_UTF_CODE_POINT && UCD_OTHERCASE(reqcu) != reqcu)
+            re->flags |= PCRE2_LASTCASELESS;
 #endif
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
         }
       }
     }
@@ -11391,8 +11750,9 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
     /* If the minimum length set (or not set) by study() is less than the minimum
     implied by required code units, override it. */
 
-    if (re->minlength < minminlength) re->minlength = minminlength;
-  }     // End of start-of-match optimizations.
+    if (re->minlength < minminlength)
+      re->minlength = minminlength;
+  } // End of start-of-match optimizations.
 
   /* Control ends up here in all cases. When running under valgrind, make a
   pattern's terminating zero defined again. If memory was obtained for the parsed
@@ -11405,9 +11765,10 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   PCRE2_ASSERT(cb.first_data == NULL);
 #endif
 
-  EXIT:
+EXIT:
 #ifdef SUPPORT_VALGRIND
-  if (zero_terminated) VALGRIND_MAKE_MEM_DEFINED(pattern + patlen, CU2BYTES(1));
+  if (zero_terminated)
+    VALGRIND_MAKE_MEM_DEFINED(pattern + patlen, CU2BYTES(1));
 #endif
   if (cb.parsed_pattern != stack_parsed_pattern)
     ccontext->memctl.free(cb.parsed_pattern, ccontext->memctl.memory_data);
@@ -11416,7 +11777,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   if (cb.groupinfo != stack_groupinfo)
     ccontext->memctl.free((void *)cb.groupinfo, ccontext->memctl.memory_data);
 
-  return re;    // Will be NULL after an error
+  return re; // Will be NULL after an error
 
   /* Errors discovered in parse_regex() set the offset value in the compile
   block. Errors discovered before it is called must compute it from the ptr
@@ -11424,10 +11785,10 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
   the end of the pattern, but certain errors in compile_regex() may reset it if
   an offset is available in the parsed pattern. */
 
-  HAD_CB_ERROR:
+HAD_CB_ERROR:
   ptr = pattern + cb.erroroffset;
 
-  HAD_EARLY_ERROR:
+HAD_EARLY_ERROR:
   /* Ensure we don't return out-of-range erroroffset. */
   PCRE2_ASSERT(ptr >= pattern);
   PCRE2_ASSERT(ptr <= (pattern + patlen));
@@ -11446,21 +11807,20 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options,
 #endif
   *erroroffset = ptr - pattern;
 
-  HAD_ERROR:
+HAD_ERROR:
   *errorptr = errorcode;
   pcre2_code_free(re);
   re = NULL;
 
   if (cb.first_data != NULL)
   {
-    compile_data* current_data = cb.first_data;
+    compile_data *current_data = cb.first_data;
     do
     {
-      compile_data* next_data = current_data->next;
+      compile_data *next_data = current_data->next;
       cb.cx->memctl.free(current_data, cb.cx->memctl.memory_data);
       current_data = next_data;
-    }
-    while (current_data != NULL);
+    } while (current_data != NULL);
   }
 
   goto EXIT;

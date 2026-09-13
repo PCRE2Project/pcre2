@@ -184,7 +184,7 @@ static const uint8_t posspropstab[3][4] = {
   { ucp_L, ucp_N, ucp_P, ucp_Po },  /* WORD */
   // clang-format on
 };
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
 
 
@@ -206,8 +206,7 @@ Returns:       TRUE if auto-possessifying is OK
 */
 
 static BOOL
-check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
-  BOOL negated)
+check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata, BOOL negated)
 {
   BOOL ok, rc;
   const uint32_t *p;
@@ -216,9 +215,8 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
   switch (ptype)
   {
   case PT_LAMP:
-    return (prop->chartype == ucp_Lu ||
-            prop->chartype == ucp_Ll ||
-            prop->chartype == ucp_Lt) == negated;
+    return (prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || prop->chartype == ucp_Lt) ==
+           negated;
 
   case PT_GC:
     return (pdata == PRIV(ucp_gentype)[prop->chartype]) == negated;
@@ -230,8 +228,8 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
     return (pdata == prop->script) == negated;
 
   case PT_SCX:
-    ok = (pdata == prop->script
-          || MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), pdata) != 0);
+    ok = (pdata == prop->script ||
+          MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), pdata) != 0);
     return ok == negated;
 
     /* These are specials */
@@ -244,8 +242,8 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
     means that Perl space and POSIX space are now identical. PCRE was changed
     at release 8.34. */
 
-  case PT_SPACE:      // Perl space
-  case PT_PXSPACE:    // POSIX space
+  case PT_SPACE:   // Perl space
+  case PT_PXSPACE: // POSIX space
     switch (c)
     {
     HSPACE_CASES:
@@ -260,15 +258,16 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
 
   case PT_WORD:
     return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-            PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-            c == CHAR_UNDERSCORE) == negated;
+            PRIV(ucp_gentype)[prop->chartype] == ucp_N || c == CHAR_UNDERSCORE) == negated;
 
   case PT_CLIST:
     p = PRIV(ucd_caseless_sets) + prop->caseset;
     for (;;)
     {
-      if (c < *p) return !negated;
-      if (c == *p++) return negated;
+      if (c < *p)
+        return !negated;
+      if (c == *p++)
+        return negated;
     }
     /* LCOV_EXCL_START */
     PCRE2_DEBUG_UNREACHABLE(); // Control should never reach here
@@ -286,7 +285,7 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
 
   return FALSE;
 }
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
 
 
@@ -304,12 +303,12 @@ Returns:    base opcode for the type
 static PCRE2_UCHAR
 get_repeat_base(PCRE2_UCHAR c)
 {
-  return (c > OP_TYPEPOSUPTO)? c :
-         (c >= OP_TYPESTAR)?   OP_TYPESTAR :
-         (c >= OP_NOTSTARI)?   OP_NOTSTARI :
-         (c >= OP_NOTSTAR)?    OP_NOTSTAR :
-         (c >= OP_STARI)?      OP_STARI :
-                               OP_STAR;
+  return (c > OP_TYPEPOSUPTO) ? c
+         : (c >= OP_TYPESTAR) ? OP_TYPESTAR
+         : (c >= OP_NOTSTARI) ? OP_NOTSTARI
+         : (c >= OP_NOTSTAR)  ? OP_NOTSTAR
+         : (c >= OP_STARI)    ? OP_STARI
+                              : OP_STAR;
 }
 
 
@@ -336,8 +335,7 @@ Returns:      points to the start of the next opcode if *code is accepted
 */
 
 static PCRE2_SPTR
-get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc,
-  uint32_t *list)
+get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc, uint32_t *list)
 {
   PCRE2_UCHAR c = *code;
   PCRE2_UCHAR base;
@@ -349,7 +347,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc,
   uint32_t *clist_dest;
   const uint32_t *clist_src;
 #else
-  (void)utf;    // Suppress "unused parameter" compiler warnings
+  (void)utf; // Suppress "unused parameter" compiler warnings
   (void)ucp;
 #endif
 
@@ -365,8 +363,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc,
     if (c == OP_UPTO || c == OP_MINUPTO || c == OP_EXACT || c == OP_POSUPTO)
       code += IMM2_SIZE;
 
-    list[1] = (c != OP_PLUS && c != OP_MINPLUS && c != OP_EXACT &&
-               c != OP_POSPLUS);
+    list[1] = (c != OP_PLUS && c != OP_MINPLUS && c != OP_EXACT && c != OP_POSPLUS);
 
     switch (base)
     {
@@ -471,14 +468,13 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc,
         /* Early return if there is not enough space. GenerateUcd.py
         generated a list with more than 5 characters and something
         must be done about that going forward. */
-        PCRE2_DEBUG_UNREACHABLE();   // Remove if it ever triggers
+        PCRE2_DEBUG_UNREACHABLE(); // Remove if it ever triggers
         list[2] = code[0];
         list[3] = code[1];
         return code;
       }
       *clist_dest++ = *clist_src;
-    }
-    while (*clist_src++ != NOTACHAR);
+    } while (*clist_src++ != NOTACHAR);
 
     /* All characters are stored. The terminating NOTACHAR is copied from the
     clist itself. */
@@ -529,7 +525,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc,
     return end;
   }
 
-  return NULL;    // Opcode not accepted
+  return NULL; // Opcode not accepted
 }
 
 
@@ -555,7 +551,7 @@ Returns:      TRUE if the auto-possessification is possible
 
 static BOOL
 compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
-  const uint32_t *base_list, PCRE2_SPTR base_end, int *rec_limit)
+                const uint32_t *base_list, PCRE2_SPTR base_end, int *rec_limit)
 {
   PCRE2_UCHAR c;
   uint32_t list[MAX_LIST];
@@ -572,7 +568,8 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
   BOOL accepted, invert_bits;
   BOOL entered_a_group = FALSE;
 
-  if (--(*rec_limit) <= 0) return FALSE;  // Recursion has gone too deep
+  if (--(*rec_limit) <= 0)
+    return FALSE; // Recursion has gone too deep
 
   /* Note: the base_list[1] contains whether the current opcode has a greedy
   (represented by a non-zero value) quantifier. This is a different from
@@ -598,7 +595,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 
     if (c == OP_CALLOUT_STR)
     {
-      code += GET(code, 1 + 2*LINK_SIZE);
+      code += GET(code, 1 + 2 * LINK_SIZE);
       continue;
     }
 
@@ -606,7 +603,9 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 
     if (c == OP_ALT)
     {
-      do code += GET(code, 1); while (*code == OP_ALT);
+      do
+        code += GET(code, 1);
+      while (*code == OP_ALT);
       c = *code;
     }
 
@@ -633,7 +632,8 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
     case OP_KETRPOS:
       /* The non-greedy case cannot be converted to a possessive form. */
 
-      if (base_list[1] == 0) return FALSE;
+      if (base_list[1] == 0)
+        return FALSE;
 
       /* If the bracket is capturing it might be referenced by an OP_RECURSE
       so its last iterator can never be possessified if the pattern contains
@@ -647,7 +647,8 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       case OP_SCBRA:
       case OP_CBRAPOS:
       case OP_SCBRAPOS:
-        if (cb->had_recurse) return FALSE;
+        if (cb->had_recurse)
+          return FALSE;
         break;
 
         /* A script run might have to backtrack if the iterated item can match
@@ -677,11 +678,11 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       case OP_ASSERTBACK_NOT:
         do
         {
-          if (bracode[1+LINK_SIZE] == OP_VREVERSE) return FALSE;  // Variable
+          if (bracode[1 + LINK_SIZE] == OP_VREVERSE)
+            return FALSE; // Variable
           bracode += GET(bracode, 1);
-        }
-        while (*bracode == OP_ALT);
-        return !entered_a_group;  // Not variable length
+        } while (*bracode == OP_ALT);
+        return !entered_a_group; // Not variable length
 
         /* Non-atomic assertions - don't possessify last iterator. This needs
         more thought. */
@@ -722,16 +723,17 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
     case OP_BRAMINZERO:
 
       next_code = code + 1;
-      if (*next_code != OP_BRA && *next_code != OP_CBRA &&
-          *next_code != OP_ONCE) return FALSE;
+      if (*next_code != OP_BRA && *next_code != OP_CBRA && *next_code != OP_ONCE)
+        return FALSE;
 
-      do next_code += GET(next_code, 1); while (*next_code == OP_ALT);
+      do
+        next_code += GET(next_code, 1);
+      while (*next_code == OP_ALT);
 
       /* The bracket content will be checked by the OP_BRA/OP_CBRA case above. */
 
       next_code += 1 + LINK_SIZE;
-      if (!compare_opcodes(next_code, utf, ucp, cb, base_list, base_end,
-           rec_limit))
+      if (!compare_opcodes(next_code, utf, ucp, cb, base_list, base_end, rec_limit))
         return FALSE;
 
       code += PRIV(OP_lengths)[c];
@@ -748,7 +750,8 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
     for a supported opcode, and load its properties. */
 
     code = get_chr_property_list(code, utf, ucp, cb->fcc, list);
-    if (code == NULL) return FALSE;    // Unsupported
+    if (code == NULL)
+      return FALSE; // Unsupported
 
     /* If either opcode is a small character list, set pointers for comparing
     characters from that list with another list, or with a property. */
@@ -766,12 +769,13 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 
     /* Character bitsets can also be compared to certain opcodes. */
 
-    else if (base_list[0] == OP_CLASS || list[0] == OP_CLASS
+    else if (base_list[0] == OP_CLASS ||
+             list[0] == OP_CLASS
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        /* In 8 bit, non-UTF mode, OP_CLASS and OP_NCLASS are the same. */
-        || (!utf && (base_list[0] == OP_NCLASS || list[0] == OP_NCLASS))
+             /* In 8 bit, non-UTF mode, OP_CLASS and OP_NCLASS are the same. */
+             || (!utf && (base_list[0] == OP_NCLASS || list[0] == OP_NCLASS))
 #endif
-        )
+    )
     {
 #if PCRE2_CODE_UNIT_WIDTH == 8
       if (base_list[0] == OP_CLASS || (!utf && base_list[0] == OP_NCLASS))
@@ -793,19 +797,19 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       {
       case OP_CLASS:
       case OP_NCLASS:
-        set2 = (const uint8_t *)
-          ((list_ptr == list ? code : base_end) - list_ptr[2]);
+        set2 = (const uint8_t *)((list_ptr == list ? code : base_end) - list_ptr[2]);
         break;
 
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
-        xclass_flags = (list_ptr == list ? code : base_end) -
-          list_ptr[2] + LINK_SIZE;
-        if ((*xclass_flags & XCL_HASPROP) != 0) return FALSE;
+        xclass_flags = (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE;
+        if ((*xclass_flags & XCL_HASPROP) != 0)
+          return FALSE;
         if ((*xclass_flags & XCL_MAP) == 0)
         {
           /* No bits are set for characters < 256. */
-          if (list[1] == 0) return (*xclass_flags & XCL_NOT) == 0;
+          if (list[1] == 0)
+            return (*xclass_flags & XCL_NOT) == 0;
           /* Might be an empty repeat. */
           continue;
         }
@@ -846,20 +850,21 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       {
         do
         {
-          if ((*set1++ & ~(*set2++)) != 0) return FALSE;
-        }
-        while (set1 < set_end);
+          if ((*set1++ & ~(*set2++)) != 0)
+            return FALSE;
+        } while (set1 < set_end);
       }
       else
       {
         do
         {
-          if ((*set1++ & *set2++) != 0) return FALSE;
-        }
-        while (set1 < set_end);
+          if ((*set1++ & *set2++) != 0)
+            return FALSE;
+        } while (set1 < set_end);
       }
 
-      if (list[1] == 0) return TRUE;
+      if (list[1] == 0)
+        return TRUE;
       /* Might be an empty repeat. */
       continue;
     }
@@ -901,16 +906,23 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
           n = propposstab[base_list[2]][list[2]];
           switch (n)
           {
-          case 0:   break;
-          case 1:   accepted = bothprop; break;
-          case 2:   accepted = (base_list[3] == list[3]) != same; break;
-          case 3:   accepted = !same; break;
+          case 0:
+            break;
+          case 1:
+            accepted = bothprop;
+            break;
+          case 2:
+            accepted = (base_list[3] == list[3]) != same;
+            break;
+          case 3:
+            accepted = !same;
+            break;
 
-          case 4:    // Left general category, right particular category
+          case 4: // Left general category, right particular category
             accepted = risprop && catposstab[base_list[3]][list[3]] == same;
             break;
 
-          case 5:    // Right general category, left particular category
+          case 5: // Right general category, left particular category
             accepted = lisprop && catposstab[list[3]][base_list[3]] == same;
             break;
 
@@ -933,59 +945,55 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
             Example: the row for WORD contains ucp_L, ucp_N, ucp_P, ucp_Po.
             Underscore is covered by ucp_P or ucp_Po. */
 
-          case 6:    // Left alphanum vs right general category
-          case 7:    // Left space vs right general category
-          case 8:    // Left word vs right general category
-            p = posspropstab[n-6];
-            accepted = risprop && lisprop ==
-              (list[3] != p[0] &&
-               list[3] != p[1] &&
-              (list[3] != p[2] || !lisprop));
+          case 6: // Left alphanum vs right general category
+          case 7: // Left space vs right general category
+          case 8: // Left word vs right general category
+            p = posspropstab[n - 6];
+            accepted = risprop && lisprop == (list[3] != p[0] && list[3] != p[1] &&
+                                              (list[3] != p[2] || !lisprop));
             break;
 
-          case 9:     // Right alphanum vs left general category
-          case 10:    // Right space vs left general category
-          case 11:    // Right word vs left general category
-            p = posspropstab[n-9];
-            accepted = lisprop && risprop ==
-              (base_list[3] != p[0] &&
-               base_list[3] != p[1] &&
-              (base_list[3] != p[2] || !risprop));
+          case 9:  // Right alphanum vs left general category
+          case 10: // Right space vs left general category
+          case 11: // Right word vs left general category
+            p = posspropstab[n - 9];
+            accepted = lisprop && risprop == (base_list[3] != p[0] && base_list[3] != p[1] &&
+                                              (base_list[3] != p[2] || !risprop));
             break;
 
-          case 12:    // Left alphanum vs right particular category
-          case 13:    // Left space vs right particular category
-          case 14:    // Left word vs right particular category
-            p = posspropstab[n-12];
-            accepted = risprop && lisprop ==
-              (catposstab[p[0]][list[3]] &&
-               catposstab[p[1]][list[3]] &&
-              (list[3] != p[3] || !lisprop));
+          case 12: // Left alphanum vs right particular category
+          case 13: // Left space vs right particular category
+          case 14: // Left word vs right particular category
+            p = posspropstab[n - 12];
+            accepted =
+                risprop && lisprop == (catposstab[p[0]][list[3]] && catposstab[p[1]][list[3]] &&
+                                       (list[3] != p[3] || !lisprop));
             break;
 
-          case 15:    // Right alphanum vs left particular category
-          case 16:    // Right space vs left particular category
-          case 17:    // Right word vs left particular category
-            p = posspropstab[n-15];
-            accepted = lisprop && risprop ==
-              (catposstab[p[0]][base_list[3]] &&
-               catposstab[p[1]][base_list[3]] &&
-              (base_list[3] != p[3] || !risprop));
+          case 15: // Right alphanum vs left particular category
+          case 16: // Right space vs left particular category
+          case 17: // Right word vs left particular category
+            p = posspropstab[n - 15];
+            accepted = lisprop && risprop == (catposstab[p[0]][base_list[3]] &&
+                                              catposstab[p[1]][base_list[3]] &&
+                                              (base_list[3] != p[3] || !risprop));
             break;
           }
         }
       }
 
       else
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
-      accepted = leftop >= FIRST_AUTOTAB_OP && leftop <= LAST_AUTOTAB_LEFT_OP &&
-             rightop >= FIRST_AUTOTAB_OP && rightop <= LAST_AUTOTAB_RIGHT_OP &&
-             autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
+        accepted = leftop >= FIRST_AUTOTAB_OP && leftop <= LAST_AUTOTAB_LEFT_OP &&
+                   rightop >= FIRST_AUTOTAB_OP && rightop <= LAST_AUTOTAB_RIGHT_OP &&
+                   autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
 
-      if (!accepted) return FALSE;
+      if (!accepted)
+        return FALSE;
 
-      if (list[1] == 0) return TRUE;
+      if (list[1] == 0)
+        return TRUE;
       /* Might be an empty repeat. */
       continue;
     }
@@ -1003,10 +1011,10 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
         ochr_ptr = list_ptr + 2;
         do
         {
-          if (chr == *ochr_ptr) return FALSE;
+          if (chr == *ochr_ptr)
+            return FALSE;
           ochr_ptr++;
-        }
-        while (*ochr_ptr != NOTACHAR);
+        } while (*ochr_ptr != NOTACHAR);
         break;
 
       case OP_NOT:
@@ -1016,51 +1024,61 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
           if (chr == *ochr_ptr)
             break;
           ochr_ptr++;
-        }
-        while (*ochr_ptr != NOTACHAR);
-        if (*ochr_ptr == NOTACHAR) return FALSE;   // Not found
+        } while (*ochr_ptr != NOTACHAR);
+        if (*ochr_ptr == NOTACHAR)
+          return FALSE; // Not found
         break;
 
         /* Note that OP_DIGIT etc. are generated only when PCRE2_UCP is *not*
         set. When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
 
       case OP_DIGIT:
-        if (chr < 256 && (cb->ctypes[chr] & ctype_digit) != 0) return FALSE;
+        if (chr < 256 && (cb->ctypes[chr] & ctype_digit) != 0)
+          return FALSE;
         break;
 
       case OP_NOT_DIGIT:
-        if (chr > 255 || (cb->ctypes[chr] & ctype_digit) == 0) return FALSE;
+        if (chr > 255 || (cb->ctypes[chr] & ctype_digit) == 0)
+          return FALSE;
         break;
 
       case OP_WHITESPACE:
-        if (chr < 256 && (cb->ctypes[chr] & ctype_space) != 0) return FALSE;
+        if (chr < 256 && (cb->ctypes[chr] & ctype_space) != 0)
+          return FALSE;
         break;
 
       case OP_NOT_WHITESPACE:
-        if (chr > 255 || (cb->ctypes[chr] & ctype_space) == 0) return FALSE;
+        if (chr > 255 || (cb->ctypes[chr] & ctype_space) == 0)
+          return FALSE;
         break;
 
       case OP_WORDCHAR:
-        if (chr < 255 && (cb->ctypes[chr] & ctype_word) != 0) return FALSE;
+        if (chr < 255 && (cb->ctypes[chr] & ctype_word) != 0)
+          return FALSE;
         break;
 
       case OP_NOT_WORDCHAR:
-        if (chr > 255 || (cb->ctypes[chr] & ctype_word) == 0) return FALSE;
+        if (chr > 255 || (cb->ctypes[chr] & ctype_word) == 0)
+          return FALSE;
         break;
 
       case OP_HSPACE:
         switch (chr)
         {
-        HSPACE_CASES:   return FALSE;
-        default:   break;
+        HSPACE_CASES:
+          return FALSE;
+        default:
+          break;
         }
         break;
 
       case OP_NOT_HSPACE:
         switch (chr)
         {
-        HSPACE_CASES:   break;
-        default:   return FALSE;
+        HSPACE_CASES:
+          break;
+        default:
+          return FALSE;
         }
         break;
 
@@ -1068,16 +1086,20 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       case OP_VSPACE:
         switch (chr)
         {
-        VSPACE_CASES:   return FALSE;
-        default:   break;
+        VSPACE_CASES:
+          return FALSE;
+        default:
+          break;
         }
         break;
 
       case OP_NOT_VSPACE:
         switch (chr)
         {
-        VSPACE_CASES:   break;
-        default:   return FALSE;
+        VSPACE_CASES:
+          break;
+        default:
+          return FALSE;
         }
         break;
 
@@ -1093,46 +1115,46 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 #ifndef EBCDIC
         case 0x2028:
         case 0x2029:
-#endif  /* Not EBCDIC */
+#endif /* Not EBCDIC */
           return FALSE;
         }
         break;
 
-      case OP_EOD:      // Can always possessify before \z
+      case OP_EOD: // Can always possessify before \z
         break;
 
 #ifdef SUPPORT_UNICODE
       case OP_PROP:
       case OP_NOTPROP:
-        if (!check_char_prop(chr, list_ptr[2], list_ptr[3],
-              list_ptr[0] == OP_NOTPROP))
+        if (!check_char_prop(chr, list_ptr[2], list_ptr[3], list_ptr[0] == OP_NOTPROP))
           return FALSE;
         break;
 #endif
 
       case OP_NCLASS:
-        if (chr > 255) return FALSE;
+        if (chr > 255)
+          return FALSE;
         PCRE2_FALLTHROUGH /* Fall through */
 
       case OP_CLASS:
-        if (chr > 255) break;
-        class_bitset = (const uint8_t *)
-          ((list_ptr == list ? code : base_end) - list_ptr[2]);
-        if ((class_bitset[chr >> 3] & (1u << (chr & 7))) != 0) return FALSE;
+        if (chr > 255)
+          break;
+        class_bitset = (const uint8_t *)((list_ptr == list ? code : base_end) - list_ptr[2]);
+        if ((class_bitset[chr >> 3] & (1u << (chr & 7))) != 0)
+          return FALSE;
         break;
 
 #ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
-        if (PRIV(xclass)(chr, (list_ptr == list ? code : base_end) -
-            list_ptr[2] + LINK_SIZE, (const uint8_t*)cb->start_code, utf))
+        if (PRIV(xclass)(chr, (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE,
+                         (const uint8_t *)cb->start_code, utf))
           return FALSE;
         break;
 
       case OP_ECLASS:
-        if (PRIV(eclass)(chr,
-            (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE,
-            (list_ptr == list ? code : base_end) - list_ptr[3],
-            (const uint8_t*)cb->start_code, utf))
+        if (PRIV(eclass)(chr, (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE,
+                         (list_ptr == list ? code : base_end) - list_ptr[3],
+                         (const uint8_t *)cb->start_code, utf))
           return FALSE;
         break;
 #endif /* SUPPORT_WIDE_CHARS */
@@ -1142,12 +1164,12 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       }
 
       chr_ptr++;
-    }
-    while (*chr_ptr != NOTACHAR);
+    } while (*chr_ptr != NOTACHAR);
 
     /* At least one character must be matched from this opcode. */
 
-    if (list[1] == 0) return TRUE;
+    if (list[1] == 0)
+      return TRUE;
   }
 
   /* LCOV_EXCL_START */
@@ -1184,7 +1206,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
   PCRE2_SPTR end;
   PCRE2_UCHAR *repeat_opcode;
   uint32_t list[MAX_LIST];
-  int rec_limit = 1000;  // Was 10,000 but clang+ASAN uses a lot of stack.
+  int rec_limit = 1000; // Was 10,000 but clang+ASAN uses a lot of stack.
   BOOL utf = (cb->external_options & PCRE2_UTF) != 0;
   BOOL ucp = (cb->external_options & PCRE2_UCP) != 0;
 
@@ -1196,19 +1218,17 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
     if (c >= OP_TABLE_LENGTH)
     {
       PCRE2_DEBUG_UNREACHABLE();
-      return -1;   // Something gone wrong
+      return -1; // Something gone wrong
     }
     /* LCOV_EXCL_STOP */
 
     if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
       c -= get_repeat_base(c) - OP_STAR;
-      end = (c <= OP_MINUPTO) ?
-        get_chr_property_list(code, utf, ucp, cb->fcc, list) : NULL;
+      end = (c <= OP_MINUPTO) ? get_chr_property_list(code, utf, ucp, cb->fcc, list) : NULL;
       list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-      if (end != NULL && compare_opcodes(end, utf, ucp, cb, list, end,
-          &rec_limit))
+      if (end != NULL && compare_opcodes(end, utf, ucp, cb, list, end, &rec_limit))
       {
         switch (c)
         {
@@ -1251,7 +1271,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
 #ifdef SUPPORT_WIDE_CHARS
              || c == OP_XCLASS || c == OP_ECLASS
 #endif
-             )
+    )
     {
 #ifdef SUPPORT_WIDE_CHARS
       if (c == OP_XCLASS || c == OP_ECLASS)
@@ -1271,8 +1291,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
         end = get_chr_property_list(code, utf, ucp, cb->fcc, list);
         list[1] = (c & 1) == 0;
 
-        if (end != NULL &&
-            compare_opcodes(end, utf, ucp, cb, list, end, &rec_limit))
+        if (end != NULL && compare_opcodes(end, utf, ucp, cb, list, end, &rec_limit))
         {
           switch (c)
           {
@@ -1315,7 +1334,8 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
     case OP_TYPEPOSSTAR:
     case OP_TYPEPOSPLUS:
     case OP_TYPEPOSQUERY:
-      if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+      if (code[1] == OP_PROP || code[1] == OP_NOTPROP)
+        code += 2;
       break;
 
     case OP_TYPEUPTO:
@@ -1327,7 +1347,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
       break;
 
     case OP_CALLOUT_STR:
-      code += GET(code, 1 + 2*LINK_SIZE);
+      code += GET(code, 1 + 2 * LINK_SIZE);
       break;
 
 #ifdef SUPPORT_WIDE_CHARS
@@ -1415,13 +1435,14 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
       case OP_NOTPOSPLUSI:
       case OP_NOTPOSQUERYI:
       case OP_NOTPOSUPTOI:
-        if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
+        if (HAS_EXTRALEN(code[-1]))
+          code += GET_EXTRALEN(code[-1]);
         break;
       }
     }
 #else
-    (void)(utf);  // Keep compiler happy by referencing function argument
-#endif  /* SUPPORT_WIDE_CHARS */
+    (void)(utf); // Keep compiler happy by referencing function argument
+#endif /* SUPPORT_WIDE_CHARS */
   }
 }
 

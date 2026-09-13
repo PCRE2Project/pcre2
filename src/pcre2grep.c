@@ -62,8 +62,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if (defined _WIN32 || (defined HAVE_WINDOWS_H && HAVE_WINDOWS_H)) \
-  && !defined WIN32 && !defined(__CYGWIN__)
+#if (defined _WIN32 || (defined HAVE_WINDOWS_H && HAVE_WINDOWS_H)) && !defined WIN32 && \
+    !defined(__CYGWIN__)
 #define WIN32
 #endif
 
@@ -79,8 +79,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef WIN32
-#include <io.h>                /* For _setmode() */
-#include <fcntl.h>             /* For _O_BINARY */
+#include <io.h>    /* For _setmode() */
+#include <fcntl.h> /* For _O_BINARY */
 #endif
 
 #if defined(SUPPORT_PCRE2GREP_CALLOUT) && defined(SUPPORT_PCRE2GREP_CALLOUT_FORK)
@@ -122,7 +122,7 @@ MSVC 10/2010. Except for VC6 (which is missing some fundamentals and fails). */
 be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 
 #if defined(DISABLE_PERCENT_ZT) || (defined(_MSC_VER) && (_MSC_VER < 1800)) || \
-  (!defined(_MSC_VER) && (!defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L))
+    (!defined(_MSC_VER) && (!defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L))
 #ifdef _WIN64
 #define SIZ_FORM "llu"
 #else
@@ -133,7 +133,7 @@ be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #endif
 
 #define FALSE 0
-#define TRUE 1
+#define TRUE  1
 
 typedef int BOOL;
 
@@ -145,7 +145,7 @@ typedef int BOOL;
 #define MAXPATLEN 8192
 #endif
 
-#define FNBUFSIZ 2048
+#define FNBUFSIZ  2048
 #define ERRBUFSIZ 256
 
 /* Values for the "filenames" variable, which specifies options for file name
@@ -165,9 +165,9 @@ enum { DEE_READ, DEE_SKIP };
 
 /* Actions for special processing options (flag bits) */
 
-#define PO_WORD_MATCH     0x0001
-#define PO_LINE_MATCH     0x0002
-#define PO_FIXED_STRINGS  0x0004
+#define PO_WORD_MATCH    0x0001
+#define PO_LINE_MATCH    0x0002
+#define PO_FIXED_STRINGS 0x0004
 
 /* Binary file options */
 
@@ -183,7 +183,9 @@ Unfortunately, casting to (void) does not suppress the warning. To get round
 this, we use a macro that compiles a fudge. Oddly, this does not also seem to
 apply to fprintf(). */
 
-#define FWRITE_IGNORE(a,b,c,d) if (fwrite(a,b,c,d)) {}
+#define FWRITE_IGNORE(a, b, c, d) \
+  if (fwrite(a, b, c, d))         \
+  {}
 
 /* Under Windows, we have to set stdout to be binary, so that it does not
 convert \r\n at the ends of output lines to \r\r\n. However, that means that
@@ -193,11 +195,11 @@ quote for the example, as single quotes aren't usually available. */
 
 #ifdef WIN32
 #define DEFAULT_STDOUT_IS_CRLF
-#define DEFAULT_STDOUT_NL     "\r\n"
-#define QUOT          "\""
+#define DEFAULT_STDOUT_NL "\r\n"
+#define QUOT              "\""
 #else
-#define DEFAULT_STDOUT_NL     "\n"
-#define QUOT           "'"
+#define DEFAULT_STDOUT_NL "\n"
+#define QUOT              "'"
 #endif
 
 /* This code is returned from decode_dollar_escape() when $n is encountered,
@@ -226,9 +228,9 @@ static const char *output_text = NULL;
 static char *main_buffer = NULL;
 
 static const char *stdout_nl = DEFAULT_STDOUT_NL;
-static const char *printname_nl = DEFAULT_STDOUT_NL;  // Changed to NULL for -Z
-static int printname_colon = ':';                     // Changed to 0 for -Z
-static int printname_hyphen = '-';                    // Changed to 0 for -Z
+static const char *printname_nl = DEFAULT_STDOUT_NL; // Changed to NULL for -Z
+static int printname_colon = ':';                    // Changed to 0 for -Z
+static int printname_hyphen = '-';                   // Changed to 0 for -Z
 
 static int after_context = 0;
 static int before_context = 0;
@@ -236,13 +238,13 @@ static int binary_files = BIN_BINARY;
 static int both_context = 0;
 static int endlinetype;
 
-static int count_limit = -1;  // Not long, so that it works with OP_NUMBER
+static int count_limit = -1; // Not long, so that it works with OP_NUMBER
 static unsigned long int counts_printed = 0;
 static unsigned long int total_count = 0;
 
 static PCRE2_SIZE bufthird = PCRE2GREP_BUFSIZE;
 static PCRE2_SIZE max_bufthird = PCRE2GREP_MAX_BUFSIZE;
-static PCRE2_SIZE bufsize = 3*PCRE2GREP_BUFSIZE;
+static PCRE2_SIZE bufsize = 3 * PCRE2GREP_BUFSIZE;
 
 #ifdef WIN32
 static int dee_action = dee_SKIP;
@@ -387,11 +389,10 @@ static patdatastr exclude_patdata = { &exclude_patterns, &exclude_patterns_last 
 static patdatastr include_dir_patdata = { &include_dir_patterns, &include_dir_patterns_last };
 static patdatastr exclude_dir_patdata = { &exclude_dir_patterns, &exclude_dir_patterns_last };
 
-static patstr **incexlist[4] = { &include_patterns, &exclude_patterns,
-                                 &include_dir_patterns, &exclude_dir_patterns };
+static patstr **incexlist[4] = { &include_patterns, &exclude_patterns, &include_dir_patterns,
+                                 &exclude_dir_patterns };
 
-static const char *incexname[4] = { "--include", "--exclude",
-                                    "--include-dir", "--exclude-dir" };
+static const char *incexname[4] = { "--include", "--exclude", "--include-dir", "--exclude-dir" };
 
 /* Structure for options and list of them */
 
@@ -413,136 +414,154 @@ typedef struct option_item {
 /* Options without a single-letter equivalent get a negative value. This can be
 used to identify them. */
 
-#define N_COLOUR       (-1)
-#define N_EXCLUDE      (-2)
-#define N_EXCLUDE_DIR  (-3)
-#define N_HELP         (-4)
-#define N_INCLUDE      (-5)
-#define N_INCLUDE_DIR  (-6)
-#define N_LABEL        (-7)
-#define N_LOCALE       (-8)
-#define N_NULL         (-9)
-#define N_LOFFSETS     (-10)
-#define N_FOFFSETS     (-11)
-#define N_LBUFFER      (-12)
-#define N_H_LIMIT      (-13)
-#define N_M_LIMIT      (-14)
-#define N_M_LIMIT_DEP  (-15)
-#define N_BUFSIZE      (-16)
-#define N_NOJIT        (-17)
-#define N_FILE_LIST    (-18)
-#define N_BINARY_FILES (-19)
-#define N_EXCLUDE_FROM (-20)
-#define N_INCLUDE_FROM (-21)
-#define N_OM_SEPARATOR (-22)
-#define N_MAX_BUFSIZE  (-23)
-#define N_OM_CAPTURE   (-24)
-#define N_ALLABSK      (-25)
-#define N_POSIX_DIGIT  (-26)
-#define N_GROUP_SEPARATOR (-27)
+#define N_COLOUR             (-1)
+#define N_EXCLUDE            (-2)
+#define N_EXCLUDE_DIR        (-3)
+#define N_HELP               (-4)
+#define N_INCLUDE            (-5)
+#define N_INCLUDE_DIR        (-6)
+#define N_LABEL              (-7)
+#define N_LOCALE             (-8)
+#define N_NULL               (-9)
+#define N_LOFFSETS           (-10)
+#define N_FOFFSETS           (-11)
+#define N_LBUFFER            (-12)
+#define N_H_LIMIT            (-13)
+#define N_M_LIMIT            (-14)
+#define N_M_LIMIT_DEP        (-15)
+#define N_BUFSIZE            (-16)
+#define N_NOJIT              (-17)
+#define N_FILE_LIST          (-18)
+#define N_BINARY_FILES       (-19)
+#define N_EXCLUDE_FROM       (-20)
+#define N_INCLUDE_FROM       (-21)
+#define N_OM_SEPARATOR       (-22)
+#define N_MAX_BUFSIZE        (-23)
+#define N_OM_CAPTURE         (-24)
+#define N_ALLABSK            (-25)
+#define N_POSIX_DIGIT        (-26)
+#define N_GROUP_SEPARATOR    (-27)
 #define N_NO_GROUP_SEPARATOR (-28)
-#define N_POSIX_PATFILE (-29)
-#define N_LF           (-30)
+#define N_POSIX_PATFILE      (-29)
+#define N_LF                 (-30)
 
 static option_item optionlist[] = {
-{   OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
-{   OP_NODATA,     N_HELP,   NULL,              "help",          "display this help and exit" },
-{   OP_NUMBER,     'A',      &after_context,    "after-context=number", "set number of following context lines" },
-{   OP_NODATA,     'a',      NULL,              "text",          "treat binary files as text" },
-{   OP_NUMBER,     'B',      &before_context,   "before-context=number", "set number of prior context lines" },
-{   OP_BINFILES,   N_BINARY_FILES, NULL,        "binary-files=word", "set treatment of binary files" },
-{   OP_SIZE,       N_BUFSIZE,&bufthird,         "buffer-size=number", "set processing buffer starting size" },
-{   OP_SIZE,       N_MAX_BUFSIZE,&max_bufthird, "max-buffer-size=number",  "set processing buffer maximum size" },
-{   OP_OP_STRING,  N_COLOUR, &colour_option,    "color=option",  "matched text color option" },
-{   OP_OP_STRING,  N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
-{   OP_NUMBER,     'C',      &both_context,     "context=number", "set number of context lines, before & after" },
-{   OP_NODATA,     'c',      NULL,              "count",         "print only a count of matching lines per FILE" },
-{   OP_STRING,     'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
-{   OP_STRING,     'd',      &dee_option,       "directories=action", "how to handle directories" },
-{   OP_NODATA, N_POSIX_DIGIT, NULL,             "posix-digit",   "\\d always matches [0-9], even in UTF/UCP mode" },
-{   OP_NODATA,     'E',      NULL,              "case-restrict", "restrict case matching (no mix ASCII/non-ASCII)" },
-{   OP_PATLIST,    'e',      &match_patdata,    "regex(p)=pattern", "specify pattern (may be used more than once)" },
-{   OP_NODATA,     'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
-{   OP_FILELIST,   'f',      &pattern_files_data, "file=path",   "read patterns from file" },
-{   OP_NODATA, N_POSIX_PATFILE, NULL,           "posix-pattern-file", "use POSIX semantics for pattern files" },
-{   OP_FILELIST,   N_FILE_LIST, &file_lists_data, "file-list=path","read files to search from file" },
-{   OP_NODATA,     N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
-{   OP_STRING,     N_GROUP_SEPARATOR, &group_separator, "group-separator=text", "set separator between groups of lines" },
-{   OP_NODATA,     'H',      NULL,              "with-filename", "force the prefixing filename on output" },
-{   OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
-{   OP_NODATA,     'I',      NULL,              "",              "treat binary files as not matching (ignore)" },
-{   OP_NODATA,     'i',      NULL,              "ignore-case",   "ignore case distinctions" },
-{   OP_NODATA,     'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
-{   OP_NODATA,     'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
-{   OP_STRING,     N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
-{   OP_NODATA,     N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
+  { OP_NODATA, N_NULL, NULL, "", "terminate options" },
+  { OP_NODATA, N_HELP, NULL, "help", "display this help and exit" },
+  { OP_NUMBER, 'A', &after_context, "after-context=number",
+    "set number of following context lines" },
+  { OP_NODATA, 'a', NULL, "text", "treat binary files as text" },
+  { OP_NUMBER, 'B', &before_context, "before-context=number", "set number of prior context lines" },
+  { OP_BINFILES, N_BINARY_FILES, NULL, "binary-files=word", "set treatment of binary files" },
+  { OP_SIZE, N_BUFSIZE, &bufthird, "buffer-size=number", "set processing buffer starting size" },
+  { OP_SIZE, N_MAX_BUFSIZE, &max_bufthird, "max-buffer-size=number",
+    "set processing buffer maximum size" },
+  { OP_OP_STRING, N_COLOUR, &colour_option, "color=option", "matched text color option" },
+  { OP_OP_STRING, N_COLOUR, &colour_option, "colour=option", "matched text colour option" },
+  { OP_NUMBER, 'C', &both_context, "context=number",
+    "set number of context lines, before & after" },
+  { OP_NODATA, 'c', NULL, "count", "print only a count of matching lines per FILE" },
+  { OP_STRING, 'D', &DEE_option, "devices=action", "how to handle devices, FIFOs, and sockets" },
+  { OP_STRING, 'd', &dee_option, "directories=action", "how to handle directories" },
+  { OP_NODATA, N_POSIX_DIGIT, NULL, "posix-digit",
+    "\\d always matches [0-9], even in UTF/UCP mode" },
+  { OP_NODATA, 'E', NULL, "case-restrict", "restrict case matching (no mix ASCII/non-ASCII)" },
+  { OP_PATLIST, 'e', &match_patdata, "regex(p)=pattern",
+    "specify pattern (may be used more than once)" },
+  { OP_NODATA, 'F', NULL, "fixed-strings", "patterns are sets of newline-separated strings" },
+  { OP_FILELIST, 'f', &pattern_files_data, "file=path", "read patterns from file" },
+  { OP_NODATA, N_POSIX_PATFILE, NULL, "posix-pattern-file",
+    "use POSIX semantics for pattern files" },
+  { OP_FILELIST, N_FILE_LIST, &file_lists_data, "file-list=path",
+    "read files to search from file" },
+  { OP_NODATA, N_FOFFSETS, NULL, "file-offsets", "output file offsets, not text" },
+  { OP_STRING, N_GROUP_SEPARATOR, &group_separator, "group-separator=text",
+    "set separator between groups of lines" },
+  { OP_NODATA, 'H', NULL, "with-filename", "force the prefixing filename on output" },
+  { OP_NODATA, 'h', NULL, "no-filename", "suppress the prefixing filename on output" },
+  { OP_NODATA, 'I', NULL, "", "treat binary files as not matching (ignore)" },
+  { OP_NODATA, 'i', NULL, "ignore-case", "ignore case distinctions" },
+  { OP_NODATA, 'l', NULL, "files-with-matches", "print only FILE names containing matches" },
+  { OP_NODATA, 'L', NULL, "files-without-match", "print only FILE names not containing matches" },
+  { OP_STRING, N_LABEL, &stdin_name, "label=name", "set name for standard input" },
+  { OP_NODATA, N_LBUFFER, NULL, "line-buffered", "use line buffering" },
 #ifdef DEFAULT_STDOUT_IS_CRLF
-{   OP_NODATA,     N_LF,     NULL,              "lf",            "use LF line endings in output" },
+  { OP_NODATA, N_LF, NULL, "lf", "use LF line endings in output" },
 #else
-{   OP_NODATA,     N_LF,     NULL,              "lf",            "ignored: this pcre2grep always use LF line endings" },
+  { OP_NODATA, N_LF, NULL, "lf", "ignored: this pcre2grep always use LF line endings" },
 #endif
-{   OP_NODATA,     N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
-{   OP_STRING,     N_LOCALE, &locale,           "locale=locale", "use the named locale" },
-{   OP_U32NUMBER,  N_H_LIMIT, &heap_limit,      "heap-limit=number",  "set PCRE2 heap limit option (kibibytes)" },
-{   OP_U32NUMBER,  N_M_LIMIT, &match_limit,     "match-limit=number", "set PCRE2 match limit option" },
-{   OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "depth-limit=number", "set PCRE2 depth limit option" },
-{   OP_U32NUMBER,  N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number", "obsolete synonym for depth-limit" },
-{   OP_NODATA,     'M',      NULL,              "multiline",     "run in multiline mode" },
-{   OP_NUMBER,     'm',      &count_limit,      "max-count=number", "stop after <number> matched lines" },
-{   OP_STRING,     'N',      &newline_arg,      "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF, ANY, or NUL)" },
-{   OP_NODATA,     'n',      NULL,              "line-number",   "print line number with output lines" },
+  { OP_NODATA, N_LOFFSETS, NULL, "line-offsets", "output line numbers and offsets, not text" },
+  { OP_STRING, N_LOCALE, &locale, "locale=locale", "use the named locale" },
+  { OP_U32NUMBER, N_H_LIMIT, &heap_limit, "heap-limit=number",
+    "set PCRE2 heap limit option (kibibytes)" },
+  { OP_U32NUMBER, N_M_LIMIT, &match_limit, "match-limit=number", "set PCRE2 match limit option" },
+  { OP_U32NUMBER, N_M_LIMIT_DEP, &depth_limit, "depth-limit=number",
+    "set PCRE2 depth limit option" },
+  { OP_U32NUMBER, N_M_LIMIT_DEP, &depth_limit, "recursion-limit=number",
+    "obsolete synonym for depth-limit" },
+  { OP_NODATA, 'M', NULL, "multiline", "run in multiline mode" },
+  { OP_NUMBER, 'm', &count_limit, "max-count=number", "stop after <number> matched lines" },
+  { OP_STRING, 'N', &newline_arg, "newline=type",
+    "set newline type (CR, LF, CRLF, ANYCRLF, ANY, or NUL)" },
+  { OP_NODATA, 'n', NULL, "line-number", "print line number with output lines" },
 #ifdef SUPPORT_PCRE2GREP_JIT
-{   OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "do not use just-in-time compiler optimization" },
+  { OP_NODATA, N_NOJIT, NULL, "no-jit", "do not use just-in-time compiler optimization" },
 #else
-{   OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "ignored: this pcre2grep does not support JIT" },
+  { OP_NODATA, N_NOJIT, NULL, "no-jit", "ignored: this pcre2grep does not support JIT" },
 #endif
-{   OP_NODATA,     N_NO_GROUP_SEPARATOR, NULL,   "no-group-separator", "suppress separators between groups of lines" },
-{   OP_STRING,     'O',      &output_text,       "output=text",   "show only this text (possibly expanded)" },
-{   OP_OP_NUMBERS, 'o',      &only_matching_data, "only-matching=n", "show only the part of the line that matched" },
-{   OP_STRING,     N_OM_SEPARATOR, &om_separator, "om-separator=text", "set separator for multiple -o output" },
-{   OP_U32NUMBER,  N_OM_CAPTURE, &capture_max,  "om-capture=n",  "set capture count for --only-matching" },
-{   OP_NODATA,     'P',      NULL,              "no-ucp",        "do not enable UCP mode with Unicode" },
-{   OP_NODATA,     'q',      NULL,              "quiet",         "suppress output, just set return code" },
-{   OP_NODATA,     'r',      NULL,              "recursive",     "recursively scan sub-directories" },
-{   OP_PATLIST,    N_EXCLUDE,&exclude_patdata,  "exclude=pattern","exclude matching files when recursing" },
-{   OP_PATLIST,    N_INCLUDE,&include_patdata,  "include=pattern","include matching files when recursing" },
-{   OP_PATLIST,    N_EXCLUDE_DIR,&exclude_dir_patdata, "exclude-dir=pattern","exclude matching directories when recursing" },
-{   OP_PATLIST,    N_INCLUDE_DIR,&include_dir_patdata, "include-dir=pattern","include matching directories when recursing" },
-{   OP_FILELIST,   N_EXCLUDE_FROM,&exclude_from_data, "exclude-from=path", "read exclude list from file" },
-{   OP_FILELIST,   N_INCLUDE_FROM,&include_from_data, "include-from=path", "read include list from file" },
-{   OP_NODATA,    's',      NULL,              "no-messages",   "suppress error messages" },
-{   OP_NODATA,    't',      NULL,              "total-count",   "print total count of matching lines" },
-{   OP_NODATA,    'u',      NULL,              "utf",           "use UTF/Unicode" },
-{   OP_NODATA,    'U',      NULL,              "utf-allow-invalid", "use UTF/Unicode, allow for invalid code units" },
-{   OP_NODATA,    'V',      NULL,              "version",       "print version information and exit" },
-{   OP_NODATA,    'v',      NULL,              "invert-match",  "select non-matching lines" },
-{   OP_NODATA,    'w',      NULL,              "word-regex(p)", "force patterns to match only as words"  },
-{   OP_NODATA,    'x',      NULL,              "line-regex(p)", "force patterns to match only whole lines" },
-{   OP_NODATA,   N_ALLABSK, NULL,              "allow-lookaround-bsk", "allow \\K in lookarounds" },
-{   OP_NODATA,    'Z',      NULL,              "null",          "output 0 byte after file names"  },
-{   OP_NODATA,    0,        NULL,               NULL,            NULL }
+  { OP_NODATA, N_NO_GROUP_SEPARATOR, NULL, "no-group-separator",
+    "suppress separators between groups of lines" },
+  { OP_STRING, 'O', &output_text, "output=text", "show only this text (possibly expanded)" },
+  { OP_OP_NUMBERS, 'o', &only_matching_data, "only-matching=n",
+    "show only the part of the line that matched" },
+  { OP_STRING, N_OM_SEPARATOR, &om_separator, "om-separator=text",
+    "set separator for multiple -o output" },
+  { OP_U32NUMBER, N_OM_CAPTURE, &capture_max, "om-capture=n",
+    "set capture count for --only-matching" },
+  { OP_NODATA, 'P', NULL, "no-ucp", "do not enable UCP mode with Unicode" },
+  { OP_NODATA, 'q', NULL, "quiet", "suppress output, just set return code" },
+  { OP_NODATA, 'r', NULL, "recursive", "recursively scan sub-directories" },
+  { OP_PATLIST, N_EXCLUDE, &exclude_patdata, "exclude=pattern",
+    "exclude matching files when recursing" },
+  { OP_PATLIST, N_INCLUDE, &include_patdata, "include=pattern",
+    "include matching files when recursing" },
+  { OP_PATLIST, N_EXCLUDE_DIR, &exclude_dir_patdata, "exclude-dir=pattern",
+    "exclude matching directories when recursing" },
+  { OP_PATLIST, N_INCLUDE_DIR, &include_dir_patdata, "include-dir=pattern",
+    "include matching directories when recursing" },
+  { OP_FILELIST, N_EXCLUDE_FROM, &exclude_from_data, "exclude-from=path",
+    "read exclude list from file" },
+  { OP_FILELIST, N_INCLUDE_FROM, &include_from_data, "include-from=path",
+    "read include list from file" },
+  { OP_NODATA, 's', NULL, "no-messages", "suppress error messages" },
+  { OP_NODATA, 't', NULL, "total-count", "print total count of matching lines" },
+  { OP_NODATA, 'u', NULL, "utf", "use UTF/Unicode" },
+  { OP_NODATA, 'U', NULL, "utf-allow-invalid", "use UTF/Unicode, allow for invalid code units" },
+  { OP_NODATA, 'V', NULL, "version", "print version information and exit" },
+  { OP_NODATA, 'v', NULL, "invert-match", "select non-matching lines" },
+  { OP_NODATA, 'w', NULL, "word-regex(p)", "force patterns to match only as words" },
+  { OP_NODATA, 'x', NULL, "line-regex(p)", "force patterns to match only whole lines" },
+  { OP_NODATA, N_ALLABSK, NULL, "allow-lookaround-bsk", "allow \\K in lookarounds" },
+  { OP_NODATA, 'Z', NULL, "null", "output 0 byte after file names" },
+  { OP_NODATA, 0, NULL, NULL, NULL }
 };
 
 /* Table of names for newline types. Must be kept in step with the definitions
 of PCRE2_NEWLINE_xx in pcre2.h. */
 
-static const char *newlines[] = {
-  "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF", "NUL" };
+static const char *newlines[] = { "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF", "NUL" };
 
 /* UTF-8 tables  */
 
-const int utf8_table1[] =
-{   0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
+const int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
 const int utf8_table1_size = sizeof(utf8_table1) / sizeof(int);
 
-const int utf8_table2[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
-const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+const int utf8_table2[] = { 0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc };
+const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
 
-const char utf8_table4[] = {
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-  3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5 };
+const char utf8_table4[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                             2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5 };
 
 
 
@@ -558,7 +577,8 @@ ord2utf8(uint32_t value)
   int i, j;
   uint8_t *utf8bytes = utf8_buffer;
   for (i = 0; i < utf8_table1_size; i++)
-    if (value <= (uint32_t)utf8_table1[i]) break;
+    if (value <= (uint32_t)utf8_table1[i])
+      break;
   utf8bytes += i;
   for (j = i; j > 0; j--)
   {
@@ -583,7 +603,8 @@ strcmpic(const char *str1, const char *str2)
   {
     c1 = tolower(*str1++);
     c2 = tolower(*str2++);
-    if (c1 != c2) return ((c1 > c2) << 1) - 1;
+    if (c1 != c2)
+      return ((c1 > c2) << 1) - 1;
   }
   return 0;
 }
@@ -605,13 +626,16 @@ parse_grep_colors(const char *gc)
   static char seq[16];
   const char *col;
   uint32_t len;
-  if (gc == NULL) return NULL;
+  if (gc == NULL)
+    return NULL;
   col = strstr(gc, "ms=");
-  if (col == NULL) col = strstr(gc, "mt=");
-  if (col == NULL) return NULL;
+  if (col == NULL)
+    col = strstr(gc, "mt=");
+  if (col == NULL)
+    return NULL;
   len = 0;
   col += 3;
-  while (*col != ':' && *col != 0 && len < sizeof(seq)-1)
+  while (*col != ':' && *col != 0 && len < sizeof(seq) - 1)
     seq[len++] = *col++;
   seq[len] = 0;
   return seq;
@@ -637,19 +661,21 @@ pcre2grep_exit(int rc)
   therein. */
 
 #ifdef __VMS
-    char val_buf[4];
-    $DESCRIPTOR(sym_nam, "PCRE2GREP_RC");
-    $DESCRIPTOR(sym_val, val_buf);
-    sprintf(val_buf, "%d", rc);
-    sym_val.dsc$w_length = strlen(val_buf);
-    lib$set_symbol(&sym_nam, &sym_val);
+  char val_buf[4];
+  $DESCRIPTOR(sym_nam, "PCRE2GREP_RC");
+  $DESCRIPTOR(sym_val, val_buf);
+  sprintf(val_buf, "%d", rc);
+  sym_val.dsc$w_length = strlen(val_buf);
+  lib$set_symbol(&sym_nam, &sym_val);
 #endif
 
   if (resource_error)
   {
-    fprintf(stderr, "pcre2grep: Error %d, %d, %d or %d means that a resource "
-      "limit was exceeded.\n", PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT,
-      PCRE2_ERROR_DEPTHLIMIT, PCRE2_ERROR_HEAPLIMIT);
+    fprintf(stderr,
+            "pcre2grep: Error %d, %d, %d or %d means that a resource "
+            "limit was exceeded.\n",
+            PCRE2_ERROR_JIT_STACKLIMIT, PCRE2_ERROR_MATCHLIMIT, PCRE2_ERROR_DEPTHLIMIT,
+            PCRE2_ERROR_HEAPLIMIT);
     fprintf(stderr, "pcre2grep: Check your regex for nested unlimited loops.\n");
   }
   exit(rc);
@@ -685,8 +711,7 @@ add_pattern(char *s, PCRE2_SIZE patlen, patstr *after)
   }
   if (patlen > MAXPATLEN)
   {
-    fprintf(stderr, "pcre2grep: pattern is too long (limit is %d bytes)\n",
-      MAXPATLEN);
+    fprintf(stderr, "pcre2grep: pattern is too long (limit is %d bytes)\n", MAXPATLEN);
     free(p);
     return NULL;
   }
@@ -724,7 +749,8 @@ free_pattern_chain(patstr *pc)
   {
     patstr *p = pc;
     pc = p->next;
-    if (p->compiled != NULL) pcre2_code_free(p->compiled);
+    if (p->compiled != NULL)
+      pcre2_code_free(p->compiled);
     free(p);
   }
 }
@@ -761,10 +787,10 @@ Unix-style directory scanning can be used (see below). */
 #ifdef WIN32
 
 #ifndef STRICT
-# define STRICT
+#define STRICT
 #endif
 #ifndef WIN32_LEAN_AND_MEAN
-# define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
 
 #include <windows.h>
@@ -787,20 +813,31 @@ decode_ANSI_colour(const char *cs)
     if (isdigit((unsigned char)(*cs)))
     {
       int code = atoi(cs);
-      if (code == 1) result |= 0x08;
-      else if (code == 4) result |= 0x8000;
-      else if (code == 5) result |= 0x80;
-      else if (code >= 30 && code <= 37) result = (result & 0xF8) | BGR_RGB(code - 30);
-      else if (code == 39) result = (result & 0xF0) | (csbi.wAttributes & 0x0F);
-      else if (code >= 40 && code <= 47) result = (result & 0x8F) | (BGR_RGB(code - 40) << 4);
-      else if (code == 49) result = (result & 0x0F) | (csbi.wAttributes & 0xF0);
+      if (code == 1)
+        result |= 0x08;
+      else if (code == 4)
+        result |= 0x8000;
+      else if (code == 5)
+        result |= 0x80;
+      else if (code >= 30 && code <= 37)
+        result = (result & 0xF8) | BGR_RGB(code - 30);
+      else if (code == 39)
+        result = (result & 0xF0) | (csbi.wAttributes & 0x0F);
+      else if (code >= 40 && code <= 47)
+        result = (result & 0x8F) | (BGR_RGB(code - 40) << 4);
+      else if (code == 49)
+        result = (result & 0x0F) | (csbi.wAttributes & 0xF0);
       /* aixterm high intensity colour codes */
-      else if (code >= 90 && code <= 97) result = (result & 0xF0) | BGR_RGB(code - 90) | 0x08;
-      else if (code >= 100 && code <= 107) result = (result & 0x0F) | (BGR_RGB(code - 100) << 4) | 0x80;
+      else if (code >= 90 && code <= 97)
+        result = (result & 0xF0) | BGR_RGB(code - 90) | 0x08;
+      else if (code >= 100 && code <= 107)
+        result = (result & 0x0F) | (BGR_RGB(code - 100) << 4) | 0x80;
 
-      while (isdigit((unsigned char)(*cs))) cs++;
+      while (isdigit((unsigned char)(*cs)))
+        cs++;
     }
-    if (*cs) cs++;
+    if (*cs)
+      cs++;
   }
   return result;
 }
@@ -815,18 +852,19 @@ init_colour_output(void)
     /* This fails when redirected to con; try again if so. */
     if (!GetConsoleScreenBufferInfo(hstdout, &csbi) && !do_ansi)
     {
-      HANDLE hcon = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE,
-        FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+      HANDLE hcon = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+                               OPEN_EXISTING, 0, NULL);
       GetConsoleScreenBufferInfo(hcon, &csbi);
       CloseHandle(hcon);
     }
     match_colour = decode_ANSI_colour(colour_string);
     /* No valid colour found - turn off colouring */
-    if (!match_colour) do_colour = FALSE;
+    if (!match_colour)
+      do_colour = FALSE;
   }
 }
 
-#endif  /* WIN32 */
+#endif /* WIN32 */
 
 
 /* The following sets of functions are defined so that they can be made system
@@ -836,9 +874,9 @@ native z/OS, and "no support". */
 
 /************* Directory scanning Unix-style and z/OS ***********/
 
-#if !defined WIN32 && \
-  (defined HAVE_SYS_STAT_H && defined HAVE_DIRENT_H && defined HAVE_SYS_TYPES_H) || \
-  defined NATIVE_ZOS
+#if !defined WIN32 &&                                                                     \
+        (defined HAVE_SYS_STAT_H && defined HAVE_DIRENT_H && defined HAVE_SYS_TYPES_H) || \
+    defined NATIVE_ZOS
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -862,7 +900,7 @@ isdirectory(char *filename)
 {
   struct stat statbuf;
   if (stat(filename, &statbuf) < 0)
-    return 0;        // In the expectation that opening as a file will fail
+    return 0; // In the expectation that opening as a file will fail
   return S_ISDIR(statbuf.st_mode);
 }
 
@@ -878,7 +916,8 @@ readdirectory(directory_type *dir)
   for (;;)
   {
     struct dirent *dent = readdir(dir);
-    if (dent == NULL) break;
+    if (dent == NULL)
+      break;
     if (strcmp(dent->d_name, ".") != 0 && strcmp(dent->d_name, "..") != 0)
       return dent->d_name;
   }
@@ -900,7 +939,7 @@ isregfile(char *filename)
 {
   struct stat statbuf;
   if (stat(filename, &statbuf) < 0)
-    return 1;        // In the expectation that opening as a file will fail
+    return 1; // In the expectation that opening as a file will fail
   return S_ISREG(statbuf.st_mode);
 }
 
@@ -944,10 +983,13 @@ is_file_tty(FILE *f)
 static void
 print_match(const void *buf, size_t length)
 {
-  if (length == 0) return;
-  if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+  if (length == 0)
+    return;
+  if (do_colour)
+    fprintf(stdout, "%c[%sm", 0x1b, colour_string);
   FWRITE_IGNORE(buf, 1, length, stdout);
-  if (do_colour) fprintf(stdout, "%c[0m", 0x1b);
+  if (do_colour)
+    fprintf(stdout, "%c[0m", 0x1b);
 }
 
 /* End of Unix-style or native z/OS environment functions. */
@@ -967,8 +1009,7 @@ when it did not exist. David Byron added a patch that moved the #include of
 #define INVALID_FILE_ATTRIBUTES 0xFFFFFFFF
 #endif
 
-typedef struct directory_type
-{
+typedef struct directory_type {
   HANDLE handle;
   BOOL first;
   WIN32_FIND_DATA data;
@@ -1037,7 +1078,7 @@ readdirectory(directory_type *dir)
       return dir->data.cFileName;
   }
 #ifndef _MSC_VER
-  return NULL;   // Keep compiler happy; never executed
+  return NULL; // Keep compiler happy; never executed
 #endif
 }
 
@@ -1054,7 +1095,8 @@ closedirectory(directory_type *dir)
 /* I don't know how to do this, or if it can be done; assume all paths are
 regular if they are not directories. */
 
-static int isregfile(char *filename)
+static int
+isregfile(char *filename)
 {
   return !isdirectory(filename);
 }
@@ -1080,17 +1122,22 @@ is_file_tty(FILE *f)
 static void
 print_match(const void *buf, size_t length)
 {
-  if (length == 0) return;
+  if (length == 0)
+    return;
   if (do_colour)
   {
-    if (do_ansi) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-      else SetConsoleTextAttribute(hstdout, match_colour);
+    if (do_ansi)
+      fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+    else
+      SetConsoleTextAttribute(hstdout, match_colour);
   }
   FWRITE_IGNORE(buf, 1, length, stdout);
   if (do_colour)
   {
-    if (do_ansi) fprintf(stdout, "%c[0m", 0x1b);
-      else SetConsoleTextAttribute(hstdout, csbi.wAttributes);
+    if (do_ansi)
+      fprintf(stdout, "%c[0m", 0x1b);
+    else
+      SetConsoleTextAttribute(hstdout, csbi.wAttributes);
   }
 }
 
@@ -1106,17 +1153,35 @@ print_match(const void *buf, size_t length)
 #define FILESEP 0
 typedef void directory_type;
 
-static int isdirectory(char *filename) { return 0; }
-static directory_type * opendirectory(char *filename) { return (directory_type*)0;}
-static char *readdirectory(directory_type *dir) { return (char*)0;}
-static void closedirectory(directory_type *dir) {}
+static int
+isdirectory(char *filename)
+{
+  return 0;
+}
+static directory_type *
+opendirectory(char *filename)
+{
+  return (directory_type *)0;
+}
+static char *
+readdirectory(directory_type *dir)
+{
+  return (char *)0;
+}
+static void
+closedirectory(directory_type *dir)
+{}
 
 
 /************* Test for regular file when we can't do it **********/
 
 /* Assume all files are regular. */
 
-static int isregfile(char *filename) { return 1; }
+static int
+isregfile(char *filename)
+{
+  return 1;
+}
 
 
 /************* Test for a terminal when we can't do it **********/
@@ -1139,11 +1204,12 @@ is_file_tty(FILE *f)
 static void
 print_match(const void *buf, size_t length)
 {
-  if (length == 0) return;
+  if (length == 0)
+    return;
   FWRITE_IGNORE(buf, 1, length, stdout);
 }
 
-#endif  /* End of system-specific functions */
+#endif /* End of system-specific functions */
 
 
 
@@ -1158,11 +1224,12 @@ usage(int rc)
   fprintf(stderr, "Usage: pcre2grep [-");
   for (op = optionlist; op->one_char != 0; op++)
   {
-    if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
+    if (op->one_char > 0)
+      fprintf(stderr, "%c", op->one_char);
   }
   fprintf(stderr, "] [long options] [pattern] [files]\n");
   fprintf(stderr, "Type \"pcre2grep --help\" for more information and the long "
-    "options.\n");
+                  "options.\n");
   return rc;
 }
 
@@ -1204,10 +1271,12 @@ help(void)
 #if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
   printf("Other files and the standard input are read as plain files.%s%s", stdout_nl, stdout_nl);
 #else
-  printf("All files are read as plain files, without any interpretation.%s%s", stdout_nl, stdout_nl);
+  printf("All files are read as plain files, without any interpretation.%s%s", stdout_nl,
+         stdout_nl);
 #endif
 
-  printf("Example: pcre2grep -i " QUOT "hello.*world" QUOT " menu.h main.c%s%s", stdout_nl, stdout_nl);
+  printf("Example: pcre2grep -i " QUOT "hello.*world" QUOT " menu.h main.c%s%s", stdout_nl,
+         stdout_nl);
   printf("Options:%s", stdout_nl);
 
   for (op = optionlist; op->one_char != 0; op++)
@@ -1219,23 +1288,28 @@ help(void)
       n = 31 - printf("  -%c", op->one_char);
     else
     {
-      if (op->one_char > 0) snprintf(s, sizeof(s), "-%c,", op->one_char);
-        else snprintf(s, sizeof(s), "   ");
+      if (op->one_char > 0)
+        snprintf(s, sizeof(s), "-%c,", op->one_char);
+      else
+        snprintf(s, sizeof(s), "   ");
       n = 31 - printf("  %s --%s", s, op->long_name);
     }
 
-    if (n < 1) n = 1;
+    if (n < 1)
+      n = 1;
     printf("%.*s%s%s", n, "                           ", op->help_text, stdout_nl);
   }
 
-  printf("%sNumbers may be followed by K or M, e.g. --max-buffer-size=100K.%s", stdout_nl, stdout_nl);
+  printf("%sNumbers may be followed by K or M, e.g. --max-buffer-size=100K.%s", stdout_nl,
+         stdout_nl);
   printf("The default value for --buffer-size is %d.%s", PCRE2GREP_BUFSIZE, stdout_nl);
   printf("The default value for --max-buffer-size is %d.%s", PCRE2GREP_MAX_BUFSIZE, stdout_nl);
   printf("When reading patterns or file names from a file, trailing white%s", stdout_nl);
   printf("space is removed and blank lines are ignored.%s", stdout_nl);
   printf("The maximum size of any pattern is %d bytes.%s", MAXPATLEN, stdout_nl);
 
-  printf("%sWith no FILEs, read standard input. If fewer than two FILEs given, assume -h.%s", stdout_nl, stdout_nl);
+  printf("%sWith no FILEs, read standard input. If fewer than two FILEs given, assume -h.%s",
+         stdout_nl, stdout_nl);
   printf("Exit status is 0 if any matches, 1 if no matches, and 2 if trouble.%s", stdout_nl);
 }
 
@@ -1267,7 +1341,8 @@ test_incexc(char *path, patstr *ip, patstr *ep)
       return FALSE;
   }
 
-  if (ip == NULL) return TRUE;
+  if (ip == NULL)
+    return TRUE;
 
   for (; ip != NULL; ip = ip->next)
   {
@@ -1301,7 +1376,8 @@ decode_number(char *option_data, option_item *op, BOOL longop)
 {
   unsigned long int n = 0;
   char *endptr = option_data;
-  while (*endptr != 0 && isspace((unsigned char)(*endptr))) endptr++;
+  while (*endptr != 0 && isspace((unsigned char)(*endptr)))
+    endptr++;
   while (isdigit((unsigned char)(*endptr)))
     n = n * 10 + (int)(*endptr++ - '0');
   if (toupper(*endptr) == 'K')
@@ -1311,23 +1387,21 @@ decode_number(char *option_data, option_item *op, BOOL longop)
   }
   else if (toupper(*endptr) == 'M')
   {
-    n *= 1024*1024;
+    n *= 1024 * 1024;
     endptr++;
   }
 
-  if (*endptr != 0)   // Error
+  if (*endptr != 0) // Error
   {
     if (longop)
     {
       const char *equals = strchr(op->long_name, '=');
-      int nlen = (equals == NULL)? (int)strlen(op->long_name) :
-        (int)(equals - op->long_name);
-      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after --%.*s\n",
-        option_data, nlen, op->long_name);
+      int nlen = (equals == NULL) ? (int)strlen(op->long_name) : (int)(equals - op->long_name);
+      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after --%.*s\n", option_data, nlen,
+              op->long_name);
     }
     else
-      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after -%c\n",
-        option_data, op->one_char);
+      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after -%c\n", option_data, op->one_char);
     pcre2grep_exit(usage(2));
   }
 
@@ -1407,7 +1481,8 @@ read_one_line(char *buffer, PCRE2_SIZE length, FILE *f)
   while ((c = fgetc(f)) != EOF)
   {
     buffer[yield++] = c;
-    if (c == '\n' || yield >= length) break;
+    if (c == '\n' || yield >= length)
+      break;
   }
   return yield;
 }
@@ -1432,11 +1507,13 @@ read_pattern(char *buffer, PCRE2_SIZE *length, FILE *f)
 {
   *buffer = '\0';
   *length = read_one_line(buffer, *length, f);
-  if (*length > 0 && buffer[*length-1] == '\n') *length = *length - 1;
-  if (posix_pattern_file && *length > 0 && buffer[*length-1] == '\r')
+  if (*length > 0 && buffer[*length - 1] == '\n')
+    *length = *length - 1;
+  if (posix_pattern_file && *length > 0 && buffer[*length - 1] == '\r')
   {
     *length = *length - 1;
-    if (*length == 0) return TRUE;
+    if (*length == 0)
+      return TRUE;
   }
   return (*length > 0 || *buffer == '\n');
 }
@@ -1462,9 +1539,10 @@ end_of_line(char *p, char *endptr, int *lenptr)
 {
   switch (endlinetype)
   {
-  default:        // Just in case
+  default: // Just in case
   case PCRE2_NEWLINE_LF:
-    while (p < endptr && *p != '\n') p++;
+    while (p < endptr && *p != '\n')
+      p++;
     if (p < endptr)
     {
       *lenptr = 1;
@@ -1474,7 +1552,8 @@ end_of_line(char *p, char *endptr, int *lenptr)
     return endptr;
 
   case PCRE2_NEWLINE_CR:
-    while (p < endptr && *p != '\r') p++;
+    while (p < endptr && *p != '\r')
+      p++;
     if (p < endptr)
     {
       *lenptr = 1;
@@ -1484,7 +1563,8 @@ end_of_line(char *p, char *endptr, int *lenptr)
     return endptr;
 
   case PCRE2_NEWLINE_NUL:
-    while (p < endptr && *p != '\0') p++;
+    while (p < endptr && *p != '\0')
+      p++;
     if (p < endptr)
     {
       *lenptr = 1;
@@ -1496,7 +1576,8 @@ end_of_line(char *p, char *endptr, int *lenptr)
   case PCRE2_NEWLINE_CRLF:
     for (;;)
     {
-      while (p < endptr && *p != '\r') p++;
+      while (p < endptr && *p != '\r')
+        p++;
       if (p == endptr)
       {
         *lenptr = 0;
@@ -1533,9 +1614,9 @@ end_of_line(char *p, char *endptr, int *lenptr)
       }
 
       p++;
-    }     // End of loop for ANYCRLF case
+    } // End of loop for ANYCRLF case
 
-    *lenptr = 0;  // Must have hit the end
+    *lenptr = 0; // Must have hit the end
     return endptr;
 
   case PCRE2_NEWLINE_ANY:
@@ -1547,13 +1628,13 @@ end_of_line(char *p, char *endptr, int *lenptr)
       if (utf && c >= 0xc0)
       {
         int gcii, gcss;
-        extra = utf8_table4[c & 0x3f];  // Number of additional bytes
+        extra = utf8_table4[c & 0x3f]; // Number of additional bytes
         if (endptr - p < 1 + extra)
         {
-          *lenptr = 0;  // Hit the end, halfway through a character
+          *lenptr = 0; // Hit the end, halfway through a character
           return endptr;
         }
-        gcss = 6*extra;
+        gcss = 6 * extra;
         c = (c & utf8_table3[extra]) << gcss;
         for (gcii = 1; gcii <= extra; gcii++)
         {
@@ -1566,40 +1647,41 @@ end_of_line(char *p, char *endptr, int *lenptr)
 
       switch (c)
       {
-      case '\n':      // LF
-      case '\v':      // VT
-      case '\f':      // FF
+      case '\n': // LF
+      case '\v': // VT
+      case '\f': // FF
         *lenptr = 1 + extra;
         return p;
 
-      case '\r':      // CR
+      case '\r': // CR
         if (extra == 0 && p < endptr && *p == '\n')
         {
           *lenptr = 2;
           p++;
         }
-        else *lenptr = 1 + extra;
+        else
+          *lenptr = 1 + extra;
         return p;
 
 #ifndef EBCDIC
-      case 0x85:      // Unicode NEL
+      case 0x85: // Unicode NEL
         *lenptr = 1 + extra;
         return p;
 
-      case 0x2028:    // Unicode LS
-      case 0x2029:    // Unicode PS
+      case 0x2028: // Unicode LS
+      case 0x2029: // Unicode PS
         *lenptr = 1 + extra;
         return p;
-#endif  /* Not EBCDIC */
+#endif /* Not EBCDIC */
 
       default:
         break;
       }
-    }     // End of loop for ANY case
+    } // End of loop for ANY case
 
-    *lenptr = 0;  // Must have hit the end
+    *lenptr = 0; // Must have hit the end
     return endptr;
-  }       // End of overall switch
+  } // End of overall switch
 }
 
 
@@ -1622,49 +1704,62 @@ previous_line(char *p, char *startptr)
 {
   switch (endlinetype)
   {
-  default:        // Just in case
+  default: // Just in case
   case PCRE2_NEWLINE_LF:
     p--;
-    while (p > startptr && p[-1] != '\n') p--;
+    while (p > startptr && p[-1] != '\n')
+      p--;
     return p;
 
   case PCRE2_NEWLINE_CR:
     p--;
-    while (p > startptr && p[-1] != '\n') p--;
+    while (p > startptr && p[-1] != '\n')
+      p--;
     return p;
 
   case PCRE2_NEWLINE_NUL:
     p--;
-    while (p > startptr && p[-1] != '\0') p--;
+    while (p > startptr && p[-1] != '\0')
+      p--;
     return p;
 
   case PCRE2_NEWLINE_CRLF:
     p -= 2;
     for (;;)
     {
-      while (p > startptr && p[-1] != '\n') p--;
-      if (p == startptr) break;
-      if (p - startptr >= 2 && p[-2] == '\r') break;
+      while (p > startptr && p[-1] != '\n')
+        p--;
+      if (p == startptr)
+        break;
+      if (p - startptr >= 2 && p[-2] == '\r')
+        break;
       p--;
     }
     return p;
 
   case PCRE2_NEWLINE_ANYCRLF:
-    if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n') p -= 2;
-      else p--;
+    if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n')
+      p -= 2;
+    else
+      p--;
     while (p > startptr)
     {
-      if (p[-1] == '\n' || p[-1] == '\r') break;
+      if (p[-1] == '\n' || p[-1] == '\r')
+        break;
       p--;
     }
     return p;
 
   case PCRE2_NEWLINE_ANY:
-    if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n') p -= 2;
+    if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n')
+      p -= 2;
     else
     {
-      if (utf) while (p > startptr && (p[-1] & 0xc0) == 0x80) p--;
-      if (p > startptr) p--;
+      if (utf)
+        while (p > startptr && (p[-1] & 0xc0) == 0x80)
+          p--;
+      if (p > startptr)
+        p--;
     }
 
     while (p > startptr)
@@ -1675,18 +1770,19 @@ previous_line(char *p, char *startptr)
       if (utf)
       {
         int extra = 0;
-        while (pp > startptr && (*pp & 0xc0) == 0x80) pp--;
+        while (pp > startptr && (*pp & 0xc0) == 0x80)
+          pp--;
         c = *((unsigned char *)pp);
         if (c >= 0xc0)
         {
           int gcii, gcss;
-          extra = utf8_table4[c & 0x3f];  // Number of additional bytes
+          extra = utf8_table4[c & 0x3f]; // Number of additional bytes
           if (p - pp < 1 + extra)
           {
-            p = pp;  // Rewind over the broken character
+            p = pp; // Rewind over the broken character
             continue;
           }
-          gcss = 6*extra;
+          gcss = 6 * extra;
           c = (c & utf8_table3[extra]) << gcss;
           for (gcii = 1; gcii <= extra; gcii++)
           {
@@ -1695,30 +1791,31 @@ previous_line(char *p, char *startptr)
           }
         }
       }
-      else c = *((unsigned char *)pp);
+      else
+        c = *((unsigned char *)pp);
 
       switch (c)
       {
-      case '\n':      // LF
-      case '\v':      // VT
-      case '\f':      // FF
-      case '\r':      // CR
+      case '\n': // LF
+      case '\v': // VT
+      case '\f': // FF
+      case '\r': // CR
 #ifndef EBCDIC
-      case 0x85:      // Unicode NEL
-      case 0x2028:    // Unicode LS
-      case 0x2029:    // Unicode PS
-#endif  /* Not EBCDIC */
+      case 0x85:   // Unicode NEL
+      case 0x2028: // Unicode LS
+      case 0x2029: // Unicode PS
+#endif             /* Not EBCDIC */
         return p;
 
       default:
         break;
       }
 
-      p = pp;  // Back one character
-    }          // End of loop for ANY case
+      p = pp; // Back one character
+    } // End of loop for ANY case
 
     return p;
-  }       // End of overall switch
+  } // End of overall switch
 }
 
 
@@ -1739,7 +1836,7 @@ write_final_newline(void)
 {
   switch (endlinetype)
   {
-  default:        // Just in case
+  default: // Just in case
   case PCRE2_NEWLINE_LF:
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
@@ -1779,8 +1876,8 @@ Returns:            nothing
 */
 
 static void
-do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart,
-  char *endptr, const char *printname)
+do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart, char *endptr,
+               const char *printname)
 {
   if (after_context > 0 && lastmatchnumber > 0)
   {
@@ -1789,9 +1886,12 @@ do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart,
     while (lastmatchrestart < endptr && count < after_context)
     {
       char *pp = end_of_line(lastmatchrestart, endptr, &ellength);
-      if (ellength == 0 && pp == main_buffer + bufsize) break;
-      if (printname != NULL) fprintf(stdout, "%s%c", printname, printname_hyphen);
-      if (number) fprintf(stdout, "%lu-", lastmatchnumber++);
+      if (ellength == 0 && pp == main_buffer + bufsize)
+        break;
+      if (printname != NULL)
+        fprintf(stdout, "%s%c", printname, printname_hyphen);
+      if (number)
+        fprintf(stdout, "%lu-", lastmatchnumber++);
       FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
       lastmatchrestart = pp;
       count++;
@@ -1834,8 +1934,8 @@ Returns:       TRUE if there was a match, match_data and offsets are set
 */
 
 static BOOL
-match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
-  PCRE2_SIZE startoffset, int *mrc)
+match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options, PCRE2_SIZE startoffset,
+               int *mrc)
 {
   PCRE2_SIZE slen = length;
   int first = -1;
@@ -1851,9 +1951,10 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
 
   for (int i = 1; p != NULL; p = p->next, i++)
   {
-    int rc = pcre2_match(p->compiled, (PCRE2_SPTR)matchptr, length,
-      startoffset, options, match_data, match_context);
-    if (rc == PCRE2_ERROR_NOMATCH) continue;
+    int rc = pcre2_match(p->compiled, (PCRE2_SPTR)matchptr, length, startoffset, options,
+                         match_data, match_context);
+    if (rc == PCRE2_ERROR_NOMATCH)
+      continue;
 
     /* Handle a successful match. When all_matches is false, we are done.
     Otherwise we must save the earliest match. */
@@ -1867,8 +1968,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
       }
 
       if (first < 0 || offsets[0] < offsets_pair[first][0] ||
-           (offsets[0] == offsets_pair[first][0] &&
-            offsets[1] > offsets_pair[first][1]))
+          (offsets[0] == offsets_pair[first][0] && offsets[1] > offsets_pair[first][1]))
       {
         first = match_data_toggle;
         firstrc = rc;
@@ -1882,12 +1982,12 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
     /* Deal with PCRE2 error. */
 
     fprintf(stderr, "pcre2grep: pcre2_match() gave error %d while matching ", rc);
-    if (patterns->next != NULL) fprintf(stderr, "pattern number %d to ", i);
+    if (patterns->next != NULL)
+      fprintf(stderr, "pattern number %d to ", i);
     fprintf(stderr, "%s", msg);
-    FWRITE_IGNORE(matchptr, 1, slen, stderr);   // In case binary zero included
+    FWRITE_IGNORE(matchptr, 1, slen, stderr); // In case binary zero included
     fprintf(stderr, "\n\n");
-    if (rc <= PCRE2_ERROR_UTF8_ERR1 &&
-        rc >= PCRE2_ERROR_UTF8_ERR21)
+    if (rc <= PCRE2_ERROR_UTF8_ERR1 && rc >= PCRE2_ERROR_UTF8_ERR21)
     {
       unsigned char mbuffer[256];
       PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
@@ -1902,7 +2002,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
       fprintf(stderr, "pcre2grep: Too many errors - abandoned.\n");
       pcre2grep_exit(2);
     }
-    return invert;    // No more matching; don't show the line again
+    return invert; // No more matching; don't show the line again
   }
 
   /* We get here when all patterns have been tried. If all_matches is false,
@@ -1910,7 +2010,8 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options,
   will be non-NULL if there was at least one match, and it will point to the
   appropriate match_data block. */
 
-  if (!all_matches || first < 0) return FALSE;
+  if (!all_matches || first < 0)
+    return FALSE;
 
   match_data_toggle = first;
   match_data = match_data_pair[first];
@@ -1963,8 +2064,8 @@ Returns:     DDE_ERROR    after a syntax error
 */
 
 static int
-decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
-  uint32_t *value, PCRE2_SPTR *last)
+decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t *value,
+                     PCRE2_SPTR *last)
 {
   uint32_t c = 0;
   int base = 10;
@@ -1974,10 +2075,10 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
 
   switch (*(++string))
   {
-  case 0:   // Syntax error:   a character must be present after $.
+  case 0: // Syntax error:   a character must be present after $.
     if (!callout)
-      fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
-        (int)(string - begin), "no character after $");
+      fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n", (int)(string - begin),
+              "no character after $");
     *last = string;
     return DDE_ERROR;
 
@@ -1985,7 +2086,8 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
     /* In a callout, no capture is available. Return the character '0' for
     consistency with $0. */
 
-    if (callout) *value = '0';
+    if (callout)
+      *value = '0';
     else
     {
       *value = 0;
@@ -2000,8 +2102,8 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
     {
       /* Syntax error: a decimal number required. */
       if (!callout)
-        fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
-          (int)(string - begin), "decimal number expected");
+        fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n", (int)(string - begin),
+                "decimal number expected");
       rc = DDE_ERROR;
       break;
     }
@@ -2012,15 +2114,23 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
     always be an unknown capture number. We just stop incrementing, in order to
     avoid overflow. */
 
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
+  case '0':
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+  case '9':
     do
     {
-      if (c <= 65535) c = c * 10 + (*string - '0');
+      if (c <= 65535)
+        c = c * 10 + (*string - '0');
       string++;
-    }
-    while (*string >= '0' && *string <= '9');
-    string--;  // Point to last digit
+    } while (*string >= '0' && *string <= '9');
+    string--; // Point to last digit
 
     /* In a callout, capture number 0 is not available. No error can be given,
     so just return the character '0'. */
@@ -2048,14 +2158,16 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
       string++;
       dcount = 7;
     }
-    else dcount = 3;
+    else
+      dcount = 3;
     for (; dcount > 0; dcount--)
     {
-      if (*string < '0' || *string > '7') break;
+      if (*string < '0' || *string > '7')
+        break;
       c = c * 8 + (*string++ - '0');
     }
     *value = c;
-    string--;  // Point to last digit
+    string--; // Point to last digit
     break;
 
     /* Limit hex numbers to 2 digits without braces, or up to 6 with braces,
@@ -2070,33 +2182,55 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
       string++;
       dcount = 6;
     }
-    else dcount = 2;
+    else
+      dcount = 2;
     for (; dcount > 0; dcount--)
     {
-      if (!isxdigit(*string)) break;
+      if (!isxdigit(*string))
+        break;
       if (*string >= '0' && *string <= '9')
-        c = c *16 + (*string++ - '0');
+        c = c * 16 + (*string++ - '0');
       else
         c = c * 16 + ((*string++ | 0x20) - 'a') + 10;
     }
     *value = c;
-    string--;  // Point to last digit
+    string--; // Point to last digit
     break;
 
-  case 'a':   *value = '\a'; break;
-  case 'b':   *value = '\b'; break;
+  case 'a':
+    *value = '\a';
+    break;
+  case 'b':
+    *value = '\b';
+    break;
 #ifndef EBCDIC
-  case 'e':   *value = '\033'; break;
+  case 'e':
+    *value = '\033';
+    break;
 #else
-  case 'e':   *value = '\047'; break;
+  case 'e':
+    *value = '\047';
+    break;
 #endif
-  case 'f':   *value = '\f'; break;
-  case 'n':   *value = STDOUT_NL_CODE; break;
-  case 'r':   *value = '\r'; break;
-  case 't':   *value = '\t'; break;
-  case 'v':   *value = '\v'; break;
+  case 'f':
+    *value = '\f';
+    break;
+  case 'n':
+    *value = STDOUT_NL_CODE;
+    break;
+  case 'r':
+    *value = '\r';
+    break;
+  case 't':
+    *value = '\t';
+    break;
+  case 'v':
+    *value = '\v';
+    break;
 
-  default:   *value = *string; break;
+  default:
+    *value = *string;
+    break;
   }
 
   if (brace)
@@ -2107,33 +2241,36 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout,
       rc = DDE_ERROR;
       if (!callout)
       {
-        if ((base == 8 && c >= '0' && c <= '7') ||
-            (base == 16 && isxdigit(c)))
+        if ((base == 8 && c >= '0' && c <= '7') || (base == 16 && isxdigit(c)))
         {
-          fprintf(stderr, "pcre2grep: Error in output text at offset %d: "
-            "too many %s digits\n", (int)(string - begin),
-            (base == 8)? "octal" : "hex");
+          fprintf(stderr,
+                  "pcre2grep: Error in output text at offset %d: "
+                  "too many %s digits\n",
+                  (int)(string - begin), (base == 8) ? "octal" : "hex");
         }
         else
         {
           fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n",
-            (int)(string - begin), "missing closing brace");
+                  (int)(string - begin), "missing closing brace");
         }
       }
     }
-    else string++;
+    else
+      string++;
   }
 
   /* Check maximum code point values, but take note of STDOUT_NL_CODE. */
 
   if (rc == DDE_CHAR && *value != STDOUT_NL_CODE)
   {
-    uint32_t max = utf? 0x0010ffffu : 0xffu;
+    uint32_t max = utf ? 0x0010ffffu : 0xffu;
     if (*value > max)
     {
       if (!callout)
-        fprintf(stderr, "pcre2grep: Error in output text at offset %d: "
-          "code point greater than 0x%x is invalid\n", (int)(string - begin), max);
+        fprintf(stderr,
+                "pcre2grep: Error in output text at offset %d: "
+                "code point greater than 0x%x is invalid\n",
+                (int)(string - begin), max);
       rc = DDE_ERROR;
     }
   }
@@ -2167,8 +2304,8 @@ syntax_check_output_text(PCRE2_SPTR string, BOOL callout)
   for (; *string != 0; string++)
   {
     if (*string == '$' &&
-      decode_dollar_escape(begin, string, callout, &value, &string) == DDE_ERROR)
-        return FALSE;
+        decode_dollar_escape(begin, string, callout, &value, &string) == DDE_ERROR)
+      return FALSE;
   }
 
   return TRUE;
@@ -2194,8 +2331,8 @@ Returns:        TRUE if something was output, other than newline
 */
 
 static BOOL
-display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject,
-  PCRE2_SIZE *ovector, PCRE2_SIZE capture_top)
+display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_SIZE *ovector,
+                    PCRE2_SIZE capture_top)
 {
   uint32_t value;
   BOOL printed = FALSE;
@@ -2214,7 +2351,7 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject,
           printed = FALSE;
           continue;
         }
-        break;  // Will print value
+        break; // Will print value
 
       case DDE_CAPTURE:
         if (value < capture_top)
@@ -2245,19 +2382,23 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject,
 
         /* LCOV_EXCL_START */
       case DDE_ERROR:
-      default:    // Should not occur
+      default: // Should not occur
         abort();
         break;
         /* LCOV_EXCL_STOP */
       }
     }
 
-    else value = *string;  // Not a $ escape
+    else
+      value = *string; // Not a $ escape
 
-    if (!utf || value <= 127) fprintf(stdout, "%c", value); else
+    if (!utf || value <= 127)
+      fprintf(stdout, "%c", value);
+    else
     {
       int n = ord2utf8(value);
-      for (int i = 0; i < n; i++) fputc(utf8_buffer[i], stdout);
+      for (int i = 0; i < n; i++)
+        fputc(utf8_buffer[i], stdout);
     }
 
     printed = TRUE;
@@ -2335,20 +2476,22 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   pid_t pid;
 #endif
   int result = 0;
-#endif  /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
+#endif /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
 
-  (void)unused;   // Avoid compiler warning
+  (void)unused; // Avoid compiler warning
 
   /* Only callouts with strings are supported. */
 
-  if (string == NULL || length == 0) return 0;
+  if (string == NULL || length == 0)
+    return 0;
 
   /* If there's no command, output the remainder directly. */
 
   if (*string == '|')
   {
     string++;
-    if (!syntax_check_output_text(string, TRUE)) return 0;
+    if (!syntax_check_output_text(string, TRUE))
+      return 0;
     (void)display_output_text(string, TRUE, subject, ovector, capture_top);
     return 0;
   }
@@ -2365,7 +2508,8 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
     if (*string == '|')
     {
       argsvectorlen++;
-      if (argsvectorlen > 10000) return 0;  // Too many args
+      if (argsvectorlen > 10000)
+        return 0; // Too many args
     }
 
     else if (*string == '$')
@@ -2382,23 +2526,24 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
           /* The use of \K may make the end offset earlier than the start. */
 
-          argslen += (ovector[value + 1] > ovector[value])?
-            ovector[value + 1] - ovector[value] :
-            ovector[value] - ovector[value + 1];
+          argslen += (ovector[value + 1] > ovector[value]) ? ovector[value + 1] - ovector[value]
+                                                           : ovector[value] - ovector[value + 1];
         }
-        argslen--;   // Negate the effect of argslen++ below.
+        argslen--; // Negate the effect of argslen++ below.
         break;
 
       case DDE_CHAR:
-        if (value == STDOUT_NL_CODE) argslen += strlen(stdout_nl) - 1;
-          else if (utf && value > 127) argslen += ord2utf8(value) - 1;
+        if (value == STDOUT_NL_CODE)
+          argslen += strlen(stdout_nl) - 1;
+        else if (utf && value > 127)
+          argslen += ord2utf8(value) - 1;
         break;
 
-      case DDE_ERROR:    // Invalid syntax; silently ignore
+      case DDE_ERROR: // Invalid syntax; silently ignore
         return 0;
 
         /* LCOV_EXCL_START */
-      default:           // Should not occur
+      default: // Should not occur
         abort();
         return 0;
         /* LCOV_EXCL_STOP */
@@ -2414,10 +2559,11 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
   /* Get memory for the argument vector and its strings. */
 
-  args = (char*)malloc(argslen);
-  if (args == NULL) return 0;
+  args = (char *)malloc(argslen);
+  if (args == NULL)
+    return 0;
 
-  argsvector = (char**)malloc(argsvectorlen * sizeof(char*));
+  argsvector = (char **)malloc(argsvectorlen * sizeof(char *));
   if (argsvector == NULL)
   {
     /* LCOV_EXCL_START */
@@ -2507,7 +2653,8 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       length -= (string - begin);
     }
 
-    else *argsptr++ = *string;
+    else
+      *argsptr++ = *string;
 
     /* Advance along the string */
 
@@ -2523,26 +2670,28 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
 #ifdef WIN32
   (void)fflush(stdout);
-  result = _spawnvp(_P_WAIT, argsvector[0], (const char * const *)argsvector) != 0;
+  result = _spawnvp(_P_WAIT, argsvector[0], (const char *const *)argsvector) != 0;
 
 #elif defined __VMS
   {
     char cmdbuf[500];
     short i = 0;
-    int flags = CLI$M_NOCLISYM|CLI$M_NOLOGNAM|CLI$M_NOKEYPAD, status, retstat;
+    int flags = CLI$M_NOCLISYM | CLI$M_NOLOGNAM | CLI$M_NOKEYPAD, status, retstat;
     $DESCRIPTOR(cmd, cmdbuf);
 
     cmdbuf[0] = 0;
     while (argsvector[i])
-  {
+    {
       strcat(cmdbuf, argsvector[i]);
       strcat(cmdbuf, " ");
       i++;
-  }
+    }
     cmd.dsc$w_length = strlen(cmdbuf) - 1;
-    status = lib$spawn(&cmd, 0,0, &flags, 0,0, &retstat);
-    if (!(status & 1)) result = 0;
-    else result = retstat & 1 ? 0 : 1;
+    status = lib$spawn(&cmd, 0, 0, &flags, 0, 0, &retstat);
+    if (!(status & 1))
+      result = 0;
+    else
+      result = retstat & 1 ? 0 : 1;
   }
 
 #else  /* Neither Windows nor VMS */
@@ -2558,7 +2707,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   {
     (void)waitpid(pid, &result, 0);
   }
-#endif  /* End Windows/VMS/other handling */
+#endif /* End Windows/VMS/other handling */
 
   free(args);
   free(argsvector);
@@ -2567,9 +2716,9 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   continues) or non-zero (match fails). */
 
   return result != 0;
-#endif  /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
+#endif /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
 }
-#endif  /* SUPPORT_PCRE2GREP_CALLOUT */
+#endif /* SUPPORT_PCRE2GREP_CALLOUT */
 
 
 
@@ -2578,33 +2727,31 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 *************************************************/
 
 static ptrdiff_t
-fill_buffer(void *handle, int frtype, char *buffer, PCRE2_SIZE length,
-  BOOL input_line_buffered)
+fill_buffer(void *handle, int frtype, char *buffer, PCRE2_SIZE length, BOOL input_line_buffered)
 {
   PCRE2_SIZE nread;
-  (void)frtype;  // Avoid warning when not used
+  (void)frtype; // Avoid warning when not used
 
 #ifdef SUPPORT_LIBZ
   if (frtype == FR_LIBZ)
-    return gzread((gzFile)handle, buffer,
-                  (length > UINT_MAX)? UINT_MAX : (unsigned)length);
+    return gzread((gzFile)handle, buffer, (length > UINT_MAX) ? UINT_MAX : (unsigned)length);
   else
 #endif
 
 #ifdef SUPPORT_LIBBZ2
-  if (frtype == FR_LIBBZ2)
-    return BZ2_bzread((BZFILE *)handle, buffer,
-                      (length > UINT_MAX)? UINT_MAX : (unsigned)length);
+      if (frtype == FR_LIBBZ2)
+    return BZ2_bzread((BZFILE *)handle, buffer, (length > UINT_MAX) ? UINT_MAX : (unsigned)length);
   else
 #endif
 
-  nread = (input_line_buffered ?
-    read_one_line(buffer, length, (FILE *)handle) :
-    fread(buffer, 1, length, (FILE *)handle));
+    nread = (input_line_buffered ? read_one_line(buffer, length, (FILE *)handle)
+                                 : fread(buffer, 1, length, (FILE *)handle));
 
 #ifdef SUPPORT_VALGRIND
-  if (nread > 0) VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(buffer, nread);
-  if (nread < length) VALGRIND_MAKE_MEM_UNDEFINED(buffer + nread, length - nread);
+  if (nread > 0)
+    VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(buffer, nread);
+  if (nread < length)
+    VALGRIND_MAKE_MEM_UNDEFINED(buffer + nread, length - nread);
 #endif
 
   return (ptrdiff_t)nread;
@@ -2657,8 +2804,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   BOOL endhyphenpending = FALSE;
   BOOL lines_printed = FALSE;
   BOOL input_line_buffered = line_buffered;
-  FILE *in = NULL;                    // Ensure initialized
-  long stream_start = -1;             // Only non-negative if relevant
+  FILE *in = NULL;        // Ensure initialized
+  long stream_start = -1; // Only non-negative if relevant
 
   /* Do the first read into the start of the buffer and set up the pointer to end
   of what we have. In the case of libz, a non-zipped .gz file will be read as a
@@ -2668,24 +2815,28 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   if (frtype != FR_LIBZ && frtype != FR_LIBBZ2)
   {
     in = (FILE *)handle;
-    if (feof(in)) return 1;
-    if (is_file_tty(in)) input_line_buffered = TRUE;
+    if (feof(in))
+      return 1;
+    if (is_file_tty(in))
+      input_line_buffered = TRUE;
     else
     {
-      if (count_limit >= 0  && filename == stdin_name)
+      if (count_limit >= 0 && filename == stdin_name)
         stream_start = ftell(in);
     }
   }
-  else input_line_buffered = FALSE;
+  else
+    input_line_buffered = FALSE;
 
-  buffrc = fill_buffer(handle, frtype, main_buffer, bufsize,
-    input_line_buffered);
+  buffrc = fill_buffer(handle, frtype, main_buffer, bufsize, input_line_buffered);
 
 #if defined SUPPORT_LIBZ
-  if (frtype == FR_LIBZ && buffrc < 0) return 3;
+  if (frtype == FR_LIBZ && buffrc < 0)
+    return 3;
 #endif
 #ifdef SUPPORT_LIBBZ2
-  if (frtype == FR_LIBBZ2 && buffrc < 0) return 3;
+  if (frtype == FR_LIBBZ2 && buffrc < 0)
+    return 3;
 #endif
 
   bufflength = (PCRE2_SIZE)buffrc;
@@ -2698,9 +2849,9 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   if (binary_files != BIN_TEXT)
   {
     if (endlinetype != PCRE2_NEWLINE_NUL)
-      binary = memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength)
-        != NULL;
-    if (binary && binary_files == BIN_NOMATCH) return 1;
+      binary = memchr(main_buffer, 0, (bufflength > 1024) ? 1024 : bufflength) != NULL;
+    if (binary && binary_files == BIN_NOMATCH)
+      return 1;
   }
 
   /* Loop while the current pointer is not at the end of the file. For large
@@ -2727,7 +2878,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     {
       if (stream_start >= 0)
         (void)fseek(handle, stream_start + (long int)filepos, SEEK_SET);
-      rc = (count_limit == 0)? 1 : 0;
+      rc = (count_limit == 0) ? 1 : 0;
       break;
     }
 
@@ -2741,7 +2892,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
     t = end_of_line(t, endptr, &endlinelength);
     linelength = t - ptr - endlinelength;
-    length = multiline? (PCRE2_SIZE)(endptr - ptr) : linelength;
+    length = multiline ? (PCRE2_SIZE)(endptr - ptr) : linelength;
 
     /* Check to see if the line we are looking at extends right to the very end
     of the buffer without a line terminator. This means the line is too long to
@@ -2753,22 +2904,20 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
       if (bufthird < max_bufthird)
       {
         char *new_buffer;
-        PCRE2_SIZE new_bufthird = 2*bufthird;
+        PCRE2_SIZE new_bufthird = 2 * bufthird;
 
-        if (new_bufthird > max_bufthird) new_bufthird = max_bufthird;
-        new_buffer = (char *)malloc(3*new_bufthird);
+        if (new_bufthird > max_bufthird)
+          new_bufthird = max_bufthird;
+        new_buffer = (char *)malloc(3 * new_bufthird);
 
         if (new_buffer == NULL)
         {
           /* LCOV_EXCL_START */
           fprintf(stderr,
-            "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
-            "pcre2grep: not enough memory to increase the buffer size to %"
-              SIZ_FORM "\n",
-            linenumber,
-            (filename == NULL)? "" : " of file ",
-            (filename == NULL)? "" : filename,
-            new_bufthird);
+                  "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
+                  "pcre2grep: not enough memory to increase the buffer size to %" SIZ_FORM "\n",
+                  linenumber, (filename == NULL) ? "" : " of file ",
+                  (filename == NULL) ? "" : filename, new_bufthird);
           return 2;
           /* LCOV_EXCL_STOP */
         }
@@ -2777,7 +2926,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
         memcpy(new_buffer, main_buffer, bufsize);
         bufthird = new_bufthird;
-        bufsize = 3*bufthird;
+        bufsize = 3 * bufthird;
         ptr = new_buffer + (ptr - main_buffer);
         lastmatchrestart = new_buffer + (lastmatchrestart - main_buffer);
         free(main_buffer);
@@ -2786,14 +2935,16 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
         /* Read more data into the buffer and then try to find the line ending
         again. */
 
-        buffrc = fill_buffer(handle, frtype, main_buffer + bufflength,
-          bufsize - bufflength, input_line_buffered);
+        buffrc = fill_buffer(handle, frtype, main_buffer + bufflength, bufsize - bufflength,
+                             input_line_buffered);
 
 #if defined SUPPORT_LIBZ
-        if (frtype == FR_LIBZ && buffrc < 0) return 3;
+        if (frtype == FR_LIBZ && buffrc < 0)
+          return 3;
 #endif
 #ifdef SUPPORT_LIBBZ2
-        if (frtype == FR_LIBBZ2 && buffrc < 0) return 3;
+        if (frtype == FR_LIBBZ2 && buffrc < 0)
+          return 3;
 #endif
 
         bufflength += (PCRE2_SIZE)buffrc;
@@ -2803,13 +2954,11 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
       else
       {
         fprintf(stderr,
-          "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
-          "pcre2grep: the maximum buffer size is %" SIZ_FORM "\n"
-          "pcre2grep: use the --max-buffer-size option to change it\n",
-          linenumber,
-          (filename == NULL)? "" : " of file ",
-          (filename == NULL)? "" : filename,
-          bufthird);
+                "pcre2grep: line %lu%s%s is too long for the internal buffer\n"
+                "pcre2grep: the maximum buffer size is %" SIZ_FORM "\n"
+                "pcre2grep: use the --max-buffer-size option to change it\n",
+                linenumber, (filename == NULL) ? "" : " of file ",
+                (filename == NULL) ? "" : filename, bufthird);
         return 2;
       }
     }
@@ -2818,7 +2967,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     order to find any further matches in the same line. This applies to
     --only-matching, --file-offsets, and --line-offsets. */
 
-    ONLY_MATCHING_RESTART:
+  ONLY_MATCHING_RESTART:
 
     /* Run through all the patterns until one matches or there is an error other
     than NOMATCH. This code is in a subroutine so that it can be re-used for
@@ -2840,7 +2989,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
       /* We've failed if we want a file that doesn't have any matches. */
 
-      if (filenames == FN_NOMATCH_ONLY) return 1;
+      if (filenames == FN_NOMATCH_ONLY)
+        return 1;
 
       /* Remember that this line matched (for counting matched lines) */
 
@@ -2848,11 +2998,13 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
       /* If all we want is a yes/no answer, we can return immediately. */
 
-      if (quiet) return 0;
+      if (quiet)
+        return 0;
 
       /* Just count if just counting is wanted. */
 
-      else if (count_only || show_total_count) count++;
+      else if (count_only || show_total_count)
+        count++;
 
       /* When handling a binary file and binary-files==binary, the "binary"
       variable will be set true (it's false in all other cases). In this
@@ -2870,8 +3022,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
       else if (filenames == FN_MATCH_ONLY)
       {
         fprintf(stdout, "%s", printname);
-        if (printname_nl == NULL) fprintf(stdout, "%c", 0);
-          else fprintf(stdout, "%s", printname_nl);
+        if (printname_nl == NULL)
+          fprintf(stdout, "%c", 0);
+        else
+          fprintf(stdout, "%s", printname_nl);
         return 0;
       }
 
@@ -2890,9 +3044,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
         {
           PCRE2_SIZE oldstartoffset;
 
-          if (printname != NULL) fprintf(stdout, "%s%c", printname,
-            printname_colon);
-          if (number) fprintf(stdout, "%lu:", linenumber);
+          if (printname != NULL)
+            fprintf(stdout, "%s%c", printname, printname_colon);
+          if (number)
+            fprintf(stdout, "%lu:", linenumber);
 
           /* Handle --line-offsets and --file-offsets. The use of \K may make
           the end offset earlier than the start. In this situation, swap them
@@ -2913,16 +3068,15 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
             if (line_offsets)
               fprintf(stdout, "%d,%d%s", (int)start, (int)(end - start), stdout_nl);
             else
-              fprintf(stdout, "%d,%d%s", (int)(filepos + start),
-                (int)(end - start), stdout_nl);
+              fprintf(stdout, "%d,%d%s", (int)(filepos + start), (int)(end - start), stdout_nl);
           }
 
           /* Handle --output (which has already been syntax checked) */
 
           else if (output_text != NULL)
           {
-            (void)display_output_text((PCRE2_SPTR)output_text, FALSE,
-                (PCRE2_SPTR)ptr, offsets, mrc);
+            (void)display_output_text((PCRE2_SPTR)output_text, FALSE, (PCRE2_SPTR)ptr, offsets,
+                                      mrc);
             fprintf(stdout, "%s", stdout_nl);
           }
 
@@ -2938,8 +3092,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
               int n = om->groupnum;
               if (n == 0 || n < mrc)
               {
-                PCRE2_SIZE start = offsets[2*n];
-                PCRE2_SIZE end = offsets[2*n + 1];
+                PCRE2_SIZE start = offsets[2 * n];
+                PCRE2_SIZE end = offsets[2 * n + 1];
                 size_t plen;
 
                 /* The use of \K may make the end offset earlier than the start.
@@ -2969,22 +3123,25 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           /* Prepare to repeat to find the next match in the line. */
 
           //match = FALSE;
-          if (line_buffered) fflush(stdout);
-          rc = 0;                      // Had some success
+          if (line_buffered)
+            fflush(stdout);
+          rc = 0; // Had some success
 
           /* If the pattern contained a lookbehind that included \K, it is
           possible that the end of the match might be at or before the actual
           starting offset we have just used. In this case, start one character
           further on. */
 
-          startoffset = offsets[1];    // Restart after the match
+          startoffset = offsets[1]; // Restart after the match
           oldstartoffset = pcre2_get_startchar(match_data);
           if (startoffset <= oldstartoffset)
           {
-            if (oldstartoffset >= length) goto END_ONE_MATCH;  // We're at end
+            if (oldstartoffset >= length)
+              goto END_ONE_MATCH; // We're at end
             startoffset = oldstartoffset + 1;
-            if (utf) while (startoffset < length &&
-                            (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+            if (utf)
+              while (startoffset < length && (ptr[startoffset] & 0xc0) == 0x80)
+                startoffset++;
           }
 
           /* If the current match ended past the end of the line (only possible
@@ -3037,15 +3194,17 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           while (lastmatchrestart < p)
           {
             char *pp = lastmatchrestart;
-            if (printname != NULL) fprintf(stdout, "%s%c", printname,
-              printname_hyphen);
-            if (number) fprintf(stdout, "%lu-", lastmatchnumber++);
+            if (printname != NULL)
+              fprintf(stdout, "%s%c", printname, printname_hyphen);
+            if (number)
+              fprintf(stdout, "%lu-", lastmatchnumber++);
             pp = end_of_line(pp, endptr, &ellength);
             FWRITE_IGNORE(lastmatchrestart, 1, pp - lastmatchrestart, stdout);
             lastmatchrestart = pp;
           }
 
-          if (lastmatchrestart != ptr) hyphenpending = TRUE;
+          if (lastmatchrestart != ptr)
+            hyphenpending = TRUE;
         }
 
         /* If hyphenpending is TRUE when there is no "after" context, it means we
@@ -3068,8 +3227,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           int linecount = 0;
           char *p = ptr;
 
-          while (p > main_buffer &&
-                 (lastmatchnumber == 0 || p > lastmatchrestart) &&
+          while (p > main_buffer && (lastmatchnumber == 0 || p > lastmatchrestart) &&
                  linecount < before_context)
           {
             linecount++;
@@ -3085,9 +3243,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           {
             int ellength;
             char *pp = p;
-            if (printname != NULL) fprintf(stdout, "%s%c", printname,
-              printname_hyphen);
-            if (number) fprintf(stdout, "%lu-", linenumber - linecount--);
+            if (printname != NULL)
+              fprintf(stdout, "%s%c", printname, printname_hyphen);
+            if (number)
+              fprintf(stdout, "%lu-", linenumber - linecount--);
             pp = end_of_line(pp, endptr, &ellength);
             FWRITE_IGNORE(p, 1, pp - p, stdout);
             p = pp;
@@ -3111,9 +3270,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           endhyphenpending = TRUE;
 
 
-        if (printname != NULL) fprintf(stdout, "%s%c", printname,
-          printname_colon);
-        if (number) fprintf(stdout, "%lu:", linenumber);
+        if (printname != NULL)
+          fprintf(stdout, "%s%c", printname, printname_colon);
+        if (number)
+          fprintf(stdout, "%lu:", linenumber);
 
         /* In multiline mode, or if colouring, we have to split the line(s) up
         and search for further matches, but not of course if the line is a
@@ -3144,7 +3304,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
             PCRE2_SIZE oldstartoffset = pcre2_get_startchar(match_data);
 
             endprevious = offsets[1];
-            startoffset = endprevious;  // Advance after previous match.
+            startoffset = endprevious; // Advance after previous match.
 
             /* If the pattern contained a lookbehind that included \K, it is
             possible that the end of the match might be at or before the actual
@@ -3153,10 +3313,12 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
             if (startoffset <= oldstartoffset)
             {
-              if (oldstartoffset >= length) break;  // We're at end
+              if (oldstartoffset >= length)
+                break; // We're at end
               startoffset = oldstartoffset + 1;
-              if (utf) while (startoffset < length &&
-                              (ptr[startoffset] & 0xc0) == 0x80) startoffset++;
+              if (utf)
+                while (startoffset < length && (ptr[startoffset] & 0xc0) == 0x80)
+                  startoffset++;
             }
 
             /* If the current match ended past the end of the line (only possible
@@ -3171,11 +3333,11 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
               if (endprevious < lineadvance)
               {
-                FWRITE_IGNORE(ptr + endprevious, 1,
-                  lineadvance - endprevious, stdout);
+                FWRITE_IGNORE(ptr + endprevious, 1, lineadvance - endprevious, stdout);
                 endprevious = 0;
               }
-              else endprevious -= lineadvance;
+              else
+                endprevious -= lineadvance;
 
               ptr += lineadvance;
               filepos += (int)lineadvance;
@@ -3190,12 +3352,14 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
             complete line was the final part of the match, so there is nothing
             more to do. */
 
-            if (startoffset == linelength + endlinelength) break;
+            if (startoffset == linelength + endlinelength)
+              break;
 
             /* Otherwise, run a match from within the final line, and if found,
             loop for any that may follow. */
 
-            if (!match_patterns(ptr, length, options, startoffset, &mrc)) break;
+            if (!match_patterns(ptr, length, options, startoffset, &mrc))
+              break;
 
             /* The use of \K may make the end offset earlier than the start. In
             this situation, swap them round. */
@@ -3216,19 +3380,22 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           may be no more to print. */
 
           plength = (int)((linelength + endlinelength) - endprevious);
-          if (plength > 0) FWRITE_IGNORE(ptr + endprevious, 1, plength, stdout);
+          if (plength > 0)
+            FWRITE_IGNORE(ptr + endprevious, 1, plength, stdout);
         }
 
         /* Not colouring or multiline; no need to search for further matches. */
 
-        else FWRITE_IGNORE(ptr, 1, linelength + endlinelength, stdout);
+        else
+          FWRITE_IGNORE(ptr, 1, linelength + endlinelength, stdout);
       }
 
       /* End of doing what has to be done for a match. If --line-buffered was
       given, flush the output. */
 
-      if (line_buffered) fflush(stdout);
-      rc = 0;    // Had some success
+      if (line_buffered)
+        fflush(stdout);
+      rc = 0; // Had some success
 
       /* Remember where the last match happened for after_context. We remember
       where we are about to restart, and that line's number. */
@@ -3255,7 +3422,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
       while (t < endmatch)
       {
         t = end_of_line(t, endptr, &ellength);
-        if (t <= endmatch) linenumber++; else break;
+        if (t <= endmatch)
+          linenumber++;
+        else
+          break;
       }
       endmatch = end_of_line(endmatch, endptr, &ellength);
       linelength = endmatch - ptr - ellength;
@@ -3264,7 +3434,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     /* Advance to after the newline and increment the line number. The file
     offset to the current line is maintained in filepos. */
 
-    END_ONE_MATCH:
+  END_ONE_MATCH:
     ptr += linelength + endlinelength;
     filepos += (int)(linelength + endlinelength);
     linenumber++;
@@ -3272,7 +3442,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     /* If there was at least one match (or a non-match, as required) in the line,
     increment the count for the -m option. */
 
-    if (line_matched) count_matched_lines++;
+    if (line_matched)
+      count_matched_lines++;
 
     /* If input is line buffered, and the buffer is not yet full, read another
     line and add it into the buffer. */
@@ -3289,44 +3460,45 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     1/3 and refill it. Before we do this, if some unprinted "after" lines are
     about to be lost, print them. */
 
-    if (bufflength >= (PCRE2_SIZE)bufsize && ptr > main_buffer + 2*bufthird)
+    if (bufflength >= (PCRE2_SIZE)bufsize && ptr > main_buffer + 2 * bufthird)
     {
-      if (after_context > 0 &&
-          lastmatchnumber > 0 &&
-          lastmatchrestart < main_buffer + bufthird)
+      if (after_context > 0 && lastmatchnumber > 0 && lastmatchrestart < main_buffer + bufthird)
       {
         do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
-        lastmatchnumber = 0;  // Indicates no after lines pending
+        lastmatchnumber = 0; // Indicates no after lines pending
       }
 
       /* Now do the shuffle */
 
-      (void)memmove(main_buffer, main_buffer + bufthird, 2*bufthird);
+      (void)memmove(main_buffer, main_buffer + bufthird, 2 * bufthird);
       ptr -= bufthird;
 
-      buffrc = fill_buffer(handle, frtype, main_buffer + 2*bufthird, bufthird,
-        input_line_buffered);
+      buffrc =
+          fill_buffer(handle, frtype, main_buffer + 2 * bufthird, bufthird, input_line_buffered);
 
 #if defined SUPPORT_LIBZ
-      if (frtype == FR_LIBZ && buffrc < 0) return 3;
+      if (frtype == FR_LIBZ && buffrc < 0)
+        return 3;
 #endif
 #ifdef SUPPORT_LIBBZ2
-      if (frtype == FR_LIBBZ2 && buffrc < 0) return 3;
+      if (frtype == FR_LIBBZ2 && buffrc < 0)
+        return 3;
 #endif
 
-      bufflength = 2*bufthird + (PCRE2_SIZE)buffrc;
+      bufflength = 2 * bufthird + (PCRE2_SIZE)buffrc;
       endptr = main_buffer + bufflength;
 
       /* Adjust any last match point */
 
-      if (lastmatchnumber > 0) lastmatchrestart -= bufthird;
+      if (lastmatchnumber > 0)
+        lastmatchrestart -= bufthird;
     }
-  }       // Loop through the whole file
+  } // Loop through the whole file
 
   /* End of file; print final "after" lines if wanted; do_after_lines sets
   hyphenpending if it prints something. */
 
-  if (only_matching_count == 0 && !(count_only|show_total_count))
+  if (only_matching_count == 0 && !(count_only | show_total_count))
   {
     do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
     hyphenpending |= endhyphenpending;
@@ -3338,8 +3510,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   if (filenames == FN_NOMATCH_ONLY)
   {
     fprintf(stdout, "%s", printname);
-    if (printname_nl == NULL) fprintf(stdout, "%c", 0);
-      else fprintf(stdout, "%s", printname_nl);
+    if (printname_nl == NULL)
+      fprintf(stdout, "%c", 0);
+    else
+      fprintf(stdout, "%s", printname_nl);
     return 0;
   }
 
@@ -3356,7 +3530,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     }
   }
 
-  total_count += count;   // Can be set without count_only
+  total_count += count; // Can be set without count_only
   return rc;
 }
 
@@ -3389,7 +3563,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   int frtype;
   void *handle;
   char *lastcomp;
-  FILE *in = NULL;           // Ensure initialized
+  FILE *in = NULL; // Ensure initialized
 
 #ifdef SUPPORT_LIBZ
   gzFile ingz = NULL;
@@ -3412,10 +3586,12 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 
   if (strcmp(pathname, "-") == 0)
   {
-    if (count_limit >= 0) setbuf(stdin, NULL);
+    if (count_limit >= 0)
+      setbuf(stdin, NULL);
     return pcre2grep(stdin, FR_PLAIN, stdin_name,
-      (filenames > FN_DEFAULT || (filenames == FN_DEFAULT && !only_one_at_top))?
-        stdin_name : NULL);
+                     (filenames > FN_DEFAULT || (filenames == FN_DEFAULT && !only_one_at_top))
+                         ? stdin_name
+                         : NULL);
   }
 
   /* Inclusion and exclusion: --include-dir and --exclude-dir apply only to
@@ -3423,7 +3599,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   is against the final component of the path. */
 
   lastcomp = strrchr(pathname, FILESEP);
-  lastcomp = (lastcomp == NULL)? pathname : lastcomp + 1;
+  lastcomp = (lastcomp == NULL) ? pathname : lastcomp + 1;
 
   /* If the file is a directory, skip if not recursing or if explicitly excluded.
   Otherwise, scan the directory and recurse for each path within it. The scanning
@@ -3433,23 +3609,23 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   /* For z/OS, determine the file type. */
 
 #if defined NATIVE_ZOS
-  zos_test_file =  fopen(pathname,"rb");
+  zos_test_file = fopen(pathname, "rb");
 
   if (zos_test_file == NULL)
-   {
-     if (!silent) fprintf(stderr, "pcre2grep: failed to test next file %s\n",
-       pathname, strerror(errno));
-     return -1;
-   }
-  zos_type = identifyzosfiletype (zos_test_file);
-  fclose (zos_test_file);
+  {
+    if (!silent)
+      fprintf(stderr, "pcre2grep: failed to test next file %s\n", pathname, strerror(errno));
+    return -1;
+  }
+  zos_type = identifyzosfiletype(zos_test_file);
+  fclose(zos_test_file);
 
   /* Handle a PDS in separate code */
 
   if (zos_type == __ZOS_PDS || zos_type == __ZOS_PDSE)
-   {
-     return travelonpdsdir (pathname, only_one_at_top);
-   }
+  {
+    return travelonpdsdir(pathname, only_one_at_top);
+  }
 
   /* Deal with regular files in the normal way below. These types are:
      zos_type == __ZOS_PDS_MEMBER
@@ -3461,7 +3637,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 
   /* Handle a z/OS directory using common code. */
 
-#endif  /* NATIVE_ZOS */
+#endif /* NATIVE_ZOS */
 
 
   /* Handle directories: common code for all OS */
@@ -3470,8 +3646,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 #if defined NATIVE_ZOS
       zos_type == __ZOS_HFS &&
 #endif
-      isdirectory(pathname)
-    )
+      isdirectory(pathname))
   {
     if (dee_action == dee_SKIP ||
         !test_incexc(lastcomp, include_dir_patterns, exclude_dir_patterns))
@@ -3488,7 +3663,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
         /* LCOV_EXCL_START - this is a "never" event */
         if (!silent)
           fprintf(stderr, "pcre2grep: Failed to open directory %s: %s\n", pathname,
-            strerror(errno));
+                  strerror(errno));
         return 2;
         /* LCOV_EXCL_STOP */
       }
@@ -3498,9 +3673,9 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
         int frc;
         int prc;
         if (strlen(pathname) + strlen(nextfile) + 2 > sizeof(childpath) ||
-          (prc = snprintf(childpath, sizeof(childpath), "%s%c%s", pathname,
-                          FILESEP, nextfile)) < 0 ||
-          prc >= (int)sizeof(childpath))
+            (prc = snprintf(childpath, sizeof(childpath), "%s%c%s", pathname, FILESEP, nextfile)) <
+                0 ||
+            prc >= (int)sizeof(childpath))
         {
           /* LCOV_EXCL_START - this is a "never" event */
           fprintf(stderr, "pcre2grep: recursive filename is too long\n");
@@ -3523,24 +3698,28 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
           size_t rlen;
           if (realpath(childpath, resolvedpath) == NULL)
             /* LCOV_EXCL_START - this is a "never" event */
-            continue;     // This path is invalid - we can skip processing this
-            /* LCOV_EXCL_STOP */
+            continue; // This path is invalid - we can skip processing this
+          /* LCOV_EXCL_STOP */
           isSame = strcmp(pathname, resolvedpath) == 0;
-          if (isSame) continue;    // We have a recursion
+          if (isSame)
+            continue; // We have a recursion
           rlen = strlen(resolvedpath);
           if (rlen++ < sizeof(resolvedpath) - 3)
           {
             BOOL contained;
             strcat(resolvedpath, "/");
             contained = strncmp(pathname, resolvedpath, rlen) == 0;
-            if (contained) continue;    // We have a recursion
+            if (contained)
+              continue; // We have a recursion
           }
         }
-#endif  /* HAVE_REALPATH */
+#endif /* HAVE_REALPATH */
 
         frc = grep_or_recurse(childpath, dir_recurse, FALSE);
-        if (frc > 1) rc = frc;
-         else if (frc == 0 && rc == 1) rc = 0;
+        if (frc > 1)
+          rc = frc;
+        else if (frc == 0 && rc == 1)
+          rc = 0;
       }
 
       closedirectory(dir);
@@ -3569,9 +3748,8 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       int frc;
       int prc;
       if (strlen(pathname) + strlen(nextfile) + 1 > sizeof(buffer) ||
-        (prc = snprintf(buffer, sizeof(buffer), "%s%s", pathname,
-                        nextfile)) < 0 ||
-        prc >= (int)sizeof(buffer))
+          (prc = snprintf(buffer, sizeof(buffer), "%s%s", pathname, nextfile)) < 0 ||
+          prc >= (int)sizeof(buffer))
       {
         /* LCOV_EXCL_START - this is a "never" event */
         fprintf(stderr, "pcre2grep: wildcard filename is too long\n");
@@ -3581,8 +3759,10 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       }
 
       frc = grep_or_recurse(buffer, dir_recurse, FALSE);
-      if (frc > 1) rc = frc;
-       else if (frc == 0 && rc == 1) rc = 0;
+      if (frc > 1)
+        rc = frc;
+      else if (frc == 0 && rc == 1)
+        rc = 0;
     }
 
     closedirectory(dir);
@@ -3596,12 +3776,12 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 
   else if (
 #if defined NATIVE_ZOS
-          (zos_type == __ZOS_NOFILE && DEE_action == DEE_SKIP) ||
-#else  /* all other OS */
-          (!isregfile(pathname) && DEE_action == DEE_SKIP) ||
+      (zos_type == __ZOS_NOFILE && DEE_action == DEE_SKIP) ||
+#else /* all other OS */
+      (!isregfile(pathname) && DEE_action == DEE_SKIP) ||
 #endif
-          !test_incexc(lastcomp, include_patterns, exclude_patterns))
-    return -1;  // File skipped
+      !test_incexc(lastcomp, include_patterns, exclude_patterns))
+    return -1; // File skipped
 
   /* Control reaches here if we have a regular file, or if we have a directory
   and recursion or skipping was not requested, or if we have anything else and
@@ -3623,8 +3803,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
     {
       /* LCOV_EXCL_START */
       if (!silent)
-        fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", pathname,
-          strerror(errno));
+        fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", pathname, strerror(errno));
       return 2;
       /* LCOV_EXCL_STOP */
     }
@@ -3637,7 +3816,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   /* Otherwise open with bz2lib if it is supported and the name ends with .bz2. */
 
 #ifdef SUPPORT_LIBBZ2
-  if (pathlen > 4 && strcmp(pathname + pathlen - 4, ".bz2") == 0)
+      if (pathlen > 4 && strcmp(pathname + pathlen - 4, ".bz2") == 0)
   {
     inbz2 = BZ2_bzopen(pathname, "rb");
     handle = (void *)inbz2;
@@ -3663,15 +3842,15 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   if (handle == NULL)
   {
     if (!silent)
-      fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", pathname,
-        strerror(errno));
+      fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", pathname, strerror(errno));
     return 2;
   }
 
   /* Now grep the file */
 
-  rc = pcre2grep(handle, frtype, pathname, (filenames > FN_DEFAULT ||
-    (filenames == FN_DEFAULT && !only_one_at_top))? pathname : NULL);
+  rc = pcre2grep(
+      handle, frtype, pathname,
+      (filenames > FN_DEFAULT || (filenames == FN_DEFAULT && !only_one_at_top)) ? pathname : NULL);
 
   /* Close in an appropriate manner. */
 
@@ -3683,9 +3862,8 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       int errnum;
       const char *err = gzerror(ingz, &errnum);
       if (!silent)
-        fprintf(stderr, "pcre2grep: Failed to read %s using zlib: %s\n",
-          pathname, err);
-      rc = 2;    // The normal "something went wrong" code
+        fprintf(stderr, "pcre2grep: Failed to read %s using zlib: %s\n", pathname, err);
+      rc = 2; // The normal "something went wrong" code
     }
     gzclose(ingz);
   }
@@ -3697,7 +3875,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   again as a normal file. */
 
 #ifdef SUPPORT_LIBBZ2
-  if (frtype == FR_LIBBZ2)
+      if (frtype == FR_LIBBZ2)
   {
     if (rc == 3)
     {
@@ -3710,9 +3888,8 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       }
       /* LCOV_EXCL_START */
       else if (!silent)
-        fprintf(stderr, "pcre2grep: Failed to read %s using bzlib: %s\n",
-          pathname, err);
-      rc = 2;    // The normal "something went wrong" code
+        fprintf(stderr, "pcre2grep: Failed to read %s using bzlib: %s\n", pathname, err);
+      rc = 2; // The normal "something went wrong" code
       /* LCOV_EXCL_STOP */
     }
     BZ2_bzclose(inbz2);
@@ -3720,9 +3897,9 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   else
 #endif
 
-  /* Normal file close */
+    /* Normal file close */
 
-  fclose(in);
+    fclose(in);
 
   /* Pass back the yield from pcre2grep(). */
 
@@ -3742,43 +3919,109 @@ handle_option(int letter, int options)
 {
   switch (letter)
   {
-  case N_FOFFSETS:   file_offsets = TRUE; break;
-  case N_HELP:   help(); pcre2grep_exit(0); break; // Stops compiler warning
-  case N_LBUFFER:   line_buffered = TRUE; break;
-  case N_LF:   stdout_nl = "\n"; printname_nl = stdout_nl; break;
-  case N_LOFFSETS:   line_offsets = number = TRUE; break;
-  case N_NOJIT:   use_jit = FALSE; break;
-  case N_ALLABSK:   extra_options |= PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK; break;
-  case N_NO_GROUP_SEPARATOR:   group_separator = NULL; break;
-  case N_POSIX_PATFILE:   posix_pattern_file = TRUE; break;
-  case 'a':   binary_files = BIN_TEXT; break;
-  case 'c':   count_only = TRUE; break;
-  case N_POSIX_DIGIT:   posix_digit = TRUE; break;
-  case 'E':   case_restrict = TRUE; break;
-  case 'F':   options |= PCRE2_LITERAL; break;
-  case 'H':   filenames = FN_FORCE; break;
-  case 'I':   binary_files = BIN_NOMATCH; break;
-  case 'h':   filenames = FN_NONE; break;
-  case 'i':   options |= PCRE2_CASELESS; break;
-  case 'l':   omit_zero_count = TRUE; filenames = FN_MATCH_ONLY; break;
-  case 'L':   filenames = FN_NOMATCH_ONLY; break;
-  case 'M':   multiline = TRUE; options |= PCRE2_MULTILINE|PCRE2_FIRSTLINE; break;
-  case 'n':   number = TRUE; break;
+  case N_FOFFSETS:
+    file_offsets = TRUE;
+    break;
+  case N_HELP:
+    help();
+    pcre2grep_exit(0);
+    break; // Stops compiler warning
+  case N_LBUFFER:
+    line_buffered = TRUE;
+    break;
+  case N_LF:
+    stdout_nl = "\n";
+    printname_nl = stdout_nl;
+    break;
+  case N_LOFFSETS:
+    line_offsets = number = TRUE;
+    break;
+  case N_NOJIT:
+    use_jit = FALSE;
+    break;
+  case N_ALLABSK:
+    extra_options |= PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK;
+    break;
+  case N_NO_GROUP_SEPARATOR:
+    group_separator = NULL;
+    break;
+  case N_POSIX_PATFILE:
+    posix_pattern_file = TRUE;
+    break;
+  case 'a':
+    binary_files = BIN_TEXT;
+    break;
+  case 'c':
+    count_only = TRUE;
+    break;
+  case N_POSIX_DIGIT:
+    posix_digit = TRUE;
+    break;
+  case 'E':
+    case_restrict = TRUE;
+    break;
+  case 'F':
+    options |= PCRE2_LITERAL;
+    break;
+  case 'H':
+    filenames = FN_FORCE;
+    break;
+  case 'I':
+    binary_files = BIN_NOMATCH;
+    break;
+  case 'h':
+    filenames = FN_NONE;
+    break;
+  case 'i':
+    options |= PCRE2_CASELESS;
+    break;
+  case 'l':
+    omit_zero_count = TRUE;
+    filenames = FN_MATCH_ONLY;
+    break;
+  case 'L':
+    filenames = FN_NOMATCH_ONLY;
+    break;
+  case 'M':
+    multiline = TRUE;
+    options |= PCRE2_MULTILINE | PCRE2_FIRSTLINE;
+    break;
+  case 'n':
+    number = TRUE;
+    break;
 
   case 'o':
     only_matching_last = add_number(0, only_matching_last);
-    if (only_matching == NULL) only_matching = only_matching_last;
+    if (only_matching == NULL)
+      only_matching = only_matching_last;
     break;
 
-  case 'P':   no_ucp = TRUE; break;
-  case 'q':   quiet = TRUE; break;
-  case 'r':   dee_action = dee_RECURSE; break;
-  case 's':   silent = TRUE; break;
-  case 't':   show_total_count = TRUE; break;
-  case 'u':   options |= PCRE2_UTF | PCRE2_UCP; utf = TRUE; break;
-  case 'U':   options |= PCRE2_UTF | PCRE2_MATCH_INVALID_UTF | PCRE2_UCP;
-              utf = TRUE; break;
-  case 'v':   invert = TRUE; break;
+  case 'P':
+    no_ucp = TRUE;
+    break;
+  case 'q':
+    quiet = TRUE;
+    break;
+  case 'r':
+    dee_action = dee_RECURSE;
+    break;
+  case 's':
+    silent = TRUE;
+    break;
+  case 't':
+    show_total_count = TRUE;
+    break;
+  case 'u':
+    options |= PCRE2_UTF | PCRE2_UCP;
+    utf = TRUE;
+    break;
+  case 'U':
+    options |= PCRE2_UTF | PCRE2_MATCH_INVALID_UTF | PCRE2_UCP;
+    utf = TRUE;
+    break;
+  case 'v':
+    invert = TRUE;
+    break;
 
   case 'V':
     {
@@ -3787,11 +4030,18 @@ handle_option(int letter, int options)
       fprintf(stdout, "pcre2grep version %s%s", buffer, stdout_nl);
     }
     pcre2grep_exit(0);
-    break;  // LCOV_EXCL_LINE - statement kept to avoid compiler warning
+    break; // LCOV_EXCL_LINE - statement kept to avoid compiler warning
 
-  case 'w':   extra_options |= PCRE2_EXTRA_MATCH_WORD; break;
-  case 'x':   extra_options |= PCRE2_EXTRA_MATCH_LINE; break;
-  case 'Z':   printname_colon = printname_hyphen = 0; printname_nl = NULL; break;
+  case 'w':
+    extra_options |= PCRE2_EXTRA_MATCH_WORD;
+    break;
+  case 'x':
+    extra_options |= PCRE2_EXTRA_MATCH_LINE;
+    break;
+  case 'Z':
+    printname_colon = printname_hyphen = 0;
+    printname_nl = NULL;
+    break;
 
     /* LCOV_EXCL_START - this is a "never event" */
   default:
@@ -3817,15 +4067,25 @@ ordin(int n)
   static char buffer[14];
   char *p = buffer;
   snprintf(p, sizeof(buffer), "%d", n);
-  while (*p != 0) p++;
+  while (*p != 0)
+    p++;
   n %= 100;
-  if (n >= 11 && n <= 13) n = 0;
-  switch (n%10)
+  if (n >= 11 && n <= 13)
+    n = 0;
+  switch (n % 10)
   {
-  case 1:   snprintf(p, (buffer + sizeof(buffer)) - p, "st"); break;
-  case 2:   snprintf(p, (buffer + sizeof(buffer)) - p, "nd"); break;
-  case 3:   snprintf(p, (buffer + sizeof(buffer)) - p, "rd"); break;
-  default:   snprintf(p, (buffer + sizeof(buffer)) - p, "th"); break;
+  case 1:
+    snprintf(p, (buffer + sizeof(buffer)) - p, "st");
+    break;
+  case 2:
+    snprintf(p, (buffer + sizeof(buffer)) - p, "nd");
+    break;
+  case 3:
+    snprintf(p, (buffer + sizeof(buffer)) - p, "rd");
+    break;
+  default:
+    snprintf(p, (buffer + sizeof(buffer)) - p, "th");
+    break;
   }
   return buffer;
 }
@@ -3857,15 +4117,15 @@ Returns:         TRUE on success, FALSE after an error
 */
 
 static BOOL
-compile_pattern(patstr *p, int options, int fromfile, const char *fromtext,
-  int count)
+compile_pattern(patstr *p, int options, int fromfile, const char *fromtext, int count)
 {
   char *ps;
   int errcode;
   PCRE2_SIZE patlen, erroffset;
   PCRE2_UCHAR errmessbuffer[ERRBUFSIZ];
 
-  if (p->compiled != NULL) return TRUE;
+  if (p->compiled != NULL)
+    return TRUE;
   ps = p->string;
   patlen = p->length;
 
@@ -3878,12 +4138,13 @@ compile_pattern(patstr *p, int options, int fromfile, const char *fromtext,
     if (ellength != 0)
     {
       patlen = pe - ps - ellength;
-      if (add_pattern(pe, p->length-patlen-ellength, p) == NULL) return FALSE;
+      if (add_pattern(pe, p->length - patlen - ellength, p) == NULL)
+        return FALSE;
     }
   }
 
-  p->compiled = pcre2_compile((PCRE2_SPTR)ps, patlen, options, &errcode,
-    &erroffset, compile_context);
+  p->compiled =
+      pcre2_compile((PCRE2_SPTR)ps, patlen, options, &errcode, &erroffset, compile_context);
 
   /* Handle successful compile. Try JIT-compiling if supported and enabled. We
   ignore any JIT compiler errors, relying falling back to interpreting if
@@ -3892,29 +4153,33 @@ compile_pattern(patstr *p, int options, int fromfile, const char *fromtext,
   if (p->compiled != NULL)
   {
 #ifdef SUPPORT_PCRE2GREP_JIT
-    if (use_jit) (void)pcre2_jit_compile(p->compiled, PCRE2_JIT_COMPLETE);
+    if (use_jit)
+      (void)pcre2_jit_compile(p->compiled, PCRE2_JIT_COMPLETE);
 #endif
     return TRUE;
   }
 
   /* Handle compile errors */
 
-  if (erroffset > patlen) erroffset = patlen;
+  if (erroffset > patlen)
+    erroffset = patlen;
   pcre2_get_error_message(errcode, errmessbuffer, sizeof(errmessbuffer));
 
   if (fromfile)
   {
-    fprintf(stderr, "pcre2grep: Error in regex in line %d of %s "
-      "at offset %d: %s\n", count, fromtext, (int)erroffset, errmessbuffer);
+    fprintf(stderr,
+            "pcre2grep: Error in regex in line %d of %s "
+            "at offset %d: %s\n",
+            count, fromtext, (int)erroffset, errmessbuffer);
   }
   else
   {
     if (count == 0)
-      fprintf(stderr, "pcre2grep: Error in %s regex at offset %d: %s\n",
-        fromtext, (int)erroffset, errmessbuffer);
+      fprintf(stderr, "pcre2grep: Error in %s regex at offset %d: %s\n", fromtext, (int)erroffset,
+              errmessbuffer);
     else
-      fprintf(stderr, "pcre2grep: Error in %s %s regex at offset %d: %s\n",
-        ordin(count), fromtext, (int)erroffset, errmessbuffer);
+      fprintf(stderr, "pcre2grep: Error in %s %s regex at offset %d: %s\n", ordin(count), fromtext,
+              (int)erroffset, errmessbuffer);
   }
 
   return FALSE;
@@ -3943,7 +4208,7 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
   PCRE2_SIZE patlen;
   FILE *f;
   const char *filename;
-  char buffer[MAXPATLEN+20];
+  char buffer[MAXPATLEN + 20];
 
   if (strcmp(name, "-") == 0)
   {
@@ -3968,12 +4233,14 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
       break;
 
     if (!posix_pattern_file)
-   {
-     while (patlen > 0 && isspace((unsigned char)(buffer[patlen-1]))) patlen--;
-   }
+    {
+      while (patlen > 0 && isspace((unsigned char)(buffer[patlen - 1])))
+        patlen--;
+    }
 
     linenumber++;
-    if (!posix_pattern_file && patlen == 0) continue; // Skip blank lines
+    if (!posix_pattern_file && patlen == 0)
+      continue; // Skip blank lines
 
     /* Note: this call to add_pattern() puts a pointer to the local variable
     "buffer" into the pattern chain. However, that pointer is used only when
@@ -3984,11 +4251,13 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
     if (*patlastptr == NULL)
     {
       /* LCOV_EXCL_START - won't happen in testing */
-      if (f != stdin) fclose(f);
+      if (f != stdin)
+        fclose(f);
       return FALSE;
       /* LCOV_EXCL_STOP */
     }
-    if (*patptr == NULL) *patptr = *patlastptr;
+    if (*patptr == NULL)
+      *patptr = *patlastptr;
 
     /* This loop is needed because compiling a "pattern" when -F is set may add
     on additional literal patterns if the original contains a newline. In the
@@ -3998,19 +4267,21 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
 
     for (;;)
     {
-      if (!compile_pattern(*patlastptr, pcre2_options, TRUE, filename,
-          linenumber))
+      if (!compile_pattern(*patlastptr, pcre2_options, TRUE, filename, linenumber))
       {
-        if (f != stdin) fclose(f);
+        if (f != stdin)
+          fclose(f);
         return FALSE;
       }
-      (*patlastptr)->string = NULL;            // Insurance
-      if ((*patlastptr)->next == NULL) break;
+      (*patlastptr)->string = NULL; // Insurance
+      if ((*patlastptr)->next == NULL)
+        break;
       *patlastptr = (*patlastptr)->next;
     }
   }
 
-  if (f != stdin) fclose(f);
+  if (f != stdin)
+    fclose(f);
   return TRUE;
 }
 
@@ -4052,19 +4323,22 @@ main(int argc, char **argv)
   for (i = 1; i < argc; i++)
   {
     option_item *op = NULL;
-    char *option_data = (char *)"";    // default to keep compiler happy
+    char *option_data = (char *)""; // default to keep compiler happy
     BOOL longop;
     BOOL longopwasequals = FALSE;
 
-    if (argv[i][0] != '-') break;
+    if (argv[i][0] != '-')
+      break;
 
     /* If we hit an argument that is just "-", it may be a reference to STDIN,
     but only if we have previously had -e or -f to define the patterns. */
 
     if (argv[i][1] == 0)
     {
-      if (pattern_files != NULL || patterns != NULL) break;
-        else pcre2grep_exit(usage(2));
+      if (pattern_files != NULL || patterns != NULL)
+        break;
+      else
+        pcre2grep_exit(usage(2));
     }
 
     /* Handle a long name option, or -- to terminate the options */
@@ -4074,11 +4348,11 @@ main(int argc, char **argv)
       char *arg = argv[i] + 2;
       char *argequals = strchr(arg, '=');
 
-      if (*arg == 0)    // -- terminates options
+      if (*arg == 0) // -- terminates options
       {
         options_terminated = TRUE;
         i++;
-        break;                // out of the options-handling loop
+        break; // out of the options-handling loop
       }
 
       longop = TRUE;
@@ -4097,17 +4371,17 @@ main(int argc, char **argv)
 
         /* Handle options with only one spelling of the name */
 
-        if (opbra == NULL)     // Does not contain '('
+        if (opbra == NULL) // Does not contain '('
         {
-          if (equals == NULL)  // Not thing=data case
+          if (equals == NULL) // Not thing=data case
           {
-            if (strcmp(arg, op->long_name) == 0) break;
+            if (strcmp(arg, op->long_name) == 0)
+              break;
           }
-          else                 // Special case xxx=data
+          else // Special case xxx=data
           {
             int oplen = (int)(equals - op->long_name);
-            int arglen = (argequals == NULL)?
-              (int)strlen(arg) : (int)(argequals - arg);
+            int arglen = (argequals == NULL) ? (int)strlen(arg) : (int)(argequals - arg);
             if (oplen == arglen && strncmp(arg, op->long_name, oplen) == 0)
             {
               option_data = arg + arglen;
@@ -4131,24 +4405,22 @@ main(int argc, char **argv)
 
           int baselen = (int)(opbra - op->long_name);
           int fulllen = (int)(strchr(op->long_name, ')') - op->long_name + 1);
-          int arglen = (argequals == NULL || equals == NULL)?
-            (int)strlen(arg) : (int)(argequals - arg);
+          int arglen =
+              (argequals == NULL || equals == NULL) ? (int)strlen(arg) : (int)(argequals - arg);
 
           if ((ret = snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name),
                ret < 0 || ret >= (int)sizeof(buff1)) ||
-              (ret = snprintf(buff2, sizeof(buff2), "%s%.*s", buff1,
-                       fulllen - baselen - 2, opbra + 1),
+              (ret = snprintf(buff2, sizeof(buff2), "%s%.*s", buff1, fulllen - baselen - 2,
+                              opbra + 1),
                ret < 0 || ret >= (int)sizeof(buff2)))
           {
             /* LCOV_EXCL_START - this is a "never" event */
-            fprintf(stderr, "pcre2grep: Buffer overflow when parsing %s option\n",
-              op->long_name);
+            fprintf(stderr, "pcre2grep: Buffer overflow when parsing %s option\n", op->long_name);
             pcre2grep_exit(2);
             /* LCOV_EXCL_STOP */
           }
 
-          if (strncmp(arg, buff1, arglen) == 0 ||
-             strncmp(arg, buff2, arglen) == 0)
+          if (strncmp(arg, buff1, arglen) == 0 || strncmp(arg, buff2, arglen) == 0)
           {
             if (equals != NULL && argequals != NULL)
             {
@@ -4183,21 +4455,22 @@ main(int argc, char **argv)
       {
         for (op = optionlist; op->one_char != 0; op++)
         {
-          if (*s == op->one_char) break;
+          if (*s == op->one_char)
+            break;
         }
         if (op->one_char == 0)
         {
-          fprintf(stderr, "pcre2grep: Unknown option letter '%c' in \"%s\"\n",
-            *s, argv[i]);
+          fprintf(stderr, "pcre2grep: Unknown option letter '%c' in \"%s\"\n", *s, argv[i]);
           pcre2grep_exit(usage(2));
         }
 
-        option_data = s+1;
+        option_data = s + 1;
 
         /* Break out if this is the last character in the string; it's handled
         below like a single multi-char option. */
 
-        if (*option_data == 0) break;
+        if (*option_data == 0)
+          break;
 
         /* Check for a single-character option that has data: OP_OP_NUMBER(S)
         are used for ones that either have a numerical number or defaults, i.e.
@@ -4206,11 +4479,13 @@ main(int argc, char **argv)
 
         if (op->type == OP_OP_NUMBER || op->type == OP_OP_NUMBERS)
         {
-          if (isdigit((unsigned char)(s[1]))) break;
+          if (isdigit((unsigned char)(s[1])))
+            break;
         }
-        else   // Check for an option with data
+        else // Check for an option with data
         {
-          if (op->type != OP_NODATA) break;
+          if (op->type != OP_NODATA)
+            break;
         }
 
         /* Handle a single-character option with no data, then loop for the
@@ -4236,8 +4511,7 @@ main(int argc, char **argv)
     and "only-matching". */
 
     if (*option_data == 0 &&
-        (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER ||
-         op->type == OP_OP_NUMBERS))
+        (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER || op->type == OP_OP_NUMBERS))
     {
       switch (op->one_char)
       {
@@ -4247,7 +4521,8 @@ main(int argc, char **argv)
 
       case 'o':
         only_matching_last = add_number(0, only_matching_last);
-        if (only_matching == NULL) only_matching = only_matching_last;
+        if (only_matching == NULL)
+          only_matching = only_matching_last;
         break;
       }
       continue;
@@ -4273,7 +4548,8 @@ main(int argc, char **argv)
       unsigned long int n = decode_number(option_data, op, longop);
       omdatastr *omd = (omdatastr *)op->dataptr;
       *(omd->lastptr) = add_number((int)n, *(omd->lastptr));
-      if (*(omd->anchor) == NULL) *(omd->anchor) = *(omd->lastptr);
+      if (*(omd->anchor) == NULL)
+        *(omd->anchor) = *(omd->lastptr);
     }
 
     /* If the option type is OP_PATLIST, it's the -e option, or one of the
@@ -4283,10 +4559,11 @@ main(int argc, char **argv)
     else if (op->type == OP_PATLIST)
     {
       patdatastr *pd = (patdatastr *)op->dataptr;
-      *(pd->lastptr) = add_pattern(option_data, (PCRE2_SIZE)strlen(option_data),
-        *(pd->lastptr));
-      if (*(pd->lastptr) == NULL) goto EXIT2;
-      if (*(pd->anchor) == NULL) *(pd->anchor) = *(pd->lastptr);
+      *(pd->lastptr) = add_pattern(option_data, (PCRE2_SIZE)strlen(option_data), *(pd->lastptr));
+      if (*(pd->lastptr) == NULL)
+        goto EXIT2;
+      if (*(pd->anchor) == NULL)
+        *(pd->anchor) = *(pd->lastptr);
     }
 
     /* If the option type is OP_FILELIST, it's one of the options that names a
@@ -4324,25 +4601,27 @@ main(int argc, char **argv)
         binary_files = BIN_TEXT;
       else
       {
-        fprintf(stderr, "pcre2grep: unknown value \"%s\" for binary-files\n",
-          option_data);
+        fprintf(stderr, "pcre2grep: unknown value \"%s\" for binary-files\n", option_data);
         pcre2grep_exit(usage(2));
       }
     }
 
     /* Otherwise, deal with a single string or numeric data value. */
 
-    else if (op->type != OP_NUMBER && op->type != OP_U32NUMBER &&
-             op->type != OP_OP_NUMBER && op->type != OP_SIZE)
+    else if (op->type != OP_NUMBER && op->type != OP_U32NUMBER && op->type != OP_OP_NUMBER &&
+             op->type != OP_SIZE)
     {
       *((char **)op->dataptr) = option_data;
     }
     else
     {
       unsigned long int n = decode_number(option_data, op, longop);
-      if (op->type == OP_U32NUMBER) *((uint32_t *)op->dataptr) = (uint32_t)n;
-        else if (op->type == OP_SIZE) *((PCRE2_SIZE *)op->dataptr) = n;
-        else *((int *)op->dataptr) = (int)n;
+      if (op->type == OP_U32NUMBER)
+        *((uint32_t *)op->dataptr) = (uint32_t)n;
+      else if (op->type == OP_SIZE)
+        *((PCRE2_SIZE *)op->dataptr) = n;
+      else
+        *((int *)op->dataptr) = (int)n;
     }
   }
 
@@ -4368,21 +4647,23 @@ main(int argc, char **argv)
 
   if (both_context > 0)
   {
-    if (after_context == 0) after_context = both_context;
-    if (before_context == 0) before_context = both_context;
+    if (after_context == 0)
+      after_context = both_context;
+    if (before_context == 0)
+      before_context = both_context;
   }
 
   /* Only one of --only-matching, --output, --file-offsets, or --line-offsets is
   permitted. They display, each in their own way, only the data that has matched.
   */
 
-  only_matching_count = (only_matching != NULL) + (output_text != NULL) +
-    file_offsets + line_offsets;
+  only_matching_count =
+      (only_matching != NULL) + (output_text != NULL) + file_offsets + line_offsets;
 
   if (only_matching_count > 1)
   {
     fprintf(stderr, "pcre2grep: Cannot mix --only-matching, --output, "
-      "--file-offsets and/or --line-offsets\n");
+                    "--file-offsets and/or --line-offsets\n");
     pcre2grep_exit(usage(2));
   }
 
@@ -4401,8 +4682,7 @@ main(int argc, char **argv)
 
   /* Check the text supplied to --output for errors. */
 
-  if (output_text != NULL &&
-      !syntax_check_output_text((PCRE2_SPTR)output_text, FALSE))
+  if (output_text != NULL && !syntax_check_output_text((PCRE2_SPTR)output_text, FALSE))
     goto EXIT2;
 
   /* Set up default compile and match contexts and match data blocks. */
@@ -4429,9 +4709,12 @@ main(int argc, char **argv)
 
   /* Put limits into the match context. */
 
-  if (heap_limit != ~(uint32_t)0) pcre2_set_heap_limit(match_context, heap_limit);
-  if (match_limit > 0) pcre2_set_match_limit(match_context, match_limit);
-  if (depth_limit > 0) pcre2_set_depth_limit(match_context, depth_limit);
+  if (heap_limit != ~(uint32_t)0)
+    pcre2_set_heap_limit(match_context, heap_limit);
+  if (match_limit > 0)
+    pcre2_set_match_limit(match_context, match_limit);
+  if (depth_limit > 0)
+    pcre2_set_depth_limit(match_context, depth_limit);
 
   /* If a locale has not been provided as an option, see if the LC_CTYPE or
   LC_ALL environment variable is set, and if so, use it. */
@@ -4455,8 +4738,8 @@ main(int argc, char **argv)
   {
     if (setlocale(LC_CTYPE, locale) == NULL)
     {
-      fprintf(stderr, "pcre2grep: Failed to set locale %s (obtained from %s)\n",
-        locale, locale_from);
+      fprintf(stderr, "pcre2grep: Failed to set locale %s (obtained from %s)\n", locale,
+              locale_from);
       goto EXIT2;
     }
     character_tables = pcre2_maketables(NULL);
@@ -4472,24 +4755,30 @@ main(int argc, char **argv)
       do_ansi = !is_stdout_tty(),
 #endif
       do_colour = TRUE;
-    else if (strcmp(colour_option, "auto") == 0) do_colour = is_stdout_tty();
+    else if (strcmp(colour_option, "auto") == 0)
+      do_colour = is_stdout_tty();
     else
     {
-      fprintf(stderr, "pcre2grep: Unknown colour setting \"%s\"\n",
-        colour_option);
+      fprintf(stderr, "pcre2grep: Unknown colour setting \"%s\"\n", colour_option);
       goto EXIT2;
     }
     if (do_colour)
     {
       char *cs = getenv("PCRE2GREP_COLOUR");
-      if (cs == NULL) cs = getenv("PCRE2GREP_COLOR");
-      if (cs == NULL) cs = getenv("PCREGREP_COLOUR");
-      if (cs == NULL) cs = getenv("PCREGREP_COLOR");
-      if (cs == NULL) cs = parse_grep_colors(getenv("GREP_COLORS"));
-      if (cs == NULL) cs = getenv("GREP_COLOR");
+      if (cs == NULL)
+        cs = getenv("PCRE2GREP_COLOR");
+      if (cs == NULL)
+        cs = getenv("PCREGREP_COLOUR");
+      if (cs == NULL)
+        cs = getenv("PCREGREP_COLOR");
+      if (cs == NULL)
+        cs = parse_grep_colors(getenv("GREP_COLORS"));
+      if (cs == NULL)
+        cs = getenv("GREP_COLOR");
       if (cs != NULL)
       {
-        if (strspn(cs, ";0123456789") == strlen(cs)) colour_string = cs;
+        if (strspn(cs, ";0123456789") == strlen(cs))
+          colour_string = cs;
       }
 #ifdef WIN32
       init_colour_output();
@@ -4506,17 +4795,16 @@ main(int argc, char **argv)
 
   if (newline_arg != NULL)
   {
-    for (endlinetype = 1; endlinetype < (int)(sizeof(newlines)/sizeof(char *));
-         endlinetype++)
+    for (endlinetype = 1; endlinetype < (int)(sizeof(newlines) / sizeof(char *)); endlinetype++)
     {
-      if (strcmpic(newline_arg, newlines[endlinetype]) == 0) break;
+      if (strcmpic(newline_arg, newlines[endlinetype]) == 0)
+        break;
     }
-    if (endlinetype < (int)(sizeof(newlines)/sizeof(char *)))
+    if (endlinetype < (int)(sizeof(newlines) / sizeof(char *)))
       pcre2_set_newline(compile_context, endlinetype);
     else
     {
-      fprintf(stderr, "pcre2grep: Invalid newline specifier \"%s\"\n",
-        newline_arg);
+      fprintf(stderr, "pcre2grep: Invalid newline specifier \"%s\"\n", newline_arg);
       goto EXIT2;
     }
   }
@@ -4532,9 +4820,12 @@ main(int argc, char **argv)
 
   if (dee_option != NULL)
   {
-    if (strcmp(dee_option, "read") == 0) dee_action = dee_READ;
-    else if (strcmp(dee_option, "recurse") == 0) dee_action = dee_RECURSE;
-    else if (strcmp(dee_option, "skip") == 0) dee_action = dee_SKIP;
+    if (strcmp(dee_option, "read") == 0)
+      dee_action = dee_READ;
+    else if (strcmp(dee_option, "recurse") == 0)
+      dee_action = dee_RECURSE;
+    else if (strcmp(dee_option, "skip") == 0)
+      dee_action = dee_SKIP;
     else
     {
       fprintf(stderr, "pcre2grep: Invalid value \"%s\" for -d\n", dee_option);
@@ -4544,8 +4835,10 @@ main(int argc, char **argv)
 
   if (DEE_option != NULL)
   {
-    if (strcmp(DEE_option, "read") == 0) DEE_action = DEE_READ;
-    else if (strcmp(DEE_option, "skip") == 0) DEE_action = DEE_SKIP;
+    if (strcmp(DEE_option, "read") == 0)
+      DEE_action = DEE_READ;
+    else if (strcmp(DEE_option, "skip") == 0)
+      DEE_action = DEE_SKIP;
     else
     {
       fprintf(stderr, "pcre2grep: Invalid value \"%s\" for -D\n", DEE_option);
@@ -4555,11 +4848,13 @@ main(int argc, char **argv)
 
   /* If no_ucp is set, remove PCRE2_UCP from the compile options. */
 
-  if (no_ucp) pcre2_options &= ~PCRE2_UCP;
+  if (no_ucp)
+    pcre2_options &= ~PCRE2_UCP;
 
   /* adjust the extra options. */
 
-  if (case_restrict) extra_options |= PCRE2_EXTRA_CASELESS_RESTRICT;
+  if (case_restrict)
+    extra_options |= PCRE2_EXTRA_CASELESS_RESTRICT;
   if (posix_digit)
     extra_options |= (PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_DIGIT);
   if ((pcre2_options & PCRE2_LITERAL) != 0)
@@ -4576,7 +4871,8 @@ main(int argc, char **argv)
   {
     uint32_t answer;
     (void)pcre2_config(PCRE2_CONFIG_JIT, &answer);
-    if (!answer) use_jit = FALSE;
+    if (!answer)
+      use_jit = FALSE;
   }
 
   /* Get memory for the main buffer. */
@@ -4587,7 +4883,7 @@ main(int argc, char **argv)
     goto EXIT2;
   }
 
-  bufsize = 3*bufthird;
+  bufsize = 3 * bufthird;
   main_buffer = (char *)malloc(bufsize);
 
   if (main_buffer == NULL)
@@ -4603,11 +4899,12 @@ main(int argc, char **argv)
 
   if (patterns == NULL && pattern_files == NULL)
   {
-    if (i >= argc) return usage(2);
-    patterns = patterns_last = add_pattern(argv[i], (PCRE2_SIZE)strlen(argv[i]),
-      NULL);
+    if (i >= argc)
+      return usage(2);
+    patterns = patterns_last = add_pattern(argv[i], (PCRE2_SIZE)strlen(argv[i]), NULL);
     i++;
-    if (patterns == NULL) goto EXIT2;
+    if (patterns == NULL)
+      goto EXIT2;
   }
 
   /* Compile the patterns that were provided on the command line, either by
@@ -4619,7 +4916,7 @@ main(int argc, char **argv)
   for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   {
     if (!compile_pattern(cp, pcre2_options, FALSE, "command-line",
-         (j == 1 && patterns->next == NULL)? 0 : j))
+                         (j == 1 && patterns->next == NULL) ? 0 : j))
       goto EXIT2;
   }
 
@@ -4627,7 +4924,8 @@ main(int argc, char **argv)
 
   for (fn = pattern_files; fn != NULL; fn = fn->next)
   {
-    if (!read_pattern_file(fn->name, &patterns, &patterns_last)) goto EXIT2;
+    if (!read_pattern_file(fn->name, &patterns, &patterns_last))
+      goto EXIT2;
   }
 
   /* Unless JIT has been explicitly disabled, arrange a stack for it to use. */
@@ -4635,8 +4933,8 @@ main(int argc, char **argv)
 #ifdef SUPPORT_PCRE2GREP_JIT
   if (use_jit)
   {
-    jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
-    if (jit_stack != NULL                        )
+    jit_stack = pcre2_jit_stack_create(32 * 1024, 1024 * 1024, NULL);
+    if (jit_stack != NULL)
       pcre2_jit_stack_assign(match_context, NULL, jit_stack);
   }
 #endif
@@ -4656,7 +4954,7 @@ main(int argc, char **argv)
     for (k = 1, cp = *(incexlist[j]); cp != NULL; k++, cp = cp->next)
     {
       if (!compile_pattern(cp, pcre2_options, FALSE, incexname[j],
-           (k == 1 && cp->next == NULL)? 0 : k))
+                           (k == 1 && cp->next == NULL) ? 0 : k))
         goto EXIT2;
     }
   }
@@ -4685,8 +4983,7 @@ main(int argc, char **argv)
        affecting several BSD and AIX */
     if (count_limit >= 0)
       setbuf(stdin, NULL);
-    rc = pcre2grep(stdin, FR_PLAIN, stdin_name,
-      (filenames > FN_DEFAULT)? stdin_name : NULL);
+    rc = pcre2grep(stdin, FR_PLAIN, stdin_name, (filenames > FN_DEFAULT) ? stdin_name : NULL);
     goto EXIT;
   }
 
@@ -4697,13 +4994,14 @@ main(int argc, char **argv)
   {
     char buffer[FNBUFSIZ];
     FILE *fl;
-    if (strcmp(fn->name, "-") == 0) fl = stdin; else
+    if (strcmp(fn->name, "-") == 0)
+      fl = stdin;
+    else
     {
       fl = fopen(fn->name, "rb");
       if (fl == NULL)
       {
-        fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", fn->name,
-          strerror(errno));
+        fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", fn->name, strerror(errno));
         goto EXIT2;
       }
     }
@@ -4711,16 +5009,20 @@ main(int argc, char **argv)
     {
       int frc;
       char *end = buffer + (int)strlen(buffer);
-      while (end > buffer && isspace((unsigned char)(end[-1]))) end--;
+      while (end > buffer && isspace((unsigned char)(end[-1])))
+        end--;
       *end = 0;
       if (*buffer != 0)
       {
         frc = grep_or_recurse(buffer, dee_action == dee_RECURSE, FALSE);
-        if (frc > 1) rc = frc;
-          else if (frc == 0 && rc == 1) rc = 0;
+        if (frc > 1)
+          rc = frc;
+        else if (frc == 0 && rc == 1)
+          rc = 0;
       }
     }
-    if (fl != stdin) fclose(fl);
+    if (fl != stdin)
+      fclose(fl);
   }
 
   /* After handling file-list, work through remaining arguments. Pass in the fact
@@ -4731,10 +5033,11 @@ main(int argc, char **argv)
 
   for (; i < argc; i++)
   {
-    int frc = grep_or_recurse(argv[i], dee_action == dee_RECURSE,
-      only_one_at_top);
-    if (frc > 1) rc = frc;
-      else if (frc == 0 && rc == 1) rc = 0;
+    int frc = grep_or_recurse(argv[i], dee_action == dee_RECURSE, only_one_at_top);
+    if (frc > 1)
+      rc = frc;
+    else if (frc == 0 && rc == 1)
+      rc = 0;
   }
 
   /* Show the total number of matches if requested, but not if only one file's
@@ -4747,14 +5050,16 @@ main(int argc, char **argv)
     fprintf(stdout, "%lu%s", total_count, stdout_nl);
   }
 
-  EXIT:
+EXIT:
 #ifdef SUPPORT_PCRE2GREP_JIT
   pcre2_jit_free_unused_memory(NULL);
-  if (jit_stack != NULL) pcre2_jit_stack_free(jit_stack);
+  if (jit_stack != NULL)
+    pcre2_jit_stack_free(jit_stack);
 #endif
 
   free(main_buffer);
-  if (character_tables != NULL) pcre2_maketables_free(NULL, character_tables);
+  if (character_tables != NULL)
+    pcre2_maketables_free(NULL, character_tables);
 
   pcre2_compile_context_free(compile_context);
   pcre2_match_context_free(match_context);
@@ -4781,7 +5086,7 @@ main(int argc, char **argv)
 
   pcre2grep_exit(rc);
 
-  EXIT2:
+EXIT2:
   rc = 2;
   goto EXIT;
 }

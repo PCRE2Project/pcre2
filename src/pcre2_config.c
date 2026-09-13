@@ -47,7 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 They allow macros like PCRE2_MAJOR to be defined without quotes, which is
 convenient for user programs that want to test their values. */
 
-#define STRING(a)  # a
+#define STRING(a)  #a
 #define XSTRING(s) STRING(s)
 
 
@@ -70,7 +70,7 @@ Returns:           0 if a numerical value is returned
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_config(uint32_t what, void *where)
 {
-  if (where == NULL)  // Requests a length
+  if (where == NULL) // Requests a length
   {
     switch (what)
     {
@@ -88,7 +88,7 @@ pcre2_config(uint32_t what, void *where)
     case PCRE2_CONFIG_NEVER_BACKSLASH_C:
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
-    case PCRE2_CONFIG_STACKRECURSE:      // Obsolete
+    case PCRE2_CONFIG_STACKRECURSE: // Obsolete
     case PCRE2_CONFIG_TABLES_LENGTH:
     case PCRE2_CONFIG_UNICODE:
       return sizeof(uint32_t);
@@ -118,15 +118,15 @@ pcre2_config(uint32_t what, void *where)
   case PCRE2_CONFIG_COMPILED_WIDTHS:
     *((uint32_t *)where) = 0
 #ifdef SUPPORT_PCRE2_8
-    + (1 << 0)
+                           + (1 << 0)
 #endif
 #ifdef SUPPORT_PCRE2_16
-    + (1 << 1)
+                           + (1 << 1)
 #endif
 #ifdef SUPPORT_PCRE2_32
-    + (1 << 2)
+                           + (1 << 2)
 #endif
-    ;
+        ;
     break;
 
   case PCRE2_CONFIG_DEPTHLIMIT:
@@ -153,8 +153,7 @@ pcre2_config(uint32_t what, void *where)
 #ifdef SUPPORT_JIT
     {
       const char *v = PRIV(jit_get_target)();
-      return (int)(1 + ((where == NULL)?
-        strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
 #else
     return PCRE2_ERROR_BADOPTION;
@@ -202,8 +201,7 @@ pcre2_config(uint32_t what, void *where)
 #else
       const char *v = "Unicode not supported";
 #endif
-      return (int)(1 + ((where == NULL)?
-        strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
 
   case PCRE2_CONFIG_UNICODE:
@@ -235,13 +233,11 @@ pcre2_config(uint32_t what, void *where)
 
   case PCRE2_CONFIG_VERSION:
     {
-      const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
-        XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
-        XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-      return (int)(1 + ((where == NULL)?
-        strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)
+                          ? XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE)
+                          : XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
+      return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
-
   }
 
   return 0;

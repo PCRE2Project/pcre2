@@ -82,7 +82,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
   if ((*data++ & XCL_MAP) != 0)
   {
     if (c < 256)
-      return (((const uint8_t *)data)[c/8] & (1u << (c&7))) != 0;
+      return (((const uint8_t *)data)[c / 8] & (1u << (c & 7))) != 0;
     /* Skip bitmap. */
     data += 32 / sizeof(PCRE2_UCHAR);
   }
@@ -105,8 +105,8 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
       {
       case PT_LAMP:
         chartype = prop->chartype;
-        if ((chartype == ucp_Lu || chartype == ucp_Ll ||
-             chartype == ucp_Lt) == isprop) return not_negated;
+        if ((chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt) == isprop)
+          return not_negated;
         break;
 
       case PT_GC:
@@ -115,23 +115,26 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
         break;
 
       case PT_PC:
-        if ((data[1] == prop->chartype) == isprop) return not_negated;
+        if ((data[1] == prop->chartype) == isprop)
+          return not_negated;
         break;
 
       case PT_SC:
-        if ((data[1] == prop->script) == isprop) return not_negated;
+        if ((data[1] == prop->script) == isprop)
+          return not_negated;
         break;
 
       case PT_SCX:
         ok = (data[1] == prop->script ||
               MAPBIT(PRIV(ucd_script_sets) + UCD_SCRIPTX_PROP(prop), data[1]) != 0);
-        if (ok == isprop) return not_negated;
+        if (ok == isprop)
+          return not_negated;
         break;
 
       case PT_ALNUM:
         chartype = prop->chartype;
-        if ((PRIV(ucp_gentype)[chartype] == ucp_L ||
-             PRIV(ucp_gentype)[chartype] == ucp_N) == isprop)
+        if ((PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N) ==
+            isprop)
           return not_negated;
         break;
 
@@ -139,13 +142,14 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
         which means that Perl space and POSIX space are now identical. PCRE
         was changed at release 8.34. */
 
-      case PT_SPACE:      // Perl space
-      case PT_PXSPACE:    // POSIX space
+      case PT_SPACE:   // Perl space
+      case PT_PXSPACE: // POSIX space
         switch (c)
         {
         HSPACE_CASES:
         VSPACE_CASES:
-          if (isprop) return not_negated;
+          if (isprop)
+            return not_negated;
           break;
 
         default:
@@ -157,8 +161,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 
       case PT_WORD:
         chartype = prop->chartype;
-        if ((PRIV(ucp_gentype)[chartype] == ucp_L ||
-             PRIV(ucp_gentype)[chartype] == ucp_N ||
+        if ((PRIV(ucp_gentype)[chartype] == ucp_L || PRIV(ucp_gentype)[chartype] == ucp_N ||
              chartype == ucp_Mn || chartype == ucp_Pc) == isprop)
           return not_negated;
         break;
@@ -166,8 +169,8 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
       case PT_UCNC:
         if (c < 0xa0)
         {
-          if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-               c == CHAR_GRAVE_ACCENT) == isprop)
+          if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT || c == CHAR_GRAVE_ACCENT) ==
+              isprop)
             return not_negated;
         }
         else
@@ -183,9 +186,9 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
         break;
 
       case PT_BOOL:
-        ok = MAPBIT(PRIV(ucd_boolprop_sets) +
-          UCD_BPROPS_PROP(prop), data[1]) != 0;
-        if (ok == isprop) return not_negated;
+        ok = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), data[1]) != 0;
+        if (ok == isprop)
+          return not_negated;
         break;
 
         /* The following three properties can occur only in an XCLASS, as there
@@ -203,10 +206,9 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
       case PT_PXGRAPH:
         chartype = prop->chartype;
         if ((PRIV(ucp_gentype)[chartype] != ucp_Z &&
-              (PRIV(ucp_gentype)[chartype] != ucp_C ||
-                (chartype == ucp_Cf &&
-                  c != 0x061c && c != 0x180e && (c < 0x2066 || c > 0x2069))
-           )) == isprop)
+             (PRIV(ucp_gentype)[chartype] != ucp_C ||
+              (chartype == ucp_Cf && c != 0x061c && c != 0x180e && (c < 0x2066 || c > 0x2069)))) ==
+            isprop)
           return not_negated;
         break;
 
@@ -215,12 +217,9 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 
       case PT_PXPRINT:
         chartype = prop->chartype;
-        if ((chartype != ucp_Zl &&
-             chartype != ucp_Zp &&
-              (PRIV(ucp_gentype)[chartype] != ucp_C ||
-                (chartype == ucp_Cf &&
-                  c != 0x061c && (c < 0x2066 || c > 0x2069))
-           )) == isprop)
+        if ((chartype != ucp_Zl && chartype != ucp_Zp &&
+             (PRIV(ucp_gentype)[chartype] != ucp_C ||
+              (chartype == ucp_Cf && c != 0x061c && (c < 0x2066 || c > 0x2069)))) == isprop)
           return not_negated;
         break;
 
@@ -231,18 +230,16 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
       case PT_PXPUNCT:
         chartype = prop->chartype;
         if ((PRIV(ucp_gentype)[chartype] == ucp_P ||
-              (c < 128 && PRIV(ucp_gentype)[chartype] == ucp_S)) == isprop)
+             (c < 128 && PRIV(ucp_gentype)[chartype] == ucp_S)) == isprop)
           return not_negated;
         break;
 
         /* Perl has two sets of hex digits */
 
       case PT_PXXDIGIT:
-        if (((c >= CHAR_0 && c <= CHAR_9) ||
-             (c >= CHAR_A && c <= CHAR_F) ||
-             (c >= CHAR_a && c <= CHAR_f) ||
-             (c >= 0xff10 && c <= 0xff19) ||  // Fullwidth digits
-             (c >= 0xff21 && c <= 0xff26) ||  // Fullwidth letters
+        if (((c >= CHAR_0 && c <= CHAR_9) || (c >= CHAR_A && c <= CHAR_F) ||
+             (c >= CHAR_a && c <= CHAR_f) || (c >= 0xff10 && c <= 0xff19) || // Fullwidth digits
+             (c >= 0xff21 && c <= 0xff26) ||                                 // Fullwidth letters
              (c >= 0xff41 && c <= 0xff46)) == isprop)
           return not_negated;
         break;
@@ -258,12 +255,11 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
       }
 
       data += 2;
-    }
-    while (*data == XCL_PROP || *data == XCL_NOTPROP);
+    } while (*data == XCL_PROP || *data == XCL_NOTPROP);
   }
 #else
-    (void)utf;  // Avoid compiler warning
-#endif  /* SUPPORT_UNICODE */
+  (void)utf; // Avoid compiler warning
+#endif /* SUPPORT_UNICODE */
 
   /* Match against large chars or ranges that end with a large char. */
   if (*data < XCL_LIST)
@@ -285,7 +281,8 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
       {
         /* Since character ranges follow the properties, and they are
         sorted, early return is possible for all characters <= x. */
-        if (c <= x) return (c == x) ? not_negated : !not_negated;
+        if (c <= x)
+          return (c == x) ? not_negated : !not_negated;
         continue;
       }
 
@@ -301,10 +298,11 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 
       /* Since character ranges follow the properties, and they are
       sorted, early return is possible for all characters <= y. */
-      if (c <= y) return (c >= x) ? not_negated : !not_negated;
+      if (c <= y)
+        return (c >= x) ? not_negated : !not_negated;
     }
 
-    return !not_negated;   // char did not match
+    return !not_negated; // char did not match
   }
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -313,7 +311,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 #else
   type = data[0];
   data++;
-#endif  /* CODE_UNIT_WIDTH */
+#endif /* CODE_UNIT_WIDTH */
 
   /* Align characters. */
   next_char = char_lists_end - (GET(data, 0) << 1);
@@ -327,7 +325,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
     max_index = type & XCL_ITEM_COUNT_MASK;
     if (max_index == XCL_ITEM_COUNT_MASK)
     {
-      max_index = *(const uint16_t*)next_char;
+      max_index = *(const uint16_t *)next_char;
       PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
       next_char += 2;
     }
@@ -344,16 +342,16 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 
     if (max_index == XCL_ITEM_COUNT_MASK)
     {
-      max_index = *(const uint16_t*)next_char;
+      max_index = *(const uint16_t *)next_char;
       PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
       next_char += 2;
     }
 
-    if (max_index == 0 || c < *(const uint16_t*)next_char)
+    if (max_index == 0 || c < *(const uint16_t *)next_char)
       return ((type & XCL_BEGIN_WITH_RANGE) != 0) == not_negated;
 
     min_index = 0;
-    value = ((const uint16_t*)next_char)[--max_index];
+    value = ((const uint16_t *)next_char)[--max_index];
     if (c >= value)
       return (value == c || (value & XCL_CHAR_END) == 0) == not_negated;
 
@@ -363,11 +361,11 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
     while (TRUE)
     {
       uint32_t mid_index = (min_index + max_index) >> 1;
-      value = ((const uint16_t*)next_char)[mid_index];
+      value = ((const uint16_t *)next_char)[mid_index];
 
       if (c < value)
         max_index = mid_index - 1;
-      else if (((const uint16_t*)next_char)[mid_index + 1] <= c)
+      else if (((const uint16_t *)next_char)[mid_index + 1] <= c)
         min_index = mid_index + 1;
       else
         return (value == c || (value & XCL_CHAR_END) == 0) == not_negated;
@@ -378,7 +376,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
   max_index = type & XCL_ITEM_COUNT_MASK;
   if (max_index == XCL_ITEM_COUNT_MASK)
   {
-    max_index = *(const uint16_t*)next_char;
+    max_index = *(const uint16_t *)next_char;
     PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
     next_char += 2;
   }
@@ -396,7 +394,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
   {
     if (max_index == XCL_ITEM_COUNT_MASK)
     {
-      max_index = *(const uint32_t*)next_char;
+      max_index = *(const uint32_t *)next_char;
       PCRE2_ASSERT(max_index >= XCL_ITEM_COUNT_MASK);
       next_char += 4;
     }
@@ -411,15 +409,15 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 
   if (max_index == XCL_ITEM_COUNT_MASK)
   {
-    max_index = *(const uint32_t*)next_char;
+    max_index = *(const uint32_t *)next_char;
     next_char += 4;
   }
 
-  if (max_index == 0 || c < *(const uint32_t*)next_char)
+  if (max_index == 0 || c < *(const uint32_t *)next_char)
     return ((type & XCL_BEGIN_WITH_RANGE) != 0) == not_negated;
 
   min_index = 0;
-  value = ((const uint32_t*)next_char)[--max_index];
+  value = ((const uint32_t *)next_char)[--max_index];
   if (c >= value)
     return (value == c || (value & XCL_CHAR_END) == 0) == not_negated;
 
@@ -429,11 +427,11 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
   while (TRUE)
   {
     uint32_t mid_index = (min_index + max_index) >> 1;
-    value = ((const uint32_t*)next_char)[mid_index];
+    value = ((const uint32_t *)next_char)[mid_index];
 
     if (c < value)
       max_index = mid_index - 1;
-    else if (((const uint32_t*)next_char)[mid_index + 1] <= c)
+    else if (((const uint32_t *)next_char)[mid_index + 1] <= c)
       min_index = mid_index + 1;
     else
       return (value == c || (value & XCL_CHAR_END) == 0) == not_negated;
@@ -459,8 +457,8 @@ Returns:      TRUE if character matches, else FALSE
 */
 
 BOOL
-PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end,
-  const uint8_t *char_lists_end, BOOL utf)
+PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end, const uint8_t *char_lists_end,
+             BOOL utf)
 {
   PCRE2_SPTR ptr = data_start;
   PCRE2_UCHAR flags;
@@ -469,8 +467,7 @@ PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end,
 
   PCRE2_ASSERT(data_start < data_end);
   flags = *ptr++;
-  PCRE2_ASSERT((flags & ECL_MAP) == 0 ||
-               (data_end - ptr) >= 32 / (int)sizeof(PCRE2_UCHAR));
+  PCRE2_ASSERT((flags & ECL_MAP) == 0 || (data_end - ptr) >= 32 / (int)sizeof(PCRE2_UCHAR));
 
   /* Code points < 256 are matched against a bitmap, if one is present.
   Otherwise all codepoints are checked later. */
@@ -478,7 +475,7 @@ PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end,
   if ((flags & ECL_MAP) != 0)
   {
     if (c < 256)
-      return (((const uint8_t *)ptr)[c/8] & (1u << (c&7))) != 0;
+      return (((const uint8_t *)ptr)[c / 8] & (1u << (c & 7))) != 0;
 
     /* Skip the bitmap. */
     ptr += 32 / sizeof(PCRE2_UCHAR);
@@ -538,7 +535,7 @@ PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end,
   }
 
   PCRE2_ASSERT(stack_depth == 1);
-  (void)stack_depth;  // Ignore unused variable, if assertions are disabled.
+  (void)stack_depth; // Ignore unused variable, if assertions are disabled.
 
   /* The final bit left on the stack now holds the match result. */
   return (stack & 1u) != 0;
