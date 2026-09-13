@@ -5887,7 +5887,7 @@ sljit_u32 chr; /* Any unicode character. */
 sljit_u8 *bytes, *bytes_end, byte;
 PCRE2_SPTR alternative, cc_save, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
-PCRE2_UCHAR othercase[4];
+PCRE2_UCHAR othercase[6];
 #elif defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 16
 PCRE2_UCHAR othercase[2];
 #else
