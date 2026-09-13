@@ -136,19 +136,22 @@ have_visibility = cc.compiles(
   name: '__attribute__((visibility("default")))',
 )
 config.set('PCRE2_EXPORT', have_visibility ? '__attribute__ ((visibility ("default")))' : '')
-config.set('HAVE_BUILTIN_ASSUME', cc.compiles(
+config.set('HAVE_BUILTIN_ASSUME', cc.links(
   'int main(void) { __assume(1); return 0; }',
+  args: warning_as_error,
   name: '__assume',
 ))
-config.set('HAVE_BUILTIN_MUL_OVERFLOW', cc.compiles(
+config.set('HAVE_BUILTIN_MUL_OVERFLOW', cc.links(
   '''
   #include <stddef.h>
   int main(void) { int a, b; size_t m; __builtin_mul_overflow(a, b, &m); return 0; }
   ''',
+  args: warning_as_error,
   name: '__builtin_mul_overflow',
 ))
-config.set('HAVE_BUILTIN_UNREACHABLE', cc.compiles(
+config.set('HAVE_BUILTIN_UNREACHABLE', cc.links(
   'int main(int c, char *v[]) { if (c) __builtin_unreachable(); return (int)(*v[0]); }',
+  args: warning_as_error,
   name: '__builtin_unreachable',
 ))
 
@@ -611,7 +614,7 @@ configure_file(
 )
 cmake = import('cmake')
 cmake.configure_package_config_file(
-  name: 'pcre2',
+  name: 'PCRE2',
   input: 'cmake/pcre2-config.cmake.in',
   install_dir: cmake_install_dir,
   configuration: {
@@ -621,7 +624,7 @@ cmake.configure_package_config_file(
   },
 )
 cmake.write_basic_package_version_file(
-  name: 'pcre2',
+  name: 'PCRE2',
   version: meson.project_version() + '.0',
   compatibility: 'SameMajorVersion',
   install_dir: cmake_install_dir,
@@ -689,8 +692,11 @@ if get_option('PCRE2_BUILD_TESTS')
     pcre2_jit_test = executable(
       'pcre2_jit_test',
       'src/pcre2_jit_test.c',
+      config_h,
+      pcre2_h,
       dependencies: test_deps,
       include_directories: pcre2_includes,
+      c_args: common_c_args,
     )
     test('pcre2_jit_test', pcre2_jit_test)
   endif
