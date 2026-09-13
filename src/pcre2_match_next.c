@@ -46,45 +46,44 @@ POSSIBILITY OF SUCH DAMAGE.
 /* Advance the offset by one code unit, and return the new value.
 It is only called when the offset is not at the end of the subject. */
 
-static PCRE2_SIZE do_bumpalong(pcre2_match_data *match_data,
-  PCRE2_SIZE offset)
+static PCRE2_SIZE
+do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
 {
-PCRE2_SPTR subject = match_data->subject;
-PCRE2_SIZE subject_length = match_data->subject_length;
+  PCRE2_SPTR subject = match_data->subject;
+  PCRE2_SIZE subject_length = match_data->subject_length;
 #ifdef SUPPORT_UNICODE
-BOOL utf = (match_data->code->overall_options & PCRE2_UTF) != 0;
+  BOOL utf = (match_data->code->overall_options & PCRE2_UTF) != 0;
 #endif
 
-/* Skip over CRLF as an atomic sequence, if CRLF is configured as a newline
-sequence. */
+  /* Skip over CRLF as an atomic sequence, if CRLF is configured as a newline
+  sequence. */
 
-if (subject[offset] == CHAR_CR && offset + 1 < subject_length &&
-    subject[offset + 1] == CHAR_LF)
+  if (subject[offset] == CHAR_CR && offset + 1 < subject_length && subject[offset + 1] == CHAR_LF)
   {
-  switch (match_data->code->newline_convention)
+    switch (match_data->code->newline_convention)
     {
     case PCRE2_NEWLINE_CRLF:
     case PCRE2_NEWLINE_ANY:
     case PCRE2_NEWLINE_ANYCRLF:
-    return offset + 2;
+      return offset + 2;
     }
   }
 
-/* Advance by one full character if in UTF mode. */
+  /* Advance by one full character if in UTF mode. */
 
 #ifdef SUPPORT_UNICODE
-if (utf)
+  if (utf)
   {
-  PCRE2_SPTR next = subject + offset + 1;
-  PCRE2_SPTR subject_end = subject + subject_length;
+    PCRE2_SPTR next = subject + offset + 1;
+    PCRE2_SPTR subject_end = subject + subject_length;
 
-  (void)subject_end; // Suppress warning; 32-bit FORWARDCHARTEST ignores this
-  FORWARDCHARTEST(next, subject_end);
-  return next - subject;
+    (void)subject_end; // Suppress warning; 32-bit FORWARDCHARTEST ignores this
+    FORWARDCHARTEST(next, subject_end);
+    return next - subject;
   }
 #endif
 
-return offset + 1;
+  return offset + 1;
 }
 
 
@@ -94,78 +93,77 @@ return offset + 1;
 *************************************************/
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset,
-  uint32_t *poptions)
+pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32_t *poptions)
 {
-int rc = match_data->rc;
-PCRE2_SIZE start_offset = match_data->start_offset;
-PCRE2_SIZE *ovector = match_data->ovector;
+  int rc = match_data->rc;
+  PCRE2_SIZE start_offset = match_data->start_offset;
+  PCRE2_SIZE *ovector = match_data->ovector;
 
-/* Match error, or no match: no further iteration possible. In previous versions
-of PCRE2, we recommended that clients use a strategy which involved retrying in
-certain cases after PCRE2_ERROR_NOMATCH, but this is no longer required. */
+  /* Match error, or no match: no further iteration possible. In previous versions
+  of PCRE2, we recommended that clients use a strategy which involved retrying in
+  certain cases after PCRE2_ERROR_NOMATCH, but this is no longer required. */
 
-if (rc < 0)
-  return FALSE;
-
-/* Match succeeded: get the start offset for the next match */
-
-/* Although \K can affect the position of ovector[0], there are no ways to do
-anything surprising with ovector[1], which must always be >= start_offset. */
-
-PCRE2_ASSERT(ovector[1] >= start_offset);
-
-/* Special handling for patterns which contain \K in a lookaround, which enables
-the match start to be pushed back to before the starting search offset
-(ovector[0] < start_offset) or after the match ends (ovector[0] > ovector[1]).
-This is not a problem if ovector[1] > start_offset, because in this case, we can
-just attempt the next match at ovector[1]: we are making progress, which is all
-that we require.
-
-However, if we have ovector[1] == start_offset, then we have a very rare case
-which must be handled specially, because it's a non-empty match which
-nonetheless fails to make progress through the subject. */
-
-if (ovector[0] != start_offset && ovector[1] == start_offset)
-  {
-  /* If the match end is at the end of the subject, we are done. */
-
-  if (start_offset >= match_data->subject_length)
+  if (rc < 0)
     return FALSE;
 
-  /* Otherwise, bump along by one code unit, and do a normal search. */
+  /* Match succeeded: get the start offset for the next match */
 
-  *pstart_offset = do_bumpalong(match_data, ovector[1]);
-  *poptions = 0;
-  return TRUE;
+  /* Although \K can affect the position of ovector[0], there are no ways to do
+  anything surprising with ovector[1], which must always be >= start_offset. */
+
+  PCRE2_ASSERT(ovector[1] >= start_offset);
+
+  /* Special handling for patterns which contain \K in a lookaround, which enables
+  the match start to be pushed back to before the starting search offset
+  (ovector[0] < start_offset) or after the match ends (ovector[0] > ovector[1]).
+  This is not a problem if ovector[1] > start_offset, because in this case, we can
+  just attempt the next match at ovector[1]: we are making progress, which is all
+  that we require.
+
+  However, if we have ovector[1] == start_offset, then we have a very rare case
+  which must be handled specially, because it's a non-empty match which
+  nonetheless fails to make progress through the subject. */
+
+  if (ovector[0] != start_offset && ovector[1] == start_offset)
+  {
+    /* If the match end is at the end of the subject, we are done. */
+
+    if (start_offset >= match_data->subject_length)
+      return FALSE;
+
+    /* Otherwise, bump along by one code unit, and do a normal search. */
+
+    *pstart_offset = do_bumpalong(match_data, ovector[1]);
+    *poptions = 0;
+    return TRUE;
   }
 
-/* If the previous match was for an empty string, we are finished if we are at
-the end of the subject. Otherwise, arrange to run another match at the same
-point to see if a non-empty match can be found. */
+  /* If the previous match was for an empty string, we are finished if we are at
+  the end of the subject. Otherwise, arrange to run another match at the same
+  point to see if a non-empty match can be found. */
 
-if (ovector[0] == ovector[1])
+  if (ovector[0] == ovector[1])
   {
-  /* If the match is at the end of the subject, we are done. */
+    /* If the match is at the end of the subject, we are done. */
 
-  if (ovector[0] >= match_data->subject_length)
-    return FALSE;
+    if (ovector[0] >= match_data->subject_length)
+      return FALSE;
 
-  /* Otherwise, continue at this exact same point, but we must set the flag
-  which ensures that we don't return the exact same empty match again. */
+    /* Otherwise, continue at this exact same point, but we must set the flag
+    which ensures that we don't return the exact same empty match again. */
+
+    *pstart_offset = ovector[1];
+    *poptions = PCRE2_NOTEMPTY_ATSTART;
+    return TRUE;
+  }
+
+  /* Finally, we must be in the happy state of a non-empty match, where the end of
+  the match is further on in the subject than start_offset, so we are easily able
+  to continue and make progress. */
 
   *pstart_offset = ovector[1];
-  *poptions = PCRE2_NOTEMPTY_ATSTART;
+  *poptions = 0;
   return TRUE;
-  }
-
-/* Finally, we must be in the happy state of a non-empty match, where the end of
-the match is further on in the subject than start_offset, so we are easily able
-to continue and make progress. */
-
-*pstart_offset = ovector[1];
-*poptions = 0;
-return TRUE;
 }
 
 /* End of pcre2_match_next.c */

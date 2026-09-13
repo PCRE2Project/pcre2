@@ -50,50 +50,51 @@ POSSIBILITY OF SUCH DAMAGE.
 /* Allow for C++ users */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Options, mostly defined by POSIX, but with some extras. */
 
-#define REG_ICASE     0x0001  /* Maps to PCRE2_CASELESS */
-#define REG_NEWLINE   0x0002  /* Maps to PCRE2_MULTILINE */
-#define REG_NOTBOL    0x0004  /* Maps to PCRE2_NOTBOL */
-#define REG_NOTEOL    0x0008  /* Maps to PCRE2_NOTEOL */
-#define REG_DOTALL    0x0010  /* NOT defined by POSIX; maps to PCRE2_DOTALL */
-#define REG_NOSUB     0x0020  /* Do not report what was matched */
-#define REG_UTF       0x0040  /* NOT defined by POSIX; maps to PCRE2_UTF */
-#define REG_STARTEND  0x0080  /* BSD feature: pass subject string by so,eo */
-#define REG_NOTEMPTY  0x0100  /* NOT defined by POSIX; maps to PCRE2_NOTEMPTY */
-#define REG_UNGREEDY  0x0200  /* NOT defined by POSIX; maps to PCRE2_UNGREEDY */
-#define REG_UCP       0x0400  /* NOT defined by POSIX; maps to PCRE2_UCP */
-#define REG_PEND      0x0800  /* GNU feature: pass end pattern by re_endp */
-#define REG_NOSPEC    0x1000  /* Maps to PCRE2_LITERAL */
+#define REG_ICASE    0x0001 /* Maps to PCRE2_CASELESS */
+#define REG_NEWLINE  0x0002 /* Maps to PCRE2_MULTILINE */
+#define REG_NOTBOL   0x0004 /* Maps to PCRE2_NOTBOL */
+#define REG_NOTEOL   0x0008 /* Maps to PCRE2_NOTEOL */
+#define REG_DOTALL   0x0010 /* NOT defined by POSIX; maps to PCRE2_DOTALL */
+#define REG_NOSUB    0x0020 /* Do not report what was matched */
+#define REG_UTF      0x0040 /* NOT defined by POSIX; maps to PCRE2_UTF */
+#define REG_STARTEND 0x0080 /* BSD feature: pass subject string by so,eo */
+#define REG_NOTEMPTY 0x0100 /* NOT defined by POSIX; maps to PCRE2_NOTEMPTY */
+#define REG_UNGREEDY 0x0200 /* NOT defined by POSIX; maps to PCRE2_UNGREEDY */
+#define REG_UCP      0x0400 /* NOT defined by POSIX; maps to PCRE2_UCP */
+#define REG_PEND     0x0800 /* GNU feature: pass end pattern by re_endp */
+#define REG_NOSPEC   0x1000 /* Maps to PCRE2_LITERAL */
 
 /* This is not used by PCRE2, but by defining it we make it easier
 to slot PCRE2 into existing programs that make POSIX calls. */
 
-#define REG_EXTENDED  0
+#define REG_EXTENDED 0
 
 /* Error values. Not all these are relevant or used by the wrapper. */
 
 enum {
-  REG_ASSERT = 1,  // internal error ?
-  REG_BADBR,       // invalid repeat counts in {}
-  REG_BADPAT,      // pattern error
-  REG_BADRPT,      // ? * + invalid
-  REG_EBRACE,      // unbalanced {}
-  REG_EBRACK,      // unbalanced []
-  REG_ECOLLATE,    // collation error - not relevant
-  REG_ECTYPE,      // bad class
-  REG_EESCAPE,     // bad escape sequence
-  REG_EMPTY,       // empty expression
-  REG_EPAREN,      // unbalanced ()
-  REG_ERANGE,      // bad range inside []
-  REG_ESIZE,       // expression too big
-  REG_ESPACE,      // failed to get memory
-  REG_ESUBREG,     // bad back reference
-  REG_INVARG,      // bad argument
-  REG_NOMATCH      // match failed
+  REG_ASSERT = 1, // internal error ?
+  REG_BADBR,      // invalid repeat counts in {}
+  REG_BADPAT,     // pattern error
+  REG_BADRPT,     // ? * + invalid
+  REG_EBRACE,     // unbalanced {}
+  REG_EBRACK,     // unbalanced []
+  REG_ECOLLATE,   // collation error - not relevant
+  REG_ECTYPE,     // bad class
+  REG_EESCAPE,    // bad escape sequence
+  REG_EMPTY,      // empty expression
+  REG_EPAREN,     // unbalanced ()
+  REG_ERANGE,     // bad range inside []
+  REG_ESIZE,      // expression too big
+  REG_ESPACE,     // failed to get memory
+  REG_ESUBREG,    // bad back reference
+  REG_INVARG,     // bad argument
+  REG_NOMATCH     // match failed
 };
 
 
@@ -126,13 +127,13 @@ file. So, we don't change existing definitions of PCRE2POSIX_EXP_DECL.
 By default, we use the standard "extern" declarations. */
 
 #ifndef PCRE2POSIX_EXP_DECL
-#  if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
-#    define PCRE2POSIX_EXP_DECL  extern __declspec(dllimport)
-#  elif defined __cplusplus
-#    define PCRE2POSIX_EXP_DECL  extern "C"
-#  else
-#    define PCRE2POSIX_EXP_DECL  extern
-#  endif
+#if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
+#define PCRE2POSIX_EXP_DECL extern __declspec(dllimport)
+#elif defined __cplusplus
+#define PCRE2POSIX_EXP_DECL extern "C"
+#else
+#define PCRE2POSIX_EXP_DECL extern
+#endif
 #endif
 
 /* When compiling with the MSVC compiler, it is sometimes necessary to include
@@ -158,8 +159,9 @@ elsewhere). */
 
 PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_regcomp(regex_t *, const char *, int);
 PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_regexec(const regex_t *, const char *, size_t,
-                     regmatch_t *, int);
-PCRE2POSIX_EXP_DECL size_t PCRE2_CALL_CONVENTION pcre2_regerror(int, const regex_t *, char *, size_t);
+                                                            regmatch_t *, int);
+PCRE2POSIX_EXP_DECL size_t PCRE2_CALL_CONVENTION pcre2_regerror(int, const regex_t *, char *,
+                                                                size_t);
 PCRE2POSIX_EXP_DECL void PCRE2_CALL_CONVENTION pcre2_regfree(regex_t *);
 
 #define regcomp  pcre2_regcomp
@@ -176,7 +178,7 @@ them having to maintain their own patch, but are not documented by PCRE2. */
 #define PCRE2regfree  pcre2_regfree
 
 #ifdef __cplusplus
-}   // extern "C"
+} // extern "C"
 #endif
 
 #endif /* PCRE2POSIX_H_IDEMPOTENT_GUARD */

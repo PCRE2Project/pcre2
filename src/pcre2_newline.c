@@ -72,40 +72,44 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr,
-  uint32_t *lenptr, BOOL utf)
+PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, uint32_t *lenptr, BOOL utf)
 {
-uint32_t c;
+  uint32_t c;
 
 #ifdef SUPPORT_UNICODE
-if (utf) { GETCHAR(c, ptr); } else c = *ptr;
-#else
-(void)utf;
-c = *ptr;
-#endif  /* SUPPORT_UNICODE */
-
-if (type == NLTYPE_ANYCRLF)
+  if (utf)
   {
-  switch (c)
+    GETCHAR(c, ptr);
+  }
+  else
+    c = *ptr;
+#else
+  (void)utf;
+  c = *ptr;
+#endif /* SUPPORT_UNICODE */
+
+  if (type == NLTYPE_ANYCRLF)
+  {
+    switch (c)
     {
     case CHAR_LF:
-    *lenptr = 1;
-    return TRUE;
+      *lenptr = 1;
+      return TRUE;
 
     case CHAR_CR:
-    *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
-    return TRUE;
+      *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF) ? 2 : 1;
+      return TRUE;
 
     default:
-    return FALSE;
+      return FALSE;
     }
   }
 
-/* NLTYPE_ANY */
+  /* NLTYPE_ANY */
 
-else
+  else
   {
-  switch (c)
+    switch (c)
     {
 #ifdef EBCDIC
     case CHAR_NEL:
@@ -113,35 +117,35 @@ else
     case CHAR_LF:
     case CHAR_VT:
     case CHAR_FF:
-    *lenptr = 1;
-    return TRUE;
+      *lenptr = 1;
+      return TRUE;
 
     case CHAR_CR:
-    *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
-    return TRUE;
+      *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF) ? 2 : 1;
+      return TRUE;
 
 #ifndef EBCDIC
 #if PCRE2_CODE_UNIT_WIDTH == 8
     case CHAR_NEL:
-    *lenptr = utf? 2 : 1;
-    return TRUE;
+      *lenptr = utf ? 2 : 1;
+      return TRUE;
 
-    case 0x2028:   // LS
-    case 0x2029:   // PS
-    *lenptr = 3;
-    return TRUE;
+    case 0x2028: // LS
+    case 0x2029: // PS
+      *lenptr = 3;
+      return TRUE;
 
-#else  /* 16-bit or 32-bit code units */
+#else /* 16-bit or 32-bit code units */
     case CHAR_NEL:
-    case 0x2028:   // LS
-    case 0x2029:   // PS
-    *lenptr = 1;
-    return TRUE;
+    case 0x2028: // LS
+    case 0x2029: // PS
+      *lenptr = 1;
+      return TRUE;
 #endif
 #endif /* Not EBCDIC */
 
     default:
-    return FALSE;
+      return FALSE;
     }
   }
 }
@@ -168,50 +172,50 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr,
-  uint32_t *lenptr, BOOL utf)
+PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, uint32_t *lenptr, BOOL utf)
 {
-uint32_t c;
-ptr--;
+  uint32_t c;
+  ptr--;
 
 #ifdef SUPPORT_UNICODE
-if (utf)
+  if (utf)
   {
-  BACKCHAR(ptr);
-  GETCHAR(c, ptr);
+    BACKCHAR(ptr);
+    GETCHAR(c, ptr);
   }
-else c = *ptr;
+  else
+    c = *ptr;
 #else
-(void)utf;
-c = *ptr;
-#endif  /* SUPPORT_UNICODE */
+  (void)utf;
+  c = *ptr;
+#endif /* SUPPORT_UNICODE */
 
-if (type == NLTYPE_ANYCRLF)
+  if (type == NLTYPE_ANYCRLF)
   {
-  switch (c)
+    switch (c)
     {
     case CHAR_LF:
-    *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
-    return TRUE;
+      *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR) ? 2 : 1;
+      return TRUE;
 
     case CHAR_CR:
-    *lenptr = 1;
-    return TRUE;
+      *lenptr = 1;
+      return TRUE;
 
     default:
-    return FALSE;
+      return FALSE;
     }
   }
 
-/* NLTYPE_ANY */
+  /* NLTYPE_ANY */
 
-else
+  else
   {
-  switch (c)
+    switch (c)
     {
     case CHAR_LF:
-    *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
-    return TRUE;
+      *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR) ? 2 : 1;
+      return TRUE;
 
 #ifdef EBCDIC
     case CHAR_NEL:
@@ -219,31 +223,31 @@ else
     case CHAR_VT:
     case CHAR_FF:
     case CHAR_CR:
-    *lenptr = 1;
-    return TRUE;
+      *lenptr = 1;
+      return TRUE;
 
 #ifndef EBCDIC
 #if PCRE2_CODE_UNIT_WIDTH == 8
     case CHAR_NEL:
-    *lenptr = utf? 2 : 1;
-    return TRUE;
+      *lenptr = utf ? 2 : 1;
+      return TRUE;
 
-    case 0x2028:   // LS
-    case 0x2029:   // PS
-    *lenptr = 3;
-    return TRUE;
+    case 0x2028: // LS
+    case 0x2029: // PS
+      *lenptr = 3;
+      return TRUE;
 
 #else /* 16-bit or 32-bit code units */
     case CHAR_NEL:
-    case 0x2028:   // LS
-    case 0x2029:   // PS
-    *lenptr = 1;
-    return TRUE;
+    case 0x2028: // LS
+    case 0x2029: // PS
+      *lenptr = 1;
+      return TRUE;
 #endif
 #endif /* Not EBCDIC */
 
     default:
-    return FALSE;
+      return FALSE;
     }
   }
 }
