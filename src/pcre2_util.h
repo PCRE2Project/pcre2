@@ -63,11 +63,11 @@ side-effects. */
 #else
 #define PCRE2_ASSERT(x) do                                            \
 {                                                                     \
-  if (!(x))                                                           \
-  {                                                                   \
-  fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); \
-  abort();                                                            \
-  }                                                                   \
+    if (!(x))                                                           \
+  {                                                                     \
+    fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); \
+    abort();                                                            \
+  }                                                                     \
 } while (0)
 #endif
 
@@ -93,9 +93,9 @@ assert(((void)"Execution reached unexpected point", 0))
 #else
 #define PCRE2_UNREACHABLE() do                                      \
 {                                                                   \
-fprintf(stderr, "Execution reached unexpected point at " __FILE__   \
-                ":%d\n", __LINE__);                                 \
-abort();                                                            \
+  fprintf(stderr, "Execution reached unexpected point at " __FILE__   \
+                  ":%d\n", __LINE__);                                 \
+  abort();                                                            \
 } while (0)
 #endif
 

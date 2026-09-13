@@ -62,10 +62,10 @@ to stdout. */
 #define CAPCOUNT    5 /* Number of captures supported */
 #define PRINTF(...)   /* Shorthand for testing output */ \
   do                                                     \
-  {                                                      \
+{                                                        \
     if (v)                                               \
       printf(__VA_ARGS__);                               \
-  }                                                      \
+}                                                        \
   while (0)
 
 /* This vector contains compiler flags for each pattern that is tested. */
@@ -173,87 +173,87 @@ static int *results[] = {
 
 int main(int argc, char **argv)
 {
-regex_t re;
-regmatch_t match[CAPCOUNT];
-int v = argc > 1 && strcmp(argv[1], "-v") == 0;
+  regex_t re;
+  regmatch_t match[CAPCOUNT];
+  int v = argc > 1 && strcmp(argv[1], "-v") == 0;
 
-PRINTF("Test of pcre2posix.h without pcre2.h\n");
+  PRINTF("Test of pcre2posix.h without pcre2.h\n");
 
-for (int i = 0; i < count; i++)
+  for (int i = 0; i < count; i++)
   {
-  char *pattern = data[i][0];
-  char **subjects = data[i] + 1;
-  int *rd = results[i];
-  int rc = regcomp(&re, pattern, cflags[i]);
+    char *pattern = data[i][0];
+    char **subjects = data[i] + 1;
+    int *rd = results[i];
+    int rc = regcomp(&re, pattern, cflags[i]);
 
-  PRINTF("Pattern: %s flags=0x%02x\n", pattern, cflags[i]);
+    PRINTF("Pattern: %s flags=0x%02x\n", pattern, cflags[i]);
 
-  if (rc != *rd)
+    if (rc != *rd)
     {
-    fprintf(stderr, "Unexpected compile error %d (expected %d)\n", rc, *rd);
-    fprintf(stderr, "Pattern is: %s\n", pattern);
-    return 1;
-    }
-
-  if (rc != 0)
-    {
-    char buffer[256];
-    (void)regerror(rc, &re, buffer, sizeof(buffer));
-    PRINTF("Compile error %d: %s (expected)\n", rc, buffer);
-    continue;
-    }
-
-  for (; *subjects != NULL; subjects++)
-    {
-    rc = regexec(&re, *subjects, CAPCOUNT, match, mflags[i]);
-
-    PRINTF("Subject: %s\n", *subjects);
-    PRINTF("Return:  %d", rc);
-
-    if (rc != *(++rd))
-      {
-      PRINTF("\n");
-      fprintf(stderr, "Unexpected match error %d (expected %d)\n", rc, *rd);
+      fprintf(stderr, "Unexpected compile error %d (expected %d)\n", rc, *rd);
       fprintf(stderr, "Pattern is: %s\n", pattern);
-      fprintf(stderr, "Subject is: %s\n", *subjects);
       return 1;
+    }
+
+    if (rc != 0)
+    {
+      char buffer[256];
+      (void)regerror(rc, &re, buffer, sizeof(buffer));
+      PRINTF("Compile error %d: %s (expected)\n", rc, buffer);
+      continue;
+    }
+
+    for (; *subjects != NULL; subjects++)
+    {
+      rc = regexec(&re, *subjects, CAPCOUNT, match, mflags[i]);
+
+      PRINTF("Subject: %s\n", *subjects);
+      PRINTF("Return:  %d", rc);
+
+      if (rc != *(++rd))
+      {
+        PRINTF("\n");
+        fprintf(stderr, "Unexpected match error %d (expected %d)\n", rc, *rd);
+        fprintf(stderr, "Pattern is: %s\n", pattern);
+        fprintf(stderr, "Subject is: %s\n", *subjects);
+        return 1;
       }
 
-    if (rc == 0)
+      if (rc == 0)
       {
-      for (int j = 0; j < CAPCOUNT; j++)
+        for (int j = 0; j < CAPCOUNT; j++)
         {
-        regmatch_t *m = match + j;
-        if (m->rm_so < 0) continue;
-        if (m->rm_so != *(++rd) || m->rm_eo != *(++rd))
+          regmatch_t *m = match + j;
+          if (m->rm_so < 0) continue;
+          if (m->rm_so != *(++rd) || m->rm_eo != *(++rd))
           {
-          PRINTF("\n");
-          fprintf(stderr, "Mismatched results for successful match\n");
-          fprintf(stderr, "Pattern is: %s\n", pattern);
-          fprintf(stderr, "Subject is: %s\n", *subjects);
-          fprintf(stderr, "Result %d: expected %d %d received %d %d\n",
-            j, rd[-1], rd[0], m->rm_so, m->rm_eo);
-          return 1;
+            PRINTF("\n");
+            fprintf(stderr, "Mismatched results for successful match\n");
+            fprintf(stderr, "Pattern is: %s\n", pattern);
+            fprintf(stderr, "Subject is: %s\n", *subjects);
+            fprintf(stderr, "Result %d: expected %d %d received %d %d\n",
+              j, rd[-1], rd[0], m->rm_so, m->rm_eo);
+            return 1;
           }
-        PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);
+          PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);
         }
       }
 
-    else
+      else
       {
-      char buffer[256];
-      (void)regerror(rc, &re, buffer, sizeof(buffer));
-      PRINTF(": %s (expected)", buffer);
+        char buffer[256];
+        (void)regerror(rc, &re, buffer, sizeof(buffer));
+        PRINTF(": %s (expected)", buffer);
       }
 
-    PRINTF("\n");
+      PRINTF("\n");
     }
 
-  regfree(&re);
+    regfree(&re);
   }
 
-PRINTF("End of test\n");
-return 0;
+  PRINTF("End of test\n");
+  return 0;
 }
 
 /* End of pcre2posix_test.c */

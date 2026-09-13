@@ -66,47 +66,47 @@ Returns:      pointer to the opcode for the bracket, or NULL if not found
 PCRE2_SPTR
 PRIV(find_bracket)(PCRE2_SPTR code, BOOL utf, int number)
 {
-for (;;)
+  for (;;)
   {
-  PCRE2_UCHAR c = *code;
+    PCRE2_UCHAR c = *code;
 
-  if (c == OP_END) return NULL;
+    if (c == OP_END) return NULL;
 
-  /* XCLASS is used for classes that cannot be represented just by a bit map.
-  This includes negated single high-valued characters. ECLASS is used for
-  classes that use set operations internally. CALLOUT_STR is used for
-  callouts with string arguments. In each case the length in the table is
-  zero; the actual length is stored in the compiled code. */
+    /* XCLASS is used for classes that cannot be represented just by a bit map.
+    This includes negated single high-valued characters. ECLASS is used for
+    classes that use set operations internally. CALLOUT_STR is used for
+    callouts with string arguments. In each case the length in the table is
+    zero; the actual length is stored in the compiled code. */
 
-  if (c == OP_XCLASS || c == OP_ECLASS) code += GET(code, 1);
-  else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
+    if (c == OP_XCLASS || c == OP_ECLASS) code += GET(code, 1);
+    else if (c == OP_CALLOUT_STR) code += GET(code, 1 + 2*LINK_SIZE);
 
-  /* Handle lookbehind */
+    /* Handle lookbehind */
 
-  else if (c == OP_REVERSE || c == OP_VREVERSE)
+    else if (c == OP_REVERSE || c == OP_VREVERSE)
     {
-    if (number < 0) return code;
-    code += PRIV(OP_lengths)[c];
+      if (number < 0) return code;
+      code += PRIV(OP_lengths)[c];
     }
 
-  /* Handle capturing bracket */
+    /* Handle capturing bracket */
 
-  else if (c == OP_CBRA || c == OP_SCBRA ||
-           c == OP_CBRAPOS || c == OP_SCBRAPOS)
+    else if (c == OP_CBRA || c == OP_SCBRA ||
+             c == OP_CBRAPOS || c == OP_SCBRAPOS)
     {
-    int n = (int)GET2(code, 1+LINK_SIZE);
-    if (n == number) return code;
-    code += PRIV(OP_lengths)[c];
+      int n = (int)GET2(code, 1+LINK_SIZE);
+      if (n == number) return code;
+      code += PRIV(OP_lengths)[c];
     }
 
-  /* Otherwise, we can get the item's length from the table, except that for
-  repeated character types, we have to test for \p and \P, which have an extra
-  two bytes of parameters, and for MARK/PRUNE/SKIP/THEN with an argument, we
-  must add in its length. */
+    /* Otherwise, we can get the item's length from the table, except that for
+    repeated character types, we have to test for \p and \P, which have an extra
+    two bytes of parameters, and for MARK/PRUNE/SKIP/THEN with an argument, we
+    must add in its length. */
 
-  else
+    else
     {
-    switch (c)
+      switch (c)
       {
       case OP_TYPESTAR:
       case OP_TYPEMINSTAR:
@@ -117,38 +117,38 @@ for (;;)
       case OP_TYPEPOSSTAR:
       case OP_TYPEPOSPLUS:
       case OP_TYPEPOSQUERY:
-      if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
-      break;
+        if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+        break;
 
       case OP_TYPEUPTO:
       case OP_TYPEMINUPTO:
       case OP_TYPEEXACT:
       case OP_TYPEPOSUPTO:
-      if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP)
-        code += 2;
-      break;
+        if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP)
+          code += 2;
+        break;
 
       case OP_MARK:
       case OP_COMMIT_ARG:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
       case OP_THEN_ARG:
-      code += code[1];
-      break;
+        code += code[1];
+        break;
       }
 
-    /* Add in the fixed length from the table */
+      /* Add in the fixed length from the table */
 
-    code += PRIV(OP_lengths)[c];
+      code += PRIV(OP_lengths)[c];
 
-  /* In UTF-8 and UTF-16 modes, opcodes that are followed by a character may be
-  followed by a multi-byte character. The length in the table is a minimum, so
-  we have to arrange to skip the extra bytes. */
+    /* In UTF-8 and UTF-16 modes, opcodes that are followed by a character may be
+    followed by a multi-byte character. The length in the table is a minimum, so
+    we have to arrange to skip the extra bytes. */
 
 #ifdef MAYBE_UTF_MULTI
-    if (utf)
+      if (utf)
       {
-      switch (c)
+        switch (c)
         {
         case OP_CHAR:
         case OP_CHARI:
@@ -206,12 +206,12 @@ for (;;)
         case OP_POSQUERYI:
         case OP_NOTPOSQUERY:
         case OP_NOTPOSQUERYI:
-        if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
-        break;
+          if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
+          break;
         }
       }
 #else
-    (void)(utf);  // Keep compiler happy by referencing function argument
+      (void)(utf);  // Keep compiler happy by referencing function argument
 #endif  /* MAYBE_UTF_MULTI */
     }
   }

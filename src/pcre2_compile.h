@@ -202,13 +202,13 @@ them will be able to (i.e. assume a 64-bit world). */
 #define SIZEOFFSET 1
 #else
 #define PUTOFFSET(s,p) \
-  { *p++ = (uint32_t)(s >> 32); *p++ = (uint32_t)(s & 0xffffffff); }
+{   *p++ = (uint32_t)(s >> 32); *p++ = (uint32_t)(s & 0xffffffff); }
 #define GETOFFSET(s,p) \
-  { s = ((PCRE2_SIZE)p[0] << 32) | (PCRE2_SIZE)p[1]; p += 2; }
+{   s = ((PCRE2_SIZE)p[0] << 32) | (PCRE2_SIZE)p[1]; p += 2; }
 #define GETPLUSOFFSET(s,p) \
-  { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; p += 2; }
+{   s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; p += 2; }
 #define READPLUSOFFSET(s,p) \
-  { s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; }
+{   s = ((PCRE2_SIZE)p[1] << 32) | (PCRE2_SIZE)p[2]; }
 #define SKIPOFFSET(p) p += 2
 #define SIZEOFFSET 2
 #endif

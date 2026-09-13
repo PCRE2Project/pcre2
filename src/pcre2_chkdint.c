@@ -66,29 +66,29 @@ BOOL
 PRIV(ckd_smul)(PCRE2_SIZE *r, int a, int b)
 {
 #ifdef HAVE_BUILTIN_MUL_OVERFLOW
-PCRE2_SIZE m;
+  PCRE2_SIZE m;
 
-if (__builtin_mul_overflow(a, b, &m)) return TRUE;
+  if (__builtin_mul_overflow(a, b, &m)) return TRUE;
 
-*r = m;
+  *r = m;
 #else
-INT64_OR_DOUBLE m;
+  INT64_OR_DOUBLE m;
 
-PCRE2_ASSERT(a >= 0 && b >= 0);
+  PCRE2_ASSERT(a >= 0 && b >= 0);
 
-m = (INT64_OR_DOUBLE)a * (INT64_OR_DOUBLE)b;
+  m = (INT64_OR_DOUBLE)a * (INT64_OR_DOUBLE)b;
 
 #if defined INT64_MAX || defined int64_t
-if (sizeof(m) > sizeof(*r) && m > (INT64_OR_DOUBLE)PCRE2_SIZE_MAX) return TRUE;
-*r = (PCRE2_SIZE)m;
+  if (sizeof(m) > sizeof(*r) && m > (INT64_OR_DOUBLE)PCRE2_SIZE_MAX) return TRUE;
+  *r = (PCRE2_SIZE)m;
 #else
-if (m > PCRE2_SIZE_MAX) return TRUE;
-*r = m;
+  if (m > PCRE2_SIZE_MAX) return TRUE;
+  *r = m;
 #endif
 
 #endif
 
-return FALSE;
+  return FALSE;
 }
 
 /* End of pcre2_chkdint.c */

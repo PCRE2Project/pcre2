@@ -112,7 +112,7 @@ handling wide characters. */
 character. */
 
 const int PRIV(utf8_table1)[] =
-  { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
+{   0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
 
 const unsigned PRIV(utf8_table1_size) = ARR_SIZE(PRIV(utf8_table1));
 

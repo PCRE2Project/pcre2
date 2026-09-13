@@ -390,7 +390,7 @@ sequence. */
 advancing the pointer. */
 
 #define GETUTF16(c, eptr) \
-   { c = (((c & 0x3ffu) << 10) | (eptr[1] & 0x3ffu)) + 0x10000u; }
+ {   c = (((c & 0x3ffu) << 10) | (eptr[1] & 0x3ffu)) + 0x10000u; }
 
 /* Get the next UTF-16 character, not advancing the pointer. This is called when
 we know we are in UTF-16 mode. */
@@ -410,7 +410,7 @@ pointer. */
 the pointer. */
 
 #define GETUTF16INC(c, eptr) \
-   { c = (((c & 0x3ffu) << 10) | (*eptr++ & 0x3ffu)) + 0x10000u; }
+ {   c = (((c & 0x3ffu) << 10) | (*eptr++ & 0x3ffu)) + 0x10000u; }
 
 /* Get the next UTF-16 character, advancing the pointer. This is called when we
 know we are in UTF-16 mode. */
@@ -430,7 +430,7 @@ This is called when we don't know if we are in UTF-16 mode. */
 advancing the pointer, incrementing the length. */
 
 #define GETUTF16LEN(c, eptr, len) \
-   { c = (((c & 0x3ffu) << 10) | (eptr[1] & 0x3ffu)) + 0x10000u; len++; }
+ {   c = (((c & 0x3ffu) << 10) | (eptr[1] & 0x3ffu)) + 0x10000u; len++; }
 
 /* Get the next UTF-16 character, not advancing the pointer, incrementing
 length if there is a low surrogate. This is called when we know we are in
@@ -915,8 +915,8 @@ typedef struct heapframe {
 #else
         PCRE2_UCHAR occu[1];
 #endif
-      } oc;
-    } char_repeat;
+    }   oc;
+  }   char_repeat;
 
     struct {
       PCRE2_SPTR start_eptr;
@@ -924,21 +924,21 @@ typedef struct heapframe {
       uint32_t max;
       uint32_t c;
       uint32_t oc;
-    } charnot_repeat;
+  }   charnot_repeat;
 
     struct {
       PCRE2_SPTR start_eptr;
       PCRE2_SPTR byte_map_address;
       uint32_t min;
       uint32_t max;
-    } class_repeat;
+  }   class_repeat;
 
     struct {
       PCRE2_SPTR start_eptr;
       PCRE2_SPTR xclass_data;
       uint32_t min;
       uint32_t max;
-    } xclass_repeat;
+  }   xclass_repeat;
 
     struct {
       PCRE2_SPTR start_eptr;
@@ -946,7 +946,7 @@ typedef struct heapframe {
       PCRE2_SIZE eclass_len;
       uint32_t min;
       uint32_t max;
-    } eclass_repeat;
+  }   eclass_repeat;
 
     struct {
       PCRE2_SPTR start_eptr;
@@ -954,7 +954,7 @@ typedef struct heapframe {
       uint32_t max;
       uint32_t ctype;
       uint32_t propvalue;
-    } type_repeat;
+  }   type_repeat;
 
     struct {
       PCRE2_SPTR start;
@@ -962,40 +962,40 @@ typedef struct heapframe {
       PCRE2_SIZE length;
       uint32_t min;
       uint32_t max;
-    } ref_repeat;
+  }   ref_repeat;
 
     struct {
       uint32_t frame_type;    // Set for all that use GROUPLOOP
-    } op_bra;
+  }   op_bra;
 
     struct {
       PCRE2_SPTR start_eptr;
       PCRE2_SPTR start_group;
       uint32_t frame_type;
-    } op_brapos;
+  }   op_brapos;
 
     struct {
       PCRE2_SPTR start_branch;
       uint32_t frame_type;
-    } op_recurse;
+  }   op_recurse;
 
     struct {
       PCRE2_SPTR saved_end_subject;
       PCRE2_SPTR saved_eptr;
       PCRE2_SIZE true_end_extra;
       uint32_t saved_moptions;
-    } op_assert_scs;
+  }   op_assert_scs;
 
     struct {
       PCRE2_SPTR start_branch;
       PCRE2_SIZE length;
-    } op_cond;
+  }   op_cond;
 
     struct {
       uint32_t min;
       uint32_t max;
-    } op_vreverse;
-  } fields;
+  }   op_vreverse;
+}   fields;
 
   /* The rest have to be copied from the previous frame whenever a new frame
   becomes current. The final field is specified as a large vector so that

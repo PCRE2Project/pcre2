@@ -52,15 +52,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 static SLJIT_NOINLINE int jit_machine_stack_exec(jit_arguments *arguments, jit_function executable_func)
 {
-sljit_u8 local_space[MACHINE_STACK_SIZE];
-struct sljit_stack local_stack;
+  sljit_u8 local_space[MACHINE_STACK_SIZE];
+  struct sljit_stack local_stack;
 
-local_stack.min_start = local_space;
-local_stack.start = local_space;
-local_stack.end = local_space + MACHINE_STACK_SIZE;
-local_stack.top = local_space + MACHINE_STACK_SIZE;
-arguments->stack = &local_stack;
-return executable_func(arguments);
+  local_stack.min_start = local_space;
+  local_stack.start = local_space;
+  local_stack.end = local_space + MACHINE_STACK_SIZE;
+  local_stack.top = local_space + MACHINE_STACK_SIZE;
+  arguments->stack = &local_stack;
+  return executable_func(arguments);
 }
 
 #endif
@@ -94,24 +94,24 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 {
 #ifndef SUPPORT_JIT
 
-(void)code;
-(void)subject;
-(void)length;
-(void)start_offset;
-(void)options;
-(void)mcontext;
-return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
+  (void)code;
+  (void)subject;
+  (void)length;
+  (void)start_offset;
+  (void)options;
+  (void)mcontext;
+  return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 
 #else  /* SUPPORT_JIT */
 
-pcre2_real_code *re = (pcre2_real_code *)code;
-executable_functions *functions = (executable_functions *)re->executable_jit;
-pcre2_jit_stack *jit_stack;
-uint32_t oveccount = match_data->oveccount;
-uint32_t max_oveccount;
-union {
-   void *executable_func;
-   jit_function call_executable_func;
+  pcre2_real_code *re = (pcre2_real_code *)code;
+  executable_functions *functions = (executable_functions *)re->executable_jit;
+  pcre2_jit_stack *jit_stack;
+  uint32_t oveccount = match_data->oveccount;
+  uint32_t max_oveccount;
+  union {
+     void *executable_func;
+     jit_function call_executable_func;
 } convert_executable_func;
 jit_arguments arguments;
 int rc;
@@ -130,11 +130,11 @@ if (functions == NULL || functions->executable_funcs[index] == NULL)
 free the memory that was obtained. */
 
 if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
-  {
+{
   match_data->memctl.free((void *)match_data->subject,
     match_data->memctl.memory_data);
   match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
-  }
+}
 
 /* Sanity checks should be handled by pcre2_match. */
 arguments.str = subject + start_offset;
@@ -146,7 +146,7 @@ arguments.mark_ptr = NULL;
 arguments.options = options;
 
 if (mcontext != NULL)
-  {
+{
   arguments.callout = mcontext->callout;
   arguments.callout_data = mcontext->callout_data;
   arguments.offset_limit = mcontext->offset_limit;
@@ -156,16 +156,16 @@ if (mcontext != NULL)
     jit_stack = mcontext->jit_callback(mcontext->jit_callback_data);
   else
     jit_stack = (pcre2_jit_stack *)mcontext->jit_callback_data;
-  }
+}
 else
-  {
+{
   arguments.callout = NULL;
   arguments.callout_data = NULL;
   arguments.offset_limit = PCRE2_UNSET;
   arguments.limit_match = (MATCH_LIMIT < re->limit_match)?
     MATCH_LIMIT : re->limit_match;
   jit_stack = NULL;
-  }
+}
 
 
 max_oveccount = functions->top_bracket;
@@ -176,10 +176,10 @@ arguments.oveccount = oveccount << 1;
 
 convert_executable_func.executable_func = functions->executable_funcs[index];
 if (jit_stack != NULL)
-  {
+{
   arguments.stack = (struct sljit_stack *)(jit_stack->stack);
   rc = convert_executable_func.call_executable_func(&arguments);
-  }
+}
 else
   rc = jit_machine_stack_exec(&arguments, convert_executable_func.call_executable_func);
 

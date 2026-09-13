@@ -336,55 +336,55 @@ Returns:        length of message if all is well
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
 {
-const unsigned char *message;
-PCRE2_SIZE i;
-int n, rc = 0;
+  const unsigned char *message;
+  PCRE2_SIZE i;
+  int n, rc = 0;
 
-if (size == 0) return PCRE2_ERROR_NOMEMORY;
+  if (size == 0) return PCRE2_ERROR_NOMEMORY;
 
-if (enumber >= COMPILE_ERROR_BASE)  // Compile error
+  if (enumber >= COMPILE_ERROR_BASE)  // Compile error
   {
-  message = compile_error_texts;
-  n = enumber - COMPILE_ERROR_BASE;
+    message = compile_error_texts;
+    n = enumber - COMPILE_ERROR_BASE;
   }
-else if (enumber < 0)               // Match or UTF error
+  else if (enumber < 0)               // Match or UTF error
   {
-  message = match_error_texts;
-  n = -enumber;
+    message = match_error_texts;
+    n = -enumber;
   }
-else                                // Invalid error number
+  else                                // Invalid error number
   {
-  message = (const unsigned char *)"\0";  // Empty message list
-  n = 1;
-  }
-
-for (; n > 0; n--)
-  {
-  while (*message++ != CHAR_NUL) {}
-  if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
+    message = (const unsigned char *)"\0";  // Empty message list
+    n = 1;
   }
 
-for (i = 0; *message != 0; i++)
+  for (; n > 0; n--)
   {
-  if (i >= size - 1)
+    while (*message++ != CHAR_NUL) {}
+    if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
+  }
+
+  for (i = 0; *message != 0; i++)
+  {
+    if (i >= size - 1)
     {
-    rc = PCRE2_ERROR_NOMEMORY;
-    break;
+      rc = PCRE2_ERROR_NOMEMORY;
+      break;
     }
-  buffer[i] = *message++;
+    buffer[i] = *message++;
   }
 
 #if defined EBCDIC && 'a' != 0x81
-/* If compiling for EBCDIC, but the compiler's string literals are not EBCDIC,
-then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
-here to translate the error strings on the fly, rather than require the string
-literals above to be written out arduously using the "STR_XYZ" macros. */
-for (PCRE2_SIZE j = 0; j < i; ++j)
-  buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
+  /* If compiling for EBCDIC, but the compiler's string literals are not EBCDIC,
+  then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
+  here to translate the error strings on the fly, rather than require the string
+  literals above to be written out arduously using the "STR_XYZ" macros. */
+  for (PCRE2_SIZE j = 0; j < i; ++j)
+    buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
 #endif
 
-buffer[i] = 0;     // Terminate message, even if truncated.
-return rc? rc : (int)i;
+  buffer[i] = 0;     // Terminate message, even if truncated.
+  return rc? rc : (int)i;
 }
 
 /* End of pcre2_error.c */

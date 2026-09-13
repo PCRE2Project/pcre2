@@ -258,7 +258,7 @@ gives a significant performance advantage, and it seems never to do any harm.
 advancing the pointer. */
 
 #define GETUTF8(c, eptr) \
-    { \
+  {   \
     if ((c & 0x20u) == 0) \
       c = ((c & 0x1fu) << 6) | (eptr[1] & 0x3fu); \
     else if ((c & 0x10u) == 0) \
@@ -274,78 +274,78 @@ advancing the pointer. */
       c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | \
           ((eptr[2] & 0x3fu) << 18) | ((eptr[3] & 0x3fu) << 12) | \
           ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu); \
-    }
+  }
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
 the pointer. */
 
 #define GETUTF8INC(c, eptr) \
-    { \
+  {   \
     if ((c & 0x20u) == 0) \
       c = ((c & 0x1fu) << 6) | (*eptr++ & 0x3fu); \
     else if ((c & 0x10u) == 0) \
-      { \
+    {   \
       c = ((c & 0x0fu) << 12) | ((*eptr & 0x3fu) << 6) | (eptr[1] & 0x3fu); \
       eptr += 2; \
-      } \
+    }   \
     else if ((c & 0x08u) == 0) \
-      { \
+    {   \
       c = ((c & 0x07u) << 18) | ((*eptr & 0x3fu) << 12) | \
           ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu); \
       eptr += 3; \
-      } \
+    }   \
     else if ((c & 0x04u) == 0) \
-      { \
+    {   \
       c = ((c & 0x03u) << 24) | ((*eptr & 0x3fu) << 18) | \
           ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) | \
           (eptr[3] & 0x3fu); \
       eptr += 4; \
-      } \
+    }   \
     else \
-      { \
+    {   \
       c = ((c & 0x01u) << 30) | ((*eptr & 0x3fu) << 24) | \
           ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
           ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu); \
       eptr += 5; \
-      } \
-    }
+    }   \
+  }
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, not
 advancing the pointer, incrementing the length. */
 
 #define GETUTF8LEN(c, eptr, len) \
-    { \
+  {   \
     if ((c & 0x20u) == 0) \
-      { \
+    {   \
       c = ((c & 0x1fu) << 6) | (eptr[1] & 0x3fu); \
       len++; \
-      } \
+    }   \
     else if ((c & 0x10u)  == 0) \
-      { \
+    {   \
       c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu); \
       len += 2; \
-      } \
+    }   \
     else if ((c & 0x08u)  == 0) \
-      {\
+    {  \
       c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | \
           ((eptr[2] & 0x3fu) << 6) | (eptr[3] & 0x3fu); \
       len += 3; \
-      } \
+    }   \
     else if ((c & 0x04u)  == 0) \
-      { \
+    {   \
       c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | \
           ((eptr[2] & 0x3fu) << 12) | ((eptr[3] & 0x3fu) << 6) | \
           (eptr[4] & 0x3fu); \
       len += 4; \
-      } \
+    }   \
     else \
-      {\
+    {  \
       c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | \
           ((eptr[2] & 0x3fu) << 18) | ((eptr[3] & 0x3fu) << 12) | \
           ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu); \
       len += 5; \
-      } \
-    }
+    }   \
+  }
 
 /* --------------- Whitespace macros ---------------- */
 
@@ -383,26 +383,26 @@ PCRE (both APIs) for a long time. */
 // clang-format on
 
 #define HSPACE_MULTIBYTE_CASES \
-  case 0x1680:  /* OGHAM SPACE MARK */ \
-  case 0x180e:  /* MONGOLIAN VOWEL SEPARATOR */ \
-  case 0x2000:  /* EN QUAD */ \
-  case 0x2001:  /* EM QUAD */ \
-  case 0x2002:  /* EN SPACE */ \
-  case 0x2003:  /* EM SPACE */ \
-  case 0x2004:  /* THREE-PER-EM SPACE */ \
-  case 0x2005:  /* FOUR-PER-EM SPACE */ \
-  case 0x2006:  /* SIX-PER-EM SPACE */ \
-  case 0x2007:  /* FIGURE SPACE */ \
-  case 0x2008:  /* PUNCTUATION SPACE */ \
-  case 0x2009:  /* THIN SPACE */ \
-  case 0x200a:  /* HAIR SPACE */ \
-  case 0x202f:  /* NARROW NO-BREAK SPACE */ \
-  case 0x205f:  /* MEDIUM MATHEMATICAL SPACE */ \
+case 0x1680:    /* OGHAM SPACE MARK */ \
+case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */ \
+case 0x2000:    /* EN QUAD */ \
+case 0x2001:    /* EM QUAD */ \
+case 0x2002:    /* EN SPACE */ \
+case 0x2003:    /* EM SPACE */ \
+case 0x2004:    /* THREE-PER-EM SPACE */ \
+case 0x2005:    /* FOUR-PER-EM SPACE */ \
+case 0x2006:    /* SIX-PER-EM SPACE */ \
+case 0x2007:    /* FIGURE SPACE */ \
+case 0x2008:    /* PUNCTUATION SPACE */ \
+case 0x2009:    /* THIN SPACE */ \
+case 0x200a:    /* HAIR SPACE */ \
+case 0x202f:    /* NARROW NO-BREAK SPACE */ \
+case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */ \
   case 0x3000   /* IDEOGRAPHIC SPACE */
 
 #define HSPACE_BYTE_CASES \
-  case CHAR_HT: \
-  case CHAR_SPACE: \
+case CHAR_HT:   \
+case CHAR_SPACE:   \
   case CHAR_NBSP
 
 #define HSPACE_CASES \
@@ -413,14 +413,14 @@ PCRE (both APIs) for a long time. */
   CHAR_LF, CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, 0x2028, 0x2029, NOTACHAR
 
 #define VSPACE_MULTIBYTE_CASES \
-  case 0x2028:    /* LINE SEPARATOR */ \
+case 0x2028:      /* LINE SEPARATOR */ \
   case 0x2029     /* PARAGRAPH SEPARATOR */
 
 #define VSPACE_BYTE_CASES \
-  case CHAR_LF: \
-  case CHAR_VT: \
-  case CHAR_FF: \
-  case CHAR_CR: \
+case CHAR_LF:   \
+case CHAR_VT:   \
+case CHAR_FF:   \
+case CHAR_CR:   \
   case CHAR_NEL
 
 #define VSPACE_CASES \
@@ -433,8 +433,8 @@ PCRE (both APIs) for a long time. */
 #define HSPACE_LIST CHAR_HT, CHAR_SPACE, CHAR_NBSP, NOTACHAR
 
 #define HSPACE_BYTE_CASES \
-  case CHAR_HT: \
-  case CHAR_SPACE: \
+case CHAR_HT:   \
+case CHAR_SPACE:   \
   case CHAR_NBSP
 
 #define HSPACE_CASES HSPACE_BYTE_CASES
@@ -448,10 +448,10 @@ PCRE (both APIs) for a long time. */
 #endif
 
 #define VSPACE_BYTE_CASES \
-  case CHAR_LF: \
-  case CHAR_VT: \
-  case CHAR_FF: \
-  case CHAR_CR: \
+case CHAR_LF:   \
+case CHAR_VT:   \
+case CHAR_FF:   \
+case CHAR_CR:   \
   case CHAR_NEL
 
 #define VSPACE_CASES VSPACE_BYTE_CASES
