@@ -3549,7 +3549,7 @@ if (
   }
 
 #ifdef WIN32
-else if (iswild(pathname))
+if (iswild(pathname))
   {
   char buffer[1024];
   char *nextfile;
