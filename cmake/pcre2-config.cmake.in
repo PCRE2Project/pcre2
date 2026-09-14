@@ -31,6 +31,17 @@
 
 @PACKAGE_INIT@
 
+# Meson's equivalent helper does not currently provide this macro.
+if(NOT COMMAND check_required_components)
+  macro(check_required_components _NAME)
+    foreach(component ${${_NAME}_FIND_COMPONENTS})
+      if(NOT ${_NAME}_${component}_FOUND AND ${_NAME}_FIND_REQUIRED_${component})
+        set(${_NAME}_FOUND FALSE)
+      endif()
+    endforeach()
+  endmacro()
+endif()
+
 include(CMakeFindDependencyMacro)
 if("@REQUIRE_PTHREAD@") # REQUIRE_PTHREAD
   find_dependency(Threads)

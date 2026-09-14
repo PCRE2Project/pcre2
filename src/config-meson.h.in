@@ -1,0 +1,57 @@
+/* config.h for Meson builds */
+
+#mesondefine HAVE_ASSERT_H
+#mesondefine HAVE_BUILTIN_ASSUME
+#mesondefine HAVE_BUILTIN_MUL_OVERFLOW
+#mesondefine HAVE_BUILTIN_UNREACHABLE
+#mesondefine HAVE_ATTRIBUTE_UNINITIALIZED
+#mesondefine HAVE_DIRENT_H
+#mesondefine HAVE_SYS_STAT_H
+#mesondefine HAVE_SYS_TYPES_H
+#mesondefine HAVE_UNISTD_H
+#mesondefine HAVE_WINDOWS_H
+
+#mesondefine HAVE_MEMFD_CREATE
+#mesondefine HAVE_SECURE_GETENV
+#mesondefine HAVE_SETRLIMIT
+
+#mesondefine SUPPORT_PCRE2_8
+#mesondefine SUPPORT_PCRE2_16
+#mesondefine SUPPORT_PCRE2_32
+#mesondefine DISABLE_PERCENT_ZT
+
+#mesondefine SUPPORT_LIBBZ2
+#mesondefine SUPPORT_LIBEDIT
+#mesondefine SUPPORT_LIBREADLINE
+#mesondefine SUPPORT_LIBZ
+
+#mesondefine SUPPORT_JIT
+#mesondefine SLJIT_PROT_EXECUTABLE_ALLOCATOR
+#mesondefine SUPPORT_PCRE2GREP_JIT
+#mesondefine SUPPORT_PCRE2GREP_CALLOUT
+#mesondefine SUPPORT_PCRE2GREP_CALLOUT_FORK
+#mesondefine SUPPORT_UNICODE
+#mesondefine SUPPORT_VALGRIND
+#mesondefine SUPPORT_DIFF_FUZZ
+
+#mesondefine BSR_ANYCRLF
+#mesondefine EBCDIC
+#mesondefine EBCDIC_NL25
+#mesondefine EBCDIC_IGNORING_COMPILER
+#mesondefine NEVER_BACKSLASH_C
+
+#define PCRE2_EXPORT            @PCRE2_EXPORT@
+#define LINK_SIZE               @PCRE2_LINK_SIZE@
+#define HEAP_LIMIT              @PCRE2_HEAP_LIMIT@
+#define MATCH_LIMIT             @PCRE2_MATCH_LIMIT@
+#define MATCH_LIMIT_DEPTH       @PCRE2_MATCH_LIMIT_DEPTH@
+#define MAX_VARLOOKBEHIND       @PCRE2_MAX_VARLOOKBEHIND@
+#define NEWLINE_DEFAULT         @NEWLINE_DEFAULT@
+#define PARENS_NEST_LIMIT       @PCRE2_PARENS_NEST_LIMIT@
+#define PCRE2GREP_BUFSIZE       @PCRE2GREP_BUFSIZE@
+#define PCRE2GREP_MAX_BUFSIZE   @PCRE2GREP_MAX_BUFSIZE@
+
+#define MAX_NAME_SIZE           128
+#define MAX_NAME_COUNT          10000
+
+/* end config.h for Meson builds */
