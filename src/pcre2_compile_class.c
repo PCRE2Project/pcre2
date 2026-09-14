@@ -217,6 +217,7 @@ utf_caseless_extend(uint32_t start, uint32_t end, uint32_t options, uint32_t *bu
         tmp[2] = NOTACHAR;
       }
     }
+
     c++;
 
     /* Add characters. */
@@ -265,6 +266,7 @@ utf_caseless_extend(uint32_t start, uint32_t end, uint32_t options, uint32_t *bu
     buffer += 2;
     (void)buffer;
   }
+
   return result;
 }
 
@@ -430,10 +432,13 @@ parse_class(uint32_t *ptr, uint32_t options, uint32_t *buffer)
             buffer[1] = get_highest_char(options);
             buffer += 2;
           }
+
           total_size += 2;
         }
+
         break;
       }
+
       ptr++;
       continue;
     case META_POSIX_NEG:
@@ -849,6 +854,7 @@ PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated, uint8_t *cl
         set_bit = (PRIV(ucp_gentype)[prop->chartype] == ucp_Z);
         break;
       }
+
       break;
 
     case PT_WORD:
@@ -981,6 +987,7 @@ add_to_class(uint32_t options, uint32_t xoptions, compile_block *cb, uint32_t st
           SETBIT(classbits, cb->fcc[c]);
         }
       }
+
       if (classbits_end >= 128)
       {
         uint32_t hi_start = (start > 128 ? start : 128);
@@ -1269,8 +1276,10 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
               *class_uchardata++ = (PCRE2_UCHAR)ptype;
               *class_uchardata++ = 0;
             }
+
             xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
           }
+
           continue;
 
           /* For the other POSIX classes (ex: ascii) we are going to
@@ -1514,9 +1523,11 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
               *class_uchardata++ = ptype;
               *class_uchardata++ = pdata;
             }
+
             xclass_props |= XCLASS_REQUIRED | XCLASS_HAS_PROPS;
           }
         }
+
         continue;
 #endif
       }
@@ -2042,6 +2053,7 @@ fold_binary(int op, eclass_op_info *lhs_op_info, eclass_op_info *rhs_op_info, PC
         PCRE2_ASSERT(rhs_op_info->code_start == lhs_op_info->code_start + lhs_op_info->length);
         rhs_op_info->code_start[rhs_op_info->length] = ECL_AND;
       }
+
       lhs_op_info->length += rhs_op_info->length + 1;
       lhs_op_info->op_single_type = 0;
     }
@@ -2098,6 +2110,7 @@ fold_binary(int op, eclass_op_info *lhs_op_info, eclass_op_info *rhs_op_info, PC
         PCRE2_ASSERT(rhs_op_info->code_start == lhs_op_info->code_start + lhs_op_info->length);
         rhs_op_info->code_start[rhs_op_info->length] = ECL_OR;
       }
+
       lhs_op_info->length += rhs_op_info->length + 1;
       lhs_op_info->op_single_type = 0;
     }
@@ -2160,6 +2173,7 @@ fold_binary(int op, eclass_op_info *lhs_op_info, eclass_op_info *rhs_op_info, PC
         PCRE2_ASSERT(rhs_op_info->code_start == lhs_op_info->code_start + lhs_op_info->length);
         rhs_op_info->code_start[rhs_op_info->length] = ECL_XOR;
       }
+
       lhs_op_info->length += rhs_op_info->length + 1;
       lhs_op_info->op_single_type = 0;
     }
@@ -2214,6 +2228,7 @@ compile_class_operand(eclass_context *context, BOOL negated, uint32_t **pptr, PC
       *code++ = pop_info->op_single_type = ECL_NONE;
       memset(pop_info->bits.classbits, 0, 32);
     }
+
     break;
 
   case META_CLASS:
@@ -2770,6 +2785,7 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
           memcpy(code, op_info.bits.classbits, 32);
           code += 32 / sizeof(PCRE2_UCHAR);
         }
+
         code += rest_len;
       }
 #endif /* SUPPORT_WIDE_CHARS */
@@ -2810,6 +2826,7 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
         memcpy(map_start, op_info.bits.classbits, 32);
         code += 32 / sizeof(PCRE2_UCHAR);
       }
+
       PUT(previous, 1, (int)(code - previous));
     }
   }

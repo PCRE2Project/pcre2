@@ -428,6 +428,7 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
       pmatch[i].rm_so = (ovector[i * 2] == PCRE2_UNSET) ? -1 : (int)(ovector[i * 2] + so);
       pmatch[i].rm_eo = (ovector[i * 2 + 1] == PCRE2_UNSET) ? -1 : (int)(ovector[i * 2 + 1] + so);
     }
+
     for (; i < nmatch; i++)
       pmatch[i].rm_so = pmatch[i].rm_eo = -1;
     return 0;

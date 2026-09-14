@@ -98,6 +98,7 @@ PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
   {
     *newmemctl = *memctl;
   }
+
   return yield;
 }
 
@@ -510,6 +511,7 @@ pcre2_set_optimize(pcre2_compile_context *ccontext, uint32_t directive)
         ccontext->optimization_flags |= 1u << ((directive >> 1) - 32);
       return 0;
     }
+
     return PCRE2_ERROR_BADOPTION;
   }
 

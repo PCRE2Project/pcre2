@@ -152,6 +152,7 @@ pcre2_jit_stack_create(size_t startsize, size_t maxsize, pcre2_general_context *
     jit_stack->memctl.free(jit_stack, jit_stack->memctl.memory_data);
     return NULL;
   }
+
   return jit_stack;
 
 #endif

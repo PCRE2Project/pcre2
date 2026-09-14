@@ -198,6 +198,7 @@ dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
       {
         fprintf(stream, "%02x", bufferptr[i]);
       }
+
       fprintf(stream, "\n");
     }
     else
@@ -223,6 +224,7 @@ describe_failure(const char *task, const PCRE2_UCHAR *data, PCRE2_SIZE size,
   {
     fprintf(stderr, "%02x", data[i]);
   }
+
   fprintf(stderr, "\n");
 
   print_compile_options(stderr, compile_options);
@@ -296,6 +298,7 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
     fprintf(stderr, "Hard stack size limit is too small\n");
     _exit(1);
   }
+
   rc = setrlimit(RLIMIT_STACK, &rlim);
   if (rc != 0)
   {
@@ -408,6 +411,7 @@ LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
             if (wdata[j] != '}' && wdata[j] != ',')
               goto OUTERLOOP;
           }
+
           if (wdata[j] == '}' || (ii == 0 && wdata[j] == ','))
             break;
 
@@ -417,6 +421,7 @@ LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
             j--;
             goto OUTERLOOP;
           }
+
           q = q * 10 + (wdata[j] - '0');
         }
 
@@ -456,6 +461,7 @@ LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
       continue;
     }
   }
+
 END_QSCAN:
 
   /* Limiting the length of the subject for matching stops fruitless searches
@@ -474,6 +480,7 @@ END_QSCAN:
 #endif
     abort();
   }
+
   pcre2_set_max_pattern_compiled_length(compile_context, 10 * 1024 * 1024);
 
   /* Ensure that all undefined option bits are zero (waste of time trying them)
@@ -579,6 +586,7 @@ END_QSCAN:
 #endif
           abort();
         }
+
         (void)pcre2_set_match_limit(match_context, 100);
         (void)pcre2_set_depth_limit(match_context, 100);
         (void)pcre2_set_callout(match_context, callout_function, &callout_count);
@@ -817,6 +825,7 @@ main(int argc, char **argv)
         LLVMFuzzerTestOneInput(buffer, readsize);
         free(buffer);
       }
+
       continue;
     }
 
@@ -855,6 +864,7 @@ main(int argc, char **argv)
       printf("Length = %lu\n", filelen);
       LLVMFuzzerTestOneInput(buffer, filelen);
     }
+
     free(buffer);
   }
 

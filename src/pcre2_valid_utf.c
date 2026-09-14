@@ -170,6 +170,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         return PCRE2_ERROR_UTF8_ERR5;
       }
     }
+
     length -= ab; // Length remaining
 
     /* Check top bits in the second byte */
@@ -195,6 +196,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         *erroroffset = (PCRE2_SIZE)(p - string) - 1;
         return PCRE2_ERROR_UTF8_ERR15;
       }
+
       break;
 
       /* 3-byte character. Check third byte for 0x80. Then check first 2 bytes
@@ -207,16 +209,19 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
+
       if (c == 0xe0 && (d & 0x20) == 0)
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR16;
       }
+
       if (c == 0xed && d >= 0xa0)
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR14;
       }
+
       break;
 
       /* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
@@ -229,21 +234,25 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
+
       if ((*(++p) & 0xc0) != 0x80) // Fourth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR8;
       }
+
       if (c == 0xf0 && (d & 0x30) == 0)
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR17;
       }
+
       if (c > 0xf4 || (c == 0xf4 && d > 0x8f))
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR13;
       }
+
       break;
 
       /* 5-byte and 6-byte characters are not allowed by RFC 3629, and will be
@@ -260,21 +269,25 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
+
       if ((*(++p) & 0xc0) != 0x80) // Fourth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR8;
       }
+
       if ((*(++p) & 0xc0) != 0x80) // Fifth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 4;
         return PCRE2_ERROR_UTF8_ERR9;
       }
+
       if (c == 0xf8 && (d & 0x38) == 0)
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 4;
         return PCRE2_ERROR_UTF8_ERR18;
       }
+
       break;
 
       /* 6-byte character. Check 3rd-6th bytes for 0x80. Then check for
@@ -286,26 +299,31 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         *erroroffset = (PCRE2_SIZE)(p - string) - 2;
         return PCRE2_ERROR_UTF8_ERR7;
       }
+
       if ((*(++p) & 0xc0) != 0x80) // Fourth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 3;
         return PCRE2_ERROR_UTF8_ERR8;
       }
+
       if ((*(++p) & 0xc0) != 0x80) // Fifth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 4;
         return PCRE2_ERROR_UTF8_ERR9;
       }
+
       if ((*(++p) & 0xc0) != 0x80) // Sixth byte
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 5;
         return PCRE2_ERROR_UTF8_ERR10;
       }
+
       if (c == 0xfc && (d & 0x3c) == 0)
       {
         *erroroffset = (PCRE2_SIZE)(p - string) - 5;
         return PCRE2_ERROR_UTF8_ERR19;
       }
+
       break;
     }
 
@@ -319,6 +337,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       return (ab == 4) ? PCRE2_ERROR_UTF8_ERR11 : PCRE2_ERROR_UTF8_ERR12;
     }
   }
+
   return 0;
 
 
@@ -349,6 +368,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         *erroroffset = (PCRE2_SIZE)(p - string);
         return PCRE2_ERROR_UTF16_ERR1;
       }
+
       p++;
       length--;
       if ((*p & 0xfc00) != 0xdc00)
@@ -364,6 +384,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       return PCRE2_ERROR_UTF16_ERR3;
     }
   }
+
   return 0;
 
 
@@ -396,6 +417,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       return PCRE2_ERROR_UTF32_ERR1;
     }
   }
+
   return 0;
 #endif /* CODE_UNIT_WIDTH */
 }

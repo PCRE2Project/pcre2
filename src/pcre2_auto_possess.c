@@ -254,6 +254,7 @@ check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata, BOOL negated
     default:
       rc = (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
     }
+
     return rc;
 
   case PT_WORD:
@@ -388,6 +389,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc, u
       code++;
       break;
     }
+
     c = list[0];
   }
 
@@ -473,6 +475,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc, u
         list[3] = code[1];
         return code;
       }
+
       *clist_dest++ = *clist_src;
     } while (*clist_src++ != NOTACHAR);
 
@@ -520,6 +523,7 @@ get_chr_property_list(PCRE2_SPTR code, BOOL utf, BOOL ucp, const uint8_t *fcc, u
       end += 1 + 2 * IMM2_SIZE;
       break;
     }
+
     list[2] = (uint32_t)(end - code);
     list[3] = (uint32_t)(end - class_end);
     return end;
@@ -682,6 +686,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
             return FALSE; // Variable
           bracode += GET(bracode, 1);
         } while (*bracode == OP_ALT);
+
         return !entered_a_group; // Not variable length
 
         /* Non-atomic assertions - don't possessify last iterator. This needs
@@ -813,6 +818,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
           /* Might be an empty repeat. */
           continue;
         }
+
         set2 = (const uint8_t *)(xclass_flags + 1);
         break;
 #endif
@@ -1017,6 +1023,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
             return FALSE;
           ochr_ptr++;
         } while (*ochr_ptr != NOTACHAR);
+
         break;
 
       case OP_NOT:
@@ -1027,6 +1034,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
             break;
           ochr_ptr++;
         } while (*ochr_ptr != NOTACHAR);
+
         if (*ochr_ptr == NOTACHAR)
           return FALSE; // Not found
         break;
@@ -1072,6 +1080,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
         default:
           break;
         }
+
         break;
 
       case OP_NOT_HSPACE:
@@ -1082,6 +1091,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
         default:
           return FALSE;
         }
+
         break;
 
       case OP_ANYNL:
@@ -1093,6 +1103,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
         default:
           break;
         }
+
         break;
 
       case OP_NOT_VSPACE:
@@ -1103,6 +1114,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
         default:
           return FALSE;
         }
+
         break;
 
       case OP_DOLL:
@@ -1120,6 +1132,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 #endif /* Not EBCDIC */
           return FALSE;
         }
+
         break;
 
       case OP_EOD: // Can always possessify before \z
@@ -1267,6 +1280,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
           break;
         }
       }
+
       c = *code;
     }
     else if (c == OP_CLASS || c == OP_NCLASS
@@ -1319,6 +1333,7 @@ PRIV(auto_possessify)(PCRE2_UCHAR *code, const compile_block *cb)
           }
         }
       }
+
       c = *code;
     }
 

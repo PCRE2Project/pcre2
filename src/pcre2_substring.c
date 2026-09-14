@@ -87,6 +87,7 @@ pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
       failrc = PCRE2_ERROR_UNSET;
     }
   }
+
   return failrc;
 }
 
@@ -177,6 +178,7 @@ pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
       failrc = PCRE2_ERROR_UNSET;
     }
   }
+
   return failrc;
 }
 
@@ -286,6 +288,7 @@ pcre2_substring_length_byname(pcre2_match_data *match_data, PCRE2_SPTR stringnam
       failrc = PCRE2_ERROR_UNSET;
     }
   }
+
   return failrc;
 }
 
@@ -527,18 +530,21 @@ pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PC
           break;
         first -= entrysize;
       }
+
       while (last < lastentry)
       {
         if (PRIV(strcmp)(stringname, (last + entrysize + IMM2_SIZE)) != 0)
           break;
         last += entrysize;
       }
+
       if (firstptr == NULL)
         return (first == last) ? (int)GET2(entry, 0) : PCRE2_ERROR_NOUNIQUESUBSTRING;
       *firstptr = first;
       *lastptr = last;
       return entrysize;
     }
+
     if (c > 0)
       bot = mid + 1;
     else

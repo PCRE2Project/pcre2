@@ -71,6 +71,7 @@ PRIV(strcmp)(PCRE2_SPTR str1, PCRE2_SPTR str2)
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
+
   return 0;
 }
 
@@ -100,6 +101,7 @@ PRIV(strcmp_c8)(PCRE2_SPTR str1, const char *str2)
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
+
   return 0;
 }
 
@@ -128,6 +130,7 @@ PRIV(strncmp)(PCRE2_SPTR str1, PCRE2_SPTR str2, size_t len)
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
+
   return 0;
 }
 
@@ -158,6 +161,7 @@ PRIV(strncmp_c8)(PCRE2_SPTR str1, const char *str2, size_t len)
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
+
   return 0;
 }
 

@@ -678,6 +678,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         int bstate = (int)(end_code - start_code + 1 + LINK_SIZE + revlen);
         ADD_NEW_DATA(-bstate, 0, (int)(gone_back - back));
       }
+
       end_code += GET(end_code, 1);
     } while (*end_code == OP_ALT);
   }
@@ -700,6 +701,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
       {
         end_code += GET(end_code, 1);
       } while (*end_code == OP_ALT);
+
       new_count = workspace[1];
       if (!workspace[0])
         memcpy(new_states, active_states, (size_t)new_count * sizeof(stateblock));
@@ -938,10 +940,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               offsets[0] = (PCRE2_SIZE)(current_subject - start_subject);
               offsets[1] = (PCRE2_SIZE)(ptr - start_subject);
             }
+
             if ((mb->moptions & PCRE2_DFA_SHORTEST) != 0)
               return match_count;
           }
         }
+
         break;
 
         /* ========================================================================== */
@@ -954,6 +958,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           code += GET(code, 1);
         } while (*code == OP_ALT);
+
         ADD_ACTIVE((int)(code - start_code), 0);
         break;
 
@@ -965,6 +970,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
           ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE), 0);
           code += GET(code, 1);
         } while (*code == OP_ALT);
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -977,6 +983,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
           ADD_ACTIVE((int)(code - start_code + 1 + LINK_SIZE), 0);
           code += GET(code, 1);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1003,6 +1010,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1013,6 +1021,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1028,6 +1037,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_ACTIVE(state_offset + 1, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1036,6 +1046,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1044,6 +1055,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 1, 0);
         }
+
         break;
 
 
@@ -1067,6 +1079,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_NEW(state_offset + 1, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1075,6 +1088,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_NEW(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1085,6 +1099,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             return PCRE2_ERROR_PARTIAL;
           ADD_ACTIVE(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1115,6 +1130,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1148,6 +1164,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1159,6 +1176,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_NEW(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1170,6 +1188,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_NEW(state_offset + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1241,6 +1260,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_ACTIVE(state_offset + 1, 0);
           }
         }
+
         break;
 
 
@@ -1306,6 +1326,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
               break;
             }
+
             break;
 
           case PT_WORD:
@@ -1330,12 +1351,14 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 OK = FALSE;
                 break;
               }
+
               if (c == *cp++)
               {
                 OK = TRUE;
                 break;
               }
             }
+
             break;
 
           case PT_UCNC:
@@ -1363,6 +1386,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_NEW(state_offset + 3, 0);
           }
         }
+
         break;
 #endif
 
@@ -1382,6 +1406,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2, 0);
         }
+
         if (clen > 0)
         {
           if (d == OP_ANY && ptr + 1 >= mb->end_subject &&
@@ -1399,10 +1424,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             count++;
             ADD_NEW(state_offset, count);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1427,9 +1454,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW(state_offset + 2, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1454,9 +1483,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW(state_offset, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1484,6 +1515,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1509,6 +1541,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             if (++count >= (int)GET2(code, 1))
             {
               ADD_NEW(state_offset + 2 + IMM2_SIZE, 0);
@@ -1519,6 +1552,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /* ========================================================================== */
@@ -1536,6 +1570,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 4, 0);
         }
+
         if (clen > 0)
         {
           BOOL OK;
@@ -1590,6 +1625,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
               break;
             }
+
             break;
 
           case PT_WORD:
@@ -1614,12 +1650,14 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 OK = FALSE;
                 break;
               }
+
               if (c == *cp++)
               {
                 OK = TRUE;
                 break;
               }
             }
+
             break;
 
           case PT_UCNC:
@@ -1649,10 +1687,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             count++;
             ADD_NEW(state_offset, count);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1664,6 +1704,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2, 0);
         }
+
         if (clen > 0)
         {
           int ncount = 0;
@@ -1672,10 +1713,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             active_count--; // Remove non-match possibility
             next_active_state--;
           }
+
           (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           count++;
           ADD_NEW_DATA(-state_offset, count, ncount);
         }
+
         break;
 #endif
 
@@ -1688,6 +1731,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2, 0);
         }
+
         if (clen > 0)
         {
           int ncount = 0;
@@ -1716,6 +1760,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             count++;
             ADD_NEW_DATA(-state_offset, count, ncount);
             break;
@@ -1724,6 +1769,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1735,6 +1781,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2, 0);
         }
+
         if (clen > 0)
         {
           BOOL OK;
@@ -1756,10 +1803,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             count++;
             ADD_NEW_DATA(-state_offset, count, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1771,6 +1820,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2, 0);
         }
+
         if (clen > 0)
         {
           BOOL OK;
@@ -1792,10 +1842,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             count++;
             ADD_NEW_DATA(-state_offset, count, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1868,6 +1920,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
               break;
             }
+
             break;
 
           case PT_WORD:
@@ -1892,12 +1945,14 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 OK = FALSE;
                 break;
               }
+
               if (c == *cp++)
               {
                 OK = TRUE;
                 break;
               }
             }
+
             break;
 
           case PT_UCNC:
@@ -1928,9 +1983,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW(state_offset + count, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -1957,9 +2014,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             active_count--; // Remove non-match possibility
             next_active_state--;
           }
+
           (void)PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           ADD_NEW_DATA(-(state_offset + count), 0, ncount);
         }
+
         break;
 #endif
 
@@ -2006,6 +2065,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW_DATA(-(state_offset + (int)count), 0, ncount);
             break;
 
@@ -2013,6 +2073,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2042,6 +2103,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             OK = FALSE;
             break;
           }
+
           if (OK == (d == OP_VSPACE))
           {
             if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSSTAR ||
@@ -2050,9 +2112,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW_DATA(-(state_offset + (int)count), 0, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2091,9 +2155,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW_DATA(-(state_offset + (int)count), 0, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2106,6 +2172,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 1 + IMM2_SIZE + 3, 0);
         }
+
         count = current_state->count; // Number already matched
         if (clen > 0)
         {
@@ -2162,6 +2229,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
               break;
             }
+
             break;
 
           case PT_WORD:
@@ -2186,12 +2254,14 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 OK = FALSE;
                 break;
               }
+
               if (c == *cp++)
               {
                 OK = TRUE;
                 break;
               }
             }
+
             break;
 
           case PT_UCNC:
@@ -2222,6 +2292,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             if (++count >= (int)GET2(code, 1))
             {
               ADD_NEW(state_offset + 1 + IMM2_SIZE + 3, 0);
@@ -2232,6 +2303,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2243,6 +2315,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
         }
+
         count = current_state->count; // Number already matched
         if (clen > 0)
         {
@@ -2253,6 +2326,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             active_count--; // Remove non-match possibility
             next_active_state--;
           }
+
           nptr = PRIV(extuni)(c, ptr + clen, mb->start_subject, end_subject, utf, &ncount);
           if (nptr >= end_subject && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
@@ -2265,6 +2339,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_NEW_DATA(-state_offset, count, ncount);
           }
         }
+
         break;
 #endif
 
@@ -2277,6 +2352,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
         }
+
         count = current_state->count; // Number already matched
         if (clen > 0)
         {
@@ -2306,6 +2382,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             if (++count >= (int)GET2(code, 1))
             {
               ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount);
@@ -2314,12 +2391,14 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               ADD_NEW_DATA(-state_offset, count, ncount);
             }
+
             break;
 
           default:
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2331,6 +2410,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
         }
+
         count = current_state->count; // Number already matched
         if (clen > 0)
         {
@@ -2352,6 +2432,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             if (++count >= (int)GET2(code, 1))
             {
               ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0);
@@ -2362,6 +2443,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2373,6 +2455,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0);
         }
+
         count = current_state->count; // Number already matched
         if (clen > 0)
         {
@@ -2395,6 +2478,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             if (++count >= (int)GET2(code, 1))
             {
               ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0);
@@ -2405,6 +2489,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /* ========================================================================== */
@@ -2419,6 +2504,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_NEW(state_offset + dlen + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2455,6 +2541,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_NEW(state_offset + 2, 0);
           }
         }
+
         break;
 
 
@@ -2474,6 +2561,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             reset_could_continue = TRUE;
           ADD_NEW_DATA(-(state_offset + 1), 0, ncount);
         }
+
         break;
 #endif
 
@@ -2517,9 +2605,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               ADD_NEW(state_offset + 1, 0);
             }
+
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2536,6 +2626,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2552,6 +2643,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2568,6 +2660,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2584,6 +2677,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             break;
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2594,6 +2688,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_NEW(state_offset + dlen + 1, 0);
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2614,6 +2709,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_NEW(state_offset + dlen + 1, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2638,6 +2734,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         {
           ADD_ACTIVE(state_offset + dlen + 1, 0);
         }
+
         if (clen > 0)
         {
           uint32_t otherd = NOTACHAR;
@@ -2650,6 +2747,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 #endif /* SUPPORT_UNICODE */
               otherd = TABLE_GET(d, fcc, d);
           }
+
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (count > 0 && (codevalue == OP_POSPLUS || codevalue == OP_NOTPOSPLUS))
@@ -2657,10 +2755,12 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             count++;
             ADD_NEW(state_offset, count);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2692,6 +2792,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 #endif /* SUPPORT_UNICODE */
               otherd = TABLE_GET(d, fcc, d);
           }
+
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (codevalue == OP_POSQUERY || codevalue == OP_NOTPOSQUERY)
@@ -2699,9 +2800,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW(state_offset + dlen + 1, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2733,6 +2836,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 #endif /* SUPPORT_UNICODE */
               otherd = TABLE_GET(d, fcc, d);
           }
+
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (codevalue == OP_POSSTAR || codevalue == OP_NOTPOSSTAR)
@@ -2740,9 +2844,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             ADD_NEW(state_offset, 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2766,6 +2872,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 #endif /* SUPPORT_UNICODE */
               otherd = TABLE_GET(d, fcc, d);
           }
+
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (++count >= (int)GET2(code, 1))
@@ -2778,6 +2885,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -2810,6 +2918,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 #endif /* SUPPORT_UNICODE */
               otherd = TABLE_GET(d, fcc, d);
           }
+
           if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
             if (codevalue == OP_POSUPTO || codevalue == OP_NOTPOSUPTO)
@@ -2817,6 +2926,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               active_count--; // Remove non-match possibility
               next_active_state--;
             }
+
             if (++count >= (int)GET2(code, 1))
             {
               ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0);
@@ -2827,6 +2937,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
 
@@ -2903,8 +3014,10 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 active_count--; // Remove non-match possibility
                 next_active_state--;
               }
+
               ADD_NEW(state_offset, 0);
             }
+
             break;
 
           case OP_CRPLUS:
@@ -2915,6 +3028,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               ADD_ACTIVE(next_state_offset + 1, 0);
             }
+
             if (isinclass)
             {
               if (count > 0 && *ecode == OP_CRPOSPLUS)
@@ -2922,9 +3036,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 active_count--; // Remove non-match possibility
                 next_active_state--;
               }
+
               count++;
               ADD_NEW(state_offset, count);
             }
+
             break;
 
           case OP_CRQUERY:
@@ -2938,8 +3054,10 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 active_count--; // Remove non-match possibility
                 next_active_state--;
               }
+
               ADD_NEW(next_state_offset + 1, 0);
             }
+
             break;
 
           case OP_CRRANGE:
@@ -2950,6 +3068,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               ADD_ACTIVE(next_state_offset + 1 + 2 * IMM2_SIZE, 0);
             }
+
             if (isinclass)
             {
               int max = (int)GET2(ecode, 1 + IMM2_SIZE);
@@ -2969,6 +3088,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
                 ADD_NEW(state_offset, count);
               }
             }
+
             break;
 
           default:
@@ -2976,9 +3096,11 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               ADD_NEW(next_state_offset, 0);
             }
+
             break;
           }
         }
+
         break;
 
         /* ========================================================================== */
@@ -3037,6 +3159,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_ACTIVE((int)(endasscode + LINK_SIZE + 1 - start_code), 0);
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -3156,6 +3279,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -3256,6 +3380,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
           else if (rc != PCRE2_ERROR_NOMATCH)
             return rc;
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -3344,6 +3469,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               end_subpattern += GET(end_subpattern, 1);
             } while (*end_subpattern == OP_ALT);
+
             next_state_offset = (int)(end_subpattern - start_code + LINK_SIZE + 1);
 
             /* Optimization: if there are no more active states, and there
@@ -3376,6 +3502,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             }
           }
         }
+
         break;
 
         /*-----------------------------------------------------------------*/
@@ -3422,6 +3549,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             {
               end_subpattern += GET(end_subpattern, 1);
             } while (*end_subpattern == OP_ALT);
+
             next_state_offset = (int)(end_subpattern - start_code + LINK_SIZE + 1);
 
             /* If the end of this subpattern is KETRMAX or KETRMIN, we must
@@ -3488,6 +3616,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
           else if (rc != PCRE2_ERROR_NOMATCH)
             return rc;
         }
+
         break;
 
 
@@ -3506,6 +3635,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ADD_ACTIVE(state_offset + (int)callout_length, 0);
           }
         }
+
         break;
 
 
@@ -3654,6 +3784,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rc = PCRE2_ERROR_NULL;
     goto EXIT;
   }
+
   if ((options & ~PUBLIC_DFA_MATCH_OPTIONS) != 0)
   {
     rc = PCRE2_ERROR_BADOPTION;
@@ -3670,6 +3801,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rc = PCRE2_ERROR_DFA_WSSIZE;
     goto EXIT;
   }
+
   if (start_offset > length)
   {
     rc = PCRE2_ERROR_BADOFFSET;
@@ -3791,8 +3923,10 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
         rc = PCRE2_ERROR_BADOFFSETLIMIT;
         goto EXIT;
       }
+
       bumpalong_limit = subject + mcontext->offset_limit;
     }
+
     mb->callout = mcontext->callout;
     mb->callout_data = mcontext->callout_data;
     mb->memctl = mcontext->memctl;
@@ -3886,6 +4020,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
         rc = PCRE2_ERROR_BADUTFOFFSET;
         goto EXIT;
       }
+
       for (i = re->max_lookbehind; i > 0 && check_subject > subject; i--)
       {
         check_subject--;
@@ -4045,6 +4180,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               ok = (start_bits[c / 8] & (1u << (c & 7))) != 0;
             }
           }
+
           if (!ok)
             break;
         }
@@ -4372,18 +4508,21 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             rc = PCRE2_ERROR_NOMEMORY;
             goto EXIT;
           }
+
           memcpy((void *)match_data->subject, subject, CU2BYTES(length));
         }
         else
         {
           match_data->subject = NULL;
         }
+
         match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
       else if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)
       {
         match_data->subject = original_subject;
       }
+
       goto EXIT;
     }
 

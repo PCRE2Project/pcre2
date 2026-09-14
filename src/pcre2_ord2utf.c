@@ -91,6 +91,7 @@ PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
     *buffer-- = 0x80 | (cvalue & 0x3f);
     cvalue >>= 6;
   }
+
   *buffer = (PCRE2_UCHAR)(PRIV(utf8_table2)[i] | (int)cvalue);
   return i + 1;
 
@@ -102,6 +103,7 @@ PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
     *buffer = (PCRE2_UCHAR)cvalue;
     return 1;
   }
+
   cvalue -= 0x10000;
   *buffer++ = 0xd800 | (cvalue >> 10);
   *buffer = 0xdc00 | (cvalue & 0x3ff);

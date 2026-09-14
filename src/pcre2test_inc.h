@@ -158,6 +158,7 @@ pcre2_strcmp_c8(PCRE2_SPTR str1, const char *str2)
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
+
   return 0;
 }
 
@@ -213,6 +214,7 @@ pchars(int clr, PCRE2_SPTR p, ptrdiff_t length, BOOL utf, FILE *f)
         continue;
       }
     }
+
     c = *p++;
     yield += pchar(c, utf, f);
   }
@@ -350,8 +352,10 @@ ptrunc_16(int clr, PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left, BOOL ut
       fprintf(f, "%.*s", clen, u8buff);
       continue;
     }
+
     fputc((int)c, f);
   }
+
   if (!left && end < p + p_len)
     fprintf(f, "...");
 
@@ -388,8 +392,10 @@ ptrunc_32(int clr, PCRE2_SPTR p, size_t p_len, size_t offset, BOOL left, BOOL ut
       fprintf(f, "%.*s", clen, u8buff);
       continue;
     }
+
     fputc((int)c, f);
   }
+
   if (!left && end < p + p_len)
     fprintf(f, "...");
 
@@ -577,6 +583,7 @@ to32(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
         p++;
         len--;
       }
+
       chlen = utf8_to_ord(p, end, &c);
       if (chlen <= 0)
         return -1;
@@ -871,6 +878,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
                      c1modlist[i].fullname);
             return FALSE;
           }
+
           c1modlist[i].index = index; // Cache for next time
         }
 
@@ -907,6 +915,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
         cfprintf(clr_test_error, outfile, "** '=' expected after \"%s\"\n", m->name);
         return FALSE;
       }
+
       if (off)
       {
         cfprintf(clr_test_error, outfile, "** '-' is not valid for \"%s\"\n", m->name);
@@ -973,6 +982,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
         else
           dctl->control2 |= CTL2_BSR_SET;
       }
+
       pp = ep;
       break;
 
@@ -996,12 +1006,14 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
             break;
           }
         }
+
         if (i >= convertlistcount)
           goto INVALID_VALUE;
         pp += len;
         if (*pp != ':')
           break;
       }
+
       break;
 
     case MOD_IN2: // One or two unsigned integers
@@ -1022,6 +1034,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
       {
         ((uint32_t *)field)[1] = 0;
       }
+
       pp = (uint8_t *)endptr;
       break;
 
@@ -1049,6 +1062,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
         *((uint32_t *)field) = (uint32_t)(m->value);
         break;
       }
+
       PCRE2_FALLTHROUGH /* Fall through */
 
     case MOD_INT: // Unsigned integer
@@ -1093,6 +1107,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
         else
           dctl->control2 |= CTL2_NL_SET;
       }
+
       pp = ep;
       break;
 
@@ -1116,6 +1131,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
             return FALSE;
           }
         }
+
         *((int32_t *)field) = value;
         if (ct > 0)
           ((int32_t *)field)[1] = -1;
@@ -1134,6 +1150,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
             cfprintf(clr_test_error, outfile, "** Group name in \"%s\" is too long\n", m->name);
             return FALSE;
           }
+
           while (*nn != 0)
             nn += strlen(nn) + 1;
           if (nn + len + 2 - (char *)field > LENCPYGET)
@@ -1142,12 +1159,15 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
                      m->name);
             return FALSE;
           }
+
           memcpy(nn, pp, len);
         }
+
         nn[len] = 0;
         nn[len + 1] = 0;
         pp = ep;
       }
+
       break;
 
     case MOD_STR:
@@ -1156,12 +1176,14 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
         cfprintf(clr_test_error, stderr, "pcre2test: mod %s size > 256 \n", m->name);
         exit(1);
       }
+
       if (len + 1 > m->value)
       {
         cfprintf(clr_test_error, outfile, "** Overlong value for \"%s\" (max %d code units)\n",
                  m->name, m->value - 1);
         return FALSE;
       }
+
       ((uint8_t *)field)[0] = (uint8_t)len; // len <= m->value - 1 <= UINT8_MAX
       memcpy(((uint8_t *)field) + 1, pp, len);
       ((uint8_t *)field)[len + 1] = 0;
@@ -1225,6 +1247,7 @@ pattern_info(int what, void *where, BOOL unsetok)
              "pcre2_pattern_info_" STR(PCRE2_CODE_UNIT_WIDTH) "(%d)\n",
              rc, what);
   }
+
   return rc;
 }
 
@@ -1328,6 +1351,7 @@ print_error_message_file(FILE *file, int errorcode, const char *before, const ch
     pchars(clr_api_error, buf, len, FALSE, file);
     cfprintf(clr_api_error, file, "%s", after);
   }
+
   return len >= 0;
 }
 
@@ -1375,6 +1399,7 @@ callout_enumerate_function(pcre2_callout_enumerate_block *cb, void *callout_data
         break;
       }
     }
+
     fprintf(outfile, "%c  ", CHAR_OUTPUT(delimiter));
   }
   else
@@ -1713,6 +1738,7 @@ show_pattern_info(void)
             fprintf(outfile, "\n ");
             c = 2;
           }
+
           if (PRINTABLE(i) && i != CHAR_SPACE)
           {
             fprintf(outfile, " %c", CHAR_OUTPUT(i));
@@ -1725,6 +1751,7 @@ show_pattern_info(void)
           }
         }
       }
+
       fprintf(outfile, "\n");
     }
 
@@ -1918,9 +1945,11 @@ process_command(void)
             first_listed_newline = j;
         }
       }
+
       while (*argptr != 0 && !isspace(*argptr))
         argptr++;
     }
+
     local_newline_default = first_listed_newline;
     break;
 
@@ -1935,6 +1964,7 @@ process_command(void)
       cfprintf(clr_test_error, outfile, "** Can't pop off an empty stack\n");
       return PR_SKIP;
     }
+
     patctl_zero(&pat_patctl); // Completely unset
     if (!decode_modifiers(argptr, CTX_POPPAT, &pat_patctl, NULL))
       return PR_SKIP;
@@ -2003,6 +2033,7 @@ process_command(void)
       compiled_code = patstack[--patstacknext];
       pcre2_code_free(compiled_code);
     }
+
     compiled_code = NULL;
     break;
 
@@ -2023,6 +2054,7 @@ process_command(void)
         fclose(f);
         return PR_ABEND;
       }
+
       serial_size |= (PCRE2_SIZE)c << (i * 8);
     }
 
@@ -2068,6 +2100,7 @@ process_command(void)
           rc = PATSTACKSIZE - patstacknext;
           cfprintf(clr_test_error, outfile, "** Decoding %d pattern%s\n", rc, (rc == 1) ? "" : "s");
         }
+
         rc = pcre2_serialize_decode(patstack + patstacknext, rc, serial, general_context);
         if (rc < 0)
         {
@@ -2128,6 +2161,7 @@ process_command(void)
       argptr++;
       if_inverted = TRUE;
     }
+
     while (isspace(*argptr))
       argptr++;
     for (i = 0; i < COPTLISTCOUNT; i++)
@@ -2144,6 +2178,7 @@ process_command(void)
       if (*argptr_trail == 0 || *argptr_trail == '\n')
         break;
     }
+
     if (i == COPTLISTCOUNT)
     {
       cfprintf(clr_test_error, outfile, "** Unknown condition: %s\n", buffer);
@@ -2174,6 +2209,7 @@ process_command(void)
       cfprintf(clr_test_error, outfile, "** Unexpected #endif\n");
       return PR_ABEND;
     }
+
     inside_if = FALSE;
     break;
   }
@@ -2243,6 +2279,7 @@ process_pattern(void)
         break;
       p++;
     }
+
     if (*p != 0)
       break;
     if ((p = extend_inputline(infile, p, "    > ")) == NULL)
@@ -2250,6 +2287,7 @@ process_pattern(void)
       cfprintf(clr_test_error, outfile, "** Unexpected EOF\n");
       return PR_ABEND;
     }
+
     if (!INTERACTIVE(infile))
       cfprintf(clr_input, outfile, "%s", (char *)p);
   }
@@ -2356,6 +2394,7 @@ process_pattern(void)
                      pq - buffer - 2);
             return PR_SKIP;
           }
+
           if (d == c)
             break;
           *pt++ = d;
@@ -2374,11 +2413,13 @@ process_pattern(void)
                    c, pp - buffer - 2);
           return PR_SKIP;
         }
+
         if (*pp == 0)
         {
           cfprintf(clr_test_error, outfile, "** Odd number of digits in hex pattern\n");
           return PR_SKIP;
         }
+
         d = *pp;
         if (!isxdigit(d))
         {
@@ -2388,6 +2429,7 @@ process_pattern(void)
                    d, pp - buffer - 1);
           return PR_SKIP;
         }
+
         c = toupper(c);
         d = toupper(d);
         c = isdigit(c) ? (c - '0') : (c - 'A' + 10);
@@ -2395,6 +2437,7 @@ process_pattern(void)
         *pt++ = CHAR_OUTPUT(CHAR_INPUT_HEX((c << 4) + d));
       }
     }
+
     *pt = 0;
     patlen = pt - pbuffer8;
   }
@@ -2444,6 +2487,7 @@ process_pattern(void)
                 cfprintf(clr_test_error, outfile, "** Zero repeat not allowed\n");
                 return PR_SKIP;
               }
+
               pc += 2;
               count = i;
               length = clen;
@@ -2499,11 +2543,13 @@ process_pattern(void)
       cfprintf(clr_test_error, outfile, "** 'Locale' and 'tables' must not both be set\n");
       return PR_SKIP;
     }
+
     if (setlocale(LC_CTYPE, (const char *)pat_patctl.locale + 1) == NULL)
     {
       cfprintf(clr_test_error, outfile, "** Failed to set locale \"%s\"\n", pat_patctl.locale + 1);
       return PR_SKIP;
     }
+
     if (strcmp((const char *)pat_patctl.locale + 1, (const char *)locale_name) != 0)
     {
       strncpy((char *)locale_name, (char *)pat_patctl.locale + 1, sizeof(locale_name));
@@ -2512,8 +2558,10 @@ process_pattern(void)
       {
         pcre2_maketables_free(general_context, locale_tables);
       }
+
       locale_tables = pcre2_maketables(general_context);
     }
+
     use_tables = locale_tables;
   }
 
@@ -2539,6 +2587,7 @@ process_pattern(void)
                  "been loaded\n");
         return PR_SKIP;
       }
+
       use_tables = tables3;
       break;
 
@@ -2686,11 +2735,13 @@ process_pattern(void)
       {
         cfprintf(clr_test_error, outfile, "** regerror() message truncated\n");
       }
+
       if (bsize > 0 && strlen(regbuffer) != strsize)
       {
         cfprintf(clr_test_error, outfile, "** regerror() strlen incorrect\n");
         return PR_ABEND;
       }
+
       return PR_SKIP;
     }
 
@@ -2729,6 +2780,7 @@ process_pattern(void)
       cfprintf(clr_test_error, outfile, "** Replacement text is not supported with 'push'.\n");
       return PR_OK;
     }
+
     if ((pat_patctl.control & ~PUSH_SUPPORTED_COMPILE_CONTROLS) != 0 ||
         (pat_patctl.control2 & ~PUSH_SUPPORTED_COMPILE_CONTROLS2) != 0)
     {
@@ -2737,6 +2789,7 @@ process_pattern(void)
                     "** Ignored when compiled pattern is stacked with 'push':");
       fprintf(outfile, "\n");
     }
+
     if ((pat_patctl.control & PUSH_COMPILE_ONLY_CONTROLS) != 0 ||
         (pat_patctl.control2 & PUSH_COMPILE_ONLY_CONTROLS2) != 0)
     {
@@ -2972,6 +3025,7 @@ process_pattern(void)
       if (compiled_code != NULL)
         pcre2_code_free(compiled_code);
     }
+
     total_compile_time += time_taken;
     cfprintf(clr_profiling, outfile, "Compile time %8.4f microseconds\n",
              ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeit);
@@ -3051,6 +3105,7 @@ process_pattern(void)
           break;
         }
       }
+
       total_jit_compile_time += time_taken;
       if (jitrc == 0)
         cfprintf(clr_profiling, outfile, "JIT compile  %8.4f microseconds\n",
@@ -3154,6 +3209,7 @@ process_pattern(void)
         ptrunc(clr_input, pbuffer, full_patlen, erroroffset, TRUE, utf, outfile);
         fprintf(outfile, " ");
       }
+
       cfprintf(clr_api_error, outfile,
                (direction == 1)   ? "|<--|"
                : (direction == 2) ? "|-->|"
@@ -3163,6 +3219,7 @@ process_pattern(void)
         fprintf(outfile, " ");
         ptrunc(clr_input, pbuffer, full_patlen, erroroffset, FALSE, utf, outfile);
       }
+
       fprintf(outfile, "\n");
     }
 
@@ -3247,6 +3304,7 @@ process_pattern(void)
       cfprintf(clr_test_error, outfile, "** Too many pushed patterns (max %d)\n", PATSTACKSIZE);
       return PR_ABEND;
     }
+
     patstack[patstacknext++] = compiled_code;
     compiled_code = NULL;
   }
@@ -3262,6 +3320,7 @@ process_pattern(void)
       cfprintf(clr_test_error, outfile, "** Too many pushed patterns (max %d)\n", PATSTACKSIZE);
       return PR_ABEND;
     }
+
     if ((pat_patctl.control & CTL_PUSHCOPY) != 0)
     {
       patstack[patstacknext++] = pcre2_code_copy(compiled_code);
@@ -3411,11 +3470,13 @@ check_match_limit(PCRE2_SPTR pp, PCRE2_SIZE ulen, int errnumber, const char *msg
         fprintf(outfile, "Minimum %s limit = 0\n", msg);
         break;
       }
+
       if (mid == min + 1)
       {
         fprintf(outfile, "Minimum %s limit = %d\n", msg, mid);
         break;
       }
+
       max = mid;
       mid = (min + max) / 2;
     }
@@ -3654,6 +3715,7 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
         break;
       }
     }
+
     fprintf(outfile, "%c", CHAR_OUTPUT(delimiter));
     if (!callout_capture)
       fprintf(outfile, "\n");
@@ -3678,6 +3740,7 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
         pchars(clr_none, cb->subject + cb->offset_vector[i],
                cb->offset_vector[i + 1] - cb->offset_vector[i], utf, f);
       }
+
       fprintf(outfile, "\n");
     }
   }
@@ -3858,6 +3921,7 @@ copy_and_get(BOOL utf, int capcount)
       pchars(clr_none, copybuffer, length, utf, outfile);
       fprintf(outfile, " (%" SIZ_FORM ")\n", length);
     }
+
     rc2 = pcre2_substring_length_bynumber(match_data, n, &length2);
     if (rc2 < 0)
     {
@@ -3923,6 +3987,7 @@ copy_and_get(BOOL utf, int capcount)
       else
         fprintf(outfile, " (non-unique)\n");
     }
+
     rc2 = pcre2_substring_length_byname(match_data, pbuffer, &length2);
     if (rc2 < 0)
     {
@@ -3935,6 +4000,7 @@ copy_and_get(BOOL utf, int capcount)
       cfprintf(clr_test_error, outfile,
                "** Mismatched substring lengths: %" SIZ_FORM " %" SIZ_FORM "\n", length, length2);
     }
+
     nptr += namelen + 1;
   }
 
@@ -4013,6 +4079,7 @@ copy_and_get(BOOL utf, int capcount)
         fprintf(outfile, " (non-unique)\n");
       pcre2_substring_free(gotbuffer);
     }
+
     nptr += namelen + 1;
   }
 
@@ -4038,6 +4105,7 @@ copy_and_get(BOOL utf, int capcount)
         pchars(clr_none, stringlist[i], lengths[i], utf, outfile);
         putc('\n', outfile);
       }
+
       if (stringlist[i] != NULL)
         cfprintf(clr_test_error, outfile, "** string list not terminated by NULL\n");
       pcre2_substring_list_free(stringlist);
@@ -4253,6 +4321,7 @@ process_data(void)
       else
         dbuffer_size = needlen + 1;
     }
+
     dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
     if (dbuffer == NULL)
     {
@@ -4260,6 +4329,7 @@ process_data(void)
       exit(1);
     }
   }
+
   q = (PCRE2_UCHAR *)dbuffer;
 
   /* Scan the data line, interpreting data escapes, and put the result into a
@@ -4292,6 +4362,7 @@ process_data(void)
         cfprintf(clr_test_error, outfile, "** Repeat count too large\n");
         return PR_OK;
       }
+
       i = (int)li;
 
       p = (uint8_t *)endptr;
@@ -4313,6 +4384,7 @@ process_data(void)
         cfprintf(clr_test_error, outfile, "** Expanded content too large\n");
         return PR_OK;
       }
+
       needlen += replen * i;
 
       if (needlen >= dbuffer_size)
@@ -4326,6 +4398,7 @@ process_data(void)
           else
             dbuffer_size = needlen + 1;
         }
+
         dbuffer = (uint8_t *)realloc(dbuffer, dbuffer_size);
         if (dbuffer == NULL)
         {
@@ -4333,6 +4406,7 @@ process_data(void)
                    dbuffer_size);
           exit(1);
         }
+
         q = (PCRE2_UCHAR *)(dbuffer + qoffset);
         start_rep = (PCRE2_UCHAR *)(dbuffer + rep_offset);
       }
@@ -4364,6 +4438,7 @@ process_data(void)
       {
         GETUTF8INC(c, p);
       }
+
       c |= topbit;
     }
 
@@ -4443,6 +4518,7 @@ process_data(void)
               c = c * 8 + (*pt - '0');
             }
           }
+
           c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
           if (i == 0 || *pt != '}')
           {
@@ -4454,6 +4530,7 @@ process_data(void)
             p = pt + 1;
           }
         }
+
         break;
 
       case 'x':
@@ -4483,6 +4560,7 @@ process_data(void)
               c = c * 16 + (tolower(*pt) - (isdigit(*pt) ? '0' : 'a' - 10));
             }
           }
+
           c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
           if (i == 0 || *pt != '}')
           {
@@ -4506,12 +4584,14 @@ process_data(void)
             c = c * 16 + (tolower(*p) - (isdigit(*p) ? '0' : 'a' - 10));
             p++;
           }
+
           c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
 #if PCRE2_CODE_UNIT_WIDTH == 8
           if (utf)
             encoding = FORCE_RAW;
 #endif
         }
+
         break;
 
       case 'N':
@@ -4549,6 +4629,7 @@ process_data(void)
           cfprintf(clr_test_error, outfile, "** Nested replication is not supported\n");
           return PR_OK;
         }
+
         start_rep = q;
         continue;
 
@@ -4578,6 +4659,7 @@ process_data(void)
                  "** Truncation will probably give the wrong "
                  "result.\n");
       }
+
       *q++ = (uint8_t)c;
     }
     else
@@ -4597,6 +4679,7 @@ process_data(void)
                  "0x%x and should not be encoded as UTF-8\n",
                  c, MAX_UTF_CODE_POINT);
       }
+
       q += ord_to_utf8(c, q);
     }
 #endif
@@ -4616,6 +4699,7 @@ process_data(void)
                  "** Truncation will probably give the wrong "
                  "result.\n");
       }
+
       *q++ = (uint16_t)c;
     }
     else
@@ -4873,6 +4957,7 @@ ENDSTRING:
                      "Start of matched string is beyond its end - "
                      "displaying from end to start.\n");
           }
+
           fprintf(outfile, "%2d: ", (int)i);
           pchars(clr_none, pp + start, end - start, utf, outfile);
           fprintf(outfile, "\n");
@@ -4889,6 +4974,7 @@ ENDSTRING:
         }
       }
     }
+
     if (pmatch != &startend_buf)
       free(pmatch);
     return PR_OK;
@@ -4942,6 +5028,7 @@ ENDSTRING:
       jit_stack = pcre2_jit_stack_create(1, dat_datctl.jitstack * 1024, NULL);
       jit_stack_size = dat_datctl.jitstack;
     }
+
     pcre2_jit_stack_assign(dat_context, jit_callback, jit_stack);
   }
 
@@ -5123,6 +5210,7 @@ ENDSTRING:
         cfprintf(clr_test_error, outfile, "** Bad buffer size in replacement string\n");
         return PR_OK;
       }
+
       ++pr;
       if (n > nsize)
       {
@@ -5132,6 +5220,7 @@ ENDSTRING:
                  n, nsize);
         return PR_OK;
       }
+
       nsize = n;
     }
 
@@ -5278,6 +5367,7 @@ ENDSTRING:
           ptrunc(clr_input, rbptr, full_rlen, nsize, TRUE, utf, outfile);
           fprintf(outfile, " ");
         }
+
         cfprintf(clr_api_error, outfile, "|<--|");
         if (nsize < full_rlen)
         {
@@ -5343,6 +5433,7 @@ ENDSTRING:
           cfprintf(clr_test_error, outfile, "** Timing DFA restarts is not supported\n");
           return PR_ABEND;
         }
+
         if (dfa_workspace == NULL)
           dfa_workspace = (int *)malloc(DFA_WS_DIMENSION * sizeof(int));
         start_time = clock();
@@ -5373,6 +5464,7 @@ ENDSTRING:
                             dat_datctl.options | g_notempty, match_data, use_dat_context);
         }
       }
+
       total_match_time += (time_taken = clock() - start_time);
 
       outfile = saved_outfile;
@@ -5807,6 +5899,7 @@ ENDSTRING:
         rubriclength = pchars(clr_none, match_data->mark - 1, -1, utf, outfile);
         rubriclength += 7;
       }
+
       fprintf(outfile, ": ");
       rubriclength += 15;
 
@@ -5861,6 +5954,7 @@ ENDSTRING:
             fprintf(outfile, ", mark = ");
             pchars(clr_none, match_data->mark - 1, -1, utf, outfile);
           }
+
           if ((pat_patctl.control & CTL_JITVERIFY) != 0 && jit_was_used)
             fprintf(outfile, " (JIT)");
           fprintf(outfile, "\n");
@@ -5870,6 +5964,7 @@ ENDSTRING:
           if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
             show_ovector(ovector, oveccount);
         }
+
         break;
 
       case PCRE2_ERROR_BADUTFOFFSET:
@@ -5887,6 +5982,7 @@ ENDSTRING:
           startchar = pcre2_get_startchar(match_data);
           cfprintf(clr_api_error, outfile, " at offset %" SIZ_FORM, startchar);
         }
+
         fprintf(outfile, "\n");
         break;
       }

@@ -163,6 +163,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         cc = cs + 1 + LINK_SIZE;
         break;
       }
+
       goto PROCESS_NON_CAPTURE;
 
     case OP_BRA:
@@ -177,6 +178,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         cc += 1 + LINK_SIZE;
         break;
       }
+
       PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_ONCE:
@@ -212,6 +214,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         if (prev_cap_d < 0)
           return prev_cap_d;
       }
+
       branchlength += prev_cap_d;
       do
         cc += GET(cc, 1);
@@ -470,6 +473,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         branchlength++;
         break;
       }
+
       break;
 
       /* Backreferences and subroutine calls (OP_RECURSE) are treated in the same
@@ -713,6 +717,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
           }
         }
       }
+
       cc += 1 + LINK_SIZE + once_fudge;
       once_fudge = 0;
       break;
@@ -1306,6 +1311,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
               SET_BIT(c);
           }
         }
+
         try_next = FALSE;
         break;
 
@@ -1404,6 +1410,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           tcode = ncode;
           continue; // With the following significant opcode
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 
         /* For a group bracket or a positive assertion without an immediately
@@ -1438,6 +1445,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
         {
           return rc; // FAIL, UNKNOWN, or TOODEEP
         }
+
         break;
 
         /* If we hit ALT or KET, it means we haven't found anything mandatory in
@@ -1892,6 +1900,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           re->start_bitmap[24] |= 0xf0;           // Bits for 0xc4 - 0xc8
           memset(re->start_bitmap + 25, 0xff, 7); // Bits for 0xc9 - 0xff
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 #elif PCRE2_CODE_UNIT_WIDTH != 8
         SET_BIT(0xFF);    // For characters >= 255
@@ -1979,6 +1988,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           try_next = FALSE;
           break;
         }
+
         break; // End of class handling case
       } // End of switch for opcodes
     } // End of try_next loop
@@ -2159,6 +2169,7 @@ PRIV(study)(pcre2_real_code *re)
           re->flags &= ~(PCRE2_LASTSET | PCRE2_LASTCASELESS);
           re->last_codeunit = 0;
         }
+
         re->first_codeunit = a;
         flags = PCRE2_FIRSTSET;
         if (b >= 0)

@@ -598,6 +598,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
         status |= XCLASS_SCRIPT_EXTENSION_NOTPROP;
         break;
       }
+
       compares++;
       PCRE2_FALLTHROUGH /* Fall through */
 
@@ -758,6 +759,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
           jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]);
           add_jump(compiler, compares > 0 ? list : backtracks, jump);
         }
+
         cc += 2;
       }
 
@@ -786,6 +788,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
                (sljit_sw)(1u << (cc[1] & 0x1f)));
           add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
         }
+
         cc += 2;
       }
 
@@ -817,6 +820,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
           add_jump(compiler, compares > 0 ? list : backtracks,
                    CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (int)cc[1]));
         }
+
         cc += 2;
       }
 
@@ -845,6 +849,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
             status |= XCLASS_SCRIPT_EXTENSION_RESTORE_RETURN_ADDR;
           }
         }
+
         OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2),
             (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, script));
       }
@@ -867,6 +872,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
               add_jump(compiler, backtracks, jump);
               jump = NULL;
             }
+
             invertcmp ^= 0x1;
           }
 
@@ -878,6 +884,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
           if (jump != NULL)
             JUMPHERE(jump);
         }
+
         cc += 2;
       }
 
@@ -1215,6 +1222,7 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
         OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
         OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_EQUAL);
       }
+
       first_item += 2;
     }
 
@@ -1462,6 +1470,7 @@ byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
       context->c.asuchars[context->ucharptr] = *cc;
       context->oc.asuchars[context->ucharptr] = 0;
     }
+
     context->ucharptr++;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -1515,6 +1524,7 @@ byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
         SLJIT_UNREACHABLE();
         break;
       }
+
       context->ucharptr = 0;
     }
 
@@ -1978,6 +1988,7 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
     {
       check_newlinechar(common, common->nltype, backtracks, TRUE);
     }
+
     return cc;
 
   case OP_ALLANY:
@@ -2107,6 +2118,7 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
       check_partial(common, TRUE);
       JUMPHERE(jump[0]);
     }
+
     return cc;
 #endif
 
@@ -2167,6 +2179,7 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
       add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, oc));
       JUMPHERE(jump[0]);
     }
+
     return cc + length;
 
   case OP_NOT:
@@ -2232,6 +2245,7 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
         add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, oc));
       }
     }
+
     return cc + length;
 
   case OP_CLASS:
@@ -2301,6 +2315,7 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
     return compile_eclass_matchingpath(common, cc, backtracks);
 #endif
   }
+
   SLJIT_UNREACHABLE();
   return cc;
 }

@@ -331,6 +331,7 @@ PRIV(compile_process_capture_list)(uint32_t *pptr, PCRE2_SIZE offset, int *error
         cb->erroroffset = offset;
         return 0;
       }
+
       if (i > cb->top_backref)
         cb->top_backref = (uint16_t)i;
       size++;

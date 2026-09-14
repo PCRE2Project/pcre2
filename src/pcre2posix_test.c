@@ -236,6 +236,7 @@ main(int argc, char **argv)
                     m->rm_so, m->rm_eo);
             return 1;
           }
+
           PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);
         }
       }

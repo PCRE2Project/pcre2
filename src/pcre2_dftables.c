@@ -152,6 +152,7 @@ main(int argc, char **argv)
         (void)fprintf(stderr, "pcre2_dftables: setlocale() failed\n");
         return 1;
       }
+
       env = getenv("LC_ALL");
     }
 
@@ -215,6 +216,7 @@ main(int argc, char **argv)
                     (int)len, TABLES_LENGTH);
       yield = 1;
     }
+
     fclose(f);
     free((void *)base_of_tables);
     return yield;
@@ -258,6 +260,7 @@ main(int argc, char **argv)
     if (i != 255)
       fprintf(f, ",");
   }
+
   (void)fprintf(f, ",\n\n");
 
   (void)fprintf(f, "/* This table is a case flipping table. */\n\n");
@@ -271,6 +274,7 @@ main(int argc, char **argv)
     if (i != 255)
       fprintf(f, ",");
   }
+
   (void)fprintf(f, ",\n\n");
 
   (void)fprintf(
@@ -290,10 +294,12 @@ main(int argc, char **argv)
         (void)fprintf(f, "  /* %s */", classlist[nclass++]);
       (void)fprintf(f, "\n  ");
     }
+
     (void)fprintf(f, "0x%02x", *tables++);
     if (i != cbit_length - 1)
       (void)fprintf(f, ",");
   }
+
   (void)fprintf(f, ",\n\n");
 
   (void)fprintf(f,
@@ -321,6 +327,7 @@ main(int argc, char **argv)
         (void)fprintf(f, "%3d", i - 1);
       (void)fprintf(f, " */\n  ");
     }
+
     (void)fprintf(f, "0x%02x", *tables++);
     if (i != 255)
       (void)fprintf(f, ",");

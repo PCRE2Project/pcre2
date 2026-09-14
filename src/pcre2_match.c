@@ -867,6 +867,7 @@ MATCH_RECURSE:
       break;
     }
   }
+
   fprintf(stderr, "\n");
 #endif
 
@@ -952,6 +953,7 @@ NEW_FRAME:
             break;
           offset = P->last_group_offset;
         }
+
         offset = (number << 1) - 2;
         Fcapture_last = number;
         Fovector[offset] = P->eptr - mb->start_subject;
@@ -959,6 +961,7 @@ NEW_FRAME:
         if (offset >= Foffset_top)
           Foffset_top = offset + 2;
       }
+
       Fecode += PRIV(OP_lengths)[*Fecode];
       break;
 
@@ -1011,6 +1014,7 @@ NEW_FRAME:
         Fecode += 1 + LINK_SIZE;
         continue;
       }
+
       PCRE2_FALLTHROUGH /* Fall through */
 
       /* OP_END itself can never be reached within a recursion because that is
@@ -1109,6 +1113,7 @@ NEW_FRAME:
         if (mb->partial > 1)
           return PCRE2_ERROR_PARTIAL;
       }
+
       PCRE2_FALLTHROUGH /* Fall through */
 
       /* Match any single character whatsoever. */
@@ -1120,6 +1125,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       Feptr++;
 #ifdef SUPPORT_UNICODE
       if (utf)
@@ -1141,6 +1147,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       Feptr++;
       Fecode++;
       break;
@@ -1161,6 +1168,7 @@ NEW_FRAME:
           CHECK_PARTIAL(); // Not SCHECK_PARTIAL()
           RRETURN(MATCH_NOMATCH);
         }
+
         for (; length > 0; length--)
         {
           if (*Fecode++ != *Feptr++)
@@ -1177,10 +1185,12 @@ NEW_FRAME:
           SCHECK_PARTIAL(); // This one can use SCHECK_PARTIAL()
           RRETURN(MATCH_NOMATCH);
         }
+
         if (Fecode[1] != *Feptr++)
           RRETURN(MATCH_NOMATCH);
         Fecode += 2;
       }
+
       break;
 
 
@@ -1250,6 +1260,7 @@ NEW_FRAME:
           if (cc != fc && cc != UCD_OTHERCASE(fc))
             RRETURN(MATCH_NOMATCH);
         }
+
         Feptr++;
         Fecode += 2;
       }
@@ -1264,6 +1275,7 @@ NEW_FRAME:
         Feptr++;
         Fecode += 2;
       }
+
       break;
 
 
@@ -1336,6 +1348,7 @@ NEW_FRAME:
           RRETURN(MATCH_NOMATCH);
         Fecode += 2;
       }
+
       break;
 
 
@@ -1508,6 +1521,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
           }
           else // Maximize
@@ -1550,6 +1564,7 @@ NEW_FRAME:
               }
             }
           }
+
           break; // End of repeated wide character handling
         }
 
@@ -1595,11 +1610,13 @@ NEW_FRAME:
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
           }
+
           cc = *Feptr;
           if (Lc != cc && Loc != cc)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
         }
+
         if (Lmin == Lmax)
           continue;
 
@@ -1618,11 +1635,13 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             cc = *Feptr;
             if (Lc != cc && Loc != cc)
               RRETURN(MATCH_NOMATCH);
             Feptr++;
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
 
@@ -1637,11 +1656,13 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               break;
             }
+
             cc = *Feptr;
             if (Lc != cc && Loc != cc)
               break;
             Feptr++;
           }
+
           if (reptype != REPTYPE_POS)
           {
             for (;;)
@@ -1668,6 +1689,7 @@ NEW_FRAME:
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
           }
+
           if (Lc != *Feptr++)
             RRETURN(MATCH_NOMATCH);
         }
@@ -1689,9 +1711,11 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             if (Lc != *Feptr++)
               RRETURN(MATCH_NOMATCH);
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
         else // Maximize
@@ -1724,6 +1748,7 @@ NEW_FRAME:
           }
         }
       }
+
       break;
 
 #undef Llength
@@ -1856,6 +1881,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             GETCHARINC(d, Feptr);
             if (Lc == d || Loc == d)
               RRETURN(MATCH_NOMATCH);
@@ -1873,6 +1899,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             if (Lc == *Feptr || Loc == *Feptr)
               RRETURN(MATCH_NOMATCH);
             Feptr++;
@@ -1900,6 +1927,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(d, Feptr);
               if (Lc == d || Loc == d)
                 RRETURN(MATCH_NOMATCH);
@@ -1922,11 +1950,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (Lc == *Feptr || Loc == *Feptr)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
 
@@ -1948,6 +1978,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(d, Feptr, len);
               if (Lc == d || Loc == d)
                 break;
@@ -1984,10 +2015,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (Lc == *Feptr || Loc == *Feptr)
                 break;
               Feptr++;
             }
+
             if (reptype != REPTYPE_POS)
             {
               for (;;)
@@ -2019,6 +2052,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             GETCHARINC(d, Feptr);
             if (Lc == d)
               RRETURN(MATCH_NOMATCH);
@@ -2035,6 +2069,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             if (Lc == *Feptr++)
               RRETURN(MATCH_NOMATCH);
           }
@@ -2061,6 +2096,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(d, Feptr);
               if (Lc == d)
                 RRETURN(MATCH_NOMATCH);
@@ -2082,10 +2118,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (Lc == *Feptr++)
                 RRETURN(MATCH_NOMATCH);
             }
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
 
@@ -2107,6 +2145,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(d, Feptr, len);
               if (Lc == d)
                 break;
@@ -2142,10 +2181,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (Lc == *Feptr)
                 break;
               Feptr++;
             }
+
             if (reptype != REPTYPE_POS)
             {
               for (;;)
@@ -2161,6 +2202,7 @@ NEW_FRAME:
           }
         }
       }
+
       break;
 
 #undef Lstart_eptr
@@ -2238,6 +2280,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             GETCHARINC(fc, Feptr);
             if (fc > 255)
             {
@@ -2261,6 +2304,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             fc = *Feptr++;
 #if PCRE2_CODE_UNIT_WIDTH != 8
             if (fc > 255)
@@ -2300,6 +2344,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               if (fc > 255)
               {
@@ -2328,6 +2373,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               fc = *Feptr++;
 #if PCRE2_CODE_UNIT_WIDTH != 8
               if (fc > 255)
@@ -2341,6 +2387,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
             }
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
 
@@ -2361,6 +2408,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc > 255)
               {
@@ -2371,6 +2419,7 @@ NEW_FRAME:
               {
                 break;
               }
+
               Feptr += len;
             }
 
@@ -2402,6 +2451,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               fc = *Feptr;
 #if PCRE2_CODE_UNIT_WIDTH != 8
               if (fc > 255)
@@ -2500,6 +2550,7 @@ NEW_FRAME:
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
           }
+
           GETCHARINCTEST(fc, Feptr);
           if (!PRIV(xclass)(fc, Lxclass_data, (const uint8_t *)mb->start_code, utf))
             RRETURN(MATCH_NOMATCH);
@@ -2527,10 +2578,12 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             GETCHARINCTEST(fc, Feptr);
             if (!PRIV(xclass)(fc, Lxclass_data, (const uint8_t *)mb->start_code, utf))
               RRETURN(MATCH_NOMATCH);
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
 
@@ -2576,6 +2629,7 @@ NEW_FRAME:
               BACKCHAR(Feptr);
 #endif
           }
+
           RRETURN(MATCH_NOMATCH);
         }
 
@@ -2649,6 +2703,7 @@ NEW_FRAME:
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
           }
+
           GETCHARINCTEST(fc, Feptr);
           if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
                             (const uint8_t *)mb->start_code, utf))
@@ -2677,11 +2732,13 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             GETCHARINCTEST(fc, Feptr);
             if (!PRIV(eclass)(fc, Leclass_data, Leclass_data + Leclass_len,
                               (const uint8_t *)mb->start_code, utf))
               RRETURN(MATCH_NOMATCH);
           }
+
           PCRE2_UNREACHABLE(); // Control never reaches here
         }
 
@@ -2728,6 +2785,7 @@ NEW_FRAME:
               BACKCHAR(Feptr);
 #endif
           }
+
           RRETURN(MATCH_NOMATCH);
         }
 
@@ -2753,6 +2811,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       if (CHMAX_255(fc) && (mb->ctypes[fc] & ctype_digit) != 0)
         RRETURN(MATCH_NOMATCH);
@@ -2765,6 +2824,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       if (!CHMAX_255(fc) || (mb->ctypes[fc] & ctype_digit) == 0)
         RRETURN(MATCH_NOMATCH);
@@ -2777,6 +2837,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       if (CHMAX_255(fc) && (mb->ctypes[fc] & ctype_space) != 0)
         RRETURN(MATCH_NOMATCH);
@@ -2789,6 +2850,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       if (!CHMAX_255(fc) || (mb->ctypes[fc] & ctype_space) == 0)
         RRETURN(MATCH_NOMATCH);
@@ -2801,6 +2863,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       if (CHMAX_255(fc) && (mb->ctypes[fc] & ctype_word) != 0)
         RRETURN(MATCH_NOMATCH);
@@ -2813,6 +2876,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       if (!CHMAX_255(fc) || (mb->ctypes[fc] & ctype_word) == 0)
         RRETURN(MATCH_NOMATCH);
@@ -2825,6 +2889,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       switch (fc)
       {
@@ -2840,6 +2905,7 @@ NEW_FRAME:
         {
           Feptr++;
         }
+
         break;
 
       case CHAR_LF:
@@ -2856,6 +2922,7 @@ NEW_FRAME:
           RRETURN(MATCH_NOMATCH);
         break;
       }
+
       Fecode++;
       break;
 
@@ -2865,6 +2932,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       switch (fc)
       {
@@ -2873,6 +2941,7 @@ NEW_FRAME:
       default:
         break;
       }
+
       Fecode++;
       break;
 
@@ -2882,6 +2951,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       switch (fc)
       {
@@ -2890,6 +2960,7 @@ NEW_FRAME:
       default:
         RRETURN(MATCH_NOMATCH);
       }
+
       Fecode++;
       break;
 
@@ -2899,6 +2970,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       switch (fc)
       {
@@ -2907,6 +2979,7 @@ NEW_FRAME:
       default:
         break;
       }
+
       Fecode++;
       break;
 
@@ -2916,6 +2989,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       switch (fc)
       {
@@ -2924,6 +2998,7 @@ NEW_FRAME:
       default:
         RRETURN(MATCH_NOMATCH);
       }
+
       Fecode++;
       break;
 
@@ -2941,6 +3016,7 @@ NEW_FRAME:
         SCHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
       }
+
       GETCHARINCTEST(fc, Feptr);
       {
         const uint32_t *cp;
@@ -2978,6 +3054,7 @@ NEW_FRAME:
             if (ok == notmatch)
               RRETURN(MATCH_NOMATCH);
           }
+
           break;
 
           /* These are specials */
@@ -3008,6 +3085,7 @@ NEW_FRAME:
               RRETURN(MATCH_NOMATCH);
             break;
           }
+
           break;
 
         case PT_WORD:
@@ -3041,6 +3119,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
             }
+
             if (fc == *cp++)
             {
               if (notmatch)
@@ -3053,6 +3132,7 @@ NEW_FRAME:
               }
             }
           }
+
           break;
 
         case PT_UCNC:
@@ -3072,6 +3152,7 @@ NEW_FRAME:
             if (ok == notmatch)
               RRETURN(MATCH_NOMATCH);
           }
+
           break;
 
           /* This should never occur */
@@ -3085,6 +3166,7 @@ NEW_FRAME:
 
         Fecode += 3;
       }
+
       break;
 
 
@@ -3103,6 +3185,7 @@ NEW_FRAME:
         GETCHARINCTEST(fc, Feptr);
         Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf, NULL);
       }
+
       CHECK_PARTIAL();
       Fecode++;
       break;
@@ -3213,11 +3296,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               chartype = UCD_CHARTYPE(fc);
               if ((chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_GC:
@@ -3228,10 +3313,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_CATEGORY(fc) == Lpropvalue) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_PC:
@@ -3242,10 +3329,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_CHARTYPE(fc) == Lpropvalue) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_SC:
@@ -3256,10 +3345,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_SCX:
@@ -3272,6 +3363,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               prop = GET_UCD(fc);
               ok = (prop->script == Lpropvalue ||
@@ -3279,6 +3371,7 @@ NEW_FRAME:
               if (ok == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_ALNUM:
@@ -3290,11 +3383,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               category = UCD_CATEGORY(fc);
               if ((category == ucp_L || category == ucp_N) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -3310,6 +3405,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               switch (fc)
               {
@@ -3325,6 +3421,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case PT_WORD:
@@ -3336,6 +3433,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               chartype = UCD_CHARTYPE(fc);
               category = PRIV(ucp_gentype)[chartype];
@@ -3343,6 +3441,7 @@ NEW_FRAME:
                    chartype == ucp_Pc) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_CLIST:
@@ -3354,6 +3453,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
 #if PCRE2_CODE_UNIT_WIDTH == 32
               if (fc > MAX_UTF_CODE_POINT)
@@ -3372,6 +3472,7 @@ NEW_FRAME:
                     break;
                   RRETURN(MATCH_NOMATCH);
                 }
+
                 if (fc == *cp++)
                 {
                   if (notmatch)
@@ -3380,6 +3481,7 @@ NEW_FRAME:
                 }
               }
             }
+
             break;
 
           case PT_UCNC:
@@ -3390,11 +3492,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT || fc == CHAR_GRAVE_ACCENT ||
                    (fc >= 0xa0 && fc <= 0xd7ff) || fc >= 0xe000) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_BIDICL:
@@ -3405,10 +3509,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case PT_BOOL:
@@ -3421,12 +3527,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               prop = GET_UCD(fc);
               ok = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
               if (ok == notmatch)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
             /* This should not occur */
@@ -3456,6 +3564,7 @@ NEW_FRAME:
               GETCHARINCTEST(fc, Feptr);
               Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf, NULL);
             }
+
             CHECK_PARTIAL();
           }
         }
@@ -3477,6 +3586,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (IS_NEWLINE(Feptr))
                 RRETURN(MATCH_NOMATCH);
               if (mb->partial != 0 && Feptr + 1 >= mb->end_subject &&
@@ -3487,9 +3597,11 @@ NEW_FRAME:
                 if (mb->partial > 1)
                   return PCRE2_ERROR_PARTIAL;
               }
+
               Feptr++;
               ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
+
             break;
 
           case OP_ALLANY:
@@ -3500,9 +3612,11 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               Feptr++;
               ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
+
             break;
 
           case OP_ANYBYTE:
@@ -3519,6 +3633,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               switch (fc)
               {
@@ -3545,6 +3660,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_NOT_HSPACE:
@@ -3555,6 +3671,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               switch (fc)
               {
@@ -3564,6 +3681,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_HSPACE:
@@ -3574,6 +3692,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               switch (fc)
               {
@@ -3583,6 +3702,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
             }
+
             break;
 
           case OP_NOT_VSPACE:
@@ -3593,6 +3713,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               switch (fc)
               {
@@ -3602,6 +3723,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_VSPACE:
@@ -3612,6 +3734,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               switch (fc)
               {
@@ -3621,6 +3744,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
             }
+
             break;
 
           case OP_NOT_DIGIT:
@@ -3631,10 +3755,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINC(fc, Feptr);
               if (fc < 128 && (mb->ctypes[fc] & ctype_digit) != 0)
                 RRETURN(MATCH_NOMATCH);
             }
+
             break;
 
           case OP_DIGIT:
@@ -3646,12 +3772,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               cc = *Feptr;
               if (cc >= 128 || (mb->ctypes[cc] & ctype_digit) == 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
               /* No need to skip more code units - we know it has only one. */
             }
+
             break;
 
           case OP_NOT_WHITESPACE:
@@ -3663,12 +3791,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               cc = *Feptr;
               if (cc < 128 && (mb->ctypes[cc] & ctype_space) != 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
               ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
+
             break;
 
           case OP_WHITESPACE:
@@ -3680,12 +3810,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               cc = *Feptr;
               if (cc >= 128 || (mb->ctypes[cc] & ctype_space) == 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
               /* No need to skip more code units - we know it has only one. */
             }
+
             break;
 
           case OP_NOT_WORDCHAR:
@@ -3697,12 +3829,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               cc = *Feptr;
               if (cc < 128 && (mb->ctypes[cc] & ctype_word) != 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
               ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
+
             break;
 
           case OP_WORDCHAR:
@@ -3714,12 +3848,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               cc = *Feptr;
               if (cc >= 128 || (mb->ctypes[cc] & ctype_word) == 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
               /* No need to skip more code units - we know it has only one. */
             }
+
             break;
 
             /* LCOV_EXCL_START */
@@ -3746,6 +3882,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (IS_NEWLINE(Feptr))
                 RRETURN(MATCH_NOMATCH);
               if (mb->partial != 0 && Feptr + 1 >= mb->end_subject &&
@@ -3756,8 +3893,10 @@ NEW_FRAME:
                 if (mb->partial > 1)
                   return PCRE2_ERROR_PARTIAL;
               }
+
               Feptr++;
             }
+
             break;
 
           case OP_ALLANY:
@@ -3766,6 +3905,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             Feptr += Lmin;
             break;
 
@@ -3790,6 +3930,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               switch (*Feptr++)
               {
               default:
@@ -3815,6 +3956,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_NOT_HSPACE:
@@ -3825,6 +3967,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               switch (*Feptr++)
               {
               default:
@@ -3836,6 +3979,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
             }
+
             break;
 
           case OP_HSPACE:
@@ -3846,6 +3990,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               switch (*Feptr++)
               {
               default:
@@ -3857,6 +4002,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_NOT_VSPACE:
@@ -3867,6 +4013,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               switch (*Feptr++)
               {
               VSPACE_BYTE_CASES:
@@ -3878,6 +4025,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_VSPACE:
@@ -3888,6 +4036,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               switch (*Feptr++)
               {
               default:
@@ -3899,6 +4048,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             break;
 
           case OP_NOT_DIGIT:
@@ -3909,10 +4059,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (MAX_255(*Feptr) && (mb->ctypes[*Feptr] & ctype_digit) != 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
+
             break;
 
           case OP_DIGIT:
@@ -3923,10 +4075,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (!MAX_255(*Feptr) || (mb->ctypes[*Feptr] & ctype_digit) == 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
+
             break;
 
           case OP_NOT_WHITESPACE:
@@ -3937,10 +4091,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (MAX_255(*Feptr) && (mb->ctypes[*Feptr] & ctype_space) != 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
+
             break;
 
           case OP_WHITESPACE:
@@ -3951,10 +4107,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (!MAX_255(*Feptr) || (mb->ctypes[*Feptr] & ctype_space) == 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
+
             break;
 
           case OP_NOT_WORDCHAR:
@@ -3965,10 +4123,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (MAX_255(*Feptr) && (mb->ctypes[*Feptr] & ctype_word) != 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
+
             break;
 
           case OP_WORDCHAR:
@@ -3979,10 +4139,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               if (!MAX_255(*Feptr) || (mb->ctypes[*Feptr] & ctype_word) == 0)
                 RRETURN(MATCH_NOMATCH);
               Feptr++;
             }
+
             break;
 
             /* LCOV_EXCL_START */
@@ -4024,12 +4186,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               chartype = UCD_CHARTYPE(fc);
               if ((chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt) ==
                   (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_GC:
@@ -4045,10 +4209,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_CATEGORY(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_PC:
@@ -4064,10 +4230,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_CHARTYPE(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_SC:
@@ -4083,10 +4251,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_SCRIPT(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_SCX:
@@ -4104,6 +4274,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               prop = GET_UCD(fc);
               ok = (prop->script == Lpropvalue ||
@@ -4111,6 +4282,7 @@ NEW_FRAME:
               if (ok == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_ALNUM:
@@ -4127,11 +4299,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               category = UCD_CATEGORY(fc);
               if ((category == ucp_L || category == ucp_N) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -4152,6 +4326,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               switch (fc)
               {
@@ -4167,6 +4342,7 @@ NEW_FRAME:
                 break;
               }
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_WORD:
@@ -4183,6 +4359,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               chartype = UCD_CHARTYPE(fc);
               category = PRIV(ucp_gentype)[chartype];
@@ -4190,6 +4367,7 @@ NEW_FRAME:
                    chartype == ucp_Pc) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_CLIST:
@@ -4206,6 +4384,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
 #if PCRE2_CODE_UNIT_WIDTH == 32
               if (fc > MAX_UTF_CODE_POINT)
@@ -4224,6 +4403,7 @@ NEW_FRAME:
                     break;
                   RRETURN(MATCH_NOMATCH);
                 }
+
                 if (fc == *cp++)
                 {
                   if (Lctype == OP_NOTPROP)
@@ -4232,6 +4412,7 @@ NEW_FRAME:
                 }
               }
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_UCNC:
@@ -4247,11 +4428,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT || fc == CHAR_GRAVE_ACCENT ||
                    (fc >= 0xa0 && fc <= 0xd7ff) || fc >= 0xe000) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_BIDICL:
@@ -4267,10 +4450,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               if ((UCD_BIDICLASS(fc) == Lpropvalue) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
           case PT_BOOL:
@@ -4288,12 +4473,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 RRETURN(MATCH_NOMATCH);
               }
+
               GETCHARINCTEST(fc, Feptr);
               prop = GET_UCD(fc);
               ok = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
               if (ok == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
             }
+
             PCRE2_UNREACHABLE(); // Control never reaches here
 
             /* This should never occur */
@@ -4328,6 +4515,7 @@ NEW_FRAME:
               GETCHARINCTEST(fc, Feptr);
               Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf, NULL);
             }
+
             CHECK_PARTIAL();
           }
         }
@@ -4351,6 +4539,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             if (Lctype == OP_ANY && IS_NEWLINE(Feptr))
               RRETURN(MATCH_NOMATCH);
             GETCHARINC(fc, Feptr);
@@ -4365,6 +4554,7 @@ NEW_FRAME:
                 if (mb->partial > 1)
                   return PCRE2_ERROR_PARTIAL;
               }
+
               break;
 
             case OP_ALLANY:
@@ -4396,6 +4586,7 @@ NEW_FRAME:
                   RRETURN(MATCH_NOMATCH);
                 break;
               }
+
               break;
 
             case OP_NOT_HSPACE:
@@ -4406,6 +4597,7 @@ NEW_FRAME:
               default:
                 break;
               }
+
               break;
 
             case OP_HSPACE:
@@ -4416,6 +4608,7 @@ NEW_FRAME:
               default:
                 RRETURN(MATCH_NOMATCH);
               }
+
               break;
 
             case OP_NOT_VSPACE:
@@ -4426,6 +4619,7 @@ NEW_FRAME:
               default:
                 break;
               }
+
               break;
 
             case OP_VSPACE:
@@ -4436,6 +4630,7 @@ NEW_FRAME:
               default:
                 RRETURN(MATCH_NOMATCH);
               }
+
               break;
 
             case OP_NOT_DIGIT:
@@ -4493,6 +4688,7 @@ NEW_FRAME:
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
             }
+
             if (Lctype == OP_ANY && IS_NEWLINE(Feptr))
               RRETURN(MATCH_NOMATCH);
             fc = *Feptr++;
@@ -4507,6 +4703,7 @@ NEW_FRAME:
                 if (mb->partial > 1)
                   return PCRE2_ERROR_PARTIAL;
               }
+
               break;
 
             case OP_ALLANY:
@@ -4538,6 +4735,7 @@ NEW_FRAME:
                   RRETURN(MATCH_NOMATCH);
                 break;
               }
+
               break;
 
             case OP_NOT_HSPACE:
@@ -4551,6 +4749,7 @@ NEW_FRAME:
 #endif
                 RRETURN(MATCH_NOMATCH);
               }
+
               break;
 
             case OP_HSPACE:
@@ -4564,6 +4763,7 @@ NEW_FRAME:
 #endif
                 break;
               }
+
               break;
 
             case OP_NOT_VSPACE:
@@ -4577,6 +4777,7 @@ NEW_FRAME:
 #endif
                 RRETURN(MATCH_NOMATCH);
               }
+
               break;
 
             case OP_VSPACE:
@@ -4590,6 +4791,7 @@ NEW_FRAME:
 #endif
                 break;
               }
+
               break;
 
             case OP_NOT_DIGIT:
@@ -4659,12 +4861,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               chartype = UCD_CHARTYPE(fc);
               if ((chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_GC:
@@ -4676,11 +4880,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               if ((UCD_CATEGORY(fc) == Lpropvalue) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_PC:
@@ -4692,11 +4898,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               if ((UCD_CHARTYPE(fc) == Lpropvalue) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_SC:
@@ -4708,11 +4916,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               if ((UCD_SCRIPT(fc) == Lpropvalue) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_SCX:
@@ -4726,6 +4936,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               prop = GET_UCD(fc);
               ok = (prop->script == Lpropvalue ||
@@ -4734,6 +4945,7 @@ NEW_FRAME:
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_ALNUM:
@@ -4746,12 +4958,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               category = UCD_CATEGORY(fc);
               if ((category == ucp_L || category == ucp_N) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
             /* Perl space used to exclude VT, but from Perl 5.18 it is included,
@@ -4768,6 +4982,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               switch (fc)
               {
@@ -4782,8 +4997,10 @@ NEW_FRAME:
                   goto ENDLOOP99; // Break the loop
                 break;
               }
+
               Feptr += len;
             }
+
           ENDLOOP99:
             break;
 
@@ -4797,6 +5014,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               chartype = UCD_CHARTYPE(fc);
               category = PRIV(ucp_gentype)[chartype];
@@ -4805,6 +5023,7 @@ NEW_FRAME:
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_CLIST:
@@ -4817,6 +5036,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
 #if PCRE2_CODE_UNIT_WIDTH == 32
               if (fc > MAX_UTF_CODE_POINT)
@@ -4837,6 +5057,7 @@ NEW_FRAME:
                     else
                       goto GOT_MAX;
                   }
+
                   if (fc == *cp++)
                   {
                     if (notmatch)
@@ -4849,6 +5070,7 @@ NEW_FRAME:
 
               Feptr += len;
             }
+
           GOT_MAX:
             break;
 
@@ -4861,12 +5083,14 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               if ((fc == CHAR_DOLLAR_SIGN || fc == CHAR_COMMERCIAL_AT || fc == CHAR_GRAVE_ACCENT ||
                    (fc >= 0xa0 && fc <= 0xd7ff) || fc >= 0xe000) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_BIDICL:
@@ -4878,11 +5102,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               if ((UCD_BIDICLASS(fc) == Lpropvalue) == notmatch)
                 break;
               Feptr += len;
             }
+
             break;
 
           case PT_BOOL:
@@ -4896,6 +5122,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLENTEST(fc, Feptr, len);
               prop = GET_UCD(fc);
               ok = MAPBIT(PRIV(ucd_boolprop_sets) + UCD_BPROPS_PROP(prop), Lpropvalue) != 0;
@@ -4903,6 +5130,7 @@ NEW_FRAME:
                 break;
               Feptr += len;
             }
+
             break;
 
             /* LCOV_EXCL_START */
@@ -4951,6 +5179,7 @@ NEW_FRAME:
               GETCHARINCTEST(fc, Feptr);
               Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf, NULL);
             }
+
             CHECK_PARTIAL();
           }
 
@@ -4989,6 +5218,7 @@ NEW_FRAME:
               BACKCHAR(Feptr);
               GETCHAR(fc, Feptr);
             }
+
             rgb = UCD_GRAPHBREAK(fc);
 
             for (;;)
@@ -5005,6 +5235,7 @@ NEW_FRAME:
                 BACKCHAR(fptr);
                 GETCHAR(fc, fptr);
               }
+
               lgb = UCD_GRAPHBREAK(fc);
               if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0)
                 break;
@@ -5030,6 +5261,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (IS_NEWLINE(Feptr))
                 break;
               if (mb->partial != 0 && // Take care with CRLF partial
@@ -5040,9 +5272,11 @@ NEW_FRAME:
                 if (mb->partial > 1)
                   return PCRE2_ERROR_PARTIAL;
               }
+
               Feptr++;
               ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
             }
+
             break;
 
           case OP_ALLANY:
@@ -5055,6 +5289,7 @@ NEW_FRAME:
                   SCHECK_PARTIAL();
                   break;
                 }
+
                 Feptr++;
                 ACROSSCHAR(Feptr < mb->end_subject, Feptr, Feptr++);
               }
@@ -5064,6 +5299,7 @@ NEW_FRAME:
               Feptr = mb->end_subject; // Unlimited UTF-8 repeat
               SCHECK_PARTIAL();
             }
+
             break;
 
             /* The "byte" (i.e. "code unit") case is the same as non-UTF */
@@ -5079,6 +5315,7 @@ NEW_FRAME:
             {
               Feptr += fc;
             }
+
             break;
 
           case OP_ANYNL:
@@ -5090,6 +5327,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc == CHAR_CR)
               {
@@ -5110,6 +5348,7 @@ NEW_FRAME:
                 Feptr += len;
               }
             }
+
             break;
 
           case OP_NOT_HSPACE:
@@ -5123,6 +5362,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               switch (fc)
               {
@@ -5133,10 +5373,12 @@ NEW_FRAME:
                 gotspace = FALSE;
                 break;
               }
+
               if (gotspace == (Lctype == OP_NOT_HSPACE))
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_NOT_VSPACE:
@@ -5150,6 +5392,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               switch (fc)
               {
@@ -5160,10 +5403,12 @@ NEW_FRAME:
                 gotspace = FALSE;
                 break;
               }
+
               if (gotspace == (Lctype == OP_NOT_VSPACE))
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_NOT_DIGIT:
@@ -5175,11 +5420,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc < 256 && (mb->ctypes[fc] & ctype_digit) != 0)
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_DIGIT:
@@ -5191,11 +5438,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc >= 256 || (mb->ctypes[fc] & ctype_digit) == 0)
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_NOT_WHITESPACE:
@@ -5207,11 +5456,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc < 256 && (mb->ctypes[fc] & ctype_space) != 0)
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_WHITESPACE:
@@ -5223,11 +5474,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc >= 256 || (mb->ctypes[fc] & ctype_space) == 0)
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_NOT_WORDCHAR:
@@ -5239,11 +5492,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc < 256 && (mb->ctypes[fc] & ctype_word) != 0)
                 break;
               Feptr += len;
             }
+
             break;
 
           case OP_WORDCHAR:
@@ -5255,11 +5510,13 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               GETCHARLEN(fc, Feptr, len);
               if (fc >= 256 || (mb->ctypes[fc] & ctype_word) == 0)
                 break;
               Feptr += len;
             }
+
             break;
 
             /* LCOV_EXCL_START */
@@ -5305,6 +5562,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (IS_NEWLINE(Feptr))
                 break;
               if (mb->partial != 0 && // Take care with CRLF partial
@@ -5315,8 +5573,10 @@ NEW_FRAME:
                 if (mb->partial > 1)
                   return PCRE2_ERROR_PARTIAL;
               }
+
               Feptr++;
             }
+
             break;
 
           case OP_ALLANY:
@@ -5331,6 +5591,7 @@ NEW_FRAME:
             {
               Feptr += fc;
             }
+
             break;
 
           case OP_ANYNL:
@@ -5341,6 +5602,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               fc = *Feptr;
               if (fc == CHAR_CR)
               {
@@ -5361,6 +5623,7 @@ NEW_FRAME:
                 Feptr++;
               }
             }
+
             break;
 
           case OP_NOT_HSPACE:
@@ -5371,6 +5634,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               switch (*Feptr)
               {
               default:
@@ -5383,6 +5647,7 @@ NEW_FRAME:
                 goto ENDLOOP00;
               }
             }
+
           ENDLOOP00:
             break;
 
@@ -5394,6 +5659,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               switch (*Feptr)
               {
               default:
@@ -5406,6 +5672,7 @@ NEW_FRAME:
                 break;
               }
             }
+
           ENDLOOP01:
             break;
 
@@ -5417,6 +5684,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               switch (*Feptr)
               {
               default:
@@ -5429,6 +5697,7 @@ NEW_FRAME:
                 goto ENDLOOP02;
               }
             }
+
           ENDLOOP02:
             break;
 
@@ -5440,6 +5709,7 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               switch (*Feptr)
               {
               default:
@@ -5452,6 +5722,7 @@ NEW_FRAME:
                 break;
               }
             }
+
           ENDLOOP03:
             break;
 
@@ -5463,10 +5734,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (MAX_255(*Feptr) && (mb->ctypes[*Feptr] & ctype_digit) != 0)
                 break;
               Feptr++;
             }
+
             break;
 
           case OP_DIGIT:
@@ -5477,10 +5750,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (!MAX_255(*Feptr) || (mb->ctypes[*Feptr] & ctype_digit) == 0)
                 break;
               Feptr++;
             }
+
             break;
 
           case OP_NOT_WHITESPACE:
@@ -5491,10 +5766,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (MAX_255(*Feptr) && (mb->ctypes[*Feptr] & ctype_space) != 0)
                 break;
               Feptr++;
             }
+
             break;
 
           case OP_WHITESPACE:
@@ -5505,10 +5782,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (!MAX_255(*Feptr) || (mb->ctypes[*Feptr] & ctype_space) == 0)
                 break;
               Feptr++;
             }
+
             break;
 
           case OP_NOT_WORDCHAR:
@@ -5519,10 +5798,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (MAX_255(*Feptr) && (mb->ctypes[*Feptr] & ctype_word) != 0)
                 break;
               Feptr++;
             }
+
             break;
 
           case OP_WORDCHAR:
@@ -5533,10 +5814,12 @@ NEW_FRAME:
                 SCHECK_PARTIAL();
                 break;
               }
+
               if (!MAX_255(*Feptr) || (mb->ctypes[*Feptr] & ctype_word) == 0)
                 break;
               Feptr++;
             }
+
             break;
 
             /* LCOV_EXCL_START */
@@ -5563,6 +5846,7 @@ NEW_FRAME:
           }
         }
       }
+
       break; // End of repeat character type processing
 
 #undef Lstart_eptr
@@ -5605,6 +5889,7 @@ NEW_FRAME:
           slot += mb->name_entry_size;
         }
       }
+
       goto REF_REPEAT;
 
     case OP_REF:
@@ -5658,6 +5943,7 @@ NEW_FRAME:
             RRETURN(MATCH_NOMATCH);
           }
         }
+
         Feptr += length;
         continue; // With the main loop
       }
@@ -5693,6 +5979,7 @@ NEW_FRAME:
           CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
         }
+
         Feptr += slength;
       }
 
@@ -5721,6 +6008,7 @@ NEW_FRAME:
             CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
           }
+
           Feptr += slength;
         }
 
@@ -5751,6 +6039,7 @@ NEW_FRAME:
               if (mb->partial > 1)
                 return PCRE2_ERROR_PARTIAL;
             }
+
             break;
           }
 
@@ -5856,6 +6145,7 @@ NEW_FRAME:
         while (*next_ecode == OP_ALT);
         Fecode = next_ecode + 1 + LINK_SIZE;
       }
+
       break;
 
     case OP_BRAMINZERO:
@@ -5871,6 +6161,7 @@ NEW_FRAME:
         if (rrc != MATCH_NOMATCH)
           RRETURN(rrc);
       }
+
       break;
 
     case OP_SKIPZERO:
@@ -5881,6 +6172,7 @@ NEW_FRAME:
         while (*next_ecode == OP_ALT);
         Fecode = next_ecode + 1 + LINK_SIZE;
       }
+
       break;
 
 
@@ -6053,12 +6345,14 @@ NEW_FRAME:
           if (mb->verb_ecode_ptr < next_ecode && (*Fecode == OP_ALT || *next_ecode == OP_ALT))
             rrc = MATCH_NOMATCH;
         }
+
         if (rrc != MATCH_NOMATCH)
           RRETURN(rrc);
         Fecode += GET(Fecode, 1);
         if (*Fecode != OP_ALT)
           RRETURN(MATCH_NOMATCH);
       }
+
       PCRE2_UNREACHABLE(); // Control never reaches here
 
 #undef Lframe_type
@@ -6099,6 +6393,7 @@ NEW_FRAME:
               return PCRE2_ERROR_RECURSELOOP;
             break;
           }
+
           offset = P->last_group_offset;
         }
       }
@@ -6147,6 +6442,7 @@ NEW_FRAME:
         if (*Lstart_branch != OP_ALT)
           RRETURN(MATCH_NOMATCH);
       }
+
       PCRE2_UNREACHABLE(); // Control never reaches here
 
 #undef Lstart_branch
@@ -6175,6 +6471,7 @@ NEW_FRAME:
           Fmark = assert_accept_frame->mark;
           break;
         }
+
         if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
           RRETURN(rrc);
         Fecode += GET(Fecode, 1);
@@ -6347,6 +6644,7 @@ NEW_FRAME:
           mb->moptions = Lsaved_moptions;
           RRETURN(MATCH_NOMATCH);
         }
+
         length = 0;
       }
 
@@ -6435,6 +6733,7 @@ NEW_FRAME:
           number = GET2(Fecode, 1);
           condition = (number == RREF_ANY || number == Fcurrent_recurse);
         }
+
         break;
 
       case OP_DNRREF: // Duplicate named group recursion test
@@ -6451,6 +6750,7 @@ NEW_FRAME:
             slot += mb->name_entry_size;
           }
         }
+
         break;
 
       case OP_CREF:                          // Numbered group used test
@@ -6471,6 +6771,7 @@ NEW_FRAME:
             slot += mb->name_entry_size;
           }
         }
+
         break;
 
       case OP_FALSE:
@@ -6531,6 +6832,7 @@ NEW_FRAME:
           default:
             RRETURN(rrc);
           }
+
           break; // Out of the branch loop
         }
 
@@ -6543,6 +6845,7 @@ NEW_FRAME:
             Fecode += GET(Fecode, 1);
           while (*Fecode == OP_ALT);
         }
+
         break; // End of assertion condition
       }
 
@@ -6561,6 +6864,7 @@ NEW_FRAME:
         RMATCH(Fecode, RM35);
         RRETURN(rrc);
       }
+
       break;
 
 #undef Lstart_branch
@@ -6645,6 +6949,7 @@ NEW_FRAME:
             Lmax = i;
             break;
           }
+
           Feptr--;
           BACKCHAR(Feptr);
         }
@@ -6682,6 +6987,7 @@ NEW_FRAME:
         }
 #endif
       }
+
       PCRE2_UNREACHABLE(); // Control never reaches here
 
 #undef Lmin
@@ -6855,6 +7161,7 @@ NEW_FRAME:
             break;
           P->ecode += y;
         }
+
         break;
 
         /* A matching negative assertion returns MATCH, which is turned into
@@ -7018,6 +7325,7 @@ NEW_FRAME:
         if (mb->partial > 1)
           return PCRE2_ERROR_PARTIAL;
       }
+
       Fecode++;
       break;
 
@@ -7035,6 +7343,7 @@ NEW_FRAME:
           if (mb->partial > 1)
             return PCRE2_ERROR_PARTIAL;
         }
+
         RRETURN(MATCH_NOMATCH);
       }
 
@@ -7046,6 +7355,7 @@ NEW_FRAME:
         if (mb->partial > 1)
           return PCRE2_ERROR_PARTIAL;
       }
+
       Fecode++;
       break;
 
@@ -7081,6 +7391,7 @@ NEW_FRAME:
             if (mb->partial > 1)
               return PCRE2_ERROR_PARTIAL;
           }
+
           RRETURN(MATCH_NOMATCH);
         }
       }
@@ -7090,6 +7401,7 @@ NEW_FRAME:
           RRETURN(MATCH_NOMATCH);
         SCHECK_PARTIAL();
       }
+
       Fecode++;
       break;
 
@@ -7218,6 +7530,7 @@ NEW_FRAME:
         mb->verb_skip_ptr = Feptr; // Pass back current position
         RRETURN(MATCH_SKIP);
       }
+
       RRETURN(rrc);
 
     case OP_FAIL:
@@ -7280,6 +7593,7 @@ NEW_FRAME:
         Fecode += PRIV(OP_lengths)[*Fecode] + Fecode[1];
         break;
       }
+
       RMATCH(Fecode + PRIV(OP_lengths)[*Fecode] + Fecode[1], RM17);
       if (rrc != MATCH_NOMATCH)
         RRETURN(rrc);
@@ -7486,6 +7800,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
   {
     length = PRIV(strlen)(subject);
   }
+
   true_end_subject = end_subject = subject + length;
 
   if (start_offset > length)
@@ -7555,6 +7870,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
     match_data->memctl.free((void *)match_data->subject, match_data->memctl.memory_data);
     match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
   }
+
   match_data->subject = NULL;
 
   /* Zero the error offset in case the first code unit is invalid UTF. */
@@ -7656,6 +7972,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
       {
         match_data->subject = NULL;
       }
+
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
     else
@@ -7665,6 +7982,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
       if (match_data->subject != NULL)
         match_data->subject = original_subject;
     }
+
     return rc;
   }
 #endif /* SUPPORT_JIT */
@@ -7961,6 +8279,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
       match_data->heapframes_size = 0;
       return match_data->rc = PCRE2_ERROR_NOMEMORY;
     }
+
     match_data->heapframes_size = heapframes_size;
   }
 
@@ -8099,6 +8418,7 @@ FRAGMENT_RESTART:
               ok = (start_bits[c / 8] & (1u << (c & 7))) != 0;
             }
           }
+
           if (!ok)
           {
             rc = MATCH_NOMATCH;
@@ -8448,6 +8768,7 @@ FRAGMENT_RESTART:
         new_start_match = mb->verb_skip_ptr;
         break;
       }
+
       PCRE2_FALLTHROUGH /* Fall through */
 
       /* NOMATCH and PRUNE advance by one character. THEN at this level acts
@@ -8633,6 +8954,7 @@ ENDLOOP:
       {
         match_data->subject = NULL;
       }
+
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
     else

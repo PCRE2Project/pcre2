@@ -1208,6 +1208,7 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
       instruction = 0x4ea01c00 | (cmp2_ind << 16) | (dst_ind << 5) | dst_ind;
       sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     }
+
     return;
   }
 
@@ -1790,6 +1791,7 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
       instruction[2] = (sljit_u16)((0xe << 8) | 0x6a);
       sljit_emit_op_custom(compiler, instruction, 6);
     }
+
     return;
   }
 
@@ -3186,6 +3188,7 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
       OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
       JUMPHERE(partial_quit[1]);
     }
+
     return;
   }
 #endif

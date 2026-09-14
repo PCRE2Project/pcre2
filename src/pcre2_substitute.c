@@ -572,6 +572,7 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
       PCRE2_ASSERT(rest_len <= output_cap - rc);
       memmove(output + rc, rest, CU2BYTES(rest_len));
     }
+
     rc2 = rest_len;
 
     state->to_case = PCRE2_SUBSTITUTE_CASE_NONE;
@@ -1047,6 +1048,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       rc = PCRE2_ERROR_TOOMANYREPLACE;
       goto EXIT;
     }
+
     subs++;
 
     /* Copy the text leading up to the match (unless not required); remember
@@ -1110,6 +1112,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             ptr += 2;
             continue;
           }
+
           goto LOADLITERAL;
         }
 
@@ -1148,6 +1151,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             group = 0;
             goto GROUP_SUBSTITUTE;
           }
+
           if (next == CHAR_GRAVE_ACCENT || next == CHAR_APOSTROPHE)
           {
             ++ptr;
@@ -1181,6 +1185,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
             goto SUBPTR_SUBSTITUTE;
           }
+
           if (next == CHAR_UNDERSCORE)
           {
             /* Java, .NET support $_ for "entire input string". */
@@ -1196,6 +1201,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             subptrend = subject + length;
             goto SUBPTR_SUBSTITUTE;
           }
+
           if (next == CHAR_PLUS && !(ptr + 1 < repend && ptr[1] == CHAR_LEFT_CURLY_BRACKET))
           {
             /* Perl supports $+ for "highest captured group" (not the same as $^N
@@ -1211,6 +1217,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                 rc = PCRE2_ERROR_NOSUBSTRING;
                 goto PTREXIT;
               }
+
               group = 0;
             }
             else
@@ -1222,10 +1229,12 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                 rc = PCRE2_ERROR_UNAVAILABLE;
                 goto PTREXIT;
               }
+
               for (group = code->top_bracket; group > 0; group--)
                 if (ovector[2 * group] != PCRE2_UNSET)
                   break;
             }
+
             if (group == 0)
             {
               if ((suboptions & PCRE2_SUBSTITUTE_UNSET_EMPTY) != 0)
@@ -1233,6 +1242,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               rc = PCRE2_ERROR_UNSET;
               goto PTREXIT;
             }
+
             goto GROUP_SUBSTITUTE;
           }
 
@@ -1440,6 +1450,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               {
                 rc = PCRE2_ERROR_UNSET;
               }
+
               if (rc != PCRE2_ERROR_UNSET)
                 goto PTREXIT;   // Non-unset errors
               if (special == 0) // Plain substitution
@@ -1479,6 +1490,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                 ptr = text2_start;
                 repend = text2_end;
               }
+
               continue;
             }
 
@@ -1529,6 +1541,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                 new_forcecase.single_char = FALSE;
                 ptr += 2;
               }
+
               break;
 
             case CHAR_U:
@@ -1548,6 +1561,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                 new_forcecase.single_char = FALSE;
                 ptr += 2;
               }
+
               break;
 
             default:
@@ -1647,6 +1661,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               group = -rc - 1;
               goto GROUP_SUBSTITUTE;
             }
+
             goto BADESCAPE;
           }
         } // End of backslash processing

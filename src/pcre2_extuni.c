@@ -108,6 +108,7 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR check_subject, PCRE2_SPTR e
     {
       GETCHARLEN(c, eptr, len);
     }
+
     rgb = UCD_GRAPHBREAK(c);
     if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0)
       break;
@@ -142,10 +143,12 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR check_subject, PCRE2_SPTR e
         {
           c = *bptr;
         }
+
         if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator)
           break;
         ricount++;
       }
+
       if ((ricount & 1) != 0)
         break; // Grapheme break required
     }

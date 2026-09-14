@@ -157,6 +157,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
             return not_negated;
           break;
         }
+
         break;
 
       case PT_WORD:
@@ -178,6 +179,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
           if ((c < 0xd800 || c > 0xdfff) == isprop)
             return not_negated;
         }
+
         break;
 
       case PT_BIDICL:

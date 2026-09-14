@@ -934,10 +934,12 @@ show_parsed(compile_block *cb)
                 break;
             }
           }
+
           if (cc > ESCAPES_LAST)
             cc = CHAR_QUESTION_MARK;
           fprintf(stderr, "META \\%c", cc);
         }
+
         break;
 
       case META_MINMAX:
@@ -1117,6 +1119,7 @@ show_parsed(compile_block *cb)
           GETOFFSET(offset, pptr);
           fprintf(stderr, "%zd next=%d/%d", offset, patoffset, patlength);
         }
+
         break;
 
       case META_RECURSE_BYNAME:
@@ -1216,6 +1219,7 @@ show_parsed(compile_block *cb)
           else
             fprintf(stderr, "\\x{%x}", cc);
         }
+
         fprintf(stderr, ") length=%u", length);
         break;
 
@@ -1236,8 +1240,10 @@ show_parsed(compile_block *cb)
         break;
       }
     }
+
     fprintf(stderr, "\n");
   }
+
   return;
 }
 #endif /* DEBUG_SHOW_PARSED */
@@ -1308,6 +1314,7 @@ pcre2_code_copy_with_tables(const pcre2_code *code)
     code->memctl.free((void *)newcode, code->memctl.memory_data);
     return NULL;
   }
+
   memcpy(newtables, code->tables, TABLES_LENGTH);
   ref_count = (PCRE2_SIZE *)(newtables + TABLES_LENGTH);
   *ref_count = 1;
@@ -1534,6 +1541,7 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp, uint32
     {
       return FALSE;
     }
+
     while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT))
       pp++;
     if (pp >= ptrend || *pp != CHAR_RIGHT_CURLY_BRACKET)
@@ -1781,6 +1789,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
         *errorcodeptr = ERR3;
         goto EXIT;
       }
+
       alt_bsux = FALSE; // Do not modify \x handling
     }
 
@@ -1827,6 +1836,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
               ptr = hptr; // Show where *hptr != } will cause another break below
               break;
             }
+
             cc = (cc << 4) | xc;
             hptr++;
           }
@@ -1877,6 +1887,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
           *errorcodeptr = ERR77;
         }
       }
+
       break;
 
       /* \U is unrecognized unless PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set,
@@ -1979,6 +1990,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
             escape = ESC_k; // No number found
           break;
         }
+
         while (p < ptrend && (*p == CHAR_SPACE || *p == CHAR_HT))
           p++;
 
@@ -1988,6 +2000,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
           *errorcodeptr = ERR119; // Missing terminator for number
           break;
         }
+
         ptr = p + 1;
       }
 
@@ -2107,6 +2120,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
           {
             escape = -(s + 1); // Indicates a back reference
           }
+
           break;
         }
 
@@ -2160,6 +2174,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
         *errorcodeptr = ERR55;
         break;
       }
+
       ptr++;
 
       while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
@@ -2230,6 +2245,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
         if (ptr < ptrend)
           goto ESCAPE_FAILED_FORWARD;
       }
+
       break;
 
       /* When PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set, \x must be followed
@@ -2272,6 +2288,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
             *errorcodeptr = ERR78;
             break;
           }
+
           c = 0;
           overflow = FALSE;
 
@@ -2346,6 +2363,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
             *errorcodeptr = ERR78;
             break;
           }
+
           ptr++;
           c = cc;
 
@@ -2364,6 +2382,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
           c = (c << 4) | cc;
         } // End of \xdd handling
       } // End of Perl-style \x handling
+
       break;
 
       /* The handling of \c is different in ASCII and EBCDIC environments. In an
@@ -2386,6 +2405,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
         *errorcodeptr = ERR2;
         break;
       }
+
       c = *ptr;
       if (c >= CHAR_a && c <= CHAR_z)
         c = UPPER_CASE(c);
@@ -2398,6 +2418,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
         *errorcodeptr = ERR68;
         goto ESCAPE_FAILED_FORWARD;
       }
+
       c ^= 0x40;
 
       /* Handle \c in an EBCDIC environment. The special case \c? is converted to
@@ -2417,6 +2438,7 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
           if (c == ebcdic_escape_c[i])
             break;
         }
+
         if (i < 32)
         {
           c = i;
@@ -2802,6 +2824,7 @@ check_posix_name(PCRE2_SPTR ptr, int len)
     pn += posix_name_lengths[yield] + 1;
     yield++;
   }
+
   return -1;
 }
 
@@ -2922,6 +2945,7 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
     *errorcodeptr = ERR48;
     goto FAILED;
   }
+
   *namelenptr = (uint32_t)(ptr - *nameptr);
 
   /* Subpattern names must not be empty, and their terminator is checked here.
@@ -2934,6 +2958,7 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
       *errorcodeptr = ERR62; // Subpattern name expected
       goto FAILED;
     }
+
     if (is_braced)
       while (ptr < ptrend && (*ptr == CHAR_SPACE || *ptr == CHAR_HT))
         ptr++;
@@ -2944,6 +2969,7 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
         *errorcodeptr = ERR42;
         goto FAILED;
       }
+
       ptr++;
     }
   }
@@ -3015,6 +3041,7 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t *pa
         *errorcodeptr = ERR15;
         goto FAILED;
       }
+
       meta = META_CAPTURE_NUMBER;
       namelen = (uint32_t)i;
     }
@@ -3132,6 +3159,7 @@ manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout, uint3
       previous_callout[2] = 0;
       previous_callout[3] = 255;
     }
+
     previous_callout[1] = (uint32_t)(ptr - cb->start_pattern);
   }
 
@@ -3467,6 +3495,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             manage_callouts(thisptr, &previous_callout, auto_callout, parsed_pattern, cb);
       PARSED_LITERAL(c, parsed_pattern);
     }
+
     goto PARSED_END;
   }
 
@@ -3581,8 +3610,10 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 manage_callouts(thisptr, &previous_callout, auto_callout, parsed_pattern, cb);
           PARSED_LITERAL(c, parsed_pattern);
         }
+
         meta_quantifier = 0;
       }
+
       continue; // Next character
     }
 
@@ -3637,6 +3668,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR76;
           goto FAILED;
         }
+
         *verblengthptr = (uint32_t)verbnamelength;
 
         /* If this name was on a verb such as (*ACCEPT) which does not continue,
@@ -3648,6 +3680,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           *parsed_pattern++ = add_after_mark;
           add_after_mark = 0;
         }
+
         break;
 
       case CHAR_BACKSLASH:
@@ -3691,6 +3724,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           goto FAILED;
         }
       }
+
       continue; // Next character in pattern
     }
 
@@ -3712,6 +3746,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR28;
           goto FAILED;
         }
+
         inescq = *ptr == CHAR_Q;
         ptr++;
         continue;
@@ -3744,12 +3779,14 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             ptr += cb->nllen;
             break;
           }
+
           ptr++;
 #ifdef SUPPORT_UNICODE
           if (utf)
             FORWARDCHARTEST(ptr, ptrend);
 #endif
         }
+
         continue; // Next character in pattern
       }
     }
@@ -3767,6 +3804,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         errorcode = ERR18;
         goto FAILED;
       }
+
       ptr++;
       continue; // Next character in pattern
     }
@@ -3892,6 +3930,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         {
           GETCHARINCTEST(c, ptr); // Get character value, increment pointer
         }
+
         escape = 0; // Treat as literal character
       }
 
@@ -3923,6 +3962,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         {
           PUTOFFSET(offset, parsed_pattern);
         }
+
         okquantifier = TRUE;
       }
 
@@ -4038,6 +4078,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             errorcode = (escape == ESC_g) ? ERR57 : ERR69;
             goto ESCAPE_FAILED;
           }
+
           terminator = (*ptr == CHAR_LESS_THAN_SIGN) ? CHAR_GREATER_THAN_SIGN
                        : (*ptr == CHAR_APOSTROPHE)   ? CHAR_APOSTROPHE
                                                      : CHAR_RIGHT_CURLY_BRACKET;
@@ -4056,9 +4097,11 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 errorcode = ERR119; // Missing terminator for number
                 goto ESCAPE_FAILED;
               }
+
               ptr = p + 1;
               goto SET_RECURSION;
             }
+
             if (errorcode != 0)
               goto ESCAPE_FAILED;
           }
@@ -4082,6 +4125,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           break; // End special escape processing
         }
       }
+
       break; // End escape sequence processing
 
 
@@ -4126,6 +4170,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         PARSED_LITERAL(c, parsed_pattern); // Not a quantifier
         break;                             // No more quantifier processing
       }
+
       meta_quantifier = META_MINMAX;
       /* Fall through */
 
@@ -4174,6 +4219,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         *parsed_pattern++ = min_repeat;
         *parsed_pattern++ = max_repeat;
       }
+
       break;
 
 
@@ -4216,6 +4262,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           *parsed_pattern++ = META_ESCAPE + ESC_p;
           *parsed_pattern++ = PT_WORD << 16;
         }
+
         *parsed_pattern++ = META_KET;
         ptr += 6;
         okquantifier = TRUE;
@@ -4580,6 +4627,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               ptr--; // Correct the offset
               goto FAILED;
             }
+
             if (c == CHAR_RIGHT_PARENTHESIS && class_depth_m1 < 1)
             {
               errorcode = ERR22;
@@ -4771,6 +4819,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             {
               GETCHARINCTEST(c, ptr); // Get character value, increment pointer
             }
+
             escape = 0; // Treat as literal character
           }
 
@@ -4972,6 +5021,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 parsed_pattern[-1] = META_RANGE_ESCAPED;
               PARSED_LITERAL(c, parsed_pattern);
             }
+
             class_range_state = RANGE_NO;
             class_op_state = CLASS_OP_OPERAND;
           }
@@ -5003,6 +5053,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             errorcode = ERR6; // Missing terminating ']'
           goto FAILED;
         }
+
         GETCHARINCTEST(c, ptr);
       } // End of class-processing loop
 
@@ -5035,6 +5086,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               errorcode = ERR97;
               goto FAILED;
             }
+
             cb->bracount++;
             *parsed_pattern++ = META_CAPTURE | cb->bracount;
           }
@@ -5162,6 +5214,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 errorcode = ERR84;
                 goto FAILED;
               }
+
               top_nest->nest_depth = nest_depth;
               top_nest->flags = NSF_ATOMICSR;
               top_nest->options = options & PARSE_TRACKED_OPTIONS;
@@ -5173,6 +5226,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               parsed_pattern_extra++;
 #endif
             }
+
             break;
 #else /* SUPPORT_UNICODE */
             errorcode = ERR96;
@@ -5273,6 +5327,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             *parsed_pattern++ = verbs[i].meta;
           }
         } // End of (*VERB) handling
+
         break; // Done with this parenthesis
       } // End of groups that don't start with (?
 
@@ -5307,6 +5362,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR84;
           goto FAILED;
         }
+
         top_nest->nest_depth = nest_depth;
         top_nest->flags = 0;
         top_nest->options = options & PARSE_TRACKED_OPTIONS;
@@ -5361,6 +5417,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 errorcode = ERR94;
                 goto FAILED;
               }
+
               optset = &unset;
               xoptset = &xunset;
               hyphenok = FALSE;
@@ -5377,24 +5434,28 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                   ptr++;
                   break;
                 }
+
                 if (*ptr == CHAR_P)
                 {
                   *xoptset |= (PCRE2_EXTRA_ASCII_POSIX | PCRE2_EXTRA_ASCII_DIGIT);
                   ptr++;
                   break;
                 }
+
                 if (*ptr == CHAR_S)
                 {
                   *xoptset |= PCRE2_EXTRA_ASCII_BSS;
                   ptr++;
                   break;
                 }
+
                 if (*ptr == CHAR_T)
                 {
                   *xoptset |= PCRE2_EXTRA_ASCII_DIGIT;
                   ptr++;
                   break;
                 }
+
                 if (*ptr == CHAR_W)
                 {
                   *xoptset |= PCRE2_EXTRA_ASCII_BSW;
@@ -5402,6 +5463,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                   break;
                 }
               }
+
               *xoptset |= PCRE2_EXTRA_ASCII_BSD | PCRE2_EXTRA_ASCII_BSS | PCRE2_EXTRA_ASCII_BSW |
                           PCRE2_EXTRA_ASCII_DIGIT | PCRE2_EXTRA_ASCII_POSIX;
               break;
@@ -5439,6 +5501,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 *optset |= PCRE2_EXTENDED_MORE;
                 ptr++;
               }
+
               break;
 
             default:
@@ -5490,6 +5553,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             *parsed_pattern++ = xoptions;
           }
         } // End options processing
+
         break; // End default case after (?
 
 
@@ -5521,6 +5585,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR41;
           goto FAILED_FORWARD;
         }
+
         if (!read_name(&ptr, ptrend, utf, CHAR_RIGHT_PARENTHESIS, &offset, &name, &namelen,
                        &errorcode, cb))
           goto FAILED;
@@ -5541,6 +5606,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR58;
           goto FAILED;
         }
+
         terminator = CHAR_NUL;
         goto SET_RECURSION;
 
@@ -5553,12 +5619,14 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           ++ptr;
           goto UNCLOSED_PARENTHESIS;
         }
+
         if (!IS_DIGIT(ptr[1]))
         {
           errorcode = ERR29; // Missing number
           ++ptr;
           goto FAILED_FORWARD;
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 
       case CHAR_0:
@@ -5673,6 +5741,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               break;
             }
           }
+
           if (delimiter == 0)
           {
             errorcode = ERR82;
@@ -5690,6 +5759,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               ptr = startptr; // To give a more useful message
               goto FAILED;
             }
+
             if (*ptr == delimiter && (++ptr >= ptrend || *ptr != delimiter))
               break;
           }
@@ -5700,6 +5770,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             errorcode = ERR72;
             goto FAILED;
           }
+
           *parsed_pattern++ = (uint32_t)calloutlength;
           offset = (PCRE2_SIZE)(startptr - cb->start_pattern);
           PUTOFFSET(offset, parsed_pattern);
@@ -5722,6 +5793,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               goto FAILED;
             }
           }
+
           *parsed_pattern++ = n;
         }
 
@@ -5732,6 +5804,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR39;
           goto FAILED;
         }
+
         ptr++;
 
         /* Remember the offset to the next item in the pattern, and set a default
@@ -5792,6 +5865,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             errorcode = ERR15;
             goto FAILED;
           }
+
           *parsed_pattern++ = META_COND_NUMBER;
           offset = (PCRE2_SIZE)(ptr - cb->start_pattern - 2);
           PUTOFFSET(offset, parsed_pattern);
@@ -5841,9 +5915,11 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
                 goto FAILED_FORWARD;
               goto FAILED;
             }
+
             if (!read_number(&ptr, ptrend, -1, 1000, ERR79, &minor, &errorcode))
               goto FAILED;
           }
+
           if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
           {
             errorcode = ERR79;
@@ -5917,6 +5993,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               *parsed_pattern =
                   (*name == CHAR_R && i >= (int)namelen) ? META_COND_RNUMBER : META_COND_NAME;
             }
+
             ptr--; // Back to closing parens
           }
 
@@ -5940,6 +6017,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR24;
           goto FAILED;
         }
+
         ptr++;
         break; // End of condition processing
 
@@ -5987,6 +6065,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           terminator = CHAR_GREATER_THAN_SIGN;
           goto DEFINE_NAME;
         }
+
         *parsed_pattern++ = (ptr[1] == CHAR_EQUALS_SIGN)        ? META_LOOKBEHIND
                             : (ptr[1] == CHAR_EXCLAMATION_MARK) ? META_LOOKBEHINDNOT
                                                                 : META_LOOKBEHIND_NA;
@@ -6020,11 +6099,13 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             errorcode = ERR84;
             goto FAILED;
           }
+
           top_nest->nest_depth = nest_depth;
           top_nest->flags = NSF_CONDASSERT;
           top_nest->options = options & PARSE_TRACKED_OPTIONS;
           top_nest->xoptions = xoptions & PARSE_TRACKED_EXTRA_OPTIONS;
         }
+
         break;
 
 
@@ -6049,6 +6130,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           errorcode = ERR97;
           goto FAILED;
         }
+
         cb->bracount++;
         *parsed_pattern++ = META_CAPTURE | cb->bracount;
         nest_depth++;
@@ -6160,6 +6242,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         c = *ptr++;
         goto FROM_PERL_EXTENDED_CLASS;
       } // End of (? switch
+
       break; // End of ( handling
 
 
@@ -6175,6 +6258,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           top_nest->max_group = (uint16_t)cb->bracount;
         cb->bracount = top_nest->reset_group;
       }
+
       *parsed_pattern++ = META_ALT;
       break;
 
@@ -6208,11 +6292,13 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         else
           top_nest--;
       }
+
       if (nest_depth == 0) // Unmatched closing parenthesis
       {
         errorcode = ERR22;
         goto FAILED;
       }
+
       nest_depth--;
       *parsed_pattern++ = META_KET;
       break;
@@ -6559,6 +6645,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           cb->erroroffset = 0;
           return 0;
         }
+
         *lengthptr += (PCRE2_SIZE)(code - orig_code);
         if (*lengthptr > MAX_PATTERN_SIZE)
         {
@@ -6566,6 +6653,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           cb->erroroffset = 0;
           return 0;
         }
+
         code = orig_code;
       }
 
@@ -6624,6 +6712,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
       {
         *code++ = OP_CIRC;
       }
+
       break;
 
     case META_DOLLAR:
@@ -6821,6 +6910,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
               options |= PCRE2_CASELESS;
               req_caseopt = REQ_CASELESS;
             }
+
             goto CLASS_CASELESS_CHAR;
           }
         }
@@ -6873,6 +6963,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           PUT2INC(code, 0, oc->number);
         }
       }
+
       *code++ = (cb->assert_depth > 0) ? OP_ASSERT_ACCEPT : OP_ACCEPT;
       if (firstcuflags == REQ_UNSET)
         firstcuflags = REQ_NONE;
@@ -6927,6 +7018,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           mclength = 1;
           mcbuffer[0] = meta;
         }
+
         if (lengthptr != NULL)
         {
           *lengthptr += mclength;
@@ -7015,6 +7107,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
 
         break;
       }
+
       --pptr;
       break;
 
@@ -7200,6 +7293,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
         cb->erroroffset = offset;
         return 0;
       }
+
       if (groupnumber > cb->top_backref)
         cb->top_backref = groupnumber;
 
@@ -7265,6 +7359,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
         cb->assert_depth += 1;
         goto GROUP_PROCESS;
       }
+
       break;
 
     case META_LOOKBEHIND:
@@ -7375,6 +7470,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             *errorcodeptr = ERR54;
             return 0;
           }
+
           code[LINK_SIZE + 1] = OP_FALSE;
           bravalue = OP_DEFINE; // A flag to suppress char handling below
         }
@@ -7392,6 +7488,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             *errorcodeptr = ERR27;
             return 0;
           }
+
           if (condcount == 1)
             subfirstcuflags = subreqcuflags = REQ_NONE;
           else if (group_return > 0)
@@ -7411,6 +7508,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           *errorcodeptr = ERR20;
           return 0;
         }
+
         *lengthptr += length_prevgroup - 2 - 2 * LINK_SIZE;
         code++; // This already contains bravalue
         PUTINC(code, 0, 1 + LINK_SIZE);
@@ -7462,6 +7560,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           {
             firstcuflags = REQ_NONE;
           }
+
           zerofirstcuflags = REQ_NONE;
         }
 
@@ -7583,6 +7682,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
                                                                        : 0) |
                     (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0) ? REFI_FLAG_TURKISH_CASING : 0);
       }
+
       break;
 
 
@@ -7656,6 +7756,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             *callout_string++ = *pp++;
           }
         }
+
         *callout_string++ = CHAR_NUL;
 
         /* Set the length of the entire item, the advance to its end. */
@@ -7663,6 +7764,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
         PUT(code, 1 + 2 * LINK_SIZE, (int)(callout_string - code));
         code = callout_string;
       }
+
       break;
 
 
@@ -7800,6 +7902,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
               reqcuflags |= REQ_CASELESS;
           }
         }
+
         goto OUTPUT_SINGLE_REPEAT; // Code shared with single character types
 
         /* If previous was a character class or a back reference, we put the
@@ -7821,6 +7924,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           code = previous;
           goto END_REPEAT;
         }
+
         if (repeat_max == 1 && repeat_min == 1)
           goto END_REPEAT;
 
@@ -7844,6 +7948,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             repeat_max = 0; // 2-byte encoding for max
           PUT2INC(code, 0, repeat_max);
         }
+
         break;
 
         /* Prior to 10.30, repeated recursions were wrapped in OP_ONCE brackets
@@ -7886,6 +7991,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
               *errorcodeptr = ERR20;
               return 0;
             }
+
             *lengthptr += delta;
           }
           else
@@ -7918,6 +8024,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           previous[1 + LINK_SIZE + length] = OP_KET;
           PUT(previous, 2 + LINK_SIZE + length, 1 + LINK_SIZE + length);
         }
+
         code += 2 + 2 * LINK_SIZE;
         length_prevgroup += 2 + 2 * LINK_SIZE;
         group_return = -1; // Set "may match empty string"
@@ -8011,6 +8118,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
                 *previous++ = OP_SKIPZERO;
                 goto END_REPEAT;
               }
+
               brazeroptr = previous; // Save for possessive optimizing
               *previous++ = OP_BRAZERO + repeat_type;
             }
@@ -8063,6 +8171,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
                   *errorcodeptr = ERR20;
                   return 0;
                 }
+
                 *lengthptr += delta;
               }
 
@@ -8077,6 +8186,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
                   reqcu = firstcu;
                   reqcuflags = firstcuflags;
                 }
+
                 for (uint32_t i = 1; i < repeat_min; i++)
                 {
                   memcpy(code, previous, CU2BYTES(len));
@@ -8114,6 +8224,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
                 *errorcodeptr = ERR20;
                 return 0;
               }
+
               delta -= (2 + 2 * LINK_SIZE); // Last one doesn't nest
               *lengthptr += delta;
             }
@@ -8261,6 +8372,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             }
           }
         }
+
         break;
 
         /* If previous was a character type match (\d or similar), abolish it and
@@ -8433,6 +8545,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             }
           }
         }
+
         break;
       } // End of switch on different op_previous values
 
@@ -8623,6 +8736,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
         *errorcodeptr = ERR15; // Non-existent subpattern
         return 0;
       }
+
     HANDLE_NUMERICAL_RECURSION:
       *code = OP_RECURSE;
       PUT(code, 1, meta_arg);
@@ -8766,6 +8880,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           *code++ = ptype;
           *code++ = pdata;
         }
+
         break; // End META_ESCAPE
       }
 #endif
@@ -9182,6 +9297,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, uint32
               reqcuflags = firstcuflags;
             }
           }
+
           firstcuflags = REQ_NONE;
         }
 
@@ -9252,8 +9368,10 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, uint32
           *errorcodeptr = ERR20;
           return 0;
         }
+
         *lengthptr += length;
       }
+
       return okreturn;
     }
 
@@ -9280,6 +9398,7 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, uint32
         cb->erroroffset = 0;
         return 0;
       }
+
       *lengthptr += length;
       length = 0;
     }
@@ -9497,6 +9616,7 @@ is_startline(PCRE2_SPTR code, unsigned int bracket_map, compile_block *cb, int a
         scode += 1 + LINK_SIZE;
         break;
       }
+
       scode = first_significant_code(scode, FALSE);
       op = *scode;
     }
@@ -9790,6 +9910,7 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
       {
         return 0;
       }
+
       break;
 
     case OP_EXACT:
@@ -9811,6 +9932,7 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
       {
         return 0;
       }
+
       break;
 
     case OP_EXACTI:
@@ -9847,6 +9969,7 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
       {
         return 0;
       }
+
       break;
     }
 
@@ -10226,6 +10349,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
           if (escape == ESC_p || escape == ESC_P)
             pptr++; // Skip prop data
         }
+
         break;
 
         /* Lookaheads do not contribute to the length of this branch, but they may
@@ -10264,6 +10388,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
         default:
           break;
         }
+
         break;
 
         /* A nested lookbehind does not contribute any length to this lookbehind,
@@ -10319,6 +10444,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
               (!is_dupname && (cb->external_flags & PCRE2_DUPCAPUSED) == 0))
             goto RECURSE_OR_BACKREF_LENGTH; // Handle as a numbered version.
         }
+
         goto ISNOTFIXED; // Duplicate name or number
 
         /* The offset values for back references < 10 are in a separate vector
@@ -10353,6 +10479,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
           *errcodeptr = ERR15; // Non-existent subpattern
           return -1;
         }
+
         if (group == 0)
           goto ISNOTFIXED; // Local recursion
         for (gptr = cb->parsed_pattern; *gptr != META_END; gptr++)
@@ -10393,6 +10520,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
             goto ISNOTFIXED;
           return -1; // Error already set
         }
+
         itemlength = grouplength;
         itemminlength = groupminlength;
         break;
@@ -10466,6 +10594,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
             *errcodeptr = ERR87; // Integer overflow; lookbehind too big
             return -1;
           }
+
           if (min == 0)
             branchminlength -= lastitemminlength;
           else
@@ -10476,6 +10605,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
             itemlength = (max - 1) * lastitemlength;
           break;
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 
         /* Any other item means this branch does not have a fixed length. */
@@ -10683,6 +10813,7 @@ check_lookbehinds(uint32_t *pptr, uint32_t **retptr, parsed_recurse_check *recur
           *retptr = pptr;
         return 0;
       }
+
       break;
 
     case META_ATOMIC:
@@ -10892,12 +11023,14 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
       *erroroffset = 0;
     return NULL;
   }
+
   if (erroroffset == NULL)
   {
     if (errorptr != NULL)
       *errorptr = ERR120;
     return NULL;
   }
+
   *errorptr = ERR0;
   *erroroffset = 0;
 
@@ -11100,6 +11233,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
                 break; // Integer overflow
               c = c * 10 + (ptr[pp++] - CHAR_0);
             }
+
             if (pp >= patlen || pp == skipatstart || ptr[pp] != CHAR_RIGHT_PARENTHESIS)
             {
               errorcode = ERR60;
@@ -11107,6 +11241,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
               utf = FALSE; // Used by HAD_EARLY_ERROR
               goto HAD_EARLY_ERROR;
             }
+
             if (p->type == PSO_LIMH)
               limit_heap = c;
             else if (p->type == PSO_LIMM)
@@ -11148,12 +11283,15 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
             PCRE2_DEBUG_UNREACHABLE();
             /* LCOV_EXCL_STOP */
           }
+
           break; // Out of the table scan loop
         }
       }
+
       if (i >= sizeof(pso_list) / sizeof(pso))
         break; // Out of pso loop
     }
+
     PCRE2_ASSERT(skipatstart <= patlen);
   }
 
@@ -11184,6 +11322,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
       errorcode = ERR74;
       goto HAD_EARLY_ERROR;
     }
+
     if ((options & PCRE2_NO_UTF_CHECK) == 0 &&
         (errorcode = PRIV(valid_utf)(pattern, patlen, erroroffset)) != 0)
       goto HAD_ERROR; // Offset was set by valid_utf()
@@ -11313,8 +11452,10 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
       *errorptr = ERR21;
       goto EXIT;
     }
+
     cb.parsed_pattern = heap_parsed_pattern;
   }
+
   cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed;
 
   /* Do the parsing scan. */
@@ -11347,6 +11488,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
         goto HAD_CB_ERROR;
       }
     }
+
     memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));
     errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
     if (errorcode != 0)

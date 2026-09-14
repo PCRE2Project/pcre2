@@ -374,6 +374,7 @@ pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
       rc = PCRE2_ERROR_NOMEMORY;
       break;
     }
+
     buffer[i] = *message++;
   }
 
