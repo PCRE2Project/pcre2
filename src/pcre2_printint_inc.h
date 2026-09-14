@@ -120,7 +120,9 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
   if (one_code_unit)
   {
     if (PRINTABLE(c))
+    {
       fprintf(f, "%c", CHAR_OUTPUT(c));
+    }
     else
     {
       c = CHAR_OUTPUT_HEX(c);
@@ -129,6 +131,7 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
       else
         fprintf(f, "\\x{%02x}", c);
     }
+
     return 0;
   }
 
@@ -163,9 +166,11 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
         fprintf(f, "\\X{%x}", c); // Invalid secondary byte
         return i - 1;
       }
+
       s -= 6;
       c |= (ptr[i] & 0x3f) << s;
     }
+
     fprintf(f, "\\x{%x}", c);
     return a;
   }
@@ -180,6 +185,7 @@ Print it with \X instead of \x as an indication. */
     fprintf(f, "\\X{%x}", c);
     return 0;
   }
+
   c = (((c & 0x3ff) << 10) | (ptr[1] & 0x3ff)) + 0x10000;
   fprintf(f, "\\x{%x}", c);
   return 1;
@@ -416,7 +422,9 @@ print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
         range_start = ~(uint32_t)0;
       }
       else
+      {
         range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+      }
 
       item_count--;
     }
@@ -510,6 +518,7 @@ print_map(FILE *f, const uint8_t *map, BOOL negated)
         if ((map[j / 8] & (1u << (j & 7))) == 0)
           break;
       }
+
       j = CHAR_INPUT_HEX(jinput);
       if (i == CHAR_MINUS || i == CHAR_BACKSLASH || i == CHAR_RIGHT_SQUARE_BRACKET ||
           (first && i == CHAR_CIRCUMFLEX_ACCENT))
@@ -530,6 +539,7 @@ print_map(FILE *f, const uint8_t *map, BOOL negated)
         else
           fprintf(f, "\\x%02x", CHAR_OUTPUT_HEX(j));
       }
+
       input = jinput;
     }
   }
@@ -632,6 +642,7 @@ print_class(FILE *f, int type, PCRE2_SPTR code, const uint8_t *char_lists_end, B
             break;
           }
         }
+
         break;
 
       default:
@@ -641,6 +652,7 @@ print_class(FILE *f, int type, PCRE2_SPTR code, const uint8_t *char_lists_end, B
           fprintf(f, "-");
           ccode += 1 + print_char(f, ccode, utf);
         }
+
         break;
       }
     }
@@ -707,6 +719,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         code++;
         code += 1 + print_char(f, code, utf);
       } while (*code == OP_CHAR);
+
       fprintf(f, "\n");
       continue;
 
@@ -717,6 +730,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         code++;
         code += 1 + print_char(f, code, utf);
       } while (*code == OP_CHARI);
+
       fprintf(f, "\n");
       continue;
 
@@ -778,6 +792,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         print_custring(f, entry);
         fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }
+
       break;
 
     case OP_RREF:
@@ -827,10 +842,15 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
           extra = 2;
         }
         else
+        {
           fprintf(f, "%s", OP_names[code[1]]);
+        }
       }
       else
+      {
         extra = print_char(f, code + 1, utf);
+      }
+
       fprintf(f, "%s", OP_names[*code]);
       break;
 
@@ -866,7 +886,10 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         extra = 2;
       }
       else
+      {
         fprintf(f, "    %s", OP_names[code[1 + IMM2_SIZE]]);
+      }
+
       fprintf(f, "{");
       if (*code != OP_TYPEEXACT)
         fprintf(f, "0,");
@@ -968,6 +991,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         if (i != 0)
           fprintf(f, " 0x%02x", i);
       }
+
       ccode = code + OP_lengths[*code];
       goto CLASS_REF_REPEAT;
 
@@ -982,11 +1006,14 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       extra = GET(code, 1 + 2 * LINK_SIZE);
       print_custring_bylen(f, code + 2 + 4 * LINK_SIZE, extra - 3 - 4 * LINK_SIZE);
       for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
+      {
         if (c == PRIV(callout_start_delims)[i])
         {
           c = PRIV(callout_end_delims)[i];
           break;
         }
+      }
+
       fprintf(f, "%c %d %d %d", CHAR_OUTPUT(c), GET(code, 1 + 3 * LINK_SIZE), GET(code, 1),
               GET(code, 1 + LINK_SIZE));
       break;
@@ -1053,6 +1080,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
           break;
         }
       }
+
       fprintf(f, "        ]");
       goto CLASS_REF_REPEAT;
 #endif /* SUPPORT_WIDE_CHARS */
@@ -1109,6 +1137,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       default:
         break;
       }
+
       break;
 
     case OP_MARK:

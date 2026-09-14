@@ -23,13 +23,16 @@ please consult the man page, in case the conversion went wrong.
 <h2><a name="SEC1" href="#TOC1">SAVING AND RE-USING PRECOMPILED PCRE2 PATTERNS</a></h2>
 <p>
 <b>int32_t pcre2_serialize_decode(pcre2_code **<i>codes</i>,</b>
-<b>  int32_t <i>number_of_codes</i>, const uint8_t *<i>bytes</i>,</b>
-<b>  pcre2_general_context *<i>gcontext</i>);</b>
+<b>                               int32_t <i>number_of_codes</i>,</b>
+<b>                               const uint8_t *<i>bytes</i>,</b>
+<b>                               pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>int32_t pcre2_serialize_encode(const pcre2_code **<i>codes</i>,</b>
-<b>  int32_t <i>number_of_codes</i>, uint8_t **<i>serialized_bytes</i>,</b>
-<b>  PCRE2_SIZE *<i>serialized_size</i>, pcre2_general_context *<i>gcontext</i>);</b>
+<b>                               int32_t <i>number_of_codes</i>,</b>
+<b>                               uint8_t **<i>serialized_bytes</i>,</b>
+<b>                               PCRE2_SIZE *<i>serialized_size</i>,</b>
+<b>                               pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>void pcre2_serialize_free(uint8_t *<i>bytes</i>);</b>

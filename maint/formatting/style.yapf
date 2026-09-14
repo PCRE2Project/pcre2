@@ -1,0 +1,7 @@
+[style]
+based_on_style = pep8
+# Using anything other than 4 spaces for Python indentation is considered
+# eccentric, so we don't match the 2-space indent we like for C. However, this
+# does require us to format at a wider limit to avoid ugliness.
+column_limit = 120
+indent_width = 4

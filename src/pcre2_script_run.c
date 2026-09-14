@@ -187,6 +187,7 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
           require_state = SCRIPT_MAP;
           break;
         }
+
         break;
 
         /* The first significant character was Han. An inspection of the Unicode
@@ -231,6 +232,7 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
           /* Otherwise this character must be allowed with all of them, so remain
           in the pending state. */
         }
+
         break;
 
         /* Previously encountered one of the "with Han" scripts. Check that
@@ -319,7 +321,9 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
       uint32_t digitset;
 
       if (c <= PRIV(ucd_digit_sets)[1])
+      {
         digitset = 1;
+      }
       else
       {
         int mid;
@@ -332,6 +336,7 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
             digitset = top;
             break;
           }
+
           mid = (top + bot) / 2;
           if (c <= PRIV(ucd_digit_sets)[mid])
             top = mid;

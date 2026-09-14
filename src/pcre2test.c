@@ -1175,9 +1175,11 @@ should_print_colour(int clr, FILE *f)
       colour_last_fd = fileno(f);
       colour_fd_interactive = INTERACTIVE(f);
     }
+
     if (!colour_fd_interactive)
       return FALSE;
   }
+
   return TRUE;
 }
 
@@ -1599,10 +1601,14 @@ my_malloc(size_t size, void *data)
         malloclistlength[malloclistptr++] = size;
       }
       else
+      {
         cfprintf(clr_profiling, outfile, " (not remembered)");
+      }
+
       fprintf(outfile, "\n");
     }
   }
+
   return block;
 }
 
@@ -1628,10 +1634,12 @@ my_free(void *block, void *data)
           malloclist[j] = malloclist[j + 1];
           malloclistlength[j] = malloclistlength[j + 1];
         }
+
         found = TRUE;
         break;
       }
     }
+
     if (!found)
       cfprintf(clr_profiling, outfile, " unremembered block");
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
@@ -1639,6 +1647,7 @@ my_free(void *block, void *data)
 #endif
     fprintf(outfile, "\n");
   }
+
   free(block);
 }
 
@@ -1792,6 +1801,7 @@ utf8_to_ord(PCRE2_SPTR8 utf8bytes, PCRE2_SPTR8 end, uint32_t *vptr)
     *vptr = c;
     return 1;
   } // ascii character
+
   if (i == 0 || i == 6)
     return 0; // invalid UTF-8
 
@@ -1905,6 +1915,7 @@ ord_to_utf8(uint32_t cvalue, uint8_t *utf8bytes)
     *utf8bytes-- = 0x80 | (cvalue & 0x3f);
     cvalue >>= 6;
   }
+
   *utf8bytes = utf8_table2[i] | cvalue;
   return i + 1;
 }
@@ -2065,6 +2076,7 @@ extend_inputline(FILE *f, uint8_t *start, const char *prompt)
         cfprintf(clr_test_error, outfile, "** Interactive prompt exceeds buffer space\n");
         exit(1);
       }
+
       s = readline(promptbuf);
       if (s == NULL)
         return (here == start) ? NULL : start;
@@ -2074,6 +2086,7 @@ extend_inputline(FILE *f, uint8_t *start, const char *prompt)
         cfprintf(clr_test_error, outfile, "** Interactive input exceeds buffer space\n");
         exit(1);
       }
+
       if (dlen > 0)
         add_history(s);
       memcpy(here, s, dlen);
@@ -2195,6 +2208,7 @@ scan_modifiers(const uint8_t *p, size_t len)
         return mid;
       c = len > mlen ? 1 : -1;
     }
+
     if (c > 0)
       bot = mid + 1;
     else
@@ -3069,6 +3083,7 @@ print_version(FILE *f, BOOL include_mode)
   {
     fprintf(f, " (%d-bit)", test_mode);
   }
+
   fprintf(f, "\n");
   free(buf);
 }
@@ -3274,6 +3289,7 @@ c_option(const char *arg)
         yield = 3;
         break;
       }
+
       printf("%d\n", yield);
       break;
     }
@@ -3351,7 +3367,9 @@ c_option(const char *arg)
     printf(")\n");
   }
   else
+  {
     printf("  No Unicode support\n");
+  }
 
   (void)pcre2_config(PCRE2_CONFIG_JIT, &optval);
   if (optval != 0)
@@ -3472,6 +3490,7 @@ format_list_item(int16_t *ff, char *buff, BOOL isscript)
       buff += sprintf(buff, "%s%s", sep, PRIV(utt_names) + ff[i]);
       sep = ", ";
     }
+
     (void)sprintf(buff, ")");
   }
 }
@@ -3525,6 +3544,7 @@ display_properties(BOOL wantscripts)
       if (t->type == seentypes[k] && t->value == seenvalues[k])
         break;
     }
+
     if (k < seencount)
       continue;
 
@@ -3668,6 +3688,7 @@ display_selected_modifiers(BOOL for_pattern, const char *title)
           break;
         }
       }
+
       list[n++] = i;
     }
   }
@@ -3687,6 +3708,7 @@ display_selected_modifiers(BOOL for_pattern, const char *title)
         printf(" ");
       display_one_modifier(modlist + list[j], for_pattern);
     }
+
     printf("\n");
   }
 }
@@ -3885,6 +3907,7 @@ main(int argc, char **argv)
         cfprintf(clr_test_error, stderr, "pcre2test: Argument for -S is too big\n");
         exit(1);
       }
+
       stack_size = (uint32_t)uli;
       getrlimit(RLIMIT_STACK, &rlim_old);
       rlim = rlim_old;
@@ -3903,6 +3926,7 @@ main(int argc, char **argv)
           cfprintf(clr_test_error, stderr, "%lu bytes\n", (unsigned long)(rlim.rlim_max));
         exit(1);
       }
+
       if (rlim_old.rlim_cur != RLIM_INFINITY && rlim_old.rlim_cur <= INT32_MAX &&
           rlim.rlim_cur > rlim_old.rlim_cur)
         rc = setrlimit(RLIMIT_STACK, &rlim);
@@ -3912,6 +3936,7 @@ main(int argc, char **argv)
                  (unsigned long int)stack_size, strerror(errno));
         exit(1);
       }
+
       op++;
       argc--;
 #endif
@@ -3963,17 +3988,22 @@ main(int argc, char **argv)
           cfprintf(clr_test_error, stderr, "pcre2test: Argument for %s must not be zero\n", arg);
           exit(1);
         }
+
         if (U32OVERFLOW(uli))
         {
           cfprintf(clr_test_error, stderr, "pcre2test: Argument for %s is too big\n", arg);
           exit(1);
         }
+
         timeitm = (int)uli;
         op++;
         argc--;
       }
       else
+      {
         timeitm = LOOPREPEAT;
+      }
+
       if (both)
         timeit = timeitm;
     }
@@ -4026,6 +4056,7 @@ main(int argc, char **argv)
         yield = 1;
         goto EXIT;
       }
+
       op++;
       argc--;
     }
@@ -4039,11 +4070,17 @@ main(int argc, char **argv)
     {
       char *val = strchr(arg, '=') + 1;
       if (strcmp(val, "always") == 0)
+      {
         colour_setting = COLOUR_ALWAYS;
+      }
       else if (strcmp(val, "never") == 0)
+      {
         colour_setting = COLOUR_NEVER;
+      }
       else if (strcmp(val, "auto") == 0)
+      {
         colour_setting = COLOUR_AUTO;
+      }
       else
       {
         cfprintf(clr_test_error, stderr, "pcre2test: Invalid value for \"%.*s\"\n",
@@ -4062,6 +4099,7 @@ main(int argc, char **argv)
       yield = 1;
       goto EXIT;
     }
+
     op++;
     argc--;
   }
@@ -4087,6 +4125,7 @@ main(int argc, char **argv)
         yield = 1;
         goto EXIT;
       }
+
       errcode = (int)li;
       printf("Error %d: ", errcode);
       print_error_message_file(stdout, errcode, "", "\n", TRUE);
@@ -4267,9 +4306,13 @@ main(int argc, char **argv)
     }
 
     if (rc == PR_SKIP && !INTERACTIVE(infile))
+    {
       skipping = TRUE;
+    }
     else if (rc == PR_ENDIF)
+    {
       skipping_endif = TRUE;
+    }
     else if (rc == PR_ABEND)
     {
       cfprintf(clr_test_error, outfile, "** pcre2test run abandoned\n");
@@ -4303,6 +4346,7 @@ main(int argc, char **argv)
                  ((1000000 / CLOCKS_PER_SEC) * (double)total_jit_compile_time) / timeit);
       pad = "  ";
     }
+
     cfprintf(clr_profiling, outfile, "Total match time %s%8.2f microseconds\n", pad,
              ((1000000 / CLOCKS_PER_SEC) * (double)total_match_time) / timeitm);
   }

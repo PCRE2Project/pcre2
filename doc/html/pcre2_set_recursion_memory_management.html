@@ -20,9 +20,10 @@ SYNOPSIS
 </p>
 <p>
 <b>int pcre2_set_recursion_memory_management(</b>
-<b>  pcre2_match_context *<i>mcontext</i>,</b>
-<b>  void *(*<i>private_malloc</i>)(size_t, void *),</b>
-<b>  void (*<i>private_free</i>)(void *, void *), void *<i>memory_data</i>);</b>
+<b>      pcre2_match_context *<i>mcontext</i>,</b>
+<b>      void *(*<i>mymalloc</i>)(size_t <i>size</i>, void *<i>mydata</i>),</b>
+<b>      void (*<i>myfree</i>)(void *<i>ptr</i>, void *<i>mydata</i>),</b>
+<b>      void *<i>mydata</i>);</b>
 </p>
 <h2>
 DESCRIPTION

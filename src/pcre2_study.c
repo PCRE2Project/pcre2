@@ -163,6 +163,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         cc = cs + 1 + LINK_SIZE;
         break;
       }
+
       goto PROCESS_NON_CAPTURE;
 
     case OP_BRA:
@@ -177,6 +178,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         cc += 1 + LINK_SIZE;
         break;
       }
+
       PCRE2_FALLTHROUGH /* Fall through */
 
     case OP_ONCE:
@@ -212,6 +214,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         if (prev_cap_d < 0)
           return prev_cap_d;
       }
+
       branchlength += prev_cap_d;
       do
         cc += GET(cc, 1);
@@ -470,6 +473,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
         branchlength++;
         break;
       }
+
       break;
 
       /* Backreferences and subroutine calls (OP_RECURSE) are treated in the same
@@ -507,7 +511,9 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
           recno = GET2(slot, 0);
 
           if (recno <= backref_cache[0] && backref_cache[recno] >= 0)
+          {
             dd = backref_cache[recno];
+          }
           else
           {
             ce = cs = PRIV(find_bracket)(startcode, utf, recno);
@@ -571,7 +577,9 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
     case OP_REFI:
       recno = GET2(cc, 1);
       if (recno <= backref_cache[0] && backref_cache[recno] >= 0)
+      {
         d = backref_cache[recno];
+      }
       else
       {
         int i;
@@ -683,7 +691,9 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
           ce += GET(ce, 1);
         while (*ce == OP_ALT);
         if (cc > cs && cc < ce) // Simple recursion
+        {
           had_recurse = TRUE;
+        }
         else
         {
           recurse_check *r = recurses;
@@ -691,7 +701,9 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
             if (r->group == cs)
               break;
           if (r != NULL) // Mutual recursion
+          {
             had_recurse = TRUE;
+          }
           else
           {
             this_recurse.prev = recurses;
@@ -705,6 +717,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
           }
         }
       }
+
       cc += 1 + LINK_SIZE + once_fudge;
       once_fudge = 0;
       break;
@@ -872,7 +885,9 @@ set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf, BOOL u
         SET_BIT(buff[0]);
       }
       else if (c < 256)
+      {
         SET_BIT(c);
+      }
 #else /* 16-bit or 32-bit mode */
       if (c > 0xff)
         SET_BIT(0xff);
@@ -1053,12 +1068,16 @@ study_char_list(PCRE2_SPTR code, uint8_t *start_bitmap, const uint8_t *char_list
             start_bitmap[start / 8] |= (1u << (start & 7));
         }
         else
+        {
           start_bitmap[end / 8] |= (1u << (end & 7));
+        }
 
         range_start = ~(uint32_t)0;
       }
       else
+      {
         range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+      }
 
       item_count--;
     }
@@ -1292,6 +1311,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
               SET_BIT(c);
           }
         }
+
         try_next = FALSE;
         break;
 
@@ -1390,6 +1410,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           tcode = ncode;
           continue; // With the following significant opcode
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 
         /* For a group bracket or a positive assertion without an immediately
@@ -1421,7 +1442,10 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           tcode += 1 + LINK_SIZE;
         }
         else
+        {
           return rc; // FAIL, UNKNOWN, or TOODEEP
+        }
+
         break;
 
         /* If we hit ALT or KET, it means we haven't found anything mandatory in
@@ -1876,6 +1900,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           re->start_bitmap[24] |= 0xf0;           // Bits for 0xc4 - 0xc8
           memset(re->start_bitmap + 25, 0xff, 7); // Bits for 0xc9 - 0xff
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 #elif PCRE2_CODE_UNIT_WIDTH != 8
         SET_BIT(0xFF);    // For characters >= 255
@@ -1888,7 +1913,9 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
 
       case OP_CLASS:
         if (*tcode == OP_XCLASS)
+        {
           tcode += GET(tcode, 1);
+        }
         else
         {
           classmap = (const uint8_t *)(++tcode);
@@ -1961,6 +1988,7 @@ set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp, int *de
           try_next = FALSE;
           break;
         }
+
         break; // End of class handling case
       } // End of switch for opcodes
     } // End of try_next loop
@@ -2090,7 +2118,9 @@ PRIV(study)(pcre2_real_code *re)
             goto DONE;
 #endif
           if (a < 0)
-            a = c;        // First one found, save in a
+          {
+            a = c; // First one found, save in a
+          }
           else if (b < 0) // Second one found
           {
             int d = TABLE_GET((unsigned int)c, re->tables + fcc_offset, c);
@@ -2139,6 +2169,7 @@ PRIV(study)(pcre2_real_code *re)
           re->flags &= ~(PCRE2_LASTSET | PCRE2_LASTCASELESS);
           re->last_codeunit = 0;
         }
+
         re->first_codeunit = a;
         flags = PCRE2_FIRSTSET;
         if (b >= 0)

@@ -7,9 +7,12 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      int (*\fIsubstitute_callout\fP)("
+.B "          pcre2_substitute_callout_block *\fIcallout_block\fP,"
+.B "          void *\fIsubstitute_callout_data\fP),"
+.B "      void *\fIsubstitute_callout_data\fP);"
 .fi
 .
 .SH DESCRIPTION

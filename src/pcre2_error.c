@@ -325,33 +325,33 @@ negative for match-time errors (except for UTF errors), but the numbers are all
 distinct.
 
 Arguments:
-  enumber       error number
+  errorcode     error number
   buffer        where to put the message (zero terminated)
-  size          size of the buffer in code units
+  bufflen       size of the buffer in code units
 
 Returns:        length of message if all is well
                 negative on error
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
+pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer, PCRE2_SIZE bufflen)
 {
   const unsigned char *message;
   PCRE2_SIZE i;
   int n, rc = 0;
 
-  if (size == 0)
+  if (bufflen == 0)
     return PCRE2_ERROR_NOMEMORY;
 
-  if (enumber >= COMPILE_ERROR_BASE) // Compile error
+  if (errorcode >= COMPILE_ERROR_BASE) // Compile error
   {
     message = compile_error_texts;
-    n = enumber - COMPILE_ERROR_BASE;
+    n = errorcode - COMPILE_ERROR_BASE;
   }
-  else if (enumber < 0) // Match or UTF error
+  else if (errorcode < 0) // Match or UTF error
   {
     message = match_error_texts;
-    n = -enumber;
+    n = -errorcode;
   }
   else // Invalid error number
   {
@@ -369,11 +369,12 @@ pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
 
   for (i = 0; *message != 0; i++)
   {
-    if (i >= size - 1)
+    if (i >= bufflen - 1)
     {
       rc = PCRE2_ERROR_NOMEMORY;
       break;
     }
+
     buffer[i] = *message++;
   }
 

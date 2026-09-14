@@ -585,6 +585,7 @@ ord2utf8(uint32_t value)
     *utf8bytes-- = 0x80 | (value & 0x3f);
     value >>= 6;
   }
+
   *utf8bytes = utf8_table2[i] | value;
   return i + 1;
 }
@@ -606,6 +607,7 @@ strcmpic(const char *str1, const char *str2)
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
+
   return 0;
 }
 
@@ -678,6 +680,7 @@ pcre2grep_exit(int rc)
             PCRE2_ERROR_HEAPLIMIT);
     fprintf(stderr, "pcre2grep: Check your regex for nested unlimited loops.\n");
   }
+
   exit(rc);
 }
 
@@ -709,6 +712,7 @@ add_pattern(char *s, PCRE2_SIZE patlen, patstr *after)
     fprintf(stderr, "pcre2grep: malloc failed\n");
     pcre2grep_exit(2);
   }
+
   if (patlen > MAXPATLEN)
   {
     fprintf(stderr, "pcre2grep: pattern is too long (limit is %d bytes)\n", MAXPATLEN);
@@ -728,6 +732,7 @@ add_pattern(char *s, PCRE2_SIZE patlen, patstr *after)
     p->next = after->next;
     after->next = p;
   }
+
   return p;
 }
 
@@ -836,9 +841,11 @@ decode_ANSI_colour(const char *cs)
       while (isdigit((unsigned char)(*cs)))
         cs++;
     }
+
     if (*cs)
       cs++;
   }
+
   return result;
 }
 
@@ -857,6 +864,7 @@ init_colour_output(void)
       GetConsoleScreenBufferInfo(hcon, &csbi);
       CloseHandle(hcon);
     }
+
     match_colour = decode_ANSI_colour(colour_string);
     /* No valid colour found - turn off colouring */
     if (!match_colour)
@@ -1041,6 +1049,7 @@ opendirectory(char *filename)
     fprintf(stderr, "pcre2grep: malloc failed\n");
     pcre2grep_exit(2);
   }
+
   memcpy(pattern, filename, len);
   if (iswild(filename))
     pattern[len] = 0;
@@ -1053,6 +1062,7 @@ opendirectory(char *filename)
     dir->first = TRUE;
     return dir;
   }
+
   err = GetLastError();
   free(pattern);
   free(dir);
@@ -1074,6 +1084,7 @@ readdirectory(directory_type *dir)
     {
       dir->first = FALSE;
     }
+
     if (strcmp(dir->data.cFileName, ".") != 0 && strcmp(dir->data.cFileName, "..") != 0)
       return dir->data.cFileName;
   }
@@ -1131,6 +1142,7 @@ print_match(const void *buf, size_t length)
     else
       SetConsoleTextAttribute(hstdout, match_colour);
   }
+
   FWRITE_IGNORE(buf, 1, length, stdout);
   if (do_colour)
   {
@@ -1158,16 +1170,19 @@ isdirectory(char *filename)
 {
   return 0;
 }
+
 static directory_type *
 opendirectory(char *filename)
 {
   return (directory_type *)0;
 }
+
 static char *
 readdirectory(directory_type *dir)
 {
   return (char *)0;
 }
+
 static void
 closedirectory(directory_type *dir)
 {}
@@ -1227,6 +1242,7 @@ usage(int rc)
     if (op->one_char > 0)
       fprintf(stderr, "%c", op->one_char);
   }
+
   fprintf(stderr, "] [long options] [pattern] [files]\n");
   fprintf(stderr, "Type \"pcre2grep --help\" for more information and the long "
                   "options.\n");
@@ -1285,7 +1301,9 @@ help(void)
     char s[4];
 
     if (op->one_char > 0 && (op->long_name)[0] == 0)
+    {
       n = 31 - printf("  -%c", op->one_char);
+    }
     else
     {
       if (op->one_char > 0)
@@ -1401,7 +1419,10 @@ decode_number(char *option_data, option_item *op, BOOL longop)
               op->long_name);
     }
     else
+    {
       fprintf(stderr, "pcre2grep: Malformed number \"%s\" after -%c\n", option_data, op->one_char);
+    }
+
     pcre2grep_exit(usage(2));
   }
 
@@ -1447,6 +1468,7 @@ add_number(int n, omstr *after)
     om->next = after->next;
     after->next = om;
   }
+
   return om;
 }
 
@@ -1484,6 +1506,7 @@ read_one_line(char *buffer, PCRE2_SIZE length, FILE *f)
     if (c == '\n' || yield >= length)
       break;
   }
+
   return yield;
 }
 
@@ -1515,6 +1538,7 @@ read_pattern(char *buffer, PCRE2_SIZE *length, FILE *f)
     if (*length == 0)
       return TRUE;
   }
+
   return (*length > 0 || *buffer == '\n');
 }
 
@@ -1548,6 +1572,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
       *lenptr = 1;
       return p + 1;
     }
+
     *lenptr = 0;
     return endptr;
 
@@ -1559,6 +1584,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
       *lenptr = 1;
       return p + 1;
     }
+
     *lenptr = 0;
     return endptr;
 
@@ -1570,6 +1596,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
       *lenptr = 1;
       return p + 1;
     }
+
     *lenptr = 0;
     return endptr;
 
@@ -1583,6 +1610,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
         *lenptr = 0;
         return endptr;
       }
+
       p++;
       if (p < endptr && *p == '\n')
       {
@@ -1590,6 +1618,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
         return p + 1;
       }
     }
+
     break;
 
   case PCRE2_NEWLINE_ANYCRLF:
@@ -1634,6 +1663,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
           *lenptr = 0; // Hit the end, halfway through a character
           return endptr;
         }
+
         gcss = 6 * extra;
         c = (c & utf8_table3[extra]) << gcss;
         for (gcii = 1; gcii <= extra; gcii++)
@@ -1660,7 +1690,10 @@ end_of_line(char *p, char *endptr, int *lenptr)
           p++;
         }
         else
+        {
           *lenptr = 1 + extra;
+        }
+
         return p;
 
 #ifndef EBCDIC
@@ -1735,6 +1768,7 @@ previous_line(char *p, char *startptr)
         break;
       p--;
     }
+
     return p;
 
   case PCRE2_NEWLINE_ANYCRLF:
@@ -1748,11 +1782,14 @@ previous_line(char *p, char *startptr)
         break;
       p--;
     }
+
     return p;
 
   case PCRE2_NEWLINE_ANY:
     if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n')
+    {
       p -= 2;
+    }
     else
     {
       if (utf)
@@ -1782,6 +1819,7 @@ previous_line(char *p, char *startptr)
             p = pp; // Rewind over the broken character
             continue;
           }
+
           gcss = 6 * extra;
           c = (c & utf8_table3[extra]) << gcss;
           for (gcii = 1; gcii <= extra; gcii++)
@@ -1792,7 +1830,9 @@ previous_line(char *p, char *startptr)
         }
       }
       else
+      {
         c = *((unsigned char *)pp);
+      }
 
       switch (c)
       {
@@ -1976,6 +2016,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options, PCRE2_SI
         match_data = match_data_pair[match_data_toggle];
         offsets = offsets_pair[match_data_toggle];
       }
+
       continue;
     }
 
@@ -1994,6 +2035,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options, PCRE2_SI
       (void)pcre2_get_error_message(rc, mbuffer, sizeof(mbuffer));
       fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer, startchar);
     }
+
     if (rc == PCRE2_ERROR_MATCHLIMIT || rc == PCRE2_ERROR_DEPTHLIMIT ||
         rc == PCRE2_ERROR_HEAPLIMIT || rc == PCRE2_ERROR_JIT_STACKLIMIT)
       resource_error = TRUE;
@@ -2002,6 +2044,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options, PCRE2_SI
       fprintf(stderr, "pcre2grep: Too many errors - abandoned.\n");
       pcre2grep_exit(2);
     }
+
     return invert; // No more matching; don't show the line again
   }
 
@@ -2087,12 +2130,15 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
     consistency with $0. */
 
     if (callout)
+    {
       *value = '0';
+    }
     else
     {
       *value = 0;
       rc = DDE_CAPTURE;
     }
+
     break;
 
   case '{':
@@ -2130,6 +2176,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
         c = c * 10 + (*string - '0');
       string++;
     } while (*string >= '0' && *string <= '9');
+
     string--; // Point to last digit
 
     /* In a callout, capture number 0 is not available. No error can be given,
@@ -2144,6 +2191,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       *value = c;
       rc = DDE_CAPTURE;
     }
+
     break;
 
     /* Limit octal numbers to 3 digits without braces, or up to 7 with braces,
@@ -2159,13 +2207,17 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       dcount = 7;
     }
     else
+    {
       dcount = 3;
+    }
+
     for (; dcount > 0; dcount--)
     {
       if (*string < '0' || *string > '7')
         break;
       c = c * 8 + (*string++ - '0');
     }
+
     *value = c;
     string--; // Point to last digit
     break;
@@ -2183,7 +2235,10 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       dcount = 6;
     }
     else
+    {
       dcount = 2;
+    }
+
     for (; dcount > 0; dcount--)
     {
       if (!isxdigit(*string))
@@ -2193,6 +2248,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       else
         c = c * 16 + ((*string++ | 0x20) - 'a') + 10;
     }
+
     *value = c;
     string--; // Point to last digit
     break;
@@ -2256,7 +2312,9 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       }
     }
     else
+    {
       string++;
+    }
   }
 
   /* Check maximum code point values, but take note of STDOUT_NL_CODE. */
@@ -2351,6 +2409,7 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
           printed = FALSE;
           continue;
         }
+
         break; // Will print value
 
       case DDE_CAPTURE:
@@ -2378,6 +2437,7 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
             printed = TRUE;
           }
         }
+
         continue;
 
         /* LCOV_EXCL_START */
@@ -2393,7 +2453,9 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
       value = *string; // Not a $ escape
 
     if (!utf || value <= 127)
+    {
       fprintf(stdout, "%c", value);
+    }
     else
     {
       int n = ord2utf8(value);
@@ -2529,6 +2591,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
           argslen += (ovector[value + 1] > ovector[value]) ? ovector[value + 1] - ovector[value]
                                                            : ovector[value] - ovector[value + 1];
         }
+
         argslen--; // Negate the effect of argslen++ below.
         break;
 
@@ -2618,6 +2681,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
           memcpy(argsptr, subject + start, capturesize);
           argsptr += capturesize;
         }
+
         break;
 
       case DDE_CHAR:
@@ -2636,6 +2700,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
         {
           *argsptr++ = value;
         }
+
         break;
 
         /* LCOV_EXCL_START */
@@ -2686,6 +2751,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       strcat(cmdbuf, " ");
       i++;
     }
+
     cmd.dsc$w_length = strlen(cmdbuf) - 1;
     status = lib$spawn(&cmd, 0, 0, &flags, 0, 0, &retstat);
     if (!(status & 1))
@@ -2818,7 +2884,9 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     if (feof(in))
       return 1;
     if (is_file_tty(in))
+    {
       input_line_buffered = TRUE;
+    }
     else
     {
       if (count_limit >= 0 && filename == stdin_name)
@@ -2826,7 +2894,9 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     }
   }
   else
+  {
     input_line_buffered = FALSE;
+  }
 
   buffrc = fill_buffer(handle, frtype, main_buffer, bufsize, input_line_buffered);
 
@@ -3116,6 +3186,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
                 }
               }
             }
+
             if (printed || printname != NULL || number)
               fprintf(stdout, "%s", stdout_nl);
           }
@@ -3337,7 +3408,9 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
                 endprevious = 0;
               }
               else
+              {
                 endprevious -= lineadvance;
+              }
 
               ptr += lineadvance;
               filepos += (int)lineadvance;
@@ -3427,6 +3500,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
         else
           break;
       }
+
       endmatch = end_of_line(endmatch, endptr, &ellength);
       linelength = endmatch - ptr - ellength;
     }
@@ -3617,6 +3691,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       fprintf(stderr, "pcre2grep: failed to test next file %s\n", pathname, strerror(errno));
     return -1;
   }
+
   zos_type = identifyzosfiletype(zos_test_file);
   fclose(zos_test_file);
 
@@ -3807,6 +3882,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       return 2;
       /* LCOV_EXCL_STOP */
     }
+
     handle = (void *)ingz;
     frtype = FR_LIBZ;
   }
@@ -3865,6 +3941,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
         fprintf(stderr, "pcre2grep: Failed to read %s using zlib: %s\n", pathname, err);
       rc = 2; // The normal "something went wrong" code
     }
+
     gzclose(ingz);
   }
   else
@@ -3892,6 +3969,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
       rc = 2; // The normal "something went wrong" code
       /* LCOV_EXCL_STOP */
     }
+
     BZ2_bzclose(inbz2);
   }
   else
@@ -4029,6 +4107,7 @@ handle_option(int letter, int options)
       (void)pcre2_config(PCRE2_CONFIG_VERSION, buffer);
       fprintf(stdout, "pcre2grep version %s%s", buffer, stdout_nl);
     }
+
     pcre2grep_exit(0);
     break; // LCOV_EXCL_LINE - statement kept to avoid compiler warning
 
@@ -4087,6 +4166,7 @@ ordin(int n)
     snprintf(p, (buffer + sizeof(buffer)) - p, "th");
     break;
   }
+
   return buffer;
 }
 
@@ -4223,6 +4303,7 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
       fprintf(stderr, "pcre2grep: Failed to open %s: %s\n", name, strerror(errno));
       return FALSE;
     }
+
     filename = name;
   }
 
@@ -4256,6 +4337,7 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
       return FALSE;
       /* LCOV_EXCL_STOP */
     }
+
     if (*patptr == NULL)
       *patptr = *patlastptr;
 
@@ -4273,6 +4355,7 @@ read_pattern_file(char *name, patstr **patptr, patstr **patlastptr)
           fclose(f);
         return FALSE;
       }
+
       (*patlastptr)->string = NULL; // Insurance
       if ((*patlastptr)->next == NULL)
         break;
@@ -4390,6 +4473,7 @@ main(int argc, char **argv)
                 option_data++;
                 longopwasequals = TRUE;
               }
+
               break;
             }
           }
@@ -4431,6 +4515,7 @@ main(int argc, char **argv)
                 longopwasequals = TRUE;
               }
             }
+
             break;
           }
         }
@@ -4458,6 +4543,7 @@ main(int argc, char **argv)
           if (*s == op->one_char)
             break;
         }
+
         if (op->one_char == 0)
         {
           fprintf(stderr, "pcre2grep: Unknown option letter '%c' in \"%s\"\n", *s, argv[i]);
@@ -4525,6 +4611,7 @@ main(int argc, char **argv)
           only_matching = only_matching_last;
         break;
       }
+
       continue;
     }
 
@@ -4537,6 +4624,7 @@ main(int argc, char **argv)
         fprintf(stderr, "pcre2grep: Data missing after %s\n", argv[i]);
         pcre2grep_exit(usage(2));
       }
+
       option_data = argv[++i];
     }
 
@@ -4580,6 +4668,7 @@ main(int argc, char **argv)
         goto EXIT2;
         /* LCOV_EXCL_STOP */
       }
+
       fn->next = NULL;
       fn->name = option_data;
       if (*(fd->anchor) == NULL)
@@ -4594,11 +4683,17 @@ main(int argc, char **argv)
     else if (op->type == OP_BINFILES)
     {
       if (strcmp(option_data, "binary") == 0)
+      {
         binary_files = BIN_BINARY;
+      }
       else if (strcmp(option_data, "without-match") == 0)
+      {
         binary_files = BIN_NOMATCH;
+      }
       else if (strcmp(option_data, "text") == 0)
+      {
         binary_files = BIN_TEXT;
+      }
       else
       {
         fprintf(stderr, "pcre2grep: unknown value \"%s\" for binary-files\n", option_data);
@@ -4742,6 +4837,7 @@ main(int argc, char **argv)
               locale_from);
       goto EXIT2;
     }
+
     character_tables = pcre2_maketables(NULL);
     pcre2_set_character_tables(compile_context, character_tables);
   }
@@ -4762,6 +4858,7 @@ main(int argc, char **argv)
       fprintf(stderr, "pcre2grep: Unknown colour setting \"%s\"\n", colour_option);
       goto EXIT2;
     }
+
     if (do_colour)
     {
       char *cs = getenv("PCRE2GREP_COLOUR");
@@ -4800,8 +4897,11 @@ main(int argc, char **argv)
       if (strcmpic(newline_arg, newlines[endlinetype]) == 0)
         break;
     }
+
     if (endlinetype < (int)(sizeof(newlines) / sizeof(char *)))
+    {
       pcre2_set_newline(compile_context, endlinetype);
+    }
     else
     {
       fprintf(stderr, "pcre2grep: Invalid newline specifier \"%s\"\n", newline_arg);
@@ -4821,11 +4921,17 @@ main(int argc, char **argv)
   if (dee_option != NULL)
   {
     if (strcmp(dee_option, "read") == 0)
+    {
       dee_action = dee_READ;
+    }
     else if (strcmp(dee_option, "recurse") == 0)
+    {
       dee_action = dee_RECURSE;
+    }
     else if (strcmp(dee_option, "skip") == 0)
+    {
       dee_action = dee_SKIP;
+    }
     else
     {
       fprintf(stderr, "pcre2grep: Invalid value \"%s\" for -d\n", dee_option);
@@ -4836,9 +4942,13 @@ main(int argc, char **argv)
   if (DEE_option != NULL)
   {
     if (strcmp(DEE_option, "read") == 0)
+    {
       DEE_action = DEE_READ;
+    }
     else if (strcmp(DEE_option, "skip") == 0)
+    {
       DEE_action = DEE_SKIP;
+    }
     else
     {
       fprintf(stderr, "pcre2grep: Invalid value \"%s\" for -D\n", DEE_option);
@@ -4995,7 +5105,9 @@ main(int argc, char **argv)
     char buffer[FNBUFSIZ];
     FILE *fl;
     if (strcmp(fn->name, "-") == 0)
+    {
       fl = stdin;
+    }
     else
     {
       fl = fopen(fn->name, "rb");
@@ -5005,6 +5117,7 @@ main(int argc, char **argv)
         goto EXIT2;
       }
     }
+
     while (fgets(buffer, sizeof(buffer), fl) != NULL)
     {
       int frc;
@@ -5021,6 +5134,7 @@ main(int argc, char **argv)
           rc = 0;
       }
     }
+
     if (fl != stdin)
       fclose(fl);
   }

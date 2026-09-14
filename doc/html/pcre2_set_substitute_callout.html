@@ -19,9 +19,12 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>int pcre2_set_substitute_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  int (*<i>callout_function</i>)(pcre2_substitute_callout_block *, void *),</b>
-<b>  void *<i>callout_data</i>);</b>
+<b>int pcre2_set_substitute_callout(</b>
+<b>      pcre2_match_context *<i>mcontext</i>,</b>
+<b>      int (*<i>substitute_callout</i>)(</b>
+<b>          pcre2_substitute_callout_block *<i>callout_block</i>,</b>
+<b>          void *<i>substitute_callout_data</i>),</b>
+<b>      void *<i>substitute_callout_data</i>);</b>
 </p>
 <h2>
 DESCRIPTION

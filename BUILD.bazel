@@ -1,11 +1,7 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("@rules_python//python:defs.bzl", "py_test")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
-
-# We use `buildifier` for auto-formatting our Bazel files.
-# Applied to all Bazel files using:
-#    > buildifier --lint=warn *.bazel
+load("@rules_python//python:defs.bzl", "py_test")
 
 copy_file(
     name = "config_h_generic",
@@ -201,6 +197,6 @@ py_test(
         ":pcre2test",
         ":testdata_tar",
     ],
-    deps = ["@bazel_tools//tools/python/runfiles"],
     main = "RunTest.py",
+    deps = ["@bazel_tools//tools/python/runfiles"],
 )

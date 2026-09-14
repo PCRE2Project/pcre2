@@ -19,9 +19,10 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>int pcre2_pattern_convert(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
-<b>  uint32_t <i>options</i>, PCRE2_UCHAR **<i>buffer</i>,</b>
-<b>  PCRE2_SIZE *<i>blength</i>, pcre2_convert_context *<i>cvcontext</i>);</b>
+<b>int pcre2_pattern_convert(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>plength</i>,</b>
+<b>                          uint32_t <i>options</i>, PCRE2_UCHAR **<i>buffptr</i>,</b>
+<b>                          PCRE2_SIZE *<i>bufflenptr</i>,</b>
+<b>                          pcre2_convert_context *<i>ccontext</i>);</b>
 </p>
 <h2>
 DESCRIPTION

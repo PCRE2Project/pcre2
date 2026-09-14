@@ -7,9 +7,10 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIlength\fP,
-.B "  uint32_t \fIoptions\fP, int *\fIerrorcode\fP, PCRE2_SIZE *\fIerroroffset,\fP"
-.B "  pcre2_compile_context *\fIccontext\fP);"
+.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIpatlen\fP,
+.B "                          uint32_t \fIoptions\fP, int *\fIerrorptr\fP,"
+.B "                          PCRE2_SIZE *\fIerroroffset\fP,"
+.B "                          pcre2_compile_context *\fIccontext\fP);"
 .fi
 .
 .SH DESCRIPTION

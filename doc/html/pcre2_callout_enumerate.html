@@ -19,9 +19,11 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
-<b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
-<b>  void *<i>callout_data</i>);</b>
+<b>int pcre2_callout_enumerate(</b>
+<b>      const pcre2_code *<i>code</i>,</b>
+<b>      int (*<i>callback</i>)(pcre2_callout_enumerate_block *<i>callout_block</i>,</b>
+<b>                      void *<i>callout_data</i>),</b>
+<b>      void *<i>callout_data</i>);</b>
 </p>
 <h2>
 DESCRIPTION

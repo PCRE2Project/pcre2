@@ -152,6 +152,7 @@ pcre2_maketables(pcre2_general_context *gcontext)
     if (iscntrl(charfn_to(i)))
       p[cbit_cntrl + i / 8] |= 1u << (i & 7);
   }
+
   p += cbit_length;
 
   /* Finally, the character type table. In this, we used to exclude VT from the

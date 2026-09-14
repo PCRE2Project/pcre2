@@ -262,6 +262,7 @@ cleanup:
     memctl->free(codes[j], memctl->memory_data);
     codes[j] = NULL;
   }
+
   return error;
 }
 

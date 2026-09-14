@@ -241,6 +241,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
             posix++;
             continue; // With next character after :]
           }
+
           PCRE2_FALLTHROUGH /* Fall through */
 
         case POSIX_CLASS_NOT_STARTED:
@@ -308,6 +309,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
             plength--;
             PUTCHARS(STR_CIRCUMFLEX_ACCENT);
           }
+
           if (plength > 0 && *posix == CHAR_RIGHT_SQUARE_BRACKET)
           {
             posix++;
@@ -315,13 +317,16 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
             PUTCHARS(STR_RIGHT_SQUARE_BRACKET);
           }
         }
+
         break;
 
       case CHAR_BACKSLASH:
         if (plength == 0)
           return PCRE2_ERROR_END_BACKSLASH;
         if (extended)
+        {
           nextisliteral = TRUE;
+        }
         else
         {
           if (*posix < 255 && strchr(posix_meta_escapes, *posix) != NULL)
@@ -334,8 +339,11 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
             plength--;
           }
           else
+          {
             nextisliteral = TRUE;
+          }
         }
+
         break;
 
       case CHAR_RIGHT_PARENTHESIS:
@@ -375,6 +383,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
             goto ESCAPE_LITERAL;
           goto COPY_SPECIAL;
         }
+
         break; // Ignore second and subsequent asterisks
 
       case CHAR_CIRCUMFLEX_ACCENT:
@@ -385,6 +394,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
           posix_state = POSIX_ANCHORED;
           goto COPY_SPECIAL;
         }
+
         PCRE2_FALLTHROUGH /* Fall through */
 
       default:
@@ -393,6 +403,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
         ESCAPE_LITERAL:
           PUTCHARS(STR_BACKSLASH);
         }
+
         lastspecial = 0xff; // Indicates nothing special
         if (p + clength > endp)
           return PCRE2_ERROR_NOMEMORY;
@@ -569,6 +580,7 @@ convert_glob_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
         *from = pattern;
         return class_index;
       }
+
       pattern++;
       class_ptr++;
     }
@@ -732,6 +744,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
         out->out_str[len] = CHAR_BACKSLASH;
         len++;
       }
+
       out->out_str[len] = (uint8_t)separator;
       len++;
     }
@@ -739,7 +752,9 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
     convert_glob_write_str(out, len);
   }
   else
+  {
     convert_glob_write(out, CHAR_LEFT_SQUARE_BRACKET);
+  }
 
   has_prev_c = FALSE;
   prev_c = 0;
@@ -1079,7 +1094,9 @@ convert_glob(uint32_t options, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf,
           in_atomic = TRUE;
         }
         else
+        {
           convert_glob_print_commit(&out);
+        }
       }
 
       if (no_wildsep)
@@ -1120,6 +1137,7 @@ convert_glob(uint32_t options, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf,
         result = PCRE2_ERROR_CONVERT_SYNTAX;
         break;
       }
+
       c = *pattern++;
     }
 
@@ -1288,6 +1306,7 @@ pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength, uint32_t options,
       *bufflenptr = 0; // Error offset
       return PCRE2_ERROR_NOMEMORY;
     }
+
     *buffptr = (PCRE2_UCHAR *)(((char *)allocated) + sizeof(pcre2_memctl));
 
     use_buffer = *buffptr;

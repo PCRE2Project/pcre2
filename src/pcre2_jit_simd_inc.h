@@ -451,7 +451,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -921,7 +923,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
   if (char1a == char1b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1a));
+  }
   else
   {
     bit1 = char1a ^ char1b;
@@ -947,7 +951,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
     sljit_emit_simd_lane_mov(compiler, value, SLJIT_VR4, 0, TMP2, 0);
 
   if (char2a == char2b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char2a));
+  }
   else
   {
     bit2 = char2a ^ char2b;
@@ -1202,6 +1208,7 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
       instruction = 0x4ea01c00 | (cmp2_ind << 16) | (dst_ind << 5) | dst_ind;
       sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     }
+
     return;
   }
 
@@ -1334,7 +1341,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -1782,6 +1791,7 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
       instruction[2] = (sljit_u16)((0xe << 8) | 0x6a);
       sljit_emit_op_custom(compiler, instruction, 6);
     }
+
     return;
   }
 
@@ -1990,7 +2000,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -2626,7 +2638,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -2795,7 +2809,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
   if (char1a == char1b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1a);
+  }
   else
   {
     bit1 = char1a ^ char1b;
@@ -2824,7 +2840,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   }
 
   if (char2a == char2b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char2a);
+  }
   else
   {
     bit2 = char2a ^ char2b;
@@ -3016,9 +3034,11 @@ fast_forward_char_pair_alpha_compare(struct sljit_compiler *compiler,
       OP2(SLJIT_XOR, dst, 0, dst, 0, cmp1, 0);
     }
     else
+    {
       OP2(SLJIT_XOR, dst, 0, data, 0, cmp1, 0);
+    }
 
-    /* CMPBGE $31, dst, dst — bits set where XOR byte is zero (match). */
+    /* CMPBGE $31, dst, dst - bits set where XOR byte is zero (match). */
     emit_alpha_cmpbge(compiler, 31, dst_ind, dst_ind);
     return;
   }
@@ -3059,7 +3079,7 @@ compact_cmpbge_mask(struct sljit_compiler *compiler, sljit_s32 mask, sljit_s32 t
 /* Find the position of the lowest set bit in an 8-bit CMPBGE mask held in
    TMP1; replace TMP1 with that bit index (0-7). TMP2 and RETURN_ADDR are
    clobbered. Uses base-ISA NEGQ+AND to isolate the bit, then a binary search
-   via three AND+SELECT pairs — identical to glibc's Alpha strchr approach. */
+   via three AND+SELECT pairs - identical to glibc's Alpha strchr approach. */
 static SLJIT_INLINE void
 emit_alpha_ctz8(struct sljit_compiler *compiler)
 {
@@ -3159,7 +3179,7 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     }
     else
     {
-      /* Partial mode: found → STR_PTR = result, not found → STR_PTR = STR_END. */
+      /* Partial mode: found => STR_PTR = result, not found => STR_PTR = STR_END. */
       quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
       OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
       partial_quit[1] = JUMP(SLJIT_JUMP);
@@ -3168,6 +3188,7 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
       OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
       JUMPHERE(partial_quit[1]);
     }
+
     return;
   }
 #endif
@@ -3246,7 +3267,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -3413,7 +3436,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
 
   /* Set up replicated character constants. */
   if (char1a == char1b)
+  {
     OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1a));
+  }
   else
   {
     bit1 = char1a ^ char1b;
@@ -3433,7 +3458,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   }
 
   if (char2a == char2b)
+  {
     OP1(SLJIT_MOV, SLJIT_R7, 0, SLJIT_IMM, replicate_char_alpha(char2a));
+  }
   else
   {
     bit2 = char2a ^ char2b;
@@ -3699,7 +3726,9 @@ fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits
     high_reg[k] = 0;
 
     if (low[k] == high[k])
+    {
       low_reg[k] = SLJIT_R(next++);
+    }
     else
     {
       if (low[k] != 0)

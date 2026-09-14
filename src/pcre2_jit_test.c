@@ -117,6 +117,7 @@ main(void)
     printf("JIT must be enabled to run pcre2_jit_test\n");
     return 1;
   }
+
   return regression_tests() | invalid_utf8_regression_tests() | invalid_utf16_regression_tests() |
          invalid_utf32_regression_tests();
 }
@@ -1069,7 +1070,9 @@ convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *offsetmap, 
       *offsetmap++ = (int)(iptr - (unsigned char *)input);
 
     if (*iptr < 0xc0)
+    {
       c = *iptr++;
+    }
     else if (!(*iptr & 0x20))
     {
       c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
@@ -1107,6 +1110,7 @@ convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *offsetmap, 
         offsetmap++;
     }
   }
+
   if (offsetmap)
     *offsetmap = (int)(iptr - (unsigned char *)input);
   *optr = '\0';
@@ -1127,6 +1131,7 @@ copy_char8_to_char16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int max_length)
     *optr++ = *iptr++;
     max_length--;
   }
+
   *optr = '\0';
   return (int)(optr - output);
 }
@@ -1156,7 +1161,9 @@ convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *offsetmap, 
       *offsetmap++ = (int)(iptr - (unsigned char *)input);
 
     if (*iptr < 0xc0)
+    {
       c = *iptr++;
+    }
     else if (!(*iptr & 0x20))
     {
       c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
@@ -1177,6 +1184,7 @@ convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *offsetmap, 
     *optr++ = c;
     max_length--;
   }
+
   if (offsetmap)
     *offsetmap = (int)(iptr - (unsigned char *)input);
   *optr = 0;
@@ -1197,6 +1205,7 @@ copy_char8_to_char32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int max_length)
     *optr++ = *iptr++;
     max_length--;
   }
+
   *optr = '\0';
   return (int)(optr - output);
 }
@@ -1217,6 +1226,7 @@ check_ascii(const char *input)
       return 0;
     ptr++;
   }
+
   return 1;
 }
 
@@ -1355,10 +1365,13 @@ regression_tests(void)
         if (!re8 && (utf || is_ascii))
           printf("\n8 bit: Cannot compile pattern \"%s\": %d\n", current->pattern, error);
       }
+
       pcre2_compile_context_free_8(ccontext8);
     }
     else
+    {
       printf("\n8 bit: Cannot allocate compile context\n");
+    }
 #endif
 #ifdef SUPPORT_PCRE2_16
     if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
@@ -1385,10 +1398,13 @@ regression_tests(void)
         if (!re16 && (utf || is_ascii))
           printf("\n16 bit: Cannot compile pattern \"%s\": %d\n", current->pattern, error);
       }
+
       pcre2_compile_context_free_16(ccontext16);
     }
     else
+    {
       printf("\n16 bit: Cannot allocate compile context\n");
+    }
 #endif
 #ifdef SUPPORT_PCRE2_32
     if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
@@ -1415,10 +1431,13 @@ regression_tests(void)
         if (!re32 && (utf || is_ascii))
           printf("\n32 bit: Cannot compile pattern \"%s\": %d\n", current->pattern, error);
       }
+
       pcre2_compile_context_free_32(ccontext32);
     }
     else
+    {
       printf("\n32 bit: Cannot allocate compile context\n");
+    }
 #endif
 
     counter++;
@@ -1460,6 +1479,7 @@ regression_tests(void)
         ovector8_2[i] = (PCRE2_SIZE)(-2);
       pcre2_set_match_limit_8(mcontext8, 10000000);
     }
+
     if (re8)
     {
       return_value8[1] = pcre2_match_8(re8, (PCRE2_SPTR8)current->input, strlen(current->input),
@@ -1512,6 +1532,7 @@ regression_tests(void)
         ovector16_2[i] = (PCRE2_SIZE)(-2);
       pcre2_set_match_limit_16(mcontext16, 10000000);
     }
+
     if (re16)
     {
       if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
@@ -1571,6 +1592,7 @@ regression_tests(void)
         ovector32_2[i] = (PCRE2_SIZE)(-2);
       pcre2_set_match_limit_32(mcontext32, 10000000);
     }
+
     if (re32)
     {
       if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
@@ -1776,6 +1798,7 @@ regression_tests(void)
             return_value8[0] *= 2;
 
           for (i = 0; i < return_value8[0]; ++i)
+          {
             if (ovector8_1[i] != ovector8_2[i])
             {
               printf("\n8 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
@@ -1783,6 +1806,7 @@ regression_tests(void)
                      current->input);
               is_successful = 0;
             }
+          }
         }
 #endif
 
@@ -1801,6 +1825,7 @@ regression_tests(void)
             return_value16[0] *= 2;
 
           for (i = 0; i < return_value16[0]; ++i)
+          {
             if (ovector16_1[i] != ovector16_2[i])
             {
               printf("\n16 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
@@ -1808,6 +1833,7 @@ regression_tests(void)
                      current->input);
               is_successful = 0;
             }
+          }
         }
 #endif
 
@@ -1826,6 +1852,7 @@ regression_tests(void)
             return_value32[0] *= 2;
 
           for (i = 0; i < return_value32[0]; ++i)
+          {
             if (ovector32_1[i] != ovector32_2[i])
             {
               printf("\n32 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
@@ -1833,6 +1860,7 @@ regression_tests(void)
                      current->input);
               is_successful = 0;
             }
+          }
         }
 #endif
       }
@@ -1958,7 +1986,9 @@ regression_tests(void)
       }
     }
     else
+    {
       successful_row = 0;
+    }
 
     fflush(stdout);
     current++;
@@ -1999,6 +2029,7 @@ check_invalid_utf_result(int pattern_index, const char *type, int result, int ma
       printf("Pattern[%d] %s result is not -1.\n", pattern_index, type);
       return 1;
     }
+
     return 0;
   }
 

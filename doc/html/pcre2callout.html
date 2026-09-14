@@ -27,12 +27,15 @@ please consult the man page, in case the conversion went wrong.
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>int (*pcre2_callout)(pcre2_callout_block *, void *);</b>
+<b>int (*pcre2_callout)(pcre2_callout_block *<i>callout_block</i>,</b>
+<b>                     void *<i>callout_data</i>);</b>
 <br>
 <br>
-<b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
-<b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
-<b>  void *<i>user_data</i>);</b>
+<b>int pcre2_callout_enumerate(</b>
+<b>      const pcre2_code *<i>code</i>,</b>
+<b>      int (*<i>callback</i>)(pcre2_callout_enumerate_block *<i>callout_block</i>,</b>
+<b>                      void *<i>callout_data</i>),</b>
+<b>      void *<i>callout_data</i>);</b>
 </p>
 <h2><a name="SEC2" href="#TOC1">DESCRIPTION</a></h2>
 <p>
@@ -418,9 +421,11 @@ functions; it will never be used by PCRE2 itself.
 </p>
 <h2><a name="SEC6" href="#TOC1">CALLOUT ENUMERATION</a></h2>
 <p>
-<b>int pcre2_callout_enumerate(const pcre2_code *<i>code</i>,</b>
-<b>  int (*<i>callback</i>)(pcre2_callout_enumerate_block *, void *),</b>
-<b>  void *<i>user_data</i>);</b>
+<b>int pcre2_callout_enumerate(</b>
+<b>      const pcre2_code *<i>code</i>,</b>
+<b>      int (*<i>callback</i>)(pcre2_callout_enumerate_block *<i>callout_block</i>,</b>
+<b>                      void *<i>callout_data</i>),</b>
+<b>      void *<i>callout_data</i>);</b>
 <br>
 <br>
 A script language that supports the use of string arguments in callouts might

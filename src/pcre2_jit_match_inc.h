@@ -180,7 +180,9 @@ free the memory that was obtained. */
     rc = convert_executable_func.call_executable_func(&arguments);
   }
   else
+  {
     rc = jit_machine_stack_exec(&arguments, convert_executable_func.call_executable_func);
+  }
 
   if (rc > (int)oveccount)
     rc = 0;

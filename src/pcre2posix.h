@@ -127,13 +127,13 @@ file. So, we don't change existing definitions of PCRE2POSIX_EXP_DECL.
 By default, we use the standard "extern" declarations. */
 
 #ifndef PCRE2POSIX_EXP_DECL
-#if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
-#define PCRE2POSIX_EXP_DECL extern __declspec(dllimport)
-#elif defined __cplusplus
-#define PCRE2POSIX_EXP_DECL extern "C"
-#else
-#define PCRE2POSIX_EXP_DECL extern
-#endif
+#  if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
+#    define PCRE2POSIX_EXP_DECL extern __declspec(dllimport)
+#  elif defined __cplusplus
+#    define PCRE2POSIX_EXP_DECL extern "C"
+#  else
+#    define PCRE2POSIX_EXP_DECL extern
+#  endif
 #endif
 
 /* When compiling with the MSVC compiler, it is sometimes necessary to include
@@ -148,7 +148,7 @@ PCRE2 normally uses the platform's standard calling convention, so this should
 not be set unless you know you need it. */
 
 #ifndef PCRE2_CALL_CONVENTION
-#define PCRE2_CALL_CONVENTION
+#  define PCRE2_CALL_CONVENTION
 #endif
 
 /* The functions. The actual code is in functions with pcre2_xxx names for
@@ -157,12 +157,19 @@ regex functions. It's done this way to ensure to they are always linked from
 the PCRE2 library and not by accident from elsewhere (regex_t differs in size
 elsewhere). */
 
-PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_regcomp(regex_t *, const char *, int);
-PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_regexec(const regex_t *, const char *, size_t,
-                                                            regmatch_t *, int);
-PCRE2POSIX_EXP_DECL size_t PCRE2_CALL_CONVENTION pcre2_regerror(int, const regex_t *, char *,
-                                                                size_t);
-PCRE2POSIX_EXP_DECL void PCRE2_CALL_CONVENTION pcre2_regfree(regex_t *);
+PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION
+pcre2_regcomp(regex_t *preg, const char *pattern, int cflags);
+
+PCRE2POSIX_EXP_DECL int PCRE2_CALL_CONVENTION
+pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch,
+              regmatch_t *pmatch, int eflags);
+
+PCRE2POSIX_EXP_DECL size_t PCRE2_CALL_CONVENTION
+pcre2_regerror(int errcode, const regex_t *preg, char *errbuf,
+               size_t errbuf_size);
+
+PCRE2POSIX_EXP_DECL void PCRE2_CALL_CONVENTION
+pcre2_regfree(regex_t *preg);
 
 #define regcomp  pcre2_regcomp
 #define regexec  pcre2_regexec

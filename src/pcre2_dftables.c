@@ -152,6 +152,7 @@ main(int argc, char **argv)
         (void)fprintf(stderr, "pcre2_dftables: setlocale() failed\n");
         return 1;
       }
+
       env = getenv("LC_ALL");
     }
 
@@ -215,6 +216,7 @@ main(int argc, char **argv)
                     (int)len, TABLES_LENGTH);
       yield = 1;
     }
+
     fclose(f);
     free((void *)base_of_tables);
     return yield;
@@ -244,7 +246,8 @@ main(int argc, char **argv)
                    "pcre2_dftables manually with the -L option to build tables using the LC_ALL\n"
                    "locale. */\n\n");
 
-  (void)fprintf(f, "#include \"pcre2_internal.h\"\n\n");
+  (void)fprintf(f, "#include \"pcre2_internal.h\"\n\n"
+                   "// clang-format off\n");
 
   (void)fprintf(f, "const uint8_t PRIV(default_tables)[] = {\n\n"
                    "/* This table is a lower casing table. */\n\n");
@@ -258,6 +261,7 @@ main(int argc, char **argv)
     if (i != 255)
       fprintf(f, ",");
   }
+
   (void)fprintf(f, ",\n\n");
 
   (void)fprintf(f, "/* This table is a case flipping table. */\n\n");
@@ -271,6 +275,7 @@ main(int argc, char **argv)
     if (i != 255)
       fprintf(f, ",");
   }
+
   (void)fprintf(f, ",\n\n");
 
   (void)fprintf(
@@ -290,10 +295,12 @@ main(int argc, char **argv)
         (void)fprintf(f, "  /* %s */", classlist[nclass++]);
       (void)fprintf(f, "\n  ");
     }
+
     (void)fprintf(f, "0x%02x", *tables++);
     if (i != cbit_length - 1)
       (void)fprintf(f, ",");
   }
+
   (void)fprintf(f, ",\n\n");
 
   (void)fprintf(f,
@@ -305,37 +312,31 @@ main(int argc, char **argv)
                 "  0x%02x   word (alphanumeric or '_')\n*/\n\n",
                 ctype_space, ctype_letter, ctype_lcletter, ctype_digit, ctype_word);
 
-  (void)fprintf(f, "  ");
   for (i = 0; i < 256; i++)
   {
-    if ((i & 7) == 0 && i != 0)
+    if ((i & 7) == 0)
+      (void)fprintf(f, "  ");
+    (void)fprintf(f, "0x%02x", *tables++);
+    (void)fprintf(f, ",");
+
+    if ((i & 7) == 7)
     {
       (void)fprintf(f, " /* ");
-      if (isprint(i - 8))
-        (void)fprintf(f, " %c -", i - 8);
+      if (isprint(i - 7))
+        (void)fprintf(f, " %c -", i - 7);
       else
-        (void)fprintf(f, "%3d-", i - 8);
-      if (isprint(i - 1))
-        (void)fprintf(f, " %c ", i - 1);
+        (void)fprintf(f, "%3d-", i - 7);
+      if (isprint(i))
+        (void)fprintf(f, " %c ", i);
       else
-        (void)fprintf(f, "%3d", i - 1);
-      (void)fprintf(f, " */\n  ");
+        (void)fprintf(f, "%3d", i);
+      (void)fprintf(f, " */\n");
     }
-    (void)fprintf(f, "0x%02x", *tables++);
-    if (i != 255)
-      (void)fprintf(f, ",");
   }
 
-  (void)fprintf(f, "};/* ");
-  if (isprint(i - 8))
-    (void)fprintf(f, " %c -", i - 8);
-  else
-    (void)fprintf(f, "%3d-", i - 8);
-  if (isprint(i - 1))
-    (void)fprintf(f, " %c ", i - 1);
-  else
-    (void)fprintf(f, "%3d", i - 1);
-  (void)fprintf(f, " */\n\n/* End of pcre2_chartables.c */\n");
+  (void)fprintf(f, "};\n"
+                   "// clang-format on\n\n"
+                   "/* End of pcre2_chartables.c */\n");
 
   fclose(f);
   free((void *)base_of_tables);
