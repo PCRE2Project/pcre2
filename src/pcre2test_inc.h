@@ -462,6 +462,7 @@ to16(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
   }
 
   else
+  {
     while (len > 0)
     {
       uint32_t c;
@@ -476,7 +477,9 @@ to16(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
       p += chlen;
       len -= chlen;
       if (c < 0x10000)
+      {
         *pp++ = c;
+      }
       else
       {
         c -= 0x10000;
@@ -484,6 +487,7 @@ to16(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
         *pp++ = 0xdc00 | (c & 0x3ff);
       }
     }
+  }
 
   *pp = 0;
   *lenptr = pp - pbuffer16;
@@ -560,6 +564,7 @@ to32(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
   }
 
   else
+  {
     while (len > 0)
     {
       int chlen;
@@ -581,6 +586,7 @@ to32(uint8_t *p, int utf, PCRE2_SIZE *lenptr)
       len -= chlen;
       *pp++ = c | topbit;
     }
+  }
 
   *pp = 0;
   *lenptr = pp - pbuffer32;
@@ -881,7 +887,9 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
           *((uint32_t *)field) |= PCRE2_EXTENDED_MORE;
         }
         else
+        {
           *((uint32_t *)field) |= modlist[index].value;
+        }
       }
 
       continue; // With the next (fullname) modifier
@@ -1011,7 +1019,9 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
         ((uint32_t *)field)[1] = (uint32_t)uli;
       }
       else
+      {
         ((uint32_t *)field)[1] = 0;
+      }
       pp = (uint8_t *)endptr;
       break;
 
@@ -1358,15 +1368,19 @@ callout_enumerate_function(pcre2_callout_enumerate_block *cb, void *callout_data
     fprintf(outfile, "%c", CHAR_OUTPUT(delimiter));
     pchars(clr_none, cb->callout_string, cb->callout_string_length, utf, outfile);
     for (i = 0; callout_start_delims[i] != 0; i++)
+    {
       if (delimiter == callout_start_delims[i])
       {
         delimiter = callout_end_delims[i];
         break;
       }
+    }
     fprintf(outfile, "%c  ", CHAR_OUTPUT(delimiter));
   }
   else
+  {
     fprintf(outfile, "%d  ", cb->callout_number);
+  }
 
   if (next_item_length == 0 && pattern_string[cb->pattern_position] != 0)
     next_item_length = 1;
@@ -1606,7 +1620,9 @@ show_pattern_info(void)
     if ((compile_options | overall_options) != 0)
     {
       if (compile_options == overall_options)
+      {
         show_compile_options(clr_none, compile_options, "Options:", "\n");
+      }
       else
       {
         show_compile_options(clr_none, compile_options, "Compile options:", "\n");
@@ -1669,7 +1685,9 @@ show_pattern_info(void)
       const char *caseless =
           ((compiled_code->flags & PCRE2_FIRSTCASELESS) == 0) ? "" : " (caseless)";
       if (first_cunit != 0xff && PRINTABLE(first_cunit))
+      {
         fprintf(outfile, "First code unit = \'%c\'%s\n", CHAR_OUTPUT(first_cunit), caseless);
+      }
       else
       {
         fprintf(outfile, "First code unit = ");
@@ -1715,7 +1733,9 @@ show_pattern_info(void)
       const char *caseless =
           ((compiled_code->flags & PCRE2_LASTCASELESS) == 0) ? "" : " (caseless)";
       if (PRINTABLE(last_cunit))
+      {
         fprintf(outfile, "Last code unit = \'%c\'%s\n", CHAR_OUTPUT(last_cunit), caseless);
+      }
       else
       {
         fprintf(outfile, "Last code unit = ");
@@ -1731,7 +1751,9 @@ show_pattern_info(void)
     {
 #ifdef SUPPORT_JIT
       if (compiled_code->executable_jit != NULL)
+      {
         fprintf(outfile, "JIT compilation was successful\n");
+      }
       else
       {
         cfprintf(clr_api_error, outfile, "JIT compilation was not successful");
@@ -2053,7 +2075,9 @@ process_command(void)
             yield = PR_ABEND;
         }
         else
+        {
           patstacknext += rc;
+        }
       }
     }
 
@@ -2788,7 +2812,9 @@ process_pattern(void)
       }
     }
     else
+    {
       converted_pattern = NULL; // Let the library allocate
+    }
 
     if (utf)
       convert_options |= PCRE2_CONVERT_UTF;
@@ -3345,8 +3371,10 @@ check_match_limit(PCRE2_SPTR pp, PCRE2_SIZE ulen, int errnumber, const char *msg
     }
 
     else if ((pat_patctl.control & CTL_JITFAST) != 0 && (dat_datctl.options & PCRE2_NO_JIT) == 0)
+    {
       capcount = pcre2_jit_match(compiled_code, pp, ulen, dat_datctl.offset, dat_datctl.options,
                                  match_data, dat_context);
+    }
 
     else
     {
@@ -3605,7 +3633,9 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
     }
   }
   else
+  {
     f = fdefault;
+  }
 
   /* For a callout with a string argument, show the string first because there
   isn't a tidy way to fit it in the rest of the data. */
@@ -3617,11 +3647,13 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
             CHAR_OUTPUT(delimiter));
     pchars(clr_none, cb->callout_string, cb->callout_string_length, utf, outfile);
     for (i = 0; callout_start_delims[i] != 0; i++)
+    {
       if (delimiter == callout_start_delims[i])
       {
         delimiter = callout_end_delims[i];
         break;
       }
+    }
     fprintf(outfile, "%c", CHAR_OUTPUT(delimiter));
     if (!callout_capture)
       fprintf(outfile, "\n");
@@ -3638,7 +3670,9 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
     {
       fprintf(outfile, "%2d: ", i / 2);
       if (cb->offset_vector[i] == PCRE2_UNSET)
+      {
         fprintf(outfile, "<unset>");
+      }
       else
       {
         pchars(clr_none, cb->subject + cb->offset_vector[i],
@@ -3724,7 +3758,9 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
       pchars(clr_none, pbuffer + cb->pattern_position, cb->next_item_length, utf, outfile);
     }
     else
+    {
       fprintf(outfile, "End of pattern");
+    }
 
     fprintf(outfile, "\n");
   }
@@ -3734,7 +3770,9 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
   if (cb->mark != last_callout_mark)
   {
     if (cb->mark == NULL)
+    {
       fprintf(outfile, "Latest Mark: <unset>\n");
+    }
     else
     {
       fprintf(outfile, "Latest Mark: ");
@@ -4076,7 +4114,9 @@ copy_substitute_string(BOOL utf, uint8_t *input, PCRE2_SIZE inlen, PCRE2_UCHAR *
         *output++ = 0xdc00 | (c & 0x3ff);
       }
       else
+      {
         *output++ = c;
+      }
 
 #elif PCRE2_CODE_UNIT_WIDTH == 32
       *output++ = c;
@@ -4399,7 +4439,9 @@ process_data(void)
               return PR_OK;
             }
             else
+            {
               c = c * 8 + (*pt - '0');
+            }
           }
           c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
           if (i == 0 || *pt != '}')
@@ -4408,7 +4450,9 @@ process_data(void)
             return PR_OK;
           }
           else
+          {
             p = pt + 1;
+          }
         }
         break;
 
@@ -4435,7 +4479,9 @@ process_data(void)
               break;
             }
             else
+            {
               c = c * 16 + (tolower(*pt) - (isdigit(*pt) ? '0' : 'a' - 10));
+            }
           }
           c = CHAR_OUTPUT(CHAR_INPUT_HEX(c));
           if (i == 0 || *pt != '}')
@@ -4444,7 +4490,9 @@ process_data(void)
             return PR_OK;
           }
           else
+          {
             p = pt + 1;
+          }
         }
         else
         {
@@ -4543,10 +4591,12 @@ process_data(void)
         return PR_OK;
       }
       else if (encoding == FORCE_UTF && c > MAX_UTF_CODE_POINT)
+      {
         cfprintf(clr_test_error, outfile,
                  "** Warning: character \\N{U+%x} is greater than "
                  "0x%x and should not be encoded as UTF-8\n",
                  c, MAX_UTF_CODE_POINT);
+      }
       q += ord_to_utf8(c, q);
     }
 #endif
@@ -4795,9 +4845,13 @@ ENDSTRING:
       fputs("\n", outfile);
     }
     else if ((pat_patctl.control & CTL_POSIX_NOSUB) != 0)
+    {
       fprintf(outfile, "Matched with REG_NOSUB\n");
+    }
     else if (dat_datctl.oveccount == 0)
+    {
       fprintf(outfile, "Matched without capture\n");
+    }
     else
     {
       size_t i, j;
@@ -5639,7 +5693,9 @@ ENDSTRING:
             showallused = i == 0 && (leftchar < start || rightchar > end);
           }
           else
+          {
             showallused = FALSE;
+          }
 
           if (showallused)
           {
@@ -5740,7 +5796,9 @@ ENDSTRING:
         leftchar = match_data->leftchar;
       }
       else
+      {
         leftchar = ovector[0];
+      }
 
       cfprintf(clr_api_error, outfile, "Partial match");
       if ((dat_datctl.control & CTL_MARK) != 0 && match_data->mark != NULL)
@@ -5843,7 +5901,9 @@ ENDSTRING:
   NEXT_MATCH:
 
     if ((dat_datctl.control & CTL_ANYGLOB) == 0)
+    {
       break;
+    }
     else
     {
       PCRE2_SIZE new_start_offset = (PCRE2_SIZE)-1;

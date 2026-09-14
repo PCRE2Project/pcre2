@@ -101,7 +101,9 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR check_subject, PCRE2_SPTR e
     int rgb;
     int len = 1;
     if (!utf)
+    {
       c = *eptr;
+    }
     else
     {
       GETCHARLEN(c, eptr, len);
@@ -137,7 +139,9 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR check_subject, PCRE2_SPTR e
           GETCHAR(c, bptr);
         }
         else
+        {
           c = *bptr;
+        }
         if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator)
           break;
         ricount++;

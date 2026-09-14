@@ -884,7 +884,9 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
       if (leftop == OP_PROP || leftop == OP_NOTPROP)
       {
         if (rightop == OP_EOD)
+        {
           accepted = TRUE;
+        }
         else if (rightop == OP_PROP || rightop == OP_NOTPROP)
         {
           int n;

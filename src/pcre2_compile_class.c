@@ -201,7 +201,9 @@ utf_caseless_extend(uint32_t start, uint32_t end, uint32_t options, uint32_t *bu
     }
 
     if (co != 0)
+    {
       list = PRIV(ucd_caseless_sets) + co;
+    }
     else
     {
       co = UCD_OTHERCASE(c);
@@ -242,7 +244,9 @@ utf_caseless_extend(uint32_t start, uint32_t end, uint32_t options, uint32_t *bu
         }
       }
       else
+      {
         continue;
+      }
 
       result += 2;
       if (buffer != NULL)
@@ -631,7 +635,9 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
       dst[1] = ptr[1];
     }
     else if (dst[1] < ptr[1])
+    {
       dst[1] = ptr[1];
+    }
 
     ptr += 2;
     range_list_size -= 2;
@@ -698,7 +704,9 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
             *(uint32_t *)(--next_char) = (range_start << XCL_CHAR_SHIFT);
         }
         else
+        {
           cranges->char_lists_types |= XCL_BEGIN_WITH_RANGE << tmp2;
+        }
       }
 
       PCRE2_ASSERT((uint32_t *)next_char >= dst + 2);
@@ -746,7 +754,9 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
         *(uint32_t *)(--next_char) = tmp1;
     }
     else
+    {
       cranges->char_lists_types |= tmp1 << tmp2;
+    }
 
     if (range_end < XCL_CHAR_LIST_LOW_16_START || tmp2 == 0)
     {
@@ -1250,7 +1260,9 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
           if ((xclass_props & XCLASS_HIGH_ANY) == 0)
           {
             if (lengthptr != NULL)
+            {
               *lengthptr += 3;
+            }
             else
             {
               *class_uchardata++ = local_negate ? XCL_NOTPROP : XCL_PROP;
@@ -1493,7 +1505,9 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
           if ((xclass_props & XCLASS_HIGH_ANY) == 0)
           {
             if (lengthptr != NULL)
+            {
               *lengthptr += 3;
+            }
             else
             {
               *class_uchardata++ = (escape == ESC_p) ? XCL_PROP : XCL_NOTPROP;
@@ -1694,7 +1708,9 @@ END_PROCESSING:
             class_uchardata += PRIV(ord2utf)(range_start, class_uchardata);
           }
           else
+          {
             *class_uchardata++ = XCL_SINGLE;
+          }
 
           class_uchardata += PRIV(ord2utf)(range_end, class_uchardata);
           continue;
@@ -1711,7 +1727,9 @@ END_PROCESSING:
           *class_uchardata++ = range_start;
         }
         else
+        {
           *class_uchardata++ = XCL_SINGLE;
+        }
 
         *class_uchardata++ = range_end;
 #endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
@@ -1786,7 +1804,9 @@ END_PROCESSING:
       }
     }
     else
+    {
       code = class_uchardata;
+    }
 
     if ((xclass_props & XCLASS_HAS_CHAR_LISTS) != 0)
     {
@@ -2014,7 +2034,9 @@ fold_binary(int op, eclass_op_info *lhs_op_info, eclass_op_info *rhs_op_info, PC
     {
       /* Both of LHS & RHS are either ECL_XCLASS, or compound operations. */
       if (lengthptr != NULL)
+      {
         *lengthptr += 1;
+      }
       else
       {
         PCRE2_ASSERT(rhs_op_info->code_start == lhs_op_info->code_start + lhs_op_info->length);
@@ -2068,7 +2090,9 @@ fold_binary(int op, eclass_op_info *lhs_op_info, eclass_op_info *rhs_op_info, PC
     {
       /* Both of LHS & RHS are either ECL_XCLASS, or compound operations. */
       if (lengthptr != NULL)
+      {
         *lengthptr += 1;
+      }
       else
       {
         PCRE2_ASSERT(rhs_op_info->code_start == lhs_op_info->code_start + lhs_op_info->length);
@@ -2128,7 +2152,9 @@ fold_binary(int op, eclass_op_info *lhs_op_info, eclass_op_info *rhs_op_info, PC
     {
       /* Both of LHS & RHS are either ECL_XCLASS, or compound operations. */
       if (lengthptr != NULL)
+      {
         *lengthptr += 1;
+      }
       else
       {
         PCRE2_ASSERT(rhs_op_info->code_start == lhs_op_info->code_start + lhs_op_info->length);
@@ -2271,14 +2297,18 @@ compile_class_operand(eclass_context *context, BOOL negated, uint32_t **pptr, PC
         uint32_t *classwords = pop_info->bits.classwords;
 
         for (int i = 0; i < 8; i++)
+        {
           if (classwords[i] != 0)
           {
             context->needs_bitmap = TRUE;
             break;
           }
+        }
       }
       else
+      {
         context->needs_bitmap = TRUE;
+      }
     }
 
     /* Finally, for OP_XCLASS we hoist out the bitmap (if any), and convert to
@@ -2625,11 +2655,13 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
 
   /* Do some useful counting of what's in the bitmap. */
   for (int i = 0; i < 8; i++)
+  {
     if (op_info.bits.classwords[i] != 0xffffffff)
     {
       allbitsone = FALSE;
       break;
     }
+  }
 
   /* After constant-folding the extended class syntax, it may turn out to be
   a simple class after all. In that case, we can unwrap it from the

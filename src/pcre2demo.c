@@ -107,16 +107,22 @@ main(int argc, char **argv)
   for (i = 1; i < argc; i++)
   {
     if (strcmp(argv[i], "-g") == 0)
+    {
       find_all = 1;
+    }
     else if (strcmp(argv[i], "-i") == 0)
+    {
       caseless_match = PCRE2_CASELESS;
+    }
     else if (argv[i][0] == '-')
     {
       printf("Unrecognised option %s\n", argv[i]);
       return 1;
     }
     else
+    {
       break;
+    }
   }
 
   /* After the options, we require exactly two arguments, which are the pattern,
@@ -272,7 +278,9 @@ main(int argc, char **argv)
                            &namecount);          // where to put the answer
 
   if (namecount == 0)
+  {
     printf("No named substrings\n");
+  }
   else
   {
     PCRE2_SPTR tabptr;
@@ -426,7 +434,9 @@ main(int argc, char **argv)
     }
 
     if (namecount == 0)
+    {
       printf("No named substrings\n");
+    }
     else
     {
       PCRE2_SPTR tabptr = name_table;

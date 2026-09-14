@@ -82,7 +82,9 @@ PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, uint32_t *len
     GETCHAR(c, ptr);
   }
   else
+  {
     c = *ptr;
+  }
 #else
   (void)utf;
   c = *ptr;
@@ -184,7 +186,9 @@ PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, uint32_t *
     GETCHAR(c, ptr);
   }
   else
+  {
     c = *ptr;
+  }
 #else
   (void)utf;
   c = *ptr;

@@ -95,7 +95,9 @@ PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
     newmemctl->memory_data = NULL;
   }
   else
+  {
     *newmemctl = *memctl;
+  }
   return yield;
 }
 

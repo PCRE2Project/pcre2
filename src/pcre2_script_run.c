@@ -319,7 +319,9 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
       uint32_t digitset;
 
       if (c <= PRIV(ucd_digit_sets)[1])
+      {
         digitset = 1;
+      }
       else
       {
         int mid;

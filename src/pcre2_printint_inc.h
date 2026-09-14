@@ -120,7 +120,9 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
   if (one_code_unit)
   {
     if (PRINTABLE(c))
+    {
       fprintf(f, "%c", CHAR_OUTPUT(c));
+    }
     else
     {
       c = CHAR_OUTPUT_HEX(c);
@@ -416,7 +418,9 @@ print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
         range_start = ~(uint32_t)0;
       }
       else
+      {
         range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+      }
 
       item_count--;
     }
@@ -827,10 +831,14 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
           extra = 2;
         }
         else
+        {
           fprintf(f, "%s", OP_names[code[1]]);
+        }
       }
       else
+      {
         extra = print_char(f, code + 1, utf);
+      }
       fprintf(f, "%s", OP_names[*code]);
       break;
 
@@ -866,7 +874,9 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         extra = 2;
       }
       else
+      {
         fprintf(f, "    %s", OP_names[code[1 + IMM2_SIZE]]);
+      }
       fprintf(f, "{");
       if (*code != OP_TYPEEXACT)
         fprintf(f, "0,");
@@ -982,11 +992,13 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       extra = GET(code, 1 + 2 * LINK_SIZE);
       print_custring_bylen(f, code + 2 + 4 * LINK_SIZE, extra - 3 - 4 * LINK_SIZE);
       for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
+      {
         if (c == PRIV(callout_start_delims)[i])
         {
           c = PRIV(callout_end_delims)[i];
           break;
         }
+      }
       fprintf(f, "%c %d %d %d", CHAR_OUTPUT(c), GET(code, 1 + 3 * LINK_SIZE), GET(code, 1),
               GET(code, 1 + LINK_SIZE));
       break;

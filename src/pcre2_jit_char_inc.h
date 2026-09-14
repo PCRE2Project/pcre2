@@ -230,7 +230,9 @@ xclass_compute_ranges(compiler_common *common, PCRE2_SPTR cc, xclass_ranges *ran
         range_start = ~(uint32_t)0;
       }
       else
+      {
         range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+      }
 
       item_count--;
     }
@@ -449,7 +451,9 @@ xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr
       }
     }
     else
+    {
       next_char += (type & XCL_ITEM_COUNT_MASK) << (list_ind <= 1 ? 1 : 2);
+    }
 
     if ((type >> XCL_TYPE_BIT_LEN) == 0)
       break;
@@ -687,7 +691,9 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
   if (!(status & XCLASS_IS_ECLASS))
   {
     if ((flags & XCL_NOT) != 0)
+    {
       read_char(common, min, max, backtracks, READ_CHAR_UPDATE_STR_PTR);
+    }
     else
     {
 #ifdef SUPPORT_UNICODE
@@ -1121,7 +1127,9 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
                  (sljit_sw)(range_end - range_start));
     }
     else
+    {
       jump = CMP(SLJIT_EQUAL ^ invertcmp, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_start - charoffset));
+    }
 
     add_jump(compiler, backtracks, jump);
 
@@ -1170,8 +1178,10 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
         last_range_set = TRUE;
       }
       else
+      {
         ranges.stack[depth].jump =
             CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, (sljit_sw)(range_end - charoffset));
+      }
 
       ranges.stack[depth].first_item = (sljit_u32)(mid_item + 2);
       ranges.stack[depth].last_item = (sljit_u32)last_item;
@@ -1257,7 +1267,9 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
     set_jumps(check_result, LABEL());
 
   if (has_cmov)
+  {
     jump = CMP(SLJIT_NOT_EQUAL ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
+  }
   else
   {
     sljit_set_current_flags(compiler, SLJIT_SET_Z);
@@ -1521,7 +1533,9 @@ byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
              CMP(SLJIT_NOT_EQUAL, context->sourcereg, 0, SLJIT_IMM, *cc | othercasebit));
   }
   else
+  {
     add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, context->sourcereg, 0, SLJIT_IMM, *cc));
+  }
 
 #endif
 
@@ -1961,7 +1975,9 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
       JUMPHERE(jump[0]);
     }
     else
+    {
       check_newlinechar(common, common->nltype, backtracks, TRUE);
+    }
     return cc;
 
   case OP_ALLANY:
@@ -2168,7 +2184,9 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
       {
         OP1(SLJIT_MOV_U8, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
         if (type == OP_NOT || !char_has_othercase(common, cc))
+        {
           add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, c));
+        }
         else
         {
           /* Since UTF8 code page is fixed, we know that c is in [a-z] or [A-Z] range. */

@@ -1020,7 +1020,9 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         if (ptr >= end_subject)
         {
           if ((mb->moptions & PCRE2_PARTIAL_HARD) != 0)
+          {
             return PCRE2_ERROR_PARTIAL;
+          }
           else
           {
             ADD_ACTIVE(state_offset + 1, 0);
@@ -1090,7 +1092,9 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         if ((mb->moptions & PCRE2_NOTEOL) == 0)
         {
           if (clen == 0 && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
+          {
             could_continue = TRUE;
+          }
           else if (clen == 0 || ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr) &&
                                  (ptr == end_subject - mb->nllen)))
           {
@@ -1106,7 +1110,9 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               ADD_NEW_DATA(-(state_offset + 1), 0, 1);
             }
             else
+            {
               could_continue = partial_newline = TRUE;
+            }
           }
         }
         break;
@@ -1116,7 +1122,9 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
         if ((mb->moptions & PCRE2_NOTEOL) == 0)
         {
           if (clen == 0 && (mb->moptions & PCRE2_PARTIAL_HARD) != 0)
+          {
             could_continue = TRUE;
+          }
           else if (clen == 0 || ((mb->poptions & PCRE2_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr)))
           {
             ADD_ACTIVE(state_offset + 1, 0);
@@ -1131,7 +1139,9 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               ADD_NEW_DATA(-(state_offset + 1), 0, 1);
             }
             else
+            {
               could_continue = partial_newline = TRUE;
+            }
           }
         }
         else if (IS_NEWLINE(ptr))
@@ -3282,7 +3292,9 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
             ++code; // The following opcode will be one of the above BRAs
           }
           else
+          {
             allow_zero = FALSE;
+          }
 
           /* Loop to match the subpattern as many times as possible as if it were
           a complete pattern. */
@@ -4091,7 +4103,9 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             }
 
             else
+            {
               pp2 = (memchr_found_first_cu2 == end_subject) ? NULL : memchr_found_first_cu2;
+            }
 
             /* Set the start to the end of the subject if neither case was found.
             Otherwise, use the earlier found point. */
@@ -4361,7 +4375,9 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           memcpy((void *)match_data->subject, subject, CU2BYTES(length));
         }
         else
+        {
           match_data->subject = NULL;
+        }
         match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
       }
       else if (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)

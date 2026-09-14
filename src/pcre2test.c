@@ -1599,7 +1599,9 @@ my_malloc(size_t size, void *data)
         malloclistlength[malloclistptr++] = size;
       }
       else
+      {
         cfprintf(clr_profiling, outfile, " (not remembered)");
+      }
       fprintf(outfile, "\n");
     }
   }
@@ -3351,7 +3353,9 @@ c_option(const char *arg)
     printf(")\n");
   }
   else
+  {
     printf("  No Unicode support\n");
+  }
 
   (void)pcre2_config(PCRE2_CONFIG_JIT, &optval);
   if (optval != 0)
@@ -3973,7 +3977,9 @@ main(int argc, char **argv)
         argc--;
       }
       else
+      {
         timeitm = LOOPREPEAT;
+      }
       if (both)
         timeit = timeitm;
     }
@@ -4039,11 +4045,17 @@ main(int argc, char **argv)
     {
       char *val = strchr(arg, '=') + 1;
       if (strcmp(val, "always") == 0)
+      {
         colour_setting = COLOUR_ALWAYS;
+      }
       else if (strcmp(val, "never") == 0)
+      {
         colour_setting = COLOUR_NEVER;
+      }
       else if (strcmp(val, "auto") == 0)
+      {
         colour_setting = COLOUR_AUTO;
+      }
       else
       {
         cfprintf(clr_test_error, stderr, "pcre2test: Invalid value for \"%.*s\"\n",
@@ -4267,9 +4279,13 @@ main(int argc, char **argv)
     }
 
     if (rc == PR_SKIP && !INTERACTIVE(infile))
+    {
       skipping = TRUE;
+    }
     else if (rc == PR_ENDIF)
+    {
       skipping_endif = TRUE;
+    }
     else if (rc == PR_ABEND)
     {
       cfprintf(clr_test_error, outfile, "** pcre2test run abandoned\n");

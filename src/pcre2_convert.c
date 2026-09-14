@@ -321,7 +321,9 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
         if (plength == 0)
           return PCRE2_ERROR_END_BACKSLASH;
         if (extended)
+        {
           nextisliteral = TRUE;
+        }
         else
         {
           if (*posix < 255 && strchr(posix_meta_escapes, *posix) != NULL)
@@ -334,7 +336,9 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
             plength--;
           }
           else
+          {
             nextisliteral = TRUE;
+          }
         }
         break;
 
@@ -739,7 +743,9 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
     convert_glob_write_str(out, len);
   }
   else
+  {
     convert_glob_write(out, CHAR_LEFT_SQUARE_BRACKET);
+  }
 
   has_prev_c = FALSE;
   prev_c = 0;
@@ -1079,7 +1085,9 @@ convert_glob(uint32_t options, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf,
           in_atomic = TRUE;
         }
         else
+        {
           convert_glob_print_commit(&out);
+        }
       }
 
       if (no_wildsep)

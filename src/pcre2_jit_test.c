@@ -1069,7 +1069,9 @@ convert_utf8_to_utf16(PCRE2_SPTR8 input, PCRE2_UCHAR16 *output, int *offsetmap, 
       *offsetmap++ = (int)(iptr - (unsigned char *)input);
 
     if (*iptr < 0xc0)
+    {
       c = *iptr++;
+    }
     else if (!(*iptr & 0x20))
     {
       c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
@@ -1156,7 +1158,9 @@ convert_utf8_to_utf32(PCRE2_SPTR8 input, PCRE2_UCHAR32 *output, int *offsetmap, 
       *offsetmap++ = (int)(iptr - (unsigned char *)input);
 
     if (*iptr < 0xc0)
+    {
       c = *iptr++;
+    }
     else if (!(*iptr & 0x20))
     {
       c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
@@ -1358,7 +1362,9 @@ regression_tests(void)
       pcre2_compile_context_free_8(ccontext8);
     }
     else
+    {
       printf("\n8 bit: Cannot allocate compile context\n");
+    }
 #endif
 #ifdef SUPPORT_PCRE2_16
     if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
@@ -1388,7 +1394,9 @@ regression_tests(void)
       pcre2_compile_context_free_16(ccontext16);
     }
     else
+    {
       printf("\n16 bit: Cannot allocate compile context\n");
+    }
 #endif
 #ifdef SUPPORT_PCRE2_32
     if ((current->compile_options & PCRE2_UTF) || (current->start_offset & F_FORCECONV))
@@ -1418,7 +1426,9 @@ regression_tests(void)
       pcre2_compile_context_free_32(ccontext32);
     }
     else
+    {
       printf("\n32 bit: Cannot allocate compile context\n");
+    }
 #endif
 
     counter++;
@@ -1776,6 +1786,7 @@ regression_tests(void)
             return_value8[0] *= 2;
 
           for (i = 0; i < return_value8[0]; ++i)
+          {
             if (ovector8_1[i] != ovector8_2[i])
             {
               printf("\n8 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
@@ -1783,6 +1794,7 @@ regression_tests(void)
                      current->input);
               is_successful = 0;
             }
+          }
         }
 #endif
 
@@ -1801,6 +1813,7 @@ regression_tests(void)
             return_value16[0] *= 2;
 
           for (i = 0; i < return_value16[0]; ++i)
+          {
             if (ovector16_1[i] != ovector16_2[i])
             {
               printf("\n16 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
@@ -1808,6 +1821,7 @@ regression_tests(void)
                      current->input);
               is_successful = 0;
             }
+          }
         }
 #endif
 
@@ -1826,6 +1840,7 @@ regression_tests(void)
             return_value32[0] *= 2;
 
           for (i = 0; i < return_value32[0]; ++i)
+          {
             if (ovector32_1[i] != ovector32_2[i])
             {
               printf("\n32 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n", i,
@@ -1833,6 +1848,7 @@ regression_tests(void)
                      current->input);
               is_successful = 0;
             }
+          }
         }
 #endif
       }
@@ -1958,7 +1974,9 @@ regression_tests(void)
       }
     }
     else
+    {
       successful_row = 0;
+    }
 
     fflush(stdout);
     current++;

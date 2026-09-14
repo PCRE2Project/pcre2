@@ -923,13 +923,17 @@ show_parsed(compile_block *cb)
           /* There's just one escape we might have here that isn't negated in the
           escapes table. */
           if (meta_arg == ESC_g)
+          {
             cc = CHAR_g;
+          }
           else
+          {
             for (cc = ESCAPES_FIRST; cc <= ESCAPES_LAST; cc++)
             {
               if (meta_arg == (uint32_t)(-escapes[cc - ESCAPES_FIRST]))
                 break;
             }
+          }
           if (cc > ESCAPES_LAST)
             cc = CHAR_QUESTION_MARK;
           fprintf(stderr, "META \\%c", cc);
@@ -1429,14 +1433,18 @@ read_number(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, int32_t allow_sign, uint32_t 
     }
 
     if (sign > 0)
+    {
       n += allow_sign;
+    }
     else if (n > (uint32_t)allow_sign)
     {
       *errorcodeptr = ERR15; // Non-existent subpattern
       goto EXIT;
     }
     else
+    {
       n = allow_sign + 1 - n;
+    }
   }
 
   yield = TRUE;
@@ -1523,7 +1531,9 @@ read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp, uint32
       {}
     }
     else if (!had_minimum)
+    {
       return FALSE;
+    }
     while (pp < ptrend && (*pp == CHAR_SPACE || *pp == CHAR_HT))
       pp++;
     if (pp >= ptrend || *pp != CHAR_RIGHT_CURLY_BRACKET)
@@ -1795,7 +1805,9 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
 
     case CHAR_u:
       if (!alt_bsux)
+      {
         *errorcodeptr = ERR37;
+      }
       else
       {
         uint32_t xc;
@@ -1861,7 +1873,9 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
             *errorcodeptr = ERR73;
         }
         else if (c > MAX_NON_UTF_CHAR)
+        {
           *errorcodeptr = ERR77;
+        }
       }
       break;
 
@@ -2090,7 +2104,9 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
             *errorcodeptr = ERR61;
           }
           else
+          {
             escape = -(s + 1); // Indicates a back reference
+          }
           break;
         }
 
@@ -2391,7 +2407,9 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
 
 #else
       if (c == CHAR_QUESTION_MARK)
+      {
         c = (CHAR_BACKSLASH == 188 && CHAR_GRAVE_ACCENT == 74) ? 0x5f : 0xff;
+      }
       else
       {
         for (i = 0; i < 32; i++)
@@ -2400,7 +2418,9 @@ PRIV(check_escape)(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *chptr, int *
             break;
         }
         if (i < 32)
+        {
           c = i;
+        }
         else
         {
           *errorcodeptr = ERR68;
@@ -2601,11 +2621,15 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr, uint16_t
     }
 
     else if (PRIV(strcmp_c8)(name, STRING_script) == 0 || PRIV(strcmp_c8)(name, STRING_sc) == 0)
+    {
       ptscript = PT_SC;
+    }
 
     else if (PRIV(strcmp_c8)(name, STRING_scriptextensions) == 0 ||
              PRIV(strcmp_c8)(name, STRING_scx) == 0)
+    {
       ptscript = PT_SCX;
+    }
 
     else
     {
@@ -2730,11 +2754,15 @@ check_posix_syntax(PCRE2_SPTR ptr, PCRE2_SPTR ptrend, PCRE2_SPTR *endptr)
   for (; ptrend - ptr >= 2; ptr++)
   {
     if (*ptr == CHAR_BACKSLASH && (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET || ptr[1] == CHAR_BACKSLASH))
+    {
       ptr++;
+    }
 
     else if ((*ptr == CHAR_LEFT_SQUARE_BRACKET && ptr[1] == terminator) ||
              *ptr == CHAR_RIGHT_SQUARE_BRACKET)
+    {
       return FALSE;
+    }
 
     else if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
     {
@@ -2991,14 +3019,20 @@ parse_capture_list(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t *pa
       namelen = (uint32_t)i;
     }
     else if (*errorcodeptr != 0)
+    {
       goto FAILED; // Number too big
+    }
     else
     {
       /* Handle 'name' or <name> cases. */
       if (*ptr == CHAR_LESS_THAN_SIGN)
+      {
         terminator = CHAR_GREATER_THAN_SIGN;
+      }
       else if (*ptr == CHAR_APOSTROPHE)
+      {
         terminator = CHAR_APOSTROPHE;
+      }
       else
       {
         *errorcodeptr = ERR117;
@@ -3084,7 +3118,9 @@ manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout, uint3
     previous_callout[2] = (uint32_t)(ptr - cb->start_pattern - (PCRE2_SIZE)previous_callout[1]);
 
   if (!auto_callout)
+  {
     previous_callout = NULL;
+  }
   else
   {
     if (previous_callout == NULL || previous_callout != parsed_pattern - 4 ||
@@ -3623,7 +3659,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             goto FAILED;
         }
         else
+        {
           escape = 0; // Treat all as literal
+        }
 
         switch (escape)
         {
@@ -3847,7 +3885,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           goto FAILED;
         ptr = tempptr;
         if (ptr >= ptrend)
+        {
           c = CHAR_BACKSLASH;
+        }
         else
         {
           GETCHARINCTEST(c, ptr); // Get character value, increment pointer
@@ -4168,7 +4208,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         }
 
         if ((options & PCRE2_UCP) == 0)
+        {
           *parsed_pattern++ = META_ESCAPE + ESC_w;
+        }
         else
         {
           *parsed_pattern++ = META_ESCAPE + ESC_p;
@@ -4431,7 +4473,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
 
             GETCHARINCTEST(c, ptr);
             if (new_class_mode_state == CLASS_MODE_PERL_EXT)
+            {
               break;
+            }
             else if (c == CHAR_BACKSLASH)
             {
               if (ptr < ptrend && *ptr == CHAR_E)
@@ -4445,11 +4489,17 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             else if ((c == CHAR_SPACE || c == CHAR_HT) && // Note: just these two
                      ((options & PCRE2_EXTENDED_MORE) != 0 ||
                       new_class_mode_state >= CLASS_MODE_PERL_EXT))
+            {
               continue;
+            }
             else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
+            {
               negate_class = TRUE;
+            }
             else
+            {
               break;
+            }
           }
 
           /* Now the real contents of the class; c has the first "real" character.
@@ -4714,7 +4764,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               goto FAILED;
             ptr = tempptr;
             if (ptr >= ptrend)
+            {
               c = CHAR_BACKSLASH;
+            }
             else
             {
               GETCHARINCTEST(c, ptr); // Get character value, increment pointer
@@ -4906,7 +4958,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           if (class_range_state == RANGE_STARTED)
           {
             if (c == parsed_pattern[-2]) // Optimize one-char range
+            {
               parsed_pattern--;
+            }
             else if (parsed_pattern[-2] > c) // Check range is in order
             {
               errorcode = ERR8;
@@ -4985,7 +5039,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             *parsed_pattern++ = META_CAPTURE | cb->bracount;
           }
           else
+          {
             *parsed_pattern++ = META_NOCAPTURE;
+          }
         }
 
         /* Do nothing for (* followed by end of pattern or ) so it gives a "bad
@@ -5098,7 +5154,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             {
               *parsed_pattern++ = META_ATOMIC;
               if (top_nest == NULL)
+              {
                 top_nest = (nest_save *)(cb->start_workspace);
+              }
               else if (++top_nest >= end_nests)
               {
                 errorcode = ERR84;
@@ -5241,7 +5299,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
 
         nest_depth++;
         if (top_nest == NULL)
+        {
           top_nest = (nest_save *)(cb->start_workspace);
+        }
         else if (++top_nest >= end_nests)
         {
           errorcode = ERR84;
@@ -5417,7 +5477,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
               top_nest->nest_depth = nest_depth;
           }
           else
+          {
             *parsed_pattern++ = META_NOCAPTURE;
+          }
 
           /* If nothing changed, no need to record. */
 
@@ -5736,7 +5798,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           *parsed_pattern++ = i;
         }
         else if (errorcode != 0)
+        {
           goto FAILED; // Number too big
+        }
 
         /* No number found. Handle the special case (?(VERSION[>]=n.m)... */
 
@@ -5811,9 +5875,13 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
             ptr++;
           }
           else if (*ptr == CHAR_LESS_THAN_SIGN)
+          {
             terminator = CHAR_GREATER_THAN_SIGN;
+          }
           else if (*ptr == CHAR_APOSTROPHE)
+          {
             terminator = CHAR_APOSTROPHE;
+          }
           else
           {
             terminator = CHAR_RIGHT_PARENTHESIS;
@@ -5838,7 +5906,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           else if (terminator == CHAR_RIGHT_PARENTHESIS)
           {
             if (namelen == 6 && PRIV(strncmp_c8)(name, STRING_DEFINE, 6) == 0)
+            {
               *parsed_pattern = META_COND_DEFINE;
+            }
             else
             {
               for (i = 1; i < (int)namelen; i++)
@@ -5942,7 +6012,9 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         if (prev_expect_cond_assert > 0)
         {
           if (top_nest == NULL)
+          {
             top_nest = (nest_save *)(cb->start_workspace);
+          }
           else if (++top_nest >= end_nests)
           {
             errorcode = ERR84;
@@ -6549,7 +6621,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
         *code++ = OP_CIRCM;
       }
       else
+      {
         *code++ = OP_CIRC;
+      }
       break;
 
     case META_DOLLAR:
@@ -6585,7 +6659,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
     case META_CLASS_EMPTY_NOT:
       matched_char = TRUE;
       if (meta == META_CLASS_EMPTY_NOT)
+      {
         *code++ = OP_ALLANY;
+      }
       else
       {
         *code++ = OP_CLASS;
@@ -6852,7 +6928,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           mcbuffer[0] = meta;
         }
         if (lengthptr != NULL)
+        {
           *lengthptr += mclength;
+        }
         else
         {
           memcpy(code, mcbuffer, CU2BYTES(mclength));
@@ -7381,7 +7459,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             groupsetfirstcu = TRUE;
           }
           else
+          {
             firstcuflags = REQ_NONE;
+          }
           zerofirstcuflags = REQ_NONE;
         }
 
@@ -7572,7 +7652,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             length--;
           }
           else
+          {
             *callout_string++ = *pp++;
+          }
         }
         *callout_string++ = CHAR_NUL;
 
@@ -7743,11 +7825,17 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           goto END_REPEAT;
 
         if (repeat_min == 0 && repeat_max == REPEAT_UNLIMITED)
+        {
           *code++ = OP_CRSTAR + repeat_type;
+        }
         else if (repeat_min == 1 && repeat_max == REPEAT_UNLIMITED)
+        {
           *code++ = OP_CRPLUS + repeat_type;
+        }
         else if (repeat_min == 0 && repeat_max == 1)
+        {
           *code++ = OP_CRQUERY + repeat_type;
+        }
         else
         {
           *code++ = OP_CRRANGE + repeat_type;
@@ -7801,12 +7889,14 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             *lengthptr += delta;
           }
           else
+          {
             for (int i = 0; i < replicate; i++)
             {
               memcpy(code, previous, CU2BYTES(length_prevgroup));
               previous = code;
               code += length_prevgroup;
             }
+          }
 
           /* If the number of repeats is fixed, we are done. Otherwise, adjust
           the counts and fall through. */
@@ -8239,9 +8329,13 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           if (repeat_min == 0)
           {
             if (repeat_max == REPEAT_UNLIMITED)
+            {
               *code++ = OP_STAR + repeat_type;
+            }
             else if (repeat_max == 1)
+            {
               *code++ = OP_QUERY + repeat_type;
+            }
             else
             {
               *code++ = OP_UPTO + repeat_type;
@@ -8257,7 +8351,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           else if (repeat_min == 1)
           {
             if (repeat_max == REPEAT_UNLIMITED)
+            {
               *code++ = OP_PLUS + repeat_type;
+            }
             else
             {
               code = oldcode; // Leave previous item in place
@@ -8301,7 +8397,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
               /* Now set up the following opcode */
 
               if (repeat_max == REPEAT_UNLIMITED)
+              {
                 *code++ = OP_STAR + repeat_type;
+              }
               else
               {
                 repeat_max -= repeat_min;
@@ -8658,7 +8756,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
             code += 32 / sizeof(PCRE2_UCHAR);
           }
           else
+          {
             *code++ = OP_ALLANY;
+          }
         }
         else
         {
@@ -8841,7 +8941,9 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
           }
         }
         else
+        {
           firstcuflags = reqcuflags = REQ_NONE;
+        }
       }
 
       /* firstcu was previously set; we can set reqcu only if the length is
@@ -8974,7 +9076,9 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, uint32
     pptr += SIZEOFFSET;
   }
   else
+  {
     lookbehindlength = lookbehindminlength = 0;
+  }
 
   /* If this is a capturing subpattern, add to the chain of open capturing items
   so that we can detect them if (*ACCEPT) is encountered. Note that only OP_CBRA
@@ -9094,7 +9198,9 @@ compile_regex(uint32_t options, uint32_t xoptions, PCRE2_UCHAR **codeptr, uint32
         /* Now ensure that the reqcus match */
 
         if (((reqcuflags & ~REQ_VARY) != (branchreqcuflags & ~REQ_VARY)) || reqcu != branchreqcu)
+        {
           reqcuflags = REQ_NONE;
+        }
         else
         {
           reqcu = branchreqcu;
@@ -9681,7 +9787,9 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
         cflags = dflags;
       }
       else if (c != d || cflags != dflags)
+      {
         return 0;
+      }
       break;
 
     case OP_EXACT:
@@ -9700,7 +9808,9 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
         cflags = 0;
       }
       else if (c != scode[1])
+      {
         return 0;
+      }
       break;
 
     case OP_EXACTI:
@@ -9734,7 +9844,9 @@ find_firstassertedcu(PCRE2_SPTR code, uint32_t *flags, uint32_t inassert)
         cflags = REQ_CASELESS;
       }
       else if (c != scode[1])
+      {
         return 0;
+      }
       break;
     }
 
@@ -10499,7 +10611,9 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
     }
   }
   else
+  {
     gbptr[1] = LOOKBEHIND_MAX;
+  }
 
   return TRUE;
 }
@@ -10792,7 +10906,9 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
   if (pattern == NULL)
   {
     if (patlen == 0)
+    {
       pattern = null_str;
+    }
     else
     {
       *errorptr = ERR16;
@@ -11502,7 +11618,9 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
 
       groupnumber = (int)GET(rcode, 1);
       if (groupnumber == 0)
+      {
         rgroup = codestart;
+      }
       else
       {
         PCRE2_SPTR search_from = codestart;

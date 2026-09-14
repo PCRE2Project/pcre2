@@ -325,7 +325,9 @@ pcre2_substring_length_bynumber(pcre2_match_data *match_data, uint32_t stringnum
     count = 0;
   }
   else if (count < 0)
+  {
     return count; // Match failed
+  }
 
   if (match_data->matchedby != PCRE2_MATCHEDBY_DFA_INTERPRETER)
   {

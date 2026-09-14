@@ -808,7 +808,9 @@ main(int argc, char **argv)
       printf("%.*s\n", (int)readsize, argv[i] + 1);
       buffer = (unsigned char *)malloc(readsize);
       if (buffer == NULL)
+      {
         printf("** Failed to allocate %lu bytes of memory\n", readsize);
+      }
       else
       {
         memcpy(buffer, argv[i] + 1, readsize);
@@ -845,7 +847,9 @@ main(int argc, char **argv)
     fclose(f);
 
     if (readsize != filelen)
+    {
       printf("** File size is %lu but fread() returned %lu\n", filelen, readsize);
+    }
     else
     {
       printf("Length = %lu\n", filelen);

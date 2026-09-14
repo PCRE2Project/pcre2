@@ -451,7 +451,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -921,7 +923,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
   if (char1a == char1b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char1a));
+  }
   else
   {
     bit1 = char1a ^ char1b;
@@ -947,7 +951,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
     sljit_emit_simd_lane_mov(compiler, value, SLJIT_VR4, 0, TMP2, 0);
 
   if (char2a == char2b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, character_to_int32(char2a));
+  }
   else
   {
     bit2 = char2a ^ char2b;
@@ -1334,7 +1340,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -1990,7 +1998,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -2626,7 +2636,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -2795,7 +2807,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
 
   if (char1a == char1b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char1a);
+  }
   else
   {
     bit1 = char1a ^ char1b;
@@ -2824,7 +2838,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   }
 
   if (char2a == char2b)
+  {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, char2a);
+  }
   else
   {
     bit2 = char2a ^ char2b;
@@ -3016,7 +3032,9 @@ fast_forward_char_pair_alpha_compare(struct sljit_compiler *compiler,
       OP2(SLJIT_XOR, dst, 0, dst, 0, cmp1, 0);
     }
     else
+    {
       OP2(SLJIT_XOR, dst, 0, data, 0, cmp1, 0);
+    }
 
     /* CMPBGE $31, dst, dst — bits set where XOR byte is zero (match). */
     emit_alpha_cmpbge(compiler, 31, dst_ind, dst_ind);
@@ -3246,7 +3264,9 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     SELECT(SLJIT_GREATER, STR_PTR, STR_END, 0, STR_PTR);
   }
   else
+  {
     add_jump(compiler, &common->failed_match, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -3413,7 +3433,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
 
   /* Set up replicated character constants. */
   if (char1a == char1b)
+  {
     OP1(SLJIT_MOV, SLJIT_R5, 0, SLJIT_IMM, replicate_char_alpha(char1a));
+  }
   else
   {
     bit1 = char1a ^ char1b;
@@ -3433,7 +3455,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   }
 
   if (char2a == char2b)
+  {
     OP1(SLJIT_MOV, SLJIT_R7, 0, SLJIT_IMM, replicate_char_alpha(char2a));
+  }
   else
   {
     bit2 = char2a ^ char2b;
@@ -3699,7 +3723,9 @@ fast_forward_start_bits_simd(compiler_common *common, const sljit_u8 *start_bits
     high_reg[k] = 0;
 
     if (low[k] == high[k])
+    {
       low_reg[k] = SLJIT_R(next++);
+    }
     else
     {
       if (low[k] != 0)

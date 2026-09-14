@@ -100,7 +100,9 @@ find_text_end(const pcre2_code *code, PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOO
     }
 
     else if (*ptr == CHAR_COLON && !last && nestlevel == 0)
+    {
       goto EXIT;
+    }
 
     else if (*ptr == CHAR_DOLLAR_SIGN)
     {
@@ -988,8 +990,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       use_existing_match = FALSE;
     }
     else
+    {
       rc = pcre2_match(code, subject, length, start_offset, options | goptions, match_data,
                        mcontext);
+    }
 
 #ifdef SUPPORT_UNICODE
     if (utf)

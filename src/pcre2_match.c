@@ -394,7 +394,9 @@ match_ref(PCRE2_SIZE offset, BOOL caseless, int caseopts, heapframe *F, match_bl
       return 0; // Match
     }
     else
+    {
       return -1; // No match
+    }
   }
 
   /* Separate the caseless and UTF cases for speed. */
@@ -566,7 +568,9 @@ recurse_update_offsets(heapframe *F, heapframe *P)
       dst[1] = src[1];
     }
     else if (diff >= 4)
+    {
       memcpy(dst, src, diff * sizeof(PCRE2_SIZE));
+    }
 
     /* Skip the unmodified entry. */
     diff += 2;
@@ -582,7 +586,9 @@ recurse_update_offsets(heapframe *F, heapframe *P)
     dst[1] = src[1];
   }
   else if (diff >= 4)
+  {
     memcpy(dst, src, diff * sizeof(PCRE2_SIZE));
+  }
 
   Fecode = ecode;
   Foffset_top = (offset <= P->offset_top) ? P->offset_top : (offset - 2);
@@ -793,13 +799,17 @@ MATCH_RECURSE:
       newsize = PCRE2_SIZE_MAX - 1;
     }
     else
+    {
       newsize = match_data->heapframes_size * 2;
+    }
 
     if (newsize / 1024 >= mb->heap_limit)
     {
       PCRE2_SIZE old_size = match_data->heapframes_size / 1024;
       if (mb->heap_limit <= old_size)
+      {
         return PCRE2_ERROR_HEAPLIMIT;
+      }
       else
       {
         PCRE2_SIZE max_delta = 1024 * (mb->heap_limit - old_size);
@@ -1455,10 +1465,14 @@ NEW_FRAME:
           for (i = 1; i <= Lmin; i++)
           {
             if (Feptr <= mb->end_subject - length && memcmp(Feptr, Lcharptr, CU2BYTES(length)) == 0)
+            {
               Feptr += length;
+            }
             else if (Loclength > 0 && Feptr <= mb->end_subject - Loclength &&
                      memcmp(Feptr, Loccu, CU2BYTES(Loclength)) == 0)
+            {
               Feptr += Loclength;
+            }
             else
             {
               CHECK_PARTIAL();
@@ -1480,10 +1494,14 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               if (Feptr <= mb->end_subject - Llength &&
                   memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0)
+              {
                 Feptr += Llength;
+              }
               else if (Loclength > 0 && Feptr <= mb->end_subject - Loclength &&
                        memcmp(Feptr, Loccu, CU2BYTES(Loclength)) == 0)
+              {
                 Feptr += Loclength;
+              }
               else
               {
                 CHECK_PARTIAL();
@@ -1499,10 +1517,14 @@ NEW_FRAME:
             {
               if (Feptr <= mb->end_subject - Llength &&
                   memcmp(Feptr, Lcharptr, CU2BYTES(Llength)) == 0)
+              {
                 Feptr += Llength;
+              }
               else if (Loclength > 0 && Feptr <= mb->end_subject - Loclength &&
                        memcmp(Feptr, Loccu, CU2BYTES(Loclength)) == 0)
+              {
                 Feptr += Loclength;
+              }
               else
               {
                 CHECK_PARTIAL();
@@ -1515,6 +1537,7 @@ NEW_FRAME:
             go too far. */
 
             if (reptype != REPTYPE_POS)
+            {
               for (;;)
               {
                 if (Feptr <= Lstart_eptr)
@@ -1525,6 +1548,7 @@ NEW_FRAME:
                 Feptr--;
                 BACKCHAR(Feptr);
               }
+            }
           }
           break; // End of repeated wide character handling
         }
@@ -1619,6 +1643,7 @@ NEW_FRAME:
             Feptr++;
           }
           if (reptype != REPTYPE_POS)
+          {
             for (;;)
             {
               if (Feptr == Lstart_eptr)
@@ -1628,6 +1653,7 @@ NEW_FRAME:
               if (rrc != MATCH_NOMATCH)
                 RRETURN(rrc);
             }
+          }
         }
       }
 
@@ -1685,6 +1711,7 @@ NEW_FRAME:
           }
 
           if (reptype != REPTYPE_POS)
+          {
             for (;;)
             {
               if (Feptr <= Lstart_eptr)
@@ -1694,6 +1721,7 @@ NEW_FRAME:
               if (rrc != MATCH_NOMATCH)
                 RRETURN(rrc);
             }
+          }
         }
       }
       break;
@@ -1931,6 +1959,7 @@ NEW_FRAME:
             go too far. */
 
             if (reptype != REPTYPE_POS)
+            {
               for (;;)
               {
                 if (Feptr <= Lstart_eptr)
@@ -1941,6 +1970,7 @@ NEW_FRAME:
                 Feptr--;
                 BACKCHAR(Feptr);
               }
+            }
           }
           else
 #endif /* SUPPORT_UNICODE */
@@ -1959,6 +1989,7 @@ NEW_FRAME:
               Feptr++;
             }
             if (reptype != REPTYPE_POS)
+            {
               for (;;)
               {
                 if (Feptr == Lstart_eptr)
@@ -1968,6 +1999,7 @@ NEW_FRAME:
                   RRETURN(rrc);
                 Feptr--;
               }
+            }
           }
         }
       }
@@ -2086,6 +2118,7 @@ NEW_FRAME:
             go too far. */
 
             if (reptype != REPTYPE_POS)
+            {
               for (;;)
               {
                 if (Feptr <= Lstart_eptr)
@@ -2096,6 +2129,7 @@ NEW_FRAME:
                 Feptr--;
                 BACKCHAR(Feptr);
               }
+            }
           }
           else
 #endif
@@ -2113,6 +2147,7 @@ NEW_FRAME:
               Feptr++;
             }
             if (reptype != REPTYPE_POS)
+            {
               for (;;)
               {
                 if (Feptr == Lstart_eptr)
@@ -2122,6 +2157,7 @@ NEW_FRAME:
                   RRETURN(rrc);
                 Feptr--;
               }
+            }
           }
         }
       }
@@ -2209,7 +2245,9 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
             }
             else if ((Lbyte_map[fc / 8] & (1u << (fc & 7))) == 0)
+            {
               RRETURN(MATCH_NOMATCH);
+            }
           }
         }
         else
@@ -2269,7 +2307,9 @@ NEW_FRAME:
                   RRETURN(MATCH_NOMATCH);
               }
               else if ((Lbyte_map[fc / 8] & (1u << (fc & 7))) == 0)
+              {
                 RRETURN(MATCH_NOMATCH);
+              }
             }
           }
           else
@@ -2328,7 +2368,9 @@ NEW_FRAME:
                   break;
               }
               else if ((Lbyte_map[fc / 8] & (1u << (fc & 7))) == 0)
+              {
                 break;
+              }
               Feptr += len;
             }
 
@@ -2795,7 +2837,9 @@ NEW_FRAME:
           SCHECK_PARTIAL();
         }
         else if (*Feptr == CHAR_LF)
+        {
           Feptr++;
+        }
         break;
 
       case CHAR_LF:
@@ -2989,7 +3033,9 @@ NEW_FRAME:
             if (fc < *cp)
             {
               if (notmatch)
+              {
                 break;
+              }
               else
               {
                 RRETURN(MATCH_NOMATCH);
@@ -3002,7 +3048,9 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
               else
+              {
                 break;
+              }
             }
           }
           break;
@@ -3137,7 +3185,9 @@ NEW_FRAME:
         Lpropvalue = *Fecode++;
       }
       else
+      {
         proptype = -1;
+      }
 #endif
 
       /* First, ensure the minimum number of matches are present. Use inline
@@ -4931,7 +4981,9 @@ NEW_FRAME:
 
             Feptr--;
             if (!utf)
+            {
               fc = *Feptr;
+            }
             else
             {
               BACKCHAR(Feptr);
@@ -4945,7 +4997,9 @@ NEW_FRAME:
                 break; // At start of char run
               fptr = Feptr - 1;
               if (!utf)
+              {
                 fc = *fptr;
+              }
               else
               {
                 BACKCHAR(fptr);
@@ -5022,7 +5076,9 @@ NEW_FRAME:
               SCHECK_PARTIAL();
             }
             else
+            {
               Feptr += fc;
+            }
             break;
 
           case OP_ANYNL:
@@ -5272,7 +5328,9 @@ NEW_FRAME:
               SCHECK_PARTIAL();
             }
             else
+            {
               Feptr += fc;
+            }
             break;
 
           case OP_ANYNL:
@@ -6242,7 +6300,9 @@ NEW_FRAME:
             ecode += 1 + 2 * IMM2_SIZE;
           }
           else
+          {
             break;
+          }
         }
       }
 
@@ -6739,7 +6799,9 @@ NEW_FRAME:
           Foffset_top = P->offset_top;
         }
         else
+        {
           recurse_update_offsets(F, P);
+        }
 
         Fcapture_last = P->capture_last;
         Fcurrent_recurse = P->current_recurse;
@@ -6856,7 +6918,9 @@ NEW_FRAME:
             Foffset_top = P->offset_top;
           }
           else
+          {
             recurse_update_offsets(F, P);
+          }
 
           Fcapture_last = P->capture_last;
           Fcurrent_recurse = P->current_recurse;
@@ -7061,7 +7125,9 @@ NEW_FRAME:
     case OP_NOT_UCP_WORD_BOUNDARY:
     case OP_UCP_WORD_BOUNDARY:
       if (Feptr == mb->check_subject)
+      {
         prev_is_word = FALSE;
+      }
       else
       {
         PCRE2_SPTR lastptr = Feptr - 1;
@@ -7587,7 +7653,9 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
         memcpy((void *)match_data->subject, subject, CU2BYTES(length));
       }
       else
+      {
         match_data->subject = NULL;
+      }
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
     else
@@ -7748,7 +7816,9 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
     mb->memctl = re->memctl;
   }
   else
+  {
     mb->memctl = mcontext->memctl;
+  }
 
   anchored = ((re->overall_options | options) & PCRE2_ANCHORED) != 0;
   firstline = !anchored && (re->overall_options & PCRE2_FIRSTLINE) != 0;
@@ -8090,7 +8160,9 @@ FRAGMENT_RESTART:
             }
 
             else
+            {
               pp2 = (memchr_found_first_cu2 == end_subject) ? NULL : memchr_found_first_cu2;
+            }
 
             /* Set the start to the end of the subject if neither case was found.
             Otherwise, use the earlier found point. */
@@ -8558,11 +8630,15 @@ ENDLOOP:
         memcpy((void *)match_data->subject, subject, CU2BYTES(length));
       }
       else
+      {
         match_data->subject = NULL;
+      }
       match_data->flags |= PCRE2_MD_COPIED_SUBJECT;
     }
     else
+    {
       match_data->subject = original_subject;
+    }
 
     return match_data->rc;
   }
