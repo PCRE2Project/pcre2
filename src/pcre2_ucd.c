@@ -69,11 +69,11 @@ the tables when not needed. But don't leave a totally empty module because some
 compilers barf at that. Instead, just supply some small dummy tables. */
 
 #ifndef SUPPORT_UNICODE
-const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0}};
-const uint16_t PRIV(ucd_stage1)[] = {0};
-const uint16_t PRIV(ucd_stage2)[] = {0};
-const uint32_t PRIV(ucd_caseless_sets)[] = {0};
-const uint32_t PRIV(ucd_nocase_ranges)[] = {0};
+const ucd_record PRIV(ucd_records)[] = { { 0, 0, 0, 0, 0, 0, 0 } };
+const uint16_t PRIV(ucd_stage1)[] = { 0 };
+const uint16_t PRIV(ucd_stage2)[] = { 0 };
+const uint32_t PRIV(ucd_caseless_sets)[] = { 0 };
+const uint32_t PRIV(ucd_nocase_ranges)[] = { 0 };
 const uint32_t PRIV(ucd_nocase_ranges_size) = 0;
 #else
 
@@ -100,20 +100,21 @@ uint16_t property_6;
 than 0x10ffff may be encountered. For these we set up a special record. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
-const ucd_record PRIV(dummy_ucd_record)[] = {{
-  ucp_Unknown,    /* script */
-  ucp_Cn,         /* type unassigned */
-  ucp_gbOther,    /* grapheme break property */
-  0,              /* case set */
-  0,              /* other case */
-  0 | (ucp_bidiL << UCD_BIDICLASS_SHIFT), /* script extension and bidi class */
-  0,              /* bool properties offset */
-  }};
+const ucd_record PRIV(dummy_ucd_record)[] = { {
+    ucp_Unknown,                            /* script */
+    ucp_Cn,                                 /* type unassigned */
+    ucp_gbOther,                            /* grapheme break property */
+    0,                                      /* case set */
+    0,                                      /* other case */
+    0 | (ucp_bidiL << UCD_BIDICLASS_SHIFT), /* script extension and bidi class */
+    0,                                      /* bool properties offset */
+} };
 #endif
 
 /* This table contains lists of characters that are caseless sets of
 more than one character. Each list is terminated by NOTACHAR. */
 
+// clang-format off
 const uint32_t PRIV(ucd_caseless_sets)[] = {
   NOTACHAR,
   0x0053,  0x0073,  0x017f,  NOTACHAR,
@@ -146,6 +147,7 @@ const uint32_t PRIV(ucd_caseless_sets)[] = {
   0x0069,  0x0130,  NOTACHAR,
   0x0049,  0x0131,  NOTACHAR,
 };
+// clang-format on
 
 /* This is the index, within ucd_caseless_sets, of the additional
 Turkish case-equivalences. The dotted I ones are this offset; the
@@ -161,6 +163,7 @@ the large main UCD tables. */
 /* This table contains character ranges, where the characters in the range have
 no other case. Both start and end values are excluded from the range. */
 
+// clang-format off
 const uint32_t PRIV(ucd_nocase_ranges)[] = {
   0x0000, 0x0041, /* 64 */
   0x007a, 0x00b5, /* 58 */
@@ -205,6 +208,7 @@ const uint32_t PRIV(ucd_nocase_ranges)[] = {
   0x1e943, 0x110000, /* 988860 */
   0xffffffff, 0xffffffff /* terminator */
 };
+// clang-format on
 
 /* Total: 1110881 characters. */
 const uint32_t PRIV(ucd_nocase_ranges_size) = 82;
@@ -213,6 +217,7 @@ const uint32_t PRIV(ucd_nocase_ranges_size) = 82;
 decimal digits. It is used to ensure that all the digits in a script run come
 from the same set. */
 
+// clang-format off
 const uint32_t PRIV(ucd_digit_sets)[] = {
   77,  /* Number of subsequent values */
   0x00039, 0x00669, 0x006f9, 0x007c9, 0x0096f, 0x009ef, 0x00a6f, 0x00aef,
@@ -226,11 +231,13 @@ const uint32_t PRIV(ucd_digit_sets)[] = {
   0x16d79, 0x1ccf9, 0x1d7d7, 0x1d7e1, 0x1d7eb, 0x1d7f5, 0x1d7ff, 0x1e149,
   0x1e2f9, 0x1e4f9, 0x1e5fa, 0x1e959, 0x1fbf9,
 };
+// clang-format on
 
 /* This vector is a list of script bitsets for the Script Extension property.
 The number of 32-bit words in each bitset is #defined in pcre2_ucp.h as
 ucd_script_sets_item_size. */
 
+// clang-format off
 const uint32_t PRIV(ucd_script_sets)[] = {
  0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u,
  0x40200003u, 0x00381901u, 0x00200246u, 0x00000000u,
@@ -352,11 +359,13 @@ const uint32_t PRIV(ucd_script_sets)[] = {
  0x00000020u, 0x00000800u, 0x00000000u, 0x00000000u,
  0x00000000u, 0x00000000u, 0x08000080u, 0x00000000u,
 };
+// clang-format on
 
 /* This vector is a list of bitsets for Boolean properties. The number of
 32_bit words in each bitset is #defined as ucd_boolprop_sets_item_size in
 pcre2_ucp.h. */
 
+// clang-format off
 const uint32_t PRIV(ucd_boolprop_sets)[] = {
  0x00000000u, 0x00000000u,
  0x00000001u, 0x00000000u,
@@ -550,6 +559,7 @@ const uint32_t PRIV(ucd_boolprop_sets)[] = {
  0x00b30000u, 0x00000000u,
  0x01022020u, 0x00000008u,
 };
+// clang-format on
 
 /* These are the main two-stage UCD tables. The fields in each record are:
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
@@ -557,6 +567,7 @@ offset to multichar other cases or zero (8 bits), offset to other case or zero
 (32 bits, signed), bidi class (5 bits) and script extension (11 bits) packed
 into a 16-bit field, and offset in binary properties table (16 bits). */
 
+// clang-format off
 const ucd_record PRIV(ucd_records)[] = { /* 18756 bytes, record size 12 */
   {   100,      0,      2,      0,      0,   6144,      2, }, /*   0 */
   {   100,      0,      2,      0,      0,  43008,      4, }, /*   1 */
@@ -2122,7 +2133,9 @@ const ucd_record PRIV(ucd_records)[] = { /* 18756 bytes, record size 12 */
   {   100,     26,     14,      0,      0,  28672,    378, }, /* 1561 */
   {   100,      1,      3,      0,      0,   6144,    380, }, /* 1562 */
 };
+// clang-format on
 
+// clang-format off
 const uint16_t PRIV(ucd_stage1)[] = { /* 17408 bytes */
   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, /* U+0000 */
  16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, /* U+0800 */
@@ -2669,7 +2682,9 @@ const uint16_t PRIV(ucd_stage1)[] = { /* 17408 bytes */
 128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128, /* U+10F000 */
 128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,313, /* U+10F800 */
 };
+// clang-format on
 
+// clang-format off
 const uint16_t PRIV(ucd_stage2)[] = { /* 80384 bytes, block = 128 */
 
 /* block 0 */
@@ -5812,12 +5827,13 @@ const uint16_t PRIV(ucd_stage2)[] = { /* 80384 bytes, block = 128 */
 1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,
 1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1031,1039,1039,
 };
+// clang-format on
 
 #if UCD_BLOCK_SIZE != 128
 #error Please correct UCD_BLOCK_SIZE in pcre2_internal.h
 #endif
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
-#endif  /* PCRE2_PCRE2TEST */
+#endif /* PCRE2_PCRE2TEST */
 
 /* End of pcre2_ucd.c */

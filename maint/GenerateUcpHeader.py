@@ -51,7 +51,7 @@ f.write("};\n\n")
 
 f.write("/* These are the particular character categories. */\n\nenum {\n")
 for i in range(0, len(category_names), 2):
-  f.write("  ucp_%s,    /* %s */\n" % (category_names[i], category_names[i+1]))
+  f.write("  ucp_%s, /* %s */\n" % (category_names[i], category_names[i+1]))
 f.write("};\n\n")
 
 f.write("/* These are Boolean properties. */\n\nenum {\n")
@@ -66,7 +66,7 @@ f.write("#define ucd_boolprop_sets_item_size %d\n\n" % bool_props_list_item_size
 
 f.write("/* These are the bidi class values. */\n\nenum {\n")
 for i in range(0, len(bidi_classes), 2):
-  sp = ' ' * (4 - len(bidi_classes[i]))
+  sp = ' ' * (3 - len(bidi_classes[i]))
   f.write("  ucp_bidi%s,%s /* %s */\n" % (bidi_classes[i], sp, bidi_classes[i+1]))
 f.write("};\n\n")
 
@@ -90,7 +90,7 @@ f.write("  ucp_Script_Count\n};\n\n")
 f.write("/* Size of entries in ucd_script_sets[] */\n\n")
 f.write("#define ucd_script_sets_item_size %d\n\n" % script_list_item_size)
 
-f.write("#endif  /* PCRE2_UCP_H_IDEMPOTENT_GUARD */\n\n")
+f.write("#endif /* PCRE2_UCP_H_IDEMPOTENT_GUARD */\n\n")
 f.write("/* End of pcre2_ucp.h */\n")
 
 f.close()

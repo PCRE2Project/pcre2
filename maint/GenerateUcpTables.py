@@ -153,6 +153,7 @@ the "loose matching" rules that Unicode advises and Perl uses. */
 # We have to use STR_ macros to define the strings so that it all works in
 # UTF-8 mode on EBCDIC platforms.
 
+f.write('// clang-format off\n')
 for utt in utt_table:
   f.write('#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')))
   for c in utt[0]:
@@ -161,19 +162,23 @@ for utt in utt_table:
     else:
       f.write(' STR_%s' % c);
   f.write(' "\\0"\n')
+f.write('// clang-format on\n\n')
 
 # Output the long string of concatenated names
 
-f.write('\nconst char PRIV(utt_names)[] =\n')
+f.write('// clang-format off\n')
+f.write('const char PRIV(utt_names)[] =\n')
 last = ''
 for utt in utt_table:
   if utt == utt_table[-1]:
     last = ';'
   f.write('  STRING_%s0%s\n' % (utt[0].replace('&', '_AMPERSAND'), last))
+f.write('// clang-format on\n\n')
 
 # Output the property type table
 
-f.write('\nconst ucp_type_table PRIV(utt)[] = {\n')
+f.write('// clang-format off\n')
+f.write('const ucp_type_table PRIV(utt)[] = {\n')
 offset = 0
 last = ','
 for utt in utt_table:
@@ -186,7 +191,8 @@ for utt in utt_table:
     last = ''
   f.write('  { %3d, %s, %s }%s\n' % (offset, utt[2], value, last))
   offset += len(utt[0]) + 1
-f.write('};\n\n')
+f.write('};\n')
+f.write('// clang-format on\n\n')
 
 # Ending text
 

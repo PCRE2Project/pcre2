@@ -402,6 +402,7 @@ def write_table(table, table_name, block_size = None):
   type, size = get_type_size(table)
   ELEMS_PER_LINE = 16
 
+  f.write("// clang-format off\n")
   s = "const %s %s[] = { /* %d bytes" % (type, table_name, size * len(table))
   if block_size:
     s += ", block = %d" % block_size
@@ -422,7 +423,8 @@ def write_table(table, table_name, block_size = None):
       fmt = fmt * int(block_size / ELEMS_PER_LINE)
     for i in range(0, len(table), block_size):
       f.write(("\n/* block %d */\n" + fmt) % ((i / block_size,) + table[i:i+block_size]))
-  f.write("};\n\n")
+  f.write("};\n")
+  f.write("// clang-format on\n\n")
 
 
 # Extract the unique combinations of properties into records
@@ -463,13 +465,15 @@ def get_record_size_struct(records):
 # Write records
 
 def write_records(records, record_size):
+  f.write('// clang-format off\n')
   f.write('const ucd_record PRIV(ucd_records)[] = { ' + \
     '/* %d bytes, record size %d */\n' % (len(records) * record_size, record_size))
   records = list(zip(list(records.keys()), list(records.values())))
   records.sort(key = lambda x: x[1])
   for i, record in enumerate(records):
     f.write(('  {' + '%6d, ' * len(record[0]) + '}, /* %3d */\n') % (record[0] + (i,)))
-  f.write('};\n\n')
+  f.write('};\n')
+  f.write('// clang-format on\n\n')
 
 
 # Write a bit set
@@ -485,7 +489,7 @@ def write_bitsets(list, item_size):
       s = ", "
       f.write("0x%08xu" % x)
     f.write(",\n")
-  f.write("};\n\n")
+  f.write("};\n")
 
 
 # ---------------------------------------------------------------------------
@@ -804,11 +808,11 @@ the tables when not needed. But don't leave a totally empty module because some
 compilers barf at that. Instead, just supply some small dummy tables. */
 
 #ifndef SUPPORT_UNICODE
-const ucd_record PRIV(ucd_records)[] = {{0,0,0,0,0,0,0}};
-const uint16_t PRIV(ucd_stage1)[] = {0};
-const uint16_t PRIV(ucd_stage2)[] = {0};
-const uint32_t PRIV(ucd_caseless_sets)[] = {0};
-const uint32_t PRIV(ucd_nocase_ranges)[] = {0};
+const ucd_record PRIV(ucd_records)[] = { { 0, 0, 0, 0, 0, 0, 0 } };
+const uint16_t PRIV(ucd_stage1)[] = { 0 };
+const uint16_t PRIV(ucd_stage2)[] = { 0 };
+const uint32_t PRIV(ucd_caseless_sets)[] = { 0 };
+const uint32_t PRIV(ucd_nocase_ranges)[] = { 0 };
 const uint32_t PRIV(ucd_nocase_ranges_size) = 0;
 #else
 \n""")
@@ -831,15 +835,15 @@ f.write("""
 than 0x10ffff may be encountered. For these we set up a special record. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
-const ucd_record PRIV(dummy_ucd_record)[] = {{
-  ucp_Unknown,    /* script */
-  ucp_Cn,         /* type unassigned */
-  ucp_gbOther,    /* grapheme break property */
-  0,              /* case set */
-  0,              /* other case */
-  0 | (ucp_bidiL << UCD_BIDICLASS_SHIFT), /* script extension and bidi class */
-  0,              /* bool properties offset */
-  }};
+const ucd_record PRIV(dummy_ucd_record)[] = { {
+    ucp_Unknown,                            /* script */
+    ucp_Cn,                                 /* type unassigned */
+    ucp_gbOther,                            /* grapheme break property */
+    0,                                      /* case set */
+    0,                                      /* other case */
+    0 | (ucp_bidiL << UCD_BIDICLASS_SHIFT), /* script extension and bidi class */
+    0,                                      /* bool properties offset */
+} };
 #endif
 \n""")
 
@@ -849,6 +853,7 @@ f.write("""\
 /* This table contains lists of characters that are caseless sets of
 more than one character. Each list is terminated by NOTACHAR. */
 
+// clang-format off
 const uint32_t PRIV(ucd_caseless_sets)[] = {
   NOTACHAR,
 """)
@@ -858,7 +863,8 @@ for s in caseless_sets:
   for x in s:
     f.write('  0x%04x,' % x)
   f.write('  NOTACHAR,\n')
-f.write('};\n\n')
+f.write('};\n')
+f.write('// clang-format on\n\n')
 
 # --- Output the indices of the Turkish caseless character sets ---
 
@@ -886,6 +892,7 @@ f.write("""\
 /* This table contains character ranges, where the characters in the range have
 no other case. Both start and end values are excluded from the range. */
 
+// clang-format off
 const uint32_t PRIV(ucd_nocase_ranges)[] = {
 """)
 
@@ -911,7 +918,8 @@ if other_case[MAX_UNICODE - 1] == 0 and MAX_UNICODE - range_start > expected_siz
   total += range_size
   size += 2
 
-f.write('  0xffffffff, 0xffffffff /* terminator */\n};\n\n');
+f.write('  0xffffffff, 0xffffffff /* terminator */\n};\n');
+f.write('// clang-format on\n\n')
 f.write('/* Total: %d characters. */\nconst uint32_t PRIV(ucd_nocase_ranges_size) = %d;\n\n' % (total, size))
 
 # --- Read Scripts.txt again for the sets of 10 digits. ---
@@ -939,6 +947,7 @@ f.write("""\
 decimal digits. It is used to ensure that all the digits in a script run come
 from the same set. */
 
+// clang-format off
 const uint32_t PRIV(ucd_digit_sets)[] = {
 """)
 
@@ -950,25 +959,30 @@ for d in digitsets:
     count = 0
   f.write(" 0x%05x," % d)
   count += 1
-f.write("\n};\n\n")
+f.write("\n};\n")
+f.write("// clang-format on\n\n")
 
 f.write("""\
 /* This vector is a list of script bitsets for the Script Extension property.
 The number of 32-bit words in each bitset is #defined in pcre2_ucp.h as
 ucd_script_sets_item_size. */
 
+// clang-format off
 const uint32_t PRIV(ucd_script_sets)[] = {
 """)
 write_bitsets(script_lists, script_list_item_size)
+f.write("// clang-format on\n\n")
 
 f.write("""\
 /* This vector is a list of bitsets for Boolean properties. The number of
 32_bit words in each bitset is #defined as ucd_boolprop_sets_item_size in
 pcre2_ucp.h. */
 
+// clang-format off
 const uint32_t PRIV(ucd_boolprop_sets)[] = {
 """)
 write_bitsets(bool_props_lists, bool_props_list_item_size)
+f.write("// clang-format on\n\n")
 
 
 # Output the main UCD tables.
@@ -989,9 +1003,9 @@ f.write("#if UCD_BLOCK_SIZE != %d\n" % min_block_size)
 f.write("""\
 #error Please correct UCD_BLOCK_SIZE in pcre2_internal.h
 #endif
-#endif  /* SUPPORT_UNICODE */
+#endif /* SUPPORT_UNICODE */
 
-#endif  /* PCRE2_PCRE2TEST */
+#endif /* PCRE2_PCRE2TEST */
 
 /* End of pcre2_ucd.c */
 """)
