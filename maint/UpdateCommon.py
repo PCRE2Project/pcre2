@@ -5,6 +5,7 @@ import os
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
+
 def get_current_release():
     with open(f"{script_dir}/../configure.ac", 'r') as file:
         content = file.read()
@@ -14,7 +15,9 @@ def get_current_release():
 
     return current_release
 
+
 CURRENT_RELEASE = get_current_release()
+
 
 # Update a file, using a pattern. Verify that it matches the file, and perform
 # the replacement.

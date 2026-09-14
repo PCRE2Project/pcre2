@@ -17,9 +17,15 @@ date_regex = r'\d+ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w* \d+'
 header_regex = r'(?m)^(.TH.*? )"%s"' % date_regex
 last_updated_regex = r'(?m)^Last updated: %s' % date_regex
 
+
 def get_last_date(filename):
-    result = subprocess.run(['git', 'log', '-n1', '--date=format:%d %B %Y', '--format=%cd', '--grep', '#noupdate', '--invert-grep', filename], capture_output=True, text=True)
+    result = subprocess.run([
+        'git', 'log', '-n1', '--date=format:%d %B %Y', '--format=%cd', '--grep', '#noupdate', '--invert-grep', filename
+    ],
+                            capture_output=True,
+                            text=True)
     return result.stdout.strip()
+
 
 def check_no_match(filename, pattern):
     with open(filename, 'r') as file:
@@ -27,6 +33,7 @@ def check_no_match(filename, pattern):
 
     if re.search(pattern, content):
         raise Exception('Pattern unexpectedly found in %s' % filename)
+
 
 def update_man_date(filename):
     print('  Updating %s' % filename)
@@ -38,6 +45,7 @@ def update_man_date(filename):
         check_no_match(filename, last_updated_regex)
     else:
         update_file(filename, last_updated_regex, 'Last updated: %s' % file_date)
+
 
 print('Updating man pages')
 

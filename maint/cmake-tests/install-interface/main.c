@@ -2,7 +2,8 @@
 #include <pcre2.h>
 #include <stdio.h>
 
-int main(void)
+int
+main(void)
 {
   char version_str[32];
   pcre2_config(PCRE2_CONFIG_VERSION, version_str);

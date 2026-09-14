@@ -12,9 +12,11 @@ import re
 
 from UpdateCommon import update_file, CURRENT_RELEASE
 
+
 def update_man_version(filename):
     print('  Updating %s' % filename)
     update_file(filename, r'(.TH.*? )"PCRE2 .*?"', '\\1"PCRE2 %s"' % CURRENT_RELEASE)
+
 
 print('Updating man pages')
 

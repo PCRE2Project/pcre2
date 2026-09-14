@@ -105,15 +105,6 @@
 # 2025-03-27 Theodore used standard CMake constructs to export the library's
 #            targets.
 
-################################################################################
-# We use `gersemi` for auto-formatting our CMake files.
-# Applied to all CMake files using:
-#    > pip3 install gersemi
-#    > gersemi --in-place --line-length 120 --indent 2 \
-#          --definitions cmake/*.cmake \
-#          -- ./CMakeLists.txt ./cmake/*.cmake ./cmake/*.cmake.in
-################################################################################
-
 message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
@@ -799,7 +790,7 @@ foreach(configure_line ${configure_lines})
   endforeach()
 endforeach()
 
-macro(PARSE_LIB_VERSION variable_prefix)
+macro(parse_lib_version variable_prefix)
   string(REPLACE ":" ";" ${variable_prefix}_VERSION_LIST ${${variable_prefix}_VERSION})
   list(GET ${variable_prefix}_VERSION_LIST 0 ${variable_prefix}_VERSION_CURRENT)
   list(GET ${variable_prefix}_VERSION_LIST 1 ${variable_prefix}_VERSION_REVISION)

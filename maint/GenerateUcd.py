@@ -238,7 +238,6 @@
 #  Philip Hazel, last updated 14 January 2022.
 ##############################################################################
 
-
 # Import standard modules
 
 import re
@@ -262,234 +261,243 @@ from GenerateCommon import \
 
 # Some general parameters
 
-MAX_LIST = 8             # keep on sync with the value in pcre2_auto_possess.c
+MAX_LIST = 8  # keep on sync with the value in pcre2_auto_possess.c
 MAX_UNICODE = 0x110000
 NOTACHAR = 0xffffffff
-
 
 # ---------------------------------------------------------------------------
 #                         DEFINE FUNCTIONS
 # ---------------------------------------------------------------------------
 
-
 # Parse a line of Scripts.txt, GraphemeBreakProperty.txt or DerivedGeneralCategory.txt
 
+
 def make_get_names(enum):
-  return lambda chardata: enum.index(chardata[1])
+    return lambda chardata: enum.index(chardata[1])
 
 
 # Parse a line of DerivedBidiClass.txt
 
+
 def get_bidi(chardata):
-  if len(chardata[1]) > 3:
-    return bidi_classes_long.index(chardata[1])
-  else:
-    return bidi_classes_short.index(chardata[1])
+    if len(chardata[1]) > 3:
+        return bidi_classes_long.index(chardata[1])
+    else:
+        return bidi_classes_short.index(chardata[1])
 
 
 # Parse a line of CaseFolding.txt
 
+
 def get_other_case(chardata):
-  if chardata[1] == 'C' or chardata[1] == 'S':
-    return int(chardata[2], 16) - int(chardata[0], 16)
-  return None
+    if chardata[1] == 'C' or chardata[1] == 'S':
+        return int(chardata[2], 16) - int(chardata[0], 16)
+    return None
 
 
 # Parse a line of ScriptExtensions.txt
 
+
 def get_script_extension(chardata):
-  script_extension = tuple(script_abbrevs.index(abbrev) for abbrev in chardata[1].split(' '))
+    script_extension = tuple(script_abbrevs.index(abbrev) for abbrev in chardata[1].split(' '))
 
-  try:
-    index = script_lists.index(script_extension)
-  except ValueError:
-    index = len(script_lists)
-    script_lists.append(script_extension)
+    try:
+        index = script_lists.index(script_extension)
+    except ValueError:
+        index = len(script_lists)
+        script_lists.append(script_extension)
 
-  return index * script_list_item_size
+    return index * script_list_item_size
 
 
 # Read a whole table in memory, setting/checking the Unicode version
 
+
 def read_table(file_name, get_value, default_value):
-  global unicode_version
+    global unicode_version
 
-  f = re.match(r'^[^/]+/([^.]+)\.txt$', file_name)
-  file_base = f.group(1)
-  version_pat = r"^# " + re.escape(file_base) + r"-(\d+\.\d+\.\d+)\.txt$"
-  file = open(file_name, 'r', encoding='utf-8')
-  f = re.match(version_pat, file.readline())
-  version = f.group(1)
-  if unicode_version == "":
-    unicode_version = version
-  elif unicode_version != version:
-    print("WARNING: Unicode version differs in %s", file_name, file=sys.stderr)
+    f = re.match(r'^[^/]+/([^.]+)\.txt$', file_name)
+    file_base = f.group(1)
+    version_pat = r"^# " + re.escape(file_base) + r"-(\d+\.\d+\.\d+)\.txt$"
+    file = open(file_name, 'r', encoding='utf-8')
+    f = re.match(version_pat, file.readline())
+    version = f.group(1)
+    if unicode_version == "":
+        unicode_version = version
+    elif unicode_version != version:
+        print("WARNING: Unicode version differs in %s", file_name, file=sys.stderr)
 
-  table = [default_value] * MAX_UNICODE
-  for line in file:
-    if file_base == 'DerivedBidiClass':
-      line = re.sub(r'# @missing: ', '', line)
+    table = [default_value] * MAX_UNICODE
+    for line in file:
+        if file_base == 'DerivedBidiClass':
+            line = re.sub(r'# @missing: ', '', line)
 
-    line = re.sub(r'#.*', '', line)
-    chardata = list(map(str.strip, line.split(';')))
-    if len(chardata) <= 1:
-      continue
-    value = get_value(chardata)
-    if value is None:
-      continue
-    m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
-    char = int(m.group(1), 16)
-    if m.group(3) is None:
-      last = char
-    else:
-      last = int(m.group(3), 16)
-    for i in range(char, last + 1):
-      if file_base == 'CaseFolding' and table[i] != default_value:
-        print("WARNING: multiple rules for other_case[0x{:X}]".format(i))
-      table[i] = value
+        line = re.sub(r'#.*', '', line)
+        chardata = list(map(str.strip, line.split(';')))
+        if len(chardata) <= 1:
+            continue
+        value = get_value(chardata)
+        if value is None:
+            continue
+        m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
+        char = int(m.group(1), 16)
+        if m.group(3) is None:
+            last = char
+        else:
+            last = int(m.group(3), 16)
+        for i in range(char, last + 1):
+            if file_base == 'CaseFolding' and table[i] != default_value:
+                print("WARNING: multiple rules for other_case[0x{:X}]".format(i))
+            table[i] = value
 
-  file.close()
-  return table
+    file.close()
+    return table
 
 
 # Get the smallest possible C language type for the values in a table
 
+
 def get_type_size(table):
-  type_size = [("uint8_t", 1), ("uint16_t", 2), ("uint32_t", 4),
-    ("signed char", 1), ("int16_t", 2), ("int32_t", 4)]
-  limits = [(0, 255), (0, 65535), (0, 4294967295), (-128, 127),
-    (-32768, 32767), (-2147483648, 2147483647)]
-  minval = min(table)
-  maxval = max(table)
-  for num, (minlimit, maxlimit) in enumerate(limits):
-    if minlimit <= minval and maxval <= maxlimit:
-      return type_size[num]
-  raise OverflowError("Too large to fit into C types")
+    type_size = [("uint8_t", 1), ("uint16_t", 2), ("uint32_t", 4), ("signed char", 1), ("int16_t", 2), ("int32_t", 4)]
+    limits = [(0, 255), (0, 65535), (0, 4294967295), (-128, 127), (-32768, 32767), (-2147483648, 2147483647)]
+    minval = min(table)
+    maxval = max(table)
+    for num, (minlimit, maxlimit) in enumerate(limits):
+        if minlimit <= minval and maxval <= maxlimit:
+            return type_size[num]
+    raise OverflowError("Too large to fit into C types")
 
 
 # Get the total size of a list of tables
 
+
 def get_tables_size(*tables):
-  total_size = 0
-  for table in tables:
-    type, size = get_type_size(table)
-    total_size += size * len(table)
-  return total_size
+    total_size = 0
+    for table in tables:
+        type, size = get_type_size(table)
+        total_size += size * len(table)
+    return total_size
 
 
 # Compress a table into the two stages
 
+
 def compress_table(table, block_size):
-  blocks = {} # Dictionary for finding identical blocks
-  stage1 = [] # Stage 1 table contains block numbers (indices into stage 2 table)
-  stage2 = [] # Stage 2 table contains the blocks with property values
-  table = tuple(table)
-  for i in range(0, len(table), block_size):
-    block = table[i:i+block_size]
-    start = blocks.get(block)
-    if start is None:
-      # Allocate a new block
-      start = len(stage2) / block_size
-      stage2 += block
-      blocks[block] = start
-    stage1.append(start)
-  return stage1, stage2
+    blocks = {}  # Dictionary for finding identical blocks
+    stage1 = []  # Stage 1 table contains block numbers (indices into stage 2 table)
+    stage2 = []  # Stage 2 table contains the blocks with property values
+    table = tuple(table)
+    for i in range(0, len(table), block_size):
+        block = table[i:i + block_size]
+        start = blocks.get(block)
+        if start is None:
+            # Allocate a new block
+            start = len(stage2) / block_size
+            stage2 += block
+            blocks[block] = start
+        stage1.append(start)
+    return stage1, stage2
 
 
 # Output a table
 
-def write_table(table, table_name, block_size = None):
-  type, size = get_type_size(table)
-  ELEMS_PER_LINE = 16
 
-  f.write("// clang-format off\n")
-  s = "const %s %s[] = { /* %d bytes" % (type, table_name, size * len(table))
-  if block_size:
-    s += ", block = %d" % block_size
-  f.write(s + " */\n")
-  table = tuple(table)
-  if block_size is None:
-    fmt = "%3d," * ELEMS_PER_LINE + " /* U+%04X */\n"
-    mult = MAX_UNICODE / len(table)
-    for i in range(0, len(table), ELEMS_PER_LINE):
-      f.write(fmt % (table[i:i+ELEMS_PER_LINE] + (int(i * mult),)))
-  else:
-    if block_size > ELEMS_PER_LINE:
-      el = ELEMS_PER_LINE
+def write_table(table, table_name, block_size=None):
+    type, size = get_type_size(table)
+    ELEMS_PER_LINE = 16
+
+    f.write("// clang-format off\n")
+    s = "const %s %s[] = { /* %d bytes" % (type, table_name, size * len(table))
+    if block_size:
+        s += ", block = %d" % block_size
+    f.write(s + " */\n")
+    table = tuple(table)
+    if block_size is None:
+        fmt = "%3d," * ELEMS_PER_LINE + " /* U+%04X */\n"
+        mult = MAX_UNICODE / len(table)
+        for i in range(0, len(table), ELEMS_PER_LINE):
+            f.write(fmt % (table[i:i + ELEMS_PER_LINE] + (int(i * mult), )))
     else:
-      el = block_size
-    fmt = "%3d," * el + "\n"
-    if block_size > ELEMS_PER_LINE:
-      fmt = fmt * int(block_size / ELEMS_PER_LINE)
-    for i in range(0, len(table), block_size):
-      f.write(("\n/* block %d */\n" + fmt) % ((i / block_size,) + table[i:i+block_size]))
-  f.write("};\n")
-  f.write("// clang-format on\n\n")
+        if block_size > ELEMS_PER_LINE:
+            el = ELEMS_PER_LINE
+        else:
+            el = block_size
+        fmt = "%3d," * el + "\n"
+        if block_size > ELEMS_PER_LINE:
+            fmt = fmt * int(block_size / ELEMS_PER_LINE)
+        for i in range(0, len(table), block_size):
+            f.write(("\n/* block %d */\n" + fmt) % ((i / block_size, ) + table[i:i + block_size]))
+    f.write("};\n")
+    f.write("// clang-format on\n\n")
 
 
 # Extract the unique combinations of properties into records
 
+
 def combine_tables(*tables):
-  records = {}
-  index = []
-  for t in zip(*tables):
-    i = records.get(t)
-    if i is None:
-      i = records[t] = len(records)
-    index.append(i)
-  return index, records
+    records = {}
+    index = []
+    for t in zip(*tables):
+        i = records.get(t)
+        if i is None:
+            i = records[t] = len(records)
+        index.append(i)
+    return index, records
 
 
 # Create a record struct
 
+
 def get_record_size_struct(records):
-  size = 0
-  structure = 'typedef struct {\n'
-  for i in range(len(records[0])):
-    record_slice = [record[i] for record in records]
+    size = 0
+    structure = 'typedef struct {\n'
+    for i in range(len(records[0])):
+        record_slice = [record[i] for record in records]
+        slice_type, slice_size = get_type_size(record_slice)
+        # add padding: round up to the nearest power of slice_size
+        size = (size + slice_size - 1) & -slice_size
+        size += slice_size
+        structure += '%s property_%d;\n' % (slice_type, i)
+
+    # round up to the first item of the next structure in array
+    record_slice = [record[0] for record in records]
     slice_type, slice_size = get_type_size(record_slice)
-    # add padding: round up to the nearest power of slice_size
     size = (size + slice_size - 1) & -slice_size
-    size += slice_size
-    structure += '%s property_%d;\n' % (slice_type, i)
 
-  # round up to the first item of the next structure in array
-  record_slice = [record[0] for record in records]
-  slice_type, slice_size = get_type_size(record_slice)
-  size = (size + slice_size - 1) & -slice_size
-
-  structure += '} ucd_record;\n*/\n'
-  return size, structure
+    structure += '} ucd_record;\n*/\n'
+    return size, structure
 
 
 # Write records
 
+
 def write_records(records, record_size):
-  f.write('// clang-format off\n')
-  f.write('const ucd_record PRIV(ucd_records)[] = { ' + \
-    '/* %d bytes, record size %d */\n' % (len(records) * record_size, record_size))
-  records = list(zip(list(records.keys()), list(records.values())))
-  records.sort(key = lambda x: x[1])
-  for i, record in enumerate(records):
-    f.write(('  {' + '%6d, ' * len(record[0]) + '}, /* %3d */\n') % (record[0] + (i,)))
-  f.write('};\n')
-  f.write('// clang-format on\n\n')
+    f.write('// clang-format off\n')
+    f.write('const ucd_record PRIV(ucd_records)[] = { ' + \
+      '/* %d bytes, record size %d */\n' % (len(records) * record_size, record_size))
+    records = list(zip(list(records.keys()), list(records.values())))
+    records.sort(key=lambda x: x[1])
+    for i, record in enumerate(records):
+        f.write(('  {' + '%6d, ' * len(record[0]) + '}, /* %3d */\n') % (record[0] + (i, )))
+    f.write('};\n')
+    f.write('// clang-format on\n\n')
 
 
 # Write a bit set
 
+
 def write_bitsets(list, item_size):
-  for d in list:
-    bitwords = [0] * item_size
-    for idx in d:
-      bitwords[idx // 32] |= 1 << (idx & 31)
-    s = " "
-    for x in bitwords:
-      f.write("%s" % s)
-      s = ", "
-      f.write("0x%08xu" % x)
-    f.write(",\n")
-  f.write("};\n")
+    for d in list:
+        bitwords = [0] * item_size
+        for idx in d:
+            bitwords[idx // 32] |= 1 << (idx & 31)
+        s = " "
+        for x in bitwords:
+            f.write("%s" % s)
+            s = ", "
+            f.write("0x%08xu" % x)
+        f.write(",\n")
+    f.write("};\n")
 
 
 # ---------------------------------------------------------------------------
@@ -513,8 +521,6 @@ def write_bitsets(list, item_size):
 # test_record_size()
 # ---------------------------------------------------------------------------
 
-
-
 # ---------------------------------------------------------------------------
 #                       MAIN CODE FOR CREATING TABLES
 # ---------------------------------------------------------------------------
@@ -533,8 +539,10 @@ category_names = category_names[::2]
 # Create the various tables from Unicode data files
 
 script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), script_names.index('Unknown'))
-category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names), category_names.index('Cn'))
-break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_names(break_properties), break_properties.index('Other'))
+category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names),
+                      category_names.index('Cn'))
+break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_names(break_properties),
+                         break_properties.index('Other'))
 other_case = read_table('Unicode.tables/CaseFolding.txt', get_other_case, 0)
 bidi_class = read_table('Unicode.tables/DerivedBidiClass.txt', get_bidi, bidi_classes_short.index('L'))
 
@@ -546,23 +554,25 @@ bidi_class = read_table('Unicode.tables/DerivedBidiClass.txt', get_bidi, bidi_cl
 
 file = open('Unicode.tables/emoji-data.txt', 'r', encoding='utf-8')
 for line in file:
-  line = re.sub(r'#.*', '', line)
-  chardata = list(map(str.strip, line.split(';')))
-  if len(chardata) <= 1:
-    continue
-  if chardata[1] != "Extended_Pictographic":
-    continue
-  m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
-  char = int(m.group(1), 16)
-  if m.group(3) is None:
-    last = char
-  else:
-    last = int(m.group(3), 16)
-  for i in range(char, last + 1):
-    if break_props[i] != break_properties.index('Other'):
-      print("WARNING: Emoji 0x%x has break property %s, not 'Other'",
-        i, break_properties[break_props[i]], file=sys.stderr)
-    break_props[i] = break_properties.index('Extended_Pictographic')
+    line = re.sub(r'#.*', '', line)
+    chardata = list(map(str.strip, line.split(';')))
+    if len(chardata) <= 1:
+        continue
+    if chardata[1] != "Extended_Pictographic":
+        continue
+    m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
+    char = int(m.group(1), 16)
+    if m.group(3) is None:
+        last = char
+    else:
+        last = int(m.group(3), 16)
+    for i in range(char, last + 1):
+        if break_props[i] != break_properties.index('Other'):
+            print("WARNING: Emoji 0x%x has break property %s, not 'Other'",
+                  i,
+                  break_properties[break_props[i]],
+                  file=sys.stderr)
+        break_props[i] = break_properties.index('Extended_Pictographic')
 file.close()
 
 # Handle script extensions. The get_script_extesion() function maintains a
@@ -574,7 +584,7 @@ script_lists = [[]]
 scriptx_bidi_class = read_table('Unicode.tables/ScriptExtensions.txt', get_script_extension, 0)
 
 for idx in range(len(scriptx_bidi_class)):
-  scriptx_bidi_class[idx] = scriptx_bidi_class[idx] | (bidi_class[idx] << 11)
+    scriptx_bidi_class[idx] = scriptx_bidi_class[idx] | (bidi_class[idx] << 11)
 bidi_class = None
 
 # Find the Boolean properties of each character. This next bit of magic creates
@@ -586,41 +596,41 @@ bprops = [[] for _ in range(MAX_UNICODE)]
 # Collect the properties from the various files
 
 for filename in bool_propsfiles:
-  try:
-    file = open('Unicode.tables/' + filename, 'r')
-  except IOError:
-    print(f"** Couldn't open {'Unicode.tables/' + filename}\n")
-    sys.exit(1)
-
-  for line in file:
-    line = re.sub(r'#.*', '', line)
-    data = list(map(str.strip, line.split(';')))
-    if len(data) <= 1:
-      continue
-
     try:
-      ix = bool_properties.index(data[1])
-    except ValueError:
-      continue
+        file = open('Unicode.tables/' + filename, 'r')
+    except IOError:
+        print(f"** Couldn't open {'Unicode.tables/' + filename}\n")
+        sys.exit(1)
 
-    m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', data[0])
-    char = int(m.group(1), 16)
-    if m.group(3) is None:
-      last = char
-    else:
-      last = int(m.group(3), 16)
+    for line in file:
+        line = re.sub(r'#.*', '', line)
+        data = list(map(str.strip, line.split(';')))
+        if len(data) <= 1:
+            continue
 
-    for i in range(char, last + 1):
-      bprops[i].append(ix)
+        try:
+            ix = bool_properties.index(data[1])
+        except ValueError:
+            continue
 
-  file.close()
+        m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', data[0])
+        char = int(m.group(1), 16)
+        if m.group(3) is None:
+            last = char
+        else:
+            last = int(m.group(3), 16)
+
+        for i in range(char, last + 1):
+            bprops[i].append(ix)
+
+    file.close()
 
 # The ASCII property isn't listed in any files, but it is easy enough to add
 # it manually.
 
 ix = bool_properties.index("ASCII")
 for i in range(128):
-  bprops[i].append(ix)
+    bprops[i].append(ix)
 
 # The Bidi_Mirrored property isn't listed in any property files. We have to
 # deduce it from the file that lists the mirrored characters.
@@ -628,18 +638,18 @@ for i in range(128):
 ix = bool_properties.index("Bidi_Mirrored")
 
 try:
-  file = open('Unicode.tables/BidiMirroring.txt', 'r')
+    file = open('Unicode.tables/BidiMirroring.txt', 'r')
 except IOError:
-  print(f"** Couldn't open {'Unicode.tables/BidiMirroring.txt'}\n")
-  sys.exit(1)
+    print(f"** Couldn't open {'Unicode.tables/BidiMirroring.txt'}\n")
+    sys.exit(1)
 
 for line in file:
-  line = re.sub(r'#.*', '', line)
-  data = list(map(str.strip, line.split(';')))
-  if len(data) <= 1:
-    continue
-  c = int(data[0], 16)
-  bprops[c].append(ix)
+    line = re.sub(r'#.*', '', line)
+    data = list(map(str.strip, line.split(';')))
+    if len(data) <= 1:
+        continue
+    c = int(data[0], 16)
+    bprops[c].append(ix)
 
 file.close()
 
@@ -651,15 +661,15 @@ bool_props = [0] * MAX_UNICODE
 bool_props_lists = [[]]
 
 for c in range(MAX_UNICODE):
-  s = set(bprops[c])
-  for i in range(len(bool_props_lists)):
-    if s == set(bool_props_lists[i]):
-      break
-  else:
-    bool_props_lists.append(bprops[c])
-    i += 1
+    s = set(bprops[c])
+    for i in range(len(bool_props_lists)):
+        if s == set(bool_props_lists[i]):
+            break
+    else:
+        bool_props_lists.append(bprops[c])
+        i += 1
 
-  bool_props[c] = i * bool_props_list_item_size
+    bool_props[c] = i * bool_props_list_item_size
 
 # This block of code was added by PH in September 2012. It scans the other_case
 # table to find sets of more than two characters that must all match each other
@@ -672,48 +682,48 @@ for c in range(MAX_UNICODE):
 # offsets for those that are not already set.
 
 for c in range(MAX_UNICODE):
-  if other_case[c] != 0 and other_case[c + other_case[c]] == 0:
-    other_case[c + other_case[c]] = -other_case[c]
+    if other_case[c] != 0 and other_case[c + other_case[c]] == 0:
+        other_case[c + other_case[c]] = -other_case[c]
 
 # Now scan again and create equivalence sets.
 
 caseless_sets = []
 
 for c in range(MAX_UNICODE):
-  o = c + other_case[c]
+    o = c + other_case[c]
 
-  # Trigger when this character's other case does not point back here. We
-  # now have three characters that are case-equivalent.
+    # Trigger when this character's other case does not point back here. We
+    # now have three characters that are case-equivalent.
 
-  if other_case[o] != -other_case[c]:
-    t = o + other_case[o]
+    if other_case[o] != -other_case[c]:
+        t = o + other_case[o]
 
-    # Scan the existing sets to see if any of the three characters are already
-    # part of a set. If so, unite the existing set with the new set.
+        # Scan the existing sets to see if any of the three characters are already
+        # part of a set. If so, unite the existing set with the new set.
 
-    appended = 0
-    for s in caseless_sets:
-      found = 0
-      for x in s:
-        if x == c or x == o or x == t:
-          found = 1
+        appended = 0
+        for s in caseless_sets:
+            found = 0
+            for x in s:
+                if x == c or x == o or x == t:
+                    found = 1
 
-      # Add new characters to an existing set
+            # Add new characters to an existing set
 
-      if found:
-        found = 0
-        for y in [c, o, t]:
-          for x in s:
-            if x == y:
-              found = 1
-          if not found:
-            s.append(y)
-        appended = 1
+            if found:
+                found = 0
+                for y in [c, o, t]:
+                    for x in s:
+                        if x == y:
+                            found = 1
+                    if not found:
+                        s.append(y)
+                appended = 1
 
-    # If we have not added to an existing set, create a new one.
+        # If we have not added to an existing set, create a new one.
 
-    if not appended:
-      caseless_sets.append([c, o, t])
+        if not appended:
+            caseless_sets.append([c, o, t])
 
 # End of loop looking for caseless sets.
 
@@ -723,22 +733,22 @@ caseless_offsets = [0] * MAX_UNICODE
 
 offset = 1
 for s in caseless_sets:
-  for x in s:
-    caseless_offsets[x] = offset
-  offset += len(s) + 1
+    for x in s:
+        caseless_offsets[x] = offset
+    offset += len(s) + 1
 
 # End of block of code for creating offsets for caseless matching sets.
 
 # Scan the caseless sets, and for any non-ASCII character that has an ASCII
 # character as its "base" other case, remove the other case. This makes it
 # easier to handle those characters when the PCRE2 option for not mixing ASCII
-# and non-ASCII is enabled. In principle one should perhaps scan for a 
+# and non-ASCII is enabled. In principle one should perhaps scan for a
 # non-ASCII alternative, but in practice these don't exist.
 
 for s in caseless_sets:
-  for x in s:
-    if x > 127 and x + other_case[x] < 128:
-      other_case[x] = 0  
+    for x in s:
+        if x > 127 and x + other_case[x] < 128:
+            other_case[x] = 0
 
 # Append a couple of extra caseless sets (unreferenced by the record objects)
 # to hold the optional Turkish case equivalences.
@@ -748,8 +758,8 @@ caseless_sets.append([0x49, 0x0131])
 
 # Combine all the tables
 
-table, records = combine_tables(script, category, break_props,
-  caseless_offsets, other_case, scriptx_bidi_class, bool_props)
+table, records = combine_tables(script, category, break_props, caseless_offsets, other_case, scriptx_bidi_class,
+                                bool_props)
 
 # Find the record size and create a string definition of the structure for
 # outputting as a comment.
@@ -759,16 +769,15 @@ record_size, record_struct = get_record_size_struct(list(records.keys()))
 # Find the optimum block size for the two-stage table
 
 min_size = sys.maxsize
-for block_size in [2 ** i for i in range(5,10)]:
-  size = len(records) * record_size
-  stage1, stage2 = compress_table(table, block_size)
-  size += get_tables_size(stage1, stage2)
-  #print("/* block size {:3d} => {:5d} bytes */".format(block_size, size))
-  if size < min_size:
-    min_size = size
-    min_stage1, min_stage2 = stage1, stage2
-    min_block_size = block_size
-
+for block_size in [2**i for i in range(5, 10)]:
+    size = len(records) * record_size
+    stage1, stage2 = compress_table(table, block_size)
+    size += get_tables_size(stage1, stage2)
+    #print("/* block size {:3d} => {:5d} bytes */".format(block_size, size))
+    if size < min_size:
+        min_size = size
+        min_stage1, min_stage2 = stage1, stage2
+        min_block_size = block_size
 
 # ---------------------------------------------------------------------------
 #                   MAIN CODE FOR WRITING THE OUTPUT FILE
@@ -859,10 +868,10 @@ const uint32_t PRIV(ucd_caseless_sets)[] = {
 """)
 
 for s in caseless_sets:
-  s = sorted(s)
-  for x in s:
-    f.write('  0x%04x,' % x)
-  f.write('  NOTACHAR,\n')
+    s = sorted(s)
+    for x in s:
+        f.write('  0x%04x,' % x)
+    f.write('  NOTACHAR,\n')
 f.write('};\n')
 f.write('// clang-format on\n\n')
 
@@ -903,22 +912,22 @@ expected_size = 8
 total = 0
 
 for c in range(1, MAX_UNICODE):
-  if other_case[c] != 0 or c in [0x0130, 0x0131]: # add the two chars that gain casing in Turkish
-    if c - range_start > expected_size:
-      range_size = c - range_start - 1
-      f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, c, range_size))
-      total += range_size
-      size += 2
-    range_start = c
+    if other_case[c] != 0 or c in [0x0130, 0x0131]:  # add the two chars that gain casing in Turkish
+        if c - range_start > expected_size:
+            range_size = c - range_start - 1
+            f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, c, range_size))
+            total += range_size
+            size += 2
+        range_start = c
 
 # The else case is unlikely
 if other_case[MAX_UNICODE - 1] == 0 and MAX_UNICODE - range_start > expected_size:
-  range_size = MAX_UNICODE - range_start - 1
-  f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, MAX_UNICODE, range_size))
-  total += range_size
-  size += 2
+    range_size = MAX_UNICODE - range_start - 1
+    f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, MAX_UNICODE, range_size))
+    total += range_size
+    size += 2
 
-f.write('  0xffffffff, 0xffffffff /* terminator */\n};\n');
+f.write('  0xffffffff, 0xffffffff /* terminator */\n};\n')
 f.write('// clang-format on\n\n')
 f.write('/* Total: %d characters. */\nconst uint32_t PRIV(ucd_nocase_ranges_size) = %d;\n\n' % (total, size))
 
@@ -928,17 +937,16 @@ digitsets = []
 file = open('Unicode.tables/Scripts.txt', 'r', encoding='utf-8')
 
 for line in file:
-  m = re.match(r'([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)\s+;\s+\S+\s+#\s+Nd\s+', line)
-  if m is None:
-    continue
-  first = int(m.group(1),16)
-  last  = int(m.group(2),16)
-  if ((last - first + 1) % 10) != 0:
-    f.write("ERROR: %04x..%04x does not contain a multiple of 10 characters" % (first, last),
-      file=sys.stderr)
-  while first < last:
-    digitsets.append(first + 9)
-    first += 10
+    m = re.match(r'([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)\s+;\s+\S+\s+#\s+Nd\s+', line)
+    if m is None:
+        continue
+    first = int(m.group(1), 16)
+    last = int(m.group(2), 16)
+    if ((last - first + 1) % 10) != 0:
+        f.write("ERROR: %04x..%04x does not contain a multiple of 10 characters" % (first, last), file=sys.stderr)
+    while first < last:
+        digitsets.append(first + 9)
+        first += 10
 file.close()
 digitsets.sort()
 
@@ -954,11 +962,11 @@ const uint32_t PRIV(ucd_digit_sets)[] = {
 f.write("  %d,  /* Number of subsequent values */" % len(digitsets))
 count = 8
 for d in digitsets:
-  if count == 8:
-    f.write("\n ")
-    count = 0
-  f.write(" 0x%05x," % d)
-  count += 1
+    if count == 8:
+        f.write("\n ")
+        count = 0
+    f.write(" 0x%05x," % d)
+    count += 1
 f.write("\n};\n")
 f.write("// clang-format on\n\n")
 
@@ -983,7 +991,6 @@ const uint32_t PRIV(ucd_boolprop_sets)[] = {
 """)
 write_bitsets(bool_props_lists, bool_props_list_item_size)
 f.write("// clang-format on\n\n")
-
 
 # Output the main UCD tables.
 

@@ -45,7 +45,6 @@
 # 10-January-2022:  Further updates for Boolean property support
 # -----------------------------------------------------------------------------
 
-
 # Import common data lists and functions
 
 from GenerateCommon import \
@@ -68,7 +67,7 @@ f = open_output("pcre2_ucptables_inc.h")
 
 bidi_class_names = []
 for i in range(0, len(bidi_classes), 2):
-  bidi_class_names.append("bidi" + bidi_classes[i])
+    bidi_class_names.append("bidi" + bidi_classes[i])
 
 # Remove the comments from other lists that contain them.
 
@@ -77,14 +76,17 @@ category_names = category_names[::2]
 # Create standardized versions of the names by lowercasing and removing
 # underscores.
 
+
 def stdname(x):
-  return x.lower().replace('_', '')
+    return x.lower().replace('_', '')
+
 
 def stdnames(x):
-  y = [''] * len(x)
-  for i in range(len(x)):
-    y[i] = stdname(x[i])
-  return y
+    y = [''] * len(x)
+    for i in range(len(x)):
+        y[i] = stdname(x[i])
+    return y
+
 
 std_category_names = stdnames(category_names)
 std_general_category_names = stdnames(general_category_names)
@@ -101,10 +103,10 @@ utt_table = []
 scx_end = script_names.index('Unknown')
 
 for idx, name in enumerate(script_names):
-  pt_type = 'PT_SCX' if idx < scx_end else 'PT_SC'
-  utt_table.append((stdname(name), name, pt_type))
-  for abbrev in abbreviations[name]:
-    utt_table.append((stdname(abbrev), name, pt_type))
+    pt_type = 'PT_SCX' if idx < scx_end else 'PT_SC'
+    utt_table.append((stdname(name), name, pt_type))
+    for abbrev in abbreviations[name]:
+        utt_table.append((stdname(abbrev), name, pt_type))
 
 # Add the remaining property lists
 
@@ -113,17 +115,17 @@ utt_table += list(zip(std_general_category_names, general_category_names, ['PT_G
 utt_table += list(zip(std_bidi_class_names, bidi_class_names, ['PT_BIDICL'] * len(bidi_class_names)))
 
 for name in bool_properties:
-  utt_table.append((stdname(name), name, 'PT_BOOL'))
-  if name in abbreviations:
-    for abbrev in abbreviations[name]:
-      utt_table.append((stdname(abbrev), name, 'PT_BOOL'))
+    utt_table.append((stdname(name), name, 'PT_BOOL'))
+    if name in abbreviations:
+        for abbrev in abbreviations[name]:
+            utt_table.append((stdname(abbrev), name, 'PT_BOOL'))
 
 # Now add specials and synonyms. Note both the standardized and capitalized
 # forms are needed.
 
 utt_table.append(('any', 'Any', 'PT_ANY'))
-utt_table.append(('l&',  'L&',  'PT_LAMP'))
-utt_table.append(('lc',  'LC',  'PT_LAMP'))
+utt_table.append(('l&', 'L&', 'PT_LAMP'))
+utt_table.append(('lc', 'LC', 'PT_LAMP'))
 utt_table.append(('xan', 'Xan', 'PT_ALNUM'))
 utt_table.append(('xps', 'Xps', 'PT_PXSPACE'))
 utt_table.append(('xsp', 'Xsp', 'PT_SPACE'))
@@ -132,7 +134,7 @@ utt_table.append(('xwd', 'Xwd', 'PT_WORD'))
 
 # Remove duplicates from the table and then sort it.
 
-utt_table = list(set(utt_table)) 
+utt_table = list(set(utt_table))
 utt_table.sort()
 
 # Output file-specific heading
@@ -155,13 +157,13 @@ the "loose matching" rules that Unicode advises and Perl uses. */
 
 f.write('// clang-format off\n')
 for utt in utt_table:
-  f.write('#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')))
-  for c in utt[0]:
-    if c == '&':
-      f.write(' STR_AMPERSAND')
-    else:
-      f.write(' STR_%s' % c);
-  f.write(' "\\0"\n')
+    f.write('#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')))
+    for c in utt[0]:
+        if c == '&':
+            f.write(' STR_AMPERSAND')
+        else:
+            f.write(' STR_%s' % c)
+    f.write(' "\\0"\n')
 f.write('// clang-format on\n\n')
 
 # Output the long string of concatenated names
@@ -170,9 +172,9 @@ f.write('// clang-format off\n')
 f.write('const char PRIV(utt_names)[] =\n')
 last = ''
 for utt in utt_table:
-  if utt == utt_table[-1]:
-    last = ';'
-  f.write('  STRING_%s0%s\n' % (utt[0].replace('&', '_AMPERSAND'), last))
+    if utt == utt_table[-1]:
+        last = ';'
+    f.write('  STRING_%s0%s\n' % (utt[0].replace('&', '_AMPERSAND'), last))
 f.write('// clang-format on\n\n')
 
 # Output the property type table
@@ -182,15 +184,14 @@ f.write('const ucp_type_table PRIV(utt)[] = {\n')
 offset = 0
 last = ','
 for utt in utt_table:
-  if utt[2] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE',
-      'PT_SPACE', 'PT_UCNC', 'PT_WORD'):
-    value = '0'
-  else:
-    value = 'ucp_' + utt[1]
-  if utt == utt_table[-1]:
-    last = ''
-  f.write('  { %3d, %s, %s }%s\n' % (offset, utt[2], value, last))
-  offset += len(utt[0]) + 1
+    if utt[2] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE', 'PT_SPACE', 'PT_UCNC', 'PT_WORD'):
+        value = '0'
+    else:
+        value = 'ucp_' + utt[1]
+    if utt == utt_table[-1]:
+        last = ''
+    f.write('  { %3d, %s, %s }%s\n' % (offset, utt[2], value, last))
+    offset += len(utt[0]) + 1
 f.write('};\n')
 f.write('// clang-format on\n\n')
 
