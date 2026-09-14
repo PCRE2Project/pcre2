@@ -1,4 +1,0 @@
----
-BasedOnStyle: InheritParentConfig
-ColumnLimit: 78
-BreakAfterReturnType: All

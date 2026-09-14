@@ -1,0 +1,23 @@
+# Clang can't format it due to its @...@ substitutions
+config-cmake.h.in
+
+# These are public files, which we treat a little more like ASCII-art, and
+# don't format rigidly with Clang.
+pcre2.h.in
+pcre2.h.generic
+pcre2posix.h
+
+# Config files from autoconf can't be formatted.
+config.h.generic
+
+# Public files (that need to fit in a terminal) need to formatted specially.
+pcre2demo.c
+
+# Generate files should be checked, but not have formatting applied
+# automatically.
+src/pcre2_chartables.c.dist
+src/pcre2_chartables.c.ebcdic-1047-nl15
+src/pcre2_chartables.c.ebcdic-1047-nl25
+src/pcre2_ucd.c
+src/pcre2_ucp.h
+src/pcre2_ucptables_inc.h
