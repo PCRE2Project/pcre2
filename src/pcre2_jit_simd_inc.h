@@ -3038,7 +3038,7 @@ fast_forward_char_pair_alpha_compare(struct sljit_compiler *compiler,
       OP2(SLJIT_XOR, dst, 0, data, 0, cmp1, 0);
     }
 
-    /* CMPBGE $31, dst, dst — bits set where XOR byte is zero (match). */
+    /* CMPBGE $31, dst, dst - bits set where XOR byte is zero (match). */
     emit_alpha_cmpbge(compiler, 31, dst_ind, dst_ind);
     return;
   }
@@ -3079,7 +3079,7 @@ compact_cmpbge_mask(struct sljit_compiler *compiler, sljit_s32 mask, sljit_s32 t
 /* Find the position of the lowest set bit in an 8-bit CMPBGE mask held in
    TMP1; replace TMP1 with that bit index (0-7). TMP2 and RETURN_ADDR are
    clobbered. Uses base-ISA NEGQ+AND to isolate the bit, then a binary search
-   via three AND+SELECT pairs — identical to glibc's Alpha strchr approach. */
+   via three AND+SELECT pairs - identical to glibc's Alpha strchr approach. */
 static SLJIT_INLINE void
 emit_alpha_ctz8(struct sljit_compiler *compiler)
 {
@@ -3179,7 +3179,7 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
     }
     else
     {
-      /* Partial mode: found → STR_PTR = result, not found → STR_PTR = STR_END. */
+      /* Partial mode: found => STR_PTR = result, not found => STR_PTR = STR_END. */
       quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
       OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
       partial_quit[1] = JUMP(SLJIT_JUMP);

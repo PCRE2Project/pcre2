@@ -267,7 +267,8 @@ Returns:        0 when successfully completed
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_callout_enumerate(const pcre2_code *code,
-                        int (*callback)(pcre2_callout_enumerate_block *, void *),
+                        int (*callback)(pcre2_callout_enumerate_block *callout_block,
+                                        void *callout_data),
                         void *callout_data)
 {
   const pcre2_real_code *re = (const pcre2_real_code *)code;

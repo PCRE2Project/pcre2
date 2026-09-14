@@ -23,7 +23,10 @@ AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
-AttributeMacros : ['PCRE2_CALL_CONVENTION']
+AttributeMacros:
+  - 'PCRE2_CALL_CONVENTION'
+  - 'PCRE2_EXP_DECL'
+  - 'PCRE2POSIX_EXP_DECL'
 BinPackArguments: true
 BinPackParameters: BinPack
 BraceWrapping:

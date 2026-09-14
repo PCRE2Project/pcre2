@@ -114,8 +114,8 @@ when an external context is not supplied. The initializing functions have an
 option to set up default memory management. */
 
 PCRE2_EXP_DEFN pcre2_general_context *PCRE2_CALL_CONVENTION
-pcre2_general_context_create(void *(*private_malloc)(size_t, void *),
-                             void (*private_free)(void *, void *), void *memory_data)
+pcre2_general_context_create(void *(*private_malloc)(size_t size, void *memory_data),
+                             void (*private_free)(void *ptr, void *memory_data), void *memory_data)
 {
   pcre2_general_context *gcontext;
   if (private_malloc == NULL)
@@ -476,8 +476,8 @@ pcre2_set_compile_extra_options(pcre2_compile_context *ccontext, uint32_t option
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext, int (*guard)(uint32_t, void *),
-                                  void *user_data)
+pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
+                                  int (*guard)(uint32_t depth, void *user_data), void *user_data)
 {
   ccontext->stack_guard = guard;
   ccontext->stack_guard_data = user_data;
@@ -521,7 +521,8 @@ pcre2_set_optimize(pcre2_compile_context *ccontext, uint32_t directive)
 /* ------------ Match context ------------ */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_callout(pcre2_match_context *mcontext, int (*callout)(pcre2_callout_block *, void *),
+pcre2_set_callout(pcre2_match_context *mcontext,
+                  int (*callout)(pcre2_callout_block *callout_block, void *callout_data),
                   void *callout_data)
 {
   mcontext->callout = callout;
@@ -530,9 +531,11 @@ pcre2_set_callout(pcre2_match_context *mcontext, int (*callout)(pcre2_callout_bl
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_substitute_callout(pcre2_match_context *mcontext,
-                             int (*substitute_callout)(pcre2_substitute_callout_block *, void *),
-                             void *substitute_callout_data)
+pcre2_set_substitute_callout(
+    pcre2_match_context *mcontext,
+    int (*substitute_callout)(pcre2_substitute_callout_block *callout_block,
+                              void *substitute_callout_data),
+    void *substitute_callout_data)
 {
   mcontext->substitute_callout = substitute_callout;
   mcontext->substitute_callout_data = substitute_callout_data;
@@ -540,11 +543,12 @@ pcre2_set_substitute_callout(pcre2_match_context *mcontext,
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_substitute_case_callout(pcre2_match_context *mcontext,
-                                  PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE,
-                                                                        PCRE2_UCHAR *, PCRE2_SIZE,
-                                                                        int, void *),
-                                  void *substitute_case_callout_data)
+pcre2_set_substitute_case_callout(
+    pcre2_match_context *mcontext,
+    PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR input, PCRE2_SIZE input_length,
+                                          PCRE2_UCHAR *output, PCRE2_SIZE output_capacity,
+                                          int case_operation, void *substitute_case_callout_data),
+    void *substitute_case_callout_data)
 {
   mcontext->substitute_case_callout = substitute_case_callout;
   mcontext->substitute_case_callout_data = substitute_case_callout_data;
@@ -654,8 +658,8 @@ pcre2_set_recursion_limit(pcre2_match_context *mcontext, uint32_t limit)
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
-                                      void *(*mymalloc)(size_t, void *),
-                                      void (*myfree)(void *, void *), void *mydata)
+                                      void *(*mymalloc)(size_t size, void *mydata),
+                                      void (*myfree)(void *ptr, void *mydata), void *mydata)
 {
   (void)mcontext;
   (void)mymalloc;
@@ -668,11 +672,12 @@ pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
 /* ------------ Convert context ------------ */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_glob_separator(pcre2_convert_context *ccontext, uint32_t separator)
+pcre2_set_glob_separator(pcre2_convert_context *ccontext, uint32_t separator_char)
 {
-  if (separator != CHAR_SLASH && separator != CHAR_BACKSLASH && separator != CHAR_DOT)
+  if (separator_char != CHAR_SLASH && separator_char != CHAR_BACKSLASH &&
+      separator_char != CHAR_DOT)
     return PCRE2_ERROR_BADDATA;
-  ccontext->glob_separator = separator;
+  ccontext->glob_separator = separator_char;
   return 0;
 }
 
@@ -685,11 +690,11 @@ static const char *globpunct = STR_EXCLAMATION_MARK STR_QUOTATION_MARK STR_NUMBE
                         STR_VERTICAL_LINE STR_RIGHT_CURLY_BRACKET STR_TILDE;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_set_glob_escape(pcre2_convert_context *ccontext, uint32_t escape)
+pcre2_set_glob_escape(pcre2_convert_context *ccontext, uint32_t escape_char)
 {
-  if (escape > 255 || (escape != 0 && strchr(globpunct, escape) == NULL))
+  if (escape_char > 255 || (escape_char != 0 && strchr(globpunct, escape_char) == NULL))
     return PCRE2_ERROR_BADDATA;
-  ccontext->glob_escape = escape;
+  ccontext->glob_escape = escape_char;
   return 0;
 }
 
