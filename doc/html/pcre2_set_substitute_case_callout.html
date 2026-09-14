@@ -19,11 +19,13 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>int pcre2_set_substitute_case_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  PCRE2_SIZE (*<i>callout_function</i>)(PCRE2_SPTR, PCRE2_SIZE,</b>
-<b>                                 PCRE2_UCHAR *, PCRE2_SIZE,</b>
-<b>                                 int, void *),</b>
-<b>  void *<i>callout_data</i>);</b>
+<b>int pcre2_set_substitute_case_callout(</b>
+<b>      pcre2_match_context *<i>mcontext</i>,</b>
+<b>      PCRE2_SIZE (*<i>substitute_case_callout</i>)(</b>
+<b>          PCRE2_SPTR <i>input</i>, PCRE2_SIZE <i>input_length</i>,</b>
+<b>          PCRE2_UCHAR *<i>output</i>, PCRE2_SIZE <i>output_capacity</i>,</b>
+<b>          int <i>case_operation</i>, void *<i>substitute_case_callout_data</i>),</b>
+<b>      void *<i>substitute_case_callout_data</i>);</b>
 </p>
 <h2>
 DESCRIPTION

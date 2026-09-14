@@ -20,8 +20,10 @@ SYNOPSIS
 </p>
 <p>
 <b>int pcre2_set_callout(pcre2_match_context *<i>mcontext</i>,</b>
-<b>  int (*<i>callout_function</i>)(pcre2_callout_block *),</b>
-<b>  void *<i>callout_data</i>);</b>
+<b>                      int (*<i>callout</i>)(</b>
+<b>                          pcre2_callout_block *<i>callout_block</i>,</b>
+<b>                          void *<i>callout_data</i>),</b>
+<b>                      void *<i>callout_data</i>);</b>
 </p>
 <h2>
 DESCRIPTION

@@ -15,18 +15,18 @@ globs and POSIX patterns, are supported.
 .sp
 .nf
 .B pcre2_convert_context *pcre2_convert_context_create(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_convert_context *pcre2_convert_context_copy(
-.B "  pcre2_convert_context *\fIcvcontext\fP);"
+.B "      pcre2_convert_context *\fIccontext\fP);"
 .sp
-.B void pcre2_convert_context_free(pcre2_convert_context *\fIcvcontext\fP);
+.B void pcre2_convert_context_free(pcre2_convert_context *\fIccontext\fP);
 .sp
-.B int pcre2_set_glob_escape(pcre2_convert_context *\fIcvcontext\fP,
-.B "  uint32_t \fIescape_char\fP);"
+.B int pcre2_set_glob_escape(pcre2_convert_context *\fIccontext\fP,
+.B "                          uint32_t \fIescape_char\fP);"
 .sp
-.B int pcre2_set_glob_separator(pcre2_convert_context *\fIcvcontext\fP,
-.B "  uint32_t \fIseparator_char\fP);"
+.B int pcre2_set_glob_separator(pcre2_convert_context *\fIccontext\fP,
+.B "                             uint32_t \fIseparator_char\fP);"
 .fi
 .sp
 A convert context is used to hold parameters that affect the way that pattern
@@ -51,11 +51,12 @@ their second argument is invalid.
 .rs
 .sp
 .nf
-.B int pcre2_pattern_convert(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIlength\fP,
-.B "  uint32_t \fIoptions\fP, PCRE2_UCHAR **\fIbuffer\fP,"
-.B "  PCRE2_SIZE *\fIblength\fP, pcre2_convert_context *\fIcvcontext\fP);"
+.B int pcre2_pattern_convert(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIplength\fP,
+.B "                          uint32_t \fIoptions\fP, PCRE2_UCHAR **\fIbuffptr\fP,"
+.B "                          PCRE2_SIZE *\fIbufflenptr\fP,"
+.B "                          pcre2_convert_context *\fIccontext\fP);"
 .sp
-.B void pcre2_converted_pattern_free(PCRE2_UCHAR *\fIconverted_pattern\fP);
+.B void pcre2_converted_pattern_free(PCRE2_UCHAR *\fIconverted\fP);
 .fi
 .sp
 The first two arguments of \fBpcre2_pattern_convert()\fP define the foreign

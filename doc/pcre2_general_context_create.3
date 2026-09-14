@@ -8,8 +8,9 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .PP
 .nf
 .B pcre2_general_context *pcre2_general_context_create(
-.B "  void *(*\fIprivate_malloc\fP)(size_t, void *),"
-.B "  void (*\fIprivate_free\fP)(void *, void *), void *\fImemory_data\fP);"
+.B "      void *(*\fIprivate_malloc\fP)(size_t \fIsize\fP, void *\fImemory_data\fP),"
+.B "      void (*\fIprivate_free\fP)(void *\fIptr\fP, void *\fImemory_data\fP),"
+.B "      void *\fImemory_data\fP);"
 .fi
 .
 .SH DESCRIPTION

@@ -19,9 +19,10 @@ SYNOPSIS
 <b>#include &#60;pcre2.h&#62;</b>
 </p>
 <p>
-<b>pcre2_code *pcre2_compile(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
-<b>  uint32_t <i>options</i>, int *<i>errorcode</i>, PCRE2_SIZE *<i>erroroffset,</i></b>
-<b>  pcre2_compile_context *<i>ccontext</i>);</b>
+<b>pcre2_code *pcre2_compile(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>patlen</i>,</b>
+<b>                          uint32_t <i>options</i>, int *<i>errorptr</i>,</b>
+<b>                          PCRE2_SIZE *<i>erroroffset</i>,</b>
+<b>                          pcre2_compile_context *<i>ccontext</i>);</b>
 </p>
 <h2>
 DESCRIPTION

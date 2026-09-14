@@ -8,8 +8,10 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .PP
 .nf
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *),"
-.B "  void *\fIcallout_data\fP);"
+.B "                      int (*\fIcallout\fP)("
+.B "                          pcre2_callout_block *\fIcallout_block\fP,"
+.B "                          void *\fIcallout_data\fP),"
+.B "                      void *\fIcallout_data\fP);"
 .fi
 .
 .SH DESCRIPTION

@@ -7,11 +7,13 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE,"
-.B "                                 PCRE2_UCHAR *, PCRE2_SIZE,"
-.B "                                 int, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_case_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      PCRE2_SIZE (*\fIsubstitute_case_callout\fP)("
+.B "          PCRE2_SPTR \fIinput\fP, PCRE2_SIZE \fIinput_length\fP,"
+.B "          PCRE2_UCHAR *\fIoutput\fP, PCRE2_SIZE \fIoutput_capacity\fP,"
+.B "          int \fIcase_operation\fP, void *\fIsubstitute_case_callout_data\fP),"
+.B "      void *\fIsubstitute_case_callout_data\fP);"
 .fi
 .
 .SH DESCRIPTION

@@ -8,7 +8,9 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .PP
 .nf
 .B int pcre2_set_compile_recursion_guard(pcre2_compile_context *\fIccontext\fP,
-.B "  int (*\fIguard_function\fP)(uint32_t, void *), void *\fIuser_data\fP);"
+.B "                                      int (*\fIguard\fP)(uint32_t \fIdepth\fP,"
+.B "                                                   void *\fIuser_data\fP),"
+.B "                                      void *\fIuser_data\fP);"
 .fi
 .
 .SH DESCRIPTION

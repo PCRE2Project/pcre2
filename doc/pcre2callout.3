@@ -7,11 +7,14 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B int (*pcre2_callout)(pcre2_callout_block *, void *);
+.B int (*pcre2_callout)(pcre2_callout_block *\fIcallout_block\fP,
+.B "                     void *\fIcallout_data\fP);"
 .sp
-.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
-.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
-.B "  void *\fIuser_data\fP);"
+.B int pcre2_callout_enumerate(
+.B "      const pcre2_code *\fIcode\fP,"
+.B "      int (*\fIcallback\fP)(pcre2_callout_enumerate_block *\fIcallout_block\fP,"
+.B "                      void *\fIcallout_data\fP),"
+.B "      void *\fIcallout_data\fP);"
 .fi
 .
 .SH DESCRIPTION
@@ -393,9 +396,11 @@ functions; it will never be used by PCRE2 itself.
 .rs
 .sp
 .nf
-.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
-.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
-.B "  void *\fIuser_data\fP);"
+.B int pcre2_callout_enumerate(
+.B "      const pcre2_code *\fIcode\fP,"
+.B "      int (*\fIcallback\fP)(pcre2_callout_enumerate_block *\fIcallout_block\fP,"
+.B "                      void *\fIcallout_data\fP),"
+.B "      void *\fIcallout_data\fP);"
 .fi
 .sp
 A script language that supports the use of string arguments in callouts might

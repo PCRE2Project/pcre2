@@ -16,28 +16,29 @@ document for an overview of all the PCRE2 documentation.
 .rs
 .sp
 .nf
-.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIlength\fP,
-.B "  uint32_t \fIoptions\fP, int *\fIerrorcode\fP, PCRE2_SIZE *\fIerroroffset,\fP"
-.B "  pcre2_compile_context *\fIccontext\fP);"
+.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIpatlen\fP,
+.B "                          uint32_t \fIoptions\fP, int *\fIerrorptr\fP,"
+.B "                          PCRE2_SIZE *\fIerroroffset\fP,"
+.B "                          pcre2_compile_context *\fIccontext\fP);"
 .sp
 .B void pcre2_code_free(pcre2_code *\fIcode\fP);
 .sp
-.B pcre2_match_data *pcre2_match_data_create(uint32_t \fIovecsize\fP,
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B pcre2_match_data *pcre2_match_data_create(
+.B "      uint32_t \fIoveccount\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_match_data *pcre2_match_data_create_from_pattern(
-.B "  const pcre2_code *\fIcode\fP, pcre2_general_context *\fIgcontext\fP);"
+.B "      const pcre2_code *\fIcode\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B int pcre2_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP);"
+.B "                PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                pcre2_match_context *\fImcontext\fP);"
 .sp
 .B int pcre2_dfa_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP,"
-.B "  int *\fIworkspace\fP, PCRE2_SIZE \fIwscount\fP);"
+.B "                    PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                    uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                    pcre2_match_context *\fImcontext\fP, int *\fIworkspace\fP,"
+.B "                    PCRE2_SIZE \fIwscount\fP);"
 .sp
 .B void pcre2_match_data_free(pcre2_match_data *\fImatch_data\fP);
 .fi
@@ -52,7 +53,7 @@ document for an overview of all the PCRE2 documentation.
 .B PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *\fImatch_data\fP);
 .sp
 .B PCRE2_SIZE pcre2_get_match_data_heapframes_size(
-.B "  pcre2_match_data *\fImatch_data\fP);"
+.B "      pcre2_match_data *\fImatch_data\fP);"
 .sp
 .B uint32_t pcre2_get_ovector_count(pcre2_match_data *\fImatch_data\fP);
 .sp
@@ -67,11 +68,12 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B pcre2_general_context *pcre2_general_context_create(
-.B "  void *(*\fIprivate_malloc\fP)(PCRE2_SIZE, void *),"
-.B "  void (*\fIprivate_free\fP)(void *, void *), void *\fImemory_data\fP);"
+.B "      void *(*\fIprivate_malloc\fP)(size_t \fIsize\fP, void *\fImemory_data\fP),"
+.B "      void (*\fIprivate_free\fP)(void *\fIptr\fP, void *\fImemory_data\fP),"
+.B "      void *\fImemory_data\fP);"
 .sp
 .B pcre2_general_context *pcre2_general_context_copy(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_general_context_free(pcre2_general_context *\fIgcontext\fP);
 .fi
@@ -82,54 +84,54 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B pcre2_compile_context *pcre2_compile_context_create(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_compile_context *pcre2_compile_context_copy(
-.B "  pcre2_compile_context *\fIccontext\fP);"
+.B "      pcre2_compile_context *\fIccontext\fP);"
 .sp
 .B void pcre2_compile_context_free(pcre2_compile_context *\fIccontext\fP);
 .sp
-.B int pcre2_get_bsr(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B int pcre2_get_bsr(pcre2_compile_context *\fIccontext\fP, uint32_t *\fIlength\fP);
 .sp
 .B int pcre2_get_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
-.B "  PCRE2_SIZE *\fIvalue\fP);"
+.B "                                 PCRE2_SIZE *\fIlength\fP);"
 .sp
 .B int pcre2_get_newline(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                      uint32_t *\fInewline\fP);"
 .sp
 .B int pcre2_get_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                                uint32_t *\fIlimit\fP);"
 .sp
-.B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP, uint32_t \fIvalue\fP);
 .sp
 .B int pcre2_set_character_tables(pcre2_compile_context *\fIccontext\fP,
-.B "  const uint8_t *\fItables\fP);"
+.B "                               const uint8_t *\fItables\fP);"
 .sp
 .B int pcre2_set_compile_extra_options(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIextra_options\fP);"
+.B "                                    uint32_t \fIoptions\fP);"
 .sp
 .B int pcre2_set_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
-.B "  PCRE2_SIZE \fIvalue\fP);"
+.B "                                 PCRE2_SIZE \fIlength\fP);"
 .sp
 .B int pcre2_set_max_pattern_compiled_length(
-.B "  pcre2_compile_context *\fIccontext\fP, PCRE2_SIZE \fIvalue\fP);"
+.B "      pcre2_compile_context *\fIccontext\fP, PCRE2_SIZE \fIlength\fP);"
 .sp
-.B int pcre2_set_max_varlookbehind(pcre2_compile_contest *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B int pcre2_set_max_varlookbehind(pcre2_compile_context *\fIccontext\fP,
+.B "                                uint32_t \fIlimit\fP);"
 .sp
 .B int pcre2_set_newline(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                      uint32_t \fInewline\fP);"
 .sp
 .B int pcre2_set_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                                uint32_t \fIlimit\fP);"
 .sp
 .B int pcre2_set_compile_recursion_guard(pcre2_compile_context *\fIccontext\fP,
-.B "  int (*\fIguard_function\fP)(uint32_t, void *), void *\fIuser_data\fP);"
+.B "                                      int (*\fIguard\fP)(uint32_t \fIdepth\fP,"
+.B "                                                   void *\fIuser_data\fP),"
+.B "                                      void *\fIuser_data\fP);"
 .sp
 .B int pcre2_set_optimize(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIdirective\fP);"
+.B "                       uint32_t \fIdirective\fP);"
 .fi
 .
 .
@@ -138,50 +140,57 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B pcre2_match_context *pcre2_match_context_create(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_match_context *pcre2_match_context_copy(
-.B "  pcre2_match_context *\fImcontext\fP);"
+.B "      pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_match_context_free(pcre2_match_context *\fImcontext\fP);
 .sp
 .B int pcre2_get_heap_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                         uint32_t *\fIlimit\fP);"
 .sp
 .B int pcre2_get_match_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                          uint32_t *\fIlimit\fP);"
 .sp
 .B int pcre2_get_depth_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                          uint32_t *\fIlimit\fP);"
 .sp
 .B int pcre2_get_offset_limit(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE *\fIvalue\fP);"
+.B "                           PCRE2_SIZE *\fIlimit\fP);"
 .sp
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B "                      int (*\fIcallout\fP)("
+.B "                          pcre2_callout_block *\fIcallout_block\fP,"
+.B "                          void *\fIcallout_data\fP),"
+.B "                      void *\fIcallout_data\fP);"
 .sp
-.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      int (*\fIsubstitute_callout\fP)("
+.B "          pcre2_substitute_callout_block *\fIcallout_block\fP,"
+.B "          void *\fIsubstitute_callout_data\fP),"
+.B "      void *\fIsubstitute_callout_data\fP);"
 .sp
-.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE,"
-.B "                                 PCRE2_UCHAR *, PCRE2_SIZE,"
-.B "                                 int, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_case_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      PCRE2_SIZE (*\fIsubstitute_case_callout\fP)("
+.B "          PCRE2_SPTR \fIinput\fP, PCRE2_SIZE \fIinput_length\fP,"
+.B "          PCRE2_UCHAR *\fIoutput\fP, PCRE2_SIZE \fIoutput_capacity\fP,"
+.B "          int \fIcase_operation\fP, void *\fIsubstitute_case_callout_data\fP),"
+.B "      void *\fIsubstitute_case_callout_data\fP);"
 .sp
 .B int pcre2_set_offset_limit(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE \fIvalue\fP);"
+.B "                           PCRE2_SIZE \fIlimit\fP);"
 .sp
 .B int pcre2_set_heap_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                         uint32_t \fIlimit\fP);"
 .sp
 .B int pcre2_set_match_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                          uint32_t \fIlimit\fP);"
 .sp
 .B int pcre2_set_depth_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                          uint32_t \fIlimit\fP);"
 .fi
 .
 .
@@ -190,37 +199,48 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B int pcre2_substring_copy_byname(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_UCHAR *\fIbuffer\fP, PCRE2_SIZE *\fIbufflen\fP);"
+.B "                                PCRE2_SPTR \fIstringname\fP,"
+.B "                                PCRE2_UCHAR *\fIbuffer\fP,"
+.B "                                PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_copy_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  uint32_t \fInumber\fP, PCRE2_UCHAR *\fIbuffer\fP,"
-.B "  PCRE2_SIZE *\fIbufflen\fP);"
+.B "                                  uint32_t \fIstringnumber\fP,"
+.B "                                  PCRE2_UCHAR *\fIbuffer\fP,"
+.B "                                  PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
-.B void pcre2_substring_free(PCRE2_UCHAR *\fIbuffer\fP);
+.B void pcre2_substring_free(PCRE2_UCHAR *\fIstring\fP);
 .sp
 .B int pcre2_substring_get_byname(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_UCHAR **\fIbufferptr\fP, PCRE2_SIZE *\fIbufflen\fP);"
+.B "                               PCRE2_SPTR \fIstringname\fP,"
+.B "                               PCRE2_UCHAR **\fIstringptr\fP,"
+.B "                               PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_get_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  uint32_t \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP,"
-.B "  PCRE2_SIZE *\fIbufflen\fP);"
+.B "                                 uint32_t \fIstringnumber\fP,"
+.B "                                 PCRE2_UCHAR **\fIstringptr\fP,"
+.B "                                 PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_length_byname(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_SIZE *\fIlength\fP);"
+.B "                                  PCRE2_SPTR \fIstringname\fP,"
+.B "                                  PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_length_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  uint32_t \fInumber\fP, PCRE2_SIZE *\fIlength\fP);"
+.B "                                    uint32_t \fIstringnumber\fP,"
+.B "                                    PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_nametable_scan(const pcre2_code *\fIcode\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_SPTR *\fIfirst\fP, PCRE2_SPTR *\fIlast\fP);"
+.B "                                   PCRE2_SPTR \fIstringname\fP,"
+.B "                                   PCRE2_SPTR *\fIfirstptr\fP,"
+.B "                                   PCRE2_SPTR *\fIlastptr\fP);"
 .sp
 .B int pcre2_substring_number_from_name(const pcre2_code *\fIcode\fP,
-.B "  PCRE2_SPTR \fIname\fP);"
+.B "                                     PCRE2_SPTR \fIstringname\fP);"
 .sp
 .B void pcre2_substring_list_free(PCRE2_UCHAR **\fIlist\fP);
 .sp
 .B int pcre2_substring_list_get(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_UCHAR ***\fIlistptr\fP, PCRE2_SIZE **\fIlengthsptr\fP);"
+.B "                             PCRE2_UCHAR ***\fIlistptr\fP,"
+.B "                             PCRE2_SIZE **\fIlengthsptr\fP);"
 .fi
 .
 .
@@ -229,11 +249,11 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacement\fP,"
-.B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\fP,"
-.B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
+.B "                     PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                     uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                     pcre2_match_context *\fImcontext\fP,"
+.B "                     PCRE2_SPTR \fIreplacement\fP, PCRE2_SIZE \fIrlength\fP,"
+.B "                     PCRE2_UCHAR *\fIbuffer\fP, PCRE2_SIZE *\fIblength\fP);"
 .fi
 .
 .
@@ -244,17 +264,19 @@ document for an overview of all the PCRE2 documentation.
 .B int pcre2_jit_compile(pcre2_code *\fIcode\fP, uint32_t \fIoptions\fP);
 .sp
 .B int pcre2_jit_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP);"
+.B "                    PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                    uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                    pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B pcre2_jit_stack *pcre2_jit_stack_create(size_t \fIstartsize\fP,
-.B "  size_t \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
+.B pcre2_jit_stack *pcre2_jit_stack_create(
+.B "      size_t \fIstartsize\fP, size_t \fImaxsize\fP,"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
-.B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
+.B "                            pcre2_jit_callback \fIcallback\fP,"
+.B "                            void *\fIcallback_data\fP);"
 .sp
 .B void pcre2_jit_stack_free(pcre2_jit_stack *\fIjit_stack\fP);
 .fi
@@ -265,12 +287,15 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B int32_t pcre2_serialize_decode(pcre2_code **\fIcodes\fP,
-.B "  int32_t \fInumber_of_codes\fP, const uint8_t *\fIbytes\fP,"
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "                               int32_t \fInumber_of_codes\fP,"
+.B "                               const uint8_t *\fIbytes\fP,"
+.B "                               pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B int32_t pcre2_serialize_encode(const pcre2_code **\fIcodes\fP,
-.B "  int32_t \fInumber_of_codes\fP, uint8_t **\fIserialized_bytes\fP,"
-.B "  PCRE2_SIZE *\fIserialized_size\fP, pcre2_general_context *\fIgcontext\fP);"
+.B "                               int32_t \fInumber_of_codes\fP,"
+.B "                               uint8_t **\fIserialized_bytes\fP,"
+.B "                               PCRE2_SIZE *\fIserialized_size\fP,"
+.B "                               pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_serialize_free(uint8_t *\fIbytes\fP);
 .sp
@@ -287,19 +312,21 @@ document for an overview of all the PCRE2 documentation.
 .B pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *\fIcode\fP);
 .sp
 .B int pcre2_get_error_message(int \fIerrorcode\fP, PCRE2_UCHAR *\fIbuffer\fP,
-.B "  PCRE2_SIZE \fIbufflen\fP);"
+.B "                            PCRE2_SIZE \fIbufflen\fP);"
 .sp
 .B const uint8_t *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
 .sp
 .B void pcre2_maketables_free(pcre2_general_context *\fIgcontext\fP,
-.B "  const uint8_t *\fItables\fP);"
+.B "                           const uint8_t *\fItables\fP);"
 .sp
 .B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP,
-.B "  void *\fIwhere\fP);"
+.B "                       void *\fIwhere\fP);"
 .sp
-.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
-.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
-.B "  void *\fIuser_data\fP);"
+.B int pcre2_callout_enumerate(
+.B "      const pcre2_code *\fIcode\fP,"
+.B "      int (*\fIcallback\fP)(pcre2_callout_enumerate_block *\fIcallout_block\fP,"
+.B "                      void *\fIcallout_data\fP),"
+.B "      void *\fIcallout_data\fP);"
 .sp
 .B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP);
 .fi
@@ -310,12 +337,13 @@ document for an overview of all the PCRE2 documentation.
 .sp
 .nf
 .B int pcre2_set_recursion_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                              uint32_t \fIlimit\fP);"
 .sp
 .B int pcre2_set_recursion_memory_management(
-.B "  pcre2_match_context *\fImcontext\fP,"
-.B "  void *(*\fIprivate_malloc\fP)(size_t, void *),"
-.B "  void (*\fIprivate_free\fP)(void *, void *), void *\fImemory_data\fP);"
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      void *(*\fImymalloc\fP)(size_t \fIsize\fP, void *\fImydata\fP),"
+.B "      void (*\fImyfree\fP)(void *\fIptr\fP, void *\fImydata\fP),"
+.B "      void *\fImydata\fP);"
 .fi
 .sp
 These functions became obsolete at release 10.30 and are retained only for
@@ -329,24 +357,25 @@ has no effect (it always returns zero).
 .sp
 .nf
 .B pcre2_convert_context *pcre2_convert_context_create(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_convert_context *pcre2_convert_context_copy(
-.B "  pcre2_convert_context *\fIcvcontext\fP);"
+.B "      pcre2_convert_context *\fIccontext\fP);"
 .sp
-.B void pcre2_convert_context_free(pcre2_convert_context *\fIcvcontext\fP);
+.B void pcre2_convert_context_free(pcre2_convert_context *\fIccontext\fP);
 .sp
-.B int pcre2_set_glob_escape(pcre2_convert_context *\fIcvcontext\fP,
-.B "  uint32_t \fIescape_char\fP);"
+.B int pcre2_set_glob_escape(pcre2_convert_context *\fIccontext\fP,
+.B "                          uint32_t \fIescape_char\fP);"
 .sp
-.B int pcre2_set_glob_separator(pcre2_convert_context *\fIcvcontext\fP,
-.B "  uint32_t \fIseparator_char\fP);"
+.B int pcre2_set_glob_separator(pcre2_convert_context *\fIccontext\fP,
+.B "                             uint32_t \fIseparator_char\fP);"
 .sp
-.B int pcre2_pattern_convert(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIlength\fP,
-.B "  uint32_t \fIoptions\fP, PCRE2_UCHAR **\fIbuffer\fP,"
-.B "  PCRE2_SIZE *\fIblength\fP, pcre2_convert_context *\fIcvcontext\fP);"
+.B int pcre2_pattern_convert(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIplength\fP,
+.B "                          uint32_t \fIoptions\fP, PCRE2_UCHAR **\fIbuffptr\fP,"
+.B "                          PCRE2_SIZE *\fIbufflenptr\fP,"
+.B "                          pcre2_convert_context *\fIccontext\fP);"
 .sp
-.B void pcre2_converted_pattern_free(PCRE2_UCHAR *\fIconverted_pattern\fP);
+.B void pcre2_converted_pattern_free(PCRE2_UCHAR *\fIconverted\fP);
 .fi
 .sp
 These functions provide a way of converting non-PCRE2 patterns into
@@ -718,8 +747,9 @@ general context. A general context is created by:
 .sp
 .nf
 .B pcre2_general_context *pcre2_general_context_create(
-.B "  void *(*\fIprivate_malloc\fP)(PCRE2_SIZE, void *),"
-.B "  void (*\fIprivate_free\fP)(void *, void *), void *\fImemory_data\fP);"
+.B "      void *(*\fIprivate_malloc\fP)(size_t \fIsize\fP, void *\fImemory_data\fP),"
+.B "      void (*\fIprivate_free\fP)(void *\fIptr\fP, void *\fImemory_data\fP),"
+.B "      void *\fImemory_data\fP);"
 .fi
 .sp
 The two function pointers specify custom memory management functions, whose
@@ -744,7 +774,7 @@ A general context can be copied by calling:
 .sp
 .nf
 .B pcre2_general_context *pcre2_general_context_copy(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .fi
 .sp
 The memory used for a general context should be freed by calling:
@@ -781,10 +811,10 @@ A compile context is created, copied, and freed by the following functions:
 .sp
 .nf
 .B pcre2_compile_context *pcre2_compile_context_create(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_compile_context *pcre2_compile_context_copy(
-.B "  pcre2_compile_context *\fIccontext\fP);"
+.B "      pcre2_compile_context *\fIccontext\fP);"
 .sp
 .B void pcre2_compile_context_free(pcre2_compile_context *\fIccontext\fP);
 .fi
@@ -799,17 +829,16 @@ nested parentheses. They return 0 on success or PCRE2_ERROR_NULL if either
 argument is NULL.
 .sp
 .nf
-.B int pcre2_get_bsr(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B int pcre2_get_bsr(pcre2_compile_context *\fIccontext\fP, uint32_t *\fIlength\fP);
 .sp
 .B int pcre2_get_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
-.B "  PCRE2_SIZE *\fIvalue\fP);"
+.B "                                 PCRE2_SIZE *\fIlength\fP);"
 .sp
 .B int pcre2_get_newline(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                      uint32_t *\fInewline\fP);"
 .sp
 .B int pcre2_get_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                                uint32_t *\fIlimit\fP);"
 .fi
 .sp
 The value returned by \fBpcre2_get_max_pattern_length()\fP is the largest
@@ -817,8 +846,7 @@ value a PCRE2_SIZE variable can hold when the limit is unlimited. Passing this
 value to \fBpcre2_set_max_pattern_length()\fP makes the limit unlimited.
 .sp
 .nf
-.B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP, uint32_t \fIvalue\fP);
 .fi
 .sp
 The value must be PCRE2_BSR_ANYCRLF, to specify that \eR matches only CR, LF,
@@ -829,7 +857,7 @@ interpreted matching functions, \fIpcre2_match()\fP and
 .sp
 .nf
 .B int pcre2_set_character_tables(pcre2_compile_context *\fIccontext\fP,
-.B "  const uint8_t *\fItables\fP);"
+.B "                               const uint8_t *\fItables\fP);"
 .fi
 .sp
 The value must be the result of a call to \fBpcre2_maketables()\fP, whose only
@@ -838,7 +866,7 @@ in the current locale.
 .sp
 .nf
 .B int pcre2_set_compile_extra_options(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIextra_options\fP);"
+.B "                                    uint32_t \fIoptions\fP);"
 .fi
 .sp
 As PCRE2 has developed, almost all the 32 option bits that are available in
@@ -855,7 +883,7 @@ below.
 .sp
 .nf
 .B int pcre2_set_max_pattern_length(pcre2_compile_context *\fIccontext\fP,
-.B "  PCRE2_SIZE \fIvalue\fP);"
+.B "                                 PCRE2_SIZE \fIlength\fP);"
 .fi
 .sp
 This sets a maximum length, in code units, for any pattern string that is
@@ -866,7 +894,7 @@ PCRE2_SIZE variable can hold, which is effectively unlimited.
 .sp
 .nf
 .B int pcre2_set_max_pattern_compiled_length(
-.B "  pcre2_compile_context *\fIccontext\fP, PCRE2_SIZE \fIvalue\fP);"
+.B "      pcre2_compile_context *\fIccontext\fP, PCRE2_SIZE \fIlength\fP);"
 .fi
 .sp
 This sets a maximum size, in bytes, for the memory needed to hold the compiled
@@ -877,8 +905,8 @@ memory they use. The default is the largest number that a PCRE2_SIZE variable
 can hold, which is effectively unlimited.
 .sp
 .nf
-.B int pcre2_set_max_varlookbehind(pcre2_compile_contest *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B int pcre2_set_max_varlookbehind(pcre2_compile_context *\fIccontext\fP,
+.B "                                uint32_t \fIlimit\fP);"
 .fi
 .sp
 This sets a maximum length for the number of characters matched by a
@@ -888,7 +916,7 @@ without a bounding length are not supported.
 .sp
 .nf
 .B int pcre2_set_newline(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                      uint32_t \fInewline\fP);"
 .fi
 .sp
 This specifies which characters or character sequences are to be recognized as
@@ -913,7 +941,7 @@ functions, \fIpcre2_match()\fP and \fIpcre2_dfa_match()\fP.
 .sp
 .nf
 .B int pcre2_set_parens_nest_limit(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                                uint32_t \fIlimit\fP);"
 .fi
 .sp
 This parameter adjusts the limit, set when PCRE2 is built (default 250), on the
@@ -923,7 +951,9 @@ parentheses of all kinds, not just capturing parentheses.
 .sp
 .nf
 .B int pcre2_set_compile_recursion_guard(pcre2_compile_context *\fIccontext\fP,
-.B "  int (*\fIguard_function\fP)(uint32_t, void *), void *\fIuser_data\fP);"
+.B "                                      int (*\fIguard\fP)(uint32_t \fIdepth\fP,"
+.B "                                                   void *\fIuser_data\fP),"
+.B "                                      void *\fIuser_data\fP);"
 .fi
 .sp
 There is at least one application that runs PCRE2 in threads with very limited
@@ -941,7 +971,7 @@ zero if all is well, or non-zero to force an error.
 .sp
 .nf
 .B int pcre2_set_optimize(pcre2_compile_context *\fIccontext\fP,
-.B "  uint32_t \fIdirective\fP);"
+.B "                       uint32_t \fIdirective\fP);"
 .fi
 .sp
 PCRE2 can apply various performance optimizations during compilation, in order
@@ -1059,10 +1089,10 @@ A match context is created, copied, and freed by the following functions:
 .sp
 .nf
 .B pcre2_match_context *pcre2_match_context_create(
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_match_context *pcre2_match_context_copy(
-.B "  pcre2_match_context *\fImcontext\fP);"
+.B "      pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_match_context_free(pcre2_match_context *\fImcontext\fP);
 .fi
@@ -1077,16 +1107,16 @@ PCRE2_ERROR_NULL if either argument is NULL.
 .sp
 .nf
 .B int pcre2_get_heap_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                         uint32_t *\fIlimit\fP);"
 .sp
 .B int pcre2_get_match_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                          uint32_t *\fIlimit\fP);"
 .sp
 .B int pcre2_get_depth_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t *\fIvalue\fP);"
+.B "                          uint32_t *\fIlimit\fP);"
 .sp
 .B int pcre2_get_offset_limit(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE *\fIvalue\fP);"
+.B "                           PCRE2_SIZE *\fIlimit\fP);"
 .fi
 .sp
 The value returned by \fBpcre2_get_offset_limit()\fP is the largest value a
@@ -1095,8 +1125,10 @@ to \fBpcre2_set_offset_limit()\fP removes the offset limit.
 .sp
 .nf
 .B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_callout_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B "                      int (*\fIcallout\fP)("
+.B "                          pcre2_callout_block *\fIcallout_block\fP,"
+.B "                          void *\fIcallout_data\fP),"
+.B "                      void *\fIcallout_data\fP);"
 .fi
 .sp
 This sets up a callout function for PCRE2 to call at specified points
@@ -1107,9 +1139,12 @@ during a matching operation. Details are given in the
 documentation.
 .sp
 .nf
-.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      int (*\fIsubstitute_callout\fP)("
+.B "          pcre2_substitute_callout_block *\fIcallout_block\fP,"
+.B "          void *\fIsubstitute_callout_data\fP),"
+.B "      void *\fIsubstitute_callout_data\fP);"
 .fi
 .sp
 This sets up a callout function for PCRE2 to call after each substitution
@@ -1121,11 +1156,13 @@ below.
 .\"
 .sp
 .nf
-.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE,"
-.B "                                 PCRE2_UCHAR *, PCRE2_SIZE,"
-.B "                                 int, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_case_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      PCRE2_SIZE (*\fIsubstitute_case_callout\fP)("
+.B "          PCRE2_SPTR \fIinput\fP, PCRE2_SIZE \fIinput_length\fP,"
+.B "          PCRE2_UCHAR *\fIoutput\fP, PCRE2_SIZE \fIoutput_capacity\fP,"
+.B "          int \fIcase_operation\fP, void *\fIsubstitute_case_callout_data\fP),"
+.B "      void *\fIsubstitute_case_callout_data\fP);"
 .fi
 .sp
 This sets up a callout function for PCRE2 to call when performing case
@@ -1138,7 +1175,7 @@ below.
 .sp
 .nf
 .B int pcre2_set_offset_limit(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE \fIvalue\fP);"
+.B "                           PCRE2_SIZE \fIlimit\fP);"
 .fi
 .sp
 The \fIoffset_limit\fP parameter limits how far an unanchored search can
@@ -1168,7 +1205,7 @@ offset limit. In other words, whichever limit comes first is used.
 .sp
 .nf
 .B int pcre2_set_heap_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                         uint32_t \fIlimit\fP);"
 .fi
 .sp
 The \fIheap_limit\fP parameter specifies, in units of kibibytes (1024 bytes),
@@ -1210,7 +1247,7 @@ disables the use of the heap.
 .sp
 .nf
 .B int pcre2_set_match_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                          uint32_t \fIlimit\fP);"
 .fi
 .sp
 The \fImatch_limit\fP parameter provides a means of preventing PCRE2 from using
@@ -1245,7 +1282,7 @@ less than the limit set by the caller of \fBpcre2_match()\fP or
 .sp
 .nf
 .B int pcre2_set_depth_limit(pcre2_match_context *\fImcontext\fP,
-.B "  uint32_t \fIvalue\fP);"
+.B "                          uint32_t \fIlimit\fP);"
 .fi
 .sp
 This parameter limits the depth of nested backtracking in \fBpcre2_match()\fP.
@@ -1478,9 +1515,10 @@ the terminating zero.
 .rs
 .sp
 .nf
-.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIlength\fP,
-.B "  uint32_t \fIoptions\fP, int *\fIerrorcode\fP, PCRE2_SIZE *\fIerroroffset,\fP"
-.B "  pcre2_compile_context *\fIccontext\fP);"
+.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIpatlen\fP,
+.B "                          uint32_t \fIoptions\fP, int *\fIerrorptr\fP,"
+.B "                          PCRE2_SIZE *\fIerroroffset\fP,"
+.B "                          pcre2_compile_context *\fIccontext\fP);"
 .sp
 .B void pcre2_code_free(pcre2_code *\fIcode\fP);
 .sp
@@ -2312,17 +2350,19 @@ cannot be combined with PCRE2_EXTRA_CASELESS_RESTRICT.
 .B int pcre2_jit_compile(pcre2_code *\fIcode\fP, uint32_t \fIoptions\fP);
 .sp
 .B int pcre2_jit_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP);"
+.B "                    PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                    uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                    pcre2_match_context *\fImcontext\fP);"
 .sp
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
 .sp
-.B pcre2_jit_stack *pcre2_jit_stack_create(size_t \fIstartsize\fP,
-.B "  size_t \fImaxsize\fP, pcre2_general_context *\fIgcontext\fP);"
+.B pcre2_jit_stack *pcre2_jit_stack_create(
+.B "      size_t \fIstartsize\fP, size_t \fImaxsize\fP,"
+.B "      pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
-.B "  pcre2_jit_callback \fIcallback_function\fP, void *\fIcallback_data\fP);"
+.B "                            pcre2_jit_callback \fIcallback\fP,"
+.B "                            void *\fIcallback_data\fP);"
 .sp
 .B void pcre2_jit_stack_free(pcre2_jit_stack *\fIjit_stack\fP);
 .fi
@@ -2350,7 +2390,7 @@ Most (but not all) patterns can be optimized by the JIT compiler.
 .B const uint8_t *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
 .sp
 .B void pcre2_maketables_free(pcre2_general_context *\fIgcontext\fP,
-.B "  const uint8_t *\fItables\fP);"
+.B "                           const uint8_t *\fItables\fP);"
 .fi
 .P
 PCRE2 handles caseless matching, and determines whether characters are letters,
@@ -2441,7 +2481,8 @@ documentation for details.
 .rs
 .sp
 .nf
-.B int pcre2_pattern_info(const pcre2 *\fIcode\fP, uint32_t \fIwhat\fP, void *\fIwhere\fP);
+.B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP,
+.B "                       void *\fIwhere\fP);"
 .fi
 .P
 The \fBpcre2_pattern_info()\fP function returns general information about a
@@ -2788,9 +2829,11 @@ compiler does not alter the value returned by this option.
 .rs
 .sp
 .nf
-.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
-.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
-.B "  void *\fIuser_data\fP);"
+.B int pcre2_callout_enumerate(
+.B "      const pcre2_code *\fIcode\fP,"
+.B "      int (*\fIcallback\fP)(pcre2_callout_enumerate_block *\fIcallout_block\fP,"
+.B "                      void *\fIcallout_data\fP),"
+.B "      void *\fIcallout_data\fP);"
 .fi
 .sp
 A script language that supports the use of string arguments in callouts might
@@ -2831,11 +2874,11 @@ to an abstract format like Java or .NET serialization.
 .rs
 .sp
 .nf
-.B pcre2_match_data *pcre2_match_data_create(uint32_t \fIovecsize\fP,
-.B "  pcre2_general_context *\fIgcontext\fP);"
+.B pcre2_match_data *pcre2_match_data_create(
+.B "      uint32_t \fIoveccount\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B pcre2_match_data *pcre2_match_data_create_from_pattern(
-.B "  const pcre2_code *\fIcode\fP, pcre2_general_context *\fIgcontext\fP);"
+.B "      const pcre2_code *\fIcode\fP, pcre2_general_context *\fIgcontext\fP);"
 .sp
 .B void pcre2_match_data_free(pcre2_match_data *\fImatch_data\fP);
 .fi
@@ -2924,7 +2967,7 @@ argument, it returns immediately, without doing anything.
 .B PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *\fImatch_data\fP);
 .sp
 .B PCRE2_SIZE pcre2_get_match_data_heapframes_size(
-.B "  pcre2_match_data *\fImatch_data\fP);"
+.B "      pcre2_match_data *\fImatch_data\fP);"
 .fi
 .P
 The size of a match data block depends on the size of the ovector that it
@@ -2961,9 +3004,9 @@ frames vector has become too big.
 .sp
 .nf
 .B int pcre2_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP);"
+.B "                PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                pcre2_match_context *\fImcontext\fP);"
 .fi
 .P
 The function \fBpcre2_match()\fP is called to match a subject string against a
@@ -3589,7 +3632,7 @@ matching is attempted.
 .sp
 .nf
 .B int pcre2_get_error_message(int \fIerrorcode\fP, PCRE2_UCHAR *\fIbuffer\fP,
-.B "  PCRE2_SIZE \fIbufflen\fP);"
+.B "                            PCRE2_SIZE \fIbufflen\fP);"
 .fi
 .P
 A text message for an error code from any PCRE2 function (compile, match, or
@@ -3613,7 +3656,7 @@ None of the messages is very long; a buffer size of 120 code units is ample.
 .sp
 .nf
 .B int pcre2_next_match(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SIZE *\fIpstart_offset\fP, uint32_t *\fIpoptions\fP);"
+.B "                     PCRE2_SIZE *\fIpstart_offset\fP, uint32_t *\fIpoptions\fP);"
 .fi
 .P
 A common task for applications is to implement "global" matching behaviour,
@@ -3702,17 +3745,20 @@ PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.
 .sp
 .nf
 .B int pcre2_substring_length_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  uint32_t \fInumber\fP, PCRE2_SIZE *\fIlength\fP);"
+.B "                                    uint32_t \fIstringnumber\fP,"
+.B "                                    PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_copy_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  uint32_t \fInumber\fP, PCRE2_UCHAR *\fIbuffer\fP,"
-.B "  PCRE2_SIZE *\fIbufflen\fP);"
+.B "                                  uint32_t \fIstringnumber\fP,"
+.B "                                  PCRE2_UCHAR *\fIbuffer\fP,"
+.B "                                  PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_get_bynumber(pcre2_match_data *\fImatch_data\fP,
-.B "  uint32_t \fInumber\fP, PCRE2_UCHAR **\fIbufferptr\fP,"
-.B "  PCRE2_SIZE *\fIbufflen\fP);"
+.B "                                 uint32_t \fIstringnumber\fP,"
+.B "                                 PCRE2_UCHAR **\fIstringptr\fP,"
+.B "                                 PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
-.B void pcre2_substring_free(PCRE2_UCHAR *\fIbuffer\fP);
+.B void pcre2_substring_free(PCRE2_UCHAR *\fIstring\fP);
 .fi
 .P
 Captured substrings can be accessed directly by using the ovector as described
@@ -3796,7 +3842,8 @@ capturing slots, substring number 1 is unset.
 .sp
 .nf
 .B int pcre2_substring_list_get(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_UCHAR ***\fIlistptr\fP, PCRE2_SIZE **\fIlengthsptr\fP);"
+.B "                             PCRE2_UCHAR ***\fIlistptr\fP,"
+.B "                             PCRE2_SIZE **\fIlengthsptr\fP);"
 .sp
 .B void pcre2_substring_list_free(PCRE2_UCHAR **\fIlist\fP);
 .fi
@@ -3835,18 +3882,23 @@ substrings, or by calling \fBpcre2_substring_length_bynumber()\fP.
 .sp
 .nf
 .B int pcre2_substring_number_from_name(const pcre2_code *\fIcode\fP,
-.B "  PCRE2_SPTR \fIname\fP);"
+.B "                                     PCRE2_SPTR \fIstringname\fP);"
 .sp
 .B int pcre2_substring_length_byname(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_SIZE *\fIlength\fP);"
+.B "                                  PCRE2_SPTR \fIstringname\fP,"
+.B "                                  PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_copy_byname(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_UCHAR *\fIbuffer\fP, PCRE2_SIZE *\fIbufflen\fP);"
+.B "                                PCRE2_SPTR \fIstringname\fP,"
+.B "                                PCRE2_UCHAR *\fIbuffer\fP,"
+.B "                                PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
 .B int pcre2_substring_get_byname(pcre2_match_data *\fImatch_data\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_UCHAR **\fIbufferptr\fP, PCRE2_SIZE *\fIbufflen\fP);"
+.B "                               PCRE2_SPTR \fIstringname\fP,"
+.B "                               PCRE2_UCHAR **\fIstringptr\fP,"
+.B "                               PCRE2_SIZE *\fIsizeptr\fP);"
 .sp
-.B void pcre2_substring_free(PCRE2_UCHAR *\fIbuffer\fP);
+.B void pcre2_substring_free(PCRE2_UCHAR *\fIstring\fP);
 .fi
 .P
 To extract a substring by name, you first have to find associated number.
@@ -3897,11 +3949,11 @@ same number causes an error at compile time.
 .sp
 .nf
 .B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP, PCRE2_SPTR \fIreplacement\fP,"
-.B "  PCRE2_SIZE \fIrlength\fP, PCRE2_UCHAR *\fIoutputbuffer\fP,"
-.B "  PCRE2_SIZE *\fIoutlengthptr\fP);"
+.B "                     PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                     uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                     pcre2_match_context *\fImcontext\fP,"
+.B "                     PCRE2_SPTR \fIreplacement\fP, PCRE2_SIZE \fIrlength\fP,"
+.B "                     PCRE2_UCHAR *\fIbuffer\fP, PCRE2_SIZE *\fIblength\fP);"
 .fi
 .P
 This function optionally calls \fBpcre2_match()\fP and then makes a copy of the
@@ -4248,9 +4300,12 @@ above).
 .rs
 .sp
 .nf
-.B int pcre2_set_substitute_callout(pcre2_match_context *\fImcontext\fP,
-.B "  int (*\fIcallout_function\fP)(pcre2_substitute_callout_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      int (*\fIsubstitute_callout\fP)("
+.B "          pcre2_substitute_callout_block *\fIcallout_block\fP,"
+.B "          void *\fIsubstitute_callout_data\fP),"
+.B "      void *\fIsubstitute_callout_data\fP);"
 .fi
 .sp
 The \fBpcre2_set_substitute_callout()\fP function can be used to specify a
@@ -4314,11 +4369,13 @@ matches so far.
 .rs
 .sp
 .nf
-.B int pcre2_set_substitute_case_callout(pcre2_match_context *\fImcontext\fP,
-.B "  PCRE2_SIZE (*\fIcallout_function\fP)(PCRE2_SPTR, PCRE2_SIZE,"
-.B "                                 PCRE2_UCHAR *, PCRE2_SIZE,"
-.B "                                 int, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_set_substitute_case_callout(
+.B "      pcre2_match_context *\fImcontext\fP,"
+.B "      PCRE2_SIZE (*\fIsubstitute_case_callout\fP)("
+.B "          PCRE2_SPTR \fIinput\fP, PCRE2_SIZE \fIinput_length\fP,"
+.B "          PCRE2_UCHAR *\fIoutput\fP, PCRE2_SIZE \fIoutput_capacity\fP,"
+.B "          int \fIcase_operation\fP, void *\fIsubstitute_case_callout_data\fP),"
+.B "      void *\fIsubstitute_case_callout_data\fP);"
 .fi
 .sp
 The \fBpcre2_set_substitute_case_callout()\fP function can be used to specify
@@ -4406,7 +4463,9 @@ loop.
 .sp
 .nf
 .B int pcre2_substring_nametable_scan(const pcre2_code *\fIcode\fP,
-.B "  PCRE2_SPTR \fIname\fP, PCRE2_SPTR *\fIfirst\fP, PCRE2_SPTR *\fIlast\fP);"
+.B "                                   PCRE2_SPTR \fIstringname\fP,"
+.B "                                   PCRE2_SPTR *\fIfirstptr\fP,"
+.B "                                   PCRE2_SPTR *\fIlastptr\fP);"
 .fi
 .P
 When a pattern is compiled with the PCRE2_DUPNAMES option, names for capture
@@ -4477,10 +4536,10 @@ other alternatives. Ultimately, when it runs out of matches,
 .sp
 .nf
 .B int pcre2_dfa_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "  PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstartoffset\fP,"
-.B "  uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "  pcre2_match_context *\fImcontext\fP,"
-.B "  int *\fIworkspace\fP, PCRE2_SIZE \fIwscount\fP);"
+.B "                    PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
+.B "                    uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
+.B "                    pcre2_match_context *\fImcontext\fP, int *\fIworkspace\fP,"
+.B "                    PCRE2_SIZE \fIwscount\fP);"
 .fi
 .P
 The function \fBpcre2_dfa_match()\fP is called to match a subject string

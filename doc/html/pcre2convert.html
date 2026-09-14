@@ -31,22 +31,22 @@ globs and POSIX patterns, are supported.
 <h2><a name="SEC2" href="#TOC1">THE CONVERT CONTEXT</a></h2>
 <p>
 <b>pcre2_convert_context *pcre2_convert_context_create(</b>
-<b>  pcre2_general_context *<i>gcontext</i>);</b>
+<b>      pcre2_general_context *<i>gcontext</i>);</b>
 <br>
 <br>
 <b>pcre2_convert_context *pcre2_convert_context_copy(</b>
-<b>  pcre2_convert_context *<i>cvcontext</i>);</b>
+<b>      pcre2_convert_context *<i>ccontext</i>);</b>
 <br>
 <br>
-<b>void pcre2_convert_context_free(pcre2_convert_context *<i>cvcontext</i>);</b>
+<b>void pcre2_convert_context_free(pcre2_convert_context *<i>ccontext</i>);</b>
 <br>
 <br>
-<b>int pcre2_set_glob_escape(pcre2_convert_context *<i>cvcontext</i>,</b>
-<b>  uint32_t <i>escape_char</i>);</b>
+<b>int pcre2_set_glob_escape(pcre2_convert_context *<i>ccontext</i>,</b>
+<b>                          uint32_t <i>escape_char</i>);</b>
 <br>
 <br>
-<b>int pcre2_set_glob_separator(pcre2_convert_context *<i>cvcontext</i>,</b>
-<b>  uint32_t <i>separator_char</i>);</b>
+<b>int pcre2_set_glob_separator(pcre2_convert_context *<i>ccontext</i>,</b>
+<b>                             uint32_t <i>separator_char</i>);</b>
 <br>
 <br>
 A convert context is used to hold parameters that affect the way that pattern
@@ -70,12 +70,13 @@ their second argument is invalid.
 </p>
 <h2><a name="SEC3" href="#TOC1">THE CONVERSION FUNCTION</a></h2>
 <p>
-<b>int pcre2_pattern_convert(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>length</i>,</b>
-<b>  uint32_t <i>options</i>, PCRE2_UCHAR **<i>buffer</i>,</b>
-<b>  PCRE2_SIZE *<i>blength</i>, pcre2_convert_context *<i>cvcontext</i>);</b>
+<b>int pcre2_pattern_convert(PCRE2_SPTR <i>pattern</i>, PCRE2_SIZE <i>plength</i>,</b>
+<b>                          uint32_t <i>options</i>, PCRE2_UCHAR **<i>buffptr</i>,</b>
+<b>                          PCRE2_SIZE *<i>bufflenptr</i>,</b>
+<b>                          pcre2_convert_context *<i>ccontext</i>);</b>
 <br>
 <br>
-<b>void pcre2_converted_pattern_free(PCRE2_UCHAR *<i>converted_pattern</i>);</b>
+<b>void pcre2_converted_pattern_free(PCRE2_UCHAR *<i>converted</i>);</b>
 <br>
 <br>
 The first two arguments of <b>pcre2_pattern_convert()</b> define the foreign

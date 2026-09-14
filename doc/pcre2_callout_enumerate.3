@@ -1,4 +1,4 @@
-.TH PCRE2_COMPILE 3 "23 March 2017" "PCRE2 10.49-DEV"
+.TH PCRE2_CALLOUT_ENUMERATE 3 "23 March 2017" "PCRE2 10.49-DEV"
 .SH NAME
 PCRE2 - Perl-compatible regular expressions (revised API)
 .SH SYNOPSIS
@@ -7,9 +7,11 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .B #include <pcre2.h>
 .PP
 .nf
-.B int pcre2_callout_enumerate(const pcre2_code *\fIcode\fP,
-.B "  int (*\fIcallback\fP)(pcre2_callout_enumerate_block *, void *),"
-.B "  void *\fIcallout_data\fP);"
+.B int pcre2_callout_enumerate(
+.B "      const pcre2_code *\fIcode\fP,"
+.B "      int (*\fIcallback\fP)(pcre2_callout_enumerate_block *\fIcallout_block\fP,"
+.B "                      void *\fIcallout_data\fP),"
+.B "      void *\fIcallout_data\fP);"
 .fi
 .
 .SH DESCRIPTION
