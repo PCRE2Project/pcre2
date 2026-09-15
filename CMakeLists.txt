@@ -163,6 +163,7 @@ check_include_file(sys/stat.h HAVE_SYS_STAT_H)
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(unistd.h HAVE_UNISTD_H)
 check_include_file(windows.h HAVE_WINDOWS_H)
+check_include_file(stdatomic.h HAVE_STDATOMIC_H)
 
 # Check whether any system-wide extensions need to be enabled, in order for
 # OS functionality to be exposed.

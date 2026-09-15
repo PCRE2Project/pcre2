@@ -82,6 +82,7 @@ pub fn build(b: *std.Build) !void {
             .HAVE_SYS_TYPES_H = true,
             .HAVE_UNISTD_H = is_unix or is_mingw,
             .HAVE_WINDOWS_H = rt.os.tag == .windows,
+            .HAVE_STDATOMIC_H = true,
 
             .HAVE_MEMFD_CREATE = is_musl or is_glibc or is_freebsd,
             .HAVE_SECURE_GETENV = is_musl or is_glibc or is_freebsd,

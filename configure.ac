@@ -588,6 +588,7 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 AC_CHECK_HEADERS(assert.h limits.h sys/types.h sys/stat.h dirent.h)
 AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 AC_CHECK_HEADERS([sys/wait.h], [HAVE_SYS_WAIT_H=1])
+AC_CHECK_HEADERS([stdatomic.h])
 
 # Conditional compilation
 AM_CONDITIONAL(WITH_PCRE2_8, test "x$enable_pcre2_8" = "xyes")
