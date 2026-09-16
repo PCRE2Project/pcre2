@@ -1,0 +1,124 @@
+'\" t
+.\"     Title: pcre2-config
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 2025-02-22
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2\-CONFIG" "1" "2025-02-22" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2-config \- program to return PCRE2 configuration == SYNOPSIS
+.sp
+.if n .RS 4
+.nf
+.fam C
+pcre2\-config  [\-\-prefix] [\-\-exec\-prefix] [\-\-version]
+             [\-\-libs8] [\-\-libs16] [\-\-libs32] [\-\-libs\-posix]
+             [\-\-cflags] [\-\-cflags\-posix]
+.fam
+.fi
+.if n .RE
+.SH "DESCRIPTION"
+.sp
+\fBpcre2\-config\fP returns the configuration of the installed PCRE2 libraries
+and the options required to compile a program to use them. Some of the options
+apply only to the 8\-bit, 16\-bit, or 32\-bit libraries, respectively, and are not
+available for libraries that have not been built. If an unavailable option is
+encountered, the "usage" information is output.
+.SH "OPTIONS"
+.sp
+\fB\-\-prefix\fP
+.RS 4
+Writes the directory prefix used in the PCRE2 installation for
+architecture\-independent files (\fI/usr\fP on many systems, \fI/usr/local\fP on
+some systems) to the standard output.
+.RE
+.sp
+\fB\-\-exec\-prefix\fP
+.RS 4
+Writes the directory prefix used in the PCRE2 installation for
+architecture\-dependent files (normally the same as \fB\-\-prefix\fP) to the
+standard output.
+.RE
+.sp
+\fB\-\-version\fP
+.RS 4
+Writes the version number of the installed PCRE2 libraries to the standard
+output.
+.RE
+.sp
+\fB\-\-libs8\fP
+.RS 4
+Writes to the standard output the command line options required to link
+with the 8\-bit PCRE2 library (\fB\-lpcre2\-8\fP on many systems).
+.RE
+.sp
+\fB\-\-libs16\fP
+.RS 4
+Writes to the standard output the command line options required to link
+with the 16\-bit PCRE2 library (\fB\-lpcre2\-16\fP on many systems).
+.RE
+.sp
+\fB\-\-libs32\fP
+.RS 4
+Writes to the standard output the command line options required to link
+with the 32\-bit PCRE2 library (\fB\-lpcre2\-32\fP on many systems).
+.RE
+.sp
+\fB\-\-libs\-posix\fP
+.RS 4
+Writes to the standard output the command line options required to link with
+PCRE2\(cqs POSIX API wrapper library (\fB\-lpcre2\-posix\fP \fB\-lpcre2\-8\fP on many
+systems).
+.RE
+.sp
+\fB\-\-cflags\fP
+.RS 4
+Writes to the standard output the command line options required to compile
+files that use PCRE2 (this may include some \fB\-I\fP options, but is blank on
+many systems).
+.RE
+.sp
+\fB\-\-cflags\-posix\fP
+.RS 4
+Writes to the standard output the command line options required to compile
+files that use PCRE2\(cqs POSIX API wrapper library (this may include some
+\fB\-I\fP options, but is blank on many systems).
+.RE
+.SH "SEE ALSO"
+.sp
+\fBpcre2(3)\fP
+.SH "AUTHOR"
+.sp
+This manual page was originally written by Mark Baker for the Debian GNU/Linux
+system. It has been subsequently revised as a generic PCRE2 man page.
+.SH "REVISION"
+.sp
+.if n .RS 4
+.nf
+.fam C
+Last updated: 22 February 2025
+.fam
+.fi
+.if n .RE

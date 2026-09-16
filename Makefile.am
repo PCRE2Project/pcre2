@@ -24,6 +24,9 @@ dist_doc_DATA = \
   README \
   SECURITY.md \
   SUPPORT-LIFECYCLE.md \
+  doc/pcre2-config.adoc \
+  doc/pcre2_code_free.adoc \
+  doc/pcre2_compile.adoc \
   doc/pcre2.txt \
   doc/pcre2-config.txt \
   doc/pcre2grep.txt \
@@ -143,13 +146,13 @@ dist_html_DATA = \
   doc/html/pcre2unicode.html
 
 dist_man_MANS = \
-  doc/pcre2-config.1 \
+  doc/man/pcre2-config.1 \
   doc/pcre2.3 \
   doc/pcre2_callout_enumerate.3 \
   doc/pcre2_code_copy.3 \
   doc/pcre2_code_copy_with_tables.3 \
-  doc/pcre2_code_free.3 \
-  doc/pcre2_compile.3 \
+  doc/man/pcre2_code_free.3 \
+  doc/man/pcre2_compile.3 \
   doc/pcre2_compile_context_copy.3 \
   doc/pcre2_compile_context_create.3 \
   doc/pcre2_compile_context_free.3 \

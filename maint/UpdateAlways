@@ -21,6 +21,9 @@
 
 # LintMan     A Perl script that lints man pages looking for inconsistencies.
 
+# RenderAsciidoc
+#             A script that renders an AsciiDoc source as a manpage and HTML.
+
 # doc/index.html.src
 #             A file that is copied as index.html into the doc/html directory
 #             when the HTML documentation is built. It works like this so that
@@ -69,6 +72,36 @@ for file in *.1 *.3 ; do
   fi
 done
 
+# Verify the version number in AsciiDoc manpages and render them before their
+# generated manpages are needed by the text and warning checks below.
+
+for file in *.adoc ; do
+  if ! grep -qE "^:mansource: PCRE2 $CURRENT_RELEASE$" "$file" ; then
+    echo "Version number in $file does not match current release"
+    exit 1
+  fi
+done
+
+echo "Making HTML documentation"
+/bin/rm html/*
+cp index.html.src html/index.html
+cp ../README html/README.txt
+cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
+
+mkdir -p man
+/bin/rm -f man/*
+for file in *.adoc ; do
+  base=`basename $file .adoc`
+  section=`sed -n 's/^:manvolnum: //p' "$file"`
+  if [ "$section" != "1" ] && [ "$section" != "3" ] ; then
+    echo "Invalid manpage section in $file"
+    exit 1
+  fi
+  echo "  Making $base.$section and $base.html"
+  ../maint/RenderAsciidoc "$file" "man/$base.$section" "html/$base.html"
+  if [ $? != 0 ] ; then exit 1; fi
+done
+
 # Make Text form of the documentation. It needs some mangling to make it
 # tidy for online reading. Concatenate all the .3 stuff, but omit the
 # individual function pages.
@@ -105,7 +138,9 @@ done
 # The three commands
 for file in pcre2test pcre2grep pcre2-config ; do
   echo Making $file.txt
-  nroff -c -man $file.1 >$file.rawtxt
+  man_source=$file.1
+  if [ -f "man/$man_source" ] ; then man_source="man/$man_source"; fi
+  nroff -c -man $man_source >$file.rawtxt
   perl ../maint/CleanTxt <$file.rawtxt >$file.txt
   /bin/rm $file.rawtxt
 done
@@ -162,7 +197,7 @@ if [ $? != 0 ] ; then exit 1; fi
 
 # Verify that `man` can process the pages without warnings.
 if man --help 2>/dev/null | grep -q warnings ; then
-  for file in *.1 *.3 ; do
+  for file in *.1 *.3 man/*.1 man/*.3 ; do
     MAN_OUT=`MANROFFSEQ='' MANWIDTH=80 man --warnings=w,all -E UTF-8 -l -Tutf8 -Z "$file" 2>&1 >/dev/null`
     if [ "$MAN_OUT" != "" ]; then
       printf "Running man generated warnings:\n%s\n" "$MAN_OUT"
@@ -176,13 +211,7 @@ else
 fi
 
 
-# Make HTML form of the documentation.
-
-echo "Making HTML documentation"
-/bin/rm html/*
-cp index.html.src html/index.html
-cp ../README html/README.txt
-cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
+# Make HTML for the manpage sources that have not yet been converted.
 
 for file in *.1 ; do
   base=`basename $file .1`
@@ -257,6 +286,7 @@ txt_files=(
   m4/pcre2_visibility.m4
   m4/pcre2_zos.m4
   doc/p*
+  doc/man/*
   doc/html/*
   src/libpcre2-*.sym.in
   )

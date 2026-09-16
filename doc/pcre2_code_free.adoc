@@ -1,0 +1,34 @@
+= PCRE2_CODE_FREE(3)
+:doctype: manpage
+:manname: PCRE2_CODE_FREE
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 2018-06-28
+:revdate: 2018-06-28
+
+== NAME
+
+PCRE2 - Perl-compatible regular expressions (revised API)
+== SYNOPSIS
+
+*#include <pcre2.h>*
+
+[source]
+----
+void pcre2_code_free(pcre2_code *code);
+----
+
+== DESCRIPTION
+
+If _code_ is NULL, this function does nothing. Otherwise, _code_ must
+point to a compiled pattern. This function frees its memory, including any
+memory used by the JIT compiler. If the compiled pattern was created by a call
+to *pcre2_code_copy_with_tables()*, the memory for the character tables is
+also freed.
+
+There is a complete description of the PCRE2 native API in the
+link:pcre2api.html[*pcre2api*]
+page and a description of the POSIX API in the
+link:pcre2posix.html[*pcre2posix*]
+page.

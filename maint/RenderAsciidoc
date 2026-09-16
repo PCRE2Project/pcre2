@@ -1,0 +1,26 @@
+#! /bin/bash
+
+# Render one PCRE2 AsciiDoc source as both a manpage and an HTML document.
+
+if [ $# != 3 ] ; then
+  echo "Usage: $0 input.adoc output.1-or-3 output.html" >&2
+  exit 1
+fi
+
+if ! command -v asciidoctor >/dev/null ; then
+  echo "asciidoctor is required to render documentation" >&2
+  exit 1
+fi
+
+input=$1
+man_output=$2
+html_output=$3
+
+mkdir -p "$(dirname "$man_output")" "$(dirname "$html_output")"
+asciidoctor --failure-level WARN --backend manpage --out-file "$man_output" "$input"
+man_title=`basename "$man_output"`
+man_title=${man_title%.*}
+man_title=${man_title^^}
+man_title=${man_title//-/\\-}
+MAN_TITLE="$man_title" perl -pi -e 's/^\.TH "[^"]+"/.TH "$ENV{MAN_TITLE}"/' "$man_output"
+asciidoctor --failure-level WARN --backend html5 --out-file "$html_output" "$input"

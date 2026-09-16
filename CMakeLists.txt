@@ -1508,8 +1508,8 @@ file(
   SECURITY.md
   SUPPORT-LIFECYCLE.md
 )
-file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
-file(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/*.3)
+file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1 ${PROJECT_SOURCE_DIR}/doc/man/*.1)
+file(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/*.3 ${PROJECT_SOURCE_DIR}/doc/man/*.3)
 
 install(FILES ${man1} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 install(FILES ${man3} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
