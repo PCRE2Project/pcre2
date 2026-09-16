@@ -122,7 +122,7 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to 1 if you have the `setrlimit' function. */
 /* #undef HAVE_SETRLIMIT */
 
-/* Define to 1 if you have the <stdatomic.h> header file. */
+/* Define to 1 if stardard (C11 or later) atomics are available. */
 /* #undef HAVE_STDATOMIC_H */
 
 /* Define to 1 if you have the <stdint.h> header file. */
@@ -488,9 +488,6 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */
-
-/* Define to empty if `const' does not conform to ANSI C. */
-/* #undef const */
 
 /* Define to the type of a signed integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
