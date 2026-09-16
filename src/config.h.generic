@@ -122,6 +122,9 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to 1 if you have the `setrlimit' function. */
 /* #undef HAVE_SETRLIMIT */
 
+/* Define to 1 if you have the <stdatomic.h> header file. */
+/* #undef HAVE_STDATOMIC_H */
+
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */
 

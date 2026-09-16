@@ -27,7 +27,7 @@ LOCAL_DEFINES = [
     "SUPPORT_UNICODE",
 ] + select({
     "@platforms//os:windows": [],
-    "//conditions:default": ["HAVE_UNISTD_H"],
+    "//conditions:default": ["HAVE_UNISTD_H", "HAVE_STDATOMIC_H"],
 })
 
 # Workaround for a Bazel quirk. It is extremely strict about the #include path

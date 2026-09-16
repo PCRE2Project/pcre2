@@ -242,9 +242,9 @@ jobs:
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   passenger:
-    # Tests with: Autoconf on oldest RHEL (in extended support).
-    # That's the absolute limit to how old a Linux version I'll tolerate regular testing on.
-    name: GCC, very old Autotools
+    # Tests on the oldest RHEL release in extended support with the minimum
+    # supported Autoconf version.
+    name: GCC, RHEL 8, minimum Autoconf
     runs-on: ubuntu-latest
     container: redhat/ubi8:8.6
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'passenger')
@@ -252,8 +252,22 @@ jobs:
       - name: Setup
         run: |
           yum -q makecache
-          yum -q install -y gcc git make automake autoconf libtool diffutils file glibc-langpack-en
+          yum -q install -y gcc git make automake libtool diffutils file glibc-langpack-en m4 perl curl xz
           yum -q update -y glibc-common
+
+      - name: Install Autoconf 2.71
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/autoconf-2.71.tar.xz" \
+            https://ftp.gnu.org/gnu/autoconf/autoconf-2.71.tar.xz
+          printf '%s  %s\n' \
+            f14c83cfebcc9427f2c3cea7258bd90df972d92eb26752da4ddad81c87a0faa4 \
+            "$RUNNER_TEMP/autoconf-2.71.tar.xz" | sha256sum --check --status
+          tar -C "$RUNNER_TEMP" -xf "$RUNNER_TEMP/autoconf-2.71.tar.xz"
+          pushd "$RUNNER_TEMP/autoconf-2.71"
+          ./configure --prefix="$RUNNER_TEMP/autoconf-prefix"
+          make -j"$(nproc)" install
+          popd
+          echo "$RUNNER_TEMP/autoconf-prefix/bin" >> "$GITHUB_PATH"
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

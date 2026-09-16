@@ -7,6 +7,7 @@ dnl Bruno Haible).
 
 AC_DEFUN([PCRE2_ZOS_FIXES],
 [
+  AC_LANG_PUSH([C])
   AC_CACHE_CHECK([for OS/390 (z/OS)], [pcre2_cv_os390],
     [if test "`uname`" = "OS/390"; then
        pcre2_cv_os390=yes
@@ -47,4 +48,5 @@ AC_DEFUN([PCRE2_ZOS_FIXES],
     fi
 
   fi
+  AC_LANG_POP([C])
 ])

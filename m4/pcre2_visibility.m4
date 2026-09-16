@@ -21,6 +21,7 @@ dnl Refactored to work with non GCC (but compatible) compilers.
 AC_DEFUN([PCRE2_VISIBILITY],
 [
   AC_REQUIRE([AC_PROG_CC])
+  AC_LANG_PUSH([C])
   VISIBILITY_CFLAGS=
   HAVE_VISIBILITY=0
   dnl First, check whether -Werror can be added to the command line, or
@@ -59,8 +60,8 @@ AC_DEFUN([PCRE2_VISIBILITY],
       dnl at the first function definition in every compilation unit, and we
       dnl don't want to use the option in this case.
       AC_COMPILE_IFELSE(
-        [AC_LANG_PROGRAM(
-           [[extern __attribute__((__visibility__("hidden"))) int hiddenfunc (void);
+        [AC_LANG_PROGRAM([[
+             extern __attribute__((__visibility__("hidden"))) int hiddenfunc (void);
              extern __attribute__((__visibility__("default"))) int exportedfunc (void);
              void dummyfunc (void) {}
            ]],
@@ -82,4 +83,5 @@ AC_DEFUN([PCRE2_VISIBILITY],
   AC_SUBST([HAVE_VISIBILITY])
   AC_DEFINE_UNQUOTED([HAVE_VISIBILITY], [$HAVE_VISIBILITY],
     [Define to 1 if the compiler supports GCC compatible visibility declarations.])
+  AC_LANG_POP([C])
 ])
