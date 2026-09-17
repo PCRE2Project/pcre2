@@ -1,29 +1,53 @@
-.TH PCRE2_CODE_FREE 3 "28 June 2018" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_code_free - free a compiled pattern
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_code_free
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 28 June 2018
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_CODE_FREE" "3" "28 June 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_code_free \- free a compiled pattern
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B void pcre2_code_free(pcre2_code *\fIcode\fP);
+.fam C
+#include <pcre2.h>
+
+void pcre2_code_free(pcre2_code *code);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 If \fIcode\fP is NULL, this function does nothing. Otherwise, \fIcode\fP must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
-to \fBpcre2_code_copy_with_tables()\fP, the memory for the character tables is
+to \f(CRpcre2_code_copy_with_tables()\fP, the memory for the character tables is
 also freed.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
+\f(CRpcre2posix\fP
 page.
-

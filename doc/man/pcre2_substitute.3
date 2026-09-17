@@ -1,47 +1,106 @@
-.TH PCRE2_SUBSTITUTE 3 "03 October 2025" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_substitute - replace matched substrings
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_substitute
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 03 October 2025
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SUBSTITUTE" "3" "03 October 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_substitute \- replace matched substrings
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "                     PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
-.B "                     uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "                     pcre2_match_context *\fImcontext\fP,"
-.B "                     PCRE2_SPTR \fIreplacement\fP, PCRE2_SIZE \fIrlength\fP,"
-.B "                     PCRE2_UCHAR *\fIbuffer\fP, PCRE2_SIZE *\fIblength\fP);"
+.fam C
+#include <pcre2.h>
+
+int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
+                     PCRE2_SIZE length, PCRE2_SIZE start_offset,
+                     uint32_t options, pcre2_match_data *match_data,
+                     pcre2_match_context *mcontext,
+                     PCRE2_SPTR replacement, PCRE2_SIZE rlength,
+                     PCRE2_UCHAR *buffer, PCRE2_SIZE *blength);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 This function matches a compiled regular expression against a given subject
 string, using a matching algorithm that is similar to Perl's. It then makes a
 copy of the subject, substituting a replacement string for what was matched.
 Its arguments are:
 .sp
-  \fIcode\fP          Points to the compiled pattern
-  \fIsubject\fP       Points to the subject string
-  \fIlength\fP        Length of the subject string
-  \fIstartoffset\fP   Offset in the subject at which to start matching
-  \fIoptions\fP       Option bits
-  \fImatch_data\fP    Points to a match data block, or is NULL
-  \fImcontext\fP      Points to a match context, or is NULL
-  \fIreplacement\fP   Points to the replacement string
-  \fIrlength\fP       Length of the replacement string
-  \fIoutputbuffer\fP  Points to the output buffer
-  \fIoutlengthptr\fP  Points to the length of the output buffer
+.ti +2
+\fIcode\fP          Points to the compiled pattern
+.br
+.ti +2
+\fIsubject\fP       Points to the subject string
+.br
+.ti +2
+\fIlength\fP        Length of the subject string
+.br
+.ti +2
+\fIstartoffset\fP   Offset in the subject at which to start matching
+.br
+.ti +2
+\fIoptions\fP       Option bits
+.br
+.ti +2
+\fImatch_data\fP    Points to a match data block, or is NULL
+.br
+.ti +2
+\fImcontext\fP      Points to a match context, or is NULL
+.br
+.ti +2
+\fIreplacement\fP   Points to the replacement string
+.br
+.ti +2
+\fIrlength\fP       Length of the replacement string
+.br
+.ti +2
+\fIoutputbuffer\fP  Points to the output buffer
+.br
+.ti +2
+\fIoutlengthptr\fP  Points to the length of the output buffer
 .sp
 A match data block is needed only if you want to inspect the data from the
 final match that is returned in that block or if PCRE2_SUBSTITUTE_MATCHED is
 set. A match context is needed only if you want to:
 .sp
-  Set up a callout function
-  Set a matching offset limit
-  Change the backtracking match limit
-  Change the backtracking depth limit
-  Set custom memory management in the match context
+.ti +2
+Set up a callout function
+.br
+.ti +2
+Set a matching offset limit
+.br
+.ti +2
+Change the backtracking match limit
+.br
+.ti +2
+Change the backtracking depth limit
+.br
+.ti +2
+Set custom memory management in the match context
 .sp
 The \fIlength\fP, \fIstartoffset\fP and \fIrlength\fP values are code units,
 not characters, as is the contents of the variable pointed at by
@@ -49,62 +108,97 @@ not characters, as is the contents of the variable pointed at by
 when the function is called. If the function is successful, the value is
 changed to the length of the new string, excluding the trailing zero that is
 automatically added.
-.P
-The subject and replacement lengths can be given as PCRE2_ZERO_TERMINATED for
-zero-terminated strings. The options are:
 .sp
-  PCRE2_ANCHORED                     Match only at the first position
-  PCRE2_ENDANCHORED                  Match only at end of subject
-.\" JOIN
-  PCRE2_NOTBOL                       Subject is not the beginning of a
-                                      line
-  PCRE2_NOTEOL                       Subject is not the end of a line
-.\" JOIN
-  PCRE2_NOTEMPTY                     An empty string is not a
-                                      valid match
-.\" JOIN
-  PCRE2_NOTEMPTY_ATSTART             An empty string at the start of
-                                      the subject is not a valid match
-  PCRE2_NO_JIT                       Do not use JIT matching
-.\" JOIN
-  PCRE2_NO_UTF_CHECK                 Do not check for UTF validity in
-                                      the subject or replacement
-.\" JOIN
-                                      (only relevant if PCRE2_UTF was
-                                      set at compile time)
-  PCRE2_SUBSTITUTE_EXTENDED          Do extended replacement processing
-.\" JOIN
-  PCRE2_SUBSTITUTE_GLOBAL            Replace all occurrences in the
-                                      subject
-  PCRE2_SUBSTITUTE_LITERAL           The replacement string is literal
-.\" JOIN
-  PCRE2_SUBSTITUTE_MATCHED           Use pre-existing match data for
-                                      first match
-  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH   If overflow, compute needed length
-  PCRE2_SUBSTITUTE_REPLACEMENT_ONLY  Return only replacement string(s)
-  PCRE2_SUBSTITUTE_UNKNOWN_UNSET     Treat unknown group as unset
-  PCRE2_SUBSTITUTE_UNSET_EMPTY       Simple unset insert = empty string
+The subject and replacement lengths can be given as PCRE2_ZERO_TERMINATED for
+zero\-terminated strings. The options are:
+.sp
+.ti +2
+PCRE2_ANCHORED                     Match only at the first position
+.br
+.ti +2
+PCRE2_ENDANCHORED                  Match only at end of subject
+.br
+.ti +2
+PCRE2_NOTBOL                       Subject is not the beginning of a
+.br
+.ti +2
+                                    line
+.br
+.ti +2
+PCRE2_NOTEOL                       Subject is not the end of a line
+.br
+.ti +2
+PCRE2_NOTEMPTY                     An empty string is not a
+.br
+.ti +2
+                                    valid match
+.br
+.ti +2
+PCRE2_NOTEMPTY_ATSTART             An empty string at the start of
+.br
+.ti +2
+                                    the subject is not a valid match
+.br
+.ti +2
+PCRE2_NO_JIT                       Do not use JIT matching
+.br
+.ti +2
+PCRE2_NO_UTF_CHECK                 Do not check for UTF validity in
+.br
+.ti +2
+                                    the subject or replacement
+.br
+.ti +2
+                                    (only relevant if PCRE2_UTF was
+.br
+.ti +2
+                                    set at compile time)
+.br
+.ti +2
+PCRE2_SUBSTITUTE_EXTENDED          Do extended replacement processing
+.br
+.ti +2
+PCRE2_SUBSTITUTE_GLOBAL            Replace all occurrences in the
+.br
+.ti +2
+                                    subject
+.br
+.ti +2
+PCRE2_SUBSTITUTE_LITERAL           The replacement string is literal
+.br
+.ti +2
+PCRE2_SUBSTITUTE_MATCHED           Use pre\-existing match data for
+.br
+.ti +2
+                                    first match
+.br
+.ti +2
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH   If overflow, compute needed length
+.br
+.ti +2
+PCRE2_SUBSTITUTE_REPLACEMENT_ONLY  Return only replacement string(s)
+.br
+.ti +2
+PCRE2_SUBSTITUTE_UNKNOWN_UNSET     Treat unknown group as unset
+.br
+.ti +2
+PCRE2_SUBSTITUTE_UNSET_EMPTY       Simple unset insert = empty string
 .sp
 If PCRE2_SUBSTITUTE_LITERAL is set, PCRE2_SUBSTITUTE_EXTENDED,
 PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
-.P
-If PCRE2_SUBSTITUTE_MATCHED is set, \fImatch_data\fP must be non-NULL; its
-contents must be the result of a call to \fBpcre2_match()\fP (or
-\fBpcre2_jit_match()\fP) using the same pattern, subject pointer, effective
+.sp
+If PCRE2_SUBSTITUTE_MATCHED is set, \fImatch_data\fP must be non\-NULL; its
+contents must be the result of a call to \f(CRpcre2_match()\fP (or
+\f(CRpcre2_jit_match()\fP) using the same pattern, subject pointer, effective
 subject length, start offset, and match options.
-.P
+.sp
 The function returns the number of substitutions, which may be zero if there
 are no matches. The result may be greater than one only when
 PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code
 is returned.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
+\f(CRpcre2posix\fP
 page.
-

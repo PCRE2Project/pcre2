@@ -1,53 +1,93 @@
-.TH PCRE2_SERIALIZE_DECODE 3 "22 April 2022" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_serialize_decode - decode serialized compiled patterns
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_serialize_decode
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 22 April 2022
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SERIALIZE_DECODE" "3" "22 April 2022" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_serialize_decode \- decode serialized compiled patterns
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B int32_t pcre2_serialize_decode(pcre2_code **\fIcodes\fP,
-.B "                               int32_t \fInumber_of_codes\fP,"
-.B "                               const uint8_t *\fIbytes\fP,"
-.B "                               pcre2_general_context *\fIgcontext\fP);"
+.fam C
+#include <pcre2.h>
+
+int32_t pcre2_serialize_decode(pcre2_code **codes,
+                               int32_t number_of_codes,
+                               const uint8_t *bytes,
+                               pcre2_general_context *gcontext);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 This function decodes a serialized set of compiled patterns back into a list of
 individual patterns. This is possible only on a host that is running the same
 version of PCRE2, with the same code unit width, and the host must also have
 the same endianness, pointer width and PCRE2_SIZE type. The arguments for
-\fBpcre2_serialize_decode()\fP are:
+\f(CRpcre2_serialize_decode()\fP are:
 .sp
-  \fIcodes\fP            pointer to a vector in which to build the list
-  \fInumber_of_codes\fP  number of slots in the vector
-  \fIbytes\fP            the serialized byte stream
-  \fIgcontext\fP         pointer to a general context or NULL
+.ti +2
+\fIcodes\fP            pointer to a vector in which to build the list
+.br
+.ti +2
+\fInumber_of_codes\fP  number of slots in the vector
+.br
+.ti +2
+\fIbytes\fP            the serialized byte stream
+.br
+.ti +2
+\fIgcontext\fP         pointer to a general context or NULL
 .sp
 The \fIbytes\fP argument must point to a block of data that was originally
-created by \fBpcre2_serialize_encode()\fP, though it may have been saved on
+created by \f(CRpcre2_serialize_encode()\fP, though it may have been saved on
 disc or elsewhere in the meantime. If there are more codes in the serialized
 data than slots in the list, only those compiled patterns that will fit are
 decoded. The yield of the function is the number of decoded patterns, or one of
 the following negative error codes:
 .sp
-  PCRE2_ERROR_BADDATA   \fInumber_of_codes\fP is zero or less
-  PCRE2_ERROR_BADMAGIC  mismatch of id bytes in \fIbytes\fP
-  PCRE2_ERROR_BADMODE   mismatch of variable unit size or PCRE version
-  PCRE2_ERROR_NOMEMORY  memory allocation failed
-  PCRE2_ERROR_NULL      \fIcodes\fP or \fIbytes\fP is NULL
+.ti +2
+PCRE2_ERROR_BADDATA   \fInumber_of_codes\fP is zero or less
+.br
+.ti +2
+PCRE2_ERROR_BADMAGIC  mismatch of id bytes in \fIbytes\fP
+.br
+.ti +2
+PCRE2_ERROR_BADMODE   mismatch of variable unit size or PCRE version
+.br
+.ti +2
+PCRE2_ERROR_NOMEMORY  memory allocation failed
+.br
+.ti +2
+PCRE2_ERROR_NULL      \fIcodes\fP or \fIbytes\fP is NULL
 .sp
 PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the serialization functions in the
-.\" HREF
-\fBpcre2serialize\fP
-.\"
+\f(CRpcre2serialize\fP
 page.
-

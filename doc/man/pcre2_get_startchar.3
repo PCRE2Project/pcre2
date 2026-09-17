@@ -1,31 +1,55 @@
-.TH PCRE2_GET_STARTCHAR 3 "25 October 2014" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_get_startchar - get the starting character offset
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_get_startchar
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 25 October 2014
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_GET_STARTCHAR" "3" "25 October 2014" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_get_startchar \- get the starting character offset
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *\fImatch_data\fP);
-.fi
-.
-.SH DESCRIPTION
-.sp
-After a successful call of \fBpcre2_match()\fP that was passed the match block
-that is this function's argument, this function returns the code unit offset of
-the character at which the successful match started. For a non-partial match,
-this can be different to the value of \fIovector[0]\fP if the pattern contains
-the \eK escape sequence. After a partial match, however, this value is always
-the same as \fIovector[0]\fP because \eK does not affect the result of a
-partial match.
-.P
-There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
-page and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
-page.
+.fam C
+#include <pcre2.h>
 
+PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+After a successful call of \f(CRpcre2_match()\fP that was passed the match block
+that is this function's argument, this function returns the code unit offset of
+the character at which the successful match started. For a non\-partial match,
+this can be different to the value of \fIovector[0]\fP if the pattern contains
+the \(rsK escape sequence. After a partial match, however, this value is always
+the same as \fIovector[0]\fP because \(rsK does not affect the result of a
+partial match.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

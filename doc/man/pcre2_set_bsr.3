@@ -1,28 +1,52 @@
-.TH PCRE2_SET_BSR 3 "25 October 2014" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_set_bsr - set \eR convention
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_set_bsr
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 25 October 2014
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SET_BSR" "3" "25 October 2014" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_set_bsr \- set \(rsR convention
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B int pcre2_set_bsr(pcre2_compile_context *\fIccontext\fP, uint32_t \fIvalue\fP);
+.fam C
+#include <pcre2.h>
+
+int pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
-This function sets the convention for processing \eR within a compile context.
+This function sets the convention for processing \(rsR within a compile context.
 The second argument must be one of PCRE2_BSR_ANYCRLF or PCRE2_BSR_UNICODE. The
 result is zero for success or PCRE2_ERROR_BADDATA if the second argument is
 invalid.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
+\f(CRpcre2posix\fP
 page.
-

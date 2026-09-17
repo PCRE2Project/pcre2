@@ -1,36 +1,452 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>pcre2jit specification</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.20">
+<title>pcre2jit(3)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
 </head>
-<body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-<h1>pcre2jit man page</h1>
-<p>
-Return to the <a href="index.html">PCRE2 index page</a>.
-</p>
-<p>
-This page is part of the PCRE2 HTML documentation. It was generated
-automatically from the original man page. If there is any nonsense in it,
-please consult the man page, in case the conversion went wrong.
-<br>
-<ul>
-<li><a name="TOC1" href="#SEC1">PCRE2 JUST-IN-TIME COMPILER SUPPORT</a>
-<li><a name="TOC2" href="#SEC2">AVAILABILITY OF JIT SUPPORT</a>
-<li><a name="TOC3" href="#SEC3">SIMPLE USE OF JIT</a>
-<li><a name="TOC4" href="#SEC4">MATCHING SUBJECTS CONTAINING INVALID UTF</a>
-<li><a name="TOC5" href="#SEC5">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a>
-<li><a name="TOC6" href="#SEC6">RETURN VALUES FROM JIT MATCHING</a>
-<li><a name="TOC7" href="#SEC7">CONTROLLING THE JIT STACK</a>
-<li><a name="TOC8" href="#SEC8">JIT STACK FAQ</a>
-<li><a name="TOC9" href="#SEC9">FREEING JIT SPECULATIVE MEMORY</a>
-<li><a name="TOC10" href="#SEC10">EXAMPLE CODE</a>
-<li><a name="TOC11" href="#SEC11">JIT FAST PATH API</a>
-<li><a name="TOC12" href="#SEC12">SEE ALSO</a>
-<li><a name="TOC13" href="#SEC13">AUTHOR</a>
-<li><a name="TOC14" href="#SEC14">REVISION</a>
-</ul>
-<h2><a name="SEC1" href="#TOC1">PCRE2 JUST-IN-TIME COMPILER SUPPORT</a></h2>
-<p>
-Just-in-time compiling is a heavyweight optimization that can greatly speed up
+<body class="manpage">
+<div id="header">
+<h1>pcre2jit(3) Manual Page</h1>
+<h2>Name</h2>
+<div class="sectionbody">
+<p>pcre2jit - PCRE2 just-in-time compilation support</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_pcre2_just_in_time_compiler_support">Pcre2 Just-In-Time Compiler Support</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
 match is performed, so it is of most benefit when the same pattern is going to
 be matched many times. This does not necessarily mean many calls of a matching
@@ -38,470 +454,542 @@ function; if the pattern is not anchored, matching attempts may take place many
 times at various positions in the subject, even for a single call. Therefore,
 if the subject string is very long, it may still pay to use JIT even for
 one-off matches. JIT support is available for all of the 8-bit, 16-bit and
-32-bit PCRE2 libraries.
-</p>
-<p>
-JIT support applies only to the traditional Perl-compatible matching function.
+32-bit PCRE2 libraries.</p>
+</div>
+<div class="paragraph">
+<p>JIT support applies only to the traditional Perl-compatible matching function.
 It does not apply when the DFA matching function is being used. The code for
-JIT support was written by Zoltan Herczeg.
-</p>
-<h2><a name="SEC2" href="#TOC1">AVAILABILITY OF JIT SUPPORT</a></h2>
-<p>
-JIT support is an optional feature of PCRE2. The "configure" option
+JIT support was written by Zoltan Herczeg.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_availability_of_jit_support">Availability Of Jit Support</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>JIT support is an optional feature of PCRE2. The "configure" option
 --enable-jit (or equivalent CMake option) must be set when PCRE2 is built if
 you want to use JIT. The support is limited to the following hardware
-platforms:
-<pre>
-  ARM 32-bit (v7, and Thumb2)
-  ARM 64-bit
-  DEC Alpha 64-bit
-  IBM s390x 64 bit
-  Intel x86 32-bit and 64-bit
-  LoongArch 64 bit
-  MIPS 32-bit and 64-bit
-  Power PC 32-bit and 64-bit
-  RISC-V 32-bit and 64-bit
-</pre>
-If --enable-jit is set on an unsupported platform, compilation fails.
-</p>
-<p>
-A client program can tell if JIT support has been compiled by calling
-<b>pcre2_config()</b> with the PCRE2_CONFIG_JIT option. The result is one if
+platforms:</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">ARM 32-bit (v7, and Thumb2)<br>
+ARM 64-bit<br>
+DEC Alpha 64-bit<br>
+IBM s390x 64 bit<br>
+Intel x86 32-bit and 64-bit<br>
+LoongArch 64 bit<br>
+MIPS 32-bit and 64-bit<br>
+Power PC 32-bit and 64-bit<br>
+RISC-V 32-bit and 64-bit</p>
+</div>
+<div class="paragraph">
+<p>If --enable-jit is set on an unsupported platform, compilation fails.</p>
+</div>
+<div class="paragraph">
+<p>A client program can tell if JIT support has been compiled by calling
+<code>pcre2_config()</code> with the PCRE2_CONFIG_JIT option. The result is one if
 PCRE2 was built with JIT support, and zero otherwise. However, having the JIT
 code available does not guarantee that it will be used for any particular
 match. One reason for this is that there are a number of options and pattern
 items that are
-<a href="#unsupported">not supported by JIT</a>
+not supported by JIT
 (see below). Another reason is that in some environments JIT is unable to get
 executable memory in which to build its compiled code. The only guarantee from
-<b>pcre2_config()</b> is that if it returns zero, JIT will definitely <i>not</i>
-be used.
-</p>
-<p>
-As of release 10.45 there is a more informative way to test for JIT support. If
-<b>pcre2_compile_jit()</b> is called with the single option PCRE2_JIT_TEST_ALLOC
+<code>pcre2_config()</code> is that if it returns zero, JIT will definitely <em>not</em>
+be used.</p>
+</div>
+<div class="paragraph">
+<p>As of release 10.45 there is a more informative way to test for JIT support. If
+<code>pcre2_compile_jit()</code> is called with the single option PCRE2_JIT_TEST_ALLOC
 it returns zero if JIT is available and has a working allocator. Otherwise it
 returns PCRE2_ERROR_NOMEMORY if JIT is available but cannot allocate executable
 memory, or PCRE2_ERROR_JIT_UNSUPPORTED if JIT support is not compiled. The
-code argument is ignored, so it can be a NULL value.
-</p>
-<p>
-A simple program does not need to check availability in order to use JIT when
+code argument is ignored, so it can be a NULL value.</p>
+</div>
+<div class="paragraph">
+<p>A simple program does not need to check availability in order to use JIT when
 possible. The API is implemented in a way that falls back to the interpretive
 code if JIT is not available or cannot be used for a given match. For programs
 that need the best possible performance, there is a
-<a href="#fastpath">"fast path"</a>
-API that is JIT-specific.
-</p>
-<h2><a name="SEC3" href="#TOC1">SIMPLE USE OF JIT</a></h2>
-<p>
-To make use of the JIT support in the simplest way, all you have to do is to
-call <b>pcre2_jit_compile()</b> after successfully compiling a pattern with
-<b>pcre2_compile()</b>. This function has two arguments: the first is the
-compiled pattern pointer that was returned by <b>pcre2_compile()</b>, and the
+"fast path"
+API that is JIT-specific.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_simple_use_of_jit">Simple Use Of Jit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To make use of the JIT support in the simplest way, all you have to do is to
+call <code>pcre2_jit_compile()</code> after successfully compiling a pattern with
+<code>pcre2_compile()</code>. This function has two arguments: the first is the
+compiled pattern pointer that was returned by <code>pcre2_compile()</code>, and the
 second is zero or more of the following option bits: PCRE2_JIT_COMPLETE,
-PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
-</p>
-<p>
-If JIT support is not available, a call to <b>pcre2_jit_compile()</b> does
+PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.</p>
+</div>
+<div class="paragraph">
+<p>If JIT support is not available, a call to <code>pcre2_jit_compile()</code> does
 nothing and returns PCRE2_ERROR_JIT_BADOPTION. Otherwise, the compiled pattern
 is passed to the JIT compiler, which turns it into machine code that executes
 much faster than the normal interpretive code, but yields exactly the same
-results. The returned value from <b>pcre2_jit_compile()</b> is zero on success,
-or a negative error code.
-</p>
-<p>
-There is a limit to the size of pattern that JIT supports, imposed by the size
+results. The returned value from <code>pcre2_jit_compile()</code> is zero on success,
+or a negative error code.</p>
+</div>
+<div class="paragraph">
+<p>There is a limit to the size of pattern that JIT supports, imposed by the size
 of machine stack that it uses. The exact rules are not documented because they
 may change at any time, in particular, when new optimizations are introduced.
-If a pattern is too big, a call to <b>pcre2_jit_compile()</b> returns
-PCRE2_ERROR_NOMEMORY.
-</p>
-<p>
-PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
+If a pattern is too big, a call to <code>pcre2_jit_compile()</code> returns
+PCRE2_ERROR_NOMEMORY.</p>
+</div>
+<div class="paragraph">
+<p>PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
 matches. If you want to run partial matches using the PCRE2_PARTIAL_HARD or
-PCRE2_PARTIAL_SOFT options of <b>pcre2_match()</b>, you should set one or both
+PCRE2_PARTIAL_SOFT options of <code>pcre2_match()</code>, you should set one or both
 of the other options as well as, or instead of PCRE2_JIT_COMPLETE. The JIT
 compiler generates different optimized code for each of the three modes
-(normal, soft partial, hard partial). When <b>pcre2_match()</b> is called, the
+(normal, soft partial, hard partial). When <code>pcre2_match()</code> is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
-using interpretive code.
-</p>
-<p>
-You can call <b>pcre2_jit_compile()</b> multiple times for the same compiled
+using interpretive code.</p>
+</div>
+<div class="paragraph">
+<p>You can call <code>pcre2_jit_compile()</code> multiple times for the same compiled
 pattern. It does nothing if it has previously compiled code for any of the
 option bits. For example, you can call it once with PCRE2_JIT_COMPLETE and
 (perhaps later, when you find you need partial matching) again with
 PCRE2_JIT_COMPLETE and PCRE2_JIT_PARTIAL_HARD. This time it will ignore
 PCRE2_JIT_COMPLETE and just compile code for partial matching. If
-<b>pcre2_jit_compile()</b> is called with no option bits set, it immediately
+<code>pcre2_jit_compile()</code> is called with no option bits set, it immediately
 returns zero. This is an alternative way of testing whether JIT support has
-been compiled.
-</p>
-<p>
-At present, it is not possible to free JIT compiled code except when the entire
-compiled pattern is freed by calling <b>pcre2_code_free()</b>.
-</p>
-<p>
-In some circumstances you may need to call additional functions. These are
+been compiled.</p>
+</div>
+<div class="paragraph">
+<p>At present, it is not possible to free JIT compiled code except when the entire
+compiled pattern is freed by calling <code>pcre2_code_free()</code>.</p>
+</div>
+<div class="paragraph">
+<p>In some circumstances you may need to call additional functions. These are
 described in the section entitled
-<a href="#stackcontrol">"Controlling the JIT stack"</a>
-below.
-</p>
-<p>
-There are some <b>pcre2_match()</b> options that are not supported by JIT, and
+"Controlling the JIT stack"
+below.</p>
+</div>
+<div class="paragraph">
+<p>There are some <code>pcre2_match()</code> options that are not supported by JIT, and
 there are also some pattern items that JIT cannot handle. Details are given
-<a href="#unsupported">below.</a>
+below.
 In both cases, matching automatically falls back to the interpretive code. If
 you want to know whether JIT was actually used for a particular match, you
 should arrange for a JIT callback function to be set up as described in the
 section entitled
-<a href="#stackcontrol">"Controlling the JIT stack"</a>
+"Controlling the JIT stack"
 below, even if you do not need to supply a non-default JIT stack. Such a
 callback function is called whenever JIT code is about to be obeyed. If the
 match-time options are not right for JIT execution, the callback function is
-not obeyed.
-</p>
-<p>
-If the JIT compiler finds an unsupported item, no JIT data is generated. You
+not obeyed.</p>
+</div>
+<div class="paragraph">
+<p>If the JIT compiler finds an unsupported item, no JIT data is generated. You
 can find out if JIT compilation was successful for a compiled pattern by
-calling <b>pcre2_pattern_info()</b> with the PCRE2_INFO_JITSIZE option. A
+calling <code>pcre2_pattern_info()</code> with the PCRE2_INFO_JITSIZE option. A
 non-zero result means that JIT compilation was successful. A result of 0 means
 that JIT support is not available, or the pattern was not processed by
-<b>pcre2_jit_compile()</b>, or the JIT compiler was not able to handle the
+<code>pcre2_jit_compile()</code>, or the JIT compiler was not able to handle the
 pattern. Successful JIT compilation does not, however, guarantee the use of JIT
 at match time because there are some match time options that are not supported
-by JIT.
-</p>
-<h2><a name="SEC4" href="#TOC1">MATCHING SUBJECTS CONTAINING INVALID UTF</a></h2>
-<p>
-When a pattern is compiled with the PCRE2_UTF option, subject strings are
+by JIT.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_matching_subjects_containing_invalid_utf">Matching Subjects Containing Invalid Utf</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When a pattern is compiled with the PCRE2_UTF option, subject strings are
 normally expected to be a valid sequence of UTF code units. By default, this is
 checked at the start of matching and an error is generated if invalid UTF is
-detected. The PCRE2_NO_UTF_CHECK option can be passed to <b>pcre2_match()</b> to
+detected. The PCRE2_NO_UTF_CHECK option can be passed to <code>pcre2_match()</code> to
 skip the check (for improved performance) if you are sure that a subject string
 is valid. If this option is used with an invalid string, the result is
-undefined. The calling program may crash or loop or otherwise misbehave.
-</p>
-<p>
-However, a way of running matches on strings that may contain invalid UTF
-sequences is available. Calling <b>pcre2_compile()</b> with the
+undefined. The calling program may crash or loop or otherwise misbehave.</p>
+</div>
+<div class="paragraph">
+<p>However, a way of running matches on strings that may contain invalid UTF
+sequences is available. Calling <code>pcre2_compile()</code> with the
 PCRE2_MATCH_INVALID_UTF option has two effects: it tells the interpreter in
-<b>pcre2_match()</b> to support invalid UTF, and, if <b>pcre2_jit_compile()</b>
+<code>pcre2_match()</code> to support invalid UTF, and, if <code>pcre2_jit_compile()</code>
 is subsequently called, the compiled JIT code also supports invalid UTF.
 Details of how this support works, in both the JIT and the interpretive cases,
 is given in the
-<a href="pcre2unicode.html"><b>pcre2unicode</b></a>
-documentation.
-</p>
-<p>
-There is also an obsolete option for <b>pcre2_jit_compile()</b> called
+<a href="pcre2unicode.html"><code>pcre2unicode</code></a>
+documentation.</p>
+</div>
+<div class="paragraph">
+<p>There is also an obsolete option for <code>pcre2_jit_compile()</code> called
 PCRE2_JIT_INVALID_UTF, which currently exists only for backward compatibility.
-It is superseded by the <b>pcre2_compile()</b> option PCRE2_MATCH_INVALID_UTF
-and should no longer be used. It may be removed in future.
-<a name="unsupported"></a></p>
-<h2><a name="SEC5" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a></h2>
-<p>
-The <b>pcre2_match()</b> options that are supported for JIT matching are
+It is superseded by the <code>pcre2_compile()</code> option PCRE2_MATCH_INVALID_UTF
+and should no longer be used. It may be removed in future.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_unsupported_options_and_pattern_items">Unsupported Options And Pattern Items</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>pcre2_match()</code> options that are supported for JIT matching are
 PCRE2_COPY_MATCHED_SUBJECT, PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
 PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and
 PCRE2_PARTIAL_SOFT. The PCRE2_ANCHORED and PCRE2_ENDANCHORED options are not
-supported at match time.
-</p>
-<p>
-If the PCRE2_NO_JIT option is passed to <b>pcre2_match()</b> it disables the
-use of JIT, forcing matching by the interpreter code.
-</p>
-<p>
-The only unsupported pattern items are \C (match a single data unit) when
+supported at match time.</p>
+</div>
+<div class="paragraph">
+<p>If the PCRE2_NO_JIT option is passed to <code>pcre2_match()</code> it disables the
+use of JIT, forcing matching by the interpreter code.</p>
+</div>
+<div class="paragraph">
+<p>The only unsupported pattern items are \C (match a single data unit) when
 running in a UTF mode, and a callout immediately before an assertion condition
-in a conditional group.
-</p>
-<h2><a name="SEC6" href="#TOC1">RETURN VALUES FROM JIT MATCHING</a></h2>
-<p>
-When a pattern is matched using JIT, the return values are the same as those
-given by the interpretive <b>pcre2_match()</b> code, with the addition of one
+in a conditional group.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_return_values_from_jit_matching">Return Values From Jit Matching</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When a pattern is matched using JIT, the return values are the same as those
+given by the interpretive <code>pcre2_match()</code> code, with the addition of one
 new error code: PCRE2_ERROR_JIT_STACKLIMIT. This means that the memory used for
 the JIT stack was insufficient. See
-<a href="#stackcontrol">"Controlling the JIT stack"</a>
-below for a discussion of JIT stack usage.
-</p>
-<p>
-The error code PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if searching
+"Controlling the JIT stack"
+below for a discussion of JIT stack usage.</p>
+</div>
+<div class="paragraph">
+<p>The error code PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if searching
 a very large pattern tree goes on for too long, as it is in the same
 circumstance when JIT is not used, but the details of exactly what is counted
 are not the same. The PCRE2_ERROR_DEPTHLIMIT error code is never returned
-when JIT matching is used.
-<a name="stackcontrol"></a></p>
-<h2><a name="SEC7" href="#TOC1">CONTROLLING THE JIT STACK</a></h2>
-<p>
-When the compiled JIT code runs, it needs a block of memory to use as a stack.
+when JIT matching is used.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_controlling_the_jit_stack">Controlling The Jit Stack</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32KiB on the machine stack. However, some large or
 complicated patterns need more than this. The error PCRE2_ERROR_JIT_STACKLIMIT
 is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks. There is further discussion
 about the use of JIT stacks in the section entitled
-<a href="#stackfaq">"JIT stack FAQ"</a>
-below.
-</p>
-<p>
-The <b>pcre2_jit_stack_create()</b> function creates a JIT stack. Its arguments
+"JIT stack FAQ"
+below.</p>
+</div>
+<div class="paragraph">
+<p>The <code>pcre2_jit_stack_create()</code> function creates a JIT stack. Its arguments
 are a starting size, a maximum size, and a general context (for memory
 allocation functions, or NULL for standard memory allocation). It returns a
-pointer to an opaque structure of type <b>pcre2_jit_stack</b>, or NULL if there
-is an error. The <b>pcre2_jit_stack_free()</b> function is used to free a stack
+pointer to an opaque structure of type <code>pcre2_jit_stack</code>, or NULL if there
+is an error. The <code>pcre2_jit_stack_free()</code> function is used to free a stack
 that is no longer needed. If its argument is NULL, this function returns
 immediately, without doing anything. (For the technically minded: the address
 space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
-1MiB should be more than enough for any pattern.
-</p>
-<p>
-The <b>pcre2_jit_stack_assign()</b> function specifies which stack JIT code
-should use. Its arguments are as follows:
-<pre>
-  pcre2_match_context  *mcontext
-  pcre2_jit_callback    callback
-  void                 *data
-</pre>
-The first argument is a pointer to a match context. When this is subsequently
+1MiB should be more than enough for any pattern.</p>
+</div>
+<div class="paragraph">
+<p>The <code>pcre2_jit_stack_assign()</code> function specifies which stack JIT code
+should use. Its arguments are as follows:</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">pcre2_match_context  *mcontext<br>
+pcre2_jit_callback    callback<br>
+void                 *data</p>
+</div>
+<div class="paragraph">
+<p>The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
 used. If this argument is NULL, the function returns immediately, without doing
-anything. There are three cases for the values of the other two options:
-<pre>
-  (1) If <i>callback</i> is NULL and <i>data</i> is NULL, an internal 32KiB block
-      on the machine stack is used. This is the default when a match
-      context is created.
-
-  (2) If <i>callback</i> is NULL and <i>data</i> is not NULL, <i>data</i> must be
-      a pointer to a valid JIT stack, the result of calling
-      <b>pcre2_jit_stack_create()</b>.
-
-  (3) If <i>callback</i> is not NULL, it must point to a function that is
-      called with <i>data</i> as an argument at the start of matching, in
-      order to set up a JIT stack. If the return from the callback
-      function is NULL, the internal 32KiB stack is used; otherwise the
-      return value must be a valid JIT stack, the result of calling
-      <b>pcre2_jit_stack_create()</b>.
-</pre>
-A callback function is obeyed whenever JIT code is about to be run; it is not
-obeyed when <b>pcre2_match()</b> is called with options that are incompatible
+anything. There are three cases for the values of the other two options:</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">(1) If <em>callback</em> is NULL and <em>data</em> is NULL, an internal 32KiB block<br>
+    on the machine stack is used. This is the default when a match<br>
+    context is created.</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">(2) If <em>callback</em> is NULL and <em>data</em> is not NULL, <em>data</em> must be<br>
+    a pointer to a valid JIT stack, the result of calling<br>
+    <code>pcre2_jit_stack_create()</code>.</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">(3) If <em>callback</em> is not NULL, it must point to a function that is<br>
+    called with <em>data</em> as an argument at the start of matching, in<br>
+    order to set up a JIT stack. If the return from the callback<br>
+    function is NULL, the internal 32KiB stack is used; otherwise the<br>
+    return value must be a valid JIT stack, the result of calling<br>
+    <code>pcre2_jit_stack_create()</code>.</p>
+</div>
+<div class="paragraph">
+<p>A callback function is obeyed whenever JIT code is about to be run; it is not
+obeyed when <code>pcre2_match()</code> is called with options that are incompatible
 for JIT matching. A callback function can therefore be used to determine
-whether a match operation was executed by JIT or by the interpreter.
-</p>
-<p>
-You may safely use the same JIT stack for more than one pattern (either by
+whether a match operation was executed by JIT or by the interpreter.</p>
+</div>
+<div class="paragraph">
+<p>You may safely use the same JIT stack for more than one pattern (either by
 assigning directly or by callback), as long as the patterns are matched
 sequentially in the same thread. Currently, the only way to set up
 non-sequential matches in one thread is to use callouts: if a callout function
 starts another match, that match must use a different JIT stack to the one used
-for currently suspended match(es).
-</p>
-<p>
-In a multithread application, if you do not specify a JIT stack, or if you
+for currently suspended match(es).</p>
+</div>
+<div class="paragraph">
+<p>In a multithread application, if you do not specify a JIT stack, or if you
 assign or pass back NULL from a callback, that is thread-safe, because each
 thread has its own machine stack. However, if you assign or pass back a
 non-NULL JIT stack, this must be a different stack for each thread so that the
-application is thread-safe.
-</p>
-<p>
-Strictly speaking, even more is allowed. You can assign the same non-NULL stack
+application is thread-safe.</p>
+</div>
+<div class="paragraph">
+<p>Strictly speaking, even more is allowed. You can assign the same non-NULL stack
 to a match context that is used by any number of patterns, as long as they are
 not used for matching by multiple threads at the same time. For example, you
 could use the same stack in all compiled patterns, with a global mutex in the
 callback to wait until the stack is available for use. However, this is an
-inefficient solution, and not recommended.
-</p>
-<p>
-This is a suggestion for how a multithreaded program that needs to set up
-non-default JIT stacks might operate:
-<pre>
-  During thread initialization
-    thread_local_var = pcre2_jit_stack_create(...)
-
-  During thread exit
-    pcre2_jit_stack_free(thread_local_var)
-
-  Use a one-line callback function
-    return thread_local_var
-</pre>
-All the functions described in this section do nothing if JIT is not available.
-<a name="stackfaq"></a></p>
-<h2><a name="SEC8" href="#TOC1">JIT STACK FAQ</a></h2>
-<p>
-(1) Why do we need JIT stacks?
-<br>
-<br>
-PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack where
+inefficient solution, and not recommended.</p>
+</div>
+<div class="paragraph">
+<p>This is a suggestion for how a multithreaded program that needs to set up
+non-default JIT stacks might operate:</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">During thread initialization<br>
+  thread_local_var = pcre2_jit_stack_create(...)</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">During thread exit<br>
+  pcre2_jit_stack_free(thread_local_var)</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">Use a one-line callback function<br>
+  return thread_local_var</p>
+</div>
+<div class="paragraph">
+<p>All the functions described in this section do nothing if JIT is not available.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jit_stack_faq">Jit Stack Faq</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>(1) Why do we need JIT stacks?</p>
+</div>
+<div class="paragraph">
+<p>PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack where
 the local data of the current node is pushed before checking its child nodes.
 Allocating real machine stack on some platforms is difficult. For example, the
 stack chain needs to be updated every time if we extend the stack on PowerPC.
 Although it is possible, its updating time overhead decreases performance. So
-we do the recursion in memory.
-</p>
-<p>
-(2) Why don't we simply allocate blocks of memory with <b>malloc()</b>?
-<br>
-<br>
-Modern operating systems have a nice feature: they can reserve an address space
+we do the recursion in memory.</p>
+</div>
+<div class="paragraph">
+<p>(2) Why don&#8217;t we simply allocate blocks of memory with <code>malloc()</code>?</p>
+</div>
+<div class="paragraph">
+<p>Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
 address space, so the stack could grow without moving memory data (this is
 important because of pointers). Thus we can allocate 1MiB address space, and
 use only a single memory page (usually 4KiB) if that is enough. However, we can
-still grow up to 1MiB anytime if needed.
-</p>
-<p>
-(3) Who "owns" a JIT stack?
-<br>
-<br>
-The owner of the stack is the user program, not the JIT studied pattern or
+still grow up to 1MiB anytime if needed.</p>
+</div>
+<div class="paragraph">
+<p>(3) Who "owns" a JIT stack?</p>
+</div>
+<div class="paragraph">
+<p>The owner of the stack is the user program, not the JIT studied pattern or
 anything else. The user program must ensure that if a stack is being used by
-<b>pcre2_match()</b>, (that is, it is assigned to a match context that is passed
+<code>pcre2_match()</code>, (that is, it is assigned to a match context that is passed
 to the pattern currently running), that stack must not be used by any other
 threads (to avoid overwriting the same memory area). The best practice for
 multithreaded programs is to allocate a stack for each thread, and return this
-stack through the JIT callback function.
-</p>
-<p>
-(4) When should a JIT stack be freed?
-<br>
-<br>
-You can free a JIT stack at any time, as long as it will not be used by
-<b>pcre2_match()</b> again. When you assign the stack to a match context, only a
+stack through the JIT callback function.</p>
+</div>
+<div class="paragraph">
+<p>(4) When should a JIT stack be freed?</p>
+</div>
+<div class="paragraph">
+<p>You can free a JIT stack at any time, as long as it will not be used by
+<code>pcre2_match()</code> again. When you assign the stack to a match context, only a
 pointer is set. There is no reference counting or any other magic. You can free
 compiled patterns, contexts, and stacks in any order, anytime.
-Just <i>do not</i> call <b>pcre2_match()</b> with a match context pointing to an
+Just <em>do not</em> call <code>pcre2_match()</code> with a match context pointing to an
 already freed stack, as that will cause SEGFAULT. (Also, do not free a stack
-currently used by <b>pcre2_match()</b> in another thread). You can also replace
+currently used by <code>pcre2_match()</code> in another thread). You can also replace
 the stack in a context at any time when it is not in use. You should free the
-previous stack before assigning a replacement.
-</p>
-<p>
-(5) Should I allocate/free a stack every time before/after calling
-<b>pcre2_match()</b>?
-<br>
-<br>
-No, because this is too costly in terms of resources. However, you could
-implement some clever idea which release the stack if it is not used in let's
+previous stack before assigning a replacement.</p>
+</div>
+<div class="paragraph">
+<p>(5) Should I allocate/free a stack every time before/after calling
+<code>pcre2_match()</code>?</p>
+</div>
+<div class="paragraph">
+<p>No, because this is too costly in terms of resources. However, you could
+implement some clever idea which release the stack if it is not used in let&#8217;s
 say two minutes. The JIT callback can help to achieve this without keeping a
-list of patterns.
-</p>
-<p>
-(6) OK, the stack is for long term memory allocation. But what happens if a
+list of patterns.</p>
+</div>
+<div class="paragraph">
+<p>(6) OK, the stack is for long term memory allocation. But what happens if a
 pattern causes stack overflow with a stack of 1MiB? Is that 1MiB kept until the
-stack is freed?
-<br>
-<br>
-Especially on embedded systems, it might be a good idea to release memory
+stack is freed?</p>
+</div>
+<div class="paragraph">
+<p>Especially on embedded systems, it might be a good idea to release memory
 sometimes without freeing the stack. There is no API for this at the moment.
 Probably a function call which returns with the currently allocated memory for
 any stack and another which allows releasing memory (shrinking the stack) would
-be a good idea if someone needs this.
-</p>
-<p>
-(7) This is too much of a headache. Isn't there any better solution for JIT
-stack handling?
-<br>
-<br>
-No, thanks to Windows. If POSIX threads were used everywhere, we could throw
-out this complicated API.
-</p>
-<h2><a name="SEC9" href="#TOC1">FREEING JIT SPECULATIVE MEMORY</a></h2>
-<p>
-<b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b>
-</p>
-<p>
-The JIT executable allocator does not free all memory when it is possible. It
+be a good idea if someone needs this.</p>
+</div>
+<div class="paragraph">
+<p>(7) This is too much of a headache. Isn&#8217;t there any better solution for JIT
+stack handling?</p>
+</div>
+<div class="paragraph">
+<p>No, thanks to Windows. If POSIX threads were used everywhere, we could throw
+out this complicated API.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_freeing_jit_speculative_memory">Freeing Jit Speculative Memory</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The JIT executable allocator does not free all memory when it is possible. It
 expects new allocations, and keeps some free memory around to improve
 allocation speed. However, in low memory conditions, it might be better to free
 all possible memory. You can cause this to happen by calling
 pcre2_jit_free_unused_memory(). Its argument is a general context, for custom
-memory management, or NULL for standard memory management.
-</p>
-<h2><a name="SEC10" href="#TOC1">EXAMPLE CODE</a></h2>
-<p>
-This is a single-threaded example that specifies a JIT stack without using a
+memory management, or NULL for standard memory management.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_example_code">Example Code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is a single-threaded example that specifies a JIT stack without using a
 callback. A real program should include error checking after all the function
-calls.
-<pre>
-  int rc;
-  pcre2_code *re;
-  pcre2_match_data *match_data;
-  pcre2_match_context *mcontext;
-  pcre2_jit_stack *jit_stack;
-
-  re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
-    &errornumber, &erroffset, NULL);
-  rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-  mcontext = pcre2_match_context_create(NULL);
-  jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
-  pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
-  match_data = pcre2_match_data_create(re, 10);
-  rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
-  /* Process result */
-
-  pcre2_code_free(re);
-  pcre2_match_data_free(match_data);
-  pcre2_match_context_free(mcontext);
-  pcre2_jit_stack_free(jit_stack);
-
-<a name="fastpath"></a></pre>
-</p>
-<h2><a name="SEC11" href="#TOC1">JIT FAST PATH API</a></h2>
-<p>
-Because the API described above falls back to interpreted matching when JIT is
+calls.</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">int rc;<br>
+pcre2_code *re;<br>
+pcre2_match_data *match_data;<br>
+pcre2_match_context *mcontext;<br>
+pcre2_jit_stack *jit_stack;</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,<br>
+  &amp;errornumber, &amp;erroffset, NULL);<br>
+rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);<br>
+mcontext = pcre2_match_context_create(NULL);<br>
+jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);<br>
+pcre2_jit_stack_assign(mcontext, NULL, jit_stack);<br>
+match_data = pcre2_match_data_create(re, 10);<br>
+rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);<br>
+/* Process result */</p>
+</div>
+<div class="paragraph">
+  <p style="margin-left: 2ch">pcre2_code_free(re);<br>
+pcre2_match_data_free(match_data);<br>
+pcre2_match_context_free(mcontext);<br>
+pcre2_jit_stack_free(jit_stack);</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jit_fast_path_api">Jit Fast Path Api</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Because the API described above falls back to interpreted matching when JIT is
 not available, it is convenient for programs that are written for general use
-in many environments. However, calling JIT via <b>pcre2_match()</b> does have a
+in many environments. However, calling JIT via <code>pcre2_match()</code> does have a
 performance impact. Programs that are written for use where JIT is known to be
 available, and which need the best possible performance, can instead use a
 "fast path" API to call JIT matching directly instead of calling
-<b>pcre2_match()</b> (obviously only for patterns that have been successfully
-processed by <b>pcre2_jit_compile()</b>).
-</p>
-<p>
-The fast path function is called <b>pcre2_jit_match()</b>, and it takes exactly
-the same arguments as <b>pcre2_match()</b>. However, the subject string must be
+<code>pcre2_match()</code> (obviously only for patterns that have been successfully
+processed by <code>pcre2_jit_compile()</code>).</p>
+</div>
+<div class="paragraph">
+<p>The fast path function is called <code>pcre2_jit_match()</code>, and it takes exactly
+the same arguments as <code>pcre2_match()</code>. However, the subject string must be
 specified with a length; PCRE2_ZERO_TERMINATED is not supported. Unsupported
 option bits (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED, and
 PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the PCRE2_NO_JIT option. The
-return values are also the same as for <b>pcre2_match()</b>, plus
+return values are also the same as for <code>pcre2_match()</code>, plus
 PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
-that was not compiled.
-</p>
-<p>
-When you call <b>pcre2_match()</b>, as well as testing for invalid options, a
+that was not compiled.</p>
+</div>
+<div class="paragraph">
+<p>When you call <code>pcre2_match()</code>, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
 the subject pointer is NULL but the length is non-zero, an immediate error is
 given. Also, unless PCRE2_NO_UTF_CHECK is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
 fast path. If invalid UTF data is passed when PCRE2_MATCH_INVALID_UTF was not
-set for <b>pcre2_compile()</b>, the result is undefined. The program may crash
+set for <code>pcre2_compile()</code>, the result is undefined. The program may crash
 or loop or give wrong results. In the absence of PCRE2_MATCH_INVALID_UTF you
-should call <b>pcre2_jit_match()</b> in UTF mode only if you are sure the
-subject is valid.
-</p>
-<p>
-Bypassing the sanity checks and the <b>pcre2_match()</b> wrapping can give
-speedups of more than 10%.
-</p>
-<h2><a name="SEC12" href="#TOC1">SEE ALSO</a></h2>
-<p>
-<b>pcre2api</b>(3), <b>pcre2unicode</b>(3)
-</p>
-<h2><a name="SEC13" href="#TOC1">AUTHOR</a></h2>
-<p>
-Philip Hazel (FAQ by Zoltan Herczeg)
-<br>
+should call <code>pcre2_jit_match()</code> in UTF mode only if you are sure the
+subject is valid.</p>
+</div>
+<div class="paragraph">
+<p>Bypassing the sanity checks and the <code>pcre2_match()</code> wrapping can give
+speedups of more than 10%.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See Also</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>pcre2api</code>(3), <code>pcre2unicode</code>(3)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_author">Author</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>Philip Hazel (FAQ by Zoltan Herczeg)
 Retired from University Computing Service
-<br>
-Cambridge, England.
-<br>
-</p>
-<h2><a name="SEC14" href="#TOC1">REVISION</a></h2>
-<p>
-Last updated: 08 August 2026
-<br>
-Copyright &copy; 1997-2024 University of Cambridge.
-<br>
-<p>
-Return to the <a href="index.html">PCRE2 index page</a>.
-</p>
+Cambridge, England.</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_revision">Revision</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last updated: 08 August 2026<br>
+Copyright (c) 1997-2024 University of Cambridge.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2026-09-17 19:53:34 +0100
+</div>
+</div>
+</body>
+</html>

@@ -1,32 +1,56 @@
-.TH PCRE2_SET_CALLOUT 3 "25 March 2017" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_set_callout - set up a callout function
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_set_callout
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 25 March 2017
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SET_CALLOUT" "3" "25 March 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_set_callout \- set up a callout function
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B int pcre2_set_callout(pcre2_match_context *\fImcontext\fP,
-.B "                      int (*\fIcallout\fP)("
-.B "                          pcre2_callout_block *\fIcallout_block\fP,"
-.B "                          void *\fIcallout_data\fP),"
-.B "                      void *\fIcallout_data\fP);"
+.fam C
+#include <pcre2.h>
+
+int pcre2_set_callout(pcre2_match_context *mcontext,
+                      int (*callout)(
+                          pcre2_callout_block *callout_block,
+                          void *callout_data),
+                      void *callout_data);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 This function sets the callout fields in a match context (the first argument).
 The second argument specifies a callout function, and the third argument is an
 opaque data item that is passed to it. The result of this function is always
 zero.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
+\f(CRpcre2posix\fP
 page.
-

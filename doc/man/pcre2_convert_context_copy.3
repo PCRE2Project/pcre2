@@ -1,25 +1,51 @@
-.TH PCRE2_CONVERT_CONTEXT_COPY 3 "12 July 2017" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_convert_context_copy - copy a convert context
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_convert_context_copy
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 12 July 2017
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_CONVERT_CONTEXT_COPY" "3" "12 July 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_convert_context_copy \- copy a convert context
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B pcre2_convert_context *pcre2_convert_context_copy(
-.B "      pcre2_convert_context *\fIccontext\fP);"
+.fam C
+#include <pcre2.h>
+
+pcre2_convert_context *pcre2_convert_context_copy(
+      pcre2_convert_context *ccontext);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 This function is part of an experimental set of pattern conversion functions.
 It makes a new copy of a convert context, using the memory allocation function
 that was used for the original context. The result is NULL if the memory cannot
 be obtained.
-.P
+.sp
 The pattern conversion functions are described in the
-.\" HREF
-\fBpcre2convert\fP
-.\"
+\f(CRpcre2convert\fP
 documentation.
-

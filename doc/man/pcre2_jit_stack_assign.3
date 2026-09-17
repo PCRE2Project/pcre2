@@ -1,59 +1,86 @@
-.TH PCRE2_JIT_STACK_ASSIGN 3 "13 August 2018" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_jit_stack_assign - assign stack for JIT matching
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_jit_stack_assign
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 13 August 2018
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_JIT_STACK_ASSIGN" "3" "13 August 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_jit_stack_assign \- assign stack for JIT matching
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B void pcre2_jit_stack_assign(pcre2_match_context *\fImcontext\fP,
-.B "                            pcre2_jit_callback \fIcallback\fP,"
-.B "                            void *\fIcallback_data\fP);"
+.fam C
+#include <pcre2.h>
+
+void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
+                            pcre2_jit_callback callback,
+                            void *callback_data);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
-This function provides control over the memory used by JIT as a run-time stack
-when \fBpcre2_match()\fP or \fBpcre2_jit_match()\fP is called with a pattern
+This function provides control over the memory used by JIT as a run\-time stack
+when \f(CRpcre2_match()\fP or \f(CRpcre2_jit_match()\fP is called with a pattern
 that has been successfully processed by the JIT compiler. The information that
 determines which stack is used is put into a match context that is subsequently
 passed to a matching function. The arguments of this function are:
 .sp
-  mcontext       a pointer to a match context
-  callback       a callback function
-  callback_data  a JIT stack or a value to be passed to the callback
-.P
+.ti +2
+mcontext       a pointer to a match context
+.br
+.ti +2
+callback       a callback function
+.br
+.ti +2
+callback_data  a JIT stack or a value to be passed to the callback
+.sp
 If \fImcontext\fP is NULL, the function returns immediately, without doing
 anything.
-.P
+.sp
 If \fIcallback\fP is NULL and \fIcallback_data\fP is NULL, an internal 32KiB
 block on the machine stack is used.
-.P
+.sp
 If \fIcallback\fP is NULL and \fIcallback_data\fP is not NULL,
 \fIcallback_data\fP must be a valid JIT stack, the result of calling
-\fBpcre2_jit_stack_create()\fP.
-.P
+\f(CRpcre2_jit_stack_create()\fP.
+.sp
 If \fIcallback\fP not NULL, it is called with \fIcallback_data\fP as an
 argument at the start of matching, in order to set up a JIT stack. If the
 result is NULL, the internal 32KiB stack is used; otherwise the return value
 must be a valid JIT stack, the result of calling
-\fBpcre2_jit_stack_create()\fP.
-.P
+\f(CRpcre2_jit_stack_create()\fP.
+.sp
 You may safely use the same JIT stack for multiple patterns, as long as they
 are all matched in the same thread. In a multithread application, each thread
 must use its own JIT stack. For more details, see the
-.\" HREF
-\fBpcre2jit\fP
-.\"
+\f(CRpcre2jit\fP
 page.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
+\f(CRpcre2posix\fP
 page.
-

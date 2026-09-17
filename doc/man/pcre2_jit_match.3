@@ -1,57 +1,77 @@
-.TH PCRE2_JIT_MATCH 3 "20 January 2023" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_jit_match - fast path interface to JIT matching
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_jit_match
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 20 January 2023
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_JIT_MATCH" "3" "20 January 2023" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_jit_match \- fast path interface to JIT matching
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B int pcre2_jit_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
-.B "                    PCRE2_SIZE \fIlength\fP, PCRE2_SIZE \fIstart_offset\fP,"
-.B "                    uint32_t \fIoptions\fP, pcre2_match_data *\fImatch_data\fP,"
-.B "                    pcre2_match_context *\fImcontext\fP);"
+.fam C
+#include <pcre2.h>
+
+int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
+                    PCRE2_SIZE length, PCRE2_SIZE start_offset,
+                    uint32_t options, pcre2_match_data *match_data,
+                    pcre2_match_context *mcontext);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 This function matches a compiled regular expression that has been successfully
 processed by the JIT compiler against a given subject string, using a matching
 algorithm that is similar to Perl's. It is a "fast path" interface to JIT, and
-it bypasses some of the sanity checks that \fBpcre2_match()\fP applies.
-.P
+it bypasses some of the sanity checks that \f(CRpcre2_match()\fP applies.
+.sp
 In UTF mode, the subject string is not checked for UTF validity. Unless
 PCRE2_MATCH_INVALID_UTF was set when the pattern was compiled, passing an
 invalid UTF string results in undefined behaviour. Your program may crash or
 loop or give wrong results. In the absence of PCRE2_MATCH_INVALID_UTF you
-should only call \fBpcre2_jit_match()\fP in UTF mode if you are sure the
+should only call \f(CRpcre2_jit_match()\fP in UTF mode if you are sure the
 subject is valid.
-.P
-The arguments for \fBpcre2_jit_match()\fP are exactly the same as for
-.\" HREF
-\fBpcre2_match()\fP,
-.\"
+.sp
+The arguments for \f(CRpcre2_jit_match()\fP are exactly the same as for
+\f(CRpcre2_match()\fP,
 except that the subject string must be specified with a length;
 PCRE2_ZERO_TERMINATED is not supported.
-.P
+.sp
 The supported options are PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
 PCRE2_NOTEMPTY_ATSTART, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Unsupported
 options are ignored.
-.P
-The return values are the same as for \fBpcre2_match()\fP plus
+.sp
+The return values are the same as for \f(CRpcre2_match()\fP plus
 PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
 that was not compiled. For details of partial matching, see the
-.\" HREF
-\fBpcre2partial\fP
-.\"
+\f(CRpcre2partial\fP
 page.
-.P
+.sp
 There is a complete description of the PCRE2 native API in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page and a description of the JIT API in the
-.\" HREF
-\fBpcre2jit\fP
-.\"
+\f(CRpcre2jit\fP
 page.
-

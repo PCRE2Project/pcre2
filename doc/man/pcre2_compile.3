@@ -1,107 +1,214 @@
-.TH PCRE2_COMPILE 3 "30 October 2024" "PCRE2 10.49-DEV"
-.SH NAME
-pcre2_compile - compile a regular expression pattern
-.SH SYNOPSIS
+'\" t
+.\"     Title: pcre2_compile
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 30 October 2024
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_COMPILE" "3" "30 October 2024" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_compile \- compile a regular expression pattern
+.SH "SYNOPSIS"
 .sp
-.B #include <pcre2.h>
-.PP
 .nf
-.B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIpatlen\fP,
-.B "                          uint32_t \fIoptions\fP, int *\fIerrorptr\fP,"
-.B "                          PCRE2_SIZE *\fIerroroffset\fP,"
-.B "                          pcre2_compile_context *\fIccontext\fP);"
+.fam C
+#include <pcre2.h>
+
+pcre2_code *pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen,
+                          uint32_t options, int *errorptr,
+                          PCRE2_SIZE *erroroffset,
+                          pcre2_compile_context *ccontext);
+.fam
 .fi
-.
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 .sp
 This function compiles a regular expression pattern into an internal form. Its
 arguments are:
 .sp
-  \fIpattern\fP       A string containing expression to be compiled
-  \fIlength\fP        The length of the string or PCRE2_ZERO_TERMINATED
-  \fIoptions\fP       Primary option bits
-  \fIerrorcode\fP     Where to put an error code
-  \fIerroffset\fP     Where to put an error offset
-  \fIccontext\fP      Pointer to a compile context or NULL
+.ti +2
+\fIpattern\fP       A string containing expression to be compiled
+.br
+.ti +2
+\fIlength\fP        The length of the string or PCRE2_ZERO_TERMINATED
+.br
+.ti +2
+\fIoptions\fP       Primary option bits
+.br
+.ti +2
+\fIerrorcode\fP     Where to put an error code
+.br
+.ti +2
+\fIerroffset\fP     Where to put an error offset
+.br
+.ti +2
+\fIccontext\fP      Pointer to a compile context or NULL
 .sp
 The length of the pattern and any error offset that is returned are in code
 units, not characters. A NULL pattern with zero length is treated as an empty
 string. A compile context is needed only if you want to provide custom memory
 allocation functions, or to provide an external function for system stack size
-checking (see \fBpcre2_set_compile_recursion_guard()\fP), or to change one or
+checking (see \f(CRpcre2_set_compile_recursion_guard()\fP), or to change one or
 more of these parameters:
 .sp
-  What \eR matches (Unicode newlines, or CR, LF, CRLF only);
-  PCRE2's character tables;
-  The newline character sequence;
-  The compile time nested parentheses limit;
-  The maximum pattern length (in code units) that is allowed;
-  The additional options bits.
+.ti +2
+What \(rsR matches (Unicode newlines, or CR, LF, CRLF only);
+.br
+.ti +2
+PCRE2\*(Aqs character tables;
+.br
+.ti +2
+The newline character sequence;
+.br
+.ti +2
+The compile time nested parentheses limit;
+.br
+.ti +2
+The maximum pattern length (in code units) that is allowed;
+.br
+.ti +2
+The additional options bits.
 .sp
 The primary option bits are:
 .sp
-  PCRE2_ANCHORED           Force pattern anchoring
-  PCRE2_ALLOW_EMPTY_CLASS  Allow empty classes
-  PCRE2_ALT_BSUX           Alternative handling of \eu, \eU, and \ex
-  PCRE2_ALT_CIRCUMFLEX     Alternative handling of ^ in multiline mode
-  PCRE2_ALT_EXTENDED_CLASS Alternative extended character class syntax
-  PCRE2_ALT_VERBNAMES      Process backslashes in verb names
-  PCRE2_AUTO_CALLOUT       Compile automatic callouts
-  PCRE2_CASELESS           Do caseless matching
-  PCRE2_DOLLAR_ENDONLY     $ not to match newline at end
-  PCRE2_DOTALL             . matches anything including NL
-  PCRE2_DUPNAMES           Allow duplicate names for subpatterns
-  PCRE2_ENDANCHORED        Pattern can match only at end of subject
-  PCRE2_EXTENDED           Ignore white space and # comments
-  PCRE2_FIRSTLINE          Force matching to be before newline
-  PCRE2_LITERAL            Pattern characters are all literal
-  PCRE2_MATCH_INVALID_UTF  Enable support for matching invalid UTF
-  PCRE2_MATCH_UNSET_BACKREF  Match unset backreferences
-  PCRE2_MULTILINE          ^ and $ match newlines within data
-  PCRE2_NEVER_BACKSLASH_C  Lock out the use of \eC in patterns
-  PCRE2_NEVER_UCP          Lock out PCRE2_UCP, e.g. via (*UCP)
-  PCRE2_NEVER_UTF          Lock out PCRE2_UTF, e.g. via (*UTF)
-  PCRE2_NO_AUTO_CAPTURE    Disable numbered capturing paren-
-                            theses (named ones available)
-  PCRE2_NO_AUTO_POSSESS    Disable auto-possessification
-  PCRE2_NO_DOTSTAR_ANCHOR  Disable automatic anchoring for .*
-  PCRE2_NO_START_OPTIMIZE  Disable match-time start optimizations
-  PCRE2_NO_UTF_CHECK       Do not check the pattern for UTF validity
-                             (only relevant if PCRE2_UTF is set)
-  PCRE2_UCP                Use Unicode properties for \ed, \ew, etc.
-  PCRE2_UNGREEDY           Invert greediness of quantifiers
-  PCRE2_USE_OFFSET_LIMIT   Enable offset limit for unanchored matching
-  PCRE2_UTF                Treat pattern and subjects as UTF strings
+.ti +2
+PCRE2_ANCHORED           Force pattern anchoring
+.br
+.ti +2
+PCRE2_ALLOW_EMPTY_CLASS  Allow empty classes
+.br
+.ti +2
+PCRE2_ALT_BSUX           Alternative handling of \(rsu, \(rsU, and \(rsx
+.br
+.ti +2
+PCRE2_ALT_CIRCUMFLEX     Alternative handling of ^ in multiline mode
+.br
+.ti +2
+PCRE2_ALT_EXTENDED_CLASS Alternative extended character class syntax
+.br
+.ti +2
+PCRE2_ALT_VERBNAMES      Process backslashes in verb names
+.br
+.ti +2
+PCRE2_AUTO_CALLOUT       Compile automatic callouts
+.br
+.ti +2
+PCRE2_CASELESS           Do caseless matching
+.br
+.ti +2
+PCRE2_DOLLAR_ENDONLY     $ not to match newline at end
+.br
+.ti +2
+PCRE2_DOTALL             . matches anything including NL
+.br
+.ti +2
+PCRE2_DUPNAMES           Allow duplicate names for subpatterns
+.br
+.ti +2
+PCRE2_ENDANCHORED        Pattern can match only at end of subject
+.br
+.ti +2
+PCRE2_EXTENDED           Ignore white space and # comments
+.br
+.ti +2
+PCRE2_FIRSTLINE          Force matching to be before newline
+.br
+.ti +2
+PCRE2_LITERAL            Pattern characters are all literal
+.br
+.ti +2
+PCRE2_MATCH_INVALID_UTF  Enable support for matching invalid UTF
+.br
+.ti +2
+PCRE2_MATCH_UNSET_BACKREF  Match unset backreferences
+.br
+.ti +2
+PCRE2_MULTILINE          ^ and $ match newlines within data
+.br
+.ti +2
+PCRE2_NEVER_BACKSLASH_C  Lock out the use of \(rsC in patterns
+.br
+.ti +2
+PCRE2_NEVER_UCP          Lock out PCRE2_UCP, e.g. via (*UCP)
+.br
+.ti +2
+PCRE2_NEVER_UTF          Lock out PCRE2_UTF, e.g. via (*UTF)
+.br
+.ti +2
+PCRE2_NO_AUTO_CAPTURE    Disable numbered capturing paren\-
+.br
+.ti +2
+                          theses (named ones available)
+.br
+.ti +2
+PCRE2_NO_AUTO_POSSESS    Disable auto\-possessification
+.br
+.ti +2
+PCRE2_NO_DOTSTAR_ANCHOR  Disable automatic anchoring for .*
+.br
+.ti +2
+PCRE2_NO_START_OPTIMIZE  Disable match\-time start optimizations
+.br
+.ti +2
+PCRE2_NO_UTF_CHECK       Do not check the pattern for UTF validity
+.br
+.ti +2
+                           (only relevant if PCRE2_UTF is set)
+.br
+.ti +2
+PCRE2_UCP                Use Unicode properties for \(rsd, \(rsw, etc.
+.br
+.ti +2
+PCRE2_UNGREEDY           Invert greediness of quantifiers
+.br
+.ti +2
+PCRE2_USE_OFFSET_LIMIT   Enable offset limit for unanchored matching
+.br
+.ti +2
+PCRE2_UTF                Treat pattern and subjects as UTF strings
 .sp
 PCRE2 must be built with Unicode support (the default) in order to use
 PCRE2_UTF, PCRE2_UCP and related options.
-.P
+.sp
 Additional options may be set in the compile context via the
-.\" HREF
-\fBpcre2_set_compile_extra_options\fP
-.\"
+\f(CRpcre2_set_compile_extra_options\fP
 function.
-.P
+.sp
 If either of \fIerrorcode\fP or \fIerroroffset\fP is NULL, the function returns
 NULL immediately. Otherwise, the yield of this function is a pointer to a
 private data structure that contains the compiled pattern, or NULL if an error
 was detected. In the error case, a text error message can be obtained by
 passing the value returned via the \fIerrorcode\fP argument to the
-\fBpcre2_get_error_message()\fP function. The offset (in code units) where the
+\f(CRpcre2_get_error_message()\fP function. The offset (in code units) where the
 error was encountered is returned via the \fIerroroffset\fP argument.
-.P
+.sp
 If there is no error, the value passed via \fIerrorcode\fP returns the message
-"no error" if passed to \fBpcre2_get_error_message()\fP, and the value passed
+"no error" if passed to \f(CRpcre2_get_error_message()\fP, and the value passed
 via \fIerroroffset\fP is zero.
-.P
+.sp
 There is a complete description of the PCRE2 native API, with more detail on
 each option, in the
-.\" HREF
-\fBpcre2api\fP
-.\"
+\f(CRpcre2api\fP
 page, and a description of the POSIX API in the
-.\" HREF
-\fBpcre2posix\fP
-.\"
+\f(CRpcre2posix\fP
 page.
-
