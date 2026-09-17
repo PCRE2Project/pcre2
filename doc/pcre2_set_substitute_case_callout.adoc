@@ -1,0 +1,37 @@
+= pcre2_set_substitute_case_callout(3)
+:doctype: manpage
+:manname: pcre2_set_substitute_case_callout
+:manpurpose: set a substitution case callout function
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 26 December 2024
+:revdate: 26 December 2024
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_set_substitute_case_callout(
+      pcre2_match_context *mcontext,
+      PCRE2_SIZE (*substitute_case_callout)(
+          PCRE2_SPTR input, PCRE2_SIZE input_length,
+          PCRE2_UCHAR *output, PCRE2_SIZE output_capacity,
+          int case_operation, void *substitute_case_callout_data),
+      void *substitute_case_callout_data);
+....
+
+== Description
+
+This function sets the substitute case callout fields in a match context (the
+first argument). The second argument specifies a callout function, and the third
+argument is an opaque data item that is passed to it. The result of this
+function is always zero.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

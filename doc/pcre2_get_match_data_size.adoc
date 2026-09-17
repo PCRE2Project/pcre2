@@ -1,0 +1,29 @@
+= pcre2_get_match_data_size(3)
+:doctype: manpage
+:manname: pcre2_get_match_data_size
+:manpurpose: get the size of a match data block
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 17 October 2019
+:revdate: 17 October 2019
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *match_data);
+....
+
+== Description
+
+This function returns the size, in bytes, of the match data block that is its
+argument.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

@@ -1,0 +1,31 @@
+= pcre2_convert_context_create(3)
+:doctype: manpage
+:manname: pcre2_convert_context_create
+:manpurpose: create a convert context
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 12 July 2017
+:revdate: 12 July 2017
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+pcre2_convert_context *pcre2_convert_context_create(
+      pcre2_general_context *gcontext);
+....
+
+== Description
+
+This function is part of an experimental set of pattern conversion functions.
+It creates and initializes a new convert context. If its argument is
+NULL, `malloc()` is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is NULL if
+the memory could not be obtained.
+
+The pattern conversion functions are described in the
+xref:pcre2convert.adoc[`pcre2convert`]
+documentation.

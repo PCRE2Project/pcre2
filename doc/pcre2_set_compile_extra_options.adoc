@@ -1,0 +1,58 @@
+= pcre2_set_compile_extra_options(3)
+:doctype: manpage
+:manname: pcre2_set_compile_extra_options
+:manpurpose: set compile time extra options
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 14 October 2024
+:revdate: 14 October 2024
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_set_compile_extra_options(pcre2_compile_context *ccontext,
+                                    uint32_t options);
+....
+
+== Description
+
+This function sets additional option bits for `pcre2_compile()` that are
+housed in a compile context. It completely replaces all the bits. The extra
+options are:
+
+[literal]
+....
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK     Allow \K in lookarounds
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  Allow \x{d800} to \x{dfff}
+                                       in UTF-8 and UTF-32 modes
+PCRE2_EXTRA_ALT_BSUX                 Extended alternate \u, \U, and
+                                       \x handling
+PCRE2_EXTRA_ASCII_BSD                \d remains ASCII in UCP mode
+PCRE2_EXTRA_ASCII_BSS                \s remains ASCII in UCP mode
+PCRE2_EXTRA_ASCII_BSW                \w remains ASCII in UCP mode
+PCRE2_EXTRA_ASCII_DIGIT              [:digit:] and [:xdigit:] POSIX classes
+                                       remain ASCII in UCP mode
+PCRE2_EXTRA_ASCII_POSIX              POSIX classes remain ASCII in
+                                       UCP mode
+PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as
+                                       a literal following character
+PCRE2_EXTRA_CASELESS_RESTRICT        Disable mixed ASCII/non-ASCII
+                                       case folding
+PCRE2_EXTRA_ESCAPED_CR_IS_LF         Interpret \r as \n
+PCRE2_EXTRA_MATCH_LINE               Pattern matches whole lines
+PCRE2_EXTRA_MATCH_WORD               Pattern matches "words"
+PCRE2_EXTRA_NEVER_CALLOUT            Disallow callouts in pattern
+PCRE2_EXTRA_NO_BS0                   Disallow \0 (but not \00 or \000)
+PCRE2_EXTRA_PYTHON_OCTAL             Use Python rules for octal
+PCRE2_EXTRA_TURKISH_CASING           Use Turkish I case folding
+....
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.
