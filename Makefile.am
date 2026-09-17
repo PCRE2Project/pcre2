@@ -28,7 +28,7 @@ dist_doc_DATA = \
   doc/pcre2-config.txt \
   doc/pcre2grep.txt \
   doc/pcre2test.txt \
-  doc/pcre2-config.1 \
+  doc/pcre2-config.adoc \
   doc/pcre2.adoc \
   doc/pcre2_callout_enumerate.adoc \
   doc/pcre2_code_copy.adoc \
