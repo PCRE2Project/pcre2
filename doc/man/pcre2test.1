@@ -1,0 +1,2871 @@
+'\" t
+.\"     Title: pcre2test
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 22 August 2026
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2TEST" "1" "22 August 2026" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2test \- a program for testing Perl\-compatible regular expressions.
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+pcre2test [options] [input file [output file]]
+.fam
+.fi
+.sp
+\f(CRpcre2test\fP is a test program for the PCRE2 regular expression libraries,
+but it can also be used for experimenting with regular expressions. This
+document describes the features of the test program; for details of the regular
+expressions themselves, see the
+\f(CRpcre2pattern\fP
+documentation. For details of the PCRE2 library function calls and their
+options, see the
+\f(CRpcre2api\fP
+documentation.
+.sp
+The input for \f(CRpcre2test\fP is a sequence of regular expression patterns and
+subject strings to be matched. There are also command lines for setting
+defaults and controlling some special actions. The output shows the result of
+each match attempt. Modifiers on external or internal command lines, the
+patterns, and the subject lines specify PCRE2 function options, control how the
+subject is processed, and what output is produced.
+.sp
+There are many obscure modifiers, some of which are specifically designed for
+use in conjunction with the test script and data files that are distributed as
+part of PCRE2. All the modifiers are documented here, some without much
+justification, but many of them are unlikely to be of use except when testing
+the libraries.
+.SH "PCRE2'S 8\-BIT, 16\-BIT AND 32\-BIT LIBRARIES"
+.sp
+Different versions of the PCRE2 library can be built to support character
+strings that are encoded in 8\-bit, 16\-bit, or 32\-bit code units. One, two, or
+all three of these libraries may be simultaneously installed. The
+\f(CRpcre2test\fP program can be used to test all the libraries. However, its own
+input and output are always in 8\-bit format. When testing the 16\-bit or 32\-bit
+libraries, patterns and subject strings are converted to 16\-bit or 32\-bit
+format before being passed to the library functions. Results are converted back
+to 8\-bit code units for output.
+.sp
+In the rest of this document, the names of library functions and structures
+are given in generic form, for example, \f(CRpcre2_compile()\fP. The actual
+names used in the libraries have a suffix _8, _16, or _32, as appropriate.
+.SH "INPUT ENCODING"
+.sp
+Input to \f(CRpcre2test\fP is processed line by line, either by calling the C
+library's \f(CRfgets()\fP function, or via the \f(CRlibreadline\fP or \f(CRlibedit\fP
+library. In some Windows environments character 26 (hex 1A) causes an immediate
+end of file, and no further data is read, so this character should be avoided
+unless you really want that action.
+.sp
+The input is processed using C's string functions, so must not contain binary
+zeros, even though in Unix\-like environments, \f(CRfgets()\fP treats any bytes
+other than newline as data characters. An error is generated if a binary zero
+is encountered. By default subject lines are processed for backslash escapes,
+which makes it possible to include any data value in strings that are passed to
+the library for matching. For patterns, there is a facility for specifying some
+or all of the 8\-bit input characters as hexadecimal pairs, which makes it
+possible to include binary zeros.
+.SS "Input for the 16\-bit and 32\-bit libraries"
+.sp
+When testing the 16\-bit or 32\-bit libraries, there is a need to be able to
+generate character code points greater than 255 in the strings that are passed
+to the library. For subject lines and some patterns, backslash escapes can be
+used. In addition, when the \f(CRutf\fP modifier (see
+"Setting compilation options"
+below) is set, the pattern and any following subject lines are interpreted as
+UTF\-8 strings and translated to UTF\-16 or UTF\-32 as appropriate.
+.sp
+For non\-UTF testing of wide characters, the \f(CRutf8_input\fP modifier can be
+used. This is mutually exclusive with \f(CRutf\fP, and is allowed only in 16\-bit
+or 32\-bit mode. It causes the pattern and following subject lines to be treated
+as UTF\-8 according to the original definition (RFC 2279), which allows for
+character values up to 0x7fffffff. Each character is placed in one 16\-bit or
+32\-bit code unit (in the 16\-bit case, values greater than 0xffff cause an error
+to occur).
+.sp
+UTF\-8 (in its original definition) is not capable of encoding values greater
+than 0x7fffffff, but such values can be handled by the 32\-bit library. When
+testing this library in non\-UTF mode with \f(CRutf8_input\fP set, if any
+character is preceded by the byte 0xff (which is an invalid byte in UTF\-8)
+0x80000000 is added to the character's value. For subject strings, using an
+escape sequence is preferable.
+.SH "COMMAND LINE OPTIONS"
+.TP 10
+\f(CR\-8\fP
+If the 8\-bit library has been built, this option causes it to be used (this is
+the default). If the 8\-bit library has not been built, this option causes an
+error.
+.TP 10
+\f(CR\-16\fP
+If the 16\-bit library has been built, this option causes it to be used. If the
+8\-bit library has not been built, this is the default. If the 16\-bit library
+has not been built, this option causes an error.
+.TP 10
+\f(CR\-32\fP
+If the 32\-bit library has been built, this option causes it to be used. If no
+other library has been built, this is the default. If the 32\-bit library has
+not been built, this option causes an error.
+.TP 10
+\f(CR\-ac\fP
+Behave as if each pattern has the \f(CRauto_callout\fP modifier, that is, insert
+automatic callouts into every pattern that is compiled.
+.TP 10
+\f(CR\-AC\fP
+As for \f(CR\-ac\fP, but in addition behave as if each subject line has the
+\f(CRcallout_extra\fP modifier, that is, show additional information from
+callouts.
+.TP 10
+\f(CR\-b\fP
+Behave as if each pattern has the \f(CRfullbincode\fP modifier; the full
+internal binary form of the pattern is output after compilation.
+.TP 10
+\f(CR\-C\fP
+Output the version number of the PCRE2 library, and all available information
+about the optional features that are included, and then exit with zero exit
+code. All other options are ignored. If both \-C and \-LM are present, whichever
+is first is recognized.
+.TP 10
+\f(CR\-C\fP \fIoption\fP
+Output information about a specific build\-time option, then exit. This
+functionality is intended for use in scripts such as \f(CRRunTest\fP. The
+following options output the value and set the exit code as indicated:
+.sp
+.ti +2
+linksize   the configured internal link size (2, 3, or 4)
+.br
+.ti +2
+             exit code is set to the link size
+.br
+.ti +2
+newline    the default newline setting:
+.br
+.ti +2
+             CR, LF, CRLF, ANYCRLF, ANY, or NUL
+.br
+.ti +2
+             exit code is always 0
+.br
+.ti +2
+bsr        the default setting for what \(rsR matches:
+.br
+.ti +2
+             ANYCRLF or ANY
+.br
+.ti +2
+             exit code is always 0
+.sp
+The following options output 1 for true or 0 for false, and set the exit code
+to the same value:
+.sp
+.ti +2
+backslash\-C  \(rsC is supported (not locked out)
+.br
+.ti +2
+ebcdic       compiled for an EBCDIC environment
+.br
+.ti +2
+ebcdic\-io    if PCRE2 is compiled for EBCDIC, whether pcre2test\*(Aqs input and
+.br
+.ti +2
+               output is EBCDIC or ASCII
+.br
+.ti +2
+ebcdic\-nl25  if PCRE2 is compiled for EBCDIC, whether NL (= LF) is 0x25
+.br
+.ti +2
+               (otherwise it is 0x15, the default)
+.br
+.ti +2
+jit          just\-in\-time support is available
+.br
+.ti +2
+pcre2\-16     the 16\-bit library was built
+.br
+.ti +2
+pcre2\-32     the 32\-bit library was built
+.br
+.ti +2
+pcre2\-8      the 8\-bit library was built
+.br
+.ti +2
+unicode      Unicode support is available
+.sp
+Note that the availability of JIT support in the library does not guarantee
+that it can actually be used because in some environments it is unable to
+allocate executable memory. The option "jitusable" gives more detailed
+information. It returns one of the following values:
+.sp
+.ti +2
+0  JIT is available and usable
+.br
+.ti +2
+1  JIT is available but cannot allocate executable memory
+.br
+.ti +2
+2  JIT is not available
+.br
+.ti +2
+3  Unexpected return from test call to \f(CRpcre2_jit_compile()\fP
+.sp
+If an unknown option is given, an error message is output; the exit code is 0.
+.TP 10
+\f(CR\-\-colo[u]r[=<always,auto,never>]\fP
+With \f(CRauto\fP, the output is coloured if the output is to a terminal. Force or
+suppress output of ANSI colour escapes with \f(CRalways\fP (or no specifier
+provided) and \f(CRnever\fP respectively. If no colour option is provided, the
+default is \f(CRauto\fP, unless the NO_COLOR environment variable is defined and
+non\-empty.
+.TP 10
+\f(CR\-d\fP
+Behave as if each pattern has the \f(CRdebug\fP modifier; the internal
+form and information about the compiled pattern is output after compilation;
+\f(CR\-d\fP is equivalent to \f(CR\-b \-i\fP.
+.TP 10
+\f(CR\-dfa\fP
+Behave as if each subject line has the \f(CRdfa\fP modifier; matching is done
+using the \f(CRpcre2_dfa_match()\fP function instead of the default
+\f(CRpcre2_match()\fP.
+.TP 10
+\f(CR\-E\fP
+Run in "preprocess only" mode (similar to "gcc \-E"). The "#if ... #endif"
+commands are processed, and all other lines are printed verbatim.
+.TP 10
+\f(CR\-error\fP \fInumber[,number,...]\fP
+Call \f(CRpcre2_get_error_message()\fP for each of the error numbers in the
+comma\-separated list, display the resulting messages on the standard output,
+then exit with zero exit code. The numbers may be positive or negative. This is
+a convenience facility for PCRE2 maintainers.
+.TP 10
+\f(CR\-help\fP
+Output a brief summary these options and then exit.
+.TP 10
+\f(CR\-i\fP
+Behave as if each pattern has the \f(CRinfo\fP modifier; information about the
+compiled pattern is given after compilation.
+.TP 10
+\f(CR\-jit\fP
+Behave as if each pattern line has the \f(CRjit\fP modifier; after successful
+compilation, each pattern is passed to the just\-in\-time compiler, if available.
+.TP 10
+\f(CR\-jitfast\fP
+Behave as if each pattern line has the \f(CRjitfast\fP modifier; after
+successful compilation, each pattern is passed to the just\-in\-time compiler, if
+available, and each subject line is passed directly to the JIT matcher via its
+"fast path".
+.TP 10
+\f(CR\-jitverify\fP
+Behave as if each pattern line has the \f(CRjitverify\fP modifier; after
+successful compilation, each pattern is passed to the just\-in\-time compiler, if
+available, and the use of JIT for matching is verified.
+.TP 10
+\f(CR\-LM\fP
+List modifiers: write a list of available pattern and subject modifiers to the
+standard output, then exit with zero exit code. All other options are ignored.
+If both \-C and any \-Lx options are present, whichever is first is recognized.
+.TP 10
+\f(CR\-LP\fP
+List properties: write a list of recognized Unicode properties to the standard
+output, then exit with zero exit code. All other options are ignored. If both
+\-C and any \-Lx options are present, whichever is first is recognized.
+.TP 10
+\f(CR\-LS\fP
+List scripts: write a list of recognized Unicode script names to the standard
+output, then exit with zero exit code. All other options are ignored. If both
+\-C and any \-Lx options are present, whichever is first is recognized.
+.TP 10
+\f(CR\-malloc\fP
+Exercise malloc() failures, by first counting the number of calls made to malloc
+during pattern compilation and matching, then re\-running the compilation and
+matching that many times, exercising a failure of each malloc() call.
+.TP 10
+\f(CR\-pattern\fP \fImodifier\-list\fP
+Behave as if each pattern line contains the given modifiers.
+.TP 10
+\f(CR\-q\fP
+Do not output the version number of \f(CRpcre2test\fP at the start of execution.
+.TP 10
+\f(CR\-S\fP \fIsize\fP
+On Unix\-like systems, set the size of the run\-time stack to \fIsize\fP
+mebibytes (units of 1024*1024 bytes).
+.TP 10
+\f(CR\-subject\fP \fImodifier\-list\fP
+Behave as if each subject line contains the given modifiers.
+.TP 10
+\f(CR\-t\fP
+Run each compile and match many times with a timer, and output the resulting
+times per compile or match. When JIT is used, separate times are given for the
+initial compile and the JIT compile. You can control the number of iterations
+that are used for timing by following \f(CR\-t\fP with a number (as a separate
+item on the command line). For example, "\-t 1000" iterates 1000 times. The
+default is to iterate 500,000 times.
+.TP 10
+\f(CR\-tm\fP
+This is like \f(CR\-t\fP except that it times only the matching phase, not the
+compile phase.
+.TP 10
+\f(CR\-T\fP \f(CR\-TM\fP
+These behave like \f(CR\-t\fP and \f(CR\-tm\fP, but in addition, at the end of a run,
+the total times for all compiles and matches are output.
+.TP 10
+\f(CR\-unittest\fP
+Run a fixed set of additional tests of the PCRE2 API which are not driven by
+the test input files, and then exit.
+.TP 10
+\f(CR\-version\fP
+Output the PCRE2 version number and then exit.
+.PP
+.SH "DESCRIPTION"
+.sp
+If \f(CRpcre2test\fP is given two filename arguments, it reads from the first and
+writes to the second. If the first name is "\-", input is taken from the
+standard input. If \f(CRpcre2test\fP is given only one argument, it reads from
+that file and writes to stdout. Otherwise, it reads from stdin and writes to
+stdout.
+.sp
+When \f(CRpcre2test\fP is built, a configuration option can specify that it
+should be linked with the \f(CRlibreadline\fP or \f(CRlibedit\fP library. When this
+is done, if the input is from a terminal, it is read using the \f(CRreadline()\fP
+function. This provides line\-editing and history facilities. The output from
+the \f(CR\-help\fP option states whether or not \f(CRreadline()\fP will be used.
+.sp
+The program handles any number of tests, each of which consists of a set of
+input lines. Each set starts with a regular expression pattern, followed by any
+number of subject lines to be matched against that pattern. In between sets of
+test data, command lines that begin with # may appear. This file format, with
+some restrictions, can also be processed by the \f(CRperltest.sh\fP script that
+is distributed with PCRE2 as a means of checking that the behaviour of PCRE2
+and Perl is the same. For a specification of \f(CRperltest.sh\fP, see the
+comments near its beginning. See also the #perltest command below.
+.sp
+When the input is a terminal, \f(CRpcre2test\fP prompts for each line of input,
+using "re>" to prompt for regular expression patterns, and "data>" to prompt
+for subject lines. Command lines starting with # can be entered only in
+response to the "re>" prompt.
+.sp
+Each subject line is matched separately and independently. If you want to do
+multi\-line matches, you have to use the \(rsn escape sequence (or \(rsr or \(rsr\(rsn,
+etc., depending on the newline setting) in a single line of input to encode the
+newline sequences. There is no limit on the length of subject lines; the input
+buffer is automatically extended if it is too small. There are replication
+features that makes it possible to generate long repetitive pattern or subject
+lines without having to supply them explicitly.
+.sp
+An empty line or the end of the file signals the end of the subject lines for a
+test, at which point a new pattern or command line is expected if there is
+still input to be read.
+.SH "COMMAND LINES"
+.sp
+In between sets of test data, a line that begins with # is interpreted as a
+command line. If the first character is followed by white space or an
+exclamation mark, the line is treated as a comment, and ignored. Otherwise, the
+following commands are recognized:
+.sp
+.ti +2
+#forbid_utf
+.sp
+Subsequent patterns automatically have the PCRE2_NEVER_UTF and PCRE2_NEVER_UCP
+options set, which locks out the use of the PCRE2_UTF and PCRE2_UCP options and
+the use of (*UTF) and (*UCP) at the start of patterns. This command also forces
+an error if a subsequent pattern contains any occurrences of \(rsP, \(rsp, or \(rsX,
+which are still supported when PCRE2_UTF is not set, but which require Unicode
+property support to be included in the library.
+.sp
+This is a trigger guard that is used in test files to ensure that UTF or
+Unicode property tests are not accidentally added to files that are used when
+Unicode support is not included in the library. Setting PCRE2_NEVER_UTF and
+PCRE2_NEVER_UCP as a default can also be obtained by the use of \f(CR#pattern\fP;
+the difference is that \f(CR#forbid_utf\fP cannot be unset, and the automatic
+options are not displayed in pattern information, to avoid cluttering up test
+output.
+.sp
+.ti +2
+#load <filename>
+.sp
+This command is used to load a set of precompiled patterns from a file, as
+described in the section entitled "Saving and restoring compiled patterns"
+below.
+.sp
+.ti +2
+#loadtables <filename>
+.sp
+This command is used to load a set of binary character tables that can be
+accessed by the tables=3 qualifier. Such tables can be created by the
+\f(CRpcre2_dftables\fP program with the \-b option.
+.sp
+.ti +2
+#newline_default [<newline\-list>]
+.sp
+When PCRE2 is built, a default newline convention can be specified. This
+determines which characters and/or character pairs are recognized as indicating
+a newline in a pattern or subject string. The default can be overridden when a
+pattern is compiled. The standard test files contain tests of various newline
+conventions, but the majority of the tests expect a single linefeed to be
+recognized as a newline by default. Without special action the tests would fail
+when PCRE2 is compiled with either CR or CRLF as the default newline.
+.sp
+The #newline_default command specifies a list of newline types that are
+acceptable as the default. The types must be one of CR, LF, CRLF, ANYCRLF,
+ANY, or NUL (in upper or lower case), for example:
+.sp
+.ti +2
+#newline_default LF Any anyCRLF
+.sp
+If the default newline is in the list, this command has no effect. Otherwise,
+except when testing the POSIX API, a \f(CRnewline\fP modifier that specifies the
+first newline convention in the list (LF in the above example) is added to any
+pattern that does not already have a \f(CRnewline\fP modifier. If the newline
+list is empty, the feature is turned off. This command is present in a number
+of the standard test input files.
+.sp
+When the POSIX API is being tested there is no way to override the default
+newline convention, though it is possible to set the newline convention from
+within the pattern. A warning is given if the \f(CRposix\fP or \f(CRposix_nosub\fP
+modifier is used when \f(CR#newline_default\fP would set a default for the
+non\-POSIX API.
+.sp
+.ti +2
+#pattern <modifier\-list>
+.sp
+This command sets a default modifier list that applies to all subsequent
+patterns. Modifiers on a pattern can change these settings.
+.sp
+.ti +2
+#perltest
+.sp
+This line is used in test files that can also be processed by \f(CRperltest.sh\fP
+to confirm that Perl gives the same results as PCRE2. Subsequent tests are
+checked for the use of \f(CRpcre2test\fP features that are incompatible with the
+\f(CRperltest.sh\fP script.
+.sp
+Patterns must use \*(Aq/\*(Aq as their delimiter, and only certain modifiers are
+supported. Comment lines, #pattern commands, and #subject commands that set or
+unset "mark" are recognized and acted on. The #perltest, #forbid_utf, and
+#newline_default commands, which are needed in the relevant pcre2test files,
+are silently ignored. All other command lines are ignored, but give a warning
+message. The \f(CR#perltest\fP command helps detect tests that are accidentally
+put in the wrong file or use the wrong delimiter. For more details of the
+\f(CRperltest.sh\fP script see the comments it contains.
+.sp
+.ti +2
+#pop [<modifiers>]
+.br
+.ti +2
+#popcopy [<modifiers>]
+.sp
+These commands are used to manipulate the stack of compiled patterns, as
+described in the section entitled "Saving and restoring compiled patterns"
+below.
+.sp
+.ti +2
+#save <filename>
+.sp
+This command is used to save a set of compiled patterns to a file, as described
+in the section entitled "Saving and restoring compiled patterns"
+below.
+.sp
+.ti +2
+#subject <modifier\-list>
+.sp
+This command sets a default modifier list that applies to all subsequent
+subject lines. Modifiers on a subject line can change these settings.
+.sp
+.ti +2
+#if CONDITION
+.br
+.ti +2
+\&...
+.br
+.ti +2
+#endif
+.sp
+If CONDITION is true, then the command is printed, and its contents are
+processed as normal, including printing the commandlines to the output. If
+CONDITION is false, then all lines between the "#if" and "#endif" are skipped
+and not printed. The CONDITION can be any of the conditions which are tested by
+the "\-C" commandline option and which set pcre2test's exit code to a boolean
+value. The CONDITION may also be preceded by "!".
+.SH "MODIFIER SYNTAX"
+.sp
+Modifier lists are used with both pattern and subject lines. Items in a list
+are separated by commas followed by optional white space. Trailing white space
+in a modifier list is ignored. Some modifiers may be given for both patterns
+and subject lines, whereas others are valid only for one or the other. Each
+modifier has a long name, for example "anchored", and some of them must be
+followed by an equals sign and a value, for example, "offset=12". Values cannot
+contain comma characters, but may contain spaces. Modifiers that do not take
+values may be preceded by a minus sign to turn off a previous setting.
+.sp
+A few of the more common modifiers can also be specified as single letters, for
+example "i" for "caseless". In documentation, following the Perl convention,
+these are written with a slash ("the /i modifier") for clarity. Abbreviated
+modifiers must all be concatenated in the first item of a modifier list. If the
+first item is not recognized as a long modifier name, it is interpreted as a
+sequence of these abbreviations. For example:
+.sp
+.ti +2
+/abc/ig,newline=cr,jit=3
+.sp
+This is a pattern line whose modifier list starts with two one\-letter modifiers
+(/i and /g). The lower\-case abbreviated modifiers are the same as used in Perl.
+.SH "PATTERN SYNTAX"
+.sp
+A pattern line must start with one of the following characters (common symbols,
+excluding pattern meta\-characters):
+.sp
+.ti +2
+/ ! " \*(Aq ` \- = _ : ; , % & @ ~
+.sp
+This is interpreted as the pattern's delimiter. A regular expression may be
+continued over several input lines, in which case the newline characters are
+included within it. It is possible to include the delimiter as a literal within
+the pattern by escaping it with a backslash, for example
+.sp
+.ti +2
+/abc\(rs/def/
+.sp
+If you do this, the escape and the delimiter form part of the pattern, but
+since the delimiters are all non\-alphanumeric, the inclusion of the backslash
+does not affect the pattern's interpretation. Note, however, that this trick
+does not work within \(rsQ...\(rsE literal bracketing because the backslash will
+itself be interpreted as a literal. If the terminating delimiter is immediately
+followed by a backslash, for example,
+.sp
+.ti +2
+/abc/\(rs
+.sp
+a backslash is added to the end of the pattern. This is done to provide a way
+of testing the error condition that arises if a pattern finishes with a
+backslash, because
+.sp
+.ti +2
+/abc\(rs/
+.sp
+is interpreted as the first line of a pattern that starts with "abc/", causing
+pcre2test to read the next line as a continuation of the regular expression.
+.sp
+A pattern can be followed by a modifier list (details below).
+.SH "SUBJECT LINE SYNTAX"
+.sp
+Before each subject line is passed to \f(CRpcre2_match()\fP,
+\f(CRpcre2_dfa_match()\fP, or \f(CRpcre2_jit_match()\fP, leading and trailing white
+space is removed, and the line is scanned for backslash escapes, unless the
+\f(CRsubject_literal\fP modifier was set for the pattern. The following provide a
+means of encoding non\-printing characters in a visible way:
+.sp
+.ti +2
+\(rsa          alarm (BEL, \(rsx07)
+.br
+.ti +2
+\(rsb          backspace (\(rsx08)
+.br
+.ti +2
+\(rse          escape (\(rsx27)
+.br
+.ti +2
+\(rsf          form feed (\(rsx0c)
+.br
+.ti +2
+\(rsn          newline (\(rsx0a)
+.br
+.ti +2
+\(rsN{U+hh...} unicode character (any number of hex digits)
+.br
+.ti +2
+\(rsr          carriage return (\(rsx0d)
+.br
+.ti +2
+\(rst          tab (\(rsx09)
+.br
+.ti +2
+\(rsv          vertical tab (\(rsx0b)
+.br
+.ti +2
+\(rsddd        octal number (up to 3 octal digits); represent a single
+.br
+.ti +2
+              code point unless larger than 255 with the 8\-bit library
+.br
+.ti +2
+\(rso{dd...}   octal number (any number of octal digits} representing a
+.br
+.ti +2
+              character in UTF mode or a code point
+.br
+.ti +2
+\(rsxhh        hexadecimal byte (up to 2 hex digits)
+.br
+.ti +2
+\(rsx{hh...}   hexadecimal number (up to 8 hex digits) representing a
+.br
+.ti +2
+              character in UTF mode or a code point
+.sp
+Invoking \(rsN{U+hh...} or \(rsx{hh...} doesn't require the use of the \f(CRutf\fP
+modifier on the pattern. It is always recognized. There may be any number of
+hexadecimal digits inside the braces; invalid values provoke error messages
+but when using \(rsN{U+hh...} with some invalid unicode characters they will
+be accepted with a warning instead.
+.sp
+Note that even in UTF\-8 mode, \(rsxhh (and depending of how large, \(rsddd)
+describe one byte rather than one character; this makes it possible to
+construct invalid UTF\-8 sequences for testing purposes. On the other hand,
+\(rsx{hh...} is interpreted as a UTF\-8 character in UTF\-8 mode, only generating
+more than one byte if the value is greater than 127. To avoid the ambiguity
+it is preferred to use \(rsN{U+hh...} when describing characters. When testing
+the 8\-bit library not in UTF\-8 mode, \(rsx{hh} generates one byte for values
+that could fit on it, and causes an error for greater values.
+.sp
+When testing the 16\-bit library, not in UTF\-16 mode, all 4\-digit \(rsx{hhhh}
+values are accepted. This makes it possible to construct invalid UTF\-16
+sequences for testing purposes.
+.sp
+When testing the 32\-bit library, not in UTF\-32 mode, all 4 to 8\-digit \(rsx{...}
+values are accepted. This makes it possible to construct invalid UTF\-32
+sequences for testing purposes.
+.sp
+There is a special backslash sequence that specifies replication of one or more
+characters:
+.sp
+.ti +2
+\(rs[<characters>]{<count>}
+.sp
+This makes it possible to test long strings without having to provide them as
+part of the file. For example:
+.sp
+.ti +2
+\(rs[abc]{4}
+.sp
+is converted to "abcabcabcabc". This feature does not support nesting. To
+include a closing square bracket in the characters, code it as \(rsx5D.
+.sp
+A backslash followed by an equals sign marks the end of the subject string and
+the start of a modifier list. For example:
+.sp
+.ti +2
+abc\(rs=notbol,notempty
+.sp
+If the subject string is empty and \(rs= is followed by white space, the line is
+treated as a comment line, and is not used for matching. For example:
+.sp
+.ti +2
+\(rs= This is a comment.
+.br
+.ti +2
+abc\(rs= This is an invalid modifier list.
+.sp
+A backslash followed by any other non\-alphanumeric character just escapes that
+character. A backslash followed by anything else causes an error. However, if
+the very last character in the line is a backslash (and there is no modifier
+list), it is ignored. This gives a way of passing an empty line as data, since
+a real empty line terminates the data input.
+.sp
+If the \f(CRsubject_literal\fP modifier is set for a pattern, all subject lines
+that follow are treated as literals, with no special treatment of backslashes.
+No replication is possible, and any subject modifiers must be set as defaults
+by a \f(CR#subject\fP command.
+.SH "PATTERN MODIFIERS"
+.sp
+There are several types of modifier that can appear in pattern lines. Except
+where noted below, they may also be used in \f(CR#pattern\fP commands. A
+pattern's modifier list can add to or override default modifiers that were set
+by a previous \f(CR#pattern\fP command.
+.SS "Setting compilation options"
+.sp
+The following modifiers set options for \f(CRpcre2_compile()\fP. Most of them set
+bits in the options argument of that function, but those whose names start with
+PCRE2_EXTRA are additional options that are set in the compile context.
+Some of these options have single\-letter abbreviations. There is special
+handling for /x: if a second x is present, PCRE2_EXTENDED is converted into
+PCRE2_EXTENDED_MORE as in Perl. A third appearance adds PCRE2_EXTENDED as well,
+though this makes no difference to the way \f(CRpcre2_compile()\fP behaves. See
+\f(CRpcre2api\fP
+for a description of the effects of these options.
+.sp
+.ti +2
+    allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
+.br
+.ti +2
+    allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+.br
+.ti +2
+    allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
+.br
+.ti +2
+    alt_bsux                  set PCRE2_ALT_BSUX
+.br
+.ti +2
+    alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
+.br
+.ti +2
+    alt_extended_class        set PCRE2_ALT_EXTENDED_CLASS
+.br
+.ti +2
+    alt_verbnames             set PCRE2_ALT_VERBNAMES
+.br
+.ti +2
+    anchored                  set PCRE2_ANCHORED
+.br
+.ti +2
+/a  ascii_all                 set all ASCII options
+.br
+.ti +2
+    ascii_bsd                 set PCRE2_EXTRA_ASCII_BSD
+.br
+.ti +2
+    ascii_bss                 set PCRE2_EXTRA_ASCII_BSS
+.br
+.ti +2
+    ascii_bsw                 set PCRE2_EXTRA_ASCII_BSW
+.br
+.ti +2
+    ascii_digit               set PCRE2_EXTRA_ASCII_DIGIT
+.br
+.ti +2
+    ascii_posix               set PCRE2_EXTRA_ASCII_POSIX
+.br
+.ti +2
+    auto_callout              set PCRE2_AUTO_CALLOUT
+.br
+.ti +2
+    bad_escape_is_literal     set PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
+.br
+.ti +2
+/i  caseless                  set PCRE2_CASELESS
+.br
+.ti +2
+/r  caseless_restrict         set PCRE2_EXTRA_CASELESS_RESTRICT
+.br
+.ti +2
+    dollar_endonly            set PCRE2_DOLLAR_ENDONLY
+.br
+.ti +2
+/s  dotall                    set PCRE2_DOTALL
+.br
+.ti +2
+    dupnames                  set PCRE2_DUPNAMES
+.br
+.ti +2
+    endanchored               set PCRE2_ENDANCHORED
+.br
+.ti +2
+    escaped_cr_is_lf          set PCRE2_EXTRA_ESCAPED_CR_IS_LF
+.br
+.ti +2
+/x  extended                  set PCRE2_EXTENDED
+.br
+.ti +2
+/xx extended_more             set PCRE2_EXTENDED_MORE
+.br
+.ti +2
+    extra_alt_bsux            set PCRE2_EXTRA_ALT_BSUX
+.br
+.ti +2
+    firstline                 set PCRE2_FIRSTLINE
+.br
+.ti +2
+    literal                   set PCRE2_LITERAL
+.br
+.ti +2
+    match_line                set PCRE2_EXTRA_MATCH_LINE
+.br
+.ti +2
+    match_invalid_utf         set PCRE2_MATCH_INVALID_UTF
+.br
+.ti +2
+    match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
+.br
+.ti +2
+    match_word                set PCRE2_EXTRA_MATCH_WORD
+.br
+.ti +2
+/m  multiline                 set PCRE2_MULTILINE
+.br
+.ti +2
+    never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
+.br
+.ti +2
+    never_callout             set PCRE2_EXTRA_NEVER_CALLOUT
+.br
+.ti +2
+    never_ucp                 set PCRE2_NEVER_UCP
+.br
+.ti +2
+    never_utf                 set PCRE2_NEVER_UTF
+.br
+.ti +2
+/n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
+.br
+.ti +2
+    no_auto_possess           set PCRE2_NO_AUTO_POSSESS
+.br
+.ti +2
+    no_bs0                    set PCRE2_EXTRA_NO_BS0
+.br
+.ti +2
+    no_dotstar_anchor         set PCRE2_NO_DOTSTAR_ANCHOR
+.br
+.ti +2
+    no_start_optimize         set PCRE2_NO_START_OPTIMIZE
+.br
+.ti +2
+    no_utf_check              set PCRE2_NO_UTF_CHECK
+.br
+.ti +2
+    python_octal              set PCRE2_EXTRA_PYTHON_OCTAL
+.br
+.ti +2
+    turkish_casing            set PCRE2_EXTRA_TURKISH_CASING
+.br
+.ti +2
+    ucp                       set PCRE2_UCP
+.br
+.ti +2
+    ungreedy                  set PCRE2_UNGREEDY
+.br
+.ti +2
+    use_offset_limit          set PCRE2_USE_OFFSET_LIMIT
+.br
+.ti +2
+    utf                       set PCRE2_UTF
+.sp
+As well as turning on the PCRE2_UTF option, the \f(CRutf\fP modifier causes all
+non\-printing characters in output strings to be printed using the \(rsx{hh...}
+notation. Otherwise, those less than 0x100 are output in hex without the curly
+brackets. Setting \f(CRutf\fP in 16\-bit or 32\-bit mode also causes pattern and
+subject strings to be translated to UTF\-16 or UTF\-32, respectively, before
+being passed to library functions.
+.sp
+The following modifiers enable or disable performance optimizations by
+calling \f(CRpcre2_set_optimize()\fP before invoking the regex compiler.
+.sp
+.ti +2
+    optimization_full      enable all optional optimizations
+.br
+.ti +2
+    optimization_none      disable all optional optimizations
+.br
+.ti +2
+    auto_possess           auto\-possessify variable quantifiers
+.br
+.ti +2
+    auto_possess_off       don't auto\-possessify variable quantifiers
+.br
+.ti +2
+    dotstar_anchor         anchor patterns starting with .*
+.br
+.ti +2
+    dotstar_anchor_off     don't anchor patterns starting with .*
+.br
+.ti +2
+    start_optimize         enable pre\-scan of subject string
+.br
+.ti +2
+    start_optimize_off     disable pre\-scan of subject string
+.sp
+See the
+\f(CRpcre2_set_optimize\fP
+documentation for details on these optimizations.
+.SS "Setting compilation controls"
+.sp
+The following modifiers affect the compilation process or request information
+about the pattern. There are single\-letter abbreviations for some that are
+heavily used in the test files.
+.sp
+.ti +2
+/B  bincode                   show binary code without lengths
+.br
+.ti +2
+    bsr=[anycrlf|unicode]     specify \(rsR handling
+.br
+.ti +2
+    callout_info              show callout information
+.br
+.ti +2
+    convert=<options>         request foreign pattern conversion
+.br
+.ti +2
+    convert_glob_escape=c     set glob escape character
+.br
+.ti +2
+    convert_glob_separator=c  set glob separator character
+.br
+.ti +2
+    convert_length            set convert buffer length
+.br
+.ti +2
+    debug                     same as info,fullbincode
+.br
+.ti +2
+    expand                    expand repetition syntax in pattern
+.br
+.ti +2
+    framesize                 show matching frame size
+.br
+.ti +2
+    fullbincode               show binary code with lengths
+.br
+.ti +2
+/I  info                      show info about compiled pattern
+.br
+.ti +2
+    hex                       unquoted characters are hexadecimal
+.br
+.ti +2
+    jit[=<number>]            use JIT
+.br
+.ti +2
+    jitfast                   use JIT fast path
+.br
+.ti +2
+    jitverify                 verify JIT use
+.br
+.ti +2
+    locale=<name>             use this locale
+.br
+.ti +2
+    max_pattern_compiled      ) set maximum compiled pattern
+.br
+.ti +2
+               _length=<n>    )   length (bytes)
+.br
+.ti +2
+    max_pattern_length=<n>    set maximum pattern length (code units)
+.br
+.ti +2
+    max_varlookbehind=<n>     set maximum variable lookbehind length
+.br
+.ti +2
+    memory                    show memory used
+.br
+.ti +2
+    newline=<type>            set newline type
+.br
+.ti +2
+    null_context              compile with a NULL context
+.br
+.ti +2
+    null_pattern              pass pattern as NULL
+.br
+.ti +2
+    parens_nest_limit=<n>     set maximum parentheses depth
+.br
+.ti +2
+    posix                     use the POSIX API
+.br
+.ti +2
+    posix_nosub               use the POSIX API with REG_NOSUB
+.br
+.ti +2
+    push                      push compiled pattern onto the stack
+.br
+.ti +2
+    pushcopy                  push a copy onto the stack
+.br
+.ti +2
+    pushtablescopy            push a copy with tables onto the stack
+.br
+.ti +2
+    stackguard=<number>       test the stackguard feature
+.br
+.ti +2
+    subject_literal           treat all subject lines as literal
+.br
+.ti +2
+    tables=[0|1|2|3]          select internal tables
+.br
+.ti +2
+    use_length                do not zero\-terminate the pattern
+.br
+.ti +2
+    utf8_input                treat input as UTF\-8
+.sp
+The effects of these modifiers are described in the following sections.
+.SS "Newline and \(rsR handling"
+.sp
+The \f(CRbsr\fP modifier specifies what \(rsR in a pattern should match. If it is
+set to "anycrlf", \(rsR matches CR, LF, or CRLF only. If it is set to "unicode",
+\(rsR matches any Unicode newline sequence. The default can be specified when
+PCRE2 is built; if it is not, the default is set to Unicode.
+.sp
+The \f(CRnewline\fP modifier specifies which characters are to be interpreted as
+newlines, both in the pattern and in subject lines. The type must be one of CR,
+LF, CRLF, ANYCRLF, ANY, or NUL (in upper or lower case).
+.SS "Information about a pattern"
+.sp
+The \f(CRdebug\fP modifier is a shorthand for \f(CRinfo,fullbincode\fP, requesting
+all available information.
+.sp
+The \f(CRbincode\fP modifier causes a representation of the compiled code to be
+output after compilation. This information does not contain length and offset
+values, which ensures that the same output is generated for different internal
+link sizes and different code unit widths. By using \f(CRbincode\fP, the same
+regression tests can be used in different environments.
+.sp
+The \f(CRfullbincode\fP modifier, by contrast, \fIdoes\fP include length and
+offset values. This is used in a few special tests that run only for specific
+code unit widths and link sizes, and is also useful for one\-off tests.
+.sp
+The \f(CRinfo\fP modifier requests information about the compiled pattern
+(whether it is anchored, has a fixed first character, and so on). The
+information is obtained from the \f(CRpcre2_pattern_info()\fP function. Here are
+some typical examples:
+.sp
+.ti +2
+  re> /(?i)(^a|^b)/m,info
+.br
+.ti +2
+Capture group count = 1
+.br
+.ti +2
+Compile options: multiline
+.br
+.ti +2
+Overall options: caseless multiline
+.br
+.ti +2
+First code unit at start or follows newline
+.br
+.ti +2
+Subject length lower bound = 1
+.sp
+.ti +2
+  re> /(?i)abc/info
+.br
+.ti +2
+Capture group count = 0
+.br
+.ti +2
+Compile options: <none>
+.br
+.ti +2
+Overall options: caseless
+.br
+.ti +2
+First code unit = \*(Aqa\*(Aq (caseless)
+.br
+.ti +2
+Last code unit = \*(Aqc\*(Aq (caseless)
+.br
+.ti +2
+Subject length lower bound = 3
+.sp
+"Compile options" are those specified by modifiers; "overall options" have
+added options that are taken or deduced from the pattern. If both sets of
+options are the same, just a single "options" line is output; if there are no
+options, the line is omitted. "First code unit" is where any match must start;
+if there is more than one they are listed as "starting code units". "Last code
+unit" is the last literal code unit that must be present in any match. This is
+not necessarily the last character. These lines are omitted if no starting or
+ending code units are recorded. The subject length line is omitted when
+\f(CRno_start_optimize\fP is set because the minimum length is not calculated
+when it can never be used.
+.sp
+The \f(CRframesize\fP modifier shows the size, in bytes, of each storage frame
+used by \f(CRpcre2_match()\fP for handling backtracking. The size depends on the
+number of capturing parentheses in the pattern. A vector of these frames is
+used at matching time; its overall size is shown when the \f(CRheapframes_size\fP
+subject modifier is set.
+.sp
+The \f(CRcallout_info\fP modifier requests information about all the callouts in
+the pattern. A list of them is output at the end of any other information that
+is requested. For each callout, either its number or string is given, followed
+by the item that follows it in the pattern.
+.SS "Passing a NULL context"
+.sp
+Normally, \f(CRpcre2test\fP passes a context block to \f(CRpcre2_compile()\fP. If
+the \f(CRnull_context\fP modifier is set, however, NULL is passed. This is for
+testing that \f(CRpcre2_compile()\fP behaves correctly in this case (it uses
+default values).
+.SS "Passing a NULL pattern"
+.sp
+The \f(CRnull_pattern\fP modifier is for testing the behaviour of
+\f(CRpcre2_compile()\fP when the pattern argument is NULL. The length value
+passed is the default PCRE2_ZERO_TERMINATED unless \f(CRuse_length\fP is set.
+Any length other than zero causes an error.
+.SS "Specifying pattern characters in hexadecimal"
+.sp
+The \f(CRhex\fP modifier specifies that the characters of the pattern, except for
+substrings enclosed in single or double quotes, are to be interpreted as pairs
+of hexadecimal digits. This feature is provided as a way of creating patterns
+that contain binary zeros and other non\-printing characters. White space is
+permitted between pairs of digits. For example, this pattern contains three
+characters:
+.sp
+.ti +2
+/ab 32 59/hex
+.sp
+Parts of such a pattern are taken literally if quoted. This pattern contains
+nine characters, only two of which are specified in hexadecimal:
+.sp
+.ti +2
+/ab "literal" 32/hex
+.sp
+Either single or double quotes may be used. There is no way of including
+the delimiter within a substring. The \f(CRhex\fP and \f(CRexpand\fP modifiers are
+mutually exclusive.
+.SS "Specifying the pattern's length"
+.sp
+By default, patterns are passed to the compiling functions as zero\-terminated
+strings but can be passed by length instead of being zero\-terminated. The
+\f(CRuse_length\fP modifier causes this to happen. Using a length happens
+automatically (whether or not \f(CRuse_length\fP is set) when \f(CRhex\fP is set,
+because patterns specified in hexadecimal may contain binary zeros.
+.sp
+If \f(CRhex\fP or \f(CRuse_length\fP is used with the POSIX wrapper API (see
+"Using the POSIX wrapper API"
+below), the REG_PEND extension is used to pass the pattern's length.
+.SS "Specifying a maximum for variable lookbehinds"
+.sp
+Variable lookbehind assertions are supported only if, for each one, there is a
+maximum length (in characters) that it can match. There is a limit on this,
+whose default can be set at build time, with an ultimate default of 255. The
+\f(CRmax_varlookbehind\fP modifier uses the \f(CRpcre2_set_max_varlookbehind()\fP
+function to change the limit. Lookbehinds whose branches each match a fixed
+length are limited to 65535 characters per branch.
+.SS "Specifying wide characters in 16\-bit and 32\-bit modes"
+.sp
+In 16\-bit and 32\-bit modes, all input is automatically treated as UTF\-8 and
+translated to UTF\-16 or UTF\-32 when the \f(CRutf\fP modifier is set. For testing
+the 16\-bit and 32\-bit libraries in non\-UTF mode, the \f(CRutf8_input\fP modifier
+can be used. It is mutually exclusive with \f(CRutf\fP. Input lines are
+interpreted as UTF\-8 as a means of specifying wide characters. More details are
+given in
+"Input encoding"
+above.
+.SS "Generating long repetitive patterns"
+.sp
+Some tests use long patterns that are very repetitive. Instead of creating a
+very long input line for such a pattern, you can use a special repetition
+feature, similar to the one described for subject lines above. If the
+\f(CRexpand\fP modifier is present on a pattern, parts of the pattern that have
+the form
+.sp
+.ti +2
+\(rs[<characters>]{<count>}
+.sp
+are expanded before the pattern is passed to \f(CRpcre2_compile()\fP. For
+example, \(rs[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
+cannot be nested. An initial "\(rs[" sequence is recognized only if "]{" followed
+by decimal digits and "}" is found later in the pattern. If not, the characters
+remain in the pattern unaltered. The \f(CRexpand\fP and \f(CRhex\fP modifiers are
+mutually exclusive.
+.sp
+If part of an expanded pattern looks like an expansion, but is really part of
+the actual pattern, unwanted expansion can be avoided by giving two values in
+the quantifier. For example, \(rs[AB]{6000,6000} is not recognized as an
+expansion item.
+.sp
+If the \f(CRinfo\fP modifier is set on an expanded pattern, the result of the
+expansion is included in the information that is output.
+.SS "JIT compilation"
+.sp
+Just\-in\-time (JIT) compiling is a heavyweight optimization that can greatly
+speed up pattern matching. See the
+\f(CRpcre2jit\fP
+documentation for details. JIT compiling happens, optionally, after a pattern
+has been successfully compiled into an internal form. The JIT compiler converts
+this to optimized machine code. It needs to know whether the match\-time options
+PCRE2_PARTIAL_HARD and PCRE2_PARTIAL_SOFT are going to be used, because
+different code is generated for the different cases. See the \f(CRpartial\fP
+modifier in "Subject Modifiers"
+below
+for details of how these options are specified for each match attempt.
+.sp
+JIT compilation is requested by the \f(CRjit\fP pattern modifier, which may
+optionally be followed by an equals sign and a number in the range 0 to 7.
+The three bits that make up the number specify which of the three JIT operating
+modes are to be compiled:
+.sp
+.ti +2
+1  compile JIT code for non\-partial matching
+.br
+.ti +2
+2  compile JIT code for soft partial matching
+.br
+.ti +2
+4  compile JIT code for hard partial matching
+.sp
+The possible values for the \f(CRjit\fP modifier are therefore:
+.sp
+.ti +2
+0  disable JIT
+.br
+.ti +2
+1  normal matching only
+.br
+.ti +2
+2  soft partial matching only
+.br
+.ti +2
+3  normal and soft partial matching
+.br
+.ti +2
+4  hard partial matching only
+.br
+.ti +2
+6  soft and hard partial matching only
+.br
+.ti +2
+7  all three modes
+.sp
+If no number is given, 7 is assumed. The phrase "partial matching" means a call
+to \f(CRpcre2_match()\fP with either the PCRE2_PARTIAL_SOFT or the
+PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
+match; the options enable the possibility of a partial match, but do not
+require it. Note also that if you request JIT compilation only for partial
+matching (for example, jit=2) but do not set the \f(CRpartial\fP modifier on a
+subject line, that match will not use JIT code because none was compiled for
+non\-partial matching.
+.sp
+If JIT compilation is successful, the compiled JIT code will automatically be
+used when an appropriate type of match is run, except when incompatible
+run\-time options are specified. For more details, see the
+\f(CRpcre2jit\fP
+documentation. See also the \f(CRjitstack\fP modifier below for a way of
+setting the size of the JIT stack.
+.sp
+If the \f(CRjitfast\fP modifier is specified, matching is done using the JIT
+"fast path" interface, \f(CRpcre2_jit_match()\fP, which skips some of the sanity
+checks that are done by \f(CRpcre2_match()\fP, and of course does not work when
+JIT is not supported. If \f(CRjitfast\fP is specified without \f(CRjit\fP, jit=7 is
+assumed.
+.sp
+If the \f(CRjitverify\fP modifier is specified, information about the compiled
+pattern shows whether JIT compilation was or was not successful. If
+\f(CRjitverify\fP is specified without \f(CRjit\fP, jit=7 is assumed. If JIT
+compilation is successful when \f(CRjitverify\fP is set, the text "(JIT)" is
+added to the first output line after a match or non match when JIT\-compiled
+code was actually used in the match.
+.SS "Setting a locale"
+.sp
+The \f(CRlocale\fP modifier must specify the name of a locale, for example:
+.sp
+.ti +2
+/pattern/locale=fr_FR
+.sp
+The given locale is set, \f(CRpcre2_maketables()\fP is called to build a set of
+character tables for the locale, and this is then passed to
+\f(CRpcre2_compile()\fP when compiling the regular expression. The same tables
+are used when matching the following subject lines. The \f(CRlocale\fP modifier
+applies only to the pattern on which it appears, but can be given in a
+\f(CR#pattern\fP command if a default is needed. Setting a locale and alternate
+character tables are mutually exclusive.
+.SS "Showing pattern memory"
+.sp
+The \f(CRmemory\fP modifier causes the size in bytes of the memory used to hold
+the compiled pattern to be output. This does not include the size of the
+\f(CRpcre2_code\fP block; it is just the actual compiled data. If the pattern is
+subsequently passed to the JIT compiler, the size of the JIT compiled code is
+also output. Here is an example:
+.sp
+.ti +2
+  re> /a(b)c/jit,memory
+.br
+.ti +2
+Memory allocation (code space): 21
+.br
+.ti +2
+Memory allocation (JIT code): 1910
+.SS "Limiting nested parentheses"
+.sp
+The \f(CRparens_nest_limit\fP modifier sets a limit on the depth of nested
+parentheses in a pattern. Breaching the limit causes a compilation error.
+The default for the library is set when PCRE2 is built, but \f(CRpcre2test\fP
+sets its own default of 220, which is required for running the standard test
+suite.
+.SS "Limiting the pattern length"
+.sp
+The \f(CRmax_pattern_length\fP modifier sets a limit, in code units, to the
+length of pattern that \f(CRpcre2_compile()\fP will accept. Breaching the limit
+causes a compilation error. The default is the largest number a PCRE2_SIZE
+variable can hold (essentially unlimited).
+.SS "Limiting the size of a compiled pattern"
+.sp
+The \f(CRmax_pattern_compiled_length\fP modifier sets a limit, in bytes, to the
+amount of memory used by a compiled pattern. Breaching the limit causes a
+compilation error. The default is the largest number a PCRE2_SIZE variable can
+hold (essentially unlimited).
+.SS "Using the POSIX wrapper API"
+.sp
+The \f(CRposix\fP and \f(CRposix_nosub\fP modifiers cause \f(CRpcre2test\fP to call
+PCRE2 via the POSIX wrapper API rather than its native API. When
+\f(CRposix_nosub\fP is used, the POSIX option REG_NOSUB is passed to
+\f(CRregcomp()\fP. The POSIX wrapper supports only the 8\-bit library. Note that
+it does not imply POSIX matching semantics; for more detail see the
+\f(CRpcre2posix\fP
+documentation. The following pattern modifiers set options for the
+\f(CRregcomp()\fP function:
+.sp
+.ti +2
+caseless           REG_ICASE
+.br
+.ti +2
+multiline          REG_NEWLINE
+.br
+.ti +2
+dotall             REG_DOTALL     )
+.br
+.ti +2
+ungreedy           REG_UNGREEDY   ) These options are not part of
+.br
+.ti +2
+ucp                REG_UCP        )   the POSIX standard
+.br
+.ti +2
+utf                REG_UTF8       )
+.sp
+The \f(CRregerror_buffsize\fP modifier specifies a size for the error buffer that
+is passed to \f(CRregerror()\fP in the event of a compilation error. For example:
+.sp
+.ti +2
+/abc/posix,regerror_buffsize=20
+.sp
+This provides a means of testing the behaviour of \f(CRregerror()\fP when the
+buffer is too small for the error message. If this modifier has not been set, a
+large buffer is used.
+.sp
+The \f(CRaftertext\fP and \f(CRallaftertext\fP subject modifiers work as described
+below. All other modifiers are either ignored, with a warning message, or cause
+an error.
+.sp
+The pattern is passed to \f(CRregcomp()\fP as a zero\-terminated string by
+default, but if the \f(CRuse_length\fP or \f(CRhex\fP modifiers are set, the
+REG_PEND extension is used to pass it by length.
+.SS "Testing the stack guard feature"
+.sp
+The \f(CRstackguard\fP modifier is used to test the use of
+\f(CRpcre2_set_compile_recursion_guard()\fP, a function that is provided to
+enable stack availability to be checked during compilation (see the
+\f(CRpcre2api\fP
+documentation for details). If the number specified by the modifier is greater
+than zero, \f(CRpcre2_set_compile_recursion_guard()\fP is called to set up
+callback from \f(CRpcre2_compile()\fP to a local function. The argument it
+receives is the current nesting parenthesis depth; if this is greater than the
+value given by the modifier, non\-zero is returned, causing the compilation to
+be aborted.
+.SS "Using alternative character tables"
+.sp
+The value specified for the \f(CRtables\fP modifier must be one of the digits 0,
+1, 2, or 3. It causes a specific set of built\-in character tables to be passed
+to \f(CRpcre2_compile()\fP. This is used in the PCRE2 tests to check behaviour
+with different character tables. The digit specifies the tables as follows:
+.sp
+.ti +2
+0   do not pass any special character tables
+.br
+.ti +2
+1   the default ASCII tables, as distributed in
+.br
+.ti +2
+      pcre2_chartables.c.dist
+.br
+.ti +2
+2   a set of tables defining ISO 8859 characters
+.br
+.ti +2
+3   a set of tables loaded by the #loadtables command
+.sp
+In tables 2, some characters whose codes are greater than 128 are identified as
+letters, digits, spaces, etc. Tables 3 can be used only after a
+\f(CR#loadtables\fP command has loaded them from a binary file. Setting alternate
+character tables and a locale are mutually exclusive.
+.SS "Setting certain match controls"
+.sp
+The following modifiers are really subject modifiers, and are described under
+"Subject Modifiers" below. However, they may be included in a pattern's
+modifier list, in which case they are applied to every subject line that is
+processed with that pattern. These modifiers do not affect the compilation
+process.
+.sp
+.ti +2
+    aftertext                   show text after match
+.br
+.ti +2
+    allaftertext                show text after captures
+.br
+.ti +2
+    allcaptures                 show all captures
+.br
+.ti +2
+    allvector                   show the entire ovector
+.br
+.ti +2
+    allusedtext                 show all consulted text
+.br
+.ti +2
+    altglobal                   alternative global matching
+.br
+.ti +2
+/g  global                      global matching
+.br
+.ti +2
+    heapframes_size             show match data heapframes size
+.br
+.ti +2
+    jitstack=<n>                set size of JIT stack
+.br
+.ti +2
+    mark                        show mark values
+.br
+.ti +2
+    null_substitute_match_data  substitute with NULL match data
+.br
+.ti +2
+    replace=<str>               specify a replacement string
+.br
+.ti +2
+    startchar                   show starting character when relevant
+.br
+.ti +2
+    substitute_callout          use substitution callouts
+.br
+.ti +2
+    substitute_case_callout     use substitution case callouts
+.br
+.ti +2
+    substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
+.br
+.ti +2
+    substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
+.br
+.ti +2
+    substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
+.br
+.ti +2
+    substitute_overflow_length  use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+.br
+.ti +2
+    substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+.br
+.ti +2
+    substitute_skip=<n>         skip substitution <n>
+.br
+.ti +2
+    substitute_stop=<n>         skip substitution <n> and following
+.br
+.ti +2
+    substitute_unknown_unset    use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+.br
+.ti +2
+    substitute_unset_empty      use PCRE2_SUBSTITUTE_UNSET_EMPTY
+.sp
+These modifiers may not appear in a \f(CR#pattern\fP command. If you want them as
+defaults, set them in a \f(CR#subject\fP command.
+.SS "Specifying literal subject lines"
+.sp
+If the \f(CRsubject_literal\fP modifier is present on a pattern, all the subject
+lines that it matches are taken as literal strings, with no interpretation of
+backslashes. It is not possible to set subject modifiers on such lines, but any
+that are set as defaults by a \f(CR#subject\fP command are recognized.
+.SS "Saving a compiled pattern"
+.sp
+When a pattern with the \f(CRpush\fP modifier is successfully compiled, it is
+pushed onto a stack of compiled patterns, and \f(CRpcre2test\fP expects the next
+line to contain a new pattern (or a command) instead of a subject line. This
+facility is used when saving compiled patterns to a file, as described in the
+section entitled "Saving and restoring compiled patterns"
+below.
+If \f(CRpushcopy\fP is used instead of \f(CRpush\fP, a copy of the compiled
+pattern is stacked, leaving the original as current, ready to match the
+following input lines. This provides a way of testing the
+\f(CRpcre2_code_copy()\fP function.
+The \f(CRpush\fP and \f(CRpushcopy\fP  modifiers are incompatible with compilation
+modifiers such as \f(CRglobal\fP that act at match time. Any that are specified
+are ignored (for the stacked copy), with a warning message, except for
+\f(CRreplace\fP, which causes an error. Note that \f(CRjitverify\fP, which is
+allowed, does not carry through to any subsequent matching that uses a stacked
+pattern.
+.SS "Testing foreign pattern conversion"
+.sp
+The experimental foreign pattern conversion functions in PCRE2 can be tested by
+setting the \f(CRconvert\fP modifier. Its argument is a colon\-separated list of
+options, which set the equivalent option for the \f(CRpcre2_pattern_convert()\fP
+function:
+.sp
+.ti +2
+glob                    PCRE2_CONVERT_GLOB
+.br
+.ti +2
+glob_no_starstar        PCRE2_CONVERT_GLOB_NO_STARSTAR
+.br
+.ti +2
+glob_no_wild_separator  PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
+.br
+.ti +2
+posix_basic             PCRE2_CONVERT_POSIX_BASIC
+.br
+.ti +2
+posix_extended          PCRE2_CONVERT_POSIX_EXTENDED
+.br
+.ti +2
+unset                   Unset all options
+.sp
+The "unset" value is useful for turning off a default that has been set by a
+\f(CR#pattern\fP command. When one of these options is set, the input pattern is
+passed to \f(CRpcre2_pattern_convert()\fP. If the conversion is successful, the
+result is reflected in the output and then passed to \f(CRpcre2_compile()\fP. The
+normal \f(CRutf\fP and \f(CRno_utf_check\fP options, if set, cause the
+PCRE2_CONVERT_UTF and PCRE2_CONVERT_NO_UTF_CHECK options to be passed to
+\f(CRpcre2_pattern_convert()\fP.
+.sp
+By default, the conversion function is allowed to allocate a buffer for its
+output. However, if the \f(CRconvert_length\fP modifier is set to a value greater
+than zero, \f(CRpcre2test\fP passes a buffer of the given length. This makes it
+possible to test the length check.
+.sp
+The \f(CRconvert_glob_escape\fP and \f(CRconvert_glob_separator\fP modifiers can be
+used to specify the escape and separator characters for glob processing,
+overriding the defaults, which are operating\-system dependent.
+.SH "SUBJECT MODIFIERS"
+.sp
+The modifiers that can appear in subject lines and the \f(CR#subject\fP
+command are of two types.
+.SS "Setting match options"
+.sp
+The following modifiers set options for \f(CRpcre2_match()\fP or
+\f(CRpcre2_dfa_match()\fP. See
+\f(CRpcre2api\fP
+for a description of their effects.
+.sp
+.ti +2
+    anchored                   set PCRE2_ANCHORED
+.br
+.ti +2
+    copy_matched_subject       set PCRE2_COPY_MATCHED_SUBJECT
+.br
+.ti +2
+    endanchored                set PCRE2_ENDANCHORED
+.br
+.ti +2
+    dfa_restart                set PCRE2_DFA_RESTART
+.br
+.ti +2
+    dfa_shortest               set PCRE2_DFA_SHORTEST
+.br
+.ti +2
+    disable_recurseloop_check  set PCRE2_DISABLE_RECURSELOOP_CHECK
+.br
+.ti +2
+    no_jit                     set PCRE2_NO_JIT
+.br
+.ti +2
+    no_utf_check               set PCRE2_NO_UTF_CHECK
+.br
+.ti +2
+    notbol                     set PCRE2_NOTBOL
+.br
+.ti +2
+    notempty                   set PCRE2_NOTEMPTY
+.br
+.ti +2
+    notempty_atstart           set PCRE2_NOTEMPTY_ATSTART
+.br
+.ti +2
+    noteol                     set PCRE2_NOTEOL
+.br
+.ti +2
+    partial_hard (or ph)       set PCRE2_PARTIAL_HARD
+.br
+.ti +2
+    partial_soft (or ps)       set PCRE2_PARTIAL_SOFT
+.sp
+The partial matching modifiers are provided with abbreviations because they
+appear frequently in tests.
+.sp
+If the \f(CRposix\fP or \f(CRposix_nosub\fP modifier was present on the pattern,
+causing the POSIX wrapper API to be used, the only option\-setting modifiers
+that have any effect are \f(CRnotbol\fP, \f(CRnotempty\fP, and \f(CRnoteol\fP,
+causing REG_NOTBOL, REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to
+\f(CRregexec()\fP. The other modifiers are ignored, with a warning message.
+.sp
+There is one additional modifier that can be used with the POSIX wrapper. It is
+ignored (with a warning) if used for non\-POSIX matching.
+.sp
+.ti +2
+    posix_startend=<n>[:<m>]
+.sp
+This causes the subject string to be passed to \f(CRregexec()\fP using the
+REG_STARTEND option, which uses offsets to specify which part of the string is
+searched. If only one number is given, the end offset is passed as the end of
+the subject string. For more detail of REG_STARTEND, see the
+\f(CRpcre2posix\fP
+documentation. If the subject string contains binary zeros (coded as escapes
+such as \(rsx{00} because \f(CRpcre2test\fP does not support actual binary zeros in
+its input), you must use \f(CRposix_startend\fP to specify its length.
+.SS "Setting match controls"
+.sp
+The following modifiers affect the matching process or request additional
+information. Some of them may also be specified on a pattern line (see above),
+in which case they apply to every subject line that is matched against that
+pattern, but can be overridden by modifiers on the subject.
+.sp
+.ti +2
+    aftertext                  show text after match
+.br
+.ti +2
+    allaftertext               show text after captures
+.br
+.ti +2
+    allcaptures                show all captures
+.br
+.ti +2
+    allusedtext                show all consulted text (non\-JIT only)
+.br
+.ti +2
+    allvector                  show the entire ovector
+.br
+.ti +2
+    altglobal                  alternative global matching
+.br
+.ti +2
+    callout_capture            show captures at callout time
+.br
+.ti +2
+    callout_data=<n>           set a value to pass via callouts
+.br
+.ti +2
+    callout_error=<n>[:<m>]    control callout error
+.br
+.ti +2
+    callout_extra              show extra callout information
+.br
+.ti +2
+    callout_fail=<n>[:<m>]     control callout failure
+.br
+.ti +2
+    callout_no_where           do not show position of a callout
+.br
+.ti +2
+    callout_none               do not supply a callout function
+.br
+.ti +2
+    copy=<number or name>      copy captured substring
+.br
+.ti +2
+    depth_limit=<n>            set a depth limit
+.br
+.ti +2
+    dfa                        use \f(CRpcre2_dfa_match()\fP
+.br
+.ti +2
+    find_limits                find heap, match and depth limits
+.br
+.ti +2
+    find_limits_noheap         find match and depth limits
+.br
+.ti +2
+    get=<number or name>       extract captured substring
+.br
+.ti +2
+    getall                     extract all captured substrings
+.br
+.ti +2
+/g  global                     global matching
+.br
+.ti +2
+    heapframes_size            show match data heapframes size
+.br
+.ti +2
+    heap_limit=<n>             set a limit on heap memory (Kbytes)
+.br
+.ti +2
+    jitstack=<n>               set size of JIT stack
+.br
+.ti +2
+    mark                       show mark values
+.br
+.ti +2
+    match_limit=<n>            set a match limit
+.br
+.ti +2
+    memory                     show heap memory usage
+.br
+.ti +2
+    null_context               match with a NULL context
+.br
+.ti +2
+    null_replacement           substitute with NULL replacement
+.br
+.ti +2
+    null_subject               match with NULL subject
+.br
+.ti +2
+    null_substitute_match_data substitute with NULL match data
+.br
+.ti +2
+    offset=<n>                 set starting offset
+.br
+.ti +2
+    offset_limit=<n>           set offset limit
+.br
+.ti +2
+    ovector=<n>                set size of output vector
+.br
+.ti +2
+    recursion_limit=<n>        obsolete synonym for depth_limit
+.br
+.ti +2
+    replace=<str>              specify a replacement string
+.br
+.ti +2
+    startchar                  show startchar when relevant
+.br
+.ti +2
+    startoffset=<n>            same as offset=<n>
+.br
+.ti +2
+    substitute_callout         use substitution callouts
+.br
+.ti +2
+    substitute_case_callout    use substitution case callouts
+.br
+.ti +2
+    substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
+.br
+.ti +2
+    substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
+.br
+.ti +2
+    substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
+.br
+.ti +2
+    substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+.br
+.ti +2
+    substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+.br
+.ti +2
+    substitute_skip=<n>        skip substitution number n
+.br
+.ti +2
+    substitute_stop=<n>        skip substitution number n and greater
+.br
+.ti +2
+    substitute_subject=<str>   specify a different subject for substitution
+.br
+.ti +2
+    substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+.br
+.ti +2
+    substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
+.br
+.ti +2
+    zero_terminate             pass the subject as zero\-terminated
+.sp
+The effects of these modifiers are described in the following sections. When
+matching via the POSIX wrapper API, the \f(CRaftertext\fP, \f(CRallaftertext\fP,
+and \f(CRovector\fP subject modifiers work as described below. All other
+modifiers are either ignored, with a warning message, or cause an error.
+.SS "Showing more text"
+.sp
+The \f(CRaftertext\fP modifier requests that as well as outputting the part of
+the subject string that matched the entire pattern, \f(CRpcre2test\fP should in
+addition output the remainder of the subject string. This is useful for tests
+where the subject contains multiple copies of the same substring. The
+\f(CRallaftertext\fP modifier requests the same action for captured substrings as
+well as the main matched substring. In each case the remainder is output on the
+following line with a plus character following the capture number.
+.sp
+The \f(CRallusedtext\fP modifier requests that all the text that was consulted
+during a successful pattern match by the interpreter should be shown, for both
+full and partial matches. This feature is not supported for JIT matching, and
+if requested with JIT it is ignored (with a warning message). Setting this
+modifier affects the output if there is a lookbehind at the start of a match,
+or, for a complete match, a lookahead at the end, or if \(rsK is used in the
+pattern. Characters that precede or follow the start and end of the actual
+match are indicated in the output by \*(Aq<\*(Aq or \*(Aq>\*(Aq characters underneath them.
+Here is an example:
+.sp
+.ti +2
+  re> /(?<=pqr)abc(?=xyz)/
+.br
+.ti +2
+data> 123pqrabcxyz456\(rs=allusedtext
+.br
+.ti +2
+ 0: pqrabcxyz
+.br
+.ti +2
+    <<<   >>>
+.br
+.ti +2
+data> 123pqrabcxy\(rs=ph,allusedtext
+.br
+.ti +2
+Partial match: pqrabcxy
+.br
+.ti +2
+               <<<
+.sp
+The first, complete match shows that the matched string is "abc", with the
+preceding and following strings "pqr" and "xyz" having been consulted during
+the match (when processing the assertions). The partial match can indicate only
+the preceding string.
+.sp
+The \f(CRstartchar\fP modifier requests that the starting character for the match
+be indicated, if it is different to the start of the matched string. The only
+time when this occurs is when \(rsK has been processed as part of the match. In
+this situation, the output for the matched string is displayed from the
+starting character instead of from the match point, with circumflex characters
+under the earlier characters. For example:
+.sp
+.ti +2
+  re> /abc\(rsKxyz/
+.br
+.ti +2
+data> abcxyz\(rs=startchar
+.br
+.ti +2
+ 0: abcxyz
+.br
+.ti +2
+    ^^^
+.sp
+Unlike \f(CRallusedtext\fP, the \f(CRstartchar\fP modifier can be used with JIT.
+However, these two modifiers are mutually exclusive.
+.SS "Showing the value of all capture groups"
+.sp
+The \f(CRallcaptures\fP modifier requests that the values of all potential
+captured parentheses be output after a match. By default, only those up to the
+highest one actually used in the match are output (corresponding to the return
+code from \f(CRpcre2_match()\fP). Groups that did not take part in the match
+are output as "<unset>". This modifier is not relevant for DFA matching (which
+does no capturing) and does not apply when \f(CRreplace\fP is specified; it is
+ignored, with a warning message, if present.
+.SS "Showing the entire ovector, for all outcomes"
+.sp
+The \f(CRallvector\fP modifier requests that the entire ovector be shown,
+whatever the outcome of the match. Compare \f(CRallcaptures\fP, which shows only
+up to the maximum number of capture groups for the pattern, and then only for a
+successful complete non\-DFA match. This modifier, which acts after any match
+result, and also for DFA matching, provides a means of checking that there are
+no unexpected modifications to ovector fields. Before each match attempt, the
+ovector is filled with a special value, and if this is found in both elements
+of a capturing pair, "<unchanged>" is output. After a successful match, this
+applies to all groups after the maximum capture group for the pattern. In other
+cases it applies to the entire ovector. After a partial match, the first two
+elements are the only ones that should be set. After a DFA match, the amount of
+ovector that is used depends on the number of matches that were found.
+.SS "Testing pattern callouts"
+.sp
+A callout function is supplied when \f(CRpcre2test\fP calls the library matching
+functions, unless \f(CRcallout_none\fP is specified. Its behaviour can be
+controlled by various modifiers listed above whose names begin with
+\f(CRcallout_\fP. Details are given in the section entitled "Callouts"
+below.
+Testing callouts from \f(CRpcre2_substitute()\fP is described separately in
+"Testing the substitution function"
+below.
+.SS "Finding all matches in a string"
+.sp
+Searching for all possible matches within a subject can be requested by the
+\f(CRglobal\fP or \f(CRaltglobal\fP modifier. After finding a match, the matching
+function is called again to search the remainder of the subject. The difference
+between \f(CRglobal\fP and \f(CRaltglobal\fP is that the former uses the
+\fIstart_offset\fP argument to \f(CRpcre2_match()\fP or \f(CRpcre2_dfa_match()\fP
+to start searching at a new point within the entire string (which is what Perl
+does), whereas the latter passes over a shortened subject. This makes a
+difference to the matching process if the pattern begins with a lookbehind
+assertion (including \(rsb or \(rsB).
+.sp
+If an empty string is matched, the next match is done with the
+PCRE2_NOTEMPTY_ATSTART flag set, in order to search for another, non\-empty,
+match at the same point in the subject. This imitates the way Perl handles such
+cases when using the \f(CR/g\fP modifier or the \f(CRsplit()\fP function.
+.SS "Testing substring extraction functions"
+.sp
+The \f(CRcopy\fP and \f(CRget\fP modifiers can be used to test the
+\f(CRpcre2_substring_copy_xxx()\fP and \f(CRpcre2_substring_get_xxx()\fP functions.
+They can be given more than once, and each can specify a capture group name or
+number, for example:
+.sp
+.ti +2
+ abcd\(rs=copy=1,copy=3,get=G1
+.sp
+If the \f(CR#subject\fP command is used to set default copy and/or get lists,
+these can be unset by specifying a negative number to cancel all numbered
+groups and an empty name to cancel all named groups.
+.sp
+The \f(CRgetall\fP modifier tests \f(CRpcre2_substring_list_get()\fP, which
+extracts all captured substrings.
+.sp
+If the subject line is successfully matched, the substrings extracted by the
+convenience functions are output with C, G, or L after the string number
+instead of a colon. This is in addition to the normal full list. The string
+length (that is, the return from the extraction function) is given in
+parentheses after each substring, followed by the name when the extraction was
+by name.
+.SS "Testing the substitution function"
+.sp
+If the \f(CRreplace\fP modifier is set, the \f(CRpcre2_substitute()\fP function is
+called instead of one of the matching functions (or after one call of
+\f(CRpcre2_match()\fP in the case of PCRE2_SUBSTITUTE_MATCHED). Note that
+replacement strings cannot contain commas, because a comma signifies the end of
+a modifier. This is not thought to be an issue in a test program.
+.sp
+Specifying a completely empty replacement string disables this modifier.
+However, it is possible to specify an empty replacement by providing a buffer
+length, as described below, for an otherwise empty replacement.
+.sp
+Unlike subject strings, \f(CRpcre2test\fP does not process replacement strings
+for escape sequences. In UTF mode, a replacement string is checked to see if it
+is a valid UTF\-8 string. If so, it is correctly converted to a UTF string of
+the appropriate code unit width. If it is not a valid UTF\-8 string, the
+individual code units are copied directly. This provides a means of passing an
+invalid UTF\-8 string for testing purposes.
+.sp
+The following modifiers set options (in additional to the normal match options)
+for \f(CRpcre2_substitute()\fP:
+.sp
+.ti +2
+global                      PCRE2_SUBSTITUTE_GLOBAL
+.br
+.ti +2
+substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
+.br
+.ti +2
+substitute_literal          PCRE2_SUBSTITUTE_LITERAL
+.br
+.ti +2
+substitute_matched          PCRE2_SUBSTITUTE_MATCHED
+.br
+.ti +2
+substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+.br
+.ti +2
+substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+.br
+.ti +2
+substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+.br
+.ti +2
+substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
+.sp
+See the
+\f(CRpcre2api\fP
+documentation for details of these options.
+.sp
+After a successful substitution, the modified string is output, preceded by the
+number of replacements. This may be zero if there were no matches. Here is a
+simple example of a substitution test:
+.sp
+.ti +2
+/abc/replace=xxx
+.br
+.ti +2
+    =abc=abc=
+.br
+.ti +2
+ 1: =xxx=abc=
+.br
+.ti +2
+    =abc=abc=\(rs=global
+.br
+.ti +2
+ 2: =xxx=xxx=
+.sp
+Subject and replacement strings should be kept relatively short (fewer than 256
+characters) for substitution tests, as fixed\-size buffers are used. To make it
+easy to test for buffer overflow, if the replacement string starts with a
+number in square brackets, that number is passed to \f(CRpcre2_substitute()\fP as
+the size of the output buffer, with the replacement string starting at the next
+character. Here is an example that tests the edge case:
+.sp
+.ti +2
+/abc/
+.br
+.ti +2
+    123abc123\(rs=replace=[10]XYZ
+.br
+.ti +2
+ 1: 123XYZ123
+.br
+.ti +2
+    123abc123\(rs=replace=[9]XYZ
+.br
+.ti +2
+Failed: error \-48: no more memory
+.sp
+The default action of \f(CRpcre2_substitute()\fP is to return
+PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
+PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using the
+\f(CRsubstitute_overflow_length\fP modifier), \f(CRpcre2_substitute()\fP continues
+to go through the motions of matching and substituting (but not doing any
+callouts), in order to compute the size of buffer that is required. When this
+happens, \f(CRpcre2test\fP shows the required buffer length (which includes space
+for the trailing zero) as part of the error message. For example:
+.sp
+.ti +2
+/abc/substitute_overflow_length
+.br
+.ti +2
+    123abc123\(rs=replace=[9]XYZ
+.br
+.ti +2
+Failed: error \-48: no more memory: 10 code units are needed
+.sp
+A replacement string is ignored with POSIX and DFA matching. Specifying partial
+matching provokes an error return ("bad option value") from
+\f(CRpcre2_substitute()\fP.
+.sp
+The \f(CRsubstitute_subject\fP modifier may be used to test the use of the PCRE2
+API, in which a client calls \f(CRpcre2_match()\fP followed by \f(CRpcre2_substitute()\fP
+with PCRE2_SUBSTITUTE_MATCHED, but the client performs an unexpected and
+unsupported modification of the subject buffer in\-place, in between the match
+and substitution.
+.SS "Testing substitute callouts"
+.sp
+If the \f(CRsubstitute_callout\fP modifier is set, a substitution callout
+function is set up. The \f(CRnull_context\fP modifier must not be set, because
+the address of the callout function is passed in a match context. When the
+callout function is called (after each substitution), details of the input
+and output strings are output. For example:
+.sp
+.ti +2
+/abc/g,replace=<$0>,substitute_callout
+.br
+.ti +2
+    abcdefabcpqr
+.br
+.ti +2
+ 1(1) Old 0 3 "abc" New 0 5 "<abc>"
+.br
+.ti +2
+ 2(1) Old 6 9 "abc" New 8 13 "<abc>"
+.br
+.ti +2
+ 2: <abc>def<abc>pqr
+.sp
+The first number on each callout line is the count of matches. The
+parenthesized number is the number of pairs that are set in the ovector (that
+is, one more than the number of capturing groups that were set). Then are
+listed the offsets of the old substring, its contents, and the same for the
+replacement.
+.sp
+By default, the substitution callout function returns zero, which accepts the
+replacement and causes matching to continue if /g was used. Two further
+modifiers can be used to test other return values. If \f(CRsubstitute_skip\fP is
+set to a value greater than zero the callout function returns +1 for the match
+of that number, and similarly \f(CRsubstitute_stop\fP returns \-1. These cause the
+replacement to be rejected, and \-1 causes no further matching to take place. If
+either of them are set, \f(CRsubstitute_callout\fP is assumed. For example:
+.sp
+.ti +2
+/abc/g,replace=<$0>,substitute_skip=1
+.br
+.ti +2
+    abcdefabcpqr
+.br
+.ti +2
+ 1(1) Old 0 3 "abc" New 0 5 "<abc> SKIPPED"
+.br
+.ti +2
+ 2(1) Old 6 9 "abc" New 6 11 "<abc>"
+.br
+.ti +2
+ 2: abcdef<abc>pqr
+.br
+.ti +2
+    abcdefabcpqr\(rs=substitute_stop=1
+.br
+.ti +2
+ 1(1) Old 0 3 "abc" New 0 5 "<abc> STOPPED"
+.br
+.ti +2
+ 1: abcdefabcpqr
+.sp
+If both are set for the same number, stop takes precedence. Only a single skip
+or stop is supported, which is sufficient for testing that the feature works.
+.SS "Testing substitute case callouts"
+.sp
+If the \f(CRsubstitute_case_callout\fP modifier is set, a substitution
+case callout function is set up. The callout function is called for each
+substituted chunk which is to be case\-transformed.
+.sp
+The callout function passed is a fixed function with implementation for certain
+behaviours: inputs which shrink when case\-transformed; inputs which grow; inputs
+with distinct upper/lower/titlecase forms. The characters which are not
+special\-cased for testing purposes are left unmodified, as if they are caseless
+characters.
+.SS "Setting the JIT stack size"
+.sp
+The \f(CRjitstack\fP modifier provides a way of setting the maximum stack size
+that is used by the just\-in\-time optimization code. It is ignored if JIT
+optimization is not being used. The value is a number of kibibytes (units of
+1024 bytes). Setting zero reverts to the default of 32KiB. Providing a stack
+that is larger than the default is necessary only for very complicated
+patterns. If \f(CRjitstack\fP is set non\-zero on a subject line it overrides any
+value that was set on the pattern.
+.SS "Setting heap, match, and depth limits"
+.sp
+The \f(CRheap_limit\fP, \f(CRmatch_limit\fP, and \f(CRdepth_limit\fP modifiers set
+the appropriate limits in the match context. These values are ignored when the
+\f(CRfind_limits\fP or \f(CRfind_limits_noheap\fP modifier is specified.
+.SS "Finding minimum limits"
+.sp
+If the \f(CRfind_limits\fP modifier is present on a subject line, \f(CRpcre2test\fP
+calls the relevant matching function several times, setting different values in
+the match context via \f(CRpcre2_set_heap_limit()\fP,
+\f(CRpcre2_set_match_limit()\fP, or \f(CRpcre2_set_depth_limit()\fP until it finds
+the smallest value for each parameter that allows the match to complete without
+a "limit exceeded" error. The match itself may succeed or fail. An alternative
+modifier, \f(CRfind_limits_noheap\fP, omits the heap limit. This is used in the
+standard tests, because the minimum heap limit varies between systems. If JIT
+is being used, only the match limit is relevant, and the other two are
+automatically omitted.
+.sp
+When using this modifier, the pattern should not contain any limit settings
+such as (*LIMIT_MATCH=...) within it. If such a setting is present and is
+lower than the minimum matching value, the minimum value cannot be found
+because \f(CRpcre2_set_match_limit()\fP etc. are only able to reduce the value of
+an in\-pattern limit; they cannot increase it.
+.sp
+For non\-DFA matching, the minimum \fIdepth_limit\fP number is a measure of how
+much nested backtracking happens (that is, how deeply the pattern's tree is
+searched). In the case of DFA matching, \fIdepth_limit\fP controls the depth of
+recursive calls of the internal function that is used for handling pattern
+recursion, lookaround assertions, and atomic groups.
+.sp
+For non\-DFA matching, the \fImatch_limit\fP number is a measure of the amount
+of backtracking that takes place, and learning the minimum value can be
+instructive. For most simple matches, the number is quite small, but for
+patterns with very large numbers of matching possibilities, it can become large
+very quickly with increasing length of subject string. In the case of DFA
+matching, \fImatch_limit\fP controls the total number of calls, both recursive
+and non\-recursive, to the internal matching function, thus controlling the
+overall amount of computing resource that is used.
+.sp
+For both kinds of matching, the \fIheap_limit\fP number, which is in kibibytes
+(units of 1024 bytes), limits the amount of heap memory used for matching.
+.SS "Showing MARK names"
+.sp
+The \f(CRmark\fP modifier causes the names from backtracking control verbs that
+are returned from calls to \f(CRpcre2_match()\fP to be displayed. If a mark is
+returned for a match, non\-match, or partial match, \f(CRpcre2test\fP shows it.
+For a match, it is on a line by itself, tagged with "MK:". Otherwise, it
+is added to the non\-match message.
+.SS "Showing memory usage"
+.sp
+The \f(CRmemory\fP modifier causes \f(CRpcre2test\fP to log the sizes of all heap
+memory allocation and freeing calls that occur during a call to
+\f(CRpcre2_match()\fP or \f(CRpcre2_dfa_match()\fP. In the latter case, heap memory
+is used only when a match requires more internal workspace that the default
+allocation on the stack, so in many cases there will be no output. No heap
+memory is allocated during matching with JIT. For this modifier to work, the
+\f(CRnull_context\fP modifier must not be set on both the pattern and the
+subject, though it can be set on one or the other.
+.SS "Showing the heap frame overall vector size"
+.sp
+The \f(CRheapframes_size\fP modifier is relevant for matches using
+\f(CRpcre2_match()\fP without JIT. After a match has run (whether successful or
+not) the size, in bytes, of the allocated heap frames vector that is left
+attached to the match data block is shown. If the matching action involved
+several calls to \f(CRpcre2_match()\fP (for example, global matching or for
+timing) only the final value is shown.
+.sp
+This modifier is ignored, with a warning, for POSIX or DFA matching. JIT
+matching does not use the heap frames vector, so the size is always zero,
+unless there was a previous non\-JIT match. Note that specifing a size of zero
+for the output vector (see below) causes \f(CRpcre2test\fP to free its match data
+block (and associated heap frames vector) and allocate a new one.
+.SS "Setting a starting offset"
+.sp
+The \f(CRoffset\fP modifier sets an offset in the subject string at which
+matching starts. Its value is a number of code units, not characters.
+.SS "Setting an offset limit"
+.sp
+The \f(CRoffset_limit\fP modifier sets a limit for unanchored matches. If a match
+cannot be found starting at or before this offset in the subject, a "no match"
+return is given. The data value is a number of code units, not characters. When
+this modifier is used, the \f(CRuse_offset_limit\fP modifier must have been set
+for the pattern; if not, an error is generated.
+.SS "Setting the size of the output vector"
+.sp
+The \f(CRovector\fP modifier applies only to the subject line in which it
+appears, though of course it can also be used to set a default in a
+\f(CR#subject\fP command. It specifies the number of pairs of offsets that are
+available for storing matching information. The default is 15.
+.sp
+A value of zero is useful when testing the POSIX API because it causes
+\f(CRregexec()\fP to be called with a NULL capture vector. When not testing the
+POSIX API, a value of zero is used to cause
+\f(CRpcre2_match_data_create_from_pattern()\fP to be called, in order to create a
+new match block of exactly the right size for the pattern. (It is not possible
+to create a match block with a zero\-length ovector; there is always at least
+one pair of offsets.) The old match data block is freed.
+.SS "Passing the subject as zero\-terminated"
+.sp
+By default, the subject string is passed to a native API matching function with
+its correct length. In order to test the facility for passing a zero\-terminated
+string, the \f(CRzero_terminate\fP modifier is provided. It causes the length to
+be passed as PCRE2_ZERO_TERMINATED. When matching via the POSIX interface,
+this modifier is ignored, with a warning.
+.sp
+When testing \f(CRpcre2_substitute()\fP, this modifier also has the effect of
+passing the replacement string as zero\-terminated.
+.SS "Passing a NULL context, subject, or replacement"
+.sp
+Normally, \f(CRpcre2test\fP passes a context block to \f(CRpcre2_match()\fP,
+\f(CRpcre2_dfa_match()\fP, \f(CRpcre2_jit_match()\fP or \f(CRpcre2_substitute()\fP.
+If the \f(CRnull_context\fP modifier is set, however, NULL is passed. This is for
+testing that the matching and substitution functions behave correctly in this
+case (they use default values). This modifier cannot be used with the
+\f(CRfind_limits\fP, \f(CRfind_limits_noheap\fP, or \f(CRsubstitute_callout\fP
+modifiers.
+.sp
+Similarly, for testing purposes, if the \f(CRnull_subject\fP or
+\f(CRnull_replacement\fP modifier is set, the subject or replacement string
+pointers are passed as NULL, respectively, to the relevant functions.
+.SH "THE ALTERNATIVE MATCHING FUNCTION"
+.sp
+By default, \f(CRpcre2test\fP uses the standard PCRE2 matching function,
+\f(CRpcre2_match()\fP to match each subject line. PCRE2 also supports an
+alternative matching function, \f(CRpcre2_dfa_match()\fP, which operates in a
+different way, and has some restrictions. The differences between the two
+functions are described in the
+\f(CRpcre2matching\fP
+documentation.
+.sp
+If the \f(CRdfa\fP modifier is set, the alternative matching function is used.
+This function finds all possible matches at a given point in the subject. If,
+however, the \f(CRdfa_shortest\fP modifier is set, processing stops after the
+first match is found. This is always the shortest possible match.
+.SH "DEFAULT OUTPUT FROM pcre2test"
+.sp
+This section describes the output when the normal matching function,
+\f(CRpcre2_match()\fP, is being used.
+.sp
+When a match succeeds, \f(CRpcre2test\fP outputs the list of captured substrings,
+starting with number 0 for the string that matched the whole pattern.
+Otherwise, it outputs "No match" when the return is PCRE2_ERROR_NOMATCH, or
+"Partial match:" followed by the partially matching substring when the
+return is PCRE2_ERROR_PARTIAL. (Note that this is the
+entire substring that was inspected during the partial match; it may include
+characters before the actual match start if a lookbehind assertion, \(rsK, \(rsb,
+or \(rsB was involved.)
+.sp
+For any other return, \f(CRpcre2test\fP outputs the PCRE2 negative error number
+and a short descriptive phrase. If the error is a failed UTF string check, the
+code unit offset of the start of the failing character is also output. Here is
+an example of an interactive \f(CRpcre2test\fP run.
+.sp
+.ti +2
+$ pcre2test
+.br
+.ti +2
+PCRE2 version 10.22 2016\-07\-29
+.sp
+.ti +2
+  re> /^abc(\(rsd+)/
+.br
+.ti +2
+data> abc123
+.br
+.ti +2
+ 0: abc123
+.br
+.ti +2
+ 1: 123
+.br
+.ti +2
+data> xyz
+.br
+.ti +2
+No match
+.sp
+Unset capturing substrings that are not followed by one that is set are not
+shown by \f(CRpcre2test\fP unless the \f(CRallcaptures\fP modifier is specified. In
+the following example, there are two capturing substrings, but when the first
+data line is matched, the second, unset substring is not shown. An "internal"
+unset substring is shown as "<unset>", as for the second data line.
+.sp
+.ti +2
+  re> /(a)|(b)/
+.br
+.ti +2
+data> a
+.br
+.ti +2
+ 0: a
+.br
+.ti +2
+ 1: a
+.br
+.ti +2
+data> b
+.br
+.ti +2
+ 0: b
+.br
+.ti +2
+ 1: <unset>
+.br
+.ti +2
+ 2: b
+.sp
+If the strings contain any non\-printing characters, they are output as \(rsxhh
+escapes if the value is less than 256 and UTF mode is not set. Otherwise they
+are output as \(rsx{hh...} escapes. See below for the definition of non\-printing
+characters. If the \f(CRaftertext\fP modifier is set, the output for substring 0
+is followed by the rest of the subject string, identified by "0+" like this:
+.sp
+.ti +2
+  re> /cat/aftertext
+.br
+.ti +2
+data> cataract
+.br
+.ti +2
+ 0: cat
+.br
+.ti +2
+ 0+ aract
+.sp
+If global matching is requested, the results of successive matching attempts
+are output in sequence, like this:
+.sp
+.ti +2
+  re> /\(rsBi(\(rsw\(rsw)/g
+.br
+.ti +2
+data> Mississippi
+.br
+.ti +2
+ 0: iss
+.br
+.ti +2
+ 1: ss
+.br
+.ti +2
+ 0: iss
+.br
+.ti +2
+ 1: ss
+.br
+.ti +2
+ 0: ipp
+.br
+.ti +2
+ 1: pp
+.sp
+"No match" is output only if the first match attempt fails. Here is an example
+of a failure message (the offset 4 that is specified by the \f(CRoffset\fP
+modifier is past the end of the subject string):
+.sp
+.ti +2
+  re> /xyz/
+.br
+.ti +2
+data> xyz\(rs=offset=4
+.br
+.ti +2
+Error \-24 (bad offset value)
+.sp
+Note that whereas patterns can be continued over several lines (a plain ">"
+prompt is used for continuations), subject lines may not. However newlines can
+be included in a subject by means of the \(rsn escape (or \(rsr, \(rsr\(rsn, etc.,
+depending on the newline sequence setting).
+.SH "OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION"
+.sp
+When the alternative matching function, \f(CRpcre2_dfa_match()\fP, is used, the
+output consists of a list of all the matches that start at the first point in
+the subject where there is at least one match. For example:
+.sp
+.ti +2
+  re> /(tang|tangerine|tan)/
+.br
+.ti +2
+data> yellow tangerine\(rs=dfa
+.br
+.ti +2
+ 0: tangerine
+.br
+.ti +2
+ 1: tang
+.br
+.ti +2
+ 2: tan
+.sp
+Using the normal matching function on this data finds only "tang". The
+longest matching string is always given first (and numbered zero). After a
+PCRE2_ERROR_PARTIAL return, the output is "Partial match:", followed by the
+partially matching substring. Note that this is the entire substring that was
+inspected during the partial match; it may include characters before the actual
+match start if a lookbehind assertion, \(rsb, or \(rsB was involved. (\(rsK is not
+supported for DFA matching.)
+.sp
+If global matching is requested, the search for further matches resumes
+at the end of the longest match. For example:
+.sp
+.ti +2
+  re> /(tang|tangerine|tan)/g
+.br
+.ti +2
+data> yellow tangerine and tangy sultana\(rs=dfa
+.br
+.ti +2
+ 0: tangerine
+.br
+.ti +2
+ 1: tang
+.br
+.ti +2
+ 2: tan
+.br
+.ti +2
+ 0: tang
+.br
+.ti +2
+ 1: tan
+.br
+.ti +2
+ 0: tan
+.sp
+The alternative matching function does not support substring capture, so the
+modifiers that are concerned with captured substrings are not relevant.
+.SH "RESTARTING AFTER A PARTIAL MATCH"
+.sp
+When the alternative matching function has given the PCRE2_ERROR_PARTIAL
+return, indicating that the subject partially matched the pattern, you can
+restart the match with additional subject data by means of the
+\f(CRdfa_restart\fP modifier. For example:
+.sp
+.ti +2
+  re> /^\(rsd?\(rsd(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\(rsd\(rsd$/
+.br
+.ti +2
+data> 23ja\(rs=ps,dfa
+.br
+.ti +2
+Partial match: 23ja
+.br
+.ti +2
+data> n05\(rs=dfa,dfa_restart
+.br
+.ti +2
+ 0: n05
+.sp
+For further information about partial matching, see the
+\f(CRpcre2partial\fP
+documentation.
+.SH "CALLOUTS"
+.sp
+If the pattern contains any callout requests, \f(CRpcre2test\fP\*(Aqs callout
+function is called during matching unless \f(CRcallout_none\fP is specified. This
+works with both matching functions, and with JIT, though there are some
+differences in behaviour. The output for callouts with numerical arguments and
+those with string arguments is slightly different.
+.SS "Callouts with numerical arguments"
+.sp
+By default, the callout function displays the callout number, the start and
+current positions in the subject text at the callout time, and the next pattern
+item to be tested. For example:
+.sp
+.ti +2
+\-\-\->pqrabcdef
+.br
+.ti +2
+  0    ^  ^     \(rsd
+.sp
+This output indicates that callout number 0 occurred for a match attempt
+starting at the fourth character of the subject string, when the pointer was at
+the seventh character, and when the next pattern item was \(rsd. Just
+one circumflex is output if the start and current positions are the same, or if
+the current position precedes the start position, which can happen if the
+callout is in a lookbehind assertion.
+.sp
+Callouts numbered 255 are assumed to be automatic callouts, inserted as a
+result of the \f(CRauto_callout\fP pattern modifier. In this case, instead of
+showing the callout number, the offset in the pattern, preceded by a plus, is
+output. For example:
+.sp
+.ti +2
+  re> /\(rsd?[A\-E]\(rs*/auto_callout
+.br
+.ti +2
+data> E*
+.br
+.ti +2
+\-\-\->E*
+.br
+.ti +2
+ +0 ^      \(rsd?
+.br
+.ti +2
+ +3 ^      [A\-E]
+.br
+.ti +2
+ +8 ^^     \(rs*
+.br
+.ti +2
++10 ^ ^
+.br
+.ti +2
+ 0: E*
+.sp
+If a pattern contains (*MARK) items, an additional line is output whenever
+a change of latest mark is passed to the callout function. For example:
+.sp
+.ti +2
+  re> /a(*MARK:X)bc/auto_callout
+.br
+.ti +2
+data> abc
+.br
+.ti +2
+\-\-\->abc
+.br
+.ti +2
+ +0 ^       a
+.br
+.ti +2
+ +1 ^^      (*MARK:X)
+.br
+.ti +2
++10 ^^      b
+.br
+.ti +2
+Latest Mark: X
+.br
+.ti +2
++11 ^ ^     c
+.br
+.ti +2
++12 ^  ^
+.br
+.ti +2
+ 0: abc
+.sp
+The mark changes between matching "a" and "b", but stays the same for the rest
+of the match, so nothing more is output. If, as a result of backtracking, the
+mark reverts to being unset, the text "<unset>" is output.
+.SS "Callouts with string arguments"
+.sp
+The output for a callout with a string argument is similar, except that instead
+of outputting a callout number before the position indicators, the callout
+string and its offset in the pattern string are output before the reflection of
+the subject string, and the subject string is reflected for each callout. For
+example:
+.sp
+.ti +2
+  re> /^ab(?C'first\*(Aq)cd(?C"second")ef/
+.br
+.ti +2
+data> abcdefg
+.br
+.ti +2
+Callout (7): \*(Aqfirst\*(Aq
+.br
+.ti +2
+\-\-\->abcdefg
+.br
+.ti +2
+    ^ ^         c
+.br
+.ti +2
+Callout (20): "second"
+.br
+.ti +2
+\-\-\->abcdefg
+.br
+.ti +2
+    ^   ^       e
+.br
+.ti +2
+ 0: abcdef
+.SS "Callout modifiers"
+.sp
+The callout function in \f(CRpcre2test\fP returns zero (carry on matching) by
+default, but you can use a \f(CRcallout_fail\fP modifier in a subject line to
+change this and other parameters of the callout (see below).
+.sp
+If the \f(CRcallout_capture\fP modifier is set, the current captured groups are
+output when a callout occurs. This is useful only for non\-DFA matching, as
+\f(CRpcre2_dfa_match()\fP does not support capturing, so no captures are ever
+shown.
+.sp
+The normal callout output, showing the callout number or pattern offset (as
+described above) is suppressed if the \f(CRcallout_no_where\fP modifier is set.
+.sp
+When using the interpretive matching function \f(CRpcre2_match()\fP without JIT,
+setting the \f(CRcallout_extra\fP modifier causes additional output from
+\f(CRpcre2test\fP\*(Aqs callout function to be generated. For the first callout in a
+match attempt at a new starting position in the subject, "New match attempt" is
+output. If there has been a backtrack since the last callout (or start of
+matching if this is the first callout), "Backtrack" is output, followed by "No
+other matching paths" if the backtrack ended the previous match attempt. For
+example:
+.sp
+.ti +2
+ re> /(a+)b/auto_callout,no_start_optimize,no_auto_possess
+.br
+.ti +2
+data> aac\(rs=callout_extra
+.br
+.ti +2
+New match attempt
+.br
+.ti +2
+\-\-\->aac
+.br
+.ti +2
+ +0 ^       (
+.br
+.ti +2
+ +1 ^       a+
+.br
+.ti +2
+ +3 ^ ^     )
+.br
+.ti +2
+ +4 ^ ^     b
+.br
+.ti +2
+Backtrack
+.br
+.ti +2
+\-\-\->aac
+.br
+.ti +2
+ +3 ^^      )
+.br
+.ti +2
+ +4 ^^      b
+.br
+.ti +2
+Backtrack
+.br
+.ti +2
+No other matching paths
+.br
+.ti +2
+New match attempt
+.br
+.ti +2
+\-\-\->aac
+.br
+.ti +2
+ +0  ^      (
+.br
+.ti +2
+ +1  ^      a+
+.br
+.ti +2
+ +3  ^^     )
+.br
+.ti +2
+ +4  ^^     b
+.br
+.ti +2
+Backtrack
+.br
+.ti +2
+No other matching paths
+.br
+.ti +2
+New match attempt
+.br
+.ti +2
+\-\-\->aac
+.br
+.ti +2
+ +0   ^     (
+.br
+.ti +2
+ +1   ^     a+
+.br
+.ti +2
+Backtrack
+.br
+.ti +2
+No other matching paths
+.br
+.ti +2
+New match attempt
+.br
+.ti +2
+\-\-\->aac
+.br
+.ti +2
+ +0    ^    (
+.br
+.ti +2
+ +1    ^    a+
+.br
+.ti +2
+No match
+.sp
+Notice that various optimizations must be turned off if you want all possible
+matching paths to be scanned. If \f(CRno_start_optimize\fP is not used, there is
+an immediate "no match", without any callouts, because the starting
+optimization fails to find "b" in the subject, which it knows must be present
+for any match. If \f(CRno_auto_possess\fP is not used, the "a+" item is turned
+into "a++", which reduces the number of backtracks.
+.sp
+The \f(CRcallout_extra\fP modifier has no effect if used with the DFA matching
+function, or with JIT.
+.SS "Return values from callouts"
+.sp
+The default return from the callout function is zero, which allows matching to
+continue. The \f(CRcallout_fail\fP modifier can be given one or two numbers. If
+there is only one number, 1 is returned instead of 0 (causing matching to
+backtrack) when a callout of that number is reached. If two numbers (<n>:<m>)
+are given, 1 is returned when callout <n> is reached and there have been at
+least <m> callouts. The \f(CRcallout_error\fP modifier is similar, except that
+PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
+aborted. If both these modifiers are set for the same callout number,
+\f(CRcallout_error\fP takes precedence. Note that callouts with string arguments
+are always given the number zero.
+.sp
+The \f(CRcallout_data\fP modifier can be given an unsigned or a negative number.
+This is set as the "user data" that is passed to the matching function, and
+passed back when the callout function is invoked. Any value other than zero is
+used as a return from \f(CRpcre2test\fP\*(Aqs callout function.
+.sp
+Inserting callouts can be helpful when using \f(CRpcre2test\fP to check
+complicated regular expressions. For further information about callouts, see
+the
+\f(CRpcre2callout\fP
+documentation.
+.SH "NON\-PRINTING CHARACTERS"
+.sp
+When \f(CRpcre2test\fP is outputting text in the compiled version of a pattern,
+bytes other than 32\-126 are always treated as non\-printing characters and are
+therefore shown as hex escapes.
+.sp
+When \f(CRpcre2test\fP is outputting text that is a matched part of a subject
+string, it behaves in the same way, unless a different locale has been set for
+the pattern (using the \f(CRlocale\fP modifier). In this case, the
+\f(CRisprint()\fP function is used to distinguish printing and non\-printing
+characters.
+.SH "SAVING AND RESTORING COMPILED PATTERNS"
+.sp
+It is possible to save compiled patterns on disc or elsewhere, and reload them
+later, subject to a number of restrictions. JIT data cannot be saved. The host
+on which the patterns are reloaded must be running the same version of PCRE2,
+with the same code unit width, and must also have the same endianness, pointer
+width and PCRE2_SIZE type. Before compiled patterns can be saved they must be
+serialized, that is, converted to a stream of bytes. A single byte stream may
+contain any number of compiled patterns, but they must all use the same
+character tables. A single copy of the tables is included in the byte stream
+(its size is 1088 bytes).
+.sp
+The functions whose names begin with \f(CRpcre2_serialize_\fP are used
+for serializing and de\-serializing. They are described in the
+\f(CRpcre2serialize\fP
+documentation. In this section we describe the features of \f(CRpcre2test\fP that
+can be used to test these functions.
+.sp
+Note that "serialization" in PCRE2 does not convert compiled patterns to an
+abstract format like Java or .NET. It just makes a reloadable byte code stream.
+Hence the restrictions on reloading mentioned above.
+.sp
+In \f(CRpcre2test\fP, when a pattern with \f(CRpush\fP modifier is successfully
+compiled, it is pushed onto a stack of compiled patterns, and \f(CRpcre2test\fP
+expects the next line to contain a new pattern (or command) instead of a
+subject line. By contrast, the \f(CRpushcopy\fP modifier causes a copy of the
+compiled pattern to be stacked, leaving the original available for immediate
+matching. By using \f(CRpush\fP and/or \f(CRpushcopy\fP, a number of patterns can
+be compiled and retained. These modifiers are incompatible with \f(CRposix\fP,
+and control modifiers that act at match time are ignored (with a message) for
+the stacked patterns. The \f(CRjitverify\fP modifier applies only at compile
+time.
+.sp
+The command
+.sp
+.ti +2
+#save <filename>
+.sp
+causes all the stacked patterns to be serialized and the result written to the
+named file. Afterwards, all the stacked patterns are freed. The command
+.sp
+.ti +2
+#load <filename>
+.sp
+reads the data in the file, and then arranges for it to be de\-serialized, with
+the resulting compiled patterns added to the pattern stack. The pattern on the
+top of the stack can be retrieved by the #pop command, which must be followed
+by lines of subjects that are to be matched with the pattern, terminated as
+usual by an empty line or end of file. This command may be followed by a
+modifier list containing only
+control modifiers
+that act after a pattern has been compiled. In particular, \f(CRhex\fP,
+\f(CRposix\fP, \f(CRposix_nosub\fP, \f(CRpush\fP, and \f(CRpushcopy\fP are not allowed,
+nor are any
+option\-setting modifiers.
+The JIT modifiers are, however permitted. Here is an example that saves and
+reloads two patterns.
+.sp
+.ti +2
+/abc/push
+.br
+.ti +2
+/xyz/push
+.br
+.ti +2
+#save tempfile
+.br
+.ti +2
+#load tempfile
+.br
+.ti +2
+#pop info
+.br
+.ti +2
+xyz
+.sp
+.ti +2
+#pop jit,bincode
+.br
+.ti +2
+abc
+.sp
+If \f(CRjitverify\fP is used with #pop, it does not automatically imply
+\f(CRjit\fP, which is different behaviour from when it is used on a pattern.
+.sp
+The #popcopy command is analogous to the \f(CRpushcopy\fP modifier in that it
+makes current a copy of the topmost stack pattern, leaving the original still
+on the stack.
+.SH "SEE ALSO"
+.sp
+\f(CRpcre2\fP(3), \f(CRpcre2api\fP(3), \f(CRpcre2callout\fP(3),
+\f(CRpcre2jit\fP, \f(CRpcre2matching\fP(3), \f(CRpcre2partial\fP(d),
+\f(CRpcre2pattern\fP(3), \f(CRpcre2serialize\fP(3).
+.SH "AUTHOR"
+.sp
+.nf
+.fam C
+Philip Hazel
+Retired from University Computing Service
+Cambridge, England.
+.fam
+.fi
+.SH "REVISION"
+.sp
+Last updated: 22 August 2026
+.br
+Copyright (c) 1997\-2024 University of Cambridge.

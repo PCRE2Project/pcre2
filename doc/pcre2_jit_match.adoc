@@ -1,0 +1,56 @@
+= pcre2_jit_match(3)
+:doctype: manpage
+:manname: pcre2_jit_match
+:manpurpose: fast path interface to JIT matching
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 20 January 2023
+:revdate: 20 January 2023
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
+                    PCRE2_SIZE length, PCRE2_SIZE start_offset,
+                    uint32_t options, pcre2_match_data *match_data,
+                    pcre2_match_context *mcontext);
+....
+
+== Description
+
+This function matches a compiled regular expression that has been successfully
+processed by the JIT compiler against a given subject string, using a matching
+algorithm that is similar to Perl's. It is a "fast path" interface to JIT, and
+it bypasses some of the sanity checks that `pcre2_match()` applies.
+
+In UTF mode, the subject string is not checked for UTF validity. Unless
+PCRE2_MATCH_INVALID_UTF was set when the pattern was compiled, passing an
+invalid UTF string results in undefined behaviour. Your program may crash or
+loop or give wrong results. In the absence of PCRE2_MATCH_INVALID_UTF you
+should only call `pcre2_jit_match()` in UTF mode if you are sure the
+subject is valid.
+
+The arguments for `pcre2_jit_match()` are exactly the same as for
+xref:pcre2_match.adoc[`pcre2_match()`,]
+except that the subject string must be specified with a length;
+PCRE2_ZERO_TERMINATED is not supported.
+
+The supported options are PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
+PCRE2_NOTEMPTY_ATSTART, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Unsupported
+options are ignored.
+
+The return values are the same as for `pcre2_match()` plus
+PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+that was not compiled. For details of partial matching, see the
+xref:pcre2partial.adoc[`pcre2partial`]
+page.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the JIT API in the
+xref:pcre2jit.adoc[`pcre2jit`]
+page.

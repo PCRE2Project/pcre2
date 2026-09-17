@@ -1,0 +1,33 @@
+= pcre2_maketables_free(3)
+:doctype: manpage
+:manname: pcre2_maketables_free
+:manpurpose: free character tables
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 03 September 2019
+:revdate: 03 September 2019
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+void pcre2_maketables_free(pcre2_general_context *gcontext,
+                           const uint8_t *tables);
+....
+
+== Description
+
+This function discards a set of character tables that were created by a call
+to
+xref:pcre2_maketables.adoc[`pcre2_maketables()`.]
+
+The _gcontext_ parameter should match what was used in that call to
+account for any custom allocators that might be in use; if it is NULL
+the system `free()` is used.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page.

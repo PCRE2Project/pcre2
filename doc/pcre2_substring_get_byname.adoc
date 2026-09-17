@@ -1,0 +1,58 @@
+= pcre2_substring_get_byname(3)
+:doctype: manpage
+:manname: pcre2_substring_get_byname
+:manpurpose: extract named substring into new memory
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 19 December 2014
+:revdate: 19 December 2014
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_substring_get_byname(pcre2_match_data *match_data,
+                               PCRE2_SPTR stringname,
+                               PCRE2_UCHAR **stringptr,
+                               PCRE2_SIZE *sizeptr);
+....
+
+== Description
+
+This is a convenience function for extracting a captured substring by name into
+newly acquired memory. The arguments are:
+
+[literal,subs=normal]
+....
+_match_data_    The match data for the match
+_name_          Name of the required substring
+_bufferptr_     Where to put the string pointer
+_bufflen_       Where to put the string length
+....
+
+The memory in which the substring is placed is obtained by calling the same
+memory allocation function that was used for the match data block. The
+convenience function `pcre2_substring_free()` can be used to free it when
+it is no longer needed. The yield of the function is zero for success or one of
+the following error numbers:
+
+[literal]
+....
+PCRE2_ERROR_NOSUBSTRING   there are no groups of that name
+PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
+PCRE2_ERROR_UNSET         the group did not participate in the match
+PCRE2_ERROR_NOMEMORY      memory could not be obtained
+....
+
+If there is more than one group with the given name, the first one that is set
+is returned. In this situation PCRE2_ERROR_UNSET means that no group with the
+given name was set.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

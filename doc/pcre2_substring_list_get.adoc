@@ -1,0 +1,50 @@
+= pcre2_substring_list_get(3)
+:doctype: manpage
+:manname: pcre2_substring_list_get
+:manpurpose: extract all substrings into new memory
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 21 October 2014
+:revdate: 21 October 2014
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_substring_list_get(pcre2_match_data *match_data,
+                             PCRE2_UCHAR ***listptr,
+                             PCRE2_SIZE **lengthsptr);
+....
+
+== Description
+
+This is a convenience function for extracting all the captured substrings after
+a pattern match. It builds a list of pointers to the strings, and (optionally)
+a second list that contains their lengths (in code units), excluding a
+terminating zero that is added to each of them. All this is done in a single
+block of memory that is obtained using the same memory allocation function that
+was used to get the match data block. The convenience function
+`pcre2_substring_list_free()` can be used to free it when it is no longer
+needed. The arguments are:
+
+[literal,subs=normal]
+....
+_match_data_    The match data block
+_listptr_       Where to put a pointer to the list
+_lengthsptr_    Where to put a pointer to the lengths, or NULL
+....
+
+A pointer to a list of pointers is put in the variable whose address is in
+_listptr_. The list is terminated by a NULL pointer. If _lengthsptr_ is
+not NULL, a matching list of lengths is created, and its address is placed in
+_lengthsptr_. The yield of the function is zero on success or
+PCRE2_ERROR_NOMEMORY if sufficient memory could not be obtained.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

@@ -1,0 +1,50 @@
+'\" t
+.\"     Title: pcre2_get_match_data_size
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 17 October 2019
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_GET_MATCH_DATA_SIZE" "3" "17 October 2019" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_get_match_data_size \- get the size of a match data block
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *match_data);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function returns the size, in bytes, of the match data block that is its
+argument.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

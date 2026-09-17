@@ -1,0 +1,105 @@
+'\" t
+.\"     Title: pcre2_pattern_convert
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 12 July 2017
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_PATTERN_CONVERT" "3" "12 July 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_pattern_convert \- foreign pattern converter
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
+                          uint32_t options, PCRE2_UCHAR **buffptr,
+                          PCRE2_SIZE *bufflenptr,
+                          pcre2_convert_context *ccontext);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function is part of an experimental set of pattern conversion functions.
+It converts a foreign pattern (for example, a glob) into a PCRE2 regular
+expression pattern. Its arguments are:
+.sp
+.ti +2
+\fIpattern\fP     The foreign pattern
+.br
+.ti +2
+\fIlength\fP      The length of the input pattern or PCRE2_ZERO_TERMINATED
+.br
+.ti +2
+\fIoptions\fP     Option bits
+.br
+.ti +2
+\fIbuffer\fP      Pointer to pointer to output buffer, or NULL
+.br
+.ti +2
+\fIblength\fP     Pointer to output length field
+.br
+.ti +2
+\fIcvcontext\fP   Pointer to a convert context or NULL
+.sp
+The length of the converted pattern (excluding the terminating zero) is
+returned via \fIblength\fP. If \fIbuffer\fP is NULL, the function just returns
+the output length. If \fIbuffer\fP points to a NULL pointer, heap memory is
+obtained for the converted pattern, using the allocator in the context if
+present (or else \f(CRmalloc()\fP), and the field pointed to by \fIbuffer\fP is
+updated. If \fIbuffer\fP points to a non\-NULL field, that must point to a
+buffer whose size is in the variable pointed to by \fIblength\fP. This value is
+updated.
+.sp
+The option bits are:
+.sp
+.ti +2
+PCRE2_CONVERT_UTF                     Input is UTF
+.br
+.ti +2
+PCRE2_CONVERT_NO_UTF_CHECK            Do not check UTF validity
+.br
+.ti +2
+PCRE2_CONVERT_POSIX_BASIC             Convert POSIX basic pattern
+.br
+.ti +2
+PCRE2_CONVERT_POSIX_EXTENDED          Convert POSIX extended pattern
+.br
+.ti +2
+PCRE2_CONVERT_GLOB                    ) Convert
+.br
+.ti +2
+PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR  )   various types
+.br
+.ti +2
+PCRE2_CONVERT_GLOB_NO_STARSTAR        )     of glob
+.sp
+The return value from \f(CRpcre2_pattern_convert()\fP is zero on success or a
+non\-zero PCRE2 error code.
+.sp
+The pattern conversion functions are described in the
+\f(CRpcre2convert\fP
+documentation.

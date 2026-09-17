@@ -1,0 +1,32 @@
+= pcre2_set_glob_separator(3)
+:doctype: manpage
+:manname: pcre2_set_glob_separator
+:manpurpose: set glob separator character
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 17 June 2018
+:revdate: 17 June 2018
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_set_glob_separator(pcre2_convert_context *ccontext,
+                             uint32_t separator_char);
+....
+
+== Description
+
+This function is part of an experimental set of pattern conversion functions.
+It sets the component separator character that is used when converting globs.
+The second argument must be one of the characters forward slash, backslash, or
+dot. The default is backslash when running under Windows, otherwise forward
+slash. The result of the function is zero for success or PCRE2_ERROR_BADDATA if
+the second argument is invalid.
+
+The pattern conversion functions are described in the
+xref:pcre2convert.adoc[`pcre2convert`]
+documentation.

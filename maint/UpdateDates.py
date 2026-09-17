@@ -16,6 +16,7 @@ from UpdateCommon import update_file
 date_regex = r'\d+ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w* \d+'
 header_regex = r'(?m)^(.TH.*? )"%s"' % date_regex
 last_updated_regex = r'(?m)^Last updated: %s' % date_regex
+adoc_date_regex = r'(?m)^:(docdate|revdate): %s$' % date_regex
 
 
 def get_last_date(filename):
@@ -47,17 +48,25 @@ def update_man_date(filename):
         update_file(filename, last_updated_regex, 'Last updated: %s' % file_date)
 
 
+def update_adoc_date(filename):
+    print('  Updating %s' % filename)
+    file_date = get_last_date(filename)
+
+    update_file(filename, adoc_date_regex, r':\1: %s' % file_date)
+
+    if filename.startswith('doc/pcre2_'):
+        check_no_match(filename, last_updated_regex)
+    else:
+        update_file(filename, last_updated_regex, 'Last updated: %s' % file_date)
+
+
 print('Updating man pages')
 
-# doc/*.1
-for filename in glob.glob('doc/*.1'):
-    update_man_date(filename)
-
-# doc/*.3
-for filename in glob.glob('doc/*.3'):
-    if filename == 'doc/pcre2demo.3':
+# doc/*.adoc
+for filename in glob.glob('doc/*.adoc'):
+    if filename == 'doc/pcre2demo.adoc':
         continue
-    update_man_date(filename)
+    update_adoc_date(filename)
 
 # README, NON-AUTOTOOLS-BUILD
 print('Updating README and NON-AUTOTOOLS-BUILD')

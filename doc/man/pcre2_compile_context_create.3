@@ -1,0 +1,53 @@
+'\" t
+.\"     Title: pcre2_compile_context_create
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 25 October 2014
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_COMPILE_CONTEXT_CREATE" "3" "25 October 2014" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_compile_context_create \- create a compile context
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+pcre2_compile_context *pcre2_compile_context_create(
+      pcre2_general_context *gcontext);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function creates and initializes a new compile context. If its argument is
+NULL, \f(CRmalloc()\fP is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is NULL if
+the memory could not be obtained.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

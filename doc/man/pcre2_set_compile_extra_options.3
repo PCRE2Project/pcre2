@@ -1,0 +1,121 @@
+'\" t
+.\"     Title: pcre2_set_compile_extra_options
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 14 October 2024
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SET_COMPILE_EXTRA_OPTIONS" "3" "14 October 2024" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_set_compile_extra_options \- set compile time extra options
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+int pcre2_set_compile_extra_options(pcre2_compile_context *ccontext,
+                                    uint32_t options);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function sets additional option bits for \f(CRpcre2_compile()\fP that are
+housed in a compile context. It completely replaces all the bits. The extra
+options are:
+.sp
+.ti +2
+PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK     Allow \(rsK in lookarounds
+.br
+.ti +2
+PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  Allow \(rsx{d800} to \(rsx{dfff}
+.br
+.ti +2
+                                       in UTF\-8 and UTF\-32 modes
+.br
+.ti +2
+PCRE2_EXTRA_ALT_BSUX                 Extended alternate \(rsu, \(rsU, and
+.br
+.ti +2
+                                       \(rsx handling
+.br
+.ti +2
+PCRE2_EXTRA_ASCII_BSD                \(rsd remains ASCII in UCP mode
+.br
+.ti +2
+PCRE2_EXTRA_ASCII_BSS                \(rss remains ASCII in UCP mode
+.br
+.ti +2
+PCRE2_EXTRA_ASCII_BSW                \(rsw remains ASCII in UCP mode
+.br
+.ti +2
+PCRE2_EXTRA_ASCII_DIGIT              [:digit:] and [:xdigit:] POSIX classes
+.br
+.ti +2
+                                       remain ASCII in UCP mode
+.br
+.ti +2
+PCRE2_EXTRA_ASCII_POSIX              POSIX classes remain ASCII in
+.br
+.ti +2
+                                       UCP mode
+.br
+.ti +2
+PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as
+.br
+.ti +2
+                                       a literal following character
+.br
+.ti +2
+PCRE2_EXTRA_CASELESS_RESTRICT        Disable mixed ASCII/non\-ASCII
+.br
+.ti +2
+                                       case folding
+.br
+.ti +2
+PCRE2_EXTRA_ESCAPED_CR_IS_LF         Interpret \(rsr as \(rsn
+.br
+.ti +2
+PCRE2_EXTRA_MATCH_LINE               Pattern matches whole lines
+.br
+.ti +2
+PCRE2_EXTRA_MATCH_WORD               Pattern matches "words"
+.br
+.ti +2
+PCRE2_EXTRA_NEVER_CALLOUT            Disallow callouts in pattern
+.br
+.ti +2
+PCRE2_EXTRA_NO_BS0                   Disallow \(rs0 (but not \(rs00 or \(rs000)
+.br
+.ti +2
+PCRE2_EXTRA_PYTHON_OCTAL             Use Python rules for octal
+.br
+.ti +2
+PCRE2_EXTRA_TURKISH_CASING           Use Turkish I case folding
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

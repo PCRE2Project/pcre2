@@ -1,0 +1,49 @@
+= pcre2_set_optimize(3)
+:doctype: manpage
+:manname: pcre2_set_optimize
+:manpurpose: set an optimization directive
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 September 2024
+:revdate: 22 September 2024
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_set_optimize(pcre2_compile_context *ccontext,
+                       uint32_t directive);
+....
+
+== Description
+
+This function controls which performance optimizations will be applied
+by `pcre2_compile()`. It can be called multiple times with the same compile
+context; the effects are cumulative, with the effects of later calls taking
+precedence over earlier ones.
+
+The result is zero for success, PCRE2_ERROR_NULL if _ccontext_ is NULL,
+or PCRE2_ERROR_BADOPTION if _directive_ is unknown. The latter could be
+useful to detect if a certain optimization is available.
+
+The list of possible values for the _directive_ parameter are:
+
+[literal]
+....
+PCRE2_OPTIMIZATION_FULL   Enable all optimizations (default)
+PCRE2_OPTIMIZATION_NONE   Disable all optimizations
+PCRE2_AUTO_POSSESS        Enable auto-possessification
+PCRE2_AUTO_POSSESS_OFF    Disable auto-possessification
+PCRE2_DOTSTAR_ANCHOR      Enable implicit dotstar anchoring
+PCRE2_DOTSTAR_ANCHOR_OFF  Disable implicit dotstar anchoring
+PCRE2_START_OPTIMIZE      Enable start-up optimizations at match time
+PCRE2_START_OPTIMIZE_OFF  Disable start-up optimizations at match time
+....
+
+There is a complete description of the PCRE2 native API, including detailed
+descriptions _directive_ parameter values in the
+xref:pcre2api.adoc[`pcre2api`]
+page.

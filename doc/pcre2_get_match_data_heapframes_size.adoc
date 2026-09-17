@@ -1,0 +1,30 @@
+= pcre2_get_match_data_heapframes_size(3)
+:doctype: manpage
+:manname: pcre2_get_match_data_heapframes_size
+:manpurpose: get the size of match data heapframes
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 18 January 2023
+:revdate: 18 January 2023
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+PCRE2_SIZE pcre2_get_match_data_heapframes_size(
+      pcre2_match_data *match_data);
+....
+
+== Description
+
+This function returns the size, in bytes, of the heapframes data block that is
+owned by its argument.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

@@ -1,0 +1,65 @@
+'\" t
+.\"     Title: pcre2_serialize_get_number_of_codes
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 13 August 2018
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SERIALIZE_GET_NUMBER_OF_CODES" "3" "13 August 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_serialize_get_number_of_codes \- get number of serialized compiled patterns
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+int32_t pcre2_serialize_get_number_of_codes(const uint8_t *bytes);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+The \fIbytes\fP argument must point to a serialized byte stream that was
+originally created by \f(CRpcre2_serialize_encode()\fP (though it may have been
+saved on disc or elsewhere in the meantime). The function returns the number of
+serialized patterns in the byte stream, or one of the following negative error
+codes:
+.sp
+.ti +2
+PCRE2_ERROR_BADMAGIC  mismatch of id bytes in \fIbytes\fP
+.br
+.ti +2
+PCRE2_ERROR_BADMODE   mismatch of variable unit size or PCRE version
+.br
+.ti +2
+PCRE2_ERROR_NULL      the argument is NULL
+.sp
+PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
+on a system with different endianness.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the serialization functions in the
+\f(CRpcre2serialize\fP
+page.

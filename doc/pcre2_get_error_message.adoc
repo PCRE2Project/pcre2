@@ -1,0 +1,44 @@
+= pcre2_get_error_message(3)
+:doctype: manpage
+:manname: pcre2_get_error_message
+:manpurpose: get textual error message for error number
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 24 March 2017
+:revdate: 24 March 2017
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer,
+                            PCRE2_SIZE bufflen);
+....
+
+== Description
+
+This function provides a textual error message for each PCRE2 error code.
+Compilation errors are positive numbers; UTF formatting errors and matching
+errors are negative numbers. The arguments are:
+
+[literal,subs=normal]
+....
+_errorcode_   an error code (positive or negative)
+_buffer_      where to put the message
+_bufflen_     the length of the buffer (code units)
+....
+
+The function returns the length of the message in code units, excluding the
+trailing zero, or the negative error code PCRE2_ERROR_NOMEMORY if the buffer is
+too small. In this case, the returned message is truncated (but still with a
+trailing zero). If _errorcode_ does not contain a recognized error code
+number, the negative value PCRE2_ERROR_BADDATA is returned.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

@@ -1,0 +1,153 @@
+'\" t
+.\"     Title: pcre2_dfa_match
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 31 August 2021
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_DFA_MATCH" "3" "31 August 2021" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_dfa_match \- match a pattern using the alternative matching algorithm
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
+                    PCRE2_SIZE length, PCRE2_SIZE start_offset,
+                    uint32_t options, pcre2_match_data *match_data,
+                    pcre2_match_context *mcontext, int *workspace,
+                    PCRE2_SIZE wscount);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function matches a compiled regular expression against a given subject
+string, using an alternative matching algorithm that scans the subject string
+just once (except when processing lookaround assertions). This function is
+\fInot\fP Perl\-compatible (the Perl\-compatible matching function is
+\f(CRpcre2_match()\fP). The arguments for this function are:
+.sp
+.ti +2
+\fIcode\fP         Points to the compiled pattern
+.br
+.ti +2
+\fIsubject\fP      Points to the subject string
+.br
+.ti +2
+\fIlength\fP       Length of the subject string
+.br
+.ti +2
+\fIstartoffset\fP  Offset in the subject at which to start matching
+.br
+.ti +2
+\fIoptions\fP      Option bits
+.br
+.ti +2
+\fImatch_data\fP   Points to a match data block, for results
+.br
+.ti +2
+\fImcontext\fP     Points to a match context, or is NULL
+.br
+.ti +2
+\fIworkspace\fP    Points to a vector of ints used as working space
+.br
+.ti +2
+\fIwscount\fP      Number of elements in the vector
+.sp
+The size of output vector needed to contain all the results depends on the
+number of simultaneous matches, not on the number of parentheses in the
+pattern. Using \f(CRpcre2_match_data_create_from_pattern()\fP to create the match
+data block is therefore not advisable when using this function.
+.sp
+A match context is needed only if you want to set up a callout function or
+specify the heap limit or the match or the recursion depth limits. The
+\fIlength\fP and \fIstartoffset\fP values are code units, not characters. The
+options are:
+.sp
+.ti +2
+PCRE2_ANCHORED          Match only at the first position
+.br
+.ti +2
+PCRE2_COPY_MATCHED_SUBJECT
+.br
+.ti +2
+                        On success, make a private subject copy
+.br
+.ti +2
+PCRE2_ENDANCHORED       Pattern can match only at end of subject
+.br
+.ti +2
+PCRE2_NOTBOL            Subject is not the beginning of a line
+.br
+.ti +2
+PCRE2_NOTEOL            Subject is not the end of a line
+.br
+.ti +2
+PCRE2_NOTEMPTY          An empty string is not a valid match
+.br
+.ti +2
+PCRE2_NOTEMPTY_ATSTART  An empty string at the start of the subject
+.br
+.ti +2
+                         is not a valid match
+.br
+.ti +2
+PCRE2_NO_UTF_CHECK      Do not check the subject for UTF
+.br
+.ti +2
+                         validity (only relevant if PCRE2_UTF
+.br
+.ti +2
+                         was set at compile time)
+.br
+.ti +2
+PCRE2_PARTIAL_HARD      Return PCRE2_ERROR_PARTIAL for a partial
+.br
+.ti +2
+                         match even if there is a full match
+.br
+.ti +2
+PCRE2_PARTIAL_SOFT      Return PCRE2_ERROR_PARTIAL for a partial
+.br
+.ti +2
+                         match if no full matches are found
+.br
+.ti +2
+PCRE2_DFA_RESTART       Restart after a partial match
+.br
+.ti +2
+PCRE2_DFA_SHORTEST      Return only the shortest match
+.sp
+There are restrictions on what may appear in a pattern when using this matching
+function. Details are given in the
+\f(CRpcre2matching\fP
+documentation. For details of partial matching, see the
+\f(CRpcre2partial\fP
+page. There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

@@ -1,0 +1,31 @@
+= pcre2_get_offset_limit(3)
+:doctype: manpage
+:manname: pcre2_get_offset_limit
+:manpurpose: get the offset limit
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 11 September 2026
+:revdate: 11 September 2026
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_get_offset_limit(pcre2_match_context *mcontext,
+                           PCRE2_SIZE *limit);
+....
+
+== Description
+
+This function gets the offset limit from a match context. The result is zero
+for success or PCRE2_ERROR_NULL if either argument is NULL. The largest value a
+PCRE2_SIZE variable can hold indicates that no offset limit is set.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

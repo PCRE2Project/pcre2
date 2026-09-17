@@ -1,0 +1,34 @@
+= pcre2_set_max_pattern_compiled_length(3)
+:doctype: manpage
+:manname: pcre2_set_max_pattern_compiled_length
+:manpurpose: set the maximum length of a compiled pattern
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 09 June 2024
+:revdate: 09 June 2024
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+int pcre2_set_max_pattern_compiled_length(
+      pcre2_compile_context *ccontext, PCRE2_SIZE length);
+....
+
+== Description
+
+This function sets, in a compile context, the maximum size (in bytes) for the
+memory needed to hold the compiled version of a pattern that is using this
+context. The result is always zero. If a pattern that is passed to
+`pcre2_compile()` referencing this context needs more memory, an error is
+generated. The default is the largest number that a PCRE2_SIZE variable can
+hold, which is effectively unlimited.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

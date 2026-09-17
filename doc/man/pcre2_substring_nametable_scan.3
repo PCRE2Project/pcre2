@@ -1,0 +1,73 @@
+'\" t
+.\"     Title: pcre2_substring_nametable_scan
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 06 February 2019
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SUBSTRING_NAMETABLE_SCAN" "3" "06 February 2019" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_substring_nametable_scan \- find table entries for given string name
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+int pcre2_substring_nametable_scan(const pcre2_code *code,
+                                   PCRE2_SPTR stringname,
+                                   PCRE2_SPTR *firstptr,
+                                   PCRE2_SPTR *lastptr);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This convenience function finds, for a compiled pattern, the first and last
+entries for a given name in the table that translates capture group names into
+numbers.
+.sp
+.ti +2
+\fIcode\fP    Compiled regular expression
+.br
+.ti +2
+\fIname\fP    Name whose entries required
+.br
+.ti +2
+\fIfirst\fP   Where to return a pointer to the first entry
+.br
+.ti +2
+\fIlast\fP    Where to return a pointer to the last entry
+.sp
+When the name is found in the table, if \fIfirst\fP is NULL, the function
+returns a group number, but if there is more than one matching entry, it is not
+defined which one. Otherwise, when both pointers have been set, the yield of
+the function is the length of each entry in code units. If the name is not
+found, PCRE2_ERROR_NOSUBSTRING is returned.
+.sp
+There is a complete description of the PCRE2 native API, including the format of
+the table entries, in the
+\f(CRpcre2api\fP
+page, and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

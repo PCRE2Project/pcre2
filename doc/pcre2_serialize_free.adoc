@@ -1,0 +1,31 @@
+= pcre2_serialize_free(3)
+:doctype: manpage
+:manname: pcre2_serialize_free
+:manpurpose: free serialized compiled patterns
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 13 August 2018
+:revdate: 13 August 2018
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+void pcre2_serialize_free(uint8_t *bytes);
+....
+
+== Description
+
+This function frees the memory that was obtained by
+`pcre2_serialize_encode()` to hold a serialized byte stream. The argument
+must point to such a byte stream or be NULL, in which case the function returns
+without doing anything.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the serialization functions in the
+xref:pcre2serialize.adoc[`pcre2serialize`]
+page.

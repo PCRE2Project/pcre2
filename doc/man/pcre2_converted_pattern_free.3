@@ -1,0 +1,51 @@
+'\" t
+.\"     Title: pcre2_converted_pattern_free
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 13 August 2018
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_CONVERTED_PATTERN_FREE" "3" "13 August 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_converted_pattern_free \- free converted foreign pattern
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function is part of an experimental set of pattern conversion functions.
+It frees the memory occupied by a converted pattern that was obtained by
+calling \f(CRpcre2_pattern_convert()\fP with arguments that caused it to place
+the converted pattern into newly obtained heap memory. If the argument is NULL,
+the function returns immediately without doing anything.
+.sp
+The pattern conversion functions are described in the
+\f(CRpcre2convert\fP
+documentation.

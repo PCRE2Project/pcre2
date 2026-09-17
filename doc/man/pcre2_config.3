@@ -1,0 +1,156 @@
+'\" t
+.\"     Title: pcre2_config
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 03 September 2025
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_CONFIG" "3" "03 September 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_config \- show build\-time related configuration options
+.SH "SYNOPSIS"
+.sp
+.nf
+.fam C
+#include <pcre2.h>
+
+int pcre2_config(uint32_t what, void *where);
+.fam
+.fi
+.SH "DESCRIPTION"
+.sp
+This function makes it possible for a client program to find out which optional
+features are available in the version of the PCRE2 library it is using. The
+arguments are as follows:
+.sp
+.ti +2
+\fIwhat\fP     A code specifying what information is required
+.br
+.ti +2
+\fIwhere\fP    Points to where to put the information
+.sp
+If \fIwhere\fP is NULL, the function returns the amount of memory needed for
+the requested information. When the information is a string, the value is in
+code units; for other types of data it is in bytes.
+.sp
+If \f(CRwhere\fP is not NULL, for PCRE2_CONFIG_JITTARGET,
+PCRE2_CONFIG_UNICODE_VERSION, and PCRE2_CONFIG_VERSION it must point to a
+buffer that is large enough to hold the string. For all other codes it must
+point to a uint32_t integer variable. The available codes are:
+.sp
+.ti +2
+PCRE2_CONFIG_BSR                Indicates what \(rsR matches by default:
+.br
+.ti +2
+                                  PCRE2_BSR_UNICODE
+.br
+.ti +2
+                                  PCRE2_BSR_ANYCRLF
+.br
+.ti +2
+PCRE2_CONFIG_COMPILED_WIDTHS    Which of 8/16/32 support was compiled
+.br
+.ti +2
+PCRE2_CONFIG_DEPTHLIMIT         Default backtracking depth limit
+.br
+.ti +2
+PCRE2_CONFIG_EFFECTIVE_LINKSIZE How many bytes are used for link size
+.br
+.ti +2
+PCRE2_CONFIG_HEAPLIMIT          Default heap memory limit
+.br
+.ti +2
+PCRE2_CONFIG_JIT                Availability of just\-in\-time compiler
+.br
+.ti +2
+                                 support (1=yes 0=no)
+.br
+.ti +2
+PCRE2_CONFIG_JITTARGET          Information (a string) about the target
+.br
+.ti +2
+                                 architecture for the JIT compiler
+.br
+.ti +2
+PCRE2_CONFIG_LINKSIZE           Configured internal link size (2, 3, 4)
+.br
+.ti +2
+PCRE2_CONFIG_MATCHLIMIT         Default internal resource limit
+.br
+.ti +2
+PCRE2_CONFIG_NEVER_BACKSLASH_C  Whether or not \(rsC is disabled
+.br
+.ti +2
+PCRE2_CONFIG_NEWLINE            Code for the default newline sequence:
+.br
+.ti +2
+                                  PCRE2_NEWLINE_CR
+.br
+.ti +2
+                                  PCRE2_NEWLINE_LF
+.br
+.ti +2
+                                  PCRE2_NEWLINE_CRLF
+.br
+.ti +2
+                                  PCRE2_NEWLINE_ANY
+.br
+.ti +2
+                                  PCRE2_NEWLINE_ANYCRLF
+.br
+.ti +2
+                                  PCRE2_NEWLINE_NUL
+.br
+.ti +2
+PCRE2_CONFIG_PARENSLIMIT        Default parentheses nesting limit
+.br
+.ti +2
+PCRE2_CONFIG_RECURSIONLIMIT     Obsolete: use PCRE2_CONFIG_DEPTHLIMIT
+.br
+.ti +2
+PCRE2_CONFIG_STACKRECURSE       Obsolete: always returns 0
+.br
+.ti +2
+PCRE2_CONFIG_UNICODE            Availability of Unicode support
+.br
+.ti +2
+                                 (1=yes 0=no)
+.br
+.ti +2
+PCRE2_CONFIG_UNICODE_VERSION    The Unicode version (a string)
+.br
+.ti +2
+PCRE2_CONFIG_VERSION            The PCRE2 version (a string)
+.sp
+The function yields a non\-negative value on success or the negative value
+PCRE2_ERROR_BADOPTION otherwise. This is also the result for the
+PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string is
+requested, the function returns the number of code units used, including the
+terminating zero.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

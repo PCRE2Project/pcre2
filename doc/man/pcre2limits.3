@@ -1,0 +1,104 @@
+'\" t
+.\"     Title: pcre2limits
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 03 September 2025
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2LIMITS" "3" "03 September 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2limits \- PCRE2 resource limits
+.SH "SIZE AND OTHER LIMITATIONS"
+.sp
+There are some size limitations in PCRE2 but it is hoped that they will never
+in practice be relevant.
+.sp
+The maximum size of a compiled pattern is approximately 64 thousand code units
+for the 8\-bit and 16\-bit libraries if PCRE2 is compiled with the default
+internal linkage size, which is 2 bytes for these libraries. If you want to
+process regular expressions that are truly enormous, you can compile PCRE2 with
+an internal linkage size of 3 or 4 (when building the 16\-bit library, 3 is
+rounded up to 4). See the \f(CRREADME\fP file in the source distribution and the
+\f(CRpcre2build\fP
+documentation for details. In these cases the limit is substantially larger.
+However, the speed of execution is slower. In the 32\-bit library, the internal
+linkage size is always 4.
+.sp
+The maximum length of a source pattern string is essentially unlimited; it is
+the largest number a PCRE2_SIZE variable can hold. However, the program that
+calls \f(CRpcre2_compile()\fP can specify a smaller limit.
+.sp
+The maximum length (in code units) of a subject string is one less than the
+largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
+integer type, usually defined as size_t. Its maximum value (that is
+~(PCRE2_SIZE)0) is reserved as a special indicator for zero\-terminated strings
+and unset offsets.
+.sp
+All values in repeating quantifiers must be less than 65536.
+.sp
+There are two different limits that apply to branches of lookbehind assertions.
+If every branch in such an assertion matches a fixed number of characters,
+the maximum length of any branch is 65535 characters. If any branch matches a
+variable number of characters, then the maximum matching length for every
+branch is limited. The default limit is set at compile time, defaulting to 255,
+but can be changed by the calling program.
+.sp
+There is no limit to the number of parenthesized groups, but there can be no
+more than 65535 capture groups, and there is a limit to the depth of nesting of
+parenthesized subpatterns of all kinds. This is imposed in order to limit the
+amount of system stack used at compile time. The default limit can be specified
+when PCRE2 is built; if not, the default is set to 250. An application can
+change this limit by calling pcre2_set_parens_nest_limit() to set the limit in
+a compile context.
+.sp
+The maximum length of the name for a named capture group as well as the number
+of such groups is configurable at build time. The maximum length for the name
+defaults to
+128 code units, and the maximum number of such groups to
+10000.
+.sp
+The maximum length of a name in a (*MARK), (*PRUNE), (*SKIP), or (*THEN) verb
+is 255 code units for the 8\-bit library and 65535 code units for the 16\-bit and
+32\-bit libraries.
+.sp
+The maximum length of a string argument to a callout is the largest number a
+32\-bit unsigned integer can hold.
+.sp
+The maximum amount of heap memory used for matching is controlled by the heap
+limit, which can be set in a pattern or in a match context. The default is a
+very large number, effectively unlimited.
+.SH "AUTHOR"
+.sp
+.nf
+.fam C
+Philip Hazel
+Retired from University Computing Service
+Cambridge, England.
+.fam
+.fi
+.SH "REVISION"
+.sp
+Last updated: 03 September 2025
+.br
+Copyright (c) 1997\-2023 University of Cambridge.

@@ -1,0 +1,31 @@
+= pcre2_match_context_copy(3)
+:doctype: manpage
+:manname: pcre2_match_context_copy
+:manpurpose: copy a match context
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 25 October 2014
+:revdate: 25 October 2014
+
+== Synopsis
+
+[synopsis]
+....
+#include <pcre2.h>
+
+pcre2_match_context *pcre2_match_context_copy(
+      pcre2_match_context *mcontext);
+....
+
+== Description
+
+This function makes a new copy of a match context, using the memory
+allocation function that was used for the original context. The result is NULL
+if the memory cannot be obtained.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.
