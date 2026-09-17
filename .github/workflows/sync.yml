@@ -34,6 +34,12 @@ jobs:
       - name: Install zig
         uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
 
+      # Install Asciidoctor
+      - name: Install Asciidoctor
+        run: |
+          sudo apt update
+          sudo apt install -y asciidoctor
+
       - name: UpdateDates
         if: |
           github.event_name != 'pull_request' &&
