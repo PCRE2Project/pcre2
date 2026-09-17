@@ -5,7 +5,6 @@ pcre2grep - a grep with Perl-compatible regular expressions.
 .B pcre2grep [options] [long options] [pattern] [path1 path2 ...]
 .
 .SH DESCRIPTION
-.rs
 .sp
 \fBpcre2grep\fP searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE2 regular expression library to support
@@ -109,7 +108,6 @@ The \fB--locale\fP option can be used to override this.
 .
 .
 .SH "SUPPORT FOR COMPRESSED FILES"
-.rs
 .sp
 Compile-time options for \fBpcre2grep\fP can set it up to use \fBlibz\fP or
 \fBlibbz2\fP for reading compressed files whose names end in \fB.gz\fP or
@@ -123,7 +121,6 @@ plain text file. When input is from a compressed .gz or .bz2 file, the
 .
 .
 .SH "BINARY FILES"
-.rs
 .sp
 By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. However, if the
@@ -133,7 +130,6 @@ option for a means of changing the way binary files are handled.
 .
 .
 .SH "BINARY ZEROS IN PATTERNS"
-.rs
 .sp
 Patterns passed from the command line are strings that are terminated by a
 binary zero, so cannot contain internal zeros. However, patterns that are read
@@ -141,7 +137,6 @@ from a file via the \fB-f\fP option may contain binary zeros.
 .
 .
 .SH OPTIONS
-.rs
 .sp
 The order in which some of the options appear can affect the output. For
 example, both the \fB-H\fP and \fB-l\fP options affect the printing of file
@@ -799,7 +794,6 @@ option does not apply to file names in error messages.
 .
 .
 .SH "ENVIRONMENT VARIABLES"
-.rs
 .sp
 The environment variables \fBLC_ALL\fP and \fBLC_CTYPE\fP are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
@@ -808,7 +802,6 @@ by the \fB--locale\fP option. If no locale is set, the PCRE2 library's default
 .
 .
 .SH "NEWLINES"
-.rs
 .sp
 The \fB-N\fP (\fB--newline\fP) option allows \fBpcre2grep\fP to scan files with
 newline conventions that differ from the default. This option affects only the
@@ -833,7 +826,6 @@ for all messages to the standard error stream, "\en" is used.
 .
 .
 .SH "OPTIONS COMPATIBILITY WITH GNU GREP"
-.rs
 .sp
 Many of the short and long forms of \fBpcre2grep\fP's options are the same as
 in the GNU \fBgrep\fP program. Any long option of the form \fB--xxx-regexp\fP
@@ -856,7 +848,6 @@ gives the counts as well.
 .
 .
 .SH "OPTIONS WITH DATA"
-.rs
 .sp
 There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
@@ -888,7 +879,6 @@ character. Otherwise \fBpcre2grep\fP will assume that it has no data.
 .
 .
 .SH "USING PCRE2'S CALLOUT FACILITY"
-.rs
 .sp
 \fBpcre2grep\fP has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
@@ -909,7 +899,6 @@ only callouts with string arguments are useful.
 .
 .
 .SS "Echoing a specific string"
-.rs
 .sp
 Starting the callout string with a pipe character invokes an echoing facility
 that avoids calling an external program or script. This facility is always
@@ -933,7 +922,6 @@ pattern with (*FAIL).
 .
 .
 .SS "Calling external programs or scripts"
-.rs
 .sp
 This facility can be independently disabled when \fBpcre2grep\fP is built. It
 is supported for Windows, where a call to \fB_spawnvp()\fP is used, for VMS,
@@ -976,7 +964,6 @@ normal way.
 .
 .
 .SH "MATCHING ERRORS"
-.rs
 .sp
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
@@ -993,7 +980,6 @@ memory used during matching; see the discussion of \fB--heap-limit\fP and
 .
 .
 .SH DIAGNOSTICS
-.rs
 .sp
 Exit status is 0 if any matches were found, 1 if no matches were found, and 2
 for syntax errors, overlong lines, non-existent or inaccessible files (even if
@@ -1006,14 +992,12 @@ because VMS does not distinguish between exit(0) and exit(1).
 .
 .
 .SH "SEE ALSO"
-.rs
 .sp
 \fBpcre2pattern\fP(3), \fBpcre2syntax\fP(3), \fBpcre2callout\fP(3),
 \fBpcre2unicode\fP(3).
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -1023,7 +1007,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 24 January 2025

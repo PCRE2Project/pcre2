@@ -1,8 +1,7 @@
 .TH PCRE2JIT 3 "08 August 2026" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2jit - PCRE2 just-in-time compilation support
 .SH "PCRE2 JUST-IN-TIME COMPILER SUPPORT"
-.rs
 .sp
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
@@ -20,7 +19,6 @@ JIT support was written by Zoltan Herczeg.
 .
 .
 .SH "AVAILABILITY OF JIT SUPPORT"
-.rs
 .sp
 JIT support is an optional feature of PCRE2. The "configure" option
 --enable-jit (or equivalent CMake option) must be set when PCRE2 is built if
@@ -73,7 +71,6 @@ API that is JIT-specific.
 .
 .
 .SH "SIMPLE USE OF JIT"
-.rs
 .sp
 To make use of the JIT support in the simplest way, all you have to do is to
 call \fBpcre2_jit_compile()\fP after successfully compiling a pattern with
@@ -156,7 +153,6 @@ by JIT.
 .
 .
 .SH "MATCHING SUBJECTS CONTAINING INVALID UTF"
-.rs
 .sp
 When a pattern is compiled with the PCRE2_UTF option, subject strings are
 normally expected to be a valid sequence of UTF code units. By default, this is
@@ -186,7 +182,6 @@ and should no longer be used. It may be removed in future.
 .
 .\" HTML <a name="unsupported"></a>
 .SH "UNSUPPORTED OPTIONS AND PATTERN ITEMS"
-.rs
 .sp
 The \fBpcre2_match()\fP options that are supported for JIT matching are
 PCRE2_COPY_MATCHED_SUBJECT, PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
@@ -203,7 +198,6 @@ in a conditional group.
 .
 .
 .SH "RETURN VALUES FROM JIT MATCHING"
-.rs
 .sp
 When a pattern is matched using JIT, the return values are the same as those
 given by the interpretive \fBpcre2_match()\fP code, with the addition of one
@@ -224,7 +218,6 @@ when JIT matching is used.
 .
 .\" HTML <a name="stackcontrol"></a>
 .SH "CONTROLLING THE JIT STACK"
-.rs
 .sp
 When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32KiB on the machine stack. However, some large or
@@ -317,7 +310,6 @@ All the functions described in this section do nothing if JIT is not available.
 .
 .\" HTML <a name="stackfaq"></a>
 .SH "JIT STACK FAQ"
-.rs
 .sp
 (1) Why do we need JIT stacks?
 .sp
@@ -385,7 +377,6 @@ out this complicated API.
 .
 .
 .SH "FREEING JIT SPECULATIVE MEMORY"
-.rs
 .sp
 .nf
 .B void pcre2_jit_free_unused_memory(pcre2_general_context *\fIgcontext\fP);
@@ -400,7 +391,6 @@ memory management, or NULL for standard memory management.
 .
 .
 .SH "EXAMPLE CODE"
-.rs
 .sp
 This is a single-threaded example that specifies a JIT stack without using a
 callback. A real program should include error checking after all the function
@@ -431,7 +421,6 @@ calls.
 .
 .\" HTML <a name="fastpath"></a>
 .SH "JIT FAST PATH API"
-.rs
 .sp
 Because the API described above falls back to interpreted matching when JIT is
 not available, it is convenient for programs that are written for general use
@@ -467,13 +456,11 @@ speedups of more than 10%.
 .
 .
 .SH "SEE ALSO"
-.rs
 .sp
 \fBpcre2api\fP(3), \fBpcre2unicode\fP(3)
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel (FAQ by Zoltan Herczeg)
@@ -483,7 +470,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 08 August 2026

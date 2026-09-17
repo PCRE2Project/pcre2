@@ -1,8 +1,7 @@
 .TH PCRE2UNICODE 3 "27 November 2024" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2unicode - PCRE2 Unicode support
 .SH "UNICODE AND UTF SUPPORT"
-.rs
 .sp
 PCRE2 is normally built with Unicode support, though if you do not need it, you
 can build it without, in which case the library will be smaller. With Unicode
@@ -36,7 +35,6 @@ handled, as documented below.
 .
 .
 .SH "UNICODE PROPERTY SUPPORT"
-.rs
 .sp
 When PCRE2 is built with Unicode support, the escape sequences \ep{..},
 \eP{..}, and \eX can be used. This is not dependent on the PCRE2_UTF setting.
@@ -61,7 +59,6 @@ supported. Furthermore, in Perl, many properties may optionally be prefixed by
 .
 .
 .SH "WIDE CHARACTERS AND UTF MODES"
-.rs
 .sp
 Code points less than 256 can be specified in patterns by either braced or
 unbraced hexadecimal escape sequences (for example, \ex{b3} or \exb3). Larger
@@ -131,7 +128,6 @@ all the appropriate Unicode characters, whether or not PCRE2_UCP is set.
 .
 .
 .SH "UNICODE CASE-EQUIVALENCE"
-.rs
 .sp
 If either PCRE2_UTF or PCRE2_UCP is set, upper/lower case processing makes use
 of Unicode properties except for characters whose code points are less than 128
@@ -148,27 +144,27 @@ counterparts can be disabled by setting the PCRE2_EXTRA_CASELESS_RESTRICT
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non-ASCII; there can be no mixing.
 .sp
-    Without PCRE2_EXTRA_CASELESS_RESTRICT:
-      'k' = 'K' = U+212A (Kelvin sign)
-      's' = 'S' = U+017F (long S)
-    With PCRE2_EXTRA_CASELESS_RESTRICT:
-      'k' = 'K'
-      U+212A (Kelvin sign)  only case-equivalent to itself
-      's' = 'S'
-      U+017F (long S)       only case-equivalent to itself
+  Without PCRE2_EXTRA_CASELESS_RESTRICT:
+    'k' = 'K' = U+212A (Kelvin sign)
+    's' = 'S' = U+017F (long S)
+  With PCRE2_EXTRA_CASELESS_RESTRICT:
+    'k' = 'K'
+    U+212A (Kelvin sign)  only case-equivalent to itself
+    's' = 'S'
+    U+017F (long S)       only case-equivalent to itself
 .P
 One language family, Turkish and Azeri, has its own case-insensitivity rules,
 which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
 behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
 (small dotless i) characters.
 .sp
-    Without PCRE2_EXTRA_TURKISH_CASING:
-      'i' = 'I'
-      U+0130 (capital I with dot above)  only case-equivalent to itself
-      U+0131 (small dotless i)           only case-equivalent to itself
-    With PCRE2_EXTRA_TURKISH_CASING:
-      'i' = U+0130 (capital I with dot above)
-      U+0131 (small dotless i) = 'I'
+  Without PCRE2_EXTRA_TURKISH_CASING:
+    'i' = 'I'
+    U+0130 (capital I with dot above)  only case-equivalent to itself
+    U+0131 (small dotless i)           only case-equivalent to itself
+  With PCRE2_EXTRA_TURKISH_CASING:
+    'i' = U+0130 (capital I with dot above)
+    U+0131 (small dotless i) = 'I'
 .P
 It is not allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
 PCRE2_EXTRA_TURKISH_CASING together.
@@ -180,7 +176,6 @@ matching is set by the PCRE2_CASELESS option or (?i) within the pattern.
 .
 .\" HTML <a name="scriptruns"></a>
 .SH "SCRIPT RUNS"
-.rs
 .sp
 The pattern constructs (*script_run:...) and (*atomic_script_run:...), with
 synonyms (*sr:...) and (*asr:...), verify that the string matched within the
@@ -223,7 +218,6 @@ digits. These are covered in subsequent sections.
 .
 .
 .SS "Basic script run rules"
-.rs
 .sp
 A string that is less than two characters long is a script run. This is the
 only case in which an Unknown character can be part of a script run. Longer
@@ -255,7 +249,6 @@ appear in Syriac or Thaana script runs, but the second could not.
 .
 .
 .SS "The Chinese Han script"
-.rs
 .sp
 The Chinese Han script is commonly used in conjunction with other scripts for
 writing certain languages. Japanese uses the Hiragana and Katakana scripts
@@ -270,7 +263,6 @@ in allowing such mixtures.
 .
 .
 .SS "Decimal digits"
-.rs
 .sp
 Unicode contains many sets of 10 decimal digits in different scripts, and some
 scripts (including the Common script) contain more than one set. Some of these
@@ -281,7 +273,6 @@ adjacent characters.
 .
 .
 .SH "VALIDITY OF UTF STRINGS"
-.rs
 .sp
 When the PCRE2_UTF option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions. If an
@@ -347,7 +338,6 @@ values are not representable in UTF-16.
 .
 .\" HTML <a name="utf8strings"></a>
 .SS "Errors in UTF-8 strings"
-.rs
 .sp
 The following negative error codes are given for invalid UTF-8 strings:
 .sp
@@ -416,19 +406,14 @@ never occur in a valid UTF-8 string.
 .
 .\" HTML <a name="utf16strings"></a>
 .SS "Errors in UTF-16 strings"
-.rs
 .sp
 The following negative error codes are given for invalid UTF-16 strings:
 .sp
   PCRE2_ERROR_UTF16_ERR1  Missing low surrogate at end of string
   PCRE2_ERROR_UTF16_ERR2  Invalid low surrogate follows high surrogate
   PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate
-.sp
-.
-.
 .\" HTML <a name="utf32strings"></a>
 .SS "Errors in UTF-32 strings"
-.rs
 .sp
 The following negative error codes are given for invalid UTF-32 strings:
 .sp
@@ -439,7 +424,6 @@ The following negative error codes are given for invalid UTF-32 strings:
 .
 .\" HTML <a name="matchinvalid"></a>
 .SH "MATCHING IN INVALID UTF STRINGS"
-.rs
 .sp
 You can run pattern matches on subject strings that may contain invalid UTF
 sequences if you call \fBpcre2_compile()\fP with the PCRE2_MATCH_INVALID_UTF
@@ -496,7 +480,6 @@ suitably aligned.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -506,7 +489,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 27 November 2024

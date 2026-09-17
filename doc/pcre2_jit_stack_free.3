@@ -1,8 +1,7 @@
 .TH PCRE2_JIT_STACK_FREE 3 "26 February 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_jit_stack_free - free a JIT matching stack
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function is used to free a JIT stack that was created by
 \fBpcre2_jit_stack_create()\fP when it is no longer needed. If the argument is

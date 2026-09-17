@@ -1,8 +1,7 @@
 .TH PCRE2_SUBSTRING_GET_BYNUMBER 3 "13 December 2014" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_substring_get_bynumber - extract numbered substring into new memory
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -14,7 +13,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This is a convenience function for extracting a captured substring by number
 into newly acquired memory. The arguments are:
@@ -35,7 +33,6 @@ the following error numbers:
   PCRE2_ERROR_UNSET         the group did not participate in the match
   PCRE2_ERROR_NOMEMORY      memory could not be obtained
 .sp
-.P
 There is a complete description of the PCRE2 native API in the
 .\" HREF
 \fBpcre2api\fP

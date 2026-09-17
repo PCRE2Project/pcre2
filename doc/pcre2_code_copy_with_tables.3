@@ -1,8 +1,7 @@
 .TH PCRE2_CODE_COPY_WITH_TABLES 3 "16 January 2017" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_code_copy_with_tables - copy a compiled pattern and its character tables
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function makes a copy of the memory used for a compiled pattern, excluding
 any memory used by the JIT compiler. Without a subsequent call to

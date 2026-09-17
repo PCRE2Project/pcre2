@@ -1,8 +1,7 @@
 .TH PCRE2_SERIALIZE_ENCODE 3 "13 August 2018" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_serialize_encode - serialize compiled patterns for save/restore
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -15,7 +14,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function encodes a list of compiled patterns into a byte stream that can
 be saved on disc or elsewhere. Note that this is not an abstract format like

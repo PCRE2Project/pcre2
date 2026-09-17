@@ -1,8 +1,7 @@
 .TH PCRE2_CALLOUT_ENUMERATE 3 "23 March 2017" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_callout_enumerate - enumerate callouts in a compiled pattern
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -15,7 +14,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function scans a compiled regular expression and calls the \fIcallback()\fP
 function for each callout within the pattern. The yield of the function is zero

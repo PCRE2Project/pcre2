@@ -1,8 +1,7 @@
 .TH PCRE2_MATCH_DATA_FREE 3 "16 August 2023" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_match_data_free - free a match data block
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 If \fImatch_data\fP is NULL, this function does nothing. Otherwise,
 \fImatch_data\fP must point to a match data block, which this function frees,

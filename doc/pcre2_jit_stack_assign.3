@@ -1,8 +1,7 @@
 .TH PCRE2_JIT_STACK_ASSIGN 3 "13 August 2018" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_jit_stack_assign - assign stack for JIT matching
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -13,7 +12,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function provides control over the memory used by JIT as a run-time stack
 when \fBpcre2_match()\fP or \fBpcre2_jit_match()\fP is called with a pattern

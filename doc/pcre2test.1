@@ -2,7 +2,6 @@
 .SH NAME
 pcre2test - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
-.rs
 .sp
 .B pcre2test "[options] [input file [output file]]"
 .sp
@@ -34,8 +33,7 @@ justification, but many of them are unlikely to be of use except when testing
 the libraries.
 .
 .
-.SH "PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
-.rs
+.SH "PCRE2'S 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
 .sp
 Different versions of the PCRE2 library can be built to support character
 strings that are encoded in 8-bit, 16-bit, or 32-bit code units. One, two, or
@@ -53,7 +51,6 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 .
 .\" HTML <a name="inputencoding"></a>
 .SH "INPUT ENCODING"
-.rs
 .sp
 Input to \fBpcre2test\fP is processed line by line, either by calling the C
 library's \fBfgets()\fP function, or via the \fBlibreadline\fP or \fBlibedit\fP
@@ -72,7 +69,6 @@ possible to include binary zeros.
 .
 .
 .SS "Input for the 16-bit and 32-bit libraries"
-.rs
 .sp
 When testing the 16-bit or 32-bit libraries, there is a need to be able to
 generate character code points greater than 255 in the strings that are passed
@@ -102,7 +98,7 @@ escape sequence is preferable.
 .
 .
 .SH "COMMAND LINE OPTIONS"
-.rs
+.
 .TP 10
 \fB-8\fP
 If the 8-bit library has been built, this option causes it to be used (this is
@@ -286,7 +282,6 @@ Output the PCRE2 version number and then exit.
 .
 .
 .SH "DESCRIPTION"
-.rs
 .sp
 If \fBpcre2test\fP is given two filename arguments, it reads from the first and
 writes to the second. If the first name is "-", input is taken from the
@@ -328,7 +323,6 @@ still input to be read.
 .
 .
 .SH "COMMAND LINES"
-.rs
 .sp
 In between sets of test data, a line that begins with # is interpreted as a
 command line. If the first character is followed by white space or an
@@ -454,7 +448,6 @@ value. The CONDITION may also be preceded by "!".
 .
 .
 .SH "MODIFIER SYNTAX"
-.rs
 .sp
 Modifier lists are used with both pattern and subject lines. Items in a list
 are separated by commas followed by optional white space. Trailing white space
@@ -479,7 +472,6 @@ This is a pattern line whose modifier list starts with two one-letter modifiers
 .
 .
 .SH "PATTERN SYNTAX"
-.rs
 .sp
 A pattern line must start with one of the following characters (common symbols,
 excluding pattern meta-characters):
@@ -515,7 +507,6 @@ A pattern can be followed by a modifier list (details below).
 .
 .
 .SH "SUBJECT LINE SYNTAX"
-.rs
 .sp
 Before each subject line is passed to \fBpcre2_match()\fP,
 \fBpcre2_dfa_match()\fP, or \fBpcre2_jit_match()\fP, leading and trailing white
@@ -600,7 +591,6 @@ by a \fB#subject\fP command.
 .
 .
 .SH "PATTERN MODIFIERS"
-.rs
 .sp
 There are several types of modifier that can appear in pattern lines. Except
 where noted below, they may also be used in \fB#pattern\fP commands. A
@@ -610,7 +600,6 @@ by a previous \fB#pattern\fP command.
 .
 .\" HTML <a name="optionmodifiers"></a>
 .SS "Setting compilation options"
-.rs
 .sp
 The following modifiers set options for \fBpcre2_compile()\fP. Most of them set
 bits in the options argument of that function, but those whose names start with
@@ -702,7 +691,6 @@ documentation for details on these optimizations.
 .
 .\" HTML <a name="controlmodifiers"></a>
 .SS "Setting compilation controls"
-.rs
 .sp
 The following modifiers affect the compilation process or request information
 about the pattern. There are single-letter abbreviations for some that are
@@ -749,7 +737,6 @@ The effects of these modifiers are described in the following sections.
 .
 .
 .SS "Newline and \eR handling"
-.rs
 .sp
 The \fBbsr\fP modifier specifies what \eR in a pattern should match. If it is
 set to "anycrlf", \eR matches CR, LF, or CRLF only. If it is set to "unicode",
@@ -762,7 +749,6 @@ LF, CRLF, ANYCRLF, ANY, or NUL (in upper or lower case).
 .
 .
 .SS "Information about a pattern"
-.rs
 .sp
 The \fBdebug\fP modifier is a shorthand for \fBinfo,fullbincode\fP, requesting
 all available information.
@@ -821,7 +807,6 @@ by the item that follows it in the pattern.
 .
 .
 .SS "Passing a NULL context"
-.rs
 .sp
 Normally, \fBpcre2test\fP passes a context block to \fBpcre2_compile()\fP. If
 the \fBnull_context\fP modifier is set, however, NULL is passed. This is for
@@ -830,7 +815,6 @@ default values).
 .
 .
 .SS "Passing a NULL pattern"
-.rs
 .sp
 The \fBnull_pattern\fP modifier is for testing the behaviour of
 \fBpcre2_compile()\fP when the pattern argument is NULL. The length value
@@ -839,7 +823,6 @@ Any length other than zero causes an error.
 .
 .
 .SS "Specifying pattern characters in hexadecimal"
-.rs
 .sp
 The \fBhex\fP modifier specifies that the characters of the pattern, except for
 substrings enclosed in single or double quotes, are to be interpreted as pairs
@@ -861,7 +844,6 @@ mutually exclusive.
 .
 .
 .SS "Specifying the pattern's length"
-.rs
 .sp
 By default, patterns are passed to the compiling functions as zero-terminated
 strings but can be passed by length instead of being zero-terminated. The
@@ -878,7 +860,6 @@ below), the REG_PEND extension is used to pass the pattern's length.
 .
 .
 .SS "Specifying a maximum for variable lookbehinds"
-.rs
 .sp
 Variable lookbehind assertions are supported only if, for each one, there is a
 maximum length (in characters) that it can match. There is a limit on this,
@@ -889,7 +870,6 @@ length are limited to 65535 characters per branch.
 .
 .
 .SS "Specifying wide characters in 16-bit and 32-bit modes"
-.rs
 .sp
 In 16-bit and 32-bit modes, all input is automatically treated as UTF-8 and
 translated to UTF-16 or UTF-32 when the \fButf\fP modifier is set. For testing
@@ -905,7 +885,6 @@ above.
 .
 .
 .SS "Generating long repetitive patterns"
-.rs
 .sp
 Some tests use long patterns that are very repetitive. Instead of creating a
 very long input line for such a pattern, you can use a special repetition
@@ -932,7 +911,6 @@ expansion is included in the information that is output.
 .
 .
 .SS "JIT compilation"
-.rs
 .sp
 Just-in-time (JIT) compiling is a heavyweight optimization that can greatly
 speed up pattern matching. See the
@@ -1003,7 +981,6 @@ code was actually used in the match.
 .
 .
 .SS "Setting a locale"
-.rs
 .sp
 The \fBlocale\fP modifier must specify the name of a locale, for example:
 .sp
@@ -1019,7 +996,6 @@ character tables are mutually exclusive.
 .
 .
 .SS "Showing pattern memory"
-.rs
 .sp
 The \fBmemory\fP modifier causes the size in bytes of the memory used to hold
 the compiled pattern to be output. This does not include the size of the
@@ -1034,7 +1010,6 @@ also output. Here is an example:
 .
 .
 .SS "Limiting nested parentheses"
-.rs
 .sp
 The \fBparens_nest_limit\fP modifier sets a limit on the depth of nested
 parentheses in a pattern. Breaching the limit causes a compilation error.
@@ -1044,7 +1019,6 @@ suite.
 .
 .
 .SS "Limiting the pattern length"
-.rs
 .sp
 The \fBmax_pattern_length\fP modifier sets a limit, in code units, to the
 length of pattern that \fBpcre2_compile()\fP will accept. Breaching the limit
@@ -1053,7 +1027,6 @@ variable can hold (essentially unlimited).
 .
 .
 .SS "Limiting the size of a compiled pattern"
-.rs
 .sp
 The \fBmax_pattern_compiled_length\fP modifier sets a limit, in bytes, to the
 amount of memory used by a compiled pattern. Breaching the limit causes a
@@ -1063,7 +1036,6 @@ hold (essentially unlimited).
 .
 .\" HTML <a name="posixwrapper"></a>
 .SS "Using the POSIX wrapper API"
-.rs
 .sp
 The \fBposix\fP and \fBposix_nosub\fP modifiers cause \fBpcre2test\fP to call
 PCRE2 via the POSIX wrapper API rather than its native API. When
@@ -1102,7 +1074,6 @@ REG_PEND extension is used to pass it by length.
 .
 .
 .SS "Testing the stack guard feature"
-.rs
 .sp
 The \fBstackguard\fP modifier is used to test the use of
 \fBpcre2_set_compile_recursion_guard()\fP, a function that is provided to
@@ -1119,7 +1090,6 @@ be aborted.
 .
 .
 .SS "Using alternative character tables"
-.rs
 .sp
 The value specified for the \fBtables\fP modifier must be one of the digits 0,
 1, 2, or 3. It causes a specific set of built-in character tables to be passed
@@ -1139,7 +1109,6 @@ character tables and a locale are mutually exclusive.
 .
 .
 .SS "Setting certain match controls"
-.rs
 .sp
 The following modifiers are really subject modifiers, and are described under
 "Subject Modifiers" below. However, they may be included in a pattern's
@@ -1177,7 +1146,6 @@ defaults, set them in a \fB#subject\fP command.
 .
 .
 .SS "Specifying literal subject lines"
-.rs
 .sp
 If the \fBsubject_literal\fP modifier is present on a pattern, all the subject
 lines that it matches are taken as literal strings, with no interpretation of
@@ -1186,7 +1154,6 @@ that are set as defaults by a \fB#subject\fP command are recognized.
 .
 .
 .SS "Saving a compiled pattern"
-.rs
 .sp
 When a pattern with the \fBpush\fP modifier is successfully compiled, it is
 pushed onto a stack of compiled patterns, and \fBpcre2test\fP expects the next
@@ -1211,7 +1178,6 @@ pattern.
 .
 .
 .SS "Testing foreign pattern conversion"
-.rs
 .sp
 The experimental foreign pattern conversion functions in PCRE2 can be tested by
 setting the \fBconvert\fP modifier. Its argument is a colon-separated list of
@@ -1245,14 +1211,12 @@ overriding the defaults, which are operating-system dependent.
 .
 .\" HTML <a name="subjectmodifiers"></a>
 .SH "SUBJECT MODIFIERS"
-.rs
 .sp
 The modifiers that can appear in subject lines and the \fB#subject\fP
 command are of two types.
 .
 .
 .SS "Setting match options"
-.rs
 .sp
 The following modifiers set options for \fBpcre2_match()\fP or
 \fBpcre2_dfa_match()\fP. See
@@ -1303,7 +1267,6 @@ its input), you must use \fBposix_startend\fP to specify its length.
 .
 .
 .SS "Setting match controls"
-.rs
 .sp
 The following modifiers affect the matching process or request additional
 information. Some of them may also be specified on a pattern line (see above),
@@ -1369,7 +1332,6 @@ modifiers are either ignored, with a warning message, or cause an error.
 .
 .
 .SS "Showing more text"
-.rs
 .sp
 The \fBaftertext\fP modifier requests that as well as outputting the part of
 the subject string that matched the entire pattern, \fBpcre2test\fP should in
@@ -1419,7 +1381,6 @@ However, these two modifiers are mutually exclusive.
 .
 .
 .SS "Showing the value of all capture groups"
-.rs
 .sp
 The \fBallcaptures\fP modifier requests that the values of all potential
 captured parentheses be output after a match. By default, only those up to the
@@ -1431,7 +1392,6 @@ ignored, with a warning message, if present.
 .
 .
 .SS "Showing the entire ovector, for all outcomes"
-.rs
 .sp
 The \fBallvector\fP modifier requests that the entire ovector be shown,
 whatever the outcome of the match. Compare \fBallcaptures\fP, which shows only
@@ -1448,7 +1408,6 @@ ovector that is used depends on the number of matches that were found.
 .
 .
 .SS "Testing pattern callouts"
-.rs
 .sp
 A callout function is supplied when \fBpcre2test\fP calls the library matching
 functions, unless \fBcallout_none\fP is specified. Its behaviour can be
@@ -1467,7 +1426,6 @@ below.
 .
 .
 .SS "Finding all matches in a string"
-.rs
 .sp
 Searching for all possible matches within a subject can be requested by the
 \fBglobal\fP or \fBaltglobal\fP modifier. After finding a match, the matching
@@ -1486,7 +1444,6 @@ cases when using the \fB/g\fP modifier or the \fBsplit()\fP function.
 .
 .
 .SS "Testing substring extraction functions"
-.rs
 .sp
 The \fBcopy\fP and \fBget\fP modifiers can be used to test the
 \fBpcre2_substring_copy_xxx()\fP and \fBpcre2_substring_get_xxx()\fP functions.
@@ -1512,7 +1469,6 @@ by name.
 .
 .\" HTML <a name="substitution"></a>
 .SS "Testing the substitution function"
-.rs
 .sp
 If the \fBreplace\fP modifier is set, the \fBpcre2_substitute()\fP function is
 called instead of one of the matching functions (or after one call of
@@ -1597,7 +1553,6 @@ and substitution.
 .
 .
 .SS "Testing substitute callouts"
-.rs
 .sp
 If the \fBsubstitute_callout\fP modifier is set, a substitution callout
 function is set up. The \fBnull_context\fP modifier must not be set, because
@@ -1639,7 +1594,6 @@ or stop is supported, which is sufficient for testing that the feature works.
 .
 .
 .SS "Testing substitute case callouts"
-.rs
 .sp
 If the \fBsubstitute_case_callout\fP modifier is set, a substitution
 case callout function is set up. The callout function is called for each
@@ -1653,7 +1607,6 @@ characters.
 .
 .
 .SS "Setting the JIT stack size"
-.rs
 .sp
 The \fBjitstack\fP modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
@@ -1665,7 +1618,6 @@ value that was set on the pattern.
 .
 .
 .SS "Setting heap, match, and depth limits"
-.rs
 .sp
 The \fBheap_limit\fP, \fBmatch_limit\fP, and \fBdepth_limit\fP modifiers set
 the appropriate limits in the match context. These values are ignored when the
@@ -1673,7 +1625,6 @@ the appropriate limits in the match context. These values are ignored when the
 .
 .
 .SS "Finding minimum limits"
-.rs
 .sp
 If the \fBfind_limits\fP modifier is present on a subject line, \fBpcre2test\fP
 calls the relevant matching function several times, setting different values in
@@ -1712,7 +1663,6 @@ For both kinds of matching, the \fIheap_limit\fP number, which is in kibibytes
 .
 .
 .SS "Showing MARK names"
-.rs
 .sp
 .P
 The \fBmark\fP modifier causes the names from backtracking control verbs that
@@ -1723,7 +1673,6 @@ is added to the non-match message.
 .
 .
 .SS "Showing memory usage"
-.rs
 .sp
 The \fBmemory\fP modifier causes \fBpcre2test\fP to log the sizes of all heap
 memory allocation and freeing calls that occur during a call to
@@ -1736,7 +1685,6 @@ subject, though it can be set on one or the other.
 .
 .
 .SS "Showing the heap frame overall vector size"
-.rs
 .sp
 The \fBheapframes_size\fP modifier is relevant for matches using
 \fBpcre2_match()\fP without JIT. After a match has run (whether successful or
@@ -1753,14 +1701,12 @@ block (and associated heap frames vector) and allocate a new one.
 .
 .
 .SS "Setting a starting offset"
-.rs
 .sp
 The \fBoffset\fP modifier sets an offset in the subject string at which
 matching starts. Its value is a number of code units, not characters.
 .
 .
 .SS "Setting an offset limit"
-.rs
 .sp
 The \fBoffset_limit\fP modifier sets a limit for unanchored matches. If a match
 cannot be found starting at or before this offset in the subject, a "no match"
@@ -1770,7 +1716,6 @@ for the pattern; if not, an error is generated.
 .
 .
 .SS "Setting the size of the output vector"
-.rs
 .sp
 The \fBovector\fP modifier applies only to the subject line in which it
 appears, though of course it can also be used to set a default in a
@@ -1787,7 +1732,6 @@ one pair of offsets.) The old match data block is freed.
 .
 .
 .SS "Passing the subject as zero-terminated"
-.rs
 .sp
 By default, the subject string is passed to a native API matching function with
 its correct length. In order to test the facility for passing a zero-terminated
@@ -1800,7 +1744,6 @@ passing the replacement string as zero-terminated.
 .
 .
 .SS "Passing a NULL context, subject, or replacement"
-.rs
 .sp
 Normally, \fBpcre2test\fP passes a context block to \fBpcre2_match()\fP,
 \fBpcre2_dfa_match()\fP, \fBpcre2_jit_match()\fP or \fBpcre2_substitute()\fP.
@@ -1816,7 +1759,6 @@ pointers are passed as NULL, respectively, to the relevant functions.
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
-.rs
 .sp
 By default, \fBpcre2test\fP uses the standard PCRE2 matching function,
 \fBpcre2_match()\fP to match each subject line. PCRE2 also supports an
@@ -1835,7 +1777,6 @@ first match is found. This is always the shortest possible match.
 .
 .
 .SH "DEFAULT OUTPUT FROM pcre2test"
-.rs
 .sp
 This section describes the output when the normal matching function,
 \fBpcre2_match()\fP, is being used.
@@ -1918,7 +1859,6 @@ depending on the newline sequence setting).
 .
 .
 .SH "OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION"
-.rs
 .sp
 When the alternative matching function, \fBpcre2_dfa_match()\fP, is used, the
 output consists of a list of all the matches that start at the first point in
@@ -1955,7 +1895,6 @@ modifiers that are concerned with captured substrings are not relevant.
 .
 .
 .SH "RESTARTING AFTER A PARTIAL MATCH"
-.rs
 .sp
 When the alternative matching function has given the PCRE2_ERROR_PARTIAL
 return, indicating that the subject partially matched the pattern, you can
@@ -1977,7 +1916,6 @@ documentation.
 .
 .\" HTML <a name="callouts"></a>
 .SH CALLOUTS
-.rs
 .sp
 If the pattern contains any callout requests, \fBpcre2test\fP's callout
 function is called during matching unless \fBcallout_none\fP is specified. This
@@ -1987,7 +1925,6 @@ those with string arguments is slightly different.
 .
 .
 .SS "Callouts with numerical arguments"
-.rs
 .sp
 By default, the callout function displays the callout number, the start and
 current positions in the subject text at the callout time, and the next pattern
@@ -2037,7 +1974,6 @@ mark reverts to being unset, the text "<unset>" is output.
 .
 .
 .SS "Callouts with string arguments"
-.rs
 .sp
 The output for a callout with a string argument is similar, except that instead
 of outputting a callout number before the position indicators, the callout
@@ -2058,7 +1994,6 @@ example:
 .
 .
 .SS "Callout modifiers"
-.rs
 .sp
 The callout function in \fBpcre2test\fP returns zero (carry on matching) by
 default, but you can use a \fBcallout_fail\fP modifier in a subject line to
@@ -2127,7 +2062,6 @@ function, or with JIT.
 .
 .
 .SS "Return values from callouts"
-.rs
 .sp
 The default return from the callout function is zero, which allows matching to
 continue. The \fBcallout_fail\fP modifier can be given one or two numbers. If
@@ -2156,7 +2090,6 @@ documentation.
 .
 .
 .SH "NON-PRINTING CHARACTERS"
-.rs
 .sp
 When \fBpcre2test\fP is outputting text in the compiled version of a pattern,
 bytes other than 32-126 are always treated as non-printing characters and are
@@ -2172,7 +2105,6 @@ characters.
 .
 .\" HTML <a name="saverestore"></a>
 .SH "SAVING AND RESTORING COMPILED PATTERNS"
-.rs
 .sp
 It is possible to save compiled patterns on disc or elsewhere, and reload them
 later, subject to a number of restrictions. JIT data cannot be saved. The host
@@ -2256,7 +2188,6 @@ on the stack.
 .
 .
 .SH "SEE ALSO"
-.rs
 .sp
 \fBpcre2\fP(3), \fBpcre2api\fP(3), \fBpcre2callout\fP(3),
 \fBpcre2jit\fP, \fBpcre2matching\fP(3), \fBpcre2partial\fP(d),
@@ -2264,7 +2195,6 @@ on the stack.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -2274,7 +2204,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 22 August 2026

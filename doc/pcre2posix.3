@@ -1,8 +1,7 @@
 .TH PCRE2POSIX 3 "27 November 2024" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2posix - PCRE2 POSIX API
 .SH "SYNOPSIS"
-.rs
 .sp
 .B #include <pcre2posix.h>
 .PP
@@ -20,7 +19,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This set of functions provides a POSIX-style API for the PCRE2 regular
 expression 8-bit library. There are no POSIX-style wrappers for PCRE2's 16-bit
@@ -71,7 +69,6 @@ captured substrings. It also defines some constants whose names start with
 .
 .
 .SH "USING THE POSIX FUNCTIONS"
-.rs
 .sp
 Note that these functions are just POSIX-style wrappers for PCRE2's native API.
 They do not give POSIX regular expression behaviour, and they are not
@@ -100,7 +97,6 @@ used.
 .
 .
 .SH "COMPILING A PATTERN"
-.rs
 .sp
 The function \fBpcre2_regcomp()\fP is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
@@ -198,7 +194,6 @@ crash.
 .
 .
 .SH "MATCHING NEWLINE CHARACTERS"
-.rs
 .sp
 This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
@@ -237,7 +232,6 @@ passes PCRE2_DOTALL. There is no way to pass PCRE2_DOLLAR_ENDONLY.
 .
 .
 .SH "MATCHING A PATTERN"
-.rs
 .sp
 The function \fBpcre2_regexec()\fP is called to match a compiled pattern
 \fIpreg\fP against a given \fIstring\fP, which is by default terminated by a
@@ -308,7 +302,6 @@ header file, of which REG_NOMATCH is the "expected" failure code.
 .
 .
 .SH "ERROR MESSAGES"
-.rs
 .sp
 The \fBpcre2_regerror()\fP function maps a non-zero errorcode from either
 \fBpcre2_regcomp()\fP or \fBpcre2_regexec()\fP to a printable message. If
@@ -321,7 +314,6 @@ greater than \fIerrbuf_size\fP if the message was truncated.
 .
 .
 .SH MEMORY USAGE
-.rs
 .sp
 Compiling a regular expression causes memory to be allocated and associated
 with the \fIpreg\fP structure. The function \fBpcre2_regfree()\fP frees all
@@ -330,7 +322,6 @@ expression.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -340,7 +331,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 27 November 2024

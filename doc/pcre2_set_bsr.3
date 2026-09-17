@@ -1,8 +1,7 @@
 .TH PCRE2_SET_BSR 3 "25 October 2014" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_set_bsr - set \eR convention
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function sets the convention for processing \eR within a compile context.
 The second argument must be one of PCRE2_BSR_ANYCRLF or PCRE2_BSR_UNICODE. The

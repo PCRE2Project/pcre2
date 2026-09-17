@@ -1,8 +1,7 @@
 .TH PCRE2_SET_CALLOUT 3 "25 March 2017" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_set_callout - set up a callout function
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -15,7 +14,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function sets the callout fields in a match context (the first argument).
 The second argument specifies a callout function, and the third argument is an

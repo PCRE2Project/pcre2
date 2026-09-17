@@ -1,8 +1,7 @@
 .TH PCRE2_SUBSTRING_LIST_FREE 3 "26 February 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_substring_list_free - free list of extracted substrings
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This is a convenience function for freeing the store obtained by a previous
 call to \fBpcre2substring_list_get()\fP. Its only argument is a pointer to

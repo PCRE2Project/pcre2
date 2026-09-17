@@ -1,8 +1,7 @@
 .TH PCRE2_SERIALIZE_FREE 3 "13 August 2018" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_serialize_free - free serialized compiled patterns
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function frees the memory that was obtained by
 \fBpcre2_serialize_encode()\fP to hold a serialized byte stream. The argument

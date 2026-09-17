@@ -1,8 +1,7 @@
 .TH PCRE2_SUBSTRING_COPY_BYNUMBER 3 "13 December 2014" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_substring_copy_bynumber - extract numbered substring into given buffer
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -14,7 +13,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This is a convenience function for extracting a captured substring into a given
 buffer. The arguments are:
@@ -33,7 +31,6 @@ or one of the following error numbers:
   PCRE2_ERROR_UNSET         the group did not participate in the match
   PCRE2_ERROR_NOMEMORY      the buffer is too small
 .sp
-.P
 There is a complete description of the PCRE2 native API in the
 .\" HREF
 \fBpcre2api\fP

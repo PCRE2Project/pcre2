@@ -1,8 +1,7 @@
 .TH PCRE2_SET_COMPILE_RECURSION_GUARD 3 "26 November 2014" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_set_compile_recursion_guard - set up a compile recursion guard function
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -14,7 +13,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function defines, within a compile context, a function that is called
 whenever \fBpcre2_compile()\fP starts to compile a parenthesized part of a

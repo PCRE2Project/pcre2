@@ -1,8 +1,7 @@
 .TH PCRE2MATCHING 3 "22 February 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2matching - PCRE2 matching algorithms
 .SH "PCRE2 MATCHING ALGORITHMS"
-.rs
 .sp
 This document describes the two different algorithms that are available in
 PCRE2 for matching a compiled regular expression against a given subject
@@ -35,7 +34,6 @@ them, whereas the alternative algorithm finds all three.
 .
 .
 .SH "REGULAR EXPRESSIONS AS TREES"
-.rs
 .sp
 The set of strings that are matched by a regular expression can be represented
 as a tree structure. An unlimited repetition in the pattern makes the tree of
@@ -46,7 +44,6 @@ correspond to the two matching algorithms provided by PCRE2.
 .
 .
 .SH "THE STANDARD MATCHING ALGORITHM"
-.rs
 .sp
 In the terminology of Jeffrey Friedl's book "Mastering Regular Expressions",
 the standard algorithm is an "NFA algorithm". It conducts a depth-first search
@@ -72,7 +69,6 @@ capturing parentheses and backreferences.
 .
 .
 .SH "THE ALTERNATIVE MATCHING ALGORITHM"
-.rs
 .sp
 This algorithm conducts a breadth-first search of the tree. Starting from the
 first matching point in the subject, it scans the subject string from left to
@@ -173,7 +169,6 @@ supported by \fBpcre2_dfa_match()\fP.
 .
 .
 .SH "ADVANTAGES OF THE ALTERNATIVE ALGORITHM"
-.rs
 .sp
 The main advantage of the alternative algorithm is that all possible matches
 (at a single point in the subject) are automatically found, and in particular,
@@ -190,7 +185,6 @@ matching.
 .
 .
 .SH "DISADVANTAGES OF THE ALTERNATIVE ALGORITHM"
-.rs
 .sp
 The alternative algorithm suffers from a number of disadvantages:
 .P
@@ -210,7 +204,6 @@ performance advantage that it does for the standard algorithm.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -220,7 +213,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 22 February 2025

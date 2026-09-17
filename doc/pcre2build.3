@@ -1,10 +1,9 @@
 .TH PCRE2BUILD 3 "17 October 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2build - PCRE2 build-time options
 .
 .
 .SH "BUILDING PCRE2"
-.rs
 .sp
 PCRE2 is distributed with a \fBconfigure\fP script that can be used to build
 the library in Unix-like environments using the Autotools applications. Also in
@@ -33,7 +32,6 @@ file if you are building in a non-Unix-like environment.
 .
 .
 .SH "PCRE2 BUILD-TIME OPTIONS"
-.rs
 .sp
 The rest of this document describes the optional features of PCRE2 that can be
 selected when the library is compiled. It assumes use of the \fBconfigure\fP
@@ -65,7 +63,6 @@ Options that specify values have names that start with --with. At the end of a
 .
 .
 .SH "BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
-.rs
 .sp
 By default, a library called \fBlibpcre2-8\fP is built, containing functions
 that take string arguments contained in arrays of bytes, interpreted either as
@@ -90,7 +87,6 @@ libraries.
 .
 .
 .SH "BUILDING SHARED AND STATIC LIBRARIES"
-.rs
 .sp
 The Autotools PCRE2 building process uses \fBlibtool\fP to build both shared
 and static libraries by default. You can suppress an unwanted library by adding
@@ -113,7 +109,6 @@ of all the relevant libraries are available for linking.
 .
 .
 .SH "UNICODE AND UTF SUPPORT"
-.rs
 .sp
 By default, PCRE2 is built with support for Unicode and UTF character strings.
 To build it without Unicode support, add
@@ -148,7 +143,6 @@ request this by starting with (*UCP).
 .
 .
 .SH "DISABLING THE USE OF \eC"
-.rs
 .sp
 The \eC escape sequence, which matches a single code unit, even in a UTF mode,
 can cause unpredictable behaviour because it may leave the current matching
@@ -162,7 +156,6 @@ it out by setting the PCRE2_NEVER_BACKSLASH_C option when calling
 .
 .
 .SH "JUST-IN-TIME COMPILER SUPPORT"
-.rs
 .sp
 Just-in-time (JIT) compiler support is included in the build by specifying
 .sp
@@ -195,7 +188,6 @@ to the \fBconfigure\fP command.
 .
 .
 .SH "NEWLINE RECOGNITION"
-.rs
 .sp
 By default, PCRE2 interprets the linefeed (LF) character as indicating the end
 of a line. This is the normal newline character on Unix-like systems. You can
@@ -236,7 +228,6 @@ recommended to use the standard for your operating system.
 .
 .
 .SH "WHAT \eR MATCHES"
-.rs
 .sp
 By default, the sequence \eR in a pattern matches any Unicode newline sequence,
 independently of what has been selected as the line ending sequence. If you
@@ -250,7 +241,6 @@ library.
 .
 .
 .SH "HANDLING VERY LARGE PATTERNS"
-.rs
 .sp
 Within a compiled pattern, offset values are used to point from one part to
 another (for example, from an opening parenthesis to an alternation
@@ -271,7 +261,6 @@ additional data when handling them. For the 32-bit library the value is always
 .
 .
 .SH "LIMITING PCRE2 RESOURCE USAGE"
-.rs
 .sp
 The \fBpcre2_match()\fP function increments a counter each time it goes round
 its main loop. Putting a limit on this counter controls the amount of computing
@@ -329,7 +318,6 @@ The limit does not apply to JIT matching.
 .
 .
 .SH "LIMITING VARIABLE-LENGTH LOOKBEHIND ASSERTIONS"
-.rs
 .sp
 Lookbehind assertions in which one or more branches can match a variable number
 of characters are supported only if there is a maximum matching length for each
@@ -346,7 +334,6 @@ not constrained by this limit.
 .
 .\" HTML <a name="createtables"></a>
 .SH "CREATING CHARACTER TABLES AT BUILD TIME"
-.rs
 .sp
 PCRE2 uses fixed tables for processing characters whose code points are less
 than 256. By default, PCRE2 is built with a set of tables that are distributed
@@ -386,7 +373,6 @@ different environments, to ensure consistent behaviour.
 .
 .
 .SH "USING EBCDIC CODE"
-.rs
 .sp
 PCRE2 assumes by default that it will run in an environment where the character
 code is ASCII or Unicode, which is a superset of ASCII. This is the case for
@@ -437,7 +423,6 @@ used to build (or test) EBCDIC support on an ASCII/UTF-8 system such as Linux.
 .
 .
 .SH "PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS"
-.rs
 .sp
 By default \fBpcre2grep\fP supports the use of callouts with string arguments
 within the patterns it is matching. There are two kinds: one that generates
@@ -453,7 +438,6 @@ documentation.
 .
 .
 .SH "PCRE2GREP OPTIONS FOR COMPRESSED FILE SUPPORT"
-.rs
 .sp
 By default, \fBpcre2grep\fP reads all files as plain text. You can build it so
 that it recognizes files whose names end in \fB.gz\fP or \fB.bz2\fP, and reads
@@ -468,7 +452,6 @@ they are not.
 .
 .
 .SH "PCRE2GREP BUFFER SIZE"
-.rs
 .sp
 \fBpcre2grep\fP uses an internal buffer to hold a "window" on the file it is
 scanning, in order to be able to output "before" and "after" lines when it
@@ -488,7 +471,6 @@ these values by using --buffer-size and --max-buffer-size on the command line.
 .
 .
 .SH "PCRE2TEST OPTION FOR LIBREADLINE SUPPORT"
-.rs
 .sp
 If you add one of
 .sp
@@ -496,7 +478,7 @@ If you add one of
   --enable-pcre2test-libedit
 .sp
 to the \fBconfigure\fP command, \fBpcre2test\fP is linked with the
-\fBlibreadline\fP or\fBlibedit\fP library, respectively, and when its input is
+\fBlibreadline\fP or \fBlibedit\fP library, respectively, and when its input is
 from a terminal, it reads it using the \fBreadline()\fP function. This provides
 line-editing and history facilities. Note that \fBlibreadline\fP is
 GPL-licensed, so if you distribute a binary of \fBpcre2test\fP linked in this
@@ -523,7 +505,6 @@ immediately before the \fBconfigure\fP command.
 .
 .
 .SH "INCLUDING DEBUGGING CODE"
-.rs
 .sp
 If you add
 .sp
@@ -534,7 +515,6 @@ build. This feature is intended for use by the PCRE2 maintainers.
 .
 .
 .SH "DEBUGGING WITH VALGRIND SUPPORT"
-.rs
 .sp
 If you add
 .sp
@@ -546,7 +526,6 @@ memory accesses, and is mostly useful for debugging PCRE2 itself.
 .
 .
 .SH "CODE COVERAGE REPORTING"
-.rs
 .sp
 If your C compiler is gcc, you can build a version of PCRE2 that can generate a
 code coverage report for its test suite. To enable this, you must install
@@ -603,7 +582,6 @@ documentation.
 .
 .
 .SH "DISABLING THE Z AND T FORMATTING MODIFIERS"
-.rs
 .sp
 The C99 standard defines formatting modifiers z and t for size_t and
 ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
@@ -620,7 +598,6 @@ a suitable format is used depending in the size of long for the platform.
 .
 .
 .SH "SUPPORT FOR FUZZERS"
-.rs
 .sp
 There is a special option for use by people who want to run fuzzing tests on
 PCRE2:
@@ -645,7 +622,6 @@ file are the test string.
 .
 .
 .SH "OBSOLETE OPTION"
-.rs
 .sp
 In versions of PCRE2 prior to 10.30, there were two ways of handling
 backtracking in the \fBpcre2_match()\fP function. The default was to use the
@@ -658,13 +634,11 @@ changed (the stack is no longer used) and this option now does nothing except
 give a warning.
 .
 .SH "SEE ALSO"
-.rs
 .sp
 \fBpcre2api\fP(3), \fBpcre2-config\fP(3).
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -674,7 +648,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 17 October 2025

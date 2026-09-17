@@ -1,8 +1,7 @@
 .TH PCRE2_GET_BSR 3 "11 September 2026" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_get_bsr - get the \eR convention
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function gets the convention for processing \eR within a compile context.
 The result is zero for success or PCRE2_ERROR_NULL if either argument is NULL.

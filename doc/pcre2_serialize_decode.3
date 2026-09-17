@@ -1,8 +1,7 @@
 .TH PCRE2_SERIALIZE_DECODE 3 "22 April 2022" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_serialize_decode - decode serialized compiled patterns
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -14,7 +13,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function decodes a serialized set of compiled patterns back into a list of
 individual patterns. This is possible only on a host that is running the same

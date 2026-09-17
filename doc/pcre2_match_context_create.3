@@ -1,8 +1,7 @@
 .TH PCRE2_MATCH_CONTEXT_CREATE 3 "25 October 2014" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_match_context_create - create a match context
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -12,7 +11,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function creates and initializes a new match context. If its argument is
 NULL, \fBmalloc()\fP is used to get the necessary memory; otherwise the memory

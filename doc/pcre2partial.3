@@ -1,8 +1,7 @@
 .TH PCRE2PARTIAL 3 "16 August 2026" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2partial - PCRE2 partial matching
 .SH "PARTIAL MATCHING IN PCRE2"
-.rs
 .sp
 In normal use of PCRE2, if there is a match up to the end of a subject string,
 but more characters are needed to match the entire pattern, PCRE2_ERROR_NOMATCH
@@ -46,7 +45,6 @@ is also disabled for partial matching.
 .
 .
 .SH "REQUIREMENTS FOR A PARTIAL MATCH"
-.rs
 .sp
 A possible partial match occurs during matching when the end of the subject
 string is reached successfully, but either more characters are needed to
@@ -88,7 +86,6 @@ something longer".
 .
 .
 .SH "PARTIAL MATCHING USING pcre2_match()"
-.rs
 .sp
 When a partial matching option is set, the result of calling
 \fBpcre2_match()\fP can be one of the following:
@@ -130,7 +127,6 @@ matches, because "dog" on its own partially matches the second alternative.)
 .
 .
 .SS "How a partial match is processed by pcre2_match()"
-.rs
 .sp
 What happens when a partial match is identified depends on which of the two
 partial matching options is set.
@@ -176,7 +172,6 @@ shorter match first.
 .
 .
 .SS "Example of partial matching using pcre2test"
-.rs
 .sp
 The \fBpcre2test\fP data modifiers \fBpartial_hard\fP (or \fBph\fP) and
 \fBpartial_soft\fP (or \fBps\fP) set PCRE2_PARTIAL_HARD and PCRE2_PARTIAL_SOFT,
@@ -209,7 +204,6 @@ there is only a partial match.
 .
 .
 .SH "MULTI-SEGMENT MATCHING WITH pcre2_match()"
-.rs
 .sp
 PCRE was not originally designed with multi-segment matching in mind. However,
 over time, features (including partial matching) that make multi-segment
@@ -284,7 +278,6 @@ units.
 .
 .
 .SH "PARTIAL MATCHING USING pcre2_dfa_match()"
-.rs
 .sp
 The DFA function moves along the subject string character by character, without
 backtracking, searching for all possible matches simultaneously. If the end of
@@ -310,7 +303,6 @@ returns that when PCRE2_PARTIAL_HARD is set.
 .
 .
 .SH "MULTI-SEGMENT MATCHING WITH pcre2_dfa_match()"
-.rs
 .sp
 When a partial match has been found using the DFA matching function, it is
 possible to continue the match by providing additional subject data and calling
@@ -368,7 +360,6 @@ matching function, over the retained text.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -378,7 +369,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 16 August 2026

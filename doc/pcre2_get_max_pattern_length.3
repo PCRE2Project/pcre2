@@ -1,8 +1,7 @@
 .TH PCRE2_GET_MAX_PATTERN_LENGTH 3 "11 September 2026" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_get_max_pattern_length - get the maximum length of a pattern
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -12,7 +11,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function gets, from a compile context, the maximum text length (in code
 units) of the pattern that can be compiled. The result is zero for success or

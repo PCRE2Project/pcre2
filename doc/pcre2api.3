@@ -1,6 +1,7 @@
 .TH PCRE2API 3 "08 December 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2api - PCRE2 native API
+.SH DESCRIPTION
 .sp
 .B #include <pcre2.h>
 .sp
@@ -13,7 +14,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API BASIC FUNCTIONS"
-.rs
 .sp
 .nf
 .B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIpatlen\fP,
@@ -45,7 +45,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API AUXILIARY MATCH FUNCTIONS"
-.rs
 .sp
 .nf
 .B PCRE2_SPTR pcre2_get_mark(pcre2_match_data *\fImatch_data\fP);
@@ -64,7 +63,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API GENERAL CONTEXT FUNCTIONS"
-.rs
 .sp
 .nf
 .B pcre2_general_context *pcre2_general_context_create(
@@ -80,7 +78,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API COMPILE CONTEXT FUNCTIONS"
-.rs
 .sp
 .nf
 .B pcre2_compile_context *pcre2_compile_context_create(
@@ -136,7 +133,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API MATCH CONTEXT FUNCTIONS"
-.rs
 .sp
 .nf
 .B pcre2_match_context *pcre2_match_context_create(
@@ -195,7 +191,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API STRING EXTRACTION FUNCTIONS"
-.rs
 .sp
 .nf
 .B int pcre2_substring_copy_byname(pcre2_match_data *\fImatch_data\fP,
@@ -245,7 +240,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API STRING SUBSTITUTION FUNCTION"
-.rs
 .sp
 .nf
 .B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
@@ -258,7 +252,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API JIT FUNCTIONS"
-.rs
 .sp
 .nf
 .B int pcre2_jit_compile(pcre2_code *\fIcode\fP, uint32_t \fIoptions\fP);
@@ -283,7 +276,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API SERIALIZATION FUNCTIONS"
-.rs
 .sp
 .nf
 .B int32_t pcre2_serialize_decode(pcre2_code **\fIcodes\fP,
@@ -304,7 +296,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API AUXILIARY FUNCTIONS"
-.rs
 .sp
 .nf
 .B pcre2_code *pcre2_code_copy(const pcre2_code *\fIcode\fP);
@@ -333,7 +324,6 @@ document for an overview of all the PCRE2 documentation.
 .
 .
 .SH "PCRE2 NATIVE API OBSOLETE FUNCTIONS"
-.rs
 .sp
 .nf
 .B int pcre2_set_recursion_limit(pcre2_match_context *\fImcontext\fP,
@@ -353,7 +343,6 @@ has no effect (it always returns zero).
 .
 .
 .SH "PCRE2 EXPERIMENTAL PATTERN CONVERSION FUNCTIONS"
-.rs
 .sp
 .nf
 .B pcre2_convert_context *pcre2_convert_context_create(
@@ -389,7 +378,6 @@ documentation.
 .
 .
 .SH "PCRE2 8-BIT, 16-BIT, AND 32-BIT LIBRARIES"
-.rs
 .sp
 There are three PCRE2 libraries, supporting 8-bit, 16-bit, and 32-bit code
 units, respectively. However, there is just one header file, \fBpcre2.h\fP.
@@ -449,7 +437,6 @@ names, without the _8, _16, or _32 suffix.
 .
 .
 .SH "PCRE2 API OVERVIEW"
-.rs
 .sp
 PCRE2 has its own native API, which is described in this document. There are
 also some wrapper functions for the 8-bit library that correspond to the
@@ -558,7 +545,6 @@ a NULL argument, it does nothing.
 .
 .
 .SH "STRING LENGTHS AND OFFSETS"
-.rs
 .sp
 The PCRE2 API uses string lengths and offsets into strings of code units in
 several places. These values are always of type PCRE2_SIZE, which is an
@@ -572,7 +558,6 @@ maximum. Note that string lengths are always given in code units. Only in the
 .
 .\" HTML <a name="newlines"></a>
 .SH NEWLINES
-.rs
 .sp
 PCRE2 supports five different conventions for indicating line breaks in
 strings: a single CR (carriage return) character, a single LF (linefeed)
@@ -611,7 +596,6 @@ its own separate convention.
 .
 .
 .SH MULTITHREADING
-.rs
 .sp
 In a multithreaded application it is important to keep thread-specific data
 separate from data that can be shared between threads. The PCRE2 library code
@@ -624,7 +608,6 @@ between the application and the PCRE2 libraries.
 .
 .
 .SS "The compiled pattern"
-.rs
 .sp
 A pointer to the compiled form of a pattern is returned to the user when
 \fBpcre2_compile()\fP is successful. The data in the compiled pattern is fixed,
@@ -694,7 +677,6 @@ compiled code before calling the JIT compiler.
 .
 .
 .SS "Context blocks"
-.rs
 .sp
 The next main section below introduces the idea of "contexts" in which PCRE2
 functions are called. A context is nothing more than a collection of parameters
@@ -711,7 +693,6 @@ thread-specific copy.
 .
 .
 .SS "Match blocks"
-.rs
 .sp
 The matching functions need a block of memory for storing the results of a
 match. This includes details of what was matched, as well as additional
@@ -720,7 +701,6 @@ own copy of this memory.
 .
 .
 .SH "PCRE2 CONTEXTS"
-.rs
 .sp
 Some PCRE2 functions have a lot of parameters, many of which are used only by
 specialist applications, for example, those that use custom memory management
@@ -736,7 +716,6 @@ for several PCRE2 operations, a compile-time context, and a match-time context.
 .
 .
 .SS "The general context"
-.rs
 .sp
 At present, this context just contains pointers to (and data for) external
 memory management functions that are called from several places in the PCRE2
@@ -789,7 +768,6 @@ doing anything.
 .
 .\" HTML <a name="compilecontext"></a>
 .SS "The compile context"
-.rs
 .sp
 A compile context is required if you want to provide an external function for
 stack checking during compilation or to change the default values of any of the
@@ -1071,7 +1049,6 @@ auxiliary information that is returned.
 .
 .\" HTML <a name="matchcontext"></a>
 .SS "The match context"
-.rs
 .sp
 A match context is required if you want to:
 .sp
@@ -1326,7 +1303,6 @@ less than the limit set by the caller of \fBpcre2_match()\fP or
 .
 .
 .SH "CHECKING BUILD-TIME OPTIONS"
-.rs
 .sp
 .B int pcre2_config(uint32_t \fIwhat\fP, void *\fIwhere\fP);
 .P
@@ -1512,7 +1488,6 @@ the terminating zero.
 .
 .\" HTML <a name="compiling"></a>
 .SH "COMPILING A PATTERN"
-.rs
 .sp
 .nf
 .B pcre2_code *pcre2_compile(PCRE2_SPTR \fIpattern\fP, PCRE2_SIZE \fIpatlen\fP,
@@ -1667,11 +1642,7 @@ This code fragment shows a typical straightforward call to
     &errorcode,             /* for error code */
     &erroffset,             /* for error offset */
     NULL);                  /* no compile context */
-.sp
-.
-.
 .SS "Main compile options"
-.rs
 .sp
 The following names for option bits are defined in the \fBpcre2.h\fP header
 file:
@@ -2180,7 +2151,6 @@ page. In particular, note that it changes the way PCRE2_CASELESS works.
 .
 .\" HTML <a name="extracompileoptions"></a>
 .SS "Extra compile options"
-.rs
 .sp
 The option bits that can be set in a compile context by calling the
 \fBpcre2_set_compile_extra_options()\fP function are as follows:
@@ -2344,7 +2314,6 @@ cannot be combined with PCRE2_EXTRA_CASELESS_RESTRICT.
 .
 .\" HTML <a name="jitcompiling"></a>
 .SH "JUST-IN-TIME (JIT) COMPILATION"
-.rs
 .sp
 .nf
 .B int pcre2_jit_compile(pcre2_code *\fIcode\fP, uint32_t \fIoptions\fP);
@@ -2384,7 +2353,6 @@ Most (but not all) patterns can be optimized by the JIT compiler.
 .
 .\" HTML <a name="localesupport"></a>
 .SH "LOCALE SUPPORT"
-.rs
 .sp
 .nf
 .B const uint8_t *pcre2_maketables(pcre2_general_context *\fIgcontext\fP);
@@ -2457,7 +2425,6 @@ tables.
 .
 .
 .SS "Saving locale tables"
-.rs
 .sp
 The tables described above are just a sequence of binary bytes, which makes
 them independent of hardware characteristics such as endianness or whether the
@@ -2478,7 +2445,6 @@ documentation for details.
 .
 .\" HTML <a name="infoaboutpattern"></a>
 .SH "INFORMATION ABOUT A COMPILED PATTERN"
-.rs
 .sp
 .nf
 .B int pcre2_pattern_info(const pcre2_code *\fIcode\fP, uint32_t \fIwhat\fP,
@@ -2826,7 +2792,6 @@ compiler does not alter the value returned by this option.
 .
 .\" HTML <a name="infoaboutcallouts"></a>
 .SH "INFORMATION ABOUT A PATTERN'S CALLOUTS"
-.rs
 .sp
 .nf
 .B int pcre2_callout_enumerate(
@@ -2852,7 +2817,6 @@ documentation, which also gives further details about callouts.
 .
 .
 .SH "SERIALIZATION AND PRECOMPILING"
-.rs
 .sp
 It is possible to save compiled patterns on disc or elsewhere, and reload them
 later, subject to a number of restrictions. The host on which the patterns are
@@ -2871,7 +2835,6 @@ to an abstract format like Java or .NET serialization.
 .
 .\" HTML <a name="matchdatablock"></a>
 .SH "THE MATCH DATA BLOCK"
-.rs
 .sp
 .nf
 .B pcre2_match_data *pcre2_match_data_create(
@@ -2961,7 +2924,6 @@ argument, it returns immediately, without doing anything.
 .
 .
 .SH "MEMORY USE FOR MATCH DATA BLOCKS"
-.rs
 .sp
 .nf
 .B PCRE2_SIZE pcre2_get_match_data_size(pcre2_match_data *\fImatch_data\fP);
@@ -3000,7 +2962,6 @@ frames vector has become too big.
 .
 .
 .SH "MATCHING A PATTERN: THE TRADITIONAL FUNCTION"
-.rs
 .sp
 .nf
 .B int pcre2_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
@@ -3047,7 +3008,6 @@ above.
 .
 .
 .SS "The string to be matched by \fBpcre2_match()\fP"
-.rs
 .sp
 The subject string is passed to \fBpcre2_match()\fP as a pointer in
 \fIsubject\fP, a length in \fIlength\fP, and a starting offset in
@@ -3103,7 +3063,6 @@ the use of .* with PCRE2_DOTALL, not by starting the pattern with ^ or \eA.
 .
 .\" HTML <a name="matchoptions"></a>
 .SS "Option bits for \fBpcre2_match()\fP"
-.rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_match()\fP must be
 zero. The only bits that may be set are PCRE2_ANCHORED,
@@ -3297,7 +3256,6 @@ documentation.
 .
 .
 .SH "NEWLINE HANDLING WHEN MATCHING"
-.rs
 .sp
 When PCRE2 is built, a default newline convention is set; this is usually the
 standard convention for the operating system. The default can be overridden in
@@ -3344,7 +3302,6 @@ valid newline sequence and explicit \er or \en escapes appear in the pattern.
 .
 .\" HTML <a name="matchedstrings"></a>
 .SH "HOW PCRE2_MATCH() RETURNS A STRING AND CAPTURED SUBSTRINGS"
-.rs
 .sp
 .nf
 .B uint32_t pcre2_get_ovector_count(pcre2_match_data *\fImatch_data\fP);
@@ -3444,7 +3401,6 @@ had. After a failed match attempt, the contents of the ovector are unchanged.
 .
 .\" HTML <a name="matchotherdata"></a>
 .SH "OTHER INFORMATION ABOUT A MATCH"
-.rs
 .sp
 .nf
 .B PCRE2_SPTR pcre2_get_mark(pcre2_match_data *\fImatch_data\fP);
@@ -3507,7 +3463,6 @@ page.
 .
 .\" HTML <a name="errorlist"></a>
 .SH "ERROR RETURNS FROM \fBpcre2_match()\fP"
-.rs
 .sp
 If \fBpcre2_match()\fP fails, it returns a negative number. This can be
 converted to a text string by calling the \fBpcre2_get_error_message()\fP
@@ -3628,7 +3583,6 @@ matching is attempted.
 .
 .\" HTML <a name="geterrormessage"></a>
 .SH "OBTAINING A TEXTUAL ERROR MESSAGE"
-.rs
 .sp
 .nf
 .B int pcre2_get_error_message(int \fIerrorcode\fP, PCRE2_UCHAR *\fIbuffer\fP,
@@ -3652,7 +3606,6 @@ None of the messages is very long; a buffer size of 120 code units is ample.
 .
 .\" HTML <a name="matchiter"></a>
 .SH "ITERATING OVER ALL MATCHES"
-.rs
 .sp
 .nf
 .B int pcre2_next_match(pcre2_match_data *\fImatch_data\fP,
@@ -3741,7 +3694,6 @@ PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.
 .
 .\" HTML <a name="extractbynumber"></a>
 .SH "EXTRACTING CAPTURED SUBSTRINGS BY NUMBER"
-.rs
 .sp
 .nf
 .B int pcre2_substring_length_bynumber(pcre2_match_data *\fImatch_data\fP,
@@ -3838,7 +3790,6 @@ capturing slots, substring number 1 is unset.
 .
 .
 .SH "EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS"
-.rs
 .sp
 .nf
 .B int pcre2_substring_list_get(pcre2_match_data *\fImatch_data\fP,
@@ -3878,7 +3829,6 @@ substrings, or by calling \fBpcre2_substring_length_bynumber()\fP.
 .
 .\" HTML <a name="extractbyname"></a>
 .SH "EXTRACTING CAPTURED SUBSTRINGS BY NAME"
-.rs
 .sp
 .nf
 .B int pcre2_substring_number_from_name(const pcre2_code *\fIcode\fP,
@@ -3945,7 +3895,6 @@ same number causes an error at compile time.
 .
 .\" HTML <a name="substitutions"></a>
 .SH "CREATING A NEW STRING WITH SUBSTITUTIONS"
-.rs
 .sp
 .nf
 .B int pcre2_substitute(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
@@ -4255,7 +4204,6 @@ are ignored.
 .
 .
 .SS "Substitution errors"
-.rs
 .sp
 In the event of an error, \fBpcre2_substitute()\fP returns a negative error
 code. Except for PCRE2_ERROR_NOMATCH (which is never returned), errors from
@@ -4297,7 +4245,6 @@ above).
 .
 .\" HTML <a name="subcallouts"></a>
 .SS "Substitution callouts"
-.rs
 .sp
 .nf
 .B int pcre2_set_substitute_callout(
@@ -4366,7 +4313,6 @@ matches so far.
 .
 .
 .SS "Substitution case callouts"
-.rs
 .sp
 .nf
 .B int pcre2_set_substitute_case_callout(
@@ -4459,7 +4405,6 @@ loop.
 .
 .
 .SH "DUPLICATE CAPTURE GROUP NAMES"
-.rs
 .sp
 .nf
 .B int pcre2_substring_nametable_scan(const pcre2_code *\fIcode\fP,
@@ -4510,7 +4455,6 @@ the captured data.
 .
 .
 .SH "FINDING ALL POSSIBLE MATCHES AT ONE POSITION"
-.rs
 .sp
 The traditional matching function uses a similar algorithm to Perl, which stops
 when it finds the first match at a given point in the subject. If you want to
@@ -4532,7 +4476,6 @@ other alternatives. Ultimately, when it runs out of matches,
 .
 .\" HTML <a name="dfamatch"></a>
 .SH "MATCHING A PATTERN: THE ALTERNATIVE FUNCTION"
-.rs
 .sp
 .nf
 .B int pcre2_dfa_match(const pcre2_code *\fIcode\fP, PCRE2_SPTR \fIsubject\fP,
@@ -4583,7 +4526,6 @@ Here is an example of a simple call to \fBpcre2_dfa_match()\fP:
     20);            /* number of elements (NOT size in bytes) */
 .
 .SS "Option bits for \fBpcre2_dfa_match()\fP"
-.rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre2_dfa_match()\fP must
 be zero. The only bits that may be set are PCRE2_ANCHORED,
@@ -4635,7 +4577,6 @@ documentation.
 .
 .
 .SS "Successful returns from \fBpcre2_dfa_match()\fP"
-.rs
 .sp
 When \fBpcre2_dfa_match()\fP succeeds, it may have matched more than one
 substring in the subject. Note, however, that all the matches from one run of
@@ -4679,7 +4620,6 @@ the PCRE2_NO_AUTO_POSSESS option when compiling.
 .
 .
 .SS "Error returns from \fBpcre2_dfa_match()\fP"
-.rs
 .sp
 The \fBpcre2_dfa_match()\fP function returns a negative number when it fails.
 Many of the errors are the same as for \fBpcre2_match()\fP, as described
@@ -4729,7 +4669,6 @@ fail, this error is given.
 .
 .
 .SH "SEE ALSO"
-.rs
 .sp
 \fBpcre2build\fP(3), \fBpcre2callout\fP(3), \fBpcre2demo(3)\fP,
 \fBpcre2matching\fP(3), \fBpcre2partial\fP(3), \fBpcre2posix\fP(3),
@@ -4737,7 +4676,6 @@ fail, this error is given.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -4747,7 +4685,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 08 December 2025

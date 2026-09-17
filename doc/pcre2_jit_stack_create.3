@@ -1,8 +1,7 @@
 .TH PCRE2_JIT_STACK_CREATE 3 "23 January 2023" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_jit_stack_create - create a stack for JIT matching
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -13,7 +12,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function is used to create a stack for use by the code compiled by the JIT
 compiler. The first two arguments are a starting size for the stack, and a

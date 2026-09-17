@@ -1,8 +1,7 @@
 .TH PCRE2SYNTAX 3 "14 October 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2syntax - PCRE2 syntax quick reference
 .SH "PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY"
-.rs
 .sp
 The full syntax and semantics of the regular expression patterns that are
 supported by PCRE2 are described in the
@@ -18,7 +17,6 @@ The full description of the latter is in the
 documentation.
 .
 .SH "QUOTING"
-.rs
 .sp
   \ex         where x is non-alphanumeric is a literal x
   \eQ...\eE    treat enclosed characters as literal
@@ -33,7 +31,6 @@ documentation for details.
 .
 .
 .SH "BRACED ITEMS"
-.rs
 .sp
 With one exception, wherever brace characters { and } are required to enclose
 data for constructions such as \eg{2} or \ek{name}, space and/or horizontal tab
@@ -45,7 +42,6 @@ follows ECMAScript's behaviour.
 .
 .
 .SH "ESCAPED CHARACTERS"
-.rs
 .sp
 This table applies to ASCII and Unicode environments. An unrecognized escape
 sequence causes an error.
@@ -97,7 +93,6 @@ also given.
 .
 .
 .SH "CHARACTER TYPES"
-.rs
 .sp
   .          any character except newline;
                in dotall mode, any character whatsoever
@@ -138,7 +133,6 @@ as \ep{ bidi class = AL }.
 .
 .
 .SH "GENERAL CATEGORY PROPERTIES FOR \ep and \eP"
-.rs
 .sp
   C          Other
   Cc         Control
@@ -191,7 +185,6 @@ equivalent to Lc.
 .
 .
 .SH "PCRE2 SPECIAL CATEGORY PROPERTIES FOR \ep and \eP"
-.rs
 .sp
   Xan        Alphanumeric: union of properties L and N
   Xps        POSIX space: property Z or tab, NL, VT, FF, CR
@@ -205,7 +198,6 @@ at release 5.18.
 .
 .
 .SH "BINARY PROPERTIES FOR \ep AND \eP"
-.rs
 .sp
 Unicode defines a number of binary properties, that is, properties whose only
 values are true or false. You can obtain a list of those that are recognized by
@@ -216,7 +208,6 @@ values are true or false. You can obtain a list of those that are recognized by
 .
 .
 .SH "SCRIPT MATCHING WITH \ep AND \eP"
-.rs
 .sp
 Many script names and their 4-letter abbreviations are recognized in
 \ep{sc:...} or \ep{scx:...} items, or on their own with \ep (and also \eP of
@@ -227,7 +218,6 @@ course). You can obtain a list of these scripts by running this command:
 .
 .
 .SH "THE BIDI_CLASS PROPERTY FOR \ep AND \eP"
-.rs
 .sp
   \ep{Bidi_Class:<class>}   matches a character with the given class
   \ep{BC:<class>}           matches a character with the given class
@@ -260,7 +250,6 @@ The recognized classes are:
 .
 .
 .SH "CHARACTER CLASSES"
-.rs
 .sp
   [...]       positive character class
   [^...]      negative character class
@@ -300,7 +289,6 @@ used, allowing nested character classes, combined using set operators.
 .
 .
 .SH "PERL EXTENDED CHARACTER CLASSES"
-.rs
 .sp
   (?[...])                Perl extended character class
   (?[\ep{Thai} & \ep{Nd}])  operators; white space ignored
@@ -326,7 +314,6 @@ as the first character); outside of a nested class, ^ is the XOR operator.
 .
 .
 .SH "QUANTIFIERS"
-.rs
 .sp
   ?           0 or 1, greedy
   ?+          0 or 1, possessive
@@ -350,7 +337,6 @@ as the first character); outside of a nested class, ^ is the XOR operator.
 .
 .
 .SH "ANCHORS AND SIMPLE ASSERTIONS"
-.rs
 .sp
   \eb          word boundary
   \eB          not a word boundary
@@ -368,7 +354,6 @@ as the first character); outside of a nested class, ^ is the XOR operator.
 .
 .
 .SH "REPORTED MATCH POINT SETTING"
-.rs
 .sp
   \eK          set reported start of match
 .sp
@@ -379,13 +364,11 @@ option is set, the previous behaviour is re-enabled. When this option is set,
 .
 .
 .SH "ALTERNATION"
-.rs
 .sp
   expr|expr|expr...
 .
 .
 .SH "CAPTURING"
-.rs
 .sp
   (...)           capture group
   (?<name>...)    named capture group (Perl)
@@ -401,20 +384,18 @@ both cases, a name must not start with a digit.
 .
 .
 .SH "ATOMIC GROUPS"
-.rs
 .sp
   (?>...)         atomic non-capture group
   (*atomic:...)   atomic non-capture group
 .
 .
 .SH "COMMENT"
-.rs
 .sp
   (?#....)        comment (not nestable)
 .
 .
 .SH "OPTION SETTING"
-.rs
+.sp
 Changes of these options within a group are automatically cancelled at the end
 of the group.
 .sp
@@ -472,7 +453,6 @@ PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at compile time.
 .
 .
 .SH "NEWLINE CONVENTION"
-.rs
 .sp
 These are recognized only at the very start of the pattern or after option
 settings with a similar syntax.
@@ -486,7 +466,6 @@ settings with a similar syntax.
 .
 .
 .SH "WHAT \eR MATCHES"
-.rs
 .sp
 These are recognized only at the very start of the pattern or after option
 setting with a similar syntax.
@@ -496,7 +475,6 @@ setting with a similar syntax.
 .
 .
 .SH "LOOKAHEAD AND LOOKBEHIND ASSERTIONS"
-.rs
 .sp
   (?=...)                     )
   (*pla:...)                  ) positive lookahead
@@ -523,7 +501,6 @@ the limit for each branch is 65535 characters.
 .
 .
 .SH "NON-ATOMIC LOOKAROUND ASSERTIONS"
-.rs
 .sp
 These assertions are specific to PCRE2 and are not Perl-compatible.
 .sp
@@ -537,7 +514,7 @@ These assertions are specific to PCRE2 and are not Perl-compatible.
 .
 .
 .SH "SUBSTRING SCAN ASSERTION"
-.rs
+.sp
 This feature is not Perl-compatible.
 .sp
   (*scan_substring:(grouplist)...)  scan captured substring
@@ -554,7 +531,6 @@ following ways:
 .
 .
 .SH "SCRIPT RUNS"
-.rs
 .sp
   (*script_run:...)           ) script run, can be backtracked into
   (*sr:...)                   )
@@ -564,7 +540,6 @@ following ways:
 .
 .
 .SH "BACKREFERENCES"
-.rs
 .sp
   \en              reference by number (can be ambiguous)
   \egn             reference by number
@@ -581,7 +556,6 @@ following ways:
 .
 .
 .SH "SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)"
-.rs
 .sp
   (?R)            recurse whole pattern
   (?n)            call subroutine by absolute number
@@ -622,7 +596,6 @@ following ways:
 .
 .
 .SH "CONDITIONAL PATTERNS"
-.rs
 .sp
   (?(condition)yes-pattern)
   (?(condition)yes-pattern|no-pattern)
@@ -649,7 +622,6 @@ The fractional part of the version number defaults to 0 in that case.
 .
 .
 .SH "BACKTRACKING CONTROL"
-.rs
 .sp
 All backtracking control verbs may be in the form (*VERB:NAME). For (*MARK) the
 name is mandatory, for the others it is optional. (*SKIP) changes its behaviour
@@ -678,7 +650,6 @@ to the subroutine call.
 .
 .
 .SH "CALLOUTS"
-.rs
 .sp
   (?C)            callout (assumed number 0)
   (?Cn)           callout with numerical data n
@@ -690,7 +661,6 @@ delimiter }. To encode the ending delimiter within the string, double it.
 .
 .
 .SH "REPLACEMENT STRINGS"
-.rs
 .sp
 If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
 \fBpcre2_substitute()\fP is not interpreted. Otherwise, by default, the only
@@ -737,14 +707,12 @@ escape colons and closing curly brackets.
 .
 .
 .SH "SEE ALSO"
-.rs
 .sp
 \fBpcre2pattern\fP(3), \fBpcre2api\fP(3), \fBpcre2callout\fP(3),
 \fBpcre2matching\fP(3), \fBpcre2\fP(3).
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -754,7 +722,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 14 October 2025

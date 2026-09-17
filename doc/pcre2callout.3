@@ -1,8 +1,7 @@
 .TH PCRE2CALLOUT 3 "26 February 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2callout - PCRE2 callouts
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -18,7 +17,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 PCRE2 provides a feature called "callout", which is a means of temporarily
 passing control to the caller of PCRE2 in the middle of pattern matching. The
@@ -89,7 +87,6 @@ optimize the performance of a particular pattern.
 .
 .
 .SH "MISSING CALLOUTS"
-.rs
 .sp
 You should be aware that, because of optimizations in the way PCRE2 compiles
 and matches patterns, callouts sometimes do not happen exactly as you might
@@ -97,7 +94,6 @@ expect.
 .
 .
 .SS "Auto-possessification"
-.rs
 .sp
 At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
 what follows cannot be part of the repeat. For example, a+[bc] is compiled as
@@ -129,7 +125,6 @@ again, repeatedly, until a+ itself fails.
 .
 .
 .SS "Automatic .* anchoring"
-.rs
 .sp
 By default, an optimization is applied when .* is the first significant item in
 a pattern. If PCRE2_DOTALL is set, so that the dot can match any character, the
@@ -174,7 +169,6 @@ subsequent attempt to match with an empty subject.
 .
 .
 .SS "Other optimizations"
-.rs
 .sp
 Other optimizations that provide fast "no match" results also affect callouts.
 For example, if the pattern is
@@ -199,7 +193,6 @@ callouts such as the example above are obeyed.
 .
 .\" HTML <a name="calloutinterface"></a>
 .SH "THE CALLOUT INTERFACE"
-.rs
 .sp
 During matching, when PCRE2 reaches a callout point, if an external function is
 provided in the match context, it is called. This applies to both normal,
@@ -240,7 +233,6 @@ remove any of the existing fields.
 .
 .
 .SS "Fields for numerical callouts"
-.rs
 .sp
 For a numerical callout, \fIcallout_string\fP is NULL, and \fIcallout_number\fP
 contains the number of the callout, in the range 0-255. This is the number
@@ -249,7 +241,6 @@ automatically generated callouts.
 .
 .
 .SS "Fields for string callouts"
-.rs
 .sp
 For callouts with string arguments, \fIcallout_number\fP is always zero, and
 \fIcallout_string\fP points to the string that is contained within the compiled
@@ -269,7 +260,6 @@ need to report errors in the callout string within the pattern.
 .
 .
 .SS "Fields for all callouts"
-.rs
 .sp
 The remaining fields in the callout block are the same for both kinds of
 callout.
@@ -377,7 +367,6 @@ cases the \fBcallout_flags\fP field is always zero.
 .
 .
 .SH "RETURN VALUES FROM CALLOUTS"
-.rs
 .sp
 The external callout function returns an integer to PCRE2. If the value is
 zero, matching proceeds as normal. If the value is greater than zero, matching
@@ -393,7 +382,6 @@ functions; it will never be used by PCRE2 itself.
 .
 .
 .SH "CALLOUT ENUMERATION"
-.rs
 .sp
 .nf
 .B int pcre2_callout_enumerate(
@@ -443,7 +431,6 @@ value, scanning the pattern stops, and that value is returned from
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -453,7 +440,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 26 February 2025

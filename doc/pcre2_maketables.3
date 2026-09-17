@@ -1,8 +1,7 @@
 .TH PCRE2_MAKETABLES 3 "26 February 2025" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_maketables - build character tables in current locale
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This function builds a set of character tables for character code points that
 are less than 256. These can be passed to \fBpcre2_compile()\fP in a compile

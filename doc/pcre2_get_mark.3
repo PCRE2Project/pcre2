@@ -1,8 +1,7 @@
 .TH PCRE2_GET_MARK 3 "13 January 2018" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_get_mark - get a (*MARK) name
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -11,7 +10,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 After a call of \fBpcre2_match()\fP that was passed the match block that is
 this function's argument, this function returns a pointer to the last (*MARK),

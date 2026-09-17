@@ -1,15 +1,13 @@
 .TH PCRE2PERFORM 3 "06 December 2022" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2perform - PCRE2 performance
 .SH "PCRE2 PERFORMANCE"
-.rs
 .sp
 Two aspects of performance are discussed below: memory usage and processing
 time. The way you express your pattern as a regular expression can affect both
 of them.
 .
 .SH "COMPILED PATTERN MEMORY USAGE"
-.rs
 .sp
 Patterns are compiled by PCRE2 into a reasonably efficient interpretive code,
 so that most simple patterns do not use much memory for storing the compiled
@@ -63,7 +61,6 @@ were different in earlier releases.)
 .
 .
 .SH "STACK AND HEAP USAGE AT RUN TIME"
-.rs
 .sp
 From release 10.30, the interpretive (non-JIT) version of \fBpcre2_match()\fP
 uses very little system stack at run time. In earlier releases recursive
@@ -107,7 +104,6 @@ recursion, and the "match heap" parameter to limit heap memory in
 .
 .
 .SH "PROCESSING TIME"
-.rs
 .sp
 Certain items in regular expression patterns are processed more efficiently
 than others. It is more efficient to use a character class like [aeiou] than a
@@ -214,8 +210,7 @@ subject strings is to write repeated parenthesized subpatterns to match more
 than one character whenever possible.
 .
 .
-.SS "SETTING RESOURCE LIMITS"
-.rs
+.SS "Setting Resource Limits"
 .sp
 You can set limits on the amount of processing that takes place when matching,
 and on the amount of heap memory that is used. The default values of the limits
@@ -242,7 +237,6 @@ pattern to match. This is done by repeatedly matching with different limits.
 .
 .
 .SH AUTHOR
-.rs
 .sp
 .nf
 Philip Hazel
@@ -252,7 +246,6 @@ Cambridge, England.
 .
 .
 .SH REVISION
-.rs
 .sp
 .nf
 Last updated: 06 December 2022

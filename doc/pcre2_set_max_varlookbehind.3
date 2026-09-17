@@ -1,8 +1,7 @@
 .TH PCRE2_SET_MAX_VARLOOKBEHIND 3 "11 August 2023" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_set_max_varlookbehind - set the maximum match length for a variable-length lookbehind
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -12,7 +11,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This sets a maximum length for the number of characters matched by a
 variable-length lookbehind assertion. The default is set when PCRE2 is built,

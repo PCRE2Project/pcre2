@@ -1,8 +1,7 @@
 .TH PCRE2_SUBSTRING_LIST_GET 3 "21 October 2014" "PCRE2 10.49-DEV"
 .SH NAME
-PCRE2 - Perl-compatible regular expressions (revised API)
+pcre2_substring_list_get - extract all substrings into new memory
 .SH SYNOPSIS
-.rs
 .sp
 .B #include <pcre2.h>
 .PP
@@ -13,7 +12,6 @@ PCRE2 - Perl-compatible regular expressions (revised API)
 .fi
 .
 .SH DESCRIPTION
-.rs
 .sp
 This is a convenience function for extracting all the captured substrings after
 a pattern match. It builds a list of pointers to the strings, and (optionally)
