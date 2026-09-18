@@ -110,7 +110,13 @@ message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 # Increased minimum to 3.15 to allow use of string(REPEAT).
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(PCRE2 C)
-set(CMAKE_C_STANDARD 99)
+if("c_std_11" IN_LIST CMAKE_C_COMPILE_FEATURES)
+  set(CMAKE_C_STANDARD 11)
+elseif("c_std_99" IN_LIST CMAKE_C_COMPILE_FEATURES)
+  set(CMAKE_C_STANDARD 99)
+else()
+  message(FATAL_ERROR "C compiler must support at least C99.")
+endif()
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
@@ -192,9 +198,24 @@ cmake_pop_check_state()
 
 check_c_source_compiles(
   [=[
+  #ifdef __STDC_NO_ATOMICS__
+  #error "C compiler does not support standard C atomics"
+  #endif
+  #include <stdatomic.h>
+  int main(void) {
+    atomic_int value;
+    atomic_init(&value, 0);
+    return atomic_load(&value);
+  }
+  ]=]
+  HAVE_STDATOMIC_H
+)
+
+check_c_source_compiles(
+  [=[
   #include <stdlib.h>
   #include <limits.h>
-  int main(int c, char *v[]) { char buf[PATH_MAX]; realpath(v[c], buf); return 0; }
+  int main(int c, char *v[]) { char buf[PATH_MAX]; return realpath(v[c], buf) == NULL; }
   ]=]
   HAVE_REALPATH
 )

@@ -549,6 +549,9 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to 1 if you have the 'secure_getenv' function. */
 #undef HAVE_SECURE_GETENV
 
+/* Define to 1 if you have the <stdatomic.h> header file. */
+#undef HAVE_STDATOMIC_H
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
 
