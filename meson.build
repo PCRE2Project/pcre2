@@ -244,7 +244,14 @@ endif
 # -----------------------------------------------------------------------------
 
 thread_dep = dependency('threads', required: jit_enabled)
-bzip2_dep = dependency('bzip2', required: get_option('pcre2_support_libbz2'))
+bzip2_option = get_option('pcre2_support_libbz2')
+bzip2_dep = dependency('', required: false)
+if not bzip2_option.disabled()
+  bzip2_dep = dependency('bzip2', required: false)
+  if not bzip2_dep.found()
+    bzip2_dep = dependency('BZip2', method: 'cmake', required: bzip2_option)
+  endif
+endif
 zlib_dep = dependency('zlib', required: get_option('pcre2_support_libz'))
 editline_dep = dependency('libedit', required: get_option('pcre2_support_libedit'))
 readline_dep = dependency('readline', required: get_option('pcre2_support_libreadline'))
@@ -868,6 +875,7 @@ if get_option('pcre2_build_tests')
     dependencies: test_deps,
     c_args: common_c_args,
     link_args: msvc_like ? ['/STACK:2500000'] : [],
+    install: true,
   )
   if build_8
     pcre2posix_test = executable(

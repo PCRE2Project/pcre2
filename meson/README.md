@@ -33,8 +33,8 @@ When PCRE2 is a Meson subproject, use `dependency('libpcre2-8')`,
 `dependency('libpcre2-posix')`. Only enabled code-unit widths are exported.
 
 Installation includes the enabled libraries, public headers, `pcre2grep`,
-`pcre2-config`, pkg-config metadata, CMake package metadata, manpages, and HTML
-and text documentation.
+`pcre2-config`, `pcre2test` when tests are enabled, pkg-config metadata, CMake
+package metadata, manpages, and HTML and text documentation.
 
 ## Implemented platform behavior
 
@@ -65,6 +65,16 @@ CMake consumers using both shared and static package aliases. Static-only,
 shared-only, and 16-bit-only installations were also checked for exact target
 availability and valid legacy CMake library variables.
 
+The full native feature matrix has also been checked with JIT, zlib, bzip2,
+and readline enabled. The Meson test suite, the complete core test suite under
+Valgrind, the static/shared producer regression check, and the canonical shared
+symbol manifests all pass. All four installed pkg-config modules resolve, and
+shared and fully static `pcre2demo` consumers compile and run. A separate
+editline-enabled, readline-disabled build also passes. After normalizing
+Meson's Debian multiarch library directory and standard `PCRE2Config*.cmake`
+filename spelling, the 273 installed paths match the Linux CMake install
+manifest.
+
 A Windows GNU cross-build using Zig has also been checked with all code-unit
 widths and both library variants. Release and debug-postfixed DLLs, static
 archives, import libraries, both MinGW compatibility naming options, install
@@ -93,7 +103,10 @@ python3 maint/meson-tests/check-static-shared.py build-meson-variants
 2. The minimum remains Meson 1.3 because the implementation does not require a
    newer API. Development validation currently uses Meson 1.7.
 3. Optional zlib, bzip2, readline, and editline switches are Meson `feature`
-   options, so `auto` retains CMake's enable-when-found behavior.
+   options, so `auto` retains CMake's enable-when-found behavior. Bzip2 lookup
+   falls back from pkg-config to CMake's `BZip2` package because some systems,
+   including the validated Ubuntu environment, do not provide a bzip2 `.pc`
+   file. An explicitly disabled option performs neither lookup.
 4. Meson has no equivalent of CMake's `install(EXPORT)`. The build generates
    target declarations and release artifact properties explicitly, while
    taking static and shared basenames from the actual Meson targets to avoid
