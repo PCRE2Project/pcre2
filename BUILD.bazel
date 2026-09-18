@@ -163,7 +163,8 @@ cc_binary(
     name = "pcre2test",
     srcs = ["src/pcre2test.c"],
     linkopts = select({
-        "@platforms//os:windows": ["-STACK:2500000"],
+        "@rules_cc//cc/compiler:clang-cl": ["/STACK:2500000"],
+        "@rules_cc//cc/compiler:msvc-cl": ["/STACK:2500000"],
         "//conditions:default": [],
     }),
     local_defines = LOCAL_DEFINES,
