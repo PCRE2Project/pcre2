@@ -63,6 +63,19 @@ and shared compile commands, hidden symbols from PIC static archives embedded
 in a shared object, GNU-versioned shared exports, installation, and standalone
 CMake consumers using both shared and static package aliases.
 
+The static/shared regression check can be repeated with:
+
+```sh
+meson setup build-meson-variants \
+   -Dbuild_shared_libs=true \
+   -Dbuild_static_libs=true \
+   -Dpcre2_build_pcre2_16=true \
+   -Dpcre2_build_pcre2_32=true \
+   -Dpcre2_static_pic=true
+meson compile -C build-meson-variants
+python3 maint/meson-tests/check-static-shared.py build-meson-variants
+```
+
 ## Decisions and remaining work
 
 1. Explicit `static_library()` and `shared_library()` targets are retained
