@@ -61,7 +61,9 @@ Linux native builds have been checked with all code-unit widths and both
 library variants enabled. The checks include the full build, distinct static
 and shared compile commands, hidden symbols from PIC static archives embedded
 in a shared object, GNU-versioned shared exports, installation, and standalone
-CMake consumers using both shared and static package aliases.
+CMake consumers using both shared and static package aliases. Static-only,
+shared-only, and 16-bit-only installations were also checked for exact target
+availability and valid legacy CMake library variables.
 
 A Windows GNU cross-build using Zig has also been checked with all code-unit
 widths and both library variants. Release and debug-postfixed DLLs, static
