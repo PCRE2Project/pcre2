@@ -19,9 +19,6 @@ m4_define(libpcre2_16_version,    [16:0:16])
 m4_define(libpcre2_32_version,    [16:0:16])
 m4_define(libpcre2_posix_version, [3:8:0])
 
-# NOTE: The CMakeLists.txt file searches for the above variables in the first
-# 50 lines of this file. Please update that if the variables above are moved.
-
 AC_PREREQ([2.69])
 AC_INIT([PCRE2],pcre2_major.pcre2_minor[]pcre2_prerelease,[],[pcre2])
 AC_CONFIG_SRCDIR([src/pcre2.h.in])

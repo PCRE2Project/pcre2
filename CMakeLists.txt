@@ -760,35 +760,16 @@ endif()
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 
-# Parse version numbers and date out of configure.ac
+# Release and library version information
 
-file(
-  STRINGS ${PROJECT_SOURCE_DIR}/configure.ac
-  configure_lines
-  LIMIT_COUNT 50 # Read only the first 50 lines of the file
-)
-
-set(
-  SEARCHED_VARIABLES
-  "pcre2_major"
-  "pcre2_minor"
-  "pcre2_prerelease"
-  "pcre2_date"
-  "libpcre2_posix_version"
-  "libpcre2_8_version"
-  "libpcre2_16_version"
-  "libpcre2_32_version"
-)
-foreach(configure_line ${configure_lines})
-  foreach(substitution_variable ${SEARCHED_VARIABLES})
-    string(TOUPPER ${substitution_variable} substitution_variable_upper)
-    if(NOT DEFINED ${substitution_variable_upper})
-      if("${configure_line}" MATCHES "m4_define\\(${substitution_variable}, *\\[(.*)\\]")
-        set(${substitution_variable_upper} "${CMAKE_MATCH_1}")
-      endif()
-    endif()
-  endforeach()
-endforeach()
+set(PCRE2_MAJOR "10")
+set(PCRE2_MINOR "49")
+set(PCRE2_PRERELEASE "-DEV")
+set(PCRE2_DATE "2026-11-31")
+set(LIBPCRE2_POSIX_VERSION "3:8:0")
+set(LIBPCRE2_8_VERSION "16:0:16")
+set(LIBPCRE2_16_VERSION "16:0:16")
+set(LIBPCRE2_32_VERSION "16:0:16")
 
 macro(parse_lib_version variable_prefix)
   string(REPLACE ":" ";" ${variable_prefix}_VERSION_LIST ${${variable_prefix}_VERSION})
