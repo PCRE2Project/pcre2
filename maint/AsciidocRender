@@ -19,4 +19,4 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 
 mkdir -p "$(dirname "$man_output")" "$(dirname "$html_output")"
 asciidoctor --failure-level WARN --require "$script_dir/AsciidocConverterPcre2.rb" --backend manpage --out-file "$man_output" "$input"
-asciidoctor --failure-level WARN --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --out-file "$html_output" "$input"
+asciidoctor --failure-level WARN --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --attribute nofooter --out-file "$html_output" "$input"
