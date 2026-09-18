@@ -10,8 +10,10 @@
 #mesondefine HAVE_SYS_TYPES_H
 #mesondefine HAVE_UNISTD_H
 #mesondefine HAVE_WINDOWS_H
+#mesondefine HAVE_STDATOMIC_H
 
 #mesondefine HAVE_MEMFD_CREATE
+#mesondefine HAVE_REALPATH
 #mesondefine HAVE_SECURE_GETENV
 #mesondefine HAVE_SETRLIMIT
 

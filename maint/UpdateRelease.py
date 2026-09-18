@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # Script to update all the hardcoded release numbers in the source tree.
-#  - CMake build metadata.
+#  - CMake and Meson build metadata.
 #  - AsciiDoc documentation sources.
 #  - Bazel MODULE file.
 #  - Zig package manifest.
@@ -33,6 +33,18 @@ cmake_versions = {
 for variable, configure_name in cmake_versions.items():
     update_file('CMakeLists.txt', r'(?m)^set\(%s ".*"\)$' % variable,
                 'set(%s "%s")' % (variable, VERSION_INFO[configure_name]))
+
+print('Updating meson.build')
+update_file('meson.build', r"(?m)^  version: '.*',$",
+            "  version: '%s.%s'," % (VERSION_INFO['pcre2_major'], VERSION_INFO['pcre2_minor']))
+update_file('meson.build', r"(?m)^pcre2_prerelease = '.*'$",
+            "pcre2_prerelease = '%s'" % VERSION_INFO['pcre2_prerelease'])
+update_file('meson.build', r"(?m)^pcre2_date = '.*'$",
+            "pcre2_date = '%s'" % VERSION_INFO['pcre2_date'])
+for library in ('posix', '8', '16', '32'):
+    configure_name = 'libpcre2_%s_version' % library
+    update_file('meson.build', r"(?m)^  '%s': '.*',$" % library,
+                "  '%s': '%s'," % (library, VERSION_INFO[configure_name]))
 
 print('Updating AsciiDoc sources')
 for filename in glob.glob('doc/*.adoc'):

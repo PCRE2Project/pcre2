@@ -1,62 +1,62 @@
+# -----------------------------------------------------------------------------
+# Project setup
+# -----------------------------------------------------------------------------
+
 project(
   'PCRE2',
   'c',
   version: '10.49',
   license: 'BSD-3-Clause WITH PCRE2-exception',
   meson_version: '>=1.3.0',
-  default_options: ['c_std=c99', 'c_args=-fvisibility=hidden'],
+  default_options: ['c_std=c11,c99'],
 )
 
-fs = import('fs')
 cc = meson.get_compiler('c')
+host_is_windows = host_machine.system() == 'windows'
+msvc_like = cc.get_id() in ['msvc', 'clang-cl', 'intel-cl']
+mingw = host_is_windows and not msvc_like
+windows_debug_postfix = host_is_windows and get_option('buildtype') == 'debug' ? 'd' : ''
 
-# Parse version numbers and date out of configure.ac, as CMake does.
-configure_values = {}
-searched_variables = [
-  'pcre2_major',
-  'pcre2_minor',
-  'pcre2_prerelease',
-  'pcre2_date',
-  'libpcre2_posix_version',
-  'libpcre2_8_version',
-  'libpcre2_16_version',
-  'libpcre2_32_version',
-]
-foreach line : fs.read('configure.ac').split('\n')
-  foreach variable : searched_variables
-    marker = 'm4_define(' + variable + ','
-    if line.strip().startswith(marker)
-      configure_values += {variable: line.split('[')[1].split(']')[0]}
-    endif
-  endforeach
-endforeach
-foreach variable : searched_variables
-  if not configure_values.has_key(variable)
-    error('Could not parse @0@ from configure.ac'.format(variable))
-  endif
-endforeach
-
-pcre2_major = configure_values['pcre2_major']
-pcre2_minor = configure_values['pcre2_minor']
-pcre2_prerelease = configure_values['pcre2_prerelease']
-pcre2_date = configure_values['pcre2_date']
-if meson.project_version() != pcre2_major + '.' + pcre2_minor
-  error('project version and configure.ac version do not match')
+if msvc_like
+  add_project_arguments('-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_SECURE_NO_WARNINGS', language: 'c')
 endif
+
+# -----------------------------------------------------------------------------
+# Release and library version information
+# -----------------------------------------------------------------------------
+
+project_version_parts = meson.project_version().split('.')
+pcre2_major = project_version_parts[0]
+pcre2_minor = project_version_parts[1]
+pcre2_prerelease = '-DEV'
+pcre2_date = '2026-11-31'
+libtool_versions = {
+  'posix': '3:8:0',
+  '8': '16:0:16',
+  '16': '16:0:16',
+  '32': '16:0:16',
+}
 
 lib_versions = {}
 lib_soversions = {}
+lib_darwin_versions = {}
 foreach library : ['posix', '8', '16', '32']
-  parts = configure_values['libpcre2_' + library + '_version'].split(':')
+  parts = libtool_versions[library].split(':')
   current = parts[0].to_int()
   revision = parts[1]
   age = parts[2]
   soversion = current - age.to_int()
   lib_soversions += {library: soversion.to_string()}
   lib_versions += {library: '@0@.@1@.@2@'.format(soversion, age, revision)}
+  darwin_compatibility = current + 1
+  lib_darwin_versions += {
+    library: [darwin_compatibility.to_string(), '@0@.@1@'.format(darwin_compatibility, revision)],
+  }
 endforeach
 
-# Configuration checks.
+# -----------------------------------------------------------------------------
+# Configuration checks
+# -----------------------------------------------------------------------------
 config = configuration_data()
 foreach header : ['assert.h', 'dirent.h', 'sys/stat.h', 'sys/types.h', 'unistd.h', 'windows.h']
   config.set('HAVE_' + header.underscorify().to_upper(), cc.has_header(header))
@@ -107,19 +107,32 @@ config.set('HAVE_SETRLIMIT', cc.has_function(
   prefix: '#include <sys/resource.h>',
   args: system_extension_args,
 ))
-cc.compiles(
+config.set('HAVE_STDATOMIC_H', cc.compiles(
+  '''
+  #ifdef __STDC_NO_ATOMICS__
+  #error "C compiler does not support standard C atomics"
+  #endif
+  #include <stdatomic.h>
+  int main(void) {
+    atomic_int value;
+    atomic_init(&value, 0);
+    return atomic_load(&value);
+  }
+  ''',
+  name: 'standard C atomics',
+))
+config.set('HAVE_REALPATH', cc.compiles(
   '''
   #include <stdlib.h>
   #include <limits.h>
   int main(int c, char *v[]) {
     char buf[PATH_MAX];
-    realpath(v[c], buf);
-    return 0;
+    return realpath(v[c], buf) == NULL;
   }
   ''',
   args: system_extension_args,
   name: 'realpath',
-)
+))
 
 config.set('HAVE_ATTRIBUTE_UNINITIALIZED', cc.compiles(
   'int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }',
@@ -162,26 +175,28 @@ if cc.compiles(
   add_project_arguments(cc.get_supported_arguments('-mshstk'), language: 'c')
 endif
 
-# User-configurable options and their constraints.
-build_shared = get_option('BUILD_SHARED_LIBS')
-build_static = get_option('BUILD_STATIC_LIBS')
-build_8 = get_option('PCRE2_BUILD_PCRE2_8')
-build_16 = get_option('PCRE2_BUILD_PCRE2_16')
-build_32 = get_option('PCRE2_BUILD_PCRE2_32')
+# -----------------------------------------------------------------------------
+# User-configurable options
+# -----------------------------------------------------------------------------
+build_shared = get_option('build_shared_libs')
+build_static = get_option('build_static_libs')
+build_8 = get_option('pcre2_build_pcre2_8')
+build_16 = get_option('pcre2_build_pcre2_16')
+build_32 = get_option('pcre2_build_pcre2_32')
 if not build_shared and not build_static
-  error('At least one of BUILD_SHARED_LIBS or BUILD_STATIC_LIBS must be enabled.')
+  error('At least one of build_shared_libs or build_static_libs must be enabled.')
 endif
 if not build_8 and not build_16 and not build_32
   error('At least one PCRE2 code unit width must be enabled.')
 endif
 
-build_grep = get_option('PCRE2_BUILD_PCRE2GREP')
+build_grep = get_option('pcre2_build_pcre2grep')
 if build_grep and not build_8
   message('PCRE2_BUILD_PCRE2_8 must be enabled for pcre2grep; disabling pcre2grep')
   build_grep = false
 endif
 
-jit_option = get_option('PCRE2_SUPPORT_JIT')
+jit_option = get_option('pcre2_support_jit')
 jit_enabled = jit_option == 'ON'
 if jit_option == 'AUTO'
   jit_enabled = cc.compiles(
@@ -197,23 +212,14 @@ if jit_option == 'AUTO'
     name: 'JIT support on this CPU',
   )
 endif
-thread_dep = dependency('threads', required: jit_enabled)
 
-bzip2_dep = dependency('bzip2', required: get_option('PCRE2_SUPPORT_LIBBZ2'))
-zlib_dep = dependency('zlib', required: get_option('PCRE2_SUPPORT_LIBZ'))
-editline_dep = dependency('libedit', required: get_option('PCRE2_SUPPORT_LIBEDIT'))
-readline_dep = dependency('readline', required: get_option('PCRE2_SUPPORT_LIBREADLINE'))
-if editline_dep.found() and readline_dep.found()
-  error('Only one of PCRE2_SUPPORT_LIBREADLINE and PCRE2_SUPPORT_LIBEDIT can be enabled.')
-endif
-
-ebcdic = get_option('PCRE2_EBCDIC') or get_option('PCRE2_EBCDIC_NL25') or get_option('PCRE2_EBCDIC_IGNORING_COMPILER')
-rebuild_chartables = get_option('PCRE2_REBUILD_CHARTABLES')
+ebcdic = get_option('pcre2_ebcdic') or get_option('pcre2_ebcdic_nl25') or get_option('pcre2_ebcdic_ignoring_compiler')
+rebuild_chartables = get_option('pcre2_rebuild_chartables')
 if ebcdic
-  if not get_option('PCRE2_EBCDIC_IGNORING_COMPILER')
+  if not get_option('pcre2_ebcdic_ignoring_compiler')
     rebuild_chartables = true
   endif
-  if get_option('PCRE2_SUPPORT_UNICODE')
+  if get_option('pcre2_support_unicode')
     error('Support for EBCDIC and Unicode cannot be enabled at the same time.')
   endif
   if build_16 or build_32
@@ -221,11 +227,11 @@ if ebcdic
   endif
 endif
 
-if get_option('PCRE2_FUZZ_SUPPORT') and not build_8
+if get_option('pcre2_fuzz_support') and not build_8
   error('Fuzzer support requires PCRE2_BUILD_PCRE2_8.')
 endif
-if get_option('PCRE2_DIFF_FUZZ_SUPPORT')
-  if not get_option('PCRE2_FUZZ_SUPPORT')
+if get_option('pcre2_diff_fuzz_support')
+  if not get_option('pcre2_fuzz_support')
     error('Differential fuzzing requires PCRE2_FUZZ_SUPPORT.')
   endif
   if not jit_enabled
@@ -233,42 +239,64 @@ if get_option('PCRE2_DIFF_FUZZ_SUPPORT')
   endif
 endif
 
+# -----------------------------------------------------------------------------
+# External packages
+# -----------------------------------------------------------------------------
+
+thread_dep = dependency('threads', required: jit_enabled)
+bzip2_dep = dependency('bzip2', required: get_option('pcre2_support_libbz2'))
+zlib_dep = dependency('zlib', required: get_option('pcre2_support_libz'))
+editline_dep = dependency('libedit', required: get_option('pcre2_support_libedit'))
+readline_dep = dependency('readline', required: get_option('pcre2_support_libreadline'))
+if editline_dep.found() and readline_dep.found()
+  error('Only one of PCRE2_SUPPORT_LIBREADLINE and PCRE2_SUPPORT_LIBEDIT can be enabled.')
+endif
+
+# -----------------------------------------------------------------------------
+# Build configuration
+# -----------------------------------------------------------------------------
+
 newline_values = {'CR': 1, 'LF': 2, 'CRLF': 3, 'ANY': 4, 'ANYCRLF': 5, 'NUL': 6}
-config.set('NEWLINE_DEFAULT', newline_values[get_option('PCRE2_NEWLINE')])
+config.set('NEWLINE_DEFAULT', newline_values[get_option('pcre2_newline')])
 config.set('SUPPORT_PCRE2_8', build_8)
 config.set('SUPPORT_PCRE2_16', build_16)
 config.set('SUPPORT_PCRE2_32', build_32)
-config.set('DISABLE_PERCENT_ZT', get_option('PCRE2_DISABLE_PERCENT_ZT'))
+config.set('DISABLE_PERCENT_ZT', get_option('pcre2_disable_percent_zt'))
 config.set('SUPPORT_LIBBZ2', bzip2_dep.found())
 config.set('SUPPORT_LIBEDIT', editline_dep.found())
 config.set('SUPPORT_LIBREADLINE', readline_dep.found())
 config.set('SUPPORT_LIBZ', zlib_dep.found())
 config.set('SUPPORT_JIT', jit_enabled)
-config.set('SLJIT_PROT_EXECUTABLE_ALLOCATOR', get_option('PCRE2_SUPPORT_JIT_SEALLOC'))
-config.set('SUPPORT_PCRE2GREP_JIT', get_option('PCRE2GREP_SUPPORT_JIT'))
-config.set('SUPPORT_PCRE2GREP_CALLOUT', get_option('PCRE2GREP_SUPPORT_CALLOUT'))
+config.set('SLJIT_PROT_EXECUTABLE_ALLOCATOR', get_option('pcre2_support_jit_sealloc'))
+config.set('SUPPORT_PCRE2GREP_JIT', get_option('pcre2grep_support_jit'))
+config.set('SUPPORT_PCRE2GREP_CALLOUT', get_option('pcre2grep_support_callout'))
 config.set('SUPPORT_PCRE2GREP_CALLOUT_FORK',
-  get_option('PCRE2GREP_SUPPORT_CALLOUT') and get_option('PCRE2GREP_SUPPORT_CALLOUT_FORK'))
-config.set('SUPPORT_UNICODE', get_option('PCRE2_SUPPORT_UNICODE'))
-config.set('SUPPORT_VALGRIND', get_option('PCRE2_SUPPORT_VALGRIND'))
-config.set('SUPPORT_DIFF_FUZZ', get_option('PCRE2_DIFF_FUZZ_SUPPORT'))
-config.set('BSR_ANYCRLF', get_option('PCRE2_SUPPORT_BSR_ANYCRLF'))
+  get_option('pcre2grep_support_callout') and get_option('pcre2grep_support_callout_fork'))
+config.set('SUPPORT_UNICODE', get_option('pcre2_support_unicode'))
+config.set('SUPPORT_VALGRIND', get_option('pcre2_support_valgrind'))
+config.set('SUPPORT_DIFF_FUZZ', get_option('pcre2_diff_fuzz_support'))
+config.set('BSR_ANYCRLF', get_option('pcre2_support_bsr_anycrlf'))
 config.set('EBCDIC', ebcdic)
-config.set('EBCDIC_NL25', get_option('PCRE2_EBCDIC_NL25'))
-config.set('EBCDIC_IGNORING_COMPILER', get_option('PCRE2_EBCDIC_IGNORING_COMPILER'))
-config.set('NEVER_BACKSLASH_C', get_option('PCRE2_NEVER_BACKSLASH_C'))
-foreach option : [
-  'PCRE2_LINK_SIZE',
-  'PCRE2_HEAP_LIMIT',
-  'PCRE2_MATCH_LIMIT',
-  'PCRE2_MATCH_LIMIT_DEPTH',
-  'PCRE2_MAX_VARLOOKBEHIND',
-  'PCRE2_PARENS_NEST_LIMIT',
-  'PCRE2GREP_BUFSIZE',
-  'PCRE2GREP_MAX_BUFSIZE',
-]
-  config.set(option, get_option(option))
+config.set('EBCDIC_NL25', get_option('pcre2_ebcdic_nl25'))
+config.set('EBCDIC_IGNORING_COMPILER', get_option('pcre2_ebcdic_ignoring_compiler'))
+config.set('NEVER_BACKSLASH_C', get_option('pcre2_never_backslash_c'))
+config_options = {
+  'PCRE2_LINK_SIZE': 'pcre2_link_size',
+  'PCRE2_HEAP_LIMIT': 'pcre2_heap_limit',
+  'PCRE2_MATCH_LIMIT': 'pcre2_match_limit',
+  'PCRE2_MATCH_LIMIT_DEPTH': 'pcre2_match_limit_depth',
+  'PCRE2_MAX_VARLOOKBEHIND': 'pcre2_max_varlookbehind',
+  'PCRE2_PARENS_NEST_LIMIT': 'pcre2_parens_nest_limit',
+  'PCRE2GREP_BUFSIZE': 'pcre2grep_bufsize',
+  'PCRE2GREP_MAX_BUFSIZE': 'pcre2grep_max_bufsize',
+}
+foreach config_name, option_name : config_options
+  config.set(config_name, get_option(option_name))
 endforeach
+
+# -----------------------------------------------------------------------------
+# Generated files
+# -----------------------------------------------------------------------------
 
 config_h = configure_file(
   input: 'src/config-meson.h.in',
@@ -292,6 +320,10 @@ pcre2posix_h = configure_file(
   copy: true,
 )
 
+# -----------------------------------------------------------------------------
+# Character table generation
+# -----------------------------------------------------------------------------
+
 if rebuild_chartables
   pcre2_dftables = executable(
     'pcre2_dftables',
@@ -312,7 +344,7 @@ elif not ebcdic
     output: 'pcre2_chartables.c',
     copy: true,
   )
-elif get_option('PCRE2_EBCDIC_NL25')
+elif get_option('pcre2_ebcdic_nl25')
   chartables = configure_file(
     input: 'src/pcre2_chartables.c.ebcdic-1047-nl25',
     output: 'pcre2_chartables.c',
@@ -325,6 +357,10 @@ else
     copy: true,
   )
 endif
+
+# -----------------------------------------------------------------------------
+# Source code
+# -----------------------------------------------------------------------------
 
 pcre2_sources = files(
   'src/pcre2_auto_possess.c',
@@ -359,31 +395,55 @@ pcre2_sources = files(
   'src/pcre2_xclass.c',
 )
 pcre2_sources += [chartables, config_h, pcre2_h]
+fs = import('fs')
+pcre2_resource = []
+pcre2_posix_resource = []
+if host_is_windows and build_shared
+  windows_module = import('windows')
+  if fs.exists('pcre2.rc')
+    pcre2_resource = windows_module.compile_resources('pcre2.rc')
+  endif
+  if fs.exists('pcre2posix.rc')
+    pcre2_posix_resource = windows_module.compile_resources('pcre2posix.rc')
+  endif
+endif
 pcre2_includes = include_directories('.', 'src')
 private_deps = jit_enabled ? [thread_dep] : []
 common_c_args = ['-DHAVE_CONFIG_H']
-debug_option = get_option('PCRE2_DEBUG')
+debug_option = get_option('pcre2_debug')
 if debug_option == 'ON' or (debug_option == 'IfDebugBuild' and get_option('buildtype') == 'debug')
   common_c_args += '-DPCRE2_DEBUG'
 endif
 
-# Configure Linux/GNU symbol version scripts.
+# Configure GNU version scripts or Sun linker map files.
 symbol_files = {}
 foreach library : ['pcre2-8', 'pcre2-16', 'pcre2-32', 'pcre2-posix']
   symbol_files += {
     library: configure_file(
       input: 'src/lib@0@.sym.in'.format(library),
       output: 'lib@0@.sym'.format(library),
-      configuration: {'PCRE2_EXTRA_LOCAL_SYMS': ''},
+      configuration: {'PCRE2_EXTRA_LOCAL_SYMS': '  local: *;'},
     ),
   }
 endforeach
-have_vscript = cc.has_link_argument(
-  '-Wl,--version-script=' + meson.current_build_dir() / 'libpcre2-8.sym',
-)
-use_vscript = have_vscript and get_option('PCRE2_SYMVERS')
+vscript_flag = ''
+if not msvc_like and get_option('pcre2_symvers')
+  vscript_path = meson.current_build_dir() / 'libpcre2-8.sym'
+  if cc.has_link_argument('-Wl,--version-script=' + vscript_path)
+    vscript_flag = '--version-script'
+  elif cc.has_link_argument('-Wl,-M,' + vscript_path)
+    vscript_flag = '-M'
+  endif
+endif
+use_vscript = vscript_flag != ''
 
-# Libraries. Separate targets preserve CMake's independent static/shared options.
+# -----------------------------------------------------------------------------
+# Libraries
+# -----------------------------------------------------------------------------
+
+# Separate targets preserve CMake's independent static/shared options.
+static_output_names = {}
+shared_output_names = {}
 foreach width : ['8', '16', '32']
   enabled = width == '8' ? build_8 : build_16
   if width == '32'
@@ -395,15 +455,22 @@ foreach width : ['8', '16', '32']
   name = 'pcre2-' + width
   width_args = common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=' + width]
   if build_static
+    static_name = name + windows_debug_postfix
+    if msvc_like
+      static_name = name + '-static' + windows_debug_postfix
+    endif
     static_lib = static_library(
-      name,
+      static_name,
       pcre2_sources,
       include_directories: pcre2_includes,
       dependencies: private_deps,
-      c_args: width_args,
-      pic: get_option('PCRE2_STATIC_PIC'),
+      c_args: width_args + ['-DPCRE2_STATIC'],
+      pic: get_option('pcre2_static_pic'),
+      name_suffix: msvc_like ? 'lib' : [],
+      gnu_symbol_visibility: 'hidden',
       install: true,
     )
+    static_output_names += {width: fs.name(static_lib.full_path())}
     static_dep = declare_dependency(
       link_with: static_lib,
       include_directories: pcre2_includes,
@@ -415,20 +482,28 @@ foreach width : ['8', '16', '32']
     set_variable('pcre2_' + width + '_static_dep', static_dep)
   endif
   if build_shared
-    link_args = use_vscript ? ['-Wl,--version-script=' + meson.current_build_dir() / ('lib' + name + '.sym')] : []
+    shared_name = name + windows_debug_postfix
+    if mingw and get_option('non_standard_lib_suffix')
+      shared_name += '-0'
+    endif
+    shared_name_prefix = mingw and get_option('non_standard_lib_prefix') ? '' : []
+    link_args = use_vscript ? ['-Wl,' + vscript_flag + ',' + meson.current_build_dir() / ('lib' + name + '.sym')] : []
     shared_lib = shared_library(
-      name,
-      pcre2_sources,
+      shared_name,
+      pcre2_sources + pcre2_resource,
       include_directories: pcre2_includes,
       dependencies: private_deps,
       c_args: width_args,
       link_args: link_args,
       link_depends: use_vscript ? symbol_files[name] : [],
-      version: lib_versions[width],
-      soversion: lib_soversions[width],
+      version: host_is_windows ? '' : lib_versions[width],
+      soversion: host_is_windows ? '' : lib_soversions[width],
+      darwin_versions: lib_darwin_versions[width],
+      name_prefix: shared_name_prefix,
       gnu_symbol_visibility: 'hidden',
       install: true,
     )
+    shared_output_names += {width: fs.name(shared_lib.full_path())}
     shared_dep = declare_dependency(
       link_with: shared_lib,
       include_directories: pcre2_includes,
@@ -445,18 +520,25 @@ endforeach
 
 if build_8
   if build_static
+    posix_static_name = 'pcre2-posix' + windows_debug_postfix
+    if msvc_like
+      posix_static_name = 'pcre2-posix-static' + windows_debug_postfix
+    endif
     pcre2_posix_static = static_library(
-      'pcre2-posix',
+      posix_static_name,
       'src/pcre2posix.c',
       config_h,
       pcre2_h,
       pcre2posix_h,
       include_directories: pcre2_includes,
       dependencies: pcre2_8_static_dep,
-      c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8'],
-      pic: get_option('PCRE2_STATIC_PIC'),
+      c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2_STATIC'],
+      pic: get_option('pcre2_static_pic'),
+      name_suffix: msvc_like ? 'lib' : [],
+      gnu_symbol_visibility: 'hidden',
       install: true,
     )
+    static_output_names += {'posix': fs.name(pcre2_posix_static.full_path())}
     pcre2_posix_static_dep = declare_dependency(
       link_with: pcre2_posix_static,
       include_directories: pcre2_includes,
@@ -466,10 +548,16 @@ if build_8
     )
   endif
   if build_shared
-    posix_link_args = use_vscript ? ['-Wl,--version-script=' + meson.current_build_dir() / 'libpcre2-posix.sym'] : []
+    posix_shared_name = 'pcre2-posix' + windows_debug_postfix
+    if mingw and get_option('non_standard_lib_suffix')
+      posix_shared_name += '-0'
+    endif
+    posix_shared_name_prefix = mingw and get_option('non_standard_lib_prefix') ? '' : []
+    posix_link_args = use_vscript ? ['-Wl,' + vscript_flag + ',' + meson.current_build_dir() / 'libpcre2-posix.sym'] : []
     pcre2_posix_shared = shared_library(
-      'pcre2-posix',
+      posix_shared_name,
       'src/pcre2posix.c',
+      pcre2_posix_resource,
       config_h,
       pcre2_h,
       pcre2posix_h,
@@ -478,11 +566,14 @@ if build_8
       c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2POSIX_SHARED'],
       link_args: posix_link_args,
       link_depends: use_vscript ? symbol_files['pcre2-posix'] : [],
-      version: lib_versions['posix'],
-      soversion: lib_soversions['posix'],
+      version: host_is_windows ? '' : lib_versions['posix'],
+      soversion: host_is_windows ? '' : lib_soversions['posix'],
+      darwin_versions: lib_darwin_versions['posix'],
+      name_prefix: posix_shared_name_prefix,
       gnu_symbol_visibility: 'hidden',
       install: true,
     )
+    shared_output_names += {'posix': fs.name(pcre2_posix_shared.full_path())}
     pcre2_posix_shared_dep = declare_dependency(
       link_with: pcre2_posix_shared,
       include_directories: pcre2_includes,
@@ -495,7 +586,10 @@ if build_8
   meson.override_dependency('libpcre2-posix', libpcre2_posix)
 endif
 
-# Generate pkg-config files.
+# -----------------------------------------------------------------------------
+# Package metadata
+# -----------------------------------------------------------------------------
+
 pkg = import('pkgconfig')
 foreach width : ['8', '16', '32']
   enabled = width == '8' ? build_8 : build_16
@@ -549,14 +643,15 @@ pcre2_config = configure_file(
   install_mode: 'rwxr-xr-x',
 )
 
-# CMake package files. Meson has no target-export API, so define the installed
-# Linux targets explicitly while retaining the public CMake package interface.
-cmake_install_dir = get_option('PCRE2_INSTALL_CMAKEDIR')
+# CMake package files. Meson has no target-export API, so define imported
+# targets using the filenames generated for this host platform.
+cmake_install_dir = get_option('pcre2_install_cmakedir')
 if cmake_install_dir == ''
   cmake_install_dir = get_option('libdir') / 'cmake/pcre2'
 endif
 cmake_target_definitions = ''
-cmake_thread_interface = jit_enabled ? ' INTERFACE_LINK_LIBRARIES "Threads::Threads"' : ''
+cmake_release_properties = ''
+cmake_thread_interface = jit_enabled ? '  INTERFACE_LINK_LIBRARIES "Threads::Threads"\n' : ''
 foreach width : ['8', '16', '32']
   enabled = width == '8' ? build_8 : build_16
   if width == '32'
@@ -569,18 +664,47 @@ foreach width : ['8', '16', '32']
     cmake_target_definitions += '''
 add_library(pcre2::pcre2-@0@-static STATIC IMPORTED)
 set_target_properties(pcre2::pcre2-@0@-static PROPERTIES
-  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/@1@/libpcre2-@0@.a"
   INTERFACE_COMPILE_DEFINITIONS "PCRE2_STATIC"
-  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@2@"@3@)
-'''.format(width, get_option('libdir'), get_option('includedir'), cmake_thread_interface)
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@1@"
+@2@)
+'''.format(width, get_option('includedir'), cmake_thread_interface)
+    cmake_release_properties += '''
+set_property(TARGET pcre2::pcre2-@0@-static APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(pcre2::pcre2-@0@-static PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+  IMPORTED_LOCATION_RELEASE "${PACKAGE_PREFIX_DIR}/@1@/@2@")
+'''.format(width, get_option('libdir'), static_output_names[width])
   endif
   if build_shared
     cmake_target_definitions += '''
 add_library(pcre2::pcre2-@0@-shared SHARED IMPORTED)
 set_target_properties(pcre2::pcre2-@0@-shared PROPERTIES
-  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/@1@/libpcre2-@0@.so"
-  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@2@"@3@)
-'''.format(width, get_option('libdir'), get_option('includedir'), cmake_thread_interface)
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@1@"
+@2@)
+'''.format(width, get_option('includedir'), cmake_thread_interface)
+    shared_install_name = shared_output_names[width]
+    shared_soname_property = ''
+    shared_import_property = ''
+    shared_install_dir = get_option('libdir')
+    if host_is_windows
+      shared_install_dir = get_option('bindir')
+      import_filename = shared_output_names[width].replace('.dll', '')
+      import_filename += msvc_like ? '.lib' : '.dll.a'
+      shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
+        get_option('libdir'), import_filename)
+    elif host_machine.system() == 'darwin'
+      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@rpath/@0@"\n'.format(shared_install_name)
+    elif host_machine.system() != 'cygwin'
+      unversioned_name = shared_output_names[width].replace('.' + lib_versions[width], '')
+      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@0@.@1@"\n'.format(
+        unversioned_name, lib_soversions[width])
+    endif
+    cmake_release_properties += '''
+set_property(TARGET pcre2::pcre2-@0@-shared APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(pcre2::pcre2-@0@-shared PROPERTIES
+  IMPORTED_LOCATION_RELEASE "${PACKAGE_PREFIX_DIR}/@1@/@2@"
+@3@@4@)
+'''.format(width, shared_install_dir, shared_install_name, shared_import_property, shared_soname_property)
   endif
 endforeach
 if build_8
@@ -588,27 +712,61 @@ if build_8
     cmake_target_definitions += '''
 add_library(pcre2::pcre2-posix-static STATIC IMPORTED)
 set_target_properties(pcre2::pcre2-posix-static PROPERTIES
-  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/@0@/libpcre2-posix.a"
   INTERFACE_COMPILE_DEFINITIONS "PCRE2_STATIC"
-  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@1@"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@0@"
   INTERFACE_LINK_LIBRARIES "pcre2::pcre2-8-static")
-'''.format(get_option('libdir'), get_option('includedir'))
+'''.format(get_option('includedir'))
+    cmake_release_properties += '''
+set_property(TARGET pcre2::pcre2-posix-static APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(pcre2::pcre2-posix-static PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+  IMPORTED_LOCATION_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@")
+'''.format(get_option('libdir'), static_output_names['posix'])
   endif
   if build_shared
     cmake_target_definitions += '''
 add_library(pcre2::pcre2-posix-shared SHARED IMPORTED)
 set_target_properties(pcre2::pcre2-posix-shared PROPERTIES
-  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/@0@/libpcre2-posix.so"
   INTERFACE_COMPILE_DEFINITIONS "PCRE2POSIX_SHARED"
-  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@1@"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@0@"
   INTERFACE_LINK_LIBRARIES "pcre2::pcre2-8-shared")
-'''.format(get_option('libdir'), get_option('includedir'))
+'''.format(get_option('includedir'))
+    shared_install_name = shared_output_names['posix']
+    shared_soname_property = ''
+    shared_import_property = ''
+    shared_install_dir = get_option('libdir')
+    if host_is_windows
+      shared_install_dir = get_option('bindir')
+      import_filename = shared_output_names['posix'].replace('.dll', '')
+      import_filename += msvc_like ? '.lib' : '.dll.a'
+      shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
+        get_option('libdir'), import_filename)
+    elif host_machine.system() == 'darwin'
+      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@rpath/@0@"\n'.format(shared_install_name)
+    elif host_machine.system() != 'cygwin'
+      unversioned_name = shared_output_names['posix'].replace('.' + lib_versions['posix'], '')
+      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@0@.@1@"\n'.format(
+        unversioned_name, lib_soversions['posix'])
+    endif
+    cmake_release_properties += '''
+set_property(TARGET pcre2::pcre2-posix-shared APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(pcre2::pcre2-posix-shared PROPERTIES
+  IMPORTED_LOCATION_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"
+@2@@3@)
+'''.format(shared_install_dir, shared_install_name, shared_import_property, shared_soname_property)
   endif
 endif
 configure_file(
   input: 'meson/pcre2-targets.cmake.in',
   output: 'pcre2-targets.cmake',
   configuration: {'TARGET_DEFINITIONS': cmake_target_definitions},
+  install: true,
+  install_dir: cmake_install_dir,
+)
+configure_file(
+  input: 'meson/pcre2-targets-release.cmake.in',
+  output: 'pcre2-targets-release.cmake',
+  configuration: {'RELEASE_PROPERTIES': cmake_release_properties},
   install: true,
   install_dir: cmake_install_dir,
 )
@@ -630,7 +788,10 @@ cmake.write_basic_package_version_file(
   install_dir: cmake_install_dir,
 )
 
-# Executables.
+# -----------------------------------------------------------------------------
+# Executables
+# -----------------------------------------------------------------------------
+
 if build_grep
   grep_deps = [libpcre2_posix]
   if zlib_dep.found()
@@ -651,7 +812,11 @@ if build_grep
   )
 endif
 
-if get_option('PCRE2_BUILD_TESTS')
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+
+if get_option('pcre2_build_tests')
   test_deps = []
   foreach width : ['8', '16', '32']
     enabled = width == '8' ? build_8 : build_16
@@ -678,6 +843,7 @@ if get_option('PCRE2_BUILD_TESTS')
     include_directories: pcre2_includes,
     dependencies: test_deps,
     c_args: common_c_args,
+    link_args: msvc_like ? ['/STACK:2500000'] : [],
   )
   if build_8
     pcre2posix_test = executable(
@@ -752,8 +918,11 @@ if get_option('PCRE2_BUILD_TESTS')
   endif
 endif
 
-# Fuzzer support.
-if get_option('PCRE2_FUZZ_SUPPORT')
+# -----------------------------------------------------------------------------
+# Fuzzer support
+# -----------------------------------------------------------------------------
+
+if get_option('pcre2_fuzz_support')
   foreach width : ['8', '16', '32']
     enabled = width == '8' ? build_8 : build_16
     if width == '32'
@@ -783,9 +952,12 @@ if get_option('PCRE2_FUZZ_SUPPORT')
   endforeach
 endif
 
-# Installation.
+# -----------------------------------------------------------------------------
+# Installation
+# -----------------------------------------------------------------------------
+
 install_headers(pcre2_h, pcre2posix_h)
-install_man(
+man_pages = [
   'doc/pcre2-config.1',
   'doc/pcre2grep.1',
   'doc/pcre2test.1',
@@ -894,7 +1066,10 @@ install_man(
   'doc/pcre2serialize.3',
   'doc/pcre2syntax.3',
   'doc/pcre2unicode.3',
-)
+]
+foreach man_page : man_pages
+  install_man('doc/man' / man_page.split('/')[1])
+endforeach
 install_data(
   'AUTHORS.md',
   'COPYING',
@@ -915,10 +1090,14 @@ install_subdir(
   install_dir: get_option('datadir') / 'doc/pcre2',
 )
 
-if get_option('PCRE2_HEAP_MATCH_RECURSE')
+# -----------------------------------------------------------------------------
+# Configuration summary
+# -----------------------------------------------------------------------------
+
+if get_option('pcre2_heap_match_recurse')
   warning('PCRE2_HEAP_MATCH_RECURSE is obsolete and does nothing.')
 endif
-if get_option('PCRE2_SHOW_REPORT')
+if get_option('pcre2_show_report')
   summary(
     {
       'Install prefix': get_option('prefix'),
@@ -928,32 +1107,32 @@ if get_option('PCRE2_SHOW_REPORT')
       'Build 32 bit pcre2 library': build_32,
       'Include debugging code': debug_option,
       'Enable JIT compiling support': jit_enabled,
-      'Use SELinux allocator in JIT': get_option('PCRE2_SUPPORT_JIT_SEALLOC'),
-      'Enable Unicode support': get_option('PCRE2_SUPPORT_UNICODE'),
-      'Newline char/sequence': get_option('PCRE2_NEWLINE'),
-      '\\R matches only ANYCRLF': get_option('PCRE2_SUPPORT_BSR_ANYCRLF'),
-      '\\C is disabled': get_option('PCRE2_NEVER_BACKSLASH_C'),
+      'Use SELinux allocator in JIT': get_option('pcre2_support_jit_sealloc'),
+      'Enable Unicode support': get_option('pcre2_support_unicode'),
+      'Newline char/sequence': get_option('pcre2_newline'),
+      '\\R matches only ANYCRLF': get_option('pcre2_support_bsr_anycrlf'),
+      '\\C is disabled': get_option('pcre2_never_backslash_c'),
       'EBCDIC coding': ebcdic,
       'Rebuild char tables': rebuild_chartables,
-      'Internal link size': get_option('PCRE2_LINK_SIZE'),
-      'Maximum variable lookbehind': get_option('PCRE2_MAX_VARLOOKBEHIND'),
-      'Nested parentheses limit': get_option('PCRE2_PARENS_NEST_LIMIT'),
-      'Heap limit': get_option('PCRE2_HEAP_LIMIT'),
-      'Match limit': get_option('PCRE2_MATCH_LIMIT'),
-      'Match depth limit': get_option('PCRE2_MATCH_LIMIT_DEPTH'),
+      'Internal link size': get_option('pcre2_link_size'),
+      'Maximum variable lookbehind': get_option('pcre2_max_varlookbehind'),
+      'Nested parentheses limit': get_option('pcre2_parens_nest_limit'),
+      'Heap limit': get_option('pcre2_heap_limit'),
+      'Match limit': get_option('pcre2_match_limit'),
+      'Match depth limit': get_option('pcre2_match_limit_depth'),
       'Build shared libs': build_shared,
       'with symbol versioning': use_vscript,
       'Build static libs': build_static,
-      'with PIC enabled': get_option('PCRE2_STATIC_PIC'),
+      'with PIC enabled': get_option('pcre2_static_pic'),
       'Build pcre2grep': build_grep,
-      'Build tests': get_option('PCRE2_BUILD_TESTS'),
+      'Build tests': get_option('pcre2_build_tests'),
       'Link pcre2grep with libz': zlib_dep.found(),
       'Link pcre2grep with libbz2': bzip2_dep.found(),
       'Link pcre2test with libeditline': editline_dep.found(),
       'Link pcre2test with libreadline': readline_dep.found(),
-      'Enable Valgrind support': get_option('PCRE2_SUPPORT_VALGRIND'),
-      'Fuzzer support': get_option('PCRE2_FUZZ_SUPPORT'),
-      'Differential fuzzer support': get_option('PCRE2_DIFF_FUZZ_SUPPORT'),
+      'Enable Valgrind support': get_option('pcre2_support_valgrind'),
+      'Fuzzer support': get_option('pcre2_fuzz_support'),
+      'Differential fuzzer support': get_option('pcre2_diff_fuzz_support'),
     },
     section: 'PCRE2-' + meson.project_version() + ' configuration',
   )
