@@ -1319,14 +1319,6 @@ if(PCRE2_BUILD_TESTS)
 
   set(PCRE2TEST_SOURCES src/pcre2test.c)
 
-  set(PCRE2TEST_LINKER_FLAGS "")
-  if(MSVC)
-    # This is needed to avoid a stack overflow error in the standard tests. The
-    # flag should be indicated with a forward-slash instead of a hyphen, but
-    # then CMake treats it as a file path.
-    set(PCRE2TEST_LINKER_FLAGS -STACK:2500000)
-  endif()
-
   add_executable(pcre2test ${PCRE2TEST_SOURCES})
   list(APPEND TARGETS pcre2test)
   if(PCRE2_BUILD_PCRE2_8)
@@ -1338,7 +1330,11 @@ if(PCRE2_BUILD_TESTS)
   if(PCRE2_BUILD_PCRE2_32)
     list(APPEND PCRE2TEST_LIBS pcre2-32)
   endif()
-  target_link_libraries(pcre2test ${PCRE2TEST_LIBS} ${PCRE2TEST_LINKER_FLAGS})
+  target_link_libraries(pcre2test ${PCRE2TEST_LIBS})
+  if(MSVC)
+    # This is needed to avoid a stack overflow error in the standard tests.
+    target_link_options(pcre2test PRIVATE /STACK:2500000)
+  endif()
 
   if(PCRE2_BUILD_PCRE2_8)
     add_executable(pcre2posix_test src/pcre2posix_test.c)
