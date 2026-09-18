@@ -483,25 +483,34 @@ foreach width : ['8', '16', '32']
   endif
   if build_shared
     shared_name = name + windows_debug_postfix
-    if mingw and get_option('non_standard_lib_suffix')
-      shared_name += '-0'
-    endif
     shared_name_prefix = mingw and get_option('non_standard_lib_prefix') ? '' : []
     link_args = use_vscript ? ['-Wl,' + vscript_flag + ',' + meson.current_build_dir() / ('lib' + name + '.sym')] : []
+    shared_kwargs = {
+      'include_directories': pcre2_includes,
+      'dependencies': private_deps,
+      'c_args': width_args,
+      'link_args': link_args,
+      'link_depends': use_vscript ? symbol_files[name] : [],
+      'name_prefix': shared_name_prefix,
+      'gnu_symbol_visibility': 'hidden',
+      'install': true,
+    }
+    if mingw and get_option('non_standard_lib_suffix')
+      shared_kwargs += {'soversion': '0'}
+    endif
+    if not host_is_windows
+      shared_kwargs += {
+        'version': lib_versions[width],
+        'soversion': lib_soversions[width],
+      }
+    endif
+    if host_machine.system() == 'darwin'
+      shared_kwargs += {'darwin_versions': lib_darwin_versions[width]}
+    endif
     shared_lib = shared_library(
       shared_name,
       pcre2_sources + pcre2_resource,
-      include_directories: pcre2_includes,
-      dependencies: private_deps,
-      c_args: width_args,
-      link_args: link_args,
-      link_depends: use_vscript ? symbol_files[name] : [],
-      version: host_is_windows ? '' : lib_versions[width],
-      soversion: host_is_windows ? '' : lib_soversions[width],
-      darwin_versions: lib_darwin_versions[width],
-      name_prefix: shared_name_prefix,
-      gnu_symbol_visibility: 'hidden',
-      install: true,
+      kwargs: shared_kwargs,
     )
     shared_output_names += {width: fs.name(shared_lib.full_path())}
     shared_dep = declare_dependency(
@@ -549,11 +558,30 @@ if build_8
   endif
   if build_shared
     posix_shared_name = 'pcre2-posix' + windows_debug_postfix
-    if mingw and get_option('non_standard_lib_suffix')
-      posix_shared_name += '-0'
-    endif
     posix_shared_name_prefix = mingw and get_option('non_standard_lib_prefix') ? '' : []
     posix_link_args = use_vscript ? ['-Wl,' + vscript_flag + ',' + meson.current_build_dir() / 'libpcre2-posix.sym'] : []
+    posix_shared_kwargs = {
+      'include_directories': pcre2_includes,
+      'dependencies': pcre2_8_shared_dep,
+      'c_args': common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2POSIX_SHARED'],
+      'link_args': posix_link_args,
+      'link_depends': use_vscript ? symbol_files['pcre2-posix'] : [],
+      'name_prefix': posix_shared_name_prefix,
+      'gnu_symbol_visibility': 'hidden',
+      'install': true,
+    }
+    if mingw and get_option('non_standard_lib_suffix')
+      posix_shared_kwargs += {'soversion': '0'}
+    endif
+    if not host_is_windows
+      posix_shared_kwargs += {
+        'version': lib_versions['posix'],
+        'soversion': lib_soversions['posix'],
+      }
+    endif
+    if host_machine.system() == 'darwin'
+      posix_shared_kwargs += {'darwin_versions': lib_darwin_versions['posix']}
+    endif
     pcre2_posix_shared = shared_library(
       posix_shared_name,
       'src/pcre2posix.c',
@@ -561,17 +589,7 @@ if build_8
       config_h,
       pcre2_h,
       pcre2posix_h,
-      include_directories: pcre2_includes,
-      dependencies: pcre2_8_shared_dep,
-      c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2POSIX_SHARED'],
-      link_args: posix_link_args,
-      link_depends: use_vscript ? symbol_files['pcre2-posix'] : [],
-      version: host_is_windows ? '' : lib_versions['posix'],
-      soversion: host_is_windows ? '' : lib_soversions['posix'],
-      darwin_versions: lib_darwin_versions['posix'],
-      name_prefix: posix_shared_name_prefix,
-      gnu_symbol_visibility: 'hidden',
-      install: true,
+      kwargs: posix_shared_kwargs,
     )
     shared_output_names += {'posix': fs.name(pcre2_posix_shared.full_path())}
     pcre2_posix_shared_dep = declare_dependency(
@@ -689,6 +707,9 @@ set_target_properties(pcre2::pcre2-@0@-shared PROPERTIES
     if host_is_windows
       shared_install_dir = get_option('bindir')
       import_filename = shared_output_names[width].replace('.dll', '')
+      if mingw and get_option('non_standard_lib_suffix')
+        import_filename = import_filename.replace('-0', '')
+      endif
       import_filename += msvc_like ? '.lib' : '.dll.a'
       shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
         get_option('libdir'), import_filename)
@@ -738,6 +759,9 @@ set_target_properties(pcre2::pcre2-posix-shared PROPERTIES
     if host_is_windows
       shared_install_dir = get_option('bindir')
       import_filename = shared_output_names['posix'].replace('.dll', '')
+      if mingw and get_option('non_standard_lib_suffix')
+        import_filename = import_filename.replace('-0', '')
+      endif
       import_filename += msvc_like ? '.lib' : '.dll.a'
       shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
         get_option('libdir'), import_filename)

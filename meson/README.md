@@ -63,6 +63,13 @@ and shared compile commands, hidden symbols from PIC static archives embedded
 in a shared object, GNU-versioned shared exports, installation, and standalone
 CMake consumers using both shared and static package aliases.
 
+A Windows GNU cross-build using Zig has also been checked with all code-unit
+widths and both library variants. Release and debug-postfixed DLLs, static
+archives, import libraries, both MinGW compatibility naming options, install
+layout, generated CMake artifact paths, and relocated shared and static CMake
+consumer links were verified. The resulting consumers are x86-64 PE
+executables; runtime execution was not available in this environment.
+
 The static/shared regression check can be repeated with:
 
 ```sh
@@ -92,9 +99,11 @@ python3 maint/meson-tests/check-static-shared.py build-meson-variants
 5. Symbol maps conservatively retain `local: *;`. Reliably proving that a
    linker accepts an omitted wildcard requires a shared-library link probe,
    which Meson's compiler checks do not directly provide.
-6. Windows/MSVC, MinGW, Darwin, and Sun-linker paths are implemented but have
-   not been executed on those hosts in this effort. Native artifact, consumer,
-   symbol, and runtime checks remain TODOs for the future CI integration.
+6. Windows GNU paths have been cross-built, but native Windows execution, MSVC
+   artifacts and PDBs, and resource compilation remain unchecked. The resource
+   inputs are not present in this checkout. Darwin and Sun-linker paths also
+   remain unexecuted. These native checks remain TODOs for future CI
+   integration.
 7. `src/config-meson.h.in` mirrors `src/config-cmake.h.in` because their
    substitution directives differ. Changes to configuration macros must be
    applied to both; no template-sync tooling is planned.
