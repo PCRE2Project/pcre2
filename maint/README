@@ -32,6 +32,11 @@ CleanTxt
   A Perl script to clean up the nroff output in PCRE2 man pages, used by
   UpdateAlways.
 
+cmake-tests
+  CMake projects that exercise PCRE2 as a build-tree dependency and as an
+  installed package. The check-interface.py runner builds and runs both static
+  and shared consumers and verifies their dynamic library dependencies.
+
 Detrail
   A Perl script to remove trailing whitespace from PCRE2 files, used by
   UpdateAlways.
@@ -80,6 +85,11 @@ ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
   different configuration settings.
 
+meson-tests
+  Meson projects and Python runners that check static/shared implementation
+  details, native subproject dependencies, and Meson consumption of installed
+  CMake packages.
+
 UpdateAlways
   A shell script to ensure that all auto-generated outputs are ready for
   release.
@@ -123,6 +133,11 @@ RunManifestTest
 RunManifestTest.ps1
   Scripts to generate and verify a list of files against an expected 'manifest'
   detailing what the directory should contain.
+
+RunSymbolTest
+RunSymbolTest.ps1
+  Scripts to verify the exported symbols of installed shared libraries against
+  the manifest-libpcre2-*.so files.
 
 Unicode.tables
   The files in this directory were downloaded from the Unicode web site. They

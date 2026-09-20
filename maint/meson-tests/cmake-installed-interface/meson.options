@@ -1,0 +1,7 @@
+option(
+  'linkage',
+  type: 'combo',
+  choices: ['default', 'static', 'shared'],
+  value: 'default',
+  description: 'Installed PCRE2 CMake target linkage',
+)

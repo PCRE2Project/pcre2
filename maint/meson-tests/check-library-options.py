@@ -23,6 +23,7 @@ def run_case(source_dir, work_dir, case):
     request_shared = library_type in ('shared', 'both')
     setup_command = [
         'meson', 'setup', str(build_dir), str(source_dir),
+        '--wrap-mode=forcefallback',
         f'-Dexpect_default_static={str(default_static).lower()}',
         f'-Drequest_static={str(request_static).lower()}',
         f'-Drequest_shared={str(request_shared).lower()}',
