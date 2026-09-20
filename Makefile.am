@@ -1184,7 +1184,6 @@ EXTRA_DIST += \
 ## Meson support
 
 EXTRA_DIST += \
-  meson/README.md \
   meson/pcre2-targets-release.cmake.in \
   meson/pcre2-targets.cmake.in \
   src/config-meson.h.in \

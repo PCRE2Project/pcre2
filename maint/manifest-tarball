@@ -431,7 +431,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/m4
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/meson
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/meson.build
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/meson.options
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/meson/README.md
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/meson/pcre2-targets-release.cmake.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/meson/pcre2-targets.cmake.in
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/missing
