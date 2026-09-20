@@ -31,30 +31,42 @@
 pcre2_substring_length_bynumber \- find length of numbered substring
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_substring_length_bynumber(pcre2_match_data *match_data,
-                                    uint32_t stringnumber,
-                                    PCRE2_SIZE *sizeptr);
+\fBint\fP pcre2_substring_length_bynumber(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                                    \fBuint32_t\fP \fIstringnumber\fP,
+                                    \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function returns the length of a matched substring, identified by number.
 The arguments are:
 .sp
-.ti +2
-\fImatch_data\fP   The match data block for the match
-.br
-.ti +2
-\fInumber\fP       The substring number
-.br
-.ti +2
-\fIlength\fP       Where to return the length, or NULL
+.RS 4
+.PD 0
+.TP 13
+\fImatch_data\fP
+.ad l
+The match data block for the match
+.TP 13
+\fIstringnumber\fP
+.ad l
+The substring number
+.TP 13
+\fIsizeptr\fP
+.ad l
+Where to return the length, or \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-The third argument may be NULL if all you want to know is whether or not a
+The third argument may be \f(CRNULL\fP if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise. After a partial match, only substring 0 is available.
 .sp

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_general_context *pcre2_general_context_create(
       void *(*private_malloc)(size_t size, void *memory_data),
@@ -463,9 +463,9 @@ pcre2_general_context *pcre2_general_context_create(
 <div class="paragraph">
 <p>This function creates and initializes a general context. The arguments define
 custom memory management functions and a data value that is passed to them when
-they are called. The <code>private_malloc()</code> function is used to get memory for
-the context. If either of the first two arguments is NULL, the system memory
-management function is used. The result is NULL if no memory could be obtained.</p>
+they are called. The <code class="parameter">private_malloc</code>() function is used to get memory for
+the context. If either of the first two arguments is <code class="c">NULL</code>, the system memory
+management function is used. The result is <code class="c">NULL</code> if no memory could be obtained.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

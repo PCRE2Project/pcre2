@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_jit_stack *pcre2_jit_stack_create(
       size_t startsize, size_t maxsize,
@@ -463,13 +463,13 @@ pcre2_jit_stack *pcre2_jit_stack_create(
 <p>This function is used to create a stack for use by the code compiled by the JIT
 compiler. The first two arguments are a starting size for the stack, and a
 maximum size to which it is allowed to grow. The final argument is a general
-context, for memory allocation functions, or NULL for standard memory
+context, for memory allocation functions, or <code class="c">NULL</code> for standard memory
 allocation. The result can be passed to the JIT run-time code by calling
-<code>pcre2_jit_stack_assign()</code> to associate the stack with a compiled pattern,
-which can then be processed by <code>pcre2_match()</code> or <code>pcre2_jit_match()</code>.
+<code class="function">pcre2_jit_stack_assign()</code> to associate the stack with a compiled pattern,
+which can then be processed by <code class="function">pcre2_match()</code> or <code class="function">pcre2_jit_match()</code>.
 A maximum stack size of 512KiB to 1MiB should be more than enough for any
 pattern. If the stack couldn&#8217;t be allocated or the values passed were not
-reasonable, NULL will be returned. For more details, see the
+reasonable, <code class="c">NULL</code> will be returned. For more details, see the
 <a href="pcre2jit.html"><code>pcre2jit</code></a>
 page.</p>
 </div>

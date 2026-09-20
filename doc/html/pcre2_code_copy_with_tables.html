@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *code);</code></pre>
 </div>
@@ -460,11 +460,11 @@ pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *code);</code></pre>
 <div class="paragraph">
 <p>This function makes a copy of the memory used for a compiled pattern, excluding
 any memory used by the JIT compiler. Without a subsequent call to
-<code>pcre2_jit_compile()</code>, the copy can be used only for non-JIT matching.
-Unlike <code>pcre2_code_copy()</code>, a separate copy of the character tables is also
+<code class="function">pcre2_jit_compile()</code>, the copy can be used only for non-JIT matching.
+Unlike <code class="function">pcre2_code_copy()</code>, a separate copy of the character tables is also
 made, with the new code pointing to it. This memory will be automatically freed
-when <code>pcre2_code_free()</code> is called. The yield of the function is NULL if
-<em>code</em> is NULL or if sufficient memory cannot be obtained.</p>
+when <code class="function">pcre2_code_free()</code> is called. The yield of the function is <code class="c">NULL</code> if
+<code class="parameter">code</code> is <code class="c">NULL</code> or if sufficient memory cannot be obtained.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

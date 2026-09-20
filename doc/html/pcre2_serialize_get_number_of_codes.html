@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int32_t pcre2_serialize_get_number_of_codes(const uint8_t *bytes);</code></pre>
 </div>
@@ -458,19 +458,30 @@ int32_t pcre2_serialize_get_number_of_codes(const uint8_t *bytes);</code></pre>
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <em>bytes</em> argument must point to a serialized byte stream that was
-originally created by <code>pcre2_serialize_encode()</code> (though it may have been
+<p>The <code class="parameter">bytes</code> argument must point to a serialized byte stream that was
+originally created by <code class="function">pcre2_serialize_encode()</code> (though it may have been
 saved on disc or elsewhere in the meantime). The function returns the number of
 serialized patterns in the byte stream, or one of the following negative error
 codes:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_BADMAGIC  mismatch of id bytes in <em>bytes</em><br>
-PCRE2_ERROR_BADMODE   mismatch of variable unit size or PCRE version<br>
-PCRE2_ERROR_NULL      the argument is NULL</p>
+<div class="dlist errors">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADMAGIC</code></dt>
+<dd>
+<p>mismatch of id bytes in <code class="parameter">bytes</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADMODE</code></dt>
+<dd>
+<p>mismatch of variable unit size or PCRE version</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_NULL</code></dt>
+<dd>
+<p>the argument is <code class="c">NULL</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
+<p><code class="constant">PCRE2_ERROR_BADMAGIC</code> may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.</p>
 </div>
 <div class="paragraph">

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
                                  PCRE2_SIZE *length);</code></pre>
@@ -461,7 +461,7 @@ int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
 <div class="paragraph">
 <p>This function gets, from a compile context, the maximum text length (in code
 units) of the pattern that can be compiled. The result is zero for success or
-PCRE2_ERROR_NULL if either argument is NULL. The largest value a PCRE2_SIZE
+<code class="constant">PCRE2_ERROR_NULL</code> if either argument is <code class="c">NULL</code>. The largest value a <code class="type">PCRE2_SIZE</code>
 variable can hold indicates an unlimited limit.</p>
 </div>
 <div class="paragraph">

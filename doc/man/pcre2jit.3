@@ -81,7 +81,7 @@ RISC\-V 32\-bit and 64\-bit
 If \-\-enable\-jit is set on an unsupported platform, compilation fails.
 .sp
 A client program can tell if JIT support has been compiled by calling
-\f(CRpcre2_config()\fP with the PCRE2_CONFIG_JIT option. The result is one if
+pcre2_config() with the \fBPCRE2_CONFIG_JIT\fP option. The result is one if
 PCRE2 was built with JIT support, and zero otherwise. However, having the JIT
 code available does not guarantee that it will be used for any particular
 match. One reason for this is that there are a number of options and pattern
@@ -89,14 +89,14 @@ items that are
 not supported by JIT
 (see below). Another reason is that in some environments JIT is unable to get
 executable memory in which to build its compiled code. The only guarantee from
-\f(CRpcre2_config()\fP is that if it returns zero, JIT will definitely \fInot\fP
+pcre2_config() is that if it returns zero, JIT will definitely \fInot\fP
 be used.
 .sp
 As of release 10.45 there is a more informative way to test for JIT support. If
-\f(CRpcre2_compile_jit()\fP is called with the single option PCRE2_JIT_TEST_ALLOC
+pcre2_jit_compile() is called with the single option \fBPCRE2_JIT_TEST_ALLOC\fP
 it returns zero if JIT is available and has a working allocator. Otherwise it
-returns PCRE2_ERROR_NOMEMORY if JIT is available but cannot allocate executable
-memory, or PCRE2_ERROR_JIT_UNSUPPORTED if JIT support is not compiled. The
+returns \fBPCRE2_ERROR_NOMEMORY\fP if JIT is available but cannot allocate executable
+memory, or \fBPCRE2_ERROR_JIT_UNSUPPORTED\fP if JIT support is not compiled. The
 code argument is ignored, so it can be a NULL value.
 .sp
 A simple program does not need to check availability in order to use JIT when
@@ -108,53 +108,53 @@ API that is JIT\-specific.
 .SH "SIMPLE USE OF JIT"
 .sp
 To make use of the JIT support in the simplest way, all you have to do is to
-call \f(CRpcre2_jit_compile()\fP after successfully compiling a pattern with
-\f(CRpcre2_compile()\fP. This function has two arguments: the first is the
-compiled pattern pointer that was returned by \f(CRpcre2_compile()\fP, and the
-second is zero or more of the following option bits: PCRE2_JIT_COMPLETE,
-PCRE2_JIT_PARTIAL_HARD, or PCRE2_JIT_PARTIAL_SOFT.
+call pcre2_jit_compile() after successfully compiling a pattern with
+pcre2_compile(). This function has two arguments: the first is the
+compiled pattern pointer that was returned by pcre2_compile(), and the
+second is zero or more of the following option bits: \fBPCRE2_JIT_COMPLETE\fP,
+\fBPCRE2_JIT_PARTIAL_HARD\fP, or \fBPCRE2_JIT_PARTIAL_SOFT\fP.
 .sp
-If JIT support is not available, a call to \f(CRpcre2_jit_compile()\fP does
-nothing and returns PCRE2_ERROR_JIT_BADOPTION. Otherwise, the compiled pattern
+If JIT support is not available, a call to pcre2_jit_compile() does
+nothing and returns \fBPCRE2_ERROR_JIT_BADOPTION\fP. Otherwise, the compiled pattern
 is passed to the JIT compiler, which turns it into machine code that executes
 much faster than the normal interpretive code, but yields exactly the same
-results. The returned value from \f(CRpcre2_jit_compile()\fP is zero on success,
+results. The returned value from pcre2_jit_compile() is zero on success,
 or a negative error code.
 .sp
 There is a limit to the size of pattern that JIT supports, imposed by the size
 of machine stack that it uses. The exact rules are not documented because they
 may change at any time, in particular, when new optimizations are introduced.
-If a pattern is too big, a call to \f(CRpcre2_jit_compile()\fP returns
-PCRE2_ERROR_NOMEMORY.
+If a pattern is too big, a call to pcre2_jit_compile() returns
+\fBPCRE2_ERROR_NOMEMORY\fP.
 .sp
-PCRE2_JIT_COMPLETE requests the JIT compiler to generate code for complete
-matches. If you want to run partial matches using the PCRE2_PARTIAL_HARD or
-PCRE2_PARTIAL_SOFT options of \f(CRpcre2_match()\fP, you should set one or both
-of the other options as well as, or instead of PCRE2_JIT_COMPLETE. The JIT
+\fBPCRE2_JIT_COMPLETE\fP requests the JIT compiler to generate code for complete
+matches. If you want to run partial matches using the \fBPCRE2_PARTIAL_HARD\fP or
+\fBPCRE2_PARTIAL_SOFT\fP options of pcre2_match(), you should set one or both
+of the other options as well as, or instead of \fBPCRE2_JIT_COMPLETE\fP. The JIT
 compiler generates different optimized code for each of the three modes
-(normal, soft partial, hard partial). When \f(CRpcre2_match()\fP is called, the
+(normal, soft partial, hard partial). When pcre2_match() is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
 using interpretive code.
 .sp
-You can call \f(CRpcre2_jit_compile()\fP multiple times for the same compiled
+You can call pcre2_jit_compile() multiple times for the same compiled
 pattern. It does nothing if it has previously compiled code for any of the
-option bits. For example, you can call it once with PCRE2_JIT_COMPLETE and
+option bits. For example, you can call it once with \fBPCRE2_JIT_COMPLETE\fP and
 (perhaps later, when you find you need partial matching) again with
-PCRE2_JIT_COMPLETE and PCRE2_JIT_PARTIAL_HARD. This time it will ignore
-PCRE2_JIT_COMPLETE and just compile code for partial matching. If
-\f(CRpcre2_jit_compile()\fP is called with no option bits set, it immediately
+\fBPCRE2_JIT_COMPLETE\fP and \fBPCRE2_JIT_PARTIAL_HARD\fP. This time it will ignore
+\fBPCRE2_JIT_COMPLETE\fP and just compile code for partial matching. If
+pcre2_jit_compile() is called with no option bits set, it immediately
 returns zero. This is an alternative way of testing whether JIT support has
 been compiled.
 .sp
 At present, it is not possible to free JIT compiled code except when the entire
-compiled pattern is freed by calling \f(CRpcre2_code_free()\fP.
+compiled pattern is freed by calling pcre2_code_free().
 .sp
 In some circumstances you may need to call additional functions. These are
 described in the section entitled
 "Controlling the JIT stack"
 below.
 .sp
-There are some \f(CRpcre2_match()\fP options that are not supported by JIT, and
+There are some pcre2_match() options that are not supported by JIT, and
 there are also some pattern items that JIT cannot handle. Details are given
 below.
 In both cases, matching automatically falls back to the interpretive code. If
@@ -169,97 +169,98 @@ not obeyed.
 .sp
 If the JIT compiler finds an unsupported item, no JIT data is generated. You
 can find out if JIT compilation was successful for a compiled pattern by
-calling \f(CRpcre2_pattern_info()\fP with the PCRE2_INFO_JITSIZE option. A
+calling pcre2_pattern_info() with the \fBPCRE2_INFO_JITSIZE\fP option. A
 non\-zero result means that JIT compilation was successful. A result of 0 means
 that JIT support is not available, or the pattern was not processed by
-\f(CRpcre2_jit_compile()\fP, or the JIT compiler was not able to handle the
+pcre2_jit_compile(), or the JIT compiler was not able to handle the
 pattern. Successful JIT compilation does not, however, guarantee the use of JIT
 at match time because there are some match time options that are not supported
 by JIT.
 .SH "MATCHING SUBJECTS CONTAINING INVALID UTF"
 .sp
-When a pattern is compiled with the PCRE2_UTF option, subject strings are
+When a pattern is compiled with the \fBPCRE2_UTF\fP option, subject strings are
 normally expected to be a valid sequence of UTF code units. By default, this is
 checked at the start of matching and an error is generated if invalid UTF is
-detected. The PCRE2_NO_UTF_CHECK option can be passed to \f(CRpcre2_match()\fP to
+detected. The \fBPCRE2_NO_UTF_CHECK\fP option can be passed to pcre2_match() to
 skip the check (for improved performance) if you are sure that a subject string
 is valid. If this option is used with an invalid string, the result is
 undefined. The calling program may crash or loop or otherwise misbehave.
 .sp
 However, a way of running matches on strings that may contain invalid UTF
-sequences is available. Calling \f(CRpcre2_compile()\fP with the
-PCRE2_MATCH_INVALID_UTF option has two effects: it tells the interpreter in
-\f(CRpcre2_match()\fP to support invalid UTF, and, if \f(CRpcre2_jit_compile()\fP
+sequences is available. Calling pcre2_compile() with the
+\fBPCRE2_MATCH_INVALID_UTF\fP option has two effects: it tells the interpreter in
+pcre2_match() to support invalid UTF, and, if pcre2_jit_compile()
 is subsequently called, the compiled JIT code also supports invalid UTF.
 Details of how this support works, in both the JIT and the interpretive cases,
 is given in the
 \f(CRpcre2unicode\fP
 documentation.
 .sp
-There is also an obsolete option for \f(CRpcre2_jit_compile()\fP called
-PCRE2_JIT_INVALID_UTF, which currently exists only for backward compatibility.
-It is superseded by the \f(CRpcre2_compile()\fP option PCRE2_MATCH_INVALID_UTF
+There is also an obsolete option for pcre2_jit_compile() called
+\fBPCRE2_JIT_INVALID_UTF\fP, which currently exists only for backward compatibility.
+It is superseded by the pcre2_compile() option \fBPCRE2_MATCH_INVALID_UTF\fP
 and should no longer be used. It may be removed in future.
 .SH "UNSUPPORTED OPTIONS AND PATTERN ITEMS"
 .sp
-The \f(CRpcre2_match()\fP options that are supported for JIT matching are
-PCRE2_COPY_MATCHED_SUBJECT, PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
-PCRE2_NOTEMPTY_ATSTART, PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and
-PCRE2_PARTIAL_SOFT. The PCRE2_ANCHORED and PCRE2_ENDANCHORED options are not
+The pcre2_match() options that are supported for JIT matching are
+\fBPCRE2_COPY_MATCHED_SUBJECT\fP, \fBPCRE2_NOTBOL\fP, \fBPCRE2_NOTEOL\fP, \fBPCRE2_NOTEMPTY\fP,
+\fBPCRE2_NOTEMPTY_ATSTART\fP, \fBPCRE2_NO_UTF_CHECK\fP, \fBPCRE2_PARTIAL_HARD\fP, and
+\fBPCRE2_PARTIAL_SOFT\fP. The \fBPCRE2_ANCHORED\fP and \fBPCRE2_ENDANCHORED\fP options are not
 supported at match time.
 .sp
-If the PCRE2_NO_JIT option is passed to \f(CRpcre2_match()\fP it disables the
+If the \fBPCRE2_NO_JIT\fP option is passed to pcre2_match() it disables the
 use of JIT, forcing matching by the interpreter code.
 .sp
-The only unsupported pattern items are \(rsC (match a single data unit) when
+The only unsupported pattern items are \f(CR\(rsC\fP (match a single data unit) when
 running in a UTF mode, and a callout immediately before an assertion condition
 in a conditional group.
 .SH "RETURN VALUES FROM JIT MATCHING"
 .sp
 When a pattern is matched using JIT, the return values are the same as those
-given by the interpretive \f(CRpcre2_match()\fP code, with the addition of one
-new error code: PCRE2_ERROR_JIT_STACKLIMIT. This means that the memory used for
+given by the interpretive pcre2_match() code, with the addition of one
+new error code: \fBPCRE2_ERROR_JIT_STACKLIMIT\fP. This means that the memory used for
 the JIT stack was insufficient. See
 "Controlling the JIT stack"
 below for a discussion of JIT stack usage.
 .sp
-The error code PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if searching
+The error code \fBPCRE2_ERROR_MATCHLIMIT\fP is returned by the JIT code if searching
 a very large pattern tree goes on for too long, as it is in the same
 circumstance when JIT is not used, but the details of exactly what is counted
-are not the same. The PCRE2_ERROR_DEPTHLIMIT error code is never returned
+are not the same. The \fBPCRE2_ERROR_DEPTHLIMIT\fP error code is never returned
 when JIT matching is used.
 .SH "CONTROLLING THE JIT STACK"
 .sp
 When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32KiB on the machine stack. However, some large or
-complicated patterns need more than this. The error PCRE2_ERROR_JIT_STACKLIMIT
+complicated patterns need more than this. The error \fBPCRE2_ERROR_JIT_STACKLIMIT\fP
 is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks. There is further discussion
 about the use of JIT stacks in the section entitled
 "JIT stack FAQ"
 below.
 .sp
-The \f(CRpcre2_jit_stack_create()\fP function creates a JIT stack. Its arguments
+The pcre2_jit_stack_create() function creates a JIT stack. Its arguments
 are a starting size, a maximum size, and a general context (for memory
 allocation functions, or NULL for standard memory allocation). It returns a
-pointer to an opaque structure of type \f(CRpcre2_jit_stack\fP, or NULL if there
-is an error. The \f(CRpcre2_jit_stack_free()\fP function is used to free a stack
+pointer to an opaque structure of type \fBpcre2_jit_stack\fP, or NULL if there
+is an error. The pcre2_jit_stack_free() function is used to free a stack
 that is no longer needed. If its argument is NULL, this function returns
 immediately, without doing anything. (For the technically minded: the address
 space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
 1MiB should be more than enough for any pattern.
 .sp
-The \f(CRpcre2_jit_stack_assign()\fP function specifies which stack JIT code
+The pcre2_jit_stack_assign() function specifies which stack JIT code
 should use. Its arguments are as follows:
 .sp
-.ti +2
-pcre2_match_context  *mcontext
-.br
-.ti +2
-pcre2_jit_callback    callback
-.br
-.ti +2
-void                 *data
+.ss \n[.ss]
+.nf
+.fam C
+\fBpcre2_match_context\fP  *mcontext
+\fBpcre2_jit_callback\fP    callback
+\fBvoid\fP                 *data
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
@@ -282,7 +283,7 @@ anything. There are three cases for the values of the other two options:
     a pointer to a valid JIT stack, the result of calling
 .br
 .ti +2
-    \f(CRpcre2_jit_stack_create()\fP.
+  pcre2_jit_stack_create().
 .sp
 .ti +2
 (3) If \fIcallback\fP is not NULL, it must point to a function that is
@@ -300,10 +301,10 @@ anything. There are three cases for the values of the other two options:
     return value must be a valid JIT stack, the result of calling
 .br
 .ti +2
-    \f(CRpcre2_jit_stack_create()\fP.
+    pcre2_jit_stack_create().
 .sp
 A callback function is obeyed whenever JIT code is about to be run; it is not
-obeyed when \f(CRpcre2_match()\fP is called with options that are incompatible
+obeyed when pcre2_match() is called with options that are incompatible
 for JIT matching. A callback function can therefore be used to determine
 whether a match operation was executed by JIT or by the interpreter.
 .sp
@@ -330,23 +331,32 @@ inefficient solution, and not recommended.
 This is a suggestion for how a multithreaded program that needs to set up
 non\-default JIT stacks might operate:
 .sp
-.ti +2
-During thread initialization
-.br
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
+During \fBthread\fP initialization
   thread_local_var = pcre2_jit_stack_create(...)
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-.ti +2
-During thread exit
-.br
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
+During \fBthread\fP exit
   pcre2_jit_stack_free(thread_local_var)
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 Use a one\-line callback function
-.br
-.ti +2
-  return thread_local_var
+  \fBreturn\fP thread_local_var
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 All the functions described in this section do nothing if JIT is not available.
 .SH "JIT STACK FAQ"
@@ -360,7 +370,7 @@ stack chain needs to be updated every time if we extend the stack on PowerPC.
 Although it is possible, its updating time overhead decreases performance. So
 we do the recursion in memory.
 .sp
-(2) Why don't we simply allocate blocks of memory with \f(CRmalloc()\fP?
+(2) Why don\(cqt we simply allocate blocks of memory with \f(CRmalloc()\fP?
 .sp
 Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
@@ -373,7 +383,7 @@ still grow up to 1MiB anytime if needed.
 .sp
 The owner of the stack is the user program, not the JIT studied pattern or
 anything else. The user program must ensure that if a stack is being used by
-\f(CRpcre2_match()\fP, (that is, it is assigned to a match context that is passed
+pcre2_match(), (that is, it is assigned to a match context that is passed
 to the pattern currently running), that stack must not be used by any other
 threads (to avoid overwriting the same memory area). The best practice for
 multithreaded programs is to allocate a stack for each thread, and return this
@@ -382,20 +392,20 @@ stack through the JIT callback function.
 (4) When should a JIT stack be freed?
 .sp
 You can free a JIT stack at any time, as long as it will not be used by
-\f(CRpcre2_match()\fP again. When you assign the stack to a match context, only a
+pcre2_match() again. When you assign the stack to a match context, only a
 pointer is set. There is no reference counting or any other magic. You can free
 compiled patterns, contexts, and stacks in any order, anytime.
-Just \fIdo not\fP call \f(CRpcre2_match()\fP with a match context pointing to an
+Just \fIdo not\fP call pcre2_match() with a match context pointing to an
 already freed stack, as that will cause SEGFAULT. (Also, do not free a stack
-currently used by \f(CRpcre2_match()\fP in another thread). You can also replace
+currently used by pcre2_match() in another thread). You can also replace
 the stack in a context at any time when it is not in use. You should free the
 previous stack before assigning a replacement.
 .sp
 (5) Should I allocate/free a stack every time before/after calling
-\f(CRpcre2_match()\fP?
+pcre2_match()?
 .sp
 No, because this is too costly in terms of resources. However, you could
-implement some clever idea which release the stack if it is not used in let's
+implement some clever idea which release the stack if it is not used in let\(cqs
 say two minutes. The JIT callback can help to achieve this without keeping a
 list of patterns.
 .sp
@@ -409,18 +419,20 @@ Probably a function call which returns with the currently allocated memory for
 any stack and another which allows releasing memory (shrinking the stack) would
 be a good idea if someone needs this.
 .sp
-(7) This is too much of a headache. Isn't there any better solution for JIT
+(7) This is too much of a headache. Isn\(cqt there any better solution for JIT
 stack handling?
 .sp
 No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.
 .SH "FREEING JIT SPECULATIVE MEMORY"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
+\fBvoid\fP pcre2_jit_free_unused_memory(\fBpcre2_general_context\fP *\fIgcontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .sp
 The JIT executable allocator does not free all memory when it is possible. It
 expects new allocations, and keeps some free memory around to improve
@@ -434,104 +446,90 @@ This is a single\-threaded example that specifies a JIT stack without using a
 callback. A real program should include error checking after all the function
 calls.
 .sp
-.ti +2
-int rc;
-.br
-.ti +2
-pcre2_code *re;
-.br
-.ti +2
-pcre2_match_data *match_data;
-.br
-.ti +2
-pcre2_match_context *mcontext;
-.br
-.ti +2
-pcre2_jit_stack *jit_stack;
+.ss \n[.ss]
+.nf
+.fam C
+\fBint\fP rc;
+\fBpcre2_code\fP *re;
+\fBpcre2_match_data\fP *match_data;
+\fBpcre2_match_context\fP *mcontext;
+\fBpcre2_jit_stack\fP *jit_stack;
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-.ti +2
-re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
-.br
-.ti +2
-  &errornumber, &erroffset, NULL);
-.br
-.ti +2
-rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-.br
-.ti +2
-mcontext = pcre2_match_context_create(NULL);
-.br
-.ti +2
-jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
-.br
-.ti +2
-pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
-.br
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
+re = pcre2_compile(pattern, \fBPCRE2_ZERO_TERMINATED\fP, 0,
+  &errornumber, &erroffset, \fBNULL\fP);
+rc = pcre2_jit_compile(re, \fBPCRE2_JIT_COMPLETE\fP);
+mcontext = pcre2_match_context_create(\fBNULL\fP);
+jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, \fBNULL\fP);
+pcre2_jit_stack_assign(mcontext, \fBNULL\fP, jit_stack);
 match_data = pcre2_match_data_create(re, 10);
-.br
-.ti +2
 rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
-.br
-.ti +2
 /* Process result */
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2_code_free(re);
-.br
-.ti +2
 pcre2_match_data_free(match_data);
-.br
-.ti +2
 pcre2_match_context_free(mcontext);
-.br
-.ti +2
 pcre2_jit_stack_free(jit_stack);
+.fam
+.fi
+.ss \n[.ss] 0
 .SH "JIT FAST PATH API"
 .sp
 Because the API described above falls back to interpreted matching when JIT is
 not available, it is convenient for programs that are written for general use
-in many environments. However, calling JIT via \f(CRpcre2_match()\fP does have a
+in many environments. However, calling JIT via pcre2_match() does have a
 performance impact. Programs that are written for use where JIT is known to be
 available, and which need the best possible performance, can instead use a
 "fast path" API to call JIT matching directly instead of calling
-\f(CRpcre2_match()\fP (obviously only for patterns that have been successfully
-processed by \f(CRpcre2_jit_compile()\fP).
+pcre2_match() (obviously only for patterns that have been successfully
+processed by pcre2_jit_compile()).
 .sp
-The fast path function is called \f(CRpcre2_jit_match()\fP, and it takes exactly
-the same arguments as \f(CRpcre2_match()\fP. However, the subject string must be
-specified with a length; PCRE2_ZERO_TERMINATED is not supported. Unsupported
-option bits (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED, and
-PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the PCRE2_NO_JIT option. The
-return values are also the same as for \f(CRpcre2_match()\fP, plus
-PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+The fast path function is called pcre2_jit_match(), and it takes exactly
+the same arguments as pcre2_match(). However, the subject string must be
+specified with a length; \fBPCRE2_ZERO_TERMINATED\fP is not supported. Unsupported
+option bits (for example, \fBPCRE2_ANCHORED\fP, \fBPCRE2_ENDANCHORED\fP, and
+\fBPCRE2_COPY_MATCHED_SUBJECT\fP) are ignored, as is the \fBPCRE2_NO_JIT\fP option. The
+return values are also the same as for pcre2_match(), plus
+\fBPCRE2_ERROR_JIT_BADOPTION\fP if a matching mode (partial or complete) is requested
 that was not compiled.
 .sp
-When you call \f(CRpcre2_match()\fP, as well as testing for invalid options, a
+When you call pcre2_match(), as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
 the subject pointer is NULL but the length is non\-zero, an immediate error is
-given. Also, unless PCRE2_NO_UTF_CHECK is set, a UTF subject string is tested
+given. Also, unless \fBPCRE2_NO_UTF_CHECK\fP is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
-fast path. If invalid UTF data is passed when PCRE2_MATCH_INVALID_UTF was not
-set for \f(CRpcre2_compile()\fP, the result is undefined. The program may crash
-or loop or give wrong results. In the absence of PCRE2_MATCH_INVALID_UTF you
-should call \f(CRpcre2_jit_match()\fP in UTF mode only if you are sure the
+fast path. If invalid UTF data is passed when \fBPCRE2_MATCH_INVALID_UTF\fP was not
+set for pcre2_compile(), the result is undefined. The program may crash
+or loop or give wrong results. In the absence of \fBPCRE2_MATCH_INVALID_UTF\fP you
+should call pcre2_jit_match() in UTF mode only if you are sure the
 subject is valid.
 .sp
-Bypassing the sanity checks and the \f(CRpcre2_match()\fP wrapping can give
+Bypassing the sanity checks and the pcre2_match() wrapping can give
 speedups of more than 10%.
 .SH "SEE ALSO"
 .sp
 \f(CRpcre2api\fP(3), \f(CRpcre2unicode\fP(3)
 .SH "AUTHOR"
 .sp
-.nf
-.fam C
+.ti +2
 Philip Hazel (FAQ by Zoltan Herczeg)
+.br
+.ti +2
 Retired from University Computing Service
+.br
+.ti +2
 Cambridge, England.
-.fam
-.fi
 .SH "REVISION"
 .sp
 Last updated: 08 August 2026

@@ -31,21 +31,23 @@
 pcre2_code_copy \- copy a compiled pattern
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-pcre2_code *pcre2_code_copy(const pcre2_code *code);
+\fBpcre2_code\fP *pcre2_code_copy(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function makes a copy of the memory used for a compiled pattern, excluding
 any memory used by the JIT compiler. Without a subsequent call to
-\f(CRpcre2_jit_compile()\fP, the copy can be used only for non\-JIT matching. The
+pcre2_jit_compile(), the copy can be used only for non\-JIT matching. The
 pointer to the character tables is copied, not the tables themselves (see
-\f(CRpcre2_code_copy_with_tables()\fP). The yield of the function is NULL if
-\fIcode\fP is NULL or if sufficient memory cannot be obtained.
+pcre2_code_copy_with_tables()). The yield of the function is \f(CRNULL\fP if
+\fIcode\fP is \f(CRNULL\fP or if sufficient memory cannot be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

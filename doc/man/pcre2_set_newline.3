@@ -31,39 +31,54 @@
 pcre2_set_newline \- set the newline convention
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_newline(pcre2_compile_context *ccontext,
-                      uint32_t newline);
+\fBint\fP pcre2_set_newline(\fBpcre2_compile_context\fP *\fIccontext\fP,
+                      \fBuint32_t\fP \fInewline\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function sets the newline convention within a compile context. This
 specifies which character(s) are recognized as newlines when compiling and
 matching patterns. The second argument must be one of:
 .sp
-.ti +2
-PCRE2_NEWLINE_CR        Carriage return only
-.br
-.ti +2
-PCRE2_NEWLINE_LF        Linefeed only
-.br
-.ti +2
-PCRE2_NEWLINE_CRLF      CR followed by LF only
-.br
-.ti +2
-PCRE2_NEWLINE_ANYCRLF   Any of the above
-.br
-.ti +2
-PCRE2_NEWLINE_ANY       Any Unicode newline sequence
-.br
-.ti +2
-PCRE2_NEWLINE_NUL       The NUL character (binary zero)
+.RS 4
+.PD 0
+.TP 22
+\fBPCRE2_NEWLINE_CR\fP
+.ad l
+Carriage return only
+.TP 22
+\fBPCRE2_NEWLINE_LF\fP
+.ad l
+Linefeed only
+.TP 22
+\fBPCRE2_NEWLINE_CRLF\fP
+.ad l
+\f(CRCR\fP followed by \f(CRLF\fP only
+.TP 22
+\fBPCRE2_NEWLINE_ANYCRLF\fP
+.ad l
+Any of the above
+.TP 22
+\fBPCRE2_NEWLINE_ANY\fP
+.ad l
+Any Unicode newline sequence
+.TP 22
+\fBPCRE2_NEWLINE_NUL\fP
+.ad l
+The \f(CRNUL\fP character (binary zero)
+.PD
+.RE
+.PP
+.ad l
 .sp
-The result is zero for success or PCRE2_ERROR_BADDATA if the second argument is
+The result is zero for success or \fBPCRE2_ERROR_BADDATA\fP if the second argument is
 invalid.
 .sp
 There is a complete description of the PCRE2 native API in the

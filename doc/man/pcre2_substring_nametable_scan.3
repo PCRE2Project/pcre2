@@ -31,39 +31,53 @@
 pcre2_substring_nametable_scan \- find table entries for given string name
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_substring_nametable_scan(const pcre2_code *code,
-                                   PCRE2_SPTR stringname,
-                                   PCRE2_SPTR *firstptr,
-                                   PCRE2_SPTR *lastptr);
+\fBint\fP pcre2_substring_nametable_scan(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP,
+                                   \fBPCRE2_SPTR\fP \fIstringname\fP,
+                                   \fBPCRE2_SPTR\fP *\fIfirstptr\fP,
+                                   \fBPCRE2_SPTR\fP *\fIlastptr\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This convenience function finds, for a compiled pattern, the first and last
 entries for a given name in the table that translates capture group names into
 numbers.
 .sp
-.ti +2
-\fIcode\fP    Compiled regular expression
-.br
-.ti +2
-\fIname\fP    Name whose entries required
-.br
-.ti +2
-\fIfirst\fP   Where to return a pointer to the first entry
-.br
-.ti +2
-\fIlast\fP    Where to return a pointer to the last entry
+.RS 4
+.PD 0
+.TP 11
+\fIcode\fP
+.ad l
+Compiled regular expression
+.TP 11
+\fIstringname\fP
+.ad l
+Name whose entries required
+.TP 11
+\fIfirstptr\fP
+.ad l
+Where to return a pointer to the first entry
+.TP 11
+\fIlastptr\fP
+.ad l
+Where to return a pointer to the last entry
+.PD
+.RE
+.PP
+.ad l
 .sp
-When the name is found in the table, if \fIfirst\fP is NULL, the function
+When the name is found in the table, if \fIfirstptr\fP is \f(CRNULL\fP, the function
 returns a group number, but if there is more than one matching entry, it is not
-defined which one. Otherwise, when both pointers have been set, the yield of
+defined which one. Otherwise, when both \fIfirstptr\fP and \fIlastptr\fP have been
+set, the yield of
 the function is the length of each entry in code units. If the name is not
-found, PCRE2_ERROR_NOSUBSTRING is returned.
+found, \fBPCRE2_ERROR_NOSUBSTRING\fP is returned.
 .sp
 There is a complete description of the PCRE2 native API, including the format of
 the table entries, in the

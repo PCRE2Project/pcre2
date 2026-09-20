@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_character_tables(pcre2_compile_context *ccontext,
                                const uint8_t *tables);</code></pre>
@@ -461,8 +461,8 @@ int pcre2_set_character_tables(pcre2_compile_context *ccontext,
 <div class="paragraph">
 <p>This function sets a pointer to custom character tables within a compile
 context. The second argument must point to a set of PCRE2 character tables or
-be NULL to request the default tables. The result is always zero. Character
-tables can be created by calling <code>pcre2_maketables()</code> or by running the
+be <code class="c">NULL</code> to request the default tables. The result is always zero. Character
+tables can be created by calling <code class="function">pcre2_maketables()</code> or by running the
 <code>pcre2_dftables</code> maintenance command in binary mode (see the
 <a href="pcre2build.html"><code>pcre2build</code></a>
 documentation).</p>

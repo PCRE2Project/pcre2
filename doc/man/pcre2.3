@@ -62,14 +62,19 @@ is optional at build time (but is the default). However, processing strings as
 UTF code units must be enabled explicitly at run time. The version of Unicode
 in use can be discovered by running
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2test \-C
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The three libraries contain identical sets of functions, with names ending in
-_8, _16, or _32, respectively (for example, \f(CRpcre2_compile_8()\fP). However,
-by defining PCRE2_CODE_UNIT_WIDTH to be 8, 16, or 32, a program that uses just
+_8, _16, or _32, respectively (for example, pcre2_compile_8()). However,
+by defining \fBPCRE2_CODE_UNIT_WIDTH\fP to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
-\f(CRpcre2_compile()\fP, and the documentation is written assuming that this is
+pcre2_compile(), and the documentation is written assuming that this is
 the case.
 .sp
 In addition to the Perl\-compatible matching function, PCRE2 contains an
@@ -90,7 +95,7 @@ page.
 .sp
 Some features of PCRE2 can be included, excluded, or changed when the library
 is built. The
-\f(CRpcre2_config()\fP
+pcre2_config()
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 \f(CRpcre2build\fP
@@ -113,7 +118,7 @@ not exported.
 If you are using PCRE2 in a non\-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
-8\-bit pattern that begins with "(*UTF)" turns on UTF\-8 mode, which interprets
+8\-bit pattern that begins with \f(CR(*UTF)\fP turns on UTF\-8 mode, which interprets
 patterns and subjects as strings of UTF\-8 code units instead of individual
 8\-bit characters. This causes both the pattern and any data against which it is
 matched to be checked for UTF\-8 validity. If the data string is very long, such
@@ -121,33 +126,33 @@ a check might use sufficiently many resources as to cause your application to
 lose performance.
 .sp
 One way of guarding against this possibility is to use the
-\f(CRpcre2_pattern_info()\fP function to check the compiled pattern's options for
-PCRE2_UTF. Alternatively, you can set the PCRE2_NEVER_UTF option when calling
-\f(CRpcre2_compile()\fP. This causes a compile time error if the pattern contains
+pcre2_pattern_info() function to check the compiled pattern\(cqs options for
+\fBPCRE2_UTF\fP. Alternatively, you can set the \fBPCRE2_NEVER_UTF\fP option when calling
+pcre2_compile(). This causes a compile time error if the pattern contains
 a UTF\-setting sequence.
 .sp
-The use of Unicode properties for character types such as \(rsd can also be
-enabled from within the pattern, by specifying "(*UCP)". This feature can be
-disallowed by setting the PCRE2_NEVER_UCP option.
+The use of Unicode properties for character types such as \f(CR\(rsd\fP can also be
+enabled from within the pattern, by specifying \f(CR(*UCP)\fP. This feature can be
+disallowed by setting the \fBPCRE2_NEVER_UCP\fP option.
 .sp
 If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
-the PCRE2_NO_UTF_CHECK option for the second and subsequent matches to avoid
+the \fBPCRE2_NO_UTF_CHECK\fP option for the second and subsequent matches to avoid
 running redundant checks.
 .sp
-The use of the \(rsC escape sequence in a UTF\-8 or UTF\-16 pattern can lead to
+The use of the \f(CR\(rsC\fP escape sequence in a UTF\-8 or UTF\-16 pattern can lead to
 problems, because it may leave the current matching point in the middle of a
-multi\-code\-unit character. The PCRE2_NEVER_BACKSLASH_C option can be used by an
-application to lock out the use of \(rsC, causing a compile\-time error if it is
-encountered. It is also possible to build PCRE2 with the use of \(rsC permanently
+multi\-code\-unit character. The \fBPCRE2_NEVER_BACKSLASH_C\fP option can be used by an
+application to lock out the use of \f(CR\(rsC\fP, causing a compile\-time error if it is
+encountered. It is also possible to build PCRE2 with the use of \f(CR\(rsC\fP permanently
 disabled.
 .sp
 Another way that performance can be hit is by running a pattern that has a very
 large search tree against a string that will never match. Nested unlimited
 repeats in a pattern are a common example. PCRE2 provides some protection
-against this: see the \f(CRpcre2_set_match_limit()\fP function in the
+against this: see the pcre2_set_match_limit() function in the
 \f(CRpcre2api\fP
-page. There is a similar function called \f(CRpcre2_set_depth_limit()\fP that can
+page. There is a similar function called pcre2_set_depth_limit() that can
 be used to restrict the amount of memory that is used.
 .SH "USER DOCUMENTATION"
 .sp
@@ -160,71 +165,97 @@ remaining sections, except for the \f(CRpcre2demo\fP section (which is a program
 listing), and the short pages for individual functions, are concatenated in
 \f(CRpcre2.txt\fP, for ease of searching. The sections are as follows:
 .sp
-.ti +2
-pcre2              this document
-.br
-.ti +2
-pcre2\-config       show PCRE2 installation configuration information
-.br
-.ti +2
-pcre2api           details of PCRE2's native C API
-.br
-.ti +2
-pcre2build         building PCRE2
-.br
-.ti +2
-pcre2callout       details of the pattern callout feature
-.br
-.ti +2
-pcre2compat        discussion of Perl compatibility
-.br
-.ti +2
-pcre2convert       details of pattern conversion functions
-.br
-.ti +2
-pcre2demo          a demonstration C program that uses PCRE2
-.br
-.ti +2
-pcre2grep          description of the \f(CRpcre2grep\fP command (8\-bit only)
-.br
-.ti +2
-pcre2jit           discussion of just\-in\-time optimization support
-.br
-.ti +2
-pcre2limits        details of size and other limits
-.br
-.ti +2
-pcre2matching      discussion of the two matching algorithms
-.br
-.ti +2
-pcre2partial       details of the partial matching facility
-.br
-.ti +2
-pcre2pattern       syntax and semantics of supported regular
-.br
-.ti +2
-                     expression patterns
-.br
-.ti +2
-pcre2perform       discussion of performance issues
-.br
-.ti +2
-pcre2posix         the POSIX\-compatible C API for the 8\-bit library
-.br
-.ti +2
-pcre2sample        discussion of the pcre2demo program
-.br
-.ti +2
-pcre2serialize     details of pattern serialization
-.br
-.ti +2
-pcre2syntax        quick syntax reference
-.br
-.ti +2
-pcre2test          description of the \f(CRpcre2test\fP command
-.br
-.ti +2
-pcre2unicode       discussion of Unicode and UTF support
+.RS 4
+.PD 0
+.TP 15
+pcre2
+.ad l
+this document
+.TP 15
+pcre2\-config
+.ad l
+show PCRE2 installation configuration information
+.TP 15
+pcre2api
+.ad l
+details of PCRE2\(cqs native C API
+.TP 15
+pcre2build
+.ad l
+building PCRE2
+.TP 15
+pcre2callout
+.ad l
+details of the pattern callout feature
+.TP 15
+pcre2compat
+.ad l
+discussion of Perl compatibility
+.TP 15
+pcre2convert
+.ad l
+details of pattern conversion functions
+.TP 15
+pcre2demo
+.ad l
+a demonstration C program that uses PCRE2
+.TP 15
+pcre2grep
+.ad l
+description of the \f(CRpcre2grep\fP command (8\-bit only)
+.TP 15
+pcre2jit
+.ad l
+discussion of just\-in\-time optimization support
+.TP 15
+pcre2limits
+.ad l
+details of size and other limits
+.TP 15
+pcre2matching
+.ad l
+discussion of the two matching algorithms
+.TP 15
+pcre2partial
+.ad l
+details of the partial matching facility
+.TP 15
+pcre2pattern
+.ad l
+syntax and semantics of supported regular
+expression patterns
+.TP 15
+pcre2perform
+.ad l
+discussion of performance issues
+.TP 15
+pcre2posix
+.ad l
+the POSIX\-compatible C API for the 8\-bit library
+.TP 15
+pcre2sample
+.ad l
+discussion of the pcre2demo program
+.TP 15
+pcre2serialize
+.ad l
+details of pattern serialization
+.TP 15
+pcre2syntax
+.ad l
+quick syntax reference
+.TP 15
+pcre2test
+.ad l
+description of the \f(CRpcre2test\fP command
+.TP 15
+pcre2unicode
+.ad l
+discussion of Unicode and UTF support
+.PD
+.RE
+.PP
+.ad l
 .sp
 In the "man" and HTML formats, there is also a short page for each C library
 function, listing its arguments and results.

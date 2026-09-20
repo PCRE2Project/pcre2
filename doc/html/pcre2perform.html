@@ -443,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_pcre2_performance">Pcre2 Performance</h2>
+<h2 id="_pcre2_performance">PCRE2 performance</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Two aspects of performance are discussed below: memory usage and processing
@@ -453,7 +453,7 @@ of them.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_compiled_pattern_memory_usage">Compiled Pattern Memory Usage</h2>
+<h2 id="_compiled_pattern_memory_usage">Compiled pattern memory usage</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Patterns are compiled by PCRE2 into a reasonably efficient interpretive code,
@@ -463,14 +463,18 @@ pattern can be unexpectedly large. If a parenthesized group has a quantifier
 with a minimum greater than 1 and/or a limited maximum, the whole group is
 repeated in the compiled code. For example, the pattern</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(abc|def){2,4}</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(abc|def){2,4}</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>is compiled as if it were</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(abc|def)(abc|def)((abc|def)(abc|def)?)?</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(abc|def)(abc|def)((abc|def)(abc|def)?)?</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>(Technical aside: It is done this way so that backtrack points within each of
@@ -482,8 +486,10 @@ usually a problem. However, if the numbers are large, and particularly if such
 repetitions are nested, the memory usage can become an embarrassment. For
 example, the very simple pattern</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">((ab){1,1000}c){1,3}</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">((ab){1,1000}c){1,3}</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>uses over 50KiB when compiled using the 8-bit library. When PCRE2 is
@@ -500,8 +506,10 @@ PCRE2&#8217;s
 "subroutine"
 facility. Re-writing the above pattern as</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">((ab)(?2){0,999}c)(?1){0,2}</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">((ab)(?2){0,999}c)(?1){0,2}</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>reduces the memory requirements to around 16KiB, and indeed it remains under
@@ -516,10 +524,10 @@ were different in earlier releases.)</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_stack_and_heap_usage_at_run_time">Stack And Heap Usage At Run Time</h2>
+<h2 id="_stack_and_heap_usage_at_run_time">Stack and heap usage at run time</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>From release 10.30, the interpretive (non-JIT) version of <code>pcre2_match()</code>
+<p>From release 10.30, the interpretive (non-JIT) version of <code class="function">pcre2_match()</code>
 uses very little system stack at run time. In earlier releases recursive
 function calls could use a great deal of stack, and this could cause problems,
 but this usage has been eliminated. Backtracking positions are now explicitly
@@ -536,7 +544,7 @@ capturing group the size increases by 16 bytes.</p>
 stack, but this still caused some issues for multi-thread applications where
 each thread has a very small stack. From release 10.41 backtracking memory
 frames are always held in heap memory. An initial heap allocation is obtained
-the first time any match data block is passed to <code>pcre2_match()</code>. This is
+the first time any match data block is passed to <code class="function">pcre2_match()</code>. This is
 remembered with the match data block and re-used if that block is used for
 another match. It is freed when the match data block itself is freed.</p>
 </div>
@@ -546,28 +554,28 @@ frame size, unless the heap limit is less than this, in which case the heap
 limit is used. If the initial block proves to be too small during matching, it
 is replaced by a larger block, subject to the heap limit. The heap limit is
 checked only when a new block is to be allocated. Reducing the heap limit
-between calls to <code>pcre2_match()</code> with the same match data block does not
+between calls to <code class="function">pcre2_match()</code> with the same match data block does not
 affect the saved block.</p>
 </div>
 <div class="paragraph">
-<p>In contrast to <code>pcre2_match()</code>, <code>pcre2_dfa_match()</code> does use recursive
+<p>In contrast to <code class="function">pcre2_match()</code>, <code class="function">pcre2_dfa_match()</code> does use recursive
 function calls, but only for processing atomic groups, lookaround assertions,
 and recursion within the pattern. The original version of the code used to
 allocate quite large internal workspace vectors on the stack, which caused some
 problems for some patterns in environments with small stacks. From release
-10.32 the code for <code>pcre2_dfa_match()</code> has been re-factored to use heap
+10.32 the code for <code class="function">pcre2_dfa_match()</code> has been re-factored to use heap
 memory when necessary for internal workspace when recursing, though recursive
 function calls are still used.</p>
 </div>
 <div class="paragraph">
 <p>The "match depth" parameter can be used to limit the depth of function
 recursion, and the "match heap" parameter to limit heap memory in
-<code>pcre2_dfa_match()</code>.</p>
+<code class="function">pcre2_dfa_match()</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_processing_time">Processing Time</h2>
+<h2 id="_processing_time">Processing time</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Certain items in regular expression patterns are processed more efficiently
@@ -579,38 +587,40 @@ about optimizing regular expressions for efficient performance. This document
 contains a few observations about PCRE2.</p>
 </div>
 <div class="paragraph">
-<p>Using Unicode character properties (the \p, \P, and \X escapes) is slow,
+<p>Using Unicode character properties (the <code class="regex">\p</code>, <code class="regex">\P</code>, and <code class="regex">\X</code> escapes) is slow,
 because PCRE2 has to use a multi-stage table lookup whenever it needs a
 character&#8217;s property. If you can find an alternative pattern that does not use
 character properties, it will probably be faster.</p>
 </div>
 <div class="paragraph">
-<p>By default, the escape sequences \b, \d, \s, and \w, and the POSIX
-character classes such as [:alpha:] do not use Unicode properties, partly for
+<p>By default, the escape sequences <code class="regex">\b</code>, <code class="regex">\d</code>, <code class="regex">\s</code>, and <code class="regex">\w</code>, and the POSIX
+character classes such as <code class="regex">[:alpha:]</code> do not use Unicode properties, partly for
 backwards compatibility, and partly for performance reasons. However, you can
-set the PCRE2_UCP option or start the pattern with (*UCP) if you want Unicode
+set the <code class="constant">PCRE2_UCP</code> option or start the pattern with <code class="regex">(*UCP)</code> if you want Unicode
 character properties to be used. This can double the matching time for items
-such as \d, when matched with <code>pcre2_match()</code>; the performance loss is
+such as <code class="regex">\d</code>, when matched with <code class="function">pcre2_match()</code>; the performance loss is
 less with a DFA matching function, and in both cases there is not much
-difference for \b.</p>
+difference for <code class="regex">\b</code>.</p>
 </div>
 <div class="paragraph">
-<p>When a pattern begins with .* not in atomic parentheses, nor in parentheses
-that are the subject of a backreference, and the PCRE2_DOTALL option is set,
+<p>When a pattern begins with <code class="regex">.*</code> not in atomic parentheses, nor in parentheses
+that are the subject of a backreference, and the <code class="constant">PCRE2_DOTALL</code> option is set,
 the pattern is implicitly anchored by PCRE2, since it can match only at the
 start of a subject string. If the pattern has multiple top-level branches, they
 must all be anchorable. The optimization can be disabled by the
-PCRE2_NO_DOTSTAR_ANCHOR option, and is automatically disabled if the pattern
-contains (*PRUNE) or (*SKIP).</p>
+<code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code> option, and is automatically disabled if the pattern
+contains <code class="regex">(*PRUNE)</code> or <code class="regex">(*SKIP)</code>.</p>
 </div>
 <div class="paragraph">
-<p>If PCRE2_DOTALL is not set, PCRE2 cannot make this optimization, because the
+<p>If <code class="constant">PCRE2_DOTALL</code> is not set, PCRE2 cannot make this optimization, because the
 dot metacharacter does not then match a newline, and if the subject string
 contains newlines, the pattern may match from the character immediately
 following one of them instead of from the very start. For example, the pattern</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">.*second</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">.*second</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>matches the subject "first\nand second" (where \n stands for a newline
@@ -619,8 +629,8 @@ this, PCRE2 has to retry the match starting after every newline in the subject.<
 </div>
 <div class="paragraph">
 <p>If you are using such a pattern with subject strings that do not contain
-newlines, the best performance is obtained by setting PCRE2_DOTALL, or starting
-the pattern with ^.* or ^.*? to indicate explicit anchoring. That saves PCRE2
+newlines, the best performance is obtained by setting <code class="constant">PCRE2_DOTALL</code>, or starting
+the pattern with <code class="regex">^.<strong></code> or <code class="regex">^.</strong>?</code> to indicate explicit anchoring. That saves PCRE2
 from having to scan along the subject looking for a newline to restart at.</p>
 </div>
 <div class="paragraph">
@@ -628,13 +638,15 @@ from having to scan along the subject looking for a newline to restart at.</p>
 long time to run when applied to a string that does not match. Consider the
 pattern fragment</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">^(a+)*</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">^(a+)*</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This can match "aaaa" in 16 different ways, and this number increases very
-rapidly as the string gets longer. (The * repeat can match 0, 1, 2, 3, or 4
-times, and for each of those cases other than 0 or 4, the + repeats can match
+rapidly as the string gets longer. (The <code class="regex">*</code> repeat can match 0, 1, 2, 3, or 4
+times, and for each of those cases other than 0 or 4, the <code class="regex">+</code> repeats can match
 different numbers of times.) When the remainder of the pattern is such that the
 entire match is going to fail, PCRE2 has in principle to try every possible
 variation, and this can take an extremely long time, even for relatively short
@@ -643,8 +655,10 @@ strings.</p>
 <div class="paragraph">
 <p>An optimization catches some of the more simple cases such as</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(a+)*b</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(a+)*b</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>where a literal character follows. Before embarking on the standard matching
@@ -653,8 +667,10 @@ there is not, it fails the match immediately. However, when there is no
 following literal this optimization cannot be used. You can see the difference
 by comparing the behaviour of</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(a+)*\d</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(a+)*\d</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>with the pattern above. The former gives a failure almost instantly when
@@ -666,8 +682,10 @@ appreciable time with strings longer than about 20 characters.</p>
 atomic group or a possessive quantifier. This can often reduce memory
 requirements as well. As another example, consider this pattern:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">([^&lt;]|&lt;(?!inet))+</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">([^&lt;]|&lt;(?!inet))+</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>It matches from wherever it starts until it encounters "&lt;inet" or the end of
@@ -679,8 +697,10 @@ formulation uses a memory frame for each matched character. For a long string,
 a lot of memory is required. Consider now this rewritten pattern, which matches
 exactly the same strings:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">([^&lt;]++|&lt;(?!inet))+</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">([^&lt;]++|&lt;(?!inet))+</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This runs much faster, because sequences of characters that do not contain "&lt;"
@@ -696,13 +716,13 @@ subject strings is to write repeated parenthesized subpatterns to match more
 than one character whenever possible.</p>
 </div>
 <div class="sect2">
-<h3 id="_setting_resource_limits">Setting Resource Limits</h3>
+<h3 id="_setting_resource_limits">Setting resource limits</h3>
 <div class="paragraph">
 <p>You can set limits on the amount of processing that takes place when matching,
 and on the amount of heap memory that is used. The default values of the limits
 are very large, and unlikely ever to operate. They can be changed when PCRE2 is
-built, and they can also be set when <code>pcre2_match()</code> or
-<code>pcre2_dfa_match()</code> is called. For details of these interfaces, see the
+built, and they can also be set when <code class="function">pcre2_match()</code> or
+<code class="function">pcre2_dfa_match()</code> is called. For details of these interfaces, see the
 <a href="pcre2build.html"><code>pcre2build</code></a>
 documentation and the section entitled
 "The match context"
@@ -721,11 +741,11 @@ pattern to match. This is done by repeatedly matching with different limits.</p>
 <div class="sect1">
 <h2 id="_author">Author</h2>
 <div class="sectionbody">
-<div class="listingblock">
+<div class="literalblock">
 <div class="content">
-<pre class="highlight"><code>Philip Hazel
+<pre>Philip Hazel
 Retired from University Computing Service
-Cambridge, England.</code></pre>
+Cambridge, England.</pre>
 </div>
 </div>
 </div>

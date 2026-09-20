@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
                                       int (*guard)(uint32_t depth,
@@ -462,13 +462,13 @@ int pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function defines, within a compile context, a function that is called
-whenever <code>pcre2_compile()</code> starts to compile a parenthesized part of a
+whenever <code class="function">pcre2_compile()</code> starts to compile a parenthesized part of a
 pattern. The first argument to the function gives the current depth of
 parenthesis nesting, and the second is user data that is supplied when the
 function is set up. The callout function should return zero if all is well, or
 non-zero to force an error. This feature is provided so that applications can
 check the available system stack space, in order to avoid running out. The
-result of <code>pcre2_set_compile_recursion_guard()</code> is always zero.</p>
+result of <code class="function">pcre2_set_compile_recursion_guard()</code> is always zero.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

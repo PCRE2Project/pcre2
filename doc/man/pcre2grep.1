@@ -31,11 +31,13 @@
 pcre2grep \- a grep with Perl\-compatible regular expressions.
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
 pcre2grep [options] [long options] [pattern] [path1 path2 ...]
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 \f(CRpcre2grep\fP searches files for character patterns, in the same way as other
@@ -50,8 +52,13 @@ that PCRE2 supports.
 Patterns, whether supplied on the command line or in a separate file, are given
 without delimiters. For example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2grep Thursday /etc/motd
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 If you attempt to use delimiters (for example, by surrounding a pattern with
 slashes, as is common in Perl scripts), they are interpreted as part of the
@@ -69,11 +76,16 @@ If no files are specified, \f(CRpcre2grep\fP reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2grep some\-pattern file1 \- file3
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 By default, input files are searched line by line, so pattern assertions about
-the beginning and end of a subject string (^, $, \(rsA, \(rsZ, and \(rsz) match at
+the beginning and end of a subject string (\f(CR^\fP, \f(CR$\fP, \f(CR\(rsA\fP, \f(CR\(rsZ\fP, and \f(CR\(rsz\fP) match at
 the beginning and end of each line. When a line matches a pattern, it is copied
 to the standard output, and if there is more than one file, the file name is
 output at the start of each line, followed by a colon. However, there are
@@ -101,7 +113,7 @@ small, fewer than requested "before" and "after" lines may be output.
 When matching with a multiline pattern, the size of the buffer must be at least
 half of the maximum match expected or the pattern might fail to match.
 .sp
-Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
+Patterns can be no longer than 8KiB or \f(CRBUFSIZ\fP bytes, whichever is the greater.
 BUFSIZ is defined in \f(CR<stdio.h>\fP. When there is more than one pattern
 (specified by the use of \f(CR\-e\fP and/or \f(CR\-f\fP), each pattern is applied to
 each line in the order in which they are defined, except that all the \f(CR\-e\fP
@@ -127,7 +139,7 @@ grep. In earlier releases, \f(CRpcre2grep\fP did not recognize matches from
 later patterns that were earlier in the subject.
 .sp
 Patterns that can match an empty string are accepted, but empty string
-matches are never recognized. An example is the pattern "(super)?(man)?", in
+matches are never recognized. An example is the pattern \f(CR(super)?(man)?\fP, in
 which all components are optional. This pattern finds all occurrences of both
 "super" and "man"; the output differs from matching with "super|man" when only
 the matching substrings are being shown.
@@ -165,14 +177,16 @@ example, both the \f(CR\-H\fP and \f(CR\-l\fP options affect the printing of fil
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
-to signify multiplication by 1024 or 1024*1024 respectively.
-.TP 10
+to signify multiplication by 1024 or \f(CR1024*1024\fP respectively.
+.TP 24
 \f(CR\-\-\fP
+.ad l
 This terminates the list of options. It is useful if the next item on the
 command line starts with a hyphen but is not an option. This allows for the
 processing of patterns and file names that start with hyphens.
-.TP 10
+.TP 24
 \f(CR\-A\fP \fInumber\fP, \f(CR\-\-after\-context=number\fP
+.ad l
 Output up to \fInumber\fP lines of context after each matching line. Fewer
 lines are output if the next match or the end of the file is reached, or if the
 processing buffer size has been set too small. If file names and/or line
@@ -182,17 +196,20 @@ terminator to a zero byte). A line containing "\-\-" is output between each grou
 of lines, unless they are in fact contiguous in the input file. The value of
 \fInumber\fP is expected to be relatively small. When \f(CR\-c\fP is used,
 \f(CR\-A\fP is ignored.
-.TP 10
+.TP 24
 \f(CR\-a\fP, \f(CR\-\-text\fP
+.ad l
 Treat binary files as text. This is equivalent to
 \f(CR\-\-binary\-files\fP=\fItext\fP.
-.TP 10
+.TP 24
 \f(CR\-\-allow\-lookaround\-bsk\fP
-PCRE2 now forbids the use of \(rsK in lookarounds by default, in line with Perl.
-This option causes \f(CRpcre2grep\fP to set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+.ad l
+PCRE2 now forbids the use of \f(CR\(rsK\fP in lookarounds by default, in line with Perl.
+This option causes \f(CRpcre2grep\fP to set the \fBPCRE2_EXTRA_ALLOW_LOOKAROUND_BSK\fP
 option, which enables this somewhat dangerous usage.
-.TP 10
+.TP 24
 \f(CR\-B\fP \fInumber\fP, \f(CR\-\-before\-context=number\fP
+.ad l
 Output up to \fInumber\fP lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
 \fInumber\fP lines, or if the processing buffer size has been set too small. If
@@ -202,8 +219,9 @@ change the file name terminator to a zero byte). A line containing "\-\-" is
 output between each group of lines, unless they are in fact contiguous in the
 input file. The value of \fInumber\fP is expected to be relatively small. When
 \f(CR\-c\fP is used, \f(CR\-B\fP is ignored.
-.TP 10
+.TP 24
 \f(CR\-\-binary\-files=word\fP
+.ad l
 Specify how binary files are to be processed. If the word is "binary" (the
 default), pattern matching is performed on binary files, but the only output is
 "Binary file <name> matches" when a match succeeds. If the word is "text",
@@ -214,17 +232,20 @@ sent to a terminal. If the word is "without\-match", which is equivalent to the
 \f(CR\-I\fP option, binary files are not processed at all; they are assumed not to
 be of interest and are skipped without causing any output or affecting the
 return code.
-.TP 10
+.TP 24
 \f(CR\-\-buffer\-size=number\fP
+.ad l
 Set the parameter that controls how much memory is obtained at the start of
 processing for buffering files that are being scanned. See also
 \f(CR\-\-max\-buffer\-size\fP below.
-.TP 10
+.TP 24
 \f(CR\-C\fP \fInumber\fP, \f(CR\-\-context=number\fP
+.ad l
 Output \fInumber\fP lines of context both before and after each matching line.
 This is equivalent to setting both \f(CR\-A\fP and \f(CR\-B\fP to the same value.
-.TP 10
+.TP 24
 \f(CR\-c\fP, \f(CR\-\-count\fP
+.ad l
 Do not output lines from the files that are being scanned; instead output the
 number of lines that would have been shown, either because they matched, or, if
 \f(CR\-v\fP is set, because they failed to match. By default, this count is
@@ -238,13 +259,15 @@ be used to cause a total to be output at the end. However, if the
 \f(CR\-\-files\-with\-matches\fP option is also used, only those files whose counts
 are greater than zero are listed. When \f(CR\-c\fP is used, the \f(CR\-A\fP,
 \f(CR\-B\fP, and \f(CR\-C\fP options are ignored.
-.TP 10
+.TP 24
 \f(CR\-\-colour\fP, \f(CR\-\-color\fP
+.ad l
 If this option is given without any data, it is equivalent to "\-\-colour=auto".
 If data is required, it must be given in the same shell item, separated by an
 equals sign.
-.TP 10
+.TP 24
 \f(CR\-\-colour=value\fP, \f(CR\-\-color=value\fP
+.ad l
 This option specifies under what circumstances the parts of a line that matched
 a pattern should be coloured in the output. It is ignored if
 \f(CR\-\-file\-offsets\fP, \f(CR\-\-line\-offsets\fP, or \f(CR\-\-output\fP is set. By
@@ -271,13 +294,15 @@ is used. The string is copied directly into the control string for setting
 colour on a terminal, so it is your responsibility to ensure that the values
 make sense. If no relevant environment variable is set, the default is "1;31",
 which gives red.
-.TP 10
+.TP 24
 \f(CR\-D\fP \fIaction\fP, \f(CR\-\-devices=action\fP
+.ad l
 If an input path is not a regular file or a directory, "action" specifies how
 it is to be processed. Valid values are "read" (the default) or "skip"
 (silently skip the path).
-.TP 10
+.TP 24
 \f(CR\-d\fP \fIaction\fP, \f(CR\-\-directories=action\fP
+.ad l
 If an input path is a directory, "action" specifies how it is to be processed.
 Valid values are "read" (the default in non\-Windows environments, for
 compatibility with GNU grep), "recurse" (equivalent to the \f(CR\-r\fP option), or
@@ -285,18 +310,21 @@ compatibility with GNU grep), "recurse" (equivalent to the \f(CR\-r\fP option), 
 "read" case, directories are read as if they were ordinary files. In some
 operating systems the effect of reading a directory like this is an immediate
 end\-of\-file; in others it may provoke an error.
-.TP 10
+.TP 24
 \f(CR\-\-depth\-limit\fP=\fInumber\fP
+.ad l
 See \f(CR\-\-match\-limit\fP below.
-.TP 10
+.TP 24
 \f(CR\-E\fP, \f(CR\-\-case\-restrict\fP
+.ad l
 When case distinctions are being ignored in Unicode mode, two ASCII letters (K
-and S) will by default match Unicode characters U+212A (Kelvin sign) and U+017F
+and S) will by default match Unicode characters \f(CRU+212A\fP (Kelvin sign) and \f(CRU+017F\fP
 (long S) respectively, as well as their lower case ASCII counterparts. When
 this option is set, case equivalences are restricted such that no ASCII
 character matches a non\-ASCII character, and vice versa.
-.TP 10
+.TP 24
 \f(CR\-e\fP \fIpattern\fP, \f(CR\-\-regex=pattern\fP, \f(CR\-\-regexp=pattern\fP
+.ad l
 Specify a pattern to be matched. This option can be used multiple times in
 order to specify several patterns. It can also be used as a way of specifying a
 single pattern that starts with a hyphen. When \f(CR\-e\fP is used, no argument
@@ -307,8 +335,9 @@ line in the order in which they are defined.
 If \f(CR\-f\fP is used with \f(CR\-e\fP, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
 these options are specified.
-.TP 10
+.TP 24
 \f(CR\-\-exclude\fP=\fIpattern\fP
+.ad l
 Files (but not directories) whose names match the pattern are skipped without
 being processed. This applies to all files, whether listed on the command line,
 obtained from \f(CR\-\-file\-list\fP, or by scanning a directory. The pattern is a
@@ -318,15 +347,17 @@ not apply to this pattern. The option may be given any number of times in order
 to specify multiple patterns. If a file name matches both an \f(CR\-\-include\fP
 and an \f(CR\-\-exclude\fP pattern, it is excluded. There is no short form for this
 option.
-.TP 10
+.TP 24
 \f(CR\-\-exclude\-from=filename\fP
+.ad l
 Treat each non\-empty line of the file as the data for an \f(CR\-\-exclude\fP
 option. What constitutes a newline when reading the file is the operating
-system's default. The \f(CR\-\-newline\fP option has no effect on this option. This
+system\(cqs default. The \f(CR\-\-newline\fP option has no effect on this option. This
 option may be given more than once in order to specify a number of files to
 read.
-.TP 10
+.TP 24
 \f(CR\-\-exclude\-dir\fP=\fIpattern\fP
+.ad l
 Directories whose names match the pattern are skipped without being processed,
 whatever the setting of the \f(CR\-\-recursive\fP option. This applies to all
 directories, whether listed on the command line, obtained from
@@ -337,8 +368,9 @@ apply to this pattern. The option may be given any number of times in order to
 specify more than one pattern. If a directory matches both \f(CR\-\-include\-dir\fP
 and \f(CR\-\-exclude\-dir\fP, it is excluded. There is no short form for this
 option.
-.TP 10
+.TP 24
 \f(CR\-F\fP, \f(CR\-\-fixed\-strings\fP
+.ad l
 Interpret each data\-matching pattern as a list of fixed strings, separated by
 newlines, instead of as a regular expression. What constitutes a newline for
 this purpose is controlled by the \f(CR\-\-newline\fP option. The \f(CR\-w\fP (match
@@ -348,11 +380,12 @@ strings are found in it (subject to \f(CR\-w\fP or \f(CR\-x\fP, if present). Thi
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the \f(CR\-\-include\fP or
 \f(CR\-\-exclude\fP options.
-.TP 10
+.TP 24
 \f(CR\-f\fP \fIfilename\fP, \f(CR\-\-file=filename\fP
+.ad l
 Read patterns from the file, one per line. As is the case with patterns on the
 command line, no delimiters should be used. What constitutes a newline when
-reading the file is the operating system's default interpretation of \(rsn. The
+reading the file is the operating system\(cqs default interpretation of \(rsn. The
 \f(CR\-\-newline\fP option has no effect on this option. Trailing white space is
 removed from each line, and blank lines are ignored unless the
 \f(CR\-\-posix\-pattern\-file\fP option is also provided. An empty file contains no
@@ -363,13 +396,14 @@ If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
 as "\-" to refer to the standard input. When \f(CR\-f\fP is used, patterns
 specified on the command line using \f(CR\-e\fP may also be present; they are
-matched before the file's patterns. However, no pattern is taken from the
+matched before the file\(cqs patterns. However, no pattern is taken from the
 command line; all arguments are treated as the names of paths to be searched.
-.TP 10
+.TP 24
 \f(CR\-\-file\-list\fP=\fIfilename\fP
+.ad l
 Read a list of files and/or directories that are to be scanned from the given
 file, one per line. What constitutes a newline when reading the file is the
-operating system's default. Trailing white space is removed from each line, and
+operating system\(cqs default. Trailing white space is removed from each line, and
 blank lines are ignored. These paths are processed before any that are listed
 on the command line. The file name can be given as "\-" to refer to the standard
 input. If \f(CR\-\-file\fP and \f(CR\-\-file\-list\fP are both specified as "\-",
@@ -377,20 +411,23 @@ patterns are read first. This is useful only when the standard input is a
 terminal, from which further lines (the list of files) can be read after an
 end\-of\-file indication. If this option is given more than once, all the
 specified files are read.
-.TP 10
+.TP 24
 \f(CR\-\-file\-offsets\fP
+.ad l
 Instead of showing lines or parts of lines that match, show each match as an
 offset from the start of the file and a length, separated by a comma. In this
 mode, \f(CR\-\-colour\fP has no effect, and no context is shown. That is, the
 \f(CR\-A\fP, \f(CR\-B\fP, and \f(CR\-C\fP options are ignored. If there is more than one
 match in a line, each of them is shown separately. This option is mutually
 exclusive with \f(CR\-\-output\fP, \f(CR\-\-line\-offsets\fP, and \f(CR\-\-only\-matching\fP.
-.TP 10
+.TP 24
 \f(CR\-\-group\-separator\fP=\fItext\fP
+.ad l
 Output this text string instead of two hyphens between groups of lines when
 \f(CR\-A\fP, \f(CR\-B\fP, or \f(CR\-C\fP is in use. See also \f(CR\-\-no\-group\-separator\fP.
-.TP 10
+.TP 24
 \f(CR\-H\fP, \f(CR\-\-with\-filename\fP
+.ad l
 Force the inclusion of the file name at the start of output lines when
 searching a single file. The file name is not normally shown in this case.
 By default, for matching lines, the file name is followed by a colon; for
@@ -399,33 +436,39 @@ change the terminator to a zero byte. If a line number is also being output,
 it follows the file name. When the \f(CR\-M\fP option causes a pattern to match
 more than one line, only the first is preceded by the file name. This option
 overrides any previous \f(CR\-h\fP, \f(CR\-l\fP, or \f(CR\-L\fP options.
-.TP 10
+.TP 24
 \f(CR\-h\fP, \f(CR\-\-no\-filename\fP
+.ad l
 Suppress the output file names when searching multiple files. File names are
 normally shown when multiple files are searched. By default, for matching
 lines, the file name is followed by a colon; for context lines, a hyphen
 separator is used. The \f(CR\-Z\fP option can be used to change the terminator to
 a zero byte. If a line number is also being output, it follows the file name.
 This option overrides any previous \f(CR\-H\fP, \f(CR\-L\fP, or \f(CR\-l\fP options.
-.TP 10
+.TP 24
 \f(CR\-\-heap\-limit\fP=\fInumber\fP
+.ad l
 See \f(CR\-\-match\-limit\fP below.
-.TP 10
+.TP 24
 \f(CR\-\-help\fP
+.ad l
 Output a help message, giving brief details of the command options and file
 type support, and then exit. Anything else on the command line is
 ignored.
-.TP 10
+.TP 24
 \f(CR\-I\fP
+.ad l
 Ignore binary files. This is equivalent to
 \f(CR\-\-binary\-files\fP=\fIwithout\-match\fP.
-.TP 10
+.TP 24
 \f(CR\-i\fP, \f(CR\-\-ignore\-case\fP
+.ad l
 Ignore upper/lower case distinctions when pattern matching. This applies when
 matching path names for inclusion or exclusion as well as when matching lines
 in files.
-.TP 10
+.TP 24
 \f(CR\-\-include\fP=\fIpattern\fP
+.ad l
 If any \f(CR\-\-include\fP patterns are specified, the only files that are
 processed are those whose names match one of the patterns and do not match an
 \f(CR\-\-exclude\fP pattern. This option does not affect directories, but it
@@ -436,14 +479,16 @@ the entire path. The \f(CR\-F\fP, \f(CR\-w\fP, and \f(CR\-x\fP options do not ap
 this pattern. The option may be given any number of times. If a file name
 matches both an \f(CR\-\-include\fP and an \f(CR\-\-exclude\fP pattern, it is excluded.
 There is no short form for this option.
-.TP 10
+.TP 24
 \f(CR\-\-include\-from=filename\fP
+.ad l
 Treat each non\-empty line of the file as the data for an \f(CR\-\-include\fP
-option. What constitutes a newline for this purpose is the operating system's
+option. What constitutes a newline for this purpose is the operating system\(cqs
 default. The \f(CR\-\-newline\fP option has no effect on this option. This option
 may be given any number of times; all the files are read.
-.TP 10
+.TP 24
 \f(CR\-\-include\-dir\fP=\fIpattern\fP
+.ad l
 If any \f(CR\-\-include\-dir\fP patterns are specified, the only directories that
 are processed are those whose names match one of the patterns and do not match
 an \f(CR\-\-exclude\-dir\fP pattern. This applies to all directories, whether listed
@@ -453,15 +498,17 @@ the final component of the directory name, not the entire path. The \f(CR\-F\fP,
 \f(CR\-w\fP, and \f(CR\-x\fP options do not apply to this pattern. The option may be
 given any number of times. If a directory matches both \f(CR\-\-include\-dir\fP and
 \f(CR\-\-exclude\-dir\fP, it is excluded. There is no short form for this option.
-.TP 10
+.TP 24
 \f(CR\-L\fP, \f(CR\-\-files\-without\-match\fP
+.ad l
 Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
 output once, on a separate line by default, but if the \f(CR\-Z\fP option is set,
 they are separated by zero bytes instead of newlines. This option overrides any
 previous \f(CR\-H\fP, \f(CR\-h\fP, or \f(CR\-l\fP options.
-.TP 10
+.TP 24
 \f(CR\-l\fP, \f(CR\-\-files\-with\-matches\fP
+.ad l
 Instead of outputting lines from the files, just output the names of the files
 containing lines that would have been output. Each file name is output once, on
 a separate line, but if the \f(CR\-Z\fP option is set, they are separated by zero
@@ -472,17 +519,20 @@ have at least one match are listed along with their counts. Using this option
 with \f(CR\-c\fP is a way of suppressing the listing of files with no matches that
 occurs with \f(CR\-c\fP on its own. This option overrides any previous \f(CR\-H\fP,
 \f(CR\-h\fP, or \f(CR\-L\fP options.
-.TP 10
+.TP 24
 \f(CR\-\-label\fP=\fIname\fP
+.ad l
 This option supplies a name to be used for the standard input when file names
 are being output. If not supplied, "(standard input)" is used. There is no
 short form for this option.
-.TP 10
+.TP 24
 \f(CR\-\-lf\fP
+.ad l
 Use LF as the line ending for standard output. This has no effect except on
 Windows, where CRLF is the default. There is no short form for this option.
-.TP 10
+.TP 24
 \f(CR\-\-line\-buffered\fP
+.ad l
 When this option is given, non\-compressed input is read and processed line by
 line, and the output is flushed after each write. By default, input is read in
 large chunks, unless \f(CRpcre2grep\fP can determine that it is reading from a
@@ -493,8 +543,9 @@ pipe and you do not want \f(CRpcre2grep\fP to buffer up large amounts of data.
 However, its use will affect performance, and the \f(CR\-M\fP (multiline) option
 ceases to work. When input is from a compressed .gz or .bz2 file,
 \f(CR\-\-line\-buffered\fP is ignored.
-.TP 10
+.TP 24
 \f(CR\-\-line\-offsets\fP
+.ad l
 Instead of showing lines or parts of lines that match, show each match as a
 line number, the offset from the start of the line, and a length. The line
 number is terminated by a colon (as usual; see the \f(CR\-n\fP option), and the
@@ -503,23 +554,25 @@ effect, and no context is shown. That is, the \f(CR\-A\fP, \f(CR\-B\fP, and \f(C
 options are ignored. If there is more than one match in a line, each of them is
 shown separately. This option is mutually exclusive with \f(CR\-\-output\fP,
 \f(CR\-\-file\-offsets\fP, and \f(CR\-\-only\-matching\fP.
-.TP 10
+.TP 24
 \f(CR\-\-locale\fP=\fIlocale\-name\fP
+.ad l
 This option specifies a locale to be used for pattern matching. It overrides
 the value in the \f(CRLC_ALL\fP or \f(CRLC_CTYPE\fP environment variables. If no
-locale is specified, the PCRE2 library's default (usually the "C" locale) is
+locale is specified, the PCRE2 library\(cqs default (usually the "C" locale) is
 used. There is no short form for this option.
-.TP 10
+.TP 24
 \f(CR\-M\fP, \f(CR\-\-multiline\fP
+.ad l
 Allow patterns to match more than one line. When this option is set, the PCRE2
 library is called in "multiline" mode, and a match is allowed to continue past
 the end of the initial line and onto one or more subsequent lines.
 .sp
 Patterns used with \f(CR\-M\fP may usefully contain literal newline characters and
-internal occurrences of ^ and $ characters, because in multiline mode these can
+internal occurrences of \f(CR^\fP and \f(CR$\fP characters, because in multiline mode these can
 match at internal newlines. Because \f(CRpcre2grep\fP is scanning multiple lines,
-the \(rsZ and \(rsz assertions match only at the end of the last line in the file.
-The \(rsA assertion matches at the start of the first line of a match. This can
+the \f(CR\(rsZ\fP and \f(CR\(rsz\fP assertions match only at the end of the last line in the file.
+The \f(CR\(rsA\fP assertion matches at the start of the first line of a match. This can
 be any line in the file; it is not anchored to the first line.
 .sp
 The output for a successful match may consist of more than one line. The first
@@ -534,11 +587,16 @@ the pattern. For example, to find the phrase "regular expression" in a file
 where "regular" might be at the end of a line and "expression" at the start of
 the next line, you could use this command:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2grep \-M \*(Aqregular\(rss+expression\*(Aq <file>
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-The \(rss escape sequence matches any white space character, including newlines,
-and is followed by + so as to match trailing white space on the first line as
+The \f(CR\(rss\fP escape sequence matches any white space character, including newlines,
+and is followed by \f(CR+\fP so as to match trailing white space on the first line as
 well as possibly handling a two\-character newline sequence.
 .sp
 There is a limit to the number of lines that can be matched, imposed by the way
@@ -547,8 +605,9 @@ large processing buffer, this should not be a problem.
 .sp
 The \f(CR\-M\fP option does not work when input is read line by line (see
 \f(CR\-\-line\-buffered\fP.)
-.TP 10
+.TP 24
 \f(CR\-m\fP \fInumber\fP, \f(CR\-\-max\-count\fP=\fInumber\fP
+.ad l
 Stop processing after finding \fInumber\fP matching lines, or non\-matching
 lines if \f(CR\-v\fP is also set. Any trailing context lines are output after the
 final match. In multiline mode, each multiline match counts as just one line
@@ -557,8 +616,9 @@ a regular file, the file is left positioned just after the last matching line.
 If \f(CR\-c\fP is also set, the count that is output is never greater than
 \fInumber\fP. This option has no effect if used with \f(CR\-L\fP, \f(CR\-l\fP, or
 \f(CR\-q\fP, or when just checking for a match in a binary file.
-.TP 10
+.TP 24
 \f(CR\-\-match\-limit\fP=\fInumber\fP
+.ad l
 Processing some regular expression patterns may take a very long time to search
 for all possible matching strings. Others may require a very large amount of
 memory. There are three options that set resource limits for matching.
@@ -583,18 +643,25 @@ set smaller than \f(CR\-\-match\-limit\fP.
 There are no short forms for these options. The default limits can be set
 when the PCRE2 library is compiled; if they are not specified, the defaults
 are very large and so effectively unlimited.
-.TP 10
+.TP 24
 \f(CR\-\-max\-buffer\-size\fP=\fInumber\fP
+.ad l
 This limits the expansion of the processing buffer, whose initial size can be
 set by \f(CR\-\-buffer\-size\fP. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
-.TP 10
+.TP 24
 \f(CR\-N\fP \fInewline\-type\fP, \f(CR\-\-newline\fP=\fInewline\-type\fP
+.ad l
 Six different conventions for indicating the ends of lines in scanned files are
 supported. For example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2grep \-N CRLF \*(Aqsome pattern\*(Aq <file>
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The newline type may be specified in upper, lower, or mixed case. If the
 newline type is NUL, lines are separated by binary zero characters. The other
@@ -602,42 +669,46 @@ types are the single\-character sequences CR (carriage return) and LF
 (linefeed), the two\-character sequence CRLF, an "anycrlf" type, which
 recognizes any of the preceding three types, and an "any" type, for which any
 Unicode line ending sequence is assumed to end a line. The Unicode sequences
-are the three just mentioned, plus VT (vertical tab, U+000B), FF (form feed,
-U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
-(paragraph separator, U+2029).
+are the three just mentioned, plus VT (vertical tab, \f(CRU+000B\fP), FF (form feed,
+\f(CRU+000C\fP), NEL (next line, \f(CRU+0085\fP), LS (line separator, \f(CRU+2028\fP), and PS
+(paragraph separator, \f(CRU+2029\fP).
 .sp
 When the PCRE2 library is built, a default line\-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
-otherwise specified by this option, \f(CRpcre2grep\fP uses the library's default.
+otherwise specified by this option, \f(CRpcre2grep\fP uses the library\(cqs default.
 .sp
 This option makes it possible to use \f(CRpcre2grep\fP to scan files that have
 come from other environments without having to modify their line endings. If
 the data that is being scanned does not agree with the convention set by this
 option, \f(CRpcre2grep\fP may behave in strange ways. Note that this option does
 not apply to files specified by the \f(CR\-f\fP, \f(CR\-\-exclude\-from\fP, or
-\f(CR\-\-include\-from\fP options, which are expected to use the operating system's
+\f(CR\-\-include\-from\fP options, which are expected to use the operating system\(cqs
 standard newline sequence.
-.TP 10
+.TP 24
 \f(CR\-n\fP, \f(CR\-\-line\-number\fP
+.ad l
 Precede each output line by its line number in the file, followed by a colon
 for matching lines or a hyphen for context lines. If the file name is also
 being output, it precedes the line number. When the \f(CR\-M\fP option causes a
 pattern to match more than one line, only the first is preceded by its line
 number. This option is forced if \f(CR\-\-line\-offsets\fP is used.
-.TP 10
+.TP 24
 \f(CR\-\-no\-group\-separator\fP
+.ad l
 Do not output a separator between groups of lines when \f(CR\-A\fP, \f(CR\-B\fP, or
 \f(CR\-C\fP is in use. The default is to output a line containing two hyphens. See
 also \f(CR\-\-group\-separator\fP.
-.TP 10
+.TP 24
 \f(CR\-\-no\-jit\fP
+.ad l
 If the PCRE2 library is built with support for just\-in\-time compiling (which
 speeds up matching), \f(CRpcre2grep\fP automatically makes use of this, unless it
 was explicitly disabled at build time. This option can be used to disable the
 use of JIT at run time. It is provided for testing and working around problems.
 It should never be needed in normal use.
-.TP 10
+.TP 24
 \f(CR\-O\fP \fItext\fP, \f(CR\-\-output\fP=\fItext\fP
+.ad l
 When there is a match, instead of outputting the line that matched, output just
 the text specified in this option, followed by an operating\-system standard
 newline. In this mode, \f(CR\-\-colour\fP has no effect, and no context is shown.
@@ -671,8 +742,9 @@ character, the second form must be used.
 .sp
 Any other character is substituted by itself. In particular, $$ is replaced by
 a single dollar.
-.TP 10
+.TP 24
 \f(CR\-o\fP, \f(CR\-\-only\-matching\fP
+.ad l
 Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the \f(CR\-A\fP, \f(CR\-B\fP, and
 \f(CR\-C\fP options are ignored. If there is more than one match in a line, each
@@ -683,8 +755,9 @@ the matched portion of the line is empty, nothing is output unless the file
 name or line number are being printed, in which case they are shown on an
 otherwise empty line. This option is mutually exclusive with \f(CR\-\-output\fP,
 \f(CR\-\-file\-offsets\fP and \f(CR\-\-line\-offsets\fP.
-.TP 10
+.TP 24
 \f(CR\-onumber\fP, \f(CR\-\-only\-matching\fP=\fInumber\fP
+.ad l
 Show only the part of the line that matched the capturing parentheses of the
 given number. Up to 50 capturing parentheses are supported by default. This
 limit can be changed via the \f(CR\-\-om\-capture\fP option. A pattern may contain
@@ -705,73 +778,84 @@ match, in the order the options are given, and all on one line. For example,
 \-o3 \-o1 \-o3 causes the substrings matched by capturing parentheses 3 and 1 and
 then 3 again to be output. By default, there is no separator (but see the next
 but one option).
-.TP 10
+.TP 24
 \f(CR\-\-om\-capture\fP=\fInumber\fP
+.ad l
 Set the number of capturing parentheses that can be accessed by \f(CR\-o\fP. The
 default is 50.
-.TP 10
+.TP 24
 \f(CR\-\-om\-separator\fP=\fItext\fP
+.ad l
 Specify a separating string for multiple occurrences of \f(CR\-o\fP. The default
 is an empty string. Separating strings are never coloured.
-.TP 10
+.TP 24
 \f(CR\-P\fP, \f(CR\-\-no\-ucp\fP
+.ad l
 Starting from release 10.43, when UTF/Unicode mode is specified with \f(CR\-u\fP
-or \f(CR\-U\fP, the PCRE2_UCP option is used by default. This means that the
+or \f(CR\-U\fP, the \fBPCRE2_UCP\fP option is used by default. This means that the
 POSIX classes in patterns match more than just ASCII characters. For example,
-[:digit:] matches any Unicode decimal digit. The \f(CR\-\-no\-ucp\fP option
-suppresses PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
+\f(CR[:digit:]\fP matches any Unicode decimal digit. The \f(CR\-\-no\-ucp\fP option
+suppresses \fBPCRE2_UCP\fP, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine\-grained
 option settings within patterns that affect individual classes. For example,
-when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
-allowing \(rsw to match Unicode letters and digits.
-.TP 10
+when in UCP mode, the sequence \f(CR(?aP)\fP restricts \f(CR[:word:]\fP to ASCII letters, while
+allowing \f(CR\(rsw\fP to match Unicode letters and digits.
+.TP 24
 \f(CR\-\-posix\-pattern\-file\fP
+.ad l
 When patterns are provided with the \f(CR\-f\fP option, do not trim trailing
 spaces or ignore empty lines in a similar way than other grep tools. To keep
 the behaviour consistent with older versions, if the pattern read was
-terminated with CRLF (as character literals) then both characters won't be
+terminated with CRLF (as character literals) then both characters won\(cqt be
 included as part of it, so if you really need to have pattern ending in \*(Aq\(rsr\*(Aq,
 use a escape sequence or provide it by a different method.
-.TP 10
+.TP 24
 \f(CR\-q\fP, \f(CR\-\-quiet\fP
+.ad l
 Work quietly, that is, display nothing except error messages. The exit
 status indicates whether or not any matches were found.
-.TP 10
+.TP 24
 \f(CR\-r\fP, \f(CR\-\-recursive\fP
+.ad l
 If any given path is a directory, recursively scan the files it contains,
 taking note of any \f(CR\-\-include\fP and \f(CR\-\-exclude\fP settings. By default, a
 directory is read as a normal file; in some operating systems this gives an
 immediate end\-of\-file. This option is a shorthand for setting the \f(CR\-d\fP
 option to "recurse".
-.TP 10
+.TP 24
 \f(CR\-\-recursion\-limit\fP=\fInumber\fP
+.ad l
 This is an obsolete synonym for \f(CR\-\-depth\-limit\fP. See \f(CR\-\-match\-limit\fP
 above for details.
-.TP 10
+.TP 24
 \f(CR\-s\fP, \f(CR\-\-no\-messages\fP
+.ad l
 Suppress error messages about non\-existent or unreadable files. Such files are
 quietly skipped. However, the return code is still 2, even if matches were
 found in other files.
-.TP 10
+.TP 24
 \f(CR\-t\fP, \f(CR\-\-total\-count\fP
+.ad l
 This option is useful when scanning more than one file. If used on its own,
 \f(CR\-t\fP suppresses all output except for a grand total number of matching
 lines (or non\-matching lines if \f(CR\-v\fP is used) in all the files. If \f(CR\-t\fP
 is used with \f(CR\-c\fP, a grand total is output except when the previous output
-is just one line. In other words, it is not output when just one file's count
+is just one line. In other words, it is not output when just one file\(cqs count
 is listed. If file names are being output, the grand total is preceded by
 "TOTAL:". Otherwise, it appears as just another number. The \f(CR\-t\fP option is
 ignored when used with \f(CR\-L\fP (list files without matches), because the grand
 total would always be zero.
-.TP 10
+.TP 24
 \f(CR\-u\fP, \f(CR\-\-utf\fP
+.ad l
 Operate in UTF/Unicode mode. This option is available only if PCRE2 has been
 compiled with UTF\-8 support. All patterns (including those for any
 \f(CR\-\-exclude\fP and \f(CR\-\-include\fP options) and all lines that are scanned
 must be valid strings of UTF\-8 characters. If an invalid UTF\-8 string is
 encountered, an error occurs.
-.TP 10
+.TP 24
 \f(CR\-U\fP, \f(CR\-\-utf\-allow\-invalid\fP
+.ad l
 As \f(CR\-\-utf\fP, but in addition subject lines may contain invalid UTF\-8 code
 unit sequences. These can never form part of any pattern match. Patterns
 themselves, however, must still be valid UTF\-8 strings. This facility allows
@@ -780,45 +864,51 @@ or other binary files. For more details about matching in non\-valid UTF\-8
 strings, see the
 \f(CRpcre2unicode\fP(3)
 documentation.
-.TP 10
+.TP 24
 \f(CR\-V\fP, \f(CR\-\-version\fP
+.ad l
 Write the version numbers of \f(CRpcre2grep\fP and the PCRE2 library to the
 standard output and then exit. Anything else on the command line is
 ignored.
-.TP 10
+.TP 24
 \f(CR\-v\fP, \f(CR\-\-invert\-match\fP
+.ad l
 Invert the sense of the match, so that lines which do \fInot\fP match any of
 the patterns are the ones that are found. When this option is set, options such
 as \f(CR\-\-only\-matching\fP and \f(CR\-\-output\fP, which specify parts of a match
 that are to be output, are ignored.
-.TP 10
+.TP 24
 \f(CR\-w\fP, \f(CR\-\-word\-regex\fP, \f(CR\-\-word\-regexp\fP
+.ad l
 Force the patterns only to match "words". That is, there must be a word
 boundary at the start and end of each matched string. This is equivalent to
-having "\(rsb(?:" at the start of each pattern, and ")\(rsb" at the end. This
+having \f(CR\(rsb(?:\fP at the start of each pattern, and \f(CR)\(rsb\fP at the end. This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the \f(CR\-\-include\fP or
 \f(CR\-\-exclude\fP options.
-.TP 10
+.TP 24
 \f(CR\-x\fP, \f(CR\-\-line\-regex\fP, \f(CR\-\-line\-regexp\fP
+.ad l
 Force the patterns to start matching only at the beginnings of lines, and in
 addition, require them to match entire lines. In multiline mode the match may
-be more than one line. This is equivalent to having "^(?:" at the start of each
-pattern and ")$" at the end. This option applies only to the patterns that are
+be more than one line. This is equivalent to having \f(CR^(?:\fP at the start of each
+pattern and \f(CR)$\fP at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the \f(CR\-\-include\fP or \f(CR\-\-exclude\fP options.
-.TP 10
+.TP 24
 \f(CR\-Z\fP, \f(CR\-\-null\fP
+.ad l
 Terminate files names in the regular output with a zero byte (the NUL
 character) instead of what would normally appear. This is useful when file
 names contain unusual characters such as colons, hyphens, or even newlines. The
 option does not apply to file names in error messages.
 .PP
+.ad l
 .SH "ENVIRONMENT VARIABLES"
 .sp
 The environment variables \f(CRLC_ALL\fP and \f(CRLC_CTYPE\fP are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
-by the \f(CR\-\-locale\fP option. If no locale is set, the PCRE2 library's default
+by the \f(CR\-\-locale\fP option. If no locale is set, the PCRE2 library\(cqs default
 (usually the "C" locale) is used.
 .SH "NEWLINES"
 .sp
@@ -857,7 +947,7 @@ However, the \f(CR\-\-case\-restrict\fP, \f(CR\-\-depth\-limit\fP, \f(CR\-E\fP,
 capturing parentheses number.
 .sp
 Although most of the common options work the same way, a few are different in
-\f(CRpcre2grep\fP. For example, the \f(CR\-\-include\fP option's argument is a glob
+\f(CRpcre2grep\fP. For example, the \f(CR\-\-include\fP option\(cqs argument is a glob
 for GNU \f(CRgrep\fP, but in \f(CRpcre2grep\fP it is a regular expression to which
 the \f(CR\-i\fP option applies. If both the \f(CR\-c\fP and \f(CR\-l\fP options are
 given, GNU grep lists only file names, without counts, but \f(CRpcre2grep\fP
@@ -868,11 +958,14 @@ There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
 exception) in the next command line item. For example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-f/some/file
-.br
-.ti +2
 \-f /some/file
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The exception is the \f(CR\-o\fP option, which may appear with or without data.
 Because of this, if data is present, it must follow immediately in the same
@@ -882,11 +975,14 @@ If a long form option is used, the data may appear in the same command line
 item, separated by an equals character, or (with two exceptions) it may appear
 in the next command line item. For example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-file=/some/file
-.br
-.ti +2
 \-\-file /some/file
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 Note, however, that if you want to supply a file name beginning with ~ as data
 in a shell command, and have the shell expand ~ to a home directory, you must
@@ -897,10 +993,10 @@ The exceptions to the above are the \f(CR\-\-colour\fP (or \f(CR\-\-color\fP) an
 \f(CR\-\-only\-matching\fP options, for which the data is optional. If one of these
 options does have data, it must be given in the first form, using an equals
 character. Otherwise \f(CRpcre2grep\fP will assume that it has no data.
-.SH "USING PCRE2'S CALLOUT FACILITY"
+.SH "USING PCRE2\(cqS CALLOUT FACILITY"
 .sp
 \f(CRpcre2grep\fP has, by default, support for calling external programs or
-scripts or echoing specific strings during matching by making use of PCRE2's
+scripts or echoing specific strings during matching by making use of PCRE2\(cqs
 callout facility. However, this support can be completely or partially disabled
 when \f(CRpcre2grep\fP is built. You can find out whether your binary has support
 for callouts by running it with the \f(CR\-\-help\fP option. If callout support is
@@ -908,7 +1004,7 @@ completely disabled, callouts in patterns are forbidden by \f(CRpcre2grep\fP.
 If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.
 .sp
-A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is
+A callout in a PCRE2 pattern is of the form \f(CR(?C<arg>)\fP where the argument is
 either a number or a quoted string (see the
 \f(CRpcre2callout\fP
 documentation for details). Numbered callouts are ignored by \f(CRpcre2grep\fP;
@@ -929,12 +1025,17 @@ character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
 the escape $n. For example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 pcre2grep \*(Aq(.)(..(.))(?C"|[$1] [$2] [$3]$n")\*(Aq <some file>
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
-pattern with (*FAIL).
+pattern with \f(CR(*FAIL)\fP.
 .SS "Calling external programs or scripts"
 .sp
 This facility can be independently disabled when \f(CRpcre2grep\fP is built. It
@@ -957,14 +1058,15 @@ matched string because the match is still in progress. Instead, the character
 \*(Aq0\*(Aq is inserted. If you need a literal dollar or pipe character in any
 substring, use $$ or $| respectively. Here is an example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 echo \-e "abcde\(rsn12345" | pcre2grep \(rs
-.br
-.ti +2
   \*(Aq(?x)(.)(..(.))
-.br
-.ti +2
   (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()\*(Aq \-
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 .ti +2
 Output:
@@ -993,7 +1095,7 @@ normal way.
 .sp
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
-repeats, for example: (a+)*\(rsd when matched against a line of a's with no final
+repeats, for example: \f(CR(a+)*\(rsd\fP when matched against a line of a\(cqs with no final
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, \f(CRpcre2grep\fP outputs an error
 message and the line that caused the problem to the standard error stream. If
@@ -1012,20 +1114,21 @@ matches were found in other files) or too many matching errors. Using the
 affect the return code.
 .sp
 When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
-because VMS does not distinguish between exit(0) and exit(1).
+because VMS does not distinguish between \f(CRexit(0)\fP and \f(CRexit(1)\fP.
 .SH "SEE ALSO"
 .sp
 \f(CRpcre2pattern\fP(3), \f(CRpcre2syntax\fP(3), \f(CRpcre2callout\fP(3),
 \f(CRpcre2unicode\fP(3).
 .SH "AUTHOR"
 .sp
-.nf
-.fam C
+.ti +2
 Philip Hazel
+.br
+.ti +2
 Retired from University Computing Service
+.br
+.ti +2
 Cambridge, England.
-.fam
-.fi
 .SH "REVISION"
 .sp
 Last updated: 24 January 2025

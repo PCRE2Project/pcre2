@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_general_context *pcre2_general_context_copy(
       pcre2_general_context *gcontext);</code></pre>
@@ -461,7 +461,7 @@ pcre2_general_context *pcre2_general_context_copy(
 <div class="paragraph">
 <p>This function makes a new copy of a general context, using the memory
 allocation functions in the context, if set, to get the necessary memory.
-Otherwise <code>malloc()</code> is used. The result is NULL if the memory cannot be
+Otherwise <code class="c">malloc()</code> is used. The result is <code class="c">NULL</code> if the memory cannot be
 obtained.</p>
 </div>
 <div class="paragraph">

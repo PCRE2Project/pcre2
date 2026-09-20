@@ -31,115 +31,139 @@
 pcre2_dfa_match \- match a pattern using the alternative matching algorithm
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
-                    PCRE2_SIZE length, PCRE2_SIZE start_offset,
-                    uint32_t options, pcre2_match_data *match_data,
-                    pcre2_match_context *mcontext, int *workspace,
-                    PCRE2_SIZE wscount);
+\fBint\fP pcre2_dfa_match(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBPCRE2_SPTR\fP \fIsubject\fP,
+                    \fBPCRE2_SIZE\fP \fIlength\fP, \fBPCRE2_SIZE\fP \fIstart_offset\fP,
+                    \fBuint32_t\fP \fIoptions\fP, \fBpcre2_match_data\fP *\fImatch_data\fP,
+                    \fBpcre2_match_context\fP *\fImcontext\fP, \fBint\fP *\fIworkspace\fP,
+                    \fBPCRE2_SIZE\fP \fIwscount\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function matches a compiled regular expression against a given subject
 string, using an alternative matching algorithm that scans the subject string
 just once (except when processing lookaround assertions). This function is
 \fInot\fP Perl\-compatible (the Perl\-compatible matching function is
-\f(CRpcre2_match()\fP). The arguments for this function are:
+pcre2_match()). The arguments for this function are:
 .sp
-.ti +2
-\fIcode\fP         Points to the compiled pattern
-.br
-.ti +2
-\fIsubject\fP      Points to the subject string
-.br
-.ti +2
-\fIlength\fP       Length of the subject string
-.br
-.ti +2
-\fIstartoffset\fP  Offset in the subject at which to start matching
-.br
-.ti +2
-\fIoptions\fP      Option bits
-.br
-.ti +2
-\fImatch_data\fP   Points to a match data block, for results
-.br
-.ti +2
-\fImcontext\fP     Points to a match context, or is NULL
-.br
-.ti +2
-\fIworkspace\fP    Points to a vector of ints used as working space
-.br
-.ti +2
-\fIwscount\fP      Number of elements in the vector
+.RS 4
+.PD 0
+.TP 13
+\fIcode\fP
+.ad l
+Points to the compiled pattern
+.TP 13
+\fIsubject\fP
+.ad l
+Points to the subject string
+.TP 13
+\fIlength\fP
+.ad l
+Length of the subject string
+.TP 13
+\fIstart_offset\fP
+.ad l
+Offset in the subject at which to start matching
+.TP 13
+\fIoptions\fP
+.ad l
+Option bits
+.TP 13
+\fImatch_data\fP
+.ad l
+Points to a match data block, for results
+.TP 13
+\fImcontext\fP
+.ad l
+Points to a match context, or is \f(CRNULL\fP
+.TP 13
+\fIworkspace\fP
+.ad l
+Points to a vector of ints used as working space
+.TP 13
+\fIwscount\fP
+.ad l
+Number of elements in the vector
+.PD
+.RE
+.PP
+.ad l
 .sp
 The size of output vector needed to contain all the results depends on the
 number of simultaneous matches, not on the number of parentheses in the
-pattern. Using \f(CRpcre2_match_data_create_from_pattern()\fP to create the match
+pattern. Using pcre2_match_data_create_from_pattern() to create the match
 data block is therefore not advisable when using this function.
 .sp
 A match context is needed only if you want to set up a callout function or
 specify the heap limit or the match or the recursion depth limits. The
-\fIlength\fP and \fIstartoffset\fP values are code units, not characters. The
+\fIlength\fP and \fIstart_offset\fP values are code units, not characters. The
 options are:
 .sp
-.ti +2
-PCRE2_ANCHORED          Match only at the first position
-.br
-.ti +2
-PCRE2_COPY_MATCHED_SUBJECT
-.br
-.ti +2
-                        On success, make a private subject copy
-.br
-.ti +2
-PCRE2_ENDANCHORED       Pattern can match only at end of subject
-.br
-.ti +2
-PCRE2_NOTBOL            Subject is not the beginning of a line
-.br
-.ti +2
-PCRE2_NOTEOL            Subject is not the end of a line
-.br
-.ti +2
-PCRE2_NOTEMPTY          An empty string is not a valid match
-.br
-.ti +2
-PCRE2_NOTEMPTY_ATSTART  An empty string at the start of the subject
-.br
-.ti +2
-                         is not a valid match
-.br
-.ti +2
-PCRE2_NO_UTF_CHECK      Do not check the subject for UTF
-.br
-.ti +2
-                         validity (only relevant if PCRE2_UTF
-.br
-.ti +2
-                         was set at compile time)
-.br
-.ti +2
-PCRE2_PARTIAL_HARD      Return PCRE2_ERROR_PARTIAL for a partial
-.br
-.ti +2
-                         match even if there is a full match
-.br
-.ti +2
-PCRE2_PARTIAL_SOFT      Return PCRE2_ERROR_PARTIAL for a partial
-.br
-.ti +2
-                         match if no full matches are found
-.br
-.ti +2
-PCRE2_DFA_RESTART       Restart after a partial match
-.br
-.ti +2
-PCRE2_DFA_SHORTEST      Return only the shortest match
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_ANCHORED\fP
+.ad l
+Match only at the first position
+.TP 24
+\fBPCRE2_COPY_MATCHED_SUBJECT\fP
+.ad l
+On success, make a private subject copy
+.TP 24
+\fBPCRE2_ENDANCHORED\fP
+.ad l
+Pattern can match only at end of subject
+.TP 24
+\fBPCRE2_NOTBOL\fP
+.ad l
+Subject is not the beginning of a line
+.TP 24
+\fBPCRE2_NOTEOL\fP
+.ad l
+Subject is not the end of a line
+.TP 24
+\fBPCRE2_NOTEMPTY\fP
+.ad l
+An empty string is not a valid match
+.TP 24
+\fBPCRE2_NOTEMPTY_ATSTART\fP
+.ad l
+An empty string at the start of the subject
+is not a valid match
+.TP 24
+\fBPCRE2_NO_UTF_CHECK\fP
+.ad l
+Do not check the subject for UTF
+validity (only relevant if \fBPCRE2_UTF\fP
+was set at compile time)
+.TP 24
+\fBPCRE2_PARTIAL_HARD\fP
+.ad l
+Return \fBPCRE2_ERROR_PARTIAL\fP for a partial
+match even if there is a full match
+.TP 24
+\fBPCRE2_PARTIAL_SOFT\fP
+.ad l
+Return \fBPCRE2_ERROR_PARTIAL\fP for a partial
+match if no full matches are found
+.TP 24
+\fBPCRE2_DFA_RESTART\fP
+.ad l
+Restart after a partial match
+.TP 24
+\fBPCRE2_DFA_SHORTEST\fP
+.ad l
+Return only the shortest match
+.PD
+.RE
+.PP
+.ad l
 .sp
 There are restrictions on what may appear in a pattern when using this matching
 function. Details are given in the

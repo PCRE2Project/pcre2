@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_recursion_limit(pcre2_match_context *mcontext,
                               uint32_t limit);</code></pre>
@@ -460,7 +460,7 @@ int pcre2_set_recursion_limit(pcre2_match_context *mcontext,
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function is obsolete and should not be used in new code. Use
-<code>pcre2_set_depth_limit()</code> instead.</p>
+<code class="function">pcre2_set_depth_limit()</code> instead.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

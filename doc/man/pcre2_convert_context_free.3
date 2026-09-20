@@ -31,19 +31,21 @@
 pcre2_convert_context_free \- free a convert context
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_convert_context_free(pcre2_convert_context *ccontext);
+\fBvoid\fP pcre2_convert_context_free(\fBpcre2_convert_context\fP *\fIccontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a convert context, using the memory
 freeing function from the general context with which it was created, or
-\f(CRfree()\fP if that was not set. If the argument is NULL, the function returns
+\f(CRfree()\fP if that was not set. If the argument is \f(CRNULL\fP, the function returns
 immediately without doing anything.
 .sp
 The pattern conversion functions are described in the

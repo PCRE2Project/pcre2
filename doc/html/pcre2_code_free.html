@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 void pcre2_code_free(pcre2_code *code);</code></pre>
 </div>
@@ -458,10 +458,10 @@ void pcre2_code_free(pcre2_code *code);</code></pre>
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If <em>code</em> is NULL, this function does nothing. Otherwise, <em>code</em> must
+<p>If <code class="parameter">code</code> is <code class="c">NULL</code>, this function does nothing. Otherwise, <code class="parameter">code</code> must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
-to <code>pcre2_code_copy_with_tables()</code>, the memory for the character tables is
+to <code class="function">pcre2_code_copy_with_tables()</code>, the memory for the character tables is
 also freed.</p>
 </div>
 <div class="paragraph">

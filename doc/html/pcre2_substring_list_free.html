@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 void pcre2_substring_list_free(PCRE2_UCHAR **list);</code></pre>
 </div>
@@ -459,8 +459,8 @@ void pcre2_substring_list_free(PCRE2_UCHAR **list);</code></pre>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This is a convenience function for freeing the store obtained by a previous
-call to <code>pcre2substring_list_get()</code>. Its only argument is a pointer to
-the list of string pointers. If the argument is NULL, the function returns
+call to <code class="function">pcre2_substring_list_get()</code>. Its only argument is a pointer to
+the list of string pointers. If the argument is <code class="c">NULL</code>, the function returns
 immediately, without doing anything.</p>
 </div>
 <div class="paragraph">

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_glob_separator(pcre2_convert_context *ccontext,
                              uint32_t separator_char);</code></pre>
@@ -463,7 +463,7 @@ int pcre2_set_glob_separator(pcre2_convert_context *ccontext,
 It sets the component separator character that is used when converting globs.
 The second argument must be one of the characters forward slash, backslash, or
 dot. The default is backslash when running under Windows, otherwise forward
-slash. The result of the function is zero for success or PCRE2_ERROR_BADDATA if
+slash. The result of the function is zero for success or <code class="constant">PCRE2_ERROR_BADDATA</code> if
 the second argument is invalid.</p>
 </div>
 <div class="paragraph">

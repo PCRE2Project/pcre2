@@ -31,18 +31,20 @@
 pcre2_jit_stack_free \- free a JIT matching stack
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_jit_stack_free(pcre2_jit_stack *jit_stack);
+\fBvoid\fP pcre2_jit_stack_free(\fBpcre2_jit_stack\fP *\fIjit_stack\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function is used to free a JIT stack that was created by
-\f(CRpcre2_jit_stack_create()\fP when it is no longer needed. If the argument is
-NULL, the function returns immediately without doing anything. For more
+pcre2_jit_stack_create() when it is no longer needed. If the argument is
+\f(CRNULL\fP, the function returns immediately without doing anything. For more
 details, see the
 \f(CRpcre2jit\fP
 page.

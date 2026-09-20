@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 void pcre2_jit_stack_free(pcre2_jit_stack *jit_stack);</code></pre>
 </div>
@@ -459,8 +459,8 @@ void pcre2_jit_stack_free(pcre2_jit_stack *jit_stack);</code></pre>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function is used to free a JIT stack that was created by
-<code>pcre2_jit_stack_create()</code> when it is no longer needed. If the argument is
-NULL, the function returns immediately without doing anything. For more
+<code class="function">pcre2_jit_stack_create()</code> when it is no longer needed. If the argument is
+<code class="c">NULL</code>, the function returns immediately without doing anything. For more
 details, see the
 <a href="pcre2jit.html"><code>pcre2jit</code></a>
 page.</p>

@@ -31,20 +31,22 @@
 pcre2_set_character_tables \- set character tables
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_character_tables(pcre2_compile_context *ccontext,
-                               const uint8_t *tables);
+\fBint\fP pcre2_set_character_tables(\fBpcre2_compile_context\fP *\fIccontext\fP,
+                               \fBconst\fP \fBuint8_t\fP *\fItables\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function sets a pointer to custom character tables within a compile
 context. The second argument must point to a set of PCRE2 character tables or
-be NULL to request the default tables. The result is always zero. Character
-tables can be created by calling \f(CRpcre2_maketables()\fP or by running the
+be \f(CRNULL\fP to request the default tables. The result is always zero. Character
+tables can be created by calling pcre2_maketables() or by running the
 \f(CRpcre2_dftables\fP maintenance command in binary mode (see the
 \f(CRpcre2build\fP
 documentation).

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_max_pattern_compiled_length(
       pcre2_compile_context *ccontext, PCRE2_SIZE length);</code></pre>
@@ -462,8 +462,8 @@ int pcre2_set_max_pattern_compiled_length(
 <p>This function sets, in a compile context, the maximum size (in bytes) for the
 memory needed to hold the compiled version of a pattern that is using this
 context. The result is always zero. If a pattern that is passed to
-<code>pcre2_compile()</code> referencing this context needs more memory, an error is
-generated. The default is the largest number that a PCRE2_SIZE variable can
+<code class="function">pcre2_compile()</code> referencing this context needs more memory, an error is
+generated. The default is the largest number that a <code class="type">PCRE2_SIZE</code> variable can
 hold, which is effectively unlimited.</p>
 </div>
 <div class="paragraph">

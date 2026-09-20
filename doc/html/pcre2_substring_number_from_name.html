@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_substring_number_from_name(const pcre2_code *code,
                                      PCRE2_SPTR stringname);</code></pre>
@@ -463,16 +463,24 @@ int pcre2_substring_number_from_name(const pcre2_code *code,
 parenthesis in a compiled pattern, provided that it is a unique name. The
 function arguments are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>code</em>    Compiled regular expression<br>
-<em>name</em>    Name whose number is required</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">code</code></dt>
+<dd>
+<p>Compiled regular expression</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">stringname</code></dt>
+<dd>
+<p>Name whose number is required</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The yield of the function is the number of the parenthesis if the name is
-found, or PCRE2_ERROR_NOSUBSTRING if it is not found. When duplicate names are
-allowed (PCRE2_DUPNAMES is set), if the name is not unique,
-PCRE2_ERROR_NOUNIQUESUBSTRING is returned. You can obtain the list of numbers
-with the same name by calling <code>pcre2_substring_nametable_scan()</code>.</p>
+found, or <code class="constant">PCRE2_ERROR_NOSUBSTRING</code> if it is not found. When duplicate names are
+allowed (<code class="constant">PCRE2_DUPNAMES</code> is set), if the name is not unique,
+<code class="constant">PCRE2_ERROR_NOUNIQUESUBSTRING</code> is returned. You can obtain the list of numbers
+with the same name by calling <code class="function">pcre2_substring_nametable_scan()</code>.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the
