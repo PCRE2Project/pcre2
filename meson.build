@@ -29,12 +29,7 @@ pcre2_major = project_version_parts[0]
 pcre2_minor = project_version_parts[1]
 pcre2_prerelease = '-DEV'
 pcre2_date = '2026-11-31'
-libtool_versions = {
-  'posix': '3:8:0',
-  '8': '16:0:16',
-  '16': '16:0:16',
-  '32': '16:0:16',
-}
+libtool_versions = {'posix': '3:8:0', '8': '16:0:16', '16': '16:0:16', '32': '16:0:16'}
 
 lib_versions = {}
 lib_soversions = {}
@@ -48,9 +43,7 @@ foreach library : ['posix', '8', '16', '32']
   lib_soversions += {library: soversion.to_string()}
   lib_versions += {library: '@0@.@1@.@2@'.format(soversion, age, revision)}
   darwin_compatibility = current + 1
-  lib_darwin_versions += {
-    library: [darwin_compatibility.to_string(), '@0@.@1@'.format(darwin_compatibility, revision)],
-  }
+  lib_darwin_versions += {library: [darwin_compatibility.to_string(), '@0@.@1@'.format(darwin_compatibility, revision)]}
 endforeach
 
 # -----------------------------------------------------------------------------
@@ -91,23 +84,22 @@ if not cc.compiles(mkostemp_test, args: warning_as_error, name: 'mkostemp withou
 endif
 add_project_arguments(system_extension_args, language: 'c')
 
-config.set('HAVE_MEMFD_CREATE', cc.has_function(
-  'memfd_create',
-  prefix: '#include <sys/mman.h>',
-  args: system_extension_args,
-))
-config.set('HAVE_SECURE_GETENV', cc.has_function(
-  'secure_getenv',
-  prefix: '#include <stdlib.h>',
-  args: system_extension_args,
-))
-config.set('HAVE_SETRLIMIT', cc.has_function(
-  'setrlimit',
-  prefix: '#include <sys/resource.h>',
-  args: system_extension_args,
-))
-config.set('HAVE_STDATOMIC_H', cc.compiles(
-  '''
+config.set(
+  'HAVE_MEMFD_CREATE',
+  cc.has_function('memfd_create', prefix: '#include <sys/mman.h>', args: system_extension_args),
+)
+config.set(
+  'HAVE_SECURE_GETENV',
+  cc.has_function('secure_getenv', prefix: '#include <stdlib.h>', args: system_extension_args),
+)
+config.set(
+  'HAVE_SETRLIMIT',
+  cc.has_function('setrlimit', prefix: '#include <sys/resource.h>', args: system_extension_args),
+)
+config.set(
+  'HAVE_STDATOMIC_H',
+  cc.compiles(
+    '''
   #ifdef __STDC_NO_ATOMICS__
   #error "C compiler does not support standard C atomics"
   #endif
@@ -118,10 +110,13 @@ config.set('HAVE_STDATOMIC_H', cc.compiles(
     return atomic_load(&value);
   }
   ''',
-  name: 'standard C atomics',
-))
-config.set('HAVE_REALPATH', cc.compiles(
-  '''
+    name: 'standard C atomics',
+  ),
+)
+config.set(
+  'HAVE_REALPATH',
+  cc.compiles(
+    '''
   #include <stdlib.h>
   #include <limits.h>
   int main(int c, char *v[]) {
@@ -129,15 +124,19 @@ config.set('HAVE_REALPATH', cc.compiles(
     return realpath(v[c], buf) == NULL;
   }
   ''',
-  args: system_extension_args,
-  name: 'realpath',
-))
+    args: system_extension_args,
+    name: 'realpath',
+  ),
+)
 
-config.set('HAVE_ATTRIBUTE_UNINITIALIZED', cc.compiles(
-  'int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }',
-  args: warning_as_error,
-  name: '__attribute__((uninitialized))',
-))
+config.set(
+  'HAVE_ATTRIBUTE_UNINITIALIZED',
+  cc.compiles(
+    'int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }',
+    args: warning_as_error,
+    name: '__attribute__((uninitialized))',
+  ),
+)
 have_visibility = cc.compiles(
   '''
   extern __attribute__ ((visibility ("default"))) int f(void);
@@ -148,29 +147,31 @@ have_visibility = cc.compiles(
   name: '__attribute__((visibility("default")))',
 )
 config.set('PCRE2_EXPORT', have_visibility ? '__attribute__ ((visibility ("default")))' : '')
-config.set('HAVE_BUILTIN_ASSUME', cc.links(
-  'int main(void) { __assume(1); return 0; }',
-  args: warning_as_error,
-  name: '__assume',
-))
-config.set('HAVE_BUILTIN_MUL_OVERFLOW', cc.links(
-  '''
+config.set(
+  'HAVE_BUILTIN_ASSUME',
+  cc.links('int main(void) { __assume(1); return 0; }', args: warning_as_error, name: '__assume'),
+)
+config.set(
+  'HAVE_BUILTIN_MUL_OVERFLOW',
+  cc.links(
+    '''
   #include <stddef.h>
   int main(void) { int a, b; size_t m; __builtin_mul_overflow(a, b, &m); return 0; }
   ''',
-  args: warning_as_error,
-  name: '__builtin_mul_overflow',
-))
-config.set('HAVE_BUILTIN_UNREACHABLE', cc.links(
-  'int main(int c, char *v[]) { if (c) __builtin_unreachable(); return (int)(*v[0]); }',
-  args: warning_as_error,
-  name: '__builtin_unreachable',
-))
-
-if cc.compiles(
-  '#ifndef __CET__\n#error CET is not enabled\n#endif\nint main(void) { return 0; }',
-  name: 'Intel CET',
+    args: warning_as_error,
+    name: '__builtin_mul_overflow',
+  ),
 )
+config.set(
+  'HAVE_BUILTIN_UNREACHABLE',
+  cc.links(
+    'int main(int c, char *v[]) { if (c) __builtin_unreachable(); return (int)(*v[0]); }',
+    args: warning_as_error,
+    name: '__builtin_unreachable',
+  ),
+)
+
+if cc.compiles('#ifndef __CET__\n#error CET is not enabled\n#endif\nint main(void) { return 0; }', name: 'Intel CET')
   add_project_arguments(cc.get_supported_arguments('-mshstk'), language: 'c')
 endif
 
@@ -181,8 +182,7 @@ library_type = get_option('default_library')
 build_shared = library_type in ['shared', 'both']
 build_static = library_type in ['static', 'both']
 # With both variants, Meson's auto selection falls back to shared.
-default_to_static = library_type == 'static' or (
-  library_type == 'both' and get_option('default_both_libraries') == 'static'
+default_to_static = library_type == 'static' or (library_type == 'both' and get_option('default_both_libraries') == 'static'
 )
 build_8 = get_option('pcre2_build_pcre2_8')
 build_16 = get_option('pcre2_build_pcre2_16')
@@ -278,8 +278,10 @@ config.set('SUPPORT_JIT', jit_enabled)
 config.set('SLJIT_PROT_EXECUTABLE_ALLOCATOR', get_option('pcre2_support_jit_sealloc'))
 config.set('SUPPORT_PCRE2GREP_JIT', get_option('pcre2grep_support_jit'))
 config.set('SUPPORT_PCRE2GREP_CALLOUT', get_option('pcre2grep_support_callout'))
-config.set('SUPPORT_PCRE2GREP_CALLOUT_FORK',
-  get_option('pcre2grep_support_callout') and get_option('pcre2grep_support_callout_fork'))
+config.set(
+  'SUPPORT_PCRE2GREP_CALLOUT_FORK',
+  get_option('pcre2grep_support_callout') and get_option('pcre2grep_support_callout_fork'),
+)
 config.set('SUPPORT_UNICODE', get_option('pcre2_support_unicode'))
 config.set('SUPPORT_VALGRIND', get_option('pcre2_support_valgrind'))
 config.set('SUPPORT_DIFF_FUZZ', get_option('pcre2_diff_fuzz_support'))
@@ -306,27 +308,15 @@ endforeach
 # Generated files
 # -----------------------------------------------------------------------------
 
-config_h = configure_file(
-  input: 'src/config-meson.h.in',
-  output: 'config.h',
-  configuration: config,
-)
+config_h = configure_file(input: 'src/config-meson.h.in', output: 'config.h', configuration: config)
 pcre2_header_config = {
   'PCRE2_MAJOR': pcre2_major,
   'PCRE2_MINOR': pcre2_minor,
   'PCRE2_PRERELEASE': pcre2_prerelease,
   'PCRE2_DATE': pcre2_date,
 }
-pcre2_h = configure_file(
-  input: 'src/pcre2.h.in',
-  output: 'pcre2.h',
-  configuration: pcre2_header_config,
-)
-pcre2posix_h = configure_file(
-  input: 'src/pcre2posix.h',
-  output: 'pcre2posix.h',
-  copy: true,
-)
+pcre2_h = configure_file(input: 'src/pcre2.h.in', output: 'pcre2.h', configuration: pcre2_header_config)
+pcre2posix_h = configure_file(input: 'src/pcre2posix.h', output: 'pcre2posix.h', copy: true)
 
 # -----------------------------------------------------------------------------
 # Character table generation
@@ -341,29 +331,13 @@ if rebuild_chartables
     c_args: '-DHAVE_CONFIG_H',
     native: true,
   )
-  chartables = custom_target(
-    'pcre2_chartables',
-    output: 'pcre2_chartables.c',
-    command: [pcre2_dftables, '@OUTPUT@'],
-  )
+  chartables = custom_target('pcre2_chartables', output: 'pcre2_chartables.c', command: [pcre2_dftables, '@OUTPUT@'])
 elif not ebcdic
-  chartables = configure_file(
-    input: 'src/pcre2_chartables.c.dist',
-    output: 'pcre2_chartables.c',
-    copy: true,
-  )
+  chartables = configure_file(input: 'src/pcre2_chartables.c.dist', output: 'pcre2_chartables.c', copy: true)
 elif get_option('pcre2_ebcdic_nl25')
-  chartables = configure_file(
-    input: 'src/pcre2_chartables.c.ebcdic-1047-nl25',
-    output: 'pcre2_chartables.c',
-    copy: true,
-  )
+  chartables = configure_file(input: 'src/pcre2_chartables.c.ebcdic-1047-nl25', output: 'pcre2_chartables.c', copy: true)
 else
-  chartables = configure_file(
-    input: 'src/pcre2_chartables.c.ebcdic-1047-nl15',
-    output: 'pcre2_chartables.c',
-    copy: true,
-  )
+  chartables = configure_file(input: 'src/pcre2_chartables.c.ebcdic-1047-nl15', output: 'pcre2_chartables.c', copy: true)
 endif
 
 # -----------------------------------------------------------------------------
@@ -501,19 +475,12 @@ foreach width : ['8', '16', '32']
       'install': true,
     }
     if not host_is_windows
-      shared_kwargs += {
-        'version': lib_versions[width],
-        'soversion': lib_soversions[width],
-      }
+      shared_kwargs += {'version': lib_versions[width], 'soversion': lib_soversions[width]}
     endif
     if host_machine.system() == 'darwin'
       shared_kwargs += {'darwin_versions': lib_darwin_versions[width]}
     endif
-    shared_lib = shared_library(
-      shared_name,
-      pcre2_sources + pcre2_resource,
-      kwargs: shared_kwargs,
-    )
+    shared_lib = shared_library(shared_name, pcre2_sources + pcre2_resource, kwargs: shared_kwargs)
     shared_output_names += {width: fs.name(shared_lib.full_path())}
     shared_dep = declare_dependency(
       link_with: shared_lib,
@@ -585,10 +552,7 @@ if build_8
       'install': true,
     }
     if not host_is_windows
-      posix_shared_kwargs += {
-        'version': lib_versions['posix'],
-        'soversion': lib_soversions['posix'],
-      }
+      posix_shared_kwargs += {'version': lib_versions['posix'], 'soversion': lib_soversions['posix']}
     endif
     if host_machine.system() == 'darwin'
       posix_shared_kwargs += {'darwin_versions': lib_darwin_versions['posix']}
@@ -637,12 +601,16 @@ foreach width : ['8', '16', '32']
     enabled = build_32
   endif
   if enabled
-    pkg_lib = build_shared ? get_variable('pcre2_' + width + '_shared_lib') : get_variable('pcre2_' + width + '_static_lib')
+    pkg_lib = build_shared ? get_variable('pcre2_' + width + '_shared_lib') : get_variable(
+      'pcre2_' + width + '_static_lib',
+    )
     pkg.generate(
       pkg_lib,
       filebase: 'libpcre2-' + width,
       name: 'libpcre2-' + width,
-      description: 'PCRE2 - Perl compatible regular expressions C library (2nd API) with @0@ bit character support'.format(width),
+      description: 'PCRE2 - Perl compatible regular expressions C library (2nd API) with @0@ bit character support'.format(
+        width,
+      ),
       extra_cflags: build_shared ? [] : ['-DPCRE2_STATIC'],
       version: meson.project_version(),
     )
@@ -731,13 +699,14 @@ set_target_properties(pcre2::pcre2-@0@-shared PROPERTIES
       import_filename = shared_output_names[width].replace('.dll', '')
       import_filename += msvc_like ? '.lib' : '.dll.a'
       shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
-        get_option('libdir'), import_filename)
+        get_option('libdir'),
+        import_filename,
+      )
     elif host_machine.system() == 'darwin'
       shared_soname_property = '  IMPORTED_SONAME_RELEASE "@rpath/@0@"\n'.format(shared_install_name)
     elif host_machine.system() != 'cygwin'
       unversioned_name = shared_output_names[width].replace('.' + lib_versions[width], '')
-      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@0@.@1@"\n'.format(
-        unversioned_name, lib_soversions[width])
+      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@0@.@1@"\n'.format(unversioned_name, lib_soversions[width])
     endif
     cmake_release_properties += '''
 set_property(TARGET pcre2::pcre2-@0@-shared APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -780,13 +749,14 @@ set_target_properties(pcre2::pcre2-posix-shared PROPERTIES
       import_filename = shared_output_names['posix'].replace('.dll', '')
       import_filename += msvc_like ? '.lib' : '.dll.a'
       shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
-        get_option('libdir'), import_filename)
+        get_option('libdir'),
+        import_filename,
+      )
     elif host_machine.system() == 'darwin'
       shared_soname_property = '  IMPORTED_SONAME_RELEASE "@rpath/@0@"\n'.format(shared_install_name)
     elif host_machine.system() != 'cygwin'
       unversioned_name = shared_output_names['posix'].replace('.' + lib_versions['posix'], '')
-      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@0@.@1@"\n'.format(
-        unversioned_name, lib_soversions['posix'])
+      shared_soname_property = '  IMPORTED_SONAME_RELEASE "@0@.@1@"\n'.format(unversioned_name, lib_soversions['posix'])
     endif
     cmake_release_properties += '''
 set_property(TARGET pcre2::pcre2-posix-shared APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -815,11 +785,7 @@ cmake.configure_package_config_file(
   name: 'PCRE2',
   input: 'cmake/pcre2-config.cmake.in',
   install_dir: cmake_install_dir,
-  configuration: {
-    'REQUIRE_PTHREAD': jit_enabled ? '1' : '0',
-    'PCRE2_MAJOR': pcre2_major,
-    'PCRE2_MINOR': pcre2_minor,
-  },
+  configuration: {'REQUIRE_PTHREAD': jit_enabled ? '1' : '0', 'PCRE2_MAJOR': pcre2_major, 'PCRE2_MINOR': pcre2_minor},
 )
 cmake.write_basic_package_version_file(
   name: 'PCRE2',
@@ -923,9 +889,12 @@ if get_option('pcre2_build_tests')
         python,
         args: [
           files('RunGrepTest.py'),
-          '--srcdir', meson.project_source_root(),
-          '--pcre2test', pcre2test.full_path(),
-          '--pcre2grep', pcre2grep.full_path(),
+          '--srcdir',
+          meson.project_source_root(),
+          '--pcre2test',
+          pcre2test.full_path(),
+          '--pcre2grep',
+          pcre2grep.full_path(),
         ],
         workdir: meson.project_build_root(),
         should_fail: ebcdic,
@@ -947,9 +916,12 @@ if get_option('pcre2_build_tests')
         shell,
         args: [
           files('RunGrepTest'),
-          '--srcdir', meson.project_source_root(),
-          '--pcre2test', pcre2test.full_path(),
-          '--pcre2grep', pcre2grep.full_path(),
+          '--srcdir',
+          meson.project_source_root(),
+          '--pcre2test',
+          pcre2test.full_path(),
+          '--pcre2grep',
+          pcre2grep.full_path(),
         ],
         workdir: meson.project_build_root(),
         should_fail: ebcdic,
@@ -1126,10 +1098,7 @@ install_data(
   'doc/pcre2test.txt',
   install_dir: get_option('datadir') / 'doc/pcre2',
 )
-install_subdir(
-  'doc/html',
-  install_dir: get_option('datadir') / 'doc/pcre2',
-)
+install_subdir('doc/html', install_dir: get_option('datadir') / 'doc/pcre2')
 
 # -----------------------------------------------------------------------------
 # Configuration summary
