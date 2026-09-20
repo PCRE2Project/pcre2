@@ -3,6 +3,7 @@
 import argparse
 import os
 import platform
+import re
 import shlex
 import shutil
 import subprocess
@@ -55,9 +56,13 @@ def dependencies(executable):
     return output.lower()
 
 
-def check_linkage(output, shared, build_type):
+def check_linkage(output, shared, build_type, expected_library=None):
+    pcre2_library = re.compile(
+        r'\b(?:lib)?pcre2-(?:8|16|32|posix)d?(?:\.\d+)*'
+        r'\.(?:dll|dylib|so(?:\.\d+)*)\b'
+    )
     if not shared:
-        if 'pcre2' in output:
+        if pcre2_library.search(output):
             raise RuntimeError('PCRE2 found in static consumer dependencies')
         return
 
@@ -71,6 +76,10 @@ def check_linkage(output, shared, build_type):
         expected = 'libpcre2-8.so.0'
     if expected not in output:
         raise RuntimeError(f'{expected} not found in shared consumer dependencies')
+    if expected_library and str(expected_library).lower() not in output:
+        raise RuntimeError(
+            f'{expected_library} not found in shared consumer dependencies'
+        )
 
 
 def run_case(args, source_dir, build_dir, shared):
@@ -103,7 +112,15 @@ def run_case(args, source_dir, build_dir, shared):
     ], check=True)
     executable = find_executable(build_dir, args.build_type)
     subprocess.run([str(executable)], check=True)
-    check_linkage(dependencies(executable), shared, args.build_type)
+    expected_library = None
+    if shared and platform.system() == 'Linux':
+        if args.mode == 'install':
+            expected_library = args.install_prefix.resolve() / 'lib/libpcre2-8.so.0'
+        else:
+            expected_library = build_dir.resolve() / 'pcre2/libpcre2-8.so.0'
+    check_linkage(
+        dependencies(executable), shared, args.build_type, expected_library
+    )
 
 
 def main():
