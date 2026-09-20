@@ -10,23 +10,23 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);
-....
+----
 
 == Description
 
 This function builds a set of character tables for character code points that
-are less than 256. These can be passed to `pcre2_compile()` in a compile
+are less than 256. These can be passed to func:pcre2_compile() in a compile
 context in order to override the internal, built-in tables (which were either
-defaulted or made by `pcre2_maketables()` when PCRE2 was compiled). See the
-xref:pcre2_set_character_tables.adoc[`pcre2_set_character_tables()`]
+defaulted or made by func:pcre2_maketables() when PCRE2 was compiled). See the
+xref:pcre2_set_character_tables.adoc[func:pcre2_set_character_tables()]
 page. You might want to do this if you are using a non-standard locale.
 
-If the argument is NULL, `malloc()` is used to get memory for the tables.
+If the argument is [.c]`NULL`, [.c]`malloc()` is used to get memory for the tables.
 Otherwise it must point to a general context, which can supply pointers to a
 custom memory manager. The function yields a pointer to the tables.
 

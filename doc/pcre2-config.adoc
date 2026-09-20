@@ -27,6 +27,8 @@ encountered, the "usage" information is output.
 
 == Options
 
+[.options]
+
 `--prefix`::
 Writes the directory prefix used in the PCRE2 installation for
 architecture-independent files (_/usr_ on many systems, _/usr/local_ on
@@ -68,7 +70,7 @@ Writes to the standard output the command line options required to compile
 files that use PCRE2's POSIX API wrapper library (this may include some
 `-I` options, but is blank on many systems).
 
-== See Also
+== See also
 
 `pcre2(3)`
 

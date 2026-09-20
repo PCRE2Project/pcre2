@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_set_substitute_callout(
@@ -20,7 +20,7 @@ int pcre2_set_substitute_callout(
           pcre2_substitute_callout_block *callout_block,
           void *substitute_callout_data),
       void *substitute_callout_data);
-....
+----
 
 == Description
 

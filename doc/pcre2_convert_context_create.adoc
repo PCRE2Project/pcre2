@@ -10,20 +10,20 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_convert_context *pcre2_convert_context_create(
       pcre2_general_context *gcontext);
-....
+----
 
 == Description
 
 This function is part of an experimental set of pattern conversion functions.
 It creates and initializes a new convert context. If its argument is
-NULL, `malloc()` is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is NULL if
+[.c]`NULL`, [.c]`malloc()` is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is [.c]`NULL` if
 the memory could not be obtained.
 
 The pattern conversion functions are described in the

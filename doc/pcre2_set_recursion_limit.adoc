@@ -10,18 +10,18 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_set_recursion_limit(pcre2_match_context *mcontext,
                               uint32_t limit);
-....
+----
 
 == Description
 
 This function is obsolete and should not be used in new code. Use
-`pcre2_set_depth_limit()` instead.
+func:pcre2_set_depth_limit() instead.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
@@ -20,7 +20,7 @@ int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
                      pcre2_match_context *mcontext,
                      PCRE2_SPTR replacement, PCRE2_SIZE rlength,
                      PCRE2_UCHAR *buffer, PCRE2_SIZE *blength);
-....
+----
 
 == Description
 
@@ -29,83 +29,103 @@ string, using a matching algorithm that is similar to Perl's. It then makes a
 copy of the subject, substituting a replacement string for what was matched.
 Its arguments are:
 
-[literal,subs=normal]
-....
-_code_          Points to the compiled pattern
-_subject_       Points to the subject string
-_length_        Length of the subject string
-_startoffset_   Offset in the subject at which to start matching
-_options_       Option bits
-_match_data_    Points to a match data block, or is NULL
-_mcontext_      Points to a match context, or is NULL
-_replacement_   Points to the replacement string
-_rlength_       Length of the replacement string
-_outputbuffer_  Points to the output buffer
-_outlengthptr_  Points to the length of the output buffer
-....
+[.parameters]
+arg:code::
+    Points to the compiled pattern
+arg:subject::
+    Points to the subject string
+arg:length::
+    Length of the subject string
+arg:start_offset::
+    Offset in the subject at which to start matching
+arg:options::
+    Option bits
+arg:match_data::
+    Points to a match data block, or is [.c]`NULL`
+arg:mcontext::
+    Points to a match context, or is [.c]`NULL`
+arg:replacement::
+    Points to the replacement string
+arg:rlength::
+    Length of the replacement string
+arg:buffer::
+    Points to the output buffer
+arg:blength::
+    Points to the length of the output buffer
 
 A match data block is needed only if you want to inspect the data from the
-final match that is returned in that block or if PCRE2_SUBSTITUTE_MATCHED is
+final match that is returned in that block or if const:PCRE2_SUBSTITUTE_MATCHED is
 set. A match context is needed only if you want to:
 
-[literal]
-....
-Set up a callout function
-Set a matching offset limit
-Change the backtracking match limit
-Change the backtracking depth limit
-Set custom memory management in the match context
-....
+* Set up a callout function
+* Set a matching offset limit
+* Change the backtracking match limit
+* Change the backtracking depth limit
+* Set custom memory management in the match context
 
-The _length_, _startoffset_ and _rlength_ values are code units,
+The arg:length, arg:start_offset and arg:rlength values are code units,
 not characters, as is the contents of the variable pointed at by
-_outlengthptr_. This variable must contain the length of the output buffer
+arg:blength. This variable must contain the length of the output buffer
 when the function is called. If the function is successful, the value is
 changed to the length of the new string, excluding the trailing zero that is
 automatically added.
 
-The subject and replacement lengths can be given as PCRE2_ZERO_TERMINATED for
+The subject and replacement lengths can be given as const:PCRE2_ZERO_TERMINATED for
 zero-terminated strings. The options are:
 
-[literal]
-....
-PCRE2_ANCHORED                     Match only at the first position
-PCRE2_ENDANCHORED                  Match only at end of subject
-PCRE2_NOTBOL                       Subject is not the beginning of a
-                                    line
-PCRE2_NOTEOL                       Subject is not the end of a line
-PCRE2_NOTEMPTY                     An empty string is not a
-                                    valid match
-PCRE2_NOTEMPTY_ATSTART             An empty string at the start of
-                                    the subject is not a valid match
-PCRE2_NO_JIT                       Do not use JIT matching
-PCRE2_NO_UTF_CHECK                 Do not check for UTF validity in
-                                    the subject or replacement
-                                    (only relevant if PCRE2_UTF was
-                                    set at compile time)
-PCRE2_SUBSTITUTE_EXTENDED          Do extended replacement processing
-PCRE2_SUBSTITUTE_GLOBAL            Replace all occurrences in the
-                                    subject
-PCRE2_SUBSTITUTE_LITERAL           The replacement string is literal
-PCRE2_SUBSTITUTE_MATCHED           Use pre-existing match data for
-                                    first match
-PCRE2_SUBSTITUTE_OVERFLOW_LENGTH   If overflow, compute needed length
-PCRE2_SUBSTITUTE_REPLACEMENT_ONLY  Return only replacement string(s)
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET     Treat unknown group as unset
-PCRE2_SUBSTITUTE_UNSET_EMPTY       Simple unset insert = empty string
-....
+[.options]
+const:PCRE2_ANCHORED::
+    Match only at the first position
+const:PCRE2_ENDANCHORED::
+    Match only at end of subject
+const:PCRE2_NOTBOL::
+    Subject is not the beginning of a
+    line
+const:PCRE2_NOTEOL::
+    Subject is not the end of a line
+const:PCRE2_NOTEMPTY::
+    An empty string is not a
+    valid match
+const:PCRE2_NOTEMPTY_ATSTART::
+    An empty string at the start of
+    the subject is not a valid match
+const:PCRE2_NO_JIT::
+    Do not use JIT matching
+const:PCRE2_NO_UTF_CHECK::
+    Do not check for UTF validity in
+    the subject or replacement
+    (only relevant if const:PCRE2_UTF was
+    set at compile time)
+const:PCRE2_SUBSTITUTE_EXTENDED::
+    Do extended replacement processing
+const:PCRE2_SUBSTITUTE_GLOBAL::
+    Replace all occurrences in the
+    subject
+const:PCRE2_SUBSTITUTE_LITERAL::
+    The replacement string is literal
+const:PCRE2_SUBSTITUTE_MATCHED::
+    Use pre-existing match data for
+    first match
+const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH::
+    If overflow, compute needed length
+const:PCRE2_SUBSTITUTE_REPLACEMENT_ONLY::
+    Return only replacement string(s)
+const:PCRE2_SUBSTITUTE_UNKNOWN_UNSET::
+    Treat unknown group as unset
+const:PCRE2_SUBSTITUTE_UNSET_EMPTY::
+    Simple unset insert = empty string
 
-If PCRE2_SUBSTITUTE_LITERAL is set, PCRE2_SUBSTITUTE_EXTENDED,
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
+If const:PCRE2_SUBSTITUTE_LITERAL is set, const:PCRE2_SUBSTITUTE_EXTENDED,
+const:PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and const:PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
 
-If PCRE2_SUBSTITUTE_MATCHED is set, _match_data_ must be non-NULL; its
-contents must be the result of a call to `pcre2_match()` (or
-`pcre2_jit_match()`) using the same pattern, subject pointer, effective
+If const:PCRE2_SUBSTITUTE_MATCHED is set, arg:match_data must be non-[.c]`NULL`; its
+contents must be the result of a call to func:pcre2_match() (or
+func:pcre2_jit_match()) using the same pattern, subject pointer, effective
 subject length, start offset, and match options.
 
 The function returns the number of substitutions, which may be zero if there
 are no matches. The result may be greater than one only when
-PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code
+const:PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code
 is returned.
 
 There is a complete description of the PCRE2 native API in the

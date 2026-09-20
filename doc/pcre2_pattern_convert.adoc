@@ -10,15 +10,15 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
                           uint32_t options, PCRE2_UCHAR **buffptr,
                           PCRE2_SIZE *bufflenptr,
                           pcre2_convert_context *ccontext);
-....
+----
 
 == Description
 
@@ -26,39 +26,48 @@ This function is part of an experimental set of pattern conversion functions.
 It converts a foreign pattern (for example, a glob) into a PCRE2 regular
 expression pattern. Its arguments are:
 
-[literal,subs=normal]
-....
-_pattern_     The foreign pattern
-_length_      The length of the input pattern or PCRE2_ZERO_TERMINATED
-_options_     Option bits
-_buffer_      Pointer to pointer to output buffer, or NULL
-_blength_     Pointer to output length field
-_cvcontext_   Pointer to a convert context or NULL
-....
+[.parameters]
+arg:pattern::
+    The foreign pattern
+arg:plength::
+    The length of the input pattern or const:PCRE2_ZERO_TERMINATED
+arg:options::
+    Option bits
+arg:buffptr::
+    Pointer to pointer to output buffer, or [.c]`NULL`
+arg:bufflenptr::
+    Pointer to output length field
+arg:ccontext::
+    Pointer to a convert context or [.c]`NULL`
 
 The length of the converted pattern (excluding the terminating zero) is
-returned via _blength_. If _buffer_ is NULL, the function just returns
-the output length. If _buffer_ points to a NULL pointer, heap memory is
+returned via arg:bufflenptr. If arg:buffptr is [.c]`NULL`, the function just returns
+the output length. If arg:buffptr points to a [.c]`NULL` pointer, heap memory is
 obtained for the converted pattern, using the allocator in the context if
-present (or else `malloc()`), and the field pointed to by _buffer_ is
-updated. If _buffer_ points to a non-NULL field, that must point to a
-buffer whose size is in the variable pointed to by _blength_. This value is
+present (or else [.c]`malloc()`), and the field pointed to by arg:buffptr is
+updated. If arg:buffptr points to a non-[.c]`NULL` field, that must point to a
+buffer whose size is in the variable pointed to by arg:bufflenptr. This value is
 updated.
 
 The option bits are:
 
-[literal]
-....
-PCRE2_CONVERT_UTF                     Input is UTF
-PCRE2_CONVERT_NO_UTF_CHECK            Do not check UTF validity
-PCRE2_CONVERT_POSIX_BASIC             Convert POSIX basic pattern
-PCRE2_CONVERT_POSIX_EXTENDED          Convert POSIX extended pattern
-PCRE2_CONVERT_GLOB                    ) Convert
-PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR  )   various types
-PCRE2_CONVERT_GLOB_NO_STARSTAR        )     of glob
-....
+[.options]
+const:PCRE2_CONVERT_UTF::
+    Input is UTF
+const:PCRE2_CONVERT_NO_UTF_CHECK::
+    Do not check UTF validity
+const:PCRE2_CONVERT_POSIX_BASIC::
+    Convert POSIX basic pattern
+const:PCRE2_CONVERT_POSIX_EXTENDED::
+    Convert POSIX extended pattern
+const:PCRE2_CONVERT_GLOB::
+    Convert
+const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR::
+    various types
+const:PCRE2_CONVERT_GLOB_NO_STARSTAR::
+    of glob
 
-The return value from `pcre2_pattern_convert()` is zero on success or a
+The return value from func:pcre2_pattern_convert() is zero on success or a
 non-zero PCRE2 error code.
 
 The pattern conversion functions are described in the

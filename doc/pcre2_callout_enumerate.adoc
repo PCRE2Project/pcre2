@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_callout_enumerate(
@@ -19,40 +19,46 @@ int pcre2_callout_enumerate(
       int (*callback)(pcre2_callout_enumerate_block *callout_block,
                       void *callout_data),
       void *callout_data);
-....
+----
 
 == Description
 
-This function scans a compiled regular expression and calls the _callback()_
+This function scans a compiled regular expression and calls the [.c]`callback()`
 function for each callout within the pattern. The yield of the function is zero
 for success and non-zero otherwise. The arguments are:
 
-[literal,subs=normal]
-....
-_code_           Points to the compiled pattern
-_callback_       The callback function
-_callout_data_   User data that is passed to the callback
-....
+[.parameters]
+arg:code::
+      Points to the compiled pattern
+arg:callback::
+      The callback function
+arg:callout_data::
+      User data that is passed to the callback
 
-The _callback()_ function is passed a pointer to a data block containing
+The [.c]`callback()` function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):
 
-[literal,subs=normal]
-....
-uint32_t   _version_                Block version number
-uint32_t   _callout_number_         Number for numbered callouts
-PCRE2_SIZE _pattern_position_       Offset to next item in pattern
-PCRE2_SIZE _next_item_length_       Length of next item in pattern
-PCRE2_SIZE _callout_string_offset_  Offset to string within pattern
-PCRE2_SIZE _callout_string_length_  Length of callout string
-PCRE2_SPTR _callout_string_         Points to callout string or is NULL
-....
+[.members]
+[.c]`uint32_t` arg:version::
+      Block version number
+[.c]`uint32_t` arg:callout_number::
+      Number for numbered callouts
+type:PCRE2_SIZE arg:pattern_position::
+      Offset to next item in pattern
+type:PCRE2_SIZE arg:next_item_length::
+      Length of next item in pattern
+type:PCRE2_SIZE arg:callout_string_offset::
+      Offset to string within pattern
+type:PCRE2_SIZE arg:callout_string_length::
+      Length of callout string
+type:PCRE2_SPTR arg:callout_string::
+      Points to callout string or is [.c]`NULL`
 
-The second argument passed to the `callback()` function is the callout data
-that was passed to `pcre2_callout_enumerate()`. The `callback()`
+The second argument passed to the [.c]`callback()` function is the callout data
+that was passed to func:pcre2_callout_enumerate(). The [.c]`callback()`
 function must return zero for success. Any other value causes the pattern scan
 to stop, with the value being passed back as the result of
-`pcre2_callout_enumerate()`.
+func:pcre2_callout_enumerate().
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

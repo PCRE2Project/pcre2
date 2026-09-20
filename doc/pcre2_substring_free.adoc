@@ -10,19 +10,19 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 void pcre2_substring_free(PCRE2_UCHAR *string);
-....
+----
 
 == Description
 
 This is a convenience function for freeing the memory obtained by a previous
-call to `pcre2_substring_get_byname()` or
-`pcre2_substring_get_bynumber()`. Its only argument is a pointer to the
-string. If the argument is NULL, the function does nothing.
+call to func:pcre2_substring_get_byname() or
+func:pcre2_substring_get_bynumber(). Its only argument is a pointer to the
+string. If the argument is [.c]`NULL`, the function does nothing.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

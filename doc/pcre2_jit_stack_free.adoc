@@ -10,18 +10,18 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 void pcre2_jit_stack_free(pcre2_jit_stack *jit_stack);
-....
+----
 
 == Description
 
 This function is used to free a JIT stack that was created by
-`pcre2_jit_stack_create()` when it is no longer needed. If the argument is
-NULL, the function returns immediately without doing anything. For more
+func:pcre2_jit_stack_create() when it is no longer needed. If the argument is
+[.c]`NULL`, the function returns immediately without doing anything. For more
 details, see the
 xref:pcre2jit.adoc[`pcre2jit`]
 page.

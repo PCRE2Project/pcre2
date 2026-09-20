@@ -8,7 +8,7 @@
 :docdate: 14 September 2026
 :revdate: 14 September 2026
 
-== Source Code
+== Source code
 
 [source,role=wide]
 ----

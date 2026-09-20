@@ -12,6 +12,11 @@ if ! command -v asciidoctor >/dev/null ; then
   exit 1
 fi
 
+if ! ruby -r rouge -e '' 2>/dev/null ; then
+  echo "the Rouge Ruby gem is required to render documentation" >&2
+  exit 1
+fi
+
 input=$1
 man_output=$2
 html_output=$3

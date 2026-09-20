@@ -10,18 +10,18 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_compile_context *pcre2_compile_context_copy(
       pcre2_compile_context *ccontext);
-....
+----
 
 == Description
 
 This function makes a new copy of a compile context, using the memory
-allocation function that was used for the original context. The result is NULL
+allocation function that was used for the original context. The result is [.c]`NULL`
 if the memory cannot be obtained.
 
 There is a complete description of the PCRE2 native API in the
