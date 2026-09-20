@@ -10,7 +10,7 @@
 
 == Synopsis
 
-[synopsis]
+[source,c,role=prototype]
 ....
 #include <pcre2.h>
 
@@ -29,18 +29,18 @@ int pcre2_callout_enumerate(
 PCRE2 provides a feature called "callout", which is a means of temporarily
 passing control to the caller of PCRE2 in the middle of pattern matching. The
 caller of PCRE2 provides an external function by putting its entry point in
-a match context (see `pcre2_set_callout()` in the
+a match context (see func:pcre2_set_callout() in the
 xref:pcre2api.adoc[`pcre2api`]
 documentation).
 
-When using the `pcre2_substitute()` function, an additional callout feature
+When using the func:pcre2_substitute() function, an additional callout feature
 is available. This does a callout after each change to the subject string and
 is described in the
 xref:pcre2api.adoc[`pcre2api`]
 documentation; the rest of this document is concerned with callouts during
 pattern matching.
 
-Within a regular expression, (?C<arg>) indicates a point at which the external
+Within a regular expression, [.regex]`(?C<arg>)` indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
 Alternatively, the argument may be a delimited string. The starting delimiter
@@ -49,38 +49,38 @@ start, except for {, where the ending delimiter is }. If the ending delimiter
 is needed within the string, it must be doubled. For example, this pattern has
 two callout points:
 
-[literal]
+[source,regex]
 ....
 (?C1)abc(?C"some ""arbitrary"" text")def
 ....
 
-If the PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled, PCRE2
+If the const:PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled, PCRE2
 automatically inserts callouts, all with number 255, before each item in the
 pattern except for immediately before or after an explicit callout. For
-example, if PCRE2_AUTO_CALLOUT is used with the pattern
+example, if const:PCRE2_AUTO_CALLOUT is used with the pattern
 
-[literal]
+[source,regex]
 ....
 A(?C3)B
 ....
 
 it is processed as if it were
 
-[literal]
+[source,regex]
 ....
 (?C255)A(?C3)B(?C255)
 ....
 
 Here is a more complicated example:
 
-[literal]
+[source,regex]
 ....
 A(\d{2}|--)
 ....
 
-With PCRE2_AUTO_CALLOUT, this pattern is processed as if it were
+With const:PCRE2_AUTO_CALLOUT, this pattern is processed as if it were
 
-[literal]
+[source,regex]
 ....
 (?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
 ....
@@ -90,7 +90,7 @@ alternation bar. If the pattern contains a conditional group whose condition is
 an assertion, an automatic callout is inserted immediately before the
 condition. Such a callout may also be inserted explicitly, for example:
 
-[literal]
+[source,regex]
 ....
 (?(?C9)(?=a)ab|de)  (?(?C%text%)(?!=d)ab|de)
 ....
@@ -105,7 +105,7 @@ When any callouts are present, the output from `pcre2test` indicates how
 the pattern is being matched. This is useful information when you are trying to
 optimize the performance of a particular pattern.
 
-== Missing Callouts
+== Missing callouts
 
 You should be aware that, because of optimizations in the way PCRE2 compiles
 and matches patterns, callouts sometimes do not happen exactly as you might
@@ -114,12 +114,12 @@ expect.
 === Auto-possessification
 
 At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
-what follows cannot be part of the repeat. For example, apass:[+][bc] is compiled as
-if it were apass:[+]pass:[+][bc]. The `pcre2test` output when this pattern is compiled
-with PCRE2_ANCHORED and PCRE2_AUTO_CALLOUT and then applied to the string
+what follows cannot be part of the repeat. For example, [.regex]`a+[bc]` is compiled as
+if it were [.regex]`a++[bc]`. The `pcre2test` output when this pattern is compiled
+with const:PCRE2_ANCHORED and const:PCRE2_AUTO_CALLOUT and then applied to the string
 "aaaa" is:
 
-[literal]
+[source,text]
 ....
 --->aaaa
  +0 ^        a+
@@ -127,13 +127,13 @@ with PCRE2_ANCHORED and PCRE2_AUTO_CALLOUT and then applied to the string
 No match
 ....
 
-This indicates that when matching [bc] fails, there is no backtracking into apass:[+]
-(because it is being treated as apass:[+]pass:[+]) and therefore the callouts that would be
+This indicates that when matching [.regex]`[bc]` fails, there is no backtracking into [.regex]`a+`
+(because it is being treated as [.regex]`a++`) and therefore the callouts that would be
 taken for the backtracks do not occur. You can disable the auto-possessify
-feature by passing PCRE2_NO_AUTO_POSSESS to `pcre2_compile()`, or starting
-the pattern with (pass:[*]NO_AUTO_POSSESS). In this case, the output changes to this:
+feature by passing const:PCRE2_NO_AUTO_POSSESS to func:pcre2_compile(), or starting
+the pattern with [.regex]`(*NO_AUTO_POSSESS)`. In this case, the output changes to this:
 
-[literal]
+[source,text]
 ....
 --->aaaa
  +0 ^        a+
@@ -144,27 +144,27 @@ the pattern with (pass:[*]NO_AUTO_POSSESS). In this case, the output changes to 
 No match
 ....
 
-This time, when matching [bc] fails, the matcher backtracks into apass:[+] and tries
-again, repeatedly, until apass:[+] itself fails.
+This time, when matching [.regex]`[bc]` fails, the matcher backtracks into [.regex]`a+` and tries
+again, repeatedly, until [.regex]`a+` itself fails.
 
-=== Automatic .pass:[*] anchoring
+=== Automatic [.regex]`.*` anchoring
 
-By default, an optimization is applied when .pass:[*] is the first significant item in
-a pattern. If PCRE2_DOTALL is set, so that the dot can match any character, the
-pattern is automatically anchored. If PCRE2_DOTALL is not set, a match can
+By default, an optimization is applied when [.regex]`.*` is the first significant item in
+a pattern. If const:PCRE2_DOTALL is set, so that the dot can match any character, the
+pattern is automatically anchored. If const:PCRE2_DOTALL is not set, a match can
 start only after an internal newline or at the beginning of the subject, and
-`pcre2_compile()` remembers this. If a pattern has more than one top-level
+func:pcre2_compile() remembers this. If a pattern has more than one top-level
 branch, automatic anchoring occurs if all branches are anchorable.
 
-This optimization is disabled, however, if .pass:[*] is in an atomic group or if there
+This optimization is disabled, however, if [.regex]`.*` is in an atomic group or if there
 is a backreference to the capture group in which it appears. It is also
-disabled if the pattern contains (pass:[*]PRUNE) or (pass:[*]SKIP). However, the presence of
+disabled if the pattern contains [.regex]`(*PRUNE)` or [.regex]`(*SKIP)`. However, the presence of
 callouts does not affect it.
 
-For example, if the pattern .pass:[*]\d is compiled with PCRE2_AUTO_CALLOUT and
+For example, if the pattern [.regex]`.*\d` is compiled with const:PCRE2_AUTO_CALLOUT and
 applied to the string "aa", the `pcre2test` output is:
 
-[literal]
+[source,text]
 ....
 --->aa
  +0 ^      .*
@@ -176,10 +176,10 @@ No match
 
 This shows that all match attempts start at the beginning of the subject. In
 other words, the pattern is anchored. You can disable this optimization by
-passing PCRE2_NO_DOTSTAR_ANCHOR to `pcre2_compile()`, or starting the
-pattern with (pass:[*]NO_DOTSTAR_ANCHOR). In this case, the output changes to:
+passing const:PCRE2_NO_DOTSTAR_ANCHOR to func:pcre2_compile(), or starting the
+pattern with [.regex]`(*NO_DOTSTAR_ANCHOR)`. In this case, the output changes to:
 
-[literal]
+[source,text]
 ....
 --->aa
  +0 ^      .*
@@ -201,7 +201,7 @@ subsequent attempt to match with an empty subject.
 Other optimizations that provide fast "no match" results also affect callouts.
 For example, if the pattern is
 
-[literal]
+[source,regex]
 ....
 ab(?C4)cd
 ....
@@ -216,41 +216,41 @@ will immediately give a "no match" return without actually running a match if
 the subject is not long enough, or, for unanchored patterns, if it has been
 scanned far enough.
 
-You can disable these optimizations by passing the PCRE2_NO_START_OPTIMIZE
-option to `pcre2_compile()`, or by starting the pattern with
-(pass:[*]NO_START_OPT). This slows down the matching process, but does ensure that
+You can disable these optimizations by passing the const:PCRE2_NO_START_OPTIMIZE
+option to func:pcre2_compile(), or by starting the pattern with
+[.regex]`(*NO_START_OPT)`. This slows down the matching process, but does ensure that
 callouts such as the example above are obeyed.
 
-== The Callout Interface
+== The callout interface
 
 During matching, when PCRE2 reaches a callout point, if an external function is
 provided in the match context, it is called. This applies to both normal,
 DFA, and JIT matching. The first argument to the callout function is a pointer
-to a `pcre2_callout` block. The second argument is the void pass:[*] callout data
+to a type:pcre2_callout block. The second argument is the void [.c]`*` callout data
 that was supplied when the callout was set up by calling
-`pcre2_set_callout()` (see the
+func:pcre2_set_callout() (see the
 xref:pcre2api.adoc[`pcre2api`]
 documentation). The callout block structure contains the following fields, not
 necessarily in this order:
 
-[literal,subs=normal]
+[source,c]
 ....
-uint32_t      _version_;
-uint32_t      _callout_number_;
-uint32_t      _capture_top_;
-uint32_t      _capture_last_;
-uint32_t      _callout_flags_;
-PCRE2_SIZE   pass:[*]_offset_vector_;
-PCRE2_SPTR    _mark_;
-PCRE2_SPTR    _subject_;
-PCRE2_SIZE    _subject_length_;
-PCRE2_SIZE    _start_match_;
-PCRE2_SIZE    _current_position_;
-PCRE2_SIZE    _pattern_position_;
-PCRE2_SIZE    _next_item_length_;
-PCRE2_SIZE    _callout_string_offset_;
-PCRE2_SIZE    _callout_string_length_;
-PCRE2_SPTR    _callout_string_;
+uint32_t      version;
+uint32_t      callout_number;
+uint32_t      capture_top;
+uint32_t      capture_last;
+uint32_t      callout_flags;
+PCRE2_SIZE   *offset_vector;
+PCRE2_SPTR    mark;
+PCRE2_SPTR    subject;
+PCRE2_SIZE    subject_length;
+PCRE2_SIZE    start_match;
+PCRE2_SIZE    current_position;
+PCRE2_SIZE    pattern_position;
+PCRE2_SIZE    next_item_length;
+PCRE2_SIZE    callout_string_offset;
+PCRE2_SIZE    callout_string_length;
+PCRE2_SPTR    callout_string;
 ....
 
 The _version_ field contains the version number of the block format. The
@@ -265,7 +265,7 @@ remove any of the existing fields.
 
 For a numerical callout, _callout_string_ is NULL, and _callout_number_
 contains the number of the callout, in the range 0-255. This is the number
-that follows (?C for callouts that part of the pattern; it is 255 for
+that follows [.regex]`(?C` for callouts that part of the pattern; it is 255 for
 automatically generated callouts.
 
 === Fields for string callouts
@@ -278,7 +278,7 @@ into single characters, but there is no other processing of the callout string
 argument. An additional code unit containing binary zero is present after the
 string, but is not included in the length. The delimiter that was used to start
 the string is also stored within the pattern, immediately before the string
-itself. You can access this delimiter as _callout_string_[-1] if you need
+itself. You can access this delimiter as [.c]`callout_string[-1]` if you need
 it.
 
 The _callout_string_offset_ field is the code unit offset to the start of
@@ -295,7 +295,7 @@ The _offset_vector_ field is a pointer to a vector of capturing offsets
 (the "ovector"). You may read the elements in this vector, but you must not
 change any of them.
 
-For calls to `pcre2_match()`, the _offset_vector_ field is not (since
+For calls to func:pcre2_match(), the _offset_vector_ field is not (since
 release 10.30) a pointer to the actual ovector that was passed to the matching
 function in the match data block. Instead it points to an internal ovector of a
 size large enough to hold all possible captured substrings in the pattern. Note
@@ -307,22 +307,22 @@ substring, and the _capture_top_ field contains one more than the number of
 the highest numbered captured substring so far. If no substrings have yet been
 captured, the value of _capture_last_ is 0 and the value of
 _capture_top_ is 1. The values of these fields do not always differ by one;
-for example, when the callout in the pattern pass:[((]a)(bpass:[))](?C2) is taken,
+for example, when the callout in the pattern [.regex]`((a)(b))(?C2)` is taken,
 _capture_last_ is 1 but _capture_top_ is 4.
 
-The contents of ovector[2] to ovector[<capture_top>pass:[*]2-1] can be inspected in
+The contents of [.c]`ovector[2]` to [.c]`ovector[capture_top*2-1]` can be inspected in
 order to extract substrings that have been matched so far, in the same way as
 extracting substrings after a match has completed. The values in ovector[0] and
-ovector[1] are always PCRE2_UNSET because the match is by definition not
+ovector[1] are always const:PCRE2_UNSET because the match is by definition not
 complete. Substrings that have not been captured but whose numbers are less
 than _capture_top_ also have both of their ovector slots set to
-PCRE2_UNSET.
+const:PCRE2_UNSET.
 
 For DFA matching, the _offset_vector_ field points to the ovector that was
 passed to the matching function in the match data block for callouts at the top
 level, but to an internal ovector during the processing of pattern recursions,
 lookarounds, and atomic groups. However, these ovectors hold no useful
-information because `pcre2_dfa_match()` does not support substring
+information because func:pcre2_dfa_match() does not support substring
 capturing. The value of _capture_top_ is always 1 and the value of
 _capture_last_ is always 0 for DFA matching.
 
@@ -330,7 +330,7 @@ The _subject_ and _subject_length_ fields contain copies of the values
 that were passed to the matching function.
 
 The _start_match_ field normally contains the offset within the subject at
-which the current match attempt started. However, if the escape sequence \K
+which the current match attempt started. However, if the escape sequence [.regex]`\K`
 has been encountered, this value is changed to reflect the modified starting
 point. If the pattern is not anchored, the callout function may be called
 several times from the same point in the pattern for different starting points
@@ -359,32 +359,28 @@ same callout number. However, they are set for all callouts, and are used by
 `pcre2test` to show the next item to be matched when displaying callout
 information.
 
-In callouts from `pcre2_match()` the _mark_ field contains a pointer to
-the zero-terminated name of the most recently passed (pass:[*]MARK), (pass:[*]PRUNE), or
-(pass:[*]THEN) item in the match, or NULL if no such items have been passed. Instances
-of (pass:[*]PRUNE) or (pass:[*]THEN) without a name do not obliterate a previous (pass:[*]MARK). In
+In callouts from func:pcre2_match() the _mark_ field contains a pointer to
+the zero-terminated name of the most recently passed [.regex]`(*MARK)`, [.regex]`(*PRUNE)`, or
+[.regex]`(*THEN)` item in the match, or [.c]`NULL` if no such items have been passed. Instances
+of [.regex]`(*PRUNE)` or [.regex]`(*THEN)` without a name do not obliterate a previous [.regex]`(*MARK)`. In
 callouts from the DFA matching function this field always contains NULL.
 
 The _callout_flags_ field is always zero in callouts from
-`pcre2_dfa_match()` or when JIT is being used. When `pcre2_match()`
+func:pcre2_dfa_match() or when JIT is being used. When func:pcre2_match()
 without JIT is used, the following bits may be set:
 
-[literal]
-....
-PCRE2_CALLOUT_STARTMATCH
-....
+[.values]
+const:PCRE2_CALLOUT_STARTMATCH::
 
 This is set for the first callout after the start of matching for each new
 starting position in the subject.
 
-[literal]
-....
-PCRE2_CALLOUT_BACKTRACK
-....
+[.values]
+const:PCRE2_CALLOUT_BACKTRACK::
 
 This is set if there has been a matching backtrack since the previous callout,
 or since the start of matching if this is the first callout from a
-`pcre2_match()` run.
+func:pcre2_match() run.
 
 Both bits are set when a backtrack has caused a "bumpalong" to a new starting
 position in the subject. Output from `pcre2test` does not indicate the
@@ -393,12 +389,12 @@ presence of these bits unless the `callout_extra` modifier is set.
 The information in the `callout_flags` field is provided so that
 applications can track and tell their users how matching with backtracking is
 done. This can be useful when trying to optimize patterns, or just to
-understand how PCRE2 works. There is no support in `pcre2_dfa_match()`
+understand how PCRE2 works. There is no support in func:pcre2_dfa_match()
 because there is no backtracking in DFA matching, and there is no support in
 JIT because JIT is all about maximimizing matching performance. In both these
 cases the `callout_flags` field is always zero.
 
-== Return Values From Callouts
+== Return values from callouts
 
 The external callout function returns an integer to PCRE2. If the value is
 zero, matching proceeds as normal. If the value is greater than zero, matching
@@ -407,14 +403,14 @@ goes ahead, just as if a lookahead assertion had failed. If the value is less
 than zero, the match is abandoned, and the matching function returns the
 negative value.
 
-Negative values should normally be chosen from the set of PCRE2_ERROR_xxx
-values. In particular, PCRE2_ERROR_NOMATCH forces a standard "no match"
-failure. The error number PCRE2_ERROR_CALLOUT is reserved for use by callout
+Negative values should normally be chosen from the set of `PCRE2_ERROR_xxx`
+values. In particular, const:PCRE2_ERROR_NOMATCH forces a standard "no match"
+failure. The error number const:PCRE2_ERROR_CALLOUT is reserved for use by callout
 functions; it will never be used by PCRE2 itself.
 
-== Callout Enumeration
+== Callout enumeration
 
-[source]
+[source,c,role=prototype]
 ----
 int pcre2_callout_enumerate(
       const pcre2_code *code,
@@ -425,28 +421,26 @@ int pcre2_callout_enumerate(
 
 A script language that supports the use of string arguments in callouts might
 like to scan all the callouts in a pattern before running the match. This can
-be done by calling `pcre2_callout_enumerate()`. The first argument is a
+be done by calling func:pcre2_callout_enumerate(). The first argument is a
 pointer to a compiled pattern, the second points to a callback function, and
 the third is arbitrary user data. The callback function is called for every
 callout in the pattern in the order in which they appear. Its first argument is
 a pointer to a callout enumeration block, and its second argument is the
-_user_data_ value that was passed to `pcre2_callout_enumerate()`. The
+_user_data_ value that was passed to func:pcre2_callout_enumerate(). The
 data block contains the following fields:
 
-[literal,subs=normal]
-....
-_version_                Block version number
-_pattern_position_       Offset to next item in pattern
-_next_item_length_       Length of next item in pattern
-_callout_number_         Number for numbered callouts
-_callout_string_offset_  Offset to string within pattern
-_callout_string_length_  Length of callout string
-_callout_string_         Points to callout string or is NULL
-....
+[.members]
+arg:version:: Block version number
+arg:pattern_position:: Offset to next item in pattern
+arg:next_item_length:: Length of next item in pattern
+arg:callout_number:: Number for numbered callouts
+arg:callout_string_offset:: Offset to string within pattern
+arg:callout_string_length:: Length of callout string
+arg:callout_string:: Points to callout string or is [.c]`NULL`
 
 The version number is currently 0. It will increase if new fields are ever
 added to the block. The remaining fields are the same as their namesakes in the
-`pcre2_callout` block that is used for callouts during matching, as
+type:pcre2_callout block that is used for callouts during matching, as
 described
 above.
 
@@ -459,11 +453,11 @@ with the same value for _pattern_position_ in each case.
 
 The callback function should normally return zero. If it returns a non-zero
 value, scanning the pattern stops, and that value is returned from
-`pcre2_callout_enumerate()`.
+func:pcre2_callout_enumerate().
 
 == Author
 
-[source]
+[literal]
 ----
 Philip Hazel
 Retired from University Computing Service

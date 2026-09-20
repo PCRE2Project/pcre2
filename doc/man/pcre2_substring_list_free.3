@@ -31,18 +31,20 @@
 pcre2_substring_list_free \- free list of extracted substrings
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_substring_list_free(PCRE2_UCHAR **list);
+\fBvoid\fP pcre2_substring_list_free(\fBPCRE2_UCHAR\fP **\fIlist\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This is a convenience function for freeing the store obtained by a previous
-call to \f(CRpcre2substring_list_get()\fP. Its only argument is a pointer to
-the list of string pointers. If the argument is NULL, the function returns
+call to pcre2_substring_list_get(). Its only argument is a pointer to
+the list of string pointers. If the argument is \f(CRNULL\fP, the function returns
 immediately, without doing anything.
 .sp
 There is a complete description of the PCRE2 native API in the

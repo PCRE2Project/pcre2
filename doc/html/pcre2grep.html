@@ -469,8 +469,10 @@ that PCRE2 supports.</p>
 <p>Patterns, whether supplied on the command line or in a separate file, are given
 without delimiters. For example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2grep Thursday /etc/motd</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep Thursday /etc/motd</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>If you attempt to use delimiters (for example, by surrounding a pattern with
@@ -491,12 +493,14 @@ argument pattern must be provided.</p>
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2grep some-pattern file1 - file3</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep some-pattern file1 - file3</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>By default, input files are searched line by line, so pattern assertions about
-the beginning and end of a subject string (^, $, \A, \Z, and \z) match at
+the beginning and end of a subject string (<code class="regex">^</code>, <code class="regex">$</code>, <code class="regex">\A</code>, <code class="regex">\Z</code>, and <code class="regex">\z</code>) match at
 the beginning and end of each line. When a line matches a pattern, it is copied
 to the standard output, and if there is more than one file, the file name is
 output at the start of each line, followed by a colon. However, there are
@@ -528,7 +532,7 @@ small, fewer than requested "before" and "after" lines may be output.</p>
 half of the maximum match expected or the pattern might fail to match.</p>
 </div>
 <div class="paragraph">
-<p>Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
+<p>Patterns can be no longer than 8KiB or <code class="c">BUFSIZ</code> bytes, whichever is the greater.
 BUFSIZ is defined in <code>&lt;stdio.h&gt;</code>. When there is more than one pattern
 (specified by the use of <code>-e</code> and/or <code>-f</code>), each pattern is applied to
 each line in the order in which they are defined, except that all the <code>-e</code>
@@ -558,7 +562,7 @@ later patterns that were earlier in the subject.</p>
 </div>
 <div class="paragraph">
 <p>Patterns that can match an empty string are accepted, but empty string
-matches are never recognized. An example is the pattern "(super)?(man)?", in
+matches are never recognized. An example is the pattern <code class="regex">(super)?(man)?</code>, in
 which all components are optional. This pattern finds all occurrences of both
 "super" and "man"; the output differs from matching with "super|man" when only
 the matching substrings are being shown.</p>
@@ -571,7 +575,7 @@ The <code>--locale</code> option can be used to override this.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_support_for_compressed_files">Support For Compressed Files</h2>
+<h2 id="_support_for_compressed_files">Support for compressed files</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Compile-time options for <code>pcre2grep</code> can set it up to use <code>libz</code> or
@@ -587,7 +591,7 @@ plain text file. When input is from a compressed .gz or .bz2 file, the
 </div>
 </div>
 <div class="sect1">
-<h2 id="_binary_files">Binary Files</h2>
+<h2 id="_binary_files">Binary files</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, a file that contains a binary zero byte within the first 1024 bytes
@@ -599,7 +603,7 @@ option for a means of changing the way binary files are handled.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_binary_zeros_in_patterns">Binary Zeros In Patterns</h2>
+<h2 id="_binary_zeros_in_patterns">Binary zeros in patterns</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Patterns passed from the command line are strings that are terminated by a
@@ -611,13 +615,13 @@ from a file via the <code>-f</code> option may contain binary zeros.</p>
 <div class="sect1">
 <h2 id="_options">Options</h2>
 <div class="sectionbody">
-<div class="paragraph">
+<div class="paragraph options">
 <p>The order in which some of the options appear can affect the output. For
 example, both the <code>-H</code> and <code>-l</code> options affect the printing of file
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
-to signify multiplication by 1024 or 1024*1024 respectively.</p>
+to signify multiplication by 1024 or <code>1024*1024</code> respectively.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -646,8 +650,8 @@ of lines, unless they are in fact contiguous in the input file. The value of
 </dd>
 <dt class="hdlist1"><code>--allow-lookaround-bsk</code></dt>
 <dd>
-<p>PCRE2 now forbids the use of \K in lookarounds by default, in line with Perl.
-This option causes <code>pcre2grep</code> to set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+<p>PCRE2 now forbids the use of <code class="regex">\K</code> in lookarounds by default, in line with Perl.
+This option causes <code>pcre2grep</code> to set the <code class="constant">PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK</code>
 option, which enables this somewhat dangerous usage.</p>
 </dd>
 <dt class="hdlist1"><code>-B</code> <em>number</em>, <code>--before-context=number</code></dt>
@@ -763,7 +767,7 @@ end-of-file; in others it may provoke an error.</p>
 <dt class="hdlist1"><code>-E</code>, <code>--case-restrict</code></dt>
 <dd>
 <p>When case distinctions are being ignored in Unicode mode, two ASCII letters (K
-and S) will by default match Unicode characters U+212A (Kelvin sign) and U+017F
+and S) will by default match Unicode characters <code>U+212A</code> (Kelvin sign) and <code>U+017F</code>
 (long S) respectively, as well as their lower case ASCII counterparts. When
 this option is set, case equivalences are restricted such that no ASCII
 character matches a non-ASCII character, and vice versa.</p>
@@ -1016,10 +1020,10 @@ library is called in "multiline" mode, and a match is allowed to continue past
 the end of the initial line and onto one or more subsequent lines.</p>
 <div class="paragraph">
 <p>Patterns used with <code>-M</code> may usefully contain literal newline characters and
-internal occurrences of ^ and $ characters, because in multiline mode these can
+internal occurrences of <code class="regex">^</code> and <code class="regex">$</code> characters, because in multiline mode these can
 match at internal newlines. Because <code>pcre2grep</code> is scanning multiple lines,
-the \Z and \z assertions match only at the end of the last line in the file.
-The \A assertion matches at the start of the first line of a match. This can
+the <code class="regex">\Z</code> and <code class="regex">\z</code> assertions match only at the end of the last line in the file.
+The <code class="regex">\A</code> assertion matches at the start of the first line of a match. This can
 be any line in the file; it is not anchored to the first line.</p>
 </div>
 <div class="paragraph">
@@ -1036,12 +1040,14 @@ the pattern. For example, to find the phrase "regular expression" in a file
 where "regular" might be at the end of a line and "expression" at the start of
 the next line, you could use this command:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2grep -M 'regular\s+expression' &lt;file&gt;</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep -M 'regular\s+expression' &lt;file&gt;</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>The \s escape sequence matches any white space character, including newlines,
-and is followed by + so as to match trailing white space on the first line as
+<p>The <code class="regex">\s</code> escape sequence matches any white space character, including newlines,
+and is followed by <code class="regex">+</code> so as to match trailing white space on the first line as
 well as possibly handling a two-character newline sequence.</p>
 </div>
 <div class="paragraph">
@@ -1106,8 +1112,10 @@ smaller than the starting buffer size.</p>
 <dd>
 <p>Six different conventions for indicating the ends of lines in scanned files are
 supported. For example:</p>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2grep -N CRLF 'some pattern' &lt;file&gt;</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep -N CRLF 'some pattern' &lt;file&gt;</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The newline type may be specified in upper, lower, or mixed case. If the
@@ -1116,9 +1124,9 @@ types are the single-character sequences CR (carriage return) and LF
 (linefeed), the two-character sequence CRLF, an "anycrlf" type, which
 recognizes any of the preceding three types, and an "any" type, for which any
 Unicode line ending sequence is assumed to end a line. The Unicode sequences
-are the three just mentioned, plus VT (vertical tab, U+000B), FF (form feed,
-U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
-(paragraph separator, U+2029).</p>
+are the three just mentioned, plus VT (vertical tab, <code>U+000B</code>), FF (form feed,
+<code>U+000C</code>), NEL (next line, <code>U+0085</code>), LS (line separator, <code>U+2028</code>), and PS
+(paragraph separator, <code>U+2029</code>).</p>
 </div>
 <div class="paragraph">
 <p>When the PCRE2 library is built, a default line-ending sequence is specified.
@@ -1250,14 +1258,14 @@ is an empty string. Separating strings are never coloured.</p>
 <dt class="hdlist1"><code>-P</code>, <code>--no-ucp</code></dt>
 <dd>
 <p>Starting from release 10.43, when UTF/Unicode mode is specified with <code>-u</code>
-or <code>-U</code>, the PCRE2_UCP option is used by default. This means that the
+or <code>-U</code>, the <code class="constant">PCRE2_UCP</code> option is used by default. This means that the
 POSIX classes in patterns match more than just ASCII characters. For example,
-[:digit:] matches any Unicode decimal digit. The <code>--no-ucp</code> option
-suppresses PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
+<code class="regex">[:digit:]</code> matches any Unicode decimal digit. The <code>--no-ucp</code> option
+suppresses <code class="constant">PCRE2_UCP</code>, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine-grained
 option settings within patterns that affect individual classes. For example,
-when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
-allowing \w to match Unicode letters and digits.</p>
+when in UCP mode, the sequence <code class="regex">(?aP)</code> restricts <code class="regex">[:word:]</code> to ASCII letters, while
+allowing <code class="regex">\w</code> to match Unicode letters and digits.</p>
 </dd>
 <dt class="hdlist1"><code>--posix-pattern-file</code></dt>
 <dd>
@@ -1340,7 +1348,7 @@ that are to be output, are ignored.</p>
 <dd>
 <p>Force the patterns only to match "words". That is, there must be a word
 boundary at the start and end of each matched string. This is equivalent to
-having "\b(?:" at the start of each pattern, and ")\b" at the end. This
+having <code class="regex">\b(?:</code> at the start of each pattern, and <code class="regex">)\b</code> at the end. This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the <code>--include</code> or
 <code>--exclude</code> options.</p>
@@ -1349,8 +1357,8 @@ files; it does not apply to patterns specified by any of the <code>--include</co
 <dd>
 <p>Force the patterns to start matching only at the beginnings of lines, and in
 addition, require them to match entire lines. In multiline mode the match may
-be more than one line. This is equivalent to having "^(?:" at the start of each
-pattern and ")$" at the end. This option applies only to the patterns that are
+be more than one line. This is equivalent to having <code class="regex">^(?:</code> at the start of each
+pattern and <code class="regex">)$</code> at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the <code>--include</code> or <code>--exclude</code> options.</p>
 </dd>
@@ -1366,7 +1374,7 @@ option does not apply to file names in error messages.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_environment_variables">Environment Variables</h2>
+<h2 id="_environment_variables">Environment variables</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The environment variables <code>LC_ALL</code> and <code>LC_CTYPE</code> are examined, in that
@@ -1406,7 +1414,7 @@ for all messages to the standard error stream, "\n" is used.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_options_compatibility_with_gnu_grep">Options Compatibility With Gnu Grep</h2>
+<h2 id="_options_compatibility_with_gnu_grep">Options compatibility with GNU grep</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Many of the short and long forms of <code>pcre2grep</code>'s options are the same as
@@ -1432,16 +1440,18 @@ gives the counts as well.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_options_with_data">Options With Data</h2>
+<h2 id="_options_with_data">Options with data</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
 exception) in the next command line item. For example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">-f/some/file<br>
--f /some/file</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">-f/some/file
+-f /some/file</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The exception is the <code>-o</code> option, which may appear with or without data.
@@ -1453,9 +1463,11 @@ item, for example -o3.</p>
 item, separated by an equals character, or (with two exceptions) it may appear
 in the next command line item. For example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--file=/some/file<br>
---file /some/file</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--file=/some/file
+--file /some/file</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Note, however, that if you want to supply a file name beginning with ~ as data
@@ -1472,7 +1484,7 @@ character. Otherwise <code>pcre2grep</code> will assume that it has no data.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_using_pcre2s_callout_facility">Using Pcre2&#8217;S Callout Facility</h2>
+<h2 id="_using_pcre2s_callout_facility">Using PCRE2&#8217;s callout facility</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>pcre2grep</code> has, by default, support for calling external programs or
@@ -1485,7 +1497,7 @@ If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.</p>
 </div>
 <div class="paragraph">
-<p>A callout in a PCRE2 pattern is of the form (?C&lt;arg&gt;) where the argument is
+<p>A callout in a PCRE2 pattern is of the form <code class="regex">(?C&lt;arg&gt;)</code> where the argument is
 either a number or a quoted string (see the
 <a href="pcre2callout.html"><code>pcre2callout</code></a>
 documentation for details). Numbered callouts are ignored by <code>pcre2grep</code>;
@@ -1508,13 +1520,15 @@ character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
 the escape $n. For example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' &lt;some file&gt;</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' &lt;some file&gt;</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
-pattern with (*FAIL).</p>
+pattern with <code class="regex">(*FAIL)</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1531,8 +1545,10 @@ is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">executable_name|arg1|arg2|...</p>
+<div class="literalblock">
+<div class="content">
+<pre>executable_name|arg1|arg2|...</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Any substring (including the executable name) may contain escape sequences
@@ -1542,19 +1558,25 @@ matched string because the match is still in progress. Instead, the character
 '0' is inserted. If you need a literal dollar or pipe character in any
 substring, use $$ or $| respectively. Here is an example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">echo -e "abcde\n12345" | pcre2grep \<br>
-  '(?x)(.)(..(.))<br>
-  (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">echo -e "abcde\n12345" | pcre2grep \
+  '(?x)(.)(..(.))
+  (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -</code></pre>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">Output:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">  Arg1: [a] [bcd] [d] Arg2: |a| ()<br>
-  abcde<br>
-  Arg1: [1] [234] [4] Arg2: |1| ()<br>
-  12345</p>
+<div class="literalblock">
+<div class="content">
+<pre>Output:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>  Arg1: [a] [bcd] [d] Arg2: |a| ()
+  abcde
+  Arg1: [1] [234] [4] Arg2: |1| ()
+  12345</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The parameters for the system call that is used to run the program or script
@@ -1570,12 +1592,12 @@ normal way.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_matching_errors">Matching Errors</h2>
+<h2 id="_matching_errors">Matching errors</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
-repeats, for example: (a+)*\d when matched against a line of a&#8217;s with no final
+repeats, for example: <code class="regex">(a+)*\d</code> when matched against a line of a&#8217;s with no final
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, <code>pcre2grep</code> outputs an error
 message and the line that caused the problem to the standard error stream. If
@@ -1601,12 +1623,12 @@ affect the return code.</p>
 </div>
 <div class="paragraph">
 <p>When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
-because VMS does not distinguish between exit(0) and exit(1).</p>
+because VMS does not distinguish between <code class="c">exit(0)</code> and <code class="c">exit(1)</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_see_also">See Also</h2>
+<h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>pcre2pattern</code>(3), <code>pcre2syntax</code>(3), <code>pcre2callout</code>(3),
@@ -1617,11 +1639,11 @@ because VMS does not distinguish between exit(0) and exit(1).</p>
 <div class="sect1">
 <h2 id="_author">Author</h2>
 <div class="sectionbody">
-<div class="listingblock">
+<div class="literalblock">
 <div class="content">
-<pre class="highlight"><code>Philip Hazel
+<pre>Philip Hazel
 Retired from University Computing Service
-Cambridge, England.</code></pre>
+Cambridge, England.</pre>
 </div>
 </div>
 </div>

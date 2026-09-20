@@ -31,18 +31,20 @@
 pcre2_get_depth_limit \- get the match backtracking depth limit
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_get_depth_limit(pcre2_match_context *mcontext,
-                          uint32_t *limit);
+\fBint\fP pcre2_get_depth_limit(\fBpcre2_match_context\fP *\fImcontext\fP,
+                          \fBuint32_t\fP *\fIlimit\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function gets the backtracking depth limit from a match context. The
-result is zero for success or PCRE2_ERROR_NULL if either argument is NULL.
+result is zero for success or \fBPCRE2_ERROR_NULL\fP if either argument is \f(CRNULL\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

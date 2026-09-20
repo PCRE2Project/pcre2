@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_substring_length_bynumber(pcre2_match_data *match_data,
                                     uint32_t stringnumber,
@@ -463,13 +463,24 @@ int pcre2_substring_length_bynumber(pcre2_match_data *match_data,
 <p>This function returns the length of a matched substring, identified by number.
 The arguments are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>match_data</em>   The match data block for the match<br>
-<em>number</em>       The substring number<br>
-<em>length</em>       Where to return the length, or NULL</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">match_data</code></dt>
+<dd>
+<p>The match data block for the match</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">stringnumber</code></dt>
+<dd>
+<p>The substring number</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">sizeptr</code></dt>
+<dd>
+<p>Where to return the length, or <code class="c">NULL</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The third argument may be NULL if all you want to know is whether or not a
+<p>The third argument may be <code class="c">NULL</code> if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise. After a partial match, only substring 0 is available.</p>
 </div>

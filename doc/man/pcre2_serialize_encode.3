@@ -31,17 +31,19 @@
 pcre2_serialize_encode \- serialize compiled patterns for save/restore
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int32_t pcre2_serialize_encode(const pcre2_code **codes,
-                               int32_t number_of_codes,
-                               uint8_t **serialized_bytes,
-                               PCRE2_SIZE *serialized_size,
-                               pcre2_general_context *gcontext);
+\fBint32_t\fP pcre2_serialize_encode(\fBconst\fP \fBpcre2_code\fP **\fIcodes\fP,
+                               \fBint32_t\fP \fInumber_of_codes\fP,
+                               \fBuint8_t\fP **\fIserialized_bytes\fP,
+                               \fBPCRE2_SIZE\fP *\fIserialized_size\fP,
+                               \fBpcre2_general_context\fP *\fIgcontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function encodes a list of compiled patterns into a byte stream that can
@@ -49,45 +51,69 @@ be saved on disc or elsewhere. Note that this is not an abstract format like
 Java or .NET. Conversion of the byte stream back into usable compiled patterns
 can only happen on a host that is running the same version of PCRE2, with the
 same code unit width, and the host must also have the same endianness, pointer
-width and PCRE2_SIZE type. The arguments for \f(CRpcre2_serialize_encode()\fP
+width and \fBPCRE2_SIZE\fP type. The arguments for pcre2_serialize_encode()
 are:
 .sp
-.ti +2
-\fIcodes\fP             pointer to a vector containing the list
-.br
-.ti +2
-\fInumber_of_codes\fP   number of slots in the vector
-.br
-.ti +2
-\fIserialized_bytes\fP  set to point to the serialized byte stream
-.br
-.ti +2
-\fIserialized_size\fP   set to the number of bytes in the byte stream
-.br
-.ti +2
-\fIgcontext\fP          pointer to a general context or NULL
+.RS 4
+.PD 0
+.TP 17
+\fIcodes\fP
+.ad l
+pointer to a vector containing the list
+.TP 17
+\fInumber_of_codes\fP
+.ad l
+number of slots in the vector
+.TP 17
+\fIserialized_bytes\fP
+.ad l
+set to point to the serialized byte stream
+.TP 17
+\fIserialized_size\fP
+.ad l
+set to the number of bytes in the byte stream
+.TP 17
+\fIgcontext\fP
+.ad l
+pointer to a general context or \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
 The context argument is used to obtain memory for the byte stream. When the
 serialized data is no longer needed, it must be freed by calling
-\f(CRpcre2_serialize_free()\fP. The yield of the function is the number of
+pcre2_serialize_free(). The yield of the function is the number of
 serialized patterns, or one of the following negative error codes:
 .sp
-.ti +2
-PCRE2_ERROR_BADDATA      \fInumber_of_codes\fP is zero or less
-.br
-.ti +2
-PCRE2_ERROR_BADMAGIC     mismatch of id bytes in one of the patterns
-.br
-.ti +2
-PCRE2_ERROR_MEMORY       memory allocation failed
-.br
-.ti +2
-PCRE2_ERROR_MIXEDTABLES  the patterns do not all use the same tables
-.br
-.ti +2
-PCRE2_ERROR_NULL         an argument other than \fIgcontext\fP is NULL
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_ERROR_BADDATA\fP
+.ad l
+\fInumber_of_codes\fP is zero or less
+.TP 24
+\fBPCRE2_ERROR_BADMAGIC\fP
+.ad l
+mismatch of id bytes in one of the patterns
+.TP 24
+\fBPCRE2_ERROR_MEMORY\fP
+.ad l
+memory allocation failed
+.TP 24
+\fBPCRE2_ERROR_MIXEDTABLES\fP
+.ad l
+the patterns do not all use the same tables
+.TP 24
+\fBPCRE2_ERROR_NULL\fP
+.ad l
+an argument other than \fIgcontext\fP is \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
+\fBPCRE2_ERROR_BADMAGIC\fP means either that a pattern\(cqs code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.
 .sp
 There is a complete description of the PCRE2 native API in the

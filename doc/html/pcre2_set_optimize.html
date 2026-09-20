@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_optimize(pcre2_compile_context *ccontext,
                        uint32_t directive);</code></pre>
@@ -460,31 +460,57 @@ int pcre2_set_optimize(pcre2_compile_context *ccontext,
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function controls which performance optimizations will be applied
-by <code>pcre2_compile()</code>. It can be called multiple times with the same compile
+by <code class="function">pcre2_compile()</code>. It can be called multiple times with the same compile
 context; the effects are cumulative, with the effects of later calls taking
 precedence over earlier ones.</p>
 </div>
 <div class="paragraph">
-<p>The result is zero for success, PCRE2_ERROR_NULL if <em>ccontext</em> is NULL,
-or PCRE2_ERROR_BADOPTION if <em>directive</em> is unknown. The latter could be
+<p>The result is zero for success, <code class="constant">PCRE2_ERROR_NULL</code> if <code class="parameter">ccontext</code> is <code class="c">NULL</code>,
+or <code class="constant">PCRE2_ERROR_BADOPTION</code> if <code class="parameter">directive</code> is unknown. The latter could be
 useful to detect if a certain optimization is available.</p>
 </div>
 <div class="paragraph">
-<p>The list of possible values for the <em>directive</em> parameter are:</p>
+<p>The list of possible values for the <code class="parameter">directive</code> parameter are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_OPTIMIZATION_FULL   Enable all optimizations (default)<br>
-PCRE2_OPTIMIZATION_NONE   Disable all optimizations<br>
-PCRE2_AUTO_POSSESS        Enable auto-possessification<br>
-PCRE2_AUTO_POSSESS_OFF    Disable auto-possessification<br>
-PCRE2_DOTSTAR_ANCHOR      Enable implicit dotstar anchoring<br>
-PCRE2_DOTSTAR_ANCHOR_OFF  Disable implicit dotstar anchoring<br>
-PCRE2_START_OPTIMIZE      Enable start-up optimizations at match time<br>
-PCRE2_START_OPTIMIZE_OFF  Disable start-up optimizations at match time</p>
+<div class="dlist values">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_OPTIMIZATION_FULL</code></dt>
+<dd>
+<p>Enable all optimizations (default)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_OPTIMIZATION_NONE</code></dt>
+<dd>
+<p>Disable all optimizations</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_AUTO_POSSESS</code></dt>
+<dd>
+<p>Enable auto-possessification</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_AUTO_POSSESS_OFF</code></dt>
+<dd>
+<p>Disable auto-possessification</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DOTSTAR_ANCHOR</code></dt>
+<dd>
+<p>Enable implicit dotstar anchoring</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DOTSTAR_ANCHOR_OFF</code></dt>
+<dd>
+<p>Disable implicit dotstar anchoring</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_START_OPTIMIZE</code></dt>
+<dd>
+<p>Enable start-up optimizations at match time</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_START_OPTIMIZE_OFF</code></dt>
+<dd>
+<p>Disable start-up optimizations at match time</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API, including detailed
-descriptions <em>directive</em> parameter values in the
+descriptions of <code class="parameter">directive</code> parameter values in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 page.</p>
 </div>

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);</code></pre>
 </div>
@@ -459,10 +459,10 @@ void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);</code></pre>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function frees unused JIT executable memory. The argument is a general
-context, for custom memory management, or NULL for standard memory management.
+context, for custom memory management, or <code class="c">NULL</code> for standard memory management.
 JIT memory allocation retains some memory in order to improve future JIT
 compilation speed. In low memory conditions,
-<code>pcre2_jit_free_unused_memory()</code> can be used to cause this memory to be
+<code class="function">pcre2_jit_free_unused_memory()</code> can be used to cause this memory to be
 freed.</p>
 </div>
 <div class="paragraph">

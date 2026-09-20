@@ -10,104 +10,138 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
                        void *where);
-....
+----
 
 == Description
 
 This function returns information about a compiled pattern. Its arguments are:
 
-[literal,subs=normal]
-....
-_code_     Pointer to a compiled regular expression pattern
-_what_     What information is required
-_where_    Where to put the information
-....
+[.parameters]
+arg:code::
+    Pointer to a compiled regular expression pattern
+arg:what::
+    What information is required
+arg:where::
+    Where to put the information
 
-The recognized values for the _what_ argument, and the information they
+The recognized values for the arg:what argument, and the information they
 request are as follows:
 
-[literal,subs=normal]
-....
-PCRE2_INFO_ALLOPTIONS      Final options after compiling
-PCRE2_INFO_ARGOPTIONS      Options passed to `pcre2_compile()`
-PCRE2_INFO_BACKREFMAX      Number of highest backreference
-PCRE2_INFO_BSR             What \R matches:
-                             PCRE2_BSR_UNICODE: Unicode line endings
-                             PCRE2_BSR_ANYCRLF: CR, LF, or CRLF only
-PCRE2_INFO_CAPTURECOUNT    Number of capturing subpatterns
-PCRE2_INFO_DEPTHLIMIT      Backtracking depth limit if set,
-                             otherwise PCRE2_ERROR_UNSET
-PCRE2_INFO_EXTRAOPTIONS    Extra options that were passed in the
-                             compile context
-PCRE2_INFO_FIRSTBITMAP     Bitmap of first code units, or NULL
-PCRE2_INFO_FIRSTCODETYPE   Type of start-of-match information
-                             0 nothing set
-                             1 first code unit is set
-                             2 start of string or after newline
-PCRE2_INFO_FIRSTCODEUNIT   First code unit when type is 1
-PCRE2_INFO_FRAMESIZE       Size of backtracking frame
-PCRE2_INFO_HASBACKSLASHC   Return 1 if pattern contains \C
-PCRE2_INFO_HASCRORLF       Return 1 if explicit CR or LF matches
-                             exist in the pattern
-PCRE2_INFO_HEAPLIMIT       Heap memory limit if set,
-                             otherwise PCRE2_ERROR_UNSET
-PCRE2_INFO_JCHANGED        Return 1 if (?J) or (?-J) was used
-PCRE2_INFO_JITSIZE         Size of JIT compiled code, or 0
-PCRE2_INFO_LASTCODETYPE    Type of must-be-present information
-                             0 nothing set
-                             1 code unit is set
-PCRE2_INFO_LASTCODEUNIT    Last code unit when type is 1
-PCRE2_INFO_MATCHEMPTY      1 if the pattern can match an
-                             empty string, 0 otherwise
-PCRE2_INFO_MATCHLIMIT      Match limit if set,
-                             otherwise PCRE2_ERROR_UNSET
-PCRE2_INFO_MAXLOOKBEHIND   Length (in characters) of the longest
-                             lookbehind assertion
-PCRE2_INFO_MINLENGTH       Lower bound length of matching strings
-PCRE2_INFO_NAMECOUNT       Number of named subpatterns
-PCRE2_INFO_NAMEENTRYSIZE   Size of name table entries
-PCRE2_INFO_NAMETABLE       Pointer to name table
-PCRE2_CONFIG_NEWLINE       Code for the newline sequence:
-                             PCRE2_NEWLINE_CR
-                             PCRE2_NEWLINE_LF
-                             PCRE2_NEWLINE_CRLF
-                             PCRE2_NEWLINE_ANY
-                             PCRE2_NEWLINE_ANYCRLF
-                             PCRE2_NEWLINE_NUL
-PCRE2_INFO_RECURSIONLIMIT  Obsolete synonym for PCRE2_INFO_DEPTHLIMIT
-PCRE2_INFO_SIZE            Size of compiled pattern
-....
+[.values]
+const:PCRE2_INFO_ALLOPTIONS::
+    Final options after compiling
+const:PCRE2_INFO_ARGOPTIONS::
+    Options passed to func:pcre2_compile()
+const:PCRE2_INFO_BACKREFMAX::
+    Number of highest backreference
+const:PCRE2_INFO_BSR::
+    What [.regex]`\R` matches:
+    const:PCRE2_BSR_UNICODE:::
+        Unicode line endings
+    const:PCRE2_BSR_ANYCRLF:::
+        CR, LF, or CRLF only
+const:PCRE2_INFO_CAPTURECOUNT::
+    Number of capturing subpatterns
+const:PCRE2_INFO_DEPTHLIMIT::
+    Backtracking depth limit if set,
+    otherwise const:PCRE2_ERROR_UNSET
+const:PCRE2_INFO_EXTRAOPTIONS::
+    Extra options that were passed in the
+    compile context
+const:PCRE2_INFO_FIRSTBITMAP::
+    Bitmap of first code units, or [.c]`NULL`
+const:PCRE2_INFO_FIRSTCODETYPE::
+    Type of start-of-match information
+    [.c]`0` nothing set
+    [.c]`1` first code unit is set
+    [.c]`2` start of string or after newline
+const:PCRE2_INFO_FIRSTCODEUNIT::
+    First code unit when type is [.c]`1`
+const:PCRE2_INFO_FRAMESIZE::
+    Size of backtracking frame
+const:PCRE2_INFO_HASBACKSLASHC::
+    Return [.c]`1` if pattern contains [.regex]`\C`
+const:PCRE2_INFO_HASCRORLF::
+    Return [.c]`1` if explicit CR or LF matches
+    exist in the pattern
+const:PCRE2_INFO_HEAPLIMIT::
+    Heap memory limit if set,
+    otherwise const:PCRE2_ERROR_UNSET
+const:PCRE2_INFO_JCHANGED::
+    Return [.c]`1` if [.regex]`(?J)` or [.regex]`(?-J)` was used
+const:PCRE2_INFO_JITSIZE::
+    Size of JIT compiled code, or [.c]`0`
+const:PCRE2_INFO_LASTCODETYPE::
+    Type of must-be-present information
+    [.c]`0` nothing set
+    [.c]`1` code unit is set
+const:PCRE2_INFO_LASTCODEUNIT::
+    Last code unit when type is [.c]`1`
+const:PCRE2_INFO_MATCHEMPTY::
+    [.c]`1` if the pattern can match an
+    empty string, [.c]`0` otherwise
+const:PCRE2_INFO_MATCHLIMIT::
+    Match limit if set,
+    otherwise const:PCRE2_ERROR_UNSET
+const:PCRE2_INFO_MAXLOOKBEHIND::
+    Length (in characters) of the longest
+    lookbehind assertion
+const:PCRE2_INFO_MINLENGTH::
+    Lower bound length of matching strings
+const:PCRE2_INFO_NAMECOUNT::
+    Number of named subpatterns
+const:PCRE2_INFO_NAMEENTRYSIZE::
+    Size of name table entries
+const:PCRE2_INFO_NAMETABLE::
+    Pointer to name table
+const:PCRE2_CONFIG_NEWLINE::
+    Code for the newline sequence:
+    const:PCRE2_NEWLINE_CR::
+    const:PCRE2_NEWLINE_LF::
+    const:PCRE2_NEWLINE_CRLF::
+    const:PCRE2_NEWLINE_ANY::
+    const:PCRE2_NEWLINE_ANYCRLF::
+    const:PCRE2_NEWLINE_NUL::
+const:PCRE2_INFO_RECURSIONLIMIT::
+    Obsolete synonym for const:PCRE2_INFO_DEPTHLIMIT
+const:PCRE2_INFO_SIZE::
+    Size of compiled pattern
 
-If _where_ is NULL, the function returns the amount of memory needed for
-the requested information, in bytes. Otherwise, the _where_ argument must
-point to an unsigned 32-bit integer (uint32_t variable), except for the
-following _what_ values, when it must point to a variable of the type
+If arg:where is [.c]`NULL`, the function returns the amount of memory needed for
+the requested information, in bytes. Otherwise, the arg:where argument must
+point to an unsigned 32-bit integer ([.c]`uint32_t` variable), except for the
+following arg:what values, when it must point to a variable of the type
 shown:
 
-[literal]
-....
-PCRE2_INFO_FIRSTBITMAP     const uint8_t *
-PCRE2_INFO_JITSIZE         size_t
-PCRE2_INFO_NAMETABLE       PCRE2_SPTR
-PCRE2_INFO_SIZE            size_t
-....
+[.values]
+const:PCRE2_INFO_FIRSTBITMAP::
+    [.c]`const uint8_t *`
+const:PCRE2_INFO_JITSIZE::
+    [.c]`size_t`
+const:PCRE2_INFO_NAMETABLE::
+    type:PCRE2_SPTR
+const:PCRE2_INFO_SIZE::
+    [.c]`size_t`
 
 The yield of the function is zero on success or:
 
-[literal,subs=normal]
-....
-PCRE2_ERROR_NULL           the argument _code_ is NULL
-PCRE2_ERROR_BADMAGIC       the "magic number" was not found
-PCRE2_ERROR_BADOPTION      the value of _what_ is invalid
-PCRE2_ERROR_BADMODE        the pattern was compiled in the wrong mode
-PCRE2_ERROR_UNSET          the requested information is not set
-....
+[.errors]
+const:PCRE2_ERROR_NULL::
+    the argument arg:code is [.c]`NULL`
+const:PCRE2_ERROR_BADMAGIC::
+    the "magic number" was not found
+const:PCRE2_ERROR_BADOPTION::
+    the value of arg:what is invalid
+const:PCRE2_ERROR_BADMODE::
+    the pattern was compiled in the wrong mode
+const:PCRE2_ERROR_UNSET::
+    the requested information is not set
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

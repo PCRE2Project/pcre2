@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_callout_enumerate(
       const pcre2_code *code,
@@ -462,34 +462,68 @@ int pcre2_callout_enumerate(
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This function scans a compiled regular expression and calls the <em>callback()</em>
+<p>This function scans a compiled regular expression and calls the <code class="c">callback()</code>
 function for each callout within the pattern. The yield of the function is zero
 for success and non-zero otherwise. The arguments are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>code</em>           Points to the compiled pattern<br>
-<em>callback</em>       The callback function<br>
-<em>callout_data</em>   User data that is passed to the callback</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">code</code></dt>
+<dd>
+<p>Points to the compiled pattern</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">callback</code></dt>
+<dd>
+<p>The callback function</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">callout_data</code></dt>
+<dd>
+<p>User data that is passed to the callback</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The <em>callback()</em> function is passed a pointer to a data block containing
+<p>The <code class="c">callback()</code> function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">uint32_t   <em>version</em>                Block version number<br>
-uint32_t   <em>callout_number</em>         Number for numbered callouts<br>
-PCRE2_SIZE <em>pattern_position</em>       Offset to next item in pattern<br>
-PCRE2_SIZE <em>next_item_length</em>       Length of next item in pattern<br>
-PCRE2_SIZE <em>callout_string_offset</em>  Offset to string within pattern<br>
-PCRE2_SIZE <em>callout_string_length</em>  Length of callout string<br>
-PCRE2_SPTR <em>callout_string</em>         Points to callout string or is NULL</p>
+<div class="dlist members">
+<dl>
+<dt class="hdlist1"><code class="c">uint32_t</code> <code class="parameter">version</code></dt>
+<dd>
+<p>Block version number</p>
+</dd>
+<dt class="hdlist1"><code class="c">uint32_t</code> <code class="parameter">callout_number</code></dt>
+<dd>
+<p>Number for numbered callouts</p>
+</dd>
+<dt class="hdlist1"><code class="type">PCRE2_SIZE</code> <code class="parameter">pattern_position</code></dt>
+<dd>
+<p>Offset to next item in pattern</p>
+</dd>
+<dt class="hdlist1"><code class="type">PCRE2_SIZE</code> <code class="parameter">next_item_length</code></dt>
+<dd>
+<p>Length of next item in pattern</p>
+</dd>
+<dt class="hdlist1"><code class="type">PCRE2_SIZE</code> <code class="parameter">callout_string_offset</code></dt>
+<dd>
+<p>Offset to string within pattern</p>
+</dd>
+<dt class="hdlist1"><code class="type">PCRE2_SIZE</code> <code class="parameter">callout_string_length</code></dt>
+<dd>
+<p>Length of callout string</p>
+</dd>
+<dt class="hdlist1"><code class="type">PCRE2_SPTR</code> <code class="parameter">callout_string</code></dt>
+<dd>
+<p>Points to callout string or is <code class="c">NULL</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The second argument passed to the <code>callback()</code> function is the callout data
-that was passed to <code>pcre2_callout_enumerate()</code>. The <code>callback()</code>
+<p>The second argument passed to the <code class="c">callback()</code> function is the callout data
+that was passed to <code class="function">pcre2_callout_enumerate()</code>. The <code class="c">callback()</code>
 function must return zero for success. Any other value causes the pattern scan
 to stop, with the value being passed back as the result of
-<code>pcre2_callout_enumerate()</code>.</p>
+<code class="function">pcre2_callout_enumerate()</code>.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

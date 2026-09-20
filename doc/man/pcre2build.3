@@ -64,8 +64,13 @@ The complete list of options for \f(CRconfigure\fP (which includes the standard
 ones such as the selection of the installation directory) can be obtained by
 running
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \&./configure \-\-help
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The following sections include descriptions of "on/off" options whose names
 begin with \-\-enable or \-\-disable. Because of the way that \f(CRconfigure\fP
@@ -84,16 +89,24 @@ respectively. These can be interpreted either as single\-unit characters or
 UTF\-16/UTF\-32 strings. To build these additional libraries, add one or both of
 the following to the \f(CRconfigure\fP command:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-pcre2\-16
-.br
-.ti +2
 \-\-enable\-pcre2\-32
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 If you do not want the 8\-bit library, add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-disable\-pcre2\-8
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 as well. At least one of the three libraries must be built. Note that the POSIX
 wrapper is for the 8\-bit library only, and that \f(CRpcre2grep\fP is an 8\-bit
@@ -105,11 +118,14 @@ The Autotools PCRE2 building process uses \f(CRlibtool\fP to build both shared
 and static libraries by default. You can suppress an unwanted library by adding
 one of
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-disable\-shared
-.br
-.ti +2
 \-\-disable\-static
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. Setting \-\-disable\-shared ensures that PCRE2
 libraries are built as static libraries. The binaries that are then created as
@@ -118,7 +134,13 @@ are linked statically with one or more PCRE2 libraries, but may also be
 dynamically linked with other libraries such as \f(CRlibc\fP. If you want these
 binaries to be fully statically linked, you can set LDFLAGS like this:
 .sp
+.ss \n[.ss]
+.nf
+.fam C
 LDFLAGS=\-\-static ./configure \-\-disable\-shared
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 Note the two hyphens in \-\-static. Of course, this works only if static versions
 of all the relevant libraries are available for linking.
@@ -127,65 +149,90 @@ of all the relevant libraries are available for linking.
 By default, PCRE2 is built with support for Unicode and UTF character strings.
 To build it without Unicode support, add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-disable\-unicode
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. This setting applies to all three libraries. It
 is not possible to build one library with Unicode support and another without
 in the same configuration.
 .sp
 Of itself, Unicode support does not make PCRE2 treat strings as UTF\-8, UTF\-16
-or UTF\-32. To do that, applications that use the library can set the PCRE2_UTF
-option when they call \f(CRpcre2_compile()\fP to compile a pattern.
-Alternatively, patterns may be started with (*UTF) unless the application has
-locked this out by setting PCRE2_NEVER_UTF.
+or UTF\-32. To do that, applications that use the library can set the \fBPCRE2_UTF\fP
+option when they call pcre2_compile() to compile a pattern.
+Alternatively, patterns may be started with \f(CR(*UTF)\fP unless the application has
+locked this out by setting \fBPCRE2_NEVER_UTF\fP.
 .sp
 UTF support allows the libraries to process character code points up to
 0x10ffff in the strings that they handle. Unicode support also gives access to
-the Unicode properties of characters, using pattern escapes such as \(rsP, \(rsp,
-and \(rsX. Only the general category properties such as \fILu\fP and \fINd\fP,
+the Unicode properties of characters, using pattern escapes such as \f(CR\(rsP\fP, \f(CR\(rsp\fP,
+and \f(CR\(rsX\fP. Only the general category properties such as \fILu\fP and \fINd\fP,
 script names, and some bi\-directional and binary properties are supported.
 Details are given in the
 \f(CRpcre2pattern\fP
 documentation.
 .sp
-Pattern escapes such as \(rsd and \(rsw do not by default make use of Unicode
-properties. The application can request that they do by setting the PCRE2_UCP
-option. Unless the application has set PCRE2_NEVER_UCP, a pattern may also
-request this by starting with (*UCP).
-.SH "DISABLING THE USE OF \(rsC"
+Pattern escapes such as \f(CR\(rsd\fP and \f(CR\(rsw\fP do not by default make use of Unicode
+properties. The application can request that they do by setting the \fBPCRE2_UCP\fP
+option. Unless the application has set \fBPCRE2_NEVER_UCP\fP, a pattern may also
+request this by starting with \f(CR(*UCP)\fP.
+.SH "DISABLING THE USE OF \f(CR\(rsC\fP"
 .sp
-The \(rsC escape sequence, which matches a single code unit, even in a UTF mode,
+The \f(CR\(rsC\fP escape sequence, which matches a single code unit, even in a UTF mode,
 can cause unpredictable behaviour because it may leave the current matching
 point in the middle of a multi\-code\-unit character. The application can lock
-it out by setting the PCRE2_NEVER_BACKSLASH_C option when calling
-\f(CRpcre2_compile()\fP. There is also a build\-time option
+it out by setting the \fBPCRE2_NEVER_BACKSLASH_C\fP option when calling
+pcre2_compile(). There is also a build\-time option
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-never\-backslash\-C
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-(note the upper case C) which locks out the use of \(rsC entirely.
+(note the upper case C) which locks out the use of \f(CR\(rsC\fP entirely.
 .SH "JUST\-IN\-TIME COMPILER SUPPORT"
 .sp
 Just\-in\-time (JIT) compiler support is included in the build by specifying
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-jit
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This support is available only for certain hardware architectures. If this
 option is set for an unsupported architecture, a building error occurs.
 If in doubt, use
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-jit=auto
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 which enables JIT only if the current hardware is supported. You can check
 if JIT is enabled in the configuration summary that is output at the end of a
 \f(CRconfigure\fP run. If you are enabling JIT under SELinux you may also want to
 add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-jit\-sealloc
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 which enables the use of an execmem allocator in JIT that is compatible with
 SELinux. This has no effect if JIT is not enabled. See the
@@ -193,8 +240,13 @@ SELinux. This has no effect if JIT is not enabled. See the
 documentation for a discussion of JIT usage. When JIT support is enabled,
 \f(CRpcre2grep\fP automatically makes use of it, unless you add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-disable\-pcre2grep\-jit
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command.
 .SH "NEWLINE RECOGNITION"
@@ -203,8 +255,13 @@ By default, PCRE2 interprets the linefeed (LF) character as indicating the end
 of a line. This is the normal newline character on Unix\-like systems. You can
 compile PCRE2 to use carriage return (CR) instead, by adding
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-newline\-is\-cr
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. There is also an \-\-enable\-newline\-is\-lf option,
 which explicitly specifies linefeed as the newline character.
@@ -213,43 +270,68 @@ Alternatively, you can specify that line endings are to be indicated by the
 two\-character sequence CRLF (CR immediately followed by LF). If you want this,
 add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-newline\-is\-crlf
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. There is a fourth option, specified by
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-newline\-is\-anycrlf
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 which causes PCRE2 to recognize any of the three sequences CR, LF, or CRLF as
 indicating a line ending. A fifth option, specified by
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-newline\-is\-any
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 causes PCRE2 to recognize any Unicode newline sequence. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
-tab, U+000B), FF (form feed, U+000C), NEL (next line, U+0085), LS (line
-separator, U+2028), and PS (paragraph separator, U+2029). The final option is
+tab, \f(CRU+000B\fP), FF (form feed, \f(CRU+000C\fP), NEL (next line, \f(CRU+0085\fP), LS (line
+separator, \f(CRU+2028\fP), and PS (paragraph separator, \f(CRU+2029\fP). The final option is
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-newline\-is\-nul
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 which causes NUL (binary zero) to be set as the default line\-ending character.
 .sp
 Whatever default line ending convention is selected when PCRE2 is built can be
 overridden by applications that use the library. At build time it is
 recommended to use the standard for your operating system.
-.SH "WHAT \(rsR MATCHES"
+.SH "WHAT \f(CR\(rsR\fP MATCHES"
 .sp
-By default, the sequence \(rsR in a pattern matches any Unicode newline sequence,
+By default, the sequence \f(CR\(rsR\fP in a pattern matches any Unicode newline sequence,
 independently of what has been selected as the line ending sequence. If you
 specify
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-bsr\-anycrlf
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-the default is changed so that \(rsR matches only CR, LF, or CRLF. Whatever is
+the default is changed so that \f(CR\(rsR\fP matches only CR, LF, or CRLF. Whatever is
 selected when PCRE2 is built can be overridden by applications that use the
 library.
 .SH "HANDLING VERY LARGE PATTERNS"
@@ -263,8 +345,13 @@ gigantic patterns. Nevertheless, some people do want to process truly enormous
 patterns, so it is possible to compile PCRE2 to use three\-byte or four\-byte
 offsets by adding a setting such as
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-with\-link\-size=3
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. The value given must be 2, 3, or 4. For the
 16\-bit library, a value of 3 is rounded up to 4. In these libraries, using
@@ -273,22 +360,27 @@ additional data when handling them. For the 32\-bit library the value is always
 4 and cannot be overridden; the value of \-\-with\-link\-size is ignored.
 .SH "LIMITING PCRE2 RESOURCE USAGE"
 .sp
-The \f(CRpcre2_match()\fP function increments a counter each time it goes round
+The pcre2_match() function increments a counter each time it goes round
 its main loop. Putting a limit on this counter controls the amount of computing
-resource used by a single call to \f(CRpcre2_match()\fP. The limit can be changed
+resource used by a single call to pcre2_match(). The limit can be changed
 at run time, as described in the
 \f(CRpcre2api\fP
 documentation. The default is 10 million, but this can be changed by adding a
 setting such as
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-with\-match\-limit=500000
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. This setting also applies to the
-\f(CRpcre2_dfa_match()\fP matching function, and to JIT matching (though the
+pcre2_dfa_match() matching function, and to JIT matching (though the
 counting is done differently).
 .sp
-The \f(CRpcre2_match()\fP function uses heap memory to record backtracking
+The pcre2_match() function uses heap memory to record backtracking
 points. The more nested backtracking points there are (that is, the deeper the
 search tree), the more memory is needed. There is an upper limit, specified in
 kibibytes (units of 1024 bytes). This limit can be changed at run time, as
@@ -297,22 +389,32 @@ described in the
 documentation. The default limit (in effect unlimited) is 20 million. You can
 change this by a setting such as
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-with\-heap\-limit=500
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 which limits the amount of heap to 500 KiB. This limit applies only to
-interpretive matching in \f(CRpcre2_match()\fP and \f(CRpcre2_dfa_match()\fP, which
+interpretive matching in pcre2_match() and pcre2_dfa_match(), which
 may also use the heap for internal workspace when processing complicated
 patterns. This limit does not apply when JIT (which has its own memory
 arrangements) is used.
 .sp
 You can also explicitly limit the depth of nested backtracking in the
-\f(CRpcre2_match()\fP interpreter. This limit defaults to the value that is set
+pcre2_match() interpreter. This limit defaults to the value that is set
 for \-\-with\-match\-limit. You can set a lower default limit by adding, for
 example,
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-with\-match\-limit\-depth=10000
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. This value can be overridden at run time. This
 depth limit indirectly limits the amount of heap memory that is used, but
@@ -321,8 +423,8 @@ capturing parentheses in a pattern, the amount of heap that is used before the
 limit is reached varies from pattern to pattern. This limit was more useful in
 versions before 10.30, where function recursion was used for backtracking.
 .sp
-As well as applying to \f(CRpcre2_match()\fP, the depth limit also controls
-the depth of recursive function calls in \f(CRpcre2_dfa_match()\fP. These are
+As well as applying to pcre2_match(), the depth limit also controls
+the depth of recursive function calls in pcre2_dfa_match(). These are
 used for lookaround assertions, atomic groups, and recursion within patterns.
 The limit does not apply to JIT matching.
 .SH "LIMITING VARIABLE\-LENGTH LOOKBEHIND ASSERTIONS"
@@ -332,11 +434,16 @@ of characters are supported only if there is a maximum matching length for each
 top\-level branch. There is a limit to this maximum that defaults to 255
 characters. You can alter this default by a setting such as
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-with\-max\-varlookbehind=100
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The limit can be changed at runtime by calling
-\f(CRpcre2_set_max_varlookbehind()\fP. Lookbehind assertions in which every
+pcre2_set_max_varlookbehind(). Lookbehind assertions in which every
 branch matches a fixed number of characters (not necessarily all the same) are
 not constrained by this limit.
 .SH "CREATING CHARACTER TABLES AT BUILD TIME"
@@ -346,8 +453,13 @@ than 256. By default, PCRE2 is built with a set of tables that are distributed
 in the file \fIsrc/pcre2_chartables.c.dist\fP. These tables are for ASCII codes
 only. If you add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-rebuild\-chartables
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command, the distributed tables are no longer used.
 Instead, a program called \f(CRpcre2_dftables\fP is compiled and run. This
@@ -362,22 +474,30 @@ To cause \f(CRpcre2_dftables\fP to be built on the local host, run a normal
 compiling command, and then run the program with the output file as its
 argument, for example:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 cc src/pcre2_dftables.c \-o pcre2_dftables
-.br
-.ti +2
 \&./pcre2_dftables src/pcre2_chartables.c
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This builds the tables in the default locale of the local host. If you want to
 specify a locale, you must use the \-L option:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 LC_ALL=fr_FR ./pcre2_dftables \-L src/pcre2_chartables.c
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 You can also specify \-b (with or without \-L). This causes the tables to be
 written in binary instead of as source code. A set of binary tables can be
-loaded into memory by an application and passed to \f(CRpcre2_compile()\fP in the
-same way as tables created by calling \f(CRpcre2_maketables()\fP. The tables are
+loaded into memory by an application and passed to pcre2_compile() in the
+same way as tables created by calling pcre2_maketables(). The tables are
 just a string of bytes, independent of hardware characteristics such as
 endianness. This means they can be bundled with an application that runs in
 different environments, to ensure consistent behaviour.
@@ -388,14 +508,19 @@ code is ASCII or Unicode, which is a superset of ASCII. This is the case for
 most computer operating systems. PCRE2 can, however, be compiled to run in an
 8\-bit EBCDIC environment by adding
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-ebcdic \-\-disable\-unicode
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. You should only use it if you know that you are
 in an EBCDIC environment (for example, an IBM mainframe operating system).
 .sp
 This setting implies \-\-enable\-rebuild\-chartables, in order to ensure that you
-have the correct default character tables for your system's codepage. There is
+have the correct default character tables for your system\(cqs codepage. There is
 an exception when you set \-\-enable\-ebcdic\-ignoring\-compiler (see below), which
 allows using a default set of EBCDIC 1047 character tables rather than forcing
 use of \-\-enable\-rebuild\-chartables.
@@ -409,8 +534,13 @@ The EBCDIC character that corresponds to an ASCII LF is assumed to have the
 value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In
 such an environment you should use
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-ebcdic\-nl25
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 (which implies \-\-enable\-ebcdic). The EBCDIC character for CR has the same value
 as in ASCII, namely, 0x0d. Whichever of 0x15 and 0x25 is \fInot\fP chosen as LF
@@ -426,10 +556,15 @@ numeric value for whichever EBCDIC codpage is in use. (PCRE2 cannot support
 multiple EBCDIC codepages dynamically.) However, if this not possible, then you
 can use
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-ebcdic\-ignoring\-compiler
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-in order to disregard the compiler's codepage, and instead force PCRE2 to use
+in order to disregard the compiler\(cqs codepage, and instead force PCRE2 to use
 numeric constants corresponding to the EBCDIC 1047 codepage instead. This can be
 used to build (or test) EBCDIC support on an ASCII/UTF\-8 system such as Linux.
 .SH "PCRE2GREP SUPPORT FOR EXTERNAL SCRIPTS"
@@ -449,11 +584,14 @@ By default, \f(CRpcre2grep\fP reads all files as plain text. You can build it so
 that it recognizes files whose names end in \f(CR.gz\fP or \f(CR.bz2\fP, and reads
 them with \f(CRlibz\fP or \f(CRlibbz2\fP, respectively, by adding one or both of
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-pcre2grep\-libz
-.br
-.ti +2
 \-\-enable\-pcre2grep\-libbz2
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. These options naturally require that the
 relevant libraries are installed on your system. Configuration will fail if
@@ -470,23 +608,29 @@ automatically expands the buffer, up to a specified maximum size, whose default
 is 1MiB or the starting size, whichever is the larger. You can change the
 default parameter values by adding, for example,
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-with\-pcre2grep\-bufsize=51200
-.br
-.ti +2
 \-\-with\-pcre2grep\-max\-bufsize=2097152
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command. The caller of \f(CRpcre2grep\fP can override
 these values by using \-\-buffer\-size and \-\-max\-buffer\-size on the command line.
-.SH "PCRE2TEST OPTION FOR LIBREADLINE SUPPORT"
+.SH "pcre2test OPTION FOR LIBREADLINE SUPPORT"
 .sp
 If you add one of
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-pcre2test\-libreadline
-.br
-.ti +2
 \-\-enable\-pcre2test\-libedit
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command, \f(CRpcre2test\fP is linked with the
 \f(CRlibreadline\fP or \f(CRlibedit\fP library, respectively, and when its input is
@@ -515,16 +659,26 @@ which link with readline the to choose an appropriate library."
 If your environment has not been set up so that an appropriate library is
 automatically included, you may need to add something like
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 LIBS="\-lncurses"
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 immediately before the \f(CRconfigure\fP command.
 .SH "INCLUDING DEBUGGING CODE"
 .sp
 If you add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-debug
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command, additional debugging code is included in the
 build. This feature is intended for use by the PCRE2 maintainers.
@@ -532,8 +686,13 @@ build. This feature is intended for use by the PCRE2 maintainers.
 .sp
 If you add
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-valgrind
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command, PCRE2 will use valgrind annotations to mark
 certain memory regions as unaddressable. This allows it to detect invalid
@@ -544,8 +703,13 @@ If your C compiler is gcc, you can build a version of PCRE2 that can generate a
 code coverage report for its test suite. To enable this, you must install
 \f(CRlcov\fP version 1.6 or above. Then specify
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-coverage
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 to the \f(CRconfigure\fP command and build PCRE2 in the usual way.
 .sp
@@ -553,50 +717,90 @@ Note that using \f(CRccache\fP (a caching C compiler) is incompatible with code
 coverage reporting. If you have configured \f(CRccache\fP to run automatically
 on your system, you must set the environment variable
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 CCACHE_DISABLE=1
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 before running \f(CRmake\fP to build PCRE2, so that \f(CRccache\fP is not used.
 .sp
 When \-\-enable\-coverage is used, the following addition targets are added to the
 \fIMakefile\fP:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This creates a fresh coverage report for the PCRE2 test suite. It is equivalent
 to running "make coverage\-reset", "make coverage\-baseline", "make check", and
 then "make coverage\-report".
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage\-reset
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This zeroes the coverage counters, but does nothing else.
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage\-baseline
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This captures baseline coverage information.
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage\-report
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This creates the coverage report.
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage\-clean\-report
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This removes the generated coverage report without cleaning the coverage data
 itself.
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage\-clean\-data
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This removes the captured coverage data without removing the coverage files
-created at compile time (*.gcno).
+created at compile time (\f(CR*.gcno\fP).
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 make coverage\-clean
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This cleans all coverage data including the generated coverage report. For more
 information about code coverage, see the \f(CRgcov\fP and \f(CRlcov\fP
@@ -606,13 +810,18 @@ documentation.
 The C99 standard defines formatting modifiers z and t for size_t and
 ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
 environments other than old versions of Microsoft Visual Studio when
-__STDC_VERSION__ is defined and has a value greater than or equal to 199901L
+\f(CR\fISTDC_VERSION\fP\fP is defined and has a value greater than or equal to 199901L
 (indicating support for C99).
 However, there is at least one environment that claims to be C99 but does not
 support these modifiers. If
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-disable\-percent\-zt
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 is specified, no use is made of the z or t modifiers. Instead of %td or %zu,
 a suitable format is used depending in the size of long for the platform.
@@ -621,8 +830,13 @@ a suitable format is used depending in the size of long for the platform.
 There is a special option for use by people who want to run fuzzing tests on
 PCRE2:
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-enable\-fuzz\-support
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 At present this applies only to the 8\-bit library. If set, it causes an extra
 library called libpcre2\-fuzzsupport.a to be built, but not installed. This
@@ -642,11 +856,16 @@ file are the test string.
 .SH "OBSOLETE OPTION"
 .sp
 In versions of PCRE2 prior to 10.30, there were two ways of handling
-backtracking in the \f(CRpcre2_match()\fP function. The default was to use the
+backtracking in the pcre2_match() function. The default was to use the
 system stack, but if
 .sp
-.ti +2
+.ss \n[.ss]
+.nf
+.fam C
 \-\-disable\-stack\-for\-recursion
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 was set, memory on the heap was used. From release 10.30 onwards this has
 changed (the stack is no longer used) and this option now does nothing except
@@ -656,13 +875,14 @@ give a warning.
 \f(CRpcre2api\fP(3), \f(CRpcre2\-config\fP(3).
 .SH "AUTHOR"
 .sp
-.nf
-.fam C
+.ti +2
 Philip Hazel
+.br
+.ti +2
 Retired from University Computing Service
+.br
+.ti +2
 Cambridge, England.
-.fam
-.fi
 .SH "REVISION"
 .sp
 Last updated: 17 October 2025

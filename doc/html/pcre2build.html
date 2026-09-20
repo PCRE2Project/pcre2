@@ -443,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_building_pcre2">Building Pcre2</h2>
+<h2 id="_building_pcre2">Building PCRE2</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>PCRE2 is distributed with a <code>configure</code> script that can be used to build
@@ -465,7 +465,7 @@ file if you are building in a non-Unix-like environment.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pcre2_build_time_options">Pcre2 Build-Time Options</h2>
+<h2 id="_pcre2_build_time_options">PCRE2 build-time options</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The rest of this document describes the optional features of PCRE2 that can be
@@ -486,8 +486,10 @@ compiler, as described in
 ones such as the selection of the installation directory) can be obtained by
 running</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">./configure --help</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">./configure --help</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The following sections include descriptions of "on/off" options whose names
@@ -500,7 +502,7 @@ Options that specify values have names that start with --with. At the end of a
 </div>
 </div>
 <div class="sect1">
-<h2 id="_building_8_bit_16_bit_and_32_bit_libraries">Building 8-Bit, 16-Bit And 32-Bit Libraries</h2>
+<h2 id="_building_8_bit_16_bit_and_32_bit_libraries">Building 8-bit, 16-bit and 32-bit libraries</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, a library called <code>libpcre2-8</code> is built, containing functions
@@ -512,15 +514,19 @@ respectively. These can be interpreted either as single-unit characters or
 UTF-16/UTF-32 strings. To build these additional libraries, add one or both of
 the following to the <code>configure</code> command:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-pcre2-16<br>
---enable-pcre2-32</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-pcre2-16
+--enable-pcre2-32</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>If you do not want the 8-bit library, add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--disable-pcre2-8</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--disable-pcre2-8</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>as well. At least one of the three libraries must be built. Note that the POSIX
@@ -531,16 +537,18 @@ libraries.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_building_shared_and_static_libraries">Building Shared And Static Libraries</h2>
+<h2 id="_building_shared_and_static_libraries">Building shared and static libraries</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The Autotools PCRE2 building process uses <code>libtool</code> to build both shared
 and static libraries by default. You can suppress an unwanted library by adding
 one of</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--disable-shared<br>
---disable-static</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--disable-shared
+--disable-static</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. Setting --disable-shared ensures that PCRE2
@@ -550,8 +558,10 @@ are linked statically with one or more PCRE2 libraries, but may also be
 dynamically linked with other libraries such as <code>libc</code>. If you want these
 binaries to be fully statically linked, you can set LDFLAGS like this:</p>
 </div>
-<div class="paragraph">
-<p>LDFLAGS=--static ./configure --disable-shared</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">LDFLAGS=--static ./configure --disable-shared</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Note the two hyphens in --static. Of course, this works only if static versions
@@ -560,14 +570,16 @@ of all the relevant libraries are available for linking.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_unicode_and_utf_support">Unicode And Utf Support</h2>
+<h2 id="_unicode_and_utf_support">Unicode and UTF support</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, PCRE2 is built with support for Unicode and UTF character strings.
 To build it without Unicode support, add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--disable-unicode</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--disable-unicode</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. This setting applies to all three libraries. It
@@ -576,63 +588,69 @@ in the same configuration.</p>
 </div>
 <div class="paragraph">
 <p>Of itself, Unicode support does not make PCRE2 treat strings as UTF-8, UTF-16
-or UTF-32. To do that, applications that use the library can set the PCRE2_UTF
-option when they call <code>pcre2_compile()</code> to compile a pattern.
-Alternatively, patterns may be started with (*UTF) unless the application has
-locked this out by setting PCRE2_NEVER_UTF.</p>
+or UTF-32. To do that, applications that use the library can set the <code class="constant">PCRE2_UTF</code>
+option when they call <code class="function">pcre2_compile()</code> to compile a pattern.
+Alternatively, patterns may be started with <code class="regex">(*UTF)</code> unless the application has
+locked this out by setting <code class="constant">PCRE2_NEVER_UTF</code>.</p>
 </div>
 <div class="paragraph">
 <p>UTF support allows the libraries to process character code points up to
 0x10ffff in the strings that they handle. Unicode support also gives access to
-the Unicode properties of characters, using pattern escapes such as \P, \p,
-and \X. Only the general category properties such as <em>Lu</em> and <em>Nd</em>,
+the Unicode properties of characters, using pattern escapes such as <code class="regex">\P</code>, <code class="regex">\p</code>,
+and <code class="regex">\X</code>. Only the general category properties such as <em>Lu</em> and <em>Nd</em>,
 script names, and some bi-directional and binary properties are supported.
 Details are given in the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation.</p>
 </div>
 <div class="paragraph">
-<p>Pattern escapes such as \d and \w do not by default make use of Unicode
-properties. The application can request that they do by setting the PCRE2_UCP
-option. Unless the application has set PCRE2_NEVER_UCP, a pattern may also
-request this by starting with (*UCP).</p>
+<p>Pattern escapes such as <code class="regex">\d</code> and <code class="regex">\w</code> do not by default make use of Unicode
+properties. The application can request that they do by setting the <code class="constant">PCRE2_UCP</code>
+option. Unless the application has set <code class="constant">PCRE2_NEVER_UCP</code>, a pattern may also
+request this by starting with <code class="regex">(*UCP)</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_disabling_the_use_of_c">Disabling The Use Of \C</h2>
+<h2 id="_disabling_the_use_of_c">Disabling the use of <code class="regex">\C</code></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The \C escape sequence, which matches a single code unit, even in a UTF mode,
+<p>The <code class="regex">\C</code> escape sequence, which matches a single code unit, even in a UTF mode,
 can cause unpredictable behaviour because it may leave the current matching
 point in the middle of a multi-code-unit character. The application can lock
-it out by setting the PCRE2_NEVER_BACKSLASH_C option when calling
-<code>pcre2_compile()</code>. There is also a build-time option</p>
+it out by setting the <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option when calling
+<code class="function">pcre2_compile()</code>. There is also a build-time option</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-never-backslash-C</code></pre>
+</div>
 </div>
 <div class="paragraph">
-  <p style="margin-left: 2ch">--enable-never-backslash-C</p>
-</div>
-<div class="paragraph">
-<p>(note the upper case C) which locks out the use of \C entirely.</p>
+<p>(note the upper case C) which locks out the use of <code class="regex">\C</code> entirely.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_just_in_time_compiler_support">Just-In-Time Compiler Support</h2>
+<h2 id="_just_in_time_compiler_support">Just-in-time compiler support</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Just-in-time (JIT) compiler support is included in the build by specifying</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-jit</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-jit</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This support is available only for certain hardware architectures. If this
 option is set for an unsupported architecture, a building error occurs.
 If in doubt, use</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-jit=auto</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-jit=auto</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>which enables JIT only if the current hardware is supported. You can check
@@ -640,8 +658,10 @@ if JIT is enabled in the configuration summary that is output at the end of a
 <code>configure</code> run. If you are enabling JIT under SELinux you may also want to
 add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-jit-sealloc</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-jit-sealloc</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>which enables the use of an execmem allocator in JIT that is compatible with
@@ -650,8 +670,10 @@ SELinux. This has no effect if JIT is not enabled. See the
 documentation for a discussion of JIT usage. When JIT support is enabled,
 <code>pcre2grep</code> automatically makes use of it, unless you add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--disable-pcre2grep-jit</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--disable-pcre2grep-jit</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command.</p>
@@ -659,15 +681,17 @@ documentation for a discussion of JIT usage. When JIT support is enabled,
 </div>
 </div>
 <div class="sect1">
-<h2 id="_newline_recognition">Newline Recognition</h2>
+<h2 id="_newline_recognition">Newline recognition</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, PCRE2 interprets the linefeed (LF) character as indicating the end
 of a line. This is the normal newline character on Unix-like systems. You can
 compile PCRE2 to use carriage return (CR) instead, by adding</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-newline-is-cr</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-newline-is-cr</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. There is also an --enable-newline-is-lf option,
@@ -678,30 +702,38 @@ which explicitly specifies linefeed as the newline character.</p>
 two-character sequence CRLF (CR immediately followed by LF). If you want this,
 add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-newline-is-crlf</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-newline-is-crlf</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. There is a fourth option, specified by</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-newline-is-anycrlf</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-newline-is-anycrlf</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>which causes PCRE2 to recognize any of the three sequences CR, LF, or CRLF as
 indicating a line ending. A fifth option, specified by</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-newline-is-any</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-newline-is-any</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>causes PCRE2 to recognize any Unicode newline sequence. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
-tab, U+000B), FF (form feed, U+000C), NEL (next line, U+0085), LS (line
-separator, U+2028), and PS (paragraph separator, U+2029). The final option is</p>
+tab, <code>U+000B</code>), FF (form feed, <code>U+000C</code>), NEL (next line, <code>U+0085</code>), LS (line
+separator, <code>U+2028</code>), and PS (paragraph separator, <code>U+2029</code>). The final option is</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-newline-is-nul</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-newline-is-nul</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>which causes NUL (binary zero) to be set as the default line-ending character.</p>
@@ -714,25 +746,27 @@ recommended to use the standard for your operating system.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_what_r_matches">What \R Matches</h2>
+<h2 id="_what_r_matches">What <code class="regex">\R</code> matches</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>By default, the sequence \R in a pattern matches any Unicode newline sequence,
+<p>By default, the sequence <code class="regex">\R</code> in a pattern matches any Unicode newline sequence,
 independently of what has been selected as the line ending sequence. If you
 specify</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-bsr-anycrlf</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-bsr-anycrlf</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>the default is changed so that \R matches only CR, LF, or CRLF. Whatever is
+<p>the default is changed so that <code class="regex">\R</code> matches only CR, LF, or CRLF. Whatever is
 selected when PCRE2 is built can be overridden by applications that use the
 library.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_handling_very_large_patterns">Handling Very Large Patterns</h2>
+<h2 id="_handling_very_large_patterns">Handling very large patterns</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Within a compiled pattern, offset values are used to point from one part to
@@ -744,8 +778,10 @@ gigantic patterns. Nevertheless, some people do want to process truly enormous
 patterns, so it is possible to compile PCRE2 to use three-byte or four-byte
 offsets by adding a setting such as</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--with-link-size=3</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--with-link-size=3</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. The value given must be 2, 3, or 4. For the
@@ -757,27 +793,29 @@ additional data when handling them. For the 32-bit library the value is always
 </div>
 </div>
 <div class="sect1">
-<h2 id="_limiting_pcre2_resource_usage">Limiting Pcre2 Resource Usage</h2>
+<h2 id="_limiting_pcre2_resource_usage">Limiting PCRE2 resource usage</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <code>pcre2_match()</code> function increments a counter each time it goes round
+<p>The <code class="function">pcre2_match()</code> function increments a counter each time it goes round
 its main loop. Putting a limit on this counter controls the amount of computing
-resource used by a single call to <code>pcre2_match()</code>. The limit can be changed
+resource used by a single call to <code class="function">pcre2_match()</code>. The limit can be changed
 at run time, as described in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 documentation. The default is 10 million, but this can be changed by adding a
 setting such as</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--with-match-limit=500000</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--with-match-limit=500000</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. This setting also applies to the
-<code>pcre2_dfa_match()</code> matching function, and to JIT matching (though the
+<code class="function">pcre2_dfa_match()</code> matching function, and to JIT matching (though the
 counting is done differently).</p>
 </div>
 <div class="paragraph">
-<p>The <code>pcre2_match()</code> function uses heap memory to record backtracking
+<p>The <code class="function">pcre2_match()</code> function uses heap memory to record backtracking
 points. The more nested backtracking points there are (that is, the deeper the
 search tree), the more memory is needed. There is an upper limit, specified in
 kibibytes (units of 1024 bytes). This limit can be changed at run time, as
@@ -786,24 +824,28 @@ described in the
 documentation. The default limit (in effect unlimited) is 20 million. You can
 change this by a setting such as</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--with-heap-limit=500</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--with-heap-limit=500</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>which limits the amount of heap to 500 KiB. This limit applies only to
-interpretive matching in <code>pcre2_match()</code> and <code>pcre2_dfa_match()</code>, which
+interpretive matching in <code class="function">pcre2_match()</code> and <code class="function">pcre2_dfa_match()</code>, which
 may also use the heap for internal workspace when processing complicated
 patterns. This limit does not apply when JIT (which has its own memory
 arrangements) is used.</p>
 </div>
 <div class="paragraph">
 <p>You can also explicitly limit the depth of nested backtracking in the
-<code>pcre2_match()</code> interpreter. This limit defaults to the value that is set
+<code class="function">pcre2_match()</code> interpreter. This limit defaults to the value that is set
 for --with-match-limit. You can set a lower default limit by adding, for
 example,</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--with-match-limit-depth=10000</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--with-match-limit-depth=10000</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. This value can be overridden at run time. This
@@ -814,15 +856,15 @@ limit is reached varies from pattern to pattern. This limit was more useful in
 versions before 10.30, where function recursion was used for backtracking.</p>
 </div>
 <div class="paragraph">
-<p>As well as applying to <code>pcre2_match()</code>, the depth limit also controls
-the depth of recursive function calls in <code>pcre2_dfa_match()</code>. These are
+<p>As well as applying to <code class="function">pcre2_match()</code>, the depth limit also controls
+the depth of recursive function calls in <code class="function">pcre2_dfa_match()</code>. These are
 used for lookaround assertions, atomic groups, and recursion within patterns.
 The limit does not apply to JIT matching.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_limiting_variable_length_lookbehind_assertions">Limiting Variable-Length Lookbehind Assertions</h2>
+<h2 id="_limiting_variable_length_lookbehind_assertions">Limiting variable-length lookbehind assertions</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Lookbehind assertions in which one or more branches can match a variable number
@@ -830,19 +872,21 @@ of characters are supported only if there is a maximum matching length for each
 top-level branch. There is a limit to this maximum that defaults to 255
 characters. You can alter this default by a setting such as</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--with-max-varlookbehind=100</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--with-max-varlookbehind=100</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The limit can be changed at runtime by calling
-<code>pcre2_set_max_varlookbehind()</code>. Lookbehind assertions in which every
+<code class="function">pcre2_set_max_varlookbehind()</code>. Lookbehind assertions in which every
 branch matches a fixed number of characters (not necessarily all the same) are
 not constrained by this limit.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_creating_character_tables_at_build_time">Creating Character Tables At Build Time</h2>
+<h2 id="_creating_character_tables_at_build_time">Creating character tables at build time</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>PCRE2 uses fixed tables for processing characters whose code points are less
@@ -850,8 +894,10 @@ than 256. By default, PCRE2 is built with a set of tables that are distributed
 in the file <em>src/pcre2_chartables.c.dist</em>. These tables are for ASCII codes
 only. If you add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-rebuild-chartables</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-rebuild-chartables</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command, the distributed tables are no longer used.
@@ -868,22 +914,26 @@ To cause <code>pcre2_dftables</code> to be built on the local host, run a normal
 compiling command, and then run the program with the output file as its
 argument, for example:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">cc src/pcre2_dftables.c -o pcre2_dftables<br>
-./pcre2_dftables src/pcre2_chartables.c</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">cc src/pcre2_dftables.c -o pcre2_dftables
+./pcre2_dftables src/pcre2_chartables.c</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This builds the tables in the default locale of the local host. If you want to
 specify a locale, you must use the -L option:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">LC_ALL=fr_FR ./pcre2_dftables -L src/pcre2_chartables.c</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>You can also specify -b (with or without -L). This causes the tables to be
 written in binary instead of as source code. A set of binary tables can be
-loaded into memory by an application and passed to <code>pcre2_compile()</code> in the
-same way as tables created by calling <code>pcre2_maketables()</code>. The tables are
+loaded into memory by an application and passed to <code class="function">pcre2_compile()</code> in the
+same way as tables created by calling <code class="function">pcre2_maketables()</code>. The tables are
 just a string of bytes, independent of hardware characteristics such as
 endianness. This means they can be bundled with an application that runs in
 different environments, to ensure consistent behaviour.</p>
@@ -891,7 +941,7 @@ different environments, to ensure consistent behaviour.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_using_ebcdic_code">Using Ebcdic Code</h2>
+<h2 id="_using_ebcdic_code">Using EBCDIC code</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>PCRE2 assumes by default that it will run in an environment where the character
@@ -899,8 +949,10 @@ code is ASCII or Unicode, which is a superset of ASCII. This is the case for
 most computer operating systems. PCRE2 can, however, be compiled to run in an
 8-bit EBCDIC environment by adding</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-ebcdic --disable-unicode</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-ebcdic --disable-unicode</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. You should only use it if you know that you are
@@ -924,8 +976,10 @@ are mutually exclusive.</p>
 value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In
 such an environment you should use</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-ebcdic-nl25</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-ebcdic-nl25</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>(which implies --enable-ebcdic). The EBCDIC character for CR has the same value
@@ -944,8 +998,10 @@ numeric value for whichever EBCDIC codpage is in use. (PCRE2 cannot support
 multiple EBCDIC codepages dynamically.) However, if this not possible, then you
 can use</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-ebcdic-ignoring-compiler</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-ebcdic-ignoring-compiler</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>in order to disregard the compiler&#8217;s codepage, and instead force PCRE2 to use
@@ -955,7 +1011,7 @@ used to build (or test) EBCDIC support on an ASCII/UTF-8 system such as Linux.</
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pcre2grep_support_for_external_scripts">Pcre2Grep Support For External Scripts</h2>
+<h2 id="_pcre2grep_support_for_external_scripts">pcre2grep support for external scripts</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default <code>pcre2grep</code> supports the use of callouts with string arguments
@@ -971,16 +1027,18 @@ documentation.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pcre2grep_options_for_compressed_file_support">Pcre2Grep Options For Compressed File Support</h2>
+<h2 id="_pcre2grep_options_for_compressed_file_support">pcre2grep options for compressed file support</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, <code>pcre2grep</code> reads all files as plain text. You can build it so
 that it recognizes files whose names end in <code>.gz</code> or <code>.bz2</code>, and reads
 them with <code>libz</code> or <code>libbz2</code>, respectively, by adding one or both of</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-pcre2grep-libz<br>
---enable-pcre2grep-libbz2</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-pcre2grep-libz
+--enable-pcre2grep-libbz2</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. These options naturally require that the
@@ -990,7 +1048,7 @@ they are not.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pcre2grep_buffer_size">Pcre2Grep Buffer Size</h2>
+<h2 id="_pcre2grep_buffer_size">pcre2grep buffer size</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>pcre2grep</code> uses an internal buffer to hold a "window" on the file it is
@@ -1003,9 +1061,11 @@ automatically expands the buffer, up to a specified maximum size, whose default
 is 1MiB or the starting size, whichever is the larger. You can change the
 default parameter values by adding, for example,</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--with-pcre2grep-bufsize=51200<br>
---with-pcre2grep-max-bufsize=2097152</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--with-pcre2grep-bufsize=51200
+--with-pcre2grep-max-bufsize=2097152</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. The caller of <code>pcre2grep</code> can override
@@ -1014,14 +1074,16 @@ these values by using --buffer-size and --max-buffer-size on the command line.</
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pcre2test_option_for_libreadline_support">Pcre2Test Option For Libreadline Support</h2>
+<h2 id="_pcre2test_option_for_libreadline_support">pcre2test option for libreadline support</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If you add one of</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-pcre2test-libreadline<br>
---enable-pcre2test-libedit</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-pcre2test-libreadline
+--enable-pcre2test-libedit</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command, <code>pcre2test</code> is linked with the
@@ -1040,17 +1102,21 @@ environments (e.g. if an unmodified distribution version of readline is in
 use), some extra configuration may be necessary. The INSTALL file for
 <code>libreadline</code> says this:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">"Readline uses the termcap functions, but does not link with<br>
-the termcap or curses library itself, allowing applications<br>
-which link with readline the to choose an appropriate library."</p>
+<div class="literalblock">
+<div class="content">
+<pre>"Readline uses the termcap functions, but does not link with
+the termcap or curses library itself, allowing applications
+which link with readline the to choose an appropriate library."</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>If your environment has not been set up so that an appropriate library is
 automatically included, you may need to add something like</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">LIBS="-lncurses"</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">LIBS="-lncurses"</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>immediately before the <code>configure</code> command.</p>
@@ -1058,13 +1124,15 @@ automatically included, you may need to add something like</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_including_debugging_code">Including Debugging Code</h2>
+<h2 id="_including_debugging_code">Including debugging code</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If you add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-debug</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-debug</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command, additional debugging code is included in the
@@ -1073,13 +1141,15 @@ build. This feature is intended for use by the PCRE2 maintainers.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_debugging_with_valgrind_support">Debugging With Valgrind Support</h2>
+<h2 id="_debugging_with_valgrind_support">Debugging with Valgrind support</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If you add</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-valgrind</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-valgrind</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command, PCRE2 will use valgrind annotations to mark
@@ -1089,15 +1159,17 @@ memory accesses, and is mostly useful for debugging PCRE2 itself.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_code_coverage_reporting">Code Coverage Reporting</h2>
+<h2 id="_code_coverage_reporting">Code coverage reporting</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If your C compiler is gcc, you can build a version of PCRE2 that can generate a
 code coverage report for its test suite. To enable this, you must install
 <code>lcov</code> version 1.6 or above. Then specify</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-coverage</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-coverage</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command and build PCRE2 in the usual way.</p>
@@ -1107,8 +1179,10 @@ code coverage report for its test suite. To enable this, you must install
 coverage reporting. If you have configured <code>ccache</code> to run automatically
 on your system, you must set the environment variable</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">CCACHE_DISABLE=1</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">CCACHE_DISABLE=1</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>before running <code>make</code> to build PCRE2, so that <code>ccache</code> is not used.</p>
@@ -1117,48 +1191,62 @@ on your system, you must set the environment variable</p>
 <p>When --enable-coverage is used, the following addition targets are added to the
 <em>Makefile</em>:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This creates a fresh coverage report for the PCRE2 test suite. It is equivalent
 to running "make coverage-reset", "make coverage-baseline", "make check", and
 then "make coverage-report".</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage-reset</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage-reset</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This zeroes the coverage counters, but does nothing else.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage-baseline</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage-baseline</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This captures baseline coverage information.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage-report</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage-report</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This creates the coverage report.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage-clean-report</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage-clean-report</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This removes the generated coverage report without cleaning the coverage data
 itself.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage-clean-data</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage-clean-data</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This removes the captured coverage data without removing the coverage files
-created at compile time (*.gcno).</p>
+created at compile time (<code>*.gcno</code>).</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">make coverage-clean</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">make coverage-clean</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This cleans all coverage data including the generated coverage report. For more
@@ -1168,19 +1256,21 @@ documentation.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_disabling_the_z_and_t_formatting_modifiers">Disabling The Z And T Formatting Modifiers</h2>
+<h2 id="_disabling_the_z_and_t_formatting_modifiers">Disabling the z and t formatting modifiers</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The C99 standard defines formatting modifiers z and t for size_t and
 ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
 environments other than old versions of Microsoft Visual Studio when
-__STDC_VERSION__ is defined and has a value greater than or equal to 199901L
+<code class="c"><em>STDC_VERSION</em></code> is defined and has a value greater than or equal to 199901L
 (indicating support for C99).
 However, there is at least one environment that claims to be C99 but does not
 support these modifiers. If</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--disable-percent-zt</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--disable-percent-zt</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>is specified, no use is made of the z or t modifiers. Instead of %td or %zu,
@@ -1189,14 +1279,16 @@ a suitable format is used depending in the size of long for the platform.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_support_for_fuzzers">Support For Fuzzers</h2>
+<h2 id="_support_for_fuzzers">Support for fuzzers</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>There is a special option for use by people who want to run fuzzing tests on
 PCRE2:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--enable-fuzz-support</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--enable-fuzz-support</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>At present this applies only to the 8-bit library. If set, it causes an extra
@@ -1219,15 +1311,17 @@ file are the test string.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_obsolete_option">Obsolete Option</h2>
+<h2 id="_obsolete_option">Obsolete option</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>In versions of PCRE2 prior to 10.30, there were two ways of handling
-backtracking in the <code>pcre2_match()</code> function. The default was to use the
+backtracking in the <code class="function">pcre2_match()</code> function. The default was to use the
 system stack, but if</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">--disable-stack-for-recursion</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">--disable-stack-for-recursion</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>was set, memory on the heap was used. From release 10.30 onwards this has
@@ -1237,7 +1331,7 @@ give a warning.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_see_also">See Also</h2>
+<h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>pcre2api</code>(3), <code>pcre2-config</code>(3).</p>
@@ -1247,11 +1341,11 @@ give a warning.</p>
 <div class="sect1">
 <h2 id="_author">Author</h2>
 <div class="sectionbody">
-<div class="listingblock">
+<div class="literalblock">
 <div class="content">
-<pre class="highlight"><code>Philip Hazel
+<pre>Philip Hazel
 Retired from University Computing Service
-Cambridge, England.</code></pre>
+Cambridge, England.</pre>
 </div>
 </div>
 </div>

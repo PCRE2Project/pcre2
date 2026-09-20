@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_config(uint32_t what, void *where);</code></pre>
 </div>
@@ -462,55 +462,116 @@ int pcre2_config(uint32_t what, void *where);</code></pre>
 features are available in the version of the PCRE2 library it is using. The
 arguments are as follows:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>what</em>     A code specifying what information is required<br>
-<em>where</em>    Points to where to put the information</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">what</code></dt>
+<dd>
+<p>A code specifying what information is required</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">where</code></dt>
+<dd>
+<p>Points to where to put the information</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>If <em>where</em> is NULL, the function returns the amount of memory needed for
+<p>If <code class="parameter">where</code> is <code class="c">NULL</code>, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
 code units; for other types of data it is in bytes.</p>
 </div>
 <div class="paragraph">
-<p>If <code>where</code> is not NULL, for PCRE2_CONFIG_JITTARGET,
-PCRE2_CONFIG_UNICODE_VERSION, and PCRE2_CONFIG_VERSION it must point to a
+<p>If <code class="parameter">where</code> is not <code class="c">NULL</code>, for <code class="constant">PCRE2_CONFIG_JITTARGET</code>,
+<code class="constant">PCRE2_CONFIG_UNICODE_VERSION</code>, and <code class="constant">PCRE2_CONFIG_VERSION</code> it must point to a
 buffer that is large enough to hold the string. For all other codes it must
-point to a uint32_t integer variable. The available codes are:</p>
+point to a <code class="c">uint32_t</code> integer variable. The available codes are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_CONFIG_BSR                Indicates what \R matches by default:<br>
-                                  PCRE2_BSR_UNICODE<br>
-                                  PCRE2_BSR_ANYCRLF<br>
-PCRE2_CONFIG_COMPILED_WIDTHS    Which of 8/16/32 support was compiled<br>
-PCRE2_CONFIG_DEPTHLIMIT         Default backtracking depth limit<br>
-PCRE2_CONFIG_EFFECTIVE_LINKSIZE How many bytes are used for link size<br>
-PCRE2_CONFIG_HEAPLIMIT          Default heap memory limit<br>
-PCRE2_CONFIG_JIT                Availability of just-in-time compiler<br>
-                                 support (1=yes 0=no)<br>
-PCRE2_CONFIG_JITTARGET          Information (a string) about the target<br>
-                                 architecture for the JIT compiler<br>
-PCRE2_CONFIG_LINKSIZE           Configured internal link size (2, 3, 4)<br>
-PCRE2_CONFIG_MATCHLIMIT         Default internal resource limit<br>
-PCRE2_CONFIG_NEVER_BACKSLASH_C  Whether or not \C is disabled<br>
-PCRE2_CONFIG_NEWLINE            Code for the default newline sequence:<br>
-                                  PCRE2_NEWLINE_CR<br>
-                                  PCRE2_NEWLINE_LF<br>
-                                  PCRE2_NEWLINE_CRLF<br>
-                                  PCRE2_NEWLINE_ANY<br>
-                                  PCRE2_NEWLINE_ANYCRLF<br>
-                                  PCRE2_NEWLINE_NUL<br>
-PCRE2_CONFIG_PARENSLIMIT        Default parentheses nesting limit<br>
-PCRE2_CONFIG_RECURSIONLIMIT     Obsolete: use PCRE2_CONFIG_DEPTHLIMIT<br>
-PCRE2_CONFIG_STACKRECURSE       Obsolete: always returns 0<br>
-PCRE2_CONFIG_UNICODE            Availability of Unicode support<br>
-                                 (1=yes 0=no)<br>
-PCRE2_CONFIG_UNICODE_VERSION    The Unicode version (a string)<br>
-PCRE2_CONFIG_VERSION            The PCRE2 version (a string)</p>
+<div class="dlist values">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_BSR</code></dt>
+<dd>
+<p>Indicates what <code class="regex">\R</code> matches by default:
+<code class="constant">PCRE2_BSR_UNICODE</code>
+<code class="constant">PCRE2_BSR_ANYCRLF</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_COMPILED_WIDTHS</code></dt>
+<dd>
+<p>Which of <code>8/16/32</code> support was compiled</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_DEPTHLIMIT</code></dt>
+<dd>
+<p>Default backtracking depth limit</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_EFFECTIVE_LINKSIZE</code></dt>
+<dd>
+<p>How many bytes are used for link size</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_HEAPLIMIT</code></dt>
+<dd>
+<p>Default heap memory limit</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_JIT</code></dt>
+<dd>
+<p>Availability of just-in-time compiler
+support (<code>1=yes 0=no</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_JITTARGET</code></dt>
+<dd>
+<p>Information (a string) about the target
+architecture for the JIT compiler</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_LINKSIZE</code></dt>
+<dd>
+<p>Configured internal link size (<code>2</code>, <code>3</code>, <code>4</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_MATCHLIMIT</code></dt>
+<dd>
+<p>Default internal resource limit</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_NEVER_BACKSLASH_C</code></dt>
+<dd>
+<p>Whether or not <code class="regex">\C</code> is disabled</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_NEWLINE</code></dt>
+<dd>
+<p>Code for the default newline sequence:
+<code class="constant">PCRE2_NEWLINE_CR</code>
+<code class="constant">PCRE2_NEWLINE_LF</code>
+<code class="constant">PCRE2_NEWLINE_CRLF</code>
+<code class="constant">PCRE2_NEWLINE_ANY</code>
+<code class="constant">PCRE2_NEWLINE_ANYCRLF</code>
+<code class="constant">PCRE2_NEWLINE_NUL</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_PARENSLIMIT</code></dt>
+<dd>
+<p>Default parentheses nesting limit</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_RECURSIONLIMIT</code></dt>
+<dd>
+<p>Obsolete: use <code class="constant">PCRE2_CONFIG_DEPTHLIMIT</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_STACKRECURSE</code></dt>
+<dd>
+<p>Obsolete: always returns <code>0</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_UNICODE</code></dt>
+<dd>
+<p>Availability of Unicode support
+(<code>1=yes 0=no</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_UNICODE_VERSION</code></dt>
+<dd>
+<p>The Unicode version (a string)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_VERSION</code></dt>
+<dd>
+<p>The PCRE2 version (a string)</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The function yields a non-negative value on success or the negative value
-PCRE2_ERROR_BADOPTION otherwise. This is also the result for the
-PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string is
+<code class="constant">PCRE2_ERROR_BADOPTION</code> otherwise. This is also the result for the
+<code class="constant">PCRE2_CONFIG_JITTARGET</code> code if JIT support is not available. When a string is
 requested, the function returns the number of code units used, including the
 terminating zero.</p>
 </div>

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_compile_context *pcre2_compile_context_copy(
       pcre2_compile_context *ccontext);</code></pre>
@@ -460,7 +460,7 @@ pcre2_compile_context *pcre2_compile_context_copy(
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function makes a new copy of a compile context, using the memory
-allocation function that was used for the original context. The result is NULL
+allocation function that was used for the original context. The result is <code class="c">NULL</code>
 if the memory cannot be obtained.</p>
 </div>
 <div class="paragraph">

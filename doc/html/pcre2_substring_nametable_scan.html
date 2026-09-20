@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_substring_nametable_scan(const pcre2_code *code,
                                    PCRE2_SPTR stringname,
@@ -465,18 +465,33 @@ int pcre2_substring_nametable_scan(const pcre2_code *code,
 entries for a given name in the table that translates capture group names into
 numbers.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>code</em>    Compiled regular expression<br>
-<em>name</em>    Name whose entries required<br>
-<em>first</em>   Where to return a pointer to the first entry<br>
-<em>last</em>    Where to return a pointer to the last entry</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">code</code></dt>
+<dd>
+<p>Compiled regular expression</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">stringname</code></dt>
+<dd>
+<p>Name whose entries required</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">firstptr</code></dt>
+<dd>
+<p>Where to return a pointer to the first entry</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">lastptr</code></dt>
+<dd>
+<p>Where to return a pointer to the last entry</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>When the name is found in the table, if <em>first</em> is NULL, the function
+<p>When the name is found in the table, if <code class="parameter">firstptr</code> is <code class="c">NULL</code>, the function
 returns a group number, but if there is more than one matching entry, it is not
-defined which one. Otherwise, when both pointers have been set, the yield of
+defined which one. Otherwise, when both <code class="parameter">firstptr</code> and <code class="parameter">lastptr</code> have been
+set, the yield of
 the function is the length of each entry in code units. If the name is not
-found, PCRE2_ERROR_NOSUBSTRING is returned.</p>
+found, <code class="constant">PCRE2_ERROR_NOSUBSTRING</code> is returned.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API, including the format of

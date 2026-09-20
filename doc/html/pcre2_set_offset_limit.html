@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_offset_limit(pcre2_match_context *mcontext,
                            PCRE2_SIZE limit);</code></pre>
@@ -460,7 +460,7 @@ int pcre2_set_offset_limit(pcre2_match_context *mcontext,
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function sets the offset limit field in a match context. The result is
-always zero. The largest value a PCRE2_SIZE variable can hold removes the
+always zero. The largest value a <code class="type">PCRE2_SIZE</code> variable can hold removes the
 offset limit.</p>
 </div>
 <div class="paragraph">

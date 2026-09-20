@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 void pcre2_serialize_free(uint8_t *bytes);</code></pre>
 </div>
@@ -459,8 +459,8 @@ void pcre2_serialize_free(uint8_t *bytes);</code></pre>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function frees the memory that was obtained by
-<code>pcre2_serialize_encode()</code> to hold a serialized byte stream. The argument
-must point to such a byte stream or be NULL, in which case the function returns
+<code class="function">pcre2_serialize_encode()</code> to hold a serialized byte stream. The argument
+must point to such a byte stream or be <code class="c">NULL</code>, in which case the function returns
 without doing anything.</p>
 </div>
 <div class="paragraph">

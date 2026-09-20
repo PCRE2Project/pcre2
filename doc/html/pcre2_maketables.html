@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);</code></pre>
 </div>
@@ -459,14 +459,14 @@ const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);</code></pre>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function builds a set of character tables for character code points that
-are less than 256. These can be passed to <code>pcre2_compile()</code> in a compile
+are less than 256. These can be passed to <code class="function">pcre2_compile()</code> in a compile
 context in order to override the internal, built-in tables (which were either
-defaulted or made by <code>pcre2_maketables()</code> when PCRE2 was compiled). See the
-<a href="pcre2_set_character_tables.html"><code>pcre2_set_character_tables()</code></a>
+defaulted or made by <code class="function">pcre2_maketables()</code> when PCRE2 was compiled). See the
+<a href="pcre2_set_character_tables.html"><code class="function">pcre2_set_character_tables()</code></a>
 page. You might want to do this if you are using a non-standard locale.</p>
 </div>
 <div class="paragraph">
-<p>If the argument is NULL, <code>malloc()</code> is used to get memory for the tables.
+<p>If the argument is <code class="c">NULL</code>, <code class="c">malloc()</code> is used to get memory for the tables.
 Otherwise it must point to a general context, which can supply pointers to a
 custom memory manager. The function yields a pointer to the tables.</p>
 </div>

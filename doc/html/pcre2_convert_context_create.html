@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_convert_context *pcre2_convert_context_create(
       pcre2_general_context *gcontext);</code></pre>
@@ -461,8 +461,8 @@ pcre2_convert_context *pcre2_convert_context_create(
 <div class="paragraph">
 <p>This function is part of an experimental set of pattern conversion functions.
 It creates and initializes a new convert context. If its argument is
-NULL, <code>malloc()</code> is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is NULL if
+<code class="c">NULL</code>, <code class="c">malloc()</code> is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is <code class="c">NULL</code> if
 the memory could not be obtained.</p>
 </div>
 <div class="paragraph">

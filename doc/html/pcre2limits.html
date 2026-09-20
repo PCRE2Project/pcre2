@@ -443,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_size_and_other_limitations">Size And Other Limitations</h2>
+<h2 id="_size_and_other_limitations">Size and other limitations</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>There are some size limitations in PCRE2 but it is hoped that they will never
@@ -463,14 +463,14 @@ linkage size is always 4.</p>
 </div>
 <div class="paragraph">
 <p>The maximum length of a source pattern string is essentially unlimited; it is
-the largest number a PCRE2_SIZE variable can hold. However, the program that
-calls <code>pcre2_compile()</code> can specify a smaller limit.</p>
+the largest number a <code class="type">PCRE2_SIZE</code> variable can hold. However, the program that
+calls <code class="function">pcre2_compile()</code> can specify a smaller limit.</p>
 </div>
 <div class="paragraph">
 <p>The maximum length (in code units) of a subject string is one less than the
-largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
-integer type, usually defined as size_t. Its maximum value (that is
-~(PCRE2_SIZE)0) is reserved as a special indicator for zero-terminated strings
+largest number a <code class="type">PCRE2_SIZE</code> variable can hold. <code class="type">PCRE2_SIZE</code> is an unsigned
+integer type, usually defined as <code class="c">size_t</code>. Its maximum value (that is
+<code class="c">~(PCRE2_SIZE)0</code>) is reserved as a special indicator for zero-terminated strings
 and unset offsets.</p>
 </div>
 <div class="paragraph">
@@ -490,7 +490,7 @@ more than 65535 capture groups, and there is a limit to the depth of nesting of
 parenthesized subpatterns of all kinds. This is imposed in order to limit the
 amount of system stack used at compile time. The default limit can be specified
 when PCRE2 is built; if not, the default is set to 250. An application can
-change this limit by calling pcre2_set_parens_nest_limit() to set the limit in
+change this limit by calling <code class="function">pcre2_set_parens_nest_limit()</code> to set the limit in
 a compile context.</p>
 </div>
 <div class="paragraph">
@@ -501,7 +501,7 @@ defaults to
 10000.</p>
 </div>
 <div class="paragraph">
-<p>The maximum length of a name in a (*MARK), (*PRUNE), (*SKIP), or (*THEN) verb
+<p>The maximum length of a name in a <code class="regex">(*MARK)</code>, <code class="regex">(*PRUNE)</code>, <code class="regex">(*SKIP)</code>, or <code class="regex">(*THEN)</code> verb
 is 255 code units for the 8-bit library and 65535 code units for the 16-bit and
 32-bit libraries.</p>
 </div>
@@ -519,11 +519,11 @@ very large number, effectively unlimited.</p>
 <div class="sect1">
 <h2 id="_author">Author</h2>
 <div class="sectionbody">
-<div class="listingblock">
+<div class="literalblock">
 <div class="content">
-<pre class="highlight"><code>Philip Hazel
+<pre>Philip Hazel
 Retired from University Computing Service
-Cambridge, England.</code></pre>
+Cambridge, England.</pre>
 </div>
 </div>
 </div>

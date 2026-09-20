@@ -110,7 +110,13 @@ message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 # Increased minimum to 3.15 to allow use of string(REPEAT).
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(PCRE2 C)
-set(CMAKE_C_STANDARD 99)
+if("c_std_11" IN_LIST CMAKE_C_COMPILE_FEATURES)
+  set(CMAKE_C_STANDARD 11)
+elseif("c_std_99" IN_LIST CMAKE_C_COMPILE_FEATURES)
+  set(CMAKE_C_STANDARD 99)
+else()
+  message(FATAL_ERROR "C compiler must support at least C99.")
+endif()
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
@@ -192,9 +198,24 @@ cmake_pop_check_state()
 
 check_c_source_compiles(
   [=[
+  #ifdef __STDC_NO_ATOMICS__
+  #error "C compiler does not support standard C atomics"
+  #endif
+  #include <stdatomic.h>
+  int main(void) {
+    atomic_int value;
+    atomic_init(&value, 0);
+    return atomic_load(&value);
+  }
+  ]=]
+  HAVE_STDATOMIC_H
+)
+
+check_c_source_compiles(
+  [=[
   #include <stdlib.h>
   #include <limits.h>
-  int main(int c, char *v[]) { char buf[PATH_MAX]; realpath(v[c], buf); return 0; }
+  int main(int c, char *v[]) { char buf[PATH_MAX]; return realpath(v[c], buf) == NULL; }
   ]=]
   HAVE_REALPATH
 )
@@ -760,35 +781,16 @@ endif()
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 
-# Parse version numbers and date out of configure.ac
+# Release and library version information
 
-file(
-  STRINGS ${PROJECT_SOURCE_DIR}/configure.ac
-  configure_lines
-  LIMIT_COUNT 50 # Read only the first 50 lines of the file
-)
-
-set(
-  SEARCHED_VARIABLES
-  "pcre2_major"
-  "pcre2_minor"
-  "pcre2_prerelease"
-  "pcre2_date"
-  "libpcre2_posix_version"
-  "libpcre2_8_version"
-  "libpcre2_16_version"
-  "libpcre2_32_version"
-)
-foreach(configure_line ${configure_lines})
-  foreach(substitution_variable ${SEARCHED_VARIABLES})
-    string(TOUPPER ${substitution_variable} substitution_variable_upper)
-    if(NOT DEFINED ${substitution_variable_upper})
-      if("${configure_line}" MATCHES "m4_define\\(${substitution_variable}, *\\[(.*)\\]")
-        set(${substitution_variable_upper} "${CMAKE_MATCH_1}")
-      endif()
-    endif()
-  endforeach()
-endforeach()
+set(PCRE2_MAJOR "10")
+set(PCRE2_MINOR "49")
+set(PCRE2_PRERELEASE "-DEV")
+set(PCRE2_DATE "2026-11-31")
+set(LIBPCRE2_POSIX_VERSION "3:8:0")
+set(LIBPCRE2_8_VERSION "16:0:16")
+set(LIBPCRE2_16_VERSION "16:0:16")
+set(LIBPCRE2_32_VERSION "16:0:16")
 
 macro(parse_lib_version variable_prefix)
   string(REPLACE ":" ";" ${variable_prefix}_VERSION_LIST ${${variable_prefix}_VERSION})

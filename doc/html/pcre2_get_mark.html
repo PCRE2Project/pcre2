@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 PCRE2_SPTR pcre2_get_mark(pcre2_match_data *match_data);</code></pre>
 </div>
@@ -458,11 +458,11 @@ PCRE2_SPTR pcre2_get_mark(pcre2_match_data *match_data);</code></pre>
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>After a call of <code>pcre2_match()</code> that was passed the match block that is
-this function&#8217;s argument, this function returns a pointer to the last (*MARK),
-(*PRUNE), or (*THEN) name that was encountered during the matching process. The
+<p>After a call of <code class="function">pcre2_match()</code> that was passed the match block that is
+this function&#8217;s argument, this function returns a pointer to the last <code class="regex">(*MARK)</code>,
+<code class="regex">(*PRUNE)</code>, or <code class="regex">(*THEN)</code> name that was encountered during the matching process. The
 name is zero-terminated, and is within the compiled pattern. The length of the
-name is in the preceding code unit. If no name is available, NULL is returned.</p>
+name is in the preceding code unit. If no name is available, <code class="c">NULL</code> is returned.</p>
 </div>
 <div class="paragraph">
 <p>After a successful match, the name that is returned is the last one on the

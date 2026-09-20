@@ -10,18 +10,18 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_match_context *pcre2_match_context_copy(
       pcre2_match_context *mcontext);
-....
+----
 
 == Description
 
 This function makes a new copy of a match context, using the memory
-allocation function that was used for the original context. The result is NULL
+allocation function that was used for the original context. The result is [.c]`NULL`
 if the memory cannot be obtained.
 
 There is a complete description of the PCRE2 native API in the

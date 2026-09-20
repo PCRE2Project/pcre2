@@ -31,34 +31,46 @@
 pcre2_get_error_message \- get textual error message for error number
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer,
-                            PCRE2_SIZE bufflen);
+\fBint\fP pcre2_get_error_message(\fBint\fP \fIerrorcode\fP, \fBPCRE2_UCHAR\fP *\fIbuffer\fP,
+                            \fBPCRE2_SIZE\fP \fIbufflen\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function provides a textual error message for each PCRE2 error code.
 Compilation errors are positive numbers; UTF formatting errors and matching
 errors are negative numbers. The arguments are:
 .sp
-.ti +2
-\fIerrorcode\fP   an error code (positive or negative)
-.br
-.ti +2
-\fIbuffer\fP      where to put the message
-.br
-.ti +2
-\fIbufflen\fP     the length of the buffer (code units)
+.RS 4
+.PD 0
+.TP 10
+\fIerrorcode\fP
+.ad l
+an error code (positive or negative)
+.TP 10
+\fIbuffer\fP
+.ad l
+where to put the message
+.TP 10
+\fIbufflen\fP
+.ad l
+the length of the buffer (code units)
+.PD
+.RE
+.PP
+.ad l
 .sp
 The function returns the length of the message in code units, excluding the
-trailing zero, or the negative error code PCRE2_ERROR_NOMEMORY if the buffer is
+trailing zero, or the negative error code \fBPCRE2_ERROR_NOMEMORY\fP if the buffer is
 too small. In this case, the returned message is truncated (but still with a
 trailing zero). If \fIerrorcode\fP does not contain a recognized error code
-number, the negative value PCRE2_ERROR_BADDATA is returned.
+number, the negative value \fBPCRE2_ERROR_BADDATA\fP is returned.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

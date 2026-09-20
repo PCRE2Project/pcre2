@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_match_data *pcre2_match_data_create_from_pattern(
       const pcre2_code *code, pcre2_general_context *gcontext);</code></pre>
@@ -460,20 +460,20 @@ pcre2_match_data *pcre2_match_data_create_from_pattern(
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function creates a new match data block for holding the result of a match.
-If the first argument is NULL, this function returns NULL, otherwise the first
+If the first argument is <code class="c">NULL</code>, this function returns <code class="c">NULL</code>, otherwise the first
 argument points to a compiled pattern. The number of capturing parentheses
 within the pattern is used to compute the number of pairs of offsets that are
 required in the match data block. These form the "output vector" (ovector)
 within the match data block, and are used to identify the matched string and
-any captured substrings when matching with <code>pcre2_match()</code>. If you are
-using <code>pcre2_dfa_match()</code>, which uses the output vector in a different way,
-you should use <code>pcre2_match_data_create()</code> instead of this function.</p>
+any captured substrings when matching with <code class="function">pcre2_match()</code>. If you are
+using <code class="function">pcre2_dfa_match()</code>, which uses the output vector in a different way,
+you should use <code class="function">pcre2_match_data_create()</code> instead of this function.</p>
 </div>
 <div class="paragraph">
 <p>The second argument points to a general context, for custom memory management,
-or is NULL to use the same memory allocator that was used for the compiled
-pattern. The result of the function is NULL if the memory for the block could
-not be obtained or if NULL was provided as the first argument.</p>
+or is <code class="c">NULL</code> to use the same memory allocator that was used for the compiled
+pattern. The result of the function is <code class="c">NULL</code> if the memory for the block could
+not be obtained or if <code class="c">NULL</code> was provided as the first argument.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

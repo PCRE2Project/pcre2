@@ -10,23 +10,23 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_general_context *pcre2_general_context_create(
       void *(*private_malloc)(size_t size, void *memory_data),
       void (*private_free)(void *ptr, void *memory_data),
       void *memory_data);
-....
+----
 
 == Description
 
 This function creates and initializes a general context. The arguments define
 custom memory management functions and a data value that is passed to them when
-they are called. The `private_malloc()` function is used to get memory for
-the context. If either of the first two arguments is NULL, the system memory
-management function is used. The result is NULL if no memory could be obtained.
+they are called. The arg:private_malloc() function is used to get memory for
+the context. If either of the first two arguments is [.c]`NULL`, the system memory
+management function is used. The result is [.c]`NULL` if no memory could be obtained.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

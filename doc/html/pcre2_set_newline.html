@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_set_newline(pcre2_compile_context *ccontext,
                       uint32_t newline);</code></pre>
@@ -463,16 +463,36 @@ int pcre2_set_newline(pcre2_compile_context *ccontext,
 specifies which character(s) are recognized as newlines when compiling and
 matching patterns. The second argument must be one of:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_NEWLINE_CR        Carriage return only<br>
-PCRE2_NEWLINE_LF        Linefeed only<br>
-PCRE2_NEWLINE_CRLF      CR followed by LF only<br>
-PCRE2_NEWLINE_ANYCRLF   Any of the above<br>
-PCRE2_NEWLINE_ANY       Any Unicode newline sequence<br>
-PCRE2_NEWLINE_NUL       The NUL character (binary zero)</p>
+<div class="dlist values">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_CR</code></dt>
+<dd>
+<p>Carriage return only</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_LF</code></dt>
+<dd>
+<p>Linefeed only</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_CRLF</code></dt>
+<dd>
+<p><code>CR</code> followed by <code>LF</code> only</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_ANYCRLF</code></dt>
+<dd>
+<p>Any of the above</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_ANY</code></dt>
+<dd>
+<p>Any Unicode newline sequence</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_NUL</code></dt>
+<dd>
+<p>The <code>NUL</code> character (binary zero)</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The result is zero for success or PCRE2_ERROR_BADDATA if the second argument is
+<p>The result is zero for success or <code class="constant">PCRE2_ERROR_BADDATA</code> if the second argument is
 invalid.</p>
 </div>
 <div class="paragraph">

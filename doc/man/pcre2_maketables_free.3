@@ -31,22 +31,24 @@
 pcre2_maketables_free \- free character tables
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_maketables_free(pcre2_general_context *gcontext,
-                           const uint8_t *tables);
+\fBvoid\fP pcre2_maketables_free(\fBpcre2_general_context\fP *\fIgcontext\fP,
+                           \fBconst\fP \fBuint8_t\fP *\fItables\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function discards a set of character tables that were created by a call
 to
-\f(CRpcre2_maketables()\fP.
+pcre2_maketables().
 .sp
 The \fIgcontext\fP parameter should match what was used in that call to
-account for any custom allocators that might be in use; if it is NULL
+account for any custom allocators that might be in use; if it is \f(CRNULL\fP
 the system \f(CRfree()\fP is used.
 .sp
 There is a complete description of the PCRE2 native API in the

@@ -31,53 +31,77 @@
 pcre2_substring_get_byname \- extract named substring into new memory
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_substring_get_byname(pcre2_match_data *match_data,
-                               PCRE2_SPTR stringname,
-                               PCRE2_UCHAR **stringptr,
-                               PCRE2_SIZE *sizeptr);
+\fBint\fP pcre2_substring_get_byname(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                               \fBPCRE2_SPTR\fP \fIstringname\fP,
+                               \fBPCRE2_UCHAR\fP **\fIstringptr\fP,
+                               \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This is a convenience function for extracting a captured substring by name into
 newly acquired memory. The arguments are:
 .sp
-.ti +2
-\fImatch_data\fP    The match data for the match
-.br
-.ti +2
-\fIname\fP          Name of the required substring
-.br
-.ti +2
-\fIbufferptr\fP     Where to put the string pointer
-.br
-.ti +2
-\fIbufflen\fP       Where to put the string length
+.RS 4
+.PD 0
+.TP 11
+\fImatch_data\fP
+.ad l
+The match data for the match
+.TP 11
+\fIstringname\fP
+.ad l
+Name of the required substring
+.TP 11
+\fIstringptr\fP
+.ad l
+Where to put the string pointer
+.TP 11
+\fIsizeptr\fP
+.ad l
+Where to put the string length
+.PD
+.RE
+.PP
+.ad l
 .sp
 The memory in which the substring is placed is obtained by calling the same
 memory allocation function that was used for the match data block. The
-convenience function \f(CRpcre2_substring_free()\fP can be used to free it when
+convenience function pcre2_substring_free() can be used to free it when
 it is no longer needed. The yield of the function is zero for success or one of
 the following error numbers:
 .sp
-.ti +2
-PCRE2_ERROR_NOSUBSTRING   there are no groups of that name
-.br
-.ti +2
-PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
-.br
-.ti +2
-PCRE2_ERROR_UNSET         the group did not participate in the match
-.br
-.ti +2
-PCRE2_ERROR_NOMEMORY      memory could not be obtained
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_ERROR_NOSUBSTRING\fP
+.ad l
+there are no groups of that name
+.TP 24
+\fBPCRE2_ERROR_UNAVAILABLE\fP
+.ad l
+the ovector was too small for that group
+.TP 24
+\fBPCRE2_ERROR_UNSET\fP
+.ad l
+the group did not participate in the match
+.TP 24
+\fBPCRE2_ERROR_NOMEMORY\fP
+.ad l
+memory could not be obtained
+.PD
+.RE
+.PP
+.ad l
 .sp
 If there is more than one group with the given name, the first one that is set
-is returned. In this situation PCRE2_ERROR_UNSET means that no group with the
+is returned. In this situation \fBPCRE2_ERROR_UNSET\fP means that no group with the
 given name was set.
 .sp
 There is a complete description of the PCRE2 native API in the

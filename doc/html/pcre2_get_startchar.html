@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);</code></pre>
 </div>
@@ -458,12 +458,12 @@ PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);</code></pre>
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>After a successful call of <code>pcre2_match()</code> that was passed the match block
+<p>After a successful call of <code class="function">pcre2_match()</code> that was passed the match block
 that is this function&#8217;s argument, this function returns the code unit offset of
 the character at which the successful match started. For a non-partial match,
-this can be different to the value of <em>ovector[0]</em> if the pattern contains
-the \K escape sequence. After a partial match, however, this value is always
-the same as <em>ovector[0]</em> because \K does not affect the result of a
+this can be different to the value of <code class="c">ovector[0]</code> if the pattern contains
+the <code class="regex">\K</code> escape sequence. After a partial match, however, this value is always
+the same as <code class="c">ovector[0]</code> because <code class="regex">\K</code> does not affect the result of a
 partial match.</p>
 </div>
 <div class="paragraph">

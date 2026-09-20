@@ -31,19 +31,21 @@
 pcre2_substring_free \- free extracted substring
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_substring_free(PCRE2_UCHAR *string);
+\fBvoid\fP pcre2_substring_free(\fBPCRE2_UCHAR\fP *\fIstring\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This is a convenience function for freeing the memory obtained by a previous
-call to \f(CRpcre2_substring_get_byname()\fP or
-\f(CRpcre2_substring_get_bynumber()\fP. Its only argument is a pointer to the
-string. If the argument is NULL, the function does nothing.
+call to pcre2_substring_get_byname() or
+pcre2_substring_get_bynumber(). Its only argument is a pointer to the
+string. If the argument is \f(CRNULL\fP, the function does nothing.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

@@ -31,59 +31,84 @@
 pcre2_serialize_decode \- decode serialized compiled patterns
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int32_t pcre2_serialize_decode(pcre2_code **codes,
-                               int32_t number_of_codes,
-                               const uint8_t *bytes,
-                               pcre2_general_context *gcontext);
+\fBint32_t\fP pcre2_serialize_decode(\fBpcre2_code\fP **\fIcodes\fP,
+                               \fBint32_t\fP \fInumber_of_codes\fP,
+                               \fBconst\fP \fBuint8_t\fP *\fIbytes\fP,
+                               \fBpcre2_general_context\fP *\fIgcontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function decodes a serialized set of compiled patterns back into a list of
 individual patterns. This is possible only on a host that is running the same
 version of PCRE2, with the same code unit width, and the host must also have
-the same endianness, pointer width and PCRE2_SIZE type. The arguments for
-\f(CRpcre2_serialize_decode()\fP are:
+the same endianness, pointer width and \fBPCRE2_SIZE\fP type. The arguments for
+pcre2_serialize_decode() are:
 .sp
-.ti +2
-\fIcodes\fP            pointer to a vector in which to build the list
-.br
-.ti +2
-\fInumber_of_codes\fP  number of slots in the vector
-.br
-.ti +2
-\fIbytes\fP            the serialized byte stream
-.br
-.ti +2
-\fIgcontext\fP         pointer to a general context or NULL
+.RS 4
+.PD 0
+.TP 16
+\fIcodes\fP
+.ad l
+pointer to a vector in which to build the list
+.TP 16
+\fInumber_of_codes\fP
+.ad l
+number of slots in the vector
+.TP 16
+\fIbytes\fP
+.ad l
+the serialized byte stream
+.TP 16
+\fIgcontext\fP
+.ad l
+pointer to a general context or \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
 The \fIbytes\fP argument must point to a block of data that was originally
-created by \f(CRpcre2_serialize_encode()\fP, though it may have been saved on
+created by pcre2_serialize_encode(), though it may have been saved on
 disc or elsewhere in the meantime. If there are more codes in the serialized
 data than slots in the list, only those compiled patterns that will fit are
 decoded. The yield of the function is the number of decoded patterns, or one of
 the following negative error codes:
 .sp
-.ti +2
-PCRE2_ERROR_BADDATA   \fInumber_of_codes\fP is zero or less
-.br
-.ti +2
-PCRE2_ERROR_BADMAGIC  mismatch of id bytes in \fIbytes\fP
-.br
-.ti +2
-PCRE2_ERROR_BADMODE   mismatch of variable unit size or PCRE version
-.br
-.ti +2
-PCRE2_ERROR_NOMEMORY  memory allocation failed
-.br
-.ti +2
-PCRE2_ERROR_NULL      \fIcodes\fP or \fIbytes\fP is NULL
+.RS 4
+.PD 0
+.TP 21
+\fBPCRE2_ERROR_BADDATA\fP
+.ad l
+\fInumber_of_codes\fP is zero or less
+.TP 21
+\fBPCRE2_ERROR_BADMAGIC\fP
+.ad l
+mismatch of id bytes in \fIbytes\fP
+.TP 21
+\fBPCRE2_ERROR_BADMODE\fP
+.ad l
+mismatch of variable unit size or PCRE version
+.TP 21
+\fBPCRE2_ERROR_NOMEMORY\fP
+.ad l
+memory allocation failed
+.TP 21
+\fBPCRE2_ERROR_NULL\fP
+.ad l
+\fIcodes\fP or \fIbytes\fP is \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
+\fBPCRE2_ERROR_BADMAGIC\fP may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
 .sp
 There is a complete description of the PCRE2 native API in the

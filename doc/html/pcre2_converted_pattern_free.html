@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);</code></pre>
 </div>
@@ -460,8 +460,8 @@ void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);</code></pre>
 <div class="paragraph">
 <p>This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a converted pattern that was obtained by
-calling <code>pcre2_pattern_convert()</code> with arguments that caused it to place
-the converted pattern into newly obtained heap memory. If the argument is NULL,
+calling <code class="function">pcre2_pattern_convert()</code> with arguments that caused it to place
+the converted pattern into newly obtained heap memory. If the argument is <code class="c">NULL</code>,
 the function returns immediately without doing anything.</p>
 </div>
 <div class="paragraph">

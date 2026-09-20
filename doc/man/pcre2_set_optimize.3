@@ -31,52 +31,69 @@
 pcre2_set_optimize \- set an optimization directive
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_optimize(pcre2_compile_context *ccontext,
-                       uint32_t directive);
+\fBint\fP pcre2_set_optimize(\fBpcre2_compile_context\fP *\fIccontext\fP,
+                       \fBuint32_t\fP \fIdirective\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function controls which performance optimizations will be applied
-by \f(CRpcre2_compile()\fP. It can be called multiple times with the same compile
+by pcre2_compile(). It can be called multiple times with the same compile
 context; the effects are cumulative, with the effects of later calls taking
 precedence over earlier ones.
 .sp
-The result is zero for success, PCRE2_ERROR_NULL if \fIccontext\fP is NULL,
-or PCRE2_ERROR_BADOPTION if \fIdirective\fP is unknown. The latter could be
+The result is zero for success, \fBPCRE2_ERROR_NULL\fP if \fIccontext\fP is \f(CRNULL\fP,
+or \fBPCRE2_ERROR_BADOPTION\fP if \fIdirective\fP is unknown. The latter could be
 useful to detect if a certain optimization is available.
 .sp
 The list of possible values for the \fIdirective\fP parameter are:
 .sp
-.ti +2
-PCRE2_OPTIMIZATION_FULL   Enable all optimizations (default)
-.br
-.ti +2
-PCRE2_OPTIMIZATION_NONE   Disable all optimizations
-.br
-.ti +2
-PCRE2_AUTO_POSSESS        Enable auto\-possessification
-.br
-.ti +2
-PCRE2_AUTO_POSSESS_OFF    Disable auto\-possessification
-.br
-.ti +2
-PCRE2_DOTSTAR_ANCHOR      Enable implicit dotstar anchoring
-.br
-.ti +2
-PCRE2_DOTSTAR_ANCHOR_OFF  Disable implicit dotstar anchoring
-.br
-.ti +2
-PCRE2_START_OPTIMIZE      Enable start\-up optimizations at match time
-.br
-.ti +2
-PCRE2_START_OPTIMIZE_OFF  Disable start\-up optimizations at match time
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_OPTIMIZATION_FULL\fP
+.ad l
+Enable all optimizations (default)
+.TP 24
+\fBPCRE2_OPTIMIZATION_NONE\fP
+.ad l
+Disable all optimizations
+.TP 24
+\fBPCRE2_AUTO_POSSESS\fP
+.ad l
+Enable auto\-possessification
+.TP 24
+\fBPCRE2_AUTO_POSSESS_OFF\fP
+.ad l
+Disable auto\-possessification
+.TP 24
+\fBPCRE2_DOTSTAR_ANCHOR\fP
+.ad l
+Enable implicit dotstar anchoring
+.TP 24
+\fBPCRE2_DOTSTAR_ANCHOR_OFF\fP
+.ad l
+Disable implicit dotstar anchoring
+.TP 24
+\fBPCRE2_START_OPTIMIZE\fP
+.ad l
+Enable start\-up optimizations at match time
+.TP 24
+\fBPCRE2_START_OPTIMIZE_OFF\fP
+.ad l
+Disable start\-up optimizations at match time
+.PD
+.RE
+.PP
+.ad l
 .sp
 There is a complete description of the PCRE2 native API, including detailed
-descriptions \fIdirective\fP parameter values in the
+descriptions of \fIdirective\fP parameter values in the
 \f(CRpcre2api\fP
 page.

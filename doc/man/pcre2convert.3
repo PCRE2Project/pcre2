@@ -37,29 +37,31 @@ experimental, and may be changed in future releases. Two kinds of pattern,
 globs and POSIX patterns, are supported.
 .SH "THE CONVERT CONTEXT"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-pcre2_convert_context *pcre2_convert_context_create(
-      pcre2_general_context *gcontext);
+\fBpcre2_convert_context\fP *pcre2_convert_context_create(
+      \fBpcre2_general_context\fP *\fIgcontext\fP);
 
-pcre2_convert_context *pcre2_convert_context_copy(
-      pcre2_convert_context *ccontext);
+\fBpcre2_convert_context\fP *pcre2_convert_context_copy(
+      \fBpcre2_convert_context\fP *\fIccontext\fP);
 
-void pcre2_convert_context_free(pcre2_convert_context *ccontext);
+\fBvoid\fP pcre2_convert_context_free(\fBpcre2_convert_context\fP *\fIccontext\fP);
 
-int pcre2_set_glob_escape(pcre2_convert_context *ccontext,
-                          uint32_t escape_char);
+\fBint\fP pcre2_set_glob_escape(\fBpcre2_convert_context\fP *\fIccontext\fP,
+                          \fBuint32_t\fP \fIescape_char\fP);
 
-int pcre2_set_glob_separator(pcre2_convert_context *ccontext,
-                             uint32_t separator_char);
+\fBint\fP pcre2_set_glob_separator(\fBpcre2_convert_context\fP *\fIccontext\fP,
+                             \fBuint32_t\fP \fIseparator_char\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .sp
 A convert context is used to hold parameters that affect the way that pattern
 conversion works. Like all PCRE2 contexts, you need to use a context only if
 you want to override the defaults. There are the usual create, copy, and free
 functions. If custom memory management functions are set in a general context
-that is passed to \f(CRpcre2_convert_context_create()\fP, they are used for all
+that is passed to pcre2_convert_context_create(), they are used for all
 memory management within the conversion functions.
 .sp
 There are only two parameters in the convert context at present. Both apply
@@ -69,118 +71,127 @@ character, or to any punctuation character with a code point less than 256.
 The separator character defaults to backslash under Windows, otherwise forward
 slash. It can be set to forward slash, backslash, or dot.
 .sp
-The two setting functions return zero on success, or PCRE2_ERROR_BADDATA if
+The two setting functions return zero on success, or \fBPCRE2_ERROR_BADDATA\fP if
 their second argument is invalid.
 .SH "THE CONVERSION FUNCTION"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
-                          uint32_t options, PCRE2_UCHAR **buffptr,
-                          PCRE2_SIZE *bufflenptr,
-                          pcre2_convert_context *ccontext);
+\fBint\fP pcre2_pattern_convert(\fBPCRE2_SPTR\fP \fIpattern\fP, \fBPCRE2_SIZE\fP \fIplength\fP,
+                          \fBuint32_t\fP \fIoptions\fP, \fBPCRE2_UCHAR\fP **\fIbuffptr\fP,
+                          \fBPCRE2_SIZE\fP *\fIbufflenptr\fP,
+                          \fBpcre2_convert_context\fP *\fIccontext\fP);
 
-void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);
+\fBvoid\fP pcre2_converted_pattern_free(\fBPCRE2_UCHAR\fP *\fIconverted\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .sp
-The first two arguments of \f(CRpcre2_pattern_convert()\fP define the foreign
+The first two arguments of pcre2_pattern_convert() define the foreign
 pattern that is to be converted. The length may be given as
-PCRE2_ZERO_TERMINATED. The \f(CRoptions\fP argument defines how the pattern is to
-be processed. If the input is UTF, the PCRE2_CONVERT_UTF option should be set.
-PCRE2_CONVERT_NO_UTF_CHECK may also be set if you are sure the input is valid.
+\fBPCRE2_ZERO_TERMINATED\fP. The \fIoptions\fP argument defines how the pattern is to
+be processed. If the input is UTF, the \fBPCRE2_CONVERT_UTF\fP option should be set.
+\fBPCRE2_CONVERT_NO_UTF_CHECK\fP may also be set if you are sure the input is valid.
 One or more of the glob options, or one of the following POSIX options must be
 set to define the type of conversion that is required:
 .sp
-.ti +2
-PCRE2_CONVERT_GLOB
-.br
-.ti +2
-PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
-.br
-.ti +2
-PCRE2_CONVERT_GLOB_NO_STARSTAR
-.br
-.ti +2
-PCRE2_CONVERT_POSIX_BASIC
-.br
-.ti +2
-PCRE2_CONVERT_POSIX_EXTENDED
-.sp
-Details of the conversions are given below. The \f(CRbuffer\fP and \f(CRblength\fP
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_CONVERT_GLOB\fP, \fBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP, \fBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP, \fBPCRE2_CONVERT_POSIX_BASIC\fP, \fBPCRE2_CONVERT_POSIX_EXTENDED\fP
+.ad l
+Details of the conversions are given below. The \fIbuffer\fP and \fIblength\fP
 arguments define how the output is handled:
+.PD
+.RE
+.PP
+.ad l
 .sp
-If \f(CRbuffer\fP is NULL, the function just returns the length of the converted
-pattern via \f(CRblength\fP. This is one less than the length of buffer needed,
+If \fIbuffer\fP is NULL, the function just returns the length of the converted
+pattern via \fIblength\fP. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.
 .sp
-If \f(CRbuffer\fP points to a NULL pointer, an output buffer is obtained using
+If \fIbuffer\fP points to a NULL pointer, an output buffer is obtained using
 the allocator in the context or \f(CRmalloc()\fP if no context is supplied. A
-pointer to this buffer is placed in the variable to which \f(CRbuffer\fP points.
+pointer to this buffer is placed in the variable to which \fIbuffer\fP points.
 When no longer needed the output buffer must be freed by calling
-\f(CRpcre2_converted_pattern_free()\fP. If this function is called with a NULL
+pcre2_converted_pattern_free(). If this function is called with a NULL
 argument, it returns immediately without doing anything.
 .sp
-If \f(CRbuffer\fP points to a non\-NULL pointer, \f(CRblength\fP must be set to the
+If \fIbuffer\fP points to a non\-NULL pointer, \fIblength\fP must be set to the
 actual length of the buffer provided (in code units).
 .sp
 In all cases, after successful conversion, the variable pointed to by
-\f(CRblength\fP is updated to the length actually used (in code units), excluding
+\fIblength\fP is updated to the length actually used (in code units), excluding
 the terminating zero that is always added.
 .sp
-If an error occurs, the length (via \f(CRblength\fP) is set to the offset
+If an error occurs, the length (via \fIblength\fP) is set to the offset
 within the input pattern where the error was detected. Only gross syntax errors
 are caught; there are plenty of errors that will get passed on for
-\f(CRpcre2_compile()\fP to discover.
+pcre2_compile() to discover.
 .sp
-The return from \f(CRpcre2_pattern_convert()\fP is zero on success or a non\-zero
+The return from pcre2_pattern_convert() is zero on success or a non\-zero
 PCRE2 error code. Note that PCRE2 error codes may be positive or negative:
-\f(CRpcre2_compile()\fP uses mostly positive codes and \f(CRpcre2_match()\fP
-negative ones; \f(CRpcre2_convert()\fP uses existing codes of both kinds. A
+pcre2_compile() uses mostly positive codes and pcre2_match()
+negative ones; pcre2_convert() uses existing codes of both kinds. A
 textual error message can be obtained by calling
-\f(CRpcre2_get_error_message()\fP.
+pcre2_get_error_message().
 .SH "CONVERTING GLOBS"
 .sp
 Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
-otherwise. If PCRE2_CONVERT_GLOB is set, the wildcards * and ? are not
-permitted to match separator characters, but the double\-star (**) feature
+otherwise. If \fBPCRE2_CONVERT_GLOB\fP is set, the wildcards \f(CR\fB\fP and \f(CR?\fP are not
+permitted to match separator characters, but the double\-star \f(CR\fP*\fP feature
 (which does match separators) is supported.
 .sp
-PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
-match separator characters. PCRE2_CONVERT_GLOB_NO_STARSTAR matches globs with
+\fBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP matches globs with wildcards allowed to
+match separator characters. \fBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP matches globs with
 the double\-star feature disabled. These options may be given together.
 .SH "CONVERTING POSIX PATTERNS"
 .sp
 POSIX defines two kinds of regular expression pattern: basic and extended.
-These can be processed by setting PCRE2_CONVERT_POSIX_BASIC or
-PCRE2_CONVERT_POSIX_EXTENDED, respectively.
+These can be processed by setting \fBPCRE2_CONVERT_POSIX_BASIC\fP or
+\fBPCRE2_CONVERT_POSIX_EXTENDED\fP, respectively.
 .sp
 In POSIX patterns, backslash is not special in a character class. Unmatched
 closing parentheses are treated as literals.
 .sp
-In basic patterns, ? + | {} and () must be escaped to be recognized
+In basic patterns, \f(CR? + | {} ()\fP must be escaped to be recognized
 as metacharacters outside a character class. If the first character in the
-pattern is * it is treated as a literal. ^ is a metacharacter only at the start
+pattern is \f(CR*\fP it is treated as a literal. \f(CR^\fP is a metacharacter only at the start
 of a branch.
 .sp
 In extended patterns, a backslash not in a character class always
 makes the next character literal, whatever it is. There are no backreferences.
+.if n .sp
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+.B Note
+.ps -1
+.br
 .sp
-Note: POSIX mandates that the longest possible match at the first matching
-position must be found. This is not what \f(CRpcre2_match()\fP does; it yields
-the first match that is found. An application can use \f(CRpcre2_dfa_match()\fP
+POSIX mandates that the longest possible match at the first matching
+position must be found. This is not what pcre2_match() does; it yields
+the first match that is found. An application can use pcre2_dfa_match()
 to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).
+.sp .5v
+.RE
 .SH "AUTHOR"
 .sp
-.nf
-.fam C
+.ti +2
 Philip Hazel
+.br
+.ti +2
 Retired from University Computing Service
+.br
+.ti +2
 Cambridge, England.
-.fam
-.fi
 .SH "REVISION"
 .sp
 Last updated: 14 November 2023

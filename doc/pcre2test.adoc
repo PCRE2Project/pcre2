@@ -39,7 +39,7 @@ part of PCRE2. All the modifiers are documented here, some without much
 justification, but many of them are unlikely to be of use except when testing
 the libraries.
 
-== PCRE2's 8-BIT, 16-BIT AND 32-BIT LIBRARIES
+== PCRE2's 8-bit, 16-bit and 32-bit libraries
 
 Different versions of the PCRE2 library can be built to support character
 strings that are encoded in 8-bit, 16-bit, or 32-bit code units. One, two, or
@@ -51,10 +51,10 @@ format before being passed to the library functions. Results are converted back
 to 8-bit code units for output.
 
 In the rest of this document, the names of library functions and structures
-are given in generic form, for example, `pcre2_compile()`. The actual
+are given in generic form, for example, func:pcre2_compile(). The actual
 names used in the libraries have a suffix _8, _16, or _32, as appropriate.
 
-== Input Encoding
+== Input encoding
 
 Input to `pcre2test` is processed line by line, either by calling the C
 library's `fgets()` function, or via the `libreadline` or `libedit`
@@ -96,7 +96,9 @@ character is preceded by the byte 0xff (which is an invalid byte in UTF-8)
 0x80000000 is added to the character's value. For subject strings, using an
 escape sequence is preferable.
 
-== Command Line Options
+== Command line options
+
+[.options]
 
 `-8`::
 If the 8-bit library has been built, this option causes it to be used (this is
@@ -182,7 +184,7 @@ information. It returns one of the following values:
 0  JIT is available and usable
 1  JIT is available but cannot allocate executable memory
 2  JIT is not available
-3  Unexpected return from test call to `pcre2_jit_compile()`
+3  Unexpected return from test call to func:pcre2_jit_compile()
 ....
 
 +
@@ -202,15 +204,15 @@ form and information about the compiled pattern is output after compilation;
 
 `-dfa`::
 Behave as if each subject line has the `dfa` modifier; matching is done
-using the `pcre2_dfa_match()` function instead of the default
-`pcre2_match()`.
+using the func:pcre2_dfa_match() function instead of the default
+func:pcre2_match().
 
 `-E`::
 Run in "preprocess only" mode (similar to "gcc -E"). The "#if ... #endif"
 commands are processed, and all other lines are printed verbatim.
 
 `-error` _number[,number,...]_::
-Call `pcre2_get_error_message()` for each of the error numbers in the
+Call func:pcre2_get_error_message() for each of the error numbers in the
 comma-separated list, display the resulting messages on the standard output,
 then exit with zero exit code. The numbers may be positive or negative. This is
 a convenience facility for PCRE2 maintainers.
@@ -265,7 +267,7 @@ Do not output the version number of `pcre2test` at the start of execution.
 
 `-S` _size_::
 On Unix-like systems, set the size of the run-time stack to _size_
-mebibytes (units of 1024pass:[*]1024 bytes).
+mebibytes (units of 1024*1024 bytes).
 
 `-subject` _modifier-list_::
 Behave as if each subject line contains the given modifiers.
@@ -333,7 +335,7 @@ An empty line or the end of the file signals the end of the subject lines for a
 test, at which point a new pattern or command line is expected if there is
 still input to be read.
 
-== Command Lines
+== Command lines
 
 In between sets of test data, a line that begins with # is interpreted as a
 command line. If the first character is followed by white space or an
@@ -345,17 +347,17 @@ following commands are recognized:
 #forbid_utf
 ....
 
-Subsequent patterns automatically have the PCRE2_NEVER_UTF and PCRE2_NEVER_UCP
-options set, which locks out the use of the PCRE2_UTF and PCRE2_UCP options and
-the use of (pass:[*]UTF) and (pass:[*]UCP) at the start of patterns. This command also forces
-an error if a subsequent pattern contains any occurrences of \P, \p, or \X,
-which are still supported when PCRE2_UTF is not set, but which require Unicode
+Subsequent patterns automatically have the const:PCRE2_NEVER_UTF and const:PCRE2_NEVER_UCP
+options set, which locks out the use of the const:PCRE2_UTF and const:PCRE2_UCP options and
+the use of ([.regex]`*UTF`) and ([.regex]`*UCP`) at the start of patterns. This command also forces
+an error if a subsequent pattern contains any occurrences of [.regex]`\P`, [.regex]`\p`, or [.regex]`\X`,
+which are still supported when const:PCRE2_UTF is not set, but which require Unicode
 property support to be included in the library.
 
 This is a trigger guard that is used in test files to ensure that UTF or
 Unicode property tests are not accidentally added to files that are used when
-Unicode support is not included in the library. Setting PCRE2_NEVER_UTF and
-PCRE2_NEVER_UCP as a default can also be obtained by the use of `#pattern`;
+Unicode support is not included in the library. Setting const:PCRE2_NEVER_UTF and
+const:PCRE2_NEVER_UCP as a default can also be obtained by the use of `#pattern`;
 the difference is that `#forbid_utf` cannot be unset, and the automatic
 options are not displayed in pattern information, to avoid cluttering up test
 output.
@@ -375,7 +377,7 @@ below.
 ....
 
 This command is used to load a set of binary character tables that can be
-accessed by the tables=3 qualifier. Such tables can be created by the
+accessed by the `tables=3` qualifier. Such tables can be created by the
 `pcre2_dftables` program with the -b option.
 
 [literal]
@@ -481,7 +483,7 @@ and not printed. The CONDITION can be any of the conditions which are tested by
 the "-C" commandline option and which set pcre2test's exit code to a boolean
 value. The CONDITION may also be preceded by "!".
 
-== Modifier Syntax
+== Modifier syntax
 
 Modifier lists are used with both pattern and subject lines. Items in a list
 are separated by commas followed by optional white space. Trailing white space
@@ -507,7 +509,7 @@ sequence of these abbreviations. For example:
 This is a pattern line whose modifier list starts with two one-letter modifiers
 (/i and /g). The lower-case abbreviated modifiers are the same as used in Perl.
 
-== Pattern Syntax
+== Pattern syntax
 
 A pattern line must start with one of the following characters (common symbols,
 excluding pattern meta-characters):
@@ -553,10 +555,10 @@ pcre2test to read the next line as a continuation of the regular expression.
 
 A pattern can be followed by a modifier list (details below).
 
-== Subject Line Syntax
+== Subject line syntax
 
-Before each subject line is passed to `pcre2_match()`,
-`pcre2_dfa_match()`, or `pcre2_jit_match()`, leading and trailing white
+Before each subject line is passed to func:pcre2_match(),
+func:pcre2_dfa_match(), or func:pcre2_jit_match(), leading and trailing white
 space is removed, and the line is scanned for backslash escapes, unless the
 `subject_literal` modifier was set for the pattern. The following provide a
 means of encoding non-printing characters in a visible way:
@@ -581,10 +583,10 @@ means of encoding non-printing characters in a visible way:
               character in UTF mode or a code point
 ....
 
-Invoking \N{Upass:[+]hh...} or \x{hh...} doesn't require the use of the `utf`
+Invoking `\N{U+hh...}` or \x{hh...} doesn't require the use of the `utf`
 modifier on the pattern. It is always recognized. There may be any number of
 hexadecimal digits inside the braces; invalid values provoke error messages
-but when using \N{Upass:[+]hh...} with some invalid unicode characters they will
+but when using `\N{U+hh...}` with some invalid unicode characters they will
 be accepted with a warning instead.
 
 Note that even in UTF-8 mode, \xhh (and depending of how large, \ddd)
@@ -592,7 +594,7 @@ describe one byte rather than one character; this makes it possible to
 construct invalid UTF-8 sequences for testing purposes. On the other hand,
 \x{hh...} is interpreted as a UTF-8 character in UTF-8 mode, only generating
 more than one byte if the value is greater than 127. To avoid the ambiguity
-it is preferred to use \N{Upass:[+]hh...} when describing characters. When testing
+it is preferred to use `\N{U+hh...}` when describing characters. When testing
 the 8-bit library not in UTF-8 mode, \x{hh} generates one byte for values
 that could fit on it, and causes an error for greater values.
 
@@ -651,7 +653,7 @@ that follow are treated as literals, with no special treatment of backslashes.
 No replication is possible, and any subject modifiers must be set as defaults
 by a `#subject` command.
 
-== Pattern Modifiers
+== Pattern modifiers
 
 There are several types of modifier that can appear in pattern lines. Except
 where noted below, they may also be used in `#pattern` commands. A
@@ -660,70 +662,68 @@ by a previous `#pattern` command.
 
 === Setting compilation options
 
-The following modifiers set options for `pcre2_compile()`. Most of them set
+The following modifiers set options for func:pcre2_compile(). Most of them set
 bits in the options argument of that function, but those whose names start with
-PCRE2_EXTRA are additional options that are set in the compile context.
+const:PCRE2_EXTRA are additional options that are set in the compile context.
 Some of these options have single-letter abbreviations. There is special
-handling for /x: if a second x is present, PCRE2_EXTENDED is converted into
-PCRE2_EXTENDED_MORE as in Perl. A third appearance adds PCRE2_EXTENDED as well,
-though this makes no difference to the way `pcre2_compile()` behaves. See
+handling for /x: if a second x is present, const:PCRE2_EXTENDED is converted into
+const:PCRE2_EXTENDED_MORE as in Perl. A third appearance adds const:PCRE2_EXTENDED as well,
+though this makes no difference to the way func:pcre2_compile() behaves. See
 xref:pcre2api.adoc[`pcre2api`]
 for a description of the effects of these options.
 
-[literal,subs=normal]
-....
-pass:[    ]allow_empty_class         set PCRE2_ALLOW_EMPTY_CLASS
-pass:[    ]allow_lookaround_bsk      set PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
-pass:[    ]allow_surrogate_escapes   set PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
-pass:[    ]alt_bsux                  set PCRE2_ALT_BSUX
-pass:[    ]alt_circumflex            set PCRE2_ALT_CIRCUMFLEX
-pass:[    ]alt_extended_class        set PCRE2_ALT_EXTENDED_CLASS
-pass:[    ]alt_verbnames             set PCRE2_ALT_VERBNAMES
-pass:[    ]anchored                  set PCRE2_ANCHORED
-/a  ascii_all                 set all ASCII options
-pass:[    ]ascii_bsd                 set PCRE2_EXTRA_ASCII_BSD
-pass:[    ]ascii_bss                 set PCRE2_EXTRA_ASCII_BSS
-pass:[    ]ascii_bsw                 set PCRE2_EXTRA_ASCII_BSW
-pass:[    ]ascii_digit               set PCRE2_EXTRA_ASCII_DIGIT
-pass:[    ]ascii_posix               set PCRE2_EXTRA_ASCII_POSIX
-pass:[    ]auto_callout              set PCRE2_AUTO_CALLOUT
-pass:[    ]bad_escape_is_literal     set PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
-/i  caseless                  set PCRE2_CASELESS
-/r  caseless_restrict         set PCRE2_EXTRA_CASELESS_RESTRICT
-pass:[    ]dollar_endonly            set PCRE2_DOLLAR_ENDONLY
-/s  dotall                    set PCRE2_DOTALL
-pass:[    ]dupnames                  set PCRE2_DUPNAMES
-pass:[    ]endanchored               set PCRE2_ENDANCHORED
-pass:[    ]escaped_cr_is_lf          set PCRE2_EXTRA_ESCAPED_CR_IS_LF
-/x  extended                  set PCRE2_EXTENDED
-/xx extended_more             set PCRE2_EXTENDED_MORE
-pass:[    ]extra_alt_bsux            set PCRE2_EXTRA_ALT_BSUX
-pass:[    ]firstline                 set PCRE2_FIRSTLINE
-pass:[    ]literal                   set PCRE2_LITERAL
-pass:[    ]match_line                set PCRE2_EXTRA_MATCH_LINE
-pass:[    ]match_invalid_utf         set PCRE2_MATCH_INVALID_UTF
-pass:[    ]match_unset_backref       set PCRE2_MATCH_UNSET_BACKREF
-pass:[    ]match_word                set PCRE2_EXTRA_MATCH_WORD
-/m  multiline                 set PCRE2_MULTILINE
-pass:[    ]never_backslash_c         set PCRE2_NEVER_BACKSLASH_C
-pass:[    ]never_callout             set PCRE2_EXTRA_NEVER_CALLOUT
-pass:[    ]never_ucp                 set PCRE2_NEVER_UCP
-pass:[    ]never_utf                 set PCRE2_NEVER_UTF
-/n  no_auto_capture           set PCRE2_NO_AUTO_CAPTURE
-pass:[    ]no_auto_possess           set PCRE2_NO_AUTO_POSSESS
-pass:[    ]no_bs0                    set PCRE2_EXTRA_NO_BS0
-pass:[    ]no_dotstar_anchor         set PCRE2_NO_DOTSTAR_ANCHOR
-pass:[    ]no_start_optimize         set PCRE2_NO_START_OPTIMIZE
-pass:[    ]no_utf_check              set PCRE2_NO_UTF_CHECK
-pass:[    ]python_octal              set PCRE2_EXTRA_PYTHON_OCTAL
-pass:[    ]turkish_casing            set PCRE2_EXTRA_TURKISH_CASING
-pass:[    ]ucp                       set PCRE2_UCP
-pass:[    ]ungreedy                  set PCRE2_UNGREEDY
-pass:[    ]use_offset_limit          set PCRE2_USE_OFFSET_LIMIT
-pass:[    ]utf                       set PCRE2_UTF
-....
+[.options]
+`allow_empty_class`:: set const:PCRE2_ALLOW_EMPTY_CLASS
+`allow_lookaround_bsk`:: set const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+`allow_surrogate_escapes`:: set const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES
+`alt_bsux`:: set const:PCRE2_ALT_BSUX
+`alt_circumflex`:: set const:PCRE2_ALT_CIRCUMFLEX
+`alt_extended_class`:: set const:PCRE2_ALT_EXTENDED_CLASS
+`alt_verbnames`:: set const:PCRE2_ALT_VERBNAMES
+`anchored`:: set const:PCRE2_ANCHORED
+`/a  ascii_all`:: set all ASCII options
+`ascii_bsd`:: set const:PCRE2_EXTRA_ASCII_BSD
+`ascii_bss`:: set const:PCRE2_EXTRA_ASCII_BSS
+`ascii_bsw`:: set const:PCRE2_EXTRA_ASCII_BSW
+`ascii_digit`:: set const:PCRE2_EXTRA_ASCII_DIGIT
+`ascii_posix`:: set const:PCRE2_EXTRA_ASCII_POSIX
+`auto_callout`:: set const:PCRE2_AUTO_CALLOUT
+`bad_escape_is_literal`:: set const:PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
+`/i  caseless`:: set const:PCRE2_CASELESS
+`/r  caseless_restrict`:: set const:PCRE2_EXTRA_CASELESS_RESTRICT
+`dollar_endonly`:: set const:PCRE2_DOLLAR_ENDONLY
+`/s  dotall`:: set const:PCRE2_DOTALL
+`dupnames`:: set const:PCRE2_DUPNAMES
+`endanchored`:: set const:PCRE2_ENDANCHORED
+`escaped_cr_is_lf`:: set const:PCRE2_EXTRA_ESCAPED_CR_IS_LF
+`/x  extended`:: set const:PCRE2_EXTENDED
+`/xx extended_more`:: set const:PCRE2_EXTENDED_MORE
+`extra_alt_bsux`:: set const:PCRE2_EXTRA_ALT_BSUX
+`firstline`:: set const:PCRE2_FIRSTLINE
+`literal`:: set const:PCRE2_LITERAL
+`match_line`:: set const:PCRE2_EXTRA_MATCH_LINE
+`match_invalid_utf`:: set const:PCRE2_MATCH_INVALID_UTF
+`match_unset_backref`:: set const:PCRE2_MATCH_UNSET_BACKREF
+`match_word`:: set const:PCRE2_EXTRA_MATCH_WORD
+`/m  multiline`:: set const:PCRE2_MULTILINE
+`never_backslash_c`:: set const:PCRE2_NEVER_BACKSLASH_C
+`never_callout`:: set const:PCRE2_EXTRA_NEVER_CALLOUT
+`never_ucp`:: set const:PCRE2_NEVER_UCP
+`never_utf`:: set const:PCRE2_NEVER_UTF
+`/n  no_auto_capture`:: set const:PCRE2_NO_AUTO_CAPTURE
+`no_auto_possess`:: set const:PCRE2_NO_AUTO_POSSESS
+`no_bs0`:: set const:PCRE2_EXTRA_NO_BS0
+`no_dotstar_anchor`:: set const:PCRE2_NO_DOTSTAR_ANCHOR
+`no_start_optimize`:: set const:PCRE2_NO_START_OPTIMIZE
+`no_utf_check`:: set const:PCRE2_NO_UTF_CHECK
+`python_octal`:: set const:PCRE2_EXTRA_PYTHON_OCTAL
+`turkish_casing`:: set const:PCRE2_EXTRA_TURKISH_CASING
+`ucp`:: set const:PCRE2_UCP
+`ungreedy`:: set const:PCRE2_UNGREEDY
+`use_offset_limit`:: set const:PCRE2_USE_OFFSET_LIMIT
+`utf`:: set const:PCRE2_UTF
 
-As well as turning on the PCRE2_UTF option, the `utf` modifier causes all
+As well as turning on the const:PCRE2_UTF option, the `utf` modifier causes all
 non-printing characters in output strings to be printed using the \x{hh...}
 notation. Otherwise, those less than 0x100 are output in hex without the curly
 brackets. Setting `utf` in 16-bit or 32-bit mode also causes pattern and
@@ -731,19 +731,32 @@ subject strings to be translated to UTF-16 or UTF-32, respectively, before
 being passed to library functions.
 
 The following modifiers enable or disable performance optimizations by
-calling `pcre2_set_optimize()` before invoking the regex compiler.
+calling func:pcre2_set_optimize() before invoking the regex compiler.
 
-[literal,subs=normal]
-....
-pass:[    ]optimization_full      enable all optional optimizations
-pass:[    ]optimization_none      disable all optional optimizations
-pass:[    ]auto_possess           auto-possessify variable quantifiers
-pass:[    ]auto_possess_off       don't auto-possessify variable quantifiers
-pass:[    ]dotstar_anchor         anchor patterns starting with .*
-pass:[    ]dotstar_anchor_off     don't anchor patterns starting with .*
-pass:[    ]start_optimize         enable pre-scan of subject string
-pass:[    ]start_optimize_off     disable pre-scan of subject string
-....
+[.options]
+`optimization_full`::
+enable all optional optimizations
+
+`optimization_none`::
+disable all optional optimizations
+
+`auto_possess`::
+auto-possessify variable quantifiers
+
+`auto_possess_off`::
+don't auto-possessify variable quantifiers
+
+`dotstar_anchor`::
+anchor patterns starting with [.regex]`.*`
+
+`dotstar_anchor_off`::
+don't anchor patterns starting with [.regex]`.*`
+
+`start_optimize`::
+enable pre-scan of subject string
+
+`start_optimize_off`::
+disable pre-scan of subject string
 
 See the
 xref:pcre2_set_optimize.adoc[`pcre2_set_optimize`]
@@ -799,9 +812,9 @@ The effects of these modifiers are described in the following sections.
 
 === Newline and \R handling
 
-The `bsr` modifier specifies what \R in a pattern should match. If it is
-set to "anycrlf", \R matches CR, LF, or CRLF only. If it is set to "unicode",
-\R matches any Unicode newline sequence. The default can be specified when
+The `bsr` modifier specifies what [.regex]`\R` in a pattern should match. If it is
+set to "anycrlf", [.regex]`\R` matches CR, LF, or CRLF only. If it is set to "unicode",
+[.regex]`\R` matches any Unicode newline sequence. The default can be specified when
 PCRE2 is built; if it is not, the default is set to Unicode.
 
 The `newline` modifier specifies which characters are to be interpreted as
@@ -825,7 +838,7 @@ code unit widths and link sizes, and is also useful for one-off tests.
 
 The `info` modifier requests information about the compiled pattern
 (whether it is anchored, has a fixed first character, and so on). The
-information is obtained from the `pcre2_pattern_info()` function. Here are
+information is obtained from the func:pcre2_pattern_info() function. Here are
 some typical examples:
 
 [literal]
@@ -861,7 +874,7 @@ ending code units are recorded. The subject length line is omitted when
 when it can never be used.
 
 The `framesize` modifier shows the size, in bytes, of each storage frame
-used by `pcre2_match()` for handling backtracking. The size depends on the
+used by func:pcre2_match() for handling backtracking. The size depends on the
 number of capturing parentheses in the pattern. A vector of these frames is
 used at matching time; its overall size is shown when the `heapframes_size`
 subject modifier is set.
@@ -871,18 +884,18 @@ the pattern. A list of them is output at the end of any other information that
 is requested. For each callout, either its number or string is given, followed
 by the item that follows it in the pattern.
 
-=== Passing a NULL context
+=== Passing a null context
 
-Normally, `pcre2test` passes a context block to `pcre2_compile()`. If
+Normally, `pcre2test` passes a context block to func:pcre2_compile(). If
 the `null_context` modifier is set, however, NULL is passed. This is for
-testing that `pcre2_compile()` behaves correctly in this case (it uses
+testing that func:pcre2_compile() behaves correctly in this case (it uses
 default values).
 
-=== Passing a NULL pattern
+=== Passing a null pattern
 
 The `null_pattern` modifier is for testing the behaviour of
-`pcre2_compile()` when the pattern argument is NULL. The length value
-passed is the default PCRE2_ZERO_TERMINATED unless `use_length` is set.
+func:pcre2_compile() when the pattern argument is NULL. The length value
+passed is the default const:PCRE2_ZERO_TERMINATED unless `use_length` is set.
 Any length other than zero causes an error.
 
 === Specifying pattern characters in hexadecimal
@@ -928,7 +941,7 @@ below), the REG_PEND extension is used to pass the pattern's length.
 Variable lookbehind assertions are supported only if, for each one, there is a
 maximum length (in characters) that it can match. There is a limit on this,
 whose default can be set at build time, with an ultimate default of 255. The
-`max_varlookbehind` modifier uses the `pcre2_set_max_varlookbehind()`
+`max_varlookbehind` modifier uses the func:pcre2_set_max_varlookbehind()
 function to change the limit. Lookbehinds whose branches each match a fixed
 length are limited to 65535 characters per branch.
 
@@ -956,7 +969,7 @@ the form
 \[<characters>]{<count>}
 ....
 
-are expanded before the pattern is passed to `pcre2_compile()`. For
+are expanded before the pattern is passed to func:pcre2_compile(). For
 example, \[AB]{6000} is expanded to "ABAB..." 6000 times. This construction
 cannot be nested. An initial "\[" sequence is recognized only if "]{" followed
 by decimal digits and "}" is found later in the pattern. If not, the characters
@@ -979,7 +992,7 @@ xref:pcre2jit.adoc[`pcre2jit`]
 documentation for details. JIT compiling happens, optionally, after a pattern
 has been successfully compiled into an internal form. The JIT compiler converts
 this to optimized machine code. It needs to know whether the match-time options
-PCRE2_PARTIAL_HARD and PCRE2_PARTIAL_SOFT are going to be used, because
+const:PCRE2_PARTIAL_HARD and const:PCRE2_PARTIAL_SOFT are going to be used, because
 different code is generated for the different cases. See the `partial`
 modifier in "Subject Modifiers"
 below
@@ -1011,8 +1024,8 @@ The possible values for the `jit` modifier are therefore:
 ....
 
 If no number is given, 7 is assumed. The phrase "partial matching" means a call
-to `pcre2_match()` with either the PCRE2_PARTIAL_SOFT or the
-PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
+to func:pcre2_match() with either the const:PCRE2_PARTIAL_SOFT or the
+const:PCRE2_PARTIAL_HARD option set. Note that such a call may return a complete
 match; the options enable the possibility of a partial match, but do not
 require it. Note also that if you request JIT compilation only for partial
 matching (for example, jit=2) but do not set the `partial` modifier on a
@@ -1027,8 +1040,8 @@ documentation. See also the `jitstack` modifier below for a way of
 setting the size of the JIT stack.
 
 If the `jitfast` modifier is specified, matching is done using the JIT
-"fast path" interface, `pcre2_jit_match()`, which skips some of the sanity
-checks that are done by `pcre2_match()`, and of course does not work when
+"fast path" interface, func:pcre2_jit_match(), which skips some of the sanity
+checks that are done by func:pcre2_match(), and of course does not work when
 JIT is not supported. If `jitfast` is specified without `jit`, jit=7 is
 assumed.
 
@@ -1048,9 +1061,9 @@ The `locale` modifier must specify the name of a locale, for example:
 /pattern/locale=fr_FR
 ....
 
-The given locale is set, `pcre2_maketables()` is called to build a set of
+The given locale is set, func:pcre2_maketables() is called to build a set of
 character tables for the locale, and this is then passed to
-`pcre2_compile()` when compiling the regular expression. The same tables
+func:pcre2_compile() when compiling the regular expression. The same tables
 are used when matching the following subject lines. The `locale` modifier
 applies only to the pattern on which it appears, but can be given in a
 `#pattern` command if a default is needed. Setting a locale and alternate
@@ -1060,7 +1073,7 @@ character tables are mutually exclusive.
 
 The `memory` modifier causes the size in bytes of the memory used to hold
 the compiled pattern to be output. This does not include the size of the
-`pcre2_code` block; it is just the actual compiled data. If the pattern is
+type:pcre2_code block; it is just the actual compiled data. If the pattern is
 subsequently passed to the JIT compiler, the size of the JIT compiled code is
 also output. Here is an example:
 
@@ -1082,22 +1095,22 @@ suite.
 === Limiting the pattern length
 
 The `max_pattern_length` modifier sets a limit, in code units, to the
-length of pattern that `pcre2_compile()` will accept. Breaching the limit
-causes a compilation error. The default is the largest number a PCRE2_SIZE
+length of pattern that func:pcre2_compile() will accept. Breaching the limit
+causes a compilation error. The default is the largest number a type:PCRE2_SIZE
 variable can hold (essentially unlimited).
 
 === Limiting the size of a compiled pattern
 
 The `max_pattern_compiled_length` modifier sets a limit, in bytes, to the
 amount of memory used by a compiled pattern. Breaching the limit causes a
-compilation error. The default is the largest number a PCRE2_SIZE variable can
+compilation error. The default is the largest number a type:PCRE2_SIZE variable can
 hold (essentially unlimited).
 
 === Using the POSIX wrapper API
 
 The `posix` and `posix_nosub` modifiers cause `pcre2test` to call
 PCRE2 via the POSIX wrapper API rather than its native API. When
-`posix_nosub` is used, the POSIX option REG_NOSUB is passed to
+`posix_nosub` is used, the POSIX option [.c]`REG_NOSUB` is passed to
 `regcomp()`. The POSIX wrapper supports only the 8-bit library. Note that
 it does not imply POSIX matching semantics; for more detail see the
 xref:pcre2posix.adoc[`pcre2posix`]
@@ -1132,17 +1145,17 @@ an error.
 
 The pattern is passed to `regcomp()` as a zero-terminated string by
 default, but if the `use_length` or `hex` modifiers are set, the
-REG_PEND extension is used to pass it by length.
+const:REG_PEND extension is used to pass it by length.
 
 === Testing the stack guard feature
 
 The `stackguard` modifier is used to test the use of
-`pcre2_set_compile_recursion_guard()`, a function that is provided to
+func:pcre2_set_compile_recursion_guard(), a function that is provided to
 enable stack availability to be checked during compilation (see the
 xref:pcre2api.adoc[`pcre2api`]
 documentation for details). If the number specified by the modifier is greater
-than zero, `pcre2_set_compile_recursion_guard()` is called to set up
-callback from `pcre2_compile()` to a local function. The argument it
+than zero, func:pcre2_set_compile_recursion_guard() is called to set up
+callback from func:pcre2_compile() to a local function. The argument it
 receives is the current nesting parenthesis depth; if this is greater than the
 value given by the modifier, non-zero is returned, causing the compilation to
 be aborted.
@@ -1151,7 +1164,7 @@ be aborted.
 
 The value specified for the `tables` modifier must be one of the digits 0,
 1, 2, or 3. It causes a specific set of built-in character tables to be passed
-to `pcre2_compile()`. This is used in the PCRE2 tests to check behaviour
+to func:pcre2_compile(). This is used in the PCRE2 tests to check behaviour
 with different character tables. The digit specifies the tables as follows:
 
 [literal]
@@ -1176,33 +1189,31 @@ modifier list, in which case they are applied to every subject line that is
 processed with that pattern. These modifiers do not affect the compilation
 process.
 
-[literal,subs=normal]
-....
-pass:[    ]aftertext                   show text after match
-pass:[    ]allaftertext                show text after captures
-pass:[    ]allcaptures                 show all captures
-pass:[    ]allvector                   show the entire ovector
-pass:[    ]allusedtext                 show all consulted text
-pass:[    ]altglobal                   alternative global matching
-/g  global                      global matching
-pass:[    ]heapframes_size             show match data heapframes size
-pass:[    ]jitstack=<n>                set size of JIT stack
-pass:[    ]mark                        show mark values
-pass:[    ]null_substitute_match_data  substitute with NULL match data
-pass:[    ]replace=<str>               specify a replacement string
-pass:[    ]startchar                   show starting character when relevant
-pass:[    ]substitute_callout          use substitution callouts
-pass:[    ]substitute_case_callout     use substitution case callouts
-pass:[    ]substitute_extended         use PCRE2_SUBSTITUTE_EXTENDED
-pass:[    ]substitute_literal          use PCRE2_SUBSTITUTE_LITERAL
-pass:[    ]substitute_matched          use PCRE2_SUBSTITUTE_MATCHED
-pass:[    ]substitute_overflow_length  use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-pass:[    ]substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
-pass:[    ]substitute_skip=<n>         skip substitution <n>
-pass:[    ]substitute_stop=<n>         skip substitution <n> and following
-pass:[    ]substitute_unknown_unset    use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-pass:[    ]substitute_unset_empty      use PCRE2_SUBSTITUTE_UNSET_EMPTY
-....
+[.options]
+`aftertext`:: show text after match
+`allaftertext`:: show text after captures
+`allcaptures`:: show all captures
+`allvector`:: show the entire ovector
+`allusedtext`:: show all consulted text
+`altglobal`:: alternative global matching
+`/g  global`:: global matching
+`heapframes_size`:: show match data heapframes size
+`jitstack=<n>`:: set size of JIT stack
+`mark`:: show mark values
+`null_substitute_match_data`:: substitute with NULL match data
+`replace=<str>`:: specify a replacement string
+`startchar`:: show starting character when relevant
+`substitute_callout`:: use substitution callouts
+`substitute_case_callout`:: use substitution case callouts
+`substitute_extended`:: use const:PCRE2_SUBSTITUTE_EXTENDED
+`substitute_literal`:: use const:PCRE2_SUBSTITUTE_LITERAL
+`substitute_matched`:: use const:PCRE2_SUBSTITUTE_MATCHED
+`substitute_overflow_length`:: use const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+`substitute_replacement_only`:: use const:PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+`substitute_skip=<n>`:: skip substitution <n>
+`substitute_stop=<n>`:: skip substitution <n> and following
+`substitute_unknown_unset`:: use const:PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+`substitute_unset_empty`:: use const:PCRE2_SUBSTITUTE_UNSET_EMPTY
 
 These modifiers may not appear in a `#pattern` command. If you want them as
 defaults, set them in a `#subject` command.
@@ -1225,7 +1236,7 @@ below.
 If `pushcopy` is used instead of `push`, a copy of the compiled
 pattern is stacked, leaving the original as current, ready to match the
 following input lines. This provides a way of testing the
-`pcre2_code_copy()` function.
+func:pcre2_code_copy() function.
 The `push` and `pushcopy`  modifiers are incompatible with compilation
 modifiers such as `global` that act at match time. Any that are specified
 are ignored (for the stacked copy), with a warning message, except for
@@ -1237,26 +1248,24 @@ pattern.
 
 The experimental foreign pattern conversion functions in PCRE2 can be tested by
 setting the `convert` modifier. Its argument is a colon-separated list of
-options, which set the equivalent option for the `pcre2_pattern_convert()`
+options, which set the equivalent option for the func:pcre2_pattern_convert()
 function:
 
-[literal]
-....
-glob                    PCRE2_CONVERT_GLOB
-glob_no_starstar        PCRE2_CONVERT_GLOB_NO_STARSTAR
-glob_no_wild_separator  PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
-posix_basic             PCRE2_CONVERT_POSIX_BASIC
-posix_extended          PCRE2_CONVERT_POSIX_EXTENDED
-unset                   Unset all options
-....
+[.options]
+`glob`:: const:PCRE2_CONVERT_GLOB
+`glob_no_starstar`:: const:PCRE2_CONVERT_GLOB_NO_STARSTAR
+`glob_no_wild_separator`:: const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
+`posix_basic`:: const:PCRE2_CONVERT_POSIX_BASIC
+`posix_extended`:: const:PCRE2_CONVERT_POSIX_EXTENDED
+`unset`:: Unset all options
 
 The "unset" value is useful for turning off a default that has been set by a
 `#pattern` command. When one of these options is set, the input pattern is
-passed to `pcre2_pattern_convert()`. If the conversion is successful, the
-result is reflected in the output and then passed to `pcre2_compile()`. The
+passed to func:pcre2_pattern_convert(). If the conversion is successful, the
+result is reflected in the output and then passed to func:pcre2_compile(). The
 normal `utf` and `no_utf_check` options, if set, cause the
-PCRE2_CONVERT_UTF and PCRE2_CONVERT_NO_UTF_CHECK options to be passed to
-`pcre2_pattern_convert()`.
+const:PCRE2_CONVERT_UTF and const:PCRE2_CONVERT_NO_UTF_CHECK options to be passed to
+func:pcre2_pattern_convert().
 
 By default, the conversion function is allowed to allocate a buffer for its
 output. However, if the `convert_length` modifier is set to a value greater
@@ -1267,35 +1276,60 @@ The `convert_glob_escape` and `convert_glob_separator` modifiers can be
 used to specify the escape and separator characters for glob processing,
 overriding the defaults, which are operating-system dependent.
 
-== Subject Modifiers
+== Subject modifiers
 
 The modifiers that can appear in subject lines and the `#subject`
 command are of two types.
 
 === Setting match options
 
-The following modifiers set options for `pcre2_match()` or
-`pcre2_dfa_match()`. See
+The following modifiers set options for func:pcre2_match() or
+func:pcre2_dfa_match(). See
 xref:pcre2api.adoc[`pcre2api`]
 for a description of their effects.
 
-[literal,subs=normal]
-....
-pass:[    ]anchored                   set PCRE2_ANCHORED
-pass:[    ]copy_matched_subject       set PCRE2_COPY_MATCHED_SUBJECT
-pass:[    ]endanchored                set PCRE2_ENDANCHORED
-pass:[    ]dfa_restart                set PCRE2_DFA_RESTART
-pass:[    ]dfa_shortest               set PCRE2_DFA_SHORTEST
-pass:[    ]disable_recurseloop_check  set PCRE2_DISABLE_RECURSELOOP_CHECK
-pass:[    ]no_jit                     set PCRE2_NO_JIT
-pass:[    ]no_utf_check               set PCRE2_NO_UTF_CHECK
-pass:[    ]notbol                     set PCRE2_NOTBOL
-pass:[    ]notempty                   set PCRE2_NOTEMPTY
-pass:[    ]notempty_atstart           set PCRE2_NOTEMPTY_ATSTART
-pass:[    ]noteol                     set PCRE2_NOTEOL
-pass:[    ]partial_hard (or ph)       set PCRE2_PARTIAL_HARD
-pass:[    ]partial_soft (or ps)       set PCRE2_PARTIAL_SOFT
-....
+[.options]
+`anchored`::
+set const:PCRE2_ANCHORED
+
+`copy_matched_subject`::
+set const:PCRE2_COPY_MATCHED_SUBJECT
+
+`endanchored`::
+set const:PCRE2_ENDANCHORED
+
+`dfa_restart`::
+set const:PCRE2_DFA_RESTART
+
+`dfa_shortest`::
+set const:PCRE2_DFA_SHORTEST
+
+`disable_recurseloop_check`::
+set const:PCRE2_DISABLE_RECURSELOOP_CHECK
+
+`no_jit`::
+set const:PCRE2_NO_JIT
+
+`no_utf_check`::
+set const:PCRE2_NO_UTF_CHECK
+
+`notbol`::
+set const:PCRE2_NOTBOL
+
+`notempty`::
+set const:PCRE2_NOTEMPTY
+
+`notempty_atstart`::
+set const:PCRE2_NOTEMPTY_ATSTART
+
+`noteol`::
+set const:PCRE2_NOTEOL
+
+`partial_hard (or ph)`::
+set const:PCRE2_PARTIAL_HARD
+
+`partial_soft (or ps)`::
+set const:PCRE2_PARTIAL_SOFT
 
 The partial matching modifiers are provided with abbreviations because they
 appear frequently in tests.
@@ -1303,16 +1337,14 @@ appear frequently in tests.
 If the `posix` or `posix_nosub` modifier was present on the pattern,
 causing the POSIX wrapper API to be used, the only option-setting modifiers
 that have any effect are `notbol`, `notempty`, and `noteol`,
-causing REG_NOTBOL, REG_NOTEMPTY, and REG_NOTEOL, respectively, to be passed to
+causing [.c]`REG_NOTBOL`, [.c]`REG_NOTEMPTY`, and [.c]`REG_NOTEOL`, respectively, to be passed to
 `regexec()`. The other modifiers are ignored, with a warning message.
 
 There is one additional modifier that can be used with the POSIX wrapper. It is
 ignored (with a warning) if used for non-POSIX matching.
 
-[literal,subs=normal]
-....
-pass:[    ]posix_startend=<n>[:<m>]
-....
+[.options]
+`posix_startend=<n>[:<m>]`::
 
 This causes the subject string to be passed to `regexec()` using the
 REG_STARTEND option, which uses offsets to specify which part of the string is
@@ -1330,60 +1362,58 @@ information. Some of them may also be specified on a pattern line (see above),
 in which case they apply to every subject line that is matched against that
 pattern, but can be overridden by modifiers on the subject.
 
-[literal,subs=normal]
-....
-pass:[    ]aftertext                  show text after match
-pass:[    ]allaftertext               show text after captures
-pass:[    ]allcaptures                show all captures
-pass:[    ]allusedtext                show all consulted text (non-JIT only)
-pass:[    ]allvector                  show the entire ovector
-pass:[    ]altglobal                  alternative global matching
-pass:[    ]callout_capture            show captures at callout time
-pass:[    ]callout_data=<n>           set a value to pass via callouts
-pass:[    ]callout_error=<n>[:<m>]    control callout error
-pass:[    ]callout_extra              show extra callout information
-pass:[    ]callout_fail=<n>[:<m>]     control callout failure
-pass:[    ]callout_no_where           do not show position of a callout
-pass:[    ]callout_none               do not supply a callout function
-pass:[    ]copy=<number or name>      copy captured substring
-pass:[    ]depth_limit=<n>            set a depth limit
-pass:[    ]dfa                        use `pcre2_dfa_match()`
-pass:[    ]find_limits                find heap, match and depth limits
-pass:[    ]find_limits_noheap         find match and depth limits
-pass:[    ]get=<number or name>       extract captured substring
-pass:[    ]getall                     extract all captured substrings
-/g  global                     global matching
-pass:[    ]heapframes_size            show match data heapframes size
-pass:[    ]heap_limit=<n>             set a limit on heap memory (Kbytes)
-pass:[    ]jitstack=<n>               set size of JIT stack
-pass:[    ]mark                       show mark values
-pass:[    ]match_limit=<n>            set a match limit
-pass:[    ]memory                     show heap memory usage
-pass:[    ]null_context               match with a NULL context
-pass:[    ]null_replacement           substitute with NULL replacement
-pass:[    ]null_subject               match with NULL subject
-pass:[    ]null_substitute_match_data substitute with NULL match data
-pass:[    ]offset=<n>                 set starting offset
-pass:[    ]offset_limit=<n>           set offset limit
-pass:[    ]ovector=<n>                set size of output vector
-pass:[    ]recursion_limit=<n>        obsolete synonym for depth_limit
-pass:[    ]replace=<str>              specify a replacement string
-pass:[    ]startchar                  show startchar when relevant
-pass:[    ]startoffset=<n>            same as offset=<n>
-pass:[    ]substitute_callout         use substitution callouts
-pass:[    ]substitute_case_callout    use substitution case callouts
-pass:[    ]substitute_extended        use PCRE2_SUBSTITUTE_EXTENDED
-pass:[    ]substitute_literal         use PCRE2_SUBSTITUTE_LITERAL
-pass:[    ]substitute_matched         use PCRE2_SUBSTITUTE_MATCHED
-pass:[    ]substitute_overflow_length use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-pass:[    ]substitute_replacement_only use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
-pass:[    ]substitute_skip=<n>        skip substitution number n
-pass:[    ]substitute_stop=<n>        skip substitution number n and greater
-pass:[    ]substitute_subject=<str>   specify a different subject for substitution
-pass:[    ]substitute_unknown_unset   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-pass:[    ]substitute_unset_empty     use PCRE2_SUBSTITUTE_UNSET_EMPTY
-pass:[    ]zero_terminate             pass the subject as zero-terminated
-....
+[.options]
+`aftertext`:: show text after match
+`allaftertext`:: show text after captures
+`allcaptures`:: show all captures
+`allusedtext`:: show all consulted text (non-JIT only)
+`allvector`:: show the entire ovector
+`altglobal`:: alternative global matching
+`callout_capture`:: show captures at callout time
+`callout_data=<n>`:: set a value to pass via callouts
+`callout_error=<n>[:<m>]`:: control callout error
+`callout_extra`:: show extra callout information
+`callout_fail=<n>[:<m>]`:: control callout failure
+`callout_no_where`:: do not show position of a callout
+`callout_none`:: do not supply a callout function
+`copy=<number or name>`:: copy captured substring
+`depth_limit=<n>`:: set a depth limit
+`dfa`:: use func:pcre2_dfa_match()
+`find_limits`:: find heap, match and depth limits
+`find_limits_noheap`:: find match and depth limits
+`get=<number or name>`:: extract captured substring
+`getall`:: extract all captured substrings
+`/g  global`:: global matching
+`heapframes_size`:: show match data heapframes size
+`heap_limit=<n>`:: set a limit on heap memory (Kbytes)
+`jitstack=<n>`:: set size of JIT stack
+`mark`:: show mark values
+`match_limit=<n>`:: set a match limit
+`memory`:: show heap memory usage
+`null_context`:: match with a NULL context
+`null_replacement`:: substitute with NULL replacement
+`null_subject`:: match with NULL subject
+`null_substitute_match_data`:: substitute with NULL match data
+`offset=<n>`:: set starting offset
+`offset_limit=<n>`:: set offset limit
+`ovector=<n>`:: set size of output vector
+`recursion_limit=<n>`:: obsolete synonym for depth_limit
+`replace=<str>`:: specify a replacement string
+`startchar`:: show startchar when relevant
+`startoffset=<n>`:: same as offset=<n>
+`substitute_callout`:: use substitution callouts
+`substitute_case_callout`:: use substitution case callouts
+`substitute_extended`:: use const:PCRE2_SUBSTITUTE_EXTENDED
+`substitute_literal`:: use const:PCRE2_SUBSTITUTE_LITERAL
+`substitute_matched`:: use const:PCRE2_SUBSTITUTE_MATCHED
+`substitute_overflow_length`:: use const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+`substitute_replacement_only`:: use const:PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+`substitute_skip=<n>`:: skip substitution number n
+`substitute_stop=<n>`:: skip substitution number n and greater
+`substitute_subject=<str>`:: specify a different subject for substitution
+`substitute_unknown_unset`:: use const:PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+`substitute_unset_empty`:: use const:PCRE2_SUBSTITUTE_UNSET_EMPTY
+`zero_terminate`:: pass the subject as zero-terminated
 
 The effects of these modifiers are described in the following sections. When
 matching via the POSIX wrapper API, the `aftertext`, `allaftertext`,
@@ -1405,7 +1435,7 @@ during a successful pattern match by the interpreter should be shown, for both
 full and partial matches. This feature is not supported for JIT matching, and
 if requested with JIT it is ignored (with a warning message). Setting this
 modifier affects the output if there is a lookbehind at the start of a match,
-or, for a complete match, a lookahead at the end, or if \K is used in the
+or, for a complete match, a lookahead at the end, or if [.regex]`\K` is used in the
 pattern. Characters that precede or follow the start and end of the actual
 match are indicated in the output by '<' or '>' characters underneath them.
 Here is an example:
@@ -1428,7 +1458,7 @@ the preceding string.
 
 The `startchar` modifier requests that the starting character for the match
 be indicated, if it is different to the start of the matched string. The only
-time when this occurs is when \K has been processed as part of the match. In
+time when this occurs is when [.regex]`\K` has been processed as part of the match. In
 this situation, the output for the matched string is displayed from the
 starting character instead of from the match point, with circumflex characters
 under the earlier characters. For example:
@@ -1449,7 +1479,7 @@ However, these two modifiers are mutually exclusive.
 The `allcaptures` modifier requests that the values of all potential
 captured parentheses be output after a match. By default, only those up to the
 highest one actually used in the match are output (corresponding to the return
-code from `pcre2_match()`). Groups that did not take part in the match
+code from func:pcre2_match()). Groups that did not take part in the match
 are output as "<unset>". This modifier is not relevant for DFA matching (which
 does no capturing) and does not apply when `replace` is specified; it is
 ignored, with a warning message, if present.
@@ -1476,7 +1506,7 @@ functions, unless `callout_none` is specified. Its behaviour can be
 controlled by various modifiers listed above whose names begin with
 `callout_`. Details are given in the section entitled "Callouts"
 below.
-Testing callouts from `pcre2_substitute()` is described separately in
+Testing callouts from func:pcre2_substitute() is described separately in
 "Testing the substitution function"
 below.
 
@@ -1486,21 +1516,21 @@ Searching for all possible matches within a subject can be requested by the
 `global` or `altglobal` modifier. After finding a match, the matching
 function is called again to search the remainder of the subject. The difference
 between `global` and `altglobal` is that the former uses the
-_start_offset_ argument to `pcre2_match()` or `pcre2_dfa_match()`
+_start_offset_ argument to func:pcre2_match() or func:pcre2_dfa_match()
 to start searching at a new point within the entire string (which is what Perl
 does), whereas the latter passes over a shortened subject. This makes a
 difference to the matching process if the pattern begins with a lookbehind
-assertion (including \b or \B).
+assertion (including [.regex]`\b` or [.regex]`\B`).
 
 If an empty string is matched, the next match is done with the
-PCRE2_NOTEMPTY_ATSTART flag set, in order to search for another, non-empty,
+const:PCRE2_NOTEMPTY_ATSTART flag set, in order to search for another, non-empty,
 match at the same point in the subject. This imitates the way Perl handles such
 cases when using the `/g` modifier or the `split()` function.
 
 === Testing substring extraction functions
 
 The `copy` and `get` modifiers can be used to test the
-`pcre2_substring_copy_xxx()` and `pcre2_substring_get_xxx()` functions.
+func:pcre2_substring_copy_xxx() and func:pcre2_substring_get_xxx() functions.
 They can be given more than once, and each can specify a capture group name or
 number, for example:
 
@@ -1513,7 +1543,7 @@ If the `#subject` command is used to set default copy and/or get lists,
 these can be unset by specifying a negative number to cancel all numbered
 groups and an empty name to cancel all named groups.
 
-The `getall` modifier tests `pcre2_substring_list_get()`, which
+The `getall` modifier tests func:pcre2_substring_list_get(), which
 extracts all captured substrings.
 
 If the subject line is successfully matched, the substrings extracted by the
@@ -1525,9 +1555,9 @@ by name.
 
 === Testing the substitution function
 
-If the `replace` modifier is set, the `pcre2_substitute()` function is
+If the `replace` modifier is set, the func:pcre2_substitute() function is
 called instead of one of the matching functions (or after one call of
-`pcre2_match()` in the case of PCRE2_SUBSTITUTE_MATCHED). Note that
+func:pcre2_match() in the case of const:PCRE2_SUBSTITUTE_MATCHED). Note that
 replacement strings cannot contain commas, because a comma signifies the end of
 a modifier. This is not thought to be an issue in a test program.
 
@@ -1543,7 +1573,7 @@ individual code units are copied directly. This provides a means of passing an
 invalid UTF-8 string for testing purposes.
 
 The following modifiers set options (in additional to the normal match options)
-for `pcre2_substitute()`:
+for func:pcre2_substitute():
 
 [literal]
 ....
@@ -1577,7 +1607,7 @@ simple example of a substitution test:
 Subject and replacement strings should be kept relatively short (fewer than 256
 characters) for substitution tests, as fixed-size buffers are used. To make it
 easy to test for buffer overflow, if the replacement string starts with a
-number in square brackets, that number is passed to `pcre2_substitute()` as
+number in square brackets, that number is passed to func:pcre2_substitute() as
 the size of the output buffer, with the replacement string starting at the next
 character. Here is an example that tests the edge case:
 
@@ -1590,10 +1620,10 @@ character. Here is an example that tests the edge case:
 Failed: error -48: no more memory
 ....
 
-The default action of `pcre2_substitute()` is to return
-PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
-PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using the
-`substitute_overflow_length` modifier), `pcre2_substitute()` continues
+The default action of func:pcre2_substitute() is to return
+const:PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if the
+const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH option is set (by using the
+`substitute_overflow_length` modifier), func:pcre2_substitute() continues
 to go through the motions of matching and substituting (but not doing any
 callouts), in order to compute the size of buffer that is required. When this
 happens, `pcre2test` shows the required buffer length (which includes space
@@ -1608,11 +1638,11 @@ Failed: error -48: no more memory: 10 code units are needed
 
 A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
-`pcre2_substitute()`.
+func:pcre2_substitute().
 
 The `substitute_subject` modifier may be used to test the use of the PCRE2
-API, in which a client calls `pcre2_match()` followed by `pcre2_substitute()`
-with PCRE2_SUBSTITUTE_MATCHED, but the client performs an unexpected and
+API, in which a client calls func:pcre2_match() followed by func:pcre2_substitute()
+with const:PCRE2_SUBSTITUTE_MATCHED, but the client performs an unexpected and
 unsupported modification of the subject buffer in-place, in between the match
 and substitution.
 
@@ -1642,7 +1672,7 @@ replacement.
 By default, the substitution callout function returns zero, which accepts the
 replacement and causes matching to continue if /g was used. Two further
 modifiers can be used to test other return values. If `substitute_skip` is
-set to a value greater than zero the callout function returns pass:[+]1 for the match
+set to a value greater than zero the callout function returns [.c]`+1` for the match
 of that number, and similarly `substitute_stop` returns -1. These cause the
 replacement to be rejected, and -1 causes no further matching to take place. If
 either of them are set, `substitute_callout` is assumed. For example:
@@ -1694,8 +1724,8 @@ the appropriate limits in the match context. These values are ignored when the
 
 If the `find_limits` modifier is present on a subject line, `pcre2test`
 calls the relevant matching function several times, setting different values in
-the match context via `pcre2_set_heap_limit()`,
-`pcre2_set_match_limit()`, or `pcre2_set_depth_limit()` until it finds
+the match context via func:pcre2_set_heap_limit(),
+func:pcre2_set_match_limit(), or func:pcre2_set_depth_limit() until it finds
 the smallest value for each parameter that allows the match to complete without
 a "limit exceeded" error. The match itself may succeed or fail. An alternative
 modifier, `find_limits_noheap`, omits the heap limit. This is used in the
@@ -1704,9 +1734,9 @@ is being used, only the match limit is relevant, and the other two are
 automatically omitted.
 
 When using this modifier, the pattern should not contain any limit settings
-such as (pass:[*]LIMIT_MATCH=...) within it. If such a setting is present and is
+such as ([.regex]`*LIMIT_MATCH=...`) within it. If such a setting is present and is
 lower than the minimum matching value, the minimum value cannot be found
-because `pcre2_set_match_limit()` etc. are only able to reduce the value of
+because func:pcre2_set_match_limit() etc. are only able to reduce the value of
 an in-pattern limit; they cannot increase it.
 
 For non-DFA matching, the minimum _depth_limit_ number is a measure of how
@@ -1727,10 +1757,10 @@ overall amount of computing resource that is used.
 For both kinds of matching, the _heap_limit_ number, which is in kibibytes
 (units of 1024 bytes), limits the amount of heap memory used for matching.
 
-=== Showing MARK names
+=== Showing mark names
 
 The `mark` modifier causes the names from backtracking control verbs that
-are returned from calls to `pcre2_match()` to be displayed. If a mark is
+are returned from calls to func:pcre2_match() to be displayed. If a mark is
 returned for a match, non-match, or partial match, `pcre2test` shows it.
 For a match, it is on a line by itself, tagged with "MK:". Otherwise, it
 is added to the non-match message.
@@ -1739,7 +1769,7 @@ is added to the non-match message.
 
 The `memory` modifier causes `pcre2test` to log the sizes of all heap
 memory allocation and freeing calls that occur during a call to
-`pcre2_match()` or `pcre2_dfa_match()`. In the latter case, heap memory
+func:pcre2_match() or func:pcre2_dfa_match(). In the latter case, heap memory
 is used only when a match requires more internal workspace that the default
 allocation on the stack, so in many cases there will be no output. No heap
 memory is allocated during matching with JIT. For this modifier to work, the
@@ -1749,10 +1779,10 @@ subject, though it can be set on one or the other.
 === Showing the heap frame overall vector size
 
 The `heapframes_size` modifier is relevant for matches using
-`pcre2_match()` without JIT. After a match has run (whether successful or
+func:pcre2_match() without JIT. After a match has run (whether successful or
 not) the size, in bytes, of the allocated heap frames vector that is left
 attached to the match data block is shown. If the matching action involved
-several calls to `pcre2_match()` (for example, global matching or for
+several calls to func:pcre2_match() (for example, global matching or for
 timing) only the final value is shown.
 
 This modifier is ignored, with a warning, for POSIX or DFA matching. JIT
@@ -1784,7 +1814,7 @@ available for storing matching information. The default is 15.
 A value of zero is useful when testing the POSIX API because it causes
 `regexec()` to be called with a NULL capture vector. When not testing the
 POSIX API, a value of zero is used to cause
-`pcre2_match_data_create_from_pattern()` to be called, in order to create a
+func:pcre2_match_data_create_from_pattern() to be called, in order to create a
 new match block of exactly the right size for the pattern. (It is not possible
 to create a match block with a zero-length ovector; there is always at least
 one pair of offsets.) The old match data block is freed.
@@ -1794,16 +1824,16 @@ one pair of offsets.) The old match data block is freed.
 By default, the subject string is passed to a native API matching function with
 its correct length. In order to test the facility for passing a zero-terminated
 string, the `zero_terminate` modifier is provided. It causes the length to
-be passed as PCRE2_ZERO_TERMINATED. When matching via the POSIX interface,
+be passed as const:PCRE2_ZERO_TERMINATED. When matching via the POSIX interface,
 this modifier is ignored, with a warning.
 
-When testing `pcre2_substitute()`, this modifier also has the effect of
+When testing func:pcre2_substitute(), this modifier also has the effect of
 passing the replacement string as zero-terminated.
 
-=== Passing a NULL context, subject, or replacement
+=== Passing a null context, subject, or replacement
 
-Normally, `pcre2test` passes a context block to `pcre2_match()`,
-`pcre2_dfa_match()`, `pcre2_jit_match()` or `pcre2_substitute()`.
+Normally, `pcre2test` passes a context block to func:pcre2_match(),
+func:pcre2_dfa_match(), func:pcre2_jit_match() or func:pcre2_substitute().
 If the `null_context` modifier is set, however, NULL is passed. This is for
 testing that the matching and substitution functions behave correctly in this
 case (they use default values). This modifier cannot be used with the
@@ -1814,11 +1844,11 @@ Similarly, for testing purposes, if the `null_subject` or
 `null_replacement` modifier is set, the subject or replacement string
 pointers are passed as NULL, respectively, to the relevant functions.
 
-== The Alternative Matching Function
+== The alternative matching function
 
 By default, `pcre2test` uses the standard PCRE2 matching function,
-`pcre2_match()` to match each subject line. PCRE2 also supports an
-alternative matching function, `pcre2_dfa_match()`, which operates in a
+func:pcre2_match() to match each subject line. PCRE2 also supports an
+alternative matching function, func:pcre2_dfa_match(), which operates in a
 different way, and has some restrictions. The differences between the two
 functions are described in the
 xref:pcre2matching.adoc[`pcre2matching`]
@@ -1829,19 +1859,19 @@ This function finds all possible matches at a given point in the subject. If,
 however, the `dfa_shortest` modifier is set, processing stops after the
 first match is found. This is always the shortest possible match.
 
-== DEFAULT OUTPUT FROM pcre2test
+== Default output from pcre2test
 
 This section describes the output when the normal matching function,
-`pcre2_match()`, is being used.
+func:pcre2_match(), is being used.
 
 When a match succeeds, `pcre2test` outputs the list of captured substrings,
 starting with number 0 for the string that matched the whole pattern.
-Otherwise, it outputs "No match" when the return is PCRE2_ERROR_NOMATCH, or
+Otherwise, it outputs "No match" when the return is const:PCRE2_ERROR_NOMATCH, or
 "Partial match:" followed by the partially matching substring when the
-return is PCRE2_ERROR_PARTIAL. (Note that this is the
+return is const:PCRE2_ERROR_PARTIAL. (Note that this is the
 entire substring that was inspected during the partial match; it may include
-characters before the actual match start if a lookbehind assertion, \K, \b,
-or \B was involved.)
+characters before the actual match start if a lookbehind assertion, [.regex]`\K`, [.regex]`\b`,
+or [.regex]`\B` was involved.)
 
 For any other return, `pcre2test` outputs the PCRE2 negative error number
 and a short descriptive phrase. If the error is a failed UTF string check, the
@@ -1886,7 +1916,7 @@ If the strings contain any non-printing characters, they are output as \xhh
 escapes if the value is less than 256 and UTF mode is not set. Otherwise they
 are output as \x{hh...} escapes. See below for the definition of non-printing
 characters. If the `aftertext` modifier is set, the output for substring 0
-is followed by the rest of the subject string, identified by "0pass:[+]" like this:
+is followed by the rest of the subject string, identified by "0+" like this:
 
 [literal]
 ....
@@ -1927,9 +1957,9 @@ prompt is used for continuations), subject lines may not. However newlines can
 be included in a subject by means of the \n escape (or \r, \r\n, etc.,
 depending on the newline sequence setting).
 
-== Output From The Alternative Matching Function
+== Output from the alternative matching function
 
-When the alternative matching function, `pcre2_dfa_match()`, is used, the
+When the alternative matching function, func:pcre2_dfa_match(), is used, the
 output consists of a list of all the matches that start at the first point in
 the subject where there is at least one match. For example:
 
@@ -1944,10 +1974,10 @@ data> yellow tangerine\=dfa
 
 Using the normal matching function on this data finds only "tang". The
 longest matching string is always given first (and numbered zero). After a
-PCRE2_ERROR_PARTIAL return, the output is "Partial match:", followed by the
+const:PCRE2_ERROR_PARTIAL return, the output is "Partial match:", followed by the
 partially matching substring. Note that this is the entire substring that was
 inspected during the partial match; it may include characters before the actual
-match start if a lookbehind assertion, \b, or \B was involved. (\K is not
+match start if a lookbehind assertion, [.regex]`\b`, or [.regex]`\B` was involved. ([.regex]`\K` is not
 supported for DFA matching.)
 
 If global matching is requested, the search for further matches resumes
@@ -1968,9 +1998,9 @@ data> yellow tangerine and tangy sultana\=dfa
 The alternative matching function does not support substring capture, so the
 modifiers that are concerned with captured substrings are not relevant.
 
-== Restarting After A Partial Match
+== Restarting after a partial match
 
-When the alternative matching function has given the PCRE2_ERROR_PARTIAL
+When the alternative matching function has given the const:PCRE2_ERROR_PARTIAL
 return, indicating that the subject partially matched the pattern, you can
 restart the match with additional subject data by means of the
 `dfa_restart` modifier. For example:
@@ -2010,7 +2040,7 @@ item to be tested. For example:
 
 This output indicates that callout number 0 occurred for a match attempt
 starting at the fourth character of the subject string, when the pointer was at
-the seventh character, and when the next pattern item was \d. Just
+the seventh character, and when the next pattern item was [.regex]`\d`. Just
 one circumflex is output if the start and current positions are the same, or if
 the current position precedes the start position, which can happen if the
 callout is in a lookbehind assertion.
@@ -2032,7 +2062,7 @@ data> E*
  0: E*
 ....
 
-If a pattern contains (pass:[*]MARK) items, an additional line is output whenever
+If a pattern contains [.regex]`(*MARK)` items, an additional line is output whenever
 a change of latest mark is passed to the callout function. For example:
 
 [literal]
@@ -2082,13 +2112,13 @@ change this and other parameters of the callout (see below).
 
 If the `callout_capture` modifier is set, the current captured groups are
 output when a callout occurs. This is useful only for non-DFA matching, as
-`pcre2_dfa_match()` does not support capturing, so no captures are ever
+func:pcre2_dfa_match() does not support capturing, so no captures are ever
 shown.
 
 The normal callout output, showing the callout number or pattern offset (as
 described above) is suppressed if the `callout_no_where` modifier is set.
 
-When using the interpretive matching function `pcre2_match()` without JIT,
+When using the interpretive matching function func:pcre2_match() without JIT,
 setting the `callout_extra` modifier causes additional output from
 ``pcre2test``'s callout function to be generated. For the first callout in a
 match attempt at a new starting position in the subject, "New match attempt" is
@@ -2138,8 +2168,8 @@ Notice that various optimizations must be turned off if you want all possible
 matching paths to be scanned. If `no_start_optimize` is not used, there is
 an immediate "no match", without any callouts, because the starting
 optimization fails to find "b" in the subject, which it knows must be present
-for any match. If `no_auto_possess` is not used, the "apass:[+]" item is turned
-into "apass:[+]pass:[+]", which reduces the number of backtracks.
+for any match. If `no_auto_possess` is not used, the [.regex]`a+` item is turned
+into [.regex]`a++`, which reduces the number of backtracks.
 
 The `callout_extra` modifier has no effect if used with the DFA matching
 function, or with JIT.
@@ -2152,7 +2182,7 @@ there is only one number, 1 is returned instead of 0 (causing matching to
 backtrack) when a callout of that number is reached. If two numbers (<n>:<m>)
 are given, 1 is returned when callout <n> is reached and there have been at
 least <m> callouts. The `callout_error` modifier is similar, except that
-PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
+const:PCRE2_ERROR_CALLOUT is returned, causing the entire matching process to be
 aborted. If both these modifiers are set for the same callout number,
 `callout_error` takes precedence. Note that callouts with string arguments
 are always given the number zero.
@@ -2168,7 +2198,7 @@ the
 xref:pcre2callout.adoc[`pcre2callout`]
 documentation.
 
-== Non-Printing Characters
+== Non-printing characters
 
 When `pcre2test` is outputting text in the compiled version of a pattern,
 bytes other than 32-126 are always treated as non-printing characters and are
@@ -2180,19 +2210,19 @@ the pattern (using the `locale` modifier). In this case, the
 `isprint()` function is used to distinguish printing and non-printing
 characters.
 
-== Saving And Restoring Compiled Patterns
+== Saving and restoring compiled patterns
 
 It is possible to save compiled patterns on disc or elsewhere, and reload them
 later, subject to a number of restrictions. JIT data cannot be saved. The host
 on which the patterns are reloaded must be running the same version of PCRE2,
 with the same code unit width, and must also have the same endianness, pointer
-width and PCRE2_SIZE type. Before compiled patterns can be saved they must be
+width and type:PCRE2_SIZE type. Before compiled patterns can be saved they must be
 serialized, that is, converted to a stream of bytes. A single byte stream may
 contain any number of compiled patterns, but they must all use the same
 character tables. A single copy of the tables is included in the byte stream
 (its size is 1088 bytes).
 
-The functions whose names begin with `pcre2_serialize_` are used
+The functions whose names begin with [.c]`pcre2_serialize_` are used
 for serializing and de-serializing. They are described in the
 xref:pcre2serialize.adoc[`pcre2serialize`]
 documentation. In this section we describe the features of `pcre2test` that
@@ -2265,7 +2295,7 @@ The #popcopy command is analogous to the `pushcopy` modifier in that it
 makes current a copy of the topmost stack pattern, leaving the original still
 on the stack.
 
-== See Also
+== See also
 
 `pcre2`(3), `pcre2api`(3), `pcre2callout`(3),
 `pcre2jit`, `pcre2matching`(3), `pcre2partial`(d),
@@ -2273,7 +2303,7 @@ on the stack.
 
 == Author
 
-[source]
+[literal]
 ----
 Philip Hazel
 Retired from University Computing Service

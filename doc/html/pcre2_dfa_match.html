@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
                     PCRE2_SIZE length, PCRE2_SIZE start_offset,
@@ -466,50 +466,116 @@ int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
 string, using an alternative matching algorithm that scans the subject string
 just once (except when processing lookaround assertions). This function is
 <em>not</em> Perl-compatible (the Perl-compatible matching function is
-<code>pcre2_match()</code>). The arguments for this function are:</p>
+<code class="function">pcre2_match()</code>). The arguments for this function are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>code</em>         Points to the compiled pattern<br>
-<em>subject</em>      Points to the subject string<br>
-<em>length</em>       Length of the subject string<br>
-<em>startoffset</em>  Offset in the subject at which to start matching<br>
-<em>options</em>      Option bits<br>
-<em>match_data</em>   Points to a match data block, for results<br>
-<em>mcontext</em>     Points to a match context, or is NULL<br>
-<em>workspace</em>    Points to a vector of ints used as working space<br>
-<em>wscount</em>      Number of elements in the vector</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">code</code></dt>
+<dd>
+<p>Points to the compiled pattern</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">subject</code></dt>
+<dd>
+<p>Points to the subject string</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">length</code></dt>
+<dd>
+<p>Length of the subject string</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">start_offset</code></dt>
+<dd>
+<p>Offset in the subject at which to start matching</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">options</code></dt>
+<dd>
+<p>Option bits</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">match_data</code></dt>
+<dd>
+<p>Points to a match data block, for results</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">mcontext</code></dt>
+<dd>
+<p>Points to a match context, or is <code class="c">NULL</code></p>
+</dd>
+<dt class="hdlist1"><code class="parameter">workspace</code></dt>
+<dd>
+<p>Points to a vector of ints used as working space</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">wscount</code></dt>
+<dd>
+<p>Number of elements in the vector</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The size of output vector needed to contain all the results depends on the
 number of simultaneous matches, not on the number of parentheses in the
-pattern. Using <code>pcre2_match_data_create_from_pattern()</code> to create the match
+pattern. Using <code class="function">pcre2_match_data_create_from_pattern()</code> to create the match
 data block is therefore not advisable when using this function.</p>
 </div>
 <div class="paragraph">
 <p>A match context is needed only if you want to set up a callout function or
 specify the heap limit or the match or the recursion depth limits. The
-<em>length</em> and <em>startoffset</em> values are code units, not characters. The
+<code class="parameter">length</code> and <code class="parameter">start_offset</code> values are code units, not characters. The
 options are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ANCHORED          Match only at the first position<br>
-PCRE2_COPY_MATCHED_SUBJECT<br>
-                        On success, make a private subject copy<br>
-PCRE2_ENDANCHORED       Pattern can match only at end of subject<br>
-PCRE2_NOTBOL            Subject is not the beginning of a line<br>
-PCRE2_NOTEOL            Subject is not the end of a line<br>
-PCRE2_NOTEMPTY          An empty string is not a valid match<br>
-PCRE2_NOTEMPTY_ATSTART  An empty string at the start of the subject<br>
-                         is not a valid match<br>
-PCRE2_NO_UTF_CHECK      Do not check the subject for UTF<br>
-                         validity (only relevant if PCRE2_UTF<br>
-                         was set at compile time)<br>
-PCRE2_PARTIAL_HARD      Return PCRE2_ERROR_PARTIAL for a partial<br>
-                         match even if there is a full match<br>
-PCRE2_PARTIAL_SOFT      Return PCRE2_ERROR_PARTIAL for a partial<br>
-                         match if no full matches are found<br>
-PCRE2_DFA_RESTART       Restart after a partial match<br>
-PCRE2_DFA_SHORTEST      Return only the shortest match</p>
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ANCHORED</code></dt>
+<dd>
+<p>Match only at the first position</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_COPY_MATCHED_SUBJECT</code></dt>
+<dd>
+<p>On success, make a private subject copy</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ENDANCHORED</code></dt>
+<dd>
+<p>Pattern can match only at end of subject</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTBOL</code></dt>
+<dd>
+<p>Subject is not the beginning of a line</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTEOL</code></dt>
+<dd>
+<p>Subject is not the end of a line</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTEMPTY</code></dt>
+<dd>
+<p>An empty string is not a valid match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTEMPTY_ATSTART</code></dt>
+<dd>
+<p>An empty string at the start of the subject
+is not a valid match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_UTF_CHECK</code></dt>
+<dd>
+<p>Do not check the subject for UTF
+validity (only relevant if <code class="constant">PCRE2_UTF</code>
+was set at compile time)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_PARTIAL_HARD</code></dt>
+<dd>
+<p>Return <code class="constant">PCRE2_ERROR_PARTIAL</code> for a partial
+match even if there is a full match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_PARTIAL_SOFT</code></dt>
+<dd>
+<p>Return <code class="constant">PCRE2_ERROR_PARTIAL</code> for a partial
+match if no full matches are found</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DFA_RESTART</code></dt>
+<dd>
+<p>Restart after a partial match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DFA_SHORTEST</code></dt>
+<dd>
+<p>Return only the shortest match</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>There are restrictions on what may appear in a pattern when using this matching

@@ -29,7 +29,7 @@ that PCRE2 supports.
 Patterns, whether supplied on the command line or in a separate file, are given
 without delimiters. For example:
 
-[literal]
+[source,shell]
 ....
 pcre2grep Thursday /etc/motd
 ....
@@ -50,13 +50,13 @@ If no files are specified, `pcre2grep` reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:
 
-[literal]
+[source,shell]
 ....
 pcre2grep some-pattern file1 - file3
 ....
 
 By default, input files are searched line by line, so pattern assertions about
-the beginning and end of a subject string (^, $, \A, \Z, and \z) match at
+the beginning and end of a subject string ([.regex]`^`, [.regex]`$`, [.regex]`\A`, [.regex]`\Z`, and [.regex]`\z`) match at
 the beginning and end of each line. When a line matches a pattern, it is copied
 to the standard output, and if there is more than one file, the file name is
 output at the start of each line, followed by a colon. However, there are
@@ -84,7 +84,7 @@ small, fewer than requested "before" and "after" lines may be output.
 When matching with a multiline pattern, the size of the buffer must be at least
 half of the maximum match expected or the pattern might fail to match.
 
-Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
+Patterns can be no longer than 8KiB or [.c]`BUFSIZ` bytes, whichever is the greater.
 BUFSIZ is defined in `<stdio.h>`. When there is more than one pattern
 (specified by the use of `-e` and/or `-f`), each pattern is applied to
 each line in the order in which they are defined, except that all the `-e`
@@ -110,7 +110,7 @@ grep. In earlier releases, `pcre2grep` did not recognize matches from
 later patterns that were earlier in the subject.
 
 Patterns that can match an empty string are accepted, but empty string
-matches are never recognized. An example is the pattern "(super)?(man)?", in
+matches are never recognized. An example is the pattern [.regex]`(super)?(man)?`, in
 which all components are optional. This pattern finds all occurrences of both
 "super" and "man"; the output differs from matching with "super|man" when only
 the matching substrings are being shown.
@@ -119,7 +119,7 @@ If the `LC_ALL` or `LC_CTYPE` environment variable is set,
 `pcre2grep` uses the value to set a locale when calling the PCRE2 library.
 The `--locale` option can be used to override this.
 
-== Support For Compressed Files
+== Support for compressed files
 
 Compile-time options for `pcre2grep` can set it up to use `libz` or
 `libbz2` for reading compressed files whose names end in `.gz` or
@@ -131,7 +131,7 @@ a `.gz` or `.bz2` extension is not in fact compressed, it is read as a
 plain text file. When input is from a compressed .gz or .bz2 file, the
 `--line-buffered` option is ignored.
 
-== Binary Files
+== Binary files
 
 By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. However, if the
@@ -139,7 +139,7 @@ newline type is specified as NUL, that is, the line terminator is a binary
 zero, the test for a binary file is not applied. See the `--binary-files`
 option for a means of changing the way binary files are handled.
 
-== Binary Zeros In Patterns
+== Binary zeros in patterns
 
 Patterns passed from the command line are strings that are terminated by a
 binary zero, so cannot contain internal zeros. However, patterns that are read
@@ -147,12 +147,14 @@ from a file via the `-f` option may contain binary zeros.
 
 == Options
 
+[.options]
+
 The order in which some of the options appear can affect the output. For
 example, both the `-H` and `-l` options affect the printing of file
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
-to signify multiplication by 1024 or 1024pass:[*]1024 respectively.
+to signify multiplication by 1024 or `1024*1024` respectively.
 
 `--`::
 This terminates the list of options. It is useful if the next item on the
@@ -175,8 +177,8 @@ Treat binary files as text. This is equivalent to
 `--binary-files`=_text_.
 
 `--allow-lookaround-bsk`::
-PCRE2 now forbids the use of \K in lookarounds by default, in line with Perl.
-This option causes `pcre2grep` to set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+PCRE2 now forbids the use of [.regex]`\K` in lookarounds by default, in line with Perl.
+This option causes `pcre2grep` to set the const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
 option, which enables this somewhat dangerous usage.
 
 `-B` _number_, `--before-context=number`::
@@ -281,7 +283,7 @@ See `--match-limit` below.
 
 `-E`, `--case-restrict`::
 When case distinctions are being ignored in Unicode mode, two ASCII letters (K
-and S) will by default match Unicode characters Upass:[+]212A (Kelvin sign) and Upass:[+]017F
+and S) will by default match Unicode characters `U+212A` (Kelvin sign) and `U+017F`
 (long S) respectively, as well as their lower case ASCII counterparts. When
 this option is set, case equivalences are restricted such that no ASCII
 character matches a non-ASCII character, and vice versa.
@@ -509,10 +511,10 @@ the end of the initial line and onto one or more subsequent lines.
 
 +
 Patterns used with `-M` may usefully contain literal newline characters and
-internal occurrences of ^ and $ characters, because in multiline mode these can
+internal occurrences of [.regex]`^` and [.regex]`$` characters, because in multiline mode these can
 match at internal newlines. Because `pcre2grep` is scanning multiple lines,
-the \Z and \z assertions match only at the end of the last line in the file.
-The \A assertion matches at the start of the first line of a match. This can
+the [.regex]`\Z` and [.regex]`\z` assertions match only at the end of the last line in the file.
+The [.regex]`\A` assertion matches at the start of the first line of a match. This can
 be any line in the file; it is not anchored to the first line.
 
 +
@@ -530,14 +532,14 @@ where "regular" might be at the end of a line and "expression" at the start of
 the next line, you could use this command:
 
 +
-[literal]
+[source,shell]
 ....
 pcre2grep -M 'regular\s+expression' <file>
 ....
 
 +
-The \s escape sequence matches any white space character, including newlines,
-and is followed by pass:[+] so as to match trailing white space on the first line as
+The [.regex]`\s` escape sequence matches any white space character, including newlines,
+and is followed by [.regex]`+` so as to match trailing white space on the first line as
 well as possibly handling a two-character newline sequence.
 
 +
@@ -599,7 +601,7 @@ Six different conventions for indicating the ends of lines in scanned files are
 supported. For example:
 
 +
-[literal]
+[source,shell]
 ....
 pcre2grep -N CRLF 'some pattern' <file>
 ....
@@ -611,9 +613,9 @@ types are the single-character sequences CR (carriage return) and LF
 (linefeed), the two-character sequence CRLF, an "anycrlf" type, which
 recognizes any of the preceding three types, and an "any" type, for which any
 Unicode line ending sequence is assumed to end a line. The Unicode sequences
-are the three just mentioned, plus VT (vertical tab, Upass:[+]000B), FF (form feed,
-Upass:[+]000C), NEL (next line, Upass:[+]0085), LS (line separator, Upass:[+]2028), and PS
-(paragraph separator, Upass:[+]2029).
+are the three just mentioned, plus VT (vertical tab, `U+000B`), FF (form feed,
+`U+000C`), NEL (next line, `U+0085`), LS (line separator, `U+2028`), and PS
+(paragraph separator, `U+2029`).
 
 +
 When the PCRE2 library is built, a default line-ending sequence is specified.
@@ -735,14 +737,14 @@ is an empty string. Separating strings are never coloured.
 
 `-P`, `--no-ucp`::
 Starting from release 10.43, when UTF/Unicode mode is specified with `-u`
-or `-U`, the PCRE2_UCP option is used by default. This means that the
+or `-U`, the const:PCRE2_UCP option is used by default. This means that the
 POSIX classes in patterns match more than just ASCII characters. For example,
-[:digit:] matches any Unicode decimal digit. The `--no-ucp` option
-suppresses PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
+[.regex]`[:digit:]` matches any Unicode decimal digit. The `--no-ucp` option
+suppresses const:PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine-grained
 option settings within patterns that affect individual classes. For example,
-when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
-allowing \w to match Unicode letters and digits.
+when in UCP mode, the sequence [.regex]`(?aP)` restricts [.regex]`[:word:]` to ASCII letters, while
+allowing [.regex]`\w` to match Unicode letters and digits.
 
 `--posix-pattern-file`::
 When patterns are provided with the `-f` option, do not trim trailing
@@ -814,7 +816,7 @@ that are to be output, are ignored.
 `-w`, `--word-regex`, `--word-regexp`::
 Force the patterns only to match "words". That is, there must be a word
 boundary at the start and end of each matched string. This is equivalent to
-having "\b(?:" at the start of each pattern, and ")\b" at the end. This
+having [.regex]`\b(?:` at the start of each pattern, and [.regex]`)\b` at the end. This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the `--include` or
 `--exclude` options.
@@ -822,8 +824,8 @@ files; it does not apply to patterns specified by any of the `--include` or
 `-x`, `--line-regex`, `--line-regexp`::
 Force the patterns to start matching only at the beginnings of lines, and in
 addition, require them to match entire lines. In multiline mode the match may
-be more than one line. This is equivalent to having "^(?:" at the start of each
-pattern and ")$" at the end. This option applies only to the patterns that are
+be more than one line. This is equivalent to having [.regex]`^(?:` at the start of each
+pattern and [.regex]`)$` at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the `--include` or `--exclude` options.
 
@@ -833,7 +835,7 @@ character) instead of what would normally appear. This is useful when file
 names contain unusual characters such as colons, hyphens, or even newlines. The
 option does not apply to file names in error messages.
 
-== Environment Variables
+== Environment variables
 
 The environment variables `LC_ALL` and `LC_CTYPE` are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
@@ -863,7 +865,7 @@ ends of output lines that are copied from the input is not converted to
 standard output must end with "\r\n". For all other operating systems, and
 for all messages to the standard error stream, "\n" is used.
 
-== Options Compatibility With Gnu Grep
+== Options compatibility with GNU grep
 
 Many of the short and long forms of ``pcre2grep``'s options are the same as
 in the GNU `grep` program. Any long option of the form `--xxx-regexp`
@@ -884,13 +886,13 @@ the `-i` option applies. If both the `-c` and `-l` options are
 given, GNU grep lists only file names, without counts, but `pcre2grep`
 gives the counts as well.
 
-== Options With Data
+== Options with data
 
 There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
 exception) in the next command line item. For example:
 
-[literal]
+[source,shell]
 ....
 -f/some/file
 -f /some/file
@@ -904,7 +906,7 @@ If a long form option is used, the data may appear in the same command line
 item, separated by an equals character, or (with two exceptions) it may appear
 in the next command line item. For example:
 
-[literal]
+[source,shell]
 ....
 --file=/some/file
 --file /some/file
@@ -920,7 +922,7 @@ The exceptions to the above are the `--colour` (or `--color`) and
 options does have data, it must be given in the first form, using an equals
 character. Otherwise `pcre2grep` will assume that it has no data.
 
-== Using Pcre2'S Callout Facility
+== Using PCRE2's callout facility
 
 `pcre2grep` has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
@@ -931,7 +933,7 @@ completely disabled, callouts in patterns are forbidden by `pcre2grep`.
 If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.
 
-A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is
+A callout in a PCRE2 pattern is of the form [.regex]`(?C<arg>)` where the argument is
 either a number or a quoted string (see the
 xref:pcre2callout.adoc[`pcre2callout`]
 documentation for details). Numbered callouts are ignored by `pcre2grep`;
@@ -953,14 +955,14 @@ character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
 the escape $n. For example:
 
-[literal]
+[source,shell]
 ....
 pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' <some file>
 ....
 
 Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
-pattern with (pass:[*]FAIL).
+pattern with [.regex]`(*FAIL)`.
 
 === Calling external programs or scripts
 
@@ -986,7 +988,7 @@ matched string because the match is still in progress. Instead, the character
 '0' is inserted. If you need a literal dollar or pipe character in any
 substring, use $$ or $| respectively. Here is an example:
 
-[literal]
+[source,shell]
 ....
 echo -e "abcde\n12345" | pcre2grep \
   '(?x)(.)(..(.))
@@ -1015,11 +1017,11 @@ If running the program fails for any reason (including the non-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
 normal way.
 
-== Matching Errors
+== Matching errors
 
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
-repeats, for example: (apass:[+])pass:[*]\d when matched against a line of a's with no final
+repeats, for example: [.regex]`(a+)*\d` when matched against a line of a's with no final
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, `pcre2grep` outputs an error
 message and the line that caused the problem to the standard error stream. If
@@ -1039,16 +1041,16 @@ matches were found in other files) or too many matching errors. Using the
 affect the return code.
 
 When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
-because VMS does not distinguish between exit(0) and exit(1).
+because VMS does not distinguish between [.c]`exit(0)` and [.c]`exit(1)`.
 
-== See Also
+== See also
 
 `pcre2pattern`(3), `pcre2syntax`(3), `pcre2callout`(3),
 `pcre2unicode`(3).
 
 == Author
 
-[source]
+[literal]
 ----
 Philip Hazel
 Retired from University Computing Service

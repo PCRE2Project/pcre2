@@ -31,14 +31,16 @@
 pcre2_set_max_varlookbehind \- set the maximum match length for a variable\-length lookbehind
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext,
-                                uint32_t limit);
+\fBint\fP pcre2_set_max_varlookbehind(\fBpcre2_compile_context\fP *\fIccontext\fP,
+                                \fBuint32_t\fP \fIlimit\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This sets a maximum length for the number of characters matched by a

@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
                     PCRE2_SIZE length, PCRE2_SIZE start_offset,
@@ -464,30 +464,30 @@ int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
 <p>This function matches a compiled regular expression that has been successfully
 processed by the JIT compiler against a given subject string, using a matching
 algorithm that is similar to Perl&#8217;s. It is a "fast path" interface to JIT, and
-it bypasses some of the sanity checks that <code>pcre2_match()</code> applies.</p>
+it bypasses some of the sanity checks that <code class="function">pcre2_match()</code> applies.</p>
 </div>
 <div class="paragraph">
 <p>In UTF mode, the subject string is not checked for UTF validity. Unless
-PCRE2_MATCH_INVALID_UTF was set when the pattern was compiled, passing an
+<code class="constant">PCRE2_MATCH_INVALID_UTF</code> was set when the pattern was compiled, passing an
 invalid UTF string results in undefined behaviour. Your program may crash or
-loop or give wrong results. In the absence of PCRE2_MATCH_INVALID_UTF you
-should only call <code>pcre2_jit_match()</code> in UTF mode if you are sure the
+loop or give wrong results. In the absence of <code class="constant">PCRE2_MATCH_INVALID_UTF</code> you
+should only call <code class="function">pcre2_jit_match()</code> in UTF mode if you are sure the
 subject is valid.</p>
 </div>
 <div class="paragraph">
-<p>The arguments for <code>pcre2_jit_match()</code> are exactly the same as for
-<a href="pcre2_match.html"><code>pcre2_match()</code>,</a>
+<p>The arguments for <code class="function">pcre2_jit_match()</code> are exactly the same as for
+<a href="pcre2_match.html"><code class="function">pcre2_match()</code></a>
 except that the subject string must be specified with a length;
-PCRE2_ZERO_TERMINATED is not supported.</p>
+<code class="constant">PCRE2_ZERO_TERMINATED</code> is not supported.</p>
 </div>
 <div class="paragraph">
-<p>The supported options are PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY,
-PCRE2_NOTEMPTY_ATSTART, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Unsupported
+<p>The supported options are <code class="constant">PCRE2_NOTBOL</code>, <code class="constant">PCRE2_NOTEOL</code>, <code class="constant">PCRE2_NOTEMPTY</code>,
+<code class="constant">PCRE2_NOTEMPTY_ATSTART</code>, <code class="constant">PCRE2_PARTIAL_HARD</code>, and <code class="constant">PCRE2_PARTIAL_SOFT</code>. Unsupported
 options are ignored.</p>
 </div>
 <div class="paragraph">
-<p>The return values are the same as for <code>pcre2_match()</code> plus
-PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
+<p>The return values are the same as for <code class="function">pcre2_match()</code> plus
+<code class="constant">PCRE2_ERROR_JIT_BADOPTION</code> if a matching mode (partial or complete) is requested
 that was not compiled. For details of partial matching, see the
 <a href="pcre2partial.html"><code>pcre2partial</code></a>
 page.</p>

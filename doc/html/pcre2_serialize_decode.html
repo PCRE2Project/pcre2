@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int32_t pcre2_serialize_decode(pcre2_code **codes,
                                int32_t number_of_codes,
@@ -464,32 +464,63 @@ int32_t pcre2_serialize_decode(pcre2_code **codes,
 <p>This function decodes a serialized set of compiled patterns back into a list of
 individual patterns. This is possible only on a host that is running the same
 version of PCRE2, with the same code unit width, and the host must also have
-the same endianness, pointer width and PCRE2_SIZE type. The arguments for
-<code>pcre2_serialize_decode()</code> are:</p>
+the same endianness, pointer width and <code class="type">PCRE2_SIZE</code> type. The arguments for
+<code class="function">pcre2_serialize_decode()</code> are:</p>
+</div>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">codes</code></dt>
+<dd>
+<p>pointer to a vector in which to build the list</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">number_of_codes</code></dt>
+<dd>
+<p>number of slots in the vector</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">bytes</code></dt>
+<dd>
+<p>the serialized byte stream</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">gcontext</code></dt>
+<dd>
+<p>pointer to a general context or <code class="c">NULL</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-  <p style="margin-left: 2ch"><em>codes</em>            pointer to a vector in which to build the list<br>
-<em>number_of_codes</em>  number of slots in the vector<br>
-<em>bytes</em>            the serialized byte stream<br>
-<em>gcontext</em>         pointer to a general context or NULL</p>
-</div>
-<div class="paragraph">
-<p>The <em>bytes</em> argument must point to a block of data that was originally
-created by <code>pcre2_serialize_encode()</code>, though it may have been saved on
+<p>The <code class="parameter">bytes</code> argument must point to a block of data that was originally
+created by <code class="function">pcre2_serialize_encode()</code>, though it may have been saved on
 disc or elsewhere in the meantime. If there are more codes in the serialized
 data than slots in the list, only those compiled patterns that will fit are
 decoded. The yield of the function is the number of decoded patterns, or one of
 the following negative error codes:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_BADDATA   <em>number_of_codes</em> is zero or less<br>
-PCRE2_ERROR_BADMAGIC  mismatch of id bytes in <em>bytes</em><br>
-PCRE2_ERROR_BADMODE   mismatch of variable unit size or PCRE version<br>
-PCRE2_ERROR_NOMEMORY  memory allocation failed<br>
-PCRE2_ERROR_NULL      <em>codes</em> or <em>bytes</em> is NULL</p>
+<div class="dlist errors">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADDATA</code></dt>
+<dd>
+<p><code class="parameter">number_of_codes</code> is zero or less</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADMAGIC</code></dt>
+<dd>
+<p>mismatch of id bytes in <code class="parameter">bytes</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADMODE</code></dt>
+<dd>
+<p>mismatch of variable unit size or PCRE version</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_NOMEMORY</code></dt>
+<dd>
+<p>memory allocation failed</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_NULL</code></dt>
+<dd>
+<p><code class="parameter">codes</code> or <code class="parameter">bytes</code> is <code class="c">NULL</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
+<p><code class="constant">PCRE2_ERROR_BADMAGIC</code> may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.</p>
 </div>
 <div class="paragraph">

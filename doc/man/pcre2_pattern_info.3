@@ -31,208 +31,240 @@
 pcre2_pattern_info \- extract information about a pattern
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
-                       void *where);
+\fBint\fP pcre2_pattern_info(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBuint32_t\fP \fIwhat\fP,
+                       \fBvoid\fP *\fIwhere\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function returns information about a compiled pattern. Its arguments are:
 .sp
-.ti +2
-\fIcode\fP     Pointer to a compiled regular expression pattern
-.br
-.ti +2
-\fIwhat\fP     What information is required
-.br
-.ti +2
-\fIwhere\fP    Where to put the information
+.RS 4
+.PD 0
+.TP 6
+\fIcode\fP
+.ad l
+Pointer to a compiled regular expression pattern
+.TP 6
+\fIwhat\fP
+.ad l
+What information is required
+.TP 6
+\fIwhere\fP
+.ad l
+Where to put the information
+.PD
+.RE
+.PP
+.ad l
 .sp
 The recognized values for the \fIwhat\fP argument, and the information they
 request are as follows:
 .sp
-.ti +2
-PCRE2_INFO_ALLOPTIONS      Final options after compiling
-.br
-.ti +2
-PCRE2_INFO_ARGOPTIONS      Options passed to \f(CRpcre2_compile()\fP
-.br
-.ti +2
-PCRE2_INFO_BACKREFMAX      Number of highest backreference
-.br
-.ti +2
-PCRE2_INFO_BSR             What \(rsR matches:
-.br
-.ti +2
-                             PCRE2_BSR_UNICODE: Unicode line endings
-.br
-.ti +2
-                             PCRE2_BSR_ANYCRLF: CR, LF, or CRLF only
-.br
-.ti +2
-PCRE2_INFO_CAPTURECOUNT    Number of capturing subpatterns
-.br
-.ti +2
-PCRE2_INFO_DEPTHLIMIT      Backtracking depth limit if set,
-.br
-.ti +2
-                             otherwise PCRE2_ERROR_UNSET
-.br
-.ti +2
-PCRE2_INFO_EXTRAOPTIONS    Extra options that were passed in the
-.br
-.ti +2
-                             compile context
-.br
-.ti +2
-PCRE2_INFO_FIRSTBITMAP     Bitmap of first code units, or NULL
-.br
-.ti +2
-PCRE2_INFO_FIRSTCODETYPE   Type of start\-of\-match information
-.br
-.ti +2
-                             0 nothing set
-.br
-.ti +2
-                             1 first code unit is set
-.br
-.ti +2
-                             2 start of string or after newline
-.br
-.ti +2
-PCRE2_INFO_FIRSTCODEUNIT   First code unit when type is 1
-.br
-.ti +2
-PCRE2_INFO_FRAMESIZE       Size of backtracking frame
-.br
-.ti +2
-PCRE2_INFO_HASBACKSLASHC   Return 1 if pattern contains \(rsC
-.br
-.ti +2
-PCRE2_INFO_HASCRORLF       Return 1 if explicit CR or LF matches
-.br
-.ti +2
-                             exist in the pattern
-.br
-.ti +2
-PCRE2_INFO_HEAPLIMIT       Heap memory limit if set,
-.br
-.ti +2
-                             otherwise PCRE2_ERROR_UNSET
-.br
-.ti +2
-PCRE2_INFO_JCHANGED        Return 1 if (?J) or (?\-J) was used
-.br
-.ti +2
-PCRE2_INFO_JITSIZE         Size of JIT compiled code, or 0
-.br
-.ti +2
-PCRE2_INFO_LASTCODETYPE    Type of must\-be\-present information
-.br
-.ti +2
-                             0 nothing set
-.br
-.ti +2
-                             1 code unit is set
-.br
-.ti +2
-PCRE2_INFO_LASTCODEUNIT    Last code unit when type is 1
-.br
-.ti +2
-PCRE2_INFO_MATCHEMPTY      1 if the pattern can match an
-.br
-.ti +2
-                             empty string, 0 otherwise
-.br
-.ti +2
-PCRE2_INFO_MATCHLIMIT      Match limit if set,
-.br
-.ti +2
-                             otherwise PCRE2_ERROR_UNSET
-.br
-.ti +2
-PCRE2_INFO_MAXLOOKBEHIND   Length (in characters) of the longest
-.br
-.ti +2
-                             lookbehind assertion
-.br
-.ti +2
-PCRE2_INFO_MINLENGTH       Lower bound length of matching strings
-.br
-.ti +2
-PCRE2_INFO_NAMECOUNT       Number of named subpatterns
-.br
-.ti +2
-PCRE2_INFO_NAMEENTRYSIZE   Size of name table entries
-.br
-.ti +2
-PCRE2_INFO_NAMETABLE       Pointer to name table
-.br
-.ti +2
-PCRE2_CONFIG_NEWLINE       Code for the newline sequence:
-.br
-.ti +2
-                             PCRE2_NEWLINE_CR
-.br
-.ti +2
-                             PCRE2_NEWLINE_LF
-.br
-.ti +2
-                             PCRE2_NEWLINE_CRLF
-.br
-.ti +2
-                             PCRE2_NEWLINE_ANY
-.br
-.ti +2
-                             PCRE2_NEWLINE_ANYCRLF
-.br
-.ti +2
-                             PCRE2_NEWLINE_NUL
-.br
-.ti +2
-PCRE2_INFO_RECURSIONLIMIT  Obsolete synonym for PCRE2_INFO_DEPTHLIMIT
-.br
-.ti +2
-PCRE2_INFO_SIZE            Size of compiled pattern
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_INFO_ALLOPTIONS\fP
+.ad l
+Final options after compiling
+.TP 24
+\fBPCRE2_INFO_ARGOPTIONS\fP
+.ad l
+Options passed to pcre2_compile()
+.TP 24
+\fBPCRE2_INFO_BACKREFMAX\fP
+.ad l
+Number of highest backreference
+.TP 24
+\fBPCRE2_INFO_BSR\fP
+.ad l
+What \f(CR\(rsR\fP matches:
+.TP 18
+\fBPCRE2_BSR_UNICODE\fP
+.ad l
+Unicode line endings
+.TP 18
+\fBPCRE2_BSR_ANYCRLF\fP
+.ad l
+CR, LF, or CRLF only
+.PP
+.ad l
+.TP 24
+\fBPCRE2_INFO_CAPTURECOUNT\fP
+.ad l
+Number of capturing subpatterns
+.TP 24
+\fBPCRE2_INFO_DEPTHLIMIT\fP
+.ad l
+Backtracking depth limit if set,
+otherwise \fBPCRE2_ERROR_UNSET\fP
+.TP 24
+\fBPCRE2_INFO_EXTRAOPTIONS\fP
+.ad l
+Extra options that were passed in the
+compile context
+.TP 24
+\fBPCRE2_INFO_FIRSTBITMAP\fP
+.ad l
+Bitmap of first code units, or \f(CRNULL\fP
+.TP 24
+\fBPCRE2_INFO_FIRSTCODETYPE\fP
+.ad l
+Type of start\-of\-match information
+\f(CR0\fP nothing set
+\f(CR1\fP first code unit is set
+\f(CR2\fP start of string or after newline
+.TP 24
+\fBPCRE2_INFO_FIRSTCODEUNIT\fP
+.ad l
+First code unit when type is \f(CR1\fP
+.TP 24
+\fBPCRE2_INFO_FRAMESIZE\fP
+.ad l
+Size of backtracking frame
+.TP 24
+\fBPCRE2_INFO_HASBACKSLASHC\fP
+.ad l
+Return \f(CR1\fP if pattern contains \f(CR\(rsC\fP
+.TP 24
+\fBPCRE2_INFO_HASCRORLF\fP
+.ad l
+Return \f(CR1\fP if explicit CR or LF matches
+exist in the pattern
+.TP 24
+\fBPCRE2_INFO_HEAPLIMIT\fP
+.ad l
+Heap memory limit if set,
+otherwise \fBPCRE2_ERROR_UNSET\fP
+.TP 24
+\fBPCRE2_INFO_JCHANGED\fP
+.ad l
+Return \f(CR1\fP if \f(CR(?J)\fP or \f(CR(?\-J)\fP was used
+.TP 24
+\fBPCRE2_INFO_JITSIZE\fP
+.ad l
+Size of JIT compiled code, or \f(CR0\fP
+.TP 24
+\fBPCRE2_INFO_LASTCODETYPE\fP
+.ad l
+Type of must\-be\-present information
+\f(CR0\fP nothing set
+\f(CR1\fP code unit is set
+.TP 24
+\fBPCRE2_INFO_LASTCODEUNIT\fP
+.ad l
+Last code unit when type is \f(CR1\fP
+.TP 24
+\fBPCRE2_INFO_MATCHEMPTY\fP
+.ad l
+\f(CR1\fP if the pattern can match an
+empty string, \f(CR0\fP otherwise
+.TP 24
+\fBPCRE2_INFO_MATCHLIMIT\fP
+.ad l
+Match limit if set,
+otherwise \fBPCRE2_ERROR_UNSET\fP
+.TP 24
+\fBPCRE2_INFO_MAXLOOKBEHIND\fP
+.ad l
+Length (in characters) of the longest
+lookbehind assertion
+.TP 24
+\fBPCRE2_INFO_MINLENGTH\fP
+.ad l
+Lower bound length of matching strings
+.TP 24
+\fBPCRE2_INFO_NAMECOUNT\fP
+.ad l
+Number of named subpatterns
+.TP 24
+\fBPCRE2_INFO_NAMEENTRYSIZE\fP
+.ad l
+Size of name table entries
+.TP 24
+\fBPCRE2_INFO_NAMETABLE\fP
+.ad l
+Pointer to name table
+.TP 24
+\fBPCRE2_CONFIG_NEWLINE\fP
+.ad l
+Code for the newline sequence:
+.TP 24
+\fBPCRE2_NEWLINE_CR\fP, \fBPCRE2_NEWLINE_LF\fP, \fBPCRE2_NEWLINE_CRLF\fP, \fBPCRE2_NEWLINE_ANY\fP, \fBPCRE2_NEWLINE_ANYCRLF\fP, \fBPCRE2_NEWLINE_NUL\fP, \fBPCRE2_INFO_RECURSIONLIMIT\fP
+.ad l
+Obsolete synonym for \fBPCRE2_INFO_DEPTHLIMIT\fP
+.TP 24
+\fBPCRE2_INFO_SIZE\fP
+.ad l
+Size of compiled pattern
+.PD
+.RE
+.PP
+.ad l
 .sp
-If \fIwhere\fP is NULL, the function returns the amount of memory needed for
+If \fIwhere\fP is \f(CRNULL\fP, the function returns the amount of memory needed for
 the requested information, in bytes. Otherwise, the \fIwhere\fP argument must
-point to an unsigned 32\-bit integer (uint32_t variable), except for the
+point to an unsigned 32\-bit integer (\f(CRuint32_t\fP variable), except for the
 following \fIwhat\fP values, when it must point to a variable of the type
 shown:
 .sp
-.ti +2
-PCRE2_INFO_FIRSTBITMAP     const uint8_t *
-.br
-.ti +2
-PCRE2_INFO_JITSIZE         size_t
-.br
-.ti +2
-PCRE2_INFO_NAMETABLE       PCRE2_SPTR
-.br
-.ti +2
-PCRE2_INFO_SIZE            size_t
+.RS 4
+.PD 0
+.TP 23
+\fBPCRE2_INFO_FIRSTBITMAP\fP
+.ad l
+\f(CRconst uint8_t *\fP
+.TP 23
+\fBPCRE2_INFO_JITSIZE\fP
+.ad l
+\f(CRsize_t\fP
+.TP 23
+\fBPCRE2_INFO_NAMETABLE\fP
+.ad l
+\fBPCRE2_SPTR\fP
+.TP 23
+\fBPCRE2_INFO_SIZE\fP
+.ad l
+\f(CRsize_t\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
 The yield of the function is zero on success or:
 .sp
-.ti +2
-PCRE2_ERROR_NULL           the argument \fIcode\fP is NULL
-.br
-.ti +2
-PCRE2_ERROR_BADMAGIC       the "magic number" was not found
-.br
-.ti +2
-PCRE2_ERROR_BADOPTION      the value of \fIwhat\fP is invalid
-.br
-.ti +2
-PCRE2_ERROR_BADMODE        the pattern was compiled in the wrong mode
-.br
-.ti +2
-PCRE2_ERROR_UNSET          the requested information is not set
+.RS 4
+.PD 0
+.TP 22
+\fBPCRE2_ERROR_NULL\fP
+.ad l
+the argument \fIcode\fP is \f(CRNULL\fP
+.TP 22
+\fBPCRE2_ERROR_BADMAGIC\fP
+.ad l
+the "magic number" was not found
+.TP 22
+\fBPCRE2_ERROR_BADOPTION\fP
+.ad l
+the value of \fIwhat\fP is invalid
+.TP 22
+\fBPCRE2_ERROR_BADMODE\fP
+.ad l
+the pattern was compiled in the wrong mode
+.TP 22
+\fBPCRE2_ERROR_UNSET\fP
+.ad l
+the requested information is not set
+.PD
+.RE
+.PP
+.ad l
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

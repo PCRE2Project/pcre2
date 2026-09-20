@@ -24,6 +24,15 @@ Files in the maint directory
   A Perl script to convert man pages to HTML (.1 and .3 files "two" HTML),
   used by UpdateAlways.
 
+AsciidocMarkup.md
+  Design goals and authoring conventions for semantic markup in
+  doc/pcre2api.adoc, including HTML and manpage requirements.
+
+AsciidocConverterPcre2.rb
+AsciidocRender
+  Custom Asciidoctor converters and the wrapper that renders HTML and manpage
+  output. Rendering requires the Asciidoctor and Rouge Ruby gems.
+
 CheckMan
   A Perl script to validate the syntax in PCRE2 man pages, used by
   UpdateAlways.

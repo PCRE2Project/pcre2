@@ -445,9 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_next_match(pcre2_match_data *match_data,
                      PCRE2_SIZE *pstart_offset, uint32_t *poptions);</code></pre>
@@ -460,8 +460,8 @@ int pcre2_next_match(pcre2_match_data *match_data,
 <div class="sectionbody">
 <div class="paragraph">
 <p>This function can be called after one of the match functions
-(<code>pcre2_match()</code>, <code>pcre2_dfa_match()</code>, or <code>pcre2_jit_match()</code>), and
-must be provided with the same <em>match_data</em> parameter. It outputs the
+(<code class="function">pcre2_match()</code>, <code class="function">pcre2_dfa_match()</code>, or <code class="function">pcre2_jit_match()</code>), and
+must be provided with the same <code class="parameter">match_data</code> parameter. It outputs the
 appropriate parameters for searching for the next match in the same subject
 string, and is suitable for applications providing "global" matching behaviour
 (for example, replacing all matches in the subject, or splitting the subject on
@@ -472,9 +472,9 @@ all matches, or simply counting the number of matches).</p>
 or 1 ("true") if another match should be attempted.</p>
 </div>
 <div class="paragraph">
-<p>The *<em>pstart_offset</em> and *<em>poptions</em> are set if the function returns 1.
-The *<em>pstart_offset</em> should be passed to the next match attempt directly,
-and the *<em>poptions</em> should be passed to the next match attempt by combining
+<p>The <code class="c">*pstart_offset</code> and <code class="c">*poptions</code> are set if the function returns 1.
+The <code class="c">*pstart_offset</code> should be passed to the next match attempt directly,
+and the <code class="c">*poptions</code> should be passed to the next match attempt by combining
 with the application&#8217;s match options using OR.</p>
 </div>
 <div class="paragraph">
