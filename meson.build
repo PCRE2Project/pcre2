@@ -7,8 +7,8 @@ project(
   'c',
   version: '10.49',
   license: 'BSD-3-Clause WITH PCRE2-exception',
-  meson_version: '>=1.3.0',
-  default_options: ['c_std=c11,c99'],
+  meson_version: '>=1.6.0',
+  default_options: ['c_std=c11,c99', 'default_library=static'],
 )
 
 cc = meson.get_compiler('c')
@@ -177,14 +177,16 @@ endif
 # -----------------------------------------------------------------------------
 # User-configurable options
 # -----------------------------------------------------------------------------
-build_shared = get_option('build_shared_libs')
-build_static = get_option('build_static_libs')
+library_type = get_option('default_library')
+build_shared = library_type in ['shared', 'both']
+build_static = library_type in ['static', 'both']
+# With both variants, Meson's auto selection falls back to shared.
+default_to_static = library_type == 'static' or (
+  library_type == 'both' and get_option('default_both_libraries') == 'static'
+)
 build_8 = get_option('pcre2_build_pcre2_8')
 build_16 = get_option('pcre2_build_pcre2_16')
 build_32 = get_option('pcre2_build_pcre2_32')
-if not build_shared and not build_static
-  error('At least one of build_shared_libs or build_static_libs must be enabled.')
-endif
 if not build_8 and not build_16 and not build_32
   error('At least one PCRE2 code unit width must be enabled.')
 endif
@@ -447,7 +449,7 @@ use_vscript = vscript_flag != ''
 # Libraries
 # -----------------------------------------------------------------------------
 
-# Separate targets preserve CMake's independent static/shared options.
+# Separate targets keep each variant's arguments and platform names explicit.
 static_output_names = {}
 shared_output_names = {}
 foreach width : ['8', '16', '32']
@@ -522,9 +524,24 @@ foreach width : ['8', '16', '32']
     set_variable('pcre2_' + width + '_shared_lib', shared_lib)
     set_variable('pcre2_' + width + '_shared_dep', shared_dep)
   endif
-  selected_dep = build_static ? get_variable('pcre2_' + width + '_static_dep') : get_variable('pcre2_' + width + '_shared_dep')
-  set_variable('libpcre2_' + width, selected_dep)
-  meson.override_dependency('libpcre2-' + width, selected_dep)
+  # The first variant override also supplies unqualified dependency() calls.
+  if default_to_static
+    static_dep = get_variable('pcre2_' + width + '_static_dep')
+    set_variable('libpcre2_' + width, static_dep)
+    meson.override_dependency('libpcre2-' + width, static_dep, static: true)
+    if build_shared
+      shared_dep = get_variable('pcre2_' + width + '_shared_dep')
+      meson.override_dependency('libpcre2-' + width, shared_dep, static: false)
+    endif
+  else
+    shared_dep = get_variable('pcre2_' + width + '_shared_dep')
+    set_variable('libpcre2_' + width, shared_dep)
+    meson.override_dependency('libpcre2-' + width, shared_dep, static: false)
+    if build_static
+      static_dep = get_variable('pcre2_' + width + '_static_dep')
+      meson.override_dependency('libpcre2-' + width, static_dep, static: true)
+    endif
+  endif
 endforeach
 
 if build_8
@@ -594,8 +611,19 @@ if build_8
       version: meson.project_version(),
     )
   endif
-  libpcre2_posix = build_static ? pcre2_posix_static_dep : pcre2_posix_shared_dep
-  meson.override_dependency('libpcre2-posix', libpcre2_posix)
+  if default_to_static
+    libpcre2_posix = pcre2_posix_static_dep
+    meson.override_dependency('libpcre2-posix', pcre2_posix_static_dep, static: true)
+    if build_shared
+      meson.override_dependency('libpcre2-posix', pcre2_posix_shared_dep, static: false)
+    endif
+  else
+    libpcre2_posix = pcre2_posix_shared_dep
+    meson.override_dependency('libpcre2-posix', pcre2_posix_shared_dep, static: false)
+    if build_static
+      meson.override_dependency('libpcre2-posix', pcre2_posix_static_dep, static: true)
+    endif
+  endif
 endif
 
 # -----------------------------------------------------------------------------
@@ -1130,6 +1158,8 @@ if get_option('pcre2_show_report')
       'Heap limit': get_option('pcre2_heap_limit'),
       'Match limit': get_option('pcre2_match_limit'),
       'Match depth limit': get_option('pcre2_match_limit_depth'),
+      'Library variants': library_type,
+      'Default both-library linkage': get_option('default_both_libraries'),
       'Build shared libs': build_shared,
       'with symbol versioning': use_vscript,
       'Build static libs': build_static,

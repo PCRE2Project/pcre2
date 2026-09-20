@@ -18,19 +18,37 @@ Project options use lower-case snake_case names, following Meson conventions:
 
 ```sh
 meson setup build-meson \
-   -Dbuild_shared_libs=true \
-   -Dbuild_static_libs=false \
+   -Ddefault_library=shared \
    -Dpcre2_build_pcre2_16=true \
    -Dpcre2_support_jit=auto
 ```
 
 `meson configure build-meson` lists every option and its description.
 
+PCRE2 uses Meson's built-in library options. `default_library` accepts
+`static`, `shared`, or `both`; PCRE2 defaults it to `static`. When both variants
+are built, `default_both_libraries` selects the variant used by PCRE2's tools
+and by an unqualified subproject dependency. Its values are `shared` (the
+Meson default), `static`, and `auto` (`auto` selects shared when
+`default_library` is `both`):
+
+```sh
+meson setup build-meson-both \
+   -Ddefault_library=both \
+   -Ddefault_both_libraries=shared
+```
+
+In Meson 1.6 and 1.7, `default_both_libraries` is global when PCRE2 is a
+subproject. Set it without a subproject prefix. Meson 1.8 and later also allow
+the per-subproject form `-Dpcre2:default_both_libraries=static`.
+
 ## Integration
 
 When PCRE2 is a Meson subproject, use `dependency('libpcre2-8')`,
 `dependency('libpcre2-16')`, `dependency('libpcre2-32')`, or
 `dependency('libpcre2-posix')`. Only enabled code-unit widths are exported.
+An unqualified dependency uses the selected default variant. Consumers can
+request a specific available variant with `static: true` or `static: false`.
 
 Installation includes the enabled libraries, public headers, `pcre2grep`,
 `pcre2-config`, `pcre2test` when tests are enabled, pkg-config metadata, CMake
@@ -86,8 +104,7 @@ The static/shared regression check can be repeated with:
 
 ```sh
 meson setup build-meson-variants \
-   -Dbuild_shared_libs=true \
-   -Dbuild_static_libs=true \
+   -Ddefault_library=both \
    -Dpcre2_build_pcre2_16=true \
    -Dpcre2_build_pcre2_32=true \
    -Db_staticpic=true
@@ -95,13 +112,22 @@ meson compile -C build-meson-variants
 python3 maint/meson-tests/check-static-shared.py build-meson-variants
 ```
 
+The complete producer and fallback dependency selection matrix can be checked
+with:
+
+```sh
+python3 maint/meson-tests/check-library-options.py
+```
+
 ## Decisions and remaining work
 
 1. Explicit `static_library()` and `shared_library()` targets are retained
-   instead of `both_libraries()`. This makes independent producer definitions
-   and platform output names unambiguous.
-2. The minimum remains Meson 1.3 because the implementation does not require a
-   newer API. Development validation currently uses Meson 1.7.
+   instead of `both_libraries()`. This keeps each variant's arguments and
+   platform output names unambiguous while the standard `default_library` and
+   `default_both_libraries` options control production and selection.
+2. The minimum is Meson 1.6, which provides `default_both_libraries` and
+   variant-aware internal dependency behavior. Development validation currently
+   uses Meson 1.7.
 3. Optional JIT, zlib, bzip2, readline, and editline switches are Meson
    `feature` options. Static-library PIC uses Meson's built-in `b_staticpic`
    option, including its default of `true`. Bzip2 lookup falls back from

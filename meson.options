@@ -6,10 +6,6 @@
 # possible. The feature set mirrors that of CMake. Where there is a native
 # Meson capability, we prefer to use it.
 
-option('build_shared_libs', type: 'boolean', value: false,
-  description: 'Build shared libraries.')
-option('build_static_libs', type: 'boolean', value: true,
-  description: 'Build static libraries.')
 option('pcre2_build_pcre2_8', type: 'boolean', value: true,
   description: 'Build 8 bit PCRE2 library')
 option('pcre2_build_pcre2_16', type: 'boolean', value: false,
