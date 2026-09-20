@@ -14,7 +14,6 @@ project(
 cc = meson.get_compiler('c')
 host_is_windows = host_machine.system() == 'windows'
 msvc_like = cc.get_id() in ['msvc', 'clang-cl', 'intel-cl']
-mingw = host_is_windows and not msvc_like
 windows_debug_postfix = host_is_windows and get_option('buildtype') == 'debug' ? 'd' : ''
 
 if msvc_like
@@ -197,8 +196,8 @@ if build_grep and not build_8
 endif
 
 jit_option = get_option('pcre2_support_jit')
-jit_enabled = jit_option == 'ON'
-if jit_option == 'AUTO'
+jit_enabled = jit_option.enabled()
+if jit_option.auto()
   jit_enabled = cc.compiles(
     '''
     #define SLJIT_CONFIG_AUTO 1
@@ -418,7 +417,7 @@ pcre2_includes = include_directories('.', 'src')
 private_deps = jit_enabled ? [thread_dep] : []
 common_c_args = ['-DHAVE_CONFIG_H']
 debug_option = get_option('pcre2_debug')
-if debug_option == 'ON' or (debug_option == 'IfDebugBuild' and get_option('buildtype') == 'debug')
+if debug_option == 'enabled' or (debug_option == 'auto' and get_option('buildtype') == 'debug')
   common_c_args += '-DPCRE2_DEBUG'
 endif
 
@@ -472,7 +471,6 @@ foreach width : ['8', '16', '32']
       include_directories: pcre2_includes,
       dependencies: private_deps,
       c_args: width_args + ['-DPCRE2_STATIC'],
-      pic: get_option('pcre2_static_pic'),
       name_suffix: msvc_like ? 'lib' : [],
       gnu_symbol_visibility: 'hidden',
       install: true,
@@ -490,7 +488,6 @@ foreach width : ['8', '16', '32']
   endif
   if build_shared
     shared_name = name + windows_debug_postfix
-    shared_name_prefix = mingw and get_option('non_standard_lib_prefix') ? '' : []
     link_args = use_vscript ? ['-Wl,' + vscript_flag + ',' + meson.current_build_dir() / ('lib' + name + '.sym')] : []
     shared_kwargs = {
       'include_directories': pcre2_includes,
@@ -498,13 +495,9 @@ foreach width : ['8', '16', '32']
       'c_args': width_args,
       'link_args': link_args,
       'link_depends': use_vscript ? symbol_files[name] : [],
-      'name_prefix': shared_name_prefix,
       'gnu_symbol_visibility': 'hidden',
       'install': true,
     }
-    if mingw and get_option('non_standard_lib_suffix')
-      shared_kwargs += {'soversion': '0'}
-    endif
     if not host_is_windows
       shared_kwargs += {
         'version': lib_versions[width],
@@ -549,7 +542,6 @@ if build_8
       include_directories: pcre2_includes,
       dependencies: pcre2_8_static_dep,
       c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2_STATIC'],
-      pic: get_option('pcre2_static_pic'),
       name_suffix: msvc_like ? 'lib' : [],
       gnu_symbol_visibility: 'hidden',
       install: true,
@@ -565,7 +557,6 @@ if build_8
   endif
   if build_shared
     posix_shared_name = 'pcre2-posix' + windows_debug_postfix
-    posix_shared_name_prefix = mingw and get_option('non_standard_lib_prefix') ? '' : []
     posix_link_args = use_vscript ? ['-Wl,' + vscript_flag + ',' + meson.current_build_dir() / 'libpcre2-posix.sym'] : []
     posix_shared_kwargs = {
       'include_directories': pcre2_includes,
@@ -573,13 +564,9 @@ if build_8
       'c_args': common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2POSIX_SHARED'],
       'link_args': posix_link_args,
       'link_depends': use_vscript ? symbol_files['pcre2-posix'] : [],
-      'name_prefix': posix_shared_name_prefix,
       'gnu_symbol_visibility': 'hidden',
       'install': true,
     }
-    if mingw and get_option('non_standard_lib_suffix')
-      posix_shared_kwargs += {'soversion': '0'}
-    endif
     if not host_is_windows
       posix_shared_kwargs += {
         'version': lib_versions['posix'],
@@ -714,9 +701,6 @@ set_target_properties(pcre2::pcre2-@0@-shared PROPERTIES
     if host_is_windows
       shared_install_dir = get_option('bindir')
       import_filename = shared_output_names[width].replace('.dll', '')
-      if mingw and get_option('non_standard_lib_suffix')
-        import_filename = import_filename.replace('-0', '')
-      endif
       import_filename += msvc_like ? '.lib' : '.dll.a'
       shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
         get_option('libdir'), import_filename)
@@ -766,9 +750,6 @@ set_target_properties(pcre2::pcre2-posix-shared PROPERTIES
     if host_is_windows
       shared_install_dir = get_option('bindir')
       import_filename = shared_output_names['posix'].replace('.dll', '')
-      if mingw and get_option('non_standard_lib_suffix')
-        import_filename = import_filename.replace('-0', '')
-      endif
       import_filename += msvc_like ? '.lib' : '.dll.a'
       shared_import_property = '  IMPORTED_IMPLIB_RELEASE "${PACKAGE_PREFIX_DIR}/@0@/@1@"\n'.format(
         get_option('libdir'), import_filename)
@@ -1126,9 +1107,6 @@ install_subdir(
 # Configuration summary
 # -----------------------------------------------------------------------------
 
-if get_option('pcre2_heap_match_recurse')
-  warning('PCRE2_HEAP_MATCH_RECURSE is obsolete and does nothing.')
-endif
 if get_option('pcre2_show_report')
   summary(
     {
@@ -1155,7 +1133,7 @@ if get_option('pcre2_show_report')
       'Build shared libs': build_shared,
       'with symbol versioning': use_vscript,
       'Build static libs': build_static,
-      'with PIC enabled': get_option('pcre2_static_pic'),
+      'with PIC enabled': get_option('b_staticpic'),
       'Build pcre2grep': build_grep,
       'Build tests': get_option('pcre2_build_tests'),
       'Link pcre2grep with libz': zlib_dep.found(),

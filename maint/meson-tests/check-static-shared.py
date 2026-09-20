@@ -91,7 +91,7 @@ def check_embedded_archive(build_dir, fixture_source):
         except subprocess.CalledProcessError as error:
             raise RuntimeError(
                 'could not embed the static archive; configure with '
-                '-Dpcre2_static_pic=true'
+                '-Db_staticpic=true'
             ) from error
 
         symbols = subprocess.check_output(

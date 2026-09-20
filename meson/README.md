@@ -1,9 +1,9 @@
 # Meson build
 
 The native Meson build is intended to be a peer of the CMake build. It uses the
-same defaults and generated configuration, builds static and shared libraries
-independently, and installs equivalent headers, tools, documentation,
-pkg-config files, and CMake package metadata.
+same generated configuration, builds static and shared libraries independently,
+and installs equivalent headers, tools, documentation, pkg-config files, and
+CMake package metadata.
 
 Configure, build, test, and install with:
 
@@ -21,7 +21,7 @@ meson setup build-meson \
    -Dbuild_shared_libs=true \
    -Dbuild_static_libs=false \
    -Dpcre2_build_pcre2_16=true \
-   -Dpcre2_support_jit=AUTO
+   -Dpcre2_support_jit=auto
 ```
 
 `meson configure build-meson` lists every option and its description.
@@ -44,8 +44,8 @@ package metadata, manpages, and HTML and text documentation.
   archive is embedded in another shared library.
 - GNU version scripts and Sun linker map flags are detected.
 - Windows resources, MSVC-compatible CRT definitions, test stack size, library
-  naming, debug postfixes, and MinGW prefix/suffix compatibility options are
-  supported. Meson installs target debug files using its native target support.
+   naming, and debug postfixes are supported. Meson installs target debug files
+   using its native target support.
 - Darwin compatibility and current versions are derived from the same libtool
   ABI tuples used by CMake.
 - Installed CMake metadata preserves the `PCRE2::8BIT`, `PCRE2::16BIT`,
@@ -77,10 +77,10 @@ manifest.
 
 A Windows GNU cross-build using Zig has also been checked with all code-unit
 widths and both library variants. Release and debug-postfixed DLLs, static
-archives, import libraries, both MinGW compatibility naming options, install
-layout, generated CMake artifact paths, and relocated shared and static CMake
-consumer links were verified. The resulting consumers are x86-64 PE
-executables; runtime execution was not available in this environment.
+archives, import libraries, install layout, generated CMake artifact paths, and
+relocated shared and static CMake consumer links were verified. The resulting
+consumers are x86-64 PE executables; runtime execution was not available in
+this environment.
 
 The static/shared regression check can be repeated with:
 
@@ -90,7 +90,7 @@ meson setup build-meson-variants \
    -Dbuild_static_libs=true \
    -Dpcre2_build_pcre2_16=true \
    -Dpcre2_build_pcre2_32=true \
-   -Dpcre2_static_pic=true
+   -Db_staticpic=true
 meson compile -C build-meson-variants
 python3 maint/meson-tests/check-static-shared.py build-meson-variants
 ```
@@ -102,11 +102,12 @@ python3 maint/meson-tests/check-static-shared.py build-meson-variants
    and platform output names unambiguous.
 2. The minimum remains Meson 1.3 because the implementation does not require a
    newer API. Development validation currently uses Meson 1.7.
-3. Optional zlib, bzip2, readline, and editline switches are Meson `feature`
-   options, so `auto` retains CMake's enable-when-found behavior. Bzip2 lookup
-   falls back from pkg-config to CMake's `BZip2` package because some systems,
-   including the validated Ubuntu environment, do not provide a bzip2 `.pc`
-   file. An explicitly disabled option performs neither lookup.
+3. Optional JIT, zlib, bzip2, readline, and editline switches are Meson
+   `feature` options. Static-library PIC uses Meson's built-in `b_staticpic`
+   option, including its default of `true`. Bzip2 lookup falls back from
+   pkg-config to CMake's `BZip2` package because some systems, including the
+   validated Ubuntu environment, do not provide a bzip2 `.pc` file. An
+   explicitly disabled option performs neither lookup.
 4. Meson has no equivalent of CMake's `install(EXPORT)`. The build generates
    target declarations and release artifact properties explicitly, while
    taking static and shared basenames from the actual Meson targets to avoid
