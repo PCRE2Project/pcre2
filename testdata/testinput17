@@ -188,6 +188,11 @@
 /(?(R)a*(?1)|((?R))b)/
 \= Expect JIT stack limit reached
     aaaabcde
+
+# A single large stack allocation must grow beyond the current stack top.
+
+/((?(DEFINE)\[()\g{-1}]{1400}).{1}(?R)|)/expand,jit
+    AAAAAA\=jitstack=192
     
 # Invalid options disable JIT when called via pcre2_match(), causing the
 # match to happen via the interpreter, but for fast JIT invalid options are
