@@ -1927,6 +1927,10 @@ substitute with NULL replacement
 .ad l
 match with NULL subject
 .TP 24
+\f(CRnull_substitute_buffer\fP
+.ad l
+substitute with a NULL output buffer
+.TP 24
 \f(CRnull_substitute_match_data\fP
 .ad l
 substitute with NULL match data
@@ -2466,7 +2470,7 @@ this modifier is ignored, with a warning.
 .sp
 When testing pcre2_substitute(), this modifier also has the effect of
 passing the replacement string as zero\-terminated.
-.SS "Passing a null context, subject, or replacement"
+.SS "Passing a null context, subject, replacement, or substitute buffer"
 .sp
 Normally, \f(CRpcre2test\fP passes a context block to pcre2_match(),
 pcre2_dfa_match(), pcre2_jit_match() or pcre2_substitute().
@@ -2476,9 +2480,13 @@ case (they use default values). This modifier cannot be used with the
 \f(CRfind_limits\fP, \f(CRfind_limits_noheap\fP, or \f(CRsubstitute_callout\fP
 modifiers.
 .sp
-Similarly, for testing purposes, if the \f(CRnull_subject\fP or
-\f(CRnull_replacement\fP modifier is set, the subject or replacement string
-pointers are passed as NULL, respectively, to the relevant functions.
+Similarly, for testing purposes, if the \f(CRnull_subject\fP,
+or \f(CRnull_replacement\fP, or \f(CRnull_substitute_buffer\fP modifiers are set, then the
+subject, or replacement string, or substitute output buffer pointers are passed
+as NULL, respectively, to the relevant functions. For \f(CRnull_substitute_buffer\fP,
+the paired argument for the passed\-in buffer length is set by starting the
+replacement string with "[NUM]" as described in "Testing the substitution
+function" above.
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
 .sp
 By default, \f(CRpcre2test\fP uses the standard PCRE2 matching function,

@@ -4058,12 +4058,12 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
        variable, with the result of the function still being
        PCRE2_ERROR_NOMEMORY.
 
-       Passing a buffer size of zero is a permitted way of finding out how
-       much memory is needed for given substitution. However, this does mean
-       that the entire operation is carried out twice. Depending on the
-       application, it may be more efficient to allocate a large buffer and
-       free the excess afterwards, instead of using
-       PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
+       Passing a buffer size of zero (with buffer optionally NULL) is a
+       permitted way of finding out how much memory is needed for given
+       substitution. However, this does mean that the entire operation is
+       carried out twice. Depending on the application, it may be more
+       efficient to allocate a large buffer and free the excess afterwards,
+       instead of using PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
 
        The replacement string, which is interpreted as a UTF string in UTF
        mode, is checked for UTF validity unless PCRE2_NO_UTF_CHECK is set. An
@@ -4265,11 +4265,13 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
                                    returned via blength. Note that this does
                                    not happen by default.
            PCRE2_ERROR_NULL        is returned if PCRE2_SUBSTITUTE_MATCHED is
-                                   set but the match_data argument is NULL or
-                                   if the subject or replacement arguments are
-                                   NULL. For backward compatibility reasons an
-                                   exception is made for the replacement
-                                   argument if the rlength argument is also 0.
+                                   set but the match_data argument is NULL; or
+                                   if the subject or replacement or buffer
+                                   argument is NULL. However, a NULL
+                                   replacement argument is allowed if the
+                                   rlength argument is zero; and similarly for
+                                   subject with zero length and buffer with
+                                   zero blength.
            PCRE2_ERROR_BADREPLACEMENT
                                    is used for miscellaneous syntax errors in
                                    the replacement string, with more

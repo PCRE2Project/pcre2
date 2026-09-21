@@ -2395,6 +2395,10 @@ pattern, but can be overridden by modifiers on the subject.</p>
 <dd>
 <p>match with NULL subject</p>
 </dd>
+<dt class="hdlist1"><code>null_substitute_buffer</code></dt>
+<dd>
+<p>substitute with a NULL output buffer</p>
+</dd>
 <dt class="hdlist1"><code>null_substitute_match_data</code></dt>
 <dd>
 <p>substitute with NULL match data</p>
@@ -2965,7 +2969,7 @@ passing the replacement string as zero-terminated.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_passing_a_null_context_subject_or_replacement">Passing a null context, subject, or replacement</h3>
+<h3 id="_passing_a_null_context_subject_replacement_or_substitute_buffer">Passing a null context, subject, replacement, or substitute buffer</h3>
 <div class="paragraph">
 <p>Normally, <code>pcre2test</code> passes a context block to <code class="function">pcre2_match()</code>,
 <code class="function">pcre2_dfa_match()</code>, <code class="function">pcre2_jit_match()</code> or <code class="function">pcre2_substitute()</code>.
@@ -2976,9 +2980,13 @@ case (they use default values). This modifier cannot be used with the
 modifiers.</p>
 </div>
 <div class="paragraph">
-<p>Similarly, for testing purposes, if the <code>null_subject</code> or
-<code>null_replacement</code> modifier is set, the subject or replacement string
-pointers are passed as NULL, respectively, to the relevant functions.</p>
+<p>Similarly, for testing purposes, if the <code>null_subject</code>,
+or <code>null_replacement</code>, or <code>null_substitute_buffer</code> modifiers are set, then the
+subject, or replacement string, or substitute output buffer pointers are passed
+as NULL, respectively, to the relevant functions. For <code>null_substitute_buffer</code>,
+the paired argument for the passed-in buffer length is set by starting the
+replacement string with "[NUM]" as described in "Testing the substitution
+function" above.</p>
 </div>
 </div>
 </div>
