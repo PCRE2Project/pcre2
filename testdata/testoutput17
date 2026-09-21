@@ -348,6 +348,12 @@ Failed: error -46: JIT stack limit reached
 \= Expect JIT stack limit reached
     aaaabcde
 Failed: error -46: JIT stack limit reached
+
+# A single large stack allocation must grow beyond the current stack top.
+
+/((?(DEFINE)\[()\g{-1}]{1400}).{1}(?R)|)/expand,jit
+    AAAAAA\=jitstack=192
+Failed: error -46: JIT stack limit reached
     
 # Invalid options disable JIT when called via pcre2_match(), causing the
 # match to happen via the interpreter, but for fast JIT invalid options are
