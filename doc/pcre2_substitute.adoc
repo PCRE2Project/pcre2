@@ -49,7 +49,7 @@ arg:replacement::
 arg:rlength::
     Length of the replacement string
 arg:buffer::
-    Points to the output buffer
+    Points to the output buffer, or may be [.c]`NULL` if arg:blength is zero
 arg:blength::
     Points to the length of the output buffer
 

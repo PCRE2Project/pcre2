@@ -586,6 +586,7 @@ so many of them that they are split into two fields. */
 #define CTL2_FRAMESIZE                   0x00008000u
 #define CTL2_SUBSTITUTE_CASE_CALLOUT     0x00010000u
 #define CTL2_NULL_SUBSTITUTE_MATCH_DATA  0x00020000u
+#define CTL2_NULL_SUBSTITUTE_BUFFER      0x00040000u
 
 #define CTL2_HEAPFRAMES_SIZE 0x20000000u /* Informational */
 #define CTL2_NL_SET          0x40000000u /* Informational */
@@ -832,6 +833,7 @@ static modstruct modlist[] = {
   { "null_pattern",                MOD_PAT,  MOD_CTL,   CTL2_NULL_PATTERN,                   PO(control2)            },
   { "null_replacement",            MOD_DAT,  MOD_CTL,   CTL2_NULL_REPLACEMENT,               DO(control2)            },
   { "null_subject",                MOD_DAT,  MOD_CTL,   CTL2_NULL_SUBJECT,                   DO(control2)            },
+  { "null_substitute_buffer",      MOD_DAT,  MOD_CTL,   CTL2_NULL_SUBSTITUTE_BUFFER,         DO(control2)            },
   { "null_substitute_match_data",  MOD_PND,  MOD_CTL,   CTL2_NULL_SUBSTITUTE_MATCH_DATA,     PO(control2)            },
   { "offset",                      MOD_DAT,  MOD_SIZ,   0,                                   DO(offset)              },
   { "offset_limit",                MOD_CTM,  MOD_SIZ,   0,                                   MO(offset_limit)        },
@@ -2487,6 +2489,7 @@ show_controls(int clr, uint32_t controls, uint32_t controls2, const char *before
       ((controls & CTL_NULLCONTEXT) != 0) ? " null_context" : "",
       ((controls2 & CTL2_NULL_REPLACEMENT) != 0) ? " null_replacement" : "",
       ((controls2 & CTL2_NULL_SUBJECT) != 0) ? " null_subject" : "",
+      ((controls2 & CTL2_NULL_SUBSTITUTE_BUFFER) != 0) ? " null_substitute_buffer" : "",
       ((controls2 & CTL2_NULL_SUBSTITUTE_MATCH_DATA) != 0) ? " null_substitute_match_data" : "",
       ((controls & CTL_POSIX) != 0) ? " posix" : "",
       ((controls & CTL_POSIX_NOSUB) != 0) ? " posix_nosub" : "",

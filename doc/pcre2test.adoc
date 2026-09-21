@@ -1393,6 +1393,7 @@ pattern, but can be overridden by modifiers on the subject.
 `null_context`:: match with a NULL context
 `null_replacement`:: substitute with NULL replacement
 `null_subject`:: match with NULL subject
+`null_substitute_buffer`:: substitute with a NULL output buffer
 `null_substitute_match_data`:: substitute with NULL match data
 `offset=<n>`:: set starting offset
 `offset_limit=<n>`:: set offset limit
@@ -1830,7 +1831,7 @@ this modifier is ignored, with a warning.
 When testing func:pcre2_substitute(), this modifier also has the effect of
 passing the replacement string as zero-terminated.
 
-=== Passing a null context, subject, or replacement
+=== Passing a null context, subject, replacement, or substitute buffer
 
 Normally, `pcre2test` passes a context block to func:pcre2_match(),
 func:pcre2_dfa_match(), func:pcre2_jit_match() or func:pcre2_substitute().
@@ -1840,9 +1841,13 @@ case (they use default values). This modifier cannot be used with the
 `find_limits`, `find_limits_noheap`, or `substitute_callout`
 modifiers.
 
-Similarly, for testing purposes, if the `null_subject` or
-`null_replacement` modifier is set, the subject or replacement string
-pointers are passed as NULL, respectively, to the relevant functions.
+Similarly, for testing purposes, if the `null_subject`,
+or `null_replacement`, or `null_substitute_buffer` modifiers are set, then the
+subject, or replacement string, or substitute output buffer pointers are passed
+as NULL, respectively, to the relevant functions. For `null_substitute_buffer`,
+the paired argument for the passed-in buffer length is set by starting the
+replacement string with "[NUM]" as described in "Testing the substitution
+function" above.
 
 == The alternative matching function
 
