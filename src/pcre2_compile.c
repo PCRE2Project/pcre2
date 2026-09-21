@@ -6322,7 +6322,8 @@ PARSED_END:
 
   /* Manage callout for the final item */
 
-  parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout, parsed_pattern, cb);
+  if (after_manual_callout-- <= 0)
+    parsed_pattern = manage_callouts(ptr, &previous_callout, auto_callout, parsed_pattern, cb);
 
   /* Insert trailing items for word and line matching (features provided for the
   benefit of pcre2grep). */
