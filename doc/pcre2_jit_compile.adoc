@@ -28,7 +28,7 @@ documentation.
 
 The availability of JIT support can be tested by calling
 func:pcre2_jit_compile() with a single option const:PCRE2_JIT_TEST_ALLOC (the
-arg:code argument is ignored, so a [.c]`NULL` value is accepted). Such a call
+arg:code argument is ignored, so a const:NULL value is accepted). Such a call
 returns zero if JIT is available and has a working allocator. Otherwise
 it returns const:PCRE2_ERROR_NOMEMORY if JIT is available but cannot allocate
 executable memory, or const:PCRE2_ERROR_JIT_UNSUPPORTED if JIT support is not

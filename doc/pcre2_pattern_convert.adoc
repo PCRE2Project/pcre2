@@ -34,18 +34,18 @@ arg:plength::
 arg:options::
     Option bits
 arg:buffptr::
-    Pointer to pointer to output buffer, or [.c]`NULL`
+    Pointer to pointer to output buffer, or const:NULL
 arg:bufflenptr::
     Pointer to output length field
 arg:ccontext::
-    Pointer to a convert context or [.c]`NULL`
+    Pointer to a convert context or const:NULL
 
 The length of the converted pattern (excluding the terminating zero) is
-returned via arg:bufflenptr. If arg:buffptr is [.c]`NULL`, the function just returns
-the output length. If arg:buffptr points to a [.c]`NULL` pointer, heap memory is
+returned via arg:bufflenptr. If arg:buffptr is const:NULL, the function just returns
+the output length. If arg:buffptr points to a const:NULL pointer, heap memory is
 obtained for the converted pattern, using the allocator in the context if
 present (or else [.c]`malloc()`), and the field pointed to by arg:buffptr is
-updated. If arg:buffptr points to a non-[.c]`NULL` field, that must point to a
+updated. If arg:buffptr points to a non-const:NULL field, that must point to a
 buffer whose size is in the variable pointed to by arg:bufflenptr. This value is
 updated.
 
@@ -61,11 +61,9 @@ const:PCRE2_CONVERT_POSIX_BASIC::
 const:PCRE2_CONVERT_POSIX_EXTENDED::
     Convert POSIX extended pattern
 const:PCRE2_CONVERT_GLOB::
-    Convert
 const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR::
-    various types
 const:PCRE2_CONVERT_GLOB_NO_STARSTAR::
-    of glob
+    Convert the different types of glob
 
 The return value from func:pcre2_pattern_convert() is zero on success or a
 non-zero PCRE2 error code.

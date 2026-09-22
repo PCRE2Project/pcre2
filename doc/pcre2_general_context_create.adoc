@@ -25,8 +25,8 @@ pcre2_general_context *pcre2_general_context_create(
 This function creates and initializes a general context. The arguments define
 custom memory management functions and a data value that is passed to them when
 they are called. The arg:private_malloc() function is used to get memory for
-the context. If either of the first two arguments is [.c]`NULL`, the system memory
-management function is used. The result is [.c]`NULL` if no memory could be obtained.
+the context. If either of the first two arguments is const:NULL, the system memory
+management function is used. The result is const:NULL if no memory could be obtained.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

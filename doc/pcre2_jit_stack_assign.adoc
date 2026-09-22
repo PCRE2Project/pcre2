@@ -35,19 +35,19 @@ arg:callback::
 arg:callback_data::
     a JIT stack or a value to be passed to the callback
 
-If arg:mcontext is [.c]`NULL`, the function returns immediately, without doing
+If arg:mcontext is const:NULL, the function returns immediately, without doing
 anything.
 
-If arg:callback is [.c]`NULL` and arg:callback_data is [.c]`NULL`, an internal 32KiB
+If arg:callback is const:NULL and arg:callback_data is const:NULL, an internal 32KiB
 block on the machine stack is used.
 
-If arg:callback is [.c]`NULL` and arg:callback_data is not [.c]`NULL`,
+If arg:callback is const:NULL and arg:callback_data is not const:NULL,
 arg:callback_data must be a valid JIT stack, the result of calling
 func:pcre2_jit_stack_create().
 
-If arg:callback not [.c]`NULL`, it is called with arg:callback_data as an
+If arg:callback not const:NULL, it is called with arg:callback_data as an
 argument at the start of matching, in order to set up a JIT stack. If the
-result is [.c]`NULL`, the internal 32KiB stack is used; otherwise the return value
+result is const:NULL, the internal 32KiB stack is used; otherwise the return value
 must be a valid JIT stack, the result of calling
 func:pcre2_jit_stack_create().
 

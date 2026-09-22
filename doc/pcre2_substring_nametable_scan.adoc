@@ -36,7 +36,7 @@ arg:firstptr::
 arg:lastptr::
     Where to return a pointer to the last entry
 
-When the name is found in the table, if arg:firstptr is [.c]`NULL`, the function
+When the name is found in the table, if arg:firstptr is const:NULL, the function
 returns a group number, but if there is more than one matching entry, it is not
 defined which one. Otherwise, when both arg:firstptr and arg:lastptr have been
 set, the yield of

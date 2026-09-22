@@ -2,11 +2,13 @@
 :doctype: manpage
 :manname: pcre2partial
 :manpurpose: PCRE2 partial matching
+:description: Using PCRE2 for partial matching
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 16 August 2026
 :revdate: 16 August 2026
+:toc: right
 
 == Partial matching in PCRE2
 
@@ -35,11 +37,9 @@ If you want to use partial matching with just-in-time optimized code, as well
 as setting a partial match option for the matching function, you must also call
 func:pcre2_jit_compile() with one or both of these options:
 
-[source,text]
-....
-PCRE2_JIT_PARTIAL_HARD
-PCRE2_JIT_PARTIAL_SOFT
-....
+[.options]
+const:PCRE2_JIT_PARTIAL_HARD::
+const:PCRE2_JIT_PARTIAL_SOFT::
 
 const:PCRE2_JIT_COMPLETE should also be set if you are going to run non-partial
 matches on the same pattern. Separate code is compiled for each mode. If the
@@ -60,11 +60,11 @@ string is reached successfully, but either more characters are needed to
 complete the match, or the addition of more characters might change what is
 matched.
 
-Example 1: if the pattern is [.regex]`abc` and the subject is "ab", more characters are
+Example 1: if the pattern is [.regex]`abc` and the subject is [.subject]`ab`, more characters are
 definitely needed to complete a match. In this case both hard and soft matching
 options yield a partial match.
 
-Example 2: if the pattern is [.regex]`ab+` and the subject is "ab", a complete match
+Example 2: if the pattern is [.regex]`ab+` and the subject is [.subject]`ab`, a complete match
 can be found, but the addition of more characters might change what is
 matched. In this case, only const:PCRE2_PARTIAL_HARD returns a partial match;
 const:PCRE2_PARTIAL_SOFT returns the complete match.
@@ -74,30 +74,30 @@ pattern item is [.regex]`\z`, [.regex]`\Z`, [.regex]`\b`, [.regex]`\B`, or [.reg
 Otherwise, for both options, the next pattern item must be one that inspects a
 character, and at least one of the following must be true:
 
-(1) At least one character has already been inspected. An inspected character
-need not form part of the final matched string; lookbehind assertions and the
-[.regex]`\K` escape sequence provide ways of inspecting characters before the start of a
-matched string.
+. At least one character has already been inspected. An inspected character
+  need not form part of the final matched string; lookbehind assertions and the
+  [.regex]`\K` escape sequence provide ways of inspecting characters before the start of a
+  matched string.
 
-(2) The pattern contains one or more lookbehind assertions. This condition
-exists in case there is a lookbehind that inspects characters before the start
-of the match.
+. The pattern contains one or more lookbehind assertions. This condition
+  exists in case there is a lookbehind that inspects characters before the start
+  of the match.
 
-(3) There is a special case when the whole pattern can match an empty string.
-When the starting point is at the end of the subject, the empty string match is
-a possibility, and if const:PCRE2_PARTIAL_SOFT is set and neither of the above
-conditions is true, it is returned. However, because adding more characters
-might result in a non-empty match, const:PCRE2_PARTIAL_HARD returns a partial match,
-which in this case means "there is going to be a match at this point, but until
-some more characters are added, we do not know if it will be an empty string or
-something longer".
+. There is a special case when the whole pattern can match an empty string.
+  When the starting point is at the end of the subject, the empty string match is
+  a possibility, and if const:PCRE2_PARTIAL_SOFT is set and neither of the above
+  conditions is true, it is returned. However, because adding more characters
+  might result in a non-empty match, const:PCRE2_PARTIAL_HARD returns a partial match,
+  which in this case means "there is going to be a match at this point, but until
+  some more characters are added, we do not know if it will be an empty string or
+  something longer".
 
 == Partial matching using func:pcre2_match()
 
 When a partial matching option is set, the result of calling
 func:pcre2_match() can be one of the following:
 
-[.returns,width=20]
+[.returns]
 A successful match::
 A complete match has been found, starting and ending within this subject.
 
@@ -114,14 +114,14 @@ the ovector are undefined. The appearance of [.regex]`\K` in the pattern has no 
 for a partial match. Consider this pattern:
 
 [source,regex]
-....
-/abc\K123/
-....
+----
+abc\K123
+----
 
-If it is matched against "456abc123xyz" the result is a complete match, and the
-ovector defines the matched string as "123", because [.regex]`\K` resets the "start of
+If it is matched against [.subject]`456abc123xyz` the result is a complete match, and the
+ovector defines the matched string as [.subject]`123`, because [.regex]`\K` resets the "start of
 match" point. However, if a partial match is requested and the subject string
-is "456abc12", a partial match is found for the string "abc12", because all
+is [.subject]`456abc12`, a partial match is found for the string [.subject]`abc12`, because all
 these characters are needed for a subsequent re-match with additional
 characters.
 
@@ -129,15 +129,15 @@ If there is more than one partial match, the first one that was found provides
 the data that is returned. Consider this pattern:
 
 [source,regex]
-....
-/123\w+X|dogY/
-....
+----
+123\w+X|dogY
+----
 
-If this is matched against the subject string "abc123dog", both alternatives
+If this is matched against the subject string [.subject]`abc123dog`, both alternatives
 fail to match, but the end of the subject is reached during matching, so
 const:PCRE2_ERROR_PARTIAL is returned. The offsets are set to 3 and 9, identifying
-"123dog" as the first partial match. (In this example, there are two partial
-matches, because "dog" on its own partially matches the second alternative.)
+[.subject]`123dog` as the first partial match. (In this example, there are two partial
+matches, because [.subject]`dog` on its own partially matches the second alternative.)
 
 === How a partial match is processed by func:pcre2_match()
 
@@ -164,32 +164,29 @@ The difference between the two partial matching options can be illustrated by a
 pattern such as:
 
 [source,regex]
-....
-/dog(sbody)?/
-....
+----
+dog(sbody)?
+----
 
-This matches either "dog" or "dogsbody", greedily (that is, it prefers the
-longer string if possible). If it is matched against the string "dog" with
-const:PCRE2_PARTIAL_SOFT, it yields a complete match for "dog". However, if
+This matches either [.subject]`dog` or [.subject]`dogsbody`, greedily (that is, it prefers the
+longer string if possible). If it is matched against the string [.subject]`dog` with
+const:PCRE2_PARTIAL_SOFT, it yields a complete match for [.subject]`dog`. However, if
 const:PCRE2_PARTIAL_HARD is set, the result is const:PCRE2_ERROR_PARTIAL. On the other
 hand, if the pattern is made ungreedy the result is different:
 
 [source,regex]
-....
-/dog(sbody)??/
-....
+----
+dog(sbody)??
+----
 
 In this case the result is always a complete match because that is found first,
 and matching never continues after finding a complete match. It might be easier
 to follow this explanation by thinking of the two patterns like this:
 
-[source,regex]
-....
-/dog(sbody)?/    is the same as  /dogsbody|dog/
-/dog(sbody)??/   is the same as  /dog|dogsbody/
-....
+* [.regex]`dog(sbody)?`    is the same as  [.regex]`dogsbody|dog`
+* [.regex]`dog(sbody)??`   is the same as  [.regex]`dog|dogsbody`
 
-The second pattern will never match "dogsbody", because it will always find the
+The second pattern will never match [.subject]`dogsbody`, because it will always find the
 shorter match first.
 
 === Example of partial matching using pcre2test
@@ -201,7 +198,7 @@ respectively, when calling func:pcre2_match(). Here is a run of
 date:
 
 [source,text]
-....
+----
   re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
 data> 25dec3\=ph
 Partial match: 23dec3
@@ -209,20 +206,20 @@ data> 3ju\=ph
 Partial match: 3ju
 data> 3juj\=ph
 No match
-....
+----
 
 This example gives the same results for both hard and soft partial matching
 options. Here is an example where there is a difference:
 
 [source,text]
-....
+----
   re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
 data> 25jun04\=ps
  0: 25jun04
  1: jun
 data> 25jun04\=ph
 Partial match: 25jun04
-....
+----
 
 With const:PCRE2_PARTIAL_SOFT, the subject is matched completely. For
 const:PCRE2_PARTIAL_HARD, however, the subject is assumed not to be complete, so
@@ -251,14 +248,14 @@ func:pcre2_match() to begin at the point where the partial match started.
 For example:
 
 [source,text]
-....
+----
   re> /\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d/
 data> ...the date is 23ja\=ph
 Partial match: 23ja
 data> ...the date is 23jan19 and on that day...\=offset=15
  0: 23jan19
  1: jan
-....
+----
 
 Note the use of the `offset` modifier to start the new match where the
 partial match was found. In this example, the next segment was added to the one
@@ -276,15 +273,15 @@ contain any lookbehinds, it is sufficient to retain only the partially matched
 substring. However, if the pattern contains a lookbehind assertion, characters
 that precede the start of the partial match may have been inspected during the
 matching process. When `pcre2test` displays a partial match, it indicates
-these characters with '<' if the `allusedtext` modifier is set:
+these characters with `<` if the `allusedtext` modifier is set:
 
 [source,text]
-....
+----
   re> "(?<=123)abc"
 data> xx123ab\=ph,allusedtext
 Partial match: 123ab
                <<<
-....
+----
 
 However, the `allusedtext` modifier is not available for JIT matching,
 because JIT matching does not record the first (or last) consulted characters.
@@ -300,7 +297,7 @@ lookbehind in a pattern, but this can be misleading if there are nested
 lookbehinds. The value returned by calling func:pcre2_pattern_info() with the
 const:PCRE2_INFO_MAXLOOKBEHIND option is the maximum number of characters (not code
 units) that any individual lookbehind moves back when it is processed. A
-pattern such as [.regex]`(?<=(?<!b)a)` has a maximum lookbehind value of one, but
+pattern such as [.regex]`+(?<=(?<!b)a)+` has a maximum lookbehind value of one, but
 inspects two characters before its starting point.
 
 In a non-UTF or a 32-bit case, moving back is just a subtraction, but in
@@ -322,16 +319,16 @@ partial match was found is set as the first matching string.
 
 Because the DFA function always searches for all possible matches, and there is
 no difference between greedy and ungreedy repetition, its behaviour is
-different from func:pcre2_match(). Consider the string "dog" matched
+different from func:pcre2_match(). Consider the string [.subject]`dog` matched
 against this ungreedy pattern:
 
 [source,regex]
-....
-/dog(sbody)??/
-....
+----
+dog(sbody)??
+----
 
 Whereas the standard function stops as soon as it finds the complete match for
-"dog", the DFA function also finds the partial match for "dogsbody", and so
+[.subject]`dog`, the DFA function also finds the partial match for [.subject]`dogsbody`, and so
 returns that when const:PCRE2_PARTIAL_HARD is set.
 
 == Multi-segment matching with func:pcre2_dfa_match()
@@ -346,16 +343,16 @@ to continue partial matching over multiple segments. Here is an example using
 `pcre2test`:
 
 [source,text]
-....
+----
   re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
 data> 23ja\=dfa,ps
 Partial match: 23ja
 data> n05\=dfa,dfa_restart
  0: n05
-....
+----
 
-The first call has "23ja" as the subject, and requests partial matching; the
-second call has "n05" as the subject for the continued (restarted) match.
+The first call has [.subject]`23ja` as the subject, and requests partial matching; the
+second call has [.subject]`n05` as the subject for the continued (restarted) match.
 Notice that when the match is complete, only the last part is shown; PCRE2 does
 not retain the previously partially-matched string. It is up to the calling
 program to do that if it needs to. This means that, for an unanchored pattern,
@@ -364,14 +361,14 @@ point. All this facility is capable of doing is continuing with the previous
 match attempt. For example, consider this pattern:
 
 [source,regex]
-....
+----
 1234|3789
-....
+----
 
-If the first part of the subject is "ABC123", a partial match of the first
+If the first part of the subject is [.subject]`ABC123`, a partial match of the first
 alternative is found at offset 3. There is no partial match for the second
 alternative, because such a match does not start at the same point in the
-subject string. Attempting to continue with the string "7890" does not yield a
+subject string. Attempting to continue with the string [.subject]`7890` does not yield a
 match because only those alternatives that match at one point in the subject
 are remembered. Depending on the application, this may or may not be what you
 want.
@@ -381,7 +378,7 @@ doing it is to retain some or all of the segment and try a new complete match,
 as described for func:pcre2_match() above. Another possibility is to work with
 two buffers. If a partial match at offset _n_ in the first buffer is
 followed by "no match" when const:PCRE2_DFA_RESTART is used on the second buffer, you
-can then try a new match starting at offset _n&#43;1_ in the first buffer.
+can then try a new match starting at offset _n_+1 in the first buffer.
 
 Therefore, const:PCRE2_DFA_RESTART does not remove the need to keep earlier subject
 data. In order to perform a bumpalong and continue matching at the next
@@ -396,16 +393,15 @@ intended to produce the same result as searching the whole subject, it is
 usually simpler to avoid const:PCRE2_DFA_RESTART and run a fresh match, using either
 matching function, over the retained text.
 
+[discrete]
 == Author
 
-[literal]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 16 August 2026 +
-Copyright (c) 1997-2019 University of Cambridge.
+Copyright (C) 1997-2019 University of Cambridge.

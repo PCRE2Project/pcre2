@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 # PCRE2's Asciidoctor extension defines a small semantic inline vocabulary and
-# backend-specific presentation for manpage and HTML output. Keep the extension
-# backend-neutral until conversion so both outputs consume the same AST.
+# backend-specific presentation for manpage output. Keep the extension
+# backend-neutral until conversion so all outputs consume the same AST.
 require 'asciidoctor/converter/manpage'
-require 'asciidoctor/converter/html5'
 require 'asciidoctor/extensions'
 # Decode Asciidoctor's special-character substitutions before Rouge lexing.
 require 'cgi'
@@ -35,10 +34,10 @@ class Pcre2FunctionInlineMacro < Pcre2ApiInlineMacro
   end
 end
 
-# Recognize uppercase and lowercase forms used for public PCRE2 types.
+# Recognize public PCRE2 types and POSIX types with a conventional `_t` suffix.
 class Pcre2TypeInlineMacro < Pcre2ApiInlineMacro
   named :type
-  match /type:(PCRE2_[A-Z0-9_]+|pcre2_[a-z0-9_]+)/
+  match /type:(PCRE2_[A-Z0-9_]+|pcre2_[a-z0-9_]+|[A-Za-z][A-Za-z0-9_]*_t)/
 
   def initialize(*args)
     super
@@ -49,7 +48,7 @@ end
 # Recognize uppercase public constants, options, flags, and error names.
 class Pcre2ConstantInlineMacro < Pcre2ApiInlineMacro
   named :const
-  match /const:(PCRE2_[A-Z0-9_]+)/
+  match /const:([A-Z][A-Z0-9_]*)/
 
   def initialize(*args)
     super
@@ -68,74 +67,80 @@ class Pcre2ArgumentInlineMacro < Pcre2ApiInlineMacro
   end
 end
 
+# Recognize character constants
+class Pcre2CharacterInlineMacro < Pcre2ApiInlineMacro
+  named :char
+  match /char:((?:0x|U\+)[0-9A-Fa-f]+)/
+
+  def initialize(*args)
+    super
+    @role = 'character'
+  end
+end
+
 # Install the API macros globally for documents loaded with this extension.
 Asciidoctor::Extensions.register do
   inline_macro Pcre2FunctionInlineMacro
   inline_macro Pcre2TypeInlineMacro
   inline_macro Pcre2ConstantInlineMacro
   inline_macro Pcre2ArgumentInlineMacro
+  inline_macro Pcre2CharacterInlineMacro
 end
 
-# Preserve PCRE2's established terminal layout while adding semantic list,
+# Preserve PCRE2's established terminal layout while adding description-list,
 # inline API, and C source presentation to Asciidoctor's manpage backend.
 # `ESC_BS`, inherited from the stock converter, protects intended roff escapes
 # until `manify` performs its final escape and fake-markup cleanup pass.
 class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
-  # Dense API reference lists opt into compact, indented presentation; ordinary
-  # prose description lists retain normal spacing and margins.
-  SEMANTIC_DLIST_ROLES = %w[parameters members options values returns errors].freeze
+  MIN_DLIST_WIDTH = 7
+  MAX_DLIST_WIDTH = 26
+  PROTECTED_FONT_MARKER_RX = %r(</?#{Regexp.escape ESC_BS}f(B|I|\(CR|P)>)
 
   # Replace the stock manpage converter for documents using this extension.
   register_for 'manpage'
 
-  def convert_section(node)
-    # Stock manpage conversion uppercases level-one titles after AsciiDoc has
-    # parsed them. Preserve inline code and backslash sequences while matching
-    # the historical all-caps rendering of ordinary heading text.
-    macro = node.level > 1 ? 'SS' : 'SH'
-    title = node.level > 1 ? node.captioned_title : uppercase_title(node.title)
-    %(.#{macro} "#{manify title}"
-#{node.content})
-  end
-
-  # Uppercase ordinary level-one heading text while protecting inline markup,
-  # regex property escapes, and lowercase PCRE2 names from case conversion.
-  def uppercase_title(title)
+  # Stock section conversion protects inline markup while uppercasing level-one
+  # headings. Additionally preserve lowercase PCRE2 names in those headings.
+  def uppercase_pcdata(text)
     protected = []
     protect = lambda do |fragment|
       protected << fragment
       "\0#{protected.length - 1}\0"
     end
-    masked = title.gsub(/<[^>]+>.*?<\/[^>]+>/, &protect)
-    masked = masked.gsub(/\\[pP] and \\[pP]/, &protect)
-    masked = masked.gsub('\\p', &protect).gsub('\\P', &protect)
-    masked = masked.gsub(/\bpcre2_[a-z0-9_]+(?:\(\))?|\bpcre2test\b/, &protect)
-    masked.upcase.gsub(/\0(\d+)\0/) { protected[$1.to_i] }
+    masked = text.gsub(/\bpcre2_[a-z0-9_]+(?:\(\))?|\bpcre2test\b/, &protect)
+    super(masked).gsub(/\0(\d+)\0/) { protected[$1.to_i] }
   end
 
   def convert_dlist(node)
-    # PCRE2 uses traditional tagged paragraphs. `width` (or legacy `indent`)
-    # overrides an automatic label width of longest visible term plus one.
-    # Capping it at 24 keeps long API names from consuming the description area;
-    # fake inline-font tags are excluded from the measurement.
+    return super if node.style == 'qanda'
+
+    # PCRE2 uses traditional tagged paragraphs. `width` overrides the automatic
+    # label width; fake inline-font tags are excluded from the measurement.
     result = []
     terms_and_descriptions = node.items.map do |terms, description|
       term = terms.map(&:text).join(', ')
       [term, description]
     end
-    width = if node.attr?('width') || node.attr?('indent')
-      node.attr('width', node.attr('indent')).to_i
+    width = if node.attr?('width')
+      node.attr('width').to_i
     else
-      longest_term = terms_and_descriptions.map {|term, _| term.gsub(/<[^>]+>/, '').length }.max || 0
-      [longest_term + 1, 24].min
+      lengths = terms_and_descriptions.map {|term, _| term.gsub(/<[^>]+>/, '').length }
+      fitting_lengths = lengths.select {|length| length + 1 <= MAX_DLIST_WIDTH }
+      if fitting_lengths.length > lengths.length / 2
+        [fitting_lengths.max + 1, MIN_DLIST_WIDTH].max
+      else
+        MIN_DLIST_WIDTH
+      end
     end
-    semantic = !(node.roles & SEMANTIC_DLIST_ROLES).empty?
+    spaced = terms_and_descriptions.any? do |_, description|
+      description && description.blocks?
+    end
     # `.sp` retains normal separation from preceding prose, `.RS 4` indents the
-    # whole list by four ens, and `.PD 0` suppresses only inter-item paragraph
-    # distance. A bare `.PD` below restores the man macro package's default.
-    result << '.sp' if semantic
-    result << '.RS 4' if semantic
-    result << '.PD 0' if semantic
+    # whole list by four ens, and `.PD 0` suppresses inter-item paragraph
+    # distance for lists whose descriptions contain no additional blocks.
+    result << '.sp'
+    result << '.RS 4'
+    result << (spaced ? '.PD' : '.PD 0')
     terms_and_descriptions.each do |term, description|
       # `.TP width` emits a term followed by its indented description. The macro
       # resets adjustment, so restore ragged-right mode for every description.
@@ -144,11 +149,16 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
 .ad l)
       if description
         result << (manify description.text, whitespace: :normalize) if description.text?
-        result << description.content if description.blocks?
+        if description.blocks?
+          # Block macros discard `.TP`'s transient description indent.
+          result << ".RS #{width}"
+          result << description.content
+          result << '.RE'
+        end
       end
     end
-    result << '.PD' if semantic
-    result << '.RE' if semantic
+    result << '.PD'
+    result << '.RE'
     # Close the list as a paragraph and restore ragged-right mode because `.PP`
     # otherwise switches subsequent prose back to full justification.
     result << %(.PP
@@ -156,90 +166,113 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     result.join "\n"
   end
 
-  # Present semantic API roles without changing generic quoted-node behavior:
-  # types/constants are bold, parameters italic, and functions plain roman.
+  # Flatten nested font changes into independent runs because roff's `\fP`
+  # remembers only one previous font; it does not maintain a font stack.
   def convert_inline_quoted(node)
     case node.role
     when 'type', 'constant'
-      %(<#{ESC_BS}fB>#{node.text}</#{ESC_BS}fP>)
+      # Gross hack to add line-break points for roff when inside a table cell
+      text = node.parent.context == :table_cell ?
+        node.text.gsub('_', "_#{ESC_BS}:") : node.text
+      inline_font_run text, 'B'
     when 'parameter'
-      %(<#{ESC_BS}fI>#{node.text}</#{ESC_BS}fP>)
+      inline_font_run node.text, 'I'
     when 'function'
       node.text
     else
-      super
+      case node.type
+      when :emphasis
+        inline_font_run node.text, 'I'
+      when :strong
+        inline_font_run node.text, 'B'
+      when :monospaced
+        inline_font_run node.text, '(CR'
+      when :single
+        %[<#{ESC_BS}(oq>#{node.text}</#{ESC_BS}(cq>]
+      when :double
+        %[<#{ESC_BS}(lq>#{node.text}</#{ESC_BS}(rq>]
+      else
+        node.text
+      end
     end
   end
 
+  def inline_font_run(text, font)
+    text.empty? ? '' : %(<#{ESC_BS}f#{font}>#{text}</#{ESC_BS}fP>)
+  end
+
+  # Asciidoctor finishes nested inline substitutions after the outer converter
+  # callback. Flatten the resulting protected font markers before stock manify
+  # turns them into roff escapes.
+  def manify(text, options = {})
+    super flatten_inline_fonts(text), options
+  end
+
+  def flatten_inline_fonts(text)
+    return text unless PROTECTED_FONT_MARKER_RX.match? text
+
+    result = []
+    fonts = []
+    offset = 0
+    text.to_enum(:scan, PROTECTED_FONT_MARKER_RX).each do
+      match = Regexp.last_match
+      segment = text[offset...match.begin(0)]
+      result << (fonts.empty? ? segment : inline_font_run(segment, fonts.last))
+      if match[1] == 'P'
+        raise 'Unbalanced protected roff font markers' if fonts.empty?
+
+        fonts.pop
+      else
+        fonts << match[1]
+      end
+      offset = match.end(0)
+    end
+    segment = text[offset..]
+    result << (fonts.empty? ? segment : inline_font_run(segment, fonts.last))
+    raise 'Unbalanced protected roff font markers' unless fonts.empty?
+
+    result.join
+  end
+
   def convert_literal(node)
-    # Stock literal blocks are indented monospaced listings. Synopsis blocks
-    # need the PCRE2 troff layout below. All other PCRE2 literal blocks are
-    # formatted prose; their substitutions are declared in the AsciiDoc source.
-    return convert_synopsis(node) if node.style == 'synopsis'
-
-    convert_formatted node
-  end
-
-  def convert_synopsis(node)
-    # Unlike stock literal output, do not surround the synopsis with `.RS 4`.
-    # Function declarations are intentionally aligned at the page margin.
-    # Temporarily undo Asciidoctor's sentence-space suppression so punctuation
-    # cannot normalize deliberately aligned spaces in no-fill content.
-    %(.sp
-.ss \\n[.ss]
-.nf
-.fam C
-#{manify node.content, whitespace: :preserve}
-.fam
-.fi
-.ss \\n[.ss] 0)
-  end
-
-  def convert_formatted(node)
-    # Unlike stock literal output, render aligned reference rows in the normal
-    # font with a two-space default indent. `.br` preserves each source row
-    # without turning it into a monospaced code block; `indent` overrides it.
-    content = node.content
-    lines = content.lines(chomp: true)
-    indent = node.attr('indent', 2)
-    %(.sp
-#{lines.map {|line| ".ti +#{indent}\n#{manify line, whitespace: :preserve}" }.join "\n.br\n"})
+    convert_preformatted node, manify(node.content, whitespace: :preserve)
   end
 
   def convert_listing(node)
-    # Stock listings are indented with `.if n .RS 4`. PCRE2 source examples,
-    # including long function declarations, deliberately use the full page
-    # width and preserve their source alignment; non-source listings retain
-    # the stock implementation.
-    return super unless node.style == 'source'
+    content = node.style == 'source' ?
+      convert_source(node) : manify(node.content, whitespace: :preserve)
+    convert_preformatted node, content
+  end
 
+  # Follow stock literal/listing conversion, but keep preformatted blocks at
+  # the surrounding margin instead of adding a four-en relative indent.
+  def convert_preformatted(node, content)
     result = []
-    result << %(.sp
-.B #{manify node.captioned_title}
-.br) if node.title?
-    # Asciidoctor globally disables additional sentence spacing, which makes
-    # groff normalize runs of spaces after punctuation even in no-fill mode.
-    # Restore normal spacing for exact source columns, then reinstate that
-    # document-wide setting after the listing.
-    source = %(.sp
+    if node.title?
+      title = node.context == :listing ? node.captioned_title : node.title
+      result << %(.sp
+.B #{manify title}
+.br)
+    end
+    # Restore sentence spacing so groff preserves aligned spaces after punctuation.
+    formatted = %(.sp
 .ss \\n[.ss]
 .nf
 .fam C
-#{convert_source(node)}
+#{content}
 .fam
 .fi
 .ss \\n[.ss] 0)
-    # The fixed-width pcre2demo source must use the full width of an 80-column
-    # terminal. Save the current indent, move to the page edge, then restore
-    # the saved value after the block.
-    source = [
-      '.nr pI \\n(.i',
-      '.in 0',
-      source,
-      '.in \\n(pIu',
-      '.rr pI',
-    ].join "\n" if node.has_role?('wide')
-    result << source
+    if node.has_role?('wide')
+      formatted = [
+        '.nr pI \\n(.i',
+        '.in 0',
+        formatted,
+        '.in \\n(pIu',
+        '.rr pI',
+      ].join "\n"
+    end
+    result << formatted
     result.join "\n"
   end
 
@@ -296,31 +329,4 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     following = tokens.drop(index + 1).find {|token, text| token.qualname != 'Text' || !text.strip.empty? }
     following && following[1].start_with?('(')
   end
-end
-
-# Preserve PCRE2's dedicated synopsis structure in HTML; all other HTML nodes,
-# including ordinary literal blocks and semantic inline roles, use stock
-# conversion.
-class Pcre2Html5Converter < Asciidoctor::Converter::Html5Converter
-  # Replace the stock HTML5 converter for documents using this extension.
-  register_for 'html5'
-
-  def convert_literal(node)
-    # Preserve the dedicated synopsis markup. Stock conversion keeps spacing,
-    # titles, IDs, and roles intact for all ordinary literal blocks.
-    return convert_synopsis(node) if node.style == 'synopsis'
-
-    super
-  end
-
-  def convert_synopsis(node)
-    # Keep the conventional listingblock structure, but add PCRE2's synopsis
-    # class and a `<code>` wrapper for stylesheet and semantic targeting.
-    %(<div class="listingblock synopsis">
-<div class="content">
-<pre class="nowrap"><code>#{node.content}</code></pre>
-</div>
-</div>)
-  end
-
 end

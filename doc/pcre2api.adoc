@@ -2,15 +2,20 @@
 :doctype: manpage
 :manname: pcre2api
 :manpurpose: PCRE2 native API
+:description: PCRE2's native API
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 08 December 2025
 :revdate: 08 December 2025
+:toc: right
 
 == Description
 
-[.c]`#include <pcre2.h>`
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+----
 
 PCRE2 is a new API for PCRE, starting at release 10.0. This document contains a
 description of all its native functions. See the
@@ -390,23 +395,23 @@ systems the libraries are called `libpcre2-8`, `libpcre2-16`, and
 Every PCRE2 function comes in three different forms, one for each library, for
 example:
 
-[literal,subs=normal]
-....
-`pcre2_compile_8()`
-`pcre2_compile_16()`
-`pcre2_compile_32()`
-....
+[source,c]
+----
+pcre2_compile_8()
+pcre2_compile_16()
+pcre2_compile_32()
+----
 
 There are also three different sets of data types:
 
-[literal,subs=normal]
-....
-`PCRE2_UCHAR8, PCRE2_UCHAR16, PCRE2_UCHAR32`
-`PCRE2_SPTR8,  PCRE2_SPTR16,  PCRE2_SPTR32`
-....
+[source,c]
+----
+PCRE2_UCHAR8, PCRE2_UCHAR16, PCRE2_UCHAR32
+PCRE2_SPTR8,  PCRE2_SPTR16,  PCRE2_SPTR32
+----
 
 The UCHAR types define unsigned code units of the appropriate widths.
-For example, type:PCRE2_UCHAR16 is usually defined as [.c]`uint16_t`.
+For example, type:PCRE2_UCHAR16 is usually defined as type:uint16_t.
 The SPTR types are pointers to constants of the equivalent UCHAR types,
 that is, they are pointers to vectors of unsigned code units.
 
@@ -436,12 +441,12 @@ compiler error occurs.
 When using multiple libraries in an application, you must take care when
 processing any particular pattern to use only functions from a single library.
 For example, if you want to run a match using a pattern that was compiled with
-func:pcre2_compile_16(), you must do so with func:pcre2_match_16(), not
-func:pcre2_match_8() or func:pcre2_match_32().
+[.c]`pcre2_compile_16()`, you must do so with [.c]`pcre2_match_16()`, not
+[.c]`pcre2_match_8()` or [.c]`pcre2_match_32()`.
 
 In the function summaries above, and in the rest of this document and other
 PCRE2 documents, functions and data types are described using their generic
-names, without the _8, _16, or _32 suffix.
+names, without the `_8`, `_16`, or `_32` suffix.
 
 == PCRE2 API overview
 
@@ -465,7 +470,7 @@ against a non-dll PCRE2 library, you must define const:PCRE2_STATIC before inclu
 The functions func:pcre2_compile() and func:pcre2_match() are used for
 compiling and matching regular expressions in a Perl-compatible manner. A
 sample program that demonstrates the simplest way of using them is provided in
-the file called _pcre2demo.c_ in the PCRE2 source distribution. A listing
+the file called `pcre2demo.c` in the PCRE2 source distribution. A listing
 of this program is given in the
 xref:pcre2demo.adoc[`pcre2demo`]
 documentation, and the
@@ -510,45 +515,42 @@ In addition to the main compiling and matching functions, there are convenience
 functions for extracting captured substrings from a subject string that has
 been matched by func:pcre2_match(). They are:
 
-[literal,subs=normal]
-....
-`pcre2_substring_copy_byname()`
-`pcre2_substring_copy_bynumber()`
-`pcre2_substring_get_byname()`
-`pcre2_substring_get_bynumber()`
-`pcre2_substring_list_get()`
-`pcre2_substring_length_byname()`
-`pcre2_substring_length_bynumber()`
-`pcre2_substring_nametable_scan()`
-`pcre2_substring_number_from_name()`
-....
+* func:pcre2_substring_copy_byname()
+* func:pcre2_substring_copy_bynumber()
+* func:pcre2_substring_get_byname()
+* func:pcre2_substring_get_bynumber()
+* func:pcre2_substring_list_get()
+* func:pcre2_substring_length_byname()
+* func:pcre2_substring_length_bynumber()
+* func:pcre2_substring_nametable_scan()
+* func:pcre2_substring_number_from_name()
 
 func:pcre2_substring_free() and func:pcre2_substring_list_free() are also
 provided, to free memory used for extracted strings. If either of these
-functions is called with a NULL argument, the function returns immediately
+functions is called with a const:NULL argument, the function returns immediately
 without doing anything.
 
 The function func:pcre2_substitute() can be called to match a pattern and
 return a copy of the subject string with substitutions for parts that were
 matched.
 
-Functions whose names begin with `pcre2_serialize_` are used for saving
+Functions whose names begin with [.c]`pcre2_serialize_` are used for saving
 compiled patterns on disc or elsewhere, and reloading them later.
 
 Finally, there are functions for finding out information about a compiled
 pattern (func:pcre2_pattern_info()) and about the configuration with which
 PCRE2 was built (func:pcre2_config()) and that it is using.
 
-Functions with names ending with `_free()` are used for freeing memory
+Functions with names ending with [.c]`_free()` are used for freeing memory
 blocks of various sorts. In all cases, if one of these functions is called with
-a NULL argument, it does nothing.
+a const:NULL argument, it does nothing.
 
 == String lengths and offsets
 
 The PCRE2 API uses string lengths and offsets into strings of code units in
 several places. These values are always of type type:PCRE2_SIZE, which is an
-unsigned integer type, currently always defined as _size_t_. The largest
-value that can be stored in such a type (that is [.c]`~(PCRE2_SIZE)0`) is reserved
+unsigned integer type, currently always defined as type:size_t. The largest
+value that can be stored in such a type (that is [.c]`+~(PCRE2_SIZE)0+`) is reserved
 as a special indicator for zero-terminated strings and unset offsets.
 Therefore, the longest string that can be handled is one less than this
 maximum. Note that string lengths are always given in code units. Only in the
@@ -560,9 +562,9 @@ PCRE2 supports five different conventions for indicating line breaks in
 strings: a single CR (carriage return) character, a single LF (linefeed)
 character, the two-character sequence CRLF, any of the three preceding, or any
 Unicode newline sequence. The Unicode newline sequences are the three just
-mentioned, plus the single characters VT (vertical tab, `U+000B`), FF (form feed,
-`U+000C`), NEL (next line, `U+0085`), LS (line separator, `U+2028`), and PS
-(paragraph separator, `U+2029`).
+mentioned, plus the single characters VT (vertical tab, char:U+000B), FF (form feed,
+char:U+000C), NEL (next line, char:U+0085), LS (line separator, char:U+2028), and PS
+(paragraph separator, char:U+2029).
 
 Each of the first three conventions is used by at least one operating system as
 its standard newline sequence. When PCRE2 is built, a default can be specified.
@@ -576,10 +578,10 @@ page for details of the special character sequences.
 In the PCRE2 documentation the word "newline" is used to mean "the character or
 pair of characters that indicate a line break". The choice of newline
 convention affects the handling of the dot, circumflex, and dollar
-metacharacters, the handling of [.regex]`#`-comments in [.regex]`/x` mode, and, when CRLF is a
+metacharacters, the handling of [.regex]`+#+`-comments in [.regex]`+/x+` mode, and, when CRLF is a
 recognized line ending sequence, the match position advancement for a
 non-anchored pattern. There is more detail about this in the
-section on func:pcre2_match() options
+section <<match-option-bits>>
 below.
 
 The choice of newline convention does not affect the interpretation of
@@ -616,26 +618,27 @@ patterns must be protected from simultaneous writing by multiple threads. This
 is somewhat tricky to do correctly. If you know that writing to a pointer is
 atomic in your environment, you can use logic like this:
 
-[source,text,role=pseudocode]
-....
-Get a read-only (shared) lock (mutex) for pointer
+[source,c]
+----
+// Get a read-only (shared) lock (mutex) for pointer
 if (pointer == NULL)
-  {
-  Get a write (unique) lock for pointer
-  if (pointer == NULL) pointer = pcre2_compile(...
-  }
-Release the lock
-Use pointer in pcre2_match()
-....
+{
+  // Get a write (unique) lock for pointer
+  if (pointer == NULL)
+    pointer = pcre2_compile(...);
+}
+// Release the lock
+// Use pointer in pcre2_match()
+----
 
 Of course, testing for compilation errors should also be included in the code.
 
 The reason for checking the pointer a second time is as follows: Several
 threads may have acquired the shared lock and tested the pointer for being
-[.c]`NULL`, but only one of them will be given the write lock, with the rest kept
+const:NULL, but only one of them will be given the write lock, with the rest kept
 waiting. The winning thread will compile the pattern and store the result.
 After this thread releases the write lock, another thread will get it, and if
-it does not retest pointer for being NULL, will recompile the pattern and
+it does not retest pointer for being const:NULL, will recompile the pattern and
 overwrite the pointer, creating a memory leak and possibly causing other
 issues.
 
@@ -645,21 +648,21 @@ after writing only part of the pointer, which could cause other threads to use
 an invalid value. Instead of checking the pointer itself, a separate "pointer
 is valid" flag (that can be updated atomically) must be used:
 
-[source,text,role=pseudocode]
-....
-Get a read-only (shared) lock (mutex) for pointer
+[source,c]
+----
+// Get a read-only (shared) lock (mutex) for pointer
 if (!pointer_is_valid)
-  {
-  Get a write (unique) lock for pointer
+{
+  // Get a write (unique) lock for pointer
   if (!pointer_is_valid)
-    {
-    pointer = pcre2_compile(...
-    pointer_is_valid = TRUE
-    }
+  {
+    pointer = pcre2_compile(...);
+    pointer_is_valid = TRUE;
   }
-Release the lock
-Use pointer in pcre2_match()
-....
+}
+// Release the lock
+// Use pointer in pcre2_match()
+----
 
 If JIT is being used, but the JIT compilation is not being done immediately
 (perhaps waiting to see if the pattern is used often enough), similar logic is
@@ -671,7 +674,7 @@ compiled code before calling the JIT compiler.
 
 === Context blocks
 
-The next main section below introduces the idea of "contexts" in which PCRE2
+The section <<pcre2-contexts>> below introduces the idea of "contexts" in which PCRE2
 functions are called. A context is nothing more than a collection of parameters
 that control the way PCRE2 operates. Grouping a number of parameters together
 in a context is a convenient way of passing them to a PCRE2 function without
@@ -688,19 +691,20 @@ thread-specific copy.
 
 The matching functions need a block of memory for storing the results of a
 match. This includes details of what was matched, as well as additional
-information such as the name of a ([.regex]`*MARK`) setting. Each thread must provide its
+information such as the name of a [.regex]`+(*MARK)+` setting. Each thread must provide its
 own copy of this memory.
 
+[[pcre2-contexts]]
 == PCRE2 contexts
 
 Some PCRE2 functions have a lot of parameters, many of which are used only by
 specialist applications, for example, those that use custom memory management
 or non-standard character tables. To keep function argument lists at a
 reasonable size, and at the same time to keep the API extensible, "uncommon"
-parameters are passed to certain functions in a `context` instead of
+parameters are passed to certain functions in a "context" instead of
 directly. A context is just a block of memory that holds the parameter values.
 Applications that do not need to adjust any of the context parameters can pass
-`NULL` when a context pointer is required.
+const:NULL when a context pointer is required.
 
 There are three different types of context: a general context that is relevant
 for several PCRE2 operations, a compile-time context, and a match-time context.
@@ -709,7 +713,7 @@ for several PCRE2 operations, a compile-time context, and a match-time context.
 
 At present, this context just contains pointers to (and data for) external
 memory management functions that are called from several places in the PCRE2
-library. The context is named `general' rather than specifically `memory'
+library. The context is named 'general' rather than specifically 'memory'
 because in future other fields may be added. If you do not want to supply your
 own custom memory management functions, you do not need to bother with a
 general context. A general context is created by:
@@ -725,15 +729,15 @@ pcre2_general_context *pcre2_general_context_create(
 The two function pointers specify custom memory management functions, whose
 prototypes are:
 
-[literal,subs=normal]
-....
-[.c]`void *private_malloc(PCRE2_SIZE, void *);`
-[.c]`void  private_free(void *, void *);`
-....
+[source,c,role=prototype]
+----
+void *private_malloc(PCRE2_SIZE, void *);
+void private_free(void *, void *);
+----
 
 Whenever code in PCRE2 calls these functions, the final argument is the value
 of arg:memory_data. Either of the first two arguments of the creation
-function may be `NULL`, in which case the system memory management functions
+function may be const:NULL, in which case the system memory management functions
 [.c]`malloc()` and [.c]`free()` are used. (This is not currently useful, as
 there are no other fields in a general context, but in future there might be.)
 The [.c]`private_malloc()` function is used (if supplied) to obtain memory for
@@ -758,7 +762,7 @@ The memory used for a general context should be freed by calling:
 void pcre2_general_context_free(pcre2_general_context *gcontext);
 ----
 
-If this function is passed a `NULL` argument, it returns immediately without
+If this function is passed a const:NULL argument, it returns immediately without
 doing anything.
 
 === The compile context
@@ -776,7 +780,7 @@ following compile-time parameters:
 * Which performance optimizations the compiler should apply
 
 A compile context is also required if you are using custom memory management.
-If none of these apply, just pass `NULL` as the context argument of
+If none of these apply, just pass const:NULL as the context argument of
 func:pcre2_compile().
 
 A compile context is created, copied, and freed by the following functions:
@@ -793,13 +797,13 @@ void pcre2_compile_context_free(pcre2_compile_context *ccontext);
 ----
 
 A compile context is created with default values for its parameters. These can
-be changed by calling the following functions, which return `0` on success, or
+be changed by calling the following functions, which return 0 on success, or
 const:PCRE2_ERROR_BADDATA if invalid data is detected.
 
-The following functions get, respectively, the convention for processing \R,
+The following functions get, respectively, the convention for processing [.regex]`\R`,
 the maximum pattern length, the newline convention, and the maximum depth of
-nested parentheses. They return `0` on success or const:PCRE2_ERROR_NULL if either
-argument is `NULL`.
+nested parentheses. They return 0 on success or const:PCRE2_ERROR_NULL if either
+argument is const:NULL.
 
 [source,c,role=prototype]
 ----
@@ -824,8 +828,8 @@ value to func:pcre2_set_max_pattern_length() makes the limit unlimited.
 int pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value);
 ----
 
-The value must be const:PCRE2_BSR_ANYCRLF, to specify that [.regex]`\R` matches only `CR`, `LF`,
-or `CRLF`, or const:PCRE2_BSR_UNICODE, to specify that [.regex]`\R` matches any Unicode line
+The value must be const:PCRE2_BSR_ANYCRLF, to specify that [.regex]`\R` matches only CR, LF,
+or CRLF, or const:PCRE2_BSR_UNICODE, to specify that [.regex]`\R` matches any Unicode line
 ending sequence. The value is used by the JIT compiler and by the two
 interpreted matching functions, func:pcre2_match() and
 func:pcre2_dfa_match().
@@ -851,8 +855,8 @@ the arg:options argument of func:pcre2_compile() have been used up. To avoid
 running out, the compile context contains a set of extra option bits which are
 used for some newer, assumed rarer, options. This function sets those bits. It
 always sets all the bits (either on or off). It does not modify any existing
-setting. The available options are defined in the section entitled "Extra
-compile options"
+setting. The available options are defined in the section
+<<extra-compile-options>>
 below.
 
 [source,c,role=prototype]
@@ -900,18 +904,18 @@ int pcre2_set_newline(pcre2_compile_context *ccontext,
 This specifies which characters or character sequences are to be recognized as
 newlines. The value must be one of const:PCRE2_NEWLINE_CR (carriage return only),
 const:PCRE2_NEWLINE_LF (linefeed only), const:PCRE2_NEWLINE_CRLF (the two-character
-sequence `CR` followed by `LF`), const:PCRE2_NEWLINE_ANYCRLF (any of the above),
+sequence CR followed by LF), const:PCRE2_NEWLINE_ANYCRLF (any of the above),
 const:PCRE2_NEWLINE_ANY (any Unicode newline sequence), or const:PCRE2_NEWLINE_NUL (the
-`NUL` character, that is a binary zero).
+NUL character, that is a binary zero).
 
 A pattern can override the value set in the compile context by starting with a
-sequence such as [.regex]`(*CRLF)`. See the
+sequence such as [.regex]`+(*CRLF)+`. See the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page for details.
 
 When a pattern is compiled with the const:PCRE2_EXTENDED or const:PCRE2_EXTENDED_MORE
 option, the newline convention affects the recognition of the end of internal
-comments starting with [.regex]`#`. The value is saved with the compiled pattern for
+comments starting with [.regex]`+#+`. The value is saved with the compiled pattern for
 subsequent use by the JIT compiler and by the two interpreted matching
 functions, func:pcre2_match() and func:pcre2_dfa_match().
 
@@ -963,127 +967,114 @@ desirable to disable them, in order to speed up compilation.
 
 The permitted values of arg:directive are as follows:
 
-[literal]
-....
-PCRE2_OPTIMIZATION_FULL
-....
+[.values]
+const:PCRE2_OPTIMIZATION_FULL::
+      Enable all optional performance optimizations. This is the default value.
 
-Enable all optional performance optimizations. This is the default value.
+const:PCRE2_OPTIMIZATION_NONE::
+      Disable all optional performance optimizations.
 
-[literal]
-....
-PCRE2_OPTIMIZATION_NONE
-....
+const:PCRE2_AUTO_POSSESS::
+const:PCRE2_AUTO_POSSESS_OFF::
+      Enable/disable "auto-possessification" of variable quantifiers such as [.regex]`+*+` and [.regex]`{plus}`.
+      This optimization, for example, turns [.regex]`a+b` into
+      [.regex]`a{plus}{plus}b` in order to avoid
+      backtracks into [.regex]`a{plus}` that can never be successful. However, if callouts are in
+      use, auto-possessification means that some callouts are never taken. You can
+      disable this optimization if you want the matching functions to do a full,
+      unoptimized search and run all the callouts.
 
-Disable all optional performance optimizations.
+const:PCRE2_DOTSTAR_ANCHOR::
+const:PCRE2_DOTSTAR_ANCHOR_OFF::
+      Enable/disable an optimization that is applied when [.regex]`+.*+` is the first significant
+      item in a top-level branch of a pattern, and all the other branches also start
+      with [.regex]`+.*+` or with [.regex]`\A` or [.regex]`\G` or [.regex]`+^+`. Such a pattern is automatically anchored if
+      const:PCRE2_DOTALL is set for all the [.regex]`+.*+` items and const:PCRE2_MULTILINE is not set for any
+      [.regex]`+^+` items. Otherwise, the fact that any match must start either at the start of
+      the subject or following a newline is remembered. Like other optimizations,
+      this can cause callouts to be skipped.
 
-[literal]
-....
-PCRE2_AUTO_POSSESS
-PCRE2_AUTO_POSSESS_OFF
-....
-
-Enable/disable "auto-possessification" of variable quantifiers such as [.regex]`*` and [.regex]`+`.
-This optimization, for example, turns [.regex]`a+b` into
-[.regex]`a&#43;&#43;b` in order to avoid
-backtracks into [.regex]`a&#43;&#43;` that can never be successful. However, if callouts are in
-use, auto-possessification means that some callouts are never taken. You can
-disable this optimization if you want the matching functions to do a full,
-unoptimized search and run all the callouts.
-
-[literal]
-....
-PCRE2_DOTSTAR_ANCHOR
-PCRE2_DOTSTAR_ANCHOR_OFF
-....
-
-Enable/disable an optimization that is applied when [.regex]`.*` is the first significant
-item in a top-level branch of a pattern, and all the other branches also start
-with [.regex]`.*` or with \A or \G or ^. Such a pattern is automatically anchored if
-const:PCRE2_DOTALL is set for all the [.regex]`.*` items and const:PCRE2_MULTILINE is not set for any
-^ items. Otherwise, the fact that any match must start either at the start of
-the subject or following a newline is remembered. Like other optimizations,
-this can cause callouts to be skipped.
-
-Dotstar anchor optimization is automatically disabled for [.regex]`.*` if it is inside an
++
+Dotstar anchor optimization is automatically disabled for [.regex]`+.*+` if it is inside an
 atomic group or a capture group that is the subject of a backreference, or if
-the pattern contains [.regex]`(*PRUNE)` or [.regex]`(*SKIP)`.
+the pattern contains [.regex]`+(*PRUNE)+` or [.regex]`+(*SKIP)+`.
 
-[literal]
-....
-PCRE2_START_OPTIMIZE
-PCRE2_START_OPTIMIZE_OFF
-....
+const:PCRE2_START_OPTIMIZE::
+const:PCRE2_START_OPTIMIZE_OFF::
+      Enable/disable optimizations which cause matching functions to scan the subject
+      string for specific code unit values before attempting a match. For example, if
+      it is known that an unanchored match must start with a specific value, the
+      matching code searches the subject for that value, and fails immediately if it
+      cannot find it, without actually running the main matching function. This means
+      that a special item such as [.regex]`+(*COMMIT)+` at the start of a pattern is not
+      considered until after a suitable starting point for the match has been found.
+      Also, when callouts or [.regex]`+(*MARK)+` items are in use, these "start-up" optimizations
+      can cause them to be skipped if the pattern is never actually used. The start-up
+      optimizations are in effect a pre-scan of the subject that takes place before
+      the pattern is run.
 
-Enable/disable optimizations which cause matching functions to scan the subject
-string for specific code unit values before attempting a match. For example, if
-it is known that an unanchored match must start with a specific value, the
-matching code searches the subject for that value, and fails immediately if it
-cannot find it, without actually running the main matching function. This means
-that a special item such as [.regex]`(*COMMIT)` at the start of a pattern is not
-considered until after a suitable starting point for the match has been found.
-Also, when callouts or [.regex]`(*MARK)` items are in use, these "start-up" optimizations
-can cause them to be skipped if the pattern is never actually used. The start-up
-optimizations are in effect a pre-scan of the subject that takes place before
-the pattern is run.
-
++
 Disabling start-up optimizations ensures that in cases where the result is "no
-match", the callouts do occur, and that items such as [.regex]`(*COMMIT)` and [.regex]`(*MARK)` are
+match", the callouts do occur, and that items such as [.regex]`+(*COMMIT)+` and [.regex]`+(*MARK)+` are
 considered at every possible starting position in the subject string.
 
++
 Disabling start-up optimizations may change the outcome of a matching operation.
 Consider the pattern
 
-[literal]
-....
++
+[source,regex]
+----
 (*COMMIT)ABC
-....
+----
 
++
 When this is compiled, PCRE2 records the fact that a match must start with the
-character "A". Suppose the subject string is "DEFABC". The start-up
-optimization scans along the subject, finds "A" and runs the first match
-attempt from there. The [.regex]`(*COMMIT)` item means that the pattern must match the
+character [.subject]`A`. Suppose the subject string is [.subject]`DEFABC`. The start-up
+optimization scans along the subject, finds [.subject]`A` and runs the first match
+attempt from there. The [.regex]`+(*COMMIT)+` item means that the pattern must match the
 current starting position, which in this case, it does. However, if the same
 match is run without start-up optimizations, the initial scan along the subject
-string does not happen. The first match attempt is run starting from "D" and
-when this fails, [.regex]`(*COMMIT)` prevents any further matches being tried, so the
+string does not happen. The first match attempt is run starting from [.subject]`D` and
+when this fails, [.regex]`+(*COMMIT)+` prevents any further matches being tried, so the
 overall result is "no match".
 
++
 Another start-up optimization makes use of a minimum length for a matching
 subject, which is recorded when possible. Consider the pattern
 
-[literal]
-....
++
+[source,regex]
+----
 (*MARK:1)B(*MARK:2)(X|Y)
-....
+----
 
-The minimum length for a match is two characters. If the subject is "XXBB", the
-"starting character" optimization skips "XX", then tries to match "BB", which
-is long enough. In the process, [.regex]`(*MARK:2)` is encountered and remembered. When
-the match attempt fails, the next "B" is found, but there is only one character
++
+The minimum length for a match is two characters. If the subject is [.subject]`XXBB`, the
+"starting character" optimization skips [.subject]`XX`, then tries to match [.subject]`BB`, which
+is long enough. In the process, [.regex]`+(*MARK:2)+` is encountered and remembered. When
+the match attempt fails, the next [.subject]`B` is found, but there is only one character
 left, so there are no more attempts, and "no match" is returned with the "last
-mark seen" set to "2". Without start-up optimizations, however, matches are
+mark seen" set to [.subject]`2`. Without start-up optimizations, however, matches are
 tried at every possible starting position, including at the end of the subject,
-where [.regex]`(*MARK:1)` is encountered, but there is no "B", so the "last mark seen"
-that is returned is "1". In this case, the optimizations do not affect the
+where [.regex]`+(*MARK:1)+` is encountered, but there is no [.subject]`B`, so the "last mark seen"
+that is returned is [.subject]`1`. In this case, the optimizations do not affect the
 overall match result, which is still "no match", but they do affect the
 auxiliary information that is returned.
 
+[[match-context]]
 === The match context
 
 A match context is required if you want to:
 
-[literal]
-....
-Set up a callout function
-Set an offset limit for matching an unanchored pattern
-Change the limit on the amount of heap used when matching
-Change the backtracking match limit
-Change the backtracking depth limit
-Set custom memory management specifically for the match
-....
+* Set up a callout function
+* Set an offset limit for matching an unanchored pattern
+* Change the limit on the amount of heap used when matching
+* Change the backtracking match limit
+* Change the backtracking depth limit
+* Set custom memory management specifically for the match
 
-If none of these apply, just pass [.c]`NULL` as the context argument of
+If none of these apply, just pass const:NULL as the context argument of
 func:pcre2_match(), func:pcre2_dfa_match(), or func:pcre2_jit_match().
 
 A match context is created, copied, and freed by the following functions:
@@ -1105,7 +1096,7 @@ const:PCRE2_ERROR_BADDATA if invalid data is detected.
 
 The following functions get, respectively, the backtracking heap limit, match
 limit, depth limit, and offset limit. They return 0 on success or
-const:PCRE2_ERROR_NULL if either argument is [.c]`NULL`.
+const:PCRE2_ERROR_NULL if either argument is const:NULL.
 
 [source,c,role=prototype]
 ----
@@ -1151,8 +1142,8 @@ int pcre2_set_substitute_callout(
 ----
 
 This sets up a callout function for PCRE2 to call after each substitution
-made by func:pcre2_substitute(). Details are given in the section entitled
-"Creating a new string with substitutions"
+made by func:pcre2_substitute(). Details are given in the section
+<<creating-substitution-string>>
 below.
 
 [source,c,role=prototype]
@@ -1168,7 +1159,7 @@ int pcre2_set_substitute_case_callout(
 
 This sets up a callout function for PCRE2 to call when performing case
 transformations inside func:pcre2_substitute(). Details are given in the
-section entitled "Creating a new string with substitutions"
+section <<creating-substitution-string>>
 below.
 
 [source,c,role=prototype]
@@ -1184,7 +1175,7 @@ const:PCRE2_ERROR_NOMATCH if a match with a starting point before or at the give
 offset is not found. The func:pcre2_substitute() function makes no more
 substitutions.
 
-For example, if the pattern [.regex]`/abc/` is matched against "123abc" with an offset
+For example, if the pattern [.regex]`abc` is matched against [.subject]`123abc` with an offset
 limit less than 3, the result is const:PCRE2_ERROR_NOMATCH. A match can never be
 found if the arg:start_offset argument of func:pcre2_match(),
 func:pcre2_dfa_match(), or func:pcre2_substitute() is greater than the offset
@@ -1224,12 +1215,12 @@ unlimited.
 A value for the heap limit may also be supplied by an item at the start of a
 pattern of the form
 
-[source,regex]
-....
-(*LIMIT_HEAP=ddd)
-....
+[source,regex,subs=normal]
+----
+(*LIMIT_HEAP=__ddd__)
+----
 
-where ddd is a decimal number. However, such a setting is ignored unless ddd is
+where _ddd_ is a decimal number. However, such a setting is ignored unless _ddd_ is
 less than the limit set by the caller of func:pcre2_match() or, if no such
 limit is set, less than the default.
 
@@ -1274,12 +1265,12 @@ The default value for the limit can be set when PCRE2 is built; the default is
 10 million, which handles all but the most extreme cases. A value for the match
 limit may also be supplied by an item at the start of a pattern of the form
 
-[source,regex]
-....
-(*LIMIT_MATCH=ddd)
-....
+[source,regex,subs=normal]
+----
+(*LIMIT_MATCH=__ddd__)
+----
 
-where ddd is a decimal number. However, such a setting is ignored unless ddd is
+where _ddd_ is a decimal number. However, such a setting is ignored unless _ddd_ is
 less than the limit set by the caller of func:pcre2_match() or
 func:pcre2_dfa_match() or, if no such limit is set, less than the default.
 
@@ -1311,7 +1302,7 @@ a small stack can support quite a lot of recursion.
 If the depth of internal recursive function calls is great enough, local
 workspace vectors are allocated on the heap from version 10.32 onwards, so the
 depth limit also indirectly limits the amount of heap memory that is used. A
-recursive pattern such as [.regex]`/(.(?2))((?1)|)/`, when matched to a very long string
+recursive pattern such as [.regex]`(.(?2))((?1)|)`, when matched to a very long string
 using func:pcre2_dfa_match(), can use a great deal of memory. However, it is
 probably better to limit heap usage directly by calling
 func:pcre2_set_heap_limit().
@@ -1322,12 +1313,12 @@ If the limit is exceeded, func:pcre2_match() or func:pcre2_dfa_match()
 returns const:PCRE2_ERROR_DEPTHLIMIT. A value for the depth limit may also be
 supplied by an item at the start of a pattern of the form
 
-[source,regex]
-....
-(*LIMIT_DEPTH=ddd)
-....
+[source,regex,subs=normal]
+----
+(*LIMIT_DEPTH=__ddd__)
+----
 
-where ddd is a decimal number. However, such a setting is ignored unless ddd is
+where _ddd_ is a decimal number. However, such a setting is ignored unless _ddd_ is
 less than the limit set by the caller of func:pcre2_match() or
 func:pcre2_dfa_match() or, if no such limit is set, less than the default.
 
@@ -1346,9 +1337,9 @@ documentation has more details about these features.
 
 The first argument for func:pcre2_config() specifies which information is
 required. The second argument is a pointer to memory into which the information
-is placed. If NULL is passed, the function returns the amount of memory that is
+is placed. If const:NULL is passed, the function returns the amount of memory that is
 needed for the requested information. For calls that return numerical values,
-the value is in bytes; when requesting these values, _where_ should point
+the value is in bytes; when requesting these values, arg:where should point
 to appropriately aligned memory. For calls that return strings, the required
 length is given in code units, not counting the terminating zero.
 
@@ -1357,40 +1348,39 @@ non-negative on success, or the negative error code const:PCRE2_ERROR_BADOPTION 
 the value in the first argument is not recognized. The following information is
 available:
 
-.Options
 [.options]
 const:PCRE2_CONFIG_BSR::
-      The output is a uint32_t integer whose value indicates what character
-      sequences the \R escape sequence matches by default. A value of
-      const:PCRE2_BSR_UNICODE means that \R matches any Unicode line ending sequence; a
-      value of const:PCRE2_BSR_ANYCRLF means that \R matches only CR, LF, or CRLF. The
+      The output is a type:uint32_t integer whose value indicates what character
+      sequences the [.regex]`\R` escape sequence matches by default. A value of
+      const:PCRE2_BSR_UNICODE means that [.regex]`\R` matches any Unicode line ending sequence; a
+      value of const:PCRE2_BSR_ANYCRLF means that [.regex]`\R` matches only CR, LF, or CRLF. The
       default can be overridden when a pattern is compiled.
 
 const:PCRE2_CONFIG_COMPILED_WIDTHS::
-      The output is a uint32_t integer whose lower bits indicate which code unit
+      The output is a type:uint32_t integer whose lower bits indicate which code unit
       widths were selected when PCRE2 was built. The 1-bit indicates 8-bit support,
       and the 2-bit and 4-bit indicate 16-bit and 32-bit support, respectively.
 
 const:PCRE2_CONFIG_DEPTHLIMIT::
-      The output is a uint32_t integer that gives the default limit for the depth of
+      The output is a type:uint32_t integer that gives the default limit for the depth of
       nested backtracking in func:pcre2_match() or the depth of nested recursions,
       lookarounds, and atomic groups in func:pcre2_dfa_match(). Further details are
       given with func:pcre2_set_depth_limit() above.
 
 const:PCRE2_CONFIG_EFFECTIVE_LINKSIZE::
-      The output is a uint32_t integer that contains the number of bytes the library
+      The output is a type:uint32_t integer that contains the number of bytes the library
       uses for internal linkage in compiled regular expressions. Its value is derived
       from the value that was provided at build time and that is described below by
       const:PCRE2_CONFIG_LINKSIZE.
 
 const:PCRE2_CONFIG_HEAPLIMIT::
-      The output is a uint32_t integer that gives, in kibibytes, the default limit
+      The output is a type:uint32_t integer that gives, in kibibytes, the default limit
       for the amount of heap memory used by func:pcre2_match() or
       func:pcre2_dfa_match(). Further details are given with
       func:pcre2_set_heap_limit() above.
 
 const:PCRE2_CONFIG_JIT::
-      The output is a uint32_t integer that is set to one if support for just-in-time
+      The output is a type:uint32_t integer that is set to one if support for just-in-time
       compiling is included in the library; otherwise it is set to zero. Note that
       having the support in the library does not guarantee that JIT will be used for
       any given match, and neither does it guarantee that JIT will actually be able
@@ -1401,21 +1391,21 @@ const:PCRE2_CONFIG_JIT::
       documentation for more details.
 
 const:PCRE2_CONFIG_JITTARGET::
-      The _where_ argument should point to a code-unit-aligned buffer. All
+      The arg:where argument should point to a code-unit-aligned buffer. All
       previous versions of PCRE2 have required no more than 128 code units of buffer
       capacity. However, this requirement is not guaranteed to be maintained, so
-      applications should call func:pcre2_config() with `where` set to NULL to
+      applications should call func:pcre2_config() with arg:where set to const:NULL to
       receive the required buffer size, then assert or allocate a suitably-size buffer
       for a second call to func:pcre2_config(). The buffer is filled with a string
       that contains the name of the architecture for which the JIT compiler is
       configured at build time, for example, a 64-bit ARM CPU that supports the
-      Armv8.1 extension writes "ARM-64 (LSE) 64bit (little endian + unaligned)". If
+      Armv8.1 extension writes `ARM-64 (LSE) 64bit (little endian + unaligned)`. If
       JIT support is not available, const:PCRE2_ERROR_BADOPTION is returned; otherwise the
       number of code units used is returned. This is the length of the string plus one
       unit for the terminating zero.
 
 const:PCRE2_CONFIG_LINKSIZE::
-      The output is a uint32_t integer that contains the number of bytes the library
+      The output is a type:uint32_t integer that contains the number of bytes the library
       was instructed to use for internal linkage in compiled regular expressions.
       When PCRE2 is configured, the value can be set to 2, 3, or 4, with the default
       being 2 for most libraries.
@@ -1432,33 +1422,32 @@ to be up to 65535 code units. Larger values allow larger regular expressions to
 be compiled by those two libraries, but at the expense of slower matching.
 
 const:PCRE2_CONFIG_MATCHLIMIT::
-      The output is a uint32_t integer that gives the default match limit for
+      The output is a type:uint32_t integer that gives the default match limit for
       func:pcre2_match(). Further details are given with
       func:pcre2_set_match_limit() above.
 
 const:PCRE2_CONFIG_NEWLINE::
-      The output is a uint32_t integer whose value specifies the default character
+      The output is a type:uint32_t integer whose value specifies the default character
       sequence that is recognized as meaning "newline". The values are:
-
-[literal]
-....
-PCRE2_NEWLINE_CR       Carriage return (CR)
-PCRE2_NEWLINE_LF       Linefeed (LF)
-PCRE2_NEWLINE_CRLF     Carriage return, linefeed (CRLF)
-PCRE2_NEWLINE_ANY      Any Unicode line ending
-PCRE2_NEWLINE_ANYCRLF  Any of CR, LF, or CRLF
-PCRE2_NEWLINE_NUL      The NUL character (binary zero)
-....
-
++
+--
+const:PCRE2_NEWLINE_CR       :: Carriage return (CR)
+const:PCRE2_NEWLINE_LF       :: Linefeed (LF)
+const:PCRE2_NEWLINE_CRLF     :: Carriage return, linefeed (CRLF)
+const:PCRE2_NEWLINE_ANY      :: Any Unicode line ending
+const:PCRE2_NEWLINE_ANYCRLF  :: Any of CR, LF, or CRLF
+const:PCRE2_NEWLINE_NUL      :: The NUL character (binary zero)
+--
++
 The default should normally correspond to the standard sequence for your
 operating system.
 
 const:PCRE2_CONFIG_NEVER_BACKSLASH_C::
-      The output is a uint32_t integer that is set to one if the use of \C was
+      The output is a type:uint32_t integer that is set to one if the use of [.regex]`\C` was
       permanently disabled when PCRE2 was built; otherwise it is set to zero.
 
 const:PCRE2_CONFIG_PARENSLIMIT::
-      The output is a uint32_t integer that gives the maximum depth of nesting
+      The output is a type:uint32_t integer that gives the maximum depth of nesting
       of parentheses (of any kind) in a pattern. This limit is imposed to cap the
       amount of system stack used when a pattern is compiled. It is specified when
       PCRE2 is built; the default is 250. This limit does not take into account the
@@ -1467,34 +1456,34 @@ const:PCRE2_CONFIG_PARENSLIMIT::
 
 const:PCRE2_CONFIG_STACKRECURSE::
       This parameter is obsolete and should not be used in new code. The output is a
-      uint32_t integer that is always set to zero.
+      type:uint32_t integer that is always set to zero.
 
 const:PCRE2_CONFIG_TABLES_LENGTH::
-      The output is a uint32_t integer that gives the length of PCRE2's character
+      The output is a type:uint32_t integer that gives the length of PCRE2's character
       processing tables in bytes. For details of these tables see the
       section on locale support
       below.
 
 const:PCRE2_CONFIG_UNICODE_VERSION::
-      The _where_ argument should point to a code-unit-aligned buffer. All
+      The arg:where argument should point to a code-unit-aligned buffer. All
       previous versions of PCRE2 have required no more than 24 code units of buffer
       capacity. However, applications should call func:pcre2_config() with
-      `where` set to NULL to receive the required buffer size, then assert or
+      arg:where set to const:NULL to receive the required buffer size, then assert or
       allocate a suitably-size buffer for a second call to func:pcre2_config(). If
       PCRE2 has been compiled without Unicode support, the buffer is filled with the
-      text "Unicode not supported". Otherwise, the Unicode version string (for
-      example, "8.0.0") is written. The number of code units used is returned. This is
+      text `Unicode not supported`. Otherwise, the Unicode version string (for
+      example, `8.0.0`) is written. The number of code units used is returned. This is
       the length of the string plus one unit for the terminating zero.
 
 const:PCRE2_CONFIG_UNICODE::
-      The output is a uint32_t integer that is set to one if Unicode support is
+      The output is a type:uint32_t integer that is set to one if Unicode support is
       available; otherwise it is set to zero. Unicode support implies UTF support.
 
 const:PCRE2_CONFIG_VERSION::
-      The _where_ argument should point to a code-unit-aligned buffer. All
+      The arg:where argument should point to a code-unit-aligned buffer. All
       previous versions of PCRE2 have required no more than 24 code units of buffer
       capacity. However, applications should call func:pcre2_config() with
-      `where` set to NULL to receive the required buffer size, then assert or
+      arg:where set to const:NULL to receive the required buffer size, then assert or
       allocate a suitably-size buffer for a second call to func:pcre2_config(). The
       buffer is filled with the PCRE2 version string, zero-terminated. The number of
       code units used is returned. This is the length of the string plus one unit for
@@ -1519,16 +1508,16 @@ pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *code);
 The func:pcre2_compile() function compiles a pattern into an internal form.
 The pattern is defined by a pointer to a string of code units and a length in
 code units. If the pattern is zero-terminated, the length can be specified as
-const:PCRE2_ZERO_TERMINATED. A [.c]`NULL` pattern pointer with a length of zero is treated
-as an empty string ([.c]`NULL` with a non-zero length causes an error return). The
+const:PCRE2_ZERO_TERMINATED. A const:NULL pattern pointer with a length of zero is treated
+as an empty string (const:NULL with a non-zero length causes an error return). The
 function returns a pointer to a block of memory that contains the compiled
-pattern and related data, or [.c]`NULL` if an error occurred.
+pattern and related data, or const:NULL if an error occurred.
 
-If the compile context argument arg:ccontext is [.c]`NULL`, memory for the compiled
+If the compile context argument arg:ccontext is const:NULL, memory for the compiled
 pattern is obtained by calling [.c]`malloc()`. Otherwise, it is obtained from
 the same memory function that was used for the compile context. The caller must
 free the memory by calling func:pcre2_code_free() when it is no longer needed.
-If func:pcre2_code_free() is called with a [.c]`NULL` argument, it returns
+If func:pcre2_code_free() is called with a const:NULL argument, it returns
 immediately, without doing anything.
 
 The function func:pcre2_code_copy() makes a copy of the compiled code in new
@@ -1538,7 +1527,7 @@ below),
 the JIT information cannot be copied (because it is position-dependent).
 The new copy can initially be used only for non-JIT matching, though it can be
 passed to func:pcre2_jit_compile() if required. If func:pcre2_code_copy() is
-called with a [.c]`NULL` argument, it returns [.c]`NULL`.
+called with a const:NULL argument, it returns const:NULL.
 
 The func:pcre2_code_copy() function provides a way for individual threads in a
 multithreaded application to acquire a private copy of shared compiled code.
@@ -1553,8 +1542,8 @@ are needed. The func:pcre2_code_copy_with_tables() provides this facility.
 Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
 func:pcre2_code_free() is called for the new copy of the compiled code. If
-func:pcre2_code_copy_with_tables() is called with a [.c]`NULL` argument, it returns
-[.c]`NULL`.
+func:pcre2_code_copy_with_tables() is called with a const:NULL argument, it returns
+const:NULL.
 
 [NOTE]
 ====
@@ -1565,8 +1554,8 @@ After running a match, you must not free a compiled pattern or a subject string
 until after all operations on the
 match data block
 have taken place, unless, in the case of the subject string, you have used the
-PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
-"Option bits for ``pcre2_match()``"
+const:PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section
+<<match-option-bits>>
 below.
 ====
 
@@ -1579,8 +1568,10 @@ the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 documentation).
 
+// XXX up to here
+
 For those options that can be different in different parts of the pattern, the
-contents of the _options_ argument specifies their settings at the start of
+contents of the arg:options argument specifies their settings at the start of
 compilation. The const:PCRE2_ANCHORED, const:PCRE2_ENDANCHORED, and const:PCRE2_NO_UTF_CHECK
 options can be set at the time of matching as well as at compile time.
 
@@ -1589,10 +1580,10 @@ Some additional options and less frequently required compile-time parameters
 described
 above).
 
-If arg:errorcode or arg:erroroffset is [.c]`NULL`, func:pcre2_compile() returns
-[.c]`NULL` immediately. Otherwise, the variables to which these point are set to an
+If arg:errorcode or arg:erroroffset is const:NULL, func:pcre2_compile() returns
+const:NULL immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
-respectively, when func:pcre2_compile() returns [.c]`NULL` because a compilation
+respectively, when func:pcre2_compile() returns const:NULL because a compilation
 error has occurred.
 
 There are over 100 positive error codes that func:pcre2_compile() may return
@@ -1606,12 +1597,12 @@ because the textual error messages that are obtained by calling the
 func:pcre2_get_error_message() function (see "Obtaining a textual error
 message"
 below)
-should be self-explanatory. Macro names starting with PCRE2_ERROR_ are defined
+should be self-explanatory. Macro names starting with `PCRE2_ERROR_` are defined
 for both positive and negative error codes in `pcre2.h`. When compilation
-is successful _errorcode_ is set to a value that returns the message "no
-error" if passed to func:pcre2_get_error_message().
+is successful [.c]`*errorptr` is set to a value that returns the message `no
+error` if passed to func:pcre2_get_error_message().
 
-The value returned in _erroroffset_ is an indication of where in the
+The value returned in [.c]`*erroroffset` is an indication of where in the
 pattern an error occurred. When there is no error, zero is returned. A non-zero
 value is not necessarily the furthest point in the pattern that was read. For
 example, after the error "lookbehind assertion is not fixed length", the error
@@ -1633,12 +1624,12 @@ pcre2_code *re;
 PCRE2_SIZE erroffset;
 int errorcode;
 re = pcre2_compile(
-  "^A.*Z",                /* the pattern */
-  PCRE2_ZERO_TERMINATED,  /* the pattern is zero-terminated */
-  0,                      /* default options */
-  &errorcode,             /* for error code */
-  &erroffset,             /* for error offset */
-  NULL);                  /* no compile context */
+         "^A.*Z",                /* the pattern */
+         PCRE2_ZERO_TERMINATED,  /* the pattern is zero-terminated */
+         0,                      /* default options */
+         &errorcode,             /* for error code */
+         &erroffset,             /* for error offset */
+         NULL);                  /* no compile context */
 ----
 
 === Main compile options
@@ -1665,22 +1656,24 @@ therefore contains no characters and so can never match.
 const:PCRE2_ALT_BSUX::
 
 This option request alternative handling of three escape sequences, which
-makes PCRE2's behaviour more like ECMAscript (aka JavaScript). When it is set:
+makes PCRE2's behaviour more like ECMAScript (JavaScript). When it is set:
 
-(1) [.regex]`\U` matches an upper case "U" character; by default [.regex]`\U` causes a compile
-time error (Perl uses \U to upper case subsequent characters).
++
+. [.regex]`\U` matches an upper case [.subject]`U` character; by default [.regex]`\U` causes a compile
+      time error (Perl uses [.regex]`\U` to upper case subsequent characters).
 
-(2) [.regex]`\u` matches a lower case "u" character unless it is followed by four
-hexadecimal digits, in which case the hexadecimal number defines the code point
-to match. By default, [.regex]`\u` causes a compile time error (Perl uses it to upper
-case the following character).
+. [.regex]`\u` matches a lower case [.subject]`u` character unless it is followed by four
+      hexadecimal digits, in which case the hexadecimal number defines the code point
+      to match. By default, [.regex]`\u` causes a compile time error (Perl uses it to upper
+      case the following character).
 
-(3) [.regex]`\x` matches a lower case "x" character unless it is followed by two
-hexadecimal digits, in which case the hexadecimal number defines the code point
-to match. By default, as in Perl, a hexadecimal number is always expected after
-[.regex]`\x`, but it may have one or two digits.
+. [.regex]`\x` matches a lower case [.subject]`x` character unless it is followed by two
+      hexadecimal digits, in which case the hexadecimal number defines the code point
+      to match. By default, as in Perl, a hexadecimal number is always expected after
+      [.regex]`\x`, but it may have one or two digits.
 
-ECMAscript 6 added additional functionality to [.regex]`\u`. This can be accessed using
++
+ECMAScript 6 added additional functionality to [.regex]`\u`. This can be accessed using
 the const:PCRE2_EXTRA_ALT_BSUX extra option (see "Extra compile options"
 below).
 Note that this alternative escape handling applies only to patterns. Neither of
@@ -1700,21 +1693,21 @@ const:PCRE2_ALT_EXTENDED_CLASS::
 
 Alters the parsing of character classes to follow the extended syntax
 described by Unicode UTS#18. The const:PCRE2_ALT_EXTENDED_CLASS option has no impact
-on the behaviour of the Perl-specific "(?[...])" syntax for extended classes,
+on the behaviour of the Perl-specific [.regex]`+(?[...])+` syntax for extended classes,
 but instead enables the alternative syntax of extended class behaviour inside
-ordinary "[...]" character classes. See the
+ordinary [.regex]`+[...]+` character classes. See the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 documentation for details of the character classes supported.
 
 const:PCRE2_ALT_VERBNAMES::
 
 By default, for compatibility with Perl, the name in any verb sequence such as
-[.regex]`(*MARK:NAME)` is any sequence of characters that does not include a closing
+[.regex]`(*MARK:__NAME__)` is any sequence of characters that does not include a closing
 parenthesis. The name is not processed in any way, and it is not possible to
 include a closing parenthesis in the name. However, if the const:PCRE2_ALT_VERBNAMES
 option is set, normal backslash processing is applied to verb names and only an
 unescaped closing parenthesis terminates the name. A closing parenthesis can be
-included in a name either as \) or between \Q and \E. If the const:PCRE2_EXTENDED
+included in a name either as [.regex]`\)` or between [.regex]`\Q` and [.regex]`\E`. If the const:PCRE2_EXTENDED
 or const:PCRE2_EXTENDED_MORE option is set with const:PCRE2_ALT_VERBNAMES, unescaped
 white space in verb names is skipped and #-comments are recognized, exactly as
 in the rest of the pattern.
@@ -1731,31 +1724,31 @@ documentation.
 const:PCRE2_CASELESS::
 
 If this bit is set, letters in the pattern match both upper and lower case
-letters in the subject. It is equivalent to Perl's /i option, and it can be
-changed within a pattern by a [.regex]`(?i)` option setting. If either const:PCRE2_UTF or
+letters in the subject. It is equivalent to Perl's [.regex]`+/i+` option, and it can be
+changed within a pattern by a [.regex]`+(?i)+` option setting. If either const:PCRE2_UTF or
 const:PCRE2_UCP is set, Unicode properties are used for all characters with more than
 one other case, and for all characters whose code points are greater than
-`U+007F`.
-
+char:U+007F.
++
 Note that there are two ASCII characters, K and S, that, in addition to
-their lower case ASCII equivalents, are case-equivalent with `U+212A` (Kelvin
-sign) and `U+017F` (long S) respectively. If you do not want this case
+their lower case ASCII equivalents, are case-equivalent with char:U+212A (Kelvin
+sign) and char:U+017F (long S) respectively. If you do not want this case
 equivalence, you can suppress it by setting const:PCRE2_EXTRA_CASELESS_RESTRICT.
-
++
 One language family, Turkish and Azeri, has its own case-insensitivity rules,
 which can be selected by setting const:PCRE2_EXTRA_TURKISH_CASING. This alters the
-behaviour of the 'i', 'I', `U+0130` (capital I with dot above), and `U+0131`
+behaviour of the 'i', 'I', char:U+0130 (capital I with dot above), and char:U+0131
 (small dotless i) characters.
-
++
 For lower valued characters with only one other case, a lookup table is used
 for speed. When neither const:PCRE2_UTF nor const:PCRE2_UCP is set, a lookup table is used
 for all code points less than 256, and higher code points (available only in
 16-bit or 32-bit mode) are treated as not having another case.
-
++
 From release 10.45 const:PCRE2_CASELESS also affects what some of the letter-related
-Unicode property escapes (\p and \P) match. The properties Lu (upper case
-letter), Ll (lower case letter), and Lt (title case letter) are all treated as
-LC (cased letter) when const:PCRE2_CASELESS is set.
+Unicode property escapes ([.regex]`\p` and [.regex]`\P`) match. The properties [.regex]`Lu` (upper case
+letter), [.regex]`Ll` (lower case letter), and [.regex]`Lt` (title case letter) are all treated as
+[.regex]`Lc` (cased letter) when const:PCRE2_CASELESS is set.
 
 const:PCRE2_DOLLAR_ENDONLY::
 
@@ -1772,9 +1765,9 @@ If this bit is set, a dot metacharacter in the pattern matches any character,
 including one that indicates a newline. However, it only ever matches one
 character, even if newlines are coded as CRLF. Without this option, a dot does
 not match when the current position in the subject is at a newline. This option
-is equivalent to Perl's /s option, and it can be changed within a pattern by a
-(?s) option setting. A negative class such as [^a] always matches newline
-characters, and the \N escape sequence always matches a non-newline character,
+is equivalent to Perl's [.regex]`+/s+` option, and it can be changed within a pattern by a
+[.regex]`(?s)` option setting. A negative class such as [.regex]`[^a]` always matches newline
+characters, and the [.regex]`\N` escape sequence always matches a non-newline character,
 independent of the setting of const:PCRE2_DOTALL.
 
 const:PCRE2_DUPNAMES::
@@ -1790,23 +1783,26 @@ const:PCRE2_ENDANCHORED::
 
 If this bit is set, the end of any pattern match must be right at the end of
 the string being searched (the "subject string"). If the pattern match
-succeeds by reaching [.regex]`(*ACCEPT)`, but does not reach the end of the subject, the
+succeeds by reaching [.regex]`+(*ACCEPT)+`, but does not reach the end of the subject, the
 match fails at the current starting point. For unanchored patterns, a new match
 is then tried at the next starting point. However, if the match succeeds by
 reaching the end of the pattern, but not the end of the subject, backtracking
 occurs and an alternative match may be found. Consider these two patterns:
 
++
 [source,regex]
 ----
 .(*ACCEPT)|..
 .|..
 ----
 
-If matched against "abc" with const:PCRE2_ENDANCHORED set, the first matches "c"
-whereas the second matches "bc". The effect of const:PCRE2_ENDANCHORED can also be
++
+If matched against [.subject]`abc` with const:PCRE2_ENDANCHORED set, the first matches [.subject]`c`
+whereas the second matches [.subject]`bc`. The effect of const:PCRE2_ENDANCHORED can also be
 achieved by appropriate constructs in the pattern itself, which is the only way
 to do it in Perl.
 
++
 For DFA matching with func:pcre2_dfa_match(), const:PCRE2_ENDANCHORED applies only
 to the first (that is, the longest) matched string. Other parallel matches,
 which are necessarily substrings of the first one, must obviously end before
@@ -1815,32 +1811,35 @@ the end of the subject.
 const:PCRE2_EXTENDED::
 
 If this bit is set, most white space characters in the pattern are totally
-ignored except when escaped, inside a character class, or inside a \Q...\E
-sequence. However, white space is not allowed within sequences such as (?> that
-introduce various parenthesized groups, nor within numerical quantifiers such
-as {1,3}. Ignorable white space is permitted between an item and a following
-quantifier and between a quantifier and a following [.regex]`+` that indicates
-possessiveness. const:PCRE2_EXTENDED is equivalent to Perl's /x option, and it can be
-changed within a pattern by a [.regex]`(?x)` option setting.
+ignored except when escaped, inside a character class, or inside a [.regex]`+\Q...\E+`
+sequence. However, white space is not allowed within sequences such as [.regex]`+(?>+` that
+introduce various parenthesized groups, nor within numerical quantifiers such as
+[.regex]`+{1,3}+`. Ignorable white space is permitted between an item and a following
+quantifier and between a quantifier and a following [.regex]`{plus}` that indicates
+possessiveness. const:PCRE2_EXTENDED is equivalent to Perl's [.regex]`+/x+` option, and it can be
+changed within a pattern by a [.regex]`+(?x)+` option setting.
 
++
 When PCRE2 is compiled without Unicode support, const:PCRE2_EXTENDED recognizes as
 white space only those characters with code points less than 256 that are
 flagged as white space in its low-character table. The table is normally
 created by
-xref:pcre2_maketables.adoc[func:pcre2_maketables(),]
+func:pcre2_maketables(),
 which uses the [.c]`isspace()` function to identify space characters. In most
-ASCII environments, the relevant characters are those with code points 0x0009
-(tab), 0x000A (linefeed), 0x000B (vertical tab), 0x000C (formfeed), 0x000D
-(carriage return), and 0x0020 (space).
+ASCII environments, the relevant characters are those with code points char:0x0009
+(tab), char:0x000A (linefeed), char:0x000B (vertical tab), char:0x000C (formfeed), char:0x000D
+(carriage return), and char:0x0020 (space).
 
++
 When PCRE2 is compiled with Unicode support, in addition to these characters,
 five more Unicode "Pattern White Space" characters are recognized by
-const:PCRE2_EXTENDED. These are `U+0085` (next line), `U+200E` (left-to-right mark),
-`U+200F` (right-to-left mark), `U+2028` (line separator), and `U+2029` (paragraph
-separator). This set of characters is the same as recognized by Perl's /x
+const:PCRE2_EXTENDED. These are char:U+0085 (next line), char:U+200E (left-to-right mark),
+char:U+200F (right-to-left mark), char:U+2028 (line separator), and char:U+2029 (paragraph
+separator). This set of characters is the same as recognized by Perl's [.regex]`+/x+`
 option. Note that the horizontal and vertical space characters that are matched
-by the \h and \v escapes in patterns are a much bigger set.
+by the [.regex]`\h` and [.regex]`\v` escapes in patterns are a much bigger set.
 
++
 As well as ignoring most white space, const:PCRE2_EXTENDED also causes characters
 between an unescaped # outside a character class and the next newline,
 inclusive, to be ignored, which makes it possible to include comments inside
@@ -1848,6 +1847,7 @@ complicated patterns. Note that the end of this type of comment is a literal
 newline sequence in the pattern; escape sequences that happen to represent a
 newline do not count.
 
++
 Which characters are interpreted as newlines can be specified by a setting in
 the compile context that is passed to func:pcre2_compile() or by a special
 sequence at the start of the pattern, as described in the section entitled
@@ -1861,8 +1861,8 @@ This option has the effect of const:PCRE2_EXTENDED, but, in addition, unescaped 
 and horizontal tab characters are ignored inside a character class. Note: only
 these two characters are ignored, not the full set of pattern white space
 characters that are ignored outside a character class. const:PCRE2_EXTENDED_MORE is
-equivalent to Perl's /xx option, and it can be changed within a pattern by a
-[.regex]`(?xx)` option setting.
+equivalent to Perl's [.regex]`+/xx+` option, and it can be changed within a pattern by a
+[.regex]`+(?xx)+` option setting.
 
 const:PCRE2_FIRSTLINE::
 
@@ -1870,8 +1870,8 @@ If this option is set, the start of an unanchored pattern match must be before
 or at the first newline in the subject string following the start of matching,
 though the matched text may continue over the newline. If arg:start_offset is
 non-zero, the limiting newline is not necessarily the first newline in the
-subject. For example, if the subject string is "abc\nxyz" (where \n
-represents a single-character newline) a pattern match for "yz" succeeds with
+subject. For example, if the subject string is [.subject]`abc\nxyz` (where [.regex]`\n`
+represents a single-character newline) a pattern match for [.regex]`yz` succeeds with
 const:PCRE2_FIRSTLINE if arg:start_offset is greater than 3. See also
 const:PCRE2_USE_OFFSET_LIMIT, which provides a more general limiting facility. If
 const:PCRE2_FIRSTLINE is set with an offset limit, a match must occur in the first
@@ -1896,7 +1896,7 @@ const:PCRE2_MATCH_INVALID_UTF::
 This option forces const:PCRE2_UTF (see below) and also enables support for matching
 by func:pcre2_match() in subject strings that contain invalid UTF sequences.
 Note, however, that the 16-bit and 32-bit PCRE2 libraries process strings as
-sequences of uint16_t or uint32_t code points. They cannot find valid UTF
+sequences of type:uint16_t or type:uint32_t code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned. This facility is not supported for DFA matching. For details,
 see the
@@ -1907,47 +1907,47 @@ const:PCRE2_MATCH_UNSET_BACKREF::
 
 If this option is set, a backreference to an unset capture group matches an
 empty string (by default this causes the current matching alternative to fail).
-A pattern such as (\1)(a) succeeds when this option is set (assuming it can
-find an "a" in the subject), whereas it fails by default, for Perl
-compatibility. Setting this option makes PCRE2 behave more like ECMAscript (aka
-JavaScript).
+A pattern such as [.regex]`(\1)(a)` succeeds when this option is set (assuming it can
+find an [.subject]`a` in the subject), whereas it fails by default, for Perl
+compatibility. Setting this option makes PCRE2 behave more like ECMAScript (JavaScript).
 
 const:PCRE2_MULTILINE::
 
 By default, for the purposes of matching "start of line" and "end of line",
 PCRE2 treats the subject string as consisting of a single line of characters,
-even if it actually contains newlines. The "start of line" metacharacter (^)
+even if it actually contains newlines. The "start of line" metacharacter ([.regex]`^`)
 matches only at the start of the string, and the "end of line" metacharacter
-($) matches only at the end of the string, or before a terminating newline
+([.regex]`$`) matches only at the end of the string, or before a terminating newline
 (except when const:PCRE2_DOLLAR_ENDONLY is set). Note, however, that unless
-const:PCRE2_DOTALL is set, the "any character" metacharacter (.) does not match at a
-newline. This behaviour (for ^, $, and dot) is the same as Perl.
+const:PCRE2_DOTALL is set, the "any character" metacharacter ([.regex]`.`) does not match at a
+newline. This behaviour (for [.regex]`^`, [.regex]`$`, and dot) is the same as Perl.
 
++
 When const:PCRE2_MULTILINE it is set, the "start of line" and "end of line"
 constructs match immediately following or immediately before internal newlines
 in the subject string, respectively, as well as at the very start and end. This
-is equivalent to Perl's /m option, and it can be changed within a pattern by a
-[.regex]`(?m)` option setting. Note that the "start of line" metacharacter does not match
+is equivalent to Perl's [.regex]`+/m+` option, and it can be changed within a pattern by a
+[.regex]`+(?m)+` option setting. Note that the "start of line" metacharacter does not match
 after a newline at the end of the subject, for compatibility with Perl.
 However, you can change this by setting the const:PCRE2_ALT_CIRCUMFLEX option. If
-there are no newlines in a subject string, or no occurrences of ^ or $ in a
+there are no newlines in a subject string, or no occurrences of [.regex]`^` or [.regex]`$` in a
 pattern, setting const:PCRE2_MULTILINE has no effect.
 
 const:PCRE2_NEVER_BACKSLASH_C::
 
-This option locks out the use of \C in the pattern that is being compiled.
+This option locks out the use of [.regex]`\C` in the pattern that is being compiled.
 This escape can cause unpredictable behaviour in UTF-8 or UTF-16 modes, because
 it may leave the current matching point in the middle of a multi-code-unit
 character. This option may be useful in applications that process patterns from
 external sources. Note that there is also a build-time option that permanently
-locks out the use of \C.
+locks out the use of [.regex]`\C`.
 
 const:PCRE2_NEVER_UCP::
 
-This option locks out the use of Unicode properties for handling \B, \b, \D,
-\d, \S, \s, \W, \w, and some of the POSIX character classes, as described
+This option locks out the use of Unicode properties for handling [.regex]`\B`, [.regex]`\b`, [.regex]`\D`,
+[.regex]`\d`, [.regex]`\S`, [.regex]`\s`, [.regex]`\W`, [.regex]`\w`, and some of the POSIX character classes, as described
 for the const:PCRE2_UCP option below. In particular, it prevents the creator of the
-pattern from enabling this facility by starting the pattern with [.regex]`(*UCP)`. This
+pattern from enabling this facility by starting the pattern with [.regex]`+(*UCP)+`. This
 option may be useful in applications that process patterns from external
 sources. The option combination const:PCRE2_UCP and const:PCRE2_NEVER_UCP causes an error.
 
@@ -1956,16 +1956,16 @@ const:PCRE2_NEVER_UTF::
 This option locks out interpretation of the pattern as UTF-8, UTF-16, or
 UTF-32, depending on which library is in use. In particular, it prevents the
 creator of the pattern from switching to UTF interpretation by starting the
-pattern with [.regex]`(*UTF)`. This option may be useful in applications that process
+pattern with [.regex]`+(*UTF)+`. This option may be useful in applications that process
 patterns from external sources. The combination of const:PCRE2_UTF and
 const:PCRE2_NEVER_UTF causes an error.
 
 const:PCRE2_NO_AUTO_CAPTURE::
 
 If this option is set, it disables the use of numbered capturing parentheses in
-the pattern. Any opening parenthesis that is not followed by ? behaves as if it
-were followed by ?: but named parentheses can still be used for capturing (and
-they acquire numbers in the usual way). This is the same as Perl's /n option.
+the pattern. Any opening parenthesis that is not followed by [.regex]`?` behaves as if it
+were followed by [.regex]`?:` but named parentheses can still be used for capturing (and
+they acquire numbers in the usual way). This is the same as Perl's [.regex]`+/n+` option.
 Note that, when this option is set, references to capture groups
 (backreferences or recursion/subroutine calls) may only refer to named groups,
 though the reference can be by name or by number.
@@ -1974,13 +1974,14 @@ const:PCRE2_NO_AUTO_POSSESS::
 
 If this (deprecated) option is set, it disables "auto-possessification", which
 is an optimization that, for example, turns [.regex]`a+b` into
-[.regex]`a&#43;&#43;b` in order to avoid
-backtracks into [.regex]`a&#43;&#43;` that can never be successful. However, if callouts are in
+[.regex]`a{plus}{plus}b` in order to avoid
+backtracks into [.regex]`a{plus}` that can never be successful. However, if callouts are in
 use, auto-possessification means that some callouts are never taken. You can
 set this option if you want the matching functions to do a full unoptimized
 search and run all the callouts, but it is mainly provided for testing
 purposes.
 
++
 If a compile context is available, it is recommended to use
 func:pcre2_set_optimize() with the _directive_ const:PCRE2_AUTO_POSSESS_OFF rather
 than the compile option const:PCRE2_NO_AUTO_POSSESS. Note that const:PCRE2_NO_AUTO_POSSESS
@@ -1990,13 +1991,13 @@ const:PCRE2_AUTO_POSSESS and const:PCRE2_AUTO_POSSESS_OFF.
 const:PCRE2_NO_DOTSTAR_ANCHOR::
 
 If this (deprecated) option is set, it disables an optimization that is applied
-when [.regex]`.*` is the first significant item in a top-level branch of a pattern, and
-all the other branches also start with [.regex]`.*` or with \A or \G or ^. The
-optimization is automatically disabled for [.regex]`.*` if it is inside an atomic group
+when [.regex]`+.*+` is the first significant item in a top-level branch of a pattern, and
+all the other branches also start with [.regex]`+.*+` or with [.regex]`\A`, [.regex]`\G`, or [.regex]`^`. The
+optimization is automatically disabled for [.regex]`+.*+` if it is inside an atomic group
 or a capture group that is the subject of a backreference, or if the pattern
-contains [.regex]`(*PRUNE)` or [.regex]`(*SKIP)`. When the optimization is not disabled, such a
-pattern is automatically anchored if const:PCRE2_DOTALL is set for all the [.regex]`.*` items
-and const:PCRE2_MULTILINE is not set for any ^ items. Otherwise, the fact that any
+contains [.regex]`+(*PRUNE)+` or [.regex]`+(*SKIP)+`. When the optimization is not disabled, such a
+pattern is automatically anchored if const:PCRE2_DOTALL is set for all the [.regex]`+.*+` items
+and const:PCRE2_MULTILINE is not set for any [.regex]`^` items. Otherwise, the fact that any
 match must start either at the start of the subject or following a newline is
 remembered. Like other optimizations, this can cause callouts to be skipped.
 (If a compile context is available, it is recommended to use
@@ -2011,6 +2012,7 @@ compiler. Setting this option is equivalent to calling
 func:pcre2_set_optimize() with the _directive_ parameter set to
 const:PCRE2_START_OPTIMIZE_OFF.
 
++
 There are a number of optimizations that may occur at the start of a match, in
 order to speed up the process. For example, if it is known that an unanchored
 match must start with a specific code unit value, the matching code searches
@@ -2018,9 +2020,10 @@ the subject for that value, and fails immediately if it cannot find it, without
 actually running the main matching function. The start-up optimizations are
 in effect a pre-scan of the subject that takes place before the pattern is run.
 
++
 Disabling the start-up optimizations may cause performance to suffer. However,
 this may be desirable for patterns which contain callouts or items such as
-[.regex]`(*COMMIT)` and [.regex]`(*MARK)`. See the above description of const:PCRE2_START_OPTIMIZE_OFF
+[.regex]`+(*COMMIT)+` and [.regex]`+(*MARK)+`. See the above description of const:PCRE2_START_OPTIMIZE_OFF
 for further details.
 
 const:PCRE2_NO_UTF_CHECK::
@@ -2036,29 +2039,32 @@ xref:pcre2unicode.adoc[`pcre2unicode`]
 document. If an invalid UTF sequence is found, func:pcre2_compile() returns a
 negative error code.
 
++
 If you know that your pattern is a valid UTF string, and you want to skip this
 check for performance reasons, you can set the const:PCRE2_NO_UTF_CHECK option. When
 it is set, the effect of passing an invalid UTF string as a pattern is
 undefined. It may cause your program to crash or loop.
 
++
 Note that this option can also be passed to func:pcre2_match() and
 func:pcre2_dfa_match(), to suppress UTF validity checking of the subject
 string.
 
++
 Note also that setting const:PCRE2_NO_UTF_CHECK at compile time does not disable the
 error that is given if an escape sequence for an invalid Unicode code point is
 encountered in the pattern. In particular, the so-called "surrogate" code
-points (0xd800 to 0xdfff) are invalid. If you want to allow escape sequences
-such as \x{d800} you can set the const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
-option, as described in the section entitled "Extra compile options"
+points (char:0xd800 to char:0xdfff) are invalid. If you want to allow escape sequences
+such as [.regex]`\x{d800}` you can set the const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
+option, as described in the section <<extra-compile-options>>
 below.
 However, this is possible only in UTF-8 and UTF-32 modes, because these values
 are not representable in UTF-16.
 
 const:PCRE2_UCP::
 
-This option has two effects. Firstly, it change the way PCRE2 processes \B,
-\b, \D, \d, \S, \s, \W, \w, and some of the POSIX character classes. By
+This option has two effects. Firstly, it change the way PCRE2 processes [.regex]`\B`,
+[.regex]`\b`, [.regex]`\D`, [.regex]`\d`, [.regex]`\S`, [.regex]`\s`, [.regex]`\W`, [.regex]`\w`, and some of the POSIX character classes. By
 default, only ASCII characters are recognized, but if const:PCRE2_UCP is set, Unicode
 properties are used to classify characters. There are some PCRE2_EXTRA
 options (see below) that add finer control to this behaviour. More details are
@@ -2068,11 +2074,13 @@ in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page.
 
++
 The second effect of const:PCRE2_UCP is to force the use of Unicode properties for
 upper/lower casing operations, even when const:PCRE2_UTF is not set. This makes it
 possible to process strings in the 16-bit UCS-2 code. This option is available
 only if PCRE2 has been compiled with Unicode support (which is the default).
 
++
 The const:PCRE2_EXTRA_CASELESS_RESTRICT option (see above) restricts caseless
 matching such that ASCII characters match only ASCII characters and non-ASCII
 characters match only non-ASCII characters. The const:PCRE2_EXTRA_TURKISH_CASING
@@ -2085,8 +2093,8 @@ page.
 const:PCRE2_UNGREEDY::
 
 This option inverts the "greediness" of the quantifiers so that they are not
-greedy by default, but become greedy if followed by "?". It is not compatible
-with Perl. It can also be set by a [.regex]`(?U)` option setting within the pattern.
+greedy by default, but become greedy if followed by [.regex]`?`. It is not compatible
+with Perl. It can also be set by a [.regex]`+(?U)+` option setting within the pattern.
 
 const:PCRE2_USE_OFFSET_LIMIT::
 
@@ -2110,6 +2118,7 @@ behaviour of PCRE2 are given in the
 xref:pcre2unicode.adoc[`pcre2unicode`]
 page. In particular, note that it changes the way const:PCRE2_CASELESS works.
 
+[[extra-compile-options]]
 === Extra compile options
 
 The option bits that can be set in a compile context by calling the
@@ -2117,189 +2126,159 @@ func:pcre2_set_compile_extra_options() function are as follows:
 
 [.options]
 const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK::
-+
 
-Since release [.c]`10.38` PCRE2 has forbidden the use of [.regex]`\K` within lookaround
+Since release 10.38 PCRE2 has forbidden the use of [.regex]`\K` within lookaround
 assertions, following Perl's lead. This option is provided to re-enable the
 previous behaviour (act in positive lookarounds, ignore in negative ones) in
 case anybody is relying on it.
 
-[.options]
 const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES::
-+
 
 This option applies when compiling a pattern in UTF-8 or UTF-32 mode. It is
 forbidden in UTF-16 mode, and ignored in non-UTF modes. Unicode "surrogate"
-code points in the range [.c]`0xd800` to [.c]`0xdfff` are used in pairs in UTF-16 to encode
-code points with values in the range [.c]`0x10000` to [.c]`0x10ffff`. The surrogates cannot
+code points in the range char:0xd800 to char:0xdfff are used in pairs in UTF-16 to encode
+code points with values in the range char:0x10000 to char:0x10ffff. The surrogates cannot
 therefore be represented in UTF-16. They can be represented in UTF-8 and
 UTF-32, but are defined as invalid code points, and cause errors if encountered
 in a UTF-8 or UTF-32 string that is being checked for validity by PCRE2.
 
++
 These values also cause errors if encountered in escape sequences such as
-[.regex]`\x{d912}` within a pattern. However, it seems that some applications, when
+[.regex]`+\x{d912}+` within a pattern. However, it seems that some applications, when
 using PCRE2 to check for unwanted characters in UTF-8 strings, explicitly test
 for the surrogates using escape sequences. The const:PCRE2_NO_UTF_CHECK option does
 not disable the error that occurs, because it applies only to the testing of
 input strings for UTF validity.
 
++
 If the extra option const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is set, surrogate code
 point values in UTF-8 and UTF-32 patterns no longer provoke errors and are
 incorporated in the compiled pattern. However, they can only match subject
 characters if the matching function is called with const:PCRE2_NO_UTF_CHECK set.
 
-[.options]
 const:PCRE2_EXTRA_ALT_BSUX::
-+
 
 The original option const:PCRE2_ALT_BSUX causes PCRE2 to process [.regex]`\U`, [.regex]`\u`, and [.regex]`\x` in
-the way that ECMAscript (aka JavaScript) does. Additional functionality was
-defined by ECMAscript [.c]`6`; setting const:PCRE2_EXTRA_ALT_BSUX has the effect of
-const:PCRE2_ALT_BSUX, but in addition it recognizes [.regex]`\u{hhh..}` as a hexadecimal
+the way that ECMAScript (JavaScript) does. Additional functionality was
+defined by ECMAScript 6; setting const:PCRE2_EXTRA_ALT_BSUX has the effect of
+const:PCRE2_ALT_BSUX, but in addition it recognizes [.regex]`+\u{hhh..}+` as a hexadecimal
 character code, where hhh.. is any number of hexadecimal digits.
 
-[.options]
 const:PCRE2_EXTRA_ASCII_BSD::
-+
 
 This option forces [.regex]`\d` to match only ASCII digits, even when const:PCRE2_UCP is set.
-It can be changed within a pattern by means of the [.regex]`(?aD)` option setting.
+It can be changed within a pattern by means of the [.regex]`+(?aD)+` option setting.
 
-[.options]
 const:PCRE2_EXTRA_ASCII_BSS::
-+
 
 This option forces [.regex]`\s` to match only ASCII space characters, even when
-const:PCRE2_UCP is set. It can be changed within a pattern by means of the [.regex]`(?aS)`
+const:PCRE2_UCP is set. It can be changed within a pattern by means of the [.regex]`+(?aS)+`
 option setting.
 
-[.options]
 const:PCRE2_EXTRA_ASCII_BSW::
-+
 
 This option forces [.regex]`\w` to match only ASCII word characters, even when const:PCRE2_UCP
-is set. It can be changed within a pattern by means of the [.regex]`(?aW)` option
+is set. It can be changed within a pattern by means of the [.regex]`+(?aW)+` option
 setting.
 
-[.options]
 const:PCRE2_EXTRA_ASCII_DIGIT::
-+
 
-This option forces the POSIX character classes [.regex]`[:digit:]` and [.regex]`[:xdigit:]` to
+This option forces the POSIX character classes [.regex]`+[:digit:]+` and [.regex]`+[:xdigit:]+` to
 match only ASCII digits, even when const:PCRE2_UCP is set. It can be changed within
-a pattern by means of the [.regex]`(?aT)` option setting.
+a pattern by means of the [.regex]`+(?aT)+` option setting.
 
-[.options]
 const:PCRE2_EXTRA_ASCII_POSIX::
-+
 
-This option forces all the POSIX character classes, including [.regex]`[:digit:]` and
-[.regex]`[:xdigit:]`, to match only ASCII characters, even when const:PCRE2_UCP is set. It can
-be changed within a pattern by means of the [.regex]`(?aP)` option setting, but note that
-this also sets const:PCRE2_EXTRA_ASCII_DIGIT in order to ensure that [.regex]`(?-aP)` unsets
+This option forces all the POSIX character classes, including [.regex]`+[:digit:]+` and
+[.regex]`+[:xdigit:]+`, to match only ASCII characters, even when const:PCRE2_UCP is set. It can
+be changed within a pattern by means of the [.regex]`+(?aP)+` option setting, but note that
+this also sets const:PCRE2_EXTRA_ASCII_DIGIT in order to ensure that [.regex]`+(?-aP)+` unsets
 all ASCII restrictions for POSIX classes.
 
-[.options]
 const:PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL::
-+
 
 This is a dangerous option. Use with care. By default, an unrecognized escape
-such as [.regex]`\j` or a malformed one such as [.regex]`\x{2z}` causes a compile-time error when
+such as [.regex]`\j` or a malformed one such as [.regex]`+\x{2z}+` causes a compile-time error when
 detected by func:pcre2_compile(). Perl is somewhat inconsistent in handling
-such items: for example, [.regex]`\j` is treated as a literal "j", and non-hexadecimal
-digits in [.regex]`\x{}` are just ignored, though warnings are given in both cases if
-Perl's warning switch is enabled. However, a malformed octal number after [.regex]`\o{`
+such items: for example, [.regex]`\j` is treated as a literal `j`, and non-hexadecimal
+digits in [.regex]`+\x{}+` are just ignored, though warnings are given in both cases if
+Perl's warning switch is enabled. However, a malformed octal number after [.regex]`+\o{+`
 always causes an error in Perl.
 
++
 If the const:PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL extra option is passed to
 func:pcre2_compile(), all unrecognized or malformed escape sequences are
-treated as single-character escapes. For example, [.regex]`\j` is a literal "j" and
-[.regex]`\x{2z}` is treated as the literal string "x{2z}". Setting this option means
+treated as single-character escapes. For example, [.regex]`\j` is a literal `j` and
+[.regex]`+\x{2z}+` is treated as the literal string `x\{2z}`. Setting this option means
 that typos in patterns may go undetected and have unexpected results. Also note
-that a sequence such as [.regex]`[\N{]` is interpreted as a malformed attempt at
-[.regex]`[\N{...]` and so is treated as [.regex]`[N{]` whereas [.regex]`[\N]` gives an error because an
+that a sequence such as [.regex]`+[\N{]+` is interpreted as a malformed attempt at
+[.regex]`+[\N{...}]+` and so is treated as [.regex]`+[N{]+` whereas [.regex]`+[\N]+` gives an error because an
 unqualified [.regex]`\N` is a valid escape sequence but is not supported in a character
 class. To reiterate: this is a dangerous option. Use with great care.
 
-[.options]
 const:PCRE2_EXTRA_CASELESS_RESTRICT::
-+
 
 When either const:PCRE2_UCP or const:PCRE2_UTF is set, caseless matching follows Unicode
 rules, which allow for more than two cases per character. There are two
 case-equivalent character sets that contain both ASCII and non-ASCII
-characters. The ASCII letter S is case-equivalent to `U+017f` (long S) and the
-ASCII letter K is case-equivalent to `U+212a` (Kelvin sign). This option disables
+characters. The ASCII letter S is case-equivalent to char:U+017f (long S) and the
+ASCII letter K is case-equivalent to char:U+212a (Kelvin sign). This option disables
 recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a
 caseless match, both characters must either be ASCII or non-ASCII. The option
-can be changed within a pattern by the [.regex]`(*CASELESS_RESTRICT)` or [.regex]`(?r)` option
+can be changed within a pattern by the [.regex]`+(*CASELESS_RESTRICT)+` or [.regex]`+(?r)+` option
 settings.
 
-[.options]
 const:PCRE2_EXTRA_ESCAPED_CR_IS_LF::
-+
 
 There are some legacy applications where the escape sequence [.regex]`\r` in a pattern
 is expected to match a newline. If this option is set, [.regex]`\r` in a pattern is
 converted to [.regex]`\n` so that it matches a LF (linefeed) instead of a CR (carriage
 return) character. The option does not affect a literal CR in the pattern, nor
-does it affect CR specified as an explicit code point such as [.regex]`\x{0D}`.
+does it affect CR specified as an explicit code point such as [.regex]`+\x{0D}+`.
 
-[.options]
 const:PCRE2_EXTRA_MATCH_LINE::
-+
 
 This option is provided for use by the `-x` option of `pcre2grep`. It
 causes the pattern only to match complete lines. This is achieved by
-automatically inserting the code [.regex]`^(?:` at the start of the compiled
+automatically inserting the code for [.regex]`+^(?:+` at the start of the compiled
 pattern and [.regex]`)$` at the end. Thus, when const:PCRE2_MULTILINE is set, the matched
 line may be in the middle of the subject string. This option can be used with
 const:PCRE2_LITERAL.
 
-[.options]
 const:PCRE2_EXTRA_MATCH_WORD::
-+
 
 This option is provided for use by the `-w` option of `pcre2grep`. It
 causes the pattern only to match strings that have a word boundary at the start
-and the end. This is achieved by automatically inserting the code for [.regex]`\b(?:`
-at the start of the compiled pattern and [.regex]`)\b` at the end. The option may be
+and the end. This is achieved by automatically inserting the code for [.regex]`+\b(?:+`
+at the start of the compiled pattern and [.regex]`+)\b+` at the end. The option may be
 used with const:PCRE2_LITERAL. However, it is ignored if const:PCRE2_EXTRA_MATCH_LINE is
 also set.
 
-[.options]
 const:PCRE2_EXTRA_NO_BS0::
-+
 
-If this option is set (note that its final character is the digit [.c]`0`) it locks
+If this option is set (note that its final character is the digit zero) it locks
 out the use of the sequence [.regex]`\0` unless at least one more octal digit follows.
 
-[.options]
 const:PCRE2_EXTRA_PYTHON_OCTAL::
-+
 
 If this option is set, PCRE2 follows Python's rules for interpreting octal
-escape sequences. The rules for handling sequences such as [.regex]`\14`, which could
+escape sequences. The rules for handling sequences such as [.regex]`+\14+`, which could
 be an octal number or a back reference are different. Details are given in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 documentation.
 
-[.options]
 const:PCRE2_EXTRA_NEVER_CALLOUT::
-+
 
 If this option is set, PCRE2 treats callouts in the pattern as a syntax error,
 returning const:PCRE2_ERROR_CALLOUT_CALLER_DISABLED. This is useful if the application
 knows that a callout will not be provided to func:pcre2_match(), so that
 callouts in the pattern are not silently ignored.
 
-[.options]
 const:PCRE2_EXTRA_TURKISH_CASING::
-+
 
 This option alters case-equivalence of the 'i' letters to follow the
 alphabet used by Turkish and Azeri languages. The option can be changed within
-a pattern by the [.regex]`(*TURKISH_CASING)` start-of-pattern setting. Either the UTF or
+a pattern by the [.regex]`+(*TURKISH_CASING)+` start-of-pattern setting. Either the UTF or
 UCP options must be set. In the 8-bit library, UTF must be set. This option
 cannot be combined with const:PCRE2_EXTRA_CASELESS_RESTRICT.
 
@@ -2381,8 +2360,8 @@ support is expected to die away.
 
 External tables are built by calling the func:pcre2_maketables() function, in
 the relevant locale. The only argument to this function is a general context,
-which can be used to pass a custom memory allocator. If the argument is NULL,
-the system `malloc()` is used. The result can be passed to
+which can be used to pass a custom memory allocator. If the argument is const:NULL,
+the system [.c]`malloc()` is used. The result can be passed to
 func:pcre2_compile() as often as necessary, by creating a compile context and
 calling func:pcre2_set_character_tables() to set the tables pointer therein.
 
@@ -2391,13 +2370,13 @@ For example, to build and use tables that are appropriate for the French locale
 letters), the following code could be used:
 
 [source,c]
-....
+----
 setlocale(LC_CTYPE, "fr_FR");
 tables = pcre2_maketables(NULL);
 ccontext = pcre2_compile_context_create(NULL);
 pcre2_set_character_tables(ccontext, tables);
 re = pcre2_compile(..., ccontext);
-....
+----
 
 The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
 are using Windows, the name for the French locale is "french".
@@ -2429,6 +2408,7 @@ a set of binary tables. See the
 `pcre2build`
 documentation for details.
 
+[[information-about-compiled-pattern]]
 == Information about a compiled pattern
 
 [source,c,role=prototype]
@@ -2439,24 +2419,24 @@ int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
 
 The func:pcre2_pattern_info() function returns general information about a
 compiled pattern. For information about callouts, see the
-next section.
+section <<information-about-pattern-callouts>>.
 The first argument for func:pcre2_pattern_info() is a pointer to the compiled
 pattern. The second argument specifies which piece of information is required,
 and the third argument is a pointer to a variable to receive the data. If the
-third argument is NULL, the first argument is ignored, and the function returns
+third argument is const:NULL, the first argument is ignored, and the function returns
 the size in bytes of the variable that is required for the information
 requested. Otherwise, the yield of the function is zero for success, or one of
 the following negative numbers:
 
 [.errors]
 const:PCRE2_ERROR_NULL::
-            the argument _code_ was NULL
+            the argument arg:code was const:NULL
 
 const:PCRE2_ERROR_BADMAGIC::
             the "magic number" was not found
 
 const:PCRE2_ERROR_BADOPTION::
-            the value of _what_ was invalid
+            the value of arg:what was invalid
 
 const:PCRE2_ERROR_UNSET::
             the requested field is not set
@@ -2466,14 +2446,14 @@ check against passing an arbitrary memory pointer. Here is a typical call of
 func:pcre2_pattern_info(), to obtain the length of the compiled pattern:
 
 [source,c]
-....
+----
 int rc;
 size_t length;
 rc = pcre2_pattern_info(
-      re,               /* result of pcre2_compile() */
-      PCRE2_INFO_SIZE,  /* what is required */
-      &length);         /* where to put the data */
-....
+         re,              /* result of pcre2_compile() */
+         PCRE2_INFO_SIZE, /* what is required */
+         &length);        /* where to put the data */
+----
 
 The possible values for the second argument are defined in `pcre2.h`, and
 are as follows:
@@ -2482,229 +2462,204 @@ are as follows:
 const:PCRE2_INFO_ALLOPTIONS::
 const:PCRE2_INFO_ARGOPTIONS::
 const:PCRE2_INFO_EXTRAOPTIONS::
-....
-PCRE2_INFO_ALLOPTIONS
-PCRE2_INFO_ARGOPTIONS
-PCRE2_INFO_EXTRAOPTIONS
-....
-
++
 Return copies of the pattern's options. The third argument should point to a
-`uint32_t` variable. const:PCRE2_INFO_ARGOPTIONS returns exactly the options that
+type:uint32_t variable. const:PCRE2_INFO_ARGOPTIONS returns exactly the options that
 were passed to func:pcre2_compile(), whereas const:PCRE2_INFO_ALLOPTIONS returns
-the compile options as modified by any top-level [.regex]`(*XXX)` option settings such as
-[.regex]`(*UTF)` at the start of the pattern itself. const:PCRE2_INFO_EXTRAOPTIONS returns the
+the compile options as modified by any top-level [.regex]`(*__XXX__)` option settings such as
+[.regex]`+(*UTF)+` at the start of the pattern itself. const:PCRE2_INFO_EXTRAOPTIONS returns the
 extra options that were set in the compile context by calling the
 func:pcre2_set_compile_extra_options() function.
 
-For example, if the pattern [.regex]`/(*UTF)abc/` is compiled with the const:PCRE2_EXTENDED
++
+For example, if the pattern [.regex]`(*UTF)abc` is compiled with the const:PCRE2_EXTENDED
 option, the result for const:PCRE2_INFO_ALLOPTIONS is const:PCRE2_EXTENDED and const:PCRE2_UTF.
-Option settings such as [.regex]`(?i)` that can change within a pattern do not affect the
+Option settings such as [.regex]`+(?i)+` that can change within a pattern do not affect the
 result of const:PCRE2_INFO_ALLOPTIONS, even if they appear right at the start of the
 pattern. (This was different in some earlier releases.)
 
++
 A pattern compiled without const:PCRE2_ANCHORED is automatically anchored by PCRE2 if
 the first significant item in every top-level branch is one of the following:
 
-[.values]
-[.regex]`^`::
++
+--
+[.regex]`+^+`  ::: unless const:PCRE2_MULTILINE is set
+[.regex]`\A`   ::: always
+[.regex]`\G`   ::: always
+[.regex]`+.*+` ::: sometimes -- see below
+--
 
-unless const:PCRE2_MULTILINE is set
-
-[.regex]`\A`::
-
-always
-
-[.regex]`\G`::
-
-always
-
-[.regex]`.*`::
-
-sometimes - see below
-
-When [.regex]`.*` is the first significant item, anchoring is possible only when all the
++
+When [.regex]`+.*+` is the first significant item, anchoring is possible only when all the
 following are true:
 
-* [.regex]`.*` is not in an atomic group
-* [.regex]`.*` is not in a capture group that is the subject of a backreference
-* const:PCRE2_DOTALL is in force for [.regex]`.*`
-* Neither [.regex]`(*PRUNE)` nor [.regex]`(*SKIP)` appears in the pattern
-* const:PCRE2_NO_DOTSTAR_ANCHOR is not set
-* Dotstar anchoring has not been disabled with const:PCRE2_DOTSTAR_ANCHOR_OFF
++
+[loweralpha]
+. [.regex]`+.*+` is not in an atomic group
+. [.regex]`+.*+` is not in a capture group that is the subject of a backreference
+. const:PCRE2_DOTALL is in force for [.regex]`+.*+`
+. Neither [.regex]`+(*PRUNE)+` nor [.regex]`+(*SKIP)+` appears in the pattern
+. const:PCRE2_NO_DOTSTAR_ANCHOR is not set
+. Dotstar anchoring has not been disabled with const:PCRE2_DOTSTAR_ANCHOR_OFF
 
++
 For patterns that are auto-anchored, the const:PCRE2_ANCHORED bit is set in the
 options returned for const:PCRE2_INFO_ALLOPTIONS.
 
-[.values]
 const:PCRE2_INFO_BACKREFMAX::
 
 Return the number of the highest backreference in the pattern. The third
-argument should point to a `uint32_t` variable. Named capture groups
+argument should point to a type:uint32_t variable. Named capture groups
 acquire numbers as well as names, and these count towards the highest
-backreference. Backreferences such as \4 or \g{12} match the captured
+backreference. Backreferences such as [.regex]`\4` or [.regex]`\g{12}` match the captured
 characters of the given group, but in addition, the check that a capture
-group is set in a conditional group such as (?(3)a|b) is also a backreference.
+group is set in a conditional group such as [.regex]`(?(3)a|b)` is also a backreference.
 Zero is returned if there are no backreferences.
 
-[.values]
 const:PCRE2_INFO_BSR::
 
-The output is a uint32_t integer whose value indicates what character sequences
-the \R escape sequence matches. A value of const:PCRE2_BSR_UNICODE means that \R
+The output is a type:uint32_t integer whose value indicates what character sequences
+the [.regex]`\R` escape sequence matches. A value of const:PCRE2_BSR_UNICODE means that [.regex]`\R`
 matches any Unicode line ending sequence; a value of const:PCRE2_BSR_ANYCRLF means
-that \R matches only CR, LF, or CRLF.
+that [.regex]`\R` matches only CR, LF, or CRLF.
 
-[.values]
 const:PCRE2_INFO_CAPTURECOUNT::
 
-Return the highest capture group number in the pattern. In patterns where (?|
+Return the highest capture group number in the pattern. In patterns where [.regex]`(?|`
 is not used, this is also the total number of capture groups. The third
-argument should point to a `uint32_t` variable.
+argument should point to a type:uint32_t variable.
 
-[.values]
 const:PCRE2_INFO_DEPTHLIMIT::
 
 If the pattern set a backtracking depth limit by including an item of the form
-[.regex]`(*LIMIT_DEPTH=nnnn)` at the start, the value is returned. The third argument
-should point to a uint32_t integer. If no such value has been set, the call to
+[.regex]`(*LIMIT_DEPTH=__nnnn__)` at the start, the value is returned. The third argument
+should point to a type:uint32_t integer. If no such value has been set, the call to
 func:pcre2_pattern_info() returns the error const:PCRE2_ERROR_UNSET. Note that this
 limit will only be used during matching if it is less than the limit set or
 defaulted by the caller of the match function.
 
-[.values]
 const:PCRE2_INFO_FIRSTBITMAP::
 
 In the absence of a single first code unit for a non-anchored pattern,
 func:pcre2_compile() may construct a 256-bit table that defines a fixed set of
 values for the first code unit in any match. For example, a pattern that starts
-with [abc] results in a table with three bits set. When code unit values
+with [.regex]`[abc]` results in a table with three bits set. When code unit values
 greater than 255 are supported, the flag bit for 255 means "any code unit of
 value 255 or above". If such a table was constructed, a pointer to it is
-returned. Otherwise NULL is returned. The third argument should point to a
-[.c]`const uint8_t *` variable.
+returned. Otherwise const:NULL is returned. The third argument should point to a
+[.c]`+const uint8_t *+` variable.
 
-[.values]
 const:PCRE2_INFO_FIRSTCODETYPE::
 
 Return information about the first code unit of any matched string, for a
-non-anchored pattern. The third argument should point to a `uint32_t`
+non-anchored pattern. The third argument should point to a type:uint32_t
 variable. If there is a fixed first value, for example, the letter "c" from a
-pattern such as (cat|cow|coyote), 1 is returned, and the value can be retrieved
+pattern such as [.regex]`(cat|cow|coyote)`, 1 is returned, and the value can be retrieved
 using const:PCRE2_INFO_FIRSTCODEUNIT. If there is no fixed first value, but it is
 known that a match can occur only at the start of the subject or following a
 newline in the subject, 2 is returned. Otherwise, and for anchored patterns, 0
 is returned.
 
-[.values]
 const:PCRE2_INFO_FIRSTCODEUNIT::
 
 Return the value of the first code unit of any matched string for a pattern
 where const:PCRE2_INFO_FIRSTCODETYPE returns 1; otherwise return 0. The third
-argument should point to a `uint32_t` variable. In the 8-bit library, the
+argument should point to a type:uint32_t variable. In the 8-bit library, the
 value is always less than 256. In the 16-bit library the value can be up to
-0xffff. In the 32-bit library in UTF-32 mode the value can be up to 0x10ffff,
-and up to 0xffffffff when not using UTF-32 mode.
+char:0xffff. In the 32-bit library in UTF-32 mode the value can be up to char:0x10ffff,
+and up to char:0xffffffff when not using UTF-32 mode.
 
-[.values]
 const:PCRE2_INFO_FRAMESIZE::
 
 Return the size (in bytes) of the data frames that are used to remember
 backtracking positions when the pattern is processed by func:pcre2_match()
-without the use of JIT. The third argument should point to a `size_t`
+without the use of JIT. The third argument should point to a type:size_t
 variable. The frame size depends on the number of capturing parentheses in the
 pattern. Each additional capture group adds two type:PCRE2_SIZE variables.
 
-[.values]
 const:PCRE2_INFO_HASBACKSLASHC::
 
-Return 1 if the pattern contains any instances of \C, otherwise 0. The third
-argument should point to a `uint32_t` variable.
+Return 1 if the pattern contains any instances of [.regex]`\C`, otherwise 0. The third
+argument should point to a type:uint32_t variable.
 
-[.values]
 const:PCRE2_INFO_HASCRORLF::
 
 Return 1 if the pattern contains any explicit matches for CR or LF characters,
-otherwise 0. The third argument should point to a `uint32_t` variable. An
-explicit match is either a literal CR or LF character, or \r or \n or one of
+otherwise 0. The third argument should point to a type:uint32_t variable. An
+explicit match is either a literal CR or LF character, or [.regex]`\r` or [.regex]`\n` or one of
 the equivalent hexadecimal or octal escape sequences.
 
-[.values]
 const:PCRE2_INFO_HEAPLIMIT::
 
 If the pattern set a heap memory limit by including an item of the form
-[.regex]`(*LIMIT_HEAP=nnnn)` at the start, the value is returned. The third argument
-should point to a uint32_t integer. If no such value has been set, the call to
+[.regex]`(*LIMIT_HEAP=__nnnn__)` at the start, the value is returned. The third argument
+should point to a type:uint32_t integer. If no such value has been set, the call to
 func:pcre2_pattern_info() returns the error const:PCRE2_ERROR_UNSET. Note that this
 limit will only be used during matching if it is less than the limit set or
 defaulted by the caller of the match function.
 
-[.values]
 const:PCRE2_INFO_JCHANGED::
 
-Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
-0\. The third argument should point to a `uint32_t` variable. (?J) and
-(?-J) set and unset the local const:PCRE2_DUPNAMES option, respectively.
+Return 1 if the [.regex]`+(?J)+` or [.regex]`+(?-J)+` option setting is used in the pattern, otherwise 0.
+The third argument should point to a type:uint32_t variable. [.regex]`+(?J)+` and
+[.regex]`+(?-J)+` set and unset the local const:PCRE2_DUPNAMES option, respectively.
 
-[.values]
 const:PCRE2_INFO_JITSIZE::
 
 If the compiled pattern was successfully processed by
 func:pcre2_jit_compile(), return the size of the JIT compiled code, otherwise
-return zero. The third argument should point to a `size_t` variable.
+return zero. The third argument should point to a type:size_t variable.
 
-[.values]
 const:PCRE2_INFO_LASTCODETYPE::
 
 Returns 1 if there is a rightmost literal code unit that must exist in any
 matched string, other than at its start. The third argument should point to a
-`uint32_t` variable. If there is no such value, 0 is returned. When 1 is
+type:uint32_t variable. If there is no such value, 0 is returned. When 1 is
 returned, the code unit value itself can be retrieved using
 const:PCRE2_INFO_LASTCODEUNIT. For anchored patterns, a last literal value is
 recorded only if it follows something of variable length. For example, for the
-pattern [.regex]`/^a\d+z\d+/` the returned value is 1 (with "z" returned from
-const:PCRE2_INFO_LASTCODEUNIT), but for /^a\dz\d/ the returned value is 0.
+pattern [.regex]`^a\d{plus}z\d{plus}` the returned value is 1 (with "z" returned from
+const:PCRE2_INFO_LASTCODEUNIT), but for [.regex]`^a\dz\d` the returned value is 0.
 
-[.values]
 const:PCRE2_INFO_LASTCODEUNIT::
 
 Return the value of the rightmost literal code unit that must exist in any
 matched string, other than at its start, for a pattern where
 const:PCRE2_INFO_LASTCODETYPE returns 1. Otherwise, return 0. The third argument
-should point to a `uint32_t` variable.
+should point to a type:uint32_t variable.
 
-[.values]
 const:PCRE2_INFO_MATCHEMPTY::
 
 Return 1 if the pattern might match an empty string, otherwise 0. The third
-argument should point to a `uint32_t` variable. When a pattern contains
+argument should point to a type:uint32_t variable. When a pattern contains
 recursive subroutine calls it is not always possible to determine whether or
 not it can match an empty string. PCRE2 takes a cautious approach and returns 1
 in such cases.
 
-[.values]
 const:PCRE2_INFO_MATCHLIMIT::
 
 If the pattern set a match limit by including an item of the form
-[.regex]`(*LIMIT_MATCH=nnnn)` at the start, the value is returned. The third argument
-should point to a uint32_t integer. If no such value has been set, the call to
+[.regex]`(*LIMIT_MATCH=__nnnn__)` at the start, the value is returned. The third argument
+should point to a type:uint32_t integer. If no such value has been set, the call to
 func:pcre2_pattern_info() returns the error const:PCRE2_ERROR_UNSET. Note that this
 limit will only be used during matching if it is less than the limit set or
 defaulted by the caller of the match function.
 
-[.values]
 const:PCRE2_INFO_MAXLOOKBEHIND::
 
 A lookbehind assertion moves back a certain number of characters (not code
 units) when it starts to process each of its branches. This request returns the
-largest of these backward moves. The third argument should point to a uint32_t
-integer. The simple assertions \b and \B require a one-character lookbehind
+largest of these backward moves. The third argument should point to a type:uint32_t
+integer. The simple assertions [.regex]`\b` and [.regex]`\B` require a one-character lookbehind
 and cause const:PCRE2_INFO_MAXLOOKBEHIND to return 1 in the absence of anything
-longer. \A also registers a one-character lookbehind, though it does not
+longer. [.regex]`\A` also registers a one-character lookbehind, though it does not
 actually inspect the previous character.
 
++
 Note that this information is useful for multi-segment matching only
 if the pattern contains no nested lookbehinds. For example, the pattern
-[.regex]`(?<=a(?<=ba)c)` returns a maximum lookbehind of 2, but when it is processed, the
+[.regex]`+(?<=a(?<=ba)c)+` returns a maximum lookbehind of 2, but when it is processed, the
 first lookbehind moves back by two characters, matches one character, then the
 nested lookbehind also moves back by two characters. This puts the matching
 point three characters earlier than it was at the start.
@@ -2712,18 +2667,16 @@ const:PCRE2_INFO_MAXLOOKBEHIND is really only useful as a debugging tool. See th
 xref:pcre2partial.adoc[`pcre2partial`]
 documentation for a discussion of multi-segment matching.
 
-[.values]
 const:PCRE2_INFO_MINLENGTH::
 
 If a minimum length for matching subject strings was computed, its value is
 returned. Otherwise the returned value is 0. This value is not computed when
 const:PCRE2_NO_START_OPTIMIZE is set. The value is a number of characters, which in
 UTF mode may be different from the number of code units. The third argument
-should point to a `uint32_t` variable. The value is a lower bound to the
+should point to a type:uint32_t variable. The value is a lower bound to the
 length of any matching string. There may not be any strings of that length that
 do actually match, but every string that does match is at least that long.
 
-[.values]
 const:PCRE2_INFO_NAMECOUNT::
 const:PCRE2_INFO_NAMEENTRYSIZE::
 const:PCRE2_INFO_NAMETABLE::
@@ -2738,16 +2691,14 @@ output vector (described with func:pcre2_match() below). To do the conversion,
 you need to use the name-to-number map, which is described by these three
 values.
 
-The map consists of a number of fixed-size entries. const:PCRE2_INFO_NAMECOUNT gives
-the number of entries, and const:PCRE2_INFO_NAMEENTRYSIZE gives the size of each
-two bytes of each entry are the number of the capturing parenthesis, most
-significant byte first. In the 16-bit library, the pointer points to 16-bit
-code units, the first of which contains the parenthesis number. In the 32-bit
-library, the pointer points to 32-bit code units, the first of which contains
-the parenthesis number. The rest of the entry is the corresponding name, zero
-terminated.
++
+The map consists of a number of fixed-size entries. const:PCRE2_INFO_NAMECOUNT gives the number of entries, and const:PCRE2_INFO_NAMEENTRYSIZE gives the size of each entry in code units; both of these return a type:uint32_t value. The entry size depends on the length of the longest name.
 
-The names are in alphabetical order. If (?| is used to create multiple capture
++
+const:PCRE2_INFO_NAMETABLE returns a pointer to the first entry of the table. This is a type:PCRE2_SPTR pointer to a block of code units. In the 8-bit library, the first two bytes of each entry are the number of the capturing parenthesis, most significant byte first. In the 16-bit library, the pointer points to 16-bit code units, the first of which contains the parenthesis number. In the 32-bit library, the pointer points to 32-bit code units, the first of which contains the parenthesis number. The rest of the entry is the corresponding name, zero terminated.
+
++
+The names are in alphabetical order. If [.regex]`+(?|+` is used to create multiple capture
 groups with the same number, as described in the
 section on duplicate group numbers
 in the
@@ -2755,70 +2706,62 @@ xref:pcre2pattern.adoc[`pcre2pattern`]
 page, the groups may be given the same name, but there is only one entry in the
 table. Different names for groups of the same number are not permitted.
 
++
 Duplicate names for capture groups with different numbers are permitted, but
 only if const:PCRE2_DUPNAMES is set. They appear in the table in the order in which
-they were found in the pattern. In the absence of (?| this is the order of
-increasing number; when (?| is used this is not necessarily the case because
+they were found in the pattern. In the absence of [.regex]`+(?|+` this is the order of
+increasing number; when [.regex]`+(?|+` is used this is not necessarily the case because
 later capture groups may have lower numbers.
 
++
 As a simple example of the name/number table, consider the following pattern
 after compilation by the 8-bit library (assume const:PCRE2_EXTENDED is set, so white
-space - including newlines - is ignored):
+space -- including newlines -- is ignored):
 
++
 [source,regex]
-....
+----
 (?<date> (?<year>(\d\d)?\d\d) -
 (?<month>\d\d) - (?<day>\d\d) )
-....
+----
 
++
 There are four named capture groups, so the table has four entries, and each
 entry in the table is eight bytes long. The table is as follows, with
 non-printing bytes shows in hexadecimal, and undefined bytes shown as ??:
 
-[source,text,role=binary-layout]
-....
++
+[source,text]
+----
 00 01 d  a  t  e  00 ??
 00 05 d  a  y  00 ?? ??
 00 04 m  o  n  t  h  00
 00 02 y  e  a  r  00 ??
-....
+----
 
++
 When writing code to extract data from named capture groups using the
 name-to-number map, remember that the length of the entries is likely to be
 different for each compiled pattern.
 
-[.values]
 const:PCRE2_INFO_NEWLINE::
+  The output is one of the following type:uint32_t values:
++
+const:PCRE2_NEWLINE_CR::: Carriage return (CR)
+const:PCRE2_NEWLINE_LF::: Linefeed (LF)
+const:PCRE2_NEWLINE_CRLF::: Carriage return, linefeed (CRLF)
+const:PCRE2_NEWLINE_ANY::: Any Unicode line ending
+const:PCRE2_NEWLINE_ANYCRLF::: Any of CR, LF, or CRLF
+const:PCRE2_NEWLINE_NUL::: The NUL character (binary zero)
 
-The output is one of the following `uint32_t` values:
-
-[.values]
-const:PCRE2_NEWLINE_CR::
-      Carriage return (CR)
-
-const:PCRE2_NEWLINE_LF::
-      Linefeed (LF)
-
-const:PCRE2_NEWLINE_CRLF::
-      Carriage return, linefeed (CRLF)
-
-const:PCRE2_NEWLINE_ANY::
-      Any Unicode line ending
-
-const:PCRE2_NEWLINE_ANYCRLF::
-      Any of CR, LF, or CRLF
-
-const:PCRE2_NEWLINE_NUL::
-      The NUL character (binary zero)
-
++
 This identifies the character sequence that will be recognized as meaning
 "newline" while matching.
 
-[.values]
 const:PCRE2_INFO_SIZE::
 
 Return the size of the compiled pattern in bytes (for all three libraries). The
-third argument should point to a `size_t` variable. This value includes the
+third argument should point to a type:size_t variable. This value includes the
 size of the general data block that precedes the code units of the compiled
 pattern itself. The value that is used when func:pcre2_compile() is getting
 memory in which to place the compiled pattern may be slightly larger than the
@@ -2826,6 +2769,7 @@ value returned by this option, because there are cases where the code that
 calculates the size has to over-estimate. Processing a pattern with the JIT
 compiler does not alter the value returned by this option.
 
+[[information-about-pattern-callouts]]
 == Information about a pattern's callouts
 
 [source,c,role=prototype]
@@ -2880,12 +2824,12 @@ Information about a successful or unsuccessful match is placed in a match
 data block, which is an opaque structure that is accessed by function calls. In
 particular, the match data block contains a vector of offsets into the subject
 string that define the matched parts of the subject. This is known as the
-_ovector_.
+"ovector".
 
 Before calling func:pcre2_match(), func:pcre2_dfa_match(), or
 func:pcre2_jit_match() you must create a match data block by calling one of
 the creation functions above. For func:pcre2_match_data_create(), the first
-argument is the number of pairs of offsets in the _ovector_.
+argument is the number of pairs of offsets in the ovector.
 
 When using func:pcre2_match(), one pair of offsets is required to identify the
 string that matched the whole pattern, with an additional pair for each
@@ -2906,14 +2850,14 @@ used.
 The second argument of func:pcre2_match_data_create() is a pointer to a
 general context, which can specify custom memory management for obtaining the
 memory for the match data block. If you are not using custom memory management,
-pass [.c]`NULL`, which causes [.c]`malloc()` to be used.
+pass const:NULL, which causes [.c]`malloc()` to be used.
 
 For func:pcre2_match_data_create_from_pattern(), the first argument is a
 pointer to a compiled pattern. The ovector is created to be exactly the right
 size to hold all the substrings a pattern might capture when matched using
 func:pcre2_match(). You should not use this call when matching with
 func:pcre2_dfa_match(). The second argument is again a pointer to a general
-context, but in this case if [.c]`NULL` is passed, the memory is obtained using the
+context, but in this case if const:NULL is passed, the memory is obtained using the
 same allocator that was used for the compiled pattern (custom or default).
 
 A match data block can be used many times, with the same or different compiled
@@ -2935,12 +2879,12 @@ referenced by the extraction functions after a successful match. After running
 a match, you must not free a compiled pattern or a subject string until after
 all operations on the match data block (for that match) have taken place,
 unless, in the case of the subject string, you have used the
-const:PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section entitled
-"Option bits for func:pcre2_match()"
+const:PCRE2_COPY_MATCHED_SUBJECT option, which is described in the section
+<<match-option-bits>>
 below.
 
 When a match data block itself is no longer needed, it should be freed by
-calling func:pcre2_match_data_free(). If this function is called with a [.c]`NULL`
+calling func:pcre2_match_data_free(). If this function is called with a const:NULL
 argument, it returns immediately, without doing anything.
 
 == Memory use for match data blocks
@@ -2962,7 +2906,7 @@ makes use of a vector of data frames for remembering backtracking positions.
 The size of each individual frame depends on the number of capturing
 parentheses in the pattern and can be obtained by calling
 func:pcre2_pattern_info() with the const:PCRE2_INFO_FRAMESIZE option (see the
-section entitled "Information about a compiled pattern"
+section <<information-about-compiled-pattern>>
 above).
 
 Heap memory is used for the frames vector; if the initial memory block turns
@@ -3006,19 +2950,19 @@ Here is an example of a simple call to func:pcre2_match():
 ----
 pcre2_match_data *md = pcre2_match_data_create(4, NULL);
 int rc = pcre2_match(
-  re,             /* result of pcre2_compile() */
-  "some string",  /* the subject string */
-  11,             /* the length of the subject string */
-  0,              /* start at offset 0 in the subject */
-  0,              /* default options */
-  md,             /* the match data block */
-  NULL);          /* a match context; NULL means use defaults */
+             re,    /* result of pcre2_compile() */
+             "some string", /* the subject string */
+             11,    /* the length of the subject string */
+             0,     /* start at offset 0 in the subject */
+             0,     /* default options */
+             md,    /* the match data block */
+             NULL); /* a match context; NULL means use defaults */
 ----
 
 If the subject string is zero-terminated, the length can be given as
 const:PCRE2_ZERO_TERMINATED. A match context must be provided if certain less common
-matching parameters are to be changed. For details, see the section on
-the match context
+matching parameters are to be changed. For details, see the section
+<<match-context>>
 above.
 
 === The string to be matched by func:pcre2_match()
@@ -3028,9 +2972,9 @@ arg:subject, a length in arg:length, and a starting offset in
 arg:start_offset. The length and offset are in code units, not characters.
 That is, they are in bytes for the 8-bit library, 16-bit code units for the
 16-bit library, and 32-bit code units for the 32-bit library, whether or not
-UTF processing is enabled. As a special case, if arg:subject is [.c]`NULL` and
+UTF processing is enabled. As a special case, if arg:subject is const:NULL and
 arg:length is zero, the subject is assumed to be an empty string. If
-arg:length is non-zero, an error occurs if arg:subject is [.c]`NULL`.
+arg:length is non-zero, an error occurs if arg:subject is const:NULL.
 
 If arg:start_offset is greater than the length of the subject,
 func:pcre2_match() returns const:PCRE2_ERROR_BADOFFSET. When the starting offset is
@@ -3051,20 +2995,20 @@ lookbehind. For example, consider the pattern
 \Biss\B
 ----
 
-which finds occurrences of [.c]`"iss"` in the middle of words. ([.regex]`\B` matches only if
+which finds occurrences of [.subject]`iss` in the middle of words. ([.regex]`\B` matches only if
 the current position in the subject is not a word boundary.) When applied to
-the string [.c]`"Mississippi"` the first call to func:pcre2_match() finds the first
+the string [.subject]`Mississippi` the first call to func:pcre2_match() finds the first
 occurrence. If func:pcre2_match() is called again with just the remainder of
-the subject, namely [.c]`"issippi"`, it does not match, because [.regex]`\B` is always false
+the subject, namely [.subject]`issippi`, it does not match, because [.regex]`\B` is always false
 at the start of the subject, which is deemed to be a word boundary. However, if
 func:pcre2_match() is passed the entire string again, but with
-arg:start_offset set to [.c]`4`, it finds the second occurrence of `iss` because it
+arg:start_offset set to 4, it finds the second occurrence of [.subject]`iss` because it
 is able to look behind the starting point to discover that it is preceded by a
 letter.
 
 Finding all the matches in a subject is tricky when the pattern can match an
 empty string. PCRE2 includes a helper API to assist with this; see the
-section entitled "Iterating over all matches"
+section <<iterating-over-matches>>
 below
 for details.
 
@@ -3072,8 +3016,9 @@ If a non-zero starting offset is passed when the pattern is anchored, a single
 attempt to match at the given offset is made. This can only succeed if the
 pattern does not require the match to be at the start of the subject. In other
 words, the anchoring must be the result of setting the const:PCRE2_ANCHORED option or
-the use of [.regex]`*` with const:PCRE2_DOTALL, not by starting the pattern with [.regex]`^` or [.regex]`\A`.
+the use of [.regex]`+.*+` with const:PCRE2_DOTALL, not by starting the pattern with [.regex]`+^+` or [.regex]`\A`.
 
+[[match-option-bits]]
 === Option bits for func:pcre2_match()
 
 The unused bits of the arg:options argument for func:pcre2_match() must be
@@ -3118,7 +3063,7 @@ const:PCRE2_DISABLE_RECURSELOOP_CHECK::
 
 This option is relevant only to func:pcre2_match() for interpretive matching.
 It is ignored when JIT is used, and is forbidden for func:pcre2_dfa_match().
-
++
 The use of recursion in patterns can lead to infinite loops. In the
 interpretive matcher these would be eventually caught by the match or heap
 limits, but this could take a long time and/or use a lot of memory if the
@@ -3126,7 +3071,7 @@ limits are large. There is therefore a check at the start of each recursion.
 If the same group is still active from a previous call, and the current subject
 pointer is the same as it was at the start of that group, and the furthest
 inspected character of the subject has not changed, an error is generated.
-
++
 There are rare cases of matches that would complete, but nevertheless trigger
 this error. This option disables the check. It is provided mainly for testing
 when comparing JIT and interpretive behaviour.
@@ -3160,12 +3105,13 @@ An empty string is not considered to be a valid match if this option is set. If
 there are alternatives in the pattern, they are tried. If all the alternatives
 match the empty string, the entire match fails. For example, if the pattern
 
++
 [.regex]`a?b?`
-
-is applied to a string not beginning with "a" or "b", it matches an empty
++
+is applied to a string not beginning with [.subject]`a` or [.subject]`b`, it matches an empty
 string at the start of the subject. With const:PCRE2_NOTEMPTY set, this match is not
 valid, so func:pcre2_match() searches further into the string for occurrences
-of "a" or "b".
+of [.subject]`a` or [.subject]`b`.
 
 const:PCRE2_NOTEMPTY_ATSTART::
 
@@ -3190,7 +3136,7 @@ const:PCRE2_MATCH_INVALID_UTF was passed to func:pcre2_compile(). The latter spe
 case is discussed in detail in the
 xref:pcre2unicode.adoc[`pcre2unicode`]
 documentation.
-
++
 In the default case, if a non-zero starting offset is given, the check is
 applied only to that part of the subject that could be inspected during
 matching, and there is a check that the starting offset points to the first
@@ -3200,7 +3146,7 @@ Otherwise, it starts at the length of the longest lookbehind before the
 starting offset, or at the start of the subject if there are not that many
 characters before the starting offset. Note that the sequences [.regex]`\b` and [.regex]`\B` are
 one-character lookbehinds.
-
++
 The check is carried out before any other processing takes place, and a
 negative error code is returned if the check fails. There are several UTF error
 codes for each code unit width, corresponding to different problems with the
@@ -3212,13 +3158,13 @@ UTF-32 strings
 in the
 xref:pcre2unicode.adoc[`pcre2unicode`]
 documentation.
-
++
 If you know that your subject is valid, and you want to skip this check for
 performance reasons, you can set the const:PCRE2_NO_UTF_CHECK option when calling
 func:pcre2_match(). You might want to do this for the second and subsequent
 calls to func:pcre2_match() if you are making repeated calls to find multiple
 matches in the same subject string.
-
++
 [WARNING]
 ====
 Unless const:PCRE2_MATCH_INVALID_UTF was set at compile time, when
@@ -3235,20 +3181,20 @@ the end of the subject string is reached successfully, but there are not enough
 subject characters to complete the match. In addition, either at least one
 character must have been inspected or the pattern must contain a lookbehind, or
 the pattern must be one that could match an empty string.
-
++
 If this situation arises when const:PCRE2_PARTIAL_SOFT (but not const:PCRE2_PARTIAL_HARD)
 is set, matching continues by testing any remaining alternatives. Only if no
 complete match can be found is const:PCRE2_ERROR_PARTIAL returned instead of
 const:PCRE2_ERROR_NOMATCH. In other words, const:PCRE2_PARTIAL_SOFT specifies that the
 caller is prepared to handle a partial match, but only if no complete match can
 be found.
-
++
 If const:PCRE2_PARTIAL_HARD is set, it overrides const:PCRE2_PARTIAL_SOFT. In this case, if
 a partial match is found, func:pcre2_match() immediately returns
 const:PCRE2_ERROR_PARTIAL, without considering any other alternatives. In other
 words, when const:PCRE2_PARTIAL_HARD is set, a partial match is considered to be more
 important than an alternative complete match.
-
++
 There is a more detailed discussion of partial and multi-segment matching, with
 examples, in the
 xref:pcre2partial.adoc[`pcre2partial`]
@@ -3261,8 +3207,8 @@ standard convention for the operating system. The default can be overridden in
 a
 compile context
 by calling func:pcre2_set_newline(). It can also be overridden by starting a
-pattern string with, for example, ([.regex]`*CRLF`), as described in the
-section on newline conventions
+pattern string with, for example, [.regex]`+(*CRLF)+`, as described in the
+section xref:pcre2pattern.adoc#newline-conventions[Newline conventions]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page. During matching, the newline choice affects the behaviour of the dot,
@@ -3271,23 +3217,23 @@ starting position is advanced after a match failure for an unanchored pattern.
 
 When const:PCRE2_NEWLINE_CRLF, const:PCRE2_NEWLINE_ANYCRLF, or const:PCRE2_NEWLINE_ANY is set as
 the newline convention, and a match attempt for an unanchored pattern fails
-when the current starting position is at a `CRLF` sequence, and the pattern
-contains no explicit matches for `CR` or `LF` characters, the match position is
-advanced by two characters instead of one, in other words, to after the `CRLF`.
+when the current starting position is at a CRLF sequence, and the pattern
+contains no explicit matches for CR or LF characters, the match position is
+advanced by two characters instead of one, in other words, to after the CRLF.
 
 The above rule is a compromise that makes the most common cases work as
-expected. For example, if the pattern is [.regex]`.+A` (and the const:PCRE2_DOTALL option is
-not set), it does not match the string [.c]`"\r\nA"` because, after failing at the
-start, it skips both the `CR` and the `LF` before retrying. However, the pattern
-[.regex]`[\r\n]A` does match that string, because it contains an explicit `CR` or `LF`
+expected. For example, if the pattern is [.regex]`.{plus}A` (and the const:PCRE2_DOTALL option is
+not set), it does not match the string [.subject]`+\r\nA+` because, after failing at the
+start, it skips both the CR and the LF before retrying. However, the pattern
+[.regex]`+[\r\n]A+` does match that string, because it contains an explicit CR or LF
 reference, and so advances only by one character after the first failure.
 
-An explicit match for `CR` of `LF` is either a literal appearance of one of those
+An explicit match for CR of LF is either a literal appearance of one of those
 characters in the pattern, or one of the [.regex]`\r` or [.regex]`\n` or equivalent octal or
-hexadecimal escape sequences. Implicit matches such as [.regex]`[^X]` do not count, nor
-does [.regex]`\s`, even though it includes `CR` and `LF` in the characters that it matches.
+hexadecimal escape sequences. Implicit matches such as [.regex]`+[^X]+` do not count, nor
+does [.regex]`\s`, even though it includes CR and LF in the characters that it matches.
 
-Notwithstanding the above, anomalous effects may still occur when `CRLF` is a
+Notwithstanding the above, anomalous effects may still occur when CRLF is a
 valid newline sequence and explicit [.regex]`\r` or [.regex]`\n` escapes appear in the pattern.
 
 == How func:pcre2_match() returns a string and captured substrings
@@ -3316,11 +3262,11 @@ by name,
 as described in sections below.
 
 Alternatively, you can make direct use of the vector of type:PCRE2_SIZE values,
-called the `ovector`, which contains the offsets of captured strings. It is
+called the ovector, which contains the offsets of captured strings. It is
 part of the
 match data block.
 The function func:pcre2_get_ovector_pointer() returns the address of the
-`ovector`, and func:pcre2_get_ovector_count() returns the number of pairs of
+ovector, and func:pcre2_get_ovector_count() returns the number of pairs of
 values it contains.
 
 Within the ovector, the first in each pair of values is set to the offset of
@@ -3331,7 +3277,7 @@ library, 16-bit offsets in the 16-bit library, and 32-bit offsets in the 32-bit
 library.
 
 After a partial match (error return const:PCRE2_ERROR_PARTIAL), only the first pair
-of offsets (that is, [.c]`ovector[0]` and [.c]`ovector[1]`) are set. They
+of offsets (that is, [.c]`+ovector[0]+` and [.c]`+ovector[1]+`) are set. They
 identify the part of the subject that was partially matched. See the
 xref:pcre2partial.adoc[`pcre2partial`]
 documentation for details of partial matching.
@@ -3341,13 +3287,13 @@ portion of the subject string that was matched by the entire pattern. The next
 pair is used for the first captured substring, and so on. The value returned by
 func:pcre2_match() is one more than the highest numbered pair that has been
 set. For example, if two substrings have been captured, the returned value is
-[.c]`3`. If there are no captured substrings, the return value from a successful
-match is [.c]`1`, indicating that just the first pair of offsets has been set.
+3. If there are no captured substrings, the return value from a successful
+match is 1, indicating that just the first pair of offsets has been set.
 
 If a pattern uses the [.regex]`\K` escape sequence within a positive lookahead assertion,
 the reported start of a successful match can be greater than the end of the
-match. For example, if the pattern [.regex]`(?=ab\K)` is matched against [.c]`"ab"`, the start
-and end offset values for the match are [.c]`2` and [.c]`0`.
+match. For example, if the pattern [.regex]`+(?=ab\K)+` is matched against [.subject]`ab`, the start
+and end offset values for the match are 2 and 0.
 
 If a capture group is matched repeatedly within a single match operation, it is
 the last portion of the subject that it matched that is returned.
@@ -3359,24 +3305,25 @@ data block whose ovector is of minimum length (that is, one pair).
 
 It is possible for capture group number _n+1_ to match some part of the
 subject when group _n_ has not been used at all. For example, if the string
-"abc" is matched against the pattern [.regex]`(a|(z[)](bc)` the return from the function
+[.subject]`abc` is matched against the pattern [.regex]`+(a|(z))(bc)+` the return from the function
 is 4, and groups 1 and 3 are matched, but 2 is not. When this happens, both
 values in the offset pairs corresponding to unused groups are set to
 const:PCRE2_UNSET.
 
 Offset values that correspond to unused groups at the end of the expression are
-also set to const:PCRE2_UNSET. For example, if the string "abc" is matched against
-the pattern (abc)(x(yz)?)? groups 2 and 3 are not matched. The return from the
+also set to const:PCRE2_UNSET. For example, if the string [.subject]`abc` is matched against
+the pattern [.regex]`(abc)(x(yz)?)?` groups 2 and 3 are not matched. The return from the
 function is 2, because the highest used capture group number is 1. The offsets
 for the second and third capture groups (assuming the vector is large enough,
 of course) are set to const:PCRE2_UNSET.
 
 Elements in the ovector that do not correspond to capturing parentheses in the
 pattern are never changed. That is, if a pattern contains _n_ capturing
-parentheses, no more than [.c]`ovector[0]` to [.c]`ovector[2n+1]` are set by
+parentheses, no more than [.c]`+ovector[0]+` to [.c]`ovector[2__n__+1]` are set by
 func:pcre2_match(). The other elements retain whatever values they previously
 had. After a failed match attempt, the contents of the ovector are unchanged.
 
+[[other-match-information]]
 == Other information about a match
 
 [source,c,role=prototype]
@@ -3395,9 +3342,9 @@ After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a fail
 to match (const:PCRE2_ERROR_NOMATCH), a mark name may be available. The function
 func:pcre2_get_mark() can be called to access this name, which can be
 specified in the pattern by any of the backtracking control verbs, not just
-( [.regex]`*MARK`). The same function applies to all the verbs. It returns a pointer to
+[.regex]`+(*MARK)+`. The same function applies to all the verbs. It returns a pointer to
 the zero-terminated name, which is within the compiled pattern. If no name is
-available, [.c]`NULL` is returned. The length of the name (excluding the terminating
+available, const:NULL is returned. The length of the name (excluding the terminating
 zero) is stored in the code unit that precedes the name. You should use this
 length instead of relying on the terminating zero if the name might contain a
 binary zero.
@@ -3405,7 +3352,7 @@ binary zero.
 After a successful match, the name that is returned is the last mark name
 encountered on the matching path through the pattern. Instances of backtracking
 verbs without names do not count. Thus, for example, if the matching path
-contains ([.regex]`*MARK:A`)([.regex]`*PRUNE`), the name "A" is returned. After a "no match" or a
+contains [.regex]`+(*MARK:A)(*PRUNE)+`, the name [.regex]`A` is returned. After a "no match" or a
 partial match, the last encountered name is returned. For example, consider
 this pattern:
 
@@ -3414,28 +3361,28 @@ this pattern:
 ^(*MARK:A)((*MARK:B)a|b)c
 ----
 
-When it matches "bc", the returned name is A. The B mark is "seen" in the first
+When it matches [.subject]`bc`, the returned name is [.regex]`A`. The [.regex]`B` mark is "seen" in the first
 branch of the group, but it is not on the matching path. On the other hand,
-when this pattern fails to match "bx", the returned name is B.
+when this pattern fails to match [.subject]`bx`, the returned name is [.regex]`B`.
 
 [WARNING]
 ====
 By default, certain start-of-match optimizations are used to
 give a fast "no match" result in some situations. For example, if the anchoring
 is removed from the pattern above, there is an initial check for the presence
-of "c" in the subject before running the matching engine. This check fails for
-"bx", causing a match failure without seeing any marks. You can disable the
+of [.subject]`c` in the subject before running the matching engine. This check fails for
+[.subject]`bx`, causing a match failure without seeing any marks. You can disable the
 start-of-match optimizations by setting the const:PCRE2_NO_START_OPTIMIZE option for
-func:pcre2_compile() or by starting the pattern with ([.regex]`*NO_START_OPT`).
+func:pcre2_compile() or by starting the pattern with [.regex]`+(*NO_START_OPT)+`.
 ====
 
 After a successful match, a partial match, or one of the invalid UTF errors
 (for example, const:PCRE2_ERROR_UTF8_ERR5), func:pcre2_get_startchar() can be
 called. After a successful or partial match it returns the code unit offset of
 the character at which the match started. For a non-partial match, this can be
-different to the value of [.c]`ovector[0]` if the pattern contains the [.regex]`\K`
+different to the value of [.c]`+ovector[0]+` if the pattern contains the [.regex]`\K`
 escape sequence. After a partial match, however, this value is always the same
-as [.c]`ovector[0]` because [.regex]`\K` does not affect the result of a partial match.
+as [.c]`+ovector[0]+` because [.regex]`\K` does not affect the result of a partial match.
 
 After a UTF check failure, func:pcre2_get_startchar() can be used to obtain
 the code unit offset of the invalid UTF character. Details are given in the
@@ -3456,7 +3403,6 @@ xref:pcre2unicode.adoc[`pcre2unicode`]
 page. The following are the other errors that may be returned by
 func:pcre2_match():
 
-.Errors
 [.errors]
 const:PCRE2_ERROR_NOMATCH::
       The subject string did not match the pattern.
@@ -3524,7 +3470,7 @@ const:PCRE2_ERROR_NOMEMORY::
 
 const:PCRE2_ERROR_NULL::
       Either the arg:code, arg:subject, or arg:match_data argument was passed
-      as [.c]`NULL`.
+      as const:NULL.
 
 const:PCRE2_ERROR_RECURSELOOP::
       This error is returned when func:pcre2_match() detects a recursion loop within
@@ -3558,6 +3504,7 @@ returned. If the buffer is too small, the message is truncated (but still with
 a trailing zero), and the negative error code const:PCRE2_ERROR_NOMEMORY is returned.
 None of the messages is very long; a buffer size of 120 code units is ample.
 
+[[iterating-over-matches]]
 == Iterating over all matches
 
 [source,c,role=prototype]
@@ -3582,9 +3529,9 @@ It returns 0 ("false") if there is no need to make a further match attempt, or
 there is another match, only that another match should be attempted (which may
 return const:PCRE2_ERROR_NOMATCH).
 
-The [.c]`*pstart_offset` and [.c]`*poptions` are set if the function returns 1.
-The [.c]`*pstart_offset` should be passed to the next match attempt directly,
-and the [.c]`*poptions` should be passed to the next match attempt by combining
+The [.c]`+*pstart_offset+` and [.c]`+*poptions+` are set if the function returns 1.
+The [.c]`+*pstart_offset+` should be passed to the next match attempt directly,
+and the [.c]`+*poptions+` should be passed to the next match attempt by combining
 with the application's match options using OR.
 
 There is some code that demonstrates how to do this in the
@@ -3593,34 +3540,37 @@ sample program. The general pattern is:
 
 [source,c]
 ----
-  uint32_t app_options = ...;
-  uint32_t global_options = 0;
-  PCRE2_SIZE start_offset = 0;
-  while (1)
-    {
-    int rc = pcre2_match(re, subject, subject_len, start_offset,
-                         app_options | global_options, match_data,
-                         match_context);
+uint32_t app_options = ...;
+uint32_t global_options = 0;
+PCRE2_SIZE start_offset = 0;
+while (1)
+{
+  int rc = pcre2_match(re, subject, subject_len, start_offset,
+                       app_options | global_options, match_data,
+                       match_context);
 
-    if (rc == PCRE2_ERROR_NOMATCH) break; /* no match, and no more attempts */
-    if (rc < 0) { ... exit }
+  if (rc == PCRE2_ERROR_NOMATCH)
+    break; /* no match, and no more attempts */
+  if (rc < 0)
+  { /* ... exit */ }
 
-    ...handle the match
+  /* ...handle the match */
 
-    if (!pcre2_next_match(match_data, &start_offset, &global_options))
-      break; /* no more attempts */
-    }
+  if (!pcre2_next_match(match_data, &start_offset, &global_options))
+    break; /* no more attempts */
+}
 ----
 
-The guarantees provided by func:pcre2_next_match() are that the [.c]`start_offset`
+The guarantees provided by func:pcre2_next_match() are that the arg:start_offset
 will advance, so the loop will definitely terminate. The conditions which
 ensure this are that either:
 
-* func:pcre2_next_match() returns 0 (false); or
-* the returned [.c]`*pstart_offset` is strictly greater than the previous
+[loweralpha]
+. func:pcre2_next_match() returns 0 (false); or
+. the returned [.c]`+*pstart_offset+` is strictly greater than the previous
       [.c]`start_offset`; or
-* if the previous match was a successful match of the empty string, the returned
-      [.c]`*pstart_offset` is equal to the previous [.c]`ovector[1]`, and [.c]`*poptions`
+. if the previous match was a successful match of the empty string, the returned
+      [.c]`+*pstart_offset+` is equal to the previous [.c]`+ovector[1]+`, and [.c]`+*poptions+`
       will be set to const:PCRE2_NOTEMPTY_ATSTART to prevent another empty match from
       being returned.
 
@@ -3633,9 +3583,9 @@ If an application does not use the flag const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, 
 each match is "well-behaved" and satisfies:
 
 [source,c]
-....
+----
 start_offset <= ovector[0] <= ovector[1].
-....
+----
 
 In this case, the matches found by func:pcre2_match() with func:pcre2_next_match() will be
 sorted, non-overlapping (possibly touching), and with no duplicates.
@@ -3646,8 +3596,8 @@ only that the arg:start_offset will. The matches found by func:pcre2_match() wit
 func:pcre2_next_match() will be a finite sequence (as func:pcre2_next_match() ensures that
 arg:start_offset advances, so the search will terminate). The matches can however be
 overlapping, can contain duplicates, and (in truly pathological examples) may
-not even be sorted by [.c]`ovector[0]`. Additionally, each match itself can end before
-it starts ([.c]`ovector[1] < ovector[0]`). We recommend that applications do not set
+not even be sorted by [.c]`+ovector[0]+`. Additionally, each match itself can end before
+it starts ([.c]`+ovector[1] < ovector[0]+`). We recommend that applications do not set
 const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.
 
 == Extracting captured substrings by number
@@ -3682,12 +3632,13 @@ The functions in this section identify substrings by number. The number zero
 refers to the entire matched substring, with higher numbers referring to
 substrings captured by parenthesized groups. After a partial match, only
 substring zero is available. An attempt to extract any other substring gives
-the error const:PCRE2_ERROR_PARTIAL. The next section describes similar functions for
+the error const:PCRE2_ERROR_PARTIAL. The section
+<<extracting-substrings-by-name>> describes similar functions for
 extracting captured substrings by name.
 
 If a pattern uses the [.regex]`\K` escape sequence within a positive lookahead assertion,
 the reported start of a successful match can be greater than the end of the
-match. For example, if the pattern [.regex]`(?=ab\K)` is matched against "ab", the start
+match. For example, if the pattern [.regex]`+(?=ab\K)+` is matched against [.subject]`ab`, the start
 and end offset values for the match are 2 and 0. In this situation, calling
 these functions with a zero substring number extracts a zero-length empty
 string.
@@ -3697,7 +3648,7 @@ extracting it by calling func:pcre2_substring_length_bynumber(). The first
 argument is a pointer to the match data block, the second is the group number,
 and the third is a pointer to a variable into which the length is placed. If
 you just want to know whether or not the substring has been captured, you can
-pass the third argument as NULL.
+pass the third argument as const:NULL.
 
 The func:pcre2_substring_copy_bynumber() function copies a captured substring
 into a supplied buffer, whereas func:pcre2_substring_get_bynumber() copies it
@@ -3721,40 +3672,25 @@ error code. If the pattern match failed, the match failure code is returned.
 If a substring number greater than zero is used after a partial match,
 const:PCRE2_ERROR_PARTIAL is returned. Other possible error codes are:
 
-[source,c,role=errors]
-....
-PCRE2_ERROR_NOMEMORY
-....
+const:PCRE2_ERROR_NOMEMORY::
+      The buffer was too small for func:pcre2_substring_copy_bynumber(), or the
+      attempt to get memory failed for func:pcre2_substring_get_bynumber().
 
-The buffer was too small for func:pcre2_substring_copy_bynumber(), or the
-attempt to get memory failed for func:pcre2_substring_get_bynumber().
+const:PCRE2_ERROR_NOSUBSTRING::
+      There is no substring with that number in the pattern, that is, the number is
+      greater than the number of capturing parentheses.
 
-[source,c,role=errors]
-....
-PCRE2_ERROR_NOSUBSTRING
-....
+const:PCRE2_ERROR_UNAVAILABLE::
+      The substring number, though not greater than the number of captures in the
+      pattern, is greater than the number of slots in the ovector, so the substring
+      could not be captured.
 
-There is no substring with that number in the pattern, that is, the number is
-greater than the number of capturing parentheses.
+const:PCRE2_ERROR_UNSET::
+      The substring did not participate in the match. For example, if the pattern is
+      [.regex]`+(abc)|(def)+` and the subject is [.subject]`def`, and the ovector contains at least two
+      capturing slots, substring number 1 is unset.
 
-[source,c,role=errors]
-....
-PCRE2_ERROR_UNAVAILABLE
-....
-
-The substring number, though not greater than the number of captures in the
-pattern, is greater than the number of slots in the ovector, so the substring
-could not be captured.
-
-[source,c,role=errors]
-....
-PCRE2_ERROR_UNSET
-....
-
-The substring did not participate in the match. For example, if the pattern is
-[.regex]`(abc)|(def)` and the subject is "def", and the ovector contains at least two
-capturing slots, substring number 1 is unset.
-
+[[extracting-substrings-by-name]]
 == Extracting a list of all captured substrings
 
 [source,c,role=prototype]
@@ -3778,9 +3714,9 @@ partial match, the error code const:PCRE2_ERROR_PARTIAL is returned.
 
 The address of the memory block is returned via arg:listptr, which is also
 the start of the list of string pointers. The end of the list is marked by a
-NULL pointer. The address of the list of lengths is returned via
+const:NULL pointer. The address of the list of lengths is returned via
 arg:lengthsptr. If your strings do not contain binary zeros and you do not
-therefore need the lengths, you may supply NULL as the arg:lengthsptr
+therefore need the lengths, you may supply const:NULL as the arg:lengthsptr
 argument to disable the creation of a list of lengths. The yield of the
 function is zero if all went well, or const:PCRE2_ERROR_NOMEMORY if the memory block
 could not be obtained. When the list is no longer needed, it should be freed by
@@ -3821,9 +3757,9 @@ To extract a substring by name, you first have to find associated number.
 For example, for this pattern:
 
 [source,regex]
-....
+----
 (a+)b(?<xxx>\d+)...
-....
+----
 
 the number of the capture group called "xxx" is 2. If the name is known to be
 unique (const:PCRE2_DUPNAMES was not set), you can find the number from the name by
@@ -3848,7 +3784,7 @@ set, const:PCRE2_ERROR_UNSET is returned.
 
 [WARNING]
 ====
-If the pattern uses the [.regex]`(?|` feature to set up multiple
+If the pattern uses the [.regex]`+(?|+` feature to set up multiple
 capture groups with the same number, as described in the
 section on duplicate group numbers
 in the
@@ -3859,6 +3795,7 @@ numbers. For this reason, the use of different names for groups with the
 same number causes an error at compile time.
 ====
 
+[[creating-substitution-string]]
 == Creating a new string with substitutions
 
 [source,c,role=prototype]
@@ -3873,11 +3810,11 @@ int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
 
 This function optionally calls func:pcre2_match() and then makes a copy of the
 subject string in arg:buffer, replacing parts that were matched with
-the _replacement_ string, whose length is supplied in `rlength`, which
+the arg:replacement string, whose length is supplied in arg:rlength, which
 can be given as const:PCRE2_ZERO_TERMINATED for a zero-terminated string. As a
-special case, if _replacement_ is NULL and _rlength_ is zero, the
-replacement is assumed to be an empty string. If _rlength_ is non-zero, an
-error occurs if _replacement_ is NULL.
+special case, if arg:replacement is const:NULL and arg:rlength is zero, the
+replacement is assumed to be an empty string. If arg:rlength is non-zero, an
+error occurs if arg:replacement is const:NULL.
 
 There is an option (see const:PCRE2_SUBSTITUTE_REPLACEMENT_ONLY below) to return just
 the replacement string(s). The default action is to perform just one
@@ -3898,12 +3835,12 @@ with the backwards-compatibility option const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK.)
 
 The first seven arguments of func:pcre2_substitute() are the same as for
 func:pcre2_match(), except that the partial matching options are not
-permitted, and arg:match_data may be passed as [.c]`NULL`, in which case a match
+permitted, and arg:match_data may be passed as const:NULL, in which case a match
 data block is obtained and freed within this function, using memory management
 functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
 
-If arg:match_data is not [.c]`NULL` and const:PCRE2_SUBSTITUTE_MATCHED is not set, the
+If arg:match_data is not const:NULL and const:PCRE2_SUBSTITUTE_MATCHED is not set, the
 provided block is used for all calls to func:pcre2_match(), and its contents
 afterwards are the result of the final call made internally by
 func:pcre2_substitute() to the matching function. For global changes, this will
@@ -3966,7 +3903,7 @@ partial match, then func:pcre2_substitute() returns const:PCRE2_ERROR_PARTIAL. W
 partial-matching (either of const:PCRE2_PARTIAL_HARD or const:PCRE2_PARTIAL_SOFT is passed),
 then const:PCRE2_SUBSTITUTE_REPLACEMENT_ONLY must also be set, or else
 const:PCRE2_ERROR_BADOPTION is returned. Similarly, certain replacement items
-([.regex]`$'` and [.regex]`$_`) cause const:PCRE2_ERROR_PARTIALSUBS to be returned when partial-matching,
+([.repl]`$'` and [.repl]`$_`) cause const:PCRE2_ERROR_PARTIALSUBS to be returned when partial-matching,
 even if a complete match is found.
 
 The arg:blength argument of func:pcre2_substitute() must point to a
@@ -3990,7 +3927,7 @@ extra space for the terminating NUL. This value is passed back via the
 arg:blength variable, with the result of the function still being
 const:PCRE2_ERROR_NOMEMORY.
 
-Passing a buffer size of zero (with arg:buffer optionally [.c]`NULL`) is a
+Passing a buffer size of zero (with arg:buffer optionally const:NULL) is a
 permitted way of finding out how much memory is needed for given substitution.
 However, this does mean that the entire operation is carried out twice.
 Depending on the application, it may be more efficient to allocate a large
@@ -4004,44 +3941,42 @@ replacement string causes an immediate return with the relevant UTF error code.
 If const:PCRE2_SUBSTITUTE_LITERAL is set, the replacement string is not interpreted
 in any way. By default, however, a dollar character is an escape character that
 can specify the insertion of characters from capture groups and names from
-([.regex]`*MARK`) or other control verbs in the pattern. Dollar is the only escape
+[.regex]`+(*MARK)+` or other control verbs in the pattern. Dollar is the only escape
 character (backslash is treated as literal). The following forms are
 recognized:
 
-[source,text,role=values]
-....
-$$                  insert a dollar character
-$n or ${n}          insert the contents of group _n_
-$0 or $&            insert the entire matched substring
-$`                  insert the substring that precedes the match
-$'                  insert the substring that follows the match
-$_                  insert the entire input string
-$+                  insert the highest-numbered capture group which matched
-$*MARK or ${*MARK}  insert a control verb name
-....
+[.repl]`$$`:: Insert a dollar character
+[.repl]`$_n_` or [.repl]`${_n_}`:: Insert the contents of group _n_
+[.repl]`$<__name__>`:: Insert the contents of named group
+[.repl]`$0` or [.repl]`$&`:: Insert the entire matched substring
+[.repl]`$``:: Insert the substring that precedes the match
+[.repl]`$'`:: Insert the substring that follows the match
+[.repl]`$_`:: Insert the entire input string
+[.repl]`$+`:: Insert the highest-numbered capture group which matched
+[.repl]`$*MARK` or [.repl]`${*MARK}`:: Insert a control verb name
 
-Either a group number or a group name can be given for _n_, for example [.regex]`$2`
-or [.regex]`$NAME`. Curly brackets are required only if the following character would be
+Either a group number or a group name can be given for _n_, for example [.repl]`$2`
+or [.repl]`$NAME`. Curly brackets are required only if the following character would be
 interpreted as part of the number or name. The number may be zero to include
 the entire matched string. For example, if the pattern [.regex]`a(b)c` is matched with
-"=abc=" and the replacement string [.regex]`$1$0$1`, the result is "=+babcb+=".
+[.subject]`=abc=` and the replacement string [.repl]`\+$1$0$1+`, the result is [.repl]`=\+babcb+=`.
 
-The JavaScript form [.regex]`$<name>`, where the angle brackets are part of the syntax,
-is also recognized for group names, but not for group numbers or [.regex]`*MARK`.
+The JavaScript form [.repl]`$<__name__>`, where the angle brackets are part of the syntax,
+is also recognized for group names, but not for group numbers or [.repl]`*MARK`.
 
-The [.regex]`$*MARK` inserts the name from the last encountered backtracking control verb on
-the matching path that has a name. ([.regex]`*MARK`) must always include a name, but the
-other verbs need not. For example, in the case of ([.regex]`*MARK:A`)([.regex]`*PRUNE`) the name
-inserted is "A", but for ([.regex]`*MARK:A`)([.regex]`*PRUNE:B`) the relevant name is "B". This
+[.repl]`$*MARK` inserts the name from the last encountered backtracking control verb on
+the matching path that has a name. [.regex]`+(*MARK)+` must always include a name, but the
+other verbs need not. For example, in the case of [.regex]`+(*MARK:A)(*PRUNE)+` the name
+inserted is [.repl]`A`, but for [.regex]`(*MARK:A)(*PRUNE:B)` the relevant name is [.repl]`B`. This
 facility can be used to perform simple simultaneous substitutions, as this
 `pcre2test` example shows:
 
 [source,text]
-....
+----
 /(*MARK:pear)apple|(*MARK:orange)lemon/g,replace=${*MARK}
     apple lemon
  2: pear orange
-....
+----
 
 const:PCRE2_SUBSTITUTE_GLOBAL causes the function to iterate over the subject string,
 replacing every matching substring. If this option is not set, only the first
@@ -4067,11 +4002,11 @@ subject string by setting either or both of arg:start_offset and an offset
 limit. Here is a `pcre2test` example:
 
 [source,text]
-....
+----
 /B/g,replace=!,use_offset_limit
 ABC ABC ABC ABC\=offset=3,offset_limit=12
  2: ABC A!C A!C ABC
-....
+----
 
 When continuing with global substitutions after matching a substring with zero
 length, an attempt to find a non-empty match at the same offset is performed.
@@ -4096,10 +4031,10 @@ and only the group insertion forms listed above are valid. When
 const:PCRE2_SUBSTITUTE_EXTENDED is set, several things change:
 
 Firstly, backslash in a replacement string is interpreted as an escape
-character. The usual forms such as [.regex]`\x{ddd}` can be used to specify particular
+character. The usual forms such as [.repl]`\x{_ddd_}` can be used to specify particular
 character codes, and backslash followed by any non-alphanumeric character
-quotes that character. Extended quoting can be coded using [.regex]`\Q...\E`, exactly
-as in pattern strings. The escapes [.regex]`\b` and [.regex]`\v` are interpreted as the
+quotes that character. Extended quoting can be coded using [.repl]`+\Q...\E+`, exactly
+as in pattern strings. The escapes [.repl]`\b` and [.repl]`\v` are interpreted as the
 characters backspace and vertical tab, respectively.
 
 The interpretation of backslash followed by one or more digits is the same as
@@ -4107,25 +4042,25 @@ in a pattern, which in Perl has some ambiguities. Details are given in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page.
 
-The Python form [.regex]`\g<n>`, where the angle brackets are part of the syntax and
+The Python form [.repl]`\g<__n__>`, where the angle brackets are part of the syntax and
 _n_ is either a group name or number, is recognized as an alternative way
-of inserting the contents of a group, for example [.regex]`\g<3>`.
+of inserting the contents of a group, for example [.repl]`\g<3>`.
 
 There are also four escape sequences for forcing the case of inserted letters.
 Case forcing applies to all inserted characters, including those from capture
-groups and letters within [.regex]`\Q...\E` quoted sequences. The insertion mechanism
+groups and letters within [.repl]`+\Q...\E+` quoted sequences. The insertion mechanism
 has three states: no case forcing, force upper case, and force lower case. The
-escape sequences change the current state: [.regex]`\U` and [.regex]`\L` change to upper or lower
-case forcing, respectively, and [.regex]`\E` (when not terminating a [.regex]`\Q` quoted
-sequence) reverts to no case forcing. The sequences [.regex]`\u` and [.regex]`\l` force the next
+escape sequences change the current state: [.repl]`\U` and [.repl]`\L` change to upper or lower
+case forcing, respectively, and [.repl]`\E` (when not terminating a [.repl]`\Q` quoted
+sequence) reverts to no case forcing. The sequences [.repl]`\u` and [.repl]`\l` force the next
 character (if it is a letter) to upper or lower case, respectively, and then
 the state automatically reverts to no case forcing.
 
-However, if [.regex]`\u` is immediately followed by [.regex]`\L` or [.regex]`\l` is immediately followed
-by [.regex]`\U`, the next character's case is forced by the first escape sequence, and
+However, if [.repl]`\u` is immediately followed by [.repl]`\L` or [.repl]`\l` is immediately followed
+by [.repl]`\U`, the next character's case is forced by the first escape sequence, and
 subsequent characters by the second. This provides a "title casing" facility
 that can be applied to group captures. For example, if group 1 has captured
-"heLLo", the replacement string [.regex]`\u\L$1` becomes "Hello".
+[.subject]`heLLo`, the replacement string [.repl]`\u\L$1` becomes [.repl]`Hello`.
 
 If either const:PCRE2_UTF or const:PCRE2_UCP was set when the pattern was compiled, Unicode
 properties are used for case forcing characters whose code points are greater
@@ -4135,8 +4070,8 @@ special casing rules such as using different lower case Greek sigmas in the
 middle and ends of words (as defined in the Unicode file
 `SpecialCasing.txt`).
 
-Note that case forcing sequences such as [.regex]`\U...\E` do not nest. For example,
-the result of processing [.regex]`\Uaa\LBB\Ecc\E` is "AAbbcc"; the final [.regex]`\E` has no
+Note that case forcing sequences such as [.repl]`+\U...\E+` do not nest. For example,
+the result of processing [.repl]`\Uaa\LBB\Ecc\E` is [.repl]`AAbbcc`; the final [.repl]`\E` has no
 effect. Note also that the const:PCRE2_ALT_BSUX and const:PCRE2_EXTRA_ALT_BSUX options do
 not apply to replacement strings.
 
@@ -4144,11 +4079,8 @@ The final effect of setting const:PCRE2_SUBSTITUTE_EXTENDED is to add more
 flexibility to capture group substitution. The syntax is similar to that used
 by Bash:
 
-[source,text,role=values]
-....
-${n:-string}
-${n:+string1:string2}
-....
+[.repl]`${_n_:-_string_}` :: insert a default value when group _n_ is unset
+[.repl]`${_n_:{plus}__string1__:__string2__}` :: insert _string1_ when group _n_ is set, otherwise _string2_
 
 As in the simple case, _n_ may be a group number or a name. The first form
 specifies a default value. If group _n_ is set, its value is inserted; if
@@ -4156,23 +4088,20 @@ not, the string is expanded and the result inserted. The second form specifies
 strings that are expanded and inserted when group _n_ is set or unset,
 respectively. The first form is just a convenient shorthand for
 
-[source,text,role=values]
-....
-${n:+${n}:string}
-....
+[.repl]`${_n_:{plus}${_n_}:__string__}`
 
 Backslash can be used to escape colons and closing curly brackets in the
 replacement strings. A change of the case forcing state within a replacement
 string remains in force afterwards, as shown in this `pcre2test` example:
 
 [source,text]
-....
+----
 /(some)?(body)/substitute_extended,replace=${1:+\U:\L}HeLLo
     body
  1: hello
     somebody
  1: HELLO
-....
+----
 
 The const:PCRE2_SUBSTITUTE_UNSET_EMPTY option does not affect these extended
 substitutions. However, const:PCRE2_SUBSTITUTE_UNKNOWN_UNSET does cause unknown
@@ -4188,7 +4117,6 @@ In the event of an error, func:pcre2_substitute() returns a negative error
 code. Except for const:PCRE2_ERROR_NOMATCH (which is never returned), errors from
 func:pcre2_match() are passed straight back.
 
-.Errors
 [.errors]
 const:PCRE2_ERROR_NOSUBSTRING::
       is returned for a non-existent substring insertion,
@@ -4207,8 +4135,8 @@ const:PCRE2_ERROR_NOMEMORY::
 
 const:PCRE2_ERROR_NULL::
       is returned if const:PCRE2_SUBSTITUTE_MATCHED is set but the
-      arg:match_data argument is [.c]`NULL`; or if the arg:subject or arg:replacement
-      or arg:buffer argument is [.c]`NULL`. However, a [.c]`NULL` arg:replacement
+      arg:match_data argument is const:NULL; or if the arg:subject or arg:replacement
+      or arg:buffer argument is const:NULL. However, a const:NULL arg:replacement
       argument is allowed if the arg:rlength argument is zero; and similarly for
       arg:subject with zero arg:length and arg:buffer with zero arg:blength.
 
@@ -4257,21 +4185,16 @@ The first argument of the callout function is a pointer to a substitute callout
 block structure, which contains the following fields, not necessarily in this
 order:
 
-.Members
-[.members]
-[.c]`uint32_t` arg:version[.c]``;``::
-
-[.c]`uint32_t` arg:subscount[.c]``;``::
-
-type:PCRE2_SPTR arg:input[.c]``;``::
-
-type:PCRE2_SPTR arg:output[.c]``;``::
-
-type:PCRE2_SIZE [.c]``*``arg:ovector[.c]``;``::
-
-[.c]`uint32_t` arg:oveccount[.c]``;``::
-
-type:PCRE2_SIZE arg:output_offsets[.c]``[2];``::
+[source,c]
+----
+uint32_t version;
+uint32_t subscount;
+PCRE2_SPTR input;
+PCRE2_SPTR output;
+PCRE2_SIZE *ovector;
+uint32_t oveccount;
+PCRE2_SIZE output_offsets[2];
+----
 
 The arg:version field contains the version number of the block format. The
 current version is 0. The version number will increase in future if more fields
@@ -4307,12 +4230,13 @@ matches so far.
 [source,c,role=prototype]
 ----
 int pcre2_set_substitute_case_callout(
-      pcre2_match_context *mcontext,
-      PCRE2_SIZE (*substitute_case_callout)(
-          PCRE2_SPTR input, PCRE2_SIZE input_length,
-          PCRE2_UCHAR *output, PCRE2_SIZE output_capacity,
-          int case_operation, void *substitute_case_callout_data),
-      void *substitute_case_callout_data);
+        pcre2_match_context *mcontext,
+        PCRE2_SIZE (*substitute_case_callout)(
+            PCRE2_SPTR input, PCRE2_SIZE input_length,
+            PCRE2_UCHAR *output, PCRE2_SIZE output_capacity,
+            int case_operation,
+            void *substitute_case_callout_data),
+        void *substitute_case_callout_data);
 ----
 
 The func:pcre2_set_substitute_case_callout() function can be used to specify
@@ -4321,10 +4245,10 @@ transformations. This does not affect any case insensitivity behaviour when
 performing a match, but only the user-visible transformations performed when
 processing a substitution such as:
 
-[source,c,indent=2.5]
-....
+[source,c]
+----
 pcre2_substitute(..., "\\U$1", ...)
-....
+----
 
 The default case transformations applied by PCRE2 are reasonably complete, and,
 in UTF or UCP mode, perform the simple locale-invariant case transformations as
@@ -4333,27 +4257,30 @@ case-equivalence procedures used during pattern matching, but an application
 may wish to use more sophisticated locale-aware processing for the user-visible
 substitution transformations.
 
-One example implementation of the _callout_function_ using the ICU
+One example implementation of the arg:substitute_case_callout function using the ICU
 library would be:
 
 [source,c]
 ----
-    PCRE2_SIZE
-    icu_case_callout(
-      PCRE2_SPTR input, PCRE2_SIZE input_len,
-      PCRE2_UCHAR *output, PCRE2_SIZE output_cap,
-      int to_case, void *data_ptr)
-    {
-      UErrorCode err = U_ZERO_ERROR;
-      int32_t r = to_case == PCRE2_SUBSTITUTE_CASE_LOWER
-        ? u_strToLower(output, output_cap, input, input_len, NULL, &err)
-        : to_case == PCRE2_SUBSTITUTE_CASE_UPPER
-        ? u_strToUpper(output, output_cap, input, input_len, NULL, &err)
-        : u_strToTitle(output, output_cap, input, input_len, &first_char_only,
-                       NULL, &err);
-      if (U_FAILURE(err)) return (~(PCRE2_SIZE)0);
-      return r;
-    }
+PCRE2_SIZE
+icu_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len,
+                 PCRE2_UCHAR *output, PCRE2_SIZE output_cap,
+                 int to_case, void *data_ptr)
+{
+  UErrorCode err = U_ZERO_ERROR;
+  int32_t r =
+      to_case == PCRE2_SUBSTITUTE_CASE_LOWER
+          ? u_strToLower(output, output_cap, input, input_len,
+                         NULL, &err)
+      : to_case == PCRE2_SUBSTITUTE_CASE_UPPER
+          ? u_strToUpper(output, output_cap, input, input_len,
+                         NULL, &err)
+          : u_strToTitle(output, output_cap, input, input_len,
+                         &first_char_only, NULL, &err);
+  if (U_FAILURE(err))
+    return (~(PCRE2_SIZE)0);
+  return r;
+}
 ----
 
 The first and second arguments of the case callout function are the Unicode
@@ -4384,7 +4311,7 @@ of the output buffer. PCRE2 provides input and output buffers which overlap, so
 the callout must support this by suitable internal buffering.
 
 Alternatively, if the callout wishes to indicate an error, then it may return
-[.c]`(~(PCRE2_SIZE)0)`. In this case func:pcre2_substitute() will immediately fail with
+[.c]`+(~(PCRE2_SIZE)0)+`. In this case func:pcre2_substitute() will immediately fail with
 error const:PCRE2_ERROR_REPLACECASE.
 
 When a case callout is combined with the const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
@@ -4410,7 +4337,7 @@ int pcre2_substring_nametable_scan(const pcre2_code *code,
 
 When a pattern is compiled with the const:PCRE2_DUPNAMES option, names for capture
 groups are not required to be unique. Duplicate names are always allowed for
-groups with the same number, created by using the [.regex]`(?|` feature. Indeed, if such
+groups with the same number, created by using the [.regex]`+(?|+` feature. Indeed, if such
 groups are named, they are required to use the same names.
 
 Normally, patterns that use duplicate names are such that in any one match,
@@ -4428,10 +4355,10 @@ error const:PCRE2_ERROR_NOUNIQUESUBSTRING when there are duplicate names.
 If you want to get full details of all captured substrings for a given name,
 you must use the func:pcre2_substring_nametable_scan() function. The first
 argument is the compiled pattern, and the second is the name. If the third and
-fourth arguments are [.c]`NULL`, the function returns a group number for a unique
+fourth arguments are const:NULL, the function returns a group number for a unique
 name, or const:PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
-When the third and fourth arguments are not [.c]`NULL`, they must be pointers to
+When the third and fourth arguments are not const:NULL, they must be pointers to
 variables that are updated by the function. After it has run, they point to the
 first and last entries in the name-to-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,
@@ -4439,7 +4366,7 @@ const:PCRE2_ERROR_NOSUBSTRING is returned if there are no entries for the given 
 
 The format of the name table is described
 above
-in the section entitled _Information about a pattern_. Given all the
+in the section <<information-about-compiled-pattern>>. Given all the
 relevant entries for the name, you can extract each of their numbers, and hence
 the captured data.
 
@@ -4456,7 +4383,7 @@ documentation.
 
 What you have to do is to insert a callout right at the end of the pattern.
 When your callout function is called, extract and save the current matched
-substring. Then return [.c]`1`, which forces func:pcre2_match() to backtrack and try
+substring. Then return 1, which forces func:pcre2_match() to backtrack and try
 other alternatives. Ultimately, when it runs out of matches,
 func:pcre2_match() will yield const:PCRE2_ERROR_NOMATCH.
 
@@ -4497,20 +4424,20 @@ and subjects where there are a lot of potential matches.
 Here is an example of a simple call to func:pcre2_dfa_match():
 
 [source,c]
-....
+----
 int wspace[20];
 pcre2_match_data *md = pcre2_match_data_create(4, NULL);
 int rc = pcre2_dfa_match(
-  re,             /* result of pcre2_compile() */
-  "some string",  /* the subject string */
-  11,             /* the length of the subject string */
-  0,              /* start at offset 0 in the subject */
-  0,              /* default options */
-  md,             /* the match data block */
-  NULL,           /* a match context; NULL means use defaults */
-  wspace,         /* working space vector */
-  20);            /* number of elements (NOT size in bytes) */
-....
+             re,     /* result of pcre2_compile() */
+             "some string", /* the subject string */
+             11,     /* the length of the subject string */
+             0,      /* start at offset 0 in the subject */
+             0,      /* default options */
+             md,     /* the match data block */
+             NULL,   /* a match context; NULL means use defaults */
+             wspace, /* working space vector */
+             20);    /* number of elements (NOT size in bytes) */
+----
 
 === Option bits for func:pcre2_dfa_match()
 
@@ -4522,50 +4449,39 @@ const:PCRE2_PARTIAL_SOFT, const:PCRE2_DFA_SHORTEST, and const:PCRE2_DFA_RESTART.
 four of these are exactly the same as for func:pcre2_match(), so their
 description is not repeated here.
 
-[source,text,role=options]
-....
-PCRE2_PARTIAL_HARD
-PCRE2_PARTIAL_SOFT
-....
+[.options]
+const:PCRE2_PARTIAL_HARD::
+const:PCRE2_PARTIAL_SOFT::
+      These have the same general effect as they do for func:pcre2_match(), but the
+      details are slightly different. When const:PCRE2_PARTIAL_HARD is set for
+      func:pcre2_dfa_match(), it returns const:PCRE2_ERROR_PARTIAL if the end of the
+      subject is reached and there is still at least one matching possibility that
+      requires additional characters. This happens even if some complete matches have
+      already been found. When const:PCRE2_PARTIAL_SOFT is set, the return code
+      const:PCRE2_ERROR_NOMATCH is converted into const:PCRE2_ERROR_PARTIAL if the end of the
+      subject is reached, there have been no complete matches, but there is still at
+      least one matching possibility. The portion of the string that was inspected
+      when the longest partial match was found is set as the first matching string in
+      both cases. There is a more detailed discussion of partial and multi-segment
+      matching, with examples, in the
+      xref:pcre2partial.adoc[`pcre2partial`]
+      documentation.
 
-These have the same general effect as they do for func:pcre2_match(), but the
-details are slightly different. When const:PCRE2_PARTIAL_HARD is set for
-func:pcre2_dfa_match(), it returns const:PCRE2_ERROR_PARTIAL if the end of the
-subject is reached and there is still at least one matching possibility that
-requires additional characters. This happens even if some complete matches have
-already been found. When const:PCRE2_PARTIAL_SOFT is set, the return code
-const:PCRE2_ERROR_NOMATCH is converted into const:PCRE2_ERROR_PARTIAL if the end of the
-subject is reached, there have been no complete matches, but there is still at
-least one matching possibility. The portion of the string that was inspected
-when the longest partial match was found is set as the first matching string in
-both cases. There is a more detailed discussion of partial and multi-segment
-matching, with examples, in the
-xref:pcre2partial.adoc[`pcre2partial`]
-documentation.
+const:PCRE2_DFA_SHORTEST::
+      Setting the const:PCRE2_DFA_SHORTEST option causes the matching algorithm to stop as
+      soon as it has found one match. Because of the way the alternative algorithm
+      works, this is necessarily the shortest possible match at the first possible
+      matching point in the subject string.
 
-[source,text,role=options]
-....
-PCRE2_DFA_SHORTEST
-....
-
-Setting the const:PCRE2_DFA_SHORTEST option causes the matching algorithm to stop as
-soon as it has found one match. Because of the way the alternative algorithm
-works, this is necessarily the shortest possible match at the first possible
-matching point in the subject string.
-
-[source,text,role=options]
-....
-PCRE2_DFA_RESTART
-....
-
-When func:pcre2_dfa_match() returns a partial match, it is possible to call it
-again, with additional subject characters, and have it continue with the same
-match. The const:PCRE2_DFA_RESTART option requests this action; when it is set, the
-arg:workspace and arg:wscount options must reference the same vector as
-before because data about the match so far is left in them after a partial
-match. There is more discussion of this facility in the
-xref:pcre2partial.adoc[`pcre2partial`]
-documentation.
+const:PCRE2_DFA_RESTART::
+      When func:pcre2_dfa_match() returns a partial match, it is possible to call it
+      again, with additional subject characters, and have it continue with the same
+      match. The const:PCRE2_DFA_RESTART option requests this action; when it is set, the
+      arg:workspace and arg:wscount options must reference the same vector as
+      before because data about the match so far is left in them after a partial
+      match. There is more discussion of this facility in the
+      xref:pcre2partial.adoc[`pcre2partial`]
+      documentation.
 
 === Successful returns from func:pcre2_dfa_match()
 
@@ -4575,20 +4491,18 @@ the function start at the same point in the subject. The shorter matches are
 all initial substrings of the longer matches. For example, if the pattern
 
 [source,regex]
-....
+----
 <.*>
-....
+----
 
 is matched against the string
 
-[literal]
 ....
 This is <something> <something else> <something further> no more
 ....
 
 the three matched strings are
 
-[source,regex]
 ....
 <something> <something else> <something further>
 <something> <something else>
@@ -4597,7 +4511,7 @@ the three matched strings are
 
 On success, the yield of the function is a number greater than zero, which is
 the number of matched substrings. The offsets of the substrings are returned in
-the arg:ovector, and can be extracted by number in the same way as for
+the ovector, and can be extracted by number in the same way as for
 func:pcre2_match(), but the numbers bear no relation to any capture groups
 that may exist in the pattern, because DFA matching does not support capturing.
 
@@ -4606,18 +4520,18 @@ return the error const:PCRE2_ERROR_DFA_UFUNC (unsupported function) if used afte
 DFA match. The convenience functions that extract substrings by number never
 return const:PCRE2_ERROR_NOSUBSTRING.
 
-The matched strings are stored in the arg:ovector in reverse order of length; that
+The matched strings are stored in the ovector in reverse order of length; that
 is, the longest matching string is first. If there were too many matches to fit
-into the arg:ovector, the yield of the function is zero, and the vector is filled
+into the ovector, the yield of the function is zero, and the vector is filled
 with the longest matches.
 
 [NOTE]
 ====
 PCRE2's "auto-possessification" optimization usually applies to character
 repeats at the end of a pattern (as well as internally). For example, the
-pattern [.regex]`a\d+` is compiled as if it were [.regex]`a\d++`. For DFA matching, this
+pattern [.regex]`a\d{plus}` is compiled as if it were [.regex]`a\d{plus}{plus}`. For DFA matching, this
 means that only one possible match is found. If you really do want multiple
-matches in such cases, either use an ungreedy repeat such as [.regex]`a\d&#43;?` or set
+matches in such cases, either use an ungreedy repeat such as [.regex]`a\d{plus}?` or set
 the const:PCRE2_NO_AUTO_POSSESS option when compiling.
 ====
 
@@ -4629,77 +4543,52 @@ above.
 There are in addition the following errors that are specific to
 func:pcre2_dfa_match():
 
-[source,text,role=errors]
-....
-PCRE2_ERROR_DFA_UITEM
-....
+const:PCRE2_ERROR_DFA_UITEM::
+      This return is given if func:pcre2_dfa_match() encounters an item in the
+      pattern that it does not support, for instance, the use of [.regex]`\C` in a UTF mode or
+      a backreference.
 
-This return is given if func:pcre2_dfa_match() encounters an item in the
-pattern that it does not support, for instance, the use of [.regex]`\C` in a UTF mode or
-a backreference.
+const:PCRE2_ERROR_DFA_UCOND::
+      This return is given if func:pcre2_dfa_match() encounters a condition item
+      that uses a backreference for the condition, or a test for recursion in a
+      specific capture group. These are not supported.
 
-[source,text,role=errors]
-....
-PCRE2_ERROR_DFA_UCOND
-....
+const:PCRE2_ERROR_DFA_UINVALID_UTF::
+      This return is given if func:pcre2_dfa_match() is called for a pattern that
+      was compiled with const:PCRE2_MATCH_INVALID_UTF. This is not supported for DFA
+      matching.
 
-This return is given if func:pcre2_dfa_match() encounters a condition item
-that uses a backreference for the condition, or a test for recursion in a
-specific capture group. These are not supported.
+const:PCRE2_ERROR_DFA_WSSIZE::
+      This return is given if func:pcre2_dfa_match() runs out of space in the
+      arg:workspace vector.
 
-[source,text,role=errors]
-....
-PCRE2_ERROR_DFA_UINVALID_UTF
-....
+const:PCRE2_ERROR_DFA_RECURSE::
+      When a recursion or subroutine call is processed, the matching function calls
+      itself recursively, using private memory for the arg:ovector and arg:workspace.
+      This error is given if the internal arg:ovector is not large enough. This should be
+      extremely rare, as a vector of size 1000 is used.
 
-This return is given if func:pcre2_dfa_match() is called for a pattern that
-was compiled with const:PCRE2_MATCH_INVALID_UTF. This is not supported for DFA
-matching.
-
-[source,text,role=errors]
-....
-PCRE2_ERROR_DFA_WSSIZE
-....
-
-This return is given if func:pcre2_dfa_match() runs out of space in the
-arg:workspace vector.
-
-[source,text,role=errors]
-....
-PCRE2_ERROR_DFA_RECURSE
-....
-
-When a recursion or subroutine call is processed, the matching function calls
-itself recursively, using private memory for the arg:ovector and arg:workspace.
-This error is given if the internal arg:ovector is not large enough. This should be
-extremely rare, as a vector of size 1000 is used.
-
-[source,text,role=errors]
-....
-PCRE2_ERROR_DFA_BADRESTART
-....
-
-When func:pcre2_dfa_match() is called with the const:PCRE2_DFA_RESTART option,
-some plausibility checks are made on the contents of the workspace, which
-should contain data about the previous partial match. If any of these checks
-fail, this error is given.
+const:PCRE2_ERROR_DFA_BADRESTART::
+      When func:pcre2_dfa_match() is called with the const:PCRE2_DFA_RESTART option,
+      some plausibility checks are made on the contents of the workspace, which
+      should contain data about the previous partial match. If any of these checks
+      fail, this error is given.
 
 == See also
 
-`pcre2build`(3), `pcre2callout`(3), `pcre2demo(3)`,
-`pcre2matching`(3), `pcre2partial`(3), `pcre2posix`(3),
-`pcre2sample`(3), `pcre2unicode`(3).
+xref:pcre2build.adoc[`pcre2build`], xref:pcre2callout.adoc[`pcre2callout`], xref:pcre2demo.adoc[`pcre2demo`],
+xref:pcre2matching.adoc[`pcre2matching`], xref:pcre2partial.adoc[`pcre2partial`], xref:pcre2posix.adoc[`pcre2posix`],
+xref:pcre2sample.adoc[`pcre2sample`], xref:pcre2unicode.adoc[`pcre2unicode`].
 
+[discrete]
 == Author
 
-[literal]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 08 December 2025 +
-Copyright (c) 1997-2024 University of Cambridge.
+Copyright (C) 1997-2024 University of Cambridge.

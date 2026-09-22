@@ -22,7 +22,7 @@ pcre2_general_context *pcre2_general_context_copy(
 
 This function makes a new copy of a general context, using the memory
 allocation functions in the context, if set, to get the necessary memory.
-Otherwise [.c]`malloc()` is used. The result is [.c]`NULL` if the memory cannot be
+Otherwise [.c]`malloc()` is used. The result is const:NULL if the memory cannot be
 obtained.
 
 There is a complete description of the PCRE2 native API in the

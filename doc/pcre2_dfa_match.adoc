@@ -1,7 +1,7 @@
 = pcre2_dfa_match(3)
 :doctype: manpage
 :manname: pcre2_dfa_match
-:manpurpose: match a pattern using the alternative matching algorithm
+:manpurpose: match a compiled pattern to a subject string using the alternative matching algorithm (DFA algorithm; not Perl compatible)
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
@@ -43,7 +43,7 @@ arg:options::
 arg:match_data::
     Points to a match data block, for results
 arg:mcontext::
-    Points to a match context, or is [.c]`NULL`
+    Points to a match context, or is const:NULL
 arg:workspace::
     Points to a vector of ints used as working space
 arg:wscount::

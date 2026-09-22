@@ -31,9 +31,9 @@ all matches, or simply counting the number of matches).
 It returns 0 ("false") if there is no need to make any further match attempts,
 or 1 ("true") if another match should be attempted.
 
-The [.c]`*pstart_offset` and [.c]`*poptions` are set if the function returns 1.
-The [.c]`*pstart_offset` should be passed to the next match attempt directly,
-and the [.c]`*poptions` should be passed to the next match attempt by combining
+The [.c]`+*pstart_offset+` and [.c]`+*poptions+` are set if the function returns 1.
+The [.c]`+*pstart_offset+` should be passed to the next match attempt directly,
+and the [.c]`+*poptions+` should be passed to the next match attempt by combining
 with the application's match options using OR.
 
 There is a complete description of the PCRE2 native API in the

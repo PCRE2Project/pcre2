@@ -2,11 +2,13 @@
 :doctype: manpage
 :manname: pcre2jit
 :manpurpose: PCRE2 just-in-time compilation support
+:description: Discussion of the just-in-time optimization support
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 08 August 2026
 :revdate: 08 August 2026
+:toc: right
 
 == PCRE2 just-in-time compiler support
 
@@ -22,29 +24,26 @@ one-off matches. JIT support is available for all of the 8-bit, 16-bit and
 
 JIT support applies only to the traditional Perl-compatible matching function.
 It does not apply when the DFA matching function is being used. The code for
-JIT support was written by Zoltan Herczeg.
+JIT support was written by Zoltán Herczeg.
 
 == Availability of JIT support
 
-JIT support is an optional feature of PCRE2. The "configure" option
---enable-jit (or equivalent CMake option) must be set when PCRE2 is built if
+JIT support is an optional feature of PCRE2. The `configure` option
+`--enable-jit` (or equivalent CMake option) must be set when PCRE2 is built if
 you want to use JIT. The support is limited to the following hardware
 platforms:
 
-[literal]
-....
-ARM 32-bit (v7, and Thumb2)
-ARM 64-bit
-DEC Alpha 64-bit
-IBM s390x 64 bit
-Intel x86 32-bit and 64-bit
-LoongArch 64 bit
-MIPS 32-bit and 64-bit
-Power PC 32-bit and 64-bit
-RISC-V 32-bit and 64-bit
-....
+* ARM 32-bit (v7, and Thumb2)
+* ARM 64-bit
+* DEC Alpha 64-bit
+* IBM s390x 64 bit
+* Intel x86 32-bit and 64-bit
+* LoongArch 64 bit
+* MIPS 32-bit and 64-bit
+* Power PC 32-bit and 64-bit
+* RISC-V 32-bit and 64-bit
 
-If --enable-jit is set on an unsupported platform, compilation fails.
+If `--enable-jit` is set on an unsupported platform when building PCRE2, compilation fails.
 
 A client program can tell if JIT support has been compiled by calling
 func:pcre2_config() with the const:PCRE2_CONFIG_JIT option. The result is one if
@@ -63,7 +62,7 @@ func:pcre2_jit_compile() is called with the single option const:PCRE2_JIT_TEST_A
 it returns zero if JIT is available and has a working allocator. Otherwise it
 returns const:PCRE2_ERROR_NOMEMORY if JIT is available but cannot allocate executable
 memory, or const:PCRE2_ERROR_JIT_UNSUPPORTED if JIT support is not compiled. The
-code argument is ignored, so it can be a NULL value.
+arg:code argument is ignored, so it can be a const:NULL value.
 
 A simple program does not need to check availability in order to use JIT when
 possible. The API is implemented in a way that falls back to the interpretive
@@ -212,52 +211,43 @@ below.
 
 The func:pcre2_jit_stack_create() function creates a JIT stack. Its arguments
 are a starting size, a maximum size, and a general context (for memory
-allocation functions, or NULL for standard memory allocation). It returns a
-pointer to an opaque structure of type type:pcre2_jit_stack, or NULL if there
+allocation functions, or const:NULL for standard memory allocation). It returns a
+pointer to an opaque structure of type type:pcre2_jit_stack, or const:NULL if there
 is an error. The func:pcre2_jit_stack_free() function is used to free a stack
-that is no longer needed. If its argument is NULL, this function returns
+that is no longer needed. If its argument is const:NULL, this function returns
 immediately, without doing anything. (For the technically minded: the address
-space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
+space is allocated by [.c]`mmap()` or [.c]`VirtualAlloc()`.) A maximum stack size of 512KiB to
 1MiB should be more than enough for any pattern.
 
 The func:pcre2_jit_stack_assign() function specifies which stack JIT code
 should use. Its arguments are as follows:
 
 [source,c]
-....
-pcre2_match_context  *mcontext
-pcre2_jit_callback    callback
+----
+pcre2_match_context  *mcontext,
+pcre2_jit_callback    callback,
 void                 *data
-....
+----
 
 The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
-used. If this argument is NULL, the function returns immediately, without doing
+used. If this argument is const:NULL, the function returns immediately, without doing
 anything. There are three cases for the values of the other two options:
 
-[literal,subs=normal]
-....
-(1) If _callback_ is NULL and _data_ is NULL, an internal 32KiB block
+. If arg:callback is const:NULL and arg:data is const:NULL, an internal 32KiB block
     on the machine stack is used. This is the default when a match
     context is created.
-....
 
-[literal,subs=normal]
-....
-(2) If _callback_ is NULL and _data_ is not NULL, _data_ must be
+. If arg:callback is const:NULL and arg:data is not const:NULL, arg:data must be
     a pointer to a valid JIT stack, the result of calling
-  func:pcre2_jit_stack_create().
-....
+    func:pcre2_jit_stack_create().
 
-[literal,subs=normal]
-....
-(3) If _callback_ is not NULL, it must point to a function that is
-    called with _data_ as an argument at the start of matching, in
+. If arg:callback is not const:NULL, it must point to a function that is
+    called with arg:data as an argument at the start of matching, in
     order to set up a JIT stack. If the return from the callback
-    function is NULL, the internal 32KiB stack is used; otherwise the
+    function is const:NULL, the internal 32KiB stack is used; otherwise the
     return value must be a valid JIT stack, the result of calling
     func:pcre2_jit_stack_create().
-....
 
 A callback function is obeyed whenever JIT code is about to be run; it is not
 obeyed when func:pcre2_match() is called with options that are incompatible
@@ -272,12 +262,12 @@ starts another match, that match must use a different JIT stack to the one used
 for currently suspended match(es).
 
 In a multithread application, if you do not specify a JIT stack, or if you
-assign or pass back NULL from a callback, that is thread-safe, because each
+assign or pass back const:NULL from a callback, that is thread-safe, because each
 thread has its own machine stack. However, if you assign or pass back a
-non-NULL JIT stack, this must be a different stack for each thread so that the
+non-const:NULL JIT stack, this must be a different stack for each thread so that the
 application is thread-safe.
 
-Strictly speaking, even more is allowed. You can assign the same non-NULL stack
+Strictly speaking, even more is allowed. You can assign the same non-const:NULL stack
 to a match context that is used by any number of patterns, as long as they are
 not used for matching by multiple threads at the same time. For example, you
 could use the same stack in all compiled patterns, with a global mutex in the
@@ -288,29 +278,23 @@ This is a suggestion for how a multithreaded program that needs to set up
 non-default JIT stacks might operate:
 
 [source,c]
-....
-During thread initialization
-  thread_local_var = pcre2_jit_stack_create(...)
-....
+----
+// During thread initialization
+thread_local_var = pcre2_jit_stack_create(...);
 
-[source,c]
-....
-During thread exit
-  pcre2_jit_stack_free(thread_local_var)
-....
+// During thread exit
+pcre2_jit_stack_free(thread_local_var);
 
-[source,c]
-....
-Use a one-line callback function
-  return thread_local_var
-....
+// Use a one-line callback function
+return thread_local_var;
+----
 
 All the functions described in this section do nothing if JIT is not available.
 
 == JIT stack FAQ
 
-(1) Why do we need JIT stacks?
-
+. **Why do we need JIT stacks?**
++
 PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack where
 the local data of the current node is pushed before checking its child nodes.
 Allocating real machine stack on some platforms is difficult. For example, the
@@ -318,8 +302,8 @@ stack chain needs to be updated every time if we extend the stack on PowerPC.
 Although it is possible, its updating time overhead decreases performance. So
 we do the recursion in memory.
 
-(2) Why don't we simply allocate blocks of memory with `malloc()`?
-
+. **Why don't we simply allocate blocks of memory with [.c]`malloc()`?**
++
 Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
 address space, so the stack could grow without moving memory data (this is
@@ -327,8 +311,8 @@ important because of pointers). Thus we can allocate 1MiB address space, and
 use only a single memory page (usually 4KiB) if that is enough. However, we can
 still grow up to 1MiB anytime if needed.
 
-(3) Who "owns" a JIT stack?
-
+. **Who "owns" a JIT stack?**
++
 The owner of the stack is the user program, not the JIT studied pattern or
 anything else. The user program must ensure that if a stack is being used by
 func:pcre2_match(), (that is, it is assigned to a match context that is passed
@@ -337,8 +321,8 @@ threads (to avoid overwriting the same memory area). The best practice for
 multithreaded programs is to allocate a stack for each thread, and return this
 stack through the JIT callback function.
 
-(4) When should a JIT stack be freed?
-
+. **When should a JIT stack be freed?**
++
 You can free a JIT stack at any time, as long as it will not be used by
 func:pcre2_match() again. When you assign the stack to a match context, only a
 pointer is set. There is no reference counting or any other magic. You can free
@@ -349,27 +333,27 @@ currently used by func:pcre2_match() in another thread). You can also replace
 the stack in a context at any time when it is not in use. You should free the
 previous stack before assigning a replacement.
 
-(5) Should I allocate/free a stack every time before/after calling
-func:pcre2_match()?
-
+. **Should I allocate/free a stack every time before/after calling
+func:pcre2_match()?**
++
 No, because this is too costly in terms of resources. However, you could
 implement some clever idea which release the stack if it is not used in let's
 say two minutes. The JIT callback can help to achieve this without keeping a
 list of patterns.
 
-(6) OK, the stack is for long term memory allocation. But what happens if a
+. **OK, the stack is for long term memory allocation. But what happens if a
 pattern causes stack overflow with a stack of 1MiB? Is that 1MiB kept until the
-stack is freed?
-
+stack is freed?**
++
 Especially on embedded systems, it might be a good idea to release memory
 sometimes without freeing the stack. There is no API for this at the moment.
 Probably a function call which returns with the currently allocated memory for
 any stack and another which allows releasing memory (shrinking the stack) would
 be a good idea if someone needs this.
 
-(7) This is too much of a headache. Isn't there any better solution for JIT
-stack handling?
-
+. **This is too much of a headache. Isn't there any better solution for JIT
+stack handling?**
++
 No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.
 
@@ -385,7 +369,7 @@ expects new allocations, and keeps some free memory around to improve
 allocation speed. However, in low memory conditions, it might be better to free
 all possible memory. You can cause this to happen by calling
 func:pcre2_jit_free_unused_memory(). Its argument is a general context, for custom
-memory management, or NULL for standard memory management.
+memory management, or const:NULL for standard memory management.
 
 == Example code
 
@@ -394,18 +378,15 @@ callback. A real program should include error checking after all the function
 calls.
 
 [source,c]
-....
+----
 int rc;
 pcre2_code *re;
 pcre2_match_data *match_data;
 pcre2_match_context *mcontext;
 pcre2_jit_stack *jit_stack;
-....
 
-[source,c]
-....
 re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
-  &errornumber, &erroffset, NULL);
+                   &errornumber, &erroffset, NULL);
 rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
 mcontext = pcre2_match_context_create(NULL);
 jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
@@ -413,15 +394,12 @@ pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
 match_data = pcre2_match_data_create(re, 10);
 rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
 /* Process result */
-....
 
-[source,c]
-....
 pcre2_code_free(re);
 pcre2_match_data_free(match_data);
 pcre2_match_context_free(mcontext);
 pcre2_jit_stack_free(jit_stack);
-....
+----
 
 == JIT fast path API
 
@@ -445,7 +423,7 @@ that was not compiled.
 
 When you call func:pcre2_match(), as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
-the subject pointer is NULL but the length is non-zero, an immediate error is
+the subject pointer is const:NULL but the length is non-zero, an immediate error is
 given. Also, unless const:PCRE2_NO_UTF_CHECK is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
 fast path. If invalid UTF data is passed when const:PCRE2_MATCH_INVALID_UTF was not
@@ -459,18 +437,17 @@ speedups of more than 10%.
 
 == See also
 
-`pcre2api`(3), `pcre2unicode`(3)
+xref:pcre2api.adoc[`pcre2api`], xref:pcre2unicode.adoc[`pcre2unicode`].
 
+[discrete]
 == Author
 
-[literal]
-----
-Philip Hazel (FAQ by Zoltan Herczeg)
-Retired from University Computing Service
+Philip Hazel (FAQ by Zoltán Herczeg) +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 08 August 2026 +
-Copyright (c) 1997-2024 University of Cambridge.
+Copyright (C) 1997-2024 University of Cambridge.

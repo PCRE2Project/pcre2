@@ -2,16 +2,18 @@
 :doctype: manpage
 :manname: pcre2posix
 :manpurpose: PCRE2 POSIX API
+:description: The POSIX API to the PCRE2 8-bit library
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 27 November 2024
 :revdate: 27 November 2024
+:toc: right
 
 == Synopsis
 
 [source,c,role=prototype]
-....
+----
 #include <pcre2posix.h>
 
 int pcre2_regcomp(regex_t *preg, const char *pattern,
@@ -24,7 +26,7 @@ size_t pcre2_regerror(int errcode, const regex_t *preg,
      char *errbuf, size_t errbuf_size);
 
 void pcre2_regfree(regex_t *preg);
-....
+----
 
 == Description
 
@@ -44,9 +46,9 @@ processing subjects that are not bigger than 2GB. Use the native API instead.
 
 These functions are wrapper functions that ultimately call the PCRE2 native
 API. Their prototypes are defined in the `pcre2posix.h` header file, and
-they all have unique names starting with `pcre2_`. However, the
+they all have unique names starting with [.c]`pcre2_`. However, the
 `pcre2posix.h` header also contains macro definitions that convert the
-standard POSIX names such as `regcomp()` into func:pcre2_regcomp() etc. This
+standard POSIX names such as [.c]`regcomp()` into func:pcre2_regcomp() etc. This
 means that a program can use the usual POSIX names without running the risk of
 accidentally linking with POSIX functions from a different library.
 
@@ -56,13 +58,13 @@ application. Because the POSIX functions call the native ones, it is also
 necessary to add `-lpcre2-8`.
 
 On Windows systems, if you are linking to a DLL version of the library, it is
-recommended that `PCRE2POSIX_SHARED` is defined before including the
+recommended that const:PCRE2POSIX_SHARED is defined before including the
 `pcre2posix.h` header, as it will allow for a more efficient way to
-invoke the functions by adding the `__declspec(dllimport)` decorator.
+invoke the functions by adding the [.c]`__declspec(dllimport)` decorator.
 
 Although they were not defined as prototypes in `pcre2posix.h`, releases
 10.33 to 10.36 of the library contained functions with the POSIX names
-`regcomp()` etc. These simply passed their arguments to the PCRE2
+[.c]`regcomp()` etc. These simply passed their arguments to the PCRE2
 functions. These functions were provided for backwards compatibility with
 earlier versions of PCRE2, which had only POSIX names. However, this has proved
 troublesome in situations where a program links with several libraries, some of
@@ -74,7 +76,7 @@ libraries. It can, of course, be renamed or aliased as `regex.h`, which is
 the "correct" name, if there is no clash. It provides two structure types,
 type:regex_t for compiled internal forms, and type:regmatch_t for returning
 captured substrings. It also defines some constants whose names start with
-"REG_"; these are used for setting options and identifying error codes.
+[.c]`REG_`; these are used for setting options and identifying error codes.
 
 == Using the POSIX functions
 
@@ -100,7 +102,7 @@ POSIX definition; it is not fully POSIX-compatible, and in multi-unit encoding
 domains it is probably even less compatible.
 
 The descriptions below use the actual names of the functions, but, as described
-above, the standard POSIX names (without the `pcre2_` prefix) may also be
+above, the standard POSIX names (without the [.c]`pcre2_` prefix) may also be
 used.
 
 == Compiling a pattern
@@ -109,7 +111,7 @@ The function func:pcre2_regcomp() is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
 zero (but see const:REG_PEND below). The arg:preg argument is a pointer to a
 type:regex_t structure that is used as a base for storing information about
-the compiled regular expression. It is also used for input when REG_PEND is
+the compiled regular expression. It is also used for input when const:REG_PEND is
 set. The type:regex_t structure used by func:pcre2_regcomp() is defined in
 `pcre2posix.h` and is not the same as the structure used by other libraries
 that provide POSIX-style matching.
@@ -130,7 +132,8 @@ const:REG_ICASE::
 const:REG_NEWLINE::
      The const:PCRE2_MULTILINE option is set when the regular expression is passed for
      compilation to the native function. Note that this does _not_ mimic the
-     defined POSIX behaviour for const:REG_NEWLINE (see the following section).
+     defined POSIX behaviour for const:REG_NEWLINE (see the section
+     <<matching-newline-characters>>).
 
 const:REG_NOSPEC::
      The const:PCRE2_LITERAL option is set when the regular expression is passed for
@@ -148,7 +151,7 @@ const:REG_NOSUB::
 
 const:REG_PEND::
      If this option is set, the arg:reg_endp field in the arg:preg structure
-     (which has the type [.c]`const char *`) must be set to point to the character beyond
+     (which has the type [.c]`+const char *+`) must be set to point to the character beyond
      the end of the pattern before calling func:pcre2_regcomp(). The pattern itself
      may now contain binary zeros, which are treated as data characters. Without
      const:REG_PEND, a binary zero terminates the pattern and the arg:re_endp field is
@@ -178,7 +181,7 @@ particular, the way it handles newline characters in the subject string is the
 Perl way, not the POSIX way. Note that setting const:PCRE2_MULTILINE has only
 _some_ of the effects specified for const:REG_NEWLINE. It does not affect the way
 newlines are matched by the dot metacharacter (they are not) or by a negative
-class such as [.regex]`[^a]` (they are).
+class such as [.regex]`+[^a]+` (they are).
 
 The yield of func:pcre2_regcomp() is zero on success, and non-zero otherwise.
 The arg:preg structure is filled in on success, and one other member of the
@@ -194,6 +197,7 @@ to func:pcre2_regexec(), the result is undefined and your program is likely to
 crash.
 ====
 
+[[matching-newline-characters]]
 == Matching newline characters
 
 This area is not simple, because POSIX and Perl take different views of things.
@@ -201,34 +205,34 @@ It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
 never intended to be a POSIX engine. The following table lists the different
 possibilities for matching newline characters in Perl and PCRE2:
 
-[literal]
-....
-                        Default   Change with
+[cols="2,1,2",options="header"]
+|===
+| |Default |Change with
 
-. matches newline          no     PCRE2_DOTALL
-newline matches [^a]       yes    not changeable
-$ matches \n at end        yes    PCRE2_DOLLAR_ENDONLY
-$ matches \n in middle     no     PCRE2_MULTILINE
-^ matches \n in middle     no     PCRE2_MULTILINE
-....
+|[.regex]`.` matches newline |no |const:PCRE2_DOTALL
+|[.regex]`+[^a]+` matches newline |yes |not changeable
+|[.regex]`$` matches newline at end |yes |const:PCRE2_DOLLAR_ENDONLY
+|[.regex]`$` matches newline in middle |no |const:PCRE2_MULTILINE
+|[.regex]`+^+` matches newline in middle |no |const:PCRE2_MULTILINE
+|===
 
 This is the equivalent table for a POSIX-compatible pattern matcher:
 
-[literal]
-....
-                        Default   Change with
+[cols="2,1,2",options="header"]
+|===
+| |Default |Change with
 
-. matches newline          yes    REG_NEWLINE
-newline matches [^a]       yes    REG_NEWLINE
-$ matches \n at end        no     REG_NEWLINE
-$ matches \n in middle     no     REG_NEWLINE
-^ matches \n in middle     no     REG_NEWLINE
-....
+|[.regex]`.` matches newline |yes |const:REG_NEWLINE
+|[.regex]`+[^a]+` matches newline |yes |const:REG_NEWLINE
+|[.regex]`$` matches newline at end |no |const:REG_NEWLINE
+|[.regex]`$` matches newline in middle |no |const:REG_NEWLINE
+|[.regex]`+^+` matches newline in middle |no |const:REG_NEWLINE
+|===
 
 This behaviour is not what happens when PCRE2 is called via its POSIX
 API. By default, PCRE2's behaviour is the same as Perl's, except that there is
 no equivalent for const:PCRE2_DOLLAR_ENDONLY in Perl. In both PCRE2 and Perl, there
-is no way to stop newline from matching [.regex]`[^a]`.
+is no way to stop newline from matching [.regex]`+[^a]+`.
 
 Default POSIX newline handling can be obtained by setting const:PCRE2_DOTALL and
 const:PCRE2_DOLLAR_ENDONLY when calling func:pcre2_compile() directly, but there is
@@ -246,43 +250,45 @@ These can be:
 
 [.options]
 const:REG_NOTBOL::
-     The const:PCRE2_NOTBOL option is set when calling the underlying PCRE2 matching
-     function.
+      The const:PCRE2_NOTBOL option is set when calling the underlying PCRE2 matching
+      function.
 
 const:REG_NOTEMPTY::
-     The const:PCRE2_NOTEMPTY option is set when calling the underlying PCRE2 matching
-     function. Note that const:REG_NOTEMPTY is not part of the POSIX standard. However,
-     setting this option can give more POSIX-like behaviour in some situations.
+      The const:PCRE2_NOTEMPTY option is set when calling the underlying PCRE2 matching
+      function. Note that const:REG_NOTEMPTY is not part of the POSIX standard. However,
+      setting this option can give more POSIX-like behaviour in some situations.
 
 const:REG_NOTEOL::
-     The const:PCRE2_NOTEOL option is set when calling the underlying PCRE2 matching
-     function.
+      The const:PCRE2_NOTEOL option is set when calling the underlying PCRE2 matching
+      function.
 
 const:REG_STARTEND::
-     When this option is set, the subject string starts at [.c]`string + pmatch[0].rm_so`
-and ends at [.c]`string + pmatch[0].rm_eo`, which
-should point to the first character beyond the string. There may be binary
-zeros within the subject string, and indeed, using const:REG_STARTEND is the only
-way to pass a subject string that contains a binary zero.
+      When this option is set, the subject string starts at [.c]`string + pmatch[0].rm_so`
+      and ends at [.c]`string + pmatch[0].rm_eo`, which
+      should point to the first character beyond the string. There may be binary
+      zeros within the subject string, and indeed, using const:REG_STARTEND is the only
+      way to pass a subject string that contains a binary zero.
 
-Whatever the value of [.c]`pmatch[0].rm_so`, the offsets of the matched string
++
+Whatever the value of [.c]`+pmatch[0].rm_so+`, the offsets of the matched string
 and any captured substrings are still given relative to the start of
 arg:string itself. (Before PCRE2 release 10.30 these were given relative to
 [.c]`string + pmatch[0].rm_so`, but this differs from other
 implementations.)
 
++
 This is a BSD extension, compatible with but not specified by IEEE Standard
 1003.2 (POSIX.2), and should be used with caution in software intended to be
 portable to other systems. Note that a non-zero arg:rm_so does not imply
 const:REG_NOTBOL; const:REG_STARTEND affects only the location and length of the string,
-not how it is matched. Setting const:REG_STARTEND and passing arg:pmatch as NULL
+not how it is matched. Setting const:REG_STARTEND and passing arg:pmatch as const:NULL
 are mutually exclusive; the error const:REG_INVARG is returned.
 
 If the pattern was compiled with the const:REG_NOSUB flag, no data about any matched
 strings is returned. The arg:nmatch and arg:pmatch arguments of
 func:pcre2_regexec() are ignored (except possibly as input for const:REG_STARTEND).
 
-The value of arg:nmatch may be zero, and the value arg:pmatch may be NULL
+The value of arg:nmatch may be zero, and the value arg:pmatch may be const:NULL
 (unless const:REG_STARTEND is set); in both these cases no data about any matched
 strings is returned.
 
@@ -292,7 +298,7 @@ array of arg:nmatch structures of type type:regmatch_t, containing the
 members arg:rm_so and arg:rm_eo. These contain the byte offset to the first
 character of each substring and the offset to the first character after the end
 of each substring, respectively. The 0th element of the vector relates to the
-entire portion of _string_ that was matched; subsequent elements relate to
+entire portion of arg:string that was matched; subsequent elements relate to
 the capturing subpatterns of the regular expression. Unused entries in the
 array have both structure members set to -1.
 
@@ -307,7 +313,7 @@ header file, of which const:REG_NOMATCH is the "expected" failure code.
 
 The func:pcre2_regerror() function maps a non-zero errorcode from either
 func:pcre2_regcomp() or func:pcre2_regexec() to a printable message. If
-arg:preg is not NULL, the error should have arisen from the use of that
+arg:preg is not const:NULL, the error should have arisen from the use of that
 structure. A message terminated by a binary zero is placed in arg:errbuf. If
 the buffer is too short, only the first arg:errbuf_size - 1 characters of the
 error message are used. The yield of the function is the size of buffer needed
@@ -321,16 +327,15 @@ with the arg:preg structure. The function func:pcre2_regfree() frees all
 such memory, after which arg:preg may no longer be used as a compiled
 expression.
 
+[discrete]
 == Author
 
-[literal]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 27 November 2024 +
-Copyright (c) 1997-2024 University of Cambridge.
+Copyright (C) 1997-2024 University of Cambridge.

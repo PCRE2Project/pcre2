@@ -21,7 +21,7 @@ int pcre2_get_offset_limit(pcre2_match_context *mcontext,
 == Description
 
 This function gets the offset limit from a match context. The result is zero
-for success or const:PCRE2_ERROR_NULL if either argument is [.c]`NULL`. The largest value a
+for success or const:PCRE2_ERROR_NULL if either argument is const:NULL. The largest value a
 type:PCRE2_SIZE variable can hold indicates that no offset limit is set.
 
 There is a complete description of the PCRE2 native API in the

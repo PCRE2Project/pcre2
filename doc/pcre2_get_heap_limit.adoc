@@ -21,7 +21,7 @@ int pcre2_get_heap_limit(pcre2_match_context *mcontext,
 == Description
 
 This function gets the backtracking heap limit from a match context. The result
-is zero for success or const:PCRE2_ERROR_NULL if either argument is [.c]`NULL`.
+is zero for success or const:PCRE2_ERROR_NULL if either argument is const:NULL.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

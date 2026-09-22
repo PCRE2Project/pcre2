@@ -29,22 +29,22 @@ arg:what::
 arg:where::
     Points to where to put the information
 
-If arg:where is [.c]`NULL`, the function returns the amount of memory needed for
+If arg:where is const:NULL, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
 code units; for other types of data it is in bytes.
 
-If arg:where is not [.c]`NULL`, for const:PCRE2_CONFIG_JITTARGET,
+If arg:where is not const:NULL, for const:PCRE2_CONFIG_JITTARGET,
 const:PCRE2_CONFIG_UNICODE_VERSION, and const:PCRE2_CONFIG_VERSION it must point to a
 buffer that is large enough to hold the string. For all other codes it must
-point to a [.c]`uint32_t` integer variable. The available codes are:
+point to a type:uint32_t integer variable. The available codes are:
 
 [.values]
 const:PCRE2_CONFIG_BSR::
     Indicates what [.regex]`\R` matches by default:
-    const:PCRE2_BSR_UNICODE
-    const:PCRE2_BSR_ANYCRLF
+    * const:PCRE2_BSR_UNICODE
+    * const:PCRE2_BSR_ANYCRLF
 const:PCRE2_CONFIG_COMPILED_WIDTHS::
-    Which of `8/16/32` support was compiled
+    Which of 8/16/32 support was compiled
 const:PCRE2_CONFIG_DEPTHLIMIT::
     Default backtracking depth limit
 const:PCRE2_CONFIG_EFFECTIVE_LINKSIZE::
@@ -53,33 +53,33 @@ const:PCRE2_CONFIG_HEAPLIMIT::
     Default heap memory limit
 const:PCRE2_CONFIG_JIT::
     Availability of just-in-time compiler
-    support (`1=yes 0=no`)
+    support (1=yes 0=no)
 const:PCRE2_CONFIG_JITTARGET::
     Information (a string) about the target
     architecture for the JIT compiler
 const:PCRE2_CONFIG_LINKSIZE::
-    Configured internal link size (`2`, `3`, `4`)
+    Configured internal link size (2, 3, 4)
 const:PCRE2_CONFIG_MATCHLIMIT::
     Default internal resource limit
 const:PCRE2_CONFIG_NEVER_BACKSLASH_C::
     Whether or not [.regex]`\C` is disabled
 const:PCRE2_CONFIG_NEWLINE::
     Code for the default newline sequence:
-    const:PCRE2_NEWLINE_CR
-    const:PCRE2_NEWLINE_LF
-    const:PCRE2_NEWLINE_CRLF
-    const:PCRE2_NEWLINE_ANY
-    const:PCRE2_NEWLINE_ANYCRLF
-    const:PCRE2_NEWLINE_NUL
+    * const:PCRE2_NEWLINE_CR
+    * const:PCRE2_NEWLINE_LF
+    * const:PCRE2_NEWLINE_CRLF
+    * const:PCRE2_NEWLINE_ANY
+    * const:PCRE2_NEWLINE_ANYCRLF
+    * const:PCRE2_NEWLINE_NUL
 const:PCRE2_CONFIG_PARENSLIMIT::
     Default parentheses nesting limit
 const:PCRE2_CONFIG_RECURSIONLIMIT::
     Obsolete: use const:PCRE2_CONFIG_DEPTHLIMIT
 const:PCRE2_CONFIG_STACKRECURSE::
-    Obsolete: always returns `0`
+    Obsolete: always returns 0
 const:PCRE2_CONFIG_UNICODE::
     Availability of Unicode support
-    (`1=yes 0=no`)
+    (1=yes 0=no)
 const:PCRE2_CONFIG_UNICODE_VERSION::
     The Unicode version (a string)
 const:PCRE2_CONFIG_VERSION::

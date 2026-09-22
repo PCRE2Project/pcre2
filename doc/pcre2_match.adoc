@@ -1,7 +1,7 @@
 = pcre2_match(3)
 :doctype: manpage
 :manname: pcre2_match
-:manpurpose: match a compiled pattern
+:manpurpose: match a compiled pattern to a subject string (Perl compatible)
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
@@ -26,7 +26,7 @@ This function matches a compiled regular expression against a given subject
 string, using a matching algorithm that is similar to Perl's. It returns
 offsets to what it has matched and to captured substrings via the
 arg:match_data block, which can be processed by functions with names that
-start with [.c]`pcre2_get_ovector_...()` or [.c]`pcre2_substring_...()`. The
+start with [.c]`+pcre2_get_ovector_...()+` or [.c]`+pcre2_substring_...()+`. The
 return from func:pcre2_match() is one more than the highest numbered capturing
 pair that has been set (for example, 1 if there are no captures), zero if the
 vector of offsets is too small, or a negative error code for no match and other
@@ -46,7 +46,7 @@ arg:options::
 arg:match_data::
     Points to a match data block, for results
 arg:mcontext::
-    Points to a match context, or is [.c]`NULL`
+    Points to a match context, or is const:NULL
 
 A match context is needed only if you want to:
 
