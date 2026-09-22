@@ -4063,7 +4063,7 @@ function and is additionally zero\-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error
 other than \fBPCRE2_ERROR_NOMATCH\fP or \fBPCRE2_ERROR_PARTIAL\fP,
 pcre2_get_subject() may return \f(CRNULL\fP. If the \fIlengthptr\fP argument
-is not \f(CRNULL\fP, it receives the length of the returned string pointer (the
+is not \f(CRNULL\fP, it receives the length of the string which is returned (the
 subject string may contain embedded NUL characters).
 .sp
 After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a failure

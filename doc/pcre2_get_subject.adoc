@@ -32,7 +32,7 @@ other than const:PCRE2_ERROR_NOMATCH or const:PCRE2_ERROR_PARTIAL,
 func:pcre2_get_subject() may return [.c]`NULL`.
 
 If the arg:lengthptr argument is not [.c]`NULL`, it receives the length of the
-returned string pointer (the subject string may contain embedded NUL characters).
+string which is returned (the subject string may contain embedded NUL characters).
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

@@ -3509,7 +3509,7 @@ OTHER INFORMATION ABOUT A MATCH
        for another match or is freed. If there is any match error other than
        PCRE2_ERROR_NOMATCH or PCRE2_ERROR_PARTIAL, pcre2_get_subject() may
        return NULL. If the lengthptr argument is not NULL, it receives the
-       length of the returned string pointer (the subject string may contain
+       length of the string which is returned (the subject string may contain
        embedded NUL characters).
 
        After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a

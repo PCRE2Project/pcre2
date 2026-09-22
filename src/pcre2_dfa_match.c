@@ -4098,8 +4098,8 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   }
 
   /* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-  free the memory that was obtained.  Set the field to NULL for match error
-  cases.*/
+  free the memory that was obtained. Set the field to NULL for match error
+  cases. */
 
   if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {

@@ -3408,7 +3408,7 @@ function and is additionally zero-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error
 other than const:PCRE2_ERROR_NOMATCH or const:PCRE2_ERROR_PARTIAL,
 func:pcre2_get_subject() may return [.c]`NULL`. If the arg:lengthptr argument
-is not [.c]`NULL`, it receives the length of the returned string pointer (the
+is not [.c]`NULL`, it receives the length of the string which is returned (the
 subject string may contain embedded NUL characters).
 
 After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a failure
