@@ -1800,7 +1800,7 @@ show_pattern_info(void)
           ? callout_enumerate_function
           :
           /* Exercise the callout enumeration code with a dummy callback to make sure
-    it works. */
+          it works. */
           callout_enumerate_function_void,
       NULL);
   if (rc != 0)
