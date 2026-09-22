@@ -30,6 +30,7 @@ T pcre2_get_ovector_count_16@@PCRE2_10.47
 T pcre2_get_ovector_pointer_16@@PCRE2_10.47
 T pcre2_get_parens_nest_limit_16@@PCRE2_10.49
 T pcre2_get_startchar_16@@PCRE2_10.47
+T pcre2_get_subject_16@@PCRE2_10.49
 T pcre2_jit_compile_16@@PCRE2_10.47
 T pcre2_jit_free_unused_memory_16@@PCRE2_10.47
 T pcre2_jit_match_16@@PCRE2_10.47

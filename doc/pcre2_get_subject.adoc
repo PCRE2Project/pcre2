@@ -1,0 +1,35 @@
+= pcre2_get_subject(3)
+:doctype: manpage
+:manname: pcre2_get_subject
+:manpurpose: get a match subject pointer
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 September 2026
+:revdate: 22 September 2026
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);
+----
+
+== Description
+
+After a successful match, a partial match, or a failure to match, this function
+returns the subject pointer that was passed to the matching function. For a
+successful match with const:PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer to
+a copy of the subject that is owned by the match data block instead. The copy
+contains exactly the subject length that was passed to the matching function and
+is not necessarily zero-terminated. It is freed when the match data block is
+reused for another match or is freed. The returned pointer must not be used after
+that.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

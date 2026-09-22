@@ -87,6 +87,8 @@ document for an overview of all the PCRE2 documentation.
 \fBPCRE2_SIZE\fP *pcre2_get_ovector_pointer(\fBpcre2_match_data\fP *\fImatch_data\fP);
 
 \fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
+
+\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP);
 .fam
 .fi
 .ss \n[.ss] 0
@@ -4037,6 +4039,8 @@ had. After a failed match attempt, the contents of the ovector are unchanged.
 \fBPCRE2_SPTR\fP pcre2_get_mark(\fBpcre2_match_data\fP *\fImatch_data\fP);
 
 \fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
+
+\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP);
 .fam
 .fi
 .ss \n[.ss] 0
@@ -4045,6 +4049,15 @@ As well as the offsets in the ovector, other information about a match is
 retained in the match data block and can be retrieved by the above functions in
 appropriate circumstances. If they are called at other times, the result is
 undefined.
+.sp
+After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a
+failure to match (\fBPCRE2_ERROR_NOMATCH\fP), pcre2_get_subject() returns
+the subject pointer that was passed to the matching function. For a successful
+match with \fBPCRE2_COPY_MATCHED_SUBJECT\fP, it returns a pointer to a copy of
+the subject that is owned by the match data block instead. The copy contains
+exactly the subject length that was passed to the matching function and is not
+necessarily zero\-terminated. It is freed when the match data block is reused
+for another match or is freed. The returned pointer must not be used after that.
 .sp
 After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a failure
 to match (\fBPCRE2_ERROR_NOMATCH\fP), a mark name may be available. The function

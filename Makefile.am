@@ -67,6 +67,7 @@ dist_html_DATA = \
   doc/html/pcre2_get_ovector_pointer.html \
   doc/html/pcre2_get_parens_nest_limit.html \
   doc/html/pcre2_get_startchar.html \
+  doc/html/pcre2_get_subject.html \
   doc/html/pcre2_jit_compile.html \
   doc/html/pcre2_jit_free_unused_memory.html \
   doc/html/pcre2_jit_match.html \
@@ -177,6 +178,7 @@ dist_man_MANS = \
   doc/man/pcre2_get_ovector_pointer.3 \
   doc/man/pcre2_get_parens_nest_limit.3 \
   doc/man/pcre2_get_startchar.3 \
+  doc/man/pcre2_get_subject.3 \
   doc/man/pcre2_jit_compile.3 \
   doc/man/pcre2_jit_free_unused_memory.3 \
   doc/man/pcre2_jit_match.3 \
@@ -344,6 +346,7 @@ EXTRA_DIST += \
   doc/pcre2_get_ovector_pointer.adoc \
   doc/pcre2_get_parens_nest_limit.adoc \
   doc/pcre2_get_startchar.adoc \
+  doc/pcre2_get_subject.adoc \
   doc/pcre2_jit_compile.adoc \
   doc/pcre2_jit_free_unused_memory.adoc \
   doc/pcre2_jit_match.adoc \
