@@ -245,7 +245,8 @@ PCRE2 NATIVE API AUXILIARY MATCH FUNCTIONS
 
        PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
 
-       PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);
+       PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                                    PCRE2_SIZE *lengthptr);
 
 
 PCRE2 NATIVE API GENERAL CONTEXT FUNCTIONS
@@ -3488,7 +3489,8 @@ OTHER INFORMATION ABOUT A MATCH
 
        PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
 
-       PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);
+       PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                                    PCRE2_SIZE *lengthptr);
 
        As well as the offsets in the ovector, other information about a match
        is retained in the match data block and can be retrieved by the above
@@ -3499,11 +3501,16 @@ OTHER INFORMATION ABOUT A MATCH
        failure to match (PCRE2_ERROR_NOMATCH), pcre2_get_subject() returns the
        subject pointer that was passed to the matching function. For a
        successful match with PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer
-       to a copy of the subject that is owned by the match data block instead.
-       The copy contains exactly the subject length that was passed to the
-       matching function and is not necessarily zero-terminated. It is freed
-       when the match data block is reused for another match or is freed. The
-       returned pointer must not be used after that.
+       to a copy of the subject that is owned by the match data block instead
+       (except for pcre2_jit_match() which ignores
+       PCRE2_COPY_MATCHED_SUBJECT). The copy is exactly the same length as the
+       subject that was passed to the matching function and is additionally
+       zero-terminated. The copy is freed when the match data block is reused
+       for another match or is freed. If there is any match error other than
+       PCRE2_ERROR_NOMATCH or PCRE2_ERROR_PARTIAL, pcre2_get_subject() may
+       return NULL. If the lengthptr argument is not NULL, it receives the
+       length of the returned string pointer (the subject string may contain
+       embedded NUL characters).
 
        After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a
        failure to match (PCRE2_ERROR_NOMATCH), a mark name may be available.

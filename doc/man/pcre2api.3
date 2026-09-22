@@ -88,7 +88,8 @@ document for an overview of all the PCRE2 documentation.
 
 \fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
 
-\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP);
+\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                             \fBPCRE2_SIZE\fP *\fIlengthptr\fP);
 .fam
 .fi
 .ss \n[.ss] 0
@@ -4040,7 +4041,8 @@ had. After a failed match attempt, the contents of the ovector are unchanged.
 
 \fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
 
-\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP);
+\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                             \fBPCRE2_SIZE\fP *\fIlengthptr\fP);
 .fam
 .fi
 .ss \n[.ss] 0
@@ -4054,10 +4056,15 @@ After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a
 failure to match (\fBPCRE2_ERROR_NOMATCH\fP), pcre2_get_subject() returns
 the subject pointer that was passed to the matching function. For a successful
 match with \fBPCRE2_COPY_MATCHED_SUBJECT\fP, it returns a pointer to a copy of
-the subject that is owned by the match data block instead. The copy contains
-exactly the subject length that was passed to the matching function and is not
-necessarily zero\-terminated. It is freed when the match data block is reused
-for another match or is freed. The returned pointer must not be used after that.
+the subject that is owned by the match data block instead (except for
+pcre2_jit_match() which ignores \fBPCRE2_COPY_MATCHED_SUBJECT\fP). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero\-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than \fBPCRE2_ERROR_NOMATCH\fP or \fBPCRE2_ERROR_PARTIAL\fP,
+pcre2_get_subject() may return \f(CRNULL\fP. If the \fIlengthptr\fP argument
+is not \f(CRNULL\fP, it receives the length of the returned string pointer (the
+subject string may contain embedded NUL characters).
 .sp
 After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a failure
 to match (\fBPCRE2_ERROR_NOMATCH\fP), a mark name may be available. The function

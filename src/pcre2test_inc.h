@@ -6675,13 +6675,18 @@ unittest(void)
   rc = pcre2_match(test_compiled_code, pattern, PCRE2_ZERO_TERMINATED, 0,
                    0, test_match_data, NULL);
   ASSERT(rc == 1, "pcre2_match()");
-  ASSERT(pcre2_get_subject(test_match_data) == pattern, "pcre2_get_subject()");
+  ASSERT(pcre2_get_subject(test_match_data, NULL) == pattern, "pcre2_get_subject()");
+  sizeval = 123;
+  ASSERT(pcre2_get_subject(test_match_data, &sizeval) == pattern, "pcre2_get_subject()");
+  ASSERT(sizeval == pcre2_strlen(pattern), "pcre2_get_subject() length");
 
   rc = pcre2_match(test_compiled_code, pattern, PCRE2_ZERO_TERMINATED, 0,
                    PCRE2_COPY_MATCHED_SUBJECT, test_match_data, NULL);
   ASSERT(rc == 1, "pcre2_match()");
-  ASSERT(pcre2_get_subject(test_match_data) != pattern, "pcre2_get_subject()");
-  ASSERT(memcmp(pattern, pcre2_get_subject(test_match_data), pcre2_strlen(pattern) * sizeof(PCRE2_UCHAR)) == 0, "pcre2_get_subject()");
+  ASSERT(pcre2_get_subject(test_match_data, NULL) != pattern, "pcre2_get_subject()");
+  sizeval = 123;
+  ASSERT(memcmp(pattern, pcre2_get_subject(test_match_data, &sizeval), (pcre2_strlen(pattern) + 1) * sizeof(PCRE2_UCHAR)) == 0, "pcre2_get_subject()");
+  ASSERT(sizeval == pcre2_strlen(pattern), "pcre2_get_subject() length");
 
   pcre2_match_data_free(test_match_data);
   test_match_data = NULL;

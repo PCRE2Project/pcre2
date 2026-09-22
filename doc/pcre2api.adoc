@@ -65,7 +65,8 @@ PCRE2_SIZE *pcre2_get_ovector_pointer(pcre2_match_data *match_data);
 
 PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
 
-PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                             PCRE2_SIZE *lengthptr);
 ----
 
 == PCRE2 native API general context functions
@@ -3387,7 +3388,8 @@ PCRE2_SPTR pcre2_get_mark(pcre2_match_data *match_data);
 
 PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
 
-PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                             PCRE2_SIZE *lengthptr);
 ----
 
 As well as the offsets in the ovector, other information about a match is
@@ -3399,10 +3401,15 @@ After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a
 failure to match (const:PCRE2_ERROR_NOMATCH), func:pcre2_get_subject() returns
 the subject pointer that was passed to the matching function. For a successful
 match with const:PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer to a copy of
-the subject that is owned by the match data block instead. The copy contains
-exactly the subject length that was passed to the matching function and is not
-necessarily zero-terminated. It is freed when the match data block is reused
-for another match or is freed. The returned pointer must not be used after that.
+the subject that is owned by the match data block instead (except for
+func:pcre2_jit_match() which ignores const:PCRE2_COPY_MATCHED_SUBJECT). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than const:PCRE2_ERROR_NOMATCH or const:PCRE2_ERROR_PARTIAL,
+func:pcre2_get_subject() may return [.c]`NULL`. If the arg:lengthptr argument
+is not [.c]`NULL`, it receives the length of the returned string pointer (the
+subject string may contain embedded NUL characters).
 
 After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a failure
 to match (const:PCRE2_ERROR_NOMATCH), a mark name may be available. The function

@@ -865,7 +865,7 @@ information. */
   pcre2_get_startchar(pcre2_match_data *match_data);                         \
                                                                              \
   PCRE2_EXP_DECL PCRE2_SPTR PCRE2_CALL_CONVENTION                            \
-  pcre2_get_subject(pcre2_match_data *match_data);                           \
+  pcre2_get_subject(pcre2_match_data *match_data, PCRE2_SIZE *lengthptr);    \
                                                                              \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
   pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, \

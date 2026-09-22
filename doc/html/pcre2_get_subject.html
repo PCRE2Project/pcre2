@@ -449,7 +449,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="content">
 <pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
-PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);</code></pre>
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                             PCRE2_SIZE *lengthptr);</code></pre>
 </div>
 </div>
 </div>
@@ -461,11 +462,17 @@ PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data);</code></pre>
 <p>After a successful match, a partial match, or a failure to match, this function
 returns the subject pointer that was passed to the matching function. For a
 successful match with <code class="constant">PCRE2_COPY_MATCHED_SUBJECT</code>, it returns a pointer to
-a copy of the subject that is owned by the match data block instead. The copy
-contains exactly the subject length that was passed to the matching function and
-is not necessarily zero-terminated. It is freed when the match data block is
-reused for another match or is freed. The returned pointer must not be used after
-that.</p>
+a copy of the subject that is owned by the match data block instead (except for
+<code class="function">pcre2_jit_match()</code> which ignores <code class="constant">PCRE2_COPY_MATCHED_SUBJECT</code>). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than <code class="constant">PCRE2_ERROR_NOMATCH</code> or <code class="constant">PCRE2_ERROR_PARTIAL</code>,
+<code class="function">pcre2_get_subject()</code> may return <code class="c">NULL</code>.</p>
+</div>
+<div class="paragraph">
+<p>If the <code class="parameter">lengthptr</code> argument is not <code class="c">NULL</code>, it receives the length of the
+returned string pointer (the subject string may contain embedded NUL characters).</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the
