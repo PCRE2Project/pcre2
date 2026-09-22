@@ -3516,13 +3516,15 @@ substitute_callout_function(pcre2_substitute_callout_block *scb, void *data_ptr)
   fprintf(outfile, "%2d(%d) Old %" SIZ_FORM " %" SIZ_FORM " \"", scb->subscount, scb->oveccount,
           scb->ovector[0], scb->ovector[1]);
 
-  pchars(clr_none, scb->input + scb->ovector[0], scb->ovector[1] - scb->ovector[0], utf, outfile);
+  if (scb->ovector[1] > scb->ovector[0])
+    pchars(clr_none, scb->input + scb->ovector[0], scb->ovector[1] - scb->ovector[0], utf, outfile);
 
   fprintf(outfile, "\" New %" SIZ_FORM " %" SIZ_FORM " \"", scb->output_offsets[0],
           scb->output_offsets[1]);
 
-  pchars(clr_none, scb->output + scb->output_offsets[0],
-         scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
+  if (scb->output_offsets[1] > scb->output_offsets[0])
+    pchars(clr_none, scb->output + scb->output_offsets[0],
+           scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
 
 YIELD:
 
@@ -5127,6 +5129,7 @@ ENDSTRING:
     int rc;
     uint8_t *pr, *prend;
     PCRE2_UCHAR sbuffer[SUBSTITUTE_SUBJECT_MODSIZE]; // Staging, not seen by pcre2_substitute()
+    PCRE2_UCHAR *obptr;
     PCRE2_UCHAR *rbptr;
     PCRE2_UCHAR *sbptr;
     uint32_t xoptions;
@@ -5245,6 +5248,7 @@ ENDSTRING:
     full_rlen = rlen;
     if ((dat_datctl.control & CTL_ZERO_TERMINATE) != 0)
       rlen = PCRE2_ZERO_TERMINATED;
+    obptr = ((dat_datctl.control2 & CTL2_NULL_SUBSTITUTE_BUFFER) == 0) ? rep_out_buffer : NULL;
     rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0) ? rep_in_buffer : NULL;
 
     /* If the substitute_subject modifier is set, then we will modify the
@@ -5319,7 +5323,7 @@ ENDSTRING:
     nsize_input = nsize;
     rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
                           dat_datctl.options | xoptions, smatch_data, use_dat_context, rbptr, rlen,
-                          rep_out_buffer, &nsize);
+                          obptr, &nsize);
 
     /* For malloc testing, we repeat the substitution. */
 
@@ -5335,7 +5339,7 @@ ENDSTRING:
         nsize = nsize_input;
         rc = pcre2_substitute(compiled_code, sbptr, slen, dat_datctl.offset,
                               dat_datctl.options | xoptions, smatch_data, use_dat_context, rbptr,
-                              rlen, rep_out_buffer, &nsize);
+                              rlen, obptr, &nsize);
         mallocs_until_failure = INT_MAX;
         outfile = saved_outfile;
 

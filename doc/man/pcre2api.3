@@ -4747,11 +4747,12 @@ extra space for the terminating NUL. This value is passed back via the
 \fIblength\fP variable, with the result of the function still being
 \fBPCRE2_ERROR_NOMEMORY\fP.
 .sp
-Passing a buffer size of zero is a permitted way of finding out how much memory
-is needed for given substitution. However, this does mean that the entire
-operation is carried out twice. Depending on the application, it may be more
-efficient to allocate a large buffer and free the excess afterwards, instead of
-using \fBPCRE2_SUBSTITUTE_OVERFLOW_LENGTH\fP.
+Passing a buffer size of zero (with \fIbuffer\fP optionally \f(CRNULL\fP) is a
+permitted way of finding out how much memory is needed for given substitution.
+However, this does mean that the entire operation is carried out twice.
+Depending on the application, it may be more efficient to allocate a large
+buffer and free the excess afterwards, instead of using
+\fBPCRE2_SUBSTITUTE_OVERFLOW_LENGTH\fP.
 .sp
 The replacement string, which is interpreted as a UTF string in UTF mode, is
 checked for UTF validity unless \fBPCRE2_NO_UTF_CHECK\fP is set. An invalid UTF
@@ -4985,9 +4986,10 @@ default.
 \fBPCRE2_ERROR_NULL\fP
 .ad l
 is returned if \fBPCRE2_SUBSTITUTE_MATCHED\fP is set but the
-\fImatch_data\fP argument is \f(CRNULL\fP or if the \fIsubject\fP or \fIreplacement\fP
-arguments are \f(CRNULL\fP. For backward compatibility reasons an exception is made for
-the \fIreplacement\fP argument if the \fIrlength\fP argument is also \f(CR0\fP.
+\fImatch_data\fP argument is \f(CRNULL\fP; or if the \fIsubject\fP or \fIreplacement\fP
+or \fIbuffer\fP argument is \f(CRNULL\fP. However, a \f(CRNULL\fP \fIreplacement\fP
+argument is allowed if the \fIrlength\fP argument is zero; and similarly for
+\fIsubject\fP with zero \fIlength\fP and \fIbuffer\fP with zero \fIblength\fP.
 .TP 24
 \fBPCRE2_ERROR_BADREPLACEMENT\fP
 .ad l

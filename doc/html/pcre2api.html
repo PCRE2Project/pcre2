@@ -5177,11 +5177,12 @@ extra space for the terminating NUL. This value is passed back via the
 <code class="constant">PCRE2_ERROR_NOMEMORY</code>.</p>
 </div>
 <div class="paragraph">
-<p>Passing a buffer size of zero is a permitted way of finding out how much memory
-is needed for given substitution. However, this does mean that the entire
-operation is carried out twice. Depending on the application, it may be more
-efficient to allocate a large buffer and free the excess afterwards, instead of
-using <code class="constant">PCRE2_SUBSTITUTE_OVERFLOW_LENGTH</code>.</p>
+<p>Passing a buffer size of zero (with <code class="parameter">buffer</code> optionally <code class="c">NULL</code>) is a
+permitted way of finding out how much memory is needed for given substitution.
+However, this does mean that the entire operation is carried out twice.
+Depending on the application, it may be more efficient to allocate a large
+buffer and free the excess afterwards, instead of using
+<code class="constant">PCRE2_SUBSTITUTE_OVERFLOW_LENGTH</code>.</p>
 </div>
 <div class="paragraph">
 <p>The replacement string, which is interpreted as a UTF string in UTF mode, is
@@ -5423,9 +5424,10 @@ default.</p>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_NULL</code></dt>
 <dd>
 <p>is returned if <code class="constant">PCRE2_SUBSTITUTE_MATCHED</code> is set but the
-<code class="parameter">match_data</code> argument is <code class="c">NULL</code> or if the <code class="parameter">subject</code> or <code class="parameter">replacement</code>
-arguments are <code class="c">NULL</code>. For backward compatibility reasons an exception is made for
-the <code class="parameter">replacement</code> argument if the <code class="parameter">rlength</code> argument is also <code class="c">0</code>.</p>
+<code class="parameter">match_data</code> argument is <code class="c">NULL</code>; or if the <code class="parameter">subject</code> or <code class="parameter">replacement</code>
+or <code class="parameter">buffer</code> argument is <code class="c">NULL</code>. However, a <code class="c">NULL</code> <code class="parameter">replacement</code>
+argument is allowed if the <code class="parameter">rlength</code> argument is zero; and similarly for
+<code class="parameter">subject</code> with zero <code class="parameter">length</code> and <code class="parameter">buffer</code> with zero <code class="parameter">blength</code>.</p>
 </dd>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADREPLACEMENT</code></dt>
 <dd>

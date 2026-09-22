@@ -3990,11 +3990,12 @@ extra space for the terminating NUL. This value is passed back via the
 arg:blength variable, with the result of the function still being
 const:PCRE2_ERROR_NOMEMORY.
 
-Passing a buffer size of zero is a permitted way of finding out how much memory
-is needed for given substitution. However, this does mean that the entire
-operation is carried out twice. Depending on the application, it may be more
-efficient to allocate a large buffer and free the excess afterwards, instead of
-using const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
+Passing a buffer size of zero (with arg:buffer optionally [.c]`NULL`) is a
+permitted way of finding out how much memory is needed for given substitution.
+However, this does mean that the entire operation is carried out twice.
+Depending on the application, it may be more efficient to allocate a large
+buffer and free the excess afterwards, instead of using
+const:PCRE2_SUBSTITUTE_OVERFLOW_LENGTH.
 
 The replacement string, which is interpreted as a UTF string in UTF mode, is
 checked for UTF validity unless const:PCRE2_NO_UTF_CHECK is set. An invalid UTF
@@ -4206,9 +4207,10 @@ const:PCRE2_ERROR_NOMEMORY::
 
 const:PCRE2_ERROR_NULL::
       is returned if const:PCRE2_SUBSTITUTE_MATCHED is set but the
-      arg:match_data argument is [.c]`NULL` or if the arg:subject or arg:replacement
-      arguments are [.c]`NULL`. For backward compatibility reasons an exception is made for
-      the arg:replacement argument if the arg:rlength argument is also [.c]`0`.
+      arg:match_data argument is [.c]`NULL`; or if the arg:subject or arg:replacement
+      or arg:buffer argument is [.c]`NULL`. However, a [.c]`NULL` arg:replacement
+      argument is allowed if the arg:rlength argument is zero; and similarly for
+      arg:subject with zero arg:length and arg:buffer with zero arg:blength.
 
 const:PCRE2_ERROR_BADREPLACEMENT::
       is used for miscellaneous syntax errors in the

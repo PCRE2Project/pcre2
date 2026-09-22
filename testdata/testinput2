@@ -6475,6 +6475,27 @@ a)"xI
 /X+/replace=[20]
     >XX<\=null_replacement
 
+# A NULL output buffer is permitted when the buffer length is zero. This is the
+# natural way to make a sizing call with substitute_overflow_length.
+
+/a/substitute_overflow_length
+    xay\=replace=[0]b,null_substitute_buffer
+    xay\=replace=[0]b,null_substitute_buffer,offset=1
+    xyz\=replace=[0]b,null_substitute_buffer
+    \=replace=[0]b,null_substitute_buffer
+    \=replace=[0]b,null_substitute_buffer,null_subject
+    aaa\=replace=[0]bb,null_substitute_buffer,global
+    ay\=replace=[0],null_substitute_buffer,substitute_literal,substitute_replacement_only
+    ay\=replace=[0]\Uzz,null_substitute_buffer,substitute_extended
+
+/a/
+\= Expect no more memory, without a length
+    xay\=replace=[0]b,null_substitute_buffer
+\= Expect PCRE2_ERROR_NULL (NULL output buffer with a non-zero length)
+    xay\=replace=[10]b,null_substitute_buffer
+    xay\=replace=b,null_substitute_buffer
+    xay\=replace=[10]b,null_substitute_buffer,substitute_overflow_length
+
 # --------- 
 
 /[Aa]{2}/BI
