@@ -423,7 +423,7 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
     {
       PCRE2_SIZE rest_len = input_end - input;
 
-      if (!overflow && rest_len <= output_cap)
+      if (!overflow && rest_len <= output_cap && rest_len != 0)
         memcpy(output, input, CU2BYTES(rest_len));
 
       if (rest_len > ~(PCRE2_SIZE)0 - written) // Integer overflow
@@ -661,7 +661,8 @@ length. */
     }                                                                          \
     else                                                                       \
     {                                                                          \
-      memcpy(buffer + buff_offset, from, CU2BYTES(chkmc_length));              \
+      if (chkmc_length != 0)                                                   \
+        memcpy(buffer + buff_offset, from, CU2BYTES(chkmc_length));            \
       buff_offset += chkmc_length;                                             \
       lengthleft -= chkmc_length;                                              \
     }                                                                          \
@@ -764,7 +765,9 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   BOOL partial = (options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0;
   PCRE2_UCHAR temp[6];
   PCRE2_UCHAR null_str[1] = { 0xcd };
+  PCRE2_UCHAR null_buffer[1] = { 0xcd };
   PCRE2_SPTR original_subject = subject;
+  PCRE2_UCHAR *original_buffer = buffer;
   PCRE2_SPTR ptr;
   PCRE2_SPTR repend = NULL;
   PCRE2_SIZE extra_needed = 0;
@@ -826,6 +829,16 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   if (length == PCRE2_ZERO_TERMINATED)
     length = PRIV(strlen)(subject);
+
+  /* A NULL output buffer of zero length is permitted: it is the natural way to
+  ask for the required size with PCRE2_SUBSTITUTE_OVERFLOW_LENGTH. */
+
+  if (buffer == NULL)
+  {
+    if (buff_length != 0)
+      return PCRE2_ERROR_NULL;
+    buffer = null_buffer;
+  }
 
   /* Check for using a match that has already happened. Note that the subject
   pointer in the match data may be NULL after a no-match. */
@@ -936,8 +949,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   /* Fixed things in the callout block */
 
   scb.version = 0;
-  scb.input = subject;
-  scb.output = (PCRE2_SPTR)buffer;
+  scb.input = original_subject;
+  scb.output = (PCRE2_SPTR)original_buffer;
   scb.ovector = ovector;
 
   /* Check UTF replacement string if necessary. */
@@ -1818,6 +1831,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   }
 
 EXIT:
+  PCRE2_ASSERT(null_buffer[0] == 0xcd); // Check the canary was not overwritten
   if (internal_match_data != NULL)
     pcre2_match_data_free(internal_match_data);
   else
