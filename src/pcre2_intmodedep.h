@@ -495,7 +495,9 @@ into one PCRE2_UCHAR unit. */
 
 #define MAX_UTF_SINGLE_CU (0x10ffffu)
 #define HAS_EXTRALEN(c)   (0)
+/* LCOV_EXCL_START */
 #define GET_EXTRALEN(c)   (0)
+/* LCOV_EXCL_STOP */
 #define NOT_FIRSTCU(c)    (0)
 
 /* Get the next UTF-32 character, not advancing the pointer. This is called when

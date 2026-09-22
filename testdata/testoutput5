@@ -485,6 +485,122 @@ May match empty string
 Options: utf
 Subject length lower bound = 0
 
+# Exercise the opcode forms that find_bracket() must skip while resolving a
+# recursive subpattern reference during compilation.
+/[^\x{100}](a)(?1)/I,utf
+Capture group count = 1
+Options: utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/(?C'name')(a)(?1)/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
+/(?<=a)(a)(?1)/I
+Capture group count = 1
+Max lookbehind = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}*(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}*?(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}+(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/\p{L}+?(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/\p{L}?(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}??(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}*+(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}++(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/\p{L}?+(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 2
+
+/\p{L}{1,3}(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/\p{L}{1,3}?(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/\p{L}{1,3}+(a)(?1)/I,utf,ucp
+Capture group count = 1
+Options: ucp utf
+Last code unit = 'a'
+Subject length lower bound = 3
+
+/(*MARK:A)(a)(?1)/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
+/(*COMMIT:A)(a)(?1)/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
+/(*PRUNE:A)(a)(?1)/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
+/(*SKIP:A)(a)(?1)/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
+/(*THEN:A)(a)(?1)/I
+Capture group count = 1
+First code unit = 'a'
+Subject length lower bound = 2
+
 /\W/utf
     A.B
  0: .
@@ -596,6 +712,24 @@ Matched, but too many substrings
 \= Expect no match
     a\n\rb
 No match
+
+/^a.b/newline=any,utf
+    a\x0bb
+No match
+    a\x0cb
+No match
+    a\x{2028}b
+No match
+    a\x{2029}b
+No match
+
+/(?<=.)\R/bsr=unicode,newline=any,utf
+    a\x{2028}
+ 0: \x{2028}
+    a\x{2029}
+ 0: \x{2029}
+    a\r\n
+ 0: \x{0d}\x{0a}
 
 /^a\R*b/bsr=unicode,utf
     ab
