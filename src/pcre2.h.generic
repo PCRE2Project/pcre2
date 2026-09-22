@@ -56,8 +56,6 @@ By default, we use the standard "extern" declarations. */
 #ifndef PCRE2_EXP_DECL
 #  if defined(_WIN32) && !defined(PCRE2_STATIC)
 #    define PCRE2_EXP_DECL extern __declspec(dllimport)
-#  elif defined __cplusplus
-#    define PCRE2_EXP_DECL extern "C"
 #  else
 #    define PCRE2_EXP_DECL extern
 #  endif
