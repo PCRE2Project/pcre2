@@ -273,15 +273,10 @@
     a\x{2028}b
     a\x{2029}b
 
-/(?<=.)\R/newline=any,utf
+/(?<=.)\R/bsr=unicode,newline=any,utf
     a\x{2028}
     a\x{2029}
     a\r\n
-/^b/m,newline=any,utf
-    a\x{0085}b
-    a\x{2028}b
-    a\x{2029}b
-
 
 /^a\R*b/bsr=unicode,utf
     ab

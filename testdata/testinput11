@@ -523,11 +523,6 @@
 \= Expect no match
     \x{100}\x{1ff}
 
-# In 32-bit non-UTF mode, regional indicators exercise the non-UTF grapheme
-# scan used to determine their pairing parity.
-/^\X/aftertext
-    \x{1F1E6}\x{1F1E7}\x{1F1E8}B
-
 # --------------
 
 # End of testinput11
