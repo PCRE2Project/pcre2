@@ -1,0 +1,98 @@
+= pcre2_config(3)
+:doctype: manpage
+:manname: pcre2_config
+:manpurpose: show build-time related configuration options
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 03 September 2025
+:revdate: 03 September 2025
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_config(uint32_t what, void *where);
+----
+
+== Description
+
+This function makes it possible for a client program to find out which optional
+features are available in the version of the PCRE2 library it is using. The
+arguments are as follows:
+
+[.parameters]
+arg:what::
+    A code specifying what information is required
+arg:where::
+    Points to where to put the information
+
+If arg:where is [.c]`NULL`, the function returns the amount of memory needed for
+the requested information. When the information is a string, the value is in
+code units; for other types of data it is in bytes.
+
+If arg:where is not [.c]`NULL`, for const:PCRE2_CONFIG_JITTARGET,
+const:PCRE2_CONFIG_UNICODE_VERSION, and const:PCRE2_CONFIG_VERSION it must point to a
+buffer that is large enough to hold the string. For all other codes it must
+point to a [.c]`uint32_t` integer variable. The available codes are:
+
+[.values]
+const:PCRE2_CONFIG_BSR::
+    Indicates what [.regex]`\R` matches by default:
+    const:PCRE2_BSR_UNICODE
+    const:PCRE2_BSR_ANYCRLF
+const:PCRE2_CONFIG_COMPILED_WIDTHS::
+    Which of `8/16/32` support was compiled
+const:PCRE2_CONFIG_DEPTHLIMIT::
+    Default backtracking depth limit
+const:PCRE2_CONFIG_EFFECTIVE_LINKSIZE::
+    How many bytes are used for link size
+const:PCRE2_CONFIG_HEAPLIMIT::
+    Default heap memory limit
+const:PCRE2_CONFIG_JIT::
+    Availability of just-in-time compiler
+    support (`1=yes 0=no`)
+const:PCRE2_CONFIG_JITTARGET::
+    Information (a string) about the target
+    architecture for the JIT compiler
+const:PCRE2_CONFIG_LINKSIZE::
+    Configured internal link size (`2`, `3`, `4`)
+const:PCRE2_CONFIG_MATCHLIMIT::
+    Default internal resource limit
+const:PCRE2_CONFIG_NEVER_BACKSLASH_C::
+    Whether or not [.regex]`\C` is disabled
+const:PCRE2_CONFIG_NEWLINE::
+    Code for the default newline sequence:
+    const:PCRE2_NEWLINE_CR
+    const:PCRE2_NEWLINE_LF
+    const:PCRE2_NEWLINE_CRLF
+    const:PCRE2_NEWLINE_ANY
+    const:PCRE2_NEWLINE_ANYCRLF
+    const:PCRE2_NEWLINE_NUL
+const:PCRE2_CONFIG_PARENSLIMIT::
+    Default parentheses nesting limit
+const:PCRE2_CONFIG_RECURSIONLIMIT::
+    Obsolete: use const:PCRE2_CONFIG_DEPTHLIMIT
+const:PCRE2_CONFIG_STACKRECURSE::
+    Obsolete: always returns `0`
+const:PCRE2_CONFIG_UNICODE::
+    Availability of Unicode support
+    (`1=yes 0=no`)
+const:PCRE2_CONFIG_UNICODE_VERSION::
+    The Unicode version (a string)
+const:PCRE2_CONFIG_VERSION::
+    The PCRE2 version (a string)
+
+The function yields a non-negative value on success or the negative value
+const:PCRE2_ERROR_BADOPTION otherwise. This is also the result for the
+const:PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string is
+requested, the function returns the number of code units used, including the
+terminating zero.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

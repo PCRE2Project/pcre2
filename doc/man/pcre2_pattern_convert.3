@@ -1,0 +1,134 @@
+'\" t
+.\"     Title: pcre2_pattern_convert
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 12 July 2017
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_PATTERN_CONVERT" "3" "12 July 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_pattern_convert \- foreign pattern converter
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_pattern_convert(\fBPCRE2_SPTR\fP \fIpattern\fP, \fBPCRE2_SIZE\fP \fIplength\fP,
+                          \fBuint32_t\fP \fIoptions\fP, \fBPCRE2_UCHAR\fP **\fIbuffptr\fP,
+                          \fBPCRE2_SIZE\fP *\fIbufflenptr\fP,
+                          \fBpcre2_convert_context\fP *\fIccontext\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This function is part of an experimental set of pattern conversion functions.
+It converts a foreign pattern (for example, a glob) into a PCRE2 regular
+expression pattern. Its arguments are:
+.sp
+.RS 4
+.PD 0
+.TP 11
+\fIpattern\fP
+.ad l
+The foreign pattern
+.TP 11
+\fIplength\fP
+.ad l
+The length of the input pattern or \fBPCRE2_ZERO_TERMINATED\fP
+.TP 11
+\fIoptions\fP
+.ad l
+Option bits
+.TP 11
+\fIbuffptr\fP
+.ad l
+Pointer to pointer to output buffer, or \f(CRNULL\fP
+.TP 11
+\fIbufflenptr\fP
+.ad l
+Pointer to output length field
+.TP 11
+\fIccontext\fP
+.ad l
+Pointer to a convert context or \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
+.sp
+The length of the converted pattern (excluding the terminating zero) is
+returned via \fIbufflenptr\fP. If \fIbuffptr\fP is \f(CRNULL\fP, the function just returns
+the output length. If \fIbuffptr\fP points to a \f(CRNULL\fP pointer, heap memory is
+obtained for the converted pattern, using the allocator in the context if
+present (or else \f(CRmalloc()\fP), and the field pointed to by \fIbuffptr\fP is
+updated. If \fIbuffptr\fP points to a non\-\f(CRNULL\fP field, that must point to a
+buffer whose size is in the variable pointed to by \fIbufflenptr\fP. This value is
+updated.
+.sp
+The option bits are:
+.sp
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_CONVERT_UTF\fP
+.ad l
+Input is UTF
+.TP 24
+\fBPCRE2_CONVERT_NO_UTF_CHECK\fP
+.ad l
+Do not check UTF validity
+.TP 24
+\fBPCRE2_CONVERT_POSIX_BASIC\fP
+.ad l
+Convert POSIX basic pattern
+.TP 24
+\fBPCRE2_CONVERT_POSIX_EXTENDED\fP
+.ad l
+Convert POSIX extended pattern
+.TP 24
+\fBPCRE2_CONVERT_GLOB\fP
+.ad l
+Convert
+.TP 24
+\fBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP
+.ad l
+various types
+.TP 24
+\fBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP
+.ad l
+of glob
+.PD
+.RE
+.PP
+.ad l
+.sp
+The return value from pcre2_pattern_convert() is zero on success or a
+non\-zero PCRE2 error code.
+.sp
+The pattern conversion functions are described in the
+\f(CRpcre2convert\fP
+documentation.

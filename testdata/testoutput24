@@ -512,6 +512,15 @@ No match
 /??a??/
 (?s)\A..a..\z
 
+/[!a]/
+(?s)\A[^a]\z
+
+/[^xy]/
+(?s)\A[^xy]\z
+
+/a*[!b]/
+(?s)\Aa(*COMMIT).*?[^b]\z
+
 #pattern convert=unset
 #pattern convert=glob,convert_glob_escape=0
 

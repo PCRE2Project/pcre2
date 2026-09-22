@@ -5,16 +5,19 @@ import os
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
-def get_current_release():
+
+def get_version_info():
     with open(f"{script_dir}/../configure.ac", 'r') as file:
         content = file.read()
 
-    matches = [match[1] for match in re.findall(r"m4_define\(pcre2_(major|minor|prerelease), \[(.*?)\]\)", content)]
-    current_release = '%s.%s%s' % tuple(matches)
+    pattern = r"m4_define\((pcre2_(?:major|minor|prerelease|date)|libpcre2_(?:posix|8|16|32)_version), *\[(.*?)\]\)"
+    return dict(re.findall(pattern, content))
 
-    return current_release
 
-CURRENT_RELEASE = get_current_release()
+VERSION_INFO = get_version_info()
+CURRENT_RELEASE = '%s.%s%s' % (VERSION_INFO['pcre2_major'], VERSION_INFO['pcre2_minor'],
+                               VERSION_INFO['pcre2_prerelease'])
+
 
 # Update a file, using a pattern. Verify that it matches the file, and perform
 # the replacement.

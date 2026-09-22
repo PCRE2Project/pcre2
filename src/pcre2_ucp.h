@@ -69,36 +69,36 @@ enum {
 /* These are the particular character categories. */
 
 enum {
-  ucp_Cc,    /* Control */
-  ucp_Cf,    /* Format */
-  ucp_Cn,    /* Unassigned */
-  ucp_Co,    /* Private use */
-  ucp_Cs,    /* Surrogate */
-  ucp_Ll,    /* Lower case letter */
-  ucp_Lm,    /* Modifier letter */
-  ucp_Lo,    /* Other letter */
-  ucp_Lt,    /* Title case letter */
-  ucp_Lu,    /* Upper case letter */
-  ucp_Mc,    /* Spacing mark */
-  ucp_Me,    /* Enclosing mark */
-  ucp_Mn,    /* Non-spacing mark */
-  ucp_Nd,    /* Decimal number */
-  ucp_Nl,    /* Letter number */
-  ucp_No,    /* Other number */
-  ucp_Pc,    /* Connector punctuation */
-  ucp_Pd,    /* Dash punctuation */
-  ucp_Pe,    /* Close punctuation */
-  ucp_Pf,    /* Final punctuation */
-  ucp_Pi,    /* Initial punctuation */
-  ucp_Po,    /* Other punctuation */
-  ucp_Ps,    /* Open punctuation */
-  ucp_Sc,    /* Currency symbol */
-  ucp_Sk,    /* Modifier symbol */
-  ucp_Sm,    /* Mathematical symbol */
-  ucp_So,    /* Other symbol */
-  ucp_Zl,    /* Line separator */
-  ucp_Zp,    /* Paragraph separator */
-  ucp_Zs,    /* Space separator */
+  ucp_Cc, /* Control */
+  ucp_Cf, /* Format */
+  ucp_Cn, /* Unassigned */
+  ucp_Co, /* Private use */
+  ucp_Cs, /* Surrogate */
+  ucp_Ll, /* Lower case letter */
+  ucp_Lm, /* Modifier letter */
+  ucp_Lo, /* Other letter */
+  ucp_Lt, /* Title case letter */
+  ucp_Lu, /* Upper case letter */
+  ucp_Mc, /* Spacing mark */
+  ucp_Me, /* Enclosing mark */
+  ucp_Mn, /* Non-spacing mark */
+  ucp_Nd, /* Decimal number */
+  ucp_Nl, /* Letter number */
+  ucp_No, /* Other number */
+  ucp_Pc, /* Connector punctuation */
+  ucp_Pd, /* Dash punctuation */
+  ucp_Pe, /* Close punctuation */
+  ucp_Pf, /* Final punctuation */
+  ucp_Pi, /* Initial punctuation */
+  ucp_Po, /* Other punctuation */
+  ucp_Ps, /* Open punctuation */
+  ucp_Sc, /* Currency symbol */
+  ucp_Sk, /* Modifier symbol */
+  ucp_Sm, /* Mathematical symbol */
+  ucp_So, /* Other symbol */
+  ucp_Zl, /* Line separator */
+  ucp_Zp, /* Paragraph separator */
+  ucp_Zs, /* Space separator */
 };
 
 /* These are Boolean properties. */
@@ -172,29 +172,29 @@ enum {
 /* These are the bidi class values. */
 
 enum {
-  ucp_bidiAL,   /* Arabic_Letter */
-  ucp_bidiAN,   /* Arabic_Number */
-  ucp_bidiB,    /* Paragraph_Separator */
-  ucp_bidiBN,   /* Boundary_Neutral */
-  ucp_bidiCS,   /* Common_Separator */
-  ucp_bidiEN,   /* European_Number */
-  ucp_bidiES,   /* European_Separator */
-  ucp_bidiET,   /* European_Terminator */
-  ucp_bidiFSI,  /* First_Strong_Isolate */
-  ucp_bidiL,    /* Left_To_Right */
-  ucp_bidiLRE,  /* Left_To_Right_Embedding */
-  ucp_bidiLRI,  /* Left_To_Right_Isolate */
-  ucp_bidiLRO,  /* Left_To_Right_Override */
-  ucp_bidiNSM,  /* Nonspacing_Mark */
-  ucp_bidiON,   /* Other_Neutral */
-  ucp_bidiPDF,  /* Pop_Directional_Format */
-  ucp_bidiPDI,  /* Pop_Directional_Isolate */
-  ucp_bidiR,    /* Right_To_Left */
-  ucp_bidiRLE,  /* Right_To_Left_Embedding */
-  ucp_bidiRLI,  /* Right_To_Left_Isolate */
-  ucp_bidiRLO,  /* Right_To_Left_Override */
-  ucp_bidiS,    /* Segment_Separator */
-  ucp_bidiWS,   /* White_Space */
+  ucp_bidiAL,  /* Arabic_Letter */
+  ucp_bidiAN,  /* Arabic_Number */
+  ucp_bidiB,   /* Paragraph_Separator */
+  ucp_bidiBN,  /* Boundary_Neutral */
+  ucp_bidiCS,  /* Common_Separator */
+  ucp_bidiEN,  /* European_Number */
+  ucp_bidiES,  /* European_Separator */
+  ucp_bidiET,  /* European_Terminator */
+  ucp_bidiFSI, /* First_Strong_Isolate */
+  ucp_bidiL,   /* Left_To_Right */
+  ucp_bidiLRE, /* Left_To_Right_Embedding */
+  ucp_bidiLRI, /* Left_To_Right_Isolate */
+  ucp_bidiLRO, /* Left_To_Right_Override */
+  ucp_bidiNSM, /* Nonspacing_Mark */
+  ucp_bidiON,  /* Other_Neutral */
+  ucp_bidiPDF, /* Pop_Directional_Format */
+  ucp_bidiPDI, /* Pop_Directional_Isolate */
+  ucp_bidiR,   /* Right_To_Left */
+  ucp_bidiRLE, /* Right_To_Left_Embedding */
+  ucp_bidiRLI, /* Right_To_Left_Isolate */
+  ucp_bidiRLO, /* Right_To_Left_Override */
+  ucp_bidiS,   /* Segment_Separator */
+  ucp_bidiWS,  /* White_Space */
 };
 
 /* These are grapheme break properties. The Extended Pictographic property
@@ -408,6 +408,6 @@ enum {
 
 #define ucd_script_sets_item_size 4
 
-#endif  /* PCRE2_UCP_H_IDEMPOTENT_GUARD */
+#endif /* PCRE2_UCP_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_ucp.h */

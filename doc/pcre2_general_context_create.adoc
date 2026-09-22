@@ -1,0 +1,35 @@
+= pcre2_general_context_create(3)
+:doctype: manpage
+:manname: pcre2_general_context_create
+:manpurpose: create a general context
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 23 January 2023
+:revdate: 23 January 2023
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+pcre2_general_context *pcre2_general_context_create(
+      void *(*private_malloc)(size_t size, void *memory_data),
+      void (*private_free)(void *ptr, void *memory_data),
+      void *memory_data);
+----
+
+== Description
+
+This function creates and initializes a general context. The arguments define
+custom memory management functions and a data value that is passed to them when
+they are called. The arg:private_malloc() function is used to get memory for
+the context. If either of the first two arguments is [.c]`NULL`, the system memory
+management function is used. The result is [.c]`NULL` if no memory could be obtained.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

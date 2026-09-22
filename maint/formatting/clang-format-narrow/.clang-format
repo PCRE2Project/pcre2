@@ -1,0 +1,11 @@
+---
+
+# I find it annoying, but clang-format won't let you 'inherit' a config by name
+# explicitly; only by searching upwards through the directory tree for a file
+# with the implicit .clang-format (or _clang-format) name. Hence, for the files
+# that need to be formatted at a narrower width, we must create the config in
+# a dummy subdirectory.
+
+BasedOnStyle: InheritParentConfig
+ColumnLimit: 78
+BreakAfterReturnType: All

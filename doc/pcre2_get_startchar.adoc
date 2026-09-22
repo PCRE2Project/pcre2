@@ -1,0 +1,34 @@
+= pcre2_get_startchar(3)
+:doctype: manpage
+:manname: pcre2_get_startchar
+:manpurpose: get the starting character offset
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 25 October 2014
+:revdate: 25 October 2014
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
+----
+
+== Description
+
+After a successful call of func:pcre2_match() that was passed the match block
+that is this function's argument, this function returns the code unit offset of
+the character at which the successful match started. For a non-partial match,
+this can be different to the value of [.c]`ovector[0]` if the pattern contains
+the [.regex]`\K` escape sequence. After a partial match, however, this value is always
+the same as [.c]`ovector[0]` because [.regex]`\K` does not affect the result of a
+partial match.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

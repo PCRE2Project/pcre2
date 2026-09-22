@@ -1,0 +1,33 @@
+= pcre2_set_max_pattern_length(3)
+:doctype: manpage
+:manname: pcre2_set_max_pattern_length
+:manpurpose: set the maximum length of a pattern
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 05 October 2016
+:revdate: 05 October 2016
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_set_max_pattern_length(pcre2_compile_context *ccontext,
+                                 PCRE2_SIZE length);
+----
+
+== Description
+
+This function sets, in a compile context, the maximum text length (in code
+units) of the pattern that can be compiled. The result is always zero. If a
+longer pattern is passed to func:pcre2_compile() there is an immediate error
+return. The default is effectively unlimited, being the largest value a
+type:PCRE2_SIZE variable can hold. Setting this value makes the limit unlimited.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

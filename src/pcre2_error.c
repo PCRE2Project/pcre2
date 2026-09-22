@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#define STRING(a)  # a
+#define STRING(a)  #a
 #define XSTRING(s) STRING(s)
 
 /* The texts of compile-time error messages. Compile-time error numbers start
@@ -60,6 +60,7 @@ Each substring ends with \0 to insert a null character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
 counting through. */
 
+// clang-format off
 static const unsigned char compile_error_texts[] =
   "no error\0"
   "\\ at end of pattern\0"
@@ -132,7 +133,7 @@ static const unsigned char compile_error_texts[] =
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "(?R (recursive pattern call) must be followed by a closing parenthesis\0"
   /* "an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)\0" */
-  "obsolete error (should not occur)\0"  /* Was the above */
+  "obsolete error (should not occur)\0"  // Was the above
   /* 60 */
   "(*VERB) not recognized or malformed\0"
   "subpattern number is too big\0"
@@ -212,9 +213,11 @@ static const unsigned char compile_error_texts[] =
   /* 120 */
   "erroroffset passed as NULL\0"
   ;
+// clang-format on
 
 /* Match-time and UTF error texts are in the same format. */
 
+// clang-format off
 static const unsigned char match_error_texts[] =
   "no error\0"
   "no match\0"
@@ -260,7 +263,7 @@ static const unsigned char match_error_texts[] =
   /* 35 */
   "invalid replacement string\0"
   "bad offset into UTF string\0"
-  "callout error code\0"              /* Never returned by PCRE2 itself */
+  "callout error code\0"              // Never returned by PCRE2 itself
   "invalid data in workspace for DFA restart\0"
   "too much recursion for DFA matching\0"
   /* 40 */
@@ -309,6 +312,7 @@ static const unsigned char match_error_texts[] =
   "disallowed use of \\K in lookaround\0"
   "replacement $' or $_ not supported with partial match\0"
   ;
+// clang-format on
 
 
 /*************************************************
@@ -321,66 +325,70 @@ negative for match-time errors (except for UTF errors), but the numbers are all
 distinct.
 
 Arguments:
-  enumber       error number
+  errorcode     error number
   buffer        where to put the message (zero terminated)
-  size          size of the buffer in code units
+  bufflen       size of the buffer in code units
 
 Returns:        length of message if all is well
                 negative on error
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
+pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer, PCRE2_SIZE bufflen)
 {
-const unsigned char *message;
-PCRE2_SIZE i;
-int n, rc = 0;
+  const unsigned char *message;
+  PCRE2_SIZE i;
+  int n, rc = 0;
 
-if (size == 0) return PCRE2_ERROR_NOMEMORY;
+  if (bufflen == 0)
+    return PCRE2_ERROR_NOMEMORY;
 
-if (enumber >= COMPILE_ERROR_BASE)  /* Compile error */
+  if (errorcode >= COMPILE_ERROR_BASE) // Compile error
   {
-  message = compile_error_texts;
-  n = enumber - COMPILE_ERROR_BASE;
+    message = compile_error_texts;
+    n = errorcode - COMPILE_ERROR_BASE;
   }
-else if (enumber < 0)               /* Match or UTF error */
+  else if (errorcode < 0) // Match or UTF error
   {
-  message = match_error_texts;
-  n = -enumber;
+    message = match_error_texts;
+    n = -errorcode;
   }
-else                                /* Invalid error number */
+  else // Invalid error number
   {
-  message = (const unsigned char *)"\0";  /* Empty message list */
-  n = 1;
-  }
-
-for (; n > 0; n--)
-  {
-  while (*message++ != CHAR_NUL) {}
-  if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
+    message = (const unsigned char *)"\0"; // Empty message list
+    n = 1;
   }
 
-for (i = 0; *message != 0; i++)
+  for (; n > 0; n--)
   {
-  if (i >= size - 1)
+    while (*message++ != CHAR_NUL)
+    {}
+    if (*message == CHAR_NUL)
+      return PCRE2_ERROR_BADDATA;
+  }
+
+  for (i = 0; *message != 0; i++)
+  {
+    if (i >= bufflen - 1)
     {
-    rc = PCRE2_ERROR_NOMEMORY;
-    break;
+      rc = PCRE2_ERROR_NOMEMORY;
+      break;
     }
-  buffer[i] = *message++;
+
+    buffer[i] = *message++;
   }
 
 #if defined EBCDIC && 'a' != 0x81
-/* If compiling for EBCDIC, but the compiler's string literals are not EBCDIC,
-then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
-here to translate the error strings on the fly, rather than require the string
-literals above to be written out arduously using the "STR_XYZ" macros. */
-for (PCRE2_SIZE j = 0; j < i; ++j)
-  buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
+  /* If compiling for EBCDIC, but the compiler's string literals are not EBCDIC,
+  then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
+  here to translate the error strings on the fly, rather than require the string
+  literals above to be written out arduously using the "STR_XYZ" macros. */
+  for (PCRE2_SIZE j = 0; j < i; ++j)
+    buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
 #endif
 
-buffer[i] = 0;     /* Terminate message, even if truncated. */
-return rc? rc : (int)i;
+  buffer[i] = 0; // Terminate message, even if truncated.
+  return rc ? rc : (int)i;
 }
 
 /* End of pcre2_error.c */

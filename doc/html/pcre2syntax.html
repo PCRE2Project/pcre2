@@ -1,781 +1,1455 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>pcre2syntax specification</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.20">
+<title>pcre2syntax(3)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
 </head>
-<body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-<h1>pcre2syntax man page</h1>
-<p>
-Return to the <a href="index.html">PCRE2 index page</a>.
-</p>
-<p>
-This page is part of the PCRE2 HTML documentation. It was generated
-automatically from the original man page. If there is any nonsense in it,
-please consult the man page, in case the conversion went wrong.
-<br>
-<ul>
-<li><a name="TOC1" href="#SEC1">PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY</a>
-<li><a name="TOC2" href="#SEC2">QUOTING</a>
-<li><a name="TOC3" href="#SEC3">BRACED ITEMS</a>
-<li><a name="TOC4" href="#SEC4">ESCAPED CHARACTERS</a>
-<li><a name="TOC5" href="#SEC5">CHARACTER TYPES</a>
-<li><a name="TOC6" href="#SEC6">GENERAL CATEGORY PROPERTIES FOR \p and \P</a>
-<li><a name="TOC7" href="#SEC7">PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P</a>
-<li><a name="TOC8" href="#SEC8">BINARY PROPERTIES FOR \p AND \P</a>
-<li><a name="TOC9" href="#SEC9">SCRIPT MATCHING WITH \p AND \P</a>
-<li><a name="TOC10" href="#SEC10">THE BIDI_CLASS PROPERTY FOR \p AND \P</a>
-<li><a name="TOC11" href="#SEC11">CHARACTER CLASSES</a>
-<li><a name="TOC12" href="#SEC12">PERL EXTENDED CHARACTER CLASSES</a>
-<li><a name="TOC13" href="#SEC13">QUANTIFIERS</a>
-<li><a name="TOC14" href="#SEC14">ANCHORS AND SIMPLE ASSERTIONS</a>
-<li><a name="TOC15" href="#SEC15">REPORTED MATCH POINT SETTING</a>
-<li><a name="TOC16" href="#SEC16">ALTERNATION</a>
-<li><a name="TOC17" href="#SEC17">CAPTURING</a>
-<li><a name="TOC18" href="#SEC18">ATOMIC GROUPS</a>
-<li><a name="TOC19" href="#SEC19">COMMENT</a>
-<li><a name="TOC20" href="#SEC20">OPTION SETTING</a>
-<li><a name="TOC21" href="#SEC21">NEWLINE CONVENTION</a>
-<li><a name="TOC22" href="#SEC22">WHAT \R MATCHES</a>
-<li><a name="TOC23" href="#SEC23">LOOKAHEAD AND LOOKBEHIND ASSERTIONS</a>
-<li><a name="TOC24" href="#SEC24">NON-ATOMIC LOOKAROUND ASSERTIONS</a>
-<li><a name="TOC25" href="#SEC25">SUBSTRING SCAN ASSERTION</a>
-<li><a name="TOC26" href="#SEC26">SCRIPT RUNS</a>
-<li><a name="TOC27" href="#SEC27">BACKREFERENCES</a>
-<li><a name="TOC28" href="#SEC28">SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)</a>
-<li><a name="TOC29" href="#SEC29">CONDITIONAL PATTERNS</a>
-<li><a name="TOC30" href="#SEC30">BACKTRACKING CONTROL</a>
-<li><a name="TOC31" href="#SEC31">CALLOUTS</a>
-<li><a name="TOC32" href="#SEC32">REPLACEMENT STRINGS</a>
-<li><a name="TOC33" href="#SEC33">SEE ALSO</a>
-<li><a name="TOC34" href="#SEC34">AUTHOR</a>
-<li><a name="TOC35" href="#SEC35">REVISION</a>
-</ul>
-<h2><a name="SEC1" href="#TOC1">PCRE2 REGULAR EXPRESSION SYNTAX SUMMARY</a></h2>
-<p>
-The full syntax and semantics of the regular expression patterns that are
+<body class="manpage">
+<div id="header">
+<h1>pcre2syntax(3) Manual Page</h1>
+<h2>Name</h2>
+<div class="sectionbody">
+<p>pcre2syntax - PCRE2 syntax quick reference</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_pcre2_regular_expression_syntax_summary">PCRE2 regular expression syntax summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The full syntax and semantics of the regular expression patterns that are
 supported by PCRE2 are described in the
-<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
+<a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation. This document contains a quick-reference summary of the pattern
 syntax followed by the syntax of replacement strings in substitution function.
 The full description of the latter is in the
-<a href="pcre2api.html"><b>pcre2api</b></a>
-documentation.
-</p>
-<h2><a name="SEC2" href="#TOC1">QUOTING</a></h2>
-<p>
-<pre>
-  \x         where x is non-alphanumeric is a literal x
-  \Q...\E    treat enclosed characters as literal
-</pre>
-Note that white space inside \Q...\E is always treated as literal, even if
-PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also
-that PCRE2's handling of \Q...\E has some differences from Perl's. See the
-<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
-documentation for details.
-</p>
-<h2><a name="SEC3" href="#TOC1">BRACED ITEMS</a></h2>
-<p>
-With one exception, wherever brace characters { and } are required to enclose
-data for constructions such as \g{2} or \k{name}, space and/or horizontal tab
+<a href="pcre2api.html"><code>pcre2api</code></a>
+documentation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_quoting">Quoting</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\x         where x is non-alphanumeric is a literal x
+\Q...\E    treat enclosed characters as literal</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that white space inside <code class="regex">\Q&#8230;&#8203;\E</code> is always treated as literal, even if
+<code class="constant">PCRE2_EXTENDED</code> is set, causing most other white space to be ignored. Note also
+that PCRE2&#8217;s handling of <code class="regex">\Q&#8230;&#8203;\E</code> has some differences from Perl&#8217;s. See the
+<a href="pcre2pattern.html"><code>pcre2pattern</code></a>
+documentation for details.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_braced_items">Braced items</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With one exception, wherever brace characters <code class="regex">{</code> and <code class="regex">}</code> are required to enclose
+data for constructions such as <code class="regex">\g{2}</code> or <code class="regex">\k{name}</code>, space and/or horizontal tab
 characters that follow { or precede } are allowed and are ignored. In the case
 of quantifiers, they may also appear before or after the comma. The exception
-is \u{...} which is not Perl-compatible and is recognized only when
-PCRE2_EXTRA_ALT_BSUX is set. This is an ECMAScript compatibility feature, and
-follows ECMAScript's behaviour.
-</p>
-<h2><a name="SEC4" href="#TOC1">ESCAPED CHARACTERS</a></h2>
-<p>
-This table applies to ASCII and Unicode environments. An unrecognized escape
-sequence causes an error.
-<pre>
-  \a         alarm, that is, the BEL character (hex 07)
-  \cx        "control-x", where x is a non-control ASCII character
-  \e         escape (hex 1B)
-  \f         form feed (hex 0C)
-  \n         newline (hex 0A)
-  \r         carriage return (hex 0D)
-  \t         tab (hex 09)
-  \0dd       character with octal code 0dd
-  \ddd       character with octal code ddd, or backreference
-  \o{ddd..}  character with octal code ddd..
-  \N{U+hh..} character with Unicode code point hh.. (Unicode mode only)
-  \xhh       character with hex code hh
-  \x{hh..}   character with hex code hh..
-</pre>
-\N{U+hh..} is synonymous with \x{hh..} but is not supported in environments
+is <code class="regex">\u{&#8230;&#8203;}</code> which is not Perl-compatible and is recognized only when
+<code class="constant">PCRE2_EXTRA_ALT_BSUX</code> is set. This is an ECMAScript compatibility feature, and
+follows ECMAScript&#8217;s behaviour.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_escaped_characters">Escaped characters</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This table applies to ASCII and Unicode environments. An unrecognized escape
+sequence causes an error.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\a         alarm, that is, the BEL character (hex 07)
+\cx        "control-x", where x is a non-control ASCII character
+\e         escape (hex 1B)
+\f         form feed (hex 0C)
+\n         newline (hex 0A)
+\r         carriage return (hex 0D)
+\t         tab (hex 09)
+\0dd       character with octal code 0dd
+\ddd       character with octal code ddd, or backreference
+\o{ddd..}  character with octal code ddd..
+\N{U+hh..} character with Unicode code point hh.. (Unicode mode only)
+\xhh       character with hex code hh
+\x{hh..}   character with hex code hh..</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code class="regex">\N{U+hh..}</code> is synonymous with <code class="regex">\x{hh..}</code> but is not supported in environments
 that use EBCDIC code (mainly IBM mainframes). Note that \N not followed by an
-opening curly bracket has a different meaning (see below).
-</p>
-<p>
-If PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set ("ALT_BSUX mode"), the
-following are also recognized:
-<pre>
-  \U         the character "U"
-  \uhhhh     character with hex code hhhh
-  \u{hh..}   character with hex code hh.. but only for EXTRA_ALT_BSUX
-</pre>
-When \x is not followed by {, one or two hexadecimal digits are read,
-but in ALT_BSUX mode \x must be followed by two hexadecimal digits to be
+opening curly bracket has a different meaning (see below).</p>
+</div>
+<div class="paragraph">
+<p>If <code class="constant">PCRE2_ALT_BSUX</code> or <code class="constant">PCRE2_EXTRA_ALT_BSUX</code> is set ("ALT_BSUX mode"), the
+following are also recognized:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\U         the character "U"
+\uhhhh     character with hex code hhhh
+\u{hh..}   character with hex code hh.. but only for EXTRA_ALT_BSUX</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When <code class="regex">\x</code> is not followed by <code class="regex">{</code>, one or two hexadecimal digits are read,
+but in ALT_BSUX mode <code class="regex">\x</code> must be followed by two hexadecimal digits to be
 recognized as a hexadecimal escape; otherwise it matches a literal "x".
-Likewise, if \u (in ALT_BSUX mode) is not followed by four hexadecimal digits
+Likewise, if <code class="regex">\u</code> (in ALT_BSUX mode) is not followed by four hexadecimal digits
 or (in EXTRA_ALT_BSUX mode) a sequence of hex digits in curly brackets, it
-matches a literal "u".
-</p>
-<p>
-Note that \0dd is always an octal code. The treatment of backslash followed by
+matches a literal "u".</p>
+</div>
+<div class="paragraph">
+<p>Note that <code class="regex">\0dd</code> is always an octal code. The treatment of backslash followed by
 a non-zero digit is complicated; for details see the section
-<a href="pcre2pattern.html#digitsafterbackslash">"Non-printing characters"</a>
+"Non-printing characters"
 in the
-<a href="pcre2pattern.html"><b>pcre2pattern</b></a>
+<a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation, where details of escape processing in EBCDIC environments are
-also given.
-</p>
-<h2><a name="SEC5" href="#TOC1">CHARACTER TYPES</a></h2>
-<p>
-<pre>
-  .          any character except newline;
-               in dotall mode, any character whatsoever
-  \C         one code unit, even in UTF mode (best avoided)
-  \d         a decimal digit
-  \D         a character that is not a decimal digit
-  \h         a horizontal white space character
-  \H         a character that is not a horizontal white space character
-  \N         a character that is not a newline
-  \p{<i>xx</i>}     a character with the <i>xx</i> property
-  \P{<i>xx</i>}     a character without the <i>xx</i> property
-  \R         a newline sequence
-  \s         a white space character
-  \S         a character that is not a white space character
-  \v         a vertical white space character
-  \V         a character that is not a vertical white space character
-  \w         a "word" character
-  \W         a "non-word" character
-  \X         a Unicode extended grapheme cluster
-</pre>
-\C is dangerous because it may leave the current matching point in the middle
+also given.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_character_types">Character types</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">.          any character except newline;
+             in dotall mode, any character whatsoever
+\C         one code unit, even in UTF mode (best avoided)
+\d         a decimal digit
+\D         a character that is not a decimal digit
+\h         a horizontal white space character
+\H         a character that is not a horizontal white space character
+\N         a character that is not a newline
+\p{_xx_}     a character with the _xx_ property
+\P{_xx_}     a character without the _xx_ property
+\R         a newline sequence
+\s         a white space character
+\S         a character that is not a white space character
+\v         a vertical white space character
+\V         a character that is not a vertical white space character
+\w         a "word" character
+\W         a "non-word" character
+\X         a Unicode extended grapheme cluster</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code class="regex">\C</code> is dangerous because it may leave the current matching point in the middle
 of a UTF-8 or UTF-16 character. The application can lock out the use of \C by
-setting the PCRE2_NEVER_BACKSLASH_C option. It is also possible to build PCRE2
-with the use of \C permanently disabled.
-</p>
-<p>
-By default, \d, \s, and \w match only ASCII characters, even in UTF-8 mode
+setting the <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option. It is also possible to build PCRE2
+with the use of <code class="regex">\C</code> permanently disabled.</p>
+</div>
+<div class="paragraph">
+<p>By default, <code class="regex">\d</code>, <code class="regex">\s</code>, and <code class="regex">\w</code> match only ASCII characters, even in UTF-8 mode
 or in the 16-bit and 32-bit libraries. However, if locale-specific matching is
 happening, \s and \w may also match characters with code points in the range
-128-255. If the PCRE2_UCP option is set, the behaviour of these escape
+128-255. If the <code class="constant">PCRE2_UCP</code> option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
 characters, but there are some option settings that can restrict individual
-sequences to matching only ASCII characters.
-</p>
-<p>
-Property descriptions in \p and \P are matched caselessly; hyphens,
+sequences to matching only ASCII characters.</p>
+</div>
+<div class="paragraph">
+<p>Property descriptions in <code class="regex">\p</code> and <code class="regex">\P</code> are matched caselessly; hyphens,
 underscores, and ASCII white space characters are ignored, in accordance with
-Unicode's "loose matching" rules. For example, \p{Bidi_Class=al} is the same
-as \p{ bidi class = AL }.
-</p>
-<h2><a name="SEC6" href="#TOC1">GENERAL CATEGORY PROPERTIES FOR \p and \P</a></h2>
-<p>
-<pre>
-  C          Other
-  Cc         Control
-  Cf         Format
-  Cn         Unassigned
-  Co         Private use
-  Cs         Surrogate
-
-  L          Letter
-  Lc         Cased letter, the union of Ll, Lu, and Lt
-  L&         Synonym of Lc
-  Ll         Lower case letter
-  Lm         Modifier letter
-  Lo         Other letter
-  Lt         Title case letter
-  Lu         Upper case letter
-
-  M          Mark
-  Mc         Spacing mark
-  Me         Enclosing mark
-  Mn         Non-spacing mark
-
-  N          Number
-  Nd         Decimal number
-  Nl         Letter number
-  No         Other number
-
-  P          Punctuation
-  Pc         Connector punctuation
-  Pd         Dash punctuation
-  Pe         Close punctuation
-  Pf         Final punctuation
-  Pi         Initial punctuation
-  Po         Other punctuation
-  Ps         Open punctuation
-
-  S          Symbol
-  Sc         Currency symbol
-  Sk         Modifier symbol
-  Sm         Mathematical symbol
-  So         Other symbol
-
-  Z          Separator
-  Zl         Line separator
-  Zp         Paragraph separator
-  Zs         Space separator
-</pre>
-From release 10.45, when caseless matching is set, Ll, Lu, and Lt are all
-equivalent to Lc.
-</p>
-<h2><a name="SEC7" href="#TOC1">PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P</a></h2>
-<p>
-<pre>
-  Xan        Alphanumeric: union of properties L and N
-  Xps        POSIX space: property Z or tab, NL, VT, FF, CR
-  Xsp        Perl space: property Z or tab, NL, VT, FF, CR
-  Xuc        Universally-named character: one that can be
-               represented by a Universal Character Name
-  Xwd        Perl word: property Xan or underscore
-</pre>
-Perl and POSIX space are now the same. Perl added VT to its space character set
-at release 5.18.
-</p>
-<h2><a name="SEC8" href="#TOC1">BINARY PROPERTIES FOR \p AND \P</a></h2>
-<p>
-Unicode defines a number of binary properties, that is, properties whose only
+Unicode&#8217;s "loose matching" rules. For example, <code class="regex">\p{Bidi_Class=al}</code> is the same
+as <code class="regex">\p{ bidi class = AL }</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_general_category_properties_for_p_and_p">General category properties for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">C          Other
+Cc         Control
+Cf         Format
+Cn         Unassigned
+Co         Private use
+Cs         Surrogate</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">L          Letter
+Lc         Cased letter, the union of Ll, Lu, and Lt
+L&amp;         Synonym of Lc
+Ll         Lower case letter
+Lm         Modifier letter
+Lo         Other letter
+Lt         Title case letter
+Lu         Upper case letter</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">M          Mark
+Mc         Spacing mark
+Me         Enclosing mark
+Mn         Non-spacing mark</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">N          Number
+Nd         Decimal number
+Nl         Letter number
+No         Other number</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">P          Punctuation
+Pc         Connector punctuation
+Pd         Dash punctuation
+Pe         Close punctuation
+Pf         Final punctuation
+Pi         Initial punctuation
+Po         Other punctuation
+Ps         Open punctuation</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">S          Symbol
+Sc         Currency symbol
+Sk         Modifier symbol
+Sm         Mathematical symbol
+So         Other symbol</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">Z          Separator
+Zl         Line separator
+Zp         Paragraph separator
+Zs         Space separator</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From release 10.45, when caseless matching is set, Ll, Lu, and Lt are all
+equivalent to Lc.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pcre2_special_category_properties_for_p_and_p">PCRE2 special category properties for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">Xan        Alphanumeric: union of properties L and N
+Xps        POSIX space: property Z or tab, NL, VT, FF, CR
+Xsp        Perl space: property Z or tab, NL, VT, FF, CR
+Xuc        Universally-named character: one that can be
+             represented by a Universal Character Name
+Xwd        Perl word: property Xan or underscore</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Perl and POSIX space are now the same. Perl added VT to its space character set
+at release 5.18.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_binary_properties_for_p_and_p">Binary properties for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unicode defines a number of binary properties, that is, properties whose only
 values are true or false. You can obtain a list of those that are recognized by
-\p and \P, along with their abbreviations, by running this command:
-<pre>
-  pcre2test -LP
-</pre>
-</p>
-<h2><a name="SEC9" href="#TOC1">SCRIPT MATCHING WITH \p AND \P</a></h2>
-<p>
-Many script names and their 4-letter abbreviations are recognized in
-\p{sc:...} or \p{scx:...} items, or on their own with \p (and also \P of
-course). You can obtain a list of these scripts by running this command:
-<pre>
-  pcre2test -LS
-</pre>
-</p>
-<h2><a name="SEC10" href="#TOC1">THE BIDI_CLASS PROPERTY FOR \p AND \P</a></h2>
-<p>
-<pre>
-  \p{Bidi_Class:&#60;class&#62;}   matches a character with the given class
-  \p{BC:&#60;class&#62;}           matches a character with the given class
-</pre>
-The recognized classes are:
-<pre>
-  AL          Arabic letter
-  AN          Arabic number
-  B           paragraph separator
-  BN          boundary neutral
-  CS          common separator
-  EN          European number
-  ES          European separator
-  ET          European terminator
-  FSI         first strong isolate
-  L           left-to-right
-  LRE         left-to-right embedding
-  LRI         left-to-right isolate
-  LRO         left-to-right override
-  NSM         non-spacing mark
-  ON          other neutral
-  PDF         pop directional format
-  PDI         pop directional isolate
-  R           right-to-left
-  RLE         right-to-left embedding
-  RLI         right-to-left isolate
-  RLO         right-to-left override
-  S           segment separator
-  WS          white space
-</pre>
-</p>
-<h2><a name="SEC11" href="#TOC1">CHARACTER CLASSES</a></h2>
-<p>
-<pre>
-  [...]       positive character class
-  [^...]      negative character class
-  [x-y]       range (can be used for hex characters)
-  [[:xxx:]]   positive POSIX named set
-  [[:^xxx:]]  negative POSIX named set
-
-  alnum       alphanumeric
-  alpha       alphabetic
-  ascii       0-127
-  blank       space or tab
-  cntrl       control character
-  digit       decimal digit
-  graph       printing, excluding space
-  lower       lower case letter
-  print       printing, including space
-  punct       printing, excluding alphanumeric
-  space       white space
-  upper       upper case letter
-  word        same as \w
-  xdigit      hexadecimal digit
-</pre>
-In PCRE2, POSIX character set names recognize only ASCII characters by default,
-but some of them use Unicode properties if PCRE2_UCP is set. You can use
-\Q...\E inside a character class.
-</p>
-<p>
-When PCRE2_ALT_EXTENDED_CLASS is set, UTS#18 extended character classes may be
-used, allowing nested character classes, combined using set operators.
-<pre>
-  [x&&[^y]]   UTS#18 extended character class
-
-  x||y        set union (OR)
-  x&&y        set intersection (AND)
-  x--y        set difference (AND NOT)
-  x~~y        set symmetric difference (XOR)
-
-</pre>
-</p>
-<h2><a name="SEC12" href="#TOC1">PERL EXTENDED CHARACTER CLASSES</a></h2>
-<p>
-<pre>
-  (?[...])                Perl extended character class
-  (?[\p{Thai} & \p{Nd}])  operators; white space ignored
-  (?[(x - y) & z])        parentheses for grouping
-
-  (?[ [^3] & \p{Nd} ])    [...] is a nested ordinary class
-  (?[ [:alpha:] - [z] ])  POSIX set is allowed outside [...]
-  (?[ \d - [3] ])         backslash-escaped set is allowed outside [...]
-  (?[ !\n & [:ascii:] ])  backslash-escaped character is allowed outside [...]
-                      all other characters or ranges must be enclosed in [...]
-
-  x|y, x+y                set union (OR)
-  x&y                     set intersection (AND)
-  x-y                     set difference (AND NOT)
-  x^y                     set symmetric difference (XOR)
-  !x                      set complement (NOT)
-</pre>
-Inside a Perl extended character class, [...] switches mode to be interpreted
-as an ordinary character class. Outside of a nested [...], the only items
+<code class="regex">\p</code> and <code class="regex">\P</code>, along with their abbreviations, by running this command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">pcre2test -LP</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_script_matching_with_p_and_p">Script matching with <code class="regex">\p</code> and <code class="regex">\P</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Many script names and their 4-letter abbreviations are recognized in
+<code class="regex">\p{sc:&#8230;&#8203;}</code> or <code class="regex">\p{scx:&#8230;&#8203;}</code> items, or on their own with <code class="regex">\p</code> (and also <code class="regex">\P</code> of
+course). You can obtain a list of these scripts by running this command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">pcre2test -LS</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_bidi_class_property_for_p_and_p">The Bidi_Class property for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\p{Bidi_Class:&lt;class&gt;}   matches a character with the given class
+\p{BC:&lt;class&gt;}           matches a character with the given class</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The recognized classes are:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">AL          Arabic letter
+AN          Arabic number
+B           paragraph separator
+BN          boundary neutral
+CS          common separator
+EN          European number
+ES          European separator
+ET          European terminator
+FSI         first strong isolate
+L           left-to-right
+LRE         left-to-right embedding
+LRI         left-to-right isolate
+LRO         left-to-right override
+NSM         non-spacing mark
+ON          other neutral
+PDF         pop directional format
+PDI         pop directional isolate
+R           right-to-left
+RLE         right-to-left embedding
+RLI         right-to-left isolate
+RLO         right-to-left override
+S           segment separator
+WS          white space</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_character_classes">Character classes</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">[...]       positive character class
+[^...]      negative character class
+[x-y]       range (can be used for hex characters)
+[[:xxx:]]   positive POSIX named set
+[[:^xxx:]]  negative POSIX named set</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">alnum       alphanumeric
+alpha       alphabetic
+ascii       0-127
+blank       space or tab
+cntrl       control character
+digit       decimal digit
+graph       printing, excluding space
+lower       lower case letter
+print       printing, including space
+punct       printing, excluding alphanumeric
+space       white space
+upper       upper case letter
+word        same as \w
+xdigit      hexadecimal digit</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In PCRE2, POSIX character set names recognize only ASCII characters by default,
+but some of them use Unicode properties if <code class="constant">PCRE2_UCP</code> is set. You can use
+<code class="regex">\Q&#8230;&#8203;\E</code> inside a character class.</p>
+</div>
+<div class="paragraph">
+<p>When <code class="constant">PCRE2_ALT_EXTENDED_CLASS</code> is set, UTS#18 extended character classes may be
+used, allowing nested character classes, combined using set operators.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">[x&amp;&amp;[^y]]   UTS#18 extended character class</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">x||y        set union (OR)
+x&amp;&amp;y        set intersection (AND)
+x--y        set difference (AND NOT)
+x~~y        set symmetric difference (XOR)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_perl_extended_character_classes">Perl extended character classes</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?[...])                Perl extended character class
+(?[\p{Thai} &amp; \p{Nd}])  operators; white space ignored
+(?[(x - y) &amp; z])        parentheses for grouping</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?[ [^3] &amp; \p{Nd} ])    [...] is a nested ordinary class
+(?[ [:alpha:] - [z] ])  POSIX set is allowed outside [...]
+(?[ \d - [3] ])         backslash-escaped set is allowed outside [...]
+(?[ !\n &amp; [:ascii:] ])  backslash-escaped character is allowed outside [...]
+                    all other characters or ranges must be enclosed in [...]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">x|y, x+y                set union (OR)
+x&amp;y                     set intersection (AND)
+x-y                     set difference (AND NOT)
+x^y                     set symmetric difference (XOR)
+!x                      set complement (NOT)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Inside a Perl extended character class, [&#8230;&#8203;] switches mode to be interpreted
+as an ordinary character class. Outside of a nested [&#8230;&#8203;], the only items
 permitted are backslash-escapes, POSIX sets, operators, and parentheses. Inside
 a nested ordinary class, ^ has its usual meaning (inverts the class when used
-as the first character); outside of a nested class, ^ is the XOR operator.
-</p>
-<h2><a name="SEC13" href="#TOC1">QUANTIFIERS</a></h2>
-<p>
-<pre>
-  ?           0 or 1, greedy
-  ?+          0 or 1, possessive
-  ??          0 or 1, lazy
-  *           0 or more, greedy
-  *+          0 or more, possessive
-  *?          0 or more, lazy
-  +           1 or more, greedy
-  ++          1 or more, possessive
-  +?          1 or more, lazy
-  {n}         exactly n
-  {n,m}       at least n, no more than m, greedy
-  {n,m}+      at least n, no more than m, possessive
-  {n,m}?      at least n, no more than m, lazy
-  {n,}        n or more, greedy
-  {n,}+       n or more, possessive
-  {n,}?       n or more, lazy
-  {,m}        zero up to m, greedy
-  {,m}+       zero up to m, possessive
-  {,m}?       zero up to m, lazy
-</pre>
-</p>
-<h2><a name="SEC14" href="#TOC1">ANCHORS AND SIMPLE ASSERTIONS</a></h2>
-<p>
-<pre>
-  \b          word boundary
-  \B          not a word boundary
-  ^           start of subject
-                also after an internal newline in multiline mode
-                (after any newline if PCRE2_ALT_CIRCUMFLEX is set)
-  \A          start of subject
-  $           end of subject
-                also before newline at end of subject
-                also before internal newline in multiline mode
-  \Z          end of subject
-                also before newline at end of subject
-  \z          end of subject
-  \G          first matching position in subject
-</pre>
-</p>
-<h2><a name="SEC15" href="#TOC1">REPORTED MATCH POINT SETTING</a></h2>
-<p>
-<pre>
-  \K          set reported start of match
-</pre>
-From release 10.38 \K is not permitted by default in lookaround assertions,
-for compatibility with Perl. However, if the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+as the first character); outside of a nested class, ^ is the XOR operator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_quantifiers">Quantifiers</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">?           0 or 1, greedy
+?+          0 or 1, possessive
+??          0 or 1, lazy
+*           0 or more, greedy
+*+          0 or more, possessive
+*?          0 or more, lazy
++           1 or more, greedy
+++          1 or more, possessive
++?          1 or more, lazy
+{n}         exactly n
+{n,m}       at least n, no more than m, greedy
+{n,m}+      at least n, no more than m, possessive
+{n,m}?      at least n, no more than m, lazy
+{n,}        n or more, greedy
+{n,}+       n or more, possessive
+{n,}?       n or more, lazy
+{,m}        zero up to m, greedy
+{,m}+       zero up to m, possessive
+{,m}?       zero up to m, lazy</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_anchors_and_simple_assertions">Anchors and simple assertions</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\b          word boundary
+\B          not a word boundary
+^           start of subject
+              also after an internal newline in multiline mode
+              (after any newline if PCRE2_ALT_CIRCUMFLEX is set)
+\A          start of subject
+$           end of subject
+              also before newline at end of subject
+              also before internal newline in multiline mode
+\Z          end of subject
+              also before newline at end of subject
+\z          end of subject
+\G          first matching position in subject</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reported_match_point_setting">Reported match point setting</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\K          set reported start of match</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From release 10.38 \K is not permitted by default in lookaround assertions,
+for compatibility with Perl. However, if the <code class="constant">PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK</code>
 option is set, the previous behaviour is re-enabled. When this option is set,
-\K is honoured in positive assertions, but ignored in negative ones.
-</p>
-<h2><a name="SEC16" href="#TOC1">ALTERNATION</a></h2>
-<p>
-<pre>
-  expr|expr|expr...
-</pre>
-</p>
-<h2><a name="SEC17" href="#TOC1">CAPTURING</a></h2>
-<p>
-<pre>
-  (...)           capture group
-  (?&#60;name&#62;...)    named capture group (Perl)
-  (?'name'...)    named capture group (Perl)
-  (?P&#60;name&#62;...)   named capture group (Python)
-  (?:...)         non-capture group
-  (?|...)         non-capture group; reset group numbers for
-                   capture groups in each alternative
-</pre>
-In non-UTF modes, names may contain underscores and ASCII letters and digits;
+\K is honoured in positive assertions, but ignored in negative ones.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_alternation">Alternation</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">expr|expr|expr...</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_capturing">Capturing</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(...)           capture group
+(?&lt;name&gt;...)    named capture group (Perl)
+(?'name'...)    named capture group (Perl)
+(?P&lt;name&gt;...)   named capture group (Python)
+(?:...)         non-capture group
+(?|...)         non-capture group; reset group numbers for
+                 capture groups in each alternative</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In non-UTF modes, names may contain underscores and ASCII letters and digits;
 in UTF modes, any Unicode letters and Unicode decimal digits are permitted. In
-both cases, a name must not start with a digit.
-</p>
-<h2><a name="SEC18" href="#TOC1">ATOMIC GROUPS</a></h2>
-<p>
-<pre>
-  (?&#62;...)         atomic non-capture group
-  (*atomic:...)   atomic non-capture group
-</pre>
-</p>
-<h2><a name="SEC19" href="#TOC1">COMMENT</a></h2>
-<p>
-<pre>
-  (?#....)        comment (not nestable)
-</pre>
-</p>
-<h2><a name="SEC20" href="#TOC1">OPTION SETTING</a></h2>
-<p>
-Changes of these options within a group are automatically cancelled at the end
-of the group.
-<pre>
-  (?a)            all ASCII options
-  (?aD)           restrict \d to ASCII in UCP mode
-  (?aS)           restrict \s to ASCII in UCP mode
-  (?aW)           restrict \w to ASCII in UCP mode
-  (?aP)           restrict all POSIX classes to ASCII in UCP mode
-  (?aT)           restrict POSIX digit classes to ASCII in UCP mode
-  (?i)            caseless
-  (?J)            allow duplicate named groups
-  (?m)            multiline
-  (?n)            no auto capture
-  (?r)            restrict caseless to either ASCII or non-ASCII
-  (?s)            single line (dotall)
-  (?U)            default ungreedy (lazy)
-  (?x)            ignore white space except in classes or \Q...\E
-  (?xx)           as (?x) but also ignore space and tab in classes
-  (?-...)         unset the given option(s)
-  (?^)            unset imnrsx options
-</pre>
-(?aP) implies (?aT) as well, though this has no additional effect. However, it
+both cases, a name must not start with a digit.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_atomic_groups">Atomic groups</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?&gt;...)         atomic non-capture group
+(*atomic:...)   atomic non-capture group</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comment">Comment</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?#....)        comment (not nestable)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_option_setting">Option setting</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Changes of these options within a group are automatically cancelled at the end
+of the group.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?a)            all ASCII options
+(?aD)           restrict \d to ASCII in UCP mode
+(?aS)           restrict \s to ASCII in UCP mode
+(?aW)           restrict \w to ASCII in UCP mode
+(?aP)           restrict all POSIX classes to ASCII in UCP mode
+(?aT)           restrict POSIX digit classes to ASCII in UCP mode
+(?i)            caseless
+(?J)            allow duplicate named groups
+(?m)            multiline
+(?n)            no auto capture
+(?r)            restrict caseless to either ASCII or non-ASCII
+(?s)            single line (dotall)
+(?U)            default ungreedy (lazy)
+(?x)            ignore white space except in classes or \Q...\E
+(?xx)           as (?x) but also ignore space and tab in classes
+(?-...)         unset the given option(s)
+(?^)            unset imnrsx options</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(?aP) implies (?aT) as well, though this has no additional effect. However, it
 means that (?-aP) also implies (?-aT) and disables all ASCII restrictions for
-POSIX classes.
-</p>
-<p>
-Unsetting x or xx unsets both. Several options may be set at once, and a
+POSIX classes.</p>
+</div>
+<div class="paragraph">
+<p>Unsetting x or xx unsets both. Several options may be set at once, and a
 mixture of setting and unsetting such as (?i-x) is allowed, but there may be
 only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
 (?^in). An option setting may appear at the start of a non-capture group, for
-example (?i:...).
-</p>
-<p>
-The following are recognized only at the very start of a pattern or after one
+example (?i:&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>The following are recognized only at the very start of a pattern or after one
 of the newline or \R sequences or options with similar syntax. More than one
-of them may appear. For the first three, d is a decimal number.
-<pre>
-  (*LIMIT_DEPTH=d)     set the backtracking limit to d
-  (*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes
-  (*LIMIT_MATCH=d)     set the match limit to d
-  (*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
-  (*NOTEMPTY)          set PCRE2_NOTEMPTY when matching
-  (*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching
-  (*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)
-  (*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
-  (*NO_JIT)            disable JIT optimization
-  (*NO_START_OPT)      no start-match optimization (PCRE2_NO_START_OPTIMIZE)
-  (*TURKISH_CASING)    set PCRE2_EXTRA_TURKISH_CASING when matching
-  (*UTF)               set appropriate UTF mode for the library in use
-  (*UCP)               set PCRE2_UCP (use Unicode properties for \d etc)
-</pre>
-Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the value of
-the limits set by the caller of <b>pcre2_match()</b> or <b>pcre2_dfa_match()</b>,
+of them may appear. For the first three, d is a decimal number.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*LIMIT_DEPTH=d)     set the backtracking limit to d
+(*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes
+(*LIMIT_MATCH=d)     set the match limit to d
+(*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
+(*NOTEMPTY)          set PCRE2_NOTEMPTY when matching
+(*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching
+(*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)
+(*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
+(*NO_JIT)            disable JIT optimization
+(*NO_START_OPT)      no start-match optimization (PCRE2_NO_START_OPTIMIZE)
+(*TURKISH_CASING)    set PCRE2_EXTRA_TURKISH_CASING when matching
+(*UTF)               set appropriate UTF mode for the library in use
+(*UCP)               set PCRE2_UCP (use Unicode properties for \d etc)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the value of
+the limits set by the caller of <code class="function">pcre2_match()</code> or <code class="function">pcre2_dfa_match()</code>,
 not increase them. LIMIT_RECURSION is an obsolete synonym for LIMIT_DEPTH. The
-application can lock out the use of (*UTF) and (*UCP) by setting the
-PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at compile time.
-</p>
-<h2><a name="SEC21" href="#TOC1">NEWLINE CONVENTION</a></h2>
-<p>
-These are recognized only at the very start of the pattern or after option
-settings with a similar syntax.
-<pre>
-  (*CR)           carriage return only
-  (*LF)           linefeed only
-  (*CRLF)         carriage return followed by linefeed
-  (*ANYCRLF)      all three of the above
-  (*ANY)          any Unicode newline sequence
-  (*NUL)          the NUL character (binary zero)
-</pre>
-</p>
-<h2><a name="SEC22" href="#TOC1">WHAT \R MATCHES</a></h2>
-<p>
-These are recognized only at the very start of the pattern or after option
-setting with a similar syntax.
-<pre>
-  (*BSR_ANYCRLF)  CR, LF, or CRLF
-  (*BSR_UNICODE)  any Unicode newline sequence
-</pre>
-</p>
-<h2><a name="SEC23" href="#TOC1">LOOKAHEAD AND LOOKBEHIND ASSERTIONS</a></h2>
-<p>
-<pre>
-  (?=...)                     )
-  (*pla:...)                  ) positive lookahead
-  (*positive_lookahead:...)   )
-
-  (?!...)                     )
-  (*nla:...)                  ) negative lookahead
-  (*negative_lookahead:...)   )
-
-  (?&#60;=...)                    )
-  (*plb:...)                  ) positive lookbehind
-  (*positive_lookbehind:...)  )
-
-  (?&#60;!...)                    )
-  (*nlb:...)                  ) negative lookbehind
-  (*negative_lookbehind:...)  )
-</pre>
-Each top-level branch of a lookbehind must have a limit for the number of
+application can lock out the use of <code class="regex">(*UTF)</code> and <code class="regex">(*UCP)</code> by setting the
+<code class="constant">PCRE2_NEVER_UTF</code> or <code class="constant">PCRE2_NEVER_UCP</code> options, respectively, at compile time.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_newline_convention">Newline convention</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These are recognized only at the very start of the pattern or after option
+settings with a similar syntax.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*CR)           carriage return only
+(*LF)           linefeed only
+(*CRLF)         carriage return followed by linefeed
+(*ANYCRLF)      all three of the above
+(*ANY)          any Unicode newline sequence
+(*NUL)          the NUL character (binary zero)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_r_matches">What \R matches</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These are recognized only at the very start of the pattern or after option
+setting with a similar syntax.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*BSR_ANYCRLF)  CR, LF, or CRLF
+(*BSR_UNICODE)  any Unicode newline sequence</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lookahead_and_lookbehind_assertions">Lookahead and lookbehind assertions</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?=...)                     )
+(*pla:...)                  ) positive lookahead
+(*positive_lookahead:...)   )</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?!...)                     )
+(*nla:...)                  ) negative lookahead
+(*negative_lookahead:...)   )</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?&lt;=...)                    )
+(*plb:...)                  ) positive lookbehind
+(*positive_lookbehind:...)  )</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?&lt;!...)                    )
+(*nlb:...)                  ) negative lookbehind
+(*negative_lookbehind:...)  )</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each top-level branch of a lookbehind must have a limit for the number of
 characters it matches. If any branch can match a variable number of characters,
 the maximum for each branch is limited to a value set by the caller of
-<b>pcre2_compile()</b> or defaulted. The default is set when PCRE2 is built
+<code class="function">pcre2_compile()</code> or defaulted. The default is set when PCRE2 is built
 (ultimate default 255). If every branch matches a fixed number of characters,
-the limit for each branch is 65535 characters.
-</p>
-<h2><a name="SEC24" href="#TOC1">NON-ATOMIC LOOKAROUND ASSERTIONS</a></h2>
-<p>
-These assertions are specific to PCRE2 and are not Perl-compatible.
-<pre>
-  (?*...)                                )
-  (*napla:...)                           ) synonyms
-  (*non_atomic_positive_lookahead:...)   )
-
-  (?&#60;*...)                               )
-  (*naplb:...)                           ) synonyms
-  (*non_atomic_positive_lookbehind:...)  )
-</pre>
-</p>
-<h2><a name="SEC25" href="#TOC1">SUBSTRING SCAN ASSERTION</a></h2>
-<p>
-This feature is not Perl-compatible.
-<pre>
-  (*scan_substring:(grouplist)...)  scan captured substring
-  (*scs:(grouplist)...)             scan captured substring
-</pre>
-The comma-separated list "grouplist" may identify groups in any of the
-following ways:
-<pre>
-  n       absolute reference
-  +n      relative reference
-  -n      relative reference
-  &#60;name&#62;  name
-  'name'  name
-</pre>
-</p>
-<h2><a name="SEC26" href="#TOC1">SCRIPT RUNS</a></h2>
-<p>
-<pre>
-  (*script_run:...)           ) script run, can be backtracked into
-  (*sr:...)                   )
-
-  (*atomic_script_run:...)    ) atomic script run
-  (*asr:...)                  )
-</pre>
-</p>
-<h2><a name="SEC27" href="#TOC1">BACKREFERENCES</a></h2>
-<p>
-<pre>
-  \n              reference by number (can be ambiguous)
-  \gn             reference by number
-  \g{n}           reference by number
-  \g+n            relative reference by number (PCRE2 extension)
-  \g-n            relative reference by number
-  \g{+n}          relative reference by number (PCRE2 extension)
-  \g{-n}          relative reference by number
-  \k&#60;name&#62;        reference by name (Perl)
-  \k'name'        reference by name (Perl)
-  \g{name}        reference by name (Perl)
-  \k{name}        reference by name (.NET)
-  (?P=name)       reference by name (Python)
-</pre>
-</p>
-<h2><a name="SEC28" href="#TOC1">SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)</a></h2>
-<p>
-<pre>
-  (?R)            recurse whole pattern
-  (?n)            call subroutine by absolute number
-  (?+n)           call subroutine by relative number
-  (?-n)           call subroutine by relative number
-  (?&name)        call subroutine by name (Perl)
-  (?P&#62;name)       call subroutine by name (Python)
-  \g&#60;name&#62;        call subroutine by name (Oniguruma)
-  \g'name'        call subroutine by name (Oniguruma)
-  \g&#60;n&#62;           call subroutine by absolute number (Oniguruma)
-  \g'n'           call subroutine by absolute number (Oniguruma)
-  \g&#60;+n&#62;          call subroutine by relative number (PCRE2 extension)
-  \g'+n'          call subroutine by relative number (PCRE2 extension)
-  \g&#60;-n&#62;          call subroutine by relative number (PCRE2 extension)
-  \g'-n'          call subroutine by relative number (PCRE2 extension)
-</pre>
-The variants using parentheses (?...) may also specify a list of capture groups
+the limit for each branch is 65535 characters.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_non_atomic_lookaround_assertions">Non-atomic lookaround assertions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These assertions are specific to PCRE2 and are not Perl-compatible.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?*...)                                )
+(*napla:...)                           ) synonyms
+(*non_atomic_positive_lookahead:...)   )</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?&lt;*...)                               )
+(*naplb:...)                           ) synonyms
+(*non_atomic_positive_lookbehind:...)  )</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_substring_scan_assertion">Substring scan assertion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This feature is not Perl-compatible.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*scan_substring:(grouplist)...)  scan captured substring
+(*scs:(grouplist)...)             scan captured substring</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The comma-separated list "grouplist" may identify groups in any of the
+following ways:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">n       absolute reference
++n      relative reference
+-n      relative reference
+&lt;name&gt;  name
+'name'  name</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_script_runs">Script runs</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*script_run:...)           ) script run, can be backtracked into
+(*sr:...)                   )</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*atomic_script_run:...)    ) atomic script run
+(*asr:...)                  )</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_backreferences">Backreferences</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">\n              reference by number (can be ambiguous)
+\gn             reference by number
+\g{n}           reference by number
+\g+n            relative reference by number (PCRE2 extension)
+\g-n            relative reference by number
+\g{+n}          relative reference by number (PCRE2 extension)
+\g{-n}          relative reference by number
+\k&lt;name&gt;        reference by name (Perl)
+\k'name'        reference by name (Perl)
+\g{name}        reference by name (Perl)
+\k{name}        reference by name (.NET)
+(?P=name)       reference by name (Python)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_subroutine_references_possibly_recursive">Subroutine references (possibly recursive)</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?R)            recurse whole pattern
+(?n)            call subroutine by absolute number
+(?+n)           call subroutine by relative number
+(?-n)           call subroutine by relative number
+(?&amp;name)        call subroutine by name (Perl)
+(?P&gt;name)       call subroutine by name (Python)
+\g&lt;name&gt;        call subroutine by name (Oniguruma)
+\g'name'        call subroutine by name (Oniguruma)
+\g&lt;n&gt;           call subroutine by absolute number (Oniguruma)
+\g'n'           call subroutine by absolute number (Oniguruma)
+\g&lt;+n&gt;          call subroutine by relative number (PCRE2 extension)
+\g'+n'          call subroutine by relative number (PCRE2 extension)
+\g&lt;-n&gt;          call subroutine by relative number (PCRE2 extension)
+\g'-n'          call subroutine by relative number (PCRE2 extension)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The variants using parentheses (?&#8230;&#8203;) may also specify a list of capture groups
 to return, which shall be retained in the calling subexpression if set during
-the recursion (this feature is not supported by Perl).
-<pre>
-  (?R(grouplist))       recurse whole pattern, returning capture groups
-                          (PCRE2 extension)
-  (?n(grouplist))       )
-  (?+n(grouplist))      ) call subroutine, returning capture groups
-  (?-n(grouplist))      )   (PCRE2 extension)
-  (?&name(grouplist))   )
-  (?P&#62;name(grouplist))  )
-</pre>
-The comma-separated list "grouplist" uses the same syntax as
-(*scan_substring:(grouplist)...), and may identify groups in any of the
-following ways:
-<pre>
-  n       absolute reference
-  +n      relative reference
-  -n      relative reference
-  &#60;name&#62;  name
-  'name'  name
-</pre>
-</p>
-<h2><a name="SEC29" href="#TOC1">CONDITIONAL PATTERNS</a></h2>
-<p>
-<pre>
-  (?(condition)yes-pattern)
-  (?(condition)yes-pattern|no-pattern)
-
-  (?(n)                absolute reference condition
-  (?(+n)               relative reference condition (PCRE2 extension)
-  (?(-n)               relative reference condition (PCRE2 extension)
-  (?(&#60;name&#62;)           named reference condition (Perl)
-  (?('name')           named reference condition (Perl)
-  (?(name)             named reference condition (PCRE2, deprecated)
-  (?(R)                overall recursion condition
-  (?(Rn)               specific numbered group recursion condition
-  (?(R&name)           specific named group recursion condition
-  (?(DEFINE)           define groups for reference
-  (?(VERSION[&#62;]=n[.m]) test PCRE2 version
-  (?(assert)           assertion condition
-</pre>
-Note the ambiguity of (?(R) and (?(Rn) which might be named reference
+the recursion (this feature is not supported by Perl).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?R(grouplist))       recurse whole pattern, returning capture groups
+                        (PCRE2 extension)
+(?n(grouplist))       )
+(?+n(grouplist))      ) call subroutine, returning capture groups
+(?-n(grouplist))      )   (PCRE2 extension)
+(?&amp;name(grouplist))   )
+(?P&gt;name(grouplist))  )</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The comma-separated list "grouplist" uses the same syntax as
+<code class="regex">(*scan_substring:(grouplist)&#8230;&#8203;)</code>, and may identify groups in any of the
+following ways:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">n       absolute reference
++n      relative reference
+-n      relative reference
+&lt;name&gt;  name
+'name'  name</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conditional_patterns">Conditional patterns</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?(condition)yes-pattern)
+(?(condition)yes-pattern|no-pattern)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?(n)                absolute reference condition
+(?(+n)               relative reference condition (PCRE2 extension)
+(?(-n)               relative reference condition (PCRE2 extension)
+(?(&lt;name&gt;)           named reference condition (Perl)
+(?('name')           named reference condition (Perl)
+(?(name)             named reference condition (PCRE2, deprecated)
+(?(R)                overall recursion condition
+(?(Rn)               specific numbered group recursion condition
+(?(R&amp;name)           specific named group recursion condition
+(?(DEFINE)           define groups for reference
+(?(VERSION[&gt;]=n[.m]) test PCRE2 version
+(?(assert)           assertion condition</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note the ambiguity of (?&#174; and (?(Rn) which might be named reference
 conditions or recursion tests. Such a condition is interpreted as a reference
-condition if the relevant named group exists.
-<br>
-<br>
-The parts within brackets for the VERSION conditional syntax could be ommited.
-The fractional part of the version number defaults to 0 in that case.
-</p>
-<h2><a name="SEC30" href="#TOC1">BACKTRACKING CONTROL</a></h2>
-<p>
-All backtracking control verbs may be in the form (*VERB:NAME). For (*MARK) the
-name is mandatory, for the others it is optional. (*SKIP) changes its behaviour
+condition if the relevant named group exists.</p>
+</div>
+<div class="paragraph">
+<p>The parts within brackets for the VERSION conditional syntax could be ommited.
+The fractional part of the version number defaults to 0 in that case.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_backtracking_control">Backtracking control</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All backtracking control verbs may be in the form <code class="regex">(*VERB:NAME)</code>. For <code class="regex">(*MARK)</code> the
+name is mandatory, for the others it is optional. <code class="regex">(*SKIP)</code> changes its behaviour
 if :NAME is present. The others just set a name for passing back to the caller,
-but this is not a name that (*SKIP) can see. The following act immediately they
-are reached:
-<pre>
-  (*ACCEPT)       force successful match
-  (*FAIL)         force backtrack; synonym (*F)
-  (*MARK:NAME)    set name to be passed back; synonym (*:NAME)
-</pre>
-The following act only when a subsequent match failure causes a backtrack to
+but this is not a name that <code class="regex">(*SKIP)</code> can see. The following act immediately they
+are reached:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*ACCEPT)       force successful match
+(*FAIL)         force backtrack; synonym (*F)
+(*MARK:NAME)    set name to be passed back; synonym (*:NAME)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following act only when a subsequent match failure causes a backtrack to
 reach them. They all force a match failure, but they differ in what happens
 afterwards. Those that advance the start-of-match point do so only if the
-pattern is not anchored.
-<pre>
-  (*COMMIT)       overall failure, no advance of starting point
-  (*PRUNE)        advance to next starting character
-  (*SKIP)         advance to current matching position
-  (*SKIP:NAME)    advance to position corresponding to an earlier
-                  (*MARK:NAME); if not found, the (*SKIP) is ignored
-  (*THEN)         local failure, backtrack to next alternation
-</pre>
-The effect of one of these verbs in a group called as a subroutine is confined
-to the subroutine call.
-</p>
-<h2><a name="SEC31" href="#TOC1">CALLOUTS</a></h2>
-<p>
-<pre>
-  (?C)            callout (assumed number 0)
-  (?Cn)           callout with numerical data n
-  (?C"text")      callout with string data
-</pre>
-The allowed string delimiters are ` ' " ^ % # $ (which are the same for the
+pattern is not anchored.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(*COMMIT)       overall failure, no advance of starting point
+(*PRUNE)        advance to next starting character
+(*SKIP)         advance to current matching position
+(*SKIP:NAME)    advance to position corresponding to an earlier
+                (*MARK:NAME); if not found, the (*SKIP) is ignored
+(*THEN)         local failure, backtrack to next alternation</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The effect of one of these verbs in a group called as a subroutine is confined
+to the subroutine call.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callouts">Callouts</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-regex" data-lang="regex">(?C)            callout (assumed number 0)
+(?Cn)           callout with numerical data n
+(?C"text")      callout with string data</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The allowed string delimiters are ` ' " ^ % # $ (which are the same for the
 start and the end), and the starting delimiter { matched with the ending
-delimiter }. To encode the ending delimiter within the string, double it.
-</p>
-<h2><a name="SEC32" href="#TOC1">REPLACEMENT STRINGS</a></h2>
-<p>
-If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
-<b>pcre2_substitute()</b> is not interpreted. Otherwise, by default, the only
-special character is the dollar character in one of the following forms:
-<pre>
-  $$                  insert a dollar character
-  $n or ${n}          insert the contents of group <i>n</i>
-  $&#60;name&#62;             insert the contents of named group
-  $0 or $&            insert the entire matched substring
-  $`                  insert the substring that precedes the match
-  $'                  insert the substring that follows the match
-  $_                  insert the entire input string
-  $+                  insert the highest-numbered capture group which matched
-  $*MARK or ${*MARK}  insert a control verb name
-</pre>
-For ${n}, n can be a name or a number. If PCRE2_SUBSTITUTE_EXTENDED is set,
-there is additional interpretation:
-</p>
-<p>
-1. Backslash is an escape character, and the forms described in "ESCAPED
-CHARACTERS" above are recognized. Also:
-<pre>
-  \Q...\E can be used to suppress interpretation
-  \l      force the next character to lower case
-  \u      force the next character to upper case
-  \L      force subsequent characters to lower case
-  \U      force subsequent characters to upper case
-  \u\L    force next character to upper case, then all lower
-  \l\U    force next character to lower case, then all upper
-  \E      end \L or \U case forcing
-  \b      backspace character (note: as in character class in pattern)
-  \v      vertical tab character (note: not the same as in a pattern)
-</pre>
-2. The Python form \g&#60;n&#62;, where the angle brackets are part of the syntax and
-<i>n</i> is either a group name or a number, is recognized as an alternative way
-of inserting the contents of a group, for example \g&#60;3&#62;.
-</p>
-<p>
-3. Capture substitution supports the following additional forms:
-<pre>
-  ${n:-string}             default for unset group
-  ${n:+string1:string2}    values for set/unset group
-</pre>
-The substitution strings themselves are expanded. Backslash can be used to
-escape colons and closing curly brackets.
-</p>
-<h2><a name="SEC33" href="#TOC1">SEE ALSO</a></h2>
-<p>
-<b>pcre2pattern</b>(3), <b>pcre2api</b>(3), <b>pcre2callout</b>(3),
-<b>pcre2matching</b>(3), <b>pcre2</b>(3).
-</p>
-<h2><a name="SEC34" href="#TOC1">AUTHOR</a></h2>
-<p>
-Philip Hazel
-<br>
+delimiter }. To encode the ending delimiter within the string, double it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_replacement_strings">Replacement strings</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the <code class="constant">PCRE2_SUBSTITUTE_LITERAL</code> option is set, a replacement string for
+<code class="function">pcre2_substitute()</code> is not interpreted. Otherwise, by default, the only
+special character is the dollar character in one of the following forms:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">$$                  insert a dollar character
+$n or ${n}          insert the contents of group _n_
+$&lt;name&gt;             insert the contents of named group
+$0 or $&amp;            insert the entire matched substring
+$`                  insert the substring that precedes the match
+$'                  insert the substring that follows the match
+$_                  insert the entire input string
+$+                  insert the highest-numbered capture group which matched
+$*MARK or ${*MARK}  insert a control verb name</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For ${n}, n can be a name or a number. If <code class="constant">PCRE2_SUBSTITUTE_EXTENDED</code> is set,
+there is additional interpretation:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Backslash is an escape character, and the forms described in "ESCAPED
+CHARACTERS" above are recognized. Also:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">\Q...\E can be used to suppress interpretation
+\l      force the next character to lower case
+\u      force the next character to upper case
+\L      force subsequent characters to lower case
+\U      force subsequent characters to upper case
+\u\L    force next character to upper case, then all lower
+\l\U    force next character to lower case, then all upper
+\E      end \L or \U case forcing
+\b      backspace character (note: as in character class in pattern)
+\v      vertical tab character (note: not the same as in a pattern)</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The Python form \g&lt;n&gt;, where the angle brackets are part of the syntax and
+<em>n</em> is either a group name or a number, is recognized as an alternative way
+of inserting the contents of a group, for example \g&lt;3&gt;.</p>
+</li>
+<li>
+<p>Capture substitution supports the following additional forms:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">${n:-string}             default for unset group
+${n:+string1:string2}    values for set/unset group</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The substitution strings themselves are expanded. Backslash can be used to
+escape colons and closing curly brackets.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>pcre2pattern</code>(3), <code>pcre2api</code>(3), <code>pcre2callout</code>(3),
+<code>pcre2matching</code>(3), <code>pcre2</code>(3).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_author">Author</h2>
+<div class="sectionbody">
+<div class="literalblock">
+<div class="content">
+<pre>Philip Hazel
 Retired from University Computing Service
-<br>
-Cambridge, England.
-<br>
-</p>
-<h2><a name="SEC35" href="#TOC1">REVISION</a></h2>
-<p>
-Last updated: 14 October 2025
-<br>
-Copyright &copy; 1997-2024 University of Cambridge.
-<br>
-<p>
-Return to the <a href="index.html">PCRE2 index page</a>.
-</p>
+Cambridge, England.</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_revision">Revision</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last updated: 14 October 2025<br>
+Copyright (c) 1997-2024 University of Cambridge.</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

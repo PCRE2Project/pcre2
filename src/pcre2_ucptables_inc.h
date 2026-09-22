@@ -54,6 +54,7 @@ putting all the names into a single, large string and using offsets instead.
 All letters are lower cased, and underscores are removed, in accordance with
 the "loose matching" rules that Unicode advises and Perl uses. */
 
+// clang-format off
 #define STRING_adlam0 STR_a STR_d STR_l STR_a STR_m "\0"
 #define STRING_adlm0 STR_a STR_d STR_l STR_m "\0"
 #define STRING_aghb0 STR_a STR_g STR_h STR_b "\0"
@@ -572,7 +573,9 @@ the "loose matching" rules that Unicode advises and Perl uses. */
 #define STRING_zs0 STR_z STR_s "\0"
 #define STRING_zyyy0 STR_z STR_y STR_y STR_y "\0"
 #define STRING_zzzz0 STR_z STR_z STR_z STR_z "\0"
+// clang-format on
 
+// clang-format off
 const char PRIV(utt_names)[] =
   STRING_adlam0
   STRING_adlm0
@@ -1092,7 +1095,9 @@ const char PRIV(utt_names)[] =
   STRING_zs0
   STRING_zyyy0
   STRING_zzzz0;
+// clang-format on
 
+// clang-format off
 const ucp_type_table PRIV(utt)[] = {
   {   0, PT_SCX, ucp_Adlam },
   {   6, PT_SCX, ucp_Adlam },
@@ -1613,6 +1618,7 @@ const ucp_type_table PRIV(utt)[] = {
   { 3823, PT_SC, ucp_Common },
   { 3828, PT_SC, ucp_Unknown }
 };
+// clang-format on
 
 const size_t PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
 

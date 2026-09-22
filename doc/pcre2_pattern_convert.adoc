@@ -1,0 +1,75 @@
+= pcre2_pattern_convert(3)
+:doctype: manpage
+:manname: pcre2_pattern_convert
+:manpurpose: foreign pattern converter
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 12 July 2017
+:revdate: 12 July 2017
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
+                          uint32_t options, PCRE2_UCHAR **buffptr,
+                          PCRE2_SIZE *bufflenptr,
+                          pcre2_convert_context *ccontext);
+----
+
+== Description
+
+This function is part of an experimental set of pattern conversion functions.
+It converts a foreign pattern (for example, a glob) into a PCRE2 regular
+expression pattern. Its arguments are:
+
+[.parameters]
+arg:pattern::
+    The foreign pattern
+arg:plength::
+    The length of the input pattern or const:PCRE2_ZERO_TERMINATED
+arg:options::
+    Option bits
+arg:buffptr::
+    Pointer to pointer to output buffer, or [.c]`NULL`
+arg:bufflenptr::
+    Pointer to output length field
+arg:ccontext::
+    Pointer to a convert context or [.c]`NULL`
+
+The length of the converted pattern (excluding the terminating zero) is
+returned via arg:bufflenptr. If arg:buffptr is [.c]`NULL`, the function just returns
+the output length. If arg:buffptr points to a [.c]`NULL` pointer, heap memory is
+obtained for the converted pattern, using the allocator in the context if
+present (or else [.c]`malloc()`), and the field pointed to by arg:buffptr is
+updated. If arg:buffptr points to a non-[.c]`NULL` field, that must point to a
+buffer whose size is in the variable pointed to by arg:bufflenptr. This value is
+updated.
+
+The option bits are:
+
+[.options]
+const:PCRE2_CONVERT_UTF::
+    Input is UTF
+const:PCRE2_CONVERT_NO_UTF_CHECK::
+    Do not check UTF validity
+const:PCRE2_CONVERT_POSIX_BASIC::
+    Convert POSIX basic pattern
+const:PCRE2_CONVERT_POSIX_EXTENDED::
+    Convert POSIX extended pattern
+const:PCRE2_CONVERT_GLOB::
+    Convert
+const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR::
+    various types
+const:PCRE2_CONVERT_GLOB_NO_STARSTAR::
+    of glob
+
+The return value from func:pcre2_pattern_convert() is zero on success or a
+non-zero PCRE2 error code.
+
+The pattern conversion functions are described in the
+xref:pcre2convert.adoc[`pcre2convert`]
+documentation.

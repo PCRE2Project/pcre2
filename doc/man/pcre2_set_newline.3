@@ -1,0 +1,88 @@
+'\" t
+.\"     Title: pcre2_set_newline
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 19 July 2017
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SET_NEWLINE" "3" "19 July 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_set_newline \- set the newline convention
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_set_newline(\fBpcre2_compile_context\fP *\fIccontext\fP,
+                      \fBuint32_t\fP \fInewline\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This function sets the newline convention within a compile context. This
+specifies which character(s) are recognized as newlines when compiling and
+matching patterns. The second argument must be one of:
+.sp
+.RS 4
+.PD 0
+.TP 22
+\fBPCRE2_NEWLINE_CR\fP
+.ad l
+Carriage return only
+.TP 22
+\fBPCRE2_NEWLINE_LF\fP
+.ad l
+Linefeed only
+.TP 22
+\fBPCRE2_NEWLINE_CRLF\fP
+.ad l
+\f(CRCR\fP followed by \f(CRLF\fP only
+.TP 22
+\fBPCRE2_NEWLINE_ANYCRLF\fP
+.ad l
+Any of the above
+.TP 22
+\fBPCRE2_NEWLINE_ANY\fP
+.ad l
+Any Unicode newline sequence
+.TP 22
+\fBPCRE2_NEWLINE_NUL\fP
+.ad l
+The \f(CRNUL\fP character (binary zero)
+.PD
+.RE
+.PP
+.ad l
+.sp
+The result is zero for success or \fBPCRE2_ERROR_BADDATA\fP if the second argument is
+invalid.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

@@ -8,6 +8,7 @@
 import sys
 import re
 
+
 def scan_exclusions(srcpath):
     """Return a set of line numbers to exclude for this source file."""
     with open(srcpath, "r", encoding="utf-8") as fh:
@@ -40,6 +41,7 @@ def scan_exclusions(srcpath):
             excl.add(i)
     return excl
 
+
 DA_RE = re.compile(r'^\s*DA:(\d+),(\d+)(,.*)?\s*$')
 LF_RE = re.compile(r'^\s*LF:(\d+)\s*$')
 LH_RE = re.compile(r'^\s*LH:(\d+)\s*$')
@@ -50,6 +52,7 @@ FN_RE = re.compile(r'^\s*FN:(\d+),([^,\s]*)\s*$')
 FNDA_RE = re.compile(r'^\s*FNDA:(\d+),([^,\s]*)\s*$')
 FNF_RE = re.compile(r'^\s*FNF:(\d+)\s*$')
 FNH_RE = re.compile(r'^\s*FNH:(\d+)\s*$')
+
 
 def process_block(block_lines):
     """Return processed block lines with excluded DA/BRDA removed and LF/LH fixed."""
@@ -165,7 +168,8 @@ def process_block(block_lines):
             try:
                 lf_orig = int(m_lf.group(1))
                 if lf_orig != da_orig_found:
-                    print(f"warning: original LF ({lf_orig}) != counted DA entries ({da_orig_found}) for {sf_path}", file=sys.stderr)
+                    print(f"warning: original LF ({lf_orig}) != counted DA entries ({da_orig_found}) for {sf_path}",
+                          file=sys.stderr)
             except Exception:
                 pass
             continue
@@ -179,7 +183,8 @@ def process_block(block_lines):
             try:
                 lh_orig = int(m_lh.group(1))
                 if lh_orig != da_orig_hit:
-                    print(f"warning: original LH ({lh_orig}) != counted DA hits ({da_orig_hit}) for {sf_path}", file=sys.stderr)
+                    print(f"warning: original LH ({lh_orig}) != counted DA hits ({da_orig_hit}) for {sf_path}",
+                          file=sys.stderr)
             except Exception:
                 pass
             continue
@@ -194,7 +199,9 @@ def process_block(block_lines):
             try:
                 brf_orig = int(m_brf.group(1))
                 if brf_orig != brda_orig_found:
-                    print(f"warning: original BRF ({brf_orig}) != counted BRDA entries ({brda_orig_found}) for {sf_path}", file=sys.stderr)
+                    print(
+                        f"warning: original BRF ({brf_orig}) != counted BRDA entries ({brda_orig_found}) for {sf_path}",
+                        file=sys.stderr)
             except Exception:
                 pass
             continue
@@ -208,7 +215,8 @@ def process_block(block_lines):
             try:
                 brh_orig = int(m_brh.group(1))
                 if brh_orig != brda_orig_hit:
-                    print(f"warning: original BRH ({brh_orig}) != counted BRDA hits ({brda_orig_hit}) for {sf_path}", file=sys.stderr)
+                    print(f"warning: original BRH ({brh_orig}) != counted BRDA hits ({brda_orig_hit}) for {sf_path}",
+                          file=sys.stderr)
             except Exception:
                 pass
             continue
@@ -222,7 +230,9 @@ def process_block(block_lines):
             try:
                 fnf_orig = int(m_fnf.group(1))
                 if fnf_orig != fnda_orig_found:
-                    print(f"warning: original FNF ({fnf_orig}) != counted FNDA entries ({fnda_orig_found}) for {sf_path}", file=sys.stderr)
+                    print(
+                        f"warning: original FNF ({fnf_orig}) != counted FNDA entries ({fnda_orig_found}) for {sf_path}",
+                        file=sys.stderr)
             except Exception:
                 pass
             continue
@@ -236,12 +246,14 @@ def process_block(block_lines):
             try:
                 fnh_orig = int(m_fnh.group(1))
                 if fnh_orig != fnda_orig_hit:
-                    print(f"warning: original FNH ({fnh_orig}) != counted FNDA hits ({fnda_orig_hit}) for {sf_path}", file=sys.stderr)
+                    print(f"warning: original FNH ({fnh_orig}) != counted FNDA hits ({fnda_orig_hit}) for {sf_path}",
+                          file=sys.stderr)
             except Exception:
                 pass
             continue
 
     return new_lines
+
 
 def filter_lcov(in_fh, out_fh):
     lines = in_fh.readlines()
@@ -266,6 +278,7 @@ def filter_lcov(in_fh, out_fh):
             i += 1
 
     out_fh.writelines(out_lines)
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 3:

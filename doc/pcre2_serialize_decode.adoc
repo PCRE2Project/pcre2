@@ -1,0 +1,67 @@
+= pcre2_serialize_decode(3)
+:doctype: manpage
+:manname: pcre2_serialize_decode
+:manpurpose: decode serialized compiled patterns
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 April 2022
+:revdate: 22 April 2022
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int32_t pcre2_serialize_decode(pcre2_code **codes,
+                               int32_t number_of_codes,
+                               const uint8_t *bytes,
+                               pcre2_general_context *gcontext);
+----
+
+== Description
+
+This function decodes a serialized set of compiled patterns back into a list of
+individual patterns. This is possible only on a host that is running the same
+version of PCRE2, with the same code unit width, and the host must also have
+the same endianness, pointer width and type:PCRE2_SIZE type. The arguments for
+func:pcre2_serialize_decode() are:
+
+[.parameters]
+arg:codes::
+    pointer to a vector in which to build the list
+arg:number_of_codes::
+    number of slots in the vector
+arg:bytes::
+    the serialized byte stream
+arg:gcontext::
+    pointer to a general context or [.c]`NULL`
+
+The arg:bytes argument must point to a block of data that was originally
+created by func:pcre2_serialize_encode(), though it may have been saved on
+disc or elsewhere in the meantime. If there are more codes in the serialized
+data than slots in the list, only those compiled patterns that will fit are
+decoded. The yield of the function is the number of decoded patterns, or one of
+the following negative error codes:
+
+[.errors]
+const:PCRE2_ERROR_BADDATA::
+    arg:number_of_codes is zero or less
+const:PCRE2_ERROR_BADMAGIC::
+    mismatch of id bytes in arg:bytes
+const:PCRE2_ERROR_BADMODE::
+    mismatch of variable unit size or PCRE version
+const:PCRE2_ERROR_NOMEMORY::
+    memory allocation failed
+const:PCRE2_ERROR_NULL::
+    arg:codes or arg:bytes is [.c]`NULL`
+
+const:PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
+on a system with different endianness.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the serialization functions in the
+xref:pcre2serialize.adoc[`pcre2serialize`]
+page.

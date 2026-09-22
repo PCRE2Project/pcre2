@@ -105,21 +105,18 @@
 # 2025-03-27 Theodore used standard CMake constructs to export the library's
 #            targets.
 
-################################################################################
-# We have used `gersemi` for auto-formatting our CMake files.
-# Applied to all CMake files using:
-#    > pip3 install gersemi
-#    > gersemi --in-place --line-length 120 --indent 2 \
-#          --definitions cmake/*.cmake \
-#          -- ./CMakeLists.txt ./cmake/*.cmake ./cmake/*.cmake.in
-################################################################################
-
 message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 project(PCRE2 C)
-set(CMAKE_C_STANDARD 99)
+if("c_std_11" IN_LIST CMAKE_C_COMPILE_FEATURES)
+  set(CMAKE_C_STANDARD 11)
+elseif("c_std_99" IN_LIST CMAKE_C_COMPILE_FEATURES)
+  set(CMAKE_C_STANDARD 99)
+else()
+  message(FATAL_ERROR "C compiler must support at least C99.")
+endif()
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
@@ -201,9 +198,24 @@ cmake_pop_check_state()
 
 check_c_source_compiles(
   [=[
+  #ifdef __STDC_NO_ATOMICS__
+  #error "C compiler does not support standard C atomics"
+  #endif
+  #include <stdatomic.h>
+  int main(void) {
+    atomic_int value;
+    atomic_init(&value, 0);
+    return atomic_load(&value);
+  }
+  ]=]
+  HAVE_STDATOMIC_H
+)
+
+check_c_source_compiles(
+  [=[
   #include <stdlib.h>
   #include <limits.h>
-  int main(int c, char *v[]) { char buf[PATH_MAX]; realpath(v[c], buf); return 0; }
+  int main(int c, char *v[]) { char buf[PATH_MAX]; return realpath(v[c], buf) == NULL; }
   ]=]
   HAVE_REALPATH
 )
@@ -391,7 +403,53 @@ set(PCRE2_NEWLINE "LF" CACHE STRING "What to recognize as a newline (one of CR, 
 set(PCRE2_HEAP_MATCH_RECURSE OFF CACHE BOOL "Obsolete option: do not use")
 mark_as_advanced(PCRE2_HEAP_MATCH_RECURSE)
 
-set(PCRE2_SUPPORT_JIT OFF CACHE BOOL "Enable support for Just-in-time compiling.")
+set(PCRE2_SUPPORT_JIT "OFF" CACHE STRING "Enable support for Just-in-time compiling (OFF, ON, or AUTO).")
+set_property(CACHE PCRE2_SUPPORT_JIT PROPERTY STRINGS "OFF" "ON" "AUTO")
+
+# Handle JIT auto-detection
+if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
+  # Try to compile a test that checks if SLJIT supports this CPU
+
+  set(first_run FALSE)
+  if(NOT DEFINED SLJIT_SUPPORTS_THIS_CPU)
+    set(first_run TRUE)
+  endif()
+
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
+  set(
+    _jit_test_source
+    "
+    #define SLJIT_CONFIG_AUTO 1
+    #include \"./sljit_src/sljitConfigCPU.h\"
+    #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+    #error unsupported
+    #endif
+    int main(void) { return 0; }
+  "
+  )
+  check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
+  cmake_pop_check_state()
+
+  if(SLJIT_SUPPORTS_THIS_CPU)
+    if(first_run)
+      message(STATUS "JIT auto-detection: supported on this CPU")
+    endif()
+    set(PCRE2_SUPPORT_JIT_DETECTED ON)
+  else()
+    if(first_run)
+      message(STATUS "JIT auto-detection: not supported on this CPU")
+    endif()
+    set(PCRE2_SUPPORT_JIT_DETECTED OFF)
+  endif()
+
+  unset(_jit_test_source)
+  unset(first_run)
+elseif(PCRE2_SUPPORT_JIT)
+  set(PCRE2_SUPPORT_JIT_DETECTED ON)
+else()
+  set(PCRE2_SUPPORT_JIT_DETECTED OFF)
+endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
   set(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL "Enable SELinux compatible execmem allocator in JIT (experimental).")
@@ -417,6 +475,9 @@ set(
 set(PCRE2_NEVER_BACKSLASH_C OFF CACHE BOOL "If ON, backslash-C (upper case C) is locked out.")
 
 set(PCRE2_SUPPORT_VALGRIND OFF CACHE BOOL "Enable Valgrind support.")
+
+option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support" OFF)
+option(PCRE2_DIFF_FUZZ_SUPPORT "Enable differential fuzzer support (requires fuzz support and JIT)" OFF)
 
 option(PCRE2_SHOW_REPORT "Show the final configuration report" ON)
 option(PCRE2_BUILD_PCRE2GREP "Build pcre2grep" ON)
@@ -573,7 +634,7 @@ if(PCRE2_SUPPORT_UNICODE)
   set(SUPPORT_UNICODE 1)
 endif()
 
-if(PCRE2_SUPPORT_JIT)
+if(PCRE2_SUPPORT_JIT_DETECTED)
   set(SUPPORT_JIT 1)
   if(UNIX)
     find_package(Threads REQUIRED)
@@ -600,6 +661,23 @@ endif()
 
 if(PCRE2_SUPPORT_VALGRIND)
   set(SUPPORT_VALGRIND 1)
+endif()
+
+# Fuzz support validation
+if(PCRE2_FUZZ_SUPPORT)
+  if(NOT PCRE2_BUILD_PCRE2_8)
+    message(FATAL_ERROR "Fuzzer support requires the 8-bit library (PCRE2_BUILD_PCRE2_8)")
+  endif()
+endif()
+
+if(PCRE2_DIFF_FUZZ_SUPPORT)
+  if(NOT PCRE2_FUZZ_SUPPORT)
+    message(FATAL_ERROR "Differential fuzzing support requires fuzzing support (PCRE2_FUZZ_SUPPORT)")
+  endif()
+  if(NOT PCRE2_SUPPORT_JIT_DETECTED)
+    message(FATAL_ERROR "Differential fuzzing support requires JIT support (PCRE2_SUPPORT_JIT)")
+  endif()
+  set(SUPPORT_DIFF_FUZZ 1)
 endif()
 
 if(PCRE2_DISABLE_PERCENT_ZT)
@@ -703,39 +781,18 @@ endif()
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 
-# Parse version numbers and date out of configure.ac
+# Release and library version information
 
-file(
-  STRINGS
-  ${PROJECT_SOURCE_DIR}/configure.ac
-  configure_lines
-  LIMIT_COUNT
-    50 # Read only the first 50 lines of the file
-)
+set(PCRE2_MAJOR "10")
+set(PCRE2_MINOR "49")
+set(PCRE2_PRERELEASE "-DEV")
+set(PCRE2_DATE "2026-11-31")
+set(LIBPCRE2_POSIX_VERSION "3:8:0")
+set(LIBPCRE2_8_VERSION "16:0:16")
+set(LIBPCRE2_16_VERSION "16:0:16")
+set(LIBPCRE2_32_VERSION "16:0:16")
 
-set(
-  SEARCHED_VARIABLES
-  "pcre2_major"
-  "pcre2_minor"
-  "pcre2_prerelease"
-  "pcre2_date"
-  "libpcre2_posix_version"
-  "libpcre2_8_version"
-  "libpcre2_16_version"
-  "libpcre2_32_version"
-)
-foreach(configure_line ${configure_lines})
-  foreach(substitution_variable ${SEARCHED_VARIABLES})
-    string(TOUPPER ${substitution_variable} substitution_variable_upper)
-    if(NOT DEFINED ${substitution_variable_upper})
-      if("${configure_line}" MATCHES "m4_define\\(${substitution_variable}, *\\[(.*)\\]")
-        set(${substitution_variable_upper} "${CMAKE_MATCH_1}")
-      endif()
-    endif()
-  endforeach()
-endforeach()
-
-macro(PARSE_LIB_VERSION variable_prefix)
+macro(parse_lib_version variable_prefix)
   string(REPLACE ":" ";" ${variable_prefix}_VERSION_LIST ${${variable_prefix}_VERSION})
   list(GET ${variable_prefix}_VERSION_LIST 0 ${variable_prefix}_VERSION_CURRENT)
   list(GET ${variable_prefix}_VERSION_LIST 1 ${variable_prefix}_VERSION_REVISION)
@@ -1264,14 +1321,6 @@ if(PCRE2_BUILD_TESTS)
 
   set(PCRE2TEST_SOURCES src/pcre2test.c)
 
-  set(PCRE2TEST_LINKER_FLAGS "")
-  if(MSVC)
-    # This is needed to avoid a stack overflow error in the standard tests. The
-    # flag should be indicated with a forward-slash instead of a hyphen, but
-    # then CMake treats it as a file path.
-    set(PCRE2TEST_LINKER_FLAGS -STACK:2500000)
-  endif()
-
   add_executable(pcre2test ${PCRE2TEST_SOURCES})
   list(APPEND TARGETS pcre2test)
   if(PCRE2_BUILD_PCRE2_8)
@@ -1283,14 +1332,18 @@ if(PCRE2_BUILD_TESTS)
   if(PCRE2_BUILD_PCRE2_32)
     list(APPEND PCRE2TEST_LIBS pcre2-32)
   endif()
-  target_link_libraries(pcre2test ${PCRE2TEST_LIBS} ${PCRE2TEST_LINKER_FLAGS})
+  target_link_libraries(pcre2test ${PCRE2TEST_LIBS})
+  if(MSVC)
+    # This is needed to avoid a stack overflow error in the standard tests.
+    target_link_options(pcre2test PRIVATE /STACK:2500000)
+  endif()
 
   if(PCRE2_BUILD_PCRE2_8)
     add_executable(pcre2posix_test src/pcre2posix_test.c)
     target_link_libraries(pcre2posix_test pcre2-posix pcre2-8)
   endif()
 
-  if(PCRE2_SUPPORT_JIT)
+  if(PCRE2_SUPPORT_JIT_DETECTED)
     add_executable(pcre2_jit_test src/pcre2_jit_test.c)
     set(PCRE2_JIT_TEST_LIBS)
     if(PCRE2_BUILD_PCRE2_8)
@@ -1309,8 +1362,7 @@ if(PCRE2_BUILD_TESTS)
   # Write out a CTest configuration file
   #
   file(
-    WRITE
-    ${PROJECT_BINARY_DIR}/CTestCustom.ctest
+    WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
     "# This is a generated file.
 MESSAGE(\"When testing is complete, review test output in the
 \\\"${PROJECT_BINARY_DIR}/Testing/Temporary\\\" folder.\")
@@ -1318,125 +1370,92 @@ MESSAGE(\" \")
 "
   )
 
-  file(
-    WRITE
-    ${PROJECT_BINARY_DIR}/pcre2_test.sh
-    "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcre2test=${PROJECT_BINARY_DIR}/pcre2test
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2test=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2test
-. ${PROJECT_SOURCE_DIR}/RunTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-"
-  )
+  find_package(Python3 3.7 COMPONENTS Interpreter)
 
-  if(UNIX)
-    add_test(pcre2_test sh ${PROJECT_BINARY_DIR}/pcre2_test.sh)
+  if(Python3_FOUND)
+    add_test(
+      NAME pcre2_test
+      COMMAND
+        Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunTest.py" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test
+        "$<TARGET_FILE:pcre2test>"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
+  elseif(UNIX)
+    add_test(
+      NAME pcre2_test
+      COMMAND sh "${PROJECT_SOURCE_DIR}/RunTest" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test "$<TARGET_FILE:pcre2test>"
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
+  else()
+    message(FATAL_ERROR "Neither Python nor shell support found for pcre2_test")
   endif()
 
   if(PCRE2_BUILD_PCRE2GREP)
-    file(
-      WRITE
-      ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh
-      "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcre2grep=${PROJECT_BINARY_DIR}/pcre2grep
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2grep=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2grep
-pcre2test=${PROJECT_BINARY_DIR}/pcre2test
-test -z \"$CMAKE_CONFIG_TYPE\" || pcre2test=${PROJECT_BINARY_DIR}/$CMAKE_CONFIG_TYPE/pcre2test
-. ${PROJECT_SOURCE_DIR}/RunGrepTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-"
-    )
+    if(Python3_FOUND)
+      add_test(
+        NAME pcre2_grep_test
+        COMMAND
+          Python3::Interpreter "${PROJECT_SOURCE_DIR}/RunGrepTest.py" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test
+          "$<TARGET_FILE:pcre2test>" --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      )
+    elseif(UNIX)
+      add_test(
+        NAME pcre2_grep_test
+        COMMAND
+          sh "${PROJECT_SOURCE_DIR}/RunGrepTest" --srcdir "${PROJECT_SOURCE_DIR}" --pcre2test "$<TARGET_FILE:pcre2test>"
+          --pcre2grep "$<TARGET_FILE:pcre2grep>"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      )
+    else()
+      message(FATAL_ERROR "Neither Python nor shell support found for pcre2_grep_test")
+    endif()
 
-    if(UNIX)
-      add_test(pcre2_grep_test sh ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
-
-      if(PCRE2_EBCDIC)
-        # The grep tests currently fail in EBCDIC mode because the test data
-        # files are in ASCII. This could be fixed properly, but for now, we
-        # have very few EBCDIC users and the pcre2grep utility is hardly even
-        # part of the official project artifacts.
-        set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
-      endif()
+    if(PCRE2_EBCDIC)
+      # The grep tests currently fail in EBCDIC mode because the test data
+      # files are in ASCII. This could be fixed properly, but for now, we
+      # have very few EBCDIC users and the pcre2grep utility is hardly even
+      # part of the official project artifacts.
+      set_property(TEST pcre2_grep_test PROPERTY WILL_FAIL TRUE)
     endif()
   endif()
 
-  if(WIN32)
-    # Provide environment for executing the bat file version of RunTest
-    file(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR} winsrc)
-    file(TO_NATIVE_PATH ${PROJECT_BINARY_DIR} winbin)
-
-    file(
-      WRITE
-      ${PROJECT_BINARY_DIR}/pcre2_test.bat
-      "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winbin}\\pcre2test.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
-call %srcdir%\\RunTest.bat
-if errorlevel 1 exit /b 1
-echo RunTest.bat tests successfully completed
-"
-    )
-
-    add_test(NAME pcre2_test_bat COMMAND pcre2_test.bat)
-    set_tests_properties(pcre2_test_bat PROPERTIES PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
-
-    if(PCRE2_BUILD_PCRE2GREP)
-      file(
-        WRITE
-        ${PROJECT_BINARY_DIR}/pcre2_grep_test.bat
-        "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcre2test=\"${winbin}\\pcre2test.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2test=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2test.exe\"
-SET pcre2grep=\"${winbin}\\pcre2grep.exe\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcre2grep=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcre2grep.exe\"
-call %srcdir%\\RunGrepTest.bat
-if errorlevel 1 exit /b 1
-echo RunGrepTest.bat tests successfully completed
-"
-      )
-
-      add_test(NAME pcre2_grep_test_bat COMMAND pcre2_grep_test.bat)
-      set_tests_properties(
-        pcre2_grep_test_bat
-        PROPERTIES PASS_REGULAR_EXPRESSION "RunGrepTest\\.bat tests successfully completed"
-      )
-    endif()
-
-    if(DEFINED ENV{OSTYPE})
-      if("$ENV{OSTYPE}" STREQUAL "msys")
-        set(MSYS2 TRUE)
-      endif()
-    endif()
-    if(MSYS2)
-      # Both the sh and bat file versions of RunTest are run if make test is used
-      # in msys
-      add_test(pcre2_test_sh sh.exe ${PROJECT_BINARY_DIR}/pcre2_test.sh)
-      if(PCRE2_BUILD_PCRE2GREP)
-        add_test(pcre2_grep_test sh.exe ${PROJECT_BINARY_DIR}/pcre2_grep_test.sh)
-      endif()
-    endif()
-  endif()
-
-  # Changed to accommodate testing whichever location was just built
-
-  if(PCRE2_SUPPORT_JIT)
+  if(PCRE2_SUPPORT_JIT_DETECTED)
     add_test(pcre2_jit_test pcre2_jit_test)
   endif()
 
   if(PCRE2_BUILD_PCRE2_8)
     add_test(pcre2posix_test pcre2posix_test)
+  endif()
+endif()
+
+# Fuzzer support: build pcre2fuzzcheck binaries
+
+if(PCRE2_FUZZ_SUPPORT)
+  if(PCRE2_BUILD_PCRE2_8)
+    # Random naming mismatch: no "-8" suffix on the library.
+    add_library(pcre2-fuzzsupport STATIC src/pcre2_fuzzsupport.c)
+    target_compile_definitions(pcre2-fuzzsupport PRIVATE PCRE2_CODE_UNIT_WIDTH=8)
+
+    add_executable(pcre2fuzzcheck-8 src/pcre2_fuzzsupport.c)
+    target_compile_definitions(pcre2fuzzcheck-8 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=8)
+    target_link_libraries(pcre2fuzzcheck-8 pcre2-8)
+  endif()
+  if(PCRE2_BUILD_PCRE2_16)
+    add_library(pcre2-fuzzsupport-16 STATIC src/pcre2_fuzzsupport.c)
+    target_compile_definitions(pcre2-fuzzsupport-16 PRIVATE PCRE2_CODE_UNIT_WIDTH=16)
+
+    add_executable(pcre2fuzzcheck-16 src/pcre2_fuzzsupport.c)
+    target_compile_definitions(pcre2fuzzcheck-16 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=16)
+    target_link_libraries(pcre2fuzzcheck-16 pcre2-16)
+  endif()
+  if(PCRE2_BUILD_PCRE2_32)
+    add_library(pcre2-fuzzsupport-32 STATIC src/pcre2_fuzzsupport.c)
+    target_compile_definitions(pcre2-fuzzsupport-32 PRIVATE PCRE2_CODE_UNIT_WIDTH=32)
+
+    add_executable(pcre2fuzzcheck-32 src/pcre2_fuzzsupport.c)
+    target_compile_definitions(pcre2fuzzcheck-32 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=32)
+    target_link_libraries(pcre2fuzzcheck-32 pcre2-32)
   endif()
 endif()
 
@@ -1487,8 +1506,8 @@ file(
   SECURITY.md
   SUPPORT-LIFECYCLE.md
 )
-file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
-file(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/*.3)
+file(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/man/*.1)
+file(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/man/*.3)
 
 install(FILES ${man1} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 install(FILES ${man3} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
@@ -1496,11 +1515,7 @@ install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
 install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(MSVC AND INSTALL_MSVC_PDB)
-  install(
-    FILES ${DLL_PDB_FILES}
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    CONFIGURATIONS Debug RelWithDebInfo
-  )
+  install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
 endif()
 
 # Help, only for nice output
@@ -1554,7 +1569,14 @@ if(PCRE2_SHOW_REPORT)
   message(STATUS "  Build 16 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_16}")
   message(STATUS "  Build 32 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
   message(STATUS "  Include debugging code ............ : ${PCRE2_DEBUG}")
-  message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
+  if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
+    message(
+      STATUS
+      "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT} (detected: ${PCRE2_SUPPORT_JIT_DETECTED})"
+    )
+  else()
+    message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
+  endif()
   message(STATUS "  Use SELinux allocator in JIT ...... : ${PCRE2_SUPPORT_JIT_SEALLOC}")
   message(STATUS "  Enable Unicode support ............ : ${PCRE2_SUPPORT_UNICODE}")
   message(STATUS "  Newline char/sequence ............. : ${PCRE2_NEWLINE}")
@@ -1616,6 +1638,8 @@ if(PCRE2_SHOW_REPORT)
     message(STATUS "  Link pcre2test with libreadline ... : Library not found")
   endif()
   message(STATUS "  Enable Valgrind support ........... : ${PCRE2_SUPPORT_VALGRIND}")
+  message(STATUS "  Fuzzer support .................... : ${PCRE2_FUZZ_SUPPORT}")
+  message(STATUS "  Differential fuzzer support ....... : ${PCRE2_DIFF_FUZZ_SUPPORT}")
   if(PCRE2_DISABLE_PERCENT_ZT)
     message(STATUS "  Use %zu and %td ................... : OFF")
   else()

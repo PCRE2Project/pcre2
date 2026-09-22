@@ -1,0 +1,30 @@
+= pcre2_converted_pattern_free(3)
+:doctype: manpage
+:manname: pcre2_converted_pattern_free
+:manpurpose: free converted foreign pattern
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 13 August 2018
+:revdate: 13 August 2018
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);
+----
+
+== Description
+
+This function is part of an experimental set of pattern conversion functions.
+It frees the memory occupied by a converted pattern that was obtained by
+calling func:pcre2_pattern_convert() with arguments that caused it to place
+the converted pattern into newly obtained heap memory. If the argument is [.c]`NULL`,
+the function returns immediately without doing anything.
+
+The pattern conversion functions are described in the
+xref:pcre2convert.adoc[`pcre2convert`]
+documentation.

@@ -1,0 +1,79 @@
+'\" t
+.\"     Title: pcre2_get_error_message
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 24 March 2017
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_GET_ERROR_MESSAGE" "3" "24 March 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_get_error_message \- get textual error message for error number
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_get_error_message(\fBint\fP \fIerrorcode\fP, \fBPCRE2_UCHAR\fP *\fIbuffer\fP,
+                            \fBPCRE2_SIZE\fP \fIbufflen\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This function provides a textual error message for each PCRE2 error code.
+Compilation errors are positive numbers; UTF formatting errors and matching
+errors are negative numbers. The arguments are:
+.sp
+.RS 4
+.PD 0
+.TP 10
+\fIerrorcode\fP
+.ad l
+an error code (positive or negative)
+.TP 10
+\fIbuffer\fP
+.ad l
+where to put the message
+.TP 10
+\fIbufflen\fP
+.ad l
+the length of the buffer (code units)
+.PD
+.RE
+.PP
+.ad l
+.sp
+The function returns the length of the message in code units, excluding the
+trailing zero, or the negative error code \fBPCRE2_ERROR_NOMEMORY\fP if the buffer is
+too small. In this case, the returned message is truncated (but still with a
+trailing zero). If \fIerrorcode\fP does not contain a recognized error code
+number, the negative value \fBPCRE2_ERROR_BADDATA\fP is returned.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

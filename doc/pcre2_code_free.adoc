@@ -1,0 +1,32 @@
+= pcre2_code_free(3)
+:doctype: manpage
+:manname: pcre2_code_free
+:manpurpose: free a compiled pattern
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 28 June 2018
+:revdate: 28 June 2018
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+void pcre2_code_free(pcre2_code *code);
+----
+
+== Description
+
+If arg:code is [.c]`NULL`, this function does nothing. Otherwise, arg:code must
+point to a compiled pattern. This function frees its memory, including any
+memory used by the JIT compiler. If the compiled pattern was created by a call
+to func:pcre2_code_copy_with_tables(), the memory for the character tables is
+also freed.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

@@ -1,0 +1,30 @@
+= pcre2_get_newline(3)
+:doctype: manpage
+:manname: pcre2_get_newline
+:manpurpose: get the newline convention
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 11 September 2026
+:revdate: 11 September 2026
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_get_newline(pcre2_compile_context *ccontext,
+                      uint32_t *newline);
+----
+
+== Description
+
+This function gets the newline convention within a compile context. The result
+is zero for success or const:PCRE2_ERROR_NULL if either argument is [.c]`NULL`.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

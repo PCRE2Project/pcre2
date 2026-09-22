@@ -1,0 +1,102 @@
+= pcre2_dfa_match(3)
+:doctype: manpage
+:manname: pcre2_dfa_match
+:manpurpose: match a pattern using the alternative matching algorithm
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 31 August 2021
+:revdate: 31 August 2021
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
+                    PCRE2_SIZE length, PCRE2_SIZE start_offset,
+                    uint32_t options, pcre2_match_data *match_data,
+                    pcre2_match_context *mcontext, int *workspace,
+                    PCRE2_SIZE wscount);
+----
+
+== Description
+
+This function matches a compiled regular expression against a given subject
+string, using an alternative matching algorithm that scans the subject string
+just once (except when processing lookaround assertions). This function is
+_not_ Perl-compatible (the Perl-compatible matching function is
+func:pcre2_match()). The arguments for this function are:
+
+[.parameters]
+arg:code::
+    Points to the compiled pattern
+arg:subject::
+    Points to the subject string
+arg:length::
+    Length of the subject string
+arg:start_offset::
+    Offset in the subject at which to start matching
+arg:options::
+    Option bits
+arg:match_data::
+    Points to a match data block, for results
+arg:mcontext::
+    Points to a match context, or is [.c]`NULL`
+arg:workspace::
+    Points to a vector of ints used as working space
+arg:wscount::
+    Number of elements in the vector
+
+The size of output vector needed to contain all the results depends on the
+number of simultaneous matches, not on the number of parentheses in the
+pattern. Using func:pcre2_match_data_create_from_pattern() to create the match
+data block is therefore not advisable when using this function.
+
+A match context is needed only if you want to set up a callout function or
+specify the heap limit or the match or the recursion depth limits. The
+arg:length and arg:start_offset values are code units, not characters. The
+options are:
+
+[.options]
+const:PCRE2_ANCHORED::
+    Match only at the first position
+const:PCRE2_COPY_MATCHED_SUBJECT::
+    On success, make a private subject copy
+const:PCRE2_ENDANCHORED::
+    Pattern can match only at end of subject
+const:PCRE2_NOTBOL::
+    Subject is not the beginning of a line
+const:PCRE2_NOTEOL::
+    Subject is not the end of a line
+const:PCRE2_NOTEMPTY::
+    An empty string is not a valid match
+const:PCRE2_NOTEMPTY_ATSTART::
+    An empty string at the start of the subject
+    is not a valid match
+const:PCRE2_NO_UTF_CHECK::
+    Do not check the subject for UTF
+    validity (only relevant if const:PCRE2_UTF
+    was set at compile time)
+const:PCRE2_PARTIAL_HARD::
+    Return const:PCRE2_ERROR_PARTIAL for a partial
+    match even if there is a full match
+const:PCRE2_PARTIAL_SOFT::
+    Return const:PCRE2_ERROR_PARTIAL for a partial
+    match if no full matches are found
+const:PCRE2_DFA_RESTART::
+    Restart after a partial match
+const:PCRE2_DFA_SHORTEST::
+    Return only the shortest match
+
+There are restrictions on what may appear in a pattern when using this matching
+function. Details are given in the
+xref:pcre2matching.adoc[`pcre2matching`]
+documentation. For details of partial matching, see the
+xref:pcre2partial.adoc[`pcre2partial`]
+page. There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

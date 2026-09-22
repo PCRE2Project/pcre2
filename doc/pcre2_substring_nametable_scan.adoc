@@ -1,0 +1,51 @@
+= pcre2_substring_nametable_scan(3)
+:doctype: manpage
+:manname: pcre2_substring_nametable_scan
+:manpurpose: find table entries for given string name
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 06 February 2019
+:revdate: 06 February 2019
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_substring_nametable_scan(const pcre2_code *code,
+                                   PCRE2_SPTR stringname,
+                                   PCRE2_SPTR *firstptr,
+                                   PCRE2_SPTR *lastptr);
+----
+
+== Description
+
+This convenience function finds, for a compiled pattern, the first and last
+entries for a given name in the table that translates capture group names into
+numbers.
+
+[.parameters]
+arg:code::
+    Compiled regular expression
+arg:stringname::
+    Name whose entries required
+arg:firstptr::
+    Where to return a pointer to the first entry
+arg:lastptr::
+    Where to return a pointer to the last entry
+
+When the name is found in the table, if arg:firstptr is [.c]`NULL`, the function
+returns a group number, but if there is more than one matching entry, it is not
+defined which one. Otherwise, when both arg:firstptr and arg:lastptr have been
+set, the yield of
+the function is the length of each entry in code units. If the name is not
+found, const:PCRE2_ERROR_NOSUBSTRING is returned.
+
+There is a complete description of the PCRE2 native API, including the format of
+the table entries, in the
+xref:pcre2api.adoc[`pcre2api`]
+page, and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

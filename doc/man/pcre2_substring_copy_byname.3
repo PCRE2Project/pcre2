@@ -1,0 +1,109 @@
+'\" t
+.\"     Title: pcre2_substring_copy_byname
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 19 December 2014
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SUBSTRING_COPY_BYNAME" "3" "19 December 2014" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_substring_copy_byname \- extract named substring into given buffer
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_substring_copy_byname(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                                \fBPCRE2_SPTR\fP \fIstringname\fP,
+                                \fBPCRE2_UCHAR\fP *\fIbuffer\fP,
+                                \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This is a convenience function for extracting a captured substring, identified
+by name, into a given buffer. The arguments are:
+.sp
+.RS 4
+.PD 0
+.TP 11
+\fImatch_data\fP
+.ad l
+The match data block for the match
+.TP 11
+\fIstringname\fP
+.ad l
+Name of the required substring
+.TP 11
+\fIbuffer\fP
+.ad l
+Buffer to receive the string
+.TP 11
+\fIsizeptr\fP
+.ad l
+Length of buffer (code units)
+.PD
+.RE
+.PP
+.ad l
+.sp
+The \fIsizeptr\fP variable is updated to contain the length of the extracted
+string, excluding the trailing zero. The yield of the function is zero for
+success or one of the following error numbers:
+.sp
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_ERROR_NOSUBSTRING\fP
+.ad l
+there are no groups of that name
+.TP 24
+\fBPCRE2_ERROR_UNAVAILABLE\fP
+.ad l
+the ovector was too small for that group
+.TP 24
+\fBPCRE2_ERROR_UNSET\fP
+.ad l
+the group did not participate in the match
+.TP 24
+\fBPCRE2_ERROR_NOMEMORY\fP
+.ad l
+the buffer is not big enough
+.PD
+.RE
+.PP
+.ad l
+.sp
+If there is more than one group with the given name, the first one that is set
+is returned. In this situation \fBPCRE2_ERROR_UNSET\fP means that no group with the
+given name was set.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

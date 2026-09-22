@@ -59,50 +59,57 @@ to stdout. */
 #include <string.h>
 #include <pcre2posix.h>
 
-#define CAPCOUNT 5               /* Number of captures supported */
-#define PRINTF if (v) printf     /* Shorthand for testing output */
+#define CAPCOUNT    5 /* Number of captures supported */
+#define PRINTF(...)   /* Shorthand for testing output */ \
+  do                                                     \
+  {                                                      \
+    if (v)                                               \
+      printf(__VA_ARGS__);                               \
+  } while (0)
 
 /* This vector contains compiler flags for each pattern that is tested. */
 
 static int cflags[] = {
-  0,           /* Test 0 */
-  REG_ICASE,   /* Test 1 */
-  0,           /* Test 2 */
-  REG_NEWLINE, /* Test 3 */
-  0            /* Test 4 */
+  0,           // Test 0
+  REG_ICASE,   // Test 1
+  0,           // Test 2
+  REG_NEWLINE, // Test 3
+  0,           // Test 4
 };
 
 /* This vector contains match flags for each pattern that is tested. */
 
 static int mflags[] = {
-  0,           /* Test 0 */
-  0,           /* Test 1 */
-  0,           /* Test 2 */
-  REG_NOTBOL,  /* Test 3 */
-  0            /* Test 4 */
+  0,          // Test 0
+  0,          // Test 1
+  0,          // Test 2
+  REG_NOTBOL, // Test 3
+  0,          // Test 4
 };
 
 /* Automate the number of patterns */
 
-#define count (int)(sizeof(cflags)/sizeof(int))
+#define count (int)(sizeof(cflags) / sizeof(int))
 
 /* The data for each pattern consists of a pattern string, followed by any
 number of subject strings, terminated by NULL. Some tests share data, but use
 different flags. */
 
 static const char *data0_1[] = { "posix", "lower posix", "upper POSIX", NULL };
-static const char *data2_3[] = { "(*LF)^(cat|dog)", "catastrophic\ncataclysm",
-  "dogfight", "no animals", NULL };
+static const char *data2_3[] = { "(*LF)^(cat|dog)", "catastrophic\ncataclysm", "dogfight",
+                                 "no animals", NULL };
 static const char *data4[] = { "*badpattern", NULL };
 
 /* Index the data strings */
 
 static char **data[] = {
+  // clang-format off
   (char **)(&data0_1),
   (char **)(&data0_1),
   (char **)(&data2_3),
   (char **)(&data2_3),
-  (char **)(&data4)
+  (char **)(&data4),
+  // clang-format on
 };
 
 /* The expected results for each pattern consist of a compiler return code,
@@ -110,130 +117,145 @@ optionally followed, for each subject string, by a match return code and, for a
 successful match, up to CAPCOUNT pairs of returned match data. */
 
 static int results0[] = {
-  0,             /* Compiler rc */
-  0, 6, 11,      /* 1st match */
-  REG_NOMATCH    /* 2nd match */
+  // clang-format off
+  0,             // Compiler rc
+  0, 6, 11,      // 1st match
+  REG_NOMATCH,   // 2nd match
+  // clang-format on
 };
 
 static int results1[] = {
-  0,             /* Compiler rc */
-  0, 6, 11,      /* 1st match */
-  0, 6, 11       /* 2nd match */
+  // clang-format off
+  0,             // Compiler rc
+  0, 6, 11,      // 1st match
+  0, 6, 11,      // 2nd match
+  // clang-format on
 };
 
 static int results2[] = {
-  0,             /* Compiler rc */
-  0, 0, 3, 0, 3, /* 1st match */
-  0, 0, 3, 0, 3, /* 2nd match */
-  REG_NOMATCH    /* 3rd match */
+  // clang-format off
+  0,             // Compiler rc
+  0, 0, 3, 0, 3, // 1st match
+  0, 0, 3, 0, 3, // 2nd match
+  REG_NOMATCH,   // 3rd match
+  // clang-format on
 };
 
 static int results3[] = {
-  0,                 /* Compiler rc */
-  0, 13, 16, 13, 16, /* 1st match */
-  REG_NOMATCH,       /* 2nd match */
-  REG_NOMATCH        /* 3rd match */
+  // clang-format off
+  0,                 // Compiler rc
+  0, 13, 16, 13, 16, // 1st match
+  REG_NOMATCH,       // 2nd match
+  REG_NOMATCH,       // 3rd match
+  // clang-format on
 };
 
 static int results4[] = {
-  REG_BADRPT         /* Compiler rc */
+  // clang-format off
+  REG_BADRPT,        // Compiler rc
+  // clang-format on
 };
 
 /* Index the result vectors */
 
 static int *results[] = {
+  // clang-format off
   (int *)(&results0),
   (int *)(&results1),
   (int *)(&results2),
   (int *)(&results3),
-  (int *)(&results4)
+  (int *)(&results4),
+  // clang-format on
 };
 
 /* And here is the program */
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-regex_t re;
-regmatch_t match[CAPCOUNT];
-int v = argc > 1 && strcmp(argv[1], "-v") == 0;
+  regex_t re;
+  regmatch_t match[CAPCOUNT];
+  int v = argc > 1 && strcmp(argv[1], "-v") == 0;
 
-PRINTF("Test of pcre2posix.h without pcre2.h\n");
+  PRINTF("Test of pcre2posix.h without pcre2.h\n");
 
-for (int i = 0; i < count; i++)
+  for (int i = 0; i < count; i++)
   {
-  char *pattern = data[i][0];
-  char **subjects = data[i] + 1;
-  int *rd = results[i];
-  int rc = regcomp(&re, pattern, cflags[i]);
+    char *pattern = data[i][0];
+    char **subjects = data[i] + 1;
+    int *rd = results[i];
+    int rc = regcomp(&re, pattern, cflags[i]);
 
-  PRINTF("Pattern: %s flags=0x%02x\n", pattern, cflags[i]);
+    PRINTF("Pattern: %s flags=0x%02x\n", pattern, cflags[i]);
 
-  if (rc != *rd)
+    if (rc != *rd)
     {
-    fprintf(stderr, "Unexpected compile error %d (expected %d)\n", rc, *rd);
-    fprintf(stderr, "Pattern is: %s\n", pattern);
-    return 1;
-    }
-
-  if (rc != 0)
-    {
-    char buffer[256];
-    (void)regerror(rc, &re, buffer, sizeof(buffer));
-    PRINTF("Compile error %d: %s (expected)\n", rc, buffer);
-    continue;
-    }
-
-  for (; *subjects != NULL; subjects++)
-    {
-    rc = regexec(&re, *subjects, CAPCOUNT, match, mflags[i]);
-
-    PRINTF("Subject: %s\n", *subjects);
-    PRINTF("Return:  %d", rc);
-
-    if (rc != *(++rd))
-      {
-      PRINTF("\n");
-      fprintf(stderr, "Unexpected match error %d (expected %d)\n", rc, *rd);
+      fprintf(stderr, "Unexpected compile error %d (expected %d)\n", rc, *rd);
       fprintf(stderr, "Pattern is: %s\n", pattern);
-      fprintf(stderr, "Subject is: %s\n", *subjects);
       return 1;
+    }
+
+    if (rc != 0)
+    {
+      char buffer[256];
+      (void)regerror(rc, &re, buffer, sizeof(buffer));
+      PRINTF("Compile error %d: %s (expected)\n", rc, buffer);
+      continue;
+    }
+
+    for (; *subjects != NULL; subjects++)
+    {
+      rc = regexec(&re, *subjects, CAPCOUNT, match, mflags[i]);
+
+      PRINTF("Subject: %s\n", *subjects);
+      PRINTF("Return:  %d", rc);
+
+      if (rc != *(++rd))
+      {
+        PRINTF("\n");
+        fprintf(stderr, "Unexpected match error %d (expected %d)\n", rc, *rd);
+        fprintf(stderr, "Pattern is: %s\n", pattern);
+        fprintf(stderr, "Subject is: %s\n", *subjects);
+        return 1;
       }
 
-    if (rc == 0)
+      if (rc == 0)
       {
-      for (int j = 0; j < CAPCOUNT; j++)
+        for (int j = 0; j < CAPCOUNT; j++)
         {
-        regmatch_t *m = match + j;
-        if (m->rm_so < 0) continue;
-        if (m->rm_so != *(++rd) || m->rm_eo != *(++rd))
+          regmatch_t *m = match + j;
+          if (m->rm_so < 0)
+            continue;
+          if (m->rm_so != *(++rd) || m->rm_eo != *(++rd))
           {
-          PRINTF("\n");
-          fprintf(stderr, "Mismatched results for successful match\n");
-          fprintf(stderr, "Pattern is: %s\n", pattern);
-          fprintf(stderr, "Subject is: %s\n", *subjects);
-          fprintf(stderr, "Result %d: expected %d %d received %d %d\n",
-            j, rd[-1], rd[0], m->rm_so, m->rm_eo);
-          return 1;
+            PRINTF("\n");
+            fprintf(stderr, "Mismatched results for successful match\n");
+            fprintf(stderr, "Pattern is: %s\n", pattern);
+            fprintf(stderr, "Subject is: %s\n", *subjects);
+            fprintf(stderr, "Result %d: expected %d %d received %d %d\n", j, rd[-1], rd[0],
+                    m->rm_so, m->rm_eo);
+            return 1;
           }
-        PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);
+
+          PRINTF(" (%d %d %d)", j, m->rm_so, m->rm_eo);
         }
       }
 
-    else
+      else
       {
-      char buffer[256];
-      (void)regerror(rc, &re, buffer, sizeof(buffer));
-      PRINTF(": %s (expected)", buffer);
+        char buffer[256];
+        (void)regerror(rc, &re, buffer, sizeof(buffer));
+        PRINTF(": %s (expected)", buffer);
       }
 
-    PRINTF("\n");
+      PRINTF("\n");
     }
 
-  regfree(&re);
+    regfree(&re);
   }
 
-PRINTF("End of test\n");
-return 0;
+  PRINTF("End of test\n");
+  return 0;
 }
 
 /* End of pcre2posix_test.c */

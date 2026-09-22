@@ -1,0 +1,43 @@
+= pcre2_substring_length_bynumber(3)
+:doctype: manpage
+:manname: pcre2_substring_length_bynumber
+:manpurpose: find length of numbered substring
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 December 2014
+:revdate: 22 December 2014
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_substring_length_bynumber(pcre2_match_data *match_data,
+                                    uint32_t stringnumber,
+                                    PCRE2_SIZE *sizeptr);
+----
+
+== Description
+
+This function returns the length of a matched substring, identified by number.
+The arguments are:
+
+[.parameters]
+arg:match_data::
+    The match data block for the match
+arg:stringnumber::
+    The substring number
+arg:sizeptr::
+    Where to return the length, or [.c]`NULL`
+
+The third argument may be [.c]`NULL` if all you want to know is whether or not a
+substring is set. The yield is zero on success, or a negative error code
+otherwise. After a partial match, only substring 0 is available.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

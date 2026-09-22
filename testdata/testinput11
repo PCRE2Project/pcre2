@@ -499,6 +499,30 @@
 \= Expect no match
     \x{80000002}
 
+# A negated class accepts every code unit above 255, even when its bitmap
+# leaves out 255 itself.
+
+/[^\x00-\x40\x42-\xff]/
+    A
+    \x{100}
+\= Expect no match
+    \xff
+
+/.{2}[^\x00-\x40\x42-\xff]/
+    xyA
+    xy\x{100}
+\= Expect no match
+    xy\xff
+
+# A positive class accepts no code unit above 255, even when its bitmap
+# includes 255 itself.
+
+/[A\xff]/
+    \x{100}\xff
+    \x{100}A
+\= Expect no match
+    \x{100}\x{1ff}
+
 # --------------
 
 # End of testinput11

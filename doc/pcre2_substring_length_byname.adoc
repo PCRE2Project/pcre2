@@ -1,0 +1,43 @@
+= pcre2_substring_length_byname(3)
+:doctype: manpage
+:manname: pcre2_substring_length_byname
+:manpurpose: find length of named substring
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 26 September 2025
+:revdate: 26 September 2025
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_substring_length_byname(pcre2_match_data *match_data,
+                                  PCRE2_SPTR stringname,
+                                  PCRE2_SIZE *sizeptr);
+----
+
+== Description
+
+This function returns the length of a matched substring, identified by name.
+The arguments are:
+
+[.parameters]
+arg:match_data::
+    The match data block for the match
+arg:stringname::
+    The substring name
+arg:sizeptr::
+    Where to return the length, or [.c]`NULL`
+
+The third argument may be [.c]`NULL` if all you want to know is whether or not a
+substring is set. The yield is zero on success, or a negative error code
+otherwise.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

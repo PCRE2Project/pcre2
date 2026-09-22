@@ -1,0 +1,31 @@
+= pcre2_set_offset_limit(3)
+:doctype: manpage
+:manname: pcre2_set_offset_limit
+:manpurpose: set the offset limit
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 September 2015
+:revdate: 22 September 2015
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_set_offset_limit(pcre2_match_context *mcontext,
+                           PCRE2_SIZE limit);
+----
+
+== Description
+
+This function sets the offset limit field in a match context. The result is
+always zero. The largest value a type:PCRE2_SIZE variable can hold removes the
+offset limit.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

@@ -1,0 +1,29 @@
+= pcre2_get_bsr(3)
+:doctype: manpage
+:manname: pcre2_get_bsr
+:manpurpose: get the \R convention
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 11 September 2026
+:revdate: 11 September 2026
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);
+----
+
+== Description
+
+This function gets the convention for processing [.regex]`\R` within a compile context.
+The result is zero for success or const:PCRE2_ERROR_NULL if either argument is [.c]`NULL`.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

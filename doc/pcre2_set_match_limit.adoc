@@ -1,0 +1,30 @@
+= pcre2_set_match_limit(3)
+:doctype: manpage
+:manname: pcre2_set_match_limit
+:manpurpose: set the match limit
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 25 October 2014
+:revdate: 25 October 2014
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_set_match_limit(pcre2_match_context *mcontext,
+                          uint32_t limit);
+----
+
+== Description
+
+This function sets the match limit field in a match context. The result is
+always zero.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

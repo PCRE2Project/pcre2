@@ -1,0 +1,55 @@
+'\" t
+.\"     Title: pcre2_set_glob_separator
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 17 June 2018
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SET_GLOB_SEPARATOR" "3" "17 June 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_set_glob_separator \- set glob separator character
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_set_glob_separator(\fBpcre2_convert_context\fP *\fIccontext\fP,
+                             \fBuint32_t\fP \fIseparator_char\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This function is part of an experimental set of pattern conversion functions.
+It sets the component separator character that is used when converting globs.
+The second argument must be one of the characters forward slash, backslash, or
+dot. The default is backslash when running under Windows, otherwise forward
+slash. The result of the function is zero for success or \fBPCRE2_ERROR_BADDATA\fP if
+the second argument is invalid.
+.sp
+The pattern conversion functions are described in the
+\f(CRpcre2convert\fP
+documentation.

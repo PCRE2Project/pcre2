@@ -1,0 +1,43 @@
+= pcre2_substring_number_from_name(3)
+:doctype: manpage
+:manname: pcre2_substring_number_from_name
+:manpurpose: convert captured string name to number
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 03 November 2014
+:revdate: 03 November 2014
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+int pcre2_substring_number_from_name(const pcre2_code *code,
+                                     PCRE2_SPTR stringname);
+----
+
+== Description
+
+This convenience function finds the number of a named substring capturing
+parenthesis in a compiled pattern, provided that it is a unique name. The
+function arguments are:
+
+[.parameters]
+arg:code::
+    Compiled regular expression
+arg:stringname::
+    Name whose number is required
+
+The yield of the function is the number of the parenthesis if the name is
+found, or const:PCRE2_ERROR_NOSUBSTRING if it is not found. When duplicate names are
+allowed (const:PCRE2_DUPNAMES is set), if the name is not unique,
+const:PCRE2_ERROR_NOUNIQUESUBSTRING is returned. You can obtain the list of numbers
+with the same name by calling func:pcre2_substring_nametable_scan().
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

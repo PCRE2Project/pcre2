@@ -4850,6 +4850,35 @@ First code unit = 'a'
 Last code unit = 'f'
 Subject length lower bound = 6
 
+# Automatic callouts following explicit callouts
+/a(?C1)/IB,auto_callout
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 1
+        a
+        Callout 1 6 0
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: auto_callout
+First code unit = 'a'
+Subject length lower bound = 1
+
+/a(?C255)/IB,auto_callout
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 1
+        a
+        Callout 255 8 0
+        Ket
+        End
+------------------------------------------------------------------
+Capture group count = 0
+Options: auto_callout
+First code unit = 'a'
+Subject length lower bound = 1
+
 /abcde/IB,auto_callout
 ------------------------------------------------------------------
         Bra

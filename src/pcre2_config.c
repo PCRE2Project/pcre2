@@ -47,7 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 They allow macros like PCRE2_MAJOR to be defined without quotes, which is
 convenient for user programs that want to test their values. */
 
-#define STRING(a)  # a
+#define STRING(a)  #a
 #define XSTRING(s) STRING(s)
 
 
@@ -70,12 +70,12 @@ Returns:           0 if a numerical value is returned
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_config(uint32_t what, void *where)
 {
-if (where == NULL)  /* Requests a length */
+  if (where == NULL) // Requests a length
   {
-  switch (what)
+    switch (what)
     {
     default:
-    return PCRE2_ERROR_BADOPTION;
+      return PCRE2_ERROR_BADOPTION;
 
     case PCRE2_CONFIG_BSR:
     case PCRE2_CONFIG_COMPILED_WIDTHS:
@@ -88,163 +88,159 @@ if (where == NULL)  /* Requests a length */
     case PCRE2_CONFIG_NEVER_BACKSLASH_C:
     case PCRE2_CONFIG_NEWLINE:
     case PCRE2_CONFIG_PARENSLIMIT:
-    case PCRE2_CONFIG_STACKRECURSE:    /* Obsolete */
+    case PCRE2_CONFIG_STACKRECURSE: // Obsolete
     case PCRE2_CONFIG_TABLES_LENGTH:
     case PCRE2_CONFIG_UNICODE:
-    return sizeof(uint32_t);
+      return sizeof(uint32_t);
 
-    /* These are handled below */
+      /* These are handled below */
 
     case PCRE2_CONFIG_JITTARGET:
     case PCRE2_CONFIG_UNICODE_VERSION:
     case PCRE2_CONFIG_VERSION:
-    break;
+      break;
     }
   }
 
-switch (what)
+  switch (what)
   {
   default:
-  return PCRE2_ERROR_BADOPTION;
+    return PCRE2_ERROR_BADOPTION;
 
   case PCRE2_CONFIG_BSR:
 #ifdef BSR_ANYCRLF
-  *((uint32_t *)where) = PCRE2_BSR_ANYCRLF;
+    *((uint32_t *)where) = PCRE2_BSR_ANYCRLF;
 #else
-  *((uint32_t *)where) = PCRE2_BSR_UNICODE;
+    *((uint32_t *)where) = PCRE2_BSR_UNICODE;
 #endif
-  break;
+    break;
 
   case PCRE2_CONFIG_COMPILED_WIDTHS:
-  *((uint32_t *)where) = 0
+    *((uint32_t *)where) = 0
 #ifdef SUPPORT_PCRE2_8
-  + (1 << 0)
+                           + (1 << 0)
 #endif
 #ifdef SUPPORT_PCRE2_16
-  + (1 << 1)
+                           + (1 << 1)
 #endif
 #ifdef SUPPORT_PCRE2_32
-  + (1 << 2)
+                           + (1 << 2)
 #endif
-  ;
-  break;
+        ;
+    break;
 
   case PCRE2_CONFIG_DEPTHLIMIT:
-  *((uint32_t *)where) = MATCH_LIMIT_DEPTH;
-  break;
+    *((uint32_t *)where) = MATCH_LIMIT_DEPTH;
+    break;
 
   case PCRE2_CONFIG_EFFECTIVE_LINKSIZE:
-  *((uint32_t *)where) = LINK_SIZE * sizeof(PCRE2_UCHAR);
-  break;
+    *((uint32_t *)where) = LINK_SIZE * sizeof(PCRE2_UCHAR);
+    break;
 
   case PCRE2_CONFIG_HEAPLIMIT:
-  *((uint32_t *)where) = HEAP_LIMIT;
-  break;
+    *((uint32_t *)where) = HEAP_LIMIT;
+    break;
 
   case PCRE2_CONFIG_JIT:
 #ifdef SUPPORT_JIT
-  *((uint32_t *)where) = 1;
+    *((uint32_t *)where) = 1;
 #else
-  *((uint32_t *)where) = 0;
+    *((uint32_t *)where) = 0;
 #endif
-  break;
+    break;
 
   case PCRE2_CONFIG_JITTARGET:
 #ifdef SUPPORT_JIT
     {
-    const char *v = PRIV(jit_get_target)();
-    return (int)(1 + ((where == NULL)?
-      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      const char *v = PRIV(jit_get_target)();
+      return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
 #else
-  return PCRE2_ERROR_BADOPTION;
+    return PCRE2_ERROR_BADOPTION;
 #endif
 
   case PCRE2_CONFIG_LINKSIZE:
-  *((uint32_t *)where) = (uint32_t)CONFIGURED_LINK_SIZE;
-  break;
+    *((uint32_t *)where) = (uint32_t)CONFIGURED_LINK_SIZE;
+    break;
 
   case PCRE2_CONFIG_MATCHLIMIT:
-  *((uint32_t *)where) = MATCH_LIMIT;
-  break;
+    *((uint32_t *)where) = MATCH_LIMIT;
+    break;
 
   case PCRE2_CONFIG_NEWLINE:
-  *((uint32_t *)where) = NEWLINE_DEFAULT;
-  break;
+    *((uint32_t *)where) = NEWLINE_DEFAULT;
+    break;
 
   case PCRE2_CONFIG_NEVER_BACKSLASH_C:
 #ifdef NEVER_BACKSLASH_C
-  *((uint32_t *)where) = 1;
+    *((uint32_t *)where) = 1;
 #else
-  *((uint32_t *)where) = 0;
+    *((uint32_t *)where) = 0;
 #endif
-  break;
+    break;
 
   case PCRE2_CONFIG_PARENSLIMIT:
-  *((uint32_t *)where) = PARENS_NEST_LIMIT;
-  break;
+    *((uint32_t *)where) = PARENS_NEST_LIMIT;
+    break;
 
-  /* This is now obsolete. The stack is no longer used via recursion for
-  handling backtracking in pcre2_match(). */
+    /* This is now obsolete. The stack is no longer used via recursion for
+    handling backtracking in pcre2_match(). */
 
   case PCRE2_CONFIG_STACKRECURSE:
-  *((uint32_t *)where) = 0;
-  break;
+    *((uint32_t *)where) = 0;
+    break;
 
   case PCRE2_CONFIG_TABLES_LENGTH:
-  *((uint32_t *)where) = TABLES_LENGTH;
-  break;
+    *((uint32_t *)where) = TABLES_LENGTH;
+    break;
 
   case PCRE2_CONFIG_UNICODE_VERSION:
     {
 #if defined SUPPORT_UNICODE
-    const char *v = PRIV(unicode_version);
+      const char *v = PRIV(unicode_version);
 #else
-    const char *v = "Unicode not supported";
+      const char *v = "Unicode not supported";
 #endif
-    return (int)(1 + ((where == NULL)?
-      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
 
   case PCRE2_CONFIG_UNICODE:
 #if defined SUPPORT_UNICODE
-  *((uint32_t *)where) = 1;
+    *((uint32_t *)where) = 1;
 #else
-  *((uint32_t *)where) = 0;
+    *((uint32_t *)where) = 0;
 #endif
-  break;
+    break;
 
-  /* The hackery in setting "v" below is to cope with the case when
-  PCRE2_PRERELEASE is set to an empty string (which it is for real releases).
-  If the second alternative is used in this case, it does not leave a space
-  before the date. On the other hand, if all four macros are put into a single
-  XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted.
-  There are problems using an "obvious" approach like this:
+    /* The hackery in setting "v" below is to cope with the case when
+    PCRE2_PRERELEASE is set to an empty string (which it is for real releases).
+    If the second alternative is used in this case, it does not leave a space
+    before the date. On the other hand, if all four macros are put into a single
+    XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted.
+    There are problems using an "obvious" approach like this:
 
-     XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR)
-     XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE2_DATE)
+       XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR)
+       XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE2_DATE)
 
-  because, when PCRE2_PRERELEASE is empty, this leads to an attempted expansion
-  of STRING(). The C standard states: "If (before argument substitution) any
-  argument consists of no preprocessing tokens, the behavior is undefined." It
-  turns out the gcc treats this case as a single empty string - which is what
-  we really want - but Visual C grumbles about the lack of an argument for the
-  macro. Unfortunately, both are within their rights. As there seems to be no
-  way to test for a macro's value being empty at compile time, we have to
-  resort to a runtime test. */
+    because, when PCRE2_PRERELEASE is empty, this leads to an attempted expansion
+    of STRING(). The C standard states: "If (before argument substitution) any
+    argument consists of no preprocessing tokens, the behavior is undefined." It
+    turns out the gcc treats this case as a single empty string - which is what
+    we really want - but Visual C grumbles about the lack of an argument for the
+    macro. Unfortunately, both are within their rights. As there seems to be no
+    way to test for a macro's value being empty at compile time, we have to
+    resort to a runtime test. */
 
   case PCRE2_CONFIG_VERSION:
     {
-    const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)?
-      XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
-      XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
-    return (int)(1 + ((where == NULL)?
-      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)
+                          ? XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE)
+                          : XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
+      return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
-
   }
 
-return 0;
+  return 0;
 }
 
 /* End of pcre2_config.c */

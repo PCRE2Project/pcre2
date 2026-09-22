@@ -52,12 +52,20 @@ dist_html_DATA = \
   doc/html/pcre2_general_context_copy.html \
   doc/html/pcre2_general_context_create.html \
   doc/html/pcre2_general_context_free.html \
+  doc/html/pcre2_get_bsr.html \
+  doc/html/pcre2_get_depth_limit.html \
   doc/html/pcre2_get_error_message.html \
+  doc/html/pcre2_get_heap_limit.html \
   doc/html/pcre2_get_mark.html \
   doc/html/pcre2_get_match_data_heapframes_size.html \
   doc/html/pcre2_get_match_data_size.html \
+  doc/html/pcre2_get_match_limit.html \
+  doc/html/pcre2_get_max_pattern_length.html \
+  doc/html/pcre2_get_newline.html \
+  doc/html/pcre2_get_offset_limit.html \
   doc/html/pcre2_get_ovector_count.html \
   doc/html/pcre2_get_ovector_pointer.html \
+  doc/html/pcre2_get_parens_nest_limit.html \
   doc/html/pcre2_get_startchar.html \
   doc/html/pcre2_jit_compile.html \
   doc/html/pcre2_jit_free_unused_memory.html \
@@ -94,9 +102,9 @@ dist_html_DATA = \
   doc/html/pcre2_set_max_pattern_compiled_length.html \
   doc/html/pcre2_set_max_pattern_length.html \
   doc/html/pcre2_set_max_varlookbehind.html \
+  doc/html/pcre2_set_newline.html \
   doc/html/pcre2_set_offset_limit.html \
   doc/html/pcre2_set_optimize.html \
-  doc/html/pcre2_set_newline.html \
   doc/html/pcre2_set_parens_nest_limit.html \
   doc/html/pcre2_set_recursion_limit.html \
   doc/html/pcre2_set_recursion_memory_management.html \
@@ -135,106 +143,114 @@ dist_html_DATA = \
   doc/html/pcre2unicode.html
 
 dist_man_MANS = \
-  doc/pcre2-config.1 \
-  doc/pcre2.3 \
-  doc/pcre2_callout_enumerate.3 \
-  doc/pcre2_code_copy.3 \
-  doc/pcre2_code_copy_with_tables.3 \
-  doc/pcre2_code_free.3 \
-  doc/pcre2_compile.3 \
-  doc/pcre2_compile_context_copy.3 \
-  doc/pcre2_compile_context_create.3 \
-  doc/pcre2_compile_context_free.3 \
-  doc/pcre2_config.3 \
-  doc/pcre2_convert_context_copy.3 \
-  doc/pcre2_convert_context_create.3 \
-  doc/pcre2_convert_context_free.3 \
-  doc/pcre2_converted_pattern_free.3 \
-  doc/pcre2_dfa_match.3 \
-  doc/pcre2_general_context_copy.3 \
-  doc/pcre2_general_context_create.3 \
-  doc/pcre2_general_context_free.3 \
-  doc/pcre2_get_error_message.3 \
-  doc/pcre2_get_mark.3 \
-  doc/pcre2_get_match_data_heapframes_size.3 \
-  doc/pcre2_get_match_data_size.3 \
-  doc/pcre2_get_ovector_count.3 \
-  doc/pcre2_get_ovector_pointer.3 \
-  doc/pcre2_get_startchar.3 \
-  doc/pcre2_jit_compile.3 \
-  doc/pcre2_jit_free_unused_memory.3 \
-  doc/pcre2_jit_match.3 \
-  doc/pcre2_jit_stack_assign.3 \
-  doc/pcre2_jit_stack_create.3 \
-  doc/pcre2_jit_stack_free.3 \
-  doc/pcre2_maketables.3 \
-  doc/pcre2_maketables_free.3 \
-  doc/pcre2_match.3 \
-  doc/pcre2_match_context_copy.3 \
-  doc/pcre2_match_context_create.3 \
-  doc/pcre2_match_context_free.3 \
-  doc/pcre2_match_data_create.3 \
-  doc/pcre2_match_data_create_from_pattern.3 \
-  doc/pcre2_match_data_free.3 \
-  doc/pcre2_next_match.3 \
-  doc/pcre2_pattern_convert.3 \
-  doc/pcre2_pattern_info.3 \
-  doc/pcre2_serialize_decode.3 \
-  doc/pcre2_serialize_encode.3 \
-  doc/pcre2_serialize_free.3 \
-  doc/pcre2_serialize_get_number_of_codes.3 \
-  doc/pcre2_set_bsr.3 \
-  doc/pcre2_set_callout.3 \
-  doc/pcre2_set_character_tables.3 \
-  doc/pcre2_set_compile_extra_options.3 \
-  doc/pcre2_set_compile_recursion_guard.3 \
-  doc/pcre2_set_depth_limit.3 \
-  doc/pcre2_set_glob_escape.3 \
-  doc/pcre2_set_glob_separator.3 \
-  doc/pcre2_set_heap_limit.3 \
-  doc/pcre2_set_match_limit.3 \
-  doc/pcre2_set_max_pattern_compiled_length.3 \
-  doc/pcre2_set_max_pattern_length.3 \
-  doc/pcre2_set_max_varlookbehind.3 \
-  doc/pcre2_set_offset_limit.3 \
-  doc/pcre2_set_optimize.3 \
-  doc/pcre2_set_newline.3 \
-  doc/pcre2_set_parens_nest_limit.3 \
-  doc/pcre2_set_recursion_limit.3 \
-  doc/pcre2_set_recursion_memory_management.3 \
-  doc/pcre2_set_substitute_callout.3 \
-  doc/pcre2_set_substitute_case_callout.3 \
-  doc/pcre2_substitute.3 \
-  doc/pcre2_substring_copy_byname.3 \
-  doc/pcre2_substring_copy_bynumber.3 \
-  doc/pcre2_substring_free.3 \
-  doc/pcre2_substring_get_byname.3 \
-  doc/pcre2_substring_get_bynumber.3 \
-  doc/pcre2_substring_length_byname.3 \
-  doc/pcre2_substring_length_bynumber.3 \
-  doc/pcre2_substring_list_free.3 \
-  doc/pcre2_substring_list_get.3 \
-  doc/pcre2_substring_nametable_scan.3 \
-  doc/pcre2_substring_number_from_name.3 \
-  doc/pcre2api.3 \
-  doc/pcre2build.3 \
-  doc/pcre2callout.3 \
-  doc/pcre2compat.3 \
-  doc/pcre2convert.3 \
-  doc/pcre2demo.3 \
-  doc/pcre2grep.1 \
-  doc/pcre2jit.3 \
-  doc/pcre2limits.3 \
-  doc/pcre2matching.3 \
-  doc/pcre2partial.3 \
-  doc/pcre2pattern.3 \
-  doc/pcre2perform.3 \
-  doc/pcre2posix.3 \
-  doc/pcre2sample.3 \
-  doc/pcre2serialize.3 \
-  doc/pcre2syntax.3 \
-  doc/pcre2test.1 \
-  doc/pcre2unicode.3
+  doc/man/pcre2-config.1 \
+  doc/man/pcre2.3 \
+  doc/man/pcre2_callout_enumerate.3 \
+  doc/man/pcre2_code_copy.3 \
+  doc/man/pcre2_code_copy_with_tables.3 \
+  doc/man/pcre2_code_free.3 \
+  doc/man/pcre2_compile.3 \
+  doc/man/pcre2_compile_context_copy.3 \
+  doc/man/pcre2_compile_context_create.3 \
+  doc/man/pcre2_compile_context_free.3 \
+  doc/man/pcre2_config.3 \
+  doc/man/pcre2_convert_context_copy.3 \
+  doc/man/pcre2_convert_context_create.3 \
+  doc/man/pcre2_convert_context_free.3 \
+  doc/man/pcre2_converted_pattern_free.3 \
+  doc/man/pcre2_dfa_match.3 \
+  doc/man/pcre2_general_context_copy.3 \
+  doc/man/pcre2_general_context_create.3 \
+  doc/man/pcre2_general_context_free.3 \
+  doc/man/pcre2_get_bsr.3 \
+  doc/man/pcre2_get_depth_limit.3 \
+  doc/man/pcre2_get_error_message.3 \
+  doc/man/pcre2_get_heap_limit.3 \
+  doc/man/pcre2_get_mark.3 \
+  doc/man/pcre2_get_match_data_heapframes_size.3 \
+  doc/man/pcre2_get_match_data_size.3 \
+  doc/man/pcre2_get_match_limit.3 \
+  doc/man/pcre2_get_max_pattern_length.3 \
+  doc/man/pcre2_get_newline.3 \
+  doc/man/pcre2_get_offset_limit.3 \
+  doc/man/pcre2_get_ovector_count.3 \
+  doc/man/pcre2_get_ovector_pointer.3 \
+  doc/man/pcre2_get_parens_nest_limit.3 \
+  doc/man/pcre2_get_startchar.3 \
+  doc/man/pcre2_jit_compile.3 \
+  doc/man/pcre2_jit_free_unused_memory.3 \
+  doc/man/pcre2_jit_match.3 \
+  doc/man/pcre2_jit_stack_assign.3 \
+  doc/man/pcre2_jit_stack_create.3 \
+  doc/man/pcre2_jit_stack_free.3 \
+  doc/man/pcre2_maketables.3 \
+  doc/man/pcre2_maketables_free.3 \
+  doc/man/pcre2_match.3 \
+  doc/man/pcre2_match_context_copy.3 \
+  doc/man/pcre2_match_context_create.3 \
+  doc/man/pcre2_match_context_free.3 \
+  doc/man/pcre2_match_data_create.3 \
+  doc/man/pcre2_match_data_create_from_pattern.3 \
+  doc/man/pcre2_match_data_free.3 \
+  doc/man/pcre2_next_match.3 \
+  doc/man/pcre2_pattern_convert.3 \
+  doc/man/pcre2_pattern_info.3 \
+  doc/man/pcre2_serialize_decode.3 \
+  doc/man/pcre2_serialize_encode.3 \
+  doc/man/pcre2_serialize_free.3 \
+  doc/man/pcre2_serialize_get_number_of_codes.3 \
+  doc/man/pcre2_set_bsr.3 \
+  doc/man/pcre2_set_callout.3 \
+  doc/man/pcre2_set_character_tables.3 \
+  doc/man/pcre2_set_compile_extra_options.3 \
+  doc/man/pcre2_set_compile_recursion_guard.3 \
+  doc/man/pcre2_set_depth_limit.3 \
+  doc/man/pcre2_set_glob_escape.3 \
+  doc/man/pcre2_set_glob_separator.3 \
+  doc/man/pcre2_set_heap_limit.3 \
+  doc/man/pcre2_set_match_limit.3 \
+  doc/man/pcre2_set_max_pattern_compiled_length.3 \
+  doc/man/pcre2_set_max_pattern_length.3 \
+  doc/man/pcre2_set_max_varlookbehind.3 \
+  doc/man/pcre2_set_newline.3 \
+  doc/man/pcre2_set_offset_limit.3 \
+  doc/man/pcre2_set_optimize.3 \
+  doc/man/pcre2_set_parens_nest_limit.3 \
+  doc/man/pcre2_set_recursion_limit.3 \
+  doc/man/pcre2_set_recursion_memory_management.3 \
+  doc/man/pcre2_set_substitute_callout.3 \
+  doc/man/pcre2_set_substitute_case_callout.3 \
+  doc/man/pcre2_substitute.3 \
+  doc/man/pcre2_substring_copy_byname.3 \
+  doc/man/pcre2_substring_copy_bynumber.3 \
+  doc/man/pcre2_substring_free.3 \
+  doc/man/pcre2_substring_get_byname.3 \
+  doc/man/pcre2_substring_get_bynumber.3 \
+  doc/man/pcre2_substring_length_byname.3 \
+  doc/man/pcre2_substring_length_bynumber.3 \
+  doc/man/pcre2_substring_list_free.3 \
+  doc/man/pcre2_substring_list_get.3 \
+  doc/man/pcre2_substring_nametable_scan.3 \
+  doc/man/pcre2_substring_number_from_name.3 \
+  doc/man/pcre2api.3 \
+  doc/man/pcre2build.3 \
+  doc/man/pcre2callout.3 \
+  doc/man/pcre2compat.3 \
+  doc/man/pcre2convert.3 \
+  doc/man/pcre2demo.3 \
+  doc/man/pcre2grep.1 \
+  doc/man/pcre2jit.3 \
+  doc/man/pcre2limits.3 \
+  doc/man/pcre2matching.3 \
+  doc/man/pcre2partial.3 \
+  doc/man/pcre2pattern.3 \
+  doc/man/pcre2perform.3 \
+  doc/man/pcre2posix.3 \
+  doc/man/pcre2sample.3 \
+  doc/man/pcre2serialize.3 \
+  doc/man/pcre2syntax.3 \
+  doc/man/pcre2test.1 \
+  doc/man/pcre2unicode.3
 
 # The Libtool libraries to install.  We'll add to this later.
 
@@ -289,6 +305,119 @@ EXTRA_DIST += \
 EXTRA_DIST += \
   NON-AUTOTOOLS-BUILD \
   HACKING
+
+# These are the documentation files that are included in the tarball but not
+# installed in the system.
+
+EXTRA_DIST += \
+  doc/pcre2-config.adoc \
+  doc/pcre2.adoc \
+  doc/pcre2_callout_enumerate.adoc \
+  doc/pcre2_code_copy.adoc \
+  doc/pcre2_code_copy_with_tables.adoc \
+  doc/pcre2_code_free.adoc \
+  doc/pcre2_compile.adoc \
+  doc/pcre2_compile_context_copy.adoc \
+  doc/pcre2_compile_context_create.adoc \
+  doc/pcre2_compile_context_free.adoc \
+  doc/pcre2_config.adoc \
+  doc/pcre2_convert_context_copy.adoc \
+  doc/pcre2_convert_context_create.adoc \
+  doc/pcre2_convert_context_free.adoc \
+  doc/pcre2_converted_pattern_free.adoc \
+  doc/pcre2_dfa_match.adoc \
+  doc/pcre2_general_context_copy.adoc \
+  doc/pcre2_general_context_create.adoc \
+  doc/pcre2_general_context_free.adoc \
+  doc/pcre2_get_bsr.adoc \
+  doc/pcre2_get_depth_limit.adoc \
+  doc/pcre2_get_error_message.adoc \
+  doc/pcre2_get_heap_limit.adoc \
+  doc/pcre2_get_mark.adoc \
+  doc/pcre2_get_match_data_heapframes_size.adoc \
+  doc/pcre2_get_match_data_size.adoc \
+  doc/pcre2_get_match_limit.adoc \
+  doc/pcre2_get_max_pattern_length.adoc \
+  doc/pcre2_get_newline.adoc \
+  doc/pcre2_get_offset_limit.adoc \
+  doc/pcre2_get_ovector_count.adoc \
+  doc/pcre2_get_ovector_pointer.adoc \
+  doc/pcre2_get_parens_nest_limit.adoc \
+  doc/pcre2_get_startchar.adoc \
+  doc/pcre2_jit_compile.adoc \
+  doc/pcre2_jit_free_unused_memory.adoc \
+  doc/pcre2_jit_match.adoc \
+  doc/pcre2_jit_stack_assign.adoc \
+  doc/pcre2_jit_stack_create.adoc \
+  doc/pcre2_jit_stack_free.adoc \
+  doc/pcre2_maketables.adoc \
+  doc/pcre2_maketables_free.adoc \
+  doc/pcre2_match.adoc \
+  doc/pcre2_match_context_copy.adoc \
+  doc/pcre2_match_context_create.adoc \
+  doc/pcre2_match_context_free.adoc \
+  doc/pcre2_match_data_create.adoc \
+  doc/pcre2_match_data_create_from_pattern.adoc \
+  doc/pcre2_match_data_free.adoc \
+  doc/pcre2_next_match.adoc \
+  doc/pcre2_pattern_convert.adoc \
+  doc/pcre2_pattern_info.adoc \
+  doc/pcre2_serialize_decode.adoc \
+  doc/pcre2_serialize_encode.adoc \
+  doc/pcre2_serialize_free.adoc \
+  doc/pcre2_serialize_get_number_of_codes.adoc \
+  doc/pcre2_set_bsr.adoc \
+  doc/pcre2_set_callout.adoc \
+  doc/pcre2_set_character_tables.adoc \
+  doc/pcre2_set_compile_extra_options.adoc \
+  doc/pcre2_set_compile_recursion_guard.adoc \
+  doc/pcre2_set_depth_limit.adoc \
+  doc/pcre2_set_glob_escape.adoc \
+  doc/pcre2_set_glob_separator.adoc \
+  doc/pcre2_set_heap_limit.adoc \
+  doc/pcre2_set_match_limit.adoc \
+  doc/pcre2_set_max_pattern_compiled_length.adoc \
+  doc/pcre2_set_max_pattern_length.adoc \
+  doc/pcre2_set_max_varlookbehind.adoc \
+  doc/pcre2_set_newline.adoc \
+  doc/pcre2_set_offset_limit.adoc \
+  doc/pcre2_set_optimize.adoc \
+  doc/pcre2_set_parens_nest_limit.adoc \
+  doc/pcre2_set_recursion_limit.adoc \
+  doc/pcre2_set_recursion_memory_management.adoc \
+  doc/pcre2_set_substitute_callout.adoc \
+  doc/pcre2_set_substitute_case_callout.adoc \
+  doc/pcre2_substitute.adoc \
+  doc/pcre2_substring_copy_byname.adoc \
+  doc/pcre2_substring_copy_bynumber.adoc \
+  doc/pcre2_substring_free.adoc \
+  doc/pcre2_substring_get_byname.adoc \
+  doc/pcre2_substring_get_bynumber.adoc \
+  doc/pcre2_substring_length_byname.adoc \
+  doc/pcre2_substring_length_bynumber.adoc \
+  doc/pcre2_substring_list_free.adoc \
+  doc/pcre2_substring_list_get.adoc \
+  doc/pcre2_substring_nametable_scan.adoc \
+  doc/pcre2_substring_number_from_name.adoc \
+  doc/pcre2api.adoc \
+  doc/pcre2build.adoc \
+  doc/pcre2callout.adoc \
+  doc/pcre2compat.adoc \
+  doc/pcre2convert.adoc \
+  doc/pcre2demo.adoc \
+  doc/pcre2grep.adoc \
+  doc/pcre2jit.adoc \
+  doc/pcre2limits.adoc \
+  doc/pcre2matching.adoc \
+  doc/pcre2partial.adoc \
+  doc/pcre2pattern.adoc \
+  doc/pcre2perform.adoc \
+  doc/pcre2posix.adoc \
+  doc/pcre2sample.adoc \
+  doc/pcre2serialize.adoc \
+  doc/pcre2syntax.adoc \
+  doc/pcre2test.adoc \
+  doc/pcre2unicode.adoc
 
 # These are patches containing backports for older versions of PCRE2
 
@@ -406,16 +535,16 @@ if WITH_EBCDIC
 if WITH_EBCDIC_NL25
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25 $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl25" "$(abs_builddir)/src/pcre2_chartables.c"
 else # WITH_EBCDIC_NL25
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15 $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.ebcdic-1047-nl15" "$(abs_builddir)/src/pcre2_chartables.c"
 endif # WITH_EBCDIC_NL25
 else # WITH_EBCDIC
 src/pcre2_chartables.c: $(srcdir)/src/pcre2_chartables.c.dist
 	rm -f $@
-	$(LN_S) $(abs_srcdir)/src/pcre2_chartables.c.dist $(abs_builddir)/src/pcre2_chartables.c
+	$(LN_S) "$(abs_srcdir)/src/pcre2_chartables.c.dist" "$(abs_builddir)/src/pcre2_chartables.c"
 endif # WITH_EBCDIC
 endif # WITH_REBUILD_CHARTABLES
 
@@ -530,6 +659,7 @@ EXTRA_DIST += \
   deps/sljit/sljit_src/sljitConfigInternal.h \
   deps/sljit/sljit_src/sljitLir.c \
   deps/sljit/sljit_src/sljitLir.h \
+  deps/sljit/sljit_src/sljitNativeALPHA_64.c \
   deps/sljit/sljit_src/sljitNativeARM_32.c \
   deps/sljit/sljit_src/sljitNativeARM_64.c \
   deps/sljit/sljit_src/sljitNativeARM_T2_32.c \
@@ -744,18 +874,16 @@ endif # WITH_GCOV
 
 ## The main library tests. Each test is a binary plus a script that runs that
 ## binary in various ways. We install these test binaries in case folks find it
-## helpful. The two .bat files are for running the tests under Windows.
+## helpful.
 
 TESTS += RunTest
-EXTRA_DIST += RunTest.bat
-dist_noinst_SCRIPTS += RunTest
+dist_noinst_SCRIPTS += RunTest RunTest.py
 
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
 TESTS += RunGrepTest
-EXTRA_DIST += RunGrepTest.bat
-dist_noinst_SCRIPTS += RunGrepTest
+dist_noinst_SCRIPTS += RunGrepTest RunGrepTest.py
 if WITH_EBCDIC
 XFAIL_TESTS += RunGrepTest
 endif # WITH_EBCDIC
@@ -826,6 +954,10 @@ EXTRA_DIST += \
   testdata/testoutput3 \
   testdata/testoutput3A \
   testdata/testoutput3B \
+  testdata/testoutput3C \
+  testdata/testoutput3D \
+  testdata/testoutput3E \
+  testdata/testoutput3F \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
@@ -867,8 +999,6 @@ EXTRA_DIST += \
   testdata/testoutputheap-32 \
   testdata/testoutputheap-8 \
   testdata/valgrind-jit.supp \
-  testdata/wintestinput3 \
-  testdata/wintestoutput3 \
   perltest.sh
 
 # RunTest and RunGrepTest should clean up after themselves, but just in case
@@ -881,6 +1011,10 @@ CLEANFILES += \
   test3output \
   test3outputA \
   test3outputB \
+  test3outputC \
+  test3outputD \
+  test3outputE \
+  test3outputF \
   testtry \
   teststdout \
   teststderr \

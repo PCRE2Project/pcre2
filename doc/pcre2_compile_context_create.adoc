@@ -1,0 +1,32 @@
+= pcre2_compile_context_create(3)
+:doctype: manpage
+:manname: pcre2_compile_context_create
+:manpurpose: create a compile context
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 25 October 2014
+:revdate: 25 October 2014
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+pcre2_compile_context *pcre2_compile_context_create(
+      pcre2_general_context *gcontext);
+----
+
+== Description
+
+This function creates and initializes a new compile context. If its argument is
+[.c]`NULL`, [.c]`malloc()` is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is [.c]`NULL` if
+the memory could not be obtained.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

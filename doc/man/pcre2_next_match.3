@@ -1,0 +1,66 @@
+'\" t
+.\"     Title: pcre2_next_match
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 24 March 2025
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_NEXT_MATCH" "3" "24 March 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_next_match \- get the match parameters for the next match
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_next_match(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                     \fBPCRE2_SIZE\fP *\fIpstart_offset\fP, \fBuint32_t\fP *\fIpoptions\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This function can be called after one of the match functions
+(pcre2_match(), pcre2_dfa_match(), or pcre2_jit_match()), and
+must be provided with the same \fImatch_data\fP parameter. It outputs the
+appropriate parameters for searching for the next match in the same subject
+string, and is suitable for applications providing "global" matching behaviour
+(for example, replacing all matches in the subject, or splitting the subject on
+all matches, or simply counting the number of matches).
+.sp
+It returns 0 ("false") if there is no need to make any further match attempts,
+or 1 ("true") if another match should be attempted.
+.sp
+The \f(CR*pstart_offset\fP and \f(CR*poptions\fP are set if the function returns 1.
+The \f(CR*pstart_offset\fP should be passed to the next match attempt directly,
+and the \f(CR*poptions\fP should be passed to the next match attempt by combining
+with the application\(cqs match options using OR.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

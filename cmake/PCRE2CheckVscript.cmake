@@ -23,18 +23,24 @@ function(_pcre2_try_vscript_shared_lib link_flag map_file result_var)
   file(MAKE_DIRECTORY "${try_dir}")
 
   # Write a minimal C source with exported symbols
-  file(WRITE "${try_dir}/test_vscript.c" "
+  file(
+    WRITE "${try_dir}/test_vscript.c"
+    "
 int hidethis(void) { return 0; }
 int exposethis(void) { return hidethis(); }
-")
+"
+  )
 
   # Write a CMakeLists.txt that builds a shared library with the version script
-  file(WRITE "${try_dir}/CMakeLists.txt" "
+  file(
+    WRITE "${try_dir}/CMakeLists.txt"
+    "
 cmake_minimum_required(VERSION 3.15)
 project(test_vscript C)
 add_library(test_vscript SHARED test_vscript.c)
 target_link_options(test_vscript PRIVATE \"-Wl,${link_flag},${map_file}\")
-")
+"
+  )
 
   try_compile(
     compile_result
@@ -98,7 +104,11 @@ function(pcre2_check_vscript have_var flag_var no_star_var)
   if(HAVE_VSCRIPT)
     # Perform the same logic as ax_check_vscript.m4, to test whether the linker
     # silently ignores (and overwrites) linker scripts it doesn't understand.
-    _pcre2_try_vscript_shared_lib("${VSCRIPT_FLAG}" "${PROJECT_BINARY_DIR}/test-map-file-broken.sym" HAVE_VSCRIPT_BROKEN)
+    _pcre2_try_vscript_shared_lib(
+      "${VSCRIPT_FLAG}"
+      "${PROJECT_BINARY_DIR}/test-map-file-broken.sym"
+      HAVE_VSCRIPT_BROKEN
+    )
 
     if(HAVE_VSCRIPT_BROKEN)
       set(HAVE_VSCRIPT FALSE)
@@ -122,7 +132,11 @@ function(pcre2_check_vscript have_var flag_var no_star_var)
 
     # Test that the linker works without requiring a wildcard to hide platform-specific
     # symbols (_init, _fini, etc.).
-    _pcre2_try_vscript_shared_lib("${VSCRIPT_FLAG}" "${PROJECT_BINARY_DIR}/test-map-file-no-star.sym" HAVE_VSCRIPT_NO_STAR)
+    _pcre2_try_vscript_shared_lib(
+      "${VSCRIPT_FLAG}"
+      "${PROJECT_BINARY_DIR}/test-map-file-no-star.sym"
+      HAVE_VSCRIPT_NO_STAR
+    )
 
     if(first_run)
       message(STATUS "Detecting if version scripts work without wildcard - ${HAVE_VSCRIPT_NO_STAR}")

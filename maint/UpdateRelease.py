@@ -1,7 +1,8 @@
 #! /usr/bin/env python3
 
 # Script to update all the hardcoded release numbers in the source tree.
-#  - Documentation manpages.
+#  - CMake build metadata.
+#  - AsciiDoc documentation sources.
 #  - Bazel MODULE file.
 #  - Zig package manifest.
 
@@ -10,21 +11,32 @@
 import glob
 import re
 
-from UpdateCommon import update_file, CURRENT_RELEASE
+from UpdateCommon import update_file, CURRENT_RELEASE, VERSION_INFO
 
-def update_man_version(filename):
+
+def update_adoc_version(filename):
     print('  Updating %s' % filename)
-    update_file(filename, r'(.TH.*? )"PCRE2 .*?"', '\\1"PCRE2 %s"' % CURRENT_RELEASE)
+    update_file(filename, r'(?m)^:mansource: PCRE2 .*$', ':mansource: PCRE2 %s' % CURRENT_RELEASE)
 
-print('Updating man pages')
 
-# doc/*.1
-for filename in glob.glob('doc/*.1'):
-    update_man_version(filename)
+print('Updating CMakeLists.txt')
+cmake_versions = {
+    'PCRE2_MAJOR': 'pcre2_major',
+    'PCRE2_MINOR': 'pcre2_minor',
+    'PCRE2_PRERELEASE': 'pcre2_prerelease',
+    'PCRE2_DATE': 'pcre2_date',
+    'LIBPCRE2_POSIX_VERSION': 'libpcre2_posix_version',
+    'LIBPCRE2_8_VERSION': 'libpcre2_8_version',
+    'LIBPCRE2_16_VERSION': 'libpcre2_16_version',
+    'LIBPCRE2_32_VERSION': 'libpcre2_32_version',
+}
+for variable, configure_name in cmake_versions.items():
+    update_file('CMakeLists.txt', r'(?m)^set\(%s ".*"\)$' % variable,
+                'set(%s "%s")' % (variable, VERSION_INFO[configure_name]))
 
-# doc/*.3
-for filename in glob.glob('doc/*.3'):
-    update_man_version(filename)
+print('Updating AsciiDoc sources')
+for filename in glob.glob('doc/*.adoc'):
+    update_adoc_version(filename)
 
 # MODULE.bazel
 print('Updating MODULE.bazel')

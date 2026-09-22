@@ -1,0 +1,33 @@
+= pcre2_code_copy(3)
+:doctype: manpage
+:manname: pcre2_code_copy
+:manpurpose: copy a compiled pattern
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 November 2016
+:revdate: 22 November 2016
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+pcre2_code *pcre2_code_copy(const pcre2_code *code);
+----
+
+== Description
+
+This function makes a copy of the memory used for a compiled pattern, excluding
+any memory used by the JIT compiler. Without a subsequent call to
+func:pcre2_jit_compile(), the copy can be used only for non-JIT matching. The
+pointer to the character tables is copied, not the tables themselves (see
+func:pcre2_code_copy_with_tables()). The yield of the function is [.c]`NULL` if
+arg:code is [.c]`NULL` or if sufficient memory cannot be obtained.
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

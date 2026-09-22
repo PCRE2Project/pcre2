@@ -1,0 +1,77 @@
+'\" t
+.\"     Title: pcre2_substring_length_byname
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 26 September 2025
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.49-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_SUBSTRING_LENGTH_BYNAME" "3" "26 September 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_substring_length_byname \- find length of named substring
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\fB\&#include\fP \fB<pcre2.h>\fP
+
+\fBint\fP pcre2_substring_length_byname(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                                  \fBPCRE2_SPTR\fP \fIstringname\fP,
+                                  \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+This function returns the length of a matched substring, identified by name.
+The arguments are:
+.sp
+.RS 4
+.PD 0
+.TP 11
+\fImatch_data\fP
+.ad l
+The match data block for the match
+.TP 11
+\fIstringname\fP
+.ad l
+The substring name
+.TP 11
+\fIsizeptr\fP
+.ad l
+Where to return the length, or \f(CRNULL\fP
+.PD
+.RE
+.PP
+.ad l
+.sp
+The third argument may be \f(CRNULL\fP if all you want to know is whether or not a
+substring is set. The yield is zero on success, or a negative error code
+otherwise.
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.
