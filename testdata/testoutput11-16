@@ -909,6 +909,12 @@ No match
     \x{100}\x{1ff}
 No match
 
+# In 32-bit non-UTF mode, regional indicators exercise the non-UTF grapheme
+# scan used to determine their pairing parity.
+/^\X/aftertext
+** \P, \p, and \X are not allowed after the #forbid_utf command
+    \x{1F1E6}\x{1F1E7}\x{1F1E8}B
+
 # --------------
 
 # End of testinput11

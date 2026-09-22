@@ -89,6 +89,22 @@ Failed: error -10: UTF-8 error: byte 4 top bits not 0x80 at offset 0
 Failed: error -11: UTF-8 error: byte 5 top bits not 0x80 at offset 0
     \xfd\x80\x80\x80\x80\x7f
 Failed: error -12: UTF-8 error: byte 6 top bits not 0x80 at offset 0
+    \xc2\xc0
+Failed: error -8: UTF-8 error: byte 2 top bits not 0x80 at offset 0
+    \xe1\x80\xc0
+Failed: error -9: UTF-8 error: byte 3 top bits not 0x80 at offset 0
+    \xf1\x80\x80\xc0
+Failed: error -10: UTF-8 error: byte 4 top bits not 0x80 at offset 0
+    \xf8\x80\x80\x80\xc0
+Failed: error -11: UTF-8 error: byte 5 top bits not 0x80 at offset 0
+    \xfc\x80\x80\x80\x80\xc0
+Failed: error -12: UTF-8 error: byte 6 top bits not 0x80 at offset 0
+    \xf4\x90\x80\x80
+Failed: error -15: UTF-8 error: code points greater than 0x10ffff are not defined at offset 0
+    \xf8\x80\x80\x80\x80
+Failed: error -20: UTF-8 error: overlong 5-byte sequence at offset 0
+    \xfc\x80\x80\x80\x80\x80
+Failed: error -21: UTF-8 error: overlong 6-byte sequence at offset 0
     \xed\xa0\x80
 Failed: error -16: UTF-8 error: code points 0xd800-0xdfff are not defined at offset 0
     \xc0\x8f

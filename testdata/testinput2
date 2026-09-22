@@ -1935,6 +1935,10 @@
     a\r\nb
     a\x85b
 
+/^a.b/newline=any
+    a\x0bb
+    a\x0cb
+
 /^a.b/newline=nul
     a\nb
 \= Expect no match

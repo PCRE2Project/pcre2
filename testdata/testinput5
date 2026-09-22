@@ -184,6 +184,48 @@
 
 /(\x{100}(b(?1)c)){0,2}/IB,utf
 
+# Exercise the opcode forms that find_bracket() must skip while resolving a
+# recursive subpattern reference during compilation.
+/[^\x{100}](a)(?1)/I,utf
+
+/(?C'name')(a)(?1)/I
+
+/(?<=a)(a)(?1)/I
+
+/\p{L}*(a)(?1)/I,utf,ucp
+
+/\p{L}*?(a)(?1)/I,utf,ucp
+
+/\p{L}+(a)(?1)/I,utf,ucp
+
+/\p{L}+?(a)(?1)/I,utf,ucp
+
+/\p{L}?(a)(?1)/I,utf,ucp
+
+/\p{L}??(a)(?1)/I,utf,ucp
+
+/\p{L}*+(a)(?1)/I,utf,ucp
+
+/\p{L}++(a)(?1)/I,utf,ucp
+
+/\p{L}?+(a)(?1)/I,utf,ucp
+
+/\p{L}{1,3}(a)(?1)/I,utf,ucp
+
+/\p{L}{1,3}?(a)(?1)/I,utf,ucp
+
+/\p{L}{1,3}+(a)(?1)/I,utf,ucp
+
+/(*MARK:A)(a)(?1)/I
+
+/(*COMMIT:A)(a)(?1)/I
+
+/(*PRUNE:A)(a)(?1)/I
+
+/(*SKIP:A)(a)(?1)/I
+
+/(*THEN:A)(a)(?1)/I
+
 /\W/utf
     A.B
     A\x{100}B
@@ -224,6 +266,22 @@
     a\x{2029}b
 \= Expect no match
     a\n\rb
+
+/^a.b/newline=any,utf
+    a\x0bb
+    a\x0cb
+    a\x{2028}b
+    a\x{2029}b
+
+/(?<=.)\R/newline=any,utf
+    a\x{2028}
+    a\x{2029}
+    a\r\n
+/^b/m,newline=any,utf
+    a\x{0085}b
+    a\x{2028}b
+    a\x{2029}b
+
 
 /^a\R*b/bsr=unicode,utf
     ab

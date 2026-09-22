@@ -7689,6 +7689,12 @@ No match
     a\x85b
 No match
 
+/^a.b/newline=any
+    a\x0bb
+No match
+    a\x0cb
+No match
+
 /^a.b/newline=nul
     a\nb
  0: a\x0ab

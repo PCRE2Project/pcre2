@@ -2721,9 +2721,26 @@ No match
     \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
  0: \x{1f1e6}\x{1f1e7}
  0+ B            RegionalIndicator RegionalIndicator
+    \x{1F1E6}\x{1F1E7}\x{1F1E8}B   RegionalIndicator RegionalIndicator RegionalIndicator
+ 0: \x{1f1e6}\x{1f1e7}
+ 0+ \x{1f1e8}B   RegionalIndicator RegionalIndicator RegionalIndicator
+    \x{1F1E6}\x{1F1E7}\x{1F1E8}\x{1F1E9}B RegionalIndicator RegionalIndicator RegionalIndicator RegionalIndicator
+ 0: \x{1f1e6}\x{1f1e7}
+ 0+ \x{1f1e8}\x{1f1e9}B RegionalIndicator RegionalIndicator RegionalIndicator RegionalIndicator
+    \x{200d}\x{1f308}B             ZWJ without Extended_Pictographic
+ 0: \x{200d}
+ 0+ \x{1f308}B             ZWJ without Extended_Pictographic
+    \x{261d}\x{200d}\x{1f308}B    Extended_Pictographic ZWJ Extended_Pictographic
+ 0: \x{261d}\x{200d}\x{1f308}
+ 0+ B    Extended_Pictographic ZWJ Extended_Pictographic
     *There are no Prepend characters, so we can't test Prepend, CR
  0: *
  0+ There are no Prepend characters, so we can't test Prepend, CR
+
+/^.\X/utf,aftertext
+    A\x{1F1E6}\x{1F1E7}\x{1F1E8}B
+ 0: A\x{1f1e6}\x{1f1e7}
+ 0+ \x{1f1e8}B
 
 /^(?>\X{2})X/utf,aftertext
     \x{1111}\x{ae4c}\x{1111}\x{ae4c}X

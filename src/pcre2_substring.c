@@ -215,9 +215,17 @@ pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber
   rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
-  if (size > ((PCRE2_SIZE_MAX - sizeof(pcre2_memctl)) / CU2BYTES(1)) - 1 ||
-      (yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) + CU2BYTES(size + 1),
-                                   (pcre2_memctl *)match_data)) == NULL)
+  /* LCOV_EXCL_START - it should be unreachable for any substring's size in
+  bytes to overflow size_t */
+  if (size > ((PCRE2_SIZE_MAX - sizeof(pcre2_memctl)) / CU2BYTES(1)) - 1)
+  {
+    PCRE2_DEBUG_UNREACHABLE();
+    return PCRE2_ERROR_NOMEMORY;
+  }
+  /* LCOV_EXCL_STOP */
+  yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) + CU2BYTES(size + 1),
+                              (pcre2_memctl *)match_data);
+  if (yield == NULL)
     return PCRE2_ERROR_NOMEMORY;
   yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
   if (size != 0)
