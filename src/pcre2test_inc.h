@@ -3516,13 +3516,15 @@ substitute_callout_function(pcre2_substitute_callout_block *scb, void *data_ptr)
   fprintf(outfile, "%2d(%d) Old %" SIZ_FORM " %" SIZ_FORM " \"", scb->subscount, scb->oveccount,
           scb->ovector[0], scb->ovector[1]);
 
-  pchars(clr_none, scb->input + scb->ovector[0], scb->ovector[1] - scb->ovector[0], utf, outfile);
+  if (scb->ovector[1] > scb->ovector[0])
+    pchars(clr_none, scb->input + scb->ovector[0], scb->ovector[1] - scb->ovector[0], utf, outfile);
 
   fprintf(outfile, "\" New %" SIZ_FORM " %" SIZ_FORM " \"", scb->output_offsets[0],
           scb->output_offsets[1]);
 
-  pchars(clr_none, scb->output + scb->output_offsets[0],
-         scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
+  if (scb->output_offsets[1] > scb->output_offsets[0])
+    pchars(clr_none, scb->output + scb->output_offsets[0],
+           scb->output_offsets[1] - scb->output_offsets[0], utf, outfile);
 
 YIELD:
 
