@@ -74,8 +74,6 @@ Returns:       TRUE or FALSE
 BOOL
 PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, uint32_t *lenptr, BOOL utf)
 {
-  uint32_t c;
-
 #ifdef SUPPORT_UNICODE
   if (utf)
   {
@@ -87,7 +85,7 @@ PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, uint32_t *len
   }
 #else
   (void)utf;
-  c = *ptr;
+  uint32_t c = *ptr;
 #endif /* SUPPORT_UNICODE */
 
   if (type == NLTYPE_ANYCRLF)
@@ -176,7 +174,6 @@ Returns:       TRUE or FALSE
 BOOL
 PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, uint32_t *lenptr, BOOL utf)
 {
-  uint32_t c;
   ptr--;
 
 #ifdef SUPPORT_UNICODE
@@ -191,7 +188,7 @@ PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, uint32_t *
   }
 #else
   (void)utf;
-  c = *ptr;
+  uint32_t c = *ptr;
 #endif /* SUPPORT_UNICODE */
 
   if (type == NLTYPE_ANYCRLF)

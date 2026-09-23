@@ -243,7 +243,6 @@ get_propname(int prop, int type)
 {
   size_t i, j, len;
   size_t foundlist[2];
-  const char *yield;
   int typex = (type == PT_SC) ? PT_SCX : type;
 
   j = 0;
@@ -261,7 +260,7 @@ get_propname(int prop, int type)
   if (j == 0)
     return "??";
 
-  yield = NULL;
+  const char *yield = NULL;
   len = 0;
 
   for (i = 0; i < j; i++)
@@ -1135,7 +1134,6 @@ process_command_line(unsigned char *buffer)
 int
 main(int argc, char **argv)
 {
-  BOOL interactive;
   int first_arg = 1;
   unsigned char buffer[1024];
 
@@ -1179,7 +1177,7 @@ main(int argc, char **argv)
     return 0;
   }
 
-  interactive = is_stdin_tty();
+  BOOL interactive = is_stdin_tty();
 
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
   if (interactive)
@@ -1191,11 +1189,10 @@ main(int argc, char **argv)
 #if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
     if (interactive)
     {
-      size_t len;
       unsigned char *s = US readline("> ");
       if (s == NULL)
         break;
-      len = strlen(CS s);
+      size_t len = strlen(CS s);
       if (len > 0)
         add_history(CS s);
       memcpy(buffer, s, len);

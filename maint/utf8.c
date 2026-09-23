@@ -289,13 +289,11 @@ main(int argc, char **argv)
 
     if (strlen(x) >= 3 && (strncmp(x, "0x", 2) == 0 || strncmp(x, "U+", 2) == 0) && isxdigit(x[2]))
     {
-      size_t rc;
-      unsigned long d;
       char *endptr;
       int utf8_input = 0;
 
       errno = 0;
-      d = strtoul(x + 2, &endptr, 16);
+      unsigned long d = strtoul(x + 2, &endptr, 16);
       if (errno != 0 || *endptr != 0)
       {
         printf("** Invalid hex number %s\n", x);
@@ -314,7 +312,7 @@ main(int argc, char **argv)
         d &= 0x7fffffff;
       }
 
-      rc = ord2utf8(d, buffer);
+      size_t rc = ord2utf8(d, buffer);
       printf("U+%08lx => ", d);
       if (rc == 0)
         fputs("** -b needed for codepoints greater than 0x7fffffff", stdout);
@@ -344,8 +342,6 @@ main(int argc, char **argv)
     }
     else
     {
-      unsigned char *bptr;
-      const unsigned char *buffend;
       unsigned char y = 0;
       int len = 0;
       int z = 0;
@@ -375,8 +371,8 @@ main(int argc, char **argv)
       if (len < 0)
         continue; /* With next argument after malformation */
 
-      bptr = buffer;
-      buffend = buffer + len;
+      unsigned char *bptr = buffer;
+      const unsigned char *buffend = buffer + len;
 
       while (bptr < buffend)
       {

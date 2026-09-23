@@ -83,11 +83,10 @@ Returns:      pointer to memory or NULL on failure
 extern void *
 PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 {
-  pcre2_memctl *newmemctl;
   void *yield = (memctl == NULL) ? malloc(size) : memctl->malloc(size, memctl->memory_data);
   if (yield == NULL)
     return NULL;
-  newmemctl = (pcre2_memctl *)yield;
+  pcre2_memctl *newmemctl = (pcre2_memctl *)yield;
   if (memctl == NULL)
   {
     newmemctl->malloc = default_malloc;
@@ -117,12 +116,11 @@ PCRE2_EXP_DEFN pcre2_general_context *PCRE2_CALL_CONVENTION
 pcre2_general_context_create(void *(*private_malloc)(size_t size, void *memory_data),
                              void (*private_free)(void *ptr, void *memory_data), void *memory_data)
 {
-  pcre2_general_context *gcontext;
   if (private_malloc == NULL)
     private_malloc = default_malloc;
   if (private_free == NULL)
     private_free = default_free;
-  gcontext = private_malloc(sizeof(pcre2_real_general_context), memory_data);
+  pcre2_general_context *gcontext = private_malloc(sizeof(pcre2_real_general_context), memory_data);
   if (gcontext == NULL)
     return NULL;
   gcontext->memctl.malloc = private_malloc;

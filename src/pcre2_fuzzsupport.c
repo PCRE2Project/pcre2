@@ -289,7 +289,6 @@ int LLVMFuzzerTestOneInput(unsigned char *, size_t);
 int
 LLVMFuzzerInitialize(int *argc, char ***argv)
 {
-  int rc;
   struct rlimit rlim;
   getrlimit(RLIMIT_STACK, &rlim);
   rlim.rlim_cur = STACK_SIZE_MB * 1024 * 1024;
@@ -299,7 +298,7 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
     _exit(1);
   }
 
-  rc = setrlimit(RLIMIT_STACK, &rlim);
+  int rc = setrlimit(RLIMIT_STACK, &rlim);
   if (rc != 0)
   {
     fprintf(stderr, "Failed to expand stack size\n");
@@ -316,11 +315,9 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
 int
 LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 {
-  PCRE2_UCHAR *wdata;
   PCRE2_UCHAR *newwdata = NULL;
   uint32_t compile_options;
   uint32_t match_options;
-  uint64_t random_options;
   pcre2_match_data *match_data = NULL;
 #ifdef SUPPORT_JIT
   pcre2_match_data *match_data_jit = NULL;
@@ -333,9 +330,9 @@ LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
   if (size < sizeof(random_options))
     return -1;
 
-  random_options = *(uint64_t *)(data);
+  uint64_t random_options = *(uint64_t *)(data);
   data += sizeof(random_options);
-  wdata = (PCRE2_UCHAR *)data;
+  PCRE2_UCHAR *wdata = (PCRE2_UCHAR *)data;
   size -= sizeof(random_options);
   size /= PCRE2_CODE_UNIT_WIDTH / 8;
 
@@ -800,11 +797,6 @@ main(int argc, char **argv)
 
   for (int i = 1; i < argc; i++)
   {
-    size_t filelen;
-    size_t readsize;
-    unsigned char *buffer;
-    FILE *f;
-
     /* Handle a literal string. Copy to an exact size buffer so that checks for
     overrunning work. */
 
@@ -831,7 +823,7 @@ main(int argc, char **argv)
 
     /* Handle a string given in a file */
 
-    f = fopen(argv[i], "rb");
+    FILE *f = fopen(argv[i], "rb");
     if (f == NULL)
     {
       printf("** Failed to open %s: %s\n", argv[i], strerror(errno));
@@ -841,10 +833,10 @@ main(int argc, char **argv)
     printf("------ %s ------\n", argv[i]);
 
     fseek(f, 0, SEEK_END);
-    filelen = ftell(f);
+    size_t filelen = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    buffer = (unsigned char *)malloc(filelen);
+    unsigned char *buffer = (unsigned char *)malloc(filelen);
     if (buffer == NULL)
     {
       printf("** Failed to allocate %lu bytes of memory\n", filelen);
@@ -852,7 +844,7 @@ main(int argc, char **argv)
       continue;
     }
 
-    readsize = fread(buffer, 1, filelen, f);
+    size_t readsize = fread(buffer, 1, filelen, f);
     fclose(f);
 
     if (readsize != filelen)

@@ -121,13 +121,10 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-  FILE *f;
   int i;
   int nclass = 0;
   BOOL binary = FALSE;
   char *env = (char *)"C";
-  const uint8_t *tables;
-  const uint8_t *base_of_tables;
   int (*charfn_to)(int) = identity;
   int (*charfn_from)(int) = identity;
 
@@ -192,10 +189,10 @@ main(int argc, char **argv)
 
   /* Make the tables */
 
-  tables = maketables(charfn_to, charfn_from);
-  base_of_tables = tables;
+  const uint8_t *tables = maketables(charfn_to, charfn_from);
+  const uint8_t *base_of_tables = tables;
 
-  f = fopen(argv[i], "wb");
+  FILE *f = fopen(argv[i], "wb");
   if (f == NULL)
   {
     fprintf(stderr, "pcre2_dftables: failed to open %s for writing\n", argv[1]);

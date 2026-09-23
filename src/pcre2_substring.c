@@ -118,9 +118,8 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_bynumber(pcre2_match_data *match_data, uint32_t stringnumber,
                               PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
-  int rc;
   PCRE2_SIZE size;
-  rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
+  int rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
   if (size + 1 > *sizeptr)
@@ -209,10 +208,8 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber,
                              PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
-  int rc;
   PCRE2_SIZE size;
-  PCRE2_UCHAR *yield;
-  rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
+  int rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
   /* LCOV_EXCL_START - it should be unreachable for any substring's size in
@@ -227,7 +224,7 @@ pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber
                               (pcre2_memctl *)match_data);
   if (yield == NULL)
     return PCRE2_ERROR_NOMEMORY;
-  yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
+  PCRE2_UCHAR *yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
   if (size != 0)
     memcpy(yield, match_data->subject + match_data->ovector[stringnumber * 2], CU2BYTES(size));
   yield[size] = 0;
@@ -401,12 +398,8 @@ pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
                          PCRE2_SIZE **lengthsptr)
 {
   int i, count, count2;
-  PCRE2_SIZE size;
-  PCRE2_SIZE *lensp;
-  pcre2_memctl *memp;
   PCRE2_UCHAR **listp;
   PCRE2_UCHAR *sp;
-  PCRE2_SIZE *ovector;
 
   if ((count = match_data->rc) < 0)
     return count; // Match failed
@@ -414,8 +407,8 @@ pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
     count = match_data->oveccount; // Ovector too small
 
   count2 = 2 * count;
-  ovector = match_data->ovector;
-  size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *); // For final NULL
+  PCRE2_SIZE *ovector = match_data->ovector;
+  PCRE2_SIZE size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *); // For final NULL
   if (lengthsptr != NULL)
     size += sizeof(PCRE2_SIZE) * count; // For lengths
 
@@ -426,12 +419,12 @@ pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
       size += CU2BYTES(ovector[i + 1] - ovector[i]);
   }
 
-  memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data);
+  pcre2_memctl *memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data);
   if (memp == NULL)
     return PCRE2_ERROR_NOMEMORY;
 
   *listptr = listp = (PCRE2_UCHAR **)((char *)memp + sizeof(pcre2_memctl));
-  lensp = (PCRE2_SIZE *)((char *)listp + sizeof(PCRE2_UCHAR *) * (count + 1));
+  PCRE2_SIZE *lensp = (PCRE2_SIZE *)((char *)listp + sizeof(PCRE2_UCHAR *) * (count + 1));
 
   if (lengthsptr == NULL)
   {
@@ -527,11 +520,9 @@ pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PC
     int c = PRIV(strcmp)(stringname, entry + IMM2_SIZE);
     if (c == 0)
     {
-      PCRE2_SPTR first;
       PCRE2_SPTR last;
-      PCRE2_SPTR lastentry;
-      lastentry = nametable + entrysize * (code->name_count - 1);
-      first = last = entry;
+      PCRE2_SPTR lastentry = nametable + entrysize * (code->name_count - 1);
+      PCRE2_SPTR first = last = entry;
       while (first > nametable)
       {
         if (PRIV(strcmp)(stringname, (first - entrysize + IMM2_SIZE)) != 0)

@@ -91,11 +91,10 @@ pcre2_maketables(pcre2_general_context *gcontext)
 #endif /* PCRE2_DFTABLES */
 
   int i;
-  uint8_t *p;
 
   if (yield == NULL)
     return NULL;
-  p = yield;
+  uint8_t *p = yield;
 
   /* First comes the lower casing table */
 

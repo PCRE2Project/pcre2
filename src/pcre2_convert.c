@@ -538,9 +538,7 @@ convert_glob_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
 {
   PCRE2_SPTR start = *from + 1;
   PCRE2_SPTR pattern = start;
-  const char *class_ptr;
   PCRE2_UCHAR c;
-  int class_index;
 
   while (TRUE)
   {
@@ -556,8 +554,8 @@ convert_glob_parse_class(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
   if (c != CHAR_COLON || pattern >= pattern_end || *pattern != CHAR_RIGHT_SQUARE_BRACKET)
     return 0;
 
-  class_ptr = posix_classes;
-  class_index = 1;
+  const char *class_ptr = posix_classes;
+  int class_index = 1;
 
   while (TRUE)
   {
@@ -707,7 +705,6 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
 {
   BOOL is_negative = FALSE;
   BOOL separator_seen = FALSE;
-  BOOL has_prev_c;
   PCRE2_SPTR pattern = *from;
   PCRE2_SPTR char_start = NULL;
   uint32_t c, prev_c;
@@ -756,7 +753,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
     convert_glob_write(out, CHAR_LEFT_SQUARE_BRACKET);
   }
 
-  has_prev_c = FALSE;
+  BOOL has_prev_c = FALSE;
   prev_c = 0;
 
   if (*pattern == CHAR_RIGHT_SQUARE_BRACKET)

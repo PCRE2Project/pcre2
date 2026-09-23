@@ -524,14 +524,9 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
                        compile_block *cb)
 {
   class_ranges *cranges;
-  uint32_t *ptr;
-  uint32_t *buffer;
-  uint32_t *dst;
   uint32_t class_options = 0;
   size_t range_list_size = 0, total_size, i;
   uint32_t tmp1, tmp2;
-  const uint32_t *char_list_next;
-  uint16_t *next_char;
   uint32_t char_list_start, char_list_end;
   uint32_t range_start, range_end;
 
@@ -589,7 +584,7 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
   if (range_list_size == 0)
     return cranges;
 
-  buffer = (uint32_t *)(cranges + 1);
+  uint32_t *buffer = (uint32_t *)(cranges + 1);
   parse_class(start_ptr, class_options, buffer);
 
   /* Using <= instead of == to help static analysis. */
@@ -624,8 +619,8 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
   }
 
   /* Merge ranges whenever possible. */
-  dst = buffer;
-  ptr = buffer + 2;
+  uint32_t *dst = buffer;
+  uint32_t *ptr = buffer + 2;
   range_list_size -= 2;
 
   /* The second condition is a very rare corner case, where the end of the last
@@ -664,7 +659,7 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
 
   /* Compute character lists structures. */
 
-  char_list_next = char_list_starts;
+  const uint32_t *char_list_next = char_list_starts;
   char_list_start = *char_list_next++;
 #if PCRE2_CODE_UNIT_WIDTH == 32
   char_list_end = XCL_CHAR_LIST_HIGH_32_END;
@@ -673,7 +668,7 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
 #else
   char_list_end = XCL_CHAR_LIST_HIGH_16_END;
 #endif
-  next_char = (uint16_t *)(buffer + total_size);
+  uint16_t *next_char = (uint16_t *)(buffer + total_size);
 
   tmp1 = 0;
   tmp2 = ((sizeof(char_list_starts) / sizeof(uint32_t)) - 1) * XCL_TYPE_BIT_LEN;
@@ -1121,7 +1116,6 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
 {
   uint32_t *pptr = start_ptr;
   PCRE2_UCHAR *code = *pcode;
-  BOOL should_flip_negation;
   const uint8_t *cbits = cb->cbits;
   /* Some functions such as add_to_class() or eclass processing
   expects that the bitset is stored in cb->classbits.classbits. */
@@ -1136,9 +1130,6 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
   /* Helper variables for OP_XCLASS opcode (for characters > 255). */
 
 #ifdef SUPPORT_WIDE_CHARS
-  uint32_t xclass_props;
-  PCRE2_UCHAR *class_uchardata;
-  class_ranges *cranges;
 #else
   (void)has_bitmap;   // Avoid compiler warning.
   (void)errorcodeptr; // Avoid compiler warning.
@@ -1151,15 +1142,15 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
   matching or non-matching code for wide characters.
   */
 
-  should_flip_negation = FALSE;
+  BOOL should_flip_negation = FALSE;
 
   /* XClass will be used when characters > 255 might match. */
 
 #ifdef SUPPORT_WIDE_CHARS
-  xclass_props = 0;
+  uint32_t xclass_props = 0;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  cranges = NULL;
+  class_ranges *cranges = NULL;
 
   if (utf)
 #endif
@@ -1200,7 +1191,7 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
     }
   }
 
-  class_uchardata = code + LINK_SIZE + 2; // For XCLASS items
+  PCRE2_UCHAR *class_uchardata = code + LINK_SIZE + 2; // For XCLASS items
 #endif                                    /* SUPPORT_WIDE_CHARS */
 
   /* Initialize the 256-bit (32-byte) bit map to all zeros. We build the map
@@ -1563,13 +1554,11 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
 
     if (*pptr == META_RANGE_LITERAL || *pptr == META_RANGE_ESCAPED)
     {
-      uint32_t d;
-
 #ifdef EBCDIC
       BOOL range_is_literal = (*pptr == META_RANGE_LITERAL);
 #endif
       ++pptr;
-      d = *(pptr++);
+      uint32_t d = *(pptr++);
       if (d == META_BIGVALUE)
         d = *(pptr++);
 
@@ -1850,8 +1839,6 @@ END_PROCESSING:
       }
       else
       {
-        uint8_t *data;
-
         PCRE2_ASSERT(cranges->char_lists_types <= XCL_TYPE_MASK);
 #if PCRE2_CODE_UNIT_WIDTH == 8
         /* Encode as high / low bytes. */
@@ -1871,7 +1858,7 @@ END_PROCESSING:
         PCRE2_ASSERT(char_lists_size <= PCRE2_SIZE_MAX - cb->char_lists_size);
 
         cb->char_lists_size += char_lists_size;
-        data = (uint8_t *)cb->start_code - cb->char_lists_size;
+        uint8_t *data = (uint8_t *)cb->start_code - cb->char_lists_size;
 
         memcpy(data, (uint8_t *)(cranges + 1) + cranges->char_lists_start, char_lists_size);
 
@@ -2642,7 +2629,6 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
   eclass_op_info op_info;
   PCRE2_SIZE previous_length = (lengthptr != NULL) ? *lengthptr : 0;
   PCRE2_UCHAR *code = *pcode;
-  PCRE2_UCHAR *previous;
   BOOL allbitsone = TRUE;
 
   context.needs_bitmap = FALSE;
@@ -2651,7 +2637,7 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
   context.errorcodeptr = errorcodeptr;
   context.cb = cb;
 
-  previous = code;
+  PCRE2_UCHAR *previous = code;
   *code++ = OP_ECLASS;
   code += LINK_SIZE;
   *code++ = 0; // Flags, currently zero.
@@ -2734,10 +2720,9 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
       PCRE2_DEBUG_UNREACHABLE();
 #else
       BOOL need_map = context.needs_bitmap;
-      PCRE2_SIZE required_len;
 
       PCRE2_ASSERT(op_info.op_single_type == ECL_XCLASS);
-      required_len = op_info.length + (need_map ? 32 / sizeof(PCRE2_UCHAR) : 0);
+      PCRE2_SIZE required_len = op_info.length + (need_map ? 32 / sizeof(PCRE2_UCHAR) : 0);
 
       if (lengthptr != NULL)
       {
@@ -2758,17 +2743,13 @@ PRIV(compile_class_nested)(uint32_t options, uint32_t xoptions, uint32_t **pptr,
       }
       else
       {
-        PCRE2_UCHAR *rest;
-        PCRE2_SIZE rest_len;
-        PCRE2_UCHAR flags;
-
         /* 1 unit: OP_XCLASS | LINK_SIZE units | 1 unit: flags | ...rest */
         PCRE2_ASSERT(op_info.length >= 1 + LINK_SIZE + 1);
-        rest = op_info.code_start + 1 + LINK_SIZE + 1;
-        rest_len = (op_info.code_start + op_info.length) - rest;
+        PCRE2_UCHAR *rest = op_info.code_start + 1 + LINK_SIZE + 1;
+        PCRE2_SIZE rest_len = (op_info.code_start + op_info.length) - rest;
 
         /* First read any data we use, before memmove splats it. */
-        flags = op_info.code_start[1 + LINK_SIZE];
+        PCRE2_UCHAR flags = op_info.code_start[1 + LINK_SIZE];
         PCRE2_ASSERT((flags & XCL_MAP) == 0);
 
         /* Next do the memmove before any writes. */

@@ -626,16 +626,14 @@ static char *
 parse_grep_colors(const char *gc)
 {
   static char seq[16];
-  const char *col;
-  uint32_t len;
   if (gc == NULL)
     return NULL;
-  col = strstr(gc, "ms=");
+  const char *col = strstr(gc, "ms=");
   if (col == NULL)
     col = strstr(gc, "mt=");
   if (col == NULL)
     return NULL;
-  len = 0;
+  uint32_t len = 0;
   col += 3;
   while (*col != ':' && *col != 0 && len < sizeof(seq) - 1)
     seq[len++] = *col++;
@@ -1037,13 +1035,9 @@ isdirectory(char *filename)
 static directory_type *
 opendirectory(char *filename)
 {
-  size_t len;
-  char *pattern;
-  directory_type *dir;
-  DWORD err;
-  len = strlen(filename);
-  pattern = (char *)malloc(len + 3);
-  dir = (directory_type *)malloc(sizeof(*dir));
+  size_t len = strlen(filename);
+  char *pattern = (char *)malloc(len + 3);
+  directory_type *dir = (directory_type *)malloc(sizeof(*dir));
   if ((pattern == NULL) || (dir == NULL))
   {
     fprintf(stderr, "pcre2grep: malloc failed\n");
@@ -1063,7 +1057,7 @@ opendirectory(char *filename)
     return dir;
   }
 
-  err = GetLastError();
+  DWORD err = GetLastError();
   free(pattern);
   free(dir);
   errno = (err == ERROR_ACCESS_DENIED) ? EACCES : ENOENT;
@@ -2530,12 +2524,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 #ifdef SUPPORT_PCRE2GREP_CALLOUT_FORK
   PCRE2_SIZE argsvectorlen = 2;
   PCRE2_SIZE argslen = 1;
-  char *args;
-  char *argsptr;
-  char **argsvector;
-  char **argsvectorptr;
 #ifndef WIN32
-  pid_t pid;
 #endif
   int result = 0;
 #endif /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
@@ -2622,11 +2611,11 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
   /* Get memory for the argument vector and its strings. */
 
-  args = (char *)malloc(argslen);
+  char *args = (char *)malloc(argslen);
   if (args == NULL)
     return 0;
 
-  argsvector = (char **)malloc(argsvectorlen * sizeof(char *));
+  char **argsvector = (char **)malloc(argsvectorlen * sizeof(char *));
   if (argsvector == NULL)
   {
     /* LCOV_EXCL_START */
@@ -2637,8 +2626,8 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
   /* Now reprocess the string and set up the arguments. */
 
-  argsptr = args;
-  argsvectorptr = argsvector;
+  char *argsptr = args;
+  char **argsvectorptr = argsvector;
   *argsvectorptr++ = argsptr;
 
   length = calloutptr->callout_string_length;
@@ -2762,7 +2751,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
 #else  /* Neither Windows nor VMS */
   (void)fflush(stdout);
-  pid = fork();
+  pid_t pid = fork();
   if (pid == 0)
   {
     (void)execv(argsvector[0], argsvector);
@@ -2863,9 +2852,6 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   long int count_matched_lines = 0;
   char *lastmatchrestart = main_buffer;
   char *ptr = main_buffer;
-  char *endptr;
-  PCRE2_SIZE bufflength;
-  ptrdiff_t buffrc;
   BOOL binary = FALSE;
   BOOL endhyphenpending = FALSE;
   BOOL lines_printed = FALSE;
@@ -2898,7 +2884,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     input_line_buffered = FALSE;
   }
 
-  buffrc = fill_buffer(handle, frtype, main_buffer, bufsize, input_line_buffered);
+  ptrdiff_t buffrc = fill_buffer(handle, frtype, main_buffer, bufsize, input_line_buffered);
 
 #if defined SUPPORT_LIBZ
   if (frtype == FR_LIBZ && buffrc < 0)
@@ -2909,8 +2895,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     return 3;
 #endif
 
-  bufflength = (PCRE2_SIZE)buffrc;
-  endptr = main_buffer + bufflength;
+  PCRE2_SIZE bufflength = (PCRE2_SIZE)buffrc;
+  char *endptr = main_buffer + bufflength;
 
   /* Unless binary-files=text, see if we have a binary file. This uses the same
   rule as GNU grep, namely, a search for a binary zero byte near the start of the
@@ -2973,12 +2959,11 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     {
       if (bufthird < max_bufthird)
       {
-        char *new_buffer;
         PCRE2_SIZE new_bufthird = 2 * bufthird;
 
         if (new_bufthird > max_bufthird)
           new_bufthird = max_bufthird;
-        new_buffer = (char *)malloc(3 * new_bufthird);
+        char *new_buffer = (char *)malloc(3 * new_bufthird);
 
         if (new_buffer == NULL)
         {
@@ -3112,8 +3097,6 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
       {
         if (!invert)
         {
-          PCRE2_SIZE oldstartoffset;
-
           if (printname != NULL)
             fprintf(stdout, "%s%c", printname, printname_colon);
           if (number)
@@ -3164,7 +3147,6 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
               {
                 PCRE2_SIZE start = offsets[2 * n];
                 PCRE2_SIZE end = offsets[2 * n + 1];
-                size_t plen;
 
                 /* The use of \K may make the end offset earlier than the start.
                 In this situation, swap them round. */
@@ -3176,7 +3158,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
                   end = temp;
                 }
 
-                plen = end - start;
+                size_t plen = end - start;
                 if (plen > 0)
                 {
                   if (printed && om_separator != NULL)
@@ -3204,7 +3186,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           further on. */
 
           startoffset = offsets[1]; // Restart after the match
-          oldstartoffset = pcre2_get_startchar(match_data);
+          PCRE2_SIZE oldstartoffset = pcre2_get_startchar(match_data);
           if (startoffset <= oldstartoffset)
           {
             if (oldstartoffset >= length)
@@ -3354,7 +3336,6 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
         if ((multiline || do_colour) && !invert)
         {
-          int plength;
           PCRE2_SIZE endprevious;
 
           /* The use of \K may make the end offset earlier than the start. In
@@ -3452,7 +3433,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           and its line-ending characters (if they matched the pattern), so there
           may be no more to print. */
 
-          plength = (int)((linelength + endlinelength) - endprevious);
+          int plength = (int)((linelength + endlinelength) - endprevious);
           if (plength > 0)
             FWRITE_IGNORE(ptr + endprevious, 1, plength, stdout);
         }
@@ -3636,7 +3617,6 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   int rc = 1;
   int frtype;
   void *handle;
-  char *lastcomp;
   FILE *in = NULL; // Ensure initialized
 
 #ifdef SUPPORT_LIBZ
@@ -3648,12 +3628,9 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 #endif
 
 #if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
-  int pathlen;
 #endif
 
 #if defined NATIVE_ZOS
-  int zos_type;
-  FILE *zos_test_file;
 #endif
 
   /* If the file name is "-" we scan stdin */
@@ -3672,7 +3649,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   directories, whereas --include and --exclude apply to everything else. The test
   is against the final component of the path. */
 
-  lastcomp = strrchr(pathname, FILESEP);
+  char *lastcomp = strrchr(pathname, FILESEP);
   lastcomp = (lastcomp == NULL) ? pathname : lastcomp + 1;
 
   /* If the file is a directory, skip if not recursing or if explicitly excluded.
@@ -3683,7 +3660,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   /* For z/OS, determine the file type. */
 
 #if defined NATIVE_ZOS
-  zos_test_file = fopen(pathname, "rb");
+  FILE *zos_test_file = fopen(pathname, "rb");
 
   if (zos_test_file == NULL)
   {
@@ -3692,7 +3669,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
     return -1;
   }
 
-  zos_type = identifyzosfiletype(zos_test_file);
+  int zos_type = identifyzosfiletype(zos_test_file);
   fclose(zos_test_file);
 
   /* Handle a PDS in separate code */
@@ -3745,7 +3722,6 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 
       while ((nextfile = readdirectory(dir)) != NULL)
       {
-        int frc;
         int prc;
         if (strlen(pathname) + strlen(nextfile) + 2 > sizeof(childpath) ||
             (prc = snprintf(childpath, sizeof(childpath), "%s%c%s", pathname, FILESEP, nextfile)) <
@@ -3769,28 +3745,25 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 #ifdef HAVE_REALPATH
         {
           char resolvedpath[PATH_MAX];
-          BOOL isSame;
-          size_t rlen;
           if (realpath(childpath, resolvedpath) == NULL)
             /* LCOV_EXCL_START - this is a "never" event */
             continue; // This path is invalid - we can skip processing this
           /* LCOV_EXCL_STOP */
-          isSame = strcmp(pathname, resolvedpath) == 0;
+          BOOL isSame = strcmp(pathname, resolvedpath) == 0;
           if (isSame)
             continue; // We have a recursion
-          rlen = strlen(resolvedpath);
+          size_t rlen = strlen(resolvedpath);
           if (rlen++ < sizeof(resolvedpath) - 3)
           {
-            BOOL contained;
             strcat(resolvedpath, "/");
-            contained = strncmp(pathname, resolvedpath, rlen) == 0;
+            BOOL contained = strncmp(pathname, resolvedpath, rlen) == 0;
             if (contained)
               continue; // We have a recursion
           }
         }
 #endif /* HAVE_REALPATH */
 
-        frc = grep_or_recurse(childpath, dir_recurse, FALSE);
+        int frc = grep_or_recurse(childpath, dir_recurse, FALSE);
         if (frc > 1)
           rc = frc;
         else if (frc == 0 && rc == 1)
@@ -3820,7 +3793,6 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 
     while ((nextfile = readdirectory(dir)) != NULL)
     {
-      int frc;
       int prc;
       if (strlen(pathname) + strlen(nextfile) + 1 > sizeof(buffer) ||
           (prc = snprintf(buffer, sizeof(buffer), "%s%s", pathname, nextfile)) < 0 ||
@@ -3833,7 +3805,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
         /* LCOV_EXCL_STOP */
       }
 
-      frc = grep_or_recurse(buffer, dir_recurse, FALSE);
+      int frc = grep_or_recurse(buffer, dir_recurse, FALSE);
       if (frc > 1)
         rc = frc;
       else if (frc == 0 && rc == 1)
@@ -3865,7 +3837,7 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
   the file name, or the filename was forced (-H). */
 
 #if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
-  pathlen = (int)(strlen(pathname));
+  int pathlen = (int)(strlen(pathname));
 #endif
 
   /* Open using zlib if it is supported and the file name ends with .gz. */
@@ -4199,14 +4171,13 @@ Returns:         TRUE on success, FALSE after an error
 static BOOL
 compile_pattern(patstr *p, int options, int fromfile, const char *fromtext, int count)
 {
-  char *ps;
   int errcode;
   PCRE2_SIZE patlen, erroffset;
   PCRE2_UCHAR errmessbuffer[ERRBUFSIZ];
 
   if (p->compiled != NULL)
     return TRUE;
-  ps = p->string;
+  char *ps = p->string;
   patlen = p->length;
 
   if ((options & PCRE2_LITERAL) != 0)
@@ -4381,7 +4352,6 @@ main(int argc, char **argv)
 {
   int i, j;
   int rc = 1;
-  BOOL only_one_at_top;
   BOOL options_terminated = FALSE;
   patstr *cp;
   fnstr *fn;
@@ -5143,7 +5113,7 @@ main(int argc, char **argv)
   that there is only one argument at top level - this suppresses the file name if
   the argument is not a directory and filenames are not otherwise forced. */
 
-  only_one_at_top = i == argc - 1 && file_lists == NULL;
+  BOOL only_one_at_top = i == argc - 1 && file_lists == NULL;
 
   for (; i < argc; i++)
   {

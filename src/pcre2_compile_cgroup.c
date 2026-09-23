@@ -58,11 +58,9 @@ Returns:       hash code
 uint16_t
 PRIV(compile_get_hash_from_name)(PCRE2_SPTR name, uint32_t length)
 {
-  uint16_t hash;
-
   PCRE2_ASSERT(length > 0);
 
-  hash = (uint16_t)((name[0] & 0x7f) | ((name[length - 1] & 0xff) << 7));
+  uint16_t hash = (uint16_t)((name[0] & 0x7f) | ((name[length - 1] & 0xff) << 7));
   PCRE2_ASSERT(hash <= NAMED_GROUP_HASH_MASK);
   return hash;
 }
@@ -214,7 +212,6 @@ PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length, int *indexp
                                    int *errorcodeptr, compile_block *cb)
 {
   uint32_t i, groupnumber;
-  int count;
   PCRE2_UCHAR *slot = cb->name_table;
 
   /* Find the first entry in the table */
@@ -243,7 +240,7 @@ PRIV(compile_find_dupname_details)(PCRE2_SPTR name, uint32_t length, int *indexp
   backref map and maximum back reference as we do. */
 
   *indexptr = i;
-  count = 0;
+  int count = 0;
 
   for (;;)
   {
@@ -368,14 +365,12 @@ uint32_t *
 PRIV(compile_parse_scan_substr_args)(uint32_t *pptr, int *errorcodeptr, compile_block *cb,
                                      PCRE2_SIZE *lengthptr)
 {
-  uint8_t *captures;
   uint8_t *capture_ptr;
   uint8_t bit;
   PCRE2_SPTR name;
   named_group *ng;
   named_group *end = cb->named_groups + cb->names_found;
   BOOL all_found;
-  size_t size;
 
   PCRE2_ASSERT(*pptr == META_OFFSET);
   if (PRIV(compile_process_capture_list)(pptr - 1, 0, errorcodeptr, cb) == 0)
@@ -383,8 +378,8 @@ PRIV(compile_parse_scan_substr_args)(uint32_t *pptr, int *errorcodeptr, compile_
 
   /* Align to bytes. Since the highest capture can
   be equal to bracount, +1 is added before the aligning. */
-  size = (cb->bracount + 1 + 7) >> 3;
-  captures = (uint8_t *)cb->cx->memctl.malloc(size, cb->cx->memctl.memory_data);
+  size_t size = (cb->bracount + 1 + 7) >> 3;
+  uint8_t *captures = (uint8_t *)cb->cx->memctl.malloc(size, cb->cx->memctl.memory_data);
   if (captures == NULL)
   {
     *errorcodeptr = ERR21;
@@ -523,10 +518,6 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start, PCRE2_SIZE offset, int *e
   named_group *ng;
   named_group *end = cb->named_groups + cb->names_found;
   recurse_arguments *args;
-  uint16_t *captures;
-  uint16_t *current;
-  uint16_t *captures_end;
-  uint16_t tmp;
 
   /* Process all arguments, compute the required size. */
 
@@ -560,7 +551,7 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start, PCRE2_SIZE offset, int *e
 
   /* Create the capture list size. */
 
-  captures = (uint16_t *)(args + 1);
+  uint16_t *captures = (uint16_t *)(args + 1);
 
   while (TRUE)
   {
@@ -624,9 +615,9 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start, PCRE2_SIZE offset, int *e
 
   /* Remove duplicates. */
 
-  captures_end = captures + size;
-  tmp = *captures++;
-  current = captures;
+  uint16_t *captures_end = captures + size;
+  uint16_t tmp = *captures++;
+  uint16_t *current = captures;
 
   while (current < captures_end)
   {

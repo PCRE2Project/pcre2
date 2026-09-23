@@ -70,13 +70,8 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
                        uint8_t **serialized_bytes, PCRE2_SIZE *serialized_size,
                        pcre2_general_context *gcontext)
 {
-  uint8_t *bytes;
-  uint8_t *dst_bytes;
   int32_t i;
-  PCRE2_SIZE total_size;
   const pcre2_real_code *re;
-  const uint8_t *tables;
-  pcre2_serialized_data *data;
 
   const pcre2_memctl *memctl =
       (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
@@ -88,8 +83,8 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
     return PCRE2_ERROR_BADDATA;
 
   /* Compute total size. */
-  total_size = sizeof(pcre2_serialized_data) + TABLES_LENGTH;
-  tables = NULL;
+  PCRE2_SIZE total_size = sizeof(pcre2_serialized_data) + TABLES_LENGTH;
+  const uint8_t *tables = NULL;
 
   for (i = 0; i < number_of_codes; i++)
   {
@@ -106,7 +101,7 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
   }
 
   /* Initialize the byte stream. */
-  bytes = memctl->malloc(total_size + sizeof(pcre2_memctl), memctl->memory_data);
+  uint8_t *bytes = memctl->malloc(total_size + sizeof(pcre2_memctl), memctl->memory_data);
   if (bytes == NULL)
     return PCRE2_ERROR_NOMEMORY;
 
@@ -114,14 +109,14 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
   memcpy(bytes, memctl, sizeof(pcre2_memctl));
   bytes += sizeof(pcre2_memctl);
 
-  data = (pcre2_serialized_data *)bytes;
+  pcre2_serialized_data *data = (pcre2_serialized_data *)bytes;
   data->magic = SERIALIZED_DATA_MAGIC;
   data->version = SERIALIZED_DATA_VERSION;
   data->config = SERIALIZED_DATA_CONFIG;
   data->number_of_codes = number_of_codes;
 
   /* Copy all compiled code data. */
-  dst_bytes = bytes + sizeof(pcre2_serialized_data);
+  uint8_t *dst_bytes = bytes + sizeof(pcre2_serialized_data);
   memcpy(dst_bytes, tables, TABLES_LENGTH);
   dst_bytes += TABLES_LENGTH;
 
@@ -165,9 +160,7 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes, const uint8_
   const pcre2_memctl *memctl =
       (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
-  const uint8_t *src_bytes;
   pcre2_real_code *dst_re = NULL;
-  uint8_t *tables;
   int32_t i, j;
   int32_t error;
 
@@ -189,12 +182,12 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes, const uint8_
   if (number_of_codes > data->number_of_codes)
     number_of_codes = data->number_of_codes;
 
-  src_bytes = bytes + sizeof(pcre2_serialized_data);
+  const uint8_t *src_bytes = bytes + sizeof(pcre2_serialized_data);
 
   /* Decode tables. The reference count for the tables is stored immediately
   following them. */
 
-  tables = memctl->malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), memctl->memory_data);
+  uint8_t *tables = memctl->malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), memctl->memory_data);
   if (tables == NULL)
     return PCRE2_ERROR_NOMEMORY;
 

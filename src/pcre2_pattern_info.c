@@ -273,16 +273,14 @@ pcre2_callout_enumerate(const pcre2_code *code,
 {
   const pcre2_real_code *re = (const pcre2_real_code *)code;
   pcre2_callout_enumerate_block cb;
-  PCRE2_SPTR cc;
 #ifdef SUPPORT_UNICODE
-  BOOL utf;
 #endif
 
   if (re == NULL)
     return PCRE2_ERROR_NULL;
 
 #ifdef SUPPORT_UNICODE
-  utf = (re->overall_options & PCRE2_UTF) != 0;
+  BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 #endif
 
   /* Check that the first field in the block is the magic number. If it is not,
@@ -297,7 +295,7 @@ pcre2_callout_enumerate(const pcre2_code *code,
     return PCRE2_ERROR_BADMODE;
 
   cb.version = 0;
-  cc = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
+  PCRE2_SPTR cc = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
   while (TRUE)
   {

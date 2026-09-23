@@ -118,7 +118,6 @@ find_text_end(const pcre2_code *code, PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOO
       int erc;
       int errorcode;
       uint32_t ch;
-      PCRE2_SPTR esc_end_ptr;
 
       if (ptr < ptrend - 1)
       {
@@ -144,7 +143,7 @@ find_text_end(const pcre2_code *code, PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOO
         goto EXIT;
       }
 
-      esc_end_ptr = ptr;
+      PCRE2_SPTR esc_end_ptr = ptr;
       ptr -= 1; // Rewind by one, because the for-loop will increment it
 
       switch (erc)
@@ -305,13 +304,10 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
 {
   PCRE2_SPTR input_end = input + input_len;
 #ifdef SUPPORT_UNICODE
-  BOOL utf;
-  BOOL ucp;
 #endif
   PCRE2_UCHAR temp[6];
   BOOL next_to_upper;
   BOOL rest_to_upper;
-  BOOL single_char;
   BOOL overflow = FALSE;
   PCRE2_SIZE written = 0;
 
@@ -324,8 +320,8 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
                (char *)(output + output_cap) <= (char *)input);
 
 #ifdef SUPPORT_UNICODE
-  utf = (code->overall_options & PCRE2_UTF) != 0;
-  ucp = (code->overall_options & PCRE2_UCP) != 0;
+  BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+  BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 #endif
 
   if (input_len == 0)
@@ -357,7 +353,7 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
     break;
   }
 
-  single_char = state->single_char;
+  BOOL single_char = state->single_char;
   if (single_char)
     state->to_case = PCRE2_SUBSTITUTE_CASE_NONE;
 
@@ -459,8 +455,6 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
   int rest_to_case;
   PCRE2_UCHAR ch1[6];
   PCRE2_SIZE ch1_len;
-  PCRE2_SPTR rest;
-  PCRE2_SIZE rest_len;
   BOOL ch1_overflow = FALSE;
   BOOL rest_overflow = FALSE;
 
@@ -520,8 +514,8 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
     memcpy(ch1, input, CU2BYTES(ch1_len));
   }
 
-  rest = input + ch1_len;
-  rest_len = input_len - ch1_len;
+  PCRE2_SPTR rest = input + ch1_len;
+  PCRE2_SIZE rest_len = input_len - ch1_len;
 
   /* Transform just ch1. The buffers are always in-place (input == output). With a
   custom callout, we need a loop to discover its required buffer size. The loop
@@ -530,12 +524,9 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
   exact same input! */
 
   {
-    PCRE2_SIZE ch1_cap;
-    PCRE2_SIZE max_ch1_cap;
-
-    ch1_cap = ch1_len; // First attempt uses the space vacated by ch1.
+    PCRE2_SIZE ch1_cap = ch1_len; // First attempt uses the space vacated by ch1.
     PCRE2_ASSERT(output_cap >= input_len && input_len >= rest_len);
-    max_ch1_cap = output_cap - rest_len;
+    PCRE2_SIZE max_ch1_cap = output_cap - rest_len;
 
     while (TRUE)
     {
@@ -752,15 +743,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                  PCRE2_UCHAR *buffer, PCRE2_SIZE *blength)
 {
   int rc;
-  int subs;
-  uint32_t ovector_count;
   uint32_t goptions = 0;
-  uint32_t suboptions;
   pcre2_match_data *internal_match_data = NULL;
   BOOL escaped_literal = FALSE;
   BOOL overflowed = FALSE;
-  BOOL use_existing_match;
-  BOOL replacement_only;
   BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
   BOOL partial = (options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0;
   PCRE2_UCHAR temp[6];
@@ -772,7 +758,6 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   PCRE2_SPTR repend = NULL;
   PCRE2_SIZE extra_needed = 0;
   PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
-  PCRE2_SIZE *ovector;
   PCRE2_SIZE ovecsave[2] = { 0, 0 };
   pcre2_substitute_callout_block scb;
   PCRE2_SIZE sub_start_extra_needed;
@@ -843,8 +828,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   /* Check for using a match that has already happened. Note that the subject
   pointer in the match data may be NULL after a no-match. */
 
-  use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
-  replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
+  BOOL use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
+  BOOL replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
   if (use_existing_match && match_data == NULL)
     return PCRE2_ERROR_NULL;
@@ -943,8 +928,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   /* Remember ovector details */
 
-  ovector = pcre2_get_ovector_pointer(match_data);
-  ovector_count = pcre2_get_ovector_count(match_data);
+  PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
+  uint32_t ovector_count = pcre2_get_ovector_count(match_data);
 
   /* Fixed things in the callout block */
 
@@ -969,7 +954,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   /* Save the substitute options and remove them from the match options. */
 
-  suboptions = options & SUBSTITUTE_OPTIONS;
+  uint32_t suboptions = options & SUBSTITUTE_OPTIONS;
   options &= ~SUBSTITUTE_OPTIONS;
 
   /* Error if the start match offset is greater than the length of the subject. */
@@ -989,7 +974,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   /* Loop for global substituting. If PCRE2_SUBSTITUTE_MATCHED is set, the first
   match is taken from the match_data that was passed in. */
 
-  subs = 0;
+  int subs = 0;
   for (;;)
   {
     PCRE2_SPTR ptrstack[PTR_STACK_SIZE];
@@ -1133,11 +1118,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
         if (*ptr == CHAR_DOLLAR_SIGN)
         {
-          BOOL inparens;
-          BOOL inangle;
-          BOOL star;
           PCRE2_SIZE sublength;
-          PCRE2_UCHAR next;
           PCRE2_SPTR subptr, subptrend;
 
           if (++ptr >= repend)
@@ -1151,9 +1132,9 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           text2_start = NULL;
           text2_end = NULL;
           group = -1;
-          inparens = FALSE;
-          inangle = FALSE;
-          star = FALSE;
+          BOOL inparens = FALSE;
+          BOOL inangle = FALSE;
+          BOOL star = FALSE;
           subptr = NULL;
           subptrend = NULL;
 
@@ -1318,16 +1299,15 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           }
           else
           {
-            PCRE2_SIZE name_len;
             PCRE2_SPTR name_start = ptr;
             if (!read_name_subst(&ptr, repend, utf, code->tables + ctypes_offset))
               goto BAD;
-            name_len = ptr - name_start;
+            PCRE2_SIZE name_len = ptr - name_start;
             memcpy(name, name_start, CU2BYTES(name_len));
             name[name_len] = 0;
           }
 
-          next = 0; // not used or updated after this point
+          PCRE2_UCHAR next = 0; // not used or updated after this point
           (void)next;
 
           /* In extended mode we recognize ${name:+set text:unset text} and
@@ -1643,18 +1623,15 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
           case ESC_g:
             {
-              PCRE2_SIZE name_len;
-              PCRE2_SPTR name_start;
-
               /* Parse the \g<name> form (\g<number> already handled by check_escape) */
               if (ptr >= repend || *ptr != CHAR_LESS_THAN_SIGN)
                 goto BADESCAPE;
               ++ptr;
 
-              name_start = ptr;
+              PCRE2_SPTR name_start = ptr;
               if (!read_name_subst(&ptr, repend, utf, code->tables + ctypes_offset))
                 goto BADESCAPE;
-              name_len = ptr - name_start;
+              PCRE2_SIZE name_len = ptr - name_start;
 
               if (ptr >= repend || *ptr != CHAR_GREATER_THAN_SIGN)
                 goto BADESCAPE;

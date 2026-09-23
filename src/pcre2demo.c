@@ -72,8 +72,6 @@ main(int argc, char **argv)
   pcre2_code *re;
   /* PCRE2_SPTR is a pointer to unsigned code units of the appropriate width
   (in this case, 8 bits). */
-  PCRE2_SPTR pattern;
-  PCRE2_SPTR subject;
   PCRE2_SPTR name_table;
 
   int errornumber;
@@ -85,11 +83,8 @@ main(int argc, char **argv)
   uint32_t name_entry_size;
 
   PCRE2_SIZE erroroffset;
-  PCRE2_SIZE *ovector;
   PCRE2_SIZE ovector_last[2];
-  PCRE2_SIZE subject_length;
 
-  pcre2_match_data *match_data;
 
 
   /*************************************************************************
@@ -139,9 +134,9 @@ main(int argc, char **argv)
   length is cast to PCRE2_SIZE for completeness, though PCRE2_SIZE is in fact
   defined to be size_t. */
 
-  pattern = (PCRE2_SPTR)argv[i];
-  subject = (PCRE2_SPTR)argv[i + 1];
-  subject_length = (PCRE2_SIZE)strlen((char *)subject);
+  PCRE2_SPTR pattern = (PCRE2_SPTR)argv[i];
+  PCRE2_SPTR subject = (PCRE2_SPTR)argv[i + 1];
+  PCRE2_SIZE subject_length = (PCRE2_SIZE)strlen((char *)subject);
 
 
   /*************************************************************************
@@ -181,7 +176,7 @@ main(int argc, char **argv)
   * PCRE2_SIZE match_data_size = pcre2_get_match_data_size(match_data);    *
   *************************************************************************/
 
-  match_data = pcre2_match_data_create_from_pattern(re, NULL);
+  pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(re, NULL);
 
   /* Now run the match. */
 
@@ -218,7 +213,7 @@ main(int argc, char **argv)
   /* Match succeeded. Get a pointer to the output vector, where string offsets
   are stored. */
 
-  ovector = pcre2_get_ovector_pointer(match_data);
+  PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
   printf("Match succeeded at offset %d\n", (int)ovector[0]);
 
 
@@ -286,7 +281,6 @@ main(int argc, char **argv)
   }
   else
   {
-    PCRE2_SPTR tabptr;
     printf("Named substrings\n");
 
     /* Before we can access the substrings, we must extract the table for
@@ -305,7 +299,7 @@ main(int argc, char **argv)
     name, and the substring itself. In the 8-bit library the number is held in
     two bytes, most significant first. */
 
-    tabptr = name_table;
+    PCRE2_SPTR tabptr = name_table;
     for (i = 0; i < namecount; i++)
     {
       int n = (tabptr[0] << 8) | tabptr[1];

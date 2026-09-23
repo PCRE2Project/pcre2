@@ -165,18 +165,16 @@ build_subject(size_t length)
   while (offset < length)
   {
     const char *token;
-    size_t token_length;
     size_t i;
-    int is_needle;
 
-    is_needle = (words_emitted != 0 && words_emitted % RARE_PERIOD == 0);
+    int is_needle = (words_emitted != 0 && words_emitted % RARE_PERIOD == 0);
 
     if (is_needle)
       token = rare_needles[(words_emitted / RARE_PERIOD - 1) % RARE_COUNT];
     else
       token = words[rng_next() % (unsigned long long)WORD_COUNT];
 
-    token_length = strlen(token);
+    size_t token_length = strlen(token);
     if (offset + token_length + 1 > length)
       break;
 
@@ -289,7 +287,6 @@ scan_all(pcre2_code *code, pcre2_match_data *match_data, PCRE2_SPTR subject, siz
   for (;;)
   {
     int rc;
-    PCRE2_SIZE *ovector;
 
     if (use_jit)
       rc = pcre2_jit_match(code, subject, length, offset, 0, match_data, NULL);
@@ -302,7 +299,7 @@ scan_all(pcre2_code *code, pcre2_match_data *match_data, PCRE2_SPTR subject, siz
       return -1;
 
     matches++;
-    ovector = pcre2_get_ovector_pointer(match_data);
+    PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
     offset = (ovector[1] > ovector[0]) ? ovector[1] : ovector[0] + 1;
     if (offset > length)
       break;
@@ -324,9 +321,7 @@ run_throughput(const char *label, PCRE2_SPTR subject, size_t length, int use_jit
     int errorcode;
     PCRE2_SIZE erroroffset;
     pcre2_code *code;
-    pcre2_match_data *match_data;
     PCRE2_UCHAR pattern[TEXT_MAX];
-    long matches;
     double best = 0.0;
     int rep;
 
@@ -348,11 +343,11 @@ run_throughput(const char *label, PCRE2_SPTR subject, size_t length, int use_jit
       return 1;
     }
 
-    match_data = pcre2_match_data_create_from_pattern(code, NULL);
+    pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(code, NULL);
 
     /* Warm up, and establish the match count. */
 
-    matches = scan_all(code, match_data, subject, length, use_jit);
+    long matches = scan_all(code, match_data, subject, length, use_jit);
     if (matches < 0)
     {
       fprintf(stderr, "%s: match error\n", benchmarks[i].name);
@@ -364,7 +359,6 @@ run_throughput(const char *label, PCRE2_SPTR subject, size_t length, int use_jit
       double start = now_seconds();
       double elapsed;
       long iterations = 0;
-      double throughput;
 
       do
       {
@@ -377,7 +371,7 @@ run_throughput(const char *label, PCRE2_SPTR subject, size_t length, int use_jit
         elapsed = now_seconds() - start;
       } while (elapsed < MIN_SECONDS);
 
-      throughput = ((double)length * (double)iterations) / elapsed / (1024.0 * 1024.0);
+      double throughput = ((double)length * (double)iterations) / elapsed / (1024.0 * 1024.0);
       if (throughput > best)
         best = throughput;
     }
@@ -434,7 +428,6 @@ run_short(const char *label, PCRE2_SPTR subject, size_t total, int use_jit)
       int errorcode;
       PCRE2_SIZE erroroffset;
       pcre2_code *code;
-      pcre2_match_data *match_data;
       PCRE2_UCHAR pattern[TEXT_MAX];
       double best = 0.0;
       long expected = -1;
@@ -458,7 +451,7 @@ run_short(const char *label, PCRE2_SPTR subject, size_t total, int use_jit)
         return 1;
       }
 
-      match_data = pcre2_match_data_create_from_pattern(code, NULL);
+      pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(code, NULL);
 
       for (rep = 0; rep < REPEATS; rep++)
       {
@@ -532,7 +525,6 @@ int
 main(int argc, char **argv)
 {
   size_t length = SUBJECT_UNITS;
-  PCRE2_UCHAR *subject;
   const char *label = "build";
   int use_jit = 1;
   int short_mode = 0;
@@ -554,7 +546,7 @@ main(int argc, char **argv)
     }
   }
 
-  subject = build_subject(length);
+  PCRE2_UCHAR *subject = build_subject(length);
   if (subject == NULL)
   {
     fprintf(stderr, "out of memory\n");

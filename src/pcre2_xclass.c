@@ -70,7 +70,6 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
   PCRE2_UCHAR t;
   BOOL not_negated = (*data & XCL_NOT) == 0;
   uint32_t type, max_index, min_index, value;
-  const uint8_t *next_char;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
   /* In 8 bit mode, this must always be TRUE. Help the compiler to know that. */
@@ -316,7 +315,7 @@ PRIV(xclass)(uint32_t c, PCRE2_SPTR data, const uint8_t *char_lists_end, BOOL ut
 #endif /* CODE_UNIT_WIDTH */
 
   /* Align characters. */
-  next_char = char_lists_end - (GET(data, 0) << 1);
+  const uint8_t *next_char = char_lists_end - (GET(data, 0) << 1);
   type &= XCL_TYPE_MASK;
 
   /* Alignment check. */
@@ -463,12 +462,11 @@ PRIV(eclass)(uint32_t c, PCRE2_SPTR data_start, PCRE2_SPTR data_end, const uint8
              BOOL utf)
 {
   PCRE2_SPTR ptr = data_start;
-  PCRE2_UCHAR flags;
   uint32_t stack = 0;
   int stack_depth = 0;
 
   PCRE2_ASSERT(data_start < data_end);
-  flags = *ptr++;
+  PCRE2_UCHAR flags = *ptr++;
   PCRE2_ASSERT((flags & ECL_MAP) == 0 || (data_end - ptr) >= 32 / (int)sizeof(PCRE2_UCHAR));
 
   /* Code points < 256 are matched against a bitmap, if one is present.
