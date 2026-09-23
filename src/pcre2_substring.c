@@ -220,11 +220,11 @@ pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber
     return PCRE2_ERROR_NOMEMORY;
   }
   /* LCOV_EXCL_STOP */
-  yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) + CU2BYTES(size + 1),
-                              (pcre2_memctl *)match_data);
+  PCRE2_UCHAR *yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) + CU2BYTES(size + 1),
+                                           (pcre2_memctl *)match_data);
   if (yield == NULL)
     return PCRE2_ERROR_NOMEMORY;
-  PCRE2_UCHAR *yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
+  yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
   if (size != 0)
     memcpy(yield, match_data->subject + match_data->ovector[stringnumber * 2], CU2BYTES(size));
   yield[size] = 0;

@@ -8695,7 +8695,7 @@ compile_dnref_search(compiler_common *common, PCRE2_SPTR cc, jump_list **backtra
   count--;
   while (count-- > 0)
   {
-    offset = GET2(slot, 0) << 1;
+    unsigned int offset = GET2(slot, 0) << 1;
     GET_LOCAL_BASE(TMP2, 0, OVECTOR(offset));
     add_jump(compiler, &found,
              CMP(SLJIT_NOT_EQUAL, SLJIT_MEM1(SLJIT_SP), OVECTOR(offset), TMP1, 0));
@@ -10338,7 +10338,6 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
   {
     bra = *cc;
     cc++;
-    opcode = *cc;
   }
 
   PCRE2_UCHAR opcode = *cc;

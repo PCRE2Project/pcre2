@@ -327,7 +327,7 @@ LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
   size_t match_size;
   int dfa_workspace[DFA_WORKSPACE_COUNT];
 
-  if (size < sizeof(random_options))
+  if (size < sizeof(uint64_t))
     return -1;
 
   uint64_t random_options = *(uint64_t *)(data);
@@ -802,11 +802,11 @@ main(int argc, char **argv)
 
     if (argv[i][0] == '=')
     {
-      readsize = strlen(argv[i]) - 1;
+      size_t readsize = strlen(argv[i]) - 1;
       printf("------ <Literal> ------\n");
       printf("Length = %lu\n", readsize);
       printf("%.*s\n", (int)readsize, argv[i] + 1);
-      buffer = (unsigned char *)malloc(readsize);
+      unsigned char *buffer = (unsigned char *)malloc(readsize);
       if (buffer == NULL)
       {
         printf("** Failed to allocate %lu bytes of memory\n", readsize);

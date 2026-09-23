@@ -94,10 +94,7 @@ xclass_compute_ranges(compiler_common *common, PCRE2_SPTR cc, xclass_ranges *ran
   size_t range_count = 0, est_range_count;
   size_t est_stack_size, tmp;
   uint32_t type, list_ind;
-  uint32_t est_type;
   uint32_t char_list_add, range_start, range_end;
-  const uint8_t *next_char;
-  const uint8_t *est_next_char;
 #if defined SUPPORT_UNICODE && (PCRE2_CODE_UNIT_WIDTH == 8 || PCRE2_CODE_UNIT_WIDTH == 16)
   BOOL utf = common->utf;
 #endif /* SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == [8|16] */
@@ -136,12 +133,12 @@ xclass_compute_ranges(compiler_common *common, PCRE2_SPTR cc, xclass_ranges *ran
 #endif /* CODE_UNIT_WIDTH */
 
   /* Align characters. */
-  next_char = (const uint8_t *)common->start - (GET(cc, 0) << 1);
+  const uint8_t *next_char = (const uint8_t *)common->start - (GET(cc, 0) << 1);
   type &= XCL_TYPE_MASK;
 
   /* Estimate size. */
-  est_next_char = next_char;
-  est_type = type;
+  const uint8_t *est_next_char = next_char;
+  uint32_t est_type = type;
   est_range_count = 0;
   list_ind = 0;
 
@@ -329,7 +326,6 @@ xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr
   sljit_u32 min = *min_ptr;
   sljit_u32 max = *max_ptr;
   uint32_t char_list_add;
-  const uint8_t *next_char;
   BOOL utf = TRUE;
 
   /* This function is pointless without utf 8/16. */
@@ -371,7 +367,7 @@ xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr
 #endif /* CODE_UNIT_WIDTH */
 
   /* Align characters. */
-  next_char = (const uint8_t *)common->start - (GET(cc, 0) << 1);
+  const uint8_t *next_char = (const uint8_t *)common->start - (GET(cc, 0) << 1);
   type &= XCL_TYPE_MASK;
 
   SLJIT_ASSERT(type != 0);
@@ -535,8 +531,6 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
   sljit_uw c, charoffset;
   sljit_u32 max = READ_CHAR_MAX, min = 0;
   struct sljit_jump *jump = NULL;
-  PCRE2_UCHAR flags;
-  PCRE2_SPTR ccbegin;
   sljit_u32 compares, invertcmp, depth;
   sljit_u32 first_item, last_item, mid_item;
   sljit_u32 range_start, range_end;
@@ -553,8 +547,8 @@ compile_xclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
 
   SLJIT_ASSERT(common->locals_size >= SSIZE_OF(sw));
   /* Scanning the necessary info. */
-  flags = *cc++;
-  ccbegin = cc;
+  PCRE2_UCHAR flags = *cc++;
+  PCRE2_SPTR ccbegin = cc;
   compares = 0;
 
   if (flags & XCL_MAP)
@@ -1301,7 +1295,6 @@ compile_eclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
 {
   DEFINE_COMPILER;
   PCRE2_SPTR end = cc + GET(cc, 0) - 1;
-  PCRE2_SPTR begin;
   jump_list *not_found;
   jump_list *found = NULL;
 
@@ -1316,7 +1309,7 @@ compile_eclass_matchingpath(compiler_common *common, PCRE2_SPTR cc, jump_list **
     cc += 32 / sizeof(PCRE2_UCHAR);
   }
 
-  begin = cc;
+  PCRE2_SPTR begin = cc;
 
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, ECLASS_CHAR_DATA, 0);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL1, ECLASS_STACK_DATA, 0);
@@ -1398,7 +1391,6 @@ byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
   unsigned int othercasebit = 0;
   PCRE2_SPTR othercasechar = NULL;
 #ifdef SUPPORT_UNICODE
-  int utflength;
 #endif
 
   if (caseless && char_has_othercase(common, cc))
@@ -1447,7 +1439,7 @@ byte_sequence_compare(compiler_common *common, BOOL caseless, PCRE2_SPTR cc,
   }
 
 #ifdef SUPPORT_UNICODE
-  utflength = 1;
+  int utflength = 1;
   if (common->utf && HAS_EXTRALEN(*cc))
     utflength += GET_EXTRALEN(*cc);
 
@@ -1737,12 +1729,11 @@ do_extuni_no_utf(jit_arguments *args, PCRE2_SPTR cc)
   PCRE2_SPTR end_subject = args->end;
   int lgb, rgb, ricount;
   PCRE2_SPTR bptr;
-  uint32_t c;
   BOOL was_ep_ZWJ = FALSE;
 
   /* Patch by PH */
   /* GETCHARINC(c, cc); */
-  c = *cc++;
+  uint32_t c = *cc++;
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
   if (c >= 0x110000)

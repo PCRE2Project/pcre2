@@ -606,7 +606,7 @@ PRIV(compile_parse_recurse_args)(uint32_t *pptr_start, PCRE2_SIZE offset, int *e
 
   for (i = size - 1; i > 0; i--)
   {
-    tmp = captures[0];
+    uint16_t tmp = captures[0];
     captures[0] = captures[i];
     captures[i] = tmp;
 

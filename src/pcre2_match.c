@@ -540,6 +540,7 @@ recurse_update_offsets(heapframe *F, heapframe *P)
   PCRE2_SIZE offset = 2;
   PCRE2_SIZE offset_top = Foffset_top + 2;
   PCRE2_SPTR ecode = Fecode;
+  PCRE2_SIZE diff;
 
   do
   {
@@ -572,7 +573,7 @@ recurse_update_offsets(heapframe *F, heapframe *P)
     src += diff;
   } while (*ecode == OP_CREF);
 
-  PCRE2_SIZE diff = offset_top - offset;
+  diff = offset_top - offset;
   if (diff == 2)
   {
     dst[0] = src[0];
@@ -710,13 +711,10 @@ match(PCRE2_SPTR start_eptr, PCRE2_SPTR start_ecode, uint16_t top_bracket, PCRE2
 {
   /* Frame-handling variables */
 
-  heapframe *F;        // Current frame pointer
   heapframe *N = NULL; // Temporary frame pointers
   heapframe *P = NULL;
 
-  heapframe *frames_top;                 // End of frames vector
   heapframe *assert_accept_frame = NULL; // For passing back a frame with captures
-  PCRE2_SIZE frame_copy_size;            // Amount to copy when creating a new frame
 
   /* Local variables that do not need to be preserved over calls to RMATCH(). */
 
@@ -735,7 +733,6 @@ match(PCRE2_SPTR start_eptr, PCRE2_SPTR start_ecode, uint16_t top_bracket, PCRE2
   uint32_t fc;               // Character values
   uint32_t number;           // Used for group and other numbers
   uint32_t reptype = 0;      // Type of repetition (0 to avoid compiler warning)
-  uint32_t group_frame_type; // Specifies type for new group frames
 
   BOOL condition;    // Used in conditional groups
   BOOL cur_is_word;  // Used in "word" tests
@@ -753,12 +750,14 @@ match(PCRE2_SPTR start_eptr, PCRE2_SPTR start_ecode, uint16_t top_bracket, PCRE2
   /* This is the length of the last part of a backtracking frame that must be
   copied when a new frame is created. */
 
-  frame_copy_size = frame_size - offsetof(heapframe, eptr);
+  PCRE2_SIZE frame_copy_size =
+      frame_size - offsetof(heapframe, eptr); // Amount to copy when creating a new frame
 
   /* Set up the first frame and the end of the frames vector. */
 
-  F = match_data->heapframes;
-  frames_top = (heapframe *)((char *)F + match_data->heapframes_size);
+  heapframe *F = match_data->heapframes; // Current frame pointer
+  heapframe *frames_top =
+      (heapframe *)((char *)F + match_data->heapframes_size); // End of frames vector
 
   Frdepth = 0;                       // "Recursion" depth
   Fcapture_last = 0;                 // Number of most recent capture
@@ -767,7 +766,7 @@ match(PCRE2_SPTR start_eptr, PCRE2_SPTR start_ecode, uint16_t top_bracket, PCRE2
   Fmark = NULL;                      // Most recent mark
   Foffset_top = 0;                   // End of captures within the frame
   Flast_group_offset = PCRE2_UNSET;  // Saved frame of most recent group
-  group_frame_type = 0;              // Not a start of group frame
+  uint32_t group_frame_type = 0; // Specifies type for new group frames; not a start of group frame
   goto NEW_FRAME;                    // Start processing with this frame
 
   /* Come back here when we want to create a new frame for remembering a
@@ -1595,14 +1594,13 @@ NEW_FRAME:
 
         for (i = 1; i <= Lmin; i++)
         {
-          uint32_t cc; // Faster than PCRE2_UCHAR
           if (Feptr >= mb->end_subject)
           {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
           }
 
-          cc = *Feptr;
+          uint32_t cc = *Feptr; // Faster than PCRE2_UCHAR
           if (Lc != cc && Loc != cc)
             RRETURN(MATCH_NOMATCH);
           Feptr++;
@@ -1615,7 +1613,6 @@ NEW_FRAME:
         {
           for (;;)
           {
-            uint32_t cc; // Faster than PCRE2_UCHAR
             RMATCH(Fecode, RM25);
             if (rrc != MATCH_NOMATCH)
               RRETURN(rrc);
@@ -1627,7 +1624,7 @@ NEW_FRAME:
               RRETURN(MATCH_NOMATCH);
             }
 
-            cc = *Feptr;
+            uint32_t cc = *Feptr; // Faster than PCRE2_UCHAR
             if (Lc != cc && Loc != cc)
               RRETURN(MATCH_NOMATCH);
             Feptr++;
@@ -1641,14 +1638,13 @@ NEW_FRAME:
           Lstart_eptr = Feptr;
           for (i = Lmin; i < Lmax; i++)
           {
-            uint32_t cc; // Faster than PCRE2_UCHAR
             if (Feptr >= mb->end_subject)
             {
               SCHECK_PARTIAL();
               break;
             }
 
-            cc = *Feptr;
+            uint32_t cc = *Feptr; // Faster than PCRE2_UCHAR
             if (Lc != cc && Loc != cc)
               break;
             Feptr++;

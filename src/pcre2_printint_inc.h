@@ -362,7 +362,6 @@ print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
   uint32_t type, list_ind;
   uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
   uint32_t range_start = ~(uint32_t)0, range_end = 0;
-  const uint8_t *next_char;
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
   type = (uint32_t)(code[0] << 8) | code[1];
@@ -373,7 +372,7 @@ print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
 #endif /* CODE_UNIT_WIDTH */
 
   /* Align characters. */
-  next_char = char_lists_end - (GET(code, 0) << 1);
+  const uint8_t *next_char = char_lists_end - (GET(code, 0) << 1);
   type &= XCL_TYPE_MASK;
   list_ind = 0;
 

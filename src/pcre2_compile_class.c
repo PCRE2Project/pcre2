@@ -1148,10 +1148,9 @@ PRIV(compile_class_not_nested)(uint32_t options, uint32_t xoptions, uint32_t *st
 
 #ifdef SUPPORT_WIDE_CHARS
   uint32_t xclass_props = 0;
-
-#if PCRE2_CODE_UNIT_WIDTH == 8
   class_ranges *cranges = NULL;
 
+#if PCRE2_CODE_UNIT_WIDTH == 8
   if (utf)
 #endif
   {

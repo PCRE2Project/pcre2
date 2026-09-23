@@ -134,7 +134,6 @@ pcre2_jit_stack_create(size_t startsize, size_t maxsize, pcre2_general_context *
 
 #else /* SUPPORT_JIT */
 
-  pcre2_jit_stack *jit_stack;
 
   if (startsize == 0 || maxsize == 0 || maxsize > SIZE_MAX - STACK_GROWTH_RATE)
     return NULL;
@@ -143,7 +142,8 @@ pcre2_jit_stack_create(size_t startsize, size_t maxsize, pcre2_general_context *
   startsize = (startsize + STACK_GROWTH_RATE - 1) & (size_t)(~(STACK_GROWTH_RATE - 1));
   maxsize = (maxsize + STACK_GROWTH_RATE - 1) & (size_t)(~(STACK_GROWTH_RATE - 1));
 
-  jit_stack = PRIV(memctl_malloc)(sizeof(pcre2_real_jit_stack), (pcre2_memctl *)gcontext);
+  pcre2_jit_stack *jit_stack =
+      PRIV(memctl_malloc)(sizeof(pcre2_real_jit_stack), (pcre2_memctl *)gcontext);
   if (jit_stack == NULL)
     return NULL;
   jit_stack->stack = sljit_allocate_stack(startsize, maxsize, &jit_stack->memctl);

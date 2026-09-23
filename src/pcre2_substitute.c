@@ -1123,7 +1123,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
           if (++ptr >= repend)
             goto BAD;
-          if ((next = *ptr) == CHAR_DOLLAR_SIGN)
+          PCRE2_UCHAR next = *ptr;
+          if (next == CHAR_DOLLAR_SIGN)
             goto LOADLITERAL;
 
           special = 0;
@@ -1307,7 +1308,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             name[name_len] = 0;
           }
 
-          PCRE2_UCHAR next = 0; // not used or updated after this point
+          next = 0; // not used or updated after this point
           (void)next;
 
           /* In extended mode we recognize ${name:+set text:unset text} and

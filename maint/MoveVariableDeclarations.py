@@ -10,7 +10,7 @@ DECLARATION_RE = re.compile(r"^(?P<indent> +)"
                             r"struct +[A-Za-z_]\w*|union +[A-Za-z_]\w*|enum +[A-Za-z_]\w*) +)*"
                             r"[A-Za-z_]\w*(?: *\*+ *| +))"
                             r"(?P<name>[A-Za-z_]\w*) *; *"
-                            r"(?P<comment>/\*.*\*/)? *$")
+                            r"(?P<comment>(?://.*|/\*.*\*/))? *$")
 NON_TYPE_WORDS = {
     "break",
     "case",
