@@ -10254,6 +10254,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
     uint32_t group = 0;
     uint32_t itemlength = 0;
     uint32_t itemminlength = 0;
+    BOOL cond_no_else = FALSE;
 
     if (*pptr < META_END)
     {
@@ -10542,14 +10543,20 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
       case META_COND_RNAME:
       case META_COND_RNUMBER:
         pptr += 2 + SIZEOFFSET;
-        goto CHECK_GROUP;
+        goto CHECK_COND;
 
       case META_COND_ASSERT:
         pptr += 1;
-        goto CHECK_GROUP;
+        goto CHECK_COND;
 
       case META_COND_VERSION:
         pptr += 4;
+
+      CHECK_COND:
+        gptr = parsed_skip(pptr, PSKIP_ALT);
+        if (gptr == NULL)
+          return -1;
+        cond_no_else = *gptr == META_KET;
         goto CHECK_GROUP;
 
       case META_CAPTURE:
@@ -10566,7 +10573,7 @@ get_branchlength(uint32_t **pptrptr, int *minptr, int *errcodeptr, int *lcptr,
         if (grouplength < 0)
           return -1;
         itemlength = grouplength;
-        itemminlength = groupminlength;
+        itemminlength = cond_no_else ? 0 : groupminlength;
         break;
 
       case META_QUERY:
