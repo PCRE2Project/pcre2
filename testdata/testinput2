@@ -8497,4 +8497,21 @@ a)"xI
 /(*naplb:(?(?=x)ab))/
     xabe\=offset=3
 
+/(?=X)/newline=crlf,use_offset_limit,no_start_optimize
+    \r\nX\=offset_limit=2
+\= Expect no match
+    \r\nX\=offset_limit=1
+
+/(?:xyzw\R{4}|abc)/
+    abc
+
+/(?:xyzw\X{3}|abc)/
+    abc
+
+/(?:wxyz\h{2}|abcd)/
+    abcd
+
+/(Z|[ab])\R{4}/
+    b\r\n\r\n\r\n\r\n
+
 # End of testinput2

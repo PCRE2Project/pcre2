@@ -931,6 +931,9 @@ static struct regression_test_case regression_test_cases[] = {
   { MU, A, 0, 2, "(*naplb:(?(?=x)a))", "ae" },
   { MU, A, 0, 2, "(?<=(?(?=e)a))", "ae" },
   { MU, A, 0, 3, "(*naplb:(?(?=x)ab))", "xabe" },
+  { MU, A, 0, 0, "(?:xyzw\\R{4}|abc)", "abc" },
+  { M, A, 0, 0, "(?:xyzw\\X{3}|abc)", "abc" },
+  { M, A, 0, 0, "(?:wxyz\\h{2}|abcd)", "abcd" },
 
   /* Recurse and control verbs. */
   { MU, A, 0, 0, "(a(*ACCEPT)b){0}a(?1)b", "aacaabb" },

@@ -23967,6 +23967,30 @@ No match
     xabe\=offset=3
  0: 
 
+/(?=X)/newline=crlf,use_offset_limit,no_start_optimize
+    \r\nX\=offset_limit=2
+ 0: 
+\= Expect no match
+    \r\nX\=offset_limit=1
+No match
+
+/(?:xyzw\R{4}|abc)/
+    abc
+ 0: abc
+
+/(?:xyzw\X{3}|abc)/
+** \P, \p, and \X are not allowed after the #forbid_utf command
+    abc
+
+/(?:wxyz\h{2}|abcd)/
+    abcd
+ 0: abcd
+
+/(Z|[ab])\R{4}/
+    b\r\n\r\n\r\n\r\n
+ 0: b\x0d\x0a\x0d\x0a\x0d\x0a\x0d\x0a
+ 1: b
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

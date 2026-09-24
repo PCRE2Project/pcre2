@@ -5875,7 +5875,7 @@ do_getucdtype(compiler_common *common)
 #endif /* SUPPORT_UNICODE */
 
 static SLJIT_INLINE struct sljit_label *
-mainloop_entry(compiler_common *common)
+mainloop_entry(compiler_common *common, jump_list **limit_reached)
 {
   DEFINE_COMPILER;
   struct sljit_label *mainloop;
@@ -6061,6 +6061,11 @@ mainloop_entry(compiler_common *common)
     JUMPHERE(end2);
   }
 
+  if ((readuchar || newlinecheck) &&
+      (overall_options & (PCRE2_FIRSTLINE | PCRE2_USE_OFFSET_LIMIT)) == PCRE2_USE_OFFSET_LIMIT)
+    add_jump(compiler, limit_reached,
+             CMP(SLJIT_GREATER, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr));
+
   return mainloop;
 }
 
@@ -6181,6 +6186,7 @@ scan_prefix(compiler_common *common, PCRE2_SPTR cc, fast_forward_char_data *char
       --stack_ptr;
       cc = cc_stack[stack_ptr];
       chars = chars_stack[stack_ptr];
+      repeat = 1;
 
       if (chars >= chars_end)
         continue;
@@ -14433,6 +14439,7 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   struct sljit_jump *empty_match = NULL;
   struct sljit_jump *end_anchor_failed = NULL;
   jump_list *reqcu_not_found = NULL;
+  jump_list *limit_reached = NULL;
 
   SLJIT_ASSERT(tables);
 
@@ -14728,7 +14735,7 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   /* Main part of the matching */
   if ((re->overall_options & PCRE2_ANCHORED) == 0)
   {
-    mainloop_label = mainloop_entry(common);
+    mainloop_label = mainloop_entry(common, &limit_reached);
     continue_match_label = LABEL();
     /* Forward search if possible. */
     if ((re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
@@ -14931,6 +14938,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   /* No more remaining characters. */
   if (reqcu_not_found != NULL)
     set_jumps(reqcu_not_found, LABEL());
+  if (limit_reached != NULL)
+    set_jumps(limit_reached, LABEL());
 
   if (mode == PCRE2_JIT_PARTIAL_SOFT)
     CMPTO(SLJIT_NOT_EQUAL, SLJIT_MEM1(SLJIT_SP), common->hit_start, SLJIT_IMM, -1,
