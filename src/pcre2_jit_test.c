@@ -846,6 +846,15 @@ static struct regression_test_case regression_test_cases[] = {
   { MU, A, PCRE2_PARTIAL_HARD, 0, "a\\b", "a" },
   { M | PCRE2_DUPNAMES, A, PCRE2_PARTIAL_HARD, 0, "^(?P<NAME>..)(?P<NAME>..)\\k<NAME>{2,4}", "AaAAAaAaAaA" },
   { M | PCRE2_DUPNAMES, A, PCRE2_PARTIAL_HARD, 0, "^(?P<NAME>..)(?P<NAME>..)\\k<NAME>{2,4}", "AaAAAaAaAaa" },
+  { MU, A, PCRE2_PARTIAL_SOFT, 0, "\\R(*F)", "\r" },
+  { MU, A, PCRE2_PARTIAL_SOFT, 0, "(?:\\R|z)(*F)", "\r" },
+  { MU, A, PCRE2_PARTIAL_SOFT, 0, "(?=(?!\\R)?})", "\r" },
+  { MU, A, PCRE2_PARTIAL_SOFT, 0 | F_NOMATCH, "(?<!(x))\\1", "ab" },
+  { MU, A, PCRE2_PARTIAL_HARD, 0, "x\\R?", "x\r" },
+  { MU, A, PCRE2_PARTIAL_SOFT, 0, "\\R?(*F)", "\r" },
+  { MU, A, PCRE2_PARTIAL_HARD, 0, "\\b", "" },
+  { MU, A, PCRE2_PARTIAL_HARD, 0, "((?<=\\b!?))", "" },
+  { MU, A, PCRE2_PARTIAL_HARD, 0, "^\\bw", "" },
 
   /* (*MARK) verb. */
   { MU, A, 0, 0, "a(*MARK:aa)a", "ababaa" },

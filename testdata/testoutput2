@@ -23991,6 +23991,57 @@ No match
  0: b\x0d\x0a\x0d\x0a\x0d\x0a\x0d\x0a
  1: b
 
+/(?<!(x))\1/
+\= Expect no match
+    ab\=ps
+No match
+    ab\=ph
+No match
+
+/\R(*F)/
+    \r\=ps
+Partial match: \x0d
+    \r\=ph
+Partial match: \x0d
+
+/(?=(?!\R)?})/
+    \r\=ps
+Partial match: \x0d
+
+/x\R?/
+    x\r\=ph
+Partial match: x\x0d
+    x\r\=ps
+ 0: x\x0d
+
+/\R?(*F)/
+    \r\=ps
+Partial match: \x0d
+
+/\R+(*F)/
+    \r\=ps
+Partial match: \x0d
+
+/\b/
+    \=ph
+Partial match: 
+
+/((?<=\b!?))/
+    \=ph
+Partial match: 
+
+/(?:\b|x)(*F)/
+    \=ph
+Partial match: 
+
+/^\bw/
+    \=ph
+Partial match: 
+
+/\A\b /
+    \=ph
+Partial match: 
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

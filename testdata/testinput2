@@ -8514,4 +8514,41 @@ a)"xI
 /(Z|[ab])\R{4}/
     b\r\n\r\n\r\n\r\n
 
+/(?<!(x))\1/
+\= Expect no match
+    ab\=ps
+    ab\=ph
+
+/\R(*F)/
+    \r\=ps
+    \r\=ph
+
+/(?=(?!\R)?})/
+    \r\=ps
+
+/x\R?/
+    x\r\=ph
+    x\r\=ps
+
+/\R?(*F)/
+    \r\=ps
+
+/\R+(*F)/
+    \r\=ps
+
+/\b/
+    \=ph
+
+/((?<=\b!?))/
+    \=ph
+
+/(?:\b|x)(*F)/
+    \=ph
+
+/^\bw/
+    \=ph
+
+/\A\b /
+    \=ph
+
 # End of testinput2
