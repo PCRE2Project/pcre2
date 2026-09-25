@@ -650,21 +650,13 @@ PCRE2 API OVERVIEW
        string that has been matched by pcre2_match(). They are:
 
        •   pcre2_substring_copy_byname()
-
        •   pcre2_substring_copy_bynumber()
-
        •   pcre2_substring_get_byname()
-
        •   pcre2_substring_get_bynumber()
-
        •   pcre2_substring_list_get()
-
        •   pcre2_substring_length_byname()
-
        •   pcre2_substring_length_bynumber()
-
        •   pcre2_substring_nametable_scan()
-
        •   pcre2_substring_number_from_name()
 
        pcre2_substring_free() and pcre2_substring_list_free() are also
@@ -901,17 +893,11 @@ PCRE2 CONTEXTS
        values of any of the following compile-time parameters:
 
        •   What \R matches (Unicode newlines or CR, LF, CRLF only)
-
        •   PCRE2’s character tables
-
        •   The newline character sequence
-
        •   The compile time nested parentheses limit
-
        •   The maximum length of the pattern string
-
        •   The extra options bits (none set by default)
-
        •   Which performance optimizations the compiler should apply
 
        A compile context is also required if you are using custom memory
@@ -1169,15 +1155,10 @@ PCRE2 CONTEXTS
        A match context is required if you want to:
 
        •   Set up a callout function
-
        •   Set an offset limit for matching an unanchored pattern
-
        •   Change the limit on the amount of heap used when matching
-
        •   Change the backtracking match limit
-
        •   Change the backtracking depth limit
-
        •   Set custom memory management specifically for the match
 
        If none of these apply, just pass NULL as the context argument of
@@ -1784,7 +1765,6 @@ COMPILING A PATTERN
                                          by default \U causes a compile time
                                          error (Perl uses \U to upper case
                                          subsequent characters).
-
                                       2. \u matches a lower case u character
                                          unless it is followed by four
                                          hexadecimal digits, in which case the
@@ -1792,7 +1772,6 @@ COMPILING A PATTERN
                                          point to match. By default, \u causes
                                          a compile time error (Perl uses it to
                                          upper case the following character).
-
                                       3. \x matches a lower case x character
                                          unless it is followed by two
                                          hexadecimal digits, in which case the
@@ -2821,19 +2800,14 @@ INFORMATION ABOUT A COMPILED PATTERN
                                     anchoring is possible only when all the
                                     following are true:
 
-                                     1. .* is not in an atomic group
-
-                                     2. .* is not in a capture group that is
+                                     a. .* is not in an atomic group
+                                     b. .* is not in a capture group that is
                                         the subject of a backreference
-
-                                     3. PCRE2_DOTALL is in force for .*
-
-                                     4. Neither (*PRUNE) nor (*SKIP) appears
+                                     c. PCRE2_DOTALL is in force for .*
+                                     d. Neither (*PRUNE) nor (*SKIP) appears
                                         in the pattern
-
-                                     5. PCRE2_NO_DOTSTAR_ANCHOR is not set
-
-                                     6. Dotstar anchoring has not been
+                                     e. PCRE2_NO_DOTSTAR_ANCHOR is not set
+                                     f. Dotstar anchoring has not been
                                         disabled with PCRE2_DOTSTAR_ANCHOR_OFF
 
                                     For patterns that are auto-anchored, the
@@ -3983,12 +3957,10 @@ ITERATING OVER ALL MATCHES
        will advance, so the loop will definitely terminate. The conditions
        which ensure this are that either:
 
-        1. pcre2_next_match() returns 0 (false); or
-
-        2. the returned *pstart_offset is strictly greater than the previous
+        a. pcre2_next_match() returns 0 (false); or
+        b. the returned *pstart_offset is strictly greater than the previous
            start_offset; or
-
-        3. if the previous match was a successful match of the empty string,
+        c. if the previous match was a successful match of the empty string,
            the returned *pstart_offset is equal to the previous ovector[1],
            and *poptions will be set to PCRE2_NOTEMPTY_ATSTART to prevent
            another empty match from being returned.
@@ -6217,53 +6189,41 @@ DIFFERENCES BETWEEN PCRE2 AND PERL
            were in PCRE2 for some time before. This list is with respect to
            Perl 5.38:
 
-            1. If PCRE2_DOLLAR_ENDONLY is set and PCRE2_MULTILINE is not set,
+            a. If PCRE2_DOLLAR_ENDONLY is set and PCRE2_MULTILINE is not set,
                the $ meta-character matches only at the very end of the
                string.
-
-            2. A backslash followed by a letter with no special meaning is
+            b. A backslash followed by a letter with no special meaning is
                faulted. (Perl can be made to issue a warning.)
-
-            3. If PCRE2_UNGREEDY is set, the greediness of the repetition
+            c. If PCRE2_UNGREEDY is set, the greediness of the repetition
                quantifiers is inverted, that is, by default they are not
                greedy, but if followed by a question mark they are.
-
-            4. PCRE2_ANCHORED can be used at matching time to force a pattern
+            d. PCRE2_ANCHORED can be used at matching time to force a pattern
                to be tried only at the first matching position in the subject
                string.
-
-            5. The PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY and
+            e. The PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY and
                PCRE2_NOTEMPTY_ATSTART options have no Perl equivalents.
-
-            6. The \R escape sequence can be restricted to match only CR, LF,
+            f. The \R escape sequence can be restricted to match only CR, LF,
                or CRLF by the PCRE2_BSR_ANYCRLF option.
-
-            7. The callout facility is PCRE2-specific. Perl supports
+            g. The callout facility is PCRE2-specific. Perl supports
                codeblocks and variable interpolation, but not general hooks on
                every match.
-
-            8. The partial matching facility is PCRE2-specific.
-
-            9. The alternative matching function (pcre2_dfa_match()) matches
+            h. The partial matching facility is PCRE2-specific.
+            i. The alternative matching function (pcre2_dfa_match()) matches
                in a different way and is not Perl-compatible.
-
-            10. PCRE2 recognizes some special sequences such as (*CR) or
+            j. PCRE2 recognizes some special sequences such as (*CR) or
                (*NO_JIT) at the start of a pattern. These set overall options
                that cannot be changed within the pattern.
-
-            11. PCRE2 supports non-atomic positive lookaround assertions. This
+            k. PCRE2 supports non-atomic positive lookaround assertions. This
                is an extension to the lookaround facilities. The default,
                Perl-compatible lookarounds are atomic.
-
-            12. There are three syntactical items in patterns that can refer
-               to a capturing group by number: back references such as \g{2},
+            l. There are three syntactical items in patterns that can refer to
+               a capturing group by number: back references such as \g{2},
                subroutine calls such as (?3), and condition references such as
                (?(4)...). PCRE2 supports relative group numbers such as +2 and
                -4 in all three cases. Perl supports both plus and minus for
                subroutine calls, but only minus for back references, and no
                relative numbering at all for conditions.
-
-            13. The scan substring assertion (syntax (*scs:(n)...)) is a PCRE2
+            m. The scan substring assertion (syntax (*scs:(n)...)) is a PCRE2
                extension that is not available in Perl.
 
        •   Perl has different limits than PCRE2. See the pcre2limits
@@ -6340,21 +6300,13 @@ AVAILABILITY OF JIT SUPPORT
        hardware platforms:
 
        •   ARM 32-bit (v7, and Thumb2)
-
        •   ARM 64-bit
-
        •   DEC Alpha 64-bit
-
        •   IBM s390x 64 bit
-
        •   Intel x86 32-bit and 64-bit
-
        •   LoongArch 64 bit
-
        •   MIPS 32-bit and 64-bit
-
        •   Power PC 32-bit and 64-bit
-
        •   RISC-V 32-bit and 64-bit
 
        If --enable-jit is set on an unsupported platform when building PCRE2,
@@ -6547,10 +6499,8 @@ CONTROLLING THE JIT STACK
         1. If callback is NULL and data is NULL, an internal 32KiB block on
            the machine stack is used. This is the default when a match context
            is created.
-
         2. If callback is NULL and data is not NULL, data must be a pointer to
            a valid JIT stack, the result of calling pcre2_jit_stack_create().
-
         3. If callback is not NULL, it must point to a function that is called
            with data as an argument at the start of matching, in order to set
            up a JIT stack. If the return from the callback function is NULL,
@@ -6993,14 +6943,11 @@ THE ALTERNATIVE MATCHING ALGORITHM
         3. Because no substrings are captured, a number of related features
            are not available:
 
-            1. Backreferences;
-
-            2. Conditional expressions that use a backreference as the
+            a. Backreferences;
+            b. Conditional expressions that use a backreference as the
                condition or test for a specific group recursion;
-
-            3. Script runs;
-
-            4. Scan substring assertions.
+            c. Script runs;
+            d. Scan substring assertions.
 
         4. Because many paths through the tree may be active, the \K escape
            sequence, which resets the start of the match when encountered (but
@@ -7041,15 +6988,11 @@ DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
         1. It is substantially slower than the standard algorithm. This is
            partly because it has to search for all possible matches, but is
            also because it is less susceptible to optimization.
-
         2. Capturing parentheses and other features such as backreferences
            that rely on them are not supported.
-
         3. Matching within invalid UTF strings is not supported.
-
         4. Although atomic groups are supported, their use does not provide
            the performance advantage that it does for the standard algorithm.
-
         5. JIT optimization is not supported.
 
    Author
@@ -7143,11 +7086,9 @@ REQUIREMENTS FOR A PARTIAL MATCH
            character need not form part of the final matched string;
            lookbehind assertions and the \K escape sequence provide ways of
            inspecting characters before the start of a matched string.
-
         2. The pattern contains one or more lookbehind assertions. This
            condition exists in case there is a lookbehind that inspects
            characters before the start of the match.
-
         3. There is a special case when the whole pattern can match an empty
            string. When the starting point is at the end of the subject, the
            empty string match is a possibility, and if PCRE2_PARTIAL_SOFT is
@@ -7237,7 +7178,6 @@ PARTIAL MATCHING USING pcre2_match()
        two patterns like this:
 
        •   dog(sbody)? is the same as  dogsbody|dog
-
        •   dog(sbody)?? is the same as  dog|dogsbody
 
        The second pattern will never match dogsbody, because it will always
@@ -8363,32 +8303,25 @@ BACKSLASH
        cluster:
 
         1. End at the end of the subject string.
-
         2. Do not end between CR and LF; otherwise end after any control
            character.
-
         3. Do not break Hangul (a Korean script) syllable sequences. Hangul
            characters are of five types: L, V, T, LV, and LVT. An L character
            may be followed by an L, V, LV, or LVT character; an LV or V
            character may be followed by a V or T character; an LVT or T
            character may be followed only by a T character.
-
         4. Do not end before extending characters or spacing marks or the
            zero-width joiner (ZWJ) character. Characters with the "mark"
            property always have the "extend" grapheme breaking property.
-
         5. Do not end after prepend characters.
-
         6. Do not end within emoji modifier sequences or emoji ZWJ (zero-width
            joiner) sequences. An emoji ZWJ sequence consists of a character
            with the Extended_Pictographic property, optionally followed by one
            or more characters with the Extend property, followed by the ZWJ
            character, followed by another Extended_Pictographic character.
-
         7. Do not break within emoji flag sequences. That is, do not break
            between regional indicator (RI) characters if there are an odd
            number of RI characters before the break point.
-
         8. Otherwise, end the cluster.
 
    PCRE2’s additional properties
@@ -9339,23 +9272,14 @@ REPETITION
        these items:
 
        •   a literal data character
-
        •   the dot metacharacter
-
        •   the \C escape sequence
-
        •   the \R escape sequence
-
        •   the \X escape sequence
-
        •   any escape sequence that matches a single character
-
        •   a character class
-
        •   a backreference
-
        •   a parenthesized group (including lookaround assertions)
-
        •   a subroutine call (recursive or otherwise)
 
        If a quantifier does not follow a repeatable item, an error occurs. The
@@ -13169,7 +13093,6 @@ SCRIPT RUNS
        in their Script Extension. Consider the following characters:
 
        •   U+060C, Arabic comma
-
        •   U+06D4, Arabic full stop
 
        The first has the Script Extension list Arabic, Hanifi Rohingya,
