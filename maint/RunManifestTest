@@ -11,13 +11,14 @@ LC_ALL=C
 export LANG LC_ALL
 
 if [ "$1" = "" -o "$2" = "" ] ; then
-  echo "Usage: $0 <dir> <manifest name> [<build type>]" >&2
+  echo "Usage: $0 <dir> <manifest name> [<build type>] [<producer>]" >&2
   exit 1
 fi
 
 input_dir="$1"
 expected_manifest="$2"
 build_type="${3:-release}"
+producer="${4:-cmake}"
 
 actual_file=`basename $expected_manifest`.actual
 expected_file=`basename $expected_manifest`.expected
@@ -41,6 +42,16 @@ find "$input_dir" -print | \
 cat "$expected_manifest" | \
   $sed -E -e "s/pcre2-targets-release.cmake/pcre2-targets-$build_type.cmake/" \
   > "$expected_file"
+
+if [ "$producer" = "meson" ]; then
+  $sed -E \
+    -e 's/pcre2-config-version\.cmake/PCRE2ConfigVersion.cmake/' \
+    -e 's/pcre2-config\.cmake/PCRE2Config.cmake/' \
+    -e '/\/libpcre2-(8|16|32|posix)\.so(\.[0-9]+)+$/s/^-rw-r--r-- /-rwxr-xr-x /' \
+    "$expected_file" > "$expected_file.meson"
+  sort -k2 "$expected_file.meson" > "$expected_file"
+  rm "$expected_file.meson"
+fi
 
 if ! diff -u "$expected_file" "$actual_file"; then
   echo "Installed files differ from expected"
