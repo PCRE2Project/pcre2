@@ -255,7 +255,7 @@ pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_siz
     errbuf[(i < errbuf_size) ? i : errbuf_size - 1] = 0;
   i++;
 
-  return (int)i;
+  return i;
 }
 
 
@@ -267,8 +267,12 @@ pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_siz
 PCRE2POSIX_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_regfree(regex_t *preg)
 {
+  if (preg == NULL)
+    return;
   pcre2_match_data_free(preg->re_match_data);
+  preg->re_match_data = NULL;
   pcre2_code_free(preg->re_pcre2_code);
+  preg->re_pcre2_code = NULL;
 }
 
 
@@ -296,11 +300,25 @@ pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
   int options = 0;
   int re_nsub = 0;
 
+  if (preg == NULL)
+    return REG_INVARG;
+
   preg->re_match_data = NULL;
   preg->re_pcre2_code = NULL;
 
-  patlen =
-      ((cflags & REG_PEND) != 0) ? (PCRE2_SIZE)(preg->re_endp - pattern) : PCRE2_ZERO_TERMINATED;
+  if (pattern == NULL)
+    return REG_INVARG;
+
+  if ((cflags & REG_PEND) != 0)
+  {
+    if (preg->re_endp == NULL || (uintptr_t)preg->re_endp < (uintptr_t)pattern)
+      return REG_INVARG;
+    patlen = (PCRE2_SIZE)(preg->re_endp - pattern);
+  }
+  else
+  {
+    patlen = PCRE2_ZERO_TERMINATED;
+  }
 
   if ((cflags & REG_ICASE) != 0)
     options |= PCRE2_CASELESS;
@@ -380,10 +398,13 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
   int rc;
   PCRE2_SIZE so, eo;
   int options = 0;
-  pcre2_match_data *md = (pcre2_match_data *)preg->re_match_data;
+  pcre2_match_data *md;
 
-  if (string == NULL)
+  if (preg == NULL || preg->re_pcre2_code == NULL ||
+      preg->re_match_data == NULL || string == NULL)
     return REG_INVARG;
+
+  md = (pcre2_match_data *)preg->re_match_data;
 
   if ((eflags & REG_NOTBOL) != 0)
     options |= PCRE2_NOTBOL;
