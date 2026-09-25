@@ -117,6 +117,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_get_ovector_pointer.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_get_parens_nest_limit.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_get_startchar.html
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_get_subject.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_jit_compile.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_jit_free_unused_memory.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2_jit_match.html
@@ -227,6 +228,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/man
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_get_ovector_pointer.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_get_parens_nest_limit.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_get_startchar.3
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_get_subject.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_jit_compile.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_jit_free_unused_memory.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2_jit_match.3
@@ -337,6 +339,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/man
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_get_ovector_pointer.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_get_parens_nest_limit.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_get_startchar.adoc
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_get_subject.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_jit_compile.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_jit_free_unused_memory.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2_jit_match.adoc

@@ -862,6 +862,9 @@ information. */
   PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION                            \
   pcre2_get_startchar(pcre2_match_data *match_data);                         \
                                                                              \
+  PCRE2_EXP_DECL PCRE2_SPTR PCRE2_CALL_CONVENTION                            \
+  pcre2_get_subject(pcre2_match_data *match_data, PCRE2_SIZE *lengthptr);    \
+                                                                             \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
   pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, \
               PCRE2_SIZE start_offset, uint32_t options,                     \
@@ -1099,6 +1102,7 @@ pcre2_compile are called by application code. */
 #define pcre2_get_ovector_pointer             PCRE2_SUFFIX(pcre2_get_ovector_pointer_)
 #define pcre2_get_parens_nest_limit           PCRE2_SUFFIX(pcre2_get_parens_nest_limit_)
 #define pcre2_get_startchar                   PCRE2_SUFFIX(pcre2_get_startchar_)
+#define pcre2_get_subject                     PCRE2_SUFFIX(pcre2_get_subject_)
 #define pcre2_jit_compile                     PCRE2_SUFFIX(pcre2_jit_compile_)
 #define pcre2_jit_free_unused_memory          PCRE2_SUFFIX(pcre2_jit_free_unused_memory_)
 #define pcre2_jit_match                       PCRE2_SUFFIX(pcre2_jit_match_)
