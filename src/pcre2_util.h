@@ -180,6 +180,17 @@ This macro should be used with no following semicolon, and ideally with a commen
 #define PCRE2_FALLTHROUGH
 #endif
 
+#ifndef PCRE2_PRINTF_FORMAT
+#if defined(__GNUC__) || defined(__clang__)
+#  define PCRE2_PRINTF_FORMAT(fmt_idx, arg_idx) \
+     __attribute__((format(printf, fmt_idx, arg_idx)))
+#endif
+#endif /* !PCRE2_PRINTF_FORMAT */
+
+#ifndef PCRE2_PRINTF_FORMAT
+#define PCRE2_PRINTF_FORMAT(fmt_idx, arg_idx)
+#endif
+
 #endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_util.h */

@@ -306,6 +306,7 @@ needs to be when compiling one of the libraries). */
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
+#include "pcre2_util.h"
 
 /* We need access to some of the data tables that PCRE2 uses. The previous
 definition of PCRE2_PCRE2TEST makes some minor changes in the files. The
@@ -1201,6 +1202,9 @@ colour_end(FILE *f)
 }
 
 /* cfprintf is like fprintf but takes a colour to wrap its output. */
+static int
+cfprintf(int clr, FILE *file, const char *fmt, ...) PCRE2_PRINTF_FORMAT(3, 4);
+
 static int
 cfprintf(int clr, FILE *file, const char *fmt, ...)
 {
@@ -2459,7 +2463,7 @@ show_controls(int clr, uint32_t controls, uint32_t controls2, const char *before
   cfprintf(
       clr, outfile,
       "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%"
-      "s%s%s%s%s%s%s",
+      "s%s%s%s%s%s%s%s",
       before, ((controls & CTL_AFTERTEXT) != 0) ? " aftertext" : "",
       ((controls & CTL_ALLAFTERTEXT) != 0) ? " allaftertext" : "",
       ((controls & CTL_ALLCAPTURES) != 0) ? " allcaptures" : "",
