@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_code_copy_with_tables
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 16 January 2017
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -47,8 +47,8 @@ any memory used by the JIT compiler. Without a subsequent call to
 pcre2_jit_compile(), the copy can be used only for non\-JIT matching.
 Unlike pcre2_code_copy(), a separate copy of the character tables is also
 made, with the new code pointing to it. This memory will be automatically freed
-when pcre2_code_free() is called. The yield of the function is \f(CRNULL\fP if
-\fIcode\fP is \f(CRNULL\fP or if sufficient memory cannot be obtained.
+when pcre2_code_free() is called. The yield of the function is \fBNULL\fP if
+\fIcode\fP is \fBNULL\fP or if sufficient memory cannot be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

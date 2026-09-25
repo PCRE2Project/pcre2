@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2matching
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 February 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -139,8 +139,8 @@ cat(er(pillar)?)?
 .fi
 .ss \n[.ss] 0
 .sp
-is matched against the string "the caterpillar catchment", the result is the
-three strings "caterpillar", "cater", and "cat" that start at the fifth
+is matched against the string \f(CRthe caterpillar catchment\fP, the result is the
+three strings \f(CRcaterpillar\fP, \f(CRcater\fP, and \f(CRcat\fP that start at the fifth
 character of the subject. The algorithm does not automatically move on to find
 matches that start at later positions.
 .sp
@@ -170,7 +170,6 @@ auto\-possessification, as just described). During matching, greedy and ungreedy
 quantifiers are treated in exactly the same way. However, possessive
 quantifiers can make a difference when what follows could also match what is
 quantified, for example in a pattern like this:
-.RE
 .sp
 .ss \n[.ss]
 .nf
@@ -180,69 +179,24 @@ quantified, for example in a pattern like this:
 .fi
 .ss \n[.ss] 0
 .sp
-This pattern matches "aaab!" but not "aaa!", which would be matched by a
+This pattern matches \f(CRaaab!\fP but not \f(CRaaa!\fP, which would be matched by a
 non\-possessive quantifier. Similarly, if an atomic group is present, it is
 matched as if it were a standalone pattern at the current point, and the
 longest match is then "locked in" for the rest of the overall pattern.
+.RE
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' 2.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " 2." 4.2
 .\}
 When dealing with multiple paths through the tree simultaneously, it is not
 straightforward to keep track of captured substrings for the different matching
 possibilities, and PCRE2\(cqs implementation of this algorithm does not attempt to
 do this. This means that no captured substrings are available.
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 2.\h'+01'\c
-.\}
-.el \{\
-.  sp -1
-.  IP " 2." 4.2
-.\}
-Because no substrings are captured, a number of related features are not
-available:
-.RE
-.sp
-(a) Backreferences;
-.sp
-(b) Conditional expressions that use a backreference as the condition or test
-for a specific group recursion;
-.sp
-(c) Script runs;
-.sp
-(d) Scan substring assertions.
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 1.\h'+01'\c
-.\}
-.el \{\
-.  sp -1
-.  IP " 1." 4.2
-.\}
-Because many paths through the tree may be active, the \f(CR\(rsK\fP escape sequence,
-which resets the start of the match when encountered (but may be on some paths
-and not on others), is not supported.
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 2.\h'+01'\c
-.\}
-.el \{\
-.  sp -1
-.  IP " 2." 4.2
-.\}
-Callouts are supported, but the value of the \fIcapture_top\fP field is
-always 1, and the value of the \fIcapture_last\fP field is always 0.
 .RE
 .sp
 .RS 4
@@ -253,10 +207,41 @@ always 1, and the value of the \fIcapture_last\fP field is always 0.
 .  sp -1
 .  IP " 3." 4.2
 .\}
-The \f(CR\(rsC\fP escape sequence, which (in the standard algorithm) always matches a
-single code unit, even in a UTF mode, is not supported in UTF modes because
-the alternative algorithm moves through the subject string one character (not
-code unit) at a time, for all active paths through the tree.
+Because no substrings are captured, a number of related features are not
+available:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 1." 4.2
+.\}
+Backreferences;
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 2." 4.2
+.\}
+Conditional expressions that use a backreference as the condition or test
+for a specific group recursion;
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 3." 4.2
+.\}
+Script runs;
 .RE
 .sp
 .RS 4
@@ -267,8 +252,21 @@ code unit) at a time, for all active paths through the tree.
 .  sp -1
 .  IP " 4." 4.2
 .\}
-Except for \f(CR(*FAIL)\fP, the backtracking control verbs such as \f(CR(*PRUNE)\fP are not
-supported. \f(CR(*FAIL)\fP is supported, and behaves like a failing negative assertion.
+Scan substring assertions.
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 4." 4.2
+.\}
+Because many paths through the tree may be active, the \f(CR\(rsK\fP escape sequence,
+which resets the start of the match when encountered (but may be on some paths
+and not on others), is not supported.
 .RE
 .sp
 .RS 4
@@ -278,6 +276,44 @@ supported. \f(CR(*FAIL)\fP is supported, and behaves like a failing negative ass
 .el \{\
 .  sp -1
 .  IP " 5." 4.2
+.\}
+Callouts are supported, but the value of the \fIcapture_top\fP field is
+always 1, and the value of the \fIcapture_last\fP field is always 0.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 6.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 6." 4.2
+.\}
+The \f(CR\(rsC\fP escape sequence, which (in the standard algorithm) always matches a
+single code unit, even in a UTF mode, is not supported in UTF modes because
+the alternative algorithm moves through the subject string one character (not
+code unit) at a time, for all active paths through the tree.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 7.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 7." 4.2
+.\}
+Except for \f(CR(*FAIL)\fP, the backtracking control verbs such as \f(CR(*PRUNE)\fP are not
+supported. \f(CR(*FAIL)\fP is supported, and behaves like a failing negative assertion.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 8.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 8." 4.2
 .\}
 The \fBPCRE2_MATCH_INVALID_UTF\fP option for pcre2_compile() is not
 supported by pcre2_dfa_match().
@@ -356,18 +392,15 @@ performance advantage that it does for the standard algorithm.
 .\}
 JIT optimization is not supported.
 .RE
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 22 February 2025
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

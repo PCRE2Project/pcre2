@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_callout_enumerate
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 23 March 2017
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -72,40 +72,20 @@ User data that is passed to the callback
 The \f(CRcallback()\fP function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):
 .sp
-.RS 4
-.PD 0
-.TP 24
-\f(CRuint32_t\fP \fIversion\fP
-.ad l
-Block version number
-.TP 24
-\f(CRuint32_t\fP \fIcallout_number\fP
-.ad l
-Number for numbered callouts
-.TP 24
-\fBPCRE2_SIZE\fP \fIpattern_position\fP
-.ad l
-Offset to next item in pattern
-.TP 24
-\fBPCRE2_SIZE\fP \fInext_item_length\fP
-.ad l
-Length of next item in pattern
-.TP 24
-\fBPCRE2_SIZE\fP \fIcallout_string_offset\fP
-.ad l
-Offset to string within pattern
-.TP 24
-\fBPCRE2_SIZE\fP \fIcallout_string_length\fP
-.ad l
-Length of callout string
-.TP 24
-\fBPCRE2_SPTR\fP \fIcallout_string\fP
-.ad l
-Points to callout string or is \f(CRNULL\fP
-.PD
-.RE
-.PP
-.ad l
+.ss \n[.ss]
+.nf
+.fam C
+\fBuint32_t\fP version;\&                 /* Block version number */
+\fBuint32_t\fP callout_number;\&          /* Number for numbered callouts */
+\fBPCRE2_SIZE\fP pattern_position;\&      /* Offset to next item in pattern */
+\fBPCRE2_SIZE\fP next_item_length;\&      /* Length of next item in pattern */
+\fBPCRE2_SIZE\fP callout_string_offset; /* Offset to string within pattern */
+\fBPCRE2_SIZE\fP callout_string_length; /* Length of callout string */
+\fBPCRE2_SPTR\fP callout_string;\&        /* Points to callout string or is
+                                     NULL */
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The second argument passed to the \f(CRcallback()\fP function is the callout data
 that was passed to pcre2_callout_enumerate(). The \f(CRcallback()\fP

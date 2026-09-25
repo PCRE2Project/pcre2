@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_general_context_create
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 23 January 2023
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -48,8 +48,8 @@ pcre2_general_context_create \- create a general context
 This function creates and initializes a general context. The arguments define
 custom memory management functions and a data value that is passed to them when
 they are called. The \fIprivate_malloc\fP() function is used to get memory for
-the context. If either of the first two arguments is \f(CRNULL\fP, the system memory
-management function is used. The result is \f(CRNULL\fP if no memory could be obtained.
+the context. If either of the first two arguments is \fBNULL\fP, the system memory
+management function is used. The result is \fBNULL\fP if no memory could be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

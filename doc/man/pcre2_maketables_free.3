@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_maketables_free
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 03 September 2019
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -44,11 +44,10 @@ pcre2_maketables_free \- free character tables
 .SH "DESCRIPTION"
 .sp
 This function discards a set of character tables that were created by a call
-to
-pcre2_maketables().
+to pcre2_maketables().
 .sp
 The \fIgcontext\fP parameter should match what was used in that call to
-account for any custom allocators that might be in use; if it is \f(CRNULL\fP
+account for any custom allocators that might be in use; if it is \fBNULL\fP
 the system \f(CRfree()\fP is used.
 .sp
 There is a complete description of the PCRE2 native API in the

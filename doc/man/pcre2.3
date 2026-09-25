@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 February 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -28,7 +28,7 @@
 .  LINKSTYLE blue R < >
 .\}
 .SH "NAME"
-pcre2 \- Perl\-compatible regular expressions (revised API)
+pcre2 \- Perl\-compatible regular expressions (PCRE2 API)
 .SH "INTRODUCTION"
 .sp
 PCRE2 is the name used for a revised API for the PCRE library, which is a set
@@ -55,7 +55,7 @@ supports 32\-bit applications, versions of PCRE2 that are compiled in both
 64\-bit and 32\-bit modes may be needed.
 .sp
 The original work to extend PCRE to 16\-bit and 32\-bit code units was done by
-Zoltan Herczeg and Christian Persch, respectively. In all three cases, strings
+Zoltán Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF\-encoded
 Unicode, with support for Unicode general category properties. Unicode support
 is optional at build time (but is the default). However, processing strings as
@@ -71,7 +71,7 @@ pcre2test \-C
 .ss \n[.ss] 0
 .sp
 The three libraries contain identical sets of functions, with names ending in
-_8, _16, or _32, respectively (for example, pcre2_compile_8()). However,
+\f(CR_8\fP, \f(CR_16\fP, or \f(CR_32\fP, respectively (for example, pcre2_compile_8()). However,
 by defining \fBPCRE2_CODE_UNIT_WIDTH\fP to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
 pcre2_compile(), and the documentation is written assuming that this is
@@ -94,8 +94,7 @@ pages. There is a syntax summary in the
 page.
 .sp
 Some features of PCRE2 can be included, excluded, or changed when the library
-is built. The
-pcre2_config()
+is built. The pcre2_config()
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 \f(CRpcre2build\fP
@@ -109,7 +108,7 @@ files in the source distribution.
 The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-"_pcre2", which hopefully will not provoke any name clashes. In some
+\f(CR_pcre2\fP, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.
@@ -259,9 +258,9 @@ discussion of Unicode and UTF support
 .sp
 In the "man" and HTML formats, there is also a short page for each C library
 function, listing its arguments and results.
-.SH "AUTHORS"
+.SS "Authors"
 .sp
-The current maintainers of PCRE2 are Nicholas Wilson and Zoltan Herczeg.
+The current maintainers of PCRE2 are Nicholas Wilson and Zoltán Herczeg.
 .sp
 PCRE2 was written by Philip Hazel, of the University Computing Service,
 Cambridge, England. Many others have also contributed.
@@ -269,8 +268,8 @@ Cambridge, England. Many others have also contributed.
 To contact the maintainers, please use the GitHub issues tracker or PCRE2
 mailing list, as described at the project page:
 .URL "https://github.com/PCRE2Project/pcre2" "" ""
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 22 February 2025
 .br
-Copyright (c) 1997\-2021 University of Cambridge.
+Copyright \(co 1997\-2021 University of Cambridge.

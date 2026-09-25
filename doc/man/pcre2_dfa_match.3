@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_dfa_match
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 31 August 2021
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -28,7 +28,7 @@
 .  LINKSTYLE blue R < >
 .\}
 .SH "NAME"
-pcre2_dfa_match \- match a pattern using the alternative matching algorithm
+pcre2_dfa_match \- match a compiled pattern to a subject string using the alternative matching algorithm (DFA algorithm; not Perl compatible)
 .SH "SYNOPSIS"
 .sp
 .ss \n[.ss]
@@ -81,7 +81,7 @@ Points to a match data block, for results
 .TP 13
 \fImcontext\fP
 .ad l
-Points to a match context, or is \f(CRNULL\fP
+Points to a match context, or is \fBNULL\fP
 .TP 13
 \fIworkspace\fP
 .ad l
@@ -107,56 +107,56 @@ options are:
 .sp
 .RS 4
 .PD 0
-.TP 24
+.TP 23
 \fBPCRE2_ANCHORED\fP
 .ad l
 Match only at the first position
-.TP 24
+.TP 23
 \fBPCRE2_COPY_MATCHED_SUBJECT\fP
 .ad l
 On success, make a private subject copy
-.TP 24
+.TP 23
 \fBPCRE2_ENDANCHORED\fP
 .ad l
 Pattern can match only at end of subject
-.TP 24
+.TP 23
 \fBPCRE2_NOTBOL\fP
 .ad l
 Subject is not the beginning of a line
-.TP 24
+.TP 23
 \fBPCRE2_NOTEOL\fP
 .ad l
 Subject is not the end of a line
-.TP 24
+.TP 23
 \fBPCRE2_NOTEMPTY\fP
 .ad l
 An empty string is not a valid match
-.TP 24
+.TP 23
 \fBPCRE2_NOTEMPTY_ATSTART\fP
 .ad l
 An empty string at the start of the subject
 is not a valid match
-.TP 24
+.TP 23
 \fBPCRE2_NO_UTF_CHECK\fP
 .ad l
 Do not check the subject for UTF
 validity (only relevant if \fBPCRE2_UTF\fP
 was set at compile time)
-.TP 24
+.TP 23
 \fBPCRE2_PARTIAL_HARD\fP
 .ad l
 Return \fBPCRE2_ERROR_PARTIAL\fP for a partial
 match even if there is a full match
-.TP 24
+.TP 23
 \fBPCRE2_PARTIAL_SOFT\fP
 .ad l
 Return \fBPCRE2_ERROR_PARTIAL\fP for a partial
 match if no full matches are found
-.TP 24
+.TP 23
 \fBPCRE2_DFA_RESTART\fP
 .ad l
 Restart after a partial match
-.TP 24
+.TP 23
 \fBPCRE2_DFA_SHORTEST\fP
 .ad l
 Return only the shortest match

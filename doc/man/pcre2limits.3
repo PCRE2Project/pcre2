@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2limits
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 03 September 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -51,7 +51,7 @@ calls pcre2_compile() can specify a smaller limit.
 .sp
 The maximum length (in code units) of a subject string is one less than the
 largest number a \fBPCRE2_SIZE\fP variable can hold. \fBPCRE2_SIZE\fP is an unsigned
-integer type, usually defined as \f(CRsize_t\fP. Its maximum value (that is
+integer type, usually defined as \fBsize_t\fP. Its maximum value (that is
 \f(CR~(PCRE2_SIZE)0\fP) is reserved as a special indicator for zero\-terminated strings
 and unset offsets.
 .sp
@@ -88,18 +88,15 @@ The maximum length of a string argument to a callout is the largest number a
 The maximum amount of heap memory used for matching is controlled by the heap
 limit, which can be set in a pattern or in a match context. The default is a
 very large number, effectively unlimited.
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 03 September 2025
 .br
-Copyright (c) 1997\-2023 University of Cambridge.
+Copyright \(co 1997\-2023 University of Cambridge.

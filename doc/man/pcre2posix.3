@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2posix
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 27 November 2024
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -88,7 +88,7 @@ application. Because the POSIX functions call the native ones, it is also
 necessary to add \f(CR\-lpcre2\-8\fP.
 .sp
 On Windows systems, if you are linking to a DLL version of the library, it is
-recommended that \f(CRPCRE2POSIX_SHARED\fP is defined before including the
+recommended that \fBPCRE2POSIX_SHARED\fP is defined before including the
 \f(CRpcre2posix.h\fP header, as it will allow for a more efficient way to
 invoke the functions by adding the \f(CR__declspec(dllimport)\fP decorator.
 .sp
@@ -104,9 +104,9 @@ For this reason, the POSIX names have been removed since release 10.37.
 Calling the header file \f(CRpcre2posix.h\fP avoids any conflict with other POSIX
 libraries. It can, of course, be renamed or aliased as \f(CRregex.h\fP, which is
 the "correct" name, if there is no clash. It provides two structure types,
-type:regex_t for compiled internal forms, and type:regmatch_t for returning
+\fBregex_t\fP for compiled internal forms, and \fBregmatch_t\fP for returning
 captured substrings. It also defines some constants whose names start with
-"REG_"; these are used for setting options and identifying error codes.
+\f(CRREG_\fP; these are used for setting options and identifying error codes.
 .SH "USING THE POSIX FUNCTIONS"
 .sp
 Note that these functions are just POSIX\-style wrappers for PCRE2\(cqs native API.
@@ -114,7 +114,7 @@ They do not give POSIX regular expression behaviour, and they are not
 thread\-safe or even POSIX compatible.
 .sp
 Those POSIX option bits that can reasonably be mapped to PCRE2 native options
-have been implemented. In addition, the option const:REG_EXTENDED is defined with the
+have been implemented. In addition, the option \fBREG_EXTENDED\fP is defined with the
 value zero. This has no effect, but since programs that are written to the
 POSIX interface often use it, this makes it easier to slot in PCRE2 as a
 replacement library. Other POSIX options are not even defined.
@@ -137,10 +137,10 @@ used.
 .sp
 The function pcre2_regcomp() is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
-zero (but see const:REG_PEND below). The \fIpreg\fP argument is a pointer to a
-type:regex_t structure that is used as a base for storing information about
-the compiled regular expression. It is also used for input when REG_PEND is
-set. The type:regex_t structure used by pcre2_regcomp() is defined in
+zero (but see \fBREG_PEND\fP below). The \fIpreg\fP argument is a pointer to a
+\fBregex_t\fP structure that is used as a base for storing information about
+the compiled regular expression. It is also used for input when \fBREG_PEND\fP is
+set. The \fBregex_t\fP structure used by pcre2_regcomp() is defined in
 \f(CRpcre2posix.h\fP and is not the same as the structure used by other libraries
 that provide POSIX\-style matching.
 .sp
@@ -149,68 +149,69 @@ defined by the following macros:
 .sp
 .RS 4
 .PD 0
-.TP 19
-const:REG_DOTALL
+.TP 13
+\fBREG_DOTALL\fP
 .ad l
 The \fBPCRE2_DOTALL\fP option is set when the regular expression is passed for
-compilation to the native function. Note that const:REG_DOTALL is not part of the
+compilation to the native function. Note that \fBREG_DOTALL\fP is not part of the
 POSIX standard.
-.TP 19
-const:REG_ICASE
+.TP 13
+\fBREG_ICASE\fP
 .ad l
 The \fBPCRE2_CASELESS\fP option is set when the regular expression is passed for
 compilation to the native function.
-.TP 19
-const:REG_NEWLINE
+.TP 13
+\fBREG_NEWLINE\fP
 .ad l
 The \fBPCRE2_MULTILINE\fP option is set when the regular expression is passed for
 compilation to the native function. Note that this does \fInot\fP mimic the
-defined POSIX behaviour for const:REG_NEWLINE (see the following section).
-.TP 19
-const:REG_NOSPEC
+defined POSIX behaviour for \fBREG_NEWLINE\fP (see the section
+MATCHING NEWLINE CHARACTERS).
+.TP 13
+\fBREG_NOSPEC\fP
 .ad l
 The \fBPCRE2_LITERAL\fP option is set when the regular expression is passed for
 compilation to the native function. This disables all meta characters in the
 pattern, causing it to be treated as a literal string. The only other options
-that are allowed with const:REG_NOSPEC are const:REG_ICASE, const:REG_NOSUB, const:REG_PEND, and
-const:REG_UTF. Note that const:REG_NOSPEC is not part of the POSIX standard.
-.TP 19
-const:REG_NOSUB
+that are allowed with \fBREG_NOSPEC\fP are \fBREG_ICASE\fP, \fBREG_NOSUB\fP, \fBREG_PEND\fP, and
+\fBREG_UTF\fP. Note that \fBREG_NOSPEC\fP is not part of the POSIX standard.
+.TP 13
+\fBREG_NOSUB\fP
 .ad l
 When a pattern that is compiled with this flag is passed to
 pcre2_regexec() for matching, the \fInmatch\fP and \fIpmatch\fP arguments
 are ignored, and no captured strings are returned. Versions of the PCRE2 library
 prior to 10.22 used to set the \fBPCRE2_NO_AUTO_CAPTURE\fP compile option, but this
 no longer happens because it disables the use of backreferences.
-.TP 19
-const:REG_PEND
+.TP 13
+\fBREG_PEND\fP
 .ad l
 If this option is set, the \fIreg_endp\fP field in the \fIpreg\fP structure
 (which has the type \f(CRconst char *\fP) must be set to point to the character beyond
 the end of the pattern before calling pcre2_regcomp(). The pattern itself
 may now contain binary zeros, which are treated as data characters. Without
-const:REG_PEND, a binary zero terminates the pattern and the \fIre_endp\fP field is
+\fBREG_PEND\fP, a binary zero terminates the pattern and the \fIre_endp\fP field is
 ignored. This is a GNU extension to the POSIX standard and should be used with
 caution in software intended to be portable to other systems.
-.TP 19
-const:REG_UCP
+.TP 13
+\fBREG_UCP\fP
 .ad l
 The \fBPCRE2_UCP\fP option is set when the regular expression is passed for
 compilation to the native function. This causes PCRE2 to use Unicode properties
 when matching \f(CR\(rsd\fP, \f(CR\(rsw\fP, etc., instead of just recognizing ASCII values. Note
-that const:REG_UCP is not part of the POSIX standard.
-.TP 19
-const:REG_UNGREEDY
+that \fBREG_UCP\fP is not part of the POSIX standard.
+.TP 13
+\fBREG_UNGREEDY\fP
 .ad l
 The \fBPCRE2_UNGREEDY\fP option is set when the regular expression is passed for
-compilation to the native function. Note that const:REG_UNGREEDY is not part of the
+compilation to the native function. Note that \fBREG_UNGREEDY\fP is not part of the
 POSIX standard.
-.TP 19
-const:REG_UTF
+.TP 13
+\fBREG_UTF\fP
 .ad l
 The \fBPCRE2_UTF\fP option is set when the regular expression is passed for
 compilation to the native function. This causes the pattern itself and all data
-strings used for matching it to be treated as UTF\-8 strings. Note that const:REG_UTF
+strings used for matching it to be treated as UTF\-8 strings. Note that \fBREG_UTF\fP
 is not part of the POSIX standard.
 .PD
 .RE
@@ -221,7 +222,7 @@ In the absence of these flags, no options are passed to the native function.
 This means that the regex is compiled with PCRE2 default semantics. In
 particular, the way it handles newline characters in the subject string is the
 Perl way, not the POSIX way. Note that setting \fBPCRE2_MULTILINE\fP has only
-\fIsome\fP of the effects specified for const:REG_NEWLINE. It does not affect the way
+\fIsome\fP of the effects specified for \fBREG_NEWLINE\fP. It does not affect the way
 newlines are matched by the dot metacharacter (they are not) or by a negative
 class such as \f(CR[^a]\fP (they are).
 .sp
@@ -253,50 +254,142 @@ This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
 never intended to be a POSIX engine. The following table lists the different
 possibilities for matching newline characters in Perl and PCRE2:
+.TS
+allbox tab(:);
+ltB ltB ltB.
+T{
 .sp
-.ti +2
-                        Default   Change with
-.br
-.ti +2
 
-.br
-.ti +2
-\&. matches newline          no     PCRE2_DOTALL
-.br
-.ti +2
-newline matches [^a]       yes    not changeable
-.br
-.ti +2
-$ matches \(rsn at end        yes    PCRE2_DOLLAR_ENDONLY
-.br
-.ti +2
-$ matches \(rsn in middle     no     PCRE2_MULTILINE
-.br
-.ti +2
-^ matches \(rsn in middle     no     PCRE2_MULTILINE
+T}:T{
+.sp
+Default
+T}:T{
+.sp
+Change with
+T}
+.T&
+lt lt lt.
+T{
+.sp
+\f(CR.\fP matches newline
+T}:T{
+.sp
+no
+T}:T{
+.sp
+\fBPCRE2_\:DOTALL\fP
+T}
+T{
+.sp
+\f(CR[^a]\fP matches newline
+T}:T{
+.sp
+yes
+T}:T{
+.sp
+not changeable
+T}
+T{
+.sp
+\f(CR$\fP matches newline at end
+T}:T{
+.sp
+yes
+T}:T{
+.sp
+\fBPCRE2_\:DOLLAR_\:ENDONLY\fP
+T}
+T{
+.sp
+\f(CR$\fP matches newline in middle
+T}:T{
+.sp
+no
+T}:T{
+.sp
+\fBPCRE2_\:MULTILINE\fP
+T}
+T{
+.sp
+\f(CR^\fP matches newline in middle
+T}:T{
+.sp
+no
+T}:T{
+.sp
+\fBPCRE2_\:MULTILINE\fP
+T}
+.TE
+.sp
 .sp
 This is the equivalent table for a POSIX\-compatible pattern matcher:
+.TS
+allbox tab(:);
+ltB ltB ltB.
+T{
 .sp
-.ti +2
-                        Default   Change with
-.br
-.ti +2
 
-.br
-.ti +2
-\&. matches newline          yes    REG_NEWLINE
-.br
-.ti +2
-newline matches [^a]       yes    REG_NEWLINE
-.br
-.ti +2
-$ matches \(rsn at end        no     REG_NEWLINE
-.br
-.ti +2
-$ matches \(rsn in middle     no     REG_NEWLINE
-.br
-.ti +2
-^ matches \(rsn in middle     no     REG_NEWLINE
+T}:T{
+.sp
+Default
+T}:T{
+.sp
+Change with
+T}
+.T&
+lt lt lt.
+T{
+.sp
+\f(CR.\fP matches newline
+T}:T{
+.sp
+yes
+T}:T{
+.sp
+\fBREG_\:NEWLINE\fP
+T}
+T{
+.sp
+\f(CR[^a]\fP matches newline
+T}:T{
+.sp
+yes
+T}:T{
+.sp
+\fBREG_\:NEWLINE\fP
+T}
+T{
+.sp
+\f(CR$\fP matches newline at end
+T}:T{
+.sp
+no
+T}:T{
+.sp
+\fBREG_\:NEWLINE\fP
+T}
+T{
+.sp
+\f(CR$\fP matches newline in middle
+T}:T{
+.sp
+no
+T}:T{
+.sp
+\fBREG_\:NEWLINE\fP
+T}
+T{
+.sp
+\f(CR^\fP matches newline in middle
+T}:T{
+.sp
+no
+T}:T{
+.sp
+\fBREG_\:NEWLINE\fP
+T}
+.TE
+.sp
 .sp
 This behaviour is not what happens when PCRE2 is called via its POSIX
 API. By default, PCRE2\(cqs behaviour is the same as Perl\(cqs, except that there is
@@ -305,47 +398,44 @@ is no way to stop newline from matching \f(CR[^a]\fP.
 .sp
 Default POSIX newline handling can be obtained by setting \fBPCRE2_DOTALL\fP and
 \fBPCRE2_DOLLAR_ENDONLY\fP when calling pcre2_compile() directly, but there is
-no way to make PCRE2 behave exactly as for the const:REG_NEWLINE action. When using
-the POSIX API, passing const:REG_NEWLINE to PCRE2\(cqs pcre2_regcomp() function
-causes \fBPCRE2_MULTILINE\fP to be passed to pcre2_compile(), and const:REG_DOTALL
+no way to make PCRE2 behave exactly as for the \fBREG_NEWLINE\fP action. When using
+the POSIX API, passing \fBREG_NEWLINE\fP to PCRE2\(cqs pcre2_regcomp() function
+causes \fBPCRE2_MULTILINE\fP to be passed to pcre2_compile(), and \fBREG_DOTALL\fP
 passes \fBPCRE2_DOTALL\fP. There is no way to pass \fBPCRE2_DOLLAR_ENDONLY\fP.
 .SH "MATCHING A PATTERN"
 .sp
 The function pcre2_regexec() is called to match a compiled pattern
 \fIpreg\fP against a given \fIstring\fP, which is by default terminated by a
-zero byte (but see const:REG_STARTEND below), subject to the options in \fIeflags\fP.
+zero byte (but see \fBREG_STARTEND\fP below), subject to the options in \fIeflags\fP.
 These can be:
 .sp
 .RS 4
-.PD 0
-.TP 19
-const:REG_NOTBOL
+.PD
+.TP 13
+\fBREG_NOTBOL\fP
 .ad l
 The \fBPCRE2_NOTBOL\fP option is set when calling the underlying PCRE2 matching
 function.
-.TP 19
-const:REG_NOTEMPTY
+.TP 13
+\fBREG_NOTEMPTY\fP
 .ad l
 The \fBPCRE2_NOTEMPTY\fP option is set when calling the underlying PCRE2 matching
-function. Note that const:REG_NOTEMPTY is not part of the POSIX standard. However,
+function. Note that \fBREG_NOTEMPTY\fP is not part of the POSIX standard. However,
 setting this option can give more POSIX\-like behaviour in some situations.
-.TP 19
-const:REG_NOTEOL
+.TP 13
+\fBREG_NOTEOL\fP
 .ad l
 The \fBPCRE2_NOTEOL\fP option is set when calling the underlying PCRE2 matching
 function.
-.TP 19
-const:REG_STARTEND
+.TP 13
+\fBREG_STARTEND\fP
 .ad l
-     When this option is set, the subject string starts at \f(CRstring + pmatch[0].rm_so\fP
+When this option is set, the subject string starts at \f(CRstring + pmatch[0].rm_so\fP
 and ends at \f(CRstring + pmatch[0].rm_eo\fP, which
 should point to the first character beyond the string. There may be binary
-zeros within the subject string, and indeed, using const:REG_STARTEND is the only
+zeros within the subject string, and indeed, using \fBREG_STARTEND\fP is the only
 way to pass a subject string that contains a binary zero.
-.PD
-.RE
-.PP
-.ad l
+.RS 13
 .sp
 Whatever the value of \f(CRpmatch[0].rm_so\fP, the offsets of the matched string
 and any captured substrings are still given relative to the start of
@@ -356,21 +446,26 @@ implementations.)
 This is a BSD extension, compatible with but not specified by IEEE Standard
 1003.2 (POSIX.2), and should be used with caution in software intended to be
 portable to other systems. Note that a non\-zero \fIrm_so\fP does not imply
-const:REG_NOTBOL; const:REG_STARTEND affects only the location and length of the string,
-not how it is matched. Setting const:REG_STARTEND and passing \fIpmatch\fP as NULL
-are mutually exclusive; the error const:REG_INVARG is returned.
+\fBREG_NOTBOL\fP; \fBREG_STARTEND\fP affects only the location and length of the string,
+not how it is matched. Setting \fBREG_STARTEND\fP and passing \fIpmatch\fP as \fBNULL\fP
+are mutually exclusive; the error \fBREG_INVARG\fP is returned.
+.RE
+.PD
+.RE
+.PP
+.ad l
 .sp
-If the pattern was compiled with the const:REG_NOSUB flag, no data about any matched
+If the pattern was compiled with the \fBREG_NOSUB\fP flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
-pcre2_regexec() are ignored (except possibly as input for const:REG_STARTEND).
+pcre2_regexec() are ignored (except possibly as input for \fBREG_STARTEND\fP).
 .sp
-The value of \fInmatch\fP may be zero, and the value \fIpmatch\fP may be NULL
-(unless const:REG_STARTEND is set); in both these cases no data about any matched
+The value of \fInmatch\fP may be zero, and the value \fIpmatch\fP may be \fBNULL\fP
+(unless \fBREG_STARTEND\fP is set); in both these cases no data about any matched
 strings is returned.
 .sp
 Otherwise, the portion of the string that was matched, and also any captured
 substrings, are returned via the \fIpmatch\fP argument, which points to an
-array of \fInmatch\fP structures of type type:regmatch_t, containing the
+array of \fInmatch\fP structures of type \fBregmatch_t\fP, containing the
 members \fIrm_so\fP and \fIrm_eo\fP. These contain the byte offset to the first
 character of each substring and the offset to the first character after the end
 of each substring, respectively. The 0th element of the vector relates to the
@@ -378,17 +473,17 @@ entire portion of \fIstring\fP that was matched; subsequent elements relate to
 the capturing subpatterns of the regular expression. Unused entries in the
 array have both structure members set to \-1.
 .sp
-type:regmatch_t as well as the type:regoff_t typedef it uses are defined in
+\fBregmatch_t\fP as well as the \fBregoff_t\fP typedef it uses are defined in
 \f(CRpcre2posix.h\fP and are not warranted to have the same size or layout as other
 similarly named types from other libraries that provide POSIX\-style matching.
 .sp
 A successful match yields a zero return; various error codes are defined in the
-header file, of which const:REG_NOMATCH is the "expected" failure code.
+header file, of which \fBREG_NOMATCH\fP is the "expected" failure code.
 .SH "ERROR MESSAGES"
 .sp
 The pcre2_regerror() function maps a non\-zero errorcode from either
 pcre2_regcomp() or pcre2_regexec() to a printable message. If
-\fIpreg\fP is not NULL, the error should have arisen from the use of that
+\fIpreg\fP is not \fBNULL\fP, the error should have arisen from the use of that
 structure. A message terminated by a binary zero is placed in \fIerrbuf\fP. If
 the buffer is too short, only the first \fIerrbuf_size\fP \- 1 characters of the
 error message are used. The yield of the function is the size of buffer needed
@@ -400,18 +495,15 @@ Compiling a regular expression causes memory to be allocated and associated
 with the \fIpreg\fP structure. The function pcre2_regfree() frees all
 such memory, after which \fIpreg\fP may no longer be used as a compiled
 expression.
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 27 November 2024
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.
