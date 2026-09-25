@@ -322,7 +322,7 @@ static void
 xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr,
                       sljit_u32 *max_ptr)
 {
-  uint32_t type, c;
+  uint32_t type;
   sljit_u32 min = *min_ptr;
   sljit_u32 max = *max_ptr;
   uint32_t char_list_add;
@@ -337,6 +337,7 @@ xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr
     {
       type = *cc++;
       SLJIT_ASSERT(type == XCL_SINGLE || type == XCL_RANGE);
+      uint32_t c;
       GETCHARINCTEST(c, cc);
 
       if (c < min)

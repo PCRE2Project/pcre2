@@ -2502,7 +2502,6 @@ static BOOL
 get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr, uint16_t *pdataptr,
         int *errorcodeptr, compile_block *cb)
 {
-  uint32_t c;
   ptrdiff_t i;
   PCRE2_SIZE bot, top;
   PCRE2_SPTR ptr = *ptrptr;
@@ -2516,6 +2515,7 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr, uint16_t
 
   if (ptr >= cb->end_pattern)
     goto ERROR_RETURN;
+  uint32_t c;
   GETCHARINCTEST(c, ptr);
   *negptr = FALSE;
 
@@ -2882,9 +2882,9 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
 #ifdef SUPPORT_UNICODE
   if (utf && is_group)
   {
-    uint32_t c;
     PCRE2_SPTR p = ptr;
 
+    uint32_t c;
     GETCHARINC(c, p); // Peek at next character
     uint32_t type = UCD_CHARTYPE(c);
 

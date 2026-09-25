@@ -221,12 +221,11 @@ read_name_subst(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, const uint8_t *
 #ifdef SUPPORT_UNICODE
   if (utf)
   {
-    uint32_t c, type;
-
     while (ptr < ptrend)
     {
+      uint32_t c;
       GETCHAR(c, ptr);
-      type = UCD_CHARTYPE(c);
+      uint32_t type = UCD_CHARTYPE(c);
       if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L && c != CHAR_UNDERSCORE)
         break;
       ptr++;
@@ -359,9 +358,9 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
 
   while (input < input_end)
   {
-    uint32_t ch;
     unsigned int chlen;
 
+    uint32_t ch;
     GETCHARINCTEST(ch, input);
 
 #ifdef SUPPORT_UNICODE

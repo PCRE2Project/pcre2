@@ -1281,8 +1281,8 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
       if (utf)
       {
-        uint32_t ch;
         Fecode++;
+        uint32_t ch;
         GETCHARINC(ch, Fecode);
         GETCHARINC(fc, Feptr);
         if (ch == fc)
@@ -1857,7 +1857,6 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
         if (utf)
         {
-          uint32_t d;
           for (i = 1; i <= Lmin; i++)
           {
             if (Feptr >= mb->end_subject)
@@ -1866,6 +1865,7 @@ NEW_FRAME:
               RRETURN(MATCH_NOMATCH);
             }
 
+            uint32_t d;
             GETCHARINC(d, Feptr);
             if (Lc == d || Loc == d)
               RRETURN(MATCH_NOMATCH);
@@ -1898,7 +1898,6 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
           if (utf)
           {
-            uint32_t d;
             for (;;)
             {
               RMATCH(Fecode, RM204);
@@ -1912,6 +1911,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
 
+              uint32_t d;
               GETCHARINC(d, Feptr);
               if (Lc == d || Loc == d)
                 RRETURN(MATCH_NOMATCH);
@@ -1953,7 +1953,6 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
           if (utf)
           {
-            uint32_t d;
             for (i = Lmin; i < Lmax; i++)
             {
               int len = 1;
@@ -1963,6 +1962,7 @@ NEW_FRAME:
                 break;
               }
 
+              uint32_t d;
               GETCHARLEN(d, Feptr, len);
               if (Lc == d || Loc == d)
                 break;
@@ -2028,7 +2028,6 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
         if (utf)
         {
-          uint32_t d;
           for (i = 1; i <= Lmin; i++)
           {
             if (Feptr >= mb->end_subject)
@@ -2037,6 +2036,7 @@ NEW_FRAME:
               RRETURN(MATCH_NOMATCH);
             }
 
+            uint32_t d;
             GETCHARINC(d, Feptr);
             if (Lc == d)
               RRETURN(MATCH_NOMATCH);
@@ -2067,7 +2067,6 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
           if (utf)
           {
-            uint32_t d;
             for (;;)
             {
               RMATCH(Fecode, RM206);
@@ -2081,6 +2080,7 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
               }
 
+              uint32_t d;
               GETCHARINC(d, Feptr);
               if (Lc == d)
                 RRETURN(MATCH_NOMATCH);
@@ -2120,7 +2120,6 @@ NEW_FRAME:
 #ifdef SUPPORT_UNICODE
           if (utf)
           {
-            uint32_t d;
             for (i = Lmin; i < Lmax; i++)
             {
               int len = 1;
@@ -2130,6 +2129,7 @@ NEW_FRAME:
                 break;
               }
 
+              uint32_t d;
               GETCHARLEN(d, Feptr, len);
               if (Lc == d)
                 break;
