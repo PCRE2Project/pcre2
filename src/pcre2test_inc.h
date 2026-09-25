@@ -7048,6 +7048,17 @@ unittest(void)
                         &sizeval);
   ASSERT(rc == 1, "pcre2_substitute(baseline)");
 
+  /* NULL code or NULL blength should return PCRE2_ERROR_NULL */
+  rc = pcre2_substitute(NULL, substitute_subject, PCRE2_ZERO_TERMINATED, 0,
+                        PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+                        NULL, 0, replace_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substitute(NULL code)");
+
+  rc = pcre2_substitute(test_compiled_code, substitute_subject,
+                        PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED,
+                        test_match_data, NULL, NULL, 0, replace_buf, NULL);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substitute(NULL blength)");
+
   /* Move the subject pointer, but keep the contents and length the same */
   memcpy(substitute_subject + 1, subject_abcz, sizeof(subject_abcz));
   sizeval = sizeof(replace_buf) / sizeof(*replace_buf);
