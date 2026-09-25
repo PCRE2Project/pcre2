@@ -23837,6 +23837,77 @@ Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported
 Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
         here: >$' |<--| <
 
+# (*ACCEPT) inside a group that is called as a subroutine ends only the
+# subroutine, even when the group itself is inside an assertion.
+
+/(?=(a|(*ACCEPT))(?1)x)/
+    a
+ 0: 
+ 1: 
+
+/(?=(()|(*ACCEPT))(?1)x)/
+    a
+ 0: 
+ 1: 
+
+/(?=(a|(*ACCEPT))(?1)x)a/
+    a
+ 0: a
+ 1: 
+
+/^(?!(a|(*ACCEPT))(?1)x)/
+    a
+No match
+
+/(?<=(a|(*ACCEPT))(?1)x)/
+    a
+ 0: 
+ 1: 
+
+# An assertion entered inside the subroutine is still ended by (*ACCEPT).
+
+/(?1)(?(DEFINE)((?=a(*ACCEPT)x)a))/
+    a
+ 0: a
+
+/(?1)(?(DEFINE)((?=(a)(*ACCEPT)x)a))/
+    a
+ 0: a
+
+/(?1)(?(DEFINE)((?(?=a(*ACCEPT)x)a|b)))/
+    a
+ 0: a
+    b
+ 0: b
+
+/(?(?=(a|(*ACCEPT))(?1)x)a|b)/
+    a
+ 0: a
+ 1: 
+    b
+No match
+
+# A group inside an assertion that is called from outside any assertion. The
+# interpreter used to return an internal code (-999) here.
+
+/(?=(b|(*ACCEPT)))(?1)x/
+    ax
+ 0: x
+ 1: 
+    bx
+ 0: bx
+ 1: b
+
+/(?!(b|(*ACCEPT)))|(?1)a/
+    a
+ 0: a
+
+/(a)(*scs:(1)(b|(*ACCEPT)))(?2)a/
+    aa
+ 0: aa
+ 1: a
+ 2: 
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
